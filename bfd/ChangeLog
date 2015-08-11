@@ -1,3 +1,10 @@
+2015-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18808
+	* elf32-i386.c (elf_i386_relocate_section): Skip IFUNC
+	relocations in debug sections.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
 2015-08-11  Peter Zotov  <whitequark@whitequark.org>
 
 	PR ld/18759

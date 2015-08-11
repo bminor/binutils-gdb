@@ -1960,6 +1960,51 @@ proc check_ifunc_available { } {
     return $ifunc_available_saved
 }
 
+# Returns true if ifunc attribute works.
+
+proc check_ifunc_attribute_available { } {
+    global ifunc_attribute_available_saved
+    global CC
+
+    if {![info exists ifunc_attribute_available_saved]} {
+        if { [which $CC] == 0 } {
+	    set ifunc_attribute_available_saved 0
+	    return 0
+	}
+	# Check if gcc supports -flto -fuse-linker-plugin
+	set flags ""
+	if [board_info [target_info name] exists cflags] {
+	    append flags " [board_info [target_info name] cflags]"
+	}
+	if [board_info [target_info name] exists ldflags] {
+	    append flags " [board_info [target_info name] ldflags]"
+	}
+
+	set basename "tmpdir/ifunc[pid]"
+	set src ${basename}.c
+	set output ${basename}.out
+	set f [open $src "w"]
+	puts $f "extern int library_func2 (void) __attribute__ ((ifunc (\"foo\")));"
+	puts $f "int main (void)"
+	puts $f "{"
+	puts $f "  if (library_func2 () != 2) __builtin_abort ();"
+	puts $f "  return 0; "
+	puts $f "}"
+	puts $f "static int library_func1 (void) {return 2; }"
+	puts $f "void *foo (void) { return library_func1; }"
+	close $f
+	remote_download host $src
+	set ifunc_attribute_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
+	if { $ifunc_attribute_available_saved == 1 } {
+	  set ifunc_attribute_available_saved [run_host_cmd_yesno "$output" ""]
+	}
+	remote_file host delete $src
+	remote_file host delete $output
+	file delete $src
+    }
+    return $ifunc_attribute_available_saved
+}
+
 # Provide virtual target "cfi" for targets supporting CFI.
 
 rename "istarget" "istarget_ld"

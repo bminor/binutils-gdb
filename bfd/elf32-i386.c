@@ -3503,8 +3503,16 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  bfd_vma plt_index;
 	  const char *name;
 
-	  if ((input_section->flags & SEC_ALLOC) == 0
-	      || h->plt.offset == (bfd_vma) -1)
+	  if ((input_section->flags & SEC_ALLOC) == 0)
+	    {
+	      /* Dynamic relocs are not propagated for SEC_DEBUGGING
+		 sections because such sections are not SEC_ALLOC and
+		 thus ld.so will not process them.  */
+	      if ((input_section->flags & SEC_DEBUGGING) != 0)
+		break;
+	      abort ();
+	    }
+	  else if (h->plt.offset == (bfd_vma) -1)
 	    abort ();
 
 	  /* STT_GNU_IFUNC symbol must go through PLT.  */
