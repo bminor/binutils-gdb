@@ -869,7 +869,7 @@ clear_opname_map (opname_map *m)
 static bfd_boolean
 same_operand_name (const opname_map_e *m1, const opname_map_e *m2)
 {
-  if (m1->operand_name == NULL || m1->operand_name == NULL)
+  if (m1->operand_name == NULL || m2->operand_name == NULL)
     return FALSE;
   return (m1->operand_name == m2->operand_name);
 }

@@ -1,3 +1,8 @@
+2015-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18679
+	* config/xtensa-relax.c (same_operand_name): Fix typo.
+
 2015-08-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* tc-arm.c (double_to_single, is_double_a_single): Append ULL to
