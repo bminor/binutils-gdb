@@ -2333,9 +2333,11 @@ aarch64_type_of_stub (struct bfd_link_info *info,
   globals = elf_aarch64_hash_table (info);
   via_plt_p = (globals->root.splt != NULL && hash != NULL
 	       && hash->root.plt.offset != (bfd_vma) - 1);
-
+  /* Make sure call to plt stub can fit into the branch range.  */
   if (via_plt_p)
-    return stub_type;
+    destination = (globals->root.splt->output_section->vma
+		   + globals->root.splt->output_offset
+		   + hash->root.plt.offset);
 
   /* Determine where the call point is.  */
   location = (input_sec->output_offset
@@ -4890,38 +4892,25 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	/* If the call goes through a PLT entry, make sure to
 	   check distance to the right destination address.  */
 	if (via_plt_p)
-	  {
-	    value = (splt->output_section->vma
-		     + splt->output_offset + h->plt.offset);
-	    *unresolved_reloc_p = FALSE;
-	  }
+	  value = (splt->output_section->vma
+		   + splt->output_offset + h->plt.offset);
 
-	/* If the target symbol is global and marked as a function the
-	   relocation applies a function call or a tail call.  In this
-	   situation we can veneer out of range branches.  The veneers
-	   use IP0 and IP1 hence cannot be used arbitrary out of range
-	   branches that occur within the body of a function.  */
-	if (h && h->type == STT_FUNC)
-	  {
-	    /* Check if a stub has to be inserted because the destination
-	       is too far away.  */
-	    if (! aarch64_valid_branch_p (value, place))
-	      {
-		/* The target is out of reach, so redirect the branch to
-		   the local stub for this function.  */
-		struct elf_aarch64_stub_hash_entry *stub_entry;
-		stub_entry = elfNN_aarch64_get_stub_entry (input_section,
-							   sym_sec, h,
-							   rel, globals);
-		if (stub_entry != NULL)
-		  value = (stub_entry->stub_offset
-			   + stub_entry->stub_sec->output_offset
-			   + stub_entry->stub_sec->output_section->vma);
-	      }
-	  }
+	/* Check if a stub has to be inserted because the destination
+	   is too far away.  */
+	struct elf_aarch64_stub_hash_entry *stub_entry = NULL;
+	if (! aarch64_valid_branch_p (value, place))
+	  /* The target is out of reach, so redirect the branch to
+	     the local stub for this function.  */
+	stub_entry = elfNN_aarch64_get_stub_entry (input_section, sym_sec, h,
+						   rel, globals);
+	if (stub_entry != NULL)
+	  value = (stub_entry->stub_offset
+		   + stub_entry->stub_sec->output_offset
+		   + stub_entry->stub_sec->output_section->vma);
       }
       value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
 						   signed_addend, weak_undef_p);
+      *unresolved_reloc_p = FALSE;
       break;
 
     case BFD_RELOC_AARCH64_16_PCREL:

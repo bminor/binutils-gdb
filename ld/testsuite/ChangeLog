@@ -1,5 +1,14 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* ld-aarch64/farcall-b-gsym.s: New test.
+	* ld-aarch64/farcall-b-plt.s: Likewise.
+	* ld-aarch64/farcall-bl-plt.s: Likewise.
+	* ld-aarch64/farcall-b-gsym.d: New expect file.
+	* ld-aarch64/farcall-b-plt.d: Likewise.
+	* ld-aarch64/farcall-bl-plt.d: Likewise.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* ld-aarch64/emit-relocs-529.s: New testcase.
 	* ld-aarch64/emit-relocs-529-overflow.s: Likewise.
 	* ld-aarch64/emit-relocs-86.s: Likewise.

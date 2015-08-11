@@ -1,5 +1,13 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	PR ld/18668
+	* elfnn-aarch64.c (aarch64_type_of_stub): Update destination for
+	calls go through plt stub.
+	(elfNN_aarch64_final_link_relocate): Adjust code logic for CALL26,
+	JUMP26 relocation to support inserting veneer for call to plt stub.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Recognize
 	BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12.
 	(aarch64_reloc_got_type): Likewise.
