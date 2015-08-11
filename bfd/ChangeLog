@@ -1,5 +1,9 @@
 2015-08-11  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/18747
+	* coff-sh.c (_bfd_sh_align_load_span): Fix typo when setting
+	opcode count.
+
 	PR binutils/18758
 	* elf.c (_bfd_elf_setup_sections): Add checks for corrupt section
 	group information.
