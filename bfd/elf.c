@@ -1237,7 +1237,7 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 		 into SHT_NOBITS sections, the output SHT_NOBITS type
 		 matches any input type.  */
 	      if ((oheader->sh_type == SHT_NOBITS
-		   || oheader->sh_type == oheader->sh_type)
+		   || iheader->sh_type == oheader->sh_type)
 		  && iheader->sh_flags == oheader->sh_flags
 		  && iheader->sh_addralign == oheader->sh_addralign
 		  && iheader->sh_entsize == oheader->sh_entsize
