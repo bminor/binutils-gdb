@@ -1,5 +1,12 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* config/tc-aarch64.c (reloc_table): New relocation modifiers
+	"dtprel_lo12".
+	(md_apply_fix): Support BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12.
+	(aarch64_force_relocation): Likewise.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* config/tc-aarch64.c (reloc_table): New relocation modifiers.
 	(md_apply_fix): Support BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC.
 	(aarch64_force_relocation): Likewise.

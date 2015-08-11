@@ -1,5 +1,12 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* gas/aarch64/reloc-dtprel_lo12-1.s: New testcase.
+	* gas/aarch64/reloc-dtprel_lo12-ilp32-1.s: Likewise.
+	* gas/aarch64/reloc-dtprel_lo12-1.d: New expectation file.
+	* gas/aarch64/reloc-dtprel_lo12-ilp32-1.d: Likewise.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* gas/aarch64/reloc-tlsldm_lo12_nc-1.s: New testcase.
 	* gas/aarch64/reloc-tlsldm_lo12_nc-ilp32-1.s: Likewise.
 	* gas/aarch64/reloc-tlsldm_lo12_nc-1.d: New expectation file.

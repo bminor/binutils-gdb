@@ -6844,6 +6844,10 @@ ENUM
 ENUMDOC
   AArch64 TLS INITIAL EXEC relocation.
 ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12
+ENUMDOC
+  Unsigned 12 bit byte offset to module TLS base address.
+ENUM
   BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC
 ENUMDOC
   Unsigned 12 bit byte offset to global offset table entry for a symbols

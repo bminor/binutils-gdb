@@ -2522,6 +2522,15 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0},
 
+  /* 12 bit offset into the module TLS base address.  */
+  {"dtprel_lo12", 0,
+   0,				/* adr_type */
+   0,
+   0,
+   BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12,
+   0,
+   0},
+
   /* Get to the page containing GOT TLS entry for a symbol */
   {"gottprel", 0,
    0,				/* adr_type */
@@ -6787,6 +6796,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
@@ -6999,6 +7009,7 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
