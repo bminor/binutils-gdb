@@ -1,5 +1,9 @@
 2015-08-11  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/18677
+	* config/tc-mmix.c (md_assemble): Fix typo checking operands with
+	a numeric constant value.
+
 	PR gas/18678
 	* config/tc-tic4x.c (tic4x_insn_check): Fix typo.
 
