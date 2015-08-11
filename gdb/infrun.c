@@ -803,7 +803,7 @@ follow_fork (void)
 		       issued is most likely not applicable to the
 		       child, so just warn, and refuse to resume.  */
 		    warning (_("Not resuming: switched threads "
-			       "before following fork child.\n"));
+			       "before following fork child."));
 		  }
 
 		/* Reset breakpoints in the child as appropriate.  */
@@ -1860,7 +1860,7 @@ displaced_step_prepare (ptid_t ptid)
 	 "auto".  */
       if (can_use_displaced_stepping == AUTO_BOOLEAN_TRUE)
 	{
-	  warning (_("disabling displaced stepping: %s\n"),
+	  warning (_("disabling displaced stepping: %s"),
 		   ex.message);
 	}
 
@@ -2356,7 +2356,7 @@ resume (enum gdb_signal sig)
 	 pending signals to deliver.  */
       if (sig != GDB_SIGNAL_0)
 	{
-	  warning (_("Couldn't deliver signal %s to %s.\n"),
+	  warning (_("Couldn't deliver signal %s to %s."),
 		   gdb_signal_to_name (sig), target_pid_to_str (tp->ptid));
 	}
 
@@ -3075,7 +3075,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	  switch_to_thread (tp->ptid);
 	  keep_going_pass_signal (ecs);
 	  if (!ecs->wait_some_more)
-	    error ("Command aborted.");
+	    error (_("Command aborted."));
 	}
     }
   else if (!tp->resumed && !thread_is_in_step_over_chain (tp))
@@ -3085,7 +3085,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
       switch_to_thread (tp->ptid);
       keep_going_pass_signal (ecs);
       if (!ecs->wait_some_more)
-	error ("Command aborted.");
+	error (_("Command aborted."));
     }
 
   discard_cleanups (old_chain);

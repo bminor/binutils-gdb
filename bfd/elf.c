@@ -817,9 +817,22 @@ _bfd_elf_setup_sections (bfd *abfd)
   for (i = 0; i < num_group; i++)
     {
       Elf_Internal_Shdr *shdr = elf_tdata (abfd)->group_sect_ptr[i];
-      Elf_Internal_Group *idx = (Elf_Internal_Group *) shdr->contents;
-      unsigned int n_elt = shdr->sh_size / 4;
+      Elf_Internal_Group *idx;
+      unsigned int n_elt;
 
+      /* PR binutils/18758: Beware of corrupt binaries with invalid group data.  */
+      if (shdr == NULL || shdr->bfd_section == NULL || shdr->contents == NULL)
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: section group entry number %u is corrupt"),
+	     abfd, i);
+	  result = FALSE;
+	  continue;
+	}
+
+      idx = (Elf_Internal_Group *) shdr->contents;
+      n_elt = shdr->sh_size / 4;
+      
       while (--n_elt != 0)
 	if ((++idx)->shdr->bfd_section)
 	  elf_sec_group (idx->shdr->bfd_section) = shdr->bfd_section;
@@ -1237,7 +1250,7 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 		 into SHT_NOBITS sections, the output SHT_NOBITS type
 		 matches any input type.  */
 	      if ((oheader->sh_type == SHT_NOBITS
-		   || oheader->sh_type == oheader->sh_type)
+		   || iheader->sh_type == oheader->sh_type)
 		  && iheader->sh_flags == oheader->sh_flags
 		  && iheader->sh_addralign == oheader->sh_addralign
 		  && iheader->sh_entsize == oheader->sh_entsize

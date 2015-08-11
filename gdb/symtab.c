@@ -5604,9 +5604,9 @@ make_symbol_completion_list_fn (struct cmd_list_element *ignore,
 /* Like make_symbol_completion_list, but returns a list of symbols
    defined in a source file FILE.  */
 
-VEC (char_ptr) *
-make_file_symbol_completion_list (const char *text, const char *word,
-				  const char *srcfile)
+static VEC (char_ptr) *
+make_file_symbol_completion_list_1 (const char *text, const char *word,
+				    const char *srcfile)
 {
   struct symbol *sym;
   struct symtab *s;
@@ -5662,8 +5662,6 @@ make_file_symbol_completion_list (const char *text, const char *word,
 
   sym_text_len = strlen (sym_text);
 
-  return_val = NULL;
-
   /* Find the symtab for SRCFILE (this loads it if it was not yet read
      in).  */
   s = lookup_symtab (srcfile);
@@ -5697,6 +5695,36 @@ make_file_symbol_completion_list (const char *text, const char *word,
     }
 
   return (return_val);
+}
+
+/* Wrapper around make_file_symbol_completion_list_1
+   to handle MAX_COMPLETIONS_REACHED_ERROR.  */
+
+VEC (char_ptr) *
+make_file_symbol_completion_list (const char *text, const char *word,
+				  const char *srcfile)
+{
+  struct cleanup *back_to, *cleanups;
+
+  completion_tracker = new_completion_tracker ();
+  cleanups = make_cleanup_free_completion_tracker (&completion_tracker);
+  return_val = NULL;
+  back_to = make_cleanup (do_free_completion_list, &return_val);
+
+  TRY
+    {
+      make_file_symbol_completion_list_1 (text, word, srcfile);
+    }
+  CATCH (except, RETURN_MASK_ERROR)
+    {
+      if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
+	throw_exception (except);
+    }
+  END_CATCH
+
+  discard_cleanups (back_to);
+  do_cleanups (cleanups);
+  return return_val;
 }
 
 /* A helper function for make_source_files_completion_list.  It adds

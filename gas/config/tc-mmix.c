@@ -1475,8 +1475,8 @@ md_assemble (char *str)
 		&& ((exp[1].X_op == O_register
 		     && exp[1].X_add_number < 512)
 		    || (exp[1].X_op == O_constant
-			&& exp[1].X_add_number < 0
-			&& exp[1].X_add_number > 4)
+			&& (exp[1].X_add_number < 0
+			    || exp[1].X_add_number > 4))
 		    || (exp[1].X_op != O_register
 			&& exp[1].X_op != O_constant))))
 	  {

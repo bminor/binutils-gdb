@@ -1,3 +1,16 @@
+2015-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18758
+	* elf.c (_bfd_elf_setup_sections): Add checks for corrupt section
+	group information.
+	* peicode.h (pe_ILF_make_a_section): Ensure alignment of the
+	used_by_bfd pointer.
+	(pe_ILF_build_a_bfd): Ensure alignment of vars.data pointer.
+
+2015-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (_bfd_elf_copy_private_bfd_data): Fix a typo.
+
 2015-08-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_symbol_version): New enum.
@@ -19,7 +32,7 @@
 	PR binutils/18785
 	* elf.c (_bfd_elf_copy_private_bfd_data): When copying the
 	sh_link and sh_info fields in stripped section headers, we also
-	check if the sh_type, sh_flags, /sh_addralign and sh_entsize
+	check if the sh_type, sh_flags, sh_addralign and sh_entsize
 	fields of the output section match the output.  Since
 	--only-keep-debug turns all non-debug sections into SHT_NOBITS
 	sections, the output SHT_NOBITS type matches any input type.

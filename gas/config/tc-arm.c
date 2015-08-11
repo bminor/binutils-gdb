@@ -8000,9 +8000,9 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 
 		  /* Fill other bits in vmov encoding for both thumb and arm.  */
 		  if (thumb_mode)
-		    inst.instruction |= (0x7 << 29) | (0xF << 24);
+		    inst.instruction |= (0x7U << 29) | (0xF << 24);
 		  else
-		    inst.instruction |= (0xF << 28) | (0x1 << 25);
+		    inst.instruction |= (0xFU << 28) | (0x1 << 25);
 		  neon_write_immbits (immbits);
 		  return TRUE;
 		}
@@ -9974,7 +9974,7 @@ do_iwmmxt_wldstd (void)
       && inst.operands[1].immisreg)
     {
       inst.instruction &= ~0x1a000ff;
-      inst.instruction |= (0xf << 28);
+      inst.instruction |= (0xfU << 28);
       if (inst.operands[1].preind)
 	inst.instruction |= PRE_INDEX;
       if (!inst.operands[1].negative)
@@ -10053,7 +10053,7 @@ do_iwmmxt_wrwrwr_or_imm5 (void)
       }
     /* Map 32 -> 0, etc.  */
     inst.operands[2].imm &= 0x1f;
-    inst.instruction |= (0xf << 28) | ((inst.operands[2].imm & 0x10) << 4) | (inst.operands[2].imm & 0xf);
+    inst.instruction |= (0xfU << 28) | ((inst.operands[2].imm & 0x10) << 4) | (inst.operands[2].imm & 0xf);
   }
 }
 
@@ -17975,7 +17975,7 @@ md_assemble (char *str)
 
       inst.instruction = opcode->avalue;
       if (opcode->tag == OT_unconditionalF)
-	inst.instruction |= 0xF << 28;
+	inst.instruction |= 0xFU << 28;
       else
 	inst.instruction |= inst.cond << 28;
       inst.size = INSN_SIZE;
