@@ -199,7 +199,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
          FALSE,                 /* partial_inplace */
          0,                     /* src_mask */
          0xffffffff,            /* dst_mask */
-         FALSE),                /* pcrel_offset */
+         TRUE),                 /* pcrel_offset */
 
   HOWTO (R_OR1K_16_PCREL,
          0,                     /* rightshift */
@@ -213,7 +213,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
          FALSE,                 /* partial_inplace */
          0,                     /* src_mask */
          0xffff,                /* dst_mask */
-         FALSE),                /* pcrel_offset */
+         TRUE),                 /* pcrel_offset */
 
   HOWTO (R_OR1K_8_PCREL,
          0,                     /* rightshift */
@@ -227,7 +227,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
          FALSE,                 /* partial_inplace */
          0,                     /* src_mask */
          0xff,                  /* dst_mask */
-         FALSE),                /* pcrel_offset */
+         TRUE),                 /* pcrel_offset */
 
    HOWTO (R_OR1K_GOTPC_HI16,    /* Type.  */
          16,                    /* Rightshift.  */

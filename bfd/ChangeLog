@@ -1,3 +1,10 @@
+2015-08-11  Peter Zotov  <whitequark@whitequark.org>
+
+	PR ld/18759
+	* elf32-or1k.c (R_OR1K_32_PCREL): Set pcrel_offset to TRUE.
+	(R_OR1K_16_PCREL): Likewise.
+	(R_OR1K_8_PCREL): Likewise.
+
 2015-08-11  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18747
