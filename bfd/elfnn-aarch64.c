@@ -174,6 +174,7 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12	\
@@ -4122,6 +4123,7 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
       return GOT_TLS_GD;
 
@@ -5029,6 +5031,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
       if (globals->root.sgot == NULL)
 	return bfd_reloc_notsupported;
@@ -5514,6 +5517,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
 	  if (! symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    {
@@ -5547,8 +5551,11 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		    * RELOC_SIZE (htab);
 		  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 
-		  if (elfNN_aarch64_bfd_reloc_from_type (r_type)
-		      == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21)
+		  bfd_reloc_code_real_type real_type =
+		    elfNN_aarch64_bfd_reloc_from_type (r_type);
+
+		  if (real_type == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21
+		      || real_type == BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21)
 		    {
 		      /* For local dynamic, don't generate DTPREL in any case.
 			 Initialize the DTPREL slot into zero, so we get module
@@ -6041,6 +6048,7 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
@@ -6514,6 +6522,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:

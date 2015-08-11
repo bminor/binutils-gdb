@@ -1,5 +1,17 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Recognize
+	BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21.
+	(aarch64_reloc_got_type): Likewise.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* reloc.c (BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21): New entry.
 	* bfd-in2.h: Regenerate.
 	* libbfd.h: Regenerate.
