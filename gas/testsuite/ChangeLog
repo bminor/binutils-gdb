@@ -1,3 +1,10 @@
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/reloc-tlsldm-page-1.s: New testcase.
+	* gas/aarch64/reloc-tlsldm-page-ilp32-1.s: Likewise.
+	* gas/aarch64/reloc-tlsldm-page-1.d: New expectation file.
+	* gas/aarch64/reloc-tlsldm-page-ilp32-1.d: Likewise.
+
 2015-08-10  Robert Suchanek  <robert.suchanek@imgtec.com>
 
 	* gas/mips/r6.s: Add tests for "sigrie".

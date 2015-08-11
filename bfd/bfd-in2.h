@@ -5794,6 +5794,10 @@ BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21.  */
 /* AArch64 TLS INITIAL EXEC relocation.  */
   BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19,
 
+/* GOT entry page address for AArch64 TLS Local Dynamic, used with ADRP
+instruction.  */
+  BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21,
+
 /* GOT entry address for AArch64 TLS Local Dynamic, used with ADR instruction.  */
   BFD_RELOC_AARCH64_TLSLD_ADR_PREL21,
 

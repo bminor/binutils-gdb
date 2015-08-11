@@ -6844,6 +6844,11 @@ ENUM
 ENUMDOC
   AArch64 TLS INITIAL EXEC relocation.
 ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21
+ENUMDOC
+  GOT entry page address for AArch64 TLS Local Dynamic, used with ADRP
+  instruction.
+ENUM
   BFD_RELOC_AARCH64_TLSLD_ADR_PREL21
 ENUMDOC
   GOT entry address for AArch64 TLS Local Dynamic, used with ADR instruction.
