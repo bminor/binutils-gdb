@@ -1,5 +1,9 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* ld-aarch64/tls-small-ld.s: Update testcase.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* ld-aarch64/tls-small-ld.s: New file.
 	* ld-aarch64/tls-small-ld.d: Likewise.
 	* ld-aarch64/aarch64-elf.exp: Run new test.
