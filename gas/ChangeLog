@@ -1,5 +1,13 @@
 2015-08-11  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/18765
+	* config/tc-arm.c (move_or_literal_pool): Use U suffix to remove
+	compile time warnings about constant expressions being shifted
+	into bit 31.
+	(do_iwmmxt_wldstd): Likewise.
+	(do_iwmmxt_wrwrwr_or_imm5): Likewise.
+	(md_assemble): Likewise.
+
 	PR gas/18574
 	* config/tc-msp430.c (msp430_operands): Rewrite if statements to
 	remove redundant checks.
