@@ -1,5 +1,10 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELAX_RELOC): New.
+	(aarch64_can_relax_tls): Use the new IS_AARCH64_TLS_RELAX_RELOC.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* bfd/elfnn-aarch64.c (aarch64_type_of_stub): New parameter "sym_sec".
 	Loose the check for symbol from ABS section.
 	(elfNN_aarch64_size_stubs): Pass sym_sec.
