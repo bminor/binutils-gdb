@@ -1,3 +1,12 @@
+2015-08-11  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/strip-12.s: Align .bss section.
+	* binutils-all/strip-12.d: Adjust.
+	* binutils-all/symbols-1.d: Allow extraneous symbols.
+	* binutils-all/symbols-2.d: Likewise, and V for weakened syms.
+	* binutils-all/symbols-3.d: Likewise.
+	* binutils-all/symbols-4.d: Likewise.
+
 2015-08-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* binutils-all/strip-12.s: Use ".section .bss" instead of ".bss"

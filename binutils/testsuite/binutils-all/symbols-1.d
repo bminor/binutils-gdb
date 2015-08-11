@@ -5,6 +5,7 @@
 #DUMPPROG: nm
 #nm: -n
 
+#...
 0+ D bar
 0+ d foa
 0+ d fob
