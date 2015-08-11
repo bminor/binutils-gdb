@@ -1,5 +1,13 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* reloc.c (BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC): New entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Recognize
 	BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21.
 	(aarch64_reloc_got_type): Likewise.
