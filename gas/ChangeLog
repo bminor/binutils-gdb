@@ -1,5 +1,10 @@
 2015-08-11  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/18574
+	* config/tc-msp430.c (msp430_operands): Rewrite if statements to
+	remove redundant checks.
+	(md_apply_fix): Likewise.
+
 	PR gas/18677
 	* config/tc-mmix.c (md_assemble): Fix typo checking operands with
 	a numeric constant value.

@@ -2069,7 +2069,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  if (op1.exp.X_op == O_constant)
 		    extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
 
-		  else if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		  else if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 				 BFD_RELOC_MSP430X_ABS20_EXT_SRC);
 		  else
@@ -2155,7 +2155,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  if (op1.exp.X_op == O_constant)
 		    extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
 
-		  else if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		  else if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 				 BFD_RELOC_MSP430X_ABS20_EXT_SRC);
 		  else
@@ -2201,7 +2201,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 		  if (!extended_op)
 		    {
-		      if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		      if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 			fix_new_exp (frag_now, where, 2,
 				     &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		      else
@@ -2271,7 +2271,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 		  bfd_putl16 ((bfd_vma) ZEROS, frag + 2);
 
-		  if (op1.reg || (op1.reg == 0 && op1.am == 3))
+		  if (op1.reg || op1.am == 3)
 		    fix_new_exp (frag_now, where, 2,
 				 &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		  else
@@ -2799,7 +2799,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      if (op1.exp.X_op == O_constant)
 		extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
 
-	      else  if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+	      else  if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_ABS20_EXT_SRC);
 	      else
@@ -2845,7 +2845,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 	      if (!extended_op)
 		{
-		  if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		  if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 2,
 				 &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		  else
@@ -2947,7 +2947,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      if (op1.exp.X_op == O_constant)
 		extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
 
-	      else if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+	      else if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_ABS20_EXT_SRC);
 	      else
@@ -2978,7 +2978,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 	      if (!extended_op)
 		{
-		  if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		  if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 2,
 				 &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		  else
@@ -3323,8 +3323,8 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
   if (msp430_enable_polys
       && !msp430_enable_relax)
     {
-      if (!fixp->fx_addsy || (fixp->fx_addsy
-	  && S_GET_SEGMENT (fixp->fx_addsy) == absolute_section))
+      if (!fixp->fx_addsy
+	  || S_GET_SEGMENT (fixp->fx_addsy) == absolute_section)
 	fixp->fx_done = 1;	/* It is ok to kill 'abs' reloc.  */
       else
       	fixp->fx_done = 0;
