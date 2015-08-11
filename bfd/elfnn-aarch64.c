@@ -2316,6 +2316,7 @@ static enum elf_aarch64_stub_type
 aarch64_type_of_stub (struct bfd_link_info *info,
 		      asection *input_sec,
 		      const Elf_Internal_Rela *rel,
+		      asection *sym_sec,
 		      unsigned char st_type,
 		      struct elf_aarch64_link_hash_entry *hash,
 		      bfd_vma destination)
@@ -2327,7 +2328,8 @@ aarch64_type_of_stub (struct bfd_link_info *info,
   enum elf_aarch64_stub_type stub_type = aarch64_stub_none;
   bfd_boolean via_plt_p;
 
-  if (st_type != STT_FUNC)
+  if (st_type != STT_FUNC
+      && (sym_sec != bfd_abs_section_ptr))
     return stub_type;
 
   globals = elf_aarch64_hash_table (info);
@@ -3815,7 +3817,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 
 		  /* Determine what (if any) linker stub is needed.  */
 		  stub_type = aarch64_type_of_stub
-		    (info, section, irela, st_type, hash, destination);
+		    (info, section, irela, sym_sec, st_type, hash, destination);
 		  if (stub_type == aarch64_stub_none)
 		    continue;
 

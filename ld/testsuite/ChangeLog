@@ -1,5 +1,12 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* ld-aarch64/farcall-b-defsym.s: New test.
+	* ld-aarch64/farcall-bl-defsym.s: Likewise.
+	* ld-aarch64/farcall-b-defsym.d: New expectation.
+	* ld-aarch64/farcall-bl-defsym.d: Likewise.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* ld-aarch64/farcall-b-gsym.s: New test.
 	* ld-aarch64/farcall-b-plt.s: Likewise.
 	* ld-aarch64/farcall-bl-plt.s: Likewise.
