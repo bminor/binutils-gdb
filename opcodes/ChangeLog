@@ -1,3 +1,9 @@
+2015-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 18800
+	* aarch64-tbl.h (aarch64_opcode_table): Fix mask for SIMD EXT
+	instruction.
+
 2015-08-10  Robert Suchanek  <robert.suchanek@imgtec.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Add "sigrie".
