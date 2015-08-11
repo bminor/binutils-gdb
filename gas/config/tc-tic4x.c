@@ -2354,7 +2354,7 @@ tic4x_insn_check (tic4x_insn_t *tinsn)
            || !strcmp (tinsn->name, "ldf1_ldf2")
            || !strcmp (tinsn->name, "ldf2_ldf1") )
     {
-      if (tinsn->num_operands < 4 && tinsn->num_operands > 5 )
+      if (tinsn->num_operands < 4 || tinsn->num_operands > 5)
         as_fatal ("Illegal internal %s insn definition", tinsn->name);
       
       if (tinsn->operands[1].mode == M_REGISTER
