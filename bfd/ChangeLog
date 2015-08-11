@@ -1,3 +1,12 @@
+2015-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18758
+	* elf.c (_bfd_elf_setup_sections): Add checks for corrupt section
+	group information.
+	* peicode.h (pe_ILF_make_a_section): Ensure alignment of the
+	used_by_bfd pointer.
+	(pe_ILF_build_a_bfd): Ensure alignment of vars.data pointer.
+
 2015-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_copy_private_bfd_data): Fix a typo.
