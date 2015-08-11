@@ -1,3 +1,18 @@
+2015-09-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* nat/linux-btrace.h (struct btrace_target_info) <ptr_bits>: Remove.
+	* nat/linux-btrace.c: Include filestuff.h and inttypes.h.
+	Remove include of sys/utsname.h.
+	(linux_determine_kernel_ptr_bits): Remove.
+	(linux_determine_kernel_start): New.
+	(perf_event_is_kernel_addr): Remove tinfo argument.  Update users.
+	Update check.
+	(perf_event_skip_bts_record): Remove tinfo argument.  Update users.
+	(linux_enable_bts, linux_enable_pt): Remove tinfo->ptr_bits
+	initialization.
+	* x86-linux-nat.c (x86_linux_enable_btrace): Remove ptr_bits
+	assignment.
+
 2015-09-07  Pedro Alves  <palves@redhat.com>
 
 	* guile/guile-internal.h (as_a_scm_t_subr): New.

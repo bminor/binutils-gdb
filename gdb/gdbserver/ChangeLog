@@ -1,3 +1,9 @@
+2015-09-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* linux-low.c (linux_low_enable_btrace): Remove.
+	(linux_target_ops): Replace linux_low_enable_btrace with
+	linux_enable_btrace.
+
 2015-09-03  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_insert_point): Call

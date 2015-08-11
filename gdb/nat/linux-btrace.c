@@ -24,6 +24,9 @@
 #include "common-regcache.h"
 #include "gdb_wait.h"
 #include "x86-cpuid.h"
+#include "filestuff.h"
+
+#include <inttypes.h>
 
 #ifdef HAVE_SYS_SYSCALL_H
 #include <sys/syscall.h>
@@ -36,7 +39,6 @@
 #include "nat/gdb_ptrace.h"
 #include <sys/types.h>
 #include <signal.h>
-#include <sys/utsname.h>
 
 /* A branch trace record in perf_event.  */
 struct perf_event_bts
@@ -189,56 +191,75 @@ perf_event_pt_event_type (int *type)
   return -1;
 }
 
-static int
-linux_determine_kernel_ptr_bits (void)
+/* Try to determine the start address of the Linux kernel.  */
+
+static uint64_t
+linux_determine_kernel_start (void)
 {
-  struct utsname utsn;
-  int errcode;
+  static uint64_t kernel_start;
+  static int cached;
+  FILE *file;
 
-  memset (&utsn, 0, sizeof (utsn));
+  if (cached != 0)
+    return kernel_start;
 
-  errcode = uname (&utsn);
-  if (errcode < 0)
-    return 0;
+  cached = 1;
 
-  /* We only need to handle the 64-bit host case, here.  For 32-bit host,
-     the pointer size can be filled in later based on the inferior.  */
-  if (strcmp (utsn.machine, "x86_64") == 0)
-    return 64;
+  file = gdb_fopen_cloexec ("/proc/kallsyms", "r");
+  if (file == NULL)
+    return kernel_start;
 
-  return 0;
+  while (!feof (file))
+    {
+      char buffer[1024], symbol[8], *line;
+      uint64_t addr;
+      int match;
+
+      line = fgets (buffer, sizeof (buffer), file);
+      if (line == NULL)
+	break;
+
+      match = sscanf (line, "%" SCNx64 " %*[tT] %7s", &addr, symbol);
+      if (match != 2)
+	continue;
+
+      if (strcmp (symbol, "_text") == 0)
+	{
+	  kernel_start = addr;
+	  break;
+	}
+    }
+
+  fclose (file);
+
+  return kernel_start;
 }
 
 /* Check whether an address is in the kernel.  */
 
 static inline int
-perf_event_is_kernel_addr (const struct btrace_target_info *tinfo,
-			   uint64_t addr)
+perf_event_is_kernel_addr (uint64_t addr)
 {
-  uint64_t mask;
+  uint64_t kernel_start;
 
-  /* If we don't know the size of a pointer, we can't check.  Let's assume it's
-     not a kernel address in this case.  */
-  if (tinfo->ptr_bits == 0)
-    return 0;
+  kernel_start = linux_determine_kernel_start ();
+  if (kernel_start != 0ull)
+    return (addr >= kernel_start);
 
-  /* A bit mask for the most significant bit in an address.  */
-  mask = (uint64_t) 1 << (tinfo->ptr_bits - 1);
-
-  /* Check whether the most significant bit in the address is set.  */
-  return (addr & mask) != 0;
+  /* If we don't know the kernel's start address, let's check the most
+     significant bit.  This will work at least for 64-bit kernels.  */
+  return ((addr & (1ull << 63)) != 0);
 }
 
 /* Check whether a perf event record should be skipped.  */
 
 static inline int
-perf_event_skip_bts_record (const struct btrace_target_info *tinfo,
-			    const struct perf_event_bts *bts)
+perf_event_skip_bts_record (const struct perf_event_bts *bts)
 {
   /* The hardware may report branches from kernel into user space.  Branches
      from user into kernel space will be suppressed.  We filter the former to
      provide a consistent branch trace excluding kernel.  */
-  return perf_event_is_kernel_addr (tinfo, bts->from);
+  return perf_event_is_kernel_addr (bts->from);
 }
 
 /* Perform a few consistency checks on a perf event sample record.  This is
@@ -335,7 +356,7 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
 	  break;
 	}
 
-      if (perf_event_skip_bts_record (tinfo, &psample->bts))
+      if (perf_event_skip_bts_record (&psample->bts))
 	continue;
 
       /* We found a valid sample, so we can complete the current block.  */
@@ -649,7 +670,6 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
   tinfo = XCNEW (struct btrace_target_info);
   tinfo->ptid = ptid;
-  tinfo->ptr_bits = linux_determine_kernel_ptr_bits ();
 
   tinfo->conf.format = BTRACE_FORMAT_BTS;
   bts = &tinfo->variant.bts;
@@ -782,7 +802,6 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 
   tinfo = XCNEW (struct btrace_target_info);
   tinfo->ptid = ptid;
-  tinfo->ptr_bits = 0;
 
   tinfo->conf.format = BTRACE_FORMAT_PT;
   pt = &tinfo->variant.pt;
