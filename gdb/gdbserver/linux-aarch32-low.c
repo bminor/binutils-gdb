@@ -27,6 +27,12 @@
 #include <elf.h>
 #endif
 
+/* Some older versions of GNU/Linux and Android do not define
+   the following macros.  */
+#ifndef NT_ARM_VFP
+#define NT_ARM_VFP 0x400
+#endif
+
 /* Collect GP registers from REGCACHE to buffer BUF.  */
 
 void
