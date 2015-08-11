@@ -59,6 +59,8 @@ run_dump_test "erratum843419"
 # Relocation Tests
 run_dump_test "weak-undefined"
 run_dump_test "emit-relocs-28"
+run_dump_test "emit-relocs-86"
+run_dump_test "emit-relocs-86-overflow"
 run_dump_test "emit-relocs-257"
 run_dump_test "emit-relocs-257-be"
 # 258 is tested in 257
@@ -109,6 +111,8 @@ run_dump_test "emit-relocs-309-low-bad"
 run_dump_test "emit-relocs-311"
 run_dump_test "emit-relocs-312"
 run_dump_test "emit-relocs-313"
+run_dump_test "emit-relocs-529"
+run_dump_test "emit-relocs-529-overflow"
 
 # test addend correctness when --emit-relocs specified for non-relocatable obj.
 run_dump_test "emit-relocs-local-addend"

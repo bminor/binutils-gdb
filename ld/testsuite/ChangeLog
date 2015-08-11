@@ -1,5 +1,17 @@
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
+	* ld-aarch64/emit-relocs-529.s: New testcase.
+	* ld-aarch64/emit-relocs-529-overflow.s: Likewise.
+	* ld-aarch64/emit-relocs-86.s: Likewise.
+	* ld-aarch64/emit-relocs-86-overflow.s: Likewise.
+	* ld-aarch64/emit-relocs-529.d: New expectation file.
+	* ld-aarch64/emit-relocs-529-overflow.d: Likewise.
+	* ld-aarch64/emit-relocs-86.d: Likewise.
+	* ld-aarch64/emit-relocs-86-overflow.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Run new testcases.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
 	* ld-aarch64/tls-small-ld.s: Update testcase.
 
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
