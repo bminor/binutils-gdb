@@ -1,3 +1,14 @@
+2015-08-12  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp (aarch64_choose_ilp32_emul): Support all
+	four triple shape: aarch64-*-linux*, aarch64-*-elf,
+	aarch64_be-*-linux*, aarch64_be-*-elf.
+	* ld-aarch64/emit-relocs-86.d: Use aarch64_choose_ilp32_emul.
+	* ld-aarch64/emit-relocs-86-overflow.d: Likewise.
+	* ld-aarch64/ld-aarch64/farcall-b-plt.d: Relax instrucion encoding
+	check when they reflect address.
+	* ld-aarch64/ld-aarch64/farcall-bl-plt.d: Likewise.
+
 2015-08-12  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp: Rename relocs-257-symbolic-func to

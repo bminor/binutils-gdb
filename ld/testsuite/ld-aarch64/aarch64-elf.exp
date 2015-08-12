@@ -46,10 +46,17 @@ set aarch64elftests {
 }
 
 proc aarch64_choose_ilp32_emul {} {
-    if [istarget aarch64_be*-*-*] then {
+    if [istarget aarch64-*-linux*] then {
+        return "aarch64linux32"
+    } elseif [istarget aarch64-*-elf] {
+        return "aarch64elf32"
+    } elseif [istarget aarch64_be-*-linux*] {
+        return "aarch64linux32b"
+    } elseif [istarget aarch64_be-*-elf] {
         return "aarch64elf32b"
     } else {
-        return "aarch64linux32"
+      perror "Unknown target triple."
+      exit 1
     }
 }
 
