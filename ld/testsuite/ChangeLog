@@ -63,7 +63,7 @@
 	* ld-ifunc/pr18808.out: New file.
 	* ld-ifunc/pr18808a.c: Likewise.
 	* ld-ifunc/pr18808b.c: Likewise.
----
+
 2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18720
