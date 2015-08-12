@@ -1,3 +1,10 @@
+2015-08-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-08-11  Trevor Saunders  <tbsaunde+gcc@tbsaunde.org>
+
+	* ansidecl.h (GCC_FINAL): New macro.
+
 2015-07-16  Jiong Wang  <jiong.wang@arm.com>
 
 	* elf/aarch64.h (R_AARCH64_P32_TLSLD_ADR_PREL21): New enumeration.
