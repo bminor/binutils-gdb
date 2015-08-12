@@ -216,9 +216,8 @@ re_set_exception_catchpoint (struct breakpoint *self)
   /* We first try to use the probe interface.  */
   TRY
     {
-      char *spec = ASTRDUP (exception_functions[kind].probe);
-
-      location = new_linespec_location (&spec);
+      location
+	= new_probe_location (exception_functions[kind].probe);
       cleanup = make_cleanup_delete_event_location (location);
       sals = parse_probes (location, NULL);
       do_cleanups (cleanup);

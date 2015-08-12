@@ -45,6 +45,7 @@ struct event_location
        probes.  */
     char *addr_string;
 #define EL_LINESPEC(PTR) ((PTR)->u.addr_string)
+#define EL_PROBE(PTR) ((PTR)->u.addr_string)
 
     /* An address in the inferior.  */
     CORE_ADDR address;
@@ -121,6 +122,29 @@ get_address_location (const struct event_location *location)
 /* See description in location.h.  */
 
 struct event_location *
+new_probe_location (const char *probe)
+{
+  struct event_location *location;
+
+  location = XCNEW (struct event_location);
+  EL_TYPE (location) = PROBE_LOCATION;
+  if (probe != NULL)
+    EL_PROBE (location) = xstrdup (probe);
+  return location;
+}
+
+/* See description in location.h.  */
+
+const char *
+get_probe_location (const struct event_location *location)
+{
+  gdb_assert (EL_TYPE (location) == PROBE_LOCATION);
+  return EL_PROBE (location);
+}
+
+/* See description in location.h.  */
+
+struct event_location *
 copy_event_location (const struct event_location *src)
 {
   struct event_location *dst;
@@ -139,6 +163,11 @@ copy_event_location (const struct event_location *src)
 
     case ADDRESS_LOCATION:
       EL_ADDRESS (dst) = EL_ADDRESS (src);
+      break;
+
+    case PROBE_LOCATION:
+      if (EL_PROBE (src) != NULL)
+	EL_PROBE (dst) = xstrdup (EL_PROBE (src));
       break;
 
     default:
@@ -185,6 +214,10 @@ delete_event_location (struct event_location *location)
 	  /* Nothing to do.  */
 	  break;
 
+	case PROBE_LOCATION:
+	  xfree (EL_PROBE (location));
+	  break;
+
 	default:
 	  gdb_assert_not_reached ("unknown event location type");
 	}
@@ -211,6 +244,10 @@ event_location_to_string (struct event_location *location)
 	  EL_STRING (location)
 	    = xstrprintf ("*%s",
 			  core_addr_to_string (EL_ADDRESS (location)));
+	  break;
+
+	case PROBE_LOCATION:
+	  EL_STRING (location) = xstrdup (EL_PROBE (location));
 	  break;
 
 	default:
@@ -242,8 +279,20 @@ string_to_event_location (char **stringp,
     }
   else
     {
-      /* Everything else is a linespec.  */
-      location = new_linespec_location (stringp);
+      const char *cs;
+
+      /* Next, try the input as a probe spec.  */
+      cs = *stringp;
+      if (cs != NULL && probe_linespec_to_ops (&cs) != NULL)
+	{
+	  location = new_probe_location (*stringp);
+	  *stringp += strlen (*stringp);
+	}
+      else
+	{
+	  /* Everything else is a linespec.  */
+	  location = new_linespec_location (stringp);
+	}
     }
 
   return location;
@@ -262,6 +311,9 @@ event_location_empty_p (const struct event_location *location)
 
     case ADDRESS_LOCATION:
       return 0;
+
+    case PROBE_LOCATION:
+      return EL_PROBE (location) == NULL;
 
     default:
       gdb_assert_not_reached ("unknown event location type");

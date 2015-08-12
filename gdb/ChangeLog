@@ -1,5 +1,25 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
+	* break-catch-throw.c (re_set_exception_catchpoint): Convert
+	linespec for stap probe to probe location.
+	* breakpoint.c (create_longjmp_master_breakpoint)
+	(create_exception_master_breakpoint): Likewise.
+	(break_command_1): Remove local variable `arg_cp'.
+	Check location type to set appropriate breakpoint ops methods.
+	(trace_command): Likewise.
+	* linespec.c (event_location_to_sals): Assert on probe locations.
+	* location.c (EL_PROBE): Add macro definition.
+	(new_probe_location, get_probe_location): New functions.
+	(copy_event_location, delete_event_location, event_location_to_string)
+	(string_to_event_location, event_location_empty_p): Handle probe
+	locations.
+	* location.h (enum event_location_type): Add PROBE_LOCATION.
+	(new_probe_location, get_probe_location): Declare.
+	* probe.c (parse_probes): Assert that LOCATION is a probe location.
+	Convert linespec into probe location.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
 	* breakpoint.c (create_thread_event_breakpoint, init_breakpoint_sal):
 	Convert linespec to address location.
 	* linespec.c (canonicalize_linespec): Do not handle address

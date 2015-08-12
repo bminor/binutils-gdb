@@ -59,7 +59,8 @@ parse_probes (const struct event_location *location,
   result.sals = NULL;
   result.nelts = 0;
 
-  arg_start = get_linespec_location (location);
+  gdb_assert (event_location_type (location) == PROBE_LOCATION);
+  arg_start = get_probe_location (location);
 
   cs = arg_start;
   probe_ops = probe_linespec_to_ops (&cs);
@@ -178,7 +179,7 @@ parse_probes (const struct event_location *location,
       make_cleanup (xfree, canon);
       canonical->special_display = 1;
       canonical->pre_expanded = 1;
-      canonical->location = new_linespec_location (&canon);
+      canonical->location = new_probe_location (canon);
     }
 
   do_cleanups (cleanup);

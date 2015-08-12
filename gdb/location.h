@@ -31,7 +31,10 @@ enum event_location_type
   LINESPEC_LOCATION,
 
   /* An address in the inferior.  */
-  ADDRESS_LOCATION
+  ADDRESS_LOCATION,
+
+  /* A probe location.  */
+  PROBE_LOCATION
 };
 
 /* Return the type of the given event location.  */
@@ -71,6 +74,18 @@ extern struct event_location *
 
 extern CORE_ADDR
   get_address_location (const struct event_location *location);
+
+/* Create a new probe location.  The return result is malloc'd
+   and should be freed with delete_event_location.  */
+
+extern struct event_location *
+  new_probe_location (const char *probe);
+
+/* Return the probe location (a string) of the given event_location
+   (which must be of type PROBE_LOCATION).  */
+
+extern const char *
+  get_probe_location (const struct event_location *location);
 
 /* Free an event location and any associated data.  */
 

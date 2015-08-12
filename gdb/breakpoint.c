@@ -3517,7 +3517,6 @@ create_longjmp_master_breakpoint (void)
 	  int i;
 	  struct probe *probe;
 	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-	  char *p;
 
 	  for (i = 0;
 	       VEC_iterate (probe_p,
@@ -3532,8 +3531,8 @@ create_longjmp_master_breakpoint (void)
 								 objfile),
 					      bp_longjmp_master,
 					      &internal_breakpoint_ops);
-	      p = ASTRDUP ("-probe-stap libc:longjmp");
-	      b->location = new_linespec_location (&p);
+	      b->location
+		= new_probe_location ("-probe-stap libc:longjmp");
 	      b->enable_state = bp_disabled;
 	    }
 
@@ -3695,15 +3694,14 @@ create_exception_master_breakpoint (void)
 	       ++i)
 	    {
 	      struct breakpoint *b;
-	      char *p;
 
 	      b = create_internal_breakpoint (gdbarch,
 					      get_probe_address (probe,
 								 objfile),
 					      bp_exception_master,
 					      &internal_breakpoint_ops);
-	      p = ASTRDUP ("-probe-stap libgcc:unwind");
-	      b->location = new_linespec_location (&p);
+	      b->location
+		= new_probe_location ("-probe-stap libgcc:unwind");
 	      b->enable_state = bp_disabled;
 	    }
 
@@ -9850,7 +9848,6 @@ break_command_1 (char *arg, int flag, int from_tty)
 			     ? bp_hardware_breakpoint
 			     : bp_breakpoint);
   struct breakpoint_ops *ops;
-  const char *arg_cp = arg;
   struct event_location *location;
   struct cleanup *cleanup;
 
@@ -9858,7 +9855,8 @@ break_command_1 (char *arg, int flag, int from_tty)
   cleanup = make_cleanup_delete_event_location (location);
 
   /* Matching breakpoints on probes.  */
-  if (arg_cp != NULL && probe_linespec_to_ops (&arg_cp) != NULL)
+  if (location != NULL
+      && event_location_type (location) == PROBE_LOCATION)
     ops = &bkpt_probe_breakpoint_ops;
   else
     ops = &bkpt_breakpoint_ops;
@@ -14983,11 +14981,11 @@ trace_command (char *arg, int from_tty)
   struct breakpoint_ops *ops;
   struct event_location *location;
   struct cleanup *back_to;
-  const char *arg_cp = arg;
 
   location = string_to_event_location (&arg, current_language);
   back_to = make_cleanup_delete_event_location (location);
-  if (arg_cp != NULL && probe_linespec_to_ops (&arg_cp) != NULL)
+  if (location != NULL
+      && event_location_type (location) == PROBE_LOCATION)
     ops = &tracepoint_probe_breakpoint_ops;
   else
     ops = &tracepoint_breakpoint_ops;

@@ -2479,6 +2479,11 @@ event_location_to_sals (linespec_parser *parser,
 					    get_address_location (location));
       break;
 
+    case PROBE_LOCATION:
+      /* Probes are handled by their own decoders.  */
+      gdb_assert_not_reached ("attempt to decode probe location");
+      break;
+
     default:
       gdb_assert_not_reached ("unhandled event location type");
     }
