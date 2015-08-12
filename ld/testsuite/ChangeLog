@@ -1,3 +1,12 @@
+2015-08-12  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Rename relocs-257-symbolic-func to
+	relocs-1027-symbolic-func.
+	* ld-aarch64/relocs-257-symbolic-func.d: Rename to ...
+	* ld-aarch64/relocs-1027-symbolic-func.d: ... this.
+	* ld-aarch64/relocs-257-symbolic-func.s: Rename to ...
+	* ld-aarch64/relocs-1027-symbolic-func.s: ... this.
+
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/farcall-b-defsym.s: New test.
