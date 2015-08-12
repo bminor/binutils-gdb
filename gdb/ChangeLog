@@ -1,5 +1,179 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
+	* ax-gdb.c: Include location.h.
+	(agent_command_1) Use linespec location instead of address
+	string.
+	* break-catch-throw.c: Include location.h.
+	(re_set_exception_catchpoint): Use linespec locations instead
+	of address strings.
+	* breakpoint.c: Include location.h.
+	(create_overlay_event_breakpoint, create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint, update_breakpoints_after_exec):
+	Use linespec location instead of address string.
+	(print_breakpoint_location):  Use locations and
+	event_location_to_string.
+	Print extra_string for pending locations for non-MI streams.
+	(print_one_breakpoint_location): Use locations and
+	event_location_to_string.
+	(init_raw_breakpoint_without_location): Initialize b->location.
+	(create_thread_event_breakpoint): Use linespec location instead of
+	address string.
+	(init_breakpoint_sal): Likewise.
+	Only save extra_string if it is non-NULL and not the empty string.
+	Use event_location_to_string instead of `addr_string'.
+	Constify `p' and `endp'.
+	Use skip_spaces_const/skip_space_const instead of non-const versions.
+	Copy the location into the breakpoint.
+	If LOCATION is NULL, save the breakpoint address as a linespec location
+	instead of an address string.
+	(create_breakpoint_sal): Change `addr_string' parameter to a struct
+	event_location. All uses updated.
+	(create_breakpoints_sal): Likewise for local variable `addr_string'.
+	(parse_breakpoint_sals): Use locations instead of address strings.
+	Remove check for empty linespec with conditional.
+	Refactor.
+	(decode_static_tracepoint_spec): Make argument const and update
+	function.
+	(create_breakpoint): Change `arg' to a struct event_location and
+	rename.
+	Remove `copy_arg' and `addr_start'.
+	If EXTRA_STRING is empty, set it to NULL.
+	Don't populate `canonical' for pending breakpoints.
+	Pass `extra_string' to find_condition_and_thread.
+	Clear `extra_string' if `rest' was NULL.
+	Do not error with "garbage after location" if setting a dprintf
+	breakpoint.
+	Copy the location into the breakpoint instead of an address string.
+	(break_command_1): Use string_to_event_location and pass this to
+	create_breakpoint instead of an address string.
+	Check against `arg_cp' for a probe linespec.
+	(dprintf_command): Use string_to_event_location and pass this to
+	create_breakpoint instead of an address string.
+	Throw an exception if no format string was specified.
+	(print_recreate_ranged_breakpoint): Use event_location_to_string
+	instead of address strings.
+	(break_range_command, until_break_command)
+	(init_ada_exception_breakpoint): Use locations instead
+	of address strings.
+	(say_where): Print out extra_string for pending locations.
+	(base_breakpoint_dtor): Delete `location' and `location_range_end' of
+	the breakpoint.
+	(base_breakpoint_create_sals_from_location): Use struct event_location
+	instead of address string.
+	Remove `addr_start' and `copy_arg' parameters.
+	(base_breakpoint_decode_location): Use struct event_location instead of
+	address string.
+	(bkpt_re_set): Use locations instead of address strings.
+	Use event_location_empty_p to check for unset location.
+	(bkpt_print_recreate): Use event_location_to_string instead of
+	an address string.
+	Print out extra_string for pending locations.
+	(bkpt_create_sals_from_location, bkpt_decode_location)
+	(bkpt_probe_create_sals_from_location): Use struct event_location
+	instead of address string.
+	(bkpt_probe_decode_location): Use struct event_location instead of
+	address string.
+	(tracepoint_print_recreate): Use event_location_to_string to
+	recreate the tracepoint.
+	(tracepoint_create_sals_from_location, tracepoint_decode_location)
+	(tracepoint_probe_create_sals_from_location)
+	(tracepoint_probe_decode_location): Use struct event_location
+	instead of address string.
+	(dprintf_print_recreate): Use event_location_to_string to recreate
+	the dprintf.
+	(dprintf_re_set): Remove check for valid/missing format string.
+	(strace_marker_create_sals_from_location)
+	(strace_marker_create_breakpoints_sal, strace_marker_decode_location)
+	(update_static_tracepoint): Use struct event_location instead of
+	address string.
+	(location_to_sals): Likewise.
+	Pass `extra_string' to find_condition_and_thread.
+	For newly resolved pending breakpoint locations, clear the location's
+	string representation.
+	Assert that the breakpoint's condition string is NULL when
+	condition_not_parsed.
+	(breakpoint_re_set_default, create_sals_from_location_default)
+	(decode_location_default, trace_command, ftrace_command)
+	(strace_command, create_tracepoint_from_upload): Use locations
+	instead of address strings.
+	* breakpoint.h (struct breakpoint_ops) <create_sals_from_location>:
+	Use struct event_location instead of address string.
+	Update all uses.
+	<decode_location>: Likewise.
+	(struct breakpoint) <addr_string>: Change to struct event_location
+	and rename `location'.
+	<addr_string_range_end>: Change to struct event_location and rename
+	`location_range_end'.
+	(create_breakpoint): Use struct event_location instead of address
+	string.
+	* cli/cli-cmds.c: Include location.h.
+	(edit_command, list_command): Use locations instead of address strings.
+	* elfread.c: Include location.h.
+	(elf_gnu_ifunc_resolver_return_stop): Use event_location_to_string.
+	* guile/scm-breakpoint.c: Include location.h.
+	(bpscm_print_breakpoint_smob): Use event_location_to_string.
+	(gdbscm_register_breakpoint): Use locations instead of address
+	strings.
+	* linespec.c: Include location.h.
+	(struct ls_parser) <stream>: Change to const char *.
+	(PARSER_STREAM): Update.
+	(lionespec_lexer_lex_keyword): According to find_condition_and_thread,
+	keywords must be followed by whitespace.
+	(canonicalize_linespec): Save a linespec location into `canonical'.
+	Save a canonical linespec into `canonical'.
+	(parse_linespec): Change `argptr' to const char * and rename `arg'.
+	All uses updated.
+	Update function description.
+	(linespec_parser_new): Initialize `parser'.
+	Update initialization of  parsing stream.
+	(event_location_to_sals): New function.
+	(decode_line_full): Change `argptr' to a struct event_location and
+	rename it `location'.
+	Use locations instead of address strings.
+	Call event_location_to_sals instead of parse_linespec.
+	(decode_line_1): Likewise.
+	(decode_line_with_current_source, decode_line_with_last_displayed)
+	Use locations instead of address strings.
+	(decode_objc): Likewise.
+	Change `argptr' to const char * and rename `arg'.
+	(destroy_linespec_result): Delete the linespec result's location
+	instead of freeing the address string.
+	* linespec.h (struct linespec_result) <addr_string>: Change to
+	struct event_location and rename to ...
+	<location>: ... this.
+	(decode_line_1, decode_line_full): Change `argptr' to struct
+	event_location.  All callers updated.
+	* mi/mi-cmd-break.c: Include language.h, location.h, and linespec.h.
+	(mi_cmd_break_insert_1): Use locations instead of address strings.
+	Throw an error if there was "garbage" at the end of the specified
+	linespec.
+	* probe.c: Include location.h.
+	(parse_probes): Change `argptr' to struct event_location.
+	Use event locations instead of address strings.
+	* probe.h (parse_probes): Change `argptr' to struct event_location.
+	* python/py-breakpoint.c: Include location.h.
+	(bppy_get_location): Constify local variable `str'.
+	Use event_location_to_string.
+	(bppy_init): Use locations instead of address strings.
+	* python/py-finishbreakpoint.c: Include location.h.
+	(bpfinishpy_init): Remove local variable `addr_str'.
+	Use locations instead of address strings.
+	* python/python.c: Include location.h.
+	(gdbpy_decode_line): Use locations instead of address strings.
+	* remote.c: Include location.h.
+	(remote_download_tracepoint): Use locations instead of address
+	strings.
+	* spu-tdep.c: Include location.h.
+	(spu_catch_start): Remove local variable `buf'.
+	Use locations instead of address strings.
+	* tracepoint.c: Include location.h.
+	(scope_info): Use locations instead of address strings.
+	(encode_source_string): Constify parameter `src'.
+	* tracepoint.h (encode_source_string): Likewise.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
 	* Makefile.in (SFILES): Add location.c.
 	(HFILES_NO_SRCDIR): Add location.h.
 	(COMMON_OBS): Add location.o.

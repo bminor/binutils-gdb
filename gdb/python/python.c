@@ -34,6 +34,7 @@
 #include "extension-priv.h"
 #include "cli/cli-utils.h"
 #include <ctype.h>
+#include "location.h"
 
 /* Declared constants and enum for python stack printing.  */
 static const char python_excp_none[] = "none";
@@ -724,12 +725,12 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   struct symtabs_and_lines sals = { NULL, 0 }; /* Initialize to
 						  appease gcc.  */
   struct symtab_and_line sal;
-  const char *arg = NULL;
-  char *copy_to_free = NULL, *copy = NULL;
+  char *arg = NULL;
   struct cleanup *cleanups;
   PyObject *result = NULL;
   PyObject *return_result = NULL;
   PyObject *unparsed = NULL;
+  struct event_location *location;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
@@ -738,14 +739,16 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
   sals.sals = NULL;
 
+  if (arg != NULL)
+    {
+      location = new_linespec_location (&arg);
+      make_cleanup_delete_event_location (location);
+    }
+
   TRY
     {
       if (arg)
-	{
-	  copy = xstrdup (arg);
-	  copy_to_free = copy;
-	  sals = decode_line_1 (&copy, 0, 0, 0);
-	}
+	sals = decode_line_1 (location, 0, 0, 0);
       else
 	{
 	  set_default_source_symtab_and_line ();
@@ -761,10 +764,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   END_CATCH
 
   if (sals.sals != NULL && sals.sals != &sal)
-    {
-      make_cleanup (xfree, copy_to_free);
-      make_cleanup (xfree, sals.sals);
-    }
+    make_cleanup (xfree, sals.sals);
 
   if (except.reason < 0)
     {
@@ -808,9 +808,9 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
       goto error;
     }
 
-  if (copy && strlen (copy) > 0)
+  if (arg != NULL && strlen (arg) > 0)
     {
-      unparsed = PyString_FromString (copy);
+      unparsed = PyString_FromString (arg);
       if (unparsed == NULL)
 	{
 	  Py_DECREF (result);

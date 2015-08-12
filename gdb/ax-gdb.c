@@ -40,6 +40,7 @@
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
 #include "linespec.h"
+#include "location.h"
 #include "objfiles.h"
 
 #include "valprint.h"
@@ -2642,13 +2643,16 @@ agent_command_1 (char *exp, int eval)
       int ix;
       struct linespec_sals *iter;
       struct cleanup *old_chain;
+      struct event_location *location;
 
       exp = skip_spaces (exp);
       init_linespec_result (&canonical);
-      decode_line_full (&exp, DECODE_LINE_FUNFIRSTLINE,
+      location = new_linespec_location (&exp);
+      old_chain = make_cleanup_delete_event_location (location);
+      decode_line_full (location, DECODE_LINE_FUNFIRSTLINE,
 			(struct symtab *) NULL, 0, &canonical,
 			NULL, NULL);
-      old_chain = make_cleanup_destroy_linespec_result (&canonical);
+      make_cleanup_destroy_linespec_result (&canonical);
       exp = skip_spaces (exp);
       if (exp[0] == ',')
         {

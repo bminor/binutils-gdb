@@ -28,6 +28,9 @@
 #include "observer.h"
 #include "mi-main.h"
 #include "mi-cmd-break.h"
+#include "language.h"
+#include "location.h"
+#include "linespec.h"
 #include "gdb_obstack.h"
 #include <ctype.h>
 
@@ -177,6 +180,7 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
   int tracepoint = 0;
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
   enum bptype type_wanted;
+  struct event_location *location;
   struct breakpoint_ops *ops;
   char *extra_string = NULL;
 
@@ -287,7 +291,13 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
       ops = &bkpt_breakpoint_ops;
     }
 
-  create_breakpoint (get_current_arch (), address, condition, thread,
+  location = string_to_event_location (&address, current_language);
+  make_cleanup_delete_event_location (location);
+
+  if (*address)
+    error (_("Garbage '%s' at end of location"), address);
+
+  create_breakpoint (get_current_arch (), location, condition, thread,
 		     extra_string,
 		     0 /* condition and thread are valid.  */,
 		     temp_p, type_wanted,

@@ -43,6 +43,7 @@
 #include "filenames.h"
 #include "ada-lang.h"
 #include "stack.h"
+#include "location.h"
 
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
@@ -281,8 +282,8 @@ struct ls_parser
     const char *saved_arg;
 
     /* Head of the input stream.  */
-    const char **stream;
-#define PARSER_STREAM(P) (*(P)->lexer.stream)
+    const char *stream;
+#define PARSER_STREAM(P) ((P)->lexer.stream)
 
     /* The current token.  */
     linespec_token current;
@@ -315,7 +316,7 @@ static CORE_ADDR linespec_expression_to_pc (const char **exp_ptr);
 
 static struct symtabs_and_lines decode_objc (struct linespec_state *self,
 					     linespec_p ls,
-					     const char **argptr);
+					     const char *arg);
 
 static VEC (symtab_ptr) *symtabs_from_filename (const char *);
 
@@ -1785,21 +1786,29 @@ linespec_parse_basic (linespec_parser *parser)
    STATE->canonical.  */
 
 static void
-canonicalize_linespec (struct linespec_state *state, linespec_p ls)
+canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 {
+  char *tmp;
+
   /* If canonicalization was not requested, no need to do anything.  */
   if (!state->canonical)
     return;
 
   /* Shortcut expressions, which can only appear by themselves.  */
   if (ls->expression != NULL)
-    state->canonical->addr_string = xstrdup (ls->expression);
+    {
+      tmp = ASTRDUP (ls->expression);
+      state->canonical->location = new_linespec_location (&tmp);
+    }
   else
     {
       struct ui_file *buf;
       int need_colon = 0;
+      struct cleanup *cleanup;
 
       buf = mem_fileopen ();
+      cleanup = make_cleanup_ui_file_delete (buf);
+
       if (ls->source_filename)
 	{
 	  fputs_unfiltered (ls->source_filename, buf);
@@ -1848,8 +1857,10 @@ canonicalize_linespec (struct linespec_state *state, linespec_p ls)
 			    ls->line_offset.offset);
 	}
 
-      state->canonical->addr_string = ui_file_xstrdup (buf, NULL);
-      ui_file_delete (buf);
+      tmp = ui_file_xstrdup (buf, NULL);
+      make_cleanup (xfree, tmp);
+      state->canonical->location = new_linespec_location (&tmp);
+      do_cleanups (cleanup);
     }
 }
 
@@ -2117,8 +2128,6 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 }
 
 /* Parse a string that specifies a linespec.
-   Pass the address of a char * variable; that variable will be
-   advanced over the characters actually parsed.
 
    The basic grammar of linespecs:
 
@@ -2167,10 +2176,10 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
    if no file is validly specified.  Callers must check that.
    Also, the line number returned may be invalid.  */
 
-/* Parse the linespec in ARGPTR.  */
+/* Parse the linespec in ARG.  */
 
 static struct symtabs_and_lines
-parse_linespec (linespec_parser *parser, const char **argptr)
+parse_linespec (linespec_parser *parser, const char *arg)
 {
   linespec_token token;
   struct symtabs_and_lines values;
@@ -2181,30 +2190,30 @@ parse_linespec (linespec_parser *parser, const char **argptr)
      IDEs to work around bugs in the previous parser by quoting
      the entire linespec, so we attempt to deal with this nicely.  */
   parser->is_quote_enclosed = 0;
-  if (!is_ada_operator (*argptr)
-      && strchr (linespec_quote_characters, **argptr) != NULL)
+  if (!is_ada_operator (arg)
+      && strchr (linespec_quote_characters, *arg) != NULL)
     {
       const char *end;
 
-      end = skip_quote_char (*argptr + 1, **argptr);
+      end = skip_quote_char (arg + 1, *arg);
       if (end != NULL && is_closing_quote_enclosed (end))
 	{
-	  /* Here's the special case.  Skip ARGPTR past the initial
+	  /* Here's the special case.  Skip ARG past the initial
 	     quote.  */
-	  ++(*argptr);
+	  ++arg;
 	  parser->is_quote_enclosed = 1;
 	}
     }
 
-  parser->lexer.saved_arg = *argptr;
-  parser->lexer.stream = argptr;
+  parser->lexer.saved_arg = arg;
+  parser->lexer.stream = arg;
 
   /* Initialize the default symtab and line offset.  */
   initialize_defaults (&PARSER_STATE (parser)->default_symtab,
 		       &PARSER_STATE (parser)->default_line);
 
   /* Objective-C shortcut.  */
-  values = decode_objc (PARSER_STATE (parser), PARSER_RESULT (parser), argptr);
+  values = decode_objc (PARSER_STATE (parser), PARSER_RESULT (parser), arg);
   if (values.sals != NULL)
     return values;
 
@@ -2390,6 +2399,7 @@ linespec_parser_new (linespec_parser *parser,
 		     int default_line,
 		     struct linespec_result *canonical)
 {
+  memset (parser, 0, sizeof (linespec_parser));
   parser->lexer.current.type = LSTOKEN_CONSUMED;
   memset (PARSER_RESULT (parser), 0, sizeof (struct linespec));
   PARSER_RESULT (parser)->line_offset.sign = LINE_OFFSET_UNKNOWN;
@@ -2443,7 +2453,6 @@ linespec_lex_to_end (char **stringp)
   linespec_parser parser;
   struct cleanup *cleanup;
   linespec_token token;
-  volatile struct gdb_exception e;
   const char *orig;
 
   if (stringp == NULL || *stringp == NULL)
@@ -2483,10 +2492,42 @@ linespec_lex_to_end (char **stringp)
   do_cleanups (cleanup);
 }
 
+/* A helper function for decode_line_full and decode_line_1 to
+   turn LOCATION into symtabs_and_lines.  */
+
+static struct symtabs_and_lines
+event_location_to_sals (linespec_parser *parser,
+			const struct event_location *location)
+{
+  struct symtabs_and_lines result = {NULL, 0};
+
+  switch (event_location_type (location))
+    {
+    case LINESPEC_LOCATION:
+      {
+	TRY
+	  {
+	    result = parse_linespec (parser, get_linespec_location (location));
+	  }
+	CATCH (except, RETURN_MASK_ERROR)
+	  {
+	    throw_exception (except);
+	  }
+	END_CATCH
+      }
+      break;
+
+    default:
+      gdb_assert_not_reached ("unhandled event location type");
+    }
+
+  return result;
+}
+
 /* See linespec.h.  */
 
 void
-decode_line_full (char **argptr, int flags,
+decode_line_full (const struct event_location *location, int flags,
 		  struct symtab *default_symtab,
 		  int default_line, struct linespec_result *canonical,
 		  const char *select_mode,
@@ -2497,7 +2538,6 @@ decode_line_full (char **argptr, int flags,
   VEC (const_char_ptr) *filters = NULL;
   linespec_parser parser;
   struct linespec_state *state;
-  const char *copy, *orig;
 
   gdb_assert (canonical != NULL);
   /* The filter only makes sense for 'all'.  */
@@ -2513,13 +2553,10 @@ decode_line_full (char **argptr, int flags,
   cleanups = make_cleanup (linespec_parser_delete, &parser);
   save_current_program_space ();
 
-  orig = copy = *argptr;
-  result = parse_linespec (&parser, &copy);
-  *argptr += copy - orig;
+  result = event_location_to_sals (&parser, location);
   state = PARSER_STATE (&parser);
 
   gdb_assert (result.nelts == 1 || canonical->pre_expanded);
-  gdb_assert (canonical->addr_string != NULL);
   canonical->pre_expanded = 1;
 
   /* Arrange for allocated canonical names to be freed.  */
@@ -2563,23 +2600,20 @@ decode_line_full (char **argptr, int flags,
 /* See linespec.h.  */
 
 struct symtabs_and_lines
-decode_line_1 (char **argptr, int flags,
+decode_line_1 (const struct event_location *location, int flags,
 	       struct symtab *default_symtab,
 	       int default_line)
 {
   struct symtabs_and_lines result;
   linespec_parser parser;
   struct cleanup *cleanups;
-  const char *copy, *orig;
 
   linespec_parser_new (&parser, flags, current_language, default_symtab,
 		       default_line, NULL);
   cleanups = make_cleanup (linespec_parser_delete, &parser);
   save_current_program_space ();
 
-  orig = copy = *argptr;
-  result = parse_linespec (&parser, &copy);
-  *argptr += copy - orig;
+  result = event_location_to_sals (&parser, location);
 
   do_cleanups (cleanups);
   return result;
@@ -2592,6 +2626,8 @@ decode_line_with_current_source (char *string, int flags)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line cursal;
+  struct event_location *location;
+  struct cleanup *cleanup;
 
   if (string == 0)
     error (_("Empty line specification."));
@@ -2600,11 +2636,15 @@ decode_line_with_current_source (char *string, int flags)
      and get a default source symtab+line or it will recursively call us!  */
   cursal = get_current_source_symtab_and_line ();
 
-  sals = decode_line_1 (&string, flags,
+  location = string_to_event_location (&string, current_language);
+  cleanup = make_cleanup_delete_event_location (location);
+  sals = decode_line_1 (location, flags,
 			cursal.symtab, cursal.line);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
+
+  do_cleanups (cleanup);
   return sals;
 }
 
@@ -2614,19 +2654,25 @@ struct symtabs_and_lines
 decode_line_with_last_displayed (char *string, int flags)
 {
   struct symtabs_and_lines sals;
+  struct event_location *location;
+  struct cleanup *cleanup;
 
   if (string == 0)
     error (_("Empty line specification."));
 
+  location = string_to_event_location (&string, current_language);
+  cleanup = make_cleanup_delete_event_location (location);
   if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (&string, flags,
+    sals = decode_line_1 (location, flags,
 			  get_last_displayed_symtab (),
 			  get_last_displayed_line ());
   else
-    sals = decode_line_1 (&string, flags, (struct symtab *) NULL, 0);
+    sals = decode_line_1 (location, flags, (struct symtab *) NULL, 0);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
+
+  do_cleanups (cleanup);
   return sals;
 }
 
@@ -2679,7 +2725,7 @@ linespec_expression_to_pc (const char **exp_ptr)
    the existing C++ code to let the user choose one.  */
 
 static struct symtabs_and_lines
-decode_objc (struct linespec_state *self, linespec_p ls, const char **argptr)
+decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 {
   struct collect_info info;
   VEC (const_char_ptr) *symbol_names = NULL;
@@ -2697,7 +2743,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char **argptr)
   values.nelts = 0;
   values.sals = NULL;
 
-  new_argptr = find_imps (*argptr, &symbol_names); 
+  new_argptr = find_imps (arg, &symbol_names);
   if (VEC_empty (const_char_ptr, symbol_names))
     {
       do_cleanups (cleanup);
@@ -2711,9 +2757,9 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char **argptr)
     {
       char *saved_arg;
 
-      saved_arg = alloca (new_argptr - *argptr + 1);
-      memcpy (saved_arg, *argptr, new_argptr - *argptr);
-      saved_arg[new_argptr - *argptr] = '\0';
+      saved_arg = alloca (new_argptr - arg + 1);
+      memcpy (saved_arg, arg, new_argptr - arg);
+      saved_arg[new_argptr - arg] = '\0';
 
       ls->function_name = xstrdup (saved_arg);
       ls->function_symbols = info.result.symbols;
@@ -2722,16 +2768,22 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char **argptr)
 
       if (self->canonical)
 	{
+	  char *str;
+
 	  self->canonical->pre_expanded = 1;
+
 	  if (ls->source_filename)
-	    self->canonical->addr_string
-	      = xstrprintf ("%s:%s", ls->source_filename, saved_arg);
+	    {
+	      str = xstrprintf ("%s:%s",
+				ls->source_filename, saved_arg);
+	    }
 	  else
-	    self->canonical->addr_string = xstrdup (saved_arg);
+	    str = xstrdup (saved_arg);
+
+	  make_cleanup (xfree, str);
+	  self->canonical->location = new_linespec_location (&str);
 	}
     }
-
-  *argptr = new_argptr;
 
   do_cleanups (cleanup);
 
@@ -3830,7 +3882,7 @@ destroy_linespec_result (struct linespec_result *ls)
   int i;
   struct linespec_sals *lsal;
 
-  xfree (ls->addr_string);
+  delete_event_location (ls->location);
   for (i = 0; VEC_iterate (linespec_sals, ls->sals, i, lsal); ++i)
     {
       xfree (lsal->canonical);

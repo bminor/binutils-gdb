@@ -37,6 +37,7 @@ struct bpstats;
 struct bp_location;
 struct linespec_result;
 struct linespec_sals;
+struct event_location;
 
 /* This is the maximum number of bytes a breakpoint instruction can
    take.  Feel free to increase it.  It's just used in a few places to
@@ -580,8 +581,9 @@ struct breakpoint_ops
      `create_sals_from_location_default'.
 
      This function is called inside `create_breakpoint'.  */
-  void (*create_sals_from_location) (char **, struct linespec_result *,
-				     enum bptype, char *, char **);
+  void (*create_sals_from_location) (const struct event_location *location,
+				     struct linespec_result *canonical,
+				     enum bptype type_wanted);
 
   /* This method will be responsible for creating a breakpoint given its SALs.
      Usually, it just calls `create_breakpoints_sal' (for ordinary
@@ -602,8 +604,9 @@ struct breakpoint_ops
      it calls `decode_line_full'.
 
      This function is called inside `location_to_sals'.  */
-  void (*decode_location) (struct breakpoint *, char **,
-			   struct symtabs_and_lines *);
+  void (*decode_location) (struct breakpoint *b,
+			   const struct event_location *location,
+			   struct symtabs_and_lines *sals);
 
   /* Return true if this breakpoint explains a signal.  See
      bpstat_explains_signal.  */
@@ -702,17 +705,17 @@ struct breakpoint
        non-thread-specific ordinary breakpoints this is NULL.  */
     struct program_space *pspace;
 
-    /* String we used to set the breakpoint (malloc'd).  */
-    char *addr_string;
+    /* Location we used to set the breakpoint (malloc'd).  */
+    struct event_location *location;
 
     /* The filter that should be passed to decode_line_full when
        re-setting this breakpoint.  This may be NULL, but otherwise is
        allocated with xmalloc.  */
     char *filter;
 
-    /* For a ranged breakpoint, the string we used to find
+    /* For a ranged breakpoint, the location we used to find
        the end of the range (malloc'd).  */
-    char *addr_string_range_end;
+    struct event_location *location_range_end;
 
     /* Architecture we used to set the breakpoint.  */
     struct gdbarch *gdbarch;
@@ -1293,10 +1296,30 @@ enum breakpoint_create_flags
     CREATE_BREAKPOINT_FLAGS_INSERTED = 1 << 0
   };
 
-extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
+/* Set a breakpoint.  This function is shared between CLI and MI functions
+   for setting a breakpoint at LOCATION.
+
+   This function has two major modes of operations, selected by the
+   PARSE_EXTRA parameter.
+
+   If PARSE_EXTRA is zero, LOCATION is just the breakpoint's location,
+   with condition, thread, and extra string specified by the COND_STRING,
+   THREAD, and EXTRA_STRING parameters.
+
+   If PARSE_EXTRA is non-zero, this function will attempt to extract
+   the condition, thread, and extra string from EXTRA_STRING, ignoring
+   the similarly named parameters.
+
+   If INTERNAL is non-zero, the breakpoint number will be allocated
+   from the internal breakpoint count.
+
+   Returns true if any breakpoint was created; false otherwise.  */
+
+extern int create_breakpoint (struct gdbarch *gdbarch,
+			      const struct event_location *location,
 			      char *cond_string, int thread,
 			      char *extra_string,
-			      int parse_arg,
+			      int parse_extra,
 			      int tempflag, enum bptype wanted_type,
 			      int ignore_count,
 			      enum auto_boolean pending_break_support,

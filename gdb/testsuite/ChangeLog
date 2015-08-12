@@ -1,3 +1,9 @@
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/dprintf-pending.exp: Update dprintf "without format"
+	test.
+	Add tests for missing ",FMT" and ",".
+
 2015-08-10  Doug Evans  <dje@google.com>
 	    Keith Seitz  <keiths@redhat.com>
 
