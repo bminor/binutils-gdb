@@ -1,5 +1,34 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
+	* completer.c: Include location.h.
+	(enum match_type): New enum.
+	(location_completer): Rename to ...
+	(linespec_completer): ... this.
+	(collect_explicit_location_matches, backup_text_ptr)
+	(explicit_location_completer): New functions.
+	(location_completer): "New" function; handle linespec
+	and explicit location completions.
+	(complete_line_internal): Remove all location completer-specific
+	handling.
+	* linespec.c (linespec_lexer_lex_keyword, is_ada_operator)
+	(find_toplevel_char): Export.
+	(linespec_parse_line_offset): Export.
+	Issue error if STRING is not numerical.
+	(gdb_get_linespec_parser_quote_characters): New function.
+	* linespec.h (linespec_parse_line_offset): Declare.
+	(get_gdb_linespec_parser_quote_characters): Declare.
+	(is_ada_operator): Declare.
+	(find_toplevel_char): Declare.
+	(linespec_lexer_lex_keyword): Declare.
+	* location.c (explicit_to_event_location): New function.
+	(explicit_location_lex_one): New function.
+	(string_to_explicit_location): New function.
+	(string_to_event_location): Handle explicit locations.
+	* location.h (explicit_to_event_location): Declare.
+	(string_to_explicit_location): Declare.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
 	* break-catch-throw.c (re_set_exception_catchpoint): Convert
 	linespec into explicit location.
 	* breakpoint.c (create_overlay_breakpoint)

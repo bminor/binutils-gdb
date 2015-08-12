@@ -1,5 +1,18 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
+	* gdb.linespec/3explicit.c: New file.
+	* gdb.linespec/cpexplicit.cc: New file.
+	* gdb.linespec/cpexplicit.exp: New file.
+	* gdb.linespec/explicit.c: New file.
+	* gdb.linespec/explicit.exp: New file.
+	* gdb.linespec/explicit2.c: New file.
+	* gdb.linespec/ls-errs.exp: Add explicit location tests.
+	* lib/gdb.exp (capture_command_output): Regexp-escape `command'
+	before using in the matching pattern.
+	Clarify that `prefix' is a regular expression.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
 	* gdb.base/dprintf-pending.exp: Update dprintf "without format"
 	test.
 	Add tests for missing ",FMT" and ",".

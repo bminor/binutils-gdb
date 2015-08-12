@@ -429,6 +429,196 @@ event_location_to_string (struct event_location *location)
   return EL_STRING (location);
 }
 
+/* A lexer for explicit locations.  This function will advance INP
+   past any strings that it lexes.  Returns a malloc'd copy of the
+   lexed string or NULL if no lexing was done.  */
+
+static char *
+explicit_location_lex_one (const char **inp,
+			   const struct language_defn *language)
+{
+  const char *start = *inp;
+
+  if (*start == '\0')
+    return NULL;
+
+  /* If quoted, skip to the ending quote.  */
+  if (strchr (get_gdb_linespec_parser_quote_characters (), *start))
+    {
+      char quote_char = *start;
+
+      /* If the input is not an Ada operator, skip to the matching
+	 closing quote and return the string.  */
+      if (!(language->la_language == language_ada
+	    && quote_char == '\"' && is_ada_operator (start)))
+	{
+	  const char *end = find_toplevel_char (start + 1, quote_char);
+
+	  if (end == NULL)
+	    error (_("Unmatched quote, %s."), start);
+	  *inp = end + 1;
+	  return savestring (start + 1, *inp - start - 2);
+	}
+    }
+
+  /* If the input starts with '-' or '+', the string ends with the next
+     whitespace or comma.  */
+  if (*start == '-' || *start == '+')
+    {
+      while (*inp[0] != '\0' && *inp[0] != ',' && !isspace (*inp[0]))
+	++(*inp);
+    }
+  else
+    {
+      /* Handle numbers first, stopping at the next whitespace or ','.  */
+      while (isdigit (*inp[0]))
+	++(*inp);
+      if (*inp[0] == '\0' || isspace (*inp[0]) || *inp[0] == ',')
+	return savestring (start, *inp - start);
+
+      /* Otherwise stop at the next occurrence of whitespace, '\0',
+	 keyword, or ','.  */
+      *inp = start;
+      while ((*inp)[0]
+	     && (*inp)[0] != ','
+	     && !(isspace ((*inp)[0])
+		  || linespec_lexer_lex_keyword (&(*inp)[1])))
+	{
+	  /* Special case: C++ operator,.  */
+	  if (language->la_language == language_cplus
+	      && strncmp (*inp, "operator", 8)
+	      && (*inp)[9] == ',')
+	    (*inp) += 9;
+	  ++(*inp);
+	}
+    }
+
+  if (*inp - start > 0)
+    return savestring (start, *inp - start);
+
+  return NULL;
+}
+
+/* See description in location.h.  */
+
+struct event_location *
+string_to_explicit_location (const char **argp,
+			     const struct language_defn *language,
+			     int dont_throw)
+{
+  struct cleanup *cleanup;
+  struct event_location *location;
+
+  /* It is assumed that input beginning with '-' and a non-digit
+     character is an explicit location.  */
+  if (argp == NULL
+      || *argp == '\0'
+      || *argp[0] != '-'
+      || !isalpha ((*argp)[1]))
+    return NULL;
+
+  location = new_explicit_location (NULL);
+  cleanup = make_cleanup_delete_event_location (location);
+
+  /* Process option/argument pairs.  dprintf_command
+     requires that processing stop on ','.  */
+  while ((*argp)[0] != '\0' && (*argp)[0] != ',')
+    {
+      int len;
+      char *opt, *oarg;
+      const char *start;
+      struct cleanup *opt_cleanup, *oarg_cleanup;
+
+      /* If *ARGP starts with a keyword, stop processing
+	 options.  */
+      if (linespec_lexer_lex_keyword (*argp) != NULL)
+	break;
+
+      /* Mark the start of the string in case we need to rewind.  */
+      start = *argp;
+
+      /* Get the option string.  */
+      opt = explicit_location_lex_one (argp, language);
+      opt_cleanup = make_cleanup (xfree, opt);
+
+      *argp = skip_spaces_const (*argp);
+
+      /* Get the argument string.  */
+      oarg = explicit_location_lex_one (argp, language);
+      oarg_cleanup = make_cleanup (xfree, oarg);
+      *argp = skip_spaces_const (*argp);
+
+      /* Use the length of the option to allow abbreviations.  */
+      len = strlen (opt);
+
+      /* All options have a required argument.  Checking for this required
+	 argument is deferred until later.  */
+      if (strncmp (opt, "-source", len) == 0)
+	EL_EXPLICIT (location)->source_filename = oarg;
+      else if (strncmp (opt, "-function", len) == 0)
+	EL_EXPLICIT (location)->function_name = oarg;
+      else if (strncmp (opt, "-line", len) == 0)
+	{
+	  if (oarg != NULL)
+	    {
+	      EL_EXPLICIT (location)->line_offset
+		= linespec_parse_line_offset (oarg);
+	      do_cleanups (oarg_cleanup);
+	      do_cleanups (opt_cleanup);
+	      continue;
+	    }
+	}
+      else if (strncmp (opt, "-label", len) == 0)
+	EL_EXPLICIT (location)->label_name = oarg;
+      /* Only emit an "invalid argument" error for options
+	 that look like option strings.  */
+      else if (opt[0] == '-' && !isdigit (opt[1]))
+	{
+	  if (!dont_throw)
+	    error (_("invalid explicit location argument, \"%s\""), opt);
+	}
+      else
+	{
+	  /* End of the explicit location specification.
+	     Stop parsing and return whatever explicit location was
+	     parsed.  */
+	  *argp = start;
+	  discard_cleanups (oarg_cleanup);
+	  do_cleanups (opt_cleanup);
+	  discard_cleanups (cleanup);
+	  return location;
+	}
+
+      /* It's a little lame to error after the fact, but in this
+	 case, it provides a much better user experience to issue
+	 the "invalid argument" error before any missing
+	 argument error.  */
+      if (oarg == NULL && !dont_throw)
+	error (_("missing argument for \"%s\""), opt);
+
+      /* The option/argument pair was successfully processed;
+	 oarg belongs to the explicit location, and opt should
+	 be freed.  */
+      discard_cleanups (oarg_cleanup);
+      do_cleanups (opt_cleanup);
+    }
+
+  /* One special error check:  If a source filename was given
+     without offset, function, or label, issue an error.  */
+  if (EL_EXPLICIT (location)->source_filename != NULL
+      && EL_EXPLICIT (location)->function_name == NULL
+      && EL_EXPLICIT (location)->label_name == NULL
+      && (EL_EXPLICIT (location)->line_offset.sign == LINE_OFFSET_UNKNOWN)
+      && !dont_throw)
+    {
+      error (_("Source filename requires function, label, or "
+	       "line offset."));
+    }
+
+  discard_cleanups (cleanup);
+  return location;
+}
+
 /* See description in location.h.  */
 
 struct event_location *
@@ -461,8 +651,22 @@ string_to_event_location (char **stringp,
 	}
       else
 	{
-	  /* Everything else is a linespec.  */
-	  location = new_linespec_location (stringp);
+	  const char *arg, *orig;
+
+	  /* Next, try an explicit location.  */
+	  orig = arg = *stringp;
+	  location = string_to_explicit_location (&arg, language, 0);
+	  if (location != NULL)
+	    {
+	      /* It was a valid explicit location.  Advance STRINGP to
+		 the end of input.  */
+	      *stringp += arg - orig;
+	    }
+	  else
+	    {
+	      /* Everything else is a linespec.  */
+	      location = new_linespec_location (stringp);
+	    }
 	}
     }
 

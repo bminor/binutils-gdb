@@ -5552,14 +5552,16 @@ proc parse_args { argset } {
     # number of items expected to be passed into the procedure...
 }
 
-# Capture the output of COMMAND in a string ignoring PREFIX; return that string.
+# Capture the output of COMMAND in a string ignoring PREFIX (a regexp);
+# return that string.
+
 proc capture_command_output { command prefix } {
     global gdb_prompt
     global expect_out
 
     set output_string ""
     gdb_test_multiple "$command" "capture_command_output for $command" {
-	-re "${command}\[\r\n\]+${prefix}(.*)\[\r\n\]+$gdb_prompt $" {
+	-re "[string_to_regexp ${command}]\[\r\n\]+${prefix}(.*)\[\r\n\]+$gdb_prompt $" {
 	    set output_string $expect_out(1,string)
 	}
     }

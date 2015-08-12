@@ -203,6 +203,21 @@ extern struct event_location *
   string_to_event_location (char **argp,
 			    const struct language_defn *langauge);
 
+/* Attempt to convert the input string in *ARGP into an explicit location.
+   ARGP is advanced past any processed input.  Returns an event_location
+   (malloc'd) if an explicit location was successfully found in *ARGP,
+   NULL otherwise.
+
+   IF !DONT_THROW, this function may call error() if *ARGP looks like
+   properly formed input, e.g., if it is called with missing argument
+   parameters or invalid options.  If DONT_THROW is non-zero, this function
+   will not throw any exceptions.  */
+
+extern struct event_location *
+  string_to_explicit_location (const char **argp,
+			       const struct language_defn *langauge,
+			       int dont_throw);
+
 /* A convenience function for testing for unset locations.  */
 
 extern int event_location_empty_p (const struct event_location *location);

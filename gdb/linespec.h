@@ -157,6 +157,26 @@ extern struct symtabs_and_lines decode_line_with_last_displayed (char *, int);
 
 extern const char *linespec_lexer_lex_keyword (const char *p);
 
+/* Parse a line offset from STRING.  */
+
+extern struct line_offset linespec_parse_line_offset (const char *string);
+
+/* Return the quote characters permitted by the linespec parser.  */
+
+extern const char *get_gdb_linespec_parser_quote_characters (void);
+
+/* Does STRING represent an Ada operator?  If so, return the length
+   of the decoded operator name.  If not, return 0.  */
+
+extern int is_ada_operator (const char *string);
+
+/* Find an instance of the character C in the string S that is outside
+   of all parenthesis pairs, single-quoted strings, and double-quoted
+   strings.  Also, ignore the char within a template name, like a ','
+   within foo<int, int>.  */
+
+extern const char *find_toplevel_char (const char *s, char c);
+
 /* Find the end of the (first) linespec pointed to by *STRINGP.
    STRINGP will be advanced to this point.  */
 

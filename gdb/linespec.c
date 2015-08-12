@@ -323,8 +323,6 @@ static int compare_symbols (const void *a, const void *b);
 
 static int compare_msymbols (const void *a, const void *b);
 
-static const char *find_toplevel_char (const char *s, char c);
-
 /* Permitted quote characters for the parser.  This is different from the
    completer's quote characters to allow backward compatibility with the
    previous parser.  */
@@ -419,10 +417,9 @@ linespec_lexer_lex_keyword (const char *p)
   return NULL;
 }
 
-/* Does STRING represent an Ada operator?  If so, return the length
-   of the decoded operator name.  If not, return 0.  */
+/*  See description in linespec.h.  */
 
-static int
+int
 is_ada_operator (const char *string)
 {
   const struct ada_opname_map *mapping;
@@ -1140,7 +1137,7 @@ find_methods (struct type *t, const char *name,
    strings.  Also, ignore the char within a template name, like a ','
    within foo<int, int>.  */
 
-static const char *
+const char *
 find_toplevel_char (const char *s, char c)
 {
   int quoted = 0;		/* zero if we're not in quotes;
@@ -1551,11 +1548,12 @@ source_file_not_found_error (const char *name)
   throw_error (NOT_FOUND_ERROR, _("No source file named %s."), name);
 }
 
-/* Parse and return a line offset in STRING.  */
+/* See description in linespec.h.  */
 
-static struct line_offset
+struct line_offset
 linespec_parse_line_offset (const char *string)
 {
+  const char *start = string;
   struct line_offset line_offset = {0, LINE_OFFSET_NONE};
 
   if (*string == '+')
@@ -1568,6 +1566,9 @@ linespec_parse_line_offset (const char *string)
       line_offset.sign = LINE_OFFSET_MINUS;
       ++string;
     }
+
+  if (*string != '\0' && !isdigit (*string))
+    error (_("malformed line offset: \"%s\""), start);
 
   /* Right now, we only allow base 10 for offsets.  */
   line_offset.offset = atoi (string);
@@ -3902,4 +3903,12 @@ struct cleanup *
 make_cleanup_destroy_linespec_result (struct linespec_result *ls)
 {
   return make_cleanup (cleanup_linespec_result, ls);
+}
+
+/* Return the quote characters permitted by the linespec parser.  */
+
+const char *
+get_gdb_linespec_parser_quote_characters (void)
+{
+  return linespec_quote_characters;
 }
