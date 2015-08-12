@@ -1,5 +1,13 @@
 2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (struct btrace_line_range): New.
+	(btrace_mk_line_range, btrace_line_range_add)
+	(btrace_line_range_is_empty, btrace_line_range_contains_range)
+	(btrace_find_line_range, btrace_print_lines): New.
+	(btrace_insn_history): Add source interleaving algorithm.
+
+2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* disasm.h (DISASSEMBLY_SPECULATION): New.
 	(struct disasm_insn): New.
 	(gdb_pretty_print_insn): New.
