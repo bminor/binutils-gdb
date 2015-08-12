@@ -1,3 +1,9 @@
+2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
+
+	* micromips-opc.c (micromips_opcodes): Re-order table so that move
+	based on 'or' is first.
+	* mips-opc.c (mips_builtin_opcodes): Ditto.
+
 2015-08-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 18800

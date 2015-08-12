@@ -1,3 +1,12 @@
+2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
+
+	* elfxx-mips.c (STUB_MOVE): Change to use 'or' only.
+	(mips_o32_exec_plt0_entry, mips_n32_exec_plt0_entry,
+	mips_n64_exec_plt0_entry, micromips_insn32_o32_exec_plt0_entry):
+	Update to use 'or' instead of 'addu/daddu'.
+	(_bfd_mips_elf_finish_dynamic_symbol): Update usage of STUB_MOVE.
+	(move_insns_32): Reorder table.
+
 2015-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Properly skip IFUNC

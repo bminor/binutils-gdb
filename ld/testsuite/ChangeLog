@@ -1,3 +1,34 @@
+2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
+
+	* ld-mips-elf/compressed-plt-1-n32-mips16.od: Update test.
+	* ld-mips-elf/compressed-plt-1-n32-umips.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-mips16-got.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-mips16-only.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-mips16-word.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-mips16.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-se.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-umips-got.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-umips-word.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-umips.od: Ditto.
+	* ld-mips-elf/jalx-2.dd: Ditto.
+	* ld-mips-elf/mips16-pic-3.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-3a.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-3b.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-5b.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-6-n32.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-6-o32.dd: Ditto.
+	* ld-mips-elf/stub-dynsym-1-10000.d: Ditto.
+	* ld-mips-elf/stub-dynsym-1-2fe80.d: Ditto.
+	* ld-mips-elf/stub-dynsym-1-7fff.d: Ditto.
+	* ld-mips-elf/stub-dynsym-1-8000.d: Ditto.
+	* ld-mips-elf/stub-dynsym-1-fff0.d: Ditto.
+	* ld-mips-elf/tlsbin-o32.d: Ditto.
+	* ld-mips-elf/tlsdyn-o32-1.d: Ditto.
+	* ld-mips-elf/tlsdyn-o32-2.d: Ditto.
+	* ld-mips-elf/tlsdyn-o32-3.d: Ditto.
+	* ld-mips-elf/tlsdyn-o32.d: Ditto.
+	* ld-mips-elf/tlslib-o32.d: Ditto.
+
 2015-08-12  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp (aarch64_choose_ilp32_emul): Support all

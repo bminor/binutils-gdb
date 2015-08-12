@@ -1,3 +1,9 @@
+2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
+
+	* config/tc-mips.c (move_register): Change to use 'or' only.
+	(s_cpload, s_cpsetup, s_cprestore, s_cpreturn): Update to
+	use or for move.
+
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): New relocation modifiers

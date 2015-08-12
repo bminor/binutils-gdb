@@ -9325,8 +9325,7 @@ move_register (int dest, int source)
       && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
     macro_build (NULL, "move", "mp,mj", dest, source);
   else
-    macro_build (NULL, GPR_SIZE == 32 ? "addu" : "daddu", "d,v,t",
-		 dest, source, 0);
+    macro_build (NULL, "or", "d,v,t", dest, source, 0);
 }
 
 /* Emit an SVR4 PIC sequence to load address LOCAL into DEST, where
@@ -15886,7 +15885,7 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
      daddu	$gp, $gp, $reg1
 
    If $reg2 is given, this results in:
-     daddu	$reg2, $gp, $0
+     or		$reg2, $gp, $0
      lui	$gp, %hi(%neg(%gp_rel(label)))
      addiu	$gp, $gp, %lo(%neg(%gp_rel(label)))
      daddu	$gp, $gp, $reg1
@@ -15966,8 +15965,7 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
 		   BFD_RELOC_LO16, SP);
     }
   else
-    macro_build (NULL, "daddu", "d,v,t", mips_cpreturn_register,
-		 mips_gp_register, 0);
+    move_register (mips_cpreturn_register, mips_gp_register);
 
   if (mips_in_shared || HAVE_64BIT_SYMBOLS)
     {
@@ -16080,7 +16078,7 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
      ld		$gp, offset($sp)
 
    If a register $reg2 was given there, it results in:
-     daddu	$gp, $reg2, $0  */
+     or		$gp, $reg2, $0  */
 
 static void
 s_cpreturn (int ignore ATTRIBUTE_UNUSED)
@@ -16118,8 +16116,8 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
       macro_build (&ex, "ld", "t,o(b)", mips_gp_register, BFD_RELOC_LO16, SP);
     }
   else
-    macro_build (NULL, "daddu", "d,v,t", mips_gp_register,
-		 mips_cpreturn_register, 0);
+    move_register (mips_gp_register, mips_cpreturn_register);
+
   macro_end ();
 
   mips_assembling_insn = FALSE;

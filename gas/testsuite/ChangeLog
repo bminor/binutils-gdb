@@ -1,3 +1,42 @@
+2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
+
+	* gas/mips/elf-rel23.d: Update test.
+	* gas/mips/elf-rel23.d: Ditto.
+	* gas/mips/elf-rel23a.d: Ditto.
+	* gas/mips/elf-rel23b.d: Ditto.
+	* gas/mips/elf_e_flags1.d: Ditto.
+	* gas/mips/elf_e_flags2.d: Ditto.
+	* gas/mips/elf_e_flags3.d: Ditto.
+	* gas/mips/elf_e_flags4.d: Ditto.
+	* gas/mips/loc-swap-dis.d: Ditto.
+	* gas/mips/micromips-insn32.d: Ditto.
+	* gas/mips/micromips-noinsn32.d: Ditto.
+	* gas/mips/micromips-trap.d: Ditto.
+	* gas/mips/micromips.d: Ditto.
+	* gas/mips/mips-abi32-pic.d: Ditto.
+	* gas/mips/mips-abi32.d: Ditto.
+	* gas/mips/mips-gp32-fp32-pic.d: Ditto.
+	* gas/mips/mips-gp32-fp32.d: Ditto.
+	* gas/mips/mips-gp32-fp64-pic.d: Ditto.
+	* gas/mips/mips-gp32-fp64.d: Ditto.
+	* gas/mips/mips-gp64-fp32-pic.d: Ditto.
+	* gas/mips/mips-gp64-fp32.d: Ditto.
+	* gas/mips/mips-gp64-fp64-pic.d: Ditto.
+	* gas/mips/mips-gp64-fp64.d: Ditto.
+	* gas/mips/mipsr6@loc-swap-dis.d: Ditto.
+	* gas/mips/tls-o32.d: Ditto.
+	* gas/mips/uld2-eb.d: Ditto.
+	* gas/mips/uld2-el.d: Ditto.
+	* gas/mips/ulw2-eb-ilocks.d: Ditto.
+	* gas/mips/ulw2-eb.d: Ditto.
+	* gas/mips/ulw2-el-ilocks.d: Ditto.
+	* gas/mips/ulw2-el.d: Ditto.
+	* gas/mips/move.d: New test.
+	* gas/mips/move.s: Ditto.
+	* gas/mips/micromips32-move.d: Ditto.
+	* gas/mips/micromips32-move.s: Ditto.
+	* gas/mips/mips.exp: Run the new tests.
+
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/aarch64/reloc-dtprel_lo12-1.s: New testcase.

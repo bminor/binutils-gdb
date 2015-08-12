@@ -425,9 +425,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"li",			"t,i",		0x34000000, 0xffe00000, WR_1,			INSN2_ALIAS,	I1,		0,	0 }, /* ori */
 {"li",			"t,I",		0,    (int) M_LI,	INSN_MACRO,		0,		I1,		0,	0 },
 {"move",		"d,s",		0,    (int) M_MOVE,	INSN_MACRO,		0,		I1,		0,	0 },
+{"move",		"d,s",		0x00000025, 0xfc1f07ff,	WR_1|RD_2,		INSN2_ALIAS,	I1,		0,	0 },/* or */
 {"move",		"d,s",		0x0000002d, 0xfc1f07ff, WR_1|RD_2,		INSN2_ALIAS,	I3,		0,	0 },/* daddu */
 {"move",		"d,s",		0x00000021, 0xfc1f07ff, WR_1|RD_2,		INSN2_ALIAS,	I1,		0,	0 },/* addu */
-{"move",		"d,s",		0x00000025, 0xfc1f07ff,	WR_1|RD_2,		INSN2_ALIAS,	I1,		0,	0 },/* or */
 {"b",			"p",		0x10000000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1,		0,	0 },/* beq 0,0 */
 {"b",			"p",		0x04010000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1,		0,	0 },/* bgez 0 */
 {"nal",			"",		0x04100000, 0xffffffff,	WR_31|CBD,		INSN2_ALIAS,	I1,		0,	0 },/* bltzal 0 */
