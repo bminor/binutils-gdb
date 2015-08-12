@@ -2435,6 +2435,54 @@ linespec_parser_delete (void *arg)
   linespec_state_destructor (PARSER_STATE (parser));
 }
 
+/* See description in linespec.h.  */
+
+void
+linespec_lex_to_end (char **stringp)
+{
+  linespec_parser parser;
+  struct cleanup *cleanup;
+  linespec_token token;
+  volatile struct gdb_exception e;
+  const char *orig;
+
+  if (stringp == NULL || *stringp == NULL)
+    return;
+
+  linespec_parser_new (&parser, 0, current_language, NULL, 0, NULL);
+  cleanup = make_cleanup (linespec_parser_delete, &parser);
+  parser.lexer.saved_arg = *stringp;
+  PARSER_STREAM (&parser) = orig = *stringp;
+
+  do
+    {
+      /* Stop before any comma tokens;  we need it to keep it
+	 as the next token in the string.  */
+      token = linespec_lexer_peek_token (&parser);
+      if (token.type == LSTOKEN_COMMA)
+	break;
+
+      /* For addresses advance the parser stream past
+	 any parsed input and stop lexing.  */
+      if (token.type == LSTOKEN_STRING
+	  && *LS_TOKEN_STOKEN (token).ptr == '*')
+	{
+	  const char *arg;
+
+	  arg = *stringp;
+	  (void) linespec_expression_to_pc (&arg);
+	  PARSER_STREAM (&parser) = arg;
+	  break;
+	}
+
+      token = linespec_lexer_consume_token (&parser);
+    }
+  while (token.type != LSTOKEN_EOI && token.type != LSTOKEN_KEYWORD);
+
+  *stringp += PARSER_STREAM (&parser) - orig;
+  do_cleanups (cleanup);
+}
+
 /* See linespec.h.  */
 
 void

@@ -1,5 +1,15 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
+	* Makefile.in (SFILES): Add location.c.
+	(HFILES_NO_SRCDIR): Add location.h.
+	(COMMON_OBS): Add location.o.
+	* linespec.c (linespec_lex_to_end): New function.
+	* linespec.h (linespec_lex_to_end): Declare.
+	* location.c: New file.
+	* location.h: New file.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
 	* breakpoint.h (struct breakpoint_ops) <create_sals_from_address>:
 	Renamed to create_sals_from_location.
 	<decode_linespec>: Renamed to decode_location.

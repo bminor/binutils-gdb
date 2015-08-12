@@ -156,4 +156,9 @@ extern struct symtabs_and_lines decode_line_with_last_displayed (char *, int);
    the keyword.  If not, return NULL.  */
 
 extern const char *linespec_lexer_lex_keyword (const char *p);
+
+/* Find the end of the (first) linespec pointed to by *STRINGP.
+   STRINGP will be advanced to this point.  */
+
+extern void linespec_lex_to_end (char **stringp);
 #endif /* defined (LINESPEC_H) */
