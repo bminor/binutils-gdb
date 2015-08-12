@@ -228,7 +228,7 @@ re_set_exception_catchpoint (struct breakpoint *self)
 	{
 	  char *spec = ASTRDUP (exception_functions[kind].function);
 
-	  self->ops->decode_linespec (self, &spec, &sals);
+	  self->ops->decode_location (self, &spec, &sals);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{

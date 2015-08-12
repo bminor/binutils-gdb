@@ -108,10 +108,10 @@ static int breakpoint_re_set_one (void *);
 
 static void breakpoint_re_set_default (struct breakpoint *);
 
-static void create_sals_from_address_default (char **,
-					      struct linespec_result *,
-					      enum bptype, char *,
-					      char **);
+static void create_sals_from_location_default (char **,
+					       struct linespec_result *,
+					       enum bptype, char *,
+					       char **);
 
 static void create_breakpoints_sal_default (struct gdbarch *,
 					    struct linespec_result *,
@@ -121,7 +121,7 @@ static void create_breakpoints_sal_default (struct gdbarch *,
 					    const struct breakpoint_ops *,
 					    int, int, int, unsigned);
 
-static void decode_linespec_default (struct breakpoint *, char **,
+static void decode_location_default (struct breakpoint *, char **,
 				     struct symtabs_and_lines *);
 
 static void clear_command (char *, int);
@@ -9609,8 +9609,8 @@ create_breakpoint (struct gdbarch *gdbarch,
 
   TRY
     {
-      ops->create_sals_from_address (&arg, &canonical, type_wanted,
-				     addr_start, &copy_arg);
+      ops->create_sals_from_location (&arg, &canonical, type_wanted,
+				      addr_start, &copy_arg);
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
@@ -12711,11 +12711,11 @@ base_breakpoint_print_recreate (struct breakpoint *b, struct ui_file *fp)
 }
 
 static void
-base_breakpoint_create_sals_from_address (char **arg,
-					  struct linespec_result *canonical,
-					  enum bptype type_wanted,
-					  char *addr_start,
-					  char **copy_arg)
+base_breakpoint_create_sals_from_location (char **arg,
+					   struct linespec_result *canonical,
+					   enum bptype type_wanted,
+					   char *addr_start,
+					   char **copy_arg)
 {
   internal_error_pure_virtual_called ();
 }
@@ -12737,7 +12737,7 @@ base_breakpoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 }
 
 static void
-base_breakpoint_decode_linespec (struct breakpoint *b, char **s,
+base_breakpoint_decode_location (struct breakpoint *b, char **s,
 				 struct symtabs_and_lines *sals)
 {
   internal_error_pure_virtual_called ();
@@ -12775,9 +12775,9 @@ struct breakpoint_ops base_breakpoint_ops =
   base_breakpoint_print_one_detail,
   base_breakpoint_print_mention,
   base_breakpoint_print_recreate,
-  base_breakpoint_create_sals_from_address,
+  base_breakpoint_create_sals_from_location,
   base_breakpoint_create_breakpoints_sal,
-  base_breakpoint_decode_linespec,
+  base_breakpoint_decode_location,
   base_breakpoint_explains_signal,
   base_breakpoint_after_condition_true,
 };
@@ -12947,12 +12947,12 @@ bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
 }
 
 static void
-bkpt_create_sals_from_address (char **arg,
+bkpt_create_sals_from_location (char **arg,
 			       struct linespec_result *canonical,
 			       enum bptype type_wanted,
 			       char *addr_start, char **copy_arg)
 {
-  create_sals_from_address_default (arg, canonical, type_wanted,
+  create_sals_from_location_default (arg, canonical, type_wanted,
 				    addr_start, copy_arg);
 }
 
@@ -12978,10 +12978,10 @@ bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
 }
 
 static void
-bkpt_decode_linespec (struct breakpoint *b, char **s,
+bkpt_decode_location (struct breakpoint *b, char **s,
 		      struct symtabs_and_lines *sals)
 {
-  decode_linespec_default (b, s, sals);
+  decode_location_default (b, s, sals);
 }
 
 /* Virtual table for internal breakpoints.  */
@@ -13181,10 +13181,10 @@ bkpt_probe_remove_location (struct bp_location *bl)
 }
 
 static void
-bkpt_probe_create_sals_from_address (char **arg,
-				     struct linespec_result *canonical,
-				     enum bptype type_wanted,
-				     char *addr_start, char **copy_arg)
+bkpt_probe_create_sals_from_location (char **arg,
+				      struct linespec_result *canonical,
+				      enum bptype type_wanted,
+				      char *addr_start, char **copy_arg)
 {
   struct linespec_sals lsal;
 
@@ -13197,7 +13197,7 @@ bkpt_probe_create_sals_from_address (char **arg,
 }
 
 static void
-bkpt_probe_decode_linespec (struct breakpoint *b, char **s,
+bkpt_probe_decode_location (struct breakpoint *b, char **s,
 			    struct symtabs_and_lines *sals)
 {
   *sals = parse_probes (s, NULL);
@@ -13290,12 +13290,12 @@ tracepoint_print_recreate (struct breakpoint *self, struct ui_file *fp)
 }
 
 static void
-tracepoint_create_sals_from_address (char **arg,
+tracepoint_create_sals_from_location (char **arg,
 				     struct linespec_result *canonical,
 				     enum bptype type_wanted,
 				     char *addr_start, char **copy_arg)
 {
-  create_sals_from_address_default (arg, canonical, type_wanted,
+  create_sals_from_location_default (arg, canonical, type_wanted,
 				    addr_start, copy_arg);
 }
 
@@ -13321,10 +13321,10 @@ tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 }
 
 static void
-tracepoint_decode_linespec (struct breakpoint *b, char **s,
+tracepoint_decode_location (struct breakpoint *b, char **s,
 			    struct symtabs_and_lines *sals)
 {
-  decode_linespec_default (b, s, sals);
+  decode_location_default (b, s, sals);
 }
 
 struct breakpoint_ops tracepoint_breakpoint_ops;
@@ -13333,22 +13333,22 @@ struct breakpoint_ops tracepoint_breakpoint_ops;
    static probe.  */
 
 static void
-tracepoint_probe_create_sals_from_address (char **arg,
-					   struct linespec_result *canonical,
-					   enum bptype type_wanted,
-					   char *addr_start, char **copy_arg)
+tracepoint_probe_create_sals_from_location (char **arg,
+					    struct linespec_result *canonical,
+					    enum bptype type_wanted,
+					    char *addr_start, char **copy_arg)
 {
   /* We use the same method for breakpoint on probes.  */
-  bkpt_probe_create_sals_from_address (arg, canonical, type_wanted,
-				       addr_start, copy_arg);
+  bkpt_probe_create_sals_from_location (arg, canonical, type_wanted,
+					addr_start, copy_arg);
 }
 
 static void
-tracepoint_probe_decode_linespec (struct breakpoint *b, char **s,
+tracepoint_probe_decode_location (struct breakpoint *b, char **s,
 				  struct symtabs_and_lines *sals)
 {
   /* We use the same method for breakpoint on probes.  */
-  bkpt_probe_decode_linespec (b, s, sals);
+  bkpt_probe_decode_location (b, s, sals);
 }
 
 static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
@@ -13434,10 +13434,10 @@ dprintf_after_condition_true (struct bpstats *bs)
    markers (`-m').  */
 
 static void
-strace_marker_create_sals_from_address (char **arg,
-					struct linespec_result *canonical,
-					enum bptype type_wanted,
-					char *addr_start, char **copy_arg)
+strace_marker_create_sals_from_location (char **arg,
+					 struct linespec_result *canonical,
+					 enum bptype type_wanted,
+					 char *addr_start, char **copy_arg)
 {
   struct linespec_sals lsal;
 
@@ -13510,7 +13510,7 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 }
 
 static void
-strace_marker_decode_linespec (struct breakpoint *b, char **s,
+strace_marker_decode_location (struct breakpoint *b, char **s,
 			       struct symtabs_and_lines *sals)
 {
   struct tracepoint *tp = (struct tracepoint *) b;
@@ -14055,7 +14055,7 @@ update_breakpoint_locations (struct breakpoint *b,
    On return, FOUND will be 1 if any SaL was found, zero otherwise.  */
 
 static struct symtabs_and_lines
-addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
+location_to_sals (struct breakpoint *b, char *addr_string, int *found)
 {
   char *s;
   struct symtabs_and_lines sals = {0};
@@ -14066,7 +14066,7 @@ addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
 
   TRY
     {
-      b->ops->decode_linespec (b, &s, &sals);
+      b->ops->decode_location (b, &s, &sals);
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
@@ -14148,7 +14148,7 @@ breakpoint_re_set_default (struct breakpoint *b)
   struct symtabs_and_lines expanded = {0};
   struct symtabs_and_lines expanded_end = {0};
 
-  sals = addr_string_to_sals (b, b->addr_string, &found);
+  sals = location_to_sals (b, b->addr_string, &found);
   if (found)
     {
       make_cleanup (xfree, sals.sals);
@@ -14157,7 +14157,7 @@ breakpoint_re_set_default (struct breakpoint *b)
 
   if (b->addr_string_range_end)
     {
-      sals_end = addr_string_to_sals (b, b->addr_string_range_end, &found);
+      sals_end = location_to_sals (b, b->addr_string_range_end, &found);
       if (found)
 	{
 	  make_cleanup (xfree, sals_end.sals);
@@ -14172,7 +14172,7 @@ breakpoint_re_set_default (struct breakpoint *b)
    calls parse_breakpoint_sals.  Return 1 for success, zero for failure.  */
 
 static void
-create_sals_from_address_default (char **arg,
+create_sals_from_location_default (char **arg,
 				  struct linespec_result *canonical,
 				  enum bptype type_wanted,
 				  char *addr_start, char **copy_arg)
@@ -14205,10 +14205,10 @@ create_breakpoints_sal_default (struct gdbarch *gdbarch,
 }
 
 /* Decode the line represented by S by calling decode_line_full.  This is the
-   default function for the `decode_linespec' method of breakpoint_ops.  */
+   default function for the `decode_location' method of breakpoint_ops.  */
 
 static void
-decode_linespec_default (struct breakpoint *b, char **s,
+decode_location_default (struct breakpoint *b, char **s,
 			 struct symtabs_and_lines *sals)
 {
   struct linespec_result canonical;
@@ -15588,9 +15588,9 @@ initialize_breakpoint_ops (void)
   ops->insert_location = bkpt_insert_location;
   ops->remove_location = bkpt_remove_location;
   ops->breakpoint_hit = bkpt_breakpoint_hit;
-  ops->create_sals_from_address = bkpt_create_sals_from_address;
+  ops->create_sals_from_location = bkpt_create_sals_from_location;
   ops->create_breakpoints_sal = bkpt_create_breakpoints_sal;
-  ops->decode_linespec = bkpt_decode_linespec;
+  ops->decode_location = bkpt_decode_location;
 
   /* The breakpoint_ops structure to be used in regular breakpoints.  */
   ops = &bkpt_breakpoint_ops;
@@ -15638,8 +15638,8 @@ initialize_breakpoint_ops (void)
   *ops = bkpt_breakpoint_ops;
   ops->insert_location = bkpt_probe_insert_location;
   ops->remove_location = bkpt_probe_remove_location;
-  ops->create_sals_from_address = bkpt_probe_create_sals_from_address;
-  ops->decode_linespec = bkpt_probe_decode_linespec;
+  ops->create_sals_from_location = bkpt_probe_create_sals_from_location;
+  ops->decode_location = bkpt_probe_decode_location;
 
   /* Watchpoints.  */
   ops = &watchpoint_breakpoint_ops;
@@ -15677,22 +15677,22 @@ initialize_breakpoint_ops (void)
   ops->print_one_detail = tracepoint_print_one_detail;
   ops->print_mention = tracepoint_print_mention;
   ops->print_recreate = tracepoint_print_recreate;
-  ops->create_sals_from_address = tracepoint_create_sals_from_address;
+  ops->create_sals_from_location = tracepoint_create_sals_from_location;
   ops->create_breakpoints_sal = tracepoint_create_breakpoints_sal;
-  ops->decode_linespec = tracepoint_decode_linespec;
+  ops->decode_location = tracepoint_decode_location;
 
   /* Probe tracepoints.  */
   ops = &tracepoint_probe_breakpoint_ops;
   *ops = tracepoint_breakpoint_ops;
-  ops->create_sals_from_address = tracepoint_probe_create_sals_from_address;
-  ops->decode_linespec = tracepoint_probe_decode_linespec;
+  ops->create_sals_from_location = tracepoint_probe_create_sals_from_location;
+  ops->decode_location = tracepoint_probe_decode_location;
 
   /* Static tracepoints with marker (`-m').  */
   ops = &strace_marker_breakpoint_ops;
   *ops = tracepoint_breakpoint_ops;
-  ops->create_sals_from_address = strace_marker_create_sals_from_address;
+  ops->create_sals_from_location = strace_marker_create_sals_from_location;
   ops->create_breakpoints_sal = strace_marker_create_breakpoints_sal;
-  ops->decode_linespec = strace_marker_decode_linespec;
+  ops->decode_location = strace_marker_decode_location;
 
   /* Fork catchpoints.  */
   ops = &catch_fork_breakpoint_ops;

@@ -574,14 +574,14 @@ struct breakpoint_ops
   /* Print to FP the CLI command that recreates this breakpoint.  */
   void (*print_recreate) (struct breakpoint *, struct ui_file *fp);
 
-  /* Create SALs from address string, storing the result in linespec_result.
+  /* Create SALs from location, storing the result in linespec_result.
 
      For an explanation about the arguments, see the function
-     `create_sals_from_address_default'.
+     `create_sals_from_location_default'.
 
      This function is called inside `create_breakpoint'.  */
-  void (*create_sals_from_address) (char **, struct linespec_result *,
-				    enum bptype, char *, char **);
+  void (*create_sals_from_location) (char **, struct linespec_result *,
+				     enum bptype, char *, char **);
 
   /* This method will be responsible for creating a breakpoint given its SALs.
      Usually, it just calls `create_breakpoints_sal' (for ordinary
@@ -597,12 +597,12 @@ struct breakpoint_ops
 				  int, const struct breakpoint_ops *,
 				  int, int, int, unsigned);
 
-  /* Given the address string (second parameter), this method decodes it
+  /* Given the location (second parameter), this method decodes it
      and provides the SAL locations related to it.  For ordinary breakpoints,
      it calls `decode_line_full'.
 
-     This function is called inside `addr_string_to_sals'.  */
-  void (*decode_linespec) (struct breakpoint *, char **,
+     This function is called inside `location_to_sals'.  */
+  void (*decode_location) (struct breakpoint *, char **,
 			   struct symtabs_and_lines *);
 
   /* Return true if this breakpoint explains a signal.  See
