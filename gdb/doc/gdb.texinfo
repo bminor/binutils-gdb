@@ -6060,9 +6060,9 @@ breakpoints on all threads, or on a particular thread.
 @cindex breakpoints and threads
 @cindex thread breakpoints
 @kindex break @dots{} thread @var{threadno}
-@item break @var{linespec} thread @var{threadno}
-@itemx break @var{linespec} thread @var{threadno} if @dots{}
-@var{linespec} specifies source lines; there are several ways of
+@item break @var{location} thread @var{threadno}
+@itemx break @var{location} thread @var{threadno} if @dots{}
+@var{location} specifies source lines; there are several ways of
 writing them (@pxref{Specify Location}), but the effect is always to
 specify some source line.
 
@@ -7531,21 +7531,21 @@ argument of @samp{-}; that argument is preserved in repetition so that
 each repetition moves up in the source file.
 
 In general, the @code{list} command expects you to supply zero, one or two
-@dfn{linespecs}.  Linespecs specify source lines; there are several ways
+@dfn{locations}.  Locations specify source lines; there are several ways
 of writing them (@pxref{Specify Location}), but the effect is always
 to specify some source line.
 
 Here is a complete description of the possible arguments for @code{list}:
 
 @table @code
-@item list @var{linespec}
-Print lines centered around the line specified by @var{linespec}.
+@item list @var{location}
+Print lines centered around the line specified by @var{location}.
 
 @item list @var{first},@var{last}
 Print lines from @var{first} to @var{last}.  Both arguments are
-linespecs.  When a @code{list} command has two linespecs, and the
-source file of the second linespec is omitted, this refers to
-the same source file as the first linespec.
+locations.  When a @code{list} command has two locations, and the
+source file of the second location is omitted, this refers to
+the same source file as the first location.
 
 @item list ,@var{last}
 Print lines ending with @var{last}.
@@ -7566,15 +7566,28 @@ As described in the preceding table.
 @node Specify Location
 @section Specifying a Location
 @cindex specifying location
-@cindex linespec
+@cindex location
+@cindex source location
+
+@menu
+* Linespec Locations::                Linespec locations
+* Explicit Locations::                Explicit locations
+* Address Locations::                 Address locations
+@end menu
 
 Several @value{GDBN} commands accept arguments that specify a location
 of your program's code.  Since @value{GDBN} is a source-level
-debugger, a location usually specifies some line in the source code;
-for that reason, locations are also known as @dfn{linespecs}.
+debugger, a location usually specifies some line in the source code.
+Locations may be specified using three different formats:
+linespec locations, explicit locations, or address locations.
 
-Here are all the different ways of specifying a code location that
-@value{GDBN} understands:
+@node Linespec Locations
+@subsection Linespec Locations
+@cindex linespec locations
+
+A @dfn{linespec} is a colon-separated list of source location parameters such
+as file name, function name, etc.  Here are all the different ways of
+specifying a linespec:
 
 @table @code
 @item @var{linenum}
@@ -7613,25 +7626,93 @@ function name to avoid ambiguity when there are identically named
 functions in different source files.
 
 @item @var{label}
-Specifies the line at which the label named @var{label} appears.
-@value{GDBN} searches for the label in the function corresponding to
-the currently selected stack frame.  If there is no current selected
-stack frame (for instance, if the inferior is not running), then
-@value{GDBN} will not search for a label.
+Specifies the line at which the label named @var{label} appears
+in the function corresponding to the currently selected stack frame.
+If there is no current selected stack frame (for instance, if the inferior
+is not running), then @value{GDBN} will not search for a label.
 
-@item *@var{address}
-Specifies the program address @var{address}.  For line-oriented
-commands, such as @code{list} and @code{edit}, this specifies a source
-line that contains @var{address}.  For @code{break} and other
-breakpoint oriented commands, this can be used to set breakpoints in
+@cindex breakpoint at static probe point
+@item -pstap|-probe-stap @r{[}@var{objfile}:@r{[}@var{provider}:@r{]}@r{]}@var{name}
+The @sc{gnu}/Linux tool @code{SystemTap} provides a way for
+applications to embed static probes.  @xref{Static Probe Points}, for more
+information on finding and using static probes.  This form of linespec
+specifies the location of such a static probe.
+
+If @var{objfile} is given, only probes coming from that shared library
+or executable matching @var{objfile} as a regular expression are considered.
+If @var{provider} is given, then only probes from that provider are considered.
+If several probes match the spec, @value{GDBN} will insert a breakpoint at
+each one of those probes.
+@end table
+
+@node Explicit Locations
+@subsection Explicit Locations
+@cindex explicit locations
+
+@dfn{Explicit locations} allow the user to directly specify the source
+location's parameters using option-value pairs.
+
+Explicit locations are useful when several functions, labels, or
+file names have the same name (base name for files) in the program's
+sources.  In these cases, explicit locations point to the source
+line you meant more accurately and unambiguously.  Also, using
+explicit locations might be faster in large programs.
+
+For example, the linespec @samp{foo:bar} may refer to a function @code{bar}
+defined in the file named @file{foo} or the label @code{bar} in a function
+named @code{foo}.  @value{GDBN} must search either the file system or
+the symbol table to know.
+
+The list of valid explicit location options is summarized in the
+following table:
+
+@table @code
+@item -source @var{filename}
+The value specifies the source file name.  To differentiate between
+files with the same base name, prepend as many directories as is necessary
+to uniquely identify the desired file, e.g., @file{foo/bar/baz.c}.  Otherwise
+@value{GDBN} will use the first file it finds with the given base
+name.   This option requires the use of either @code{-function} or @code{-line}.
+
+@item -function @var{function}
+The value specifies the name of a function.  Operations
+on function locations unmodified by other options (such as @code{-label}
+or @code{-line}) refer to the line that begins the body of the function.
+In C, for example, this is the line with the open brace.
+
+@item -label @var{label}
+The value specifies the name of a label.  When the function
+name is not specified, the label is searched in the function of the currently
+selected stack frame.
+
+@item -line @var{number}
+The value specifies a line offset for the location.  The offset may either
+be absolute (@code{-line 3}) or relative (@code{-line +3}), depending on
+the command.  When specified without any other options, the line offset is
+relative to the current line.
+@end table
+
+Explicit location options may be abbreviated by omitting any non-unique
+trailing characters from the option name, e.g., @code{break -s main.c -li 3}.
+
+@node Address Locations
+@subsection Address Locations
+@cindex address locations
+
+@dfn{Address locations} indicate a specific program address.  They have
+the generalized form *@var{address}.
+
+For line-oriented commands, such as @code{list} and @code{edit}, this
+specifies a source line that contains @var{address}.  For @code{break} and
+other breakpoint-oriented commands, this can be used to set breakpoints in
 parts of your program which do not have debugging information or
 source files.
 
 Here @var{address} may be any expression valid in the current working
 language (@pxref{Languages, working language}) that specifies a code
 address.  In addition, as a convenience, @value{GDBN} extends the
-semantics of expressions used in locations to cover the situations
-that frequently happen during debugging.  Here are the various forms
+semantics of expressions used in locations to cover several situations
+that frequently occur during debugging.  Here are the various forms
 of @var{address}:
 
 @table @code
@@ -7655,22 +7736,6 @@ file explicitly.  This is useful if the name of the function does not
 specify the function unambiguously, e.g., if there are several
 functions with identical names in different source files.
 @end table
-
-@cindex breakpoint at static probe point
-@item -pstap|-probe-stap @r{[}@var{objfile}:@r{[}@var{provider}:@r{]}@r{]}@var{name}
-The @sc{gnu}/Linux tool @code{SystemTap} provides a way for
-applications to embed static probes.  @xref{Static Probe Points}, for more
-information on finding and using static probes.  This form of linespec
-specifies the location of such a static probe.
-
-If @var{objfile} is given, only probes coming from that shared library
-or executable matching @var{objfile} as a regular expression are considered.
-If @var{provider} is given, then only probes from that provider are considered.
-If several probes match the spec, @value{GDBN} will insert a breakpoint at
-each one of those probes.
-
-@end table
-
 
 @node Edit
 @section Editing Source Files
@@ -7989,9 +8054,9 @@ well as hex.
 
 @table @code
 @kindex info line
-@item info line @var{linespec}
+@item info line @var{location}
 Print the starting and ending addresses of the compiled code for
-source line @var{linespec}.  You can specify source lines in any of
+source line @var{location}.  You can specify source lines in any of
 the ways documented in @ref{Specify Location}.
 @end table
 
@@ -8009,7 +8074,7 @@ Line 895 of "builtin.c" starts at pc 0x634c and ends at 0x6350.
 @noindent
 @cindex code address and its source line
 We can also inquire (using @code{*@var{addr}} as the form for
-@var{linespec}) what source line covers a particular address:
+@var{location}) what source line covers a particular address:
 @smallexample
 (@value{GDBP}) info line *0x63ff
 Line 926 of "builtin.c" starts at pc 0x63e4 and ends at 0x6404.
@@ -8119,7 +8184,7 @@ Dump of assembler code from 0x400281 to 0x40028b:
 End of assembler dump.
 @end smallexample
 
-Addresses cannot be specified as a linespec (@pxref{Specify Location}).
+Addresses cannot be specified as a location (@pxref{Specify Location}).
 So, for example, if you want to disassemble function @code{bar}
 in file @file{foo.c}, you must type @samp{disassemble 'foo.c'::bar}
 and not @samp{disassemble foo.c:bar}.
@@ -11772,9 +11837,9 @@ argument processing and the beginning of @var{macro} for non C-like macros where
 the macro may begin with a hyphen.
 
 @kindex info macros
-@item info macros @var{linespec}
+@item info macros @var{location}
 Show all macro definitions that are in effect at the location specified
-by @var{linespec},  and describe the source location or compiler
+by @var{location},  and describe the source location or compiler
 command-line where those definitions were established.
 
 @kindex macro define
@@ -12079,12 +12144,11 @@ conditions and actions.
 @kindex trace
 @item trace @var{location}
 The @code{trace} command is very similar to the @code{break} command.
-Its argument @var{location} can be a source line, a function name, or
-an address in the target program.  @xref{Specify Location}.  The
-@code{trace} command defines a tracepoint, which is a point in the
-target program where the debugger will briefly stop, collect some
-data, and then allow the program to continue.  Setting a tracepoint or
-changing its actions takes effect immediately if the remote stub
+Its argument @var{location} can be any valid location.
+@xref{Specify Location}.  The @code{trace} command defines a tracepoint,
+which is a point in the target program where the debugger will briefly stop,
+collect some data, and then allow the program to continue.  Setting a tracepoint
+or changing its actions takes effect immediately if the remote stub
 supports the @samp{InstallInTrace} feature (@pxref{install tracepoint
 in tracing}).
 If remote stub doesn't support the @samp{InstallInTrace} feature, all
@@ -15964,14 +16028,14 @@ from the current task to the given task.
 #4  0x804aacc in un () at un.adb:5
 @end smallexample
 
-@item break @var{linespec} task @var{taskno}
-@itemx break @var{linespec} task @var{taskno} if @dots{}
+@item break @var{location} task @var{taskno}
+@itemx break @var{location} task @var{taskno} if @dots{}
 @cindex breakpoints and tasks, in Ada
 @cindex task breakpoints, in Ada
 @kindex break @dots{} task @var{taskno}@r{ (Ada)}
 These commands are like the @code{break @dots{} thread @dots{}}
 command (@pxref{Thread Stops}).  The
-@var{linespec} argument specifies source lines, as described
+@var{location} argument specifies source lines, as described
 in @ref{Specify Location}.
 
 Use the qualifier @samp{task @var{taskno}} with a breakpoint command
@@ -16899,20 +16963,17 @@ an address of your own choosing, with the following commands:
 @table @code
 @kindex jump
 @kindex j @r{(@code{jump})}
-@item jump @var{linespec}
-@itemx j @var{linespec}
-@itemx jump @var{location}
+@item jump @var{location}
 @itemx j @var{location}
-Resume execution at line @var{linespec} or at address given by
-@var{location}.  Execution stops again immediately if there is a
-breakpoint there.  @xref{Specify Location}, for a description of the
-different forms of @var{linespec} and @var{location}.  It is common
+Resume execution at @var{location}.  Execution stops again immediately
+if there is a breakpoint there.  @xref{Specify Location}, for a description
+of the different forms of @var{location}.  It is common
 practice to use the @code{tbreak} command in conjunction with
 @code{jump}.  @xref{Set Breaks, ,Setting Breakpoints}.
 
 The @code{jump} command does not change the current stack frame, or
 the stack pointer, or the contents of any memory location or any
-register other than the program counter.  If line @var{linespec} is in
+register other than the program counter.  If @var{location} is in
 a different function from the one currently executing, the results may
 be bizarre if the two functions expect different patterns of arguments or
 of local variables.  For this reason, the @code{jump} command requests
@@ -26851,6 +26912,7 @@ N.A.
 
 @subheading The @code{-break-insert} Command
 @findex -break-insert
+@anchor{-break-insert}
 
 @subsubheading Synopsis
 
@@ -26863,16 +26925,35 @@ N.A.
 @noindent
 If specified, @var{location}, can be one of:
 
-@itemize @bullet
-@item function
-@c @item +offset
-@c @item -offset
-@c @item linenum
-@item filename:linenum
-@item filename:function
-@item *address
-@end itemize
+@table @var
+@item linespec location
+A linespec location.  @xref{Linespec Locations}.
 
+@item explicit location
+An explicit location.  @sc{gdb/mi} explicit locations are
+analogous to the CLI's explicit locations using the option names
+listed below.  @xref{Explicit Locations}.
+
+@table @samp
+@item --source @var{filename}
+The source file name of the location.  This option requires the use
+of either @samp{--function} or @samp{--line}.
+
+@item --function @var{function}
+The name of a function or method.
+
+@item --label @var{label}
+The name of a label.
+
+@item --line @var{lineoffset}
+An absolute or relative line offset from the start of the location.
+@end table
+
+@item address location
+An address location, *@var{address}.  @xref{Address Locations}.
+@end table
+
+@noindent
 The possible optional parameters of this command are:
 
 @table @samp
@@ -26964,17 +27045,8 @@ times="0"@}]@}
 @end smallexample
 
 @noindent
-If specified, @var{location}, can be one of:
-
-@itemize @bullet
-@item @var{function}
-@c @item +offset
-@c @item -offset
-@c @item @var{linenum}
-@item @var{filename}:@var{linenum}
-@item @var{filename}:function
-@item *@var{address}
-@end itemize
+If supplied, @var{location} may be specified the same way as for
+the @code{-break-insert} command.  @xref{-break-insert}.
 
 The possible optional parameters of this command are:
 

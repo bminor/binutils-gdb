@@ -1,5 +1,9 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
+	* gdb.base/help.exp: Update help_breakpoint_text.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
 	* gdb.mi/mi-break.exp (test_explicit_breakpoints): New proc.
 	(at toplevel): Call test_explicit_breakpoints.
 	* gdb.mi/mi-dprintf.exp: Add tests for explicit dprintf

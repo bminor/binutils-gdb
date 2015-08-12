@@ -1,5 +1,13 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
+	* NEWS: Mention explicit locations.
+	* breakpoint.c [LOCATION_HELP_STRING]: New macro.
+	[BREAK_ARGS_HELP]: Use LOCATION_HELP_STRING.
+	(_initialize_breakpoint): Update documentation for
+	"clear", "break", "trace", "strace", "ftrace", and "dprintf".
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
 	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Add support for
 	explicit locations, options "--source", "--function",
 	"--label", and "--line".

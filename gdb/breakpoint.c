@@ -15566,26 +15566,46 @@ all_tracepoints (void)
 }
 
 
+/* This help string is used to consolidate all the help string for specifying
+   locations used by several commands.  */
+
+#define LOCATION_HELP_STRING \
+"Linespecs are colon-separated lists of location parameters, such as\n\
+source filename, function name, label name, and line number.\n\
+Example: To specify the start of a label named \"the_top\" in the\n\
+function \"fact\" in the file \"factorial.c\", use\n\
+\"factorial.c:fact:the_top\".\n\
+\n\
+Address locations begin with \"*\" and specify an exact address in the\n\
+program.  Example: To specify the fourth byte past the start function\n\
+\"main\", use \"*main + 4\".\n\
+\n\
+Explicit locations are similar to linespecs but use an option/argument\n\
+syntax to specify location parameters.\n\
+Example: To specify the start of the label named \"the_top\" in the\n\
+function \"fact\" in the file \"factorial.c\", use \"-source factorial.c\n\
+-function fact -label the_top\".\n"
+
 /* This help string is used for the break, hbreak, tbreak and thbreak
    commands.  It is defined as a macro to prevent duplication.
    COMMAND should be a string constant containing the name of the
    command.  */
+
 #define BREAK_ARGS_HELP(command) \
 command" [PROBE_MODIFIER] [LOCATION] [thread THREADNUM] [if CONDITION]\n\
 PROBE_MODIFIER shall be present if the command is to be placed in a\n\
 probe point.  Accepted values are `-probe' (for a generic, automatically\n\
 guessed probe type), `-probe-stap' (for a SystemTap probe) or \n\
 `-probe-dtrace' (for a DTrace probe).\n\
-LOCATION may be a line number, function name, or \"*\" and an address.\n\
-If a line number is specified, break at start of code for that line.\n\
-If a function is specified, break at start of code for that function.\n\
-If an address is specified, break at that exact address.\n\
+LOCATION may be a linespec, address, or explicit location as described\n\
+below.\n\
+\n\
 With no LOCATION, uses current execution address of the selected\n\
 stack frame.  This is useful for breaking on return to a stack frame.\n\
 \n\
 THREADNUM is the number from \"info threads\".\n\
 CONDITION is a boolean expression.\n\
-\n\
+\n" LOCATION_HELP_STRING "\n\
 Multiple breakpoints at one place are permitted, and useful if their\n\
 conditions are different.\n\
 \n\
@@ -16032,20 +16052,17 @@ This command may be abbreviated \"delete\"."),
 	   &deletelist);
 
   add_com ("clear", class_breakpoint, clear_command, _("\
-Clear breakpoint at specified line or function.\n\
-Argument may be line number, function name, or \"*\" and an address.\n\
-If line number is specified, all breakpoints in that line are cleared.\n\
-If function is specified, breakpoints at beginning of function are cleared.\n\
-If an address is specified, breakpoints at that address are cleared.\n\
+Clear breakpoint at specified location.\n\
+Argument may be a linespec, explicit, or address location as described below.\n\
 \n\
 With no argument, clears all breakpoints in the line that the selected frame\n\
-is executing in.\n\
-\n\
+is executing in.\n"
+"\n" LOCATION_HELP_STRING "\n\
 See also the \"delete\" command which clears breakpoints by number."));
   add_com_alias ("cl", "clear", class_breakpoint, 1);
 
   c = add_com ("break", class_breakpoint, break_command, _("\
-Set breakpoint at specified line or function.\n"
+Set breakpoint at specified location.\n"
 BREAK_ARGS_HELP ("break")));
   set_cmd_completer (c, location_completer);
 
@@ -16208,7 +16225,7 @@ hardware.)"),
   /* Tracepoint manipulation commands.  */
 
   c = add_com ("trace", class_breakpoint, trace_command, _("\
-Set a tracepoint at specified line or function.\n\
+Set a tracepoint at specified location.\n\
 \n"
 BREAK_ARGS_HELP ("trace") "\n\
 Do \"help tracepoints\" for info on other tracepoint commands."));
@@ -16220,31 +16237,27 @@ Do \"help tracepoints\" for info on other tracepoint commands."));
   add_com_alias ("trac", "trace", class_alias, 1);
 
   c = add_com ("ftrace", class_breakpoint, ftrace_command, _("\
-Set a fast tracepoint at specified line or function.\n\
+Set a fast tracepoint at specified location.\n\
 \n"
 BREAK_ARGS_HELP ("ftrace") "\n\
 Do \"help tracepoints\" for info on other tracepoint commands."));
   set_cmd_completer (c, location_completer);
 
   c = add_com ("strace", class_breakpoint, strace_command, _("\
-Set a static tracepoint at specified line, function or marker.\n\
+Set a static tracepoint at location or marker.\n\
 \n\
 strace [LOCATION] [if CONDITION]\n\
-LOCATION may be a line number, function name, \"*\" and an address,\n\
-or -m MARKER_ID.\n\
-If a line number is specified, probe the marker at start of code\n\
-for that line.  If a function is specified, probe the marker at start\n\
-of code for that function.  If an address is specified, probe the marker\n\
-at that exact address.  If a marker id is specified, probe the marker\n\
-with that name.  With no LOCATION, uses current execution address of\n\
-the selected stack frame.\n\
+LOCATION may be a linespec, explicit, or address location (described below) \n\
+or -m MARKER_ID.\n\n\
+If a marker id is specified, probe the marker with that name.  With\n\
+no LOCATION, uses current execution address of the selected stack frame.\n\
 Static tracepoints accept an extra collect action -- ``collect $_sdata''.\n\
 This collects arbitrary user data passed in the probe point call to the\n\
 tracing library.  You can inspect it when analyzing the trace buffer,\n\
 by printing the $_sdata variable like any other convenience variable.\n\
 \n\
 CONDITION is a boolean expression.\n\
-\n\
+\n" LOCATION_HELP_STRING "\n\
 Multiple tracepoints at one place are permitted, and useful if their\n\
 conditions are different.\n\
 \n\
@@ -16396,11 +16409,10 @@ an instruction at any address within the [START-LOCATION, END-LOCATION]\n\
 range (including START-LOCATION and END-LOCATION)."));
 
   c = add_com ("dprintf", class_breakpoint, dprintf_command, _("\
-Set a dynamic printf at specified line or function.\n\
+Set a dynamic printf at specified location.\n\
 dprintf location,format string,arg1,arg2,...\n\
-location may be a line number, function name, or \"*\" and an address.\n\
-If a line number is specified, break at start of code for that line.\n\
-If a function is specified, break at start of code for that function."));
+location may be a linespec, explicit, or address location.\n"
+"\n" LOCATION_HELP_STRING));
   set_cmd_completer (c, location_completer);
 
   add_setshow_enum_cmd ("dprintf-style", class_support,

@@ -8,6 +8,10 @@
 * The 'record instruction-history' command now indicates speculative execution
   when using the Intel(R) Processor Trace recording format.
 
+* GDB now allows users to specify explicit locations, bypassing
+  the linespec parser.  This feature is also available to GDB/MI
+  clients.
+
 * New commands
 
 maint set target-non-stop (on|off|auto)
