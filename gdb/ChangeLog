@@ -1,6 +1,68 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
 	* break-catch-throw.c (re_set_exception_catchpoint): Convert
+	linespec into explicit location.
+	* breakpoint.c (create_overlay_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint): Convert linespec into explicit
+	location.
+	(update_static_tracepoint): Convert linespec into explicit location.
+	* linespec.c (enum offset_relative_sign, struct line_offset): Move
+	location.h.
+	(struct linespec) <expression, expr_pc, source_filename>
+	<function_name, label_name, line_offset>: Replace with ...
+	<explicit>: ... this.
+	<is_linespec>: New member.
+	(PARSER_EXPLICIT): New accessor macro.
+	(undefined_label_error): New function.
+	(source_file_not_found_error): New function.
+	(linespec_parse_basic): The parser result is now an explicit location.
+	Use PARSER_EXPLICIT to access it.
+	Use undefined_label_error.
+	(canonicalize_linespec): Convert canonical linespec into explicit
+	location.
+	Move string representation of location to explicit_location_to_linespec
+	and use it and explicit_location_to_string to save string
+	representations of the canonical location.
+	(create_sals_line_offset, convert_linespec_to_sals): `ls' contains an
+	explicit location.  Update all references.
+	(convert_explicit_location_to_sals): New function.
+	(parse_linespec): Use PARSER_EXPLICIT to access the parser
+	result's explicit location.
+	(linespec_state_constructor): Initialize is_linespec.
+	Use PARSER_EXPLICIT.
+	(linespec_parser_delete): Use PARSER_EXPLICIT to access the parser's
+	result.
+	(event_location_to_sals): For linespec locations, set is_linespec.
+	Handle explicit locations.
+	(decode_objc): 'ls' contains an explicit location now. Update all
+	references.
+	(symtabs_from_filename): Use source_file_not_found_error.
+	* location.c (struct event_location.u) <explicit>: New member.
+	(initialize_explicit_location): New function.
+	(initialize_event_location): Initialize explicit locations.
+	(new_explicit_location, get_explicit_location)
+	(get_explicit_location_const): New functions.
+	(explicit_to_string_internal): New function; most of contents moved
+	from canonicalize_linespec.
+	(explicit_location_to_string): New function.
+	(explicit_location_to_linespec): New function.
+	(copy_event_location, delete_event_location)
+	(event_location_to_string_const, event_location_empty_p): Handle
+	explicit locations.
+	* location.h (enum offset_relative_sign, struct line_offset): Move
+	here from linespec.h.
+	(enum event_location_type): Add EXPLICIT_LOCATION.
+	(struct explicit_location): New structure.
+	(explicit_location_to_string): Declare.
+	(explicit_location_to_linespec): Declare.
+	(new_explicit_location, get_explicit_locationp
+	(get_explicit_location_const, initialize_explicit_location): Declare.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
+	* break-catch-throw.c (re_set_exception_catchpoint): Convert
 	linespec for stap probe to probe location.
 	* breakpoint.c (create_longjmp_master_breakpoint)
 	(create_exception_master_breakpoint): Likewise.

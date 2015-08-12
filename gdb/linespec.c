@@ -65,72 +65,25 @@ typedef struct bound_minimal_symbol bound_minimal_symbol_d;
 
 DEF_VEC_O (bound_minimal_symbol_d);
 
-/* An enumeration of possible signs for a line offset.  */
-enum offset_relative_sign
-{
-  /* No sign  */
-  LINE_OFFSET_NONE,
-
-  /* A plus sign ("+")  */
-  LINE_OFFSET_PLUS,
-
-  /* A minus sign ("-")  */
-  LINE_OFFSET_MINUS,
-
-  /* A special "sign" for unspecified offset.  */
-  LINE_OFFSET_UNKNOWN
-};
-
-/* A line offset in a linespec.  */
-
-struct line_offset
-{
-  /* Line offset and any specified sign.  */
-  int offset;
-  enum offset_relative_sign sign;
-};
-
 /* A linespec.  Elements of this structure are filled in by a parser
    (either parse_linespec or some other function).  The structure is
    then converted into SALs by convert_linespec_to_sals.  */
 
 struct linespec
 {
-  /* An expression and the resulting PC.  Specifying an expression
-     currently precludes the use of other members.  */
-
-  /* The expression entered by the user.  */
-  const char *expression;
-
-  /* The resulting PC expression derived from evaluating EXPRESSION.  */
-  CORE_ADDR expr_pc;
-
-  /* Any specified file symtabs.  */
-
-  /* The user-supplied source filename or NULL if none was specified.  */
-  const char *source_filename;
+  /* An explicit location describing the SaLs.  */
+  struct explicit_location explicit;
 
   /* The list of symtabs to search to which to limit the search.  May not
-     be NULL.  If SOURCE_FILENAME is NULL (no user-specified filename),
-     FILE_SYMTABS should contain one single NULL member.  This will
-     cause the code to use the default symtab.  */
+     be NULL.  If explicit.SOURCE_FILENAME is NULL (no user-specified
+     filename), FILE_SYMTABS should contain one single NULL member.  This
+     will cause the code to use the default symtab.  */
   VEC (symtab_ptr) *file_symtabs;
-
-  /* The name of a function or method and any matching symbols.  */
-
-  /* The user-specified function name.  If no function name was
-     supplied, this may be NULL.  */
-  const char *function_name;
 
   /* A list of matching function symbols and minimal symbols.  Both lists
      may be NULL if no matching symbols were found.  */
   VEC (symbolp) *function_symbols;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
-
-  /* The name of a label and matching symbols.  */
-
-  /* The user-specified label name.  */
-  const char *label_name;
 
   /* A structure of matching label symbols and the corresponding
      function symbol in which the label was found.  Both may be NULL
@@ -140,10 +93,6 @@ struct linespec
     VEC (symbolp) *label_symbols;
     VEC (symbolp) *function_symbols;
   } labels;
-
-  /* Line offset.  It may be LINE_OFFSET_UNKNOWN, meaning that no
-   offset was specified.  */
-  struct line_offset line_offset;
 };
 typedef struct linespec *linespec_p;
 
@@ -196,6 +145,9 @@ struct linespec_state
   /* This is a set of address_entry objects which is used to prevent
      duplicate symbols from being entered into the result.  */
   htab_t addr_set;
+
+  /* Are we building a linespec?  */
+  int is_linespec;
 };
 
 /* This is a helper object that is used when collecting symbols into a
@@ -301,6 +253,10 @@ struct ls_parser
 #define PARSER_RESULT(PPTR) (&(PPTR)->result)
 };
 typedef struct ls_parser linespec_parser;
+
+/* A convenience macro for accessing the explicit location result of
+   the parser.  */
+#define PARSER_EXPLICIT(PPTR) (&PARSER_RESULT ((PPTR))->explicit)
 
 /* Prototypes for local functions.  */
 
@@ -1572,6 +1528,29 @@ unexpected_linespec_error (linespec_parser *parser)
 		 token_type_strings[token.type]);
 }
 
+/* Throw an undefined label error.  */
+
+static void ATTRIBUTE_NORETURN
+undefined_label_error (const char *function, const char *label)
+{
+  if (function != NULL)
+    throw_error (NOT_FOUND_ERROR,
+                _("No label \"%s\" defined in function \"%s\"."),
+                label, function);
+  else
+    throw_error (NOT_FOUND_ERROR,
+                _("No label \"%s\" defined in current function."),
+                label);
+}
+
+/* Throw a source file not found error.  */
+
+static void ATTRIBUTE_NORETURN
+source_file_not_found_error (const char *name)
+{
+  throw_error (NOT_FOUND_ERROR, _("No source file named %s."), name);
+}
+
 /* Parse and return a line offset in STRING.  */
 
 static struct line_offset
@@ -1618,7 +1597,7 @@ linespec_parse_basic (linespec_parser *parser)
       /* Record the line offset and get the next token.  */
       name = copy_token_string (token);
       cleanup = make_cleanup (xfree, name);
-      PARSER_RESULT (parser)->line_offset = linespec_parse_line_offset (name);
+      PARSER_EXPLICIT (parser)->line_offset = linespec_parse_line_offset (name);
       do_cleanups (cleanup);
 
       /* Get the next token.  */
@@ -1655,7 +1634,7 @@ linespec_parse_basic (linespec_parser *parser)
     {
       PARSER_RESULT (parser)->function_symbols = symbols;
       PARSER_RESULT (parser)->minimal_symbols = minimal_symbols;
-      PARSER_RESULT (parser)->function_name = name;
+      PARSER_EXPLICIT (parser)->function_name = name;
       symbols = NULL;
       discard_cleanups (cleanup);
     }
@@ -1669,7 +1648,7 @@ linespec_parse_basic (linespec_parser *parser)
 	{
 	  PARSER_RESULT (parser)->labels.label_symbols = labels;
 	  PARSER_RESULT (parser)->labels.function_symbols = symbols;
-	  PARSER_RESULT (parser)->label_name = name;
+	  PARSER_EXPLICIT (parser)->label_name = name;
 	  symbols = NULL;
 	  discard_cleanups (cleanup);
 	}
@@ -1677,14 +1656,14 @@ linespec_parse_basic (linespec_parser *parser)
 	       && *LS_TOKEN_STOKEN (token).ptr == '$')
 	{
 	  /* User specified a convenience variable or history value.  */
-	  PARSER_RESULT (parser)->line_offset
+	  PARSER_EXPLICIT (parser)->line_offset
 	    = linespec_parse_variable (PARSER_STATE (parser), name);
 
-	  if (PARSER_RESULT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN)
+	  if (PARSER_EXPLICIT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN)
 	    {
 	      /* The user-specified variable was not valid.  Do not
 		 throw an error here.  parse_linespec will do it for us.  */
-	      PARSER_RESULT (parser)->function_name = name;
+	      PARSER_EXPLICIT (parser)->function_name = name;
 	      discard_cleanups (cleanup);
 	      return;
 	    }
@@ -1699,7 +1678,7 @@ linespec_parse_basic (linespec_parser *parser)
 	     an error here.  parse_linespec will do it for us.  */
 
 	  /* Save a copy of the name we were trying to lookup.  */
-	  PARSER_RESULT (parser)->function_name = name;
+	  PARSER_EXPLICIT (parser)->function_name = name;
 	  discard_cleanups (cleanup);
 	  return;
 	}
@@ -1719,7 +1698,7 @@ linespec_parse_basic (linespec_parser *parser)
 	     get the next token.  */
 	  name = copy_token_string (token);
 	  cleanup = make_cleanup (xfree, name);
-	  PARSER_RESULT (parser)->line_offset
+	  PARSER_EXPLICIT (parser)->line_offset
 	    = linespec_parse_line_offset (name);
 	  do_cleanups (cleanup);
 
@@ -1739,16 +1718,15 @@ linespec_parse_basic (linespec_parser *parser)
 	    {
 	      PARSER_RESULT (parser)->labels.label_symbols = labels;
 	      PARSER_RESULT (parser)->labels.function_symbols = symbols;
-	      PARSER_RESULT (parser)->label_name = name;
+	      PARSER_EXPLICIT (parser)->label_name = name;
 	      symbols = NULL;
 	      discard_cleanups (cleanup);
 	    }
 	  else
 	    {
 	      /* We don't know what it was, but it isn't a label.  */
-	      throw_error (NOT_FOUND_ERROR,
-			   _("No label \"%s\" defined in function \"%s\"."),
-			   name, PARSER_RESULT (parser)->function_name);
+	      undefined_label_error (PARSER_EXPLICIT (parser)->function_name,
+				     name);
 	    }
 
 	  /* Check for a line offset.  */
@@ -1766,7 +1744,7 @@ linespec_parse_basic (linespec_parser *parser)
 	      name = copy_token_string (token);
 	      cleanup = make_cleanup (xfree, name);
 
-	      PARSER_RESULT (parser)->line_offset
+	      PARSER_EXPLICIT (parser)->line_offset
 		= linespec_parse_line_offset (name);
 	      do_cleanups (cleanup);
 
@@ -1783,43 +1761,28 @@ linespec_parse_basic (linespec_parser *parser)
 }
 
 /* Canonicalize the linespec contained in LS.  The result is saved into
-   STATE->canonical.  */
+   STATE->canonical.  This function handles both linespec and explicit
+   locations.  */
 
 static void
 canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 {
-  char *tmp;
-  struct ui_file *buf;
-  int need_colon = 0;
-  struct cleanup *cleanup;
+  struct event_location *canon;
+  struct explicit_location *explicit;
 
   /* If canonicalization was not requested, no need to do anything.  */
   if (!state->canonical)
     return;
 
-  buf = mem_fileopen ();
-  cleanup = make_cleanup_ui_file_delete (buf);
+  /* Save everything as an explicit location.  */
+  canon = state->canonical->location = new_explicit_location (&ls->explicit);
+  explicit = get_explicit_location (canon);
 
-  if (ls->source_filename)
+  if (explicit->label_name != NULL)
     {
-      fputs_unfiltered (ls->source_filename, buf);
-      need_colon = 1;
-    }
+      state->canonical->special_display = 1;
 
-  if (ls->function_name)
-    {
-      if (need_colon)
-	fputc_unfiltered (':', buf);
-      fputs_unfiltered (ls->function_name, buf);
-      need_colon = 1;
-    }
-
-  if (ls->label_name)
-    {
-      if (need_colon)
-	fputc_unfiltered (':', buf);
-
-      if (ls->function_name == NULL)
+      if (explicit->function_name == NULL)
 	{
 	  struct symbol *s;
 
@@ -1828,30 +1791,19 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 		      && (VEC_length (symbolp, ls->labels.function_symbols)
 			  == 1));
 	  s = VEC_index (symbolp, ls->labels.function_symbols, 0);
-	  fputs_unfiltered (SYMBOL_NATURAL_NAME (s), buf);
-	  fputc_unfiltered (':', buf);
+	  explicit->function_name = xstrdup (SYMBOL_NATURAL_NAME (s));
 	}
-
-      fputs_unfiltered (ls->label_name, buf);
-      need_colon = 1;
-      state->canonical->special_display = 1;
     }
 
-  if (ls->line_offset.sign != LINE_OFFSET_UNKNOWN)
+  /* If this location originally came from a linespec, save a string
+     representation of it for display and saving to file.  */
+  if (state->is_linespec)
     {
-      if (need_colon)
-	fputc_unfiltered (':', buf);
-      fprintf_filtered (buf, "%s%d",
-			(ls->line_offset.sign == LINE_OFFSET_NONE ? ""
-			 : (ls->line_offset.sign
-			    == LINE_OFFSET_PLUS ? "+" : "-")),
-			ls->line_offset.offset);
-    }
+      char *linespec = explicit_location_to_linespec (explicit);
 
-  tmp = ui_file_xstrdup (buf, NULL);
-  make_cleanup (xfree, tmp);
-  state->canonical->location = new_linespec_location (&tmp);
-  do_cleanups (cleanup);
+      set_event_location_string (canon, linespec);
+      xfree (linespec);
+    }
 }
 
 /* Given a line offset in LS, construct the relevant SALs.  */
@@ -1891,18 +1843,18 @@ create_sals_line_offset (struct linespec_state *self,
       use_default = 1;
     }
 
-  val.line = ls->line_offset.offset;
-  switch (ls->line_offset.sign)
+  val.line = ls->explicit.line_offset.offset;
+  switch (ls->explicit.line_offset.sign)
     {
     case LINE_OFFSET_PLUS:
-      if (ls->line_offset.offset == 0)
+      if (ls->explicit.line_offset.offset == 0)
 	val.line = 5;
       if (use_default)
 	val.line = self->default_line + val.line;
       break;
 
     case LINE_OFFSET_MINUS:
-      if (ls->line_offset.offset == 0)
+      if (ls->explicit.line_offset.offset == 0)
 	val.line = 15;
       if (use_default)
 	val.line = self->default_line - val.line;
@@ -1994,9 +1946,9 @@ create_sals_line_offset (struct linespec_state *self,
 
   if (values.nelts == 0)
     {
-      if (ls->source_filename)
+      if (ls->explicit.source_filename)
 	throw_error (NOT_FOUND_ERROR, _("No line %d in file \"%s\"."),
-		     val.line, ls->source_filename);
+		     val.line, ls->explicit.source_filename);
       else
 	throw_error (NOT_FOUND_ERROR, _("No line %d in the current file."),
 		     val.line);
@@ -2093,13 +2045,13 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	    }
 	}
     }
-  else if (ls->line_offset.sign != LINE_OFFSET_UNKNOWN)
+  else if (ls->explicit.line_offset.sign != LINE_OFFSET_UNKNOWN)
     {
       /* Only an offset was specified.  */
 	sals = create_sals_line_offset (state, ls);
 
 	/* Make sure we have a filename for canonicalization.  */
-	if (ls->source_filename == NULL)
+	if (ls->explicit.source_filename == NULL)
 	  {
 	    const char *fullname = symtab_to_fullname (state->default_symtab);
 
@@ -2107,7 +2059,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	       form so that displaying SOURCE_FILENAME can follow the current
 	       FILENAME_DISPLAY_STRING setting.  But as it is used only rarely
 	       it has been kept for code simplicity only in absolute form.  */
-	    ls->source_filename = xstrdup (fullname);
+	    ls->explicit.source_filename = xstrdup (fullname);
 	  }
     }
   else
@@ -2122,6 +2074,72 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
     state->canonical->pre_expanded = 1;
 
   return sals;
+}
+
+/* Convert the explicit location EXPLICIT into SaLs.  */
+
+static struct symtabs_and_lines
+convert_explicit_location_to_sals (struct linespec_state *self,
+				   linespec_p result,
+				   const struct explicit_location *explicit)
+{
+  VEC (symbolp) *symbols, *labels;
+  VEC (bound_minimal_symbol_d) *minimal_symbols;
+
+  if (explicit->source_filename != NULL)
+    {
+      TRY
+	{
+	  result->file_symtabs
+	    = symtabs_from_filename (explicit->source_filename);
+	}
+      CATCH (except, RETURN_MASK_ERROR)
+	{
+	  source_file_not_found_error (explicit->source_filename);
+	}
+      END_CATCH
+      result->explicit.source_filename = xstrdup (explicit->source_filename);
+    }
+  else
+    {
+      /* A NULL entry means to use the default symtab.  */
+      VEC_safe_push (symtab_ptr, result->file_symtabs, NULL);
+    }
+
+  if (explicit->function_name != NULL)
+    {
+      find_linespec_symbols (self, result->file_symtabs,
+			     explicit->function_name, &symbols,
+			     &minimal_symbols);
+
+      if (symbols == NULL && minimal_symbols == NULL)
+	symbol_not_found_error (explicit->function_name,
+				result->explicit.source_filename);
+
+      result->explicit.function_name = xstrdup (explicit->function_name);
+      result->function_symbols = symbols;
+      result->minimal_symbols = minimal_symbols;
+    }
+
+  if (explicit->label_name != NULL)
+    {
+      symbols = NULL;
+      labels = find_label_symbols (self, result->function_symbols,
+				   &symbols, explicit->label_name);
+
+      if (labels == NULL)
+	undefined_label_error (result->explicit.function_name,
+			       explicit->label_name);
+
+      result->explicit.label_name = xstrdup (explicit->label_name);
+      result->labels.label_symbols = labels;
+      result->labels.function_symbols = symbols;
+    }
+
+  if (explicit->line_offset.sign != LINE_OFFSET_UNKNOWN)
+    result->explicit.line_offset = explicit->line_offset;
+
+   return convert_linespec_to_sals (self, result);
 }
 
 /* Parse a string that specifies a linespec.
@@ -2229,13 +2247,13 @@ parse_linespec (linespec_parser *parser, const char *arg)
       /* User specified a convenience variable or history value.  */
       var = copy_token_string (token);
       cleanup = make_cleanup (xfree, var);
-      PARSER_RESULT (parser)->line_offset
+      PARSER_EXPLICIT (parser)->line_offset
 	= linespec_parse_variable (PARSER_STATE (parser), var);
       do_cleanups (cleanup);
 
       /* If a line_offset wasn't found (VAR is the name of a user
 	 variable/function), then skip to normal symbol processing.  */
-      if (PARSER_RESULT (parser)->line_offset.sign != LINE_OFFSET_UNKNOWN)
+      if (PARSER_EXPLICIT (parser)->line_offset.sign != LINE_OFFSET_UNKNOWN)
 	{
 	  /* Consume this token.  */
 	  linespec_lexer_consume_token (parser);
@@ -2273,7 +2291,7 @@ parse_linespec (linespec_parser *parser, const char *arg)
       if (file_exception.reason >= 0)
 	{
 	  /* Symtabs were found for the file.  Record the filename.  */
-	  PARSER_RESULT (parser)->source_filename = user_filename;
+	  PARSER_EXPLICIT (parser)->source_filename = user_filename;
 
 	  /* Get the next token.  */
 	  token = linespec_lexer_consume_token (parser);
@@ -2310,7 +2328,7 @@ parse_linespec (linespec_parser *parser, const char *arg)
 
   if (PARSER_RESULT (parser)->function_symbols == NULL
       && PARSER_RESULT (parser)->labels.label_symbols == NULL
-      && PARSER_RESULT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN
+      && PARSER_EXPLICIT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN
       && PARSER_RESULT (parser)->minimal_symbols == NULL)
     {
       /* The linespec didn't parse.  Re-throw the file exception if
@@ -2319,8 +2337,8 @@ parse_linespec (linespec_parser *parser, const char *arg)
 	throw_exception (file_exception);
 
       /* Otherwise, the symbol is not found.  */
-      symbol_not_found_error (PARSER_RESULT (parser)->function_name,
-			      PARSER_RESULT (parser)->source_filename);
+      symbol_not_found_error (PARSER_EXPLICIT (parser)->function_name,
+			      PARSER_EXPLICIT (parser)->source_filename);
     }
 
  convert_to_sals:
@@ -2358,6 +2376,7 @@ linespec_state_constructor (struct linespec_state *self,
   self->program_space = current_program_space;
   self->addr_set = htab_create_alloc (10, hash_address_entry, eq_address_entry,
 				      xfree, xcalloc, xfree);
+  self->is_linespec = 0;
 }
 
 /* Initialize a new linespec parser.  */
@@ -2372,7 +2391,7 @@ linespec_parser_new (linespec_parser *parser,
   memset (parser, 0, sizeof (linespec_parser));
   parser->lexer.current.type = LSTOKEN_CONSUMED;
   memset (PARSER_RESULT (parser), 0, sizeof (struct linespec));
-  PARSER_RESULT (parser)->line_offset.sign = LINE_OFFSET_UNKNOWN;
+  PARSER_EXPLICIT (parser)->line_offset.sign = LINE_OFFSET_UNKNOWN;
   linespec_state_constructor (PARSER_STATE (parser), flags, language,
 			      default_symtab, default_line, canonical);
 }
@@ -2392,10 +2411,9 @@ linespec_parser_delete (void *arg)
 {
   linespec_parser *parser = (linespec_parser *) arg;
 
-  xfree ((char *) PARSER_RESULT (parser)->expression);
-  xfree ((char *) PARSER_RESULT (parser)->source_filename);
-  xfree ((char *) PARSER_RESULT (parser)->label_name);
-  xfree ((char *) PARSER_RESULT (parser)->function_name);
+  xfree (PARSER_EXPLICIT (parser)->source_filename);
+  xfree (PARSER_EXPLICIT (parser)->label_name);
+  xfree (PARSER_EXPLICIT (parser)->function_name);
 
   if (PARSER_RESULT (parser)->file_symtabs != NULL)
     VEC_free (symtab_ptr, PARSER_RESULT (parser)->file_symtabs);
@@ -2461,6 +2479,7 @@ event_location_to_sals (linespec_parser *parser,
     {
     case LINESPEC_LOCATION:
       {
+	PARSER_STATE (parser)->is_linespec = 1;
 	TRY
 	  {
 	    result = parse_linespec (parser, get_linespec_location (location));
@@ -2477,6 +2496,17 @@ event_location_to_sals (linespec_parser *parser,
       result
 	= convert_address_location_to_sals (PARSER_STATE (parser),
 					    get_address_location (location));
+      break;
+
+    case EXPLICIT_LOCATION:
+      {
+	const struct explicit_location *explicit;
+
+	explicit = get_explicit_location_const (location);
+	result = convert_explicit_location_to_sals (PARSER_STATE (parser),
+						    PARSER_RESULT (parser),
+						    explicit);
+      }
       break;
 
     case PROBE_LOCATION:
@@ -2728,7 +2758,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
       memcpy (saved_arg, arg, new_argptr - arg);
       saved_arg[new_argptr - arg] = '\0';
 
-      ls->function_name = xstrdup (saved_arg);
+      ls->explicit.function_name = xstrdup (saved_arg);
       ls->function_symbols = info.result.symbols;
       ls->minimal_symbols = info.result.minimal_symbols;
       values = convert_linespec_to_sals (self, ls);
@@ -2739,10 +2769,10 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 
 	  self->canonical->pre_expanded = 1;
 
-	  if (ls->source_filename)
+	  if (ls->explicit.source_filename)
 	    {
 	      str = xstrprintf ("%s:%s",
-				ls->source_filename, saved_arg);
+				ls->explicit.source_filename, saved_arg);
 	    }
 	  else
 	    str = xstrdup (saved_arg);
@@ -3122,7 +3152,7 @@ symtabs_from_filename (const char *filename)
 	throw_error (NOT_FOUND_ERROR,
 		     _("No symbol table is loaded.  "
 		       "Use the \"file\" command."));
-      throw_error (NOT_FOUND_ERROR, _("No source file named %s."), filename);
+      source_file_not_found_error (filename);
     }
 
   return result;

@@ -3424,7 +3424,7 @@ create_overlay_event_breakpoint (void)
       struct breakpoint *b;
       struct breakpoint_objfile_data *bp_objfile_data;
       CORE_ADDR addr;
-      char *p;
+      struct explicit_location explicit;
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3449,8 +3449,9 @@ create_overlay_event_breakpoint (void)
       b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
                                       bp_overlay_event,
 				      &internal_breakpoint_ops);
-      p = ASTRDUP (func_name);
-      b->location = new_linespec_location (&p);
+      initialize_explicit_location (&explicit);
+      explicit.function_name = ASTRDUP (func_name);
+      b->location = new_explicit_location (&explicit);
 
       if (overlay_debugging == ovly_auto)
         {
@@ -3547,7 +3548,7 @@ create_longjmp_master_breakpoint (void)
 	  struct breakpoint *b;
 	  const char *func_name;
 	  CORE_ADDR addr;
-	  char *p;
+	  struct explicit_location explicit;
 
 	  if (msym_not_found_p (bp_objfile_data->longjmp_msym[i].minsym))
 	    continue;
@@ -3570,8 +3571,9 @@ create_longjmp_master_breakpoint (void)
 	  addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
 	  b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
 					  &internal_breakpoint_ops);
-	  p = ASTRDUP (func_name);
-	  b->location = new_linespec_location (&p);
+	  initialize_explicit_location (&explicit);
+	  explicit.function_name = ASTRDUP (func_name);
+	  b->location = new_explicit_location (&explicit);
 	  b->enable_state = bp_disabled;
 	}
     }
@@ -3602,7 +3604,7 @@ create_std_terminate_master_breakpoint (void)
     {
       struct breakpoint *b;
       struct breakpoint_objfile_data *bp_objfile_data;
-      char *p;
+      struct explicit_location explicit;
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3628,8 +3630,9 @@ create_std_terminate_master_breakpoint (void)
       b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
                                       bp_std_terminate_master,
 				      &internal_breakpoint_ops);
-      p = ASTRDUP (func_name);
-      b->location = new_linespec_location (&p);
+      initialize_explicit_location (&explicit);
+      explicit.function_name = ASTRDUP (func_name);
+      b->location = new_explicit_location (&explicit);
       b->enable_state = bp_disabled;
     }
   }
@@ -3653,7 +3656,7 @@ create_exception_master_breakpoint (void)
       struct gdbarch *gdbarch;
       struct breakpoint_objfile_data *bp_objfile_data;
       CORE_ADDR addr;
-      char *p;
+      struct explicit_location explicit;
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3734,8 +3737,9 @@ create_exception_master_breakpoint (void)
 						 &current_target);
       b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
 				      &internal_breakpoint_ops);
-      p = ASTRDUP (func_name);
-      b->location = new_linespec_location (&p);
+      initialize_explicit_location (&explicit);
+      explicit.function_name = ASTRDUP (func_name);
+      b->location = new_explicit_location (&explicit);
       b->enable_state = bp_disabled;
     }
 
@@ -13932,12 +13936,11 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 
       if (!VEC_empty(static_tracepoint_marker_p, markers))
 	{
-	  char *p, *tmp;
 	  struct symtab_and_line sal2;
 	  struct symbol *sym;
 	  struct static_tracepoint_marker *tpmarker;
 	  struct ui_out *uiout = current_uiout;
-	  struct cleanup *cleanup;
+	  struct explicit_location explicit;
 
 	  tpmarker = VEC_index (static_tracepoint_marker_p, markers, 0);
 
@@ -13979,12 +13982,12 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	  b->loc->symtab = sym != NULL ? sal2.symtab : NULL;
 
 	  delete_event_location (b->location);
-	  p = tmp = xstrprintf ("%s:%d",
-				symtab_to_filename_for_display (sal2.symtab),
-				b->loc->line_number);
-	  cleanup = make_cleanup (xfree, tmp);
-	  b->location = new_linespec_location (&tmp);
-	  do_cleanups (cleanup);
+	  initialize_explicit_location (&explicit);
+	  explicit.source_filename
+	    = ASTRDUP (symtab_to_filename_for_display (sal2.symtab));
+	  explicit.line_offset.offset = b->loc->line_number;
+	  explicit.line_offset.sign = LINE_OFFSET_NONE;
+	  b->location = new_explicit_location (&explicit);
 
 	  /* Might be nice to check if function changed, and warn if
 	     so.  */

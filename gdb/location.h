@@ -22,6 +22,32 @@
 struct language_defn;
 struct event_location;
 
+/* An enumeration of possible signs for a line offset.  */
+
+enum offset_relative_sign
+{
+  /* No sign  */
+  LINE_OFFSET_NONE,
+
+  /* A plus sign ("+")  */
+  LINE_OFFSET_PLUS,
+
+  /* A minus sign ("-")  */
+  LINE_OFFSET_MINUS,
+
+  /* A special "sign" for unspecified offset.  */
+  LINE_OFFSET_UNKNOWN
+};
+
+/* A line offset in a location.  */
+
+struct line_offset
+{
+  /* Line offset and any specified sign.  */
+  int offset;
+  enum offset_relative_sign sign;
+};
+
 /* An enumeration of the various ways to specify a stop event
    location (used with create_breakpoint).  */
 
@@ -33,14 +59,51 @@ enum event_location_type
   /* An address in the inferior.  */
   ADDRESS_LOCATION,
 
+  /* An explicit location.  */
+  EXPLICIT_LOCATION,
+
   /* A probe location.  */
   PROBE_LOCATION
+};
+
+/* An explicit location.  This structure is used to bypass the
+   parsing done on linespecs.  It still has the same requirements
+   as linespecs, though.  For example, source_filename requires
+   at least one other field.  */
+
+struct explicit_location
+{
+  /* The source filename. Malloc'd.  */
+  char *source_filename;
+
+  /* The function name.  Malloc'd.  */
+  char *function_name;
+
+  /* The name of a label.  Malloc'd.  */
+  char *label_name;
+
+  /* A line offset relative to the start of the symbol
+     identified by the above fields or the current symtab
+     if the other fields are NULL.  */
+  struct line_offset line_offset;
 };
 
 /* Return the type of the given event location.  */
 
 extern enum event_location_type
   event_location_type (const struct event_location *);
+
+/* Return a malloc'd explicit string representation of the given
+   explicit location.  The location must already be canonicalized/valid.  */
+
+extern char *
+  explicit_location_to_string (const struct explicit_location *explicit);
+
+/* Return a malloc'd linespec string representation of the given
+   explicit location.  The location must already be canonicalized/valid.  */
+
+extern char *
+  explicit_location_to_linespec (const struct explicit_location *explicit);
 
 /* Return a string representation of the LOCATION.
    This function may return NULL for unspecified linespecs,
@@ -86,6 +149,30 @@ extern struct event_location *
 
 extern const char *
   get_probe_location (const struct event_location *location);
+
+/* Initialize the given explicit location.  */
+
+extern void initialize_explicit_location (struct explicit_location *explicit);
+
+/* Create a new explicit location.  If not NULL, EXPLICIT is checked for
+   validity.  If invalid, an exception is thrown.
+
+   The return result is malloc'd and should be freed with
+   delete_event_location.  */
+
+extern struct event_location *
+  new_explicit_location (const struct explicit_location *explicit);
+
+/* Return the explicit location of the given event_location
+   (which must be of type EXPLICIT_LOCATION).  */
+
+extern struct explicit_location *
+  get_explicit_location (struct event_location *location);
+
+/* A const version of the above.  */
+
+extern const struct explicit_location *
+  get_explicit_location_const (const struct event_location *location);
 
 /* Free an event location and any associated data.  */
 
