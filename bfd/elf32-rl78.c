@@ -448,7 +448,7 @@ rl78_compute_complex_reloc (unsigned long  r_type,
     case R_RL78_SYM:
       RL78_STACK_PUSH (symval);
       return 0;
-      
+
     case R_RL78_OPneg:
       RL78_STACK_POP (tmp1);
       tmp1 = - tmp1;
@@ -1046,7 +1046,7 @@ rl78_elf_relocate_section
 	      break;
 	    }
 	  break;
-	  
+
 	case R_RL78_SYM:
 	  if (r_symndx < symtab_hdr->sh_info)
 	    relocation = sec->output_section->vma + sec->output_offset
@@ -1244,7 +1244,7 @@ rl78_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 	    (*_bfd_error_handler) (_("- %s is 64-bit, %s is not"),
 				   bfd_get_filename (ibfd), bfd_get_filename (obfd));
 	  error = TRUE;
-	}    
+	}
     }
 
   return !error;
@@ -1971,7 +1971,7 @@ rl78_offset_for_reloc (bfd *                    abfd,
 	case R_RL78_ABS8UW:
 	  *scale = 2;
 	  goto reloc_computes_value;
-	  
+
 	default:
 	reloc_computes_value:
 	  symval = rl78_compute_complex_reloc (r_type, 0, input_section);

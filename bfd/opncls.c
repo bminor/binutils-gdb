@@ -1378,7 +1378,7 @@ find_separate_debug_file (bfd *           abfd,
     }
 
   base = get_func (abfd, & crc32);
-    
+
   if (base == NULL)
     return NULL;
 

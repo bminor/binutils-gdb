@@ -742,7 +742,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	 some long jumps created by the compiler.  */
       if (irel != internal_relocs)
 	last_reloc = irel - 1;
-      
+
       switch(ELF32_R_TYPE (irel->r_info))
 	{
 	case R_H8_DIR24R8:

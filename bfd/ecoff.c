@@ -876,7 +876,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
     return TRUE;
 
   internal = (ecoff_symbol_type *) bfd_alloc2 (abfd, bfd_get_symcount (abfd),
-					       sizeof (ecoff_symbol_type)); 
+					       sizeof (ecoff_symbol_type));
   if (internal == NULL)
     return FALSE;
 

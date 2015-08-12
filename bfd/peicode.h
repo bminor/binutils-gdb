@@ -867,7 +867,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       ptr += alignment - (SIZEOF_ILF_STRINGS & (alignment - 1));
   }
 #endif
-  
+
   vars.data = ptr;
   vars.abfd = abfd;
   vars.sec_index = 0;

@@ -2265,7 +2265,7 @@ sh_elf64_copy_private_data_internal (bfd *ibfd, bfd *obfd)
 
   /* Copy object attributes.  */
   _bfd_elf_copy_private_bfd_data (ibfd, obfd);
-  
+
   return sh_elf64_set_private_flags (obfd, elf_elfheader (ibfd)->e_flags);
 }
 

@@ -9581,13 +9581,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	     prevent the bad prefetch from happening in the first
 	     place:
 	     .
-	     .	lis 9,new_page@ha	 lis 9,new_page@ha	
-	     .	addi 9,9,new_page@l	 addi 9,9,new_page@l	
-	     .	mtctr 9			 mtctr 9			
-	     .	bctr			 bctr			
+	     .	lis 9,new_page@ha	 lis 9,new_page@ha
+	     .	addi 9,9,new_page@l	 addi 9,9,new_page@l
+	     .	mtctr 9			 mtctr 9
+	     .	bctr			 bctr
 	     .	nop			 b somewhere_else
-	     .	b somewhere_else	 nop			
-	     . new_page:		new_page:		
+	     .	b somewhere_else	 nop
+	     . new_page:		new_page:
 	     .  */
 	  insn = bfd_get_32 (input_bfd, contents + offset);
 	  if ((insn & (0x3f << 26)) == (18u << 26)          /* b,bl,ba,bla */

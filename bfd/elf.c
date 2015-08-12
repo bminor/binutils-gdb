@@ -832,7 +832,7 @@ _bfd_elf_setup_sections (bfd *abfd)
 
       idx = (Elf_Internal_Group *) shdr->contents;
       n_elt = shdr->sh_size / 4;
-      
+
       while (--n_elt != 0)
 	if ((++idx)->shdr->bfd_section)
 	  elf_sec_group (idx->shdr->bfd_section) = shdr->bfd_section;
@@ -1245,7 +1245,7 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  for (j = 0; j < elf_numsections (ibfd); j++)
 	    {
 	      Elf_Internal_Shdr * iheader = iheaders[j];
-	      
+
 	      /* Since --only-keep-debug turns all non-debug sections
 		 into SHT_NOBITS sections, the output SHT_NOBITS type
 		 matches any input type.  */
