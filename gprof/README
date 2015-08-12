@@ -1,7 +1,7 @@
 		README for GPROF
 
-This is the GNU profiler.  It is distributed with other "binary 
-utilities" which should be in ../binutils.  See ../binutils/README for 
+This is the GNU profiler.  It is distributed with other "binary
+utilities" which should be in ../binutils.  See ../binutils/README for
 more general notes, including where to send bug reports.
 
 This file documents the changes and new features available with this
@@ -118,7 +118,7 @@ Here are some examples:
 				dots.  In such cases, it is necessary to
 				add a leading colon to the name.  For example,
 				":.mul" selects function ".mul".
-				
+
 	main.c:main		Selects function "main" in file "main.c".
 
 	main.c:134		Selects line 134 in file "main.c".
@@ -195,7 +195,7 @@ Short Form:	Long Form:
 			option is specified multiple times, the flat
 			profile includes symbols selected by the union
 			of all symspecs.
-			
+
 -P[symspec]	--no-flat-profile[=symspec]
 			Suppress output in the flat profile.  If given
 			without an argument, the flat profile is suppressed
