@@ -730,7 +730,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   PyObject *result = NULL;
   PyObject *return_result = NULL;
   PyObject *unparsed = NULL;
-  struct event_location *location;
+  struct event_location *location = NULL;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
@@ -747,7 +747,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
   TRY
     {
-      if (arg)
+      if (location != NULL)
 	sals = decode_line_1 (location, 0, 0, 0);
       else
 	{
