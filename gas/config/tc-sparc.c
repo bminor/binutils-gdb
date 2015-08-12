@@ -280,7 +280,7 @@ static struct sparc_arch {
   { "v8pluse", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VE, 0 },
   { "v8plusv", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VV, 0 },
   { "v8plusm", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VM, 0 },
-  
+
   { "v9",      "v9",  v9,  0, 1, HWS_V9, 0 },
   { "v9a",     "v9a", v9,  0, 1, HWS_VA, 0 },
   { "v9b",     "v9b", v9,  0, 1, HWS_VB, 0 },

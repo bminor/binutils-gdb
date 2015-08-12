@@ -20,7 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "as.h"
-#include "subsegs.h"     
+#include "subsegs.h"
 #include "symcat.h"
 #include "opcodes/m32c-desc.h"
 #include "opcodes/m32c-opc.h"
@@ -141,7 +141,7 @@ void
 md_show_usage (FILE * stream)
 {
   fprintf (stream, _(" M32C specific command line options:\n"));
-} 
+}
 
 static void
 s_bss (int ignore ATTRIBUTE_UNUSED)
@@ -261,21 +261,21 @@ m32c_indirect_operand (char *str)
       if (s[0] == '[' && s[1] == '[')
 	indirection[operand] = relative;
     }
-   
+
   if (indirection[1] == none && indirection[2] == none)
     return FALSE;
-  
+
   operand = 1;
   ns_len = strlen (str);
   new_str = (char*) xmalloc (ns_len);
   ns = new_str;
   ns_end = ns + ns_len;
- 
+
   for (s = str; *s; s++)
     {
       if (s[0] == ',')
 	operand = 2;
- 
+
       if (s[0] == '[' && ! brace_n[operand])
 	{
 	  brace_n[operand] += 1;
@@ -283,7 +283,7 @@ m32c_indirect_operand (char *str)
 	  if (indirection[operand] != none)
 	    continue;
 	}
- 
+
       else if (s[0] == '[' && brace_n[operand])
 	{
 	  brace_n[operand] += 1;
@@ -315,7 +315,7 @@ m32c_indirect_operand (char *str)
       {
 	fprintf (stderr, "Unmatched [[operand-%d]] %d\n", operand, brace_n[operand]);
       }
-       
+
   if (indirection[1] != none && indirection[2] != none)
     md_assemble ("src-dest-indirect");
   else if (indirection[1] != none)
@@ -345,7 +345,7 @@ md_assemble (char * str)
 
   insn.insn = m32c_cgen_assemble_insn
     (gas_cgen_cpu_desc, str, & insn.fields, insn.buffer, & errmsg);
-  
+
   if (!insn.insn)
     {
       as_bad ("%s", errmsg);
@@ -398,7 +398,7 @@ md_assemble (char * str)
 /* The syntax in the manual says constants begin with '#'.
    We just ignore it.  */
 
-void 
+void
 md_operand (expressionS * exp)
 {
   /* In case of a syntax error, escape back to try next syntax combo. */
@@ -595,7 +595,7 @@ md_estimate_size_before_relax (fragS * fragP, segT segment ATTRIBUTE_UNUSED)
     }
 
   return subtype_mappings[fragP->fr_subtype].bytes - (fragP->fr_fix - where);
-} 
+}
 
 /* *fragP has been relaxed to its final size, and now needs to have
    the bytes inside it modified to conform to the new size.
@@ -1063,9 +1063,9 @@ tc_gen_reloc (asection *sec, fixS *fx)
       || fx->fx_r_type == BFD_RELOC_M32C_RL_2ADDR)
     {
       arelent * reloc;
- 
+
       reloc = xmalloc (sizeof (* reloc));
- 
+
       reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fx->fx_addsy);
       reloc->address = fx->fx_frag->fr_address + fx->fx_where;

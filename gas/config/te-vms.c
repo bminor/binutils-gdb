@@ -342,6 +342,6 @@ vms_dwarf2_file_name (const char *filename, const char *dirname)
   static char buff [255 + 7];
 
   vms_file_stats_name (dirname, filename, 0, 0, 0, &ver);
-  snprintf (buff, 255 + 7, "%s;%d", filename, ver);     
+  snprintf (buff, 255 + 7, "%s;%d", filename, ver);
   return buff;
 }

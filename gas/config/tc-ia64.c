@@ -829,7 +829,7 @@ ar_is_only_in_integer_unit (int reg)
   return reg >= 64 && reg <= 111;
 }
 
-/* Determine if application register REGNUM resides only in the memory 
+/* Determine if application register REGNUM resides only in the memory
    unit (as opposed to the integer unit).  */
 static int
 ar_is_only_in_memory_unit (int reg)
@@ -3687,7 +3687,7 @@ generate_unwind_image (const segT text_seg)
 
       /* Set expression which points to start of unwind descriptor area.  */
       unwind.info = expr_build_dot ();
-      
+
       frag_var (rs_machine_dependent, size, size, 0, 0,
 		(offsetT) (long) unwind.personality_routine,
 		(char *) list);
@@ -6009,10 +6009,10 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
       if (e->X_op == O_constant)
 	{
 	  /* 5-bit signed scaled by 64 */
-	  if ((e->X_add_number <=  	( 0xf  << 6 )) 
+	  if ((e->X_add_number <=  	( 0xf  << 6 ))
 	       && (e->X_add_number >=  -( 0x10 << 6 )))
 	    {
-	      
+
 	      /* Must be a multiple of 64 */
 	      if ((e->X_add_number & 0x3f) != 0)
 	        as_warn (_("stride must be a multiple of 64; lower 6 bits ignored"));
@@ -6028,7 +6028,7 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
       if (e->X_op == O_constant)
 	{
 	  /* 6-bit unsigned biased by 1 -- count 0 is meaningless */
-	  if ((e->X_add_number     <=   64) 
+	  if ((e->X_add_number     <=   64)
 	       && (e->X_add_number > 0) )
 	    {
 	      return OPERAND_MATCH;
@@ -6143,7 +6143,7 @@ parse_operands (struct ia64_opcode *idesc)
 
   for (; ; ++i)
     {
-      if (i < NELEMS (CURR_SLOT.opnd)) 
+      if (i < NELEMS (CURR_SLOT.opnd))
 	{
 	  sep = parse_operand_maybe_eval (CURR_SLOT.opnd + i, '=',
 					  idesc->operands[i]);
@@ -7011,7 +7011,7 @@ emit_one_bundle (void)
 	as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
 		      _("Missing '}' at end of file"));
     }
-	
+
   know (md.num_slots_in_use < NUM_SLOTS);
 
   t0 = end_of_insn_group | (template_val << 1) | (insn[0] << 5) | (insn[1] << 46);
@@ -9653,7 +9653,7 @@ update_qp_mutex (valueT mask)
 		  print_prmask (qp_mutexes[i].prmask);
 		  fprintf (stderr, "\n");
 		}
-	      
+
 	      /* Deal with the old mutex with more than 3+ PRs only if
 		 the new mutex on the same execution path with it.
 
@@ -9666,7 +9666,7 @@ update_qp_mutex (valueT mask)
 		  if (add == 0
 		      && (qp_mutexes[i].prmask & mask) == mask)
 		    add = 1;
-		  
+
 		  qp_mutexes[i].prmask &= ~mask;
 		  if (qp_mutexes[i].prmask & (qp_mutexes[i].prmask - 1))
 		    {
@@ -9676,7 +9676,7 @@ update_qp_mutex (valueT mask)
 		      i++;
 		    }
 		}
-	      
+
 	      if (keep == 0)
 		/* Remove the mutex.  */
 		qp_mutexes[i] = qp_mutexes[--qp_mutexeslen];
@@ -10797,7 +10797,7 @@ md_assemble (char *str)
     {
       enum ia64_opnd opnd1, opnd2;
       int rop;
-      
+
       opnd1 = idesc->operands[0];
       opnd2 = idesc->operands[1];
       if (opnd1 == IA64_OPND_AR3)
@@ -11700,7 +11700,7 @@ ia64_handle_align (fragS *fragp)
   bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
   p = fragp->fr_literal + fragp->fr_fix;
 
-  /* If no paddings are needed, we check if we need a stop bit.  */ 
+  /* If no paddings are needed, we check if we need a stop bit.  */
   if (!bytes && fragp->tc_frag_data)
     {
       if (fragp->fr_fix < 16)
@@ -11881,7 +11881,7 @@ dot_alias (int section)
   h = (struct alias *) xmalloc (sizeof (struct alias));
   as_where (&h->file, &h->line);
   h->name = name;
-  
+
   error_string = hash_jam (ahash, alias, (void *) h);
   if (error_string)
     {
@@ -12001,7 +12001,7 @@ ia64_vms_note (void)
   bname = xstrdup (lbasename (out_file_name));
   if ((p = strrchr (bname, '.')))
     *p = '\0';
-  
+
   /* VMS note header is 24 bytes long.  */
   p = frag_more (8 + 8 + 8);
   number_to_chars_littleendian (p + 0, 8, 8);

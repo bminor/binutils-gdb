@@ -701,7 +701,7 @@ extern const char FLT_CHARS[];
 
 /* This is a utility function called from various tc-*.c files.  It
    is here in order to reduce code duplication.
-   
+
    Turn a string at input_line_pointer into a floating point constant
    of type TYPE (a character found in the FLT_CHARS macro), and store
    it as LITTLENUMS in the bytes buffer LITP.  The number of chars

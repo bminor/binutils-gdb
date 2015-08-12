@@ -1148,7 +1148,7 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 	  fprintf(stderr, "Missed case %d %d at 0x%lx\n",
 		  rl78_opcode_type (fragP->fr_opcode), fragP->fr_subtype, mypc);
 	  abort ();
-	  
+
 	}
       break;
 
@@ -1253,7 +1253,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
      the __rl78_abs__ symbol and arrange for the linker scripts to place
      this symbol at address 0.  */
 #define OPIMM(IMM) OPX (BFD_RELOC_RL78_SYM, symbol_get_bfdsym (rl78_abs_sym), IMM)
-      
+
 #define OP(OP) OPX(BFD_RELOC_RL78_##OP, *reloc[0]->sym_ptr_ptr, 0)
 #define SYM0() reloc[0]->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RL78_SYM)
 

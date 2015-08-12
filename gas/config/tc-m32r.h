@@ -108,7 +108,7 @@ extern void m32r_elf_section_change_hook (void);
 
 #define md_flush_pending_output()       m32r_flush_pending_output ()
 extern void m32r_flush_pending_output (void);
-                                                                                  
+
 #define elf_tc_final_processing 	m32r_elf_final_processing
 extern void m32r_elf_final_processing (void);
 

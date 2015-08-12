@@ -280,7 +280,7 @@ output_invalid (char c)
     snprintf (output_invalid_buf, sizeof (output_invalid_buf),
 	      "'%c'", c);
   else
-    snprintf (output_invalid_buf, sizeof (output_invalid_buf), 
+    snprintf (output_invalid_buf, sizeof (output_invalid_buf),
 	      "(0x%x)", (unsigned char) c);
   return output_invalid_buf;
 }

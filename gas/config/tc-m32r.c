@@ -2198,9 +2198,9 @@ tc_gen_reloc (asection * section, fixS * fixP)
 {
   arelent * reloc;
   bfd_reloc_code_real_type code;
- 
+
   reloc = xmalloc (sizeof (* reloc));
- 
+
   reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
@@ -2215,7 +2215,7 @@ tc_gen_reloc (asection * section, fixS * fixP)
           bfd_set_error (bfd_error_bad_value);
 	}
     }
- 
+
   code = fixP->fx_r_type;
   if (pic_code)
     {
@@ -2267,7 +2267,7 @@ printf("%s",bfd_get_reloc_code_name(code));
 printf(" => %s",bfd_get_reloc_code_name(code));
 #endif
     }
- 
+
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
 
 #ifdef DEBUG_PIC
@@ -2281,7 +2281,7 @@ printf(" => %s\n",reloc->howto->name);
             fixP->fx_r_type, bfd_get_reloc_code_name (code));
       return NULL;
     }
- 
+
   /* Use fx_offset for these cases.  */
   if (   fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
@@ -2299,7 +2299,7 @@ printf(" => %s\n",reloc->howto->name);
     reloc->addend  = fixP->fx_offset;
   else
     reloc->addend  = fixP->fx_addnumber;
- 
+
   return reloc;
 }
 

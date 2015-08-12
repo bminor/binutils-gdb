@@ -803,7 +803,7 @@ machine_ip (char *str)
 	      continue;
 	    }
 
-	  the_insn.reloc        = (the_insn.HI) ? RELOC_DLX_HI16 
+	  the_insn.reloc        = (the_insn.HI) ? RELOC_DLX_HI16
 	    : (the_insn.LO ? RELOC_DLX_LO16 : RELOC_DLX_16);
 	  the_insn.reloc_offset = 2;
 	  the_insn.size         = 2;

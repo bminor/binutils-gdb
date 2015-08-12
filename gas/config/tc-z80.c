@@ -524,14 +524,14 @@ is_indir (const char *s)
 }
 
 /* Check whether a symbol involves a register.  */
-static int 
+static int
 contains_register(symbolS *sym)
 {
   if (sym)
   {
     expressionS * ex = symbol_get_value_expression(sym);
-    return (O_register == ex->X_op) 
-      || (ex->X_add_symbol && contains_register(ex->X_add_symbol)) 
+    return (O_register == ex->X_op)
+      || (ex->X_add_symbol && contains_register(ex->X_add_symbol))
       || (ex->X_op_symbol && contains_register(ex->X_op_symbol));
   }
   else
@@ -693,7 +693,7 @@ void z80_cons_fix_new (fragS *frag_p, int offset, int nbytes, expressionS *exp)
       BFD_RELOC_32
     };
 
-  if (nbytes < 1 || nbytes > 4) 
+  if (nbytes < 1 || nbytes > 4)
     {
       as_bad (_("unsupported BFD relocation size %u"), nbytes);
     }
@@ -1822,7 +1822,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "d32", cons, 4},
   { "def24", cons, 3},
   { "def32", cons, 4},
-  { "defb", emit_data, 1},  
+  { "defb", emit_data, 1},
   { "defs", s_space, 1}, /* Synonym for ds on some assemblers.  */
   { "defw", cons, 2},
   { "ds",   s_space, 1}, /* Fill with bytes rather than words.  */
@@ -1929,12 +1929,12 @@ md_assemble (char* str)
     }
   else if ((*p) && (!ISSPACE (*p)))
     as_bad (_("syntax error"));
-  else 
+  else
     {
       buf[i] = 0;
       p = skip_space (p);
       key = buf;
-      
+
       insp = bsearch (&key, instab, ARRAY_SIZE (instab),
 		    sizeof (instab[0]), key_cmp);
       if (!insp)
@@ -1997,7 +1997,7 @@ md_apply_fix (fixS * fixP, valueT* valP, segT seg ATTRIBUTE_UNUSED)
       if (val > 255 || val < -128)
 	as_warn_where (fixP->fx_file, fixP->fx_line, _("overflow"));
       *p_lit++ = val;
-      fixP->fx_no_overflow = 1; 
+      fixP->fx_no_overflow = 1;
       if (fixP->fx_addsy == NULL)
 	fixP->fx_done = 1;
       break;
@@ -2005,7 +2005,7 @@ md_apply_fix (fixS * fixP, valueT* valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_16:
       *p_lit++ = val;
       *p_lit++ = (val >> 8);
-      fixP->fx_no_overflow = 1; 
+      fixP->fx_no_overflow = 1;
       if (fixP->fx_addsy == NULL)
 	fixP->fx_done = 1;
       break;
@@ -2014,7 +2014,7 @@ md_apply_fix (fixS * fixP, valueT* valP, segT seg ATTRIBUTE_UNUSED)
       *p_lit++ = val;
       *p_lit++ = (val >> 8);
       *p_lit++ = (val >> 16);
-      fixP->fx_no_overflow = 1; 
+      fixP->fx_no_overflow = 1;
       if (fixP->fx_addsy == NULL)
 	fixP->fx_done = 1;
       break;

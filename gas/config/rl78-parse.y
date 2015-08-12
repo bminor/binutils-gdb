@@ -1551,7 +1551,7 @@ expr_is_word_aligned (expressionS exp)
   if (v & 1)
     return 0;
   return 1;
-  
+
 }
 
 static void

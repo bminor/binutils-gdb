@@ -1868,7 +1868,7 @@ mips_clear_insn_labels (void)
     {
       for (pl = &free_insn_labels; *pl != NULL; pl = &(*pl)->next)
 	;
-      
+
       si = seg_info (now_seg);
       *pl = si->label_list;
       si->label_list = NULL;
@@ -2542,7 +2542,7 @@ struct regname {
     {"$28",	RTYPE_NUM | 28}, \
     {"$29",	RTYPE_NUM | 29}, \
     {"$30",	RTYPE_NUM | 30}, \
-    {"$31",	RTYPE_NUM | 31} 
+    {"$31",	RTYPE_NUM | 31}
 
 #define FPU_REGISTER_NAMES       \
     {"$f0",	RTYPE_FPU | 0},  \
@@ -2624,7 +2624,7 @@ struct regname {
     {"$ta0",	RTYPE_GP | 12}, /* alias for $t4 */ \
     {"$ta1",	RTYPE_GP | 13}, /* alias for $t5 */ \
     {"$ta2",	RTYPE_GP | 14}, /* alias for $t6 */ \
-    {"$ta3",	RTYPE_GP | 15}  /* alias for $t7 */ 
+    {"$ta3",	RTYPE_GP | 15}  /* alias for $t7 */
 
 /* Remaining symbolic register names */
 #define SYMBOLIC_REGISTER_NAMES \
@@ -2720,7 +2720,7 @@ static const struct regname reg_names[] = {
 
   /* The $txx registers depends on the abi,
      these will be added later into the symbol table from
-     one of the tables below once mips_abi is set after 
+     one of the tables below once mips_abi is set after
      parsing of arguments from the command line. */
   SYMBOLIC_REGISTER_NAMES,
 
@@ -3578,17 +3578,17 @@ md_begin (void)
 
   /* We add all the general register names to the symbol table.  This
      helps us detect invalid uses of them.  */
-  for (i = 0; reg_names[i].name; i++) 
+  for (i = 0; reg_names[i].name; i++)
     symbol_table_insert (symbol_new (reg_names[i].name, reg_section,
 				     reg_names[i].num, /* & RNUM_MASK, */
 				     &zero_address_frag));
   if (HAVE_NEWABI)
-    for (i = 0; reg_names_n32n64[i].name; i++) 
+    for (i = 0; reg_names_n32n64[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_n32n64[i].name, reg_section,
 				       reg_names_n32n64[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
   else
-    for (i = 0; reg_names_o32[i].name; i++) 
+    for (i = 0; reg_names_o32[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
 				       reg_names_o32[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
@@ -6366,7 +6366,7 @@ fix_24k_record_store_info (struct fix_24k_store_info *stinfo,
    * Run the data cache in write-through mode.
    * Insert a non-store instruction between
      Store A and Store B or Store B and Store C.  */
-  
+
 static int
 nops_for_24k (int ignore, const struct mips_cl_insn *hist,
 	      const struct mips_cl_insn *insn)
@@ -12488,7 +12488,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	abort ();
 
       break;
-	
+
     case M_SAA_AB:
       s = "saa";
       goto saa_saad;
@@ -18684,7 +18684,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "sb1",            0, ASE_MIPS3D | ASE_MDMX,	ISA_MIPS64,   CPU_SB1 },
   /* Broadcom SB-1A CPU core */
   { "sb1a",           0, ASE_MIPS3D | ASE_MDMX,	ISA_MIPS64,   CPU_SB1 },
-  
+
   { "loongson3a",     0, 0,			ISA_MIPS64R2, CPU_LOONGSON_3A },
 
   /* MIPS 64 Release 2 */
@@ -18924,7 +18924,7 @@ MIPS options:\n\
 -mno-micromips		do not generate microMIPS instructions\n"));
   fprintf (stream, _("\
 -msmartmips		generate smartmips instructions\n\
--mno-smartmips		do not generate smartmips instructions\n"));  
+-mno-smartmips		do not generate smartmips instructions\n"));
   fprintf (stream, _("\
 -mdsp			generate DSP instructions\n\
 -mno-dsp		do not generate DSP instructions\n"));

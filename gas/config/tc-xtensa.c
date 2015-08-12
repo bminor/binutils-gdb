@@ -1712,7 +1712,7 @@ map_suffix_reloc_to_operator (bfd_reloc_code_real_type reloc)
 {
   struct suffix_reloc_map *sfx;
   unsigned char operator = (unsigned char) -1;
-  
+
   for (sfx = &suffix_relocs[0]; sfx->suffix; sfx++)
     {
       if (sfx->reloc == reloc)
@@ -2454,7 +2454,7 @@ xg_translate_idioms (char **popname, int *pnum_args, char **arg_strings)
     }
 
   /* Don't do anything special with NOPs inside FLIX instructions.  They
-     are handled elsewhere.  Real NOP instructions are always available 
+     are handled elsewhere.  Real NOP instructions are always available
      in configurations with FLIX, so this should never be an issue but
      check for it anyway.  */
   if (!cur_vinsn.inside_bundle && xtensa_nop_opcode == XTENSA_UNDEFINED
@@ -2744,7 +2744,7 @@ xtensa_insnbuf_set_operand (xtensa_insnbuf slotbuf,
       if (xtensa_operand_is_PCrelative (xtensa_default_isa, opcode, operand)
 	  == 1)
 	as_bad_where ((char *) file, line,
-		      _("operand %d of '%s' has out of range value '%u'"), 
+		      _("operand %d of '%s' has out of range value '%u'"),
 		      operand + 1,
 		      xtensa_opcode_name (xtensa_default_isa, opcode),
 		      value);
@@ -5043,7 +5043,7 @@ xtensa_find_unaligned_loops (bfd *abfd ATTRIBUTE_UNUSED,
 
 	      if (frag->fr_fix == 0)
 		frag = next_non_empty_frag (frag);
-	      
+
 	      if (frag)
 		{
 		  xtensa_insnbuf_from_chars
@@ -5051,7 +5051,7 @@ xtensa_find_unaligned_loops (bfd *abfd ATTRIBUTE_UNUSED,
 		  fmt = xtensa_format_decode (isa, insnbuf);
 		  op_size = xtensa_format_length (isa, fmt);
 		  frag_addr = frag->fr_address % xtensa_fetch_width;
-		  
+
 		  if (frag_addr + op_size > xtensa_fetch_width)
 		    as_warn_where (frag->fr_file, frag->fr_line,
 				   _("unaligned loop: %d bytes at 0x%lx"),
@@ -5193,7 +5193,7 @@ md_begin (void)
   xtensa_rsr_lcount_opcode = xtensa_opcode_lookup (isa, "rsr.lcount");
   xtensa_waiti_opcode = xtensa_opcode_lookup (isa, "waiti");
 
-  for (i = 0; i < xtensa_isa_num_formats (isa); i++) 
+  for (i = 0; i < xtensa_isa_num_formats (isa); i++)
     {
       int format_slots = xtensa_format_num_slots (isa, i);
       if (format_slots > config_max_slots)
@@ -5831,7 +5831,7 @@ xtensa_fix_adjustable (fixS *fixP)
 
 symbolS *expr_symbols = NULL;
 
-void 
+void
 xtensa_symbol_new_hook (symbolS *sym)
 {
   if (is_leb128_expr && S_GET_SEGMENT (sym) == expr_section)
@@ -7605,7 +7605,7 @@ xtensa_mark_zcl_first_insns (void)
 
 	      /* Handle a corner case that comes up in hardware
 		 diagnostics.  The original assembly looks like this:
-		 
+
 		 loop aX, LabelA
 		 <empty_frag>--not found by next_non_empty_frag
 		 loop aY, LabelB
@@ -7623,7 +7623,7 @@ xtensa_mark_zcl_first_insns (void)
 		  {
 		    if (loop_frag->fr_type == rs_machine_dependent
 			&& (loop_frag->fr_subtype == RELAX_ALIGN_NEXT_OPCODE
-			    || loop_frag->fr_subtype 
+			    || loop_frag->fr_subtype
 			    == RELAX_CHECK_ALIGN_NEXT_OPCODE))
 		      targ_frag = loop_frag;
 		    else
@@ -7663,13 +7663,13 @@ xtensa_mark_zcl_first_insns (void)
    sleb128 value, the linker is unable to adjust that value to account for
    link-time relaxation.  Mark all the code between such symbols so that
    its size cannot be changed by linker relaxation.  */
-  
+
 static void
 xtensa_mark_difference_of_two_symbols (void)
 {
   symbolS *expr_sym;
 
-  for (expr_sym = expr_symbols; expr_sym; 
+  for (expr_sym = expr_symbols; expr_sym;
        expr_sym = symbol_get_tc (expr_sym)->next_expr_symbol)
     {
       expressionS *exp = symbol_get_value_expression (expr_sym);
@@ -7678,7 +7678,7 @@ xtensa_mark_difference_of_two_symbols (void)
 	{
 	  symbolS *left = exp->X_add_symbol;
 	  symbolS *right = exp->X_op_symbol;
-	  
+
 	  /* Difference of two symbols not in the same section
 	     are handled with relocations in the linker.  */
 	  if (S_GET_SEGMENT (left) == S_GET_SEGMENT (right))
@@ -7687,7 +7687,7 @@ xtensa_mark_difference_of_two_symbols (void)
 	      fragS *end;
 	      fragS *walk;
 
-	      if (symbol_get_frag (left)->fr_address 
+	      if (symbol_get_frag (left)->fr_address
 		  <= symbol_get_frag (right)->fr_address)
 		{
 		  start = symbol_get_frag (left);
@@ -7703,7 +7703,7 @@ xtensa_mark_difference_of_two_symbols (void)
 		walk = start->tc_frag_data.no_transform_end;
 	      else
 		walk = start;
-	      do 
+	      do
 		{
 		  walk->tc_frag_data.is_no_transform = 1;
 		  walk = walk->fr_next;
@@ -8269,7 +8269,7 @@ xtensa_sanity_check (void)
 	for (fragP = frchP->frch_root; fragP; fragP = fragP->fr_next)
 	  {
 	    if (fragP->fr_type == rs_machine_dependent
-		&& fragP->fr_subtype == RELAX_SLOTS 
+		&& fragP->fr_subtype == RELAX_SLOTS
 		&& fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED)
 	      {
 		static xtensa_insnbuf insnbuf = NULL;
@@ -9556,7 +9556,7 @@ bytes_to_stretch (fragS *this_frag,
   int extra_bytes;
   int bytes_short = desired_diff - num_widens;
 
-  gas_assert (desired_diff >= 0 
+  gas_assert (desired_diff >= 0
 	      && desired_diff < (signed) xtensa_fetch_width);
   if (desired_diff == 0)
     return 0;
@@ -9917,20 +9917,20 @@ relax_frag_immed (segT segP,
 	  /* The first instruction in the relaxed sequence will go after
 	     the current wide instruction, and thus its symbolic immediates
 	     might not fit.  */
-	  
+
 	  istack_init (&istack);
-	  num_steps = xg_assembly_relax (&istack, &tinsn, segP, fragP, 
+	  num_steps = xg_assembly_relax (&istack, &tinsn, segP, fragP,
 					 frag_offset + old_size,
 					 min_steps, stretch + old_size);
 	  gas_assert (num_steps >= min_steps && num_steps <= RELAX_IMMED_MAXSTEPS);
 
-	  fragP->tc_frag_data.slot_subtypes[slot] 
+	  fragP->tc_frag_data.slot_subtypes[slot]
 	    = (int) RELAX_IMMED + num_steps;
 
 	  num_literal_bytes = get_num_stack_literal_bytes (&istack);
-	  literal_diff 
+	  literal_diff
 	    = num_literal_bytes - fragP->tc_frag_data.literal_expansion[slot];
-	  
+
 	  num_text_bytes = get_num_stack_text_bytes (&istack) + old_size;
 	}
     }
@@ -11079,7 +11079,7 @@ match_section_group (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 {
   const char *gname = inf;
   const char *group_name = elf_group_name (sec);
-  
+
   return (group_name == gname
 	  || (group_name != NULL
 	      && gname != NULL
@@ -11120,7 +11120,7 @@ cache_literal_section (bfd_boolean use_abs_literals)
 
   if (*pcached)
     return *pcached;
-  
+
   text_name = default_lit_sections.lit_prefix;
   if (! text_name || ! *text_name)
     {
@@ -12419,7 +12419,7 @@ xg_clear_vinsn (vliw_insn *v)
 {
   int i;
 
-  memset (v, 0, offsetof (vliw_insn, slots) 
+  memset (v, 0, offsetof (vliw_insn, slots)
                 + sizeof(TInsn) * config_max_slots);
 
   v->format = XTENSA_UNDEFINED;
@@ -12437,7 +12437,7 @@ xg_clear_vinsn (vliw_insn *v)
 static void
 xg_copy_vinsn (vliw_insn *dst, vliw_insn *src)
 {
-  memcpy (dst, src, 
+  memcpy (dst, src,
 	  offsetof(vliw_insn, slots) + src->num_slots * sizeof(TInsn));
   dst->insnbuf = src->insnbuf;
   memcpy (dst->slotbuf, src->slotbuf, src->num_slots * sizeof(xtensa_insnbuf));

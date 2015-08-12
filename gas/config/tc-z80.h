@@ -102,7 +102,7 @@ extern void z80_cons_fix_new (fragS *, int, int, expressionS *);
    P2VAR to the truncated power of two of sizes up to eight bytes.  */
 #define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR) (P2VAR) = 0
 
-/* It does not make any sense to perform arithmetic on the numbers 
+/* It does not make any sense to perform arithmetic on the numbers
    we use to identify registers.  */
 #define md_register_arithmetic 0
 

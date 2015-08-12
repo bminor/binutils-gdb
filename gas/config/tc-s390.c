@@ -2248,7 +2248,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      mop |= (unsigned int) ((value & 0xfff) << 8 |
 				     (value & 0xff000) >> 12);
 	      bfd_putb32 ((bfd_vma) mop, (unsigned char *) where);
-	    } 
+	    }
 	  break;
 
 	case BFD_RELOC_16:

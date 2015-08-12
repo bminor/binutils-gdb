@@ -265,7 +265,7 @@ struct option md_longopts[] =
 #define OPTION_REPLACE (OPTION_RELAX + 1)
 #define OPTION_NOREPLACE (OPTION_REPLACE+1)
     { "replace", no_argument, NULL, OPTION_REPLACE },
-    { "noreplace", no_argument, NULL, OPTION_NOREPLACE },    
+    { "noreplace", no_argument, NULL, OPTION_NOREPLACE },
 #endif
     { NULL, no_argument, NULL, 0 }
   };
@@ -1798,7 +1798,7 @@ emit_insn (struct alpha_insn *insn)
 	    default:
 	      gas_assert (size >= 1 && size <= 4);
 	    }
- 
+
 	  pcrel = reloc_howto->pc_relative;
 	}
 
@@ -2137,7 +2137,7 @@ assemble_insn (const struct alpha_opcode *opcode,
 
       /* If this is a real relocation (as opposed to a lituse hint), then
 	 the relocation width should match the operand width.
-	 Take care of -MDISP in operand table.  */ 
+	 Take care of -MDISP in operand table.  */
       else if (reloc < BFD_RELOC_UNUSED && reloc > 0)
 	{
 	  reloc_howto_type *reloc_howto
@@ -2190,7 +2190,7 @@ emit_ir_load (const expressionS *tok,
   if (basereg == alpha_gp_register &&
       (symlen > 4 && strcmp (&symname [symlen - 4], "..lk") == 0))
     return;
-  
+
   newtok[0] = tok[0];
   set_tok_preg (newtok[2], basereg);
 
@@ -2231,7 +2231,7 @@ emit_loadstore (const expressionS *tok,
       if (alpha_noat_on)
 	as_bad (_("macro requires $at register while noat in effect"));
 
-      lituse = load_expression (AXP_REG_AT, &tok[1], 
+      lituse = load_expression (AXP_REG_AT, &tok[1],
 				&basereg, &newtok[1], (const char *) opname);
     }
   else
@@ -3383,7 +3383,7 @@ add_to_link_pool (symbolS *sym, offsetT addend)
   fixS *fixp;
   symbolS *linksym, *expsym;
   expressionS e;
-  
+
   basesym = alpha_evax_proc->symbol;
 
   /* @@ This assumes all entries in a given section will be of the same
@@ -3556,7 +3556,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
       segT current_seg = now_seg;
       subsegT current_subseg = now_subseg;
       int cur_size;
-      
+
       input_line_pointer++;
       SKIP_WHITESPACE ();
       sec_name = s_alpha_section_name ();
@@ -3610,7 +3610,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
       subseg_set (current_seg, current_subseg);
     }
 #endif
-  
+
   if (S_GET_VALUE (symbolP))
     {
       if (S_GET_VALUE (symbolP) != (valueT) size)
@@ -3626,7 +3626,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
 #endif
       S_SET_EXTERNAL (symbolP);
     }
-  
+
 #ifndef OBJ_EVAX
   know (symbolP->sy_frag == &zero_address_frag);
 #endif
@@ -4240,7 +4240,7 @@ s_alpha_section_word (char *str, size_t len)
     {
       no = 1;
       str += 2;
-      len -= 2; 
+      len -= 2;
     }
 
   if (len == 3)
@@ -4507,10 +4507,10 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
       as_bad (_(".pdesc directive has no entry symbol"));
       return;
     }
-  
+
   entry_sym = make_expr_symbol (&exp);
   entry_sym_name = S_GET_NAME (entry_sym);
- 
+
   /* Strip "..en".  */
   len = strlen (entry_sym_name);
   if (len < 4 || strcmp (entry_sym_name + len - 4, "..en") != 0)
@@ -4532,12 +4532,12 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
 
   /* Define pdesc symbol.  */
   symbol_set_value_now (alpha_evax_proc->symbol);
- 
+
   /* Save bfd symbol of proc entry in function symbol.  */
   ((struct evax_private_udata_struct *)
      symbol_get_bfdsym (alpha_evax_proc->symbol)->udata.p)->enbsym
        = symbol_get_bfdsym (entry_sym);
-  
+
   SKIP_WHITESPACE ();
   if (*input_line_pointer++ != ',')
     {
@@ -4703,7 +4703,7 @@ s_alpha_linkage (int ignore ATTRIBUTE_UNUSED)
   else
     {
       struct alpha_linkage_fixups *linkage_fixup;
-      
+
       p = frag_more (LKP_S_K_SIZE);
       memset (p, 0, LKP_S_K_SIZE);
       fixp = fix_new_exp

@@ -2440,7 +2440,7 @@ tc_gen_reloc (asection * sec ATTRIBUTE_UNUSED, fixS * fixp)
     }
   else if (sec)
     is_opcode = sec->flags & SEC_CODE;
-      
+
   /* Certain BFD relocations cannot be translated directly into
      a single (non-Red Hat) RX relocation, but instead need
      multiple RX relocations - handle them here.  */
