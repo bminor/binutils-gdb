@@ -3509,7 +3509,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		 sections because such sections are not SEC_ALLOC and
 		 thus ld.so will not process them.  */
 	      if ((input_section->flags & SEC_DEBUGGING) != 0)
-		break;
+		continue;
 	      abort ();
 	    }
 	  else if (h->plt.offset == (bfd_vma) -1)
