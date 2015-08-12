@@ -1,5 +1,31 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
+	* breakpoint.c (create_thread_event_breakpoint, init_breakpoint_sal):
+	Convert linespec to address location.
+	* linespec.c (canonicalize_linespec): Do not handle address
+	locations here.
+	(convert_address_location_to_sals): New function; contents moved
+	from ...
+	(convert_linespc_to_sals): ... here.
+	(parse_linespec): Remove address locations from linespec grammar.
+	Remove handling of address locations.
+	(linespec_lex_to_end): Remove handling of address linespecs.
+	(event_location_to_sals): Handle ADDRESS_LOCATION.
+	(linespec_expression_to_pc): Export.
+	* linespec.h (linespec_expression_to_pc): Add declaration.
+	* location.c (struct event_location.u) <address>: New member.
+	(new_address_location, get_address_location): New functions.
+	(copy_event_location, delete_event_location, event_location_to_string)
+	(string_to_event_location, event_location_empty_p): Handle address
+	locations.
+	* location.h (enum event_location_type): Add ADDRESS_LOCATION.
+	(new_address_location, get_address_location): Declare.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Convert linespec
+	to address location.
+	* spu-tdep.c (spu_catch_start): Likewise.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
 	* ax-gdb.c: Include location.h.
 	(agent_command_1) Use linespec location instead of address
 	string.

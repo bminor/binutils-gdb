@@ -45,6 +45,10 @@ struct event_location
        probes.  */
     char *addr_string;
 #define EL_LINESPEC(PTR) ((PTR)->u.addr_string)
+
+    /* An address in the inferior.  */
+    CORE_ADDR address;
+#define EL_ADDRESS(PTR) (PTR)->u.address
   } u;
 
   /* Cached string representation of this location.  This is used, e.g., to
@@ -95,6 +99,28 @@ get_linespec_location (const struct event_location *location)
 /* See description in location.h.  */
 
 struct event_location *
+new_address_location (CORE_ADDR addr)
+{
+  struct event_location *location;
+
+  location = XCNEW (struct event_location);
+  EL_TYPE (location) = ADDRESS_LOCATION;
+  EL_ADDRESS (location) = addr;
+  return location;
+}
+
+/* See description in location.h.  */
+
+CORE_ADDR
+get_address_location (const struct event_location *location)
+{
+  gdb_assert (EL_TYPE (location) == ADDRESS_LOCATION);
+  return EL_ADDRESS (location);
+}
+
+/* See description in location.h.  */
+
+struct event_location *
 copy_event_location (const struct event_location *src)
 {
   struct event_location *dst;
@@ -109,6 +135,10 @@ copy_event_location (const struct event_location *src)
     case LINESPEC_LOCATION:
       if (EL_LINESPEC (src) != NULL)
 	EL_LINESPEC (dst) = xstrdup (EL_LINESPEC (src));
+      break;
+
+    case ADDRESS_LOCATION:
+      EL_ADDRESS (dst) = EL_ADDRESS (src);
       break;
 
     default:
@@ -151,6 +181,10 @@ delete_event_location (struct event_location *location)
 	  xfree (EL_LINESPEC (location));
 	  break;
 
+	case ADDRESS_LOCATION:
+	  /* Nothing to do.  */
+	  break;
+
 	default:
 	  gdb_assert_not_reached ("unknown event location type");
 	}
@@ -173,6 +207,12 @@ event_location_to_string (struct event_location *location)
 	    EL_STRING (location) = xstrdup (EL_LINESPEC (location));
 	  break;
 
+	case ADDRESS_LOCATION:
+	  EL_STRING (location)
+	    = xstrprintf ("*%s",
+			  core_addr_to_string (EL_ADDRESS (location)));
+	  break;
+
 	default:
 	  gdb_assert_not_reached ("unknown event location type");
 	}
@@ -189,7 +229,23 @@ string_to_event_location (char **stringp,
 {
   struct event_location *location;
 
-  location = new_linespec_location (stringp);
+  /* First, check if the string is an address location.  */
+  if (*stringp != NULL && **stringp == '*')
+    {
+      const char *arg, *orig;
+      CORE_ADDR addr;
+
+      orig = arg = *stringp;
+      addr = linespec_expression_to_pc (&arg);
+      location = new_address_location (addr);
+      *stringp += arg - orig;
+    }
+  else
+    {
+      /* Everything else is a linespec.  */
+      location = new_linespec_location (stringp);
+    }
+
   return location;
 }
 
@@ -202,6 +258,9 @@ event_location_empty_p (const struct event_location *location)
     {
     case LINESPEC_LOCATION:
       /* Linespecs are never "empty."  (NULL is a valid linespec)  */
+      return 0;
+
+    case ADDRESS_LOCATION:
       return 0;
 
     default:

@@ -7660,19 +7660,14 @@ delete_std_terminate_breakpoint (void)
 struct breakpoint *
 create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 {
-  char *tmp;
   struct breakpoint *b;
-  struct cleanup *cleanup;
 
   b = create_internal_breakpoint (gdbarch, address, bp_thread_event,
 				  &internal_breakpoint_ops);
 
   b->enable_state = bp_enabled;
   /* location has to be used or breakpoint_re_set will delete me.  */
-  tmp = xstrprintf ("*%s", paddress (b->loc->gdbarch, b->loc->address));
-  cleanup = make_cleanup (xfree, tmp);
-  b->location = new_linespec_location (&tmp);
-  do_cleanups (cleanup);
+  b->location = new_address_location (b->loc->address);
 
   update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
@@ -9244,16 +9239,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
   if (location != NULL)
     b->location = location;
   else
-    {
-      char *tmp;
-      struct cleanup *cleanup;
-
-      tmp = xstrprintf ("*%s",
-			    paddress (b->loc->gdbarch, b->loc->address));
-      cleanup = make_cleanup (xfree, tmp);
-      b->location = new_linespec_location (&tmp);
-      do_cleanups (cleanup);
-   }
+    b->location = new_address_location (b->loc->address);
   b->filter = filter;
 }
 

@@ -1953,7 +1953,6 @@ spu_catch_start (struct objfile *objfile)
 {
   struct bound_minimal_symbol minsym;
   struct compunit_symtab *cust;
-  char buf[32], *p;
   CORE_ADDR pc;
   struct event_location *location;
   struct cleanup *back_to;
@@ -2000,9 +1999,7 @@ spu_catch_start (struct objfile *objfile)
 
   /* Use a numerical address for the set_breakpoint command to avoid having
      the breakpoint re-set incorrectly.  */
-  xsnprintf (buf, sizeof buf, "*%s", core_addr_to_string (pc));
-  p = buf;
-  location = new_linespec_location (&p);
+  location = new_address_location (pc);
   back_to = make_cleanup_delete_event_location (location);
   create_breakpoint (get_objfile_arch (objfile), location,
 		     NULL /* cond_string */, -1 /* thread */,

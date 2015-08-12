@@ -312,7 +312,7 @@ static void iterate_over_file_blocks (struct symtab *symtab,
 static void initialize_defaults (struct symtab **default_symtab,
 				 int *default_line);
 
-static CORE_ADDR linespec_expression_to_pc (const char **exp_ptr);
+CORE_ADDR linespec_expression_to_pc (const char **exp_ptr);
 
 static struct symtabs_and_lines decode_objc (struct linespec_state *self,
 					     linespec_p ls,
@@ -1789,79 +1789,69 @@ static void
 canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 {
   char *tmp;
+  struct ui_file *buf;
+  int need_colon = 0;
+  struct cleanup *cleanup;
 
   /* If canonicalization was not requested, no need to do anything.  */
   if (!state->canonical)
     return;
 
-  /* Shortcut expressions, which can only appear by themselves.  */
-  if (ls->expression != NULL)
+  buf = mem_fileopen ();
+  cleanup = make_cleanup_ui_file_delete (buf);
+
+  if (ls->source_filename)
     {
-      tmp = ASTRDUP (ls->expression);
-      state->canonical->location = new_linespec_location (&tmp);
+      fputs_unfiltered (ls->source_filename, buf);
+      need_colon = 1;
     }
-  else
+
+  if (ls->function_name)
     {
-      struct ui_file *buf;
-      int need_colon = 0;
-      struct cleanup *cleanup;
-
-      buf = mem_fileopen ();
-      cleanup = make_cleanup_ui_file_delete (buf);
-
-      if (ls->source_filename)
-	{
-	  fputs_unfiltered (ls->source_filename, buf);
-	  need_colon = 1;
-	}
-
-      if (ls->function_name)
-	{
-	  if (need_colon)
-	    fputc_unfiltered (':', buf);
-	  fputs_unfiltered (ls->function_name, buf);
-	  need_colon = 1;
-	}
-
-      if (ls->label_name)
-	{
-	  if (need_colon)
-	    fputc_unfiltered (':', buf);
-
-	  if (ls->function_name == NULL)
-	    {
-	      struct symbol *s;
-
-	      /* No function was specified, so add the symbol name.  */
-	      gdb_assert (ls->labels.function_symbols != NULL
-			  && (VEC_length (symbolp, ls->labels.function_symbols)
-			      == 1));
-	      s = VEC_index (symbolp, ls->labels.function_symbols, 0);
-	      fputs_unfiltered (SYMBOL_NATURAL_NAME (s), buf);
-	      fputc_unfiltered (':', buf);
-	    }
-
-	  fputs_unfiltered (ls->label_name, buf);
-	  need_colon = 1;
-	  state->canonical->special_display = 1;
-	}
-
-      if (ls->line_offset.sign != LINE_OFFSET_UNKNOWN)
-	{
-	  if (need_colon)
-	    fputc_unfiltered (':', buf);
-	  fprintf_filtered (buf, "%s%d",
-			    (ls->line_offset.sign == LINE_OFFSET_NONE ? ""
-			     : (ls->line_offset.sign
-				== LINE_OFFSET_PLUS ? "+" : "-")),
-			    ls->line_offset.offset);
-	}
-
-      tmp = ui_file_xstrdup (buf, NULL);
-      make_cleanup (xfree, tmp);
-      state->canonical->location = new_linespec_location (&tmp);
-      do_cleanups (cleanup);
+      if (need_colon)
+	fputc_unfiltered (':', buf);
+      fputs_unfiltered (ls->function_name, buf);
+      need_colon = 1;
     }
+
+  if (ls->label_name)
+    {
+      if (need_colon)
+	fputc_unfiltered (':', buf);
+
+      if (ls->function_name == NULL)
+	{
+	  struct symbol *s;
+
+	  /* No function was specified, so add the symbol name.  */
+	  gdb_assert (ls->labels.function_symbols != NULL
+		      && (VEC_length (symbolp, ls->labels.function_symbols)
+			  == 1));
+	  s = VEC_index (symbolp, ls->labels.function_symbols, 0);
+	  fputs_unfiltered (SYMBOL_NATURAL_NAME (s), buf);
+	  fputc_unfiltered (':', buf);
+	}
+
+      fputs_unfiltered (ls->label_name, buf);
+      need_colon = 1;
+      state->canonical->special_display = 1;
+    }
+
+  if (ls->line_offset.sign != LINE_OFFSET_UNKNOWN)
+    {
+      if (need_colon)
+	fputc_unfiltered (':', buf);
+      fprintf_filtered (buf, "%s%d",
+			(ls->line_offset.sign == LINE_OFFSET_NONE ? ""
+			 : (ls->line_offset.sign
+			    == LINE_OFFSET_PLUS ? "+" : "-")),
+			ls->line_offset.offset);
+    }
+
+  tmp = ui_file_xstrdup (buf, NULL);
+  make_cleanup (xfree, tmp);
+  state->canonical->location = new_linespec_location (&tmp);
+  do_cleanups (cleanup);
 }
 
 /* Given a line offset in LS, construct the relevant SALs.  */
@@ -2015,6 +2005,24 @@ create_sals_line_offset (struct linespec_state *self,
   return values;
 }
 
+/* Convert the given ADDRESS into SaLs.  */
+
+static struct symtabs_and_lines
+convert_address_location_to_sals (struct linespec_state *self,
+				  CORE_ADDR address)
+{
+  struct symtab_and_line sal;
+  struct symtabs_and_lines sals = {NULL, 0};
+
+  sal = find_pc_line (address, 0);
+  sal.pc = address;
+  sal.section = find_pc_overlay (address);
+  sal.explicit_pc = 1;
+  add_sal_to_sals (self, &sals, &sal, core_addr_to_string (address), 1);
+
+  return sals;
+}
+
 /* Create and return SALs from the linespec LS.  */
 
 static struct symtabs_and_lines
@@ -2022,18 +2030,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 {
   struct symtabs_and_lines sals = {NULL, 0};
 
-  if (ls->expression != NULL)
-    {
-      struct symtab_and_line sal;
-
-      /* We have an expression.  No other attribute is allowed.  */
-      sal = find_pc_line (ls->expr_pc, 0);
-      sal.pc = ls->expr_pc;
-      sal.section = find_pc_overlay (ls->expr_pc);
-      sal.explicit_pc = 1;
-      add_sal_to_sals (state, &sals, &sal, ls->expression, 1);
-    }
-  else if (ls->labels.label_symbols != NULL)
+  if (ls->labels.label_symbols != NULL)
     {
       /* We have just a bunch of functions/methods or labels.  */
       int i;
@@ -2131,8 +2128,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 
    The basic grammar of linespecs:
 
-   linespec -> expr_spec | var_spec | basic_spec
-   expr_spec -> '*' STRING
+   linespec -> var_spec | basic_spec
    var_spec -> '$' (STRING | NUMBER)
 
    basic_spec -> file_offset_spec | function_spec | label_spec
@@ -2223,33 +2219,7 @@ parse_linespec (linespec_parser *parser, const char *arg)
   token = linespec_lexer_lex_one (parser);
 
   /* It must be either LSTOKEN_STRING or LSTOKEN_NUMBER.  */
-  if (token.type == LSTOKEN_STRING && *LS_TOKEN_STOKEN (token).ptr == '*')
-    {
-      char *expr;
-      const char *copy;
-
-      /* User specified an expression, *EXPR.  */
-      copy = expr = copy_token_string (token);
-      cleanup = make_cleanup (xfree, expr);
-      PARSER_RESULT (parser)->expr_pc = linespec_expression_to_pc (&copy);
-      discard_cleanups (cleanup);
-      PARSER_RESULT (parser)->expression = expr;
-
-      /* This is a little hacky/tricky.  If linespec_expression_to_pc
-	 did not evaluate the entire token, then we must find the
-	 string COPY inside the original token buffer.  */
-      if (*copy != '\0')
-	{
-	  PARSER_STREAM (parser) = strstr (parser->lexer.saved_arg, copy);
-	  gdb_assert (PARSER_STREAM (parser) != NULL);
-	}
-
-      /* Consume the token.  */
-      linespec_lexer_consume_token (parser);
-
-      goto convert_to_sals;
-    }
-  else if (token.type == LSTOKEN_STRING && *LS_TOKEN_STOKEN (token).ptr == '$')
+  if (token.type == LSTOKEN_STRING && *LS_TOKEN_STOKEN (token).ptr == '$')
     {
       char *var;
 
@@ -2470,20 +2440,6 @@ linespec_lex_to_end (char **stringp)
       token = linespec_lexer_peek_token (&parser);
       if (token.type == LSTOKEN_COMMA)
 	break;
-
-      /* For addresses advance the parser stream past
-	 any parsed input and stop lexing.  */
-      if (token.type == LSTOKEN_STRING
-	  && *LS_TOKEN_STOKEN (token).ptr == '*')
-	{
-	  const char *arg;
-
-	  arg = *stringp;
-	  (void) linespec_expression_to_pc (&arg);
-	  PARSER_STREAM (&parser) = arg;
-	  break;
-	}
-
       token = linespec_lexer_consume_token (&parser);
     }
   while (token.type != LSTOKEN_EOI && token.type != LSTOKEN_KEYWORD);
@@ -2515,6 +2471,12 @@ event_location_to_sals (linespec_parser *parser,
 	  }
 	END_CATCH
       }
+      break;
+
+    case ADDRESS_LOCATION:
+      result
+	= convert_address_location_to_sals (PARSER_STATE (parser),
+					    get_address_location (location));
       break;
 
     default:
@@ -2702,7 +2664,7 @@ initialize_defaults (struct symtab **default_symtab, int *default_line)
 /* Evaluate the expression pointed to by EXP_PTR into a CORE_ADDR,
    advancing EXP_PTR past any parsed text.  */
 
-static CORE_ADDR
+CORE_ADDR
 linespec_expression_to_pc (const char **exp_ptr)
 {
   if (current_program_space->executing_startup)

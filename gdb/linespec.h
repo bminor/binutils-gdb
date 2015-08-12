@@ -161,4 +161,9 @@ extern const char *linespec_lexer_lex_keyword (const char *p);
    STRINGP will be advanced to this point.  */
 
 extern void linespec_lex_to_end (char **stringp);
+
+/* Evaluate the expression pointed to by EXP_PTR into a CORE_ADDR,
+   advancing EXP_PTR past any parsed text.  */
+
+extern CORE_ADDR linespec_expression_to_pc (const char **exp_ptr);
 #endif /* defined (LINESPEC_H) */
