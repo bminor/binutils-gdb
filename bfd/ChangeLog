@@ -1,3 +1,8 @@
+2015-08-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/18759
+	* elf32-or1k.c: Revert 2015-08-11 change.
+
 2015-08-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18801
