@@ -1,3 +1,9 @@
+2015-08-12  Luis Machado  <lgustavo@codesourcery.com>
+
+	* breakpoint.c (bp_loc_is_permanent): Return 0 when breakpoint
+	location address is not meaningful.
+	(breakpoint_address_is_meaningful): Update comment.
+
 2015-08-10  Doug Evans  <dje@google.com>
 	    Keith Seitz  <keiths@redhat.com>
 
