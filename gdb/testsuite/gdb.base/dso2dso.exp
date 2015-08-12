@@ -13,6 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# The purpose of this testcase is to verify that we can "next" over
+# a call to a function provided by one shared library made from another
+# shared library, and that GDB stops at the expected location. In this
+# case, the call is made from sub1 (provided by libdso1) and we are
+# calling sub2 (provided by libdso2).
+#
+# Note that, while this is not the main purpose of this testcase, it
+# also happens to exercise an issue with displaced stepping on amd64
+# when libdso1 is mapped at an address greater than 0xffffffff.
+
 if { [skip_shlib_tests] } {
     return 0
 }
@@ -52,10 +62,6 @@ gdb_load_shlibs $binfile_libdso2 $binfile_libdso1
 if { ![runto_main] } {
   return -1
 }
-
-# Verify that we can "next" over the call to sub2 (provided by
-# libdso2) make from sub1 (provided by libdso1), and land at
-# the expected location.
 
 set bp_location [gdb_get_line_number "STOP HERE" [file tail $srcfile_libdso1]]
 gdb_breakpoint ${srcfile_libdso1}:${bp_location}
