@@ -522,7 +522,7 @@ HASHTAB  *hashtable[HASHVAL] = {0};
 
 
 /* Initialize the disassembler instruction table.
-  
+
    Initialize the hash table and instruction table for the
    disassembler.  This should be called once before the first call to
    disasm().  */
@@ -549,14 +549,14 @@ init_disasm (void)
       hashtable[hashvalue] = &hashentries[i];
     }
 }
- 
+
 /* Decode an Operand of an instruction.
-  
+
    This function formats and writes an operand of an instruction to
    info based on the operand specification.  When the `first' flag is
    set this is the first operand of an instruction.  Undefined operand
    types cause a <dis error> message.
-  
+
    Parameters:
     disassemble_info	where the operand may be printed
     OPSPEC  *opptr      pointer to an operand specification
@@ -564,7 +564,7 @@ init_disasm (void)
     UINT    pc		pc of instruction; used for pc-relative disp.
     int     first       flag which if nonzero indicates the first
                         operand of an instruction
-  
+
    The operand specified is extracted from the instruction and is
    written to buf in the format specified. The operand is preceded by
    a comma if it is not the first operand of an instruction and it is
@@ -654,7 +654,7 @@ printop (struct disassemble_info *info,
       else
 	(*info->fprintf_func) (info->stream, "%x", extracted_field);
       break;
-                       
+
     case PCREL:
       (*info->print_address_func)
 	(pc + (4 * (SEXT (inst, opptr->offset, opptr->width))),
@@ -683,7 +683,7 @@ printop (struct disassemble_info *info,
    `pc' should be the address of this instruction, it will be used to
    print the target address if this is a relative jump or call the
    disassembled instruction is written to `info'.
-  
+
    The function returns the length of this instruction in bytes.  */
 
 static int

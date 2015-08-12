@@ -130,7 +130,7 @@ prt_rr_nn (struct buffer *buf, disassemble_info * info, char *txt)
   char mytxt[TXTSIZ];
   int rr;
 
-  rr = (buf->data[buf->n_fetch - 1] >> 4) & 3; 
+  rr = (buf->data[buf->n_fetch - 1] >> 4) & 3;
   snprintf (mytxt, TXTSIZ, txt, rr_str[rr]);
   return prt_nn (buf, info, mytxt);
 }
@@ -314,7 +314,7 @@ struct tab_elt opc_ed[] =
 };
 
 static int
-pref_ed (struct buffer * buf, disassemble_info * info, 
+pref_ed (struct buffer * buf, disassemble_info * info,
 	 char* txt ATTRIBUTE_UNUSED)
 {
   struct tab_elt *p;

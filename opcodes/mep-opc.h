@@ -87,7 +87,7 @@ extern CGEN_ATTR_VALUE_BITSET_TYPE mep_all_core_isas_mask;
 )
 
 /* A mask for all ISAs executed by a VLIW coprocessor.  */
-#define MEP_ALL_COP_ISAS_MASK mep_all_cop_isas_mask 
+#define MEP_ALL_COP_ISAS_MASK mep_all_cop_isas_mask
 extern CGEN_ATTR_VALUE_BITSET_TYPE mep_all_cop_isas_mask;
 
 #define MEP_INSN_COP_P(insn) ( \

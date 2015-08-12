@@ -697,7 +697,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 	    {
 	      int cur_page;
 	      bfd_vma vaddr;
-                
+
 	      if (memaddr >= M68HC12_BANK_VIRT)
 		cur_page = ((memaddr - M68HC12_BANK_VIRT)
 			    >> M68HC12_BANK_SHIFT);
@@ -827,7 +827,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info, int arch)
 	  val = buffer[0] & 0x0ff;
 	  (*info->fprintf_func) (info->stream, ", 0x%x", val);
 	}
-      
+
 #ifdef DEBUG
       /* Consistency check.  'format' must be 0, so that we have handled
 	 all formats; and the computed size of the insn must match the

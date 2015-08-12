@@ -256,7 +256,7 @@ tic80_symbol_to_value (name, symbol_class)
 	{
 	  low = middle + 1;
 	}
-      else 
+      else
 	{
 	  pdsp = &tic80_predefined_symbols[middle];
 	  if ((symbol_class == 0) || (symbol_class & PDS_VALUE (pdsp)))

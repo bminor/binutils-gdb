@@ -2,7 +2,7 @@
    Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
    Contributed by Dmitry Diky <diwil@mail.ru>
-        
+
    This file is part of the GNU opcodes library.
 
    This library is free software; you can redistribute it and/or modify
@@ -397,7 +397,7 @@ msp430_doubleoperand (disassemble_info *info,
 	 Rm       	Register,
          x(Rm)     	Indexed,
          0xXXXX    	Relative,
-         &0xXXXX    	Absolute 
+         &0xXXXX    	Absolute
          emulated_ins   dst
          basic_ins      dst, dst.  */
 
@@ -936,7 +936,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  sprintf (comm1, "20-bit words");
 		  bc =".a";
 		}
-	      
+
 	      cycles = 2; /*FIXME*/
 	      cmd_len = 2;
 	      break;
@@ -984,7 +984,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  if (strcmp (opcode->name, "bra") != 0)
 		    sprintf (op2, "r%d", reg);
 		  break;
-		  
+
 		case 1: /* MOVA @Rsrc+, Rdst */
 		  cmd_len = 2;
 		  if (strcmp (opcode->name, "reta") != 0)
@@ -994,7 +994,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 			sprintf (op2, "r%d", reg);
 		    }
 		  break;
-		  
+
 		case 2: /* MOVA &abs20, Rdst */
 		  cmd_len = 4;
 		  n <<= 16;
@@ -1005,7 +1005,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  if (strcmp (opcode->name, "bra") != 0)
 		    sprintf (op2, "r%d", reg);
 		  break;
-		  
+
 		case 3: /* MOVA x(Rsrc), Rdst */
 		  cmd_len = 4;
 		  if (strcmp (opcode->name, "bra") != 0)
@@ -1051,7 +1051,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 			sprintf (comm2, "0x%05x", n);
 		    }
 		  break;
-		  
+
 		case 8: /* MOVA #imm20, Rdst */
 		  cmd_len = 4;
 		  n <<= 16;
@@ -1064,7 +1064,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  if (strcmp (opcode->name, "bra") != 0)
 		    sprintf (op2, "r%d", reg);
 		  break;
-		  
+
 		case 12: /* MOVA Rsrc, Rdst */
 		  cmd_len = 2;
 		  sprintf (op1, "r%d", n);
@@ -1110,7 +1110,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		      sprintf (comm2, _("Reserved use of A/L and B/W bits detected"));
 		    }
 		}
-	      
+
 	      break;
 	    case 1:
 	      cmd_len +=

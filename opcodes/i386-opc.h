@@ -196,7 +196,7 @@ enum
   CpuAVX512VBMI,
   /* mwaitx instruction required */
   CpuMWAITX,
-  /* Clzero instruction required */ 
+  /* Clzero instruction required */
   CpuCLZERO,
   /* 64bit support required  */
   Cpu64,

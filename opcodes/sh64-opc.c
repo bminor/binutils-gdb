@@ -33,7 +33,7 @@ const shmedia_opcode_info shmedia_table[] = {
     { "add.l",	    {A_GREG_M,A_GREG_N,A_GREG_D},     {OFFSET_20,OFFSET_10,OFFSET_4}, 0x00080000
     },
 /* 110100mmmmmmssssssssssdddddd0000  addi <A_GREG_M>,<A_IMMS10>,<A_GREG_D>  */
-    { "addi",	    {A_GREG_M,A_IMMS10BY1,A_GREG_D},  {OFFSET_20,OFFSET_10,OFFSET_4}, 
+    { "addi",	    {A_GREG_M,A_IMMS10BY1,A_GREG_D},  {OFFSET_20,OFFSET_10,OFFSET_4},
       SHMEDIA_ADDI_OPC
     },
 /* 110101mmmmmmssssssssssdddddd0000  addi.l <A_GREG_M>,<A_IMMS10>,<A_GREG_D>  */

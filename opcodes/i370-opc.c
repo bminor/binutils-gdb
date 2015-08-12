@@ -257,7 +257,7 @@ const struct i370_operand i370_operands[] =
 #define SS_D2 (SS_B2 + 1)
 #define SS_D2_MASK (0xfff)
   { 12, 0, insert_ss_d2, extract_ss_d2, I370_OPERAND_RELATIVE, "SS D2" },
-  
+
 };
 
 

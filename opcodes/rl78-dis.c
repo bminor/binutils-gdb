@@ -204,7 +204,7 @@ print_insn_rl78_common (bfd_vma addr, disassemble_info * dis, RL78_Dis_Isa isa)
 		{
 		  char *comma = "";
 		  PR (PS, "  \033[35m");
-	      
+
 		  if (opcode.flags & RL78_PSW_Z)
 		    { PR (PS, "Z"); comma = ","; }
 		  if (opcode.flags & RL78_PSW_AC)
@@ -290,7 +290,7 @@ print_insn_rl78_common (bfd_vma addr, disassemble_info * dis, RL78_Dis_Isa isa)
 		      PR (PS, "+%d", oper->addend);
 		    PC (']');
 		    break;
-		      
+
 		  }
 		if (oper->type == RL78_Operand_BitIndirect)
 		  PR (PS, ".%d", oper->bit_number);

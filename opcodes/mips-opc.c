@@ -404,7 +404,7 @@ decode_mips_operand (const char *p)
 
    Because of the lookup algorithm used, entries with the same opcode
    name must be contiguous.
- 
+
    Many instructions are short hand for other instructions (i.e., The
    jal <register> instruction is short for jalr <register>).  */
 
@@ -2062,8 +2062,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"zcb",			"(b)",		0x7000071f, 0xfc1fffff, RD_1|SM,		0,		IOCT2,		0,	0 },
 {"zcbt",		"(b)",		0x7000075f, 0xfc1fffff, RD_1|SM,		0,		IOCT2,		0,	0 },
 
-/* Coprocessor 0 move instructions cfc0 and ctc0 conflict with the 
-   mfhc0 and mthc0 XPA instructions, so they have been placed here 
+/* Coprocessor 0 move instructions cfc0 and ctc0 conflict with the
+   mfhc0 and mthc0 XPA instructions, so they have been placed here
    to allow the XPA instructions to take precedence.  */
 {"ctc0",		"t,G",		0x40c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
 {"cfc0",		"t,G",		0x40400000, 0xffe007ff,	WR_1|RD_C0|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
@@ -2110,7 +2110,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"qmtc2",		"t,+6",		0x48a00000, 0xffe007ff,	RD_1|WR_C2,		0,		EE,		0,	0 },
 {"qmtc2.i",		"t,+6",		0x48a00001, 0xffe007ff,	RD_1|WR_C2,		0,		EE,		0,	0 },
 {"qmtc2.ni",		"t,+6",		0x48a00000, 0xffe007ff,	RD_1|WR_C2,		0,		EE,		0,	0 },
-/* Coprocessor 3 move/branch operations overlap with MIPS IV COP1X 
+/* Coprocessor 3 move/branch operations overlap with MIPS IV COP1X
    instructions, so they are here for the latters to take precedence.  */
 {"bc3f",		"p",		0x4d000000, 0xffff0000,	RD_CC|CBD,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"bc3fl",		"p",		0x4d020000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	IOCT|IOCTP|IOCT2|EE|I37 },

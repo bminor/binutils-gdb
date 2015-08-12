@@ -66,7 +66,7 @@ static int ubwl[] =
   RX_UByte,
   RX_UWord,
   RX_Long,
-  0 /* Bogus instructions can have a size field set to 3.  */  
+  0 /* Bogus instructions can have a size field set to 3.  */
 };
 
 static int memex[] =
@@ -250,7 +250,7 @@ rx_disp (int n, int type, int reg, int size, LocalData * ld)
 #define xZ 2
 #define xC 1
 
-#define F_____ 
+#define F_____
 #define F___ZC rx->flags_0 = rx->flags_s = xZ|xC;
 #define F__SZ_ rx->flags_0 = rx->flags_s = xS|xZ;
 #define F__SZC rx->flags_0 = rx->flags_s = xS|xZ|xC;
@@ -296,7 +296,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("brk");
 #line 987 "rx-decode.opc"
           ID(brk);
-        
+
         }
       break;
     case 0x01:
@@ -311,7 +311,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("dbt");
 #line 990 "rx-decode.opc"
           ID(dbt);
-        
+
         }
       break;
     case 0x02:
@@ -326,10 +326,10 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("rts");
 #line 768 "rx-decode.opc"
           ID(rts);
-        
+
         /*----------------------------------------------------------------------*/
         /* NOP								*/
-        
+
         }
       break;
     case 0x03:
@@ -344,10 +344,10 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("nop");
 #line 774 "rx-decode.opc"
           ID(nop);
-        
+
         /*----------------------------------------------------------------------*/
         /* STRING FUNCTIONS							*/
-        
+
         }
       break;
     case 0x04:
@@ -362,7 +362,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("bra.a	%a0");
 #line 746 "rx-decode.opc"
           ID(branch); DC(pc + IMMex(3));
-        
+
         }
       break;
     case 0x05:
@@ -377,7 +377,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("bsr.a	%a0");
 #line 762 "rx-decode.opc"
           ID(jsr); DC(pc + IMMex(3));
-        
+
         }
       break;
     case 0x06:
@@ -413,7 +413,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("sub	%2%S2, %1");
 #line 542 "rx-decode.opc"
                       ID(sub); S2Pm(ss, rsrc, mx); SR(rdst); DR(rdst); F_OSZC;
-                    
+
                     }
                   break;
               }
@@ -474,10 +474,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("cmp	%2%S2, %1");
 #line 530 "rx-decode.opc"
                       ID(sub); S2Pm(ss, rsrc, mx); SR(rdst); F_OSZC;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* SUB									*/
-                    
+
                     }
                   break;
               }
@@ -538,7 +538,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("add	%1%S1, %0");
 #line 506 "rx-decode.opc"
                       ID(add); SPm(ss, rsrc, mx); DR(rdst); F_OSZC;
-                    
+
                     }
                   break;
               }
@@ -599,7 +599,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mul	%1%S1, %0");
 #line 611 "rx-decode.opc"
                       ID(mul); SPm(ss, rsrc, mx); DR(rdst); F_____;
-                    
+
                     }
                   break;
               }
@@ -660,7 +660,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("and	%1%S1, %0");
 #line 419 "rx-decode.opc"
                       ID(and); SPm(ss, rsrc, mx); DR(rdst); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -721,7 +721,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("or	%1%S1, %0");
 #line 437 "rx-decode.opc"
                       ID(or); SPm(ss, rsrc, mx); DR(rdst); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -786,10 +786,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("sbb	%1%S1, %0");
 #line 555 "rx-decode.opc"
                             ID(sbb); SPm(sp, rsrc, mx); DR(rdst); F_OSZC;
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* ABS									*/
-                          
+
                           }
                         break;
                     }
@@ -823,10 +823,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("max	%1%S1, %0");
 #line 584 "rx-decode.opc"
                             ID(max); SPm(ss, rsrc, mx); DR(rdst);
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* MIN									*/
-                          
+
                           }
                         break;
                     }
@@ -860,10 +860,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("min	%1%S1, %0");
 #line 596 "rx-decode.opc"
                             ID(min); SPm(ss, rsrc, mx); DR(rdst);
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* MUL									*/
-                          
+
                           }
                         break;
                     }
@@ -897,10 +897,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("emul	%1%S1, %0");
 #line 626 "rx-decode.opc"
                             ID(emul); SPm(ss, rsrc, mx); DR(rdst);
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* EMULU									*/
-                          
+
                           }
                         break;
                     }
@@ -934,10 +934,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("emulu	%1%S1, %0");
 #line 638 "rx-decode.opc"
                             ID(emulu); SPm(ss, rsrc, mx); DR(rdst);
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* DIV									*/
-                          
+
                           }
                         break;
                     }
@@ -971,10 +971,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("div	%1%S1, %0");
 #line 650 "rx-decode.opc"
                             ID(div); SPm(ss, rsrc, mx); DR(rdst); F_O___;
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* DIVU									*/
-                          
+
                           }
                         break;
                     }
@@ -1008,10 +1008,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("divu	%1%S1, %0");
 #line 662 "rx-decode.opc"
                             ID(divu); SPm(ss, rsrc, mx); DR(rdst); F_O___;
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* SHIFT								*/
-                          
+
                           }
                         break;
                     }
@@ -1045,10 +1045,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("tst	%1%S1, %2");
 #line 473 "rx-decode.opc"
                             ID(and); SPm(ss, rsrc, mx); S2R(rdst); F__SZ_;
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* NEG									*/
-                          
+
                           }
                         break;
                     }
@@ -1082,10 +1082,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("xor	%1%S1, %0");
 #line 452 "rx-decode.opc"
                             ID(xor); SPm(ss, rsrc, mx); DR(rdst); F__SZ_;
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* NOT									*/
-                          
+
                           }
                         break;
                     }
@@ -1119,10 +1119,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("xchg	%1%S1, %0");
 #line 386 "rx-decode.opc"
                             ID(xchg); DR(rdst); SPm(ss, rsrc, mx);
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* STZ/STNZ								*/
-                          
+
                           }
                         break;
                     }
@@ -1156,10 +1156,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("itof	%1%S1, %0");
 #line 891 "rx-decode.opc"
                             ID(itof); DR (rdst); SPm(sd, rsrc, mx); F__SZ_;
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* BIT OPS								*/
-                          
+
                           }
                         break;
                     }
@@ -2380,10 +2380,10 @@ rx_decode_opcode (unsigned long pc AU,
                             SYNTAX("adc	%1%S1, %0");
 #line 494 "rx-decode.opc"
                             ID(adc); SPm(ss, rsrc, 2); DR(rdst); F_OSZC;
-                          
+
                           /*----------------------------------------------------------------------*/
                           /* ADD									*/
-                          
+
                           }
                         break;
                     }
@@ -3491,7 +3491,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("bra.s	%a0");
 #line 737 "rx-decode.opc"
           ID(branch); DC(pc + dsp3map[dsp]);
-        
+
         }
       break;
     case 0x10:
@@ -3527,7 +3527,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("b%1.s	%a0");
 #line 727 "rx-decode.opc"
           ID(branch); Scc(n); DC(pc + dsp3map[dsp]);
-        
+
         }
       break;
     case 0x20:
@@ -3559,7 +3559,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("b%1.b	%a0");
 #line 730 "rx-decode.opc"
           ID(branch); Scc(cond); DC(pc + IMMex (1));
-        
+
         }
       break;
     case 0x2e:
@@ -3574,7 +3574,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("bra.b	%a0");
 #line 740 "rx-decode.opc"
           ID(branch); DC(pc + IMMex(1));
-        
+
         }
       break;
     case 0x38:
@@ -3589,7 +3589,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("bra.w	%a0");
 #line 743 "rx-decode.opc"
           ID(branch); DC(pc + IMMex(2));
-        
+
         }
       break;
     case 0x39:
@@ -3604,7 +3604,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("bsr.w	%a0");
 #line 759 "rx-decode.opc"
           ID(jsr); DC(pc + IMMex(2));
-        
+
         }
       break;
     case 0x3a:
@@ -3623,8 +3623,8 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("b%1.w	%a0");
 #line 733 "rx-decode.opc"
           ID(branch); Scc(c); DC(pc + IMMex (2));
-        
-        
+
+
         }
       break;
     case 0x3c:
@@ -3656,7 +3656,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("mov%s	#%1, %0");
 #line 307 "rx-decode.opc"
                 ID(mov); sBWL (sz); DIs(dst, d*16+sppp, sz); SC(IMM(1)); F_____;
-              
+
               }
             break;
         }
@@ -3701,10 +3701,10 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("rtsd	#%1, %2-%0");
 #line 404 "rx-decode.opc"
                 ID(rtsd); SC(IMM(1) * 4); S2R(rega); DR(regb);
-              
+
               /*----------------------------------------------------------------------*/
               /* AND									*/
-              
+
               }
             break;
         }
@@ -3735,7 +3735,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("sub	%2%S2, %1");
 #line 539 "rx-decode.opc"
                 ID(sub); S2P(ss, rsrc); SR(rdst); DR(rdst); F_OSZC;
-              
+
               }
             break;
         }
@@ -3793,7 +3793,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("cmp	%2%S2, %1");
 #line 527 "rx-decode.opc"
                 ID(sub); S2P(ss, rsrc); SR(rdst); F_OSZC;
-              
+
               }
             break;
         }
@@ -3851,7 +3851,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("add	%1%S1, %0");
 #line 503 "rx-decode.opc"
                 ID(add); SP(ss, rsrc); DR(rdst); F_OSZC;
-              
+
               }
             break;
         }
@@ -3909,7 +3909,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("mul	%1%S1, %0");
 #line 608 "rx-decode.opc"
                 ID(mul); SP(ss, rsrc); DR(rdst); F_____;
-              
+
               }
             break;
         }
@@ -3967,7 +3967,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("and	%1%S1, %0");
 #line 416 "rx-decode.opc"
                 ID(and); SP(ss, rsrc); DR(rdst); F__SZ_;
-              
+
               }
             break;
         }
@@ -4025,7 +4025,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("or	%1%S1, %0");
 #line 434 "rx-decode.opc"
                 ID(or); SP(ss, rsrc); DR(rdst); F__SZ_;
-              
+
               }
             break;
         }
@@ -4086,7 +4086,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("movu%s	%1, %0");
 #line 355 "rx-decode.opc"
                 ID(mov); uBWL(s); SD(ss, rsrc, s); DR(rdst); F_____;
-              
+
               }
             break;
         }
@@ -4176,7 +4176,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("sub	#%2, %0");
 #line 536 "rx-decode.opc"
                 ID(sub); S2C(immm); SR(rdst); DR(rdst); F_OSZC;
-              
+
               }
             break;
         }
@@ -4203,7 +4203,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("cmp	#%2, %1");
 #line 518 "rx-decode.opc"
                 ID(sub); S2C(immm); SR(rdst); F_OSZC;
-              
+
               }
             break;
         }
@@ -4230,7 +4230,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("add	#%1, %0");
 #line 500 "rx-decode.opc"
                 ID(add); SC(immm); DR(rdst); F_OSZC;
-              
+
               }
             break;
         }
@@ -4257,7 +4257,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("mul	#%1, %0");
 #line 602 "rx-decode.opc"
                 ID(mul); DR(rdst); SC(immm); F_____;
-              
+
               }
             break;
         }
@@ -4284,7 +4284,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("and	#%1, %0");
 #line 410 "rx-decode.opc"
                 ID(and); SC(immm); DR(rdst); F__SZ_;
-              
+
               }
             break;
         }
@@ -4311,7 +4311,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("or	#%1, %0");
 #line 428 "rx-decode.opc"
                 ID(or); SC(immm); DR(rdst); F__SZ_;
-              
+
               }
             break;
         }
@@ -4338,7 +4338,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("mov%s	#%1, %0");
 #line 304 "rx-decode.opc"
                 ID(mov); DR(rdst); SC(immm); F_____;
-              
+
               }
             break;
         }
@@ -4355,7 +4355,7 @@ rx_decode_opcode (unsigned long pc AU,
           SYNTAX("rtsd	#%1");
 #line 401 "rx-decode.opc"
           ID(rtsd); SC(IMM(1) * 4);
-        
+
         }
       break;
     case 0x68:
@@ -4384,7 +4384,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("shlr	#%2, %0");
 #line 688 "rx-decode.opc"
                 ID(shlr); S2C(i*16+mmmm); SR(rdst); DR(rdst); F__SZC;
-              
+
               }
             break;
         }
@@ -4424,7 +4424,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("shar	#%2, %0");
 #line 678 "rx-decode.opc"
                 ID(shar); S2C(i*16+mmmm); SR(rdst); DR(rdst); F_0SZC;
-              
+
               }
             break;
         }
@@ -4464,7 +4464,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("shll	#%2, %0");
 #line 668 "rx-decode.opc"
                 ID(shll); S2C(i*16+mmmm); SR(rdst); DR(rdst); F_OSZC;
-              
+
               }
             break;
         }
@@ -4500,7 +4500,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("pushm	%1-%2");
 #line 368 "rx-decode.opc"
                 ID(pushm); SR(dsta); S2R(dstb); F_____;
-                
+
               }
             break;
         }
@@ -4527,7 +4527,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("popm	%1-%2");
 #line 365 "rx-decode.opc"
                 ID(popm); SR(dsta); S2R(dstb); F_____;
-              
+
               }
             break;
         }
@@ -4558,7 +4558,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("add	#%1, %2, %0");
 #line 509 "rx-decode.opc"
                 ID(add); SC(IMMex(im)); S2R(rsrc); DR(rdst); F_OSZC;
-              
+
               }
             break;
         }
@@ -4613,7 +4613,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("cmp	#%2, %1%S1");
 #line 521 "rx-decode.opc"
                 ID(sub); SR(rsrc); S2C(IMMex(im)); F_OSZC;
-              
+
               }
             break;
           case 0x10:
@@ -4635,7 +4635,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("mul	#%1, %0");
 #line 605 "rx-decode.opc"
                 ID(mul); DR(rdst); SC(IMMex(im)); F_____;
-              
+
               }
             break;
           case 0x20:
@@ -4657,7 +4657,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("and	#%1, %0");
 #line 413 "rx-decode.opc"
                 ID(and); SC(IMMex(im)); DR(rdst); F__SZ_;
-              
+
               }
             break;
           case 0x30:
@@ -4679,7 +4679,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("or	#%1, %0");
 #line 431 "rx-decode.opc"
                 ID(or); SC(IMMex(im)); DR(rdst); F__SZ_;
-              
+
               }
             break;
           default: UNSUPPORTED(); break;
@@ -4791,7 +4791,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("mov%s	#%1, %0");
 #line 285 "rx-decode.opc"
                 ID(mov); DR(rdst); SC(IMM (1)); F_____;
-              
+
               }
             break;
           case 0x50:
@@ -4824,7 +4824,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("cmp	#%2, %1");
 #line 524 "rx-decode.opc"
                 ID(sub); SR(rsrc); S2C(IMM(1)); F_OSZC;
-              
+
               }
             break;
           case 0x60:
@@ -4839,7 +4839,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("int #%1");
 #line 993 "rx-decode.opc"
                 ID(int); SC(IMM(1));
-              
+
               }
             break;
           case 0x70:
@@ -4861,7 +4861,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mvtipl	#%1");
 #line 960 "rx-decode.opc"
                       ID(mvtipl); SC(immm);
-                    
+
                     }
                   break;
                 default: UNSUPPORTED(); break;
@@ -4934,8 +4934,8 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("bset	#%1, %0");
 #line 905 "rx-decode.opc"
                 ID(bset); BWL(LSIZE); SC(b*16+ittt); DR(rdst); F_____;
-              
-              
+
+
               }
             break;
         }
@@ -4975,8 +4975,8 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("bclr	#%1, %0");
 #line 917 "rx-decode.opc"
                 ID(bclr); BWL(LSIZE); SC(b*16+ittt); DR(rdst); F_____;
-              
-              
+
+
               }
             break;
         }
@@ -5016,8 +5016,8 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("btst	#%2, %1");
 #line 929 "rx-decode.opc"
                 ID(btst); BWL(LSIZE); S2C(b*16+ittt); SR(rdst); F___ZC;
-              
-              
+
+
               }
             break;
         }
@@ -5050,7 +5050,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("not	%0");
 #line 458 "rx-decode.opc"
                 ID(xor); DR(rdst); SR(rdst); S2C(~0); F__SZ_;
-              
+
               }
             break;
           case 0x10:
@@ -5068,7 +5068,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("neg	%0");
 #line 479 "rx-decode.opc"
                 ID(sub); DR(rdst); SC(0); S2R(rdst); F_OSZC;
-              
+
               }
             break;
           case 0x20:
@@ -5086,7 +5086,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("abs	%0");
 #line 561 "rx-decode.opc"
                 ID(abs); DR(rdst); SR(rdst); F_OSZ_;
-              
+
               }
             break;
           case 0x30:
@@ -5104,7 +5104,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("sat	%0");
 #line 843 "rx-decode.opc"
                 ID(sat); DR (rdst);
-              
+
               }
             break;
           case 0x40:
@@ -5122,7 +5122,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("rorc	%0");
 #line 703 "rx-decode.opc"
                 ID(rorc); DR(rdst); F__SZC;
-              
+
               }
             break;
           case 0x50:
@@ -5140,7 +5140,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("rolc	%0");
 #line 700 "rx-decode.opc"
                 ID(rolc); DR(rdst); F__SZC;
-              
+
               }
             break;
           case 0x80:
@@ -5163,7 +5163,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("push%s	%1");
 #line 374 "rx-decode.opc"
                 ID(mov); BWL(sz); OP(0, RX_Operand_Predec, 0, 0); SR(rsrc); F_____;
-              
+
               }
             break;
           case 0xb0:
@@ -5181,7 +5181,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("pop	%0");
 #line 371 "rx-decode.opc"
                 ID(mov); OP(1, RX_Operand_Postinc, 0, 0); DR(rdst); F_____;
-                
+
               }
             break;
           case 0xc0:
@@ -5200,7 +5200,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("pushc	%1");
 #line 966 "rx-decode.opc"
                 ID(mov); OP(0, RX_Operand_Predec, 0, 0); SR(crsrc + 16);
-              
+
               }
             break;
           case 0xe0:
@@ -5219,7 +5219,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("popc	%0");
 #line 963 "rx-decode.opc"
                 ID(mov); OP(1, RX_Operand_Postinc, 0, 0); DR(crdst + 16);
-              
+
               }
             break;
           default: UNSUPPORTED(); break;
@@ -5259,7 +5259,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("jmp	%0");
 #line 753 "rx-decode.opc"
                 ID(branch); DR(rsrc);
-              
+
               }
             break;
           case 0x10:
@@ -5292,7 +5292,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("jsr	%0");
 #line 756 "rx-decode.opc"
                 ID(jsr); DR(rsrc);
-              
+
               }
             break;
           case 0x40:
@@ -5325,8 +5325,8 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("bra.l	%0");
 #line 749 "rx-decode.opc"
                 ID(branchrel); DR(rsrc);
-              
-              
+
+
               }
             break;
           case 0x50:
@@ -5359,7 +5359,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("bsr.l	%0");
 #line 765 "rx-decode.opc"
                 ID(jsrrel); DR(rsrc);
-              
+
               }
             break;
           case 0x80:
@@ -5379,7 +5379,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("suntil%s");
 #line 789 "rx-decode.opc"
                 ID(suntil); BWL(sz); F___ZC;
-              
+
               }
             break;
           case 0x83:
@@ -5394,7 +5394,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("scmpu");
 #line 780 "rx-decode.opc"
                 ID(scmpu); F___ZC;
-              
+
               }
             break;
           case 0x84:
@@ -5414,7 +5414,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("swhile%s");
 #line 792 "rx-decode.opc"
                 ID(swhile); BWL(sz); F___ZC;
-              
+
               }
             break;
           case 0x87:
@@ -5429,7 +5429,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("smovu");
 #line 783 "rx-decode.opc"
                 ID(smovu);
-              
+
               }
             break;
           case 0x88:
@@ -5449,10 +5449,10 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("sstr%s");
 #line 798 "rx-decode.opc"
                 ID(sstr); BWL(sz);
-              
+
               /*----------------------------------------------------------------------*/
               /* RMPA									*/
-              
+
               }
             break;
           case 0x8b:
@@ -5467,7 +5467,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("smovb");
 #line 786 "rx-decode.opc"
                 ID(smovb);
-              
+
               }
             break;
           case 0x8c:
@@ -5487,10 +5487,10 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("rmpa%s");
 #line 804 "rx-decode.opc"
                 ID(rmpa); BWL(sz); F_OS__;
-              
+
               /*----------------------------------------------------------------------*/
               /* HI/LO stuff								*/
-              
+
               }
             break;
           case 0x8f:
@@ -5505,7 +5505,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("smovf");
 #line 795 "rx-decode.opc"
                 ID(smovf);
-              
+
               }
             break;
           case 0x93:
@@ -5520,10 +5520,10 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("satr");
 #line 846 "rx-decode.opc"
                 ID(satr);
-              
+
               /*----------------------------------------------------------------------*/
               /* FLOAT								*/
-              
+
               }
             break;
           case 0x94:
@@ -5538,7 +5538,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("rtfi");
 #line 981 "rx-decode.opc"
                 ID(rtfi);
-              
+
               }
             break;
           case 0x95:
@@ -5553,7 +5553,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("rte");
 #line 984 "rx-decode.opc"
                 ID(rte);
-              
+
               }
             break;
           case 0x96:
@@ -5568,10 +5568,10 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("wait");
 #line 996 "rx-decode.opc"
                 ID(wait);
-              
+
               /*----------------------------------------------------------------------*/
               /* SCcnd								*/
-              
+
               }
             break;
           case 0xa0:
@@ -5604,7 +5604,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("setpsw	%0");
 #line 957 "rx-decode.opc"
                 ID(setpsw); DF(rdst);
-              
+
               }
             break;
           case 0xb0:
@@ -5637,7 +5637,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("clrpsw	%0");
 #line 954 "rx-decode.opc"
                 ID(clrpsw); DF(rdst);
-              
+
               }
             break;
           default: UNSUPPORTED(); break;
@@ -5678,7 +5678,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("mov%s	%1, %0");
 #line 332 "rx-decode.opc"
                 ID(mov); sBWL(sz); DIs(dst, dsp*4+a*2+b, sz); SR(src); F_____;
-              
+
               }
             break;
         }
@@ -5781,7 +5781,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("mov%s	%1, %0");
 #line 329 "rx-decode.opc"
                 ID(mov); sBWL(sz); DR(dst); SIs(src, dsp*4+a*2+b, sz); F_____;
-              
+
               }
             break;
         }
@@ -6172,7 +6172,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("movu%s	%1, %0");
 #line 352 "rx-decode.opc"
                 ID(mov); uBWL(w); DR(dst); SIs(src, dsp*4+a*2+b, w); F_____;
-              
+
               }
             break;
         }
@@ -6360,7 +6360,7 @@ rx_decode_opcode (unsigned long pc AU,
               	  SD(ss, rsrc, sz); DD(sd, rdst, sz);
               	}
                   }
-              
+
               }
             break;
         }
@@ -6814,7 +6814,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("bset	#%1, %0%S0");
 #line 897 "rx-decode.opc"
                 ID(bset); BWL(BSIZE); SC(bit); DD(sd, rdst, BSIZE); F_____;
-              
+
               }
             break;
           case 0x08:
@@ -6839,7 +6839,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("bclr	#%1, %0%S0");
 #line 909 "rx-decode.opc"
                 ID(bclr); BWL(BSIZE); SC(bit); DD(sd, rdst, BSIZE); F_____;
-              
+
               }
             break;
         }
@@ -6907,7 +6907,7 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("btst	#%2, %1%S1");
 #line 921 "rx-decode.opc"
                 ID(btst); BWL(BSIZE); S2C(bit); SD(sd, rdst, BSIZE); F___ZC;
-              
+
               }
             break;
           case 0x08:
@@ -6932,10 +6932,10 @@ rx_decode_opcode (unsigned long pc AU,
                 SYNTAX("push%s	%1");
 #line 377 "rx-decode.opc"
                 ID(mov); BWL(sz); OP(0, RX_Operand_Predec, 0, 0); SD(ss, rsrc, sz); F_____;
-              
+
               /*----------------------------------------------------------------------*/
               /* XCHG									*/
-              
+
               }
             break;
           default: UNSUPPORTED(); break;
@@ -7025,7 +7025,7 @@ rx_decode_opcode (unsigned long pc AU,
                     SC(IMMex(im));
                   }
                  F_____;
-              
+
               }
             break;
         }
@@ -7083,7 +7083,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("sbb	%1, %0");
 #line 551 "rx-decode.opc"
                       ID(sbb); SR (rsrc); DR(rdst); F_OSZC;
-                    
+
                       /* FIXME: only supports .L */
                     }
                   break;
@@ -7111,10 +7111,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("neg	%2, %0");
 #line 482 "rx-decode.opc"
                       ID(sub); DR(rdst); SC(0); S2R(rsrc); F_OSZC;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* ADC									*/
-                    
+
                     }
                   break;
               }
@@ -7141,7 +7141,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("adc	%1, %0");
 #line 491 "rx-decode.opc"
                       ID(adc); SR(rsrc); DR(rdst); F_OSZC;
-                    
+
                     }
                   break;
               }
@@ -7168,10 +7168,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("abs	%1, %0");
 #line 564 "rx-decode.opc"
                       ID(abs); DR(rdst); SR(rsrc); F_OSZ_;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* MAX									*/
-                    
+
                     }
                   break;
               }
@@ -7210,7 +7210,7 @@ rx_decode_opcode (unsigned long pc AU,
                         {
                           ID(max); SP(ss, rsrc); DR(rdst);
                         }
-                    
+
                     }
                   break;
               }
@@ -7268,7 +7268,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("min	%1%S1, %0");
 #line 593 "rx-decode.opc"
                       ID(min); SP(ss, rsrc); DR(rdst);
-                    
+
                     }
                   break;
               }
@@ -7326,7 +7326,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("emul	%1%S1, %0");
 #line 623 "rx-decode.opc"
                       ID(emul); SP(ss, rsrc); DR(rdst);
-                    
+
                     }
                   break;
               }
@@ -7384,7 +7384,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("emulu	%1%S1, %0");
 #line 635 "rx-decode.opc"
                       ID(emulu); SP(ss, rsrc); DR(rdst);
-                    
+
                     }
                   break;
               }
@@ -7442,7 +7442,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("div	%1%S1, %0");
 #line 647 "rx-decode.opc"
                       ID(div); SP(ss, rsrc); DR(rdst); F_O___;
-                    
+
                     }
                   break;
               }
@@ -7500,7 +7500,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("divu	%1%S1, %0");
 #line 659 "rx-decode.opc"
                       ID(divu); SP(ss, rsrc); DR(rdst); F_O___;
-                    
+
                     }
                   break;
               }
@@ -7558,7 +7558,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("tst	%1%S1, %2");
 #line 470 "rx-decode.opc"
                       ID(and); SP(ss, rsrc); S2R(rdst); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -7616,7 +7616,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("xor	%1%S1, %0");
 #line 449 "rx-decode.opc"
                       ID(xor); SP(ss, rsrc); DR(rdst); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -7670,10 +7670,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("not	%1, %0");
 #line 461 "rx-decode.opc"
                       ID(xor); DR(rdst); SR(rsrc); S2C(~0); F__SZ_;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* TST									*/
-                    
+
                     }
                   break;
               }
@@ -7704,7 +7704,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("xchg	%1%S1, %0");
 #line 383 "rx-decode.opc"
                       ID(xchg); DR(rdst); SP(ss, rsrc);
-                    
+
                     }
                   break;
               }
@@ -7762,7 +7762,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("itof	%1%S1, %0");
 #line 888 "rx-decode.opc"
                       ID(itof); DR (rdst); SP(sd, rsrc); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -7822,7 +7822,7 @@ rx_decode_opcode (unsigned long pc AU,
                       ID(bset); BWL(BSIZE); SR(rsrc); DD(sd, rdst, BSIZE); F_____;
                       if (sd == 3) /* bset reg,reg */
                         BWL(LSIZE);
-                    
+
                     }
                   break;
               }
@@ -7882,7 +7882,7 @@ rx_decode_opcode (unsigned long pc AU,
                       ID(bclr); BWL(BSIZE); SR(rsrc); DD(sd, rdst, BSIZE); F_____;
                       if (sd == 3) /* bset reg,reg */
                         BWL(LSIZE);
-                    
+
                     }
                   break;
               }
@@ -7942,7 +7942,7 @@ rx_decode_opcode (unsigned long pc AU,
                       ID(btst); BWL(BSIZE); S2R(rsrc); SD(sd, rdst, BSIZE); F___ZC;
                       if (sd == 3) /* bset reg,reg */
                         BWL(LSIZE);
-                    
+
                     }
                   break;
               }
@@ -8002,7 +8002,7 @@ rx_decode_opcode (unsigned long pc AU,
                       ID(bnot); BWL(BSIZE); SR(rsrc); DD(sd, rdst, BSIZE);
                       if (sd == 3) /* bset reg,reg */
                         BWL(LSIZE);
-                    
+
                     }
                   break;
               }
@@ -8060,7 +8060,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fsub	%1%S1, %0");
 #line 867 "rx-decode.opc"
                       ID(fsub); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -8118,7 +8118,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fcmp	%1%S1, %0");
 #line 861 "rx-decode.opc"
                       ID(fcmp); DR(rdst); SD(sd, rsrc, LSIZE); F_OSZ_;
-                    
+
                     }
                   break;
               }
@@ -8176,7 +8176,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fadd	%1%S1, %0");
 #line 855 "rx-decode.opc"
                       ID(fadd); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -8234,7 +8234,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fmul	%1%S1, %0");
 #line 876 "rx-decode.opc"
                       ID(fmul); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -8292,7 +8292,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fdiv	%1%S1, %0");
 #line 882 "rx-decode.opc"
                       ID(fdiv); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -8350,7 +8350,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("ftoi	%1%S1, %0");
 #line 870 "rx-decode.opc"
                       ID(ftoi); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -8408,7 +8408,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("round	%1%S1, %0");
 #line 885 "rx-decode.opc"
                       ID(round); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
-                    
+
                     }
                   break;
               }
@@ -8469,7 +8469,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("sc%1%s	%0");
 #line 1002 "rx-decode.opc"
                       ID(sccnd); BWL(sz); DD (sd, rdst, sz); Scc(cond);
-                    
+
                     }
                   break;
               }
@@ -8616,7 +8616,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("bm%2	#%1, %0%S0");
 #line 945 "rx-decode.opc"
                       ID(bmcc); BWL(BSIZE); S2cc(cond); SC(bit); DD(sd, rdst, BSIZE);
-                    
+
                     }
                   break;
                 case 0x0f:
@@ -8641,7 +8641,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("bnot	#%1, %0%S0");
 #line 933 "rx-decode.opc"
                       ID(bnot); BWL(BSIZE); SC(bit); DD(sd, rdst, BSIZE);
-                    
+
                     }
                   break;
               }
@@ -9481,7 +9481,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mulhi	%1, %2");
 #line 810 "rx-decode.opc"
                       ID(mulhi); SR(srca); S2R(srcb); F_____;
-                    
+
                     }
                   break;
               }
@@ -9508,7 +9508,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mullo	%1, %2");
 #line 813 "rx-decode.opc"
                       ID(mullo); SR(srca); S2R(srcb); F_____;
-                    
+
                     }
                   break;
               }
@@ -9535,7 +9535,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("machi	%1, %2");
 #line 816 "rx-decode.opc"
                       ID(machi); SR(srca); S2R(srcb); F_____;
-                    
+
                     }
                   break;
               }
@@ -9562,7 +9562,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("maclo	%1, %2");
 #line 819 "rx-decode.opc"
                       ID(maclo); SR(srca); S2R(srcb); F_____;
-                    
+
                     }
                   break;
               }
@@ -9586,7 +9586,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mvtachi	%1");
 #line 822 "rx-decode.opc"
                       ID(mvtachi); SR(rsrc); F_____;
-                    
+
                     }
                   break;
                 case 0x10:
@@ -9604,7 +9604,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mvtaclo	%1");
 #line 825 "rx-decode.opc"
                       ID(mvtaclo); SR(rsrc); F_____;
-                    
+
                     }
                   break;
                 default: UNSUPPORTED(); break;
@@ -9629,10 +9629,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("racw	#%1");
 #line 837 "rx-decode.opc"
                       ID(racw); SC(i+1); F_____;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* SAT									*/
-                    
+
                     }
                   break;
                 default: UNSUPPORTED(); break;
@@ -9657,7 +9657,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mvfachi	%0");
 #line 828 "rx-decode.opc"
                       ID(mvfachi); DR(rdst); F_____;
-                    
+
                     }
                   break;
                 case 0x10:
@@ -9675,7 +9675,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mvfaclo	%0");
 #line 834 "rx-decode.opc"
                       ID(mvfaclo); DR(rdst); F_____;
-                    
+
                     }
                   break;
                 case 0x20:
@@ -9693,7 +9693,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mvfacmi	%0");
 #line 831 "rx-decode.opc"
                       ID(mvfacmi); DR(rdst); F_____;
-                    
+
                     }
                   break;
                 default: UNSUPPORTED(); break;
@@ -9729,7 +9729,7 @@ rx_decode_opcode (unsigned long pc AU,
 #line 344 "rx-decode.opc"
                       ID(mov); sBWL (sz); SR(rsrc); F_____;
                       OP(0, p ? RX_Operand_Predec : RX_Operand_Postinc, rdst, 0);
-                    
+
                     }
                   break;
               }
@@ -9809,7 +9809,7 @@ rx_decode_opcode (unsigned long pc AU,
 #line 348 "rx-decode.opc"
                       ID(mov); sBWL (sz); DR(rdst); F_____;
                       OP(1, p ? RX_Operand_Predec : RX_Operand_Postinc, rsrc, 0);
-                    
+
                     }
                   break;
               }
@@ -9889,10 +9889,10 @@ rx_decode_opcode (unsigned long pc AU,
 #line 358 "rx-decode.opc"
                       ID(mov); uBWL (sz); DR(rdst); F_____;
                        OP(1, p ? RX_Operand_Predec : RX_Operand_Postinc, rsrc, 0);
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* PUSH/POP								*/
-                    
+
                     }
                   break;
               }
@@ -9964,7 +9964,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("shlr	%2, %0");
 #line 691 "rx-decode.opc"
                       ID(shlr); S2R(rsrc); SR(rdst); DR(rdst); F__SZC;
-                    
+
                     }
                   break;
               }
@@ -9991,7 +9991,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("shar	%2, %0");
 #line 681 "rx-decode.opc"
                       ID(shar); S2R(rsrc); SR(rdst); DR(rdst); F_0SZC;
-                    
+
                     }
                   break;
               }
@@ -10018,7 +10018,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("shll	%2, %0");
 #line 671 "rx-decode.opc"
                       ID(shll); S2R(rsrc); SR(rdst); DR(rdst); F_OSZC;
-                    
+
                     }
                   break;
               }
@@ -10045,7 +10045,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("rotr	%1, %0");
 #line 715 "rx-decode.opc"
                       ID(rotr); SR(rsrc); DR(rdst); F__SZC;
-                    
+
                     }
                   break;
               }
@@ -10072,7 +10072,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("revw	%1, %0");
 #line 718 "rx-decode.opc"
                       ID(revw); SR(rsrc); DR(rdst);
-                    
+
                     }
                   break;
               }
@@ -10099,7 +10099,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("rotl	%1, %0");
 #line 709 "rx-decode.opc"
                       ID(rotl); SR(rsrc); DR(rdst); F__SZC;
-                    
+
                     }
                   break;
               }
@@ -10126,10 +10126,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("revl	%1, %0");
 #line 721 "rx-decode.opc"
                       ID(revl); SR(rsrc); DR(rdst);
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* BRANCH								*/
-                    
+
                     }
                   break;
               }
@@ -10160,7 +10160,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mvtc	%1, %0");
 #line 972 "rx-decode.opc"
                       ID(mov); SR(rsrc); DR(c*16+rdst + 16);
-                    
+
                     }
                   break;
               }
@@ -10200,10 +10200,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mvfc	%1, %0");
 #line 975 "rx-decode.opc"
                       ID(mov); SR((s*16+rsrc) + 16); DR(rdst);
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* INTERRUPTS								*/
-                    
+
                     }
                   break;
               }
@@ -10243,7 +10243,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("rotr	#%1, %0");
 #line 712 "rx-decode.opc"
                       ID(rotr); SC(i*16+mmmm); DR(rdst); F__SZC;
-                    
+
                     }
                   break;
               }
@@ -10283,7 +10283,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("rotl	#%1, %0");
 #line 706 "rx-decode.opc"
                       ID(rotl); SC(i*16+mmmm); DR(rdst); F__SZC;
-                    
+
                     }
                   break;
               }
@@ -10320,7 +10320,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("adc	#%1, %0");
 #line 488 "rx-decode.opc"
                       ID(adc); SC(IMMex(im)); DR(rdst); F_OSZC;
-                    
+
                     }
                   break;
                 case 0x40:
@@ -10342,7 +10342,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("max	#%1, %0");
 #line 570 "rx-decode.opc"
                       ID(max); DR(rdst); SC(IMMex(im));
-                    
+
                     }
                   break;
                 case 0x50:
@@ -10364,7 +10364,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("min	#%1, %0");
 #line 590 "rx-decode.opc"
                       ID(min); DR(rdst); SC(IMMex(im));
-                    
+
                     }
                   break;
                 case 0x60:
@@ -10386,7 +10386,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("emul	#%1, %0");
 #line 620 "rx-decode.opc"
                       ID(emul); DR(rdst); SC(IMMex(im));
-                    
+
                     }
                   break;
                 case 0x70:
@@ -10408,7 +10408,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("emulu	#%1, %0");
 #line 632 "rx-decode.opc"
                       ID(emulu); DR(rdst); SC(IMMex(im));
-                    
+
                     }
                   break;
                 case 0x80:
@@ -10430,7 +10430,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("div	#%1, %0");
 #line 644 "rx-decode.opc"
                       ID(div); DR(rdst); SC(IMMex(im)); F_O___;
-                    
+
                     }
                   break;
                 case 0x90:
@@ -10452,7 +10452,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("divu	#%1, %0");
 #line 656 "rx-decode.opc"
                       ID(divu); DR(rdst); SC(IMMex(im)); F_O___;
-                    
+
                     }
                   break;
                 case 0xc0:
@@ -10474,7 +10474,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("tst	#%1, %2");
 #line 467 "rx-decode.opc"
                       ID(and); SC(IMMex(im)); S2R(rdst); F__SZ_;
-                    
+
                     }
                   break;
                 case 0xd0:
@@ -10496,7 +10496,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("xor	#%1, %0");
 #line 446 "rx-decode.opc"
                       ID(xor); SC(IMMex(im)); DR(rdst); F__SZ_;
-                    
+
                     }
                   break;
                 case 0xe0:
@@ -10518,7 +10518,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("stz	#%1, %0");
 #line 392 "rx-decode.opc"
                       ID(stcc); SC(IMMex(im)); DR(rdst); S2cc(RXC_z);
-                    
+
                     }
                   break;
                 case 0xf0:
@@ -10540,10 +10540,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("stnz	#%1, %0");
 #line 395 "rx-decode.opc"
                       ID(stcc); SC(IMMex(im)); DR(rdst); S2cc(RXC_nz);
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* RTSD									*/
-                    
+
                     }
                   break;
                 default: UNSUPPORTED(); break;
@@ -10568,7 +10568,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fsub	#%1, %0");
 #line 864 "rx-decode.opc"
                       ID(fsub); DR(rdst); SC(IMM(0)); F__SZ_;
-                    
+
                     }
                   break;
                 case 0x10:
@@ -10586,7 +10586,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fcmp	#%1, %0");
 #line 858 "rx-decode.opc"
                       ID(fcmp); DR(rdst); SC(IMM(0)); F_OSZ_;
-                    
+
                     }
                   break;
                 case 0x20:
@@ -10604,7 +10604,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fadd	#%1, %0");
 #line 852 "rx-decode.opc"
                       ID(fadd); DR(rdst); SC(IMM(0)); F__SZ_;
-                    
+
                     }
                   break;
                 case 0x30:
@@ -10622,7 +10622,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fmul	#%1, %0");
 #line 873 "rx-decode.opc"
                       ID(fmul); DR(rdst); SC(IMM(0)); F__SZ_;
-                    
+
                     }
                   break;
                 case 0x40:
@@ -10640,7 +10640,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("fdiv	#%1, %0");
 #line 879 "rx-decode.opc"
                       ID(fdiv); DR(rdst); SC(IMM(0)); F__SZ_;
-                    
+
                     }
                   break;
                 default: UNSUPPORTED(); break;
@@ -10669,7 +10669,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mvtc	#%1, %0");
 #line 969 "rx-decode.opc"
                       ID(mov); SC(IMMex(im)); DR(crdst + 16);
-                    
+
                     }
                   break;
                 default: UNSUPPORTED(); break;
@@ -10851,10 +10851,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("shlr	#%2, %1, %0");
 #line 694 "rx-decode.opc"
                       ID(shlr); S2C(immmm); SR(rsrc); DR(rdst); F__SZC;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* ROTATE								*/
-                    
+
                     }
                   break;
               }
@@ -11164,8 +11164,8 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("shar	#%2, %1, %0");
 #line 684 "rx-decode.opc"
                       ID(shar); S2C(immmm); SR(rsrc); DR(rdst); F_0SZC;
-                    
-                    
+
+
                     }
                   break;
               }
@@ -11475,8 +11475,8 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("shll	#%2, %1, %0");
 #line 674 "rx-decode.opc"
                       ID(shll); S2C(immmm); SR(rsrc); DR(rdst); F_OSZC;
-                    
-                    
+
+
                     }
                   break;
               }
@@ -11800,10 +11800,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("bm%2	#%1, %0%S0");
 #line 948 "rx-decode.opc"
                       ID(bmcc); BWL(LSIZE); S2cc(cond); SC(bittt); DR(rdst);
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* CONTROL REGISTERS							*/
-                    
+
                     }
                   break;
                 case 0xf0:
@@ -11825,8 +11825,8 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("bnot	#%1, %0");
 #line 941 "rx-decode.opc"
                       ID(bnot); BWL(LSIZE); SC(bittt); DR(rdst);
-                    
-                    
+
+
                     }
                   break;
               }
@@ -12673,7 +12673,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mov%s	%0, [%1, %2]");
 #line 338 "rx-decode.opc"
                       ID(movbir); sBWL(sz); DR(rdst); SRR(isrc); S2R(bsrc); F_____;
-                    
+
                     }
                   break;
               }
@@ -13130,7 +13130,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mov%s	[%1, %2], %0");
 #line 335 "rx-decode.opc"
                       ID(movbi); sBWL(sz); DR(rdst); SRR(isrc); S2R(bsrc); F_____;
-                    
+
                     }
                   break;
               }
@@ -13587,7 +13587,7 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("movu%s	[%1, %2], %0");
 #line 341 "rx-decode.opc"
                       ID(movbi); uBWL(sz); DR(rdst); SRR(isrc); S2R(bsrc); F_____;
-                    
+
                     }
                   break;
               }
@@ -14048,10 +14048,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("sub	%2, %1, %0");
 #line 545 "rx-decode.opc"
                       ID(sub); DR(rdst); SR(srcb); S2R(srca); F_OSZC;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* SBB									*/
-                    
+
                     }
                   break;
               }
@@ -14217,10 +14217,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("add	%2, %1, %0");
 #line 512 "rx-decode.opc"
                       ID(add); DR(rdst); SR(srcb); S2R(srca); F_OSZC;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* CMP									*/
-                    
+
                     }
                   break;
               }
@@ -14386,10 +14386,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("mul 	%2, %1, %0");
 #line 614 "rx-decode.opc"
                       ID(mul); DR(rdst); SR(srcb); S2R(srca); F_____;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* EMUL									*/
-                    
+
                     }
                   break;
               }
@@ -14555,10 +14555,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("and	%2, %1, %0");
 #line 422 "rx-decode.opc"
                       ID(and); DR(rdst); SR(srcb); S2R(srca); F__SZ_;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* OR									*/
-                    
+
                     }
                   break;
               }
@@ -14724,10 +14724,10 @@ rx_decode_opcode (unsigned long pc AU,
                       SYNTAX("or	%2, %1, %0");
 #line 440 "rx-decode.opc"
                       ID(or); DR(rdst); SR(srcb); S2R(srca); F__SZ_;
-                    
+
                     /*----------------------------------------------------------------------*/
                     /* XOR									*/
-                    
+
                     }
                   break;
               }
