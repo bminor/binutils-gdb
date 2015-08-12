@@ -334,12 +334,12 @@ strings_a_section (bfd *abfd, asection *sect, void *arg)
   bfd_size_type *filesizep;
   bfd_size_type sectsize;
   void *mem;
-     
+
   if ((sect->flags & DATA_FLAGS) != DATA_FLAGS)
     return;
 
   sectsize = bfd_get_section_size (sect);
-     
+
   if (sectsize <= 0)
     return;
 
@@ -350,7 +350,7 @@ strings_a_section (bfd *abfd, asection *sect, void *arg)
   if (*filesizep == 0)
     {
       struct stat st;
-      
+
       if (bfd_stat (abfd, &st))
 	return;
 

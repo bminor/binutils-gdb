@@ -955,7 +955,7 @@ open_inarch (const char *archive_filename, const char *file)
 		 bfd_get_filename (arch));
 	  goto bloser;
 	}
-    }  
+    }
 
   last_one = &(arch->archive_next);
   /* Read all the contents right away, regardless.  */

@@ -164,7 +164,7 @@ read_coff_rsrc (const char *filename, const char *target)
      this will have to be cleaned up.  */
 
   ret = read_coff_res_dir (&wrbfd, data, &flaginfo, (const rc_res_id *) NULL, 0);
-  
+
   bfd_close (abfd);
 
   return ret;

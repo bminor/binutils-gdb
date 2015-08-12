@@ -86,7 +86,7 @@ bfd_nonfatal_message (const char *filename,
   section_name = NULL;
   va_start (args, format);
   fprintf (stderr, "%s", program_name);
-  
+
   if (abfd)
     {
       if (!filename)
@@ -574,7 +574,7 @@ off_t
 get_file_size (const char * file_name)
 {
   struct stat statbuf;
-  
+
   if (stat (file_name, &statbuf) < 0)
     {
       if (errno == ENOENT)
@@ -582,7 +582,7 @@ get_file_size (const char * file_name)
       else
 	non_fatal (_("Warning: could not locate '%s'.  reason: %s"),
 		   file_name, strerror (errno));
-    }  
+    }
   else if (! S_ISREG (statbuf.st_mode))
     non_fatal (_("Warning: '%s' is not an ordinary file"), file_name);
   else if (statbuf.st_size < 0)
@@ -604,7 +604,7 @@ bfd_get_archive_filename (const bfd *abfd)
   size_t needed;
 
   assert (abfd != NULL);
-  
+
   if (!abfd->my_archive)
     return bfd_get_filename (abfd);
 

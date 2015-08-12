@@ -732,7 +732,7 @@ parse_flags (const char *s)
    We need to be careful in how we match section names because of the support
    for wildcard characters.  For example suppose that the user has invoked
    objcopy like this:
-         
+
        --set-section-flags .debug_*=debug
        --set-section-flags .debug_str=readonly,debug
        --change-section-address .debug_*ranges=0x1000
@@ -760,7 +760,7 @@ find_section_list (const char *name, bfd_boolean add, unsigned int context)
   struct section_list *p;
 
   /* assert ((context & ((1 << 7) - 1)) != 0); */
-  
+
   for (p = change_sections; p != NULL; p = p->next)
     {
       if (add)
@@ -1964,7 +1964,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 				    _("can't dump section - it has no contents"));
 	      continue;
 	    }
-	  
+
 	  bfd_size_type size = bfd_get_section_size (sec);
 	  if (size == 0)
 	    {
@@ -2001,7 +2001,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  free (contents);
 	}
     }
-  
+
   if (gnu_debuglink_filename != NULL)
     {
       /* PR 15125: Give a helpful warning message if
@@ -3925,7 +3925,7 @@ copy_main (int argc, char *argv[])
           dump_sections = init_section_add (optarg, dump_sections,
                                             "--dump-section");
 	  break;
-	  
+
 	case OPTION_CHANGE_START:
 	  change_start = parse_vma (optarg, "--change-start");
 	  break;

@@ -1,4 +1,4 @@
-#! /bin/sh 
+#! /bin/sh
 # Embed an SPU ELF executable into a PowerPC object file.
 #
 # Copyright (C) 2006-2015 Free Software Foundation, Inc.
