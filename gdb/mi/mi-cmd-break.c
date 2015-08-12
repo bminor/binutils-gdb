@@ -182,6 +182,8 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
   enum bptype type_wanted;
   struct event_location *location;
   struct breakpoint_ops *ops;
+  int is_explicit = 0;
+  struct explicit_location explicit;
   char *extra_string = NULL;
 
   enum opt
@@ -189,6 +191,8 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
       HARDWARE_OPT, TEMP_OPT, CONDITION_OPT,
       IGNORE_COUNT_OPT, THREAD_OPT, PENDING_OPT, DISABLE_OPT,
       TRACEPOINT_OPT,
+      EXPLICIT_SOURCE_OPT, EXPLICIT_FUNC_OPT,
+      EXPLICIT_LABEL_OPT, EXPLICIT_LINE_OPT
     };
   static const struct mi_opt opts[] =
   {
@@ -200,6 +204,10 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
     {"f", PENDING_OPT, 0},
     {"d", DISABLE_OPT, 0},
     {"a", TRACEPOINT_OPT, 0},
+    {"-source" , EXPLICIT_SOURCE_OPT, 1},
+    {"-function", EXPLICIT_FUNC_OPT, 1},
+    {"-label", EXPLICIT_LABEL_OPT, 1},
+    {"-line", EXPLICIT_LINE_OPT, 1},
     { 0, 0, 0 }
   };
 
@@ -207,6 +215,8 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
      to denote the end of the option list. */
   int oind = 0;
   char *oarg;
+
+  initialize_explicit_location (&explicit);
 
   while (1)
     {
@@ -240,16 +250,31 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
 	case TRACEPOINT_OPT:
 	  tracepoint = 1;
 	  break;
+	case EXPLICIT_SOURCE_OPT:
+	  is_explicit = 1;
+	  explicit.source_filename = oarg;
+	  break;
+	case EXPLICIT_FUNC_OPT:
+	  is_explicit = 1;
+	  explicit.function_name = oarg;
+	  break;
+	case EXPLICIT_LABEL_OPT:
+	  is_explicit = 1;
+	  explicit.label_name = oarg;
+	  break;
+	case EXPLICIT_LINE_OPT:
+	  is_explicit = 1;
+	  explicit.line_offset = linespec_parse_line_offset (oarg);
+	  break;
 	}
     }
 
-  if (oind >= argc)
+  if (oind >= argc && !is_explicit)
     error (_("-%s-insert: Missing <location>"),
 	   dprintf ? "dprintf" : "break");
-  address = argv[oind];
   if (dprintf)
     {
-      int format_num = oind + 1;
+      int format_num = is_explicit ? oind : oind + 1;
 
       if (hardware || tracepoint)
 	error (_("-dprintf-insert: does not support -h or -a"));
@@ -258,11 +283,21 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
 
       extra_string = mi_argv_to_format (argv + format_num, argc - format_num);
       make_cleanup (xfree, extra_string);
+      address = argv[oind];
     }
   else
     {
-      if (oind < argc - 1)
-	error (_("-break-insert: Garbage following <location>"));
+      if (is_explicit)
+	{
+	  if (oind < argc)
+	    error (_("-break-insert: Garbage following explicit location"));
+	}
+      else
+	{
+	  if (oind < argc - 1)
+	    error (_("-break-insert: Garbage following <location>"));
+	  address = argv[oind];
+	}
     }
 
   /* Now we have what we need, let's insert the breakpoint!  */
@@ -291,11 +326,30 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
       ops = &bkpt_breakpoint_ops;
     }
 
-  location = string_to_event_location (&address, current_language);
-  make_cleanup_delete_event_location (location);
+  if (is_explicit)
+    {
+      /* Error check -- we must have one of the other
+	 parameters specified.  */
+      if (explicit.source_filename != NULL
+	  && explicit.function_name == NULL
+	  && explicit.label_name == NULL
+	  && explicit.line_offset.sign == LINE_OFFSET_UNKNOWN)
+	error (_("-%s-insert: --source option requires --function, --label,"
+		 " or --line"), dprintf ? "dprintf" : "break");
 
-  if (*address)
-    error (_("Garbage '%s' at end of location"), address);
+      location = new_explicit_location (&explicit);
+    }
+  else
+    {
+      location = string_to_event_location (&address, current_language);
+      if (*address)
+	{
+	  delete_event_location (location);
+	  error (_("Garbage '%s' at end of location"), address);
+	}
+    }
+
+  make_cleanup_delete_event_location (location);
 
   create_breakpoint (get_current_arch (), location, condition, thread,
 		     extra_string,

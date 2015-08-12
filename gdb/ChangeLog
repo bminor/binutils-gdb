@@ -1,5 +1,11 @@
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Add support for
+	explicit locations, options "--source", "--function",
+	"--label", and "--line".
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
 	* completer.c: Include location.h.
 	(enum match_type): New enum.
 	(location_completer): Rename to ...
