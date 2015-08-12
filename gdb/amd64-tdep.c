@@ -1662,7 +1662,7 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 
       regcache_cooked_read_unsigned (regs, AMD64_RSP_REGNUM, &rsp);
       retaddr = read_memory_unsigned_integer (rsp, retaddr_len, byte_order);
-      retaddr = (retaddr - insn_offset) & 0xffffffffUL;
+      retaddr = (retaddr - insn_offset) & 0xffffffffffffffffULL;
       write_memory_unsigned_integer (rsp, retaddr_len, byte_order, retaddr);
 
       if (debug_displaced)
