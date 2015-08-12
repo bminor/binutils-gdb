@@ -1,3 +1,10 @@
+2015-08-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+	    Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/checkpoint-ns.exp: Use save_vars to save and restore
+	GDBFLAGS.
+
 2015-08-12  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.base/gdbhistsize-history.exp

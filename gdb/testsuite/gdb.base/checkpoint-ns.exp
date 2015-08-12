@@ -18,9 +18,8 @@
 # We drive non-stop mode from a separate file because the whole test
 # takes a while to run.  This way, we can test both modes in parallel.
 
-set saved_gdbflags $GDBFLAGS
-append GDBFLAGS " -ex \"set non-stop on\""
+save_vars { GDBFLAGS } {
+    append GDBFLAGS " -ex \"set non-stop on\""
 
-source $srcdir/$subdir/checkpoint.exp
-
-set GDBFLAGS $saved_gdbflags
+    source $srcdir/$subdir/checkpoint.exp
+}
