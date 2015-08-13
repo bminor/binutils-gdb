@@ -1,3 +1,52 @@
+2015-08-13  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c: Include namespace.h
+	(aux_add_nonlocal_symbols): Fix a function name in comment.
+	(ada_add_block_renamings): New.
+	(add_nonlocal_symbols): Add global renamings handling.
+	(ada_lookup_symbol_list_worker): Move the symbol lookup part
+	to...
+	(ada_add_all_symbols): ... this new function.
+	(ada_add_block_symbols): Try to match the input name against the
+	"using directives list", perform a recursive symbol lookup on
+	the matched declarations.
+	* block.h (struct block): Move the_namespace to top-level as
+	namespace_info. Remove the language_specific field.
+	(BLOCK_NAMESPACE): Update access to the namespace_info field.
+	* buildsym.h (using_directives): Rename into...
+	(local_using_directives): ... this.
+	(global_using_directives): New.
+	(struct context_stack): Rename the using_directives field into
+	local_using_directives.
+	* buildsym.c (finish_block_internal): Deal with the proper
+	using directives repository (local or global).
+	(prepare_for_building): Reset local_using_directives. Assert
+	that there is no pending global using directive.
+	(reset_symtab_globals): Reset global_using_directives and
+	local_using_directives.
+	(end_symtab_get_static_block): Don't ignore symtabs that have
+	only using directives.
+	(push_context): Update references to local_using_directives.
+	(buildsym_init): Do not reset using_directives.
+	* cp-support.c: Include namespace.h.
+	* cp-support.h (struct using_direct): Move to namespace.h.
+	(cp_add_using_directives): Move to namespace.h.
+	* cp-namespace.c: Include namespace.h
+	(cp_add_using_directive): Move to namespace.c, rename it to
+	add_using_directive, add a "using_directives" argument and use
+	it as the pending using directives repository.  All callers
+	updated.
+	* dwarf2read.c (using_directives): New.
+	(read_import_statement): Call using_directives.
+	(read_func_scope): Update references to local_using_directives.
+	(read_lexical_block_scope): Likewise.
+	(read_namespace): Update the heading comment, call
+	using_directives.
+	* namespace.h: New file.
+	* namespace.c: New file.
+	* Makefile.in (SFILES): Add namespace.c.
+	(COMMON_OBS): Add namespace.o
+
 2015-08-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* amd64-tdep.c (amd64_displaced_step_fixup): Fix the mask used to
