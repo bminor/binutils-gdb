@@ -1,3 +1,8 @@
+2015-08-13  Pedro Alves  <palves@redhat.com>
+
+	* python/py-unwind.c (pyuw_sniffer): Install the invalidate
+	cleanup after the decref cleanup, not before.
+
 2015-08-13  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-lang.c: Include namespace.h

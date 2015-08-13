@@ -537,8 +537,8 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
     goto error;
   ((pending_frame_object *) pyo_pending_frame)->gdbarch = gdbarch;
   ((pending_frame_object *) pyo_pending_frame)->frame_info = this_frame;
-  make_cleanup (pending_frame_invalidate, (void *) pyo_pending_frame);
   make_cleanup_py_decref (pyo_pending_frame);
+  make_cleanup (pending_frame_invalidate, (void *) pyo_pending_frame);
 
   /* Run unwinders.  */
   if (gdb_python_module == NULL
