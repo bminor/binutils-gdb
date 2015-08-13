@@ -1,4 +1,13 @@
 2015-08-13  Alan Modra  <amodra@gmail.com>
+	    DJ Delorie  <dj@redhat.com>
+
+	* expr.c (integer_constant): Return O_absent expression if eol.
+	(operand): For targets with both LOCAL_LABELS_FB and
+	NUMBERS_WITH_SUFFIX set, treat "0b" not followed by binary
+	digits as a local label reference.  Correct handling of 0b prefix.
+	If a suffix is not allowed, error on 0B.
+
+2015-08-13  Alan Modra  <amodra@gmail.com>
 
 	* doc/as.texinfo (Local Labels): Allowed range of N in local
 	labels is non-negative integers, not positive integers.

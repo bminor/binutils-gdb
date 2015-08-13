@@ -285,6 +285,12 @@ integer_constant (int radix, expressionS *expressionP)
 #define valuesize 32
 #endif
 
+  if (is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      expressionP->X_op = O_absent;
+      return;
+    }
+
   if ((NUMBERS_WITH_SUFFIX || flag_m68k_mri) && radix == 0)
     {
       int flt = 0;
@@ -832,32 +838,28 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	  break;
 
 	case 'b':
-	  if (LOCAL_LABELS_FB && ! (flag_m68k_mri || NUMBERS_WITH_SUFFIX))
+	  if (LOCAL_LABELS_FB && !flag_m68k_mri
+	      && input_line_pointer[1] != '0'
+	      && input_line_pointer[1] != '1')
 	    {
-	      /* This code used to check for '+' and '-' here, and, in
-		 some conditions, fall through to call
-		 integer_constant.  However, that didn't make sense,
-		 as integer_constant only accepts digits.  */
-	      /* Some of our code elsewhere does permit digits greater
-		 than the expected base; for consistency, do the same
-		 here.  */
-	      if (input_line_pointer[1] < '0'
-		  || input_line_pointer[1] > '9')
-		{
-		  /* Parse this as a back reference to label 0.  */
-		  input_line_pointer--;
-		  integer_constant (10, expressionP);
-		  break;
-		}
-	      /* Otherwise, parse this as a binary number.  */
+	      /* Parse this as a back reference to label 0.  */
+	      input_line_pointer--;
+	      integer_constant (10, expressionP);
+	      break;
 	    }
+	  /* Otherwise, parse this as a binary number.  */
 	  /* Fall through.  */
 	case 'B':
-	  input_line_pointer++;
+	  if (input_line_pointer[1] == '0'
+	      || input_line_pointer[1] == '1')
+	    {
+	      input_line_pointer++;
+	      integer_constant (2, expressionP);
+	      break;
+	    }
 	  if (flag_m68k_mri || NUMBERS_WITH_SUFFIX)
-	    goto default_case;
-	  integer_constant (2, expressionP);
-	  break;
+	    input_line_pointer++;
+	  goto default_case;
 
 	case '0':
 	case '1':
