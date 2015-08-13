@@ -94,6 +94,7 @@
 	* ld-ifunc/pr18808.out: New file.
 	* ld-ifunc/pr18808a.c: Likewise.
 	* ld-ifunc/pr18808b.c: Likewise.
+	* lib/ld-lib.exp (check_ifunc_attribute_available): New.
 
 2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
