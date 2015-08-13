@@ -1,3 +1,8 @@
+2015-08-12  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/dso2dso.exp: Pass basename of source file in call to
+	gdb_get_line_number.
+
 2015-08-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/dso2dso-dso2.c, gdb.base/dso2dso-dso2.h,
