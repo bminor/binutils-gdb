@@ -1,4 +1,9 @@
 2015-08-13  Alan Modra  <amodra@gmail.com>
+
+	* expr.c (operand): Rewrite handling of operands starting with "0f".
+	If atof_generic only parses "-" or "+", treat as expression.
+
+2015-08-13  Alan Modra  <amodra@gmail.com>
 	    DJ Delorie  <dj@redhat.com>
 
 	* expr.c (integer_constant): Return O_absent expression if eol.
