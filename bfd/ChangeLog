@@ -1,3 +1,10 @@
+2015-08-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18801
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Issue an error
+	for read-only segment with dynamic IFUNC relocations.
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Likewise.
+
 2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
 
 	* elfxx-mips.c (STUB_MOVE): Change to use 'or' only.

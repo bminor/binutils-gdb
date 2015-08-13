@@ -1,3 +1,13 @@
+2015-08-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18801
+	* ld-i386/i386.exp: Run pr18801.
+	* ld-x86-64/x86-64.exp: Likewise.
+	* ld-i386/pr18801.d: New file.
+	* ld-i386/pr18801.s: Likewise.
+	* ld-x86-64/pr18801.d: Likewise.
+	* ld-x86-64/pr18801.s: Likewise.
+
 2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
 
 	* ld-mips-elf/compressed-plt-1-n32-mips16.od: Update test.

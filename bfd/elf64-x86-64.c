@@ -3513,6 +3513,15 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
+	      if ((elf_tdata (output_bfd)->has_gnu_symbols
+		   & elf_gnu_symbol_ifunc) == elf_gnu_symbol_ifunc)
+		{
+		  info->callbacks->einfo
+		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+
 	      if (!add_dynamic_entry (DT_TEXTREL, 0))
 		return FALSE;
 	    }
