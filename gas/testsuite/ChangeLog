@@ -1,3 +1,10 @@
+2015-08-13  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* gas/arm/nops.d: New.
+	* gas/arm/nops.s: New.
+	* gas/arm/inst.d: Changed expectation file for 26-bit teq,
+	tst, cmn and cmp.
+
 2015-08-12  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* gas/xtensa/all.exp: Add auto-litpools to the list of xtensa

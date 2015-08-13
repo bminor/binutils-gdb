@@ -1,3 +1,11 @@
+2015-08-13  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* arm-dis.c (print_insn_arm): Disassembling for all targets V6
+	and higher with ARM instruction set will now mark the 26-bit
+	versions of teq,tst,cmn and cmp as UNPREDICTABLE.
+	(arm_opcodes): Fix for unpredictable nop being recognized as a
+	teq.
+
 2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
 
 	* micromips-opc.c (micromips_opcodes): Re-order table so that move

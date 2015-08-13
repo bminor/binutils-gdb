@@ -1647,6 +1647,8 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7), 0xf57ff050, 0xfffffff0, "dmb\t%U"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7), 0xf57ff040, 0xfffffff0, "dsb\t%U"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7), 0xf57ff060, 0xfffffff0, "isb\t%U"},
+   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7),
+    0x0320f000, 0x0fffffff, "nop%c\t{%0-7d}"},
 
   /* ARM V6T2 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
@@ -2124,11 +2126,13 @@ static const struct opcode32 arm_opcodes[] =
     0x01000010, 0x0fe00090, "tst%p%c\t%16-19R, %o"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x03200000, 0x0fe00000, "teq%p%c\t%16-19r, %o"},
+    0x03300000, 0x0ff00000, "teq%p%c\t%16-19r, %o"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01200000, 0x0fe00010, "teq%p%c\t%16-19r, %o"},
+    0x01300000, 0x0ff00010, "teq%p%c\t%16-19r, %o"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01200010, 0x0fe00090, "teq%p%c\t%16-19R, %o"},
+    0x01300010, 0x0ff00010, "teq%p%c\t%16-19R, %o"},
+  {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
+    0x0130f000, 0x0ff0f010, "bx%c\t%0-3r"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x03400000, 0x0fe00000, "cmp%p%c\t%16-19r, %o"},
@@ -2277,6 +2281,8 @@ static const struct opcode32 arm_opcodes[] =
     0x0f000000, 0x0f000000, "svc%c\t%0-23x"},
 
   /* The rest.  */
+  {ARM_FEATURE_CORE_LOW (ARM_EXT_V7),
+    0x03200000, 0x0fff00ff, "nop%c\t{%0-7d}" UNPREDICTABLE_INSTRUCTION},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x00000000, 0x00000000, UNDEFINED_INSTRUCTION},
   {ARM_FEATURE_CORE_LOW (0),
@@ -4655,6 +4661,8 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  if (! ARM_CPU_HAS_FEATURE (private_data->features, \
 						     arm_ext_v6))
 			    func (stream, "p");
+			  else
+			    is_unpredictable = TRUE;
 			}
 		      break;
 
