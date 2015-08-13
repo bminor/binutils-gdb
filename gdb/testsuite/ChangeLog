@@ -1,3 +1,8 @@
+2015-08-17  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.linespec/explicit.exp: Move strace test from here ...
+	* gdb.trace/strace.exp: ... to here.
+
 2015-08-15  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.base/kill-detach-inferiors-cmd.exp: New test file.

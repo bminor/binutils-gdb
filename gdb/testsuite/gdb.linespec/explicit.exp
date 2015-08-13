@@ -86,10 +86,6 @@ namespace eval $testfile {
     add linespecs "-function myfunction -label top -line 3" $location(top)
     add linespecs "-line 3" $location(normal)
 
-    # Test that static tracepoints on marker ID are not interpreted
-    # as an erroneous explicit option.
-    gdb_test "strace -m gdbfoobarbaz" "You can't do that.*"
-
     # Fire up gdb.
     if {![runto_main]} {
 	return -1
