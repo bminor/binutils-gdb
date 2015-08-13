@@ -1,5 +1,29 @@
 2015-08-13  Iain Buclaw  <ibuclaw@gdcproject.org>
 
+	* d-exp.y (%union): Add voidval.
+	(%token): Add UNKNOWN_NAME as a token to represent an unclassified
+	name in the lexing stage.
+	(PostfixExpression): Move symbol completion handling in grammar here
+	from PrimaryExpression.
+	(PrimaryExpression): Move routines to handle resolving identifier
+	tokens in the grammar here from push_expression_name.
+	(IdentifierExp): Remove the handling of alternating '.' and identifier
+	tokens.
+	(TypeExp): Allow TypeExp to be wrapped in parenthesis in the grammar.
+	(BasicType): Remove C-style typename rules.
+	(d_type_from_name, d_module_from_name, push_variable)
+	(push_fieldnames, push_type_name, push_module_name)
+	(push_expression_name): Remove.
+	(lex_one_token): Rename from yylex.  Replace pstate with par_state.
+	(token_and_value): New type.
+	(token_fifo, popping, name_obstack): New globals.
+	(classify_name): New function.
+	(classify_inner_name): Likewise.
+	(yylex): Likewise.
+	(d_parse): Initialize token_fifo, popping and name_obstack.
+
+2015-08-13  Iain Buclaw  <ibuclaw@gdcproject.org>
+
 	* Makefile.in (SFILES): Add d-namespace.c.
 	(COMMON_OBS): Add d-namespace.o.
 	* d-lang.c (d_language_defn): Use d_lookup_symbol_nonlocal as the
