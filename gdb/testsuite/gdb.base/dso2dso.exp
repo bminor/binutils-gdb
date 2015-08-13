@@ -57,7 +57,7 @@ if { ![runto_main] } {
 # libdso2) make from sub1 (provided by libdso1), and land at
 # the expected location.
 
-set bp_location [gdb_get_line_number "STOP HERE" $srcfile_libdso1]
+set bp_location [gdb_get_line_number "STOP HERE" [file tail $srcfile_libdso1]]
 gdb_breakpoint ${srcfile_libdso1}:${bp_location}
 
 gdb_continue_to_breakpoint "at call to sub2" \
