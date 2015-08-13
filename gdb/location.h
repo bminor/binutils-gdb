@@ -97,13 +97,13 @@ extern enum event_location_type
    explicit location.  The location must already be canonicalized/valid.  */
 
 extern char *
-  explicit_location_to_string (const struct explicit_location *explicit);
+  explicit_location_to_string (const struct explicit_location *explicit_loc);
 
 /* Return a malloc'd linespec string representation of the given
    explicit location.  The location must already be canonicalized/valid.  */
 
 extern char *
-  explicit_location_to_linespec (const struct explicit_location *explicit);
+  explicit_location_to_linespec (const struct explicit_location *explicit_loc);
 
 /* Return a string representation of the LOCATION.
    This function may return NULL for unspecified linespecs,
@@ -152,7 +152,8 @@ extern const char *
 
 /* Initialize the given explicit location.  */
 
-extern void initialize_explicit_location (struct explicit_location *explicit);
+extern void
+  initialize_explicit_location (struct explicit_location *explicit_loc);
 
 /* Create a new explicit location.  If not NULL, EXPLICIT is checked for
    validity.  If invalid, an exception is thrown.
@@ -161,7 +162,7 @@ extern void initialize_explicit_location (struct explicit_location *explicit);
    delete_event_location.  */
 
 extern struct event_location *
-  new_explicit_location (const struct explicit_location *explicit);
+  new_explicit_location (const struct explicit_location *explicit_loc);
 
 /* Return the explicit location of the given event_location
    (which must be of type EXPLICIT_LOCATION).  */

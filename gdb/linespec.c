@@ -72,7 +72,7 @@ DEF_VEC_O (bound_minimal_symbol_d);
 struct linespec
 {
   /* An explicit location describing the SaLs.  */
-  struct explicit_location explicit;
+  struct explicit_location explicit_loc;
 
   /* The list of symtabs to search to which to limit the search.  May not
      be NULL.  If explicit.SOURCE_FILENAME is NULL (no user-specified
@@ -256,7 +256,7 @@ typedef struct ls_parser linespec_parser;
 
 /* A convenience macro for accessing the explicit location result of
    the parser.  */
-#define PARSER_EXPLICIT(PPTR) (&PARSER_RESULT ((PPTR))->explicit)
+#define PARSER_EXPLICIT(PPTR) (&PARSER_RESULT ((PPTR))->explicit_loc)
 
 /* Prototypes for local functions.  */
 
@@ -1769,21 +1769,22 @@ static void
 canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 {
   struct event_location *canon;
-  struct explicit_location *explicit;
+  struct explicit_location *explicit_loc;
 
   /* If canonicalization was not requested, no need to do anything.  */
   if (!state->canonical)
     return;
 
   /* Save everything as an explicit location.  */
-  canon = state->canonical->location = new_explicit_location (&ls->explicit);
-  explicit = get_explicit_location (canon);
+  canon = state->canonical->location
+    = new_explicit_location (&ls->explicit_loc);
+  explicit_loc = get_explicit_location (canon);
 
-  if (explicit->label_name != NULL)
+  if (explicit_loc->label_name != NULL)
     {
       state->canonical->special_display = 1;
 
-      if (explicit->function_name == NULL)
+      if (explicit_loc->function_name == NULL)
 	{
 	  struct symbol *s;
 
@@ -1792,7 +1793,7 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 		      && (VEC_length (symbolp, ls->labels.function_symbols)
 			  == 1));
 	  s = VEC_index (symbolp, ls->labels.function_symbols, 0);
-	  explicit->function_name = xstrdup (SYMBOL_NATURAL_NAME (s));
+	  explicit_loc->function_name = xstrdup (SYMBOL_NATURAL_NAME (s));
 	}
     }
 
@@ -1800,7 +1801,7 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
      representation of it for display and saving to file.  */
   if (state->is_linespec)
     {
-      char *linespec = explicit_location_to_linespec (explicit);
+      char *linespec = explicit_location_to_linespec (explicit_loc);
 
       set_event_location_string (canon, linespec);
       xfree (linespec);
@@ -1844,18 +1845,18 @@ create_sals_line_offset (struct linespec_state *self,
       use_default = 1;
     }
 
-  val.line = ls->explicit.line_offset.offset;
-  switch (ls->explicit.line_offset.sign)
+  val.line = ls->explicit_loc.line_offset.offset;
+  switch (ls->explicit_loc.line_offset.sign)
     {
     case LINE_OFFSET_PLUS:
-      if (ls->explicit.line_offset.offset == 0)
+      if (ls->explicit_loc.line_offset.offset == 0)
 	val.line = 5;
       if (use_default)
 	val.line = self->default_line + val.line;
       break;
 
     case LINE_OFFSET_MINUS:
-      if (ls->explicit.line_offset.offset == 0)
+      if (ls->explicit_loc.line_offset.offset == 0)
 	val.line = 15;
       if (use_default)
 	val.line = self->default_line - val.line;
@@ -1947,9 +1948,9 @@ create_sals_line_offset (struct linespec_state *self,
 
   if (values.nelts == 0)
     {
-      if (ls->explicit.source_filename)
+      if (ls->explicit_loc.source_filename)
 	throw_error (NOT_FOUND_ERROR, _("No line %d in file \"%s\"."),
-		     val.line, ls->explicit.source_filename);
+		     val.line, ls->explicit_loc.source_filename);
       else
 	throw_error (NOT_FOUND_ERROR, _("No line %d in the current file."),
 		     val.line);
@@ -2046,13 +2047,13 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	    }
 	}
     }
-  else if (ls->explicit.line_offset.sign != LINE_OFFSET_UNKNOWN)
+  else if (ls->explicit_loc.line_offset.sign != LINE_OFFSET_UNKNOWN)
     {
       /* Only an offset was specified.  */
 	sals = create_sals_line_offset (state, ls);
 
 	/* Make sure we have a filename for canonicalization.  */
-	if (ls->explicit.source_filename == NULL)
+	if (ls->explicit_loc.source_filename == NULL)
 	  {
 	    const char *fullname = symtab_to_fullname (state->default_symtab);
 
@@ -2060,7 +2061,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	       form so that displaying SOURCE_FILENAME can follow the current
 	       FILENAME_DISPLAY_STRING setting.  But as it is used only rarely
 	       it has been kept for code simplicity only in absolute form.  */
-	    ls->explicit.source_filename = xstrdup (fullname);
+	    ls->explicit_loc.source_filename = xstrdup (fullname);
 	  }
     }
   else
@@ -2077,29 +2078,30 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
   return sals;
 }
 
-/* Convert the explicit location EXPLICIT into SaLs.  */
+/* Convert the explicit location EXPLICIT_LOC into SaLs.  */
 
 static struct symtabs_and_lines
 convert_explicit_location_to_sals (struct linespec_state *self,
 				   linespec_p result,
-				   const struct explicit_location *explicit)
+				   const struct explicit_location *explicit_loc)
 {
   VEC (symbolp) *symbols, *labels;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
 
-  if (explicit->source_filename != NULL)
+  if (explicit_loc->source_filename != NULL)
     {
       TRY
 	{
 	  result->file_symtabs
-	    = symtabs_from_filename (explicit->source_filename);
+	    = symtabs_from_filename (explicit_loc->source_filename);
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
-	  source_file_not_found_error (explicit->source_filename);
+	  source_file_not_found_error (explicit_loc->source_filename);
 	}
       END_CATCH
-      result->explicit.source_filename = xstrdup (explicit->source_filename);
+      result->explicit_loc.source_filename
+	= xstrdup (explicit_loc->source_filename);
     }
   else
     {
@@ -2107,38 +2109,39 @@ convert_explicit_location_to_sals (struct linespec_state *self,
       VEC_safe_push (symtab_ptr, result->file_symtabs, NULL);
     }
 
-  if (explicit->function_name != NULL)
+  if (explicit_loc->function_name != NULL)
     {
       find_linespec_symbols (self, result->file_symtabs,
-			     explicit->function_name, &symbols,
+			     explicit_loc->function_name, &symbols,
 			     &minimal_symbols);
 
       if (symbols == NULL && minimal_symbols == NULL)
-	symbol_not_found_error (explicit->function_name,
-				result->explicit.source_filename);
+	symbol_not_found_error (explicit_loc->function_name,
+				result->explicit_loc.source_filename);
 
-      result->explicit.function_name = xstrdup (explicit->function_name);
+      result->explicit_loc.function_name
+	= xstrdup (explicit_loc->function_name);
       result->function_symbols = symbols;
       result->minimal_symbols = minimal_symbols;
     }
 
-  if (explicit->label_name != NULL)
+  if (explicit_loc->label_name != NULL)
     {
       symbols = NULL;
       labels = find_label_symbols (self, result->function_symbols,
-				   &symbols, explicit->label_name);
+				   &symbols, explicit_loc->label_name);
 
       if (labels == NULL)
-	undefined_label_error (result->explicit.function_name,
-			       explicit->label_name);
+	undefined_label_error (result->explicit_loc.function_name,
+			       explicit_loc->label_name);
 
-      result->explicit.label_name = xstrdup (explicit->label_name);
+      result->explicit_loc.label_name = xstrdup (explicit_loc->label_name);
       result->labels.label_symbols = labels;
       result->labels.function_symbols = symbols;
     }
 
-  if (explicit->line_offset.sign != LINE_OFFSET_UNKNOWN)
-    result->explicit.line_offset = explicit->line_offset;
+  if (explicit_loc->line_offset.sign != LINE_OFFSET_UNKNOWN)
+    result->explicit_loc.line_offset = explicit_loc->line_offset;
 
    return convert_linespec_to_sals (self, result);
 }
@@ -2501,12 +2504,12 @@ event_location_to_sals (linespec_parser *parser,
 
     case EXPLICIT_LOCATION:
       {
-	const struct explicit_location *explicit;
+	const struct explicit_location *explicit_loc;
 
-	explicit = get_explicit_location_const (location);
+	explicit_loc = get_explicit_location_const (location);
 	result = convert_explicit_location_to_sals (PARSER_STATE (parser),
 						    PARSER_RESULT (parser),
-						    explicit);
+						    explicit_loc);
       }
       break;
 
@@ -2759,7 +2762,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
       memcpy (saved_arg, arg, new_argptr - arg);
       saved_arg[new_argptr - arg] = '\0';
 
-      ls->explicit.function_name = xstrdup (saved_arg);
+      ls->explicit_loc.function_name = xstrdup (saved_arg);
       ls->function_symbols = info.result.symbols;
       ls->minimal_symbols = info.result.minimal_symbols;
       values = convert_linespec_to_sals (self, ls);
@@ -2770,10 +2773,10 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 
 	  self->canonical->pre_expanded = 1;
 
-	  if (ls->explicit.source_filename)
+	  if (ls->explicit_loc.source_filename)
 	    {
 	      str = xstrprintf ("%s:%s",
-				ls->explicit.source_filename, saved_arg);
+				ls->explicit_loc.source_filename, saved_arg);
 	    }
 	  else
 	    str = xstrdup (saved_arg);

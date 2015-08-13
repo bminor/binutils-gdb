@@ -358,14 +358,15 @@ collect_explicit_location_matches (struct event_location *location,
 				   const char *word)
 {
   VEC (char_ptr) *matches = NULL;
-  const struct explicit_location *explicit = get_explicit_location (location);
+  const struct explicit_location *explicit_loc
+    = get_explicit_location (location);
 
   switch (what)
     {
     case MATCH_SOURCE:
       {
-	const char *text = (explicit->source_filename == NULL
-			    ? "" : explicit->source_filename);
+	const char *text = (explicit_loc->source_filename == NULL
+			    ? "" : explicit_loc->source_filename);
 
 	matches = make_source_files_completion_list (text, word);
       }
@@ -373,14 +374,14 @@ collect_explicit_location_matches (struct event_location *location,
 
     case MATCH_FUNCTION:
       {
-	const char *text = (explicit->function_name == NULL
-			    ? "" : explicit->function_name);
+	const char *text = (explicit_loc->function_name == NULL
+			    ? "" : explicit_loc->function_name);
 
-	if (explicit->source_filename != NULL)
+	if (explicit_loc->source_filename != NULL)
 	  {
-	    matches
-	      = make_file_symbol_completion_list (text, word,
-						  explicit->source_filename);
+	    const char *filename = explicit_loc->source_filename;
+
+	    matches = make_file_symbol_completion_list (text, word, filename);
 	  }
 	else
 	  matches = make_symbol_completion_list (text, word);
@@ -451,7 +452,8 @@ explicit_location_completer (struct cmd_list_element *ignore,
       size_t len, offset;
       const char *new_word, *end;
       enum explicit_location_match_type what;
-      struct explicit_location *explicit = get_explicit_location (location);
+      struct explicit_location *explicit_loc
+	= get_explicit_location (location);
 
       /* Backup P to the previous word, which should be the option
 	 the user is attempting to complete.  */
@@ -463,17 +465,17 @@ explicit_location_completer (struct cmd_list_element *ignore,
       if (strncmp (p, "-source", len) == 0)
 	{
 	  what = MATCH_SOURCE;
-	  new_word = explicit->source_filename + offset;
+	  new_word = explicit_loc->source_filename + offset;
 	}
       else if (strncmp (p, "-function", len) == 0)
 	{
 	  what = MATCH_FUNCTION;
-	  new_word = explicit->function_name + offset;
+	  new_word = explicit_loc->function_name + offset;
 	}
       else if (strncmp (p, "-label", len) == 0)
 	{
 	  what = MATCH_LABEL;
-	  new_word = explicit->label_name + offset;
+	  new_word = explicit_loc->label_name + offset;
 	}
       else
 	{

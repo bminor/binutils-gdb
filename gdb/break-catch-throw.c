@@ -229,12 +229,12 @@ re_set_exception_catchpoint (struct breakpoint *self)
 	 catchpoint mode.  */
       TRY
 	{
-	  struct explicit_location explicit;
+	  struct explicit_location explicit_loc;
 
-	  initialize_explicit_location (&explicit);
-	  explicit.function_name
+	  initialize_explicit_location (&explicit_loc);
+	  explicit_loc.function_name
 	    = ASTRDUP (exception_functions[kind].function);
-	  location = new_explicit_location (&explicit);
+	  location = new_explicit_location (&explicit_loc);
 	  cleanup = make_cleanup_delete_event_location (location);
 	  self->ops->decode_location (self, location, &sals);
 	  do_cleanups (cleanup);

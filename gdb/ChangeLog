@@ -54,6 +54,35 @@
 
 2015-08-12  Keith Seitz  <keiths@redhat.com>
 
+	* break-catch-throw.c (re_set_exception_catchpoint) Rename
+	reserved C++ keyword "explicit" to "explicit_loc".
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint, update_static_tracepoint):
+	Rename reserved C++ keyword "explicit" to "explicit_loc".
+	* completer.c (collect_explicit_location_matches)
+	(explicit_location_completer): Rename reserved C++ keyword
+	"explicit" to "explicit_loc".
+	* linespec.c (struct linespec) <explicit>: Rename to "explicit_loc".
+	(canonicalize_linespec, create_sals_line_offset)
+	(convert_linespec_to_sals, convert_explicit_location_to_sals)
+	(event_location_to_sals, decode_objc): Rename reserved C++ keyword
+	"explicit" to "explicit_loc".
+	* location.c (struct event_location) <explicit>: Rename to
+	"explicit_loc".
+	(initialize_explicit_location, new_explicit_location)
+	(explicit_location_to_string_internal, explicit_location_to_linespec):
+	Rename reserved C++ keyword "explicit" to "explicit_loc".
+	* location.h (explicit_location_to_string)
+	(explicit_location_to_linespec, initialize_explicit_location)
+	(new_explicit_location): Rename reserved C++ keyword "explicit"
+	to "explicit_loc".
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Rename reserved C++
+	keyword "explicit" to "explicit_loc".
+
+2015-08-12  Keith Seitz  <keiths@redhat.com>
+
 	* python/python.c (gdbpy_decode_line): Initialize `location' to NULL
 	and only call decode_line_1 when it is non-NULL.
 

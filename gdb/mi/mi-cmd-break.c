@@ -183,7 +183,7 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
   struct event_location *location;
   struct breakpoint_ops *ops;
   int is_explicit = 0;
-  struct explicit_location explicit;
+  struct explicit_location explicit_loc;
   char *extra_string = NULL;
 
   enum opt
@@ -216,7 +216,7 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
   int oind = 0;
   char *oarg;
 
-  initialize_explicit_location (&explicit);
+  initialize_explicit_location (&explicit_loc);
 
   while (1)
     {
@@ -252,19 +252,19 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
 	  break;
 	case EXPLICIT_SOURCE_OPT:
 	  is_explicit = 1;
-	  explicit.source_filename = oarg;
+	  explicit_loc.source_filename = oarg;
 	  break;
 	case EXPLICIT_FUNC_OPT:
 	  is_explicit = 1;
-	  explicit.function_name = oarg;
+	  explicit_loc.function_name = oarg;
 	  break;
 	case EXPLICIT_LABEL_OPT:
 	  is_explicit = 1;
-	  explicit.label_name = oarg;
+	  explicit_loc.label_name = oarg;
 	  break;
 	case EXPLICIT_LINE_OPT:
 	  is_explicit = 1;
-	  explicit.line_offset = linespec_parse_line_offset (oarg);
+	  explicit_loc.line_offset = linespec_parse_line_offset (oarg);
 	  break;
 	}
     }
@@ -330,14 +330,14 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
     {
       /* Error check -- we must have one of the other
 	 parameters specified.  */
-      if (explicit.source_filename != NULL
-	  && explicit.function_name == NULL
-	  && explicit.label_name == NULL
-	  && explicit.line_offset.sign == LINE_OFFSET_UNKNOWN)
+      if (explicit_loc.source_filename != NULL
+	  && explicit_loc.function_name == NULL
+	  && explicit_loc.label_name == NULL
+	  && explicit_loc.line_offset.sign == LINE_OFFSET_UNKNOWN)
 	error (_("-%s-insert: --source option requires --function, --label,"
 		 " or --line"), dprintf ? "dprintf" : "break");
 
-      location = new_explicit_location (&explicit);
+      location = new_explicit_location (&explicit_loc);
     }
   else
     {
