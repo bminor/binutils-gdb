@@ -1,3 +1,13 @@
+2015-08-13  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* Makefile.in (SFILES): Add d-namespace.c.
+	(COMMON_OBS): Add d-namespace.o.
+	* d-lang.c (d_language_defn): Use d_lookup_symbol_nonlocal as the
+	la_lookup_symbol_nonlocal callback function pointer.
+	* d-lang.h (d_lookup_symbol_nonlocal): New declaration.
+	(d_lookup_nested_symbol): New declaration.
+	* d-namespace.c: New file.
+
 2015-08-13  Pedro Alves  <palves@redhat.com>
 
 	* python/py-unwind.c (pyuw_sniffer): Install the invalidate

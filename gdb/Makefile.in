@@ -838,7 +838,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	charset.c common/cleanups.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c continuations.c corefile.c corelow.c \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
-	d-exp.y d-lang.c d-valprint.c \
+	d-exp.y d-lang.c d-namespace.c d-valprint.c \
 	cp-name-parser.y \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c \
 	dtrace-probe.c dummy-frame.c \
@@ -1072,7 +1072,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	frame-base.o \
 	inline-frame.o \
 	gnu-v2-abi.o gnu-v3-abi.o cp-abi.o cp-support.o \
-	cp-namespace.o \
+	cp-namespace.o d-namespace.o \
 	reggroups.o \
 	trad-frame.o \
 	tramp-frame.o \
