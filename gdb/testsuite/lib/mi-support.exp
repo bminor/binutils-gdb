@@ -2395,7 +2395,8 @@ proc mi_build_kv_pairs {attr_list {joiner ,}} {
 #
 # All arguments for the breakpoint may be specified using the options
 # number, type, disp, enabled, addr, func, file, fullanme, line,
-# thread-groups, cond, times, ignore, script, and original-location.
+# thread-groups, cond, evaluated-by, times, ignore, script,
+# and original-location.
 #
 # Only if -script and -ignore are given will they appear in the output.
 # Otherwise, this procedure will skip them using ".*".
@@ -2410,7 +2411,7 @@ proc mi_make_breakpoint {args} {
     parse_args {{number .*} {type .*} {disp .*} {enabled .*} {addr .*}
 	{func .*} {file .*} {fullname .*} {line .*}
 	{thread-groups \\\[.*\\\]} {times .*} {ignore 0}
-	{script ""} {original-location .*} {cond ""}}
+	{script ""} {original-location .*} {cond ""} {evaluated-by ""}}
 
     set attr_list {}
     foreach attr [list number type disp enabled addr func file \
@@ -2426,6 +2427,15 @@ proc mi_make_breakpoint {args} {
     if {[string length $cond] > 0} {
 	append result ","
 	append result [mi_build_kv_pairs [list "cond" $cond]]
+
+	# When running on a remote, GDB may output who is evaluating
+	# breakpoint conditions.
+	if {[string length ${evaluated-by}] > 0} {
+	    append result [mi_build_kv_pairs \
+			       [list "evaluated-by" ${evaluated-by}]]
+	} else {
+	    append result {(,evaluated-by=".*")?}
+	}
     }
 
     append result ","
