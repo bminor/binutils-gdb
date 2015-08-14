@@ -1,3 +1,9 @@
+2015-08-14  Keith Seitz  <keiths@redhat.com>
+
+	* location.c (EL_TYPE, EL_LINESPEC, EL_PROBE, EL_ADDRESS)
+	(EL_EXPLICIT, EL_STRING): Change macro parameter to "P" to
+	silence ARI errors.
+
 2015-08-14  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* d-exp.y (PrimaryExpression : TypeExp '.' IdentifierExp): Use

@@ -36,7 +36,7 @@ struct event_location
 {
   /* The type of this breakpoint specification.  */
   enum event_location_type type;
-#define EL_TYPE(PTR) (PTR)->type
+#define EL_TYPE(P) (P)->type
 
   union
   {
@@ -44,22 +44,22 @@ struct event_location
        This representation is used by both "normal" linespecs and
        probes.  */
     char *addr_string;
-#define EL_LINESPEC(PTR) ((PTR)->u.addr_string)
-#define EL_PROBE(PTR) ((PTR)->u.addr_string)
+#define EL_LINESPEC(P) ((P)->u.addr_string)
+#define EL_PROBE(P) ((P)->u.addr_string)
 
     /* An address in the inferior.  */
     CORE_ADDR address;
-#define EL_ADDRESS(PTR) (PTR)->u.address
+#define EL_ADDRESS(P) (P)->u.address
 
     /* An explicit location.  */
     struct explicit_location explicit_loc;
-#define EL_EXPLICIT(PTR) (&((PTR)->u.explicit_loc))
+#define EL_EXPLICIT(P) (&((P)->u.explicit_loc))
   } u;
 
   /* Cached string representation of this location.  This is used, e.g., to
      save stop event locations to file.  Malloc'd.  */
   char *as_string;
-#define EL_STRING(PTR) ((PTR)->as_string)
+#define EL_STRING(P) ((P)->as_string)
 };
 
 /* See description in location.h.  */
