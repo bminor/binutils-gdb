@@ -194,7 +194,7 @@ const struct pd_reg pre_defined_registers[] =
   { "va", NULL, OPERAND_FLAG + 6 },
 };
 
-int 
+int
 reg_name_cnt (void)
 {
   return sizeof (pre_defined_registers) / sizeof (struct pd_reg);

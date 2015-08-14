@@ -53,6 +53,7 @@
 #include "stack.h"
 #include "gdb_vecs.h"
 #include "typeprint.h"
+#include "namespace.h"
 
 #include "psymtab.h"
 #include "value.h"
@@ -107,6 +108,9 @@ static struct value *make_array_descriptor (struct type *, struct value *);
 static void ada_add_block_symbols (struct obstack *,
                                    const struct block *, const char *,
                                    domain_enum, struct objfile *, int);
+
+static void ada_add_all_symbols (struct obstack *, const struct block *,
+				 const char *, domain_enum, int, int *);
 
 static int is_nonfunction (struct block_symbol *, int);
 
@@ -5289,7 +5293,7 @@ struct match_data
   int found_sym;
 };
 
-/* A callback for add_matching_symbols that adds SYM, found in BLOCK,
+/* A callback for add_nonlocal_symbols that adds SYM, found in BLOCK,
    to a list of symbols.  DATA0 is a pointer to a struct match_data *
    containing the obstack that collects the symbol list, the file that SYM
    must come from, a flag indicating whether a non-argument symbol has
@@ -5327,6 +5331,62 @@ aux_add_nonlocal_symbols (struct block *block, struct symbol *sym, void *data0)
 	}
     }
   return 0;
+}
+
+/* Helper for add_nonlocal_symbols.  Find symbols in DOMAIN which are targetted
+   by renamings matching NAME in BLOCK.  Add these symbols to OBSTACKP.  If
+   WILD_MATCH_P is nonzero, perform the naming matching in "wild" mode (see
+   function "wild_match" for more information).  Return whether we found such
+   symbols.  */
+
+static int
+ada_add_block_renamings (struct obstack *obstackp,
+			 const struct block *block,
+			 const char *name,
+			 domain_enum domain,
+			 int wild_match_p)
+{
+  struct using_direct *renaming;
+  int defns_mark = num_defns_collected (obstackp);
+
+  for (renaming = block_using (block);
+       renaming != NULL;
+       renaming = renaming->next)
+    {
+      const char *r_name;
+      int name_match;
+
+      /* Avoid infinite recursions: skip this renaming if we are actually
+	 already traversing it.
+
+	 Currently, symbol lookup in Ada don't use the namespace machinery from
+	 C++/Fortran support: skip namespace imports that use them.  */
+      if (renaming->searched
+	  || (renaming->import_src != NULL
+	      && renaming->import_src[0] != '\0')
+	  || (renaming->import_dest != NULL
+	      && renaming->import_dest[0] != '\0'))
+	continue;
+      renaming->searched = 1;
+
+      /* TODO: here, we perform another name-based symbol lookup, which can
+	 pull its own multiple overloads.  In theory, we should be able to do
+	 better in this case since, in DWARF, DW_AT_import is a DIE reference,
+	 not a simple name.  But in order to do this, we would need to enhance
+	 the DWARF reader to associate a symbol to this renaming, instead of a
+	 name.  So, for now, we do something simpler: re-use the C++/Fortran
+	 namespace machinery.  */
+      r_name = (renaming->alias != NULL
+		? renaming->alias
+		: renaming->declaration);
+      name_match
+	= wild_match_p ? wild_match (r_name, name) : strcmp (r_name, name);
+      if (name_match == 0)
+	ada_add_all_symbols (obstackp, block, renaming->declaration, domain,
+			     1, NULL);
+      renaming->searched = 0;
+    }
+  return num_defns_collected (obstackp) != defns_mark;
 }
 
 /* Implements compare_names, but only applying the comparision using
@@ -5424,6 +5484,7 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
 		      int is_wild_match)
 {
   struct objfile *objfile;
+  struct compunit_symtab *cu;
   struct match_data data;
 
   memset (&data, 0, sizeof data);
@@ -5441,6 +5502,16 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
 	objfile->sf->qf->map_matching_symbols (objfile, name, domain, global,
 					       aux_add_nonlocal_symbols, &data,
 					       full_match, compare_names);
+
+      ALL_OBJFILE_COMPUNITS (objfile, cu)
+	{
+	  const struct block *global_block
+	    = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cu), GLOBAL_BLOCK);
+
+	  if (ada_add_block_renamings (obstackp, global_block , name, domain,
+				       is_wild_match))
+	    data.found_sym = 1;
+	}
     }
 
   if (num_defns_collected (obstackp) == 0 && global && !is_wild_match)
@@ -5460,43 +5531,35 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
     }      	
 }
 
-/* Find symbols in DOMAIN matching NAME0, in BLOCK0 and, if full_search is
+/* Find symbols in DOMAIN matching NAME, in BLOCK and, if FULL_SEARCH is
    non-zero, enclosing scope and in global scopes, returning the number of
-   matches.
-   Sets *RESULTS to point to a vector of (SYM,BLOCK) tuples,
-   indicating the symbols found and the blocks and symbol tables (if
-   any) in which they were found.  This vector is transient---good only to
-   the next call of ada_lookup_symbol_list.
+   matches.  Add these to OBSTACKP.
 
-   When full_search is non-zero, any non-function/non-enumeral
-   symbol match within the nest of blocks whose innermost member is BLOCK0,
+   When FULL_SEARCH is non-zero, any non-function/non-enumeral
+   symbol match within the nest of blocks whose innermost member is BLOCK,
    is the one match returned (no other matches in that or
    enclosing blocks is returned).  If there are any matches in or
-   surrounding BLOCK0, then these alone are returned.
+   surrounding BLOCK, then these alone are returned.
 
    Names prefixed with "standard__" are handled specially: "standard__"
-   is first stripped off, and only static and global symbols are searched.  */
+   is first stripped off, and only static and global symbols are searched.
 
-static int
-ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
-			       domain_enum domain,
-			       struct block_symbol **results,
-			       int full_search)
+   If MADE_GLOBAL_LOOKUP_P is non-null, set it before return to whether we had
+   to lookup global symbols.  */
+
+static void
+ada_add_all_symbols (struct obstack *obstackp,
+		     const struct block *block,
+		     const char *name,
+		     domain_enum domain,
+		     int full_search,
+		     int *made_global_lookup_p)
 {
   struct symbol *sym;
-  const struct block *block;
-  const char *name;
-  const int wild_match_p = should_use_wild_match (name0);
-  int syms_from_global_search = 0;
-  int ndefns;
+  const int wild_match_p = should_use_wild_match (name);
 
-  obstack_free (&symbol_list_obstack, NULL);
-  obstack_init (&symbol_list_obstack);
-
-  /* Search specified block and its superiors.  */
-
-  name = name0;
-  block = block0;
+  if (made_global_lookup_p)
+    *made_global_lookup_p = 0;
 
   /* Special case: If the user specifies a symbol name inside package
      Standard, do a non-wild matching of the symbol name without
@@ -5505,10 +5568,10 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
      using, for instance, Standard.Constraint_Error when Constraint_Error
      is ambiguous (due to the user defining its own Constraint_Error
      entity inside its program).  */
-  if (startswith (name0, "standard__"))
+  if (startswith (name, "standard__"))
     {
       block = NULL;
-      name = name0 + sizeof ("standard__") - 1;
+      name = name + sizeof ("standard__") - 1;
     }
 
   /* Check the non-global symbols.  If we have ANY match, then we're done.  */
@@ -5516,61 +5579,88 @@ ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
   if (block != NULL)
     {
       if (full_search)
-	{
-	  ada_add_local_symbols (&symbol_list_obstack, name, block,
-				 domain, wild_match_p);
-	}
+	ada_add_local_symbols (obstackp, name, block, domain, wild_match_p);
       else
 	{
 	  /* In the !full_search case we're are being called by
 	     ada_iterate_over_symbols, and we don't want to search
 	     superblocks.  */
-	  ada_add_block_symbols (&symbol_list_obstack, block, name,
-				 domain, NULL, wild_match_p);
+	  ada_add_block_symbols (obstackp, block, name, domain, NULL,
+				 wild_match_p);
 	}
-      if (num_defns_collected (&symbol_list_obstack) > 0 || !full_search)
-	goto done;
+      if (num_defns_collected (obstackp) > 0 || !full_search)
+	return;
     }
 
   /* No non-global symbols found.  Check our cache to see if we have
      already performed this search before.  If we have, then return
      the same result.  */
 
-  if (lookup_cached_symbol (name0, domain, &sym, &block))
+  if (lookup_cached_symbol (name, domain, &sym, &block))
     {
       if (sym != NULL)
-        add_defn_to_vec (&symbol_list_obstack, sym, block);
-      goto done;
+        add_defn_to_vec (obstackp, sym, block);
+      return;
     }
 
-  syms_from_global_search = 1;
+  if (made_global_lookup_p)
+    *made_global_lookup_p = 1;
 
   /* Search symbols from all global blocks.  */
  
-  add_nonlocal_symbols (&symbol_list_obstack, name, domain, 1,
-			wild_match_p);
+  add_nonlocal_symbols (obstackp, name, domain, 1, wild_match_p);
 
   /* Now add symbols from all per-file blocks if we've gotten no hits
      (not strictly correct, but perhaps better than an error).  */
 
-  if (num_defns_collected (&symbol_list_obstack) == 0)
-    add_nonlocal_symbols (&symbol_list_obstack, name, domain, 0,
-			  wild_match_p);
+  if (num_defns_collected (obstackp) == 0)
+    add_nonlocal_symbols (obstackp, name, domain, 0, wild_match_p);
+}
 
-done:
+/* Find symbols in DOMAIN matching NAME, in BLOCK and, if full_search is
+   non-zero, enclosing scope and in global scopes, returning the number of
+   matches.
+   Sets *RESULTS to point to a vector of (SYM,BLOCK) tuples,
+   indicating the symbols found and the blocks and symbol tables (if
+   any) in which they were found.  This vector is transient---good only to
+   the next call of ada_lookup_symbol_list.
+
+   When full_search is non-zero, any non-function/non-enumeral
+   symbol match within the nest of blocks whose innermost member is BLOCK,
+   is the one match returned (no other matches in that or
+   enclosing blocks is returned).  If there are any matches in or
+   surrounding BLOCK, then these alone are returned.
+
+   Names prefixed with "standard__" are handled specially: "standard__"
+   is first stripped off, and only static and global symbols are searched.  */
+
+static int
+ada_lookup_symbol_list_worker (const char *name, const struct block *block,
+			       domain_enum domain,
+			       struct block_symbol **results,
+			       int full_search)
+{
+  const int wild_match_p = should_use_wild_match (name);
+  int syms_from_global_search;
+  int ndefns;
+
+  obstack_free (&symbol_list_obstack, NULL);
+  obstack_init (&symbol_list_obstack);
+  ada_add_all_symbols (&symbol_list_obstack, block, name, domain,
+		       full_search, &syms_from_global_search);
+
   ndefns = num_defns_collected (&symbol_list_obstack);
   *results = defns_collected (&symbol_list_obstack, 1);
 
   ndefns = remove_extra_symbols (*results, ndefns);
 
   if (ndefns == 0 && full_search && syms_from_global_search)
-    cache_symbol (name0, domain, NULL, NULL);
+    cache_symbol (name, domain, NULL, NULL);
 
   if (ndefns == 1 && full_search && syms_from_global_search)
-    cache_symbol (name0, domain, (*results)[0].symbol, (*results)[0].block);
+    cache_symbol (name, domain, (*results)[0].symbol, (*results)[0].block);
 
-  ndefns = remove_irrelevant_renamings (*results, ndefns, block0);
-
+  ndefns = remove_irrelevant_renamings (*results, ndefns, block);
   return ndefns;
 }
 
@@ -6036,6 +6126,11 @@ ada_add_block_symbols (struct obstack *obstackp,
           }
       }
     }
+
+  /* Handle renamings.  */
+
+  if (ada_add_block_renamings (obstackp, block, name, domain, wild))
+    found_sym = 1;
 
   if (!found_sym && arg_sym != NULL)
     {

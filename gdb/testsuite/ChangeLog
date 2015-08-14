@@ -1,3 +1,77 @@
+2015-08-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/dso2dso.exp: Improve the testcase's documentation.
+
+2015-08-13  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/fun_renaming.exp: New testcase.
+	* gdb.ada/fun_renaming/fun_renaming.adb: New file.
+	* gdb.ada/fun_renaming/pack.adb: New file.
+	* gdb.ada/fun_renaming/pack.ads: New file.
+
+2015-08-12  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/dso2dso.exp: Pass basename of source file in call to
+	gdb_get_line_number.
+
+2015-08-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/dso2dso-dso2.c, gdb.base/dso2dso-dso2.h,
+	gdb.base/dso2dso-dso1.c, gdb.base/dso2dso-dso1.h, gdb.base/dso2dso.c,
+	gdb.base/dso2dso.exp: New files.
+
+2015-08-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+	    Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/checkpoint-ns.exp: Use save_vars to save and restore
+	GDBFLAGS.
+
+2015-08-12  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/gdbhistsize-history.exp
+	(test_histsize_history_setting): Use save_vars.
+	* gdb.base/gdbinit-history.exp (test_gdbinit_history_setting):
+	Use save_vars.
+	(test_no_truncation_of_unlimited_history_file): Use save_vars.
+	* gdb.base/readline.exp: Use save_vars.
+
+2015-08-12  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* lib/gdb.exp (save_vars): New proc.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/help.exp: Update help_breakpoint_text.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.mi/mi-break.exp (test_explicit_breakpoints): New proc.
+	(at toplevel): Call test_explicit_breakpoints.
+	* gdb.mi/mi-dprintf.exp: Add tests for explicit dprintf
+	breakpoints.
+	* lib/mi-support.exp (mi_make_breakpoint): Add support for
+	breakpoint conditions, "-cond".
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.linespec/3explicit.c: New file.
+	* gdb.linespec/cpexplicit.cc: New file.
+	* gdb.linespec/cpexplicit.exp: New file.
+	* gdb.linespec/explicit.c: New file.
+	* gdb.linespec/explicit.exp: New file.
+	* gdb.linespec/explicit2.c: New file.
+	* gdb.linespec/ls-errs.exp: Add explicit location tests.
+	* lib/gdb.exp (capture_command_output): Regexp-escape `command'
+	before using in the matching pattern.
+	Clarify that `prefix' is a regular expression.
+
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/dprintf-pending.exp: Update dprintf "without format"
+	test.
+	Add tests for missing ",FMT" and ",".
+
 2015-08-10  Doug Evans  <dje@google.com>
 	    Keith Seitz  <keiths@redhat.com>
 

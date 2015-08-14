@@ -100,10 +100,10 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0c1e      	move	zero,s8
 [ 0-9a-f]+:	0c1f      	move	zero,ra
 [ 0-9a-f]+:	0ec2      	move	s6,v0
-[ 0-9a-f]+:	0016 1150 	move	v0,s6
+[ 0-9a-f]+:	0016 1290 	move	v0,s6
 [ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	test
-[ 0-9a-f]+:	0002 b150 	move	s6,v0
+[ 0-9a-f]+:	0002 b290 	move	s6,v0
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
 [ 0-9a-f]+:	0c00      	nop

@@ -46,10 +46,17 @@ set aarch64elftests {
 }
 
 proc aarch64_choose_ilp32_emul {} {
-    if [istarget aarch64_be*-*-*] then {
+    if [istarget aarch64-*-linux*] then {
+        return "aarch64linux32"
+    } elseif [istarget aarch64-*-elf] {
+        return "aarch64elf32"
+    } elseif [istarget aarch64_be-*-linux*] {
+        return "aarch64linux32b"
+    } elseif [istarget aarch64_be-*-elf] {
         return "aarch64elf32b"
     } else {
-        return "aarch64linux32"
+      perror "Unknown target triple."
+      exit 1
     }
 }
 
@@ -59,6 +66,8 @@ run_dump_test "erratum843419"
 # Relocation Tests
 run_dump_test "weak-undefined"
 run_dump_test "emit-relocs-28"
+run_dump_test "emit-relocs-86"
+run_dump_test "emit-relocs-86-overflow"
 run_dump_test "emit-relocs-257"
 run_dump_test "emit-relocs-257-be"
 # 258 is tested in 257
@@ -109,6 +118,8 @@ run_dump_test "emit-relocs-309-low-bad"
 run_dump_test "emit-relocs-311"
 run_dump_test "emit-relocs-312"
 run_dump_test "emit-relocs-313"
+run_dump_test "emit-relocs-529"
+run_dump_test "emit-relocs-529-overflow"
 
 # test addend correctness when --emit-relocs specified for non-relocatable obj.
 run_dump_test "emit-relocs-local-addend"
@@ -123,6 +134,11 @@ run_dump_test "limit-b"
 run_dump_test "limit-bl"
 run_dump_test "farcall-section"
 run_dump_test "farcall-back"
+run_dump_test "farcall-b-defsym"
+run_dump_test "farcall-bl-defsym"
+run_dump_test "farcall-b-gsym"
+run_dump_test "farcall-b-plt"
+run_dump_test "farcall-bl-plt"
 run_dump_test "farcall-bl"
 run_dump_test "farcall-b"
 run_dump_test "farcall-b-none-function"
@@ -147,6 +163,7 @@ run_dump_test "tls-tiny-desc-ie"
 run_dump_test "tls-tiny-desc-le"
 run_dump_test "tls-tiny-ie"
 run_dump_test "tls-tiny-ld"
+run_dump_test "tls-small-ld"
 run_dump_test "tlsle"
 run_dump_test "tlsle-symbol-offset"
 run_dump_test "gc-got-relocs"
@@ -203,7 +220,7 @@ run_dump_test "ifunc-21"
 run_dump_test "ifunc-22"
 
 run_dump_test "relasz"
-run_dump_test "relocs-257-symbolic-func"
+run_dump_test "relocs-1027-symbolic-func"
 
 run_dump_test "dt_textrel"
 

@@ -212,7 +212,7 @@ cgen_parse_keyword (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
      character of the suffix ('.') is special.  */
   if (*p)
     ++p;
-  
+
   /* Allow letters, digits, and any special characters.  */
   while (((p - start) < (int) sizeof (buf))
 	 && *p

@@ -6162,7 +6162,7 @@ const uint32_t Mips_output_data_plt<size, big_endian>::plt0_entry_o32[] =
   0x8f990000,         // lw $25, %lo(&GOTPLT[0])($28)
   0x279c0000,         // addiu $28, $28, %lo(&GOTPLT[0])
   0x031cc023,         // subu $24, $24, $28
-  0x03e07821,         // move $15, $31        # 32-bit move (addu)
+  0x03e07825,         // or $15, $31, zero
   0x0018c082,         // srl $24, $24, 2
   0x0320f809,         // jalr $25
   0x2718fffe          // subu $24, $24, 2
@@ -6177,7 +6177,7 @@ const uint32_t Mips_output_data_plt<size, big_endian>::plt0_entry_n32[] =
   0x8dd90000,         // lw $25, %lo(&GOTPLT[0])($14)
   0x25ce0000,         // addiu $14, $14, %lo(&GOTPLT[0])
   0x030ec023,         // subu $24, $24, $14
-  0x03e07821,         // move $15, $31        # 32-bit move (addu)
+  0x03e07825,         // or $15, $31, zero
   0x0018c082,         // srl $24, $24, 2
   0x0320f809,         // jalr $25
   0x2718fffe          // subu $24, $24, 2
@@ -6192,7 +6192,7 @@ const uint32_t Mips_output_data_plt<size, big_endian>::plt0_entry_n64[] =
   0xddd90000,         // ld $25, %lo(&GOTPLT[0])($14)
   0x25ce0000,         // addiu $14, $14, %lo(&GOTPLT[0])
   0x030ec023,         // subu $24, $24, $14
-  0x03e07821,         // move $15, $31        # 64-bit move (daddu)
+  0x03e07825,         // or $15, $31, zero
   0x0018c0c2,         // srl $24, $24, 3
   0x0320f809,         // jalr $25
   0x2718fffe          // subu $24, $24, 2
@@ -6229,7 +6229,7 @@ plt0_entry_micromips32_o32[] =
   0xff3c, 0x0000,      // lw $25, %lo(&GOTPLT[0])($28)
   0x339c, 0x0000,      // addiu $28, $28, %lo(&GOTPLT[0])
   0x0398, 0xc1d0,      // subu $24, $24, $28
-  0x001f, 0x7950,      // move $15, $31
+  0x001f, 0x7a90,      // or $15, $31, zero
   0x0318, 0x1040,      // srl $24, $24, 2
   0x03f9, 0x0f3c,      // jalr $25
   0x3318, 0xfffe       // subu $24, $24, 2
@@ -6631,7 +6631,7 @@ const uint32_t
 Mips_output_data_mips_stubs<size, big_endian>::lazy_stub_normal_1[4] =
 {
   0x8f998010,         // lw t9,0x8010(gp)
-  0x03e07821,         // addu t7,ra,zero
+  0x03e07825,         // or t7,ra,zero
   0x0320f809,         // jalr t9,ra
   0x24180000          // addiu t8,zero,DYN_INDEX sign extended
 };
@@ -6643,7 +6643,7 @@ const uint32_t
 Mips_output_data_mips_stubs<size, big_endian>::lazy_stub_normal_1_n64[4] =
 {
   0xdf998010,         // ld t9,0x8010(gp)
-  0x03e0782d,         // daddu t7,ra,zero
+  0x03e07825,         // or t7,ra,zero
   0x0320f809,         // jalr t9,ra
   0x64180000          // daddiu t8,zero,DYN_INDEX sign extended
 };
@@ -6655,7 +6655,7 @@ const uint32_t
 Mips_output_data_mips_stubs<size, big_endian>::lazy_stub_normal_2[4] =
 {
   0x8f998010,         // lw t9,0x8010(gp)
-  0x03e07821,         // addu t7,ra,zero
+  0x03e07825,         // or t7,ra,zero
   0x0320f809,         // jalr t9,ra
   0x34180000          // ori t8,zero,DYN_INDEX unsigned
 };
@@ -6667,7 +6667,7 @@ const uint32_t
 Mips_output_data_mips_stubs<size, big_endian>::lazy_stub_normal_2_n64[4] =
 {
   0xdf998010,         // ld t9,0x8010(gp)
-  0x03e0782d,         // daddu t7,ra,zero
+  0x03e07825,         // or t7,ra,zero
   0x0320f809,         // jalr t9,ra
   0x34180000          // ori t8,zero,DYN_INDEX unsigned
 };
@@ -6678,7 +6678,7 @@ template<int size, bool big_endian>
 const uint32_t Mips_output_data_mips_stubs<size, big_endian>::lazy_stub_big[5] =
 {
   0x8f998010,         // lw t9,0x8010(gp)
-  0x03e07821,         // addu t7,ra,zero
+  0x03e07825,         // or t7,ra,zero
   0x3c180000,         // lui t8,DYN_INDEX
   0x0320f809,         // jalr t9,ra
   0x37180000          // ori t8,t8,DYN_INDEX
@@ -6691,7 +6691,7 @@ const uint32_t
 Mips_output_data_mips_stubs<size, big_endian>::lazy_stub_big_n64[5] =
 {
   0xdf998010,         // ld t9,0x8010(gp)
-  0x03e0782d,         // daddu t7,ra,zero
+  0x03e07825,         // or t7,ra,zero
   0x3c180000,         // lui t8,DYN_INDEX
   0x0320f809,         // jalr t9,ra
   0x37180000          // ori t8,t8,DYN_INDEX
@@ -6788,7 +6788,7 @@ Mips_output_data_mips_stubs<size, big_endian>::
 lazy_stub_micromips32_normal_1[] =
 {
   0xff3c, 0x8010,     // lw t9,0x8010(gp)
-  0x001f, 0x7950,     // addu t7,ra,zero
+  0x001f, 0x7a90,     // or t7,ra,zero
   0x03f9, 0x0f3c,     // jalr ra,t9
   0x3300, 0x0000      // addiu t8,zero,DYN_INDEX sign extended
 };
@@ -6802,7 +6802,7 @@ Mips_output_data_mips_stubs<size, big_endian>::
 lazy_stub_micromips32_normal_1_n64[] =
 {
   0xdf3c, 0x8010,     // ld t9,0x8010(gp)
-  0x581f, 0x7950,     // daddu t7,ra,zero
+  0x001f, 0x7a90,     // or t7,ra,zero
   0x03f9, 0x0f3c,     // jalr ra,t9
   0x5f00, 0x0000      // daddiu t8,zero,DYN_INDEX sign extended
 };
@@ -6816,7 +6816,7 @@ Mips_output_data_mips_stubs<size, big_endian>::
 lazy_stub_micromips32_normal_2[] =
 {
   0xff3c, 0x8010,     // lw t9,0x8010(gp)
-  0x001f, 0x7950,     // addu t7,ra,zero
+  0x001f, 0x7a90,     // or t7,ra,zero
   0x03f9, 0x0f3c,     // jalr ra,t9
   0x5300, 0x0000      // ori t8,zero,DYN_INDEX unsigned
 };
@@ -6830,7 +6830,7 @@ Mips_output_data_mips_stubs<size, big_endian>::
 lazy_stub_micromips32_normal_2_n64[] =
 {
   0xdf3c, 0x8010,     // ld t9,0x8010(gp)
-  0x581f, 0x7950,     // daddu t7,ra,zero
+  0x001f, 0x7a90,     // or t7,ra,zero
   0x03f9, 0x0f3c,     // jalr ra,t9
   0x5300, 0x0000      // ori t8,zero,DYN_INDEX unsigned
 };
@@ -6842,7 +6842,7 @@ const uint32_t
 Mips_output_data_mips_stubs<size, big_endian>::lazy_stub_micromips32_big[] =
 {
   0xff3c, 0x8010,     // lw t9,0x8010(gp)
-  0x001f, 0x7950,     // addu t7,ra,zero
+  0x001f, 0x7a90,     // or t7,ra,zero
   0x41b8, 0x0000,     // lui t8,DYN_INDEX
   0x03f9, 0x0f3c,     // jalr ra,t9
   0x5318, 0x0000      // ori t8,t8,DYN_INDEX
@@ -6855,7 +6855,7 @@ const uint32_t
 Mips_output_data_mips_stubs<size, big_endian>::lazy_stub_micromips32_big_n64[] =
 {
   0xdf3c, 0x8010,     // ld t9,0x8010(gp)
-  0x581f, 0x7950,     // daddu t7,ra,zero
+  0x001f, 0x7a90,     // or t7,ra,zero
   0x41b8, 0x0000,     // lui t8,DYN_INDEX
   0x03f9, 0x0f3c,     // jalr ra,t9
   0x5318, 0x0000      // ori t8,t8,DYN_INDEX

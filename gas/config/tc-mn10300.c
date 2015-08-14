@@ -938,7 +938,7 @@ md_begin (void)
     as_warn (_("could not set architecture and machine"));
 
   current_machine = AM33_2;
-#else  
+#else
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, MN103))
     as_warn (_("could not set architecture and machine"));
 
@@ -1069,7 +1069,7 @@ mn10300_cons_fix_new (fragS *frag, int off, int size, expressionS *exp,
       as_bad (_("unsupported BFD relocation size %u"), size);
       fixup.reloc = BFD_RELOC_UNUSED;
     }
-    
+
   fix_new_exp (frag, off, size, &fixup.exp, 0, fixup.reloc);
 }
 
@@ -2216,7 +2216,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	  reloc2->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
 	  *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 
-	  reloc->addend = fixp->fx_offset; 
+	  reloc->addend = fixp->fx_offset;
 	  if (asec == absolute_section)
 	    {
 	      reloc->addend += S_GET_VALUE (fixp->fx_addsy);
@@ -2283,7 +2283,7 @@ static inline bfd_boolean
 has_known_symbol_location (fragS * fragp, asection * sec)
 {
   symbolS * sym = fragp->fr_symbol;
-  
+
   return sym != NULL
     && S_IS_DEFINED (sym)
     && ! S_IS_WEAK (sym)
@@ -2384,7 +2384,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_MN10300_ALIGN:
       fixP->fx_done = 1;
       return;
-      
+
     case BFD_RELOC_NONE:
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -2453,7 +2453,7 @@ mn10300_end_of_match (char *cont, char *what)
     return cont + len;
 
   return NULL;
-}  
+}
 
 int
 mn10300_parse_name (char const *name,
@@ -2500,7 +2500,7 @@ mn10300_parse_name (char const *name,
     }
 
   exprP->X_add_symbol = symbol_find_or_make (name);
-  
+
   if (*nextcharP != '@')
     goto no_suffix;
   else if ((next_end = mn10300_end_of_match (next + 1, "GOTOFF")))

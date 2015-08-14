@@ -8,7 +8,7 @@
    the Free Software Foundation; either version 3, or (at your option)
    any later version.
 
-   GAS is distributed in the hope that it will be useful, 
+   GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
@@ -81,21 +81,21 @@ HEX	[0-9A-Fa-f]
   }
 ";"|"#"	{
     int c;
-    while ((c = input ()) !=  EOF) 
+    while ((c = input ()) !=  EOF)
       {
-        if (c ==  '\n') 
+        if (c ==  '\n')
     	{
     		unput (c);
     		break;
     	}
       }
   }
-"\n"	{ 
-    insntbl_line++; 
+"\n"	{
+    insntbl_line++;
     MDBG (("in lex, NL = %d (x%x)\n", NL, NL));
-    return NL; 
+    return NL;
   }
-" "|"\t" { 
+" "|"\t" {
   }
 . {
     MDBG (("char = %x, %d\n", yytext[0], yytext[0]));
@@ -104,9 +104,9 @@ HEX	[0-9A-Fa-f]
 %%
 
 #ifndef yywrap
-int 
-yywrap () 
-  { 
-    return 1; 
+int
+yywrap ()
+  {
+    return 1;
   }
 #endif

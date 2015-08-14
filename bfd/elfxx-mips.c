@@ -911,10 +911,7 @@ static bfd *reldyn_sorting_bfd;
   ((ABI_64_P (abfd)							\
     ? 0xdf998010				/* ld t9,0x8010(gp) */	\
     : 0x8f998010))              		/* lw t9,0x8010(gp) */
-#define STUB_MOVE(abfd)							\
-   ((ABI_64_P (abfd)							\
-     ? 0x03e0782d				/* daddu t7,ra */	\
-     : 0x03e07821))				/* addu t7,ra */
+#define STUB_MOVE 0x03e07825			/* or t7,ra,zero */
 #define STUB_LUI(VAL) (0x3c180000 + (VAL))	/* lui t8,VAL */
 #define STUB_JALR 0x0320f809			/* jalr t9,ra */
 #define STUB_ORI(VAL) (0x37180000 + (VAL))	/* ori t8,t8,VAL */
@@ -930,10 +927,7 @@ static bfd *reldyn_sorting_bfd;
    ? 0xdf3c8010					/* ld t9,0x8010(gp) */	\
    : 0xff3c8010)				/* lw t9,0x8010(gp) */
 #define STUB_MOVE_MICROMIPS 0x0dff		/* move t7,ra */
-#define STUB_MOVE32_MICROMIPS(abfd)					\
-   (ABI_64_P (abfd)							\
-    ? 0x581f7950				/* daddu t7,ra,zero */	\
-    : 0x001f7950)				/* addu t7,ra,zero */
+#define STUB_MOVE32_MICROMIPS 0x001f7a90	/* or t7,ra,zero */
 #define STUB_LUI_MICROMIPS(VAL)						\
    (0x41b80000 + (VAL))				/* lui t8,VAL */
 #define STUB_JALR_MICROMIPS 0x45d9		/* jalr t9 */
@@ -1030,7 +1024,7 @@ static const bfd_vma mips_o32_exec_plt0_entry[] =
   0x8f990000,	/* lw $25, %lo(&GOTPLT[0])($28)				*/
   0x279c0000,	/* addiu $28, $28, %lo(&GOTPLT[0])			*/
   0x031cc023,	/* subu $24, $24, $28					*/
-  0x03e07821,	/* move $15, $31	# 32-bit move (addu)		*/
+  0x03e07825,	/* or t7, ra, zero					*/
   0x0018c082,	/* srl $24, $24, 2					*/
   0x0320f809,	/* jalr $25						*/
   0x2718fffe	/* subu $24, $24, 2					*/
@@ -1044,7 +1038,7 @@ static const bfd_vma mips_n32_exec_plt0_entry[] =
   0x8dd90000,	/* lw $25, %lo(&GOTPLT[0])($14)				*/
   0x25ce0000,	/* addiu $14, $14, %lo(&GOTPLT[0])			*/
   0x030ec023,	/* subu $24, $24, $14					*/
-  0x03e07821,	/* move $15, $31	# 32-bit move (addu)		*/
+  0x03e07825,	/* or t7, ra, zero					*/
   0x0018c082,	/* srl $24, $24, 2					*/
   0x0320f809,	/* jalr $25						*/
   0x2718fffe	/* subu $24, $24, 2					*/
@@ -1058,7 +1052,7 @@ static const bfd_vma mips_n64_exec_plt0_entry[] =
   0xddd90000,	/* ld $25, %lo(&GOTPLT[0])($14)				*/
   0x25ce0000,	/* addiu $14, $14, %lo(&GOTPLT[0])			*/
   0x030ec023,	/* subu $24, $24, $14					*/
-  0x03e0782d,	/* move $15, $31	# 64-bit move (daddu)		*/
+  0x03e07825,	/* or t7, ra, zero					*/
   0x0018c0c2,	/* srl $24, $24, 3					*/
   0x0320f809,	/* jalr $25						*/
   0x2718fffe	/* subu $24, $24, 2					*/
@@ -1091,7 +1085,7 @@ static const bfd_vma micromips_insn32_o32_exec_plt0_entry[] =
   0xff3c, 0x0000,	/* lw $25, %lo(&GOTPLT[0])($28)			*/
   0x339c, 0x0000,	/* addiu $28, $28, %lo(&GOTPLT[0])		*/
   0x0398, 0xc1d0,	/* subu $24, $24, $28				*/
-  0x001f, 0x7950,	/* move $15, $31				*/
+  0x001f, 0x7a90,	/* or $15, $31, zero				*/
   0x0318, 0x1040,	/* srl $24, $24, 2				*/
   0x03f9, 0x0f3c,	/* jalr $25					*/
   0x3318, 0xfffe	/* subu $24, $24, 2				*/
@@ -10714,8 +10708,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  if (htab->insn32)
 	    {
 	      bfd_put_micromips_32 (output_bfd,
-				    STUB_MOVE32_MICROMIPS (output_bfd),
-				    stub + idx);
+				    STUB_MOVE32_MICROMIPS, stub + idx);
 	      idx += 4;
 	    }
 	  else
@@ -10765,7 +10758,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  idx = 0;
 	  bfd_put_32 (output_bfd, STUB_LW (output_bfd), stub + idx);
 	  idx += 4;
-	  bfd_put_32 (output_bfd, STUB_MOVE (output_bfd), stub + idx);
+	  bfd_put_32 (output_bfd, STUB_MOVE, stub + idx);
 	  idx += 4;
 	  if (stub_size == stub_big_size)
 	    {
@@ -13224,8 +13217,8 @@ static const struct opcode_descriptor addiupc_insn =
 #define MOVE16_RS_FIELD(r) (((r) & 0x1f)     )
 
 static const struct opcode_descriptor move_insns_32[] = {
-  { /* "move",	"d,s",		*/ 0x00000150, 0xffe007ff }, /* addu d,s,$0 */
   { /* "move",	"d,s",		*/ 0x00000290, 0xffe007ff }, /* or   d,s,$0 */
+  { /* "move",	"d,s",		*/ 0x00000150, 0xffe007ff }, /* addu d,s,$0 */
   { 0, 0 }  /* End marker for find_match().  */
 };
 

@@ -32,6 +32,7 @@
 #include "expression.h"
 #include "value.h"
 #include "cp-abi.h"
+#include "namespace.h"
 #include <signal.h>
 
 #include "safe-ctype.h"

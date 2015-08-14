@@ -559,7 +559,7 @@ extern bfd_boolean _bfd_dwarf2_find_nearest_line
 /* Find the bias between DWARF addresses and real addresses.  */
 extern bfd_signed_vma _bfd_dwarf2_find_symbol_bias
   (asymbol **, void **);
-  
+
 /* Find inliner info after calling bfd_find_nearest_line. */
 extern bfd_boolean _bfd_dwarf2_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *, void **);
@@ -2759,6 +2759,9 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC",
   "BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC",
   "BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19",
+  "BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12",
+  "BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC",
+  "BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21",
   "BFD_RELOC_AARCH64_TLSLD_ADR_PREL21",
   "BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2",
   "BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1",

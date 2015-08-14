@@ -1,3 +1,111 @@
+2015-08-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18801
+	* ld-i386/i386.exp: Run pr18801.
+	* ld-x86-64/x86-64.exp: Likewise.
+	* ld-i386/pr18801.d: New file.
+	* ld-i386/pr18801.s: Likewise.
+	* ld-x86-64/pr18801.d: Likewise.
+	* ld-x86-64/pr18801.s: Likewise.
+
+2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
+
+	* ld-mips-elf/compressed-plt-1-n32-mips16.od: Update test.
+	* ld-mips-elf/compressed-plt-1-n32-umips.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-mips16-got.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-mips16-only.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-mips16-word.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-mips16.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-se.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-umips-got.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-umips-word.od: Ditto.
+	* ld-mips-elf/compressed-plt-1-o32-umips.od: Ditto.
+	* ld-mips-elf/jalx-2.dd: Ditto.
+	* ld-mips-elf/mips16-pic-3.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-3a.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-3b.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-5b.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-6-n32.dd: Ditto.
+	* ld-mips-elf/pic-and-nonpic-6-o32.dd: Ditto.
+	* ld-mips-elf/stub-dynsym-1-10000.d: Ditto.
+	* ld-mips-elf/stub-dynsym-1-2fe80.d: Ditto.
+	* ld-mips-elf/stub-dynsym-1-7fff.d: Ditto.
+	* ld-mips-elf/stub-dynsym-1-8000.d: Ditto.
+	* ld-mips-elf/stub-dynsym-1-fff0.d: Ditto.
+	* ld-mips-elf/tlsbin-o32.d: Ditto.
+	* ld-mips-elf/tlsdyn-o32-1.d: Ditto.
+	* ld-mips-elf/tlsdyn-o32-2.d: Ditto.
+	* ld-mips-elf/tlsdyn-o32-3.d: Ditto.
+	* ld-mips-elf/tlsdyn-o32.d: Ditto.
+	* ld-mips-elf/tlslib-o32.d: Ditto.
+
+2015-08-12  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp (aarch64_choose_ilp32_emul): Support all
+	four triple shape: aarch64-*-linux*, aarch64-*-elf,
+	aarch64_be-*-linux*, aarch64_be-*-elf.
+	* ld-aarch64/emit-relocs-86.d: Use aarch64_choose_ilp32_emul.
+	* ld-aarch64/emit-relocs-86-overflow.d: Likewise.
+	* ld-aarch64/ld-aarch64/farcall-b-plt.d: Relax instrucion encoding
+	check when they reflect address.
+	* ld-aarch64/ld-aarch64/farcall-bl-plt.d: Likewise.
+
+2015-08-12  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Rename relocs-257-symbolic-func to
+	relocs-1027-symbolic-func.
+	* ld-aarch64/relocs-257-symbolic-func.d: Rename to ...
+	* ld-aarch64/relocs-1027-symbolic-func.d: ... this.
+	* ld-aarch64/relocs-257-symbolic-func.s: Rename to ...
+	* ld-aarch64/relocs-1027-symbolic-func.s: ... this.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/farcall-b-defsym.s: New test.
+	* ld-aarch64/farcall-bl-defsym.s: Likewise.
+	* ld-aarch64/farcall-b-defsym.d: New expectation.
+	* ld-aarch64/farcall-bl-defsym.d: Likewise.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/farcall-b-gsym.s: New test.
+	* ld-aarch64/farcall-b-plt.s: Likewise.
+	* ld-aarch64/farcall-bl-plt.s: Likewise.
+	* ld-aarch64/farcall-b-gsym.d: New expect file.
+	* ld-aarch64/farcall-b-plt.d: Likewise.
+	* ld-aarch64/farcall-bl-plt.d: Likewise.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/emit-relocs-529.s: New testcase.
+	* ld-aarch64/emit-relocs-529-overflow.s: Likewise.
+	* ld-aarch64/emit-relocs-86.s: Likewise.
+	* ld-aarch64/emit-relocs-86-overflow.s: Likewise.
+	* ld-aarch64/emit-relocs-529.d: New expectation file.
+	* ld-aarch64/emit-relocs-529-overflow.d: Likewise.
+	* ld-aarch64/emit-relocs-86.d: Likewise.
+	* ld-aarch64/emit-relocs-86-overflow.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Run new testcases.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/tls-small-ld.s: Update testcase.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/tls-small-ld.s: New file.
+	* ld-aarch64/tls-small-ld.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+
+2015-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18808
+	* ld-ifunc/ifunc.exp: Add a test for PR ld/18808.
+	* ld-ifunc/pr18808.out: New file.
+	* ld-ifunc/pr18808a.c: Likewise.
+	* ld-ifunc/pr18808b.c: Likewise.
+	* lib/ld-lib.exp (check_ifunc_attribute_available): New.
+
 2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18720

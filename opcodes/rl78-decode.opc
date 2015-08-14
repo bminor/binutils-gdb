@@ -208,7 +208,7 @@ rl78_decode_opcode (unsigned long pc AU,
 
 /** 0000 1110			add	%0, %ea1			*/
   ID(add); DR(A); SM(HL, IMMU(1)); Fzac;
-  
+
 /** 0110 0001 1000 0010		add	%0, %e1				*/
   ID(add); DR(A); SM2(HL, C, 0); Fzac;
 
@@ -714,28 +714,28 @@ rl78_decode_opcode (unsigned long pc AU,
   ID(mov); DR(CS); SR(A);
 
 /** 0100 0001			mov	%0, #%1				*/
-  ID(mov); DR(ES); SC(IMMU(1));	
+  ID(mov); DR(ES); SC(IMMU(1));
 
 /** 1001 1110 1111 1101		mov	%0, %1				*/
-  ID(mov); DR(ES); SR(A);	
+  ID(mov); DR(ES); SR(A);
 
 /** 0110 0001 1011 1000		mov	%0, %1				*/
-  ID(mov); DR(ES); SM(None, SADDR);	
+  ID(mov); DR(ES); SM(None, SADDR);
 
 /** 0001 1001			mov	%e0, #%1			*/
-  ID(mov); DM(B, IMMU(2)); SC(IMMU(1));	
+  ID(mov); DM(B, IMMU(2)); SC(IMMU(1));
 
 /** 0001 1000			mov	%e0, %1				*/
-  ID(mov); DM(B, IMMU(2)); SR(A);	
+  ID(mov); DM(B, IMMU(2)); SR(A);
 
 /** 0011 1001			mov	%e0, #%1			*/
-  ID(mov); DM(BC, IMMU(2)); SC(IMMU(1));	
+  ID(mov); DM(BC, IMMU(2)); SC(IMMU(1));
 
 /** 0100 1000			mov	%e0, %1				*/
-  ID(mov); DM(BC, IMMU(2)); SR(A);	
+  ID(mov); DM(BC, IMMU(2)); SR(A);
 
 /** 0011 1000			mov	%e0, #%1			*/
-  ID(mov); DM(C, IMMU(2)); SC(IMMU(1));	
+  ID(mov); DM(C, IMMU(2)); SC(IMMU(1));
 
 /** 0010 1000			mov	%e0, %1				*/
   ID(mov); DM(C, IMMU(2)); SR(A);

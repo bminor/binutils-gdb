@@ -1641,6 +1641,18 @@ struct output_elf_obj_tdata
   bfd_boolean flags_init;
 };
 
+/* Indicate if the bfd contains symbols that have the STT_GNU_IFUNC
+   symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
+   field in the ELF header structure.  */
+enum elf_gnu_symbols
+  {
+    elf_gnu_symbol_none = 0,
+    elf_gnu_symbol_any = 1 << 0,
+    elf_gnu_symbol_ifunc = (elf_gnu_symbol_any | 1 << 1),
+    elf_gnu_symbol_unique = (elf_gnu_symbol_any | 1 << 2),
+    elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
+  };
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -1751,10 +1763,7 @@ struct elf_obj_tdata
      symbols.  */
   bfd_boolean bad_symtab;
 
-  /* True if the bfd contains symbols that have the STT_GNU_IFUNC
-     symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
-     field in the ELF header structure.  */
-  bfd_boolean has_gnu_symbols;
+  enum elf_gnu_symbols has_gnu_symbols;
 
   /* Information grabbed from an elf core file.  */
   struct core_elf_obj_tdata *core;

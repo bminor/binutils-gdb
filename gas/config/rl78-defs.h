@@ -19,7 +19,7 @@
    02110-1301, USA.  */
 
 #ifndef RL78_DEFS_H
-#define RL78_DEFS_H  
+#define RL78_DEFS_H
 
 /* Third operand to rl78_op.  */
 #define RL78REL_DATA		0

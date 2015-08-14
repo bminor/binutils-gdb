@@ -7767,7 +7767,7 @@ is_double_a_single (bfd_int64_t v)
     && (mantissa & 0x1FFFFFFFl) == 0;
 }
 
-/* Returns a double precision value casted to single precision 
+/* Returns a double precision value casted to single precision
    (ignoring the least significant bits in exponent and mantissa).  */
 
 static int
@@ -7865,7 +7865,7 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	    }
 	  else
 	    l = generic_bignum;
-	  
+
 #if defined BFD_HOST_64_BIT
 	  v =
 	    ((((((((bfd_int64_t) l[3] & LITTLENUM_MASK)
@@ -7922,7 +7922,7 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		      return TRUE;
 		    }
 		  else if ((v & ~0xFFFF) == 0 || (v & ~0xFFFF0000) == 0)
-		    { 
+		    {
 		      /* The number may be loaded with a movw/movt instruction.  */
 		      int imm;
 
@@ -21880,7 +21880,7 @@ arm_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char * name)
       else
 	free (nbuf);
     }
-  
+
   return FALSE;
 }
 

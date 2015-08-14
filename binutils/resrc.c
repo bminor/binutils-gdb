@@ -2275,7 +2275,7 @@ write_rc_resource (FILE *e, const rc_res_id *type,
 	    default:
     res_id_print (e, *type, 0);
 	      break;
-	
+
 	    PRINT_RT_NAME(RT_MANIFEST);
 	    PRINT_RT_NAME(RT_ANICURSOR);
 	    PRINT_RT_NAME(RT_ANIICON);
@@ -2777,7 +2777,7 @@ write_rc_toolbar (FILE *e, const rc_toolbar *tb)
     indent (e, 2);
     if (it->id.u.id == 0)
       fprintf (e, "SEPARATOR\n");
-    else 
+    else
       fprintf (e, "BUTTON %d\n", (int) it->id.u.id);
     it = it->next;
   }
@@ -2892,7 +2892,7 @@ test_rc_datablock_text (rc_uint_type length, const bfd_byte *data)
   int has_nl;
   rc_uint_type c;
   rc_uint_type i;
-  
+
   if (length <= 1)
     return 0;
 
@@ -3029,7 +3029,7 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
 	      if (i < length)
 		fprintf (e, "\n");
 	    }
-          
+
 	  if (i == 0)
 	      {
 	      indent (e, 2);
@@ -3052,7 +3052,7 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
 	      u = (const unichar *) &data[i];
 	      indent (e, 2);
 	  fprintf (e, "L\"");
-    	  
+
 	      for (c = 0; i < length && c < 160 && u[c] != '\n'; c++, i += 2)
 		;
 	      if (i < length && u[c] == '\n')
@@ -3090,9 +3090,9 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
 		  {
 	  rc_uint_type k;
 	  rc_uint_type comment_start;
-	  
+
 	  comment_start = i;
-	  
+
 	  if (! first)
 	    indent (e, 2);
 

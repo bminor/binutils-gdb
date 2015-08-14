@@ -450,7 +450,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
   p = contents;
   p_end = p + hdr->sh_size;
   std_sec = get_elf_backend_data (abfd)->obj_attrs_vendor;
-  
+
   if (*(p++) == 'A')
     {
       len = hdr->sh_size - 1;

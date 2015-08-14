@@ -70,5 +70,5 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (32, 32, bfd_mach_nios2r2, "nios2:r2", FALSE, NULL),
 };
 
-const bfd_arch_info_type bfd_nios2_arch = 
+const bfd_arch_info_type bfd_nios2_arch =
   N (32, 32, 0, "nios2", TRUE, NIOS2R1_NEXT);

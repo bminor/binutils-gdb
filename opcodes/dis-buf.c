@@ -33,7 +33,7 @@ buffer_read_memory (bfd_vma memaddr,
 {
   unsigned int opb = info->octets_per_byte;
   unsigned int end_addr_offset = length / opb;
-  unsigned int max_addr_offset = info->buffer_length / opb; 
+  unsigned int max_addr_offset = info->buffer_length / opb;
   unsigned int octets = (memaddr - info->buffer_vma) * opb;
 
   if (memaddr < info->buffer_vma

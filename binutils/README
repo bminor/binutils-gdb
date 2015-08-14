@@ -57,7 +57,7 @@ By default, the binutils will be configured to support the system on
 which they are built.  When doing cross development, use the --target
 configure option to specify a different target, eg:
 
-	./configure --target=foo-elf        
+	./configure --target=foo-elf
 
 The --enable-targets option adds support for more binary file formats
 besides the default.  List them as the argument to --enable-targets,

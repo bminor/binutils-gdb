@@ -4821,7 +4821,7 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
        || ELF_ST_BIND (isym->st_info) == STB_GNU_UNIQUE)
       && (ibfd->flags & DYNAMIC) == 0
       && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
+    elf_tdata (info->output_bfd)->has_gnu_symbols = elf_gnu_symbol_any;
 
   if (*sec != NULL
       && strcmp ((*sec)->name, ".opd") == 0)

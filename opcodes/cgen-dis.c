@@ -49,7 +49,7 @@ count_decodable_bits (const CGEN_INSN *insn)
   return bits;
 }
 
-/* Add an instruction to the hash chain.  */     
+/* Add an instruction to the hash chain.  */
 static void
 add_insn_to_hash_chain (CGEN_INSN_LIST *hentbuf,
 			const CGEN_INSN *insn,

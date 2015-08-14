@@ -4908,13 +4908,13 @@ _bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   in_attr = &in_attrs[Tag_GNU_Sparc_HWCAPS];
   out_attr = &out_attrs[Tag_GNU_Sparc_HWCAPS];
-  
+
   out_attr->i |= in_attr->i;
   out_attr->type = 1;
 
   in_attr = &in_attrs[Tag_GNU_Sparc_HWCAPS2];
   out_attr = &out_attrs[Tag_GNU_Sparc_HWCAPS2];
-  
+
   out_attr->i |= in_attr->i;
   out_attr->type = 1;
 

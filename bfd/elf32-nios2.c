@@ -1420,7 +1420,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 	 0xfe00,
 	 0xfe00,
 	 TRUE),
-	 
+
   HOWTO (R_NIOS2_R2_T1I7_2,
 	 2,
 	 1,
@@ -1434,7 +1434,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 	 0xfe00,
 	 0xfe00,
 	 FALSE),
-	 
+
   HOWTO (R_NIOS2_R2_T2I4,
 	 0,
 	 1,
@@ -1490,7 +1490,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 	 0x1fc0,
 	 0x1fc0,
 	 FALSE),
-	 
+
   HOWTO (R_NIOS2_R2_X2L5,
 	 0,
 	 1,
@@ -1504,7 +1504,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 	 0x07c0,
 	 0x07c0,
 	 FALSE),
-	 
+
   HOWTO (R_NIOS2_R2_F1I5_2,
 	 2,
 	 1,
@@ -1546,7 +1546,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 	 0x7e00,
 	 0x7e00,
 	 FALSE),
-  
+
   HOWTO (R_NIOS2_R2_T1X1I6_2,
 	 2,
 	 2,
@@ -1560,7 +1560,7 @@ static reloc_howto_type elf_nios2_r2_howto_table_rel[] = {
 	 0x7e00,
 	 0x7e00,
 	 FALSE),
-  
+
 /* Add other relocations here.  */
 };
 
@@ -2889,7 +2889,7 @@ nios2_elf32_build_stubs (struct bfd_link_info *info)
        SEC_LINKER_CREATED flag set, while stub sections do not
        have that flag.  Ignore any non-stub sections here.  */
     if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
-      {  
+      {
 	bfd_size_type size;
 
 	/* Allocate memory to hold the linker stubs.  */
@@ -2981,7 +2981,7 @@ nios2_elf32_bfd_reloc_type_lookup (bfd *abfd,
 				   bfd_reloc_code_real_type code)
 {
   int i;
-  
+
   for (i = 0;
        i < (int) (sizeof (nios2_reloc_map) / sizeof (struct elf_reloc_map));
        ++i)
@@ -3012,11 +3012,11 @@ nios2_elf32_bfd_reloc_name_lookup (bfd *abfd,
       howto_tbl_size = (int) (sizeof (elf_nios2_r1_howto_table_rel)
 			      / sizeof (elf_nios2_r1_howto_table_rel[0]));
     }
-    
+
   for (i = 0; i < howto_tbl_size; i++)
     if (howto_tbl[i].name && strcasecmp (howto_tbl[i].name, r_name) == 0)
       return howto_tbl + i;
-  return NULL;	
+  return NULL;
 }
 
 /* Implement elf_info_to_howto:
@@ -3120,7 +3120,7 @@ lookup:
    symbol value for an external symbol if we are producing relocatable
    output.  */
 static bfd_reloc_status_type
-nios2_elf_final_gp (bfd *output_bfd, asymbol *symbol, bfd_boolean relocatable, 
+nios2_elf_final_gp (bfd *output_bfd, asymbol *symbol, bfd_boolean relocatable,
 		    char **error_message, bfd_vma *pgp)
 {
   if (bfd_is_und_section (symbol->section) && !relocatable)
@@ -3151,9 +3151,9 @@ nios2_elf_final_gp (bfd *output_bfd, asymbol *symbol, bfd_boolean relocatable,
 
 /* Do the relocations that require special handling.  */
 static bfd_reloc_status_type
-nios2_elf32_do_hi16_relocate (bfd *abfd, reloc_howto_type *howto, 
+nios2_elf32_do_hi16_relocate (bfd *abfd, reloc_howto_type *howto,
 			      asection *input_section,
-			      bfd_byte *data, bfd_vma offset, 
+			      bfd_byte *data, bfd_vma offset,
 			      bfd_vma symbol_value, bfd_vma addend)
 {
   symbol_value = symbol_value + addend;
@@ -3166,7 +3166,7 @@ nios2_elf32_do_hi16_relocate (bfd *abfd, reloc_howto_type *howto,
 static bfd_reloc_status_type
 nios2_elf32_do_lo16_relocate (bfd *abfd, reloc_howto_type *howto,
 			      asection *input_section,
-			      bfd_byte *data, bfd_vma offset, 
+			      bfd_byte *data, bfd_vma offset,
 			      bfd_vma symbol_value, bfd_vma addend)
 {
   symbol_value = symbol_value + addend;
@@ -3221,10 +3221,10 @@ nios2_elf32_do_pcrel_hiadj16_relocate (bfd *abfd, reloc_howto_type *howto,
 static bfd_reloc_status_type
 nios2_elf32_do_pcrel16_relocate (bfd *abfd, reloc_howto_type *howto,
 				 asection *input_section,
-				 bfd_byte *data, bfd_vma offset, 
+				 bfd_byte *data, bfd_vma offset,
 				 bfd_vma symbol_value, bfd_vma addend)
 {
-  /* NIOS2 pc relative relocations are relative to the next 32-bit instruction 
+  /* NIOS2 pc relative relocations are relative to the next 32-bit instruction
      so we need to subtract 4 before doing a final_link_relocate. */
   symbol_value = symbol_value + addend - 4;
   addend = 0;
@@ -3235,11 +3235,11 @@ nios2_elf32_do_pcrel16_relocate (bfd *abfd, reloc_howto_type *howto,
 static bfd_reloc_status_type
 nios2_elf32_do_call26_relocate (bfd *abfd, reloc_howto_type *howto,
 				asection *input_section,
-				bfd_byte *data, bfd_vma offset, 
+				bfd_byte *data, bfd_vma offset,
 				bfd_vma symbol_value, bfd_vma addend)
 {
   /* Check that the relocation is in the same page as the current address.  */
-  if (CALL26_SEGMENT (symbol_value + addend) 
+  if (CALL26_SEGMENT (symbol_value + addend)
       != CALL26_SEGMENT (input_section->output_section->vma
 			 + input_section->output_offset
 			 + offset))
@@ -3257,7 +3257,7 @@ nios2_elf32_do_call26_relocate (bfd *abfd, reloc_howto_type *howto,
 static bfd_reloc_status_type
 nios2_elf32_do_gprel_relocate (bfd *abfd, reloc_howto_type *howto,
 			       asection *input_section,
-			       bfd_byte *data, bfd_vma offset, 
+			       bfd_byte *data, bfd_vma offset,
 			       bfd_vma symbol_value, bfd_vma addend)
 {
   /* Because we need the output_bfd, the special handling is done
@@ -3269,7 +3269,7 @@ nios2_elf32_do_gprel_relocate (bfd *abfd, reloc_howto_type *howto,
 static bfd_reloc_status_type
 nios2_elf32_do_ujmp_relocate (bfd *abfd, reloc_howto_type *howto,
 			      asection *input_section,
-			      bfd_byte *data, bfd_vma offset, 
+			      bfd_byte *data, bfd_vma offset,
 			      bfd_vma symbol_value, bfd_vma addend)
 {
   bfd_vma symbol_lo16, symbol_hi16;
@@ -3292,7 +3292,7 @@ nios2_elf32_do_ujmp_relocate (bfd *abfd, reloc_howto_type *howto,
 static bfd_reloc_status_type
 nios2_elf32_do_cjmp_relocate (bfd *abfd, reloc_howto_type *howto,
 			      asection *input_section,
-			      bfd_byte *data, bfd_vma offset, 
+			      bfd_byte *data, bfd_vma offset,
 			      bfd_vma symbol_value, bfd_vma addend)
 {
   bfd_vma symbol_lo16, symbol_hi16;
@@ -3315,7 +3315,7 @@ nios2_elf32_do_cjmp_relocate (bfd *abfd, reloc_howto_type *howto,
 static bfd_reloc_status_type
 nios2_elf32_do_callr_relocate (bfd *abfd, reloc_howto_type *howto,
 			       asection *input_section,
-			       bfd_byte *data, bfd_vma offset, 
+			       bfd_byte *data, bfd_vma offset,
 			       bfd_vma symbol_value, bfd_vma addend)
 {
   bfd_vma symbol_lo16, symbol_hi16;
@@ -3341,9 +3341,9 @@ nios2_elf32_do_callr_relocate (bfd *abfd, reloc_howto_type *howto,
    changes in size of section don't screw up .align.  */
 static bfd_reloc_status_type
 nios2_elf32_ignore_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
-			  asymbol *symbol ATTRIBUTE_UNUSED, 
-			  void *data ATTRIBUTE_UNUSED, asection *input_section, 
-			  bfd *output_bfd, 
+			  asymbol *symbol ATTRIBUTE_UNUSED,
+			  void *data ATTRIBUTE_UNUSED, asection *input_section,
+			  bfd *output_bfd,
 			  char **error_message ATTRIBUTE_UNUSED)
 {
   if (output_bfd != NULL)
@@ -3352,9 +3352,9 @@ nios2_elf32_ignore_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
 }
 
 static bfd_reloc_status_type
-nios2_elf32_hi16_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol, 
-			   void *data, asection *input_section, 
-			   bfd *output_bfd, 
+nios2_elf32_hi16_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+			   void *data, asection *input_section,
+			   bfd *output_bfd,
 			   char **error_message ATTRIBUTE_UNUSED)
 {
   /* This part is from bfd_elf_generic_reloc.  */
@@ -3381,8 +3381,8 @@ nios2_elf32_hi16_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
 static bfd_reloc_status_type
 nios2_elf32_lo16_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
-			   void *data, asection *input_section, 
-			   bfd *output_bfd, 
+			   void *data, asection *input_section,
+			   bfd *output_bfd,
 			   char **error_message ATTRIBUTE_UNUSED)
 {
   /* This part is from bfd_elf_generic_reloc.  */
@@ -3409,8 +3409,8 @@ nios2_elf32_lo16_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
 static bfd_reloc_status_type
 nios2_elf32_hiadj16_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
-			      void *data, asection *input_section, 
-			      bfd *output_bfd, 
+			      void *data, asection *input_section,
+			      bfd *output_bfd,
 			      char **error_message ATTRIBUTE_UNUSED)
 {
   /* This part is from bfd_elf_generic_reloc.  */
@@ -3489,8 +3489,8 @@ nios2_elf32_pcrel_hiadj16_relocate (bfd *abfd, arelent *reloc_entry,
 
 static bfd_reloc_status_type
 nios2_elf32_pcrel16_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
-			      void *data, asection *input_section, 
-			      bfd *output_bfd, 
+			      void *data, asection *input_section,
+			      bfd *output_bfd,
 			      char **error_message ATTRIBUTE_UNUSED)
 {
   /* This part is from bfd_elf_generic_reloc.  */
@@ -3517,8 +3517,8 @@ nios2_elf32_pcrel16_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
 static bfd_reloc_status_type
 nios2_elf32_call26_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
-			     void *data, asection *input_section, 
-			     bfd *output_bfd, 
+			     void *data, asection *input_section,
+			     bfd *output_bfd,
 			     char **error_message ATTRIBUTE_UNUSED)
 {
   /* This part is from bfd_elf_generic_reloc.  */
@@ -3545,7 +3545,7 @@ nios2_elf32_call26_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
 static bfd_reloc_status_type
 nios2_elf32_gprel_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
-			    void *data, asection *input_section, 
+			    void *data, asection *input_section,
 			    bfd *output_bfd, char **msg)
 {
   bfd_vma relocation;
@@ -3593,7 +3593,7 @@ nios2_elf32_gprel_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
 static bfd_reloc_status_type
 nios2_elf32_ujmp_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
-			   void *data, asection *input_section, 
+			   void *data, asection *input_section,
 			   bfd *output_bfd, char **msg ATTRIBUTE_UNUSED)
 {
   /* This part is from bfd_elf_generic_reloc.  */
@@ -3620,7 +3620,7 @@ nios2_elf32_ujmp_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
 static bfd_reloc_status_type
 nios2_elf32_cjmp_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
-			   void *data, asection *input_section, 
+			   void *data, asection *input_section,
 			   bfd *output_bfd, char **msg ATTRIBUTE_UNUSED)
 {
   /* This part is from bfd_elf_generic_reloc.  */
@@ -3647,7 +3647,7 @@ nios2_elf32_cjmp_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
 static bfd_reloc_status_type
 nios2_elf32_callr_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
-			    void *data, asection *input_section, 
+			    void *data, asection *input_section,
 			    bfd *output_bfd, char **msg ATTRIBUTE_UNUSED)
 {
   /* This part is from bfd_elf_generic_reloc.  */
@@ -3672,7 +3672,7 @@ nios2_elf32_callr_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 					reloc_entry->addend);
 }
 
- 
+
 /* Implement elf_backend_relocate_section.  */
 static bfd_boolean
 nios2_elf32_relocate_section (bfd *output_bfd,
@@ -3767,7 +3767,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 			 + rel->r_offset);
       else
 	reloc_address = 0;
-		
+
       if (howto)
 	{
 	  switch (howto->type)
@@ -3837,7 +3837,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 				 "global pointer (at 0x%08x) because the "
 				 "offset (%d) is out of the allowed range, "
 				 "-32678 to 32767.\n" );
-		      sprintf (msgbuf, format, name, symbol_address, gp, 
+		      sprintf (msgbuf, format, name, symbol_address, gp,
 			       (signed)relocation);
 		      msg = msgbuf;
 		      r = bfd_reloc_outofrange;

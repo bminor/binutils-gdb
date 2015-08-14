@@ -1723,6 +1723,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* It is referenced by a non-shared object. */
 	  h->ref_regular = 1;
 	  h->root.non_ir_ref = 1;
+
+	  if (h->type == STT_GNU_IFUNC)
+	    elf_tdata (info->output_bfd)->has_gnu_symbols
+	      |= elf_gnu_symbol_ifunc;
 	}
 
       if (! elf_x86_64_tls_transition (info, abfd, sec, NULL,
@@ -3509,6 +3513,15 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
+	      if ((elf_tdata (output_bfd)->has_gnu_symbols
+		   & elf_gnu_symbol_ifunc) == elf_gnu_symbol_ifunc)
+		{
+		  info->callbacks->einfo
+		    (_("%P%X: read-only segment has dynamic IFUNC relocations; recompile with -fPIC\n"));
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+
 	      if (!add_dynamic_entry (DT_TEXTREL, 0))
 		return FALSE;
 	    }
@@ -3786,8 +3799,16 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  bfd_vma plt_index;
 	  const char *name;
 
-	  if ((input_section->flags & SEC_ALLOC) == 0
-	      || h->plt.offset == (bfd_vma) -1)
+	  if ((input_section->flags & SEC_ALLOC) == 0)
+	    {
+	      /* Dynamic relocs are not propagated for SEC_DEBUGGING
+		 sections because such sections are not SEC_ALLOC and
+		 thus ld.so will not process them.  */
+	      if ((input_section->flags & SEC_DEBUGGING) != 0)
+		continue;
+	      abort ();
+	    }
+	  else if (h->plt.offset == (bfd_vma) -1)
 	    abort ();
 
 	  /* STT_GNU_IFUNC symbol must go through PLT.  */
@@ -5865,11 +5886,11 @@ elf_x86_64_add_symbol_hook (bfd *abfd,
       return TRUE;
     }
 
-  if ((ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-       || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE)
+  if (ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE
       && (abfd->flags & DYNAMIC) == 0
       && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
+    elf_tdata (info->output_bfd)->has_gnu_symbols
+      |= elf_gnu_symbol_unique;
 
   return TRUE;
 }

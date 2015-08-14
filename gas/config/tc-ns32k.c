@@ -710,7 +710,7 @@ get_addr_mode (char *ptr, addr_modeS *addrmodeP)
       addrmodeP->am_size += 1;
     }
 
-  gas_assert (addrmodeP->mode >= 0); 
+  gas_assert (addrmodeP->mode >= 0);
   if (disp_test[(unsigned int) addrmodeP->mode])
     {
       char c;

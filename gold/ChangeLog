@@ -1,3 +1,13 @@
+2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
+
+	* mips.cc (plt0_entry_o32, plt0_entry_n32, plt0_entry_n64,
+	lazy_stub_normal_1, lazy_stub_normal_1_n64,
+	lazy_stub_normal_2, lazy_stub_normal_2_n64, lazy_stub_big,
+	lazy_stub_big_n64, lazy_stub_micromips32_normal_1_n64,
+	lazy_stub_micromips32_normal_2_n64, lazy_stub_micromips32_big,
+	lazy_stub_micromips32_big_n64): Update to use 'or' for move instead
+	of 'addu/daddu'.
+
 2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

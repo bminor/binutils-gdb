@@ -2395,7 +2395,7 @@ proc mi_build_kv_pairs {attr_list {joiner ,}} {
 #
 # All arguments for the breakpoint may be specified using the options
 # number, type, disp, enabled, addr, func, file, fullanme, line,
-# thread-groups, times, ignore, script, and original-location.
+# thread-groups, cond, times, ignore, script, and original-location.
 #
 # Only if -script and -ignore are given will they appear in the output.
 # Otherwise, this procedure will skip them using ".*".
@@ -2410,17 +2410,27 @@ proc mi_make_breakpoint {args} {
     parse_args {{number .*} {type .*} {disp .*} {enabled .*} {addr .*}
 	{func .*} {file .*} {fullname .*} {line .*}
 	{thread-groups \\\[.*\\\]} {times .*} {ignore 0}
-	{script ""} {original-location .*}}
+	{script ""} {original-location .*} {cond ""}}
 
     set attr_list {}
     foreach attr [list number type disp enabled addr func file \
-		      fullname line thread-groups times] {
+		      fullname line thread-groups] {
 	lappend attr_list $attr [set $attr]
     }
 
     set result "bkpt={[mi_build_kv_pairs $attr_list]"
 
     # There are always exceptions.
+
+    # If COND is not preset, do not output it.
+    if {[string length $cond] > 0} {
+	append result ","
+	append result [mi_build_kv_pairs [list "cond" $cond]]
+    }
+
+    append result ","
+    append result [mi_build_kv_pairs [list "times" $times]]
+
     # If SCRIPT and IGNORE are not present, do not output them.
     if {$ignore != 0} {
 	append result ","

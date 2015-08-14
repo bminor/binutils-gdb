@@ -107,7 +107,7 @@ enum xtensa_relax_statesE
   /* When the code density option is available, this will generate a
      NOP.N marked RELAX_NARROW.  Otherwise, it will create an rs_fill
      fragment with a NOP in it.  Once a frag has been converted to
-     RELAX_LOOP_END_ADD_NOP, it should never be changed back to 
+     RELAX_LOOP_END_ADD_NOP, it should never be changed back to
      RELAX_LOOP_END.  */
 
   RELAX_LITERAL,
@@ -124,6 +124,7 @@ enum xtensa_relax_statesE
 
   RELAX_LITERAL_POOL_BEGIN,
   RELAX_LITERAL_POOL_END,
+  RELAX_LITERAL_POOL_CANDIDATE_BEGIN,
   /* Technically these are not relaxations at all but mark a location
      to store literals later.  Note that fr_var stores the frchain for
      BEGIN frags and fr_var stores now_seg for END frags.  */
@@ -174,7 +175,7 @@ enum xtensa_relax_statesE
      RELAX_UNREACHABLE frag.  */
 
   RELAX_ORG,
-  /* This marks the location as having previously been an rs_org frag.  
+  /* This marks the location as having previously been an rs_org frag.
      rs_org frags are converted to fill-zero frags immediately after
      relaxation.  However, we need to remember where they were so we can
      prevent the linker from changing the size of any frag between the

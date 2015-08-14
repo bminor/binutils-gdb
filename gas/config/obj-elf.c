@@ -2321,7 +2321,7 @@ elf_adjust_symtab (void)
   list.elt_count = NULL;
   list.indexes = hash_new ();
   bfd_map_over_sections (stdoutput, build_group_lists, &list);
-  
+
   /* Make the SHT_GROUP sections that describe each section group.  We
      can't set up the section contents here yet, because elf section
      indices have yet to be calculated.  elf.c:set_group_contents does

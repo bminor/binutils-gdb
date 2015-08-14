@@ -3428,7 +3428,7 @@ _bfd_elf_relocs_compatible (const bfd_target *input,
 
 /* Make a special call to the linker "notice" function to tell it that
    we are about to handle an as-needed lib, or have finished
-   processing the lib.  */ 
+   processing the lib.  */
 
 bfd_boolean
 _bfd_elf_notice_as_needed (bfd *ibfd,
@@ -8745,7 +8745,7 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
   symbuf = (bfd_byte *) bfd_malloc (amt);
   if (symbuf == NULL)
     return FALSE;
-  
+
   if (flinfo->symshndxbuf)
     {
       amt = (sizeof (Elf_External_Sym_Shndx)

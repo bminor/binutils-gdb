@@ -6844,6 +6844,21 @@ ENUM
 ENUMDOC
   AArch64 TLS INITIAL EXEC relocation.
 ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12
+ENUMDOC
+  Unsigned 12 bit byte offset to module TLS base address.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC
+ENUMDOC
+  Unsigned 12 bit byte offset to global offset table entry for a symbols
+  tls_index structure.  Used in conjunction with
+  BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21
+ENUMDOC
+  GOT entry page address for AArch64 TLS Local Dynamic, used with ADRP
+  instruction.
+ENUM
   BFD_RELOC_AARCH64_TLSLD_ADR_PREL21
 ENUMDOC
   GOT entry address for AArch64 TLS Local Dynamic, used with ADR instruction.

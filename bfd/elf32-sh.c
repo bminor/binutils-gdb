@@ -4443,7 +4443,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	       symbols.  */
 	    else if (r_type == R_SH_REL32
 		     && h
-		     && h->root.type == bfd_link_hash_undefweak) 
+		     && h->root.type == bfd_link_hash_undefweak)
 	      check_segment[0] = check_segment[1] = -1;
 	  goto final_link_relocate;
 

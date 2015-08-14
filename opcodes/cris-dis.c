@@ -813,7 +813,7 @@ print_with_operands (const struct cris_opcode *opcodep,
 	*tp++ = 'c';
 	*tp++ = 'r';
 	break;
-	
+
       case '[':
       case ']':
       case ',':

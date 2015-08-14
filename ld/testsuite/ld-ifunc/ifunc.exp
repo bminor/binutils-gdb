@@ -457,3 +457,30 @@ run_ld_link_exec_tests [] [list \
 	"-fpic" \
     ] \
 ]
+
+# Run-time tests which require working ifunc attribute support.
+if { ![check_ifunc_attribute_available] } {
+    return
+}
+
+run_cc_link_tests [list \
+    [list \
+	"Build libpr18808.so" \
+	"-shared" \
+	"-fPIC -O2 -g" \
+	{ pr18808b.c } \
+	{} \
+	"libpr18808.so" \
+    ] \
+]
+
+run_ld_link_exec_tests [] [list \
+    [list \
+	"Run pr18808" \
+	"tmpdir/libpr18808.so" \
+	"" \
+	{ pr18808a.c } \
+	"pr18808" \
+	"pr18808.out" \
+    ] \
+]

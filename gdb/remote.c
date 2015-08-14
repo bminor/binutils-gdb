@@ -45,6 +45,7 @@
 #include "filestuff.h"
 #include "rsp-low.h"
 #include "disasm.h"
+#include "location.h"
 
 #include <sys/time.h>
 
@@ -11242,13 +11243,12 @@ remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 
   if (packet_support (PACKET_TracepointSource) == PACKET_ENABLE)
     {
-      if (b->addr_string)
+      if (b->location != NULL)
 	{
 	  strcpy (buf, "QTDPsrc:");
-	  encode_source_string (b->number, loc->address,
-				"at", b->addr_string, buf + strlen (buf),
-				2048 - strlen (buf));
-
+	  encode_source_string (b->number, loc->address, "at",
+				event_location_to_string (b->location),
+				buf + strlen (buf), 2048 - strlen (buf));
 	  putpkt (buf);
 	  remote_get_noisy_reply (&target_buf, &target_buf_size);
 	  if (strcmp (target_buf, "OK"))

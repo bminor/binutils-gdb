@@ -346,7 +346,7 @@ pex64_dump_xdata (FILE *file, bfd *abfd,
     end_addr = sec_size;
 
   pex64_get_unwind_info (abfd, &ui, &xdata[addr]);
-  
+
   if (ui.Version != 1 && ui.Version != 2)
     {
       unsigned int i;

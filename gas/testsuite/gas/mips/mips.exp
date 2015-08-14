@@ -1022,6 +1022,10 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "n32-consec"
     }
 
+    # tests of objdump's ability to disassemble the move mnemonic
+    run_dump_test_arches "move"	[mips_arch_list_matching mips64 !micromips]
+    run_dump_test_arches "micromips32-move" [mips_arch_list_matching micromips]
+
     # tests of objdump's ability to disassemble using different
     # register names.
     run_dump_test "gpr-names-numeric"

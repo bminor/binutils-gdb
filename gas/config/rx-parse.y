@@ -889,7 +889,7 @@ float2_op
 	;
 
 float2_op_ni
-	: { rx_check_float_support (); } 
+	: { rx_check_float_support (); }
 	  REG ',' REG
 	  { id24 (1, 0x83 + (sub_op << 2), 0); F ($2, 16, 4); F ($4, 20, 4); }
 	| { rx_check_float_support (); }

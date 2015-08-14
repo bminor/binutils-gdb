@@ -33,6 +33,7 @@
 #include "value.h"
 #include "ax.h"
 #include "ax-gdb.h"
+#include "location.h"
 #include <ctype.h>
 
 typedef struct bound_probe bound_probe_s;
@@ -43,23 +44,25 @@ DEF_VEC_O (bound_probe_s);
 /* See definition in probe.h.  */
 
 struct symtabs_and_lines
-parse_probes (char **argptr, struct linespec_result *canonical)
+parse_probes (const struct event_location *location,
+	      struct linespec_result *canonical)
 {
-  char *arg_start, *arg_end, *arg;
+  char *arg_end, *arg;
   char *objfile_namestr = NULL, *provider = NULL, *name, *p;
   struct cleanup *cleanup;
   struct symtabs_and_lines result;
   struct objfile *objfile;
   struct program_space *pspace;
   const struct probe_ops *probe_ops;
-  const char *cs;
+  const char *arg_start, *cs;
 
   result.sals = NULL;
   result.nelts = 0;
 
-  arg_start = *argptr;
+  gdb_assert (event_location_type (location) == PROBE_LOCATION);
+  arg_start = get_probe_location (location);
 
-  cs = *argptr;
+  cs = arg_start;
   probe_ops = probe_linespec_to_ops (&cs);
   if (probe_ops == NULL)
     error (_("'%s' is not a probe linespec"), arg_start);
@@ -170,12 +173,15 @@ parse_probes (char **argptr, struct linespec_result *canonical)
 
   if (canonical)
     {
+      char *canon;
+
+      canon = savestring (arg_start, arg_end - arg_start);
+      make_cleanup (xfree, canon);
       canonical->special_display = 1;
       canonical->pre_expanded = 1;
-      canonical->addr_string = savestring (*argptr, arg_end - *argptr);
+      canonical->location = new_probe_location (canon);
     }
 
-  *argptr = arg_end;
   do_cleanups (cleanup);
 
   return result;

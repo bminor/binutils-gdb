@@ -358,7 +358,7 @@ make_argument (argument * a, int start_bits)
   switch (a->type)
     {
     case arg_r:
-      p = makelongparameter (cr16_allWords, 
+      p = makelongparameter (cr16_allWords,
 			     inst_bit_size - (start_bits + a->size),
 			     inst_bit_size - start_bits);
       a->r = p.val;
@@ -386,7 +386,7 @@ make_argument (argument * a, int start_bits)
       break;
 
     case arg_ic:
-      p = makelongparameter (cr16_allWords, 
+      p = makelongparameter (cr16_allWords,
 			     inst_bit_size - (start_bits + a->size),
 			     inst_bit_size - start_bits);
       a->constant = p.val;
@@ -466,7 +466,7 @@ make_argument (argument * a, int start_bits)
 	}
       else if (instruction->size == 2)
 	{
-	  p = makelongparameter (cr16_allWords, inst_bit_size - 16, 
+	  p = makelongparameter (cr16_allWords, inst_bit_size - 16,
 				 inst_bit_size);
 	  a->constant = p.val;
 	}
@@ -795,7 +795,7 @@ get_words_at_PC (bfd_vma memaddr, struct disassemble_info *info)
   for (i = 0, mem = memaddr; i < 3; i++, mem += 2)
     cr16_words[i] = get_word_at_PC (mem, info);
 
-  cr16_allWords =  ((ULONGLONG) cr16_words[0] << 32) 
+  cr16_allWords =  ((ULONGLONG) cr16_words[0] << 32)
 		   + ((unsigned long) cr16_words[1] << 16) + cr16_words[2];
 }
 

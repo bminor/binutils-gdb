@@ -555,7 +555,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset XTENSA
 
 @emph{Target Xtensa options:}
- [@b{--[no-]text-section-literals}] [@b{--[no-]absolute-literals}]
+ [@b{--[no-]text-section-literals}] [@b{--[no-]auto-litpools}]
+ [@b{--[no-]absolute-literals}]
  [@b{--[no-]target-align}] [@b{--[no-]longcalls}]
  [@b{--[no-]transform}]
  [@b{--rename-section} @var{oldname}=@var{newname}]
@@ -3706,11 +3707,11 @@ Local labels are different from local symbols.  Local labels help compilers and
 programmers use names temporarily.  They create symbols which are guaranteed to
 be unique over the entire scope of the input source code and which can be
 referred to by a simple notation.  To define a local label, write a label of
-the form @samp{@b{N}:} (where @b{N} represents any positive integer).  To refer
-to the most recent previous definition of that label write @samp{@b{N}b}, using
-the same number as when you defined the label.  To refer to the next definition
-of a local label, write @samp{@b{N}f}---the @samp{b} stands for ``backwards''
-and the @samp{f} stands for ``forwards''.
+the form @samp{@b{N}:} (where @b{N} represents any non-negative integer).
+To refer to the most recent previous definition of that label write
+@samp{@b{N}b}, using the same number as when you defined the label.  To refer
+to the next definition of a local label, write @samp{@b{N}f}.  The @samp{b}
+stands for ``backwards'' and the @samp{f} stands for ``forwards''.
 
 There is no restriction on how you can use these labels, and you can reuse them
 too.  So that it is possible to repeatedly define the same local label (using

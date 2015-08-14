@@ -47,6 +47,16 @@ mi_gdb_test "[incr i]-dprintf-insert 29" \
     "$i\\^error,msg=\"-dprintf-insert: Missing <format>\"" "mi insert second breakpoint without format string"
 
 mi_gdb_test "-break-insert main" ".*" "mi insert breakpoint main"
+
+mi_gdb_test "-dprintf-insert --function main \"hello\"" \
+    "\\^done,bkpt={.*}" "explicit dprintf at main"
+
+mi_gdb_test "-dprintf-insert --source $srcfile --line $dp_location1 \"hello\"" \
+    "\\^done,bkpt={.*}" "explicit breakpoint at $srcfile:$dp_location1"
+
+mi_gdb_test "-dprintf-insert --source $srcfile \"hello\"" \
+    "\\^error,msg=\"-dprintf-insert: --source option requires --function, --label, or --line\"" "invalid explicit dprintf"
+
 mi_delete_breakpoints
 
 set bps [mi_make_breakpoint -type dprintf -func foo -file ".*mi-dprintf.c" \
@@ -61,7 +71,7 @@ mi_gdb_test "[incr i]-dprintf-insert $dp_location1 \"arg=%d, g=%d\\n\" arg g" \
 		   "$i\\^done,$bps" "mi insert dprintf dp_location1"
 
 set bps {}
-lappend bps [mi_make_breakpoint -number 3 -type dprintf -func foo \
+lappend bps [mi_make_breakpoint -type dprintf -func foo \
 		 -file ".*mi-dprintf.c" -fullname ".*mi-dprintf.c"]
 lappend bps [mi_make_breakpoint -type dprintf -func foo \
 		 -file ".*mi-dprintf.c" -fullname ".*mi-dprintf.c" \

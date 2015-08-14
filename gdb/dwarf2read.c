@@ -69,6 +69,7 @@
 #include "source.h"
 #include "filestuff.h"
 #include "build-id.h"
+#include "namespace.h"
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -1634,6 +1635,8 @@ static void read_common_block (struct die_info *, struct dwarf2_cu *);
 static void read_namespace (struct die_info *die, struct dwarf2_cu *);
 
 static void read_module (struct die_info *die, struct dwarf2_cu *cu);
+
+static struct using_direct **using_directives (enum language);
 
 static void read_import_statement (struct die_info *die, struct dwarf2_cu *);
 
@@ -8863,6 +8866,24 @@ read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
   return 0;
 }
 
+/* Return the using directives repository (global or local?) to use in the
+   current context for LANGUAGE.
+
+   For Ada, imported declarations can materialize renamings, which *may* be
+   global.  However it is impossible (for now?) in DWARF to distinguish
+   "external" imported declarations and "static" ones.  As all imported
+   declarations seem to be static in all other languages, make them all CU-wide
+   global only in Ada.  */
+
+static struct using_direct **
+using_directives (enum language language)
+{
+  if (language == language_ada && context_stack_depth == 0)
+    return &global_using_directives;
+  else
+    return &local_using_directives;
+}
+
 /* Read the import statement specified by the given die and record it.  */
 
 static void
@@ -8999,13 +9020,14 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 	process_die (child_die, cu);
       }
 
-  cp_add_using_directive (import_prefix,
-                          canonical_name,
-                          import_alias,
-                          imported_declaration,
-			  excludes,
-			  0,
-                          &objfile->objfile_obstack);
+  add_using_directive (using_directives (cu->language),
+		       import_prefix,
+		       canonical_name,
+		       import_alias,
+		       imported_declaration,
+		       excludes,
+		       0,
+		       &objfile->objfile_obstack);
 
   do_cleanups (cleanups);
 }
@@ -11485,7 +11507,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      when we finish processing a function scope, we may need to go
      back to building a containing block's symbol lists.  */
   local_symbols = newobj->locals;
-  using_directives = newobj->using_directives;
+  local_using_directives = newobj->local_using_directives;
 
   /* If we've finished processing a top-level function, subsequent
      symbols go in the file symbol list.  */
@@ -11531,7 +11553,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   inherit_abstract_dies (die, cu);
   newobj = pop_context ();
 
-  if (local_symbols != NULL || using_directives != NULL)
+  if (local_symbols != NULL || local_using_directives != NULL)
     {
       struct block *block
         = finish_block (0, &local_symbols, newobj->old_blocks,
@@ -11550,7 +11572,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
       dwarf2_record_block_ranges (die, block, baseaddr, cu);
     }
   local_symbols = newobj->locals;
-  using_directives = newobj->using_directives;
+  local_using_directives = newobj->local_using_directives;
 }
 
 /* Read in DW_TAG_GNU_call_site and insert it to CU->call_site_htab.  */
@@ -14076,7 +14098,7 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, type, cu);
 }
 
-/* Read a C++ namespace.  */
+/* Read a namespace scope.  */
 
 static void
 read_namespace (struct die_info *die, struct dwarf2_cu *cu)
@@ -14100,8 +14122,9 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  const char *previous_prefix = determine_prefix (die, cu);
 
-	  cp_add_using_directive (previous_prefix, TYPE_NAME (type), NULL,
-				  NULL, NULL, 0, &objfile->objfile_obstack);
+	  add_using_directive (using_directives (cu->language),
+			       previous_prefix, TYPE_NAME (type), NULL,
+			       NULL, NULL, 0, &objfile->objfile_obstack);
 	}
     }
 

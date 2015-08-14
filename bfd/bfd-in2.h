@@ -5794,6 +5794,18 @@ BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21.  */
 /* AArch64 TLS INITIAL EXEC relocation.  */
   BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19,
 
+/* Unsigned 12 bit byte offset to module TLS base address.  */
+  BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12,
+
+/* Unsigned 12 bit byte offset to global offset table entry for a symbols
+tls_index structure.  Used in conjunction with
+BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21.  */
+  BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC,
+
+/* GOT entry page address for AArch64 TLS Local Dynamic, used with ADRP
+instruction.  */
+  BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21,
+
 /* GOT entry address for AArch64 TLS Local Dynamic, used with ADR instruction.  */
   BFD_RELOC_AARCH64_TLSLD_ADR_PREL21,
 

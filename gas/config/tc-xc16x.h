@@ -1,6 +1,6 @@
 /* This file is tc-xc16x.h
    Copyright (C) 2006-2015 Free Software Foundation, Inc.
-   Contributed by KPIT Cummins Infosystems 
+   Contributed by KPIT Cummins Infosystems
 
    This file is part of GAS, the GNU Assembler.
 

@@ -26,7 +26,7 @@
 # cgen.sh action srcdir cgen cgendir cgenflags arch prefix \
 #         arch-file opc-file options [extrafiles]
 #
-# ACTION is currently always "opcodes". It exists to be consistent with the 
+# ACTION is currently always "opcodes". It exists to be consistent with the
 # simulator.
 # ARCH is the name of the architecture.
 # It is substituted into @arch@ and @ARCH@ in the generated files.

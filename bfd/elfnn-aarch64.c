@@ -174,6 +174,9 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12	\
@@ -187,6 +190,20 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLS_DTPREL			\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLS_TPREL			\
    || IS_AARCH64_TLSDESC_RELOC ((R_TYPE)))
+
+#define IS_AARCH64_TLS_RELAX_RELOC(R_TYPE)			\
+  ((R_TYPE) == BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSGD_ADR_PREL21		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LD_PREL19		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LDNN_LO12_NC	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_CALL		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC)
 
 #define IS_AARCH64_TLSDESC_RELOC(R_TYPE)			\
   ((R_TYPE) == BFD_RELOC_AARCH64_TLSDESC			\
@@ -1024,6 +1041,52 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0x1ffffc,		/* src_mask */
 	 0x1ffffc,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+
+  /* Unsigned 12 bit byte offset to module TLS base address.  */
+  HOWTO (AARCH64_R (TLSLD_ADD_DTPREL_LO12),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_ADD_DTPREL_LO12),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* ADD: GOT offset G(S) & 0xff8 [no overflow check] */
+  HOWTO (AARCH64_R (TLSLD_ADD_LO12_NC),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_ADD_LO12_NC),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* Get to the page for the GOT entry for the symbol
+     (G(S) - P) using an ADRP instruction.  */
+  HOWTO (AARCH64_R (TLSLD_ADR_PAGE21),	/* type */
+	 12,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 21,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_ADR_PAGE21),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x1fffff,		/* src_mask */
+	 0x1fffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
 
   HOWTO (AARCH64_R (TLSLD_ADR_PREL21),	/* type */
 	 0,			/* rightshift */
@@ -2267,6 +2330,7 @@ static enum elf_aarch64_stub_type
 aarch64_type_of_stub (struct bfd_link_info *info,
 		      asection *input_sec,
 		      const Elf_Internal_Rela *rel,
+		      asection *sym_sec,
 		      unsigned char st_type,
 		      struct elf_aarch64_link_hash_entry *hash,
 		      bfd_vma destination)
@@ -2278,15 +2342,18 @@ aarch64_type_of_stub (struct bfd_link_info *info,
   enum elf_aarch64_stub_type stub_type = aarch64_stub_none;
   bfd_boolean via_plt_p;
 
-  if (st_type != STT_FUNC)
+  if (st_type != STT_FUNC
+      && (sym_sec != bfd_abs_section_ptr))
     return stub_type;
 
   globals = elf_aarch64_hash_table (info);
   via_plt_p = (globals->root.splt != NULL && hash != NULL
 	       && hash->root.plt.offset != (bfd_vma) - 1);
-
+  /* Make sure call to plt stub can fit into the branch range.  */
   if (via_plt_p)
-    return stub_type;
+    destination = (globals->root.splt->output_section->vma
+		   + globals->root.splt->output_offset
+		   + hash->root.plt.offset);
 
   /* Determine where the call point is.  */
   location = (input_sec->output_offset
@@ -3764,7 +3831,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 
 		  /* Determine what (if any) linker stub is needed.  */
 		  stub_type = aarch64_type_of_stub
-		    (info, section, irela, st_type, hash, destination);
+		    (info, section, irela, sym_sec, st_type, hash, destination);
 		  if (stub_type == aarch64_stub_none)
 		    continue;
 
@@ -4106,6 +4173,8 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
       return GOT_TLS_GD;
 
@@ -4124,6 +4193,7 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
       return GOT_TLS_IE;
 
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -4150,7 +4220,7 @@ aarch64_can_relax_tls (bfd *input_bfd,
   unsigned int symbol_got_type;
   unsigned int reloc_got_type;
 
-  if (! IS_AARCH64_TLS_RELOC (r_type))
+  if (! IS_AARCH64_TLS_RELAX_RELOC (r_type))
     return FALSE;
 
   symbol_got_type = elfNN_aarch64_symbol_got_type (h, input_bfd, r_symndx);
@@ -4838,38 +4908,25 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	/* If the call goes through a PLT entry, make sure to
 	   check distance to the right destination address.  */
 	if (via_plt_p)
-	  {
-	    value = (splt->output_section->vma
-		     + splt->output_offset + h->plt.offset);
-	    *unresolved_reloc_p = FALSE;
-	  }
+	  value = (splt->output_section->vma
+		   + splt->output_offset + h->plt.offset);
 
-	/* If the target symbol is global and marked as a function the
-	   relocation applies a function call or a tail call.  In this
-	   situation we can veneer out of range branches.  The veneers
-	   use IP0 and IP1 hence cannot be used arbitrary out of range
-	   branches that occur within the body of a function.  */
-	if (h && h->type == STT_FUNC)
-	  {
-	    /* Check if a stub has to be inserted because the destination
-	       is too far away.  */
-	    if (! aarch64_valid_branch_p (value, place))
-	      {
-		/* The target is out of reach, so redirect the branch to
-		   the local stub for this function.  */
-		struct elf_aarch64_stub_hash_entry *stub_entry;
-		stub_entry = elfNN_aarch64_get_stub_entry (input_section,
-							   sym_sec, h,
-							   rel, globals);
-		if (stub_entry != NULL)
-		  value = (stub_entry->stub_offset
-			   + stub_entry->stub_sec->output_offset
-			   + stub_entry->stub_sec->output_section->vma);
-	      }
-	  }
+	/* Check if a stub has to be inserted because the destination
+	   is too far away.  */
+	struct elf_aarch64_stub_hash_entry *stub_entry = NULL;
+	if (! aarch64_valid_branch_p (value, place))
+	  /* The target is out of reach, so redirect the branch to
+	     the local stub for this function.  */
+	stub_entry = elfNN_aarch64_get_stub_entry (input_section, sym_sec, h,
+						   rel, globals);
+	if (stub_entry != NULL)
+	  value = (stub_entry->stub_offset
+		   + stub_entry->stub_sec->output_offset
+		   + stub_entry->stub_sec->output_section->vma);
       }
       value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
 						   signed_addend, weak_undef_p);
+      *unresolved_reloc_p = FALSE;
       break;
 
     case BFD_RELOC_AARCH64_16_PCREL:
@@ -5013,6 +5070,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
       if (globals->root.sgot == NULL)
 	return bfd_reloc_notsupported;
@@ -5024,6 +5083,12 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
 						   0, weak_undef_p);
       *unresolved_reloc_p = FALSE;
+      break;
+
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
+      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+						   signed_addend - dtpoff_base (info),
+						   weak_undef_p);
       break;
 
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
@@ -5498,6 +5563,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+	case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
 	  if (! symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    {
@@ -5531,8 +5598,12 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		    * RELOC_SIZE (htab);
 		  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 
-		  if (elfNN_aarch64_bfd_reloc_from_type (r_type)
-		      == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21)
+		  bfd_reloc_code_real_type real_type =
+		    elfNN_aarch64_bfd_reloc_from_type (r_type);
+
+		  if (real_type == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21
+		      || real_type == BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21
+		      || real_type == BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC)
 		    {
 		      /* For local dynamic, don't generate DTPREL in any case.
 			 Initialize the DTPREL slot into zero, so we get module
@@ -5731,6 +5802,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
       if (r != bfd_reloc_ok && r != bfd_reloc_continue)
 	{
+	  bfd_reloc_code_real_type real_r_type
+	    = elfNN_aarch64_bfd_reloc_from_type (r_type);
+
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
@@ -5738,6 +5812,16 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		  (info, (h ? &h->root : NULL), name, howto->name, (bfd_vma) 0,
 		   input_bfd, input_section, rel->r_offset))
 		return FALSE;
+	      if (real_r_type == BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
+		  || real_r_type == BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14)
+		{
+		  (*info->callbacks->warning)
+		    (info,
+		     _("Too many GOT entries for -fpic, "
+		       "please recompile with -fPIC"),
+		     name, input_bfd, input_section, rel->r_offset);
+		  return FALSE;
+		}
 	      break;
 
 	    case bfd_reloc_undefined:
@@ -6025,6 +6109,8 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+	case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
@@ -6498,6 +6584,8 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+	case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
 	case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:

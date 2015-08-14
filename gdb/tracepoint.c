@@ -55,6 +55,7 @@
 #include "filestuff.h"
 #include "rsp-low.h"
 #include "tracefile.h"
+#include "location.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -2712,14 +2713,22 @@ scope_info (char *args, int from_tty)
   int j, count = 0;
   struct gdbarch *gdbarch;
   int regno;
+  struct event_location *location;
+  struct cleanup *back_to;
 
   if (args == 0 || *args == 0)
     error (_("requires an argument (function, "
 	     "line or *addr) to define a scope"));
 
-  sals = decode_line_1 (&args, DECODE_LINE_FUNFIRSTLINE, NULL, 0);
+  location = string_to_event_location (&args, current_language);
+  back_to = make_cleanup_delete_event_location (location);
+  sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE, NULL, 0);
   if (sals.nelts == 0)
-    return;		/* Presumably decode_line_1 has already warned.  */
+    {
+      /* Presumably decode_line_1 has already warned.  */
+      do_cleanups (back_to);
+      return;
+    }
 
   /* Resolve line numbers to PC.  */
   resolve_sal_pc (&sals.sals[0]);
@@ -2856,6 +2865,7 @@ scope_info (char *args, int from_tty)
   if (count <= 0)
     printf_filtered ("Scope for %s contains no locals or arguments.\n",
 		     save_args);
+  do_cleanups (back_to);
 }
 
 /* Helper for trace_dump_command.  Dump the action list starting at
@@ -3078,7 +3088,7 @@ trace_dump_command (char *args, int from_tty)
 
 extern int
 encode_source_string (int tpnum, ULONGEST addr,
-		      char *srctype, char *src, char *buf, int buf_size)
+		      char *srctype, const char *src, char *buf, int buf_size)
 {
   if (80 + strlen (srctype) > buf_size)
     error (_("Buffer too small for source encoding"));

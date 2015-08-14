@@ -3091,7 +3091,7 @@ md_assemble (char *str)
       	      if (opcode->flags & PPC_OPCODE_VLE)
 		{
 		  int tmp_insn = insn & opcode->mask;
-		  
+
 		  int use_d_reloc = (tmp_insn == E_OR2I_INSN
 				     || tmp_insn == E_AND2I_DOT_INSN
 				     || tmp_insn == E_OR2IS_INSN
@@ -3129,7 +3129,7 @@ md_assemble (char *str)
 		      else if (use_a_reloc)
 			reloc = BFD_RELOC_PPC_VLE_HI16A;
 		      break;
-	 
+
 		    case BFD_RELOC_HI16_S:
 		      if (use_d_reloc)
 			reloc = BFD_RELOC_PPC_VLE_HA16D;

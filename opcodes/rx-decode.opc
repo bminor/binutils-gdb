@@ -65,7 +65,7 @@ static int ubwl[] =
   RX_UByte,
   RX_UWord,
   RX_Long,
-  0 /* Bogus instructions can have a size field set to 3.  */  
+  0 /* Bogus instructions can have a size field set to 3.  */
 };
 
 static int memex[] =
@@ -249,7 +249,7 @@ rx_disp (int n, int type, int reg, int size, LocalData * ld)
 #define xZ 2
 #define xC 1
 
-#define F_____ 
+#define F_____
 #define F___ZC rx->flags_0 = rx->flags_s = xZ|xC;
 #define F__SZ_ rx->flags_0 = rx->flags_s = xS|xZ;
 #define F__SZC rx->flags_0 = rx->flags_s = xS|xZ|xC;
@@ -366,10 +366,10 @@ rx_decode_opcode (unsigned long pc AU,
 
 /** 0110 1110 dsta dstb		pushm	%1-%2 */
   ID(pushm); SR(dsta); S2R(dstb); F_____;
-  
+
 /** 0111 1110 1011 rdst		pop	%0 */
   ID(mov); OP(1, RX_Operand_Postinc, 0, 0); DR(rdst); F_____;
-  
+
 /** 0111 1110 10sz rsrc		push%s	%1 */
   ID(mov); BWL(sz); OP(0, RX_Operand_Predec, 0, 0); SR(rsrc); F_____;
 

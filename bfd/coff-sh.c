@@ -2327,7 +2327,7 @@ _bfd_sh_align_load_span (bfd *abfd,
   if (dsp)
     {
       sh_opcodes[0xf].minor_opcodes = sh_dsp_opcodef;
-      sh_opcodes[0xf].count = sizeof sh_dsp_opcodef / sizeof sh_dsp_opcodef;
+      sh_opcodes[0xf].count = sizeof sh_dsp_opcodef / sizeof sh_dsp_opcodef [0];
     }
 
   /* Instructions should be aligned on 2 byte boundaries.  */

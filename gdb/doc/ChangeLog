@@ -1,3 +1,20 @@
+2015-08-11  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.texinfo (Thread-Specific Breakpoints, Printing Source Lines):
+	Use "location(s)"instead of "linespec(s)".
+	(Specifying a Location): Rewrite.
+	Add subsections describing linespec, address, and explicit locations.
+	Add node/menu for each subsection.
+	(Source and Machine Code, C Preprocessor Macros)
+	(Create and Delete Trace points)
+	(Extensions for Ada Tasks): Use "location(s)" instead of "linespec(s)".
+	(Continuing at a Different Address): Remove "linespec" examples.
+	Add reference to "Specify a Location"
+	(The -break-insert Command): Rewrite.  Add anchor.
+	Add reference to appropriate manual section discussing locations.
+	(The -dprintf-insert Command): Refer to -break-insert for
+	specification of 'location'.
+
 2015-08-07  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Maintenance Commands): Document "maint set/show

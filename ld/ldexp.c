@@ -877,7 +877,7 @@ fold_name (etree_type *tree)
 }
 
 /* Return true if TREE is '.'.  */
- 
+
 static bfd_boolean
 is_dot (const etree_type *tree)
 {

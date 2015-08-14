@@ -298,7 +298,7 @@ extern struct trace_state_variable *
 extern struct trace_state_variable *create_trace_state_variable (const char *name);
 
 extern int encode_source_string (int num, ULONGEST addr,
-				 char *srctype, char *src,
+				 char *srctype, const char *src,
 				 char *buf, int buf_size);
 
 extern void parse_trace_status (char *line, struct trace_status *ts);

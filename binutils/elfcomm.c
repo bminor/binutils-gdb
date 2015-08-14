@@ -51,7 +51,7 @@ warn (const char *message, ...)
 
   /* Try to keep warning messages in sync with the program's normal output.  */
   fflush (stdout);
-  
+
   va_start (args, message);
   fprintf (stderr, _("%s: Warning: "), program_name);
   vfprintf (stderr, message, args);
@@ -427,7 +427,7 @@ adjust_relative_path (const char *file_name, const char *name,
 		 name_len);
 	  return NULL;
 	}
-      
+
       member_file_name = (char *) malloc (amt);
       if (member_file_name == NULL)
         {
@@ -491,7 +491,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
       unsigned char * index_buffer;
 
       assert (sizeof_ar_index <= sizeof integer_buffer);
-  
+
       /* Check the size of the archive index.  */
       if (size < sizeof_ar_index)
 	{
@@ -756,7 +756,7 @@ get_archive_member_name (struct archive_info *arch,
 	  error (_("Archive member uses long names, but no longname table found\n"));
 	  return NULL;
 	}
-      
+
       arch->nested_member_origin = 0;
       k = j = strtoul (arch->arhdr.ar_name + 1, &endp, 10);
       if (arch->is_thin_archive && endp != NULL && * endp == ':')
@@ -786,7 +786,7 @@ get_archive_member_name (struct archive_info *arch,
 	  error (_("Invalid Thin archive member name\n"));
 	  return NULL;
 	}
- 
+
       /* This is a proxy for a member of a nested archive.
          Find the name of the member in that archive.  */
       member_file_name = adjust_relative_path (arch->file_name,
@@ -899,7 +899,7 @@ make_qualified_name (struct archive_info * arch,
 		  nested_arch->file_name, member_name);
       else
 	snprintf (name, len, "%s[%s(%s)]", arch->file_name,
-		  error_name, member_name);	
+		  error_name, member_name);
     }
   else if (arch->is_thin_archive)
     snprintf (name, len, "%s[%s]", arch->file_name, member_name);

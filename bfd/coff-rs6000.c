@@ -3591,7 +3591,7 @@ xcoff_create_csect_from_smclas (bfd *abfd,
       ".sv", ".bs", ".ds", ".uc", ".ti", ".tb", NULL, ".tc0", /* 8 - 15 */
       ".td", NULL, ".sv3264", NULL, ".tl", ".ul", ".te"
     };
-  
+
   if ((aux->x_csect.x_smclas < ARRAY_SIZE (names))
       && (NULL != names[aux->x_csect.x_smclas]))
     {

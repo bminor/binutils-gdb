@@ -1296,7 +1296,7 @@ process_entries (segT seg, struct line_entry *e)
 	 section, as well as our sub-sections, and we have to ensure
 	 that all of the sub-sections are merged into a proper
 	 .debug_line section before a debugger sees them.  */
-	 
+
       sec_name = bfd_get_section_name (stdoutput, seg);
       if (strcmp (sec_name, ".text") != 0)
 	{

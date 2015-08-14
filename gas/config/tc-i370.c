@@ -1185,7 +1185,7 @@ i370_elf_validate_fix (fixS *fixp, segT seg)
    waste space padding out to alignments.  The four pointers
    longlong_poolP, word_poolP, etc. point to a symbol labeling the
    start of each pool part.
- 
+
    lit_pool_num increments from zero to infinity and uniquely id's
      -- its used to generate the *_poolP symbol name.  */
 

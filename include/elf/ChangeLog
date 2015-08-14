@@ -1,3 +1,15 @@
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64.h (R_AARCH64_P32_TLSLD_ADD_DTPREL_LO12): Define.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64.h (R_AARCH64_P32_TLSLD_ADD_LO12_NC): Define.
+
+2015-08-11  Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64.h (R_AARCH64_P32_TLSLD_ADR_PAGE21): Define.
+
 2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
 	    Cesar Philippidis  <cesar@codesourcery.com>
 
