@@ -475,8 +475,8 @@ PrimaryExpression:
 		    {
 		      if (symbol_read_needs_frame (sym.symbol))
 			{
-			  if (innermost_block == 0 ||
-			      contained_in (sym.block, innermost_block))
+			  if (innermost_block == 0
+			      || contained_in (sym.block, innermost_block))
 			    innermost_block = sym.block;
 			}
 
@@ -491,8 +491,8 @@ PrimaryExpression:
 		     {
 		      /* It hangs off of `this'.  Must not inadvertently convert from a
 			 method call to data ref.  */
-		      if (innermost_block == 0 ||
-			  contained_in (sym.block, innermost_block))
+		      if (innermost_block == 0
+			  || contained_in (sym.block, innermost_block))
 			innermost_block = sym.block;
 		      write_exp_elt_opcode (pstate, OP_THIS);
 		      write_exp_elt_opcode (pstate, OP_THIS);
@@ -524,11 +524,12 @@ PrimaryExpression:
 			      struct block_symbol sym;
 			      const char *typename = TYPE_SAFE_NAME (type);
 			      int typename_len = strlen (typename);
-			      char *name = malloc (typename_len + $3.length + 1);
+			      char *name;
 
-			      make_cleanup (free, name);
-			      sprintf (name, "%.*s.%.*s",
-				       typename_len, typename, $3.length, $3.ptr);
+			      name = xstrprintf ("%.*s.%.*s",
+						 typename_len, typename,
+						 $3.length, $3.ptr);
+			      make_cleanup (xfree, name);
 
 			      sym =
 				lookup_symbol (name, (const struct block *) NULL,
@@ -1207,8 +1208,8 @@ lex_one_token (struct parser_state *par_state)
 	    /* We will take any letters or digits, ignoring any embedded '_'.
 	       parse_number will complain if past the radix, or if L or U are
 	       not final.  */
-	    else if ((*p < '0' || *p > '9') && (*p != '_') &&
-		     ((*p < 'a' || *p > 'z') && (*p < 'A' || *p > 'Z')))
+	    else if ((*p < '0' || *p > '9') && (*p != '_')
+		     && ((*p < 'a' || *p > 'z') && (*p < 'A' || *p > 'Z')))
 	      break;
 	  }
 
