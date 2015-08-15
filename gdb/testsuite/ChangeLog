@@ -1,5 +1,10 @@
 2015-08-14  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.perf/lib/perftest/utils.py (select_file): Kill any existing
+	inferior before selecting a new file.
+
+2015-08-14  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.mi/mi-disassemble.exp: Update.
 	* gdb.base/disasm-optim.S: New file.
 	* gdb.base/disasm-optim.c: New file.
