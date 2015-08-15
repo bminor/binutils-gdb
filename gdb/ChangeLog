@@ -1,5 +1,18 @@
 2015-08-15  Doug Evans  <xdje42@gmail.com>
 
+	* defs.h (LANGUAGE_BITS): Define.
+	* psympriv.h (partial_symbol) <domain>: Use SYMBOL_DOMAIN_BITS.
+	(partial_symbol) <aclass>: Use SYMBOL_ACLASS_BITS.
+	* symtab.h (general_symbol_info> <language>: Usage LANGUAGE_BITS.
+	(minimal_symbol_type): Add nr_minsym_types.
+	(MINSYM_TYPE_BITS): Define.
+	(minimal_symbol) <type>: Use MINSYM_TYPE_BITS.
+	(domain_enum_tag): Add NR_DOMAINS.
+	(SYMBOL_DOMAIN_BITS): Change from 4 to 3.
+	(SYMBOL_ACLASS_BITS): Define from 6 to 5.
+
+2015-08-15  Doug Evans  <xdje42@gmail.com>
+
 	* objfiles.h: Whitespace cleanup.
 	* psympriv.h: Whitespace cleanup.
 	* psymtab.c: Whitespace/coding convention cleanup.

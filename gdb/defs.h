@@ -186,6 +186,11 @@ enum language
     nr_languages
   };
 
+/* The number of bits needed to represent all languages, with enough
+   padding to allow for reasonable growth.  */
+#define LANGUAGE_BITS 5
+gdb_static_assert (nr_languages <= (1 << LANGUAGE_BITS));
+
 enum precision_type
   {
     single_precision,

@@ -149,7 +149,7 @@ struct general_symbol_info
      This is used to select one of the fields from the language specific
      union above.  */
 
-  ENUM_BITFIELD(language) language : 8;
+  ENUM_BITFIELD(language) language : LANGUAGE_BITS;
 
   /* This is only used by Ada.  If set, then the 'mangled_lang' field
      of language_specific is valid.  Otherwise, the 'obstack' field is
@@ -309,8 +309,14 @@ enum minimal_symbol_type
      within a given .o file.  */
   mst_file_text,		/* Static version of mst_text */
   mst_file_data,		/* Static version of mst_data */
-  mst_file_bss			/* Static version of mst_bss */
+  mst_file_bss,			/* Static version of mst_bss */
+  nr_minsym_types
 };
+
+/* The number of enum minimal_symbol_type values, with some padding for
+   reasonable growth.  */
+#define MINSYM_TYPE_BITS 4
+gdb_static_assert (nr_minsym_types <= (1 << MINSYM_TYPE_BITS));
 
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
@@ -345,7 +351,7 @@ struct minimal_symbol
 
   /* Classification type for this minimal symbol.  */
 
-  ENUM_BITFIELD(minimal_symbol_type) type : 8;
+  ENUM_BITFIELD(minimal_symbol_type) type : MINSYM_TYPE_BITS;
 
   /* Non-zero if this symbol was created by gdb.
      Such symbols do not appear in the output of "info var|fun".  */
@@ -460,12 +466,16 @@ typedef enum domain_enum_tag
 
   /* Fortran common blocks.  Their naming must be separate from VAR_DOMAIN.
      They also always use LOC_COMMON_BLOCK.  */
-  COMMON_BLOCK_DOMAIN
+  COMMON_BLOCK_DOMAIN,
+
+  /* This must remain last.  */
+  NR_DOMAINS
 } domain_enum;
 
 /* The number of bits in a symbol used to represent the domain.  */
 
-#define SYMBOL_DOMAIN_BITS 4
+#define SYMBOL_DOMAIN_BITS 3
+gdb_static_assert (NR_DOMAINS <= (1 << SYMBOL_DOMAIN_BITS));
 
 extern const char *domain_name (domain_enum);
 
@@ -595,6 +605,15 @@ enum address_class
   LOC_FINAL_VALUE
 };
 
+/* The number of bits needed for values in enum address_class, with some
+   padding for reasonable growth, and room for run-time registered address
+   classes. See symtab.c:MAX_SYMBOL_IMPLS.
+   This is a #define so that we can have a assertion elsewhere to
+   verify that we have reserved enough space for synthetic address
+   classes.  */
+#define SYMBOL_ACLASS_BITS 5
+gdb_static_assert (LOC_FINAL_VALUE <= (1 << SYMBOL_ACLASS_BITS));
+
 /* The methods needed to implement LOC_COMPUTED.  These methods can
    use the symbol's .aux_value for additional per-symbol information.
 
@@ -692,13 +711,6 @@ struct symbol_impl
   /* Used with LOC_REGISTER and LOC_REGPARM_ADDR.  */
   const struct symbol_register_ops *ops_register;
 };
-
-/* The number of bits we reserve in a symbol for the aclass index.
-   This is a #define so that we can have a assertion elsewhere to
-   verify that we have reserved enough space for synthetic address
-   classes.  */
-
-#define SYMBOL_ACLASS_BITS 6
 
 /* This structure is space critical.  See space comments at the top.  */
 

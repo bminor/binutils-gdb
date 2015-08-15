@@ -42,13 +42,13 @@ struct partial_symbol
 
   /* Name space code.  */
 
-  ENUM_BITFIELD(domain_enum_tag) domain : 6;
+  ENUM_BITFIELD(domain_enum_tag) domain : SYMBOL_DOMAIN_BITS;
 
   /* Address class (for info_symbols).  Note that we don't allow
      synthetic "aclass" values here at present, simply because there's
      no need.  */
 
-  ENUM_BITFIELD(address_class) aclass : 6;
+  ENUM_BITFIELD(address_class) aclass : SYMBOL_ACLASS_BITS;
 };
 
 #define PSYMBOL_DOMAIN(psymbol)	(psymbol)->domain
