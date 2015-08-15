@@ -158,7 +158,7 @@ static int block_address_function_relative = 0;
 static CORE_ADDR lowest_text_address;
 
 /* Non-zero if there is any line number info in the objfile.  Prevents
-   end_psymtab from discarding an otherwise empty psymtab.  */
+   dbx_end_psymtab from discarding an otherwise empty psymtab.  */
 
 static int has_line_numbers;
 
@@ -1358,12 +1358,12 @@ read_dbx_symtab (struct objfile *objfile)
 		     which are not the address.  */
 		  && nlist.n_value >= pst->textlow)
 		{
-		  end_psymtab (objfile, pst, psymtab_include_list,
-			       includes_used, symnum * symbol_size,
-			       nlist.n_value > pst->texthigh
-			       ? nlist.n_value : pst->texthigh,
-			       dependency_list, dependencies_used,
-			       textlow_not_set);
+		  dbx_end_psymtab (objfile, pst, psymtab_include_list,
+				   includes_used, symnum * symbol_size,
+				   nlist.n_value > pst->texthigh
+				   ? nlist.n_value : pst->texthigh,
+				   dependency_list, dependencies_used,
+				   textlow_not_set);
 		  pst = (struct partial_symtab *) 0;
 		  includes_used = 0;
 		  dependencies_used = 0;
@@ -1454,7 +1454,7 @@ read_dbx_symtab (struct objfile *objfile)
 	    prev_textlow_not_set = textlow_not_set;
 
 	    /* A zero value is probably an indication for the SunPRO 3.0
-	       compiler.  end_psymtab explicitly tests for zero, so
+	       compiler.  dbx_end_psymtab explicitly tests for zero, so
 	       don't relocate it.  */
 
 	    if (nlist.n_value == 0
@@ -1474,11 +1474,12 @@ read_dbx_symtab (struct objfile *objfile)
 
 		if (pst)
 		  {
-		    end_psymtab (objfile, pst, psymtab_include_list,
-				 includes_used, symnum * symbol_size,
-				 valu > pst->texthigh ? valu : pst->texthigh,
-				 dependency_list, dependencies_used,
-				 prev_textlow_not_set);
+		    dbx_end_psymtab (objfile, pst, psymtab_include_list,
+				     includes_used, symnum * symbol_size,
+				     valu > pst->texthigh
+				     ? valu : pst->texthigh,
+				     dependency_list, dependencies_used,
+				     prev_textlow_not_set);
 		    pst = (struct partial_symtab *) 0;
 		    includes_used = 0;
 		    dependencies_used = 0;
@@ -2080,15 +2081,16 @@ read_dbx_symtab (struct objfile *objfile)
 
 	case N_ENDM:
 	  /* Solaris 2 end of module, finish current partial symbol table.
-	     end_psymtab will set pst->texthigh to the proper value, which
+	     dbx_end_psymtab will set pst->texthigh to the proper value, which
 	     is necessary if a module compiled without debugging info
 	     follows this module.  */
 	  if (pst && gdbarch_sofun_address_maybe_missing (gdbarch))
 	    {
-	      end_psymtab (objfile, pst, psymtab_include_list, includes_used,
-			   symnum * symbol_size,
-			   (CORE_ADDR) 0, dependency_list,
-			   dependencies_used, textlow_not_set);
+	      dbx_end_psymtab (objfile, pst,
+			       psymtab_include_list, includes_used,
+			       symnum * symbol_size,
+			       (CORE_ADDR) 0, dependency_list,
+			       dependencies_used, textlow_not_set);
 	      pst = (struct partial_symtab *) 0;
 	      includes_used = 0;
 	      dependencies_used = 0;
@@ -2150,10 +2152,10 @@ read_dbx_symtab (struct objfile *objfile)
 	 : lowest_text_address)
 	+ text_size;
 
-      end_psymtab (objfile, pst, psymtab_include_list, includes_used,
-		   symnum * symbol_size,
-		   text_end > pst->texthigh ? text_end : pst->texthigh,
-		   dependency_list, dependencies_used, textlow_not_set);
+      dbx_end_psymtab (objfile, pst, psymtab_include_list, includes_used,
+		       symnum * symbol_size,
+		       text_end > pst->texthigh ? text_end : pst->texthigh,
+		       dependency_list, dependencies_used, textlow_not_set);
     }
 
   do_cleanups (back_to);
@@ -2196,11 +2198,12 @@ start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
    FIXME:  List variables and peculiarities of same.  */
 
 struct partial_symtab *
-end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
-	     const char **include_list, int num_includes,
-	     int capping_symbol_offset, CORE_ADDR capping_text,
-	     struct partial_symtab **dependency_list, int number_dependencies,
-	     int textlow_not_set)
+dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
+		 const char **include_list, int num_includes,
+		 int capping_symbol_offset, CORE_ADDR capping_text,
+		 struct partial_symtab **dependency_list,
+		 int number_dependencies,
+		 int textlow_not_set)
 {
   int i;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
@@ -2287,12 +2290,7 @@ end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 
   /* End of kludge for patching Solaris textlow and texthigh.  */
 
-  pst->n_global_syms =
-    objfile->global_psymbols.next - (objfile->global_psymbols.list
-				     + pst->globals_offset);
-  pst->n_static_syms =
-    objfile->static_psymbols.next - (objfile->static_psymbols.list
-				     + pst->statics_offset);
+  end_psymtab_common (objfile, pst);
 
   pst->number_of_dependencies = number_dependencies;
   if (number_dependencies)
@@ -2335,8 +2333,6 @@ end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       subpst->compunit_symtab = 0;
       subpst->read_symtab = pst->read_symtab;
     }
-
-  sort_pst_symbols (objfile, pst);
 
   if (num_includes == 0
       && number_dependencies == 0

@@ -1496,7 +1496,7 @@ compare_psymbols (const void *s1p, const void *s2p)
 			    SYMBOL_SEARCH_NAME (*s2));
 }
 
-void
+static void
 sort_pst_symbols (struct objfile *objfile, struct partial_symtab *pst)
 {
   /* Sort the global list; don't sort the static list.  */
@@ -1525,6 +1525,21 @@ start_psymtab_common (struct objfile *objfile,
   psymtab->globals_offset = global_syms - objfile->global_psymbols.list;
   psymtab->statics_offset = static_syms - objfile->static_psymbols.list;
   return psymtab;
+}
+
+/* Perform "finishing up" operations of a partial symtab.  */
+
+void
+end_psymtab_common (struct objfile *objfile, struct partial_symtab *pst)
+{
+  pst->n_global_syms
+    = objfile->global_psymbols.next - (objfile->global_psymbols.list
+				       + pst->globals_offset);
+  pst->n_static_syms
+    = objfile->static_psymbols.next - (objfile->static_psymbols.list
+				       + pst->statics_offset);
+
+  sort_pst_symbols (objfile, pst);
 }
 
 /* Calculate a hash code for the given partial symbol.  The hash is

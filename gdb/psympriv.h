@@ -201,8 +201,6 @@ struct partial_symtab
   void *read_symtab_private;
 };
 
-extern void sort_pst_symbols (struct objfile *, struct partial_symtab *);
-
 /* Add any kind of symbol to a psymbol_allocation_list.  */
 
 extern void add_psymbol_to_list (const char *, int,
@@ -218,6 +216,8 @@ extern struct partial_symtab *start_psymtab_common (struct objfile *,
 						    const char *, CORE_ADDR,
 						    struct partial_symbol **,
 						    struct partial_symbol **);
+
+extern void end_psymtab_common (struct objfile *, struct partial_symtab *);
 
 extern struct partial_symtab *allocate_psymtab (const char *,
 						struct objfile *)

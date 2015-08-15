@@ -2057,10 +2057,8 @@ xcoff_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
   ((struct symloc *) pst->read_symtab_private)->lineno_off =
     first_fun_line_offset;
   first_fun_line_offset = 0;
-  pst->n_global_syms = objfile->global_psymbols.next
-    - (objfile->global_psymbols.list + pst->globals_offset);
-  pst->n_static_syms = objfile->static_psymbols.next
-    - (objfile->static_psymbols.list + pst->statics_offset);
+
+  end_psymtab_common (objfile, pst);
 
   pst->number_of_dependencies = number_dependencies;
   if (number_dependencies)
@@ -2103,8 +2101,6 @@ xcoff_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       subpst->compunit_symtab = NULL;
       subpst->read_symtab = pst->read_symtab;
     }
-
-  sort_pst_symbols (objfile, pst);
 
   if (num_includes == 0
       && number_dependencies == 0

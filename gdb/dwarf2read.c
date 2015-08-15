@@ -6019,11 +6019,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   pst->textlow = gdbarch_adjust_dwarf2_addr (gdbarch, best_lowpc + baseaddr);
   pst->texthigh = gdbarch_adjust_dwarf2_addr (gdbarch, best_highpc + baseaddr);
 
-  pst->n_global_syms = objfile->global_psymbols.next -
-    (objfile->global_psymbols.list + pst->globals_offset);
-  pst->n_static_syms = objfile->static_psymbols.next -
-    (objfile->static_psymbols.list + pst->statics_offset);
-  sort_pst_symbols (objfile, pst);
+  end_psymtab_common (objfile, pst);
 
   if (!VEC_empty (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs))
     {
@@ -6135,11 +6131,7 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   highpc = (CORE_ADDR) 0;
   scan_partial_symbols (first_die, &lowpc, &highpc, 0, cu);
 
-  pst->n_global_syms = objfile->global_psymbols.next -
-    (objfile->global_psymbols.list + pst->globals_offset);
-  pst->n_static_syms = objfile->static_psymbols.next -
-    (objfile->static_psymbols.list + pst->statics_offset);
-  sort_pst_symbols (objfile, pst);
+  end_psymtab_common (objfile, pst);
 }
 
 /* Struct used to sort TUs by their abbreviation table offset.  */

@@ -340,7 +340,7 @@ struct minimal_symbol
 
   struct general_symbol_info mginfo;
 
-  /* Size of this symbol.  end_psymtab in dbxread.c uses this
+  /* Size of this symbol.  dbx_end_psymtab in dbxread.c uses this
      information to calculate the end of the partial symtab based on the
      address of the last symbol plus the size of the last symbol.  */
 

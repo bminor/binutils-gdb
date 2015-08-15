@@ -1,5 +1,18 @@
 2015-08-15  Doug Evans  <xdje42@gmail.com>
 
+	* dbxread.c (dbx_end_psymtab): Renamed from end_psymtab.  All callers
+	updated.  Call end_psymtab_common.
+	* dwarf2read.c (process_psymtab_comp_unit_reader): Call
+	end_psymtab_common.
+	(build_type_psymtabs_reader): Ditto.
+	* psympriv.h (sort_pst_symbols): Delete.
+	(end_psymtab_common): Declare.
+	* psymtab.c (sort_pst_symbols): Make static.
+	(end_psymtab_common): New function.
+	* xcoffread.c (xcoff_end_psymtab): Call end_psymtab_common.
+
+2015-08-15  Doug Evans  <xdje42@gmail.com>
+
 	* defs.h (LANGUAGE_BITS): Define.
 	* psympriv.h (partial_symbol) <domain>: Use SYMBOL_DOMAIN_BITS.
 	(partial_symbol) <aclass>: Use SYMBOL_ACLASS_BITS.
