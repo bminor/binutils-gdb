@@ -1,3 +1,9 @@
+2015-08-15  Doug Evans  <xdje42@gmail.com>
+
+	* objfiles.h: Whitespace cleanup.
+	* psympriv.h: Whitespace cleanup.
+	* psymtab.c: Whitespace/coding convention cleanup.
+
 2015-08-15  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* inferior.c (detach_inferior_command): Don't call
