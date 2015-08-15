@@ -1,3 +1,8 @@
+2015-11-28  Ian Lance Taylor  <iant@google.com>
+
+	* cp-demangle.c (d_abi_tags): Preserve di->last_name across any
+	ABI tags.
+
 2015-11-28  Mikhail Maltsev  <maltsevm@gmail.com>
 
 	* cp-demangle.c (d_dump): Fix syntax error.
