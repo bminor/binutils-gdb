@@ -1,3 +1,11 @@
+2015-08-14  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.mi/mi-disassemble.exp: Update.
+	* gdb.base/disasm-optim.S: New file.
+	* gdb.base/disasm-optim.c: New file.
+	* gdb.base/disasm-optim.h: New file.
+	* gdb.base/disasm-optim.exp: New file.
+
 2015-08-14  Keith Seitz  <keiths@redhat.com>
 
 	* lib/mi-support.exp (mi_make_breakpoint): Add option/handling for

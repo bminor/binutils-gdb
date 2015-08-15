@@ -1,3 +1,9 @@
+2015-08-14  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Machine Code): Update docs for mixed source/assembly
+	disassembly.
+	(GDB/MI Data Manipulation): Update docs for new disassembly modes.
+
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.texinfo (Thread-Specific Breakpoints, Printing Source Lines):

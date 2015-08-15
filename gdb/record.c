@@ -458,7 +458,7 @@ get_insn_history_modifiers (char **arg)
 	  switch (*args)
 	    {
 	    case 'm':
-	      modifiers |= DISASSEMBLY_SOURCE;
+	      modifiers |= DISASSEMBLY_SOURCE_DEPRECATED;
 	      modifiers |= DISASSEMBLY_FILENAME;
 	      break;
 	    case 'r':

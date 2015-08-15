@@ -223,7 +223,7 @@ proc test_disassembly_bogus_args {} {
              "data-disassemble mix different args"
 
     mi_gdb_test "789-data-disassemble -f basics.c -l $line_main_body -- 9" \
-             "789\\^error,msg=\"-data-disassemble: Mode argument must be 0, 1, 2, or 3.\"" \
+             "789\\^error,msg=\"-data-disassemble: Mode argument must be in the range 0-5.\"" \
              "data-disassemble wrong mode arg"
 
 }

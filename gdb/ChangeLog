@@ -1,3 +1,26 @@
+2015-08-14  Doug Evans  <xdje42@gmail.com>
+
+	PR gdb/11833
+	* NEWS: Document new /s modifier for the disassemble command.
+	* cli/cli-cmds.c (disassemble_command): Add support for /s.
+	(_initialize_cli_cmds): Update online docs of disassemble command.
+	* disasm.c: #include "source.h".
+	(struct deprecated_dis_line_entry): Renamed from dis_line_entry.
+	All uses updated.
+	(dis_line_entry): New struct.
+	(hash_dis_line_entry, eq_dis_line_entry): New functions.
+	(allocate_dis_line_table): New functions.
+	(maybe_add_dis_line_entry, line_has_code_p): New functions.
+	(dump_insns): New arg end_pc.  All callers updated.
+	(do_mixed_source_and_assembly_deprecated): Renamed from
+	do_mixed_source_and_assembly.  All callers updated.
+	(do_mixed_source_and_assembly): New function.
+	(gdb_disassembly): Handle /s (DISASSEMBLY_SOURCE).
+	* disasm.h (DISASSEMBLY_SOURCE_DEPRECATED): Renamed from
+	DISASSEMBLY_SOURCE.  All uses updated.
+	(DISASSEMBLY_SOURCE): New macro.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): New modes 4,5.
+
 2015-08-14  Keith Seitz  <keiths@redhat.com>
 
 	* d-exp.y (PrimaryExpression : TypeExp '.' IdentifierExp): Rename
