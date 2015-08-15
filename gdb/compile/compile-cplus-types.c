@@ -221,31 +221,28 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
       struct gcc_vbase_array bases;
       int num_base_classes = TYPE_N_BASECLASSES (type);
 
-      if (num_base_classes > 0 )
-	{
+      memset (&bases, 0, sizeof (bases));
 
+      if (num_base_classes > 0)
+	{
 	  bases.elements = XNEWVEC (gcc_type, num_base_classes);
 	  bases.n_elements = num_base_classes;
 	  bases.virtualp = xcalloc (num_base_classes, sizeof (char));
 	  for (i = 0; i < num_base_classes; i++)
 	    {
-	      /* pmuldoon: Not sure what to populate in this base
-		 class array.  */
 	      struct type *base_type = TYPE_BASECLASS (type, i);
-	      const char *base_filename = NULL;
-	      unsigned short base_line = 0;
 
-	      find_line_and_src_from_type (base_type, &base_line,
-					   &base_filename);
 	      if (BASETYPE_VIA_VIRTUAL (type, i))
 		bases.virtualp[i] = '1';
 	      bases.elements[i] = convert_cplus_type (context, base_type);
 	    }
 	}
 
-      // FIXME: build base classes array.  -lxo
       result = CP_CTX (context)->cp_ops->start_new_class_type
 	(CP_CTX (context), name, &bases, filename, line);
+
+      xfree (bases.virtualp);
+      xfree (bases.elements);
     }
   else
     {
