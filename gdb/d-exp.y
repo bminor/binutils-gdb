@@ -522,12 +522,12 @@ PrimaryExpression:
 			    {
 			      struct bound_minimal_symbol msymbol;
 			      struct block_symbol sym;
-			      const char *typename = TYPE_SAFE_NAME (type);
-			      int typename_len = strlen (typename);
+			      const char *type_name = TYPE_SAFE_NAME (type);
+			      int type_name_len = strlen (type_name);
 			      char *name;
 
 			      name = xstrprintf ("%.*s.%.*s",
-						 typename_len, typename,
+						 type_name_len, type_name,
 						 $3.length, $3.ptr);
 			      make_cleanup (xfree, name);
 

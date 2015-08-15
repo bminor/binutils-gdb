@@ -1,5 +1,10 @@
 2015-08-14  Keith Seitz  <keiths@redhat.com>
 
+	* d-exp.y (PrimaryExpression : TypeExp '.' IdentifierExp): Rename
+	`typename' to `type_name' to avoid C++ reserved word.
+
+2015-08-14  Keith Seitz  <keiths@redhat.com>
+
 	* location.c (EL_TYPE, EL_LINESPEC, EL_PROBE, EL_ADDRESS)
 	(EL_EXPLICIT, EL_STRING): Change macro parameter to "P" to
 	silence ARI errors.
