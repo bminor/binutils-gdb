@@ -2660,7 +2660,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_STATIC,
 				     &objfile->static_psymbols,
-				     0, symbol.n_value,
+				     symbol.n_value,
 				     psymtab_language, objfile);
 		continue;
 
@@ -2672,7 +2672,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_STATIC,
 				     &objfile->global_psymbols,
-				     0, symbol.n_value,
+				     symbol.n_value,
 				     psymtab_language, objfile);
 		continue;
 
@@ -2690,16 +2690,14 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    add_psymbol_to_list (namestring, p - namestring, 1,
 					 STRUCT_DOMAIN, LOC_TYPEDEF,
 					 &objfile->static_psymbols,
-					 symbol.n_value, 0,
-					 psymtab_language, objfile);
+					 0, psymtab_language, objfile);
 		    if (p[2] == 't')
 		      {
 			/* Also a typedef with the same name.  */
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_TYPEDEF,
 					     &objfile->static_psymbols,
-					     symbol.n_value, 0,
-					     psymtab_language, objfile);
+					     0, psymtab_language, objfile);
 			p += 1;
 		      }
 		  }
@@ -2711,8 +2709,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    add_psymbol_to_list (namestring, p - namestring, 1,
 					 VAR_DOMAIN, LOC_TYPEDEF,
 					 &objfile->static_psymbols,
-					 symbol.n_value, 0,
-					 psymtab_language, objfile);
+					 0, psymtab_language, objfile);
 		  }
 	      check_enum:
 		/* If this is an enumerated type, we need to
@@ -2773,7 +2770,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 			   enum constants in psymtabs, just in symtabs.  */
 			add_psymbol_to_list (p, q - p, 1,
 					     VAR_DOMAIN, LOC_CONST,
-					     &objfile->static_psymbols, 0,
+					     &objfile->static_psymbols,
 					     0, psymtab_language, objfile);
 			/* Point past the name.  */
 			p = q;
@@ -2791,7 +2788,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		/* Constant, e.g. from "const" in Pascal.  */
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_CONST,
-				     &objfile->static_psymbols, symbol.n_value,
+				     &objfile->static_psymbols,
 				     0, psymtab_language, objfile);
 		continue;
 
@@ -2811,7 +2808,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->static_psymbols,
-				     0, symbol.n_value,
+				     symbol.n_value,
 				     psymtab_language, objfile);
 		continue;
 
@@ -2842,7 +2839,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->global_psymbols,
-				     0, symbol.n_value,
+				     symbol.n_value,
 				     psymtab_language, objfile);
 		continue;
 

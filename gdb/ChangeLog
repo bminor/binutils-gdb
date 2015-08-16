@@ -1,5 +1,11 @@
 2015-08-15  Doug Evans  <xdje42@gmail.com>
 
+	* psymtab.c (add_psymbol_to_bcache): Remove "val" arg.  All callers
+	updated.
+	(add_psymbol_to_list): Ditto.
+
+2015-08-15  Doug Evans  <xdje42@gmail.com>
+
 	* dbxread.c (dbx_end_psymtab): Renamed from end_psymtab.  All callers
 	updated.  Call end_psymtab_common.
 	* dwarf2read.c (process_psymtab_comp_unit_reader): Call

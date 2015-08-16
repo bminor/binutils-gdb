@@ -1640,8 +1640,7 @@ static const struct partial_symbol *
 add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
 		       domain_enum domain,
 		       enum address_class theclass,
-		       long val,	/* Value as a long */
-		       CORE_ADDR coreaddr,	/* Value as a CORE_ADDR */
+		       CORE_ADDR coreaddr,
 		       enum language language, struct objfile *objfile,
 		       int *added)
 {
@@ -1652,15 +1651,7 @@ add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
      holes.  */
   memset (&psymbol, 0, sizeof (psymbol));
 
-  /* val and coreaddr are mutually exclusive, one of them *will* be zero.  */
-  if (val != 0)
-    {
-      SYMBOL_VALUE (&psymbol) = val;
-    }
-  else
-    {
-      SYMBOL_VALUE_ADDRESS (&psymbol) = coreaddr;
-    }
+  SYMBOL_VALUE_ADDRESS (&psymbol) = coreaddr;
   SYMBOL_SECTION (&psymbol) = -1;
   SYMBOL_SET_LANGUAGE (&psymbol, language, &objfile->objfile_obstack);
   PSYMBOL_DOMAIN (&psymbol) = domain;
@@ -1716,6 +1707,8 @@ append_psymbol_to_list (struct psymbol_allocation_list *list,
 
 /* Add a symbol with a long value to a psymtab.
    Since one arg is a struct, we pass in a ptr and deref it (sigh).
+   The only value we need to store for psyms is an address.
+   For all other psyms pass zero for COREADDR.
    Return the partial symbol that has been added.  */
 
 void
@@ -1723,8 +1716,7 @@ add_psymbol_to_list (const char *name, int namelength, int copy_name,
 		     domain_enum domain,
 		     enum address_class theclass,
 		     struct psymbol_allocation_list *list,
-		     long val,	/* Value as a long */
-		     CORE_ADDR coreaddr,	/* Value as a CORE_ADDR */
+		     CORE_ADDR coreaddr,
 		     enum language language, struct objfile *objfile)
 {
   const struct partial_symbol *psym;
@@ -1733,7 +1725,7 @@ add_psymbol_to_list (const char *name, int namelength, int copy_name,
 
   /* Stash the partial symbol away in the cache.  */
   psym = add_psymbol_to_bcache (name, namelength, copy_name, domain, theclass,
-				val, coreaddr, language, objfile, &added);
+				coreaddr, language, objfile, &added);
 
   /* Do not duplicate global partial symbols.  */
   if (list == &objfile->global_psymbols

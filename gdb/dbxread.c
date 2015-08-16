@@ -1705,8 +1705,7 @@ read_dbx_symtab (struct objfile *objfile)
 	      add_psymbol_to_list (sym_name, sym_len, 1,
 				   VAR_DOMAIN, LOC_STATIC,
 				   &objfile->static_psymbols,
-				   0, nlist.n_value,
-				   psymtab_language, objfile);
+				   nlist.n_value, psymtab_language, objfile);
 	      continue;
 
 	    case 'G':
@@ -1717,8 +1716,7 @@ read_dbx_symtab (struct objfile *objfile)
 	      add_psymbol_to_list (sym_name, sym_len, 1,
 				   VAR_DOMAIN, LOC_STATIC,
 				   &objfile->global_psymbols,
-				   0, nlist.n_value,
-				   psymtab_language, objfile);
+				   nlist.n_value, psymtab_language, objfile);
 	      continue;
 
 	    case 'T':
@@ -1735,16 +1733,14 @@ read_dbx_symtab (struct objfile *objfile)
 		  add_psymbol_to_list (sym_name, sym_len, 1,
 				       STRUCT_DOMAIN, LOC_TYPEDEF,
 				       &objfile->static_psymbols,
-				       nlist.n_value, 0,
-				       psymtab_language, objfile);
+				       0, psymtab_language, objfile);
 		  if (p[2] == 't')
 		    {
 		      /* Also a typedef with the same name.  */
 		      add_psymbol_to_list (sym_name, sym_len, 1,
 					   VAR_DOMAIN, LOC_TYPEDEF,
 					   &objfile->static_psymbols,
-					   nlist.n_value, 0,
-					   psymtab_language, objfile);
+					   0, psymtab_language, objfile);
 		      p += 1;
 		    }
 		}
@@ -1756,8 +1752,7 @@ read_dbx_symtab (struct objfile *objfile)
 		  add_psymbol_to_list (sym_name, sym_len, 1,
 				       VAR_DOMAIN, LOC_TYPEDEF,
 				       &objfile->static_psymbols,
-				       nlist.n_value, 0,
-				       psymtab_language, objfile);
+				       0, psymtab_language, objfile);
 		}
 	    check_enum:
 	      /* If this is an enumerated type, we need to
@@ -1818,7 +1813,7 @@ read_dbx_symtab (struct objfile *objfile)
 		      add_psymbol_to_list (p, q - p, 1,
 					   VAR_DOMAIN, LOC_CONST,
 					   &objfile->static_psymbols, 0,
-					   0, psymtab_language, objfile);
+					   psymtab_language, objfile);
 		      /* Point past the name.  */
 		      p = q;
 		      /* Skip over the value.  */
@@ -1835,8 +1830,8 @@ read_dbx_symtab (struct objfile *objfile)
 	      /* Constant, e.g. from "const" in Pascal.  */
 	      add_psymbol_to_list (sym_name, sym_len, 1,
 				   VAR_DOMAIN, LOC_CONST,
-				   &objfile->static_psymbols, nlist.n_value,
-				   0, psymtab_language, objfile);
+				   &objfile->static_psymbols, 0,
+				   psymtab_language, objfile);
 	      continue;
 
 	    case 'f':
@@ -1902,8 +1897,7 @@ read_dbx_symtab (struct objfile *objfile)
 	      add_psymbol_to_list (sym_name, sym_len, 1,
 				   VAR_DOMAIN, LOC_BLOCK,
 				   &objfile->static_psymbols,
-				   0, nlist.n_value,
-				   psymtab_language, objfile);
+				   nlist.n_value, psymtab_language, objfile);
 	      continue;
 
 	      /* Global functions were ignored here, but now they
@@ -1972,8 +1966,7 @@ read_dbx_symtab (struct objfile *objfile)
 	      add_psymbol_to_list (sym_name, sym_len, 1,
 				   VAR_DOMAIN, LOC_BLOCK,
 				   &objfile->global_psymbols,
-				   0, nlist.n_value,
-				   psymtab_language, objfile);
+				   nlist.n_value, psymtab_language, objfile);
 	      continue;
 
 	      /* Two things show up here (hopefully); static symbols of
