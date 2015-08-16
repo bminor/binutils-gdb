@@ -1,3 +1,10 @@
+2015-08-17  Alan Modra  <amodra@gmail.com>
+
+	* gas/config/tc-arm.c (s_align): Delete.
+	(md_pseudo_table): Use s_align_ptwo for "align".
+	* gas/config/tc-arm.h (TC_ALIGN_ZERO_IS_DEFAULT): Define.
+	* read.c (s_align): Modify for TC_ALIGN_ZERO_IS_DEFAULT.
+
 2015-08-13  Alan Modra  <amodra@gmail.com>
 
 	* expr.c (operand): Rewrite handling of operands starting with "0f".

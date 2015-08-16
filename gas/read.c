@@ -1471,6 +1471,11 @@ s_align (int arg, int bytes_p)
     {
       align = get_absolute_expression ();
       SKIP_WHITESPACE ();
+
+#ifdef TC_ALIGN_ZERO_IS_DEFAULT
+      if (arg > 0 && align == 0)
+	align = arg;
+#endif
     }
 
   if (bytes_p)
