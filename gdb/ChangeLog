@@ -1,3 +1,7 @@
+2015-08-17  Doug Evans  <dje@google.com>
+
+	* ui-out.c (default_ui_out_impl): Add comment.
+
 2015-08-17  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* d-exp.y (type_aggregate_p): New function.
