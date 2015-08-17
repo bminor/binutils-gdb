@@ -121,7 +121,7 @@ int n_varies = 0;
 
 unsigned char cur_bits[MAX_BYTES + 1];
 
-char * orig_filename;
+const char * orig_filename;
 
 FILE * sim_log = NULL;
 #define lprintf if (sim_log) fprintf
@@ -339,7 +339,10 @@ dump_lines (opcode * op, int level, Indirect * ind)
   printf ("#line %d \"%s\"\n", op->lineno + 1, orig_filename);
 
   for (i = 0; i < op->nlines; i++)
-    printf ("%*s%s", level, "", op->lines[i]);
+    if (op->lines[i][0] == '\n')
+      printf ("%s", op->lines[i]);
+    else
+      printf ("%*s%s", level, "", op->lines[i]);
 
   if (op->comment)
     printf ("%*s}\n", level, "");

@@ -1610,16 +1610,16 @@ print_dependency_table (void)
   /* And dependency lists.  */
   for (i=0;i < dlistlen;i++)
     {
-      int len = 2;
-      printf ("static const unsigned short dep%d[] = {\n  ", i);
+      unsigned int len = (unsigned) -1;
+      printf ("static const unsigned short dep%d[] = {", i);
       for (j=0;j < dlists[i]->len; j++)
         {
-          len += printf ("%d, ", dlists[i]->deps[j]);
-          if (len > 75)
+          if (len > 74)
             {
-              printf("\n  ");
-              len = 2;
+              printf("\n ");
+              len = 1;
             }
+          len += printf (" %d,", dlists[i]->deps[j]);
         }
       printf ("\n};\n\n");
     }
@@ -2124,13 +2124,13 @@ print_dis_table (void)
   int x;
   struct disent *cent = disinsntable;
 
-  printf ("static const char dis_table[] = {\n");
+  printf ("static const char dis_table[] = {");
   for (x = 0; x < insn_list_len; x++)
     {
-      if ((x > 0) && ((x % 12) == 0))
-	printf ("\n");
+      if (x % 12 == 0)
+	printf ("\n ");
 
-      printf ("0x%02x, ", insn_list[x]);
+      printf (" 0x%02x,", insn_list[x]);
     }
   printf ("\n};\n\n");
 
