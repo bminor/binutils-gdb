@@ -1,3 +1,10 @@
+2015-08-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y (type_aggregate_p): New function.
+	(PrimaryExpression : TypeExp '.' IdentifierExp): Use it.
+	(classify_inner_name): Likewise.
+	* d-namespace.c (d_lookup_nested_symbol): Handle TYPE_CODE_ENUM.
+
 2015-08-15  Doug Evans  <xdje42@gmail.com>
 
 	* psymtab.c (add_psymbol_to_bcache): Remove "val" arg.  All callers
