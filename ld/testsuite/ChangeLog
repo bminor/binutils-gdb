@@ -1,6 +1,12 @@
 2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18841
+	* ld-ifunc/ifunc.exp: Add another test for PR ld/18841.
+	* ld-ifunc/pr18841c.c: New file.
+
+2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18841
 	* ld-ifunc/ifunc.exp: Add a test for PR ld/18841.
 	* ld-ifunc/pr18841.out: New file.
 	* ld-ifunc/pr18841a.c: Likewise.
