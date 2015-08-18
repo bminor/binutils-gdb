@@ -1,3 +1,10 @@
+2015-08-18  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Delete useless check.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+
 2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd/aoutx.h: Replace shared, executable, relocatable and pie
