@@ -1,3 +1,7 @@
+2015-08-18  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (exp_fold_tree_1): Clear linker_def on symbol assignment.
+
 2015-08-06  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (align_dot_val): Delete.

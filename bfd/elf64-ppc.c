@@ -6945,11 +6945,16 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
       _bfd_elf_link_hash_hide_symbol (info, htab->elf.hgot, TRUE);
       /* Make .TOC. defined so as to prevent it being made dynamic.
 	 The wrong value here is fixed later in ppc64_elf_set_toc.  */
+      if (!htab->elf.hgot->def_regular
+	  || htab->elf.hgot->root.type != bfd_link_hash_defined)
+	{
+	  htab->elf.hgot->root.type = bfd_link_hash_defined;
+	  htab->elf.hgot->root.u.def.value = 0;
+	  htab->elf.hgot->root.u.def.section = bfd_abs_section_ptr;
+	  htab->elf.hgot->def_regular = 1;
+	  htab->elf.hgot->root.linker_def = 1;
+	}
       htab->elf.hgot->type = STT_OBJECT;
-      htab->elf.hgot->root.type = bfd_link_hash_defined;
-      htab->elf.hgot->root.u.def.value = 0;
-      htab->elf.hgot->root.u.def.section = bfd_abs_section_ptr;
-      htab->elf.hgot->def_regular = 1;
       htab->elf.hgot->other = ((htab->elf.hgot->other & ~ELF_ST_VISIBILITY (-1))
 			       | STV_HIDDEN);
     }
@@ -12538,6 +12543,34 @@ ppc64_elf_set_toc (struct bfd_link_info *info, bfd *obfd)
 {
   asection *s;
   bfd_vma TOCstart, adjust;
+
+  if (info != NULL)
+    {
+      struct elf_link_hash_entry *h;
+      struct elf_link_hash_table *htab = elf_hash_table (info);
+
+      if (is_elf_hash_table (htab)
+	  && htab->hgot != NULL)
+	h = htab->hgot;
+      else
+	{
+	  h = elf_link_hash_lookup (htab, ".TOC.", FALSE, FALSE, TRUE);
+	  if (is_elf_hash_table (htab))
+	    htab->hgot = h;
+	}
+      if (h != NULL
+	  && h->root.type == bfd_link_hash_defined
+	  && !h->root.linker_def
+	  && (!is_elf_hash_table (htab)
+	      || h->def_regular))
+	{
+	  TOCstart = (h->root.u.def.value - TOC_BASE_OFF
+		      + h->root.u.def.section->output_offset
+		      + h->root.u.def.section->output_section->vma);
+	  _bfd_set_gp_value (obfd, TOCstart);
+	  return TOCstart;
+	}
+    }
 
   /* The TOC consists of sections .got, .toc, .tocbss, .plt in that
      order.  The TOC starts where the first of these sections starts.  */

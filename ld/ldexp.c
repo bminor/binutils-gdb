@@ -1144,6 +1144,7 @@ exp_fold_tree_1 (etree_type *tree)
 	      h->type = bfd_link_hash_defined;
 	      h->u.def.value = expld.result.value;
 	      h->u.def.section = expld.result.section;
+	      h->linker_def = 0;
 	      if (tree->type.node_class == etree_provide)
 		tree->type.node_class = etree_provided;
 

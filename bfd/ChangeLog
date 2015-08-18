@@ -1,3 +1,10 @@
+2015-08-18  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Don't redefine .TOC.
+	if already defined, and set linker_def.
+	(ppc64_elf_set_toc): Use .TOC. value if defined other than by
+	the backend.
+
 2015-08-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/18759
