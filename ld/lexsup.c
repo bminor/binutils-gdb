@@ -1595,9 +1595,6 @@ parse_args (unsigned argc, char **argv)
 	einfo (_("%P%F: -f may not be used without -shared\n"));
     }
 
-  if (link_info.type == type_unknown)
-    link_info.type = type_executable;
-
   /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
      don't see how else this can be handled, since in this case we
      must preserve all externally visible symbols.  */

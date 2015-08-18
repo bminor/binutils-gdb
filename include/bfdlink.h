@@ -263,8 +263,7 @@ struct bfd_elf_version_tree;
 
 enum output_type
 {
-  type_unknown = 0,
-  type_executable,
+  type_executable = 0,
   type_dll,
   type_relocatable
 };
