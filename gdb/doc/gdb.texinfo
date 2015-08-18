@@ -17693,6 +17693,7 @@ program.  To debug a core dump of a previous run, you must also tell
 
 @menu
 * Files::                       Commands to specify files
+* File Caching::                Information about @value{GDBN}'s file caching
 * Separate Debug Files::        Debugging information in separate files
 * MiniDebugInfo::               Debugging information in a special section
 * Index Files::                 Index files speed up GDB

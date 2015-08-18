@@ -1,5 +1,9 @@
 2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.texinfo (GDB Files): Add 'File Caching' menu entry.
+
+2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.texinfo (File Caching): Document "set/show debug bfd-cache".
 
 2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
