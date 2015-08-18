@@ -1,3 +1,9 @@
+2015-08-18  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* remote.c (strprefix): New.
+	(remote_parse_stop_reply): Use strprefix instead of strncmp
+	to ensure exact match of keyword.
+
 2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb_bfd.c (debug_bfd_cache): New variable.

@@ -5835,6 +5835,18 @@ skip_to_semicolon (char *p)
   return p;
 }
 
+/* Helper for remote_parse_stop_reply.  Return nonzero if the substring
+   starting with P and ending with PEND matches PREFIX.  */
+
+static int
+strprefix (const char *p, const char *pend, const char *prefix)
+{
+  for ( ; p < pend; p++, prefix++)
+    if (*p != *prefix)
+      return 0;
+  return *prefix == '\0';
+}
+
 /* Parse the stop reply in BUF.  Either the function succeeds, and the
    result is stored in EVENT, or throws an error.  */
 
@@ -5886,17 +5898,17 @@ Packet: '%s'\n"),
 	     the server only sends such a packet if it knows the
 	     client understands it.  */
 
-	  if (strncmp (p, "thread", p1 - p) == 0)
+	  if (strprefix (p, p1, "thread"))
 	    event->ptid = read_ptid (++p1, &p);
-	  else if ((strncmp (p, "watch", p1 - p) == 0)
-		   || (strncmp (p, "rwatch", p1 - p) == 0)
-		   || (strncmp (p, "awatch", p1 - p) == 0))
+	  else if (strprefix (p, p1, "watch")
+		   || strprefix (p, p1, "rwatch")
+		   || strprefix (p, p1, "awatch"))
 	    {
 	      event->stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
 	      p = unpack_varlen_hex (++p1, &addr);
 	      event->watch_data_address = (CORE_ADDR) addr;
 	    }
-	  else if (strncmp (p, "swbreak", p1 - p) == 0)
+	  else if (strprefix (p, p1, "swbreak"))
 	    {
 	      event->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
 
@@ -5910,7 +5922,7 @@ Packet: '%s'\n"),
 		 use of it in a backward compatible way.  */
 	      p = skip_to_semicolon (p1 + 1);
 	    }
-	  else if (strncmp (p, "hwbreak", p1 - p) == 0)
+	  else if (strprefix (p, p1, "hwbreak"))
 	    {
 	      event->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
 
@@ -5922,36 +5934,36 @@ Packet: '%s'\n"),
 	      /* See above.  */
 	      p = skip_to_semicolon (p1 + 1);
 	    }
-	  else if (strncmp (p, "library", p1 - p) == 0)
+	  else if (strprefix (p, p1, "library"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_LOADED;
 	      p = skip_to_semicolon (p1 + 1);
 	    }
-	  else if (strncmp (p, "replaylog", p1 - p) == 0)
+	  else if (strprefix (p, p1, "replaylog"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
 	      /* p1 will indicate "begin" or "end", but it makes
 		 no difference for now, so ignore it.  */
 	      p = skip_to_semicolon (p1 + 1);
 	    }
-	  else if (strncmp (p, "core", p1 - p) == 0)
+	  else if (strprefix (p, p1, "core"))
 	    {
 	      ULONGEST c;
 
 	      p = unpack_varlen_hex (++p1, &c);
 	      event->core = c;
 	    }
-	  else if (strncmp (p, "fork", p1 - p) == 0)
+	  else if (strprefix (p, p1, "fork"))
 	    {
 	      event->ws.value.related_pid = read_ptid (++p1, &p);
 	      event->ws.kind = TARGET_WAITKIND_FORKED;
 	    }
-	  else if (strncmp (p, "vfork", p1 - p) == 0)
+	  else if (strprefix (p, p1, "vfork"))
 	    {
 	      event->ws.value.related_pid = read_ptid (++p1, &p);
 	      event->ws.kind = TARGET_WAITKIND_VFORKED;
 	    }
-	  else if (strncmp (p, "vforkdone", p1 - p) == 0)
+	  else if (strprefix (p, p1, "vforkdone"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_VFORK_DONE;
 	      p = skip_to_semicolon (p1 + 1);
