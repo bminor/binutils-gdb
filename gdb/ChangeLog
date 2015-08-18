@@ -1,3 +1,11 @@
+2015-08-18  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_nat_always_non_stop_p): If the linux_ops
+	target implements to_always_non_stop_p, call it.
+	* x86-linux-nat.c (x86_linux_always_non_stop_p): New function.
+	(x86_linux_create_target): Install it as to_always_non_stop_p
+	method.
+
 2015-08-17  Doug Evans  <dje@google.com>
 
 	* ui-out.c (default_ui_out_impl): Add comment.
