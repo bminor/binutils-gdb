@@ -5464,10 +5464,27 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
    dynamic linker, before writing them out.  */
 
 static enum elf_reloc_type_class
-elf_x86_64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+elf_x86_64_reloc_type_class (const struct bfd_link_info *info,
 			     const asection *rel_sec ATTRIBUTE_UNUSED,
 			     const Elf_Internal_Rela *rela)
 {
+  bfd *abfd = info->output_bfd;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  struct elf_x86_64_link_hash_table *htab = elf_x86_64_hash_table (info);
+  unsigned long r_symndx = htab->r_sym (rela->r_info);
+  Elf_Internal_Sym sym;
+
+  if (htab->elf.dynsym == NULL
+      || !bed->s->swap_symbol_in (abfd,
+				  (htab->elf.dynsym->contents
+				   + r_symndx * bed->s->sizeof_sym),
+				  0, &sym))
+    abort ();
+
+  /* Check relocation against STT_GNU_IFUNC symbol.  */
+  if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+    return reloc_class_ifunc;
+
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_X86_64_RELATIVE:

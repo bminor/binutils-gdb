@@ -472,6 +472,14 @@ run_cc_link_tests [list \
 	{} \
 	"libpr18808.so" \
     ] \
+    [list \
+	"Build libpr18841.so" \
+	"-shared" \
+	"-fPIC -O0 -g" \
+	{ pr18841b.c } \
+	{} \
+	"libpr18841.so" \
+    ] \
 ]
 
 run_ld_link_exec_tests [] [list \
@@ -482,5 +490,13 @@ run_ld_link_exec_tests [] [list \
 	{ pr18808a.c } \
 	"pr18808" \
 	"pr18808.out" \
+    ] \
+    [list \
+	"Run pr18841" \
+	"tmpdir/libpr18841.so" \
+	"" \
+	{ pr18841a.c } \
+	"pr18841" \
+	"pr18841.out" \
     ] \
 ]

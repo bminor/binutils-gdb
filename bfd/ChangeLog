@@ -7,6 +7,20 @@
 
 2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/18841
+	* elf-bfd.h (elf_link_hash_table): Add dynsym.
+	* elf32-i386.c (elf_i386_reloc_type_class): Return
+	reloc_class_ifunc for relocation against STT_GNU_IFUNC symbol.
+	* elf64-x86-64.c (elf_x86_64_reloc_type_class): Likewise.
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): Set dynsym.
+	(bfd_elf_size_dynsym_hash_dynstr): Use dynsym.
+	(elf_final_link_info): Remove dynsym_sec.
+	(elf_link_output_extsym): Replace dynsym_sec with dynsym.
+	(bfd_elf_final_link): Remove reference to dynsym_sec.  Replace
+	dynsym_sec with dynsym.
+
+2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* bfd/aoutx.h: Replace shared, executable, relocatable and pie
 	fields with bfd_link_executable, bfd_link_dll,
 	bfd_link_relocatable, bfd_link_pic and bfd_link_pie.

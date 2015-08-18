@@ -595,6 +595,7 @@ struct elf_link_hash_table
   asection *iplt;
   asection *irelplt;
   asection *irelifunc;
+  asection *dynsym;
 };
 
 /* Look up an entry in an ELF linker hash table.  */

@@ -279,6 +279,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
+  elf_hash_table (info)->dynsym = s;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".dynstr",
 					  flags | SEC_READONLY);
@@ -6545,7 +6546,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	 the final symbol table, because until then we do not know the
 	 correct value to give the symbols.  We built the .dynstr
 	 section as we went along in elf_link_add_object_symbols.  */
-      s = bfd_get_linker_section (dynobj, ".dynsym");
+      s = elf_hash_table (info)->dynsym;
       BFD_ASSERT (s != NULL);
       s->size = dynsymcount * bed->s->sizeof_sym;
 
@@ -7541,8 +7542,6 @@ struct elf_final_link_info
   bfd *output_bfd;
   /* Symbol string table.  */
   struct elf_strtab_hash *symstrtab;
-  /* .dynsym section.  */
-  asection *dynsym_sec;
   /* .hash section.  */
   asection *hash_sec;
   /* symbol version section (.gnu.version).  */
@@ -9314,7 +9313,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   /* If this symbol should be put in the .dynsym section, then put it
      there now.  We already know the symbol index.  We also fill in
      the entry in the .hash section.  */
-  if (flinfo->dynsym_sec != NULL
+  if (elf_hash_table (flinfo->info)->dynsym != NULL
       && h->dynindx != -1
       && elf_hash_table (flinfo->info)->dynamic_sections_created)
     {
@@ -9344,7 +9343,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	}
 
       sym.st_name = h->dynstr_index;
-      esym = flinfo->dynsym_sec->contents + h->dynindx * bed->s->sizeof_sym;
+      esym = (elf_hash_table (flinfo->info)->dynsym->contents
+	      + h->dynindx * bed->s->sizeof_sym);
       if (!check_dynsym (flinfo->output_bfd, &sym))
 	{
 	  eoinfo->failed = TRUE;
@@ -10868,13 +10868,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   if (! dynamic)
     {
-      flinfo.dynsym_sec = NULL;
       flinfo.hash_sec = NULL;
       flinfo.symver_sec = NULL;
     }
   else
     {
-      flinfo.dynsym_sec = bfd_get_linker_section (dynobj, ".dynsym");
       flinfo.hash_sec = bfd_get_linker_section (dynobj, ".hash");
       /* Note that dynsym_sec can be NULL (on VMS).  */
       flinfo.symver_sec = bfd_get_linker_section (dynobj, ".gnu.version");
@@ -11407,11 +11405,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   symtab_hdr->sh_info = bfd_get_symcount (abfd);
 
   if (dynamic
-      && flinfo.dynsym_sec != NULL
-      && flinfo.dynsym_sec->output_section != bfd_abs_section_ptr)
+      && elf_hash_table (info)->dynsym != NULL
+      && (elf_hash_table (info)->dynsym->output_section
+	  != bfd_abs_section_ptr))
     {
       Elf_Internal_Sym sym;
-      bfd_byte *dynsym = flinfo.dynsym_sec->contents;
+      bfd_byte *dynsym = elf_hash_table (info)->dynsym->contents;
       long last_local = 0;
 
       /* Write out the section symbols for the output sections.  */
@@ -11484,7 +11483,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    }
 	}
 
-      elf_section_data (flinfo.dynsym_sec->output_section)->this_hdr.sh_info =
+      elf_section_data (elf_hash_table (info)->dynsym->output_section)->this_hdr.sh_info =
 	last_local + 1;
     }
 
