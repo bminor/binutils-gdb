@@ -892,7 +892,7 @@ lm32_elf_relocate_section (bfd *output_bfd,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
         {
 	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
@@ -945,8 +945,10 @@ lm32_elf_relocate_section (bfd *output_bfd,
                   BFD_ASSERT (off != (bfd_vma) -1);
 
                   dyn = htab->root.dynamic_sections_created;
-                  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
-                      || (info->shared
+                  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
+							 bfd_link_pic (info),
+							 h)
+                      || (bfd_link_pic (info)
                           && (info->symbolic
                               || h->dynindx == -1
                               || h->forced_local)
@@ -1019,7 +1021,7 @@ lm32_elf_relocate_section (bfd *output_bfd,
                                                    + off);
                         }
 
-                      if (info->shared)
+                      if (bfd_link_pic (info))
                         {
                           asection *srelgot;
                           Elf_Internal_Rela outrel;
@@ -1277,7 +1279,7 @@ lm32_elf_check_relocs (bfd *abfd,
   struct elf_lm32_link_hash_table *htab;
   bfd *dynobj;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -1495,7 +1497,7 @@ lm32_elf_finish_dynamic_sections (bfd *output_bfd,
       splt = htab->splt;
       if (splt && splt->size > 0)
         {
-          if (info->shared)
+          if (bfd_link_pic (info))
             {
               bfd_put_32 (output_bfd, PLT0_PIC_ENTRY_WORD0, splt->contents);
               bfd_put_32 (output_bfd, PLT0_PIC_ENTRY_WORD1, splt->contents + 4);
@@ -1635,7 +1637,7 @@ lm32_elf_finish_dynamic_symbol (bfd *output_bfd,
       got_offset = (plt_index + 3) * 4;
 
       /* Fill in the entry in the procedure linkage table.  */
-      if (! info->shared)
+      if (! bfd_link_pic (info))
         {
           /* TODO */
         }
@@ -1692,7 +1694,7 @@ lm32_elf_finish_dynamic_symbol (bfd *output_bfd,
          the symbol was forced to be local because of a version file.
          The entry in the global offset table will already have been
          initialized in the relocate_section function.  */
-      if (info->shared
+      if (bfd_link_pic (info)
           && (info->symbolic
 	      || h->dynindx == -1
 	      || h->forced_local)
@@ -1794,7 +1796,7 @@ lm32_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (h->type == STT_FUNC
       || h->needs_plt)
     {
-      if (! info->shared
+      if (! bfd_link_pic (info)
           && !h->def_dynamic
           && !h->ref_dynamic
 	  && h->root.type != bfd_link_hash_undefweak
@@ -1833,7 +1835,7 @@ lm32_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
-  if (info->shared)
+  if (bfd_link_pic (info))
     return TRUE;
 
   /* If there are no references to this symbol that do not use the
@@ -1932,7 +1934,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
             return FALSE;
         }
 
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), h))
         {
           asection *s = htab->splt;
 
@@ -1948,7 +1950,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
              location in the .plt.  This is required to make function
              pointers compare as equal between the normal executable and
              the shared library.  */
-          if (! info->shared
+          if (! bfd_link_pic (info)
               && !h->def_regular)
             {
               h->root.u.def.section = s;
@@ -1996,7 +1998,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       h->got.offset = s->size;
       s->size += 4;
       dyn = htab->root.dynamic_sections_created;
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h))
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h))
         htab->srelgot->size += sizeof (Elf32_External_Rela);
     }
   else
@@ -2011,7 +2013,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
      space for pc-relative relocs that have become local due to symbol
      visibility changes.  */
 
-  if (info->shared)
+  if (bfd_link_pic (info))
     {
       if (h->def_regular
           && (h->forced_local
@@ -2139,7 +2141,7 @@ lm32_elf_size_dynamic_sections (bfd *output_bfd,
   if (htab->root.dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (info->executable)
+      if (bfd_link_executable (info))
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -2203,7 +2205,7 @@ lm32_elf_size_dynamic_sections (bfd *output_bfd,
             {
               *local_got = s->size;
               s->size += 4;
-              if (info->shared)
+              if (bfd_link_pic (info))
                 srel->size += sizeof (Elf32_External_Rela);
             }
           else
@@ -2282,7 +2284,7 @@ lm32_elf_size_dynamic_sections (bfd *output_bfd,
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-     if (info->executable)
+     if (bfd_link_executable (info))
 	{
 	  if (! add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;
@@ -2508,7 +2510,7 @@ lm32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       h->type = STT_OBJECT;
       htab->root.hplt = h;
 
-      if (info->shared
+      if (bfd_link_pic (info)
           && ! bfd_elf_link_record_dynamic_symbol (info, h))
         return FALSE;
     }
@@ -2550,7 +2552,7 @@ lm32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
          be needed, we can discard it later.  We will never need this
          section when generating a shared object, since they do not use
          copy relocs.  */
-      if (! info->shared)
+      if (! bfd_link_pic (info))
         {
           s = bfd_make_section_anyway_with_flags (abfd,
 						  (bed->default_use_rela_p
@@ -2616,7 +2618,7 @@ lm32_elf_copy_indirect_symbol (struct bfd_link_info *info,
 static bfd_boolean
 lm32_elf_always_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
-  if (!info->relocatable)
+  if (!bfd_link_relocatable (info))
     {
       if (!bfd_elf_stack_segment_size (output_bfd, info,
 				       "__stacksize", DEFAULT_STACK_SIZE))

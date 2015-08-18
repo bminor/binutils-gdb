@@ -603,7 +603,7 @@ coff_pe_mips_relocate_section (bfd *output_bfd,
   struct internal_reloc *rel_end;
   unsigned int i;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     {
       (*_bfd_error_handler)
 	(_("%B: `ld -r' not supported with PE MIPS objects\n"), input_bfd);
@@ -661,7 +661,7 @@ coff_pe_mips_relocate_section (bfd *output_bfd,
          then we should ignore the symbol value.  */
       if (howto->pc_relative && howto->pcrel_offset)
 	{
-	  if (info->relocatable)
+	  if (bfd_link_relocatable (info))
 	    continue;
 	  if (sym != NULL && sym->n_scnum != 0)
 	    addend += sym->n_value;
@@ -701,7 +701,7 @@ coff_pe_mips_relocate_section (bfd *output_bfd,
 		     + sec->output_offset);
 	      }
 
-	  else if (! info->relocatable)
+	  else if (! bfd_link_relocatable (info))
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,

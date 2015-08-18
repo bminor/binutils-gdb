@@ -833,8 +833,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
 	  /* For shared libraries, try to get rid of as many RELATIVE relocs
 	     as possible.  */
-	  if (info->shared
-	      && !info->relocatable
+	  if (bfd_link_pic (info)
 	      && (get_elf_backend_data (abfd)
 		  ->elf_backend_can_make_relative_eh_frame
 		  (abfd, info, sec)))
@@ -871,7 +870,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  buf += initial_insn_length;
 	  ENSURE_NO_RELOCS (buf);
 
-	  if (!info->relocatable)
+	  if (!bfd_link_relocatable (info))
 	    {
 	      /* Keep info for merging cies.  */
 	      this_inf->u.cie.u.full_cie = cie;
@@ -1018,7 +1017,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   elf_section_data (sec)->sec_info = sec_info;
   sec->sec_info_type = SEC_INFO_TYPE_EH_FRAME;
-  if (!info->relocatable)
+  if (!bfd_link_relocatable (info))
     {
       /* Keep info for merging cies.  */
       sec_info->cies = local_cies;
@@ -1264,8 +1263,7 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	}
 
       if (per_binds_local
-	  && info->shared
-	  && !info->relocatable
+	  && bfd_link_pic (info)
 	  && (cie->per_encoding & 0x70) == DW_EH_PE_absptr
 	  && (get_elf_backend_data (abfd)
 	      ->elf_backend_can_make_relative_eh_frame (abfd, info, sec)))
@@ -1365,7 +1363,7 @@ _bfd_elf_discard_section_eh_frame
 	  }
 	if (keep)
 	  {
-	    if (info->shared
+	    if (bfd_link_pic (info)
 		&& (((ent->fde_encoding & 0x70) == DW_EH_PE_absptr
 		     && ent->make_relative == 0)
 		    || (ent->fde_encoding & 0x70) == DW_EH_PE_aligned))
@@ -1907,7 +1905,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	  value = ((ent->new_offset + sec->output_offset + 4)
 		   - (cie->new_offset + cie->u.cie.u.sec->output_offset));
 	  bfd_put_32 (abfd, value, buf);
-	  if (info->relocatable)
+	  if (bfd_link_relocatable (info))
 	    continue;
 	  buf += 4;
 	  width = get_DW_EH_PE_width (ent->fde_encoding, ptr_size);

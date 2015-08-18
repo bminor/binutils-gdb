@@ -35,7 +35,7 @@ gld${EMULATION_NAME}_map_segments (bfd_boolean need_layout)
       need_layout = FALSE;
 
       if (link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour
-	  && !link_info.relocatable)
+	  && !bfd_link_relocatable (&link_info))
 	{
 	  bfd_size_type phdr_size;
 

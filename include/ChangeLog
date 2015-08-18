@@ -1,3 +1,14 @@
+2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* include/bfdlink.h (output_type): New enum.
+	(bfd_link_executable): New macro.
+	(bfd_link_dll): Likewise.
+	(bfd_link_relocatable): Likewise.
+	(bfd_link_pic): Likewise.
+	(bfd_link_pie): Likewise.
+	(bfd_link_info): Remove shared, executable, pie and relocatable.
+	Add output_type and pic.
+
 2015-08-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC

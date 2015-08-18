@@ -632,7 +632,7 @@ rx_elf_relocate_section
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	{
 	  /* This is a relocatable link.  We don't have to change
              anything, unless the reloc is against a section symbol,
@@ -2003,7 +2003,7 @@ elf32_rx_relax_section (bfd *                  abfd,
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)

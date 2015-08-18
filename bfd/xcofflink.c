@@ -1050,7 +1050,7 @@ xcoff_link_create_extra_sections (bfd * abfd, struct bfd_link_info *info)
 	 won't work if we're producing an XCOFF output file with no
 	 XCOFF input files.  FIXME.  */
 
-      if (!info->relocatable
+      if (!bfd_link_relocatable (info)
 	  && xcoff_hash_table (info)->loader_section == NULL)
 	{
 	  asection *lsec;
@@ -2700,7 +2700,7 @@ xcoff_mark_symbol (struct bfd_link_info *info, struct xcoff_link_hash_entry *h)
 
   /* If we're marking an undefined symbol, try find some way of
      defining it.  */
-  if (!info->relocatable
+  if (!bfd_link_relocatable (info)
       && (h->flags & XCOFF_IMPORT) == 0
       && (h->flags & XCOFF_DEF_REGULAR) == 0
       && (h->root.type == bfd_link_hash_undefined
@@ -3714,7 +3714,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
     }
 
   /* Garbage collect unused sections.  */
-  if (info->relocatable || !gc)
+  if (bfd_link_relocatable (info) || !gc)
     {
       gc = FALSE;
       xcoff_hash_table (info)->gc = FALSE;
@@ -5830,7 +5830,7 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   file_ptr pos;
   bfd_size_type amt;
 
-  if (info->shared)
+  if (bfd_link_pic (info))
     abfd->flags |= DYNAMIC;
 
   symesz = bfd_coff_symesz (abfd);

@@ -4066,8 +4066,8 @@ aarch64_calculate_got_entry_vma (struct elf_link_hash_entry *h,
       BFD_ASSERT (basegot != NULL);
       off = h->got.offset;
       BFD_ASSERT (off != (bfd_vma) - 1);
-      if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
-	  || (info->shared
+      if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
+	  || (bfd_link_pic (info)
 	      && SYMBOL_REFERENCES_LOCAL (info, h))
 	  || (ELF_ST_VISIBILITY (h->other)
 	      && h->root.type == bfd_link_hash_undefweak))
@@ -4229,7 +4229,7 @@ aarch64_can_relax_tls (bfd *input_bfd,
   if (symbol_got_type == GOT_TLS_IE && GOT_TLS_GD_ANY_P (reloc_got_type))
     return TRUE;
 
-  if (info->shared)
+  if (bfd_link_pic (info))
     return FALSE;
 
   if  (h && h->root.type == bfd_link_hash_undefweak)
@@ -4669,7 +4669,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	  /* Generate dynamic relocation only when there is a
 	     non-GOT reference in a shared object.  */
-	  if (info->shared && h->non_got_ref)
+	  if (bfd_link_pic (info) && h->non_got_ref)
 	    {
 	      Elf_Internal_Rela outrel;
 	      asection *sreloc;
@@ -4689,7 +4689,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	      if (h->dynindx == -1
 		  || h->forced_local
-		  || info->executable)
+		  || bfd_link_executable (info))
 		{
 		  /* This symbol is resolved locally.  */
 		  outrel.r_info = ELFNN_R_INFO (0, AARCH64_R (IRELATIVE));
@@ -4810,7 +4810,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       /* When generating a shared object or relocatable executable, these
          relocations are copied into the output file to be resolved at
          run time.  */
-      if (((info->shared == TRUE) || globals->root.is_relocatable_executable)
+      if (((bfd_link_pic (info) == TRUE)
+	   || globals->root.is_relocatable_executable)
 	  && (input_section->flags & SEC_ALLOC)
 	  && (h == NULL
 	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -4845,7 +4846,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    memset (&outrel, 0, sizeof outrel);
 	  else if (h != NULL
 		   && h->dynindx != -1
-		   && (!info->shared || !SYMBOLIC_BIND (info, h) || !h->def_regular))
+		   && (!bfd_link_pic (info)
+		       || !SYMBOLIC_BIND (info, h)
+		       || !h->def_regular))
 	    outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
 	  else
 	    {
@@ -4936,7 +4939,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
     case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
     case BFD_RELOC_AARCH64_LD_LO19_PCREL:
-      if (info->shared
+      if (bfd_link_pic (info)
 	  && (input_section->flags & SEC_ALLOC) != 0
 	  && (input_section->flags & SEC_READONLY) != 0
 	  && h != NULL
@@ -5026,7 +5029,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  {
 	    bfd_put_64 (output_bfd, value, base_got->contents + off);
 
-	    if (info->shared)
+	    if (bfd_link_pic (info))
 	      {
 		asection *s;
 		Elf_Internal_Rela outrel;
@@ -5463,7 +5466,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 
 	  /* Relocate against local STT_GNU_IFUNC symbol.  */
-	  if (!info->relocatable
+	  if (!bfd_link_relocatable (info)
 	      && ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 	    {
 	      h = elfNN_aarch64_get_local_sym_hash (globals, input_bfd,
@@ -5492,7 +5495,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       if (h != NULL)
@@ -5577,7 +5580,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	      indx = h && h->dynindx != -1 ? h->dynindx : 0;
 
 	      need_relocs =
-		(info->shared || indx != 0) &&
+		(bfd_link_pic (info) || indx != 0) &&
 		(h == NULL
 		 || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		 || h->root.type != bfd_link_hash_undefweak);
@@ -5670,7 +5673,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	      indx = h && h->dynindx != -1 ? h->dynindx : 0;
 
 	      need_relocs =
-		(info->shared || indx != 0) &&
+		(bfd_link_pic (info) || indx != 0) &&
 		(h == NULL
 		 || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		 || h->root.type != bfd_link_hash_undefweak);
@@ -6020,7 +6023,7 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
   struct elf_aarch64_local_symbol *locals;
   const Elf_Internal_Rela *rel, *relend;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   htab = elf_aarch64_hash_table (info);
@@ -6157,7 +6160,7 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	case BFD_RELOC_AARCH64_MOVW_G2_NC:
 	case BFD_RELOC_AARCH64_MOVW_G3:
 	case BFD_RELOC_AARCH64_NN:
-	  if (h != NULL && info->executable)
+	  if (h != NULL && bfd_link_executable (info))
 	    {
 	      if (h->plt.refcount > 0)
 		h->plt.refcount -= 1;
@@ -6230,7 +6233,7 @@ elfNN_aarch64_adjust_dynamic_symbol (struct bfd_link_info *info,
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
-  if (info->shared)
+  if (bfd_link_pic (info))
     return TRUE;
 
   /* If there are no references to this symbol that do not use the
@@ -6366,7 +6369,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   struct elf_aarch64_link_hash_table *htab;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   BFD_ASSERT (is_aarch64_elf (abfd));
@@ -6482,7 +6485,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  if (h != NULL)
 	    {
-	      if (!info->shared)
+	      if (!bfd_link_pic (info))
 		h->non_got_ref = 1;
 
 	      h->plt.refcount += 1;
@@ -6491,7 +6494,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* No need to do anything if we're not creating a shared
 	     object.  */
-	  if (! info->shared)
+	  if (! bfd_link_pic (info))
 	    break;
 
 	  {
@@ -6663,7 +6666,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_MOVW_G1_NC:
 	case BFD_RELOC_AARCH64_MOVW_G2_NC:
 	case BFD_RELOC_AARCH64_MOVW_G3:
-	  if (info->shared)
+	  if (bfd_link_pic (info))
 	    {
 	      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 	      (*_bfd_error_handler)
@@ -6678,7 +6681,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
 	case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
 	case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
-	  if (h != NULL && info->executable)
+	  if (h != NULL && bfd_link_executable (info))
 	    {
 	      /* If this reloc is in a read-only section, we might
 		 need a copy reloc.  We can't check reliably at this
@@ -7281,10 +7284,10 @@ elfNN_aarch64_create_dynamic_sections (bfd *dynobj,
 
   htab = elf_aarch64_hash_table (info);
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
-  if (!info->shared)
+  if (!bfd_link_pic (info))
     htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
 
-  if (!htab->sdynbss || (!info->shared && !htab->srelbss))
+  if (!htab->sdynbss || (!bfd_link_pic (info) && !htab->srelbss))
     abort ();
 
   return TRUE;
@@ -7336,7 +7339,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    return FALSE;
 	}
 
-      if (info->shared || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
+      if (bfd_link_pic (info) || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
 	  asection *s = htab->root.splt;
 
@@ -7352,7 +7355,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     location in the .plt.  This is required to make function
 	     pointers compare as equal between the normal executable and
 	     the shared library.  */
-	  if (!info->shared && !h->def_regular)
+	  if (!bfd_link_pic (info) && !h->def_regular)
 	    {
 	      h->root.u.def.section = s;
 	      h->root.u.def.value = h->plt.offset;
@@ -7426,7 +7429,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  htab->root.sgot->size += GOT_ENTRY_SIZE;
 	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	       || h->root.type != bfd_link_hash_undefweak)
-	      && (info->shared
+	      && (bfd_link_pic (info)
 		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	    {
 	      htab->root.srelgot->size += RELOC_SIZE (htab);
@@ -7459,7 +7462,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  indx = h && h->dynindx != -1 ? h->dynindx : 0;
 	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	       || h->root.type != bfd_link_hash_undefweak)
-	      && (info->shared
+	      && (bfd_link_pic (info)
 		  || indx != 0
 		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	    {
@@ -7496,7 +7499,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
      space for pc-relative relocs that have become local due to symbol
      visibility changes.  */
 
-  if (info->shared)
+  if (bfd_link_pic (info))
     {
       /* Relocs that use pc_count are those that appear on a call
          insn, or certain REL relocs that can generated via assembly.
@@ -7708,7 +7711,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (htab->root.dynamic_sections_created)
     {
-      if (info->executable)
+      if (bfd_link_executable (info))
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  if (s == NULL)
@@ -7794,7 +7797,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		{
 		}
 
-	      if (info->shared)
+	      if (bfd_link_pic (info))
 		{
 		  if (got_type & GOT_TLSDESC_GD)
 		    {
@@ -7947,7 +7950,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL)			\
       _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (info->executable)
+      if (bfd_link_executable (info))
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;
@@ -8088,7 +8091,7 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
   rela.r_offset = gotplt_entry_address;
 
   if (h->dynindx == -1
-      || ((info->executable
+      || ((bfd_link_executable (info)
 	   || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	  && h->def_regular
 	  && h->type == STT_GNU_IFUNC))
@@ -8123,7 +8126,7 @@ elfNN_aarch64_always_size_sections (bfd *output_bfd,
 {
   asection *tls_sec;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   tls_sec = elf_hash_table (info)->tls_sec;
@@ -8193,7 +8196,7 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.	 */
       if ((h->dynindx == -1
-	   && !((h->forced_local || info->executable)
+	   && !((h->forced_local || bfd_link_executable (info))
 		&& h->def_regular
 		&& h->type == STT_GNU_IFUNC))
 	  || plt == NULL
@@ -8238,7 +8241,7 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
       if (h->def_regular
 	  && h->type == STT_GNU_IFUNC)
 	{
-	  if (info->shared)
+	  if (bfd_link_pic (info))
 	    {
 	      /* Generate R_AARCH64_GLOB_DAT.  */
 	      goto do_glob_dat;
@@ -8262,7 +8265,7 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	      return TRUE;
 	    }
 	}
-      else if (info->shared && SYMBOL_REFERENCES_LOCAL (info, h))
+      else if (bfd_link_pic (info) && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  if (!h->def_regular)
 	    return FALSE;

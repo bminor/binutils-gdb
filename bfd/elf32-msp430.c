@@ -672,7 +672,7 @@ elf32_msp430_check_relocs (bfd * abfd, struct bfd_link_info * info,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -1328,7 +1328,7 @@ elf32_msp430_relocate_section (bfd * output_bfd ATTRIBUTE_UNUSED,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       r = msp430_final_link_relocate (howto, input_bfd, input_section,
@@ -1846,7 +1846,7 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
     || (sec->flags & SEC_RELOC) == 0
     || sec->reloc_count == 0 || (sec->flags & SEC_CODE) == 0)
     return TRUE;

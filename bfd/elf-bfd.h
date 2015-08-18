@@ -2555,7 +2555,7 @@ extern asection _bfd_elf_large_com_section;
       else if (info->unresolved_syms_in_objects == RM_IGNORE		\
 	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)		\
 	ignored = TRUE;							\
-      else if (!info->relocatable)					\
+      else if (!bfd_link_relocatable (info))				\
 	{								\
 	  bfd_boolean err;						\
 	  err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
@@ -2590,7 +2590,7 @@ extern asection _bfd_elf_large_com_section;
     _bfd_clear_contents (howto, input_bfd, input_section,		\
 			 contents + rel[index].r_offset);		\
 									\
-    if (info->relocatable						\
+    if (bfd_link_relocatable (info)					\
 	&& (input_section->flags & SEC_DEBUGGING))			\
       {									\
 	/* Only remove relocations in debug sections since other	\

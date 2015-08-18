@@ -50,7 +50,7 @@ static bfd_signed_vma group_size = 1;
 static void
 hppaelf_after_parse (void)
 {
-  if (link_info.relocatable)
+  if (bfd_link_relocatable (&link_info))
     lang_add_unique (".text");
 
   /* Enable this once we split millicode stuff from libgcc:
@@ -259,7 +259,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
-  if (stub_file != NULL && !link_info.relocatable)
+  if (stub_file != NULL && !bfd_link_relocatable (&link_info))
     {
       ret = elf32_hppa_setup_section_lists (link_info.output_bfd, &link_info);
       if (ret != 0)
@@ -290,7 +290,7 @@ gld${EMULATION_NAME}_after_allocation (void)
   if (need_laying_out != -1)
     gld${EMULATION_NAME}_map_segments (need_laying_out);
 
-  if (! link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     {
       /* Set the global data pointer.  */
       if (! elf32_hppa_set_gp (link_info.output_bfd, &link_info))

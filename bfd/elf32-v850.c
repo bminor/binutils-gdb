@@ -57,7 +57,7 @@ v850_elf_check_relocs (bfd *abfd,
   int other = 0;
   const char *common = NULL;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
 #ifdef DEBUG
@@ -2243,7 +2243,7 @@ v850_elf_relocate_section (bfd *output_bfd,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       /* FIXME: We should use the addend, but the COFF relocations don't.  */
@@ -3433,7 +3433,7 @@ v850_elf_relax_section (bfd *abfd,
 
   *again = FALSE;
 
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return TRUE;
