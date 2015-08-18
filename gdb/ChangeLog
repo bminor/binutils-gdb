@@ -1,3 +1,22 @@
+2015-08-18  Doug Evans  <dje@google.com>
+	    Adrian Sendroiu <adrian.sendroiu@freescale.com>
+
+	PR mi/18833
+	* cli/cli-logging.c (pop_output_files): Don't restore redirection
+	if MI-like.
+	* mi/mi-out.c: #include "vec.h".
+	(ui_filep): New type.
+	(DEV_VEC_P (ui_filep)): New type.
+	(struct ui_out_data) <buffer, original_buffer>: Delete.
+	(struct ui_out_data) <streams>: New member.
+	(mi_ui_out_impl): Add data_destroy field.
+	(mi_field_string, mi_field_fmt): Update.
+	(mi_flush, mi_redirect, field_separator): Update.
+	(mi_open, mi_close): Update.
+	(mi_out_buffered, mi_out_rewind, mi_out_put): Update.
+	(mi_out_data_ctor, mi_out_data_dtor): New functions.
+	(mi_out_new): Call mi_out_data_ctor.
+
 2015-08-18  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* remote.c (strprefix): New.

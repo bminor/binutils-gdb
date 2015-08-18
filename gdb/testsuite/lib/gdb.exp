@@ -1734,41 +1734,50 @@ proc skip_d_tests {} {
 }
 
 # Return a 1 for configurations that do not support Python scripting.
+# PROMPT_REGEXP is the expected prompt.
 
-proc skip_python_tests {} {
-    global gdb_prompt
+proc skip_python_tests_prompt { prompt_regexp } {
     global gdb_py_is_py3k
     global gdb_py_is_py24
 
     gdb_test_multiple "python print ('test')" "verify python support" {
-	-re "not supported.*$gdb_prompt $"	{
+	-re "not supported.*$prompt_regexp" {
 	    unsupported "Python support is disabled."
 	    return 1
 	}
-	-re "$gdb_prompt $"	{}
+	-re "$prompt_regexp" {}
     }
 
     set gdb_py_is_py24 0
     gdb_test_multiple "python print (sys.version_info\[0\])" "check if python 3" {
-	-re "3.*$gdb_prompt $"	{
+	-re "3.*$prompt_regexp" {
             set gdb_py_is_py3k 1
         }
-	-re ".*$gdb_prompt $"	{
+	-re ".*$prompt_regexp" {
             set gdb_py_is_py3k 0
         }
     }
     if { $gdb_py_is_py3k == 0 } {
         gdb_test_multiple "python print (sys.version_info\[1\])" "check if python 2.4" {
-	    -re "\[45\].*$gdb_prompt $" {
+	    -re "\[45\].*$prompt_regexp" {
                 set gdb_py_is_py24 1
             }
-	    -re ".*$gdb_prompt $" {
+	    -re ".*$prompt_regexp" {
                 set gdb_py_is_py24 0
             }
         }
     }
 
     return 0
+}
+
+# Return a 1 for configurations that do not support Python scripting.
+# Note: This also sets various globals that specify which version of Python
+# is in use.  See skip_python_tests_prompt.
+
+proc skip_python_tests {} {
+    global gdb_prompt
+    return [skip_python_tests_prompt "$gdb_prompt $"]
 }
 
 # Return a 1 if we should skip shared library tests.

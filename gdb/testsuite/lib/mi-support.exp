@@ -2501,3 +2501,12 @@ proc mi_make_breakpoint_table {bp_list} {
     # Assemble the final regexp.
     return "BreakpointTable={nr_rows=\"$nr\",nr_cols=\"$nc\",$header,$body}"
 }
+
+# Return a 1 for configurations that do not support Python scripting.
+# Note: This also sets various globals that specify which version of Python
+# is in use.  See skip_python_tests_prompt.
+
+proc mi_skip_python_tests {} {
+    global mi_gdb_prompt
+    return [skip_python_tests_prompt "$mi_gdb_prompt$"]
+}

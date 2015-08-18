@@ -1,3 +1,14 @@
+2015-08-18  Doug Evans  <dje@google.com>
+	    Adrian Sendroiu <adrian.sendroiu@freescale.com>
+
+	* lib/gdb.exp (skip_python_tests_prompt): Renamed from
+	skip_python_tests.  New arg prompt_regexp.
+	(skip_python_tests): New function.
+	* lib/mi-support.exp (mi_skip_python_tests): New function.
+	* gdb.python/py-mi-objfile-gdb.py: New file.
+	* gdb.python/py-mi-objfile.c: New file.
+	* gdb.python/py-mi-objfile.exp: New file.
+
 2015-08-17  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.linespec/explicit.exp: Move strace test from here ...
