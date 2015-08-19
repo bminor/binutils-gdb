@@ -1,5 +1,19 @@
 2015-08-19  Jiong Wang  <jiong.wang@arm.com>
 
+	PR ld/18276
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Recognize new relocation
+	types, including BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
 	* reloc.c (BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12,
 	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0,
 	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC,
