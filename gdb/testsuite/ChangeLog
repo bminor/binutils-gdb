@@ -1,3 +1,8 @@
+2015-08-20  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/attr_ref_and_charlit.exp: New testcase.
+	* gdb.ada/attr_ref_and_charlit/foo.adb: New file.
+
 2015-08-19  Kevin Buettner  <kevinb@redhat.com>
     
 	* gdb.dwarf2/dw2-bad-mips-linkage-name.c: New file.
