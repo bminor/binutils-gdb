@@ -1,3 +1,8 @@
+2015-08-19  Gary Benson  <gbenson@redhat.com>
+
+	* hostio.c (handle_pread): Do not attempt to read more data
+	than hostio_reply_with_data can fit in a packet.
+
 2015-08-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* linux-aarch32-low.c (NT_ARM_VFP): Define if not already defined.
