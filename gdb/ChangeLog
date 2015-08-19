@@ -1,3 +1,8 @@
+2015-08-21  Marcin Cieślak <saper@saper.info>  (tiny patch)
+
+	PR build/18843
+	* procfs.c: Include "filestuff.h".
+
 2015-08-21  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* tui/tui-data.h (tui_command_info): Remove fields cur_line and
