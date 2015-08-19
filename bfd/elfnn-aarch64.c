@@ -175,6 +175,7 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21		\
@@ -5093,6 +5094,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       break;
 
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
       value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
 						   signed_addend - dtpoff_base (info),
 						   weak_undef_p);

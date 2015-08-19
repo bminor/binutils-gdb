@@ -1,3 +1,11 @@
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/emit-relocs-530.s: New testcase.
+	* ld-aarch64/emit-relocs-92.s: Likewise.
+	* ld-aarch64/emit-relocs-530.d: New expectation file.
+	* ld-aarch64/emit-relocs-92.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Run new testcases.
+
 2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18841
