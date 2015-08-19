@@ -263,19 +263,18 @@ struct bfd_elf_version_tree;
 
 enum output_type
 {
-  type_executable = 0,
+  type_pde,
+  type_relocatable,
+  type_pie,
   type_dll,
-  type_relocatable
 };
 
-#define bfd_link_executable(info)  ((info)->type == type_executable)
+#define bfd_link_pde(info)	   ((info)->type == type_pde)
 #define bfd_link_dll(info)	   ((info)->type == type_dll)
 #define bfd_link_relocatable(info) ((info)->type == type_relocatable)
-#define bfd_link_pic(info)	   (info)->pic
-#define bfd_link_pie(info)	   (bfd_link_executable (info) \
-				    && bfd_link_pic (info))
-#define bfd_link_pde(info)	   (bfd_link_executable (info) \
-				    && !bfd_link_pic (info))
+#define bfd_link_pie(info)	   ((info)->type == type_pie)
+#define bfd_link_executable(info)  (bfd_link_pde (info) || bfd_link_pie (info))
+#define bfd_link_pic(info)	   (bfd_link_dll (info) || bfd_link_pie (info))
 
 /* This structure holds all the information needed to communicate
    between BFD and the linker when doing a link.  */
@@ -284,9 +283,6 @@ struct bfd_link_info
 {
   /* Output type.  */
   ENUM_BITFIELD (output_type) type : 2;
-
-  /* TRUE if BFD should generate a position independent object.  */
-  unsigned int pic : 1;
 
   /* TRUE if BFD should pre-bind symbols in a shared object.  */
   unsigned int symbolic: 1;

@@ -872,11 +872,10 @@ set_tv_header (struct ld_plugin_tv *tv)
 	  TVU(val) = major * 100 + minor;
 	  break;
 	case LDPT_LINKER_OUTPUT:
-	  TVU(val) = (bfd_link_relocatable (&link_info)
-		      ? LDPO_REL
-		      : (bfd_link_executable (&link_info)
-			 ? (bfd_link_pic (&link_info) ? LDPO_PIE : LDPO_EXEC)
-			 : LDPO_DYN));
+	  TVU(val) = (bfd_link_relocatable (&link_info) ? LDPO_REL
+		      : bfd_link_pde (&link_info) ? LDPO_EXEC
+		      : bfd_link_pie (&link_info) ? LDPO_PIE
+		      : LDPO_DYN);
 	  break;
 	case LDPT_OUTPUT_NAME:
 	  TVU(string) = output_filename;

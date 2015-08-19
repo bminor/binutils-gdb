@@ -1121,7 +1121,6 @@ parse_args (unsigned argc, char **argv)
 		einfo (_("%P%F: -r and -shared may not be used together\n"));
 
 	      link_info.type = type_dll;
-	      link_info.pic = TRUE;
 	      /* When creating a shared library, the default
 		 behaviour is to ignore any unresolved references.  */
 	      if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
@@ -1138,8 +1137,7 @@ parse_args (unsigned argc, char **argv)
 	      if (bfd_link_relocatable (&link_info))
 		einfo (_("%P%F: -r and -pie may not be used together\n"));
 
-	      link_info.type = type_executable;
-	      link_info.pic = TRUE;
+	      link_info.type = type_pie;
 	    }
 	  else
 	    einfo (_("%P%F: -pie not supported\n"));

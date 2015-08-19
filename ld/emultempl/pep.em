@@ -1789,10 +1789,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 
 	  /* def_file_print (stdout, pep_def_file); */
 	  if (pep_def_file->is_dll == 1)
-	    {
-	      link_info.type = type_dll;
-	      link_info.pic = 1;
-	    }
+	    link_info.type = type_dll;
 
 	  if (pep_def_file->base_address != (bfd_vma)(-1))
 	    {

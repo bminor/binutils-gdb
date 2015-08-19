@@ -533,7 +533,6 @@ gld${EMULATION_NAME}_handle_option (int optc)
       if (*optarg == 'S')
 	{
 	  link_info.type = type_dll;
-	  link_info.pic = TRUE;
 	  ++optarg;
 	}
       if (*optarg == '\0' || optarg[1] == '\0')

@@ -1,5 +1,12 @@
 2015-08-19  Alan Modra  <amodra@gmail.com>
 
+	* bfdlink.h (enum output_type): Delete type_executable, add type_pde
+	and type_pie.  Reorder.
+	(struct bfd_link_info): Delete pic field.
+	(bfd_link_executable, bfd_link_pde, bfd_link_pie, bfd_link_pic): Adjust.
+
+2015-08-19  Alan Modra  <amodra@gmail.com>
+
 	* bfdlink.h (bfd_link_pde): Define.
 
 2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>

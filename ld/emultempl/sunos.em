@@ -689,7 +689,6 @@ gld${EMULATION_NAME}_before_allocation (void)
 	      if (! found_assign)
 		{
 		  link_info.type = type_dll;
-		  link_info.pic = TRUE;
 		  break;
 		}
 	    }
