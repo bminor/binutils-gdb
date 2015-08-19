@@ -6871,6 +6871,42 @@ ENUM
 ENUMDOC
   GOT entry address for AArch64 TLS Local Dynamic, used with ADR instruction.
 ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12
+ENUMDOC
+  bit[11:1] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12
+ENUMDOC
+  bit[11:2] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12
+ENUMDOC
+  bit[11:3] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12
+ENUMDOC
+  bit[11:0] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12, but no overflow check.
+ENUM
   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0
 ENUMDOC
   bit[15:0] of byte offset to module TLS base address.
@@ -7021,6 +7057,16 @@ ENUMDOC
   AArch64 unspecified load/store instruction, holding bits 0 to 11 of the
   address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.
 ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12
+ENUMDOC
+  AArch64 pseudo relocation code for TLS local dynamic mode.  It's to be
+  used internally by the AArch64 assembler and not (currently) written to
+  any object files.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12, but no overflow check.
+ENUM
   BFD_RELOC_AARCH64_LD_GOT_LO12_NC
 ENUMDOC
   AArch64 pseudo relocation code to be used internally by the AArch64
@@ -7035,7 +7081,6 @@ ENUM
 ENUMDOC
   AArch64 pseudo relocation code to be used internally by the AArch64
   assembler and not (currently) written to any object files.
-
 ENUM
   BFD_RELOC_TILEPRO_COPY
 ENUMX

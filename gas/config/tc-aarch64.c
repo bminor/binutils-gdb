@@ -2528,7 +2528,7 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0,
    BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12,
-   0,
+   BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12,
    0},
 
   /* Same as dtprel_lo12, no overflow check.  */
@@ -2537,7 +2537,7 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0,
    BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC,
-   0,
+   BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC,
    0},
 
   /* bits[23:12] of offset to the module TLS base address.  */
@@ -4739,17 +4739,38 @@ get_logsz (unsigned int size)
 static inline bfd_reloc_code_real_type
 ldst_lo12_determine_real_reloc_type (void)
 {
-  int logsz;
+  unsigned logsz;
   enum aarch64_opnd_qualifier opd0_qlf = inst.base.operands[0].qualifier;
   enum aarch64_opnd_qualifier opd1_qlf = inst.base.operands[1].qualifier;
 
-  const bfd_reloc_code_real_type reloc_ldst_lo12[5] = {
-      BFD_RELOC_AARCH64_LDST8_LO12, BFD_RELOC_AARCH64_LDST16_LO12,
-      BFD_RELOC_AARCH64_LDST32_LO12, BFD_RELOC_AARCH64_LDST64_LO12,
+  const bfd_reloc_code_real_type reloc_ldst_lo12[3][5] = {
+    {
+      BFD_RELOC_AARCH64_LDST8_LO12,
+      BFD_RELOC_AARCH64_LDST16_LO12,
+      BFD_RELOC_AARCH64_LDST32_LO12,
+      BFD_RELOC_AARCH64_LDST64_LO12,
       BFD_RELOC_AARCH64_LDST128_LO12
+    },
+    {
+      BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12,
+      BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12,
+      BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12,
+      BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12,
+      BFD_RELOC_AARCH64_NONE
+    },
+    {
+      BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC,
+      BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC,
+      BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC,
+      BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC,
+      BFD_RELOC_AARCH64_NONE
+    }
   };
 
-  gas_assert (inst.reloc.type == BFD_RELOC_AARCH64_LDST_LO12);
+  gas_assert (inst.reloc.type == BFD_RELOC_AARCH64_LDST_LO12
+	      || inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12
+	      || (inst.reloc.type
+		  == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC));
   gas_assert (inst.base.opcode->operands[1] == AARCH64_OPND_ADDR_UIMM12);
 
   if (opd1_qlf == AARCH64_OPND_QLF_NIL)
@@ -4759,9 +4780,16 @@ ldst_lo12_determine_real_reloc_type (void)
   gas_assert (opd1_qlf != AARCH64_OPND_QLF_NIL);
 
   logsz = get_logsz (aarch64_get_qualifier_esize (opd1_qlf));
-  gas_assert (logsz >= 0 && logsz <= 4);
+  if (inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12
+      || inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC)
+    gas_assert (logsz <= 3);
+  else
+    gas_assert (logsz <= 4);
 
-  return reloc_ldst_lo12[logsz];
+  /* In reloc.c, these pseudo relocation types should be defined in similar
+     order as above reloc_ldst_lo12 array. Because the array index calcuation
+     below relies on this.  */
+  return reloc_ldst_lo12[inst.reloc.type - BFD_RELOC_AARCH64_LDST_LO12][logsz];
 }
 
 /* Check whether a register list REGINFO is valid.  The registers must be
@@ -5397,7 +5425,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  if (inst.reloc.type == BFD_RELOC_UNUSED)
 	    aarch64_set_gas_internal_fixup (&inst.reloc, info, 1);
-	  else if (inst.reloc.type == BFD_RELOC_AARCH64_LDST_LO12)
+	  else if (inst.reloc.type == BFD_RELOC_AARCH64_LDST_LO12
+		   || (inst.reloc.type
+		       == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12)
+		   || (inst.reloc.type
+		       == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC))
 	    inst.reloc.type = ldst_lo12_determine_real_reloc_type ();
 	  /* Leave qualifier to be determined by libopcodes.  */
 	  break;
@@ -6870,6 +6902,14 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
@@ -7090,6 +7130,14 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:

@@ -5815,6 +5815,34 @@ instruction.  */
 /* GOT entry address for AArch64 TLS Local Dynamic, used with ADR instruction.  */
   BFD_RELOC_AARCH64_TLSLD_ADR_PREL21,
 
+/* bit[11:1] of byte offset to module TLS base address, encoded in ldst
+instructions.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC,
+
+/* bit[11:2] of byte offset to module TLS base address, encoded in ldst
+instructions.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC,
+
+/* bit[11:3] of byte offset to module TLS base address, encoded in ldst
+instructions.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC,
+
+/* bit[11:0] of byte offset to module TLS base address, encoded in ldst
+instructions.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC,
+
 /* bit[15:0] of byte offset to module TLS base address.  */
   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0,
 
@@ -5928,6 +5956,14 @@ assembler and not (currently) written to any object files.  */
 /* AArch64 unspecified load/store instruction, holding bits 0 to 11 of the
 address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
   BFD_RELOC_AARCH64_LDST_LO12,
+
+/* AArch64 pseudo relocation code for TLS local dynamic mode.  It's to be
+used internally by the AArch64 assembler and not (currently) written to
+any object files.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12,
+
+/* Similar as BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12, but no overflow check.  */
+  BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC,
 
 /* AArch64 pseudo relocation code to be used internally by the AArch64
 assembler and not (currently) written to any object files.  */

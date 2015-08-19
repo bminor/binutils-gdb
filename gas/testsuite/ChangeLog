@@ -1,5 +1,24 @@
 2015-08-19  Jiong Wang  <jiong.wang@arm.com>
 
+	* gas/aarch64/reloc-dtprel-lo12-ldst8.s: New testcase.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst8.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst16.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst16.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst32.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst32.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst64.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst64.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst8.d: New expectation file.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst8.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst16.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst16.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst32.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst32.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst64.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst64.d: Likewise.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
 	* gas/aarch64/reloc-dtprel_g0.s: New testcase.
 	* gas/aarch64/reloc-dtprel_g0-ilp32.s: Likewise.
 	* gas/aarch64/reloc-dtprel_g0_nc.s: Likewise.
