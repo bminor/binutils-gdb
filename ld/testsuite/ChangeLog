@@ -1,5 +1,33 @@
 2015-08-19  Jiong Wang  <jiong.wang@arm.com>
 
+	* ld-aarch64/emit-relocs-531.s: New testcase.
+	* ld-aarch64/emit-relocs-531-overflow.s: Likewise.
+	* ld-aarch64/emit-relocs-532.s: Likewise.
+	* ld-aarch64/emit-relocs-533.s: Likewise.
+	* ld-aarch64/emit-relocs-533-overflow.s: Likewise.
+	* ld-aarch64/emit-relocs-534.s: Likewise.
+	* ld-aarch64/emit-relocs-535.s: Likewise.
+	* ld-aarch64/emit-relocs-535-overflow.s: Likewise.
+	* ld-aarch64/emit-relocs-536.s: Likewise.
+	* ld-aarch64/emit-relocs-537.s: Likewise.
+	* ld-aarch64/emit-relocs-537-overflow.s: Likewise.
+	* ld-aarch64/emit-relocs-538.s: Likewise.
+	* ld-aarch64/emit-relocs-531.d: New expectation file.
+	* ld-aarch64/emit-relocs-531-overflow.d: Likewise.
+	* ld-aarch64/emit-relocs-532.d: Likewise.
+	* ld-aarch64/emit-relocs-533.d: Likewise.
+	* ld-aarch64/emit-relocs-533-overflow.d: Likewise.
+	* ld-aarch64/emit-relocs-534.d: Likewise.
+	* ld-aarch64/emit-relocs-535.d: Likewise.
+	* ld-aarch64/emit-relocs-535-overflow.d: Likewise.
+	* ld-aarch64/emit-relocs-536.d: Likewise.
+	* ld-aarch64/emit-relocs-537.d: Likewise.
+	* ld-aarch64/emit-relocs-537-overflow.d: Likewise.
+	* ld-aarch64/emit-relocs-538.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Run new testcases.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
 	* ld-aarch64/emit-relocs-87.s: New testcase.
 	* ld-aarch64/emit-relocs-88.s: Likewise.
 	* ld-aarch64/emit-relocs-88-overflow.s: Likewise.
