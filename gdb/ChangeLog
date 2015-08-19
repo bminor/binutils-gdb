@@ -1,5 +1,16 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.h (enum btrace_thread_flag) <BTHR_STOP>: New.
+	* record-btrace (record_btrace_resume_thread): Clear BTHR_STOP.
+	(record_btrace_find_thread_to_move): Also accept threads that have
+	BTHR_STOP set.
+	(btrace_step_stopped_on_request, record_btrace_stop): New.
+	(record_btrace_step_thread): Support BTHR_STOP.
+	(record_btrace_wait): Also clear BTHR_STOP when stopping other threads.
+	(init_record_btrace_ops): Initialize to_stop.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_wait): Replace non_stop check with
 	target_is_non_stop_p ().
 

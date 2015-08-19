@@ -1677,6 +1677,8 @@ record_btrace_resume_thread (struct thread_info *tp,
   /* Fetch the latest branch trace.  */
   btrace_fetch (tp);
 
+  /* A resume request overwrites a preceding stop request.  */
+  btinfo->flags &= ~BTHR_STOP;
   btinfo->flags |= flag;
 }
 
@@ -1872,12 +1874,12 @@ record_btrace_find_thread_to_move (ptid_t ptid)
 
   /* First check the parameter thread.  */
   tp = find_thread_ptid (ptid);
-  if (tp != NULL && (tp->btrace.flags & BTHR_MOVE) != 0)
+  if (tp != NULL && (tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0)
     return tp;
 
   /* Otherwise, find one other thread that has been resumed.  */
   ALL_NON_EXITED_THREADS (tp)
-    if ((tp->btrace.flags & BTHR_MOVE) != 0)
+    if ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0)
       return tp;
 
   return NULL;
@@ -1908,6 +1910,20 @@ btrace_step_stopped (void)
   return status;
 }
 
+/* Return a target_waitstatus indicating that a thread was stopped as
+   requested.  */
+
+static struct target_waitstatus
+btrace_step_stopped_on_request (void)
+{
+  struct target_waitstatus status;
+
+  status.kind = TARGET_WAITKIND_STOPPED;
+  status.value.sig = GDB_SIGNAL_0;
+
+  return status;
+}
+
 /* Clear the record histories.  */
 
 static void
@@ -1932,22 +1948,26 @@ record_btrace_step_thread (struct thread_info *tp)
   enum btrace_thread_flag flags;
   unsigned int steps;
 
-  /* We can't step without an execution history.  */
-  if (btrace_is_empty (tp))
-    return btrace_step_no_history ();
 
   btinfo = &tp->btrace;
   replay = btinfo->replay;
 
-  flags = btinfo->flags & BTHR_MOVE;
-  btinfo->flags &= ~BTHR_MOVE;
+  flags = btinfo->flags & (BTHR_MOVE | BTHR_STOP);
+  btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
 
   DEBUG ("stepping %d (%s): %u", tp->num, target_pid_to_str (tp->ptid), flags);
+
+  /* We can't step without an execution history.  */
+  if ((flags & BTHR_MOVE) != 0 && btrace_is_empty (tp))
+    return btrace_step_no_history ();
 
   switch (flags)
     {
     default:
       internal_error (__FILE__, __LINE__, _("invalid stepping type."));
+
+    case BTHR_STOP:
+      return btrace_step_stopped_on_request ();
 
     case BTHR_STEP:
       /* We're done if we're not replaying.  */
@@ -2106,7 +2126,7 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   /* Stop all other threads. */
   if (!target_is_non_stop_p ())
     ALL_NON_EXITED_THREADS (other)
-      other->btrace.flags &= ~BTHR_MOVE;
+      other->btrace.flags &= ~(BTHR_MOVE | BTHR_STOP);
 
   /* Start record histories anew from the current position.  */
   record_btrace_clear_histories (&tp->btrace);
@@ -2116,6 +2136,32 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 
   return tp->ptid;
 }
+
+/* The to_stop method of target record-btrace.  */
+
+static void
+record_btrace_stop (struct target_ops *ops, ptid_t ptid)
+{
+  DEBUG ("stop %s", target_pid_to_str (ptid));
+
+  /* As long as we're not replaying, just forward the request.  */
+  if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
+    {
+      ops = ops->beneath;
+      ops->to_stop (ops, ptid);
+    }
+  else
+    {
+      struct thread_info *tp;
+
+      ALL_NON_EXITED_THREADS (tp)
+       if (ptid_match (tp->ptid, ptid))
+         {
+           tp->btrace.flags &= ~BTHR_MOVE;
+           tp->btrace.flags |= BTHR_STOP;
+         }
+    }
+ }
 
 /* The to_can_execute_reverse method of target record-btrace.  */
 
@@ -2350,6 +2396,7 @@ init_record_btrace_ops (void)
   ops->to_get_tailcall_unwinder = &record_btrace_to_get_tailcall_unwinder;
   ops->to_resume = record_btrace_resume;
   ops->to_wait = record_btrace_wait;
+  ops->to_stop = record_btrace_stop;
   ops->to_update_thread_list = record_btrace_update_thread_list;
   ops->to_thread_alive = record_btrace_thread_alive;
   ops->to_goto_record_begin = record_btrace_goto_begin;
