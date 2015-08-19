@@ -2540,6 +2540,60 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0},
 
+  /* bits[23:12] of offset to the module TLS base address.  */
+  {"dtprel_hi12", 0,
+   0,				/* adr_type */
+   0,
+   0,
+   BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12,
+   0,
+   0},
+
+  /* bits[15:0] of offset to the module TLS base address.  */
+  {"dtprel_g0", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0,
+   0,
+   0,
+   0},
+
+  /* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0.  */
+  {"dtprel_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC,
+   0,
+   0,
+   0},
+
+  /* bits[31:16] of offset to the module TLS base address.  */
+  {"dtprel_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1,
+   0,
+   0,
+   0},
+
+  /* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1.  */
+  {"dtprel_g1_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC,
+   0,
+   0,
+   0},
+
+  /* bits[47:32] of offset to the module TLS base address.  */
+  {"dtprel_g2", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2,
+   0,
+   0,
+   0},
+
   /* Get to the page containing GOT TLS entry for a symbol */
   {"gottprel", 0,
    0,				/* adr_type */
@@ -4613,6 +4667,8 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G0:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
       shift = 0;
@@ -4620,6 +4676,8 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G1:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
       shift = 16;
@@ -4627,6 +4685,7 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G2:
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
     case BFD_RELOC_AARCH64_MOVW_G2_S:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
       if (is32)
 	{
@@ -6805,11 +6864,17 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -7019,11 +7084,17 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:

@@ -1043,6 +1043,21 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0x1ffffc,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  /* ADD: bit[23:12] of byte offset to module TLS base address.  */
+  HOWTO (AARCH64_R (TLSLD_ADD_DTPREL_HI12),	/* type */
+	 12,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_ADD_DTPREL_HI12),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   /* Unsigned 12 bit byte offset to module TLS base address.  */
   HOWTO (AARCH64_R (TLSLD_ADD_DTPREL_LO12),	/* type */
 	 0,			/* rightshift */
@@ -1117,6 +1132,81 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0x1fffff,		/* src_mask */
 	 0x1fffff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
+
+  /* MOVZ: bit[15:0] of byte offset to module TLS base address.  */
+  HOWTO (AARCH64_R (TLSLD_MOVW_DTPREL_G0),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G0),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0.  */
+  HOWTO (AARCH64_R (TLSLD_MOVW_DTPREL_G0_NC),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G0_NC),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MOVZ: bit[31:16] of byte offset to module TLS base address.  */
+  HOWTO (AARCH64_R (TLSLD_MOVW_DTPREL_G1),	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G1),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1.  */
+  HOWTO64 (AARCH64_R (TLSLD_MOVW_DTPREL_G1_NC),	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G1_NC),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MOVZ: bit[47:32] of byte offset to module TLS base address.  */
+  HOWTO64 (AARCH64_R (TLSLD_MOVW_DTPREL_G2),	/* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSLD_MOVW_DTPREL_G2),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   HOWTO64 (AARCH64_R (TLSLE_MOVW_TPREL_G2),	/* type */
 	 32,			/* rightshift */

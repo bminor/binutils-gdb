@@ -5794,6 +5794,9 @@ BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21.  */
 /* AArch64 TLS INITIAL EXEC relocation.  */
   BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19,
 
+/* bit[23:12] of byte offset to module TLS base address.  */
+  BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12,
+
 /* Unsigned 12 bit byte offset to module TLS base address.  */
   BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12,
 
@@ -5811,6 +5814,21 @@ instruction.  */
 
 /* GOT entry address for AArch64 TLS Local Dynamic, used with ADR instruction.  */
   BFD_RELOC_AARCH64_TLSLD_ADR_PREL21,
+
+/* bit[15:0] of byte offset to module TLS base address.  */
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0,
+
+/* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0  */
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC,
+
+/* bit[31:16] of byte offset to module TLS base address.  */
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1,
+
+/* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1  */
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC,
+
+/* bit[47:32] of byte offset to module TLS base address.  */
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2,
 
 /* AArch64 TLS LOCAL EXEC relocation.  */
   BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2,
