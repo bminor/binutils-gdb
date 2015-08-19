@@ -1896,7 +1896,7 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_ALPHA_TPREL64:
-	  if (bfd_link_pic (info) && !bfd_link_pie (info))
+	  if (bfd_link_dll (info))
 	    {
 	      info->flags |= DF_STATIC_TLS;
 	      need = NEED_DYNREL;
@@ -2742,7 +2742,8 @@ elf64_alpha_calc_dynrel_sizes (struct alpha_elf_link_hash_entry *h,
   for (relent = h->reloc_entries; relent; relent = relent->next)
     {
       entries = alpha_dynamic_entries_for_reloc (relent->rtype, dynamic,
-						 bfd_link_pic (info), bfd_link_pie (info));
+						 bfd_link_pic (info),
+						 bfd_link_pie (info));
       if (entries)
 	{
 	  relent->srel->size +=
@@ -3071,8 +3072,7 @@ elf64_alpha_relax_got_load (struct alpha_relax_info *info, bfd_vma symval,
 
   /* Can't use local-exec relocations in shared libraries.  */
   if (r_type == R_ALPHA_GOTTPREL
-      && (bfd_link_pic (info->link_info)
-	  && !bfd_link_pie (info->link_info)))
+      && bfd_link_dll (info->link_info))
     return TRUE;
 
   if (r_type == R_ALPHA_LITERAL)
@@ -4586,7 +4586,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    else if (r_type == R_ALPHA_TPREL64)
 	      {
 		BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
-		if (!bfd_link_pic (info) || bfd_link_pie (info))
+		if (!bfd_link_dll (info))
 		  {
 		    value -= tp_base;
 		    goto default_reloc;
@@ -4636,7 +4636,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
                  input_bfd, h->root.root.root.string);
               ret_val = FALSE;
             }
-	  else if ((bfd_link_pic (info) || bfd_link_pie (info))
+	  else if (bfd_link_pic (info)
 		   && undef_weak_ref)
             {
               (*_bfd_error_handler)
@@ -4718,7 +4718,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_ALPHA_TPRELHI:
 	case R_ALPHA_TPRELLO:
 	case R_ALPHA_TPREL16:
-	  if (bfd_link_pic (info) && !bfd_link_pie (info))
+	  if (bfd_link_dll (info))
 	    {
 	      (*_bfd_error_handler)
 		(_("%B: TLS local exec code cannot be linked into shared objects"),

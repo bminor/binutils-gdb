@@ -4352,7 +4352,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
 	      break;
 	    case R_NIOS2_TLS_LE16:
-	      if (bfd_link_pic (info) && !bfd_link_pie (info))
+	      if (bfd_link_dll (info))
 		{
 		  (*_bfd_error_handler)
 		    (_("%B(%A+0x%lx): R_NIOS2_TLS_LE16 relocation not "

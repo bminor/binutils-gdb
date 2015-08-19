@@ -2215,7 +2215,7 @@ _bfinfdpic_emit_got_relocs_plt_entries (struct bfinfdpic_relocs_info *entry,
       /* If we're linking an executable at a fixed address, we can
 	 omit the dynamic relocation as long as the symbol is local to
 	 this module.  */
-      if (bfd_link_executable (info) && !bfd_link_pic (info)
+      if (bfd_link_pde (info)
 	  && (entry->symndx != -1
 	      || BFINFDPIC_SYM_LOCAL (info, entry->d.h)))
 	{
@@ -2270,7 +2270,7 @@ _bfinfdpic_emit_got_relocs_plt_entries (struct bfinfdpic_relocs_info *entry,
 	  if (entry->symndx == -1
 	      && ! BFINFDPIC_FUNCDESC_LOCAL (info, entry->d.h)
 	      && BFINFDPIC_SYM_LOCAL (info, entry->d.h)
-	      && !(bfd_link_executable (info) && !bfd_link_pic (info)))
+	      && !bfd_link_pde (info))
 	    {
 	      reloc = R_BFIN_FUNCDESC;
 	      idx = elf_section_data (entry->d.h->root.u.def.section
@@ -2306,7 +2306,7 @@ _bfinfdpic_emit_got_relocs_plt_entries (struct bfinfdpic_relocs_info *entry,
 	     dynamic symbol entry for the got section, so idx will be
 	     zero, which means we can and should compute the address
 	     of the private descriptor ourselves.  */
-	  if (bfd_link_executable (info) && !bfd_link_pic (info)
+	  if (bfd_link_pde (info)
 	      && (entry->symndx != -1
 		  || BFINFDPIC_FUNCDESC_LOCAL (info, entry->d.h)))
 	    {
@@ -2369,7 +2369,7 @@ _bfinfdpic_emit_got_relocs_plt_entries (struct bfinfdpic_relocs_info *entry,
       /* If we're linking an executable at a fixed address, we can
 	 omit the dynamic relocation as long as the symbol is local to
 	 this module.  */
-      if (bfd_link_executable (info) && !bfd_link_pic (info)
+      if (bfd_link_pde (info)
 	  && (entry->symndx != -1 || BFINFDPIC_SYM_LOCAL (info, entry->d.h)))
 	{
 	  if (sec)
@@ -2417,8 +2417,7 @@ _bfinfdpic_emit_got_relocs_plt_entries (struct bfinfdpic_relocs_info *entry,
 
       /* If we've omitted the dynamic relocation, just emit the fixed
 	 addresses of the symbol and of the local GOT base offset.  */
-      if (bfd_link_executable (info)
-	  && !bfd_link_pic (info)
+      if (bfd_link_pde (info)
 	  && sec
 	  && sec->output_section)
 	{
@@ -2834,8 +2833,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 		   section+offset.  */
 		if (h && ! BFINFDPIC_FUNCDESC_LOCAL (info, h)
 		    && BFINFDPIC_SYM_LOCAL (info, h)
-		    && !(bfd_link_executable (info)
-			 && !bfd_link_pic (info)))
+		    && !bfd_link_pde (info))
 		  {
 		    dynindx = elf_section_data (h->root.u.def.section
 						->output_section)->dynindx;
@@ -2872,7 +2870,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 		   dynamic symbol entry for the got section, so idx will
 		   be zero, which means we can and should compute the
 		   address of the private descriptor ourselves.  */
-		if (bfd_link_executable (info) && !bfd_link_pic (info)
+		if (bfd_link_pde (info)
 		    && (!h || BFINFDPIC_FUNCDESC_LOCAL (info, h)))
 		  {
 		    bfd_vma offset;
@@ -2995,7 +2993,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	       can omit the dynamic relocation as long as the symbol
 	       is defined in the current link unit (which is implied
 	       by its output section not being NULL).  */
-	    if (bfd_link_executable (info) && !bfd_link_pic (info)
+	    if (bfd_link_pde (info)
 		&& (!h || BFINFDPIC_SYM_LOCAL (info, h)))
 	      {
 		if (osec)
@@ -3075,7 +3073,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 		/* If we've omitted the dynamic relocation, just emit
 		   the fixed addresses of the symbol and of the local
 		   GOT base offset.  */
-		if (bfd_link_executable (info) && !bfd_link_pic (info)
+		if (bfd_link_pde (info)
 		    && (!h || BFINFDPIC_SYM_LOCAL (info, h)))
 		  bfd_put_32 (output_bfd,
 			      bfinfdpic_got_section (info)->output_section->vma
@@ -3655,7 +3653,7 @@ _bfinfdpic_count_relocs_fixups (struct bfinfdpic_relocs_info *entry,
 {
   bfd_vma relocs = 0, fixups = 0;
 
-  if (!bfd_link_executable (dinfo->info) || bfd_link_pie (dinfo->info))
+  if (!bfd_link_pde (dinfo->info))
     relocs = entry->relocs32 + entry->relocsfd + entry->relocsfdv;
   else
     {

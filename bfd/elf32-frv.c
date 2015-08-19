@@ -1384,7 +1384,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
       /* If we're linking an executable at a fixed address, we can
 	 omit the dynamic relocation as long as the symbol is local to
 	 this module.  */
-      if (bfd_link_executable (info) && !bfd_link_pic (info)
+      if (bfd_link_pde (info)
 	  && (entry->symndx != -1
 	      || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
 	{
@@ -1439,7 +1439,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	  if (entry->symndx == -1
 	      && ! FRVFDPIC_FUNCDESC_LOCAL (info, entry->d.h)
 	      && FRVFDPIC_SYM_LOCAL (info, entry->d.h)
-	      && !(bfd_link_executable (info) && !bfd_link_pic (info)))
+	      && !bfd_link_pde (info))
 	    {
 	      reloc = R_FRV_FUNCDESC;
 	      idx = elf_section_data (entry->d.h->root.u.def.section
@@ -1482,7 +1482,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	     dynamic symbol entry for the got section, so idx will be
 	     zero, which means we can and should compute the address
 	     of the private descriptor ourselves.  */
-	  if (bfd_link_executable (info) && !bfd_link_pic (info)
+	  if (bfd_link_pde (info)
 	      && (entry->symndx != -1
 		  || FRVFDPIC_FUNCDESC_LOCAL (info, entry->d.h)))
 	    {
@@ -1545,7 +1545,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
       /* If we're linking an executable at a fixed address, we can
 	 omit the dynamic relocation as long as the symbol is local to
 	 this module.  */
-      if (bfd_link_executable (info) && !bfd_link_pic (info)
+      if (bfd_link_pde (info)
 	  && (entry->symndx != -1 || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
 	{
 	  if (sec)
@@ -1593,8 +1593,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 
       /* If we've omitted the dynamic relocation, just emit the fixed
 	 addresses of the symbol and of the local GOT base offset.  */
-      if (bfd_link_executable (info)
-	  && !bfd_link_pic (info)
+      if (bfd_link_pde (info)
 	  && sec
 	  && sec->output_section)
 	{
@@ -1847,7 +1846,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
       if (bfd_link_executable (info) && ! entry->tlsoff_entry)
 	entry->tlsoff_entry = entry->tlsdesc_entry + 4;
 
-      if (bfd_link_executable (info) && !bfd_link_pic (info)
+      if (bfd_link_pde (info)
 	  && ((idx == 0
 	       && (bfd_is_abs_section (sec)
 		   || bfd_is_und_section (sec)))
@@ -3523,8 +3522,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   section+offset.  */
 		if (h && ! FRVFDPIC_FUNCDESC_LOCAL (info, h)
 		    && FRVFDPIC_SYM_LOCAL (info, h)
-		    && !(bfd_link_executable (info)
-			 && !bfd_link_pic (info)))
+		    && !bfd_link_pde (info))
 		  {
 		    dynindx = elf_section_data (h->root.u.def.section
 						->output_section)->dynindx;
@@ -3562,7 +3560,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   dynamic symbol entry for the got section, so idx will
 		   be zero, which means we can and should compute the
 		   address of the private descriptor ourselves.  */
-		if (bfd_link_executable (info) && !bfd_link_pic (info)
+		if (bfd_link_pde (info)
 		    && (!h || FRVFDPIC_FUNCDESC_LOCAL (info, h)))
 		  {
 		    addend += frvfdpic_got_section (info)->output_section->vma;
@@ -3684,7 +3682,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	       can omit the dynamic relocation as long as the symbol
 	       is defined in the current link unit (which is implied
 	       by its output section not being NULL).  */
-	    if (bfd_link_executable (info) && !bfd_link_pic (info)
+	    if (bfd_link_pde (info)
 		&& (!h || FRVFDPIC_SYM_LOCAL (info, h)))
 	      {
 		if (osec)
@@ -3773,7 +3771,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		/* If we've omitted the dynamic relocation, just emit
 		   the fixed addresses of the symbol and of the local
 		   GOT base offset.  */
-		if (bfd_link_executable (info) && !bfd_link_pic (info)
+		if (bfd_link_pde (info)
 		    && (!h || FRVFDPIC_SYM_LOCAL (info, h)))
 		  bfd_put_32 (output_bfd,
 			      frvfdpic_got_section (info)->output_section->vma
@@ -4512,7 +4510,7 @@ _frvfdpic_count_relocs_fixups (struct frvfdpic_relocs_info *entry,
 {
   bfd_vma relocs = 0, fixups = 0, tlsrets = 0;
 
-  if (!bfd_link_executable (dinfo->info) || bfd_link_pie (dinfo->info))
+  if (!bfd_link_pde (dinfo->info))
     {
       relocs = entry->relocs32 + entry->relocsfd + entry->relocsfdv
 	+ entry->relocstlsd;

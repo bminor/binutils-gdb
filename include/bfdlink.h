@@ -274,6 +274,8 @@ enum output_type
 #define bfd_link_pic(info)	   (info)->pic
 #define bfd_link_pie(info)	   (bfd_link_executable (info) \
 				    && bfd_link_pic (info))
+#define bfd_link_pde(info)	   (bfd_link_executable (info) \
+				    && !bfd_link_pic (info))
 
 /* This structure holds all the information needed to communicate
    between BFD and the linker when doing a link.  */

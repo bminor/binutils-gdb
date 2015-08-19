@@ -3116,7 +3116,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_390_TLS_LE32:
-	  if (bfd_link_pic (info) && !bfd_link_pie (info))
+	  if (bfd_link_dll (info))
 	    {
 	      /* Linking a shared library with non-fpic code requires
 		 a R_390_TLS_TPOFF relocation.  */

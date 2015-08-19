@@ -151,8 +151,7 @@ keep:
      point to the IPLT slot.  That way the referencing shared lib will
      always get the PLT slot address when resolving the respective
      R_390_GLOB_DAT/R_390_64 relocs on that symbol.  */
-  if (bfd_link_executable (info)
-      && !bfd_link_pic (info)
+  if (bfd_link_pde (info)
       && h->def_regular
       && h->ref_dynamic)
     {
@@ -187,7 +186,7 @@ keep:
   if (h->got.refcount <= 0
       || (bfd_link_pic (info)
 	  && (h->dynindx == -1 || h->forced_local))
-      || (bfd_link_executable (info) && bfd_link_pic (info))
+      || bfd_link_pie (info)
       || htab->sgot == NULL)
     {
       /* Use .got.iplt.  */

@@ -1,3 +1,7 @@
+2015-08-19  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (bfd_link_pde): Define.
+
 2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* include/bfdlink.h (output_type): New enum.

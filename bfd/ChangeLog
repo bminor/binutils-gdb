@@ -1,3 +1,20 @@
+2015-08-19  Alan Modra  <amodra@gmail.com>
+
+	* elf-s390-common.c: Simplify expressions using
+	bfd_linke_executable, bfd_link_pie and bfd_link_pic.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elflink.c: Likewise.
+
 2015-08-18  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (aarch64_reloc_got_type): Delete useless check.

@@ -633,7 +633,7 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
   if ((h->def_dynamic
        || h->ref_dynamic
        || bfd_link_pic (info)
-       || (bfd_link_executable (info)
+       || (bfd_link_pde (info)
 	   && elf_hash_table (info)->is_relocatable_executable))
       && h->dynindx == -1)
     {

@@ -8184,7 +8184,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
   unsigned char *toc_ref;
   int pass;
 
-  if (bfd_link_relocatable (info) || !bfd_link_executable (info))
+  if (!bfd_link_executable (info))
     return TRUE;
 
   htab = ppc_hash_table (info);

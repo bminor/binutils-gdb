@@ -5204,7 +5204,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
   struct ppc_elf_link_hash_table *htab;
   int pass;
 
-  if (bfd_link_relocatable (info) || !bfd_link_executable (info))
+  if (!bfd_link_executable (info))
     return TRUE;
 
   htab = ppc_elf_hash_table (info);
@@ -6947,7 +6947,6 @@ ppc_elf_relax_section (bfd *abfd,
 		 optimise away the call.  We won't be needing a long-
 		 branch stub in that case.  */
 	      if (bfd_link_executable (link_info)
-		  && !bfd_link_relocatable (link_info)
 		  && h == htab->tls_get_addr
 		  && irel != internal_relocs)
 		{

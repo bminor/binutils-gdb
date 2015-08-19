@@ -3916,7 +3916,7 @@ elf_m68k_relocate_section (bfd *output_bfd,
 	case R_68K_TLS_LE32:
 	case R_68K_TLS_LE16:
 	case R_68K_TLS_LE8:
-	  if (bfd_link_pic (info) && !bfd_link_pie (info))
+	  if (bfd_link_dll (info))
 	    {
 	      (*_bfd_error_handler)
 		(_("%B(%A+0x%lx): R_68K_TLS_LE32 relocation not permitted "
