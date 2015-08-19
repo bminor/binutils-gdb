@@ -5797,6 +5797,9 @@ BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21.  */
 /* Unsigned 12 bit byte offset to module TLS base address.  */
   BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12,
 
+/* No overflow check version of BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12.  */
+  BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC,
+
 /* Unsigned 12 bit byte offset to global offset table entry for a symbols
 tls_index structure.  Used in conjunction with
 BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21.  */

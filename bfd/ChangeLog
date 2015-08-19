@@ -1,3 +1,11 @@
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC): New entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC.
+
 2015-08-19  Alan Modra  <amodra@gmail.com>
 
 	* elf-s390-common.c: Simplify expressions using
