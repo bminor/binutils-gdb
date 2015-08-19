@@ -1,3 +1,21 @@
+2015-08-21  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-data.h (tui_command_info): Remove fields cur_line and
+	curch.
+	* tui/tui-data.c (tui_clear_win_detail) [CMD_WIN]: Don't set
+	cur_line or curch, instead call wmove().
+	(init_win_info) [CMD_WIN]: Likewise.
+	* tui/tui-io.c (tui_puts): Likewise. Don't read cur_line,
+	instead call getcury().
+	(tui_redisplay_readline): Don't set cur_line or curch.
+	(tui_mld_erase_entire_line): Don't read cur_line, instead call
+	getcury().
+	(tui_cont_sig): Remove call to wmove.
+	(tui_getc): Don't read cur_line or curch, instead call getcury()
+	or getyx().  Don't set curch.
+	* tui/tui-win.c (make_visible_with_new_height) [CMD_WIN]: Don't
+	set cur_line or curch.  Always move cursor to (0,0).
+
 2015-08-20  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (print_target_wait_results): Make extern.
