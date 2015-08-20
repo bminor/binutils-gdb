@@ -1,3 +1,10 @@
+2015-08-20  Alan Modra  <amodra@gmail.com>
+
+	PR gold/18846
+	* target-reloc.h (relocate_relocs <RELOC_ADJUST_FOR_SECTION_RELA>):
+	Subtract os->address() from addend.
+	* powerpc.cc (relocate_relocs): Likewise.
+
 2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
 
 	* mips.cc (plt0_entry_o32, plt0_entry_n32, plt0_entry_n64,

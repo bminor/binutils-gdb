@@ -666,6 +666,7 @@ relocate_relocs(
 
       // Get the new symbol index.
 
+      Output_section* os = NULL;
       unsigned int new_symndx;
       if (r_sym < local_count)
 	{
@@ -698,7 +699,7 @@ relocate_relocs(
 		unsigned int shndx =
 		  object->local_symbol_input_shndx(r_sym, &is_ordinary);
 		gold_assert(is_ordinary);
-		Output_section* os = object->output_section(shndx);
+		os = object->output_section(shndx);
 		gold_assert(os != NULL);
 		gold_assert(os->needs_symtab_index());
 		new_symndx = os->symtab_index();
@@ -780,7 +781,8 @@ relocate_relocs(
 		typename elfcpp::Elf_types<size>::Elf_Swxword addend;
 		addend = Reloc_types<sh_type, size, big_endian>::
 			   get_reloc_addend(&reloc);
-		addend = psymval->value(object, addend);
+		gold_assert(os != NULL);
+		addend = psymval->value(object, addend) - os->address();
 		Reloc_types<sh_type, size, big_endian>::
 		  set_reloc_addend(&reloc_write, addend);
 	      }
