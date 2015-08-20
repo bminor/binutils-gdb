@@ -1,5 +1,10 @@
 2015-08-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.server/solib-list.exp: No longer expect an interior stop in
+	non-stop mode.
+
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.server/connect-stopped-target.c: New file.
 	* gdb.server/connect-stopped-target.exp: New file.
 
