@@ -265,11 +265,8 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
 	CP_CTX (context)->cp_ops->new_decl (CP_CTX (context),
 					    TYPE_FIELD_NAME (type, i),
 					    GCC_CP_SYMBOL_VARIABLE,
-					    field_type, NULL,
-					    // FIXME: compute the
-					    // static var address.
-					    // -lxo
-					    0,
+					    field_type, 0,
+					    TYPE_FIELD_STATIC_PHYSADDR (type, i),
 					    // FIXME: do we have
 					    // location info for
 					    // static data members?

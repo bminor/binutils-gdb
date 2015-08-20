@@ -148,7 +148,8 @@ class VirtualBase : public virtual Base3
 class Foo
 {
   int var;
-
+  static const int public_static_var = 12;
+  
  private:
   int private_var = 0;
   int private_method (void);
