@@ -1,3 +1,10 @@
+2016-02-18  Wei-cheng Wang  <cole945@gmail.com>
+
+	* gdb.trace/tspeed.c (myclock): Return wallclock instead of
+	user+system time.
+	(trace_speed_test): Determine the iteration count for a time
+	between 15..30 seconds.
+
 2016-02-18  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.arch/i386-mpx-sigsegv.c: New file.
