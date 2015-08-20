@@ -3332,9 +3332,9 @@ delete_just_stopped_threads_infrun_breakpoints_cleanup (void *arg)
   delete_just_stopped_threads_infrun_breakpoints ();
 }
 
-/* Pretty print the results of target_wait, for debugging purposes.  */
+/* See infrun.h.  */
 
-static void
+void
 print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 			   const struct target_waitstatus *ws)
 {

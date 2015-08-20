@@ -226,6 +226,8 @@ static int remote_can_run_breakpoint_commands (struct target_ops *self);
 
 static void remote_btrace_reset (void);
 
+static int stop_reply_queue_length (void);
+
 /* For "remote".  */
 
 static struct cmd_list_element *remote_cmdlist;
@@ -3411,21 +3413,6 @@ get_offsets (void)
   objfile_relocate (symfile_objfile, offs);
 }
 
-/* Callback for iterate_over_threads.  Set the STOP_REQUESTED flags in
-   threads we know are stopped already.  This is used during the
-   initial remote connection in non-stop mode --- threads that are
-   reported as already being stopped are left stopped.  */
-
-static int
-set_stop_requested_callback (struct thread_info *thread, void *data)
-{
-  /* If we have a stop reply for this thread, it must be stopped.  */
-  if (peek_stop_reply (thread->ptid))
-    set_stop_requested (thread->ptid, 1);
-
-  return 0;
-}
-
 /* Send interrupt_sequence to remote target.  */
 static void
 send_interrupt_sequence (void)
@@ -3551,6 +3538,77 @@ add_current_inferior_and_thread (char *wait_status)
 
   /* Add the main thread.  */
   add_thread_silent (inferior_ptid);
+}
+
+/* Process all initial stop replies the remote side sent in response
+   to the ? packet.  These indicate threads that were already stopped
+   on initial connection.  We mark these threads as stopped and print
+   their current frame before giving the user the prompt.  */
+
+static void
+process_initial_stop_replies (void)
+{
+  int pending_stop_replies = stop_reply_queue_length ();
+
+  /* Consume the initial pending events.  */
+  while (pending_stop_replies-- > 0)
+    {
+      ptid_t waiton_ptid = minus_one_ptid;
+      ptid_t event_ptid;
+      struct target_waitstatus ws;
+      int ignore_event = 0;
+
+      memset (&ws, 0, sizeof (ws));
+      event_ptid = target_wait (waiton_ptid, &ws, TARGET_WNOHANG);
+      if (remote_debug)
+	print_target_wait_results (waiton_ptid, event_ptid, &ws);
+
+      switch (ws.kind)
+	{
+	case TARGET_WAITKIND_IGNORE:
+	case TARGET_WAITKIND_NO_RESUMED:
+	case TARGET_WAITKIND_SIGNALLED:
+	case TARGET_WAITKIND_EXITED:
+	  /* We shouldn't see these, but if we do, just ignore.  */
+	  if (remote_debug)
+	    fprintf_unfiltered (gdb_stdlog, "remote: event ignored\n");
+	  ignore_event = 1;
+	  break;
+
+	case TARGET_WAITKIND_EXECD:
+	  xfree (ws.value.execd_pathname);
+	  break;
+	default:
+	  break;
+	}
+
+      if (ignore_event)
+	continue;
+
+      switch_to_thread (event_ptid);
+      set_executing (event_ptid, 0);
+      set_running (event_ptid, 0);
+
+      stop_pc = get_frame_pc (get_current_frame ());
+      set_current_sal_from_frame (get_current_frame ());
+
+      if (ws.kind == TARGET_WAITKIND_STOPPED)
+	{
+	  enum gdb_signal sig = ws.value.sig;
+
+	  /* Stubs traditionally report SIGTRAP as initial signal,
+	     instead of signal 0.  Suppress it.  */
+	  if (sig == GDB_SIGNAL_TRAP)
+	    sig = GDB_SIGNAL_0;
+	  inferior_thread ()->suspend.stop_signal = sig;
+
+	  if (signal_print_state (sig))
+	    observer_notify_signal_received (sig);
+        }
+
+      print_stop_event (&ws);
+      observer_notify_normal_stop (NULL, 1);
+    }
 }
 
 static void
@@ -3765,6 +3823,8 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
     }
   else
     {
+      ptid_t current_ptid;
+
       /* Clear WFI global state.  Do this before finding about new
 	 threads and inferiors, and setting the current inferior.
 	 Otherwise we would clear the proceed status of the current
@@ -3786,14 +3846,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	  rs->notif_state->pending_event[notif_client_stop.id]
 	    = remote_notif_parse (notif, rs->buf);
 	  remote_notif_get_pending_events (notif);
-
-	  /* Make sure that threads that were stopped remain
-	     stopped.  */
-	  iterate_over_threads (set_stop_requested_callback, NULL);
 	}
-
-      if (target_can_async_p ())
-	target_async (1);
 
       if (thread_count () == 0)
 	{
@@ -3812,10 +3865,11 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       set_general_thread (null_ptid);
 
       /* Query it.  */
-      inferior_ptid = remote_current_thread (minus_one_ptid);
+      current_ptid = remote_current_thread (minus_one_ptid);
       if (ptid_equal (inferior_ptid, minus_one_ptid))
 	error (_("remote didn't report the current thread in non-stop mode"));
 
+      inferior_ptid = current_ptid;
       get_offsets ();		/* Get text, data & bss offsets.  */
 
       /* In non-stop mode, any cached wait status will be stored in
@@ -3824,6 +3878,15 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
       /* Report all signals during attach/startup.  */
       remote_pass_signals (target, 0, NULL);
+
+      /* If there are already stopped threads, mark them stopped and
+	 report their stops before giving the prompt to the user.  */
+      process_initial_stop_replies ();
+
+      switch_to_thread (current_ptid);
+
+      if (target_can_async_p ())
+	target_async (1);
     }
 
   /* If we connected to a live target, do some additional setup.  */
@@ -5484,6 +5547,14 @@ static void
 stop_reply_xfree (struct stop_reply *r)
 {
   notif_event_xfree ((struct notif_event *) r);
+}
+
+/* Return the length of the stop reply queue.  */
+
+static int
+stop_reply_queue_length (void)
+{
+  return QUEUE_length (stop_reply_p, stop_reply_queue);
 }
 
 static void

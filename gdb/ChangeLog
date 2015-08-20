@@ -1,5 +1,14 @@
 2015-08-20  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (print_target_wait_results): Make extern.
+	* infrun.h (print_target_wait_results): Declare.
+	* remote.c (set_stop_requested_callback): Delete.
+	(process_initial_stop_replies): New function.
+	(remote_start_remote): Use it.
+	(stop_reply_queue_length): New function.
+
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (process_full_comp_unit): To tell whether
 	start_subfile managed to deduce a language, test for
 	language_unknown instead of language_c.

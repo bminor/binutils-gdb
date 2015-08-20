@@ -1,5 +1,10 @@
 2015-08-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.server/connect-stopped-target.c: New file.
+	* gdb.server/connect-stopped-target.exp: New file.
+
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
 	* gdb.dwarf2/comp-unit-lang.exp: New file.
 	* gdb.dwarf2/comp-unit-lang.c: New file.
 
