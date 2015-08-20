@@ -215,6 +215,44 @@ if [istarget "*-*-nacl*"] {
     regsub -all -- {([a-z0-9]+)\.pd} $i386tests {\1-nacl.pd} i386tests
 }
 
+proc iamcu_tests {} {
+    if {[istarget "*-*-nacl*"]} then {
+	return
+    }
+
+    global as
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as "--32 -march=iamcu $srcdir/$subdir/start.s" tmpdir/startiamcu.o] {
+	unresolved "Build Intel MCU start.o"
+	return
+    }
+
+    if ![ld_assemble $as "--32 $srcdir/$subdir/start.s" tmpdir/start32.o] {
+	unresolved "Build ia32 start.o"
+	return
+     }
+
+    if ![ld_assemble $as "--32 -march=iamcu $srcdir/$subdir/foo.s" tmpdir/fooiamcu.o] {
+	unresolved "Build Intel MCU foo.o"
+	return
+    }
+
+    if ![ld_assemble $as "--32 $srcdir/$subdir/foo.s" tmpdir/foo32.o] {
+	unresolved "Build ia32 foo.o"
+	return
+    }
+
+    run_dump_test "abs-iamcu"
+    run_dump_test "iamcu-1"
+    run_dump_test "iamcu-2"
+    run_dump_test "iamcu-3"
+    run_dump_test "iamcu-4"
+}
+
+iamcu_tests
+
 run_ld_link_tests $i386tests
 
 run_dump_test "abs"
@@ -271,6 +309,11 @@ run_dump_test "pr14215"
 run_dump_test "pr17057"
 run_dump_test "pr17935-1"
 run_dump_test "pr17935-2"
+run_dump_test "pr18801"
+run_dump_test "pr18815"
+
+# Add $PLT_CFLAGS if PLT is expected.
+global PLT_CFLAGS
 
 # Must be Linux native with the C compiler
 if { [isnative]
@@ -304,7 +347,7 @@ if { [isnative]
 	[list \
 	    "Build libplt-main3.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC $PLT_CFLAGS" \
 	    { plt-main3.c } \
 	    {{readelf {-Wr} plt-main3.rd}} \
 	    "libplt-main3.a" \
@@ -312,7 +355,7 @@ if { [isnative]
 	[list \
 	    "Build libplt-main4.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC $PLT_CFLAGS" \
 	    { plt-main4.c } \
 	    {{readelf {-Wr} plt-main4.rd}} \
 	    "libplt-main4.a" \
@@ -368,6 +411,14 @@ if { [isnative]
 	    "pr17689.so" \
 	] \
 	[list \
+	    "Build pr17689.so with -z now" \
+	    "-shared -Wl,-z,now" \
+	    "-fPIC" \
+	    { pr17689a.c } \
+	    {{readelf {-Wr} pr17689now.rd}} \
+	    "pr17689now.so" \
+	] \
+	[list \
 	    "Build pr17689ver.so" \
 	    "-shared -Wl,--version-script,pr17689a.t" \
 	    "-fPIC" \
@@ -390,6 +441,14 @@ if { [isnative]
 	    { dummy.c } \
 	    {{readelf {-Wr} pr17689.rd}} \
 	    "pr17689" \
+	] \
+	[list \
+	    "Build pr17689 with PIE, -z now and GOTOFF" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie -Wl,-z,now" \
+	    "" \
+	    { dummy.c } \
+	    {{readelf {-Wr} pr17689now.rd}} \
+	    "pr17689now" \
 	] \
 	[list \
 	    "Build pr17689ver with PIE and GOTOFF" \
@@ -446,6 +505,14 @@ if { [isnative]
 	    "pr17689.out" \
 	] \
 	[list \
+	    "Run pr17689 with PIE, -z now and GOTOFF" \
+	    "tmpdir/pr17689b.o tmpdir/pr17689.so -pie -z now" \
+	    "" \
+	    { dummy.c } \
+	    "pr17689now" \
+	    "pr17689.out" \
+	] \
+	[list \
 	    "Run pr17689ver with PIE and GOTOFF" \
 	    "tmpdir/pr17689b.o tmpdir/pr17689ver.so -pie" \
 	    "" \
@@ -455,3 +522,12 @@ if { [isnative]
 	] \
     ]
 }
+
+if { !([istarget "i?86-*-linux*"]
+       || [istarget "x86_64-*-linux*"]) } {
+    return
+}
+
+# Linux only tests
+run_dump_test "pltgot-1"
+run_dump_test "pltgot-2"

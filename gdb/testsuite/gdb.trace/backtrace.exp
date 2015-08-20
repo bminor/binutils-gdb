@@ -146,6 +146,9 @@ if [is_amd64_regs_target] {
 } elseif [is_x86_like_target] {
     set fpreg "\$ebp"
     set spreg "\$esp"
+} elseif [is_aarch64_target] {
+    set fpreg "\$x29"
+    set spreg "\$sp"
 } else {
     set fpreg "\$fp"
     set spreg "\$sp"

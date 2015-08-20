@@ -79,7 +79,7 @@ static char *const reg_half_names[] =
 	return ret_val;				\
       val = COERCE16 ((p[-2] << 8) + p[-1]);	\
     }						\
-  while (0)						
+  while (0)
 
 /* Get a 4 byte signed integer.  */
 #define COERCE32(x) ((bfd_signed_vma) ((x) ^ 0x80000000) - 0x80000000)
@@ -1336,7 +1336,7 @@ match_insn_m68k (bfd_vma memaddr,
 
   if (*args == '.')
     args++;
-  
+
   /* Point at first word of argument data,
      and at descriptor for first argument.  */
   p = buffer + 2;
@@ -1583,7 +1583,7 @@ m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
 	}
     }
   return 0;
-}		
+}
 
 /* Print the m68k instruction at address MEMADDR in debugged memory,
    on INFO->STREAM.  Returns length of the instruction, in bytes.  */

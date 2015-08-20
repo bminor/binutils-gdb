@@ -18,13 +18,16 @@
 
 #include "server.h"
 #include "linux-low.h"
+#include "arch/arm.h"
+#include "linux-aarch32-low.h"
 
+#include <sys/uio.h>
 /* Don't include elf.h if linux/elf.h got included by gdb_proc_service.h.
    On Bionic elf.h and linux/elf.h have conflicting definitions.  */
 #ifndef ELFMAG0
 #include <elf.h>
 #endif
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <signal.h>
 
 /* Defined in auto-generated files.  */
@@ -39,9 +42,6 @@ extern const struct target_desc *tdesc_arm_with_vfpv2;
 
 void init_registers_arm_with_vfpv3 (void);
 extern const struct target_desc *tdesc_arm_with_vfpv3;
-
-void init_registers_arm_with_neon (void);
-extern const struct target_desc *tdesc_arm_with_neon;
 
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 22
@@ -116,8 +116,6 @@ struct arch_lwp_info
   CORE_ADDR stopped_data_address;
 };
 
-static unsigned long arm_hwcap;
-
 /* These are in <asm/elf.h> in current kernels.  */
 #define HWCAP_VFP       64
 #define HWCAP_IWMMXT    512
@@ -151,35 +149,11 @@ arm_cannot_fetch_register (int regno)
 }
 
 static void
-arm_fill_gregset (struct regcache *regcache, void *buf)
-{
-  int i;
-
-  for (i = 0; i < arm_num_regs; i++)
-    if (arm_regmap[i] != -1)
-      collect_register (regcache, i, ((char *) buf) + arm_regmap[i]);
-}
-
-static void
-arm_store_gregset (struct regcache *regcache, const void *buf)
-{
-  int i;
-  char zerobuf[8];
-
-  memset (zerobuf, 0, 8);
-  for (i = 0; i < arm_num_regs; i++)
-    if (arm_regmap[i] != -1)
-      supply_register (regcache, i, ((char *) buf) + arm_regmap[i]);
-    else
-      supply_register (regcache, i, zerobuf);
-}
-
-static void
 arm_fill_wmmxregset (struct regcache *regcache, void *buf)
 {
   int i;
 
-  if (!(arm_hwcap & HWCAP_IWMMXT))
+  if (regcache->tdesc != tdesc_arm_with_iwmmxt)
     return;
 
   for (i = 0; i < 16; i++)
@@ -196,7 +170,7 @@ arm_store_wmmxregset (struct regcache *regcache, const void *buf)
 {
   int i;
 
-  if (!(arm_hwcap & HWCAP_IWMMXT))
+  if (regcache->tdesc != tdesc_arm_with_iwmmxt)
     return;
 
   for (i = 0; i < 16; i++)
@@ -211,41 +185,33 @@ arm_store_wmmxregset (struct regcache *regcache, const void *buf)
 static void
 arm_fill_vfpregset (struct regcache *regcache, void *buf)
 {
-  int i, num, base;
+  int num;
 
-  if (!(arm_hwcap & HWCAP_VFP))
+  if (regcache->tdesc == tdesc_arm_with_neon
+      || regcache->tdesc == tdesc_arm_with_vfpv3)
+    num = 32;
+  else if (regcache->tdesc == tdesc_arm_with_vfpv2)
+    num = 16;
+  else
     return;
 
-  if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
-    num = 32;
-  else
-    num = 16;
-
-  base = find_regno (regcache->tdesc, "d0");
-  for (i = 0; i < num; i++)
-    collect_register (regcache, base + i, (char *) buf + i * 8);
-
-  collect_register_by_name (regcache, "fpscr", (char *) buf + 32 * 8);
+  arm_fill_vfpregset_num (regcache, buf, num);
 }
 
 static void
 arm_store_vfpregset (struct regcache *regcache, const void *buf)
 {
-  int i, num, base;
+  int num;
 
-  if (!(arm_hwcap & HWCAP_VFP))
+  if (regcache->tdesc == tdesc_arm_with_neon
+      || regcache->tdesc == tdesc_arm_with_vfpv3)
+    num = 32;
+  else if (regcache->tdesc == tdesc_arm_with_vfpv2)
+    num = 16;
+  else
     return;
 
-  if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
-    num = 32;
-  else
-    num = 16;
-
-  base = find_regno (regcache->tdesc, "d0");
-  for (i = 0; i < num; i++)
-    supply_register (regcache, base + i, (char *) buf + i * 8);
-
-  supply_register_by_name (regcache, "fpscr", (char *) buf + 32 * 8);
+  arm_store_vfpregset_num (regcache, buf, num);
 }
 
 extern int debug_threads;
@@ -717,6 +683,47 @@ arm_new_thread (struct lwp_info *lwp)
   lwp->arch_private = info;
 }
 
+static void
+arm_new_fork (struct process_info *parent, struct process_info *child)
+{
+  struct arch_process_info *parent_proc_info = parent->priv->arch_private;
+  struct arch_process_info *child_proc_info = child->priv->arch_private;
+  struct lwp_info *child_lwp;
+  struct arch_lwp_info *child_lwp_info;
+  int i;
+
+  /* These are allocated by linux_add_process.  */
+  gdb_assert (parent->priv != NULL
+	      && parent->priv->arch_private != NULL);
+  gdb_assert (child->priv != NULL
+	      && child->priv->arch_private != NULL);
+
+  /* Linux kernel before 2.6.33 commit
+     72f674d203cd230426437cdcf7dd6f681dad8b0d
+     will inherit hardware debug registers from parent
+     on fork/vfork/clone.  Newer Linux kernels create such tasks with
+     zeroed debug registers.
+
+     GDB core assumes the child inherits the watchpoints/hw
+     breakpoints of the parent, and will remove them all from the
+     forked off process.  Copy the debug registers mirrors into the
+     new process so that all breakpoints and watchpoints can be
+     removed together.  The debug registers mirror will become zeroed
+     in the end before detaching the forked off process, thus making
+     this compatible with older Linux kernels too.  */
+
+  *child_proc_info = *parent_proc_info;
+
+  /* Mark all the hardware breakpoints and watchpoints as changed to
+     make sure that the registers will be updated.  */
+  child_lwp = find_lwp_pid (ptid_of (child));
+  child_lwp_info = child_lwp->arch_private;
+  for (i = 0; i < MAX_BPTS; i++)
+    child_lwp_info->bpts_changed[i] = 1;
+  for (i = 0; i < MAX_WPTS; i++)
+    child_lwp_info->wpts_changed[i] = 1;
+}
+
 /* Called when resuming a thread.
    If the debug regs have changed, update the thread's copies.  */
 static void
@@ -797,11 +804,11 @@ static const struct target_desc *
 arm_read_description (void)
 {
   int pid = lwpid_of (current_thread);
+  unsigned long arm_hwcap = 0;
 
   /* Query hardware watchpoint/breakpoint capabilities.  */
   arm_linux_init_hwbp_cap (pid);
 
-  arm_hwcap = 0;
   if (arm_get_hwcap (&arm_hwcap) == 0)
     return tdesc_arm;
 
@@ -828,10 +835,8 @@ arm_read_description (void)
       buf = xmalloc (32 * 8 + 4);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
 	  && errno == EIO)
-	{
-	  arm_hwcap = 0;
-	  result = tdesc_arm;
-	}
+	result = tdesc_arm;
+
       free (buf);
 
       return result;
@@ -845,8 +850,23 @@ arm_read_description (void)
 static void
 arm_arch_setup (void)
 {
+  int tid = lwpid_of (current_thread);
+  int gpregs[18];
+  struct iovec iov;
+
   current_process ()->tdesc = arm_read_description ();
+
+  iov.iov_base = gpregs;
+  iov.iov_len = sizeof (gpregs);
+
+  /* Check if PTRACE_GETREGSET works.  */
+  if (ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iov) == 0)
+    have_ptrace_getregset = 1;
+  else
+    have_ptrace_getregset = 0;
 }
+
+/* Register sets without using PTRACE_GETREGSET.  */
 
 static struct regset_info arm_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, 18 * 4,
@@ -874,7 +894,7 @@ static struct usrregs_info arm_usrregs_info =
     arm_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info regs_info_arm =
   {
     NULL, /* regset_bitmap */
     &arm_usrregs_info,
@@ -884,7 +904,13 @@ static struct regs_info regs_info =
 static const struct regs_info *
 arm_regs_info (void)
 {
-  return &regs_info;
+  const struct target_desc *tdesc = current_process ()->tdesc;
+
+  if (have_ptrace_getregset == 1
+      && (tdesc == tdesc_arm_with_neon || tdesc == tdesc_arm_with_vfpv3))
+    return &regs_info_aarch32;
+  else
+    return &regs_info_arm;
 }
 
 struct linux_target_ops the_low_target = {
@@ -920,6 +946,7 @@ struct linux_target_ops the_low_target = {
   NULL, /* siginfo_fixup */
   arm_new_process,
   arm_new_thread,
+  arm_new_fork,
   arm_prepare_to_resume,
 };
 
@@ -931,7 +958,8 @@ initialize_low_arch (void)
   init_registers_arm_with_iwmmxt ();
   init_registers_arm_with_vfpv2 ();
   init_registers_arm_with_vfpv3 ();
-  init_registers_arm_with_neon ();
+
+  initialize_low_arch_aarch32 ();
 
   initialize_regsets_info (&arm_regsets_info);
 }

@@ -29,6 +29,7 @@
 #include "observer.h"
 #include "inferior.h"
 #include "block.h"
+#include "location.h"
 
 /* Function that is called when a Python finish bp is found out of scope.  */
 static char * const outofscope_func = "out_of_scope";
@@ -106,7 +107,10 @@ bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
         value_object_to_value (self_finishbp->function_value);
       struct type *value_type =
         type_object_to_type (self_finishbp->return_type);
-      struct value *ret = get_return_value (function, value_type);
+
+      /* bpfinishpy_init cannot finish into DUMMY_FRAME (throws an error
+         in such case) so it is OK to always pass CTX_SAVER as NULL.  */
+      struct value *ret = get_return_value (function, value_type, NULL);
 
       if (ret)
         {
@@ -165,8 +169,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   struct frame_id frame_id;
   PyObject *internal = NULL;
   int internal_bp = 0;
-  CORE_ADDR finish_pc, pc;
-  char *addr_str, small_buf[100];
+  CORE_ADDR pc;
   struct symbol *function;
 
   if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|OO", keywords,
@@ -293,13 +296,14 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   TRY
     {
-      /* Set a breakpoint on the return address.  */
-      finish_pc = get_frame_pc (prev_frame);
-      xsnprintf (small_buf, sizeof (small_buf), "*%s", hex_string (finish_pc));
-      addr_str = small_buf;
+      struct event_location *location;
+      struct cleanup *back_to;
 
+      /* Set a breakpoint on the return address.  */
+      location = new_address_location (get_frame_pc (prev_frame));
+      back_to = make_cleanup_delete_event_location (location);
       create_breakpoint (python_gdbarch,
-                         addr_str, NULL, thread, NULL,
+                         location, NULL, thread, NULL,
                          0,
                          1 /*temp_flag*/,
                          bp_breakpoint,
@@ -307,6 +311,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
                          AUTO_BOOLEAN_TRUE,
                          &bkpt_breakpoint_ops,
                          0, 1, internal_bp, 0);
+      do_cleanups (back_to);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

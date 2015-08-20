@@ -1,3 +1,27 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_ARG_ENABLE(sim-trapdump)): Call AS_HELP_STRING.
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* decode.c (frvbf_decode): Change TRACE_EXTRACT to CGEN_TRACE_EXTRACT.
+	* mloop.in (execute): Change TRACE_INSN_INIT to CGEN_TRACE_INSN_INIT,
+	TRACE_INSN to CGEN_TRACE_INSN, and TRACE_INSN_FINI to CGEN_TRACE_INSN_FINI.
+	* sem.c: Rename TRACE_RESULT to CGEN_TRACE_RESULT.
+
+2015-06-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (WITH_TRACE): Delete.
+
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (USING_SIM_BASE_H): Delete.
@@ -213,8 +237,8 @@
 	* config.in: Ditto.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -237,7 +261,7 @@
 2005-10-28  Dave Brolley  <brolley@redhat.com>
 
 	* cpu.c,cpu.h,decode.c,decode.h,model.c,sem.c: Regenerate.
-	
+
 	Contribute the following changes:
 	2003-09-29  Dave Brolley  <brolley@redhat.com>
 
@@ -855,7 +879,7 @@
 
 2000-09-01  Dave Brolley  <brolley@redhat.com>
 
-        * interrupts.c (frv_queue_break_interrupt): Call sim_handle_breakpoint
+	* interrupts.c (frv_queue_break_interrupt): Call sim_handle_breakpoint
 	before queuing an interrupt in order to allow 'break' to be used as
 	the breakpoint insn.
 
@@ -908,7 +932,7 @@ Thu Jul  6 13:51:12 2000  Dave Brolley  <brolley@topaz>
 	(@cpu@_simulate_insn_prefetch): Monitoring of fetch buffer moved to
 	run_caches.  Use cache directly if not counting cycles.  Don't use
 	cache at all if not counting cycles and cache not enabled.
-	* frv.c (frv_insn_fetch_buffer): New global variable. 
+	* frv.c (frv_insn_fetch_buffer): New global variable.
 	(run_caches): Monitor the status of insn prefetch requests.
 	* frv-sim.h (FRV_INSN_FETCH_BUFFER): New struct type.
 	(frv_insn_fetch_buffer): New global variable.
@@ -1833,24 +1857,24 @@ Wed May 24 14:40:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	Call sim_queue_fn_mem_xi_write.
 	(frvbf_load_quad_CPR): Call frvbf_read_mem_SI.
 	Call sim_queue_fn_mem_xi_write.
-	(frvbf_insn_cache_preload): New function. 
-	(frvbf_data_cache_preload): New function. 
-	(frvbf_insn_cache_unlock): New function. 
-	(frvbf_data_cache_unlock): New function. 
-	(frvbf_insn_cache_invalidate): New function. 
-	(frvbf_data_cache_invalidate): New function. 
-	(frvbf_data_cache_flush): New function. 
+	(frvbf_insn_cache_preload): New function.
+	(frvbf_data_cache_preload): New function.
+	(frvbf_insn_cache_unlock): New function.
+	(frvbf_data_cache_unlock): New function.
+	(frvbf_insn_cache_invalidate): New function.
+	(frvbf_data_cache_invalidate): New function.
+	(frvbf_data_cache_flush): New function.
 	* frv-sim.h (sim-options.h): Include it.
 	(GET_HSR0): New macro.
-	(SET_HSR0): New macro. 
-	(GET_HSR0_ICE): New macro. 
-	(SET_HSR0_ICE): New macro. 
-	(GET_HSR0_DCE): New macro. 
-	(SET_HSR0_DCE): New macro. 
-	(GET_HSR0_CBM): New macro. 
-	(GET_HSR0_RME): New macro. 
-	(GET_IHSR8): New macro. 
-	(GET_IHSR8_NBC): New macro. 
+	(SET_HSR0): New macro.
+	(GET_HSR0_ICE): New macro.
+	(SET_HSR0_ICE): New macro.
+	(GET_HSR0_DCE): New macro.
+	(SET_HSR0_DCE): New macro.
+	(GET_HSR0_CBM): New macro.
+	(GET_HSR0_RME): New macro.
+	(GET_IHSR8): New macro.
+	(GET_IHSR8_NBC): New macro.
 	(frvbf_insn_cache_preload): New function.
 	(frvbf_data_cache_preload): New function.
 	(frvbf_insn_cache_unlock): New function.

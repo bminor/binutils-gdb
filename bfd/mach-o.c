@@ -693,15 +693,15 @@ bfd_mach_o_bfd_copy_private_header_data (bfd *ibfd, bfd *obfd)
 	    /* PR 17512L: file: 730e492d.  */
 	    else
 	      {
-		ody->rebase_size = 
-		  ody->bind_size = 
-		  ody->weak_bind_size = 
-		  ody->lazy_bind_size = 
+		ody->rebase_size =
+		  ody->bind_size =
+		  ody->weak_bind_size =
+		  ody->lazy_bind_size =
 		  ody->export_size = 0;
-		ody->rebase_content = 
-		  ody->bind_content = 
-		  ody->weak_bind_content = 
-		  ody->lazy_bind_content = 
+		ody->rebase_content =
+		  ody->bind_content =
+		  ody->weak_bind_content =
+		  ody->lazy_bind_content =
 		  ody->export_content = NULL;
 	      }
 	  }
@@ -1392,7 +1392,7 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
 	  if (num >= (unsigned) bfd_mach_o_count_symbols (abfd))
 	    sym = bfd_und_section_ptr->symbol_ptr_ptr;
 	  else if (syms == NULL)
-	    sym = bfd_und_section_ptr->symbol_ptr_ptr;	    
+	    sym = bfd_und_section_ptr->symbol_ptr_ptr;
 	  else
 	    /* An external symbol number.  */
 	    sym = syms + num;
@@ -1411,7 +1411,7 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
 	  /* PR 17512: file: 006-2964-0.004.  */
 	  if (num > mdata->nsects)
 	    return -1;
-	  
+
 	  /* A section number.  */
           sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
           /* For a symbol defined in section S, the addend (stored in the

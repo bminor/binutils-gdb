@@ -880,14 +880,27 @@ queue_final_tasks(const General_options& options,
     }
 
   // Create tasks for tree-style build ID computation, if necessary.
-  final_blocker = layout->queue_build_id_tasks(workqueue, final_blocker, of);
+  if (strcmp(options.build_id(), "tree") == 0)
+    {
+      // Queue a task to compute the build id.  This will be blocked by
+      // FINAL_BLOCKER, and will in turn schedule the task to close
+      // the output file.
+      workqueue->queue(new Task_function(new Build_id_task_runner(&options,
+								  layout,
+								  of),
+					 final_blocker,
+					 "Task_function Build_id_task_runner"));
+    }
+  else
+    {
+      // Queue a task to close the output file.  This will be blocked by
+      // FINAL_BLOCKER.
+      workqueue->queue(new Task_function(new Close_task_runner(&options, layout,
+							       of, NULL, 0),
+					 final_blocker,
+					 "Task_function Close_task_runner"));
+    }
 
-  // Queue a task to close the output file.  This will be blocked by
-  // FINAL_BLOCKER.
-  workqueue->queue(new Task_function(new Close_task_runner(&options, layout,
-							   of),
-				     final_blocker,
-				     "Task_function Close_task_runner"));
 }
 
 } // End namespace gold.

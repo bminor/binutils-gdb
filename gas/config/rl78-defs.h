@@ -19,7 +19,7 @@
    02110-1301, USA.  */
 
 #ifndef RL78_DEFS_H
-#define RL78_DEFS_H  
+#define RL78_DEFS_H
 
 /* Third operand to rl78_op.  */
 #define RL78REL_DATA		0
@@ -46,6 +46,10 @@ extern void   rl78_linkrelax_addr16 (void);
 extern void   rl78_linkrelax_branch (void);
 extern int    rl78_parse (void);
 extern int    rl78_wrap (void);
+
+extern int    rl78_isa_g10 (void);
+extern int    rl78_isa_g13 (void);
+extern int    rl78_isa_g14 (void);
 
 extern char * rl78_lex_start;
 extern char * rl78_lex_end;

@@ -201,7 +201,7 @@ unique_section_p (const asection *sec,
   struct unique_sections *unam;
   const char *secnam;
 
-  if (link_info.relocatable
+  if (bfd_link_relocatable (&link_info)
       && sec->owner != NULL
       && bfd_is_group_section (sec->owner, sec))
     return !(os != NULL
@@ -1817,7 +1817,8 @@ lang_insert_orphan (asection *s,
       push_stat_ptr (&add);
     }
 
-  if (link_info.relocatable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
+  if (bfd_link_relocatable (&link_info)
+      || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
     address = exp_intop (0);
 
   os_tail = ((lang_output_section_statement_type **)
@@ -2347,7 +2348,7 @@ lang_add_section (lang_statement_list_type *ptr,
      format targets, .text$foo sections go into .text and it's odd
      to see .text with SEC_LINK_ONCE set.  */
 
-  if (!link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     flags &= ~(SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_RELOC);
 
   switch (output->sectype)
@@ -3172,7 +3173,8 @@ ldlang_open_output (lang_statement_union_type *statement)
       ASSERT (link_info.output_bfd == NULL);
       open_output (statement->output_statement.name);
       ldemul_set_output_arch ();
-      if (config.magic_demand_paged && !link_info.relocatable)
+      if (config.magic_demand_paged
+	  && !bfd_link_relocatable (&link_info))
 	link_info.output_bfd->flags |= D_PAGED;
       else
 	link_info.output_bfd->flags &= ~D_PAGED;
@@ -3411,6 +3413,55 @@ lang_place_undefineds (void)
 
   for (ptr = ldlang_undef_chain_list_head; ptr != NULL; ptr = ptr->next)
     insert_undefined (ptr->name);
+}
+
+/* Structure used to build the list of symbols that the user has required
+   be defined.  */
+
+struct require_defined_symbol
+{
+  const char *name;
+  struct require_defined_symbol *next;
+};
+
+/* The list of symbols that the user has required be defined.  */
+
+static struct require_defined_symbol *require_defined_symbol_list;
+
+/* Add a new symbol NAME to the list of symbols that are required to be
+   defined.  */
+
+void
+ldlang_add_require_defined (const char * const name)
+{
+  struct require_defined_symbol *ptr;
+
+  ldlang_add_undef (name, TRUE);
+  ptr = (struct require_defined_symbol *) stat_alloc (sizeof (*ptr));
+  ptr->next = require_defined_symbol_list;
+  ptr->name = strdup (name);
+  require_defined_symbol_list = ptr;
+}
+
+/* Check that all symbols the user required to be defined, are defined,
+   raise an error if we find a symbol that is not defined.  */
+
+static void
+ldlang_check_require_defined_symbols (void)
+{
+  struct require_defined_symbol *ptr;
+
+  for (ptr = require_defined_symbol_list; ptr != NULL; ptr = ptr->next)
+    {
+      struct bfd_link_hash_entry *h;
+
+      h = bfd_link_hash_lookup (link_info.hash, ptr->name,
+                                FALSE, FALSE, TRUE);
+      if (h == NULL
+          || (h->type != bfd_link_hash_defined
+              && h->type != bfd_link_hash_defweak))
+        einfo(_("%P%X: required symbol `%s' not defined\n"), ptr->name);
+    }
 }
 
 /* Check for all readonly or some readwrite sections.  */
@@ -4797,7 +4848,7 @@ lang_size_sections_1
 	       here, in lang_insert_orphan, or in the default linker scripts.
 	       This is covering for coff backend linker bugs.  See PR6945.  */
 	    if (os->addr_tree == NULL
-		&& link_info.relocatable
+		&& bfd_link_relocatable (&link_info)
 		&& (bfd_get_flavour (link_info.output_bfd)
 		    == bfd_target_coff_flavour))
 	      os->addr_tree = exp_intop (0);
@@ -4876,7 +4927,7 @@ lang_size_sections_1
 		       defined, issue an error message.  */
 		    if (!os->ignored
 			&& !IGNORE_SECTION (os->bfd_section)
-			&& ! link_info.relocatable
+			&& !bfd_link_relocatable (&link_info)
 			&& check_regions
 			&& strcmp (os->region->name_list.name,
 				   DEFAULT_MEMORY_REGION) == 0
@@ -5056,13 +5107,13 @@ lang_size_sections_1
 			&& dot >= (r->last_os->output_section_statement
 				   .bfd_section->vma)))
 		&& os->lma_region == NULL
-		&& !link_info.relocatable)
+		&& !bfd_link_relocatable (&link_info))
 	      r->last_os = s;
 
 	    /* .tbss sections effectively have zero size.  */
 	    if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
 		|| (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
-		|| link_info.relocatable)
+		|| bfd_link_relocatable (&link_info))
 	      dotdelta = TO_ADDR (os->bfd_section->size);
 	    else
 	      dotdelta = 0;
@@ -5497,7 +5548,7 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 		/* .tbss sections effectively have zero size.  */
 		if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
 		    || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
-		    || link_info.relocatable)
+		    || bfd_link_relocatable (&link_info))
 		  dot += TO_ADDR (os->bfd_section->size);
 
 		if (os->update_dot_tree != NULL)
@@ -5721,7 +5772,7 @@ lang_set_startof (void)
 {
   asection *s;
 
-  if (link_info.relocatable)
+  if (bfd_link_relocatable (&link_info))
     return;
 
   for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
@@ -5761,15 +5812,15 @@ lang_end (void)
   struct bfd_link_hash_entry *h;
   bfd_boolean warn;
 
-  if ((link_info.relocatable && !link_info.gc_sections)
-      || (link_info.shared && !link_info.executable))
+  if ((bfd_link_relocatable (&link_info) && !link_info.gc_sections)
+      || bfd_link_dll (&link_info))
     warn = entry_from_cmdline;
   else
     warn = TRUE;
 
   /* Force the user to specify a root when generating a relocatable with
      --gc-sections.  */
-  if (link_info.gc_sections && link_info.relocatable
+  if (link_info.gc_sections && bfd_link_relocatable (&link_info)
       && !(entry_from_cmdline || undef_from_cmdline))
     einfo (_("%P%F: gc-sections requires either an entry or "
 	     "an undefined symbol\n"));
@@ -5879,7 +5930,8 @@ lang_check (void)
 	 input format may not have equivalent representations in
 	 the output format (and besides BFD does not translate
 	 relocs for other link purposes than a final link).  */
-      if ((link_info.relocatable || link_info.emitrelocations)
+      if ((bfd_link_relocatable (&link_info)
+	   || link_info.emitrelocations)
 	  && (compatible == NULL
 	      || (bfd_get_flavour (input_bfd)
 		  != bfd_get_flavour (link_info.output_bfd)))
@@ -5935,7 +5987,7 @@ lang_common (void)
 {
   if (command_line.inhibit_common_definition)
     return;
-  if (link_info.relocatable
+  if (bfd_link_relocatable (&link_info)
       && ! command_line.force_common_definition)
     return;
 
@@ -6077,7 +6129,7 @@ lang_place_orphans (void)
 		  /* This is a lonely common section which must have
 		     come from an archive.  We attach to the section
 		     with the wildcard.  */
-		  if (! link_info.relocatable
+		  if (!bfd_link_relocatable (&link_info)
 		      || command_line.force_common_definition)
 		    {
 		      if (default_common_section == NULL)
@@ -6104,7 +6156,7 @@ lang_place_orphans (void)
 								 constraint,
 								 TRUE);
 		      if (os->addr_tree == NULL
-			  && (link_info.relocatable
+			  && (bfd_link_relocatable (&link_info)
 			      || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0))
 			os->addr_tree = exp_intop (0);
 		      lang_add_section (&os->children, s, NULL, os);
@@ -6385,7 +6437,7 @@ lang_gc_sections (void)
   /* SEC_EXCLUDE is ignored when doing a relocatable link, except in
      the special case of debug info.  (See bfd/stabs.c)
      Twiddle the flag here, to simplify later linker code.  */
-  if (link_info.relocatable)
+  if (bfd_link_relocatable (&link_info))
     {
       LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
@@ -6751,7 +6803,7 @@ lang_process (void)
   /* Find any sections not attached explicitly and handle them.  */
   lang_place_orphans ();
 
-  if (! link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     {
       asection *found;
 
@@ -6782,7 +6834,7 @@ lang_process (void)
   lang_record_phdrs ();
 
   /* Check relro sections.  */
-  if (link_info.relro && ! link_info.relocatable)
+  if (link_info.relro && !bfd_link_relocatable (&link_info))
     lang_find_relro_sections ();
 
   /* Size up the sections.  */
@@ -6804,6 +6856,9 @@ lang_process (void)
   /* Make sure that the section addresses make sense.  */
   if (command_line.check_section_addresses)
     lang_check_section_addresses ();
+
+  /* Check any required symbols are known.  */
+  ldlang_check_require_defined_symbols ();
 
   lang_end ();
 }
@@ -8131,5 +8186,43 @@ lang_ld_feature (char *str)
 	einfo (_("%X%P: unknown feature `%s'\n"), p);
       *q = sep;
       p = q;
+    }
+}
+
+/* Pretty print memory amount.  */
+
+static void
+lang_print_memory_size (bfd_vma sz)
+{
+  if ((sz & 0x3fffffff) == 0)
+    printf ("%10" BFD_VMA_FMT "u GB", sz >> 30);
+  else if ((sz & 0xfffff) == 0)
+    printf ("%10" BFD_VMA_FMT "u MB", sz >> 20);
+  else if ((sz & 0x3ff) == 0)
+    printf ("%10" BFD_VMA_FMT "u KB", sz >> 10);
+  else
+    printf (" %10" BFD_VMA_FMT "u B", sz);
+}
+
+/* Implement --print-memory-usage: disply per region memory usage.  */
+
+void
+lang_print_memory_usage (void)
+{
+  lang_memory_region_type *r;
+
+  printf ("Memory region         Used Size  Region Size  %%age Used\n");
+  for (r = lang_memory_region_list; r->next != NULL; r = r->next)
+    {
+      bfd_vma used_length = r->current - r->origin;
+      double percent;
+
+      printf ("%16s: ",r->name_list.name);
+      lang_print_memory_size (used_length);
+      lang_print_memory_size ((bfd_vma) r->length);
+
+      percent = used_length * 100.0 / r->length;
+
+      printf ("    %6.2f%%\n", percent);
     }
 }

@@ -74,7 +74,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
   CORE_ADDR addr;
   int want_space = 0;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
@@ -250,7 +250,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	      if (msymbol.minsym != NULL)
 		wsym = lookup_symbol (MSYMBOL_LINKAGE_NAME (msymbol.minsym),
 				      block,
-				      VAR_DOMAIN, &is_this_fld);
+				      VAR_DOMAIN, &is_this_fld).symbol;
 
 	      if (wsym)
 		{
@@ -336,7 +336,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 
     case TYPE_CODE_SET:
       elttype = TYPE_INDEX_TYPE (type);
-      CHECK_TYPEDEF (elttype);
+      elttype = check_typedef (elttype);
       if (TYPE_STUB (elttype))
 	{
 	  fprintf_filtered (stream, "<incomplete type>");
@@ -537,7 +537,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
   int i, len, n_baseclasses;
   char *last_dont_print = obstack_next_free (&dont_print_statmem_obstack);
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   fprintf_filtered (stream, "{");
   len = TYPE_NFIELDS (type);
@@ -872,7 +872,7 @@ pascal_object_print_static_field (struct value *val,
       obstack_grow (&dont_print_statmem_obstack, (char *) &addr,
 		    sizeof (CORE_ADDR));
 
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
       pascal_object_print_value_fields (type,
 					value_contents_for_printing (val),
 					value_embedded_offset (val),

@@ -3223,11 +3223,10 @@ arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     }
 }
 
-/* Return true if we are in the function's epilogue, i.e. after the
-   instruction that destroyed the function's stack frame.  */
+/* Implement the stack_frame_destroyed_p gdbarch method.  */
 
 static int
-thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+thumb_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int insn, insn2;
@@ -3334,11 +3333,10 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return found_stack_adjust;
 }
 
-/* Return true if we are in the function's epilogue, i.e. after the
-   instruction that destroyed the function's stack frame.  */
+/* Implement the stack_frame_destroyed_p gdbarch method.  */
 
 static int
-arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+arm_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int insn;
@@ -3346,7 +3344,7 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   CORE_ADDR func_start, func_end;
 
   if (arm_pc_is_thumb (gdbarch, pc))
-    return thumb_in_function_epilogue_p (gdbarch, pc);
+    return thumb_stack_frame_destroyed_p (gdbarch, pc);
 
   if (!find_pc_partial_function (pc, NULL, &func_start, &func_end))
     return 0;
@@ -4929,6 +4927,13 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	case 0x5:		/* data transfer */
 	case 0x6:
 	case 0x7:
+	  if (bits (this_instr, 25, 27) == 0x3 && bit (this_instr, 4) == 1)
+	    {
+	      /* Media instructions and architecturally undefined
+		 instructions.  */
+	      break;
+	    }
+
 	  if (bit (this_instr, 20))
 	    {
 	      /* load */
@@ -9003,7 +9008,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
   int nRc;
   enum type_code code;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   /* In the ARM ABI, "integer" like aggregate types are returned in
      registers.  For an aggregate type to be integer like, its size
@@ -9403,7 +9408,7 @@ set_fp_model_sfunc (char *args, int from_tty,
   for (fp_model = ARM_FLOAT_AUTO; fp_model != ARM_FLOAT_LAST; fp_model++)
     if (strcmp (current_fp_model, fp_model_strings[fp_model]) == 0)
       {
-	arm_fp_model = fp_model;
+	arm_fp_model = (enum arm_float_model) fp_model;
 	break;
       }
 
@@ -9440,7 +9445,7 @@ arm_set_abi (char *args, int from_tty,
   for (arm_abi = ARM_ABI_AUTO; arm_abi != ARM_ABI_LAST; arm_abi++)
     if (strcmp (arm_abi_string, arm_abi_strings[arm_abi]) == 0)
       {
-	arm_abi_global = arm_abi;
+	arm_abi_global = (enum arm_abi_kind) arm_abi;
 	break;
       }
 
@@ -9916,7 +9921,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum arm_float_model fp_model = arm_fp_model;
   struct tdesc_arch_data *tdesc_data = NULL;
   int i, is_m = 0;
-  int have_vfp_registers = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
+  int vfp_register_count = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
+  int have_wmmx_registers = 0;
   int have_neon = 0;
   int have_fpa_registers = 1;
   const struct target_desc *tdesc = info.target_desc;
@@ -9952,7 +9958,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		 anyway, so assume APCS.  */
 	      arm_abi = ARM_ABI_APCS;
 	    }
-	  else if (ei_osabi == ELFOSABI_NONE)
+	  else if (ei_osabi == ELFOSABI_NONE || ei_osabi == ELFOSABI_GNU)
 	    {
 	      int eabi_ver = EF_ARM_EABI_VERSION (e_flags);
 	      int attr_arch, attr_profile;
@@ -10180,6 +10186,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      tdesc_data_cleanup (tdesc_data);
 	      return NULL;
 	    }
+
+	  have_wmmx_registers = 1;
 	}
 
       /* If we have a VFP unit, check whether the single precision registers
@@ -10222,7 +10230,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  if (tdesc_unnumbered_register (feature, "s0") == 0)
 	    have_vfp_pseudos = 1;
 
-	  have_vfp_registers = 1;
+	  vfp_register_count = i;
 
 	  /* If we have VFP, also check for NEON.  The architecture allows
 	     NEON without VFP (integer vector operations only), but GDB
@@ -10291,7 +10299,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->fp_model = fp_model;
   tdep->is_m = is_m;
   tdep->have_fpa_registers = have_fpa_registers;
-  tdep->have_vfp_registers = have_vfp_registers;
+  tdep->have_wmmx_registers = have_wmmx_registers;
+  gdb_assert (vfp_register_count == 0
+	      || vfp_register_count == 16
+	      || vfp_register_count == 32);
+  tdep->vfp_register_count = vfp_register_count;
   tdep->have_vfp_pseudos = have_vfp_pseudos;
   tdep->have_neon_pseudos = have_neon_pseudos;
   tdep->have_neon = have_neon;
@@ -10356,8 +10368,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
 
-  /* Detect whether PC is in function epilogue.  */
-  set_gdbarch_in_function_epilogue_p (gdbarch, arm_in_function_epilogue_p);
+  /* Detect whether PC is at a point where the stack has been destroyed.  */
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, arm_stack_frame_destroyed_p);
 
   /* Skip trampolines.  */
   set_gdbarch_skip_trampoline_code (gdbarch, arm_skip_stub);

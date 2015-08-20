@@ -781,6 +781,16 @@ The @code{gdb.Value} object @code{py_val} is identical to that
 corresponding to @code{val}.
 @end defun
 
+@defun Value.reference_value ()
+Return a @code{gdb.Value} object which is a reference to the value
+encapsulated by this instance.
+@end defun
+
+@defun Value.const_value ()
+Return a @code{gdb.Value} object which is a @code{const} version of the
+value encapsulated by this instance.
+@end defun
+
 @defun Value.dynamic_cast (type)
 Like @code{Value.cast}, but works as if the C@t{++} @code{dynamic_cast}
 operator were used.  Consult a C@t{++} reference for details.
@@ -1060,6 +1070,11 @@ If @var{block} is given, then @var{name} is looked up in that scope.
 Otherwise, it is searched for globally.
 @end defun
 
+@defun Type.optimized_out ()
+Return @code{gdb.Value} instance of this type whose value is optimized
+out.  This allows a frame decorator to indicate that the value of an
+argument or a local variable is not known.
+@end defun
 
 Each type has a code, which indicates what category this type falls
 into.  The available type categories are represented by constants
@@ -2360,7 +2375,7 @@ xmethod worker is found to be equivalent to the winning C@t{++}
 method, then the xmethod worker is treated as a replacement for
 the C@t{++} method.  @value{GDBN} uses the overall winner to invoke the
 method.  If the winning xmethod worker is the overall winner, then
-the corresponding xmethod is invoked via the @code{invoke} method
+the corresponding xmethod is invoked via the @code{__call__} method
 of the worker object.
 
 If one wants to implement an xmethod as a replacement for an
@@ -2448,6 +2463,13 @@ to the arguments that the xmethod takes.  It can return an empty
 sequence or @code{None} if the xmethod does not take any arguments.
 If the xmethod takes a single argument, then a single
 @code{gdb.Type} object corresponding to it can be returned.
+@end defun
+
+@defun XMethodWorker.get_result_type (self, *args)
+This method returns a @code{gdb.Type} object representing the type
+of the result of invoking this xmethod.
+The @var{args} argument is the same tuple of arguments that would be
+passed to the @code{__call__} method of this worker.
 @end defun
 
 @defun XMethodWorker.__call__ (self, *args)
@@ -2566,6 +2588,9 @@ above is as follows:
 class MyClassWorker_geta(gdb.xmethod.XMethodWorker):
     def get_arg_types(self):
         return None
+
+    def get_result_type(self, obj):
+        return gdb.lookup_type('int')
  
     def __call__(self, obj):
         return obj['a_']
@@ -2574,6 +2599,9 @@ class MyClassWorker_geta(gdb.xmethod.XMethodWorker):
 class MyClassWorker_plus(gdb.xmethod.XMethodWorker):
     def get_arg_types(self):
         return gdb.lookup_type('MyClass')
+
+    def get_result_type(self, obj):
+        return gdb.lookup_type('int')
  
     def __call__(self, obj, other):
         return obj['a_'] + other['a_']
@@ -2637,10 +2665,13 @@ of the xmethod workers and xmethod matchers is as follows:
 class MyTemplateWorker_footprint(gdb.xmethod.XMethodWorker):
     def __init__(self, class_type):
         self.class_type = class_type
- 
+
     def get_arg_types(self):
         return None
- 
+
+    def get_result_type(self):
+        return gdb.lookup_type('int')
+
     def __call__(self, obj):
         return (self.class_type.sizeof +
                 obj['dsize_'] *
@@ -2718,7 +2749,7 @@ return an empty tuple.
 
 @findex Inferior.read_memory
 @defun Inferior.read_memory (address, length)
-Read @var{length} bytes of memory from the inferior, starting at
+Read @var{length} addressable memory units from the inferior, starting at
 @var{address}.  Returns a buffer object, which behaves much like an array
 or a string.  It can be modified and given to the
 @code{Inferior.write_memory} function.  In @code{Python} 3, the return
@@ -2731,7 +2762,8 @@ Write the contents of @var{buffer} to the inferior, starting at
 @var{address}.  The @var{buffer} parameter must be a Python object
 which supports the buffer protocol, i.e., a string, an array or the
 object returned from @code{Inferior.read_memory}.  If given, @var{length}
-determines the number of bytes from @var{buffer} to be written.
+determines the number of addressable memory units from @var{buffer} to be
+written.
 @end defun
 
 @findex gdb.search_memory

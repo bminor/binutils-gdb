@@ -1471,6 +1471,11 @@ s_align (int arg, int bytes_p)
     {
       align = get_absolute_expression ();
       SKIP_WHITESPACE ();
+
+#ifdef TC_ALIGN_ZERO_IS_DEFAULT
+      if (arg > 0 && align == 0)
+	align = arg;
+#endif
     }
 
   if (bytes_p)
@@ -5084,7 +5089,7 @@ output_big_sleb128 (char *p, LITTLENUM_TYPE *bignum, int size)
     {
       /* Sign-extend VAL.  */
       if (val & (1 << (loaded - 1)))
-	val |= ~0 << loaded;
+	val |= ~0U << loaded;
       if (orig)
 	*p = val & 0x7f;
       p++;

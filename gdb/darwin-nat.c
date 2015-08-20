@@ -83,7 +83,7 @@
 #define PTRACE(CMD, PID, ADDR, SIG) \
  darwin_ptrace(#CMD, CMD, (PID), (ADDR), (SIG))
 
-static void darwin_stop (struct target_ops *self, ptid_t);
+static void darwin_interrupt (struct target_ops *self, ptid_t);
 
 static void darwin_resume_to (struct target_ops *ops, ptid_t ptid, int step,
                               enum gdb_signal signal);
@@ -1198,7 +1198,7 @@ darwin_wait_to (struct target_ops *ops,
 }
 
 static void
-darwin_stop (struct target_ops *self, ptid_t t)
+darwin_interrupt (struct target_ops *self, ptid_t t)
 {
   struct inferior *inf = current_inferior ();
 
@@ -2156,7 +2156,7 @@ _initialize_darwin_inferior (void)
   darwin_ops->to_wait = darwin_wait_to;
   darwin_ops->to_mourn_inferior = darwin_mourn_inferior;
   darwin_ops->to_kill = darwin_kill_inferior;
-  darwin_ops->to_stop = darwin_stop;
+  darwin_ops->to_interrupt = darwin_interrupt;
   darwin_ops->to_resume = darwin_resume_to;
   darwin_ops->to_thread_alive = darwin_thread_alive;
   darwin_ops->to_pid_to_str = darwin_pid_to_str;

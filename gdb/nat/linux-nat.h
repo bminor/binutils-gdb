@@ -20,6 +20,8 @@
 #ifndef LINUX_NAT_H
 #define LINUX_NAT_H
 
+#include "target/waitstatus.h"
+
 struct lwp_info;
 struct arch_lwp_info;
 

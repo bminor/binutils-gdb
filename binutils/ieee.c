@@ -2954,7 +2954,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
 	      {
 		debug_type return_type;
 		const debug_type *arg_types;
-		bfd_boolean varargs;
+		bfd_boolean varargs = FALSE;
 
 		if (debug_get_type_kind (dhandle, pv->type)
 		    != DEBUG_KIND_FUNCTION)

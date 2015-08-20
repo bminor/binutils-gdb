@@ -390,6 +390,11 @@ if { ![gdb_target_supports_trace] } then {
     return -1
 }
 
+# Double-check that marker ID ("-m") is not mistaken for an explicit location
+# flag.
+gdb_test "strace -m gdbfoobarbaz" \
+    "No known static tracepoint marker named gdbfoobarbaz"
+
 strace_probe_marker
 
 strace_trace_on_same_addr "trace"

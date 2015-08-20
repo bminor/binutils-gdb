@@ -474,7 +474,7 @@ foo:
 	wfcdb	%v15,%v17
 	wfk	%v15,%v17,13,12
 	wfkdb	%v15,%v17
-	vfce	%v15,%v17,%v20
+	vfce	%v15,%v17,%v20,13,12,11
 	vfcedb	%v15,%v17,%v20
 	vfcedbs	%v15,%v17,%v20
 	wfcedb	%v15,%v17,%v20

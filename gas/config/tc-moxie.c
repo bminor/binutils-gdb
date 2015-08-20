@@ -616,13 +616,13 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
-    case OPTION_EB: 
-      target_big_endian = 1; 
+    case OPTION_EB:
+      target_big_endian = 1;
       break;
-    case OPTION_EL: 
+    case OPTION_EL:
       target_big_endian = 0;
       break;
-    default:        
+    default:
       return 0;
     }
 
@@ -640,7 +640,7 @@ md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
 /* Apply a fixup to the object file.  */
 
 void
-md_apply_fix (fixS *fixP ATTRIBUTE_UNUSED, 
+md_apply_fix (fixS *fixP ATTRIBUTE_UNUSED,
 	      valueT * valP ATTRIBUTE_UNUSED, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;

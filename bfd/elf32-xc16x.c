@@ -392,7 +392,7 @@ elf32_xc16x_relocate_section (bfd *output_bfd,
 					   rel, 1, relend, howto, 0, contents);
 	}
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       elf32_xc16x_final_link_relocate (r_type, input_bfd, output_bfd,

@@ -94,9 +94,12 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 fcntl.h signal.h sys/file.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h)
-AC_CHECK_FUNCS(getauxval pread pwrite pread64)
+AC_CHECK_FUNCS(getauxval pread pwrite pread64 setns)
 
 GDB_AC_COMMON
+
+# Check the return and argument types of ptrace.
+GDB_AC_PTRACE
 
 # Check for UST
 ustlibs=""
@@ -343,6 +346,7 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
   BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prgregset_t)
+  BFD_HAVE_SYS_PROCFS_TYPE(prfpregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(elf_fpregset_t)
 fi
 

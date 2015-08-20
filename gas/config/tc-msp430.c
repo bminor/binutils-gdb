@@ -255,7 +255,7 @@ relax_typeS md_relax_table[] =
 };
 
 
-#define MAX_OP_LEN	256
+#define MAX_OP_LEN	4096
 
 typedef enum msp_isa
 {
@@ -696,60 +696,60 @@ msp430_set_arch (int option)
    support the 430 ISA.  */
 static const char * msp430_mcu_names [] =
 {
-"msp430afe221",	"msp430afe222",	"msp430afe223",	"msp430afe231",	
-"msp430afe232",	"msp430afe233",	"msp430afe251",	"msp430afe252",	
-"msp430afe253",	"msp430c091",	"msp430c092",	"msp430c111",	
-"msp430c1111",	"msp430c112",	"msp430c1121",	"msp430c1331",	
-"msp430c1351",	"msp430c311s",	"msp430c312",	"msp430c313",	
-"msp430c314",	"msp430c315",	"msp430c323",	"msp430c325",	
-"msp430c336",	"msp430c337",	"msp430c412",	"msp430c413",	
-"msp430e112",	"msp430e313",	"msp430e315",	"msp430e325",	
-"msp430e337",	"msp430f110",	"msp430f1101",	"msp430f1101a",	
-"msp430f1111",	"msp430f1111a",	"msp430f112",	"msp430f1121",	
-"msp430f1121a",	"msp430f1122",	"msp430f1132",	"msp430f122",	
-"msp430f1222",	"msp430f123",	"msp430f1232",	"msp430f133",	
-"msp430f135",	"msp430f147",	"msp430f1471",	"msp430f148",	
-"msp430f1481",	"msp430f149",	"msp430f1491",	"msp430f155",	
-"msp430f156",	"msp430f157",	"msp430f1610",	"msp430f1611",	
-"msp430f1612",	"msp430f167",	"msp430f168",	"msp430f169",	
-"msp430f2001",	"msp430f2002",	"msp430f2003",	"msp430f2011",	
-"msp430f2012",	"msp430f2013",	"msp430f2101",	"msp430f2111",	
-"msp430f2112",	"msp430f2121",	"msp430f2122",	"msp430f2131",	
-"msp430f2132",	"msp430f2232",	"msp430f2234",	"msp430f2252",	
-"msp430f2254",	"msp430f2272",	"msp430f2274",	"msp430f233",	
-"msp430f2330",	"msp430f235",	"msp430f2350",	"msp430f2370",	
-"msp430f2410",	"msp430f247",	"msp430f2471",	"msp430f248",	
-"msp430f2481",	"msp430f249",	"msp430f2491",	"msp430f412",	
-"msp430f413",	"msp430f4132",	"msp430f415",	"msp430f4152",	
-"msp430f417",	"msp430f423",	"msp430f423a",	"msp430f425",	
-"msp430f4250",	"msp430f425a",	"msp430f4260",	"msp430f427",	
-"msp430f4270",	"msp430f427a",	"msp430f435",	"msp430f4351",	
-"msp430f436",	"msp430f4361",	"msp430f437",	"msp430f4371",	
-"msp430f438",	"msp430f439",	"msp430f447",	"msp430f448",	
-"msp430f4481",	"msp430f449",	"msp430f4491",	"msp430f477",	
-"msp430f478",	"msp430f4783",	"msp430f4784",	"msp430f479",	
-"msp430f4793",	"msp430f4794",	"msp430fe423",	"msp430fe4232",	
-"msp430fe423a",	"msp430fe4242",	"msp430fe425",	"msp430fe4252",	
-"msp430fe425a",	"msp430fe427",	"msp430fe4272",	"msp430fe427a",	
-"msp430fg4250",	"msp430fg4260",	"msp430fg4270",	"msp430fg437",	
-"msp430fg438",	"msp430fg439",	"msp430fg477",	"msp430fg478",	
-"msp430fg479",	"msp430fw423",	"msp430fw425",	"msp430fw427",	
-"msp430fw428",	"msp430fw429",	"msp430g2001",	"msp430g2101",	
-"msp430g2102",	"msp430g2111",	"msp430g2112",	"msp430g2113",	
-"msp430g2121",	"msp430g2131",	"msp430g2132",	"msp430g2152",	
-"msp430g2153",	"msp430g2201",	"msp430g2202",	"msp430g2203",	
-"msp430g2210",	"msp430g2211",	"msp430g2212",	"msp430g2213",	
-"msp430g2221",	"msp430g2230",	"msp430g2231",	"msp430g2232",	
-"msp430g2233",	"msp430g2252",	"msp430g2253",	"msp430g2302",	
-"msp430g2303",	"msp430g2312",	"msp430g2313",	"msp430g2332",	
-"msp430g2333",	"msp430g2352",	"msp430g2353",	"msp430g2402",	
-"msp430g2403",	"msp430g2412",	"msp430g2413",	"msp430g2432",	
-"msp430g2433",	"msp430g2444",	"msp430g2452",	"msp430g2453",	
-"msp430g2513",	"msp430g2533",	"msp430g2544",	"msp430g2553",	
-"msp430g2744",	"msp430g2755",	"msp430g2855",	"msp430g2955",	
-"msp430i2020",	"msp430i2021",	"msp430i2030",	"msp430i2031",	
-"msp430i2040",	"msp430i2041",	"msp430l092",   "msp430p112",	
-"msp430p313",	"msp430p315",	"msp430p315s",	"msp430p325",	
+"msp430afe221",	"msp430afe222",	"msp430afe223",	"msp430afe231",
+"msp430afe232",	"msp430afe233",	"msp430afe251",	"msp430afe252",
+"msp430afe253",	"msp430c091",	"msp430c092",	"msp430c111",
+"msp430c1111",	"msp430c112",	"msp430c1121",	"msp430c1331",
+"msp430c1351",	"msp430c311s",	"msp430c312",	"msp430c313",
+"msp430c314",	"msp430c315",	"msp430c323",	"msp430c325",
+"msp430c336",	"msp430c337",	"msp430c412",	"msp430c413",
+"msp430e112",	"msp430e313",	"msp430e315",	"msp430e325",
+"msp430e337",	"msp430f110",	"msp430f1101",	"msp430f1101a",
+"msp430f1111",	"msp430f1111a",	"msp430f112",	"msp430f1121",
+"msp430f1121a",	"msp430f1122",	"msp430f1132",	"msp430f122",
+"msp430f1222",	"msp430f123",	"msp430f1232",	"msp430f133",
+"msp430f135",	"msp430f147",	"msp430f1471",	"msp430f148",
+"msp430f1481",	"msp430f149",	"msp430f1491",	"msp430f155",
+"msp430f156",	"msp430f157",	"msp430f1610",	"msp430f1611",
+"msp430f1612",	"msp430f167",	"msp430f168",	"msp430f169",
+"msp430f2001",	"msp430f2002",	"msp430f2003",	"msp430f2011",
+"msp430f2012",	"msp430f2013",	"msp430f2101",	"msp430f2111",
+"msp430f2112",	"msp430f2121",	"msp430f2122",	"msp430f2131",
+"msp430f2132",	"msp430f2232",	"msp430f2234",	"msp430f2252",
+"msp430f2254",	"msp430f2272",	"msp430f2274",	"msp430f233",
+"msp430f2330",	"msp430f235",	"msp430f2350",	"msp430f2370",
+"msp430f2410",	"msp430f247",	"msp430f2471",	"msp430f248",
+"msp430f2481",	"msp430f249",	"msp430f2491",	"msp430f412",
+"msp430f413",	"msp430f4132",	"msp430f415",	"msp430f4152",
+"msp430f417",	"msp430f423",	"msp430f423a",	"msp430f425",
+"msp430f4250",	"msp430f425a",	"msp430f4260",	"msp430f427",
+"msp430f4270",	"msp430f427a",	"msp430f435",	"msp430f4351",
+"msp430f436",	"msp430f4361",	"msp430f437",	"msp430f4371",
+"msp430f438",	"msp430f439",	"msp430f447",	"msp430f448",
+"msp430f4481",	"msp430f449",	"msp430f4491",	"msp430f477",
+"msp430f478",	"msp430f4783",	"msp430f4784",	"msp430f479",
+"msp430f4793",	"msp430f4794",	"msp430fe423",	"msp430fe4232",
+"msp430fe423a",	"msp430fe4242",	"msp430fe425",	"msp430fe4252",
+"msp430fe425a",	"msp430fe427",	"msp430fe4272",	"msp430fe427a",
+"msp430fg4250",	"msp430fg4260",	"msp430fg4270",	"msp430fg437",
+"msp430fg438",	"msp430fg439",	"msp430fg477",	"msp430fg478",
+"msp430fg479",	"msp430fw423",	"msp430fw425",	"msp430fw427",
+"msp430fw428",	"msp430fw429",	"msp430g2001",	"msp430g2101",
+"msp430g2102",	"msp430g2111",	"msp430g2112",	"msp430g2113",
+"msp430g2121",	"msp430g2131",	"msp430g2132",	"msp430g2152",
+"msp430g2153",	"msp430g2201",	"msp430g2202",	"msp430g2203",
+"msp430g2210",	"msp430g2211",	"msp430g2212",	"msp430g2213",
+"msp430g2221",	"msp430g2230",	"msp430g2231",	"msp430g2232",
+"msp430g2233",	"msp430g2252",	"msp430g2253",	"msp430g2302",
+"msp430g2303",	"msp430g2312",	"msp430g2313",	"msp430g2332",
+"msp430g2333",	"msp430g2352",	"msp430g2353",	"msp430g2402",
+"msp430g2403",	"msp430g2412",	"msp430g2413",	"msp430g2432",
+"msp430g2433",	"msp430g2444",	"msp430g2452",	"msp430g2453",
+"msp430g2513",	"msp430g2533",	"msp430g2544",	"msp430g2553",
+"msp430g2744",	"msp430g2755",	"msp430g2855",	"msp430g2955",
+"msp430i2020",	"msp430i2021",	"msp430i2030",	"msp430i2031",
+"msp430i2040",	"msp430i2041",	"msp430l092",   "msp430p112",
+"msp430p313",	"msp430p315",	"msp430p315s",	"msp430p325",
 "msp430p337",	"msp430tch5e"
 };
 
@@ -840,14 +840,11 @@ md_parse_option (int c, char * arg)
 
    The code which initializes these sections should have a global
    label for these symbols, and should be marked with KEEP() in the
-   linker script.
- */
-static void
-msp430_section (int arg)
-{
-  char * saved_ilp = input_line_pointer;
-  char * name = obj_elf_section_name ();
+   linker script.  */
 
+static void
+msp430_make_init_symbols (const char * name)
+{
   if (strncmp (name, ".bss", 4) == 0
       || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_init_bss");
@@ -855,6 +852,27 @@ msp430_section (int arg)
   if (strncmp (name, ".data", 5) == 0
       || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_movedata");
+
+  /* Note - data assigned to the .either.data section may end up being
+     placed in the .upper.data section if the .lower.data section is
+     full.  Hence the need to define the crt0 symbol.  */
+  if (strncmp (name, ".either.data", 12) == 0
+      || strncmp (name, ".upper.data", 11) == 0)
+    (void) symbol_find_or_make ("__crt0_move_highdata");
+
+  /* See note about .either.data above.  */
+  if (strncmp (name, ".upper.bss", 10) == 0
+      || strncmp (name, ".either.bss", 11) == 0)
+    (void) symbol_find_or_make ("__crt0_init_highbss");
+}
+
+static void
+msp430_section (int arg)
+{
+  char * saved_ilp = input_line_pointer;
+  char * name = obj_elf_section_name ();
+
+  msp430_make_init_symbols (name);
 
   input_line_pointer = saved_ilp;
   obj_elf_section (arg);
@@ -868,13 +886,7 @@ msp430_frob_section (asection *sec)
   if (sec->size == 0)
     return;
 
-  if (strncmp (name, ".bss", 4) == 0
-      || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
-    (void) symbol_find_or_make ("__crt0_init_bss");
-
-  if (strncmp (name, ".data", 5) == 0
-      || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
-    (void) symbol_find_or_make ("__crt0_movedata");
+  msp430_make_init_symbols (name);
 }
 
 static void
@@ -1928,7 +1940,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  opcode->name);
 	  return 0;
 	}
-	
+
       fmt = (-fmt) - 1;
       extended_op = TRUE;
     }
@@ -2057,7 +2069,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  if (op1.exp.X_op == O_constant)
 		    extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
 
-		  else if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		  else if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 				 BFD_RELOC_MSP430X_ABS20_EXT_SRC);
 		  else
@@ -2143,7 +2155,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  if (op1.exp.X_op == O_constant)
 		    extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
 
-		  else if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		  else if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 				 BFD_RELOC_MSP430X_ABS20_EXT_SRC);
 		  else
@@ -2189,7 +2201,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 		  if (!extended_op)
 		    {
-		      if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		      if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 			fix_new_exp (frag_now, where, 2,
 				     &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		      else
@@ -2259,7 +2271,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 		  bfd_putl16 ((bfd_vma) ZEROS, frag + 2);
 
-		  if (op1.reg || (op1.reg == 0 && op1.am == 3))
+		  if (op1.reg || op1.am == 3)
 		    fix_new_exp (frag_now, where, 2,
 				 &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		  else
@@ -2787,7 +2799,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      if (op1.exp.X_op == O_constant)
 		extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
 
-	      else  if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+	      else  if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_ABS20_EXT_SRC);
 	      else
@@ -2833,7 +2845,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 	      if (!extended_op)
 		{
-		  if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		  if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 2,
 				 &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		  else
@@ -2935,7 +2947,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      if (op1.exp.X_op == O_constant)
 		extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
 
-	      else if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+	      else if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_ABS20_EXT_SRC);
 	      else
@@ -2966,7 +2978,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 	      if (!extended_op)
 		{
-		  if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
+		  if (op1.reg || op1.am == 3)	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 2,
 				 &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		  else
@@ -3073,7 +3085,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  as_bad (_("polymorphs are not enabled. Use -mP option to enable."));
 	  break;
 	}
-	
+
       line = extract_operand (line, l1, sizeof (l1));
       if (l1[0])
 	{
@@ -3311,8 +3323,8 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
   if (msp430_enable_polys
       && !msp430_enable_relax)
     {
-      if (!fixp->fx_addsy || (fixp->fx_addsy
-	  && S_GET_SEGMENT (fixp->fx_addsy) == absolute_section))
+      if (!fixp->fx_addsy
+	  || S_GET_SEGMENT (fixp->fx_addsy) == absolute_section)
 	fixp->fx_done = 1;	/* It is ok to kill 'abs' reloc.  */
       else
       	fixp->fx_done = 0;
@@ -3373,7 +3385,7 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 	  value &= 0xffff;	/* Get rid of extended sign.  */
 	  bfd_putl16 ((bfd_vma) value, where);
 	  break;
-	  
+
 	case BFD_RELOC_32:
 	  bfd_putl16 ((bfd_vma) value, where);
 	  break;

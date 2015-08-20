@@ -6,12 +6,12 @@ dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
 dnl the Free Software Foundation; either version 3 of the License, or
 dnl (at your option) any later version.
-dnl 
+dnl
 dnl This program is distributed in the hope that it will be useful,
 dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
-dnl 
+dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
@@ -31,6 +31,7 @@ AM_MAINTAINER_MODE
 
 AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_GREP
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_INSTALL
@@ -326,6 +327,14 @@ do
 	  case "${i}" in
 	  *elf*)
 	    elf_list_options=TRUE
+	    ;;
+	  *)
+	    if $GREP "TEMPLATE_NAME=elf32" ${srcdir}/emulparams/${i}.sh >/dev/null 2>/dev/null; then
+	      elf_list_options=TRUE
+	    fi
+	    ;;
+	  esac
+	  if test "$elf_list_options" = "TRUE"; then
 	    . ${srcdir}/emulparams/${i}.sh
 	    if test x${GENERATE_SHLIB_SCRIPT} = xyes; then
 	      elf_shlib_list_options=TRUE
@@ -333,8 +342,7 @@ do
 	    if test x${PLT_UNWIND} = xyes; then
 	      elf_plt_unwind_list_options=TRUE
 	    fi
-	    ;;
-	  esac
+	  fi
 	  ;;
 	esac
     done

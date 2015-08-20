@@ -165,7 +165,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
   int fields_seen = 0;
   static int last_set_recurse = -1;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   
   if (recurse == 0)
     {
@@ -669,7 +669,7 @@ cp_print_static_field (struct type *type,
       addr = value_address (val);
       obstack_grow (&dont_print_statmem_obstack, (char *) &addr,
 		    sizeof (CORE_ADDR));
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
       cp_print_value_fields (type, value_enclosing_type (val),
 			     value_contents_for_printing (val),
 			     value_embedded_offset (val), addr,

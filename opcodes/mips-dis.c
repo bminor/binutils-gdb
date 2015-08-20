@@ -875,8 +875,8 @@ parse_mips_dis_option (const char *option, unsigned int len)
       mips_ase |= ASE_XPA;
       return;
     }
-  
-  
+
+
   /* Look for the = that delimits the end of the option name.  */
   for (i = 0; i < len; i++)
     if (option[i] == '=')
@@ -1709,7 +1709,7 @@ print_insn_mips (bfd_vma memaddr,
     {
       for (; op < &mips_opcodes[NUMOPCODES]; op++)
 	{
-	  if (op->pinfo != INSN_MACRO 
+	  if (op->pinfo != INSN_MACRO
 	      && !(no_aliases && (op->pinfo2 & INSN2_ALIAS))
 	      && (word & op->mask) == op->match)
 	    {

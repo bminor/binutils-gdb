@@ -36,10 +36,15 @@ proc is_elf_format {} {
 	 && ![istarget tic6x*-*-uclinux*]
 	 && ![istarget *-*-irix5*]
 	 && ![istarget *-*-irix6*]
+	 && ![istarget *-*-freebsd*]
 	 && ![istarget *-*-netbsd*]
 	 && ![istarget *-*-openbsd*]
 	 && ![istarget *-*-solaris2*] } {
 	return 0
+    }
+
+    if { [istarget i?86-*-freebsd\[12\].*] } {
+        return 0
     }
 
     if { [istarget *-*-linux*aout*]
@@ -92,7 +97,7 @@ proc is_aout_format {} {
 	 || [istarget arm-*-netbsd*]
 	 || [istarget arm-*-openbsd*]
 	 || [istarget arm-*-riscix*]
-	 || [istarget i?86-*-freebsd\[12\]*]
+	 || [istarget i?86-*-freebsd\[12\].*]
 	 || [istarget i?86-*-netbsd*]
 	 || [istarget i?86-*-openbsd\[0-2\]*]
 	 || [istarget i?86-*-openbsd3.\[0-2\]*]

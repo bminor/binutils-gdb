@@ -77,8 +77,8 @@ gccgo_string_p (struct type *type)
       struct type *type0 = TYPE_FIELD_TYPE (type, 0);
       struct type *type1 = TYPE_FIELD_TYPE (type, 1);
 
-      CHECK_TYPEDEF (type0);
-      CHECK_TYPEDEF (type1);
+      type0 = check_typedef (type0);
+      type1 = check_typedef (type1);
 
       if (TYPE_CODE (type0) == TYPE_CODE_PTR
 	  && strcmp (TYPE_FIELD_NAME (type, 0), "__data") == 0
@@ -87,7 +87,7 @@ gccgo_string_p (struct type *type)
 	{
 	  struct type *target_type = TYPE_TARGET_TYPE (type0);
 
-	  CHECK_TYPEDEF (target_type);
+	  target_type = check_typedef (target_type);
 
 	  if (TYPE_CODE (target_type) == TYPE_CODE_INT
 	      && TYPE_LENGTH (target_type) == 1
@@ -119,7 +119,7 @@ sixg_string_p (struct type *type)
 enum go_type
 go_classify_struct_type (struct type *type)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   /* Recognize strings as they're useful to be able to print without
      pretty-printers.  */
@@ -478,7 +478,7 @@ static const struct op_print go_op_print_tab[] =
   {"unsafe.Sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
   {"++", UNOP_POSTINCREMENT, PREC_SUFFIX, 0},
   {"--", UNOP_POSTDECREMENT, PREC_SUFFIX, 0},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_SUFFIX, 0}
 };
 
 enum go_primitive_types {

@@ -3421,7 +3421,7 @@ xcoff_ppc_relocate_section (bfd *output_bfd,
 		}
 	      else
 		{
-		  BFD_ASSERT (info->relocatable
+		  BFD_ASSERT (bfd_link_relocatable (info)
 			      || (info->static_link
 				  && (h->flags & XCOFF_WAS_UNDEFINED) != 0)
 			      || (h->flags & XCOFF_DEF_DYNAMIC) != 0
@@ -3591,7 +3591,7 @@ xcoff_create_csect_from_smclas (bfd *abfd,
       ".sv", ".bs", ".ds", ".uc", ".ti", ".tb", NULL, ".tc0", /* 8 - 15 */
       ".td", NULL, ".sv3264", NULL, ".tl", ".ul", ".te"
     };
-  
+
   if ((aux->x_csect.x_smclas < ARRAY_SIZE (names))
       && (NULL != names[aux->x_csect.x_smclas]))
     {

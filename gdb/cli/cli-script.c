@@ -615,7 +615,8 @@ execute_control_command (struct command_line *cmd)
       }
 
     case compile_control:
-      eval_compile_command (cmd, NULL, cmd->control_u.compile.scope);
+      eval_compile_command (cmd, NULL, cmd->control_u.compile.scope,
+			    cmd->control_u.compile.scope_data);
       ret = simple_control;
       break;
 

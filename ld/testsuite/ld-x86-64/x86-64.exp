@@ -52,7 +52,7 @@ set x86_64tests {
     {"TLS -fpic -shared transitions"
      "-shared -melf_x86_64 --no-ld-generated-unwind-info" ""
      "--64" {tlspic1.s tlspic2.s}
-     {{readelf -WSsrl tlspic.rd} {objdump -drj.text tlspic.dd}
+     {{readelf -WSsrl tlspic.rd} {objdump -drj.text\ -Mintel64 tlspic.dd}
       {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
       "libtlspic.so"}
     {"TLS descriptor -fpic -shared transitions"
@@ -78,7 +78,7 @@ set x86_64tests {
     {"TLS with global dynamic and descriptors"
      "-shared -melf_x86_64 --no-ld-generated-unwind-info" ""
      "--64" {tlsgdesc.s}
-     {{readelf -WSsrl tlsgdesc.rd} {objdump -drj.text tlsgdesc.dd}}
+     {{readelf -WSsrl tlsgdesc.rd} {objdump -drj.text\ -Mintel64 tlsgdesc.dd}}
       "libtlsgdesc.so"}
     {"TLS in debug sections" "-melf_x86_64" ""
      "--64" {tlsg.s}
@@ -325,6 +325,11 @@ run_dump_test "pr17935-1"
 run_dump_test "pr17935-2"
 run_dump_test "pr18160"
 run_dump_test "pr18176"
+run_dump_test "pr18801"
+run_dump_test "pr18815"
+
+# Add $PLT_CFLAGS if PLT is expected.
+global PLT_CFLAGS
 
 # Must be native with the C compiler
 if { [isnative] && [which $CC] != 0 } {
@@ -376,7 +381,7 @@ if { [isnative] && [which $CC] != 0 } {
 	[list \
 	    "Build libplt-main3.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC $PLT_CFLAGS" \
 	    { plt-main3.c } \
 	    {{readelf {-Wr} plt-main3.rd}} \
 	    "libplt-main3.a" \
@@ -384,7 +389,7 @@ if { [isnative] && [which $CC] != 0 } {
 	[list \
 	    "Build libplt-main4.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC $PLT_CFLAGS" \
 	    { plt-main4.c } \
 	    {{readelf {-Wr} plt-main4.rd}} \
 	    "libplt-main4.a" \
@@ -440,12 +445,28 @@ if { [isnative] && [which $CC] != 0 } {
 	    "pr17689.so" \
 	] \
 	[list \
+	    "Build pr17689now.so with -z now" \
+	    "-shared -Wl,-z,now" \
+	    "-fPIC" \
+	    { pr17689a.c } \
+	    {{readelf {-Wr} pr17689now.rd}} \
+	    "pr17689now.so" \
+	] \
+	[list \
 	    "Build pr17689 with PIE without -fPIE" \
 	    "tmpdir/pr17689.so -pie" \
 	    "" \
 	    { pr17689b.S } \
 	    {{readelf {-Wr} pr17689.rd}} \
 	    "pr17689" \
+	] \
+	[list \
+	    "Build pr17689 with PIE -z now without -fPIE" \
+	    "tmpdir/pr17689.so -pie -Wl,-z,now" \
+	    "" \
+	    { pr17689b.S } \
+	    {{readelf {-Wr} pr17689now.rd}} \
+	    "pr17689now" \
 	] \
 	[list \
 	    "Build pr17827 with PIE without -fPIE" \
@@ -491,6 +512,14 @@ if { [isnative] && [which $CC] != 0 } {
 	    "" \
 	    { pr17689b.S } \
 	    "pr17689" \
+	    "pr17689.out" \
+	] \
+	[list \
+	    "Run pr17689 with PIE -z now without -fPIE" \
+	    "tmpdir/pr17689.so -pie -z now" \
+	    "" \
+	    { pr17689b.S } \
+	    "pr17689now" \
 	    "pr17689.out" \
 	] \
     ]
@@ -549,3 +578,5 @@ if { ![istarget "x86_64-*-linux*"]} {
 
 # Linux only tests
 run_dump_test "pr17618"
+run_dump_test "pltgot-1"
+run_dump_test "pltgot-2"

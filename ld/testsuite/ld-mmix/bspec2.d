@@ -24,7 +24,7 @@ Section Headers:
  +\[ 5\] \.symtab +SYMTAB +0+ .*
  +0+108 +0+18 +6 +4 +8
  +\[ 6\] \.strtab +STRTAB +0+ .*
- +0+32 +0+ +0 +0 +1
+ +0+2b +0+ +0 +0 +1
 Key to Flags:
 #...
 

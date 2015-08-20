@@ -1,33 +1,29 @@
-/*
- * This file is part of SIS.
- *
- * SIS, SPARC instruction simulator. Copyright (C) 1995 Jiri Gaisler, European
- * Space Agency
- *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 3 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, see <http://www.gnu.org/licenses/>.
- *
- *
- * This file implements the interface between the host and the simulated
- * FPU. IEEE trap handling is done as follows: 
- * 1. In the host, all IEEE traps are masked
- * 2. After each simulated FPU instruction, check if any exception occured 
- *    by reading the exception bits from the host FPU status register 
- *    (get_accex()).
- * 3. Propagate any exceptions to the simulated FSR.
- * 4. Clear host exception bits
- *
- *
+/* This file is part of SIS (SPARC instruction simulator)
+
+   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Contributed by Jiri Gaisler, European Space Agency
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+/* This file implements the interface between the host and the simulated
+   FPU.  IEEE trap handling is done as follows:
+     1. In the host, all IEEE traps are masked
+     2. After each simulated FPU instruction, check if any exception
+        occured by reading the exception bits from the host FPU status
+        register (get_accex()).
+     3. Propagate any exceptions to the simulated FSR.
+     4. Clear host exception bits.
  */
 
 #include "config.h"

@@ -21,7 +21,7 @@
 #include "inferior.h"
 #include "elf/common.h"
 #include "gdb_proc_service.h"
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/user.h>
 #include <sys/procfs.h>
 #include <sys/uio.h>
@@ -41,6 +41,7 @@
 #include "nat/linux-nat.h"
 #include "nat/x86-linux.h"
 #include "nat/x86-linux-dregs.h"
+#include "nat/linux-ptrace.h"
 
 /* Per-thread arch-specific data we want to keep.  */
 
@@ -50,8 +51,6 @@ struct arch_lwp_info
   int debug_registers_changed;
 };
 
-/* Does the current host support PTRACE_GETREGSET?  */
-int have_ptrace_getregset = -1;
 
 
 /* linux_nat_new_fork hook.   */
@@ -163,13 +162,13 @@ x86_linux_read_description (struct target_ops *ops)
       if (ptrace (PTRACE_GETFPXREGS, tid, 0, (int) &fpxregs) < 0)
 	{
 	  have_ptrace_getfpxregs = 0;
-	  have_ptrace_getregset = 0;
+	  have_ptrace_getregset = TRIBOOL_FALSE;
 	  return tdesc_i386_mmx_linux;
 	}
     }
 #endif
 
-  if (have_ptrace_getregset == -1)
+  if (have_ptrace_getregset == TRIBOOL_UNKNOWN)
     {
       uint64_t xstateregs[(X86_XSTATE_SSE_SIZE / sizeof (uint64_t))];
       struct iovec iov;
@@ -180,10 +179,10 @@ x86_linux_read_description (struct target_ops *ops)
       /* Check if PTRACE_GETREGSET works.  */
       if (ptrace (PTRACE_GETREGSET, tid,
 		  (unsigned int) NT_X86_XSTATE, &iov) < 0)
-	have_ptrace_getregset = 0;
+	have_ptrace_getregset = TRIBOOL_FALSE;
       else
 	{
-	  have_ptrace_getregset = 1;
+	  have_ptrace_getregset = TRIBOOL_TRUE;
 
 	  /* Get XCR0 from XSAVE extended state.  */
 	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
@@ -195,7 +194,7 @@ x86_linux_read_description (struct target_ops *ops)
      PTRACE_GETREGSET is not available then set xcr0_features_bits to
      zero so that the "no-features" descriptions are returned by the
      switches below.  */
-  if (have_ptrace_getregset)
+  if (have_ptrace_getregset == TRIBOOL_TRUE)
     xcr0_features_bits = xcr0 & X86_XSTATE_ALL_MASK;
   else
     xcr0_features_bits = 0;
@@ -358,6 +357,15 @@ x86_linux_get_thread_area (pid_t pid, void *addr, unsigned int *base_addr)
 }
 
 
+/* to_always_non_stop_p implementation.  */
+
+static int
+x86_linux_always_non_stop_p (struct target_ops *self)
+{
+  /* Enabling this breaks the btrace target.  */
+  return 0;
+}
+
 /* Create an x86 GNU/Linux target.  */
 
 struct target_ops *
@@ -389,6 +397,8 @@ x86_linux_create_target (void)
   t->to_teardown_btrace = x86_linux_teardown_btrace;
   t->to_read_btrace = x86_linux_read_btrace;
   t->to_btrace_conf = x86_linux_btrace_conf;
+
+  t->to_always_non_stop_p = x86_linux_always_non_stop_p;
 
   return t;
 }

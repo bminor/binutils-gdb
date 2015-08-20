@@ -1,3 +1,330 @@
+2015-08-17  Alan Modra  <amodra@gmail.com>
+
+	* cgen.sh: Trim trailing space from cgen output.
+	* ia64-gen.c (print_dependency_table): Don't generate trailing space.
+	(print_dis_table): Likewise.
+	* opc2c.c (dump_lines): Likewise.
+	(orig_filename): Warning fix.
+	* ia64-asmtab.c: Regenerate.
+
+2015-08-13  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* arm-dis.c (print_insn_arm): Disassembling for all targets V6
+	and higher with ARM instruction set will now mark the 26-bit
+	versions of teq,tst,cmn and cmp as UNPREDICTABLE.
+	(arm_opcodes): Fix for unpredictable nop being recognized as a
+	teq.
+
+2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
+
+	* micromips-opc.c (micromips_opcodes): Re-order table so that move
+	based on 'or' is first.
+	* mips-opc.c (mips_builtin_opcodes): Ditto.
+
+2015-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 18800
+	* aarch64-tbl.h (aarch64_opcode_table): Fix mask for SIMD EXT
+	instruction.
+
+2015-08-10  Robert Suchanek  <robert.suchanek@imgtec.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add "sigrie".
+
+2015-08-07  Amit Pawar <Amit.Pawar@amd.com>
+
+	* i386-gen.c: Remove CpuFMA4 from CPU_ZNVER1_FLAGS.
+	* i386-init.h: Regenerated.
+
+2015-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/13571
+	* i386-dis.c (MOD_0FC3): New.
+	(PREFIX_0FC3): Renamed to ...
+	(PREFIX_MOD_0_0FC3): This.
+	(dis386_twobyte): Replace PREFIX_0FC3 with MOD_0FC3.
+	(prefix_table): Replace Ma with Ev on movntiS.
+	(mod_table): Add MOD_0FC3.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-07-23  Alan Modra  <amodra@gmail.com>
+
+	PR 18708
+	* i386-dis.c (get64): Avoid signed integer overflow.
+
+2015-07-22  Alexander Fomin  <alexander.fomin@intel.com>
+
+	PR binutils/18631
+	* i386-dis-evex.h (EVEX_W_0F78_P_2): Replace "EXxmmq" with
+	"EXEvexHalfBcstXmmq" for the second operand.
+	(EVEX_W_0F79_P_2): Likewise.
+	(EVEX_W_0F7A_P_2): Likewise.
+	(EVEX_W_0F7B_P_2): Likewise.
+
+2015-07-16  Alessandro Marzocchi  <alessandro.marzocchi@gmail.com>
+
+	* arm-dis.c (print_insn_coprocessor): Added support for quarter
+	float bitfield format.
+	(coprocessor_opcodes): Changed VFP vmov reg,immediate to use new
+	quarter float bitfield format.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-07-03  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (PPC750, PPC7450, PPC860): Define using PPC_OPCODE_*.
+	* ppc-dis.c (ppc_opts): Add 821, 850 and 860 entries.  Add
+	PPC_OPCODE_7450 to 7450 entry.  Add PPC_OPCODE_750 to 750cl entry.
+
+2015-07-01  Sandra Loosemore  <sandra@codesourcery.com>
+	    Cesar Philippidis  <cesar@codesourcery.com>
+
+	* nios2-dis.c (nios2_extract_opcode): New.
+	(nios2_disassembler_state): New.
+	(nios2_find_opcode_hash): Use mach parameter to select correct
+	disassembler state.
+	(nios2_print_insn_arg): Extend to support new R2 argument letters
+	and formats.
+	(print_insn_nios2): Check for 16-bit instruction at end of memory.
+	* nios2-opc.c (nios2_builtin_regs): Add R2 register attributes.
+	(NIOS2_NUM_OPCODES): Rename to...
+	(NIOS2_NUM_R1_OPCODES): This.
+	(nios2_r2_opcodes): New.
+	(NIOS2_NUM_R2_OPCODES): New.
+	(nios2_num_r2_opcodes): New.
+	(nios2_r2_asi_n_mappings, nios2_num_r2_asi_n_mappings): New.
+	(nios2_r2_shi_n_mappings, nios2_num_r2_shi_n_mappings): New.
+	(nios2_r2_andi_n_mappings, nios2_num_r2_andi_n_mappings): New.
+	(nios2_r2_reg3_mappings, nios2_num_r2_reg3_mappings): New.
+	(nios2_r2_reg_range_mappings, nios2_num_r2_reg_range_mappings):	New.
+
+2015-06-30  Amit Pawar  <Amit.Pawar@amd.com>
+
+	* i386-dis.c (OP_Mwaitx): New.
+	(rm_table): Add monitorx/mwaitx.
+	* i386-gen.c (cpu_flag_init): Add CpuMWAITX to CPU_BDVER4_FLAGS
+	and CPU_ZNVER1_FLAGS.  Add CPU_MWAITX_FLAGS.
+	(operand_type_init): Add CpuMWAITX.
+	* i386-opc.h (CpuMWAITX): New.
+	(i386_cpu_flags): Add cpumwaitx.
+	* i386-opc.tbl: Add monitorx and mwaitx.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2015-06-22  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (insert_ls): Test for invalid LS operands.
+	(insert_esync): New function.
+	(LS, WC): Use insert_ls.
+	(ESYNC): Use insert_esync.
+
+2015-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* dis-buf.c (buffer_read_memory): Fail is stop_vma is set and the
+	requested region lies beyond it.
+	* bfin-dis.c (print_insn_bfin): Ignore sysop instructions when
+	looking for 32-bit insns.
+	* mcore-dis.c (print_insn_mcore): Disable stop_vma when reading
+	data.
+	* sh-dis.c (print_insn_sh): Likewise.
+	* tic6x-dis.c (print_insn_tic6x): Disable stop_vma when reading
+	blocks of instructions.
+	* vax-dis.c (print_insn_vax): Check that the requested address
+	does not clash with the stop_vma.
+
+2015-06-19  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.h (skip_optional_operands): Use ppc_optional_operand_value.
+	* ppc-opc.c (FXM4): Add non-zero optional value.
+	(TBR): Likewise.
+	(SXL): Likewise.
+	(insert_fxm): Handle new default operand value.
+	(extract_fxm): Likewise.
+	(insert_tbr): Likewise.
+	(extract_tbr): Likewise.
+
+2015-06-16  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arch64-opc.c (aarch64_sys_regs): Add "id_mmfr4_el1".
+
+2015-06-16  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* arm-dis.c (print_insn_coprocessor): Avoid negative shift.
+
+2015-06-12  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c: Add comment accidentally removed by old commit.
+	(MTMSRD_L): Delete.
+
+2015-06-04  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c: (powerpc_opcodes) <hwsync>: New extended mnemonic.
+
+2015-06-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 18474
+	* msp430-dis.c (msp430_nooperands): Fix check for emulated insns.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add "setpan".
+	(thumb_opcodes): Add "setpan".
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (select_arm_features): Rework to avoid used of redefined
+	macros.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_rdma): New.
+	(RDMA): New.
+	(aarch64_opcode_table): Add "sqrmlah" and "sqrdmlsh" instructions.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2015-06-02  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_lor): New.
+	(LOR): New.
+	(aarch64_opdocde_table): Add "ldlar", "ldlarb", "ldlarh", "stllr",
+	"stllrb", "stllrh".
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (F_ARCHEXT): New.
+	(aarch64_sys_regs): Add "pan".
+	(aarch64_sys_reg_supported_p): New.
+	(aarch64_pstatefields): Add "pan".
+	(aarch64_pstatefield_supported_p): New.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-tbl.h: Regenerate.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (print_insn): Swap rounding mode specifier and
+	general purpose register in Intel mode.
+
+2015-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl: New IntelSyntax entries for vcvt{,u}si2s{d,s}.
+	* i386-tbl.h: Regenerate.
+
+2015-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Remove Disp32 from AMD64 direct call/jmp.
+	* i386-init.h: Regenerated.
+
+2015-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* i386-dis.c: Add comments for '@'.
+	(x86_64_table): Use '@' on call/jmp for X86_64_E8/X86_64_E9.
+	(enum x86_64_isa): New.
+	(isa64): Likewise.
+	(print_i386_disassembler_options): Add amd64 and intel64.
+	(print_insn): Handle amd64 and intel64.
+	(putop): Handle '@'.
+	(OP_J): Don't ignore the operand size prefix for AMD64 in 64-bit.
+	* i386-gen.c (cpu_flags): Add CpuAMD64 and CpuIntel64.
+	* i386-opc.h (AMD64): New.
+	(CpuIntel64): Likewise.
+	(i386_cpu_flags): Add cpuamd64 and cpuintel64.
+	* i386-opc.tbl: Add direct call/jmp with Disp16|Disp32 for AMD64.
+	Mark direct call/jmp without Disp16|Disp32 as Intel64.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2015-05-14  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (IH) New define.
+	(powerpc_opcodes) <wait>: Do not enable for POWER7.
+	<tlbie>: Add RS operand for POWER7.
+	<slbia>: Add IH operand for POWER6.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* opcodes/i386-opc.tbl (call): Remove Disp16|Disp32 from 64-bit
+	direct branch.
+	(jmp): Likewise.
+	* i386-tbl.h: Regenerated.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac: Support bfd_iamcu_arch.
+	* disassemble.c (disassembler): Support bfd_iamcu_arch.
+	* i386-gen.c (cpu_flag_init): Add CPU_IAMCU_FLAGS and
+	CPU_IAMCU_COMPAT_FLAGS.
+	(cpu_flags): Add CpuIAMCU.
+	* i386-opc.h (CpuIAMCU): New.
+	(i386_cpu_flags): Add cpuiamcu.
+	* configure: Regenerated.
+	* i386-init.h: Likewise.
+	* i386-tbl.h: Likewise.
+
+2015-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutis/18386
+	* i386-dis.c (X86_64_E8): New.
+	(X86_64_E9): Likewise.
+	Update comments on 'T', 'U', 'V'.  Add comments for '^'.
+	(dis386): Replace callT/jmpT with X86_64_E8/X86_64_E9.
+	(x86_64_table): Add X86_64_E8 and X86_64_E9.
+	(mod_table): Replace {T|} with ^ on Jcall/Jmp.
+	(putop): Handle '^'.
+	(OP_J): Ignore the operand size prefix in 64-bit.  Don't check
+	REX_W.
+
+2015-04-30  DJ Delorie  <dj@redhat.com>
+
+	* disassemble.c (disassembler): Choose suitable disassembler based
+	on E_ABI.
+	* rl78-decode.opc (rl78_decode_opcode): Take ISA parameter.  Use
+	it to decode mul/div insns.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c (print_insn_rl78): Rename to...
+	(print_insn_rl78_common): ...this, take ISA parameter.
+	(print_insn_rl78): New.
+	(print_insn_rl78_g10): New.
+	(print_insn_rl78_g13): New.
+	(print_insn_rl78_g14): New.
+	(rl78_get_disassembler): New.
+
+2015-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2015-04-27  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (DCBT_EO): New define.
+	(powerpc_opcodes) <lbarx>: Enable for POWER8 and later.
+	<lharx>: Likewise.
+	<stbcx.>: Likewise.
+	<sthcx.>: Likewise.
+	<waitrsv>: Do not enable for POWER7 and later.
+	<waitimpl>: Likewise.
+	<dcbt>: Default to the two operand form of the instruction for all
+	"old" cpus.  For "new" cpus, use the operand ordering that matches
+	whether the cpu is server or embedded.
+	<dcbtst>: Likewise.
+
+2015-04-27  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-opc.c: New instruction type VV0UU2.
+	* s390-opc.txt: Fix instruction types for VFCE, VLDE, VFSQ, WFK,
+	and WFC.
+
 2015-04-23  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (putop): Extend "XY" handling to AVX512. Handle "XZ".

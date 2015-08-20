@@ -508,7 +508,7 @@ exp	:	SIZEOF_KEYWORD '(' type ')'  %prec UNARY
 			  write_exp_elt_type
 			    (pstate,
 			     parse_type (pstate)->builtin_unsigned_int);
-			  CHECK_TYPEDEF ($3);
+			  $3 = check_typedef ($3);
 			  write_exp_elt_longcst (pstate,
 						 (LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (pstate, OP_LONG);
@@ -582,7 +582,7 @@ exp	:	FALSE_KEYWORD
 	;
 
 variable:	name_not_typename ENTRY
-			{ struct symbol *sym = $1.sym;
+			{ struct symbol *sym = $1.sym.symbol;
 
 			  if (sym == NULL
 			      || !SYMBOL_IS_ARGUMENT (sym)
@@ -598,16 +598,16 @@ variable:	name_not_typename ENTRY
 	;
 
 variable:	name_not_typename
-			{ struct symbol *sym = $1.sym;
+			{ struct block_symbol sym = $1.sym;
 
-			  if (sym)
+			  if (sym.symbol)
 			    {
-			      if (symbol_read_needs_frame (sym))
+			      if (symbol_read_needs_frame (sym.symbol))
 				{
 				  if (innermost_block == 0
-				      || contained_in (block_found,
+				      || contained_in (sym.block,
 						       innermost_block))
-				    innermost_block = block_found;
+				    innermost_block = sym.block;
 				}
 
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
@@ -615,7 +615,7 @@ variable:	name_not_typename
 				 another more inner frame which happens to
 				 be in the same block.  */
 			      write_exp_elt_block (pstate, NULL);
-			      write_exp_elt_sym (pstate, sym);
+			      write_exp_elt_sym (pstate, sym.symbol);
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			    }
 			  else if ($1.is_a_field_of_this)
@@ -1382,7 +1382,7 @@ package_name_p (const char *name, const struct block *block)
   struct symbol *sym;
   struct field_of_this_result is_a_field_of_this;
 
-  sym = lookup_symbol (name, block, STRUCT_DOMAIN, &is_a_field_of_this);
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, &is_a_field_of_this).symbol;
 
   if (sym
       && SYMBOL_CLASS (sym) == LOC_TYPEDEF
@@ -1420,14 +1420,14 @@ static int
 classify_packaged_name (const struct block *block)
 {
   char *copy;
-  struct symbol *sym;
+  struct block_symbol sym;
   struct field_of_this_result is_a_field_of_this;
 
   copy = copy_name (yylval.sval);
 
   sym = lookup_symbol (copy, block, VAR_DOMAIN, &is_a_field_of_this);
 
-  if (sym)
+  if (sym.symbol)
     {
       yylval.ssym.sym = sym;
       yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
@@ -1448,7 +1448,7 @@ static int
 classify_name (struct parser_state *par_state, const struct block *block)
 {
   struct type *type;
-  struct symbol *sym;
+  struct block_symbol sym;
   char *copy;
   struct field_of_this_result is_a_field_of_this;
 
@@ -1471,7 +1471,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 
   sym = lookup_symbol (copy, block, VAR_DOMAIN, &is_a_field_of_this);
 
-  if (sym)
+  if (sym.symbol)
     {
       yylval.ssym.sym = sym;
       yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
@@ -1496,7 +1496,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 	xfree (current_package_name);
 	sym = lookup_symbol (sval.ptr, block, VAR_DOMAIN,
 			     &is_a_field_of_this);
-	if (sym)
+	if (sym.symbol)
 	  {
 	    yylval.ssym.stoken = sval;
 	    yylval.ssym.sym = sym;
@@ -1517,13 +1517,15 @@ classify_name (struct parser_state *par_state, const struct block *block)
 				  0, &newlval);
       if (hextype == INT)
 	{
-	  yylval.ssym.sym = NULL;
+	  yylval.ssym.sym.symbol = NULL;
+	  yylval.ssym.sym.block = NULL;
 	  yylval.ssym.is_a_field_of_this = 0;
 	  return NAME_OR_INT;
 	}
     }
 
-  yylval.ssym.sym = NULL;
+  yylval.ssym.sym.symbol = NULL;
+  yylval.ssym.sym.block = NULL;
   yylval.ssym.is_a_field_of_this = 0;
   return NAME;
 }

@@ -2,6 +2,17 @@
 
 Changes in 2.26:
 
+* Added the correctly spelled -march=armv6kz, for ARMv6KZ support.  The
+  previous spelling, -march=armv6zk, is still accepted.
+
+* Support for the ARMv8.1 architecture has been added to the Aarch64 port.
+  Support for the individual ARMv8.1 Adv.SIMD, LOR and PAN architecture
+  extensions has also been added to the Aarch64 port.
+
+* Support for the ARMv8.1 architecture has been added to the ARM port.  Support
+  for the individual ARMv8.1 Adv.SIMD and PAN architecture extensions has also
+  been added to the ARM port.
+
 * Extend --compress-debug-sections option to support
   --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi] for ELF
   targets.

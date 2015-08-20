@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "gdb_bfd.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "value.h"
@@ -87,7 +88,7 @@ static void gdbsim_files_info (struct target_ops *target);
 
 static void gdbsim_mourn_inferior (struct target_ops *target);
 
-static void gdbsim_stop (struct target_ops *self, ptid_t ptid);
+static void gdbsim_interrupt (struct target_ops *self, ptid_t ptid);
 
 void simulator_command (char *args, int from_tty);
 
@@ -669,7 +670,12 @@ gdbsim_open (const char *args, int from_tty)
   int len;
   char *arg_buf;
   struct sim_inferior_data *sim_data;
+  const char *sysroot;
   SIM_DESC gdbsim_desc;
+
+  sysroot = gdb_sysroot;
+  if (is_target_filename (sysroot))
+    sysroot += strlen (TARGET_SYSROOT_PREFIX);
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -688,7 +694,7 @@ gdbsim_open (const char *args, int from_tty)
   len = (7 + 1			/* gdbsim */
 	 + strlen (" -E little")
 	 + strlen (" --architecture=xxxxxxxxxx")
-	 + strlen (" --sysroot=") + strlen (gdb_sysroot) +
+	 + strlen (" --sysroot=") + strlen (sysroot) +
 	 + (args ? strlen (args) : 0)
 	 + 50) /* slack */ ;
   arg_buf = (char *) alloca (len);
@@ -715,7 +721,7 @@ gdbsim_open (const char *args, int from_tty)
     }
   /* Pass along gdb's concept of the sysroot.  */
   strcat (arg_buf, " --sysroot=");
-  strcat (arg_buf, gdb_sysroot);
+  strcat (arg_buf, sysroot);
   /* finally, any explicit args */
   if (args)
     {
@@ -888,17 +894,17 @@ gdbsim_resume (struct target_ops *ops,
     error (_("The program is not being run."));
 }
 
-/* Notify the simulator of an asynchronous request to stop.
+/* Notify the simulator of an asynchronous request to interrupt.
 
-   The simulator shall ensure that the stop request is eventually
+   The simulator shall ensure that the interrupt request is eventually
    delivered to the simulator.  If the call is made while the
-   simulator is not running then the stop request is processed when
+   simulator is not running then the interrupt request is processed when
    the simulator is next resumed.
 
    For simulators that do not support this operation, just abort.  */
 
 static int
-gdbsim_stop_inferior (struct inferior *inf, void *arg)
+gdbsim_interrupt_inferior (struct inferior *inf, void *arg)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (inf, SIM_INSTANCE_NEEDED);
@@ -918,13 +924,13 @@ gdbsim_stop_inferior (struct inferior *inf, void *arg)
 }
 
 static void
-gdbsim_stop (struct target_ops *self, ptid_t ptid)
+gdbsim_interrupt (struct target_ops *self, ptid_t ptid)
 {
   struct sim_inferior_data *sim_data;
 
   if (ptid_equal (ptid, minus_one_ptid))
     {
-      iterate_over_inferiors (gdbsim_stop_inferior, NULL);
+      iterate_over_inferiors (gdbsim_interrupt_inferior, NULL);
     }
   else
     {
@@ -934,7 +940,7 @@ gdbsim_stop (struct target_ops *self, ptid_t ptid)
 	error (_("Can't stop pid %d.  No inferior found."),
 	       ptid_get_pid (ptid));
 
-      gdbsim_stop_inferior (inf, NULL);
+      gdbsim_interrupt_inferior (inf, NULL);
     }
 }
 
@@ -962,7 +968,7 @@ gdb_os_poll_quit (host_callback *p)
 static void
 gdbsim_cntrl_c (int signo)
 {
-  gdbsim_stop (NULL, minus_one_ptid);
+  gdbsim_interrupt (NULL, minus_one_ptid);
 }
 
 static ptid_t
@@ -1320,7 +1326,7 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_load = gdbsim_load;
   gdbsim_ops.to_create_inferior = gdbsim_create_inferior;
   gdbsim_ops.to_mourn_inferior = gdbsim_mourn_inferior;
-  gdbsim_ops.to_stop = gdbsim_stop;
+  gdbsim_ops.to_interrupt = gdbsim_interrupt;
   gdbsim_ops.to_thread_alive = gdbsim_thread_alive;
   gdbsim_ops.to_pid_to_str = gdbsim_pid_to_str;
   gdbsim_ops.to_stratum = process_stratum;

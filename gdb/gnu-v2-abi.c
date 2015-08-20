@@ -204,7 +204,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 
   /* Get declared type.  */
   known_type = value_type (v);
-  CHECK_TYPEDEF (known_type);
+  known_type = check_typedef (known_type);
   /* RTTI works only or class objects.  */
   if (TYPE_CODE (known_type) != TYPE_CODE_STRUCT)
     return NULL;
@@ -225,7 +225,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   /* Make sure our basetype and known type match, otherwise, cast
      so we can get at the vtable properly.  */
   btype = known_type_vptr_basetype;
-  CHECK_TYPEDEF (btype);
+  btype = check_typedef (btype);
   if (btype != known_type )
     {
       v = value_cast (btype, v);

@@ -49,7 +49,7 @@ ptid_t general_thread;
 
 int server_waiting;
 
-static int extended_protocol;
+int extended_protocol;
 static int response_needed;
 static int exit_requested;
 
@@ -57,6 +57,8 @@ static int exit_requested;
 int run_once;
 
 int multi_process;
+int report_fork_events;
+int report_vfork_events;
 int non_stop;
 int swbreak_feature;
 int hwbreak_feature;
@@ -255,22 +257,22 @@ start_inferior (char **argv)
 
       last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 
-      if (last_status.kind != TARGET_WAITKIND_STOPPED)
-	return signal_pid;
-
-      do
+      if (last_status.kind == TARGET_WAITKIND_STOPPED)
 	{
-	  (*the_target->resume) (&resume_info, 1);
+	  do
+	    {
+	      (*the_target->resume) (&resume_info, 1);
 
- 	  last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
-	  if (last_status.kind != TARGET_WAITKIND_STOPPED)
-	    return signal_pid;
+	      last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+	      if (last_status.kind != TARGET_WAITKIND_STOPPED)
+		break;
 
-	  current_thread->last_resume_kind = resume_stop;
-	  current_thread->last_status = last_status;
+	      current_thread->last_resume_kind = resume_stop;
+	      current_thread->last_status = last_status;
+	    }
+	  while (last_status.value.sig != GDB_SIGNAL_TRAP);
 	}
-      while (last_status.value.sig != GDB_SIGNAL_TRAP);
-
+      target_arch_setup ();
       return signal_pid;
     }
 
@@ -278,12 +280,16 @@ start_inferior (char **argv)
      (assuming success).  */
   last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 
+  target_arch_setup ();
+
   if (last_status.kind != TARGET_WAITKIND_EXITED
       && last_status.kind != TARGET_WAITKIND_SIGNALLED)
     {
       current_thread->last_resume_kind = resume_stop;
       current_thread->last_status = last_status;
     }
+  else
+    mourn_inferior (find_process_pid (ptid_get_pid (last_ptid)));
 
   return signal_pid;
 }
@@ -383,8 +389,8 @@ write_qxfer_response (char *buf, const void *data, int len, int is_more)
   else
     buf[0] = 'l';
 
-  return remote_escape_output (data, len, (unsigned char *) buf + 1, &out_len,
-			       PBUFSIZ - 2) + 1;
+  return remote_escape_output (data, len, 1, (unsigned char *) buf + 1,
+			       &out_len, PBUFSIZ - 2) + 1;
 }
 
 /* Handle btrace enabling in BTS format.  */
@@ -396,6 +402,23 @@ handle_btrace_enable_bts (struct thread_info *thread)
     return "E.Btrace already enabled.";
 
   current_btrace_conf.format = BTRACE_FORMAT_BTS;
+  thread->btrace = target_enable_btrace (thread->entry.id,
+					 &current_btrace_conf);
+  if (thread->btrace == NULL)
+    return "E.Could not enable btrace.";
+
+  return NULL;
+}
+
+/* Handle btrace enabling in Intel(R) Processor Trace format.  */
+
+static const char *
+handle_btrace_enable_pt (struct thread_info *thread)
+{
+  if (thread->btrace != NULL)
+    return "E.Btrace already enabled.";
+
+  current_btrace_conf.format = BTRACE_FORMAT_PT;
   thread->btrace = target_enable_btrace (thread->entry.id,
 					 &current_btrace_conf);
   if (thread->btrace == NULL)
@@ -452,10 +475,12 @@ handle_btrace_general_set (char *own_buf)
 
   if (strcmp (op, "bts") == 0)
     err = handle_btrace_enable_bts (thread);
+  else if (strcmp (op, "pt") == 0)
+    err = handle_btrace_enable_pt (thread);
   else if (strcmp (op, "off") == 0)
     err = handle_btrace_disable (thread);
   else
-    err = "E.Bad Qbtrace operation. Use bts or off.";
+    err = "E.Bad Qbtrace operation. Use bts, pt, or off.";
 
   if (err != 0)
     strcpy (own_buf, err);
@@ -506,6 +531,21 @@ handle_btrace_conf_general_set (char *own_buf)
 	}
 
       current_btrace_conf.bts.size = (unsigned int) size;
+    }
+  else if (strncmp (op, "pt:size=", strlen ("pt:size=")) == 0)
+    {
+      unsigned long size;
+      char *endp = NULL;
+
+      errno = 0;
+      size = strtoul (op + strlen ("pt:size="), &endp, 16);
+      if (endp == NULL || *endp != 0 || errno != 0 || size > UINT_MAX)
+	{
+	  strcpy (own_buf, "E.Bad size value.");
+	  return -1;
+	}
+
+      current_btrace_conf.pt.size = (unsigned int) size;
     }
   else
     {
@@ -1144,17 +1184,32 @@ handle_qxfer_exec_file (const char *const_annex,
 			gdb_byte *readbuf, const gdb_byte *writebuf,
 			ULONGEST offset, LONGEST len)
 {
-  char *annex, *file;
+  char *file;
   ULONGEST pid;
   int total_len;
 
   if (the_target->pid_to_exec_file == NULL || writebuf != NULL)
     return -2;
 
-  annex = alloca (strlen (const_annex) + 1);
-  strcpy (annex, const_annex);
-  annex = unpack_varlen_hex (annex, &pid);
-  if (annex[0] != '\0' || pid == 0)
+  if (const_annex[0] == '\0')
+    {
+      if (current_thread == NULL)
+	return -1;
+
+      pid = pid_of (current_thread);
+    }
+  else
+    {
+      char *annex = alloca (strlen (const_annex) + 1);
+
+      strcpy (annex, const_annex);
+      annex = unpack_varlen_hex (annex, &pid);
+
+      if (annex[0] != '\0')
+	return -1;
+    }
+
+  if (pid <= 0)
     return -1;
 
   file = (*the_target->pid_to_exec_file) (pid);
@@ -1272,7 +1327,7 @@ handle_qxfer_libraries (const char *annex,
   if (document == NULL)
     return -1;
 
-  strcpy (document, "<library-list>\n");
+  strcpy (document, "<library-list version=\"1.0\">\n");
   p = document + strlen (document);
 
   for_each_inferior_with_data (&all_dlls, emit_dll_description, &p);
@@ -1852,12 +1907,25 @@ crc32 (CORE_ADDR base, int len, unsigned int crc)
 static void
 supported_btrace_packets (char *buf)
 {
+  int btrace_supported = 0;
+
   if (target_supports_btrace (BTRACE_FORMAT_BTS))
     {
       strcat (buf, ";Qbtrace:bts+");
       strcat (buf, ";Qbtrace-conf:bts:size+");
+
+      btrace_supported = 1;
     }
-  else
+
+  if (target_supports_btrace (BTRACE_FORMAT_PT))
+    {
+      strcat (buf, ";Qbtrace:pt+");
+      strcat (buf, ";Qbtrace-conf:pt:size+");
+
+      btrace_supported = 1;
+    }
+
+  if (!btrace_supported)
     return;
 
   strcat (buf, ";Qbtrace:off+");
@@ -2029,6 +2097,18 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		  if (target_supports_stopped_by_hw_breakpoint ())
 		    hwbreak_feature = 1;
 		}
+	      else if (strcmp (p, "fork-events+") == 0)
+		{
+		  /* GDB supports and wants fork events if possible.  */
+		  if (target_supports_fork_events ())
+		    report_fork_events = 1;
+		}
+	      else if (strcmp (p, "vfork-events+") == 0)
+		{
+		  /* GDB supports and wants vfork events if possible.  */
+		  if (target_supports_vfork_events ())
+		    report_vfork_events = 1;
+		}
 	      else
 		target_process_qsupported (p);
 
@@ -2079,6 +2159,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_multi_process ())
 	strcat (own_buf, ";multiprocess+");
 
+      if (target_supports_fork_events ())
+	strcat (own_buf, ";fork-events+");
+
+      if (target_supports_vfork_events ())
+	strcat (own_buf, ";vfork-events+");
+
       if (target_supports_non_stop ())
 	strcat (own_buf, ";QNonStop+");
 
@@ -2105,7 +2191,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
 
       /* Support target-side breakpoint conditions and commands.  */
-      strcat (own_buf, ";ConditionalBreakpoints+");
+      if (target_supports_conditional_breakpoints ())
+	strcat (own_buf, ";ConditionalBreakpoints+");
       strcat (own_buf, ";BreakpointCommands+");
 
       if (target_supports_agent ())
@@ -2121,6 +2208,10 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (the_target->pid_to_exec_file != NULL)
 	strcat (own_buf, ";qXfer:exec-file:read+");
+
+      /* Reinitialize components as needed for the new connection.  */
+      hostio_handle_new_gdb_connection ();
+      target_handle_new_gdb_connection ();
 
       return;
     }
@@ -3454,6 +3545,8 @@ captured_main (int argc, char *argv[])
 
       noack_mode = 0;
       multi_process = 0;
+      report_fork_events = 0;
+      report_vfork_events = 0;
       /* Be sure we're out of tfind mode.  */
       current_traceframe = -1;
       cont_thread = null_ptid;
@@ -3517,11 +3610,17 @@ captured_main (int argc, char *argv[])
 	}
       CATCH (exception, RETURN_MASK_ERROR)
 	{
+	  fflush (stdout);
+	  fprintf (stderr, "gdbserver: %s\n", exception.message);
+
 	  if (response_needed)
 	    {
 	      write_enn (own_buf);
 	      putpkt (own_buf);
 	    }
+
+	  if (run_once)
+	    throw_quit ("Quit");
 	}
       END_CATCH
     }
@@ -4021,7 +4120,20 @@ process_serial_event (void)
 
 	  /* Wait till we are at 1st instruction in prog.  */
 	  if (program_argv != NULL)
-	    start_inferior (program_argv);
+	    {
+	      start_inferior (program_argv);
+	      if (last_status.kind == TARGET_WAITKIND_STOPPED)
+		{
+		  /* Stopped at the first instruction of the target
+		     process.  */
+		  general_thread = last_ptid;
+		}
+	      else
+		{
+		  /* Something went wrong.  */
+		  general_thread = null_ptid;
+		}
+	    }
 	  else
 	    {
 	      last_status.kind = TARGET_WAITKIND_EXITED;

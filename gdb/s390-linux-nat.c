@@ -27,24 +27,17 @@
 #include "auxv.h"
 #include "gregset.h"
 #include "regset.h"
+#include "nat/linux-ptrace.h"
 
 #include "s390-linux-tdep.h"
 #include "elf/common.h"
 
 #include <asm/ptrace.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/types.h>
 #include <sys/procfs.h>
 #include <sys/ucontext.h>
 #include <elf.h>
-
-#ifndef PTRACE_GETREGSET
-#define PTRACE_GETREGSET 0x4204
-#endif
-
-#ifndef PTRACE_SETREGSET
-#define PTRACE_SETREGSET 0x4205
-#endif
 
 /* Per-thread arch-specific data.  */
 
@@ -156,19 +149,29 @@ fill_gregset (const struct regcache *regcache, gregset_t *regp, int regno)
 	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 	  ULONGEST pswa, pswm;
 	  gdb_byte buf[4];
+	  gdb_byte *pswm_p = (gdb_byte *) regp + S390_PSWM_OFFSET;
+	  gdb_byte *pswa_p = (gdb_byte *) regp + S390_PSWA_OFFSET;
 
-	  regcache_raw_collect (regcache, S390_PSWM_REGNUM, buf);
-	  pswm = extract_unsigned_integer (buf, 4, byte_order);
-	  regcache_raw_collect (regcache, S390_PSWA_REGNUM, buf);
-	  pswa = extract_unsigned_integer (buf, 4, byte_order);
+	  pswm = extract_unsigned_integer (pswm_p, 8, byte_order);
 
 	  if (regno == -1 || regno == S390_PSWM_REGNUM)
-	    store_unsigned_integer ((gdb_byte *) regp + S390_PSWM_OFFSET, 8,
-				    byte_order, ((pswm & 0xfff7ffff) << 32) |
-				    (pswa & 0x80000000));
+	    {
+	      pswm &= 0x80000000;
+	      regcache_raw_collect (regcache, S390_PSWM_REGNUM, buf);
+	      pswm |= (extract_unsigned_integer (buf, 4, byte_order)
+		       & 0xfff7ffff) << 32;
+	    }
+
 	  if (regno == -1 || regno == S390_PSWA_REGNUM)
-	    store_unsigned_integer ((gdb_byte *) regp + S390_PSWA_OFFSET, 8,
-				    byte_order, pswa & 0x7fffffff);
+	    {
+	      regcache_raw_collect (regcache, S390_PSWA_REGNUM, buf);
+	      pswa = extract_unsigned_integer (buf, 4, byte_order);
+	      pswm ^= (pswm ^ pswa) & 0x80000000;
+	      pswa &= 0x7fffffff;
+	      store_unsigned_integer (pswa_p, 8, byte_order, pswa);
+	    }
+
+	  store_unsigned_integer (pswm_p, 8, byte_order, pswm);
 	}
       return;
     }
@@ -220,7 +223,7 @@ fetch_regs (struct regcache *regcache, int tid)
   parea.len = sizeof (regs);
   parea.process_addr = (addr_t) &regs;
   parea.kernel_addr = offsetof (struct user_regs_struct, psw);
-  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea, 0) < 0)
     perror_with_name (_("Couldn't get registers"));
 
   supply_gregset (regcache, (const gregset_t *) &regs);
@@ -237,12 +240,12 @@ store_regs (const struct regcache *regcache, int tid, int regnum)
   parea.len = sizeof (regs);
   parea.process_addr = (addr_t) &regs;
   parea.kernel_addr = offsetof (struct user_regs_struct, psw);
-  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea, 0) < 0)
     perror_with_name (_("Couldn't get registers"));
 
   fill_gregset (regcache, &regs, regnum);
 
-  if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea) < 0)
+  if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea, 0) < 0)
     perror_with_name (_("Couldn't write registers"));
 }
 
@@ -257,7 +260,7 @@ fetch_fpregs (struct regcache *regcache, int tid)
   parea.len = sizeof (fpregs);
   parea.process_addr = (addr_t) &fpregs;
   parea.kernel_addr = offsetof (struct user_regs_struct, fp_regs);
-  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea, 0) < 0)
     perror_with_name (_("Couldn't get floating point status"));
 
   supply_fpregset (regcache, (const fpregset_t *) &fpregs);
@@ -274,12 +277,12 @@ store_fpregs (const struct regcache *regcache, int tid, int regnum)
   parea.len = sizeof (fpregs);
   parea.process_addr = (addr_t) &fpregs;
   parea.kernel_addr = offsetof (struct user_regs_struct, fp_regs);
-  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea, 0) < 0)
     perror_with_name (_("Couldn't get floating point status"));
 
   fill_fpregset (regcache, &fpregs, regnum);
 
-  if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea) < 0)
+  if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea, 0) < 0)
     perror_with_name (_("Couldn't write floating point status"));
 }
 
@@ -456,7 +459,7 @@ s390_stopped_by_watchpoint (struct target_ops *ops)
   parea.len = sizeof (per_lowcore);
   parea.process_addr = (addr_t) & per_lowcore;
   parea.kernel_addr = offsetof (struct user_regs_struct, per_info.lowcore);
-  if (ptrace (PTRACE_PEEKUSR_AREA, s390_inferior_tid (), &parea) < 0)
+  if (ptrace (PTRACE_PEEKUSR_AREA, s390_inferior_tid (), &parea, 0) < 0)
     perror_with_name (_("Couldn't retrieve watchpoint status"));
 
   result = (per_lowcore.perc_storage_alteration == 1
@@ -466,7 +469,7 @@ s390_stopped_by_watchpoint (struct target_ops *ops)
     {
       /* Do not report this watchpoint again.  */
       memset (&per_lowcore, 0, sizeof (per_lowcore));
-      if (ptrace (PTRACE_POKEUSR_AREA, s390_inferior_tid (), &parea) < 0)
+      if (ptrace (PTRACE_POKEUSR_AREA, s390_inferior_tid (), &parea, 0) < 0)
 	perror_with_name (_("Couldn't clear watchpoint status"));
     }
 
@@ -505,7 +508,7 @@ s390_prepare_to_resume (struct lwp_info *lp)
   parea.len = sizeof (per_info);
   parea.process_addr = (addr_t) & per_info;
   parea.kernel_addr = offsetof (struct user_regs_struct, per_info);
-  if (ptrace (PTRACE_PEEKUSR_AREA, tid, &parea) < 0)
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, &parea, 0) < 0)
     perror_with_name (_("Couldn't retrieve watchpoint status"));
 
   if (watch_base)
@@ -521,7 +524,7 @@ s390_prepare_to_resume (struct lwp_info *lp)
   per_info.starting_addr = watch_lo_addr;
   per_info.ending_addr = watch_hi_addr;
 
-  if (ptrace (PTRACE_POKEUSR_AREA, tid, &parea) < 0)
+  if (ptrace (PTRACE_POKEUSR_AREA, tid, &parea, 0) < 0)
     perror_with_name (_("Couldn't modify watchpoint status"));
 }
 
@@ -551,7 +554,7 @@ s390_new_thread (struct lwp_info *lp)
 
 static int
 s390_insert_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
   struct lwp_info *lp;
@@ -573,7 +576,7 @@ s390_insert_watchpoint (struct target_ops *self,
 
 static int
 s390_remove_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
   struct lwp_info *lp;
@@ -602,7 +605,7 @@ s390_remove_watchpoint (struct target_ops *self,
 
 static int
 s390_can_use_hw_breakpoint (struct target_ops *self,
-			    int type, int cnt, int othertype)
+			    enum bptype type, int cnt, int othertype)
 {
   return type == bp_hardware_watchpoint;
 }

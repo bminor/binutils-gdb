@@ -154,11 +154,16 @@ SECTIONS
     ${CONSTRUCTING+ __dtors_end = . ; }
 
     ${RELOCATING+. = ALIGN(2);}
+    *(.lower.text.* .lower.text)
+
+    ${RELOCATING+. = ALIGN(2);}
     *(.text)
     ${RELOCATING+. = ALIGN(2);}
     *(.text.*)
     ${RELOCATING+. = ALIGN(2);}
     *(.text:*)
+
+    *(.either.text.* .either.text)
 
     ${RELOCATING+. = ALIGN(2);}
     *(SORT_NONE(.fini9))
@@ -178,11 +183,15 @@ SECTIONS
 
   .rodata :
   {
+    ${RELOCATING+. = ALIGN(2);}
+    *(.lower.rodata.* .lower.rodata)
+
     . = ALIGN(2);
     *(.plt)
     *(.rodata .rodata.* .gnu.linkonce.r.* .const .const:*)
     *(.rodata1)
 
+    *(.either.rodata.*) *(.either.rodata)
     *(.eh_frame_hdr)
     KEEP (*(.eh_frame))
 
@@ -242,23 +251,32 @@ SECTIONS
     *(.data.rel.ro.local) *(.data.rel.ro*)
     *(.dynamic)
 
+    ${RELOCATING+. = ALIGN(2);}
+    *(.lower.data.* .lower.data)
+
     *(.data)
     *(.data.*)
     *(.gnu.linkonce.d*)
     KEEP (*(.gnu.linkonce.d.*personality*))
     *(.data1)
+
+    *(.either.data.* .either.data)
+
     *(.got.plt) *(.got)
     ${RELOCATING+. = ALIGN(2);}
     *(.sdata .sdata.* .gnu.linkonce.s.*)
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
   } ${RELOCATING+ > data ${RELOCATING+AT> text}}
-  
+
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__bss_start = .) ; }
+    *(.lower.bss.* .lower.bss)
+    ${RELOCATING+. = ALIGN(2);}
     *(.bss)
+    *(.either.bss.* .either.bss)
     *(COMMON)
     ${RELOCATING+ PROVIDE (__bss_end = .) ; }
     ${RELOCATING+ _end = . ;  }

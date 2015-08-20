@@ -24,7 +24,7 @@
 #include "elf/common.h"
 
 #include <asm/ptrace.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/uio.h>
 #include <elf.h>
 
@@ -38,14 +38,6 @@
 
 #ifndef HWCAP_S390_VX
 #define HWCAP_S390_VX 2048
-#endif
-
-#ifndef PTRACE_GETREGSET
-#define PTRACE_GETREGSET 0x4204
-#endif
-
-#ifndef PTRACE_SETREGSET
-#define PTRACE_SETREGSET 0x4205
 #endif
 
 /* Defined in auto-generated file s390-linux32.c.  */

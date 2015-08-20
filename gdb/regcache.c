@@ -391,6 +391,9 @@ do_cooked_read (void *src, int regnum, gdb_byte *buf)
   return regcache_cooked_read (regcache, regnum, buf);
 }
 
+static void regcache_cpy_no_passthrough (struct regcache *dst,
+					 struct regcache *src);
+
 void
 regcache_cpy (struct regcache *dst, struct regcache *src)
 {
@@ -407,7 +410,12 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
     regcache_cpy_no_passthrough (dst, src);
 }
 
-void
+/* Copy/duplicate the contents of a register cache.  Unlike regcache_cpy,
+   which is pass-through, this does not go through to the target.
+   Only values values already in the cache are transferred.  The SRC and DST
+   buffers must not overlap.  */
+
+static void
 regcache_cpy_no_passthrough (struct regcache *dst, struct regcache *src)
 {
   gdb_assert (src != NULL && dst != NULL);
@@ -444,7 +452,7 @@ regcache_register_status (const struct regcache *regcache, int regnum)
   else
     gdb_assert (regnum < regcache->descr->nr_raw_registers);
 
-  return regcache->register_status[regnum];
+  return (enum register_status) regcache->register_status[regnum];
 }
 
 void
@@ -656,7 +664,7 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
     memcpy (buf, register_buffer (regcache, regnum),
 	    regcache->descr->sizeof_register[regnum]);
 
-  return regcache->register_status[regnum];
+  return (enum register_status) regcache->register_status[regnum];
 }
 
 enum register_status
@@ -743,7 +751,7 @@ regcache_cooked_read (struct regcache *regcache, int regnum, gdb_byte *buf)
       else
 	memset (buf, 0, regcache->descr->sizeof_register[regnum]);
 
-      return regcache->register_status[regnum];
+      return (enum register_status) regcache->register_status[regnum];
     }
   else if (gdbarch_pseudo_register_read_value_p (regcache->descr->gdbarch))
     {

@@ -1414,8 +1414,6 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   int x;
   flagword flags = bfd_get_section_flags (abfd, sec);
   unsigned int header_size, compression_header_size;
-  /* Maximimum compression header is 24 bytes.  */
-  bfd_byte compression_header[24];
 
   if (seginfo == NULL
       || sec->size < 32
@@ -1431,14 +1429,20 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     return;
 
   if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
-    stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
+    {
+      stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
+      compression_header_size
+	= bfd_get_compression_header_size (stdoutput, NULL);
+      header_size = compression_header_size;
+    }
   else
-    stdoutput->flags |= BFD_COMPRESS;
-  compression_header_size
-    = bfd_get_compression_header_size (stdoutput, NULL);
+    {
+      stdoutput->flags |= BFD_COMPRESS;
+      compression_header_size = 0;
+      header_size = 12;
+    }
 
-  /* Create a new frag to contain the "ZLIB" header.  */
-  header_size = 12 + compression_header_size;
+  /* Create a new frag to contain the compression header.  */
   first_newf = frag_alloc (ob);
   if (obstack_room (ob) < header_size)
     first_newf = frag_alloc (ob);
@@ -1533,11 +1537,6 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   if (compressed_size >= uncompressed_size)
     return;
 
-  if (compression_header_size)
-    memcpy (header, compression_header, compression_header_size);
-  memcpy (header + compression_header_size, "ZLIB", 4);
-  bfd_putb64 (uncompressed_size, header + compression_header_size + 4);
-
   /* Replace the uncompressed frag list with the compressed frag list.  */
   seginfo->frchainP->frch_root = first_newf;
   seginfo->frchainP->frch_last = last_newf;
@@ -1586,7 +1585,9 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 					f->fr_literal, (file_ptr) offset,
 					(bfd_size_type) f->fr_fix);
 	  if (!x)
-	    as_fatal (_("can't write %s: %s"), stdoutput->filename,
+	    as_fatal (_("can't write %ld bytes to section %s of %s because: '%s'"),
+		      (long) f->fr_fix, sec->name,
+		      stdoutput->filename,
 		      bfd_errmsg (bfd_get_error ()));
 	  offset += f->fr_fix;
 	}
@@ -1607,7 +1608,9 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 						(file_ptr) offset,
 						(bfd_size_type) fill_size);
 		  if (!x)
-		    as_fatal (_("can't write %s: %s"), stdoutput->filename,
+		    as_fatal (_("can't fill %ld bytes in section %s of %s because '%s'"),
+			      (long) fill_size, sec->name,
+			      stdoutput->filename,
 			      bfd_errmsg (bfd_get_error ()));
 		  offset += fill_size;
 		}
@@ -1637,7 +1640,8 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 		    (stdoutput, sec, buf, (file_ptr) offset,
 		     (bfd_size_type) n_per_buf * fill_size);
 		  if (!x)
-		    as_fatal (_("cannot write to output file '%s': %s"),
+		    as_fatal (_("cannot fill %ld bytes in section %s of %s because: '%s'"),
+			      (long)(n_per_buf * fill_size), sec->name,
 			      stdoutput->filename,
 			      bfd_errmsg (bfd_get_error ()));
 		  offset += n_per_buf * fill_size;

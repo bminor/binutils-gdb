@@ -1869,6 +1869,7 @@ record_full_goto_entry (struct record_full_entry *p)
 
   registers_changed ();
   reinit_frame_cache ();
+  stop_pc = regcache_read_pc (get_current_regcache ());
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
@@ -2420,7 +2421,7 @@ record_full_restore (void)
 	  bfdcore_read (core_bfd, osec, &signal, 
 			sizeof (signal), &bfd_offset);
 	  signal = netorder32 (signal);
-	  rec->u.end.sigval = signal;
+	  rec->u.end.sigval = (enum gdb_signal) signal;
 
 	  /* Get insn count.  */
 	  bfdcore_read (core_bfd, osec, &count, 

@@ -46,7 +46,7 @@
    Documentation/filesystems/proc.txt, inside the Linux kernel
    tree.  */
 
-enum
+enum filterflags
   {
     COREFILTER_ANON_PRIVATE = 1 << 0,
     COREFILTER_ANON_SHARED = 1 << 1,
@@ -243,7 +243,7 @@ get_linux_inferior_data (void)
 /* This function is suitable for architectures that don't
    extend/override the standard siginfo structure.  */
 
-struct type *
+static struct type *
 linux_get_siginfo_type (struct gdbarch *gdbarch)
 {
   struct linux_gdbarch_data *linux_gdbarch_data;
@@ -598,7 +598,7 @@ mapping_is_anonymous_p (const char *filename)
      This should work OK enough, however.  */
 
 static int
-dump_mapping_p (unsigned int filterflags, const struct smaps_vmflags *v,
+dump_mapping_p (enum filterflags filterflags, const struct smaps_vmflags *v,
 		int maybe_private_p, int mapping_anon_p, int mapping_file_p,
 		const char *filename)
 {
@@ -719,7 +719,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (cmdline_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/cmdline", pid);
-      data = target_fileio_read_stralloc (filename);
+      data = target_fileio_read_stralloc (NULL, filename);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -732,7 +732,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (cwd_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/cwd", pid);
-      data = target_fileio_readlink (filename, &target_errno);
+      data = target_fileio_readlink (NULL, filename, &target_errno);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -745,7 +745,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (exe_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/exe", pid);
-      data = target_fileio_readlink (filename, &target_errno);
+      data = target_fileio_readlink (NULL, filename, &target_errno);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -758,7 +758,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (mappings_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/maps", pid);
-      data = target_fileio_read_stralloc (filename);
+      data = target_fileio_read_stralloc (NULL, filename);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -819,7 +819,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (status_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/status", pid);
-      data = target_fileio_read_stralloc (filename);
+      data = target_fileio_read_stralloc (NULL, filename);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -832,7 +832,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (stat_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/stat", pid);
-      data = target_fileio_read_stralloc (filename);
+      data = target_fileio_read_stralloc (NULL, filename);
       if (data)
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
@@ -1119,10 +1119,10 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
   /* Default dump behavior of coredump_filter (0x33), according to
      Documentation/filesystems/proc.txt from the Linux kernel
      tree.  */
-  unsigned int filterflags = (COREFILTER_ANON_PRIVATE
-			      | COREFILTER_ANON_SHARED
-			      | COREFILTER_ELF_HEADERS
-			      | COREFILTER_HUGETLB_PRIVATE);
+  enum filterflags filterflags = (COREFILTER_ANON_PRIVATE
+				  | COREFILTER_ANON_SHARED
+				  | COREFILTER_ELF_HEADERS
+				  | COREFILTER_HUGETLB_PRIVATE);
 
   /* We need to know the real target PID to access /proc.  */
   if (current_inferior ()->fake_pid_p)
@@ -1134,7 +1134,8 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
     {
       xsnprintf (coredumpfilter_name, sizeof (coredumpfilter_name),
 		 "/proc/%d/coredump_filter", pid);
-      coredumpfilterdata = target_fileio_read_stralloc (coredumpfilter_name);
+      coredumpfilterdata = target_fileio_read_stralloc (NULL,
+							coredumpfilter_name);
       if (coredumpfilterdata != NULL)
 	{
 	  sscanf (coredumpfilterdata, "%x", &filterflags);
@@ -1143,12 +1144,12 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
     }
 
   xsnprintf (mapsfilename, sizeof mapsfilename, "/proc/%d/smaps", pid);
-  data = target_fileio_read_stralloc (mapsfilename);
+  data = target_fileio_read_stralloc (NULL, mapsfilename);
   if (data == NULL)
     {
       /* Older Linux kernels did not support /proc/PID/smaps.  */
       xsnprintf (mapsfilename, sizeof mapsfilename, "/proc/%d/maps", pid);
-      data = target_fileio_read_stralloc (mapsfilename);
+      data = target_fileio_read_stralloc (NULL, mapsfilename);
     }
 
   if (data != NULL)
@@ -1163,7 +1164,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	  const char *permissions, *device, *filename;
 	  struct smaps_vmflags v;
 	  size_t permissions_len, device_len;
-	  int read, write, exec, private;
+	  int read, write, exec, priv;
 	  int has_anonymous = 0;
 	  int should_dump_p = 0;
 	  int mapping_anon_p;
@@ -1197,7 +1198,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	     not have the VmFlags there.  In this case, there is
 	     really no way to know if we are dealing with VM_SHARED,
 	     so we just assume that VM_MAYSHARE is enough.  */
-	  private = memchr (permissions, 'p', permissions_len) != 0;
+	  priv = memchr (permissions, 'p', permissions_len) != 0;
 
 	  /* Try to detect if region should be dumped by parsing smaps
 	     counters.  */
@@ -1257,7 +1258,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	    }
 
 	  if (has_anonymous)
-	    should_dump_p = dump_mapping_p (filterflags, &v, private,
+	    should_dump_p = dump_mapping_p (filterflags, &v, priv,
 					    mapping_anon_p, mapping_file_p,
 					    filename);
 	  else
@@ -1755,7 +1756,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   /* Obtaining PID and filename.  */
   pid = ptid_get_pid (inferior_ptid);
   xsnprintf (filename, sizeof (filename), "/proc/%d/cmdline", (int) pid);
-  fname = target_fileio_read_stralloc (filename);
+  fname = target_fileio_read_stralloc (NULL, filename);
 
   if (fname == NULL || *fname == '\0')
     {
@@ -1788,7 +1789,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   p->pr_psargs[sizeof (p->pr_psargs) - 1] = '\0';
 
   xsnprintf (filename, sizeof (filename), "/proc/%d/stat", (int) pid);
-  proc_stat = target_fileio_read_stralloc (filename);
+  proc_stat = target_fileio_read_stralloc (NULL, filename);
   make_cleanup (xfree, proc_stat);
 
   if (proc_stat == NULL || *proc_stat == '\0')
@@ -1869,7 +1870,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   /* Finally, obtaining the UID and GID.  For that, we read and parse the
      contents of the `/proc/PID/status' file.  */
   xsnprintf (filename, sizeof (filename), "/proc/%d/status", (int) pid);
-  proc_status = target_fileio_read_stralloc (filename);
+  proc_status = target_fileio_read_stralloc (NULL, filename);
   make_cleanup (xfree, proc_status);
 
   if (proc_status == NULL || *proc_status == '\0')
@@ -2348,6 +2349,35 @@ linux_infcall_mmap (CORE_ADDR size, unsigned prot)
   return retval;
 }
 
+/* See gdbarch.sh 'infcall_munmap'.  */
+
+static void
+linux_infcall_munmap (CORE_ADDR addr, CORE_ADDR size)
+{
+  struct objfile *objf;
+  struct value *munmap_val = find_function_in_inferior ("munmap", &objf);
+  struct value *retval_val;
+  struct gdbarch *gdbarch = get_objfile_arch (objf);
+  LONGEST retval;
+  enum
+    {
+      ARG_ADDR, ARG_LENGTH, ARG_LAST
+    };
+  struct value *arg[ARG_LAST];
+
+  arg[ARG_ADDR] = value_from_pointer (builtin_type (gdbarch)->builtin_data_ptr,
+				      addr);
+  /* Assuming sizeof (unsigned long) == sizeof (size_t).  */
+  arg[ARG_LENGTH] = value_from_ulongest
+		    (builtin_type (gdbarch)->builtin_unsigned_long, size);
+  retval_val = call_function_by_hand (munmap_val, ARG_LAST, arg);
+  retval = value_as_long (retval_val);
+  if (retval != 0)
+    warning (_("Failed inferior munmap call at %s for %s bytes, "
+	       "errno is changed."),
+	     hex_string (addr), pulongest (size));
+}
+
 /* See linux-tdep.h.  */
 
 CORE_ADDR
@@ -2409,6 +2439,8 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				    linux_gdb_signal_to_target);
   set_gdbarch_vsyscall_range (gdbarch, linux_vsyscall_range);
   set_gdbarch_infcall_mmap (gdbarch, linux_infcall_mmap);
+  set_gdbarch_infcall_munmap (gdbarch, linux_infcall_munmap);
+  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

@@ -1195,8 +1195,11 @@ load_auto_scripts_for_objfile (struct objfile *objfile)
 {
   /* Return immediately if auto-loading has been globally disabled.
      This is to handle sequencing of operations during gdb startup.
-     Also return immediately if OBJFILE is not actually a file.  */
-  if (!global_auto_load || (objfile->flags & OBJF_NOT_FILENAME) != 0)
+     Also return immediately if OBJFILE was not created from a file
+     on the local filesystem.  */
+  if (!global_auto_load
+      || (objfile->flags & OBJF_NOT_FILENAME) != 0
+      || is_target_filename (objfile->original_name))
     return;
 
   /* Load any extension language scripts for this objfile.

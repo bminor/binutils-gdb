@@ -114,7 +114,7 @@ Changes in 2.20:
 * Add new option --use-nul-prefixed-import-tables to dlltool to allow fall-
   back to old import table generation with null element prefix.
 
-* Added --identify-strict switch to cause --identify <implib> to 
+* Added --identify-strict switch to cause --identify <implib> to
   report an error when the import library is associated with
   multiple DLLs.
 
@@ -133,7 +133,7 @@ Changes in 2.19:
   object files rather than the files themselves and which contain a
   flattened symbol index for all objects, and archives, which have been
   added to the archive.
-  
+
 * Added -F switch to objdump to include file offsets in the disassembly.
 
 * Added -c switch to readelf to allow string dumps of archive symbol index.
@@ -198,9 +198,9 @@ Changes in 2.17:
 
 * Add "--globalize-symbol <name>" and "--globalize-symbols <filename>" switches
   to objcopy to convert local symbols into global symbols.
-  
+
 * gprof now allows input files to have histogram records for
-  several memory ranges, provided those ranges are disjoint.  
+  several memory ranges, provided those ranges are disjoint.
 
 Changes in 2.16:
 
@@ -249,7 +249,7 @@ Changes in 2.15:
 * objcopy now accepts --add-gnu-debuglink=<file> to insert a .gnu_debuglink
   section into a (presumably stripped) executable.  This allows the debug
   information for the file to be held in a separate file.
-  
+
 * BFD marks the sections .comment and .note as 'n' in the BSD/POSIX
   single-character representation.  This can be checked by running nm
   with the -a switch.

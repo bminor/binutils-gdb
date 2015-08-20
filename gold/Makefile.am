@@ -169,6 +169,8 @@ DEFFILES = arm-reloc.def aarch64-reloc.def
 
 EXTRA_DIST = yyscript.c yyscript.h
 
+diststuff: $(EXTRA_DIST)
+
 TARGETSOURCES = \
 	i386.cc x86_64.cc sparc.cc powerpc.cc arm.cc arm-reloc-property.cc tilegx.cc \
 	mips.cc aarch64.cc aarch64-reloc-property.cc

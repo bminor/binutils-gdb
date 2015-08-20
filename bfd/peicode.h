@@ -631,6 +631,20 @@ pe_ILF_make_a_section (pe_ILF_vars * vars,
   if (size & 1)
     vars->data --;
 
+# if (GCC_VERSION >= 3000)
+  /* PR 18758: See note in pe_ILF_buid_a_bfd.  We must make sure that we
+     preserve host alignment requirements.  We test 'size' rather than
+     vars.data as we cannot perform binary arithmetic on pointers.  We assume
+     that vars.data was sufficiently aligned upon entry to this function.
+     The BFD_ASSERTs in this functions will warn us if we run out of room,
+     but we should already have enough padding built in to ILF_DATA_SIZE.  */
+  {
+    unsigned int alignment = __alignof__ (struct coff_section_tdata);
+
+    if (size & (alignment - 1))
+      vars->data += alignment - (size & (alignment - 1));
+  }
+#endif
   /* Create a coff_section_tdata structure for our use.  */
   sec->used_by_bfd = (struct coff_section_tdata *) vars->data;
   vars->data += sizeof (struct coff_section_tdata);
@@ -836,6 +850,24 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
   /* The remaining space in bim->buffer is used
      by the pe_ILF_make_a_section() function.  */
+# if (GCC_VERSION >= 3000)
+  /* PR 18758: Make sure that the data area is sufficiently aligned for
+     pointers on the host.  __alignof__ is a gcc extension, hence the test
+     above.  For other compilers we will have to assume that the alignment is
+     unimportant, or else extra code can be added here and in
+     pe_ILF_make_a_section.
+
+     Note - we cannot test 'ptr' directly as it is illegal to perform binary
+     arithmetic on pointers, but we know that the strings section is the only
+     one that might end on an unaligned boundary.  */
+  {
+    unsigned int alignment = __alignof__ (char *);
+
+    if (SIZEOF_ILF_STRINGS & (alignment - 1))
+      ptr += alignment - (SIZEOF_ILF_STRINGS & (alignment - 1));
+  }
+#endif
+
   vars.data = ptr;
   vars.abfd = abfd;
   vars.sec_index = 0;
@@ -1255,6 +1287,87 @@ pe_ILF_object_p (bfd * abfd)
   return abfd->xvec;
 }
 
+static void
+pe_bfd_read_buildid(bfd *abfd)
+{
+  pe_data_type *pe = pe_data (abfd);
+  struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
+  asection *section;
+  bfd_byte *data = 0;
+  bfd_size_type dataoff;
+  unsigned int i;
+
+  bfd_vma addr = extra->DataDirectory[PE_DEBUG_DATA].VirtualAddress;
+  bfd_size_type size = extra->DataDirectory[PE_DEBUG_DATA].Size;
+
+  if (size == 0)
+    return;
+
+  addr += extra->ImageBase;
+
+  /* Search for the section containing the DebugDirectory */
+  for (section = abfd->sections; section != NULL; section = section->next)
+    {
+      if ((addr >= section->vma) && (addr < (section->vma + section->size)))
+        break;
+    }
+
+  if (section == NULL)
+    {
+      return;
+    }
+  else if (!(section->flags & SEC_HAS_CONTENTS))
+    {
+      return;
+    }
+
+  dataoff = addr - section->vma;
+
+  /* Read the whole section. */
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
+    {
+      if (data != NULL)
+	free (data);
+      return;
+    }
+
+  /* Search for a CodeView entry in the DebugDirectory */
+  for (i = 0; i < size / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
+    {
+      struct external_IMAGE_DEBUG_DIRECTORY *ext
+	= &((struct external_IMAGE_DEBUG_DIRECTORY *)(data + dataoff))[i];
+      struct internal_IMAGE_DEBUG_DIRECTORY idd;
+
+      _bfd_XXi_swap_debugdir_in (abfd, ext, &idd);
+
+      if (idd.Type == PE_IMAGE_DEBUG_TYPE_CODEVIEW)
+        {
+          char buffer[256 + 1];
+          CODEVIEW_INFO *cvinfo = (CODEVIEW_INFO *) buffer;
+
+          /*
+            The debug entry doesn't have to have to be in a section, in which
+            case AddressOfRawData is 0, so always use PointerToRawData.
+          */
+          if (_bfd_XXi_slurp_codeview_record (abfd,
+                                              (file_ptr) idd.PointerToRawData,
+                                              idd.SizeOfData, cvinfo))
+            {
+              struct bfd_build_id* build_id = bfd_alloc(abfd,
+                         sizeof(struct bfd_build_id) + cvinfo->SignatureLength);
+              if (build_id)
+                {
+                  build_id->size = cvinfo->SignatureLength;
+                  memcpy(build_id->data,  cvinfo->Signature,
+                         cvinfo->SignatureLength);
+                  abfd->build_id = build_id;
+                }
+            }
+          break;
+        }
+    }
+}
+
 static const bfd_target *
 pe_bfd_object_p (bfd * abfd)
 {
@@ -1265,6 +1378,7 @@ pe_bfd_object_p (bfd * abfd)
   struct internal_aouthdr internal_a;
   file_ptr opt_hdr_size;
   file_ptr offset;
+  const bfd_target *result;
 
   /* Detect if this a Microsoft Import Library Format element.  */
   /* First read the beginning of the header.  */
@@ -1358,10 +1472,20 @@ pe_bfd_object_p (bfd * abfd)
 	return NULL;
     }
 
-  return coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,
-                            (opt_hdr_size != 0
-                             ? &internal_a
-                             : (struct internal_aouthdr *) NULL));
+
+  result = coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,
+                               (opt_hdr_size != 0
+                                ? &internal_a
+                                : (struct internal_aouthdr *) NULL));
+
+
+  if (result)
+    {
+      /* Now the whole header has been processed, see if there is a build-id */
+      pe_bfd_read_buildid(abfd);
+    }
+
+  return result;
 }
 
 #define coff_object_p pe_bfd_object_p

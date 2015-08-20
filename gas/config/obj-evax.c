@@ -332,7 +332,7 @@ evax_shorten_name (char *id)
    which further designates that the name was truncated):
 
    "original_identifier"_haaaaabbbccc
-   
+
    aaaaa = 32-bit CRC
    bbb = length of original identifier
    ccc = sum of 32-bit CRC characters
@@ -361,7 +361,7 @@ static char decodings[256];
 /* Table used by the crc32 function to calcuate the checksum.  */
 static unsigned int crc32_table[256] = {0, 0};
 
-/* Given a string in BUF, calculate a 32-bit CRC for it. 
+/* Given a string in BUF, calculate a 32-bit CRC for it.
 
    This is used as a reasonably unique hash for the given string.  */
 
@@ -499,7 +499,7 @@ is_truncated_identifier (char *id)
      a truncated identifier.  */
   if (len != MAX_LABEL_LENGTH)
     return 0;
-  
+
   /* Start scanning backwards for a _h.  */
   len = len - 3 - 3 - 5 - 2;
   ptr = id + len;

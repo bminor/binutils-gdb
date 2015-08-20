@@ -19,11 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Main header for the frv.  */
 
-/* Set the mask of unsupported traces.  */
-#define WITH_TRACE \
-  (~(TRACE_alu | TRACE_decode | TRACE_memory | TRACE_model | TRACE_fpu \
-     | TRACE_branch | TRACE_debug))
-
 /* sim-basics.h includes config.h but cgen-types.h must be included before
    sim-basics.h and cgen-types.h needs config.h.  */
 #include "config.h"

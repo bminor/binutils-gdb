@@ -26,13 +26,16 @@
 
 static void *p;
 
+void
+pass (void)
+{
+}
+
 static void
 handler (int sig, siginfo_t *info, void *context)
 {
   if (info->si_addr == p)
-    printf ("Correct si_addr value.\n");
-  else
-    printf ("Got si_addr = %p, expected %p.\n", info->si_addr, p);
+    pass ();
   _exit (0);
 }
 

@@ -55,8 +55,9 @@ OTHER_BSS_END_SYMBOLS='
 '
 OTHER_END_SYMBOLS='PROVIDE (__end = .);'
 
+INIT_ADDR='ALIGN (2)'
+
 INIT_START='
- . = ALIGN(2);
  ___init__start = .;
  PROVIDE (___do_global_ctors = .);
 '
@@ -66,8 +67,9 @@ INIT_END='
  PROVIDE (___init__end = .);
 '
 
+FINI_ADDR='ALIGN (2)'
+
 FINI_START='
- . = ALIGN (2);
  ___fini__start = .;
  PROVIDE (___do_global_dtors = .);
 '

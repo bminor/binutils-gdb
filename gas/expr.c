@@ -285,6 +285,12 @@ integer_constant (int radix, expressionS *expressionP)
 #define valuesize 32
 #endif
 
+  if (is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      expressionP->X_op = O_absent;
+      return;
+    }
+
   if ((NUMBERS_WITH_SUFFIX || flag_m68k_mri) && radix == 0)
     {
       int flt = 0;
@@ -832,32 +838,28 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	  break;
 
 	case 'b':
-	  if (LOCAL_LABELS_FB && ! (flag_m68k_mri || NUMBERS_WITH_SUFFIX))
+	  if (LOCAL_LABELS_FB && !flag_m68k_mri
+	      && input_line_pointer[1] != '0'
+	      && input_line_pointer[1] != '1')
 	    {
-	      /* This code used to check for '+' and '-' here, and, in
-		 some conditions, fall through to call
-		 integer_constant.  However, that didn't make sense,
-		 as integer_constant only accepts digits.  */
-	      /* Some of our code elsewhere does permit digits greater
-		 than the expected base; for consistency, do the same
-		 here.  */
-	      if (input_line_pointer[1] < '0'
-		  || input_line_pointer[1] > '9')
-		{
-		  /* Parse this as a back reference to label 0.  */
-		  input_line_pointer--;
-		  integer_constant (10, expressionP);
-		  break;
-		}
-	      /* Otherwise, parse this as a binary number.  */
+	      /* Parse this as a back reference to label 0.  */
+	      input_line_pointer--;
+	      integer_constant (10, expressionP);
+	      break;
 	    }
+	  /* Otherwise, parse this as a binary number.  */
 	  /* Fall through.  */
 	case 'B':
-	  input_line_pointer++;
+	  if (input_line_pointer[1] == '0'
+	      || input_line_pointer[1] == '1')
+	    {
+	      input_line_pointer++;
+	      integer_constant (2, expressionP);
+	      break;
+	    }
 	  if (flag_m68k_mri || NUMBERS_WITH_SUFFIX)
-	    goto default_case;
-	  integer_constant (2, expressionP);
-	  break;
+	    input_line_pointer++;
+	  goto default_case;
 
 	case '0':
 	case '1':
@@ -875,48 +877,35 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	case 'f':
 	  if (LOCAL_LABELS_FB)
 	    {
+	      int is_label = 1;
+
 	      /* If it says "0f" and it could possibly be a floating point
 		 number, make it one.  Otherwise, make it a local label,
 		 and try to deal with parsing the rest later.  */
-	      if (!input_line_pointer[1]
-		  || (is_end_of_line[0xff & input_line_pointer[1]])
-		  || strchr (FLT_CHARS, 'f') == NULL)
-		goto is_0f_label;
-	      {
-		char *cp = input_line_pointer + 1;
-		int r = atof_generic (&cp, ".", EXP_CHARS,
-				      &generic_floating_point_number);
-		switch (r)
-		  {
-		  case 0:
-		  case ERROR_EXPONENT_OVERFLOW:
-		    if (*cp == 'f' || *cp == 'b')
-		      /* Looks like a difference expression.  */
-		      goto is_0f_label;
-		    else if (cp == input_line_pointer + 1)
-		      /* No characters has been accepted -- looks like
-			 end of operand.  */
-		      goto is_0f_label;
-		    else
-		      goto is_0f_float;
-		  default:
-		    as_fatal (_("expr.c(operand): bad atof_generic return val %d"),
-			      r);
-		  }
-	      }
+	      if (!is_end_of_line[(unsigned char) input_line_pointer[1]]
+		  && strchr (FLT_CHARS, 'f') != NULL)
+		{
+		  char *cp = input_line_pointer + 1;
 
-	      /* Okay, now we've sorted it out.  We resume at one of these
-		 two labels, depending on what we've decided we're probably
-		 looking at.  */
-	    is_0f_label:
-	      input_line_pointer--;
-	      integer_constant (10, expressionP);
-	      break;
+		  atof_generic (&cp, ".", EXP_CHARS,
+				&generic_floating_point_number);
 
-	    is_0f_float:
-	      /* Fall through.  */
-	      ;
+		  /* Was nothing parsed, or does it look like an
+		     expression?  */
+		  is_label = (cp == input_line_pointer + 1
+			      || (cp == input_line_pointer + 2
+				  && (cp[-1] == '-' || cp[-1] == '+'))
+			      || *cp == 'f'
+			      || *cp == 'b');
+		}
+	      if (is_label)
+		{
+		  input_line_pointer--;
+		  integer_constant (10, expressionP);
+		  break;
+		}
 	    }
+	  /* Fall through.  */
 
 	case 'd':
 	case 'D':

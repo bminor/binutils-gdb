@@ -29,4 +29,4 @@
 #define UNW_FLAG_UHANDLER(x)	((x) & 0x0000000200000000LL)
 #define UNW_LENGTH(x)		((x) & 0x00000000ffffffffLL)
 
-extern const unsigned char *unw_decode (const unsigned char *, int, void *);
+extern const unsigned char *unw_decode (const unsigned char *, int, void *, const unsigned char *);

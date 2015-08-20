@@ -765,29 +765,32 @@ static struct linux_record_tdep ppc64_linux_record_tdep;
 static enum gdb_syscall
 ppc_canonicalize_syscall (int syscall)
 {
+  int result = -1;
+
   if (syscall <= 165)
-    return syscall;
+    result = syscall;
   else if (syscall >= 167 && syscall <= 190)	/* Skip query_module 166 */
-    return syscall + 1;
+    result = syscall + 1;
   else if (syscall >= 192 && syscall <= 197)	/* mmap2 */
-    return syscall;
+    result = syscall;
   else if (syscall == 208)			/* tkill */
-    return gdb_sys_tkill;
+    result = gdb_sys_tkill;
   else if (syscall >= 207 && syscall <= 220)	/* gettid */
-    return syscall + 224 - 207;
+    result = syscall + 224 - 207;
   else if (syscall >= 234 && syscall <= 239)	/* exit_group */
-    return syscall + 252 - 234;
-  else if (syscall >= 240 && syscall <=248)	/* timer_create */
-    return syscall += 259 - 240;
-  else if (syscall >= 250 && syscall <=251)	/* tgkill */
-    return syscall + 270 - 250;
+    result = syscall + 252 - 234;
+  else if (syscall >= 240 && syscall <= 248)	/* timer_create */
+    result = syscall += 259 - 240;
+  else if (syscall >= 250 && syscall <= 251)	/* tgkill */
+    result = syscall + 270 - 250;
   else if (syscall == 336)
-    return gdb_sys_recv;
+    result = gdb_sys_recv;
   else if (syscall == 337)
-    return gdb_sys_recvfrom;
+    result = gdb_sys_recvfrom;
   else if (syscall == 342)
-    return gdb_sys_recvmsg;
-  return -1;
+    result = gdb_sys_recvmsg;
+
+  return (enum gdb_syscall) result;
 }
 
 /* Record registers which might be clobbered during system call.
@@ -1292,7 +1295,7 @@ struct ppu2spu_data
   gdb_byte gprs[128*16];
 };
 
-static int
+static enum register_status
 ppu2spu_unwind_register (void *src, int regnum, gdb_byte *buf)
 {
   struct ppu2spu_data *data = src;
@@ -1800,8 +1803,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
   set_gdbarch_displaced_step_location (gdbarch,
 				       linux_displaced_step_location);
-
-  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 
   /* Support reverse debugging.  */
   set_gdbarch_process_record (gdbarch, ppc_process_record);

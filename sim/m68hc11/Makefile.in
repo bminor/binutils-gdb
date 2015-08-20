@@ -25,7 +25,8 @@ SIM_OBJS = $(M68HC11_OBJS) \
 	sim-load.o \
 	sim-hload.o \
 	sim-stop.o \
-	sim-reason.o
+	sim-reason.o \
+	sim-resume.o
 
 SIM_PROFILE= -DPROFILE=1 -DWITH_PROFILE=-1
 # We must use 32-bit addresses to support memory bank switching.

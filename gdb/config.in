@@ -234,6 +234,9 @@
 /* Define to 1 if you have the `libiconvlist' function. */
 #undef HAVE_LIBICONVLIST
 
+/* Define if you have the ipt library. */
+#undef HAVE_LIBIPT
+
 /* Define if you have the lzma library. */
 #undef HAVE_LIBLZMA
 
@@ -389,6 +392,9 @@
 
 /* Define to 1 if you have the `setlocale' function. */
 #undef HAVE_SETLOCALE
+
+/* Define to 1 if you have the `setns' function. */
+#undef HAVE_SETNS
 
 /* Define to 1 if you have the `setpgid' function. */
 #undef HAVE_SETPGID
@@ -646,6 +652,9 @@
 /* Define if <proc_service.h> on solaris uses int instead of size_t, and
    assorted other type changes. */
 #undef PROC_SERVICE_IS_OLD
+
+/* Define to the type of arg 1 for ptrace. */
+#undef PTRACE_TYPE_ARG1
 
 /* Define to the type of arg 3 for ptrace. */
 #undef PTRACE_TYPE_ARG3

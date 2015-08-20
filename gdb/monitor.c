@@ -54,6 +54,7 @@
 #include "regcache.h"
 #include "gdbthread.h"
 #include "readline/readline.h"
+#include "rsp-low.h"
 
 static char *dev_name;
 static struct target_ops *targ_ops;
@@ -223,21 +224,6 @@ monitor_error (char *function, char *message,
     error (_("%s (%s): %s: %s"),
 	   function, paddress (target_gdbarch (), memaddr),
 	   message, safe_string);
-}
-
-/* Convert hex digit A to a number.  */
-
-static int
-fromhex (int a)
-{
-  if (a >= '0' && a <= '9')
-    return a - '0';
-  else if (a >= 'a' && a <= 'f')
-    return a - 'a' + 10;
-  else if (a >= 'A' && a <= 'F')
-    return a - 'A' + 10;
-  else
-    error (_("Invalid hex digit %d"), a);
 }
 
 /* monitor_vsprintf - similar to vsprintf but handles 64-bit addresses
@@ -867,8 +853,7 @@ monitor_close (struct target_ops *self)
 
   monitor_desc = NULL;
 
-  delete_thread_silent (monitor_ptid);
-  delete_inferior_silent (ptid_get_pid (monitor_ptid));
+  discard_all_inferiors ();
 }
 
 /* Terminate the open connection to the remote debugger.  Use this

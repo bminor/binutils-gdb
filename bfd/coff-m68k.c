@@ -446,7 +446,7 @@ bfd_m68k_coff_create_embedded_relocs (bfd *abfd,
   bfd_byte *p;
   bfd_size_type amt;
 
-  BFD_ASSERT (! info->relocatable);
+  BFD_ASSERT (! bfd_link_relocatable (info));
 
   *errmsg = NULL;
 

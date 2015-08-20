@@ -29,7 +29,7 @@ extern void nios2_elf32_next_input_section
   (struct bfd_link_info *, asection *);
 
 extern bfd_boolean nios2_elf32_size_stubs
-  (bfd *, bfd *, struct bfd_link_info *, 
+  (bfd *, bfd *, struct bfd_link_info *,
    asection * (*) (const char *, asection *, bfd_boolean), void (*) (void));
 
 extern bfd_boolean nios2_elf32_build_stubs

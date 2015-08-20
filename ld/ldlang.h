@@ -609,6 +609,8 @@ extern lang_output_section_statement_type *next_matching_output_section_statemen
   (lang_output_section_statement_type *, int);
 extern void ldlang_add_undef
   (const char *const, bfd_boolean);
+extern void ldlang_add_require_defined
+  (const char *const);
 extern void lang_add_output_format
   (const char *, const char *, const char *, int);
 extern void lang_list_init
@@ -687,5 +689,8 @@ ldlang_override_segment_assignment
 
 extern void
 lang_ld_feature (char *);
+
+extern void
+lang_print_memory_usage (void);
 
 #endif

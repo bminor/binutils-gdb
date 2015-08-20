@@ -119,11 +119,13 @@ responsibility among the other maintainers.
   OR1K		   Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>
   PPC		   Geoff Keating <geoffk@geoffk.org>
   PPC		   Alan Modra <amodra@gmail.com>
+  PPC		   Peter Bergner <bergner@vnet.ibm.com>
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
   RL78             DJ Delorie <dj@redhat.com>
   RX               DJ Delorie <dj@redhat.com>
   RX               Nick Clifton <nickc@redhat.com>
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
+  s390, s390x	   Andreas Krebbel <krebbel@linux.vnet.ibm.com>
   SCORE		   Mei Ligang <ligang@sunnorth.com.cn>
   SH		   Alexandre Oliva <aoliva@redhat.com>
   SH		   Kaz Kojima <kkojima@rr.iij4u.or.jp>
@@ -142,7 +144,7 @@ responsibility among the other maintainers.
   x86_64	   H.J. Lu <hjl.tools@gmail.com>
   XCOFF 	   Richard Sandiford <r.sandiford@uk.ibm.com>
   XGATE            Sean Keys <skeys@ipdatasys.com>
-  Xtensa	   Sterling Augustine <augustine.sterling@gmail.com> 
+  Xtensa	   Sterling Augustine <augustine.sterling@gmail.com>
   z80		   Arnold Metselaar <arnold.metselaar@planet.nl>
   z8k		   Christian Groessler <chris@groessler.org>
 

@@ -1731,6 +1731,12 @@ Strip a file, removing contents of any sections that would not be
 stripped by @option{--strip-debug} and leaving the debugging sections
 intact.  In ELF files, this preserves all note sections in the output.
 
+Note - the section headers of the stripped sections are preserved,
+including their sizes, but the contents of the section are discarded.
+The section headers are preserved so that other tools can match up the
+debuginfo file with the real executable, even if that executable has
+been relocated to a different address space.
+
 The intention is that this option will be used in conjunction with
 @option{--add-gnu-debuglink} to create a two part executable.  One a
 stripped binary which will occupy less space in RAM and in a
@@ -1844,10 +1850,9 @@ It can also be a useful way of reducing the size of a @option{--just-symbols}
 linker input file.
 
 @item --compress-debug-sections
-Compress DWARF debug sections using zlib.  The debug sections are
-renamed to begin with @samp{.zdebug} instead of @samp{.debug}.  Note -
-if compression would actually make a section @emph{larger} then it is
-not compressed or renamed.
+Compress DWARF debug sections using zlib with SHF_COMPRESSED from the
+ELF ABI.  Note - if compression would actually make a section
+@emph{larger}, then it is not compressed.
 
 @item --compress-debug-sections=none
 @itemx --compress-debug-sections=zlib
@@ -1857,10 +1862,13 @@ For ELF files, these options control how DWARF debug sections are
 compressed.  @option{--compress-debug-sections=none} is equivalent
 to @option{--nocompress-debug-sections}.
 @option{--compress-debug-sections=zlib} and
-@option{--compress-debug-sections=zlib-gnu} are equivalent to
+@option{--compress-debug-sections=zlib-gabi} are equivalent to
 @option{--compress-debug-sections}.
-@option{--compress-debug-sections=zlib-gabi} compresses
-DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
+@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
+sections using zlib.  The debug sections are renamed to begin with
+@samp{.zdebug} instead of @samp{.debug}.  Note - if compression would
+actually make a section @emph{larger}, then it is not compressed nor
+renamed.
 
 @item --decompress-debug-sections
 Decompress DWARF debug sections using zlib.  The original section
@@ -2041,6 +2049,15 @@ expected to contain instructions.
 Like @option{-d}, but disassemble the contents of all sections, not just
 those expected to contain instructions.
 
+This option also has a subtle effect on the disassembly of
+instructions in code sections.  When option @option{-d} is in effect
+objdump will assume that any symbols present in a code section occur
+on the boundary between instructions and it will refuse to disassemble
+across such a boundary.  When option @option{-D} is in effect however
+this assumption is supressed.  This means that it is possible for the
+output of @option{-d} and @option{-D} to differ if, for example, data
+is stored in code sections.
+
 If the target is an ARM architecture this switch also has the effect
 of forcing the disassembler to decode pieces of data found in code
 sections as if they were instructions.
@@ -2174,6 +2191,10 @@ Select disassembly for the given architecture.
 @item intel
 @itemx att
 Select between intel syntax mode and AT&T syntax mode.
+
+@item amd64
+@itemx intel64
+Select between AMD64 ISA and Intel64 ISA.
 
 @item intel-mnemonic
 @itemx att-mnemonic
@@ -3059,9 +3080,16 @@ When stripping a file, perhaps with @option{--strip-debug} or
 which would otherwise get stripped.
 
 @item --only-keep-debug
-Strip a file, removing contents of any sections that would not be
+Strip a file, emptying the contents of any sections that would not be
 stripped by @option{--strip-debug} and leaving the debugging sections
-intact.  In ELF files, this preserves all note sections in the output.
+intact.  In ELF files, this preserves all the note sections in the
+output as well.
+
+Note - the section headers of the stripped sections are preserved,
+including their sizes, but the contents of the section are discarded.
+The section headers are preserved so that other tools can match up the
+debuginfo file with the real executable, even if that executable has
+been relocated to a different address space.
 
 The intention is that this option will be used in conjunction with
 @option{--add-gnu-debuglink} to create a two part executable.  One a
@@ -4344,6 +4372,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-x} <number or name>|@option{--hex-dump=}<number or name>]
         [@option{-p} <number or name>|@option{--string-dump=}<number or name>]
         [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
+        [@option{-z}|@option{--decompress}]
         [@option{-c}|@option{--archive-index}]
         [@option{-w[lLiaprmfFsoRt]}|
          @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index]]
@@ -4492,6 +4521,12 @@ Displays the contents of the indicated section as printable strings.
 A number identifies a particular section by index in the section table;
 any other string identifies all sections with that name in the object file.
 
+@item -z
+@itemx --decompress
+Requests that the section(s) being dumped by @option{x}, @option{R} or
+@option{p} options are decompressed before being displayed.  If the
+section(s) are not compressed then they are displayed as is.
+
 @item -c
 @itemx --archive-index
 @cindex Archive file symbol index information
@@ -4614,8 +4649,8 @@ Set the matching input ELF machine type to @var{machine}.  If
 @option{--input-mach} isn't specified, it will match any ELF
 machine types.
 
-The supported ELF machine types are, @var{L1OM}, @var{K1OM} and
-@var{x86-64}.
+The supported ELF machine types are, @var{i386}, @var{IAMCU}, @var{L1OM},
+@var{K1OM} and @var{x86-64}.
 
 @item --output-mach=@var{machine}
 Change the ELF machine type in the ELF header to @var{machine}.  The

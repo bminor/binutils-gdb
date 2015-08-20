@@ -1595,6 +1595,7 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
   int ix;
   VEC(memory_read_result_s) *result;
   long offset = 0;
+  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
   int oind = 0;
   char *oarg;
   enum opt
@@ -1650,10 +1651,11 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
 			      - addr);
       ui_out_field_core_addr (uiout, "end", gdbarch, read_result->end);
 
-      data = xmalloc ((read_result->end - read_result->begin) * 2 + 1);
+      data = xmalloc (
+	  (read_result->end - read_result->begin) * 2 * unit_size + 1);
 
       for (i = 0, p = data;
-	   i < (read_result->end - read_result->begin);
+	   i < ((read_result->end - read_result->begin) * unit_size);
 	   ++i, p += 2)
 	{
 	  sprintf (p, "%02x", read_result->data[i]);
@@ -1762,29 +1764,36 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
   char *cdata;
   gdb_byte *data;
   gdb_byte *databuf;
-  size_t len, i, steps, remainder;
-  long int count, j;
+  size_t len_hex, len_bytes, len_units, i, steps, remaining_units;
+  long int count_units;
   struct cleanup *back_to;
+  int unit_size;
 
   if (argc != 2 && argc != 3)
     error (_("Usage: ADDR DATA [COUNT]."));
 
   addr = parse_and_eval_address (argv[0]);
   cdata = argv[1];
-  if (strlen (cdata) % 2)
-    error (_("Hex-encoded '%s' must have an even number of characters."),
+  len_hex = strlen (cdata);
+  unit_size = gdbarch_addressable_memory_unit_size (get_current_arch ());
+
+  if (len_hex % (unit_size * 2) != 0)
+    error (_("Hex-encoded '%s' must represent an integral number of "
+	     "addressable memory units."),
 	   cdata);
 
-  len = strlen (cdata)/2;
-  if (argc == 3)
-    count = strtoul (argv[2], NULL, 10);
-  else
-    count = len;
+  len_bytes = len_hex / 2;
+  len_units = len_bytes / unit_size;
 
-  databuf = xmalloc (len * sizeof (gdb_byte));
+  if (argc == 3)
+    count_units = strtoul (argv[2], NULL, 10);
+  else
+    count_units = len_units;
+
+  databuf = xmalloc (len_bytes * sizeof (gdb_byte));
   back_to = make_cleanup (xfree, databuf);
 
-  for (i = 0; i < len; ++i)
+  for (i = 0; i < len_bytes; ++i)
     {
       int x;
       if (sscanf (cdata + i * 2, "%02x", &x) != 1)
@@ -1792,29 +1801,32 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
       databuf[i] = (gdb_byte) x;
     }
 
-  if (len < count)
+  if (len_units < count_units)
     {
-      /* Pattern is made of less bytes than count:
+      /* Pattern is made of less units than count:
          repeat pattern to fill memory.  */
-      data = xmalloc (count);
+      data = xmalloc (count_units * unit_size);
       make_cleanup (xfree, data);
 
-      steps = count / len;
-      remainder = count % len;
-      for (j = 0; j < steps; j++)
-        memcpy (data + j * len, databuf, len);
+      /* Number of times the pattern is entirely repeated.  */
+      steps = count_units / len_units;
+      /* Number of remaining addressable memory units.  */
+      remaining_units = count_units % len_units;
+      for (i = 0; i < steps; i++)
+        memcpy (data + i * len_bytes, databuf, len_bytes);
 
-      if (remainder > 0)
-        memcpy (data + steps * len, databuf, remainder);
+      if (remaining_units > 0)
+        memcpy (data + steps * len_bytes, databuf,
+		remaining_units * unit_size);
     }
   else
     {
       /* Pattern is longer than or equal to count:
-         just copy count bytes.  */
+         just copy count addressable memory units.  */
       data = databuf;
     }
 
-  write_memory_with_notification (addr, data, count);
+  write_memory_with_notification (addr, data, count_units);
 
   do_cleanups (back_to);
 }
@@ -1952,7 +1964,7 @@ mi_cmd_remove_inferior (char *command, char **argv, int argc)
       set_current_program_space (new_inferior->pspace);
     }
 
-  delete_inferior_1 (inf, 1 /* silent */);
+  delete_inferior (inf);
 }
 
 
@@ -2743,8 +2755,8 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
   struct collection_list tracepoint_list, stepping_list;
   struct traceframe_info *tinfo;
   int oind = 0;
-  int var_print_values = PRINT_ALL_VALUES;
-  int comp_print_values = PRINT_ALL_VALUES;
+  enum print_values var_print_values = PRINT_ALL_VALUES;
+  enum print_values comp_print_values = PRINT_ALL_VALUES;
   int registers_format = 'x';
   int memory_contents = 0;
   struct ui_out *uiout = current_uiout;

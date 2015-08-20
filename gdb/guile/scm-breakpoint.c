@@ -31,6 +31,7 @@
 #include "arch-utils.h"
 #include "language.h"
 #include "guile-internal.h"
+#include "location.h"
 
 /* The <gdb:breakpoint> smob.
    N.B.: The name of this struct is known to breakpoint.h.
@@ -173,6 +174,8 @@ bpscm_print_breakpoint_smob (SCM self, SCM port, scm_print_state *pstate)
   /* Careful, the breakpoint may be invalid.  */
   if (b != NULL)
     {
+      const char *str;
+
       gdbscm_printf (port, " %s %s %s",
 		     bpscm_type_to_string (b->type),
 		     bpscm_enable_state_to_string (b->enable_state),
@@ -181,8 +184,9 @@ bpscm_print_breakpoint_smob (SCM self, SCM port, scm_print_state *pstate)
       gdbscm_printf (port, " hit:%d", b->hit_count);
       gdbscm_printf (port, " ignore:%d", b->ignore_count);
 
-      if (b->addr_string != NULL)
-	gdbscm_printf (port, " @%s", b->addr_string);
+      str = event_location_to_string (b->location);
+      if (str != NULL)
+	gdbscm_printf (port, " @%s", str);
     }
 
   scm_puts (">", port);
@@ -340,8 +344,8 @@ gdbscm_make_breakpoint (SCM location_scm, SCM rest)
   char *s;
   char *location;
   int type_arg_pos = -1, access_type_arg_pos = -1, internal_arg_pos = -1;
-  int type = bp_breakpoint;
-  int access_type = hw_write;
+  enum bptype type = bp_breakpoint;
+  enum target_hw_bp_type access_type = hw_write;
   int internal = 0;
   SCM result;
   breakpoint_smob *bp_smob;
@@ -408,6 +412,9 @@ gdbscm_register_breakpoint_x (SCM self)
   breakpoint_smob *bp_smob
     = bpscm_get_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct gdb_exception except = exception_none;
+  char *location, *copy;
+  struct event_location *eloc;
+  struct cleanup *cleanup;
 
   /* We only support registering breakpoints created with make-breakpoint.  */
   if (!bp_smob->is_scheme_bkpt)
@@ -417,10 +424,13 @@ gdbscm_register_breakpoint_x (SCM self)
     scm_misc_error (FUNC_NAME, _("breakpoint is already registered"), SCM_EOL);
 
   pending_breakpoint_scm = self;
+  location = bp_smob->spec.location;
+  copy = location;
+  eloc = new_linespec_location (&copy);
+  cleanup = make_cleanup_delete_event_location (eloc);
 
   TRY
     {
-      char *location = bp_smob->spec.location;
       int internal = bp_smob->spec.is_internal;
 
       switch (bp_smob->spec.type)
@@ -428,7 +438,7 @@ gdbscm_register_breakpoint_x (SCM self)
 	case bp_breakpoint:
 	  {
 	    create_breakpoint (get_current_arch (),
-			       location, NULL, -1, NULL,
+			       eloc, NULL, -1, NULL,
 			       0,
 			       0, bp_breakpoint,
 			       0,
@@ -464,6 +474,7 @@ gdbscm_register_breakpoint_x (SCM self)
   /* Ensure this gets reset, even if there's an error.  */
   pending_breakpoint_scm = SCM_BOOL_F;
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
+  do_cleanups (cleanup);
 
   return SCM_UNSPECIFIED;
 }
@@ -819,12 +830,12 @@ gdbscm_breakpoint_location (SCM self)
 {
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  char *str;
+  const char *str;
 
   if (bp_smob->bp->type != bp_breakpoint)
     return SCM_BOOL_F;
 
-  str = bp_smob->bp->addr_string;
+  str = event_location_to_string (bp_smob->bp->location);
   if (! str)
     str = "";
 

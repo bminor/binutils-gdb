@@ -1812,7 +1812,7 @@ cris_process_instruction (char *insn_text, struct cris_instruction *out_insnp,
 	      out_insnp->opcode |= regno << 12;
 	      out_insnp->reloc = BFD_RELOC_CRIS_SIGNED_8;
 	      continue;
-	      
+
 	    case 'O':
 	      /* A BDAP expression for any size, "expr,R".  */
 	      if (! cris_get_expression (&s, &prefixp->expr))
@@ -4327,7 +4327,7 @@ cris_insn_ver_valid_for_arch (enum cris_insn_version_usage iver,
 	 || iver == cris_ver_v8_10
 	 || iver == cris_ver_v10
 	 || iver == cris_ver_v10p);
-      
+
     case arch_crisv32:
       return
 	(iver == cris_ver_version_all

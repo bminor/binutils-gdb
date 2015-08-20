@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "../lib/unbuffer_output.c"
+
 typedef char padding[16];
 
 struct {
@@ -98,6 +100,8 @@ fill_structs (void)
 int
 main ()
 {
+  gdb_unbuffer_output ();
+
   fill_structs ();
 
   printf ("sizeof (char) == %d\n", (int) sizeof (char));

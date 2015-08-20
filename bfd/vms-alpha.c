@@ -829,7 +829,7 @@ vms_get_remaining_object_record (bfd *abfd, unsigned int read_so_far)
   /* PR 17512: file: 025-1974-0.004.  */
   else if (to_read <= read_so_far)
     return 0;
-  
+
   /* Read the remaining record.  */
   to_read -= read_so_far;
 
@@ -8597,7 +8597,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   asection *dst;
   asection *dmt;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     {
       /* FIXME: we do not yet support relocatable link.  It is not obvious
          how to do it for debug infos.  */

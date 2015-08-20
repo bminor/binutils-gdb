@@ -20,6 +20,8 @@
 #if !defined (PROBE_H)
 #define PROBE_H 1
 
+struct event_location;
+
 #include "gdb_vecs.h"
 
 /* Definition of a vector of probes.  */
@@ -219,9 +221,9 @@ struct bound_probe
   };
 
 /* A helper for linespec that decodes a probe specification.  It returns a
-   symtabs_and_lines object and updates *ARGPTR or throws an error.  */
+   symtabs_and_lines object and updates LOC or throws an error.  */
 
-extern struct symtabs_and_lines parse_probes (char **argptr,
+extern struct symtabs_and_lines parse_probes (const struct event_location *loc,
 					      struct linespec_result *canon);
 
 /* Helper function to register the proper probe_ops to a newly created probe.

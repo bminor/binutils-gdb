@@ -255,8 +255,8 @@ inline bool
 is_cident(const char* name)
 {
   return (name[strspn(name,
-	 	      ("0123456789"
-		       "ABCDEFGHIJKLMNOPWRSTUVWXYZ"
+		      ("0123456789"
+		       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		       "abcdefghijklmnopqrstuvwxyz"
 		       "_"))]
 	  == '\0');

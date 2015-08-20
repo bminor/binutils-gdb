@@ -115,6 +115,7 @@ struct opcode16
    %<bitfield>G         print as an iWMMXt general purpose or control register
    %<bitfield>D		print as a NEON D register
    %<bitfield>Q		print as a NEON Q register
+   %<bitfield>E		print a quarter-float immediate value
 
    %y<code>		print a single precision VFP reg.
 			  Codes: 0=>Sm, 1=>Sd, 2=>Sn, 3=>multi-list, 4=>Sm pair
@@ -124,7 +125,7 @@ struct opcode16
    %<bitfield>'c	print specified char iff bitfield is all ones
    %<bitfield>`c	print specified char iff bitfield is all zeroes
    %<bitfield>?ab...    select from array of values in big endian order
-   
+
    %L			print as an iWMMXt N/M width field.
    %Z			print the Immediate of a WSHUFH instruction.
    %l			like 'A' except use byte offsets for 'B' & 'H'
@@ -578,9 +579,9 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1),
     0x0c500b10, 0x0fb00ff0, "vmov%c\t%12-15r, %16-19r, %z0"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V3xD),
-    0x0eb00a00, 0x0fb00ff0, "vmov%c.f32\t%y1, #%0-3,16-19d"},
+    0x0eb00a00, 0x0fb00ff0, "vmov%c.f32\t%y1, #%0-3,16-19E"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V3),
-    0x0eb00b00, 0x0fb00ff0, "vmov%c.f64\t%z1, #%0-3,16-19d"},
+    0x0eb00b00, 0x0fb00ff0, "vmov%c.f64\t%z1, #%0-3,16-19E"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V2),
     0x0c400a10, 0x0ff00fd0, "vmov%c\t%y4, %12-15r, %16-19r"},
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V2),
@@ -919,7 +920,7 @@ static const struct opcode32 coprocessor_opcodes[] =
    %<bitfield>Sn	print byte scaled width limited by n
    %<bitfield>Tn	print short scaled width limited by n
    %<bitfield>Un	print long scaled width limited by n
-   
+
    %<bitfield>'c	print specified char iff bitfield is all ones
    %<bitfield>`c	print specified char iff bitfield is all zeroes
    %<bitfield>?ab...    select from array of values in big endian order.  */
@@ -1194,6 +1195,12 @@ static const struct opcode32 neon_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
     0xf2000a10, 0xfe800f10,
     "vpmin%c.%24?us%20-21S2\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3000b10, 0xff800f10,
+    "vqrdmlah%c.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3000c10, 0xff800f10,
+    "vqrdmlsh%c.s%20-21S6\t%12-15,22R, %16-19,7R, %0-3,5R"},
 
   /* One register and an immediate value.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
@@ -1447,6 +1454,19 @@ static const struct opcode32 neon_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
     0xf2800a40, 0xfe800f50,
     "vmull%c.%24?us%20-21S6\t%12-15,22Q, %16-19,7D, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf2800e40, 0xff800f50,
+   "vqrdmlah%c.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf2800f40, 0xff800f50,
+   "vqrdmlsh%c.s%20-21S6\t%12-15,22D, %16-19,7D, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3800e40, 0xff800f50,
+   "vqrdmlah%c.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"},
+  {ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA),
+    0xf3800f40, 0xff800f50,
+   "vqrdmlsh%c.s%20-21S6\t%12-15,22Q, %16-19,7Q, %D"
+  },
 
   /* Element and structure load/store.  */
   {ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
@@ -1519,10 +1539,10 @@ static const struct opcode32 neon_opcodes[] =
    %<bitfield>{r|R}u    as %{r|R} but if matches the other %u field then is UNPREDICTABLE
    %<bitfield>{r|R}U    as %{r|R} but if matches the other %U field then is UNPREDICTABLE
    %<bitfield>d		print the bitfield in decimal
-   %<bitfield>W         print the bitfield plus one in decimal 
+   %<bitfield>W         print the bitfield plus one in decimal
    %<bitfield>x		print the bitfield in hex
    %<bitfield>X		print the bitfield as 1 hex digit without leading "0x"
-   
+
    %<bitfield>'c	print specified char iff bitfield is all ones
    %<bitfield>`c	print specified char iff bitfield is all zeroes
    %<bitfield>?ab...    select from array of values in big endian order
@@ -1602,6 +1622,10 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
     0xe1400240, 0xfff00ff0, "crc32cw\t%12-15R, %16-19R, %0-3R"},
 
+  /* Privileged Access Never extension instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
+    0xf1100000, 0xfffffdff, "setpan\t#%9-9d"},
+
   /* Virtualization Extension instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT), 0x0160006e, 0x0fffffff, "eret%c"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT), 0x01400070, 0x0ff000f0, "hvc%c\t%e"},
@@ -1623,6 +1647,8 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7), 0xf57ff050, 0xfffffff0, "dmb\t%U"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7), 0xf57ff040, 0xfffffff0, "dsb\t%U"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7), 0xf57ff060, 0xfffffff0, "isb\t%U"},
+   {ARM_FEATURE_CORE_LOW (ARM_EXT_V7),
+    0x0320f000, 0x0fffffff, "nop%c\t{%0-7d}"},
 
   /* ARM V6T2 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2),
@@ -2100,11 +2126,13 @@ static const struct opcode32 arm_opcodes[] =
     0x01000010, 0x0fe00090, "tst%p%c\t%16-19R, %o"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x03200000, 0x0fe00000, "teq%p%c\t%16-19r, %o"},
+    0x03300000, 0x0ff00000, "teq%p%c\t%16-19r, %o"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01200000, 0x0fe00010, "teq%p%c\t%16-19r, %o"},
+    0x01300000, 0x0ff00010, "teq%p%c\t%16-19r, %o"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01200010, 0x0fe00090, "teq%p%c\t%16-19R, %o"},
+    0x01300010, 0x0ff00010, "teq%p%c\t%16-19R, %o"},
+  {ARM_FEATURE_CORE_LOW (ARM_EXT_V5),
+    0x0130f000, 0x0ff0f010, "bx%c\t%0-3r"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x03400000, 0x0fe00000, "cmp%p%c\t%16-19r, %o"},
@@ -2253,6 +2281,8 @@ static const struct opcode32 arm_opcodes[] =
     0x0f000000, 0x0f000000, "svc%c\t%0-23x"},
 
   /* The rest.  */
+  {ARM_FEATURE_CORE_LOW (ARM_EXT_V7),
+    0x03200000, 0x0fff00ff, "nop%c\t{%0-7d}" UNPREDICTABLE_INSTRUCTION},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x00000000, 0x00000000, UNDEFINED_INSTRUCTION},
   {ARM_FEATURE_CORE_LOW (0),
@@ -2293,6 +2323,7 @@ static const struct opcode16 thumb_opcodes[] =
   /* ARM V8 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),  0xbf50, 0xffff, "sevl%c"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),  0xba80, 0xffc0, "hlt\t%0-5x"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),  0xb610, 0xfff7, "setpan\t#%3-3d"},
 
   /* ARM V6K no-argument instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6K), 0xbf00, 0xffff, "nop%c"},
@@ -3059,8 +3090,8 @@ arm_decode_bitfield (const char *ptr,
 {
   unsigned long value = 0;
   int width = 0;
-  
-  do 
+
+  do
     {
       int start, end;
       int bits;
@@ -3285,7 +3316,7 @@ print_insn_coprocessor (bfd_vma pc,
 			func (stream, "\t; ");
 			/* For unaligned PCs, apply off-by-alignment
 			   correction.  */
-			info->print_address_func (offset + pc 
+			info->print_address_func (offset + pc
 						  + info->bytes_per_chunk * 2
 						  - (pc & 3),
 				 		  info);
@@ -3328,7 +3359,7 @@ print_insn_coprocessor (bfd_vma pc,
 
 		    /* Is ``imm'' a negative number?  */
 		    if (imm & 0x40)
-		      imm |= (-1 << 7);
+		      imm -= 0x80;
 
 		    func (stream, "%d", imm);
 		  }
@@ -3443,6 +3474,36 @@ print_insn_coprocessor (bfd_vma pc,
 			func (stream, "%ld", value);
 			value_in_comment = value;
 			break;
+		      case 'E':
+                        {
+			  /* Converts immediate 8 bit back to float value.  */
+			  unsigned floatVal = (value & 0x80) << 24
+			    | (value & 0x3F) << 19
+			    | ((value & 0x40) ? (0xF8 << 22) : (1 << 30));
+
+			  /* Quarter float have a maximum value of 31.0.
+			     Get floating point value multiplied by 1e7.
+			     The maximum value stays in limit of a 32-bit int.  */
+			  unsigned decVal =
+			    (78125 << (((floatVal >> 23) & 0xFF) - 124)) *
+			    (16 + (value & 0xF));
+
+			  if (!(decVal % 1000000))
+			    func (stream, "%ld\t; 0x%08x %c%u.%01u", value,
+				  floatVal, value & 0x80 ? '-' : ' ',
+				  decVal / 10000000,
+				  decVal % 10000000 / 1000000);
+			  else if (!(decVal % 10000))
+			    func (stream, "%ld\t; 0x%08x %c%u.%03u", value,
+				  floatVal, value & 0x80 ? '-' : ' ',
+				  decVal / 10000000,
+				  decVal % 10000000 / 10000);
+			  else
+			    func (stream, "%ld\t; 0x%08x %c%u.%07u", value,
+				  floatVal, value & 0x80 ? '-' : ' ',
+				  decVal / 10000000, decVal % 10000000);
+			  break;
+			}
 		      case 'k':
 			{
 			  int from = (given & (1 << 7)) ? 32 : 16;
@@ -3842,7 +3903,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
       else
 	return FALSE;
     }
-  
+
   for (insn = neon_opcodes; insn->assembler; insn++)
     {
       if ((given & insn->mask) == insn->value)
@@ -3873,7 +3934,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 
 		    case 'A':
 		      {
-			static const unsigned char enc[16] = 
+			static const unsigned char enc[16] =
 			{
 			  0x4, 0x14, /* st4 0,1 */
 			  0x4, /* st1 2 */
@@ -3895,7 +3956,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			int n = enc[type] & 0xf;
 			int stride = (enc[type] >> 4) + 1;
 			int ix;
-			
+
 			func (stream, "{");
 			if (stride > 1)
 			  for (ix = 0; ix != n; ix++)
@@ -3914,7 +3975,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			  func (stream, ", %s", arm_regnames[rm]);
 		      }
 		      break;
-		      
+
 		    case 'B':
 		      {
 			int rd = ((given >> 12) & 0xf) | (((given >> 22) & 1) << 4);
@@ -3930,7 +3991,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 
                         if (length > 1 && size > 0)
                           stride = (idx_align & (1 << size)) ? 2 : 1;
-			
+
                         switch (length)
                           {
                           case 1:
@@ -3947,19 +4008,19 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                                 }
                               }
                             break;
-                          
+
                           case 2:
                             if (size == 2 && (idx_align & 2) != 0)
                               return FALSE;
                             align = (idx_align & 1) ? 16 << size : 0;
                             break;
-                          
+
                           case 3:
                             if ((size == 2 && (idx_align & 3) != 0)
                                 || (idx_align & 1) != 0)
                               return FALSE;
                             break;
-                          
+
                           case 4:
                             if (size == 2)
                               {
@@ -3970,11 +4031,11 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                             else
                               align = (idx_align & 1) ? 32 << size : 0;
                             break;
-                          
+
                           default:
                             abort ();
                           }
-                                
+
 			func (stream, "{");
                         for (i = 0; i < length; i++)
                           func (stream, "%sd%d[%d]", (i == 0) ? "" : ",",
@@ -3989,7 +4050,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			  func (stream, ", %s", arm_regnames[rm]);
 		      }
 		      break;
-		      
+
 		    case 'C':
 		      {
 			int rd = ((given >> 12) & 0xf) | (((given >> 22) & 1) << 4);
@@ -4001,12 +4062,12 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			int n = type + 1;
 			int stride = ((given >> 5) & 0x1);
 			int ix;
-			
+
 			if (stride && (n == 1))
 			  n++;
 			else
 			  stride++;
-			
+
 			func (stream, "{");
 			if (stride > 1)
 			  for (ix = 0; ix != n; ix++)
@@ -4033,18 +4094,18 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			  func (stream, ", %s", arm_regnames[rm]);
 		      }
 		      break;
-		      
+
 		    case 'D':
 		      {
 			int raw_reg = (given & 0xf) | ((given >> 1) & 0x10);
 			int size = (given >> 20) & 3;
 			int reg = raw_reg & ((4 << size) - 1);
 			int ix = raw_reg >> size >> 2;
-			
+
 			func (stream, "d%d[%d]", reg, ix);
 		      }
 		      break;
-		      
+
 		    case 'E':
 		      /* Neon encoded constant for mov, mvn, vorr, vbic.  */
 		      {
@@ -4055,11 +4116,11 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			unsigned shift;
                         int size = 0;
                         int isfloat = 0;
-			
+
 			bits |= ((given >> 24) & 1) << 7;
 			bits |= ((given >> 16) & 7) << 4;
 			bits |= ((given >> 0) & 15) << 0;
-			
+
 			if (cmode < 8)
 			  {
 			    shift = (cmode >> 1) & 3;
@@ -4086,7 +4147,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 				/* Bit replication into bytes.  */
 				int ix;
 				unsigned long mask;
-				
+
 				value = 0;
                                 hival = 0;
 				for (ix = 7; ix >= 0; ix--)
@@ -4110,7 +4171,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			  {
 			    /* Floating point encoding.  */
 			    int tmp;
-			    
+
 			    value = (unsigned long)  (bits & 0x7f) << 19;
 			    value |= (unsigned long) (bits & 0x80) << 24;
 			    tmp = bits & 0x40 ? 0x3c : 0x40;
@@ -4130,7 +4191,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                           case 8:
 			    func (stream, "#%ld\t; 0x%.2lx", value, value);
                             break;
-                          
+
                           case 16:
                             func (stream, "#%ld\t; 0x%.4lx", value, value);
                             break;
@@ -4140,24 +4201,24 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                               {
                                 unsigned char valbytes[4];
                                 double fvalue;
-                                
+
                                 /* Do this a byte at a time so we don't have to
                                    worry about the host's endianness.  */
                                 valbytes[0] = value & 0xff;
                                 valbytes[1] = (value >> 8) & 0xff;
                                 valbytes[2] = (value >> 16) & 0xff;
                                 valbytes[3] = (value >> 24) & 0xff;
-                                
-                                floatformat_to_double 
+
+                                floatformat_to_double
                                   (& floatformat_ieee_single_little, valbytes,
                                   & fvalue);
-                                                                
+
                                 func (stream, "#%.7g\t; 0x%.8lx", fvalue,
                                       value);
                               }
                             else
                               func (stream, "#%ld\t; 0x%.8lx",
-				    (long) (((value & 0x80000000L) != 0) 
+				    (long) (((value & 0x80000000L) != 0)
 					    ? value | ~0xffffffffL : value),
 				    value);
                             break;
@@ -4165,18 +4226,18 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                           case 64:
                             func (stream, "#0x%.8lx%.8lx", hival, value);
                             break;
-                          
+
                           default:
                             abort ();
                           }
 		      }
 		      break;
-		      
+
 		    case 'F':
 		      {
 			int regno = ((given >> 16) & 0xf) | ((given >> (7 - 4)) & 0x10);
 			int num = (given >> 8) & 0x3;
-			
+
 			if (!num)
 			  func (stream, "{d%d}", regno);
 			else if (num + regno >= 32)
@@ -4194,7 +4255,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			unsigned long value;
 
 			c = arm_decode_bitfield (c, given, &value, &width);
-			
+
 			switch (*c)
 			  {
 			  case 'r':
@@ -4207,7 +4268,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			  case 'e':
 			    func (stream, "%ld", (1ul << width) - value);
 			    break;
-			    
+
 			  case 'S':
 			  case 'T':
 			  case 'U':
@@ -4247,7 +4308,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			    else
 			      func (stream, "q%ld", value >> 1);
 			    break;
-			    
+
 			  case '`':
 			    c++;
 			    if (value == 0)
@@ -4290,20 +4351,20 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 
 /* Return the name of a v7A special register.  */
 
-static const char * 
+static const char *
 banked_regname (unsigned reg)
 {
   switch (reg)
     {
       case 15: return "CPSR";
-      case 32: return "R8_usr"; 
+      case 32: return "R8_usr";
       case 33: return "R9_usr";
       case 34: return "R10_usr";
       case 35: return "R11_usr";
       case 36: return "R12_usr";
       case 37: return "SP_usr";
       case 38: return "LR_usr";
-      case 40: return "R8_fiq"; 
+      case 40: return "R8_fiq";
       case 41: return "R9_fiq";
       case 42: return "R10_fiq";
       case 43: return "R11_fiq";
@@ -4600,6 +4661,8 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  if (! ARM_CPU_HAS_FEATURE (private_data->features, \
 						     arm_ext_v6))
 			    func (stream, "p");
+			  else
+			    is_unpredictable = TRUE;
 			}
 		      break;
 
@@ -4684,7 +4747,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			}
 		      else
 			{
-			  func (stream, "%cPSR_", 
+			  func (stream, "%cPSR_",
 				(given & 0x00400000) ? 'S' : 'C');
 			  if (given & 0x80000)
 			    func (stream, "f");
@@ -4698,7 +4761,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 		      break;
 
 		    case 'U':
-		      if ((given & 0xf0) == 0x60) 
+		      if ((given & 0xf0) == 0x60)
 			{
 			  switch (given & 0xf)
 			    {
@@ -4707,8 +4770,8 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			      func (stream, "#%d", (int) given & 0xf);
 			      break;
 			    }
-			} 
-		      else 
+			}
+		      else
 			{
 			  const char * opt = data_barrier_option (given & 0xf);
 			  if (opt != NULL)
@@ -4725,7 +4788,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			unsigned long value;
 
 			c = arm_decode_bitfield (c, given, &value, &width);
-			
+
 			switch (*c)
 			  {
 			  case 'R':
@@ -5262,7 +5325,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  value_in_comment = imm;
 		}
 		break;
-		  
+
 	      case 'J':
 		{
 		  unsigned int imm = 0;
@@ -5592,7 +5655,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		break;
 
 	      case 'U':
-		if ((given & 0xf0) == 0x60) 
+		if ((given & 0xf0) == 0x60)
 		  {
 		    switch (given & 0xf)
 		      {
@@ -5602,7 +5665,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 			      break;
 		      }
 		  }
-		else 
+		else
 		  {
 		    const char * opt = data_barrier_option (given & 0xf);
 		    if (opt != NULL)
@@ -5633,7 +5696,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		    sysm |= (given & 0x30);
 		    sysm |= (given & 0x00100000) >> 14;
 		    name = banked_regname (sysm);
-		    
+
 		    if (name != NULL)
 		      func (stream, "%s", name);
 		    else
@@ -5672,7 +5735,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  unsigned long val;
 
 		  c = arm_decode_bitfield (c, given, &val, &width);
-			
+
 		  switch (*c)
 		    {
 		    case 'd':
@@ -5711,7 +5774,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      if (val == ((1ul << width) - 1))
 			func (stream, "%c", *c);
 		      break;
-		      
+
 		    case '`':
 		      c++;
 		      if (val == 0)
@@ -5722,7 +5785,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      func (stream, "%c", c[(1 << width) - (int) val]);
 		      c += 1 << width;
 		      break;
-		      
+
 		    case 'x':
 		      func (stream, "0x%lx", val & 0xffffffffUL);
 		      break;
@@ -5800,7 +5863,7 @@ arm_symbol_is_valid (asymbol * sym,
 		     struct disassemble_info * info ATTRIBUTE_UNUSED)
 {
   const char * name;
-  
+
   if (sym == NULL)
     return FALSE;
 
@@ -5863,7 +5926,7 @@ parse_disassembler_options (char *options)
 	++ options;
       /* Skip forward past seperators.  */
       while (ISSPACE (*options) || (*options == ','))
-	++ options;      
+	++ options;
     }
 }
 
@@ -6026,43 +6089,40 @@ static void
 select_arm_features (unsigned long mach,
 		     arm_feature_set * features)
 {
-#undef  ARM_FEATURE_LOW
-#define ARM_FEATURE_LOW(ARCH1,CEXT) \
-  features->core[0] = (ARCH1); \
-  features->core[1] = 0; \
-  features->coproc = (CEXT) | FPU_FPA; \
-  return
-
-#undef  ARM_FEATURE_CORE_LOW
-#define ARM_FEATURE_CORE_LOW(ARCH1) \
-  features->core[0] = (ARCH1); \
-  features->core[1] = 0; \
-  features->coproc = FPU_FPA; \
-  return
+#undef ARM_SET_FEATURES
+#define ARM_SET_FEATURES(FSET) \
+  {							\
+    const arm_feature_set fset = FSET;			\
+    arm_feature_set tmp = ARM_FEATURE (0, 0, FPU_FPA) ;	\
+    ARM_MERGE_FEATURE_SETS (*features, tmp, fset);	\
+  }
 
   switch (mach)
     {
-    case bfd_mach_arm_2:       ARM_ARCH_V2;
-    case bfd_mach_arm_2a:      ARM_ARCH_V2S;
-    case bfd_mach_arm_3:       ARM_ARCH_V3;
-    case bfd_mach_arm_3M:      ARM_ARCH_V3M;
-    case bfd_mach_arm_4:       ARM_ARCH_V4;
-    case bfd_mach_arm_4T:      ARM_ARCH_V4T;
-    case bfd_mach_arm_5:       ARM_ARCH_V5;
-    case bfd_mach_arm_5T:      ARM_ARCH_V5T;
-    case bfd_mach_arm_5TE:     ARM_ARCH_V5TE;
-    case bfd_mach_arm_XScale:  ARM_ARCH_XSCALE;
-    case bfd_mach_arm_ep9312:  ARM_FEATURE_LOW (ARM_AEXT_V4T, \
-						ARM_CEXT_MAVERICK \
-						| FPU_MAVERICK);
-    case bfd_mach_arm_iWMMXt:  ARM_ARCH_IWMMXT;
-    case bfd_mach_arm_iWMMXt2: ARM_ARCH_IWMMXT2;
+    case bfd_mach_arm_2:       ARM_SET_FEATURES (ARM_ARCH_V2); break;
+    case bfd_mach_arm_2a:      ARM_SET_FEATURES (ARM_ARCH_V2S); break;
+    case bfd_mach_arm_3:       ARM_SET_FEATURES (ARM_ARCH_V3); break;
+    case bfd_mach_arm_3M:      ARM_SET_FEATURES (ARM_ARCH_V3M); break;
+    case bfd_mach_arm_4:       ARM_SET_FEATURES (ARM_ARCH_V4); break;
+    case bfd_mach_arm_4T:      ARM_SET_FEATURES (ARM_ARCH_V4T); break;
+    case bfd_mach_arm_5:       ARM_SET_FEATURES (ARM_ARCH_V5); break;
+    case bfd_mach_arm_5T:      ARM_SET_FEATURES (ARM_ARCH_V5T); break;
+    case bfd_mach_arm_5TE:     ARM_SET_FEATURES (ARM_ARCH_V5TE); break;
+    case bfd_mach_arm_XScale:  ARM_SET_FEATURES (ARM_ARCH_XSCALE); break;
+    case bfd_mach_arm_ep9312:
+      ARM_SET_FEATURES (ARM_FEATURE_LOW (ARM_AEXT_V4T,
+					 ARM_CEXT_MAVERICK | FPU_MAVERICK));
+       break;
+    case bfd_mach_arm_iWMMXt:  ARM_SET_FEATURES (ARM_ARCH_IWMMXT); break;
+    case bfd_mach_arm_iWMMXt2: ARM_SET_FEATURES (ARM_ARCH_IWMMXT2); break;
       /* If the machine type is unknown allow all
 	 architecture types and all extensions.  */
-    case bfd_mach_arm_unknown: ARM_FEATURE_LOW (-1UL, -1UL);
+    case bfd_mach_arm_unknown: ARM_SET_FEATURES (ARM_FEATURE_ALL); break;
     default:
       abort ();
     }
+
+#undef ARM_SET_FEATURES
 }
 
 
@@ -6099,7 +6159,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       if ((info->flags & USER_SPECIFIED_MACHINE_TYPE) == 0)
 	/* If the user did not use the -m command line switch then default to
 	   disassembling all types of ARM instruction.
-	   
+
 	   The info->mach value has to be ignored as this will be based on
 	   the default archictecture for the target and/or hints in the notes
 	   section, but it will never be greater than the current largest arm

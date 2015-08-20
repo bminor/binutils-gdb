@@ -1281,7 +1281,7 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-sim
+  --enable-sim            Enable the GNU simulator
 
 Some influential environment variables:
   CC          C compiler command

@@ -70,8 +70,8 @@ subdir = .
 DIST_COMMON = NEWS README ChangeLog $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/configure \
 	$(am__configure_deps) $(srcdir)/config.in \
-	$(srcdir)/../mkinstalldirs $(top_srcdir)/po/Make-in ffsll.c \
-	ftruncate.c pread.c mremap.c yyscript.h yyscript.c \
+	$(srcdir)/../mkinstalldirs $(top_srcdir)/po/Make-in mremap.c \
+	pread.c ffsll.c ftruncate.c yyscript.h yyscript.c \
 	$(srcdir)/../depcomp $(srcdir)/../ylwrap
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
@@ -1296,6 +1296,8 @@ uninstall-am: uninstall-binPROGRAMS
 	ps ps-am recheck recheck-html tags tags-recursive uninstall \
 	uninstall-am uninstall-binPROGRAMS
 
+
+diststuff: $(EXTRA_DIST)
 
 # Use an explicit dependency for the bison generated header file.
 expression.$(OBJEXT): yyscript.h

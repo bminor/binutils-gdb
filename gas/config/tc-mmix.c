@@ -1475,8 +1475,8 @@ md_assemble (char *str)
 		&& ((exp[1].X_op == O_register
 		     && exp[1].X_add_number < 512)
 		    || (exp[1].X_op == O_constant
-			&& exp[1].X_add_number < 0
-			&& exp[1].X_add_number > 4)
+			&& (exp[1].X_add_number < 0
+			    || exp[1].X_add_number > 4))
 		    || (exp[1].X_op != O_register
 			&& exp[1].X_op != O_constant))))
 	  {
@@ -2973,7 +2973,7 @@ mmix_handle_mmixal (void)
   if (*s == 0 || is_end_of_line[(unsigned int) *s])
     /* We avoid handling empty lines here.  */
     return;
-      
+
   if (is_name_beginner (*s))
     label = s;
 
@@ -3413,7 +3413,7 @@ mmix_md_relax_frag (segT seg, fragS *fragP, long stretch)
 	fragP->fr_subtype = ENCODE_RELAX (STATE_PUSHJSTUB, STATE_ZERO);
       }
       /* FALLTHROUGH.  */
-    
+
       /* See if this PUSHJ is redirectable to a stub.  */
     case ENCODE_RELAX (STATE_PUSHJSTUB, STATE_ZERO):
       {

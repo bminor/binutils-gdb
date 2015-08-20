@@ -204,9 +204,9 @@ xstormy16_cons_fix_new (fragS *f,
  	  /* This can happen when gcc is generating debug output.
  	     For example it can create a stab with the address of
  	     a function:
- 	     
+
  	     	.stabs	"foo:F(0,21)",36,0,0,@fptr(foo)
- 
+
  	     Since this does not involve switching code pages, we
  	     just allow the reloc to be generated without any
  	     @fptr behaviour.  */
@@ -337,7 +337,7 @@ md_pcrel_from_section (fixS * fixP, segT sec)
       || xstormy16_force_relocation (fixP))
     /* The symbol is undefined,
        or it is defined but not in this section,
-       or the relocation will be relative to this symbol not the section symbol.	 
+       or the relocation will be relative to this symbol not the section symbol.
        Let the linker figure it out.  */
     return 0;
 

@@ -673,7 +673,7 @@ gdbscm_make_command (SCM name_scm, SCM rest)
   int doc_arg_pos = -1;
   char *s;
   char *name;
-  int command_class = no_class;
+  enum command_class command_class = no_class;
   SCM completer_class = SCM_BOOL_F;
   int is_prefix = 0;
   char *doc = NULL;

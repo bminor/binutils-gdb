@@ -280,7 +280,7 @@ static struct sparc_arch {
   { "v8pluse", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VE, 0 },
   { "v8plusv", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VV, 0 },
   { "v8plusm", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VM, 0 },
-  
+
   { "v9",      "v9",  v9,  0, 1, HWS_V9, 0 },
   { "v9a",     "v9a", v9,  0, 1, HWS_VA, 0 },
   { "v9b",     "v9b", v9,  0, 1, HWS_VB, 0 },
@@ -1211,7 +1211,7 @@ synthetize_setsw (const struct sparc_opcode *insn)
   output_insn (insn, &the_insn);
 }
 
-/* Handle the setsw synthetic instruction.  */
+/* Handle the setx synthetic instruction.  */
 
 static void
 synthetize_setx (const struct sparc_opcode *insn)
@@ -1973,7 +1973,8 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "%icc", 4) == 0)
+	      if ((strncmp (s, "%icc", 4) == 0)
+                  || (sparc_arch_size == 32 && strncmp (s, "%ncc", 4) == 0))
 		{
 		  s += 4;
 		  continue;
@@ -1985,7 +1986,8 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		{
 		  ++s;
 		}
-	      if (strncmp (s, "%xcc", 4) == 0)
+              if ((strncmp (s, "%xcc", 4) == 0)
+                  || (sparc_arch_size == 64 && strncmp (s, "%ncc", 4) == 0))
 		{
 		  s += 4;
 		  continue;

@@ -560,13 +560,16 @@ find_unwind_entry (CORE_ADDR pc)
   return NULL;
 }
 
-/* The epilogue is defined here as the area either on the `bv' instruction 
+/* Implement the stack_frame_destroyed_p gdbarch method.
+
+   The epilogue is defined here as the area either on the `bv' instruction 
    itself or an instruction which destroys the function's stack frame.
    
    We do not assume that the epilogue is at the end of a function as we can
    also have return sequences in the middle of a function.  */
+
 static int
-hppa_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+hppa_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned long status;
@@ -3135,8 +3138,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The following gdbarch vector elements do not depend on the address
      size, or in any other gdbarch element previously set.  */
   set_gdbarch_skip_prologue (gdbarch, hppa_skip_prologue);
-  set_gdbarch_in_function_epilogue_p (gdbarch,
-				      hppa_in_function_epilogue_p);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch,
+				       hppa_stack_frame_destroyed_p);
   set_gdbarch_inner_than (gdbarch, core_addr_greaterthan);
   set_gdbarch_sp_regnum (gdbarch, HPPA_SP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, HPPA_FP0_REGNUM);

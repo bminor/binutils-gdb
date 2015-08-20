@@ -503,8 +503,15 @@ finish_block_internal (struct symbol *symbol, struct pending **listhead,
       opblock = pblock;
     }
 
-  block_set_using (block, using_directives, &objfile->objfile_obstack);
-  using_directives = NULL;
+  block_set_using (block,
+		   (is_global
+		    ? global_using_directives
+		    : local_using_directives),
+		   &objfile->objfile_obstack);
+  if (is_global)
+    global_using_directives = NULL;
+  else
+    local_using_directives = NULL;
 
   record_pending_block (objfile, block, opblock);
 
@@ -1009,6 +1016,7 @@ prepare_for_building (const char *name, CORE_ADDR start_addr)
   last_source_start_addr = start_addr;
 
   local_symbols = NULL;
+  local_using_directives = NULL;
   within_function = 0;
   have_line_numbers = 0;
 
@@ -1018,6 +1026,7 @@ prepare_for_building (const char *name, CORE_ADDR start_addr)
      a symtab, or by the really_free_pendings cleanup.  */
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
+  gdb_assert (global_using_directives == NULL);
   gdb_assert (pending_macros == NULL);
   gdb_assert (pending_addrmap == NULL);
   gdb_assert (current_subfile == NULL);
@@ -1177,8 +1186,10 @@ reset_symtab_globals (void)
   set_last_source_file (NULL);
 
   local_symbols = NULL;
+  local_using_directives = NULL;
   file_symbols = NULL;
   global_symbols = NULL;
+  global_using_directives = NULL;
 
   /* We don't free pending_macros here because if the symtab was successfully
      built then ownership was transferred to the symtab.  */
@@ -1281,7 +1292,8 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
       && file_symbols == NULL
       && global_symbols == NULL
       && have_line_numbers == 0
-      && pending_macros == NULL)
+      && pending_macros == NULL
+      && global_using_directives == NULL)
     {
       /* Ignore symtabs that have no functions with real debugging info.  */
       return NULL;
@@ -1637,11 +1649,11 @@ push_context (int desc, CORE_ADDR valu)
   newobj->locals = local_symbols;
   newobj->old_blocks = pending_blocks;
   newobj->start_addr = valu;
-  newobj->using_directives = using_directives;
+  newobj->local_using_directives = local_using_directives;
   newobj->name = NULL;
 
   local_symbols = NULL;
-  using_directives = NULL;
+  local_using_directives = NULL;
 
   return newobj;
 }
@@ -1740,7 +1752,6 @@ get_last_source_file (void)
 void
 buildsym_init (void)
 {
-  using_directives = NULL;
   subfile_stack = NULL;
 
   pending_addrmap_interesting = 0;
@@ -1760,6 +1771,7 @@ buildsym_init (void)
   gdb_assert (pending_blocks == NULL);
   gdb_assert (file_symbols == NULL);
   gdb_assert (global_symbols == NULL);
+  gdb_assert (global_using_directives == NULL);
   gdb_assert (pending_macros == NULL);
   gdb_assert (pending_addrmap == NULL);
   gdb_assert (buildsym_compunit == NULL);

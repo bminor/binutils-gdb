@@ -295,7 +295,7 @@ dlx_aluI_type (struct disassemble_info* info)
     { OPC(SGTUIOP),  "sgtui" },  /* Store word.      */
     { OPC(SLEUIOP),  "sleui" },  /* Store word.      */
     { OPC(SGEUIOP),  "sgeui" },  /* Store word.      */
-#if 0						       
+#if 0
     { OPC(MVTSOP),   "mvts"  },  /* Store word.      */
     { OPC(MVFSOP),   "mvfs"  },  /* Store word.      */
 #endif

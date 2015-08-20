@@ -186,9 +186,9 @@ vlscm_binop (enum valscm_binary_opcode opcode, SCM x, SCM y,
 	    struct type *ltype = value_type (arg1);
 	    struct type *rtype = value_type (arg2);
 
-	    CHECK_TYPEDEF (ltype);
+	    ltype = check_typedef (ltype);
 	    ltype = STRIP_REFERENCE (ltype);
-	    CHECK_TYPEDEF (rtype);
+	    rtype = check_typedef (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
 	    if (TYPE_CODE (ltype) == TYPE_CODE_PTR
@@ -206,9 +206,9 @@ vlscm_binop (enum valscm_binary_opcode opcode, SCM x, SCM y,
 	    struct type *ltype = value_type (arg1);
 	    struct type *rtype = value_type (arg2);
 
-	    CHECK_TYPEDEF (ltype);
+	    ltype = check_typedef (ltype);
 	    ltype = STRIP_REFERENCE (ltype);
-	    CHECK_TYPEDEF (rtype);
+	    rtype = check_typedef (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
 	    if (TYPE_CODE (ltype) == TYPE_CODE_PTR

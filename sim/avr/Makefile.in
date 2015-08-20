@@ -17,8 +17,8 @@
 ## COMMON_PRE_CONFIG_FRAG
 
 SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
 	interp.o \
+	$(SIM_NEW_COMMON_OBJS) \
 	sim-hload.o \
 	sim-reason.o \
 	sim-resume.o \

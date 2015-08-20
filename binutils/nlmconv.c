@@ -1058,7 +1058,7 @@ main (int argc, char **argv)
   {
     const int    max_len  = NLM_MODULE_NAME_SIZE - 2;
     const char * filename = lbasename (output_file);
-    
+
     len = strlen (filename);
     if (len > max_len)
       len = max_len;
@@ -1941,7 +1941,7 @@ powerpc_mangle_relocs (bfd *outbfd, asection *insec,
 			     (long) rel->address);
 		  break;
 		}
-	      
+
 	      assert (rel->howto->size == 2 && rel->howto->pcrel_offset);
 	      val = bfd_get_32 (outbfd, (bfd_byte *) contents + rel->address);
 	      val = ((val &~ rel->howto->dst_mask)
@@ -1997,7 +1997,7 @@ powerpc_mangle_relocs (bfd *outbfd, asection *insec,
 			     (long) rel->address);
 		  break;
 		}
-		       
+
 	      val = bfd_get_16 (outbfd,
 				(bfd_byte *) contents + rel->address);
 	      val = ((val &~ rel->howto->dst_mask)
@@ -2020,7 +2020,7 @@ powerpc_mangle_relocs (bfd *outbfd, asection *insec,
 			     (long) rel->address);
 		  break;
 		}
-		       
+
 	      val = bfd_get_32 (outbfd,
 				(bfd_byte *) contents + rel->address);
 	      val = ((val &~ rel->howto->dst_mask)

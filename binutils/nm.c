@@ -985,7 +985,7 @@ print_size_symbols (bfd *              abfd,
    SYMCOUNT is the number of symbols in MINISYMS and SYNTH_COUNT
    is the number of these that are synthetic.  Synthetic symbols,
    if any are present, always come at the end of the MINISYMS.
-   
+
    SIZE is the size of a symbol in MINISYMS.  */
 
 static void
@@ -1059,7 +1059,7 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
       non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       return;
     }
-  
+
   if (show_synthetic && size == sizeof (asymbol *))
     {
       asymbol *synthsyms;

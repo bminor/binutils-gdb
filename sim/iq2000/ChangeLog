@@ -1,3 +1,23 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* decode.c (frvbf_decode): Change TRACE_EXTRACT to CGEN_TRACE_EXTRACT.
+	* mloop.in (execute): Change TRACE_INSN_INIT to CGEN_TRACE_INSN_INIT,
+	TRACE_INSN to CGEN_TRACE_INSN, and TRACE_INSN_FINI to CGEN_TRACE_INSN_FINI.
+	* sem.c: Rename TRACE_RESULT to CGEN_TRACE_RESULT.
+	* sem-switch.c: Likewise.
+
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (USING_SIM_BASE_H): Delete.
@@ -196,8 +216,8 @@
 	* config.in: Ditto.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -327,7 +347,7 @@
 	* iq2000/{cpu.c, cpu.h, decode.c, decode.h, model.c, sem-switch.c,
 	sem.c}: Regen'd.
 	* iq2000.c (do_syscall): Support system traps.
-	
+
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
 	* Makefile.in (stamp-arch): Use $(CGEN_CPU_DIR).

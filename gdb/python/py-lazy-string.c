@@ -99,7 +99,7 @@ stpy_convert_to_value  (PyObject *self, PyObject *args)
 
   if (self_string->address == 0)
     {
-      PyErr_SetString (PyExc_MemoryError,
+      PyErr_SetString (gdbpy_gdb_memory_error,
 		       _("Cannot create a value from NULL."));
       return NULL;
     }
@@ -133,7 +133,7 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 
   if (address == 0 && length != 0)
     {
-      PyErr_SetString (PyExc_MemoryError,
+      PyErr_SetString (gdbpy_gdb_memory_error,
 		       _("Cannot create a lazy string with address 0x0, " \
 			 "and a non-zero length."));
       return NULL;

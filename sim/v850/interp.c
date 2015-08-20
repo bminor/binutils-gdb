@@ -18,14 +18,6 @@
 
 #include "bfd.h"
 
-#ifndef INLINE
-#ifdef __GNUC__
-#define INLINE inline
-#else
-#define INLINE
-#endif
-#endif
-
 static const char * get_insn_name (sim_cpu *, int);
 
 /* For compatibility.  */

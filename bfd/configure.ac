@@ -6,12 +6,12 @@ dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
 dnl the Free Software Foundation; either version 3 of the License, or
 dnl (at your option) any later version.
-dnl 
+dnl
 dnl This program is distributed in the hope that it will be useful,
 dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
-dnl 
+dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
@@ -232,6 +232,8 @@ AC_CHECK_DECLS(malloc)
 AC_CHECK_DECLS(realloc)
 AC_CHECK_DECLS(stpcpy)
 AC_CHECK_DECLS(strstr)
+AC_CHECK_DECLS(asprintf)
+AC_CHECK_DECLS(vasprintf)
 AC_CHECK_DECLS(snprintf)
 AC_CHECK_DECLS(vsnprintf)
 AC_CHECK_DECLS(strnlen)
@@ -789,6 +791,7 @@ do
     i386_nlm32_vec)		 tb="$tb nlm32-i386.lo nlm32.lo nlm.lo" ;;
     i386_pe_vec)		 tb="$tb pe-i386.lo peigen.lo $coff" ;;
     i386_pei_vec)		 tb="$tb pei-i386.lo peigen.lo $coff" ;;
+    iamcu_elf32_vec)		 tb="$tb elf32-i386.lo elf-ifunc.lo elf-nacl.lo elf-vxworks.lo elf32.lo $elf" ;;
     i860_coff_vec)		 tb="$tb coff-i860.lo $coff" ;;
     i860_elf32_vec)		 tb="$tb elf32-i860.lo elf32.lo $elf" ;;
     i860_elf32_le_vec)		 tb="$tb elf32-i860.lo elf32.lo $elf" ;;

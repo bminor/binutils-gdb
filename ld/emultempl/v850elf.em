@@ -41,7 +41,7 @@ static void
 v850_after_open (void)
 {
   if (is_v850_target ()
-      && ! link_info.relocatable
+      && !bfd_link_relocatable (&link_info)
       && link_info.input_bfds != NULL
       && ! v850_elf_create_sections (& link_info))
 	einfo ("%X%P: can not create note section: %E\n");

@@ -165,8 +165,10 @@ extern void detach_command (char *, int);
 
 extern void notice_new_inferior (ptid_t, int, int);
 
-extern struct value *get_return_value (struct value *function,
-                                       struct type *value_type);
+struct dummy_frame_context_saver;
+extern struct value *get_return_value
+  (struct value *function, struct type *value_type,
+   struct dummy_frame_context_saver *ctx_saver);
 
 /* Prepare for execution command.  TARGET is the target that will run
    the command.  BACKGROUND determines whether this is a foreground
@@ -274,16 +276,6 @@ struct inferior_control_state
   enum stop_kind stop_soon;
 };
 
-/* Inferior process specific part of `struct infcall_suspend_state'.
-
-   Inferior thread counterpart is `struct thread_suspend_state'.  */
-
-#if 0 /* Currently unused and empty structures are not valid C.  */
-struct inferior_suspend_state
-{
-};
-#endif
-
 /* GDB represents the state of each program execution with an object
    called an inferior.  An inferior typically corresponds to a process
    but is more general and applies also to targets that do not have a
@@ -311,12 +303,6 @@ struct inferior
   /* State of GDB control of inferior process execution.
      See `struct inferior_control_state'.  */
   struct inferior_control_state control;
-
-  /* State of inferior process to restore after GDB is done with an inferior
-     call.  See `struct inferior_suspend_state'.  */
-#if 0 /* Currently unused and empty structures are not valid C.  */
-  struct inferior_suspend_state suspend;
-#endif
 
   /* True if this was an auto-created inferior, e.g. created from
      following a fork; false, if this inferior was manually added by
@@ -432,14 +418,7 @@ extern struct inferior *add_inferior (int pid);
    the CLI.  */
 extern struct inferior *add_inferior_silent (int pid);
 
-/* Delete an existing inferior list entry, due to inferior exit.  */
-extern void delete_inferior (int pid);
-
-extern void delete_inferior_1 (struct inferior *todel, int silent);
-
-/* Same as delete_inferior, but don't print new inferior notifications
-   to the CLI.  */
-extern void delete_inferior_silent (int pid);
+extern void delete_inferior (struct inferior *todel);
 
 /* Delete an existing inferior list entry, due to inferior detaching.  */
 extern void detach_inferior (int pid);

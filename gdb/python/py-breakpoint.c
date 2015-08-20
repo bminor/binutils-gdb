@@ -30,6 +30,7 @@
 #include "ada-lang.h"
 #include "arch-utils.h"
 #include "language.h"
+#include "location.h"
 
 /* Number of live breakpoints.  */
 static int bppy_live;
@@ -380,7 +381,7 @@ bppy_set_hit_count (PyObject *self, PyObject *newvalue, void *closure)
 static PyObject *
 bppy_get_location (PyObject *self, void *closure)
 {
-  char *str;
+  const char *str;
   gdbpy_breakpoint_object *obj = (gdbpy_breakpoint_object *) self;
 
   BPPY_REQUIRE_VALID (obj);
@@ -388,8 +389,7 @@ bppy_get_location (PyObject *self, void *closure)
   if (obj->bp->type != bp_breakpoint)
     Py_RETURN_NONE;
 
-  str = obj->bp->addr_string;
-
+  str = event_location_to_string (obj->bp->location);
   if (! str)
     str = "";
   return PyString_Decode (str, strlen (str), host_charset (), NULL);
@@ -670,8 +670,12 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	{
 	case bp_breakpoint:
 	  {
+	    struct event_location *location;
+
+	    location = new_linespec_location (&copy);
+	    make_cleanup_delete_event_location (location);
 	    create_breakpoint (python_gdbarch,
-			       copy, NULL, -1, NULL,
+			       location, NULL, -1, NULL,
 			       0,
 			       temporary_bp, bp_breakpoint,
 			       0,

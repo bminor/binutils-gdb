@@ -2904,7 +2904,7 @@ class Output_section_lookup_maps
 
   // Find a relaxed input section of OBJECT with index SHNDX.
   Output_relaxed_input_section*
-  find_relaxed_input_section(const Object* object, unsigned int shndx) const
+  find_relaxed_input_section(const Relobj* object, unsigned int shndx) const
   {
     gold_assert(this->is_valid_);
     Relaxed_input_sections_by_id::const_iterator p =
@@ -3099,6 +3099,11 @@ class Output_section : public Output_data
   // Update the output section flags based on input section flags.
   void
   update_flags_for_input_section(elfcpp::Elf_Xword flags);
+
+  // Set the output section flags.
+  void
+  set_flags(elfcpp::Elf_Xword flags)
+  { this->flags_ = flags; }
 
   // Return the entsize field.
   uint64_t

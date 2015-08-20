@@ -1363,7 +1363,7 @@ parse_reg (char *src, int *mode, int *reg)
     }
   else
     prefix = 0;
-  
+
   consumed = parse_reg_without_prefix (src, mode, reg);
 
   if (consumed == 0)
@@ -3245,10 +3245,10 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 	  for (; bfd_arch; bfd_arch=bfd_arch->next)
 	    {
 	      int len = strlen(bfd_arch->printable_name);
-	      
+
 	      if (bfd_arch->mach == bfd_mach_sh5)
 		continue;
-	      
+
 	      if (strncasecmp (bfd_arch->printable_name, arg, len) != 0)
 		continue;
 
@@ -3262,7 +3262,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 		continue;
 	      break;
 	    }
-	  
+
 	  if (!preset_target_arch)
 	    as_bad (_("Invalid argument to --isa option: %s"), arg);
 	}

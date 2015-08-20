@@ -1618,6 +1618,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED,
 	      fixS *fixp)
 {
   arelent *reloc;
+  bfd_reloc_code_real_type code = fixp->fx_r_type;
 
   if (fixp->fx_subsy != NULL)
     {
@@ -1631,7 +1632,21 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED,
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
-  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
+
+  if ((fixp->fx_r_type == BFD_RELOC_32) && (fixp->fx_pcrel))
+    {
+      if (seg->use_rela_p)
+        fixp->fx_offset -= md_pcrel_from_section (fixp, seg);
+      else
+        fixp->fx_offset = reloc->address;
+
+      code = BFD_RELOC_32_PCREL;
+    }
+
+  reloc->addend = fixp->fx_offset;
+
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
+
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -1644,7 +1659,6 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED,
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     reloc->address = fixp->fx_offset;
 
-  reloc->addend = fixp->fx_offset;
 
   return reloc;
 }

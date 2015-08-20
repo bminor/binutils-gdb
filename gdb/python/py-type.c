@@ -346,7 +346,7 @@ typy_fields_items (PyObject *self, enum gdbpy_iter_kind kind)
 
   TRY
     {
-      CHECK_TYPEDEF (checked_type);
+      checked_type = check_typedef (checked_type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -477,7 +477,7 @@ typy_get_composite (struct type *type)
     {
       TRY
 	{
-	  CHECK_TYPEDEF (type);
+	  type = check_typedef (type);
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
@@ -1181,6 +1181,16 @@ typy_nonzero (PyObject *self)
   return 1;
 }
 
+/* Return optimized out value of this type.  */
+
+static PyObject *
+typy_optimized_out (PyObject *self, PyObject *args)
+{
+  struct type *type = ((type_object *) self)->type;
+
+  return value_to_value_object (allocate_optimized_out_value (type));
+}
+
 /* Return a gdb.Field object for the field named by the argument.  */
 
 static PyObject *
@@ -1493,6 +1503,9 @@ They are first class values." },
   { "const", typy_const, METH_NOARGS,
     "const () -> Type\n\
 Return a const variant of this type." },
+  { "optimized_out", typy_optimized_out, METH_NOARGS,
+    "optimized_out() -> Value\n\
+Return optimized out value of this type." },
   { "fields", typy_fields, METH_NOARGS,
     "fields () -> list\n\
 Return a list holding all the fields of this type.\n\

@@ -22,13 +22,6 @@ code on the hardware.
 
 */
 
-/* The TRACE manifests enable the provision of extra features. If they
-   are not defined then a simpler (quicker) simulator is constructed
-   without the required run-time checks, etc. */
-#if 1 /* 0 to allow user build selection, 1 to force inclusion */
-#define TRACE (1)
-#endif
-
 #include "config.h"
 #include "bfd.h"
 #include "sim-main.h"
@@ -157,11 +150,13 @@ static SIM_RC sim_firmware_command (SIM_DESC sd, char* arg);
 #define MEM_SIZE (8 << 20)	/* 8 MBytes */
 
 
-#if defined(TRACE)
+#if WITH_TRACE_ANY_P
 static char *tracefile = "trace.din"; /* default filename for trace log */
 FILE *tracefh = NULL;
 static void open_trace (SIM_DESC sd);
-#endif /* TRACE */
+#else
+#define open_trace(sd)
+#endif
 
 static const char * get_insn_name (sim_cpu *, int);
 
@@ -189,7 +184,7 @@ mips_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt, char *arg,
   switch (opt)
     {
     case OPTION_DINERO_TRACE: /* ??? */
-#if defined(TRACE)
+#if WITH_TRACE_ANY_P
       /* Eventually the simTRACE flag could be treated as a toggle, to
 	 allow external control of the program points being traced
 	 (i.e. only from main onwards, excluding the run-time setup,
@@ -214,15 +209,15 @@ mips_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt, char *arg,
 	    }
 	}
       return SIM_RC_OK;
-#else /* !TRACE */
+#else /* !WITH_TRACE_ANY_P */
       fprintf(stderr,"\
 Simulator constructed without dinero tracing support (for performance).\n\
-Re-compile simulator with \"-DTRACE\" to enable this option.\n");
+Re-compile simulator with \"-DWITH_TRACE_ANY_P\" to enable this option.\n");
       return SIM_RC_FAIL;
-#endif /* !TRACE */
+#endif /* !WITH_TRACE_ANY_P */
 
     case OPTION_DINERO_FILE:
-#if defined(TRACE)
+#if WITH_TRACE_ANY_P
       if (optarg != NULL) {
 	char *tmp;
 	tmp = (char *)malloc(strlen(optarg) + 1);
@@ -237,7 +232,7 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 	  sim_io_printf(sd,"Placing trace information into file \"%s\"\n",tracefile);
 	}
       }
-#endif /* TRACE */
+#endif /* WITH_TRACE_ANY_P */
       return SIM_RC_OK;
 
     case OPTION_FIRMWARE:
@@ -695,10 +690,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 
   }
 
-#if defined(TRACE)
   if (STATE & simTRACE)
     open_trace(sd);
-#endif /* TRACE */
 
   /*
   sim_io_eprintf (sd, "idt@%x pmon@%x lsipmon@%x\n", 
@@ -821,7 +814,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   return sd;
 }
 
-#if defined(TRACE)
+#if WITH_TRACE_ANY_P
 static void
 open_trace (SIM_DESC sd)
 {
@@ -832,7 +825,7 @@ open_trace (SIM_DESC sd)
       tracefh = stderr;
   }
 }
-#endif /* TRACE */
+#endif
 
 /* Return name of an insn, used by insn profiling.  */
 static const char *
@@ -858,11 +851,11 @@ sim_close (SIM_DESC sd, int quitting)
      mechanism are released: */
   sim_io_shutdown (sd);
 
-#if defined(TRACE)
+#if WITH_TRACE_ANY_P
   if (tracefh != NULL && tracefh != stderr)
    fclose(tracefh);
   tracefh = NULL;
-#endif /* TRACE */
+#endif
 
   /* FIXME - free SD */
 
@@ -1676,16 +1669,16 @@ mips16_entry (SIM_DESC sd,
 
 /*-- trace support ----------------------------------------------------------*/
 
-/* The TRACE support is provided (if required) in the memory accessing
+/* The trace support is provided (if required) in the memory accessing
    routines. Since we are also providing the architecture specific
    features, the architecture simulation code can also deal with
-   notifying the TRACE world of cache flushes, etc. Similarly we do
+   notifying the trace world of cache flushes, etc. Similarly we do
    not need to provide profiling support in the simulator engine,
    since we can sample in the instruction fetch control loop. By
-   defining the TRACE manifest, we add tracing as a run-time
+   defining the trace manifest, we add tracing as a run-time
    option. */
 
-#if defined(TRACE)
+#if WITH_TRACE_ANY_P
 /* Tracing by default produces "din" format (as required by
    dineroIII). Each line of such a trace file *MUST* have a din label
    and address field. The rest of the line is ignored, so comments can
@@ -1749,7 +1742,7 @@ dotrace (SIM_DESC sd,
 
   return;
 }
-#endif /* TRACE */
+#endif /* WITH_TRACE_ANY_P */
 
 /*---------------------------------------------------------------------------*/
 /*-- simulator engine -------------------------------------------------------*/

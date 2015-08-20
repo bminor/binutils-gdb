@@ -127,7 +127,7 @@ generic_in_solib_return_trampoline (struct gdbarch *gdbarch,
 }
 
 int
-generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+generic_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   return 0;
 }
@@ -273,7 +273,7 @@ default_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
 
 /* Functions to manipulate the endianness of the target.  */
 
-static int target_byte_order_user = BFD_ENDIAN_UNKNOWN;
+static enum bfd_endian target_byte_order_user = BFD_ENDIAN_UNKNOWN;
 
 static const char endian_big[] = "big";
 static const char endian_little[] = "little";
@@ -603,7 +603,7 @@ static const bfd_target *default_bfd_vec = &DEFAULT_BFD_VEC;
 static const bfd_target *default_bfd_vec;
 #endif
 
-static int default_byte_order = BFD_ENDIAN_UNKNOWN;
+static enum bfd_endian default_byte_order = BFD_ENDIAN_UNKNOWN;
 
 void
 initialize_current_architecture (void)
@@ -795,8 +795,8 @@ default_has_shared_address_space (struct gdbarch *gdbarch)
 }
 
 int
-default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
-				  CORE_ADDR addr, int *isize, char **msg)
+default_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
+				  char **msg)
 {
   /* We don't know if maybe the target has some way to do fast
      tracepoints that doesn't need gdbarch, so always say yes.  */
@@ -864,6 +864,12 @@ default_infcall_mmap (CORE_ADDR size, unsigned prot)
   error (_("This target does not support inferior memory allocation by mmap."));
 }
 
+void
+default_infcall_munmap (CORE_ADDR addr, CORE_ADDR size)
+{
+  /* Memory reserved by inferior mmap is kept leaked.  */
+}
+
 /* -mcmodel=large is used so that no GOT (Global Offset Table) is needed to be
    created in inferior memory by GDB (normally it is set by ld.so).  */
 
@@ -880,6 +886,15 @@ const char *
 default_gnu_triplet_regexp (struct gdbarch *gdbarch)
 {
   return gdbarch_bfd_arch_info (gdbarch)->arch_name;
+}
+
+/* Default method for gdbarch_addressable_memory_unit_size.  By default, a memory byte has
+   a size of 1 octet.  */
+
+int
+default_addressable_memory_unit_size (struct gdbarch *gdbarch)
+{
+  return 1;
 }
 
 /* -Wmissing-prototypes */

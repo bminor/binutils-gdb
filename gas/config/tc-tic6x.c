@@ -2068,7 +2068,7 @@ tic6x_fix_adjustable (fixS *fixP)
     case BFD_RELOC_C6000_PCR_H16:
     case BFD_RELOC_C6000_PCR_L16:
       return 0;
-      
+
     default:
       return 1;
     }
@@ -4680,18 +4680,18 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
 
 
 static const int
-tic6x_unwind_frame_regs[TIC6X_NUM_UNWIND_REGS] = 
+tic6x_unwind_frame_regs[TIC6X_NUM_UNWIND_REGS] =
 /* A15 B15 B14 B13 B12 B11 B10  B3 A14 A13 A12 A11 A10.  */
   { 15, 31, 30, 29, 28, 27, 26, 19, 14, 13, 12, 11, 10 };
 
 /* Register save offsets for __c6xabi_push_rts.  */
 static const int
-tic6x_pop_rts_offset_little[TIC6X_NUM_UNWIND_REGS] = 
+tic6x_pop_rts_offset_little[TIC6X_NUM_UNWIND_REGS] =
 /* A15 B15 B14 B13 B12 B11 B10  B3 A14 A13 A12 A11 A10.  */
   { -1,  1,  0, -3, -4, -7, -8,-11, -2, -5, -6, -9,-10};
 
 static const int
-tic6x_pop_rts_offset_big[TIC6X_NUM_UNWIND_REGS] = 
+tic6x_pop_rts_offset_big[TIC6X_NUM_UNWIND_REGS] =
 /* A15 B15 B14 B13 B12 B11 B10  B3 A14 A13 A12 A11 A10.  */
   { -2,  1,  0, -4, -3, -8, -7,-12, -1, -6, -5,-10, -9};
 
@@ -5340,7 +5340,7 @@ tic6x_cfi_endproc (struct fde_entry *fde)
 	    continue;
 
 	  unwind->saved_reg_count++;
-	  /* Encoding uses 4 bits per word, so size of unwinding opcode data 
+	  /* Encoding uses 4 bits per word, so size of unwinding opcode data
 	     limits the save area size.  The exact cap will be figured out
 	     later due to overflow, the 0x800 here is just a quick sanity
 	     check to weed out obviously excessive offsets.  */

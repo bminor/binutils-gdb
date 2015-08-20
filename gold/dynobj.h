@@ -72,6 +72,16 @@ class Dynobj : public Object
     this->unknown_needed_ = set ? UNKNOWN_NEEDED_TRUE : UNKNOWN_NEEDED_FALSE;
   }
 
+  // Return the word size of the object file.
+  int
+  elfsize() const
+  { gold_unreachable(); }
+
+  // Return TRUE if this is a big-endian object file.
+  bool
+  is_big_endian() const
+  { gold_unreachable(); }
+
   // Compute the ELF hash code for a string.
   static uint32_t
   elf_hash(const char*);

@@ -111,7 +111,7 @@ static void procfs_attach (struct target_ops *, const char *, int);
 static void procfs_detach (struct target_ops *, const char *, int);
 static void procfs_resume (struct target_ops *,
 			   ptid_t, int, enum gdb_signal);
-static void procfs_stop (struct target_ops *self, ptid_t);
+static void procfs_interrupt (struct target_ops *self, ptid_t);
 static void procfs_files_info (struct target_ops *);
 static void procfs_fetch_registers (struct target_ops *,
 				    struct regcache *, int);
@@ -143,7 +143,7 @@ static char * procfs_make_note_section (struct target_ops *self,
 					bfd *, int *);
 
 static int procfs_can_use_hw_breakpoint (struct target_ops *self,
-					 int, int, int);
+					 enum bptype, int, int);
 
 static void procfs_info_proc (struct target_ops *, const char *,
 			      enum info_proc_what);
@@ -194,7 +194,7 @@ procfs_target (void)
   t->to_xfer_partial = procfs_xfer_partial;
   t->to_pass_signals = procfs_pass_signals;
   t->to_files_info = procfs_files_info;
-  t->to_stop = procfs_stop;
+  t->to_interrupt = procfs_interrupt;
 
   t->to_update_thread_list = procfs_update_thread_list;
   t->to_thread_alive = procfs_thread_alive;
@@ -4204,7 +4204,7 @@ procfs_files_info (struct target_ops *ignore)
    kill(SIGINT) to the child's process group.  */
 
 static void
-procfs_stop (struct target_ops *self, ptid_t ptid)
+procfs_interrupt (struct target_ops *self, ptid_t ptid)
 {
   kill (-inferior_process_group (), SIGINT);
 }
@@ -4764,7 +4764,8 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
 
 static int
 procfs_can_use_hw_breakpoint (struct target_ops *self,
-			      int type, int cnt, int othertype)
+			      enum bptype type,
+			      int cnt, int othertype)
 {
   /* Due to the way that proc_set_watchpoint() is implemented, host
      and target pointers must be of the same size.  If they are not,
@@ -4828,7 +4829,8 @@ procfs_stopped_data_address (struct target_ops *targ, CORE_ADDR *addr)
 
 static int
 procfs_insert_watchpoint (struct target_ops *self,
-			  CORE_ADDR addr, int len, int type,
+			  CORE_ADDR addr, int len,
+			  enum target_hw_bp_type type,
 			  struct expression *cond)
 {
   if (!target_have_steppable_watchpoint
@@ -4851,7 +4853,8 @@ procfs_insert_watchpoint (struct target_ops *self,
 
 static int
 procfs_remove_watchpoint (struct target_ops *self,
-			  CORE_ADDR addr, int len, int type,
+			  CORE_ADDR addr, int len,
+			  enum target_hw_bp_type type,
 			  struct expression *cond)
 {
   return procfs_set_watchpoint (inferior_ptid, addr, 0, 0, 0);

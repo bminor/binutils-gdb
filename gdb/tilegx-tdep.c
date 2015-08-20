@@ -437,7 +437,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 	  status = safe_frame_unwind_memory (next_frame, instbuf_start,
 					     instbuf, instbuf_size);
 	  if (status == 0)
-	    memory_error (status, next_addr);
+	    memory_error (TARGET_XFER_E_IO, next_addr);
 	}
 
       reverse_frame_valid = 0;
@@ -771,10 +771,10 @@ tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 				  NULL, NULL);
 }
 
-/* This is the implementation of gdbarch method in_function_epilogue_p.  */
+/* This is the implementation of gdbarch method stack_frame_destroyed_p.  */
 
 static int
-tilegx_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+tilegx_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr = 0, func_end = 0;
 
@@ -1051,8 +1051,7 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, tilegx_skip_prologue);
 
-  set_gdbarch_in_function_epilogue_p (gdbarch,
-				      tilegx_in_function_epilogue_p);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, tilegx_stack_frame_destroyed_p);
 
   /* Map debug registers into internal register numbers.  */
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, tilegx_dwarf2_reg_to_regnum);

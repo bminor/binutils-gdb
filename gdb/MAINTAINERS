@@ -515,12 +515,15 @@ Frank Ch. Eigler				fche@redhat.com
 Ben Elliston					bje@gnu.org
 Doug Evans					dje@google.com
 Adam Fedor					fedor@gnu.org
+Max Filippov					jcmvbkbc@gmail.com
 Brian Ford					ford@vss.fsi.com
+Matthew Fortune					matthew.fortune@imgtec.com
 Orjan Friberg					orjanf@axis.com
 Andreas From					andreas.from@ericsson.com
 Nathan Froyd					froydnj@codesourcery.com
 Mike Frysinger					vapier@gentoo.org
 Gary Funck					gary@intrepid.com
+Martin Galvan					martin.galvan@tallertechnologies.com
 Chen Gang					gang.chen.5i5j@gmail.com
 Mircea Gherzan					mircea.gherzan@intel.com
 Paul Gilliam					pgilliam@us.ibm.com
@@ -558,7 +561,7 @@ Jim Kingdon					kingdon@panix.com
 Paul Koning					paul_koning@dell.com
 Jan Kratochvil					jan.kratochvil@redhat.com
 Maxim Kuvyrkov					maxim@kugelworks.com
-Pierre Langlois 				pierre.langlois@embecosm.com
+Pierre Langlois 				pierre.langlois@arm.com
 Jonathan Larmour				jifl@ecoscentric.com
 Jeff Law					law@redhat.com
 Justin Lebar					justin.lebar@gmail.com
@@ -578,6 +581,7 @@ Greg McGary					greg@mcgary.org
 Roland McGrath					roland@hack.frob.com
 Bryce McKinlay					mckinlay@redhat.com
 Jason Merrill					jason@redhat.com
+Markus T. Metzger				markus.t.metzger@intel.com
 David S. Miller					davem@redhat.com
 Mark Mitchell					mark@codesourcery.com
 Marko Mlinar                                    markom@opencores.org

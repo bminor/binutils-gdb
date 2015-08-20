@@ -106,7 +106,7 @@ struct ttype
 struct symtoken
   {
     struct stoken stoken;
-    struct symbol *sym;
+    struct block_symbol sym;
     int is_a_field_of_this;
   };
 

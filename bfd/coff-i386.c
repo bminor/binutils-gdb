@@ -417,7 +417,7 @@ coff_pe_i386_relocate_section (bfd *output_bfd,
 			       struct internal_syment *syms,
 			       asection **sections)
 {
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   return _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
@@ -509,7 +509,12 @@ coff_i386_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
     }
 
-  BFD_ASSERT (sym != NULL);
+  /* PR 17099 - Absolute R_PCRLONG relocations do not need a symbol.  */
+  if (rel->r_type == R_PCRLONG && sym == NULL)
+    *addendp -= rel->r_vaddr;
+  else
+    BFD_ASSERT (sym != NULL);
+
   if (rel->r_type == R_SECREL32 && sym != NULL)
     {
       bfd_vma osect_vma;

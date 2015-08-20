@@ -876,7 +876,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
     return TRUE;
 
   internal = (ecoff_symbol_type *) bfd_alloc2 (abfd, bfd_get_symcount (abfd),
-					       sizeof (ecoff_symbol_type)); 
+					       sizeof (ecoff_symbol_type));
   if (internal == NULL)
     return FALSE;
 
@@ -3896,7 +3896,7 @@ ecoff_indirect_link_order (bfd *output_bfd,
      modified, and we write them out now.  We use the reloc_count
      field of output_section to keep track of the number of relocs we
      have output so far.  */
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     {
       file_ptr pos = (output_section->rel_filepos
 		      + output_section->reloc_count * external_reloc_size);
@@ -4370,7 +4370,7 @@ _bfd_ecoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   einfo.info = info;
   bfd_hash_traverse (&info->hash->table, ecoff_link_write_external, &einfo);
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     {
       /* We need to make a pass over the link_orders to count up the
 	 number of relocations we will need to output, so that we know
@@ -4400,7 +4400,7 @@ _bfd_ecoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 
   bfd_ecoff_debug_free (handle, abfd, debug, &backend->debug_swap, info);
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     {
       /* Now reset the reloc_count field of the sections in the output
 	 BFD to 0, so that we can use them to keep track of how many
@@ -4420,7 +4420,7 @@ _bfd_ecoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	ecoff_data (abfd)->gp = (h->u.def.value
 				 + h->u.def.section->output_section->vma
 				 + h->u.def.section->output_offset);
-      else if (info->relocatable)
+      else if (bfd_link_relocatable (info))
 	{
 	  bfd_vma lo;
 

@@ -30,7 +30,7 @@ AC_SUBST(CFLAGS_FOR_BUILD)
 # If a cpu ever has more than one simulator to choose from, use
 # --enable-sim=... to choose.
 AC_ARG_ENABLE(sim,
-[  --enable-sim ],
+[AS_HELP_STRING([--enable-sim], [Enable the GNU simulator])],
 [case "${enableval}" in
 yes | no) ;;
 *)	AC_MSG_ERROR(bad value ${enableval} given for --enable-sim option) ;;

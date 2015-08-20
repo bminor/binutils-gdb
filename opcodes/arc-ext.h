@@ -30,20 +30,20 @@ enum {NUM_EXT_INST = (0x1f-0x10+1) + (0x3f-0x09+1)};
 enum {NUM_EXT_CORE = 59-32+1};
 enum {NUM_EXT_COND = 0x1f-0x10+1};
 
-struct ExtInstruction 
+struct ExtInstruction
 {
   char flags;
   char *name;
-}; 
+};
 
-struct ExtAuxRegister 
+struct ExtAuxRegister
 {
   long address;
   char *name;
-  struct ExtAuxRegister *next; 
+  struct ExtAuxRegister *next;
 };
 
-struct arcExtMap 
+struct arcExtMap
 {
   struct ExtAuxRegister *auxRegisters;
   struct ExtInstruction *instructions[NUM_EXT_INST];

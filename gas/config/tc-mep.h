@@ -112,7 +112,7 @@ extern flagword mep_elf_section_flags  (flagword, bfd_vma, int);
 #define ELF_TC_SPECIAL_SECTIONS \
   { VTEXT_SECTION_NAME, SHT_PROGBITS, SHF_ALLOC|SHF_EXECINSTR|SHF_MEP_VLIW },
 
-/* The values of the following enum are for use with parinsnum, which 
+/* The values of the following enum are for use with parinsnum, which
    is a variable in md_assemble that keeps track of whether or not the
    next instruction is expected to be the first or second instrucion in
    a parallelization group.  */

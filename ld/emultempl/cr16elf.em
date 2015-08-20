@@ -39,7 +39,7 @@ cr16_elf_after_open (void)
   gld${EMULATION_NAME}_after_open ();
 
    if (command_line.embedded_relocs
-       && (! link_info.relocatable))
+       && !bfd_link_relocatable (&link_info))
      {
        bfd *abfd;
 
@@ -132,7 +132,7 @@ cr16elf_before_allocation (void)
   gld${EMULATION_NAME}_before_allocation ();
 
    if (command_line.embedded_relocs
-       && (! link_info.relocatable))
+       && (!bfd_link_relocatable (&link_info)))
      {
 
    bfd *abfd;

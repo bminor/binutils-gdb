@@ -397,7 +397,7 @@ sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	 right, and tweak the name when it's output.  Otherwise, we make
 	 an indirect symbol of it.  */
       flagword flags
-	= info->relocatable || info->emitrelocations
+	= bfd_link_relocatable (info) || info->emitrelocations
 	? BSF_GLOBAL : BSF_GLOBAL | BSF_INDIRECT;
 
       char *dl_name
@@ -441,9 +441,9 @@ sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	free (dl_name);
 
       if (h->type != STT_DATALABEL
-	  || ((info->relocatable || info->emitrelocations)
+	  || ((bfd_link_relocatable (info) || info->emitrelocations)
 	      && h->root.type != bfd_link_hash_undefined)
-	  || (! info->relocatable && !info->emitrelocations
+	  || (! bfd_link_relocatable (info) && !info->emitrelocations
 	      && h->root.type != bfd_link_hash_indirect))
 	{
 	  /* Make sure we don't get confused on invalid input.  */
@@ -487,7 +487,7 @@ sh64_elf_link_output_symbol_hook (struct bfd_link_info *info,
 {
   char *name = (char *) cname;
 
-  if (info->relocatable || info->emitrelocations)
+  if (bfd_link_relocatable (info) || info->emitrelocations)
     {
       if (ELF_ST_TYPE (sym->st_info) == STT_DATALABEL)
 	name[strlen (name) - strlen (DATALABEL_SUFFIX)] = 0;

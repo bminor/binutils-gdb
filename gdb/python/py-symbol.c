@@ -396,7 +396,8 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
 
   TRY
     {
-      symbol = lookup_symbol (name, block, domain, &is_a_field_of_this);
+      symbol = lookup_symbol (name, block, (domain_enum) domain,
+			      &is_a_field_of_this).symbol;
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -449,7 +450,7 @@ gdbpy_lookup_global_symbol (PyObject *self, PyObject *args, PyObject *kw)
 
   TRY
     {
-      symbol = lookup_global_symbol (name, NULL, domain);
+      symbol = lookup_global_symbol (name, NULL, (domain_enum) domain).symbol;
     }
   CATCH (except, RETURN_MASK_ALL)
     {

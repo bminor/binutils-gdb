@@ -13,6 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+if {![istarget "powerpc*"] || ![is_lp64_target]} {
+    verbose "Skipping powerpc64 separate debug file symtab test."
+    return
+}
+
 standard_testfile
 
 set kobz2file ${srcdir}/${subdir}/cordic.ko.bz2

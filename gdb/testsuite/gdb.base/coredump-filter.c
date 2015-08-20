@@ -59,3 +59,19 @@ main (int argc, char *argv[])
 
   return 0; /* break-here */
 }
+
+/* Write V to /proc/self/coredump_filter.  Return 0 on success.  */
+
+int
+set_coredump_filter (int v)
+{
+  FILE *f = fopen("/proc/self/coredump_filter", "r+");
+
+  if (f == NULL)
+    return 1;
+
+  fprintf(f, "%#x", v);
+
+  fclose (f);
+  return 0;
+}

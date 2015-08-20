@@ -554,8 +554,22 @@ print_children (PyObject *printer, const char *hint,
 	  break;
 	}
 
+      if (! PyTuple_Check (item) || PyTuple_Size (item) != 2)
+	{
+	  PyErr_SetString (PyExc_TypeError,
+			   _("Result of children iterator not a tuple"
+			     " of two elements."));
+	  gdbpy_print_stack ();
+	  Py_DECREF (item);
+	  continue;
+	}
       if (! PyArg_ParseTuple (item, "sO", &name, &py_v))
 	{
+	  /* The user won't necessarily get a stack trace here, so provide
+	     more context.  */
+	  if (gdbpy_print_python_errors_p ())
+	    fprintf_unfiltered (gdb_stderr,
+				_("Bad result from children iterator.\n"));
 	  gdbpy_print_stack ();
 	  Py_DECREF (item);
 	  continue;

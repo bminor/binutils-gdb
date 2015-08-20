@@ -1007,7 +1007,7 @@ opencl_print_type (struct type *type, const char *varstring,
      be printed using their TYPE_NAME.  */
   if (show > 0)
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
       if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
 	  && TYPE_NAME (type) != NULL)
 	show = 0;

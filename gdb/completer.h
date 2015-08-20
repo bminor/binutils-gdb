@@ -96,6 +96,9 @@ extern VEC (char_ptr) *signal_completer (struct cmd_list_element *,
 extern VEC (char_ptr) *reg_or_group_completer (struct cmd_list_element *,
 					       const char *, const char *);
 
+extern VEC (char_ptr) *reggroup_completer (struct cmd_list_element *,
+					   const char *, const char *);
+
 extern char *get_gdb_completer_quote_characters (void);
 
 extern char *gdb_completion_word_break_characters (void);

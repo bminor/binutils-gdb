@@ -462,6 +462,8 @@ typedef enum
 }
 tdstate;
 
+#define t_resolved t_branch
+
 /* Macros to scrutinize instructions.  The dummy do loop is to keep the compiler
    happy when the statement is used in an otherwise empty else statement.  */
 #define UNDEF_Test		do { ; } while (0)

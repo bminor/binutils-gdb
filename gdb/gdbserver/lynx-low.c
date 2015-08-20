@@ -722,6 +722,7 @@ lynx_request_interrupt (void)
 
 static struct target_ops lynx_target_ops = {
   lynx_create_inferior,
+  NULL,  /* arch_setup */
   lynx_attach,
   lynx_kill,
   lynx_detach,
@@ -746,6 +747,10 @@ static struct target_ops lynx_target_ops = {
   NULL,  /* supports_stopped_by_sw_breakpoint */
   NULL,  /* stopped_by_hw_breakpoint */
   NULL,  /* supports_stopped_by_hw_breakpoint */
+  /* Although lynx has hardware single step, still disable this
+     feature for lynx, because it is implemented in linux-low.c instead
+     of in generic code.  */
+  NULL,  /* supports_conditional_breakpoints */
   NULL,  /* stopped_by_watchpoint */
   NULL,  /* stopped_data_address */
   NULL,  /* read_offsets */
@@ -758,6 +763,9 @@ static struct target_ops lynx_target_ops = {
   NULL,  /* async */
   NULL,  /* start_non_stop */
   NULL,  /* supports_multi_process */
+  NULL,  /* supports_fork_events */
+  NULL,  /* supports_vfork_events */
+  NULL,  /* handle_new_gdb_connection */
   NULL,  /* handle_monitor_command */
 };
 

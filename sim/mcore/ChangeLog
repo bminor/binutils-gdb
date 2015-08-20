@@ -1,3 +1,27 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (handle_trap1): Replace call to cb_syscall with
+	sim_syscall.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include sim-syscall.h.
+	(syscall_read_mem, syscall_write_mem): Delete.
+	(m32r_trap): Change syscall_read_mem/syscall_write_mem
+	to sim_syscall_read_mem/sim_syscall_write_mem.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2015-04-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_resume): Change %x to %lx for all cpu registers.
@@ -262,8 +286,8 @@
 	* config.in: Ditto.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -342,7 +366,7 @@ Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* interp.c (target_big_endian): New variable.
 	(mcore_extract_unsigned_integer, mcore_store_unsigned_integer,
 	wlat, rlat, sim_resume, sim_load): Add supprot for little
-	endian targets. 
+	endian targets.
 
 2000-01-13  Nick Clifton  <nickc@cygnus.com>
 
@@ -371,7 +395,7 @@ Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-05-08  Felix Lee  <flee@cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
-	
+
 1999-05-10  Nick Clifton  <nickc@cygnus.com>
 
 	* interp.c (sim_resume): Record PC in case it is needed for error

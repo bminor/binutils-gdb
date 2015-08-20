@@ -4542,7 +4542,7 @@ Reloc_stub::stub_type_for_reloc(
   // This is a bit ugly but we want to avoid using a templated class for
   // big and little endianities.
   bool may_use_blx;
-  bool should_force_pic_veneer;
+  bool should_force_pic_veneer = parameters->options().pic_veneer();
   bool thumb2;
   bool thumb_only;
   if (parameters->target().is_big_endian())
@@ -4550,7 +4550,7 @@ Reloc_stub::stub_type_for_reloc(
       const Target_arm<true>* big_endian_target =
 	Target_arm<true>::default_target();
       may_use_blx = big_endian_target->may_use_v5t_interworking();
-      should_force_pic_veneer = big_endian_target->should_force_pic_veneer();
+      should_force_pic_veneer |= big_endian_target->should_force_pic_veneer();
       thumb2 = big_endian_target->using_thumb2();
       thumb_only = big_endian_target->using_thumb_only();
     }
@@ -4559,7 +4559,8 @@ Reloc_stub::stub_type_for_reloc(
       const Target_arm<false>* little_endian_target =
 	Target_arm<false>::default_target();
       may_use_blx = little_endian_target->may_use_v5t_interworking();
-      should_force_pic_veneer = little_endian_target->should_force_pic_veneer();
+      should_force_pic_veneer |=
+        little_endian_target->should_force_pic_veneer();
       thumb2 = little_endian_target->using_thumb2();
       thumb_only = little_endian_target->using_thumb_only();
     }
@@ -6255,16 +6256,9 @@ Arm_relobj<big_endian>::scan_section_for_cortex_a8_erratum(
     this->mapping_symbols_info_.lower_bound(section_start);
 
   // There are no mapping symbols for this section.  Treat it as a data-only
-  // section.  Issue a warning if section is marked as containing
-  // instructions.
+  // section.
   if (p == this->mapping_symbols_info_.end() || p->first.first != shndx)
-    {
-      if ((this->section_flags(shndx) & elfcpp::SHF_EXECINSTR) != 0)
-	gold_warning(_("cannot scan executable section %u of %s for Cortex-A8 "
-		       "erratum because it has no mapping symbols."),
-		     shndx, this->name().c_str());
-      return;
-    }
+    return;
 
   Arm_address output_address =
     this->simple_input_section_output_address(shndx, os);
@@ -10563,6 +10557,7 @@ Target_arm<big_endian>::do_adjust_elf_header(
   }
   elfcpp::Ehdr_write<32, big_endian> oehdr(view);
   oehdr.put_e_ident(e_ident);
+  oehdr.put_e_flags(this->processor_specific_flags());
 }
 
 // do_make_elf_object to override the same function in the base class.

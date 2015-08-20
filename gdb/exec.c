@@ -154,15 +154,8 @@ exec_file_locate_attach (int pid, int from_tty)
 
   /* If gdb_sysroot is not empty and the discovered filename
      is absolute then prefix the filename with gdb_sysroot.  */
-  if (gdb_sysroot != NULL && *gdb_sysroot != '\0'
-      && IS_ABSOLUTE_PATH (exec_file))
-    {
-      int fd = -1;
-
-      full_exec_path = exec_file_find (exec_file, &fd);
-      if (fd >= 0)
-	close (fd);
-    }
+  if (*gdb_sysroot != '\0' && IS_ABSOLUTE_PATH (exec_file))
+    full_exec_path = exec_file_find (exec_file, NULL);
 
   if (full_exec_path == NULL)
     {
@@ -290,7 +283,7 @@ exec_file_attach (const char *filename, int from_tty)
 
       if (!exec_bfd)
 	{
-	  error (_("\"%s\": could not open as an executable file: %s"),
+	  error (_("\"%s\": could not open as an executable file: %s."),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 

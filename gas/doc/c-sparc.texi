@@ -303,6 +303,10 @@ Various V9 branch and conditional move instructions allow
 specification of which set of integer condition codes to
 test.  These are referred to as @samp{%xcc} and @samp{%icc}.
 
+Additionally, GAS supports the so-called ``natural'' condition codes;
+these are referred to as @samp{%ncc} and reference to @samp{%icc} if
+the word size is 32, @samp{%xcc} if the word size is 64.
+
 In V9, there are 4 sets of floating point condition codes
 which are referred to as @samp{%fcc@var{n}}.
 

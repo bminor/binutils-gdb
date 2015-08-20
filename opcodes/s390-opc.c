@@ -484,6 +484,7 @@ const struct s390_operand s390_operands[] =
 #define INSTR_VRR_VV0U     6, { V_8,V_12,U4_32,0,0,0 }           /* e.g. vseg  */
 #define INSTR_VRR_VV0U2    6, { V_8,V_12,U4_24,0,0,0 }           /* e.g. vistrb*/
 #define INSTR_VRR_VV0UU    6, { V_8,V_12,U4_28,U4_24,0,0 }       /* e.g. vcdgb */
+#define INSTR_VRR_VV0UU2   6, { V_8,V_12,U4_32,U4_28,0,0 }       /* e.g. wfc */
 #define INSTR_VRR_VV0UU8   6, { V_8,V_12,U4_OR8_28,U4_24,0,0 }   /* e.g. wcdgb */
 #define INSTR_VRR_VV       6, { V_8,V_12,0,0,0,0 }               /* e.g. vsegb */
 #define INSTR_VRR_VVVUU0V  6, { V_8,V_12,V_16,V_32,U4_20,U4_24 } /* e.g. vstrc */
@@ -690,6 +691,7 @@ const struct s390_operand s390_operands[] =
 #define MASK_VRR_VV0U     { 0xff, 0x00, 0xff, 0xff, 0x00, 0xff }
 #define MASK_VRR_VV0U2    { 0xff, 0x00, 0xff, 0x0f, 0xf0, 0xff }
 #define MASK_VRR_VV0UU    { 0xff, 0x00, 0xff, 0x00, 0xf0, 0xff }
+#define MASK_VRR_VV0UU2   { 0xff, 0x00, 0xff, 0xf0, 0x00, 0xff }
 #define MASK_VRR_VV0UU8   { 0xff, 0x00, 0xff, 0x08, 0xf0, 0xff }
 #define MASK_VRR_VV       { 0xff, 0x00, 0xff, 0xff, 0xf0, 0xff }
 #define MASK_VRR_VVVUU0V  { 0xff, 0x00, 0x00, 0x0f, 0x00, 0xff }

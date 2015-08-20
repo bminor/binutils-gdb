@@ -585,7 +585,7 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 }
 
 bool
-Symbol_table::is_section_folded(Object* obj, unsigned int shndx) const
+Symbol_table::is_section_folded(Relobj* obj, unsigned int shndx) const
 {
   return (parameters->options().icf_enabled()
           && this->icf_->is_section_folded(obj, shndx));
@@ -650,10 +650,11 @@ Symbol_table::gc_mark_symbol(Symbol* sym)
   // Add the object and section to the work list.
   bool is_ordinary;
   unsigned int shndx = sym->shndx(&is_ordinary);
-  if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
+  if (is_ordinary && shndx != elfcpp::SHN_UNDEF && !sym->object()->is_dynamic())
     {
       gold_assert(this->gc_!= NULL);
-      this->gc_->worklist().push_back(Section_id(sym->object(), shndx));
+      Relobj* relobj = static_cast<Relobj*>(sym->object());
+      this->gc_->worklist().push_back(Section_id(relobj, shndx));
     }
   parameters->target().gc_mark_symbol(this, sym);
 }
@@ -736,7 +737,7 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from)
   bool is_ordinary;
   unsigned int shndx = from->shndx(&is_ordinary);
   this->resolve(to, esym.sym(), shndx, is_ordinary, shndx, from->object(),
-		from->version());
+		from->version(), true);
   if (from->in_reg())
     to->set_in_reg();
   if (from->in_dyn())
@@ -990,13 +991,38 @@ Symbol_table::add_from_object(Object* object,
       was_common = ret->is_common() && ret->object()->pluginobj() == NULL;
 
       this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
-		    version);
+		    version, is_default_version);
       if (parameters->options().gc_sections())
         this->gc_mark_dyn_syms(ret);
 
       if (is_default_version)
 	this->define_default_version<size, big_endian>(ret, insdefault.second,
 						       insdefault.first);
+      else if (version != NULL && ret->is_default())
+	{
+	  // We have seen NAME/VERSION already, and marked it as the
+	  // default version, but now we see a definition for
+	  // NAME/VERSION that is not the default version. This can
+	  // happen when the assembler generates two symbols for
+	  // a symbol as a result of a ".symver foo,foo@VER"
+	  // directive. We see the first unversioned symbol and
+	  // we may mark it as the default version (from a
+	  // version script); then we see the second versioned
+	  // symbol and we need to override the first.
+	  // In any other case, the two symbols should have generated
+	  // a multiple definition error.
+	  // (See PR gold/18703.)
+	  bool dummy;
+	  if (ret->source() == Symbol::FROM_OBJECT
+	      && ret->object() == object
+	      && is_ordinary
+	      && ret->shndx(&dummy) == st_shndx)
+	    {
+	      ret->set_is_not_default();
+	      const Stringpool::Key vnull_key = 0;
+	      this->table_.erase(std::make_pair(name_key, vnull_key));
+	    }
+	}
     }
   else
     {
@@ -1014,7 +1040,7 @@ Symbol_table::add_from_object(Object* object,
 	  was_common = ret->is_common() && ret->object()->pluginobj() == NULL;
 
 	  this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
-			version);
+			version, is_default_version);
           if (parameters->options().gc_sections())
             this->gc_mark_dyn_syms(ret);
 	  ins.first->second = ret;
@@ -1952,6 +1978,9 @@ Symbol_table::do_define_in_output_data(
     return sym;
   else
     {
+      if (binding == elfcpp::STB_LOCAL
+	  || this->version_script_.symbol_is_local(name))
+	this->force_local(oldsym);
       delete sym;
       return oldsym;
     }
@@ -2066,6 +2095,9 @@ Symbol_table::do_define_in_output_segment(
     return sym;
   else
     {
+      if (binding == elfcpp::STB_LOCAL
+	  || this->version_script_.symbol_is_local(name))
+	this->force_local(oldsym);
       delete sym;
       return oldsym;
     }
@@ -2185,6 +2217,9 @@ Symbol_table::do_define_as_constant(
     return sym;
   else
     {
+      if (binding == elfcpp::STB_LOCAL
+	  || this->version_script_.symbol_is_local(name))
+	this->force_local(oldsym);
       delete sym;
       return oldsym;
     }

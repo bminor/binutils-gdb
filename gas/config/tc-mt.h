@@ -45,7 +45,7 @@
 #define LITERAL_PREFIXPERCENT_BIN
 
 #define md_apply_fix mt_apply_fix
-extern void mt_apply_fix (struct fix *, valueT *, segT); 
+extern void mt_apply_fix (struct fix *, valueT *, segT);
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)

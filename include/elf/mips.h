@@ -748,6 +748,9 @@ extern void bfd_mips_elf32_swap_reginfo_out
 
 /* Points to the base of a writable PLT.  */
 #define DT_MIPS_RWPLT          0x70000034
+
+/* Relative offset of run time loader map, used for debugging.  */
+#define DT_MIPS_RLD_MAP_REL    0x70000035
 
 /* Flags which may appear in a DT_MIPS_FLAGS entry.  */
 
@@ -1294,6 +1297,10 @@ enum
 
   /* Using -mips32r2 -mfp64 -mno-odd-spreg.  */
   Val_GNU_MIPS_ABI_FP_64A = 7,
+
+  /* This is reserved for backward-compatibility with an earlier
+     implementation of the MIPS NaN2008 functionality.  */
+  Val_GNU_MIPS_ABI_FP_NAN2008 = 8,
 
   /* Values defined for Tag_GNU_MIPS_ABI_MSA.  */
 

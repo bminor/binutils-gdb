@@ -26,8 +26,6 @@
 #include "regcache.h"
 #include "target.h"
 #include "linux-nat.h"
-
-#include <stdint.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/user.h>
@@ -35,7 +33,7 @@
 #include "gdb_wait.h"
 #include <fcntl.h>
 #include <sys/procfs.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
@@ -1393,7 +1391,7 @@ have_ptrace_hwdebug_interface (void)
 
 static int
 ppc_linux_can_use_hw_breakpoint (struct target_ops *self,
-				 int type, int cnt, int ot)
+				 enum bptype type, int cnt, int ot)
 {
   int total_hw_wp, total_hw_bp;
 
@@ -1701,13 +1699,13 @@ ppc_linux_remove_hw_breakpoint (struct target_ops *self,
 }
 
 static int
-get_trigger_type (int rw)
+get_trigger_type (enum target_hw_bp_type type)
 {
   int t;
 
-  if (rw == hw_read)
+  if (type == hw_read)
     t = PPC_BREAKPOINT_TRIGGER_READ;
-  else if (rw == hw_write)
+  else if (type == hw_write)
     t = PPC_BREAKPOINT_TRIGGER_WRITE;
   else
     t = PPC_BREAKPOINT_TRIGGER_READ | PPC_BREAKPOINT_TRIGGER_WRITE;
@@ -1986,8 +1984,8 @@ ppc_linux_can_accel_watchpoint_condition (struct target_ops *self,
 
 static void
 create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
-			   int len, int rw, struct expression *cond,
-			   int insert)
+			   int len, enum target_hw_bp_type type,
+			   struct expression *cond, int insert)
 {
   if (len == 1
       || !(hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE))
@@ -2026,13 +2024,13 @@ create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
     }
 
   p->version = PPC_DEBUG_CURRENT_VERSION;
-  p->trigger_type = get_trigger_type (rw);
+  p->trigger_type = get_trigger_type (type);
   p->addr = (uint64_t) addr;
 }
 
 static int
-ppc_linux_insert_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len, int rw,
+ppc_linux_insert_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
+			     enum target_hw_bp_type type,
 			     struct expression *cond)
 {
   struct lwp_info *lp;
@@ -2042,7 +2040,7 @@ ppc_linux_insert_watchpoint (struct target_ops *self,
     {
       struct ppc_hw_breakpoint p;
 
-      create_watchpoint_request (&p, addr, len, rw, cond, 1);
+      create_watchpoint_request (&p, addr, len, type, cond, 1);
 
       ALL_LWPS (lp)
 	hwdebug_insert_point (&p, ptid_get_lwp (lp->ptid));
@@ -2070,7 +2068,7 @@ ppc_linux_insert_watchpoint (struct target_ops *self,
 	}
 
       dabr_value = addr & ~(read_mode | write_mode);
-      switch (rw)
+      switch (type)
 	{
 	  case hw_read:
 	    /* Set read and translate bits.  */
@@ -2100,8 +2098,8 @@ ppc_linux_insert_watchpoint (struct target_ops *self,
 }
 
 static int
-ppc_linux_remove_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len, int rw,
+ppc_linux_remove_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
+			     enum target_hw_bp_type type,
 			     struct expression *cond)
 {
   struct lwp_info *lp;
@@ -2111,7 +2109,7 @@ ppc_linux_remove_watchpoint (struct target_ops *self,
     {
       struct ppc_hw_breakpoint p;
 
-      create_watchpoint_request (&p, addr, len, rw, cond, 0);
+      create_watchpoint_request (&p, addr, len, type, cond, 0);
 
       ALL_LWPS (lp)
 	hwdebug_remove_point (&p, ptid_get_lwp (lp->ptid));

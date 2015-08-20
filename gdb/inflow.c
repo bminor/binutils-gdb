@@ -136,7 +136,7 @@ gdb_getpgrp (void)
 }
 #endif
 
-enum
+enum gdb_has_a_terminal_flag_enum
   {
     yes, no, have_not_checked
   }

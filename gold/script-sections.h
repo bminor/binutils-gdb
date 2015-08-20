@@ -319,6 +319,8 @@ class Script_sections
   bool saw_relro_end_;
   // Whether we have seen SEGMENT_START.
   bool saw_segment_start_expression_;
+  // Whether we have created all necessary segments.
+  bool segments_created_;
 };
 
 // Attributes for memory regions.

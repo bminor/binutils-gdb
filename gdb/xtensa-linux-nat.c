@@ -24,8 +24,6 @@
 #include "regcache.h"
 #include "target.h"
 #include "linux-nat.h"
-
-#include <stdint.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/user.h>
@@ -33,7 +31,7 @@
 #include "gdb_wait.h"
 #include <fcntl.h>
 #include <sys/procfs.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/ptrace.h>
 
 #include "gregset.h"
@@ -43,16 +41,6 @@
    Keeping these definitions separately allows to introduce
    hardware-specific overlays.  */
 #include "xtensa-xtregs.c"
-
-static int
-get_thread_id (ptid_t ptid)
-{
-  int tid = ptid_get_lwp (ptid);
-  if (0 == tid)
-    tid = ptid_get_pid (ptid);
-  return tid;
-}
-#define GET_THREAD_ID(PTID)	get_thread_id (PTID)
 
 void
 fill_gregset (const struct regcache *regcache,
@@ -183,7 +171,7 @@ supply_fpregset (struct regcache *regcache,
 static void
 fetch_gregs (struct regcache *regcache, int regnum)
 {
-  int tid = GET_THREAD_ID (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   const gdb_gregset_t regs;
   int areg;
   
@@ -202,7 +190,7 @@ fetch_gregs (struct regcache *regcache, int regnum)
 static void
 store_gregs (struct regcache *regcache, int regnum)
 {
-  int tid = GET_THREAD_ID (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   gdb_gregset_t regs;
   int areg;
 
@@ -230,7 +218,7 @@ static int xtreg_high;
 static void
 fetch_xtregs (struct regcache *regcache, int regnum)
 {
-  int tid = GET_THREAD_ID (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   const xtensa_regtable_t *ptr;
   char xtregs [XTENSA_ELF_XTREG_SIZE];
 
@@ -246,7 +234,7 @@ fetch_xtregs (struct regcache *regcache, int regnum)
 static void
 store_xtregs (struct regcache *regcache, int regnum)
 {
-  int tid = GET_THREAD_ID (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   const xtensa_regtable_t *ptr;
   char xtregs [XTENSA_ELF_XTREG_SIZE];
 

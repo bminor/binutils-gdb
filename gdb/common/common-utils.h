@@ -77,4 +77,24 @@ startswith (const char *string, const char *pattern)
   return strncmp (string, pattern, strlen (pattern)) == 0;
 }
 
+ULONGEST strtoulst (const char *num, const char **trailer, int base);
+
+/* Skip leading whitespace characters in INP, returning an updated
+   pointer.  If INP is NULL, return NULL.  */
+
+extern char *skip_spaces (char *inp);
+
+/* A const-correct version of the above.  */
+
+extern const char *skip_spaces_const (const char *inp);
+
+/* Skip leading non-whitespace characters in INP, returning an updated
+   pointer.  If INP is NULL, return NULL.  */
+
+#define skip_to_space(INP) ((char *) skip_to_space_const (INP))
+
+/* A const-correct version of the above.  */
+
+extern const char *skip_to_space_const (const char *inp);
+
 #endif

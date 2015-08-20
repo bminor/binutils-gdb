@@ -80,10 +80,11 @@ gen_targ_map_c (void)
   for (t = &sys_tdefs[0]; t->symbol; ++t)
     {
       printf ("#ifdef CB_%s\n", t->symbol);
-      printf ("  { CB_%s, TARGET_%s },\n", t->symbol, t->symbol);
+      /* Skip the "SYS_" prefix for the name.  */
+      printf ("  { \"%s\", CB_%s, TARGET_%s },\n", t->symbol + 4, t->symbol, t->symbol);
       printf ("#endif\n");
     }
-  printf ("  { -1, -1 }\n");
+  printf ("  { 0, -1, -1 }\n");
   printf ("};\n\n");
 
   printf ("/* errno mapping table */\n");
@@ -91,10 +92,10 @@ gen_targ_map_c (void)
   for (t = &errno_tdefs[0]; t->symbol; ++t)
     {
       printf ("#ifdef %s\n", t->symbol);
-      printf ("  { %s, TARGET_%s },\n", t->symbol, t->symbol);
+      printf ("  { \"%s\", %s, TARGET_%s },\n", t->symbol, t->symbol, t->symbol);
       printf ("#endif\n");
     }
-  printf ("  { 0, 0 }\n");
+  printf ("  { 0, 0, 0 }\n");
   printf ("};\n\n");
 
   printf ("/* open flags mapping table */\n");
@@ -102,10 +103,10 @@ gen_targ_map_c (void)
   for (t = &open_tdefs[0]; t->symbol; ++t)
     {
       printf ("#ifdef %s\n", t->symbol);
-      printf ("  { %s, TARGET_%s },\n", t->symbol, t->symbol);
+      printf ("  { \"%s\", %s, TARGET_%s },\n", t->symbol, t->symbol, t->symbol);
       printf ("#endif\n");
     }
-  printf ("  { -1, -1 }\n");
+  printf ("  { 0, -1, -1 }\n");
   printf ("};\n\n");
 }
 

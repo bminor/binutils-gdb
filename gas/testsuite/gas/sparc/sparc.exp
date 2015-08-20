@@ -93,6 +93,8 @@ if [istarget sparc*-*-*] {
     run_dump_test "mwait"
     run_dump_test "mcdper"
     run_dump_test "sparc5vis4"
+    run_dump_test "natural"
+    run_dump_test "natural-32"
 
     run_list_test "pr4587" ""
 }

@@ -57,7 +57,7 @@ v850_elf_check_relocs (bfd *abfd,
   int other = 0;
   const char *common = NULL;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
 #ifdef DEBUG
@@ -2243,7 +2243,7 @@ v850_elf_relocate_section (bfd *output_bfd,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       /* FIXME: We should use the addend, but the COFF relocations don't.  */
@@ -2361,7 +2361,7 @@ v850_set_note (bfd * abfd, asection * s, enum v850_notes note, unsigned int val)
 
 static asection *
 v850_elf_make_note_section (bfd * abfd)
-{  
+{
   asection *s;
   bfd_byte *data;
   flagword flags;
@@ -2463,7 +2463,7 @@ v850_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
 }
 #define bfd_elf32_bfd_copy_private_bfd_data	v850_elf_copy_private_bfd_data
 
-static bfd_boolean 
+static bfd_boolean
 v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 {
   asection * onotes;
@@ -2502,7 +2502,7 @@ v850_elf_merge_notes (bfd * ibfd, bfd *obfd)
 
 	  if (ival == 0 || ival == oval)
 	    continue;
-	  
+
 	  if (oval == 0)
 	    {
 	      bfd_put_32 (obfd, ival, odata);
@@ -2587,7 +2587,7 @@ print_v850_note (bfd * abfd, FILE * file, bfd_byte * data, enum v850_notes id)
 	}
       fputc ('\n', file);
       break;
-	
+
     case V850_NOTE_DATA_SIZE:
       fprintf (file, _(" size of doubles: "));
       switch (value)
@@ -2599,7 +2599,7 @@ print_v850_note (bfd * abfd, FILE * file, bfd_byte * data, enum v850_notes id)
 	}
       fputc ('\n', file);
       break;
-	
+
     case V850_NOTE_FPU_INFO:
       fprintf (file, _(" FPU support required: "));
       switch (value)
@@ -2611,7 +2611,7 @@ print_v850_note (bfd * abfd, FILE * file, bfd_byte * data, enum v850_notes id)
 	}
       fputc ('\n', file);
       break;
-	
+
     case V850_NOTE_SIMD_INFO:
       fprintf (file, _("SIMD use: "));
       switch (value)
@@ -2622,7 +2622,7 @@ print_v850_note (bfd * abfd, FILE * file, bfd_byte * data, enum v850_notes id)
 	}
       fputc ('\n', file);
       break;
-	
+
     case V850_NOTE_CACHE_INFO:
       fprintf (file, _("CACHE use: "));
       switch (value)
@@ -2633,7 +2633,7 @@ print_v850_note (bfd * abfd, FILE * file, bfd_byte * data, enum v850_notes id)
 	}
       fputc ('\n', file);
       break;
-	
+
     case V850_NOTE_MMU_INFO:
       fprintf (file, _("MMU use: "));
       switch (value)
@@ -2644,7 +2644,7 @@ print_v850_note (bfd * abfd, FILE * file, bfd_byte * data, enum v850_notes id)
 	}
       fputc ('\n', file);
       break;
-	
+
     default:
       BFD_ASSERT (0);
     }
@@ -3433,7 +3433,7 @@ v850_elf_relax_section (bfd *abfd,
 
   *again = FALSE;
 
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return TRUE;

@@ -2141,8 +2141,8 @@ build_indexed_byte (operand *op, int format ATTRIBUTE_UNUSED, int move_insn)
 	  if (!check_range (val, M6812_OP_IDX))
 	    as_bad (_("Offset out of 16-bit range: %ld."), val);
 
-	  if (move_insn && !(val >= -16 && val <= 15) 
-	      && ((!(mode & M6812_OP_IDX) && !(mode & M6812_OP_D_IDX_2)) 
+	  if (move_insn && !(val >= -16 && val <= 15)
+	      && ((!(mode & M6812_OP_IDX) && !(mode & M6812_OP_D_IDX_2))
 		  || !(current_architecture & cpu9s12x)))
 	    {
 	      as_bad (_("Offset out of 5-bit range for movw/movb insn: %ld."),
@@ -2420,7 +2420,7 @@ build_insn_xg (struct m68hc11_opcode *opcode,
       f = m68hc11_new_insn (1);
       number_to_chars_bigendian (f, opcode->opcode >> 8, 1); /* High byte.  */
       fixup8_xg (&operands[0].exp, format, M68XG_OP_REL9);
-    } 
+    }
   else if (format & M68XG_OP_REL10)
     {
       f = m68hc11_new_insn (1);
@@ -2949,7 +2949,7 @@ md_assemble (char *str)
 		}
 	      else
 		as_bad ("No opcode found\n");
-              
+
               return;
             }
           else
@@ -2973,7 +2973,7 @@ md_assemble (char *str)
               	{
 		  opcode_local.opcode |= (operands[0].exp.X_add_number);
 		  operands[0].mode = M68XG_OP_IMM3;
-  
+
 		  opcode = find (opc, operands, 1);
                   if (opcode)
                     {
@@ -3067,7 +3067,7 @@ md_assemble (char *str)
 
       if (opc->format & (M68XG_OP_REL9 | M68XG_OP_REL10))
         {
-          opcode_local.format = opc->format; 
+          opcode_local.format = opc->format;
           input_line_pointer = skip_whites (input_line_pointer);
           expression (&operands[0].exp);
           if (operands[0].exp.X_op == O_illegal)
@@ -3093,12 +3093,12 @@ md_assemble (char *str)
       if ((*input_line_pointer == '\n') || (*input_line_pointer == '\r')
           || (*input_line_pointer == '\0'))
         return; /* nothing left */
-      
+
       if (*input_line_pointer == '#')
         {
           as_bad ("No register specified before hash\n");
           return;
-        } 
+        }
 
       /* first operand is expected to be a register */
       if ((*input_line_pointer == 'R') || (*input_line_pointer == 'r'))
@@ -3165,12 +3165,12 @@ md_assemble (char *str)
                   if (opcode)
 		    opcode_local.opcode = opcode->opcode
 		      | (operands[0].reg1 << 8);
-                  
+
                   if (operands[0].exp.X_op != O_constant)
                     as_bad ("Only constants supported at for IMM4 mode\n");
                   else
                     {
-                      if (check_range 
+                      if (check_range
                           (operands[0].exp.X_add_number,M68XG_OP_R_IMM4))
                         opcode_local.opcode
 			  |= (operands[0].exp.X_add_number << 4);
@@ -3226,7 +3226,7 @@ md_assemble (char *str)
                              com RD, RS alias for xnor RD,R0,RS
                              mov RD, RS alias for or RD, R0, RS
                              neg RD, RS alias for sub RD, R0, RS */
-                          opcode_local.opcode = opcode->opcode 
+                          opcode_local.opcode = opcode->opcode
                             | (operands[0].reg1 << 8) | (operands[1].reg1 << 2);
                         }
                       else if ((strncmp (opc->opcode->name, "cmp",3) == 0)
@@ -3235,7 +3235,7 @@ md_assemble (char *str)
                           /* special cases for:
                              cmp RS1, RS2 alias for sub R0, RS1, RS2
                              cpc RS1, RS2 alias for sbc R0, RS1, RS2 */
-                          opcode_local.opcode = opcode->opcode 
+                          opcode_local.opcode = opcode->opcode
 			    | (operands[0].reg1 << 5) | (operands[1].reg1 << 2);
                         }
                       else
@@ -3277,7 +3277,7 @@ md_assemble (char *str)
                       opcode = find (opc, operands, 1);
                       if (opcode)
                         {
-                          opcode_local.opcode = opcode->opcode 
+                          opcode_local.opcode = opcode->opcode
                             | (operands[0].reg1 << 8) | (operands[1].reg1 << 5)
                             | (operands[2].reg1 << 2);
                           opcode_local.format = M68XG_OP_NONE;
@@ -3314,7 +3314,7 @@ md_assemble (char *str)
                 }
 
               input_line_pointer = skip_whites (input_line_pointer);
-              
+
               if (*input_line_pointer != ',')
                 {
                   as_bad (_("Missing operand."));
@@ -3349,7 +3349,7 @@ md_assemble (char *str)
                     {
                       input_line_pointer++;
                     }
-                      
+
                   /* Ok so far, can only be one mode. */
                   opcode_local.format = M68XG_OP_R_R_OFFS5;
                   operands[0].mode = M68XG_OP_R_R_OFFS5;
@@ -4433,7 +4433,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		      value);
       if (value >= 0)
 	where[0] |= value;
-      else 
+      else
 	where[0] |= (0x10 | (16 + value));
       break;
 
@@ -4445,7 +4445,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
         /* sign bit already in xb postbyte */
       if (value >= 0)
         where[1] = value;
-      else 
+      else
         where[1] = (256 + value);
       break;
 

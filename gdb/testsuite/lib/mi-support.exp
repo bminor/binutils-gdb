@@ -26,7 +26,6 @@ if ![info exists mi_gdb_prompt] then {
     set mi_gdb_prompt "\[(\]gdb\[)\] \r\n"
 }
 
-global mi_inferior_spawn_id
 global mi_inferior_tty_name
 
 set MIFLAGS "-i=mi"
@@ -104,7 +103,7 @@ proc default_mi_gdb_start { args } {
     global gdb_prompt
     global mi_gdb_prompt
     global timeout
-    global gdb_spawn_id
+    global gdb_spawn_id inferior_spawn_id
     global MIFLAGS
 
     gdb_stop_suppressing_tests
@@ -136,15 +135,6 @@ proc default_mi_gdb_start { args } {
 	    perror "$GDB does not exist."
 	    exit 1
 	}
-    }
-
-    # Create the new PTY for the inferior process.
-    if { $separate_inferior_pty } {
-	spawn -pty
-	global mi_inferior_spawn_id
-	global mi_inferior_tty_name
-	set mi_inferior_spawn_id $spawn_id
-	set mi_inferior_tty_name $spawn_out(slave,name)
     }
 
     set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS [host_info gdb_opts]"]
@@ -214,9 +204,14 @@ proc default_mi_gdb_start { args } {
 	    warning "Couldn't set the width to 0."
 	}
     }
-    # If allowing the inferior to have its own PTY then assign the inferior
-    # its own terminal device here.
+
+    # Create the new PTY for the inferior process.
     if { $separate_inferior_pty } {
+	spawn -pty
+	global mi_inferior_tty_name
+	set inferior_spawn_id $spawn_id
+	set mi_inferior_tty_name $spawn_out(slave,name)
+
 	send_gdb "102-inferior-tty-set $mi_inferior_tty_name\n"
 	gdb_expect 10 {
 	    -re ".*102\\\^done\r\n$mi_gdb_prompt$" {
@@ -226,6 +221,10 @@ proc default_mi_gdb_start { args } {
 		warning "Couldn't redirect inferior output." 2
 	    }
 	}
+    }
+
+    if {![info exists inferior_spawn_id]} {
+	set inferior_spawn_id $gdb_spawn_id
     }
 
     mi_detect_async
@@ -770,29 +769,16 @@ proc mi_gdb_test { args } {
     if { $result == 0 } {
 	if [ info exists ipattern ] {
 	    if { ![target_info exists gdb,noinferiorio] } {
-		if { [target_info gdb_protocol] == "remote"
-		    || [target_info gdb_protocol] == "extended-remote"
-		    || [target_info protocol] == "sim"} {
+		global gdb_spawn_id inferior_spawn_id
 
-		    gdb_expect {
-			-re "$ipattern" {
-			    pass "$message inferior output"
-			}
-			timeout {
-			    fail "$message inferior output (timeout)"
-			    set result 1
-			}
+		set sid "$inferior_spawn_id $gdb_spawn_id"
+		gdb_expect {
+		    -i "$sid" -re "$ipattern" {
+			pass "$message inferior output"
 		    }
-		} else {
-		    global mi_inferior_spawn_id
-		    expect {
-			-i $mi_inferior_spawn_id -re "$ipattern" {
-			    pass "$message inferior output"
-			}
-			timeout {
-			    fail "$message inferior output (timeout)"
-			    set result 1
-			}
+		    timeout {
+			fail "$message inferior output (timeout)"
+			set result 1
 		    }
 		}
 	    } else {
@@ -2409,7 +2395,8 @@ proc mi_build_kv_pairs {attr_list {joiner ,}} {
 #
 # All arguments for the breakpoint may be specified using the options
 # number, type, disp, enabled, addr, func, file, fullanme, line,
-# thread-groups, times, ignore, script, and original-location.
+# thread-groups, cond, evaluated-by, times, ignore, script,
+# and original-location.
 #
 # Only if -script and -ignore are given will they appear in the output.
 # Otherwise, this procedure will skip them using ".*".
@@ -2424,17 +2411,36 @@ proc mi_make_breakpoint {args} {
     parse_args {{number .*} {type .*} {disp .*} {enabled .*} {addr .*}
 	{func .*} {file .*} {fullname .*} {line .*}
 	{thread-groups \\\[.*\\\]} {times .*} {ignore 0}
-	{script ""} {original-location .*}}
+	{script ""} {original-location .*} {cond ""} {evaluated-by ""}}
 
     set attr_list {}
     foreach attr [list number type disp enabled addr func file \
-		      fullname line thread-groups times] {
+		      fullname line thread-groups] {
 	lappend attr_list $attr [set $attr]
     }
 
     set result "bkpt={[mi_build_kv_pairs $attr_list]"
 
     # There are always exceptions.
+
+    # If COND is not preset, do not output it.
+    if {[string length $cond] > 0} {
+	append result ","
+	append result [mi_build_kv_pairs [list "cond" $cond]]
+
+	# When running on a remote, GDB may output who is evaluating
+	# breakpoint conditions.
+	if {[string length ${evaluated-by}] > 0} {
+	    append result [mi_build_kv_pairs \
+			       [list "evaluated-by" ${evaluated-by}]]
+	} else {
+	    append result {(,evaluated-by=".*")?}
+	}
+    }
+
+    append result ","
+    append result [mi_build_kv_pairs [list "times" $times]]
+
     # If SCRIPT and IGNORE are not present, do not output them.
     if {$ignore != 0} {
 	append result ","
@@ -2494,4 +2500,13 @@ proc mi_make_breakpoint_table {bp_list} {
 
     # Assemble the final regexp.
     return "BreakpointTable={nr_rows=\"$nr\",nr_cols=\"$nc\",$header,$body}"
+}
+
+# Return a 1 for configurations that do not support Python scripting.
+# Note: This also sets various globals that specify which version of Python
+# is in use.  See skip_python_tests_prompt.
+
+proc mi_skip_python_tests {} {
+    global mi_gdb_prompt
+    return [skip_python_tests_prompt "$mi_gdb_prompt$"]
 }

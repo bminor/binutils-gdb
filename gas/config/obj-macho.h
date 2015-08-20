@@ -84,7 +84,7 @@ struct obj_mach_o_frag_data
   /* Symbol that corresponds to the subsection.  */
   symbolS *subsection;
 };
-  
+
 #define OBJ_FRAG_TYPE struct obj_mach_o_frag_data
 
 #define md_pre_output_hook obj_mach_o_pre_output_hook()

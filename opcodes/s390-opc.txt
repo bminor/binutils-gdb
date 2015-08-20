@@ -1586,11 +1586,11 @@ e7000230008a vstrczfs VRR_VVVU0VB3 "vector string range compare word" z13 zarch 
 e700000000e3 vfa VRR_VVV0UU "vector fp add" z13 zarch
 e700000030e3 vfadb VRR_VVV "vector fp add" z13 zarch
 e700000830e3 wfadb VRR_VVV "vector fp add" z13 zarch
-e700000000cb wfc VRR_VV0UU "vector fp compare scalar" z13 zarch
+e700000000cb wfc VRR_VV0UU2 "vector fp compare scalar" z13 zarch
 e700000030cb wfcdb VRR_VV "vector fp compare scalar" z13 zarch
-e700000000ca wfk VRR_VV0UU "vector fp compare and signal scalar" z13 zarch
+e700000000ca wfk VRR_VV0UU2 "vector fp compare and signal scalar" z13 zarch
 e700000030ca wfkdb VRR_VV "vector fp compare and signal scalar" z13 zarch
-e700000000e8 vfce VRR_VVV "vector fp compare equal" z13 zarch
+e700000000e8 vfce VRR_VVV0UUU "vector fp compare equal" z13 zarch
 e700000030e8 vfcedb VRR_VVV "vector fp compare equal" z13 zarch
 e700001030e8 vfcedbs VRR_VVV "vector fp compare equal" z13 zarch
 e700000830e8 wfcedb VRR_VVV "vector fp compare equal" z13 zarch
@@ -1623,7 +1623,7 @@ e700000830e5 wfddb VRR_VVV "vector fp divide" z13 zarch
 e700000000c7 vfi VRR_VV0UUU "vector load fp integer" z13 zarch
 e700000030c7 vfidb VRR_VV0UU "vector load fp integer" z13 zarch
 e700000830c7 wfidb VRR_VV0UU8 "vector load fp integer" z13 zarch
-e700000000c4 vlde VRR_VV0UU "vector fp load lengthened" z13 zarch
+e700000000c4 vlde VRR_VV0UU2 "vector fp load lengthened" z13 zarch
 e700000020c4 vldeb VRR_VV "vector fp load lengthened" z13 zarch
 e700000820c4 wldeb VRR_VV "vector fp load lengthened" z13 zarch
 e700000000c5 vled VRR_VV0UUU "vector fp load rounded" z13 zarch
@@ -1647,7 +1647,7 @@ e700001030cc vflndb VRR_VV "vector fp perform sign operation" z13 zarch
 e700001830cc wflndb VRR_VV "vector fp perform sign operation" z13 zarch
 e700002030cc vflpdb VRR_VV "vector fp perform sign operation" z13 zarch
 e700002830cc wflpdb VRR_VV "vector fp perform sign operation" z13 zarch
-e700000000ce vfsq VRR_VV0UU "vector fp square root" z13 zarch
+e700000000ce vfsq VRR_VV0UU2 "vector fp square root" z13 zarch
 e700000030ce vfsqdb VRR_VV "vector fp square root" z13 zarch
 e700000830ce wfsqdb VRR_VV "vector fp square root" z13 zarch
 e700000000e2 vfs VRR_VVV0UU "vector fp subtract" z13 zarch

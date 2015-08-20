@@ -475,7 +475,7 @@ usage (FILE *file, int status)
 {
   fprintf (file, _("Usage %s <option(s)> <object-file(s)>\n"), prog_name);
   fprintf (file, _("  Generic options:\n"));
-  fprintf (file, _("   @<file>                Read options from <file>\n"));    
+  fprintf (file, _("   @<file>                Read options from <file>\n"));
   fprintf (file, _("   --quiet, -q            Work quietly\n"));
   fprintf (file, _("   --verbose, -v          Verbose\n"));
   fprintf (file, _("   --version              Print dllwrap version\n"));
@@ -1021,9 +1021,9 @@ Creating one, but that may not be what you want"));
 
   /* Step 1. Call GCC/LD to create base relocation file. If using GCC, the
      driver command line will look like the following:
-    
+
         % gcc -Wl,--dll --Wl,--base-file,foo.base [rest of command line]
-    
+
      If the user does not specify a base name, create temporary one that
      is deleted at exit.  */
 
@@ -1065,9 +1065,9 @@ Creating one, but that may not be what you want"));
 
   /* Step 2. generate the exp file by running dlltool.
      dlltool command line will look like the following:
-    
+
         % dlltool -Wl,--dll --Wl,--base-file,foo.base [rest of command line]
-    
+
      If the user does not specify a base name, create temporary one that
      is deleted at exit.  */
 

@@ -1,3 +1,120 @@
+2015-08-11  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/strip-12.s: Align .bss section.
+	* binutils-all/strip-12.d: Adjust.
+	* binutils-all/symbols-1.d: Allow extraneous symbols.
+	* binutils-all/symbols-2.d: Likewise, and V for weakened syms.
+	* binutils-all/symbols-3.d: Likewise.
+	* binutils-all/symbols-4.d: Likewise.
+
+2015-08-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* binutils-all/strip-12.s: Use ".section .bss" instead of ".bss"
+	which isn't supported by all ELF targets.
+
+2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/18785
+	* binutils-all/objcopy.exp: Run strip-12.
+	* binutils-all/strip-12.d: New file.
+	* binutils-all/strip-12.s: Likewise.
+
+2015-08-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* binutils-all/objcopy.exp: Run new symbol tests.
+	(objcopy_test_symbol_manipulation): New function.
+	* binutils-all/symbols-1.d: New file.
+	* binutils-all/symbols-2.d: New file.
+	* binutils-all/symbols-3.d: New file.
+	* binutils-all/symbols-4.d: New file.
+	* binutils-all/symbols.s: New file.
+
+2015-08-05  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objcopy.exp (keep_debug_symbols_and_check_links):
+	New proc.  Checks that debug-info-only binaries retain the
+	sh_link field in stripped sections.
+
+2015-08-04  Nick Clifton  <nickc@redhat.com>
+
+	* lib/utils-lib.exp (run_dump_test): Document DUMPPROG, readelf
+	and size parameters.  Alpha-sort switch tables.  Include
+	addr2line, and size in list of possible auto-detected dump
+	programs.
+
+2015-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/localize-hidden-1.d: Allow for extra symbols in the
+	output.
+        * binutils-all/strip-11.d: Skip for the RL78.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp: Update.
+
+2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	 PR binutils/18656
+	 * binutils-all/compress.exp (convert_test): New proc.
+	 Run conversion tests between x86-64 and x32.
+
+2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/dw2-3.W: Updated to accept .debug_* sections.
+
+2015-05-20  Ed Maste  <emaste@freebsd.org>
+
+	* lib/binutils-common.exp (is_elf_format): Include *-*-freebsd* except
+	i?86-*-freebsd\[12\].*.
+	* (is_aout_format): Update FreeBSD to i?86-*-freebsd\[12\].*.
+
+2015-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/dw2-3.S: Replace .int with .4byte.
+
+2015-05-15  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/z.s: New test.  Checks the --decompress option to
+	readelf.
+	* binutils-all/readelf.exp: Run the test.
+	* binutils-all/readelf.z: Expected output from readelf.
+
+2015-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp: Replace "$OBJDUMP -s -j .debug_info"
+	with "$OBJDUMP -W".
+	* binutils-all/libdw2-compressedgabi.out: Updated.
+
+2015-05-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18374
+	* binutils-all/pr18374.s: New test file.
+	* binutils-all/readelf.exp: Assemble and run the new test.
+	* binutils-all/readelf.pr18374: Expected output from readelf.
+
+2015-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-1.d: Also skip x86_64-*-nacl*.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-1.d: Skip x86_64-*-gnux32.
+	* lib/utils-lib.exp (run_dump_test): Allow mixing target and
+	not-target directives.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/objdump.exp (cpus_expected): Append iamcu.
+
+2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-5.d: New file.
+	* binutils-all/elfedit.exp: Run elfedit-5.
+
+2015-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objdump.exp (cpus_expected): Add MeP CPU names.
+
 2015-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/18209

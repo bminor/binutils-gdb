@@ -17,6 +17,8 @@
 
 #include <stdio.h>
 
+#include "../lib/unbuffer_output.c"
+
 static int g;
 
 void
@@ -31,6 +33,8 @@ int
 main (int argc, char *argv[])
 {
   int loc = 1234;
+
+  gdb_unbuffer_output ();
 
   /* Ensure these functions are available.  */
   printf ("kickoff %d\n", loc);

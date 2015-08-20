@@ -90,7 +90,7 @@ static void s_enddual (int);
 static void s_atmp (int);
 static void s_align_wrapper (int);
 static int i860_get_expression (char *);
-static bfd_reloc_code_real_type obtain_reloc_for_imm16 (fixS *, long *); 
+static bfd_reloc_code_real_type obtain_reloc_for_imm16 (fixS *, long *);
 #ifdef DEBUG_I860
 static void print_insn (struct i860_it *);
 #endif
@@ -173,7 +173,7 @@ s_atmp (int ignore ATTRIBUTE_UNUSED)
 }
 
 /* Handle ".align" directive depending on syntax mode.
-   AT&T/SVR4 syntax uses the standard align directive.  However, 
+   AT&T/SVR4 syntax uses the standard align directive.  However,
    the Intel syntax additionally allows keywords for the alignment
    parameter: ".align type", where type is one of {.short, .long,
    .quad, .single, .double} representing alignments of 2, 4,
@@ -197,7 +197,7 @@ s_align_wrapper (int arg)
         strncpy (parm, "      4", 7);
       else if (strncmp (parm, ".double", 7) == 0)
         strncpy (parm, "      8", 7);
-     
+
       while (*input_line_pointer == ' ')
         ++input_line_pointer;
     }
@@ -895,7 +895,7 @@ i860_process_insn (char *str)
 
 	          the_insn.expand = insn->expand;
                   fc++;
-              
+
 	          continue;
 		}
 	      else
@@ -1482,7 +1482,7 @@ void
 i860_check_label (symbolS *labelsym)
 {
   /* At this point, the current line pointer is sitting on the character
-     just after the first colon on the label.  */ 
+     just after the first colon on the label.  */
   if (target_intel_syntax && *input_line_pointer == ':')
     {
       S_SET_EXTERNAL (labelsym);

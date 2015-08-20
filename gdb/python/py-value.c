@@ -236,6 +236,59 @@ valpy_referenced_value (PyObject *self, PyObject *args)
   return result;
 }
 
+/* Return a value which is a reference to the value.  */
+
+static PyObject *
+valpy_reference_value (PyObject *self, PyObject *args)
+{
+  PyObject *result = NULL;
+
+  TRY
+    {
+      struct value *self_val;
+      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+
+      self_val = ((value_object *) self)->value;
+      result = value_to_value_object (value_ref (self_val));
+
+      do_cleanups (cleanup);
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
+
+  return result;
+}
+
+/* Return a "const" qualified version of the value.  */
+
+static PyObject *
+valpy_const_value (PyObject *self, PyObject *args)
+{
+  PyObject *result = NULL;
+
+  TRY
+    {
+      struct value *self_val, *res_val;
+      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+
+      self_val = ((value_object *) self)->value;
+      res_val = make_cv_value (1, 0, self_val);
+      result = value_to_value_object (res_val);
+
+      do_cleanups (cleanup);
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
+
+  return result;
+}
+
 /* Return "&value".  */
 static PyObject *
 valpy_get_address (PyObject *self, void *closure)
@@ -303,7 +356,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
       struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
 
       type = value_type (val);
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
 
       if (((TYPE_CODE (type) == TYPE_CODE_PTR)
 	   || (TYPE_CODE (type) == TYPE_CODE_REF))
@@ -1006,9 +1059,9 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	    struct type *ltype = value_type (arg1);
 	    struct type *rtype = value_type (arg2);
 
-	    CHECK_TYPEDEF (ltype);
+	    ltype = check_typedef (ltype);
 	    ltype = STRIP_REFERENCE (ltype);
-	    CHECK_TYPEDEF (rtype);
+	    rtype = check_typedef (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
 	    handled = 1;
@@ -1030,9 +1083,9 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	    struct type *ltype = value_type (arg1);
 	    struct type *rtype = value_type (arg2);
 
-	    CHECK_TYPEDEF (ltype);
+	    ltype = check_typedef (ltype);
 	    ltype = STRIP_REFERENCE (ltype);
-	    CHECK_TYPEDEF (rtype);
+	    rtype = check_typedef (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
 	    handled = 1;
@@ -1421,7 +1474,7 @@ valpy_long (PyObject *self)
 
   TRY
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
 
       if (!is_integral_type (type)
 	  && TYPE_CODE (type) != TYPE_CODE_PTR)
@@ -1448,7 +1501,7 @@ valpy_float (PyObject *self)
 
   TRY
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
 
       if (TYPE_CODE (type) != TYPE_CODE_FLT)
 	error (_("Cannot convert value to float."));
@@ -1692,6 +1745,10 @@ reinterpret_cast operator."
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
   { "referenced_value", valpy_referenced_value, METH_NOARGS,
     "Return the value referenced by a TYPE_CODE_REF or TYPE_CODE_PTR value." },
+  { "reference_value", valpy_reference_value, METH_NOARGS,
+    "Return a value of type TYPE_CODE_REF referencing this value." },
+  { "const_value", valpy_const_value, METH_NOARGS,
+    "Return a 'const' qualied version of the same value." },
   { "lazy_string", (PyCFunction) valpy_lazy_string,
     METH_VARARGS | METH_KEYWORDS,
     "lazy_string ([encoding]  [, length]) -> lazy_string\n\

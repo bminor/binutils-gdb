@@ -20,7 +20,7 @@
 
 struct buffer;
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 #ifdef __UCLIBC__
 #if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
@@ -42,6 +42,14 @@ struct buffer;
 # define PTRACE_GETSIGINFO 0x4202
 # define PTRACE_SETSIGINFO 0x4203
 #endif /* PTRACE_GETSIGINF */
+
+#ifndef PTRACE_GETREGSET
+#define PTRACE_GETREGSET	0x4204
+#endif
+
+#ifndef PTRACE_SETREGSET
+#define PTRACE_SETREGSET	0x4205
+#endif
 
 /* If the system headers did not provide the constants, hard-code the normal
    values.  */
@@ -149,13 +157,13 @@ extern void linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer);
 extern char *linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err);
 
 extern void linux_ptrace_init_warnings (void);
+extern void linux_check_ptrace_features (void);
 extern void linux_enable_event_reporting (pid_t pid, int attached);
 extern void linux_disable_event_reporting (pid_t pid);
 extern int linux_supports_tracefork (void);
 extern int linux_supports_traceclone (void);
 extern int linux_supports_tracevforkdone (void);
 extern int linux_supports_tracesysgood (void);
-extern void linux_ptrace_set_additional_flags (int);
 extern int linux_ptrace_get_extended_event (int wstat);
 extern int linux_is_extended_waitstatus (int wstat);
 extern int linux_wstatus_maybe_breakpoint (int wstat);

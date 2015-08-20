@@ -140,6 +140,11 @@ class Symbol
   set_is_default()
   { this->is_def_ = true; }
 
+  // Set that this version is not the default for this symbol name.
+  void
+  set_is_not_default()
+  { this->is_def_ = false; }
+
   // Return the symbol's name as name@version (or name@@version).
   std::string
   versioned_name() const;
@@ -557,8 +562,6 @@ class Symbol
   {
     if (this->source_ != FROM_OBJECT)
       return false;
-    if (this->type_ == elfcpp::STT_COMMON)
-      return true;
     bool is_ordinary;
     unsigned int shndx = this->shndx(&is_ordinary);
     return !is_ordinary && Symbol::is_common_shndx(shndx);
@@ -1372,7 +1375,7 @@ class Symbol_table
  
   // Returns true if ICF determined that this is a duplicate section. 
   bool
-  is_section_folded(Object* obj, unsigned int shndx) const;
+  is_section_folded(Relobj* obj, unsigned int shndx) const;
 
   void
   set_gc(Garbage_collection* gc)
@@ -1708,7 +1711,8 @@ class Symbol_table
 	  const elfcpp::Sym<size, big_endian>& sym,
 	  unsigned int st_shndx, bool is_ordinary,
 	  unsigned int orig_st_shndx,
-	  Object*, const char* version);
+	  Object*, const char* version,
+	  bool is_default_version);
 
   template<int size, bool big_endian>
   void
@@ -1727,7 +1731,7 @@ class Symbol_table
   // resolve.cc.
   static bool
   should_override(const Symbol*, unsigned int, elfcpp::STT, Defined,
-		  Object*, bool*, bool*);
+		  Object*, bool*, bool*, bool);
 
   // Report a problem in symbol resolution.
   static void

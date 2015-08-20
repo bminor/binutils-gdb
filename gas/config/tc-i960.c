@@ -564,7 +564,7 @@ get_cdisp (char *dispP, /* Displacement as specified in source instruction.  */
 	   int numbits, /* # bits of displacement (13 for COBR, 24 for CTRL).  */
 	   int var_frag,/* 1 if varying length code fragment should be emitted;
 			   0 if an address fix should be emitted.  */
-	   int callj)	/* 1 if callj relocation should be done; else 0.  */	   
+	   int callj)	/* 1 if callj relocation should be done; else 0.  */
 {
   expressionS e;		/* Parsed expression.  */
   fixS *fixP;			/* Structure describing needed address fix.  */
@@ -802,7 +802,7 @@ parse_regop (struct regop *regopP,	/* Where to put description of register opera
 }
 
 /* get_ispec:	parse a memory operand for an index specification
-   
+
    Here, an "index specification" is taken to be anything surrounded
    by square brackets and NOT followed by anything else.
 
@@ -811,7 +811,7 @@ parse_regop (struct regop *regopP,	/* Where to put description of register opera
 
 static char *
 get_ispec (char *textP)  /* Pointer to memory operand from source instruction, no white space.  */
-	   
+
 {
   /* Points to start of index specification.  */
   char *start;
@@ -1258,7 +1258,7 @@ parse_ldconst (char *arg[])	/* See above.  */
               ldconst  64,<reg>  -> shlo 8,3,<reg>
               ldconst  -1,<reg>  -> subo 1,0,<reg>
               ldconst -31,<reg>  -> subo 31,0,<reg>
-        
+
          Anything else becomes:
                 lda xxx,<reg>.  */
       n = offs (e);
@@ -2287,7 +2287,7 @@ parse_po (int po_num)	/* Pseudo-op number:  currently S_LEAFPROC or S_SYSPROC.  
   	passed fixup structure.  */
 
 int
-reloc_callj (fixS *fixP)  /* Relocation that can be done at assembly time.  */    
+reloc_callj (fixS *fixP)  /* Relocation that can be done at assembly time.  */
 {
   /* Points to the binary for the instruction being relocated.  */
   char *where;

@@ -60,7 +60,7 @@ ip2k_cgen_insn_supported (CGEN_CPU_DESC cd, const CGEN_INSN *insn)
   /* No mach attribute?  Assume it's supported for all machs.  */
   if (machs == 0)
     return 1;
-  
+
   return (machs & cd->machs) != 0;
 }
 

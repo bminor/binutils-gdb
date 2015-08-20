@@ -95,7 +95,7 @@ static reloc_howto_type rl78_elf_howto_table [] =
   RL78REL (RH_RELAX, 0,  0, 0, dont,     FALSE),
 
   EMPTY_HOWTO (0x2e),
-  EMPTY_HOWTO (0x2f),
+  RL78REL (RH_SADDR, 0,  0, 0, dont,     FALSE),
   EMPTY_HOWTO (0x30),
   EMPTY_HOWTO (0x31),
   EMPTY_HOWTO (0x32),
@@ -242,6 +242,7 @@ static const struct rl78_reloc_map rl78_reloc_map [] =
   { BFD_RELOC_RL78_ABS16UL,	R_RL78_ABS16UL },
   { BFD_RELOC_RL78_ABS16UW,	R_RL78_ABS16UW },
   { BFD_RELOC_RL78_ABS16U,	R_RL78_ABS16U },
+  { BFD_RELOC_RL78_SADDR,	R_RL78_RH_SADDR },
   { BFD_RELOC_RL78_RELAX,	R_RL78_RH_RELAX }
 };
 
@@ -447,7 +448,7 @@ rl78_compute_complex_reloc (unsigned long  r_type,
     case R_RL78_SYM:
       RL78_STACK_PUSH (symval);
       return 0;
-      
+
     case R_RL78_OPneg:
       RL78_STACK_POP (tmp1);
       tmp1 = - tmp1;
@@ -757,7 +758,7 @@ rl78_elf_relocate_section
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	{
 	  /* This is a relocatable link.  We don't have to change
              anything, unless the reloc is against a section symbol,
@@ -1045,7 +1046,7 @@ rl78_elf_relocate_section
 	      break;
 	    }
 	  break;
-	  
+
 	case R_RL78_SYM:
 	  if (r_symndx < symtab_hdr->sh_info)
 	    relocation = sec->output_section->vma + sec->output_offset
@@ -1243,7 +1244,7 @@ rl78_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 	    (*_bfd_error_handler) (_("- %s is 64-bit, %s is not"),
 				   bfd_get_filename (ibfd), bfd_get_filename (obfd));
 	  error = TRUE;
-	}    
+	}
     }
 
   return !error;
@@ -1309,7 +1310,7 @@ rl78_elf_check_relocs
   asection *splt;
   bfd *dynobj;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -1441,7 +1442,7 @@ rl78_elf_always_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd *dynobj;
   asection *splt;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1528,7 +1529,7 @@ rl78_elf_relax_plt_section (bfd *dynobj,
   /* Assume nothing changes.  */
   *again = FALSE;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   /* We only relax the .plt section at the moment.  */
@@ -1970,7 +1971,7 @@ rl78_offset_for_reloc (bfd *                    abfd,
 	case R_RL78_ABS8UW:
 	  *scale = 2;
 	  goto reloc_computes_value;
-	  
+
 	default:
 	reloc_computes_value:
 	  symval = rl78_compute_complex_reloc (r_type, 0, input_section);
@@ -2087,7 +2088,7 @@ rl78_elf_relax_section
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)

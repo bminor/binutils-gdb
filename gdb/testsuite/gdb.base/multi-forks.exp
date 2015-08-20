@@ -50,6 +50,7 @@ set exit_bp_loc [gdb_get_line_number "Set exit breakpoint here."]
 
 proc continue_to_exit_bp_loc {} {
     global exit_bp_loc decimal gdb_prompt
+    global inferior_spawn_id gdb_spawn_id
 
     gdb_breakpoint $exit_bp_loc
 
@@ -70,6 +71,7 @@ proc continue_to_exit_bp_loc {} {
 	# first in the script that occurs anywhere in the input, so that
 	# we don't skip anything.
 	gdb_expect {
+	    -i "$inferior_spawn_id $gdb_spawn_id"
 	    -re "($decimal done)|(Breakpoint)|($gdb_prompt)" {
 		if {[info exists expect_out(1,string)]} {
 		    incr seen_done

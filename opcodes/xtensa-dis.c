@@ -80,7 +80,7 @@ print_xtensa_operand (bfd_vma memaddr,
 {
   xtensa_isa isa = xtensa_default_isa;
   int signed_operand_val;
-    
+
   if (show_raw_fields)
     {
       if (operand_val < 0xa)
@@ -124,7 +124,7 @@ print_xtensa_operand (bfd_vma memaddr,
 				 xtensa_regfile_shortname (isa, opnd_rf),
 				 operand_val);
 	  i++;
-	} 
+	}
     }
 }
 

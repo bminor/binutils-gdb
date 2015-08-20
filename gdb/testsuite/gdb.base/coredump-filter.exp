@@ -34,10 +34,10 @@ if { ![runto_main] } {
 gdb_breakpoint [gdb_get_line_number "break-here"]
 gdb_continue_to_breakpoint "break-here" ".* break-here .*"
 
-proc do_save_core { filter_flag core ipid } {
-    verbose -log "writing $filter_flag to /proc/$ipid/coredump_filter"
+proc do_save_core { filter_flag core } {
+    verbose -log "writing $filter_flag to /proc/<inferior pid>/coredump_filter"
 
-    remote_exec target "sh -c \"echo $filter_flag > /proc/$ipid/coredump_filter\""
+    gdb_test "p set_coredump_filter ($filter_flag)" " = 0"
 
     # Generate a corefile.
     gdb_gcore_cmd "$core" "save corefile"
@@ -146,11 +146,8 @@ if { !$core_supported } {
     return -1
 }
 
-# Get the inferior's PID.
-set infpid ""
 gdb_test_multiple "info inferiors" "getting inferior pid" {
-    -re "process \($decimal\).*\r\n$gdb_prompt $" {
-	set infpid $expect_out(1,string)
+    -re "process $decimal.*\r\n$gdb_prompt $" {
     }
     -re "Remote target.*$gdb_prompt $" {
 	# If the target does not provide PID information (like usermode QEMU),
@@ -170,6 +167,7 @@ gdb_test_multiple "print/x &main" "getting main's address" {
 
 # Obtain the address of each variable that will be checked on each
 # case.
+unset -nocomplain coredump_var_addr
 foreach item $all_anon_corefiles {
     foreach name [list [lindex $item 3] [lindex $item 4]] {
 	set test "print/x $name"
@@ -184,12 +182,12 @@ foreach item $all_anon_corefiles {
 # Generate corefiles for the "anon" case.
 foreach item $all_anon_corefiles {
     with_test_prefix "saving corefile for [lindex $item 0]" {
-	do_save_core [lindex $item 1] [subst [lindex $item 2]] $infpid
+	do_save_core [lindex $item 1] [subst [lindex $item 2]]
     }
 }
 
 with_test_prefix "saving corefile for non-Private-Shared-Anon-File" {
-    do_save_core "0x60" $non_private_shared_anon_file_core $infpid
+    do_save_core "0x60" $non_private_shared_anon_file_core
 }
 
 clean_restart $testfile

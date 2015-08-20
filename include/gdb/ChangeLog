@@ -1,3 +1,10 @@
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* callback.h (CB_TARGET_DEFS_MAP): Add name member.
+	(cb_host_str_syscall, cb_host_str_errno, cb_host_str_signal,
+	cb_target_str_syscall, cb_target_str_errno, cb_target_str_signal):
+	Declare.
+
 2015-03-28  James Bowman  <james.bowman@ftdichip.com>
 
 	* sim-ft32.h: New file.
@@ -51,7 +58,7 @@
 
 	PR gdb/7205
 
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
@@ -115,7 +122,7 @@
 
 2009-05-18  Jon Beniston <jon@beniston.com>
 
-        * sim-lm32.h: New file.
+	* sim-lm32.h: New file.
 
 2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
 
@@ -282,7 +289,7 @@ Wed Jul 17 19:36:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
-        * sim-sh.h: New file, for sh gdb<->sim interface.
+	* sim-sh.h: New file, for sh gdb<->sim interface.
 
 2002-05-09  Daniel Jacobowitz  <drow@mvista.com>
 

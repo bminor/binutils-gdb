@@ -235,8 +235,8 @@ save_current_program_space (void)
 
 /* Returns true iff there's no inferior bound to PSPACE.  */
 
-static int
-pspace_empty_p (struct program_space *pspace)
+int
+program_space_empty_p (struct program_space *pspace)
 {
   if (find_inferior_for_program_space (pspace) != NULL)
       return 0;
@@ -244,30 +244,31 @@ pspace_empty_p (struct program_space *pspace)
   return 1;
 }
 
-/* Prune away automatically added program spaces that aren't required
-   anymore.  */
+/* Remove a program space from the program spaces list and release it.  It is
+   an error to call this function while PSPACE is the current program space. */
 
 void
-prune_program_spaces (void)
+delete_program_space (struct program_space *pspace)
 {
   struct program_space *ss, **ss_link;
-  struct program_space *current = current_program_space;
+  gdb_assert (pspace != NULL);
+  gdb_assert (pspace != current_program_space);
 
   ss = program_spaces;
   ss_link = &program_spaces;
-  while (ss)
+  while (ss != NULL)
     {
-      if (ss == current || !pspace_empty_p (ss))
+      if (ss == pspace)
 	{
-	  ss_link = &ss->next;
-	  ss = *ss_link;
-	  continue;
+	  *ss_link = ss->next;
+	  break;
 	}
 
-      *ss_link = ss->next;
-      release_program_space (ss);
+      ss_link = &ss->next;
       ss = *ss_link;
     }
+
+  release_program_space (pspace);
 }
 
 /* Prints the list of program spaces and their details on UIOUT.  If

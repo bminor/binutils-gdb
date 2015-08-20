@@ -18,6 +18,11 @@ if [target_info exists gdb,nointerrupts] {
     continue
 }
 
+if [target_info exists gdb,noinferiorio] {
+    verbose "Skipping interrupt.exp because of noinferiorio."
+    return
+}
+
 standard_testfile
 
 set options { debug }
@@ -44,11 +49,6 @@ if ![file exists $binfile] then {
 	"set interrupt character in interrupt.exp"
     if [runto_main] then {
 	global inferior_spawn_id gdb_spawn_id
-
-	if {[target_info exists gdb,noinferiorio] && $inferior_spawn_id == $gdb_spawn_id} {
-	    verbose "Skipping interrupt.exp because of noinferiorio."
-	    return
-	}
 
 	set msg "process is alive"
 	gdb_test_multiple "continue" $msg {

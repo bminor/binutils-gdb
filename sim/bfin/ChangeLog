@@ -1,3 +1,64 @@
+2015-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (trace_register): Delete.
+	* sim-main.h (trace_register, TRACE_REGISTER, TRACE_REG): Delete.
+
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include sim-syscall.h.
+	(syscall_read_mem, syscall_write_mem): Delete.
+	(bfin_syscall): Change syscall_read_mem/syscall_write_mem to
+	sim_syscall_read_mem/sim_syscall_write_mem.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* linux-targ-map.h: Update example comments.
+	(cb_linux_syscall_map): Fill out name field.
+	(cb_linux_errno_map, cb_linux_open_map, cb_linux_signal_map):
+	Likewise.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Expand comment on CB_SYS_xxx defines.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-sim.c (hwloop_get_next_pc): Change TRACE_BRANCH to
+	BFIN_TRACE_BRANCH.
+	(decode_ProgCtrl_0, decode_BRCC_0, decode_UJUMP_0, decode_CALLa_0):
+	Likewise.
+	* bfin-sim.h (__PUT_MEM, __GET_MEM): Change TRACE_CORE to
+	BFIN_TRACE_CORE.
+	* dv-bfin_cec.c (_cec_raise, cec_latch, cec_return): Change
+	TRACE_BRANCH to BFIN_TRACE_BRANCH.
+	* interp.c (syscall_read_mem, syscall_write_mem): Change MAYBE_TRACE
+	to TRACE_CORE.
+	* sim-main.h (MAYBE_TRACE, TRACE_INSN, TRACE_DECODE, TRACE_EXTRACT,
+	TRACE_SYSCALL, TRACE_EVENTS): Delete.
+	(TRACE_CORE): Rename to ...
+	(BFIN_TRACE_CORE): ... this.  Change MAYBE_TRACE to TRACE_CORE.
+	(TRACE_BRANCH): Rename to ...
+	(BFIN_TRACE_BRANCH): ... this.  Change MAYBE_TRACE to TRACE_BRANCH.
+
+2015-04-24  David Binderman  <dcb314@hotmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 18273
+	* bfin-sim.c (decode_dsp32alu_0): Remove spurious check for
+	s == 1.
+
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_CPU): Add note to clean this up.

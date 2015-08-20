@@ -21,3 +21,5 @@ Disassembly of section \.text:
 			18: R_AARCH64_P32_LD32_GOT_LO12_NC	ptrs
   1c:	2a0403e0 	mov	w0, w4
   20:	d65f03c0 	ret
+  24:	f9400083 	ldr	x3, \[x4\]
+			24: R_AARCH64_P32_LD32_GOTPAGE_LO14	ptrs

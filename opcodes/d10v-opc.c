@@ -89,7 +89,7 @@ const struct pd_reg d10v_predefined_registers[] =
   { "sp", NULL, OPERAND_SP|(OPERAND_GPR+15) },
 };
 
-int 
+int
 d10v_reg_name_cnt (void)
 {
   return (sizeof(d10v_predefined_registers) / sizeof(struct pd_reg));

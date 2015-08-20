@@ -71,7 +71,7 @@ if ![runto_main] then {
 
 #step -over
 
-gdb_test "next" "g = shr1\\(g\\);" "next to shr1"
+gdb_test "next 2" "g = shr1\\(g\\);" "next to shr1"
 
 #print g
 
@@ -79,8 +79,9 @@ gdb_test "print g" "\[0-9\]* = 1" "print g"
 
 #step -over
 if ![gdb_skip_stdio_test "next over shr1"] {
-    gdb_test "next" \
-	"address of sgs is $hex.*g = shr2\\(g\\);" \
+    gdb_test_stdio "next" \
+	"address of sgs is $hex" \
+	"g = shr2\\(g\\);" \
 	"next over shr1"
 } else {
     gdb_test "next" ".*" ""
@@ -92,15 +93,17 @@ gdb_test "print g" "\[0-9\]* = 2" "print g"
 
 #print shr1(1)
 if ![gdb_skip_stdio_test "print shr1(1)"] {
-    gdb_test "print shr1(1)" \
-	"address of sgs is $hex.*\[0-9\]* = 2" \
+    gdb_test_stdio "print shr1(1)" \
+	"address of sgs is $hex" \
+	"\[0-9\]* = 2" \
 	"print shr1(1)"
 }
 
 #print shr1(g)
 if ![gdb_skip_stdio_test "print shr1(g)"] {
-    gdb_test "print shr1(g)" \
-	"address of sgs is $hex.*\[0-9\]* = 4" \
+    gdb_test_stdio "print shr1(g)" \
+	"address of sgs is $hex" \
+	"\[0-9\]* = 4" \
 	"print shr1(g)"
 }
 
@@ -117,8 +120,9 @@ gdb_test "continue" \
 
 #print shr1(1)
 if ![gdb_skip_stdio_test "print shr1(1) 2nd time"] {
-    gdb_test "print shr1(1)" \
-	"address of sgs is $hex.*\[0-9\]* = 2" \
+    gdb_test_stdio "print shr1(1)" \
+	"address of sgs is $hex" \
+	"\[0-9\]* = 2" \
 	"print shr1(1) 2nd time"
 }
 

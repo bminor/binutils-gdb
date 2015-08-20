@@ -697,8 +697,8 @@ class General_options
 
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
 	      N_("Compress .debug_* sections in the output file"),
-	      ("[none,zlib]"),
-	      {"none", "zlib"});
+	      ("[none,zlib,zlib-gnu,zlib-gabi]"),
+	      {"none", "zlib", "zlib-gnu", "zlib-gabi"});
 
   DEFINE_bool(copy_dt_needed_entries, options::TWO_DASHES, '\0', false,
 	      N_("Not supported"),
@@ -739,10 +739,12 @@ class General_options
 	      N_("Look for violations of the C++ One Definition Rule"),
 	      N_("Do not look for violations of the C++ One Definition Rule"));
 
-  DEFINE_bool(discard_all, options::TWO_DASHES, 'x', false,
-	      N_("Delete all local symbols"), NULL);
-  DEFINE_bool(discard_locals, options::TWO_DASHES, 'X', false,
-	      N_("Delete all temporary local symbols"), NULL);
+  DEFINE_special(discard_all, options::TWO_DASHES, 'x',
+		 N_("Delete all local symbols"), NULL);
+  DEFINE_special(discard_locals, options::TWO_DASHES, 'X',
+		 N_("Delete all temporary local symbols"), NULL);
+  DEFINE_special(discard_none, options::TWO_DASHES, '\0',
+		 N_("Keep all local symbols"), NULL);
 
   DEFINE_bool(dynamic_list_data, options::TWO_DASHES, '\0', false,
 	      N_("Add data symbols to dynamic symbols"), NULL);
@@ -802,9 +804,13 @@ class General_options
 	      N_("(ARM only) Fix binaries for Cortex-A8 erratum."),
 	      N_("(ARM only) Do not fix binaries for Cortex-A8 erratum."));
 
-  DEFINE_bool(fix_cortex_a53, options::TWO_DASHES, '\0', false,
-	      N_("(AArch64 only) Scan and fix binaries for Cortex-A53 errata."),
-	      N_("(AArch64 only) Do not scan for Cortex-A53 errata."));
+  DEFINE_bool(fix_cortex_a53_843419, options::TWO_DASHES, '\0', false,
+	      N_("(AArch64 only) Fix Cortex-A53 erratum 843419."),
+	      N_("(AArch64 only) Do not fix Cortex-A53 erratum 843419."));
+
+  DEFINE_bool(fix_cortex_a53_835769, options::TWO_DASHES, '\0', false,
+	      N_("(AArch64 only) Fix Cortex-A53 erratum 835769."),
+	      N_("(AArch64 only) Do not fix Cortex-A53 erratum 835769."));
 
   DEFINE_bool(fix_arm1176, options::TWO_DASHES, '\0', true,
 	      N_("(ARM only) Fix binaries for ARM1176 erratum."),
@@ -975,6 +981,10 @@ class General_options
 		    N_("Create a position independent executable"),
 		    N_("Do not create a position independent executable"),
 		    false);
+
+  DEFINE_bool(pic_veneer, options::TWO_DASHES, '\0', false,
+	      N_("Force PIC sequences for ARM/Thumb interworking veneers"),
+	      NULL);
 
   DEFINE_bool(pipeline_knowledge, options::ONE_DASH, '\0', false,
 	      NULL, N_("(ARM only) Ignore for backward compatibility"));
@@ -1525,10 +1535,35 @@ class General_options
   endianness() const
   { return this->endianness_; }
 
+  bool
+  discard_all() const
+  { return this->discard_locals_ == DISCARD_ALL; }
+
+  bool
+  discard_locals() const
+  { return this->discard_locals_ == DISCARD_LOCALS; }
+
+  bool
+  discard_sec_merge() const
+  { return this->discard_locals_ == DISCARD_SEC_MERGE; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
   General_options& operator=(const General_options&);
+
+  // What local symbols to discard.
+  enum Discard_locals
+  {
+    // Locals in merge sections (default).
+    DISCARD_SEC_MERGE,
+    // None (--discard-none).
+    DISCARD_NONE,
+    // Temporary locals (--discard-locals/-X).
+    DISCARD_LOCALS,
+    // All locals (--discard-all/-x).
+    DISCARD_ALL
+  };
 
   // Whether to mark the stack as executable.
   enum Execstack
@@ -1625,6 +1660,8 @@ class General_options
   Fix_v4bx fix_v4bx_;
   // Endianness.
   Endianness endianness_;
+  // What local symbols to discard.
+  Discard_locals discard_locals_;
 };
 
 // The position-dependent options.  We use this to store the state of

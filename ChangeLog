@@ -1,3 +1,114 @@
+2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-07-28  Ben Elliston  <bje@gnu.org>
+
+	* config.sub, config.guess: Import from upstream.
+
+2015-08-06  Yaakov Selkowitz  <yselkowi@redhat.com>
+
+	* Makefile.def (libiconv): Define bootstrap=true.
+	Mark pdf/html/info as missing.
+	(configure-gcc): Depend on all-libiconv.
+	(all-gcc): Ditto.
+	(configure-libcpp): Ditto.
+	(all-libcpp): Ditto.
+	(configure-intl): Ditto.
+	(all-intl): Ditto.
+	* Makefile.in: Regenerate.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-07-24  Michael Darling  <darlingm@gmail.com>
+
+	PR other/66259
+	* config-ml.in: Reflects renaming of configure.in to configure.ac
+	* configure: Likewise
+	* configure.ac: Likewise
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in: Regenerated.
+
+	Sync with GCC
+	2015-05-21  Jason Merrill  <jason@redhat.com>
+
+	* Makefile.tpl: Update comments.
+
+	2015-04-22  Bernhard Reutner-Fischer  <aldot@gcc.gnu.org>
+
+	* Makefile.tpl: Remove surplus whitespace throughout.
+
+	2015-03-25  Martin Liska  <mliska@suse.cz>
+		    Yury Gribov  <y.gribov@samsung.com>
+
+	* Makefile.tpl: Fix ln source location for vimrc file.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-05-16  James Bowman  <james.bowman@ftdichip.com>
+
+	* configure.ac: FT32 target added.
+	* configure: Regenerate.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-06-02  Jason Merrill  <jason@redhat.com>
+
+	PR bootstrap/66319
+	* configure.ac: Use -std=gnu++98.
+
+	2015-05-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (--vtable-verify): Use AS_HELP_STRING for help.
+	* configure: Regenerate.
+
+	2015-05-11  Paulo Matos  <paulo@matos-sorge.com>
+
+	* configure.ac: Fix typo.
+	* configure: Regenerate.
+
+	2015-05-03  Matthias Klose  <doko@ubuntu.com>
+
+	* configure.ac: Match $host configured with triplets.
+	* configure: Regenerate.
+
+	2015-04-17  Jakub Jelinek  <jakub@redhat.com>
+
+	PR bootstrap/62077
+	* configure.ac (--enable-stage1-checking): Default to
+	release,misc,gimple,rtlflag,tree,types if --disable-checking
+	or --enable-checking is not specified and DEV-PHASE is not
+	experimental.
+	* configure: Regenerated.
+
+	2015-03-27  Uros Bizjak  <ubizjak@gmail.com>
+
+	Install back PR target/47230 fix (Revert the revert).
+
+2015-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (ospace_frag): Enable for i?86*-*-elfiamcu
+	target.
+	* configure: Regenerate.
+
+2015-05-13  John David Anglin  <dave.anglin@bell.net>
+
+	* configure.ac: Disable configuration of GDB for HPUX targets.
+	* configure: Regenerate.
+
+2015-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18355
+	* Makefile.def: Add extra_configure_flags to host zlib.
+	* configure.ac (extra_host_zlib_configure_flags): New.  Set
+	to --enable-host-shared When bfd is to be built as shared
+	library.  AC_SUBST.
+	* Makefile.in: Regenerated.
+
 2015-04-15  Mike Frysinger  <vapier@gentoo.org>
 	    Hans-Peter Nilsson  <hp@axis.com>
 
@@ -6,6 +117,13 @@
 	use that in the getver call instead of $tool.
 	(sim_release): Pass gdb as fifth parameter to tar_compress.
 	(SIM_SUPPORT_DIRS): Add gdb/common/create-version.sh.
+
+2015-04-14  Max Ostapenko  <m.ostapenko@partner.samsung.com>
+
+	* Makefile.tpl (EXTRA_HOST_EXPORTS): New variables.
+	(EXTRA_BOOTSTRAP_FLAGS): Likewise.
+	(check-[+module+]): Add EXTRA_HOST_EXPORTS and EXTRA_BOOTSTRAP_FLAGS.
+	* Makefile.in: Regenerate.
 
 2015-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -203,7 +321,7 @@
 2014-04-04  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR bootstrap/60620
-	* Makefile.def (dependencies): Make gnattools depend on libstdc++-v3. 
+	* Makefile.def (dependencies): Make gnattools depend on libstdc++-v3.
 	* Makefile.in: Regenerate.
 
 2014-03-28  Yaakov Selkowitz  <yselkowitz@users.sourceforge.net>

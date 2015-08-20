@@ -4956,6 +4956,8 @@ ENUMX
   BFD_RELOC_RL78_LO16
 ENUMX
   BFD_RELOC_RL78_CODE
+ENUMX
+  BFD_RELOC_RL78_SADDR
 ENUMDOC
   Renesas RL78 Relocations.
 
@@ -6230,6 +6232,32 @@ ENUMX
   BFD_RELOC_NIOS2_CALL_LO
 ENUMX
   BFD_RELOC_NIOS2_CALL_HA
+ENUMX
+  BFD_RELOC_NIOS2_R2_S12
+ENUMX
+  BFD_RELOC_NIOS2_R2_I10_1_PCREL
+ENUMX
+  BFD_RELOC_NIOS2_R2_T1I7_1_PCREL
+ENUMX
+  BFD_RELOC_NIOS2_R2_T1I7_2
+ENUMX
+  BFD_RELOC_NIOS2_R2_T2I4
+ENUMX
+  BFD_RELOC_NIOS2_R2_T2I4_1
+ENUMX
+  BFD_RELOC_NIOS2_R2_T2I4_2
+ENUMX
+  BFD_RELOC_NIOS2_R2_X1I7_2
+ENUMX
+  BFD_RELOC_NIOS2_R2_X2L5
+ENUMX
+  BFD_RELOC_NIOS2_R2_F1I5_2
+ENUMX
+  BFD_RELOC_NIOS2_R2_L5I4X1
+ENUMX
+  BFD_RELOC_NIOS2_R2_T1X1I6
+ENUMX
+  BFD_RELOC_NIOS2_R2_T1X1I6_2
 ENUMDOC
   Relocations used by the Altera Nios II core.
 
@@ -6762,6 +6790,19 @@ ENUMDOC
   the GOT entry for this symbol.  Used in conjunction with
   BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in ILP32 ABI only.
 ENUM
+  BFD_RELOC_AARCH64_LD64_GOTOFF_LO15
+ENUMDOC
+  Unsigned 15 bit byte offset for 64 bit load/store from the page of
+  the GOT entry for this symbol. Valid in ILP64 ABI only.
+ENUM
+  BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14
+ENUMDOC
+  Scaled 14 bit byte offset to the page base of the global offset table.
+ENUM
+  BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
+ENUMDOC
+  Scaled 15 bit byte offset to the page base of the global offset table.
+ENUM
   BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21
 ENUMDOC
   Get to the page base of the global offset table entry for a symbols
@@ -6802,6 +6843,89 @@ ENUM
   BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19
 ENUMDOC
   AArch64 TLS INITIAL EXEC relocation.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12
+ENUMDOC
+  bit[23:12] of byte offset to module TLS base address.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12
+ENUMDOC
+  Unsigned 12 bit byte offset to module TLS base address.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC
+ENUMDOC
+  No overflow check version of BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC
+ENUMDOC
+  Unsigned 12 bit byte offset to global offset table entry for a symbols
+  tls_index structure.  Used in conjunction with
+  BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21
+ENUMDOC
+  GOT entry page address for AArch64 TLS Local Dynamic, used with ADRP
+  instruction.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_ADR_PREL21
+ENUMDOC
+  GOT entry address for AArch64 TLS Local Dynamic, used with ADR instruction.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12
+ENUMDOC
+  bit[11:1] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12
+ENUMDOC
+  bit[11:2] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12
+ENUMDOC
+  bit[11:3] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12
+ENUMDOC
+  bit[11:0] of byte offset to module TLS base address, encoded in ldst
+  instructions.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12, but no overflow check.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0
+ENUMDOC
+  bit[15:0] of byte offset to module TLS base address.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC
+ENUMDOC
+  No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1
+ENUMDOC
+  bit[31:16] of byte offset to module TLS base address.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC
+ENUMDOC
+  No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2
+ENUMDOC
+  bit[47:32] of byte offset to module TLS base address.
 ENUM
   BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2
 ENUMDOC
@@ -6933,6 +7057,16 @@ ENUMDOC
   AArch64 unspecified load/store instruction, holding bits 0 to 11 of the
   address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.
 ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12
+ENUMDOC
+  AArch64 pseudo relocation code for TLS local dynamic mode.  It's to be
+  used internally by the AArch64 assembler and not (currently) written to
+  any object files.
+ENUM
+  BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC
+ENUMDOC
+  Similar as BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12, but no overflow check.
+ENUM
   BFD_RELOC_AARCH64_LD_GOT_LO12_NC
 ENUMDOC
   AArch64 pseudo relocation code to be used internally by the AArch64
@@ -6947,7 +7081,6 @@ ENUM
 ENUMDOC
   AArch64 pseudo relocation code to be used internally by the AArch64
   assembler and not (currently) written to any object files.
-
 ENUM
   BFD_RELOC_TILEPRO_COPY
 ENUMX
@@ -7495,7 +7628,7 @@ bfd_generic_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			   bfd_boolean *again)
 {
-  if (link_info->relocatable)
+  if (bfd_link_relocatable (link_info))
     (*link_info->callbacks->einfo)
       (_("%P%F: --relax and -r may not be used together\n"));
 

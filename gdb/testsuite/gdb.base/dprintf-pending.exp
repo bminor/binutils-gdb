@@ -41,14 +41,8 @@ with_test_prefix "without format" {
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
 
-    gdb_test \
-	"dprintf pendfunc" \
-	"Dprintf.*pendfunc.*pending." \
-	"set pending dprintf" \
-	".*Make dprintf pending.*y or \\\[n\\\]. $" \
-	"y"
-
-    gdb_test "file ${binfile}" ".*Error in re-setting breakpoint.*" "resolved dprintf fails to be re-set"
+    gdb_test "dprintf pendfunc" "Format string required" "missing ,FMT"
+    gdb_test "dprintf pendfunc," "Format string required" "missing FMT"
 }
 
 with_test_prefix "without symbols" {

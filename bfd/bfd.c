@@ -51,6 +51,12 @@ CODE_FRAGMENT
 .    bfd_plugin_no = 2
 .  };
 .
+.struct bfd_build_id
+.  {
+.    bfd_size_type size;
+.    bfd_byte data[1];
+.  };
+.
 .struct bfd
 .{
 .  {* The filename the application opened the BFD with.  *}
@@ -335,6 +341,9 @@ CODE_FRAGMENT
 .     struct objalloc *, but we use void * to avoid requiring the inclusion
 .     of objalloc.h.  *}
 .  void *memory;
+.
+.  {* For input BFDs, the build ID, if the object has one. *}
+.  const struct bfd_build_id *build_id;
 .};
 .
 .{* See note beside bfd_set_section_userdata.  *}
@@ -1081,11 +1090,11 @@ _bfd_abort (const char *file, int line, const char *fn)
 {
   if (fn != NULL)
     (*_bfd_error_handler)
-      (_("BFD %s internal error, aborting at %s line %d in %s\n"),
+      (_("BFD %s internal error, aborting at %s:%d in %s\n"),
        BFD_VERSION_STRING, file, line, fn);
   else
     (*_bfd_error_handler)
-      (_("BFD %s internal error, aborting at %s line %d\n"),
+      (_("BFD %s internal error, aborting at %s:%d\n"),
        BFD_VERSION_STRING, file, line);
   (*_bfd_error_handler) (_("Please report this bug.\n"));
   _exit (EXIT_FAILURE);
@@ -1998,8 +2007,16 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 		}
 	    }
 	  else
-	    /* Clear the SHF_COMPRESSED bit.  */
-	    elf_section_flags (sec) &= ~SHF_COMPRESSED;
+	    {
+	      /* Clear the SHF_COMPRESSED bit.  */
+	      elf_section_flags (sec) &= ~SHF_COMPRESSED;
+
+	      /* Write the zlib header.  It should be "ZLIB" followed by
+		 the uncompressed section size, 8 bytes in big-endian
+		 order.  */
+	      memcpy (contents, "ZLIB", 4);
+	      bfd_putb64 (sec->size, contents + 4);
+	    }
 	}
     }
   else
@@ -2013,11 +2030,12 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
    SYNOPSIS
 	bfd_boolean bfd_check_compression_header
 	  (bfd *abfd, bfd_byte *contents, asection *sec,
-	   bfd_size_type uncompressed_size);
+	  bfd_size_type *uncompressed_size);
 
 DESCRIPTION
-	Check the compression header at CONTENTS of SEC in ABFD with
-	the uncompressed size UNCOMPRESSED_SIZE.
+	Check the compression header at CONTENTS of SEC in ABFD and
+	store the uncompressed size in UNCOMPRESSED_SIZE if the
+	compression header is valid.
 
 RETURNS
 	Return TRUE if the compression header is valid.
@@ -2026,7 +2044,7 @@ RETURNS
 bfd_boolean
 bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
 			      asection *sec,
-			      bfd_size_type uncompressed_size)
+			      bfd_size_type *uncompressed_size)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
       && (elf_section_flags (sec) & SHF_COMPRESSED) != 0)
@@ -2047,9 +2065,12 @@ bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
 	  chdr.ch_size = bfd_get_64 (abfd, &echdr->ch_size);
 	  chdr.ch_addralign = bfd_get_64 (abfd, &echdr->ch_addralign);
 	}
-      return (chdr.ch_type == ELFCOMPRESS_ZLIB
-	      && chdr.ch_size == uncompressed_size
-	      && chdr.ch_addralign == 1U << sec->alignment_power);
+      if (chdr.ch_type == ELFCOMPRESS_ZLIB
+	  && chdr.ch_addralign == 1U << sec->alignment_power)
+	{
+	  *uncompressed_size = chdr.ch_size;
+	  return TRUE;
+	}
     }
 
   return FALSE;
@@ -2089,4 +2110,159 @@ bfd_get_compression_header_size (bfd *abfd, asection *sec)
     }
 
   return 0;
+}
+
+/*
+FUNCTION
+	bfd_convert_section_size
+
+SYNOPSIS
+	bfd_size_type bfd_convert_section_size
+	  (bfd *ibfd, asection *isec, bfd *obfd, bfd_size_type size);
+
+DESCRIPTION
+	Convert the size @var{size} of the section @var{isec} in input
+	BFD @var{ibfd} to the section size in output BFD @var{obfd}.
+*/
+
+bfd_size_type
+bfd_convert_section_size (bfd *ibfd, sec_ptr isec, bfd *obfd,
+			  bfd_size_type size)
+{
+  bfd_size_type hdr_size;
+
+  /* Do nothing if input file will be decompressed.  */
+  if ((ibfd->flags & BFD_DECOMPRESS))
+    return size;
+
+  /* Do nothing if either input or output aren't ELF.  */
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return size;
+
+  /* Do nothing if ELF classes of input and output are the same. */
+  if (get_elf_backend_data (ibfd)->s->elfclass
+      == get_elf_backend_data (obfd)->s->elfclass)
+    return size;
+
+  /* Do nothing if the input section isn't a SHF_COMPRESSED section. */
+  hdr_size = bfd_get_compression_header_size (ibfd, isec);
+  if (hdr_size == 0)
+    return size;
+
+  /* Adjust the size of the output SHF_COMPRESSED section.  */
+  if (hdr_size == sizeof (Elf32_External_Chdr))
+    return (size - sizeof (Elf32_External_Chdr)
+	    + sizeof (Elf64_External_Chdr));
+  else
+    return (size - sizeof (Elf64_External_Chdr)
+	    + sizeof (Elf32_External_Chdr));
+}
+
+/*
+FUNCTION
+	bfd_convert_section_contents
+
+SYNOPSIS
+	bfd_boolean bfd_convert_section_contents
+	  (bfd *ibfd, asection *isec, bfd *obfd, bfd_byte **ptr);
+
+DESCRIPTION
+	Convert the contents, stored in @var{*ptr}, of the section
+	@var{isec} in input BFD @var{ibfd} to output BFD @var{obfd}
+	if needed.  The original buffer pointed to by @var{*ptr} may
+	be freed and @var{*ptr} is returned with memory malloc'd by this
+	function.
+*/
+
+bfd_boolean
+bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
+			      bfd_byte **ptr)
+{
+  bfd_byte *contents;
+  bfd_size_type ihdr_size, ohdr_size, size;
+  Elf_Internal_Chdr chdr;
+  bfd_boolean use_memmove;
+
+  /* Do nothing if input file will be decompressed.  */
+  if ((ibfd->flags & BFD_DECOMPRESS))
+    return TRUE;
+
+  /* Do nothing if either input or output aren't ELF.  */
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return TRUE;
+
+  /* Do nothing if ELF classes of input and output are the same. */
+  if (get_elf_backend_data (ibfd)->s->elfclass
+      == get_elf_backend_data (obfd)->s->elfclass)
+    return TRUE;
+
+  /* Do nothing if the input section isn't a SHF_COMPRESSED section. */
+  ihdr_size = bfd_get_compression_header_size (ibfd, isec);
+  if (ihdr_size == 0)
+    return TRUE;
+
+  contents = *ptr;
+
+  /* Convert the contents of the input SHF_COMPRESSED section to
+     output.  Get the input compression header and the size of the
+     output compression header.  */
+  if (ihdr_size == sizeof (Elf32_External_Chdr))
+    {
+      Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) contents;
+      chdr.ch_type = bfd_get_32 (ibfd, &echdr->ch_type);
+      chdr.ch_size = bfd_get_32 (ibfd, &echdr->ch_size);
+      chdr.ch_addralign = bfd_get_32 (ibfd, &echdr->ch_addralign);
+
+      ohdr_size = sizeof (Elf64_External_Chdr);
+
+      use_memmove = FALSE;
+    }
+  else
+    {
+      Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
+      chdr.ch_type = bfd_get_64 (ibfd, &echdr->ch_type);
+      chdr.ch_size = bfd_get_64 (ibfd, &echdr->ch_size);
+      chdr.ch_addralign = bfd_get_64 (ibfd, &echdr->ch_addralign);
+
+      ohdr_size = sizeof (Elf32_External_Chdr);
+      use_memmove = TRUE;
+    }
+
+  size = bfd_get_section_size (isec) - ihdr_size + ohdr_size;
+  if (!use_memmove)
+    {
+      contents = (bfd_byte *) bfd_malloc (size);
+      if (contents == NULL)
+	return FALSE;
+    }
+
+  /* Write out the output compression header.  */
+  if (ohdr_size == sizeof (Elf32_External_Chdr))
+    {
+      Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) contents;
+      bfd_put_32 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+      bfd_put_32 (obfd, chdr.ch_size, &echdr->ch_size);
+      bfd_put_32 (obfd, chdr.ch_addralign, &echdr->ch_addralign);
+    }
+  else
+    {
+      Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
+      bfd_put_64 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+      bfd_put_64 (obfd, chdr.ch_size, &echdr->ch_size);
+      bfd_put_64 (obfd, chdr.ch_addralign, &echdr->ch_addralign);
+    }
+
+  /* Copy the compressed contents.  */
+  if (use_memmove)
+    memmove (contents + ohdr_size, *ptr + ihdr_size, size - ohdr_size);
+  else
+    {
+      memcpy (contents + ohdr_size, *ptr + ihdr_size, size - ohdr_size);
+      free (*ptr);
+      *ptr = contents;
+    }
+
+  return TRUE;
 }

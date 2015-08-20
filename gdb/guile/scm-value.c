@@ -581,7 +581,7 @@ gdbscm_value_dynamic_type (SCM self)
 	= make_cleanup_value_free_to_mark (value_mark ());
 
       type = value_type (value);
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
 
       if (((TYPE_CODE (type) == TYPE_CODE_PTR)
 	   || (TYPE_CODE (type) == TYPE_CODE_REF))
@@ -906,7 +906,7 @@ gdbscm_value_to_bytevector (SCM self)
 
   TRY
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
       length = TYPE_LENGTH (type);
       contents = value_contents (value);
     }
@@ -950,7 +950,7 @@ gdbscm_value_to_bool (SCM self)
 
   TRY
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -993,7 +993,7 @@ gdbscm_value_to_integer (SCM self)
 
   TRY
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1039,7 +1039,7 @@ gdbscm_value_to_real (SCM self)
 
   TRY
     {
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

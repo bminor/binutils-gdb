@@ -282,6 +282,7 @@ ALL_EMULATION_SOURCES = \
 	eelf_i386_nacl.c \
 	eelf_i386_sol2.c \
 	eelf_i386_vxworks.c \
+	eelf_iamcu.c \
 	eelf_s390.c \
 	egld960.c \
 	egld960coff.c \
@@ -351,7 +352,7 @@ ALL_EMULATION_SOURCES = \
 	emcorepe.c \
 	emn10200.c \
 	emn10300.c \
-	emsp430.c \
+	emsp430elf.c \
 	emsp430X.c \
 	ends32elf.c \
 	ends32elf16m.c \
@@ -1182,10 +1183,10 @@ eelf32mt.c: $(srcdir)/emulparams/elf32mt.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32or1k.c: $(srcdir)/emulparams/elf32or1k.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32or1k_linux.c: $(srcdir)/emulparams/elf32or1k_linux.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emulparams/elf32ppccommon.sh \
@@ -1294,6 +1295,9 @@ eelf_i386_sol2.c: $(srcdir)/emulparams/elf_i386_sol2.sh \
 
 eelf_i386_vxworks.c: $(srcdir)/emulparams/elf_i386_vxworks.sh \
   $(srcdir)/emulparams/vxworks.sh $(srcdir)/emultempl/vxworks.em \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+eelf_iamcu.c: $(srcdir)/emulparams/elf_iamcu.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_s390.c: $(srcdir)/emulparams/elf_s390.sh \
@@ -1528,10 +1532,12 @@ emn10300.c: $(srcdir)/emulparams/mn10300.sh \
   $(srcdir)/emulparams/mn10200.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
-emsp430.c: $(srcdir)/emulparams/msp430.sh \
+emsp430elf.c: $(srcdir)/emulparams/msp430elf.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/msp430.em \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc ${GEN_DEPENDS}
 
-emsp430X.c: $(srcdir)/emulparams/msp430.sh $(srcdir)/emulparams/msp430X.sh \
+emsp430X.c: $(srcdir)/emulparams/msp430elf.sh $(srcdir)/emulparams/msp430X.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/msp430.em \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc ${GEN_DEPENDS}
 
 ends32elf.c: $(srcdir)/emulparams/nds32elf.sh \

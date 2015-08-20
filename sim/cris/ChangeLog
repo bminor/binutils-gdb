@@ -1,3 +1,37 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c: Include sim-syscall.h.
+	(syscall_read_mem, syscall_write_mem): Delete.
+	(cris_break_13_handler): Change syscall_read_mem/syscall_write_mem
+	to sim_syscall_read_mem/sim_syscall_write_mem.
+
+2015-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c (syscall_map): Fill out name field.
+	(syscall_stat32_map, errno_map, open_map): Likewise.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* decodev10.c (crisv10f_decode): Change TRACE_EXTRACT to
+	CGEN_TRACE_EXTRACT.
+	* decodev32.c (crisv32f_decode): Likewise.
+	* mloop.in (execute): Change TRACE_INSN_INIT to CGEN_TRACE_INSN_INIT,
+	TRACE_INSN to CGEN_TRACE_INSN, and TRACE_INSN_FINI to CGEN_TRACE_INSN_FINI.
+	* semcrisv10f-switch.c: Change TRACE_RESULT to CGEN_TRACE_RESULT.
+	* semcrisv32f-switch.c: Likewise.
+
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_ENGINE_HALT_HOOK, SIM_ENGINE_RESTART_HOOK): Delete.

@@ -362,7 +362,6 @@ interp_exec (struct interp *interp, const char *command_str)
 void
 clear_interpreter_hooks (void)
 {
-  deprecated_init_ui_hook = 0;
   deprecated_print_frame_info_listing_hook = 0;
   /*print_frame_more_info_hook = 0; */
   deprecated_query_hook = 0;
@@ -371,7 +370,6 @@ clear_interpreter_hooks (void)
   deprecated_readline_begin_hook = 0;
   deprecated_readline_hook = 0;
   deprecated_readline_end_hook = 0;
-  deprecated_register_changed_hook = 0;
   deprecated_context_hook = 0;
   deprecated_target_wait_hook = 0;
   deprecated_call_command_hook = 0;

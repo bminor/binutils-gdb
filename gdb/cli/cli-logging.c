@@ -177,7 +177,9 @@ pop_output_files (void)
   saved_output.targ = NULL;
   saved_output.targerr = NULL;
 
-  ui_out_redirect (current_uiout, NULL);
+  /* Stay consistent with handle_redirections.  */
+  if (!ui_out_is_mi_like_p (current_uiout))
+    ui_out_redirect (current_uiout, NULL);
 }
 
 /* This is a helper for the `set logging' command.  */

@@ -54,14 +54,16 @@ static procfs_run run;
 static ptid_t do_attach (ptid_t ptid);
 
 static int procfs_can_use_hw_breakpoint (struct target_ops *self,
-					 int, int, int);
+					 enum target_hw_bp_type, int, int);
 
 static int procfs_insert_hw_watchpoint (struct target_ops *self,
-					CORE_ADDR addr, int len, int type,
+					CORE_ADDR addr, int len,
+					enum target_hw_bp_type type,
 					struct expression *cond);
 
 static int procfs_remove_hw_watchpoint (struct target_ops *self,
-					CORE_ADDR addr, int len, int type,
+					CORE_ADDR addr, int len,
+					enum target_hw_bp_type type,
 					struct expression *cond);
 
 static int procfs_stopped_by_watchpoint (struct target_ops *ops);
@@ -692,20 +694,20 @@ Give up (and stop debugging it)? ")))
 
 /* The user typed ^C twice.  */
 static void
-nto_interrupt_twice (int signo)
+nto_handle_sigint_twice (int signo)
 {
   signal (signo, ofunc);
   interrupt_query ();
-  signal (signo, nto_interrupt_twice);
+  signal (signo, nto_handle_sigint_twice);
 }
 
 static void
-nto_interrupt (int signo)
+nto_handle_sigint (int signo)
 {
   /* If this doesn't work, try more severe steps.  */
-  signal (signo, nto_interrupt_twice);
+  signal (signo, nto_handle_sigint_twice);
 
-  target_stop (inferior_ptid);
+  target_interrupt (inferior_ptid);
 }
 
 static ptid_t
@@ -733,7 +735,7 @@ procfs_wait (struct target_ops *ops,
   devctl (ctl_fd, DCMD_PROC_STATUS, &status, sizeof (status), 0);
   while (!(status.flags & _DEBUG_FLAG_ISTOP))
     {
-      ofunc = (void (*)()) signal (SIGINT, nto_interrupt);
+      ofunc = (void (*)()) signal (SIGINT, nto_handle_sigint);
       sigwaitinfo (&set, &info);
       signal (SIGINT, ofunc);
       devctl (ctl_fd, DCMD_PROC_STATUS, &status, sizeof (status), 0);
@@ -1221,7 +1223,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
 }
 
 static void
-procfs_stop (struct target_ops *self, ptid_t ptid)
+procfs_interrupt (struct target_ops *self, ptid_t ptid)
 {
   devctl (ctl_fd, DCMD_PROC_STOP, NULL, 0, 0);
 }
@@ -1444,7 +1446,7 @@ init_procfs_targets (void)
   t->to_thread_alive = procfs_thread_alive;
   t->to_update_thread_list = procfs_update_thread_list;
   t->to_pid_to_str = procfs_pid_to_str;
-  t->to_stop = procfs_stop;
+  t->to_interrupt = procfs_interrupt;
   t->to_have_continuable_watchpoint = 1;
   t->to_extra_thread_info = nto_extra_thread_info;
 
@@ -1494,16 +1496,16 @@ _initialize_procfs (void)
 
 
 static int
-procfs_hw_watchpoint (int addr, int len, int type)
+procfs_hw_watchpoint (int addr, int len, enum target_hw_bp_type type)
 {
   procfs_break brk;
 
   switch (type)
     {
-    case 1:			/* Read.  */
+    case hw_read:
       brk.type = _DEBUG_BREAK_RD;
       break;
-    case 2:			/* Read/Write.  */
+    case hw_access:
       brk.type = _DEBUG_BREAK_RW;
       break;
     default:			/* Modify.  */
@@ -1525,14 +1527,16 @@ procfs_hw_watchpoint (int addr, int len, int type)
 
 static int
 procfs_can_use_hw_breakpoint (struct target_ops *self,
-			      int type, int cnt, int othertype)
+			      enum bptype type,
+			      int cnt, int othertype)
 {
   return 1;
 }
 
 static int
 procfs_remove_hw_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len, int type,
+			     CORE_ADDR addr, int len,
+			     enum target_hw_bp_type type,
 			     struct expression *cond)
 {
   return procfs_hw_watchpoint (addr, -1, type);
@@ -1540,7 +1544,8 @@ procfs_remove_hw_watchpoint (struct target_ops *self,
 
 static int
 procfs_insert_hw_watchpoint (struct target_ops *self,
-			     CORE_ADDR addr, int len, int type,
+			     CORE_ADDR addr, int len,
+			     enum target_hw_bp_type type,
 			     struct expression *cond)
 {
   return procfs_hw_watchpoint (addr, len, type);

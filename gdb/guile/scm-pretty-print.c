@@ -971,7 +971,7 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   struct value *value;
   enum display_hint hint;
   struct cleanup *cleanups;
-  int result = EXT_LANG_RC_NOP;
+  enum ext_lang_rc result = EXT_LANG_RC_NOP;
   enum string_repr_result print_result;
 
   /* No pretty-printer support for unavailable values.  */

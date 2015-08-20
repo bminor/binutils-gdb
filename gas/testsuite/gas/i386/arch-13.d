@@ -1,4 +1,4 @@
-#as: -march=i686+smap+adx+rdseed+clzero+xsavec+xsaves+clflushopt
+#as: -march=i686+smap+adx+rdseed+clzero+xsavec+xsaves+clflushopt+mwaitx
 #objdump: -dw
 #name: i386 arch 13
 
@@ -16,4 +16,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f c7 21             	xsavec \(%ecx\)
 [ 	]*[a-f0-9]+:	0f c7 29             	xsaves \(%ecx\)
 [ 	]*[a-f0-9]+:	66 0f ae 39          	clflushopt \(%ecx\)
+[ 	]*[a-f0-9]+:	0f 01 fa             	monitorx %eax,%ecx,%edx
+[ 	]*[a-f0-9]+:	67 0f 01 fa          	monitorx %ax,%ecx,%edx
+[ 	]*[a-f0-9]+:	0f 01 fa             	monitorx %eax,%ecx,%edx
+[ 	]*[a-f0-9]+:	0f 01 fb             	mwaitx %eax,%ecx,%ebx
+[ 	]*[a-f0-9]+:	0f 01 fb             	mwaitx %eax,%ecx,%ebx
 #pass

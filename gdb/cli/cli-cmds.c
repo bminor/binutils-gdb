@@ -38,6 +38,7 @@
 #include "disasm.h"
 #include "tracepoint.h"
 #include "filestuff.h"
+#include "location.h"
 
 #include "ui-out.h"
 
@@ -782,7 +783,6 @@ edit_command (char *arg, int from_tty)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct symbol *sym;
-  char *arg1;
   char *editor;
   char *p;
   const char *fn;
@@ -804,21 +804,28 @@ edit_command (char *arg, int from_tty)
     }
   else
     {
-      /* Now should only be one argument -- decode it in SAL.  */
+      struct cleanup *cleanup;
+      struct event_location *location;
+      char *arg1;
 
+      /* Now should only be one argument -- decode it in SAL.  */
       arg1 = arg;
-      sals = decode_line_1 (&arg1, DECODE_LINE_LIST_MODE, 0, 0);
+      location = string_to_event_location (&arg1, current_language);
+      cleanup = make_cleanup_delete_event_location (location);
+      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
 
       filter_sals (&sals);
       if (! sals.nelts)
 	{
 	  /*  C++  */
+	  do_cleanups (cleanup);
 	  return;
 	}
       if (sals.nelts > 1)
 	{
 	  ambiguous_line_spec (&sals);
 	  xfree (sals.sals);
+	  do_cleanups (cleanup);
 	  return;
 	}
 
@@ -860,6 +867,7 @@ edit_command (char *arg, int from_tty)
 
       if (sal.symtab == 0)
         error (_("No line number known for %s."), arg);
+      do_cleanups (cleanup);
     }
 
   if ((editor = (char *) getenv ("EDITOR")) == NULL)
@@ -888,6 +896,9 @@ list_command (char *arg, int from_tty)
   int dummy_beg = 0;
   int linenum_beg = 0;
   char *p;
+  struct cleanup *cleanup;
+
+  cleanup = make_cleanup (null_cleanup, NULL);
 
   /* Pull in the current default source line if necessary.  */
   if (arg == 0 || arg[0] == '+' || arg[0] == '-')
@@ -951,15 +962,24 @@ list_command (char *arg, int from_tty)
     dummy_beg = 1;
   else
     {
-      sals = decode_line_1 (&arg1, DECODE_LINE_LIST_MODE, 0, 0);
+      struct event_location *location;
+
+      location = string_to_event_location (&arg1, current_language);
+      make_cleanup_delete_event_location (location);
+      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
 
       filter_sals (&sals);
       if (!sals.nelts)
-	return;			/*  C++  */
+	{
+	  /*  C++  */
+	  do_cleanups (cleanup);
+	  return;
+	}
       if (sals.nelts > 1)
 	{
 	  ambiguous_line_spec (&sals);
 	  xfree (sals.sals);
+	  do_cleanups (cleanup);
 	  return;
 	}
 
@@ -984,18 +1004,28 @@ list_command (char *arg, int from_tty)
 	dummy_end = 1;
       else
 	{
+	  struct event_location *location;
+
+	  location = string_to_event_location (&arg1, current_language);
+	  make_cleanup_delete_event_location (location);
 	  if (dummy_beg)
-	    sals_end = decode_line_1 (&arg1, DECODE_LINE_LIST_MODE, 0, 0);
+	    sals_end = decode_line_1 (location,
+				      DECODE_LINE_LIST_MODE, 0, 0);
 	  else
-	    sals_end = decode_line_1 (&arg1, DECODE_LINE_LIST_MODE,
+	    sals_end = decode_line_1 (location, DECODE_LINE_LIST_MODE,
 				      sal.symtab, sal.line);
+
 	  filter_sals (&sals_end);
 	  if (sals_end.nelts == 0)
-	    return;
+	    {
+	      do_cleanups (cleanup);
+	      return;
+	    }
 	  if (sals_end.nelts > 1)
 	    {
 	      ambiguous_line_spec (&sals_end);
 	      xfree (sals_end.sals);
+	      do_cleanups (cleanup);
 	      return;
 	    }
 	  sal_end = sals_end.sals[0];
@@ -1076,6 +1106,7 @@ list_command (char *arg, int from_tty)
 			 ? sal.line + get_lines_to_list ()
 			 : sal_end.line + 1),
 			0);
+  do_cleanups (cleanup);
 }
 
 /* Subroutine of disassemble_command to simplify it.
@@ -1144,16 +1175,26 @@ disassemble_current_function (int flags)
 /* Dump a specified section of assembly code.
 
    Usage:
-     disassemble [/mr]
+     disassemble [/mrs]
        - dump the assembly code for the function of the current pc
-     disassemble [/mr] addr
+     disassemble [/mrs] addr
        - dump the assembly code for the function at ADDR
-     disassemble [/mr] low,high
-     disassemble [/mr] low,+length
+     disassemble [/mrs] low,high
+     disassemble [/mrs] low,+length
        - dump the assembly code in the range [LOW,HIGH), or [LOW,LOW+length)
 
-   A /m modifier will include source code with the assembly.
-   A /r modifier will include raw instructions in hex with the assembly.  */
+   A /m modifier will include source code with the assembly in a
+   "source centric" view.  This view lists only the file of the first insn,
+   even if other source files are involved (e.g., inlined functions), and
+   the output is in source order, even with optimized code.  This view is
+   considered deprecated as it hasn't been useful in practice.
+
+   A /r modifier will include raw instructions in hex with the assembly.
+
+   A /s modifier will include source code with the assembly, like /m, with
+   two important differences:
+   1) The output is still in pc address order.
+   2) File names and contents for all relevant source files are displayed.  */
 
 static void
 disassemble_command (char *arg, int from_tty)
@@ -1181,10 +1222,13 @@ disassemble_command (char *arg, int from_tty)
 	  switch (*p++)
 	    {
 	    case 'm':
-	      flags |= DISASSEMBLY_SOURCE;
+	      flags |= DISASSEMBLY_SOURCE_DEPRECATED;
 	      break;
 	    case 'r':
 	      flags |= DISASSEMBLY_RAW_INSN;
+	      break;
+	    case 's':
+	      flags |= DISASSEMBLY_SOURCE;
 	      break;
 	    default:
 	      error (_("Invalid disassembly modifier."));
@@ -1193,6 +1237,10 @@ disassemble_command (char *arg, int from_tty)
 
       p = skip_spaces_const (p);
     }
+
+  if ((flags & (DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_SOURCE))
+      == (DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_SOURCE))
+    error (_("Cannot specify both /m and /s."));
 
   if (! p || ! *p)
     {
@@ -1854,8 +1902,21 @@ the other arg."));
   c = add_com ("disassemble", class_vars, disassemble_command, _("\
 Disassemble a specified section of memory.\n\
 Default is the function surrounding the pc of the selected frame.\n\
+\n\
 With a /m modifier, source lines are included (if available).\n\
+This view is \"source centric\": the output is in source line order,\n\
+regardless of any optimization that is present.  Only the main source file\n\
+is displayed, not those of, e.g., any inlined functions.\n\
+This modifier hasn't proved useful in practice and is deprecated\n\
+in favor of /s.\n\
+\n\
+With a /s modifier, source lines are included (if available).\n\
+This differs from /m in two important respects:\n\
+- the output is still in pc address order, and\n\
+- file names and contents for all relevant source files are displayed.\n\
+\n\
 With a /r modifier, raw instructions in hex are included.\n\
+\n\
 With a single argument, the function surrounding that address is dumped.\n\
 Two arguments (separated by a comma) are taken as a range of memory to dump,\n\
   in the form of \"start,end\", or \"start,+length\".\n\

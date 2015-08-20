@@ -46,7 +46,7 @@ static MODULE_INSTALL_FN * const modules[] = {
 #if WITH_ENGINE
   sim_engine_install,
 #endif
-#if WITH_TRACE
+#if WITH_TRACE_ANY_P
   trace_install,
 #endif
 #if WITH_PROFILE

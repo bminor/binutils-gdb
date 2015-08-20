@@ -25,6 +25,7 @@
 #include "i387-fp.h"
 #include "x86-low.h"
 #include "x86-xstate.h"
+#include "nat/gdb_ptrace.h"
 
 #include "gdb_proc_service.h"
 /* Don't include elf/common.h if linux/elf.h got included by
@@ -117,17 +118,8 @@ static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 
 #include <sys/reg.h>
 #include <sys/procfs.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/uio.h>
-
-#ifndef PTRACE_GETREGSET
-#define PTRACE_GETREGSET	0x4204
-#endif
-
-#ifndef PTRACE_SETREGSET
-#define PTRACE_SETREGSET	0x4205
-#endif
-
 
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 25
@@ -634,6 +626,34 @@ x86_linux_new_process (void)
   return info;
 }
 
+/* Target routine for linux_new_fork.  */
+
+static void
+x86_linux_new_fork (struct process_info *parent, struct process_info *child)
+{
+  /* These are allocated by linux_add_process.  */
+  gdb_assert (parent->priv != NULL
+	      && parent->priv->arch_private != NULL);
+  gdb_assert (child->priv != NULL
+	      && child->priv->arch_private != NULL);
+
+  /* Linux kernel before 2.6.33 commit
+     72f674d203cd230426437cdcf7dd6f681dad8b0d
+     will inherit hardware debug registers from parent
+     on fork/vfork/clone.  Newer Linux kernels create such tasks with
+     zeroed debug registers.
+
+     GDB core assumes the child inherits the watchpoints/hw
+     breakpoints of the parent, and will remove them all from the
+     forked off process.  Copy the debug registers mirrors into the
+     new process so that all breakpoints and watchpoints can be
+     removed together.  The debug registers mirror will become zeroed
+     in the end before detaching the forked off process, thus making
+     this compatible with older Linux kernels too.  */
+
+  *child->priv->arch_private = *parent->priv->arch_private;
+}
+
 /* See nat/x86-dregs.h.  */
 
 struct x86_debug_reg_state *
@@ -1121,9 +1141,6 @@ int have_ptrace_getfpxregs =
   0
 #endif
 ;
-
-/* Does the current host support PTRACE_GETREGSET?  */
-static int have_ptrace_getregset = -1;
 
 /* Get Linux/x86 target description from running target.  */
 
@@ -3263,6 +3280,7 @@ struct linux_target_ops the_low_target =
   x86_siginfo_fixup,
   x86_linux_new_process,
   x86_linux_new_thread,
+  x86_linux_new_fork,
   x86_linux_prepare_to_resume,
   x86_linux_process_qsupported,
   x86_supports_tracepoints,

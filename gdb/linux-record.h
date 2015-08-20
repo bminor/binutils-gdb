@@ -174,6 +174,7 @@ struct linux_record_tdep
   int arg4;
   int arg5;
   int arg6;
+  int arg7;
 };
 
 /* Enum that defines the gdb-canonical set of Linux syscall identifiers.
@@ -181,6 +182,9 @@ struct linux_record_tdep
    each must provide a mapping from their set to this one.  */
 
 enum gdb_syscall {
+  /* An unknown GDB syscall, not a real syscall.  */
+  gdb_sys_no_syscall = -1,
+
   gdb_sys_restart_syscall = 0,
   gdb_sys_exit = 1,
   gdb_sys_fork = 2,

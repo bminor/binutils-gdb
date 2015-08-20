@@ -24,8 +24,10 @@ if {![istarget "*-*-linux*"]} then {
     continue
 }
 
-
-standard_testfile .c
+# Must name the source file explicitly, otherwise when driven by
+# checkpoints-ns.exp, we'd try compiling checkpoints-ns.c, which
+# doesn't exist.
+standard_testfile checkpoint.c
 
 set pi_txt [gdb_remote_download host ${srcdir}/${subdir}/pi.txt]
 if {[is_remote host]} {

@@ -877,7 +877,7 @@ fold_name (etree_type *tree)
 }
 
 /* Return true if TREE is '.'.  */
- 
+
 static bfd_boolean
 is_dot (const etree_type *tree)
 {
@@ -1026,7 +1026,12 @@ exp_fold_tree_1 (etree_type *tree)
 	      /* If we are assigning to dot inside an output section
 		 arrange to keep the section, except for certain
 		 expressions that evaluate to zero.  We ignore . = 0,
-		 . = . + 0, and . = ALIGN (. != 0 ? expr : 1).  */
+		 . = . + 0, and . = ALIGN (. != 0 ? expr : 1).
+		 We can't ignore all expressions that evaluate to zero
+		 because an otherwise empty section might have padding
+		 added by an alignment expression that changes with
+		 relaxation.  Such a section might have zero size
+		 before relaxation and so be stripped incorrectly.  */
 	      if (expld.phase == lang_mark_phase_enum
 		  && expld.section != bfd_abs_section_ptr
 		  && !(expld.result.valid_p
@@ -1139,6 +1144,7 @@ exp_fold_tree_1 (etree_type *tree)
 	      h->type = bfd_link_hash_defined;
 	      h->u.def.value = expld.result.value;
 	      h->u.def.section = expld.result.section;
+	      h->linker_def = 0;
 	      if (tree->type.node_class == etree_provide)
 		tree->type.node_class = etree_provided;
 

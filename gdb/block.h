@@ -82,21 +82,10 @@ struct block
 
   struct dictionary *dict;
 
-  /* Used for language-specific info.  */
+  /* Contains information about namespace-related info relevant to this block:
+     using directives and the current namespace scope.  */
 
-  union
-  {
-    struct
-    {
-      /* Contains information about namespace-related info relevant to
-	 this block: using directives and the current namespace
-	 scope.  */
-      
-      struct block_namespace_info *the_namespace;
-    }
-    cplus_specific;
-  }
-  language_specific;
+  struct block_namespace_info *namespace_info;
 };
 
 /* The global block is singled out so that we can provide a back-link
@@ -118,7 +107,7 @@ struct global_block
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_DICT(bl)		(bl)->dict
-#define BLOCK_NAMESPACE(bl)   (bl)->language_specific.cplus_specific.the_namespace
+#define BLOCK_NAMESPACE(bl)	(bl)->namespace_info
 
 struct blockvector
 {
@@ -291,6 +280,40 @@ extern struct symbol *block_lookup_symbol (const struct block *block,
 extern struct symbol *block_lookup_symbol_primary (const struct block *block,
 						   const char *name,
 						   const domain_enum domain);
+
+/* The type of the MATCHER argument to block_find_symbol.  */
+
+typedef int (block_symbol_matcher_ftype) (struct symbol *, void *);
+
+/* Find symbol NAME in BLOCK and in DOMAIN that satisfies MATCHER.
+   DATA is passed unchanged to MATCHER.
+   BLOCK must be STATIC_BLOCK or GLOBAL_BLOCK.  */
+
+extern struct symbol *block_find_symbol (const struct block *block,
+					 const char *name,
+					 const domain_enum domain,
+					 block_symbol_matcher_ftype *matcher,
+					 void *data);
+
+/* A matcher function for block_find_symbol to find only symbols with
+   non-opaque types.  */
+
+extern int block_find_non_opaque_type (struct symbol *sym, void *data);
+
+/* A matcher function for block_find_symbol to prefer symbols with
+   non-opaque types.  The way to use this function is as follows:
+
+   struct symbol *with_opaque = NULL;
+   struct symbol *sym
+     = block_find_symbol (block, name, domain,
+                          block_find_non_opaque_type_preferred, &with_opaque);
+
+   At this point if SYM is non-NULL then a non-opaque type has been found.
+   Otherwise, if WITH_OPAQUE is non-NULL then an opaque type has been found.
+   Otherwise, the symbol was not found.  */
+
+extern int block_find_non_opaque_type_preferred (struct symbol *sym,
+						 void *data);
 
 /* Macro to loop through all symbols in BLOCK, in no particular
    order.  ITER helps keep track of the iteration, and must be a

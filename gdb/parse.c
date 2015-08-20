@@ -615,7 +615,7 @@ mark_completion_tag (enum type_code tag, const char *ptr, int length)
 void
 write_dollar_variable (struct parser_state *ps, struct stoken str)
 {
-  struct symbol *sym = NULL;
+  struct block_symbol sym;
   struct bound_minimal_symbol msym;
   struct internalvar *isym = NULL;
 
@@ -672,11 +672,11 @@ write_dollar_variable (struct parser_state *ps, struct stoken str)
 
   sym = lookup_symbol (copy_name (str), (struct block *) NULL,
 		       VAR_DOMAIN, NULL);
-  if (sym)
+  if (sym.symbol)
     {
       write_exp_elt_opcode (ps, OP_VAR_VALUE);
-      write_exp_elt_block (ps, block_found);	/* set by lookup_symbol */
-      write_exp_elt_sym (ps, sym);
+      write_exp_elt_block (ps, sym.block);
+      write_exp_elt_sym (ps, sym.symbol);
       write_exp_elt_opcode (ps, OP_VAR_VALUE);
       return;
     }
@@ -1005,8 +1005,9 @@ operator_length_standard (const struct expression *expr, int endpos,
 
     case OP_F90_RANGE:
       oplen = 3;
+      range_type = (enum f90_range_type)
+	longest_to_int (expr->elts[endpos - 2].longconst);
 
-      range_type = longest_to_int (expr->elts[endpos - 2].longconst);
       switch (range_type)
 	{
 	case LOW_BOUND_DEFAULT:

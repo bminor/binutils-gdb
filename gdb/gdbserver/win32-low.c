@@ -26,8 +26,6 @@
 #include "gdbthread.h"
 #include "dll.h"
 #include "hostio.h"
-
-#include <stdint.h>
 #include <windows.h>
 #include <winnt.h>
 #include <imagehlp.h>
@@ -1787,6 +1785,7 @@ win32_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 
 static struct target_ops win32_target_ops = {
   win32_create_inferior,
+  NULL,  /* arch_setup */
   win32_attach,
   win32_kill,
   win32_detach,
@@ -1811,6 +1810,10 @@ static struct target_ops win32_target_ops = {
   NULL, /* supports_stopped_by_sw_breakpoint */
   NULL, /* stopped_by_hw_breakpoint */
   NULL, /* supports_stopped_by_hw_breakpoint */
+  /* Although win32-i386 has hardware single step, still disable this
+     feature for win32, because it is implemented in linux-low.c instead
+     of in generic code.  */
+  NULL, /* supports_conditional_breakpoints */
   win32_stopped_by_watchpoint,
   win32_stopped_data_address,
   NULL, /* read_offsets */
@@ -1827,6 +1830,9 @@ static struct target_ops win32_target_ops = {
   NULL, /* async */
   NULL, /* start_non_stop */
   NULL, /* supports_multi_process */
+  NULL, /* supports_fork_events */
+  NULL, /* supports_vfork_events */
+  NULL, /* handle_new_gdb_connection */
   NULL, /* handle_monitor_command */
   NULL, /* core_of_thread */
   NULL, /* read_loadmap */

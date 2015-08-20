@@ -1767,7 +1767,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   /* Out of range conditional branch.  Emit a branch around a 22bit jump.  */
   else if (fragP->fr_subtype == SUBYPTE_COND_9_22 + 1
 	   || fragP->fr_subtype == SUBYPTE_COND_9_22_32 + 1
-	   || fragP->fr_subtype == SUBYPTE_COND_9_17_22 + 2 
+	   || fragP->fr_subtype == SUBYPTE_COND_9_17_22 + 2
 	   || fragP->fr_subtype == SUBYPTE_COND_9_17_22_32 + 2)
     {
       unsigned char *buffer =

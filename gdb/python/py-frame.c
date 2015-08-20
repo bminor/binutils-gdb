@@ -540,7 +540,7 @@ frapy_read_var (PyObject *self, PyObject *args)
 
 	  if (!block)
 	    block = get_frame_block (frame, NULL);
-	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL);
+	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL).symbol;
 	}
       CATCH (except, RETURN_MASK_ALL)
 	{
@@ -666,7 +666,7 @@ gdbpy_frame_stop_reason_string (PyObject *self, PyObject *args)
       return NULL;
     }
 
-  str = unwind_stop_reason_to_string (reason);
+  str = unwind_stop_reason_to_string ((enum unwind_stop_reason) reason);
   return PyUnicode_Decode (str, strlen (str), host_charset (), NULL);
 }
 

@@ -45,7 +45,7 @@
 #include "dwarf2-frame.h"
 #include "ax.h"
 #include "spu-tdep.h"
-
+#include "location.h"
 
 /* The list of available "set spu " and "show spu " commands.  */
 static struct cmd_list_element *setspucmdlist = NULL;
@@ -881,8 +881,7 @@ spu_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
     }
 }
 
-/* Return true if we are in the function's epilogue, i.e. after the
-   instruction that destroyed the function's stack frame.
+/* Implement the stack_frame_destroyed_p gdbarch method.
 
    1) scan forward from the point of execution:
        a) If you find an instruction that modifies the stack pointer
@@ -899,7 +898,7 @@ spu_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
            limit for the size of an epilogue.  */
 
 static int
-spu_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+spu_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR scan_pc, func_start, func_end, epilogue_start, epilogue_end;
@@ -1955,7 +1954,8 @@ spu_catch_start (struct objfile *objfile)
   struct bound_minimal_symbol minsym;
   struct compunit_symtab *cust;
   CORE_ADDR pc;
-  char buf[32];
+  struct event_location *location;
+  struct cleanup *back_to;
 
   /* Do this only if requested by "set spu stop-on-load on".  */
   if (!spu_stop_on_load_p)
@@ -1999,8 +1999,9 @@ spu_catch_start (struct objfile *objfile)
 
   /* Use a numerical address for the set_breakpoint command to avoid having
      the breakpoint re-set incorrectly.  */
-  xsnprintf (buf, sizeof buf, "*%s", core_addr_to_string (pc));
-  create_breakpoint (get_objfile_arch (objfile), buf /* arg */,
+  location = new_address_location (pc);
+  back_to = make_cleanup_delete_event_location (location);
+  create_breakpoint (get_objfile_arch (objfile), location,
 		     NULL /* cond_string */, -1 /* thread */,
 		     NULL /* extra_string */,
 		     0 /* parse_condition_and_thread */, 1 /* tempflag */,
@@ -2009,6 +2010,7 @@ spu_catch_start (struct objfile *objfile)
 		     AUTO_BOOLEAN_FALSE /* pending_break_support */,
 		     &bkpt_breakpoint_ops /* ops */, 0 /* from_tty */,
 		     1 /* enabled */, 0 /* internal  */, 0);
+  do_cleanups (back_to);
 }
 
 
@@ -2785,7 +2787,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_virtual_frame_pointer (gdbarch, spu_virtual_frame_pointer);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, spu_skip_prologue);
-  set_gdbarch_in_function_epilogue_p (gdbarch, spu_in_function_epilogue_p);
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, spu_stack_frame_destroyed_p);
 
   /* Cell/B.E. cross-architecture unwinder support.  */
   frame_unwind_prepend_unwinder (gdbarch, &spu2ppu_unwind);

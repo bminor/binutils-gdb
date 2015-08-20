@@ -2,7 +2,7 @@
 #as: --compress-debug-sections=none
 #ld: -r --compress-debug-sections=zlib-gnu
 #readelf: -SW
-#notarget: arc-*-* d30v-*-* dlx-*-* fr30-*-* frv-*-* i370-*-* i860-*-* iq200-*-* mn10200-*-* msp430-*-* mt-*-* or1k-*-* pj-*-*
+#notarget: arc-*-* d30v-*-* dlx-*-* fr30-*-* frv-*-* i370-*-* i860-*-* iq2000-*-* mn10200-*-* moxie-*-* msp430-*-* mt-*-* or1k-*-* pj-*-*
 # Not all ELF targets use the elf.em emulation...
 
 #failif

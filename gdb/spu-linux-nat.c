@@ -30,7 +30,7 @@
 #include "gdbthread.h"
 #include "gdb_bfd.h"
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/ptrace.h>
 #include <sys/types.h>
 
@@ -625,7 +625,7 @@ spu_xfer_partial (struct target_ops *ops,
 /* Override the to_can_use_hw_breakpoint routine.  */
 static int
 spu_can_use_hw_breakpoint (struct target_ops *self,
-			   int type, int cnt, int othertype)
+			   enum bptype type, int cnt, int othertype)
 {
   return 0;
 }

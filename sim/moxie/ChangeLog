@@ -1,3 +1,26 @@
+2015-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (tracefile, tracing): Delete.
+	(MOXIE_TRACE_INSN): Call TRACE_INSN directly.
+
+2015-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (TRACE): Rename to ...
+	(MOXIE_TRACE_INSN): ... this.
+	(sim_engine_run): Change TRACE to MOXIE_TRACE_INSN.
+
 2015-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_CPU): Delete.
@@ -187,7 +210,7 @@
 2012-09-07  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (sim_resume): Branches are now relative to the
-          address of the instruction following the branch.
+	  address of the instruction following the branch.
 
 2012-06-17  Mike Frysinger  <vapier@gentoo.org>
 

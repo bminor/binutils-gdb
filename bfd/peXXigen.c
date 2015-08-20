@@ -1060,8 +1060,8 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
   }
 
   if (coff_data (abfd)->link_info
-      && ! coff_data (abfd)->link_info->relocatable
-      && ! coff_data (abfd)->link_info->shared
+      && ! bfd_link_relocatable (coff_data (abfd)->link_info)
+      && ! bfd_link_pic (coff_data (abfd)->link_info)
       && strcmp (scnhdr_int->s_name, ".text") == 0)
     {
       /* By inference from looking at MS output, the 32 bit field
@@ -1140,7 +1140,7 @@ _bfd_XXi_swap_debugdir_out (bfd * abfd, void * inp, void * extp)
   return sizeof (struct external_IMAGE_DEBUG_DIRECTORY);
 }
 
-static CODEVIEW_INFO *
+CODEVIEW_INFO *
 _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo)
 {
   char buffer[256+1];
@@ -2566,7 +2566,7 @@ rsrc_print_section (bfd * abfd, void * vfile)
   if (regions.resource_start != NULL)
     fprintf (file, " Resources start at offset: %#03x\n",
 	     (int) (regions.resource_start - regions.section_start));
-  
+
   free (regions.section_start);
   return TRUE;
 }
@@ -3470,7 +3470,7 @@ rsrc_compute_region_sizes (rsrc_directory * dir)
       sizeof_tables_and_entries += 8;
 
       sizeof_strings += (entry->name_id.name.len + 1) * 2;
-	  
+
       if (entry->is_dir)
 	rsrc_compute_region_sizes (entry->value.directory);
       else
@@ -4160,7 +4160,8 @@ rsrc_process_section (bfd * abfd,
     {
       asection * rsrc_sec = bfd_get_section_by_name (input, ".rsrc");
 
-      if (rsrc_sec != NULL)
+      /* PR 18372 - skip discarded .rsrc sections.  */
+      if (rsrc_sec != NULL && !discarded_section (rsrc_sec))
 	{
 	  if (num_input_rsrc == max_num_input_rsrc)
 	    {

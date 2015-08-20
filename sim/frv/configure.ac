@@ -17,7 +17,8 @@ SIM_AC_OPTION_CGEN_MAINT
 # Enable making unknown traps dump out registers
 #
 AC_ARG_ENABLE(sim-trapdump,
-[  --enable-sim-trapdump		Make unknown traps dump the registers],
+[AS_HELP_STRING([--enable-sim-trapdump],
+		[Make unknown traps dump the registers])],
 [case "${enableval}" in
   yes) sim_trapdump="-DTRAPDUMP=1";;
   no)  sim_trapdump="-DTRAPDUMP=0";;

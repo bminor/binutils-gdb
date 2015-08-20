@@ -627,14 +627,14 @@ m:int:in_solib_return_trampoline:CORE_ADDR pc, const char *name:pc, name::generi
 
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
-# as the first action in a funtion's epilogue.  in_function_epilogue_p()
+# as the first action in a function's epilogue.  stack_frame_destroyed_p()
 # is defined to return a non-zero value if either the given addr is one
 # instruction after the stack destroying instruction up to the trailing
 # return instruction or if we can figure out that the stack frame has
 # already been invalidated regardless of the value of addr.  Targets
 # which don't suffer from that problem could just let this functionality
 # untouched.
-m:int:in_function_epilogue_p:CORE_ADDR addr:addr:0:generic_in_function_epilogue_p::0
+m:int:stack_frame_destroyed_p:CORE_ADDR addr:addr:0:generic_stack_frame_destroyed_p::0
 # Process an ELF symbol in the minimal symbol table in a backend-specific
 # way.  Normally this hook is supposed to do nothing, however if required,
 # then this hook can be used to apply tranformations to symbols that are
@@ -763,6 +763,10 @@ V:ULONGEST:max_insn_length:::0:0
 # If your architecture doesn't need to adjust instructions before
 # single-stepping them, consider using simple_displaced_step_copy_insn
 # here.
+#
+# If the instruction cannot execute out of line, return NULL.  The
+# core falls back to stepping past the instruction in-line instead in
+# that case.
 M:struct displaced_step_closure *:displaced_step_copy_insn:CORE_ADDR from, CORE_ADDR to, struct regcache *regs:from, to, regs
 
 # Return true if GDB should use hardware single-stepping to execute
@@ -1018,7 +1022,7 @@ v:int:has_global_breakpoints:::0:0::0
 m:int:has_shared_address_space:void:::default_has_shared_address_space::0
 
 # True if a fast tracepoint can be set at an address.
-m:int:fast_tracepoint_valid_at:CORE_ADDR addr, int *isize, char **msg:addr, isize, msg::default_fast_tracepoint_valid_at::0
+m:int:fast_tracepoint_valid_at:CORE_ADDR addr, char **msg:addr, msg::default_fast_tracepoint_valid_at::0
 
 # Return the "auto" target charset.
 f:const char *:auto_charset:void::default_auto_charset:default_auto_charset::0
@@ -1097,6 +1101,10 @@ m:int:vsyscall_range:struct mem_range *range:range::default_vsyscall_range::0
 # Throw an error if it is not possible.  Returned address is always valid.
 f:CORE_ADDR:infcall_mmap:CORE_ADDR size, unsigned prot:size, prot::default_infcall_mmap::0
 
+# Deallocate SIZE bytes of memory at ADDR in inferior from gdbarch_infcall_mmap.
+# Print a warning if it is not possible.
+f:void:infcall_munmap:CORE_ADDR addr, CORE_ADDR size:addr, size::default_infcall_munmap::0
+
 # Return string (caller has to use xfree for it) with options for GCC
 # to produce code for this target, typically "-m64", "-m32" or "-m31".
 # These options are put before CU's DW_AT_producer compilation options so that
@@ -1109,6 +1117,12 @@ m:char *:gcc_target_options:void:::default_gcc_target_options::0
 # returns the BFD architecture name, which is correct in nearly every
 # case.
 m:const char *:gnu_triplet_regexp:void:::default_gnu_triplet_regexp::0
+
+# Return the size in 8-bit bytes of an addressable memory unit on this
+# architecture.  This corresponds to the number of 8-bit bytes associated to
+# each address in memory.
+m:int:addressable_memory_unit_size:void:::default_addressable_memory_unit_size::0
+
 EOF
 }
 

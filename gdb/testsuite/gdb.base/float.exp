@@ -36,11 +36,11 @@ if ![runto_main] then {
 
 # Test "info float".
 
-if { [istarget "aarch64*-*-*"] } then {
+if { [is_aarch64_target] } then {
     gdb_test "info float" "d0.*d1.*d31.*s0.*s1.*s31.*" "info float"
 } elseif { [istarget "alpha*-*-*"] } then {
     gdb_test "info float" "f0.*" "info float"
-} elseif { [istarget "arm*-*-*"] } then {
+} elseif { [is_aarch32_target] } then {
     gdb_test_multiple "info float" "info float" {
 	-re "Software FPU type.*mask:.*flags:.*$gdb_prompt $" {
 	    pass "info float (FPA)"

@@ -30,7 +30,7 @@
 #include "gdbthread.h"
 #include "source.h"
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include "gdb_wait.h"
 #include <dirent.h>
 #include <ctype.h>

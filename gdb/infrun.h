@@ -73,13 +73,6 @@ enum exec_direction_kind
    compatible with make_cleanup_restore_integer.  */
 extern int execution_direction;
 
-/* Save register contents here when executing a "finish" command or
-   are about to pop a stack dummy frame, if-and-only-if
-   proceed_to_finish is set.  Thus this contains the return value from
-   the called function (assuming values are returned in a
-   register).  */
-extern struct regcache *stop_registers;
-
 extern void start_remote (int from_tty);
 
 /* Clear out all variables saying what to do when inferior is
@@ -195,5 +188,12 @@ extern void signal_catch_update (const unsigned int *);
    and allow 1-15 which should match host signal numbers on most
    systems.  Use of symbolic signal names is strongly encouraged.  */
 enum gdb_signal gdb_signal_from_command (int num);
+
+/* Enables/disables infrun's async event source in the event loop.  */
+extern void infrun_async (int enable);
+
+/* The global queue of threads that need to do a step-over operation
+   to get past e.g., a breakpoint.  */
+extern struct thread_info *step_over_queue_head;
 
 #endif /* INFRUN_H */

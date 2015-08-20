@@ -52,3 +52,24 @@ proc exec_cmd_expect_vCont_count { cmd exp_vCont_s exp_vCont_r } {
     gdb_test_no_output "set debug remote 0" ""
     return $ret
 }
+
+# Check whether range stepping is supported by the target.
+
+proc gdb_range_stepping_enabled { } {
+    global gdb_prompt
+
+    set command "set range-stepping on"
+    set message "probe range-stepping support"
+    gdb_test_multiple $command $message {
+        -re "Range stepping is not supported.*\r\n$gdb_prompt $" {
+	    pass $message
+	    return 0
+	}
+        -re "^$command\r\n$gdb_prompt $" {
+	    pass $message
+	    return 1
+	}
+    }
+
+    return 0
+}

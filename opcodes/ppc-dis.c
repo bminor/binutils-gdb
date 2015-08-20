@@ -76,12 +76,18 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "7410",    (PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC),
     0 },
-  { "7450",    (PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC),
+  { "7450",    (PPC_OPCODE_PPC | PPC_OPCODE_7450 | PPC_OPCODE_ALTIVEC),
     0 },
   { "7455",    (PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC),
     0 },
-  { "750cl",   (PPC_OPCODE_PPC | PPC_OPCODE_PPCPS)
+  { "750cl",   (PPC_OPCODE_PPC | PPC_OPCODE_750 | PPC_OPCODE_PPCPS)
     , 0 },
+  { "821",     (PPC_OPCODE_PPC | PPC_OPCODE_860),
+    0 },
+  { "850",     (PPC_OPCODE_PPC | PPC_OPCODE_860),
+    0 },
+  { "860",     (PPC_OPCODE_PPC | PPC_OPCODE_860),
+    0 },
   { "a2",      (PPC_OPCODE_PPC | PPC_OPCODE_ISEL | PPC_OPCODE_POWER4
 		| PPC_OPCODE_POWER5 | PPC_OPCODE_CACHELCK | PPC_OPCODE_64
 		| PPC_OPCODE_A2),
@@ -452,7 +458,8 @@ skip_optional_operands (const unsigned char *opindex,
       operand = &powerpc_operands[*opindex];
       if ((operand->flags & PPC_OPERAND_NEXT) != 0
 	  || ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
-	      && operand_value_powerpc (operand, insn, dialect) != 0))
+	      && operand_value_powerpc (operand, insn, dialect) !=
+		 ppc_optional_operand_value (operand)))
 	return 0;
     }
 
@@ -680,7 +687,7 @@ print_insn_powerpc (bfd_vma memaddr,
 	    (*info->print_address_func) (memaddr + value, info);
 	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
 	    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
-	  else if ((operand->flags & PPC_OPERAND_FSL) != 0) 
+	  else if ((operand->flags & PPC_OPERAND_FSL) != 0)
 	    (*info->fprintf_func) (info->stream, "fsl%ld", value);
 	  else if ((operand->flags & PPC_OPERAND_FCR) != 0)
 	    (*info->fprintf_func) (info->stream, "fcr%ld", value);

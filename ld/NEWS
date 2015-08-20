@@ -1,11 +1,19 @@
 -*- text -*-
 
+* Experimental support for linker garbage collection (--gc-sections)
+  has been enabled for COFF and PE based targets.
+
 * New command line option for ELF targets to compress DWARF debug
   sections, --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi].
 
 * Add --warn-orphan option to report orphan sections.
 
 * Add support for LLVM plugin.
+
+* Add --print-memory-usage option to report memory blocks usage.
+
+* Add --require-defined option, it's like --undefined except the new symbol
+  must be defined by the end of the link.
 
 Changes in 2.25:
 

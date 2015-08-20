@@ -18,4 +18,8 @@ xsavec64        (%rcx)
 xsaves64        (%rcx)
 #CLFLUSHOPT
 clflushopt      (%rcx)
-
+monitorx %rax,%rcx,%rdx
+monitorx %eax,%rcx,%rdx
+monitorx
+mwaitx %rax,%rcx,%rbx
+mwaitx

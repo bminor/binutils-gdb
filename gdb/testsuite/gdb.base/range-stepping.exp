@@ -27,27 +27,6 @@ if ![runto_main] {
     return -1
 }
 
-# Check whether range stepping is supported by the target.
-
-proc gdb_range_stepping_enabled { } {
-    global gdb_prompt
-
-    set command "set range-stepping on"
-    set message "probe range-stepping support"
-    gdb_test_multiple $command $message {
-        -re "Range stepping is not supported.*\r\n$gdb_prompt $" {
-	    pass $message
-	    return 0
-	}
-        -re "^$command\r\n$gdb_prompt $" {
-	    pass $message
-	    return 1
-	}
-    }
-
-    return 0
-}
-
 if ![gdb_range_stepping_enabled] {
     unsupported "range stepping not supported by the target"
     return -1

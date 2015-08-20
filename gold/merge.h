@@ -42,9 +42,7 @@ class Object_merge_map
 {
  public:
   Object_merge_map()
-    : first_shnum_(-1U), first_map_(),
-      second_shnum_(-1U), second_map_(),
-      section_merge_maps_()
+    : section_merge_maps_()
   { }
 
   ~Object_merge_map();
@@ -152,7 +150,8 @@ class Object_merge_map
   };
 
   // Map input section indices to merge maps.
-  typedef std::map<unsigned int, Input_merge_map*> Section_merge_maps;
+  typedef std::vector<std::pair<unsigned int, Input_merge_map*> >
+      Section_merge_maps;
 
   // Return a pointer to the Input_merge_map to use for the input
   // section SHNDX, or NULL.
@@ -165,15 +164,6 @@ class Object_merge_map
                                              this)->get_input_merge_map(shndx));
   }
 
-  // Any given object file will normally only have a couple of input
-  // sections with mergeable contents.  So we keep the first two input
-  // section numbers inline, and push any further ones into a map.  A
-  // value of -1U in first_shnum_ or second_shnum_ means that we don't
-  // have a corresponding entry.
-  unsigned int first_shnum_;
-  Input_merge_map first_map_;
-  unsigned int second_shnum_;
-  Input_merge_map second_map_;
   Section_merge_maps section_merge_maps_;
 };
 

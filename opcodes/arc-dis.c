@@ -35,18 +35,18 @@
 #define dbg (0)
 #endif
 
-/* Classification of the opcodes for the decoder to print 
+/* Classification of the opcodes for the decoder to print
    the instructions.  */
 
 typedef enum
 {
-  CLASS_A4_ARITH,	     
+  CLASS_A4_ARITH,
   CLASS_A4_OP3_GENERAL,
   CLASS_A4_FLAG,
   /* All branches other than JC.  */
   CLASS_A4_BRANCH,
   CLASS_A4_JC ,
-  /* All loads other than immediate 
+  /* All loads other than immediate
      indexed loads.  */
   CLASS_A4_LD0,
   CLASS_A4_LD1,

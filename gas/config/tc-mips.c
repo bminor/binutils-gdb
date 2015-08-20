@@ -1868,7 +1868,7 @@ mips_clear_insn_labels (void)
     {
       for (pl = &free_insn_labels; *pl != NULL; pl = &(*pl)->next)
 	;
-      
+
       si = seg_info (now_seg);
       *pl = si->label_list;
       si->label_list = NULL;
@@ -2542,7 +2542,7 @@ struct regname {
     {"$28",	RTYPE_NUM | 28}, \
     {"$29",	RTYPE_NUM | 29}, \
     {"$30",	RTYPE_NUM | 30}, \
-    {"$31",	RTYPE_NUM | 31} 
+    {"$31",	RTYPE_NUM | 31}
 
 #define FPU_REGISTER_NAMES       \
     {"$f0",	RTYPE_FPU | 0},  \
@@ -2624,7 +2624,7 @@ struct regname {
     {"$ta0",	RTYPE_GP | 12}, /* alias for $t4 */ \
     {"$ta1",	RTYPE_GP | 13}, /* alias for $t5 */ \
     {"$ta2",	RTYPE_GP | 14}, /* alias for $t6 */ \
-    {"$ta3",	RTYPE_GP | 15}  /* alias for $t7 */ 
+    {"$ta3",	RTYPE_GP | 15}  /* alias for $t7 */
 
 /* Remaining symbolic register names */
 #define SYMBOLIC_REGISTER_NAMES \
@@ -2720,7 +2720,7 @@ static const struct regname reg_names[] = {
 
   /* The $txx registers depends on the abi,
      these will be added later into the symbol table from
-     one of the tables below once mips_abi is set after 
+     one of the tables below once mips_abi is set after
      parsing of arguments from the command line. */
   SYMBOLIC_REGISTER_NAMES,
 
@@ -3578,17 +3578,17 @@ md_begin (void)
 
   /* We add all the general register names to the symbol table.  This
      helps us detect invalid uses of them.  */
-  for (i = 0; reg_names[i].name; i++) 
+  for (i = 0; reg_names[i].name; i++)
     symbol_table_insert (symbol_new (reg_names[i].name, reg_section,
 				     reg_names[i].num, /* & RNUM_MASK, */
 				     &zero_address_frag));
   if (HAVE_NEWABI)
-    for (i = 0; reg_names_n32n64[i].name; i++) 
+    for (i = 0; reg_names_n32n64[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_n32n64[i].name, reg_section,
 				       reg_names_n32n64[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
   else
-    for (i = 0; reg_names_o32[i].name; i++) 
+    for (i = 0; reg_names_o32[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
 				       reg_names_o32[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
@@ -3795,6 +3795,10 @@ check_fpabi (int fpabi)
     case Val_GNU_MIPS_ABI_FP_OLD_64:
       as_warn (_(".gnu_attribute %d,%d is no longer supported"),
 	       Tag_GNU_MIPS_ABI_FP, fpabi);
+      break;
+
+    case Val_GNU_MIPS_ABI_FP_NAN2008:
+      /* Silently ignore compatibility value.  */
       break;
 
     default:
@@ -6362,7 +6366,7 @@ fix_24k_record_store_info (struct fix_24k_store_info *stinfo,
    * Run the data cache in write-through mode.
    * Insert a non-store instruction between
      Store A and Store B or Store B and Store C.  */
-  
+
 static int
 nops_for_24k (int ignore, const struct mips_cl_insn *hist,
 	      const struct mips_cl_insn *insn)
@@ -9321,8 +9325,7 @@ move_register (int dest, int source)
       && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
     macro_build (NULL, "move", "mp,mj", dest, source);
   else
-    macro_build (NULL, GPR_SIZE == 32 ? "addu" : "daddu", "d,v,t",
-		 dest, source, 0);
+    macro_build (NULL, "or", "d,v,t", dest, source, 0);
 }
 
 /* Emit an SVR4 PIC sequence to load address LOCAL into DEST, where
@@ -12484,7 +12487,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	abort ();
 
       break;
-	
+
     case M_SAA_AB:
       s = "saa";
       goto saa_saad;
@@ -14840,7 +14843,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      || fixP->fx_r_type == BFD_RELOC_MICROMIPS_SUB
 	      || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
 	      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-	      || fixP->fx_r_type == BFD_RELOC_MIPS_TLS_DTPREL64);
+	      || fixP->fx_r_type == BFD_RELOC_MIPS_TLS_DTPREL64
+	      || fixP->fx_r_type == BFD_RELOC_NONE);
 
   buf = fixP->fx_frag->fr_literal + fixP->fx_where;
 
@@ -15110,6 +15114,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
         S_SET_WEAK (fixP->fx_addsy);
       break;
 
+    case BFD_RELOC_NONE:
     case BFD_RELOC_VTABLE_ENTRY:
       fixP->fx_done = 0;
       break;
@@ -15880,7 +15885,7 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
      daddu	$gp, $gp, $reg1
 
    If $reg2 is given, this results in:
-     daddu	$reg2, $gp, $0
+     or		$reg2, $gp, $0
      lui	$gp, %hi(%neg(%gp_rel(label)))
      addiu	$gp, $gp, %lo(%neg(%gp_rel(label)))
      daddu	$gp, $gp, $reg1
@@ -15960,8 +15965,7 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
 		   BFD_RELOC_LO16, SP);
     }
   else
-    macro_build (NULL, "daddu", "d,v,t", mips_cpreturn_register,
-		 mips_gp_register, 0);
+    move_register (mips_cpreturn_register, mips_gp_register);
 
   if (mips_in_shared || HAVE_64BIT_SYMBOLS)
     {
@@ -16074,7 +16078,7 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
      ld		$gp, offset($sp)
 
    If a register $reg2 was given there, it results in:
-     daddu	$gp, $reg2, $0  */
+     or		$gp, $reg2, $0  */
 
 static void
 s_cpreturn (int ignore ATTRIBUTE_UNUSED)
@@ -16112,8 +16116,8 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
       macro_build (&ex, "ld", "t,o(b)", mips_gp_register, BFD_RELOC_LO16, SP);
     }
   else
-    macro_build (NULL, "daddu", "d,v,t", mips_gp_register,
-		 mips_cpreturn_register, 0);
+    move_register (mips_gp_register, mips_cpreturn_register);
+
   macro_end ();
 
   mips_assembling_insn = FALSE;
@@ -16304,7 +16308,7 @@ s_ehword (int ignore ATTRIBUTE_UNUSED)
   p = frag_more (4);
   md_number_to_chars (p, 0, 4);
   fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, FALSE,
-	       BFD_RELOC_MIPS_EH);
+	       BFD_RELOC_32_PCREL);
 
   demand_empty_rest_of_line ();
 }
@@ -17054,6 +17058,10 @@ mips_fix_adjustable (fixS *fixp)
     return 0;
 
   if (fixp->fx_addsy == NULL)
+    return 1;
+
+  /* Allow relocs used for EH tables.  */
+  if (fixp->fx_r_type == BFD_RELOC_32_PCREL)
     return 1;
 
   /* If symbol SYM is in a mergeable section, relocations of the form
@@ -18656,6 +18664,11 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "1004kf2_1",      0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
   { "1004kf",         0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
   { "1004kf1_1",      0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  /* interaptiv is the new name for 1004kf */
+  { "interaptiv",     0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  /* M5100 family */
+  { "m5100",          0, ASE_MCU,		ISA_MIPS32R5, CPU_MIPS32R5 },
+  { "m5101",          0, ASE_MCU,		ISA_MIPS32R5, CPU_MIPS32R5 },
   /* P5600 with EVA and Virtualization ASEs, other ASEs are optional.  */
   { "p5600",          0, ASE_VIRT | ASE_EVA | ASE_XPA, 	ISA_MIPS32R5, CPU_MIPS32R5 },
 
@@ -18669,7 +18682,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "sb1",            0, ASE_MIPS3D | ASE_MDMX,	ISA_MIPS64,   CPU_SB1 },
   /* Broadcom SB-1A CPU core */
   { "sb1a",           0, ASE_MIPS3D | ASE_MDMX,	ISA_MIPS64,   CPU_SB1 },
-  
+
   { "loongson3a",     0, 0,			ISA_MIPS64R2, CPU_LOONGSON_3A },
 
   /* MIPS 64 Release 2 */
@@ -18909,7 +18922,7 @@ MIPS options:\n\
 -mno-micromips		do not generate microMIPS instructions\n"));
   fprintf (stream, _("\
 -msmartmips		generate smartmips instructions\n\
--mno-smartmips		do not generate smartmips instructions\n"));  
+-mno-smartmips		do not generate smartmips instructions\n"));
   fprintf (stream, _("\
 -mdsp			generate DSP instructions\n\
 -mno-dsp		do not generate DSP instructions\n"));
@@ -19116,4 +19129,14 @@ md_mips_end (void)
       bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU,
 				Tag_GNU_MIPS_ABI_FP, fpabi);
     }
+}
+
+/*  Returns the relocation type required for a particular CFI encoding.  */
+
+bfd_reloc_code_real_type
+mips_cfi_reloc_for_encoding (int encoding)
+{
+  if (encoding == (DW_EH_PE_sdata4 | DW_EH_PE_pcrel))
+    return BFD_RELOC_32_PCREL;
+  else return BFD_RELOC_NONE;
 }

@@ -48,7 +48,7 @@ if ![runto_main] then {
 # Query GDB for the size of various types
 #
 
-gdb_test "next"
+gdb_test "next 2"
 
 set sizeof_char [get_sizeof "char" 1]
 set sizeof_short [get_sizeof "short" 2]
@@ -70,8 +70,10 @@ set sizeof_long_double [get_sizeof "long double" 8]
 proc check_sizeof { type size } {
     global gdb_prompt
 
-    set pat [string_to_regexp "sizeof (${type}) == ${size}"]
-    gdb_test "next" "${pat}\[\r\n\]+\[0-9\].*"  "check sizeof \"$type\""
+    set pat [string_to_regexp "sizeof (${type}) == ${size}\r\n"]
+    gdb_test_stdio "next" "${pat}" \
+	"\[0-9\].*" \
+	"check sizeof \"$type\""
 }
 
 check_sizeof "char" ${sizeof_char}
@@ -90,8 +92,10 @@ check_sizeof "long double" ${sizeof_long_double}
 proc check_valueof { exp val } {
     global gdb_prompt
 
-    set pat [string_to_regexp "valueof (${exp}) == ${val}"]
-    gdb_test "next" "${pat}\[\r\n\]+\[0-9\].*" "check valueof \"$exp\""
+    set pat [string_to_regexp "valueof (${exp}) == ${val}\r\n"]
+    gdb_test_stdio "next" "${pat}" \
+	"\[0-9\].*" \
+	"check valueof \"$exp\""
 }
 
 # Check that GDB and the target agree over the sign of a character.

@@ -20,10 +20,14 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#include "../lib/unbuffer_output.c"
+
 int
 main (void)
 {
   int i = 0;
+
+  gdb_unbuffer_output ();
 
   i++; /* set dprintf here */
   return 0; /* set breakpoint here */

@@ -74,6 +74,9 @@ struct target_ops
 
   int (*create_inferior) (char *program, char **args);
 
+  /* Architecture-specific setup.  */
+  void (*arch_setup) (void);
+
   /* Attach to a running process.
 
      PID is the process ID to attach to, specified by the user
@@ -222,6 +225,10 @@ struct target_ops
      HW breakpoint triggering.  */
   int (*supports_stopped_by_hw_breakpoint) (void);
 
+  /* Returns true if the target can evaluate conditions of
+     breakpoints.  */
+  int (*supports_conditional_breakpoints) (void);
+
   /* Returns 1 if target was stopped due to a watchpoint hit, 0 otherwise.  */
 
   int (*stopped_by_watchpoint) (void);
@@ -276,6 +283,15 @@ struct target_ops
 
   /* Returns true if the target supports multi-process debugging.  */
   int (*supports_multi_process) (void);
+
+  /* Returns true if fork events are supported.  */
+  int (*supports_fork_events) (void);
+
+  /* Returns true if vfork events are supported.  */
+  int (*supports_vfork_events) (void);
+
+  /* Allows target to re-initialize connection-specific settings.  */
+  void (*handle_new_gdb_connection) (void);
 
   /* If not NULL, target-specific routine to process monitor command.
      Returns 1 if handled, or 0 to perform default processing.  */
@@ -402,6 +418,27 @@ struct target_ops
      string should be copied into a buffer by the client if the string
      will not be immediately used, or if it must persist.  */
   char *(*pid_to_exec_file) (int pid);
+
+  /* Multiple-filesystem-aware open.  Like open(2), but operating in
+     the filesystem as it appears to process PID.  Systems where all
+     processes share a common filesystem should set this to NULL.
+     If NULL, the caller should fall back to open(2).  */
+  int (*multifs_open) (int pid, const char *filename,
+		       int flags, mode_t mode);
+
+  /* Multiple-filesystem-aware unlink.  Like unlink(2), but operates
+     in the filesystem as it appears to process PID.  Systems where
+     all processes share a common filesystem should set this to NULL.
+     If NULL, the caller should fall back to unlink(2).  */
+  int (*multifs_unlink) (int pid, const char *filename);
+
+  /* Multiple-filesystem-aware readlink.  Like readlink(2), but
+     operating in the filesystem as it appears to process PID.
+     Systems where all processes share a common filesystem should
+     set this to NULL.  If NULL, the caller should fall back to
+     readlink(2).  */
+  ssize_t (*multifs_readlink) (int pid, const char *filename,
+			       char *buf, size_t bufsiz);
 };
 
 extern struct target_ops *the_target;
@@ -411,10 +448,32 @@ void set_target_ops (struct target_ops *);
 #define create_inferior(program, args) \
   (*the_target->create_inferior) (program, args)
 
+#define target_arch_setup()			 \
+  do						 \
+    {						 \
+      if (the_target->arch_setup != NULL)	 \
+	(*the_target->arch_setup) ();		 \
+    } while (0)
+
 #define myattach(pid) \
   (*the_target->attach) (pid)
 
 int kill_inferior (int);
+
+#define target_supports_fork_events() \
+  (the_target->supports_fork_events ? \
+   (*the_target->supports_fork_events) () : 0)
+
+#define target_supports_vfork_events() \
+  (the_target->supports_vfork_events ? \
+   (*the_target->supports_vfork_events) () : 0)
+
+#define target_handle_new_gdb_connection()		 \
+  do							 \
+    {							 \
+      if (the_target->handle_new_gdb_connection != NULL) \
+	(*the_target->handle_new_gdb_connection) ();	 \
+    } while (0)
 
 #define detach_inferior(pid) \
   (*the_target->detach) (pid)
@@ -549,6 +608,10 @@ int kill_inferior (int);
 #define target_supports_stopped_by_hw_breakpoint() \
   (the_target->supports_stopped_by_hw_breakpoint ? \
    (*the_target->supports_stopped_by_hw_breakpoint) () : 0)
+
+#define target_supports_conditional_breakpoints() \
+  (the_target->supports_conditional_breakpoints ? \
+   (*the_target->supports_conditional_breakpoints) () : 0)
 
 #define target_stopped_by_hw_breakpoint() \
   (the_target->stopped_by_hw_breakpoint ? \

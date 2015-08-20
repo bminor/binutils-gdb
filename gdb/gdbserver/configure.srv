@@ -42,19 +42,22 @@ srv_amd64_linux_xmlfiles="i386/amd64-linux.xml i386/amd64-avx-linux.xml i386/amd
 
 # Linux object files.  This is so we don't have to repeat
 # these files over and over again.
-srv_linux_obj="linux-low.o linux-osdata.o linux-procfs.o linux-ptrace.o linux-waitpid.o linux-personality.o"
+srv_linux_obj="linux-low.o linux-osdata.o linux-procfs.o linux-ptrace.o linux-waitpid.o linux-personality.o linux-namespaces.o"
 
 # Input is taken from the "${target}" variable.
 
 case "${target}" in
   aarch64*-*-linux*)
 			srv_regobj="aarch64.o"
-			srv_tgtobj="linux-aarch64-low.o"
+			srv_regobj="${srv_regobj} arm-with-neon.o"
+			srv_tgtobj="linux-aarch64-low.o aarch64-linux-hw-point.o"
+			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
 			srv_tgtobj="${srv_tgtobj} $srv_linux_obj"
 			srv_xmlfiles="aarch64.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-core.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-fpu.xml"
-			srv_linux_usrregs=yes
+			srv_xmlfiles="${srv_xmlfiles} arm-core.xml arm-vfpv3.xml"
+			srv_xmlfiles="${srv_xmlfiles} arm-with-neon.xml"
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
@@ -63,6 +66,7 @@ case "${target}" in
 			srv_regobj="${srv_regobj} arm-with-vfpv3.o"
 			srv_regobj="${srv_regobj} arm-with-neon.o"
 			srv_tgtobj="$srv_linux_obj linux-arm-low.o"
+			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
 			srv_xmlfiles="arm-with-iwmmxt.xml"
 			srv_xmlfiles="${srv_xmlfiles} arm-with-vfpv2.xml"
 			srv_xmlfiles="${srv_xmlfiles} arm-with-vfpv3.xml"

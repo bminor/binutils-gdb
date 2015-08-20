@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include "compile-internal.h"
-#include "gdb_assert.h"
 #include "symtab.h"
 #include "parser-defs.h"
 #include "block.h"
@@ -305,12 +304,10 @@ convert_one_symbol (struct compile_c_instance *context,
 
 static void
 convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
-		    struct symbol *sym, domain_enum domain)
+		    struct block_symbol sym, domain_enum domain)
 {
-  const struct block *static_block, *found_block;
+  const struct block *static_block;
   int is_local_symbol;
-
-  found_block = block_found;
 
   /* If we found a symbol and it is not in the  static or global
      scope, then we should first convert any static or global scope
@@ -324,32 +321,32 @@ convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
      }
   */
 
-  static_block = block_static_block (found_block);
+  static_block = block_static_block (sym.block);
   /* STATIC_BLOCK is NULL if FOUND_BLOCK is the global block.  */
-  is_local_symbol = (found_block != static_block && static_block != NULL);
+  is_local_symbol = (sym.block != static_block && static_block != NULL);
   if (is_local_symbol)
     {
-      struct symbol *global_sym;
+      struct block_symbol global_sym;
 
       global_sym = lookup_symbol (identifier, NULL, domain, NULL);
       /* If the outer symbol is in the static block, we ignore it, as
 	 it cannot be referenced.  */
-      if (global_sym != NULL
-	  && block_found != block_static_block (block_found))
+      if (global_sym.symbol != NULL
+	  && global_sym.block != block_static_block (global_sym.block))
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdout,
+	    fprintf_unfiltered (gdb_stdlog,
 				"gcc_convert_symbol \"%s\": global symbol\n",
 				identifier);
-	  convert_one_symbol (context, global_sym, 1, 0);
+	  convert_one_symbol (context, global_sym.symbol, 1, 0);
 	}
     }
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdout,
+    fprintf_unfiltered (gdb_stdlog,
 			"gcc_convert_symbol \"%s\": local symbol\n",
 			identifier);
-  convert_one_symbol (context, sym, 0, is_local_symbol);
+  convert_one_symbol (context, sym.symbol, 0, is_local_symbol);
 }
 
 /* Convert a minimal symbol to its gcc form.  CONTEXT is the compiler
@@ -445,10 +442,10 @@ gcc_convert_symbol (void *datum,
      is to simply emit a gcc error.  */
   TRY
     {
-      struct symbol *sym;
+      struct block_symbol sym;
 
       sym = lookup_symbol (identifier, context->base.block, domain, NULL);
-      if (sym != NULL)
+      if (sym.symbol != NULL)
 	{
 	  convert_symbol_sym (context, identifier, sym, domain);
 	  found = 1;
@@ -473,7 +470,7 @@ gcc_convert_symbol (void *datum,
   END_CATCH
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdout,
+    fprintf_unfiltered (gdb_stdlog,
 			"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
 			identifier);
   return;
@@ -496,11 +493,11 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
       struct symbol *sym;
 
       /* We only need global functions here.  */
-      sym = lookup_symbol (identifier, NULL, VAR_DOMAIN, NULL);
+      sym = lookup_symbol (identifier, NULL, VAR_DOMAIN, NULL).symbol;
       if (sym != NULL && SYMBOL_CLASS (sym) == LOC_BLOCK)
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdout,
+	    fprintf_unfiltered (gdb_stdlog,
 				"gcc_symbol_address \"%s\": full symbol\n",
 				identifier);
 	  result = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
@@ -516,7 +513,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	  if (msym.minsym != NULL)
 	    {
 	      if (compile_debug)
-		fprintf_unfiltered (gdb_stdout,
+		fprintf_unfiltered (gdb_stdlog,
 				    "gcc_symbol_address \"%s\": minimal "
 				    "symbol\n",
 				    identifier);
@@ -535,7 +532,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
   END_CATCH
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdout,
+    fprintf_unfiltered (gdb_stdlog,
 			"gcc_symbol_address \"%s\": failed\n",
 			identifier);
   return result;

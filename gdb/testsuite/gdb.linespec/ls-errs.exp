@@ -49,11 +49,16 @@ array set error_messages {
     invalid_var_or_func_f \
 	"Undefined convenience variable or function \"%s\" not defined in \"%s\"."
     invalid_label "No label \"%s\" defined in function \"%s\"."
+    invalid_parm "invalid linespec argument, \"%s\""
     invalid_offset "No line %d in the current file."
     invalid_offset_f "No line %d in file \"%s\"."
+    malformed_line_offset "malformed line offset: \"%s\""
+    source_incomplete \
+	"Source filename requires function, label, or line offset."
     unexpected "malformed linespec error: unexpected %s"
     unexpected_opt "malformed linespec error: unexpected %s, \"%s\""
     unmatched_quote "unmatched quote"
+    garbage "Garbage '%s' at end of command"
 }
 
 # Some commonly used whitespace tests around ':'.
@@ -80,6 +85,7 @@ foreach x $invalid_offsets {
 	incr offset 16
     }
     test_break $x invalid_offset $offset
+    test_break "-line $x" invalid_offset $offset
 }
 
 # Test offsets with trailing tokens w/ and w/o spaces.
@@ -91,13 +97,17 @@ foreach x $spaces {
 
 foreach x {1 +1 +100 -10} {
     test_break "3 $x" unexpected_opt "number" $x
+    test_break "-line 3 $x" garbage $x
     test_break "+10 $x" unexpected_opt "number" $x
+    test_break "-line +10 $x" garbage $x
     test_break "-10 $x" unexpected_opt "number" $x
+    test_break "-line -10 $x" garbage $x
 }
 
-test_break "3 foo" unexpected_opt "string" "foo"
-test_break "+10 foo" unexpected_opt "string" "foo"
-test_break "-10 foo" unexpected_opt "string" "foo"
+foreach x {3 +10 -10} {
+    test_break "$x foo" unexpected_opt "string" "foo"
+    test_break "-line $x foo" garbage "foo"
+}
 
 # Test invalid linespecs starting with filename.
 foreach x [list "this_file_doesn't_exist.c" \
@@ -113,6 +123,25 @@ foreach x [list "this_file_doesn't_exist.c" \
     # Remove any quoting from FILENAME for the error message.
     test_break "$x:3" invalid_file [string trim $x \"']
 }
+foreach x [list "this_file_doesn't_exist.c" \
+	       "file::colons.c" \
+	       "'file::colons.c'"] {
+    test_break "-source $x -line 3" \
+	invalid_file [string trim $x \"']
+}
+
+# Test that option lexing stops at whitespace boundaries
+test_break "-source this file has spaces.c -line 3" \
+    invalid_file "this"
+
+test_break "-function function whitespace" \
+    invalid_function "function"
+
+test_break "-source $srcfile -function function whitespace" \
+    invalid_function_f "function" $srcfile
+
+test_break "-function main -label label whitespace" \
+    invalid_label "label" "main"
 
 # Test unmatched quotes.
 foreach x {"\"src-file.c'" "'src-file.c"} {
@@ -123,7 +152,11 @@ test_break $srcfile invalid_function $srcfile
 foreach x {"foo" " foo" " foo "} {
     # Trim any leading/trailing whitespace for error messages.
     test_break "$srcfile:$x" invalid_function_f [string trim $x] $srcfile
+    test_break "-source $srcfile -function $x" \
+	invalid_function_f [string trim $x] $srcfile
     test_break "$srcfile:main:$x" invalid_label [string trim $x] "main"
+    test_break "-source $srcfile -function main -label $x" \
+	invalid_label [string trim $x] "main"
 }
 
 foreach x $spaces {
@@ -133,20 +166,26 @@ foreach x $spaces {
 
 test_break "${srcfile}::" invalid_function "${srcfile}::"
 test_break "$srcfile:3 1" unexpected_opt "number" "1"
+test_break "-source $srcfile -line 3 1" garbage "1"
 test_break "$srcfile:3 +100" unexpected_opt "number" "+100"
+test_break "-source $srcfile -line 3 +100" garbage "+100"
 test_break "$srcfile:3 -100" unexpected_opt "number" "-100"
 test_break "$srcfile:3 foo" unexpected_opt "string" "foo"
+test_break "-source $srcfile -line 3 foo" garbage "foo"
 
 foreach x $invalid_offsets {
     test_break "$srcfile:$x" invalid_offset_f $x $srcfile
     test_break "\"$srcfile:$x\"" invalid_offset_f $x $srcfile
     test_break "'$srcfile:$x'" invalid_offset_f $x $srcfile
+    test_break "-source $srcfile -line $x" invalid_offset_f $x $srcfile
 }
+test_break "-source $srcfile -line -x" malformed_line_offset "-x"
 
 # Test invalid filespecs starting with function.
 foreach x {"foobar" "foo::bar" "foo.bar" "foo ." "foo bar" "foo 1" \
 	       "foo 0" "foo +10" "foo -10" "foo +100" "foo -100"} {
     test_break $x invalid_function $x
+    test_break "-function \"$x\"" invalid_function $x
 }
 
 foreach x $spaces {
@@ -155,13 +194,12 @@ foreach x $spaces {
     test_break "main:here${x}" unexpected "end of input"
 }
 
-test_break "main 3" invalid_function "main 3"
-test_break "main +100" invalid_function "main +100"
-test_break "main -100" invalid_function "main -100"
-test_break "main foo" invalid_function "main foo"
-
 foreach x {"3" "+100" "-100" "foo"} {
+    test_break "main 3" invalid_function "main 3"
+    test_break "-function \"main $x\"" invalid_function "main $x"
     test_break "main:here $x" invalid_label "here $x" "main"
+    test_break "-function main -label \"here $x\"" \
+	invalid_label "here $x" "main"
 }
 
 foreach x {"if" "task" "thread"} {
@@ -178,3 +216,6 @@ test_break "'main.c'+3" unexpected_opt "number" "+3"
 set x {$zippo}
 test_break $x invalid_var_or_func $x
 test_break "$srcfile:$x" invalid_var_or_func_f $x $srcfile
+
+# Explicit linespec-specific tests
+test_break "-source $srcfile" source_incomplete

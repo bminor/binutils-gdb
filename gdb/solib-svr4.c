@@ -443,10 +443,12 @@ static int match_main (const char *);
    Return a pointer to allocated memory holding the program header contents,
    or NULL on failure.  If sucessful, and unless P_SECT_SIZE is NULL, the
    size of those contents is returned to P_SECT_SIZE.  Likewise, the target
-   architecture size (32-bit or 64-bit) is returned to P_ARCH_SIZE.  */
+   architecture size (32-bit or 64-bit) is returned to P_ARCH_SIZE and
+   the base address of the section is returned in BASE_ADDR.  */
 
 static gdb_byte *
-read_program_header (int type, int *p_sect_size, int *p_arch_size)
+read_program_header (int type, int *p_sect_size, int *p_arch_size,
+		     CORE_ADDR *base_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   CORE_ADDR at_phdr, at_phent, at_phnum, pt_phdr = 0;
@@ -576,6 +578,8 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
     *p_arch_size = arch_size;
   if (p_sect_size)
     *p_sect_size = sect_size;
+  if (base_addr)
+    *base_addr = sect_addr;
 
   return buf;
 }
@@ -605,7 +609,7 @@ find_program_interpreter (void)
 
   /* If we didn't find it, use the target auxillary vector.  */
   if (!buf)
-    buf = read_program_header (PT_INTERP, NULL, NULL);
+    buf = read_program_header (PT_INTERP, NULL, NULL, NULL);
 
   return (char *) buf;
 }
@@ -615,7 +619,8 @@ find_program_interpreter (void)
    found, 1 is returned and the corresponding PTR is set.  */
 
 static int
-scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr)
+scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
+	     CORE_ADDR *ptr_addr)
 {
   int arch_size, step, sect_size;
   long current_dyntag;
@@ -695,13 +700,15 @@ scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr)
 	   {
 	     struct type *ptr_type;
 	     gdb_byte ptr_buf[8];
-	     CORE_ADDR ptr_addr;
+	     CORE_ADDR ptr_addr_1;
 
 	     ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-	     ptr_addr = dyn_addr + (buf - bufstart) + arch_size / 8;
-	     if (target_read_memory (ptr_addr, ptr_buf, arch_size / 8) == 0)
+	     ptr_addr_1 = dyn_addr + (buf - bufstart) + arch_size / 8;
+	     if (target_read_memory (ptr_addr_1, ptr_buf, arch_size / 8) == 0)
 	       dyn_ptr = extract_typed_address (ptr_buf, ptr_type);
 	     *ptr = dyn_ptr;
+	     if (ptr_addr)
+	       *ptr_addr = dyn_addr + (buf - bufstart);
 	   }
 	 return 1;
        }
@@ -715,16 +722,19 @@ scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr)
    is returned and the corresponding PTR is set.  */
 
 static int
-scan_dyntag_auxv (const int desired_dyntag, CORE_ADDR *ptr)
+scan_dyntag_auxv (const int desired_dyntag, CORE_ADDR *ptr,
+		  CORE_ADDR *ptr_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int sect_size, arch_size, step;
   long current_dyntag;
   CORE_ADDR dyn_ptr;
+  CORE_ADDR base_addr;
   gdb_byte *bufend, *bufstart, *buf;
 
   /* Read in .dynamic section.  */
-  buf = bufstart = read_program_header (PT_DYNAMIC, &sect_size, &arch_size);
+  buf = bufstart = read_program_header (PT_DYNAMIC, &sect_size, &arch_size,
+					&base_addr);
   if (!buf)
     return 0;
 
@@ -761,6 +771,9 @@ scan_dyntag_auxv (const int desired_dyntag, CORE_ADDR *ptr)
 	if (ptr)
 	  *ptr = dyn_ptr;
 
+	if (ptr_addr)
+	  *ptr_addr = base_addr + buf - bufstart;
+
 	xfree (bufstart);
 	return 1;
       }
@@ -786,13 +799,13 @@ static CORE_ADDR
 elf_locate_base (void)
 {
   struct bound_minimal_symbol msymbol;
-  CORE_ADDR dyn_ptr;
+  CORE_ADDR dyn_ptr, dyn_ptr_addr;
 
   /* Look for DT_MIPS_RLD_MAP first.  MIPS executables use this
      instead of DT_DEBUG, although they sometimes contain an unused
      DT_DEBUG.  */
-  if (scan_dyntag (DT_MIPS_RLD_MAP, exec_bfd, &dyn_ptr)
-      || scan_dyntag_auxv (DT_MIPS_RLD_MAP, &dyn_ptr))
+  if (scan_dyntag (DT_MIPS_RLD_MAP, exec_bfd, &dyn_ptr, NULL)
+      || scan_dyntag_auxv (DT_MIPS_RLD_MAP, &dyn_ptr, NULL))
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
       gdb_byte *pbuf;
@@ -806,9 +819,27 @@ elf_locate_base (void)
       return extract_typed_address (pbuf, ptr_type);
     }
 
+  /* Then check DT_MIPS_RLD_MAP_REL.  MIPS executables now use this form
+     because of needing to support PIE.  DT_MIPS_RLD_MAP will also exist
+     in non-PIE.  */
+  if (scan_dyntag (DT_MIPS_RLD_MAP_REL, exec_bfd, &dyn_ptr, &dyn_ptr_addr)
+      || scan_dyntag_auxv (DT_MIPS_RLD_MAP_REL, &dyn_ptr, &dyn_ptr_addr))
+    {
+      struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+      gdb_byte *pbuf;
+      int pbuf_size = TYPE_LENGTH (ptr_type);
+
+      pbuf = alloca (pbuf_size);
+      /* DT_MIPS_RLD_MAP_REL contains an offset from the address of the
+	 DT slot to the address of the dynamic link structure.  */
+      if (target_read_memory (dyn_ptr + dyn_ptr_addr, pbuf, pbuf_size))
+	return 0;
+      return extract_typed_address (pbuf, ptr_type);
+    }
+
   /* Find DT_DEBUG.  */
-  if (scan_dyntag (DT_DEBUG, exec_bfd, &dyn_ptr)
-      || scan_dyntag_auxv (DT_DEBUG, &dyn_ptr))
+  if (scan_dyntag (DT_DEBUG, exec_bfd, &dyn_ptr, NULL)
+      || scan_dyntag_auxv (DT_DEBUG, &dyn_ptr, NULL))
     return dyn_ptr;
 
   /* This may be a static executable.  Look for the symbol
@@ -2607,7 +2638,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
       gdb_byte *buf, *buf2;
       int arch_size;
 
-      buf = read_program_header (-1, &phdrs_size, &arch_size);
+      buf = read_program_header (-1, &phdrs_size, &arch_size, NULL);
       buf2 = read_program_headers_from_bfd (exec_bfd, &phdrs2_size);
       if (buf != NULL && buf2 != NULL)
 	{
@@ -3211,7 +3242,7 @@ struct target_so_ops svr4_so_ops;
    different rule for symbol lookup.  The lookup begins here in the DSO, not in
    the main executable.  */
 
-static struct symbol *
+static struct block_symbol
 elf_lookup_lib_symbol (struct objfile *objfile,
 		       const char *name,
 		       const domain_enum domain)
@@ -3228,8 +3259,8 @@ elf_lookup_lib_symbol (struct objfile *objfile,
       abfd = objfile->obfd;
     }
 
-  if (abfd == NULL || scan_dyntag (DT_SYMBOLIC, abfd, NULL) != 1)
-    return NULL;
+  if (abfd == NULL || scan_dyntag (DT_SYMBOLIC, abfd, NULL, NULL) != 1)
+    return (struct block_symbol) {NULL, NULL};
 
   return lookup_global_symbol_from_objfile (objfile, name, domain);
 }

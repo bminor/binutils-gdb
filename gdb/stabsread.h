@@ -160,16 +160,12 @@ struct stab_section_list
 /* Functions exported by dbxread.c.  These are not in stabsread.c because
    they are only used by some stabs readers.  */
 
-extern struct partial_symtab *end_psymtab (struct objfile *objfile,
-					   struct partial_symtab *pst,
-					   const char **include_list,
-					   int num_includes,
-					   int capping_symbol_offset,
-					   CORE_ADDR capping_text,
-					   struct partial_symtab
-					   **dependency_list,
-					   int number_dependencies,
-					   int textlow_not_set);
+extern struct partial_symtab *dbx_end_psymtab
+  (struct objfile *objfile, struct partial_symtab *pst,
+   const char **include_list, int num_includes,
+   int capping_symbol_offset, CORE_ADDR capping_text,
+   struct partial_symtab **dependency_list, int number_dependencies,
+   int textlow_not_set);
 
 extern void process_one_symbol (int, int, CORE_ADDR, char *,
 				const struct section_offsets *,
@@ -189,8 +185,6 @@ extern void coffstab_build_psymtabs
 extern void stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
 				     char *stabstr_name, char *text_name);
 
-extern void elfstab_offset_sections (struct objfile *,
-				     struct partial_symtab *);
 extern int symbol_reference_defined (char **);
 
 extern void ref_add (int, struct symbol *, char *, CORE_ADDR);
