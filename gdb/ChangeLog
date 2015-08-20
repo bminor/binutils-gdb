@@ -1,3 +1,9 @@
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (process_full_comp_unit): To tell whether
+	start_subfile managed to deduce a language, test for
+	language_unknown instead of language_c.
+
 2015-08-20  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-lex.l: Reset the start condition to INITIAL in the rule that

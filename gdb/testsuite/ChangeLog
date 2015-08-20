@@ -1,3 +1,8 @@
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/comp-unit-lang.exp: New file.
+	* gdb.dwarf2/comp-unit-lang.c: New file.
+
 2015-08-20  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/attr_ref_and_charlit.exp: New testcase.
