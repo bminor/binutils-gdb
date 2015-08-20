@@ -131,7 +131,9 @@ print_one_macro (const char *name, const struct macro_definition *macro,
   if (line == 0)
     return;
 
-  fprintf_filtered (file, "#define %s", name);
+  /* None of -Wno-builtin-macro-redefined, #undef first
+     or plain #define of the same value would avoid a warning.  */
+  fprintf_filtered (file, "#ifndef %s\n# define %s", name, name);
 
   if (macro->kind == macro_function_like)
     {
@@ -146,8 +148,7 @@ print_one_macro (const char *name, const struct macro_definition *macro,
 	}
       fputs_filtered (")", file);
     }
-
-  fprintf_filtered (file, " %s\n", macro->replacement);
+  fprintf_filtered (file, " %s\n#endif\n", macro->replacement);
 }
 
 /* Write macro definitions at PC to FILE.  */
@@ -252,7 +253,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 	    switch (TYPE_CODE (regtype))
 	      {
 	      case TYPE_CODE_PTR:
-		fprintf_filtered (stream, "void *%s", regname);
+		fprintf_filtered (stream, "__gdb_uintptr %s", regname);
 		break;
 
 	      case TYPE_CODE_INT:
@@ -340,8 +341,6 @@ cplus_compute_program (struct compile_instance *inst,
 							      expr_block, expr_pc);
       make_cleanup (xfree, registers_used);
 
-      generate_register_struct (buf, gdbarch, registers_used);
-
       fputs_unfiltered ("typedef unsigned int"
 			" __attribute__ ((__mode__(__pointer__)))"
 			" __gdb_uintptr;\n",
@@ -363,6 +362,8 @@ cplus_compute_program (struct compile_instance *inst,
 			      " __gdb_int_%s;\n",
 			      mode, mode);
 	}
+
+      generate_register_struct (buf, gdbarch, registers_used);
     }
 
   add_code_header (inst->scope, buf);

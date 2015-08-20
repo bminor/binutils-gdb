@@ -424,7 +424,8 @@ new_compile_instance (struct gcc_c_context *fe)
 				     /* Otherwise the .o file may need
 					"_Unwind_Resume" and
 					"__gcc_personality_v0".  */
-				     " -fno-exceptions");
+				     " -fno-exceptions"
+				     " -Wno-implicit-function-declaration");
 
   result->type_map = htab_create_alloc (10, hash_type_map_instance,
 					eq_type_map_instance,
