@@ -209,7 +209,8 @@ inf_child_pid_to_exec_file (struct target_ops *self, int pid)
 static int
 inf_child_fileio_open (struct target_ops *self,
 		       struct inferior *inf, const char *filename,
-		       int flags, int mode, int *target_errno)
+		       int flags, int mode, int warn_if_slow,
+		       int *target_errno)
 {
   int nat_flags;
   mode_t nat_mode;
