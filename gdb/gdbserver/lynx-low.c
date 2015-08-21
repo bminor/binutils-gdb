@@ -713,7 +713,7 @@ lynx_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 static void
 lynx_request_interrupt (void)
 {
-  ptid_t inferior_ptid = thread_to_gdb_id (current_thread);
+  ptid_t inferior_ptid = thread_to_gdb_id (get_first_thread ());
 
   kill (lynx_ptid_get_pid (inferior_ptid), SIGINT);
 }

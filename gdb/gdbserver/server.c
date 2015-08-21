@@ -816,7 +816,10 @@ gdb_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   res = prepare_to_access_memory ();
   if (res == 0)
     {
-      res = read_inferior_memory (memaddr, myaddr, len);
+      if (set_desired_thread (1))
+	res = read_inferior_memory (memaddr, myaddr, len);
+      else
+	res = 1;
       done_accessing_memory ();
 
       return res == 0 ? len : -1;
@@ -840,7 +843,10 @@ gdb_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
       ret = prepare_to_access_memory ();
       if (ret == 0)
 	{
-	  ret = write_inferior_memory (memaddr, myaddr, len);
+	  if (set_desired_thread (1))
+	    ret = write_inferior_memory (memaddr, myaddr, len);
+	  else
+	    ret = EIO;
 	  done_accessing_memory ();
 	}
       return ret;
@@ -1171,7 +1177,7 @@ handle_qxfer_auxv (const char *annex,
   if (the_target->read_auxv == NULL || writebuf != NULL)
     return -2;
 
-  if (annex[0] != '\0' || !target_running ())
+  if (annex[0] != '\0' || current_thread == NULL)
     return -1;
 
   return (*the_target->read_auxv) (offset, readbuf, len);
@@ -1316,7 +1322,7 @@ handle_qxfer_libraries (const char *annex,
   if (writebuf != NULL)
     return -2;
 
-  if (annex[0] != '\0' || !target_running ())
+  if (annex[0] != '\0' || current_thread == NULL)
     return -1;
 
   total_len = 64;
@@ -1360,7 +1366,7 @@ handle_qxfer_libraries_svr4 (const char *annex,
   if (writebuf != NULL)
     return -2;
 
-  if (!target_running () || the_target->qxfer_libraries_svr4 == NULL)
+  if (current_thread == NULL || the_target->qxfer_libraries_svr4 == NULL)
     return -1;
 
   return the_target->qxfer_libraries_svr4 (annex, readbuf, writebuf, offset, len);
@@ -1389,7 +1395,7 @@ handle_qxfer_siginfo (const char *annex,
   if (the_target->qxfer_siginfo == NULL)
     return -2;
 
-  if (annex[0] != '\0' || !target_running ())
+  if (annex[0] != '\0' || current_thread == NULL)
     return -1;
 
   return (*the_target->qxfer_siginfo) (annex, readbuf, writebuf, offset, len);
@@ -1405,7 +1411,7 @@ handle_qxfer_spu (const char *annex,
   if (the_target->qxfer_spu == NULL)
     return -2;
 
-  if (!target_running ())
+  if (current_thread == NULL)
     return -1;
 
   return (*the_target->qxfer_spu) (annex, readbuf, writebuf, offset, len);
@@ -1423,7 +1429,7 @@ handle_qxfer_statictrace (const char *annex,
   if (writebuf != NULL)
     return -2;
 
-  if (annex[0] != '\0' || !target_running () || current_traceframe == -1)
+  if (annex[0] != '\0' || current_thread == NULL || current_traceframe == -1)
     return -1;
 
   if (traceframe_read_sdata (current_traceframe, offset,
@@ -1486,7 +1492,7 @@ handle_qxfer_threads (const char *annex,
   if (writebuf != NULL)
     return -2;
 
-  if (!target_running () || annex[0] != '\0')
+  if (annex[0] != '\0')
     return -1;
 
   if (offset == 0)
@@ -1582,7 +1588,7 @@ handle_qxfer_fdpic (const char *annex, gdb_byte *readbuf,
   if (the_target->read_loadmap == NULL)
     return -2;
 
-  if (!target_running ())
+  if (current_thread == NULL)
     return -1;
 
   return (*the_target->read_loadmap) (annex, offset, readbuf, len);
@@ -1601,9 +1607,6 @@ handle_qxfer_btrace (const char *annex,
 
   if (the_target->read_btrace == NULL || writebuf != NULL)
     return -2;
-
-  if (!target_running ())
-    return -1;
 
   if (ptid_equal (general_thread, null_ptid)
       || ptid_equal (general_thread, minus_one_ptid))
@@ -1676,7 +1679,7 @@ handle_qxfer_btrace_conf (const char *annex,
   if (the_target->read_btrace_conf == NULL || writebuf != NULL)
     return -2;
 
-  if (annex[0] != '\0' || !target_running ())
+  if (annex[0] != '\0')
     return -1;
 
   if (ptid_equal (general_thread, null_ptid)
@@ -1978,7 +1981,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_tracepoints ())
 	tracepoint_look_up_symbols ();
 
-      if (target_running () && the_target->look_up_symbols != NULL)
+      if (current_thread != NULL && the_target->look_up_symbols != NULL)
 	(*the_target->look_up_symbols) ();
 
       strcpy (own_buf, "OK");
@@ -2575,8 +2578,6 @@ handle_v_cont (char *own_buf)
   if (i < n)
     resume_info[i] = default_action;
 
-  set_desired_thread (0);
-
   resume (resume_info, n);
   free (resume_info);
   return;
@@ -2877,8 +2878,6 @@ myresume (char *own_buf, int step, int sig)
   struct thread_resume resume_info[2];
   int n = 0;
   int valid_cont_thread;
-
-  set_desired_thread (0);
 
   valid_cont_thread = (!ptid_equal (cont_thread, null_ptid)
 			 && !ptid_equal (cont_thread, minus_one_ptid));
@@ -3908,14 +3907,13 @@ process_serial_event (void)
 		    (struct thread_info *) find_inferior_id (&all_threads,
 							     general_thread);
 		  if (thread == NULL)
-		    {
-		      thread = get_first_thread ();
-		      thread_id = thread->entry.id;
-		    }
+		    thread = get_first_thread ();
+		  thread_id = thread->entry.id;
 		}
 
 	      general_thread = thread_id;
 	      set_desired_thread (1);
+	      gdb_assert (current_thread != NULL);
 	    }
 	  else if (own_buf[1] == 'c')
 	    cont_thread = thread_id;
@@ -3947,9 +3945,13 @@ process_serial_event (void)
 	{
 	  struct regcache *regcache;
 
-	  set_desired_thread (1);
-	  regcache = get_thread_regcache (current_thread, 1);
-	  registers_to_string (regcache, own_buf);
+	  if (!set_desired_thread (1))
+	    write_enn (own_buf);
+	  else
+	    {
+	      regcache = get_thread_regcache (current_thread, 1);
+	      registers_to_string (regcache, own_buf);
+	    }
 	}
       break;
     case 'G':
@@ -3960,10 +3962,14 @@ process_serial_event (void)
 	{
 	  struct regcache *regcache;
 
-	  set_desired_thread (1);
-	  regcache = get_thread_regcache (current_thread, 1);
-	  registers_from_string (regcache, &own_buf[1]);
-	  write_ok (own_buf);
+	  if (!set_desired_thread (1))
+	    write_enn (own_buf);
+	  else
+	    {
+	      regcache = get_thread_regcache (current_thread, 1);
+	      registers_from_string (regcache, &own_buf[1]);
+	      write_ok (own_buf);
+	    }
 	}
       break;
     case 'm':

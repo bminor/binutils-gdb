@@ -1,3 +1,34 @@
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (wait_for_sigstop): Always switch to no thread
+	selected if the previously current thread dies.
+	* lynx-low.c (lynx_request_interrupt): Use the first thread's
+	process instead of the current thread's.
+	* remote-utils.c (input_interrupt): Don't check if there's no
+	current thread.
+	* server.c (gdb_read_memory, gdb_write_memory): If setting the
+	current thread to the general thread fails, error out.
+	(handle_qxfer_auxv, handle_qxfer_libraries)
+	(handle_qxfer_libraries_svr4, handle_qxfer_siginfo)
+	(handle_qxfer_spu, handle_qxfer_statictrace, handle_qxfer_fdpic)
+	(handle_query): Check if there's a thread selected instead of
+	checking whether there's any thread in the thread list.
+	(handle_qxfer_threads, handle_qxfer_btrace)
+	(handle_qxfer_btrace_conf): Don't error out early if there's no
+	thread in the thread list.
+	(handle_v_cont, myresume): Don't set the current thread to the
+	continue thread.
+	(process_serial_event) <Hg handling>: Also set thread_id if the
+	previous general thread is still alive.
+	(process_serial_event) <g/G handling>: If setting the current
+	thread to the general thread fails, error out.
+	* spu-low.c (spu_resume, spu_request_interrupt): Use the first
+	thread's lwp instead of the current thread's.
+	* target.c (set_desired_thread): If the desired thread was not
+	found, leave the current thread pointing to NULL.  Return an int
+	(boolean) indicating success.
+	* target.h (set_desired_thread): Change return type to int.
+
 2015-08-20  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* configure.srv (xtensa*-*-linux*): Add srv_linux_thread_db=yes.

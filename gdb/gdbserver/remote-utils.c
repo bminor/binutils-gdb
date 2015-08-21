@@ -747,7 +747,7 @@ input_interrupt (int unused)
 	  fprintf (stderr, "client connection closed\n");
 	  return;
 	}
-      else if (cc != 1 || c != '\003' || current_thread == NULL)
+      else if (cc != 1 || c != '\003')
 	{
 	  fprintf (stderr, "input_interrupt, count = %d c = %d ", cc, c);
 	  if (isprint (c))
