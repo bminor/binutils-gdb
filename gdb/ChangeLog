@@ -1,3 +1,13 @@
+2015-08-21  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (struct dwarf2_section_info): Rename field
+	'asection' to 'section'.
+	(dwarf2_has_info, get_section_bfd_owner, get_section_bfd_section)
+	(dwarf2_locate_sections, dwarf2_locate_sections)
+	(locate_dwz_sections, locate_v1_virtual_dwo_sections)
+	(dwarf2_locate_dwo_sections, dwarf2_locate_dwo_sections)
+	(dwarf2_locate_v2_dwp_sections): Adjust.
+
 2015-08-21  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* top.h (gdb_in_secondary_prompt_p): Declare.

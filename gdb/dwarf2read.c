@@ -124,7 +124,7 @@ struct dwarf2_section_info
   union
   {
     /* If this is a real section, the bfd section.  */
-    asection *asection;
+    asection *section;
     /* If this is a virtual section, pointer to the containing ("real")
        section.  */
     struct dwarf2_section_info *containing_section;
@@ -139,7 +139,7 @@ struct dwarf2_section_info
   /* True if we have tried to read this section.  */
   char readin;
   /* True if this is a virtual section, False otherwise.
-     This specifies which of s.asection and s.containing_section to use.  */
+     This specifies which of s.section and s.containing_section to use.  */
   char is_virtual;
 };
 
@@ -2055,9 +2055,9 @@ dwarf2_has_info (struct objfile *objfile,
       dwarf2_per_objfile->objfile = objfile;
     }
   return (!dwarf2_per_objfile->info.is_virtual
-	  && dwarf2_per_objfile->info.s.asection != NULL
+	  && dwarf2_per_objfile->info.s.section != NULL
 	  && !dwarf2_per_objfile->abbrev.is_virtual
-	  && dwarf2_per_objfile->abbrev.s.asection != NULL);
+	  && dwarf2_per_objfile->abbrev.s.section != NULL);
 }
 
 /* Return the containing section of virtual section SECTION.  */
@@ -2079,7 +2079,7 @@ get_section_bfd_owner (const struct dwarf2_section_info *section)
       section = get_containing_section (section);
       gdb_assert (!section->is_virtual);
     }
-  return section->s.asection->owner;
+  return section->s.section->owner;
 }
 
 /* Return the bfd section of SECTION.
@@ -2093,7 +2093,7 @@ get_section_bfd_section (const struct dwarf2_section_info *section)
       section = get_containing_section (section);
       gdb_assert (!section->is_virtual);
     }
-  return section->s.asection;
+  return section->s.section;
 }
 
 /* Return the name of SECTION.  */
@@ -2178,57 +2178,57 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     }
   else if (section_is_p (sectp->name, &names->info))
     {
-      dwarf2_per_objfile->info.s.asection = sectp;
+      dwarf2_per_objfile->info.s.section = sectp;
       dwarf2_per_objfile->info.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->abbrev))
     {
-      dwarf2_per_objfile->abbrev.s.asection = sectp;
+      dwarf2_per_objfile->abbrev.s.section = sectp;
       dwarf2_per_objfile->abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line))
     {
-      dwarf2_per_objfile->line.s.asection = sectp;
+      dwarf2_per_objfile->line.s.section = sectp;
       dwarf2_per_objfile->line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc))
     {
-      dwarf2_per_objfile->loc.s.asection = sectp;
+      dwarf2_per_objfile->loc.s.section = sectp;
       dwarf2_per_objfile->loc.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo))
     {
-      dwarf2_per_objfile->macinfo.s.asection = sectp;
+      dwarf2_per_objfile->macinfo.s.section = sectp;
       dwarf2_per_objfile->macinfo.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro))
     {
-      dwarf2_per_objfile->macro.s.asection = sectp;
+      dwarf2_per_objfile->macro.s.section = sectp;
       dwarf2_per_objfile->macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str))
     {
-      dwarf2_per_objfile->str.s.asection = sectp;
+      dwarf2_per_objfile->str.s.section = sectp;
       dwarf2_per_objfile->str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->addr))
     {
-      dwarf2_per_objfile->addr.s.asection = sectp;
+      dwarf2_per_objfile->addr.s.section = sectp;
       dwarf2_per_objfile->addr.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->frame))
     {
-      dwarf2_per_objfile->frame.s.asection = sectp;
+      dwarf2_per_objfile->frame.s.section = sectp;
       dwarf2_per_objfile->frame.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->eh_frame))
     {
-      dwarf2_per_objfile->eh_frame.s.asection = sectp;
+      dwarf2_per_objfile->eh_frame.s.section = sectp;
       dwarf2_per_objfile->eh_frame.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->ranges))
     {
-      dwarf2_per_objfile->ranges.s.asection = sectp;
+      dwarf2_per_objfile->ranges.s.section = sectp;
       dwarf2_per_objfile->ranges.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->types))
@@ -2236,7 +2236,7 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
       struct dwarf2_section_info type_section;
 
       memset (&type_section, 0, sizeof (type_section));
-      type_section.s.asection = sectp;
+      type_section.s.section = sectp;
       type_section.size = bfd_get_section_size (sectp);
 
       VEC_safe_push (dwarf2_section_info_def, dwarf2_per_objfile->types,
@@ -2244,7 +2244,7 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     }
   else if (section_is_p (sectp->name, &names->gdb_index))
     {
-      dwarf2_per_objfile->gdb_index.s.asection = sectp;
+      dwarf2_per_objfile->gdb_index.s.section = sectp;
       dwarf2_per_objfile->gdb_index.size = bfd_get_section_size (sectp);
     }
 
@@ -2261,7 +2261,7 @@ dwarf2_section_empty_p (const struct dwarf2_section_info *section)
 {
   if (section->is_virtual)
     return section->size == 0;
-  return section->s.asection == NULL || section->size == 0;
+  return section->s.section == NULL || section->size == 0;
 }
 
 /* Read the contents of the section INFO.
@@ -2414,32 +2414,32 @@ locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
      is ELF-only (at the time of writing).  */
   if (section_is_p (sectp->name, &dwarf2_elf_names.abbrev))
     {
-      dwz_file->abbrev.s.asection = sectp;
+      dwz_file->abbrev.s.section = sectp;
       dwz_file->abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.info))
     {
-      dwz_file->info.s.asection = sectp;
+      dwz_file->info.s.section = sectp;
       dwz_file->info.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.str))
     {
-      dwz_file->str.s.asection = sectp;
+      dwz_file->str.s.section = sectp;
       dwz_file->str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.line))
     {
-      dwz_file->line.s.asection = sectp;
+      dwz_file->line.s.section = sectp;
       dwz_file->line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.macro))
     {
-      dwz_file->macro.s.asection = sectp;
+      dwz_file->macro.s.section = sectp;
       dwz_file->macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.gdb_index))
     {
-      dwz_file->gdb_index.s.asection = sectp;
+      dwz_file->gdb_index.s.section = sectp;
       dwz_file->gdb_index.size = bfd_get_section_size (sectp);
     }
 }
@@ -9927,58 +9927,58 @@ locate_v1_virtual_dwo_sections (asection *sectp,
   if (section_is_p (sectp->name, &names->abbrev_dwo))
     {
       /* There can be only one.  */
-      if (sections->abbrev.s.asection != NULL)
+      if (sections->abbrev.s.section != NULL)
 	return 0;
-      sections->abbrev.s.asection = sectp;
+      sections->abbrev.s.section = sectp;
       sections->abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->info_dwo)
 	   || section_is_p (sectp->name, &names->types_dwo))
     {
       /* There can be only one.  */
-      if (sections->info_or_types.s.asection != NULL)
+      if (sections->info_or_types.s.section != NULL)
 	return 0;
-      sections->info_or_types.s.asection = sectp;
+      sections->info_or_types.s.section = sectp;
       sections->info_or_types.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line_dwo))
     {
       /* There can be only one.  */
-      if (sections->line.s.asection != NULL)
+      if (sections->line.s.section != NULL)
 	return 0;
-      sections->line.s.asection = sectp;
+      sections->line.s.section = sectp;
       sections->line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc_dwo))
     {
       /* There can be only one.  */
-      if (sections->loc.s.asection != NULL)
+      if (sections->loc.s.section != NULL)
 	return 0;
-      sections->loc.s.asection = sectp;
+      sections->loc.s.section = sectp;
       sections->loc.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo_dwo))
     {
       /* There can be only one.  */
-      if (sections->macinfo.s.asection != NULL)
+      if (sections->macinfo.s.section != NULL)
 	return 0;
-      sections->macinfo.s.asection = sectp;
+      sections->macinfo.s.section = sectp;
       sections->macinfo.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro_dwo))
     {
       /* There can be only one.  */
-      if (sections->macro.s.asection != NULL)
+      if (sections->macro.s.section != NULL)
 	return 0;
-      sections->macro.s.asection = sectp;
+      sections->macro.s.section = sectp;
       sections->macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_offsets_dwo))
     {
       /* There can be only one.  */
-      if (sections->str_offsets.s.asection != NULL)
+      if (sections->str_offsets.s.section != NULL)
 	return 0;
-      sections->str_offsets.s.asection = sectp;
+      sections->str_offsets.s.section = sectp;
       sections->str_offsets.size = bfd_get_section_size (sectp);
     }
   else
@@ -10548,42 +10548,42 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
 
   if (section_is_p (sectp->name, &names->abbrev_dwo))
     {
-      dwo_sections->abbrev.s.asection = sectp;
+      dwo_sections->abbrev.s.section = sectp;
       dwo_sections->abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->info_dwo))
     {
-      dwo_sections->info.s.asection = sectp;
+      dwo_sections->info.s.section = sectp;
       dwo_sections->info.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line_dwo))
     {
-      dwo_sections->line.s.asection = sectp;
+      dwo_sections->line.s.section = sectp;
       dwo_sections->line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc_dwo))
     {
-      dwo_sections->loc.s.asection = sectp;
+      dwo_sections->loc.s.section = sectp;
       dwo_sections->loc.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo_dwo))
     {
-      dwo_sections->macinfo.s.asection = sectp;
+      dwo_sections->macinfo.s.section = sectp;
       dwo_sections->macinfo.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro_dwo))
     {
-      dwo_sections->macro.s.asection = sectp;
+      dwo_sections->macro.s.section = sectp;
       dwo_sections->macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_dwo))
     {
-      dwo_sections->str.s.asection = sectp;
+      dwo_sections->str.s.section = sectp;
       dwo_sections->str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_offsets_dwo))
     {
-      dwo_sections->str_offsets.s.asection = sectp;
+      dwo_sections->str_offsets.s.section = sectp;
       dwo_sections->str_offsets.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->types_dwo))
@@ -10591,7 +10591,7 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
       struct dwarf2_section_info type_section;
 
       memset (&type_section, 0, sizeof (type_section));
-      type_section.s.asection = sectp;
+      type_section.s.section = sectp;
       type_section.size = bfd_get_section_size (sectp);
       VEC_safe_push (dwarf2_section_info_def, dwo_sections->types,
 		     &type_section);
@@ -10660,17 +10660,17 @@ dwarf2_locate_common_dwp_sections (bfd *abfd, asection *sectp,
   /* Look for specific sections that we need.  */
   if (section_is_p (sectp->name, &names->str_dwo))
     {
-      dwp_file->sections.str.s.asection = sectp;
+      dwp_file->sections.str.s.section = sectp;
       dwp_file->sections.str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->cu_index))
     {
-      dwp_file->sections.cu_index.s.asection = sectp;
+      dwp_file->sections.cu_index.s.section = sectp;
       dwp_file->sections.cu_index.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->tu_index))
     {
-      dwp_file->sections.tu_index.s.asection = sectp;
+      dwp_file->sections.tu_index.s.section = sectp;
       dwp_file->sections.tu_index.size = bfd_get_section_size (sectp);
     }
 }
@@ -10695,42 +10695,42 @@ dwarf2_locate_v2_dwp_sections (bfd *abfd, asection *sectp, void *dwp_file_ptr)
   /* Look for specific sections that we need.  */
   if (section_is_p (sectp->name, &names->abbrev_dwo))
     {
-      dwp_file->sections.abbrev.s.asection = sectp;
+      dwp_file->sections.abbrev.s.section = sectp;
       dwp_file->sections.abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->info_dwo))
     {
-      dwp_file->sections.info.s.asection = sectp;
+      dwp_file->sections.info.s.section = sectp;
       dwp_file->sections.info.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line_dwo))
     {
-      dwp_file->sections.line.s.asection = sectp;
+      dwp_file->sections.line.s.section = sectp;
       dwp_file->sections.line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc_dwo))
     {
-      dwp_file->sections.loc.s.asection = sectp;
+      dwp_file->sections.loc.s.section = sectp;
       dwp_file->sections.loc.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo_dwo))
     {
-      dwp_file->sections.macinfo.s.asection = sectp;
+      dwp_file->sections.macinfo.s.section = sectp;
       dwp_file->sections.macinfo.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro_dwo))
     {
-      dwp_file->sections.macro.s.asection = sectp;
+      dwp_file->sections.macro.s.section = sectp;
       dwp_file->sections.macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_offsets_dwo))
     {
-      dwp_file->sections.str_offsets.s.asection = sectp;
+      dwp_file->sections.str_offsets.s.section = sectp;
       dwp_file->sections.str_offsets.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->types_dwo))
     {
-      dwp_file->sections.types.s.asection = sectp;
+      dwp_file->sections.types.s.section = sectp;
       dwp_file->sections.types.size = bfd_get_section_size (sectp);
     }
 }
