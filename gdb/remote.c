@@ -228,6 +228,8 @@ static void remote_btrace_reset (void);
 
 static int stop_reply_queue_length (void);
 
+static void readahead_cache_invalidate (void);
+
 /* For "remote".  */
 
 static struct cmd_list_element *remote_cmdlist;
@@ -263,6 +265,29 @@ typedef unsigned char threadref[OPAQUETHREADBYTES];
 /* About this many threadisds fit in a packet.  */
 
 #define MAXTHREADLISTRESULTS 32
+
+/* Data for the vFile:pread readahead cache.  */
+
+struct readahead_cache
+{
+  /* The file descriptor for the file that is being cached.  -1 if the
+     cache is invalid.  */
+  int fd;
+
+  /* The offset into the file that the cache buffer corresponds
+     to.  */
+  ULONGEST offset;
+
+  /* The buffer holding the cache contents.  */
+  gdb_byte *buf;
+  /* The buffer's size.  We try to read as much as fits into a packet
+     at a time.  */
+  size_t bufsize;
+
+  /* Cache hit and miss counters.  */
+  ULONGEST hit_count;
+  ULONGEST miss_count;
+};
 
 /* Description of the remote protocol state for the currently
    connected target.  This is per-target state, and independent of the
@@ -383,6 +408,14 @@ struct remote_state
      Initialized to -1 to indicate that no "vFile:setfs:" packet
      has yet been sent.  */
   int fs_pid;
+
+  /* A readahead cache for vFile:pread.  Often, reading a binary
+     involves a sequence of small reads.  E.g., when parsing an ELF
+     file.  A readahead cache helps mostly the case of remote
+     debugging on a connection with higher latency, due to the
+     request/reply nature of the RSP.  We only cache data for a single
+     file descriptor at a time.  */
+  struct readahead_cache readahead_cache;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -4560,6 +4593,8 @@ remote_open_1 (const char *name, int from_tty,
   /* Probe for ability to use "ThreadInfo" query, as required.  */
   rs->use_threadinfo_query = 1;
   rs->use_threadextra_query = 1;
+
+  readahead_cache_invalidate ();
 
   if (target_async_permitted)
     {
@@ -10400,6 +10435,27 @@ remote_hostio_send_command (int command_bytes, int which_packet,
   return ret;
 }
 
+/* Invalidate the readahead cache.  */
+
+static void
+readahead_cache_invalidate (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  rs->readahead_cache.fd = -1;
+}
+
+/* Invalidate the readahead cache if it is holding data for FD.  */
+
+static void
+readahead_cache_invalidate_fd (int fd)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (rs->readahead_cache.fd == fd)
+    rs->readahead_cache.fd = -1;
+}
+
 /* Set the filesystem remote_hostio functions that take FILENAME
    arguments will use.  Return 0 on success, or -1 if an error
    occurs (and set *REMOTE_ERRNO).  */
@@ -10478,6 +10534,8 @@ remote_hostio_pwrite (struct target_ops *self,
   int left = get_remote_packet_size ();
   int out_len;
 
+  readahead_cache_invalidate_fd (fd);
+
   remote_buffer_add_string (&p, &left, "vFile:pwrite:");
 
   remote_buffer_add_int (&p, &left, fd);
@@ -10493,12 +10551,13 @@ remote_hostio_pwrite (struct target_ops *self,
 				     remote_errno, NULL, NULL);
 }
 
-/* Implementation of to_fileio_pread.  */
+/* Helper for the implementation of to_fileio_pread.  Read the file
+   from the remote side with vFile:pread.  */
 
 static int
-remote_hostio_pread (struct target_ops *self,
-		     int fd, gdb_byte *read_buf, int len,
-		     ULONGEST offset, int *remote_errno)
+remote_hostio_pread_vFile (struct target_ops *self,
+			   int fd, gdb_byte *read_buf, int len,
+			   ULONGEST offset, int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
@@ -10532,6 +10591,76 @@ remote_hostio_pread (struct target_ops *self,
   return ret;
 }
 
+/* Serve pread from the readahead cache.  Returns number of bytes
+   read, or 0 if the request can't be served from the cache.  */
+
+static int
+remote_hostio_pread_from_cache (struct remote_state *rs,
+				int fd, gdb_byte *read_buf, size_t len,
+				ULONGEST offset)
+{
+  struct readahead_cache *cache = &rs->readahead_cache;
+
+  if (cache->fd == fd
+      && cache->offset <= offset
+      && offset < cache->offset + cache->bufsize)
+    {
+      ULONGEST max = cache->offset + cache->bufsize;
+
+      if (offset + len > max)
+	len = max - offset;
+
+      memcpy (read_buf, cache->buf + offset - cache->offset, len);
+      return len;
+    }
+
+  return 0;
+}
+
+/* Implementation of to_fileio_pread.  */
+
+static int
+remote_hostio_pread (struct target_ops *self,
+		     int fd, gdb_byte *read_buf, int len,
+		     ULONGEST offset, int *remote_errno)
+{
+  int ret;
+  struct remote_state *rs = get_remote_state ();
+  struct readahead_cache *cache = &rs->readahead_cache;
+
+  ret = remote_hostio_pread_from_cache (rs, fd, read_buf, len, offset);
+  if (ret > 0)
+    {
+      cache->hit_count++;
+
+      if (remote_debug)
+	fprintf_unfiltered (gdb_stdlog, "readahead cache hit %s\n",
+			    pulongest (cache->hit_count));
+      return ret;
+    }
+
+  cache->miss_count++;
+  if (remote_debug)
+    fprintf_unfiltered (gdb_stdlog, "readahead cache miss %s\n",
+			pulongest (cache->miss_count));
+
+  cache->fd = fd;
+  cache->offset = offset;
+  cache->bufsize = get_remote_packet_size ();
+  cache->buf = xrealloc (cache->buf, cache->bufsize);
+
+  ret = remote_hostio_pread_vFile (self, cache->fd, cache->buf, cache->bufsize,
+				   cache->offset, remote_errno);
+  if (ret <= 0)
+    {
+      readahead_cache_invalidate_fd (fd);
+      return ret;
+    }
+
+  cache->bufsize = ret;
+  return remote_hostio_pread_from_cache (rs, fd, read_buf, len, offset);
+}
+
 /* Implementation of to_fileio_close.  */
 
 static int
@@ -10540,6 +10669,8 @@ remote_hostio_close (struct target_ops *self, int fd, int *remote_errno)
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
   int left = get_remote_packet_size () - 1;
+
+  readahead_cache_invalidate_fd (fd);
 
   remote_buffer_add_string (&p, &left, "vFile:close:");
 

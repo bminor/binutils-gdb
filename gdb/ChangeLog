@@ -1,3 +1,17 @@
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (struct readahead_cache): New.
+	(struct remote_state) <readahead_cache>: New field.
+	(remote_open_1): Invalidate the cache.
+	(readahead_cache_invalidate, readahead_cache_invalidate_fd): New
+	functions.
+	(remote_hostio_pwrite): Invalidate the readahead cache.
+	(remote_hostio_pread): Rename to ...
+	(remote_hostio_pread_vFile): ... this.
+	(remote_hostio_pread_from_cache): New function.
+	(remote_hostio_pread): Reimplement.
+	(remote_hostio_close): Invalidate the readahead cache.
+
 2015-08-21  Marcin Cieślak <saper@saper.info>  (tiny patch)
 
 	PR build/18843
