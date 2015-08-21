@@ -1,5 +1,11 @@
 2015-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* solib-svr4.c (solib_event_probe_action): Call
+	get_probe_argument_count using TRY...CATCH.
+	(svr4_handle_solib_event): Likewise, for evaluate_probe_argument.
+
+2015-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* probe.h (struct probe_ops) <get_probe_argument_count,
 	evaluate_probe_argument, enable_probe, disable_probe>: Mention in
 	the comment that the function can throw an exception.
