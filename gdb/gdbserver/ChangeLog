@@ -1,5 +1,9 @@
 2015-08-21  Pedro Alves  <palves@redhat.com>
 
+	* tdesc.c (default_description): Explicitly zero-initialize.
+
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/18749
 	* inferiors.c (remove_thread): Discard any pending stop reply for
 	this thread.

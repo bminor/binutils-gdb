@@ -1,3 +1,7 @@
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
+	* frame.c (null_frame_id): Explicitly zero-initialize.
+
 2015-08-21  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (struct dwarf2_section_info): Rename field
