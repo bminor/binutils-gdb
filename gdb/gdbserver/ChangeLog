@@ -1,5 +1,10 @@
 2015-08-21  Pedro Alves  <palves@redhat.com>
 
+	* ax.c (gdb_eval_agent_expr): Return expr_eval_unhandled_opcode
+	instead of literal 1.
+
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
 	* tdesc.c (default_description): Explicitly zero-initialize.
 
 2015-08-21  Pedro Alves  <palves@redhat.com>
