@@ -1,3 +1,20 @@
+2015-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* probe.h (struct probe_ops) <get_probe_argument_count,
+	evaluate_probe_argument, enable_probe, disable_probe>: Mention in
+	the comment that the function can throw an exception.
+	(get_probe_argument_count): Likewise.
+	(evaluate_probe_argument): Likewise.
+	* stap-probe.c (stap_get_opcode): Call error instead of
+	internal_error.
+	(stap_get_expected_argument_type): Likewise.  Add argument
+	'probe'.  Improve error message by mentioning the probe's name.
+	(stap_parse_probe_arguments): Adjust call to
+	stap_get_expected_argument_type.
+	(stap_get_arg): Add comment.  Assert that 'probe->args_parsed' is
+	not zero.  Call internal_error if GDB requests an argument but the
+	probe has no arguments.
+
 2015-09-01  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-lang.c (ada_resolve_function): Do not ask the user what
