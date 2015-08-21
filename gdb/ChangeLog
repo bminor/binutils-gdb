@@ -1,3 +1,8 @@
+2015-08-21  Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-namespaces.c (linux_mntns_access_fs):
+	Do not overwrite old_chain.
+
 2015-08-21  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (struct readahead_cache): New.

@@ -894,7 +894,7 @@ linux_mntns_access_fs (pid_t pid)
   if (fd < 0)
     goto error;
 
-  old_chain = make_cleanup_close (fd);
+  make_cleanup_close (fd);
 
   if (fstat (fd, &sb) != 0)
     goto error;
