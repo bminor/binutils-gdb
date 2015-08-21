@@ -2,6 +2,10 @@
 
 Changes in 2.26:
 
+* Symbol and label names can now be enclosed in double quotes (") which allows
+  them to contain characters that are not part of valid symbol names in high
+  level languages.
+
 * Added the correctly spelled -march=armv6kz, for ARMv6KZ support.  The
   previous spelling, -march=armv6zk, is still accepted.
 

@@ -179,12 +179,11 @@ microblaze_s_lcomm (int xxx ATTRIBUTE_UNUSED)
   segT current_seg = now_seg;
   subsegT current_subseg = now_subseg;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
 
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
-  *p = c;
+  (void) restore_line_pointer (c);
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
@@ -315,7 +314,8 @@ microblaze_s_bss (int localvar)
 static void
 microblaze_s_func (int end_p ATTRIBUTE_UNUSED)
 {
-  *input_line_pointer = get_symbol_end ();
+  char *name;
+  restore_line_pointer (get_symbol_name (&name));
   s_func (1);
 }
 
@@ -329,11 +329,10 @@ microblaze_s_weakext (int ignore ATTRIBUTE_UNUSED)
   symbolS *symbolP;
   expressionS exp;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   symbolP = symbol_find_or_make (name);
   S_SET_WEAK (symbolP);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   SKIP_WHITESPACE ();
 

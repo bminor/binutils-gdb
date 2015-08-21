@@ -3975,11 +3975,10 @@ s_reserve (int ignore ATTRIBUTE_UNUSED)
   int temp;
   symbolS *symbolP;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   if (*input_line_pointer != ',')
     {
@@ -4117,12 +4116,11 @@ s_common (int ignore ATTRIBUTE_UNUSED)
   offsetT temp, size;
   symbolS *symbolP;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       as_bad (_("Expected comma after symbol-name"));
@@ -4388,7 +4386,7 @@ s_register (int ignore ATTRIBUTE_UNUSED)
   char c;
   int reg;
   int flags;
-  const char *regname;
+  char *regname;
 
   if (input_line_pointer[0] != '%'
       || input_line_pointer[1] != 'g'
@@ -4402,8 +4400,7 @@ s_register (int ignore ATTRIBUTE_UNUSED)
   if (*input_line_pointer == '#')
     {
       ++input_line_pointer;
-      regname = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&regname);
       if (strcmp (regname, "scratch") && strcmp (regname, "ignore"))
 	as_bad (_("register syntax is .register %%g[2367],{#scratch|symbolname|#ignore}"));
       if (regname[0] == 'i')
@@ -4413,9 +4410,9 @@ s_register (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      regname = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&regname);
     }
+
   if (sparc_arch_size == 64)
     {
       if (globals[reg])
@@ -4462,7 +4459,7 @@ s_register (int ignore ATTRIBUTE_UNUSED)
 	}
     }
 
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   demand_empty_rest_of_line ();
 }

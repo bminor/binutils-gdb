@@ -168,11 +168,11 @@ register_name (expressionS *expressionP)
   else
     return FALSE;
 
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   reg_number = reg_name_search (name);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   /* Look to see if it's in the register table.  */
   if (reg_number >= 0)
@@ -1793,10 +1793,9 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
   else
     {
       char c;
-      cpu_string = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&cpu_string);
       cpu_string = xstrdup (cpu_string);
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
     }
 
   if (cpu_string != NULL)
@@ -1848,19 +1847,13 @@ s390_machinemode (int ignore ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
 
-  if (*input_line_pointer == '"')
-    {
-      int len;
-      mode_string = demand_copy_C_string (&len);
-    }
-  else
-    {
-      char c;
-      mode_string = input_line_pointer;
-      c = get_symbol_end ();
-      mode_string = xstrdup (mode_string);
-      *input_line_pointer = c;
-    }
+  {
+    char c;
+
+    c = get_symbol_name (&mode_string);
+    mode_string = xstrdup (mode_string);
+    (void) restore_line_pointer (c);
+  }
 
   if (mode_string != NULL)
     {

@@ -351,8 +351,8 @@ tic54x_asg (int x ATTRIBUTE_UNUSED)
       return;
     }
 
-  name = ++input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
+  ++input_line_pointer;
+  c = get_symbol_name (&name);	/* Get terminator.  */
   if (!ISALPHA (*name))
     {
       as_bad (_("symbols assigned with .asg must begin with a letter"));
@@ -367,7 +367,7 @@ tic54x_asg (int x ATTRIBUTE_UNUSED)
   strcpy (tmp, name);
   name = tmp;
   subsym_create_or_replace (name, str);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
 
@@ -411,11 +411,10 @@ tic54x_eval (int x ATTRIBUTE_UNUSED)
       ignore_rest_of_line ();
       return;
     }
-  name = input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
+  c = get_symbol_name (&name);	/* Get terminator.  */
   tmp = xmalloc (strlen (name) + 1);
   name = strcpy (tmp, name);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   if (!ISALPHA (*name))
     {
@@ -471,8 +470,9 @@ tic54x_bss (int x ATTRIBUTE_UNUSED)
   current_seg = now_seg;	/* Save current seg.  */
   current_subseg = now_subseg;	/* Save current subseg.  */
 
-  name = input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
+  c = get_symbol_name (&name);	/* Get terminator.  */
+  if (c == '"')
+    c = * ++ input_line_pointer;
   if (c != ',')
     {
       as_bad (_(".bss size argument missing\n"));
@@ -782,8 +782,8 @@ tic54x_endstruct (int is_union)
 static void
 tic54x_tag (int ignore ATTRIBUTE_UNUSED)
 {
-  char *name = input_line_pointer;
-  int c = get_symbol_end ();
+  char *name;
+  int c = get_symbol_name (&name);
   struct stag *stag = (struct stag *) hash_find (stag_hash, name);
 
   if (!stag)
@@ -829,7 +829,7 @@ tic54x_tag (int ignore ATTRIBUTE_UNUSED)
   if (current_stag != NULL && !current_stag->is_union)
     abs_section_offset += stag->size;
 
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
   line_label = NULL;
 }
@@ -1109,11 +1109,10 @@ tic54x_global (int type)
 
   do
     {
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
+      c = restore_line_pointer (c);
 
-      *input_line_pointer = c;
       S_SET_STORAGE_CLASS (symbolP, C_EXT);
       if (c == ',')
 	{
@@ -1184,13 +1183,14 @@ tic54x_sect (int arg)
       else
 	{
 	  int c;
-	  name = input_line_pointer;
-	  c = get_symbol_end ();
+
+	  c = get_symbol_name (&name);
           len = strlen(name);
 	  name = strcpy (xmalloc (len + 10), name);
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	  demand_empty_rest_of_line ();
 	}
+
       /* Make sure all named initialized sections flagged properly.  If we
          encounter instructions, we'll flag it with SEC_CODE as well.  */
       strcat (name, ",\"w\"\n");
@@ -1366,17 +1366,14 @@ tic54x_usect (int x ATTRIBUTE_UNUSED)
   current_seg = now_seg;	/* Save current seg.  */
   current_subseg = now_subseg;	/* Save current subseg.  */
 
-  if (*input_line_pointer == '"')
-    input_line_pointer++;
-  section_name = input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
-  input_line_pointer++;		/* Skip null symbol terminator.  */
+  c = get_symbol_name (&section_name);	/* Get terminator.  */
   name = xmalloc (input_line_pointer - section_name + 1);
   strcpy (name, section_name);
-
-  if (*input_line_pointer == ',')
+  c = restore_line_pointer (c);
+  
+  if (c == ',')
     ++input_line_pointer;
-  else if (c != ',')
+  else
     {
       as_bad (_("Missing size argument"));
       ignore_rest_of_line ();
@@ -2008,17 +2005,17 @@ tic54x_message (int type)
 static void
 tic54x_label (int ignored ATTRIBUTE_UNUSED)
 {
-  char *name = input_line_pointer;
+  char *name;
   symbolS *symbolP;
   int c;
 
   ILLEGAL_WITHIN_STRUCT ();
 
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   symbolP = colon (name);
   S_SET_STORAGE_CLASS (symbolP, C_STATLAB);
 
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
 
@@ -2141,12 +2138,12 @@ tic54x_sblock (int ignore ATTRIBUTE_UNUSED)
 	}
       else
 	{
-	  char *section_name = input_line_pointer;
+	  char *section_name;
 
-	  c = get_symbol_end ();
+	  c = get_symbol_name (&section_name);
 	  name = xmalloc (strlen (section_name) + 1);
 	  strcpy (name, section_name);
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	}
 
       seg = bfd_get_section_by_name (stdoutput, name);
@@ -2256,12 +2253,11 @@ tic54x_var (int ignore ATTRIBUTE_UNUSED)
 	  ignore_rest_of_line ();
 	  return;
 	}
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       /* .var symbols start out with a null string.  */
       name = strcpy (xmalloc (strlen (name) + 1), name);
       hash_insert (subsym_hash[macro_level], name, empty);
-      *input_line_pointer = c;
+      c = restore_line_pointer (c);
       if (c == ',')
 	{
 	  ++input_line_pointer;
@@ -4500,8 +4496,8 @@ subsym_substitute (char *line, int forced)
 	  if (forced)
 	    ++ptr;
 
-	  name = input_line_pointer = ptr;
-	  c = get_symbol_end ();
+	  input_line_pointer = ptr;
+	  c = get_symbol_name (&name);
 	  /* '?' is not normally part of a symbol, but it IS part of a local
 	     label.  */
 	  if (c == '?')
@@ -4846,7 +4842,7 @@ md_assemble (char *line)
   int c;
 
   input_line_pointer = line;
-  c = get_symbol_end ();
+  c = get_symbol_name (&line);
 
   if (cpu == VNONE)
     cpu = V542;

@@ -1,3 +1,12 @@
+2015-08-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18581
+	* gas/all/byte.d: Disable this test.  Quoted expressions
+	are now allowed in .byte directives.
+	* gas/all/quoted-sym-names.s: New test.
+	* gas/all/quoted-sym-names.d: Expected output.
+	* gas/all/gas.exp: Run the new test.
+
 2015-08-21  Alexander Fomin  <alexander.fomin@intel.com>
 
 	PR binutils/18257

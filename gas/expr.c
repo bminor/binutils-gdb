@@ -1142,8 +1142,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
-	      name = input_line_pointer;
-	      c = get_symbol_end ();
+	      c = get_symbol_name (& name);
 
 	      buf = (char *) xmalloc (strlen (name) + 10);
 	      if (start)
@@ -1158,7 +1157,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      expressionP->X_add_number = 0;
 
 	      *input_line_pointer = c;
-	      SKIP_WHITESPACE ();
+	      SKIP_WHITESPACE_AFTER_NAME ();
 	      if (*input_line_pointer != ')')
 		as_bad (_("syntax error in .startof. or .sizeof."));
 	      else
@@ -1214,13 +1213,13 @@ operand (expressionS *expressionP, enum expr_mode mode)
 #if defined(md_need_index_operator) || defined(TC_M68K)
     de_fault:
 #endif
-      if (is_name_beginner (c))	/* Here if did not begin with a digit.  */
+      if (is_name_beginner (c) || c == '"')	/* Here if did not begin with a digit.  */
 	{
 	  /* Identifier begins here.
 	     This is kludged for speed, so code is repeated.  */
 	isname:
-	  name = --input_line_pointer;
-	  c = get_symbol_end ();
+	  -- input_line_pointer;
+	  c = get_symbol_name (&name);
 
 #ifdef md_operator
 	  {
@@ -1229,15 +1228,15 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	    switch (op)
 	      {
 	      case O_uminus:
-		*input_line_pointer = c;
+		restore_line_pointer (c);
 		c = '-';
 		goto unary;
 	      case O_bit_not:
-		*input_line_pointer = c;
+		restore_line_pointer (c);
 		c = '~';
 		goto unary;
 	      case O_logical_not:
-		*input_line_pointer = c;
+		restore_line_pointer (c);
 		c = '!';
 		goto unary;
 	      case O_illegal:
@@ -1246,9 +1245,10 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      default:
 		break;
 	      }
+
 	    if (op != O_absent && op != O_illegal)
 	      {
-		*input_line_pointer = c;
+		restore_line_pointer (c);
 		expr (9, expressionP, mode);
 		expressionP->X_add_symbol = make_expr_symbol (expressionP);
 		expressionP->X_op_symbol = NULL;
@@ -1266,7 +1266,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	     entering it in the symbol table.  */
 	  if (md_parse_name (name, expressionP, mode, &c))
 	    {
-	      *input_line_pointer = c;
+	      restore_line_pointer (c);
 	      break;
 	    }
 #endif
@@ -1286,10 +1286,9 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		       || name[1] == 'T');
 
 	      *input_line_pointer = c;
-	      SKIP_WHITESPACE ();
+	      SKIP_WHITESPACE_AFTER_NAME ();
 
-	      name = input_line_pointer;
-	      c = get_symbol_end ();
+	      c = get_symbol_name (& name);
 
 	      buf = (char *) xmalloc (strlen (name) + 10);
 	      if (start)
@@ -1304,8 +1303,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      expressionP->X_add_number = 0;
 
 	      *input_line_pointer = c;
-	      SKIP_WHITESPACE ();
-
+	      SKIP_WHITESPACE_AFTER_NAME ();
 	      break;
 	    }
 #endif
@@ -1333,7 +1331,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      expressionP->X_add_symbol = symbolP;
 	      expressionP->X_add_number = 0;
 	    }
-	  *input_line_pointer = c;
+
+	  restore_line_pointer (c);
 	}
       else
 	{
@@ -1589,8 +1588,8 @@ operatorf (int *num_chars)
 #ifdef md_operator
   if (is_name_beginner (c))
     {
-      char *name = input_line_pointer;
-      char ec = get_symbol_end ();
+      char *name;
+      char ec = get_symbol_name (& name);
 
       ret = md_operator (name, 2, &ec);
       switch (ret)
@@ -2318,19 +2317,22 @@ resolve_expression (expressionS *expressionP)
    expr.c is just a branch office read.c anyway, and putting it
    here lessens the crowd at read.c.
 
-   Assume input_line_pointer is at start of symbol name.
+   Assume input_line_pointer is at start of symbol name, or the
+    start of a double quote enclosed symbol name.
    Advance input_line_pointer past symbol name.
-   Turn that character into a '\0', returning its former value.
+   Turn that character into a '\0', returning its former value,
+    which may be the closing double quote.
    This allows a string compare (RMS wants symbol names to be strings)
-   of the symbol name.
+    of the symbol name.
    There will always be a char following symbol name, because all good
    lines end in end-of-line.  */
 
 char
-get_symbol_end (void)
+get_symbol_name (char ** ilp_return)
 {
   char c;
 
+  * ilp_return = input_line_pointer;
   /* We accept \001 in a name in case this is being called with a
      constructed string.  */
   if (is_name_beginner (c = *input_line_pointer++) || c == '\001')
@@ -2341,8 +2343,36 @@ get_symbol_end (void)
       if (is_name_ender (c))
 	c = *input_line_pointer++;
     }
+  else if (c == '"')
+    {
+      bfd_boolean backslash_seen;
+
+      * ilp_return = input_line_pointer;
+      do
+	{
+	  backslash_seen = c == '\\';
+	  c = * input_line_pointer ++;
+	}
+      while (c != 0 && (c != '"' || backslash_seen));
+
+      if (c == 0)
+	as_warn (_("missing closing '\"'"));
+    }
   *--input_line_pointer = 0;
-  return (c);
+  return c;
+}
+
+/* Replace the NUL character pointed to by input_line_pointer
+   with C.  If C is \" then advance past it.  Return the character
+   now pointed to by input_line_pointer.  */
+
+char
+restore_line_pointer (char c)
+{
+  * input_line_pointer = c;
+  if (c == '"')
+    c = * ++ input_line_pointer;
+  return c;
 }
 
 unsigned int

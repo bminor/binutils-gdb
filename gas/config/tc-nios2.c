@@ -566,10 +566,11 @@ s_nios2_sdata (int ignore ATTRIBUTE_UNUSED)
 static void
 s_nios2_set (int equiv)
 {
-  char *directive = input_line_pointer;
-  char delim = get_symbol_end ();
+  char *directive;
+  char delim = get_symbol_name (&directive);
   char *endline = input_line_pointer;
-  *endline = delim;
+
+  (void) restore_line_pointer (delim);
 
   /* We only want to handle ".set XXX" if the
      user has tried ".set XXX, YYY" they are not

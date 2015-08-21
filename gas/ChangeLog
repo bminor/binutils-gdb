@@ -1,3 +1,70 @@
+2015-08-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18581
+	* expr.c (get_symbol_end): Rename to get_symbol_name.  Add a
+	return parameter pointing to the start of the symbol.  Allow
+	symbol names enclosed in double quotes.
+	(restore_line_pointer): New function.  Replace the NUL character
+	inserted into the input stream with the given character.  If the
+	character was a double quote, advance the input pointer.
+	* expr.h (get_symbol_end): Delete.
+	(get_symbol_name): Add prototype.
+	(restore_line_pointer): Prototype.
+	* read.h (SKIP_WHITESPACE_AFTER_NAME): New macro.
+	* doc/as.texinfo (Symbol Intro): Document that symbol names can
+	now be enclosed in double quotes.
+	* cond.c (s_ifdef): Replace get_symbol_end with get_symbol_name.
+	Use restore_line_pointer to replace the NUL in the input stream.
+	Use SKIP_WHITESPACE_AFTER_NAME to skip past the end of a symbol.
+	Check for the use of double quoted symbol names.
+	* expr.c: Likewise.
+	* config/obj-aout.c: Likewise.
+	* config/obj-coff-seh.c: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/obj-elf.c: Likewise.
+	* config/obj-evax.c: Likewise.
+	* config/obj-macho.c: Likewise.
+	* config/obj-som.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i386-intel.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-iq2000.c: Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-microblaze.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-mmix.c: Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-nios2.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-score.c: Likewise.
+	* config/tc-score7.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-tic6x.c: Likewise.
+	* config/tc-tilegx.c: Likewise.
+	* config/tc-tilepro.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-xtensa.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* dw2gencfi.c: Likewise.
+	* dwarf2dbgc.: Likewise.
+	* ecoff.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+
 2015-08-19  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): New relocation types support for

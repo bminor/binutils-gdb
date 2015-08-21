@@ -269,11 +269,11 @@ register_name (expressionS *expressionP)
     reg_number = get_single_number ();
   else
     {
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
 
       /* Put back the delimiting char.  */
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
     }
 
   /* If numeric, make sure its not out of bounds.  */
@@ -1033,12 +1033,11 @@ i370_elf_lcomm (int unused ATTRIBUTE_UNUSED)
   char *pfrag;
   int align2;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
 
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
-  *p = c;
+  (void) restore_line_pointer (c);
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {

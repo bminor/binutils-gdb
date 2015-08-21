@@ -2434,14 +2434,13 @@ ecoff_directive_begin (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  name = input_line_pointer;
-  name_end = get_symbol_end ();
+  name_end = get_symbol_name (&name);
 
   (void) add_ecoff_symbol ((const char *) NULL, st_Block, sc_Text,
 			   symbol_find_or_make (name),
 			   (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
 
-  *input_line_pointer = name_end;
+  (void) restore_line_pointer (name_end);
 
   /* The line number follows, but we don't use it.  */
   (void) get_absolute_expression ();
@@ -2472,8 +2471,7 @@ ecoff_directive_bend (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  name = input_line_pointer;
-  name_end = get_symbol_end ();
+  name_end = get_symbol_name (&name);
 
   /* The value is the distance between the .bend directive and the
      corresponding symbol.  We fill in the offset when we write out
@@ -2485,7 +2483,7 @@ ecoff_directive_bend (int ignore ATTRIBUTE_UNUSED)
     (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text, endsym,
 			     (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
 
-  *input_line_pointer = name_end;
+  restore_line_pointer (name_end);
 
   /* The line number follows, but we don't use it.  */
   (void) get_absolute_expression ();
@@ -2519,8 +2517,7 @@ ecoff_directive_def (int ignore ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
 
-  name = input_line_pointer;
-  name_end = get_symbol_end ();
+  name_end = get_symbol_name (&name);
 
   if (coff_sym_name != (char *) NULL)
     as_warn (_(".def pseudo-op used inside of .def/.endef; ignored"));
@@ -2544,7 +2541,7 @@ ecoff_directive_def (int ignore ATTRIBUTE_UNUSED)
       coff_sym_addend = 0;
     }
 
-  *input_line_pointer = name_end;
+  restore_line_pointer (name_end);
 
   demand_empty_rest_of_line ();
 }
@@ -2757,12 +2754,11 @@ ecoff_directive_tag (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  name = input_line_pointer;
-  name_end = get_symbol_end ();
+  name_end = get_symbol_name (&name);
 
   coff_tag = xstrdup (name);
 
-  *input_line_pointer = name_end;
+  (void) restore_line_pointer (name_end);
 
   demand_empty_rest_of_line ();
 }
@@ -3004,13 +3000,12 @@ ecoff_directive_end (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  name = input_line_pointer;
-  name_end = get_symbol_end ();
+  name_end = get_symbol_name (&name);
 
   if (name == input_line_pointer)
     {
       as_warn (_(".end directive has no name"));
-      *input_line_pointer = name_end;
+      (void) restore_line_pointer (name_end);
       demand_empty_rest_of_line ();
       return;
     }
@@ -3031,7 +3026,7 @@ ecoff_directive_end (int ignore ATTRIBUTE_UNUSED)
 
   cur_proc_ptr = (proc_t *) NULL;
 
-  *input_line_pointer = name_end;
+  (void) restore_line_pointer (name_end);
   demand_empty_rest_of_line ();
 }
 
@@ -3053,20 +3048,19 @@ ecoff_directive_ent (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  name = input_line_pointer;
-  name_end = get_symbol_end ();
+  name_end = get_symbol_name (&name);
 
   if (name == input_line_pointer)
     {
       as_warn (_(".ent directive has no name"));
-      *input_line_pointer = name_end;
+      (void) restore_line_pointer (name_end);
       demand_empty_rest_of_line ();
       return;
     }
 
   add_procedure (name);
 
-  *input_line_pointer = name_end;
+  (void) restore_line_pointer (name_end);
 
   /* The .ent directive is sometimes followed by a number.  I'm not
      really sure what the number means.  I don't see any way to store
@@ -3095,10 +3089,9 @@ ecoff_directive_extern (int ignore ATTRIBUTE_UNUSED)
   symbolS *symbolp;
   valueT size;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   symbolp = symbol_find_or_make (name);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   S_SET_EXTERNAL (symbolp);
 
@@ -3348,10 +3341,9 @@ ecoff_directive_weakext (int ignore ATTRIBUTE_UNUSED)
   symbolS *symbolP;
   expressionS exp;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   symbolP = symbol_find_or_make (name);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   SKIP_WHITESPACE ();
 
@@ -3489,11 +3481,9 @@ ecoff_stab (segT sec ATTRIBUTE_UNUSED,
 	  return;
 	}
 
-      name = input_line_pointer;
-      name_end = get_symbol_end ();
-
+      name_end = get_symbol_name (&name);
       sym = symbol_find_or_make (name);
-      *input_line_pointer = name_end;
+      (void) restore_line_pointer (name_end);
 
       value = 0;
       addend = 0;

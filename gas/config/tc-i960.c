@@ -2335,8 +2335,7 @@ s_endian (int ignore ATTRIBUTE_UNUSED)
   char *name;
   char c;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   if (strcasecmp (name, "little") == 0)
     ;
   else if (strcasecmp (name, "big") == 0)
@@ -2344,7 +2343,7 @@ s_endian (int ignore ATTRIBUTE_UNUSED)
   else
     as_warn (_("ignoring unrecognized .endian type `%s'"), name);
 
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   demand_empty_rest_of_line ();
 }

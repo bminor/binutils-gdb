@@ -921,8 +921,7 @@ tokenize_arguments (char *str,
 
 	  ++input_line_pointer;
 	  SKIP_WHITESPACE ();
-	  p = input_line_pointer;
-	  c = get_symbol_end ();
+	  c = get_symbol_name (&p);
 
 	  /* Parse !relocation_type.  */
 	  len = input_line_pointer - p;
@@ -943,7 +942,7 @@ tokenize_arguments (char *str,
 	    }
 
 	  *input_line_pointer = c;
-	  SKIP_WHITESPACE ();
+	  SKIP_WHITESPACE_AFTER_NAME ();
 	  if (*input_line_pointer != '!')
 	    {
 	      if (r->require_seq)
@@ -3494,14 +3493,13 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
   int log_align = 0;
 #endif
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
 
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
   *p = c;
 
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   /* Alpha OSF/1 compiler doesn't provide the comma, gcc does.  */
   if (*input_line_pointer == ',')
@@ -3714,15 +3712,15 @@ s_alpha_ent (int dummy ATTRIBUTE_UNUSED)
   else
     {
       char *name, name_end;
-      name = input_line_pointer;
-      name_end = get_symbol_end ();
+
+      name_end = get_symbol_name (&name);
       /* CFI_EMIT_eh_frame is the default.  */
       all_cfi_sections = CFI_EMIT_eh_frame;
 
       if (! is_name_beginner (*name))
 	{
 	  as_warn (_(".ent directive has no name"));
-	  *input_line_pointer = name_end;
+	  (void) restore_line_pointer (name_end);
 	}
       else
 	{
@@ -3748,7 +3746,7 @@ s_alpha_ent (int dummy ATTRIBUTE_UNUSED)
 	  /* The .ent directive is sometimes followed by a number.  Not sure
 	     what it really means, but ignore it.  */
 	  *input_line_pointer = name_end;
-	  SKIP_WHITESPACE ();
+	  SKIP_WHITESPACE_AFTER_NAME ();
 	  if (*input_line_pointer == ',')
 	    {
 	      input_line_pointer++;
@@ -3769,13 +3767,12 @@ s_alpha_end (int dummy ATTRIBUTE_UNUSED)
   else
     {
       char *name, name_end;
-      name = input_line_pointer;
-      name_end = get_symbol_end ();
+
+      name_end = get_symbol_name (&name);
 
       if (! is_name_beginner (*name))
 	{
 	  as_warn (_(".end directive has no name"));
-	  *input_line_pointer = name_end;
 	}
       else
 	{
@@ -3803,9 +3800,9 @@ s_alpha_end (int dummy ATTRIBUTE_UNUSED)
 	    }
 
 	  cur_frame_data = NULL;
-
-	  *input_line_pointer = name_end;
 	}
+
+      (void) restore_line_pointer (name_end);
       demand_empty_rest_of_line ();
     }
 }
@@ -4130,19 +4127,20 @@ s_alpha_usepv (int unused ATTRIBUTE_UNUSED)
   symbolS *sym;
   int other;
 
-  name = input_line_pointer;
-  name_end = get_symbol_end ();
+  name_end = get_symbol_name (&name);
 
   if (! is_name_beginner (*name))
     {
       as_bad (_(".usepv directive has no name"));
-      *input_line_pointer = name_end;
+      (void) restore_line_pointer (name_end);
       ignore_rest_of_line ();
       return;
     }
 
   sym = symbol_find_or_make (name);
-  *input_line_pointer++ = name_end;
+  name_end = restore_line_pointer (name_end);
+  if (! is_end_of_line[(unsigned char) name_end])
+    input_line_pointer++;
 
   if (name_end != ',')
     {
@@ -4152,8 +4150,8 @@ s_alpha_usepv (int unused ATTRIBUTE_UNUSED)
     }
 
   SKIP_WHITESPACE ();
-  which = input_line_pointer;
-  which_end = get_symbol_end ();
+
+  which_end = get_symbol_name (&which);
 
   if (strcmp (which, "no") == 0)
     other = STO_ALPHA_NOPV;
@@ -4165,7 +4163,7 @@ s_alpha_usepv (int unused ATTRIBUTE_UNUSED)
       other = 0;
     }
 
-  *input_line_pointer = which_end;
+  (void) restore_line_pointer (which_end);
   demand_empty_rest_of_line ();
 
   S_SET_OTHER (sym, other | (S_GET_OTHER (sym) & ~STO_ALPHA_STD_GPLOAD));
@@ -4319,15 +4317,15 @@ s_alpha_section (int secid)
      	      char c;
 
      	      SKIP_WHITESPACE ();
-     	      beg = input_line_pointer;
-     	      c = get_symbol_end ();
+     	      c = get_symbol_name (&beg);
      	      *input_line_pointer = c;
 
      	      vms_flags |= s_alpha_section_word (beg, input_line_pointer - beg);
 
-     	      SKIP_WHITESPACE ();
+     	      SKIP_WHITESPACE_AFTER_NAME ();
      	    }
      	  while (*input_line_pointer++ == ',');
+
      	  --input_line_pointer;
         }
 
@@ -4411,13 +4409,12 @@ s_alpha_handler (int is_data)
   else
     {
       char *name, name_end;
-      name = input_line_pointer;
-      name_end = get_symbol_end ();
+
+      name_end = get_symbol_name (&name);
 
       if (! is_name_beginner (*name))
 	{
 	  as_warn (_(".handler directive has no name"));
-	  *input_line_pointer = name_end;
 	}
       else
 	{
@@ -4426,9 +4423,11 @@ s_alpha_handler (int is_data)
 	  sym = symbol_find_or_make (name);
 	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 	  alpha_evax_proc->handler = sym;
-	  *input_line_pointer = name_end;
 	}
-      }
+
+      (void) restore_line_pointer (name_end);
+    }
+
   demand_empty_rest_of_line ();
 }
 
@@ -4547,8 +4546,7 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
     }
 
   SKIP_WHITESPACE ();
-  name = input_line_pointer;
-  name_end = get_symbol_end ();
+  name_end = get_symbol_name (&name);
 
   if (strncmp (name, "stack", 5) == 0)
     alpha_evax_proc->pdsckind = PDSC_S_K_KIND_FP_STACK;
@@ -4561,12 +4559,13 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
 
   else
     {
+      (void) restore_line_pointer (name_end);
       as_fatal (_("unknown procedure kind"));
       demand_empty_rest_of_line ();
       return;
     }
 
-  *input_line_pointer = name_end;
+  (void) restore_line_pointer (name_end);
   demand_empty_rest_of_line ();
 
 #ifdef md_flush_pending_output
@@ -4804,10 +4803,11 @@ s_alpha_fmask (int ignore ATTRIBUTE_UNUSED)
 static void
 s_alpha_end (int ignore ATTRIBUTE_UNUSED)
 {
+  char *name;
   char c;
 
-  c = get_symbol_end ();
-  *input_line_pointer = c;
+  c = get_symbol_name (&name);
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
   alpha_evax_proc = NULL;
 }
@@ -4938,12 +4938,11 @@ s_alpha_proc (int is_static ATTRIBUTE_UNUSED)
 
   /* Takes ".proc name,nargs".  */
   SKIP_WHITESPACE ();
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   p = input_line_pointer;
   symbolP = symbol_find_or_make (name);
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       *p = 0;
@@ -4973,9 +4972,8 @@ s_alpha_set (int x ATTRIBUTE_UNUSED)
   int yesno = 1;
 
   SKIP_WHITESPACE ();
-  name = input_line_pointer;
-  ch = get_symbol_end ();
 
+  ch = get_symbol_name (&name);
   s = name;
   if (s[0] == 'n' && s[1] == 'o')
     {
@@ -4995,7 +4993,7 @@ s_alpha_set (int x ATTRIBUTE_UNUSED)
   else
     as_warn (_("Tried to .set unrecognized mode `%s'"), name);
 
-  *input_line_pointer = ch;
+  (void) restore_line_pointer (ch);
   demand_empty_rest_of_line ();
 }
 
@@ -5130,8 +5128,8 @@ s_alpha_arch (int ignored ATTRIBUTE_UNUSED)
   const struct cpu_type *p;
 
   SKIP_WHITESPACE ();
-  name = input_line_pointer;
-  ch = get_symbol_end ();
+
+  ch = get_symbol_name (&name);
 
   for (p = cpu_types; p->name; ++p)
     if (strcmp (name, p->name) == 0)
@@ -5142,7 +5140,7 @@ s_alpha_arch (int ignored ATTRIBUTE_UNUSED)
   as_warn (_("Unknown CPU identifier `%s'"), name);
 
 found:
-  *input_line_pointer = ch;
+  (void) restore_line_pointer (ch);
   demand_empty_rest_of_line ();
 }
 
@@ -6334,8 +6332,8 @@ tc_get_register (int frame ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '$')
     {
-      char *s = input_line_pointer;
-      char c = get_symbol_end ();
+      char *s;
+      char c = get_symbol_name (&s);
       symbolS *sym = md_undefined_symbol (s);
 
       *strchr (s, '\0') = c;
