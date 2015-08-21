@@ -10371,11 +10371,28 @@ remote_hostio_set_filesystem (struct inferior *inf, int *remote_errno)
 static int
 remote_hostio_open (struct target_ops *self,
 		    struct inferior *inf, const char *filename,
-		    int flags, int mode, int *remote_errno)
+		    int flags, int mode, int warn_if_slow,
+		    int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
   int left = get_remote_packet_size () - 1;
+
+  if (warn_if_slow)
+    {
+      static int warning_issued = 0;
+
+      printf_unfiltered (_("Reading %s from remote target...\n"),
+			 filename);
+
+      if (!warning_issued)
+	{
+	  warning (_("File transfers from remote targets can be slow."
+		     " Use \"set sysroot\" to access files locally"
+		     " instead."));
+	  warning_issued = 1;
+	}
+    }
 
   if (remote_hostio_set_filesystem (inf, remote_errno) != 0)
     return -1;
@@ -10700,7 +10717,7 @@ remote_filesystem_is_local (struct target_ops *self)
 	     filename is irrelevant, we only care about whether
 	     the stub recognizes the packet or not.  */
 	  fd = remote_hostio_open (self, NULL, "just probing",
-				   FILEIO_O_RDONLY, 0700,
+				   FILEIO_O_RDONLY, 0700, 0,
 				   &remote_errno);
 
 	  if (fd >= 0)
@@ -10822,7 +10839,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   fd = remote_hostio_open (find_target_at (process_stratum), NULL,
 			   remote_file, (FILEIO_O_WRONLY | FILEIO_O_CREAT
 					 | FILEIO_O_TRUNC),
-			   0700, &remote_errno);
+			   0700, 0, &remote_errno);
   if (fd == -1)
     remote_hostio_error (remote_errno);
 
@@ -10906,7 +10923,8 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
     error (_("command can only be used with remote target"));
 
   fd = remote_hostio_open (find_target_at (process_stratum), NULL,
-			   remote_file, FILEIO_O_RDONLY, 0, &remote_errno);
+			   remote_file, FILEIO_O_RDONLY, 0, 0,
+			   &remote_errno);
   if (fd == -1)
     remote_hostio_error (remote_errno);
 

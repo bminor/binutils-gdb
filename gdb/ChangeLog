@@ -1,5 +1,18 @@
 2015-08-21  Gary Benson  <gbenson@redhat.com>
 
+	* target.h (struct target_ops) <to_fileio_open>: New argument
+	warn_if_slow.  Update comment.  All implementations updated.
+	(target_fileio_open_warn_if_slow): New declaration.
+	* target.c (target_fileio_open): Renamed as...
+	(target_fileio_open_1): ...this.  New argument warn_if_slow.
+	Pass warn_if_slow to implementation.  Update debug printing.
+	(target_fileio_open): New function.
+	(target_fileio_open_warn_if_slow): Likewise.
+	* gdb_bfd.c (gdb_bfd_iovec_fileio_open): Use new function
+	target_fileio_open_warn_if_slow.
+
+2015-08-21  Gary Benson  <gbenson@redhat.com>
+
 	* nat/linux-namespaces.c (linux_mntns_access_fs):
 	Do not overwrite old_chain.
 

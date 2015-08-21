@@ -2779,11 +2779,13 @@ release_fileio_fd (int fd, fileio_fh_t *fh)
 #define fileio_fd_to_fh(fd) \
   VEC_index (fileio_fh_t, fileio_fhandles, (fd))
 
-/* See target.h.  */
+/* Helper for target_fileio_open and
+   target_fileio_open_warn_if_slow.  */
 
-int
-target_fileio_open (struct inferior *inf, const char *filename,
-		    int flags, int mode, int *target_errno)
+static int
+target_fileio_open_1 (struct inferior *inf, const char *filename,
+		      int flags, int mode, int warn_if_slow,
+		      int *target_errno)
 {
   struct target_ops *t;
 
@@ -2792,7 +2794,7 @@ target_fileio_open (struct inferior *inf, const char *filename,
       if (t->to_fileio_open != NULL)
 	{
 	  int fd = t->to_fileio_open (t, inf, filename, flags, mode,
-				      target_errno);
+				      warn_if_slow, target_errno);
 
 	  if (fd < 0)
 	    fd = -1;
@@ -2801,17 +2803,39 @@ target_fileio_open (struct inferior *inf, const char *filename,
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_open (%d,%s,0x%x,0%o)"
+				"target_fileio_open (%d,%s,0x%x,0%o,%d)"
 				" = %d (%d)\n",
 				inf == NULL ? 0 : inf->num,
 				filename, flags, mode,
-				fd, fd != -1 ? 0 : *target_errno);
+				warn_if_slow, fd,
+				fd != -1 ? 0 : *target_errno);
 	  return fd;
 	}
     }
 
   *target_errno = FILEIO_ENOSYS;
   return -1;
+}
+
+/* See target.h.  */
+
+int
+target_fileio_open (struct inferior *inf, const char *filename,
+		    int flags, int mode, int *target_errno)
+{
+  return target_fileio_open_1 (inf, filename, flags, mode, 0,
+			       target_errno);
+}
+
+/* See target.h.  */
+
+int
+target_fileio_open_warn_if_slow (struct inferior *inf,
+				 const char *filename,
+				 int flags, int mode, int *target_errno)
+{
+  return target_fileio_open_1 (inf, filename, flags, mode, 1,
+			       target_errno);
 }
 
 /* See target.h.  */

@@ -4904,7 +4904,8 @@ linux_nat_fileio_pid_of (struct inferior *inf)
 static int
 linux_nat_fileio_open (struct target_ops *self,
 		       struct inferior *inf, const char *filename,
-		       int flags, int mode, int *target_errno)
+		       int flags, int mode, int warn_if_slow,
+		       int *target_errno)
 {
   int nat_flags;
   mode_t nat_mode;
