@@ -1,5 +1,32 @@
 2016-07-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* doc/binutils.texi (objcopy): Document 'remove-relocations'.
+	(strip): Likewise.
+	* objcopy.c (SECTION_CONTEXT_REMOVE_RELOCS): Define.
+	(enum command_line_switch): Add 'OPTION_REMOVE_RELOCS'.
+	(struct option strip_options): Add 'remove-relocations'.
+	(struct option copy_options): Likewise.
+	(copy_usage): Likewise.
+	(strip_usage): Likewise.
+	(handle_remove_relocations_option): New function.
+	(discard_relocations): New function.
+	(handle_remove_section_option): New function.
+	(copy_relocations_in_section): Use discard_relocations.
+	(strip_main): Use handle_remove_section_option for
+	'remove-section', and handle 'remove-relocations' option.
+	(copy_main): Likewise.
+	* testsuite/binutils-all/objcopy.exp: Run new tests.
+	* testsuite/binutils-all/remove-relocs-01.d: New file.
+	* testsuite/binutils-all/remove-relocs-01.s: New file.
+	* testsuite/binutils-all/remove-relocs-02.d: New file.
+	* testsuite/binutils-all/remove-relocs-03.d: New file.
+	* testsuite/binutils-all/remove-relocs-04.d: New file.
+	* testsuite/binutils-all/remove-relocs-05.d: New file.
+	* testsuite/binutils-all/remove-relocs-06.d: New file.
+	* NEWS: Mention new option.
+
+2016-07-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* objcopy.c (find_section_list): Handle section patterns starting
 	with '!' being a non-matching pattern.
 	* doc/binutils.texi (objcopy): Give example of using '!' with

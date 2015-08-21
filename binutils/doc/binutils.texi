@@ -1075,6 +1075,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--interleave-width=}@var{width}]
         [@option{-j} @var{sectionpattern}|@option{--only-section=}@var{sectionpattern}]
         [@option{-R} @var{sectionpattern}|@option{--remove-section=}@var{sectionpattern}]
+        [@option{--remove-relocations=}@var{sectionpattern}]
         [@option{-p}|@option{--preserve-dates}]
         [@option{-D}|@option{--enable-deterministic-archives}]
         [@option{-U}|@option{--disable-deterministic-archives}]
@@ -1253,6 +1254,34 @@ would otherwise remove it.  For example:
 
 will remove all sections matching the pattern '.text.*', but will not
 remove the section '.text.foo'.
+
+@item --remove-relocations=@var{sectionpattern}
+Remove relocations from the output file for any section matching
+@var{sectionpattern}.  This option may be given more than once.  Note
+that using this option inappropriately may make the output file
+unusable.  Wildcard characters are accepted in @var{sectionpattern}.
+For example:
+
+@smallexample
+  --remove-relocations=.text.*
+@end smallexample
+
+will remove the relocations for all sections matching the patter
+'.text.*'.
+
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not have their relocation
+removed even if an earlier use of @option{--remove-relocations} on the
+same command line would otherwise cause the relocations to be removed.
+For example:
+
+@smallexample
+  --remove-relocations=.text.* --remove-relocations=!.text.foo
+@end smallexample
+
+will remove all relocations for sections matching the pattern
+'.text.*', but will not remove relocations for the section
+'.text.foo'.
 
 @item -S
 @itemx --strip-all
@@ -2988,6 +3017,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-w}|@option{--wildcard}]
       [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
+      [@option{--remove-relocations=}@var{sectionpattern}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
       [@option{-D}|@option{--enable-deterministic-archives}]
       [@option{-U}|@option{--disable-deterministic-archives}]
@@ -3056,6 +3086,34 @@ would otherwise remove it.  For example:
 
 will remove all sections matching the pattern '.text.*', but will not
 remove the section '.text.foo'.
+
+@item --remove-relocations=@var{sectionpattern}
+Remove relocations from the output file for any section matching
+@var{sectionpattern}.  This option may be given more than once.  Note
+that using this option inappropriately may make the output file
+unusable.  Wildcard characters are accepted in @var{sectionpattern}.
+For example:
+
+@smallexample
+  --remove-relocations=.text.*
+@end smallexample
+
+will remove the relocations for all sections matching the patter
+'.text.*'.
+
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not have their relocation
+removed even if an earlier use of @option{--remove-relocations} on the
+same command line would otherwise cause the relocations to be removed.
+For example:
+
+@smallexample
+  --remove-relocations=.text.* --remove-relocations=!.text.foo
+@end smallexample
+
+will remove all relocations for sections matching the pattern
+'.text.*', but will not remove relocations for the section
+'.text.foo'.
 
 @item -s
 @itemx --strip-all

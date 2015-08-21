@@ -10,6 +10,11 @@
   A non-matching section is removed from the set of sections matched by
   an earlier --only-section pattern.
 
+* New --remove-relocations=SECTIONPATTERN option for objcopy and strip.
+  This option can be used to remove sections containing relocations.
+  The SECTIONPATTERN is the section to which the relocations apply, not
+  the relocation section itself.
+
 Changes in 2.27:
 
 * Add a configure option, --enable-64-bit-archive, to force use of a
