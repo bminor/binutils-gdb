@@ -585,7 +585,7 @@ tui_getc (FILE *fp)
          with empty lines with gdb prompt at beginning.  Instead of that,
          stay on the same line but provide a visual effect to show the
          user we recognized the command.  */
-      if (rl_end == 0)
+      if (rl_end == 0 && !gdb_in_secondary_prompt_p ())
         {
 	  wmove (w, getcury (w), 0);
 

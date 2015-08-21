@@ -1,5 +1,16 @@
 2015-08-21  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* top.h (gdb_in_secondary_prompt_p): Declare.
+	* top.c (gdb_secondary_prompt_depth): Define.
+	(gdb_in_secondary_prompt_p): Define.
+	(gdb_readline_wrapper_cleanup): Decrement
+	gdb_secondary_prompt_depth.
+	(gdb_readline_wrapper): Increment gdb_secondary_prompt_depth.
+	* tui/tui-io.c (tui_getc): Don't clear the prompt line if we
+	are in a secondary prompt.
+
+2015-08-21  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* tui/tui-io.c (tui_getc): Use tui_putc instead of waddch to
 	emit the newline.
 
