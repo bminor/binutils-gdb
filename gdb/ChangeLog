@@ -1,3 +1,8 @@
+2015-08-21  Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-namespaces.c (linux_mntns_access_fs):
+	Do not overwrite old_chain.
+
 2015-08-20  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* arch/xtensa.h: New file.
