@@ -606,7 +606,7 @@ tui_getc (FILE *fp)
 	  py += px / TUI_CMD_WIN->generic.width;
 	  px %= TUI_CMD_WIN->generic.width;
 	  wmove (w, py, px);
-	  waddch (w, ch);
+	  tui_putc ('\n');
         }
     }
   

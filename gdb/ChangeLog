@@ -1,3 +1,8 @@
+2015-08-21  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-io.c (tui_getc): Use tui_putc instead of waddch to
+	emit the newline.
+
 2015-08-21  Gary Benson  <gbenson@redhat.com>
 
 	* gdb_bfd.c (gdb_bfd_iovec_fileio_pread): Add QUIT call.
