@@ -146,15 +146,15 @@ queue_stop_reply (ptid_t ptid, struct target_waitstatus *status)
 }
 
 static int
-remove_all_on_match_pid (QUEUE (notif_event_p) *q,
-			    QUEUE_ITER (notif_event_p) *iter,
-			    struct notif_event *event,
-			    void *data)
+remove_all_on_match_ptid (QUEUE (notif_event_p) *q,
+			  QUEUE_ITER (notif_event_p) *iter,
+			  struct notif_event *event,
+			  void *data)
 {
-  int *pid = data;
+  ptid_t filter_ptid = *(ptid_t *) data;
+  struct vstop_notif *vstop_event = (struct vstop_notif *) event;
 
-  if (*pid == -1
-      || ptid_get_pid (((struct vstop_notif *) event)->ptid) == *pid)
+  if (ptid_match (vstop_event->ptid, filter_ptid))
     {
       if (q->free_func != NULL)
 	q->free_func (event);
@@ -165,14 +165,13 @@ remove_all_on_match_pid (QUEUE (notif_event_p) *q,
   return 1;
 }
 
-/* Get rid of the currently pending stop replies for PID.  If PID is
-   -1, then apply to all processes.  */
+/* See server.h.  */
 
-static void
-discard_queued_stop_replies (int pid)
+void
+discard_queued_stop_replies (ptid_t ptid)
 {
   QUEUE_iterate (notif_event_p, notif_stop.queue,
-		 remove_all_on_match_pid, &pid);
+		 remove_all_on_match_ptid, &ptid);
 }
 
 static void
@@ -2784,7 +2783,7 @@ handle_v_kill (char *own_buf)
       last_status.kind = TARGET_WAITKIND_SIGNALLED;
       last_status.value.sig = GDB_SIGNAL_KILL;
       last_ptid = pid_to_ptid (pid);
-      discard_queued_stop_replies (pid);
+      discard_queued_stop_replies (last_ptid);
       write_ok (own_buf);
       return 1;
     }
@@ -3211,7 +3210,7 @@ kill_inferior_callback (struct inferior_list_entry *entry)
   int pid = ptid_get_pid (process->entry.id);
 
   kill_inferior (pid);
-  discard_queued_stop_replies (pid);
+  discard_queued_stop_replies (pid_to_ptid (pid));
 }
 
 /* Callback for for_each_inferior to detach or kill the inferior,
@@ -3230,7 +3229,7 @@ detach_or_kill_inferior_callback (struct inferior_list_entry *entry)
   else
     kill_inferior (pid);
 
-  discard_queued_stop_replies (pid);
+  discard_queued_stop_replies (pid_to_ptid (pid));
 }
 
 /* for_each_inferior callback for detach_or_kill_for_exit to print
@@ -3487,6 +3486,7 @@ captured_main (int argc, char *argv[])
   initialize_event_loop ();
   if (target_supports_tracepoints ())
     initialize_tracepoint ();
+  initialize_notif ();
 
   own_buf = xmalloc (PBUFSIZ + 1);
   mem_buf = xmalloc (PBUFSIZ);
@@ -3522,8 +3522,6 @@ captured_main (int argc, char *argv[])
       last_ptid = minus_one_ptid;
     }
   make_cleanup (detach_or_kill_for_exit_cleanup, NULL);
-
-  initialize_notif ();
 
   /* Don't report shared library events on the initial connection,
      even if some libraries are preloaded.  Avoids the "stopped by
@@ -3575,7 +3573,7 @@ captured_main (int argc, char *argv[])
 	  /* Get rid of any pending statuses.  An eventual reconnection
 	     (by the same GDB instance or another) will refresh all its
 	     state from scratch.  */
-	  discard_queued_stop_replies (-1);
+	  discard_queued_stop_replies (minus_one_ptid);
 	  for_each_inferior (&all_threads,
 			     clear_pending_status_callback);
 
@@ -3823,7 +3821,7 @@ process_serial_event (void)
 	write_enn (own_buf);
       else
 	{
-	  discard_queued_stop_replies (pid);
+	  discard_queued_stop_replies (pid_to_ptid (pid));
 	  write_ok (own_buf);
 
 	  if (extended_protocol)

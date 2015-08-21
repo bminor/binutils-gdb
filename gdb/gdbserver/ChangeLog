@@ -1,5 +1,19 @@
 2015-08-21  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/18749
+	* inferiors.c (remove_thread): Discard any pending stop reply for
+	this thread.
+	* server.c (remove_all_on_match_pid): Rename to ...
+	(remove_all_on_match_ptid): ... this.  Work with a filter ptid
+	instead of a pid.
+	(discard_queued_stop_replies): Change parameter to a ptid.  Now
+	extern.
+	(handle_v_kill, kill_inferior_callback, captured_main)
+	(process_serial_event): Adjust.
+	* server.h (discard_queued_stop_replies): Declare.
+
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (wait_for_sigstop): Always switch to no thread
 	selected if the previously current thread dies.
 	* lynx-low.c (lynx_request_interrupt): Use the first thread's
