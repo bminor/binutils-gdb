@@ -1,5 +1,13 @@
 2015-08-25  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/18859
+	* object.cc (Input_objects::add_object): Store objects in a map,
+	indexed by soname; update as-needed flag when necessary.
+	* object.h (Object::clear_as_needed): New method.
+	(Input_objects::so_names_): Change from set to map.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/14746
 	* expression.cc (Expression::Expression_eval_info): Add
 	is_valid_pointer field.

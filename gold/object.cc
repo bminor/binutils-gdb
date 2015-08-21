@@ -2973,11 +2973,20 @@ Input_objects::add_object(Object* obj)
       Dynobj* dynobj = static_cast<Dynobj*>(obj);
       const char* soname = dynobj->soname();
 
-      std::pair<Unordered_set<std::string>::iterator, bool> ins =
-	this->sonames_.insert(soname);
+      Unordered_map<std::string, Object*>::value_type val(soname, obj);
+      std::pair<Unordered_map<std::string, Object*>::iterator, bool> ins =
+	this->sonames_.insert(val);
       if (!ins.second)
 	{
 	  // We have already seen a dynamic object with this soname.
+	  // If any instances of this object on the command line have
+	  // the --no-as-needed flag, make sure the one we keep is
+	  // marked so.
+	  if (!obj->as_needed())
+	    {
+	      gold_assert(ins.first->second != NULL);
+	      ins.first->second->clear_as_needed();
+	    }
 	  return false;
 	}
 
