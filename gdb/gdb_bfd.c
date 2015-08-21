@@ -253,6 +253,8 @@ gdb_bfd_iovec_fileio_pread (struct bfd *abfd, void *stream, void *buf,
   pos = 0;
   while (nbytes > pos)
     {
+      QUIT;
+
       bytes = target_fileio_pread (fd, (gdb_byte *) buf + pos,
 				   nbytes - pos, offset + pos,
 				   &target_errno);

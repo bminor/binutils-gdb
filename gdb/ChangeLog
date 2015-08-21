@@ -1,5 +1,9 @@
 2015-08-21  Gary Benson  <gbenson@redhat.com>
 
+	* gdb_bfd.c (gdb_bfd_iovec_fileio_pread): Add QUIT call.
+
+2015-08-21  Gary Benson  <gbenson@redhat.com>
+
 	* target.h (struct target_ops) <to_fileio_open>: New argument
 	warn_if_slow.  Update comment.  All implementations updated.
 	(target_fileio_open_warn_if_slow): New declaration.
