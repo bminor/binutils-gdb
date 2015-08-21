@@ -1,3 +1,11 @@
+2015-08-21  Alexander Fomin  <alexander.fomin@intel.com>
+
+	PR binutils/18257
+	* gas/i386/disassem.s: Add mask instructions with invalid ModR/M byte.
+	* gas/i386/x86-64-disassem.s: Likewise.
+	* gas/i386/disassem.d: Updated.
+	* gas/i386/x86-64-disassem.d: Likewise.
+
 2015-08-19  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/aarch64/reloc-dtprel-lo12-ldst8.s: New testcase.
