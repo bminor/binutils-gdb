@@ -1,3 +1,8 @@
+2015-08-22  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_slurp_version_tables): Always init vd_nodename.
+	Don't copy fields not set by _bfd_elf_swap_verdef_in.
+
 2015-08-19  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Recognize new relocation

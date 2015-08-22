@@ -7871,7 +7871,7 @@ error_return_verref:
 	    goto error_return_bad_verdef;
 
 	  iverdef = &iverdefarr[(iverdefmem.vd_ndx & VERSYM_VERSION) - 1];
-	  memcpy (iverdef, &iverdefmem, sizeof (Elf_Internal_Verdef));
+	  memcpy (iverdef, &iverdefmem, offsetof (Elf_Internal_Verdef, vd_bfd));
 
 	  iverdef->vd_bfd = abfd;
 
@@ -7920,6 +7920,7 @@ error_return_verref:
 			  ((bfd_byte *) everdaux + iverdaux->vda_next));
 	    }
 
+	  iverdef->vd_nodename = NULL;
 	  if (iverdef->vd_cnt)
 	    iverdef->vd_nodename = iverdef->vd_auxptr->vda_nodename;
 
