@@ -1,3 +1,7 @@
+2015-08-23  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (enum output_type): Reorder enum.
+
 2015-08-19  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (enum output_type): Delete type_executable, add type_pde

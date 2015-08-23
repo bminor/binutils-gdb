@@ -264,8 +264,8 @@ struct bfd_elf_version_tree;
 enum output_type
 {
   type_pde,
-  type_relocatable,
   type_pie,
+  type_relocatable,
   type_dll,
 };
 
