@@ -2038,6 +2038,10 @@ record_btrace_single_step_forward (struct thread_info *tp)
   if (replay == NULL)
     return btrace_step_no_history ();
 
+  /* Check if we're stepping a breakpoint.  */
+  if (record_btrace_replay_at_breakpoint (tp))
+    return btrace_step_stopped ();
+
   /* Skip gaps during replay.  */
   do
     {
@@ -2088,6 +2092,18 @@ record_btrace_single_step_backward (struct thread_info *tp)
 	return btrace_step_no_history ();
     }
   while (btrace_insn_get (replay) == NULL);
+
+  /* Check if we're stepping a breakpoint.
+
+     For reverse-stepping, this check is after the step.  There is logic in
+     infrun.c that handles reverse-stepping separately.  See, for example,
+     proceed and adjust_pc_after_break.
+
+     This code assumes that for reverse-stepping, PC points to the last
+     de-executed instruction, whereas for forward-stepping PC points to the
+     next to-be-executed instruction.  */
+  if (record_btrace_replay_at_breakpoint (tp))
+    return btrace_step_stopped ();
 
   return btrace_step_spurious ();
 }
@@ -2154,9 +2170,6 @@ record_btrace_step_thread (struct thread_info *tp)
 		     target_pid_to_str (tp->ptid),
 		     core_addr_to_string_nz (insn->pc));
 	    }
-
-	  if (record_btrace_replay_at_breakpoint (tp))
-	    return btrace_step_stopped ();
 	}
 
     case BTHR_RCONT:
@@ -2176,9 +2189,6 @@ record_btrace_step_thread (struct thread_info *tp)
 	  DEBUG ("reverse-stepping %d (%s) ... %s", tp->num,
 		 target_pid_to_str (tp->ptid),
 		 core_addr_to_string_nz (insn->pc));
-
-	  if (record_btrace_replay_at_breakpoint (tp))
-	    return btrace_step_stopped ();
 	}
     }
 }

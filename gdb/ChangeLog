@@ -1,5 +1,12 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_step_thread): Move breakpoint check
+	to ...
+	(record_btrace_single_step_forward): ... here and
+	(record_btrace_single_step_backward): ... here.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (btrace_step_spurious)
 	(record_btrace_single_step_forward)
 	(record_btrace_single_step_backward): New.
