@@ -35,6 +35,15 @@ show debug bfd-cache
   The "/m" option is now considered deprecated: its "source-centric"
   output hasn't proved useful in practice.
 
+* Support for various ROM monitors has been removed:
+
+  target dbug		dBUG ROM monitor for Motorola ColdFire
+  target picobug	Motorola picobug monitor
+  target dink32		DINK32 ROM monitor for PowerPC
+  target m32r		Renesas M32R/D ROM monitor
+  target mon2000	mon2000 ROM monitor
+  target ppcbug		PPCBUG ROM monitor for PowerPC
+
 *** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*

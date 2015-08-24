@@ -147,8 +147,8 @@ moxie-*-elf | moxie-*-moxiebox | moxie-*-rtems*)
 	;;
 
 h8300-*-*)
-	# Target: H8300 with HMS monitor and H8 simulator
-	gdb_target_obs="h8300-tdep.o monitor.o dsrec.o"
+	# Target: H8300 processor
+	gdb_target_obs="h8300-tdep.o"
 	gdb_sim=../sim/h8300/libsim.a
 	;;
 
@@ -289,8 +289,7 @@ m32r*-*-linux*)
 	;;
 m32r*-*-*)
 	# Target: Renesas m32r processor
-	gdb_target_obs="m32r-tdep.o monitor.o m32r-rom.o dsrec.o \
-			remote-m32r-sdi.o"
+	gdb_target_obs="m32r-tdep.o remote-m32r-sdi.o"
 	gdb_sim=../sim/m32r/libsim.a
 	;;
 
@@ -302,8 +301,8 @@ m68hc11*-*-*|m6811*-*-*)
 
 m68*-*-aout* | m68*-*-coff* | m68*-*-elf* | m68*-*-rtems* | m68*-*-uclinux* | \
 fido-*-elf*)
-	# Target: Motorola m68k embedded (e.g. bug monitors)
-	gdb_target_obs="m68k-tdep.o monitor.o dbug-rom.o dsrec.o"
+	# Target: Motorola m68k embedded
+	gdb_target_obs="m68k-tdep.o"
 	;;
 m68*-*-linux*)
 	# Target: Motorola m68k with a.out and ELF
@@ -333,13 +332,13 @@ mep-*-*)
 
 microblaze*-linux-*|microblaze*-*-linux*)
 	# Target: Xilinx MicroBlaze running Linux
-	gdb_target_obs="microblaze-tdep.o microblaze-linux-tdep.o microblaze-rom.o \
-			monitor.o dsrec.o solib-svr4.o symfile-mem.o linux-tdep.o"
+	gdb_target_obs="microblaze-tdep.o microblaze-linux-tdep.o solib-svr4.o \
+			symfile-mem.o linux-tdep.o"
 	gdb_sim=../sim/microblaze/libsim.a
 	;;
 microblaze*-*-*)
 	# Target: Xilinx MicroBlaze running standalone
-	gdb_target_obs="microblaze-tdep.o microblaze-rom.o monitor.o dsrec.o"
+	gdb_target_obs="microblaze-tdep.o"
 	gdb_sim=../sim/microblaze/libsim.a
 	;;
 
@@ -442,13 +441,12 @@ powerpc*-*-linux*)
 powerpc-*-lynx*178)
 	# Target: PowerPC running Lynx178.
 	gdb_target_obs="rs6000-tdep.o rs6000-lynx178-tdep.o \
-			xcoffread.o monitor.o dsrec.o ppc-sysv-tdep.o \
+			xcoffread.o ppc-sysv-tdep.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
 	;;
 powerpc*-*-*)
 	# Target: PowerPC running eabi
-	gdb_target_obs="rs6000-tdep.o monitor.o dsrec.o ppcbug-rom.o \
-			dink32-rom.o ppc-sysv-tdep.o solib-svr4.o \
+	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o solib-svr4.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
 	if test -f ../sim/ppc/Makefile; then
 	  gdb_sim=../sim/ppc/libsim.a
@@ -484,8 +482,8 @@ score-*-*)
 
 sh*-*-linux*)
 	# Target: GNU/Linux Super-H
-	gdb_target_obs="sh-tdep.o sh64-tdep.o sh-linux-tdep.o monitor.o \
-			dsrec.o solib-svr4.o symfile-mem.o \
+	gdb_target_obs="sh-tdep.o sh64-tdep.o sh-linux-tdep.o \
+			solib-svr4.o symfile-mem.o \
 			glibc-tdep.o linux-tdep.o"
 	gdb_sim=../sim/sh/libsim.a
 	build_gdbserver=yes
@@ -505,8 +503,8 @@ sh64-*-elf*)
 	gdb_sim=../sim/sh64/libsim.a
 	;;
 sh*)
-	# Target: Embedded Renesas Super-H with ICE and simulator
-	gdb_target_obs="sh-tdep.o sh64-tdep.o monitor.o dsrec.o"
+	# Target: Embedded Renesas Super-H processor
+	gdb_target_obs="sh-tdep.o sh64-tdep.o"
 	gdb_sim=../sim/sh/libsim.a
 	;;
 

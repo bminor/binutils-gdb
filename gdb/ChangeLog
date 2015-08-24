@@ -1,3 +1,25 @@
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention removed support for the various ROM monitors.
+	* Makefile.in (ALL_TARGET_OBS): Remove dbug-rom.o, dink32-rom.o,
+	ppcbug-rom.o, m32r-rom.o, dsrec.o and monitor.o from gdb_target_obs.
+	* configure.tgt (h8300-*-*): Remove monitor.o and m32r-rom.o from
+	gdb_target_obs.
+	(m68*-*-*): Remove monitor.o dbug-rom.o and dsrec.o from
+	gdb_target_obs.
+	(microblaze*-linux-*): Remove microblaze-rom.o, monitor.o and
+	dsrec.o from gdb_target_obs.
+	(microblaze*-*-*): Remove microblaze-rom.o, monitor.o and dsrec.o
+	from gdb_target_obs.
+	(powerpc-*-lynx*178): Remove monitor.o and dsrec.o from
+	gdb_target_obs.
+	(powerpc*-*-*): Remove monitor.o, dsrec.o, ppcbug-rom.o and
+	dink32-rom.o from gdb_target_obs.
+	(sh*-*-linux*): Remove monitor.o and dsrec.o from gdb_target_obs.
+	(sh*): Remove monitor.o and dsrec.o from gdb_target_obs.
+	* dbug-rom.c, dink32-rom.c, dsrec.c, m32r-rom.c, microblaze-rom.c,
+	monitor.c, monitor.h, ppcbug-rom.c, srec.h: Delete files.
+
 2015-08-21  Pedro Alves  <palves@redhat.com>
 
 	* frame.c (null_frame_id): Explicitly zero-initialize.
