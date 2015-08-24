@@ -1,3 +1,7 @@
+2015-08-24  Jan Stancek  <jstancek@redhat.com>
+
+	* i386-dis.c (print_insn): Fix decoding of three byte operands.
+
 2015-08-21  Alexander Fomin  <alexander.fomin@intel.com>
 
 	PR binutils/18257

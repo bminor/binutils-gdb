@@ -13438,8 +13438,10 @@ print_insn (bfd_vma pc, disassemble_info *info)
   if (*codep == 0x0f)
     {
       unsigned char threebyte;
-      FETCH_DATA (info, codep + 2);
-      threebyte = *++codep;
+
+      codep++;
+      FETCH_DATA (info, codep + 1);
+      threebyte = *codep;
       dp = &dis386_twobyte[threebyte];
       need_modrm = twobyte_has_modrm[*codep];
       codep++;

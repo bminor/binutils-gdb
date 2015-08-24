@@ -1,3 +1,9 @@
+2015-08-24  Jan Stancek  <jstancek@redhat.com>
+
+	* gas/i386/intel.s: Add test of disassembly of a potential
+	three byte instuction at the end of a function.
+	* gas/i386/intel.d: Update expected disassembly.
+
 2015-08-21  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/18581
