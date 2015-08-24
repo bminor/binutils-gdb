@@ -1,5 +1,9 @@
 2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.opt/inline-markers.c: Make z volatile.
+
+2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
+
 	* gdb.opt/inline-bt.c: New volatile global z.
 	* gdb.opt/inline-cmds.c: Likewise.
 	* gdb.opt/inline-locals.c: Likewise.
