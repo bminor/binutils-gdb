@@ -1971,6 +1971,18 @@ btrace_step_stopped_on_request (void)
   return status;
 }
 
+/* Return a target_waitstatus indicating a spurious stop.  */
+
+static struct target_waitstatus
+btrace_step_spurious (void)
+{
+  struct target_waitstatus status;
+
+  status.kind = TARGET_WAITKIND_SPURIOUS;
+
+  return status;
+}
+
 /* Clear the record histories.  */
 
 static void
@@ -2011,19 +2023,85 @@ record_btrace_replay_at_breakpoint (struct thread_info *tp)
 					     &btinfo->stop_reason);
 }
 
+/* Step one instruction in forward direction.  */
+
+static struct target_waitstatus
+record_btrace_single_step_forward (struct thread_info *tp)
+{
+  struct btrace_insn_iterator *replay, end;
+  struct btrace_thread_info *btinfo;
+
+  btinfo = &tp->btrace;
+  replay = btinfo->replay;
+
+  /* We're done if we're not replaying.  */
+  if (replay == NULL)
+    return btrace_step_no_history ();
+
+  /* Skip gaps during replay.  */
+  do
+    {
+      unsigned int steps;
+
+      steps = btrace_insn_next (replay, 1);
+      if (steps == 0)
+	{
+	  record_btrace_stop_replaying (tp);
+	  return btrace_step_no_history ();
+	}
+    }
+  while (btrace_insn_get (replay) == NULL);
+
+  /* Determine the end of the instruction trace.  */
+  btrace_insn_end (&end, btinfo);
+
+  /* We stop replaying if we reached the end of the trace.  */
+  if (btrace_insn_cmp (replay, &end) == 0)
+    record_btrace_stop_replaying (tp);
+
+  return btrace_step_spurious ();
+}
+
+/* Step one instruction in backward direction.  */
+
+static struct target_waitstatus
+record_btrace_single_step_backward (struct thread_info *tp)
+{
+  struct btrace_insn_iterator *replay;
+  struct btrace_thread_info *btinfo;
+
+  btinfo = &tp->btrace;
+  replay = btinfo->replay;
+
+  /* Start replaying if we're not already doing so.  */
+  if (replay == NULL)
+    replay = record_btrace_start_replaying (tp);
+
+  /* If we can't step any further, we reached the end of the history.
+     Skip gaps during replay.  */
+  do
+    {
+      unsigned int steps;
+
+      steps = btrace_insn_prev (replay, 1);
+      if (steps == 0)
+	return btrace_step_no_history ();
+    }
+  while (btrace_insn_get (replay) == NULL);
+
+  return btrace_step_spurious ();
+}
+
 /* Step a single thread.  */
 
 static struct target_waitstatus
 record_btrace_step_thread (struct thread_info *tp)
 {
-  struct btrace_insn_iterator *replay, end;
   struct btrace_thread_info *btinfo;
+  struct target_waitstatus status;
   enum btrace_thread_flag flags;
-  unsigned int steps;
-
 
   btinfo = &tp->btrace;
-  replay = btinfo->replay;
 
   flags = btinfo->flags & (BTHR_MOVE | BTHR_STOP);
   btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
@@ -2045,110 +2123,55 @@ record_btrace_step_thread (struct thread_info *tp)
       return btrace_step_stopped_on_request ();
 
     case BTHR_STEP:
-      /* We're done if we're not replaying.  */
-      if (replay == NULL)
-	return btrace_step_no_history ();
-
-      /* Skip gaps during replay.  */
-      do
-	{
-	  steps = btrace_insn_next (replay, 1);
-	  if (steps == 0)
-	    {
-	      record_btrace_stop_replaying (tp);
-	      return btrace_step_no_history ();
-	    }
-	}
-      while (btrace_insn_get (replay) == NULL);
-
-      /* Determine the end of the instruction trace.  */
-      btrace_insn_end (&end, btinfo);
-
-      /* We stop replaying if we reached the end of the trace.  */
-      if (btrace_insn_cmp (replay, &end) == 0)
-	record_btrace_stop_replaying (tp);
+      status = record_btrace_single_step_forward (tp);
+      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	return status;
 
       return btrace_step_stopped ();
 
     case BTHR_RSTEP:
-      /* Start replaying if we're not already doing so.  */
-      if (replay == NULL)
-	replay = record_btrace_start_replaying (tp);
-
-      /* If we can't step any further, we reached the end of the history.
-	 Skip gaps during replay.  */
-      do
-	{
-	  steps = btrace_insn_prev (replay, 1);
-	  if (steps == 0)
-	    return btrace_step_no_history ();
-
-	}
-      while (btrace_insn_get (replay) == NULL);
+      status = record_btrace_single_step_backward (tp);
+      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	return status;
 
       return btrace_step_stopped ();
 
     case BTHR_CONT:
-      /* We're done if we're not replaying.  */
-      if (replay == NULL)
-	return btrace_step_no_history ();
-
-      /* Determine the end of the instruction trace.  */
-      btrace_insn_end (&end, btinfo);
-
       for (;;)
 	{
-	  const struct btrace_insn *insn;
+	  status = record_btrace_single_step_forward (tp);
+	  if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	    return status;
 
-	  /* Skip gaps during replay.  */
-	  do
+	  if (btinfo->replay != NULL)
 	    {
-	      steps = btrace_insn_next (replay, 1);
-	      if (steps == 0)
-		{
-		  record_btrace_stop_replaying (tp);
-		  return btrace_step_no_history ();
-		}
+	      const struct btrace_insn *insn;
 
-	      insn = btrace_insn_get (replay);
+	      insn = btrace_insn_get (btinfo->replay);
+	      gdb_assert (insn != NULL);
+
+	      DEBUG ("stepping %d (%s) ... %s", tp->num,
+		     target_pid_to_str (tp->ptid),
+		     core_addr_to_string_nz (insn->pc));
 	    }
-	  while (insn == NULL);
-
-	  /* We stop replaying if we reached the end of the trace.  */
-	  if (btrace_insn_cmp (replay, &end) == 0)
-	    {
-	      record_btrace_stop_replaying (tp);
-	      return btrace_step_no_history ();
-	    }
-
-	  DEBUG ("stepping %d (%s) ... %s", tp->num,
-		 target_pid_to_str (tp->ptid),
-		 core_addr_to_string_nz (insn->pc));
 
 	  if (record_btrace_replay_at_breakpoint (tp))
 	    return btrace_step_stopped ();
 	}
 
     case BTHR_RCONT:
-      /* Start replaying if we're not already doing so.  */
-      if (replay == NULL)
-	replay = record_btrace_start_replaying (tp);
-
       for (;;)
 	{
 	  const struct btrace_insn *insn;
 
-	  /* If we can't step any further, we reached the end of the history.
-	     Skip gaps during replay.  */
-	  do
-	    {
-	      steps = btrace_insn_prev (replay, 1);
-	      if (steps == 0)
-		return btrace_step_no_history ();
+	  status = record_btrace_single_step_backward (tp);
+	  if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	    return status;
 
-	      insn = btrace_insn_get (replay);
-	    }
-	  while (insn == NULL);
+	  gdb_assert (btinfo->replay != NULL);
+
+	  insn = btrace_insn_get (btinfo->replay);
+	  gdb_assert (insn != NULL);
 
 	  DEBUG ("reverse-stepping %d (%s) ... %s", tp->num,
 		 target_pid_to_str (tp->ptid),
