@@ -14,7 +14,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 extern int x, y;
-extern volatile z;
+extern volatile int z;
 
 void bar(void)
 {

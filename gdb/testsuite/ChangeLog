@@ -1,5 +1,9 @@
 2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.opt/inline-markers.c: Make z int.
+
+2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
+
 	* gdb.opt/inline-markers.c: Make z volatile.
 
 2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
