@@ -1659,6 +1659,32 @@ record_btrace_to_get_tailcall_unwinder (struct target_ops *self)
   return &record_btrace_tailcall_frame_unwind;
 }
 
+/* Return a human-readable string for FLAG.  */
+
+static const char *
+btrace_thread_flag_to_str (enum btrace_thread_flag flag)
+{
+  switch (flag)
+    {
+    case BTHR_STEP:
+      return "step";
+
+    case BTHR_RSTEP:
+      return "reverse-step";
+
+    case BTHR_CONT:
+      return "cont";
+
+    case BTHR_RCONT:
+      return "reverse-cont";
+
+    case BTHR_STOP:
+      return "stop";
+    }
+
+  return "<invalid>";
+}
+
 /* Indicate that TP should be resumed according to FLAG.  */
 
 static void
@@ -1667,7 +1693,8 @@ record_btrace_resume_thread (struct thread_info *tp,
 {
   struct btrace_thread_info *btinfo;
 
-  DEBUG ("resuming %d (%s): %u", tp->num, target_pid_to_str (tp->ptid), flag);
+  DEBUG ("resuming thread %d (%s): %x (%s)", tp->num,
+	 target_pid_to_str (tp->ptid), flag, btrace_thread_flag_to_str (flag));
 
   btinfo = &tp->btrace;
 
@@ -1820,7 +1847,9 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
   struct thread_info *tp, *other;
   enum btrace_thread_flag flag;
 
-  DEBUG ("resume %s: %s", target_pid_to_str (ptid), step ? "step" : "cont");
+  DEBUG ("resume %s: %s%s", target_pid_to_str (ptid),
+	 execution_direction == EXEC_REVERSE ? "reverse-" : "",
+	 step ? "step" : "cont");
 
   /* Store the execution direction of the last resume.  */
   record_btrace_resume_exec_dir = execution_direction;
@@ -1863,6 +1892,24 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
       target_async (1);
       mark_async_event_handler (record_btrace_async_inferior_event_handler);
     }
+}
+
+/* Cancel resuming TP.  */
+
+static void
+record_btrace_cancel_resume (struct thread_info *tp)
+{
+  enum btrace_thread_flag flags;
+
+  flags = tp->btrace.flags & (BTHR_MOVE | BTHR_STOP);
+  if (flags == 0)
+    return;
+
+  DEBUG ("cancel resume thread %d (%s): %x (%s)", tp->num,
+	 target_pid_to_str (tp->ptid), flags,
+	 btrace_thread_flag_to_str (flags));
+
+  tp->btrace.flags &= ~(BTHR_MOVE | BTHR_STOP);
 }
 
 /* Find a thread to move.  */
@@ -1955,7 +2002,9 @@ record_btrace_step_thread (struct thread_info *tp)
   flags = btinfo->flags & (BTHR_MOVE | BTHR_STOP);
   btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
 
-  DEBUG ("stepping %d (%s): %u", tp->num, target_pid_to_str (tp->ptid), flags);
+  DEBUG ("stepping thread %d (%s): %x (%s)", tp->num,
+	 target_pid_to_str (tp->ptid), flags,
+	 btrace_thread_flag_to_str (flags));
 
   /* We can't step without an execution history.  */
   if ((flags & BTHR_MOVE) != 0 && btrace_is_empty (tp))
@@ -2126,7 +2175,7 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   /* Stop all other threads. */
   if (!target_is_non_stop_p ())
     ALL_NON_EXITED_THREADS (other)
-      other->btrace.flags &= ~(BTHR_MOVE | BTHR_STOP);
+      record_btrace_cancel_resume (other);
 
   /* Start record histories anew from the current position.  */
   record_btrace_clear_histories (&tp->btrace);

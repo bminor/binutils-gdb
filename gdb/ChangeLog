@@ -1,5 +1,14 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (btrace_thread_flag_to_str)
+	(record_btrace_cancel_resume): New.
+	(record_btrace_step_thread): Call btrace_thread_flag_to_str.
+	(record_btrace_resume): Print execution direction.
+	(record_btrace_resume_thread): Call btrace_thread_flag_to_str.
+	(record_btrace_wait): Call record_btrace_cancel_resume.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.h (enum btrace_thread_flag) <BTHR_STOP>: New.
 	* record-btrace (record_btrace_resume_thread): Clear BTHR_STOP.
 	(record_btrace_find_thread_to_move): Also accept threads that have
