@@ -1118,6 +1118,9 @@ if [is_elf_format] {
 
     run_dump_test "exclude-1a"
     run_dump_test "exclude-1b"
+
+    run_dump_test "only-section-01"
+    run_dump_test "remove-section-01"
 }
 run_dump_test "localize-hidden-2"
 

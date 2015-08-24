@@ -1,3 +1,16 @@
+2016-07-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objcopy.c (find_section_list): Handle section patterns starting
+	with '!' being a non-matching pattern.
+	* doc/binutils.texi (objcopy): Give example of using '!' with
+	--remove-section and --only-section.
+	(strip): Give example of using '!' with --remove-section.
+	* testsuite/binutils-all/data-sections.s: New file.
+	* testsuite/binutils-all/only-section-01.d: New file.
+	* testsuite/binutils-all/remove-section-01.d: New file.
+	* testsuite/binutils-all/objcopy.exp: Run new tests.
+	* NEWS: Mention new feature.
+
 2016-07-09  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/20337

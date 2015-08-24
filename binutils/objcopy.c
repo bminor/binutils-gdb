@@ -854,7 +854,7 @@ parse_symflags (const char *s, char **other)
 static struct section_list *
 find_section_list (const char *name, bfd_boolean add, unsigned int context)
 {
-  struct section_list *p;
+  struct section_list *p, *match = NULL;
 
   /* assert ((context & ((1 << 7) - 1)) != 0); */
 
@@ -890,19 +890,36 @@ find_section_list (const char *name, bfd_boolean add, unsigned int context)
 	}
       /* If we are not adding a new name/pattern then
 	 only check for a match if the context applies.  */
-      else if ((p->context & context)
-	       /* We could check for the presence of wildchar characters
-		  first and choose between calling strcmp and fnmatch,
-		  but is that really worth it ?  */
-	       && fnmatch (p->pattern, name, 0) == 0)
-	{
-	  p->used = TRUE;
-	  return p;
-	}
+      else if (p->context & context)
+        {
+          /* We could check for the presence of wildchar characters
+             first and choose between calling strcmp and fnmatch,
+             but is that really worth it ?  */
+          if (p->pattern [0] == '!')
+            {
+              if (fnmatch (p->pattern + 1, name, 0) == 0)
+                {
+                  p->used = TRUE;
+                  return NULL;
+                }
+            }
+          else
+            {
+              if (fnmatch (p->pattern, name, 0) == 0)
+                {
+                  if (match == NULL)
+                    match = p;
+                }
+            }
+        }
     }
 
   if (! add)
-    return NULL;
+    {
+      if (match != NULL)
+        match->used = TRUE;
+      return match;
+    }
 
   p = (struct section_list *) xmalloc (sizeof (struct section_list));
   p->pattern = name;

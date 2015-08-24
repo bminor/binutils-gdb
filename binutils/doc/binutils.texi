@@ -1221,6 +1221,18 @@ This option may be given more than once.  Note that using this option
 inappropriately may make the output file unusable.  Wildcard
 characters are accepted in @var{sectionpattern}.
 
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not be copied, even if earlier
+use of @option{--only-section} on the same command line would
+otherwise copy it.  For example:
+
+@smallexample
+  --only-section=.text.* --only-section=!.text.foo
+@end smallexample
+
+will copy all sectinos maching '.text.*' but not the section
+'.text.foo'.
+
 @item -R @var{sectionpattern}
 @itemx --remove-section=@var{sectionpattern}
 Remove any section matching @var{sectionpattern} from the output file.
@@ -1229,6 +1241,18 @@ inappropriately may make the output file unusable.  Wildcard
 characters are accepted in @var{sectionpattern}.  Using both the
 @option{-j} and @option{-R} options together results in undefined
 behaviour.
+
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not be removed even if an
+earlier use of @option{--remove-section} on the same command line
+would otherwise remove it.  For example:
+
+@smallexample
+  --remove-section=.text.* --remove-section=!.text.foo
+@end smallexample
+
+will remove all sections matching the pattern '.text.*', but will not
+remove the section '.text.foo'.
 
 @item -S
 @itemx --strip-all
@@ -3020,6 +3044,18 @@ option may be given more than once.  Note that using this option
 inappropriately may make the output file unusable.  The wildcard
 character @samp{*} may be given at the end of @var{sectionname}.  If
 so, then any section starting with @var{sectionname} will be removed.
+
+If the first character of @var{sectionpattern} is the exclamation
+point (!) then matching sections will not be removed even if an
+earlier use of @option{--remove-section} on the same command line
+would otherwise remove it.  For example:
+
+@smallexample
+  --remove-section=.text.* --remove-section=!.text.foo
+@end smallexample
+
+will remove all sections matching the pattern '.text.*', but will not
+remove the section '.text.foo'.
 
 @item -s
 @itemx --strip-all
