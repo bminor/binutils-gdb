@@ -1,5 +1,10 @@
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
+	* gdb.texinfo (Remote Configuration): Document the "set/show
+	remote multiprocess-extensions-packet" commands.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
 	* gdb.texinfo (Embedded Processors) <ARM>: Remove references to RDI.
 	<M32R>: Remove references to M32R/D.
 	<M68K>: Remove references to target dbug.

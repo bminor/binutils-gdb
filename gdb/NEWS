@@ -28,6 +28,10 @@ set debug bfd-cache
 show debug bfd-cache
   Control display of debugging info regarding bfd caching.
 
+set remote multiprocess-extensions-packet
+show remote multiprocess-extensions-packet
+  Set/show the use of the remote protocol multiprocess extensions.
+
 * The "disassemble" command accepts a new modifier: /s.
   It prints mixed source+disassembly like /m with two differences:
   - disassembled instructions are now printed in program order, and

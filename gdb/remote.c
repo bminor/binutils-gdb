@@ -4352,7 +4352,8 @@ remote_query_supported (void)
       char *q = NULL;
       struct cleanup *old_chain = make_cleanup (free_current_contents, &q);
 
-      q = remote_query_supported_append (q, "multiprocess+");
+      if (packet_set_cmd_state (PACKET_multiprocess_feature) != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "multiprocess+");
 
       if (packet_set_cmd_state (PACKET_swbreak_feature) != AUTO_BOOLEAN_FALSE)
 	q = remote_query_supported_append (q, "swbreak+");
@@ -13231,6 +13232,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_conf_bts_size],
        "Qbtrace-conf:bts:size", "btrace-conf-bts-size", 0);
 
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_multiprocess_feature],
+       "multiprocess-feature", "multiprocess-feature", 0);
+
   add_packet_config_cmd (&remote_protocol_packets[PACKET_swbreak_feature],
                          "swbreak-feature", "swbreak-feature", 0);
 
@@ -13260,7 +13264,6 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 	switch (i)
 	  {
 	  case PACKET_QNonStop:
-	  case PACKET_multiprocess_feature:
 	  case PACKET_EnableDisableTracepoints_feature:
 	  case PACKET_tracenz_feature:
 	  case PACKET_DisconnectedTracing_feature:

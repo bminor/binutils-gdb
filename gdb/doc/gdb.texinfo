@@ -20205,6 +20205,10 @@ are:
 @tab @code{Z0 and Z1}
 @tab @code{Support for target-side breakpoint condition evaluation}
 
+@item @code{multiprocess-extensions}
+@tab @code{multiprocess extensions}
+@tab Debug multiple processes and remote process PID awareness
+
 @item @code{swbreak-feature}
 @tab @code{swbreak stop reason}
 @tab @code{break}

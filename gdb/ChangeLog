@@ -1,5 +1,13 @@
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
+	* NEWS (New commands): Mention set/show remote
+	multiprocess-extensions-packet.
+	* remote.c (remote_query_supported): Only tell the server to use
+	the multiprocess extensions if the user hasn't force-disabled them
+	with "set remote multiprocess-extensions-packet off".
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
 	* gnulib/update-gnulib.sh (GNULIB_COMMIT_SHA1): Set to
 	1029a8112290f6eee9d7878a391c49db42c999bd.
 	* gnulib/configure, gnulib/config.in, gnulib/aclocal.m4:
