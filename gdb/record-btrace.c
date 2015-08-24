@@ -37,6 +37,7 @@
 #include "infrun.h"
 #include "event-loop.h"
 #include "inf-loop.h"
+#include "vec.h"
 
 /* The target_ops of record-btrace.  */
 static struct target_ops record_btrace_ops;
@@ -1838,6 +1839,26 @@ record_btrace_stop_replaying (struct thread_info *tp)
   registers_changed_ptid (tp->ptid);
 }
 
+/* Stop replaying TP if it is at the end of its execution history.  */
+
+static void
+record_btrace_stop_replaying_at_end (struct thread_info *tp)
+{
+  struct btrace_insn_iterator *replay, end;
+  struct btrace_thread_info *btinfo;
+
+  btinfo = &tp->btrace;
+  replay = btinfo->replay;
+
+  if (replay == NULL)
+    return;
+
+  btrace_insn_end (&end, btinfo);
+
+  if (btrace_insn_cmp (replay, &end) == 0)
+    record_btrace_stop_replaying (tp);
+}
+
 /* The to_resume method of target record-btrace.  */
 
 static void
@@ -1910,26 +1931,7 @@ record_btrace_cancel_resume (struct thread_info *tp)
 	 btrace_thread_flag_to_str (flags));
 
   tp->btrace.flags &= ~(BTHR_MOVE | BTHR_STOP);
-}
-
-/* Find a thread to move.  */
-
-static struct thread_info *
-record_btrace_find_thread_to_move (ptid_t ptid)
-{
-  struct thread_info *tp;
-
-  /* First check the parameter thread.  */
-  tp = find_thread_ptid (ptid);
-  if (tp != NULL && (tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0)
-    return tp;
-
-  /* Otherwise, find one other thread that has been resumed.  */
-  ALL_NON_EXITED_THREADS (tp)
-    if ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0)
-      return tp;
-
-  return NULL;
+  record_btrace_stop_replaying_at_end (tp);
 }
 
 /* Return a target_waitstatus indicating that we ran out of history.  */
@@ -1979,6 +1981,30 @@ btrace_step_spurious (void)
   struct target_waitstatus status;
 
   status.kind = TARGET_WAITKIND_SPURIOUS;
+
+  return status;
+}
+
+/* Return a target_waitstatus indicating that the thread was not resumed.  */
+
+static struct target_waitstatus
+btrace_step_no_resumed (void)
+{
+  struct target_waitstatus status;
+
+  status.kind = TARGET_WAITKIND_NO_RESUMED;
+
+  return status;
+}
+
+/* Return a target_waitstatus indicating that we should wait again.  */
+
+static struct target_waitstatus
+btrace_step_again (void)
+{
+  struct target_waitstatus status;
+
+  status.kind = TARGET_WAITKIND_IGNORE;
 
   return status;
 }
@@ -2047,24 +2073,22 @@ record_btrace_single_step_forward (struct thread_info *tp)
     {
       unsigned int steps;
 
+      /* We will bail out here if we continue stepping after reaching the end
+	 of the execution history.  */
       steps = btrace_insn_next (replay, 1);
       if (steps == 0)
-	{
-	  record_btrace_stop_replaying (tp);
-	  return btrace_step_no_history ();
-	}
+	return btrace_step_no_history ();
     }
   while (btrace_insn_get (replay) == NULL);
 
   /* Determine the end of the instruction trace.  */
   btrace_insn_end (&end, btinfo);
 
-  /* We stop replaying if we reached the end of the trace.  */
+  /* The execution trace contains (and ends with) the current instruction.
+     This instruction has not been executed, yet, so the trace really ends
+     one instruction earlier.  */
   if (btrace_insn_cmp (replay, &end) == 0)
-    {
-      record_btrace_stop_replaying (tp);
-      return btrace_step_no_history ();
-    }
+    return btrace_step_no_history ();
 
   return btrace_step_spurious ();
 }
@@ -2144,57 +2168,46 @@ record_btrace_step_thread (struct thread_info *tp)
     case BTHR_STEP:
       status = record_btrace_single_step_forward (tp);
       if (status.kind != TARGET_WAITKIND_SPURIOUS)
-	return status;
+	break;
 
       return btrace_step_stopped ();
 
     case BTHR_RSTEP:
       status = record_btrace_single_step_backward (tp);
       if (status.kind != TARGET_WAITKIND_SPURIOUS)
-	return status;
+	break;
 
       return btrace_step_stopped ();
 
     case BTHR_CONT:
-      for (;;)
-	{
-	  status = record_btrace_single_step_forward (tp);
-	  if (status.kind != TARGET_WAITKIND_SPURIOUS)
-	    return status;
+      status = record_btrace_single_step_forward (tp);
+      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	break;
 
-	  if (btinfo->replay != NULL)
-	    {
-	      const struct btrace_insn *insn;
-
-	      insn = btrace_insn_get (btinfo->replay);
-	      gdb_assert (insn != NULL);
-
-	      DEBUG ("stepping %d (%s) ... %s", tp->num,
-		     target_pid_to_str (tp->ptid),
-		     core_addr_to_string_nz (insn->pc));
-	    }
-	}
+      btinfo->flags |= flags;
+      return btrace_step_again ();
 
     case BTHR_RCONT:
-      for (;;)
-	{
-	  const struct btrace_insn *insn;
+      status = record_btrace_single_step_backward (tp);
+      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	break;
 
-	  status = record_btrace_single_step_backward (tp);
-	  if (status.kind != TARGET_WAITKIND_SPURIOUS)
-	    return status;
-
-	  gdb_assert (btinfo->replay != NULL);
-
-	  insn = btrace_insn_get (btinfo->replay);
-	  gdb_assert (insn != NULL);
-
-	  DEBUG ("reverse-stepping %d (%s) ... %s", tp->num,
-		 target_pid_to_str (tp->ptid),
-		 core_addr_to_string_nz (insn->pc));
-	}
+      btinfo->flags |= flags;
+      return btrace_step_again ();
     }
+
+  /* We keep threads moving at the end of their execution history.  The to_wait
+     method will stop the thread for whom the event is reported.  */
+  if (status.kind == TARGET_WAITKIND_NO_HISTORY)
+    btinfo->flags |= flags;
+
+  return status;
 }
+
+/* A vector of threads.  */
+
+typedef struct thread_info * tp_t;
+DEF_VEC_P (tp_t);
 
 /* The to_wait method of target record-btrace.  */
 
@@ -2202,7 +2215,9 @@ static ptid_t
 record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 		    struct target_waitstatus *status, int options)
 {
-  struct thread_info *tp, *other;
+  VEC (tp_t) *moving, *no_history;
+  struct thread_info *tp, *eventing;
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
   DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid), options);
 
@@ -2213,31 +2228,114 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
       return ops->to_wait (ops, ptid, status, options);
     }
 
-  /* Let's find a thread to move.  */
-  tp = record_btrace_find_thread_to_move (ptid);
-  if (tp == NULL)
-    {
-      DEBUG ("wait %s: no thread", target_pid_to_str (ptid));
+  moving = NULL;
+  no_history = NULL;
 
-      status->kind = TARGET_WAITKIND_IGNORE;
-      return minus_one_ptid;
+  make_cleanup (VEC_cleanup (tp_t), &moving);
+  make_cleanup (VEC_cleanup (tp_t), &no_history);
+
+  /* Keep a work list of moving threads.  */
+  ALL_NON_EXITED_THREADS (tp)
+    if (ptid_match (tp->ptid, ptid)
+	&& ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0))
+      VEC_safe_push (tp_t, moving, tp);
+
+  if (VEC_empty (tp_t, moving))
+    {
+      *status = btrace_step_no_resumed ();
+
+      DEBUG ("wait ended by %s: %s", target_pid_to_str (null_ptid),
+	     target_waitstatus_to_string (status));
+
+      do_cleanups (cleanups);
+      return null_ptid;
     }
 
-  /* We only move a single thread.  We're not able to correlate threads.  */
-  *status = record_btrace_step_thread (tp);
+  /* Step moving threads one by one, one step each, until either one thread
+     reports an event or we run out of threads to step.
+
+     When stepping more than one thread, chances are that some threads reach
+     the end of their execution history earlier than others.  If we reported
+     this immediately, all-stop on top of non-stop would stop all threads and
+     resume the same threads next time.  And we would report the same thread
+     having reached the end of its execution history again.
+
+     In the worst case, this would starve the other threads.  But even if other
+     threads would be allowed to make progress, this would result in far too
+     many intermediate stops.
+
+     We therefore delay the reporting of "no execution history" until we have
+     nothing else to report.  By this time, all threads should have moved to
+     either the beginning or the end of their execution history.  There will
+     be a single user-visible stop.  */
+  eventing = NULL;
+  while ((eventing == NULL) && !VEC_empty (tp_t, moving))
+    {
+      unsigned int ix;
+
+      ix = 0;
+      while ((eventing == NULL) && VEC_iterate (tp_t, moving, ix, tp))
+	{
+	  *status = record_btrace_step_thread (tp);
+
+	  switch (status->kind)
+	    {
+	    case TARGET_WAITKIND_IGNORE:
+	      ix++;
+	      break;
+
+	    case TARGET_WAITKIND_NO_HISTORY:
+	      VEC_safe_push (tp_t, no_history,
+			     VEC_ordered_remove (tp_t, moving, ix));
+	      break;
+
+	    default:
+	      eventing = VEC_unordered_remove (tp_t, moving, ix);
+	      break;
+	    }
+	}
+    }
+
+  if (eventing == NULL)
+    {
+      /* We started with at least one moving thread.  This thread must have
+	 either stopped or reached the end of its execution history.
+
+	 In the former case, EVENTING must not be NULL.
+	 In the latter case, NO_HISTORY must not be empty.  */
+      gdb_assert (!VEC_empty (tp_t, no_history));
+
+      /* We kept threads moving at the end of their execution history.  Stop
+	 EVENTING now that we are going to report its stop.  */
+      eventing = VEC_unordered_remove (tp_t, no_history, 0);
+      eventing->btrace.flags &= ~BTHR_MOVE;
+
+      *status = btrace_step_no_history ();
+    }
+
+  gdb_assert (eventing != NULL);
+
+  /* We kept threads replaying at the end of their execution history.  Stop
+     replaying EVENTING now that we are going to report its stop.  */
+  record_btrace_stop_replaying_at_end (eventing);
 
   /* Stop all other threads. */
   if (!target_is_non_stop_p ())
-    ALL_NON_EXITED_THREADS (other)
-      record_btrace_cancel_resume (other);
+    ALL_NON_EXITED_THREADS (tp)
+      record_btrace_cancel_resume (tp);
 
   /* Start record histories anew from the current position.  */
-  record_btrace_clear_histories (&tp->btrace);
+  record_btrace_clear_histories (&eventing->btrace);
 
   /* We moved the replay position but did not update registers.  */
-  registers_changed_ptid (tp->ptid);
+  registers_changed_ptid (eventing->ptid);
 
-  return tp->ptid;
+  DEBUG ("wait ended by thread %d (%s): %s", eventing->num,
+	 target_pid_to_str (eventing->ptid),
+	 target_waitstatus_to_string (status));
+
+  do_cleanups (cleanups);
+  return eventing->ptid;
 }
 
 /* The to_stop method of target record-btrace.  */

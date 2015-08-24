@@ -1,5 +1,20 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c: Include vec.h.
+	(record_btrace_find_thread_to_move): Removed.
+	(btrace_step_no_resumed, btrace_step_again)
+	(record_btrace_stop_replaying_at_end): New.
+	(record_btrace_cancel_resume): Call record_btrace_stop_replaying_at_end.
+	(record_btrace_single_step_forward): Remove calls to
+	record_btrace_stop_replaying.
+	(record_btrace_step_thread): Do only one step for BTHR_CONT and
+	BTHR_RCONT.  Keep threads at the end of their history moving.
+	(record_btrace_wait): Call record_btrace_step_thread for all threads
+	until one reports an event.  Call record_btrace_stop_replaying_at_end
+	for the eventing thread.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_single_step_forward): Return
 	NO_HISTORY if a step brings us to the end of the execution history.
 
