@@ -1,3 +1,12 @@
+2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.opt/inline-bt.c: New volatile global z.
+	* gdb.opt/inline-cmds.c: Likewise.
+	* gdb.opt/inline-locals.c: Likewise.
+	* gdb.opt/inline-markers.c: New extern global z.
+	(marker): Use z.
+	(inline_fn): Likewise.
+
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
 	* config/m32r-stub.exp: Remove file.

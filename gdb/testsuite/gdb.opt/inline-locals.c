@@ -23,6 +23,7 @@
 #endif
 
 int x, y;
+volatile int z = 0;
 volatile int result;
 volatile int *array_p;
 
