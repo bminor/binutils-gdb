@@ -636,7 +636,7 @@ spu_request_interrupt (void)
 {
   struct thread_info *thr = get_first_thread ();
 
-  syscall (SYS_tkill, ptid_get_lwp (thr), SIGINT);
+  syscall (SYS_tkill, lwpid_of (thr), SIGINT);
 }
 
 static struct target_ops spu_target_ops = {
