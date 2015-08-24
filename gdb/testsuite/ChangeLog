@@ -1,3 +1,8 @@
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/connect-without-multi-process.c: New file.
+	* gdb.server/connect-without-multi-process.exp: New file.
+
 2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.opt/inline-markers.c: Make z int.

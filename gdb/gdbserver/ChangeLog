@@ -1,5 +1,12 @@
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
+	* inferiors.c (get_first_process): New function.
+	* inferiors.h (get_first_process): New declaration.
+	* remote-utils.c (read_ptid): Default to the first process in the
+	list, instead of to the current thread's process.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
 	* debug.c: Include gdb_sys_time.h instead of sys/time.h.
 	* event-loop.c: Likewise.
 	* remote-utils.c: Likewise.

@@ -573,9 +573,10 @@ read_ptid (char *buf, char **obuf)
   /* No multi-process.  Just a tid.  */
   tid = hex_or_minus_one (p, &pp);
 
-  /* Since the stub is not sending a process id, then default to
-     what's in the current inferior.  */
-  pid = ptid_get_pid (current_ptid);
+  /* Since GDB is not sending a process id (multi-process extensions
+     are off), then there's only one process.  Default to the first in
+     the list.  */
+  pid = pid_of (get_first_process ());
 
   if (obuf)
     *obuf = pp;
