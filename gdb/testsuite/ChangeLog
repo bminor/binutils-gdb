@@ -1,3 +1,10 @@
+2015-08-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu_vector.exp: Try compilation with "-mcpu=native
+	-Wno-psabi" if "-mcpu=native" fails.  For the tests with "finish"
+	and "return" use KFAIL when GDB can not read/write the vector
+	return value.
+
 2015-08-21  Gary Benson <gbenson@redhat.com>
 
 	* gdb.trace/pending.exp: Cope with remote transfer warnings.
