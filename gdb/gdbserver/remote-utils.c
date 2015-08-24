@@ -51,7 +51,7 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #include <unistd.h>
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>

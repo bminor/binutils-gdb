@@ -1,5 +1,27 @@
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/gdb_sys_time.h.
+	* common/gdb_sys_time.h: New file.
+	* event-loop.c: Include gdb_sys_time.h instead of sys/time.h.
+	* gdb_select.h: Likewise.
+	* gdb_usleep.c: Likewise.
+	* maint.c: Likewise.
+	* mi/mi-main.c: Likewise.
+	* mi/mi-parse.h: Likewise.
+	* remote-fileio.c: Likewise.
+	* remote-m32r-sdi.c: Likewise.
+	* remote.c: Likewise.
+	* ser-base.c: Likewise.
+	* ser-pipe.c: Likewise.
+	* ser-tcp.c: Likewise.
+	* ser-unix.c: Likewise.
+	* symfile.c: Likewise.
+	* symfile.c: Likewise.  Rename OSIZE to SIZE throughout.
+	* target-memory.c: Include gdb_sys_time.h instead of sys/time.h.
+	* utils.c: Likewise.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention removed support for the various ROM monitors.
 	* Makefile.in (ALL_TARGET_OBS): Remove dbug-rom.o, dink32-rom.o,
 	ppcbug-rom.o, m32r-rom.o, dsrec.o and monitor.o from gdb_target_obs.

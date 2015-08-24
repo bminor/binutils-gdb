@@ -24,7 +24,7 @@
 #include "arch-utils.h"
 #include <ctype.h>
 #include <signal.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #include <time.h>
 #include "command.h"
 #include "gdbcmd.h"

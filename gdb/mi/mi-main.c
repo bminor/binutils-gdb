@@ -55,7 +55,7 @@
 #include "gdbcmd.h"
 
 #include <ctype.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 
 #if defined HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>

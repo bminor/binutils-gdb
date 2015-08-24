@@ -986,7 +986,7 @@ common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
 common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h \
-nat/linux-namespaces.h arch/arm.h
+nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 

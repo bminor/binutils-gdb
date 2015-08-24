@@ -1,5 +1,12 @@
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
+	* debug.c: Include gdb_sys_time.h instead of sys/time.h.
+	* event-loop.c: Likewise.
+	* remote-utils.c: Likewise.
+	* tracepoint.c: Likewise.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
 	* spu-low.c (spu_request_interrupt): Use lwpid_of instead of
 	ptid_get_lwp.
 

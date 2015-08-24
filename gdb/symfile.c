@@ -62,7 +62,7 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <time.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 
 #include "psymtab.h"
 
@@ -3518,12 +3518,12 @@ overlay_command (char *args, int from_tty)
    In this simple implementation, the target data structures are as follows:
    unsigned _novlys;            /# number of overlay sections #/
    unsigned _ovly_table[_novlys][4] = {
-   {VMA, SIZE, LMA, MAPPED},    /# one entry per overlay section #/
+   {VMA, OSIZE, LMA, MAPPED},    /# one entry per overlay section #/
    {..., ...,  ..., ...},
    }
    unsigned _novly_regions;     /# number of overlay regions #/
    unsigned _ovly_region_table[_novly_regions][3] = {
-   {VMA, SIZE, MAPPED_TO_LMA},  /# one entry per overlay region #/
+   {VMA, OSIZE, MAPPED_TO_LMA},  /# one entry per overlay region #/
    {..., ...,  ...},
    }
    These functions will attempt to update GDB's mappedness state in the
@@ -3541,7 +3541,7 @@ static unsigned cache_novlys = 0;
 static CORE_ADDR cache_ovly_table_base = 0;
 enum ovly_index
   {
-    VMA, SIZE, LMA, MAPPED
+    VMA, OSIZE, LMA, MAPPED
   };
 
 /* Throw away the cached copy of _ovly_table.  */
@@ -3641,14 +3641,14 @@ simple_overlay_update_1 (struct obj_section *osect)
   for (i = 0; i < cache_novlys; i++)
     if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
 	&& cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect)
-	/* && cache_ovly_table[i][SIZE] == size */ )
+	/* && cache_ovly_table[i][OSIZE] == size */ )
       {
 	read_target_long_array (cache_ovly_table_base + i * word_size,
 				(unsigned int *) cache_ovly_table[i],
 				4, word_size, byte_order);
 	if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
 	    && cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect)
-	    /* && cache_ovly_table[i][SIZE] == size */ )
+	    /* && cache_ovly_table[i][OSIZE] == size */ )
 	  {
 	    osect->ovly_mapped = cache_ovly_table[i][MAPPED];
 	    return 1;
@@ -3714,7 +3714,7 @@ simple_overlay_update (struct obj_section *osect)
       for (i = 0; i < cache_novlys; i++)
 	if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
 	    && cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect)
-	    /* && cache_ovly_table[i][SIZE] == size */ )
+	    /* && cache_ovly_table[i][OSIZE] == size */ )
 	  { /* obj_section matches i'th entry in ovly_table.  */
 	    osect->ovly_mapped = cache_ovly_table[i][MAPPED];
 	    break;		/* finished with inner for loop: break out.  */

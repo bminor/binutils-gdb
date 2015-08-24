@@ -47,7 +47,7 @@
 #include "disasm.h"
 #include "location.h"
 
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 
 #include "event-loop.h"
 #include "event-top.h"
