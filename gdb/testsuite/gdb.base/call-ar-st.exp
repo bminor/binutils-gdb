@@ -19,11 +19,6 @@
 
 standard_testfile
 
-# Test depends on printf, which the sparclet stub doesn't support.  
-if { [istarget "sparclet-*-*"] } {
-    return 0
-}
-
 # Some targets can't call functions, so don't even bother with this
 # test.
 if [target_info exists gdb,cannot_call_functions] {

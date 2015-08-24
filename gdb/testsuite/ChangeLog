@@ -1,3 +1,13 @@
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* config/m32r-stub.exp: Remove file.
+	* gdb.base/call-ar-st.exp: Remove reference to sparclet.
+	* gdb.base/call-rt-st.exp: Likewise.
+	* gdb.base/call-strs.exp: Likewise.
+	* gdb.base/default.exp: Remove references to h8300-*-hms and
+	*-*-udi*.
+	* gdb.base/funcargs.exp: Remove reference to sparclet-*-*.
+
 2015-08-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/gnu_vector.exp: Try compilation with "-mcpu=native
