@@ -21426,16 +21426,12 @@ acceptable commands.
 
 
 @menu
-* ARM::                         ARM RDI
-* M32R/D::                      Renesas M32R/D
+* ARM::                         ARM
+* M32R/SDI::                    Renesas M32R/SDI
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
 * PowerPC Embedded::            PowerPC Embedded
-* PA::                          HP PA Embedded
-* Sparclet::                    Tsqware Sparclet
-* Sparclite::                   Fujitsu Sparclite
-* Z8000::                       Zilog Z8000
 * AVR::                         Atmel AVR
 * CRIS::                        CRIS
 * Super-H::                     Renesas Super-H
@@ -21443,20 +21439,6 @@ acceptable commands.
 
 @node ARM
 @subsection ARM
-@cindex ARM RDI
-
-@table @code
-@kindex target rdi
-@item target rdi @var{dev}
-ARM Angel monitor, via RDI library interface to ADP protocol.  You may
-use this target to communicate with both boards running the Angel
-monitor, or with the EmbeddedICE JTAG debug device.
-
-@kindex target rdp
-@item target rdp @var{dev}
-ARM Demon monitor.
-
-@end table
 
 @value{GDBN} provides the following ARM-specific commands:
 
@@ -21532,50 +21514,6 @@ target support subsystem.
 Show whether ARM-specific debugging messages are enabled.
 @end table
 
-The following commands are available when an ARM target is debugged
-using the RDI interface:
-
-@table @code
-@item rdilogfile @r{[}@var{file}@r{]}
-@kindex rdilogfile
-@cindex ADP (Angel Debugger Protocol) logging
-Set the filename for the ADP (Angel Debugger Protocol) packet log.
-With an argument, sets the log file to the specified @var{file}.  With
-no argument, show the current log file name.  The default log file is
-@file{rdi.log}.
-
-@item rdilogenable @r{[}@var{arg}@r{]}
-@kindex rdilogenable
-Control logging of ADP packets.  With an argument of 1 or @code{"yes"}
-enables logging, with an argument 0 or @code{"no"} disables it.  With
-no arguments displays the current setting.  When logging is enabled,
-ADP packets exchanged between @value{GDBN} and the RDI target device
-are logged to a file.
-
-@item set rdiromatzero
-@kindex set rdiromatzero
-@cindex ROM at zero address, RDI
-Tell @value{GDBN} whether the target has ROM at address 0.  If on,
-vector catching is disabled, so that zero address can be used.  If off
-(the default), vector catching is enabled.  For this command to take
-effect, it needs to be invoked prior to the @code{target rdi} command.
-
-@item show rdiromatzero
-@kindex show rdiromatzero
-Show the current setting of ROM at zero address.
-
-@item set rdiheartbeat
-@kindex set rdiheartbeat
-@cindex RDI heartbeat
-Enable or disable RDI heartbeat packets.  It is not recommended to
-turn on this option, since it confuses ARM and EPI JTAG interface, as
-well as the Angel monitor.
-
-@item show rdiheartbeat
-@kindex show rdiheartbeat
-Show the setting of RDI heartbeat packets.
-@end table
-
 @table @code
 @item target sim @r{[}@var{simargs}@r{]} @dots{} 
 The @value{GDBN} ARM simulator accepts the following optional arguments.
@@ -21596,60 +21534,8 @@ The default value is @code{all}.
 @end table
 @end table
 
-@node M32R/D
-@subsection Renesas M32R/D and M32R/SDI
-
-@table @code
-@kindex target m32r
-@item target m32r @var{dev}
-Renesas M32R/D ROM monitor.
-
-@kindex target m32rsdi
-@item target m32rsdi @var{dev}
-Renesas M32R SDI server, connected via parallel port to the board.
-@end table
-
-The following @value{GDBN} commands are specific to the M32R monitor:
-
-@table @code
-@item set download-path @var{path}
-@kindex set download-path
-@cindex find downloadable @sc{srec} files (M32R)
-Set the default path for finding downloadable @sc{srec} files.
-
-@item show download-path
-@kindex show download-path
-Show the default path for downloadable @sc{srec} files.
-
-@item set board-address @var{addr}
-@kindex set board-address
-@cindex M32-EVA target board address
-Set the IP address for the M32R-EVA target board.
-
-@item show board-address
-@kindex show board-address
-Show the current IP address of the target board.
-
-@item set server-address @var{addr}
-@kindex set server-address
-@cindex download server address (M32R)
-Set the IP address for the download server, which is the @value{GDBN}'s
-host machine.
-
-@item show server-address
-@kindex show server-address
-Display the IP address of the download server.
-
-@item upload @r{[}@var{file}@r{]}
-@kindex upload@r{, M32R}
-Upload the specified @sc{srec} @var{file} via the monitor's Ethernet
-upload capability.  If no @var{file} argument is given, the current
-executable file is uploaded.
-
-@item tload @r{[}@var{file}@r{]}
-@kindex tload@r{, M32R}
-Test the @code{upload} command.
-@end table
+@node M32R/SDI
+@subsection Renesas M32R/SDI
 
 The following commands are available for M32R/SDI:
 
@@ -21688,16 +21574,7 @@ Instructs the remote to set breakpoints by DBT.
 @node M68K
 @subsection M68k
 
-The Motorola m68k configuration includes ColdFire support, and a
-target command for the following ROM monitor.
-
-@table @code
-
-@kindex target dbug
-@item target dbug @var{dev}
-dBUG ROM monitor for Motorola ColdFire.
-
-@end table
+The Motorola m68k configuration includes ColdFire support.
 
 @node MicroBlaze
 @subsection MicroBlaze
@@ -21787,14 +21664,6 @@ NEC's DDB variant of PMON for Vr4300.
 @item target lsi @var{port}
 @kindex target lsi @var{port}
 LSI variant of PMON.
-
-@kindex target r3900
-@item target r3900 @var{dev}
-Densan DVE-R3900 ROM monitor for Toshiba R3900 Mips.
-
-@kindex target array
-@item target array @var{dev}
-Array Tech LSI33K RAID controller board.
 
 @end table
 
@@ -21982,269 +21851,7 @@ Allow @value{GDBN} to use only one debug register when watching a variable
 of scalar type, thus assuming that the variable is accessed through the
 address of its first byte.
 
-@kindex target dink32
-@item target dink32 @var{dev}
-DINK32 ROM monitor.
-
-@kindex target ppcbug
-@item target ppcbug @var{dev}
-@kindex target ppcbug1
-@item target ppcbug1 @var{dev}
-PPCBUG ROM monitor for PowerPC.
-
-@kindex target sds
-@item target sds @var{dev}
-SDS monitor, running on a PowerPC board (such as Motorola's ADS).
 @end table
-
-@cindex SDS protocol
-The following commands specific to the SDS protocol are supported
-by @value{GDBN}:
-
-@table @code
-@item set sdstimeout @var{nsec}
-@kindex set sdstimeout
-Set the timeout for SDS protocol reads to be @var{nsec} seconds.  The
-default is 2 seconds.
-
-@item show sdstimeout
-@kindex show sdstimeout
-Show the current value of the SDS timeout.
-
-@item sds @var{command}
-@kindex sds@r{, a command}
-Send the specified @var{command} string to the SDS monitor.
-@end table
-
-
-@node PA
-@subsection HP PA Embedded
-
-@table @code
-
-@kindex target op50n
-@item target op50n @var{dev}
-OP50N monitor, running on an OKI HPPA board.
-
-@kindex target w89k
-@item target w89k @var{dev}
-W89K monitor, running on a Winbond HPPA board.
-
-@end table
-
-@node Sparclet
-@subsection Tsqware Sparclet
-
-@cindex Sparclet
-
-@value{GDBN} enables developers to debug tasks running on
-Sparclet targets from a Unix host.
-@value{GDBN} uses code that runs on
-both the Unix host and on the Sparclet target.  The program
-@code{@value{GDBP}} is installed and executed on the Unix host.
-
-@table @code
-@item remotetimeout @var{args}
-@kindex remotetimeout
-@value{GDBN} supports the option @code{remotetimeout}.
-This option is set by the user, and @var{args} represents the number of
-seconds @value{GDBN} waits for responses.
-@end table
-
-@cindex compiling, on Sparclet
-When compiling for debugging, include the options @samp{-g} to get debug
-information and @samp{-Ttext} to relocate the program to where you wish to
-load it on the target.  You may also want to add the options @samp{-n} or
-@samp{-N} in order to reduce the size of the sections.  Example:
-
-@smallexample
-sparclet-aout-gcc prog.c -Ttext 0x12010000 -g -o prog -N
-@end smallexample
-
-You can use @code{objdump} to verify that the addresses are what you intended:
-
-@smallexample
-sparclet-aout-objdump --headers --syms prog
-@end smallexample
-
-@cindex running, on Sparclet
-Once you have set
-your Unix execution search path to find @value{GDBN}, you are ready to
-run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}}
-(or @code{sparclet-aout-gdb}, depending on your installation).
-
-@value{GDBN} comes up showing the prompt:
-
-@smallexample
-(gdbslet)
-@end smallexample
-
-@menu
-* Sparclet File::                Setting the file to debug
-* Sparclet Connection::          Connecting to Sparclet
-* Sparclet Download::            Sparclet download
-* Sparclet Execution::           Running and debugging
-@end menu
-
-@node Sparclet File
-@subsubsection Setting File to Debug
-
-The @value{GDBN} command @code{file} lets you choose with program to debug.
-
-@smallexample
-(gdbslet) file prog
-@end smallexample
-
-@need 1000
-@value{GDBN} then attempts to read the symbol table of @file{prog}.
-@value{GDBN} locates
-the file by searching the directories listed in the command search
-path.
-If the file was compiled with debug information (option @samp{-g}), source
-files will be searched as well.
-@value{GDBN} locates
-the source files by searching the directories listed in the directory search
-path (@pxref{Environment, ,Your Program's Environment}).
-If it fails
-to find a file, it displays a message such as:
-
-@smallexample
-prog: No such file or directory.
-@end smallexample
-
-When this happens, add the appropriate directories to the search paths with
-the @value{GDBN} commands @code{path} and @code{dir}, and execute the
-@code{target} command again.
-
-@node Sparclet Connection
-@subsubsection Connecting to Sparclet
-
-The @value{GDBN} command @code{target} lets you connect to a Sparclet target.
-To connect to a target on serial port ``@code{ttya}'', type:
-
-@smallexample
-(gdbslet) target sparclet /dev/ttya
-Remote target sparclet connected to /dev/ttya
-main () at ../prog.c:3
-@end smallexample
-
-@need 750
-@value{GDBN} displays messages like these:
-
-@smallexample
-Connected to ttya.
-@end smallexample
-
-@node Sparclet Download
-@subsubsection Sparclet Download
-
-@cindex download to Sparclet
-Once connected to the Sparclet target,
-you can use the @value{GDBN}
-@code{load} command to download the file from the host to the target.
-The file name and load offset should be given as arguments to the @code{load}
-command.
-Since the file format is aout, the program must be loaded to the starting
-address.  You can use @code{objdump} to find out what this value is.  The load
-offset is an offset which is added to the VMA (virtual memory address)
-of each of the file's sections.
-For instance, if the program
-@file{prog} was linked to text address 0x1201000, with data at 0x12010160
-and bss at 0x12010170, in @value{GDBN}, type:
-
-@smallexample
-(gdbslet) load prog 0x12010000
-Loading section .text, size 0xdb0 vma 0x12010000
-@end smallexample
-
-If the code is loaded at a different address then what the program was linked
-to, you may need to use the @code{section} and @code{add-symbol-file} commands
-to tell @value{GDBN} where to map the symbol table.
-
-@node Sparclet Execution
-@subsubsection Running and Debugging
-
-@cindex running and debugging Sparclet programs
-You can now begin debugging the task using @value{GDBN}'s execution control
-commands, @code{b}, @code{step}, @code{run}, etc.  See the @value{GDBN}
-manual for the list of commands.
-
-@smallexample
-(gdbslet) b main
-Breakpoint 1 at 0x12010000: file prog.c, line 3.
-(gdbslet) run
-Starting program: prog
-Breakpoint 1, main (argc=1, argv=0xeffff21c) at prog.c:3
-3        char *symarg = 0;
-(gdbslet) step
-4        char *execarg = "hello!";
-(gdbslet)
-@end smallexample
-
-@node Sparclite
-@subsection Fujitsu Sparclite
-
-@table @code
-
-@kindex target sparclite
-@item target sparclite @var{dev}
-Fujitsu sparclite boards, used only for the purpose of loading.
-You must use an additional command to debug the program.
-For example: target remote @var{dev} using @value{GDBN} standard
-remote protocol.
-
-@end table
-
-@node Z8000
-@subsection Zilog Z8000
-
-@cindex Z8000
-@cindex simulator, Z8000
-@cindex Zilog Z8000 simulator
-
-When configured for debugging Zilog Z8000 targets, @value{GDBN} includes
-a Z8000 simulator.
-
-For the Z8000 family, @samp{target sim} simulates either the Z8002 (the
-unsegmented variant of the Z8000 architecture) or the Z8001 (the
-segmented variant).  The simulator recognizes which architecture is
-appropriate by inspecting the object code.
-
-@table @code
-@item target sim @var{args}
-@kindex sim
-@kindex target sim@r{, with Z8000}
-Debug programs on a simulated CPU.  If the simulator supports setup
-options, specify them via @var{args}.
-@end table
-
-@noindent
-After specifying this target, you can debug programs for the simulated
-CPU in the same style as programs for your host computer; use the
-@code{file} command to load a new program image, the @code{run} command
-to run your program, and so on.
-
-As well as making available all the usual machine registers
-(@pxref{Registers, ,Registers}), the Z8000 simulator provides three
-additional items of information as specially named registers:
-
-@table @code
-
-@item cycles
-Counts clock-ticks in the simulator.
-
-@item insts
-Counts instructions run in the simulator.
-
-@item time
-Execution time in 60ths of a second.
-
-@end table
-
-You can refer to these values in @value{GDBN} expressions with the usual
-conventions; for example, @w{@samp{b fputc if $cycles>5000}} sets a
-conditional breakpoint that suspends only after at least 5000
-simulated clock ticks.
 
 @node AVR
 @subsection Atmel AVR
