@@ -1,5 +1,10 @@
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_get_debug_reg_state): Add argument pid.
+	Find proc_info by find_process_pid.  All callers updated.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (struct arch64_dr_update_callback_param):
 	Remove.
 	(debug_reg_change_callback): Remove.

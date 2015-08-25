@@ -238,11 +238,10 @@ aarch64_init_debug_reg_state (struct aarch64_debug_reg_state *state)
    current process' arch-specific data area.  */
 
 static struct aarch64_debug_reg_state *
-aarch64_get_debug_reg_state ()
+aarch64_get_debug_reg_state (pid_t pid)
 {
-  struct process_info *proc;
+  struct process_info *proc = find_process_pid (pid);
 
-  proc = current_process ();
   return &proc->priv->arch_private->debug_reg_state;
 }
 
@@ -291,7 +290,8 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   int ret;
   enum target_hw_bp_type targ_type;
-  struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (pid_of (current_thread));
 
   if (show_debug_regs)
     fprintf (stderr, "insert_point on entry (addr=0x%08lx, len=%d)\n",
@@ -310,8 +310,8 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 				 state);
 
   if (show_debug_regs)
-    aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
-				  "insert_point", addr, len, targ_type);
+    aarch64_show_debug_reg_state (state, "insert_point", addr, len,
+				  targ_type);
 
   return ret;
 }
@@ -327,7 +327,8 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   int ret;
   enum target_hw_bp_type targ_type;
-  struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (pid_of (current_thread));
 
   if (show_debug_regs)
     fprintf (stderr, "remove_point on entry (addr=0x%08lx, len=%d)\n",
@@ -347,8 +348,8 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 				 state);
 
   if (show_debug_regs)
-    aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
-				  "remove_point", addr, len, targ_type);
+    aarch64_show_debug_reg_state (state, "remove_point", addr, len,
+				  targ_type);
 
   return ret;
 }
@@ -374,7 +375,7 @@ aarch64_stopped_data_address (void)
     return (CORE_ADDR) 0;
 
   /* Check if the address matches any watched address.  */
-  state = aarch64_get_debug_reg_state ();
+  state = aarch64_get_debug_reg_state (pid_of (current_thread));
   for (i = aarch64_num_wp_regs - 1; i >= 0; --i)
     {
       const unsigned int len = aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
