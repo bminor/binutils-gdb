@@ -262,10 +262,10 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
   if (show_debug_regs)
     {
       fprintf (stderr, "debug_reg_change_callback: \n\tOn entry:\n");
-      fprintf (stderr, "\tpid%d, dr_changed_bp=0x%llx, "
-	       "dr_changed_wp=0x%llx\n",
-	       pid, info->dr_changed_bp,
-	       info->dr_changed_wp);
+      fprintf (stderr, "\tpid%d, dr_changed_bp=0x%s, "
+	       "dr_changed_wp=0x%s\n",
+	       pid, phex (info->dr_changed_bp, 8),
+	       phex (info->dr_changed_wp, 8));
     }
 
   dr_changed_ptr = is_watchpoint ? &info->dr_changed_wp
@@ -288,10 +288,10 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
 
   if (show_debug_regs)
     {
-      fprintf (stderr, "\tOn exit:\n\tpid%d, dr_changed_bp=0x%llx, "
-	       "dr_changed_wp=0x%llx\n",
-	       pid, info->dr_changed_bp,
-	       info->dr_changed_wp);
+      fprintf (stderr, "\tOn exit:\n\tpid%d, dr_changed_bp=0x%s, "
+	       "dr_changed_wp=0x%s\n",
+	       pid, phex (info->dr_changed_bp, 8),
+	       phex (info->dr_changed_wp, 8));
     }
 
   return 0;
