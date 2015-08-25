@@ -20,6 +20,34 @@ maint show target-non-stop
   "set non-stop" is "off".  The default is "auto", meaning non-stop
   mode is enabled if supported by the target.
 
+maint set bfd-sharing
+maint show bfd-sharing
+  Control the reuse of bfd objects.
+
+set debug bfd-cache
+show debug bfd-cache
+  Control display of debugging info regarding bfd caching.
+
+set remote multiprocess-extensions-packet
+show remote multiprocess-extensions-packet
+  Set/show the use of the remote protocol multiprocess extensions.
+
+* The "disassemble" command accepts a new modifier: /s.
+  It prints mixed source+disassembly like /m with two differences:
+  - disassembled instructions are now printed in program order, and
+  - and source for all relevant files is now printed.
+  The "/m" option is now considered deprecated: its "source-centric"
+  output hasn't proved useful in practice.
+
+* Support for various ROM monitors has been removed:
+
+  target dbug		dBUG ROM monitor for Motorola ColdFire
+  target picobug	Motorola picobug monitor
+  target dink32		DINK32 ROM monitor for PowerPC
+  target m32r		Renesas M32R/D ROM monitor
+  target mon2000	mon2000 ROM monitor
+  target ppcbug		PPCBUG ROM monitor for PowerPC
+
 *** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*

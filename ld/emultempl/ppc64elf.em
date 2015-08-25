@@ -95,7 +95,7 @@ ppc_create_output_section_statements (void)
   ldlang_add_file (stub_file);
   params.stub_bfd = stub_file->the_bfd;
   if (params.save_restore_funcs < 0)
-    params.save_restore_funcs = !link_info.relocatable;
+    params.save_restore_funcs = !bfd_link_relocatable (&link_info);
   if (!ppc64_elf_init_stub_bfd (&link_info, &params))
     einfo ("%F%P: can not init BFD: %E\n");
 }
@@ -295,7 +295,7 @@ ppc_before_allocation (void)
 	}
 
       if (!no_toc_opt
-	  && !link_info.relocatable)
+	  && !bfd_link_relocatable (&link_info))
 	{
 	  prelim_size_sections ();
 
@@ -445,7 +445,7 @@ ppc_layout_sections_again (void)
      add even more stubs.  */
   gld${EMULATION_NAME}_map_segments (TRUE);
 
-  if (!link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     ppc64_elf_set_toc (&link_info, link_info.output_bfd);
 
   need_laying_out = -1;
@@ -498,7 +498,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 
   /* If generating a relocatable output file, then we don't have any
      stubs.  */
-  if (stub_file != NULL && !link_info.relocatable)
+  if (stub_file != NULL && !bfd_link_relocatable (&link_info))
     {
       ret = ppc64_elf_setup_section_lists (&link_info);
       if (ret < 0)
@@ -554,7 +554,7 @@ gld${EMULATION_NAME}_after_allocation (void)
      innocuous except for confusing ELF_SECTION_IN_SEGMENT.  */
   gld${EMULATION_NAME}_map_segments (need_laying_out > 0);
 
-  if (need_laying_out != -1 && !link_info.relocatable)
+  if (need_laying_out != -1 && !bfd_link_relocatable (&link_info))
     ppc64_elf_set_toc (&link_info, link_info.output_bfd);
 }
 
@@ -577,7 +577,7 @@ gld${EMULATION_NAME}_finish (void)
   if (params.emit_stub_syms < 0)
     params.emit_stub_syms = 1;
   if (stub_file != NULL
-      && !link_info.relocatable
+      && !bfd_link_relocatable (&link_info)
       && !ppc64_elf_build_stubs (&link_info, config.stats ? &msg : NULL))
     einfo ("%X%P: can not build stubs: %E\n");
 

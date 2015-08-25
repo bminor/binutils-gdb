@@ -212,8 +212,7 @@ tui_clear_win_detail (struct tui_win_info *win_info)
 	  win_info->detail.source_info.horizontal_offset = 0;
 	  break;
 	case CMD_WIN:
-	  win_info->detail.command_info.cur_line =
-	    win_info->detail.command_info.curch = 0;
+	  wmove (win_info->generic.handle, 0, 0);
 	  break;
 	case DATA_WIN:
 	  win_info->detail.data_display_info.data_content =
@@ -546,8 +545,6 @@ init_win_info (struct tui_win_info *win_info)
       win_info->detail.data_display_info.current_group = 0;
       break;
     case CMD_WIN:
-      win_info->detail.command_info.cur_line = 0;
-      win_info->detail.command_info.curch = 0;
       break;
     default:
       win_info->detail.opaque = NULL;

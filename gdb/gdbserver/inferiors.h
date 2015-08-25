@@ -128,6 +128,9 @@ void remove_inferior (struct inferior_list *list,
 
 struct inferior_list_entry *get_first_inferior (struct inferior_list *list);
 
+/* Return the first process in the processes list.  */
+struct process_info *get_first_process (void);
+
 struct process_info *add_process (int pid, int attached);
 void remove_process (struct process_info *process);
 struct process_info *find_process_pid (int pid);

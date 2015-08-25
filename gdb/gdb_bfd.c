@@ -69,6 +69,15 @@ struct gdb_bfd_data
   /* The mtime of the BFD at the point the cache entry was made.  */
   time_t mtime;
 
+  /* The file size (in bytes) at the point the cache entry was made.  */
+  off_t size;
+
+  /* The inode of the file at the point the cache entry was made.  */
+  ino_t inode;
+
+  /* The device id of the file at the point the cache entry was made.  */
+  dev_t device_id;
+
   /* This is true if we have determined whether this BFD has any
      sections requiring relocation.  */
   unsigned int relocation_computed : 1;
@@ -102,6 +111,27 @@ DEFINE_REGISTRY (bfd, GDB_BFD_DATA_ACCESSOR)
 
 static htab_t gdb_bfd_cache;
 
+/* When true gdb will reuse an existing bfd object if the filename,
+   modification time, and file size all match.  */
+
+static int bfd_sharing = 1;
+static void
+show_bfd_sharing  (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("BFD sharing is %s.\n"), value);
+}
+
+/* When non-zero debugging of the bfd caches is enabled.  */
+
+static unsigned int debug_bfd_cache;
+static void
+show_bfd_cache_debug (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("BFD cache debugging is %s.\n"), value);
+}
+
 /* The type of an object being looked up in gdb_bfd_cache.  We use
    htab's capability of storing one kind of object (BFD in this case)
    and using a different sort of object for searching.  */
@@ -112,6 +142,12 @@ struct gdb_bfd_cache_search
   const char *filename;
   /* The mtime.  */
   time_t mtime;
+  /* The file size (in bytes).  */
+  off_t size;
+  /* The inode of the file.  */
+  ino_t inode;
+  /* The device id of the file.  */
+  dev_t device_id;
 };
 
 /* A hash function for BFDs.  */
@@ -136,6 +172,9 @@ eq_bfd (const void *a, const void *b)
   struct gdb_bfd_data *gdata = bfd_usrdata (abfd);
 
   return (gdata->mtime == s->mtime
+	  && gdata->size == s->size
+	  && gdata->inode == s->inode
+	  && gdata->device_id == s->device_id
 	  && strcmp (bfd_get_filename (abfd), s->filename) == 0);
 }
 
@@ -222,10 +261,11 @@ gdb_bfd_iovec_fileio_open (struct bfd *abfd, void *inferior)
 
   gdb_assert (is_target_filename (filename));
 
-  fd = target_fileio_open ((struct inferior *) inferior,
-			   filename + strlen (TARGET_SYSROOT_PREFIX),
-			   FILEIO_O_RDONLY, 0,
-			   &target_errno);
+  fd = target_fileio_open_warn_if_slow ((struct inferior *) inferior,
+					filename
+					+ strlen (TARGET_SYSROOT_PREFIX),
+					FILEIO_O_RDONLY, 0,
+					&target_errno);
   if (fd == -1)
     {
       errno = fileio_errno_to_host (target_errno);
@@ -252,6 +292,8 @@ gdb_bfd_iovec_fileio_pread (struct bfd *abfd, void *stream, void *buf,
   pos = 0;
   while (nbytes > pos)
     {
+      QUIT;
+
       bytes = target_fileio_pread (fd, (gdb_byte *) buf + pos,
 				   nbytes - pos, offset + pos,
 				   &target_errno);
@@ -358,9 +400,17 @@ gdb_bfd_open (const char *name, const char *target, int fd)
     {
       /* Weird situation here.  */
       search.mtime = 0;
+      search.size = 0;
+      search.inode = 0;
+      search.device_id = 0;
     }
   else
-    search.mtime = st.st_mtime;
+    {
+      search.mtime = st.st_mtime;
+      search.size = st.st_size;
+      search.inode = st.st_ino;
+      search.device_id = st.st_dev;
+    }
 
   /* Note that this must compute the same result as hash_bfd.  */
   hash = htab_hash_string (name);
@@ -368,8 +418,13 @@ gdb_bfd_open (const char *name, const char *target, int fd)
      opening the BFD may fail; and this would violate hashtab
      invariants.  */
   abfd = htab_find_with_hash (gdb_bfd_cache, &search, hash);
-  if (abfd != NULL)
+  if (bfd_sharing && abfd != NULL)
     {
+      if (debug_bfd_cache)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Reusing cached bfd %s for %s\n",
+			    host_address_to_string (abfd),
+			    bfd_get_filename (abfd));
       close (fd);
       gdb_bfd_ref (abfd);
       return abfd;
@@ -379,9 +434,18 @@ gdb_bfd_open (const char *name, const char *target, int fd)
   if (abfd == NULL)
     return NULL;
 
-  slot = htab_find_slot_with_hash (gdb_bfd_cache, &search, hash, INSERT);
-  gdb_assert (!*slot);
-  *slot = abfd;
+  if (debug_bfd_cache)
+    fprintf_unfiltered (gdb_stdlog,
+			"Creating new bfd %s for %s\n",
+			host_address_to_string (abfd),
+			bfd_get_filename (abfd));
+
+  if (bfd_sharing)
+    {
+      slot = htab_find_slot_with_hash (gdb_bfd_cache, &search, hash, INSERT);
+      gdb_assert (!*slot);
+      *slot = abfd;
+    }
 
   gdb_bfd_ref (abfd);
   return abfd;
@@ -435,6 +499,7 @@ gdb_bfd_close_or_warn (struct bfd *abfd)
 void
 gdb_bfd_ref (struct bfd *abfd)
 {
+  struct stat buf;
   struct gdb_bfd_data *gdata;
   void **slot;
 
@@ -442,6 +507,12 @@ gdb_bfd_ref (struct bfd *abfd)
     return;
 
   gdata = bfd_usrdata (abfd);
+
+  if (debug_bfd_cache)
+    fprintf_unfiltered (gdb_stdlog,
+			"Increase reference count on bfd %s (%s)\n",
+			host_address_to_string (abfd),
+			bfd_get_filename (abfd));
 
   if (gdata != NULL)
     {
@@ -455,7 +526,19 @@ gdb_bfd_ref (struct bfd *abfd)
   gdata = bfd_zalloc (abfd, sizeof (struct gdb_bfd_data));
   gdata->refc = 1;
   gdata->mtime = bfd_get_mtime (abfd);
+  gdata->size = bfd_get_size (abfd);
   gdata->archive_bfd = NULL;
+  if (bfd_stat (abfd, &buf) == 0)
+    {
+      gdata->inode = buf.st_ino;
+      gdata->device_id = buf.st_dev;
+    }
+  else
+    {
+      /* The stat failed.  */
+      gdata->inode = 0;
+      gdata->device_id = 0;
+    }
   bfd_usrdata (abfd) = gdata;
 
   bfd_alloc_data (abfd);
@@ -484,7 +567,20 @@ gdb_bfd_unref (struct bfd *abfd)
 
   gdata->refc -= 1;
   if (gdata->refc > 0)
-    return;
+    {
+      if (debug_bfd_cache)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Decrease reference count on bfd %s (%s)\n",
+			    host_address_to_string (abfd),
+			    bfd_get_filename (abfd));
+      return;
+    }
+
+  if (debug_bfd_cache)
+    fprintf_unfiltered (gdb_stdlog,
+			"Delete final reference count on bfd %s (%s)\n",
+			host_address_to_string (abfd),
+			bfd_get_filename (abfd));
 
   archive_bfd = gdata->archive_bfd;
   search.filename = bfd_get_filename (abfd);
@@ -495,6 +591,9 @@ gdb_bfd_unref (struct bfd *abfd)
       void **slot;
 
       search.mtime = gdata->mtime;
+      search.size = gdata->size;
+      search.inode = gdata->inode;
+      search.device_id = gdata->device_id;
       slot = htab_find_slot_with_hash (gdb_bfd_cache, &search, hash,
 				       NO_INSERT);
 
@@ -900,4 +999,25 @@ _initialize_gdb_bfd (void)
   add_cmd ("bfds", class_maintenance, maintenance_info_bfds, _("\
 List the BFDs that are currently open."),
 	   &maintenanceinfolist);
+
+  add_setshow_boolean_cmd ("bfd-sharing", no_class,
+			   &bfd_sharing, _("\
+Set whether gdb will share bfds that appear to be the same file."), _("\
+Show whether gdb will share bfds that appear to be the same file."), _("\
+When enabled gdb will reuse existing bfds rather than reopening the\n\
+same file.  To decide if two files are the same then gdb compares the\n\
+filename, file size, file modification time, and file inode."),
+			   NULL,
+			   &show_bfd_sharing,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
+
+  add_setshow_zuinteger_cmd ("bfd-cache", class_maintenance,
+			     &debug_bfd_cache, _("\
+Set bfd cache debugging."), _("\
+Show bfd cache debugging."), _("\
+When non-zero, bfd cache specific debugging is enabled."),
+			     NULL,
+			     &show_bfd_cache_debug,
+			     &setdebuglist, &showdebuglist);
 }

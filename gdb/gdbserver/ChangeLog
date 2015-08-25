@@ -1,3 +1,155 @@
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_linux_new_thread): Remove.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (aarch64-linux.o): New rule.
+	* configure.srv (aarch64*-*-linux*): Append aarch64-linux.o to
+	srv_tgtobj.
+	* linux-aarch64-low.c: Include nat/aarch64-linux.h.
+	(aarch64_init_debug_reg_state): Make it extern.
+	(aarch64_linux_prepare_to_resume): Remove.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_linux_prepare_to_resume): Use
+	lwp_arch_private_info and ptid_of_lwp.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_get_debug_reg_state): Add argument pid.
+	Find proc_info by find_process_pid.  All callers updated.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (struct arch64_dr_update_callback_param):
+	Remove.
+	(debug_reg_change_callback): Remove.
+	(aarch64_notify_debug_reg_change): Remove.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_notify_debug_reg_change):
+	Call current_lwp_ptid.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (debug_reg_change_callback): Use
+	debug_printf.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (debug_reg_change_callback): Use phex.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (debug_reg_change_callback): Remove comments.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (debug_reg_change_callback): Re-indent
+	the code.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_dr_update_callback_param) <pid>:
+	Remove.
+	(debug_reg_change_callback): Remove argument entry and add argument
+	lwp.  Remove local variable thread.  Don't print thread id in the
+	debugging output.  Don't check whether pid of thread equals to pid.
+	(aarch64_notify_debug_reg_change): Don't set param.pid.  Call
+	iterate_over_lwps instead find_inferior.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* inferiors.c (get_first_process): New function.
+	* inferiors.h (get_first_process): New declaration.
+	* remote-utils.c (read_ptid): Default to the first process in the
+	list, instead of to the current thread's process.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* debug.c: Include gdb_sys_time.h instead of sys/time.h.
+	* event-loop.c: Likewise.
+	* remote-utils.c: Likewise.
+	* tracepoint.c: Likewise.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* spu-low.c (spu_request_interrupt): Use lwpid_of instead of
+	ptid_get_lwp.
+
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
+	* ax.c (gdb_eval_agent_expr): Return expr_eval_unhandled_opcode
+	instead of literal 1.
+
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
+	* tdesc.c (default_description): Explicitly zero-initialize.
+
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18749
+	* inferiors.c (remove_thread): Discard any pending stop reply for
+	this thread.
+	* server.c (remove_all_on_match_pid): Rename to ...
+	(remove_all_on_match_ptid): ... this.  Work with a filter ptid
+	instead of a pid.
+	(discard_queued_stop_replies): Change parameter to a ptid.  Now
+	extern.
+	(handle_v_kill, kill_inferior_callback, captured_main)
+	(process_serial_event): Adjust.
+	* server.h (discard_queued_stop_replies): Declare.
+
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (wait_for_sigstop): Always switch to no thread
+	selected if the previously current thread dies.
+	* lynx-low.c (lynx_request_interrupt): Use the first thread's
+	process instead of the current thread's.
+	* remote-utils.c (input_interrupt): Don't check if there's no
+	current thread.
+	* server.c (gdb_read_memory, gdb_write_memory): If setting the
+	current thread to the general thread fails, error out.
+	(handle_qxfer_auxv, handle_qxfer_libraries)
+	(handle_qxfer_libraries_svr4, handle_qxfer_siginfo)
+	(handle_qxfer_spu, handle_qxfer_statictrace, handle_qxfer_fdpic)
+	(handle_query): Check if there's a thread selected instead of
+	checking whether there's any thread in the thread list.
+	(handle_qxfer_threads, handle_qxfer_btrace)
+	(handle_qxfer_btrace_conf): Don't error out early if there's no
+	thread in the thread list.
+	(handle_v_cont, myresume): Don't set the current thread to the
+	continue thread.
+	(process_serial_event) <Hg handling>: Also set thread_id if the
+	previous general thread is still alive.
+	(process_serial_event) <g/G handling>: If setting the current
+	thread to the general thread fails, error out.
+	* spu-low.c (spu_resume, spu_request_interrupt): Use the first
+	thread's lwp instead of the current thread's.
+	* target.c (set_desired_thread): If the desired thread was not
+	found, leave the current thread pointing to NULL.  Return an int
+	(boolean) indicating success.
+	* target.h (set_desired_thread): Change return type to int.
+
+2015-08-20  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* configure.srv (xtensa*-*-linux*): Add srv_linux_thread_db=yes.
+	* linux-xtensa-low.c (arch/xtensa.h gdb_proc_service.h): New
+	#includes.
+	(ps_get_thread_area): New function.
+
+2015-08-19  Gary Benson  <gbenson@redhat.com>
+
+	* hostio.c (handle_pread): Do not attempt to read more data
+	than hostio_reply_with_data can fit in a packet.
+
+2015-08-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* linux-aarch32-low.c (NT_ARM_VFP): Define if not already defined.
+
 2015-08-14  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* linux-low.c (get_r_debug): Handle DT_MIPS_RLD_MAP_REL.

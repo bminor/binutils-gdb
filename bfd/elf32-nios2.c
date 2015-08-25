@@ -2779,7 +2779,7 @@ nios2_elf32_size_stubs (bfd *output_bfd, bfd *stub_bfd,
 			}
 		      else if (hh->root.root.type == bfd_link_hash_undefweak)
 			{
-			  if (! info->shared)
+			  if (! bfd_link_pic (info))
 			    continue;
 			}
 		      else if (hh->root.root.type == bfd_link_hash_undefined)
@@ -3759,7 +3759,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 					 rel, 1, relend, howto, 0, contents);
 
       /* Nothing more to do unless this is a final link.  */
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       if (sec && sec->output_section)
@@ -3986,8 +3986,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		  off = h->got.offset;
 		  BFD_ASSERT (off != (bfd_vma) -1);
 		  dyn = elf_hash_table (info)->dynamic_sections_created;
-		  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
-		      || (info->shared
+		  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
+							 bfd_link_pic (info),
+							 h)
+		      || (bfd_link_pic (info)
 			  && SYMBOL_REFERENCES_LOCAL (info, h))
 		      || (ELF_ST_VISIBILITY (h->other)
 			  && h->root.type == bfd_link_hash_undefweak))
@@ -4031,7 +4033,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		      bfd_put_32 (output_bfd, relocation,
 				  sgot->contents + off);
 
-		      if (info->shared)
+		      if (bfd_link_pic (info))
 			{
 			  asection *srelgot;
 			  Elf_Internal_Rela outrel;
@@ -4055,7 +4057,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		    }
 		}
 
-	      if (use_plt && info->shared)
+	      if (use_plt && bfd_link_pic (info))
 		{
 		  off = ((h->plt.offset - 24) / 12 + 3) * 4;
 		  relocation = (htab->root.sgotplt->output_offset + off
@@ -4156,7 +4158,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		{
 		  /* If we don't know the module number, create a relocation
 		     for it.  */
-		  if (info->shared)
+		  if (bfd_link_pic (info))
 		    {
 		      Elf_Internal_Rela outrel;
 		      bfd_byte *loc;
@@ -4203,8 +4205,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		  {
 		    bfd_boolean dyn;
 		    dyn = htab->root.dynamic_sections_created;
-		    if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
-			&& (!info->shared
+		    if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
+							 bfd_link_pic (info),
+							 h)
+			&& (!bfd_link_pic (info)
 			    || !SYMBOL_REFERENCES_LOCAL (info, h)))
 		      {
 			unresolved_reloc = FALSE;
@@ -4239,7 +4243,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		       now, and emit any relocations.  If both an IE GOT and a
 		       GD GOT are necessary, we emit the GD first.  */
 
-		    if ((info->shared || indx != 0)
+		    if ((bfd_link_pic (info) || indx != 0)
 			&& (h == NULL
 			    || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			    || h->root.type != bfd_link_hash_undefweak))
@@ -4348,7 +4352,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
 	      break;
 	    case R_NIOS2_TLS_LE16:
-	      if (info->shared && !info->pie)
+	      if (bfd_link_dll (info))
 		{
 		  (*_bfd_error_handler)
 		    (_("%B(%A+0x%lx): R_NIOS2_TLS_LE16 relocation not "
@@ -4366,7 +4370,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	      break;
 
 	    case R_NIOS2_BFD_RELOC_32:
-	      if (info->shared
+	      if (bfd_link_pic (info)
 		  && (input_section->flags & SEC_ALLOC) != 0
 		  && (h == NULL
 		      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -4397,7 +4401,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		    memset (&outrel, 0, sizeof outrel);
 		  else if (h != NULL
 			   && h->dynindx != -1
-			   && (!info->shared
+			   && (!bfd_link_pic (info)
 			       || !SYMBOLIC_BIND (info, h)
 			       || !h->def_regular))
 		    {
@@ -4594,7 +4598,7 @@ nios2_elf32_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!htab->sdynbss)
     return FALSE;
-  if (!info->shared)
+  if (!bfd_link_pic (info))
     {
       htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
       if (!htab->srelbss)
@@ -4699,7 +4703,7 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
   asection *sreloc = NULL;
   bfd_signed_vma *local_got_refcounts;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -4786,7 +4790,7 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      }
 
 	    if (srelgot == NULL
-		&& (h != NULL || info->shared))
+		&& (h != NULL || bfd_link_pic (info)))
 	      {
 		srelgot = htab->root.srelgot;
 		BFD_ASSERT (srelgot != NULL);
@@ -4892,7 +4896,7 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   sections have not yet been mapped to output sections.
 		   Tentatively set the flag for now, and correct in
 		   adjust_dynamic_symbol.  */
-	      if (!info->shared)
+	      if (!bfd_link_pic (info))
 		h->non_got_ref = 1;
 
 	      /* Make sure a plt entry is created for this symbol if it
@@ -4905,7 +4909,7 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* If we are creating a shared library, we need to copy the
 	     reloc into the shared library.  */
-	  if (info->shared
+	  if (bfd_link_pic (info)
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (r_type == R_NIOS2_BFD_RELOC_32
 		  || (h != NULL && ! h->needs_plt
@@ -5012,7 +5016,7 @@ nios2_elf32_gc_sweep_hook (bfd *abfd,
   const Elf_Internal_Rela *rel, *relend;
   bfd *dynobj;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   elf_section_data (sec)->local_dynrel = NULL;
@@ -5138,7 +5142,7 @@ nios2_elf32_finish_dynamic_symbol (bfd *output_bfd,
       BFD_ASSERT (splt != NULL && sgotplt != NULL && srela != NULL);
 
       /* Emit the PLT entry.  */
-      if (info->shared)
+      if (bfd_link_pic (info))
 	{
 	  nios2_elf32_install_data (splt, nios2_so_plt_entry, h->plt.offset,
 				    3);
@@ -5228,7 +5232,7 @@ nios2_elf32_finish_dynamic_symbol (bfd *output_bfd,
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
 
-      if (info->shared && SYMBOL_REFERENCES_LOCAL (info, h))
+      if (bfd_link_pic (info) && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  rela.r_info = ELF32_R_INFO (0, R_NIOS2_RELATIVE);
 	  rela.r_addend = bfd_get_signed_32 (output_bfd,
@@ -5377,7 +5381,7 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 	{
 	  bfd_vma got_address = (sgotplt->output_section->vma
 				 + sgotplt->output_offset);
-	  if (info->shared)
+	  if (bfd_link_pic (info))
 	    {
 	      bfd_vma corrected = got_address - (splt->output_section->vma
 						 + splt->output_offset + 4);
@@ -5506,7 +5510,7 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
-  if (info->shared)
+  if (bfd_link_pic (info))
     return TRUE;
 
   if (h->size == 0)
@@ -5623,14 +5627,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 	  && !bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
 
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), h))
 	{
 	  asection *s = htab->root.splt;
 
 	  /* Allocate room for the header.  */
 	  if (s->size == 0)
 	    {
-	      if (info->shared)
+	      if (bfd_link_pic (info))
 		s->size = 24;
 	      else
 		s->size = 28;
@@ -5643,7 +5647,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 	     location in the .plt.  This is required to make function
 	     pointers compare as equal between the normal executable and
 	     the shared library.  */
-	  if (! info->shared
+	  if (! bfd_link_pic (info)
 	      && !h->def_regular)
 	    {
 	      h->root.u.def.section = s;
@@ -5711,13 +5715,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
       dyn = htab->root.dynamic_sections_created;
 
       indx = 0;
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
-	  && (!info->shared
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
+	  && (!bfd_link_pic (info)
 	      || !SYMBOL_REFERENCES_LOCAL (info, h)))
 	indx = h->dynindx;
 
       if (tls_type != GOT_NORMAL
-	  && (info->shared || indx != 0)
+	  && (bfd_link_pic (info) || indx != 0)
 	  && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	      || h->root.type != bfd_link_hash_undefweak))
 	{
@@ -5733,7 +5737,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
       else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		|| h->root.type != bfd_link_hash_undefweak)
 	       && !use_plt
-	       && (info->shared
+	       && (bfd_link_pic (info)
 		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	htab->root.srelgot->size += sizeof (Elf32_External_Rela);
     }
@@ -5749,7 +5753,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
      space for pc-relative relocs that have become local due to symbol
      visibility changes.  */
 
-  if (info->shared)
+  if (bfd_link_pic (info))
     {
       if (h->def_regular
 	  && (h->forced_local || SYMBOLIC_BIND (info, h)))
@@ -5845,7 +5849,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (info->executable)
+      if (bfd_link_executable (info))
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -5926,7 +5930,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      if (*local_tls_type == GOT_NORMAL)
 		s->size += 4;
 
-	      if (info->shared || *local_tls_type == GOT_TLS_GD)
+	      if (bfd_link_pic (info) || *local_tls_type == GOT_TLS_GD)
 		srel->size += sizeof (Elf32_External_Rela);
 	    }
 	  else
@@ -5940,7 +5944,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 for R_NIOS2_TLS_LDM16 relocations.  */
       htab->tls_ldm_got.offset = htab->root.sgot->size;
       htab->root.sgot->size += 8;
-      if (info->shared)
+      if (bfd_link_pic (info))
 	htab->root.srelgot->size += sizeof (Elf32_External_Rela);
     }
   else
@@ -5983,7 +5987,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  plt = s->size != 0;
 
 	  /* Correct for the number of res_N branches.  */
-	  if (plt && !info->shared)
+	  if (plt && !bfd_link_pic (info))
 	    {
 	      htab->res_n_size = (s->size-28) / 3;
 	      s->size += htab->res_n_size;
@@ -6050,7 +6054,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (!info->shared && !add_dynamic_entry (DT_DEBUG, 0))
+      if (!bfd_link_pic (info) && !add_dynamic_entry (DT_DEBUG, 0))
 	return FALSE;
 
       if (got && !add_dynamic_entry (DT_PLTGOT, 0))
@@ -6068,7 +6072,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela))))
 	return FALSE;
 
-      if (!info->shared && !add_dynamic_entry (DT_NIOS2_GP, 0))
+      if (!bfd_link_pic (info) && !add_dynamic_entry (DT_NIOS2_GP, 0))
 	return FALSE;
 
       if ((info->flags & DF_TEXTREL) != 0
@@ -6166,7 +6170,7 @@ nios2_elf_add_symbol_hook (bfd *abfd,
   bfd *dynobj;
 
   if (sym->st_shndx == SHN_COMMON
-      && !info->relocatable
+      && !bfd_link_relocatable (info)
       && sym->st_size <= elf_gp_size (abfd)
       && is_nios2_elf_target (info->output_bfd->xvec))
     {

@@ -122,12 +122,19 @@ struct property_addr_info
   struct property_addr_info *next;
 };
 
-/* Converts a dynamic property into a static one.  ADDR_STACK is the stack
-   of addresses that might be needed to evaluate the property.
+/* Converts a dynamic property into a static one.  FRAME is the frame in which
+   the property is evaluated; if NULL, the selected frame (if any) is used
+   instead.
+
+   ADDR_STACK is the stack of addresses that might be needed to evaluate the
+   property. When evaluating a property that is not related to a type, it can
+   be NULL.
+
    Returns 1 if PROP could be converted and the static value is passed back
    into VALUE, otherwise returns 0.  */
 
 int dwarf2_evaluate_property (const struct dynamic_prop *prop,
+			      struct frame_info *frame,
 			      struct property_addr_info *addr_stack,
 			      CORE_ADDR *value);
 

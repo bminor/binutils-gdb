@@ -383,11 +383,12 @@ spu_thread_alive (ptid_t ptid)
 static void
 spu_resume (struct thread_resume *resume_info, size_t n)
 {
+  struct thread_info *thr = get_first_thread ();
   size_t i;
 
   for (i = 0; i < n; i++)
     if (ptid_equal (resume_info[i].thread, minus_one_ptid)
-	|| ptid_equal (resume_info[i].thread, current_ptid))
+	|| ptid_equal (resume_info[i].thread, ptid_of (thr)))
       break;
 
   if (i == n)
@@ -401,7 +402,7 @@ spu_resume (struct thread_resume *resume_info, size_t n)
   regcache_invalidate ();
 
   errno = 0;
-  ptrace (PTRACE_CONT, ptid_get_lwp (current_ptid), 0, resume_info[i].sig);
+  ptrace (PTRACE_CONT, ptid_get_lwp (ptid_of (thr)), 0, resume_info[i].sig);
   if (errno)
     perror_with_name ("ptrace");
 }
@@ -633,7 +634,9 @@ spu_look_up_symbols (void)
 static void
 spu_request_interrupt (void)
 {
-  syscall (SYS_tkill, ptid_get_lwp (current_ptid), SIGINT);
+  struct thread_info *thr = get_first_thread ();
+
+  syscall (SYS_tkill, lwpid_of (thr), SIGINT);
 }
 
 static struct target_ops spu_target_ops = {

@@ -168,13 +168,18 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
   for (j = 0; i386_types[j].name; ++j)
     if (strcasecmp (i386_types[j].name, name) == 0)
       break;
+
   if (i386_types[j].name && *pc == ' ')
     {
-      char *pname = ++input_line_pointer;
-      char c = get_symbol_end ();
+      char *pname;
+      char c;
+
+      ++input_line_pointer;
+      c = get_symbol_name (&pname);
 
       if (strcasecmp (pname, "ptr") == 0)
 	{
+	  /* FIXME: What if c == '"' ?  */
 	  pname[-1] = *pc;
 	  *pc = c;
 	  if (intel_syntax > 0 || operands != 1)
@@ -182,7 +187,7 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	  return i386_types[j].op;
 	}
 
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
       input_line_pointer = pname - 1;
     }
 

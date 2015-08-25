@@ -1548,11 +1548,11 @@ xtensa_literal_pseudo (int ignored ATTRIBUTE_UNUSED)
   frag_align (2, 0, 0);
   record_alignment (now_seg, 2);
 
-  c = get_symbol_end ();
+  c = get_symbol_name (&base_name);
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   if (*input_line_pointer != ',' && *input_line_pointer != ':')
     {
@@ -1562,11 +1562,11 @@ xtensa_literal_pseudo (int ignored ATTRIBUTE_UNUSED)
       xtensa_restore_emit_state (&state);
       return;
     }
+
   *p = 0;
-
   colon (base_name);
-
   *p = c;
+
   input_line_pointer++;		/* skip ',' or ':' */
 
   xtensa_elf_cons (4);

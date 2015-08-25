@@ -31,7 +31,7 @@
 #include "filestuff.h"
 
 #include <fcntl.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>		/* For cygwin_conv_path.  */
 #endif

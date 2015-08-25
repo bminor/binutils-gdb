@@ -35,7 +35,7 @@
 #include <sys/ioctl.h>  /* For FIONBIO.  */
 #endif
 
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 
 #ifdef USE_WIN32API
 #include <winsock2.h>

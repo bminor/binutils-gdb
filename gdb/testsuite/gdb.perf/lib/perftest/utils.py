@@ -36,6 +36,7 @@ def select_file(file_name):
     N.B. This turns confirmation off.
     """
     safe_execute("set confirm off")
+    safe_execute("kill")
     print ("Selecting file %s" % (file_name))
     if file_name is None:
         gdb.execute("file")

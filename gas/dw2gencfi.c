@@ -754,13 +754,12 @@ tc_parse_to_dw2regnum (expressionS *exp)
     {
       char *name, c;
 
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (& name);
 
       exp->X_op = O_constant;
       exp->X_add_number = tc_regname_to_dw2regnum (name);
 
-      *input_line_pointer = c;
+      restore_line_pointer (c);
     }
   else
 # endif
@@ -1197,13 +1196,14 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
   int sections = 0;
 
   SKIP_WHITESPACE ();
-  if (is_name_beginner (*input_line_pointer))
+  if (is_name_beginner (*input_line_pointer) || *input_line_pointer == '"')
     while (1)
       {
+	char * saved_ilp;
 	char *name, c;
 
-	name = input_line_pointer;
-	c = get_symbol_end ();
+	saved_ilp = input_line_pointer;
+	c = get_symbol_name (& name);
 
 	if (strncmp (name, ".eh_frame", sizeof ".eh_frame") == 0
 	    && name[9] != '_')
@@ -1224,23 +1224,23 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
 	else
 	  {
 	    *input_line_pointer = c;
-	    input_line_pointer = name;
+	    input_line_pointer = saved_ilp;
 	    break;
 	  }
 
 	*input_line_pointer = c;
-	SKIP_WHITESPACE ();
+	SKIP_WHITESPACE_AFTER_NAME ();
 	if (*input_line_pointer == ',')
 	  {
 	    name = input_line_pointer++;
 	    SKIP_WHITESPACE ();
-	    if (!is_name_beginner (*input_line_pointer))
+	    if (!is_name_beginner (*input_line_pointer) && *input_line_pointer != '"')
 	      {
 		input_line_pointer = name;
 		break;
 	      }
 	  }
-	else if (is_name_beginner (*input_line_pointer))
+	else if (is_name_beginner (*input_line_pointer) || *input_line_pointer == '"')
 	  break;
       }
 
@@ -1266,20 +1266,20 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
   cfi_new_fde (symbol_temp_new_now ());
 
   SKIP_WHITESPACE ();
-  if (is_name_beginner (*input_line_pointer))
+  if (is_name_beginner (*input_line_pointer) || *input_line_pointer == '"')
     {
+      char * saved_ilp = input_line_pointer;
       char *name, c;
 
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (& name);
 
       if (strcmp (name, "simple") == 0)
 	{
 	  simple = 1;
-	  *input_line_pointer = c;
+	  restore_line_pointer (c);
 	}
       else
-	input_line_pointer = name;
+	input_line_pointer = saved_ilp;
     }
   demand_empty_rest_of_line ();
 

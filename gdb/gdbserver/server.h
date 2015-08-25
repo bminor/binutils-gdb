@@ -115,6 +115,9 @@ typedef int gdb_fildes_t;
 extern int handle_serial_event (int err, gdb_client_data client_data);
 extern int handle_target_event (int err, gdb_client_data client_data);
 
+/* Get rid of the currently pending stop replies that match PTID.  */
+extern void discard_queued_stop_replies (ptid_t ptid);
+
 #include "remote-utils.h"
 
 #include "utils.h"

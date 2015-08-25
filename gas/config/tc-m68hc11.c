@@ -3760,10 +3760,9 @@ s_m68hc11_mark_symbol (int mark)
 
   do
     {
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
 
       SKIP_WHITESPACE ();
 

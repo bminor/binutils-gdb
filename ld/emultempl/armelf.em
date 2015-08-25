@@ -273,7 +273,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 {
   int ret;
 
-  if (!link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     {
       /* Build a sorted list of input text sections, then use that to process
 	 the unwind table index.  */
@@ -338,7 +338,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
-  if (stub_file != NULL && !link_info.relocatable)
+  if (stub_file != NULL && !bfd_link_relocatable (&link_info))
     {
       ret = elf32_arm_setup_section_lists (link_info.output_bfd, &link_info);
       if (ret != 0)
@@ -383,7 +383,7 @@ gld${EMULATION_NAME}_finish (void)
       }
   }
 
-  if (! link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     {
       /* Now build the linker stubs.  */
       if (stub_file->the_bfd->sections != NULL)

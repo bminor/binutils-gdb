@@ -36,7 +36,7 @@
 #include <netinet/in.h>
 #endif
 #include <sys/types.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #include <time.h>
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"

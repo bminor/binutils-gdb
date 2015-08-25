@@ -51,7 +51,7 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #include <unistd.h>
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -573,9 +573,10 @@ read_ptid (char *buf, char **obuf)
   /* No multi-process.  Just a tid.  */
   tid = hex_or_minus_one (p, &pp);
 
-  /* Since the stub is not sending a process id, then default to
-     what's in the current inferior.  */
-  pid = ptid_get_pid (current_ptid);
+  /* Since GDB is not sending a process id (multi-process extensions
+     are off), then there's only one process.  Default to the first in
+     the list.  */
+  pid = pid_of (get_first_process ());
 
   if (obuf)
     *obuf = pp;
@@ -747,7 +748,7 @@ input_interrupt (int unused)
 	  fprintf (stderr, "client connection closed\n");
 	  return;
 	}
-      else if (cc != 1 || c != '\003' || current_thread == NULL)
+      else if (cc != 1 || c != '\003')
 	{
 	  fprintf (stderr, "input_interrupt, count = %d c = %d ", cc, c);
 	  if (isprint (c))

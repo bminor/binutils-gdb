@@ -15134,10 +15134,9 @@ get_symbol (void)
   char *name;
   symbolS *p;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   p = (symbolS *) symbol_find_or_make (name);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
   return p;
 }
 
@@ -15280,28 +15279,34 @@ s_change_sec (int sec)
 void
 s_change_section (int ignore ATTRIBUTE_UNUSED)
 {
+  char *saved_ilp;
   char *section_name;
-  char c;
+  char c, endc;
   char next_c = 0;
   int section_type;
   int section_flag;
   int section_entry_size;
   int section_alignment;
 
-  section_name = input_line_pointer;
-  c = get_symbol_end ();
+  saved_ilp = input_line_pointer;
+  endc = get_symbol_name (&section_name);
+  c = (endc == '"' ? input_line_pointer[1] : endc);
   if (c)
-    next_c = *(input_line_pointer + 1);
+    next_c = input_line_pointer [(endc == '"' ? 2 : 1)];
 
   /* Do we have .section Name<,"flags">?  */
   if (c != ',' || (c == ',' && next_c == '"'))
     {
-      /* just after name is now '\0'.  */
-      *input_line_pointer = c;
-      input_line_pointer = section_name;
+      /* Just after name is now '\0'.  */
+      (void) restore_line_pointer (endc);
+      input_line_pointer = saved_ilp;
       obj_elf_section (ignore);
       return;
     }
+
+  section_name = xstrdup (section_name);
+  c = restore_line_pointer (endc);
+
   input_line_pointer++;
 
   /* Do we have .section Name<,type><,flag><,entry_size><,alignment>  */
@@ -15309,22 +15314,24 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
     section_type = get_absolute_expression ();
   else
     section_type = 0;
+
   if (*input_line_pointer++ == ',')
     section_flag = get_absolute_expression ();
   else
     section_flag = 0;
+
   if (*input_line_pointer++ == ',')
     section_entry_size = get_absolute_expression ();
   else
     section_entry_size = 0;
+
   if (*input_line_pointer++ == ',')
     section_alignment = get_absolute_expression ();
   else
     section_alignment = 0;
+
   /* FIXME: really ignore?  */
   (void) section_alignment;
-
-  section_name = xstrdup (section_name);
 
   /* When using the generic form of .section (as implemented by obj-elf.c),
      there's no way to set the section type to SHT_MIPS_DWARF.  Users have
@@ -15404,13 +15411,12 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
 
   do
     {
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
       S_SET_EXTERNAL (symbolP);
 
       *input_line_pointer = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
 
       /* On Irix 5, every global symbol that is not explicitly labelled as
          being a function is apparently labelled as being an object.  */
@@ -15422,12 +15428,11 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
 	  char *secname;
 	  asection *sec;
 
-	  secname = input_line_pointer;
-	  c = get_symbol_end ();
+	  c = get_symbol_name (&secname);
 	  sec = bfd_get_section_by_name (stdoutput, secname);
 	  if (sec == NULL)
 	    as_bad (_("%s: no such section"), secname);
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 
 	  if (sec != NULL && (sec->flags & SEC_CODE) != 0)
 	    flag = BSF_FUNCTION;
@@ -15455,8 +15460,7 @@ s_option (int x ATTRIBUTE_UNUSED)
   char *opt;
   char c;
 
-  opt = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&opt);
 
   if (*opt == 'O')
     {
@@ -15488,7 +15492,7 @@ s_option (int x ATTRIBUTE_UNUSED)
   else
     as_warn (_("unrecognized option \"%s\""), opt);
 
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
 
@@ -16425,13 +16429,12 @@ s_mips_weakext (int ignore ATTRIBUTE_UNUSED)
   symbolS *symbolP;
   expressionS exp;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   symbolP = symbol_find_or_make (name);
   S_SET_WEAK (symbolP);
   *input_line_pointer = c;
 
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   if (! is_end_of_line[(unsigned char) *input_line_pointer])
     {

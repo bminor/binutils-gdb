@@ -21,6 +21,7 @@
 
 #include "server.h"
 #include "linux-low.h"
+#include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
 #include "linux-aarch32-low.h"
 #include "elf/common.h"
@@ -234,125 +235,14 @@ aarch64_init_debug_reg_state (struct aarch64_debug_reg_state *state)
     }
 }
 
-struct aarch64_dr_update_callback_param
-{
-  int pid;
-  int is_watchpoint;
-  unsigned int idx;
-};
-
-/* Callback function which records the information about the change of
-   one hardware breakpoint/watchpoint setting for the thread ENTRY.
-   The information is passed in via PTR.
-   N.B.  The actual updating of hardware debug registers is not
-   carried out until the moment the thread is resumed.  */
-
-static int
-debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
-{
-  struct thread_info *thread = (struct thread_info *) entry;
-  struct lwp_info *lwp = get_thread_lwp (thread);
-  struct aarch64_dr_update_callback_param *param_p
-    = (struct aarch64_dr_update_callback_param *) ptr;
-  int pid = param_p->pid;
-  int idx = param_p->idx;
-  int is_watchpoint = param_p->is_watchpoint;
-  struct arch_lwp_info *info = lwp->arch_private;
-  dr_changed_t *dr_changed_ptr;
-  dr_changed_t dr_changed;
-
-  if (show_debug_regs)
-    {
-      fprintf (stderr, "debug_reg_change_callback: \n\tOn entry:\n");
-      fprintf (stderr, "\tpid%d, tid: %ld, dr_changed_bp=0x%llx, "
-	       "dr_changed_wp=0x%llx\n",
-	       pid, lwpid_of (thread), info->dr_changed_bp,
-	       info->dr_changed_wp);
-    }
-
-  dr_changed_ptr = is_watchpoint ? &info->dr_changed_wp
-    : &info->dr_changed_bp;
-  dr_changed = *dr_changed_ptr;
-
-  /* Only update the threads of this process.  */
-  if (pid_of (thread) == pid)
-    {
-      gdb_assert (idx >= 0
-		  && (idx <= (is_watchpoint ? aarch64_num_wp_regs
-			      : aarch64_num_bp_regs)));
-
-      /* The following assertion is not right, as there can be changes
-	 that have not been made to the hardware debug registers
-	 before new changes overwrite the old ones.  This can happen,
-	 for instance, when the breakpoint/watchpoint hit one of the
-	 threads and the user enters continue; then what happens is:
-	 1) all breakpoints/watchpoints are removed for all threads;
-	 2) a single step is carried out for the thread that was hit;
-	 3) all of the points are inserted again for all threads;
-	 4) all threads are resumed.
-	 The 2nd step will only affect the one thread in which the
-	 bp/wp was hit, which means only that one thread is resumed;
-	 remember that the actual updating only happen in
-	 aarch64_linux_prepare_to_resume, so other threads remain
-	 stopped during the removal and insertion of bp/wp.  Therefore
-	 for those threads, the change of insertion of the bp/wp
-	 overwrites that of the earlier removals.  (The situation may
-	 be different when bp/wp is steppable, or in the non-stop
-	 mode.)  */
-      /* gdb_assert (DR_N_HAS_CHANGED (dr_changed, idx) == 0);  */
-
-      /* The actual update is done later just before resuming the lwp,
-         we just mark that one register pair needs updating.  */
-      DR_MARK_N_CHANGED (dr_changed, idx);
-      *dr_changed_ptr = dr_changed;
-
-      /* If the lwp isn't stopped, force it to momentarily pause, so
-         we can update its debug registers.  */
-      if (!lwp->stopped)
-	linux_stop_lwp (lwp);
-    }
-
-  if (show_debug_regs)
-    {
-      fprintf (stderr, "\tOn exit:\n\tpid%d, tid: %ld, dr_changed_bp=0x%llx, "
-	       "dr_changed_wp=0x%llx\n",
-	       pid, lwpid_of (thread), info->dr_changed_bp,
-	       info->dr_changed_wp);
-    }
-
-  return 0;
-}
-
-/* Notify each thread that their IDXth breakpoint/watchpoint register
-   pair needs to be updated.  The message will be recorded in each
-   thread's arch-specific data area, the actual updating will be done
-   when the thread is resumed.  */
-
-void
-aarch64_notify_debug_reg_change (const struct aarch64_debug_reg_state *state,
-				 int is_watchpoint, unsigned int idx)
-{
-  struct aarch64_dr_update_callback_param param;
-
-  /* Only update the threads of this process.  */
-  param.pid = pid_of (current_thread);
-
-  param.is_watchpoint = is_watchpoint;
-  param.idx = idx;
-
-  find_inferior (&all_threads, debug_reg_change_callback, (void *) &param);
-}
-
-
 /* Return the pointer to the debug register state structure in the
    current process' arch-specific data area.  */
 
-static struct aarch64_debug_reg_state *
-aarch64_get_debug_reg_state ()
+struct aarch64_debug_reg_state *
+aarch64_get_debug_reg_state (pid_t pid)
 {
-  struct process_info *proc;
+  struct process_info *proc = find_process_pid (pid);
 
-  proc = current_process ();
   return &proc->priv->arch_private->debug_reg_state;
 }
 
@@ -401,7 +291,8 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   int ret;
   enum target_hw_bp_type targ_type;
-  struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (pid_of (current_thread));
 
   if (show_debug_regs)
     fprintf (stderr, "insert_point on entry (addr=0x%08lx, len=%d)\n",
@@ -420,8 +311,8 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 				 state);
 
   if (show_debug_regs)
-    aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
-				  "insert_point", addr, len, targ_type);
+    aarch64_show_debug_reg_state (state, "insert_point", addr, len,
+				  targ_type);
 
   return ret;
 }
@@ -437,7 +328,8 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   int ret;
   enum target_hw_bp_type targ_type;
-  struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (pid_of (current_thread));
 
   if (show_debug_regs)
     fprintf (stderr, "remove_point on entry (addr=0x%08lx, len=%d)\n",
@@ -457,8 +349,8 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 				 state);
 
   if (show_debug_regs)
-    aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
-				  "remove_point", addr, len, targ_type);
+    aarch64_show_debug_reg_state (state, "remove_point", addr, len,
+				  targ_type);
 
   return ret;
 }
@@ -484,7 +376,7 @@ aarch64_stopped_data_address (void)
     return (CORE_ADDR) 0;
 
   /* Check if the address matches any watched address.  */
-  state = aarch64_get_debug_reg_state ();
+  state = aarch64_get_debug_reg_state (pid_of (current_thread));
   for (i = aarch64_num_wp_regs - 1; i >= 0; --i)
     {
       const unsigned int len = aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
@@ -546,22 +438,6 @@ aarch64_linux_new_process (void)
   return info;
 }
 
-/* Implementation of linux_target_ops method "linux_new_thread".  */
-
-static void
-aarch64_linux_new_thread (struct lwp_info *lwp)
-{
-  struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
-
-  /* Mark that all the hardware breakpoint/watchpoint register pairs
-     for this thread need to be initialized (with data from
-     aarch_process_info.debug_reg_state).  */
-  DR_MARK_ALL_CHANGED (info->dr_changed_bp, aarch64_num_bp_regs);
-  DR_MARK_ALL_CHANGED (info->dr_changed_wp, aarch64_num_wp_regs);
-
-  lwp->arch_private = info;
-}
-
 /* Implementation of linux_target_ops method "linux_new_fork".  */
 
 static void
@@ -589,44 +465,6 @@ aarch64_linux_new_fork (struct process_info *parent,
      this compatible with older Linux kernels too.  */
 
   *child->priv->arch_private = *parent->priv->arch_private;
-}
-
-/* Implementation of linux_target_ops method "linux_prepare_to_resume".
-
-   If the debug regs have changed, update the thread's copies.  */
-
-static void
-aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
-{
-  struct thread_info *thread = get_lwp_thread (lwp);
-  ptid_t ptid = ptid_of (thread);
-  struct arch_lwp_info *info = lwp->arch_private;
-
-  if (DR_HAS_CHANGED (info->dr_changed_bp)
-      || DR_HAS_CHANGED (info->dr_changed_wp))
-    {
-      int tid = ptid_get_lwp (ptid);
-      struct process_info *proc = find_process_pid (ptid_get_pid (ptid));
-      struct aarch64_debug_reg_state *state
-	= &proc->priv->arch_private->debug_reg_state;
-
-      if (show_debug_regs)
-	fprintf (stderr, "prepare_to_resume thread %ld\n", lwpid_of (thread));
-
-      /* Watchpoints.  */
-      if (DR_HAS_CHANGED (info->dr_changed_wp))
-	{
-	  aarch64_linux_set_debug_regs (state, tid, 1);
-	  DR_CLEAR_CHANGED (info->dr_changed_wp);
-	}
-
-      /* Breakpoints.  */
-      if (DR_HAS_CHANGED (info->dr_changed_bp))
-	{
-	  aarch64_linux_set_debug_regs (state, tid, 0);
-	  DR_CLEAR_CHANGED (info->dr_changed_bp);
-	}
-    }
 }
 
 /* Return the right target description according to the ELF file of

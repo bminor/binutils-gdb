@@ -611,9 +611,9 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym,
 {
   struct bfd_sym_chain *sym;
 
-  if (link_info.relocatable)
+  if (bfd_link_relocatable (&link_info))
     return TRUE;
-  if (link_info.export_dynamic || !link_info.executable)
+  if (link_info.export_dynamic || bfd_link_dll (&link_info))
     {
       /* Check if symbol is hidden by version script.  */
       if (bfd_hide_sym_by_version (link_info.version_info,
@@ -872,11 +872,10 @@ set_tv_header (struct ld_plugin_tv *tv)
 	  TVU(val) = major * 100 + minor;
 	  break;
 	case LDPT_LINKER_OUTPUT:
-	  TVU(val) = (link_info.relocatable
-		      ? LDPO_REL
-		      : (link_info.executable
-			 ? (link_info.pie ? LDPO_PIE : LDPO_EXEC)
-			 : LDPO_DYN));
+	  TVU(val) = (bfd_link_relocatable (&link_info) ? LDPO_REL
+		      : bfd_link_pde (&link_info) ? LDPO_EXEC
+		      : bfd_link_pie (&link_info) ? LDPO_PIE
+		      : LDPO_DYN);
 	  break;
 	case LDPT_OUTPUT_NAME:
 	  TVU(string) = output_filename;

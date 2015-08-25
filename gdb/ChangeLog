@@ -1,3 +1,679 @@
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/aarch64-linux-hw-point.c (debug_reg_change_callback):
+	Rename local variable pid to tid, and get lwpid of lwp.  Update
+	debug output.
+
+2015-08-25  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (ada_read_var_value): Add a var_block argument
+	and pass it to default_read_var_value.
+	* block.c (block_static_link): New accessor.
+	* block.h (block_static_link): Declare it.
+	* buildsym.c (finish_block_internal): Add a static_link
+	argument.  If there is a static link, associate it to the new
+	block.
+	(finish_block): Add a static link argument and pass it to
+	finish_block_internal.
+	(end_symtab_get_static_block): Update calls to finish_block and
+	to finish_block_internal.
+	(end_symtab_with_blockvector): Update call to
+	finish_block_internal.
+	* buildsym.h: Forward-declare struct dynamic_prop.
+	(struct context_stack): Add a static_link field.
+	(finish_block): Add a static link argument.
+	* c-exp.y: Remove an obsolete comment (evaluation of variables
+	already start from the selected frame, and now they climb *up*
+	the call stack) and propagate the block information to the
+	produced expression.
+	* d-exp.y: Likewise.
+	* f-exp.y: Likewise.
+	* go-exp.y: Likewise.
+	* jv-exp.y: Likewise.
+	* m2-exp.y: Likewise.
+	* p-exp.y: Likewise.
+	* coffread.c (coff_symtab_read): Update calls to finish_block.
+	* dbxread.c (process_one_symbol): Likewise.
+	* xcoffread.c (read_xcoff_symtab): Likewise.
+	* compile/compile-c-symbols.c (convert_one_symbol): Promote the
+	"sym" parameter to struct block_symbol, update its uses and pass
+	its block to calls to read_var_value.
+	(convert_symbol_sym): Update the calls to convert_one_symbol.
+	* compile/compile-loc2c.c (do_compile_dwarf_expr_to_c): Update
+	call to read_var_value.
+	* dwarf2loc.c (block_op_get_frame_base): New.
+	(dwarf2_block_frame_base_locexpr_funcs): Implement the
+	get_frame_base method.
+	(dwarf2_block_frame_base_loclist_funcs): Likewise.
+	(dwarf2locexpr_baton_eval): Add a frame argument and use it
+	instead of the selected frame in order to evaluate the
+	expression.
+	(dwarf2_evaluate_property): Add a frame argument.  Update call
+	to dwarf2_locexpr_baton_eval to provide a frame in available and
+	to handle the absence of address stack.
+	* dwarf2loc.h (dwarf2_evaluate_property): Add a frame argument.
+	* dwarf2read.c (attr_to_dynamic_prop): Add a forward
+	declaration.
+	(read_func_scope): Record any available static link description.
+	Update call to finish_block.
+	(read_lexical_block_scope): Update call to finish_block.
+	* findvar.c (follow_static_link): New.
+	(get_hosting_frame): New.
+	(default_read_var_value): Add a var_block argument.  Use
+	get_hosting_frame to handle non-local references.
+	(read_var_value): Add a var_block argument and pass it to the
+	LA_READ_VAR_VALUE method.
+	* gdbtypes.c (resolve_dynamic_range): Update calls to
+	dwarf2_evaluate_property.
+	(resolve_dynamic_type_internal): Likewise.
+	* guile/scm-frame.c (gdbscm_frame_read_var): Update call to
+	read_var_value, passing it the block coming from symbol lookup.
+	* guile/scm-symbol.c (gdbscm_symbol_value): Update call to
+	read_var_value (TODO).
+	* infcmd.c (finish_command_continuation): Update call to
+	read_var_value, passing it the block coming from symbol lookup.
+	* infrun.c (insert_exception_resume_breakpoint): Likewise.
+	* language.h (struct language_defn): Add a var_block argument to
+	the LA_READ_VAR_VALUE method.
+	* objfiles.c (struct static_link_htab_entry): New.
+	(static_link_htab_entry_hash): New.
+	(static_link_htab_entry_eq): New.
+	(objfile_register_static_link): New.
+	(objfile_lookup_static_link): New.
+	(free_objfile): Free the STATIC_LINKS hashed map if needed.
+	* objfiles.h: Include hashtab.h.
+	(struct objfile): Add a static_links field.
+	(objfile_register_static_link): New.
+	(objfile_lookup_static_link): New.
+	* printcmd.c (print_variable_and_value): Update call to
+	read_var_value.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Likewise.
+	* python/py-frame.c (frapy_read_var): Update call to
+	read_var_value, passing it the block coming from symbol lookup.
+	* python/py-framefilter.c (extract_sym): Add a sym_block
+	parameter and set the pointed value to NULL (TODO).
+	(enumerate_args): Update call to extract_sym.
+	(enumerate_locals): Update calls to extract_sym and to
+	read_var_value.
+	* python/py-symbol.c (sympy_value): Update call to
+	read_var_value (TODO).
+	* stack.c (read_frame_local): Update call to read_var_value.
+	(read_frame_arg): Likewise.
+	(return_command): Likewise.
+	* symtab.h (struct symbol_block_ops): Add a get_frame_base
+	method.
+	(struct symbol): Add a block field.
+	(SYMBOL_BLOCK): New accessor.
+	* valops.c (value_of_variable): Remove frame/block handling and
+	pass the block argument to read_var_value, which does this job
+	now.
+	(value_struct_elt_for_reference): Update calls to
+	read_var_value.
+	(value_of_this): Pass the block found to read_var_value.
+	* value.h (read_var_value): Add a var_block argument.
+	(default_read_var_value): Likewise.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_new_thread): Move it to ...
+	* nat/aarch64-linux.c (aarch64_linux_new_thread): ... here.
+	* nat/aarch64-linux.h (aarch64_linux_new_thread): Declare.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* Makefile.in (aarch64-liunx.o): New rule.
+	(HFILES_NO_SRCDIR): Add aarch64-linux.h.
+	* config/aarch64/linux.mh (NAT_FILE): Add aarch64-linux.o.
+	* aarch64-linux-nat.c: Include nat/aarch64-linux.h.
+	* aarch64-linux-nat.c (aarch64_get_debug_reg_state): Make it
+	extern.
+	(aarch64_linux_prepare_to_resume): Move it nat/aarch64-linux.c.
+	* nat/aarch64-linux-hw-point.h (aarch64_debug_reg_state): Declare
+	* nat/aarch64-linux.c: New file.
+	* nat/aarch64-linux.h: New file.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_prepare_to_resume): Use
+	lwp_arch_private_info and ptid_of_lwp.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (struct arch64_dr_update_callback_param):
+	Move it to nat/aarch64-linux-hw-point.c.
+	(debug_reg_change_callback): Likewise.
+	(aarch64_notify_debug_reg_change): :Likewise.
+	* nat/aarch64-linux-hw-point.c: Include nat/linux-nat.h.
+	(aarch64_dr_update_callback_param): New.
+	(debug_reg_change_callback): New function.
+	(aarch64_notify_debug_reg_change): Likewise.
+	* nat/aarch64-linux-hw-point.h (aarch64_notify_debug_reg_change):
+	Remove the declaration.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_notify_debug_reg_change):
+	Call current_lwp_ptid.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (debug_reg_change_callback): Use
+	debug_printf.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (debug_reg_change_callback): Call
+	ptid_get_pid rather than ptid_get_lwp.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (New commands): Mention set/show remote
+	multiprocess-extensions-packet.
+	* remote.c (remote_query_supported): Only tell the server to use
+	the multiprocess extensions if the user hasn't force-disabled them
+	with "set remote multiprocess-extensions-packet off".
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* gnulib/update-gnulib.sh (GNULIB_COMMIT_SHA1): Set to
+	1029a8112290f6eee9d7878a391c49db42c999bd.
+	* gnulib/configure, gnulib/config.in, gnulib/aclocal.m4:
+	Regenerate.
+	* gnulib/import/Makefile.am: Update.
+	* gnulib/import/Makefile.in: Update.
+	* gnulib/import/alloca.in.h: Update.
+	* gnulib/import/basename-lgpl.c: Update.
+	* gnulib/import/canonicalize-lgpl.c: Update.
+	* gnulib/import/config.charset: Update.
+	* gnulib/import/dirent.in.h: Update.
+	* gnulib/import/dirfd.c: Update.
+	* gnulib/import/dirname-lgpl.c: Update.
+	* gnulib/import/dirname.h: Update.
+	* gnulib/import/dosname.h: Update.
+	* gnulib/import/errno.in.h: Update.
+	* gnulib/import/extra/snippet/arg-nonnull.h: Update.
+	* gnulib/import/extra/snippet/c++defs.h: Update.
+	* gnulib/import/extra/snippet/warn-on-use.h: Update.
+	* gnulib/import/extra/update-copyright: Update.
+	* gnulib/import/float+.h: Update.
+	* gnulib/import/float.c: Update.
+	* gnulib/import/float.in.h: Update.
+	* gnulib/import/fnmatch.c: Update.
+	* gnulib/import/fnmatch.in.h: Update.
+	* gnulib/import/fnmatch_loop.c: Update.
+	* gnulib/import/fpucw.h: Update.
+	* gnulib/import/frexp.c: Update.
+	* gnulib/import/frexpl.c: Update.
+	* gnulib/import/gettimeofday.c: Update.
+	* gnulib/import/inttypes.in.h: Update.
+	* gnulib/import/isnan.c: Update.
+	* gnulib/import/isnand-nolibm.h: Update.
+	* gnulib/import/isnand.c: Update.
+	* gnulib/import/isnanl-nolibm.h: Update.
+	* gnulib/import/isnanl.c: Update.
+	* gnulib/import/itold.c: Update.
+	* gnulib/import/localcharset.c: Update.
+	* gnulib/import/localcharset.h: Update.
+	* gnulib/import/lstat.c: Update.
+	* gnulib/import/m4/00gnulib.m4: Update.
+	* gnulib/import/m4/absolute-header.m4: Update.
+	* gnulib/import/m4/alloca.m4: Update.
+	* gnulib/import/m4/canonicalize.m4: Update.
+	* gnulib/import/m4/codeset.m4: Update.
+	* gnulib/import/m4/configmake.m4: Update.
+	* gnulib/import/m4/dirent_h.m4: Update.
+	* gnulib/import/m4/dirfd.m4: Update.
+	* gnulib/import/m4/dirname.m4: Update.
+	* gnulib/import/m4/double-slash-root.m4: Update.
+	* gnulib/import/m4/eealloc.m4: Update.
+	* gnulib/import/m4/errno_h.m4: Update.
+	* gnulib/import/m4/exponentd.m4: Update.
+	* gnulib/import/m4/exponentl.m4: Update.
+	* gnulib/import/m4/extensions.m4: Update.
+	* gnulib/import/m4/extern-inline.m4: Update.
+	* gnulib/import/m4/fcntl-o.m4: Update.
+	* gnulib/import/m4/float_h.m4: Update.
+	* gnulib/import/m4/fnmatch.m4: Update.
+	* gnulib/import/m4/fpieee.m4: Update.
+	* gnulib/import/m4/frexp.m4: Update.
+	* gnulib/import/m4/frexpl.m4: Update.
+	* gnulib/import/m4/gettimeofday.m4: Update.
+	* gnulib/import/m4/glibc21.m4: Update.
+	* gnulib/import/m4/gnulib-cache.m4: Update.
+	* gnulib/import/m4/gnulib-common.m4: Update.
+	* gnulib/import/m4/gnulib-comp.m4: Update.
+	* gnulib/import/m4/gnulib-tool.m4: Update.
+	* gnulib/import/m4/include_next.m4: Update.
+	* gnulib/import/m4/inttypes-pri.m4: Update.
+	* gnulib/import/m4/inttypes.m4: Update.
+	* gnulib/import/m4/isnand.m4: Update.
+	* gnulib/import/m4/isnanl.m4: Update.
+	* gnulib/import/m4/largefile.m4: Update.
+	* gnulib/import/m4/localcharset.m4: Update.
+	* gnulib/import/m4/locale-fr.m4: Update.
+	* gnulib/import/m4/locale-ja.m4: Update.
+	* gnulib/import/m4/locale-zh.m4: Update.
+	* gnulib/import/m4/longlong.m4: Update.
+	* gnulib/import/m4/lstat.m4: Update.
+	* gnulib/import/m4/malloc.m4: Update.
+	* gnulib/import/m4/malloca.m4: Update.
+	* gnulib/import/m4/math_h.m4: Update.
+	* gnulib/import/m4/mbrtowc.m4: Update.
+	* gnulib/import/m4/mbsinit.m4: Update.
+	* gnulib/import/m4/mbsrtowcs.m4: Update.
+	* gnulib/import/m4/mbstate_t.m4: Update.
+	* gnulib/import/m4/memchr.m4: Update.
+	* gnulib/import/m4/memmem.m4: Update.
+	* gnulib/import/m4/mmap-anon.m4: Update.
+	* gnulib/import/m4/multiarch.m4: Update.
+	* gnulib/import/m4/nocrash.m4: Update.
+	* gnulib/import/m4/off_t.m4: Update.
+	* gnulib/import/m4/pathmax.m4: Update.
+	* gnulib/import/m4/readlink.m4: Update.
+	* gnulib/import/m4/rename.m4: Update.
+	* gnulib/import/m4/rmdir.m4: Update.
+	* gnulib/import/m4/ssize_t.m4: Update.
+	* gnulib/import/m4/stat.m4: Update.
+	* gnulib/import/m4/stdbool.m4: Update.
+	* gnulib/import/m4/stddef_h.m4: Update.
+	* gnulib/import/m4/stdint.m4: Update.
+	* gnulib/import/m4/stdio_h.m4: Update.
+	* gnulib/import/m4/stdlib_h.m4: Update.
+	* gnulib/import/m4/string_h.m4: Update.
+	* gnulib/import/m4/strstr.m4: Update.
+	* gnulib/import/m4/strtok_r.m4: Update.
+	* gnulib/import/m4/sys_socket_h.m4: Update.
+	* gnulib/import/m4/sys_stat_h.m4: Update.
+	* gnulib/import/m4/sys_time_h.m4: Update.
+	* gnulib/import/m4/sys_types_h.m4: Update.
+	* gnulib/import/m4/time_h.m4: Update.
+	* gnulib/import/m4/unistd_h.m4: Update.
+	* gnulib/import/m4/warn-on-use.m4: Update.
+	* gnulib/import/m4/wchar_h.m4: Update.
+	* gnulib/import/m4/wchar_t.m4: Update.
+	* gnulib/import/m4/wctype_h.m4: Update.
+	* gnulib/import/m4/wint_t.m4: Update.
+	* gnulib/import/malloc.c: Update.
+	* gnulib/import/malloca.c: Update.
+	* gnulib/import/malloca.h: Update.
+	* gnulib/import/math.in.h: Update.
+	* gnulib/import/mbrtowc.c: Update.
+	* gnulib/import/mbsinit.c: Update.
+	* gnulib/import/mbsrtowcs-impl.h: Update.
+	* gnulib/import/mbsrtowcs-state.c: Update.
+	* gnulib/import/mbsrtowcs.c: Update.
+	* gnulib/import/memchr.c: Update.
+	* gnulib/import/memmem.c: Update.
+	* gnulib/import/pathmax.h: Update.
+	* gnulib/import/readlink.c: Update.
+	* gnulib/import/ref-add.sin: Update.
+	* gnulib/import/ref-del.sin: Update.
+	* gnulib/import/rename.c: Update.
+	* gnulib/import/rmdir.c: Update.
+	* gnulib/import/same-inode.h: Update.
+	* gnulib/import/stat.c: Update.
+	* gnulib/import/stdbool.in.h: Update.
+	* gnulib/import/stddef.in.h: Update.
+	* gnulib/import/stdint.in.h: Update.
+	* gnulib/import/stdio.c: Update.
+	* gnulib/import/stdio.in.h: Update.
+	* gnulib/import/stdlib.in.h: Update.
+	* gnulib/import/str-two-way.h: Update.
+	* gnulib/import/streq.h: Update.
+	* gnulib/import/string.in.h: Update.
+	* gnulib/import/stripslash.c: Update.
+	* gnulib/import/strnlen1.c: Update.
+	* gnulib/import/strnlen1.h: Update.
+	* gnulib/import/strstr.c: Update.
+	* gnulib/import/strtok_r.c: Update.
+	* gnulib/import/sys_stat.in.h: Update.
+	* gnulib/import/sys_time.in.h: Update.
+	* gnulib/import/sys_types.in.h: Update.
+	* gnulib/import/time.in.h: Update.
+	* gnulib/import/unistd.in.h: Update.
+	* gnulib/import/verify.h: Update.
+	* gnulib/import/wchar.in.h: Update.
+	* gnulib/import/wctype.in.h: Update.
+	* gnulib/import/gettimeofday.c: New file.
+	* gnulib/import/m4/absolute-header.m4: New file.
+	* gnulib/import/m4/gettimeofday.m4: New file.
+	* gnulib/import/m4/sys_socket_h.m4: New file.
+	* gnulib/import/m4/sys_time_h.m4: New file.
+	* gnulib/import/stdio.c: Delete file.
+	* gnulib/import/sys_time.in.h: New file.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/gdb_sys_time.h.
+	* common/gdb_sys_time.h: New file.
+	* event-loop.c: Include gdb_sys_time.h instead of sys/time.h.
+	* gdb_select.h: Likewise.
+	* gdb_usleep.c: Likewise.
+	* maint.c: Likewise.
+	* mi/mi-main.c: Likewise.
+	* mi/mi-parse.h: Likewise.
+	* remote-fileio.c: Likewise.
+	* remote-m32r-sdi.c: Likewise.
+	* remote.c: Likewise.
+	* ser-base.c: Likewise.
+	* ser-pipe.c: Likewise.
+	* ser-tcp.c: Likewise.
+	* ser-unix.c: Likewise.
+	* symfile.c: Likewise.
+	* symfile.c: Likewise.  Rename OSIZE to SIZE throughout.
+	* target-memory.c: Include gdb_sys_time.h instead of sys/time.h.
+	* utils.c: Likewise.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention removed support for the various ROM monitors.
+	* Makefile.in (ALL_TARGET_OBS): Remove dbug-rom.o, dink32-rom.o,
+	ppcbug-rom.o, m32r-rom.o, dsrec.o and monitor.o from gdb_target_obs.
+	* configure.tgt (h8300-*-*): Remove monitor.o and m32r-rom.o from
+	gdb_target_obs.
+	(m68*-*-*): Remove monitor.o dbug-rom.o and dsrec.o from
+	gdb_target_obs.
+	(microblaze*-linux-*): Remove microblaze-rom.o, monitor.o and
+	dsrec.o from gdb_target_obs.
+	(microblaze*-*-*): Remove microblaze-rom.o, monitor.o and dsrec.o
+	from gdb_target_obs.
+	(powerpc-*-lynx*178): Remove monitor.o and dsrec.o from
+	gdb_target_obs.
+	(powerpc*-*-*): Remove monitor.o, dsrec.o, ppcbug-rom.o and
+	dink32-rom.o from gdb_target_obs.
+	(sh*-*-linux*): Remove monitor.o and dsrec.o from gdb_target_obs.
+	(sh*): Remove monitor.o and dsrec.o from gdb_target_obs.
+	* dbug-rom.c, dink32-rom.c, dsrec.c, m32r-rom.c, microblaze-rom.c,
+	monitor.c, monitor.h, ppcbug-rom.c, srec.h: Delete files.
+
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
+	* frame.c (null_frame_id): Explicitly zero-initialize.
+
+2015-08-21  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (struct dwarf2_section_info): Rename field
+	'asection' to 'section'.
+	(dwarf2_has_info, get_section_bfd_owner, get_section_bfd_section)
+	(dwarf2_locate_sections, dwarf2_locate_sections)
+	(locate_dwz_sections, locate_v1_virtual_dwo_sections)
+	(dwarf2_locate_dwo_sections, dwarf2_locate_dwo_sections)
+	(dwarf2_locate_v2_dwp_sections): Adjust.
+
+2015-08-21  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* top.h (gdb_in_secondary_prompt_p): Declare.
+	* top.c (gdb_secondary_prompt_depth): Define.
+	(gdb_in_secondary_prompt_p): Define.
+	(gdb_readline_wrapper_cleanup): Decrement
+	gdb_secondary_prompt_depth.
+	(gdb_readline_wrapper): Increment gdb_secondary_prompt_depth.
+	* tui/tui-io.c (tui_getc): Don't clear the prompt line if we
+	are in a secondary prompt.
+
+2015-08-21  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-io.c (tui_getc): Use tui_putc instead of waddch to
+	emit the newline.
+
+2015-08-21  Gary Benson  <gbenson@redhat.com>
+
+	* gdb_bfd.c (gdb_bfd_iovec_fileio_pread): Add QUIT call.
+
+2015-08-21  Gary Benson  <gbenson@redhat.com>
+
+	* target.h (struct target_ops) <to_fileio_open>: New argument
+	warn_if_slow.  Update comment.  All implementations updated.
+	(target_fileio_open_warn_if_slow): New declaration.
+	* target.c (target_fileio_open): Renamed as...
+	(target_fileio_open_1): ...this.  New argument warn_if_slow.
+	Pass warn_if_slow to implementation.  Update debug printing.
+	(target_fileio_open): New function.
+	(target_fileio_open_warn_if_slow): Likewise.
+	* gdb_bfd.c (gdb_bfd_iovec_fileio_open): Use new function
+	target_fileio_open_warn_if_slow.
+
+2015-08-21  Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-namespaces.c (linux_mntns_access_fs):
+	Do not overwrite old_chain.
+
+2015-08-20  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* arch/xtensa.h: New file.
+	* xtensa-linux-nat.c (gdb_proc_service.h): New #include.
+	(ps_get_thread_area): New function.
+	* xtensa-linux-tdep.c (xtensa_linux_init_abi): Add call to
+	set_gdbarch_fetch_tls_load_module_address to enable TLS support.
+	* xtensa-tdep.c (osabi.h): New #include.
+	(xtensa_gdbarch_init): Call gdbarch_init_osabi to register
+	xtensa-specific hooks.
+	* xtensa-tdep.h (struct xtensa_elf_gregset_t): Add threadptr
+	member and move the structure to arch/xtensa.h.
+
+2015-08-21  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (struct readahead_cache): New.
+	(struct remote_state) <readahead_cache>: New field.
+	(remote_open_1): Invalidate the cache.
+	(readahead_cache_invalidate, readahead_cache_invalidate_fd): New
+	functions.
+	(remote_hostio_pwrite): Invalidate the readahead cache.
+	(remote_hostio_pread): Rename to ...
+	(remote_hostio_pread_vFile): ... this.
+	(remote_hostio_pread_from_cache): New function.
+	(remote_hostio_pread): Reimplement.
+	(remote_hostio_close): Invalidate the readahead cache.
+
+2015-08-21  Marcin Cieślak <saper@saper.info>  (tiny patch)
+
+	PR build/18843
+	* procfs.c: Include "filestuff.h".
+
+2015-08-21  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* tui/tui-data.h (tui_command_info): Remove fields cur_line and
+	curch.
+	* tui/tui-data.c (tui_clear_win_detail) [CMD_WIN]: Don't set
+	cur_line or curch, instead call wmove().
+	(init_win_info) [CMD_WIN]: Likewise.
+	* tui/tui-io.c (tui_puts): Likewise. Don't read cur_line,
+	instead call getcury().
+	(tui_redisplay_readline): Don't set cur_line or curch.
+	(tui_mld_erase_entire_line): Don't read cur_line, instead call
+	getcury().
+	(tui_cont_sig): Remove call to wmove.
+	(tui_getc): Don't read cur_line or curch, instead call getcury()
+	or getyx().  Don't set curch.
+	* tui/tui-win.c (make_visible_with_new_height) [CMD_WIN]: Don't
+	set cur_line or curch.  Always move cursor to (0,0).
+
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (print_target_wait_results): Make extern.
+	* infrun.h (print_target_wait_results): Declare.
+	* remote.c (set_stop_requested_callback): Delete.
+	(process_initial_stop_replies): New function.
+	(remote_start_remote): Use it.
+	(stop_reply_queue_length): New function.
+
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (process_full_comp_unit): To tell whether
+	start_subfile managed to deduce a language, test for
+	language_unknown instead of language_c.
+
+2015-08-20  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lex.l: Reset the start condition to INITIAL in the rule that
+	matches attributes.
+
+2015-08-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (dwarf2_string_attr): New function.
+	(lookup_dwo_unit, process_psymtab_comp_unit_reader)
+	(dwarf2_compute_name, dwarf2_physname, find_file_and_directory)
+	(read_call_site_scope, namespace_name, guess_full_die_structure_name)
+	(anonymous_struct_prefix, prepare_one_comp_unit): Use
+	dwarf2_string_attr in place of dwarf2_attr and DW_STRING.
+
+2015-08-18  Doug Evans  <dje@google.com>
+	    Adrian Sendroiu <adrian.sendroiu@freescale.com>
+
+	PR mi/18833
+	* cli/cli-logging.c (pop_output_files): Don't restore redirection
+	if MI-like.
+	* mi/mi-out.c: #include "vec.h".
+	(ui_filep): New type.
+	(DEV_VEC_P (ui_filep)): New type.
+	(struct ui_out_data) <buffer, original_buffer>: Delete.
+	(struct ui_out_data) <streams>: New member.
+	(mi_ui_out_impl): Add data_destroy field.
+	(mi_field_string, mi_field_fmt): Update.
+	(mi_flush, mi_redirect, field_separator): Update.
+	(mi_open, mi_close): Update.
+	(mi_out_buffered, mi_out_rewind, mi_out_put): Update.
+	(mi_out_data_ctor, mi_out_data_dtor): New functions.
+	(mi_out_new): Call mi_out_data_ctor.
+
+2015-08-18  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* remote.c (strprefix): New.
+	(remote_parse_stop_reply): Use strprefix instead of strncmp
+	to ensure exact match of keyword.
+
+2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb_bfd.c (debug_bfd_cache): New variable.
+	(show_bfd_cache_debug): New function.
+	(gdb_bfd_open): Add debug logging.
+	(gdb_bfd_ref): Likewise.
+	(gdb_bfd_unref): Likewise.
+	(_initialize_gdb_bfd): Add new set/show command.
+	* NEWS: Mention new command.
+
+2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb_bfd.c (bfd_sharing): New variable.
+	(show_bfd_sharing): New function.
+	(gdb_bfd_open): Check bfd_sharing variable.
+	(_initialize_gdb_bfd): Add new set/show command.
+	* NEWS: Mention new command.
+
+2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb_bfd.c (struct gdb_bfd_data): Add size, inode, and device id
+	field.
+	(struct gdb_bfd_cache_search): Likewise.
+	(eq_bfd): Compare the size, inode, and device id fields.
+	(gdb_bfd_open): Initialise the size, inode, and device id fields.
+	(gdb_bfd_ref): Likewise.
+	(gdb_bfd_unref): Likewise.
+
+2015-08-18  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_nat_always_non_stop_p): If the linux_ops
+	target implements to_always_non_stop_p, call it.
+	* x86-linux-nat.c (x86_linux_always_non_stop_p): New function.
+	(x86_linux_create_target): Install it as to_always_non_stop_p
+	method.
+
+2015-08-17  Doug Evans  <dje@google.com>
+
+	* ui-out.c (default_ui_out_impl): Add comment.
+
+2015-08-17  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y (type_aggregate_p): New function.
+	(PrimaryExpression : TypeExp '.' IdentifierExp): Use it.
+	(classify_inner_name): Likewise.
+	* d-namespace.c (d_lookup_nested_symbol): Handle TYPE_CODE_ENUM.
+
+2015-08-15  Doug Evans  <xdje42@gmail.com>
+
+	* psymtab.c (add_psymbol_to_bcache): Remove "val" arg.  All callers
+	updated.
+	(add_psymbol_to_list): Ditto.
+
+2015-08-15  Doug Evans  <xdje42@gmail.com>
+
+	* dbxread.c (dbx_end_psymtab): Renamed from end_psymtab.  All callers
+	updated.  Call end_psymtab_common.
+	* dwarf2read.c (process_psymtab_comp_unit_reader): Call
+	end_psymtab_common.
+	(build_type_psymtabs_reader): Ditto.
+	* psympriv.h (sort_pst_symbols): Delete.
+	(end_psymtab_common): Declare.
+	* psymtab.c (sort_pst_symbols): Make static.
+	(end_psymtab_common): New function.
+	* xcoffread.c (xcoff_end_psymtab): Call end_psymtab_common.
+
+2015-08-15  Doug Evans  <xdje42@gmail.com>
+
+	* defs.h (LANGUAGE_BITS): Define.
+	* psympriv.h (partial_symbol) <domain>: Use SYMBOL_DOMAIN_BITS.
+	(partial_symbol) <aclass>: Use SYMBOL_ACLASS_BITS.
+	* symtab.h (general_symbol_info> <language>: Usage LANGUAGE_BITS.
+	(minimal_symbol_type): Add nr_minsym_types.
+	(MINSYM_TYPE_BITS): Define.
+	(minimal_symbol) <type>: Use MINSYM_TYPE_BITS.
+	(domain_enum_tag): Add NR_DOMAINS.
+	(SYMBOL_DOMAIN_BITS): Change from 4 to 3.
+	(SYMBOL_ACLASS_BITS): Define from 6 to 5.
+
+2015-08-15  Doug Evans  <xdje42@gmail.com>
+
+	* objfiles.h: Whitespace cleanup.
+	* psympriv.h: Whitespace cleanup.
+	* psymtab.c: Whitespace/coding convention cleanup.
+
+2015-08-15  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* inferior.c (detach_inferior_command): Don't call
+	any_thread_of_process when pid is 0.
+	(kill_inferior_command): Likewise.
+
+2015-08-14  Doug Evans  <xdje42@gmail.com>
+
+	PR gdb/11833
+	* NEWS: Document new /s modifier for the disassemble command.
+	* cli/cli-cmds.c (disassemble_command): Add support for /s.
+	(_initialize_cli_cmds): Update online docs of disassemble command.
+	* disasm.c: #include "source.h".
+	(struct deprecated_dis_line_entry): Renamed from dis_line_entry.
+	All uses updated.
+	(dis_line_entry): New struct.
+	(hash_dis_line_entry, eq_dis_line_entry): New functions.
+	(allocate_dis_line_table): New functions.
+	(maybe_add_dis_line_entry, line_has_code_p): New functions.
+	(dump_insns): New arg end_pc.  All callers updated.
+	(do_mixed_source_and_assembly_deprecated): Renamed from
+	do_mixed_source_and_assembly.  All callers updated.
+	(do_mixed_source_and_assembly): New function.
+	(gdb_disassembly): Handle /s (DISASSEMBLY_SOURCE).
+	* disasm.h (DISASSEMBLY_SOURCE_DEPRECATED): Renamed from
+	DISASSEMBLY_SOURCE.  All uses updated.
+	(DISASSEMBLY_SOURCE): New macro.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): New modes 4,5.
+
+2015-08-14  Keith Seitz  <keiths@redhat.com>
+
+	* d-exp.y (PrimaryExpression : TypeExp '.' IdentifierExp): Rename
+	`typename' to `type_name' to avoid C++ reserved word.
+
+2015-08-14  Keith Seitz  <keiths@redhat.com>
+
+	* location.c (EL_TYPE, EL_LINESPEC, EL_PROBE, EL_ADDRESS)
+	(EL_EXPLICIT, EL_STRING): Change macro parameter to "P" to
+	silence ARI errors.
+
+2015-08-14  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y (PrimaryExpression : TypeExp '.' IdentifierExp): Use
+	xstrprintf instead of malloc and sprintf.
+	(PrimaryExpression : IdentifierExp): Avoid operator at end of line.
+	(lex_one_token): Likewise.
+
 2015-08-14  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* solib-svr4.c (read_program_header): Add base_addr argument to

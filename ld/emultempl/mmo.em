@@ -91,7 +91,7 @@ mmo_place_orphan (asection *s,
 
   /* We have nothing to say for anything other than a final link or
      for sections that are excluded.  */
-  if (link_info.relocatable
+  if (bfd_link_relocatable (&link_info)
       || (s->flags & SEC_EXCLUDE) != 0)
     return NULL;
 

@@ -1499,6 +1499,10 @@ Versions::record_version(const Symbol_table* symtab,
   gold_assert(!this->is_finalized_);
   gold_assert(sym->version() != NULL);
 
+  // A symbol defined as "sym@" is bound to an unspecified base version.
+  if (sym->version()[0] == '\0')
+    return;
+
   Stringpool::Key version_key;
   const char* version = dynpool->add(sym->version(), false, &version_key);
 
@@ -1731,15 +1735,17 @@ Versions::symbol_section_contents(const Symbol_table* symtab,
     {
       unsigned int version_index;
       const char* version = (*p)->version();
-      if (version != NULL)
-	version_index = this->version_index(symtab, dynpool, *p);
-      else
+      if (version == NULL)
 	{
 	  if ((*p)->is_defined() && !(*p)->is_from_dynobj())
 	    version_index = elfcpp::VER_NDX_GLOBAL;
 	  else
 	    version_index = elfcpp::VER_NDX_LOCAL;
 	}
+      else if (version[0] == '\0')
+        version_index = elfcpp::VER_NDX_GLOBAL;
+      else
+	version_index = this->version_index(symtab, dynpool, *p);
       // If the symbol was defined as foo@V1 instead of foo@@V1, add
       // the hidden bit.
       if ((*p)->version() != NULL && !(*p)->is_default())

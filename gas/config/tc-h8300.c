@@ -384,7 +384,7 @@ parse_reg (char *src, op_type *mode, unsigned int *reg, int direction)
   char *end;
   int len;
 
-  /* Cribbed from get_symbol_end.  */
+  /* Cribbed from get_symbol_name.  */
   if (!is_name_beginner (*src) || *src == '\001')
     return 0;
   end = src + 1;

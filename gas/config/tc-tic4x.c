@@ -727,8 +727,7 @@ tic4x_asg (int x ATTRIBUTE_UNUSED)
       return;
     }
   *input_line_pointer++ = '\0';
-  name = input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
+  c = get_symbol_name (&name);	/* Get terminator.  */
   tmp = xmalloc (strlen (str) + 1);
   strcpy (tmp, str);
   str = tmp;
@@ -739,7 +738,7 @@ tic4x_asg (int x ATTRIBUTE_UNUSED)
     hash_replace (tic4x_asg_hash, name, (void *) str);
   else
     hash_insert (tic4x_asg_hash, name, (void *) str);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
 
@@ -759,8 +758,9 @@ tic4x_bss (int x ATTRIBUTE_UNUSED)
   current_subseg = now_subseg;	/* Save current subseg.  */
 
   SKIP_WHITESPACE ();
-  name = input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
+  c = get_symbol_name (&name);	/* Get terminator.  */
+  if (c == '"')
+    c = * ++ input_line_pointer;
   if (c != ',')
     {
       as_bad (_(".bss size argument missing\n"));
@@ -807,11 +807,10 @@ tic4x_globl (int ignore ATTRIBUTE_UNUSED)
 
   do
     {
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
       *input_line_pointer = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       S_SET_STORAGE_CLASS (symbolP, C_EXT);
       S_SET_EXTERNAL (symbolP);
       if (c == ',')
@@ -939,10 +938,9 @@ tic4x_eval (int x ATTRIBUTE_UNUSED)
       as_bad (_("Symbol missing\n"));
       return;
     }
-  name = input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
+  c = get_symbol_name (&name);	/* Get terminator.  */
   tic4x_insert_sym (name, value);
-  *input_line_pointer++ = c;
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
 
@@ -967,8 +965,9 @@ tic4x_sect (int x ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '"')
     input_line_pointer++;
-  section_name = input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
+  c = get_symbol_name (&section_name);	/* Get terminator.  */
+  if (c == '"')
+    c = * ++ input_line_pointer;
   input_line_pointer++;		/* Skip null symbol terminator.  */
   name = xmalloc (input_line_pointer - section_name + 1);
   strcpy (name, section_name);
@@ -980,13 +979,16 @@ tic4x_sect (int x ATTRIBUTE_UNUSED)
      Volker Kuhlmann  <v.kuhlmann@elec.canterbury.ac.nz>.  */
   if (c == ':')
     {
-      c = get_symbol_end ();	/* Get terminator.  */
+      char *subname;
+      c = get_symbol_name (&subname);	/* Get terminator.  */
+      if (c == '"')
+	c = * ++ input_line_pointer;
       input_line_pointer++;	/* Skip null symbol terminator.  */
       as_warn (_(".sect: subsection name ignored"));
     }
 
   /* We might still have a '"' to discard, but the character after a
-     symbol name will be overwritten with a \0 by get_symbol_end()
+     symbol name will be overwritten with a \0 by get_symbol_name()
      [VK].  */
 
   if (c == ',')
@@ -1014,7 +1016,7 @@ tic4x_sect (int x ATTRIBUTE_UNUSED)
 		 bfd_errmsg (bfd_get_error ()));
     }
 
-  /* If the last character overwritten by get_symbol_end() was an
+  /* If the last character overwritten by get_symbol_name() was an
      end-of-line, we must restore it or the end of the line will not be
      recognised and scanning extends into the next line, stopping with
      an error (blame Volker Kuhlmann <v.kuhlmann@elec.canterbury.ac.nz>
@@ -1037,8 +1039,9 @@ tic4x_set (int x ATTRIBUTE_UNUSED)
       char c;
       char *name;
 
-      name = input_line_pointer;
-      c = get_symbol_end ();	/* Get terminator.  */
+      c = get_symbol_name (&name);	/* Get terminator.  */
+      if (c == '"')
+	c = * ++ input_line_pointer;
       if (c != ',')
 	{
 	  as_bad (_(".set syntax invalid\n"));
@@ -1073,8 +1076,9 @@ tic4x_usect (int x ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '"')
     input_line_pointer++;
-  section_name = input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
+  c = get_symbol_name (&section_name);	/* Get terminator.  */
+  if (c == '"')
+    c = * ++ input_line_pointer;
   input_line_pointer++;		/* Skip null symbol terminator.  */
   name = xmalloc (input_line_pointer - section_name + 1);
   strcpy (name, section_name);
@@ -1513,17 +1517,16 @@ tic4x_operand_parse (char *s, tic4x_operand_t *operand)
   input_line_pointer = s;
   SKIP_WHITESPACE ();
 
-  str = input_line_pointer;
-  c = get_symbol_end ();	/* Get terminator.  */
+  c = get_symbol_name (&str);	/* Get terminator.  */
   new_pointer = input_line_pointer;
   if (strlen (str) && (entry = hash_find (tic4x_asg_hash, str)) != NULL)
     {
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
       input_line_pointer = (char *) entry;
     }
   else
     {
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
       input_line_pointer = str;
     }
 

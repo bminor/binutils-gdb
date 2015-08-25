@@ -23,7 +23,7 @@
 #include "target.h"
 #include "memory-map.h"
 
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 
 static int
 compare_block_starting_address (const void *a, const void *b)

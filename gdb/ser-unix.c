@@ -26,7 +26,7 @@
 #include <sys/types.h>
 #include "terminal.h"
 #include <sys/socket.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 
 #include "gdb_select.h"
 #include "gdbcmd.h"

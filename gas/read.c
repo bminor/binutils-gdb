@@ -741,7 +741,8 @@ single instruction is %u bytes long but .bundle_align_mode limit is %u"),
 void
 read_a_source_file (char *name)
 {
-  char c;
+  char nul_char;
+  char next_char;
   char *s;		/* String of symbol, '\0' appended.  */
   int temp;
   pseudo_typeS *pop;
@@ -828,16 +829,18 @@ read_a_source_file (char *name)
 
 	      if (LABELS_WITHOUT_COLONS || flag_m68k_mri)
 		{
+		  next_char = * input_line_pointer;
 		  /* Text at the start of a line must be a label, we
 		     run down and stick a colon in.  */
-		  if (is_name_beginner (*input_line_pointer))
+		  if (is_name_beginner (next_char) || next_char == '"')
 		    {
-		      char *line_start = input_line_pointer;
+		      char *line_start;
 		      int mri_line_macro;
 
 		      HANDLE_CONDITIONAL_ASSEMBLY (0);
 
-		      c = get_symbol_end ();
+		      nul_char = get_symbol_name (& line_start);
+		      next_char = (nul_char == '"' ? input_line_pointer[1] : nul_char);
 
 		      /* In MRI mode, the EQU and MACRO pseudoops must
 			 be handled specially.  */
@@ -871,8 +874,8 @@ read_a_source_file (char *name)
 			 symbol in the symbol table.  */
 		      if (!mri_line_macro
 #ifdef TC_START_LABEL_WITHOUT_COLON
-			  && TC_START_LABEL_WITHOUT_COLON(c,
-							  input_line_pointer)
+			  && TC_START_LABEL_WITHOUT_COLON (next_char,
+							   input_line_pointer)
 #endif
 			  )
 			line_label = colon (line_start);
@@ -882,8 +885,8 @@ read_a_source_file (char *name)
 						    (valueT) 0,
 						    &zero_address_frag);
 
-		      *input_line_pointer = c;
-		      if (c == ':')
+		      next_char = restore_line_pointer (nul_char);
+		      if (next_char == ':')
 			input_line_pointer++;
 		    }
 		}
@@ -898,30 +901,32 @@ read_a_source_file (char *name)
 	     Each test is independent of all other tests at the (top)
 	     level.  */
 	  do
-	    c = *input_line_pointer++;
-	  while (c == '\t' || c == ' ' || c == '\f');
+	    nul_char = next_char = *input_line_pointer++;
+	  while (next_char == '\t' || next_char == ' ' || next_char == '\f');
 
 	  /* C is the 1st significant character.
 	     Input_line_pointer points after that character.  */
-	  if (is_name_beginner (c))
+	  if (is_name_beginner (next_char) || next_char == '"')
 	    {
+	      char *rest;
+
 	      /* Want user-defined label or pseudo/opcode.  */
 	      HANDLE_CONDITIONAL_ASSEMBLY (1);
 
-	      s = --input_line_pointer;
-	      c = get_symbol_end ();	/* name's delimiter.  */
+	      --input_line_pointer;
+	      nul_char = get_symbol_name (& s);	/* name's delimiter.  */
+	      next_char = (nul_char == '"' ? input_line_pointer[1] : nul_char);
+	      rest = input_line_pointer + (nul_char == '"' ? 2 : 1);
 
-	      /* C is character after symbol.
-		 That character's place in the input line is now '\0'.
+	      /* NEXT_CHAR is character after symbol.
+		 The end of symbol in the input line is now '\0'.
 		 S points to the beginning of the symbol.
 		   [In case of pseudo-op, s->'.'.]
-		 Input_line_pointer->'\0' where c was.  */
-	      if (TC_START_LABEL (c, s, input_line_pointer))
+		 Input_line_pointer->'\0' where NUL_CHAR was.  */
+	      if (TC_START_LABEL (next_char, s, input_line_pointer))
 		{
 		  if (flag_m68k_mri)
 		    {
-		      char *rest = input_line_pointer + 1;
-
 		      /* In MRI mode, \tsym: set 0 is permitted.  */
 		      if (*rest == ':')
 			++rest;
@@ -940,27 +945,27 @@ read_a_source_file (char *name)
 		    }
 
 		  line_label = colon (s);	/* User-defined label.  */
-		  /* Put ':' back for error messages' sake.  */
-		  *input_line_pointer++ = ':';
+		  restore_line_pointer (nul_char);
+		  ++ input_line_pointer;
 #ifdef tc_check_label
 		  tc_check_label (line_label);
 #endif
 		  /* Input_line_pointer->after ':'.  */
 		  SKIP_WHITESPACE ();
 		}
-	      else if ((c == '=' && input_line_pointer[1] == '=')
-		       || ((c == ' ' || c == '\t')
-			   && input_line_pointer[1] == '='
-			   && input_line_pointer[2] == '='))
+	      else if ((next_char == '=' && *rest == '=')
+		       || ((next_char == ' ' || next_char == '\t')
+			   && rest[0] == '='
+			   && rest[1] == '='))
 		{
 		  equals (s, -1);
 		  demand_empty_rest_of_line ();
 		}
-	      else if ((c == '='
-		       || ((c == ' ' || c == '\t')
-			    && input_line_pointer[1] == '='))
+	      else if ((next_char == '='
+		       || ((next_char == ' ' || next_char == '\t')
+			    && *rest == '='))
 #ifdef TC_EQUAL_IN_INSN
-			   && !TC_EQUAL_IN_INSN (c, s)
+			   && !TC_EQUAL_IN_INSN (next_char, s)
 #endif
 			   )
 		{
@@ -1000,7 +1005,7 @@ read_a_source_file (char *name)
 		    {
 		      /* PSEUDO - OP.
 
-			 WARNING: c has next char, which may be end-of-line.
+			 WARNING: next_char may be end-of-line.
 			 We lookup the pseudo-op table with s+1 because we
 			 already know that the pseudo-op begins with a '.'.  */
 
@@ -1045,25 +1050,25 @@ read_a_source_file (char *name)
 			{
 			  char *end = input_line_pointer;
 
-			  *input_line_pointer = c;
+			  (void) restore_line_pointer (nul_char);
 			  s_ignore (0);
-			  c = *--input_line_pointer;
+			  nul_char = next_char = *--input_line_pointer;
 			  *input_line_pointer = '\0';
-			  if (! macro_defined || ! try_macro (c, s))
+			  if (! macro_defined || ! try_macro (next_char, s))
 			    {
 			      *end = '\0';
 			      as_bad (_("unknown pseudo-op: `%s'"), s);
-			      *input_line_pointer++ = c;
+			      *input_line_pointer++ = nul_char;
 			    }
 			  continue;
 			}
 
 		      /* Put it back for error messages etc.  */
-		      *input_line_pointer = c;
+		      next_char = restore_line_pointer (nul_char);
 		      /* The following skip of whitespace is compulsory.
 			 A well shaped space is sometimes all that separates
 			 keyword from operands.  */
-		      if (c == ' ' || c == '\t')
+		      if (next_char == ' ' || next_char == '\t')
 			input_line_pointer++;
 
 		      /* Input_line is restored.
@@ -1077,16 +1082,16 @@ read_a_source_file (char *name)
 		    }
 		  else
 		    {
-		      /* WARNING: c has char, which may be end-of-line.  */
-		      /* Also: input_line_pointer->`\0` where c was.  */
-		      *input_line_pointer = c;
+		      /* WARNING: next_char may be end-of-line.  */
+		      /* Also: input_line_pointer->`\0` where nul_char was.  */
+		      (void) restore_line_pointer (nul_char);
 		      input_line_pointer = _find_end_of_line (input_line_pointer, flag_m68k_mri, 1, 0);
-		      c = *input_line_pointer;
+		      next_char = nul_char = *input_line_pointer;
 		      *input_line_pointer = '\0';
 
 		      generate_lineno_debug ();
 
-		      if (macro_defined && try_macro (c, s))
+		      if (macro_defined && try_macro (next_char, s))
 			continue;
 
 		      if (mri_pending_align)
@@ -1102,7 +1107,7 @@ read_a_source_file (char *name)
 
 		      assemble_one (s); /* Assemble 1 instruction.  */
 
-		      *input_line_pointer++ = c;
+		      *input_line_pointer++ = nul_char;
 
 		      /* We resume loop AFTER the end-of-line from
 			 this instruction.  */
@@ -1112,17 +1117,20 @@ read_a_source_file (char *name)
 	    }
 
 	  /* Empty statement?  */
-	  if (is_end_of_line[(unsigned char) c])
+	  if (is_end_of_line[(unsigned char) next_char])
 	    continue;
 
-	  if ((LOCAL_LABELS_DOLLAR || LOCAL_LABELS_FB) && ISDIGIT (c))
+	  if ((LOCAL_LABELS_DOLLAR || LOCAL_LABELS_FB) && ISDIGIT (next_char))
 	    {
 	      /* local label  ("4:")  */
 	      char *backup = input_line_pointer;
 
 	      HANDLE_CONDITIONAL_ASSEMBLY (1);
 
-	      temp = c - '0';
+	      temp = next_char - '0';
+
+	      if (nul_char == '"')
+		++ input_line_pointer;
 
 	      /* Read the whole number.  */
 	      while (ISDIGIT (*input_line_pointer))
@@ -1156,9 +1164,9 @@ read_a_source_file (char *name)
 		}
 
 	      input_line_pointer = backup;
-	    }			/* local label  ("4:") */
+	    }
 
-	  if (c && strchr (line_comment_chars, c))
+	  if (next_char && strchr (line_comment_chars, next_char))
 	    {			/* Its a comment.  Better say APP or NO_APP.  */
 	      sb sbuf;
 	      char *ends;
@@ -1270,7 +1278,7 @@ read_a_source_file (char *name)
 	  HANDLE_CONDITIONAL_ASSEMBLY (1);
 
 #ifdef tc_unrecognized_line
-	  if (tc_unrecognized_line (c))
+	  if (tc_unrecognized_line (next_char))
 	    continue;
 #endif
 	  input_line_pointer--;
@@ -1471,6 +1479,11 @@ s_align (int arg, int bytes_p)
     {
       align = get_absolute_expression ();
       SKIP_WHITESPACE ();
+
+#ifdef TC_ALIGN_ZERO_IS_DEFAULT
+      if (arg > 0 && align == 0)
+	align = arg;
+#endif
     }
 
   if (bytes_p)
@@ -1795,7 +1808,7 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
 
   name = input_line_pointer;
   if (!ISDIGIT (*name))
-    c = get_symbol_end ();
+    c = get_symbol_name (& name);
   else
     {
       do
@@ -1818,7 +1831,7 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
     }
 
   sym = symbol_find_or_make (name);
-  *input_line_pointer = c;
+  c = restore_line_pointer (c);
   if (alc != NULL)
     free (alc);
 
@@ -2338,8 +2351,7 @@ s_linkonce (int ignore ATTRIBUTE_UNUSED)
       char *s;
       char c;
 
-      s = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (& s);
       if (strcasecmp (s, "discard") == 0)
 	type = LINKONCE_DISCARD;
       else if (strcasecmp (s, "one_only") == 0)
@@ -2351,7 +2363,7 @@ s_linkonce (int ignore ATTRIBUTE_UNUSED)
       else
 	as_warn (_("unrecognized .linkonce type `%s'"), s);
 
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
     }
 
 #ifdef obj_handle_link_once
@@ -2845,7 +2857,7 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 
   name = input_line_pointer;
   if (!ISDIGIT (*name))
-    c = get_symbol_end ();
+    c = get_symbol_name (& name);
   else
     {
       do
@@ -2860,11 +2872,11 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 
   name = xstrdup (name);
 
-  *input_line_pointer = c;
+  c = restore_line_pointer (c);
 
   seg = subseg_new (name, 0);
 
-  if (*input_line_pointer == ',')
+  if (c == ',')
     {
       int align;
 
@@ -2919,16 +2931,15 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (& name);
 
   name = xstrdup (name);
 
-  *input_line_pointer = c;
+  c = restore_line_pointer (c);
 
   seg = subseg_new (name, 0);
 
-  if (*input_line_pointer != ',')
+  if (c != ',')
     *type = 'C';
   else
     {
@@ -2936,8 +2947,7 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 
       ++input_line_pointer;
       SKIP_WHITESPACE ();
-      sectype = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (& sectype);
       if (*sectype == '\0')
 	*type = 'C';
       else if (strcasecmp (sectype, "text") == 0)
@@ -2948,7 +2958,7 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 	*type = 'R';
       else
 	as_warn (_("unrecognized section type `%s'"), sectype);
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
     }
 
   if (*input_line_pointer == ',')
@@ -2957,8 +2967,7 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 
       ++input_line_pointer;
       SKIP_WHITESPACE ();
-      seccmd = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (& seccmd);
       if (strcasecmp (seccmd, "absolute") == 0)
 	{
 	  as_bad (_("absolute sections are not supported"));
@@ -2970,14 +2979,14 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 	{
 	  int align;
 
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	  align = get_absolute_expression ();
 	  record_alignment (seg, align);
 	}
       else
 	{
 	  as_warn (_("unrecognized section command `%s'"), seccmd);
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	}
     }
 
@@ -3023,11 +3032,10 @@ s_purgem (int ignore ATTRIBUTE_UNUSED)
       char c;
 
       SKIP_WHITESPACE ();
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (& name);
       delete_macro (name);
       *input_line_pointer = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
     }
   while (*input_line_pointer++ == ',');
 
@@ -3932,12 +3940,14 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
       else
 #endif
 	{
+#if 0
 	  if (*input_line_pointer == '"')
 	    {
 	      as_bad (_("unexpected `\"' in expression"));
 	      ignore_rest_of_line ();
 	      return;
 	    }
+#endif
 	  ret = TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
 	}
 
@@ -4041,8 +4051,7 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
 
   ++input_line_pointer;
   SKIP_WHITESPACE ();
-  r_name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (& r_name);
   if (strncasecmp (r_name, "BFD_RELOC_", 10) == 0)
     {
       unsigned int i;
@@ -4065,7 +4074,7 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
     }
 
   exp.X_op = O_absent;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer == ',')
     {
       ++input_line_pointer;
@@ -5952,11 +5961,10 @@ do_s_func (int end_p, const char *default_prefix)
 	  return;
 	}
 
-      name = input_line_pointer;
-      delim1 = get_symbol_end ();
+      delim1 = get_symbol_name (& name);
       name = xstrdup (name);
       *input_line_pointer = delim1;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       if (*input_line_pointer != ',')
 	{
 	  if (default_prefix)
@@ -5982,10 +5990,9 @@ do_s_func (int end_p, const char *default_prefix)
 	{
 	  ++input_line_pointer;
 	  SKIP_WHITESPACE ();
-	  label = input_line_pointer;
-	  delim2 = get_symbol_end ();
+	  delim2 = get_symbol_name (& label);
 	  label = xstrdup (label);
-	  *input_line_pointer = delim2;
+	  restore_line_pointer (delim2);
 	}
 
       if (debug_type == DEBUG_STABS)

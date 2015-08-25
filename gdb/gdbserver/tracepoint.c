@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #include <inttypes.h>
 #include "ax.h"
 #include "tdesc.h"

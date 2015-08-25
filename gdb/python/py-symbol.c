@@ -278,7 +278,11 @@ sympy_value (PyObject *self, PyObject *args)
       if (symbol_read_needs_frame (symbol) && frame_info == NULL)
 	error (_("symbol requires a frame to compute its value"));
 
-      value = read_var_value (symbol, frame_info);
+      /* TODO: currently, we have no way to recover the block in which SYMBOL
+	 was found, so we have no block to pass to read_var_value.  This will
+	 yield an incorrect value when symbol is not local to FRAME_INFO (this
+	 can happen with nested functions).  */
+      value = read_var_value (symbol, NULL, frame_info);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

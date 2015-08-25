@@ -1,3 +1,119 @@
+2015-08-25  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.base/nested-subp1.exp: New file.
+	* gdb.base/nested-subp1.c: New file.
+	* gdb.base/nested-subp2.exp: New file.
+	* gdb.base/nested-subp2.c: New file.
+	* gdb.base/nested-subp3.exp: New file.
+	* gdb.base/nested-subp3.c: New file.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/connect-without-multi-process.c: New file.
+	* gdb.server/connect-without-multi-process.exp: New file.
+
+2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.opt/inline-markers.c: Make z int.
+
+2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.opt/inline-markers.c: Make z volatile.
+
+2015-08-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.opt/inline-bt.c: New volatile global z.
+	* gdb.opt/inline-cmds.c: Likewise.
+	* gdb.opt/inline-locals.c: Likewise.
+	* gdb.opt/inline-markers.c: New extern global z.
+	(marker): Use z.
+	(inline_fn): Likewise.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* config/m32r-stub.exp: Remove file.
+	* gdb.base/call-ar-st.exp: Remove reference to sparclet.
+	* gdb.base/call-rt-st.exp: Likewise.
+	* gdb.base/call-strs.exp: Likewise.
+	* gdb.base/default.exp: Remove references to h8300-*-hms and
+	*-*-udi*.
+	* gdb.base/funcargs.exp: Remove reference to sparclet-*-*.
+
+2015-08-24  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu_vector.exp: Try compilation with "-mcpu=native
+	-Wno-psabi" if "-mcpu=native" fails.  For the tests with "finish"
+	and "return" use KFAIL when GDB can not read/write the vector
+	return value.
+
+2015-08-21  Gary Benson <gbenson@redhat.com>
+
+	* gdb.trace/pending.exp: Cope with remote transfer warnings.
+
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/solib-list.exp: No longer expect an interior stop in
+	non-stop mode.
+
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/connect-stopped-target.c: New file.
+	* gdb.server/connect-stopped-target.exp: New file.
+
+2015-08-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/comp-unit-lang.exp: New file.
+	* gdb.dwarf2/comp-unit-lang.c: New file.
+
+2015-08-20  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/attr_ref_and_charlit.exp: New testcase.
+	* gdb.ada/attr_ref_and_charlit/foo.adb: New file.
+
+2015-08-19  Kevin Buettner  <kevinb@redhat.com>
+    
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.c: New file.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp: New file.
+
+2015-08-18  Doug Evans  <dje@google.com>
+	    Adrian Sendroiu <adrian.sendroiu@freescale.com>
+
+	* lib/gdb.exp (skip_python_tests_prompt): Renamed from
+	skip_python_tests.  New arg prompt_regexp.
+	(skip_python_tests): New function.
+	* lib/mi-support.exp (mi_skip_python_tests): New function.
+	* gdb.python/py-mi-objfile-gdb.py: New file.
+	* gdb.python/py-mi-objfile.c: New file.
+	* gdb.python/py-mi-objfile.exp: New file.
+
+2015-08-17  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.linespec/explicit.exp: Move strace test from here ...
+	* gdb.trace/strace.exp: ... to here.
+
+2015-08-15  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb.base/kill-detach-inferiors-cmd.exp: New test file.
+	* gdb.base/kill-detach-inferiors-cmd.c: New test file.
+
+2015-08-14  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.perf/lib/perftest/utils.py (select_file): Kill any existing
+	inferior before selecting a new file.
+
+2015-08-14  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.mi/mi-disassemble.exp: Update.
+	* gdb.base/disasm-optim.S: New file.
+	* gdb.base/disasm-optim.c: New file.
+	* gdb.base/disasm-optim.h: New file.
+	* gdb.base/disasm-optim.exp: New file.
+
+2015-08-14  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_make_breakpoint): Add option/handling for
+	"evaluated-by".
+
 2015-08-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/dso2dso.exp: Improve the testcase's documentation.

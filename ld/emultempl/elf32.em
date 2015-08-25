@@ -1029,7 +1029,7 @@ gld${EMULATION_NAME}_after_open (void)
 	}
     }
 
-  if (link_info.relocatable)
+  if (bfd_link_relocatable (&link_info))
     {
       if (link_info.execstack == ! link_info.noexecstack)
 	/* PR ld/16744: If "-z [no]execstack" has been specified on the
@@ -1456,7 +1456,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 
       /* Make __ehdr_start hidden if it has been referenced, to
 	 prevent the symbol from being dynamic.  */
-      if (!link_info.relocatable)
+      if (!bfd_link_relocatable (&link_info))
        {
          struct elf_link_hash_entry *h
            = elf_link_hash_lookup (elf_hash_table (&link_info), "__ehdr_start",
@@ -1827,7 +1827,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   int iself = s->owner->xvec->flavour == bfd_target_elf_flavour;
   unsigned int sh_type = iself ? elf_section_type (s) : SHT_NULL;
 
-  if (! link_info.relocatable
+  if (!bfd_link_relocatable (&link_info)
       && link_info.combreloc
       && (s->flags & SEC_ALLOC))
     {
@@ -1909,8 +1909,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 
   /* If this is a final link, then always put .gnu.warning.SYMBOL
      sections into the .text section to get them out of the way.  */
-  if (link_info.executable
-      && ! link_info.relocatable
+  if (bfd_link_executable (&link_info)
       && CONST_STRNEQ (s->name, ".gnu.warning.")
       && hold[orphan_text].os != NULL)
     {
@@ -2009,11 +2008,11 @@ fragment <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (bfd_link_relocatable (&link_info) && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu			>> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'	>> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_relocatable (&link_info)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr			>> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn			>> e${EMULATION_NAME}.c
@@ -2023,26 +2022,28 @@ sed $sc ldscripts/${EMULATION_NAME}.xn			>> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_PIE_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
-echo '  ; else if (link_info.pie && link_info.combreloc' >> e${EMULATION_NAME}.c
-echo '             && link_info.relro' >> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.combreloc'		>> e${EMULATION_NAME}.c
+echo '             && link_info.relro'			>> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xdw			>> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.pie && link_info.combreloc) return' >> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_pie (&link_info)'		>> e${EMULATION_NAME}.c
+echo '             && link_info.combreloc) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xdc			>> e${EMULATION_NAME}.c
 fi
-echo '  ; else if (link_info.pie) return'		>> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_pie (&link_info)) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xd			>> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
-echo '  ; else if (link_info.shared && link_info.combreloc' >> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_dll (&link_info) && link_info.combreloc' >> e${EMULATION_NAME}.c
 echo '             && link_info.relro' >> e${EMULATION_NAME}.c
 echo '             && (link_info.flags & DF_BIND_NOW)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xsw			>> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.shared && link_info.combreloc) return' >> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_dll (&link_info) && link_info.combreloc) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xsc			>> e${EMULATION_NAME}.c
 fi
-echo '  ; else if (link_info.shared) return'		>> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_dll (&link_info)) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xs			>> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
@@ -2063,9 +2064,9 @@ fragment <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (bfd_link_relocatable (&link_info) && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocatable)
+  else if (bfd_link_relocatable (&link_info))
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";
@@ -2080,30 +2081,33 @@ fi
 if test -n "$GENERATE_PIE_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 fragment <<EOF
-  else if (link_info.pie && link_info.combreloc
-	   && link_info.relro && (link_info.flags & DF_BIND_NOW))
+  else if (bfd_link_pie (&link_info)
+	   && link_info.combreloc
+	   && link_info.relro
+	   && (link_info.flags & DF_BIND_NOW))
     return "ldscripts/${EMULATION_NAME}.xdw";
-  else if (link_info.pie && link_info.combreloc)
+  else if (bfd_link_pie (&link_info)
+	   && link_info.combreloc)
     return "ldscripts/${EMULATION_NAME}.xdc";
 EOF
 fi
 fragment <<EOF
-  else if (link_info.pie)
+  else if (bfd_link_pie (&link_info))
     return "ldscripts/${EMULATION_NAME}.xd";
 EOF
 fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 fragment <<EOF
-  else if (link_info.shared && link_info.combreloc
+  else if (bfd_link_dll (&link_info) && link_info.combreloc
 	   && link_info.relro && (link_info.flags & DF_BIND_NOW))
     return "ldscripts/${EMULATION_NAME}.xsw";
-  else if (link_info.shared && link_info.combreloc)
+  else if (bfd_link_dll (&link_info) && link_info.combreloc)
     return "ldscripts/${EMULATION_NAME}.xsc";
 EOF
 fi
 fragment <<EOF
-  else if (link_info.shared)
+  else if (bfd_link_dll (&link_info))
     return "ldscripts/${EMULATION_NAME}.xs";
 EOF
 fi

@@ -1525,8 +1525,6 @@ make_visible_with_new_height (struct tui_win_info *win_info)
       tui_display_all_data ();
       break;
     case CMD_WIN:
-      win_info->detail.command_info.cur_line = 0;
-      win_info->detail.command_info.curch = 0;
 #ifdef HAVE_WRESIZE
       wresize (TUI_CMD_WIN->generic.handle,
 	       TUI_CMD_WIN->generic.height,
@@ -1535,9 +1533,7 @@ make_visible_with_new_height (struct tui_win_info *win_info)
       mvwin (TUI_CMD_WIN->generic.handle,
 	     TUI_CMD_WIN->generic.origin.y,
 	     TUI_CMD_WIN->generic.origin.x);
-      wmove (win_info->generic.handle,
-	     win_info->detail.command_info.cur_line,
-	     win_info->detail.command_info.curch);
+      wmove (win_info->generic.handle, 0, 0);
       break;
     default:
       break;

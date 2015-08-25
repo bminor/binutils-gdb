@@ -567,13 +567,10 @@ debug_sym (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char delim;
-  char *end_name;
   symbolS *symbolP;
   sym_linkS *lnk;
 
-  name = input_line_pointer;
-  delim = get_symbol_end ();
-  end_name = input_line_pointer;
+  delim = get_symbol_name (&name);
 
   if ((symbolP = symbol_find (name)) == NULL
       && (symbolP = md_undefined_symbol (name)) == NULL)
@@ -595,7 +592,7 @@ debug_sym (int ignore ATTRIBUTE_UNUSED)
       symbol_get_obj (symbolP)->local = 1;
     }
 
-  *end_name = delim;
+  (void) restore_line_pointer (delim);
   demand_empty_rest_of_line ();
 }
 
@@ -1480,13 +1477,12 @@ m32r_scomm (int ignore ATTRIBUTE_UNUSED)
   offsetT align;
   int align2;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
 
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       as_bad (_("Expected comma after symbol-name: rest of line ignored."));

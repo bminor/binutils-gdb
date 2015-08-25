@@ -1,3 +1,75 @@
+2015-08-24  Jan Stancek  <jstancek@redhat.com>
+
+	* gas/i386/intel.s: Add test of disassembly of a potential
+	three byte instuction at the end of a function.
+	* gas/i386/intel.d: Update expected disassembly.
+
+2015-08-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18581
+	* gas/all/byte.d: Disable this test.  Quoted expressions
+	are now allowed in .byte directives.
+	* gas/all/quoted-sym-names.s: New test.
+	* gas/all/quoted-sym-names.d: Expected output.
+	* gas/all/gas.exp: Run the new test.
+
+2015-08-21  Alexander Fomin  <alexander.fomin@intel.com>
+
+	PR binutils/18257
+	* gas/i386/disassem.s: Add mask instructions with invalid ModR/M byte.
+	* gas/i386/x86-64-disassem.s: Likewise.
+	* gas/i386/disassem.d: Updated.
+	* gas/i386/x86-64-disassem.d: Likewise.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/reloc-dtprel-lo12-ldst8.s: New testcase.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst8.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst16.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst16.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst32.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst32.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst64.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst64.s: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst8.d: New expectation file.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst8.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst16.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst16.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst32.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst32.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12-ldst64.d: Likewise.
+	* gas/aarch64/reloc-dtprel-lo12_nc-ldst64.d: Likewise.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/reloc-dtprel_g0.s: New testcase.
+	* gas/aarch64/reloc-dtprel_g0-ilp32.s: Likewise.
+	* gas/aarch64/reloc-dtprel_g0_nc.s: Likewise.
+	* gas/aarch64/reloc-dtprel_g0_nc-ilp32.s: Likewise.
+	* gas/aarch64/reloc-dtprel_g1.s: Likewise.
+	* gas/aarch64/reloc-dtprel_g1-ilp32.s: Likewise.
+	* gas/aarch64/reloc-dtprel_g1_nc.s: Likewise.
+	* gas/aarch64/reloc-dtprel_g2.s: Likewise.
+	* gas/aarch64/reloc-dtprel_hi12.s: Likewise.
+	* gas/aarch64/reloc-dtprel_hi12-ilp32.s: Likewise.
+	* gas/aarch64/reloc-dtprel_g0.d: New expectation file.
+	* gas/aarch64/reloc-dtprel_g0-ilp32.d: Likewise.
+	* gas/aarch64/reloc-dtprel_g0_nc.d: Likewise.
+	* gas/aarch64/reloc-dtprel_g0_nc-ilp32.d: Likewise.
+	* gas/aarch64/reloc-dtprel_g1.d: Likewise.
+	* gas/aarch64/reloc-dtprel_g1-ilp32.d: Likewise.
+	* gas/aarch64/reloc-dtprel_g1_nc.d: Likewise.
+	* gas/aarch64/reloc-dtprel_g2.d: Likewise.
+	* gas/aarch64/reloc-dtprel_hi12.d: Likewise.
+	* gas/aarch64/reloc-dtprel_hi12-ilp32.d: Likewise.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/aarch64/reloc-dtprel_lo12_nc.s: New testcase.
+	* gas/aarch64/reloc-dtprel_lo12_nc-ilp32.s: Likewise.
+	* gas/aarch64/reloc-dtprel_lo12_nc.d: New expectation file.
+	* gas/aarch64/reloc-dtprel_lo12_nc-ilp32.d: Likewise.
+
 2015-08-13  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* gas/arm/nops.d: New.

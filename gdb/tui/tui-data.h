@@ -265,8 +265,6 @@ struct tui_source_info
 
 struct tui_command_info
 {
-  int cur_line;			/* The current line position.  */
-  int curch;			/* The current cursor position.  */
   int start_line;
 };
 

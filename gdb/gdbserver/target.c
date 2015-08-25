@@ -23,7 +23,7 @@
 
 struct target_ops *the_target;
 
-void
+int
 set_desired_thread (int use_general)
 {
   struct thread_info *found;
@@ -33,10 +33,8 @@ set_desired_thread (int use_general)
   else
     found = find_thread_ptid (cont_thread);
 
-  if (found == NULL)
-    current_thread = get_first_thread ();
-  else
-    current_thread = found;
+  current_thread = found;
+  return (current_thread != NULL);
 }
 
 int

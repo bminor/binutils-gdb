@@ -331,8 +331,10 @@ free_pending_blocks (void)
    file).  Put the block on the list of pending blocks.  */
 
 static struct block *
-finish_block_internal (struct symbol *symbol, struct pending **listhead,
+finish_block_internal (struct symbol *symbol,
+		       struct pending **listhead,
 		       struct pending_block *old_blocks,
+		       const struct dynamic_prop *static_link,
 		       CORE_ADDR start, CORE_ADDR end,
 		       int is_global, int expandable)
 {
@@ -421,6 +423,9 @@ finish_block_internal (struct symbol *symbol, struct pending **listhead,
     {
       BLOCK_FUNCTION (block) = NULL;
     }
+
+  if (static_link != NULL)
+    objfile_register_static_link (objfile, block, static_link);
 
   /* Now "free" the links of the list, and empty the list.  */
 
@@ -519,11 +524,13 @@ finish_block_internal (struct symbol *symbol, struct pending **listhead,
 }
 
 struct block *
-finish_block (struct symbol *symbol, struct pending **listhead,
+finish_block (struct symbol *symbol,
+	      struct pending **listhead,
 	      struct pending_block *old_blocks,
+	      const struct dynamic_prop *static_link,
 	      CORE_ADDR start, CORE_ADDR end)
 {
-  return finish_block_internal (symbol, listhead, old_blocks,
+  return finish_block_internal (symbol, listhead, old_blocks, static_link,
 				start, end, 0, 0);
 }
 
@@ -1229,7 +1236,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
       struct context_stack *cstk = pop_context ();
 
       /* Make a block for the local symbols within.  */
-      finish_block (cstk->name, &local_symbols, cstk->old_blocks,
+      finish_block (cstk->name, &local_symbols, cstk->old_blocks, NULL,
 		    cstk->start_addr, end_addr);
 
       if (context_stack_depth > 0)
@@ -1301,7 +1308,7 @@ end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
   else
     {
       /* Define the STATIC_BLOCK.  */
-      return finish_block_internal (NULL, &file_symbols, NULL,
+      return finish_block_internal (NULL, &file_symbols, NULL, NULL,
 				    last_source_start_addr, end_addr,
 				    0, expandable);
     }
@@ -1329,7 +1336,7 @@ end_symtab_with_blockvector (struct block *static_block,
   end_addr = BLOCK_END (static_block);
 
   /* Create the GLOBAL_BLOCK and build the blockvector.  */
-  finish_block_internal (NULL, &global_symbols, NULL,
+  finish_block_internal (NULL, &global_symbols, NULL, NULL,
 			 last_source_start_addr, end_addr,
 			 1, expandable);
   blockvector = make_blockvector ();

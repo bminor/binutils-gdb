@@ -1332,7 +1332,7 @@ gdb_eval_agent_expr (struct eval_agent_expr_context *ctx,
 		    op);
 	  /* If ever GDB generates any of these, we don't have the
 	     option of ignoring.  */
-	  return 1;
+	  return expr_eval_unhandled_opcode;
 
 	default:
 	  ax_debug ("Agent expression op 0x%x not recognized", op);

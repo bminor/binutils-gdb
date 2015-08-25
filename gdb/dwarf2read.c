@@ -124,7 +124,7 @@ struct dwarf2_section_info
   union
   {
     /* If this is a real section, the bfd section.  */
-    asection *asection;
+    asection *section;
     /* If this is a virtual section, pointer to the containing ("real")
        section.  */
     struct dwarf2_section_info *containing_section;
@@ -139,7 +139,7 @@ struct dwarf2_section_info
   /* True if we have tried to read this section.  */
   char readin;
   /* True if this is a virtual section, False otherwise.
-     This specifies which of s.asection and s.containing_section to use.  */
+     This specifies which of s.section and s.containing_section to use.  */
   char is_virtual;
 };
 
@@ -1524,6 +1524,9 @@ static struct attribute *dwarf2_attr (struct die_info *, unsigned int,
 static struct attribute *dwarf2_attr_no_follow (struct die_info *,
 						unsigned int);
 
+static const char *dwarf2_string_attr (struct die_info *die, unsigned int name,
+                                       struct dwarf2_cu *cu);
+
 static int dwarf2_flag_true_p (struct die_info *die, unsigned name,
                                struct dwarf2_cu *cu);
 
@@ -1739,6 +1742,10 @@ static struct type *get_DW_AT_signature_type (struct die_info *,
 static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
 
 static void read_signatured_type (struct signatured_type *);
+
+static int attr_to_dynamic_prop (const struct attribute *attr,
+				 struct die_info *die, struct dwarf2_cu *cu,
+				 struct dynamic_prop *prop);
 
 /* memory allocation interface */
 
@@ -2052,9 +2059,9 @@ dwarf2_has_info (struct objfile *objfile,
       dwarf2_per_objfile->objfile = objfile;
     }
   return (!dwarf2_per_objfile->info.is_virtual
-	  && dwarf2_per_objfile->info.s.asection != NULL
+	  && dwarf2_per_objfile->info.s.section != NULL
 	  && !dwarf2_per_objfile->abbrev.is_virtual
-	  && dwarf2_per_objfile->abbrev.s.asection != NULL);
+	  && dwarf2_per_objfile->abbrev.s.section != NULL);
 }
 
 /* Return the containing section of virtual section SECTION.  */
@@ -2076,7 +2083,7 @@ get_section_bfd_owner (const struct dwarf2_section_info *section)
       section = get_containing_section (section);
       gdb_assert (!section->is_virtual);
     }
-  return section->s.asection->owner;
+  return section->s.section->owner;
 }
 
 /* Return the bfd section of SECTION.
@@ -2090,7 +2097,7 @@ get_section_bfd_section (const struct dwarf2_section_info *section)
       section = get_containing_section (section);
       gdb_assert (!section->is_virtual);
     }
-  return section->s.asection;
+  return section->s.section;
 }
 
 /* Return the name of SECTION.  */
@@ -2175,57 +2182,57 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     }
   else if (section_is_p (sectp->name, &names->info))
     {
-      dwarf2_per_objfile->info.s.asection = sectp;
+      dwarf2_per_objfile->info.s.section = sectp;
       dwarf2_per_objfile->info.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->abbrev))
     {
-      dwarf2_per_objfile->abbrev.s.asection = sectp;
+      dwarf2_per_objfile->abbrev.s.section = sectp;
       dwarf2_per_objfile->abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line))
     {
-      dwarf2_per_objfile->line.s.asection = sectp;
+      dwarf2_per_objfile->line.s.section = sectp;
       dwarf2_per_objfile->line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc))
     {
-      dwarf2_per_objfile->loc.s.asection = sectp;
+      dwarf2_per_objfile->loc.s.section = sectp;
       dwarf2_per_objfile->loc.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo))
     {
-      dwarf2_per_objfile->macinfo.s.asection = sectp;
+      dwarf2_per_objfile->macinfo.s.section = sectp;
       dwarf2_per_objfile->macinfo.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro))
     {
-      dwarf2_per_objfile->macro.s.asection = sectp;
+      dwarf2_per_objfile->macro.s.section = sectp;
       dwarf2_per_objfile->macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str))
     {
-      dwarf2_per_objfile->str.s.asection = sectp;
+      dwarf2_per_objfile->str.s.section = sectp;
       dwarf2_per_objfile->str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->addr))
     {
-      dwarf2_per_objfile->addr.s.asection = sectp;
+      dwarf2_per_objfile->addr.s.section = sectp;
       dwarf2_per_objfile->addr.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->frame))
     {
-      dwarf2_per_objfile->frame.s.asection = sectp;
+      dwarf2_per_objfile->frame.s.section = sectp;
       dwarf2_per_objfile->frame.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->eh_frame))
     {
-      dwarf2_per_objfile->eh_frame.s.asection = sectp;
+      dwarf2_per_objfile->eh_frame.s.section = sectp;
       dwarf2_per_objfile->eh_frame.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->ranges))
     {
-      dwarf2_per_objfile->ranges.s.asection = sectp;
+      dwarf2_per_objfile->ranges.s.section = sectp;
       dwarf2_per_objfile->ranges.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->types))
@@ -2233,7 +2240,7 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
       struct dwarf2_section_info type_section;
 
       memset (&type_section, 0, sizeof (type_section));
-      type_section.s.asection = sectp;
+      type_section.s.section = sectp;
       type_section.size = bfd_get_section_size (sectp);
 
       VEC_safe_push (dwarf2_section_info_def, dwarf2_per_objfile->types,
@@ -2241,7 +2248,7 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     }
   else if (section_is_p (sectp->name, &names->gdb_index))
     {
-      dwarf2_per_objfile->gdb_index.s.asection = sectp;
+      dwarf2_per_objfile->gdb_index.s.section = sectp;
       dwarf2_per_objfile->gdb_index.size = bfd_get_section_size (sectp);
     }
 
@@ -2258,7 +2265,7 @@ dwarf2_section_empty_p (const struct dwarf2_section_info *section)
 {
   if (section->is_virtual)
     return section->size == 0;
-  return section->s.asection == NULL || section->size == 0;
+  return section->s.section == NULL || section->size == 0;
 }
 
 /* Read the contents of the section INFO.
@@ -2411,32 +2418,32 @@ locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
      is ELF-only (at the time of writing).  */
   if (section_is_p (sectp->name, &dwarf2_elf_names.abbrev))
     {
-      dwz_file->abbrev.s.asection = sectp;
+      dwz_file->abbrev.s.section = sectp;
       dwz_file->abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.info))
     {
-      dwz_file->info.s.asection = sectp;
+      dwz_file->info.s.section = sectp;
       dwz_file->info.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.str))
     {
-      dwz_file->str.s.asection = sectp;
+      dwz_file->str.s.section = sectp;
       dwz_file->str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.line))
     {
-      dwz_file->line.s.asection = sectp;
+      dwz_file->line.s.section = sectp;
       dwz_file->line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.macro))
     {
-      dwz_file->macro.s.asection = sectp;
+      dwz_file->macro.s.section = sectp;
       dwz_file->macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &dwarf2_elf_names.gdb_index))
     {
-      dwz_file->gdb_index.s.asection = sectp;
+      dwz_file->gdb_index.s.section = sectp;
       dwz_file->gdb_index.size = bfd_get_section_size (sectp);
     }
 }
@@ -5270,13 +5277,8 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
   gdb_assert (cu != NULL);
 
   /* Yeah, we look dwo_name up again, but it simplifies the code.  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
-  gdb_assert (attr != NULL);
-  dwo_name = DW_STRING (attr);
-  comp_dir = NULL;
-  attr = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
-  if (attr)
-    comp_dir = DW_STRING (attr);
+  dwo_name = dwarf2_string_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
+  comp_dir = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
   if (this_cu->is_debug_types)
     {
@@ -5938,7 +5940,6 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   struct objfile *objfile = cu->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct dwarf2_per_cu_data *per_cu = cu->per_cu;
-  struct attribute *attr;
   CORE_ADDR baseaddr;
   CORE_ADDR best_lowpc = 0, best_highpc = 0;
   struct partial_symtab *pst;
@@ -5956,18 +5957,14 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   cu->list_in_scope = &file_symbols;
 
   /* Allocate a new partial symbol table structure.  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_name, cu);
-  if (attr == NULL || !DW_STRING (attr))
+  filename = dwarf2_string_attr (comp_unit_die, DW_AT_name, cu);
+  if (filename == NULL)
     filename = "";
-  else
-    filename = DW_STRING (attr);
 
   pst = create_partial_symtab (per_cu, filename);
 
   /* This must be done before calling dwarf2_build_include_psymtabs.  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
-  if (attr != NULL)
-    pst->dirname = DW_STRING (attr);
+  pst->dirname = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -6019,11 +6016,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   pst->textlow = gdbarch_adjust_dwarf2_addr (gdbarch, best_lowpc + baseaddr);
   pst->texthigh = gdbarch_adjust_dwarf2_addr (gdbarch, best_highpc + baseaddr);
 
-  pst->n_global_syms = objfile->global_psymbols.next -
-    (objfile->global_psymbols.list + pst->globals_offset);
-  pst->n_static_syms = objfile->static_psymbols.next -
-    (objfile->static_psymbols.list + pst->statics_offset);
-  sort_pst_symbols (objfile, pst);
+  end_psymtab_common (objfile, pst);
 
   if (!VEC_empty (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs))
     {
@@ -6135,11 +6128,7 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   highpc = (CORE_ADDR) 0;
   scan_partial_symbols (first_die, &lowpc, &highpc, 0, cu);
 
-  pst->n_global_syms = objfile->global_psymbols.next -
-    (objfile->global_psymbols.list + pst->globals_offset);
-  pst->n_static_syms = objfile->static_psymbols.next -
-    (objfile->static_psymbols.list + pst->statics_offset);
-  sort_pst_symbols (objfile, pst);
+  end_psymtab_common (objfile, pst);
 }
 
 /* Struct used to sort TUs by their abbreviation table offset.  */
@@ -6911,7 +6900,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
 			       &objfile->global_psymbols,
-			       0, addr, cu->language, objfile);
+			       addr, cu->language, objfile);
 	}
       else
 	{
@@ -6921,7 +6910,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
 			       &objfile->static_psymbols,
-			       0, addr, cu->language, objfile);
+			       addr, cu->language, objfile);
 	}
       break;
     case DW_TAG_constant:
@@ -6934,7 +6923,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	  list = &objfile->static_psymbols;
 	add_psymbol_to_list (actual_name, strlen (actual_name),
 			     built_actual_name != NULL, VAR_DOMAIN, LOC_STATIC,
-			     list, 0, 0, cu->language, objfile);
+			     list, 0, cu->language, objfile);
       }
       break;
     case DW_TAG_variable:
@@ -6970,7 +6959,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 				 built_actual_name != NULL,
 				 VAR_DOMAIN, LOC_STATIC,
 				 &objfile->global_psymbols,
-				 0, addr + baseaddr,
+				 addr + baseaddr,
 				 cu->language, objfile);
 	}
       else
@@ -6991,7 +6980,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_STATIC,
 			       &objfile->static_psymbols,
-			       0,
 			       has_loc ? addr + baseaddr : (CORE_ADDR) 0,
 			       cu->language, objfile);
 	}
@@ -7003,7 +6991,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   built_actual_name != NULL,
 			   VAR_DOMAIN, LOC_TYPEDEF,
 			   &objfile->static_psymbols,
-			   0, (CORE_ADDR) 0, cu->language, objfile);
+			   0, cu->language, objfile);
       break;
     case DW_TAG_imported_declaration:
     case DW_TAG_namespace:
@@ -7011,14 +6999,14 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   built_actual_name != NULL,
 			   VAR_DOMAIN, LOC_TYPEDEF,
 			   &objfile->global_psymbols,
-			   0, (CORE_ADDR) 0, cu->language, objfile);
+			   0, cu->language, objfile);
       break;
     case DW_TAG_module:
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   built_actual_name != NULL,
 			   MODULE_DOMAIN, LOC_TYPEDEF,
 			   &objfile->global_psymbols,
-			   0, (CORE_ADDR) 0, cu->language, objfile);
+			   0, cu->language, objfile);
       break;
     case DW_TAG_class_type:
     case DW_TAG_interface_type:
@@ -7045,7 +7033,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			    || cu->language == language_java)
 			   ? &objfile->global_psymbols
 			   : &objfile->static_psymbols,
-			   0, (CORE_ADDR) 0, cu->language, objfile);
+			   0, cu->language, objfile);
 
       break;
     case DW_TAG_enumerator:
@@ -7056,7 +7044,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			    || cu->language == language_java)
 			   ? &objfile->global_psymbols
 			   : &objfile->static_psymbols,
-			   0, (CORE_ADDR) 0, cu->language, objfile);
+			   0, cu->language, objfile);
       break;
     default:
       break;
@@ -8088,7 +8076,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
 	 compilation is from a C file generated by language preprocessors, do
 	 not set the language if it was already deduced by start_subfile.  */
       if (!(cu->language == language_c
-	    && COMPUNIT_FILETABS (cust)->language != language_c))
+	    && COMPUNIT_FILETABS (cust)->language != language_unknown))
 	COMPUNIT_FILETABS (cust)->language = cu->language;
 
       /* GCC-4.0 has started to support -fvar-tracking.  GCC-3.x still can
@@ -8460,13 +8448,13 @@ dwarf2_compute_name (const char *name,
 	 to be able to reference.  Ideally, we want the user to be able
 	 to reference this entity using either natural or linkage name,
 	 but we haven't started looking at this enhancement yet.  */
-      struct attribute *attr;
+      const char *name;
 
-      attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
-      if (attr == NULL)
-	attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
-      if (attr && DW_STRING (attr))
-	return DW_STRING (attr);
+      name = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
+      if (name == NULL)
+	name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
+      if (name != NULL)
+	return name;
     }
 
   /* These are the only languages we know how to qualify names in.  */
@@ -8719,17 +8707,15 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 
   back_to = make_cleanup (null_cleanup, NULL);
 
-  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
-  if (!attr)
-    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
+  mangled = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
+  if (mangled == NULL)
+    mangled = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
 
   /* DW_AT_linkage_name is missing in some cases - depend on what GDB
      has computed.  */
-  if (attr && DW_STRING (attr))
+  if (mangled != NULL)
     {
       char *demangled;
-
-      mangled = DW_STRING (attr);
 
       /* Use DMGL_RET_DROP for C++ template functions to suppress their return
 	 type.  It is easier for GDB users to search for such functions as
@@ -9060,24 +9046,14 @@ static void
 find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
 			 const char **name, const char **comp_dir)
 {
-  struct attribute *attr;
-
-  *name = NULL;
-  *comp_dir = NULL;
-
   /* Find the filename.  Do not use dwarf2_name here, since the filename
      is not a source language identifier.  */
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr)
-    {
-      *name = DW_STRING (attr);
-    }
+  *name = dwarf2_string_attr (die, DW_AT_name, cu);
+  *comp_dir = dwarf2_string_attr (die, DW_AT_comp_dir, cu);
 
-  attr = dwarf2_attr (die, DW_AT_comp_dir, cu);
-  if (attr)
-    *comp_dir = DW_STRING (attr);
-  else if (producer_is_gcc_lt_4_3 (cu) && *name != NULL
-	   && IS_ABSOLUTE_PATH (*name))
+  if (*comp_dir == NULL
+      && producer_is_gcc_lt_4_3 (cu) && *name != NULL
+      && IS_ABSOLUTE_PATH (*name))
     {
       char *d = ldirname (*name);
 
@@ -9955,58 +9931,58 @@ locate_v1_virtual_dwo_sections (asection *sectp,
   if (section_is_p (sectp->name, &names->abbrev_dwo))
     {
       /* There can be only one.  */
-      if (sections->abbrev.s.asection != NULL)
+      if (sections->abbrev.s.section != NULL)
 	return 0;
-      sections->abbrev.s.asection = sectp;
+      sections->abbrev.s.section = sectp;
       sections->abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->info_dwo)
 	   || section_is_p (sectp->name, &names->types_dwo))
     {
       /* There can be only one.  */
-      if (sections->info_or_types.s.asection != NULL)
+      if (sections->info_or_types.s.section != NULL)
 	return 0;
-      sections->info_or_types.s.asection = sectp;
+      sections->info_or_types.s.section = sectp;
       sections->info_or_types.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line_dwo))
     {
       /* There can be only one.  */
-      if (sections->line.s.asection != NULL)
+      if (sections->line.s.section != NULL)
 	return 0;
-      sections->line.s.asection = sectp;
+      sections->line.s.section = sectp;
       sections->line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc_dwo))
     {
       /* There can be only one.  */
-      if (sections->loc.s.asection != NULL)
+      if (sections->loc.s.section != NULL)
 	return 0;
-      sections->loc.s.asection = sectp;
+      sections->loc.s.section = sectp;
       sections->loc.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo_dwo))
     {
       /* There can be only one.  */
-      if (sections->macinfo.s.asection != NULL)
+      if (sections->macinfo.s.section != NULL)
 	return 0;
-      sections->macinfo.s.asection = sectp;
+      sections->macinfo.s.section = sectp;
       sections->macinfo.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro_dwo))
     {
       /* There can be only one.  */
-      if (sections->macro.s.asection != NULL)
+      if (sections->macro.s.section != NULL)
 	return 0;
-      sections->macro.s.asection = sectp;
+      sections->macro.s.section = sectp;
       sections->macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_offsets_dwo))
     {
       /* There can be only one.  */
-      if (sections->str_offsets.s.asection != NULL)
+      if (sections->str_offsets.s.section != NULL)
 	return 0;
-      sections->str_offsets.s.asection = sectp;
+      sections->str_offsets.s.section = sectp;
       sections->str_offsets.size = bfd_get_section_size (sectp);
     }
   else
@@ -10576,42 +10552,42 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
 
   if (section_is_p (sectp->name, &names->abbrev_dwo))
     {
-      dwo_sections->abbrev.s.asection = sectp;
+      dwo_sections->abbrev.s.section = sectp;
       dwo_sections->abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->info_dwo))
     {
-      dwo_sections->info.s.asection = sectp;
+      dwo_sections->info.s.section = sectp;
       dwo_sections->info.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line_dwo))
     {
-      dwo_sections->line.s.asection = sectp;
+      dwo_sections->line.s.section = sectp;
       dwo_sections->line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc_dwo))
     {
-      dwo_sections->loc.s.asection = sectp;
+      dwo_sections->loc.s.section = sectp;
       dwo_sections->loc.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo_dwo))
     {
-      dwo_sections->macinfo.s.asection = sectp;
+      dwo_sections->macinfo.s.section = sectp;
       dwo_sections->macinfo.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro_dwo))
     {
-      dwo_sections->macro.s.asection = sectp;
+      dwo_sections->macro.s.section = sectp;
       dwo_sections->macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_dwo))
     {
-      dwo_sections->str.s.asection = sectp;
+      dwo_sections->str.s.section = sectp;
       dwo_sections->str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_offsets_dwo))
     {
-      dwo_sections->str_offsets.s.asection = sectp;
+      dwo_sections->str_offsets.s.section = sectp;
       dwo_sections->str_offsets.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->types_dwo))
@@ -10619,7 +10595,7 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
       struct dwarf2_section_info type_section;
 
       memset (&type_section, 0, sizeof (type_section));
-      type_section.s.asection = sectp;
+      type_section.s.section = sectp;
       type_section.size = bfd_get_section_size (sectp);
       VEC_safe_push (dwarf2_section_info_def, dwo_sections->types,
 		     &type_section);
@@ -10688,17 +10664,17 @@ dwarf2_locate_common_dwp_sections (bfd *abfd, asection *sectp,
   /* Look for specific sections that we need.  */
   if (section_is_p (sectp->name, &names->str_dwo))
     {
-      dwp_file->sections.str.s.asection = sectp;
+      dwp_file->sections.str.s.section = sectp;
       dwp_file->sections.str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->cu_index))
     {
-      dwp_file->sections.cu_index.s.asection = sectp;
+      dwp_file->sections.cu_index.s.section = sectp;
       dwp_file->sections.cu_index.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->tu_index))
     {
-      dwp_file->sections.tu_index.s.asection = sectp;
+      dwp_file->sections.tu_index.s.section = sectp;
       dwp_file->sections.tu_index.size = bfd_get_section_size (sectp);
     }
 }
@@ -10723,42 +10699,42 @@ dwarf2_locate_v2_dwp_sections (bfd *abfd, asection *sectp, void *dwp_file_ptr)
   /* Look for specific sections that we need.  */
   if (section_is_p (sectp->name, &names->abbrev_dwo))
     {
-      dwp_file->sections.abbrev.s.asection = sectp;
+      dwp_file->sections.abbrev.s.section = sectp;
       dwp_file->sections.abbrev.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->info_dwo))
     {
-      dwp_file->sections.info.s.asection = sectp;
+      dwp_file->sections.info.s.section = sectp;
       dwp_file->sections.info.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->line_dwo))
     {
-      dwp_file->sections.line.s.asection = sectp;
+      dwp_file->sections.line.s.section = sectp;
       dwp_file->sections.line.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc_dwo))
     {
-      dwp_file->sections.loc.s.asection = sectp;
+      dwp_file->sections.loc.s.section = sectp;
       dwp_file->sections.loc.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macinfo_dwo))
     {
-      dwp_file->sections.macinfo.s.asection = sectp;
+      dwp_file->sections.macinfo.s.section = sectp;
       dwp_file->sections.macinfo.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->macro_dwo))
     {
-      dwp_file->sections.macro.s.asection = sectp;
+      dwp_file->sections.macro.s.section = sectp;
       dwp_file->sections.macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_offsets_dwo))
     {
-      dwp_file->sections.str_offsets.s.asection = sectp;
+      dwp_file->sections.str_offsets.s.section = sectp;
       dwp_file->sections.str_offsets.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->types_dwo))
     {
-      dwp_file->sections.types.s.asection = sectp;
+      dwp_file->sections.types.s.section = sectp;
       dwp_file->sections.types.size = bfd_get_section_size (sectp);
     }
 }
@@ -11420,6 +11396,16 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     dwarf2_symbol_mark_computed (attr, newobj->name, cu, 1);
 
+  /* If there is a location for the static link, record it.  */
+  newobj->static_link = NULL;
+  attr = dwarf2_attr (die, DW_AT_static_link, cu);
+  if (attr)
+    {
+      newobj->static_link = obstack_alloc (&objfile->objfile_obstack,
+					sizeof (*newobj->static_link));
+      attr_to_dynamic_prop (attr, die, cu, newobj->static_link);
+    }
+
   cu->list_in_scope = &local_symbols;
 
   if (die->child != NULL)
@@ -11471,7 +11457,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   newobj = pop_context ();
   /* Make a block for the local symbols within.  */
   block = finish_block (newobj->name, &local_symbols, newobj->old_blocks,
-                        lowpc, highpc);
+			newobj->static_link, lowpc, highpc);
 
   /* For C++, set the block's scope.  */
   if ((cu->language == language_cplus
@@ -11556,7 +11542,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (local_symbols != NULL || local_using_directives != NULL)
     {
       struct block *block
-        = finish_block (0, &local_symbols, newobj->old_blocks,
+        = finish_block (0, &local_symbols, newobj->old_blocks, NULL,
 			newobj->start_addr, highpc);
 
       /* Note that recording ranges after traversing children, as we
@@ -11719,17 +11705,17 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       gdb_assert (target_cu->objfile == objfile);
       if (die_is_declaration (target_die, target_cu))
 	{
-	  const char *target_physname = NULL;
-	  struct attribute *target_attr;
+	  const char *target_physname;
 
 	  /* Prefer the mangled name; otherwise compute the demangled one.  */
-	  target_attr = dwarf2_attr (target_die, DW_AT_linkage_name, target_cu);
-	  if (target_attr == NULL)
-	    target_attr = dwarf2_attr (target_die, DW_AT_MIPS_linkage_name,
-				       target_cu);
-	  if (target_attr != NULL && DW_STRING (target_attr) != NULL)
-	    target_physname = DW_STRING (target_attr);
-	  else
+	  target_physname = dwarf2_string_attr (target_die,
+						DW_AT_linkage_name,
+						target_cu);
+	  if (target_physname == NULL)
+	    target_physname = dwarf2_string_attr (target_die,
+						 DW_AT_MIPS_linkage_name,
+						 target_cu);
+	  if (target_physname == NULL)
 	    target_physname = dwarf2_physname (NULL, target_die, target_cu);
 	  if (target_physname == NULL)
 	    complaint (&symfile_complaints,
@@ -14200,10 +14186,8 @@ namespace_name (struct die_info *die, int *is_anonymous, struct dwarf2_cu *cu)
     {
       /* We don't use dwarf2_name here so that we can detect the absence
 	 of a name -> anonymous namespace.  */
-      struct attribute *attr = dwarf2_attr (die, DW_AT_name, cu);
+      name = dwarf2_string_attr (die, DW_AT_name, cu);
 
-      if (attr != NULL)
-	name = DW_STRING (attr);
       if (name != NULL)
 	break;
     }
@@ -15644,7 +15628,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	    add_psymbol_to_list (part_die->name, strlen (part_die->name), 0,
 				 VAR_DOMAIN, LOC_TYPEDEF,
 				 &objfile->static_psymbols,
-				 0, (CORE_ADDR) 0, cu->language, objfile);
+				 0, cu->language, objfile);
 	  info_ptr = locate_pdi_sibling (reader, part_die, info_ptr);
 	  continue;
 	}
@@ -15683,7 +15667,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 				  || cu->language == language_java)
 				 ? &objfile->global_psymbols
 				 : &objfile->static_psymbols,
-				 0, (CORE_ADDR) 0, cu->language, objfile);
+				 0, cu->language, objfile);
 
 	  info_ptr = locate_pdi_sibling (reader, part_die, info_ptr);
 	  continue;
@@ -17104,6 +17088,33 @@ dwarf2_attr_no_follow (struct die_info *die, unsigned int name)
       return &die->attrs[i];
 
   return NULL;
+}
+
+/* Return the string associated with a string-typed attribute, or NULL if it
+   is either not found or is of an incorrect type.  */
+
+static const char *
+dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+  const char *str = NULL;
+
+  attr = dwarf2_attr (die, name, cu);
+
+  if (attr != NULL)
+    {
+      if (attr->form == DW_FORM_strp || attr->form == DW_FORM_string
+	  || attr->form == DW_FORM_GNU_strp_alt)
+	str = DW_STRING (attr);
+      else
+        complaint (&symfile_complaints,
+	           _("string type expected for attribute %s for "
+		     "DIE at 0x%x in module %s"),
+		   dwarf_attr_name (name), die->offset.sect_off,
+		   objfile_name (cu->objfile));
+    }
+
+  return str;
 }
 
 /* Return non-zero iff the attribute NAME is defined for the given DIE,
@@ -19163,16 +19174,17 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (child->tag == DW_TAG_subprogram)
 	{
-	  struct attribute *attr;
+	  const char *linkage_name;
 
-	  attr = dwarf2_attr (child, DW_AT_linkage_name, cu);
-	  if (attr == NULL)
-	    attr = dwarf2_attr (child, DW_AT_MIPS_linkage_name, cu);
-	  if (attr != NULL)
+	  linkage_name = dwarf2_string_attr (child, DW_AT_linkage_name, cu);
+	  if (linkage_name == NULL)
+	    linkage_name = dwarf2_string_attr (child, DW_AT_MIPS_linkage_name,
+	                                       cu);
+	  if (linkage_name != NULL)
 	    {
 	      char *actual_name
 		= language_class_name_from_physname (cu->language_defn,
-						     DW_STRING (attr));
+						     linkage_name);
 	      char *name = NULL;
 
 	      if (actual_name != NULL)
@@ -19220,8 +19232,7 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
       && die->tag != DW_TAG_structure_type && die->tag != DW_TAG_union_type)
     return NULL;
 
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr != NULL && DW_STRING (attr) != NULL)
+  if (dwarf2_string_attr (die, DW_AT_name, cu) != NULL)
     return NULL;
 
   attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
@@ -22092,9 +22103,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
       cu->language_defn = language_def (cu->language);
     }
 
-  attr = dwarf2_attr (comp_unit_die, DW_AT_producer, cu);
-  if (attr)
-    cu->producer = DW_STRING (attr);
+  cu->producer = dwarf2_string_attr (comp_unit_die, DW_AT_producer, cu);
 }
 
 /* Release one cached compilation unit, CU.  We unlink it from the tree

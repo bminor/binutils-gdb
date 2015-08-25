@@ -165,6 +165,7 @@ remove_thread (struct thread_info *thread)
   if (thread->btrace != NULL)
     target_disable_btrace (thread->btrace);
 
+  discard_queued_stop_replies (ptid_of (thread));
   remove_inferior (&all_threads, (struct inferior_list_entry *) thread);
   free_one_thread (&thread->entry);
 }
@@ -303,6 +304,14 @@ find_process_pid (int pid)
 {
   return (struct process_info *)
     find_inferior_id (&all_processes, pid_to_ptid (pid));
+}
+
+/* Wrapper around get_first_inferior to return a struct process_info *.  */
+
+struct process_info *
+get_first_process (void)
+{
+  return (struct process_info *) get_first_inferior (&all_processes);
 }
 
 /* Return non-zero if INF, a struct process_info, was started by us,

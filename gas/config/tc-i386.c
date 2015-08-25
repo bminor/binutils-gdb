@@ -2198,8 +2198,8 @@ set_intel_syntax (int syntax_flag)
   SKIP_WHITESPACE ();
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      char *string = input_line_pointer;
-      int e = get_symbol_end ();
+      char *string;
+      int e = get_symbol_name (&string);
 
       if (strcmp (string, "prefix") == 0)
 	ask_naked_reg = 1;
@@ -2207,7 +2207,7 @@ set_intel_syntax (int syntax_flag)
 	ask_naked_reg = -1;
       else
 	as_bad (_("bad argument to syntax directive."));
-      *input_line_pointer = e;
+      (void) restore_line_pointer (e);
     }
   demand_empty_rest_of_line ();
 
@@ -2259,8 +2259,8 @@ set_check (int what)
 
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      char *string = input_line_pointer;
-      int e = get_symbol_end ();
+      char *string;
+      int e = get_symbol_name (&string);
 
       if (strcmp (string, "none") == 0)
 	*kind = check_none;
@@ -2270,7 +2270,7 @@ set_check (int what)
 	*kind = check_error;
       else
 	as_bad (_("bad argument to %s_check directive."), str);
-      *input_line_pointer = e;
+      (void) restore_line_pointer (e);
     }
   else
     as_bad (_("missing argument for %s_check directive"), str);
@@ -2324,8 +2324,8 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      char *string = input_line_pointer;
-      int e = get_symbol_end ();
+      char *string;
+      int e = get_symbol_name (&string);
       unsigned int j;
       i386_cpu_flags flags;
 
@@ -2385,7 +2385,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  cpu_arch_flags = flags;
 		  cpu_arch_isa_flags = flags;
 		}
-	      *input_line_pointer = e;
+	      (void) restore_line_pointer (e);
 	      demand_empty_rest_of_line ();
 	      return;
 	    }
@@ -2402,8 +2402,11 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
   if (*input_line_pointer == ','
       && !is_end_of_line[(unsigned char) input_line_pointer[1]])
     {
-      char *string = ++input_line_pointer;
-      int e = get_symbol_end ();
+      char *string;
+      char e;
+
+      ++input_line_pointer;
+      e = get_symbol_name (&string);
 
       if (strcmp (string, "nojumps") == 0)
 	no_cond_jump_promotion = 1;
@@ -2412,7 +2415,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
       else
 	as_bad (_("no such architecture modifier: `%s'"), string);
 
-      *input_line_pointer = e;
+      (void) restore_line_pointer (e);
     }
 
   demand_empty_rest_of_line ();
@@ -3967,14 +3970,14 @@ parse_operands (char *l, const char *mnemonic)
       /* Skip optional white space before operand.  */
       if (is_space_char (*l))
 	++l;
-      if (!is_operand_char (*l) && *l != END_OF_INSN)
+      if (!is_operand_char (*l) && *l != END_OF_INSN && *l != '"')
 	{
 	  as_bad (_("invalid character %s before operand %d"),
 		  output_invalid (*l),
 		  i.operands + 1);
 	  return NULL;
 	}
-      token_start = l;	/* after white space */
+      token_start = l;	/* After white space.  */
       paren_not_balanced = 0;
       while (paren_not_balanced || *l != ',')
 	{
@@ -3993,7 +3996,7 @@ parse_operands (char *l, const char *mnemonic)
 	      else
 		break;	/* we are done */
 	    }
-	  else if (!is_operand_char (*l) && !is_space_char (*l))
+	  else if (!is_operand_char (*l) && !is_space_char (*l) && *l != '"')
 	    {
 	      as_bad (_("invalid character %s in operand %d"),
 		      output_invalid (*l),
@@ -8637,6 +8640,7 @@ i386_att_operand (char *operand_string)
     }
   else if (is_digit_char (*op_string)
 	   || is_identifier_char (*op_string)
+	   || *op_string == '"'
 	   || *op_string == '(')
     {
       /* This is a memory reference of some sort.  */
@@ -9471,7 +9475,7 @@ parse_register (char *reg_string, char **end_op)
       symbolS *symbolP;
 
       input_line_pointer = reg_string;
-      c = get_symbol_end ();
+      c = get_symbol_name (&reg_string);
       symbolP = symbol_find (reg_string);
       if (symbolP && S_GET_SEGMENT (symbolP) == reg_section)
 	{

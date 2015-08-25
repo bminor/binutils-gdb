@@ -1429,7 +1429,7 @@ mmix_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	{
 	  /* This is a relocatable link.  For most relocs we don't have to
 	     change anything, unless the reloc is against a section
@@ -1870,7 +1870,7 @@ mmix_elf_check_common_relocs  (bfd *abfd,
 	     DSO-related stuff if that member is non-NULL.  */
 	case R_MMIX_BASE_PLUS_OFFSET:
 	  /* We don't do anything with this reloc for a relocatable link.  */
-	  if (info->relocatable)
+	  if (bfd_link_relocatable (info))
 	    break;
 
 	  if (bpo_greg_owner == NULL)
@@ -1994,7 +1994,7 @@ mmix_elf_check_relocs (bfd *abfd,
   if (!mmix_elf_check_common_relocs (abfd, info, sec, relocs))
     return FALSE;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   rel_end = relocs + sec->reloc_count;
@@ -2303,7 +2303,7 @@ mmix_set_relaxable_size (bfd *abfd ATTRIBUTE_UNUSED,
 
   /* For use in relocatable link, we start with a max stubs size.  See
      mmix_elf_relax_section.  */
-  if (info->relocatable && sec->output_section)
+  if (bfd_link_relocatable (info) && sec->output_section)
     mmix_elf_section_data (sec->output_section)->pjs.stubs_size_sum
       += (mmix_elf_section_data (sec)->pjs.n_pushj_relocs
 	  * MAX_PUSHJ_STUB_SIZE);
@@ -2624,7 +2624,7 @@ mmix_elf_relax_section (bfd *abfd,
       /* We process relocs in a distinctly different way when this is a
 	 relocatable link (for one, we don't look at symbols), so we avoid
 	 mixing its code with that for the "normal" relaxation.  */
-      if (link_info->relocatable)
+      if (bfd_link_relocatable (link_info))
 	{
 	  /* The only transformation in a relocatable link is to generate
 	     a full stub at the location of the stub calculated for the

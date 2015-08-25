@@ -1085,33 +1085,32 @@ tilegx_parse_name (char *name, expressionS *e, char *nextcharP)
 static void
 parse_reg_expression (expressionS* expression)
 {
+  char *regname;
+  char terminating_char;
+  void *pval;
+  int regno_and_flags;
+  int regno;
+
   /* Zero everything to make sure we don't miss any flags.  */
   memset (expression, 0, sizeof *expression);
 
-  char* regname = input_line_pointer;
-  char terminating_char = get_symbol_end ();
+  terminating_char = get_symbol_name (&regname);
 
-  void* pval = hash_find (main_reg_hash, regname);
-
+  pval = hash_find (main_reg_hash, regname);
   if (pval == NULL)
-    {
-      as_bad (_("Expected register, got '%s'."), regname);
-    }
+    as_bad (_("Expected register, got '%s'."), regname);
 
-  int regno_and_flags = (int)(size_t)pval;
-  int regno = EXTRACT_REGNO(regno_and_flags);
+  regno_and_flags = (int)(size_t)pval;
+  regno = EXTRACT_REGNO(regno_and_flags);
 
   if ((regno_and_flags & NONCANONICAL_REG_NAME_FLAG)
       && require_canonical_reg_names)
-    {
-      as_warn (_("Found use of non-canonical register name %s; "
-		 "use %s instead."),
-	       regname,
-	       tilegx_register_names[regno]);
-    }
+    as_warn (_("Found use of non-canonical register name %s; "
+	       "use %s instead."),
+	     regname, tilegx_register_names[regno]);
 
   /* Restore the old character following the register name.  */
-  *input_line_pointer = terminating_char;
+  (void) restore_line_pointer (terminating_char);
 
   /* Fill in the expression fields to indicate it's a register.  */
   expression->X_op = O_register;

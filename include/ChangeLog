@@ -1,3 +1,29 @@
+2015-08-23  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (enum output_type): Reorder enum.
+
+2015-08-19  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (enum output_type): Delete type_executable, add type_pde
+	and type_pie.  Reorder.
+	(struct bfd_link_info): Delete pic field.
+	(bfd_link_executable, bfd_link_pde, bfd_link_pie, bfd_link_pic): Adjust.
+
+2015-08-19  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (bfd_link_pde): Define.
+
+2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* include/bfdlink.h (output_type): New enum.
+	(bfd_link_executable): New macro.
+	(bfd_link_dll): Likewise.
+	(bfd_link_relocatable): Likewise.
+	(bfd_link_pic): Likewise.
+	(bfd_link_pie): Likewise.
+	(bfd_link_info): Remove shared, executable, pie and relocatable.
+	Add output_type and pic.
+
 2015-08-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC

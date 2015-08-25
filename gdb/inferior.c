@@ -625,6 +625,11 @@ detach_inferior_command (char *args, int from_tty)
 	}
 
       pid = gdb_inferior_id_to_pid (num);
+      if (pid == 0)
+	{
+	  warning (_("Inferior ID %d is not running."), num);
+	  continue;
+	}
 
       tp = any_thread_of_process (pid);
       if (!tp)
@@ -661,6 +666,11 @@ kill_inferior_command (char *args, int from_tty)
 	}
 
       pid = gdb_inferior_id_to_pid (num);
+      if (pid == 0)
+	{
+	  warning (_("Inferior ID %d is not running."), num);
+	  continue;
+	}
 
       tp = any_thread_of_process (pid);
       if (!tp)

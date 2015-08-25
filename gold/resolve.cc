@@ -243,7 +243,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 		      const elfcpp::Sym<size, big_endian>& sym,
 		      unsigned int st_shndx, bool is_ordinary,
 		      unsigned int orig_st_shndx,
-		      Object* object, const char* version)
+		      Object* object, const char* version,
+		      bool is_default_version)
 {
   // It's possible for a symbol to be defined in an object file
   // using .symver to give it a version, and for there to also be
@@ -380,7 +381,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   typename Sized_symbol<size>::Size_type tosize = to->symsize();
   if (Symbol_table::should_override(to, frombits, fromtype, OBJECT,
 				    object, &adjust_common_sizes,
-				    &adjust_dyndef))
+				    &adjust_dyndef, is_default_version))
     {
       elfcpp::STB tobinding = to->binding();
       typename Sized_symbol<size>::Value_type tovalue = to->value();
@@ -449,7 +450,7 @@ bool
 Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 			      elfcpp::STT fromtype, Defined defined,
 			      Object* object, bool* adjust_common_sizes,
-			      bool* adjust_dyndef)
+			      bool* adjust_dyndef, bool is_default_version)
 {
   *adjust_common_sizes = false;
   *adjust_dyndef = false;
@@ -596,9 +597,19 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 
     case DEF * 16 + DYN_DEF:
     case WEAK_DEF * 16 + DYN_DEF:
+      // Ignore a dynamic definition if we already have a definition.
+      return false;
+
     case DYN_DEF * 16 + DYN_DEF:
     case DYN_WEAK_DEF * 16 + DYN_DEF:
-      // Ignore a dynamic definition if we already have a definition.
+      // Ignore a dynamic definition if we already have a definition,
+      // unless the existing definition is an unversioned definition
+      // in the same dynamic object, and the new definition is a
+      // default version.
+      if (to->object() == object
+          && to->version() == NULL
+          && is_default_version)
+        return true;
       return false;
 
     case UNDEF * 16 + DYN_DEF:
@@ -919,7 +930,7 @@ Symbol_table::should_override_with_special(const Symbol* to,
   unsigned int frombits = global_flag | regular_flag | def_flag;
   bool ret = Symbol_table::should_override(to, frombits, fromtype, defined,
 					   NULL, &adjust_common_sizes,
-					   &adjust_dyn_def);
+					   &adjust_dyn_def, false);
   gold_assert(!adjust_common_sizes && !adjust_dyn_def);
   return ret;
 }
@@ -1051,7 +1062,8 @@ Symbol_table::resolve<32, false>(
     bool is_ordinary,
     unsigned int orig_st_shndx,
     Object* object,
-    const char* version);
+    const char* version,
+    bool is_default_version);
 
 template
 void
@@ -1062,7 +1074,8 @@ Symbol_table::resolve<32, true>(
     bool is_ordinary,
     unsigned int orig_st_shndx,
     Object* object,
-    const char* version);
+    const char* version,
+    bool is_default_version);
 #endif
 
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
@@ -1075,7 +1088,8 @@ Symbol_table::resolve<64, false>(
     bool is_ordinary,
     unsigned int orig_st_shndx,
     Object* object,
-    const char* version);
+    const char* version,
+    bool is_default_version);
 
 template
 void
@@ -1086,7 +1100,8 @@ Symbol_table::resolve<64, true>(
     bool is_ordinary,
     unsigned int orig_st_shndx,
     Object* object,
-    const char* version);
+    const char* version,
+    bool is_default_version);
 #endif
 
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)

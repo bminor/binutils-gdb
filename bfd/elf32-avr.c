@@ -1474,7 +1474,7 @@ elf32_avr_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       r = avr_final_link_relocate (howto, input_bfd, input_section,
@@ -2375,7 +2375,7 @@ elf32_avr_relax_section (bfd *abfd,
       || !strcmp (sec->name,".jumptables"))
     shrinkable = FALSE;
 
-  if (link_info->relocatable)
+  if (bfd_link_relocatable (link_info))
     (*link_info->callbacks->einfo)
       (_("%P%F: --relax and -r may not be used together\n"));
 
@@ -2413,7 +2413,7 @@ elf32_avr_relax_section (bfd *abfd,
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)
@@ -3641,7 +3641,7 @@ elf32_avr_size_stubs (bfd *output_bfd,
                         }
                       else if (hh->root.type == bfd_link_hash_undefweak)
                         {
-                          if (! info->shared)
+                          if (! bfd_link_pic (info))
                             continue;
                         }
                       else if (hh->root.type == bfd_link_hash_undefined)

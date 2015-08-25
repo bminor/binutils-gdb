@@ -308,6 +308,7 @@ d_lookup_nested_symbol (struct type *parent_type,
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
+    case TYPE_CODE_ENUM:
     case TYPE_CODE_MODULE:
 	{
 	  int size;

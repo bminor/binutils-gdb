@@ -1384,7 +1384,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
       /* If we're linking an executable at a fixed address, we can
 	 omit the dynamic relocation as long as the symbol is local to
 	 this module.  */
-      if (info->executable && !info->pie
+      if (bfd_link_pde (info)
 	  && (entry->symndx != -1
 	      || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
 	{
@@ -1439,7 +1439,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	  if (entry->symndx == -1
 	      && ! FRVFDPIC_FUNCDESC_LOCAL (info, entry->d.h)
 	      && FRVFDPIC_SYM_LOCAL (info, entry->d.h)
-	      && !(info->executable && !info->pie))
+	      && !bfd_link_pde (info))
 	    {
 	      reloc = R_FRV_FUNCDESC;
 	      idx = elf_section_data (entry->d.h->root.u.def.section
@@ -1482,7 +1482,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	     dynamic symbol entry for the got section, so idx will be
 	     zero, which means we can and should compute the address
 	     of the private descriptor ourselves.  */
-	  if (info->executable && !info->pie
+	  if (bfd_link_pde (info)
 	      && (entry->symndx != -1
 		  || FRVFDPIC_FUNCDESC_LOCAL (info, entry->d.h)))
 	    {
@@ -1545,7 +1545,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
       /* If we're linking an executable at a fixed address, we can
 	 omit the dynamic relocation as long as the symbol is local to
 	 this module.  */
-      if (info->executable && !info->pie
+      if (bfd_link_pde (info)
 	  && (entry->symndx != -1 || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
 	{
 	  if (sec)
@@ -1593,7 +1593,9 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 
       /* If we've omitted the dynamic relocation, just emit the fixed
 	 addresses of the symbol and of the local GOT base offset.  */
-      if (info->executable && !info->pie && sec && sec->output_section)
+      if (bfd_link_pde (info)
+	  && sec
+	  && sec->output_section)
 	{
 	  lowword = ad;
 	  highword = frvfdpic_got_section (info)->output_section->vma
@@ -1768,14 +1770,14 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 
       /* *ABS*+addend is special for TLS relocations, use only the
 	 addend.  */
-      if (info->executable
+      if (bfd_link_executable (info)
 	  && idx == 0
 	  && (bfd_is_abs_section (sec)
 	      || bfd_is_und_section (sec)))
 	;
       /* If we're linking an executable, we can entirely omit the
 	 dynamic relocation if the symbol is local to this module.  */
-      else if (info->executable
+      else if (bfd_link_executable (info)
 	       && (entry->symndx != -1
 		   || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
 	{
@@ -1841,10 +1843,10 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
       /* If we didn't set up a TLS offset entry, but we're linking an
 	 executable and the symbol binds locally, we can use the
 	 module offset in the TLS descriptor in relaxations.  */
-      if (info->executable && ! entry->tlsoff_entry)
+      if (bfd_link_executable (info) && ! entry->tlsoff_entry)
 	entry->tlsoff_entry = entry->tlsdesc_entry + 4;
 
-      if (info->executable && !info->pie
+      if (bfd_link_pde (info)
 	  && ((idx == 0
 	       && (bfd_is_abs_section (sec)
 		   || bfd_is_und_section (sec)))
@@ -1943,7 +1945,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
       bfd_byte *plt_code = frvfdpic_plt_section (info)->contents
 	+ entry->tlsplt_entry;
 
-      if (info->executable
+      if (bfd_link_executable (info)
 	  && (entry->symndx != -1
 	      || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
 	{
@@ -2666,7 +2668,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
   Elf_Internal_Rela *relend;
   unsigned isec_segment, got_segment, plt_segment, gprel_segment, tls_segment,
     check_segment[2];
-  int silence_segment_error = !(info->shared || info->pie);
+  int silence_segment_error = !bfd_link_pic (info);
   unsigned long insn;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
@@ -2754,7 +2756,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       if (r_type != R_FRV_TLSMOFF
@@ -2880,10 +2882,10 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  {
 
 #define LOCAL_EXEC_P(info, picrel) \
-  ((info)->executable \
+  (bfd_link_executable (info) \
    && (picrel->symndx != -1 || FRVFDPIC_SYM_LOCAL ((info), (picrel)->d.h)))
 #define INITIAL_EXEC_P(info, picrel) \
-  (((info)->executable || (info)->flags & DF_STATIC_TLS) \
+  ((bfd_link_executable (info)|| (info)->flags & DF_STATIC_TLS) \
    && (picrel)->tlsoff_entry)
 
 #define IN_RANGE_FOR_OFST12_P(value) \
@@ -3520,7 +3522,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   section+offset.  */
 		if (h && ! FRVFDPIC_FUNCDESC_LOCAL (info, h)
 		    && FRVFDPIC_SYM_LOCAL (info, h)
-		    && !(info->executable && !info->pie))
+		    && !bfd_link_pde (info))
 		  {
 		    dynindx = elf_section_data (h->root.u.def.section
 						->output_section)->dynindx;
@@ -3558,7 +3560,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   dynamic symbol entry for the got section, so idx will
 		   be zero, which means we can and should compute the
 		   address of the private descriptor ourselves.  */
-		if (info->executable && !info->pie
+		if (bfd_link_pde (info)
 		    && (!h || FRVFDPIC_FUNCDESC_LOCAL (info, h)))
 		  {
 		    addend += frvfdpic_got_section (info)->output_section->vma;
@@ -3680,7 +3682,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	       can omit the dynamic relocation as long as the symbol
 	       is defined in the current link unit (which is implied
 	       by its output section not being NULL).  */
-	    if (info->executable && !info->pie
+	    if (bfd_link_pde (info)
 		&& (!h || FRVFDPIC_SYM_LOCAL (info, h)))
 	      {
 		if (osec)
@@ -3769,7 +3771,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		/* If we've omitted the dynamic relocation, just emit
 		   the fixed addresses of the symbol and of the local
 		   GOT base offset.  */
-		if (info->executable && !info->pie
+		if (bfd_link_pde (info)
 		    && (!h || FRVFDPIC_SYM_LOCAL (info, h)))
 		  bfd_put_32 (output_bfd,
 			      frvfdpic_got_section (info)->output_section->vma
@@ -3912,7 +3914,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		(_("%H: reloc against `%s' references a different segment\n"),
 		 input_bfd, input_section, rel->r_offset, name);
 	    }
-	  if (!silence_segment_error && (info->shared || info->pie))
+	  if (!silence_segment_error && bfd_link_pic (info))
 	    return FALSE;
 	  elf_elfheader (output_bfd)->e_flags |= EF_FRV_PIC;
 	}
@@ -4106,7 +4108,7 @@ elf32_frv_add_symbol_hook (bfd *abfd,
 			   bfd_vma *valp)
 {
   if (sym->st_shndx == SHN_COMMON
-      && !info->relocatable
+      && !bfd_link_relocatable (info)
       && (int)sym->st_size <= (int)bfd_get_gp_size (abfd))
     {
       /* Common symbols less than or equal to -G nn bytes are
@@ -4371,7 +4373,7 @@ elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
      be needed, we can discard it later.  We will never need this
      section when generating a shared object, since they do not use
      copy relocs.  */
-      if (! info->shared)
+      if (! bfd_link_pic (info))
 	{
 	  s = bfd_make_section_anyway_with_flags (abfd,
 						  (bed->default_use_rela_p
@@ -4508,7 +4510,7 @@ _frvfdpic_count_relocs_fixups (struct frvfdpic_relocs_info *entry,
 {
   bfd_vma relocs = 0, fixups = 0, tlsrets = 0;
 
-  if (!dinfo->info->executable || dinfo->info->pie)
+  if (!bfd_link_pde (dinfo->info))
     {
       relocs = entry->relocs32 + entry->relocsfd + entry->relocsfdv
 	+ entry->relocstlsd;
@@ -4520,7 +4522,7 @@ _frvfdpic_count_relocs_fixups (struct frvfdpic_relocs_info *entry,
 	 emit dynamic relocations even for local symbols, because we
 	 don't know the module id the library is going to get at
 	 run-time, nor its TLS base offset.  */
-      if (!dinfo->info->executable
+      if (!bfd_link_executable (dinfo->info)
 	  || (entry->symndx == -1
 	      && ! FRVFDPIC_SYM_LOCAL (dinfo->info, entry->d.h)))
 	relocs += entry->relocstlsoff;
@@ -4579,7 +4581,7 @@ _frvfdpic_relax_tls_entries (struct frvfdpic_relocs_info *entry,
 {
   bfd_boolean changed = ! relaxing;
 
-  BFD_ASSERT (dinfo->info->executable
+  BFD_ASSERT (bfd_link_executable (dinfo->info)
 	      || (dinfo->info->flags & DF_STATIC_TLS));
 
   if (entry->tlsdesc12 || entry->tlsdesclos || entry->tlsdeschilo)
@@ -4598,7 +4600,7 @@ _frvfdpic_relax_tls_entries (struct frvfdpic_relocs_info *entry,
 	 to GOTTLSOFF, we must keep the GOT entry in range.  We know
 	 it has to fit because we'll be trading the 4 words of hte TLS
 	 descriptor for a single word in the same range.  */
-      if (! dinfo->info->executable
+      if (! bfd_link_executable (dinfo->info)
 	  || (entry->symndx == -1
 	      && ! FRVFDPIC_SYM_LOCAL (dinfo->info, entry->d.h)))
 	{
@@ -4622,7 +4624,7 @@ _frvfdpic_relax_tls_entries (struct frvfdpic_relocs_info *entry,
      do better than this.  */
   if ((entry->tlsplt
        || entry->tlsoff12 || entry->tlsofflos || entry->tlsoffhilo)
-      && dinfo->info->executable && relaxing
+      && bfd_link_executable (dinfo->info) && relaxing
       && ((entry->symndx == -1
 	   && FRVFDPIC_SYM_LOCAL (dinfo->info, entry->d.h)
 	   /* The above may hold for an undefweak TLS symbol, so make
@@ -4695,7 +4697,8 @@ _frvfdpic_count_got_plt_entries (void **entryp, void *dinfo_)
 
   _frvfdpic_count_nontls_entries (entry, dinfo);
 
-  if (dinfo->info->executable || (dinfo->info->flags & DF_STATIC_TLS))
+  if (bfd_link_executable (dinfo->info)
+      || (dinfo->info->flags & DF_STATIC_TLS))
     _frvfdpic_relax_tls_entries (entry, dinfo, FALSE);
   else
     {
@@ -5088,7 +5091,7 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
       entry->tlsplt_entry
 	= frvfdpic_plt_section (dinfo->g.info)->size;
 
-      if (dinfo->g.info->executable
+      if (bfd_link_executable (dinfo->g.info)
 	  && (entry->symndx != -1
 	      || FRVFDPIC_SYM_LOCAL (dinfo->g.info, entry->d.h)))
 	{
@@ -5439,7 +5442,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (info->executable)
+      if (bfd_link_executable (info))
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -5498,7 +5501,7 @@ static bfd_boolean
 elf32_frvfdpic_always_size_sections (bfd *output_bfd,
 				     struct bfd_link_info *info)
 {
-  if (!info->relocatable
+  if (!bfd_link_relocatable (info)
       && !bfd_elf_stack_segment_size (output_bfd, info,
 				      "__stacksize", DEFAULT_STACK_SIZE))
     return FALSE;
@@ -5640,7 +5643,7 @@ elf32_frvfdpic_relax_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 {
   struct _frvfdpic_dynamic_got_plt_info gpinfo;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     (*info->callbacks->einfo)
       (_("%P%F: --relax and -r may not be used together\n"));
 
@@ -5653,7 +5656,7 @@ elf32_frvfdpic_relax_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 
   /* We can only relax when linking the main executable or a library
      that can't be dlopened.  */
-  if (! info->executable && ! (info->flags & DF_STATIC_TLS))
+  if (! bfd_link_executable (info) && ! (info->flags & DF_STATIC_TLS))
     return TRUE;
 
   /* If there isn't a TLS section for this binary, we can't do
@@ -6028,7 +6031,7 @@ elf32_frv_check_relocs (bfd *abfd,
   bfd *dynobj;
   struct frvfdpic_relocs_info *picrel;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;

@@ -2936,7 +2936,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      prev_textlow_not_set = textlow_not_set;
 
 		      /* A zero value is probably an indication for the
-			 SunPRO 3.0 compiler.  end_psymtab explicitly tests
+			 SunPRO 3.0 compiler.  dbx_end_psymtab explicitly tests
 			 for zero, so don't relocate it.  */
 
 		      if (sh.value == 0
@@ -3110,7 +3110,7 @@ parse_partial_symbols (struct objfile *objfile)
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_STATIC,
 					     &objfile->static_psymbols,
-					     0, sh.value,
+					     sh.value,
 					     psymtab_language, objfile);
 			continue;
 		      case 'G':
@@ -3122,7 +3122,7 @@ parse_partial_symbols (struct objfile *objfile)
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_STATIC,
 					     &objfile->global_psymbols,
-					     0, sh.value,
+					     sh.value,
 					     psymtab_language, objfile);
 			continue;
 
@@ -3140,8 +3140,7 @@ parse_partial_symbols (struct objfile *objfile)
 			    add_psymbol_to_list (namestring, p - namestring, 1,
 						 STRUCT_DOMAIN, LOC_TYPEDEF,
 						 &objfile->static_psymbols,
-						 sh.value, 0,
-						 psymtab_language, objfile);
+						 0, psymtab_language, objfile);
 			    if (p[2] == 't')
 			      {
 				/* Also a typedef with the same name.  */
@@ -3149,8 +3148,7 @@ parse_partial_symbols (struct objfile *objfile)
 						     p - namestring, 1,
 						     VAR_DOMAIN, LOC_TYPEDEF,
 						     &objfile->static_psymbols,
-						     sh.value, 0,
-						     psymtab_language,
+						     0, psymtab_language,
 						     objfile);
 				p += 1;
 			      }
@@ -3163,8 +3161,7 @@ parse_partial_symbols (struct objfile *objfile)
 			    add_psymbol_to_list (namestring, p - namestring, 1,
 						 VAR_DOMAIN, LOC_TYPEDEF,
 						 &objfile->static_psymbols,
-						 sh.value, 0,
-						 psymtab_language, objfile);
+						 0, psymtab_language, objfile);
 			  }
 		      check_enum:
 			/* If this is an enumerated type, we need to add
@@ -3228,7 +3225,7 @@ parse_partial_symbols (struct objfile *objfile)
 				add_psymbol_to_list (p, q - p, 1,
 						     VAR_DOMAIN, LOC_CONST,
 						     &objfile->static_psymbols,
-						     0, 0, psymtab_language,
+						     0, psymtab_language,
 						     objfile);
 				/* Point past the name.  */
 				p = q;
@@ -3246,8 +3243,7 @@ parse_partial_symbols (struct objfile *objfile)
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_CONST,
 					     &objfile->static_psymbols,
-					     sh.value, 0, psymtab_language,
-					     objfile);
+					     0, psymtab_language, objfile);
 			continue;
 
 		      case 'f':
@@ -3266,7 +3262,7 @@ parse_partial_symbols (struct objfile *objfile)
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
 					     &objfile->static_psymbols,
-					     0, sh.value,
+					     sh.value,
 					     psymtab_language, objfile);
 			continue;
 
@@ -3290,7 +3286,7 @@ parse_partial_symbols (struct objfile *objfile)
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
 					     &objfile->global_psymbols,
-					     0, sh.value,
+					     sh.value,
 					     psymtab_language, objfile);
 			continue;
 
@@ -3347,7 +3343,7 @@ parse_partial_symbols (struct objfile *objfile)
 
 		  case N_ENDM:
 		    /* Solaris 2 end of module, finish current partial
-		       symbol table.  END_PSYMTAB will set
+		       symbol table.  dbx_end_psymtab will set
 		       pst->texthigh to the proper value, which is
 		       necessary if a module compiled without
 		       debugging info follows this module.  */
@@ -3533,12 +3529,12 @@ parse_partial_symbols (struct objfile *objfile)
 		    add_psymbol_to_list (name, strlen (name), 1,
 					 VAR_DOMAIN, LOC_BLOCK,
 					 &objfile->global_psymbols,
-				    0, sh.value, psymtab_language, objfile);
+					 sh.value, psymtab_language, objfile);
 		  else
 		    add_psymbol_to_list (name, strlen (name), 1,
 					 VAR_DOMAIN, LOC_BLOCK,
 					 &objfile->static_psymbols,
-				    0, sh.value, psymtab_language, objfile);
+					 sh.value, psymtab_language, objfile);
 
 		  procaddr = sh.value;
 
@@ -3605,8 +3601,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      add_psymbol_to_list (name, strlen (name), 1,
 					   STRUCT_DOMAIN, LOC_TYPEDEF,
 					   &objfile->static_psymbols,
-					   0, (CORE_ADDR) 0,
-					   psymtab_language, objfile);
+					   0, psymtab_language, objfile);
 		    }
 		  handle_psymbol_enumerators (objfile, fh, sh.st, sh.value);
 
@@ -3646,7 +3641,7 @@ parse_partial_symbols (struct objfile *objfile)
 	      add_psymbol_to_list (name, strlen (name), 1,
 				   VAR_DOMAIN, theclass,
 				   &objfile->static_psymbols,
-				   0, sh.value, psymtab_language, objfile);
+				   sh.value, psymtab_language, objfile);
 	    skip:
 	      cur_sdx++;	/* Go to next file symbol.  */
 	    }
@@ -3726,17 +3721,18 @@ parse_partial_symbols (struct objfile *objfile)
 	      add_psymbol_to_list (name, strlen (name), 1,
 				   VAR_DOMAIN, theclass,
 				   &objfile->global_psymbols,
-				   0, svalue,
-				   psymtab_language, objfile);
+				   svalue, psymtab_language, objfile);
 	    }
 	}
 
-      /* Link pst to FDR.  end_psymtab returns NULL if the psymtab was
+      /* Link pst to FDR.  dbx_end_psymtab returns NULL if the psymtab was
          empty and put on the free list.  */
-      fdr_to_pst[f_idx].pst = end_psymtab (objfile, save_pst,
-					psymtab_include_list, includes_used,
-					   -1, save_pst->texthigh,
-		       dependency_list, dependencies_used, textlow_not_set);
+      fdr_to_pst[f_idx].pst
+	= dbx_end_psymtab (objfile, save_pst,
+			   psymtab_include_list, includes_used,
+			   -1, save_pst->texthigh,
+			   dependency_list, dependencies_used,
+			   textlow_not_set);
       includes_used = 0;
       dependencies_used = 0;
 
@@ -3889,8 +3885,8 @@ handle_psymbol_enumerators (struct objfile *objfile, FDR *fh, int stype,
          in psymtabs, just in symtabs.  */
       add_psymbol_to_list (name, strlen (name), 1,
 			   VAR_DOMAIN, LOC_CONST,
-			   &objfile->static_psymbols, 0,
-			   (CORE_ADDR) 0, psymtab_language, objfile);
+			   &objfile->static_psymbols,
+			   0, psymtab_language, objfile);
       ext_sym += external_sym_size;
     }
 }

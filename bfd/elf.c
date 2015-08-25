@@ -3081,7 +3081,8 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
       if (arg->link_info
 	  /* Do the normal setup if we wouldn't create any sections here.  */
 	  && esd->rel.count + esd->rela.count > 0
-	  && (arg->link_info->relocatable || arg->link_info->emitrelocations))
+	  && (bfd_link_relocatable (arg->link_info)
+	      || arg->link_info->emitrelocations))
 	{
 	  if (esd->rel.count && esd->rel.hdr == NULL
 	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rel, name, FALSE,
@@ -3298,7 +3299,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   _bfd_elf_strtab_clear_all_refs (elf_shstrtab (abfd));
 
   /* SHT_GROUP sections are in relocatable files only.  */
-  if (link_info == NULL || link_info->relocatable)
+  if (link_info == NULL || bfd_link_relocatable (link_info))
     {
       /* Put SHT_GROUP sections first.  */
       for (sec = abfd->sections; sec != NULL; sec = sec->next)
@@ -5555,9 +5556,7 @@ assign_file_positions_except_relocs (bfd *abfd,
 	}
 
       /* Set e_type in ELF header to ET_EXEC for -pie -Ttext-segment=.  */
-      if (link_info != NULL
-	  && link_info->executable
-	  && link_info->shared)
+      if (link_info != NULL && bfd_link_pie (link_info))
 	{
 	  unsigned int num_segments = elf_elfheader (abfd)->e_phnum;
 	  Elf_Internal_Phdr *segment = elf_tdata (abfd)->phdr;
@@ -6894,7 +6893,8 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
 
 {
   Elf_Internal_Shdr *ihdr, *ohdr;
-  bfd_boolean final_link = link_info != NULL && !link_info->relocatable;
+  bfd_boolean final_link = (link_info != NULL
+			    && !bfd_link_relocatable (link_info));
 
   if (ibfd->xvec->flavour != bfd_target_elf_flavour
       || obfd->xvec->flavour != bfd_target_elf_flavour)
@@ -7871,7 +7871,7 @@ error_return_verref:
 	    goto error_return_bad_verdef;
 
 	  iverdef = &iverdefarr[(iverdefmem.vd_ndx & VERSYM_VERSION) - 1];
-	  memcpy (iverdef, &iverdefmem, sizeof (Elf_Internal_Verdef));
+	  memcpy (iverdef, &iverdefmem, offsetof (Elf_Internal_Verdef, vd_bfd));
 
 	  iverdef->vd_bfd = abfd;
 
@@ -7920,6 +7920,7 @@ error_return_verref:
 			  ((bfd_byte *) everdaux + iverdaux->vda_next));
 	    }
 
+	  iverdef->vd_nodename = NULL;
 	  if (iverdef->vd_cnt)
 	    iverdef->vd_nodename = iverdef->vd_auxptr->vda_nodename;
 
@@ -8187,7 +8188,7 @@ _bfd_elf_sizeof_headers (bfd *abfd, struct bfd_link_info *info)
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ret = bed->s->sizeof_ehdr;
 
-  if (!info->relocatable)
+  if (!bfd_link_relocatable (info))
     {
       bfd_size_type phdr_size = elf_program_header_size (abfd);
 

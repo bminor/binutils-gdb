@@ -150,6 +150,11 @@ extern void print_no_history_reason (struct ui_out *uiout);
 
 extern void print_stop_event (struct target_waitstatus *ws);
 
+/* Pretty print the results of target_wait, for debugging purposes.  */
+
+extern void print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
+				       const struct target_waitstatus *ws);
+
 extern int signal_stop_state (int);
 
 extern int signal_print_state (int);

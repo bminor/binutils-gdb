@@ -8110,6 +8110,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 	}
 
       // Get the new symbol index.
+      Output_section* os = NULL;
       if (r_sym < local_count)
 	{
 	  switch (strategy)
@@ -8134,7 +8135,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 		unsigned int shndx =
 		  object->local_symbol_input_shndx(r_sym, &is_ordinary);
 		gold_assert(is_ordinary);
-		Output_section* os = object->output_section(shndx);
+		os = object->output_section(shndx);
 		gold_assert(os != NULL);
 		gold_assert(os->needs_symtab_index());
 		r_sym = os->symtab_index();
@@ -8187,7 +8188,8 @@ Target_powerpc<size, big_endian>::relocate_relocs(
       else if (strategy == Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA)
 	{
 	  const Symbol_value<size>* psymval = object->local_symbol(orig_r_sym);
-	  addend = psymval->value(object, addend);
+	  gold_assert(os != NULL);
+	  addend = psymval->value(object, addend) - os->address();
 	}
       else if (strategy == Relocatable_relocs::RELOC_SPECIAL)
 	{

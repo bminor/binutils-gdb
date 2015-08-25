@@ -503,7 +503,7 @@ elf64_hppa_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel;
   unsigned int sec_symndx;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   /* If this is the first dynamic object found in the link, create
@@ -522,7 +522,7 @@ elf64_hppa_check_relocs (bfd *abfd,
   /* If necessary, build a new table holding section symbols indices
      for this BFD.  */
 
-  if (info->shared && hppa_info->section_syms_bfd != abfd)
+  if (bfd_link_pic (info) && hppa_info->section_syms_bfd != abfd)
     {
       unsigned long i;
       unsigned int highest_shndx;
@@ -596,7 +596,7 @@ elf64_hppa_check_relocs (bfd *abfd,
      relocations when building shared libraries.  When not building shared
      libraries this value is never really used, but assign it to zero to
      prevent out of bounds memory accesses in other routines.  */
-  if (info->shared)
+  if (bfd_link_pic (info))
     {
       sec_symndx = _bfd_elf_section_from_bfd_section (abfd, sec);
 
@@ -655,7 +655,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 	 have yet been processed.  Do something with what we know, as
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
-      if (hh && ((info->shared
+      if (hh && ((bfd_link_pic (info)
 		 && (!info->symbolic
 		     || info->unresolved_syms_in_shared_libs == RM_IGNORE))
 		|| !hh->eh.def_regular
@@ -730,7 +730,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 	  break;
 
 	case R_PARISC_DIR64:
-	  if (info->shared || maybe_dynamic)
+	  if (bfd_link_pic (info) || maybe_dynamic)
 	    need_entry = (NEED_DYNREL);
 	  dynrel_type = R_PARISC_DIR64;
 	  break;
@@ -747,7 +747,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 	case R_PARISC_LTOFF_FPTR16F:
 	case R_PARISC_LTOFF_FPTR16WF:
 	case R_PARISC_LTOFF_FPTR16DF:
-	  if (info->shared || maybe_dynamic)
+	  if (bfd_link_pic (info) || maybe_dynamic)
 	    need_entry = (NEED_DLT | NEED_OPD | NEED_PLT);
 	  else
 	    need_entry = (NEED_DLT | NEED_OPD | NEED_PLT);
@@ -756,7 +756,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 
 	/* This is a simple OPD entry.  */
 	case R_PARISC_FPTR64:
-	  if (info->shared || maybe_dynamic)
+	  if (bfd_link_pic (info) || maybe_dynamic)
 	    need_entry = (NEED_OPD | NEED_PLT | NEED_DYNREL);
 	  else
 	    need_entry = (NEED_OPD | NEED_PLT);
@@ -882,7 +882,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 	     a dynamic R_PARISC_FPTR64 relocation, then make sure the
 	     section symbol for this section ends up in the dynamic
 	     symbol table.  */
-	  if (info->shared && dynrel_type == R_PARISC_FPTR64
+	  if (bfd_link_pic (info) && dynrel_type == R_PARISC_FPTR64
 	      && ! (bfd_elf_link_record_local_dynamic_symbol
 		    (info, abfd, sec_symndx)))
 	    return FALSE;
@@ -966,7 +966,7 @@ allocate_global_data_dlt (struct elf_link_hash_entry *eh, void *data)
 
   if (hh->want_dlt)
     {
-      if (x->info->shared)
+      if (bfd_link_pic (x->info))
 	{
 	  /* Possibly add the symbol to the local dynamic symbol
 	     table since we might need to create a dynamic relocation
@@ -1062,7 +1062,7 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
       /* If we are creating a shared library, took the address of a local
 	 function or might export this function from this object file, then
 	 we have to create an opd descriptor.  */
-      else if (x->info->shared
+      else if (bfd_link_pic (x->info)
 	       || hh == NULL
 	       || (hh->eh.dynindx == -1 && hh->eh.type != STT_PARISC_MILLI)
 	       || (hh->eh.root.type == bfd_link_hash_defined
@@ -1072,7 +1072,7 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
 	     create a runtime relocation for the symbol to properly
 	     initialize the .opd entry.  Make sure the symbol gets
 	     added to the dynamic symbol table.  */
-	  if (x->info->shared
+	  if (bfd_link_pic (x->info)
 	      && (hh == NULL || (hh->eh.dynindx == -1)))
 	    {
 	      bfd *owner;
@@ -1089,7 +1089,7 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
 	     in dynamic relocs.  But name munging does make the result
 	     much easier to debug.  ie, the EPLT reloc will reference
 	     a symbol like .foobar, instead of .text + offset.  */
-	  if (x->info->shared && eh)
+	  if (bfd_link_pic (x->info) && eh)
 	    {
 	      char *new_name;
 	      struct elf_link_hash_entry *nh;
@@ -1407,7 +1407,7 @@ allocate_dynrel_entries (struct elf_link_hash_entry *eh, void *data)
     return FALSE;
 
   dynamic_symbol = elf64_hppa_dynamic_symbol_p (eh, x->info);
-  shared = x->info->shared;
+  shared = bfd_link_pic (x->info);
 
   /* We may need to allocate relocations for a non-dynamic symbol
      when creating a shared library.  */
@@ -1558,7 +1558,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (info->executable)
+      if (bfd_link_executable (info))
 	{
 	  sec = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (sec != NULL);
@@ -1637,7 +1637,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	    {
 	      *local_dlt = sec->size;
 	      sec->size += DLT_ENTRY_SIZE;
-	      if (info->shared)
+	      if (bfd_link_pic (info))
 	        {
 		  srel->size += sizeof (Elf64_External_Rela);
 	        }
@@ -1664,7 +1664,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 		{
 		  *local_plt = sec->size;
 		  sec->size += PLT_ENTRY_SIZE;
-		  if (info->shared)
+		  if (bfd_link_pic (info))
 		    srel->size += sizeof (Elf64_External_Rela);
 		}
 	      else
@@ -1690,7 +1690,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 		{
 		  *local_opd = sec->size;
 		  sec->size += OPD_ENTRY_SIZE;
-		  if (info->shared)
+		  if (bfd_link_pic (info))
 		    srel->size += sizeof (Elf64_External_Rela);
 		}
 	      else
@@ -1855,7 +1855,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
-      if (! info->shared)
+      if (! bfd_link_pic (info))
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0)
 	      || !add_dynamic_entry (DT_HP_DLD_HOOK, 0)
@@ -1997,7 +1997,7 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
 	 if we are creating a shared library and the symbol is
 	 still undefined, we create a dynamic relocation to fill
 	 in the correct value.  */
-      if (info->shared && eh->root.type == bfd_link_hash_undefined)
+      if (bfd_link_pic (info) && eh->root.type == bfd_link_hash_undefined)
 	value = 0;
       else
 	value = (eh->root.u.def.value + eh->root.u.def.section->vma);
@@ -2152,7 +2152,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
   /* If we are generating a shared library, we must generate EPLT relocations
      for each entry in the .opd, even for static functions (they may have
      had their address taken).  */
-  if (info->shared && hh->want_opd)
+  if (bfd_link_pic (info) && hh->want_opd)
     {
       Elf_Internal_Rela rel;
       bfd_byte *loc;
@@ -2251,7 +2251,7 @@ elf64_hppa_finalize_dlt (struct elf_link_hash_entry *eh, void *data)
      address, so there is no need to create a relocation.  Just install
      the proper value into the DLT, note this shortcut can not be
      skipped when building a shared library.  */
-  if (! info->shared && hh && hh->want_dlt)
+  if (! bfd_link_pic (info) && hh && hh->want_dlt)
     {
       bfd_vma value;
 
@@ -2289,7 +2289,7 @@ elf64_hppa_finalize_dlt (struct elf_link_hash_entry *eh, void *data)
   /* Create a relocation for the DLT entry associated with this symbol.
      When building a shared library the symbol does not have to be dynamic.  */
   if (hh->want_dlt
-      && (elf64_hppa_dynamic_symbol_p (eh, info) || info->shared))
+      && (elf64_hppa_dynamic_symbol_p (eh, info) || bfd_link_pic (info)))
     {
       Elf_Internal_Rela rel;
       bfd_byte *loc;
@@ -2337,7 +2337,7 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
 
   dynamic_symbol = elf64_hppa_dynamic_symbol_p (eh, info);
 
-  if (!dynamic_symbol && !info->shared)
+  if (!dynamic_symbol && !bfd_link_pic (info))
     return TRUE;
 
   if (hh->reloc_entries)
@@ -2366,7 +2366,8 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
 
 	  /* Allocate one iff we are building a shared library, the relocation
 	     isn't a R_PARISC_FPTR64, or we don't want an opd entry.  */
-	  if (!info->shared && rent->type == R_PARISC_FPTR64 && hh->want_opd)
+	  if (!bfd_link_pic (info)
+	      && rent->type == R_PARISC_FPTR64 && hh->want_opd)
 	    continue;
 
 	  /* Create a dynamic relocation for this entry.
@@ -2396,7 +2397,8 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
 	     We use a section symbol recorded by check_relocs as the
 	     base symbol for the relocation.  The addend is the difference
 	     between the section symbol and the address of the .opd entry.  */
-	  if (info->shared && rent->type == R_PARISC_FPTR64 && hh->want_opd)
+	  if (bfd_link_pic (info)
+	      && rent->type == R_PARISC_FPTR64 && hh->want_opd)
 	    {
 	      bfd_vma value, value2;
 
@@ -2843,7 +2845,7 @@ elf_hppa_unmark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
 
      Ultimately we should have better controls over the generic ELF BFD
      linker code.  */
-  if (! info->relocatable
+  if (! bfd_link_relocatable (info)
       && info->unresolved_syms_in_shared_libs != RM_IGNORE
       && h->root.type == bfd_link_hash_undefined
       && h->ref_dynamic
@@ -2874,7 +2876,7 @@ elf_hppa_remark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
 
      Ultimately we should have better controls over the generic ELF BFD
      linker code.  */
-  if (! info->relocatable
+  if (! bfd_link_relocatable (info)
       && info->unresolved_syms_in_shared_libs != RM_IGNORE
       && h->root.type == bfd_link_hash_undefined
       && !h->ref_dynamic
@@ -2949,7 +2951,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
   if (hppa_info == NULL)
     return FALSE;
 
-  if (! info->relocatable)
+  if (! bfd_link_relocatable (info))
     {
       struct elf_link_hash_entry *gp;
       bfd_vma gp_val;
@@ -3035,7 +3037,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* If we're producing a final executable, sort the contents of the
      unwind section. */
-  if (retval && !info->relocatable)
+  if (retval && !bfd_link_relocatable (info))
     retval = elf_hppa_sort_unwind (abfd);
 
   return retval;
@@ -3893,10 +3895,10 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 	  else if (info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (eh->other) == STV_DEFAULT)
 	    ;
-	  else if (!info->relocatable
+	  else if (!bfd_link_relocatable (info)
 		   && elf_hppa_is_dynamic_loader_symbol (eh->root.root.string))
 	    continue;
-	  else if (!info->relocatable)
+	  else if (!bfd_link_relocatable (info))
 	    {
 	      bfd_boolean err;
 	      err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
@@ -3909,7 +3911,7 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 		return FALSE;
 	    }
 
-          if (!info->relocatable
+          if (!bfd_link_relocatable (info)
               && relocation == 0
               && eh->root.type != bfd_link_hash_defined
               && eh->root.type != bfd_link_hash_defweak
@@ -3931,7 +3933,7 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       r = elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,

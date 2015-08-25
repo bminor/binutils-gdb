@@ -855,6 +855,7 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
   SCM block_scm = SCM_UNDEFINED;
   struct frame_info *frame = NULL;
   struct symbol *var = NULL;
+  const struct block *block = NULL;
   struct value *value = NULL;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
@@ -909,9 +910,13 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
 
       TRY
 	{
+	  struct block_symbol lookup_sym;
+
 	  if (block == NULL)
 	    block = get_frame_block (frame, NULL);
-	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL).symbol;
+	  lookup_sym = lookup_symbol (var_name, block, VAR_DOMAIN, NULL);
+	  var = lookup_sym.symbol;
+	  block = lookup_sym.block;
 	}
       CATCH (ex, RETURN_MASK_ALL)
 	{
@@ -940,7 +945,7 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
 
   TRY
     {
-      value = read_var_value (var, frame);
+      value = read_var_value (var, block, frame);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

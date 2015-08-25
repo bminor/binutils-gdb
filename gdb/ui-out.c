@@ -213,7 +213,7 @@ const struct ui_out_impl default_ui_out_impl =
   default_message,
   default_wrap_hint,
   default_flush,
-  NULL,
+  NULL, /* redirect */
   default_data_destroy,
   0, /* Does not need MI hacks.  */
 };

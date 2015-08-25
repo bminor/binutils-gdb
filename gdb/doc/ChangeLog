@@ -1,3 +1,40 @@
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Remote Configuration): Document the "set/show
+	remote multiprocess-extensions-packet" commands.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Embedded Processors) <ARM>: Remove references to RDI.
+	<M32R>: Remove references to M32R/D.
+	<M68K>: Remove references to target dbug.
+	<MIPS Embedded>: Remove references to target r3900 and target
+	array.
+	<PowerPC Embedded>: Remove references to target dink32 and target
+	ppcbug, target sds
+	<PA, Sparclet, Sparclite, Z8000>: Delete nodes.
+
+2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (GDB Files): Add 'File Caching' menu entry.
+
+2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (File Caching): Document "set/show debug bfd-cache".
+
+2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Maintenance Commands): Move documentation of "main
+	info bfds" to...
+	(File Caching): A New section.  Outline bfd caching, and add new
+	description for "main set/show bfd-sharing".
+
+2015-08-14  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.texinfo (Machine Code): Update docs for mixed source/assembly
+	disassembly.
+	(GDB/MI Data Manipulation): Update docs for new disassembly modes.
+
 2015-08-11  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.texinfo (Thread-Specific Breakpoints, Printing Source Lines):

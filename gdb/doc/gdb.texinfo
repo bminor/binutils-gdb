@@ -8098,11 +8098,12 @@ Variables}).
 @cindex listing machine instructions
 @item disassemble
 @itemx disassemble /m
+@itemx disassemble /s
 @itemx disassemble /r
 This specialized command dumps a range of memory as machine
 instructions.  It can also print mixed source+disassembly by specifying
-the @code{/m} modifier and print the raw instructions in hex as well as
-in symbolic form by specifying the @code{/r}.
+the @code{/m} or @code{/s} modifier and print the raw instructions in hex
+as well as in symbolic form by specifying the @code{/r} modifier.
 The default memory range is the function surrounding the
 program counter of the selected frame.  A single argument to this
 command is a program counter value; @value{GDBN} dumps the function
@@ -8146,8 +8147,9 @@ Dump of assembler code from 0x32c4 to 0x32e4:
 End of assembler dump.
 @end smallexample
 
-Here is an example showing mixed source+assembly for Intel x86, when the
-program is stopped just after function prologue:
+Here is an example showing mixed source+assembly for Intel x86
+with @code{/m} or @code{/s}, when the program is stopped just after
+function prologue in a non-optimized function with no inline code.
 
 @smallexample
 (@value{GDBP}) disas /m main
@@ -8169,6 +8171,96 @@ Dump of assembler code for function main:
    0x0804834d <+29>:   leave
    0x0804834e <+30>:   ret
 
+End of assembler dump.
+@end smallexample
+
+The @code{/m} option is deprecated as its output is not useful when
+there is either inlined code or re-ordered code.
+The @code{/s} option is the preferred choice.
+Here is an example for AMD x86-64 showing the difference between
+@code{/m} output and @code{/s} output.
+This example has one inline function defined in a header file,
+and the code is compiled with @samp{-O2} optimization.
+Note how the @code{/m} output is missing the disassembly of
+several instructions that are present in the @code{/s} output.
+
+@file{foo.h}:
+
+@smallexample
+int
+foo (int a)
+@{
+  if (a < 0)
+    return a * 2;
+  if (a == 0)
+    return 1;
+  return a + 10;
+@}
+@end smallexample
+
+@file{foo.c}:
+
+@smallexample
+#include "foo.h"
+volatile int x, y;
+int
+main ()
+@{
+  x = foo (y);
+  return 0;
+@}
+@end smallexample
+
+@smallexample
+(@value{GDBP}) disas /m main
+Dump of assembler code for function main:
+5	@{
+
+6	  x = foo (y);
+   0x0000000000400400 <+0>:	mov    0x200c2e(%rip),%eax # 0x601034 <y>
+   0x0000000000400417 <+23>:	mov    %eax,0x200c13(%rip) # 0x601030 <x>
+
+7	  return 0;
+8	@}
+   0x000000000040041d <+29>:	xor    %eax,%eax
+   0x000000000040041f <+31>:	retq
+   0x0000000000400420 <+32>:	add    %eax,%eax
+   0x0000000000400422 <+34>:	jmp    0x400417 <main+23>
+
+End of assembler dump.
+(@value{GDBP}) disas /s main
+Dump of assembler code for function main:
+foo.c:
+5	@{
+6	  x = foo (y);
+   0x0000000000400400 <+0>:	mov    0x200c2e(%rip),%eax # 0x601034 <y>
+
+foo.h:
+4	  if (a < 0)
+   0x0000000000400406 <+6>:	test   %eax,%eax
+   0x0000000000400408 <+8>:	js     0x400420 <main+32>
+
+6	  if (a == 0)
+7	    return 1;
+8	  return a + 10;
+   0x000000000040040a <+10>:	lea    0xa(%rax),%edx
+   0x000000000040040d <+13>:	test   %eax,%eax
+   0x000000000040040f <+15>:	mov    $0x1,%eax
+   0x0000000000400414 <+20>:	cmovne %edx,%eax
+
+foo.c:
+6	  x = foo (y);
+   0x0000000000400417 <+23>:	mov    %eax,0x200c13(%rip) # 0x601030 <x>
+
+7	  return 0;
+8	@}
+   0x000000000040041d <+29>:	xor    %eax,%eax
+   0x000000000040041f <+31>:	retq
+
+foo.h:
+5	    return a * 2;
+   0x0000000000400420 <+32>:	add    %eax,%eax
+   0x0000000000400422 <+34>:	jmp    0x400417 <main+23>
 End of assembler dump.
 @end smallexample
 
@@ -17601,6 +17693,7 @@ program.  To debug a core dump of a previous run, you must also tell
 
 @menu
 * Files::                       Commands to specify files
+* File Caching::                Information about @value{GDBN}'s file caching
 * Separate Debug Files::        Debugging information in separate files
 * MiniDebugInfo::               Debugging information in a special section
 * Index Files::                 Index files speed up GDB
@@ -18249,6 +18342,46 @@ Set whether a source file may have multiple base names.
 @item show basenames-may-differ
 @kindex show basenames-may-differ
 Show whether a source file may have multiple base names.
+@end table
+
+@node File Caching
+@section File Caching
+@cindex caching of opened files
+@cindex caching of bfd objects
+
+To speed up file loading, and reduce memory usage, @value{GDBN} will
+reuse the @code{bfd} objects used to track open files.  @xref{Top, ,
+BFD, bfd, The Binary File Descriptor Library}.  The following commands
+allow visibility and control of the caching behavior.
+
+@table @code
+@kindex maint info bfds
+@item maint info bfds
+This prints information about each @code{bfd} object that is known to
+@value{GDBN}.
+
+@kindex maint set bfd-sharing
+@kindex maint show bfd-sharing
+@kindex bfd caching
+@item maint set bfd-sharing
+@item maint show bfd-sharing
+Control whether @code{bfd} objects can be shared.  When sharing is
+enabled @value{GDBN} reuses already open @code{bfd} objects rather
+than reopening the same file.  Turning sharing off does not cause
+already shared @code{bfd} objects to be unshared, but all future files
+that are opened will create a new @code{bfd} object.  Similarly,
+re-enabling sharing does not cause multiple existing @code{bfd}
+objects to be collapsed into a single shared @code{bfd} object.
+
+@kindex set debug bfd-cache @var{level}
+@kindex bfd caching
+@item set debug bfd-cache @var{level}
+Turns on debugging of the bfd cache, setting the level to @var{level}.
+
+@kindex show debug bfd-cache
+@kindex bfd caching
+@item show debug bfd-cache
+Show the current debugging level of the bfd cache.
 @end table
 
 @node Separate Debug Files
@@ -20072,6 +20205,10 @@ are:
 @tab @code{Z0 and Z1}
 @tab @code{Support for target-side breakpoint condition evaluation}
 
+@item @code{multiprocess-extensions}
+@tab @code{multiprocess extensions}
+@tab Debug multiple processes and remote process PID awareness
+
 @item @code{swbreak-feature}
 @tab @code{swbreak stop reason}
 @tab @code{break}
@@ -21293,16 +21430,12 @@ acceptable commands.
 
 
 @menu
-* ARM::                         ARM RDI
-* M32R/D::                      Renesas M32R/D
+* ARM::                         ARM
+* M32R/SDI::                    Renesas M32R/SDI
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
 * PowerPC Embedded::            PowerPC Embedded
-* PA::                          HP PA Embedded
-* Sparclet::                    Tsqware Sparclet
-* Sparclite::                   Fujitsu Sparclite
-* Z8000::                       Zilog Z8000
 * AVR::                         Atmel AVR
 * CRIS::                        CRIS
 * Super-H::                     Renesas Super-H
@@ -21310,20 +21443,6 @@ acceptable commands.
 
 @node ARM
 @subsection ARM
-@cindex ARM RDI
-
-@table @code
-@kindex target rdi
-@item target rdi @var{dev}
-ARM Angel monitor, via RDI library interface to ADP protocol.  You may
-use this target to communicate with both boards running the Angel
-monitor, or with the EmbeddedICE JTAG debug device.
-
-@kindex target rdp
-@item target rdp @var{dev}
-ARM Demon monitor.
-
-@end table
 
 @value{GDBN} provides the following ARM-specific commands:
 
@@ -21399,50 +21518,6 @@ target support subsystem.
 Show whether ARM-specific debugging messages are enabled.
 @end table
 
-The following commands are available when an ARM target is debugged
-using the RDI interface:
-
-@table @code
-@item rdilogfile @r{[}@var{file}@r{]}
-@kindex rdilogfile
-@cindex ADP (Angel Debugger Protocol) logging
-Set the filename for the ADP (Angel Debugger Protocol) packet log.
-With an argument, sets the log file to the specified @var{file}.  With
-no argument, show the current log file name.  The default log file is
-@file{rdi.log}.
-
-@item rdilogenable @r{[}@var{arg}@r{]}
-@kindex rdilogenable
-Control logging of ADP packets.  With an argument of 1 or @code{"yes"}
-enables logging, with an argument 0 or @code{"no"} disables it.  With
-no arguments displays the current setting.  When logging is enabled,
-ADP packets exchanged between @value{GDBN} and the RDI target device
-are logged to a file.
-
-@item set rdiromatzero
-@kindex set rdiromatzero
-@cindex ROM at zero address, RDI
-Tell @value{GDBN} whether the target has ROM at address 0.  If on,
-vector catching is disabled, so that zero address can be used.  If off
-(the default), vector catching is enabled.  For this command to take
-effect, it needs to be invoked prior to the @code{target rdi} command.
-
-@item show rdiromatzero
-@kindex show rdiromatzero
-Show the current setting of ROM at zero address.
-
-@item set rdiheartbeat
-@kindex set rdiheartbeat
-@cindex RDI heartbeat
-Enable or disable RDI heartbeat packets.  It is not recommended to
-turn on this option, since it confuses ARM and EPI JTAG interface, as
-well as the Angel monitor.
-
-@item show rdiheartbeat
-@kindex show rdiheartbeat
-Show the setting of RDI heartbeat packets.
-@end table
-
 @table @code
 @item target sim @r{[}@var{simargs}@r{]} @dots{} 
 The @value{GDBN} ARM simulator accepts the following optional arguments.
@@ -21463,60 +21538,8 @@ The default value is @code{all}.
 @end table
 @end table
 
-@node M32R/D
-@subsection Renesas M32R/D and M32R/SDI
-
-@table @code
-@kindex target m32r
-@item target m32r @var{dev}
-Renesas M32R/D ROM monitor.
-
-@kindex target m32rsdi
-@item target m32rsdi @var{dev}
-Renesas M32R SDI server, connected via parallel port to the board.
-@end table
-
-The following @value{GDBN} commands are specific to the M32R monitor:
-
-@table @code
-@item set download-path @var{path}
-@kindex set download-path
-@cindex find downloadable @sc{srec} files (M32R)
-Set the default path for finding downloadable @sc{srec} files.
-
-@item show download-path
-@kindex show download-path
-Show the default path for downloadable @sc{srec} files.
-
-@item set board-address @var{addr}
-@kindex set board-address
-@cindex M32-EVA target board address
-Set the IP address for the M32R-EVA target board.
-
-@item show board-address
-@kindex show board-address
-Show the current IP address of the target board.
-
-@item set server-address @var{addr}
-@kindex set server-address
-@cindex download server address (M32R)
-Set the IP address for the download server, which is the @value{GDBN}'s
-host machine.
-
-@item show server-address
-@kindex show server-address
-Display the IP address of the download server.
-
-@item upload @r{[}@var{file}@r{]}
-@kindex upload@r{, M32R}
-Upload the specified @sc{srec} @var{file} via the monitor's Ethernet
-upload capability.  If no @var{file} argument is given, the current
-executable file is uploaded.
-
-@item tload @r{[}@var{file}@r{]}
-@kindex tload@r{, M32R}
-Test the @code{upload} command.
-@end table
+@node M32R/SDI
+@subsection Renesas M32R/SDI
 
 The following commands are available for M32R/SDI:
 
@@ -21555,16 +21578,7 @@ Instructs the remote to set breakpoints by DBT.
 @node M68K
 @subsection M68k
 
-The Motorola m68k configuration includes ColdFire support, and a
-target command for the following ROM monitor.
-
-@table @code
-
-@kindex target dbug
-@item target dbug @var{dev}
-dBUG ROM monitor for Motorola ColdFire.
-
-@end table
+The Motorola m68k configuration includes ColdFire support.
 
 @node MicroBlaze
 @subsection MicroBlaze
@@ -21654,14 +21668,6 @@ NEC's DDB variant of PMON for Vr4300.
 @item target lsi @var{port}
 @kindex target lsi @var{port}
 LSI variant of PMON.
-
-@kindex target r3900
-@item target r3900 @var{dev}
-Densan DVE-R3900 ROM monitor for Toshiba R3900 Mips.
-
-@kindex target array
-@item target array @var{dev}
-Array Tech LSI33K RAID controller board.
 
 @end table
 
@@ -21849,269 +21855,7 @@ Allow @value{GDBN} to use only one debug register when watching a variable
 of scalar type, thus assuming that the variable is accessed through the
 address of its first byte.
 
-@kindex target dink32
-@item target dink32 @var{dev}
-DINK32 ROM monitor.
-
-@kindex target ppcbug
-@item target ppcbug @var{dev}
-@kindex target ppcbug1
-@item target ppcbug1 @var{dev}
-PPCBUG ROM monitor for PowerPC.
-
-@kindex target sds
-@item target sds @var{dev}
-SDS monitor, running on a PowerPC board (such as Motorola's ADS).
 @end table
-
-@cindex SDS protocol
-The following commands specific to the SDS protocol are supported
-by @value{GDBN}:
-
-@table @code
-@item set sdstimeout @var{nsec}
-@kindex set sdstimeout
-Set the timeout for SDS protocol reads to be @var{nsec} seconds.  The
-default is 2 seconds.
-
-@item show sdstimeout
-@kindex show sdstimeout
-Show the current value of the SDS timeout.
-
-@item sds @var{command}
-@kindex sds@r{, a command}
-Send the specified @var{command} string to the SDS monitor.
-@end table
-
-
-@node PA
-@subsection HP PA Embedded
-
-@table @code
-
-@kindex target op50n
-@item target op50n @var{dev}
-OP50N monitor, running on an OKI HPPA board.
-
-@kindex target w89k
-@item target w89k @var{dev}
-W89K monitor, running on a Winbond HPPA board.
-
-@end table
-
-@node Sparclet
-@subsection Tsqware Sparclet
-
-@cindex Sparclet
-
-@value{GDBN} enables developers to debug tasks running on
-Sparclet targets from a Unix host.
-@value{GDBN} uses code that runs on
-both the Unix host and on the Sparclet target.  The program
-@code{@value{GDBP}} is installed and executed on the Unix host.
-
-@table @code
-@item remotetimeout @var{args}
-@kindex remotetimeout
-@value{GDBN} supports the option @code{remotetimeout}.
-This option is set by the user, and @var{args} represents the number of
-seconds @value{GDBN} waits for responses.
-@end table
-
-@cindex compiling, on Sparclet
-When compiling for debugging, include the options @samp{-g} to get debug
-information and @samp{-Ttext} to relocate the program to where you wish to
-load it on the target.  You may also want to add the options @samp{-n} or
-@samp{-N} in order to reduce the size of the sections.  Example:
-
-@smallexample
-sparclet-aout-gcc prog.c -Ttext 0x12010000 -g -o prog -N
-@end smallexample
-
-You can use @code{objdump} to verify that the addresses are what you intended:
-
-@smallexample
-sparclet-aout-objdump --headers --syms prog
-@end smallexample
-
-@cindex running, on Sparclet
-Once you have set
-your Unix execution search path to find @value{GDBN}, you are ready to
-run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}}
-(or @code{sparclet-aout-gdb}, depending on your installation).
-
-@value{GDBN} comes up showing the prompt:
-
-@smallexample
-(gdbslet)
-@end smallexample
-
-@menu
-* Sparclet File::                Setting the file to debug
-* Sparclet Connection::          Connecting to Sparclet
-* Sparclet Download::            Sparclet download
-* Sparclet Execution::           Running and debugging
-@end menu
-
-@node Sparclet File
-@subsubsection Setting File to Debug
-
-The @value{GDBN} command @code{file} lets you choose with program to debug.
-
-@smallexample
-(gdbslet) file prog
-@end smallexample
-
-@need 1000
-@value{GDBN} then attempts to read the symbol table of @file{prog}.
-@value{GDBN} locates
-the file by searching the directories listed in the command search
-path.
-If the file was compiled with debug information (option @samp{-g}), source
-files will be searched as well.
-@value{GDBN} locates
-the source files by searching the directories listed in the directory search
-path (@pxref{Environment, ,Your Program's Environment}).
-If it fails
-to find a file, it displays a message such as:
-
-@smallexample
-prog: No such file or directory.
-@end smallexample
-
-When this happens, add the appropriate directories to the search paths with
-the @value{GDBN} commands @code{path} and @code{dir}, and execute the
-@code{target} command again.
-
-@node Sparclet Connection
-@subsubsection Connecting to Sparclet
-
-The @value{GDBN} command @code{target} lets you connect to a Sparclet target.
-To connect to a target on serial port ``@code{ttya}'', type:
-
-@smallexample
-(gdbslet) target sparclet /dev/ttya
-Remote target sparclet connected to /dev/ttya
-main () at ../prog.c:3
-@end smallexample
-
-@need 750
-@value{GDBN} displays messages like these:
-
-@smallexample
-Connected to ttya.
-@end smallexample
-
-@node Sparclet Download
-@subsubsection Sparclet Download
-
-@cindex download to Sparclet
-Once connected to the Sparclet target,
-you can use the @value{GDBN}
-@code{load} command to download the file from the host to the target.
-The file name and load offset should be given as arguments to the @code{load}
-command.
-Since the file format is aout, the program must be loaded to the starting
-address.  You can use @code{objdump} to find out what this value is.  The load
-offset is an offset which is added to the VMA (virtual memory address)
-of each of the file's sections.
-For instance, if the program
-@file{prog} was linked to text address 0x1201000, with data at 0x12010160
-and bss at 0x12010170, in @value{GDBN}, type:
-
-@smallexample
-(gdbslet) load prog 0x12010000
-Loading section .text, size 0xdb0 vma 0x12010000
-@end smallexample
-
-If the code is loaded at a different address then what the program was linked
-to, you may need to use the @code{section} and @code{add-symbol-file} commands
-to tell @value{GDBN} where to map the symbol table.
-
-@node Sparclet Execution
-@subsubsection Running and Debugging
-
-@cindex running and debugging Sparclet programs
-You can now begin debugging the task using @value{GDBN}'s execution control
-commands, @code{b}, @code{step}, @code{run}, etc.  See the @value{GDBN}
-manual for the list of commands.
-
-@smallexample
-(gdbslet) b main
-Breakpoint 1 at 0x12010000: file prog.c, line 3.
-(gdbslet) run
-Starting program: prog
-Breakpoint 1, main (argc=1, argv=0xeffff21c) at prog.c:3
-3        char *symarg = 0;
-(gdbslet) step
-4        char *execarg = "hello!";
-(gdbslet)
-@end smallexample
-
-@node Sparclite
-@subsection Fujitsu Sparclite
-
-@table @code
-
-@kindex target sparclite
-@item target sparclite @var{dev}
-Fujitsu sparclite boards, used only for the purpose of loading.
-You must use an additional command to debug the program.
-For example: target remote @var{dev} using @value{GDBN} standard
-remote protocol.
-
-@end table
-
-@node Z8000
-@subsection Zilog Z8000
-
-@cindex Z8000
-@cindex simulator, Z8000
-@cindex Zilog Z8000 simulator
-
-When configured for debugging Zilog Z8000 targets, @value{GDBN} includes
-a Z8000 simulator.
-
-For the Z8000 family, @samp{target sim} simulates either the Z8002 (the
-unsegmented variant of the Z8000 architecture) or the Z8001 (the
-segmented variant).  The simulator recognizes which architecture is
-appropriate by inspecting the object code.
-
-@table @code
-@item target sim @var{args}
-@kindex sim
-@kindex target sim@r{, with Z8000}
-Debug programs on a simulated CPU.  If the simulator supports setup
-options, specify them via @var{args}.
-@end table
-
-@noindent
-After specifying this target, you can debug programs for the simulated
-CPU in the same style as programs for your host computer; use the
-@code{file} command to load a new program image, the @code{run} command
-to run your program, and so on.
-
-As well as making available all the usual machine registers
-(@pxref{Registers, ,Registers}), the Z8000 simulator provides three
-additional items of information as specially named registers:
-
-@table @code
-
-@item cycles
-Counts clock-ticks in the simulator.
-
-@item insts
-Counts instructions run in the simulator.
-
-@item time
-Execution time in 60ths of a second.
-
-@end table
-
-You can refer to these values in @value{GDBN} expressions with the usual
-conventions; for example, @w{@samp{b fputc if $cycles>5000}} sets a
-conditional breakpoint that suspends only after at least 5000
-simulated clock ticks.
 
 @node AVR
 @subsection Atmel AVR
@@ -29782,9 +29526,20 @@ displayed; if @var{lines} is higher than the number of lines between
 @var{start-addr} and @var{end-addr}, only the lines up to @var{end-addr}
 are displayed.
 @item @var{mode}
-is either 0 (meaning only disassembly), 1 (meaning mixed source and
-disassembly), 2 (meaning disassembly with raw opcodes), or 3 (meaning
-mixed source and disassembly with raw opcodes).
+is one of:
+@itemize @bullet
+@item 0 disassembly only
+@item 1 mixed source and disassembly (deprecated)
+@item 2 disassembly with raw opcodes
+@item 3 mixed source and disassembly with raw opcodes (deprecated)
+@item 4 mixed source and disassembly
+@item 5 mixed source and disassembly with raw opcodes
+@end itemize
+
+Modes 1 and 3 are deprecated.  The output is ``source centric''
+which hasn't proved useful in practice.
+@xref{Machine Code}, for a discussion of the difference between
+@code{/m} and @code{/s} output of the @code{disassemble} command.
 @end table
 
 @subsubheading Result
@@ -29810,12 +29565,12 @@ The decimal offset in bytes from the start of @samp{func-name}.
 The text disassembly for this @samp{address}.
 
 @item opcodes
-This field is only present for mode 2.  This contains the raw opcode
+This field is only present for modes 2, 3 and 5.  This contains the raw opcode
 bytes for the @samp{inst} field.
 
 @end table
 
-For modes 1 and 3 the @samp{asm_insns} list contains tuples named
+For modes 1, 3, 4 and 5 the @samp{asm_insns} list contains tuples named
 @samp{src_and_asm_line}, each of which has the following fields:
 
 @table @code
@@ -34058,11 +33813,6 @@ Temporary internal breakpoint used by the @value{GDBN} @code{finish} command.
 Shared library events.
 
 @end table
-
-@kindex maint info bfds
-@item maint info bfds
-This prints information about each @code{bfd} object that is known to
-@value{GDBN}.  @xref{Top, , BFD, bfd, The Binary File Descriptor Library}.
 
 @kindex maint info btrace
 @item maint info btrace

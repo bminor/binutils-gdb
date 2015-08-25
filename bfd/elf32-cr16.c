@@ -705,7 +705,7 @@ cr16_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
   srelgot = NULL;
   bfd_boolean result = FALSE;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -767,7 +767,7 @@ cr16_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
             }
 
           if (srelgot == NULL
-              && (h != NULL || info->executable))
+              && (h != NULL || bfd_link_executable (info)))
             {
               srelgot = bfd_get_linker_section (dynobj, ".rela.got");
               if (srelgot == NULL)
@@ -828,7 +828,7 @@ cr16_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
               local_got_offsets[r_symndx] = sgot->size;
 
-              if (info->executable)
+              if (bfd_link_executable (info))
                 /* If we are generating a shared object, we need to
                    output a R_CR16_RELATIVE reloc so that the dynamic
                    linker can adjust this GOT entry.  */
@@ -1443,7 +1443,7 @@ elf32_cr16_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
         continue;
 
       r = cr16_elf_final_link_relocate (howto, input_bfd, output_bfd,
@@ -1776,7 +1776,7 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)
@@ -2309,7 +2309,7 @@ _bfd_cr16_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
          be needed, we can discard it later.  We will never need this
          section when generating a shared object, since they do not use
          copy relocs.  */
-      if (! info->executable)
+      if (! bfd_link_executable (info))
         {
           s = bfd_make_section_anyway_with_flags (abfd,
 						  (bed->default_use_rela_p
@@ -2353,7 +2353,7 @@ _bfd_cr16_elf_adjust_dynamic_symbol (struct bfd_link_info * info,
   if (h->type == STT_FUNC
       || h->needs_plt)
     {
-      if (! info->executable
+      if (! bfd_link_executable (info)
           && !h->def_dynamic
           && !h->ref_dynamic)
         {
@@ -2408,7 +2408,7 @@ _bfd_cr16_elf_adjust_dynamic_symbol (struct bfd_link_info * info,
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
-  if (info->executable)
+  if (bfd_link_executable (info))
     return TRUE;
 
   /* If there are no references to this symbol that do not use the
@@ -2464,7 +2464,7 @@ _bfd_cr16_elf_size_dynamic_sections (bfd * output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (info->executable)
+      if (bfd_link_executable (info))
         {
 #if 0
           s = bfd_get_linker_section (dynobj, ".interp");
@@ -2581,7 +2581,7 @@ _bfd_cr16_elf_size_dynamic_sections (bfd * output_bfd,
          but we must add the entries now so that we get the correct
          size for the .dynamic section.  The DT_DEBUG entry is filled
          in by the dynamic linker and used by the debugger.  */
-      if (! info->executable)
+      if (! bfd_link_executable (info))
         {
           if (!_bfd_elf_add_dynamic_entry (info, DT_DEBUG, 0))
             return FALSE;
@@ -2649,7 +2649,7 @@ _bfd_cr16_elf_finish_dynamic_symbol (bfd * output_bfd,
          the symbol was forced to be local because of a version file.
          The entry in the global offset table will already have been
          initialized in the relocate_section function.  */
-      if (info->executable
+      if (bfd_link_executable (info)
           && (info->symbolic || h->dynindx == -1)
           && h->def_regular)
         {
@@ -2819,7 +2819,7 @@ bfd_cr16_elf32_create_embedded_relocs (bfd *abfd,
   bfd_byte *p;
   bfd_size_type amt;
 
-  BFD_ASSERT (! info->relocatable);
+  BFD_ASSERT (! bfd_link_relocatable (info));
 
   *errmsg = NULL;
 

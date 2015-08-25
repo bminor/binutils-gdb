@@ -62,7 +62,7 @@
 
 #include "readline/readline.h"
 
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #include <time.h>
 
 #include "gdb_usleep.h"

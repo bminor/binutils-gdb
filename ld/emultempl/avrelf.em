@@ -81,7 +81,7 @@ avr_elf_${EMULATION_NAME}_before_allocation (void)
 
   /* If generating a relocatable output file, then
      we don't  have to generate the trampolines.  */
-  if (link_info.relocatable)
+  if (bfd_link_relocatable (&link_info))
     avr_no_stubs = TRUE;
 
   if (avr_no_stubs)
@@ -182,7 +182,7 @@ avr_finish (void)
   bfd *abfd;
   bfd_boolean avr_link_relax;
 
-  if (link_info.relocatable)
+  if (bfd_link_relocatable (&link_info))
     {
       avr_link_relax = TRUE;
       for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)

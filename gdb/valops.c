@@ -1291,27 +1291,12 @@ value_repeat (struct value *arg1, int count)
 struct value *
 value_of_variable (struct symbol *var, const struct block *b)
 {
-  struct frame_info *frame;
+  struct frame_info *frame = NULL;
 
-  if (!symbol_read_needs_frame (var))
-    frame = NULL;
-  else if (!b)
+  if (symbol_read_needs_frame (var))
     frame = get_selected_frame (_("No frame selected."));
-  else
-    {
-      frame = block_innermost_frame (b);
-      if (!frame)
-	{
-	  if (BLOCK_FUNCTION (b) && !block_inlined_p (b)
-	      && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)))
-	    error (_("No frame is currently executing in block %s."),
-		   SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)));
-	  else
-	    error (_("No frame is currently executing in specified block"));
-	}
-    }
 
-  return read_var_value (var, frame);
+  return read_var_value (var, b, frame);
 }
 
 struct value *
@@ -3463,9 +3448,9 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		return NULL;
 
 	      if (want_address)
-		return value_addr (read_var_value (s, 0));
+		return value_addr (read_var_value (s, 0, 0));
 	      else
-		return read_var_value (s, 0);
+		return read_var_value (s, 0, 0);
 	    }
 
 	  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
@@ -3493,7 +3478,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      if (s == NULL)
 		return NULL;
 
-	      v = read_var_value (s, 0);
+	      v = read_var_value (s, 0, 0);
 	      if (!want_address)
 		result = v;
 	      else
@@ -3729,7 +3714,7 @@ value_full_object (struct value *argp,
 struct value *
 value_of_this (const struct language_defn *lang)
 {
-  struct symbol *sym;
+  struct block_symbol sym;
   const struct block *b;
   struct frame_info *frame;
 
@@ -3740,12 +3725,12 @@ value_of_this (const struct language_defn *lang)
 
   b = get_frame_block (frame, NULL);
 
-  sym = lookup_language_this (lang, b).symbol;
-  if (sym == NULL)
+  sym = lookup_language_this (lang, b);
+  if (sym.symbol == NULL)
     error (_("current stack frame does not contain a variable named `%s'"),
 	   lang->la_name_of_this);
 
-  return read_var_value (sym, frame);
+  return read_var_value (sym.symbol, sym.block, frame);
 }
 
 /* Return the value of the local variable, if one exists.  Return NULL

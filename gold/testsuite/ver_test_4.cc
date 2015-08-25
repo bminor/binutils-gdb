@@ -22,6 +22,16 @@
 
 #include "ver_test.h"
 
+__asm__(".symver t1_2_orig,t1_2@");
+
+extern "C"
+int
+t1_2_orig()
+{
+  TRACE
+  return 12;
+}
+
 __asm__(".symver t1_2_a,t1_2@@VER2");
 
 extern "C"

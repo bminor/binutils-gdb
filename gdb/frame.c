@@ -503,7 +503,7 @@ frame_unwind_caller_id (struct frame_info *next_frame)
     return null_frame_id;
 }
 
-const struct frame_id null_frame_id; /* All zeros.  */
+const struct frame_id null_frame_id = { 0 }; /* All zeros.  */
 const struct frame_id outer_frame_id = { 0, 0, 0, FID_STACK_INVALID, 0, 1, 0 };
 
 struct frame_id

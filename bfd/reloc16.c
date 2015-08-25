@@ -153,7 +153,7 @@ bfd_coff_reloc16_relax_section (bfd *abfd,
   arelent **reloc_vector = NULL;
   long reloc_count;
 
-  if (link_info->relocatable)
+  if (bfd_link_relocatable (link_info))
     (*link_info->callbacks->einfo)
       (_("%P%F: --relax and -r may not be used together\n"));
 

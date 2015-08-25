@@ -28,6 +28,7 @@
 #include "value.h"
 #include "dis-asm.h"
 #include "inferior.h"
+#include "osabi.h"
 #include "floatformat.h"
 #include "regcache.h"
 #include "reggroups.h"
@@ -3272,6 +3273,9 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+
+  /* Hook in the ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }

@@ -126,6 +126,8 @@ static int yylex (void);
 
 void yyerror (char *);
 
+static int type_aggregate_p (struct type *);
+
 %}
 
 /* Although the yacc "value" of an expression is not used,
@@ -475,8 +477,8 @@ PrimaryExpression:
 		    {
 		      if (symbol_read_needs_frame (sym.symbol))
 			{
-			  if (innermost_block == 0 ||
-			      contained_in (sym.block, innermost_block))
+			  if (innermost_block == 0
+			      || contained_in (sym.block, innermost_block))
 			    innermost_block = sym.block;
 			}
 
@@ -491,8 +493,8 @@ PrimaryExpression:
 		     {
 		      /* It hangs off of `this'.  Must not inadvertently convert from a
 			 method call to data ref.  */
-		      if (innermost_block == 0 ||
-			  contained_in (sym.block, innermost_block))
+		      if (innermost_block == 0
+			  || contained_in (sym.block, innermost_block))
 			innermost_block = sym.block;
 		      write_exp_elt_opcode (pstate, OP_THIS);
 		      write_exp_elt_opcode (pstate, OP_THIS);
@@ -522,13 +524,14 @@ PrimaryExpression:
 			    {
 			      struct bound_minimal_symbol msymbol;
 			      struct block_symbol sym;
-			      const char *typename = TYPE_SAFE_NAME (type);
-			      int typename_len = strlen (typename);
-			      char *name = malloc (typename_len + $3.length + 1);
+			      const char *type_name = TYPE_SAFE_NAME (type);
+			      int type_name_len = strlen (type_name);
+			      char *name;
 
-			      make_cleanup (free, name);
-			      sprintf (name, "%.*s.%.*s",
-				       typename_len, typename, $3.length, $3.ptr);
+			      name = xstrprintf ("%.*s.%.*s",
+						 type_name_len, type_name,
+						 $3.length, $3.ptr);
+			      make_cleanup (xfree, name);
 
 			      sym =
 				lookup_symbol (name, (const struct block *) NULL,
@@ -553,9 +556,7 @@ PrimaryExpression:
 
 			  /* Check if the qualified name resolves as a member
 			     of an aggregate or an enum type.  */
-			  if (!(TYPE_CODE (type) == TYPE_CODE_STRUCT
-				|| TYPE_CODE (type) == TYPE_CODE_UNION
-				|| TYPE_CODE (type) == TYPE_CODE_ENUM))
+			  if (!type_aggregate_p (type))
 			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_SAFE_NAME (type));
 
@@ -693,6 +694,17 @@ BasicType:
 ;
 
 %%
+
+/* Return true if the type is aggregate-like.  */
+
+static int
+type_aggregate_p (struct type *type)
+{
+  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (type) == TYPE_CODE_UNION
+	  || (TYPE_CODE (type) == TYPE_CODE_ENUM
+	      && TYPE_DECLARED_CLASS (type)));
+}
 
 /* Take care of parsing a number (anything that starts with a digit).
    Set yylval and return the token type; update lexptr.
@@ -1207,8 +1219,8 @@ lex_one_token (struct parser_state *par_state)
 	    /* We will take any letters or digits, ignoring any embedded '_'.
 	       parse_number will complain if past the radix, or if L or U are
 	       not final.  */
-	    else if ((*p < '0' || *p > '9') && (*p != '_') &&
-		     ((*p < 'a' || *p > 'z') && (*p < 'A' || *p > 'Z')))
+	    else if ((*p < '0' || *p > '9') && (*p != '_')
+		     && ((*p < 'a' || *p > 'z') && (*p < 'A' || *p > 'Z')))
 	      break;
 	  }
 
@@ -1439,6 +1451,8 @@ classify_inner_name (struct parser_state *par_state,
     return classify_name (par_state, block);
 
   type = check_typedef (context);
+  if (!type_aggregate_p (type))
+    return ERROR;
 
   copy = copy_name (yylval.ssym.stoken);
   yylval.ssym.sym = d_lookup_nested_symbol (type, copy, block);

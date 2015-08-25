@@ -344,6 +344,7 @@ handle_pread (char *own_buf, int *new_packet_len)
 {
   int fd, ret, len, offset, bytes_sent;
   char *p, *data;
+  static int max_reply_size = -1;
 
   p = own_buf + strlen ("vFile:pread:");
 
@@ -358,6 +359,17 @@ handle_pread (char *own_buf, int *new_packet_len)
       hostio_packet_error (own_buf);
       return;
     }
+
+  /* Do not attempt to read more than the maximum number of bytes
+     hostio_reply_with_data can fit in a packet.  We may still read
+     too much because of escaping, but this is handled below.  */
+  if (max_reply_size == -1)
+    {
+      sprintf (own_buf, "F%x;", PBUFSIZ);
+      max_reply_size = PBUFSIZ - strlen (own_buf);
+    }
+  if (len > max_reply_size)
+    len = max_reply_size;
 
   data = xmalloc (len);
 #ifdef HAVE_PREAD

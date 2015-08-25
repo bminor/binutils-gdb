@@ -47,7 +47,7 @@ vxworks_after_open (void)
     einfo ("%X%P: Cannot create dynamic sections %E\n");
 
   if (!force_dynamic
-      && !link_info.shared
+      && !bfd_link_pic (&link_info)
       && bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
       && elf_hash_table (&link_info)->dynamic_sections_created)
     einfo ("%X%P: Dynamic sections created in non-dynamic link\n");

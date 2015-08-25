@@ -410,8 +410,7 @@ arc_extoper (int opertype)
   segT old_sec;
   int old_subsec;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   name = xstrdup (name);
 
   p = name;
@@ -423,7 +422,7 @@ arc_extoper (int opertype)
 
   /* just after name is now '\0'  */
   p = input_line_pointer;
-  *p = c;
+  (void) restore_line_pointer (c);
   SKIP_WHITESPACE ();
 
   if (*input_line_pointer != ',')
@@ -653,15 +652,14 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
   segT old_sec;
   int old_subsec;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   name = xstrdup (name);
   strcpy (syntax, name);
   name_len = strlen (name);
 
   /* just after name is now '\0'  */
   p = input_line_pointer;
-  *p = c;
+  (void) restore_line_pointer (c);
 
   SKIP_WHITESPACE ();
 
@@ -849,11 +847,10 @@ arc_common (int localScope)
   int align, size;
   symbolS *symbolP;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   /* just after name is now '\0'  */
   p = input_line_pointer;
-  *p = c;
+  (void) restore_line_pointer (c);
   SKIP_WHITESPACE ();
 
   if (*input_line_pointer != ',')
@@ -959,10 +956,9 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
   char c;
   char *cpu;
 
-  cpu = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&cpu);
   mach = arc_get_mach (cpu);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   /* If an instruction has already been seen, it's too late.  */
   if (cpu_tables_init_p)

@@ -33,7 +33,7 @@ need_relax_${EMULATION_NAME}_before_allocation (void)
   gld${EMULATION_NAME}_before_allocation ();
 
   /* Force -relax on if not doing a relocatable link.  */
-  if (! link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     ENABLE_RELAXATION;
 }
 EOF

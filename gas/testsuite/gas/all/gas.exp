@@ -434,6 +434,8 @@ if [is_elf_format] {
     run_dump_test none
 }
 
+run_dump_test quoted-sym-names
+
 load_lib gas-dg.exp
 dg-init
 dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn-*.s]] "" ""

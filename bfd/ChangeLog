@@ -1,3 +1,250 @@
+2015-08-25  Renlin Li  <renlin.li@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_LD64_GOTOFF_LO15): Use LP64 instead of
+	ILP64.
+	* bfd-in2.h: Regenerate.
+
+2015-08-22  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_slurp_version_tables): Always init vd_nodename.
+	Don't copy fields not set by _bfd_elf_swap_verdef_in.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Recognize new relocation
+	types, including BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12,
+	BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC,
+	BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12,
+	BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC,
+	BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12,
+	BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC,
+	BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12,
+	BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12,
+	BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC,
+	BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12,
+	BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC,
+	BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12,
+	BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC.
+	BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12,
+	BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC): New entries.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/18276
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Recognize new relocation
+	types, including BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC,
+	BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2): New entries.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELOC): Recognize
+	BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC.
+	(aarch64_reloc_got_type): Likewise.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-08-19  Jiong Wang  <jiong.wang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC): New entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC.
+
+2015-08-19  Alan Modra  <amodra@gmail.com>
+
+	* elf-s390-common.c: Simplify expressions using
+	bfd_linke_executable, bfd_link_pie and bfd_link_pic.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elflink.c: Likewise.
+
+2015-08-18  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Delete useless check.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+
+2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18841
+	* elf-bfd.h (elf_link_hash_table): Add dynsym.
+	* elf32-i386.c (elf_i386_reloc_type_class): Return
+	reloc_class_ifunc for relocation against STT_GNU_IFUNC symbol.
+	* elf64-x86-64.c (elf_x86_64_reloc_type_class): Likewise.
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): Set dynsym.
+	(bfd_elf_size_dynsym_hash_dynstr): Use dynsym.
+	(elf_final_link_info): Remove dynsym_sec.
+	(elf_link_output_extsym): Replace dynsym_sec with dynsym.
+	(bfd_elf_final_link): Remove reference to dynsym_sec.  Replace
+	dynsym_sec with dynsym.
+
+2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd/aoutx.h: Replace shared, executable, relocatable and pie
+	fields with bfd_link_executable, bfd_link_dll,
+	bfd_link_relocatable, bfd_link_pic and bfd_link_pie.
+	* bfd/bout.c: Likewise.
+	* bfd/coff-alpha.c: Likewise.
+	* bfd/coff-arm.c: Likewise.
+	* bfd/coff-i386.c: Likewise.
+	* bfd/coff-i960.c: Likewise.
+	* bfd/coff-m68k.c: Likewise.
+	* bfd/coff-mcore.c: Likewise.
+	* bfd/coff-mips.c: Likewise.
+	* bfd/coff-ppc.c: Likewise.
+	* bfd/coff-rs6000.c: Likewise.
+	* bfd/coff-sh.c: Likewise.
+	* bfd/coff-tic80.c: Likewise.
+	* bfd/coff-x86_64.c: Likewise.
+	* bfd/coff64-rs6000.c: Likewise.
+	* bfd/coffgen.c: Likewise.
+	* bfd/cofflink.c: Likewise.
+	* bfd/ecoff.c: Likewise.
+	* bfd/ecofflink.c: Likewise.
+	* bfd/elf-bfd.h: Likewise.
+	* bfd/elf-eh-frame.c: Likewise.
+	* bfd/elf-ifunc.c: Likewise.
+	* bfd/elf-m10200.c: Likewise.
+	* bfd/elf-m10300.c: Likewise.
+	* bfd/elf-s390-common.c: Likewise.
+	* bfd/elf-vxworks.c: Likewise.
+	* bfd/elf.c: Likewise.
+	* bfd/elf32-arm.c: Likewise.
+	* bfd/elf32-avr.c: Likewise.
+	* bfd/elf32-bfin.c: Likewise.
+	* bfd/elf32-cr16.c: Likewise.
+	* bfd/elf32-cr16c.c: Likewise.
+	* bfd/elf32-cris.c: Likewise.
+	* bfd/elf32-crx.c: Likewise.
+	* bfd/elf32-d10v.c: Likewise.
+	* bfd/elf32-dlx.c: Likewise.
+	* bfd/elf32-epiphany.c: Likewise.
+	* bfd/elf32-fr30.c: Likewise.
+	* bfd/elf32-frv.c: Likewise.
+	* bfd/elf32-ft32.c: Likewise.
+	* bfd/elf32-h8300.c: Likewise.
+	* bfd/elf32-hppa.c: Likewise.
+	* bfd/elf32-i370.c: Likewise.
+	* bfd/elf32-i386.c: Likewise.
+	* bfd/elf32-i860.c: Likewise.
+	* bfd/elf32-ip2k.c: Likewise.
+	* bfd/elf32-iq2000.c: Likewise.
+	* bfd/elf32-lm32.c: Likewise.
+	* bfd/elf32-m32c.c: Likewise.
+	* bfd/elf32-m32r.c: Likewise.
+	* bfd/elf32-m68hc11.c: Likewise.
+	* bfd/elf32-m68hc1x.c: Likewise.
+	* bfd/elf32-m68k.c: Likewise.
+	* bfd/elf32-mcore.c: Likewise.
+	* bfd/elf32-mep.c: Likewise.
+	* bfd/elf32-metag.c: Likewise.
+	* bfd/elf32-microblaze.c: Likewise.
+	* bfd/elf32-moxie.c: Likewise.
+	* bfd/elf32-msp430.c: Likewise.
+	* bfd/elf32-mt.c: Likewise.
+	* bfd/elf32-nds32.c: Likewise.
+	* bfd/elf32-nios2.c: Likewise.
+	* bfd/elf32-or1k.c: Likewise.
+	* bfd/elf32-ppc.c: Likewise.
+	* bfd/elf32-rl78.c: Likewise.
+	* bfd/elf32-rx.c: Likewise.
+	* bfd/elf32-s390.c: Likewise.
+	* bfd/elf32-score.c: Likewise.
+	* bfd/elf32-score7.c: Likewise.
+	* bfd/elf32-sh-symbian.c: Likewise.
+	* bfd/elf32-sh.c: Likewise.
+	* bfd/elf32-sh64.c: Likewise.
+	* bfd/elf32-spu.c: Likewise.
+	* bfd/elf32-tic6x.c: Likewise.
+	* bfd/elf32-tilepro.c: Likewise.
+	* bfd/elf32-v850.c: Likewise.
+	* bfd/elf32-vax.c: Likewise.
+	* bfd/elf32-visium.c: Likewise.
+	* bfd/elf32-xc16x.c: Likewise.
+	* bfd/elf32-xstormy16.c: Likewise.
+	* bfd/elf32-xtensa.c: Likewise.
+	* bfd/elf64-alpha.c: Likewise.
+	* bfd/elf64-hppa.c: Likewise.
+	* bfd/elf64-ia64-vms.c: Likewise.
+	* bfd/elf64-mmix.c: Likewise.
+	* bfd/elf64-ppc.c: Likewise.
+	* bfd/elf64-s390.c: Likewise.
+	* bfd/elf64-sh64.c: Likewise.
+	* bfd/elf64-x86-64.c: Likewise.
+	* bfd/elflink.c: Likewise.
+	* bfd/elfnn-aarch64.c: Likewise.
+	* bfd/elfnn-ia64.c: Likewise.
+	* bfd/elfxx-mips.c: Likewise.
+	* bfd/elfxx-sparc.c: Likewise.
+	* bfd/elfxx-tilegx.c: Likewise.
+	* bfd/i386linux.c: Likewise.
+	* bfd/linker.c: Likewise.
+	* bfd/m68klinux.c: Likewise.
+	* bfd/pdp11.c: Likewise.
+	* bfd/pe-mips.c: Likewise.
+	* bfd/peXXigen.c: Likewise.
+	* bfd/reloc.c: Likewise.
+	* bfd/reloc16.c: Likewise.
+	* bfd/sparclinux.c: Likewise.
+	* bfd/sunos.c: Likewise.
+	* bfd/vms-alpha.c: Likewise.
+	* bfd/xcofflink.c: Likewise.
+
+2015-08-18  Alan Modra  <amodra@gmail.com>
+
+	PR 18667
+	* Makefile.am: Use $(SED) in place of sed throughout.
+	* Makefile.in: Regenerate.
+
+2015-08-18  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Don't redefine .TOC.
+	if already defined, and set linker_def.
+	(ppc64_elf_set_toc): Use .TOC. value if defined other than by
+	the backend.
+
 2015-08-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/18759
