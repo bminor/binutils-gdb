@@ -252,7 +252,7 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
 {
   struct aarch64_dr_update_callback_param *param_p
     = (struct aarch64_dr_update_callback_param *) ptr;
-  int pid = pid_of (lwp->thread);
+  int pid = ptid_get_pid (ptid_of_lwp (lwp));
   int idx = param_p->idx;
   int is_watchpoint = param_p->is_watchpoint;
   struct arch_lwp_info *info = lwp->arch_private;
