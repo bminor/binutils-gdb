@@ -1,5 +1,10 @@
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_linux_prepare_to_resume): Use
+	lwp_arch_private_info and ptid_of_lwp.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_get_debug_reg_state): Add argument pid.
 	Find proc_info by find_process_pid.  All callers updated.
 

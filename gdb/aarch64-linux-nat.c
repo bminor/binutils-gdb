@@ -431,7 +431,7 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 static void
 aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
 {
-  struct arch_lwp_info *info = lwp->arch_private;
+  struct arch_lwp_info *info = lwp_arch_private_info (lwp);
 
   /* NULL means this is the main thread still going through the shell,
      or, no watchpoint has been set yet.  In that case, there's
@@ -442,9 +442,10 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
   if (DR_HAS_CHANGED (info->dr_changed_bp)
       || DR_HAS_CHANGED (info->dr_changed_wp))
     {
-      int tid = ptid_get_lwp (lwp->ptid);
+      ptid_t ptid = ptid_of_lwp (lwp);
+      int tid = ptid_get_lwp (ptid);
       struct aarch64_debug_reg_state *state
-	= aarch64_get_debug_reg_state (ptid_get_pid (lwp->ptid));
+	= aarch64_get_debug_reg_state (ptid_get_pid (ptid));
 
       if (show_debug_regs)
 	fprintf_unfiltered (gdb_stdlog, "prepare_to_resume thread %d\n", tid);

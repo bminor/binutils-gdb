@@ -489,20 +489,18 @@ aarch64_linux_new_fork (struct process_info *parent,
 static void
 aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
 {
-  struct thread_info *thread = get_lwp_thread (lwp);
-  ptid_t ptid = ptid_of (thread);
-  struct arch_lwp_info *info = lwp->arch_private;
+  struct arch_lwp_info *info = lwp_arch_private_info (lwp);
 
   if (DR_HAS_CHANGED (info->dr_changed_bp)
       || DR_HAS_CHANGED (info->dr_changed_wp))
     {
+      ptid_t ptid = ptid_of_lwp (lwp);
       int tid = ptid_get_lwp (ptid);
-      struct process_info *proc = find_process_pid (ptid_get_pid (ptid));
       struct aarch64_debug_reg_state *state
-	= &proc->priv->arch_private->debug_reg_state;
+	= aarch64_get_debug_reg_state (ptid_get_pid (ptid));
 
       if (show_debug_regs)
-	fprintf (stderr, "prepare_to_resume thread %ld\n", lwpid_of (thread));
+	fprintf (stderr, "prepare_to_resume thread %d\n", tid);
 
       /* Watchpoints.  */
       if (DR_HAS_CHANGED (info->dr_changed_wp))
