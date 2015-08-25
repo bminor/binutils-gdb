@@ -1,5 +1,12 @@
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (struct arch64_dr_update_callback_param):
+	Remove.
+	(debug_reg_change_callback): Remove.
+	(aarch64_notify_debug_reg_change): Remove.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_notify_debug_reg_change):
 	Call current_lwp_ptid.
 

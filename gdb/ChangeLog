@@ -1,5 +1,18 @@
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-linux-nat.c (struct arch64_dr_update_callback_param):
+	Move it to nat/aarch64-linux-hw-point.c.
+	(debug_reg_change_callback): Likewise.
+	(aarch64_notify_debug_reg_change): :Likewise.
+	* nat/aarch64-linux-hw-point.c: Include nat/linux-nat.h.
+	(aarch64_dr_update_callback_param): New.
+	(debug_reg_change_callback): New function.
+	(aarch64_notify_debug_reg_change): Likewise.
+	* nat/aarch64-linux-hw-point.h (aarch64_notify_debug_reg_change):
+	Remove the declaration.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-linux-nat.c (aarch64_notify_debug_reg_change):
 	Call current_lwp_ptid.
 
