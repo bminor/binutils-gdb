@@ -1,3 +1,8 @@
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (debug_reg_change_callback): Call
+	ptid_get_pid rather than ptid_get_lwp.
+
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
 	* NEWS (New commands): Mention set/show remote
