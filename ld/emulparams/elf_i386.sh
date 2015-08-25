@@ -21,6 +21,7 @@ IREL_IN_PLT=
 TINY_READONLY_SECTION="
 .plt.got      ${RELOCATING-0} : { *(.plt.got) }
 "
+SHARABLE_SECTIONS=yes
 
 # Linux modify the default library search path to first include
 # a 32-bit specific directory.

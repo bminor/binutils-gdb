@@ -285,6 +285,7 @@ main (int argc, char **argv)
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
   link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
 #endif
+  link_info.sharable_sections = FALSE;
 
   ldfile_add_arch ("");
   emulation = get_emulation (argc, argv);

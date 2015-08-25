@@ -26,6 +26,7 @@ TINY_READONLY_SECTION="
 .plt.got      ${RELOCATING-0} : { *(.plt.got) }
 .plt.bnd      ${RELOCATING-0} : { *(.plt.bnd) }
 "
+SHARABLE_SECTIONS=yes
 
 if [ "x${host}" = "x${target}" ]; then
   case " $EMULATION_LIBPATH " in

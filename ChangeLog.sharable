@@ -1,0 +1,140 @@
+bfd/
+
+2013-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (struct elf_backend_data <merge_symbol>):  Add abfd,
+	newdyn and olddyn.  Remove const from oldsec.
+	(_bfd_elf_sharable_merge_symbol): Updated.
+	* elf64-x86-64.c (elf_x86_64_merge_symbol): Likewise.
+	* elflink.c (_bfd_elf_merge_symbol): Update bed->merge_symbol
+	call.
+
+2009-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c: Fix shadowed variable warnings.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+
+2007-01-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_sharable_com_section): New.
+	(_bfd_elf_add_sharable_symbol): Likewise.
+	(_bfd_elf_sharable_section_from_bfd_section): Likewise.
+	(_bfd_elf_sharable_symbol_processing): Likewise.
+	(_bfd_elf_sharable_common_definition): Likewise.
+	(_bfd_elf_sharable_common_section_index): Likewise.
+	(_bfd_elf_sharable_common_section): Likewise.
+	(_bfd_elf_sharable_merge_symbol): Likewise.
+
+	* elf.c (special_sections_g): Add ".gnu.linkonce.shrb" and
+	".gnu.linkonce.shrd".
+	(special_sections_s): Add ".sharable_bss" and ".sharable_data".
+	(get_program_header_size): Handle PT_GNU_SHR segment.
+	(_bfd_elf_map_sections_to_segments): Likewise.
+	(assign_file_positions_for_load_sections): Likewise.
+
+	* elf32-i386.c (elf_i386_link_hash_table): Add sdynsharablebss
+	and srelsharablebss fields.
+	(elf_i386_link_hash_table_create): Initialize sdynsharablebss
+	and srelsharablebss.
+	(elf_i386_create_dynamic_sections): Handle sdynsharablebss and
+	srelsharablebss.
+	(elf_i386_adjust_dynamic_symbol): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_backend_add_symbol_hook): Defined.
+	(elf_backend_section_from_bfd_section): Likewise.
+	(elf_backend_symbol_processing): Likewise.
+	(elf_backend_common_section_index): Likewise.
+	(elf_backend_common_section): Likewise.
+	(elf_backend_common_definition): Likewise.
+	(elf_backend_merge_symbol): Likewise.
+
+	* elf64-x86-64.c (elf64_x86_64_link_hash_table): Add
+	sdynsharablebss and srelsharablebss fields.
+	(elf64_x86_64_link_hash_table_create): Initialize sdynsharablebss
+	and srelsharablebss.
+	(elf64_x86_64_create_dynamic_sections): Handle sdynsharablebss
+	and srelsharablebss.
+	(elf64_x86_64_adjust_dynamic_symbol): Likewise.
+	(elf64_x86_64_size_dynamic_sections): Likewise.
+	(elf64_x86_64_finish_dynamic_symbol): Likewise.
+	(elf64_x86_64_add_symbol_hook): Handle sharable symbols.
+	(elf64_x86_64_elf_section_from_bfd_section): Likewise.
+	(elf64_x86_64_symbol_processing): Likewise.
+	(elf64_x86_64_merge_symbol): Likewise.
+	(elf64_x86_64_common_definition): Handle sharable sections.
+	(elf64_x86_64_common_section_index): Likewise.
+	(elf64_x86_64_common_section): Likewise.
+
+	* elflink.c (_bfd_elf_create_dynamic_sections): Handle
+	.dynsharablebss section.
+	(_bfd_elf_sharable_com_section): New.
+	(get_sharable_common_section): Likewise.
+	(_bfd_elf_add_sharable_symbol): Likewise.
+	(_bfd_elf_sharable_section_from_bfd_section): Likewise.
+	(_bfd_elf_sharable_symbol_processing): Likewise.
+	(_bfd_elf_sharable_common_definition): Likewise.
+	(_bfd_elf_sharable_common_section_index): Likewise.
+	(_bfd_elf_sharable_common_section): Likewise.
+	(_bfd_elf_sharable_merge_symbol): Likewise.
+
+	* elfnn-ia64.c (elfNN_ia64_add_symbol_hook): Handle sharable
+	symbols.
+	(elf_backend_add_symbol_hook): Defined.
+	(elf_backend_section_from_bfd_section): Likewise.
+	(elf_backend_symbol_processing): Likewise.
+	(elf_backend_common_section_index): Likewise.
+	(elf_backend_common_section): Likewise.
+	(elf_backend_common_definition): Likewise.
+	(elf_backend_merge_symbol): Likewise.
+
+binutils/
+
+2007-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (dump_relocations): Handle sharable sections.
+	(get_segment_type): Handle sharable segment.
+	(get_symbol_index_type): Handle sharable sections.
+
+gas/
+
+2007-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-elf.c (obj_elf_sharable_common): New.
+	(elf_pseudo_table): Add "sharable_common".
+	(obj_elf_change_section): Handle sharable sections.
+
+include/
+
+2007-01-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add sharable_sections.
+
+include/elf/
+
+2007-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* common.h (PT_GNU_SHR): New.
+	(SHF_GNU_SHARABLE): Likewise.
+	(SHN_GNU_SHARABLE_COMMON): Likewise.
+
+ld/
+
+2011-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf32_x86_64.sh (SHARABLE_SECTIONS): Set to yes.
+
+2007-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf64_ia64.sh (SHARABLE_SECTIONS): Set to yes.
+	* emulparams/elf_i386.sh (SHARABLE_SECTIONS): Likewise.
+	* emulparams/elf_x86_64.sh (SHARABLE_SECTIONS): Likewise.
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
+	link_info.sharable_sections based on $SHARABLE_SECTIONS.
+	(gld${EMULATION_NAME}_place_orphan): Don't allow orphaned
+	sharable sections.
+
+	* ldmain.c (main): Initialize link_info.sharable_sections.
+	* scripttempl/elf.sc: Support sharable sections.

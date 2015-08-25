@@ -106,6 +106,7 @@ gld${EMULATION_NAME}_before_parse (void)
   `if test -n "$CALL_NOP_BYTE" ; then echo link_info.call_nop_byte = $CALL_NOP_BYTE; fi`;
   link_info.check_relocs_after_open_input = `if test "x${CHECK_RELOCS_AFTER_OPEN_INPUT}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
   link_info.relro = DEFAULT_LD_Z_RELRO;
+  link_info.sharable_sections = `if test "$SHARABLE_SECTIONS" = "yes" ; then echo TRUE ; else echo FALSE ; fi`;
 }
 
 EOF
@@ -1853,6 +1854,12 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   unsigned int sh_type = iself ? elf_section_type (s) : SHT_NULL;
   flagword flags;
   asection *nexts;
+
+  /* Orphaned sharable sections won't have correct page
+     requirements.  */
+  if (elf_section_flags (s) & SHF_GNU_SHARABLE)
+    einfo ("%F%P: unable to place orphaned sharable section %A (%B)\n",
+	   s, s->owner);
 
   if (!bfd_link_relocatable (&link_info)
       && link_info.combreloc
