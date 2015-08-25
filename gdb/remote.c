@@ -5281,6 +5281,20 @@ async_handle_remote_sigint_twice (int sig)
   gdb_call_async_signal_handler (async_sigint_remote_twice_token, 0);
 }
 
+/* Implementation of to_check_pending_interrupt.  */
+
+static void
+remote_check_pending_interrupt (struct target_ops *self)
+{
+  struct async_signal_handler *token = async_sigint_remote_twice_token;
+
+  if (async_signal_handler_is_marked (token))
+    {
+      clear_async_signal_handler (token);
+      call_async_signal_handler (token);
+    }
+}
+
 /* Perform the real interruption of the target execution, in response
    to a ^C.  */
 static void
@@ -5453,24 +5467,29 @@ remote_interrupt (struct target_ops *self, ptid_t ptid)
 static void
 interrupt_query (void)
 {
+  struct remote_state *rs = get_remote_state ();
+  struct cleanup *old_chain;
+
+  old_chain = make_cleanup_restore_target_terminal ();
   target_terminal_ours ();
 
-  if (target_is_async_p ())
+  if (rs->waiting_for_stop_reply && rs->ctrlc_pending_p)
     {
-      signal (SIGINT, handle_sigint);
-      quit ();
+      if (query (_("The target is not responding to interrupt requests.\n"
+		   "Stop debugging it? ")))
+	{
+	  remote_unpush_target ();
+	  throw_error (TARGET_CLOSE_ERROR, _("Disconnected from target."));
+	}
     }
   else
     {
-      if (query (_("Interrupted while waiting for the program.\n\
-Give up (and stop debugging it)? ")))
-	{
-	  remote_unpush_target ();
-	  quit ();
-	}
+      if (query (_("Interrupted while waiting for the program.\n"
+		   "Give up waiting? ")))
+	quit ();
     }
 
-  target_terminal_inferior ();
+  do_cleanups (old_chain);
 }
 
 /* Enable/disable target terminal ownership.  Most targets can use
@@ -12530,6 +12549,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_get_ada_task_ptid = remote_get_ada_task_ptid;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_interrupt = remote_interrupt;
+  remote_ops.to_check_pending_interrupt = remote_check_pending_interrupt;
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;

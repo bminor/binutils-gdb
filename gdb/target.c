@@ -3309,6 +3309,14 @@ target_interrupt (ptid_t ptid)
   (*current_target.to_interrupt) (&current_target, ptid);
 }
 
+/* See target.h.  */
+
+void
+target_check_pending_interrupt (void)
+{
+  (*current_target.to_check_pending_interrupt) (&current_target);
+}
+
 /* See target/target.h.  */
 
 void
