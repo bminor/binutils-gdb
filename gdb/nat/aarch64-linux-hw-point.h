@@ -180,4 +180,6 @@ void aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,
 
 void aarch64_linux_get_debug_reg_capacity (int tid);
 
+struct aarch64_debug_reg_state *aarch64_get_debug_reg_state (pid_t pid);
+
 #endif /* AARCH64_LINUX_HW_POINT_H */

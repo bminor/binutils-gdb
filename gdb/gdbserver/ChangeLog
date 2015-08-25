@@ -1,5 +1,14 @@
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (aarch64-linux.o): New rule.
+	* configure.srv (aarch64*-*-linux*): Append aarch64-linux.o to
+	srv_tgtobj.
+	* linux-aarch64-low.c: Include nat/aarch64-linux.h.
+	(aarch64_init_debug_reg_state): Make it extern.
+	(aarch64_linux_prepare_to_resume): Remove.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_linux_prepare_to_resume): Use
 	lwp_arch_private_info and ptid_of_lwp.
 

@@ -1,5 +1,18 @@
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
+	* Makefile.in (aarch64-liunx.o): New rule.
+	(HFILES_NO_SRCDIR): Add aarch64-linux.h.
+	* config/aarch64/linux.mh (NAT_FILE): Add aarch64-linux.o.
+	* aarch64-linux-nat.c: Include nat/aarch64-linux.h.
+	* aarch64-linux-nat.c (aarch64_get_debug_reg_state): Make it
+	extern.
+	(aarch64_linux_prepare_to_resume): Move it nat/aarch64-linux.c.
+	* nat/aarch64-linux-hw-point.h (aarch64_debug_reg_state): Declare
+	* nat/aarch64-linux.c: New file.
+	* nat/aarch64-linux.h: New file.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-linux-nat.c (aarch64_linux_prepare_to_resume): Use
 	lwp_arch_private_info and ptid_of_lwp.
 

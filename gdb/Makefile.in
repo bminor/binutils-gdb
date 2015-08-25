@@ -937,7 +937,7 @@ tui/tui-winsource.h tui/tui-regs.h tui/tui-io.h tui/tui-layout.h \
 tui/tui-source.h sol2-tdep.h gregset.h sh-tdep.h sh64-tdep.h \
 expression.h score-tdep.h gdb_select.h ser-tcp.h \
 extension.h extension-priv.h nat/aarch64-linux-hw-point.h \
-build-id.h buildsym.h valprint.h \
+build-id.h buildsym.h valprint.h nat/aarch64-linux.h \
 typeprint.h mi/mi-getopt.h mi/mi-parse.h mi/mi-console.h \
 mi/mi-out.h mi/mi-main.h mi/mi-common.h mi/mi-cmds.h linux-nat.h \
 complaints.h gdb_proc_service.h gdb_regex.h xtensa-tdep.h inf-loop.h \
@@ -2330,6 +2330,10 @@ linux-namespaces.o: ${srcdir}/nat/linux-namespaces.c
 
 aarch64-linux-hw-point.o: ${srcdir}/nat/aarch64-linux-hw-point.c
 	$(COMPILE) $(srcdir)/nat/aarch64-linux-hw-point.c
+	$(POSTCOMPILE)
+
+aarch64-linux.o: ${srcdir}/nat/aarch64-linux.c
+	$(COMPILE) $(srcdir)/nat/aarch64-linux.c
 	$(POSTCOMPILE)
 
 #

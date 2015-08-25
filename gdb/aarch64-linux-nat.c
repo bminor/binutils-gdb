@@ -30,6 +30,7 @@
 #include "aarch64-tdep.h"
 #include "aarch64-linux-tdep.h"
 #include "aarch32-linux-nat.h"
+#include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
 
 #include "elf/external.h"
@@ -141,7 +142,7 @@ aarch64_forget_process (pid_t pid)
 
 /* Get debug registers state for process PID.  */
 
-static struct aarch64_debug_reg_state *
+struct aarch64_debug_reg_state *
 aarch64_get_debug_reg_state (pid_t pid)
 {
   return &aarch64_process_info_get (pid)->state;
@@ -423,47 +424,6 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
   regcache_supply_regset (&aarch64_linux_fpregset, regcache, -1,
 			  (const gdb_byte *) fpregsetp,
 			  AARCH64_LINUX_SIZEOF_FPREGSET);
-}
-
-/* Called when resuming a thread.
-   The hardware debug registers are updated when there is any change.  */
-
-static void
-aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
-{
-  struct arch_lwp_info *info = lwp_arch_private_info (lwp);
-
-  /* NULL means this is the main thread still going through the shell,
-     or, no watchpoint has been set yet.  In that case, there's
-     nothing to do.  */
-  if (info == NULL)
-    return;
-
-  if (DR_HAS_CHANGED (info->dr_changed_bp)
-      || DR_HAS_CHANGED (info->dr_changed_wp))
-    {
-      ptid_t ptid = ptid_of_lwp (lwp);
-      int tid = ptid_get_lwp (ptid);
-      struct aarch64_debug_reg_state *state
-	= aarch64_get_debug_reg_state (ptid_get_pid (ptid));
-
-      if (show_debug_regs)
-	fprintf_unfiltered (gdb_stdlog, "prepare_to_resume thread %d\n", tid);
-
-      /* Watchpoints.  */
-      if (DR_HAS_CHANGED (info->dr_changed_wp))
-	{
-	  aarch64_linux_set_debug_regs (state, tid, 1);
-	  DR_CLEAR_CHANGED (info->dr_changed_wp);
-	}
-
-      /* Breakpoints.  */
-      if (DR_HAS_CHANGED (info->dr_changed_bp))
-	{
-	  aarch64_linux_set_debug_regs (state, tid, 0);
-	  DR_CLEAR_CHANGED (info->dr_changed_bp);
-	}
-    }
 }
 
 static void

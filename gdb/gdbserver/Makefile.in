@@ -609,6 +609,9 @@ linux-personality.o: ../nat/linux-personality.c
 aarch64-linux-hw-point.o: ../nat/aarch64-linux-hw-point.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+aarch64-linux.o: ../nat/aarch64-linux.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 btrace-common.o: ../common/btrace-common.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)

@@ -21,6 +21,7 @@
 
 #include "server.h"
 #include "linux-low.h"
+#include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
 #include "linux-aarch32-low.h"
 #include "elf/common.h"
@@ -237,7 +238,7 @@ aarch64_init_debug_reg_state (struct aarch64_debug_reg_state *state)
 /* Return the pointer to the debug register state structure in the
    current process' arch-specific data area.  */
 
-static struct aarch64_debug_reg_state *
+struct aarch64_debug_reg_state *
 aarch64_get_debug_reg_state (pid_t pid)
 {
   struct process_info *proc = find_process_pid (pid);
@@ -480,42 +481,6 @@ aarch64_linux_new_fork (struct process_info *parent,
      this compatible with older Linux kernels too.  */
 
   *child->priv->arch_private = *parent->priv->arch_private;
-}
-
-/* Implementation of linux_target_ops method "linux_prepare_to_resume".
-
-   If the debug regs have changed, update the thread's copies.  */
-
-static void
-aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
-{
-  struct arch_lwp_info *info = lwp_arch_private_info (lwp);
-
-  if (DR_HAS_CHANGED (info->dr_changed_bp)
-      || DR_HAS_CHANGED (info->dr_changed_wp))
-    {
-      ptid_t ptid = ptid_of_lwp (lwp);
-      int tid = ptid_get_lwp (ptid);
-      struct aarch64_debug_reg_state *state
-	= aarch64_get_debug_reg_state (ptid_get_pid (ptid));
-
-      if (show_debug_regs)
-	fprintf (stderr, "prepare_to_resume thread %d\n", tid);
-
-      /* Watchpoints.  */
-      if (DR_HAS_CHANGED (info->dr_changed_wp))
-	{
-	  aarch64_linux_set_debug_regs (state, tid, 1);
-	  DR_CLEAR_CHANGED (info->dr_changed_wp);
-	}
-
-      /* Breakpoints.  */
-      if (DR_HAS_CHANGED (info->dr_changed_bp))
-	{
-	  aarch64_linux_set_debug_regs (state, tid, 0);
-	  DR_CLEAR_CHANGED (info->dr_changed_bp);
-	}
-    }
 }
 
 /* Return the right target description according to the ELF file of
