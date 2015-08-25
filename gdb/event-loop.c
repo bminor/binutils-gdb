@@ -908,6 +908,22 @@ mark_async_signal_handler (async_signal_handler * async_handler_ptr)
   async_handler_ptr->ready = 1;
 }
 
+/* See event-loop.h.  */
+
+void
+clear_async_signal_handler (async_signal_handler *async_handler_ptr)
+{
+  async_handler_ptr->ready = 0;
+}
+
+/* See event-loop.h.  */
+
+int
+async_signal_handler_is_marked (async_signal_handler *async_handler_ptr)
+{
+  return async_handler_ptr->ready;
+}
+
 /* Call all the handlers that are ready.  Returns true if any was
    indeed ready.  */
 static int

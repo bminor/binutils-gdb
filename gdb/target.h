@@ -642,6 +642,8 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_interrupt) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
+    void (*to_check_pending_interrupt) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_rcmd) (struct target_ops *,
 		     const char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
@@ -1683,6 +1685,14 @@ extern void target_stop (ptid_t ptid);
    should act like SIGINT).  This function is asynchronous.  */
 
 extern void target_interrupt (ptid_t ptid);
+
+/* Some targets install their own SIGINT handler while the target is
+   running.  This method is called from the QUIT macro to give such
+   targets a chance to process a Ctrl-C.  The target may e.g., choose
+   to interrupt the (potentially) long running operation, or give up
+   waiting and disconnect.  */
+
+extern void target_check_pending_interrupt (void);
 
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is
