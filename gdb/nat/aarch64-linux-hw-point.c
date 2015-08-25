@@ -239,7 +239,7 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
 {
   struct aarch64_dr_update_callback_param *param_p
     = (struct aarch64_dr_update_callback_param *) ptr;
-  int pid = ptid_get_pid (ptid_of_lwp (lwp));
+  int tid = ptid_get_lwp (ptid_of_lwp (lwp));
   int idx = param_p->idx;
   int is_watchpoint = param_p->is_watchpoint;
   struct arch_lwp_info *info = lwp_arch_private_info (lwp);
@@ -255,8 +255,8 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
   if (show_debug_regs)
     {
       debug_printf ("debug_reg_change_callback: \n\tOn entry:\n");
-      debug_printf ("\tpid%d, dr_changed_bp=0x%s, "
-		    "dr_changed_wp=0x%s\n", pid,
+      debug_printf ("\ttid%d, dr_changed_bp=0x%s, "
+		    "dr_changed_wp=0x%s\n", tid,
 		    phex (info->dr_changed_bp, 8),
 		    phex (info->dr_changed_wp, 8));
     }
@@ -281,8 +281,8 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
 
   if (show_debug_regs)
     {
-      debug_printf ("\tOn exit:\n\tpid%d, dr_changed_bp=0x%s, "
-		    "dr_changed_wp=0x%s\n", pid,
+      debug_printf ("\tOn exit:\n\ttid%d, dr_changed_bp=0x%s, "
+		    "dr_changed_wp=0x%s\n", tid,
 		    phex (info->dr_changed_bp, 8),
 		    phex (info->dr_changed_wp, 8));
     }

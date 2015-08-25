@@ -1,3 +1,9 @@
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/aarch64-linux-hw-point.c (debug_reg_change_callback):
+	Rename local variable pid to tid, and get lwpid of lwp.  Update
+	debug output.
+
 2015-08-25  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-lang.c (ada_read_var_value): Add a var_block argument
