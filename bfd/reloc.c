@@ -6793,7 +6793,7 @@ ENUM
   BFD_RELOC_AARCH64_LD64_GOTOFF_LO15
 ENUMDOC
   Unsigned 15 bit byte offset for 64 bit load/store from the page of
-  the GOT entry for this symbol. Valid in ILP64 ABI only.
+  the GOT entry for this symbol.  Valid in LP64 ABI only.
 ENUM
   BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14
 ENUMDOC

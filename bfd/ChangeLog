@@ -1,3 +1,9 @@
+2015-08-25  Renlin Li  <renlin.li@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_LD64_GOTOFF_LO15): Use LP64 instead of
+	ILP64.
+	* bfd-in2.h: Regenerate.
+
 2015-08-22  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (_bfd_elf_slurp_version_tables): Always init vd_nodename.

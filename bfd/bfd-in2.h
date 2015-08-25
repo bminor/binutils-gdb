@@ -5753,7 +5753,7 @@ BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in ILP32 ABI only.  */
   BFD_RELOC_AARCH64_LD32_GOT_LO12_NC,
 
 /* Unsigned 15 bit byte offset for 64 bit load/store from the page of
-the GOT entry for this symbol. Valid in ILP64 ABI only.  */
+the GOT entry for this symbol.  Valid in LP64 ABI only.  */
   BFD_RELOC_AARCH64_LD64_GOTOFF_LO15,
 
 /* Scaled 14 bit byte offset to the page base of the global offset table.  */
