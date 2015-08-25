@@ -276,26 +276,6 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
 	      && (idx <= (is_watchpoint ? aarch64_num_wp_regs
 			  : aarch64_num_bp_regs)));
 
-  /* The following assertion is not right, as there can be changes
-     that have not been made to the hardware debug registers
-     before new changes overwrite the old ones.  This can happen,
-     for instance, when the breakpoint/watchpoint hit one of the
-     threads and the user enters continue; then what happens is:
-     1) all breakpoints/watchpoints are removed for all threads;
-     2) a single step is carried out for the thread that was hit;
-     3) all of the points are inserted again for all threads;
-     4) all threads are resumed.
-     The 2nd step will only affect the one thread in which the
-     bp/wp was hit, which means only that one thread is resumed;
-     remember that the actual updating only happen in
-     aarch64_linux_prepare_to_resume, so other threads remain
-     stopped during the removal and insertion of bp/wp.  Therefore
-     for those threads, the change of insertion of the bp/wp
-     overwrites that of the earlier removals.  (The situation may
-     be different when bp/wp is steppable, or in the non-stop
-     mode.)  */
-  /* gdb_assert (DR_N_HAS_CHANGED (dr_changed, idx) == 0);  */
-
   /* The actual update is done later just before resuming the lwp,
      we just mark that one register pair needs updating.  */
   DR_MARK_N_CHANGED (dr_changed, idx);
