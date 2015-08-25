@@ -1041,6 +1041,18 @@ quit (void)
 #endif
 }
 
+/* See defs.h.  */
+
+void
+maybe_quit (void)
+{
+  if (check_quit_flag () || sync_quit_force_run)
+    quit ();
+  if (deprecated_interactive_hook)
+    deprecated_interactive_hook ();
+  target_check_pending_interrupt ();
+}
+
 
 /* Called when a memory allocation fails, with the number of bytes of
    memory requested in SIZE.  */

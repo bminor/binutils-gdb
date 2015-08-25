@@ -1,3 +1,27 @@
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18804
+	* defs.h (maybe_quit): Declare.
+	(QUIT): Now calls maybe_quit.
+	* event-loop.c (clear_async_signal_handler)
+	(async_signal_handler_is_marked): New functions.
+	* event-loop.h (async_signal_handler_is_marked)
+	(clear_async_signal_handler): New declarations.
+	* remote.c (remote_check_pending_interrupt): New function.
+	(interrupt_query): Use make_cleanup_restore_target_terminal.  No
+	longer check whether the target is async.  If waiting for a stop
+	reply, and a Ctrl-C as been sent to the target, offer to
+	disconnect, and throw TARGET_CLOSE_ERROR instead of a quit.
+	Otherwise do not disconnect and throw a quit.
+	(_initialize_remote): Install remote_check_pending_interrupt as
+	to_check_pending_interrupt.
+	* target.c (target_check_pending_interrupt): New function.
+	* target.h (struct target_ops) <to_check_pending_interrupt>: New
+	field.
+	(target_check_pending_interrupt): New declaration.
+	* utils.c (maybe_quit): New function.
+	* target-delegates.c: Regenerate.
+
 2015-08-21  Gary Benson  <gbenson@redhat.com>
 
 	* gdb_bfd.c (gdb_bfd_iovec_fileio_pread): Add QUIT call.
