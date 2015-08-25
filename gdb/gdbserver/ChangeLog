@@ -1,5 +1,10 @@
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (debug_reg_change_callback): Use
+	debug_printf.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (debug_reg_change_callback): Use phex.
 
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
