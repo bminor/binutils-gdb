@@ -1,5 +1,10 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_replay_at_breakpoint): New.
+	(record_btrace_step_thread): Call record_btrace_replay_at_breakpoint.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (btrace_thread_flag_to_str)
 	(record_btrace_cancel_resume): New.
 	(record_btrace_step_thread): Call btrace_thread_flag_to_str.

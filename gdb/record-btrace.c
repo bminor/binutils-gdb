@@ -1983,6 +1983,34 @@ record_btrace_clear_histories (struct btrace_thread_info *btinfo)
   btinfo->call_history = NULL;
 }
 
+/* Check whether TP's current replay position is at a breakpoint.  */
+
+static int
+record_btrace_replay_at_breakpoint (struct thread_info *tp)
+{
+  struct btrace_insn_iterator *replay;
+  struct btrace_thread_info *btinfo;
+  const struct btrace_insn *insn;
+  struct inferior *inf;
+
+  btinfo = &tp->btrace;
+  replay = btinfo->replay;
+
+  if (replay == NULL)
+    return 0;
+
+  insn = btrace_insn_get (replay);
+  if (insn == NULL)
+    return 0;
+
+  inf = find_inferior_ptid (tp->ptid);
+  if (inf == NULL)
+    return 0;
+
+  return record_check_stopped_by_breakpoint (inf->aspace, insn->pc,
+					     &btinfo->stop_reason);
+}
+
 /* Step a single thread.  */
 
 static struct target_waitstatus
@@ -1990,8 +2018,6 @@ record_btrace_step_thread (struct thread_info *tp)
 {
   struct btrace_insn_iterator *replay, end;
   struct btrace_thread_info *btinfo;
-  struct address_space *aspace;
-  struct inferior *inf;
   enum btrace_thread_flag flags;
   unsigned int steps;
 
@@ -2067,9 +2093,6 @@ record_btrace_step_thread (struct thread_info *tp)
       if (replay == NULL)
 	return btrace_step_no_history ();
 
-      inf = find_inferior_ptid (tp->ptid);
-      aspace = inf->aspace;
-
       /* Determine the end of the instruction trace.  */
       btrace_insn_end (&end, btinfo);
 
@@ -2102,8 +2125,7 @@ record_btrace_step_thread (struct thread_info *tp)
 		 target_pid_to_str (tp->ptid),
 		 core_addr_to_string_nz (insn->pc));
 
-	  if (record_check_stopped_by_breakpoint (aspace, insn->pc,
-						  &btinfo->stop_reason))
+	  if (record_btrace_replay_at_breakpoint (tp))
 	    return btrace_step_stopped ();
 	}
 
@@ -2111,9 +2133,6 @@ record_btrace_step_thread (struct thread_info *tp)
       /* Start replaying if we're not already doing so.  */
       if (replay == NULL)
 	replay = record_btrace_start_replaying (tp);
-
-      inf = find_inferior_ptid (tp->ptid);
-      aspace = inf->aspace;
 
       for (;;)
 	{
@@ -2135,8 +2154,7 @@ record_btrace_step_thread (struct thread_info *tp)
 		 target_pid_to_str (tp->ptid),
 		 core_addr_to_string_nz (insn->pc));
 
-	  if (record_check_stopped_by_breakpoint (aspace, insn->pc,
-						  &btinfo->stop_reason))
+	  if (record_btrace_replay_at_breakpoint (tp))
 	    return btrace_step_stopped ();
 	}
     }
