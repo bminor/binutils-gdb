@@ -1,3 +1,13 @@
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_dr_update_callback_param) <pid>:
+	Remove.
+	(debug_reg_change_callback): Remove argument entry and add argument
+	lwp.  Remove local variable thread.  Don't print thread id in the
+	debugging output.  Don't check whether pid of thread equals to pid.
+	(aarch64_notify_debug_reg_change): Don't set param.pid.  Call
+	iterate_over_lwps instead find_inferior.
+
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
 	* inferiors.c (get_first_process): New function.

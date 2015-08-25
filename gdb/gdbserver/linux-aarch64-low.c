@@ -236,25 +236,23 @@ aarch64_init_debug_reg_state (struct aarch64_debug_reg_state *state)
 
 struct aarch64_dr_update_callback_param
 {
-  int pid;
   int is_watchpoint;
   unsigned int idx;
 };
 
-/* Callback function which records the information about the change of
-   one hardware breakpoint/watchpoint setting for the thread ENTRY.
+/* Callback for iterate_over_lwps.  Records the
+   information about the change of one hardware breakpoint/watchpoint
+   setting for the thread LWP.
    The information is passed in via PTR.
    N.B.  The actual updating of hardware debug registers is not
    carried out until the moment the thread is resumed.  */
 
 static int
-debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
+debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
 {
-  struct thread_info *thread = (struct thread_info *) entry;
-  struct lwp_info *lwp = get_thread_lwp (thread);
   struct aarch64_dr_update_callback_param *param_p
     = (struct aarch64_dr_update_callback_param *) ptr;
-  int pid = param_p->pid;
+  int pid = pid_of (lwp->thread);
   int idx = param_p->idx;
   int is_watchpoint = param_p->is_watchpoint;
   struct arch_lwp_info *info = lwp->arch_private;
@@ -264,9 +262,9 @@ debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
   if (show_debug_regs)
     {
       fprintf (stderr, "debug_reg_change_callback: \n\tOn entry:\n");
-      fprintf (stderr, "\tpid%d, tid: %ld, dr_changed_bp=0x%llx, "
+      fprintf (stderr, "\tpid%d, dr_changed_bp=0x%llx, "
 	       "dr_changed_wp=0x%llx\n",
-	       pid, lwpid_of (thread), info->dr_changed_bp,
+	       pid, info->dr_changed_bp,
 	       info->dr_changed_wp);
     }
 
@@ -274,9 +272,6 @@ debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
     : &info->dr_changed_bp;
   dr_changed = *dr_changed_ptr;
 
-  /* Only update the threads of this process.  */
-  if (pid_of (thread) == pid)
-    {
       gdb_assert (idx >= 0
 		  && (idx <= (is_watchpoint ? aarch64_num_wp_regs
 			      : aarch64_num_bp_regs)));
@@ -310,13 +305,12 @@ debug_reg_change_callback (struct inferior_list_entry *entry, void *ptr)
          we can update its debug registers.  */
       if (!lwp->stopped)
 	linux_stop_lwp (lwp);
-    }
 
   if (show_debug_regs)
     {
-      fprintf (stderr, "\tOn exit:\n\tpid%d, tid: %ld, dr_changed_bp=0x%llx, "
+      fprintf (stderr, "\tOn exit:\n\tpid%d, dr_changed_bp=0x%llx, "
 	       "dr_changed_wp=0x%llx\n",
-	       pid, lwpid_of (thread), info->dr_changed_bp,
+	       pid, info->dr_changed_bp,
 	       info->dr_changed_wp);
     }
 
@@ -333,14 +327,12 @@ aarch64_notify_debug_reg_change (const struct aarch64_debug_reg_state *state,
 				 int is_watchpoint, unsigned int idx)
 {
   struct aarch64_dr_update_callback_param param;
-
-  /* Only update the threads of this process.  */
-  param.pid = pid_of (current_thread);
+  ptid_t pid_ptid = pid_to_ptid (pid_of (current_thread));
 
   param.is_watchpoint = is_watchpoint;
   param.idx = idx;
 
-  find_inferior (&all_threads, debug_reg_change_callback, (void *) &param);
+  iterate_over_lwps (pid_ptid, debug_reg_change_callback, (void *) &param);
 }
 
 
