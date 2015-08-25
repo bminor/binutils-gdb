@@ -1,3 +1,12 @@
+2015-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gas/sparc/wrpr.s: Test writing to the privileged %pmcdper
+	register.
+	* gas/sparc/wrpr.d: ...and the expected result.
+	* gas/sparc/rdpr.s: Test reading from the privileged %pmcdper
+	register.
+	* gas/sparc/rdpr.d: ...and the expected result.
+
 2015-08-24  Jan Stancek  <jstancek@redhat.com>
 
 	* gas/i386/intel.s: Add test of disassembly of a potential

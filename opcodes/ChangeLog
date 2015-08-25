@@ -1,3 +1,8 @@
+2015-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-dis.c (print_insn_sparc): Handle the privileged register
+	%pmcdper.
+
 2015-08-24  Jan Stancek  <jstancek@redhat.com>
 
 	* i386-dis.c (print_insn): Fix decoding of three byte operands.

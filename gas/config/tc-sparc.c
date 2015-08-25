@@ -805,6 +805,7 @@ struct priv_reg_entry priv_reg_table[] =
   {"wstate", 14},
   {"fq", 15},
   {"gl", 16},
+  {"pmcdper", 23},
   {"ver", 31},
   {"", -1},			/* End marker.  */
 };
