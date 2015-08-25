@@ -1,3 +1,9 @@
+2015-08-25  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18854
+	* elf.c (bfd_section_from_shdr): Replace assertions with warnings
+	about multiple symbol tables.
+
 2015-08-25  Renlin Li  <renlin.li@arm.com>
 
 	* reloc.c (BFD_RELOC_AARCH64_LD64_GOTOFF_LO15): Use LP64 instead of

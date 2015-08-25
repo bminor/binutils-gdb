@@ -1833,7 +1833,15 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  goto success;
 	}
 
-      BFD_ASSERT (elf_onesymtab (abfd) == 0);
+      /* PR 18854: A binary might contain more than one symbol table.
+	 Unusual, but possible.  Warn, but continue.  */
+      if (elf_onesymtab (abfd) != 0)
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: warning: multiple symbol tables detected - ignoring the table in section %u"),
+	     abfd, shindex);
+	  goto success;
+	}
       elf_onesymtab (abfd) = shindex;
       elf_tdata (abfd)->symtab_hdr = *hdr;
       elf_elfsections (abfd)[shindex] = hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -1898,7 +1906,15 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  goto success;
 	}
 
-      BFD_ASSERT (elf_dynsymtab (abfd) == 0);
+      /* PR 18854: A binary might contain more than one dynamic symbol table.
+	 Unusual, but possible.  Warn, but continue.  */
+      if (elf_dynsymtab (abfd) != 0)
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: warning: multiple dynamic symbol tables detected - ignoring the table in section %u"),
+	     abfd, shindex);
+	  goto success;
+	}
       elf_dynsymtab (abfd) = shindex;
       elf_tdata (abfd)->dynsymtab_hdr = *hdr;
       elf_elfsections (abfd)[shindex] = hdr = &elf_tdata (abfd)->dynsymtab_hdr;
