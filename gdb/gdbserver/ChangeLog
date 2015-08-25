@@ -1,5 +1,9 @@
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_linux_new_thread): Remove.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (aarch64-linux.o): New rule.
 	* configure.srv (aarch64*-*-linux*): Append aarch64-linux.o to
 	srv_tgtobj.

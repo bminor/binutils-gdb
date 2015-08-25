@@ -1,5 +1,11 @@
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-linux-nat.c (aarch64_linux_new_thread): Move it to ...
+	* nat/aarch64-linux.c (aarch64_linux_new_thread): ... here.
+	* nat/aarch64-linux.h (aarch64_linux_new_thread): Declare.
+
+2015-08-25  Yao Qi  <yao.qi@linaro.org>
+
 	* Makefile.in (aarch64-liunx.o): New rule.
 	(HFILES_NO_SRCDIR): Add aarch64-linux.h.
 	* config/aarch64/linux.mh (NAT_FILE): Add aarch64-linux.o.

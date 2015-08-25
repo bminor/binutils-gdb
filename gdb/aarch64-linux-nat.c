@@ -426,19 +426,6 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 			  AARCH64_LINUX_SIZEOF_FPREGSET);
 }
 
-static void
-aarch64_linux_new_thread (struct lwp_info *lp)
-{
-  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
-
-  /* Mark that all the hardware breakpoint/watchpoint register pairs
-     for this thread need to be initialized.  */
-  DR_MARK_ALL_CHANGED (info->dr_changed_bp, aarch64_num_bp_regs);
-  DR_MARK_ALL_CHANGED (info->dr_changed_wp, aarch64_num_wp_regs);
-
-  lp->arch_private = info;
-}
-
 /* linux_nat_new_fork hook.   */
 
 static void

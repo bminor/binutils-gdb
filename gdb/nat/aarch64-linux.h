@@ -21,4 +21,6 @@
 
 void aarch64_linux_prepare_to_resume (struct lwp_info *lwp);
 
+void aarch64_linux_new_thread (struct lwp_info *lwp);
+
 #endif /* AARCH64_LINUX_H */

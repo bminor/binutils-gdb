@@ -62,3 +62,19 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
 	}
     }
 }
+
+/* Function to call when a new thread is detected.  */
+
+void
+aarch64_linux_new_thread (struct lwp_info *lwp)
+{
+  struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
+
+  /* Mark that all the hardware breakpoint/watchpoint register pairs
+     for this thread need to be initialized (with data from
+     aarch_process_info.debug_reg_state).  */
+  DR_MARK_ALL_CHANGED (info->dr_changed_bp, aarch64_num_bp_regs);
+  DR_MARK_ALL_CHANGED (info->dr_changed_wp, aarch64_num_wp_regs);
+
+  lwp_set_arch_private_info (lwp, info);
+}
