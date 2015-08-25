@@ -1,5 +1,12 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_resume_thread): A move request
+	overwrites a previous move request.
+	(record_btrace_find_resume_thread): Removed.
+	(record_btrace_resume): Resume all requested threads.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c: Include vec.h.
 	(record_btrace_find_thread_to_move): Removed.
 	(btrace_step_no_resumed, btrace_step_again)

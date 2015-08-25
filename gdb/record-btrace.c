@@ -1699,29 +1699,12 @@ record_btrace_resume_thread (struct thread_info *tp,
 
   btinfo = &tp->btrace;
 
-  if ((btinfo->flags & BTHR_MOVE) != 0)
-    error (_("Thread already moving."));
-
   /* Fetch the latest branch trace.  */
   btrace_fetch (tp);
 
-  /* A resume request overwrites a preceding stop request.  */
-  btinfo->flags &= ~BTHR_STOP;
+  /* A resume request overwrites a preceding resume or stop request.  */
+  btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
   btinfo->flags |= flag;
-}
-
-/* Find the thread to resume given a PTID.  */
-
-static struct thread_info *
-record_btrace_find_resume_thread (ptid_t ptid)
-{
-  struct thread_info *tp;
-
-  /* When asked to resume everything, we pick the current thread.  */
-  if (ptid_equal (minus_one_ptid, ptid) || ptid_is_pid (ptid))
-    ptid = inferior_ptid;
-
-  return find_thread_ptid (ptid);
 }
 
 /* Start replaying a thread.  */
@@ -1865,30 +1848,50 @@ static void
 record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
 		      enum gdb_signal signal)
 {
-  struct thread_info *tp, *other;
+  struct thread_info *tp;
   enum btrace_thread_flag flag;
+  ptid_t orig_ptid;
 
   DEBUG ("resume %s: %s%s", target_pid_to_str (ptid),
 	 execution_direction == EXEC_REVERSE ? "reverse-" : "",
 	 step ? "step" : "cont");
 
-  /* Store the execution direction of the last resume.  */
+  orig_ptid = ptid;
+
+  /* Store the execution direction of the last resume.
+
+     If there is more than one to_resume call, we have to rely on infrun
+     to not change the execution direction in-between.  */
   record_btrace_resume_exec_dir = execution_direction;
 
-  tp = record_btrace_find_resume_thread (ptid);
-  if (tp == NULL)
-    error (_("Cannot find thread to resume."));
+  /* For all-stop targets...  */
+  if (!target_is_non_stop_p ())
+    {
+      /* ...we pick the current thread when asked to resume an entire process
+	 or everything.  */
+      if (ptid_equal (minus_one_ptid, ptid) || ptid_is_pid (ptid))
+	ptid = inferior_ptid;
 
-  /* Stop replaying other threads if the thread to resume is not replaying.  */
-  if (!btrace_is_replaying (tp) && execution_direction != EXEC_REVERSE)
-    ALL_NON_EXITED_THREADS (other)
-      record_btrace_stop_replaying (other);
+      tp = find_thread_ptid (ptid);
+      if (tp == NULL)
+	error (_("Cannot find thread to resume."));
 
-  /* As long as we're not replaying, just forward the request.  */
+      /* ...and we stop replaying other threads if the thread to resume is not
+	 replaying.  */
+      if (!btrace_is_replaying (tp) && execution_direction != EXEC_REVERSE)
+	ALL_NON_EXITED_THREADS (tp)
+	  record_btrace_stop_replaying (tp);
+    }
+
+  /* As long as we're not replaying, just forward the request.
+
+     For non-stop targets this means that no thread is replaying.  In order to
+     make progress, we may need to explicitly move replaying threads to the end
+     of their execution history.  */
   if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
     {
       ops = ops->beneath;
-      return ops->to_resume (ops, ptid, step, signal);
+      return ops->to_resume (ops, orig_ptid, step, signal);
     }
 
   /* Compute the btrace thread flag for the requested move.  */
@@ -1897,15 +1900,11 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
   else
     flag = execution_direction == EXEC_REVERSE ? BTHR_RSTEP : BTHR_STEP;
 
-  /* At the moment, we only move a single thread.  We could also move
-     all threads in parallel by single-stepping each resumed thread
-     until the first runs into an event.
-     When we do that, we would want to continue all other threads.
-     For now, just resume one thread to not confuse to_wait.  */
-  record_btrace_resume_thread (tp, flag);
-
   /* We just indicate the resume intent here.  The actual stepping happens in
      record_btrace_wait below.  */
+  ALL_NON_EXITED_THREADS (tp)
+    if (ptid_match (tp->ptid, ptid))
+      record_btrace_resume_thread (tp, flag);
 
   /* Async support.  */
   if (target_can_async_p ())
