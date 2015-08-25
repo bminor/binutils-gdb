@@ -224,7 +224,7 @@ aarch64_notify_debug_reg_change (const struct aarch64_debug_reg_state *state,
 				 int is_watchpoint, unsigned int idx)
 {
   struct aarch64_dr_update_callback_param param;
-  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
 
   param.is_watchpoint = is_watchpoint;
   param.idx = idx;
