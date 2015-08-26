@@ -1,3 +1,14 @@
+2015-08-27  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2015-08-26  Alan Modra  <amodra@gmail.com>
+	PR 18867
+	* elflink.c (cmp_ext32l_r_offset, cmp_ext32b_r_offset): Delete.
+	(cmp_ext64l_r_offset, cmp_ext64b_r_offset): Delete.
+	(ext32l_r_offset, ext32b_r_offset, ext64l_r_offset, ext64b_r_offset):
+	New functions.
+	(elf_link_adjust_relocs): Use an insertion sort to sort relocs.
+
 2015-07-21  Tristan Gingold  <gingold@adacore.com>
 
 	* version.m4: Bump version to 2.25.2
