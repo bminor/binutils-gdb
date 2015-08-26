@@ -1,5 +1,10 @@
 2015-08-26  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdbarch.sh (append_name): Fix type in XRESIZEVEC.
+	* gdbarch.c: Re-generate.
+
+2015-08-26  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* aarch64-linux-nat.c (aarch64_add_process): Likewise.
 	* aarch64-tdep.c (aarch64_gdbarch_init): Likewise.
 	* ada-exp.y (write_ambiguous_var): Likewise.

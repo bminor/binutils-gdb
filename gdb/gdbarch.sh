@@ -2201,7 +2201,7 @@ static struct gdbarch_registration *gdbarch_registry = NULL;
 static void
 append_name (const char ***buf, int *nr, const char *name)
 {
-  *buf = XRESIZEVEC (const char **, *buf, *nr + 1);
+  *buf = XRESIZEVEC (const char *, *buf, *nr + 1);
   (*buf)[*nr] = name;
   *nr += 1;
 }
