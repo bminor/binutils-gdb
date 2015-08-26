@@ -1,3 +1,11 @@
+2015-08-25  Don Breazeal  <donb@codesourcery.com>
+
+	* infrun.c (follow_exec): Re-order operations for
+	handling follow-exec-mode "new".
+	(handle_inferior_event_1): Assign ecs->event_thread
+	to the current thread.
+	* remote.c (get_remote_arch_state): Add an assertion.
+
 2015-08-26  Pedro Alves  <palves@redhat.com>
 
 	* MAINTAINERS: Add Markus Metzger as btrace maintainer.

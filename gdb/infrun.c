@@ -1187,12 +1187,16 @@ follow_exec (ptid_t ptid, char *execd_pathname)
       /* The user wants to keep the old inferior and program spaces
 	 around.  Create a new fresh one, and switch to it.  */
 
-      inf = add_inferior (current_inferior ()->pid);
+      /* Do exit processing for the original inferior before adding
+	 the new inferior so we don't have two active inferiors with
+	 the same ptid, which can confuse find_inferior_ptid.  */
+      exit_inferior_num_silent (current_inferior ()->num);
+
+      inf = add_inferior (pid);
       pspace = add_program_space (maybe_new_address_space ());
       inf->pspace = pspace;
       inf->aspace = pspace->aspace;
-
-      exit_inferior_num_silent (current_inferior ()->num);
+      add_thread (ptid);
 
       set_current_inferior (inf);
       set_current_program_space (pspace);
@@ -4977,6 +4981,11 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
          Must do this now, before trying to determine whether to
          stop.  */
       follow_exec (inferior_ptid, ecs->ws.value.execd_pathname);
+
+      /* In follow_exec we may have deleted the original thread and
+	 created a new one.  Make sure that the event thread is the
+	 execd thread for that case (this is a nop otherwise).  */
+      ecs->event_thread = inferior_thread ();
 
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),

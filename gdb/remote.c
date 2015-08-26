@@ -600,6 +600,7 @@ static struct gdbarch_data *remote_gdbarch_data_handle;
 static struct remote_arch_state *
 get_remote_arch_state (void)
 {
+  gdb_assert (target_gdbarch () != NULL);
   return gdbarch_data (target_gdbarch (), remote_gdbarch_data_handle);
 }
 
