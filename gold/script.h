@@ -113,7 +113,7 @@ class Expression
 		 Output_section* dot_section,
 		 Output_section** result_section, uint64_t* result_alignment,
 		 elfcpp::STT* type, elfcpp::STV* vis, unsigned char* nonvis,
-		 bool is_section_dot_assignment);
+		 bool is_section_dot_assignment, bool* is_valid_pointer);
 
   // Print the expression to the FILE.  This is for debugging.
   virtual void

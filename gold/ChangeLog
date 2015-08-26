@@ -1,5 +1,19 @@
 2015-08-25  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/14746
+	* expression.cc (Expression::Expression_eval_info): Add
+	is_valid_pointer field.
+	(Expression::eval_maybe_dot): Add is_valid_pointer parameter.
+	Adjust all callers.
+	(Addr_expression::value_from_output_section): Check whether address
+	is valid.
+	* script.cc (Symbol_assignment::set_if_absolute): Defer assignment
+	if evaluation failed due to address that is not yet valid.
+	* script.h: (Expression::eval_maybe_dot): Add is_valid_pointer
+	parameter.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/18866
 	PR gold/18703
 	* symtab.cc (Symbol_table): Reorder conditions to avoid internal error.
