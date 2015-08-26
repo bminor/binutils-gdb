@@ -1,5 +1,10 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (get_thread_current_frame): New.
+	(record_btrace_start_replaying): Call get_thread_current_frame.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_resume_thread): A move request
 	overwrites a previous move request.
 	(record_btrace_find_resume_thread): Removed.

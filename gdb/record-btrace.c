@@ -1707,21 +1707,18 @@ record_btrace_resume_thread (struct thread_info *tp,
   btinfo->flags |= flag;
 }
 
-/* Start replaying a thread.  */
+/* Get the current frame for TP.  */
 
-static struct btrace_insn_iterator *
-record_btrace_start_replaying (struct thread_info *tp)
+static struct frame_info *
+get_thread_current_frame (struct thread_info *tp)
 {
-  struct btrace_insn_iterator *replay;
-  struct btrace_thread_info *btinfo;
+  struct frame_info *frame;
+  ptid_t old_inferior_ptid;
   int executing;
 
-  btinfo = &tp->btrace;
-  replay = NULL;
-
-  /* We can't start replaying without trace.  */
-  if (btinfo->begin == NULL)
-    return NULL;
+  /* Set INFERIOR_PTID, which is implicitly used by get_current_frame.  */
+  old_inferior_ptid = inferior_ptid;
+  inferior_ptid = tp->ptid;
 
   /* Clear the executing flag to allow changes to the current frame.
      We are not actually running, yet.  We just started a reverse execution
@@ -1730,8 +1727,49 @@ record_btrace_start_replaying (struct thread_info *tp)
      For the former, EXECUTING is true and we're in to_wait, about to
      move the thread.  Since we need to recompute the stack, we temporarily
      set EXECUTING to flase.  */
-  executing = is_executing (tp->ptid);
-  set_executing (tp->ptid, 0);
+  executing = is_executing (inferior_ptid);
+  set_executing (inferior_ptid, 0);
+
+  frame = NULL;
+  TRY
+    {
+      frame = get_current_frame ();
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      /* Restore the previous execution state.  */
+      set_executing (inferior_ptid, executing);
+
+      /* Restore the previous inferior_ptid.  */
+      inferior_ptid = old_inferior_ptid;
+
+      throw_exception (except);
+    }
+  END_CATCH
+
+  /* Restore the previous execution state.  */
+  set_executing (inferior_ptid, executing);
+
+  /* Restore the previous inferior_ptid.  */
+  inferior_ptid = old_inferior_ptid;
+
+  return frame;
+}
+
+/* Start replaying a thread.  */
+
+static struct btrace_insn_iterator *
+record_btrace_start_replaying (struct thread_info *tp)
+{
+  struct btrace_insn_iterator *replay;
+  struct btrace_thread_info *btinfo;
+
+  btinfo = &tp->btrace;
+  replay = NULL;
+
+  /* We can't start replaying without trace.  */
+  if (btinfo->begin == NULL)
+    return NULL;
 
   /* GDB stores the current frame_id when stepping in order to detects steps
      into subroutines.
@@ -1745,7 +1783,7 @@ record_btrace_start_replaying (struct thread_info *tp)
       int upd_step_frame_id, upd_step_stack_frame_id;
 
       /* The current frame without replaying - computed via normal unwind.  */
-      frame = get_current_frame ();
+      frame = get_thread_current_frame (tp);
       frame_id = get_frame_id (frame);
 
       /* Check if we need to update any stepping-related frame id's.  */
@@ -1777,7 +1815,7 @@ record_btrace_start_replaying (struct thread_info *tp)
       registers_changed_ptid (tp->ptid);
 
       /* The current frame with replaying - computed via btrace unwind.  */
-      frame = get_current_frame ();
+      frame = get_thread_current_frame (tp);
       frame_id = get_frame_id (frame);
 
       /* Replace stepping related frames where necessary.  */
@@ -1788,9 +1826,6 @@ record_btrace_start_replaying (struct thread_info *tp)
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      /* Restore the previous execution state.  */
-      set_executing (tp->ptid, executing);
-
       xfree (btinfo->replay);
       btinfo->replay = NULL;
 
@@ -1799,9 +1834,6 @@ record_btrace_start_replaying (struct thread_info *tp)
       throw_exception (except);
     }
   END_CATCH
-
-  /* Restore the previous execution state.  */
-  set_executing (tp->ptid, executing);
 
   return replay;
 }
