@@ -995,13 +995,14 @@ md_assemble (char *str)
 	      char *start;
 	      char c = get_symbol_name (&start);
 
-	      (void) restore_line_pointer (c);
 	      if (strcmp (start, "mdr") != 0)
 		{
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (data_register_name (&ex))
