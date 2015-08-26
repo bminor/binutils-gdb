@@ -1,3 +1,10 @@
+2015-08-26  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18842
+	* configure.ac (AS_CHECK_DECLS): Add asprintf.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2015-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-sparc.c (priv_reg_table): New privileged register
