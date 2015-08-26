@@ -1,3 +1,15 @@
+2015-08-26  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	PR ld/18401
+	* elfxx-mips.c (bfd_mips_isa_ext_mach): New function: Converts an
+	ISA value to a bfd machine number.
+	(bfd_mips_isa_ext): Update the ISA level and revision if
+	necessary.  Use mips_mach_extends_p to decide if the ISA extension
+	needs to be set.
+	(_bfd_mips_elf_merge_private_bfd_data): Allow the ISA extension to
+	be inferred from the ABI setting.  Set the ISA level from the
+	maximum of the incoming and outgoing ISA levels.
+
 2015-08-25  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18854

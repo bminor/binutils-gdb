@@ -1,3 +1,8 @@
+2015-08-26  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/18401
+	* ld-mips-elf/mips-elf-flags.exp: Add more ISA conflict tests.
+
 2015-08-19  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/emit-relocs-531.s: New testcase.

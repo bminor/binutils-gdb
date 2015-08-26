@@ -13921,6 +13921,140 @@ _bfd_mips_elf_insn32 (struct bfd_link_info *info, bfd_boolean on)
   mips_elf_hash_table (info)->insn32 = on;
 }
 
+/* Structure for saying that BFD machine EXTENSION extends BASE.  */
+
+struct mips_mach_extension
+{
+  unsigned long extension, base;
+};
+
+
+/* An array describing how BFD machines relate to one another.  The entries
+   are ordered topologically with MIPS I extensions listed last.  */
+
+static const struct mips_mach_extension mips_mach_extensions[] =
+{
+  /* MIPS64r2 extensions.  */
+  { bfd_mach_mips_octeon3, bfd_mach_mips_octeon2 },
+  { bfd_mach_mips_octeon2, bfd_mach_mips_octeonp },
+  { bfd_mach_mips_octeonp, bfd_mach_mips_octeon },
+  { bfd_mach_mips_octeon, bfd_mach_mipsisa64r2 },
+  { bfd_mach_mips_loongson_3a, bfd_mach_mipsisa64r2 },
+
+  /* MIPS64 extensions.  */
+  { bfd_mach_mipsisa64r2, bfd_mach_mipsisa64 },
+  { bfd_mach_mips_sb1, bfd_mach_mipsisa64 },
+  { bfd_mach_mips_xlr, bfd_mach_mipsisa64 },
+
+  /* MIPS V extensions.  */
+  { bfd_mach_mipsisa64, bfd_mach_mips5 },
+
+  /* R10000 extensions.  */
+  { bfd_mach_mips12000, bfd_mach_mips10000 },
+  { bfd_mach_mips14000, bfd_mach_mips10000 },
+  { bfd_mach_mips16000, bfd_mach_mips10000 },
+
+  /* R5000 extensions.  Note: the vr5500 ISA is an extension of the core
+     vr5400 ISA, but doesn't include the multimedia stuff.  It seems
+     better to allow vr5400 and vr5500 code to be merged anyway, since
+     many libraries will just use the core ISA.  Perhaps we could add
+     some sort of ASE flag if this ever proves a problem.  */
+  { bfd_mach_mips5500, bfd_mach_mips5400 },
+  { bfd_mach_mips5400, bfd_mach_mips5000 },
+
+  /* MIPS IV extensions.  */
+  { bfd_mach_mips5, bfd_mach_mips8000 },
+  { bfd_mach_mips10000, bfd_mach_mips8000 },
+  { bfd_mach_mips5000, bfd_mach_mips8000 },
+  { bfd_mach_mips7000, bfd_mach_mips8000 },
+  { bfd_mach_mips9000, bfd_mach_mips8000 },
+
+  /* VR4100 extensions.  */
+  { bfd_mach_mips4120, bfd_mach_mips4100 },
+  { bfd_mach_mips4111, bfd_mach_mips4100 },
+
+  /* MIPS III extensions.  */
+  { bfd_mach_mips_loongson_2e, bfd_mach_mips4000 },
+  { bfd_mach_mips_loongson_2f, bfd_mach_mips4000 },
+  { bfd_mach_mips8000, bfd_mach_mips4000 },
+  { bfd_mach_mips4650, bfd_mach_mips4000 },
+  { bfd_mach_mips4600, bfd_mach_mips4000 },
+  { bfd_mach_mips4400, bfd_mach_mips4000 },
+  { bfd_mach_mips4300, bfd_mach_mips4000 },
+  { bfd_mach_mips4100, bfd_mach_mips4000 },
+  { bfd_mach_mips4010, bfd_mach_mips4000 },
+  { bfd_mach_mips5900, bfd_mach_mips4000 },
+
+  /* MIPS32 extensions.  */
+  { bfd_mach_mipsisa32r2, bfd_mach_mipsisa32 },
+
+  /* MIPS II extensions.  */
+  { bfd_mach_mips4000, bfd_mach_mips6000 },
+  { bfd_mach_mipsisa32, bfd_mach_mips6000 },
+
+  /* MIPS I extensions.  */
+  { bfd_mach_mips6000, bfd_mach_mips3000 },
+  { bfd_mach_mips3900, bfd_mach_mips3000 }
+};
+
+/* Return true if bfd machine EXTENSION is an extension of machine BASE.  */
+
+static bfd_boolean
+mips_mach_extends_p (unsigned long base, unsigned long extension)
+{
+  size_t i;
+
+  if (extension == base)
+    return TRUE;
+
+  if (base == bfd_mach_mipsisa32
+      && mips_mach_extends_p (bfd_mach_mipsisa64, extension))
+    return TRUE;
+
+  if (base == bfd_mach_mipsisa32r2
+      && mips_mach_extends_p (bfd_mach_mipsisa64r2, extension))
+    return TRUE;
+
+  for (i = 0; i < ARRAY_SIZE (mips_mach_extensions); i++)
+    if (extension == mips_mach_extensions[i].extension)
+      {
+	extension = mips_mach_extensions[i].base;
+	if (extension == base)
+	  return TRUE;
+      }
+
+  return FALSE;
+}
+
+/* Return the BFD mach for each .MIPS.abiflags ISA Extension.  */
+
+static unsigned long
+bfd_mips_isa_ext_mach (unsigned int isa_ext)
+{
+  switch (isa_ext)
+    {
+    case AFL_EXT_3900:        return bfd_mach_mips3900;
+    case AFL_EXT_4010:        return bfd_mach_mips4010;
+    case AFL_EXT_4100:        return bfd_mach_mips4100;
+    case AFL_EXT_4111:        return bfd_mach_mips4111;
+    case AFL_EXT_4120:        return bfd_mach_mips4120;
+    case AFL_EXT_4650:        return bfd_mach_mips4650;
+    case AFL_EXT_5400:        return bfd_mach_mips5400;
+    case AFL_EXT_5500:        return bfd_mach_mips5500;
+    case AFL_EXT_5900:        return bfd_mach_mips5900;
+    case AFL_EXT_10000:       return bfd_mach_mips10000;
+    case AFL_EXT_LOONGSON_2E: return bfd_mach_mips_loongson_2e;
+    case AFL_EXT_LOONGSON_2F: return bfd_mach_mips_loongson_2f;
+    case AFL_EXT_LOONGSON_3A: return bfd_mach_mips_loongson_3a;
+    case AFL_EXT_SB1:         return bfd_mach_mips_sb1;
+    case AFL_EXT_OCTEON:      return bfd_mach_mips_octeon;
+    case AFL_EXT_OCTEONP:     return bfd_mach_mips_octeonp;
+    case AFL_EXT_OCTEON2:     return bfd_mach_mips_octeon2;
+    case AFL_EXT_XLR:         return bfd_mach_mips_xlr;
+    default:                  return bfd_mach_mips3000;
+    }
+}
+
 /* Return the .MIPS.abiflags value representing each ISA Extension.  */
 
 unsigned int
@@ -13928,110 +14062,71 @@ bfd_mips_isa_ext (bfd *abfd)
 {
   switch (bfd_get_mach (abfd))
     {
-    case bfd_mach_mips3900:
-      return AFL_EXT_3900;
-    case bfd_mach_mips4010:
-      return AFL_EXT_4010;
-    case bfd_mach_mips4100:
-      return AFL_EXT_4100;
-    case bfd_mach_mips4111:
-      return AFL_EXT_4111;
-    case bfd_mach_mips4120:
-      return AFL_EXT_4120;
-    case bfd_mach_mips4650:
-      return AFL_EXT_4650;
-    case bfd_mach_mips5400:
-      return AFL_EXT_5400;
-    case bfd_mach_mips5500:
-      return AFL_EXT_5500;
-    case bfd_mach_mips5900:
-      return AFL_EXT_5900;
-    case bfd_mach_mips10000:
-      return AFL_EXT_10000;
-    case bfd_mach_mips_loongson_2e:
-      return AFL_EXT_LOONGSON_2E;
-    case bfd_mach_mips_loongson_2f:
-      return AFL_EXT_LOONGSON_2F;
-    case bfd_mach_mips_loongson_3a:
-      return AFL_EXT_LOONGSON_3A;
-    case bfd_mach_mips_sb1:
-      return AFL_EXT_SB1;
-    case bfd_mach_mips_octeon:
-      return AFL_EXT_OCTEON;
-    case bfd_mach_mips_octeonp:
-      return AFL_EXT_OCTEONP;
-    case bfd_mach_mips_octeon3:
-      return AFL_EXT_OCTEON3;
-    case bfd_mach_mips_octeon2:
-      return AFL_EXT_OCTEON2;
-    case bfd_mach_mips_xlr:
-      return AFL_EXT_XLR;
+    case bfd_mach_mips3900:         return AFL_EXT_3900;
+    case bfd_mach_mips4010:         return AFL_EXT_4010;
+    case bfd_mach_mips4100:         return AFL_EXT_4100;
+    case bfd_mach_mips4111:         return AFL_EXT_4111;
+    case bfd_mach_mips4120:         return AFL_EXT_4120;
+    case bfd_mach_mips4650:         return AFL_EXT_4650;
+    case bfd_mach_mips5400:         return AFL_EXT_5400;
+    case bfd_mach_mips5500:         return AFL_EXT_5500;
+    case bfd_mach_mips5900:         return AFL_EXT_5900;
+    case bfd_mach_mips10000:        return AFL_EXT_10000;
+    case bfd_mach_mips_loongson_2e: return AFL_EXT_LOONGSON_2E;
+    case bfd_mach_mips_loongson_2f: return AFL_EXT_LOONGSON_2F;
+    case bfd_mach_mips_loongson_3a: return AFL_EXT_LOONGSON_3A;
+    case bfd_mach_mips_sb1:         return AFL_EXT_SB1;
+    case bfd_mach_mips_octeon:      return AFL_EXT_OCTEON;
+    case bfd_mach_mips_octeonp:     return AFL_EXT_OCTEONP;
+    case bfd_mach_mips_octeon3:     return AFL_EXT_OCTEON3;
+    case bfd_mach_mips_octeon2:     return AFL_EXT_OCTEON2;
+    case bfd_mach_mips_xlr:         return AFL_EXT_XLR;
+    default:                        return 0;
     }
-  return 0;
 }
+
+/* Encode ISA level and revision as a single value.  */
+#define LEVEL_REV(LEV,REV) ((LEV) << 3 | (REV))
+
+/* Decode a single value into level and revision.  */
+#define ISA_LEVEL(LEVREV)  ((LEVREV) >> 3)
+#define ISA_REV(LEVREV)    ((LEVREV) & 0x7)
 
 /* Update the isa_level, isa_rev, isa_ext fields of abiflags.  */
 
 static void
 update_mips_abiflags_isa (bfd *abfd, Elf_Internal_ABIFlags_v0 *abiflags)
 {
+  int new_isa = 0;
   switch (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH)
     {
-    case E_MIPS_ARCH_1:
-      abiflags->isa_level = 1;
-      abiflags->isa_rev = 0;
-      break;
-    case E_MIPS_ARCH_2:
-      abiflags->isa_level = 2;
-      abiflags->isa_rev = 0;
-      break;
-    case E_MIPS_ARCH_3:
-      abiflags->isa_level = 3;
-      abiflags->isa_rev = 0;
-      break;
-    case E_MIPS_ARCH_4:
-      abiflags->isa_level = 4;
-      abiflags->isa_rev = 0;
-      break;
-    case E_MIPS_ARCH_5:
-      abiflags->isa_level = 5;
-      abiflags->isa_rev = 0;
-      break;
-    case E_MIPS_ARCH_32:
-      abiflags->isa_level = 32;
-      abiflags->isa_rev = 1;
-      break;
-    case E_MIPS_ARCH_32R2:
-      abiflags->isa_level = 32;
-      /* Handle MIPS32r3 and MIPS32r5 which do not have a header flag.  */
-      if (abiflags->isa_rev < 2)
-	abiflags->isa_rev = 2;
-      break;
-    case E_MIPS_ARCH_32R6:
-      abiflags->isa_level = 32;
-      abiflags->isa_rev = 6;
-      break;
-    case E_MIPS_ARCH_64:
-      abiflags->isa_level = 64;
-      abiflags->isa_rev = 1;
-      break;
-    case E_MIPS_ARCH_64R2:
-      /* Handle MIPS64r3 and MIPS64r5 which do not have a header flag.  */
-      abiflags->isa_level = 64;
-      if (abiflags->isa_rev < 2)
-	abiflags->isa_rev = 2;
-      break;
-    case E_MIPS_ARCH_64R6:
-      abiflags->isa_level = 64;
-      abiflags->isa_rev = 6;
-      break;
+    case E_MIPS_ARCH_1:    new_isa = LEVEL_REV (1, 0); break;
+    case E_MIPS_ARCH_2:    new_isa = LEVEL_REV (2, 0); break;
+    case E_MIPS_ARCH_3:    new_isa = LEVEL_REV (3, 0); break;
+    case E_MIPS_ARCH_4:    new_isa = LEVEL_REV (4, 0); break;
+    case E_MIPS_ARCH_5:    new_isa = LEVEL_REV (5, 0); break;
+    case E_MIPS_ARCH_32:   new_isa = LEVEL_REV (32, 1); break;
+    case E_MIPS_ARCH_32R2: new_isa = LEVEL_REV (32, 2); break;
+    case E_MIPS_ARCH_32R6: new_isa = LEVEL_REV (32, 6); break;
+    case E_MIPS_ARCH_64:   new_isa = LEVEL_REV (64, 1); break;
+    case E_MIPS_ARCH_64R2: new_isa = LEVEL_REV (64, 2); break;
+    case E_MIPS_ARCH_64R6: new_isa = LEVEL_REV (64, 6); break;
     default:
       (*_bfd_error_handler)
 	(_("%B: Unknown architecture %s"),
 	 abfd, bfd_printable_name (abfd));
     }
 
-  abiflags->isa_ext = bfd_mips_isa_ext (abfd);
+  if (new_isa > LEVEL_REV (abiflags->isa_level, abiflags->isa_rev))
+    {
+      abiflags->isa_level = ISA_LEVEL (new_isa);
+      abiflags->isa_rev = ISA_REV (new_isa);
+    }
+
+  /* Update the isa_ext if ABFD describes a further extension.  */
+  if (mips_mach_extends_p (bfd_mips_isa_ext_mach (abiflags->isa_ext),
+			   bfd_get_mach (abfd)))
+    abiflags->isa_ext = bfd_mips_isa_ext (abfd);
 }
 
 /* Return true if the given ELF header flags describe a 32-bit binary.  */
@@ -14781,113 +14876,6 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Structure for saying that BFD machine EXTENSION extends BASE.  */
-
-struct mips_mach_extension
-{
-  unsigned long extension, base;
-};
-
-
-/* An array describing how BFD machines relate to one another.  The entries
-   are ordered topologically with MIPS I extensions listed last.  */
-
-static const struct mips_mach_extension mips_mach_extensions[] =
-{
-  /* MIPS64r2 extensions.  */
-  { bfd_mach_mips_octeon3, bfd_mach_mips_octeon2 },
-  { bfd_mach_mips_octeon2, bfd_mach_mips_octeonp },
-  { bfd_mach_mips_octeonp, bfd_mach_mips_octeon },
-  { bfd_mach_mips_octeon, bfd_mach_mipsisa64r2 },
-  { bfd_mach_mips_loongson_3a, bfd_mach_mipsisa64r2 },
-
-  /* MIPS64 extensions.  */
-  { bfd_mach_mipsisa64r2, bfd_mach_mipsisa64 },
-  { bfd_mach_mips_sb1, bfd_mach_mipsisa64 },
-  { bfd_mach_mips_xlr, bfd_mach_mipsisa64 },
-
-  /* MIPS V extensions.  */
-  { bfd_mach_mipsisa64, bfd_mach_mips5 },
-
-  /* R10000 extensions.  */
-  { bfd_mach_mips12000, bfd_mach_mips10000 },
-  { bfd_mach_mips14000, bfd_mach_mips10000 },
-  { bfd_mach_mips16000, bfd_mach_mips10000 },
-
-  /* R5000 extensions.  Note: the vr5500 ISA is an extension of the core
-     vr5400 ISA, but doesn't include the multimedia stuff.  It seems
-     better to allow vr5400 and vr5500 code to be merged anyway, since
-     many libraries will just use the core ISA.  Perhaps we could add
-     some sort of ASE flag if this ever proves a problem.  */
-  { bfd_mach_mips5500, bfd_mach_mips5400 },
-  { bfd_mach_mips5400, bfd_mach_mips5000 },
-
-  /* MIPS IV extensions.  */
-  { bfd_mach_mips5, bfd_mach_mips8000 },
-  { bfd_mach_mips10000, bfd_mach_mips8000 },
-  { bfd_mach_mips5000, bfd_mach_mips8000 },
-  { bfd_mach_mips7000, bfd_mach_mips8000 },
-  { bfd_mach_mips9000, bfd_mach_mips8000 },
-
-  /* VR4100 extensions.  */
-  { bfd_mach_mips4120, bfd_mach_mips4100 },
-  { bfd_mach_mips4111, bfd_mach_mips4100 },
-
-  /* MIPS III extensions.  */
-  { bfd_mach_mips_loongson_2e, bfd_mach_mips4000 },
-  { bfd_mach_mips_loongson_2f, bfd_mach_mips4000 },
-  { bfd_mach_mips8000, bfd_mach_mips4000 },
-  { bfd_mach_mips4650, bfd_mach_mips4000 },
-  { bfd_mach_mips4600, bfd_mach_mips4000 },
-  { bfd_mach_mips4400, bfd_mach_mips4000 },
-  { bfd_mach_mips4300, bfd_mach_mips4000 },
-  { bfd_mach_mips4100, bfd_mach_mips4000 },
-  { bfd_mach_mips4010, bfd_mach_mips4000 },
-  { bfd_mach_mips5900, bfd_mach_mips4000 },
-
-  /* MIPS32 extensions.  */
-  { bfd_mach_mipsisa32r2, bfd_mach_mipsisa32 },
-
-  /* MIPS II extensions.  */
-  { bfd_mach_mips4000, bfd_mach_mips6000 },
-  { bfd_mach_mipsisa32, bfd_mach_mips6000 },
-
-  /* MIPS I extensions.  */
-  { bfd_mach_mips6000, bfd_mach_mips3000 },
-  { bfd_mach_mips3900, bfd_mach_mips3000 }
-};
-
-
-/* Return true if bfd machine EXTENSION is an extension of machine BASE.  */
-
-static bfd_boolean
-mips_mach_extends_p (unsigned long base, unsigned long extension)
-{
-  size_t i;
-
-  if (extension == base)
-    return TRUE;
-
-  if (base == bfd_mach_mipsisa32
-      && mips_mach_extends_p (bfd_mach_mipsisa64, extension))
-    return TRUE;
-
-  if (base == bfd_mach_mipsisa32r2
-      && mips_mach_extends_p (bfd_mach_mipsisa64r2, extension))
-    return TRUE;
-
-  for (i = 0; i < ARRAY_SIZE (mips_mach_extensions); i++)
-    if (extension == mips_mach_extensions[i].extension)
-      {
-	extension = mips_mach_extensions[i].base;
-	if (extension == base)
-	  return TRUE;
-      }
-
-  return FALSE;
-}
-
-
 /* Merge object attributes from IBFD into OBFD.  Raise an error if
    there are conflicting attributes.  */
 static bfd_boolean
@@ -15127,9 +15115,8 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       if (in_abiflags.isa_rev == 3 || in_abiflags.isa_rev == 5)
 	in_abiflags.isa_rev = 2;
 
-      if (in_abiflags.isa_level != abiflags.isa_level
-	  || in_abiflags.isa_rev != abiflags.isa_rev
-	  || in_abiflags.isa_ext != abiflags.isa_ext)
+      if (LEVEL_REV (in_abiflags.isa_level, in_abiflags.isa_rev)
+	  < LEVEL_REV (abiflags.isa_level, abiflags.isa_rev))
 	(*_bfd_error_handler)
 	  (_("%B: warning: Inconsistent ISA between e_flags and "
 	     ".MIPS.abiflags"), ibfd);
@@ -15142,7 +15129,10 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	(*_bfd_error_handler)
 	  (_("%B: warning: Inconsistent ASEs between e_flags and "
 	     ".MIPS.abiflags"), ibfd);
-      if (in_abiflags.isa_ext != abiflags.isa_ext)
+      /* The isa_ext is allowed to be an extension of what can be inferred
+	 from e_flags.  */
+      if (!mips_mach_extends_p (bfd_mips_isa_ext_mach (abiflags.isa_ext),
+				bfd_mips_isa_ext_mach (in_abiflags.isa_ext)))
 	(*_bfd_error_handler)
 	  (_("%B: warning: Inconsistent ISA extensions between e_flags and "
 	     ".MIPS.abiflags"), ibfd);
@@ -15189,6 +15179,9 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
   /* Merge abiflags.  */
+  mips_elf_tdata (obfd)->abiflags.isa_level
+    = max (mips_elf_tdata (obfd)->abiflags.isa_level,
+	   mips_elf_tdata (ibfd)->abiflags.isa_level);
   mips_elf_tdata (obfd)->abiflags.isa_rev
     = max (mips_elf_tdata (obfd)->abiflags.isa_rev,
 	   mips_elf_tdata (ibfd)->abiflags.isa_rev);
