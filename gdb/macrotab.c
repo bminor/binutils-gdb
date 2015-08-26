@@ -1054,9 +1054,9 @@ new_macro_table (struct obstack *obstack, struct bcache *b,
 
   /* First, get storage for the `struct macro_table' itself.  */
   if (obstack)
-    t = obstack_alloc (obstack, sizeof (*t));
+    t = XOBNEW (obstack, struct macro_table);
   else
-    t = xmalloc (sizeof (*t));
+    t = XNEW (struct macro_table);
 
   memset (t, 0, sizeof (*t));
   t->obstack = obstack;

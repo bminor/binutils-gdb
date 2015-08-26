@@ -2356,7 +2356,7 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
              NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     };
 
-  int *seq = alloca (nr * sizeof (int));
+  int *seq = XALLOCAVEC (int, nr);
   int done = 0;
   struct cleanup *chain;
   int i, j;

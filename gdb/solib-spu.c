@@ -322,8 +322,8 @@ static bfd *
 spu_bfd_fopen (char *name, CORE_ADDR addr)
 {
   bfd *nbfd;
+  CORE_ADDR *open_closure = XNEW (CORE_ADDR);
 
-  CORE_ADDR *open_closure = xmalloc (sizeof (CORE_ADDR));
   *open_closure = addr;
 
   nbfd = gdb_bfd_openr_iovec (name, "elf32-spu",

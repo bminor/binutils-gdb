@@ -136,7 +136,7 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 static struct bfd *
 bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
 {
-  struct target_buffer *buffer = xmalloc (sizeof (struct target_buffer));
+  struct target_buffer *buffer = XNEW (struct target_buffer);
 
   buffer->base = addr;
   buffer->size = size;
@@ -1458,10 +1458,11 @@ free_objfile_data (struct objfile *objfile, void *data)
 static void *
 jit_gdbarch_data_init (struct obstack *obstack)
 {
-  struct jit_gdbarch_data_type *data;
+  struct jit_gdbarch_data_type *data =
+    XOBNEW (obstack, struct jit_gdbarch_data_type);
 
-  data = obstack_alloc (obstack, sizeof (struct jit_gdbarch_data_type));
   data->unwinder_registered = 0;
+
   return data;
 }
 

@@ -56,7 +56,7 @@ int ui_file_magic;
 struct ui_file *
 ui_file_new (void)
 {
-  struct ui_file *file = xmalloc (sizeof (struct ui_file));
+  struct ui_file *file = XNEW (struct ui_file);
 
   file->magic = &ui_file_magic;
   set_ui_file_data (file, NULL, null_file_delete);
@@ -514,7 +514,7 @@ static struct ui_file *
 stdio_file_new (FILE *file, int close_p)
 {
   struct ui_file *ui_file = ui_file_new ();
-  struct stdio_file *stdio = xmalloc (sizeof (struct stdio_file));
+  struct stdio_file *stdio = XNEW (struct stdio_file);
 
   stdio->magic = &stdio_file_magic;
   stdio->file = file;
@@ -751,7 +751,7 @@ tee_file_new (struct ui_file *one, int close_one,
 	      struct ui_file *two, int close_two)
 {
   struct ui_file *ui_file = ui_file_new ();
-  struct tee_file *tee = xmalloc (sizeof (struct tee_file));
+  struct tee_file *tee = XNEW (struct tee_file);
 
   tee->magic = &tee_file_magic;
   tee->one = one;

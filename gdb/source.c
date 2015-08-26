@@ -1197,7 +1197,7 @@ find_source_lines (struct symtab *s, int desc)
   int size;
 
   gdb_assert (s);
-  line_charpos = (int *) xmalloc (lines_allocated * sizeof (int));
+  line_charpos = XNEWVEC (int, lines_allocated);
   if (fstat (desc, &st) < 0)
     perror_with_name (symtab_to_filename_for_display (s));
 
@@ -1508,8 +1508,7 @@ line_info (char *arg, int from_tty)
 	sal.line = current_source_line;
 
       sals.nelts = 1;
-      sals.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
+      sals.sals = XNEW (struct symtab_and_line);
       sals.sals[0] = sal;
     }
   else
@@ -1816,9 +1815,8 @@ void
 add_substitute_path_rule (char *from, char *to)
 {
   struct substitute_path_rule *rule;
-  struct substitute_path_rule *new_rule;
+  struct substitute_path_rule *new_rule = XNEW (struct substitute_path_rule);
 
-  new_rule = xmalloc (sizeof (struct substitute_path_rule));
   new_rule->from = xstrdup (from);
   new_rule->to = xstrdup (to);
   new_rule->next = NULL;

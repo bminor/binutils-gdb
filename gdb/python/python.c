@@ -248,7 +248,7 @@ struct cleanup *
 ensure_python_env (struct gdbarch *gdbarch,
                    const struct language_defn *language)
 {
-  struct python_env *env = xmalloc (sizeof *env);
+  struct python_env *env = XNEW (struct python_env);
 
   /* We should not ever enter Python unless initialized.  */
   if (!gdb_python_initialized)

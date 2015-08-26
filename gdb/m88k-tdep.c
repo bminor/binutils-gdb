@@ -533,11 +533,9 @@ m88k_analyze_prologue (struct gdbarch *gdbarch,
   /* Provide a dummy cache if necessary.  */
   if (cache == NULL)
     {
-      size_t sizeof_saved_regs =
-	(M88K_R31_REGNUM + 1) * sizeof (struct trad_frame_saved_reg);
-
-      cache = alloca (sizeof (struct m88k_frame_cache));
-      cache->saved_regs = alloca (sizeof_saved_regs);
+      cache->saved_regs
+	= XALLOCAVEC (struct trad_frame_saved_reg, M88K_R31_REGNUM + 1);
+      cache = XALLOCA (struct m88k_frame_cache);
 
       /* We only initialize the members we care about.  */
       cache->saved_regs[M88K_R1_REGNUM].addr = -1;

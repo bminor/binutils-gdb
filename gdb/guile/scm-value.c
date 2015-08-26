@@ -851,7 +851,7 @@ gdbscm_value_call (SCM self, SCM args)
       SCM except_scm;
       long i;
 
-      vargs = alloca (sizeof (struct value *) * args_count);
+      vargs = XALLOCAVEC (struct value *, args_count);
       for (i = 0; i < args_count; i++)
 	{
 	  SCM arg = scm_car (args);

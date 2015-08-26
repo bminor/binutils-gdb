@@ -356,8 +356,7 @@ read_pe_exported_syms (struct objfile *objfile)
 
   char const *target = bfd_get_target (objfile->obfd);
 
-  section_data = xzalloc (PE_SECTION_TABLE_SIZE
-			 * sizeof (struct read_pe_section_data));
+  section_data = XCNEWVEC (struct read_pe_section_data, PE_SECTION_TABLE_SIZE);
 
   make_cleanup (free_current_contents, &section_data);
 

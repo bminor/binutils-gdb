@@ -68,7 +68,7 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
 void
 aarch64_linux_new_thread (struct lwp_info *lwp)
 {
-  struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
+  struct arch_lwp_info *info = XNEW (struct arch_lwp_info);
 
   /* Mark that all the hardware breakpoint/watchpoint register pairs
      for this thread need to be initialized (with data from

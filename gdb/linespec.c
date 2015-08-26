@@ -1332,7 +1332,7 @@ decode_line_2 (struct linespec_state *self,
 
   /* Prepare ITEMS array.  */
   items_count = result->nelts;
-  items = xmalloc (sizeof (*items) * items_count);
+  items = XNEWVEC (struct decode_line_2_item, items_count);
   make_cleanup (xfree, items);
   for (i = 0; i < items_count; ++i)
     {

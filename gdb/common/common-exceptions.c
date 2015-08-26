@@ -336,9 +336,8 @@ throw_it (enum return_reason reason, enum errors error, const char *fmt,
       int old_size = exception_messages_size;
 
       exception_messages_size = depth + 10;
-      exception_messages = (char **) xrealloc (exception_messages,
-					       exception_messages_size
-					       * sizeof (char *));
+      exception_messages = XRESIZEVEC (char *, exception_messages,
+				       exception_messages_size);
       memset (exception_messages + old_size, 0,
 	      (exception_messages_size - old_size) * sizeof (char *));
     }

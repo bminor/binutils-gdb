@@ -2048,7 +2048,7 @@ dwarf2_has_info (struct objfile *objfile,
     {
       /* Initialize per-objfile state.  */
       struct dwarf2_per_objfile *data
-	= obstack_alloc (&objfile->objfile_obstack, sizeof (*data));
+	= XOBNEW (&objfile->objfile_obstack, struct dwarf2_per_objfile);
 
       memset (data, 0, sizeof (*data));
       set_objfile_data (objfile, dwarf2_objfile_data_key, data);
@@ -2819,10 +2819,9 @@ create_cus_from_index (struct objfile *objfile,
   struct dwz_file *dwz;
 
   dwarf2_per_objfile->n_comp_units = (cu_list_elements + dwz_elements) / 2;
-  dwarf2_per_objfile->all_comp_units
-    = obstack_alloc (&objfile->objfile_obstack,
-		     dwarf2_per_objfile->n_comp_units
-		     * sizeof (struct dwarf2_per_cu_data *));
+  dwarf2_per_objfile->all_comp_units =
+    XOBNEWVEC (&objfile->objfile_obstack, struct dwarf2_per_cu_data *,
+	       dwarf2_per_objfile->n_comp_units);
 
   create_cus_from_index_list (objfile, cu_list, cu_list_elements,
 			      &dwarf2_per_objfile->info, 0, 0);
@@ -2849,9 +2848,8 @@ create_signatured_type_table_from_index (struct objfile *objfile,
   dwarf2_per_objfile->n_type_units
     = dwarf2_per_objfile->n_allocated_type_units
     = elements / 3;
-  dwarf2_per_objfile->all_type_units
-    = xmalloc (dwarf2_per_objfile->n_type_units
-	       * sizeof (struct signatured_type *));
+  dwarf2_per_objfile->all_type_units =
+    XNEWVEC (struct signatured_type *, dwarf2_per_objfile->n_type_units);
 
   sig_types_hash = allocate_signatured_type_table (objfile);
 
@@ -3230,7 +3228,7 @@ dwarf2_read_index (struct objfile *objfile)
 
   create_addrmap_from_index (objfile, &local_map);
 
-  map = obstack_alloc (&objfile->objfile_obstack, sizeof (struct mapped_index));
+  map = XOBNEW (&objfile->objfile_obstack, struct mapped_index);
   *map = local_map;
 
   dwarf2_per_objfile->index_table = map;
@@ -3314,7 +3312,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
       return;
     }
 
-  qfn = obstack_alloc (&objfile->objfile_obstack, sizeof (*qfn));
+  qfn = XOBNEW (&objfile->objfile_obstack, struct quick_file_names);
   qfn->hash.dwo_unit = cu->dwo_unit;
   qfn->hash.line_offset.sect_off = line_offset;
   gdb_assert (slot != NULL);
@@ -3323,8 +3321,8 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   find_file_and_directory (comp_unit_die, cu, &name, &comp_dir);
 
   qfn->num_file_names = lh->num_file_names;
-  qfn->file_names = obstack_alloc (&objfile->objfile_obstack,
-				   lh->num_file_names * sizeof (char *));
+  qfn->file_names =
+    XOBNEWVEC (&objfile->objfile_obstack, const char *, lh->num_file_names);
   for (i = 0; i < lh->num_file_names; ++i)
     qfn->file_names[i] = file_full_name (i + 1, lh, comp_dir);
   qfn->real_names = NULL;
@@ -4506,9 +4504,8 @@ dwarf2_create_include_psymtab (const char *name, struct partial_symtab *pst,
   subpst->textlow = 0;
   subpst->texthigh = 0;
 
-  subpst->dependencies = (struct partial_symtab **)
-    obstack_alloc (&objfile->objfile_obstack,
-                   sizeof (struct partial_symtab *));
+  subpst->dependencies
+    = XOBNEW (&objfile->objfile_obstack, struct partial_symtab *);
   subpst->dependencies[0] = pst;
   subpst->number_of_dependencies = 1;
 
@@ -4780,9 +4777,8 @@ create_all_type_units (struct objfile *objfile)
   dwarf2_per_objfile->n_type_units
     = dwarf2_per_objfile->n_allocated_type_units
     = htab_elements (types_htab);
-  dwarf2_per_objfile->all_type_units
-    = xmalloc (dwarf2_per_objfile->n_type_units
-	       * sizeof (struct signatured_type *));
+  dwarf2_per_objfile->all_type_units =
+    XNEWVEC (struct signatured_type *, dwarf2_per_objfile->n_type_units);
   iter = &dwarf2_per_objfile->all_type_units[0];
   htab_traverse_noresize (types_htab, add_signatured_type_cu_to_table, &iter);
   gdb_assert (iter - &dwarf2_per_objfile->all_type_units[0]
@@ -5130,8 +5126,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
   else if (stub_comp_dir != NULL)
     {
       /* Reconstruct the comp_dir attribute to simplify the code below.  */
-      comp_dir = (struct attribute *)
-	obstack_alloc (&cu->comp_unit_obstack, sizeof (*comp_dir));
+      comp_dir = XOBNEW (&cu->comp_unit_obstack, struct attribute);
       comp_dir->name = DW_AT_comp_dir;
       comp_dir->form = DW_FORM_string;
       DW_STRING_IS_CANONICAL (comp_dir) = 0;
@@ -5349,7 +5344,7 @@ init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
     {
       /* If !use_existing_cu, this_cu->cu must be NULL.  */
       gdb_assert (this_cu->cu == NULL);
-      cu = xmalloc (sizeof (*cu));
+      cu = XNEW (struct dwarf2_cu);
       init_one_comp_unit (cu, this_cu);
       /* If an error occurs while loading, release our storage.  */
       free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
@@ -5486,7 +5481,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
     {
       /* If !use_existing_cu, this_cu->cu must be NULL.  */
       gdb_assert (this_cu->cu == NULL);
-      cu = xmalloc (sizeof (*cu));
+      cu = XNEW (struct dwarf2_cu);
       init_one_comp_unit (cu, this_cu);
       /* If an error occurs while loading, release our storage.  */
       free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
@@ -6027,8 +6022,8 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
       /* Fill in 'dependencies' here; we fill in 'users' in a
 	 post-pass.  */
       pst->number_of_dependencies = len;
-      pst->dependencies = obstack_alloc (&objfile->objfile_obstack,
-					 len * sizeof (struct symtab *));
+      pst->dependencies =
+	XOBNEWVEC (&objfile->objfile_obstack, struct partial_symtab *, len);
       for (i = 0;
 	   VEC_iterate (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs,
 			i, iter);
@@ -6299,8 +6294,8 @@ build_type_psymtab_dependencies (void **slot, void *info)
   gdb_assert (IS_TYPE_UNIT_GROUP (per_cu));
 
   pst->number_of_dependencies = len;
-  pst->dependencies = obstack_alloc (&objfile->objfile_obstack,
-				     len * sizeof (struct psymtab *));
+  pst->dependencies =
+    XOBNEWVEC (&objfile->objfile_obstack, struct partial_symtab *, len);
   for (i = 0;
        VEC_iterate (sig_type_ptr, tu_group->tus, i, iter);
        ++i)
@@ -6565,8 +6560,7 @@ read_comp_units_from_section (struct objfile *objfile,
       length = read_initial_length (abfd, info_ptr, &initial_length_size);
 
       /* Save the compilation unit for later lookup.  */
-      this_cu = obstack_alloc (&objfile->objfile_obstack,
-			       sizeof (struct dwarf2_per_cu_data));
+      this_cu = XOBNEW (&objfile->objfile_obstack, struct dwarf2_per_cu_data);
       memset (this_cu, 0, sizeof (*this_cu));
       this_cu->offset = offset;
       this_cu->length = length + initial_length_size;
@@ -6601,8 +6595,7 @@ create_all_comp_units (struct objfile *objfile)
 
   n_comp_units = 0;
   n_allocated = 10;
-  all_comp_units = xmalloc (n_allocated
-			    * sizeof (struct dwarf2_per_cu_data *));
+  all_comp_units = XNEWVEC (struct dwarf2_per_cu_data *, n_allocated);
 
   read_comp_units_from_section (objfile, &dwarf2_per_objfile->info, 0,
 				&n_allocated, &n_comp_units, &all_comp_units);
@@ -6613,9 +6606,9 @@ create_all_comp_units (struct objfile *objfile)
 				  &n_allocated, &n_comp_units,
 				  &all_comp_units);
 
-  dwarf2_per_objfile->all_comp_units
-    = obstack_alloc (&objfile->objfile_obstack,
-		     n_comp_units * sizeof (struct dwarf2_per_cu_data *));
+  dwarf2_per_objfile->all_comp_units = XOBNEWVEC (&objfile->objfile_obstack,
+						  struct dwarf2_per_cu_data *,
+						  n_comp_units);
   memcpy (dwarf2_per_objfile->all_comp_units, all_comp_units,
 	  n_comp_units * sizeof (struct dwarf2_per_cu_data *));
   xfree (all_comp_units);
@@ -7460,7 +7453,7 @@ queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
   struct dwarf2_queue_item *item;
 
   per_cu->queued = 1;
-  item = xmalloc (sizeof (*item));
+  item = XNEW (struct dwarf2_queue_item);
   item->per_cu = per_cu;
   item->pretend_language = pretend_language;
   item->next = NULL;
@@ -7973,8 +7966,8 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
       /* Now we have a transitive closure of all the included symtabs.  */
       len = VEC_length (compunit_symtab_ptr, result_symtabs);
       cust->includes
-	= obstack_alloc (&dwarf2_per_objfile->objfile->objfile_obstack,
-			 (len + 1) * sizeof (struct compunit_symtab *));
+	= XOBNEWVEC (&dwarf2_per_objfile->objfile->objfile_obstack,
+		     struct compunit_symtab *, len + 1);
       for (ix = 0;
 	   VEC_iterate (compunit_symtab_ptr, result_symtabs, ix,
 			compunit_symtab_iter);
@@ -10148,8 +10141,8 @@ create_dwo_unit_in_dwp_v1 (struct dwp_file *dwp_file,
   dwo_unit = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_unit);
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
-  dwo_unit->section = obstack_alloc (&objfile->objfile_obstack,
-				     sizeof (struct dwarf2_section_info));
+  dwo_unit->section =
+    XOBNEW (&objfile->objfile_obstack, struct dwarf2_section_info);
   *dwo_unit->section = sections.info_or_types;
   /* dwo_unit->{offset,length,type_offset_in_tu} are set later.  */
 
@@ -10362,8 +10355,8 @@ create_dwo_unit_in_dwp_v2 (struct dwp_file *dwp_file,
   dwo_unit = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_unit);
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
-  dwo_unit->section = obstack_alloc (&objfile->objfile_obstack,
-				     sizeof (struct dwarf2_section_info));
+  dwo_unit->section =
+    XOBNEW (&objfile->objfile_obstack, struct dwarf2_section_info);
   *dwo_unit->section = create_dwp_v2_section (is_debug_types
 					      ? &dwp_file->sections.types
 					      : &dwp_file->sections.info,
@@ -11223,7 +11216,7 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
       child_die = sibling_die (child_die);
       die_children_count++;
     }
-  offsets = xmalloc (sizeof (*offsets) * die_children_count);
+  offsets = XNEWVEC (sect_offset, die_children_count);
   cleanups = make_cleanup (xfree, offsets);
 
   offsets_end = offsets;
@@ -11479,9 +11472,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       templ_func->n_template_arguments = VEC_length (symbolp, template_args);
       templ_func->template_arguments
-	= obstack_alloc (&objfile->objfile_obstack,
-			 (templ_func->n_template_arguments
-			  * sizeof (struct symbol *)));
+        = XOBNEWVEC (&objfile->objfile_obstack, struct symbol *,
+		     templ_func->n_template_arguments);
       memcpy (templ_func->template_arguments,
 	      VEC_address (symbolp, template_args),
 	      (templ_func->n_template_arguments * sizeof (struct symbol *)));
@@ -11689,7 +11681,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct dwarf2_locexpr_baton *dlbaton;
 
-      dlbaton = obstack_alloc (&objfile->objfile_obstack, sizeof (*dlbaton));
+      dlbaton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
       dlbaton->data = DW_BLOCK (attr)->data;
       dlbaton->size = DW_BLOCK (attr)->size;
       dlbaton->per_cu = cu->per_cu;
@@ -12456,7 +12448,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
   const char *fieldname = "";
 
   /* Allocate a new field list entry and link it in.  */
-  new_field = (struct nextfield *) xmalloc (sizeof (struct nextfield));
+  new_field = XNEW (struct nextfield);
   make_cleanup (xfree, new_field);
   memset (new_field, 0, sizeof (struct nextfield));
 
@@ -12642,7 +12634,7 @@ dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
   char *fieldname = "";
 
   /* Allocate a new field list entry and link it in.  */
-  new_field = xzalloc (sizeof (*new_field));
+  new_field = XCNEW (struct typedef_field_list);
   make_cleanup (xfree, new_field);
 
   gdb_assert (die->tag == DW_TAG_typedef);
@@ -12846,7 +12838,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
   /* Create a new member function field and chain it to the field list
      entry.  */
-  new_fnfield = (struct nextfnfield *) xmalloc (sizeof (struct nextfnfield));
+  new_fnfield = XNEW (struct nextfnfield);
   make_cleanup (xfree, new_fnfield);
   memset (new_fnfield, 0, sizeof (struct nextfnfield));
   new_fnfield->next = flp->head;
@@ -13303,9 +13295,9 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  TYPE_N_TEMPLATE_ARGUMENTS (type)
 	    = VEC_length (symbolp, template_args);
 	  TYPE_TEMPLATE_ARGUMENTS (type)
-	    = obstack_alloc (&objfile->objfile_obstack,
-			     (TYPE_N_TEMPLATE_ARGUMENTS (type)
-			      * sizeof (struct symbol *)));
+	    = XOBNEWVEC (&objfile->objfile_obstack,
+			 struct symbol *,
+			 TYPE_N_TEMPLATE_ARGUMENTS (type));
 	  memcpy (TYPE_TEMPLATE_ARGUMENTS (type),
 		  VEC_address (symbolp, template_args),
 		  (TYPE_N_TEMPLATE_ARGUMENTS (type)
@@ -13899,8 +13891,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
   gdb_assert (attr_form_is_block (member_loc)
 	      || attr_form_is_constant (member_loc));
 
-  baton = obstack_alloc (&objfile->objfile_obstack,
-			 sizeof (struct dwarf2_locexpr_baton));
+  baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
   baton->per_cu = cu->per_cu;
   gdb_assert (baton->per_cu);
 
@@ -14813,7 +14804,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 
   if (attr_form_is_block (attr))
     {
-      baton = obstack_alloc (obstack, sizeof (*baton));
+      baton = XOBNEW (obstack, struct dwarf2_property_baton);
       baton->referenced_type = NULL;
       baton->locexpr.per_cu = cu->per_cu;
       baton->locexpr.size = DW_BLOCK (attr)->size;
@@ -14841,7 +14832,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 	  case DW_AT_location:
 	    if (attr_form_is_section_offset (target_attr))
 	      {
-		baton = obstack_alloc (obstack, sizeof (*baton));
+		baton = XOBNEW (obstack, struct dwarf2_property_baton);
 		baton->referenced_type = die_type (target_die, target_cu);
 		fill_in_loclist_baton (cu, &baton->loclist, target_attr);
 		prop->data.baton = baton;
@@ -14850,7 +14841,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 	      }
 	    else if (attr_form_is_block (target_attr))
 	      {
-		baton = obstack_alloc (obstack, sizeof (*baton));
+		baton = XOBNEW (obstack, struct dwarf2_property_baton);
 		baton->referenced_type = die_type (target_die, target_cu);
 		baton->locexpr.per_cu = cu->per_cu;
 		baton->locexpr.size = DW_BLOCK (target_attr)->size;
@@ -14874,7 +14865,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 						&offset))
 		return 0;
 
-	      baton = obstack_alloc (obstack, sizeof (*baton));
+	      baton = XOBNEW (obstack, struct dwarf2_property_baton);
 	      baton->referenced_type = read_type_die (target_die->parent,
 						      target_cu);
 	      baton->offset_info.offset = offset;
@@ -15271,9 +15262,9 @@ abbrev_table_alloc_abbrev (struct abbrev_table *abbrev_table)
 {
   struct abbrev_info *abbrev;
 
-  abbrev = (struct abbrev_info *)
-    obstack_alloc (&abbrev_table->abbrev_obstack, sizeof (struct abbrev_info));
+  abbrev = XOBNEW (&abbrev_table->abbrev_obstack, struct abbrev_info);
   memset (abbrev, 0, sizeof (struct abbrev_info));
+
   return abbrev;
 }
 
@@ -15332,9 +15323,9 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
   abbrev_table = XNEW (struct abbrev_table);
   abbrev_table->offset = offset;
   obstack_init (&abbrev_table->abbrev_obstack);
-  abbrev_table->abbrevs = obstack_alloc (&abbrev_table->abbrev_obstack,
-					 (ABBREV_HASH_SIZE
-					  * sizeof (struct abbrev_info *)));
+  abbrev_table->abbrevs =
+    XOBNEWVEC (&abbrev_table->abbrev_obstack, struct abbrev_info *,
+	       ABBREV_HASH_SIZE);
   memset (abbrev_table->abbrevs, 0,
 	  ABBREV_HASH_SIZE * sizeof (struct abbrev_info *));
 
@@ -15344,7 +15335,7 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
   abbrev_ptr += bytes_read;
 
   allocated_attrs = ATTR_ALLOC_CHUNK;
-  cur_attrs = xmalloc (allocated_attrs * sizeof (struct attr_abbrev));
+  cur_attrs = XNEWVEC (struct attr_abbrev, allocated_attrs);
 
   /* Loop until we reach an abbrev number of 0.  */
   while (abbrev_number)
@@ -15384,9 +15375,9 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
 	  abbrev_ptr += bytes_read;
 	}
 
-      cur_abbrev->attrs = obstack_alloc (&abbrev_table->abbrev_obstack,
-					 (cur_abbrev->num_attrs
-					  * sizeof (struct attr_abbrev)));
+      cur_abbrev->attrs =
+	XOBNEWVEC (&abbrev_table->abbrev_obstack, struct attr_abbrev,
+		   cur_abbrev->num_attrs);
       memcpy (cur_abbrev->attrs, cur_attrs,
 	      cur_abbrev->num_attrs * sizeof (struct attr_abbrev));
 
@@ -15522,8 +15513,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 			    hashtab_obstack_allocate,
 			    dummy_obstack_deallocate);
 
-  part_die = obstack_alloc (&cu->comp_unit_obstack,
-			    sizeof (struct partial_die_info));
+  part_die = XOBNEW (&cu->comp_unit_obstack, struct partial_die_info);
 
   while (1)
     {
@@ -15723,8 +15713,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  *slot = part_die;
 	}
 
-      part_die = obstack_alloc (&cu->comp_unit_obstack,
-				sizeof (struct partial_die_info));
+      part_die = XOBNEW (&cu->comp_unit_obstack, struct partial_die_info);
 
       /* For some DIEs we want to follow their children (if any).  For C
 	 we have no reason to follow the children of structures; for other
@@ -17209,15 +17198,13 @@ add_include_dir (struct line_header *lh, const char *include_dir)
   if (lh->include_dirs_size == 0)
     {
       lh->include_dirs_size = 1; /* for testing */
-      lh->include_dirs = xmalloc (lh->include_dirs_size
-                                  * sizeof (*lh->include_dirs));
+      lh->include_dirs = XNEWVEC (const char *, lh->include_dirs_size);
     }
   else if (lh->num_include_dirs >= lh->include_dirs_size)
     {
       lh->include_dirs_size *= 2;
-      lh->include_dirs = xrealloc (lh->include_dirs,
-                                   (lh->include_dirs_size
-                                    * sizeof (*lh->include_dirs)));
+      lh->include_dirs = XRESIZEVEC (const char *, lh->include_dirs,
+				     lh->include_dirs_size);
     }
 
   lh->include_dirs[lh->num_include_dirs++] = include_dir;
@@ -17242,8 +17229,7 @@ add_file_name (struct line_header *lh,
   if (lh->file_names_size == 0)
     {
       lh->file_names_size = 1; /* for testing */
-      lh->file_names = xmalloc (lh->file_names_size
-                                * sizeof (*lh->file_names));
+      lh->file_names = XNEWVEC (struct file_entry, lh->file_names_size);
     }
   else if (lh->num_file_names >= lh->file_names_size)
     {
@@ -17330,7 +17316,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
       return 0;
     }
 
-  lh = xmalloc (sizeof (*lh));
+  lh = XNEW (struct line_header);
   memset (lh, 0, sizeof (*lh));
   back_to = make_cleanup ((make_cleanup_ftype *) free_line_header,
                           (void *) lh);
@@ -17390,8 +17376,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   line_ptr += 1;
   lh->opcode_base = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
-  lh->standard_opcode_lengths
-    = xmalloc (lh->opcode_base * sizeof (lh->standard_opcode_lengths[0]));
+  lh->standard_opcode_lengths = XNEWVEC (unsigned char, lh->opcode_base);
 
   lh->standard_opcode_lengths[0] = 1;  /* This should never be used anyway.  */
   for (i = 1; i < lh->opcode_base; ++i)
@@ -18764,7 +18749,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 	/* Symbols of this form are reasonably rare, so we just
 	   piggyback on the existing location code rather than writing
 	   a new implementation of symbol_computed_ops.  */
-	*baton = obstack_alloc (obstack, sizeof (struct dwarf2_locexpr_baton));
+	*baton = XOBNEW (obstack, struct dwarf2_locexpr_baton);
 	(*baton)->per_cu = cu->per_cu;
 	gdb_assert ((*baton)->per_cu);
 
@@ -20815,11 +20800,7 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 static struct dwarf_block *
 dwarf_alloc_block (struct dwarf2_cu *cu)
 {
-  struct dwarf_block *blk;
-
-  blk = (struct dwarf_block *)
-    obstack_alloc (&cu->comp_unit_obstack, sizeof (struct dwarf_block));
-  return (blk);
+  return XOBNEW (&cu->comp_unit_obstack, struct dwarf_block);
 }
 
 static struct die_info *
@@ -21019,7 +21000,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
       char *name = copy_string (body, p - body);
       int argc = 0;
       int argv_size = 1;
-      char **argv = xmalloc (argv_size * sizeof (*argv));
+      char **argv = XNEWVEC (char *, argv_size);
 
       p++;
 
@@ -21879,8 +21860,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
     {
       struct dwarf2_loclist_baton *baton;
 
-      baton = obstack_alloc (&objfile->objfile_obstack,
-			     sizeof (struct dwarf2_loclist_baton));
+      baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_loclist_baton);
 
       fill_in_loclist_baton (cu, baton, attr);
 
@@ -21898,8 +21878,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
     {
       struct dwarf2_locexpr_baton *baton;
 
-      baton = obstack_alloc (&objfile->objfile_obstack,
-			     sizeof (struct dwarf2_locexpr_baton));
+      baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
       baton->per_cu = cu->per_cu;
       gdb_assert (baton->per_cu);
 
@@ -22365,7 +22344,8 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
     complaint (&symfile_complaints,
 	       _("A problem internal to GDB: DIE 0x%x has type already set"),
 	       die->offset.sect_off);
-  *slot = obstack_alloc (&objfile->objfile_obstack, sizeof (**slot));
+  *slot = XOBNEW (&objfile->objfile_obstack,
+		  struct dwarf2_per_cu_offset_and_type);
   **slot = ofs;
   return type;
 }
@@ -23282,9 +23262,8 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 				     eq_psymtab_cu_index,
 				     NULL, xcalloc, xfree);
   make_cleanup_htab_delete (cu_index_htab);
-  psymtab_cu_index_map = (struct psymtab_cu_index_map *)
-    xmalloc (sizeof (struct psymtab_cu_index_map)
-	     * dwarf2_per_objfile->n_comp_units);
+  psymtab_cu_index_map = XNEWVEC (struct psymtab_cu_index_map,
+				  dwarf2_per_objfile->n_comp_units);
   make_cleanup (xfree, psymtab_cu_index_map);
 
   /* The CU list is already sorted, so we don't need to do additional

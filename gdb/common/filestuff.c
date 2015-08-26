@@ -420,7 +420,7 @@ do_close_cleanup (void *arg)
 struct cleanup *
 make_cleanup_close (int fd)
 {
-  int *saved_fd = xmalloc (sizeof (fd));
+  int *saved_fd = XNEW (int);
 
   *saved_fd = fd;
   return make_cleanup_dtor (do_close_cleanup, saved_fd, xfree);

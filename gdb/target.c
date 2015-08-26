@@ -552,7 +552,7 @@ cleanup_restore_target_terminal (void *arg)
 struct cleanup *
 make_cleanup_restore_target_terminal (void)
 {
-  enum terminal_state *ts = xmalloc (sizeof (*ts));
+  enum terminal_state *ts = XNEW (enum terminal_state);
 
   *ts = terminal_state;
 

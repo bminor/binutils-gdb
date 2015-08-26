@@ -91,10 +91,8 @@ cache_eq (const void *arg1, const void *arg2)
 static struct tailcall_cache *
 cache_new_ref1 (struct frame_info *next_bottom_frame)
 {
-  struct tailcall_cache *cache;
+  struct tailcall_cache *cache = XCNEW (struct tailcall_cache);
   void **slot;
-
-  cache = xzalloc (sizeof (*cache));
 
   cache->next_bottom_frame = next_bottom_frame;
   cache->refc = 1;

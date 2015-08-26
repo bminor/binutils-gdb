@@ -66,7 +66,7 @@ DEF_VEC_P(lm_info_p);
 static struct lm_info *
 solib_aix_new_lm_info (struct lm_info *info)
 {
-  struct lm_info *result = xmalloc (sizeof (struct lm_info));
+  struct lm_info *result = XNEW (struct lm_info);
 
   memcpy (result, info, sizeof (struct lm_info));
   result->filename = xstrdup (info->filename);

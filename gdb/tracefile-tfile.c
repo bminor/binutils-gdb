@@ -327,7 +327,7 @@ struct trace_file_writer *
 tfile_trace_file_writer_new (void)
 {
   struct tfile_trace_file_writer *writer
-    = xmalloc (sizeof (struct tfile_trace_file_writer));
+    = XNEW (struct tfile_trace_file_writer);
 
   writer->base.ops = &tfile_write_ops;
   writer->fp = NULL;

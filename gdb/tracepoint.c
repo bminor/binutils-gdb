@@ -2584,8 +2584,7 @@ trace_find_line_command (char *args, int from_tty)
     {
       sal = find_pc_line (get_frame_pc (get_current_frame ()), 0);
       sals.nelts = 1;
-      sals.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
+      sals.sals = XNEW (struct symtab_and_line);
       sals.sals[0] = sal;
     }
   else
@@ -3041,7 +3040,7 @@ all_tracepoint_actions_and_cleanup (struct breakpoint *t)
       make_cleanup (xfree, default_collect_line);
 
       validate_actionline (default_collect_line, t);
-      default_collect_action = xmalloc (sizeof (struct command_line));
+      default_collect_action = XNEW (struct command_line);
       make_cleanup (xfree, default_collect_action);
       default_collect_action->next = actions;
       default_collect_action->line = default_collect_line;
@@ -3253,9 +3252,9 @@ restore_current_traceframe_cleanup_dtor (void *arg)
 struct cleanup *
 make_cleanup_restore_current_traceframe (void)
 {
-  struct current_traceframe_cleanup *old;
+  struct current_traceframe_cleanup *old =
+    XNEW (struct current_traceframe_cleanup);
 
-  old = xmalloc (sizeof (struct current_traceframe_cleanup));
   old->traceframe_number = traceframe_number;
 
   return make_cleanup_dtor (do_restore_current_traceframe_cleanup, old,
@@ -3273,8 +3272,8 @@ get_uploaded_tp (int num, ULONGEST addr, struct uploaded_tp **utpp)
   for (utp = *utpp; utp; utp = utp->next)
     if (utp->number == num && utp->addr == addr)
       return utp;
-  utp = (struct uploaded_tp *) xmalloc (sizeof (struct uploaded_tp));
-  memset (utp, 0, sizeof (struct uploaded_tp));
+
+  utp = XCNEW (struct uploaded_tp);
   utp->number = num;
   utp->addr = addr;
   utp->actions = NULL;
@@ -3282,6 +3281,7 @@ get_uploaded_tp (int num, ULONGEST addr, struct uploaded_tp **utpp)
   utp->cmd_strings = NULL;
   utp->next = *utpp;
   *utpp = utp;
+
   return utp;
 }
 
@@ -3309,11 +3309,12 @@ get_uploaded_tsv (int num, struct uploaded_tsv **utsvp)
   for (utsv = *utsvp; utsv; utsv = utsv->next)
     if (utsv->number == num)
       return utsv;
-  utsv = (struct uploaded_tsv *) xmalloc (sizeof (struct uploaded_tsv));
-  memset (utsv, 0, sizeof (struct uploaded_tsv));
+
+  utsv = XCNEW (struct uploaded_tsv);
   utsv->number = num;
   utsv->next = *utsvp;
   *utsvp = utsv;
+
   return utsv;
 }
 

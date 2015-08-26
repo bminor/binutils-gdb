@@ -1,3 +1,58 @@
+2015-08-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ax.c (gdb_parse_agent_expr): Likewise.
+	(compile_bytecodes): Likewise.
+	* dll.c (loaded_dll): Likewise.
+	* event-loop.c (append_callback_event): Likewise.
+	(create_file_handler): Likewise.
+	(create_file_event): Likewise.
+	* hostio.c (handle_open): Likewise.
+	* inferiors.c (add_thread): Likewise.
+	(add_process): Likewise.
+	* linux-aarch64-low.c (aarch64_linux_new_process): Likewise.
+	* linux-arm-low.c (arm_new_process): Likewise.
+	(arm_new_thread): Likewise.
+	* linux-low.c (add_to_pid_list): Likewise.
+	(linux_add_process): Likewise.
+	(handle_extended_wait): Likewise.
+	(add_lwp): Likewise.
+	(enqueue_one_deferred_signal): Likewise.
+	(enqueue_pending_signal): Likewise.
+	(linux_resume_one_lwp_throw): Likewise.
+	(linux_resume_one_thread): Likewise.
+	(linux_read_memory): Likewise.
+	(linux_write_memory): Likewise.
+	* linux-mips-low.c (mips_linux_new_process): Likewise.
+	(mips_linux_new_thread): Likewise.
+	(mips_add_watchpoint): Likewise.
+	* linux-x86-low.c (initialize_low_arch): Likewise.
+	* lynx-low.c (lynx_add_process): Likewise.
+	* mem-break.c (set_raw_breakpoint_at): Likewise.
+	(set_breakpoint): Likewise.
+	(add_condition_to_breakpoint): Likewise.
+	(add_commands_to_breakpoint): Likewise.
+	(clone_agent_expr): Likewise.
+	(clone_one_breakpoint): Likewise.
+	* regcache.c (new_register_cache): Likewise.
+	* remote-utils.c (look_up_one_symbol): Likewise.
+	* server.c (queue_stop_reply): Likewise.
+	(start_inferior): Likewise.
+	(queue_stop_reply_callback): Likewise.
+	(handle_target_event): Likewise.
+	* spu-low.c (fetch_ppc_memory): Likewise.
+	(store_ppc_memory): Likewise.
+	* target.c (set_target_ops): Likewise.
+	* thread-db.c (thread_db_load_search): Likewise.
+	(try_thread_db_load_1): Likewise.
+	* tracepoint.c (add_tracepoint): Likewise.
+	(add_tracepoint_action): Likewise.
+	(create_trace_state_variable): Likewise.
+	(cmd_qtdpsrc): Likewise.
+	(cmd_qtro): Likewise.
+	(add_while_stepping_state): Likewise.
+	* win32-low.c (child_add_thread): Likewise.
+	(get_image_name): Likewise.
+
 2015-08-25  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_linux_new_thread): Remove.

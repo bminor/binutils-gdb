@@ -539,7 +539,7 @@ make_proc (struct inf *inf, mach_port_t port, int tid)
 {
   error_t err;
   mach_port_t prev_port = MACH_PORT_NULL;
-  struct proc *proc = xmalloc (sizeof (struct proc));
+  struct proc *proc = XNEW (struct proc);
 
   proc->port = port;
   proc->tid = tid;
@@ -636,7 +636,7 @@ _proc_free (struct proc *proc)
 static struct inf *
 make_inf (void)
 {
-  struct inf *inf = xmalloc (sizeof (struct inf));
+  struct inf *inf = XNEW (struct inf);
 
   inf->task = 0;
   inf->threads = 0;
@@ -2419,9 +2419,7 @@ gnu_write_inferior (task_t task, CORE_ADDR addr,
 	  }
 
 	/* Chain the regions for later use.  */
-	region_element =
-	  (struct vm_region_list *)
-	  obstack_alloc (&region_obstack, sizeof (struct vm_region_list));
+	region_element = XOBNEW (&region_obstack, struct vm_region_list);
 
 	region_element->protection = protection;
 	region_element->start = region_address;

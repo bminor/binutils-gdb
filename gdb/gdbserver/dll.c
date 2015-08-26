@@ -60,8 +60,7 @@ match_dll (struct inferior_list_entry *inf, void *arg)
 void
 loaded_dll (const char *name, CORE_ADDR base_addr)
 {
-  struct dll_info *new_dll = xmalloc (sizeof (*new_dll));
-  memset (new_dll, 0, sizeof (*new_dll));
+  struct dll_info *new_dll = XCNEW (struct dll_info);
 
   new_dll->entry.id = minus_one_ptid;
 

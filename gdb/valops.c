@@ -3028,8 +3028,7 @@ find_oload_champ (struct value **args, int nargs,
 	  else
 	    nparms = TYPE_NFIELDS (SYMBOL_TYPE (oload_syms[ix]));
 
-	  parm_types = (struct type **)
-	    xmalloc (nparms * (sizeof (struct type *)));
+	  parm_types = XNEWVEC (struct type *, nparms);
 	  for (jj = 0; jj < nparms; jj++)
 	    parm_types[jj] = (fns_ptr != NULL
 			      ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj].type)

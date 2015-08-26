@@ -109,15 +109,12 @@ build_command_line (enum command_control_type type, char *args)
     error (_("if/while commands require arguments."));
   gdb_assert (args != NULL);
 
-  cmd = (struct command_line *) xmalloc (sizeof (struct command_line));
+  cmd = XNEW (struct command_line);
   cmd->next = NULL;
   cmd->control_type = type;
 
   cmd->body_count = 1;
-  cmd->body_list
-    = (struct command_line **) xmalloc (sizeof (struct command_line *)
-					* cmd->body_count);
-  memset (cmd->body_list, 0, sizeof (struct command_line *) * cmd->body_count);
+  cmd->body_list = XCNEWVEC (struct command_line *, cmd->body_count);
   cmd->line = xstrdup (args);
 
   return cmd;
@@ -722,7 +719,7 @@ setup_user_args (char *p)
   struct cleanup *old_chain;
   unsigned int arg_count = 0;
 
-  args = (struct user_args *) xmalloc (sizeof (struct user_args));
+  args = XNEW (struct user_args);
   memset (args, 0, sizeof (struct user_args));
 
   args->next = user_args;
@@ -918,11 +915,9 @@ realloc_body_list (struct command_line *command, int new_length)
   if (new_length <= n)
     return;
 
-  body_list = (struct command_line **)
-    xmalloc (sizeof (struct command_line *) * new_length);
+  body_list = XCNEWVEC (struct command_line *, new_length);
 
   memcpy (body_list, command->body_list, sizeof (struct command_line *) * n);
-  memset (body_list + n, 0, sizeof (struct command_line *) * (new_length - n));
 
   xfree (command->body_list);
   command->body_list = body_list;
@@ -1076,8 +1071,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	}
       else if (p_end - p == 10 && startswith (p, "loop_break"))
 	{
-	  *command = (struct command_line *)
-	    xmalloc (sizeof (struct command_line));
+	  *command = XNEW (struct command_line);
 	  (*command)->next = NULL;
 	  (*command)->line = NULL;
 	  (*command)->control_type = break_control;
@@ -1086,8 +1080,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	}
       else if (p_end - p == 13 && startswith (p, "loop_continue"))
 	{
-	  *command = (struct command_line *)
-	    xmalloc (sizeof (struct command_line));
+	  *command = XNEW (struct command_line);
 	  (*command)->next = NULL;
 	  (*command)->line = NULL;
 	  (*command)->control_type = continue_control;
@@ -1101,8 +1094,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
   if (!parse_commands || not_handled)
     {
       /* A normal command.  */
-      *command = (struct command_line *)
-	xmalloc (sizeof (struct command_line));
+      *command = XNEW (struct command_line);
       (*command)->next = NULL;
       (*command)->line = savestring (p, p_end - p);
       (*command)->control_type = simple_control;
@@ -1414,7 +1406,7 @@ copy_command_lines (struct command_line *cmds)
 
   if (cmds)
     {
-      result = (struct command_line *) xmalloc (sizeof (struct command_line));
+      result = XNEW (struct command_line);
 
       result->next = copy_command_lines (cmds->next);
       result->line = xstrdup (cmds->line);
@@ -1424,8 +1416,7 @@ copy_command_lines (struct command_line *cmds)
         {
           int i;
 
-          result->body_list = (struct command_line **)
-            xmalloc (sizeof (struct command_line *) * cmds->body_count);
+          result->body_list = XNEWVEC (struct command_line *, cmds->body_count);
 
           for (i = 0; i < cmds->body_count; i++)
             result->body_list[i] = copy_command_lines (cmds->body_list[i]);

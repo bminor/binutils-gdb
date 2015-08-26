@@ -924,7 +924,7 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
    If your architecture doesn't need to adjust instructions before
    single-stepping them, consider using simple_displaced_step_copy_insn
    here.
-
+  
    If the instruction cannot execute out of line, return NULL.  The
    core falls back to stepping past the instruction in-line instead in
    that case. */

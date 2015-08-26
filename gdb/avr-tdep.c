@@ -1205,7 +1205,7 @@ static struct stack_item *
 push_stack_item (struct stack_item *prev, const bfd_byte *contents, int len)
 {
   struct stack_item *si;
-  si = xmalloc (sizeof (struct stack_item));
+  si = XNEW (struct stack_item);
   si->data = xmalloc (len);
   si->len = len;
   si->prev = prev;

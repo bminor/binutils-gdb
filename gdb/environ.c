@@ -29,7 +29,7 @@ make_environ (void)
 {
   struct gdb_environ *e;
 
-  e = (struct gdb_environ *) xmalloc (sizeof (struct gdb_environ));
+  e = XNEW (struct gdb_environ);
 
   e->allocated = 10;
   e->vector = (char **) xmalloc ((e->allocated + 1) * sizeof (char *));

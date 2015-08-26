@@ -102,7 +102,7 @@ gdb_parse_agent_expr (char **actparm)
   ++act;  /* skip the X */
   act = unpack_varlen_hex (act, &xlen);
   ++act;  /* skip a comma */
-  aexpr = xmalloc (sizeof (struct agent_expr));
+  aexpr = XNEW (struct agent_expr);
   aexpr->length = xlen;
   aexpr->bytes = xmalloc (xlen);
   hex2bin (act, aexpr->bytes, xlen);
@@ -430,7 +430,7 @@ compile_bytecodes (struct agent_expr *aexpr)
 
       /* Record the compiled-code address of the bytecode, for use by
 	 jump instructions.  */
-      aentry = xmalloc (sizeof (struct bytecode_address));
+      aentry = XNEW (struct bytecode_address);
       aentry->pc = pc;
       aentry->address = current_insn_ptr;
       aentry->goto_pc = -1;

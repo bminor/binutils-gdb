@@ -136,9 +136,8 @@ new_variant (void)
   struct gdbarch_tdep *var;
   int r;
 
-  var = xmalloc (sizeof (*var));
-  memset (var, 0, sizeof (*var));
-  
+  var = XCNEW (struct gdbarch_tdep);
+
   var->frv_abi = FRV_ABI_EABI;
   var->num_gprs = 64;
   var->num_fprs = 64;

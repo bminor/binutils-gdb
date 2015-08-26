@@ -636,7 +636,7 @@ source_command (char *args, int from_tty)
 {
   struct cleanup *old_cleanups;
   char *file = args;
-  int *old_source_verbose = xmalloc (sizeof(int));
+  int *old_source_verbose = XNEW (int);
   int search_path = 0;
 
   *old_source_verbose = source_verbose;

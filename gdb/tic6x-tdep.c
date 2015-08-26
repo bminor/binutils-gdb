@@ -1268,7 +1268,7 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	return arches->gdbarch;
     }
 
-  tdep = xcalloc (1, sizeof (struct gdbarch_tdep));
+  tdep = XCNEW (struct gdbarch_tdep);
 
   tdep->has_gp = has_gp;
   gdbarch = gdbarch_alloc (&info, tdep);

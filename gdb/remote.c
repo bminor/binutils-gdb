@@ -1800,7 +1800,7 @@ demand_private_info (ptid_t ptid)
 
   if (!info->priv)
     {
-      info->priv = xmalloc (sizeof (*(info->priv)));
+      info->priv = XNEW (struct private_thread_info);
       info->private_dtor = free_private_thread_info;
       info->priv->core = -1;
       info->priv->extra = 0;
@@ -5659,8 +5659,8 @@ stop_reply_dtr (struct notif_event *event)
 static struct notif_event *
 remote_notif_stop_alloc_reply (void)
 {
-  struct notif_event *r
-    = (struct notif_event *) XNEW (struct stop_reply);
+  /* We cast to a pointer to the "base class".  */
+  struct notif_event *r = (struct notif_event *) XNEW (struct stop_reply);
 
   r->dtr = stop_reply_dtr;
 
@@ -12332,7 +12332,7 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid,
 	       target_pid_to_str (ptid));
     }
 
-  tinfo = xzalloc (sizeof (*tinfo));
+  tinfo = XCNEW (struct btrace_target_info);
   tinfo->ptid = ptid;
 
   /* If we fail to read the configuration, we lose some information, but the

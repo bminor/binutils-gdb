@@ -159,11 +159,10 @@ init_register_cache (struct regcache *regcache,
 struct regcache *
 new_register_cache (const struct target_desc *tdesc)
 {
-  struct regcache *regcache;
+  struct regcache *regcache = XCNEW (struct regcache);
 
   gdb_assert (tdesc->registers_size != 0);
 
-  regcache = xmalloc (sizeof (*regcache));
   return init_register_cache (regcache, tdesc, NULL);
 }
 

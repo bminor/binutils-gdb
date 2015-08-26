@@ -444,9 +444,7 @@ dcache_splay_tree_compare (splay_tree_key a, splay_tree_key b)
 DCACHE *
 dcache_init (void)
 {
-  DCACHE *dcache;
-
-  dcache = (DCACHE *) xmalloc (sizeof (*dcache));
+  DCACHE *dcache = XNEW (DCACHE);
 
   dcache->tree = splay_tree_new (dcache_splay_tree_compare,
 				 NULL,

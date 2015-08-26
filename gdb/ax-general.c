@@ -41,7 +41,7 @@ static void generic_ext (struct agent_expr *x, enum agent_op op, int n);
 struct agent_expr *
 new_agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope)
 {
-  struct agent_expr *x = xmalloc (sizeof (*x));
+  struct agent_expr *x = XNEW (struct agent_expr);
 
   x->len = 0;
   x->size = 1;			/* Change this to a larger value once

@@ -253,8 +253,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
 	{
 	  struct stab_section_list *n, **pn;
 
-	  n = ((struct stab_section_list *)
-	       xmalloc (sizeof (struct stab_section_list)));
+	  n = XNEW (struct stab_section_list);
 	  n->section = sectp;
 	  n->next = NULL;
 	  for (pn = &csi->stabsects; *pn != NULL; pn = &(*pn)->next)
@@ -841,9 +840,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   if (type_vector)		/* Get rid of previous one.  */
     xfree (type_vector);
   type_vector_length = INITIAL_TYPE_VECTOR_LENGTH;
-  type_vector = (struct type **)
-    xmalloc (type_vector_length * sizeof (struct type *));
-  memset (type_vector, 0, type_vector_length * sizeof (struct type *));
+  type_vector = XCNEWVEC (struct type *, type_vector_length);
 
   coff_start_symtab (objfile, "");
 
@@ -2102,7 +2099,7 @@ coff_read_struct_type (int index, int length, int lastsym,
 	case C_MOU:
 
 	  /* Get space to record the next field's data.  */
-	  newobj = (struct nextfield *) alloca (sizeof (struct nextfield));
+	  newobj = XALLOCA (struct nextfield);
 	  newobj->next = list;
 	  list = newobj;
 
@@ -2119,7 +2116,7 @@ coff_read_struct_type (int index, int length, int lastsym,
 	case C_FIELD:
 
 	  /* Get space to record the next field's data.  */
-	  newobj = (struct nextfield *) alloca (sizeof (struct nextfield));
+	  newobj = XALLOCA (struct nextfield);
 	  newobj->next = list;
 	  list = newobj;
 

@@ -147,7 +147,7 @@ fetch_ppc_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
   int tid = ptid_get_lwp (current_ptid);
 
-  buffer = (PTRACE_TYPE_RET *) alloca (count * sizeof (PTRACE_TYPE_RET));
+  buffer = XALLOCAVEC (PTRACE_TYPE_RET, count);
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
     if ((ret = fetch_ppc_memory_1 (tid, addr, &buffer[i])) != 0)
       return ret;
@@ -172,7 +172,7 @@ store_ppc_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
   int tid = ptid_get_lwp (current_ptid);
 
-  buffer = (PTRACE_TYPE_RET *) alloca (count * sizeof (PTRACE_TYPE_RET));
+  buffer = XALLOCAVEC (PTRACE_TYPE_RET, count);
 
   if (addr != memaddr || len < (int) sizeof (PTRACE_TYPE_RET))
     if ((ret = fetch_ppc_memory_1 (tid, addr, &buffer[0])) != 0)

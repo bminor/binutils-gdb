@@ -503,8 +503,7 @@ compute_enum_list (SCM enum_values_scm, int arg_pos, const char *func_name)
 				 _("enumeration list is empty"));
     }
 
-  enum_values = xmalloc ((size + 1) * sizeof (char *));
-  memset (enum_values, 0, (size + 1) * sizeof (char *));
+  enum_values = XCNEWVEC (char *, size + 1);
 
   i = 0;
   while (!scm_is_eq (enum_values_scm, SCM_EOL))

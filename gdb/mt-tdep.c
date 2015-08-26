@@ -681,7 +681,7 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  regsize = register_size (gdbarch, regnum);
 
 	  buff = alloca (regsize);
-	  bytes = alloca (regsize * sizeof (*bytes));
+	  bytes = XALLOCAVEC (unsigned int, regsize);
 
 	  deprecated_frame_register_read (frame, regnum, buff);
 

@@ -486,7 +486,7 @@ procfs_meminfo (char *args, int from_tty)
       return;
     }
 
-  mapinfos = xmalloc (num * sizeof (procfs_mapinfo));
+  mapinfos = XNEWVEC (procfs_mapping, num);
 
   num_mapinfos = num;
   mapinfo_p = mapinfos;

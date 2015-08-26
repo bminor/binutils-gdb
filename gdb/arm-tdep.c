@@ -3402,7 +3402,7 @@ static struct stack_item *
 push_stack_item (struct stack_item *prev, const void *contents, int len)
 {
   struct stack_item *si;
-  si = xmalloc (sizeof (struct stack_item));
+  si = XNEW (struct stack_item);
   si->data = xmalloc (len);
   si->len = len;
   si->prev = prev;
@@ -8737,8 +8737,8 @@ arm_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      CORE_ADDR from, CORE_ADDR to,
 			      struct regcache *regs)
 {
-  struct displaced_step_closure *dsc
-    = xmalloc (sizeof (struct displaced_step_closure));
+  struct displaced_step_closure *dsc = XNEW (struct displaced_step_closure);
+
   arm_process_displaced_insn (gdbarch, from, to, regs, dsc);
   arm_displaced_init_closure (gdbarch, from, to, dsc);
 
@@ -10290,7 +10290,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return best_arch->gdbarch;
     }
 
-  tdep = xcalloc (1, sizeof (struct gdbarch_tdep));
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Record additional information about the architecture we are defining.
@@ -10571,8 +10571,8 @@ _initialize_arm_tdep (void)
 
   /* Initialize the array that will be passed to
      add_setshow_enum_cmd().  */
-  valid_disassembly_styles
-    = xmalloc ((num_disassembly_options + 1) * sizeof (char *));
+  valid_disassembly_styles = XNEWVEC (const char *,
+				      num_disassembly_options + 1);
   for (i = 0; i < num_disassembly_options; i++)
     {
       numregs = get_arm_regnames (i, &setname, &setdesc, &regnames);

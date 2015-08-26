@@ -244,7 +244,7 @@ record_full_reg_alloc (struct regcache *regcache, int regnum)
   struct record_full_entry *rec;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
-  rec = xcalloc (1, sizeof (struct record_full_entry));
+  rec = XCNEW (struct record_full_entry);
   rec->type = record_full_reg;
   rec->u.reg.num = regnum;
   rec->u.reg.len = register_size (gdbarch, regnum);
@@ -272,7 +272,7 @@ record_full_mem_alloc (CORE_ADDR addr, int len)
 {
   struct record_full_entry *rec;
 
-  rec = xcalloc (1, sizeof (struct record_full_entry));
+  rec = XCNEW (struct record_full_entry);
   rec->type = record_full_mem;
   rec->u.mem.addr = addr;
   rec->u.mem.len = len;
@@ -300,7 +300,7 @@ record_full_end_alloc (void)
 {
   struct record_full_entry *rec;
 
-  rec = xcalloc (1, sizeof (struct record_full_entry));
+  rec = XCNEW (struct record_full_entry);
   rec->type = record_full_end;
 
   return rec;
@@ -2084,9 +2084,7 @@ record_full_core_xfer_partial (struct target_ops *ops,
 		      if (!entry)
 			{
 			  /* Add a new entry.  */
-			  entry = (struct record_full_core_buf_entry *)
-			    xmalloc
-			    (sizeof (struct record_full_core_buf_entry));
+			  entry = XNEW (struct record_full_core_buf_entry);
 			  entry->p = p;
 			  if (!bfd_malloc_and_get_section
 			        (p->the_bfd_section->owner,

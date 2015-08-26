@@ -336,7 +336,7 @@ lwp_stop_reason (struct lwp_info *lwp)
 static void
 add_to_pid_list (struct simple_pid_list **listp, int pid, int status)
 {
-  struct simple_pid_list *new_pid = xmalloc (sizeof (struct simple_pid_list));
+  struct simple_pid_list *new_pid = XNEW (struct simple_pid_list);
 
   new_pid->pid = pid;
   new_pid->status = status;
@@ -822,7 +822,7 @@ add_initial_lwp (ptid_t ptid)
 
   gdb_assert (ptid_lwp_p (ptid));
 
-  lp = (struct lwp_info *) xmalloc (sizeof (struct lwp_info));
+  lp = XNEW (struct lwp_info);
 
   memset (lp, 0, sizeof (struct lwp_info));
 

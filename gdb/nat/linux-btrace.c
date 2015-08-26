@@ -647,7 +647,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   __u64 data_offset;
   int pid, pg;
 
-  tinfo = xzalloc (sizeof (*tinfo));
+  tinfo = XCNEW (struct btrace_target_info);
   tinfo->ptid = ptid;
   tinfo->ptr_bits = linux_determine_kernel_ptr_bits ();
 
@@ -780,7 +780,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   if (pid == 0)
     pid = ptid_get_pid (ptid);
 
-  tinfo = xzalloc (sizeof (*tinfo));
+  tinfo = XCNEW (struct btrace_target_info);
   tinfo->ptid = ptid;
   tinfo->ptr_bits = 0;
 

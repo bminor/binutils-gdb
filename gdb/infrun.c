@@ -1562,7 +1562,7 @@ add_displaced_stepping_state (int pid)
     if (state->pid == pid)
       return state;
 
-  state = xcalloc (1, sizeof (*state));
+  state = XCNEW (struct displaced_step_inferior_state);
   state->pid = pid;
   state->next = displaced_step_inferior_states;
   displaced_step_inferior_states = state;
@@ -8586,7 +8586,8 @@ struct infcall_control_state
 struct infcall_control_state *
 save_infcall_control_state (void)
 {
-  struct infcall_control_state *inf_status = xmalloc (sizeof (*inf_status));
+  struct infcall_control_state *inf_status =
+    XNEW (struct infcall_control_state);
   struct thread_info *tp = inferior_thread ();
   struct inferior *inf = current_inferior ();
 
@@ -8726,9 +8727,8 @@ restore_inferior_ptid (void *arg)
 struct cleanup *
 save_inferior_ptid (void)
 {
-  ptid_t *saved_ptid_ptr;
+  ptid_t *saved_ptid_ptr = XNEW (ptid_t);
 
-  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
   *saved_ptid_ptr = inferior_ptid;
   return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
 }
@@ -8914,15 +8914,11 @@ leave it stopped or free to run as needed."),
 			   &showlist);
 
   numsigs = (int) GDB_SIGNAL_LAST;
-  signal_stop = (unsigned char *) xmalloc (sizeof (signal_stop[0]) * numsigs);
-  signal_print = (unsigned char *)
-    xmalloc (sizeof (signal_print[0]) * numsigs);
-  signal_program = (unsigned char *)
-    xmalloc (sizeof (signal_program[0]) * numsigs);
-  signal_catch = (unsigned char *)
-    xmalloc (sizeof (signal_catch[0]) * numsigs);
-  signal_pass = (unsigned char *)
-    xmalloc (sizeof (signal_pass[0]) * numsigs);
+  signal_stop = XNEWVEC (unsigned char, numsigs);
+  signal_print = XNEWVEC (unsigned char, numsigs);
+  signal_program = XNEWVEC (unsigned char, numsigs);
+  signal_catch = XNEWVEC (unsigned char, numsigs);
+  signal_pass = XNEWVEC (unsigned char, numsigs);
   for (i = 0; i < numsigs; i++)
     {
       signal_stop[i] = 1;

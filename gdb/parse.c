@@ -142,7 +142,7 @@ start_arglist (void)
 {
   struct funcall *newobj;
 
-  newobj = (struct funcall *) xmalloc (sizeof (struct funcall));
+  newobj = XNEW (struct funcall);
   newobj->next = funcall_chain;
   newobj->arglist_len = arglist_len;
   arglist_len = 0;

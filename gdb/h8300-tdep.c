@@ -1267,7 +1267,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
 #if 0
-  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
+  tdep = XNEW (struct gdbarch_tdep);
 #endif
 
   if (info.bfd_arch_info->arch != bfd_arch_h8300)

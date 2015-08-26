@@ -103,8 +103,7 @@ parse_format_string (const char **arg)
 
   max_pieces = strlen (string) + 2;
 
-  pieces = (struct format_piece *)
-    xmalloc (max_pieces * sizeof (struct format_piece));
+  pieces = XNEWVEC (struct format_piece, max_pieces);
 
   next_frag = 0;
 

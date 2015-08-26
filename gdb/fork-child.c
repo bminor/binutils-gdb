@@ -170,7 +170,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	 argument.  */
       int argc = (strlen (allargs) + 1) / 2 + 2;
 
-      argv = (char **) alloca (argc * sizeof (*argv));
+      argv = XALLOCAVEC (char *, argc);
       argv[0] = exec_file;
       breakup_args (allargs, &argv[1]);
     }

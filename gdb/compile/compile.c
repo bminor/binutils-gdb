@@ -338,7 +338,7 @@ append_args (int *argcp, char ***argvp, int argc, char **argv)
 {
   int argi;
 
-  *argvp = xrealloc (*argvp, (*argcp + argc + 1) * sizeof (**argvp));
+  *argvp = XRESIZEVEC (char *, *argvp, (*argcp + argc + 1));
 
   for (argi = 0; argi < argc; argi++)
     (*argvp)[(*argcp)++] = xstrdup (argv[argi]);

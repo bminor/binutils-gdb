@@ -2638,7 +2638,7 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     return arches->gdbarch;
 
-  tdep = xcalloc (1, sizeof (*tdep));
+  tdep = XCNEW (struct gdbarch_tdep);
   arch = gdbarch_alloc (&info, tdep);
 
   /* Essential types.  */

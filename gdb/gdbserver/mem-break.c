@@ -404,7 +404,7 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int size,
       return bp;
     }
 
-  bp = xcalloc (1, sizeof (*bp));
+  bp = XCNEW (struct raw_breakpoint);
   bp->pc = where;
   bp->size = size;
   bp->refcount = 1;
@@ -755,7 +755,7 @@ set_breakpoint (enum bkpt_type type, enum raw_bkpt_type raw_type,
       return NULL;
     }
 
-  bp = xcalloc (1, sizeof (struct breakpoint));
+  bp = XCNEW (struct breakpoint);
   bp->type = type;
 
   bp->raw = raw;
@@ -1169,7 +1169,7 @@ add_condition_to_breakpoint (struct breakpoint *bp,
   struct point_cond_list *new_cond;
 
   /* Create new condition.  */
-  new_cond = xcalloc (1, sizeof (*new_cond));
+  new_cond = XCNEW (struct point_cond_list);
   new_cond->cond = condition;
 
   /* Add condition to the list.  */
@@ -1267,7 +1267,7 @@ add_commands_to_breakpoint (struct breakpoint *bp,
   struct point_command_list *new_cmd;
 
   /* Create new command.  */
-  new_cmd = xcalloc (1, sizeof (*new_cmd));
+  new_cmd = XCNEW (struct point_command_list);
   new_cmd->cmd = commands;
   new_cmd->persistence = persist;
 
@@ -1937,7 +1937,7 @@ clone_agent_expr (const struct agent_expr *src_ax)
 {
   struct agent_expr *ax;
 
-  ax = xcalloc (1, sizeof (*ax));
+  ax = XCNEW (struct agent_expr);
   ax->length = src_ax->length;
   ax->bytes = xcalloc (ax->length, 1);
   memcpy (ax->bytes, src_ax->bytes, ax->length);
@@ -1959,7 +1959,7 @@ clone_one_breakpoint (const struct breakpoint *src)
   struct point_command_list *cmd_tail = NULL;
 
   /* Clone the raw breakpoint.  */
-  dest_raw = xcalloc (1, sizeof (*dest_raw));
+  dest_raw = XCNEW (struct raw_breakpoint);
   dest_raw->raw_type = src->raw->raw_type;
   dest_raw->refcount = src->raw->refcount;
   dest_raw->pc = src->raw->pc;
@@ -1968,7 +1968,7 @@ clone_one_breakpoint (const struct breakpoint *src)
   dest_raw->inserted = src->raw->inserted;
 
   /* Clone the high-level breakpoint.  */
-  dest = xcalloc (1, sizeof (*dest));
+  dest = XCNEW (struct breakpoint);
   dest->type = src->type;
   dest->raw = dest_raw;
   dest->handler = src->handler;
@@ -1977,7 +1977,7 @@ clone_one_breakpoint (const struct breakpoint *src)
   for (current_cond = src->cond_list; current_cond != NULL;
        current_cond = current_cond->next)
     {
-      new_cond = xcalloc (1, sizeof (*new_cond));
+      new_cond = XCNEW (struct point_cond_list);
       new_cond->cond = clone_agent_expr (current_cond->cond);
       APPEND_TO_LIST (&dest->cond_list, new_cond, cond_tail);
     }
@@ -1986,7 +1986,7 @@ clone_one_breakpoint (const struct breakpoint *src)
   for (current_cmd = src->command_list; current_cmd != NULL;
        current_cmd = current_cmd->next)
     {
-      new_cmd = xcalloc (1, sizeof (*new_cmd));
+      new_cmd = XCNEW (struct point_command_list);
       new_cmd->cmd = clone_agent_expr (current_cmd->cmd);
       new_cmd->persistence = current_cmd->persistence;
       APPEND_TO_LIST (&dest->command_list, new_cmd, cmd_tail);

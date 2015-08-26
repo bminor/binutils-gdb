@@ -244,7 +244,7 @@ struct addrmap_mutable
 static splay_tree_key
 allocate_key (struct addrmap_mutable *map, CORE_ADDR addr)
 {
-  CORE_ADDR *key = obstack_alloc (map->obstack, sizeof (*key));
+  CORE_ADDR *key = XOBNEW (map->obstack, CORE_ADDR);
 
   *key = addr;
   return (splay_tree_key) key;
@@ -567,7 +567,7 @@ splay_compare_CORE_ADDR_ptr (splay_tree_key ak, splay_tree_key bk)
 struct addrmap *
 addrmap_create_mutable (struct obstack *obstack)
 {
-  struct addrmap_mutable *map = obstack_alloc (obstack, sizeof (*map));
+  struct addrmap_mutable *map = XOBNEW (obstack, struct addrmap_mutable);
 
   map->addrmap.funcs = &addrmap_mutable_funcs;
   map->obstack = obstack;

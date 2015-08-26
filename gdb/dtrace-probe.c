@@ -386,8 +386,8 @@ dtrace_process_dof_probe (struct objfile *objfile,
     {
       uint32_t probe_offset
 	= ((uint32_t *) offtab)[DOF_UINT (dof, probe->dofpr_offidx) + i];
-      struct dtrace_probe *ret
-	= obstack_alloc (&objfile->per_bfd->storage_obstack, sizeof (*ret));
+      struct dtrace_probe *ret =
+	XOBNEW (&objfile->per_bfd->storage_obstack, struct dtrace_probe);
 
       ret->p.pops = &dtrace_probe_ops;
       ret->p.arch = gdbarch;

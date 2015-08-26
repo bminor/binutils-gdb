@@ -46,7 +46,7 @@ struct munmap_list
 static void
 munmap_list_add (struct munmap_list **headp, CORE_ADDR addr, CORE_ADDR size)
 {
-  struct munmap_list *head_new = xmalloc (sizeof (*head_new));
+  struct munmap_list *head_new = XNEW (struct munmap_list);
 
   head_new->next = *headp;
   *headp = head_new;
@@ -827,7 +827,7 @@ compile_object_load (const char *object_file, const char *source_file,
 
   discard_cleanups (cleanups_free_objfile);
 
-  retval = xmalloc (sizeof (*retval));
+  retval = XNEW (struct compile_module);
   retval->objfile = objfile;
   retval->source_file = xstrdup (source_file);
   retval->func_sym = func_sym;

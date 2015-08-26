@@ -432,8 +432,8 @@ gdbscm_parse_function_args (const char *func_name,
 
   if (num_keywords > 0)
     {
-      SCM *keyword_args = (SCM *) alloca (num_keywords * sizeof (SCM));
-      int *keyword_positions = (int *) alloca (num_keywords * sizeof (int));
+      SCM *keyword_args = XALLOCAVEC (SCM, num_keywords);
+      int *keyword_positions = XALLOCAVEC (int, num_keywords);
 
       gdb_assert (*p == '#');
       ++p;

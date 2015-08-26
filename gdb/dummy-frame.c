@@ -241,7 +241,7 @@ register_dummy_frame_dtor (struct frame_id dummy_id, ptid_t ptid,
   dp = lookup_dummy_frame (&id);
   gdb_assert (dp != NULL);
   d = *dp;
-  list = xmalloc (sizeof (*list));
+  list = XNEW (struct dummy_frame_dtor_list);
   list->next = d->dtor_list;
   d->dtor_list = list;
   list->dtor = dtor;

@@ -331,7 +331,7 @@ handle_open (char *own_buf)
     }
 
   /* Record the new file descriptor.  */
-  new_fd = xmalloc (sizeof (struct fd_list));
+  new_fd = XNEW (struct fd_list);
   new_fd->fd = fd;
   new_fd->next = open_fds;
   open_fds = new_fd;

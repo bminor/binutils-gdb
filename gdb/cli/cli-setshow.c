@@ -475,8 +475,8 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 
 	  p = p->prefix;
 	}
-      cp = name = xmalloc (length);
-      cmds = xmalloc (sizeof (struct cmd_list_element *) * i);
+      cp = name = (char *) xmalloc (length);
+      cmds = XNEWVEC (struct cmd_list_element *, i);
 
       /* Track back through filed 'prefix' and cache them in CMDS.  */
       for (i = 0, p = c; p != NULL; i++)

@@ -128,7 +128,7 @@ add_inferior_silent (int pid)
 {
   struct inferior *inf;
 
-  inf = xmalloc (sizeof (*inf));
+  inf = XNEW (struct inferior);
   memset (inf, 0, sizeof (*inf));
   inf->pid = pid;
 
