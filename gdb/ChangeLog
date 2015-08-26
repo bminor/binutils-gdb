@@ -1,3 +1,7 @@
+2015-08-26  Pedro Alves  <palves@redhat.com>
+
+	* MAINTAINERS: Add Markus Metzger as btrace maintainer.
+
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
 	* defs.h (maybe_quit): Declare.
