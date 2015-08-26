@@ -240,7 +240,7 @@ class Script_sections
 
   // Find a memory region that should be used by a given output section.
   Memory_region*
-  find_memory_region(Output_section_definition*, bool,
+  find_memory_region(Output_section_definition*, bool, bool,
 		     Output_section_definition**);
 
   // Returns true if the provide block of memory is contained

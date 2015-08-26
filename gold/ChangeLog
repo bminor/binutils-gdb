@@ -1,5 +1,15 @@
 2015-08-25  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/18847
+	* script-sections.cc (Memory_region::set_address): New method.
+	(Script_sections::find_memory_region): Add explicit_only parameter.
+	(Output_section_definition::set_section_addresses): Handle case where
+	script specifies both address and vma region.
+	* script-sections.h (Script_sections::find_memory_region): Add
+	explicit_only parameter.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/18859
 	* object.cc (Input_objects::add_object): Store objects in a map,
 	indexed by soname; update as-needed flag when necessary.
