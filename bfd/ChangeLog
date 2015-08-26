@@ -1,3 +1,30 @@
+2015-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR 18867
+	* elflink.c (cmp_ext32l_r_offset, cmp_ext32b_r_offset): Delete.
+	(cmp_ext64l_r_offset, cmp_ext64b_r_offset): Delete.
+	(ext32l_r_offset, ext32b_r_offset, ext64l_r_offset, ext64b_r_offset):
+	New functions.
+	(elf_link_adjust_relocs): Use an insertion sort to sort relocs.
+
+2015-08-26  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	PR ld/18401
+	* elfxx-mips.c (bfd_mips_isa_ext_mach): New function: Converts an
+	ISA value to a bfd machine number.
+	(bfd_mips_isa_ext): Update the ISA level and revision if
+	necessary.  Use mips_mach_extends_p to decide if the ISA extension
+	needs to be set.
+	(_bfd_mips_elf_merge_private_bfd_data): Allow the ISA extension to
+	be inferred from the ABI setting.  Set the ISA level from the
+	maximum of the incoming and outgoing ISA levels.
+
+2015-08-25  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18854
+	* elf.c (bfd_section_from_shdr): Replace assertions with warnings
+	about multiple symbol tables.
+
 2015-08-25  Renlin Li  <renlin.li@arm.com>
 
 	* reloc.c (BFD_RELOC_AARCH64_LD64_GOTOFF_LO15): Use LP64 instead of

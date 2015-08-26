@@ -998,26 +998,28 @@ Symbol_table::add_from_object(Object* object,
       if (is_default_version)
 	this->define_default_version<size, big_endian>(ret, insdefault.second,
 						       insdefault.first);
-      else if (version != NULL && ret->is_default())
+      else
 	{
-	  // We have seen NAME/VERSION already, and marked it as the
-	  // default version, but now we see a definition for
-	  // NAME/VERSION that is not the default version. This can
-	  // happen when the assembler generates two symbols for
-	  // a symbol as a result of a ".symver foo,foo@VER"
-	  // directive. We see the first unversioned symbol and
-	  // we may mark it as the default version (from a
-	  // version script); then we see the second versioned
-	  // symbol and we need to override the first.
-	  // In any other case, the two symbols should have generated
-	  // a multiple definition error.
-	  // (See PR gold/18703.)
 	  bool dummy;
-	  if (ret->source() == Symbol::FROM_OBJECT
+	  if (version != NULL
+	      && ret->source() == Symbol::FROM_OBJECT
 	      && ret->object() == object
 	      && is_ordinary
-	      && ret->shndx(&dummy) == st_shndx)
+	      && ret->shndx(&dummy) == st_shndx
+	      && ret->is_default())
 	    {
+	      // We have seen NAME/VERSION already, and marked it as the
+	      // default version, but now we see a definition for
+	      // NAME/VERSION that is not the default version. This can
+	      // happen when the assembler generates two symbols for
+	      // a symbol as a result of a ".symver foo,foo@VER"
+	      // directive. We see the first unversioned symbol and
+	      // we may mark it as the default version (from a
+	      // version script); then we see the second versioned
+	      // symbol and we need to override the first.
+	      // In any other case, the two symbols should have generated
+	      // a multiple definition error.
+	      // (See PR gold/18703.)
 	      ret->set_is_not_default();
 	      const Stringpool::Key vnull_key = 0;
 	      this->table_.erase(std::make_pair(name_key, vnull_key));

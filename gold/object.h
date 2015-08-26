@@ -731,6 +731,11 @@ class Object
   set_as_needed()
   { this->as_needed_ = true; }
 
+  // Clear flag that this object was linked with --as-needed.
+  void
+  clear_as_needed()
+  { this->as_needed_ = false; }
+
   // Return whether this object was linked with --as-needed.
   bool
   as_needed() const
@@ -2836,7 +2841,7 @@ class Input_objects
   // The list of dynamic objects included in the link.
   Dynobj_list dynobj_list_;
   // SONAMEs that we have seen.
-  Unordered_set<std::string> sonames_;
+  Unordered_map<std::string, Object*> sonames_;
   // Manage cross-references if requested.
   Cref* cref_;
 };

@@ -1,3 +1,19 @@
+2015-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR gas/18581
+	* config/tc-mn10200.c (md_assemble <mdr>): Move restore_line_pointer
+	call to where input line used to be restored.
+	* config/tc-mn10300.c (md_assemble <usp>): Remove redundant input
+	line restore.
+	* config/tc-tilepro.c (parse_reg_expression): Add regname var.
+
+2015-08-26  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18842
+	* configure.ac (AS_CHECK_DECLS): Add asprintf.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2015-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-sparc.c (priv_reg_table): New privileged register

@@ -980,6 +980,7 @@ parse_reg_expression (expressionS* expression)
   /* Zero everything to make sure we don't miss any flags.  */
   memset (expression, 0, sizeof *expression);
 
+  char *regname;
   char terminating_char = get_symbol_name (&regname);
 
   void* pval = hash_find (main_reg_hash, regname);

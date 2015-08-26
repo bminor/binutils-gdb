@@ -7,6 +7,12 @@
 	register.
 	* gas/sparc/rdpr.d: ...and the expected result.
 
+2015-08-25  Simon Dardis  <Simon.Dardis@imgtec.com>
+
+	* gas/mips/micromips32-move.d: Update expected disassembly.
+	* gas/mips/move.d: Likewise.
+	* gas/mips/move.s: Fix for some MIPS configurations.
+
 2015-08-24  Jan Stancek  <jstancek@redhat.com>
 
 	* gas/i386/intel.s: Add test of disassembly of a potential

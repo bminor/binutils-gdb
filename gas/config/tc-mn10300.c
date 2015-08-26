@@ -1417,14 +1417,12 @@ md_assemble (char *str)
 
 	      if (strcasecmp (start, "usp") != 0)
 		{
-	      (void) restore_line_pointer (c);
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
 	      (void) restore_line_pointer (c);
-	      *input_line_pointer = c;
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_SSP)
