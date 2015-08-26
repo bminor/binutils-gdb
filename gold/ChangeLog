@@ -1,3 +1,9 @@
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18866
+	PR gold/18703
+	* symtab.cc (Symbol_table): Reorder conditions to avoid internal error.
+
 2015-08-20  Alan Modra  <amodra@gmail.com>
 
 	PR gold/18846
