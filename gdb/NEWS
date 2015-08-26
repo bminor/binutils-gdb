@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.10
 
+* Record btrace now supports non-stop mode.
+
 * Support for tracepoints on aarch64-linux was added in GDBserver.
 
 * The 'record instruction-history' command now indicates speculative execution

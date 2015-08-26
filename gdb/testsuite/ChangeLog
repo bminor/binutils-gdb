@@ -1,3 +1,8 @@
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/non-stop.c: New.
+	* gdb.btrace/non-stop.exp: New.
+
 2015-09-17  Pierre Langlois  <pierre.langlois@arm.com>
 	    Yao Qi  <yao.qi@linaro.org>
 

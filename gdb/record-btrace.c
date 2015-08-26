@@ -216,9 +216,6 @@ record_btrace_open (const char *args, int from_tty)
   if (!target_has_execution)
     error (_("The program is not being run."));
 
-  if (non_stop)
-    error (_("Record btrace can't debug inferior in non-stop mode."));
-
   gdb_assert (record_btrace_thread_observer == NULL);
 
   disable_chain = make_cleanup (null_cleanup, NULL);
