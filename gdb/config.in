@@ -677,9 +677,6 @@
 /* Bug reporting address */
 #undef REPORT_BUGS_TO
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#undef RETSIGTYPE
-
 /* Define to 1 if the "%Lg" format works to scan long doubles. */
 #undef SCANF_HAS_LONG_DOUBLE
 

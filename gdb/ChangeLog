@@ -1,5 +1,10 @@
 2015-08-27  Pedro Alves  <palves@redhat.com>
 
+	* configure.ac: Remove AC_TYPE_SIGNAL call.
+	* configure, config.in: Regenerate.
+
+2015-08-27  Pedro Alves  <palves@redhat.com>
+
 	* cp-support.c (gdb_demangle): Use sighandler_t.  Remove cast.
 	* extension-priv.h: Include signal.h.
 	(struct signal_handler) <handler>: Change type to sighandler_t.
