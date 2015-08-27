@@ -1849,12 +1849,15 @@ thread_db_get_thread_local_address (struct target_ops *ops,
   struct thread_info *thread_info;
   struct target_ops *beneath;
 
-  /* If we have not discovered any threads yet, check now.  */
-  if (!have_threads (ptid))
-    thread_db_find_new_threads_1 (ptid);
-
   /* Find the matching thread.  */
   thread_info = find_thread_ptid (ptid);
+
+  /* We may not have discovered the thread yet.  */
+  if (thread_info != NULL && thread_info->priv == NULL)
+    {
+      thread_from_lwp (ptid);
+      thread_info = find_thread_ptid (ptid);
+    }
 
   if (thread_info != NULL && thread_info->priv != NULL)
     {
