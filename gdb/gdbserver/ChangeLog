@@ -1,3 +1,7 @@
+2015-08-27  Pedro Alves  <palves@redhat.com>
+
+	* proc-service.c (ps_pdwrite): Return PS_ERR/PS_OK explicily.
+
 2015-08-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* ax.c (gdb_parse_agent_expr): Likewise.
