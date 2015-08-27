@@ -1,3 +1,16 @@
+2015-08-27  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (DEFAULT_MAX_MEMORY_PACKET_SIZE)
+	(MIN_MEMORY_PACKET_SIZE): New.
+	(MAX_REMOTE_PACKET_SIZE, MIN_REMOTE_PACKET_SIZE): Delete.
+	(get_memory_packet_size): Adjust.  No longer limit the max packet
+	size.
+	(set_memory_packet_size): Adjust, and remove dead code.
+	(remote_check_symbols): Use xmalloc and a cleanup instead of
+	alloca.
+	(remote_packet_size): No longer cap the packet size.
+	(putpkt_binary): Use xmalloc and a cleanup instead of alloca.
+
 2015-08-26  Luis Machado  <lgustavo@codesourcery.com>
 
 	* compile/compile.c (compile_to_object): Mention language in
