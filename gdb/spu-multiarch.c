@@ -56,6 +56,7 @@ static int
 parse_spufs_run (ptid_t ptid, int *fd, CORE_ADDR *addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  struct cleanup *old_chain;
   struct gdbarch_tdep *tdep;
   struct regcache *regcache;
   gdb_byte buf[4];
@@ -65,12 +66,21 @@ parse_spufs_run (ptid_t ptid, int *fd, CORE_ADDR *addr)
   if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_powerpc)
     return 0;
 
+  /* If we're called too early (e.g. after fork), we cannot
+     access the inferior yet.  */
+  if (find_inferior_ptid (ptid) == NULL)
+    return 0;
+
   /* Get PPU-side registers.  */
   regcache = get_thread_arch_regcache (ptid, target_gdbarch ());
   tdep = gdbarch_tdep (target_gdbarch ());
 
   /* Fetch instruction preceding current NIP.  */
-  if (target_read_memory (regcache_read_pc (regcache) - 4, buf, 4) != 0)
+  old_chain = save_inferior_ptid ();
+  inferior_ptid = ptid;
+  regval = target_read_memory (regcache_read_pc (regcache) - 4, buf, 4);
+  do_cleanups (old_chain);
+  if (regval != 0)
     return 0;
   /* It should be a "sc" instruction.  */
   if (extract_unsigned_integer (buf, 4, byte_order) != INSTR_SC)
