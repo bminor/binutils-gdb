@@ -1,5 +1,10 @@
 2015-08-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ppc-linux-tdep.c (ppc_linux_spe_context_lookup): Do not
+	attempt to relocate a TLS variable offset.
+
+2015-08-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-multiarch.c (parse_spufs_run): Bail out if inferior is not
 	registered yet.  Set inferior_ptid while calling target_read_memory.
 

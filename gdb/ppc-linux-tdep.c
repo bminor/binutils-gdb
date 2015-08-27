@@ -1140,7 +1140,7 @@ ppc_linux_spe_context_lookup (struct objfile *objfile)
     {
       spe_context_objfile = objfile;
       spe_context_lm_addr = svr4_fetch_objfile_link_map (objfile);
-      spe_context_offset = BMSYMBOL_VALUE_ADDRESS (sym);
+      spe_context_offset = MSYMBOL_VALUE_RAW_ADDRESS (sym.minsym);
       spe_context_cache_ptid = minus_one_ptid;
       spe_context_cache_address = 0;
       return;
