@@ -1,5 +1,10 @@
 2015-08-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* m88k-tdep.c (m88k_analyze_prologue): Fix inverted allocation
+	statements.
+
+2015-08-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* NEWS: Document support for non-8-bits addressable memory.
 
 2015-08-27  Pedro Alves  <palves@redhat.com>
