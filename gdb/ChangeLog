@@ -2,10 +2,6 @@
 
 	* NEWS: Document support for non-8-bits addressable memory.
 
-2015-08-27  Simon Marchi  <simon.marchi@ericsson.com>
-
-	* NEWS: Document support for non-8-bits addressable memory.
-
 2015-08-27  Pedro Alves  <palves@redhat.com>
 
 	* configure.ac: Remove AC_TYPE_SIGNAL call.
