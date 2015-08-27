@@ -44,6 +44,7 @@ IMPORTED_GNULIB_MODULES="\
     pathmax \
     readlink \
     rename \
+    signal-h \
     strstr \
     strtok_r \
     sys_stat \

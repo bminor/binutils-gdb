@@ -721,6 +721,9 @@
 /* Define to 1 if pread is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_PREAD
 
+/* Define to 1 if pthread_sigmask is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_PTHREAD_SIGMASK
+
 /* Define to 1 if ptsname is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_PTSNAME
 
@@ -810,6 +813,30 @@
 
 /* Define to 1 if setusershell is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_SETUSERSHELL
+
+/* Define to 1 if sigaction is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_SIGACTION
+
+/* Define to 1 if sigaddset is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_SIGADDSET
+
+/* Define to 1 if sigdelset is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_SIGDELSET
+
+/* Define to 1 if sigemptyset is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_SIGEMPTYSET
+
+/* Define to 1 if sigfillset is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_SIGFILLSET
+
+/* Define to 1 if sigismember is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_SIGISMEMBER
+
+/* Define to 1 if sigpending is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_SIGPENDING
+
+/* Define to 1 if sigprocmask is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_SIGPROCMASK
 
 /* Define to 1 if sinf is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_SINF
@@ -1080,6 +1107,9 @@
 
 /* Define to 1 if 'wint_t' is a signed integer type. */
 #undef HAVE_SIGNED_WINT_T
+
+/* Define to 1 if the system has the type `sigset_t'. */
+#undef HAVE_SIGSET_T
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -1468,6 +1498,9 @@
 /* Define to a replacement function name for fnmatch(). */
 #undef fnmatch
 
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef gid_t
+
 /* Work around a bug in Apple GCC 4.0.1 build 5465: In C99 mode, it supports
    the ISO C 99 semantics of 'extern inline' (unlike the GNU C semantics of
    earlier versions), but does not display it by setting __GNUC_STDC_INLINE__.
@@ -1506,6 +1539,9 @@
 
 /* Define as a signed type of the same size as size_t. */
 #undef ssize_t
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef uid_t
 
 /* Define as a marker that can be attached to declarations that might not
     be used.  This helps to reduce warnings, such as from

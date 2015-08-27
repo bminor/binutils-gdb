@@ -1,5 +1,18 @@
 2015-08-27  Pedro Alves  <palves@redhat.com>
 
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add signal-h.
+	* gnulib/aclocal.m4: Renegerate.
+	* gnulib/config.in: Renegerate.
+	* gnulib/configure: Renegerate.
+	* gnulib/import/Makefile.am: Update.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Update.
+	* gnulib/import/m4/gnulib-comp.m4: Update.
+	* gnulib/import/m4/signal_h.m4: New file.
+	* gnulib/import/signal.in.h: New file.
+
+2015-08-27  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (DEFAULT_MAX_MEMORY_PACKET_SIZE)
 	(MIN_MEMORY_PACKET_SIZE): New.
 	(MAX_REMOTE_PACKET_SIZE, MIN_REMOTE_PACKET_SIZE): Delete.
