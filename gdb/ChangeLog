@@ -1,5 +1,22 @@
 2015-08-27  Pedro Alves  <palves@redhat.com>
 
+	* cp-support.c (gdb_demangle): Use sighandler_t.  Remove cast.
+	* extension-priv.h: Include signal.h.
+	(struct signal_handler) <handler>: Change type to sighandler_t.
+	* extension.c (install_gdb_sigint_handler): Use sighandler_t.
+	* inflow.c (sigint_ours, sigquit_ours): Change type to
+	sighandler_t.
+	(child_terminal_inferior): Remove casts.
+	(child_terminal_ours_1, new_tty): Use sighandler_t.  Remove casts.
+	(osig): Change type to sighandler_t.
+	* nto-procfs.c (ofunc): Change type to sighandler_t.
+	(procfs_wait): Remove casts.
+	* remote-m32r-sdi.c (m32r_wait, m32r_load): Use sighandler_t.
+	* remote-sim.c (gdbsim_wait): Use sighandler_t.
+	* utils.c (wait_to_die_with_timeout): Use sighandler_t.
+
+2015-08-27  Pedro Alves  <palves@redhat.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add signal-h.
 	* gnulib/aclocal.m4: Renegerate.
 	* gnulib/config.in: Renegerate.

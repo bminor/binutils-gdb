@@ -47,7 +47,7 @@
 
 int ctl_fd;
 
-static void (*ofunc) ();
+static sighandler_t ofunc;
 
 static procfs_run run;
 
@@ -735,7 +735,7 @@ procfs_wait (struct target_ops *ops,
   devctl (ctl_fd, DCMD_PROC_STATUS, &status, sizeof (status), 0);
   while (!(status.flags & _DEBUG_FLAG_ISTOP))
     {
-      ofunc = (void (*)()) signal (SIGINT, nto_handle_sigint);
+      ofunc = signal (SIGINT, nto_handle_sigint);
       sigwaitinfo (&set, &info);
       signal (SIGINT, ofunc);
       devctl (ctl_fd, DCMD_PROC_STATUS, &status, sizeof (status), 0);

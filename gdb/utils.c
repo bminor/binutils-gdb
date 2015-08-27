@@ -3302,9 +3302,9 @@ wait_to_die_with_timeout (pid_t pid, int *status, int timeout)
       sa.sa_flags = 0;
       sigaction (SIGALRM, &sa, &old_sa);
 #else
-      void (*ofunc) ();
+      sighandler_t ofunc;
 
-      ofunc = (void (*)()) signal (SIGALRM, sigalrm_handler);
+      ofunc = signal (SIGALRM, sigalrm_handler);
 #endif
 
       alarm (timeout);
