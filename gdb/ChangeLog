@@ -375,8 +375,9 @@
 
 	* MAINTAINERS: Add Markus Metzger as btrace maintainer.
 
-2015-08-24  Pedro Alves  <palves@redhat.com>
+2015-08-25  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/18804
 	* defs.h (maybe_quit): Declare.
 	(QUIT): Now calls maybe_quit.
 	* event-loop.c (clear_async_signal_handler)
