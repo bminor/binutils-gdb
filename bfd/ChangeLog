@@ -1,6 +1,11 @@
 2015-08-27  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2015-08-27  Alan Modra  <amodra@gmail.com>
+	PR 18867
+	* elf64-alpha.c (elf64_alpha_sort_relocs_p): New function.
+	(elf_backend_sort_relocs_p): Define.
+
 	2015-08-26  Alan Modra  <amodra@gmail.com>
 	PR 18867
 	* elflink.c (cmp_ext32l_r_offset, cmp_ext32b_r_offset): Delete.
