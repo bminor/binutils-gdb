@@ -2240,6 +2240,29 @@ record_btrace_step_thread (struct thread_info *tp)
 typedef struct thread_info * tp_t;
 DEF_VEC_P (tp_t);
 
+/* Announce further events if necessary.  */
+
+static void
+record_btrace_maybe_mark_async_event (const VEC (tp_t) *moving,
+				      const VEC (tp_t) *no_history)
+{
+  int more_moving, more_no_history;
+
+  more_moving = !VEC_empty (tp_t, moving);
+  more_no_history = !VEC_empty (tp_t, no_history);
+
+  if (!more_moving && !more_no_history)
+    return;
+
+  if (more_moving)
+    DEBUG ("movers pending");
+
+  if (more_no_history)
+    DEBUG ("no-history pending");
+
+  mark_async_event_handler (record_btrace_async_inferior_event_handler);
+}
+
 /* The to_wait method of target record-btrace.  */
 
 static ptid_t
@@ -2354,6 +2377,10 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   if (!target_is_non_stop_p ())
     ALL_NON_EXITED_THREADS (tp)
       record_btrace_cancel_resume (tp);
+
+  /* In async mode, we need to announce further events.  */
+  if (target_is_async_p ())
+    record_btrace_maybe_mark_async_event (moving, no_history);
 
   /* Start record histories anew from the current position.  */
   record_btrace_clear_histories (&eventing->btrace);
