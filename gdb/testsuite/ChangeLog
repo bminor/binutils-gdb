@@ -1,3 +1,8 @@
+2015-08-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.compile/compile-ifunc.exp (with_test_prefix): Force language
+	to C.
+
 2015-08-26  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb.base/run-after-attach.exp: New test file.
