@@ -1970,9 +1970,9 @@ bfin_eol_in_insn (char *line)
 }
 
 bfd_boolean
-bfin_start_label (char *s, char *ptr)
+bfin_start_label (char *s)
 {
-  while (s != ptr)
+  while (*s != 0)
     {
       if (*s == '(' || *s == '[')
 	return FALSE;

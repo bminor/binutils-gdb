@@ -91,8 +91,8 @@ void aarch64_copy_symbol_attributes (symbolS *, symbolS *);
   (aarch64_copy_symbol_attributes (DEST, SRC))
 #endif
 
-#define TC_START_LABEL(C,S,STR)           ((C) == ':' \
-					   || ((C) == '/' && aarch64_data_in_code ()))
+#define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR)			\
+  (NEXT_CHAR == ':' || (NEXT_CHAR == '/' && aarch64_data_in_code ()))
 #define tc_canonicalize_symbol_name(str) aarch64_canonicalize_symbol_name (str);
 #define obj_adjust_symtab() 		 aarch64_adjust_symtab ()
 
