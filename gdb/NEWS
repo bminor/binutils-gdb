@@ -48,6 +48,9 @@ show remote multiprocess-extensions-packet
   target mon2000	mon2000 ROM monitor
   target ppcbug		PPCBUG ROM monitor for PowerPC
 
+* Support for reading/writing memory and extracting values on architectures
+  with non-8-bits-addressable memory.
+
 *** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*
