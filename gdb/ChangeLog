@@ -94,7 +94,8 @@
 
 2015-08-26  Simon Marchi  <simon.marchi@ericsson.com>
 
-	* aarch64-linux-nat.c (aarch64_add_process): Likewise.
+	* aarch64-linux-nat.c (aarch64_add_process): Replace xmalloc-family
+	function with the XNEW-family equivalent.
 	* aarch64-tdep.c (aarch64_gdbarch_init): Likewise.
 	* ada-exp.y (write_ambiguous_var): Likewise.
 	* ada-lang.c (resolve_subexp): Likewise.

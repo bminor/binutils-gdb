@@ -9,7 +9,8 @@
 
 2015-08-26  Simon Marchi  <simon.marchi@ericsson.com>
 
-	* ax.c (gdb_parse_agent_expr): Likewise.
+	* ax.c (gdb_parse_agent_expr): Replace xmalloc-family function with
+	the XNEW-family equivalent.
 	(compile_bytecodes): Likewise.
 	* dll.c (loaded_dll): Likewise.
 	* event-loop.c (append_callback_event): Likewise.
