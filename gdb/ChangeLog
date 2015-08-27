@@ -1,3 +1,8 @@
+2015-08-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* compile/compile.c (compile_to_object): Mention language in
+	error message.
+
 2015-08-26  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* target.c (target_pre_inferior): Unset attach_flag.
