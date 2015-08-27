@@ -1,3 +1,8 @@
+2015-08-27  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	* linux-low.c (check_stopped_by_breakpoint): Use
+	GDB_ARCH_IS_TRAP_BRKPT instead of GDB_ARCH_TRAP_BRKPT.
+
 2015-08-27  Pedro Alves  <palves@redhat.com>
 
 	* proc-service.c (ps_pdwrite): Return PS_ERR/PS_OK explicily.

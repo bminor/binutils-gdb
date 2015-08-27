@@ -135,12 +135,19 @@ struct buffer;
    running to a breakpoint and checking what comes out of
    siginfo->si_code.
 
-   The generic Linux target code should use GDB_ARCH_TRAP_BRKPT
-   instead of TRAP_BRKPT to abstract out this x86 peculiarity.  */
+   The ppc kernel does use TRAP_BRKPT for software breakpoints
+   in PowerPC code, but it uses SI_KERNEL for software breakpoints
+   in SPU code on a Cell/B.E.  However, SI_KERNEL is never seen
+   on a SIGTRAP for any other reason.
+
+   The generic Linux target code should use GDB_ARCH_IS_TRAP_BRKPT
+   instead of TRAP_BRKPT to abstract out these peculiarities.  */
 #if defined __i386__ || defined __x86_64__
-# define GDB_ARCH_TRAP_BRKPT SI_KERNEL
+# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL)
+#elif defined __powerpc__
+# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == SI_KERNEL || (X) == TRAP_BRKPT)
 #else
-# define GDB_ARCH_TRAP_BRKPT TRAP_BRKPT
+# define GDB_ARCH_IS_TRAP_BRKPT(X) ((X) == TRAP_BRKPT)
 #endif
 
 #ifndef TRAP_HWBKPT
