@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.9
+*** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*
   targets has been added.  GDB now supports recording of A64 instruction set
