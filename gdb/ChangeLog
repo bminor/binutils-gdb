@@ -1,5 +1,9 @@
 2015-08-28  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 7.10.0.DATE-cvs.
+
+2015-08-28  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 7.10 released.
 
 2015-08-28  Joel Brobecker  <brobecker@adacore.com>
