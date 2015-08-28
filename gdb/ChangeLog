@@ -1,3 +1,7 @@
+2015-08-28  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.10 released.
+
 2015-08-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* NEWS: Update entry about non-8-bits addressable memory.
