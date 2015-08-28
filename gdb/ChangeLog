@@ -1,3 +1,7 @@
+2015-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS: Update entry about non-8-bits addressable memory.
+
 2015-08-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	Revert:
