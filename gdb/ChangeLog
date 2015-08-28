@@ -1,3 +1,10 @@
+2015-08-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	Revert:
+	2014-11-06  Doug Evans  <xdje42@gmail.com>
+	* solib.c (solib_global_lookup): Fetch arch from objfile,
+	not target_gdbarch.
+
 2015-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-linux-tdep.c (ppc_linux_spe_context_lookup): Do not
