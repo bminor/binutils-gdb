@@ -1,21 +1,21 @@
-2015-08-08  Ulrich Weigand  <uweigand@de.ibm.com>
+2015-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-linux-tdep.c (ppc_linux_spe_context_lookup): Do not
 	attempt to relocate a TLS variable offset.
 
-2015-08-08  Ulrich Weigand  <uweigand@de.ibm.com>
+2015-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-multiarch.c (parse_spufs_run): Bail out if inferior is not
 	registered yet.  Set inferior_ptid while calling target_read_memory.
 
-2015-08-08  Ulrich Weigand  <uweigand@de.ibm.com>
+2015-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* nat/linux-ptrace.h (GDB_ARCH_TRAP_BRKPT): Replace by ...
 	(GDB_ARCH_IS_TRAP_BRKPT): ... this.  Add __powerpc__ case.
 	* linux-nat.c (check_stopped_by_breakpoint): Use
 	GDB_ARCH_IS_TRAP_BRKPT instead of GDB_ARCH_TRAP_BRKPT.
 
-2015-08-08  Ulrich Weigand  <uweigand@de.ibm.com>
+2015-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-thread-db.c (thread_db_get_thread_local_address): If the
 	thread was not yet discovered, use thread_from_lwp instead of
