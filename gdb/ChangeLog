@@ -1,11 +1,5 @@
 2015-08-29  Patrick Palka  <patrick@parcs.ath.cx>
 
-	* gdbarch.h (gdbarch_obstack_strdup): Declare.
-	* gdbarch.c (gdbarch_obstack_strdup): Define.
-	* gdbtypes.c (arch_type): Use it.
-
-2015-08-29  Patrick Palka  <patrick@parcs.ath.cx>
-
 	* gdbtypes.c (alloc_type_arch): Allocate the type on the given
 	gdbarch obstack instead of on the heap.  Update commentary
 	accordingly.

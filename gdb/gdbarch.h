@@ -1618,11 +1618,6 @@ extern void *gdbarch_obstack_zalloc (struct gdbarch *gdbarch, long size);
 #define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), (NR) * sizeof (TYPE)))
 #define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), sizeof (TYPE)))
 
-/* Duplicate STRING, returning an equivalent string that's allocated on the
-   obstack associated with GDBARCH.  The string is freed when the corresponding
-   architecture is also freed.  */
-
-extern char *gdbarch_obstack_strdup (struct gdbarch *gdbarch, const char *string);
 
 /* Helper function.  Force an update of the current architecture.
 
