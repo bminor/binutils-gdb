@@ -1,5 +1,14 @@
 2015-09-02  Patrick Palka  <patrick@parcs.ath.cx>
 
+	* gdb_obstack.h (obstack_strdup): Declare.
+	* gdb_obstack.c (obstack_strdup): Define.
+	* gdbarch.sh (gdbarch_obstack_strdup): Declare and define.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbtypes.c (arch_type): Use gdbarch_obstack_strdup.
+
+2015-09-02  Patrick Palka  <patrick@parcs.ath.cx>
+
 	* gdbtypes.c (copy_type_recursive): Update documentation.
 
 2015-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
