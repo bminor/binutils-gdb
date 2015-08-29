@@ -1,3 +1,7 @@
+2015-09-02  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdbtypes.c (copy_type_recursive): Update documentation.
+
 2015-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* solib-svr4.c (solib_event_probe_action): Initialize 'probe_argc'
