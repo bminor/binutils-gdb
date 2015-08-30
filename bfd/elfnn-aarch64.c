@@ -2260,7 +2260,7 @@ struct elf_aarch64_link_hash_table
 
   /* Assorted information used by elfNN_aarch64_size_stubs.  */
   unsigned int bfd_count;
-  int top_index;
+  unsigned int top_index;
   asection **input_list;
 
   /* The offset into splt of the PLT entry for the TLS descriptor
@@ -2985,7 +2985,7 @@ elfNN_aarch64_setup_section_lists (bfd *output_bfd,
 {
   bfd *input_bfd;
   unsigned int bfd_count;
-  int top_id, top_index;
+  unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
   bfd_size_type amt;

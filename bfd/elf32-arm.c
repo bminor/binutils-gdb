@@ -3061,11 +3061,11 @@ struct elf32_arm_link_hash_table
   struct map_stub *stub_group;
 
   /* Number of elements in stub_group.  */
-  int top_id;
+  unsigned int top_id;
 
   /* Assorted information used by elf32_arm_size_stubs.  */
   unsigned int bfd_count;
-  int top_index;
+  unsigned int top_index;
   asection **input_list;
 };
 
@@ -4432,7 +4432,7 @@ elf32_arm_setup_section_lists (bfd *output_bfd,
 {
   bfd *input_bfd;
   unsigned int bfd_count;
-  int top_id, top_index;
+  unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
   bfd_size_type amt;
@@ -11137,7 +11137,7 @@ elf32_arm_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* Process stub sections (eg BE8 encoding, ...).  */
   struct elf32_arm_link_hash_table *htab = elf32_arm_hash_table (info);
-  int i;
+  unsigned int i;
   for (i=0; i<htab->top_id; i++)
     {
       sec = htab->stub_group[i].stub_sec;

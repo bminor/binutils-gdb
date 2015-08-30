@@ -2556,7 +2556,7 @@ _bfd_xcoff_sizeof_headers (bfd *abfd,
       };
       struct nbr_reloc_lineno *n_rl;
       bfd *sub;
-      int max_index;
+      unsigned int max_index;
       asection *s;
 
       /* Although the number of sections is known, the maximum value of

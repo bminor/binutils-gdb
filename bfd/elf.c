@@ -3664,7 +3664,7 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
   unsigned int num_globals = 0;
   unsigned int num_locals2 = 0;
   unsigned int num_globals2 = 0;
-  int max_index = 0;
+  unsigned int max_index = 0;
   unsigned int idx;
   asection *asect;
   asymbol **new_syms;

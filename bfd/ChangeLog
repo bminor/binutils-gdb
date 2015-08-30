@@ -1,3 +1,21 @@
+2015-08-31  Alan Modra  <amodra@gmail.com>
+
+	* section.c (struct bfd_section): Make "id" and "index" unsigned.
+	* coff-rs6000.c (_bfd_xcoff_sizeof_headers): Adjust local var to suit.
+	* elf.c (elf_map_symbols): Likewise.
+	* elf64-ppc.c (sym_exists_at): Make "id" param unsigned.
+	(struct ppc_link_hash_table): Make "top_id" and "top_index" unsigned.
+	(ppc64_elf_setup_section_lists): Ditto for local vars.
+	* elf32-arm.c: Similarly to elf64-ppc.c.
+	* elf32-avr.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-metag.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* simple.c (struct saved_offsets): Make "section_count" unsigned.
+	* bfd-in2.h: Regenerate.
+
 2015-08-27  Alan Modra  <amodra@gmail.com>
 
 	PR 18867

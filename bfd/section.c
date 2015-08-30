@@ -155,10 +155,10 @@ CODE_FRAGMENT
 .  const char *name;
 .
 .  {* A unique sequence number.  *}
-.  int id;
+.  unsigned int id;
 .
 .  {* Which section in the bfd; 0..n-1 as sections are created in a bfd.  *}
-.  int index;
+.  unsigned int index;
 .
 .  {* The next section in the list belonging to the BFD, or NULL.  *}
 .  struct bfd_section *next;
@@ -826,7 +826,7 @@ _bfd_generic_new_section_hook (bfd *abfd, asection *newsect)
 static asection *
 bfd_section_init (bfd *abfd, asection *newsect)
 {
-  static int section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
+  static unsigned int section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
 
   newsect->id = section_id;
   newsect->index = abfd->section_count;

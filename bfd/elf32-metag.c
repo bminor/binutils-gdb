@@ -838,7 +838,7 @@ struct elf_metag_link_hash_table
 
   /* Assorted information used by elf_metag_size_stubs.  */
   unsigned int bfd_count;
-  int top_index;
+  unsigned int top_index;
   asection **input_list;
   Elf_Internal_Sym **all_local_syms;
 
@@ -3729,7 +3729,7 @@ elf_metag_setup_section_lists (bfd *output_bfd, struct bfd_link_info *info)
 {
   bfd *input_bfd;
   unsigned int bfd_count;
-  int top_id, top_index;
+  unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
   bfd_size_type amt;

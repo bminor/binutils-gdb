@@ -3101,11 +3101,11 @@ compare_symbols (const void *ap, const void *bp)
 /* Search SYMS for a symbol of the given VALUE.  */
 
 static asymbol *
-sym_exists_at (asymbol **syms, long lo, long hi, int id, bfd_vma value)
+sym_exists_at (asymbol **syms, long lo, long hi, unsigned int id, bfd_vma value)
 {
   long mid;
 
-  if (id == -1)
+  if (id == (unsigned) -1)
     {
       while (lo < hi)
 	{
@@ -3942,10 +3942,10 @@ struct ppc_link_hash_table
   asection *toc_first_sec;
 
   /* Highest input section id.  */
-  int top_id;
+  unsigned int top_id;
 
   /* Highest output section index.  */
-  int top_index;
+  unsigned int top_index;
 
   /* Used when adding symbols.  */
   struct ppc_link_hash_entry *dot_syms;
@@ -11163,7 +11163,7 @@ int
 ppc64_elf_setup_section_lists (struct bfd_link_info *info)
 {
   bfd *input_bfd;
-  int top_id, top_index, id;
+  unsigned int top_id, top_index, id;
   asection *section;
   asection **input_list;
   bfd_size_type amt;
