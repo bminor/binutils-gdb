@@ -500,6 +500,22 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{readelf {-Wrd} pr18900b.rd}} \
 	    "pr18900b" \
 	] \
+	[list \
+	    "Build gotpcrel1d.so" \
+	    "-shared" \
+	    "" \
+	    { gotpcrel1d.S } \
+	    "" \
+	    "gotpcrel1d.so" \
+	] \
+	[list \
+	    "Build gotpcrel1" \
+	    "tmpdir/gotpcrel1d.so" \
+	    "" \
+	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
+	    {{objdump {-dw} gotpcrel1.dd}} \
+	    "gotpcrel1" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
@@ -553,6 +569,14 @@ if { [isnative] && [which $CC] != 0 } {
 	    { pr18900b.c pr18900c.c } \
 	    "pr18900" \
 	    "pr18900.out" \
+	] \
+	[list \
+	    "Run gotpcrel1" \
+	    "tmpdir/gotpcrel1d.so" \
+	    "" \
+	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
+	    "gotpcrel1" \
+	    "gotpcrel1.out" \
 	] \
     ]
 

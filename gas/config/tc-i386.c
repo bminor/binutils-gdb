@@ -2947,6 +2947,7 @@ tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
       || fixP->fx_r_type == BFD_RELOC_X86_64_PLT32
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOT32
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOTPCREL
+      || fixP->fx_r_type == BFD_RELOC_X86_64_INDBR_GOTPCREL
       || fixP->fx_r_type == BFD_RELOC_X86_64_TLSGD
       || fixP->fx_r_type == BFD_RELOC_X86_64_TLSLD
       || fixP->fx_r_type == BFD_RELOC_X86_64_DTPOFF32
@@ -8224,7 +8225,14 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
       exp->X_op = O_subtract;
       exp->X_op_symbol = GOT_symbol;
       if (i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
-	i.reloc[this_operand] = BFD_RELOC_32_PCREL;
+	{
+	  if (i.operands == 1
+	      && i.types[this_operand].bitfield.jumpabsolute)
+	    /* Borrow the unused BFD_RELOC_X86_64_PC32_BND.  */
+	    i.reloc[this_operand] = BFD_RELOC_X86_64_PC32_BND;
+	  else
+	    i.reloc[this_operand] = BFD_RELOC_32_PCREL;
+	}
       else if (i.reloc[this_operand] == BFD_RELOC_X86_64_GOTOFF64)
 	i.reloc[this_operand] = BFD_RELOC_64;
       else
@@ -10335,6 +10343,14 @@ i386_validate_fix (fixS *fixp)
 	    abort ();
 	  fixp->fx_r_type = BFD_RELOC_X86_64_GOTPCREL;
 	}
+      else if (fixp->fx_r_type == BFD_RELOC_X86_64_PC32_BND)
+	{
+	  /* Covert the borrowed BFD_RELOC_X86_64_PC32_BND back to
+	     BFD_RELOC_X86_64_INDBR_GOTPCREL.  */
+	  if (!object_64bit)
+	    abort ();
+	  fixp->fx_r_type = BFD_RELOC_X86_64_INDBR_GOTPCREL;
+	}
       else
 	{
 	  if (!object_64bit)
@@ -10377,6 +10393,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     case BFD_RELOC_X86_64_PLT32:
     case BFD_RELOC_X86_64_GOT32:
     case BFD_RELOC_X86_64_GOTPCREL:
+    case BFD_RELOC_X86_64_INDBR_GOTPCREL:
     case BFD_RELOC_386_PLT32:
     case BFD_RELOC_386_GOT32:
     case BFD_RELOC_386_GOTOFF:
@@ -10530,6 +10547,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  case BFD_RELOC_X86_64_PLT32:
 	  case BFD_RELOC_X86_64_GOT32:
 	  case BFD_RELOC_X86_64_GOTPCREL:
+	  case BFD_RELOC_X86_64_INDBR_GOTPCREL:
 	  case BFD_RELOC_X86_64_TLSGD:
 	  case BFD_RELOC_X86_64_TLSLD:
 	  case BFD_RELOC_X86_64_GOTTPOFF:
