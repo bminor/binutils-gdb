@@ -402,7 +402,7 @@ tui_partial_win_by_name (char *name)
 const char *
 tui_win_name (const struct tui_gen_win_info *win_info)
 {
-  char *name = (char *) NULL;
+  const char *name = NULL;
 
   switch (win_info->type)
     {
