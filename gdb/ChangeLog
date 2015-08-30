@@ -1,3 +1,7 @@
+2015-08-29  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (struct symbol): Tweak comment.
+
 2015-08-29  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdbtypes.c (alloc_type_arch): Allocate the type on the given
