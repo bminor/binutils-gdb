@@ -291,6 +291,12 @@ run_dump_test "lea1c"
 run_dump_test "lea1d"
 run_dump_test "lea1e"
 run_dump_test "lea1f"
+run_dump_test "lea2a"
+run_dump_test "lea2b"
+run_dump_test "lea3a"
+run_dump_test "lea3b"
+run_dump_test "lea4a"
+run_dump_test "lea4b"
 run_dump_test "mov1a"
 run_dump_test "mov1b"
 
@@ -490,6 +496,22 @@ if { [isnative]
 	    {{readelf {-Wrd} pr18900b.rd}} \
 	    "pr18900b" \
 	] \
+	[list \
+	    "Build got1d.so" \
+	    "-shared" \
+	    "" \
+	    { got1d.S } \
+	    "" \
+	    "got1d.so" \
+	] \
+	[list \
+	    "Build gotpc1" \
+	    "tmpdir/got1d.so" \
+	    "" \
+	    { got1a.S got1b.c got1c.c } \
+	    {{objdump {-dw} got1.dd}} \
+	    "got1" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
@@ -551,6 +573,14 @@ if { [isnative]
 	    { pr18900b.c pr18900c.c } \
 	    "pr18900" \
 	    "pr18900.out" \
+	] \
+	[list \
+	    "Run got1" \
+	    "tmpdir/got1d.so" \
+	    "" \
+	    { got1a.S got1b.c got1c.c } \
+	    "got1" \
+	    "got1.out" \
 	] \
     ]
 }

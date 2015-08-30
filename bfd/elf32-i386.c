@@ -29,6 +29,7 @@
 #include "objalloc.h"
 #include "hashtab.h"
 #include "dwarf2.h"
+#include "opcode/i386.h"
 
 /* 386 uses REL relocations instead of RELA.  */
 #define USE_REL	1
@@ -146,9 +147,12 @@ static reloc_howto_type elf_howto_table[]=
   HOWTO(R_386_IRELATIVE, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_386_IRELATIVE",
 	TRUE, 0xffffffff, 0xffffffff, FALSE),
+  HOWTO(R_386_LOAD_GOT32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_LOAD_GOT32",
+	TRUE, 0xffffffff, 0xffffffff, FALSE),
 
   /* Another gap.  */
-#define R_386_ext2 (R_386_IRELATIVE + 1 - R_386_tls_offset)
+#define R_386_ext2 (R_386_LOAD_GOT32 + 1 - R_386_tls_offset)
 #define R_386_vt_offset (R_386_GNU_VTINHERIT - R_386_ext2)
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -331,6 +335,10 @@ elf_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_386_IRELATIVE:
       TRACE ("BFD_RELOC_386_IRELATIVE");
       return &elf_howto_table[R_386_IRELATIVE - R_386_tls_offset];
+
+    case BFD_RELOC_386_LOAD_GOT32:
+      TRACE ("BFD_RELOC_386_LOAD_GOT32");
+      return &elf_howto_table[R_386_LOAD_GOT32 - R_386_tls_offset];
 
     case BFD_RELOC_VTABLE_INHERIT:
       TRACE ("BFD_RELOC_VTABLE_INHERIT");
@@ -1468,7 +1476,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define need_convert_mov_to_lea sec_flg0
+#define need_convert_mov_and_branch sec_flg0
 
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
@@ -1580,6 +1588,7 @@ elf_i386_check_relocs (bfd *abfd,
 	    case R_386_PC32:
 	    case R_386_PLT32:
 	    case R_386_GOT32:
+	    case R_386_LOAD_GOT32:
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
 	      if (!_bfd_elf_create_ifunc_sections (htab->elf.dynobj, info))
@@ -1637,6 +1646,7 @@ elf_i386_check_relocs (bfd *abfd,
 	  /* Fall through */
 
 	case R_386_GOT32:
+	case R_386_LOAD_GOT32:
 	case R_386_TLS_GD:
 	case R_386_TLS_GOTDESC:
 	case R_386_TLS_DESC_CALL:
@@ -1647,7 +1657,10 @@ elf_i386_check_relocs (bfd *abfd,
 	    switch (r_type)
 	      {
 	      default:
-	      case R_386_GOT32: tls_type = GOT_NORMAL; break;
+	      case R_386_GOT32:
+	      case R_386_LOAD_GOT32:
+		tls_type = GOT_NORMAL;
+		break;
 	      case R_386_TLS_GD: tls_type = GOT_TLS_GD; break;
 	      case R_386_TLS_GOTDESC:
 	      case R_386_TLS_DESC_CALL:
@@ -1940,9 +1953,9 @@ do_size:
 	    return FALSE;
 	}
 
-      if (r_type == R_386_GOT32
+      if ((r_type == R_386_GOT32 || r_type == R_386_LOAD_GOT32)
 	  && (h == NULL || h->type != STT_GNU_IFUNC))
-	sec->need_convert_mov_to_lea = 1;
+	sec->need_convert_mov_and_branch = 1;
     }
 
   return TRUE;
@@ -2066,6 +2079,7 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 	case R_386_TLS_IE:
 	case R_386_TLS_GOTIE:
 	case R_386_GOT32:
+	case R_386_LOAD_GOT32:
 	  if (h != NULL)
 	    {
 	      if (h->got.refcount > 0)
@@ -2711,14 +2725,18 @@ elf_i386_readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 }
 
 /* Convert
-   mov foo@GOT(%reg), %reg
+   mov foo@GOT[(%reg)], %reg
    to
-   lea foo@GOTOFF(%reg), %reg
-   with the local symbol, foo.  */
+   lea foo[@GOTOFF(%reg)], %reg
+   with the local symbol, foo, and convert
+   call/jmp *foo@GOT[(%reg)]
+   to
+   nop call foo/jmp foo nop
+   with the locally defined function, foo.  */
 
 static bfd_boolean
-elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
-			     struct bfd_link_info *link_info)
+elf_i386_convert_mov_and_branch (bfd *abfd, asection *sec,
+				 struct bfd_link_info *link_info)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs;
@@ -2735,7 +2753,7 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 
   /* Nothing to do if there is no need or no output.  */
   if ((sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
-      || sec->need_convert_mov_to_lea == 0
+      || sec->need_convert_mov_and_branch == 0
       || bfd_is_abs_section (sec->output_section))
     return TRUE;
 
@@ -2769,34 +2787,57 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
       unsigned int r_symndx = ELF32_R_SYM (irel->r_info);
       unsigned int indx;
       struct elf_link_hash_entry *h;
+      bfd_vma roff;
+      unsigned int opcode;
+      unsigned int modrm;
+      bfd_boolean baseless;
+      unsigned int new_r_type;
+      const char *name;
+      Elf_Internal_Sym *isym;
+      unsigned int disp;
+      unsigned int nop;
+      bfd_vma nop_offset;
 
-      if (r_type != R_386_GOT32)
+      if (r_type != R_386_GOT32 && r_type != R_386_LOAD_GOT32)
 	continue;
 
-      /* Get the symbol referred to by the reloc.  */
+      roff = irel->r_offset;
+
+      if (roff < 2)
+	continue;
+
+      opcode = bfd_get_8 (abfd, contents + roff - 2);
+
+      if (!(opcode == 0x8b
+	    && (r_type == R_386_GOT32 || r_type == R_386_LOAD_GOT32))
+	  && !(opcode == 0xff && r_type == R_386_LOAD_GOT32))
+	continue;
+
+      /* Try to convert R_386_GOT32 and R_386_LOAD_GOT32.  Get the
+	 symbol referred to by the reloc.  */
       if (r_symndx < symtab_hdr->sh_info)
 	{
-	  Elf_Internal_Sym *isym;
-
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 					abfd, r_symndx);
 
-	  /* STT_GNU_IFUNC must keep R_386_GOT32 relocation.  */
-	  if (ELF_ST_TYPE (isym->st_info) != STT_GNU_IFUNC
-	      && irel->r_offset >= 2
-	      && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
+	  /* STT_GNU_IFUNC must keep GOT32 relocation.  */
+	  if (ELF_ST_TYPE (isym->st_info) != STT_GNU_IFUNC)
 	    {
-	      bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
-	      irel->r_info = ELF32_R_INFO (r_symndx, R_386_GOTOFF);
 	      if (local_got_refcounts != NULL
 		  && local_got_refcounts[r_symndx] > 0)
 		local_got_refcounts[r_symndx] -= 1;
-	      changed_contents = TRUE;
-	      changed_relocs = TRUE;
+	      h = NULL;
+	      if (opcode == 0x8b)
+		/* Convert "mov *foo@GOT[(%reg)], %reg".  */
+		goto convert_mov_to_gotoff;
+	      else
+		/* Convert "call/jmp *foo@GOT[(%reg)]".  */
+		goto convert_branch_to_gotoff;
 	    }
 	  continue;
 	}
 
+      isym = NULL;
       indx = r_symndx - symtab_hdr->sh_info;
       h = elf_sym_hashes (abfd)[indx];
       BFD_ASSERT (h != NULL);
@@ -2805,21 +2846,176 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-      /* STT_GNU_IFUNC must keep R_386_GOT32 relocation.  We also avoid
-	 optimizing _DYNAMIC since ld.so may use its link-time address.  */
-      if (h->def_regular
-	  && h->type != STT_GNU_IFUNC
-	  && h != htab->elf.hdynamic
-	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
-	  && irel->r_offset >= 2
-	  && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
+      if (opcode == 0xff && r_type == R_386_LOAD_GOT32)
 	{
-	  bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
-	  irel->r_info = ELF32_R_INFO (r_symndx, R_386_GOTOFF);
-	  if (h->got.refcount > 0)
-	    h->got.refcount -= 1;
-	  changed_contents = TRUE;
-	  changed_relocs = TRUE;
+	  /* We have "call/jmp *foo@GOT[(%reg)]".  */
+	  if (h->def_regular
+	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	    {
+	      /* The function is defined.  But STT_GNU_IFUNC must keep
+		 R_386_LOAD_GOT32 relocation.  */
+	      if (h->type != STT_GNU_IFUNC)
+		{
+convert_branch_to_gotoff:
+		  modrm = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+		  /* Convert R_386_LOAD_GOT32 to R_386_PC32.  */
+		  if (modrm == 0x15
+		      || (modrm >= 0x90 && modrm <= 0x97))
+		    modrm = 0xe8;
+		  else if (modrm == 0x25
+			   || (modrm >= 0xa0 && modrm <= 0xa7))
+		    modrm = 0xe9;
+		  else
+		    /* Skip "lcall/ljmp *foo@GOT[(%reg)]". */
+		    continue;
+		  /* When converting to PC-relative relocation, we
+		     need to adjust addend by 4.  */
+		  disp = bfd_get_32 (abfd, contents + irel->r_offset);
+		  disp -= 4;
+		  if (modrm == 0xe9)
+		    {
+		      /* Convert to "jmp foo nop".  */
+		      nop = NOP_OPCODE;
+		      nop_offset = irel->r_offset + 3;
+		      irel->r_offset -= 1;
+		    }
+		  else
+		    {
+		      /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
+			 is a nop prefix.  */
+		      nop = ADDR_PREFIX_OPCODE;
+		      nop_offset = irel->r_offset - 2;
+		    }
+		  bfd_put_8 (abfd, nop, contents + nop_offset);
+		  bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);
+		  bfd_put_32 (abfd, disp, contents + irel->r_offset);
+		  irel->r_info = ELF32_R_INFO (r_symndx, R_386_PC32);
+		  if (h)
+		    {
+		      if (h->got.refcount > 0)
+			h->got.refcount -= 1;
+		    }
+		  changed_contents = TRUE;
+		  changed_relocs = TRUE;
+		}
+	    }
+	  else
+	    {
+	      /* The function is undefined.  */
+	      modrm = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+	      baseless = (modrm & 0xc7) == 0x5;
+	      if (bfd_link_pic (link_info))
+		{
+		  /* For PIC, we leave "call/jmp *foo@GOT(%reg)" alone
+		     and disallow "call/jmp *foo@GOT" since we don't
+		     know what the GOT base is.  */
+		  if (baseless)
+		    {
+baseless_error:
+		      if (h)
+			name = h->root.root.string;
+		      else
+			name = bfd_elf_sym_name (abfd, symtab_hdr,
+						 isym, NULL);
+		      (*_bfd_error_handler)
+			(_("%B: direct GOT relocation R_386_LOAD_GOT32 against `%s' without base register can not be used when making a shared object"),
+			 abfd, name);
+		      goto error_return;
+		    }
+		}
+	      else if (!baseless)
+		{
+		  /* For non-PIC, convert "call/jmp *foo@GOT(%reg)"
+		     to "call/jmp *foo@GOT" since we don't know if
+		     REG is the GOT base.  No need to convert
+		     "call/jmp *foo@GOT".  */
+		  if (modrm >= 0x90 && modrm <= 0x97)
+		    /* Convert to "call *foo@GOT".  */
+		    modrm = 0x15;
+		  else if (modrm >= 0xa0 && modrm <= 0xa7)
+		    /* Convert to "jmp *foo@GOT".  */
+		    modrm = 0x25;
+		  else
+		    /* Skip "lcall/ljmp *foo@GOT(%reg)". */
+		    continue;
+		  bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);
+		  changed_contents = TRUE;
+		}
+	    }
+	}
+      else
+	{
+	  /* STT_GNU_IFUNC must keep GOT32 relocation.  */
+	  if (h->def_regular
+	      && h->type != STT_GNU_IFUNC
+	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	    {
+	      /* Avoid optimizing _DYNAMIC since ld.so may use its
+		 link-time address.  Convert R_386_LOAD_GOT32 in
+		 "mov _DYNAMIC@GOT(%reg), %reg" to R_386_GOT32 to
+		 avoid adding the GOT base in non-PIC mode in
+		 elf_i386_relocate_section.  */
+	      if (h == htab->elf.hdynamic)
+		{
+		  if (r_type == R_386_LOAD_GOT32)
+		    {
+		      irel->r_info = ELF32_R_INFO (r_symndx,
+						   R_386_GOT32);
+		      changed_relocs = TRUE;
+		    }
+		  continue;
+		}
+
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
+
+convert_mov_to_gotoff:
+	      bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
+	      modrm = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+	      baseless = (modrm & 0xc7) == 0x5;
+	      /* For PIC, disallow "mov foo@GOT, %reg" since we don't
+		 know what the GOT base is.  */
+	      if (baseless && bfd_link_pic (link_info))
+		goto baseless_error;
+	      if (r_type == R_386_LOAD_GOT32
+		  && (baseless || !bfd_link_pic (link_info)))
+		new_r_type = R_386_32;
+	      else
+		new_r_type = R_386_GOTOFF;
+	      irel->r_info = ELF32_R_INFO (r_symndx, new_r_type);
+	      changed_contents = TRUE;
+	      changed_relocs = TRUE;
+	      /* For non-PIC, convert "lea foo@GOTOFF(%reg1), %reg2"
+		 to "lea foo, %reg2".  */
+	      if (!baseless && new_r_type == R_386_32)
+		goto convert_to_baseless;
+	    }
+	  else if (r_type == R_386_LOAD_GOT32)
+	    {
+	      /* Function is undefined.  */
+	      modrm = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+	      baseless = (modrm & 0xc5) == 0x5;
+
+	      if (bfd_link_pic (link_info))
+		{
+		  /* For PIC, we leave "mov *foo@GOT(%reg), %reg" alone
+		     and disallow "mov foo@GOT, %reg" since we don't
+		     know what the GOT base is.  */
+		  if (baseless)
+		    goto baseless_error;
+		}
+	      else if (!baseless)
+		{
+		  /* For non-PIC, convert "mov foo@GOT(%reg1), %reg2"
+		     to "mov foo@GOT, %reg2" since the GOT base will be
+		     added in elf_i386_relocate_section.  No need to
+		     convert "mov foo@GOT, %reg".  */
+convert_to_baseless:
+		  modrm = 0x5 | (modrm & 0x38);
+		  bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);
+		  changed_contents = TRUE;
+		}
+	    }
 	}
     }
 
@@ -2905,7 +3101,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	{
 	  struct elf_dyn_relocs *p;
 
-	  if (!elf_i386_convert_mov_to_lea (ibfd, s, info))
+	  if (!elf_i386_convert_mov_and_branch (ibfd, s, info))
 	    return FALSE;
 
 	  for (p = ((struct elf_dyn_relocs *)
@@ -3655,6 +3851,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      goto do_relocation;
 
 	    case R_386_GOT32:
+	    case R_386_LOAD_GOT32:
 	      base_got = htab->elf.sgot;
 	      off = h->got.offset;
 
@@ -3732,6 +3929,34 @@ elf_i386_relocate_section (bfd *output_bfd,
       eh = (struct elf_i386_link_hash_entry *) h;
       switch (r_type)
 	{
+	case R_386_LOAD_GOT32:
+	  /* Resolve "call/jmp *GOT[(%reg)]"/"mov GOT[(%reg)], %reg".  */
+	  if (h == NULL
+	      || (h->plt.offset == (bfd_vma) -1
+		  && h->got.offset == (bfd_vma) -1)
+	      || htab->elf.sgotplt == NULL)
+	    abort ();
+
+	  offplt = (htab->elf.sgotplt->output_section->vma
+		     + htab->elf.sgotplt->output_offset);
+
+	  /* It is relative to .got.plt section.  */
+	  if (h->got.offset != (bfd_vma) -1)
+	    /* Use GOT entry.  */
+	    relocation = (htab->elf.sgot->output_section->vma
+			  + htab->elf.sgot->output_offset
+			  + h->got.offset - offplt);
+	  else
+	    /* Use GOTPLT entry.  */
+	    relocation = (h->plt.offset / plt_entry_size - 1 + 3) * 4;
+
+	  /* If not PIC, add the .got.plt section address.  */
+	  if (!bfd_link_pic (info))
+	    relocation += offplt;
+
+	  unresolved_reloc = FALSE;
+	  break;
+
 	case R_386_GOT32:
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table.  */

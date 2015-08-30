@@ -1,4 +1,4 @@
-#source: lea1.s
+#source: lea2.s
 #as: --32
 #ld: -melf_i386
 #objdump: -dw

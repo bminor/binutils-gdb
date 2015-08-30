@@ -2934,6 +2934,7 @@ tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
       || fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
       || fixP->fx_r_type == BFD_RELOC_386_GOT32
+      || fixP->fx_r_type == BFD_RELOC_386_LOAD_GOT32
       || fixP->fx_r_type == BFD_RELOC_386_TLS_GD
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LDM
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LDO_32
@@ -3711,6 +3712,20 @@ md_assemble (char *line)
 	      i.op[x].regs = i.op[x].regs + 8;
 	    }
 	}
+    }
+
+  /* We don't check BFD_RELOC_X86_64_GOTPCREL here since it is set
+     by i386_validate_fix from BFD_RELOC_32_PCREL. */
+  if (i.reloc[0] == BFD_RELOC_386_GOT32)
+    {
+      if (i.operands == 1
+	  && t->base_opcode == 0xff
+	  && (t->extension_opcode == 2 || t->extension_opcode == 4))
+	/* call/jmp *foo@GOT[(%reg])  */
+	i.reloc[0] = BFD_RELOC_386_LOAD_GOT32;
+      else if (i.operands == 2 && i.tm.base_opcode == 0x8b)
+	/* mov foo@GOT[(%reg]), %reg  */
+	i.reloc[0] = BFD_RELOC_386_LOAD_GOT32;
     }
 
   if (i.rex != 0)
@@ -4797,6 +4812,10 @@ match_template (void)
 	      break;
 	    }
 	  }
+
+      /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
+      if (i.reloc[0] == BFD_RELOC_386_GOT32 && t->base_opcode == 0xa0)
+	continue;
 
       /* We check register size if needed.  */
       check_register = t->opcode_modifier.checkregsize;
@@ -10396,6 +10415,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     case BFD_RELOC_X86_64_INDBR_GOTPCREL:
     case BFD_RELOC_386_PLT32:
     case BFD_RELOC_386_GOT32:
+    case BFD_RELOC_386_LOAD_GOT32:
     case BFD_RELOC_386_GOTOFF:
     case BFD_RELOC_386_GOTPC:
     case BFD_RELOC_386_TLS_GD:
