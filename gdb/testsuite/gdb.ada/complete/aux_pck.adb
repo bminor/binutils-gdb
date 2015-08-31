@@ -1,4 +1,4 @@
---  Copyright 2008-2015 Free Software Foundation, Inc.
+--  Copyright 2015 Free Software Foundation, Inc.
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -13,17 +13,16 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package body Pck is
-
-   procedure Proc (I : Integer) is
-      Not_In_Scope : Integer := 77;
-   begin
-      Inner.Inside_Variable := Not_In_Scope + I;
-   end Proc;
+package body Aux_Pck is
 
    procedure Ambiguous_Func is
    begin
       null;
    end Ambiguous_Func;
 
-end Pck;
+   procedure Ambiguous_Proc is
+   begin
+      null;
+   end Ambiguous_Proc;
+
+end Aux_Pck;

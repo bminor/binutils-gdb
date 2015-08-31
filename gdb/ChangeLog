@@ -1,3 +1,8 @@
+2015-09-01  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (ada_resolve_function): Do not ask the user what
+	match to use when in completion mode.
+
 2015-08-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-data.c (tui_win_name): Make local variable const, remove

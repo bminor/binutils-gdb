@@ -31,4 +31,6 @@ package Pck is
 
    procedure Proc (I : Integer);
 
+   procedure Ambiguous_Func;
+
 end Pck;
