@@ -1,5 +1,13 @@
 2015-08-31  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (elf_sort_symbol): Use correctly sized type for
+	calculating signed section->id difference.
+	(elf_link_add_object_symbols): Likewise.
+	* pef.c (bfd_pef_scan_start_address): Warning fix.
+	* vms-alpha.c (vms_new_section_hook): Likewise.
+
+2015-08-31  Alan Modra  <amodra@gmail.com>
+
 	* elf32-nds32.c (nds32_convert_32_to_16_alu1): Warning fix.
 	(find_relocs_at_address_addr): Make "reloc_type" an enum.
 	(nds32_elf_relax_delete_blanks): Warning fix.

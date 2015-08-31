@@ -9013,13 +9013,13 @@ vms_new_section_hook (bfd * abfd, asection *section)
 {
   bfd_size_type amt;
 
-  vms_debug2 ((1, "vms_new_section_hook (%p, [%d]%s)\n",
+  vms_debug2 ((1, "vms_new_section_hook (%p, [%u]%s)\n",
                abfd, section->index, section->name));
 
   if (! bfd_set_section_alignment (abfd, section, 0))
     return FALSE;
 
-  vms_debug2 ((7, "%d: %s\n", section->index, section->name));
+  vms_debug2 ((7, "%u: %s\n", section->index, section->name));
 
   amt = sizeof (struct vms_section_data_struct);
   section->used_by_bfd = bfd_zalloc (abfd, amt);
