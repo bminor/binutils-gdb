@@ -1,5 +1,13 @@
 2015-08-31  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (get_r2off): Return -1 on error.
+	(ppc_build_one_stub): Adjust for get_r2off change.  Don't emit
+	addi r2,r2,0 on r2off stubs when the low 16-bit delta is zero.
+	(ppc_size_one_stub): Corresponding size changes for r2off stubs.
+	Add condition in test for -R objects.
+
+2015-08-31  Alan Modra  <amodra@gmail.com>
+
 	* section.c (section_id): Make file scope.
 	(bfd_get_next_section_id): New function.
 	* elf64-ppc.c (struct map_stub): Remove toc_off field.  Move decl.

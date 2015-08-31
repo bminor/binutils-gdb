@@ -10540,10 +10540,10 @@ get_r2off (struct bfd_link_info *info,
 	  info->callbacks->einfo (_("%P: cannot find opd entry toc for `%T'\n"),
 				  stub_entry->h->elf.root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
-	  return 0;
+	  return (bfd_vma) -1;
 	}
       if (!bfd_get_section_contents (opd->owner, opd, buf, opd_off + 8, 8))
-	return 0;
+	return (bfd_vma) -1;
       r2off = bfd_get_64 (opd->owner, buf);
       r2off -= elf_gp (info->output_bfd);
     }
@@ -10599,23 +10599,28 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	{
 	  bfd_vma r2off = get_r2off (info, stub_entry);
 
-	  if (r2off == 0)
+	  if (r2off == (bfd_vma) -1)
 	    {
 	      htab->stub_error = TRUE;
 	      return FALSE;
 	    }
 	  bfd_put_32 (htab->params->stub_bfd, STD_R2_0R1 + STK_TOC (htab), loc);
 	  loc += 4;
-	  size = 12;
+	  size = 8;
 	  if (PPC_HA (r2off) != 0)
 	    {
-	      size = 16;
 	      bfd_put_32 (htab->params->stub_bfd,
 			  ADDIS_R2_R2 | PPC_HA (r2off), loc);
 	      loc += 4;
+	      size += 4;
 	    }
-	  bfd_put_32 (htab->params->stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
-	  loc += 4;
+	  if (PPC_LO (r2off) != 0)
+	    {
+	      bfd_put_32 (htab->params->stub_bfd,
+			  ADDI_R2_R2 | PPC_LO (r2off), loc);
+	      loc += 4;
+	      size += 4;
+	    }
 	  off -= size - 4;
 	}
       bfd_put_32 (htab->params->stub_bfd, B_DOT | (off & 0x3fffffc), loc);
@@ -10796,7 +10801,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	{
 	  bfd_vma r2off = get_r2off (info, stub_entry);
 
-	  if (r2off == 0 && htab->opd_abi)
+	  if (r2off == (bfd_vma) -1)
 	    {
 	      htab->stub_error = TRUE;
 	      return FALSE;
@@ -11062,14 +11067,16 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
 	{
 	  r2off = get_r2off (info, stub_entry);
-	  if (r2off == 0 && htab->opd_abi)
+	  if (r2off == (bfd_vma) -1)
 	    {
 	      htab->stub_error = TRUE;
 	      return FALSE;
 	    }
-	  size = 12;
+	  size = 8;
 	  if (PPC_HA (r2off) != 0)
-	    size = 16;
+	    size += 4;
+	  if (PPC_LO (r2off) != 0)
+	    size += 4;
 	  off -= size - 4;
 	}
 
@@ -11079,7 +11086,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	 Do the same for -R objects without function descriptors.  */
       if (off + (1 << 25) >= (bfd_vma) (1 << 26) - local_off
 	  || (stub_entry->stub_type == ppc_stub_long_branch_r2off
-	      && r2off == 0))
+	      && r2off == 0
+	      && htab->sec_info[stub_entry->target_section->id].toc_off == 0))
 	{
 	  struct ppc_branch_hash_entry *br_entry;
 
