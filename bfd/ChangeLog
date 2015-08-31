@@ -1,5 +1,29 @@
 2015-08-31  Alan Modra  <amodra@gmail.com>
 
+	* section.c (section_id): Make file scope.
+	(bfd_get_next_section_id): New function.
+	* elf64-ppc.c (struct map_stub): Remove toc_off field.  Move decl.
+	(struct ppc_stub_hash_entry): Delete stub_sec and id_sec.  Add
+	group.  Update all uses.
+	(struct ppc_link_hash_table): Delete top_id, top_index, and
+	input_list.  Add sec_info_arr_size.  Rename stub_group to
+	sec_info, and make group info indirect.  Update stub_group refs
+	throughout file.
+	(ppc_add_stub): Don't look for stub_sec on link_sec stub_group
+	entry.
+	(ppc_build_one_stub): Delete FIXME.
+	(ppc64_elf_setup_section_lists): Size htab->sec_info for all
+	sections, not just input sections.  Don't create htab->input_list.
+	(ppc64_elf_next_input_section): Update to use sec_info union as
+	list pointer.
+	(PREV_SEC): Delete.
+	(group_sections): Pass "info" param rather than "htab".  Iterate
+	over output sections rather than input_list.  Use sec_info union
+	as list pointers.  Alloc atruct map_stub, and return fail status.
+	* bfd-in2.h: Regenerate.
+
+2015-08-31  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (elf_sort_symbol): Use correctly sized type for
 	calculating signed section->id difference.
 	(elf_link_add_object_symbols): Likewise.

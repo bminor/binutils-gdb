@@ -1818,6 +1818,8 @@ asection *bfd_make_section_with_flags
 
 asection *bfd_make_section (bfd *, const char *name);
 
+int bfd_get_next_section_id (void);
+
 bfd_boolean bfd_set_section_flags
    (bfd *abfd, asection *sec, flagword flags);
 
