@@ -1,5 +1,486 @@
-2015-08-24  Pedro Alves  <palves@redhat.com>
+2015-08-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tui/tui-data.c (tui_win_name): Make local variable const, remove
+	cast of NULL.
+
+2015-08-31  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-tdep.h (XTENSA_GDBARCH_TDEP_INSTANTIATE): Initialize
+	call_abi using XSHAL_ABI macro.
+
+2015-08-29  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (struct symbol): Tweak comment.
+
+2015-08-29  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdbtypes.c (alloc_type_arch): Allocate the type on the given
+	gdbarch obstack instead of on the heap.  Update commentary
+	accordingly.
+
+2015-08-28  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.10 released.
+
+2015-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS: Update entry about non-8-bits addressable memory.
+
+2015-08-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	Revert:
+	2014-11-06  Doug Evans  <xdje42@gmail.com>
+	* solib.c (solib_global_lookup): Fetch arch from objfile,
+	not target_gdbarch.
+
+2015-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-linux-tdep.c (ppc_linux_spe_context_lookup): Do not
+	attempt to relocate a TLS variable offset.
+
+2015-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-multiarch.c (parse_spufs_run): Bail out if inferior is not
+	registered yet.  Set inferior_ptid while calling target_read_memory.
+
+2015-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* nat/linux-ptrace.h (GDB_ARCH_TRAP_BRKPT): Replace by ...
+	(GDB_ARCH_IS_TRAP_BRKPT): ... this.  Add __powerpc__ case.
+	* linux-nat.c (check_stopped_by_breakpoint): Use
+	GDB_ARCH_IS_TRAP_BRKPT instead of GDB_ARCH_TRAP_BRKPT.
+
+2015-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linux-thread-db.c (thread_db_get_thread_local_address): If the
+	thread was not yet discovered, use thread_from_lwp instead of
+	calling thread_db_find_new_threads_1.
+
+2015-08-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* m88k-tdep.c (m88k_analyze_prologue): Fix inverted allocation
+	statements.
+
+2015-08-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS: Document support for non-8-bits addressable memory.
+
+2015-08-27  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac: Remove AC_TYPE_SIGNAL call.
+	* configure, config.in: Regenerate.
+
+2015-08-27  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (gdb_demangle): Use sighandler_t.  Remove cast.
+	* extension-priv.h: Include signal.h.
+	(struct signal_handler) <handler>: Change type to sighandler_t.
+	* extension.c (install_gdb_sigint_handler): Use sighandler_t.
+	* inflow.c (sigint_ours, sigquit_ours): Change type to
+	sighandler_t.
+	(child_terminal_inferior): Remove casts.
+	(child_terminal_ours_1, new_tty): Use sighandler_t.  Remove casts.
+	(osig): Change type to sighandler_t.
+	* nto-procfs.c (ofunc): Change type to sighandler_t.
+	(procfs_wait): Remove casts.
+	* remote-m32r-sdi.c (m32r_wait, m32r_load): Use sighandler_t.
+	* remote-sim.c (gdbsim_wait): Use sighandler_t.
+	* utils.c (wait_to_die_with_timeout): Use sighandler_t.
+
+2015-08-27  Pedro Alves  <palves@redhat.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add signal-h.
+	* gnulib/aclocal.m4: Renegerate.
+	* gnulib/config.in: Renegerate.
+	* gnulib/configure: Renegerate.
+	* gnulib/import/Makefile.am: Update.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Update.
+	* gnulib/import/m4/gnulib-comp.m4: Update.
+	* gnulib/import/m4/signal_h.m4: New file.
+	* gnulib/import/signal.in.h: New file.
+
+2015-08-27  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (DEFAULT_MAX_MEMORY_PACKET_SIZE)
+	(MIN_MEMORY_PACKET_SIZE): New.
+	(MAX_REMOTE_PACKET_SIZE, MIN_REMOTE_PACKET_SIZE): Delete.
+	(get_memory_packet_size): Adjust.  No longer limit the max packet
+	size.
+	(set_memory_packet_size): Adjust, and remove dead code.
+	(remote_check_symbols): Use xmalloc and a cleanup instead of
+	alloca.
+	(remote_packet_size): No longer cap the packet size.
+	(putpkt_binary): Use xmalloc and a cleanup instead of alloca.
+
+2015-08-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* compile/compile.c (compile_to_object): Mention language in
+	error message.
+
+2015-08-26  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* target.c (target_pre_inferior): Unset attach_flag.
+
+2015-08-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbarch.sh (append_name): Fix type in XRESIZEVEC.
+	* gdbarch.c: Re-generate.
+
+2015-08-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aarch64-linux-nat.c (aarch64_add_process): Replace xmalloc-family
+	function with the XNEW-family equivalent.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Likewise.
+	* ada-exp.y (write_ambiguous_var): Likewise.
+	* ada-lang.c (resolve_subexp): Likewise.
+	(user_select_syms): Likewise.
+	(assign_aggregate): Likewise.
+	(ada_evaluate_subexp): Likewise.
+	(cache_symbol): Likewise.
+	* addrmap.c (allocate_key): Likewise.
+	(addrmap_create_mutable): Likewise.
+	* aix-thread.c (sync_threadlists): Likewise.
+	* alpha-tdep.c (alpha_push_dummy_call): Likewise.
+	(alpha_gdbarch_init): Likewise.
+	* amd64-windows-tdep.c (amd64_windows_push_arguments): Likewise.
+	* arm-linux-nat.c (arm_linux_add_process): Likewise.
+	* arm-linux-tdep.c (arm_linux_displaced_step_copy_insn): Likewise.
+	* arm-tdep.c (push_stack_item): Likewise.
+	(arm_displaced_step_copy_insn): Likewise.
+	(arm_gdbarch_init): Likewise.
+	(_initialize_arm_tdep): Likewise.
+	* avr-tdep.c (push_stack_item): Likewise.
+	* ax-general.c (new_agent_expr): Likewise.
+	* block.c (block_initialize_namespace): Likewise.
+	* breakpoint.c (alloc_counted_command_line): Likewise.
+	(update_dprintf_command_list): Likewise.
+	(parse_breakpoint_sals): Likewise.
+	(decode_static_tracepoint_spec): Likewise.
+	(until_break_command): Likewise.
+	(clear_command): Likewise.
+	(update_global_location_list): Likewise.
+	(get_breakpoint_objfile_data) Likewise.
+	* btrace.c (ftrace_new_function): Likewise.
+	(btrace_set_insn_history): Likewise.
+	(btrace_set_call_history): Likewise.
+	* buildsym.c (add_symbol_to_list): Likewise.
+	(record_pending_block): Likewise.
+	(start_subfile): Likewise.
+	(start_buildsym_compunit): Likewise.
+	(push_subfile): Likewise.
+	(end_symtab_get_static_block): Likewise.
+	(buildsym_init): Likewise.
+	* cli/cli-cmds.c (source_command): Likewise.
+	* cli/cli-decode.c (add_cmd): Likewise.
+	* cli/cli-script.c (build_command_line): Likewise.
+	(setup_user_args): Likewise.
+	(realloc_body_list): Likewise.
+	(process_next_line): Likewise.
+	(copy_command_lines): Likewise.
+	* cli/cli-setshow.c (do_set_command): Likewise.
+	* coff-pe-read.c (read_pe_exported_syms): Likewise.
+	* coffread.c (coff_locate_sections): Likewise.
+	(coff_symtab_read): Likewise.
+	(coff_read_struct_type): Likewise.
+	* common/cleanups.c (make_my_cleanup2): Likewise.
+	* common/common-exceptions.c (throw_it): Likewise.
+	* common/filestuff.c (make_cleanup_close): Likewise.
+	* common/format.c (parse_format_string): Likewise.
+	* common/queue.h (DEFINE_QUEUE_P): Likewise.
+	* compile/compile-object-load.c (munmap_list_add): Likewise.
+	(compile_object_load): Likewise.
+	* compile/compile-object-run.c (compile_object_run): Likewise.
+	* compile/compile.c (append_args): Likewise.
+	* corefile.c (specify_exec_file_hook): Likewise.
+	* cp-support.c (make_symbol_overload_list): Likewise.
+	* cris-tdep.c (push_stack_item): Likewise.
+	(cris_gdbarch_init): Likewise.
+	* ctf.c (ctf_trace_file_writer_new): Likewise.
+	* dbxread.c (init_header_files): Likewise.
+	(add_new_header_file): Likewise.
+	(init_bincl_list): Likewise.
+	(dbx_end_psymtab): Likewise.
+	(start_psymtab): Likewise.
+	(dbx_end_psymtab): Likewise.
+	* dcache.c (dcache_init): Likewise.
+	* dictionary.c (dict_create_hashed): Likewise.
+	(dict_create_hashed_expandable): Likewise.
+	(dict_create_linear): Likewise.
+	(dict_create_linear_expandable): Likewise.
+	* dtrace-probe.c (dtrace_process_dof_probe): Likewise.
+	* dummy-frame.c (register_dummy_frame_dtor): Likewise.
+	* dwarf2-frame-tailcall.c (cache_new_ref1): Likewise.
+	* dwarf2-frame.c (dwarf2_build_frame_info): Likewise.
+	(decode_frame_entry_1): Likewise.
+	* dwarf2expr.c (new_dwarf_expr_context): Likewise.
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Likewise.
+	* dwarf2read.c (dwarf2_has_info): Likewise.
+	(create_signatured_type_table_from_index): Likewise.
+	(dwarf2_read_index): Likewise.
+	(dw2_get_file_names_reader): Likewise.
+	(create_all_type_units): Likewise.
+	(read_cutu_die_from_dwo): Likewise.
+	(init_tu_and_read_dwo_dies): Likewise.
+	(init_cutu_and_read_dies): Likewise.
+	(create_all_comp_units): Likewise.
+	(queue_comp_unit): Likewise.
+	(inherit_abstract_dies): Likewise.
+	(read_call_site_scope): Likewise.
+	(dwarf2_add_field): Likewise.
+	(dwarf2_add_typedef): Likewise.
+	(dwarf2_add_member_fn): Likewise.
+	(attr_to_dynamic_prop): Likewise.
+	(abbrev_table_alloc_abbrev): Likewise.
+	(abbrev_table_read_table): Likewise.
+	(add_include_dir): Likewise.
+	(add_file_name): Likewise.
+	(dwarf_decode_line_header): Likewise.
+	(dwarf2_const_value_attr): Likewise.
+	(dwarf_alloc_block): Likewise.
+	(parse_macro_definition): Likewise.
+	(set_die_type): Likewise.
+	(write_psymtabs_to_index): Likewise.
+	(create_cus_from_index): Likewise.
+	(dwarf2_create_include_psymtab): Likewise.
+	(process_psymtab_comp_unit_reader): Likewise.
+	(build_type_psymtab_dependencies): Likewise.
+	(read_comp_units_from_section): Likewise.
+	(compute_compunit_symtab_includes): Likewise.
+	(create_dwo_unit_in_dwp_v1): Likewise.
+	(create_dwo_unit_in_dwp_v2): Likewise.
+	(read_func_scope): Likewise.
+	(process_structure_scope): Likewise.
+	(mark_common_block_symbol_computed): Likewise.
+	(load_partial_dies): Likewise.
+	(dwarf2_symbol_mark_computed): Likewise.
+	* elfread.c (elf_symfile_segments): Likewise.
+	(elf_read_minimal_symbols): Likewise.
+	* environ.c (make_environ): Likewise.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* event-loop.c (create_file_handler): Likewise.
+	(create_async_signal_handler): Likewise.
+	(create_async_event_handler): Likewise.
+	(create_timer): Likewise.
+	* exec.c (build_section_table): Likewise.
+	* fbsd-nat.c (fbsd_remember_child): Likewise.
+	* fork-child.c (fork_inferior): Likewise.
+	* frv-tdep.c (new_variant): Likewise.
+	* gdbarch.sh (gdbarch_alloc): Likewise.
+	(append_name): Likewise.
+	* gdbtypes.c (rank_function): Likewise.
+	(copy_type_recursive): Likewise.
+	(add_dyn_prop): Likewise.
+	* gnu-nat.c (make_proc): Likewise.
+	(make_inf): Likewise.
+	(gnu_write_inferior): Likewise.
+	* gnu-v3-abi.c (build_gdb_vtable_type): Likewise.
+	(build_std_type_info_type): Likewise.
+	* guile/scm-param.c (compute_enum_list): Likewise.
+	* guile/scm-utils.c (gdbscm_parse_function_args): Likewise.
+	* guile/scm-value.c (gdbscm_value_call): Likewise.
+	* h8300-tdep.c (h8300_gdbarch_init): Likewise.
+	* hppa-tdep.c (hppa_init_objfile_priv_data): Likewise.
+	(read_unwind_info): Likewise.
+	* ia64-tdep.c (ia64_gdbarch_init): Likewise.
+	* infcall.c (dummy_frame_context_saver_setup): Likewise.
+	(call_function_by_hand_dummy): Likewise.
+	* infcmd.c (step_once): Likewise.
+	(finish_forward): Likewise.
+	(attach_command): Likewise.
+	(notice_new_inferior): Likewise.
+	* inferior.c (add_inferior_silent): Likewise.
+	* infrun.c (add_displaced_stepping_state): Likewise.
+	(save_infcall_control_state): Likewise.
+	(save_inferior_ptid): Likewise.
+	(_initialize_infrun): Likewise.
+	* jit.c (bfd_open_from_target_memory): Likewise.
+	(jit_gdbarch_data_init): Likewise.
+	* language.c (add_language): Likewise.
+	* linespec.c (decode_line_2): Likewise.
+	* linux-nat.c (add_to_pid_list): Likewise.
+	(add_initial_lwp): Likewise.
+	* linux-thread-db.c (add_thread_db_info): Likewise.
+	(record_thread): Likewise.
+	(info_auto_load_libthread_db): Likewise.
+	* m32c-tdep.c (m32c_gdbarch_init): Likewise.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Likewise.
+	* m68k-tdep.c (m68k_gdbarch_init): Likewise.
+	* m88k-tdep.c (m88k_analyze_prologue): Likewise.
+	* macrocmd.c (macro_define_command): Likewise.
+	* macroexp.c (gather_arguments): Likewise.
+	* macroscope.c (sal_macro_scope): Likewise.
+	* macrotab.c (new_macro_table): Likewise.
+	* mdebugread.c (push_parse_stack): Likewise.
+	(parse_partial_symbols): Likewise.
+	(parse_symbol): Likewise.
+	(psymtab_to_symtab_1): Likewise.
+	(new_block): Likewise.
+	(new_psymtab): Likewise.
+	(mdebug_build_psymtabs): Likewise.
+	(add_pending): Likewise.
+	(elfmdebug_build_psymtabs): Likewise.
+	* mep-tdep.c (mep_gdbarch_init): Likewise.
+	* mi/mi-main.c (mi_execute_command): Likewise.
+	* mi/mi-parse.c (mi_parse_argv): Likewise.
+	* minidebug.c (lzma_open): Likewise.
+	* minsyms.c (terminate_minimal_symbol_table): Likewise.
+	* mips-linux-nat.c (mips_linux_insert_watchpoint): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Likewise.
+	* msp430-tdep.c (msp430_gdbarch_init): Likewise.
+	* mt-tdep.c (mt_registers_info): Likewise.
+	* nat/aarch64-linux.c (aarch64_linux_new_thread): Likewise.
+	* nat/linux-btrace.c (linux_enable_bts): Likewise.
+	(linux_enable_pt): Likewise.
+	* nat/linux-osdata.c (linux_xfer_osdata_processes): Likewise.
+	(linux_xfer_osdata_processgroups): Likewise.
+	* nios2-tdep.c (nios2_gdbarch_init): Likewise.
+	* nto-procfs.c (procfs_meminfo): Likewise.
+	* objc-lang.c (start_msglist): Likewise.
+	(selectors_info): Likewise.
+	(classes_info): Likewise.
+	(find_methods): Likewise.
+	* objfiles.c (allocate_objfile): Likewise.
+	(update_section_map): Likewise.
+	* osabi.c (gdbarch_register_osabi): Likewise.
+	(gdbarch_register_osabi_sniffer): Likewise.
+	* parse.c (start_arglist): Likewise.
+	* ppc-linux-nat.c (hwdebug_find_thread_points_by_tid): Likewise.
+	(hwdebug_insert_point): Likewise.
+	* printcmd.c (display_command): Likewise.
+	(ui_printf): Likewise.
+	* procfs.c (create_procinfo): Likewise.
+	(load_syscalls): Likewise.
+	(proc_get_LDT_entry): Likewise.
+	(proc_update_threads): Likewise.
+	* prologue-value.c (make_pv_area): Likewise.
+	(pv_area_store): Likewise.
+	* psymtab.c (extend_psymbol_list): Likewise.
+	(init_psymbol_list): Likewise.
+	(allocate_psymtab): Likewise.
+	* python/py-inferior.c (add_thread_object): Likewise.
+	* python/py-param.c (compute_enum_values): Likewise.
+	* python/py-value.c (valpy_call): Likewise.
+	* python/py-varobj.c (py_varobj_iter_next): Likewise.
+	* python/python.c (ensure_python_env): Likewise.
+	* record-btrace.c (record_btrace_start_replaying): Likewise.
+	* record-full.c (record_full_reg_alloc): Likewise.
+	(record_full_mem_alloc): Likewise.
+	(record_full_end_alloc): Likewise.
+	(record_full_core_xfer_partial): Likewise.
+	* regcache.c (get_thread_arch_aspace_regcache): Likewise.
+	* remote-fileio.c (remote_fileio_init_fd_map): Likewise.
+	* remote-notif.c (remote_notif_state_allocate): Likewise.
+	* remote.c (demand_private_info): Likewise.
+	(remote_notif_stop_alloc_reply): Likewise.
+	(remote_enable_btrace): Likewise.
+	* reverse.c (save_bookmark_command): Likewise.
+	* rl78-tdep.c (rl78_gdbarch_init): Likewise.
+	* rx-tdep.c (rx_gdbarch_init): Likewise.
+	* s390-linux-nat.c (s390_insert_watchpoint): Likewise.
+	* ser-go32.c (dos_get_tty_state): Likewise.
+	(dos_copy_tty_state): Likewise.
+	* ser-mingw.c (ser_windows_open): Likewise.
+	(ser_console_wait_handle): Likewise.
+	(ser_console_get_tty_state): Likewise.
+	(make_pipe_state): Likewise.
+	(net_windows_open): Likewise.
+	* ser-unix.c (hardwire_get_tty_state): Likewise.
+	(hardwire_copy_tty_state): Likewise.
+	* solib-aix.c (solib_aix_new_lm_info): Likewise.
+	* solib-dsbt.c (dsbt_current_sos): Likewise.
+	(dsbt_relocate_main_executable): Likewise.
+	* solib-frv.c (frv_current_sos): Likewise.
+	(frv_relocate_main_executable): Likewise.
+	* solib-spu.c (spu_bfd_fopen): Likewise.
+	* solib-svr4.c (lm_info_read): Likewise.
+	(svr4_copy_library_list): Likewise.
+	(svr4_default_sos): Likewise.
+	* source.c (find_source_lines): Likewise.
+	(line_info): Likewise.
+	(add_substitute_path_rule): Likewise.
+	* spu-linux-nat.c (spu_bfd_open): Likewise.
+	* spu-tdep.c (info_spu_dma_cmdlist): Likewise.
+	* stabsread.c (dbx_lookup_type): Likewise.
+	(read_type): Likewise.
+	(read_member_functions): Likewise.
+	(read_struct_fields): Likewise.
+	(read_baseclasses): Likewise.
+	(read_args): Likewise.
+	(_initialize_stabsread): Likewise.
+	* stack.c (func_command): Likewise.
+	* stap-probe.c (handle_stap_probe): Likewise.
+	* symfile.c (addrs_section_sort): Likewise.
+	(addr_info_make_relative): Likewise.
+	(load_section_callback): Likewise.
+	(add_symbol_file_command): Likewise.
+	(init_filename_language_table): Likewise.
+	* symtab.c (create_filename_seen_cache): Likewise.
+	(sort_search_symbols_remove_dups): Likewise.
+	(search_symbols): Likewise.
+	* target.c (make_cleanup_restore_target_terminal): Likewise.
+	* thread.c (new_thread): Likewise.
+	(enable_thread_stack_temporaries): Likewise.
+	(make_cleanup_restore_current_thread): Likewise.
+	(thread_apply_all_command): Likewise.
+	* tic6x-tdep.c (tic6x_gdbarch_init): Likewise.
+	* top.c (gdb_readline_wrapper): Likewise.
+	* tracefile-tfile.c (tfile_trace_file_writer_new): Likewise.
+	* tracepoint.c (trace_find_line_command): Likewise.
+	(all_tracepoint_actions_and_cleanup): Likewise.
+	(make_cleanup_restore_current_traceframe): Likewise.
+	(get_uploaded_tp): Likewise.
+	(get_uploaded_tsv): Likewise.
+	* tui/tui-data.c (tui_alloc_generic_win_info): Likewise.
+	(tui_alloc_win_info): Likewise.
+	(tui_alloc_content): Likewise.
+	(tui_add_content_elements): Likewise.
+	* tui/tui-disasm.c (tui_find_disassembly_address): Likewise.
+	(tui_set_disassem_content): Likewise.
+	* ui-file.c (ui_file_new): Likewise.
+	(stdio_file_new): Likewise.
+	(tee_file_new): Likewise.
+	* utils.c (make_cleanup_restore_integer): Likewise.
+	(add_internal_problem_command): Likewise.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+	* valops.c (find_oload_champ): Likewise.
+	* value.c (allocate_value_lazy): Likewise.
+	(record_latest_value): Likewise.
+	(create_internalvar): Likewise.
+	* varobj.c (install_variable): Likewise.
+	(new_variable): Likewise.
+	(new_root_variable): Likewise.
+	(cppush): Likewise.
+	(_initialize_varobj): Likewise.
+	* windows-nat.c (windows_make_so): Likewise.
+	* x86-nat.c (x86_add_process): Likewise.
+	* xcoffread.c (arrange_linetable): Likewise.
+	(allocate_include_entry): Likewise.
+	(process_linenos): Likewise.
+	(SYMBOL_DUP): Likewise.
+	(xcoff_start_psymtab): Likewise.
+	(xcoff_end_psymtab): Likewise.
+	* xml-support.c (gdb_xml_parse_attr_ulongest): Likewise.
+	* xtensa-tdep.c (xtensa_register_type): Likewise.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+
+2015-08-25  Don Breazeal  <donb@codesourcery.com>
+
+	* infrun.c (follow_exec): Re-order operations for
+	handling follow-exec-mode "new".
+	(handle_inferior_event_1): Assign ecs->event_thread
+	to the current thread.
+	* remote.c (get_remote_arch_state): Add an assertion.
+
+2015-08-26  Pedro Alves  <palves@redhat.com>
+
+	* MAINTAINERS: Add Markus Metzger as btrace maintainer.
+
+2015-08-25  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/18804
 	* defs.h (maybe_quit): Declare.
 	(QUIT): Now calls maybe_quit.
 	* event-loop.c (clear_async_signal_handler)

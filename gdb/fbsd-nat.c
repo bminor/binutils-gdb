@@ -257,9 +257,7 @@ static struct fbsd_fork_child_info *fbsd_pending_children;
 static void
 fbsd_remember_child (pid_t pid)
 {
-  struct fbsd_fork_child_info *info;
-
-  info = xcalloc (1, sizeof *info);
+  struct fbsd_fork_child_info *info = XCNEW (struct fbsd_fork_child_info);
 
   info->child = pid;
   info->next = fbsd_pending_children;

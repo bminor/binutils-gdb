@@ -193,7 +193,7 @@ ftrace_new_function (struct btrace_function *prev,
 {
   struct btrace_function *bfun;
 
-  bfun = xzalloc (sizeof (*bfun));
+  bfun = XCNEW (struct btrace_function);
 
   bfun->msym = mfun;
   bfun->sym = fun;
@@ -2196,7 +2196,7 @@ btrace_set_insn_history (struct btrace_thread_info *btinfo,
 			 const struct btrace_insn_iterator *end)
 {
   if (btinfo->insn_history == NULL)
-    btinfo->insn_history = xzalloc (sizeof (*btinfo->insn_history));
+    btinfo->insn_history = XCNEW (struct btrace_insn_history);
 
   btinfo->insn_history->begin = *begin;
   btinfo->insn_history->end = *end;
@@ -2212,7 +2212,7 @@ btrace_set_call_history (struct btrace_thread_info *btinfo,
   gdb_assert (begin->btinfo == end->btinfo);
 
   if (btinfo->call_history == NULL)
-    btinfo->call_history = xzalloc (sizeof (*btinfo->call_history));
+    btinfo->call_history = XCNEW (struct btrace_call_history);
 
   btinfo->call_history->begin = *begin;
   btinfo->call_history->end = *end;

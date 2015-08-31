@@ -562,7 +562,7 @@ thread_db_load_search (void)
 
   gdb_assert (proc->priv->thread_db == NULL);
 
-  tdb = xcalloc (1, sizeof (*tdb));
+  tdb = XCNEW (struct thread_db);
   proc->priv->thread_db = tdb;
 
   tdb->td_ta_new_p = &td_ta_new;
@@ -607,7 +607,7 @@ try_thread_db_load_1 (void *handle)
 
   gdb_assert (proc->priv->thread_db == NULL);
 
-  tdb = xcalloc (1, sizeof (*tdb));
+  tdb = XCNEW (struct thread_db);
   proc->priv->thread_db = tdb;
 
   tdb->handle = handle;

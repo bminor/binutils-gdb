@@ -351,8 +351,7 @@ block_initialize_namespace (struct block *block, struct obstack *obstack)
 {
   if (BLOCK_NAMESPACE (block) == NULL)
     {
-      BLOCK_NAMESPACE (block)
-	= obstack_alloc (obstack, sizeof (struct block_namespace_info));
+      BLOCK_NAMESPACE (block) = XOBNEW (obstack, struct block_namespace_info);
       BLOCK_NAMESPACE (block)->scope = NULL;
       BLOCK_NAMESPACE (block)->using_decl = NULL;
     }

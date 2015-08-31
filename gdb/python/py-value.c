@@ -858,7 +858,7 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
     {
       int i;
 
-      vargs = alloca (sizeof (struct value *) * args_count);
+      vargs = XALLOCAVEC (struct value *, args_count);
       for (i = 0; i < args_count; i++)
 	{
 	  PyObject *item = PyTuple_GetItem (args, i);

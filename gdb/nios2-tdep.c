@@ -2284,7 +2284,7 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = xcalloc (1, sizeof (struct gdbarch_tdep));
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* longjmp support not enabled by default.  */

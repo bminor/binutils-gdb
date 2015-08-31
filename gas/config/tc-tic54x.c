@@ -5357,22 +5357,21 @@ tic54x_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
    syntax puts the symbol *before* the pseudo (which is kinda like MRI syntax,
    I guess, except I've never seen a definition of MRI syntax).
 
-   C is the character that used to be at *REST, which points to the end of the
-   label.
-
    Don't allow labels to start with '.'  */
 
 int
-tic54x_start_label (int c, char *rest)
+tic54x_start_label (int nul_char, int next_char)
 {
+  char *rest;
+
   /* If within .struct/.union, no auto line labels, please.  */
   if (current_stag != NULL)
     return 0;
 
   /* Disallow labels starting with "."  */
-  if (c != ':')
+  if (next_char != ':')
     {
-      char *label = rest;
+      char *label = input_line_pointer;
 
       while (!is_end_of_line[(int) label[-1]])
 	--label;
@@ -5383,22 +5382,22 @@ tic54x_start_label (int c, char *rest)
 	}
     }
 
-  if (is_end_of_line[(int) c])
+  if (is_end_of_line[(int) next_char])
     return 1;
 
-  if (ISSPACE (c))
-    while (ISSPACE (c = *++rest))
-      ;
-  if (c == '.')
-    {
-      /* Don't let colon () define a label for any of these...  */
-      return (strncasecmp (rest, ".tag", 4) != 0 || !ISSPACE (rest[4]))
-	&& (strncasecmp (rest, ".struct", 7) != 0 || !ISSPACE (rest[7]))
-	&& (strncasecmp (rest, ".union", 6) != 0 || !ISSPACE (rest[6]))
-	&& (strncasecmp (rest, ".macro", 6) != 0 || !ISSPACE (rest[6]))
-	&& (strncasecmp (rest, ".set", 4) != 0 || !ISSPACE (rest[4]))
-	&& (strncasecmp (rest, ".equ", 4) != 0 || !ISSPACE (rest[4]));
-    }
+  rest = input_line_pointer;
+  if (nul_char == '"')
+    ++rest;
+  while (ISSPACE (next_char))
+    next_char = *++rest;
+  if (next_char != '.')
+    return 1;
 
-  return 1;
+  /* Don't let colon () define a label for any of these...  */
+  return ((strncasecmp (rest, ".tag", 4) != 0 || !ISSPACE (rest[4]))
+	  && (strncasecmp (rest, ".struct", 7) != 0 || !ISSPACE (rest[7]))
+	  && (strncasecmp (rest, ".union", 6) != 0 || !ISSPACE (rest[6]))
+	  && (strncasecmp (rest, ".macro", 6) != 0 || !ISSPACE (rest[6]))
+	  && (strncasecmp (rest, ".set", 4) != 0 || !ISSPACE (rest[4]))
+	  && (strncasecmp (rest, ".equ", 4) != 0 || !ISSPACE (rest[4])));
 }

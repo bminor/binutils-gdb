@@ -436,7 +436,7 @@ push_parse_stack (void)
   if (top_stack && top_stack->prev)
     newobj = top_stack->prev;
   else
-    newobj = (struct parse_stack *) xzalloc (sizeof (struct parse_stack));
+    newobj = XCNEW (struct parse_stack);
   /* Initialize new frame with previous content.  */
   if (top_stack)
     {
@@ -2395,8 +2395,7 @@ parse_partial_symbols (struct objfile *objfile)
   /* Allocate the map FDR -> PST.
      Minor hack: -O3 images might claim some global data belongs
      to FDR -1.  We`ll go along with that.  */
-  fdr_to_pst = (struct pst_map *)
-    xzalloc ((hdr->ifdMax + 1) * sizeof *fdr_to_pst);
+  fdr_to_pst = XCNEWVEC (struct pst_map, hdr->ifdMax + 1);
   old_chain = make_cleanup (xfree, fdr_to_pst);
   fdr_to_pst++;
   {
@@ -2415,7 +2414,7 @@ parse_partial_symbols (struct objfile *objfile)
 	  hdr->ifdMax * sizeof (struct mdebug_pending *));
 
   /* Pass 0 over external syms: swap them in.  */
-  ext_block = (EXTR *) xmalloc (hdr->iextMax * sizeof (EXTR));
+  ext_block = XNEWVEC (EXTR, hdr->iextMax);
   make_cleanup (xfree, ext_block);
 
   ext_out = (char *) debug_info->external_ext;
@@ -4135,7 +4134,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	  PDR *pdr_in;
 	  PDR *pdr_in_end;
 
-	  pr_block = (PDR *) xmalloc (fh->cpd * sizeof (PDR));
+	  pr_block = XNEWVEC (PDR, fh->cpd);
 	  old_chain = make_cleanup (xfree, pr_block);
 
 	  pdr_ptr = ((char *) debug_info->external_pdr
@@ -4238,7 +4237,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	      PDR *pdr_in;
 	      PDR *pdr_in_end;
 
-	      pr_block = (PDR *) xmalloc (fh->cpd * sizeof (PDR));
+	      pr_block = XNEWVEC (PDR, fh->cpd);
 
 	      old_chain = make_cleanup (xfree, pr_block);
 
@@ -4831,7 +4830,7 @@ new_block (enum block_type type)
   /* FIXME: carlton/2003-09-11: This should use allocate_block to
      allocate the block.  Which, in turn, suggests that the block
      should be allocated on an obstack.  */
-  struct block *retval = xzalloc (sizeof (struct block));
+  struct block *retval = XCNEW (struct block);
 
   if (type == FUNCTION_BLOCK)
     BLOCK_DICT (retval) = dict_create_linear_expandable ();

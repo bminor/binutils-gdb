@@ -102,7 +102,7 @@ struct saved_output_info
 
 struct saved_offsets
 {
-  int section_count;
+  unsigned int section_count;
   struct saved_output_info *sections;
 };
 

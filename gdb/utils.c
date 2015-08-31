@@ -291,8 +291,7 @@ restore_integer (void *p)
 struct cleanup *
 make_cleanup_restore_integer (int *variable)
 {
-  struct restore_integer_closure *c =
-    xmalloc (sizeof (struct restore_integer_closure));
+  struct restore_integer_closure *c = XNEW (struct restore_integer_closure);
 
   c->variable = variable;
   c->value = *variable;
@@ -860,8 +859,8 @@ add_internal_problem_command (struct internal_problem *problem)
   char *set_doc;
   char *show_doc;
 
-  set_cmd_list = xmalloc (sizeof (*set_cmd_list));
-  show_cmd_list = xmalloc (sizeof (*set_cmd_list));
+  set_cmd_list = XNEW (struct cmd_list_element *);
+  show_cmd_list = XNEW (struct cmd_list_element *);
   *set_cmd_list = NULL;
   *show_cmd_list = NULL;
 
@@ -3303,9 +3302,9 @@ wait_to_die_with_timeout (pid_t pid, int *status, int timeout)
       sa.sa_flags = 0;
       sigaction (SIGALRM, &sa, &old_sa);
 #else
-      void (*ofunc) ();
+      sighandler_t ofunc;
 
-      ofunc = (void (*)()) signal (SIGALRM, sigalrm_handler);
+      ofunc = signal (SIGALRM, sigalrm_handler);
 #endif
 
       alarm (timeout);

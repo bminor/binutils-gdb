@@ -338,7 +338,7 @@ append_args (int *argcp, char ***argvp, int argc, char **argv)
 {
   int argi;
 
-  *argvp = xrealloc (*argvp, (*argcp + argc + 1) * sizeof (**argvp));
+  *argvp = XRESIZEVEC (char *, *argvp, (*argcp + argc + 1));
 
   for (argi = 0; argi < argc; argi++)
     (*argvp)[(*argcp)++] = xstrdup (argv[argi]);
@@ -491,7 +491,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 
   /* Set up instance and context for the compiler.  */
   if (current_language->la_get_compile_instance == NULL)
-    error (_("No compiler support for this language."));
+    error (_("No compiler support for language %s."),
+	   current_language->la_name);
   compiler = current_language->la_get_compile_instance ();
   cleanup = make_cleanup (cleanup_compile_instance, compiler);
 

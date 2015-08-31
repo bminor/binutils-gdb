@@ -386,6 +386,13 @@ testsuite
 SystemTap		Sergio Durigan Junior	sergiodj@redhat.com
 
 
+
+Reverse debugging / Record and Replay / Tracing:
+
+record btrace		Markus T. Metzger	markus.t.metzger@intel.com
+
+
+
 UI: External (user) interfaces.
 
 gdbtk (c & tcl)		Fernando Nasser         fnasser@redhat.com

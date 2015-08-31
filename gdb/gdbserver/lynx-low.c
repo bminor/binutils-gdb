@@ -218,7 +218,7 @@ lynx_add_process (int pid, int attached)
 
   proc = add_process (pid, attached);
   proc->tdesc = lynx_tdesc;
-  proc->priv = xcalloc (1, sizeof (*proc->priv));
+  proc->priv = XCNEW (struct process_info_private);
   proc->priv->last_wait_event_ptid = null_ptid;
 
   return proc;

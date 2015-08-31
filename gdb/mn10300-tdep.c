@@ -1403,7 +1403,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  tdep = XNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   switch (info.bfd_arch_info->mach)

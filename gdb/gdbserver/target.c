@@ -181,7 +181,7 @@ start_non_stop (int nonstop)
 void
 set_target_ops (struct target_ops *target)
 {
-  the_target = (struct target_ops *) xmalloc (sizeof (*the_target));
+  the_target = XNEW (struct target_ops);
   memcpy (the_target, target, sizeof (*the_target));
 }
 

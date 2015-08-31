@@ -709,8 +709,8 @@ dsbt_current_sos (void)
 	      break;
 	    }
 
-	  sop = xcalloc (1, sizeof (struct so_list));
-	  sop->lm_info = xcalloc (1, sizeof (struct lm_info));
+	  sop = XCNEW (struct so_list);
+	  sop->lm_info = XCNEW (struct lm_info);
 	  sop->lm_info->map = loadmap;
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,
@@ -941,7 +941,7 @@ dsbt_relocate_main_executable (void)
   ldm = info->exec_loadmap;
 
   xfree (info->main_executable_lm_info);
-  info->main_executable_lm_info = xcalloc (1, sizeof (struct lm_info));
+  info->main_executable_lm_info = XCNEW (struct lm_info);
   info->main_executable_lm_info->map = ldm;
 
   new_offsets = xcalloc (symfile_objfile->num_sections,

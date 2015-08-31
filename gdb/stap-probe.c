@@ -1467,7 +1467,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   const char *probe_args = NULL;
   struct stap_probe *ret;
 
-  ret = obstack_alloc (&objfile->per_bfd->storage_obstack, sizeof (*ret));
+  ret = XOBNEW (&objfile->per_bfd->storage_obstack, struct stap_probe);
   ret->p.pops = &stap_probe_ops;
   ret->p.arch = gdbarch;
 

@@ -701,7 +701,7 @@ static ptid_t
 m32r_wait (struct target_ops *ops,
 	   ptid_t ptid, struct target_waitstatus *status, int options)
 {
-  static RETSIGTYPE (*prev_sigint) ();
+  static sighandler_t prev_sigint;
   unsigned long bp_addr, pc_addr;
   int ib_breakpoints;
   long i;
@@ -1249,7 +1249,7 @@ m32r_load (struct target_ops *self, const char *args, int from_tty)
   int nostart;
   struct timeval start_time, end_time;
   unsigned long data_count;	/* Number of bytes transferred to memory.  */
-  static RETSIGTYPE (*prev_sigint) ();
+  static sighandler_t prev_sigint;
 
   /* for direct tcp connections, we can do a fast binary download.  */
   quiet = 0;

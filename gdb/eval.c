@@ -998,7 +998,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  return set;
 	}
 
-      argvec = (struct value **) alloca (sizeof (struct value *) * nargs);
+      argvec = XALLOCAVEC (struct value *, nargs);
       for (tem = 0; tem < nargs; tem++)
 	{
 	  /* Ensure that array expressions are coerced into pointer
@@ -1082,8 +1082,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	selector = exp->elts[pc + 1].longconst;
 	nargs = exp->elts[pc + 2].longconst;
-	argvec = (struct value **) alloca (sizeof (struct value *) 
-					   * (nargs + 5));
+	argvec = XALLOCAVEC (struct value *, nargs + 5);
 
 	(*pos) += 3;
 

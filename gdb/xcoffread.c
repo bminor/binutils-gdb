@@ -435,8 +435,7 @@ arrange_linetable (struct linetable *oldLineTb)
 #define NUM_OF_FUNCTIONS 20
 
   fentry_size = NUM_OF_FUNCTIONS;
-  fentry = (struct linetable_entry *)
-    xmalloc (fentry_size * sizeof (struct linetable_entry));
+  fentry = XNEWVEC (struct linetable_entry, fentry_size);
 
   for (function_count = 0, ii = 0; ii < oldLineTb->nitems; ++ii)
     {
@@ -584,18 +583,14 @@ allocate_include_entry (void)
 {
   if (inclTable == NULL)
     {
-      inclTable = (InclTable *)
-	xmalloc (sizeof (InclTable) * INITIAL_INCLUDE_TABLE_LENGTH);
-      memset (inclTable,
-	      '\0', sizeof (InclTable) * INITIAL_INCLUDE_TABLE_LENGTH);
+      inclTable = XCNEWVEC (InclTable, INITIAL_INCLUDE_TABLE_LENGTH);
       inclLength = INITIAL_INCLUDE_TABLE_LENGTH;
       inclIndx = 0;
     }
   else if (inclIndx >= inclLength)
     {
       inclLength += INITIAL_INCLUDE_TABLE_LENGTH;
-      inclTable = (InclTable *)
-	xrealloc (inclTable, sizeof (InclTable) * inclLength);
+      inclTable = XRESIZEVEC (InclTable, inclTable, inclLength);
       memset (inclTable + inclLength - INITIAL_INCLUDE_TABLE_LENGTH,
 	      '\0', sizeof (InclTable) * INITIAL_INCLUDE_TABLE_LENGTH);
     }
@@ -679,8 +674,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	    {
 	      /* Have a new subfile for the include file.  */
 
-	      tmpSubfile = inclTable[ii].subfile =
-		(struct subfile *) xmalloc (sizeof (struct subfile));
+	      tmpSubfile = inclTable[ii].subfile = XNEW (struct subfile);
 
 	      memset (tmpSubfile, '\0', sizeof (struct subfile));
 	      firstLine = &(inclTable[ii].funStartLine);
@@ -1515,8 +1509,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 }
 
 #define	SYMBOL_DUP(SYMBOL1, SYMBOL2)	\
-  (SYMBOL2) = (struct symbol *)		\
-  	obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol)); \
+  (SYMBOL2) = XOBNEW (&objfile->objfile_obstack, struct symbol); \
   *(SYMBOL2) = *(SYMBOL1);
 
 
@@ -2023,8 +2016,8 @@ xcoff_start_psymtab (struct objfile *objfile,
 			  0,
 			  global_syms, static_syms);
 
-  result->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
-					       sizeof (struct symloc));
+  result->read_symtab_private =
+    XOBNEW (&objfile->objfile_obstack, struct symloc);
   ((struct symloc *) result->read_symtab_private)->first_symnum = first_symnum;
   result->read_symtab = xcoff_read_symtab;
 
@@ -2064,9 +2057,9 @@ xcoff_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
   pst->number_of_dependencies = number_dependencies;
   if (number_dependencies)
     {
-      pst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->objfile_obstack,
-		    number_dependencies * sizeof (struct partial_symtab *));
+      pst->dependencies = XOBNEWVEC (&objfile->objfile_obstack,
+				     struct partial_symtab *,
+				     number_dependencies);
       memcpy (pst->dependencies, dependency_list,
 	      number_dependencies * sizeof (struct partial_symtab *));
     }
@@ -2087,9 +2080,8 @@ xcoff_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 
       /* We could save slight bits of space by only making one of these,
          shared by the entire set of include files.  FIXME-someday.  */
-      subpst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->objfile_obstack,
-		       sizeof (struct partial_symtab *));
+      subpst->dependencies =
+	  XOBNEW (&objfile->objfile_obstack, struct partial_symtab *);
       subpst->dependencies[0] = pst;
       subpst->number_of_dependencies = 1;
 

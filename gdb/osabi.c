@@ -187,8 +187,7 @@ gdbarch_register_osabi (enum bfd_architecture arch, unsigned long machine,
 	}
     }
 
-  (*handler_p)
-    = (struct gdb_osabi_handler *) xmalloc (sizeof (struct gdb_osabi_handler));
+  (*handler_p) = XNEW (struct gdb_osabi_handler);
   (*handler_p)->next = NULL;
   (*handler_p)->arch_info = arch_info;
   (*handler_p)->osabi = osabi;
@@ -228,8 +227,7 @@ gdbarch_register_osabi_sniffer (enum bfd_architecture arch,
 {
   struct gdb_osabi_sniffer *sniffer;
 
-  sniffer =
-    (struct gdb_osabi_sniffer *) xmalloc (sizeof (struct gdb_osabi_sniffer));
+  sniffer = XNEW (struct gdb_osabi_sniffer);
   sniffer->arch = arch;
   sniffer->flavour = flavour;
   sniffer->sniffer = sniffer_fn;

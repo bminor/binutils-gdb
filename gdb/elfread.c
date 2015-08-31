@@ -95,7 +95,7 @@ elf_symfile_segments (bfd *abfd)
     return NULL;
 
   num_segments = 0;
-  segments = alloca (sizeof (Elf_Internal_Phdr *) * num_phdrs);
+  segments = XALLOCAVEC (Elf_Internal_Phdr *, num_phdrs);
   for (i = 0; i < num_phdrs; i++)
     if (phdrs[i].p_type == PT_LOAD)
       segments[num_segments++] = &phdrs[i];
@@ -1124,7 +1124,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
       long i;
 
       make_cleanup (xfree, synthsyms);
-      synth_symbol_table = xmalloc (sizeof (asymbol *) * synthcount);
+      synth_symbol_table = XNEWVEC (asymbol *, synthcount);
       for (i = 0; i < synthcount; i++)
 	synth_symbol_table[i] = synthsyms + i;
       make_cleanup (xfree, synth_symbol_table);

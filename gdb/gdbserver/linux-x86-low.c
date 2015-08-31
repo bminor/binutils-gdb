@@ -3305,7 +3305,7 @@ initialize_low_arch (void)
   init_registers_x32_avx_linux ();
   init_registers_x32_avx512_linux ();
 
-  tdesc_amd64_linux_no_xml = xmalloc (sizeof (struct target_desc));
+  tdesc_amd64_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_amd64_linux_no_xml, tdesc_amd64_linux);
   tdesc_amd64_linux_no_xml->xmltarget = xmltarget_amd64_linux_no_xml;
 #endif
@@ -3315,7 +3315,7 @@ initialize_low_arch (void)
   init_registers_i386_avx512_linux ();
   init_registers_i386_mpx_linux ();
 
-  tdesc_i386_linux_no_xml = xmalloc (sizeof (struct target_desc));
+  tdesc_i386_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_i386_linux_no_xml, tdesc_i386_linux);
   tdesc_i386_linux_no_xml->xmltarget = xmltarget_i386_linux_no_xml;
 

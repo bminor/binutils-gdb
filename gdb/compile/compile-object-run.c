@@ -155,7 +155,7 @@ compile_object_run (struct compile_module *module)
       func_val = value_from_pointer (lookup_pointer_type (func_type),
 				   BLOCK_START (SYMBOL_BLOCK_VALUE (func_sym)));
 
-      vargs = alloca (sizeof (*vargs) * TYPE_NFIELDS (func_type));
+      vargs = XALLOCAVEC (struct value *, TYPE_NFIELDS (func_type));
       if (TYPE_NFIELDS (func_type) >= 1)
 	{
 	  gdb_assert (regs_addr != 0);

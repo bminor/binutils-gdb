@@ -208,7 +208,7 @@ struct simple_pid_list *stopped_pids;
 static void
 add_to_pid_list (struct simple_pid_list **listp, int pid, int status)
 {
-  struct simple_pid_list *new_pid = xmalloc (sizeof (struct simple_pid_list));
+  struct simple_pid_list *new_pid = XNEW (struct simple_pid_list);
 
   new_pid->pid = pid;
   new_pid->status = status;
@@ -409,7 +409,7 @@ linux_add_process (int pid, int attached)
   struct process_info *proc;
 
   proc = add_process (pid, attached);
-  proc->priv = xcalloc (1, sizeof (*proc->priv));
+  proc->priv = XCNEW (struct process_info_private);
 
   if (the_low_target.new_process != NULL)
     proc->priv->arch_private = the_low_target.new_process ();
@@ -506,7 +506,7 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
 				 &child_proc->raw_breakpoints,
 				 parent_proc->breakpoints);
 
-	  tdesc = xmalloc (sizeof (struct target_desc));
+	  tdesc = XNEW (struct target_desc);
 	  copy_target_description (tdesc, parent_proc->tdesc);
 	  child_proc->tdesc = tdesc;
 
@@ -651,7 +651,7 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
     {
       if (siginfo.si_signo == SIGTRAP)
 	{
-	  if (siginfo.si_code == GDB_ARCH_TRAP_BRKPT)
+	  if (GDB_ARCH_IS_TRAP_BRKPT (siginfo.si_code))
 	    {
 	      if (debug_threads)
 		{
@@ -760,7 +760,7 @@ add_lwp (ptid_t ptid)
 {
   struct lwp_info *lwp;
 
-  lwp = (struct lwp_info *) xcalloc (1, sizeof (*lwp));
+  lwp = XCNEW (struct lwp_info);
 
   lwp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
 
@@ -1984,10 +1984,10 @@ enqueue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
 	}
     }
 
-  p_sig = xmalloc (sizeof (*p_sig));
+  p_sig = XCNEW (struct pending_signals);
   p_sig->prev = lwp->pending_signals_to_report;
   p_sig->signal = WSTOPSIG (*wstat);
-  memset (&p_sig->info, 0, sizeof (siginfo_t));
+
   ptrace (PTRACE_GETSIGINFO, lwpid_of (thread), (PTRACE_TYPE_ARG3) 0,
 	  &p_sig->info);
 
@@ -3761,9 +3761,8 @@ stop_all_lwps (int suspend, struct lwp_info *except)
 static void
 enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t *info)
 {
-  struct pending_signals *p_sig;
+  struct pending_signals *p_sig = XNEW (struct pending_signals);
 
-  p_sig = xmalloc (sizeof (*p_sig));
   p_sig->prev = lwp->pending_signals;
   p_sig->signal = signal;
   if (info == NULL)
@@ -3817,8 +3816,8 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 	  || lwp->bp_reinsert != 0
 	  || fast_tp_collecting))
     {
-      struct pending_signals *p_sig;
-      p_sig = xmalloc (sizeof (*p_sig));
+      struct pending_signals *p_sig = XNEW (struct pending_signals);
+
       p_sig->prev = lwp->pending_signals;
       p_sig->signal = signal;
       if (info == NULL)
@@ -4518,11 +4517,10 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
       /* If we have a new signal, enqueue the signal.  */
       if (lwp->resume->sig != 0)
 	{
-	  struct pending_signals *p_sig;
-	  p_sig = xmalloc (sizeof (*p_sig));
+	  struct pending_signals *p_sig = XCNEW (struct pending_signals);
+
 	  p_sig->prev = lwp->pending_signals;
 	  p_sig->signal = lwp->resume->sig;
-	  memset (&p_sig->info, 0, sizeof (siginfo_t));
 
 	  /* If this is the same signal we were previously stopped by,
 	     make sure to queue its siginfo.  We can ignore the return
@@ -5276,7 +5274,7 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   count = ((((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
 	   / sizeof (PTRACE_XFER_TYPE));
   /* Allocate buffer of that many longwords.  */
-  buffer = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
+  buffer = XALLOCAVEC (PTRACE_XFER_TYPE, count);
 
   /* Read all the longwords */
   errno = 0;
@@ -5321,8 +5319,7 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
     / sizeof (PTRACE_XFER_TYPE);
 
   /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer = (PTRACE_XFER_TYPE *)
-    alloca (count * sizeof (PTRACE_XFER_TYPE));
+  register PTRACE_XFER_TYPE *buffer = XALLOCAVEC (PTRACE_XFER_TYPE, count);
 
   int pid = lwpid_of (current_thread);
 

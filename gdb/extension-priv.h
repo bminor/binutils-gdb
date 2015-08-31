@@ -22,6 +22,7 @@
 #define EXTENSION_PRIV_H
 
 #include "extension.h"
+#include <signal.h>
 
 /* The return code for some API calls.  */
 
@@ -329,7 +330,7 @@ struct signal_handler
   int handler_saved;
 
   /* The signal handler.  */
-  RETSIGTYPE (*handler) ();
+  sighandler_t handler;
 };
 
 /* State necessary to restore the currently active extension language

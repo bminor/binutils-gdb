@@ -402,7 +402,7 @@ tui_partial_win_by_name (char *name)
 const char *
 tui_win_name (const struct tui_gen_win_info *win_info)
 {
-  char *name = (char *) NULL;
+  const char *name = NULL;
 
   switch (win_info->type)
     {
@@ -439,9 +439,9 @@ tui_initialize_static_data (void)
 struct tui_gen_win_info *
 tui_alloc_generic_win_info (void)
 {
-  struct tui_gen_win_info *win;
+  struct tui_gen_win_info *win = XNEW (struct tui_gen_win_info);
 
-  if ((win = XNEW (struct tui_gen_win_info)) != NULL)
+  if (win != NULL)
     tui_init_generic_part (win);
 
   return win;
@@ -556,9 +556,8 @@ init_win_info (struct tui_win_info *win_info)
 struct tui_win_info *
 tui_alloc_win_info (enum tui_win_type type)
 {
-  struct tui_win_info *win_info;
+  struct tui_win_info *win_info = XNEW (struct tui_win_info);
 
-  win_info = XNEW (struct tui_win_info);
   if (win_info != NULL)
     {
       win_info->generic.type = type;
@@ -577,7 +576,7 @@ tui_alloc_content (int num_elements, enum tui_win_type type)
   char *element_block_ptr;
   int i;
 
-  content = xmalloc (sizeof (struct tui_win_element *) *num_elements);
+  content = XNEWVEC (struct tui_win_element *, num_elements);
   if (content != NULL)
     {
       /*
@@ -634,7 +633,8 @@ tui_add_content_elements (struct tui_gen_win_info *win_info,
     {
       for (i = index_start; (i < num_elements + index_start); i++)
 	{
-	  if ((element_ptr = XNEW (struct tui_win_element)) != NULL)
+	  element_ptr = XNEW (struct tui_win_element);
+	  if (element_ptr != NULL)
 	    {
 	      win_info->content[i] = (void *) element_ptr;
 	      init_content_element (element_ptr, win_info->type);

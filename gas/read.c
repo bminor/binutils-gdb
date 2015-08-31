@@ -41,7 +41,7 @@
 #include "wchar.h"
 
 #ifndef TC_START_LABEL
-#define TC_START_LABEL(x,y,z) (x == ':')
+#define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR) (NEXT_CHAR == ':')
 #endif
 
 /* Set by the object-format or the target.  */
@@ -874,8 +874,7 @@ read_a_source_file (char *name)
 			 symbol in the symbol table.  */
 		      if (!mri_line_macro
 #ifdef TC_START_LABEL_WITHOUT_COLON
-			  && TC_START_LABEL_WITHOUT_COLON (next_char,
-							   input_line_pointer)
+			  && TC_START_LABEL_WITHOUT_COLON (nul_char, next_char)
 #endif
 			  )
 			line_label = colon (line_start);
@@ -923,7 +922,7 @@ read_a_source_file (char *name)
 		 S points to the beginning of the symbol.
 		   [In case of pseudo-op, s->'.'.]
 		 Input_line_pointer->'\0' where NUL_CHAR was.  */
-	      if (TC_START_LABEL (next_char, s, input_line_pointer))
+	      if (TC_START_LABEL (s, nul_char, next_char))
 		{
 		  if (flag_m68k_mri)
 		    {

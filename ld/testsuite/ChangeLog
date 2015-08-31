@@ -1,3 +1,8 @@
+2015-08-27  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/relocsort.s, * ld-powerpc/relocsort.d: New test.
+	* ld-powerpc/powerpc.exp: Run it.
+
 2015-08-26  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/18401

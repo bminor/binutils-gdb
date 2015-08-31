@@ -1192,8 +1192,7 @@ make_symbol_overload_list (const char *func_name,
 
   sym_return_val_size = 100;
   sym_return_val_index = 0;
-  sym_return_val = xmalloc ((sym_return_val_size + 1) *
-			    sizeof (struct symbol *));
+  sym_return_val = XNEWVEC (struct symbol *, sym_return_val_size + 1);
   sym_return_val[0] = NULL;
 
   old_cleanups = make_cleanup (xfree, sym_return_val);
@@ -1536,7 +1535,7 @@ gdb_demangle (const char *name, int options)
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
   struct sigaction sa, old_sa;
 #else
-  void (*ofunc) ();
+  sighandler_t ofunc;
 #endif
   static int core_dump_allowed = -1;
 
@@ -1560,7 +1559,7 @@ gdb_demangle (const char *name, int options)
 #endif
       sigaction (SIGSEGV, &sa, &old_sa);
 #else
-      ofunc = (void (*)()) signal (SIGSEGV, gdb_demangle_signal_handler);
+      ofunc = signal (SIGSEGV, gdb_demangle_signal_handler);
 #endif
 
       crash_signal = SIGSETJMP (gdb_demangle_jmp_buf);

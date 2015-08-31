@@ -607,7 +607,7 @@ windows_make_so (const char *name, LPVOID load_addr)
     }
 #endif
   so = XCNEW (struct so_list);
-  so->lm_info = (struct lm_info *) xmalloc (sizeof (struct lm_info));
+  so->lm_info = XNEW (struct lm_info);
   so->lm_info->load_addr = load_addr;
   strcpy (so->so_original_name, name);
 #ifndef __CYGWIN__

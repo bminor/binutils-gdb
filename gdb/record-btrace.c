@@ -1743,7 +1743,7 @@ record_btrace_start_replaying (struct thread_info *tp)
 
       /* We start replaying at the end of the branch trace.  This corresponds
 	 to the current instruction.  */
-      replay = xmalloc (sizeof (*replay));
+      replay = XNEW (struct btrace_insn_iterator);
       btrace_insn_end (replay, btinfo);
 
       /* Skip gaps at the end of the trace.  */

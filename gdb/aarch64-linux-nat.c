@@ -90,7 +90,7 @@ aarch64_add_process (pid_t pid)
 {
   struct aarch64_process_info *proc;
 
-  proc = xcalloc (1, sizeof (*proc));
+  proc = XCNEW (struct aarch64_process_info);
   proc->pid = pid;
 
   proc->next = aarch64_process_list;

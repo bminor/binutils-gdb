@@ -1,3 +1,37 @@
+2015-08-27  Alan Modra  <amodra@gmail.com>
+
+	PR gas/18581
+	* config/tc-aarch64.h (TC_START_LABEL): Redefine.
+	* config/tc-arm.c (tc_start_label_without_colon): Delete params.
+	Use input_line_pointer directly.
+	* config/tc-arm.h (TC_START_LABEL): Redefine.
+	(TC_START_LABEL_WITHOUT_COLON): Redefine.
+	(tc_start_label_without_colon): Update prototype.
+	* config/tc-bfin.c (bfin_start_label): Delete ptr param.  Check
+	for NUL instead.
+	* config/tc-bfin.h (bfin_start_label): Update prototype.
+	(TC_START_LABEL): Redefine.
+	* config/tc-d30v.h (TC_START_LABEL): Redefine.
+	* config/tc-fr30.c (restore_colon): Rewrite.
+	(fr30_is_colon_insn): Add nul_char param.  Return int.  Bump
+	i_l_p over quote.  Update restore_colon calls.
+	* config/tc-fr30.h (TC_START_LABEL): Redefine.
+	(fr30_is_colon_insn): Update prototype.
+	* config/tc-m32c.c (restore_colon, m32c_is_colon_insn): As above.
+	* config/tc-m32c.h (TC_START_LABEL): Redefine.
+	(m32c_is_colon_insn): Update prototype.
+	* config/tc-m32r.h (TC_START_LABEL): Redefine.
+	* config/tc-mep.h (TC_START_LABEL): Redefine.
+	* config/tc-nds32.h (TC_START_LABEL): Redefine.
+	* config/tc-tic54x.c (tic54x_start_label): Replace params with
+	nul_char and next_char.  Step over trailing quote.
+	* config/tc-tic54x.h (TC_START_LABEL_WITHOUT_COLON): Redefine.
+	(tic54x_start_label): Update prototype.
+	* read.c (TC_START_LABEL): Redefine.  Update invocation.
+	(TC_START_LABEL_WITHOUT_COLON): Update invocation.
+	* config/tc-nios2.c (s_nios2_set): Save initial input_line_pointer
+	and restore if calling s_set.  Don't restore delim again.
+
 2015-08-26  Alan Modra  <amodra@gmail.com>
 
 	PR gas/18581

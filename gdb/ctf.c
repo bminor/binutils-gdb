@@ -810,8 +810,7 @@ static const struct trace_file_write_ops ctf_write_ops =
 struct trace_file_writer *
 ctf_trace_file_writer_new (void)
 {
-  struct ctf_trace_file_writer *writer
-    = xmalloc (sizeof (struct ctf_trace_file_writer));
+  struct ctf_trace_file_writer *writer = XNEW (struct ctf_trace_file_writer);
 
   writer->base.ops = &ctf_write_ops;
 

@@ -48,7 +48,7 @@ sal_macro_scope (struct symtab_and_line sal)
   if (COMPUNIT_MACRO_TABLE (cust) == NULL)
     return NULL;
 
-  ms = (struct macro_scope *) xmalloc (sizeof (*ms));
+  ms = XNEW (struct macro_scope);
 
   main_file = macro_main (COMPUNIT_MACRO_TABLE (cust));
   inclusion = macro_lookup_inclusion (main_file, sal.symtab->filename);

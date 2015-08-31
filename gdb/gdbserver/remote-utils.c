@@ -1492,7 +1492,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
   decode_address (addrp, p, q - p);
 
   /* Save the symbol in our cache.  */
-  sym = xmalloc (sizeof (*sym));
+  sym = XNEW (struct sym_cache);
   sym->name = xstrdup (name);
   sym->addr = *addrp;
   sym->next = proc->symbol_cache;

@@ -725,11 +725,11 @@ clear_breakpoint_hit_counts (void)
 static struct counted_command_line *
 alloc_counted_command_line (struct command_line *commands)
 {
-  struct counted_command_line *result
-    = xmalloc (sizeof (struct counted_command_line));
+  struct counted_command_line *result = XNEW (struct counted_command_line);
 
   result->refc = 1;
   result->commands = commands;
+
   return result;
 }
 
@@ -3395,8 +3395,8 @@ get_breakpoint_objfile_data (struct objfile *objfile)
   bp_objfile_data = objfile_data (objfile, breakpoint_objfile_key);
   if (bp_objfile_data == NULL)
     {
-      bp_objfile_data = obstack_alloc (&objfile->objfile_obstack,
-				       sizeof (*bp_objfile_data));
+      bp_objfile_data =
+	XOBNEW (&objfile->objfile_obstack, struct breakpoint_objfile_data);
 
       memset (bp_objfile_data, 0, sizeof (*bp_objfile_data));
       set_objfile_data (objfile, breakpoint_objfile_key, bp_objfile_data);
@@ -9081,8 +9081,7 @@ update_dprintf_command_list (struct breakpoint *b)
   gdb_assert (printf_line != NULL);
   /* Manufacture a printf sequence.  */
   {
-    struct command_line *printf_cmd_line
-      = xmalloc (sizeof (struct command_line));
+    struct command_line *printf_cmd_line = XNEW (struct command_line);
 
     printf_cmd_line->control_type = simple_control;
     printf_cmd_line->body_count = 0;
@@ -9374,8 +9373,7 @@ parse_breakpoint_sals (const struct event_location *location,
 	      CORE_ADDR pc;
 
 	      init_sal (&sal);		/* Initialize to zeroes.  */
-	      lsal.sals.sals = (struct symtab_and_line *)
-		xmalloc (sizeof (struct symtab_and_line));
+	      lsal.sals.sals = XNEW (struct symtab_and_line);
 
 	      /* Set sal's pspace, pc, symtab, and line to the values
 		 corresponding to the last call to print_frame_info.
@@ -9602,7 +9600,7 @@ decode_static_tracepoint_spec (const char **arg_p)
     error (_("No known static tracepoint marker named %s"), marker_str);
 
   sals.nelts = VEC_length(static_tracepoint_marker_p, markers);
-  sals.sals = xmalloc (sizeof *sals.sals * sals.nelts);
+  sals.sals = XNEWVEC (struct symtab_and_line, sals.nelts);
 
   for (i = 0; i < sals.nelts; i++)
     {
@@ -11592,8 +11590,8 @@ until_break_command (char *arg, int from_tty, int anywhere)
 
   if (target_can_async_p () && is_running (inferior_ptid))
     {
-      struct until_break_command_continuation_args *args;
-      args = xmalloc (sizeof (*args));
+      struct until_break_command_continuation_args *args =
+        XNEW (struct until_break_command_continuation_args);
 
       args->breakpoint = breakpoint;
       args->breakpoint2 = breakpoint2;
@@ -11827,8 +11825,7 @@ clear_command (char *arg, int from_tty)
     }
   else
     {
-      sals.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
+      sals.sals = XNEW (struct symtab_and_line);
       make_cleanup (xfree, sals.sals);
       init_sal (&sal);		/* Initialize to zeroes.  */
 
@@ -12245,7 +12242,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
     for (loc = b->loc; loc; loc = loc->next)
       bp_location_count++;
 
-  bp_location = xmalloc (sizeof (*bp_location) * bp_location_count);
+  bp_location = XNEWVEC (struct bp_location *, bp_location_count);
   locp = bp_location;
   ALL_BREAKPOINTS (b)
     for (loc = b->loc; loc; loc = loc->next)

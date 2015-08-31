@@ -317,7 +317,8 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 	      if (tp == NULL)
 		{
 		  char *name = xstrprintf ("int%d", size * 8);
-		  tp = xmalloc (sizeof (struct ctype_cache));
+
+		  tp = XNEW (struct ctype_cache);
 		  tp->next = tdep->type_entries;
 		  tdep->type_entries = tp;
 		  tp->size = size;

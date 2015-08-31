@@ -238,7 +238,7 @@ do_notif_event_xfree (void *arg)
 struct remote_notif_state *
 remote_notif_state_allocate (void)
 {
-  struct remote_notif_state *notif_state = xzalloc (sizeof (*notif_state));
+  struct remote_notif_state *notif_state = XCNEW (struct remote_notif_state);
 
   notif_state->notif_queue = QUEUE_alloc (notif_client_p, NULL);
 

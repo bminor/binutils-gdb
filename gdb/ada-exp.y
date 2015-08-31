@@ -1163,8 +1163,8 @@ static void
 write_ambiguous_var (struct parser_state *par_state,
 		     const struct block *block, char *name, int len)
 {
-  struct symbol *sym =
-    obstack_alloc (&temp_parse_space, sizeof (struct symbol));
+  struct symbol *sym = XOBNEW (&temp_parse_space, struct symbol);
+
   memset (sym, 0, sizeof (struct symbol));
   SYMBOL_DOMAIN (sym) = UNDEF_DOMAIN;
   SYMBOL_LINKAGE_NAME (sym) = obstack_copy0 (&temp_parse_space, name, len);

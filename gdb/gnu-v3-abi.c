@@ -125,8 +125,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
      the alignment that type requires, and then use that here.  */
 
   /* Build the field list.  */
-  field_list = xmalloc (sizeof (struct field [4]));
-  memset (field_list, 0, sizeof (struct field [4]));
+  field_list = XCNEWVEC (struct field, 4);
   field = &field_list[0];
   offset = 0;
 
@@ -1025,8 +1024,7 @@ build_std_type_info_type (struct gdbarch *arch)
   struct type *char_ptr_type
     = make_pointer_type (make_cv_type (1, 0, char_type, NULL), NULL);
 
-  field_list = xmalloc (sizeof (struct field [2]));
-  memset (field_list, 0, sizeof (struct field [2]));
+  field_list = XCNEWVEC (struct field, 2);
   field = &field_list[0];
   offset = 0;
 

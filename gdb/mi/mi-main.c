@@ -2119,8 +2119,7 @@ mi_execute_command (const char *cmd, int from_tty)
 
       if (do_timings)
 	{
-	  command->cmd_start = (struct mi_timestamp *)
-	    xmalloc (sizeof (struct mi_timestamp));
+	  command->cmd_start = XNEW (struct mi_timestamp);
 	  timestamp (command->cmd_start);
 	}
 

@@ -324,7 +324,7 @@ spu_bfd_open (ULONGEST addr)
   struct bfd *nbfd;
   asection *spu_name;
 
-  ULONGEST *open_closure = xmalloc (sizeof (ULONGEST));
+  ULONGEST *open_closure = XNEW (ULONGEST);
   *open_closure = addr;
 
   nbfd = gdb_bfd_openr_iovec ("<in-memory>", "elf32-spu",

@@ -104,8 +104,9 @@ extern int arm_optimize_expr (expressionS *, operatorT, expressionS *);
 
 #define md_start_line_hook() arm_start_line_hook ()
 
-#define TC_START_LABEL_WITHOUT_COLON(c, l)  tc_start_label_without_colon (c, l)
-extern bfd_boolean tc_start_label_without_colon (char, const char *);
+#define TC_START_LABEL_WITHOUT_COLON(NUL_CHAR, NEXT_CHAR) \
+  tc_start_label_without_colon ()
+extern bfd_boolean tc_start_label_without_colon (void);
 
 #define tc_frob_label(S) arm_frob_label (S)
 
@@ -179,7 +180,8 @@ void arm_copy_symbol_attributes (symbolS *, symbolS *);
   (arm_copy_symbol_attributes (DEST, SRC))
 #endif
 
-#define TC_START_LABEL(C,S,STR)            (C == ':' || (C == '/' && arm_data_in_code ()))
+#define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR)			\
+  (NEXT_CHAR == ':' || (NEXT_CHAR == '/' && arm_data_in_code ()))
 #define tc_canonicalize_symbol_name(str) arm_canonicalize_symbol_name (str);
 #define obj_adjust_symtab() 		 arm_adjust_symtab ()
 

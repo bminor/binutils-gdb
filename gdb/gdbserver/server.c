@@ -137,7 +137,7 @@ DEFINE_QUEUE_P (notif_event_p);
 static void
 queue_stop_reply (ptid_t ptid, struct target_waitstatus *status)
 {
-  struct vstop_notif *new_notif = xmalloc (sizeof (*new_notif));
+  struct vstop_notif *new_notif = XNEW (struct vstop_notif);
 
   new_notif->ptid = ptid;
   new_notif->status = *status;
@@ -206,7 +206,7 @@ start_inferior (char **argv)
 	count++;
       for (i = 0; argv[i] != NULL; i++)
 	count++;
-      new_argv = alloca (sizeof (char *) * count);
+      new_argv = XALLOCAVEC (char *, count);
       count = 0;
       for (i = 0; wrapper_argv[i] != NULL; i++)
 	new_argv[count++] = wrapper_argv[i];
@@ -2915,7 +2915,7 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
      manage the thread's last_status field.  */
   if (the_target->thread_stopped == NULL)
     {
-      struct vstop_notif *new_notif = xmalloc (sizeof (*new_notif));
+      struct vstop_notif *new_notif = XNEW (struct vstop_notif);
 
       new_notif->ptid = entry->id;
       new_notif->status = thread->last_status;
@@ -4282,8 +4282,7 @@ handle_target_event (int err, gdb_client_data client_data)
 	}
       else
 	{
-	  struct vstop_notif *vstop_notif
-	    = xmalloc (sizeof (struct vstop_notif));
+	  struct vstop_notif *vstop_notif = XNEW (struct vstop_notif);
 
 	  vstop_notif->status = last_status;
 	  vstop_notif->ptid = last_ptid;

@@ -387,7 +387,7 @@ macro_define_command (char *exp, int from_tty)
     {
       /* Function-like macro.  */
       int alloced = 5;
-      char **argv = (char **) xmalloc (alloced * sizeof (char *));
+      char **argv = XNEWVEC (char *, alloced);
 
       new_macro.kind = macro_function_like;
       new_macro.argc = 0;

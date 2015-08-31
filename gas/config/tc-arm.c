@@ -3311,13 +3311,13 @@ add_to_lit_pool (unsigned int nbytes)
 }
 
 bfd_boolean
-tc_start_label_without_colon (char unused1 ATTRIBUTE_UNUSED, const char * rest)
+tc_start_label_without_colon (void)
 {
   bfd_boolean ret = TRUE;
 
   if (codecomposer_syntax && asmfunc_state == WAITING_ASMFUNC_NAME)
     {
-      const char *label = rest;
+      const char *label = input_line_pointer;
 
       while (!is_end_of_line[(int) label[-1]])
 	--label;

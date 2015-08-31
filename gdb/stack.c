@@ -2523,8 +2523,7 @@ func_command (char *arg, int from_tty)
   frame = parse_frame_specification ("0");
   sals = decode_line_with_current_source (arg, DECODE_LINE_FUNFIRSTLINE);
   cleanups = make_cleanup (xfree, sals.sals);
-  func_bounds = (struct function_bounds *) xmalloc (
-			      sizeof (struct function_bounds) * sals.nelts);
+  func_bounds = XNEWVEC (struct function_bounds, sals.nelts);
   make_cleanup (xfree, func_bounds);
   for (i = 0; (i < sals.nelts && !found); i++)
     {

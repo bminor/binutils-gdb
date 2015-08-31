@@ -46,7 +46,8 @@ extern long md_pcrel_from_section (struct fix *, segT);
 
 int d30v_cleanup (int);
 #define md_cleanup()		     d30v_cleanup (FALSE)
-#define TC_START_LABEL(ch, s, ptr)      (ch == ':' && d30v_cleanup (FALSE))
+#define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR)	\
+  (NEXT_CHAR == ':' && d30v_cleanup (FALSE))
 void d30v_start_line (void);
 #define md_start_line_hook()	     d30v_start_line ()
 

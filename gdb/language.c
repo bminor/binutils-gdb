@@ -556,8 +556,7 @@ add_language (const struct language_defn *lang)
   if (!languages)
     {
       languages_allocsize = DEFAULT_ALLOCSIZE;
-      languages = (const struct language_defn **) xmalloc
-	(languages_allocsize * sizeof (*languages));
+      languages = XNEWVEC (const struct language_defn *, languages_allocsize);
     }
   if (languages_size >= languages_allocsize)
     {

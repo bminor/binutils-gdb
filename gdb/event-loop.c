@@ -455,7 +455,7 @@ create_file_handler (int fd, int mask, handler_func * proc,
      change the data associated with it.  */
   if (file_ptr == NULL)
     {
-      file_ptr = (file_handler *) xmalloc (sizeof (file_handler));
+      file_ptr = XNEW (file_handler);
       file_ptr->fd = fd;
       file_ptr->ready_mask = 0;
       file_ptr->next_file = gdb_notifier.first_file_handler;
@@ -472,7 +472,7 @@ create_file_handler (int fd, int mask, handler_func * proc,
 					   * sizeof (struct pollfd)));
 	  else
 	    gdb_notifier.poll_fds =
-	      (struct pollfd *) xmalloc (sizeof (struct pollfd));
+	      XNEW (struct pollfd);
 	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->fd = fd;
 	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->events = mask;
 	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->revents = 0;
@@ -875,8 +875,7 @@ create_async_signal_handler (sig_handler_func * proc,
 {
   async_signal_handler *async_handler_ptr;
 
-  async_handler_ptr =
-    (async_signal_handler *) xmalloc (sizeof (async_signal_handler));
+  async_handler_ptr = XNEW (async_signal_handler);
   async_handler_ptr->ready = 0;
   async_handler_ptr->next_handler = NULL;
   async_handler_ptr->proc = proc;
@@ -990,7 +989,7 @@ create_async_event_handler (async_event_handler_func *proc,
 {
   async_event_handler *h;
 
-  h = xmalloc (sizeof (*h));
+  h = XNEW (struct async_event_handler);
   h->ready = 0;
   h->next_handler = NULL;
   h->proc = proc;
@@ -1090,7 +1089,7 @@ create_timer (int milliseconds, timer_handler_func * proc,
 
   gettimeofday (&time_now, NULL);
 
-  timer_ptr = (struct gdb_timer *) xmalloc (sizeof (*timer_ptr));
+  timer_ptr = XNEW (struct gdb_timer);
   timer_ptr->when.tv_sec = time_now.tv_sec + delta.tv_sec;
   timer_ptr->when.tv_usec = time_now.tv_usec + delta.tv_usec;
   /* Carry?  */

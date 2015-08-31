@@ -814,7 +814,7 @@ gather_arguments (const char *name, struct macro_buffer *src,
 
   args_len = 0;
   args_size = 6;
-  args = (struct macro_buffer *) xmalloc (sizeof (*args) * args_size);
+  args = XNEWVEC (struct macro_buffer, args_size);
 
   for (;;)
     {

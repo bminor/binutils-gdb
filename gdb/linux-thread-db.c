@@ -211,9 +211,8 @@ static void record_thread (struct thread_db_info *info,
 static struct thread_db_info *
 add_thread_db_info (void *handle)
 {
-  struct thread_db_info *info;
+  struct thread_db_info *info = XCNEW (struct thread_db_info);
 
-  info = xcalloc (1, sizeof (*info));
   info->pid = ptid_get_pid (inferior_ptid);
   info->handle = handle;
 
@@ -1308,8 +1307,7 @@ record_thread (struct thread_db_info *info,
     return;
 
   /* Construct the thread's private data.  */
-  priv = xmalloc (sizeof (struct private_thread_info));
-  memset (priv, 0, sizeof (struct private_thread_info));
+  priv = XCNEW (struct private_thread_info);
 
   priv->th = *th_p;
   priv->tid = ti_p->ti_tid;
@@ -1851,12 +1849,15 @@ thread_db_get_thread_local_address (struct target_ops *ops,
   struct thread_info *thread_info;
   struct target_ops *beneath;
 
-  /* If we have not discovered any threads yet, check now.  */
-  if (!have_threads (ptid))
-    thread_db_find_new_threads_1 (ptid);
-
   /* Find the matching thread.  */
   thread_info = find_thread_ptid (ptid);
+
+  /* We may not have discovered the thread yet.  */
+  if (thread_info != NULL && thread_info->priv == NULL)
+    {
+      thread_from_lwp (ptid);
+      thread_info = find_thread_ptid (ptid);
+    }
 
   if (thread_info != NULL && thread_info->priv != NULL)
     {
@@ -1998,7 +1999,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
     if (info->filename != NULL)
       info_count++;
 
-  array = xmalloc (sizeof (*array) * info_count);
+  array = XNEWVEC (struct thread_db_info *, info_count);
   back_to = make_cleanup (xfree, array);
 
   info_count = 0;

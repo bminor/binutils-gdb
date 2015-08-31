@@ -431,7 +431,7 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 static struct arch_process_info *
 aarch64_linux_new_process (void)
 {
-  struct arch_process_info *info = xcalloc (1, sizeof (*info));
+  struct arch_process_info *info = XCNEW (struct arch_process_info);
 
   aarch64_init_debug_reg_state (&info->debug_reg_state);
 

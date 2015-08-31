@@ -111,7 +111,7 @@ mi_parse_argv (const char *args, struct mi_parse *parse)
 {
   const char *chp = args;
   int argc = 0;
-  char **argv = xmalloc ((argc + 1) * sizeof (char *));
+  char **argv = XNEWVEC (char *, argc + 1);
 
   argv[argc] = NULL;
   while (1)

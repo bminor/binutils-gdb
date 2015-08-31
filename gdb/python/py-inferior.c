@@ -332,7 +332,7 @@ add_thread_object (struct thread_info *tp)
 
   inf_obj = (inferior_object *) thread_obj->inf_obj;
 
-  entry = xmalloc (sizeof (struct threadlist_entry));
+  entry = XNEW (struct threadlist_entry);
   entry->thread_obj = thread_obj;
   entry->next = inf_obj->threads;
 

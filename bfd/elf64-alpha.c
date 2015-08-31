@@ -1757,6 +1757,18 @@ elf64_alpha_want_plt (struct alpha_elf_link_hash_entry *ah)
 	  && (ah->flags & ~ALPHA_ELF_LINK_HASH_LU_PLT) == 0);
 }
 
+/* Whether to sort relocs output by ld -r or ld --emit-relocs, by r_offset.
+   Don't do so for code sections.  We want to keep ordering of LITERAL/LITUSE
+   as is.  On the other hand, elf-eh-frame.c processing requires .eh_frame
+   relocs to be sorted.  */
+
+static bfd_boolean
+elf64_alpha_sort_relocs_p (asection *sec)
+{
+  return (sec->flags & SEC_CODE) == 0;
+}
+
+
 /* Handle dynamic relocations when doing an Alpha ELF link.  */
 
 static bfd_boolean
@@ -5525,6 +5537,8 @@ static const struct elf_size_info alpha_elf_size_info =
   elf64_alpha_add_symbol_hook
 #define elf_backend_relocs_compatible \
   _bfd_elf_relocs_compatible
+#define elf_backend_sort_relocs_p \
+  elf64_alpha_sort_relocs_p
 #define elf_backend_check_relocs \
   elf64_alpha_check_relocs
 #define elf_backend_create_dynamic_sections \

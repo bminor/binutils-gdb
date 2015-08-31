@@ -220,9 +220,7 @@ init_thread_list (void)
 static struct thread_info *
 new_thread (ptid_t ptid)
 {
-  struct thread_info *tp;
-
-  tp = xcalloc (1, sizeof (*tp));
+  struct thread_info *tp = XCNEW (struct thread_info);
 
   tp->ptid = ptid;
   tp->num = ++highest_thread_num;
@@ -765,7 +763,7 @@ enable_thread_stack_temporaries (ptid_t ptid)
 
   tp->stack_temporaries_enabled = 1;
   tp->stack_temporaries = NULL;
-  data = (ptid_t *) xmalloc (sizeof (ptid_t));
+  data = XNEW (ptid_t);
   *data = ptid;
   c = make_cleanup (disable_thread_stack_temporaries, data);
 
@@ -1511,9 +1509,8 @@ make_cleanup_restore_current_thread (void)
 {
   struct thread_info *tp;
   struct frame_info *frame;
-  struct current_thread_cleanup *old;
+  struct current_thread_cleanup *old = XNEW (struct current_thread_cleanup);
 
-  old = xmalloc (sizeof (struct current_thread_cleanup));
   old->inferior_ptid = inferior_ptid;
   old->inf_id = current_inferior ()->num;
   old->was_removable = current_inferior ()->removable;
@@ -1617,7 +1614,7 @@ thread_apply_all_command (char *cmd, int from_tty)
 
       /* Save a copy of the thread_list in case we execute detach
          command.  */
-      tp_array = xmalloc (sizeof (struct thread_info *) * tc);
+      tp_array = XNEWVEC (struct thread_info *, tc);
       make_cleanup (xfree, tp_array);
 
       ALL_NON_EXITED_THREADS (tp)

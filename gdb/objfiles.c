@@ -373,7 +373,7 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
   struct objfile *objfile;
   char *expanded_name;
 
-  objfile = (struct objfile *) xzalloc (sizeof (struct objfile));
+  objfile = XCNEW (struct objfile);
   objfile->psymbol_cache = psymbol_bcache_init ();
   /* We could use obstack_specify_allocation here instead, but
      gdb_obstack.h specifies the alloc/dealloc functions.  */
@@ -1385,7 +1385,7 @@ update_section_map (struct program_space *pspace,
       return;
     }
 
-  map = xmalloc (alloc_size * sizeof (*map));
+  map = XNEWVEC (struct obj_section *, alloc_size);
 
   i = 0;
   ALL_PSPACE_OBJFILES (pspace, objfile)

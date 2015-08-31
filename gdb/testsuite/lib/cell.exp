@@ -139,7 +139,7 @@ gdb_caching_proc skip_cell_tests {
             set result 1
         }
         default {
-            verbose -log "\n$me Cell/B.E. hardware not detected (default case)"
+            unresolved "$me: unexpected failure"
             set result 1
         }
     }

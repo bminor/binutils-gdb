@@ -325,7 +325,7 @@ update_watch_registers_callback (struct inferior_list_entry *entry,
 static struct arch_process_info *
 mips_linux_new_process (void)
 {
-  struct arch_process_info *info = xcalloc (1, sizeof (*info));
+  struct arch_process_info *info = XCNEW (struct arch_process_info);
 
   return info;
 }
@@ -337,7 +337,7 @@ mips_linux_new_process (void)
 static void
 mips_linux_new_thread (struct lwp_info *lwp)
 {
-  struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
+  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
 
   info->watch_registers_changed = 1;
 
@@ -353,7 +353,7 @@ mips_add_watchpoint (struct arch_process_info *private, CORE_ADDR addr,
   struct mips_watchpoint *new_watch;
   struct mips_watchpoint **pw;
 
-  new_watch = xmalloc (sizeof (struct mips_watchpoint));
+  new_watch = XNEW (struct mips_watchpoint);
   new_watch->addr = addr;
   new_watch->len = len;
   new_watch->type = watch_type;

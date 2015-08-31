@@ -3300,7 +3300,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
       error (_("Unexpected operator during name resolution"));
     }
 
-  argvec = (struct value * *) alloca (sizeof (struct value *) * (nargs + 1));
+  argvec = XALLOCAVEC (struct value *, nargs + 1);
   for (i = 0; i < nargs; i += 1)
     argvec[i] = resolve_subexp (expp, pos, 1, NULL);
   argvec[i] = NULL;
@@ -3741,7 +3741,7 @@ int
 user_select_syms (struct block_symbol *syms, int nsyms, int max_results)
 {
   int i;
-  int *chosen = (int *) alloca (sizeof (int) * nsyms);
+  int *chosen = XALLOCAVEC (int , nsyms);
   int n_chosen;
   int first_choice = (max_results == 1) ? 1 : 2;
   const char *select_mode = multiple_symbols_select_mode ();
@@ -9790,7 +9790,7 @@ assign_aggregate (struct value *container,
 
   num_specs = num_component_specs (exp, *pos - 3);
   max_indices = 4 * num_specs + 4;
-  indices = alloca (max_indices * sizeof (indices[0]));
+  indices = XALLOCAVEC (LONGEST, max_indices);
   indices[0] = indices[1] = low_index - 1;
   indices[2] = indices[3] = high_index + 1;
   num_indices = 4;
@@ -10600,8 +10600,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       /* Allocate arg vector, including space for the function to be
          called in argvec[0] and a terminating NULL.  */
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
-      argvec =
-        (struct value **) alloca (sizeof (struct value *) * (nargs + 2));
+      argvec = XALLOCAVEC (struct value *, nargs + 2);
 
       if (exp->elts[*pos].opcode == OP_VAR_VALUE
           && SYMBOL_DOMAIN (exp->elts[pc + 5].symbol) == UNDEF_DOMAIN)

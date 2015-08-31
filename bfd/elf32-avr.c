@@ -89,7 +89,7 @@ struct elf32_avr_link_hash_table
 
   /* Assorted information used by elf32_avr_size_stubs.  */
   unsigned int        bfd_count;
-  int                 top_index;
+  unsigned int        top_index;
   asection **         input_list;
   Elf_Internal_Sym ** all_local_syms;
 
@@ -3365,7 +3365,7 @@ elf32_avr_setup_section_lists (bfd *output_bfd,
 {
   bfd *input_bfd;
   unsigned int bfd_count;
-  int top_id, top_index;
+  unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
   bfd_size_type amt;

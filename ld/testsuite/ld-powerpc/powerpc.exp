@@ -287,6 +287,7 @@ if [ supports_ppc64 ] then {
     run_dump_test "tocvar"
     run_dump_test "tocnovar"
     run_dump_test "tlsld"
+    run_dump_test "relocsort"
 }
 
 run_dump_test "tlsld32"

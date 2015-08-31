@@ -3963,7 +3963,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = xzalloc (sizeof (struct gdbarch_tdep));
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   tdep->size_of_register_frame = ia64_size_of_register_frame;

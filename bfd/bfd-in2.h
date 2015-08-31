@@ -1209,10 +1209,10 @@ typedef struct bfd_section
   const char *name;
 
   /* A unique sequence number.  */
-  int id;
+  unsigned int id;
 
   /* Which section in the bfd; 0..n-1 as sections are created in a bfd.  */
-  int index;
+  unsigned int index;
 
   /* The next section in the list belonging to the BFD, or NULL.  */
   struct bfd_section *next;
@@ -1817,6 +1817,8 @@ asection *bfd_make_section_with_flags
    (bfd *, const char *name, flagword flags);
 
 asection *bfd_make_section (bfd *, const char *name);
+
+int bfd_get_next_section_id (void);
 
 bfd_boolean bfd_set_section_flags
    (bfd *abfd, asection *sec, flagword flags);

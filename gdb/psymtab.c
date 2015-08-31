@@ -1676,8 +1676,7 @@ extend_psymbol_list (struct psymbol_allocation_list *listp,
   if (listp->size == 0)
     {
       new_size = 255;
-      listp->list = (struct partial_symbol **)
-	xmalloc (new_size * sizeof (struct partial_symbol *));
+      listp->list = XNEWVEC (struct partial_symbol *, new_size);
     }
   else
     {
@@ -1758,16 +1757,14 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
   if (objfile->global_psymbols.size > 0)
     {
       objfile->global_psymbols.next =
-	objfile->global_psymbols.list = (struct partial_symbol **)
-	xmalloc ((objfile->global_psymbols.size
-		  * sizeof (struct partial_symbol *)));
+	objfile->global_psymbols.list =
+	  XNEWVEC (struct partial_symbol *, objfile->global_psymbols.size);
     }
   if (objfile->static_psymbols.size > 0)
     {
       objfile->static_psymbols.next =
-	objfile->static_psymbols.list = (struct partial_symbol **)
-	xmalloc ((objfile->static_psymbols.size
-		  * sizeof (struct partial_symbol *)));
+	objfile->static_psymbols.list =
+	  XNEWVEC (struct partial_symbol *, objfile->static_psymbols.size);
     }
 }
 

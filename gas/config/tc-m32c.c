@@ -1247,19 +1247,16 @@ m32c_fix_adjustable (fixS * fixP)
 }
 
 /* Worker function for m32c_is_colon_insn().  */
-static char
-restore_colon (int advance_i_l_p_by)
+static int
+restore_colon (char *next_i_l_p, char *nul_char)
 {
-  char c;
-
   /* Restore the colon, and advance input_line_pointer to
      the end of the new symbol.  */
-  * input_line_pointer = ':';
-  input_line_pointer += advance_i_l_p_by;
-  c = * input_line_pointer;
-  * input_line_pointer = 0;
-
-  return c;
+  *input_line_pointer = *nul_char;
+  input_line_pointer = next_i_l_p;
+  *nul_char = *next_i_l_p;
+  *next_i_l_p = 0;
+  return 1;
 }
 
 /* Determines if the symbol starting at START and ending in
@@ -1267,28 +1264,31 @@ restore_colon (int advance_i_l_p_by)
    (but which has now been replaced bu a NUL) is in fact an
    :Z, :S, :Q, or :G suffix.
    If it is, then it restores the colon, advances INPUT_LINE_POINTER
-   to the real end of the instruction/symbol, and returns the character
-   that really terminated the symbol.  Otherwise it returns 0.  */
-char
-m32c_is_colon_insn (char *start ATTRIBUTE_UNUSED)
+   to the real end of the instruction/symbol, saves the char there to
+   NUL_CHAR and pokes a NUL, and returns 1.  Otherwise it returns 0.  */
+int
+m32c_is_colon_insn (char *start ATTRIBUTE_UNUSED, char *nul_char)
 {
   char * i_l_p = input_line_pointer;
 
+  if (*nul_char == '"')
+    ++i_l_p;
+
   /* Check to see if the text following the colon is 'G' */
   if (TOLOWER (i_l_p[1]) == 'g' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
-    return restore_colon (2);
+    return restore_colon (i_l_p + 2, nul_char);
 
   /* Check to see if the text following the colon is 'Q' */
   if (TOLOWER (i_l_p[1]) == 'q' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
-    return restore_colon (2);
+    return restore_colon (i_l_p + 2, nul_char);
 
   /* Check to see if the text following the colon is 'S' */
   if (TOLOWER (i_l_p[1]) == 's' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
-    return restore_colon (2);
+    return restore_colon (i_l_p + 2, nul_char);
 
   /* Check to see if the text following the colon is 'Z' */
   if (TOLOWER (i_l_p[1]) == 'z' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
-    return restore_colon (2);
+    return restore_colon (i_l_p + 2, nul_char);
 
   return 0;
 }

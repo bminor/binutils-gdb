@@ -664,7 +664,7 @@ arm_stopped_data_address (void)
 static struct arch_process_info *
 arm_new_process (void)
 {
-  struct arch_process_info *info = xcalloc (1, sizeof (*info));
+  struct arch_process_info *info = XCNEW (struct arch_process_info);
   return info;
 }
 
@@ -672,7 +672,7 @@ arm_new_process (void)
 static void
 arm_new_thread (struct lwp_info *lwp)
 {
-  struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
+  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
   int i;
 
   for (i = 0; i < MAX_BPTS; i++)

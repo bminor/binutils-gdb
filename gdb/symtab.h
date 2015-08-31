@@ -800,11 +800,10 @@ struct symbol
   /* An arbitrary data pointer, allowing symbol readers to record
      additional information on a per-symbol basis.  Note that this data
      must be allocated using the same obstack as the symbol itself.  */
-  /* So far it is only used by LOC_COMPUTED to
-     find the location information.  For a LOC_BLOCK symbol
-     for a function in a compilation unit compiled with DWARF 2
-     information, this is information used internally by the DWARF 2
-     code --- specifically, the location expression for the frame
+  /* So far it is only used by:
+     LOC_COMPUTED: to find the location information
+     LOC_BLOCK (DWARF2 function): information used internally by the
+     DWARF 2 code --- specifically, the location expression for the frame
      base for this function.  */
   /* FIXME drow/2003-02-21: For the LOC_BLOCK case, it might be better
      to add a magic symbol to the block containing this information,

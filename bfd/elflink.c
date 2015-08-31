@@ -3247,7 +3247,7 @@ elf_sort_symbol (const void *arg1, const void *arg2)
     return vdiff > 0 ? 1 : -1;
   else
     {
-      long sdiff = h1->root.u.def.section->id - h2->root.u.def.section->id;
+      int sdiff = h1->root.u.def.section->id - h2->root.u.def.section->id;
       if (sdiff != 0)
 	return sdiff > 0 ? 1 : -1;
     }
@@ -4830,7 +4830,7 @@ error_free_dyn:
 		i = idx + 1;
 	      else
 		{
-		  long sdiff = slook->id - h->root.u.def.section->id;
+		  int sdiff = slook->id - h->root.u.def.section->id;
 		  if (sdiff < 0)
 		    j = idx;
 		  else if (sdiff > 0)

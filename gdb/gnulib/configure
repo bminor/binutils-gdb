@@ -703,6 +703,24 @@ HAVE__BOOL
 GL_GENERATE_STDBOOL_H_FALSE
 GL_GENERATE_STDBOOL_H_TRUE
 STDBOOL_H
+NEXT_AS_FIRST_DIRECTIVE_SIGNAL_H
+NEXT_SIGNAL_H
+REPLACE_RAISE
+REPLACE_PTHREAD_SIGMASK
+HAVE_SIGHANDLER_T
+HAVE_TYPE_VOLATILE_SIG_ATOMIC_T
+HAVE_STRUCT_SIGACTION_SA_SIGACTION
+HAVE_SIGACTION
+HAVE_SIGINFO_T
+HAVE_SIGSET_T
+HAVE_RAISE
+HAVE_PTHREAD_SIGMASK
+HAVE_POSIX_SIGNALBLOCKING
+GNULIB_SIGACTION
+GNULIB_SIGPROCMASK
+GNULIB_SIGNAL_H_SIGPIPE
+GNULIB_RAISE
+GNULIB_PTHREAD_SIGMASK
 REPLACE_VSPRINTF
 REPLACE_VSNPRINTF
 REPLACE_VPRINTF
@@ -5306,6 +5324,7 @@ fi
   # Code from module rename:
   # Code from module rmdir:
   # Code from module same-inode:
+  # Code from module signal-h:
   # Code from module snippet/_Noreturn:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
@@ -11102,6 +11121,89 @@ $as_echo "$gl_cv_func_memmem_works_always" >&6; }
 
 
 
+
+  GNULIB_PTHREAD_SIGMASK=0;
+  GNULIB_RAISE=0;
+  GNULIB_SIGNAL_H_SIGPIPE=0;
+  GNULIB_SIGPROCMASK=0;
+  GNULIB_SIGACTION=0;
+    HAVE_POSIX_SIGNALBLOCKING=1;
+  HAVE_PTHREAD_SIGMASK=1;
+  HAVE_RAISE=1;
+  HAVE_SIGSET_T=1;
+  HAVE_SIGINFO_T=1;
+  HAVE_SIGACTION=1;
+  HAVE_STRUCT_SIGACTION_SA_SIGACTION=1;
+
+  HAVE_TYPE_VOLATILE_SIG_ATOMIC_T=1;
+
+  HAVE_SIGHANDLER_T=1;
+  REPLACE_PTHREAD_SIGMASK=0;
+  REPLACE_RAISE=0;
+
+
+  ac_fn_c_check_type "$LINENO" "sigset_t" "ac_cv_type_sigset_t" "
+      #include <signal.h>
+      /* Mingw defines sigset_t not in <signal.h>, but in <sys/types.h>.  */
+      #include <sys/types.h>
+
+"
+if test "x$ac_cv_type_sigset_t" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_SIGSET_T 1
+_ACEOF
+
+gl_cv_type_sigset_t=yes
+else
+  gl_cv_type_sigset_t=no
+fi
+
+  if test $gl_cv_type_sigset_t != yes; then
+    HAVE_SIGSET_T=0
+  fi
+
+ac_fn_c_check_type "$LINENO" "pid_t" "ac_cv_type_pid_t" "$ac_includes_default"
+if test "x$ac_cv_type_pid_t" = x""yes; then :
+
+else
+
+cat >>confdefs.h <<_ACEOF
+#define pid_t int
+_ACEOF
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for uid_t in sys/types.h" >&5
+$as_echo_n "checking for uid_t in sys/types.h... " >&6; }
+if test "${ac_cv_type_uid_t+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "uid_t" >/dev/null 2>&1; then :
+  ac_cv_type_uid_t=yes
+else
+  ac_cv_type_uid_t=no
+fi
+rm -f conftest*
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_type_uid_t" >&5
+$as_echo "$ac_cv_type_uid_t" >&6; }
+if test $ac_cv_type_uid_t = no; then
+
+$as_echo "#define uid_t int" >>confdefs.h
+
+
+$as_echo "#define gid_t int" >>confdefs.h
+
+fi
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for stdbool.h that conforms to C99" >&5
 $as_echo_n "checking for stdbool.h that conforms to C99... " >&6; }
 if test "${ac_cv_header_stdbool_h+set}" = set; then :
@@ -11532,17 +11634,6 @@ fi
 $as_echo "$MKDIR_P" >&6; }
 
 
-
-ac_fn_c_check_type "$LINENO" "pid_t" "ac_cv_type_pid_t" "$ac_includes_default"
-if test "x$ac_cv_type_pid_t" = x""yes; then :
-
-else
-
-cat >>confdefs.h <<_ACEOF
-#define pid_t int
-_ACEOF
-
-fi
 
 
 
@@ -16543,6 +16634,152 @@ $as_echo "$gl_cv_func_rmdir_works" >&6; }
 
 $as_echo "#define GNULIB_TEST_RMDIR 1" >>confdefs.h
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_signal_h='<'signal.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <signal.h>" >&5
+$as_echo_n "checking absolute name of <signal.h>... " >&6; }
+if test "${gl_cv_next_signal_h+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <signal.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'signal.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_signal_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_signal_h
+           gl_cv_next_signal_h='"'$gl_header'"'
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_signal_h" >&5
+$as_echo "$gl_cv_next_signal_h" >&6; }
+     fi
+     NEXT_SIGNAL_H=$gl_cv_next_signal_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'signal.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_signal_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_SIGNAL_H=$gl_next_as_first_directive
+
+
+
+
+
+# AIX declares sig_atomic_t to already include volatile, and C89 compilers
+# then choke on 'volatile sig_atomic_t'.  C99 requires that it compile.
+  ac_fn_c_check_type "$LINENO" "volatile sig_atomic_t" "ac_cv_type_volatile_sig_atomic_t" "
+#include <signal.h>
+
+"
+if test "x$ac_cv_type_volatile_sig_atomic_t" = x""yes; then :
+
+else
+  HAVE_TYPE_VOLATILE_SIG_ATOMIC_T=0
+fi
+
+
+
+
+
+
+
+  ac_fn_c_check_type "$LINENO" "sighandler_t" "ac_cv_type_sighandler_t" "
+#include <signal.h>
+
+"
+if test "x$ac_cv_type_sighandler_t" = x""yes; then :
+
+else
+  HAVE_SIGHANDLER_T=0
+fi
+
+
+
+    for gl_func in pthread_sigmask sigaction     sigaddset sigdelset sigemptyset sigfillset sigismember     sigpending sigprocmask; do
+    as_gl_Symbol=`$as_echo "gl_cv_have_raw_decl_$gl_func" | $as_tr_sh`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $gl_func is declared without a macro" >&5
+$as_echo_n "checking whether $gl_func is declared without a macro... " >&6; }
+if { as_var=$as_gl_Symbol; eval "test \"\${$as_var+set}\" = set"; }; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <signal.h>
+
+int
+main ()
+{
+#undef $gl_func
+  (void) $gl_func;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$as_gl_Symbol=yes"
+else
+  eval "$as_gl_Symbol=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$as_gl_Symbol
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+    eval as_val=\$$as_gl_Symbol
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_RAW_DECL_$gl_func" | $as_tr_cpp` 1
+_ACEOF
+
+                     eval ac_cv_have_decl_$gl_func=yes
+fi
+      done
 
 
 

@@ -87,6 +87,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module rename:
   # Code from module rmdir:
   # Code from module same-inode:
+  # Code from module signal-h:
   # Code from module snippet/_Noreturn:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
@@ -266,6 +267,7 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([rmdir])
   fi
   gl_UNISTD_MODULE_INDICATOR([rmdir])
+  gl_SIGNAL_H
   gt_TYPE_SSIZE_T
   gl_FUNC_STAT
   if test $REPLACE_STAT = 1; then
@@ -501,6 +503,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/rename.c
   lib/rmdir.c
   lib/same-inode.h
+  lib/signal.in.h
   lib/stat.c
   lib/stdbool.in.h
   lib/stddef.in.h
@@ -579,6 +582,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/readlink.m4
   m4/rename.m4
   m4/rmdir.m4
+  m4/signal_h.m4
   m4/ssize_t.m4
   m4/stat.m4
   m4/stdbool.m4

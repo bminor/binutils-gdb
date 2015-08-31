@@ -666,7 +666,7 @@ gdb_xml_parse_attr_ulongest (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Can't convert %s=\"%s\" to an integer"),
 		   attribute->name, value);
 
-  ret = xmalloc (sizeof (result));
+  ret = XNEW (ULONGEST);
   memcpy (ret, &result, sizeof (result));
   return ret;
 }

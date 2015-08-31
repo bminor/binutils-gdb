@@ -600,6 +600,7 @@ static struct gdbarch_data *remote_gdbarch_data_handle;
 static struct remote_arch_state *
 get_remote_arch_state (void)
 {
+  gdb_assert (target_gdbarch () != NULL);
   return gdbarch_data (target_gdbarch (), remote_gdbarch_data_handle);
 }
 
@@ -920,6 +921,16 @@ struct memory_packet_config
   int fixed_p;
 };
 
+/* The default max memory-write-packet-size.  The 16k is historical.
+   (It came from older GDB's using alloca for buffers and the
+   knowledge (folklore?) that some hosts don't cope very well with
+   large alloca calls.)  */
+#define DEFAULT_MAX_MEMORY_PACKET_SIZE 16384
+
+/* The minimum remote packet size for memory transfers.  Ensures we
+   can write at least one byte.  */
+#define MIN_MEMORY_PACKET_SIZE 20
+
 /* Compute the current size of a read/write packet.  Since this makes
    use of ``actual_register_packet_size'' the computation is dynamic.  */
 
@@ -929,23 +940,11 @@ get_memory_packet_size (struct memory_packet_config *config)
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
 
-  /* NOTE: The somewhat arbitrary 16k comes from the knowledge (folk
-     law?) that some hosts don't cope very well with large alloca()
-     calls.  Eventually the alloca() code will be replaced by calls to
-     xmalloc() and make_cleanups() allowing this restriction to either
-     be lifted or removed.  */
-#ifndef MAX_REMOTE_PACKET_SIZE
-#define MAX_REMOTE_PACKET_SIZE 16384
-#endif
-  /* NOTE: 20 ensures we can write at least one byte.  */
-#ifndef MIN_REMOTE_PACKET_SIZE
-#define MIN_REMOTE_PACKET_SIZE 20
-#endif
   long what_they_get;
   if (config->fixed_p)
     {
       if (config->size <= 0)
-	what_they_get = MAX_REMOTE_PACKET_SIZE;
+	what_they_get = DEFAULT_MAX_MEMORY_PACKET_SIZE;
       else
 	what_they_get = config->size;
     }
@@ -964,10 +963,8 @@ get_memory_packet_size (struct memory_packet_config *config)
 	  && what_they_get > rsa->actual_register_packet_size)
 	what_they_get = rsa->actual_register_packet_size;
     }
-  if (what_they_get > MAX_REMOTE_PACKET_SIZE)
-    what_they_get = MAX_REMOTE_PACKET_SIZE;
-  if (what_they_get < MIN_REMOTE_PACKET_SIZE)
-    what_they_get = MIN_REMOTE_PACKET_SIZE;
+  if (what_they_get < MIN_MEMORY_PACKET_SIZE)
+    what_they_get = MIN_MEMORY_PACKET_SIZE;
 
   /* Make sure there is room in the global buffer for this packet
      (including its trailing NUL byte).  */
@@ -1004,15 +1001,16 @@ set_memory_packet_size (char *args, struct memory_packet_config *config)
       size = strtoul (args, &end, 0);
       if (args == end)
 	error (_("Invalid %s (bad syntax)."), config->name);
-#if 0
-      /* Instead of explicitly capping the size of a packet to
-         MAX_REMOTE_PACKET_SIZE or dissallowing it, the user is
-         instead allowed to set the size to something arbitrarily
-         large.  */
-      if (size > MAX_REMOTE_PACKET_SIZE)
-	error (_("Invalid %s (too large)."), config->name);
-#endif
+
+      /* Instead of explicitly capping the size of a packet to or
+	 disallowing it, the user is allowed to set the size to
+	 something arbitrarily large.  */
     }
+
+  /* So that the query shows the correct value.  */
+  if (size <= 0)
+    size = DEFAULT_MAX_MEMORY_PACKET_SIZE;
+
   /* Extra checks?  */
   if (fixed_p && !config->fixed_p)
     {
@@ -1799,7 +1797,7 @@ demand_private_info (ptid_t ptid)
 
   if (!info->priv)
     {
-      info->priv = xmalloc (sizeof (*(info->priv)));
+      info->priv = XNEW (struct private_thread_info);
       info->private_dtor = free_private_thread_info;
       info->priv->core = -1;
       info->priv->extra = 0;
@@ -4007,6 +4005,7 @@ remote_check_symbols (void)
   char *msg, *reply, *tmp;
   struct bound_minimal_symbol sym;
   int end;
+  struct cleanup *old_chain;
 
   /* The remote side has no concept of inferiors that aren't running
      yet, it only knows about running processes.  If we're connected
@@ -4025,7 +4024,8 @@ remote_check_symbols (void)
 
   /* Allocate a message buffer.  We can't reuse the input buffer in RS,
      because we need both at the same time.  */
-  msg = alloca (get_remote_packet_size ());
+  msg = xmalloc (get_remote_packet_size ());
+  old_chain = make_cleanup (xfree, msg);
 
   /* Invite target to request symbol lookups.  */
 
@@ -4063,6 +4063,8 @@ remote_check_symbols (void)
       getpkt (&rs->buf, &rs->buf_size, 0);
       reply = rs->buf;
     }
+
+  do_cleanups (old_chain);
 }
 
 static struct serial *
@@ -4183,13 +4185,6 @@ remote_packet_size (const struct protocol_feature *feature,
       warning (_("Remote target reported \"%s\" with a bad size: \"%s\"."),
 	       feature->name, value);
       return;
-    }
-
-  if (packet_size > MAX_REMOTE_PACKET_SIZE)
-    {
-      warning (_("limiting remote suggested packet size (%d bytes) to %d"),
-	       packet_size, MAX_REMOTE_PACKET_SIZE);
-      packet_size = MAX_REMOTE_PACKET_SIZE;
     }
 
   /* Record the new maximum packet size.  */
@@ -5658,8 +5653,8 @@ stop_reply_dtr (struct notif_event *event)
 static struct notif_event *
 remote_notif_stop_alloc_reply (void)
 {
-  struct notif_event *r
-    = (struct notif_event *) XNEW (struct stop_reply);
+  /* We cast to a pointer to the "base class".  */
+  struct notif_event *r = (struct notif_event *) XNEW (struct stop_reply);
 
   r->dtr = stop_reply_dtr;
 
@@ -7783,7 +7778,8 @@ putpkt_binary (const char *buf, int cnt)
   struct remote_state *rs = get_remote_state ();
   int i;
   unsigned char csum = 0;
-  char *buf2 = alloca (cnt + 6);
+  char *buf2 = xmalloc (cnt + 6);
+  struct cleanup *old_chain = make_cleanup (xfree, buf2);
 
   int ch;
   int tcount = 0;
@@ -7876,6 +7872,7 @@ putpkt_binary (const char *buf, int cnt)
 	    case '+':
 	      if (remote_debug)
 		fprintf_unfiltered (gdb_stdlog, "Ack\n");
+	      do_cleanups (old_chain);
 	      return 1;
 	    case '-':
 	      if (remote_debug)
@@ -7884,7 +7881,10 @@ putpkt_binary (const char *buf, int cnt)
 	    case SERIAL_TIMEOUT:
 	      tcount++;
 	      if (tcount > 3)
-		return 0;
+		{
+		  do_cleanups (old_chain);
+		  return 0;
+		}
 	      break;		/* Retransmit buffer.  */
 	    case '$':
 	      {
@@ -7971,6 +7971,8 @@ putpkt_binary (const char *buf, int cnt)
 	}
 #endif
     }
+
+  do_cleanups (old_chain);
   return 0;
 }
 
@@ -12331,7 +12333,7 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid,
 	       target_pid_to_str (ptid));
     }
 
-  tinfo = xzalloc (sizeof (*tinfo));
+  tinfo = XCNEW (struct btrace_target_info);
   tinfo->ptid = ptid;
 
   /* If we fail to read the configuration, we lose some information, but the

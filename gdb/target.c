@@ -552,7 +552,7 @@ cleanup_restore_target_terminal (void *arg)
 struct cleanup *
 make_cleanup_restore_target_terminal (void)
 {
-  enum terminal_state *ts = xmalloc (sizeof (*ts));
+  enum terminal_state *ts = XNEW (enum terminal_state);
 
   *ts = terminal_state;
 
@@ -2137,6 +2137,10 @@ target_pre_inferior (int from_tty)
 
       target_clear_description ();
     }
+
+  /* attach_flag may be set if the previous process associated with
+     the inferior was attached to.  */
+  current_inferior ()->attach_flag = 0;
 
   agent_capability_invalidate ();
 }

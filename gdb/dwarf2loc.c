@@ -2908,7 +2908,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
   unsigned int addr_size_bits = 8 * addr_size;
   int bits_big_endian = gdbarch_bits_big_endian (arch);
 
-  offsets = xmalloc ((op_end - op_ptr) * sizeof (int));
+  offsets = XNEWVEC (int, op_end - op_ptr);
   cleanups = make_cleanup (xfree, offsets);
 
   for (i = 0; i < op_end - op_ptr; ++i)

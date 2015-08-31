@@ -496,7 +496,7 @@ get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
   new_regcache = regcache_xmalloc_1 (gdbarch, aspace, 0);
   new_regcache->ptid = ptid;
 
-  list = xmalloc (sizeof (struct regcache_list));
+  list = XNEW (struct regcache_list);
   list->regcache = new_regcache;
   list->next = current_regcache;
   current_regcache = list;

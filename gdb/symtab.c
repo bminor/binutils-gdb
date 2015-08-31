@@ -4135,9 +4135,8 @@ struct filename_seen_cache
 static struct filename_seen_cache *
 create_filename_seen_cache (void)
 {
-  struct filename_seen_cache *cache;
+  struct filename_seen_cache *cache = XNEW (struct filename_seen_cache);
 
-  cache = XNEW (struct filename_seen_cache);
   cache->tab = htab_create_alloc (INITIAL_FILENAME_SEEN_CACHE_SIZE,
 				  filename_hash, filename_eq,
 				  NULL, xcalloc, xfree);
@@ -4372,8 +4371,8 @@ sort_search_symbols_remove_dups (struct symbol_search *found, int nfound,
   gdb_assert (found != NULL && nfound > 0);
 
   /* Build an array out of the list so we can easily sort them.  */
-  symbols = (struct symbol_search **) xmalloc (sizeof (struct symbol_search *)
-					       * nfound);
+  symbols = XNEWVEC (struct symbol_search *, nfound);
+
   symp = found;
   for (i = 0; i < nfound; i++)
     {
@@ -4659,11 +4658,10 @@ search_symbols (const char *regexp, enum search_domain kind,
 			    && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
 	      {
 		/* match */
-		struct symbol_search *psr = (struct symbol_search *)
-		  xmalloc (sizeof (struct symbol_search));
+		struct symbol_search *psr = XCNEW (struct symbol_search);
+
 		psr->block = i;
 		psr->symbol = sym;
-		memset (&psr->msymbol, 0, sizeof (psr->msymbol));
 		psr->next = NULL;
 		if (tail == NULL)
 		  found = psr;
@@ -4714,8 +4712,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 			.symbol == NULL)
 		      {
 			/* match */
-			struct symbol_search *psr = (struct symbol_search *)
-			  xmalloc (sizeof (struct symbol_search));
+			struct symbol_search *psr = XNEW (struct symbol_search);
 			psr->block = i;
 			psr->msymbol.minsym = msymbol;
 			psr->msymbol.objfile = objfile;

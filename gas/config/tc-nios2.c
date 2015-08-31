@@ -566,6 +566,7 @@ s_nios2_sdata (int ignore ATTRIBUTE_UNUSED)
 static void
 s_nios2_set (int equiv)
 {
+  char *save = input_line_pointer;
   char *directive;
   char delim = get_symbol_name (&directive);
   char *endline = input_line_pointer;
@@ -610,8 +611,7 @@ s_nios2_set (int equiv)
   /* If we fall through to here, either we have ".set XXX, YYY"
      or we have ".set XXX" where XXX is unknown or we have
      a syntax error.  */
-  input_line_pointer = directive;
-  *endline = delim;
+  input_line_pointer = save;
   s_set (equiv);
 }
 

@@ -277,8 +277,7 @@ dbx_lookup_type (int typenums[2], struct objfile *objfile)
 	  if (old_len == 0)
 	    {
 	      type_vector_length = INITIAL_TYPE_VECTOR_LENGTH;
-	      type_vector = (struct type **)
-		xmalloc (type_vector_length * sizeof (struct type *));
+	      type_vector = XNEWVEC (struct type *, type_vector_length);
 	    }
 	  while (index >= type_vector_length)
 	    {
@@ -1809,7 +1808,7 @@ again:
         while (**pp && **pp != '#')
           {
             struct type *arg_type = read_type (pp, objfile);
-            struct type_list *newobj = alloca (sizeof (*newobj));
+            struct type_list *newobj = XALLOCA (struct type_list);
             newobj->type = arg_type;
             newobj->next = arg_types;
             arg_types = newobj;
@@ -2304,10 +2303,8 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
       look_ahead_type = NULL;
       length = 0;
 
-      new_fnlist = (struct next_fnfieldlist *)
-	xmalloc (sizeof (struct next_fnfieldlist));
+      new_fnlist = XCNEW (struct next_fnfieldlist);
       make_cleanup (xfree, new_fnlist);
-      memset (new_fnlist, 0, sizeof (struct next_fnfieldlist));
 
       if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && is_cplus_marker ((*pp)[2]))
 	{
@@ -2346,10 +2343,8 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 
       do
 	{
-	  new_sublist =
-	    (struct next_fnfield *) xmalloc (sizeof (struct next_fnfield));
+	  new_sublist = XCNEW (struct next_fnfield);
 	  make_cleanup (xfree, new_sublist);
-	  memset (new_sublist, 0, sizeof (struct next_fnfield));
 
 	  /* Check for and handle cretinous dbx symbol name continuation!  */
 	  if (look_ahead_type == NULL)
@@ -2637,17 +2632,16 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 
 	      /* Create a new fn_fieldlist for the destructors.  */
 
-	      destr_fnlist = (struct next_fnfieldlist *)
-		xmalloc (sizeof (struct next_fnfieldlist));
+	      destr_fnlist = XCNEW (struct next_fnfieldlist);
 	      make_cleanup (xfree, destr_fnlist);
-	      memset (destr_fnlist, 0, sizeof (struct next_fnfieldlist));
+
 	      destr_fnlist->fn_fieldlist.name
 		= obconcat (&objfile->objfile_obstack, "~",
 			    new_fnlist->fn_fieldlist.name, (char *) NULL);
 
-	      destr_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
-		obstack_alloc (&objfile->objfile_obstack,
-			       sizeof (struct fn_field) * has_destructor);
+	      destr_fnlist->fn_fieldlist.fn_fields =
+		XOBNEWVEC (&objfile->objfile_obstack,
+			   struct fn_field, has_destructor);
 	      memset (destr_fnlist->fn_fieldlist.fn_fields, 0,
 		  sizeof (struct fn_field) * has_destructor);
 	      tmp_sublist = sublist;
@@ -3017,9 +3011,9 @@ read_struct_fields (struct field_info *fip, char **pp, struct type *type,
     {
       STABS_CONTINUE (pp, objfile);
       /* Get space to record the next field's data.  */
-      newobj = (struct nextfield *) xmalloc (sizeof (struct nextfield));
+      newobj = XCNEW (struct nextfield);
       make_cleanup (xfree, newobj);
-      memset (newobj, 0, sizeof (struct nextfield));
+
       newobj->next = fip->list;
       fip->list = newobj;
 
@@ -3139,9 +3133,9 @@ read_baseclasses (struct field_info *fip, char **pp, struct type *type,
 
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
-      newobj = (struct nextfield *) xmalloc (sizeof (struct nextfield));
+      newobj = XCNEW (struct nextfield);
       make_cleanup (xfree, newobj);
-      memset (newobj, 0, sizeof (struct nextfield));
+
       newobj->next = fip->list;
       fip->list = newobj;
       FIELD_BITSIZE (newobj->field) = 0;	/* This should be an unpacked
@@ -4299,8 +4293,7 @@ read_args (char **pp, int end, struct objfile *objfile, int *nargsp,
       *varargsp = 0;
     }
 
-  rval = (struct field *) xmalloc (n * sizeof (struct field));
-  memset (rval, 0, n * sizeof (struct field));
+  rval = XCNEWVEC (struct field, n);
   for (i = 0; i < n; i++)
     rval[i].type = types[i];
   *nargsp = n;
@@ -4844,13 +4837,11 @@ _initialize_stabsread (void)
 
   undef_types_allocated = 20;
   undef_types_length = 0;
-  undef_types = (struct type **)
-    xmalloc (undef_types_allocated * sizeof (struct type *));
+  undef_types = XNEWVEC (struct type *, undef_types_allocated);
 
   noname_undefs_allocated = 20;
   noname_undefs_length = 0;
-  noname_undefs = (struct nat *)
-    xmalloc (noname_undefs_allocated * sizeof (struct nat));
+  noname_undefs = XNEWVEC (struct nat, noname_undefs_allocated);
 
   stab_register_index = register_symbol_register_impl (LOC_REGISTER,
 						       &stab_register_funcs);

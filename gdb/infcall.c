@@ -570,9 +570,9 @@ dummy_frame_context_saver_get_regs (struct dummy_frame_context_saver *saver)
 struct dummy_frame_context_saver *
 dummy_frame_context_saver_setup (struct frame_id dummy_id, ptid_t ptid)
 {
-  struct dummy_frame_context_saver *saver;
+  struct dummy_frame_context_saver *saver =
+    XNEW (struct dummy_frame_context_saver);
 
-  saver = xmalloc (sizeof (*saver));
   saver->retbuf = NULL;
   saver->drop_done = 0;
   register_dummy_frame_dtor (dummy_id, inferior_ptid,
@@ -922,7 +922,7 @@ call_function_by_hand_dummy (struct value *function,
       struct value **new_args;
 
       /* Add the new argument to the front of the argument list.  */
-      new_args = xmalloc (sizeof (struct value *) * (nargs + 1));
+      new_args = XNEWVEC (struct value *, nargs + 1);
       new_args[0] = value_from_pointer (lookup_pointer_type (values_type),
 					struct_addr);
       memcpy (&new_args[1], &args[0], sizeof (struct value *) * nargs);

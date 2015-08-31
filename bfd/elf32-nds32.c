@@ -6868,7 +6868,7 @@ nds32_convert_32_to_16_alu1 (bfd *abfd, uint32_t insn, uint16_t *pinsn16,
 			     int *pinsn_type)
 {
   uint16_t insn16 = 0;
-  int insn_type;
+  int insn_type = 0;
   unsigned long mach = bfd_get_mach (abfd);
 
   if (N32_SH5 (insn) != 0)
@@ -8331,7 +8331,7 @@ static Elf_Internal_Rela *
 find_relocs_at_address_addr (Elf_Internal_Rela *reloc,
 			     Elf_Internal_Rela *relocs,
 			     Elf_Internal_Rela *irelend,
-			     unsigned char reloc_type,
+			     enum elf_nds32_reloc_type reloc_type,
 			     bfd_vma offset_p)
 {
   Elf_Internal_Rela *rel_t = NULL;
@@ -8682,7 +8682,7 @@ nds32_elf_relax_delete_blanks (bfd *abfd, asection *sec,
 	      unsigned long val = 0;
 	      unsigned long mask;
 	      long before, between;
-	      long offset;
+	      long offset = 0;
 
 	      switch (ELF32_R_TYPE (irel->r_info))
 		{
@@ -10787,7 +10787,8 @@ nds32_elf_relax_loadstore (struct bfd_link_info *link_info, bfd *abfd,
 			   bfd_byte *contents, Elf_Internal_Sym *isymbuf,
 			   Elf_Internal_Shdr *symtab_hdr, int load_store_relax)
 {
-  int eliminate_sethi = 0, range_type, i;
+  int eliminate_sethi = 0, range_type;
+  unsigned int i;
   bfd_vma local_sda, laddr;
   int seq_len;	/* Original length of instruction sequence.  */
   uint32_t insn;
@@ -10807,7 +10808,7 @@ nds32_elf_relax_loadstore (struct bfd_link_info *link_info, bfd *abfd,
   *insn_len = seq_len;
 
   /* Get the high part relocation.  */
-  for (i = 0; (unsigned) i < sizeof (checked_types); i++)
+  for (i = 0; i < ARRAY_SIZE (checked_types); i++)
     {
       hi_irelfn = find_relocs_at_address_addr (irel, internal_relocs, irelend,
 					       checked_types[i], laddr);

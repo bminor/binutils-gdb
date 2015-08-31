@@ -187,7 +187,7 @@ alloc_type (struct objfile *objfile)
 
 /* Allocate a new GDBARCH-associated type structure and fill it
    with some defaults.  Space for the type structure is allocated
-   on the heap.  */
+   on the obstack associated with GDBARCH.  */
 
 struct type *
 alloc_type_arch (struct gdbarch *gdbarch)
@@ -198,8 +198,8 @@ alloc_type_arch (struct gdbarch *gdbarch)
 
   /* Alloc the structure and start off with all fields zeroed.  */
 
-  type = XCNEW (struct type);
-  TYPE_MAIN_TYPE (type) = XCNEW (struct main_type);
+  type = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct type);
+  TYPE_MAIN_TYPE (type) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct main_type);
 
   TYPE_OBJFILE_OWNED (type) = 0;
   TYPE_OWNER (type).gdbarch = gdbarch;
@@ -3022,10 +3022,9 @@ rank_function (struct type **parms, int nparms,
 	       struct value **args, int nargs)
 {
   int i;
-  struct badness_vector *bv;
+  struct badness_vector *bv = XNEW (struct badness_vector);
   int min_len = nparms < nargs ? nparms : nargs;
 
-  bv = xmalloc (sizeof (struct badness_vector));
   bv->length = nargs + 1;	/* add 1 for the length-match rank.  */
   bv->rank = XNEWVEC (struct rank, nargs + 1);
 
@@ -4386,8 +4385,7 @@ copy_type_recursive (struct objfile *objfile,
 
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
-  stored
-    = obstack_alloc (&objfile->objfile_obstack, sizeof (struct type_pair));
+  stored = XOBNEW (&objfile->objfile_obstack, struct type_pair);
   stored->old = type;
   stored->newobj = new_type;
   *slot = stored;
@@ -4455,7 +4453,7 @@ copy_type_recursive (struct objfile *objfile,
   /* For range types, copy the bounds information.  */
   if (TYPE_CODE (type) == TYPE_CODE_RANGE)
     {
-      TYPE_RANGE_DATA (new_type) = xmalloc (sizeof (struct range_bounds));
+      TYPE_RANGE_DATA (new_type) = XNEW (struct range_bounds);
       *TYPE_RANGE_DATA (new_type) = *TYPE_RANGE_DATA (type);
     }
 

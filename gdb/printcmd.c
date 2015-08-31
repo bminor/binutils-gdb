@@ -1534,7 +1534,7 @@ display_command (char *arg, int from_tty)
   innermost_block = NULL;
   expr = parse_expression (exp);
 
-  newobj = (struct display *) xmalloc (sizeof (struct display));
+  newobj = XNEW (struct display);
 
   newobj->exp_string = xstrdup (exp);
   newobj->exp = expr;
@@ -2256,7 +2256,7 @@ ui_printf (const char *arg, struct ui_file *stream)
   int allocated_args = 20;
   struct cleanup *old_cleanups;
 
-  val_args = xmalloc (allocated_args * sizeof (struct value *));
+  val_args = XNEWVEC (struct value *, allocated_args);
   old_cleanups = make_cleanup (free_current_contents, &val_args);
 
   if (s == 0)

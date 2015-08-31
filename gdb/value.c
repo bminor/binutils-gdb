@@ -930,7 +930,7 @@ allocate_value_lazy (struct type *type)
      description correctly.  */
   check_typedef (type);
 
-  val = (struct value *) xzalloc (sizeof (struct value));
+  val = XCNEW (struct value);
   val->contents = NULL;
   val->next = all_values;
   all_values = val;
@@ -1823,11 +1823,8 @@ record_latest_value (struct value *val)
   i = value_history_count % VALUE_HISTORY_CHUNK;
   if (i == 0)
     {
-      struct value_history_chunk *newobj
-	= (struct value_history_chunk *)
+      struct value_history_chunk *newobj = XCNEW (struct value_history_chunk);
 
-      xmalloc (sizeof (struct value_history_chunk));
-      memset (newobj->values, 0, sizeof newobj->values);
       newobj->next = value_history_chain;
       value_history_chain = newobj;
     }
@@ -2087,9 +2084,8 @@ complete_internalvar (const char *name)
 struct internalvar *
 create_internalvar (const char *name)
 {
-  struct internalvar *var;
+  struct internalvar *var = XNEW (struct internalvar);
 
-  var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
   var->name = concat (name, (char *)NULL);
   var->kind = INTERNALVAR_VOID;
   var->next = internalvars;
