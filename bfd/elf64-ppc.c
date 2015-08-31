@@ -238,6 +238,10 @@ static bfd_vma opd_entry_value
 #define NO_OPD_RELOCS 0
 #endif
 
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a) (sizeof (a) / sizeof ((a)[0]))
+#endif
+
 static inline int
 abiversion (bfd *abfd)
 {
@@ -2163,13 +2167,10 @@ ppc_howto_init (void)
 {
   unsigned int i, type;
 
-  for (i = 0;
-       i < sizeof (ppc64_elf_howto_raw) / sizeof (ppc64_elf_howto_raw[0]);
-       i++)
+  for (i = 0; i < ARRAY_SIZE (ppc64_elf_howto_raw); i++)
     {
       type = ppc64_elf_howto_raw[i].type;
-      BFD_ASSERT (type < (sizeof (ppc64_elf_howto_table)
-			  / sizeof (ppc64_elf_howto_table[0])));
+      BFD_ASSERT (type < ARRAY_SIZE (ppc64_elf_howto_table));
       ppc64_elf_howto_table[type] = &ppc64_elf_howto_raw[i];
     }
 }
@@ -2428,9 +2429,7 @@ ppc64_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  for (i = 0;
-       i < sizeof (ppc64_elf_howto_raw) / sizeof (ppc64_elf_howto_raw[0]);
-       i++)
+  for (i = 0; i < ARRAY_SIZE (ppc64_elf_howto_raw); i++)
     if (ppc64_elf_howto_raw[i].name != NULL
 	&& strcasecmp (ppc64_elf_howto_raw[i].name, r_name) == 0)
       return &ppc64_elf_howto_raw[i];
@@ -2451,8 +2450,7 @@ ppc64_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
     ppc_howto_init ();
 
   type = ELF64_R_TYPE (dst->r_info);
-  if (type >= (sizeof (ppc64_elf_howto_table)
-	       / sizeof (ppc64_elf_howto_table[0])))
+  if (type >= ARRAY_SIZE (ppc64_elf_howto_table))
     {
       (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
 			     abfd, (int) type);
@@ -3796,7 +3794,8 @@ enum ppc_stub_type {
   ppc_stub_plt_branch_r2off,
   ppc_stub_plt_call,
   ppc_stub_plt_call_r2save,
-  ppc_stub_global_entry
+  ppc_stub_global_entry,
+  ppc_stub_save_res
 };
 
 /* Information on stub grouping.  */
@@ -3806,6 +3805,11 @@ struct map_stub
   asection *stub_sec;
   /* This is the section to which stubs in the group will be attached.  */
   asection *link_sec;
+  /* Next group.  */
+  struct map_stub *next;
+  /* Whether to emit a copy of register save/restore functions in this
+     group.  */
+  int needs_save_res;
 };
 
 struct ppc_stub_hash_entry {
@@ -3893,6 +3897,10 @@ struct ppc_link_hash_entry
   /* Set if we twiddled this symbol to weak at some stage.  */
   unsigned int was_undefined:1;
 
+  /* Set if this is an out-of-line register save/restore function,
+     with non-standard calling convention.  */
+  unsigned int save_res:1;
+
   /* Contexts in which symbol is used in the GOT (or TOC).
      TLS_GD .. TLS_EXPLICIT bits are or'd into the mask as the
      corresponding relocs are encountered during check_relocs.
@@ -3949,6 +3957,9 @@ struct ppc_link_hash_table
       asection *list;
     } u;
   } *sec_info;
+
+  /* Linked list of groups.  */
+  struct map_stub *group;
 
   /* Temp used when calculating TOC pointers.  */
   bfd_vma toc_curr;
@@ -6559,10 +6570,14 @@ struct sfpr_def_parms
   bfd_byte * (*write_tail) (bfd *, bfd_byte *, int);
 };
 
-/* Auto-generate _save*, _rest* functions in .sfpr.  */
+/* Auto-generate _save*, _rest* functions in .sfpr.
+   If STUB_SEC is non-null, define alias symbols in STUB_SEC
+   instead.  */
 
 static bfd_boolean
-sfpr_define (struct bfd_link_info *info, const struct sfpr_def_parms *parm)
+sfpr_define (struct bfd_link_info *info,
+	     const struct sfpr_def_parms *parm,
+	     asection *stub_sec)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
   unsigned int i;
@@ -6578,26 +6593,60 @@ sfpr_define (struct bfd_link_info *info, const struct sfpr_def_parms *parm)
 
   for (i = parm->lo; i <= parm->hi; i++)
     {
-      struct elf_link_hash_entry *h;
+      struct ppc_link_hash_entry *h;
 
       sym[len + 0] = i / 10 + '0';
       sym[len + 1] = i % 10 + '0';
-      h = elf_link_hash_lookup (&htab->elf, sym, FALSE, FALSE, TRUE);
-      if (h != NULL
-	  && !h->def_regular)
+      h = (struct ppc_link_hash_entry *)
+	elf_link_hash_lookup (&htab->elf, sym, FALSE, FALSE, TRUE);
+      if (stub_sec != NULL)
 	{
-	  h->root.type = bfd_link_hash_defined;
-	  h->root.u.def.section = htab->sfpr;
-	  h->root.u.def.value = htab->sfpr->size;
-	  h->type = STT_FUNC;
-	  h->def_regular = 1;
-	  _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
-	  writing = TRUE;
-	  if (htab->sfpr->contents == NULL)
+	  if (h != NULL
+	      && h->elf.root.type == bfd_link_hash_defined
+	      && h->elf.root.u.def.section == htab->sfpr)
 	    {
-	      htab->sfpr->contents = bfd_alloc (htab->elf.dynobj, SFPR_MAX);
-	      if (htab->sfpr->contents == NULL)
+	      struct elf_link_hash_entry *s;
+	      char buf[32];
+	      sprintf (buf, "%08x.%s", stub_sec->id & 0xffffffff, sym);
+	      s = elf_link_hash_lookup (&htab->elf, buf, TRUE, TRUE, FALSE);
+	      if (s == NULL)
 		return FALSE;
+	      if (s->root.type == bfd_link_hash_new
+		  || (s->root.type = bfd_link_hash_defined
+		      && s->root.u.def.section == stub_sec))
+		{
+		  s->root.type = bfd_link_hash_defined;
+		  s->root.u.def.section = stub_sec;
+		  s->root.u.def.value = (stub_sec->size
+					 + h->elf.root.u.def.value);
+		  s->ref_regular = 1;
+		  s->def_regular = 1;
+		  s->ref_regular_nonweak = 1;
+		  s->forced_local = 1;
+		  s->non_elf = 0;
+		  s->root.linker_def = 1;
+		}
+	    }
+	  continue;
+	}
+      if (h != NULL)
+	{
+	  h->save_res = 1;
+	  if (!h->elf.def_regular)
+	    {
+	      h->elf.root.type = bfd_link_hash_defined;
+	      h->elf.root.u.def.section = htab->sfpr;
+	      h->elf.root.u.def.value = htab->sfpr->size;
+	      h->elf.type = STT_FUNC;
+	      h->elf.def_regular = 1;
+	      _bfd_elf_link_hash_hide_symbol (info, &h->elf, TRUE);
+	      writing = TRUE;
+	      if (htab->sfpr->contents == NULL)
+		{
+		  htab->sfpr->contents = bfd_alloc (htab->elf.dynobj, SFPR_MAX);
+		  if (htab->sfpr->contents == NULL)
+		    return FALSE;
+		}
 	    }
 	}
       if (writing)
@@ -6908,6 +6957,22 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
+static const struct sfpr_def_parms save_res_funcs[] =
+  {
+    { "_savegpr0_", 14, 31, savegpr0, savegpr0_tail },
+    { "_restgpr0_", 14, 29, restgpr0, restgpr0_tail },
+    { "_restgpr0_", 30, 31, restgpr0, restgpr0_tail },
+    { "_savegpr1_", 14, 31, savegpr1, savegpr1_tail },
+    { "_restgpr1_", 14, 31, restgpr1, restgpr1_tail },
+    { "_savefpr_", 14, 31, savefpr, savefpr0_tail },
+    { "_restfpr_", 14, 29, restfpr, restfpr0_tail },
+    { "_restfpr_", 30, 31, restfpr, restfpr0_tail },
+    { "._savef", 14, 31, savefpr, savefpr1_tail },
+    { "._restf", 14, 31, restfpr, restfpr1_tail },
+    { "_savevr_", 20, 31, savevr, savevr_tail },
+    { "_restvr_", 20, 31, restvr, restvr_tail }
+  };
+
 /* Called near the start of bfd_elf_size_dynamic_sections.  We use
    this hook to a) provide some gcc support functions, and b) transfer
    dynamic linking information gathered so far on function code symbol
@@ -6919,21 +6984,6 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
 {
   struct ppc_link_hash_table *htab;
   unsigned int i;
-  static const struct sfpr_def_parms funcs[] =
-    {
-      { "_savegpr0_", 14, 31, savegpr0, savegpr0_tail },
-      { "_restgpr0_", 14, 29, restgpr0, restgpr0_tail },
-      { "_restgpr0_", 30, 31, restgpr0, restgpr0_tail },
-      { "_savegpr1_", 14, 31, savegpr1, savegpr1_tail },
-      { "_restgpr1_", 14, 31, restgpr1, restgpr1_tail },
-      { "_savefpr_", 14, 31, savefpr, savefpr0_tail },
-      { "_restfpr_", 14, 29, restfpr, restfpr0_tail },
-      { "_restfpr_", 30, 31, restfpr, restfpr0_tail },
-      { "._savef", 14, 31, savefpr, savefpr1_tail },
-      { "._restf", 14, 31, restfpr, restfpr1_tail },
-      { "_savevr_", 20, 31, savevr, savevr_tail },
-      { "_restvr_", 20, 31, restvr, restvr_tail }
-    };
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
@@ -6966,8 +7016,8 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
   /* Provide any missing _save* and _rest* functions.  */
   htab->sfpr->size = 0;
   if (htab->params->save_restore_funcs)
-    for (i = 0; i < sizeof (funcs) / sizeof (funcs[0]); i++)
-      if (!sfpr_define (info, &funcs[i]))
+    for (i = 0; i < ARRAY_SIZE (save_res_funcs); i++)
+      if (!sfpr_define (info, &save_res_funcs[i], NULL))
 	return FALSE;
 
   elf_link_hash_traverse (&htab->elf, func_desc_adjust, info);
@@ -7029,7 +7079,8 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  || (h->type != STT_GNU_IFUNC
 	      && (SYMBOL_CALLS_LOCAL (info, h)
 		  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-		      && h->root.type == bfd_link_hash_undefweak))))
+		      && h->root.type == bfd_link_hash_undefweak)))
+	  || ((struct ppc_link_hash_entry *) h)->save_res)
 	{
 	  h->plt.plist = NULL;
 	  h->needs_plt = 0;
@@ -10945,6 +10996,9 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       size = p - loc;
       break;
 
+    case ppc_stub_save_res:
+      return TRUE;
+
     default:
       BFD_FAIL ();
       return FALSE;
@@ -11012,6 +11066,18 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   htab = ppc_hash_table (info);
   if (htab == NULL)
     return FALSE;
+
+  if (stub_entry->h != NULL
+      && stub_entry->h->save_res
+      && stub_entry->h->elf.root.type == bfd_link_hash_defined
+      && stub_entry->h->elf.root.u.def.section == htab->sfpr)
+    {
+      /* Don't make stubs to out-of-line register save/restore
+	 functions.  Instead, emit copies of the functions.  */
+      stub_entry->group->needs_save_res = 1;
+      stub_entry->stub_type = ppc_stub_save_res;
+      return TRUE;
+    }
 
   if (stub_entry->stub_type == ppc_stub_plt_call
       || stub_entry->stub_type == ppc_stub_plt_call_r2save)
@@ -11900,6 +11966,9 @@ group_sections (struct bfd_link_info *info,
 	    return FALSE;
 	  group->link_sec = curr;
 	  group->stub_sec = NULL;
+	  group->needs_save_res = 0;
+	  group->next = htab->group;
+	  htab->group = group;
 	  do
 	    {
 	      prev = htab->sec_info[tail->id].u.list;
@@ -12020,7 +12089,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	};
       unsigned i;
 
-      for (i = 0; i < sizeof (thread_starter)/ sizeof (thread_starter[0]); i++)
+      for (i = 0; i < ARRAY_SIZE (thread_starter); i++)
 	{
 	  struct elf_link_hash_entry *h;
 	  h = elf_link_hash_lookup (&htab->elf, thread_starter[i],
@@ -12043,6 +12112,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
     {
       bfd *input_bfd;
       unsigned int bfd_indx;
+      struct map_stub *group;
       asection *stub_sec;
 
       htab->stub_iteration += 1;
@@ -12369,6 +12439,10 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	htab->relbrlt->size = 0;
 
       bfd_hash_traverse (&htab->stub_hash_table, ppc_size_one_stub, info);
+
+      for (group = htab->group; group != NULL; group = group->next)
+	if (group->needs_save_res)
+	  group->stub_sec->size += htab->sfpr->size;
 
       if (info->emitrelocations
 	  && htab->glink != NULL && htab->glink->size != 0)
@@ -12730,6 +12804,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 		       char **stats)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  struct map_stub *group;
   asection *stub_sec;
   bfd_byte *p;
   int stub_sec_count = 0;
@@ -12902,6 +12977,23 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 
   /* Build the stubs as directed by the stub hash table.  */
   bfd_hash_traverse (&htab->stub_hash_table, ppc_build_one_stub, info);
+
+  for (group = htab->group; group != NULL; group = group->next)
+    if (group->needs_save_res)
+      {
+	stub_sec = group->stub_sec;
+	memcpy (stub_sec->contents + stub_sec->size, htab->sfpr->contents,
+		htab->sfpr->size);
+	if (htab->params->emit_stub_syms)
+	  {
+	    unsigned int i;
+
+	    for (i = 0; i < ARRAY_SIZE (save_res_funcs); i++)
+	      if (!sfpr_define (info, &save_res_funcs[i], stub_sec))
+		return FALSE;
+	  }
+	stub_sec->size += htab->sfpr->size;
+      }
 
   if (htab->relbrlt != NULL)
     htab->relbrlt->reloc_count = 0;
@@ -13923,9 +14015,18 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      /* Munge up the value and addend so that we call the stub
 		 rather than the procedure directly.  */
-	      relocation = (stub_entry->stub_offset
-			    + stub_entry->group->stub_sec->output_offset
-			    + stub_entry->group->stub_sec->output_section->vma);
+	      asection *stub_sec = stub_entry->group->stub_sec;
+
+	      if (stub_entry->stub_type == ppc_stub_save_res)
+		relocation += (stub_sec->output_offset
+			       + stub_sec->output_section->vma
+			       + stub_sec->size - htab->sfpr->size
+			       - htab->sfpr->output_offset
+			       - htab->sfpr->output_section->vma);
+	      else
+		relocation = (stub_entry->stub_offset
+			      + stub_sec->output_offset
+			      + stub_sec->output_section->vma);
 	      addend = 0;
 	      reloc_dest = DEST_STUB;
 
