@@ -2350,7 +2350,7 @@ gnu_write_inferior (task_t task, CORE_ADDR addr,
   char *errstr = "Bug in gnu_write_inferior";
 
   struct vm_region_list *region_element;
-  struct vm_region_list *region_head = (struct vm_region_list *) NULL;
+  struct vm_region_list *region_head = NULL;
 
   /* Get memory from inferior with page aligned addresses.  */
   err = vm_read (task,
