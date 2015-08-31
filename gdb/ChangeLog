@@ -1,5 +1,9 @@
 2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cli/cli-decode.c (find_cmd): Remove cast of NULL pointer.
+
+2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* c-valprint.c (print_unpacked_pointer): Remove cast of NULL
 	pointer.
 	* dbxread.c (dbx_end_psymtab): Likewise.
