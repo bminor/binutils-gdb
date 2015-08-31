@@ -1,5 +1,26 @@
 2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tui/tui-data.c (win_with_focus): Remove cast of NULL pointer.
+	(tui_next_win): Likewise.
+	(tui_prev_win): Likewise.
+	(tui_partial_win_by_name): Likewise.
+	(tui_init_generic_part): Likewise.
+	(init_content_element): Likewise.
+	(tui_del_window): Likewise.
+	(tui_free_window): Likewise.
+	(tui_del_data_windows): Likewise.
+	(tui_free_data_content): Likewise.
+	* tui/tui-layout.c (make_source_or_disasm_window): Likewise.
+	* tui/tui-regs.c (tui_show_register_group): Likewise.
+	* tui/tui-win.c (tui_resize_all): Likewise.
+	(tui_set_focus): Likewise.
+	(tui_set_win_height): Likewise.
+	(make_invisible_and_set_new_height): Likewise.
+	* tui/tui-windata.c (tui_delete_data_content_windows): Likewise.
+	* tui/tui-wingeneral.c (make_visible): Likewise.
+
+2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cli/cli-decode.c (find_cmd): Remove cast of NULL pointer.
 
 2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
