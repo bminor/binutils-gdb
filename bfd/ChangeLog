@@ -1,5 +1,12 @@
 2015-08-31  Alan Modra  <amodra@gmail.com>
 
+	* elf32-nds32.c (nds32_convert_32_to_16_alu1): Warning fix.
+	(find_relocs_at_address_addr): Make "reloc_type" an enum.
+	(nds32_elf_relax_delete_blanks): Warning fix.
+	(nds32_elf_relax_loadstore): Correct loop bound.
+
+2015-08-31  Alan Modra  <amodra@gmail.com>
+
 	* section.c (struct bfd_section): Make "id" and "index" unsigned.
 	* coff-rs6000.c (_bfd_xcoff_sizeof_headers): Adjust local var to suit.
 	* elf.c (elf_map_symbols): Likewise.
