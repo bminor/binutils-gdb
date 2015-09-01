@@ -1,3 +1,14 @@
+2015-09-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2loc.c (locexpr_get_frame_base): Renames
+	block_op_get_frame_base.
+	(dwarf2_block_frame_base_locexpr_funcs): Replace reference to
+	block_op_get_frame_base by reference to locexpr_get_frame_base.
+	(loclist_get_frame_base): New function, near identical copy of
+	locexpr_get_frame_base.
+	(dwarf2_block_frame_base_loclist_funcs): Replace reference to
+	block_op_get_frame_base by reference to loclist_get_frame_base.
+
 2015-09-19  Doug Evans  <xdje42@gmail.com>
 
 	* ravenscar-thread.c (ravenscar_inferior_created): Replace
