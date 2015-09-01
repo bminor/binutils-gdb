@@ -1,5 +1,10 @@
 2015-09-01  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_maybe_function_sym): Adjust symbol value
+	if .opd section has been edited.
+
+2015-09-01  Alan Modra  <amodra@gmail.com>
+
 	PR 18878
 	* elf64-ppc.c (ARRAY_SIZE): Define.  Use throughout.
 	(enum ppc_stub_type): Add ppc_stub_save_res.

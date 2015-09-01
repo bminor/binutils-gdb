@@ -6130,7 +6130,23 @@ ppc64_elf_maybe_function_sym (const asymbol *sym, asection *sec,
 
   if (strcmp (sym->section->name, ".opd") == 0)
     {
-      if (opd_entry_value (sym->section, sym->value,
+      struct _opd_sec_data *opd = get_opd_info (sym->section);
+      bfd_vma symval = sym->value;
+
+      if (opd != NULL
+	  && opd->adjust != NULL
+	  && elf_section_data (sym->section)->relocs != NULL)
+	{
+	  /* opd_entry_value will use cached relocs that have been
+	     adjusted, but with raw symbols.  That means both local
+	     and global symbols need adjusting.  */
+	  long adjust = opd->adjust[OPD_NDX (symval)];
+	  if (adjust == -1)
+	    return 0;
+	  symval += adjust;
+	}
+
+      if (opd_entry_value (sym->section, symval,
 			   &sec, code_off, TRUE) == (bfd_vma) -1)
 	return 0;
       /* An old ABI binary with dot-syms has a size of 24 on the .opd
