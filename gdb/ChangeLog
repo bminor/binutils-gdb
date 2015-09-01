@@ -1,3 +1,9 @@
+2015-09-23  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) <OP_FUNCALL>: When the input
+	value is a reference, actually dereference it in order to get
+	the underlying value.
+
 2015-09-22  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* stap-probe.c (handle_stap_probe): Remove unnecessary cast.

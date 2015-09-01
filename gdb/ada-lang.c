@@ -10642,10 +10642,17 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	   therefore already coerced to a simple array.  Nothing further
 	   to do.  */
         ;
-      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_REF
-               || (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_ARRAY
-                   && VALUE_LVAL (argvec[0]) == lval_memory))
-        argvec[0] = value_addr (argvec[0]);
+      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_REF)
+	{
+	  /* Make sure we dereference references so that all the code below
+	     feels like it's really handling the referenced value.  Wrapping
+	     types (for alignment) may be there, so make sure we strip them as
+	     well.  */
+	  argvec[0] = ada_to_fixed_value (coerce_ref (argvec[0]));
+	}
+      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_ARRAY
+	       && VALUE_LVAL (argvec[0]) == lval_memory)
+	argvec[0] = value_addr (argvec[0]);
 
       type = ada_check_typedef (value_type (argvec[0]));
 
