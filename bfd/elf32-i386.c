@@ -759,6 +759,10 @@ struct elf_i386_link_hash_entry
   /* Symbol is referenced by R_386_GOTOFF relocation.  */
   unsigned int gotoff_ref : 1;
 
+  /* Reference count of C/C++ function pointer relocations in read-write
+     section which can be resolved at run-time.  */
+  bfd_signed_vma func_pointer_refcount;
+
   /* Information about the GOT PLT entry. Filled when there are both
      GOT and PLT relocations against the same function.  */
   union gotplt_union plt_got;
@@ -883,6 +887,7 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->dyn_relocs = NULL;
       eh->tls_type = GOT_UNKNOWN;
       eh->gotoff_ref = 0;
+      eh->func_pointer_refcount = 0;
       eh->plt_got.offset = (bfd_vma) -1;
       eh->tlsdesc_got = (bfd_vma) -1;
     }
@@ -952,6 +957,7 @@ elf_i386_get_local_sym_hash (struct elf_i386_link_hash_table *htab,
       ret->elf.indx = sec->id;
       ret->elf.dynstr_index = ELF32_R_SYM (rel->r_info);
       ret->elf.dynindx = -1;
+      ret->func_pointer_refcount = 0;
       ret->plt_got.offset = (bfd_vma) -1;
       *slot = ret;
     }
@@ -1138,7 +1144,15 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
       dir->pointer_equality_needed |= ind->pointer_equality_needed;
     }
   else
-    _bfd_elf_link_hash_copy_indirect (info, dir, ind);
+    {
+      if (eind->func_pointer_refcount > 0)
+	{
+	  edir->func_pointer_refcount += eind->func_pointer_refcount;
+	  eind->func_pointer_refcount = 0;
+	}
+
+      _bfd_elf_link_hash_copy_indirect (info, dir, ind);
+    }
 }
 
 /* Return TRUE if the TLS access code sequence support transition
@@ -1759,7 +1773,13 @@ elf_i386_check_relocs (bfd *abfd,
 		 refers to is in a shared lib.  */
 	      h->plt.refcount += 1;
 	      if (r_type != R_386_PC32)
-		h->pointer_equality_needed = 1;
+		{
+		  h->pointer_equality_needed = 1;
+		  /* R_386_32 can be resolved at run-time.  */
+		  if (r_type == R_386_32
+		      && (sec->flags & SEC_READONLY) == 0)
+		    eh->func_pointer_refcount += 1;
+		}
 	    }
 
 	  size_reloc = FALSE;
@@ -2076,6 +2096,14 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 	    {
 	      if (h->plt.refcount > 0)
 		h->plt.refcount -= 1;
+	      if (r_type == R_386_32
+		  && (sec->flags & SEC_READONLY) == 0)
+		{
+		  struct elf_i386_link_hash_entry *eh
+		    = (struct elf_i386_link_hash_entry *) h;
+		  if (eh->func_pointer_refcount > 0)
+		    eh->func_pointer_refcount -= 1;
+		}
 	    }
 	  break;
 
@@ -2298,6 +2326,11 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
 
+  /* Clear the reference count of function pointer relocations if
+     symbol isn't a normal function.  */
+  if (h->type != STT_FUNC)
+    eh->func_pointer_refcount = 0;
+
   /* We can't use the GOT PLT if pointer equality is needed since
      finish_dynamic_symbol won't clear symbol value and the dynamic
      linker won't update the GOT slot.  We will get into an infinite
@@ -2323,10 +2356,17 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
                                                plt_entry_size,
 					       plt_entry_size, 4);
+  /* Don't create the PLT entry if there are only function pointer
+     relocations which can be resolved at run-time.  */
   else if (htab->elf.dynamic_sections_created
-	   && (h->plt.refcount > 0 || eh->plt_got.refcount > 0))
+	   && (h->plt.refcount > eh->func_pointer_refcount
+	       || eh->plt_got.refcount > 0))
     {
       bfd_boolean use_plt_got;
+
+      /* Clear the reference count of function pointer relocations
+	 if PLT is used.  */
+      eh->func_pointer_refcount = 0;
 
       if ((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
 	{
@@ -2570,9 +2610,10 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       /* For the non-shared case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
-	 dynamic.  */
+	 dynamic.  Keep dynamic relocations for run-time function
+	 pointer initialization.  */
 
-      if (!h->non_got_ref
+      if ((!h->non_got_ref || eh->func_pointer_refcount > 0)
 	  && ((h->def_dynamic
 	       && !h->def_regular)
 	      || (htab->elf.dynamic_sections_created
@@ -2595,6 +2636,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	}
 
       eh->dyn_relocs = NULL;
+      eh->func_pointer_refcount = 0;
 
     keep: ;
     }
@@ -3687,6 +3729,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	    }
 	}
 
+      eh = (struct elf_i386_link_hash_entry *) h;
       switch (r_type)
 	{
 	case R_386_GOT32:
@@ -3855,7 +3898,6 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  if (h == NULL)
 	    break;
 
-	  eh = (struct elf_i386_link_hash_entry *) h;
 	  if ((h->plt.offset == (bfd_vma) -1
 	       && eh->plt_got.offset == (bfd_vma) -1)
 	      || htab->elf.splt == NULL)
@@ -3894,6 +3936,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      || is_vxworks_tls)
 	    break;
 
+	  /* Copy dynamic function pointer relocations.  */
 	  if ((bfd_link_pic (info)
 	       && (h == NULL
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -3904,7 +3947,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  && !bfd_link_pic (info)
 		  && h != NULL
 		  && h->dynindx != -1
-		  && !h->non_got_ref
+		  && (!h->non_got_ref || eh->func_pointer_refcount > 0)
 		  && ((h->def_dynamic
 		       && !h->def_regular)
 		      || h->root.type == bfd_link_hash_undefweak

@@ -1,3 +1,35 @@
+2015-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18900
+	* elf32-i386.c (elf_i386_link_hash_entry): Add
+	func_pointer_refcount.
+	(elf_i386_link_hash_newfunc): Clear func_pointer_refcount.
+	(elf_i386_get_local_sym_hash): Likewise.
+	(elf_i386_copy_indirect_symbol): Also copy
+	func_pointer_refcount.
+	(elf_i386_check_relocs): Increment func_pointer_refcount.
+	(elf_i386_gc_sweep_hook): Decrement func_pointer_refcount.
+	(elf_i386_allocate_dynrelocs): Don't create the PLT entry if
+	there are only function pointer relocations which can be
+	resolved at run-time.  Keep dynanamic relocations for run-time
+	function pointer initialization.
+	(elf_i386_relocate_section): Copy dynamic function pointer
+	relocations.
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add
+	func_pointer_refcount.
+	(elf_x86_64_link_hash_newfunc): Clear func_pointer_refcount.
+	(elf_x86_64_get_local_sym_hash): Likewise.
+	(elf_x86_64_copy_indirect_symbol): Also copy
+	func_pointer_refcount.
+	(elf_x86_64_check_relocs): Increment func_pointer_refcount.
+	(elf_x86_64_gc_sweep_hook): Decrement func_pointer_refcount.
+	(elf_x86_64_allocate_dynrelocs): Don't create the PLT entry if
+	there are only function pointer relocations which can be
+	resolved at run-time.  Keep dynanamic relocations for run-time
+	function pointer initialization.
+	(elf_x86_64_relocate_section): Copy dynamic function pointer
+	relocations.
+
 2015-09-01  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_maybe_function_sym): Adjust symbol value

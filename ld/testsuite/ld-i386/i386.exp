@@ -466,6 +466,30 @@ if { [isnative]
 	    {{readelf {-Wr} pr17827.rd}} \
 	    "pr17827" \
 	] \
+	[list \
+	    "Build pr18900.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr18900a.c } \
+	    "" \
+	    "pr18900.so" \
+	] \
+	[list \
+	    "Build pr18900a" \
+	    "tmpdir/pr18900.so" \
+	    "" \
+	    { pr18900b.c pr18900c.c } \
+	    {{readelf {-Wrd} pr18900a.rd}} \
+	    "pr18900a" \
+	] \
+	[list \
+	    "Build pr18900b" \
+	    "tmpdir/pr18900.so" \
+	    "" \
+	    { pr18900b.c pr18900c.c } \
+	    {{readelf {-Wrd} pr18900b.rd}} \
+	    "pr18900b" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
@@ -519,6 +543,14 @@ if { [isnative]
 	    { dummy.c } \
 	    "pr17689ver" \
 	    "pr17689.out" \
+	] \
+	[list \
+	    "Run pr18900" \
+	    "tmpdir/pr18900.so" \
+	    "" \
+	    { pr18900b.c pr18900c.c } \
+	    "pr18900" \
+	    "pr18900.out" \
 	] \
     ]
 }

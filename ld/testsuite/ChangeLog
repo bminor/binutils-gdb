@@ -1,3 +1,23 @@
+2015-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18900
+	* ld-i386/i386.exp: Run tests for PR ld/18900.
+	* ld-x86-64/x86-64.exp: Likewise.
+	* ld-i386/pr18900.out: New file.
+	* ld-i386/pr18900a.c: Likewise.
+	* ld-i386/pr18900a.c: Likewise.
+	* ld-i386/pr18900a.rd: Likewise.
+	* ld-i386/pr18900b.c: Likewise.
+	* ld-i386/pr18900b.rd: Likewise.
+	* ld-i386/pr18900c.c: Likewise.
+	* ld-x86-64/pr18900.out: Likewise.
+	* ld-x86-64/pr18900a.c: Likewise.
+	* ld-x86-64/pr18900a.rd: Likewise.
+	* ld-x86-64/pr18900b.c: Likewise.
+	* ld-x86-64/pr18900b.rd: Likewise.
+	* ld-x86-64/pr18900c.c: Likewise.
+	* ld-x86-64/mpx3.dd: Updated.
+
 2015-08-27  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/relocsort.s, * ld-powerpc/relocsort.d: New test.
