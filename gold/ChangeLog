@@ -1,3 +1,11 @@
+2015-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18886
+	* resolve.cc (Symbol::override_base): Turn IFUNC symbols from
+	shared libraries into normal FUNC symbols.
+	* symtab.cc (Symbol_table::sized_write_symbol): Assert IFUNC
+	symbols aren't from shared libraries.
+
 2015-09-02  Alan Modra  <amodra@gmail.com>
 
 	PR 18878
