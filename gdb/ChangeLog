@@ -1,3 +1,9 @@
+2015-09-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (ada_language_arch_info): Create a TYPE_CODE_CHAR
+	type instead of a TYPE_CODE_INT one for the string_char_type
+	and the ada_primitive_type_char types.
+
 2015-09-03  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_region_ok_for_hw_watchpoint):

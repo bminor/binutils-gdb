@@ -1,3 +1,8 @@
+2015-09-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/funcall_char.exp: New testcase.
+	* gdb.ada/funcall_char/foo.adb: New file.
+
 2015-09-01  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/complete.exp: Add "pck.ambiguous_func" to the relevant

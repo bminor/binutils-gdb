@@ -13775,7 +13775,7 @@ ada_language_arch_info (struct gdbarch *gdbarch,
 			 0, "short_integer");
   lai->string_char_type
     = lai->primitive_type_vector [ada_primitive_type_char]
-    = arch_integer_type (gdbarch, TARGET_CHAR_BIT, 0, "character");
+    = arch_character_type (gdbarch, TARGET_CHAR_BIT, 0, "character");
   lai->primitive_type_vector [ada_primitive_type_float]
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
 		       "float", NULL);
