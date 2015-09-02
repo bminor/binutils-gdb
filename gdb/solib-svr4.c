@@ -1772,7 +1772,7 @@ static enum probe_action
 solib_event_probe_action (struct probe_and_action *pa)
 {
   enum probe_action action;
-  unsigned probe_argc;
+  unsigned probe_argc = 0;
   struct frame_info *frame = get_current_frame ();
 
   action = pa->action;
