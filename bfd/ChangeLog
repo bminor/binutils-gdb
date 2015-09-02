@@ -1,3 +1,11 @@
+2015-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (R_386_irelative): Renamed to ...
+	(R_386_ext2): This.
+	(R_386_vt_offset): Updated.
+	(elf_i386_rtype_to_howto): Likewise.
+	(elf_i386_relocate_section): Likewise.
+
 2015-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18900

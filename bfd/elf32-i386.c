@@ -148,8 +148,8 @@ static reloc_howto_type elf_howto_table[]=
 	TRUE, 0xffffffff, 0xffffffff, FALSE),
 
   /* Another gap.  */
-#define R_386_irelative (R_386_IRELATIVE + 1 - R_386_tls_offset)
-#define R_386_vt_offset (R_386_GNU_VTINHERIT - R_386_irelative)
+#define R_386_ext2 (R_386_IRELATIVE + 1 - R_386_tls_offset)
+#define R_386_vt_offset (R_386_GNU_VTINHERIT - R_386_ext2)
 
 /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_386_GNU_VTINHERIT,	/* type */
@@ -371,9 +371,9 @@ elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
       && ((indx = r_type - R_386_ext_offset) - R_386_standard
 	  >= R_386_ext - R_386_standard)
       && ((indx = r_type - R_386_tls_offset) - R_386_ext
-	  >= R_386_irelative - R_386_ext)
-      && ((indx = r_type - R_386_vt_offset) - R_386_irelative
-	  >= R_386_vt - R_386_irelative))
+	  >= R_386_ext2 - R_386_ext)
+      && ((indx = r_type - R_386_vt_offset) - R_386_ext2
+	  >= R_386_vt - R_386_ext2))
     {
       (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
 			     abfd, (int) r_type);
@@ -3422,7 +3422,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  && ((indx = r_type - R_386_ext_offset) - R_386_standard
 	      >= R_386_ext - R_386_standard)
 	  && ((indx = r_type - R_386_tls_offset) - R_386_ext
-	      >= R_386_irelative - R_386_ext))
+	      >= R_386_ext2 - R_386_ext))
 	{
 	  (*_bfd_error_handler)
 	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
