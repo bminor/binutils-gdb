@@ -3010,9 +3010,6 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
       asection *tsec;
       char symtype;
       bfd_vma toff, roff;
-      enum {
-	none, local, global
-      } convert_mov_to_lea;
       unsigned int opcode;
 
       if (r_type != R_X86_64_GOTPCREL)
@@ -3030,16 +3027,10 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
       if (opcode != 0x8b)
 	continue;
 
-      tsec = NULL;
-      convert_mov_to_lea = none;
-
       /* Get the symbol referred to by the reloc.  */
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  Elf_Internal_Sym *isym;
-
-	  /* Silence older GCC warning.  */
-	  h = NULL;
 
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 					abfd, r_symndx);
@@ -3048,20 +3039,20 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 
 	  /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation and
 	     skip relocation against undefined symbols.  */
-	  if (symtype != STT_GNU_IFUNC && isym->st_shndx != SHN_UNDEF)
-	    {
-	      if (isym->st_shndx == SHN_ABS)
-		tsec = bfd_abs_section_ptr;
-	      else if (isym->st_shndx == SHN_COMMON)
-		tsec = bfd_com_section_ptr;
-	      else if (isym->st_shndx == SHN_X86_64_LCOMMON)
-		tsec = &_bfd_elf_large_com_section;
-	      else
-		tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+	  if (symtype == STT_GNU_IFUNC || isym->st_shndx == SHN_UNDEF)
+	    continue;
 
-	      toff = isym->st_value;
-	      convert_mov_to_lea = local;
-	    }
+	  if (isym->st_shndx == SHN_ABS)
+	    tsec = bfd_abs_section_ptr;
+	  else if (isym->st_shndx == SHN_COMMON)
+	    tsec = bfd_com_section_ptr;
+	  else if (isym->st_shndx == SHN_X86_64_LCOMMON)
+	    tsec = &_bfd_elf_large_com_section;
+	  else
+	    tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+
+	  h = NULL;
+	  toff = isym->st_value;
 	}
       else
 	{
@@ -3084,12 +3075,10 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 	      tsec = h->root.u.def.section;
 	      toff = h->root.u.def.value;
 	      symtype = h->type;
-	      convert_mov_to_lea = global;
 	    }
+	  else
+	    continue;
 	}
-
-      if (convert_mov_to_lea == none)
-	continue;
 
       if (tsec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	{
@@ -3168,16 +3157,16 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
       changed_contents = TRUE;
       changed_relocs = TRUE;
 
-      if (convert_mov_to_lea == local)
+      if (h)
+	{
+	  if (h->got.refcount > 0)
+	    h->got.refcount -= 1;
+	}
+      else
 	{
 	  if (local_got_refcounts != NULL
 	      && local_got_refcounts[r_symndx] > 0)
 	    local_got_refcounts[r_symndx] -= 1;
-	}
-      else
-	{
-	  if (h->got.refcount > 0)
-	    h->got.refcount -= 1;
 	}
     }
 
