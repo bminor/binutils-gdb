@@ -9,11 +9,11 @@ _start:
 	.global __start
 __start:
 	.type __start,"function"
-	call	.L6
-.L6:
-	popl	%ebx
-	addl	$_GLOBAL_OFFSET_TABLE_+[.-.L6], %ebx
+	call	*foo@GOT(%ebx)
+	jmp	*foo@GOT(%ebx)
+	add	foo@GOT(%ebx), %eax
 	mov	foo@GOT(%ebx), %eax
+	test	%eax, foo@GOT(%ebx)
 	mov	bar@GOT(%ebx), %eax
 	.type	foo, %gnu_indirect_function
 foo:

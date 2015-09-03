@@ -1,6 +1,17 @@
+2015-09-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc-21-i386.s: Add tests for call, jmp, add, test.
+	* ld-ifunc/ifunc-21-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-22-i386.s: Likewise.
+	* ld-ifunc/ifunc-22-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-21-i386.d: Updated.
+	* ld-ifunc/ifunc-21-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-22-i386.d: Likewise.
+	* ld-ifunc/ifunc-22-x86-64.d: Likewise.
+
 2015-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* ld-ifunc/ifunc-21-i386.d: Likewise.
+	* ld-ifunc/ifunc-21-i386.d: New file.
 	* ld-ifunc/ifunc-21-i386.s: Likewise.
 	* ld-ifunc/ifunc-21-x86-64.d: Likewise.
 	* ld-ifunc/ifunc-21-x86-64.s: Likewise.

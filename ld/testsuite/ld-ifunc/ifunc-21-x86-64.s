@@ -9,7 +9,11 @@ _start:
 	.global __start
 __start:
 	.type __start,"function"
+	call	*foo@GOTPCREL(%rip)
+	jmp	*foo@GOTPCREL(%rip)
+	add	foo@GOTPCREL(%rip), %rax
 	movq    foo@GOTPCREL(%rip), %rax
+	test	%rax, foo@GOTPCREL(%rip)
 	movq    bar@GOTPCREL(%rip), %rax
 	.type foo, %gnu_indirect_function
 foo:
