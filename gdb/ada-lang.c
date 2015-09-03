@@ -3655,9 +3655,13 @@ ada_resolve_function (struct block_symbol syms[],
         }
     }
 
+  /* If we got multiple matches, ask the user which one to use.  Don't do this
+     interactive thing during completion, though, as the purpose of the
+     completion is providing a list of all possible matches.  Prompting the
+     user to filter it down would be completely unexpected in this case.  */
   if (m == 0)
     return -1;
-  else if (m > 1)
+  else if (m > 1 && !parse_completion)
     {
       printf_filtered (_("Multiple matches for %s\n"), name);
       user_select_syms (syms, m, 1);

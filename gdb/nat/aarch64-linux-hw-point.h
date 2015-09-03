@@ -182,4 +182,6 @@ void aarch64_linux_get_debug_reg_capacity (int tid);
 
 struct aarch64_debug_reg_state *aarch64_get_debug_reg_state (pid_t pid);
 
+int aarch64_linux_region_ok_for_watchpoint (CORE_ADDR addr, int len);
+
 #endif /* AARCH64_LINUX_HW_POINT_H */

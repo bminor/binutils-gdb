@@ -1772,7 +1772,7 @@ static enum probe_action
 solib_event_probe_action (struct probe_and_action *pa)
 {
   enum probe_action action;
-  unsigned probe_argc;
+  unsigned probe_argc = 0;
   struct frame_info *frame = get_current_frame ();
 
   action = pa->action;
@@ -1786,7 +1786,23 @@ solib_event_probe_action (struct probe_and_action *pa)
        arg0: Lmid_t lmid (mandatory)
        arg1: struct r_debug *debug_base (mandatory)
        arg2: struct link_map *new (optional, for incremental updates)  */
-  probe_argc = get_probe_argument_count (pa->probe, frame);
+  TRY
+    {
+      probe_argc = get_probe_argument_count (pa->probe, frame);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      exception_print (gdb_stderr, ex);
+      probe_argc = 0;
+    }
+  END_CATCH
+
+  /* If get_probe_argument_count throws an exception, probe_argc will
+     be set to zero.  However, if pa->probe does not have arguments,
+     then get_probe_argument_count will succeed but probe_argc will
+     also be zero.  Both cases happen because of different things, but
+     they are treated equally here: action will be set to
+     PROBES_INTERFACE_FAILED.  */
   if (probe_argc == 2)
     action = FULL_RELOAD;
   else if (probe_argc < 2)
@@ -1892,7 +1908,7 @@ svr4_handle_solib_event (void)
   struct probe_and_action *pa;
   enum probe_action action;
   struct cleanup *old_chain, *usm_chain;
-  struct value *val;
+  struct value *val = NULL;
   CORE_ADDR pc, debug_base, lm = 0;
   int is_initial_ns;
   struct frame_info *frame = get_current_frame ();
@@ -1940,7 +1956,17 @@ svr4_handle_solib_event (void)
   usm_chain = make_cleanup (resume_section_map_updates_cleanup,
 			    current_program_space);
 
-  val = evaluate_probe_argument (pa->probe, 1, frame);
+  TRY
+    {
+      val = evaluate_probe_argument (pa->probe, 1, frame);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      exception_print (gdb_stderr, ex);
+      val = NULL;
+    }
+  END_CATCH
+
   if (val == NULL)
     {
       do_cleanups (old_chain);
@@ -1971,7 +1997,18 @@ svr4_handle_solib_event (void)
 
   if (action == UPDATE_OR_RELOAD)
     {
-      val = evaluate_probe_argument (pa->probe, 2, frame);
+      TRY
+	{
+	  val = evaluate_probe_argument (pa->probe, 2, frame);
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  exception_print (gdb_stderr, ex);
+	  do_cleanups (old_chain);
+	  return;
+	}
+      END_CATCH
+
       if (val != NULL)
 	lm = value_as_address (val);
 

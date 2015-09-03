@@ -3130,10 +3130,7 @@ Symbol_table::sized_write_symbol(
   else
     osym.put_st_size(sym->symsize());
   elfcpp::STT type = sym->type();
-  // Turn IFUNC symbols from shared libraries into normal FUNC symbols.
-  if (type == elfcpp::STT_GNU_IFUNC
-      && sym->is_from_dynobj())
-    type = elfcpp::STT_FUNC;
+  gold_assert(type != elfcpp::STT_GNU_IFUNC || !sym->is_from_dynobj());
   // A version script may have overridden the default binding.
   if (sym->is_forced_local())
     osym.put_st_info(elfcpp::elf_st_info(elfcpp::STB_LOCAL, type));

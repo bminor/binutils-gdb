@@ -1,3 +1,63 @@
+2015-09-03  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_region_ok_for_hw_watchpoint):
+	Move code to aarch64_linux_region_ok_for_watchpoint.  Call
+	aarch64_linux_region_ok_for_watchpoint.
+	* nat/aarch64-linux-hw-point.c (aarch64_linux_region_ok_for_watchpoint):
+	New function.
+	* nat/aarch64-linux-hw-point.h (aarch64_linux_region_ok_for_watchpoint):
+	Declare it.
+
+2015-09-02  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdb_obstack.h (obstack_strdup): Declare.
+	* gdb_obstack.c (obstack_strdup): Define.
+	* gdbarch.sh (gdbarch_obstack_strdup): Declare and define.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbtypes.c (arch_type): Use gdbarch_obstack_strdup.
+
+2015-09-02  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* gdbtypes.c (copy_type_recursive): Update documentation.
+
+2015-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* solib-svr4.c (solib_event_probe_action): Initialize 'probe_argc'
+	as zero.
+
+2015-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* solib-svr4.c (svr4_handle_solib_event): Initialize 'val' as NULL
+
+2015-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* solib-svr4.c (solib_event_probe_action): Call
+	get_probe_argument_count using TRY...CATCH.
+	(svr4_handle_solib_event): Likewise, for evaluate_probe_argument.
+
+2015-09-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* probe.h (struct probe_ops) <get_probe_argument_count,
+	evaluate_probe_argument, enable_probe, disable_probe>: Mention in
+	the comment that the function can throw an exception.
+	(get_probe_argument_count): Likewise.
+	(evaluate_probe_argument): Likewise.
+	* stap-probe.c (stap_get_opcode): Call error instead of
+	internal_error.
+	(stap_get_expected_argument_type): Likewise.  Add argument
+	'probe'.  Improve error message by mentioning the probe's name.
+	(stap_parse_probe_arguments): Adjust call to
+	stap_get_expected_argument_type.
+	(stap_get_arg): Add comment.  Assert that 'probe->args_parsed' is
+	not zero.  Call internal_error if GDB requests an argument but the
+	probe has no arguments.
+
+2015-09-01  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (ada_resolve_function): Do not ask the user what
+	match to use when in completion mode.
+
 2015-08-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-data.c (tui_win_name): Make local variable const, remove

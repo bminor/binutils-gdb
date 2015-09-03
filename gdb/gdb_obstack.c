@@ -45,3 +45,13 @@ obconcat (struct obstack *obstackp, ...)
 
   return obstack_finish (obstackp);
 }
+
+/* See gdb_obstack.h.  */
+
+char *
+obstack_strdup (struct obstack *obstackp, const char *string)
+{
+  char *obstring = obstack_alloc (obstackp, strlen (string) + 1);
+  strcpy (obstring, string);
+  return obstring;
+}

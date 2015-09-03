@@ -63,6 +63,9 @@ template<int size, bool big_endian>
 class Stub_table;
 
 template<int size, bool big_endian>
+class Output_data_save_res;
+
+template<int size, bool big_endian>
 class Target_powerpc;
 
 struct Stub_table_owner
@@ -510,7 +513,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
       tlsld_got_offset_(-1U),
       stub_tables_(), branch_lookup_table_(), branch_info_(),
       plt_thread_safe_(false), relax_failed_(false), relax_fail_count_(0),
-      stub_group_size_(0)
+      stub_group_size_(0), savres_section_(0)
   {
   }
 
@@ -773,6 +776,12 @@ class Target_powerpc : public Sized_target<size, big_endian>
     if (this->abiversion() >= 2)
       return 8;
     return 24;
+  }
+
+  Output_data_save_res<size, big_endian>*
+  savres_section() const
+  {
+    return this->savres_section_;
   }
 
   // Add any special sections for this symbol to the gc work list.
@@ -1315,6 +1324,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
   bool relax_failed_;
   int relax_fail_count_;
   int32_t stub_group_size_;
+
+  Output_data_save_res<size, big_endian> *savres_section_;
 };
 
 template<>
@@ -2740,8 +2751,13 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 			   this->object_->section_name(this->shndx_).c_str());
 	      return true;
 	    }
+	  bool save_res = (size == 64
+			   && gsym != NULL
+			   && gsym->source() == Symbol::IN_OUTPUT_DATA
+			   && gsym->output_data() == target->savres_section());
 	  return stub_table->add_long_branch_entry(this->object_,
-						   this->r_type_, from, to);
+						   this->r_type_,
+						   from, to, save_res);
 	}
     }
   return true;
@@ -3581,7 +3597,8 @@ class Stub_table : public Output_relaxed_input_section
       targ_(targ), plt_call_stubs_(), long_branch_stubs_(),
       orig_data_size_(owner->current_data_size()),
       plt_size_(0), last_plt_size_(0),
-      branch_size_(0), last_branch_size_(0), eh_frame_added_(false)
+      branch_size_(0), last_branch_size_(0), eh_frame_added_(false),
+      need_save_res_(false)
   {
     this->set_output_section(output_section);
 
@@ -3628,7 +3645,7 @@ class Stub_table : public Output_relaxed_input_section
   // Add a long branch stub.
   bool
   add_long_branch_entry(const Powerpc_relobj<size, big_endian>*,
-			unsigned int, Address, Address);
+			unsigned int, Address, Address, bool);
 
   Address
   find_long_branch_entry(const Powerpc_relobj<size, big_endian>*,
@@ -3652,6 +3669,7 @@ class Stub_table : public Output_relaxed_input_section
     this->plt_size_ = 0;
     this->long_branch_stubs_.clear();
     this->branch_size_ = 0;
+    this->need_save_res_ = false;
     if (all)
       {
 	this->last_plt_size_ = 0;
@@ -3665,6 +3683,8 @@ class Stub_table : public Output_relaxed_input_section
     Address start_off = off;
     off += this->orig_data_size_;
     Address my_size = this->plt_size_ + this->branch_size_;
+    if (this->need_save_res_)
+      my_size += this->targ_->savres_section()->data_size();
     if (my_size != 0)
       off = align_address(off, this->stub_align());
     // Include original section size and alignment padding in size
@@ -3919,8 +3939,9 @@ class Stub_table : public Output_relaxed_input_section
   class Branch_stub_ent
   {
   public:
-    Branch_stub_ent(const Powerpc_relobj<size, big_endian>* obj, Address to)
-      : dest_(to), toc_base_off_(0)
+    Branch_stub_ent(const Powerpc_relobj<size, big_endian>* obj,
+		    Address to, bool save_res)
+      : dest_(to), toc_base_off_(0), save_res_(save_res)
     {
       if (size == 64)
 	toc_base_off_ = obj->toc_base_offset();
@@ -3935,6 +3956,7 @@ class Stub_table : public Output_relaxed_input_section
 
     Address dest_;
     unsigned int toc_base_off_;
+    bool save_res_;
   };
 
   class Branch_stub_ent_hash
@@ -3958,6 +3980,9 @@ class Stub_table : public Output_relaxed_input_section
   section_size_type plt_size_, last_plt_size_, branch_size_, last_branch_size_;
   // Whether .eh_frame info has been created for this stub section.
   bool eh_frame_added_;
+  // Set if this stub group needs a copy of out-of-line register
+  // save/restore functions.
+  bool need_save_res_;
 };
 
 // Add a plt call stub, if we do not already have one for this
@@ -4056,21 +4081,27 @@ Stub_table<size, big_endian>::add_long_branch_entry(
     const Powerpc_relobj<size, big_endian>* object,
     unsigned int r_type,
     Address from,
-    Address to)
+    Address to,
+    bool save_res)
 {
-  Branch_stub_ent ent(object, to);
+  Branch_stub_ent ent(object, to, save_res);
   Address off = this->branch_size_;
   if (this->long_branch_stubs_.insert(std::make_pair(ent, off)).second)
     {
-      unsigned int stub_size = this->branch_stub_size(to);
-      this->branch_size_ = off + stub_size;
-      if (size == 64 && stub_size != 4)
-	this->targ_->add_branch_lookup_table(to);
+      if (save_res)
+	this->need_save_res_ = true;
+      else
+	{
+	  unsigned int stub_size = this->branch_stub_size(to);
+	  this->branch_size_ = off + stub_size;
+	  if (size == 64 && stub_size != 4)
+	    this->targ_->add_branch_lookup_table(to);
+	}
     }
   return this->can_reach_stub(from, off, r_type);
 }
 
-// Find long branch stub.
+// Find long branch stub offset.
 
 template<int size, bool big_endian>
 typename Stub_table<size, big_endian>::Address
@@ -4078,10 +4109,14 @@ Stub_table<size, big_endian>::find_long_branch_entry(
     const Powerpc_relobj<size, big_endian>* object,
     Address to) const
 {
-  Branch_stub_ent ent(object, to);
+  Branch_stub_ent ent(object, to, false);
   typename Branch_stub_entries::const_iterator p
     = this->long_branch_stubs_.find(ent);
-  return p == this->long_branch_stubs_.end() ? invalid_address : p->second;
+  if (p == this->long_branch_stubs_.end())
+    return invalid_address;
+  if (p->first.save_res_)
+    return to - this->targ_->savres_section()->address() + this->branch_size_;
+  return p->second;
 }
 
 // A class to handle .glink.
@@ -4420,6 +4455,8 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	   bs != this->long_branch_stubs_.end();
 	   ++bs)
 	{
+	  if (bs->first.save_res_)
+	    continue;
 	  p = oview + this->plt_size_ + bs->second;
 	  Address loc = this->stub_address() + this->plt_size_ + bs->second;
 	  Address delta = bs->first.dest_ - loc;
@@ -4531,6 +4568,8 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	   bs != this->long_branch_stubs_.end();
 	   ++bs)
 	{
+	  if (bs->first.save_res_)
+	    continue;
 	  p = oview + this->plt_size_ + bs->second;
 	  Address loc = this->stub_address() + this->plt_size_ + bs->second;
 	  Address delta = bs->first.dest_ - loc;
@@ -4556,6 +4595,12 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      write_insn<big_endian>(p + 28, bctr);
 	    }
 	}
+    }
+  if (this->need_save_res_)
+    {
+      p = oview + this->plt_size_ + this->branch_size_;
+      memcpy (p, this->targ_->savres_section()->contents(),
+	      this->targ_->savres_section()->data_size());
     }
 }
 
@@ -4766,6 +4811,12 @@ class Output_data_save_res : public Output_section_data_build
 {
  public:
   Output_data_save_res(Symbol_table* symtab);
+
+  const unsigned char*
+  contents() const
+  {
+    return contents_;
+  }
 
  protected:
   // Write to a map file.
@@ -6685,8 +6736,9 @@ Target_powerpc<size, big_endian>::define_save_restore_funcs(
 {
   if (size == 64)
     {
-      Output_data_save_res<64, big_endian>* savres
-	= new Output_data_save_res<64, big_endian>(symtab);
+      Output_data_save_res<size, big_endian>* savres
+	= new Output_data_save_res<size, big_endian>(symtab);
+      this->savres_section_ = savres;
       layout->add_output_section_data(".text", elfcpp::SHT_PROGBITS,
 				      elfcpp::SHF_ALLOC | elfcpp::SHF_EXECINSTR,
 				      savres, ORDER_TEXT, false);

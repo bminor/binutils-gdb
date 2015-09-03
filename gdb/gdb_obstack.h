@@ -58,4 +58,9 @@
 
 extern char *obconcat (struct obstack *obstackp, ...) ATTRIBUTE_SENTINEL;
 
+/* Duplicate STRING, returning an equivalent string that's allocated on the
+   obstack OBSTACKP.  */
+
+extern char *obstack_strdup (struct obstack *obstackp, const char *string);
+
 #endif

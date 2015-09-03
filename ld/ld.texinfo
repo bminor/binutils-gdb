@@ -2271,7 +2271,7 @@ enable other tradeoffs in future versions of the linker.
 @item --build-id
 @itemx --build-id=@var{style}
 Request the creation of a @code{.note.gnu.build-id} ELF note section
-or a @code{.build-id} COFF section.  The contents of the note are
+or a @code{.buildid} COFF section.  The contents of the note are
 unique bits identifying this linked file.  @var{style} can be
 @code{uuid} to use 128 random bits, @code{sha1} to use a 160-bit
 @sc{SHA1} hash on the normative parts of the output contents,

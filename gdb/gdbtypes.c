@@ -4356,9 +4356,9 @@ copy_dynamic_prop_list (struct obstack *objfile_obstack,
 }
 
 /* Recursively copy (deep copy) TYPE, if it is associated with
-   OBJFILE.  Return a new type allocated using malloc, a saved type if
-   we have already visited TYPE (using COPIED_TYPES), or TYPE if it is
-   not associated with OBJFILE.  */
+   OBJFILE.  Return a new type owned by the gdbarch associated with the type, a
+   saved type if we have already visited TYPE (using COPIED_TYPES), or TYPE if
+   it is not associated with OBJFILE.  */
 
 struct type *
 copy_type_recursive (struct objfile *objfile, 
@@ -4549,7 +4549,7 @@ arch_type (struct gdbarch *gdbarch,
   TYPE_LENGTH (type) = length;
 
   if (name)
-    TYPE_NAME (type) = xstrdup (name);
+    TYPE_NAME (type) = gdbarch_obstack_strdup (gdbarch, name);
 
   return type;
 }

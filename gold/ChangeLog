@@ -1,3 +1,30 @@
+2015-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18886
+	* resolve.cc (Symbol::override_base): Turn IFUNC symbols from
+	shared libraries into normal FUNC symbols.
+	* symtab.cc (Symbol_table::sized_write_symbol): Assert IFUNC
+	symbols aren't from shared libraries.
+
+2015-09-02  Alan Modra  <amodra@gmail.com>
+
+	PR 18878
+	* powerpc.cc (Target_powerpc): Add savres_section_ and accessor.
+	(Target_powerpc::Branch_info::make_stub): Determine whether long
+	branch stub is for save/restore function.
+	(Branch_stub_ent): Add save_res_, and extra parm to constructor.
+	(Stub_table): Add need_save_res_.
+	(Stub_table:clear_stubs): Clear need_save_res_.
+	(Stub_table:set_address_and_size): Add save/restore section size.
+	(Stub_table::add_long_branch_entry): Add save_res param.  Set
+	need_save_res_, but don't add space for save/restore stubs.
+	(Stub_table::find_long_branch_entry): Return offset to local copy
+	of save/restore func.
+	(Stub_table::do_write): Don't output save/restore stubs.  Instead
+	copy the save/restore functions.
+	(Output_data_save_res:contents): New accessor.
+	(Target_powerpc::define_save_restore_funcs): Set savres_section_.
+
 2015-08-25  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/18847

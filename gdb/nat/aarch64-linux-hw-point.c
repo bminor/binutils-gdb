@@ -645,3 +645,43 @@ aarch64_linux_get_debug_reg_capacity (int tid)
       aarch64_num_bp_regs = 0;
     }
 }
+
+/* Return true if we can watch a memory region that starts address
+   ADDR and whose length is LEN in bytes.  */
+
+int
+aarch64_linux_region_ok_for_watchpoint (CORE_ADDR addr, int len)
+{
+  CORE_ADDR aligned_addr;
+
+  /* Can not set watchpoints for zero or negative lengths.  */
+  if (len <= 0)
+    return 0;
+
+  /* Must have hardware watchpoint debug register(s).  */
+  if (aarch64_num_wp_regs == 0)
+    return 0;
+
+  /* We support unaligned watchpoint address and arbitrary length,
+     as long as the size of the whole watched area after alignment
+     doesn't exceed size of the total area that all watchpoint debug
+     registers can watch cooperatively.
+
+     This is a very relaxed rule, but unfortunately there are
+     limitations, e.g. false-positive hits, due to limited support of
+     hardware debug registers in the kernel.  See comment above
+     aarch64_align_watchpoint for more information.  */
+
+  aligned_addr = addr & ~(AARCH64_HWP_MAX_LEN_PER_REG - 1);
+  if (aligned_addr + aarch64_num_wp_regs * AARCH64_HWP_MAX_LEN_PER_REG
+      < addr + len)
+    return 0;
+
+  /* All tests passed so we are likely to be able to set the watchpoint.
+     The reason that it is 'likely' rather than 'must' is because
+     we don't check the current usage of the watchpoint registers, and
+     there may not be enough registers available for this watchpoint.
+     Ideally we should check the cached debug register state, however
+     the checking is costly.  */
+  return 1;
+}

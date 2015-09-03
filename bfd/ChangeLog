@@ -1,3 +1,74 @@
+2015-09-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Remove
+	convert_mov_to_lea.
+
+2015-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (R_386_irelative): Renamed to ...
+	(R_386_ext2): This.
+	(R_386_vt_offset): Updated.
+	(elf_i386_rtype_to_howto): Likewise.
+	(elf_i386_relocate_section): Likewise.
+
+2015-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18900
+	* elf32-i386.c (elf_i386_link_hash_entry): Add
+	func_pointer_refcount.
+	(elf_i386_link_hash_newfunc): Clear func_pointer_refcount.
+	(elf_i386_get_local_sym_hash): Likewise.
+	(elf_i386_copy_indirect_symbol): Also copy
+	func_pointer_refcount.
+	(elf_i386_check_relocs): Increment func_pointer_refcount.
+	(elf_i386_gc_sweep_hook): Decrement func_pointer_refcount.
+	(elf_i386_allocate_dynrelocs): Don't create the PLT entry if
+	there are only function pointer relocations which can be
+	resolved at run-time.  Keep dynanamic relocations for run-time
+	function pointer initialization.
+	(elf_i386_relocate_section): Copy dynamic function pointer
+	relocations.
+	* elf64-x86-64.c (elf_x86_64_link_hash_entry): Add
+	func_pointer_refcount.
+	(elf_x86_64_link_hash_newfunc): Clear func_pointer_refcount.
+	(elf_x86_64_get_local_sym_hash): Likewise.
+	(elf_x86_64_copy_indirect_symbol): Also copy
+	func_pointer_refcount.
+	(elf_x86_64_check_relocs): Increment func_pointer_refcount.
+	(elf_x86_64_gc_sweep_hook): Decrement func_pointer_refcount.
+	(elf_x86_64_allocate_dynrelocs): Don't create the PLT entry if
+	there are only function pointer relocations which can be
+	resolved at run-time.  Keep dynanamic relocations for run-time
+	function pointer initialization.
+	(elf_x86_64_relocate_section): Copy dynamic function pointer
+	relocations.
+
+2015-09-01  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_maybe_function_sym): Adjust symbol value
+	if .opd section has been edited.
+
+2015-09-01  Alan Modra  <amodra@gmail.com>
+
+	PR 18878
+	* elf64-ppc.c (ARRAY_SIZE): Define.  Use throughout.
+	(enum ppc_stub_type): Add ppc_stub_save_res.
+	(struct map_stub): Add "next" and "needs_save_res".
+	(struct ppc_link_hash_entry): Add "save_res" flag.
+	(struct ppc_link_hash_table): Add "group".
+	(sfpr_define): Add stub_sec param.  Define symbol in stub_sec if
+	stub_sec is non-null.  Set "save_res".
+	(save_res_funcs): Make file scope, rename from funcs.  Adjust uses.
+	(ppc64_elf_adjust_dynamic_symbol): Prohibit plt call to save_res syms.
+	(ppc_build_one_stub): Handle ppc_stub_save_res.
+	(ppc_size_one_stub): Set stub type to ppc_size_one_stub on finding
+	stub for linker defined save_res sym.
+	(group_sections): Init new fields of struct map_stub.
+	(ppc64_elf_size_stubs): Reserve space for save/restore func copy.
+	(ppc64_elf_build_stubs): Copy save/restore funcs to groups.  Emit
+	alias syms too.
+	(ppc64_elf_relocate_section): Set destination for ppc_stub_save_res.
+
 2015-08-31  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (get_r2off): Return -1 on error.

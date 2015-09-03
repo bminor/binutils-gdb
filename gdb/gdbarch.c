@@ -449,6 +449,14 @@ gdbarch_obstack_zalloc (struct gdbarch *arch, long size)
   return data;
 }
 
+/* See gdbarch.h.  */
+
+char *
+gdbarch_obstack_strdup (struct gdbarch *arch, const char *string)
+{
+  return obstack_strdup (arch->obstack, string);
+}
+
 
 /* Free a gdbarch struct.  This should never happen in normal
    operation --- once you've created a gdbarch, you keep it around.
