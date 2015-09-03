@@ -1,3 +1,8 @@
+2015-12-08  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* NEWS: Announce this enhancement and the corresponding new
+	option.
+
 2015-12-07  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-lang.c (print_signatures): New.

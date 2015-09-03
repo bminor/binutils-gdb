@@ -1,3 +1,9 @@
+2015-12-08  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.texinfo (Ada Mode Into): Move overloading support
+	description to its own node.
+	(Overloading support for Ada): New node.
+
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
 	PR 14618

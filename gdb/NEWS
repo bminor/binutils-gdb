@@ -28,6 +28,9 @@
   and "maint info program-spaces" now list the corresponding items in
   ascending ID order, for consistency with all other "info" commands.
 
+* In Ada, the overloads selection menu has been enhanced to display the
+  parameter types and the return types for the matching overloaded subprograms.
+
 * New commands
 
 maint set target-non-stop (on|off|auto)
@@ -51,6 +54,11 @@ show remote multiprocess-extensions-packet
 set remote thread-events
 show remote thread-events
   Set/show the use of thread create/exit events.
+
+set ada print-signatures on|off
+show ada print-signatures"
+  Control whether parameter types and return types are displayed in overloads
+  selection menus.  It is activaled (@code{on}) by default.
 
 * The "disassemble" command accepts a new modifier: /s.
   It prints mixed source+disassembly like /m with two differences:
