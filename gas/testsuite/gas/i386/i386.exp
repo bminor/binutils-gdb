@@ -780,6 +780,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "x86-64-jump"
 	run_dump_test "x86-64-branch-2"
 	run_list_test "x86-64-branch-3" "-al -mintel64"
+
+	run_dump_test "x86-64-gotpcrel"
     }
 
     set ASFLAGS "$old_ASFLAGS"
