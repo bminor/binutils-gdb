@@ -1,3 +1,8 @@
+2015-12-07  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/fun_overload_menu.exp: New testcase.
+	* gdb.ada/fun_overload_menu/foo.adb: New testcase.
+
 2015-12-04  Josh Stone  <jistone@redhat.com>
 
 	* gdb.base/catch-fork-static.exp: New.

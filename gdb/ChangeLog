@@ -1,3 +1,12 @@
+2015-12-07  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (print_signatures): New.
+	(ada_print_symbol_signature): New.
+	(user_select_syms): Add signatures to the output of candidate
+	symbols using ada_print_symbol_signature.
+	(_initialize_ada_language): Add a "set/show ada
+	print-signatures" boolean option.
+
 2015-12-07  Andreas Arnez <arnez@linux.vnet.ibm.com>
 
 	* MAINTAINERS (Write After Approval): Add Andreas Arnez.
