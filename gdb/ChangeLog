@@ -1,3 +1,13 @@
+2015-09-03  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_region_ok_for_hw_watchpoint):
+	Move code to aarch64_linux_region_ok_for_watchpoint.  Call
+	aarch64_linux_region_ok_for_watchpoint.
+	* nat/aarch64-linux-hw-point.c (aarch64_linux_region_ok_for_watchpoint):
+	New function.
+	* nat/aarch64-linux-hw-point.h (aarch64_linux_region_ok_for_watchpoint):
+	Declare it.
+
 2015-09-02  Patrick Palka  <patrick@parcs.ath.cx>
 
 	* gdb_obstack.h (obstack_strdup): Declare.

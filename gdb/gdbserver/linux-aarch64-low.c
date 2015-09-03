@@ -302,9 +302,13 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   targ_type = raw_bkpt_type_to_target_hw_bp_type (type);
 
   if (targ_type != hw_execute)
-    ret =
-      aarch64_handle_watchpoint (targ_type, addr, len, 1 /* is_insert */,
-				 state);
+    {
+      if (aarch64_linux_region_ok_for_watchpoint (addr, len))
+	ret = aarch64_handle_watchpoint (targ_type, addr, len,
+					 1 /* is_insert */, state);
+      else
+	ret = -1;
+    }
   else
     ret =
       aarch64_handle_breakpoint (targ_type, addr, len, 1 /* is_insert */,

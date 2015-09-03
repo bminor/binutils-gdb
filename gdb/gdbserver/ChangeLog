@@ -1,3 +1,9 @@
+2015-09-03  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_insert_point): Call
+	aarch64_handle_watchpoint if aarch64_linux_region_ok_for_watchpoint
+	returns true.
+
 2015-08-27  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
 
 	* linux-low.c (check_stopped_by_breakpoint): Use
