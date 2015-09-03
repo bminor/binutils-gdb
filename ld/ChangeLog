@@ -3,6 +3,11 @@
 	* ld.texinfo (--build-id): Fix typo.  The COFF/PE build-id section
 	is called .buildid not .build-id.
 
+2015-09-03  Nick Clifton  <nickc@redhat.com>
+
+	(Source Code Reference): Fix off-by-one typo in example of how to
+	use linker script symbols in C source code.
+
 2015-08-19  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/aix.em: Don't set link_info.pic.

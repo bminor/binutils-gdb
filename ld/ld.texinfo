@@ -3853,7 +3853,7 @@ linker script contains these declarations:
 @smallexample
 @group
   start_of_ROM   = .ROM;
-  end_of_ROM     = .ROM + sizeof (.ROM) - 1;
+  end_of_ROM     = .ROM + sizeof (.ROM);
   start_of_FLASH = .FLASH;
 @end group
 @end smallexample
