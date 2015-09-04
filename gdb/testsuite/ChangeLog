@@ -1,3 +1,10 @@
+2015-09-14  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/access_to_packed_array.exp: New testcase.
+	* gdb.ada/access_to_packed_array/foo.adb: New file.
+	* gdb.ada/access_to_packed_array/pack.adb: New file.
+	* gdb.ada/access_to_packed_array/pack.ads: New file.
+
 2015-09-14  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/buffer-size.exp: Remove recording with unlimited BTS

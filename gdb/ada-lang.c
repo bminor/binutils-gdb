@@ -2757,14 +2757,27 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
 
 /* Assuming ARR is a pointer to a GDB array, the value of the element
    of *ARR at the ARITY indices given in IND.
-   Does not read the entire array into memory.  */
+   Does not read the entire array into memory.
+
+   Note: Unlike what one would expect, this function is used instead of
+   ada_value_subscript for basically all non-packed array types.  The reason
+   for this is that a side effect of doing our own pointer arithmetics instead
+   of relying on value_subscript is that there is no implicit typedef peeling.
+   This is important for arrays of array accesses, where it allows us to
+   preserve the fact that the array's element is an array access, where the
+   access part os encoded in a typedef layer.  */
 
 static struct value *
 ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
 {
   int k;
+  struct value *array_ind = ada_value_ind (arr);
   struct type *type
-    = check_typedef (value_enclosing_type (ada_value_ind (arr)));
+    = check_typedef (value_enclosing_type (array_ind));
+
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+      && TYPE_FIELD_BITSIZE (type, 0) > 0)
+    return value_subscript_packed (array_ind, arity, ind);
 
   for (k = 0; k < arity; k += 1)
     {
