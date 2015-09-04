@@ -12,6 +12,10 @@
   the linespec parser.  This feature is also available to GDB/MI
   clients.
 
+* Multi-architecture debugging is supported on AArch64 GNU/Linux.
+  GDB now is able to debug both AArch64 applications and ARM applications
+  at the same time.
+
 * New commands
 
 maint set target-non-stop (on|off|auto)

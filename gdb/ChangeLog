@@ -1,3 +1,7 @@
+2015-09-04  Yao Qi  <yao.qi@linaro.org>
+
+	* NEWS: Mention the aarch64 multi-arch debugging support.
+
 2015-09-03  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-lang.c (ada_language_arch_info): Create a TYPE_CODE_CHAR
