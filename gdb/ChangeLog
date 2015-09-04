@@ -1,5 +1,10 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_single_step_forward): Return
+	NO_HISTORY if a step brings us to the end of the execution history.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_step_thread): Move breakpoint check
 	to ...
 	(record_btrace_single_step_forward): ... here and

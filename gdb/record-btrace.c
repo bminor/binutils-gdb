@@ -2061,7 +2061,10 @@ record_btrace_single_step_forward (struct thread_info *tp)
 
   /* We stop replaying if we reached the end of the trace.  */
   if (btrace_insn_cmp (replay, &end) == 0)
-    record_btrace_stop_replaying (tp);
+    {
+      record_btrace_stop_replaying (tp);
+      return btrace_step_no_history ();
+    }
 
   return btrace_step_spurious ();
 }
