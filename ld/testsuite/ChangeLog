@@ -1,3 +1,7 @@
+2015-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/orphan-8.map: Updated to support 32-bit targets.
+
 2015-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld-elf/elf.exp: Switch to rely on run_dump_test.
