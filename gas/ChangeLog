@@ -1,3 +1,8 @@
+2015-09-05  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* config/tc-avr.c (md_section_align): Append UL for -1 to avoid
+	the latest gcc's warning.
+
 2015-08-27  Alan Modra  <amodra@gmail.com>
 
 	PR gas/18581
