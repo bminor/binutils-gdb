@@ -2166,13 +2166,15 @@ resume_cleanups (void *ignore)
 static const char schedlock_off[] = "off";
 static const char schedlock_on[] = "on";
 static const char schedlock_step[] = "step";
+static const char schedlock_replay[] = "replay";
 static const char *const scheduler_enums[] = {
   schedlock_off,
   schedlock_on,
   schedlock_step,
+  schedlock_replay,
   NULL
 };
-static const char *scheduler_mode = schedlock_off;
+static const char *scheduler_mode = schedlock_replay;
 static void
 show_scheduler_mode (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
@@ -2236,6 +2238,13 @@ user_visible_resume_ptid (int step)
     {
       /* User-settable 'scheduler' mode requires solo thread
 	 resume.  */
+      resume_ptid = inferior_ptid;
+    }
+  else if ((scheduler_mode == schedlock_replay)
+	   && target_record_will_replay (minus_one_ptid, execution_direction))
+    {
+      /* User-settable 'scheduler' mode requires solo thread resume in replay
+	 mode.  */
       resume_ptid = inferior_ptid;
     }
   else if (!sched_multi && target_supports_multi_process ())
@@ -2803,6 +2812,18 @@ clear_proceed_status_thread (struct thread_info *tp)
 void
 clear_proceed_status (int step)
 {
+  /* With scheduler-locking replay, stop replaying other threads if we're
+     not replaying the user-visible resume ptid.
+
+     This is a convenience feature to not require the user to explicitly
+     stop replaying the other threads.  We're assuming that the user's
+     intent is to resume tracing the recorded process.  */
+  if (!non_stop && scheduler_mode == schedlock_replay
+      && target_record_is_replaying (minus_one_ptid)
+      && !target_record_will_replay (user_visible_resume_ptid (step),
+				     execution_direction))
+    target_record_stop_replaying ();
+
   if (!non_stop)
     {
       struct thread_info *tp;
@@ -2890,7 +2911,10 @@ schedlock_applies (struct thread_info *tp)
 {
   return (scheduler_mode == schedlock_on
 	  || (scheduler_mode == schedlock_step
-	      && tp->control.stepping_command));
+	      && tp->control.stepping_command)
+	  || (scheduler_mode == schedlock_replay
+	      && target_record_will_replay (minus_one_ptid,
+					    execution_direction)));
 }
 
 /* Basic routine for continuing the program in various fashions.
@@ -9187,10 +9211,13 @@ By default, the debugger will use the same inferior."),
 			scheduler_enums, &scheduler_mode, _("\
 Set mode for locking scheduler during execution."), _("\
 Show mode for locking scheduler during execution."), _("\
-off  == no locking (threads may preempt at any time)\n\
-on   == full locking (no thread except the current thread may run)\n\
-step == scheduler locked during stepping commands (step, next, stepi, nexti).\n\
-	In this mode, other threads may run during other commands."),
+off    == no locking (threads may preempt at any time)\n\
+on     == full locking (no thread except the current thread may run)\n\
+          This applies to both normal execution and replay mode.\n\
+step   == scheduler locked during stepping commands (step, next, stepi, nexti).\n\
+          In this mode, other threads may run during other commands.\n\
+          This applies to both normal execution and replay mode.\n\
+replay == scheduler locked in replay mode and unlocked during normal execution."),
 			set_schedlock_func,	/* traps on target vector */
 			show_scheduler_mode,
 			&setlist, &showlist);

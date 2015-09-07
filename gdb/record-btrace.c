@@ -1903,22 +1903,16 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
      to not change the execution direction in-between.  */
   record_btrace_resume_exec_dir = execution_direction;
 
-  /* For all-stop targets...  */
+  /* For all-stop targets we pick the current thread when asked to resume an
+     entire process or everything.  */
   if (!target_is_non_stop_p ())
     {
-      /* ...we pick the current thread when asked to resume an entire process
-	 or everything.  */
       if (ptid_equal (minus_one_ptid, ptid) || ptid_is_pid (ptid))
 	ptid = inferior_ptid;
 
       tp = find_thread_ptid (ptid);
       if (tp == NULL)
 	error (_("Cannot find thread to resume."));
-
-      /* ...and we stop replaying other threads if the thread to resume is not
-	 replaying.  */
-      if (!btrace_is_replaying (tp) && execution_direction != EXEC_REVERSE)
-	target_record_stop_replaying ();
     }
 
   /* As long as we're not replaying, just forward the request.

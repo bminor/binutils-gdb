@@ -1,5 +1,19 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* NEWS: Announce new scheduler-locking mode.
+	* infrun.c (schedlock_replay): New.
+	(scheduler_enums): Add schedlock_replay.
+	(scheduler_mode): Change default to schedlock_replay.
+	(user_visible_resume_ptid): Handle schedlock_replay.
+	(clear_proceed_status_thread): Stop replaying if resumed thread is
+	not replaying.
+	(schedlock_applies): Handle schedlock_replay.
+	(_initialize_infrun): Document new scheduler-locking mode.
+	* record-btrace.c (record_btrace_resume): Remove code to stop other
+	threads when not replaying the resumed thread.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c ((record_btrace_will_replay): New.
 	(init_record_btrace_ops): Initialize to_record_will_replay.
 	* record-full.c ((record_full_will_replay): New.

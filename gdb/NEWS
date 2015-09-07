@@ -45,6 +45,9 @@ show remote multiprocess-extensions-packet
   The "/m" option is now considered deprecated: its "source-centric"
   output hasn't proved useful in practice.
 
+* The "set scheduler-locking" command supports a new mode "replay".
+  It behaves like "off" in record mode and like "on" in replay mode.
+
 * Support for various ROM monitors has been removed:
 
   target dbug		dBUG ROM monitor for Motorola ColdFire
