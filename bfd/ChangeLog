@@ -1,3 +1,11 @@
+2016-08-31  Andrew Pinski  <apinski@cavium.com>
+
+	* cpu-aarch64.c (compatible):
+	Don't reject different mach or ILP32 here.
+	* elfnn-aarch64.c (elfNN_aarch64_merge_private_bfd_data):
+	Add an error message on why endianess is rejected.
+	Reject different ILP32/LP64 settings.
+
 2016-08-31  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (group_sections): Delete stub14_group_size.  Instead,

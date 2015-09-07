@@ -34,31 +34,9 @@ compatible (const bfd_arch_info_type * a, const bfd_arch_info_type * b)
   if (a->arch != b->arch)
     return NULL;
 
-  /* If a & b are for the same machine then all is well.  */
-  if (a->mach == b->mach)
-    return a;
-
-  /* Don't allow mixing ilp32 with lp64.  */
-  if ((a->mach & bfd_mach_aarch64_ilp32) != (b->mach & bfd_mach_aarch64_ilp32))
-    return NULL;
-
-  /* Otherwise if either a or b is the 'default' machine
-     then it can be polymorphed into the other.  */
-  if (a->the_default)
-    return b;
-
-  if (b->the_default)
-    return a;
-
-  /* So far all newer cores are
-     supersets of previous cores.  */
-  if (a->mach < b->mach)
-    return b;
-  else if (a->mach > b->mach)
-    return a;
-
-  /* Never reached!  */
-  return NULL;
+  /* Machine compatibility is checked in
+     elfNN_aarch64_merge_private_bfd_data.  */
+  return a;
 }
 
 static struct
