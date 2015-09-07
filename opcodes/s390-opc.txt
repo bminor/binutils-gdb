@@ -1678,4 +1678,4 @@ eb00000000e1 stocfh*12 RSY_R0RD "store high on condition" z13 zarch
 e3000000003a llzrgf RXY_RRRD "load logical and zero rightmost bytes 32->64" z13 zarch
 e3000000003b lzrf RXY_RRRD "load and zero rightmost byte 32->32" z13 zarch
 e3000000002a lzrg RXY_RRRD "load and zero rightmost byte 64->64" z13 zarch
-b9ec ppno RRE_RR "perform pseudorandom number operation" z13 zarch
+b93c ppno RRE_RR "perform pseudorandom number operation" z13 zarch
