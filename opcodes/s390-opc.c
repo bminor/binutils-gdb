@@ -256,6 +256,8 @@ const struct s390_operand s390_operands[] =
 /* 8/16/48 bit opcodes.  */
 #define OP8(x) { x, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define OP16(x) { x >> 8, x & 255, 0x00, 0x00, 0x00, 0x00 }
+#define OP32(x) { x >> 24, (x >> 16) & 255, (x >> 8) & 255, x & 255,	\
+		  0x00, 0x00 }
 #define OP48(x) { x >> 40, (x >> 32) & 255, (x >> 24) & 255, \
 		  (x >> 16) & 255, (x >> 8) & 255, x & 255}
 
