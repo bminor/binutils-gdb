@@ -1,5 +1,13 @@
 2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* stack.c (parse_frame_specification): Remove message parameter,
+	replace with fixed string in function body, update function
+	comment.
+	(frame_info): Remove message to parse_frame_specification.
+	(select_frame_command): Likewise.
+
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* stack.c (parse_frame_specification): Delete.
 	(parse_frame_specification_1): Rename to
 	parse_frame_specification.

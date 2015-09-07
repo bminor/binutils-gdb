@@ -1273,15 +1273,13 @@ print_frame (struct frame_info *frame, int print_level,
 }
 
 
-/* Read a frame specification in whatever the appropriate format is
-   from FRAME_EXP.  Call error(), printing MESSAGE, if the
-   specification is in any way invalid (so this function never returns
-   NULL).  When SEPECTED_P is non-NULL set its target to indicate that
-   the default selected frame was used.  */
+/* Read a frame specification in whatever the appropriate format is from
+   FRAME_EXP.  Call error() if the specification is in any way invalid (so
+   this function never returns NULL).  When SEPECTED_P is non-NULL set its
+   target to indicate that the default selected frame was used.  */
 
 static struct frame_info *
-parse_frame_specification (const char *frame_exp, const char *message,
-			   int *selected_frame_p)
+parse_frame_specification (const char *frame_exp, int *selected_frame_p)
 {
   int numargs;
   struct value *args[4];
@@ -1330,7 +1328,7 @@ parse_frame_specification (const char *frame_exp, const char *message,
     {
       if (selected_frame_p != NULL)
 	(*selected_frame_p) = 1;
-      return get_selected_frame (message);
+      return get_selected_frame (_("No stack."));
     }
 
   /* None of the remaining use the selected frame.  */
@@ -1425,7 +1423,7 @@ frame_info (char *addr_exp, int from_tty)
   CORE_ADDR caller_pc = 0;
   int caller_pc_p = 0;
 
-  fi = parse_frame_specification (addr_exp, "No stack.", &selected_frame_p);
+  fi = parse_frame_specification (addr_exp, &selected_frame_p);
   gdbarch = get_frame_arch (fi);
 
   /* Name of the value returned by get_frame_pc().  Per comments, "pc"
@@ -2278,7 +2276,7 @@ find_relative_frame (struct frame_info *frame, int *level_offset_ptr)
 void
 select_frame_command (char *level_exp, int from_tty)
 {
-  select_frame (parse_frame_specification (level_exp, "No stack.", NULL));
+  select_frame (parse_frame_specification (level_exp, NULL));
 }
 
 /* The "frame" command.  With no argument, print the selected frame
