@@ -1,3 +1,11 @@
+2015-09-07  Andrew Pinski  <apinski@cavium.com>
+
+	* cpu-aarch64.c (compatible):
+	Don't reject different mach or ILP32 here.
+	* elfnn-aarch64.c (elfNN_aarch64_merge_private_bfd_data):
+	Add an error message on why endianess is rejected.
+	Reject different ILP32/LP64 settings.
+
 2015-09-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Remove
