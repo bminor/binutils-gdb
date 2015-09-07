@@ -91,6 +91,10 @@ struct gdbarch_tdep
 
   /* syscall record.  */
   int (*aarch64_syscall_record) (struct regcache *regcache, unsigned long svc_number);
+
+  /* If this is ILP32 or LP64.  */
+  char ilp32;
+
 };
 
 extern struct target_desc *tdesc_aarch64;

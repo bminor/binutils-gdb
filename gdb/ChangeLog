@@ -1,3 +1,12 @@
+2015-09-07  Andrew Pinski  <apinski@cavium.com>
+
+	* aarch64-tdep.h (gdbarch_tdep): Add ilp32 field.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Setup ILP32 support.
+	Make sure the gdbarches have compatible ilp32 flags.
+	Set long and ptr sizes correctly for ilp32. 
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi):
+	Add support for ILP32.
+
 2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-data.c (win_with_focus): Remove cast of NULL pointer.
