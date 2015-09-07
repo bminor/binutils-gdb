@@ -1117,7 +1117,7 @@ gdbscm_set_parameter_value_x (SCM self, SCM value)
 
 static const scheme_function parameter_functions[] =
 {
-  { "make-parameter", 1, 0, 1, gdbscm_make_parameter,
+  { "make-parameter", 1, 0, 1, as_a_scm_t_subr (gdbscm_make_parameter),
     "\
 Make a GDB parameter object.\n\
 \n\
@@ -1149,20 +1149,22 @@ Make a GDB parameter object.\n\
     show-doc: The \"doc string\" when showing the parameter.\n\
     initial-value: The initial value of the parameter." },
 
-  { "register-parameter!", 1, 0, 0, gdbscm_register_parameter_x,
+  { "register-parameter!", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_register_parameter_x),
     "\
 Register a <gdb:parameter> object with GDB." },
 
-  { "parameter?", 1, 0, 0, gdbscm_parameter_p,
+  { "parameter?", 1, 0, 0, as_a_scm_t_subr (gdbscm_parameter_p),
     "\
 Return #t if the object is a <gdb:parameter> object." },
 
-  { "parameter-value", 1, 0, 0, gdbscm_parameter_value,
+  { "parameter-value", 1, 0, 0, as_a_scm_t_subr (gdbscm_parameter_value),
     "\
 Return the value of a <gdb:parameter> object\n\
 or any gdb parameter if param is a string naming the parameter." },
 
-  { "set-parameter-value!", 2, 0, 0, gdbscm_set_parameter_value_x,
+  { "set-parameter-value!", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_set_parameter_value_x),
     "\
 Set the value of a <gdb:parameter> object.\n\
 \n\

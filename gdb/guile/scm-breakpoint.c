@@ -1169,7 +1169,7 @@ static const scheme_integer_constant breakpoint_integer_constants[] =
 
 static const scheme_function breakpoint_functions[] =
 {
-  { "make-breakpoint", 1, 0, 1, gdbscm_make_breakpoint,
+  { "make-breakpoint", 1, 0, 1, as_a_scm_t_subr (gdbscm_make_breakpoint),
     "\
 Create a GDB breakpoint object.\n\
 \n\
@@ -1178,128 +1178,142 @@ Create a GDB breakpoint object.\n\
   Returns:\n\
     <gdb:breakpoint object" },
 
-  { "register-breakpoint!", 1, 0, 0, gdbscm_register_breakpoint_x,
+  { "register-breakpoint!", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_register_breakpoint_x),
     "\
 Register a <gdb:breakpoint> object with GDB." },
 
-  { "delete-breakpoint!", 1, 0, 0, gdbscm_delete_breakpoint_x,
+  { "delete-breakpoint!", 1, 0, 0, as_a_scm_t_subr (gdbscm_delete_breakpoint_x),
     "\
 Delete the breakpoint from GDB." },
 
-  { "breakpoints", 0, 0, 0, gdbscm_breakpoints,
+  { "breakpoints", 0, 0, 0, as_a_scm_t_subr (gdbscm_breakpoints),
     "\
 Return a list of all GDB breakpoints.\n\
 \n\
   Arguments: none" },
 
-  { "breakpoint?", 1, 0, 0, gdbscm_breakpoint_p,
+  { "breakpoint?", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_p),
     "\
 Return #t if the object is a <gdb:breakpoint> object." },
 
-  { "breakpoint-valid?", 1, 0, 0, gdbscm_breakpoint_valid_p,
+  { "breakpoint-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_valid_p),
     "\
 Return #t if the breakpoint has not been deleted from GDB." },
 
-  { "breakpoint-number", 1, 0, 0, gdbscm_breakpoint_number,
+  { "breakpoint-number", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_number),
     "\
 Return the breakpoint's number." },
 
-  { "breakpoint-type", 1, 0, 0, gdbscm_breakpoint_type,
+  { "breakpoint-type", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_type),
     "\
 Return the type of the breakpoint." },
 
-  { "breakpoint-visible?", 1, 0, 0, gdbscm_breakpoint_visible,
+  { "breakpoint-visible?", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_visible),
     "\
 Return #t if the breakpoint is visible to the user." },
 
-  { "breakpoint-location", 1, 0, 0, gdbscm_breakpoint_location,
+  { "breakpoint-location", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_breakpoint_location),
     "\
 Return the location of the breakpoint as specified by the user." },
 
-  { "breakpoint-expression", 1, 0, 0, gdbscm_breakpoint_expression,
+  { "breakpoint-expression", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_breakpoint_expression),
     "\
 Return the expression of the breakpoint as specified by the user.\n\
 Valid for watchpoints only, returns #f for non-watchpoints." },
 
-  { "breakpoint-enabled?", 1, 0, 0, gdbscm_breakpoint_enabled_p,
+  { "breakpoint-enabled?", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_breakpoint_enabled_p),
     "\
 Return #t if the breakpoint is enabled." },
 
-  { "set-breakpoint-enabled!", 2, 0, 0, gdbscm_set_breakpoint_enabled_x,
+  { "set-breakpoint-enabled!", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_set_breakpoint_enabled_x),
     "\
 Set the breakpoint's enabled state.\n\
 \n\
   Arguments: <gdb:breakpoint> boolean" },
 
-  { "breakpoint-silent?", 1, 0, 0, gdbscm_breakpoint_silent_p,
+  { "breakpoint-silent?", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_silent_p),
     "\
 Return #t if the breakpoint is silent." },
 
-  { "set-breakpoint-silent!", 2, 0, 0, gdbscm_set_breakpoint_silent_x,
+  { "set-breakpoint-silent!", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_set_breakpoint_silent_x),
     "\
 Set the breakpoint's silent state.\n\
 \n\
   Arguments: <gdb:breakpoint> boolean" },
 
-  { "breakpoint-ignore-count", 1, 0, 0, gdbscm_breakpoint_ignore_count,
+  { "breakpoint-ignore-count", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_breakpoint_ignore_count),
     "\
 Return the breakpoint's \"ignore\" count." },
 
   { "set-breakpoint-ignore-count!", 2, 0, 0,
-    gdbscm_set_breakpoint_ignore_count_x,
+    as_a_scm_t_subr (gdbscm_set_breakpoint_ignore_count_x),
     "\
 Set the breakpoint's \"ignore\" count.\n\
 \n\
   Arguments: <gdb:breakpoint> count" },
 
-  { "breakpoint-hit-count", 1, 0, 0, gdbscm_breakpoint_hit_count,
+  { "breakpoint-hit-count", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_breakpoint_hit_count),
     "\
 Return the breakpoint's \"hit\" count." },
 
-  { "set-breakpoint-hit-count!", 2, 0, 0, gdbscm_set_breakpoint_hit_count_x,
+  { "set-breakpoint-hit-count!", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_set_breakpoint_hit_count_x),
     "\
 Set the breakpoint's \"hit\" count.  The value must be zero.\n\
 \n\
   Arguments: <gdb:breakpoint> 0" },
 
-  { "breakpoint-thread", 1, 0, 0, gdbscm_breakpoint_thread,
+  { "breakpoint-thread", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_thread),
     "\
 Return the breakpoint's thread id or #f if there isn't one." },
 
-  { "set-breakpoint-thread!", 2, 0, 0, gdbscm_set_breakpoint_thread_x,
+  { "set-breakpoint-thread!", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_set_breakpoint_thread_x),
     "\
 Set the thread id for this breakpoint.\n\
 \n\
   Arguments: <gdb:breakpoint> thread-id" },
 
-  { "breakpoint-task", 1, 0, 0, gdbscm_breakpoint_task,
+  { "breakpoint-task", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_task),
     "\
 Return the breakpoint's Ada task-id or #f if there isn't one." },
 
-  { "set-breakpoint-task!", 2, 0, 0, gdbscm_set_breakpoint_task_x,
+  { "set-breakpoint-task!", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_set_breakpoint_task_x),
     "\
 Set the breakpoint's Ada task-id.\n\
 \n\
   Arguments: <gdb:breakpoint> task-id" },
 
-  { "breakpoint-condition", 1, 0, 0, gdbscm_breakpoint_condition,
+  { "breakpoint-condition", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_breakpoint_condition),
     "\
 Return the breakpoint's condition as specified by the user.\n\
 Return #f if there isn't one." },
 
-  { "set-breakpoint-condition!", 2, 0, 0, gdbscm_set_breakpoint_condition_x,
+  { "set-breakpoint-condition!", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_set_breakpoint_condition_x),
     "\
 Set the breakpoint's condition.\n\
 \n\
   Arguments: <gdb:breakpoint> condition\n\
     condition: a string" },
 
-  { "breakpoint-stop", 1, 0, 0, gdbscm_breakpoint_stop,
+  { "breakpoint-stop", 1, 0, 0, as_a_scm_t_subr (gdbscm_breakpoint_stop),
     "\
 Return the breakpoint's stop predicate.\n\
 Return #f if there isn't one." },
 
-  { "set-breakpoint-stop!", 2, 0, 0, gdbscm_set_breakpoint_stop_x,
+  { "set-breakpoint-stop!", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_set_breakpoint_stop_x),
     "\
 Set the breakpoint's stop predicate.\n\
 \n\
@@ -1307,7 +1321,8 @@ Set the breakpoint's stop predicate.\n\
     procedure: A procedure of one argument, the breakpoint.\n\
       Its result is true if program execution should stop." },
 
-  { "breakpoint-commands", 1, 0, 0, gdbscm_breakpoint_commands,
+  { "breakpoint-commands", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_breakpoint_commands),
     "\
 Return the breakpoint's commands." },
 

@@ -373,38 +373,39 @@ gdbscm_progspaces (void)
 
 static const scheme_function pspace_functions[] =
 {
-  { "progspace?", 1, 0, 0, gdbscm_progspace_p,
+  { "progspace?", 1, 0, 0, as_a_scm_t_subr (gdbscm_progspace_p),
     "\
 Return #t if the object is a <gdb:objfile> object." },
 
-  { "progspace-valid?", 1, 0, 0, gdbscm_progspace_valid_p,
+  { "progspace-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_progspace_valid_p),
     "\
 Return #t if the progspace is valid (hasn't been deleted from gdb)." },
 
-  { "progspace-filename", 1, 0, 0, gdbscm_progspace_filename,
+  { "progspace-filename", 1, 0, 0, as_a_scm_t_subr (gdbscm_progspace_filename),
     "\
 Return the name of the main symbol file of the progspace." },
 
-  { "progspace-objfiles", 1, 0, 0, gdbscm_progspace_objfiles,
+  { "progspace-objfiles", 1, 0, 0, as_a_scm_t_subr (gdbscm_progspace_objfiles),
     "\
 Return the list of objfiles associated with the progspace.\n\
 Objfiles that are separate debug objfiles are not included in the result.\n\
 The order of appearance of objfiles in the result is arbitrary." },
 
-  { "progspace-pretty-printers", 1, 0, 0, gdbscm_progspace_pretty_printers,
+  { "progspace-pretty-printers", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_progspace_pretty_printers),
     "\
 Return a list of pretty-printers of the progspace." },
 
   { "set-progspace-pretty-printers!", 2, 0, 0,
-    gdbscm_set_progspace_pretty_printers_x,
+    as_a_scm_t_subr (gdbscm_set_progspace_pretty_printers_x),
     "\
 Set the list of pretty-printers of the progspace." },
 
-  { "current-progspace", 0, 0, 0, gdbscm_current_progspace,
+  { "current-progspace", 0, 0, 0, as_a_scm_t_subr (gdbscm_current_progspace),
     "\
 Return the current program space if there is one or #f if there isn't one." },
 
-  { "progspaces", 0, 0, 0, gdbscm_progspaces,
+  { "progspaces", 0, 0, 0, as_a_scm_t_subr (gdbscm_progspaces),
     "\
 Return a list of all program spaces." },
 

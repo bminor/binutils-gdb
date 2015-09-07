@@ -819,7 +819,7 @@ gdbscm_register_command_x (SCM self)
 
 static const scheme_function command_functions[] =
 {
-  { "make-command", 1, 0, 1, gdbscm_make_command,
+  { "make-command", 1, 0, 1, as_a_scm_t_subr (gdbscm_make_command),
     "\
 Make a GDB command object.\n\
 \n\
@@ -840,19 +840,19 @@ Make a GDB command object.\n\
     doc: The \"doc string\" of the command.\n\
   Returns: <gdb:command> object" },
 
-  { "register-command!", 1, 0, 0, gdbscm_register_command_x,
+  { "register-command!", 1, 0, 0, as_a_scm_t_subr (gdbscm_register_command_x),
     "\
 Register a <gdb:command> object with GDB." },
 
-  { "command?", 1, 0, 0, gdbscm_command_p,
+  { "command?", 1, 0, 0, as_a_scm_t_subr (gdbscm_command_p),
     "\
 Return #t if the object is a <gdb:command> object." },
 
-  { "command-valid?", 1, 0, 0, gdbscm_command_valid_p,
+  { "command-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_command_valid_p),
     "\
 Return #t if the <gdb:command> object is valid." },
 
-  { "dont-repeat", 1, 0, 0, gdbscm_dont_repeat,
+  { "dont-repeat", 1, 0, 0, as_a_scm_t_subr (gdbscm_dont_repeat),
     "\
 Prevent command repetition when user enters an empty line.\n\
 \n\

@@ -318,7 +318,7 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
 
 static const scheme_function disasm_functions[] =
 {
-  { "arch-disassemble", 2, 0, 1, gdbscm_arch_disassemble,
+  { "arch-disassemble", 2, 0, 1, as_a_scm_t_subr (gdbscm_arch_disassemble),
     "\
 Return list of disassembled instructions in memory.\n\
 \n\

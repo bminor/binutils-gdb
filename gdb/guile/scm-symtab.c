@@ -614,61 +614,63 @@ gdbscm_find_pc_line (SCM pc_scm)
 
 static const scheme_function symtab_functions[] =
 {
-  { "symtab?", 1, 0, 0, gdbscm_symtab_p,
+  { "symtab?", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_p),
     "\
 Return #t if the object is a <gdb:symtab> object." },
 
-  { "symtab-valid?", 1, 0, 0, gdbscm_symtab_valid_p,
+  { "symtab-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_valid_p),
     "\
 Return #t if the symtab still exists in GDB.\n\
 Symtabs are deleted when the corresponding objfile is freed." },
 
-  { "symtab-filename", 1, 0, 0, gdbscm_symtab_filename,
+  { "symtab-filename", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_filename),
     "\
 Return the symtab's source file name." },
 
-  { "symtab-fullname", 1, 0, 0, gdbscm_symtab_fullname,
+  { "symtab-fullname", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_fullname),
     "\
 Return the symtab's full source file name." },
 
-  { "symtab-objfile", 1, 0, 0, gdbscm_symtab_objfile,
+  { "symtab-objfile", 1, 0, 0, as_a_scm_t_subr (gdbscm_symtab_objfile),
     "\
 Return the symtab's objfile." },
 
-  { "symtab-global-block", 1, 0, 0, gdbscm_symtab_global_block,
+  { "symtab-global-block", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_symtab_global_block),
     "\
 Return the symtab's global block." },
 
-  { "symtab-static-block", 1, 0, 0, gdbscm_symtab_static_block,
+  { "symtab-static-block", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_symtab_static_block),
     "\
 Return the symtab's static block." },
 
-  { "sal?", 1, 0, 0, gdbscm_sal_p,
+  { "sal?", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_p),
     "\
 Return #t if the object is a <gdb:sal> (symtab-and-line) object." },
 
-  { "sal-valid?", 1, 0, 0, gdbscm_sal_valid_p,
+  { "sal-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_valid_p),
     "\
 Return #t if the symtab for the sal still exists in GDB.\n\
 Symtabs are deleted when the corresponding objfile is freed." },
 
-  { "sal-symtab", 1, 0, 0, gdbscm_sal_symtab,
+  { "sal-symtab", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_symtab),
     "\
 Return the sal's symtab." },
 
-  { "sal-line", 1, 0, 0, gdbscm_sal_line,
+  { "sal-line", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_line),
     "\
 Return the sal's line number, or #f if there is none." },
 
-  { "sal-pc", 1, 0, 0, gdbscm_sal_pc,
+  { "sal-pc", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_pc),
     "\
 Return the sal's address." },
 
-  { "sal-last", 1, 0, 0, gdbscm_sal_last,
+  { "sal-last", 1, 0, 0, as_a_scm_t_subr (gdbscm_sal_last),
     "\
 Return the last address specified by the sal, or #f if there is none." },
 
-  { "find-pc-line", 1, 0, 0, gdbscm_find_pc_line,
+  { "find-pc-line", 1, 0, 0, as_a_scm_t_subr (gdbscm_find_pc_line),
     "\
 Return the sal corresponding to the address, or #f if there isn't one.\n\
 \n\

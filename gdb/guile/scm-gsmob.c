@@ -275,7 +275,7 @@ static const scheme_function gsmob_functions[] =
   /* N.B. There is a general rule of not naming symbols in gdb-guile with a
      "gdb" prefix.  This symbol does not violate this rule because it is to
      be read as "gdb-object-foo", not "gdb-foo".  */
-  { "gdb-object-kind", 1, 0, 0, gdbscm_gsmob_kind,
+  { "gdb-object-kind", 1, 0, 0, as_a_scm_t_subr (gdbscm_gsmob_kind),
     "\
 Return the kind of the GDB object, e.g., <gdb:breakpoint>, as a symbol." },
 

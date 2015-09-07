@@ -1075,86 +1075,89 @@ static const scheme_integer_constant frame_integer_constants[] =
 
 static const scheme_function frame_functions[] =
 {
-  { "frame?", 1, 0, 0, gdbscm_frame_p,
+  { "frame?", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_p),
     "\
 Return #t if the object is a <gdb:frame> object." },
 
-  { "frame-valid?", 1, 0, 0, gdbscm_frame_valid_p,
+  { "frame-valid?", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_valid_p),
     "\
 Return #t if the object is a valid <gdb:frame> object.\n\
 Frames become invalid when the inferior returns to its caller." },
 
-  { "frame-name", 1, 0, 0, gdbscm_frame_name,
+  { "frame-name", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_name),
     "\
 Return the name of the function corresponding to this frame,\n\
 or #f if there is no function." },
 
-  { "frame-arch", 1, 0, 0, gdbscm_frame_arch,
+  { "frame-arch", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_arch),
     "\
 Return the frame's architecture as a <gdb:arch> object." },
 
-  { "frame-type", 1, 0, 0, gdbscm_frame_type,
+  { "frame-type", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_type),
     "\
 Return the frame type, namely one of the gdb:*_FRAME constants." },
 
-  { "frame-unwind-stop-reason", 1, 0, 0, gdbscm_frame_unwind_stop_reason,
+  { "frame-unwind-stop-reason", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_frame_unwind_stop_reason),
     "\
 Return one of the gdb:FRAME_UNWIND_* constants explaining why\n\
 it's not possible to find frames older than this." },
 
-  { "frame-pc", 1, 0, 0, gdbscm_frame_pc,
+  { "frame-pc", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_pc),
     "\
 Return the frame's resume address." },
 
-  { "frame-block", 1, 0, 0, gdbscm_frame_block,
+  { "frame-block", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_block),
     "\
 Return the frame's code block, or #f if one cannot be found." },
 
-  { "frame-function", 1, 0, 0, gdbscm_frame_function,
+  { "frame-function", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_function),
     "\
 Return the <gdb:symbol> for the function corresponding to this frame,\n\
 or #f if there isn't one." },
 
-  { "frame-older", 1, 0, 0, gdbscm_frame_older,
+  { "frame-older", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_older),
     "\
 Return the frame immediately older (outer) to this frame,\n\
 or #f if there isn't one." },
 
-  { "frame-newer", 1, 0, 0, gdbscm_frame_newer,
+  { "frame-newer", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_newer),
     "\
 Return the frame immediately newer (inner) to this frame,\n\
 or #f if there isn't one." },
 
-  { "frame-sal", 1, 0, 0, gdbscm_frame_sal,
+  { "frame-sal", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_sal),
     "\
 Return the frame's symtab-and-line <gdb:sal> object." },
 
-  { "frame-read-var", 2, 0, 1, gdbscm_frame_read_var,
+  { "frame-read-var", 2, 0, 1, as_a_scm_t_subr (gdbscm_frame_read_var),
     "\
 Return the value of the symbol in the frame.\n\
 \n\
   Arguments: <gdb:frame> <gdb:symbol>\n\
          Or: <gdb:frame> string [#:block <gdb:block>]" },
 
-  { "frame-read-register", 2, 0, 0, gdbscm_frame_read_register,
+  { "frame-read-register", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_frame_read_register),
     "\
 Return the value of the register in the frame.\n\
 \n\
   Arguments: <gdb:frame> string" },
 
-  { "frame-select", 1, 0, 0, gdbscm_frame_select,
+  { "frame-select", 1, 0, 0, as_a_scm_t_subr (gdbscm_frame_select),
     "\
 Select this frame." },
 
-  { "newest-frame", 0, 0, 0, gdbscm_newest_frame,
+  { "newest-frame", 0, 0, 0, as_a_scm_t_subr (gdbscm_newest_frame),
     "\
 Return the newest frame." },
 
-  { "selected-frame", 0, 0, 0, gdbscm_selected_frame,
+  { "selected-frame", 0, 0, 0, as_a_scm_t_subr (gdbscm_selected_frame),
     "\
 Return the selected frame." },
 
-  { "unwind-stop-reason-string", 1, 0, 0, gdbscm_unwind_stop_reason_string,
+  { "unwind-stop-reason-string", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_unwind_stop_reason_string),
     "\
 Return a string explaining the unwind stop reason.\n\
 \n\

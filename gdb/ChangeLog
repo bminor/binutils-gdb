@@ -1,3 +1,33 @@
+2015-09-07  Pedro Alves  <palves@redhat.com>
+
+	* guile/guile-internal.h (as_a_scm_t_subr): New.
+	* guile/guile.c (misc_guile_functions): Use it.
+	* guile/scm-arch.c (arch_functions): Use it.
+	* guile/scm-block.c (block_functions, gdbscm_initialize_blocks):
+	Use it.
+	* guile/scm-breakpoint.c (breakpoint_functions): Use it.
+	* guile/scm-cmd.c (command_functions): Use it.
+	* guile/scm-disasm.c (disasm_functions): Use it.
+	* guile/scm-exception.c (exception_functions)
+	(private_exception_functions): Use it.
+	* guile/scm-frame.c (frame_functions)
+	* guile/scm-gsmob.c (gsmob_functions): Use it.
+	* guile/scm-iterator.c (iterator_functions): Use it.
+	* guile/scm-lazy-string.c (lazy_string_functions): Use it.
+	* guile/scm-math.c (math_functions): Use it.
+	* guile/scm-objfile.c (objfile_functions): Use it.
+	* guile/scm-param.c (parameter_functions): Use it.
+	* guile/scm-ports.c (port_functions, private_port_functions): Use
+	it.
+	* guile/scm-pretty-print.c (pretty_printer_functions): Use it.
+	* guile/scm-progspace.c (pspace_functions): Use it.
+	* guile/scm-string.c (string_functions): Use it.
+	* guile/scm-symbol.c (symbol_functions): Use it.
+	* guile/scm-symtab.c (symtab_functions): Use it.
+	* guile/scm-type.c (type_functions, gdbscm_initialize_types): Use
+	it.
+	* guile/scm-value.c (value_functions): Use it.
+
 2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui-data.c (win_with_focus): Remove cast of NULL pointer.
