@@ -5126,8 +5126,14 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_NO_HISTORY\n");
       /* Reverse execution: target ran out of history info.  */
 
+      /* Switch to the stopped thread.  */
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
+
       delete_just_stopped_threads_single_step_breakpoints ();
-      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
+      stop_pc = regcache_read_pc (get_thread_regcache (inferior_ptid));
       observer_notify_no_history ();
       stop_waiting (ecs);
       return;
