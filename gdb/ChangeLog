@@ -1,5 +1,17 @@
 2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* stack.c (parse_frame_specification): Delete.
+	(parse_frame_specification_1): Rename to
+	parse_frame_specification.
+	(frame_info): Use parse_frame_specification.
+	(select_frame_command): Likewise.
+	(return_command): Use select_frame and print_stack_frame rather
+	than frame_command and select_frame_command.
+	(func_command): Use get_current_frame rather than
+	parse_frame_specification.
+
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* stack.c (func_command): Return early when there is no ARG
 	string.
 

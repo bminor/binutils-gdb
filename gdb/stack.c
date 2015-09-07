@@ -1280,8 +1280,8 @@ print_frame (struct frame_info *frame, int print_level,
    the default selected frame was used.  */
 
 static struct frame_info *
-parse_frame_specification_1 (const char *frame_exp, const char *message,
-			     int *selected_frame_p)
+parse_frame_specification (const char *frame_exp, const char *message,
+			   int *selected_frame_p)
 {
   int numargs;
   struct value *args[4];
@@ -1401,12 +1401,6 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
     error (_("Too many args in frame specification"));
 }
 
-static struct frame_info *
-parse_frame_specification (char *frame_exp)
-{
-  return parse_frame_specification_1 (frame_exp, NULL, NULL);
-}
-
 /* Print verbosely the selected frame or the frame at address
    ADDR_EXP.  Absolutely all information in the frame is printed.  */
 
@@ -1431,7 +1425,7 @@ frame_info (char *addr_exp, int from_tty)
   CORE_ADDR caller_pc = 0;
   int caller_pc_p = 0;
 
-  fi = parse_frame_specification_1 (addr_exp, "No stack.", &selected_frame_p);
+  fi = parse_frame_specification (addr_exp, "No stack.", &selected_frame_p);
   gdbarch = get_frame_arch (fi);
 
   /* Name of the value returned by get_frame_pc().  Per comments, "pc"
@@ -2284,7 +2278,7 @@ find_relative_frame (struct frame_info *frame, int *level_offset_ptr)
 void
 select_frame_command (char *level_exp, int from_tty)
 {
-  select_frame (parse_frame_specification_1 (level_exp, "No stack.", NULL));
+  select_frame (parse_frame_specification (level_exp, "No stack.", NULL));
 }
 
 /* The "frame" command.  With no argument, print the selected frame
@@ -2492,11 +2486,10 @@ return_command (char *retval_exp, int from_tty)
   if (get_frame_type (get_current_frame ()) == DUMMY_FRAME)
     frame_pop (get_current_frame ());
 
+  select_frame (get_current_frame ());
   /* If interactive, print the frame that is now current.  */
   if (from_tty)
-    frame_command ("0", 1);
-  else
-    select_frame_command ("0", 0);
+    print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* Sets the scope to input function name, provided that the function
@@ -2521,7 +2514,7 @@ func_command (char *arg, int from_tty)
   if (arg == NULL)
     return;
 
-  frame = parse_frame_specification ("0");
+  frame = get_current_frame ();
   sals = decode_line_with_current_source (arg, DECODE_LINE_FUNFIRSTLINE);
   cleanups = make_cleanup (xfree, sals.sals);
   func_bounds = XNEWVEC (struct function_bounds, sals.nelts);
