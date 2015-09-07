@@ -1,3 +1,9 @@
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* stack.c: Include safe-ctype.h not ctype.h.
+	(parse_frame_specification): Use ISSPACE not isspace.
+	(backtrace_command): Use TOLOWER not tolower.
+
 2015-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* mep-tdep.c (current_me_module): Add cast.

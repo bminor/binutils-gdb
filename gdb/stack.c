@@ -48,7 +48,7 @@
 #include "cli/cli-utils.h"
 #include "objfiles.h"
 
-#include <ctype.h>
+#include "safe-ctype.h"
 #include "symfile.h"
 #include "extension.h"
 
@@ -1305,7 +1305,7 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
 
 	  /* Parse the argument, extract it, save it.  */
 	  for (p = frame_exp;
-	       *p && !isspace (*p);
+	       *p && !ISSPACE (*p);
 	       p++);
 	  addr_string = savestring (frame_exp, p - frame_exp);
 	  frame_exp = p;
@@ -1894,7 +1894,7 @@ backtrace_command (char *arg, int from_tty)
 	  unsigned int j;
 
 	  for (j = 0; j < strlen (argv[i]); j++)
-	    argv[i][j] = tolower (argv[i][j]);
+	    argv[i][j] = TOLOWER (argv[i][j]);
 
 	  if (no_filters < 0 && subset_compare (argv[i], "no-filters"))
 	    no_filters = argc;
