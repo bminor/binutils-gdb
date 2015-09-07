@@ -1,5 +1,10 @@
 2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* stack.c (func_command): Return early when there is no ARG
+	string.
+
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* stack.c: Include safe-ctype.h not ctype.h.
 	(parse_frame_specification): Use ISSPACE not isspace.
 	(backtrace_command): Use TOLOWER not tolower.

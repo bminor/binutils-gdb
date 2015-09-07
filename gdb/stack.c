@@ -2518,7 +2518,7 @@ func_command (char *arg, int from_tty)
   struct function_bounds *func_bounds = NULL;
   struct cleanup *cleanups;
 
-  if (arg != NULL)
+  if (arg == NULL)
     return;
 
   frame = parse_frame_specification ("0");
