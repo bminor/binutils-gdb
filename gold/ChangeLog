@@ -1,3 +1,10 @@
+2015-09-07  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18930
+	PR gold/18886
+	* resolve.cc (Symbol::override_base): Don't convert IFUNC symbols here.
+	* symtab.cc (Symbol_table::add_from_dynobj): Convert them here instead.
+
 2015-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/18886

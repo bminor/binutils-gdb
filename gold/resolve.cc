@@ -98,13 +98,7 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
   this->is_ordinary_shndx_ = is_ordinary;
   // Don't override st_type from plugin placeholder symbols.
   if (object->pluginobj() == NULL)
-    {
-      // Turn IFUNC symbols from shared libraries into normal FUNC symbols.
-      elfcpp::STT type = sym.get_st_type();
-      if (object->is_dynamic() && type == elfcpp::STT_GNU_IFUNC)
-	type = elfcpp::STT_FUNC;
-      this->type_ = type;
-    }
+    this->type_ = sym.get_st_type();
   this->binding_ = sym.get_st_bind();
   this->override_visibility(sym.get_st_visibility());
   this->nonvis_ = sym.get_st_nonvis();
