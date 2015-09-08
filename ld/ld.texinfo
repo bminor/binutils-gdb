@@ -3887,6 +3887,19 @@ Then the C source code to perform the copy would be:
 @end smallexample
 
 Note the use of the @samp{&} operators.  These are correct.
+Alternatively the symbols can be treated as the names of vectors or
+arrays and then the code will again work as expected:
+
+@smallexample
+@group
+  extern char start_of_ROM[], end_of_ROM[], start_of_FLASH[];
+
+  memcpy (start_of_FLASH, start_of_ROM, end_of_ROM - start_of_ROM);
+@end group
+@end smallexample
+
+Note how using this method does not require the use of @samp{&}
+operators.
 
 @node SECTIONS
 @section SECTIONS Command
