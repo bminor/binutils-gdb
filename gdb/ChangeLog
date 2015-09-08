@@ -1,5 +1,13 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_xfer_partial)
+	(record_btrace_store_registers, record_btrace_prepare_to_store):
+	Call record_btrace_is_replaying with inferior_ptid instead of
+	minus_one_ptid.
+	(record_btrace_store_registers): Change error message.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_is_replaying): Add ptid argument.
 	Update users to pass minus_one_ptid.
 	* record-full.c (record_full_is_replaying): Add ptid argument (ignored).

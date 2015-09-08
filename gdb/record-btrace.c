@@ -1160,7 +1160,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
   /* Filter out requests that don't make sense during replay.  */
   if (replay_memory_access == replay_memory_access_read_only
       && !record_btrace_generating_corefile
-      && record_btrace_is_replaying (ops, minus_one_ptid))
+      && record_btrace_is_replaying (ops, inferior_ptid))
     {
       switch (object)
 	{
@@ -1314,8 +1314,8 @@ record_btrace_store_registers (struct target_ops *ops,
   struct target_ops *t;
 
   if (!record_btrace_generating_corefile
-      && record_btrace_is_replaying (ops, minus_one_ptid))
-    error (_("This record target does not allow writing registers."));
+      && record_btrace_is_replaying (ops, inferior_ptid))
+    error (_("Cannot write registers while replaying."));
 
   gdb_assert (may_write_registers != 0);
 
@@ -1332,7 +1332,7 @@ record_btrace_prepare_to_store (struct target_ops *ops,
   struct target_ops *t;
 
   if (!record_btrace_generating_corefile
-      && record_btrace_is_replaying (ops, minus_one_ptid))
+      && record_btrace_is_replaying (ops, inferior_ptid))
     return;
 
   t = ops->beneath;
