@@ -1,3 +1,8 @@
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_wait): Replace non_stop check with
+	target_is_non_stop_p ().
+
 2015-09-15  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-typeprint.c (print_array_type): Do not describe arrays as

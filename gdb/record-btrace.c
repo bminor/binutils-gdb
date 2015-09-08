@@ -2104,7 +2104,7 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   *status = record_btrace_step_thread (tp);
 
   /* Stop all other threads. */
-  if (!non_stop)
+  if (!target_is_non_stop_p ())
     ALL_NON_EXITED_THREADS (other)
       other->btrace.flags &= ~BTHR_MOVE;
 
