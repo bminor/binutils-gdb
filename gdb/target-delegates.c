@@ -3602,26 +3602,28 @@ debug_delete_record (struct target_ops *self)
 }
 
 static int
-delegate_record_is_replaying (struct target_ops *self)
+delegate_record_is_replaying (struct target_ops *self, ptid_t arg1)
 {
   self = self->beneath;
-  return self->to_record_is_replaying (self);
+  return self->to_record_is_replaying (self, arg1);
 }
 
 static int
-tdefault_record_is_replaying (struct target_ops *self)
+tdefault_record_is_replaying (struct target_ops *self, ptid_t arg1)
 {
   return 0;
 }
 
 static int
-debug_record_is_replaying (struct target_ops *self)
+debug_record_is_replaying (struct target_ops *self, ptid_t arg1)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_record_is_replaying (...)\n", debug_target.to_shortname);
-  result = debug_target.to_record_is_replaying (&debug_target);
+  result = debug_target.to_record_is_replaying (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_record_is_replaying (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_ptid_t (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);

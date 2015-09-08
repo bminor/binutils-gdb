@@ -1136,12 +1136,12 @@ record_btrace_call_history_from (struct target_ops *self,
 /* The to_record_is_replaying method of target record-btrace.  */
 
 static int
-record_btrace_is_replaying (struct target_ops *self)
+record_btrace_is_replaying (struct target_ops *self, ptid_t ptid)
 {
   struct thread_info *tp;
 
   ALL_NON_EXITED_THREADS (tp)
-    if (btrace_is_replaying (tp))
+    if (ptid_match (tp->ptid, ptid) && btrace_is_replaying (tp))
       return 1;
 
   return 0;
@@ -1160,7 +1160,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
   /* Filter out requests that don't make sense during replay.  */
   if (replay_memory_access == replay_memory_access_read_only
       && !record_btrace_generating_corefile
-      && record_btrace_is_replaying (ops))
+      && record_btrace_is_replaying (ops, minus_one_ptid))
     {
       switch (object)
 	{
@@ -1313,7 +1313,8 @@ record_btrace_store_registers (struct target_ops *ops,
 {
   struct target_ops *t;
 
-  if (!record_btrace_generating_corefile && record_btrace_is_replaying (ops))
+  if (!record_btrace_generating_corefile
+      && record_btrace_is_replaying (ops, minus_one_ptid))
     error (_("This record target does not allow writing registers."));
 
   gdb_assert (may_write_registers != 0);
@@ -1330,7 +1331,8 @@ record_btrace_prepare_to_store (struct target_ops *ops,
 {
   struct target_ops *t;
 
-  if (!record_btrace_generating_corefile && record_btrace_is_replaying (ops))
+  if (!record_btrace_generating_corefile
+      && record_btrace_is_replaying (ops, minus_one_ptid))
     return;
 
   t = ops->beneath;
@@ -1917,7 +1919,8 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
      For non-stop targets this means that no thread is replaying.  In order to
      make progress, we may need to explicitly move replaying threads to the end
      of their execution history.  */
-  if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
+  if ((execution_direction != EXEC_REVERSE)
+      && !record_btrace_is_replaying (ops, minus_one_ptid))
     {
       ops = ops->beneath;
       return ops->to_resume (ops, orig_ptid, step, signal);
@@ -2273,7 +2276,8 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid), options);
 
   /* As long as we're not replaying, just forward the request.  */
-  if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
+  if ((execution_direction != EXEC_REVERSE)
+      && !record_btrace_is_replaying (ops, minus_one_ptid))
     {
       ops = ops->beneath;
       return ops->to_wait (ops, ptid, status, options);
@@ -2401,7 +2405,8 @@ record_btrace_stop (struct target_ops *ops, ptid_t ptid)
   DEBUG ("stop %s", target_pid_to_str (ptid));
 
   /* As long as we're not replaying, just forward the request.  */
-  if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
+  if ((execution_direction != EXEC_REVERSE)
+      && !record_btrace_is_replaying (ops, minus_one_ptid))
     {
       ops = ops->beneath;
       ops->to_stop (ops, ptid);
@@ -2432,7 +2437,7 @@ record_btrace_can_execute_reverse (struct target_ops *self)
 static int
 record_btrace_stopped_by_sw_breakpoint (struct target_ops *ops)
 {
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     {
       struct thread_info *tp = inferior_thread ();
 
@@ -2448,7 +2453,7 @@ record_btrace_stopped_by_sw_breakpoint (struct target_ops *ops)
 static int
 record_btrace_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
 {
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     return 1;
 
   return ops->beneath->to_supports_stopped_by_sw_breakpoint (ops->beneath);
@@ -2459,7 +2464,7 @@ record_btrace_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
 static int
 record_btrace_stopped_by_hw_breakpoint (struct target_ops *ops)
 {
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     {
       struct thread_info *tp = inferior_thread ();
 
@@ -2475,7 +2480,7 @@ record_btrace_stopped_by_hw_breakpoint (struct target_ops *ops)
 static int
 record_btrace_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
 {
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     return 1;
 
   return ops->beneath->to_supports_stopped_by_hw_breakpoint (ops->beneath);
@@ -2487,7 +2492,7 @@ static void
 record_btrace_update_thread_list (struct target_ops *ops)
 {
   /* We don't add or remove threads during replay.  */
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     return;
 
   /* Forward the request.  */
@@ -2501,7 +2506,7 @@ static int
 record_btrace_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   /* We don't add or remove threads during replay.  */
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     return find_thread_ptid (ptid) != NULL;
 
   /* Forward the request.  */

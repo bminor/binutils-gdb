@@ -1153,8 +1153,8 @@ struct target_ops
     void (*to_delete_record) (struct target_ops *)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
-    /* Query if the record target is currently replaying.  */
-    int (*to_record_is_replaying) (struct target_ops *)
+    /* Query if the record target is currently replaying PTID.  */
+    int (*to_record_is_replaying) (struct target_ops *, ptid_t ptid)
       TARGET_DEFAULT_RETURN (0);
 
     /* Go to the begin of the execution trace.  */
@@ -2440,7 +2440,7 @@ extern int target_supports_delete_record (void);
 extern void target_delete_record (void);
 
 /* See to_record_is_replaying in struct target_ops.  */
-extern int target_record_is_replaying (void);
+extern int target_record_is_replaying (ptid_t ptid);
 
 /* See to_goto_record_begin in struct target_ops.  */
 extern void target_goto_record_begin (void);

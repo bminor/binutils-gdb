@@ -1,5 +1,18 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_is_replaying): Add ptid argument.
+	Update users to pass minus_one_ptid.
+	* record-full.c (record_full_is_replaying): Add ptid argument (ignored).
+	* record.c (cmd_record_delete): Pass inferior_ptid to
+	target_record_is_replaying.
+	* target-delegates.c: Regenerated.
+	* target.c (target_record_is_replaying): Add ptid argument.
+	* target.h (struct target_ops) <to_record_is_replaying>: Add ptid
+	argument.
+	(target_record_is_replaying): Add ptid argument.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_open): Remove non_stop check.
 	* NEWS: Announce that record btrace supports non-stop mode.
 
