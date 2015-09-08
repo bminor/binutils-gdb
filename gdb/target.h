@@ -1157,6 +1157,10 @@ struct target_ops
     int (*to_record_is_replaying) (struct target_ops *, ptid_t ptid)
       TARGET_DEFAULT_RETURN (0);
 
+    /* Stop replaying.  */
+    void (*to_record_stop_replaying) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
+
     /* Go to the begin of the execution trace.  */
     void (*to_goto_record_begin) (struct target_ops *)
       TARGET_DEFAULT_NORETURN (tcomplain ());
@@ -2441,6 +2445,9 @@ extern void target_delete_record (void);
 
 /* See to_record_is_replaying in struct target_ops.  */
 extern int target_record_is_replaying (ptid_t ptid);
+
+/* See to_record_stop_replaying in struct target_ops.  */
+extern void target_record_stop_replaying (void);
 
 /* See to_goto_record_begin in struct target_ops.  */
 extern void target_goto_record_begin (void);

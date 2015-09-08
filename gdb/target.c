@@ -3664,6 +3664,14 @@ target_record_is_replaying (ptid_t ptid)
 /* See target.h.  */
 
 void
+target_record_stop_replaying (void)
+{
+  current_target.to_record_stop_replaying (&current_target);
+}
+
+/* See target.h.  */
+
+void
 target_goto_record_begin (void)
 {
   current_target.to_goto_record_begin (&current_target);

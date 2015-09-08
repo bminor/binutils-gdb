@@ -3631,6 +3631,28 @@ debug_record_is_replaying (struct target_ops *self, ptid_t arg1)
 }
 
 static void
+delegate_record_stop_replaying (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_record_stop_replaying (self);
+}
+
+static void
+tdefault_record_stop_replaying (struct target_ops *self)
+{
+}
+
+static void
+debug_record_stop_replaying (struct target_ops *self)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_record_stop_replaying (...)\n", debug_target.to_shortname);
+  debug_target.to_record_stop_replaying (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_record_stop_replaying (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+static void
 delegate_goto_record_begin (struct target_ops *self)
 {
   self = self->beneath;
@@ -4267,6 +4289,8 @@ install_delegators (struct target_ops *ops)
     ops->to_delete_record = delegate_delete_record;
   if (ops->to_record_is_replaying == NULL)
     ops->to_record_is_replaying = delegate_record_is_replaying;
+  if (ops->to_record_stop_replaying == NULL)
+    ops->to_record_stop_replaying = delegate_record_stop_replaying;
   if (ops->to_goto_record_begin == NULL)
     ops->to_goto_record_begin = delegate_goto_record_begin;
   if (ops->to_goto_record_end == NULL)
@@ -4434,6 +4458,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_save_record = tdefault_save_record;
   ops->to_delete_record = tdefault_delete_record;
   ops->to_record_is_replaying = tdefault_record_is_replaying;
+  ops->to_record_stop_replaying = tdefault_record_stop_replaying;
   ops->to_goto_record_begin = tdefault_goto_record_begin;
   ops->to_goto_record_end = tdefault_goto_record_end;
   ops->to_goto_record = tdefault_goto_record;
@@ -4587,6 +4612,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_save_record = debug_save_record;
   ops->to_delete_record = debug_delete_record;
   ops->to_record_is_replaying = debug_record_is_replaying;
+  ops->to_record_stop_replaying = debug_record_stop_replaying;
   ops->to_goto_record_begin = debug_goto_record_begin;
   ops->to_goto_record_end = debug_goto_record_end;
   ops->to_goto_record = debug_goto_record;

@@ -1917,6 +1917,14 @@ record_full_goto (struct target_ops *self, ULONGEST target_insn)
   record_full_goto_entry (p);
 }
 
+/* The "to_record_stop_replaying" target method.  */
+
+static void
+record_full_stop_replaying (struct target_ops *self)
+{
+  record_full_goto_end (self);
+}
+
 static void
 init_record_full_ops (void)
 {
@@ -1957,6 +1965,7 @@ init_record_full_ops (void)
   record_full_ops.to_save_record = record_full_save;
   record_full_ops.to_delete_record = record_full_delete;
   record_full_ops.to_record_is_replaying = record_full_is_replaying;
+  record_full_ops.to_record_stop_replaying = record_full_stop_replaying;
   record_full_ops.to_goto_record_begin = record_full_goto_begin;
   record_full_ops.to_goto_record_end = record_full_goto_end;
   record_full_ops.to_goto_record = record_full_goto;

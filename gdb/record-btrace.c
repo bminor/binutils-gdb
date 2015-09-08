@@ -1910,8 +1910,7 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
       /* ...and we stop replaying other threads if the thread to resume is not
 	 replaying.  */
       if (!btrace_is_replaying (tp) && execution_direction != EXEC_REVERSE)
-	ALL_NON_EXITED_THREADS (tp)
-	  record_btrace_stop_replaying (tp);
+	target_record_stop_replaying ();
     }
 
   /* As long as we're not replaying, just forward the request.
@@ -2596,6 +2595,17 @@ record_btrace_goto (struct target_ops *self, ULONGEST insn)
   record_btrace_set_replay (tp, &it);
 }
 
+/* The to_record_stop_replaying method of target record-btrace.  */
+
+static void
+record_btrace_stop_replaying_all (struct target_ops *self)
+{
+  struct thread_info *tp;
+
+  ALL_NON_EXITED_THREADS (tp)
+    record_btrace_stop_replaying (tp);
+}
+
 /* The to_execution_direction target method.  */
 
 static enum exec_direction_kind
@@ -2647,6 +2657,7 @@ init_record_btrace_ops (void)
   ops->to_call_history_from = record_btrace_call_history_from;
   ops->to_call_history_range = record_btrace_call_history_range;
   ops->to_record_is_replaying = record_btrace_is_replaying;
+  ops->to_record_stop_replaying = record_btrace_stop_replaying_all;
   ops->to_xfer_partial = record_btrace_xfer_partial;
   ops->to_remove_breakpoint = record_btrace_remove_breakpoint;
   ops->to_insert_breakpoint = record_btrace_insert_breakpoint;
