@@ -1,5 +1,9 @@
 2015-09-09  Doug Evans  <dje@google.com>
 
+	* gdb.python/py-prettyprint.exp: Check result of run_lang_tests.
+
+2015-09-09  Doug Evans  <dje@google.com>
+
 	* gdb.base/pie-execl.exp: Fix result test of build_executable.
 
 2015-09-09  Doug Evans  <dje@google.com>
