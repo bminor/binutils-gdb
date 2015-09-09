@@ -217,4 +217,8 @@ extern void mark_infrun_async_event_handler (void);
    to get past e.g., a breakpoint.  */
 extern struct thread_info *step_over_queue_head;
 
+/* Remove breakpoints if possible (usually that means, if everything
+   is stopped).  On failure, print a message.  */
+extern void maybe_remove_breakpoints (void);
+
 #endif /* INFRUN_H */

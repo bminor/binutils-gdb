@@ -67,6 +67,9 @@ struct thread_fsm_ops
   /* The async_reply_reason that is broadcast to MI clients if this
      FSM finishes successfully.  */
   enum async_reply_reason (*async_reply_reason) (struct thread_fsm *self);
+
+  /* Whether the stop should be notified to the user/frontend.  */
+  int (*should_notify_stop) (struct thread_fsm *self);
 };
 /* Initialize FSM.  */
 extern void thread_fsm_ctor (struct thread_fsm *fsm,
@@ -94,5 +97,8 @@ extern int thread_fsm_finished_p (struct thread_fsm *fsm);
 /* Calls the FSM's reply_reason method.  */
 extern enum async_reply_reason
   thread_fsm_async_reply_reason (struct thread_fsm *fsm);
+
+/* Calls the FSM's should_notify_stop method.  */
+extern int thread_fsm_should_notify_stop (struct thread_fsm *self);
 
 #endif /* THREAD_FSM_H */

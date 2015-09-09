@@ -95,3 +95,13 @@ thread_fsm_async_reply_reason (struct thread_fsm *self)
 
   return self->ops->async_reply_reason (self);
 }
+
+/* See thread-fsm.h.  */
+
+int
+thread_fsm_should_notify_stop (struct thread_fsm *self)
+{
+  if (self->ops->should_notify_stop != NULL)
+    return self->ops->should_notify_stop (self);
+  return 1;
+}

@@ -3834,6 +3834,7 @@ fetch_inferior_event (void *client_data)
       struct inferior *inf = find_inferior_ptid (ecs->ptid);
       int should_stop = 1;
       struct thread_info *thr = ecs->event_thread;
+      int should_notify_stop = 1;
 
       delete_just_stopped_threads_infrun_breakpoints ();
 
@@ -3853,12 +3854,21 @@ fetch_inferior_event (void *client_data)
 	{
 	  clean_up_just_stopped_threads_fsms (ecs);
 
-	  /* We may not find an inferior if this was a process exit.  */
-	  if (inf == NULL || inf->control.stop_soon == NO_STOP_QUIETLY)
-	    normal_stop ();
+	  if (thr != NULL && thr->thread_fsm != NULL)
+	    {
+	      should_notify_stop
+		= thread_fsm_should_notify_stop (thr->thread_fsm);
+	    }
 
-	  inferior_event_handler (INF_EXEC_COMPLETE, NULL);
-	  cmd_done = 1;
+	  if (should_notify_stop)
+	    {
+	      /* We may not find an inferior if this was a process exit.  */
+	      if (inf == NULL || inf->control.stop_soon == NO_STOP_QUIETLY)
+		normal_stop ();
+
+	      inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+	      cmd_done = 1;
+	    }
 	}
     }
 
@@ -7810,6 +7820,23 @@ print_stop_event (struct ui_out *uiout)
     }
 }
 
+/* See infrun.h.  */
+
+void
+maybe_remove_breakpoints (void)
+{
+  if (!breakpoints_should_be_inserted_now () && target_has_execution)
+    {
+      if (remove_breakpoints ())
+	{
+	  target_terminal_ours_for_output ();
+	  printf_filtered (_("Cannot remove breakpoints because "
+			     "program is no longer writable.\nFurther "
+			     "execution is probably impossible.\n"));
+	}
+    }
+}
+
 /* Here to return control to GDB when the inferior stops for real.
    Print appropriate messages, remove breakpoints, give terminal our modes.
 
@@ -7903,16 +7930,7 @@ normal_stop (void)
     }
 
   /* Note: this depends on the update_thread_list call above.  */
-  if (!breakpoints_should_be_inserted_now () && target_has_execution)
-    {
-      if (remove_breakpoints ())
-	{
-	  target_terminal_ours_for_output ();
-	  printf_filtered (_("Cannot remove breakpoints because "
-			     "program is no longer writable.\nFurther "
-			     "execution is probably impossible.\n"));
-	}
-    }
+  maybe_remove_breakpoints ();
 
   /* If an auto-display called a function and that got a signal,
      delete that auto-display to avoid an infinite recursion.  */
@@ -7923,24 +7941,36 @@ normal_stop (void)
   target_terminal_ours ();
   async_enable_stdin ();
 
-  /* Set the current source location.  This will also happen if we
-     display the frame below, but the current SAL will be incorrect
-     during a user hook-stop function.  */
-  if (has_stack_frames () && !stop_stack_dummy)
-    set_current_sal_from_frame (get_current_frame ());
+  /* Let the user/frontend see the threads as stopped.  */
+  do_cleanups (old_chain);
 
-  /* Let the user/frontend see the threads as stopped, but defer to
-     call_function_by_hand if the thread finished an infcall
-     successfully.  We may be e.g., evaluating a breakpoint condition.
-     In that case, the thread had state THREAD_RUNNING before the
-     infcall, and shall remain marked running, all without informing
-     the user/frontend about state transition changes.  */
-  if (target_has_execution
-      && inferior_thread ()->control.in_infcall
-      && stop_stack_dummy == STOP_STACK_DUMMY)
-    discard_cleanups (old_chain);
-  else
-    do_cleanups (old_chain);
+  /* Select innermost stack frame - i.e., current frame is frame 0,
+     and current location is based on that.  Handle the case where the
+     dummy call is returning after being stopped.  E.g. the dummy call
+     previously hit a breakpoint.  (If the dummy call returns
+     normally, we won't reach here.)  Do this before the stop hook is
+     run, so that it doesn't get to see the temporary dummy frame,
+     which is not where we'll present the stop.  */
+  if (has_stack_frames ())
+    {
+      if (stop_stack_dummy == STOP_STACK_DUMMY)
+	{
+	  /* Pop the empty frame that contains the stack dummy.  This
+	     also restores inferior state prior to the call (struct
+	     infcall_suspend_state).  */
+	  struct frame_info *frame = get_current_frame ();
+
+	  gdb_assert (get_frame_type (frame) == DUMMY_FRAME);
+	  frame_pop (frame);
+	  /* frame_pop calls reinit_frame_cache as the last thing it
+	     does which means there's now no selected frame.  */
+	}
+
+      select_frame (get_current_frame ());
+
+      /* Set the current source location.  */
+      set_current_sal_from_frame (get_current_frame ());
+    }
 
   /* Look up the hook_stop and run it (CLI internally handles problem
      of stop_command's pre-hook not existing).  */
@@ -7948,62 +7978,13 @@ normal_stop (void)
     catch_errors (hook_stop_stub, stop_command,
 		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
 
-  if (!has_stack_frames ())
-    goto done;
-
-  if (last.kind == TARGET_WAITKIND_SIGNALLED
-      || last.kind == TARGET_WAITKIND_EXITED)
-    goto done;
-
-  /* Select innermost stack frame - i.e., current frame is frame 0,
-     and current location is based on that.
-     Don't do this on return from a stack dummy routine,
-     or if the program has exited.  */
-
-  if (!stop_stack_dummy)
-    select_frame (get_current_frame ());
-
-  if (stop_stack_dummy == STOP_STACK_DUMMY)
-    {
-      /* Pop the empty frame that contains the stack dummy.
-	 This also restores inferior state prior to the call
-	 (struct infcall_suspend_state).  */
-      struct frame_info *frame = get_current_frame ();
-
-      gdb_assert (get_frame_type (frame) == DUMMY_FRAME);
-      frame_pop (frame);
-      /* frame_pop() calls reinit_frame_cache as the last thing it
-	 does which means there's currently no selected frame.  We
-	 don't need to re-establish a selected frame if the dummy call
-	 returns normally, that will be done by
-	 restore_infcall_control_state.  However, we do have to handle
-	 the case where the dummy call is returning after being
-	 stopped (e.g. the dummy call previously hit a breakpoint).
-	 We can't know which case we have so just always re-establish
-	 a selected frame here.  */
-      select_frame (get_current_frame ());
-    }
-
-done:
-
-  /* Suppress the stop observer if we're in the middle of:
-
-     - calling an inferior function, as we pretend we inferior didn't
-       run at all.  The return value of the call is handled by the
-       expression evaluator, through call_function_by_hand.  */
-
-  if (!target_has_execution
-      || last.kind == TARGET_WAITKIND_SIGNALLED
-      || last.kind == TARGET_WAITKIND_EXITED
-      || last.kind == TARGET_WAITKIND_NO_RESUMED
-      || !inferior_thread ()->control.in_infcall)
-    {
-      if (!ptid_equal (inferior_ptid, null_ptid))
-	observer_notify_normal_stop (inferior_thread ()->control.stop_bpstat,
-				     stop_print_frame);
-      else
-	observer_notify_normal_stop (NULL, stop_print_frame);
-    }
+  /* Notify observers about the stop.  This is where the interpreters
+     print the stop event.  */
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    observer_notify_normal_stop (inferior_thread ()->control.stop_bpstat,
+				 stop_print_frame);
+  else
+    observer_notify_normal_stop (NULL, stop_print_frame);
 
   annotate_stopped ();
 

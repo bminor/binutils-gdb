@@ -1,5 +1,30 @@
 2015-09-09  Pedro Alves  <palves@redhat.com>
 
+	* infcall.c: Include thread_fsm.h.
+	(struct call_return_meta_info): New.
+	(get_call_return_value): New function, factored out from
+	call_function_by_hand_dummy.
+	(struct call_thread_fsm): New.
+	(call_thread_fsm_ops): New global.
+	(new_call_thread_fsm, call_thread_fsm_should_stop)
+	(call_thread_fsm_should_notify_stop): New functions.
+	(run_inferior_call): Add 'sm' parameter.  Associate the FSM with
+	the thread.
+	(call_function_by_hand_dummy): Create a new call_thread_fsm
+	instance, associate it with the thread, and wait for the FSM to
+	finish.  If finished successfully, fetch the function's result
+	value out of the FSM.
+	* infrun.c (fetch_inferior_event): If the FSM says the stop
+	shouldn't be notified, don't call normal_stop.
+	(maybe_remove_breakpoints): New function, factored out from ...
+	(normal_stop): ... here.  Simplify.
+	* infrun.h (maybe_remove_breakpoints): Declare.
+	* thread-fsm.c (thread_fsm_should_notify_stop): New function.
+	(thread-fsm.h) <struct thread_fsm_ops>: New field.
+	(thread_fsm_should_notify_stop): Declare.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (COMMON_OBS): Add thread-fsm.o.
 	* breakpoint.c (handle_jit_event): Print debug output.
 	(bpstat_what): Split event callback handling to ...
