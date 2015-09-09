@@ -1,3 +1,7 @@
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-cli.exp: Add CLI finish tests.
+
 2015-09-08  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.threads/hand-call-in-threads.exp: Make sure the thread

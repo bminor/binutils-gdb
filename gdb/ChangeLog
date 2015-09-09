@@ -1,5 +1,83 @@
 2015-09-09  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (COMMON_OBS): Add thread-fsm.o.
+	* breakpoint.c (handle_jit_event): Print debug output.
+	(bpstat_what): Split event callback handling to ...
+	(bpstat_run_callbacks): ... this new function.
+	(momentary_bkpt_print_it): No longer handle bp_finish here.
+	* breakpoint.h (bpstat_run_callbacks): Declare.
+	* gdbthread.h (struct thread_info) <step_multi>: Delete field.
+	<thread_fsm>: New field.
+	(thread_cancel_execution_command): Declare.
+	* infcmd.c: Include thread-fsm.h.
+	(struct step_command_fsm): New.
+	(step_command_fsm_ops): New global.
+	(new_step_command_fsm, step_command_fsm_prepare): New functions.
+	(step_1): Adjust to use step_command_fsm_prepare and
+	prepare_one_step.
+	(struct step_1_continuation_args): Delete.
+	(step_1_continuation): Delete.
+	(step_command_fsm_should_stop): New function.
+	(step_once): Delete.
+	(step_command_fsm_clean_up, step_command_fsm_async_reply_reason)
+	(prepare_one_step): New function, based on step_once.
+	(until_next_command): Remove step_multi reference.
+	(struct return_value_info): New.
+	(print_return_value): Rename to ...
+	(print_return_value_1): ... this.  New struct return_value_info
+	parameter.  Adjust.
+	(print_return_value): Reimplement as wrapper around
+	print_return_value_1.
+	(struct finish_command_fsm): New.
+	(finish_command_continuation): Delete.
+	(finish_command_fsm_ops): New global.
+	(new_finish_command_fsm, finish_command_fsm_should_stop): New
+	functions.
+	(finish_command_fsm_clean_up, finish_command_fsm_return_value):
+	New.
+	(finish_command_continuation_free_arg): Delete.
+	(finish_command_fsm_async_reply_reason): New.
+	(finish_backward, finish_forward): Change symbol parameter to a
+	finish_command_fsm.  Adjust.
+	(finish_command): Create a finish_command_fsm.  Adjust.
+	* infrun.c: Include "thread-fsm.h".
+	(clear_proceed_status_thread): Delete the thread's FSM.
+	(infrun_thread_stop_requested_callback): Cancel the thread's
+	execution command.
+	(clean_up_just_stopped_threads_fsms): New function.
+	(fetch_inferior_event): Handle the event_thread's should_stop
+	method saying the command isn't done yet.
+	(process_event_stop_test): Run breakpoint callbacks here.
+	(print_stop_event): Rename to ...
+	(print_stop_location): ... this.
+	(restore_current_uiout_cleanup): New function.
+	(print_stop_event): Reimplement.
+	(normal_stop): No longer notify the end_stepping_range observers
+	here handle "step N" nor "finish" here.  No longer call
+	print_stop_event here.
+	* infrun.h (struct return_value_info): Forward declare.
+	(print_return_value): Declare.
+	(print_stop_event): Change prototype.
+	* thread-fsm.c: New file.
+	* thread-fsm.h: New file.
+	* thread.c: Include "thread-fsm.h".
+	(thread_cancel_execution_command): New function.
+	(clear_thread_inferior_resources): Call it.
+	* cli/cli-interp.c (cli_on_normal_stop): New function.
+	(cli_interpreter_init): Install cli_on_normal_stop as normal_stop
+	observer.
+	* mi/mi-interp.c: Include "thread-fsm.h".
+	(restore_current_uiout_cleanup): Delete.
+	(mi_on_normal_stop): If the thread has an FSM associated, and it
+	finished, ask it for the async-reply-reason to print.  Always call
+	print_stop_event here, regardless of the top-level interpreter.
+	Check bpstat_what to tell whether an asynchronous breakpoint hit
+	triggered.
+	* tui/tui-interp.c (tui_on_normal_stop): New function.
+	(tui_init): Install tui_on_normal_stop as normal_stop observer.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (bpstat_do_actions_1, until_break_command): Don't
 	check whether the target can async.
 	* inf-loop.c (inferior_event_handler): Only call target_async if

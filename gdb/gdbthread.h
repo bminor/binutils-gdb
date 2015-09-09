@@ -277,9 +277,10 @@ struct thread_info
      command.  */
   struct continuation *intermediate_continuations;
 
-  /* If stepping, nonzero means step count is > 1 so don't print frame
-     next time inferior stops if it stops due to stepping.  */
-  int step_multi;
+  /* Pointer to the state machine manager object that handles what is
+     left to do for the thread's execution command after the target
+     stops.  Several execution commands use it.  */
+  struct thread_fsm *thread_fsm;
 
   /* This is used to remember when a fork or vfork event was caught by
      a catchpoint, and thus the event is to be followed at the next
@@ -556,6 +557,10 @@ extern struct thread_info *thread_step_over_chain_next (struct thread_info *tp);
 /* Return true if TP is in the step-over chain.  */
 
 extern int thread_is_in_step_over_chain (struct thread_info *tp);
+
+/* Cancel any ongoing execution command.  */
+
+extern void thread_cancel_execution_command (struct thread_info *thr);
 
 extern struct thread_info *thread_list;
 

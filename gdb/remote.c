@@ -3637,7 +3637,7 @@ process_initial_stop_replies (void)
 	    observer_notify_signal_received (sig);
         }
 
-      print_stop_event (&ws);
+      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
       observer_notify_normal_stop (NULL, 1);
     }
 }

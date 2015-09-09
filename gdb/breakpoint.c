@@ -5694,6 +5694,9 @@ handle_jit_event (void)
   struct frame_info *frame;
   struct gdbarch *gdbarch;
 
+  if (debug_infrun)
+    fprintf_unfiltered (gdb_stdlog, "handling bp_jit_event\n");
+
   /* Switch terminal for any messages produced by
      breakpoint_re_set.  */
   target_terminal_ours_for_output ();
@@ -5885,16 +5888,13 @@ bpstat_what (bpstat bs_head)
       retval.main_action = max (retval.main_action, this_action);
     }
 
-  /* These operations may affect the bs->breakpoint_at state so they are
-     delayed after MAIN_ACTION is decided above.  */
+  return retval;
+}
 
-  if (jit_event)
-    {
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "bpstat_what: bp_jit_event\n");
-
-      handle_jit_event ();
-    }
+void
+bpstat_run_callbacks (bpstat bs_head)
+{
+  bpstat bs;
 
   for (bs = bs_head; bs != NULL; bs = bs->next)
     {
@@ -5904,6 +5904,9 @@ bpstat_what (bpstat bs_head)
 	continue;
       switch (b->type)
 	{
+	case bp_jit_event:
+	  handle_jit_event ();
+	  break;
 	case bp_gnu_ifunc_resolver:
 	  gnu_ifunc_resolver_stop (b);
 	  break;
@@ -5912,8 +5915,6 @@ bpstat_what (bpstat bs_head)
 	  break;
 	}
     }
-
-  return retval;
 }
 
 /* Nonzero if we should step constantly (e.g. watchpoints on machines
@@ -13202,12 +13203,6 @@ momentary_bkpt_print_it (bpstat bs)
 
       switch (b->type)
 	{
-	case bp_finish:
-	  ui_out_field_string
-	    (uiout, "reason",
-	     async_reason_lookup (EXEC_ASYNC_FUNCTION_FINISHED));
-	  break;
-
 	case bp_until:
 	  ui_out_field_string
 	    (uiout, "reason",

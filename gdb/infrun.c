@@ -62,6 +62,7 @@
 #include "terminal.h"
 #include "solist.h"
 #include "event-loop.h"
+#include "thread-fsm.h"
 
 /* Prototypes for local functions */
 
@@ -2749,6 +2750,9 @@ clear_proceed_status_thread (struct thread_info *tp)
   if (!signal_pass_state (tp->suspend.stop_signal))
     tp->suspend.stop_signal = GDB_SIGNAL_0;
 
+  thread_fsm_delete (tp->thread_fsm);
+  tp->thread_fsm = NULL;
+
   tp->control.trap_expected = 0;
   tp->control.step_range_start = 0;
   tp->control.step_range_end = 0;
@@ -3220,7 +3224,7 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 	 have consistent output as if the stop event had been
 	 reported.  */
       ecs->ptid = info->ptid;
-      ecs->event_thread = find_thread_ptid (info->ptid);
+      ecs->event_thread = info;
       ecs->ws.kind = TARGET_WAITKIND_STOPPED;
       ecs->ws.value.sig = GDB_SIGNAL_0;
 
@@ -3229,6 +3233,9 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
       if (!ecs->wait_some_more)
 	{
 	  struct thread_info *tp;
+
+	  /* Cancel any running execution command.  */
+	  thread_cancel_execution_command (info);
 
 	  normal_stop ();
 
@@ -3718,6 +3725,35 @@ reinstall_readline_callback_handler_cleanup (void *arg)
     gdb_rl_callback_handler_reinstall ();
 }
 
+/* Clean up the FSMs of threads that are now stopped.  In non-stop,
+   that's just the event thread.  In all-stop, that's all threads.  */
+
+static void
+clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
+{
+  struct thread_info *thr = ecs->event_thread;
+
+  if (thr != NULL && thr->thread_fsm != NULL)
+    thread_fsm_clean_up (thr->thread_fsm);
+
+  if (!non_stop)
+    {
+      ALL_NON_EXITED_THREADS (thr)
+        {
+	  if (thr->thread_fsm == NULL)
+	    continue;
+	  if (thr == ecs->event_thread)
+	    continue;
+
+	  switch_to_thread (thr->ptid);
+	  thread_fsm_clean_up (thr->thread_fsm);
+	}
+
+      if (ecs->event_thread != NULL)
+	switch_to_thread (ecs->event_thread->ptid);
+    }
+}
+
 /* Asynchronous version of wait_for_inferior.  It is called by the
    event loop whenever a change of state is detected on the file
    descriptor corresponding to the target.  It can be called more than
@@ -3796,22 +3832,31 @@ fetch_inferior_event (void *client_data)
   if (!ecs->wait_some_more)
     {
       struct inferior *inf = find_inferior_ptid (ecs->ptid);
+      int should_stop = 1;
+      struct thread_info *thr = ecs->event_thread;
 
       delete_just_stopped_threads_infrun_breakpoints ();
 
-      /* We may not find an inferior if this was a process exit.  */
-      if (inf == NULL || inf->control.stop_soon == NO_STOP_QUIETLY)
-	normal_stop ();
+      if (thr != NULL)
+	{
+	  struct thread_fsm *thread_fsm = thr->thread_fsm;
 
-      if (target_has_execution
-	  && ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED
-	  && ecs->ws.kind != TARGET_WAITKIND_EXITED
-	  && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
-	  && ecs->event_thread->step_multi
-	  && ecs->event_thread->control.stop_step)
-	inferior_event_handler (INF_EXEC_CONTINUE, NULL);
+	  if (thread_fsm != NULL)
+	    should_stop = thread_fsm_should_stop (thread_fsm);
+	}
+
+      if (!should_stop)
+	{
+	  keep_going (ecs);
+	}
       else
 	{
+	  clean_up_just_stopped_threads_fsms (ecs);
+
+	  /* We may not find an inferior if this was a process exit.  */
+	  if (inf == NULL || inf->control.stop_soon == NO_STOP_QUIETLY)
+	    normal_stop ();
+
 	  inferior_event_handler (INF_EXEC_COMPLETE, NULL);
 	  cmd_done = 1;
 	}
@@ -5898,6 +5943,10 @@ process_event_stop_test (struct execution_control_state *ecs)
       stop_stack_dummy = what.call_dummy;
     }
 
+  /* A few breakpoint types have callbacks associated (e.g.,
+     bp_jit_event).  Run them now.  */
+  bpstat_run_callbacks (ecs->event_thread->control.stop_bpstat);
+
   /* If we hit an internal event that triggers symbol changes, the
      current frame will be invalidated within bpstat_what (e.g., if we
      hit an internal solib event).  Re-fetch it.  */
@@ -7663,8 +7712,8 @@ print_no_history_reason (struct ui_out *uiout)
    bpstat_print contains the logic deciding in detail what to print,
    based on the event(s) that just occurred.  */
 
-void
-print_stop_event (struct target_waitstatus *ws)
+static void
+print_stop_location (struct target_waitstatus *ws)
 {
   int bpstat_ret;
   enum print_what source_flag;
@@ -7715,9 +7764,50 @@ print_stop_event (struct target_waitstatus *ws)
      SRC_AND_LOC: Print location and source line.  */
   if (do_frame_printing)
     print_stack_frame (get_selected_frame (NULL), 0, source_flag, 1);
+}
+
+/* Cleanup that restores a previous current uiout.  */
+
+static void
+restore_current_uiout_cleanup (void *arg)
+{
+  struct ui_out *saved_uiout = arg;
+
+  current_uiout = saved_uiout;
+}
+
+/* See infrun.h.  */
+
+void
+print_stop_event (struct ui_out *uiout)
+{
+  struct cleanup *old_chain;
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+  struct thread_info *tp;
+
+  get_last_target_status (&last_ptid, &last);
+
+  old_chain = make_cleanup (restore_current_uiout_cleanup, current_uiout);
+  current_uiout = uiout;
+
+  print_stop_location (&last);
 
   /* Display the auto-display expressions.  */
   do_displays ();
+
+  do_cleanups (old_chain);
+
+  tp = inferior_thread ();
+  if (tp->thread_fsm != NULL
+      && thread_fsm_finished_p (tp->thread_fsm))
+    {
+      struct return_value_info *rv;
+
+      rv = thread_fsm_return_value (tp->thread_fsm);
+      if (rv != NULL)
+	print_return_value (uiout, rv);
+    }
 }
 
 /* Here to return control to GDB when the inferior stops for real.
@@ -7830,20 +7920,6 @@ normal_stop (void)
   if (stopped_by_random_signal)
     disable_current_display ();
 
-  /* Notify observers if we finished a "step"-like command, etc.  */
-  if (target_has_execution
-      && last.kind != TARGET_WAITKIND_SIGNALLED
-      && last.kind != TARGET_WAITKIND_EXITED
-      && inferior_thread ()->control.stop_step)
-    {
-      /* But not if in the middle of doing a "step n" operation for
-	 n > 1 */
-      if (inferior_thread ()->step_multi)
-	goto done;
-
-      observer_notify_end_stepping_range ();
-    }
-
   target_terminal_ours ();
   async_enable_stdin ();
 
@@ -7885,15 +7961,7 @@ normal_stop (void)
      or if the program has exited.  */
 
   if (!stop_stack_dummy)
-    {
-      select_frame (get_current_frame ());
-
-      /* If --batch-silent is enabled then there's no need to print the current
-	 source location, and to try risks causing an error message about
-	 missing source files.  */
-      if (stop_print_frame && !batch_silent)
-	print_stop_event (&last);
-    }
+    select_frame (get_current_frame ());
 
   if (stop_stack_dummy == STOP_STACK_DUMMY)
     {
@@ -7917,15 +7985,8 @@ normal_stop (void)
     }
 
 done:
-  annotate_stopped ();
 
   /* Suppress the stop observer if we're in the middle of:
-
-     - a step n (n > 1), as there still more steps to be done.
-
-     - a "finish" command, as the observer will be called in
-       finish_command_continuation, so it can include the inferior
-       function's return value.
 
      - calling an inferior function, as we pretend we inferior didn't
        run at all.  The return value of the call is handled by the
@@ -7935,11 +7996,7 @@ done:
       || last.kind == TARGET_WAITKIND_SIGNALLED
       || last.kind == TARGET_WAITKIND_EXITED
       || last.kind == TARGET_WAITKIND_NO_RESUMED
-      || (!(inferior_thread ()->step_multi
-	    && inferior_thread ()->control.stop_step)
-	  && !(inferior_thread ()->control.stop_bpstat
-	       && inferior_thread ()->control.proceed_to_finish)
-	  && !inferior_thread ()->control.in_infcall))
+      || !inferior_thread ()->control.in_infcall)
     {
       if (!ptid_equal (inferior_ptid, null_ptid))
 	observer_notify_normal_stop (inferior_thread ()->control.stop_bpstat,
@@ -7947,6 +8004,8 @@ done:
       else
 	observer_notify_normal_stop (NULL, stop_print_frame);
     }
+
+  annotate_stopped ();
 
   if (target_has_execution)
     {
