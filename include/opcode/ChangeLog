@@ -1,3 +1,9 @@
+2015-09-09  Daniel Santos  <daniel.santos@pobox.com>
+
+	* visium.h (gen_reg_table): Make static.
+	(fp_reg_table): Likewise.
+	(cc_table): Likewise.
+
 2015-07-20  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* arm.h (ARM_AEXT_V6ZK): Rename to ARM_AEXT_V6KZ.
