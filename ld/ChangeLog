@@ -1,3 +1,7 @@
+2015-09-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated simplified Chinese translation.
+
 2015-09-08  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (Source Code Reference): Extend description to
