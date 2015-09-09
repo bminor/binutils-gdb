@@ -42,7 +42,6 @@
 #include "cli/cli-decode.h"
 #include "gdb_regex.h"
 #include "cli/cli-utils.h"
-#include "continuations.h"
 #include "thread-fsm.h"
 
 /* Definition of struct thread_info exported to gdbthread.h.  */
@@ -190,9 +189,6 @@ clear_thread_inferior_resources (struct thread_info *tp)
   btrace_teardown (tp);
 
   thread_cancel_execution_command (tp);
-
-  do_all_intermediate_continuations_thread (tp, 1);
-  do_all_continuations_thread (tp, 1);
 }
 
 static void

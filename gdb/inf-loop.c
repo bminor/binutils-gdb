@@ -32,39 +32,16 @@
 #include "top.h"
 #include "observer.h"
 
-/* General function to handle events in the inferior.  So far it just
-   takes care of detecting errors reported by select() or poll(),
-   otherwise it assumes that all is OK, and goes on reading data from
-   the fd.  This however may not always be what we want to do.  */
+/* General function to handle events in the inferior.  */
+
 void
 inferior_event_handler (enum inferior_event_type event_type, 
 			gdb_client_data client_data)
 {
-  struct cleanup *cleanup_if_error = make_bpstat_clear_actions_cleanup ();
-
   switch (event_type)
     {
     case INF_REG_EVENT:
-      /* Catch errors for now, until the inner layers of
-	 fetch_inferior_event (i.e. readchar) can return meaningful
-	 error status.  If an error occurs while getting an event from
-	 the target, just cancel the current command.  */
-      {
-
-	TRY
-	  {
-	    fetch_inferior_event (client_data);
-	  }
-	CATCH (ex, RETURN_MASK_ALL)
-	  {
-	    bpstat_clear_actions ();
-	    do_all_intermediate_continuations (1);
-	    do_all_continuations (1);
-
-	    throw_exception (ex);
-	  }
-	END_CATCH
-      }
+      fetch_inferior_event (client_data);
       break;
 
     case INF_EXEC_COMPLETE:
@@ -82,36 +59,10 @@ inferior_event_handler (enum inferior_event_type event_type,
       if (!ptid_equal (inferior_ptid, null_ptid))
 	do_all_inferior_continuations (0);
 
-      /* If we were doing a multi-step (eg: step n, next n), but it
-	 got interrupted by a breakpoint, still do the pending
-	 continuations.  The continuation itself is responsible for
-	 distinguishing the cases.  The continuations are allowed to
-	 touch the inferior memory, e.g. to remove breakpoints, so run
-	 them before running breakpoint commands, which may resume the
-	 target.  */
-      if (non_stop
-	  && target_has_execution
-	  && !ptid_equal (inferior_ptid, null_ptid))
-	do_all_intermediate_continuations_thread (inferior_thread (), 0);
-      else
-	do_all_intermediate_continuations (0);
-
-      /* Always finish the previous command before running any
-	 breakpoint commands.  Any stop cancels the previous command.
-	 E.g. a "finish" or "step-n" command interrupted by an
-	 unrelated breakpoint is canceled.  */
-      if (non_stop
-	  && target_has_execution
-	  && !ptid_equal (inferior_ptid, null_ptid))
-	do_all_continuations_thread (inferior_thread (), 0);
-      else
-	do_all_continuations (0);
-
       /* When running a command list (from a user command, say), these
 	 are only run when the command list is all done.  */
       if (interpreter_async)
 	{
-
 	  check_frame_language_change ();
 
 	  /* Don't propagate breakpoint commands errors.  Either we're
@@ -129,21 +80,9 @@ inferior_event_handler (enum inferior_event_type event_type,
 	}
       break;
 
-    case INF_EXEC_CONTINUE:
-      /* Is there anything left to do for the command issued to
-         complete?  */
-
-      if (non_stop)
-	do_all_intermediate_continuations_thread (inferior_thread (), 0);
-      else
-	do_all_intermediate_continuations (0);
-      break;
-
     case INF_TIMER:
     default:
       printf_unfiltered (_("Event type not recognized.\n"));
       break;
     }
-
-  discard_cleanups (cleanup_if_error);
 }

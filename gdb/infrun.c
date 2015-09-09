@@ -3232,17 +3232,10 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 
       if (!ecs->wait_some_more)
 	{
-	  struct thread_info *tp;
-
 	  /* Cancel any running execution command.  */
 	  thread_cancel_execution_command (info);
 
 	  normal_stop ();
-
-	  /* Finish off the continuations.  */
-	  tp = inferior_thread ();
-	  do_all_intermediate_continuations_thread (tp, 1);
-	  do_all_continuations_thread (tp, 1);
 	}
 
       do_cleanups (old_chain);

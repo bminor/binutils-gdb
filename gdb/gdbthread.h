@@ -265,18 +265,6 @@ struct thread_info
      when GDB gets back SIGTRAP from step_resume_breakpoint.  */
   int step_after_step_resume_breakpoint;
 
-  /* Per-thread command support.  */
-
-  /* Pointer to what is left to do for an execution command after the
-     target stops.  Used only in asynchronous mode, by targets that
-     support async execution.  Several execution commands use it.  */
-  struct continuation *continuations;
-
-  /* Similar to the above, but used when a single execution command
-     requires several resume/stop iterations.  Used by the step
-     command.  */
-  struct continuation *intermediate_continuations;
-
   /* Pointer to the state machine manager object that handles what is
      left to do for the thread's execution command after the target
      stops.  Several execution commands use it.  */

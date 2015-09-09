@@ -126,11 +126,6 @@ enum inferior_event_type
     INF_TIMER,
     /* We are called to do stuff after the inferior stops.  */
     INF_EXEC_COMPLETE,
-    /* We are called to do some stuff after the inferior stops, but we
-       are expected to reenter the proceed() and
-       handle_inferior_event() functions.  This is used only in case of
-       'step n' like commands.  */
-    INF_EXEC_CONTINUE
   };
 
 /* Target objects which can be transfered using target_read,

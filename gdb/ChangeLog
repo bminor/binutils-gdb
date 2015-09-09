@@ -1,5 +1,40 @@
 2015-09-09  Pedro Alves  <palves@redhat.com>
 
+	* continuations.c (add_continuation, restore_thread_cleanup)
+	(do_all_continuations_ptid, do_all_continuations_thread_callback)
+	(do_all_continuations_thread, do_all_continuations)
+	(discard_all_continuations_thread_callback)
+	(discard_all_continuations_thread, discard_all_continuations)
+	(add_intermediate_continuation)
+	(do_all_intermediate_continuations_thread_callback)
+	(do_all_intermediate_continuations_thread)
+	(do_all_intermediate_continuations)
+	(discard_all_intermediate_continuations_thread_callback)
+	(discard_all_intermediate_continuations_thread)
+	(discard_all_intermediate_continuations): Delete.
+	* continuations.h (add_continuation, do_all_continuations)
+	(do_all_continuations_thread, discard_all_continuations)
+	(discard_all_continuations_thread, add_intermediate_continuation)
+	(do_all_intermediate_continuations)
+	(do_all_intermediate_continuations_thread)
+	(discard_all_intermediate_continuations)
+	(discard_all_intermediate_continuations_thread): Delete
+	declarations.
+	* event-top.c (stdin_event_handler): Delete references to
+	continuations.
+	* gdbthread.h (struct thread_info): Delete continuations and
+	intermediate_continuations fields.
+	* inf-loop.c (inferior_event_handler): Remove references to
+	continuations.
+	* infrun.c (infrun_thread_stop_requested_callback): Remove
+	references to continuations.
+	* target.h (enum inferior_event_type) <INF_EXEC_CONTINUE>: Delete.
+	* thread.c: Don't include "continuations.h".
+	(clear_thread_inferior_resources): Remove references to
+	continuations.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
 	* infcall.c (struct dummy_frame_context_saver): Delete.
 	(dummy_frame_context_saver_free, dummy_frame_context_saver_dtor)
 	(dummy_frame_context_saver_drop)
