@@ -107,10 +107,7 @@ bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
         value_object_to_value (self_finishbp->function_value);
       struct type *value_type =
         type_object_to_type (self_finishbp->return_type);
-
-      /* bpfinishpy_init cannot finish into DUMMY_FRAME (throws an error
-         in such case) so it is OK to always pass CTX_SAVER as NULL.  */
-      struct value *ret = get_return_value (function, value_type, NULL);
+      struct value *ret = get_return_value (function, value_type);
 
       if (ret)
         {

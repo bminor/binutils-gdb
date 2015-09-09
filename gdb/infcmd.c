@@ -1585,22 +1585,15 @@ advance_command (char *arg, int from_tty)
    right after an inferior call has finished.  */
 
 struct value *
-get_return_value (struct value *function, struct type *value_type,
-		  struct dummy_frame_context_saver *ctx_saver)
+get_return_value (struct value *function, struct type *value_type)
 {
-  struct regcache *stop_regs = NULL;
+  struct regcache *stop_regs;
   struct gdbarch *gdbarch;
   struct value *value;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+  struct cleanup *cleanup;
 
-  /* If registers were not saved, use the current registers.  */
-  if (ctx_saver != NULL)
-    stop_regs = dummy_frame_context_saver_get_regs (ctx_saver);
-  else
-    {
-      stop_regs = regcache_dup (get_current_regcache ());
-      make_cleanup_regcache_xfree (stop_regs);
-    }
+  stop_regs = regcache_dup (get_current_regcache ());
+  cleanup = make_cleanup_regcache_xfree (stop_regs);
 
   gdbarch = get_regcache_arch (stop_regs);
 
@@ -1800,7 +1793,7 @@ finish_command_fsm_should_stop (struct thread_fsm *self)
 	  struct value *func;
 
 	  func = read_var_value (f->function, NULL, get_current_frame ());
-	  rv->value = get_return_value (func, rv->type, NULL);
+	  rv->value = get_return_value (func, rv->type);
 	  rv->value_history_index = record_latest_value (rv->value);
 	}
     }

@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "infcall.h"
 #include "breakpoint.h"
 #include "tracepoint.h"
 #include "target.h"
@@ -30,7 +31,6 @@
 #include "objfiles.h"
 #include "gdbcmd.h"
 #include "command.h"
-#include "infcall.h"
 #include "dummy-frame.h"
 #include "ada-lang.h"
 #include "gdbthread.h"
@@ -659,96 +659,6 @@ struct value *
 call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
   return call_function_by_hand_dummy (function, nargs, args, NULL, NULL);
-}
-
-/* Data for dummy_frame_context_saver.  Structure can be freed only
-   after both dummy_frame_context_saver_dtor and
-   dummy_frame_context_saver_drop have been called for it.  */
-
-struct dummy_frame_context_saver
-{
-  /* Inferior registers fetched before associated dummy_frame got freed
-     and before any other destructors of associated dummy_frame got called.
-     It is initialized to NULL.  */
-  struct regcache *retbuf;
-
-  /* It is 1 if this dummy_frame_context_saver_drop has been already
-     called.  */
-  int drop_done;
-};
-
-/* Free struct dummy_frame_context_saver.  */
-
-static void
-dummy_frame_context_saver_free (struct dummy_frame_context_saver *saver)
-{
-  regcache_xfree (saver->retbuf);
-  xfree (saver);
-}
-
-/* Destructor for associated dummy_frame.  */
-
-static void
-dummy_frame_context_saver_dtor (void *data_voidp, int registers_valid)
-{
-  struct dummy_frame_context_saver *data = data_voidp;
-
-  gdb_assert (data->retbuf == NULL);
-
-  if (data->drop_done)
-    dummy_frame_context_saver_free (data);
-  else if (registers_valid)
-    data->retbuf = regcache_dup (get_current_regcache ());
-}
-
-/* Caller is no longer interested in this
-   struct dummy_frame_context_saver.  After its associated dummy_frame
-   gets freed struct dummy_frame_context_saver can be also freed.  */
-
-void
-dummy_frame_context_saver_drop (struct dummy_frame_context_saver *saver)
-{
-  saver->drop_done = 1;
-
-  if (!find_dummy_frame_dtor (dummy_frame_context_saver_dtor, saver))
-    dummy_frame_context_saver_free (saver);
-}
-
-/* Stub dummy_frame_context_saver_drop compatible with make_cleanup.  */
-
-void
-dummy_frame_context_saver_cleanup (void *data)
-{
-  struct dummy_frame_context_saver *saver = data;
-
-  dummy_frame_context_saver_drop (saver);
-}
-
-/* Fetch RETBUF field of possibly opaque DTOR_DATA.
-   RETBUF must not be NULL.  */
-
-struct regcache *
-dummy_frame_context_saver_get_regs (struct dummy_frame_context_saver *saver)
-{
-  gdb_assert (saver->retbuf != NULL);
-  return saver->retbuf;
-}
-
-/* Register provider of inferior registers at the time DUMMY_ID frame of
-   PTID gets freed (before inferior registers get restored to those
-   before dummy_frame).  */
-
-struct dummy_frame_context_saver *
-dummy_frame_context_saver_setup (struct frame_id dummy_id, ptid_t ptid)
-{
-  struct dummy_frame_context_saver *saver =
-    XNEW (struct dummy_frame_context_saver);
-
-  saver->retbuf = NULL;
-  saver->drop_done = 0;
-  register_dummy_frame_dtor (dummy_id, inferior_ptid,
-			     dummy_frame_context_saver_dtor, saver);
-  return saver;
 }
 
 /* All this stuff with a dummy frame may seem unnecessarily complicated

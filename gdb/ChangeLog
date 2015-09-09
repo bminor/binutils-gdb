@@ -1,5 +1,21 @@
 2015-09-09  Pedro Alves  <palves@redhat.com>
 
+	* infcall.c (struct dummy_frame_context_saver): Delete.
+	(dummy_frame_context_saver_free, dummy_frame_context_saver_dtor)
+	(dummy_frame_context_saver_drop)
+	(dummy_frame_context_saver_cleanup)
+	(dummy_frame_context_saver_get_regs)
+	(dummy_frame_context_saver_setup): Delete.
+	* infcall.h (dummy_frame_context_saver_drop)
+	(dummy_frame_context_saver_cleanup)
+	(dummy_frame_context_saver_get_regs, dummy_frame_context_saver):
+	Delete.
+	(get_return_value): Remove 'ctx_saver' paremeter.  Adjust.
+	* inferior.h (get_return_value): Remove 'ctx_saver' paremeter.
+	* python/py-finishbreakpoint.c (bpfinishpy_pre_stop_hook): Adjust.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c: Include "thread-fsm.h".
 	(struct until_break_command_continuation_args): Delete.
 	(struct until_break_fsm): New.
