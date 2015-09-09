@@ -1,5 +1,28 @@
 2015-09-09  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c: Include "thread-fsm.h".
+	(struct until_break_command_continuation_args): Delete.
+	(struct until_break_fsm): New.
+	(until_break_fsm_ops): New global.
+	(new_until_break_fsm, until_break_fsm_should_stop): New functions.
+	(until_break_command_continuation): Delete.
+	(until_break_fsm_clean_up): New function.
+	(until_break_fsm_async_reply_reason): New function.
+	(until_break_command): Adjust to create an until_break_fsm instead
+	of a continuation.
+	(momentary_bkpt_print_it): No longer print MI's async-stop-reason
+	here.
+	* infcmd.c (struct until_next_fsm): New.
+	(until_next_fsm_ops): New global.
+	(new_until_next_fsm, until_next_fsm_should_stop): New function.
+	(until_next_continuation): Delete.
+	(until_next_fsm_clean_up, until_next_fsm_async_reply_reason): New
+	functions.
+	(until_next_command): Adjust to create a new until_next_fsm
+	instead of a continuation.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
 	* infcall.c: Include thread_fsm.h.
 	(struct call_return_meta_info): New.
 	(get_call_return_value): New function, factored out from

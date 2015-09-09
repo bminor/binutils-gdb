@@ -1385,22 +1385,81 @@ queue_signal_command (char *signum_exp, int from_tty)
   tp->suspend.stop_signal = oursig;
 }
 
-/* Continuation args to be passed to the "until" command
-   continuation.  */
-struct until_next_continuation_args
+/* Data for the FSM that manages the until (with no argument)
+   command.  */
+
+struct until_next_fsm
 {
-  /* The thread that was current when the command was executed.  */
+  /* The base class.  */
+  struct thread_fsm thread_fsm;
+
+  /* The thread that as current when the command was executed.  */
   int thread;
 };
 
-/* A continuation callback for until_next_command.  */
+static int until_next_fsm_should_stop (struct thread_fsm *self);
+static void until_next_fsm_clean_up (struct thread_fsm *self);
+static enum async_reply_reason
+  until_next_fsm_async_reply_reason (struct thread_fsm *self);
+
+/* until_next_fsm's vtable.  */
+
+static struct thread_fsm_ops until_next_fsm_ops =
+{
+  NULL, /* dtor */
+  until_next_fsm_clean_up,
+  until_next_fsm_should_stop,
+  NULL, /* return_value */
+  until_next_fsm_async_reply_reason,
+};
+
+/* Allocate a new until_next_fsm.  */
+
+static struct until_next_fsm *
+new_until_next_fsm (int thread)
+{
+  struct until_next_fsm *sm;
+
+  sm = XCNEW (struct until_next_fsm);
+  thread_fsm_ctor (&sm->thread_fsm, &until_next_fsm_ops);
+
+  sm->thread = thread;
+
+  return sm;
+}
+
+/* Implementation of the 'should_stop' FSM method for the until (with
+   no arg) command.  */
+
+static int
+until_next_fsm_should_stop (struct thread_fsm *self)
+{
+  struct thread_info *tp = inferior_thread ();
+
+  if (tp->control.stop_step)
+    thread_fsm_set_finished (self);
+
+  return 1;
+}
+
+/* Implementation of the 'clean_up' FSM method for the until (with no
+   arg) command.  */
 
 static void
-until_next_continuation (void *arg, int err)
+until_next_fsm_clean_up (struct thread_fsm *self)
 {
-  struct until_next_continuation_args *a = arg;
+  struct until_next_fsm *sm = (struct until_next_fsm *) self;
 
-  delete_longjmp_breakpoint (a->thread);
+  delete_longjmp_breakpoint (sm->thread);
+}
+
+/* Implementation of the 'async_reply_reason' FSM method for the until
+   (with no arg) command.  */
+
+static enum async_reply_reason
+until_next_fsm_async_reply_reason (struct thread_fsm *self)
+{
+  return EXEC_ASYNC_END_STEPPING_RANGE;
 }
 
 /* Proceed until we reach a different source line with pc greater than
@@ -1421,6 +1480,7 @@ until_next_command (int from_tty)
   struct thread_info *tp = inferior_thread ();
   int thread = tp->num;
   struct cleanup *old_chain;
+  struct until_next_fsm *sm;
 
   clear_proceed_status (0);
   set_step_frame ();
@@ -1460,20 +1520,12 @@ until_next_command (int from_tty)
   set_longjmp_breakpoint (tp, get_frame_id (frame));
   old_chain = make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
 
+  sm = new_until_next_fsm (tp->num);
+  tp->thread_fsm = &sm->thread_fsm;
+  discard_cleanups (old_chain);
+
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 
-  if (is_running (inferior_ptid))
-    {
-      struct until_next_continuation_args *cont_args;
-
-      discard_cleanups (old_chain);
-      cont_args = XNEW (struct until_next_continuation_args);
-      cont_args->thread = inferior_thread ()->num;
-
-      add_continuation (tp, until_next_continuation, cont_args, xfree);
-    }
-  else
-    do_cleanups (old_chain);
 }
 
 static void
