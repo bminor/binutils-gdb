@@ -1,3 +1,11 @@
+2015-09-09  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/tls-relax-ld-le-tiny.s: New testcase.
+	* ld-aarch64/tls-relax-ld-le-small.s: Likewise.
+	* ld-aarch64/tls-relax-ld-le-tiny.d: New expectation file.
+	* ld-aarch64/tls-relax-ld-le-small.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Run new testcases.
+
 2015-09-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ld-elf/orphan-7.map: Allow for other discarded sections.

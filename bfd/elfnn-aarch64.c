@@ -213,6 +213,9 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21		\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LD_PREL19		\
@@ -4390,6 +4393,11 @@ aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
       /* Instructions with these relocations will become NOPs.  */
       return BFD_RELOC_AARCH64_NONE;
 
+    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+      return is_local ? BFD_RELOC_AARCH64_NONE : r_type;
+
     default:
       break;
     }
@@ -5613,6 +5621,51 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	{
 	  insn = bfd_getl32 (contents + rel->r_offset);
 	  bfd_putl32 (0xf2800000 | (insn & 0x1f), contents + rel->r_offset);
+	}
+      return bfd_reloc_continue;
+
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+      /* LD->LE relaxation (tiny):
+	 adr  x0, :tlsldm:x  => mrs x0, tpidr_el0
+	 bl   __tls_get_addr => add x0, x0, TCB_SIZE
+       */
+      if (is_local)
+	{
+	  BFD_ASSERT (rel->r_offset + 4 == rel[1].r_offset);
+	  BFD_ASSERT (ELFNN_R_TYPE (rel[1].r_info) == AARCH64_R (CALL26));
+	  /* No need of CALL26 relocation for tls_get_addr.  */
+	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
+	  bfd_putl32 (0xd53bd040, contents + rel->r_offset + 0);
+	  bfd_putl32 (0x91004000, contents + rel->r_offset + 4);
+	  return bfd_reloc_ok;
+	}
+      return bfd_reloc_continue;
+
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
+      /* LD->LE relaxation (small):
+	 adrp  x0, :tlsldm:x       => mrs x0, tpidr_el0
+       */
+      if (is_local)
+	{
+	  bfd_putl32 (0xd53bd040, contents + rel->r_offset);
+	  return bfd_reloc_ok;
+	}
+      return bfd_reloc_continue;
+
+    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+      /* LD->LE relaxation (small):
+	 add   x0, #:tlsldm_lo12:x => add x0, x0, TCB_SIZE
+	 bl   __tls_get_addr       => nop
+       */
+      if (is_local)
+	{
+	  BFD_ASSERT (rel->r_offset + 4 == rel[1].r_offset);
+	  BFD_ASSERT (ELFNN_R_TYPE (rel[1].r_info) == AARCH64_R (CALL26));
+	  /* No need of CALL26 relocation for tls_get_addr.  */
+	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
+	  bfd_putl32 (0x91004000, contents + rel->r_offset + 0);
+	  bfd_putl32 (0xd503201f, contents + rel->r_offset + 4);
+	  return bfd_reloc_ok;
 	}
       return bfd_reloc_continue;
 
