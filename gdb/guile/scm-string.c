@@ -268,7 +268,7 @@ gdbscm_string_to_argv (SCM string_scm)
 
 static const scheme_function string_functions[] =
 {
-  { "string->argv", 1, 0, 0, gdbscm_string_to_argv,
+  { "string->argv", 1, 0, 0, as_a_scm_t_subr (gdbscm_string_to_argv),
   "\
 Convert a string to a list of strings split up according to\n\
 gdb's argv parsing rules." },

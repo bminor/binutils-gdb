@@ -1001,6 +1001,35 @@ with @samp{-Ur}; once the constructor table has been built, it cannot
 be added to.  Use @samp{-Ur} only for the last partial link, and
 @samp{-r} for the others.
 
+@kindex --orphan-handling=@var{MODE}
+@cindex orphan sections
+@cindex sections, orphan
+@item --orphan-handling=@var{MODE}
+Control how orphan sections are handled.  An orphan section is one not
+specifically mentioned in a linker script.  @xref{Orphan Sections}.
+
+@var{MODE} can have any of the following values:
+
+@table @code
+@item place
+Orphan sections are placed into a suitable output section following
+the strategy described in @ref{Orphan Sections}.  The option
+@samp{--unique} also effects how sections are placed.
+
+@item discard
+All orphan sections are discarded, by placing them in the
+@samp{/DISCARD/} section (@pxref{Output Section Discarding}).
+
+@item warn
+The linker will place the orphan section as for @code{place} and also
+issue a warning.
+
+@item error
+The linker will exit with an error if any orphan section is found.
+@end table
+
+The default if @samp{--orphan-handling} is not given is @code{place}.
+
 @kindex --unique[=@var{SECTION}]
 @item --unique[=@var{SECTION}]
 Creates a separate output section for every input section matching
@@ -2104,17 +2133,6 @@ option causes a warning to be issued whenever this case occurs.
 @item --warn-once
 Only warn once for each undefined symbol, rather than once per module
 which refers to it.
-
-@kindex --warn-orphan
-@kindex --no-warn-orphan
-@cindex warnings, on orphan sections
-@cindex orphan sections, warnings on
-@item --warn-orphan
-The @option{--warn-orphan} option tells the linker to generate a
-warning message whenever it has to place an orphan section into the
-output file.  @xref{Orphan Sections}.  The @option{--no-warn-orphan}
-option restores the default behaviour of just silently placing these
-sections.
 
 @kindex --warn-section-align
 @cindex warnings, on section alignment
@@ -3853,7 +3871,7 @@ linker script contains these declarations:
 @smallexample
 @group
   start_of_ROM   = .ROM;
-  end_of_ROM     = .ROM + sizeof (.ROM) - 1;
+  end_of_ROM     = .ROM + sizeof (.ROM);
   start_of_FLASH = .FLASH;
 @end group
 @end smallexample
@@ -3869,6 +3887,19 @@ Then the C source code to perform the copy would be:
 @end smallexample
 
 Note the use of the @samp{&} operators.  These are correct.
+Alternatively the symbols can be treated as the names of vectors or
+arrays and then the code will again work as expected:
+
+@smallexample
+@group
+  extern char start_of_ROM[], end_of_ROM[], start_of_FLASH[];
+
+  memcpy (start_of_FLASH, start_of_ROM, end_of_ROM - start_of_ROM);
+@end group
+@end smallexample
+
+Note how using this method does not require the use of @samp{&}
+operators.
 
 @node SECTIONS
 @section SECTIONS Command
@@ -5568,6 +5599,10 @@ at the end of the file.
 
 For ELF targets, the attribute of the section includes section type as
 well as section flag.
+
+The command line options @samp{--orphan-handling} and @samp{--unique}
+(@pxref{Options,,Command Line Options}) can be used to control which
+output sections an orphan is placed in.
 
 If an orphaned section's name is representable as a C identifier then
 the linker will automatically @pxref{PROVIDE} two symbols:

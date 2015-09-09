@@ -1,7 +1,40 @@
+2015-09-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated simplified Chinese translation.
+
+2015-09-08  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (Source Code Reference): Extend description to
+	include an example using arrays.
+
+2015-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld.h (enum orphan_handling_enum): New.
+	(ld_config_type): Remove warn_orphan, add orphan_handling.
+	* ldemul.c (ldemul_place_orphan): Remove warning about orphan
+	sections.
+	* ldlang.c (ldlang_place_orphan): New function.
+	(lang_place_orphans): Call ldlang_place_orphan.
+	* ldlex.h (enum option_values): Remove OPTION_WARN_ORPHAN and
+	OPTION_NO_WARN_ORPHAN, add OPTION_ORPHAN_HANDLING.
+	* lexsup.c (ld_options): Remove 'warn-orphan' and
+	'no-warn-orphan', add 'orphan-handling'.
+	(parse_args): Remove handling for OPTION_WARN_ORPHAN and
+	OPTION_NO_WARN_ORPHAN, add handling for OPTION_ORPHAN_HANDLING.
+	* NEWS: Replace text about --warn-orphan with --orphan-handling.
+	* ld.texinfo (Options): Remove --warn-orphan entry and add
+	entry on --orphan-handling.
+	(Orphan Sections): Add reference to relevant command line options.
+
 2015-09-03  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (--build-id): Fix typo.  The COFF/PE build-id section
 	is called .buildid not .build-id.
+
+2015-09-03  Nick Clifton  <nickc@redhat.com>
+
+	(Source Code Reference): Fix off-by-one typo in example of how to
+	use linker script symbols in C source code.
 
 2015-08-19  Alan Modra  <amodra@gmail.com>
 

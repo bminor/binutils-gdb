@@ -886,9 +886,9 @@ ec000000007e cij$12 RIE_R0PI "compare immediate and branch relative (32<8)" z10 
 ec000000007e cij RIE_RUPI "compare immediate and branch relative (32<8)" z10 zarch
 ec000000007c cgij$12 RIE_R0PI "compare immediate and branch relative (64<8)" z10 zarch
 ec000000007c cgij RIE_RUPI "compare immediate and branch relative (64<8)" z10 zarch
-b97200000000 crt$16 RRF_00RR "compare and trap" z10 zarch
+b9720000 crt$16 RRF_00RR "compare and trap" z10 zarch
 b972 crt RRF_U0RR "compare and trap" z10 zarch
-b96000000000 cgrt$16 RRF_00RR "compare and trap 64" z10 zarch
+b9600000 cgrt$16 RRF_00RR "compare and trap 64" z10 zarch
 b960 cgrt RRF_U0RR "compare and trap 64" z10 zarch
 ec0000000072 cit$32 RIE_R0I0 "compare immediate and trap (32<16)" z10 zarch
 ec0000000072 cit RIE_R0IU "compare immediate and trap (32<16)" z10 zarch
@@ -924,9 +924,9 @@ ec000000007f clij$12 RIE_R0PU "compare logical immediate and branch relative (32
 ec000000007f clij RIE_RUPU "compare logical immediate and branch relative (32<8)" z10 zarch
 ec000000007d clgij$12 RIE_R0PU "compare logical immediate and branch relative (64<8)" z10 zarch
 ec000000007d clgij RIE_RUPU "compare logical immediate and branch relative (64<8)" z10 zarch
-b97300000000 clrt$16 RRF_00RR "compare logical and trap (32)" z10 zarch
+b9730000 clrt$16 RRF_00RR "compare logical and trap (32)" z10 zarch
 b973 clrt RRF_U0RR "compare logical and trap (32)" z10 zarch
-b96100000000 clgrt$16 RRF_00RR "compare logical and trap (64)" z10 zarch
+b9610000 clgrt$16 RRF_00RR "compare logical and trap (64)" z10 zarch
 b961 clgrt RRF_U0RR "compare logical and trap (64)" z10 zarch
 ec0000000073 clfit$32 RIE_R0U0 "compare logical and trap (32<16)" z10 zarch
 ec0000000073 clfit RIE_R0UU "compare logical and trap (32<16)" z10 zarch
@@ -1022,9 +1022,9 @@ eb00000000e6 laog RSY_RRRD "load and or 64 bit" z196 zarch
 c804 lpd SSF_RERDRD2 "load pair disjoint 32 bit" z196 zarch
 c805 lpdg SSF_RERDRD2 "load pair disjoint 64 bit" z196 zarch
 b9f2 locr RRF_U0RR "load on condition 32 bit" z196 zarch
-b9f200000000 locr*16 RRF_00RR "load on condition 32 bit" z196 zarch
+b9f20000 locr*16 RRF_00RR "load on condition 32 bit" z196 zarch
 b9e2 locgr RRF_U0RR "load on condition 64  bit" z196 zarch
-b9e200000000 locgr*16 RRF_00RR "load on condition 64  bit" z196 zarch
+b9e20000 locgr*16 RRF_00RR "load on condition 64  bit" z196 zarch
 eb00000000f2 loc RSY_RURD2 "load on condition 32 bit" z196 zarch
 eb00000000f2 loc*12 RSY_R0RD "load on condition 32 bit" z196 zarch
 eb00000000e2 locg RSY_RURD2 "load on condition 64 bit" z196 zarch
@@ -1663,7 +1663,7 @@ ed00000000ac cpdt RSL_LRDFU "convert from long dfp to packed" z13 zarch
 ed00000000ad cpxt RSL_LRDFEU "convert from extended dfp to packed" z13 zarch
 
 b9e0 locfhr RRF_U0RR "load high on condition from gpr" z13 zarch
-b9e000000000 locfhr*16 RRF_00RR "load high on condition from gpr" z13 zarch
+b9e00000 locfhr*16 RRF_00RR "load high on condition from gpr" z13 zarch
 eb00000000e0 locfh RSY_RURD2 "load high on condition from memory" z13 zarch
 eb00000000e0 locfh*12 RSY_R0RD "load high on condition from memory" z13 zarch
 ec0000000042 lochi RIE_RUI0 "load halfword immediate on condition into 32 bit gpr" z13 zarch
@@ -1678,4 +1678,4 @@ eb00000000e1 stocfh*12 RSY_R0RD "store high on condition" z13 zarch
 e3000000003a llzrgf RXY_RRRD "load logical and zero rightmost bytes 32->64" z13 zarch
 e3000000003b lzrf RXY_RRRD "load and zero rightmost byte 32->32" z13 zarch
 e3000000002a lzrg RXY_RRRD "load and zero rightmost byte 64->64" z13 zarch
-b9ec ppno RRE_RR "perform pseudorandom number operation" z13 zarch
+b93c ppno RRE_RR "perform pseudorandom number operation" z13 zarch

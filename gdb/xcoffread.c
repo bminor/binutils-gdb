@@ -2108,7 +2108,7 @@ xcoff_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       discard_psymtab (objfile, pst);
 
       /* Indicate that psymtab was thrown away.  */
-      pst = (struct partial_symtab *) NULL;
+      pst = NULL;
     }
   return pst;
 }

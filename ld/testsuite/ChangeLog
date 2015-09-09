@@ -1,3 +1,34 @@
+2015-09-09  Jiong Wang  <jiong.wang@arm.com>
+
+	* ld-aarch64/tls-relax-ld-le-tiny.s: New testcase.
+	* ld-aarch64/tls-relax-ld-le-small.s: Likewise.
+	* ld-aarch64/tls-relax-ld-le-tiny.d: New expectation file.
+	* ld-aarch64/tls-relax-ld-le-small.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Run new testcases.
+
+2015-09-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-elf/orphan-7.map: Allow for other discarded sections.
+	* ld-elf/orphan-8.map: Updated to allow for different section
+	ordering on different targets.
+	* ld-elf/orphan.ld: Place .sbss section.
+
+2015-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/orphan-8.map: Updated to support 32-bit targets.
+
+2015-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld-elf/elf.exp: Switch to rely on run_dump_test.
+	* ld-elf/orphan-5.l: Update expected output.
+	* ld-elf/orphan-5.d: New file.
+	* ld-elf/orphan-6.d: New file.
+	* ld-elf/orphan-6.l: New file.
+	* ld-elf/orphan-7.d: New file.
+	* ld-elf/orphan-7.map: New file.
+	* ld-elf/orphan-8.d: New file.
+	* ld-elf/orphan-8.map: New file.
+
 2015-09-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ifunc/ifunc-21-i386.s: Add tests for call, jmp, add, test.

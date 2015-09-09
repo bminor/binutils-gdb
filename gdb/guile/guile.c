@@ -478,7 +478,7 @@ info_guile_command (char *args, int from_tty)
 
 static const scheme_function misc_guile_functions[] =
 {
-  { "execute", 1, 0, 1, gdbscm_execute_gdb_command,
+  { "execute", 1, 0, 1, as_a_scm_t_subr (gdbscm_execute_gdb_command),
   "\
 Execute the given GDB command.\n\
 \n\
@@ -491,23 +491,24 @@ Execute the given GDB command.\n\
   Returns: The result of the command if #:to-string is true.\n\
     Otherwise returns unspecified." },
 
-  { "data-directory", 0, 0, 0, gdbscm_data_directory,
+  { "data-directory", 0, 0, 0, as_a_scm_t_subr (gdbscm_data_directory),
     "\
 Return the name of GDB's data directory." },
 
-  { "guile-data-directory", 0, 0, 0, gdbscm_guile_data_directory,
+  { "guile-data-directory", 0, 0, 0,
+    as_a_scm_t_subr (gdbscm_guile_data_directory),
     "\
 Return the name of the Guile directory within GDB's data directory." },
 
-  { "gdb-version", 0, 0, 0, gdbscm_gdb_version,
+  { "gdb-version", 0, 0, 0, as_a_scm_t_subr (gdbscm_gdb_version),
     "\
 Return GDB's version string." },
 
-  { "host-config", 0, 0, 0, gdbscm_host_config,
+  { "host-config", 0, 0, 0, as_a_scm_t_subr (gdbscm_host_config),
     "\
 Return the name of the host configuration." },
 
-  { "target-config", 0, 0, 0, gdbscm_target_config,
+  { "target-config", 0, 0, 0, as_a_scm_t_subr (gdbscm_target_config),
     "\
 Return the name of the target configuration." },
 

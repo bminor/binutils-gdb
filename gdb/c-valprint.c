@@ -193,9 +193,9 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
       if (vt_address && options->vtblprint)
 	{
 	  struct value *vt_val;
-	  struct symbol *wsym = (struct symbol *) NULL;
+	  struct symbol *wsym = NULL;
 	  struct type *wtype;
-	  struct block *block = (struct block *) NULL;
+	  struct block *block = NULL;
 	  struct field_of_this_result is_this_fld;
 
 	  if (want_space)

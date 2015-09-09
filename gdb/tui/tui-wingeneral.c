@@ -194,7 +194,7 @@ make_visible (struct tui_gen_win_info *win_info, int visible)
     {
       win_info->is_visible = FALSE;
       tui_delete_win (win_info->handle);
-      win_info->handle = (WINDOW *) NULL;
+      win_info->handle = NULL;
     }
 
   return;

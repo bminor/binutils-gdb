@@ -863,7 +863,7 @@ make_source_or_disasm_window (struct tui_win_info **win_info_ptr,
 			      enum tui_win_type type,
 			      int height, int origin_y)
 {
-  struct tui_gen_win_info *execution_info = (struct tui_gen_win_info *) NULL;
+  struct tui_gen_win_info *execution_info = NULL;
 
   /* Create the exeuction info window.  */
   if (type == SRC_WIN)

@@ -100,11 +100,6 @@ struct btrace_target_info
     struct btrace_tinfo_pt pt;
   } variant;
 #endif /* HAVE_LINUX_PERF_EVENT_H */
-
-  /* The size of a pointer in bits for this thread.
-     The information is used to identify kernel addresses in order to skip
-     records from/to kernel space.  */
-  int ptr_bits;
 };
 
 /* See to_supports_btrace in target.h.  */

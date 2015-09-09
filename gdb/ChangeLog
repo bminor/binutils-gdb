@@ -1,3 +1,93 @@
+2015-09-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* nat/linux-btrace.h (struct btrace_target_info) <ptr_bits>: Remove.
+	* nat/linux-btrace.c: Include filestuff.h and inttypes.h.
+	Remove include of sys/utsname.h.
+	(linux_determine_kernel_ptr_bits): Remove.
+	(linux_determine_kernel_start): New.
+	(perf_event_is_kernel_addr): Remove tinfo argument.  Update users.
+	Update check.
+	(perf_event_skip_bts_record): Remove tinfo argument.  Update users.
+	(linux_enable_bts, linux_enable_pt): Remove tinfo->ptr_bits
+	initialization.
+	* x86-linux-nat.c (x86_linux_enable_btrace): Remove ptr_bits
+	assignment.
+
+2015-09-07  Pedro Alves  <palves@redhat.com>
+
+	* guile/guile-internal.h (as_a_scm_t_subr): New.
+	* guile/guile.c (misc_guile_functions): Use it.
+	* guile/scm-arch.c (arch_functions): Use it.
+	* guile/scm-block.c (block_functions, gdbscm_initialize_blocks):
+	Use it.
+	* guile/scm-breakpoint.c (breakpoint_functions): Use it.
+	* guile/scm-cmd.c (command_functions): Use it.
+	* guile/scm-disasm.c (disasm_functions): Use it.
+	* guile/scm-exception.c (exception_functions)
+	(private_exception_functions): Use it.
+	* guile/scm-frame.c (frame_functions)
+	* guile/scm-gsmob.c (gsmob_functions): Use it.
+	* guile/scm-iterator.c (iterator_functions): Use it.
+	* guile/scm-lazy-string.c (lazy_string_functions): Use it.
+	* guile/scm-math.c (math_functions): Use it.
+	* guile/scm-objfile.c (objfile_functions): Use it.
+	* guile/scm-param.c (parameter_functions): Use it.
+	* guile/scm-ports.c (port_functions, private_port_functions): Use
+	it.
+	* guile/scm-pretty-print.c (pretty_printer_functions): Use it.
+	* guile/scm-progspace.c (pspace_functions): Use it.
+	* guile/scm-string.c (string_functions): Use it.
+	* guile/scm-symbol.c (symbol_functions): Use it.
+	* guile/scm-symtab.c (symtab_functions): Use it.
+	* guile/scm-type.c (type_functions, gdbscm_initialize_types): Use
+	it.
+	* guile/scm-value.c (value_functions): Use it.
+
+2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-data.c (win_with_focus): Remove cast of NULL pointer.
+	(tui_next_win): Likewise.
+	(tui_prev_win): Likewise.
+	(tui_partial_win_by_name): Likewise.
+	(tui_init_generic_part): Likewise.
+	(init_content_element): Likewise.
+	(tui_del_window): Likewise.
+	(tui_free_window): Likewise.
+	(tui_del_data_windows): Likewise.
+	(tui_free_data_content): Likewise.
+	* tui/tui-layout.c (make_source_or_disasm_window): Likewise.
+	* tui/tui-regs.c (tui_show_register_group): Likewise.
+	* tui/tui-win.c (tui_resize_all): Likewise.
+	(tui_set_focus): Likewise.
+	(tui_set_win_height): Likewise.
+	(make_invisible_and_set_new_height): Likewise.
+	* tui/tui-windata.c (tui_delete_data_content_windows): Likewise.
+	* tui/tui-wingeneral.c (make_visible): Likewise.
+
+2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-decode.c (find_cmd): Remove cast of NULL pointer.
+
+2015-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* c-valprint.c (print_unpacked_pointer): Remove cast of NULL
+	pointer.
+	* dbxread.c (dbx_end_psymtab): Likewise.
+	* gnu-nat.c (gnu_write_inferior): Likewise.
+	* mdebugread.c (cross_ref): Likewise.
+	* p-valprint.c (pascal_val_print): Likewise.
+	* xcoffread.c (xcoff_end_psymtab): Likewise.
+
+2015-09-04  Yao Qi  <yao.qi@linaro.org>
+
+	* NEWS: Mention the aarch64 multi-arch debugging support.
+
+2015-09-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (ada_language_arch_info): Create a TYPE_CODE_CHAR
+	type instead of a TYPE_CODE_INT one for the string_char_type
+	and the ada_primitive_type_char types.
+
 2015-09-03  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_region_ok_for_hw_watchpoint):

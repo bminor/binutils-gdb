@@ -6663,26 +6663,6 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 
 #ifdef HAVE_LINUX_BTRACE
 
-/* See to_enable_btrace target method.  */
-
-static struct btrace_target_info *
-linux_low_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
-{
-  struct btrace_target_info *tinfo;
-
-  tinfo = linux_enable_btrace (ptid, conf);
-
-  if (tinfo != NULL && tinfo->ptr_bits == 0)
-    {
-      struct thread_info *thread = find_thread_ptid (ptid);
-      struct regcache *regcache = get_thread_regcache (thread, 0);
-
-      tinfo->ptr_bits = register_size (regcache->tdesc, 0) * 8;
-    }
-
-  return tinfo;
-}
-
 /* See to_disable_btrace target method.  */
 
 static int
@@ -6936,7 +6916,7 @@ static struct target_ops linux_target_ops = {
   linux_supports_agent,
 #ifdef HAVE_LINUX_BTRACE
   linux_supports_btrace,
-  linux_low_enable_btrace,
+  linux_enable_btrace,
   linux_low_disable_btrace,
   linux_low_read_btrace,
   linux_low_btrace_conf,

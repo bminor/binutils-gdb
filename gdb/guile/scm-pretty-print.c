@@ -1055,7 +1055,8 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 
 static const scheme_function pretty_printer_functions[] =
 {
-  { "make-pretty-printer", 2, 0, 0, gdbscm_make_pretty_printer,
+  { "make-pretty-printer", 2, 0, 0,
+    as_a_scm_t_subr (gdbscm_make_pretty_printer),
     "\
 Create a <gdb:pretty-printer> object.\n\
 \n\
@@ -1064,21 +1065,23 @@ Create a <gdb:pretty-printer> object.\n\
     lookup: a procedure:\n\
       (pretty-printer <gdb:value>) -> <gdb:pretty-printer-worker> | #f." },
 
-  { "pretty-printer?", 1, 0, 0, gdbscm_pretty_printer_p,
+  { "pretty-printer?", 1, 0, 0, as_a_scm_t_subr (gdbscm_pretty_printer_p),
     "\
 Return #t if the object is a <gdb:pretty-printer> object." },
 
-  { "pretty-printer-enabled?", 1, 0, 0, gdbscm_pretty_printer_enabled_p,
+  { "pretty-printer-enabled?", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_pretty_printer_enabled_p),
     "\
 Return #t if the pretty-printer is enabled." },
 
   { "set-pretty-printer-enabled!", 2, 0, 0,
-    gdbscm_set_pretty_printer_enabled_x,
+    as_a_scm_t_subr (gdbscm_set_pretty_printer_enabled_x),
     "\
 Set the enabled flag of the pretty-printer.\n\
 Returns \"unspecified\"." },
 
-  { "make-pretty-printer-worker", 3, 0, 0, gdbscm_make_pretty_printer_worker,
+  { "make-pretty-printer-worker", 3, 0, 0,
+    as_a_scm_t_subr (gdbscm_make_pretty_printer_worker),
     "\
 Create a <gdb:pretty-printer-worker> object.\n\
 \n\
@@ -1089,16 +1092,17 @@ Create a <gdb:pretty-printer-worker> object.\n\
     children:     either #f or a procedure:\n\
       (pretty-printer) -> <gdb:iterator>" },
 
-  { "pretty-printer-worker?", 1, 0, 0, gdbscm_pretty_printer_worker_p,
+  { "pretty-printer-worker?", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_pretty_printer_worker_p),
     "\
 Return #t if the object is a <gdb:pretty-printer-worker> object." },
 
-  { "pretty-printers", 0, 0, 0, gdbscm_pretty_printers,
+  { "pretty-printers", 0, 0, 0, as_a_scm_t_subr (gdbscm_pretty_printers),
     "\
 Return the list of global pretty-printers." },
 
   { "set-pretty-printers!", 1, 0, 0,
-    gdbscm_set_pretty_printers_x,
+    as_a_scm_t_subr (gdbscm_set_pretty_printers_x),
     "\
 Set the list of global pretty-printers." },
 

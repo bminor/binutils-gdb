@@ -1219,7 +1219,7 @@ find_cmd (const char *command, int len, struct cmd_list_element *clist,
 {
   struct cmd_list_element *found, *c;
 
-  found = (struct cmd_list_element *) NULL;
+  found = NULL;
   *nfound = 0;
   for (c = clist; c; c = c->next)
     if (!strncmp (command, c->name, len)

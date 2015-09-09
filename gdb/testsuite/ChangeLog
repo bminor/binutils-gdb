@@ -1,3 +1,14 @@
+2015-09-08  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.threads/hand-call-in-threads.exp: Make sure the thread
+	command actually switches threads.  Give up on remaining
+	tests if target fails to stop at breakpoint.
+
+2015-09-03  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/funcall_char.exp: New testcase.
+	* gdb.ada/funcall_char/foo.adb: New file.
+
 2015-09-01  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/complete.exp: Add "pck.ambiguous_func" to the relevant

@@ -7518,7 +7518,10 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
     return FALSE;
 
   /* If the offset is invalid then fail.  */
-  if (word_offset > sec->sh_size - 4)
+  if (word_offset > (sec->sh_size - 4)
+      /* PR 18879 */
+      || (sec->sh_size < 5 && word_offset >= sec->sh_size)
+      || ((bfd_signed_vma) word_offset) < 0)
     return FALSE;
 
   /* Get the word at the required offset.  */
@@ -8301,6 +8304,15 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 	    {
 	      table_sec = section_headers + entry_addr.section;
 	      table_offset = entry_addr.offset;
+	      /* PR 18879 */
+	      if (table_offset > table_sec->sh_size
+		  || ((bfd_signed_vma) table_offset) < 0)
+		{
+		  warn (_("Unwind entry contains corrupt offset (0x%lx) into section %s\n"),
+			(unsigned long) table_offset,
+			printable_section_name (table_sec));
+		  continue;
+		}
 	    }
 	  else
 	    {

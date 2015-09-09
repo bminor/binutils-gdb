@@ -1,3 +1,10 @@
+2015-09-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/18879
+	* readelf.c (get_unwind_section_word): Check for negative offsets
+	and very small sections.
+	(dump_arm_unwind): Warn if the table offset is too large.
+
 2015-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (TOOL_PROGS): Add readelf.

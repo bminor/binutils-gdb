@@ -1468,14 +1468,20 @@ Symbol_table::add_from_dynobj(
       // A protected symbol in a shared library must be treated as a
       // normal symbol when viewed from outside the shared library.
       // Implement this by overriding the visibility here.
+      // Likewise, an IFUNC symbol in a shared library must be treated
+      // as a normal FUNC symbol.
       elfcpp::Sym<size, big_endian>* psym = &sym;
       unsigned char symbuf[sym_size];
       elfcpp::Sym<size, big_endian> sym2(symbuf);
-      if (sym.get_st_visibility() == elfcpp::STV_PROTECTED)
+      if (sym.get_st_visibility() == elfcpp::STV_PROTECTED
+	  || sym.get_st_type() == elfcpp::STT_GNU_IFUNC)
 	{
 	  memcpy(symbuf, p, sym_size);
 	  elfcpp::Sym_write<size, big_endian> sw(symbuf);
-	  sw.put_st_other(elfcpp::STV_DEFAULT, sym.get_st_nonvis());
+	  if (sym.get_st_visibility() == elfcpp::STV_PROTECTED)
+	    sw.put_st_other(elfcpp::STV_DEFAULT, sym.get_st_nonvis());
+	  if (sym.get_st_type() == elfcpp::STT_GNU_IFUNC)
+	    sw.put_st_info(sym.get_st_bind(), elfcpp::STT_FUNC);
 	  psym = &sym2;
 	}
 
