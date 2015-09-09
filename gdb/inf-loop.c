@@ -80,7 +80,6 @@ inferior_event_handler (enum inferior_event_type event_type,
 	}
       break;
 
-    case INF_TIMER:
     default:
       printf_unfiltered (_("Event type not recognized.\n"));
       break;

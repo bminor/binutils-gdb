@@ -122,8 +122,6 @@ enum inferior_event_type
     /* Process a normal inferior event which will result in target_wait
        being called.  */
     INF_REG_EVENT,
-    /* We are called because a timer went off.  */
-    INF_TIMER,
     /* We are called to do stuff after the inferior stops.  */
     INF_EXEC_COMPLETE,
   };
