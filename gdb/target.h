@@ -471,7 +471,7 @@ struct target_ops
     ptid_t (*to_wait) (struct target_ops *,
 		       ptid_t, struct target_waitstatus *,
 		       int TARGET_DEBUG_PRINTER (target_debug_print_options))
-      TARGET_DEFAULT_NORETURN (noprocess ());
+      TARGET_DEFAULT_FUNC (default_target_wait);
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int)
       TARGET_DEFAULT_IGNORE ();
     void (*to_store_registers) (struct target_ops *, struct regcache *, int)
@@ -1326,6 +1326,13 @@ extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
 
 extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status,
 			   int options);
+
+/* The default target_ops::to_wait implementation.  */
+
+extern ptid_t default_target_wait (struct target_ops *ops,
+				   ptid_t ptid,
+				   struct target_waitstatus *status,
+				   int options);
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 

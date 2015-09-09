@@ -1,3 +1,48 @@
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bpstat_do_actions_1, until_break_command): Don't
+	check whether the target can async.
+	* inf-loop.c (inferior_event_handler): Only call target_async if
+	the target can async.
+	* infcall.c: Include top.h and interps.h.
+	(run_inferior_call): For the interpreter to sync mode while
+	running the infcall.  Call wait_sync_command_done instead of
+	wait_for_inferior plus normal_stop.
+	* infcmd.c (prepare_execution_command): Don't check whether the
+	target can async when running in the foreground.
+	(step_1): Delete synchronous case handling.
+	(step_once): Always install a continuation, even in sync mode.
+	(until_next_command, finish_forward): Don't check whether the
+	target can async.
+	(attach_command_post_wait, notice_new_inferior): Always install a
+	continuation, even in sync mode.
+	* infrun.c (mark_infrun_async_event_handler): New function.
+	(proceed): In sync mode, mark infrun's event source instead of
+	waiting for events here.
+	(fetch_inferior_event): If the target can't async, do a blocking
+	wait.
+	(prepare_to_wait): In sync mode, mark infrun's event source.
+	(infrun_async_inferior_event_handler): No longer bail out if the
+	target can't async.
+	* infrun.h (mark_infrun_async_event_handler): New declaration.
+	* linux-nat.c (linux_nat_wait_1): Remove calls to
+	set_sigint_trap/clear_sigint_trap.
+	(linux_nat_terminal_inferior): No longer check whether the target
+	can async.
+	* mi/mi-interp.c (mi_on_sync_execution_done): Update and simplify
+	comment.
+	(mi_execute_command_input_handler): No longer check whether the
+	target is async.  Update and simplify comment.
+	* target.c (default_target_wait): New function.
+	* target.h (struct target_ops) <to_wait>: Now defaults to
+	default_target_wait.
+	(default_target_wait): Declare.
+	* top.c (wait_sync_command_done): New function, factored out from
+	...
+	(maybe_wait_sync_command_done): ... this.
+	* top.h (wait_sync_command_done): Declare.
+	* target-delegates.c: Regenerate.
+
 2015-09-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* nat/linux-btrace.h (struct btrace_target_info) <ptr_bits>: Remove.

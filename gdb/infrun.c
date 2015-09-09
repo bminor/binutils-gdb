@@ -131,6 +131,14 @@ infrun_async (int enable)
     }
 }
 
+/* See infrun.h.  */
+
+void
+mark_infrun_async_event_handler (void)
+{
+  mark_async_event_handler (infrun_async_inferior_event_token);
+}
+
 /* When set, stop the 'step' command if we enter a function which has
    no line number information.  The normal behavior is that we step
    over such function.  */
@@ -3094,15 +3102,11 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   discard_cleanups (old_chain);
 
-  /* Wait for it to stop (if not standalone)
-     and in any case decode why it stopped, and act accordingly.  */
-  /* Do this only if we are not using the event loop, or if the target
-     does not support asynchronous execution.  */
+  /* Tell the event loop to wait for it to stop.  If the target
+     supports asynchronous execution, it'll do this from within
+     target_resume.  */
   if (!target_can_async_p ())
-    {
-      wait_for_inferior ();
-      normal_stop ();
-    }
+    mark_async_event_handler (infrun_async_inferior_event_token);
 }
 
 
@@ -3766,7 +3770,8 @@ fetch_inferior_event (void *client_data)
   make_cleanup_restore_integer (&execution_direction);
   execution_direction = target_execution_direction ();
 
-  ecs->ptid = do_target_wait (waiton_ptid, &ecs->ws, TARGET_WNOHANG);
+  ecs->ptid = do_target_wait (waiton_ptid, &ecs->ws,
+			      target_can_async_p () ? TARGET_WNOHANG : 0);
 
   if (debug_infrun)
     print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);
@@ -7520,10 +7525,10 @@ prepare_to_wait (struct execution_control_state *ecs)
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog, "infrun: prepare_to_wait\n");
 
-  /* This is the old end of the while loop.  Let everybody know we
-     want to wait for the inferior some more and get called again
-     soon.  */
   ecs->wait_some_more = 1;
+
+  if (!target_is_async_p ())
+    mark_infrun_async_event_handler ();
 }
 
 /* We are done with the step range of a step/next/si/ni command.
@@ -8816,14 +8821,6 @@ static const struct internalvar_funcs siginfo_funcs =
 static void
 infrun_async_inferior_event_handler (gdb_client_data data)
 {
-  /* If the target is closed while this event source is marked, we
-     will reach here without execution, or a target to call
-     target_wait on, which is an error.  Instead of tracking whether
-     the target has been popped already, or whether we do have threads
-     with pending statutes, simply ignore the event.  */
-  if (!target_is_async_p ())
-    return;
-
   inferior_event_handler (INF_REG_EVENT, NULL);
 }
 

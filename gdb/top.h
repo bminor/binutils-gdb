@@ -50,6 +50,9 @@ extern void execute_command (char *, int);
 
 extern void maybe_wait_sync_command_done (int was_sync);
 
+/* Wait for a synchronous execution command to end.  */
+extern void wait_sync_command_done (void);
+
 extern void check_frame_language_change (void);
 
 /* Prepare for execution of a command.

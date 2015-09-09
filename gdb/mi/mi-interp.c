@@ -309,16 +309,8 @@ mi_execute_command_wrapper (const char *cmd)
 static void
 mi_on_sync_execution_done (void)
 {
-  /* MI generally prints a prompt after a command, indicating it's
-     ready for further input.  However, due to an historical wart, if
-     MI async, and a (CLI) synchronous command was issued, then we
-     will print the prompt right after printing "^running", even if we
-     cannot actually accept any input until the target stops.  See
-     mi_on_resume.  However, if the target is async but MI is sync,
-     then we need to output the MI prompt now, to replicate gdb's
-     behavior when neither the target nor MI are async.  (Note this
-     observer is only called by the asynchronous target event handling
-     code.)  */
+  /* If MI is sync, then output the MI prompt now, indicating we're
+     ready for further input.  */
   if (!mi_async_p ())
     {
       fputs_unfiltered ("(gdb) \n", raw_stdout);
@@ -333,20 +325,12 @@ mi_execute_command_input_handler (char *cmd)
 {
   mi_execute_command_wrapper (cmd);
 
-  /* MI generally prints a prompt after a command, indicating it's
-     ready for further input.  However, due to an historical wart, if
-     MI is async, and a synchronous command was issued, then we will
-     print the prompt right after printing "^running", even if we
-     cannot actually accept any input until the target stops.  See
-     mi_on_resume.
-
-     If MI is not async, then we print the prompt when the command
-     finishes.  If the target is sync, that means output the prompt
-     now, as in that case executing a command doesn't return until the
-     command is done.  However, if the target is async, we go back to
-     the event loop and output the prompt in the
-     'synchronous_command_done' observer.  */
-  if (!target_is_async_p () || !sync_execution)
+  /* Print a prompt, indicating we're ready for further input, unless
+     we just started a synchronous command.  In that case, we're about
+     to go back to the event loop and will output the prompt in the
+     'synchronous_command_done' observer when the target next
+     stops.  */
+  if (!sync_execution)
     {
       fputs_unfiltered ("(gdb) \n", raw_stdout);
       gdb_flush (raw_stdout);

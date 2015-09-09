@@ -2233,6 +2233,17 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
   return (current_target.to_wait) (&current_target, ptid, status, options);
 }
 
+/* See target.h.  */
+
+ptid_t
+default_target_wait (struct target_ops *ops,
+		     ptid_t ptid, struct target_waitstatus *status,
+		     int options)
+{
+  status->kind = TARGET_WAITKIND_IGNORE;
+  return minus_one_ptid;
+}
+
 char *
 target_pid_to_str (ptid_t ptid)
 {

@@ -117,12 +117,6 @@ delegate_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *a
 }
 
 static ptid_t
-tdefault_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *arg2, int arg3)
-{
-  noprocess ();
-}
-
-static ptid_t
 debug_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *arg2, int arg3)
 {
   ptid_t result;
@@ -4251,7 +4245,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_detach = tdefault_detach;
   ops->to_disconnect = tdefault_disconnect;
   ops->to_resume = tdefault_resume;
-  ops->to_wait = tdefault_wait;
+  ops->to_wait = default_target_wait;
   ops->to_fetch_registers = tdefault_fetch_registers;
   ops->to_store_registers = tdefault_store_registers;
   ops->to_prepare_to_store = tdefault_prepare_to_store;

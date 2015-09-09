@@ -197,6 +197,10 @@ enum gdb_signal gdb_signal_from_command (int num);
 /* Enables/disables infrun's async event source in the event loop.  */
 extern void infrun_async (int enable);
 
+/* Call infrun's event handler the next time through the event
+   loop.  */
+extern void mark_infrun_async_event_handler (void);
+
 /* The global queue of threads that need to do a step-over operation
    to get past e.g., a breakpoint.  */
 extern struct thread_info *step_over_queue_head;

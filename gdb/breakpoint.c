@@ -4662,7 +4662,7 @@ bpstat_do_actions_1 (bpstat *bsp)
 
       if (breakpoint_proceeded)
 	{
-	  if (interpreter_async && target_can_async_p ())
+	  if (interpreter_async)
 	    /* If we are in async mode, then the target might be still
 	       running, not stopped at any breakpoint, so nothing for
 	       us to do here -- just return to the event loop.  */
@@ -11588,7 +11588,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
      be deleted when the target stops.  Otherwise, we're already
      stopped and delete breakpoints via cleanup chain.  */
 
-  if (target_can_async_p () && is_running (inferior_ptid))
+  if (is_running (inferior_ptid))
     {
       struct until_break_command_continuation_args *args =
         XNEW (struct until_break_command_continuation_args);
