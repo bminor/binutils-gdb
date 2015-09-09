@@ -1,5 +1,9 @@
 2015-09-09  Doug Evans  <dje@google.com>
 
+	* gdb.base/pie-execl.exp: Fix result test of build_executable.
+
+2015-09-09  Doug Evans  <dje@google.com>
+
 	* gdb.base/savedregs.exp: Fix typo.
 
 2015-09-09  Pedro Alves  <palves@redhat.com>
