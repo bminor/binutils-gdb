@@ -1,3 +1,9 @@
+2015-09-22  Andrew Pinski  <apinski@cavium.com>
+
+	* elfxx-aarch64.c (_bfd_aarch64_elf_grok_prstatus):
+	Add ILP32 sized prstatus.
+	(_bfd_aarch64_elf_grok_psinfo): Likewise.
+
 2015-09-07  Andrew Pinski  <apinski@cavium.com>
 
 	* cpu-aarch64.c (compatible):

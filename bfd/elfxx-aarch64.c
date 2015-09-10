@@ -556,6 +556,22 @@ _bfd_aarch64_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	size = 272;
 
 	break;
+
+      case 352:		/* sizeof(struct elf_prstatus) on Linux/arm64_ilp32.  */
+	/* pr_cursig */
+	elf_tdata (abfd)->core->signal
+	  = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core->lwpid
+	  = bfd_get_32 (abfd, note->descdata + 32);
+
+	/* pr_reg */
+	offset = 72;
+	size = 272;
+
+	break;
+
     }
 
   /* Make a ".reg/999" section.  */
@@ -577,6 +593,15 @@ _bfd_aarch64_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 	= _bfd_elfcore_strndup (abfd, note->descdata + 40, 16);
       elf_tdata (abfd)->core->command
 	= _bfd_elfcore_strndup (abfd, note->descdata + 56, 80);
+      break;
+
+    case 124:        /* This is sizeof(struct elf_prpsinfo) on Linux/aarch64_ilp32.  */
+      elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 12);
+      elf_tdata (abfd)->core->program
+	= _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
+      elf_tdata (abfd)->core->command
+	= _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+      break;
     }
 
   /* Note that for some reason, a spurious space is tacked
@@ -598,6 +623,7 @@ char *
 _bfd_aarch64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
 				  ...)
 {
+  /* TODO ILP32 support. */
   switch (note_type)
     {
     default:
