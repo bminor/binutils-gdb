@@ -39,19 +39,19 @@ Disassembly of section .text:
 .*:	ec 67 84 57 a0 e4 [	 ]*cgrbnl	%r6,%r7,1111\(%r8\)
 .*:	ec 67 84 57 c0 e4 [	 ]*cgrbnh	%r6,%r7,1111\(%r8\)
 .*:	ec 67 84 57 c0 e4 [	 ]*cgrbnh	%r6,%r7,1111\(%r8\)
-.*:	ec 67 00 00 a0 76 [	 ]*crj	%r6,%r7,10,c6 <foo\+0xc6>
-.*:	ec 67 00 00 20 76 [	 ]*crj	%r6,%r7,2,cc <foo\+0xcc>
-.*:	ec 67 00 00 20 76 [	 ]*crj	%r6,%r7,2,d2 <foo\+0xd2>
-.*:	ec 67 00 00 40 76 [	 ]*crj	%r6,%r7,4,d8 <foo\+0xd8>
-.*:	ec 67 00 00 40 76 [	 ]*crj	%r6,%r7,4,de <foo\+0xde>
-.*:	ec 67 00 00 60 76 [	 ]*crj	%r6,%r7,6,e4 <foo\+0xe4>
-.*:	ec 67 00 00 60 76 [	 ]*crj	%r6,%r7,6,ea <foo\+0xea>
-.*:	ec 67 00 00 80 76 [	 ]*crj	%r6,%r7,8,f0 <foo\+0xf0>
-.*:	ec 67 00 00 80 76 [	 ]*crj	%r6,%r7,8,f6 <foo\+0xf6>
-.*:	ec 67 00 00 a0 76 [	 ]*crj	%r6,%r7,10,fc <foo\+0xfc>
-.*:	ec 67 00 00 a0 76 [	 ]*crj	%r6,%r7,10,102 <foo\+0x102>
-.*:	ec 67 00 00 c0 76 [	 ]*crj	%r6,%r7,12,108 <foo\+0x108>
-.*:	ec 67 00 00 c0 76 [	 ]*crj	%r6,%r7,12,10e <foo\+0x10e>
+.*:	ec 67 00 00 a0 76 [	 ]*crjnl	%r6,%r7,c6 <foo\+0xc6>
+.*:	ec 67 00 00 20 76 [	 ]*crjh	%r6,%r7,cc <foo\+0xcc>
+.*:	ec 67 00 00 20 76 [	 ]*crjh	%r6,%r7,d2 <foo\+0xd2>
+.*:	ec 67 00 00 40 76 [	 ]*crjl	%r6,%r7,d8 <foo\+0xd8>
+.*:	ec 67 00 00 40 76 [	 ]*crjl	%r6,%r7,de <foo\+0xde>
+.*:	ec 67 00 00 60 76 [	 ]*crjne	%r6,%r7,e4 <foo\+0xe4>
+.*:	ec 67 00 00 60 76 [	 ]*crjne	%r6,%r7,ea <foo\+0xea>
+.*:	ec 67 00 00 80 76 [	 ]*crje	%r6,%r7,f0 <foo\+0xf0>
+.*:	ec 67 00 00 80 76 [	 ]*crje	%r6,%r7,f6 <foo\+0xf6>
+.*:	ec 67 00 00 a0 76 [	 ]*crjnl	%r6,%r7,fc <foo\+0xfc>
+.*:	ec 67 00 00 a0 76 [	 ]*crjnl	%r6,%r7,102 <foo\+0x102>
+.*:	ec 67 00 00 c0 76 [	 ]*crjnh	%r6,%r7,108 <foo\+0x108>
+.*:	ec 67 00 00 c0 76 [	 ]*crjnh	%r6,%r7,10e <foo\+0x10e>
 .*:	ec 67 00 00 a0 64 [	 ]*cgrjnl	%r6,%r7,114 <foo\+0x114>
 .*:	ec 67 00 00 20 64 [	 ]*cgrjh	%r6,%r7,11a <foo\+0x11a>
 .*:	ec 67 00 00 20 64 [	 ]*cgrjh	%r6,%r7,120 <foo\+0x120>
@@ -209,32 +209,32 @@ Disassembly of section .text:
 .*:	ec 67 84 57 a0 e5 [	 ]*clgrbnl	%r6,%r7,1111\(%r8\)
 .*:	ec 67 84 57 c0 e5 [	 ]*clgrbnh	%r6,%r7,1111\(%r8\)
 .*:	ec 67 84 57 c0 e5 [	 ]*clgrbnh	%r6,%r7,1111\(%r8\)
-.*:	ec 67 00 00 a0 77 [	 ]*clrj	%r6,%r7,10,48e <foo\+0x48e>
-.*:	ec 67 00 00 20 77 [	 ]*clrj	%r6,%r7,2,494 <foo\+0x494>
-.*:	ec 67 00 00 20 77 [	 ]*clrj	%r6,%r7,2,49a <foo\+0x49a>
-.*:	ec 67 00 00 40 77 [	 ]*clrj	%r6,%r7,4,4a0 <foo\+0x4a0>
-.*:	ec 67 00 00 40 77 [	 ]*clrj	%r6,%r7,4,4a6 <foo\+0x4a6>
-.*:	ec 67 00 00 60 77 [	 ]*clrj	%r6,%r7,6,4ac <foo\+0x4ac>
-.*:	ec 67 00 00 60 77 [	 ]*clrj	%r6,%r7,6,4b2 <foo\+0x4b2>
-.*:	ec 67 00 00 80 77 [	 ]*clrj	%r6,%r7,8,4b8 <foo\+0x4b8>
-.*:	ec 67 00 00 80 77 [	 ]*clrj	%r6,%r7,8,4be <foo\+0x4be>
-.*:	ec 67 00 00 a0 77 [	 ]*clrj	%r6,%r7,10,4c4 <foo\+0x4c4>
-.*:	ec 67 00 00 a0 77 [	 ]*clrj	%r6,%r7,10,4ca <foo\+0x4ca>
-.*:	ec 67 00 00 c0 77 [	 ]*clrj	%r6,%r7,12,4d0 <foo\+0x4d0>
-.*:	ec 67 00 00 c0 77 [	 ]*clrj	%r6,%r7,12,4d6 <foo\+0x4d6>
-.*:	ec 67 00 00 a0 65 [	 ]*clgrj	%r6,%r7,10,4dc <foo\+0x4dc>
-.*:	ec 67 00 00 20 65 [	 ]*clgrj	%r6,%r7,2,4e2 <foo\+0x4e2>
-.*:	ec 67 00 00 20 65 [	 ]*clgrj	%r6,%r7,2,4e8 <foo\+0x4e8>
-.*:	ec 67 00 00 40 65 [	 ]*clgrj	%r6,%r7,4,4ee <foo\+0x4ee>
-.*:	ec 67 00 00 40 65 [	 ]*clgrj	%r6,%r7,4,4f4 <foo\+0x4f4>
-.*:	ec 67 00 00 60 65 [	 ]*clgrj	%r6,%r7,6,4fa <foo\+0x4fa>
-.*:	ec 67 00 00 60 65 [	 ]*clgrj	%r6,%r7,6,500 <foo\+0x500>
-.*:	ec 67 00 00 80 65 [	 ]*clgrj	%r6,%r7,8,506 <foo\+0x506>
-.*:	ec 67 00 00 80 65 [	 ]*clgrj	%r6,%r7,8,50c <foo\+0x50c>
-.*:	ec 67 00 00 a0 65 [	 ]*clgrj	%r6,%r7,10,512 <foo\+0x512>
-.*:	ec 67 00 00 a0 65 [	 ]*clgrj	%r6,%r7,10,518 <foo\+0x518>
-.*:	ec 67 00 00 c0 65 [	 ]*clgrj	%r6,%r7,12,51e <foo\+0x51e>
-.*:	ec 67 00 00 c0 65 [	 ]*clgrj	%r6,%r7,12,524 <foo\+0x524>
+.*:	ec 67 00 00 a0 77 [	 ]*clrjnl	%r6,%r7,48e <foo\+0x48e>
+.*:	ec 67 00 00 20 77 [	 ]*clrjh	%r6,%r7,494 <foo\+0x494>
+.*:	ec 67 00 00 20 77 [	 ]*clrjh	%r6,%r7,49a <foo\+0x49a>
+.*:	ec 67 00 00 40 77 [	 ]*clrjl	%r6,%r7,4a0 <foo\+0x4a0>
+.*:	ec 67 00 00 40 77 [	 ]*clrjl	%r6,%r7,4a6 <foo\+0x4a6>
+.*:	ec 67 00 00 60 77 [	 ]*clrjne	%r6,%r7,4ac <foo\+0x4ac>
+.*:	ec 67 00 00 60 77 [	 ]*clrjne	%r6,%r7,4b2 <foo\+0x4b2>
+.*:	ec 67 00 00 80 77 [	 ]*clrje	%r6,%r7,4b8 <foo\+0x4b8>
+.*:	ec 67 00 00 80 77 [	 ]*clrje	%r6,%r7,4be <foo\+0x4be>
+.*:	ec 67 00 00 a0 77 [	 ]*clrjnl	%r6,%r7,4c4 <foo\+0x4c4>
+.*:	ec 67 00 00 a0 77 [	 ]*clrjnl	%r6,%r7,4ca <foo\+0x4ca>
+.*:	ec 67 00 00 c0 77 [	 ]*clrjnh	%r6,%r7,4d0 <foo\+0x4d0>
+.*:	ec 67 00 00 c0 77 [	 ]*clrjnh	%r6,%r7,4d6 <foo\+0x4d6>
+.*:	ec 67 00 00 a0 65 [	 ]*clgrjnl	%r6,%r7,4dc <foo\+0x4dc>
+.*:	ec 67 00 00 20 65 [	 ]*clgrjh	%r6,%r7,4e2 <foo\+0x4e2>
+.*:	ec 67 00 00 20 65 [	 ]*clgrjh	%r6,%r7,4e8 <foo\+0x4e8>
+.*:	ec 67 00 00 40 65 [	 ]*clgrjl	%r6,%r7,4ee <foo\+0x4ee>
+.*:	ec 67 00 00 40 65 [	 ]*clgrjl	%r6,%r7,4f4 <foo\+0x4f4>
+.*:	ec 67 00 00 60 65 [	 ]*clgrjne	%r6,%r7,4fa <foo\+0x4fa>
+.*:	ec 67 00 00 60 65 [	 ]*clgrjne	%r6,%r7,500 <foo\+0x500>
+.*:	ec 67 00 00 80 65 [	 ]*clgrje	%r6,%r7,506 <foo\+0x506>
+.*:	ec 67 00 00 80 65 [	 ]*clgrje	%r6,%r7,50c <foo\+0x50c>
+.*:	ec 67 00 00 a0 65 [	 ]*clgrjnl	%r6,%r7,512 <foo\+0x512>
+.*:	ec 67 00 00 a0 65 [	 ]*clgrjnl	%r6,%r7,518 <foo\+0x518>
+.*:	ec 67 00 00 c0 65 [	 ]*clgrjnh	%r6,%r7,51e <foo\+0x51e>
+.*:	ec 67 00 00 c0 65 [	 ]*clgrjnh	%r6,%r7,524 <foo\+0x524>
 .*:	ec 6a 74 57 c8 ff [	 ]*clibnl	%r6,200,1111\(%r7\)
 .*:	ec 62 74 57 c8 ff [	 ]*clibh	%r6,200,1111\(%r7\)
 .*:	ec 62 74 57 c8 ff [	 ]*clibh	%r6,200,1111\(%r7\)
