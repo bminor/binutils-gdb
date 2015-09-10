@@ -1,3 +1,12 @@
+2015-09-10  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.c (download_tracepoint_locations): New local
+	can_download_tracepoint.  Check the result of
+	target_can_download_tracepoint and save it in
+	can_download_tracepoint if there are tracepoints to download.
+	* linux-nat.h (enum tribool): Move it to ...
+	* common/common-types.h: ... here.
+
 2015-09-09  Pedro Alves  <palves@redhat.com>
 
 	* inf-loop.c (inferior_event_handler): Delete INF_TIMER case.

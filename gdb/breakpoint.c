@@ -12146,9 +12146,7 @@ download_tracepoint_locations (void)
 {
   struct breakpoint *b;
   struct cleanup *old_chain;
-
-  if (!target_can_download_tracepoint ())
-    return;
+  enum tribool can_download_tracepoint = TRIBOOL_UNKNOWN;
 
   old_chain = save_current_space_and_thread ();
 
@@ -12162,6 +12160,17 @@ download_tracepoint_locations (void)
 	   ? !may_insert_fast_tracepoints
 	   : !may_insert_tracepoints))
 	continue;
+
+      if (can_download_tracepoint == TRIBOOL_UNKNOWN)
+	{
+	  if (target_can_download_tracepoint ())
+	    can_download_tracepoint = TRIBOOL_TRUE;
+	  else
+	    can_download_tracepoint = TRIBOOL_FALSE;
+	}
+
+      if (can_download_tracepoint == TRIBOOL_FALSE)
+	break;
 
       for (bl = b->loc; bl; bl = bl->next)
 	{
