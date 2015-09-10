@@ -55,6 +55,10 @@
    -T {bfdname}
 		Specify a non-default object file format.
 
+  --output-separator=sep_string
+  -s sep_string	String used to separate parsed strings in output.
+		Default is newline.
+
    --help
    -h		Print the usage message on the standard output.
 
@@ -114,6 +118,9 @@ static char *target;
 static char encoding;
 static int encoding_bytes;
 
+/* Output string used to separate parsed strings  */
+static char *output_separator;
+
 static struct option long_options[] =
 {
   {"all", no_argument, NULL, 'a'},
@@ -124,6 +131,7 @@ static struct option long_options[] =
   {"include-all-whitespace", required_argument, NULL, 'w'},
   {"encoding", required_argument, NULL, 'e'},
   {"target", required_argument, NULL, 'T'},
+  {"output-separator", required_argument, NULL, 's'},
   {"help", no_argument, NULL, 'h'},
   {"version", no_argument, NULL, 'v'},
   {NULL, 0, NULL, 0}
@@ -178,8 +186,9 @@ main (int argc, char **argv)
     datasection_only = TRUE;
   target = NULL;
   encoding = 's';
+  output_separator = NULL;
 
-  while ((optc = getopt_long (argc, argv, "adfhHn:wot:e:T:Vv0123456789",
+  while ((optc = getopt_long (argc, argv, "adfhHn:wot:e:T:s:Vv0123456789",
 			      long_options, (int *) 0)) != EOF)
     {
       switch (optc)
@@ -247,6 +256,10 @@ main (int argc, char **argv)
 	    usage (stderr, 1);
 	  encoding = optarg[0];
 	  break;
+
+	case 's':
+	  output_separator = optarg;
+          break;
 
 	case 'V':
 	case 'v':
@@ -650,7 +663,10 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	  putchar (c);
 	}
 
-      putchar ('\n');
+      if (output_separator)
+        fputs (output_separator, stdout);
+      else
+        putchar ('\n');
     }
   free (buf);
 }
@@ -681,6 +697,7 @@ usage (FILE *stream, int status)
   -T --target=<BFDNAME>     Specify the binary file format\n\
   -e --encoding={s,S,b,l,B,L} Select character size and endianness:\n\
                             s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n\
+  -s --output-separator=<string> String used to separate strings in output.\n\
   @<file>                   Read options from <file>\n\
   -h --help                 Display this information\n\
   -v -V --version           Print the program's version number\n"));
