@@ -1,5 +1,10 @@
 2015-09-10  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* ada-lang.c (scan_discrim_bound): Factor out arithmetic
+	operations.
+
+2015-09-10  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* ada-lang.c (ada_search_struct_field): Constify parameters
 	and/or variables..
 	(xget_renaming_scope): Likewise.

@@ -11432,24 +11432,29 @@ scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
 {
   static char *bound_buffer = NULL;
   static size_t bound_buffer_len = 0;
-  const char *pend, *bound;
+  const char *pstart, *pend, *bound;
   struct value *bound_val;
 
   if (dval == NULL || str == NULL || str[k] == '\0')
     return 0;
 
-  pend = strstr (str + k, "__");
+  pstart = str + k;
+  pend = strstr (pstart, "__");
   if (pend == NULL)
     {
-      bound = str + k;
+      bound = pstart;
       k += strlen (bound);
     }
   else
     {
-      GROW_VECT (bound_buffer, bound_buffer_len, pend - (str + k) + 1);
+      int len = pend - pstart;
+
+      /* Strip __ and beyond.  */
+      GROW_VECT (bound_buffer, bound_buffer_len, len + 1);
+      strncpy (bound_buffer, pstart, len);
+      bound_buffer[len] = '\0';
+
       bound = bound_buffer;
-      strncpy (bound_buffer, str + k, pend - (str + k));
-      bound_buffer[pend - (str + k)] = '\0';
       k = pend - str;
     }
 
