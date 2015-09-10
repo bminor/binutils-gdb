@@ -1,3 +1,7 @@
+2015-09-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated simplified Chinese translation.
+
 2015-09-09  James Bowman  <james.bowman@ftdichip.com>
 
 	* scripttempl/ft32.sc: default linker script RAM and
