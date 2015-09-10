@@ -7401,12 +7401,14 @@ address serves as the address of the frame.  Usually this address is kept
 in a register called the @dfn{frame pointer register}
 (@pxref{Registers, $fp}) while execution is going on in that frame.
 
+@cindex frame level
 @cindex frame number
-@value{GDBN} assigns numbers to all existing stack frames, starting with
-zero for the innermost frame, one for the frame that called it,
-and so on upward.  These numbers do not really exist in your program;
-they are assigned by @value{GDBN} to give you a way of designating stack
-frames in @value{GDBN} commands.
+@value{GDBN} labels each existing stack frame with a @dfn{level}, a
+number that is zero for the innermost frame, one for the frame that
+called it, and so on upward.  These level numbers give you a way of
+designating stack frames in @value{GDBN} commands.  The terms
+@dfn{frame number} and @dfn{frame level} can be used interchangeably to
+describe this number.
 
 @c The -fomit-frame-pointer below perennially causes hbox overflow
 @c underflow problems.
@@ -7639,21 +7641,75 @@ of the stack frame just selected.
 @table @code
 @kindex frame@r{, selecting}
 @kindex f @r{(@code{frame})}
-@item frame @var{n}
-@itemx f @var{n}
-Select frame number @var{n}.  Recall that frame zero is the innermost
-(currently executing) frame, frame one is the frame that called the
-innermost one, and so on.  The highest-numbered frame is the one for
-@code{main}.
+@item frame @r{[} @var{frame-selection-spec} @r{]}
+@item f @r{[} @var{frame-selection-spec} @r{]}
+The @command{frame} command allows different stack frames to be
+selected.  The @var{frame-selection-spec} can be any of the following:
 
-@item frame @var{stack-addr} [ @var{pc-addr} ]
-@itemx f @var{stack-addr} [ @var{pc-addr} ]
-Select the frame at address @var{stack-addr}.  This is useful mainly if the
-chaining of stack frames has been damaged by a bug, making it
-impossible for @value{GDBN} to assign numbers properly to all frames.  In
-addition, this can be useful when your program has multiple stacks and
-switches between them.  The optional @var{pc-addr} can also be given to
-specify the value of PC for the stack frame.
+@table @code
+@kindex frame level
+@item @var{num}
+@item level @var{num}
+Select frame level @var{num}.  Recall that frame zero is the innermost
+(currently executing) frame, frame one is the frame that called the
+innermost one, and so on.  The highest level frame is usually the one
+for @code{main}.
+
+As this is the most common method of navigating the frame stack, the
+string @command{level} can be omitted.  For example, the following two
+commands are equivalent:
+
+@smallexample
+(@value{GDBP}) frame 3
+(@value{GDBP}) frame level 3
+@end smallexample
+
+@kindex frame address
+@item address @var{stack-address}
+Select the frame with stack address @var{stack-address}.  The
+@var{stack-address} for a frame can be seen in the output of
+@command{info frame}, for example:
+
+@smallexample
+(gdb) info frame
+Stack level 1, frame at 0x7fffffffda30:
+ rip = 0x40066d in b (amd64-entry-value.cc:59); saved rip 0x4004c5
+ tail call frame, caller of frame at 0x7fffffffda30
+ source language c++.
+ Arglist at unknown address.
+ Locals at unknown address, Previous frame's sp is 0x7fffffffda30
+@end smallexample
+
+The @var{stack-address} for this frame is @code{0x7fffffffda30} as
+indicated by the line:
+
+@smallexample
+Stack level 1, frame at 0x7fffffffda30:
+@end smallexample
+
+@kindex frame function
+@item function @var{function-name}
+Select the stack frame for function @var{function-name}.  If there are
+multiple stack frames for function @var{function-name} then the inner
+most stack frame is selected.
+
+@kindex frame view
+@item view @var{stack-address} @r{[} @var{pc-addr} @r{]}
+View a frame that is not part of @value{GDBN}'s backtrace.  The frame
+viewed has stack address @var{stack-addr}, and optionally, a program
+counter address of @var{pc-addr}.
+
+This is useful mainly if the chaining of stack frames has been
+damaged by a bug, making it impossible for @value{GDBN} to assign
+numbers properly to all frames.  In addition, this can be useful
+when your program has multiple stacks and switches between them.
+
+When viewing a frame outside the current backtrace using
+@command{frame view} then you can always return to the original
+stack using one of the previous stack frame selection instructions,
+for example @command{frame level 0}.
+
+@end table
 
 @kindex up
 @item up @var{n}
@@ -7696,11 +7752,13 @@ for details.
 
 @table @code
 @kindex select-frame
-@item select-frame
+@item select-frame @r{[} @var{frame-selection-spec} @r{]}
 The @code{select-frame} command is a variant of @code{frame} that does
 not display the new frame after selecting it.  This command is
 intended primarily for use in @value{GDBN} command scripts, where the
-output might be unnecessary and distracting.
+output might be unnecessary and distracting.  The
+@var{frame-selection-spec} is as for the @command{frame} command
+described in @ref{Selection, ,Selecting a Frame}.
 
 @kindex down-silently
 @kindex up-silently
@@ -7758,13 +7816,12 @@ which registers were saved in the frame
 something has gone wrong that has made the stack format fail to fit
 the usual conventions.
 
-@item info frame @var{addr}
-@itemx info f @var{addr}
-Print a verbose description of the frame at address @var{addr}, without
-selecting that frame.  The selected frame remains unchanged by this
-command.  This requires the same kind of address (more than one for some
-architectures) that you specify in the @code{frame} command.
-@xref{Selection, ,Selecting a Frame}.
+@item info frame @r{[} @var{frame-selection-spec} @r{]}
+@itemx info f @r{[} @var{frame-selection-spec} @r{]}
+Print a verbose description of the frame selected by
+@var{frame-selection-spec}.  The @var{frame-selection-spec} is the
+same as for the @command{frame} command (@pxref{Selection, ,Selecting
+a Frame}).  The selected frame remains unchanged by this command.
 
 @kindex info args
 @item info args

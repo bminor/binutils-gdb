@@ -35,6 +35,7 @@
 #include <ctype.h>
 #include "mi-parse.h"
 #include "common/gdb_optional.h"
+#include "safe-ctype.h"
 
 enum what_to_list { locals, arguments, all };
 
@@ -678,13 +679,87 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
     }
 }
 
+/* Read a frame specification from FRAME_EXP and return the selected frame.
+   Call error() if the specification is in any way invalid (so this
+   function never returns NULL).
+
+   The frame specification is usually an integer level number, however if
+   the number does not match a valid frame level then it will be treated as
+   a frame address.  The frame address will then be used to find a matching
+   frame in the stack.  If no matching frame is found then a new frame will
+   be created.
+
+   The use of FRAME_EXP as an address is undocumented in the GDB user
+   manual, this feature is supported here purely for backward
+   compatibility.  */
+
+static struct frame_info *
+parse_frame_specification (const char *frame_exp)
+{
+  gdb_assert (frame_exp != NULL);
+
+  /* NOTE: Parse and evaluate expression, but do not use
+     functions such as parse_and_eval_long or
+     parse_and_eval_address to also extract the value.
+     Instead value_as_long and value_as_address are used.
+     This avoids problems with expressions that contain
+     side-effects.  */
+  struct value *arg = parse_and_eval (frame_exp);
+
+  /* Assume ARG is an integer, and try using that to select a frame.  */
+  struct frame_info *fid;
+  int level = value_as_long (arg);
+
+  fid = find_relative_frame (get_current_frame (), &level);
+  if (level == 0)
+    /* find_relative_frame was successful.  */
+    return fid;
+
+  /* Convert the value into a corresponding address.  */
+  CORE_ADDR addr = value_as_address (arg);
+
+  /* Assume that ADDR is an address, use that to identify a frame with a
+     matching ID.  */
+  struct frame_id id = frame_id_build_wild (addr);
+
+  /* If (s)he specifies the frame with an address, he deserves
+     what (s)he gets.  Still, give the highest one that matches.
+     (NOTE: cagney/2004-10-29: Why highest, or outer-most, I don't
+     know).  */
+  for (fid = get_current_frame ();
+       fid != NULL;
+       fid = get_prev_frame (fid))
+    {
+      if (frame_id_eq (id, get_frame_id (fid)))
+	{
+	  struct frame_info *prev_frame;
+
+	  while (1)
+	    {
+	      prev_frame = get_prev_frame (fid);
+	      if (!prev_frame
+		  || !frame_id_eq (id, get_frame_id (prev_frame)))
+		break;
+	      fid = prev_frame;
+	    }
+	  return fid;
+	}
+    }
+
+  /* We couldn't identify the frame as an existing frame, but
+     perhaps we can create one with a single argument.  */
+  return create_new_frame (addr, 0);
+}
+
+/* Implement the -stack-select-frame MI command.  */
+
 void
 mi_cmd_stack_select_frame (const char *command, char **argv, int argc)
 {
   if (argc == 0 || argc > 1)
     error (_("-stack-select-frame: Usage: FRAME_SPEC"));
 
-  select_frame_command (argv[0], 1 /* not used */ );
+  select_frame_for_mi (parse_frame_specification (argv[0]));
 }
 
 void

@@ -251,6 +251,23 @@ add_cmd (const char *name, enum command_class theclass,
   return result;
 }
 
+/* Add an element with a suppress notification to the LIST of commands.  */
+
+struct cmd_list_element *
+add_cmd_suppress_notification (const char *name, enum command_class theclass,
+			       cmd_const_cfunc_ftype *fun, const char *doc,
+			       struct cmd_list_element **list,
+			       int *suppress_notification)
+{
+  struct cmd_list_element *element;
+
+  element = add_cmd (name, theclass, fun, doc, list);
+  element->suppress_notification = suppress_notification;
+
+  return element;
+}
+
+
 /* Deprecates a command CMD.
    REPLACEMENT is the name of the command which should be used in
    place of this command, or NULL if no such command exists.
@@ -360,6 +377,25 @@ add_prefix_cmd (const char *name, enum command_class theclass,
     p->prefix = c;
 
   return c;
+}
+
+/* Like ADD_PREFIX_CMD but sets the suppress_notification pointer on the
+   new command list element.  */
+
+struct cmd_list_element *
+add_prefix_cmd_suppress_notification
+               (const char *name, enum command_class theclass,
+		cmd_const_cfunc_ftype *fun,
+		const char *doc, struct cmd_list_element **prefixlist,
+		const char *prefixname, int allow_unknown,
+		struct cmd_list_element **list,
+		int *suppress_notification)
+{
+  struct cmd_list_element *element
+    = add_prefix_cmd (name, theclass, fun, doc, prefixlist,
+		      prefixname, allow_unknown, list);
+  element->suppress_notification = suppress_notification;
+  return element;
 }
 
 /* Like add_prefix_cmd but sets the abbrev_flag on the new command.  */
@@ -893,12 +929,8 @@ add_com_suppress_notification (const char *name, enum command_class theclass,
 			       cmd_const_cfunc_ftype *fun, const char *doc,
 			       int *suppress_notification)
 {
-  struct cmd_list_element *element;
-
-  element = add_cmd (name, theclass, fun, doc, &cmdlist);
-  element->suppress_notification = suppress_notification;
-
-  return element;
+  return add_cmd_suppress_notification (name, theclass, fun, doc,
+					&cmdlist, suppress_notification);
 }
 
 /* Recursively walk the commandlist structures, and print out the

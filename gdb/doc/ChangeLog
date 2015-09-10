@@ -1,3 +1,11 @@
+2018-09-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Frames): Rewrite the description of 'frame number'
+	to highlight that the number is also the frame's level.
+	(Selection): Rewrite documentation for 'frame' and 'select-frame'
+	commands.
+	(Frame Info): Rewrite documentation for 'info frame' command.
+
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
 	PR python/18852:

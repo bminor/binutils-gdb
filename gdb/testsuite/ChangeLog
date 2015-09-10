@@ -1,3 +1,8 @@
+2018-09-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/frame-selection.exp: New file.
+	* gdb.base/frame-selection.c: New file.
+
 2018-09-27  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.threads/check-libthread-db.c (thread_routine): Use a
