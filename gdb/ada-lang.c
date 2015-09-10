@@ -215,7 +215,7 @@ static struct value *value_val_atr (struct type *, struct value *);
 static struct symbol *standard_lookup (const char *, const struct block *,
                                        domain_enum);
 
-static struct value *ada_search_struct_field (char *, struct value *, int,
+static struct value *ada_search_struct_field (const char *, struct value *, int,
                                               struct type *);
 
 static struct value *ada_value_primitive_field (struct value *, int, int,
@@ -5028,8 +5028,8 @@ xget_renaming_scope (struct type *renaming_type)
      and then backtrack until we find the first "__".  */
 
   const char *name = type_name_no_tag (renaming_type);
-  char *suffix = strstr (name, "___XR");
-  char *last;
+  const char *suffix = strstr (name, "___XR");
+  const char *last;
   int scope_len;
   char *scope;
 
@@ -7221,7 +7221,7 @@ num_visible_fields (struct type *type)
    Searches recursively through wrapper fields (e.g., '_parent').  */
 
 static struct value *
-ada_search_struct_field (char *name, struct value *arg, int offset,
+ada_search_struct_field (const char *name, struct value *arg, int offset,
                          struct type *type)
 {
   int i;
@@ -8585,7 +8585,7 @@ ada_is_redundant_range_encoding (struct type *range_type,
 				 struct type *encoding_type)
 {
   struct type *fixed_range_type;
-  char *bounds_str;
+  const char *bounds_str;
   int n;
   LONGEST lo, hi;
 
@@ -11427,13 +11427,12 @@ ada_float_to_fixed (struct type *type, DOUBLEST x)
    not alter *PX and *PNEW_K if unsuccessful.  */
 
 static int
-scan_discrim_bound (char *str, int k, struct value *dval, LONGEST * px,
+scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
                     int *pnew_k)
 {
   static char *bound_buffer = NULL;
   static size_t bound_buffer_len = 0;
-  char *bound;
-  char *pend;
+  const char *pend, *bound;
   struct value *bound_val;
 
   if (dval == NULL || str == NULL || str[k] == '\0')
@@ -11450,7 +11449,7 @@ scan_discrim_bound (char *str, int k, struct value *dval, LONGEST * px,
       GROW_VECT (bound_buffer, bound_buffer_len, pend - (str + k) + 1);
       bound = bound_buffer;
       strncpy (bound_buffer, str + k, pend - (str + k));
-      bound[pend - (str + k)] = '\0';
+      bound_buffer[pend - (str + k)] = '\0';
       k = pend - str;
     }
 
@@ -11526,7 +11525,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
 {
   const char *name;
   struct type *base_type;
-  char *subtype_info;
+  const char *subtype_info;
 
   gdb_assert (raw_type != NULL);
   gdb_assert (TYPE_NAME (raw_type) != NULL);
@@ -11556,7 +11555,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       int prefix_len = subtype_info - name;
       LONGEST L, U;
       struct type *type;
-      char *bounds_str;
+      const char *bounds_str;
       int n;
 
       GROW_VECT (name_buf, name_len, prefix_len + 5);
