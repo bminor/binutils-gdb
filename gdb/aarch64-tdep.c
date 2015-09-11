@@ -339,7 +339,8 @@ decode_b (CORE_ADDR addr, uint32_t insn, int *is_bl, int32_t *offset)
 static int
 decode_bcond (CORE_ADDR addr, uint32_t insn, unsigned *cond, int32_t *offset)
 {
-  if (decode_masked_match (insn, 0xfe000000, 0x54000000))
+  /* b.cond  0101 0100 iiii iiii iiii iiii iii0 cccc */
+  if (decode_masked_match (insn, 0xff000010, 0x54000000))
     {
       *cond = (insn >> 0) & 0xf;
       *offset = extract_signed_bitfield (insn, 19, 5) << 2;

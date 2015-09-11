@@ -1,3 +1,7 @@
+2015-09-11  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (decode_bcond): Fix incorrect mask.
+
 2015-09-11  Mihail-Marian Nistor  <mihail.nistor@freescale.com>
 
 	PR gdb/18947
