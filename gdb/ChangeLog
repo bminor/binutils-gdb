@@ -1,5 +1,14 @@
 2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* disasm.h (DISASSEMBLY_SPECULATION): New.
+	(struct disasm_insn): New.
+	(gdb_pretty_print_insn): New.
+	* disasm.c (gdb_pretty_print_insn): Replace parameter PC with INSN.
+	Update users.  Print instruction number and indicate speculative
+	execution, if requested.
+
+2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* disasm.c (dump_insns): Split into this and ...
 	(gdb_pretty_print_insn): ... this.
 

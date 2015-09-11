@@ -170,12 +170,12 @@ compare_lines (const void *mle1p, const void *mle2p)
   return val;
 }
 
-/* Prints the instruction at PC into UIOUT and returns the length of the
-   printed instruction in bytes.  */
+/* See disasm.h.  */
 
-static int
+int
 gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
-		       struct disassemble_info * di, CORE_ADDR pc, int flags,
+		       struct disassemble_info * di,
+		       const struct disasm_insn *insn, int flags,
 		       struct ui_file *stb)
 {
   /* parts of the symbolic representation of the address */
@@ -186,10 +186,37 @@ gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
   struct cleanup *ui_out_chain;
   char *filename = NULL;
   char *name = NULL;
+  CORE_ADDR pc;
 
   ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  pc = insn->addr;
 
-  if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+  if (insn->number != 0)
+    {
+      ui_out_field_fmt (uiout, "insn-number", "%u", insn->number);
+      ui_out_text (uiout, "\t");
+    }
+
+  if ((flags & DISASSEMBLY_SPECULATIVE) != 0)
+    {
+      if (insn->is_speculative)
+	{
+	  ui_out_field_string (uiout, "is-speculative", "?");
+
+	  /* The speculative execution indication overwrites the first
+	     character of the PC prefix.
+	     We assume a PC prefix length of 3 characters.  */
+	  if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+	    ui_out_text (uiout, pc_prefix (pc) + 1);
+	  else
+	    ui_out_text (uiout, "  ");
+	}
+      else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+	ui_out_text (uiout, pc_prefix (pc));
+      else
+	ui_out_text (uiout, "   ");
+    }
+  else if ((flags & DISASSEMBLY_OMIT_PC) == 0)
     ui_out_text (uiout, pc_prefix (pc));
   ui_out_field_core_addr (uiout, "address", gdbarch, pc);
 
@@ -263,25 +290,29 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 	    int how_many, int flags, struct ui_file *stb,
 	    CORE_ADDR *end_pc)
 {
+  struct disasm_insn insn;
   int num_displayed = 0;
 
-  while (low < high && (how_many < 0 || num_displayed < how_many))
+  memset (&insn, 0, sizeof (insn));
+  insn.addr = low;
+
+  while (insn.addr < high && (how_many < 0 || num_displayed < how_many))
     {
       int size;
 
-      size = gdb_pretty_print_insn (gdbarch, uiout, di, low, flags, stb);
+      size = gdb_pretty_print_insn (gdbarch, uiout, di, &insn, flags, stb);
       if (size <= 0)
 	break;
 
       ++num_displayed;
-      low += size;
+      insn.addr += size;
 
       /* Allow user to bail out with ^C.  */
       QUIT;
     }
 
   if (end_pc != NULL)
-    *end_pc = low;
+    *end_pc = insn.addr;
 
   return num_displayed;
 }
