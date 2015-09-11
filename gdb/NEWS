@@ -55,6 +55,27 @@ show remote multiprocess-extensions-packet
 * Support for reading/writing memory and extracting values on architectures
   whose memory is addressable in units of any integral multiple of 8 bits.
 
+* New remote packets
+
+exec stop reason
+  Indicates that an exec system call was executed.
+
+exec-events feature in qSupported
+  The qSupported packet allows GDB to request support for exec
+  events using the new 'gdbfeature' exec-event, and the qSupported
+  response can contain the corresponding 'stubfeature'.  Set and
+  show commands can be used to display whether these features are enabled.
+
+* Extended-remote exec events
+
+  ** GDB now has support for exec events on extended-remote Linux targets.
+     For such targets with Linux kernels 2.5.46 and later, this enables
+     follow-exec-mode and exec catchpoints.
+
+set remote exec-event-feature-packet
+show remote exec-event-feature-packet
+  Set/show the use of the remote exec event feature.
+
 *** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*

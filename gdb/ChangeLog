@@ -1,5 +1,10 @@
 2015-09-11  Don Breazeal  <donb@codesourcery.com>
 
+	* NEWS: Announce new remote packets for the exec-events
+	feature and the exec-events feature and associated commands.
+
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+
 	* remote.c (remote_exec_event_p): New function.
 	(remote_insert_exec_catchpoint): New function.
 	(remote_remove_exec_catchpoint): New function.

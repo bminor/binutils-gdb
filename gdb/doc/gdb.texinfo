@@ -20225,6 +20225,10 @@ are:
 @tab @code{vfork stop reason}
 @tab @code{vfork}
 
+@item @code{exec-event-feature}
+@tab @code{exec stop reason}
+@tab @code{exec}
+
 @end multitable
 
 @node Remote Stub
@@ -35506,6 +35510,18 @@ appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
 remote stub must also supply the appropriate @samp{qSupported} feature
 indicating support.
 
+@cindex exec events, remote reply
+@item exec
+The packet indicates that @code{execve} was called, and @var{r}
+is the absolute pathname of the file that was executed, in hex.
+This packet is only applicable to targets that support exec events.
+
+This packet should not be sent by default; older @value{GDBN} versions
+did not support it.  @value{GDBN} requests it, by supplying an
+appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
+remote stub must also supply the appropriate @samp{qSupported} feature
+indicating support.
+
 @end table
 
 @item W @var{AA}
@@ -36110,6 +36126,12 @@ This feature indicates whether @value{GDBN} supports vfork event
 extensions to the remote protocol.  @value{GDBN} does not use such
 extensions unless the stub also reports that it supports them by
 including @samp{vfork-events+} in its @samp{qSupported} reply.
+
+@item exec-events
+This feature indicates whether @value{GDBN} supports exec event
+extensions to the remote protocol.  @value{GDBN} does not use such
+extensions unless the stub also reports that it supports them by
+including @samp{exec-events+} in its @samp{qSupported} reply.
 @end table
 
 Stubs should ignore any unknown values for
@@ -36373,6 +36395,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{exec-events}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36577,6 +36604,9 @@ The remote stub reports the @samp{fork} stop reason for fork events.
 @item vfork-events
 The remote stub reports the @samp{vfork} stop reason for vfork events
 and vforkdone events.
+
+@item exec-events
+The remote stub reports the @samp{exec} stop reason for exec events.
 
 @end table
 

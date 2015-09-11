@@ -1,3 +1,14 @@
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.texinfo (Remote Configuration): Add exec event
+	feature to table of packet settings.
+	(Stop Reply Packets): Add exec events to the list of stop
+	reasons.
+	(General Query Packets): Add exec events to tables of
+	'gdbfeatures' and 'stub features' supported in the qSupported
+	packet, as well as to the list containing stub feature
+	details.
+
 2015-08-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Remote Configuration): Document the "set/show
