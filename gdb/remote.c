@@ -1596,6 +1596,14 @@ remote_vfork_event_p (struct remote_state *rs)
   return packet_support (PACKET_vfork_event_feature) == PACKET_ENABLE;
 }
 
+/* Returns true if exec events are supported.  */
+
+static int
+remote_exec_event_p (struct remote_state *rs)
+{
+  return packet_support (PACKET_exec_event_feature) == PACKET_ENABLE;
+}
+
 /* Insert fork catchpoint target routine.  If fork events are enabled
    then return success, nothing more to do.  */
 
@@ -1632,6 +1640,26 @@ remote_insert_vfork_catchpoint (struct target_ops *ops, int pid)
 
 static int
 remote_remove_vfork_catchpoint (struct target_ops *ops, int pid)
+{
+  return 0;
+}
+
+/* Insert exec catchpoint target routine.  If exec events are
+   enabled, just return success.  */
+
+static int
+remote_insert_exec_catchpoint (struct target_ops *ops, int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return !remote_exec_event_p (rs);
+}
+
+/* Remove exec catchpoint target routine.  Nothing to do, just
+   return success.  */
+
+static int
+remote_remove_exec_catchpoint (struct target_ops *ops, int pid)
 {
   return 0;
 }
@@ -12793,6 +12821,10 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
     = remote_insert_vfork_catchpoint;
   extended_remote_ops.to_remove_vfork_catchpoint
     = remote_remove_vfork_catchpoint;
+  extended_remote_ops.to_insert_exec_catchpoint
+    = remote_insert_exec_catchpoint;
+  extended_remote_ops.to_remove_exec_catchpoint
+    = remote_remove_exec_catchpoint;
 }
 
 static int

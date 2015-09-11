@@ -1,4 +1,13 @@
 2015-09-11  Don Breazeal  <donb@codesourcery.com>
+
+	* remote.c (remote_exec_event_p): New function.
+	(remote_insert_exec_catchpoint): New function.
+	(remote_remove_exec_catchpoint): New function.
+	(init_extended_remote_ops): Initialize extended_remote_ops
+	members to_insert_exec_catchpoint and
+	to_remove_exec_catchpoint.
+
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
 	    Luis Machado  <lgustavo@codesourcery.com>
 
 	* infrun.c (follow_exec): Use process-style ptid for
