@@ -2304,6 +2304,14 @@ target_follow_fork (int follow_child, int detach_fork)
 					follow_child, detach_fork);
 }
 
+/* Target wrapper for follow exec hook.  */
+
+void
+target_follow_exec (struct inferior *inf, char *execd_pathname)
+{
+  current_target.to_follow_exec (&current_target, inf, execd_pathname);
+}
+
 static void
 default_mourn_inferior (struct target_ops *self)
 {

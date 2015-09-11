@@ -1832,6 +1832,7 @@ static struct target_ops win32_target_ops = {
   NULL, /* supports_multi_process */
   NULL, /* supports_fork_events */
   NULL, /* supports_vfork_events */
+  NULL, /* supports_exec_events */
   NULL, /* handle_new_gdb_connection */
   NULL, /* handle_monitor_command */
   NULL, /* core_of_thread */

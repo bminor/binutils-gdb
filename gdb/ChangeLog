@@ -1,3 +1,40 @@
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* infrun.c (follow_exec): Use process-style ptid for
+	exec message.  Call add_inferior_with_spaces and
+	target_follow_exec.
+	* nat/linux-ptrace.c (linux_supports_traceexec): New function.
+	* nat/linux-ptrace.h (linux_supports_traceexec): Declare.
+	* remote.c (remote_pspace_data): New static variable.
+	(remote_pspace_data_cleanup): New function.
+	(get_remote_exec_file): New function.
+	(set_remote_exec_file_1): New function.
+	(set_remote_exec_file): New function.
+	(show_remote_exec_file): New function.
+	(remote_exec_file): Delete static variable.
+	(anonymous enum) <PACKET_exec_event_feature>: New
+	enumeration constant.
+	(remote_protocol_features): Add entry for exec-events feature.
+	(remote_query_supported): Add client side of qSupported query
+	for exec-events feature.
+	(remote_follow_exec): New function.
+	(remote_parse_stop_reply): Handle 'exec' stop reason.
+	(extended_remote_run, extended_remote_create_inferior): Call
+	get_remote_exec_file and set_remote_exec_file_1.
+	(init_extended_remote_ops) <to_follow_exec>: Initialize new
+	member.
+	(_initialize_remote): Call
+	register_program_space_data_with_cleanup.  Call
+	add_packet_config_cmd for remote exec-events feature.
+	Modify call to add_setshow_string_noescape_cmd for exec-file
+	to use new functions set_remote_exec_file and
+	show_remote_exec_file.
+	* target-debug.h, target-delegates.c: Regenerated.
+	* target.c (target_follow_exec): New function.
+	* target.h (struct target_ops) <to_follow_exec>: New member.
+	(target_follow_exec): Declare new function.
+
 2015-09-11  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* aarch64-tdep.c (decode_cb): Move up comment describing the

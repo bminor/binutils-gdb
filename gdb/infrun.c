@@ -1095,6 +1095,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
   struct thread_info *th, *tmp;
   struct inferior *inf = current_inferior ();
   int pid = ptid_get_pid (ptid);
+  ptid_t process_ptid;
 
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
@@ -1161,8 +1162,9 @@ follow_exec (ptid_t ptid, char *execd_pathname)
   update_breakpoints_after_exec ();
 
   /* What is this a.out's name?  */
+  process_ptid = pid_to_ptid (pid);
   printf_unfiltered (_("%s is executing new program: %s\n"),
-		     target_pid_to_str (inferior_ptid),
+		     target_pid_to_str (process_ptid),
 		     execd_pathname);
 
   /* We've followed the inferior through an exec.  Therefore, the
@@ -1191,8 +1193,6 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
   if (follow_exec_mode_string == follow_exec_mode_new)
     {
-      struct program_space *pspace;
-
       /* The user wants to keep the old inferior and program spaces
 	 around.  Create a new fresh one, and switch to it.  */
 
@@ -1201,14 +1201,13 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 	 the same ptid, which can confuse find_inferior_ptid.  */
       exit_inferior_num_silent (current_inferior ()->num);
 
-      inf = add_inferior (pid);
-      pspace = add_program_space (maybe_new_address_space ());
-      inf->pspace = pspace;
-      inf->aspace = pspace->aspace;
-      add_thread (ptid);
+      inf = add_inferior_with_spaces ();
+      inf->pid = pid;
+      target_follow_exec (inf, execd_pathname);
 
       set_current_inferior (inf);
-      set_current_program_space (pspace);
+      set_current_program_space (inf->pspace);
+      add_thread (ptid);
     }
   else
     {

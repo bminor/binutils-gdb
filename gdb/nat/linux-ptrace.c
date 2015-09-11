@@ -538,6 +538,17 @@ linux_supports_tracefork (void)
   return ptrace_supports_feature (PTRACE_O_TRACEFORK);
 }
 
+/* Returns non-zero if PTRACE_EVENT_EXEC is supported by ptrace,
+   0 otherwise.  Note that if PTRACE_EVENT_FORK is supported so is
+   PTRACE_EVENT_CLONE, PTRACE_EVENT_FORK and PTRACE_EVENT_VFORK,
+   since they were all added to the kernel at the same time.  */
+
+int
+linux_supports_traceexec (void)
+{
+  return ptrace_supports_feature (PTRACE_O_TRACEEXEC);
+}
+
 /* Returns non-zero if PTRACE_EVENT_CLONE is supported by ptrace,
    0 otherwise.  Note that if PTRACE_EVENT_CLONE is supported so is
    PTRACE_EVENT_FORK, PTRACE_EVENT_EXEC and PTRACE_EVENT_VFORK,

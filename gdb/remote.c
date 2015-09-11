@@ -75,6 +75,15 @@
 static char *target_buf;
 static long target_buf_size;
 
+/* Per-program-space data key.  */
+static const struct program_space_data *remote_pspace_data;
+
+/* The variable registered as the control variable used by the
+   remote exec-file commands.  While the remote exec-file setting is
+   per-program-space, the set/show machinery uses this as the 
+   location of the remote exec-file value.  */
+static char *remote_exec_file_var;
+
 /* The size to align memory write packets, when practical.  The protocol
    does not guarantee any alignment, and gdb will generate short
    writes and unaligned writes, but even as a best-effort attempt this
@@ -619,6 +628,63 @@ get_remote_state (void)
   return get_remote_state_raw ();
 }
 
+/* Cleanup routine for the remote module's pspace data.  */
+
+static void
+remote_pspace_data_cleanup (struct program_space *pspace, void *arg)
+{
+  char *remote_exec_file = arg;
+
+  xfree (remote_exec_file);
+}
+
+/* Fetch the remote exec-file from the current program space.  */
+
+static const char *
+get_remote_exec_file (void)
+{
+  char *remote_exec_file;
+
+  remote_exec_file = program_space_data (current_program_space,
+					 remote_pspace_data);
+  if (remote_exec_file == NULL)
+    return "";
+
+  return remote_exec_file;
+}
+
+/* Set the remote exec file for PSPACE.  */
+
+static void
+set_pspace_remote_exec_file (struct program_space *pspace,
+			char *remote_exec_file)
+{
+  char *old_file = program_space_data (pspace, remote_pspace_data);
+
+  xfree (old_file);
+  set_program_space_data (pspace, remote_pspace_data,
+			  xstrdup (remote_exec_file));
+}
+
+/* The "set/show remote exec-file" set command hook.  */
+
+static void
+set_remote_exec_file (char *ignored, int from_tty,
+		      struct cmd_list_element *c)
+{
+  gdb_assert (remote_exec_file_var != NULL);
+  set_pspace_remote_exec_file (current_program_space, remote_exec_file_var);
+}
+
+/* The "set/show remote exec-file" show command hook.  */
+
+static void
+show_remote_exec_file (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *cmd, const char *value)
+{
+  fprintf_filtered (file, "%s\n", remote_exec_file_var);
+}
+
 static int
 compare_pnums (const void *lhs_, const void *rhs_)
 {
@@ -900,10 +966,6 @@ static unsigned int remote_address_size;
    remote_terminal_* for more details.  */
 
 static int remote_async_terminal_ours_p;
-
-/* The executable file to use for "run" on the remote side.  */
-
-static char *remote_exec_file = "";
 
 
 /* User configurable variables for the number of characters in a
@@ -1400,6 +1462,9 @@ enum {
 
   /* Support for the Qbtrace-conf:pt:size packet.  */
   PACKET_Qbtrace_conf_pt_size,
+
+  /* Support for exec events.  */
+  PACKET_exec_event_feature,
 
   PACKET_MAX
 };
@@ -4279,6 +4344,8 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_fork_event_feature },
   { "vfork-events", PACKET_DISABLE, remote_supported_packet,
     PACKET_vfork_event_feature },
+  { "exec-events", PACKET_DISABLE, remote_supported_packet,
+    PACKET_exec_event_feature },
   { "Qbtrace-conf:pt:size", PACKET_DISABLE, remote_supported_packet,
     PACKET_Qbtrace_conf_pt_size }
 };
@@ -4368,6 +4435,9 @@ remote_query_supported (void)
 	  if (packet_set_cmd_state (PACKET_vfork_event_feature)
 	      != AUTO_BOOLEAN_FALSE)
 	    q = remote_query_supported_append (q, "vfork-events+");
+	  if (packet_set_cmd_state (PACKET_exec_event_feature)
+	      != AUTO_BOOLEAN_FALSE)
+	    q = remote_query_supported_append (q, "exec-events+");
 	}
 
       q = reconcat (q, "qSupported:", q, (char *) NULL);
@@ -4777,6 +4847,24 @@ remote_follow_fork (struct target_ops *ops, int follow_child,
 	}
     }
   return 0;
+}
+
+/* Target follow-exec function for remote targets.  Save EXECD_PATHNAME
+   in the program space of the new inferior.  On entry and at return the
+   current inferior is the exec'ing inferior.  INF is the new exec'd
+   inferior, which may be the same as the exec'ing inferior unless
+   follow-exec-mode is "new".  */
+
+static void
+remote_follow_exec (struct target_ops *ops,
+		    struct inferior *inf, char *execd_pathname)
+{
+  /* We know that this is a target file name, so if it has the "target:"
+     prefix we strip it off before saving it in the program space.  */
+  if (is_target_filename (execd_pathname))
+    execd_pathname += strlen (TARGET_SYSROOT_PREFIX);
+
+  set_pspace_remote_exec_file (inf->pspace, execd_pathname);
 }
 
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
@@ -5977,6 +6065,7 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
   struct remote_arch_state *rsa = get_remote_arch_state ();
   ULONGEST addr;
   char *p;
+  int skipregs = 0;
 
   event->ptid = null_ptid;
   event->rs = get_remote_state ();
@@ -6089,10 +6178,41 @@ Packet: '%s'\n"),
 	      event->ws.kind = TARGET_WAITKIND_VFORK_DONE;
 	      p = skip_to_semicolon (p1 + 1);
 	    }
+	  else if (strncmp (p, "exec", p1 - p) == 0)
+	    {
+	      ULONGEST ignored;
+	      char pathname[PATH_MAX];
+	      int pathlen;
+
+	      /* Determine the length of the execd pathname.  */
+	      p = unpack_varlen_hex (++p1, &ignored);
+	      pathlen = (p - p1) / 2;
+
+	      /* Save the pathname for event reporting and for
+		 the next run command.  */
+	      hex2bin (p1, (gdb_byte *) pathname, pathlen);
+	      pathname[pathlen] = '\0';
+
+	      /* This is freed during event handling.  */
+	      event->ws.value.execd_pathname = xstrdup (pathname);
+	      event->ws.kind = TARGET_WAITKIND_EXECD;
+
+	      /* Skip the registers included in this packet, since
+		 they may be for an architecture different from the
+		 one used by the original program.  */
+	      skipregs = 1;
+	    }
 	  else
 	    {
 	      ULONGEST pnum;
 	      char *p_temp;
+
+	      if (skipregs)
+		{
+		  p = skip_to_semicolon (p1 + 1);
+		  p++;
+		  continue;
+		}
 
 	      /* Maybe a real ``P'' register number.  */
 	      p_temp = unpack_varlen_hex (p, &pnum);
@@ -8593,6 +8713,7 @@ extended_remote_run (char *args)
 {
   struct remote_state *rs = get_remote_state ();
   int len;
+  const char *remote_exec_file = get_remote_exec_file ();
 
   /* If the user has disabled vRun support, or we have detected that
      support is not available, do not try it.  */
@@ -8665,6 +8786,7 @@ extended_remote_create_inferior (struct target_ops *ops,
   int run_worked;
   char *stop_reply;
   struct remote_state *rs = get_remote_state ();
+  const char *remote_exec_file = get_remote_exec_file ();
 
   /* If running asynchronously, register the target file descriptor
      with the event loop.  */
@@ -12662,6 +12784,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_supports_disable_randomization
     = extended_remote_supports_disable_randomization;
   extended_remote_ops.to_follow_fork = remote_follow_fork;
+  extended_remote_ops.to_follow_exec = remote_follow_exec;
   extended_remote_ops.to_insert_fork_catchpoint
     = remote_insert_fork_catchpoint;
   extended_remote_ops.to_remove_fork_catchpoint
@@ -12892,6 +13015,10 @@ _initialize_remote (void)
     gdbarch_data_register_post_init (init_remote_state);
   remote_g_packet_data_handle =
     gdbarch_data_register_pre_init (remote_g_packet_data_init);
+
+  remote_pspace_data
+    = register_program_space_data_with_cleanup (NULL,
+						remote_pspace_data_cleanup);
 
   /* Initialize the per-target state.  At the moment there is only one
      of these, not one per target.  Only one target is active at a
@@ -13272,6 +13399,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_conf_pt_size],
        "Qbtrace-conf:pt:size", "btrace-conf-pt-size", 0);
 
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_exec_event_feature],
+			 "exec-event-feature", "exec-event-feature", 0);
+
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */
   {
@@ -13340,12 +13470,14 @@ Transfer files to and from the remote target system."),
 	   _("Delete a remote file."),
 	   &remote_cmdlist);
 
-  remote_exec_file = xstrdup ("");
   add_setshow_string_noescape_cmd ("exec-file", class_files,
-				   &remote_exec_file, _("\
+				   &remote_exec_file_var, _("\
 Set the remote pathname for \"run\""), _("\
-Show the remote pathname for \"run\""), NULL, NULL, NULL,
-				   &remote_set_cmdlist, &remote_show_cmdlist);
+Show the remote pathname for \"run\""), NULL,
+				   set_remote_exec_file,
+				   show_remote_exec_file,
+				   &remote_set_cmdlist,
+				   &remote_show_cmdlist);
 
   add_setshow_boolean_cmd ("range-stepping", class_run,
 			   &use_range_stepping, _("\

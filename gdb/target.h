@@ -596,6 +596,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     int (*to_remove_exec_catchpoint) (struct target_ops *, int)
       TARGET_DEFAULT_RETURN (1);
+    void (*to_follow_exec) (struct target_ops *, struct inferior *, char *)
+      TARGET_DEFAULT_IGNORE ();
     int (*to_set_syscall_catchpoint) (struct target_ops *,
 				      int, int, int, int, int *)
       TARGET_DEFAULT_RETURN (1);
@@ -1576,6 +1578,11 @@ extern void target_load (const char *arg, int from_tty);
    (i.e. there is another event pending).  */
 
 int target_follow_fork (int follow_child, int detach_fork);
+
+/* Handle the target-specific bookkeeping required when the inferior
+   makes an exec call.  INF is the exec'd inferior.  */
+
+void target_follow_exec (struct inferior *inf, char *execd_pathname);
 
 /* On some targets, we can catch an inferior exec event when it
    occurs.  These functions insert/remove an already-created
