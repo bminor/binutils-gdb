@@ -1,3 +1,8 @@
+2015-09-14  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/buffer-size.exp: Remove recording with unlimited BTS
+	buffer size test.
+
 2015-09-11  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.base/foll-exec.c: Add copyright header.  Fix
