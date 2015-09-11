@@ -458,7 +458,8 @@ get_insn_history_modifiers (char **arg)
 	  switch (*args)
 	    {
 	    case 'm':
-	      modifiers |= DISASSEMBLY_SOURCE_DEPRECATED;
+	    case 's':
+	      modifiers |= DISASSEMBLY_SOURCE;
 	      modifiers |= DISASSEMBLY_FILENAME;
 	      break;
 	    case 'r':
@@ -817,7 +818,7 @@ Argument is instruction number, as shown by 'info record'."),
 
   add_cmd ("instruction-history", class_obscure, cmd_record_insn_history, _("\
 Print disassembled instructions stored in the execution log.\n\
-With a /m modifier, source lines are included (if available).\n\
+With a /m or /s modifier, source lines are included (if available).\n\
 With a /r modifier, raw instructions in hex are included.\n\
 With a /f modifier, function names are omitted.\n\
 With a /p modifier, current position markers are omitted.\n\

@@ -1,5 +1,12 @@
 2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record.c (get_insn_history_modifiers): Set DISASSEMBLY_SOURCE
+	instead of DISASSEMBLY_SOURCE_DEPRECATED.  Also accept /s.
+	(_initialize_record): Document the /s modifier.
+	* NEWS: Announce record instruction-history's new /s modifier.
+
+2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (struct btrace_line_range): New.
 	(btrace_mk_line_range, btrace_line_range_add)
 	(btrace_line_range_is_empty, btrace_line_range_contains_range)
