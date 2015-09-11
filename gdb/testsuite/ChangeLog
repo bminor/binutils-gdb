@@ -1,3 +1,20 @@
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/foll-exec.c: Add copyright header.  Fix
+	formatting issues.
+	* gdb.base/foll-exec.exp (zap_session): Delete proc.
+	(do_exec_tests): Use clean_restart in place of zap_session,
+	and for test initialization.  Fix formatting issues.  Use
+	fail in place of perror.
+	* gdb.base/pie-execl.exp (main): Use 'inferior_spawn_id' in
+	an expect statement to match an expression with output from
+	the program under debug.
+	* gdb.threads/non-ldr-exc-1.exp (do_test, main): Add
+	non-stop tests and use save_vars to enable non-stop in GDBFLAGS.
+	* gdb.threads/non-ldr-exc-2.exp: Likewise.
+	* gdb.threads/non-ldr-exc-3.exp: Likewise.
+	* gdb.threads/non-ldr-exc-4.exp: Likewise.
+
 2015-09-09  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-prettyprint.exp: Check result of run_lang_tests.
