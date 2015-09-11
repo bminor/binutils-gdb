@@ -1,3 +1,9 @@
+2015-09-11  Mihail-Marian Nistor  <mihail.nistor@freescale.com>
+
+	PR gdb/18947
+	* aarch64-linux-tdep.c: (aarch64_linux_init_abi): Install
+	glibc_skip_solib_resolver as gdbarch_skip_solib_resolver callback.
+
 2015-09-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* ada-lang.c (scan_discrim_bound): Factor out arithmetic
