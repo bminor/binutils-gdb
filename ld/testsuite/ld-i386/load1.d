@@ -1,6 +1,7 @@
 #as: --32
 #ld: -melf_i386
 #objdump: -dw --sym
+#notarget: i?86-*-nacl* x86_64-*-nacl*
 
 .*: +file format .*
 

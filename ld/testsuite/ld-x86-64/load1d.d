@@ -2,6 +2,7 @@
 #as: --x32
 #ld: -shared -melf32_x86_64
 #objdump: -dw
+#notarget: x86_64-*-nacl*
 
 .*: +file format .*
 
