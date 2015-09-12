@@ -1,3 +1,9 @@
+2015-09-12  Helge Deller  <deller@gmx.de>
+
+	PR ld/18514
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_sections): Set .plt entry
+	size to 0.
+
 2015-09-09  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (IS_AARCH64_TLS_RELAX_RELOC): Sort alphabetically.
