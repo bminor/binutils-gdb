@@ -1,3 +1,8 @@
+2015-09-14  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (Changes in GDB 7.10, New commands>: Remove duplicate
+	mention of maint set/show target-non-stop.
+
 2015-09-11  Don Breazeal  <donb@codesourcery.com>
 
 	* NEWS: Announce new remote packets for the exec-events

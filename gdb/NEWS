@@ -172,12 +172,6 @@ maint print symbol-cache-statistics
 maint flush-symbol-cache
   Flush the contents of the symbol cache.
 
-maint set target-non-stop (on|off|auto)
-maint show target-non-stop
-  Control whether GDB targets always operate in non-stop mode even if
-  "set non-stop" is "off".  The default is "auto", meaning non-stop
-  mode is enabled if supported by the target.
-
 record btrace bts
 record bts
   Start branch trace recording using Branch Trace Store (BTS) format.
