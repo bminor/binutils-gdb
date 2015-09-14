@@ -6,6 +6,8 @@
 
 * Add --update-section option to objcopy.
 
+* Add --output-separator option to strings.
+
 Changes in 2.25:
 
 * Add --data option to strings to only print strings in loadable, initialized

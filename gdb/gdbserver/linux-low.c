@@ -265,6 +265,7 @@ static int linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 					  int *wstat, int options);
 static int linux_wait_for_event (ptid_t ptid, int *wstat, int options);
 static struct lwp_info *add_lwp (ptid_t ptid);
+static void linux_mourn (struct process_info *process);
 static int linux_stopped_by_watchpoint (void);
 static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
 static int lwp_is_marked_dead (struct lwp_info *lwp);
@@ -419,13 +420,39 @@ linux_add_process (int pid, int attached)
 
 static CORE_ADDR get_pc (struct lwp_info *lwp);
 
-/* Handle a GNU/Linux extended wait response.  If we see a clone
-   event, we need to add the new LWP to our list (and return 0 so as
-   not to report the trap to higher layers).  */
+/* Implement the arch_setup target_ops method.  */
+
+static void
+linux_arch_setup (void)
+{
+  the_low_target.arch_setup ();
+}
+
+/* Call the target arch_setup function on THREAD.  */
+
+static void
+linux_arch_setup_thread (struct thread_info *thread)
+{
+  struct thread_info *saved_thread;
+
+  saved_thread = current_thread;
+  current_thread = thread;
+
+  linux_arch_setup ();
+
+  current_thread = saved_thread;
+}
+
+/* Handle a GNU/Linux extended wait response.  If we see a clone,
+   fork, or vfork event, we need to add the new LWP to our list
+   (and return 0 so as not to report the trap to higher layers).
+   If we see an exec event, we will modify ORIG_EVENT_LWP to point
+   to a new LWP representing the new program.  */
 
 static int
-handle_extended_wait (struct lwp_info *event_lwp, int wstat)
+handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 {
+  struct lwp_info *event_lwp = *orig_event_lwp;
   int event = linux_ptrace_get_extended_event (wstat);
   struct thread_info *event_thr = get_lwp_thread (event_lwp);
   struct lwp_info *new_lwp;
@@ -569,6 +596,50 @@ handle_extended_wait (struct lwp_info *event_lwp, int wstat)
       event_lwp->waitstatus.kind = TARGET_WAITKIND_VFORK_DONE;
 
       /* Report the event.  */
+      return 0;
+    }
+  else if (event == PTRACE_EVENT_EXEC && report_exec_events)
+    {
+      struct process_info *proc;
+      ptid_t event_ptid;
+      pid_t event_pid;
+
+      if (debug_threads)
+	{
+	  debug_printf ("HEW: Got exec event from LWP %ld\n",
+			lwpid_of (event_thr));
+	}
+
+      /* Get the event ptid.  */
+      event_ptid = ptid_of (event_thr);
+      event_pid = ptid_get_pid (event_ptid);
+
+      /* Delete the execing process and all its threads.  */
+      proc = get_thread_process (event_thr);
+      linux_mourn (proc);
+      current_thread = NULL;
+
+      /* Create a new process/lwp/thread.  */
+      proc = linux_add_process (event_pid, 0);
+      event_lwp = add_lwp (event_ptid);
+      event_thr = get_lwp_thread (event_lwp);
+      gdb_assert (current_thread == event_thr);
+      linux_arch_setup_thread (event_thr);
+
+      /* Set the event status.  */
+      event_lwp->waitstatus.kind = TARGET_WAITKIND_EXECD;
+      event_lwp->waitstatus.value.execd_pathname
+	= xstrdup (linux_proc_pid_to_exec_file (lwpid_of (event_thr)));
+
+      /* Mark the exec status as pending.  */
+      event_lwp->stopped = 1;
+      event_lwp->status_pending_p = 1;
+      event_lwp->status_pending = wstat;
+      event_thr->last_resume_kind = resume_continue;
+      event_thr->last_status.kind = TARGET_WAITKIND_IGNORE;
+
+      /* Report the event.  */
+      *orig_event_lwp = event_lwp;
       return 0;
     }
 
@@ -837,14 +908,6 @@ linux_create_inferior (char *program, char **allargs)
   new_lwp->must_set_ptrace_flags = 1;
 
   return pid;
-}
-
-/* Implement the arch_setup target_ops method.  */
-
-static void
-linux_arch_setup (void)
-{
-  the_low_target.arch_setup ();
 }
 
 /* Attach to an inferior process.  Returns 0 on success, ERRNO on
@@ -1639,7 +1702,7 @@ check_zombie_leaders (void)
 		      leader_pid, leader_lp!= NULL, num_lwps (leader_pid),
 		      linux_proc_pid_is_zombie (leader_pid));
 
-      if (leader_lp != NULL
+      if (leader_lp != NULL && !leader_lp->stopped
 	  /* Check if there are other threads in the group, as we may
 	     have raced with the inferior simply exiting.  */
 	  && !last_thread_of_process_p (leader_pid)
@@ -2098,6 +2161,9 @@ linux_low_ptrace_options (int attached)
   if (report_vfork_events)
     options |= (PTRACE_O_TRACEVFORK | PTRACE_O_TRACEVFORKDONE);
 
+  if (report_exec_events)
+    options |= PTRACE_O_TRACEEXEC;
+
   return options;
 }
 
@@ -2113,6 +2179,38 @@ linux_low_filter_event (int lwpid, int wstat)
   int have_stop_pc = 0;
 
   child = find_lwp_pid (pid_to_ptid (lwpid));
+
+  /* Check for stop events reported by a process we didn't already
+     know about - anything not already in our LWP list.
+
+     If we're expecting to receive stopped processes after
+     fork, vfork, and clone events, then we'll just add the
+     new one to our list and go back to waiting for the event
+     to be reported - the stopped process might be returned
+     from waitpid before or after the event is.
+
+     But note the case of a non-leader thread exec'ing after the
+     leader having exited, and gone from our lists (because
+     check_zombie_leaders deleted it).  The non-leader thread
+     changes its tid to the tgid.  */
+
+  if (WIFSTOPPED (wstat) && child == NULL && WSTOPSIG (wstat) == SIGTRAP
+      && linux_ptrace_get_extended_event (wstat) == PTRACE_EVENT_EXEC)
+    {
+      ptid_t child_ptid;
+
+      /* A multi-thread exec after we had seen the leader exiting.  */
+      if (debug_threads)
+	{
+	  debug_printf ("LLW: Re-adding thread group leader LWP %d"
+			"after exec.\n", lwpid);
+	}
+
+      child_ptid = ptid_build (lwpid, lwpid, 0);
+      child = add_lwp (child_ptid);
+      child->stopped = 1;
+      current_thread = child->thread;
+    }
 
   /* If we didn't find a process, one of two things presumably happened:
      - A process we started and then detached from has exited.  Ignore it.
@@ -2171,17 +2269,10 @@ linux_low_filter_event (int lwpid, int wstat)
 	{
 	  if (proc->attached)
 	    {
-	      struct thread_info *saved_thread;
-
 	      /* This needs to happen after we have attached to the
 		 inferior and it is stopped for the first time, but
 		 before we access any inferior registers.  */
-	      saved_thread = current_thread;
-	      current_thread = thread;
-
-	      the_low_target.arch_setup ();
-
-	      current_thread = saved_thread;
+	      linux_arch_setup_thread (thread);
 	    }
 	  else
 	    {
@@ -2210,7 +2301,7 @@ linux_low_filter_event (int lwpid, int wstat)
       && linux_is_extended_waitstatus (wstat))
     {
       child->stop_pc = get_pc (child);
-      if (handle_extended_wait (child, wstat))
+      if (handle_extended_wait (&child, wstat))
 	{
 	  /* The event has been handled, so just return without
 	     reporting it.  */
@@ -2419,8 +2510,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 	 - When a non-leader thread execs, that thread just vanishes
 	   without reporting an exit (so we'd hang if we waited for it
 	   explicitly in that case).  The exec event is reported to
-	   the TGID pid (although we don't currently enable exec
-	   events).  */
+	   the TGID pid.  */
       errno = 0;
       ret = my_waitpid (-1, wstatp, options | WNOHANG);
 
@@ -5801,6 +5891,14 @@ linux_supports_vfork_events (void)
   return linux_supports_tracefork ();
 }
 
+/* Check if exec events are supported.  */
+
+static int
+linux_supports_exec_events (void)
+{
+  return linux_supports_traceexec ();
+}
+
 /* Callback for 'find_inferior'.  Set the (possibly changed) ptrace
    options for the specified lwp.  */
 
@@ -6891,6 +6989,7 @@ static struct target_ops linux_target_ops = {
   linux_supports_multi_process,
   linux_supports_fork_events,
   linux_supports_vfork_events,
+  linux_supports_exec_events,
   linux_handle_new_gdb_connection,
 #ifdef USE_THREAD_DB
   thread_db_handle_monitor_command,

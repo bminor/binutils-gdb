@@ -1,3 +1,36 @@
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* linux-low.c (linux_mourn): Static declaration.
+	(linux_arch_setup): Move in front of
+	handle_extended_wait.
+	(linux_arch_setup_thread): New function.
+	(handle_extended_wait): Handle exec events.  Call
+	linux_arch_setup_thread.  Make event_lwp argument a
+	pointer-to-a-pointer.
+	(check_zombie_leaders): Do not check stopped threads.
+	(linux_low_ptrace_options): Add PTRACE_O_TRACEEXEC.
+	(linux_low_filter_event): Add lwp and thread for exec'ing
+	non-leader thread if leader thread has been deleted.
+	Refactor code into linux_arch_setup_thread and call it.
+	Pass child lwp pointer by reference to handle_extended_wait.
+	(linux_wait_for_event_filtered): Update comment.
+	(linux_wait_1): Prevent clobbering exec event status.
+	(linux_supports_exec_events): New function.
+	(linux_target_ops) <supports_exec_events>: Initialize new member.
+	* lynx-low.c (lynx_target_ops) <supports_exec_events>: Initialize
+	new member.
+	* remote-utils.c (prepare_resume_reply): New stop reason 'exec'.
+	* server.c (report_exec_events): New global variable.
+	(handle_query): Handle qSupported query for exec-events feature.
+	(captured_main): Initialize report_exec_events.
+	* server.h (report_exec_events): Declare new global variable.
+	* target.h (struct target_ops) <supports_exec_events>: New
+	member.
+	(target_supports_exec_events): New macro.
+	* win32-low.c (win32_target_ops) <supports_exec_events>:
+	Initialize new member.
+
 2015-09-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* linux-low.c (linux_low_enable_btrace): Remove.

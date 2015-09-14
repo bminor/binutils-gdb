@@ -339,7 +339,8 @@ decode_b (CORE_ADDR addr, uint32_t insn, int *is_bl, int32_t *offset)
 static int
 decode_bcond (CORE_ADDR addr, uint32_t insn, unsigned *cond, int32_t *offset)
 {
-  if (decode_masked_match (insn, 0xfe000000, 0x54000000))
+  /* b.cond  0101 0100 iiii iiii iiii iiii iii0 cccc */
+  if (decode_masked_match (insn, 0xff000010, 0x54000000))
     {
       *cond = (insn >> 0) & 0xf;
       *offset = extract_signed_bitfield (insn, 19, 5) << 2;
@@ -400,11 +401,10 @@ static int
 decode_cb (CORE_ADDR addr, uint32_t insn, int *is64, int *is_cbnz,
 	   unsigned *rn, int32_t *offset)
 {
+  /* cbz  T011 010o iiii iiii iiii iiii iiir rrrr */
+  /* cbnz T011 010o iiii iiii iiii iiii iiir rrrr */
   if (decode_masked_match (insn, 0x7e000000, 0x34000000))
     {
-      /* cbz  T011 010o iiii iiii iiii iiii iiir rrrr */
-      /* cbnz T011 010o iiii iiii iiii iiii iiir rrrr */
-
       *rn = (insn >> 0) & 0x1f;
       *is64 = (insn >> 31) & 0x1;
       *is_cbnz = (insn >> 24) & 0x1;
@@ -627,7 +627,7 @@ decode_stur (CORE_ADDR addr, uint32_t insn, int *is64, unsigned *rt,
   return 0;
 }
 
-/* Decode an opcode if it represents a TB or TBNZ instruction.
+/* Decode an opcode if it represents a TBZ or TBNZ instruction.
 
    ADDR specifies the address of the opcode.
    INSN specifies the opcode to test.
@@ -642,11 +642,10 @@ static int
 decode_tb (CORE_ADDR addr, uint32_t insn, int *is_tbnz, unsigned *bit,
 	   unsigned *rt, int32_t *imm)
 {
+  /* tbz  b011 0110 bbbb biii iiii iiii iiir rrrr */
+  /* tbnz B011 0111 bbbb biii iiii iiii iiir rrrr */
   if (decode_masked_match (insn, 0x7e000000, 0x36000000))
     {
-      /* tbz  b011 0110 bbbb biii iiii iiii iiir rrrr */
-      /* tbnz B011 0111 bbbb biii iiii iiii iiir rrrr */
-
       *rt = (insn >> 0) & 0x1f;
       *is_tbnz = (insn >> 24) & 0x1;
       *bit = ((insn >> (31 - 4)) & 0x20) | ((insn >> 19) & 0x1f);

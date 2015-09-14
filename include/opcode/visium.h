@@ -104,7 +104,7 @@ struct reg_entry
   unsigned char code;
 };
 
-const struct reg_entry gen_reg_table[] =
+static const struct reg_entry gen_reg_table[] =
 {
   {"fp", 0x16},
   {"r0", 0x0},
@@ -142,7 +142,7 @@ const struct reg_entry gen_reg_table[] =
   {"sp", 0x17},
 };
 
-const struct reg_entry fp_reg_table[] =
+static const struct reg_entry fp_reg_table[] =
 {
   {"f0", 0x0},
   {"f1", 0x1},
@@ -162,7 +162,7 @@ const struct reg_entry fp_reg_table[] =
   {"f9", 0x9},
 };
 
-const struct cc_entry
+static const struct cc_entry
 {
   char *name;
   int code;

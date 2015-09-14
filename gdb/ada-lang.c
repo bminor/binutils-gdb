@@ -215,7 +215,7 @@ static struct value *value_val_atr (struct type *, struct value *);
 static struct symbol *standard_lookup (const char *, const struct block *,
                                        domain_enum);
 
-static struct value *ada_search_struct_field (char *, struct value *, int,
+static struct value *ada_search_struct_field (const char *, struct value *, int,
                                               struct type *);
 
 static struct value *ada_value_primitive_field (struct value *, int, int,
@@ -2757,14 +2757,27 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
 
 /* Assuming ARR is a pointer to a GDB array, the value of the element
    of *ARR at the ARITY indices given in IND.
-   Does not read the entire array into memory.  */
+   Does not read the entire array into memory.
+
+   Note: Unlike what one would expect, this function is used instead of
+   ada_value_subscript for basically all non-packed array types.  The reason
+   for this is that a side effect of doing our own pointer arithmetics instead
+   of relying on value_subscript is that there is no implicit typedef peeling.
+   This is important for arrays of array accesses, where it allows us to
+   preserve the fact that the array's element is an array access, where the
+   access part os encoded in a typedef layer.  */
 
 static struct value *
 ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
 {
   int k;
+  struct value *array_ind = ada_value_ind (arr);
   struct type *type
-    = check_typedef (value_enclosing_type (ada_value_ind (arr)));
+    = check_typedef (value_enclosing_type (array_ind));
+
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+      && TYPE_FIELD_BITSIZE (type, 0) > 0)
+    return value_subscript_packed (array_ind, arity, ind);
 
   for (k = 0; k < arity; k += 1)
     {
@@ -5028,8 +5041,8 @@ xget_renaming_scope (struct type *renaming_type)
      and then backtrack until we find the first "__".  */
 
   const char *name = type_name_no_tag (renaming_type);
-  char *suffix = strstr (name, "___XR");
-  char *last;
+  const char *suffix = strstr (name, "___XR");
+  const char *last;
   int scope_len;
   char *scope;
 
@@ -7221,7 +7234,7 @@ num_visible_fields (struct type *type)
    Searches recursively through wrapper fields (e.g., '_parent').  */
 
 static struct value *
-ada_search_struct_field (char *name, struct value *arg, int offset,
+ada_search_struct_field (const char *name, struct value *arg, int offset,
                          struct type *type)
 {
   int i;
@@ -8585,7 +8598,7 @@ ada_is_redundant_range_encoding (struct type *range_type,
 				 struct type *encoding_type)
 {
   struct type *fixed_range_type;
-  char *bounds_str;
+  const char *bounds_str;
   int n;
   LONGEST lo, hi;
 
@@ -11427,30 +11440,34 @@ ada_float_to_fixed (struct type *type, DOUBLEST x)
    not alter *PX and *PNEW_K if unsuccessful.  */
 
 static int
-scan_discrim_bound (char *str, int k, struct value *dval, LONGEST * px,
+scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
                     int *pnew_k)
 {
   static char *bound_buffer = NULL;
   static size_t bound_buffer_len = 0;
-  char *bound;
-  char *pend;
+  const char *pstart, *pend, *bound;
   struct value *bound_val;
 
   if (dval == NULL || str == NULL || str[k] == '\0')
     return 0;
 
-  pend = strstr (str + k, "__");
+  pstart = str + k;
+  pend = strstr (pstart, "__");
   if (pend == NULL)
     {
-      bound = str + k;
+      bound = pstart;
       k += strlen (bound);
     }
   else
     {
-      GROW_VECT (bound_buffer, bound_buffer_len, pend - (str + k) + 1);
+      int len = pend - pstart;
+
+      /* Strip __ and beyond.  */
+      GROW_VECT (bound_buffer, bound_buffer_len, len + 1);
+      strncpy (bound_buffer, pstart, len);
+      bound_buffer[len] = '\0';
+
       bound = bound_buffer;
-      strncpy (bound_buffer, str + k, pend - (str + k));
-      bound[pend - (str + k)] = '\0';
       k = pend - str;
     }
 
@@ -11526,7 +11543,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
 {
   const char *name;
   struct type *base_type;
-  char *subtype_info;
+  const char *subtype_info;
 
   gdb_assert (raw_type != NULL);
   gdb_assert (TYPE_NAME (raw_type) != NULL);
@@ -11556,7 +11573,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       int prefix_len = subtype_info - name;
       LONGEST L, U;
       struct type *type;
-      char *bounds_str;
+      const char *bounds_str;
       int n;
 
       GROW_VECT (name_buf, name_len, prefix_len + 5);

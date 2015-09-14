@@ -1028,7 +1028,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	linespec.o dictionary.o namespace.o \
 	location.o infcall.o \
 	infcmd.o infrun.o \
-	expprint.o environ.o stack.o thread.o \
+	expprint.o environ.o stack.o thread.o thread-fsm.o \
 	exceptions.o \
 	extension.o \
 	filesystem.o \

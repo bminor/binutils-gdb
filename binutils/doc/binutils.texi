@@ -234,8 +234,7 @@ a normal archive.  Instead the elements of the first archive are added
 individually to the second archive.
 
 The paths to the elements of the archive are stored relative to the
-archive itself.  For security reasons absolute paths and paths with a
-@code{/../} component are not allowed.
+archive itself.
 
 @cindex compatibility, @command{ar}
 @cindex @command{ar} compatibility
@@ -2791,6 +2790,7 @@ strings [@option{-afovV}] [@option{-}@var{min-len}]
         [@option{-}] [@option{--all}] [@option{--print-file-name}]
         [@option{-T} @var{bfdname}] [@option{--target=}@var{bfdname}]
         [@option{-w}] [@option{--include-all-whitespace}]
+        [@option{-s}] [@option{--output-separator}@var{sep_string}]
         [@option{--help}] [@option{--version}] @var{file}@dots{}
 @c man end
 @end smallexample
@@ -2895,6 +2895,13 @@ By default tab and space characters are included in the strings that
 are displayed, but other whitespace characters, such a newlines and
 carriage returns, are not.  The @option{-w} option changes this so
 that all whitespace characters are considered to be part of a string.
+
+@item -s
+@itemx --output-separator
+By default, output strings are delimited by a new-line. This option
+allows you to supply any string to be used as the output record
+separator.  Useful with --include-all-whitespace where strings
+may contain new-lines internally.
 @end table
 
 @c man end

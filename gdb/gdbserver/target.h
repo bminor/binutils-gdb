@@ -290,6 +290,9 @@ struct target_ops
   /* Returns true if vfork events are supported.  */
   int (*supports_vfork_events) (void);
 
+  /* Returns true if exec events are supported.  */
+  int (*supports_exec_events) (void);
+
   /* Allows target to re-initialize connection-specific settings.  */
   void (*handle_new_gdb_connection) (void);
 
@@ -467,6 +470,10 @@ int kill_inferior (int);
 #define target_supports_vfork_events() \
   (the_target->supports_vfork_events ? \
    (*the_target->supports_vfork_events) () : 0)
+
+#define target_supports_exec_events() \
+  (the_target->supports_exec_events ? \
+   (*the_target->supports_exec_events) () : 0)
 
 #define target_handle_new_gdb_connection()		 \
   do							 \

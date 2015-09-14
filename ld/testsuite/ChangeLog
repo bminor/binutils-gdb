@@ -1,3 +1,9 @@
+2015-09-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-plugin/lto.exp (lto_link_tests): Add a "ld -r" test for
+	PR ld/15323.
+	(lto_run_tests): Add a "ld -r" test for PR ld/15323.
+
 2015-09-09  Jiong Wang  <jiong.wang@arm.com>
 
 	* ld-aarch64/tls-relax-ld-le-tiny.s: New testcase.

@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: ld 2.24.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-02-10 09:42+1030\n"
-"PO-Revision-Date: 2015-09-04 18:49-0400\n"
+"PO-Revision-Date: 2015-09-09 23:28-0400\n"
 "Last-Translator: Mingye Wang <arthur200126@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -27,7 +27,7 @@ msgstr "  --support-old-code          支持与旧式代码的交互工作\n"
 #: emultempl/armcoff.em:74
 #, c-format
 msgid "  --thumb-entry=<sym>         Set the entry point to be Thumb symbol <sym>\n"
-msgstr "  --thumb-entry=<sym>         设置入口点为缩略图符号<sym>\n"
+msgstr "  --thumb-entry=<符号>        设置入口点为 ARM Thumb <符号>\n"
 
 #: emultempl/armcoff.em:122
 #, c-format
@@ -40,7 +40,7 @@ msgstr "%P: 警告: '--thumb-entry %s' 会盖过 '-e %s'\n"
 
 #: emultempl/armcoff.em:197 emultempl/pe.em:1832
 msgid "%P: warning: cannot find thumb start symbol %s\n"
-msgstr "%P: 警告: 无法找到缩略图开始符号 %s\n"
+msgstr "%P: 警告: 无法找到 thumb 开始符号 %s\n"
 
 #: emultempl/pe.em:425
 #, c-format
@@ -125,7 +125,7 @@ msgstr "  --[no-]leading-underscore          设置明确的符号底线前缀�
 #: emultempl/pe.em:441
 #, c-format
 msgid "  --thumb-entry=<symbol>             Set the entry point to be Thumb <symbol>\n"
-msgstr "  --thumb-entry=<符号>               设置入口点到为缩略图<符号>\n"
+msgstr "  --thumb-entry=<符号>               设置入口点为 ARM Thumb <符号>\n"
 
 #: emultempl/pe.em:442
 #, c-format
@@ -358,7 +358,7 @@ msgstr "  --tsaware                  映像能认知终端服务器\n"
 
 #: emultempl/pe.em:624
 msgid "%P: warning: bad version number in -subsystem option\n"
-msgstr "%P: 警告: -subsystem 选项中出现不当的版本号码\n"
+msgstr "%P: 警告: -subsystem 选项中出现不当的版本号\n"
 
 #: emultempl/pe.em:649
 msgid "%P%F: invalid subsystem type %s\n"
@@ -382,7 +382,7 @@ msgstr "%P: 警告，文件对齐 > 节对齐。\n"
 
 #: emultempl/pe.em:994
 msgid "%P: warning: --export-dynamic is not supported for PE targets, did you mean --export-all-symbols?\n"
-msgstr "%P: 警告: --export-dynamic 未被支持用于 PE 目标，did 您平均 --export-all-symbols？\n"
+msgstr "%P: 警告: --export-dynamic 未被支持用于 PE 目标，您是不是要用 --export-all-symbols？\n"
 
 #: emultempl/pe.em:1070 emultempl/pe.em:1097
 #, c-format
@@ -2029,7 +2029,7 @@ msgstr "%P%F: 不当的 -plugin-opt 选项\n"
 #. and will seg-fault the next time around.
 #: lexsup.c:985
 msgid "%P%F: bad -rpath option\n"
-msgstr "%P%F：错误的 -rpath 选项\n"
+msgstr "%P%F：不当的 -rpath 选项\n"
 
 #: lexsup.c:1099
 msgid "%P%F: -shared not supported\n"
@@ -2041,7 +2041,7 @@ msgstr "%P%F：不支持 -pie\n"
 
 #: lexsup.c:1116
 msgid "descending"
-msgstr "递降"
+msgstr "递减"
 
 #: lexsup.c:1118
 msgid "ascending"

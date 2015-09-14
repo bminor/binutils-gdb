@@ -368,6 +368,16 @@ check_frame_language_change (void)
 /* See top.h.  */
 
 void
+wait_sync_command_done (void)
+{
+  while (gdb_do_one_event () >= 0)
+    if (!sync_execution)
+      break;
+}
+
+/* See top.h.  */
+
+void
 maybe_wait_sync_command_done (int was_sync)
 {
   /* If the interpreter is in sync mode (we're running a user
@@ -375,11 +385,7 @@ maybe_wait_sync_command_done (int was_sync)
      just ran a synchronous command that started the target, wait
      for that command to end.  */
   if (!interpreter_async && !was_sync && sync_execution)
-    {
-      while (gdb_do_one_event () >= 0)
-	if (!sync_execution)
-	  break;
-    }
+    wait_sync_command_done ();
 }
 
 /* Execute the line P as a command, in the current user context.

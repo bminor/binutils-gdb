@@ -4585,9 +4585,10 @@ elf32_hppa_finish_dynamic_sections (bfd *output_bfd,
 
   if (htab->splt != NULL && htab->splt->size != 0)
     {
-      /* Set plt entry size.  */
-      elf_section_data (htab->splt->output_section)
-	->this_hdr.sh_entsize = PLT_ENTRY_SIZE;
+      /* Set plt entry size to 0 instead of PLT_ENTRY_SIZE, since we add the
+	 plt stubs and as such the section does not hold a table of fixed-size
+	 entries.  */
+      elf_section_data (htab->splt->output_section)->this_hdr.sh_entsize = 0;
 
       if (htab->need_plt_stub)
 	{

@@ -1,3 +1,344 @@
+2015-09-14  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (current_stop_id): New global.
+	(get_stop_id, new_stop_id): New functions.
+	(fetch_inferior_event): Handle normal_stop proceeding the target.
+	(struct stop_context): New.
+	(save_stop_context, release_stop_context_cleanup)
+	(stop_context_changed): New functions.
+	(normal_stop): Return true if the hook-stop changes the stop
+	context.
+	* infrun.h (get_stop_id): Declare.
+	(normal_stop): Now returns int.  Add documentation.
+
+2015-09-14  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (ada_value_ptr_subscript): Update the heading
+	comment.  Handle packed arrays.
+
+2015-09-14  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (Changes in GDB 7.10, New commands>: Remove duplicate
+	mention of maint set/show target-non-stop.
+
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+
+	* NEWS: Announce new remote packets for the exec-events
+	feature and the exec-events feature and associated commands.
+
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+
+	* remote.c (remote_exec_event_p): New function.
+	(remote_insert_exec_catchpoint): New function.
+	(remote_remove_exec_catchpoint): New function.
+	(init_extended_remote_ops): Initialize extended_remote_ops
+	members to_insert_exec_catchpoint and
+	to_remove_exec_catchpoint.
+
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* infrun.c (follow_exec): Use process-style ptid for
+	exec message.  Call add_inferior_with_spaces and
+	target_follow_exec.
+	* nat/linux-ptrace.c (linux_supports_traceexec): New function.
+	* nat/linux-ptrace.h (linux_supports_traceexec): Declare.
+	* remote.c (remote_pspace_data): New static variable.
+	(remote_pspace_data_cleanup): New function.
+	(get_remote_exec_file): New function.
+	(set_remote_exec_file_1): New function.
+	(set_remote_exec_file): New function.
+	(show_remote_exec_file): New function.
+	(remote_exec_file): Delete static variable.
+	(anonymous enum) <PACKET_exec_event_feature>: New
+	enumeration constant.
+	(remote_protocol_features): Add entry for exec-events feature.
+	(remote_query_supported): Add client side of qSupported query
+	for exec-events feature.
+	(remote_follow_exec): New function.
+	(remote_parse_stop_reply): Handle 'exec' stop reason.
+	(extended_remote_run, extended_remote_create_inferior): Call
+	get_remote_exec_file and set_remote_exec_file_1.
+	(init_extended_remote_ops) <to_follow_exec>: Initialize new
+	member.
+	(_initialize_remote): Call
+	register_program_space_data_with_cleanup.  Call
+	add_packet_config_cmd for remote exec-events feature.
+	Modify call to add_setshow_string_noescape_cmd for exec-file
+	to use new functions set_remote_exec_file and
+	show_remote_exec_file.
+	* target-debug.h, target-delegates.c: Regenerated.
+	* target.c (target_follow_exec): New function.
+	* target.h (struct target_ops) <to_follow_exec>: New member.
+	(target_follow_exec): Declare new function.
+
+2015-09-11  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (decode_cb): Move up comment describing the
+	encoding.
+	(decode_tb): Fix a typo in comment above the function.  Move up
+	comment describing the encoding.
+
+2015-09-11  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (decode_bcond): Fix incorrect mask.
+
+2015-09-11  Mihail-Marian Nistor  <mihail.nistor@freescale.com>
+
+	PR gdb/18947
+	* aarch64-linux-tdep.c: (aarch64_linux_init_abi): Install
+	glibc_skip_solib_resolver as gdbarch_skip_solib_resolver callback.
+
+2015-09-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-lang.c (scan_discrim_bound): Factor out arithmetic
+	operations.
+
+2015-09-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ada-lang.c (ada_search_struct_field): Constify parameters
+	and/or variables..
+	(xget_renaming_scope): Likewise.
+	(ada_is_redundant_range_encoding): Likewise.
+	(scan_discrim_bound): Likewise.
+	(to_fixed_range_type): Likewise.
+
+2015-09-10  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.c (download_tracepoint_locations): New local
+	can_download_tracepoint.  Check the result of
+	target_can_download_tracepoint and save it in
+	can_download_tracepoint if there are tracepoints to download.
+	* linux-nat.h (enum tribool): Move it to ...
+	* common/common-types.h: ... here.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* inf-loop.c (inferior_event_handler): Delete INF_TIMER case.
+	* target.h (enum inferior_event_type) <INF_TIMER>: Delete.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* continuations.c (add_continuation, restore_thread_cleanup)
+	(do_all_continuations_ptid, do_all_continuations_thread_callback)
+	(do_all_continuations_thread, do_all_continuations)
+	(discard_all_continuations_thread_callback)
+	(discard_all_continuations_thread, discard_all_continuations)
+	(add_intermediate_continuation)
+	(do_all_intermediate_continuations_thread_callback)
+	(do_all_intermediate_continuations_thread)
+	(do_all_intermediate_continuations)
+	(discard_all_intermediate_continuations_thread_callback)
+	(discard_all_intermediate_continuations_thread)
+	(discard_all_intermediate_continuations): Delete.
+	* continuations.h (add_continuation, do_all_continuations)
+	(do_all_continuations_thread, discard_all_continuations)
+	(discard_all_continuations_thread, add_intermediate_continuation)
+	(do_all_intermediate_continuations)
+	(do_all_intermediate_continuations_thread)
+	(discard_all_intermediate_continuations)
+	(discard_all_intermediate_continuations_thread): Delete
+	declarations.
+	* event-top.c (stdin_event_handler): Delete references to
+	continuations.
+	* gdbthread.h (struct thread_info): Delete continuations and
+	intermediate_continuations fields.
+	* inf-loop.c (inferior_event_handler): Remove references to
+	continuations.
+	* infrun.c (infrun_thread_stop_requested_callback): Remove
+	references to continuations.
+	* target.h (enum inferior_event_type) <INF_EXEC_CONTINUE>: Delete.
+	* thread.c: Don't include "continuations.h".
+	(clear_thread_inferior_resources): Remove references to
+	continuations.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* infcall.c (struct dummy_frame_context_saver): Delete.
+	(dummy_frame_context_saver_free, dummy_frame_context_saver_dtor)
+	(dummy_frame_context_saver_drop)
+	(dummy_frame_context_saver_cleanup)
+	(dummy_frame_context_saver_get_regs)
+	(dummy_frame_context_saver_setup): Delete.
+	* infcall.h (dummy_frame_context_saver_drop)
+	(dummy_frame_context_saver_cleanup)
+	(dummy_frame_context_saver_get_regs, dummy_frame_context_saver):
+	Delete.
+	(get_return_value): Remove 'ctx_saver' paremeter.  Adjust.
+	* inferior.h (get_return_value): Remove 'ctx_saver' paremeter.
+	* python/py-finishbreakpoint.c (bpfinishpy_pre_stop_hook): Adjust.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c: Include "thread-fsm.h".
+	(struct until_break_command_continuation_args): Delete.
+	(struct until_break_fsm): New.
+	(until_break_fsm_ops): New global.
+	(new_until_break_fsm, until_break_fsm_should_stop): New functions.
+	(until_break_command_continuation): Delete.
+	(until_break_fsm_clean_up): New function.
+	(until_break_fsm_async_reply_reason): New function.
+	(until_break_command): Adjust to create an until_break_fsm instead
+	of a continuation.
+	(momentary_bkpt_print_it): No longer print MI's async-stop-reason
+	here.
+	* infcmd.c (struct until_next_fsm): New.
+	(until_next_fsm_ops): New global.
+	(new_until_next_fsm, until_next_fsm_should_stop): New function.
+	(until_next_continuation): Delete.
+	(until_next_fsm_clean_up, until_next_fsm_async_reply_reason): New
+	functions.
+	(until_next_command): Adjust to create a new until_next_fsm
+	instead of a continuation.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* infcall.c: Include thread_fsm.h.
+	(struct call_return_meta_info): New.
+	(get_call_return_value): New function, factored out from
+	call_function_by_hand_dummy.
+	(struct call_thread_fsm): New.
+	(call_thread_fsm_ops): New global.
+	(new_call_thread_fsm, call_thread_fsm_should_stop)
+	(call_thread_fsm_should_notify_stop): New functions.
+	(run_inferior_call): Add 'sm' parameter.  Associate the FSM with
+	the thread.
+	(call_function_by_hand_dummy): Create a new call_thread_fsm
+	instance, associate it with the thread, and wait for the FSM to
+	finish.  If finished successfully, fetch the function's result
+	value out of the FSM.
+	* infrun.c (fetch_inferior_event): If the FSM says the stop
+	shouldn't be notified, don't call normal_stop.
+	(maybe_remove_breakpoints): New function, factored out from ...
+	(normal_stop): ... here.  Simplify.
+	* infrun.h (maybe_remove_breakpoints): Declare.
+	* thread-fsm.c (thread_fsm_should_notify_stop): New function.
+	(thread-fsm.h) <struct thread_fsm_ops>: New field.
+	(thread_fsm_should_notify_stop): Declare.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMMON_OBS): Add thread-fsm.o.
+	* breakpoint.c (handle_jit_event): Print debug output.
+	(bpstat_what): Split event callback handling to ...
+	(bpstat_run_callbacks): ... this new function.
+	(momentary_bkpt_print_it): No longer handle bp_finish here.
+	* breakpoint.h (bpstat_run_callbacks): Declare.
+	* gdbthread.h (struct thread_info) <step_multi>: Delete field.
+	<thread_fsm>: New field.
+	(thread_cancel_execution_command): Declare.
+	* infcmd.c: Include thread-fsm.h.
+	(struct step_command_fsm): New.
+	(step_command_fsm_ops): New global.
+	(new_step_command_fsm, step_command_fsm_prepare): New functions.
+	(step_1): Adjust to use step_command_fsm_prepare and
+	prepare_one_step.
+	(struct step_1_continuation_args): Delete.
+	(step_1_continuation): Delete.
+	(step_command_fsm_should_stop): New function.
+	(step_once): Delete.
+	(step_command_fsm_clean_up, step_command_fsm_async_reply_reason)
+	(prepare_one_step): New function, based on step_once.
+	(until_next_command): Remove step_multi reference.
+	(struct return_value_info): New.
+	(print_return_value): Rename to ...
+	(print_return_value_1): ... this.  New struct return_value_info
+	parameter.  Adjust.
+	(print_return_value): Reimplement as wrapper around
+	print_return_value_1.
+	(struct finish_command_fsm): New.
+	(finish_command_continuation): Delete.
+	(finish_command_fsm_ops): New global.
+	(new_finish_command_fsm, finish_command_fsm_should_stop): New
+	functions.
+	(finish_command_fsm_clean_up, finish_command_fsm_return_value):
+	New.
+	(finish_command_continuation_free_arg): Delete.
+	(finish_command_fsm_async_reply_reason): New.
+	(finish_backward, finish_forward): Change symbol parameter to a
+	finish_command_fsm.  Adjust.
+	(finish_command): Create a finish_command_fsm.  Adjust.
+	* infrun.c: Include "thread-fsm.h".
+	(clear_proceed_status_thread): Delete the thread's FSM.
+	(infrun_thread_stop_requested_callback): Cancel the thread's
+	execution command.
+	(clean_up_just_stopped_threads_fsms): New function.
+	(fetch_inferior_event): Handle the event_thread's should_stop
+	method saying the command isn't done yet.
+	(process_event_stop_test): Run breakpoint callbacks here.
+	(print_stop_event): Rename to ...
+	(print_stop_location): ... this.
+	(restore_current_uiout_cleanup): New function.
+	(print_stop_event): Reimplement.
+	(normal_stop): No longer notify the end_stepping_range observers
+	here handle "step N" nor "finish" here.  No longer call
+	print_stop_event here.
+	* infrun.h (struct return_value_info): Forward declare.
+	(print_return_value): Declare.
+	(print_stop_event): Change prototype.
+	* thread-fsm.c: New file.
+	* thread-fsm.h: New file.
+	* thread.c: Include "thread-fsm.h".
+	(thread_cancel_execution_command): New function.
+	(clear_thread_inferior_resources): Call it.
+	* cli/cli-interp.c (cli_on_normal_stop): New function.
+	(cli_interpreter_init): Install cli_on_normal_stop as normal_stop
+	observer.
+	* mi/mi-interp.c: Include "thread-fsm.h".
+	(restore_current_uiout_cleanup): Delete.
+	(mi_on_normal_stop): If the thread has an FSM associated, and it
+	finished, ask it for the async-reply-reason to print.  Always call
+	print_stop_event here, regardless of the top-level interpreter.
+	Check bpstat_what to tell whether an asynchronous breakpoint hit
+	triggered.
+	* tui/tui-interp.c (tui_on_normal_stop): New function.
+	(tui_init): Install tui_on_normal_stop as normal_stop observer.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bpstat_do_actions_1, until_break_command): Don't
+	check whether the target can async.
+	* inf-loop.c (inferior_event_handler): Only call target_async if
+	the target can async.
+	* infcall.c: Include top.h and interps.h.
+	(run_inferior_call): For the interpreter to sync mode while
+	running the infcall.  Call wait_sync_command_done instead of
+	wait_for_inferior plus normal_stop.
+	* infcmd.c (prepare_execution_command): Don't check whether the
+	target can async when running in the foreground.
+	(step_1): Delete synchronous case handling.
+	(step_once): Always install a continuation, even in sync mode.
+	(until_next_command, finish_forward): Don't check whether the
+	target can async.
+	(attach_command_post_wait, notice_new_inferior): Always install a
+	continuation, even in sync mode.
+	* infrun.c (mark_infrun_async_event_handler): New function.
+	(proceed): In sync mode, mark infrun's event source instead of
+	waiting for events here.
+	(fetch_inferior_event): If the target can't async, do a blocking
+	wait.
+	(prepare_to_wait): In sync mode, mark infrun's event source.
+	(infrun_async_inferior_event_handler): No longer bail out if the
+	target can't async.
+	* infrun.h (mark_infrun_async_event_handler): New declaration.
+	* linux-nat.c (linux_nat_wait_1): Remove calls to
+	set_sigint_trap/clear_sigint_trap.
+	(linux_nat_terminal_inferior): No longer check whether the target
+	can async.
+	* mi/mi-interp.c (mi_on_sync_execution_done): Update and simplify
+	comment.
+	(mi_execute_command_input_handler): No longer check whether the
+	target is async.  Update and simplify comment.
+	* target.c (default_target_wait): New function.
+	* target.h (struct target_ops) <to_wait>: Now defaults to
+	default_target_wait.
+	(default_target_wait): Declare.
+	* top.c (wait_sync_command_done): New function, factored out from
+	...
+	(maybe_wait_sync_command_done): ... this.
+	* top.h (wait_sync_command_done): Declare.
+	* target-delegates.c: Regenerate.
+
 2015-09-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* nat/linux-btrace.h (struct btrace_target_info) <ptr_bits>: Remove.

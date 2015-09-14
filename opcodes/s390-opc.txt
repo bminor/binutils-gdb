@@ -874,7 +874,7 @@ ec00000000f6 crb$32 RRS_RRRD0 "compare and branch (32)" z10 zarch
 ec00000000f6 crb RRS_RRRDU "compare and branch (32)" z10 zarch
 ec00000000e4 cgrb$32 RRS_RRRD0 "compare and branch (64)" z10 zarch
 ec00000000e4 cgrb RRS_RRRDU "compare and branch (64)" z10 zarch
-ec0000000076 crj$32 RIE_RRP "compare and branch relative (32)" z10 zarch
+ec0000000076 crj$32 RIE_RRP0 "compare and branch relative (32)" z10 zarch
 ec0000000076 crj RIE_RRPU "compare and branch relative (32)" z10 zarch
 ec0000000064 cgrj$32 RIE_RRP0 "compare and branch relative (64)" z10 zarch
 ec0000000064 cgrj RIE_RRPU "compare and branch relative (64)" z10 zarch
@@ -912,9 +912,9 @@ ec00000000f7 clrb$32 RRS_RRRD0 "compare logical and branch (32)" z10 zarch
 ec00000000f7 clrb RRS_RRRDU "compare logical and branch (32)" z10 zarch
 ec00000000e5 clgrb$32 RRS_RRRD0 "compare logical and branch (64)" z10 zarch
 ec00000000e5 clgrb RRS_RRRDU "compare logical and branch (64)" z10 zarch
-ec0000000077 clrj$32 RIE_RRP "compare logical and branch relative (32)" z10 zarch
+ec0000000077 clrj$32 RIE_RRP0 "compare logical and branch relative (32)" z10 zarch
 ec0000000077 clrj RIE_RRPU "compare logical and branch relative (32)" z10 zarch
-ec0000000065 clgrj$32 RIE_RRP "compare logical and branch relative (64)" z10 zarch
+ec0000000065 clgrj$32 RIE_RRP0 "compare logical and branch relative (64)" z10 zarch
 ec0000000065 clgrj RIE_RRPU "compare logical and branch relative (64)" z10 zarch
 ec00000000ff clib$12 RIS_R0RDU "compare logical immediate and branch (32<8)" z10 zarch
 ec00000000ff clib RIS_RURDU "compare logical immediate and branch (32<8)" z10 zarch

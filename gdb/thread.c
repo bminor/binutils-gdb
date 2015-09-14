@@ -42,7 +42,7 @@
 #include "cli/cli-decode.h"
 #include "gdb_regex.h"
 #include "cli/cli-utils.h"
-#include "continuations.h"
+#include "thread-fsm.h"
 
 /* Definition of struct thread_info exported to gdbthread.h.  */
 
@@ -158,6 +158,19 @@ thread_has_single_step_breakpoint_here (struct thread_info *tp,
 	  && breakpoint_has_location_inserted_here (ss_bps, aspace, addr));
 }
 
+/* See gdbthread.h.  */
+
+void
+thread_cancel_execution_command (struct thread_info *thr)
+{
+  if (thr->thread_fsm != NULL)
+    {
+      thread_fsm_clean_up (thr->thread_fsm);
+      thread_fsm_delete (thr->thread_fsm);
+      thr->thread_fsm = NULL;
+    }
+}
+
 static void
 clear_thread_inferior_resources (struct thread_info *tp)
 {
@@ -175,8 +188,7 @@ clear_thread_inferior_resources (struct thread_info *tp)
 
   btrace_teardown (tp);
 
-  do_all_intermediate_continuations_thread (tp, 1);
-  do_all_continuations_thread (tp, 1);
+  thread_cancel_execution_command (tp);
 }
 
 static void

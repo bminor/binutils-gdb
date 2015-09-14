@@ -1,3 +1,57 @@
+2015-09-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/hook-stop-continue.c: Delete.
+	* gdb.base/hook-stop-continue.exp: Delete.
+	* gdb.base/hook-stop-frame.c: Delete.
+	* gdb.base/hook-stop-frame.exp: Delete.
+	* gdb.base/hook-stop.c: New file.
+	* gdb.base/hook-stop.exp: New file.
+
+2015-09-14  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/access_to_packed_array.exp: New testcase.
+	* gdb.ada/access_to_packed_array/foo.adb: New file.
+	* gdb.ada/access_to_packed_array/pack.adb: New file.
+	* gdb.ada/access_to_packed_array/pack.ads: New file.
+
+2015-09-14  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/buffer-size.exp: Remove recording with unlimited BTS
+	buffer size test.
+
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/foll-exec.c: Add copyright header.  Fix
+	formatting issues.
+	* gdb.base/foll-exec.exp (zap_session): Delete proc.
+	(do_exec_tests): Use clean_restart in place of zap_session,
+	and for test initialization.  Fix formatting issues.  Use
+	fail in place of perror.
+	* gdb.base/pie-execl.exp (main): Use 'inferior_spawn_id' in
+	an expect statement to match an expression with output from
+	the program under debug.
+	* gdb.threads/non-ldr-exc-1.exp (do_test, main): Add
+	non-stop tests and use save_vars to enable non-stop in GDBFLAGS.
+	* gdb.threads/non-ldr-exc-2.exp: Likewise.
+	* gdb.threads/non-ldr-exc-3.exp: Likewise.
+	* gdb.threads/non-ldr-exc-4.exp: Likewise.
+
+2015-09-09  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-prettyprint.exp: Check result of run_lang_tests.
+
+2015-09-09  Doug Evans  <dje@google.com>
+
+	* gdb.base/pie-execl.exp: Fix result test of build_executable.
+
+2015-09-09  Doug Evans  <dje@google.com>
+
+	* gdb.base/savedregs.exp: Fix typo.
+
+2015-09-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-cli.exp: Add CLI finish tests.
+
 2015-09-08  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.threads/hand-call-in-threads.exp: Make sure the thread

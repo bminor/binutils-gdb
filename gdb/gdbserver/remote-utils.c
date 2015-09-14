@@ -1117,6 +1117,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     case TARGET_WAITKIND_STOPPED:
     case TARGET_WAITKIND_FORKED:
     case TARGET_WAITKIND_VFORKED:
+    case TARGET_WAITKIND_EXECD:
       {
 	struct thread_info *saved_thread;
 	const char **regp;
@@ -1133,6 +1134,25 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    buf += strlen (buf);
 	    buf = write_ptid (buf, status->value.related_pid);
 	    strcat (buf, ";");
+	  }
+	else if (status->kind == TARGET_WAITKIND_EXECD && multi_process)
+	  {
+	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
+	    const char *event = "exec";
+	    char hexified_pathname[PATH_MAX * 2];
+
+	    sprintf (buf, "T%02x%s:", signal, event);
+	    buf += strlen (buf);
+
+	    /* Encode pathname to hexified format.  */
+	    bin2hex ((const gdb_byte *) status->value.execd_pathname,
+		     hexified_pathname,
+		     strlen (status->value.execd_pathname));
+
+	    sprintf (buf, "%s;", hexified_pathname);
+	    xfree (status->value.execd_pathname);
+	    status->value.execd_pathname = NULL;
+	    buf += strlen (buf);
 	  }
 	else
 	  sprintf (buf, "T%02x", status->value.sig);

@@ -265,21 +265,10 @@ struct thread_info
      when GDB gets back SIGTRAP from step_resume_breakpoint.  */
   int step_after_step_resume_breakpoint;
 
-  /* Per-thread command support.  */
-
-  /* Pointer to what is left to do for an execution command after the
-     target stops.  Used only in asynchronous mode, by targets that
-     support async execution.  Several execution commands use it.  */
-  struct continuation *continuations;
-
-  /* Similar to the above, but used when a single execution command
-     requires several resume/stop iterations.  Used by the step
-     command.  */
-  struct continuation *intermediate_continuations;
-
-  /* If stepping, nonzero means step count is > 1 so don't print frame
-     next time inferior stops if it stops due to stepping.  */
-  int step_multi;
+  /* Pointer to the state machine manager object that handles what is
+     left to do for the thread's execution command after the target
+     stops.  Several execution commands use it.  */
+  struct thread_fsm *thread_fsm;
 
   /* This is used to remember when a fork or vfork event was caught by
      a catchpoint, and thus the event is to be followed at the next
@@ -556,6 +545,10 @@ extern struct thread_info *thread_step_over_chain_next (struct thread_info *tp);
 /* Return true if TP is in the step-over chain.  */
 
 extern int thread_is_in_step_over_chain (struct thread_info *tp);
+
+/* Cancel any ongoing execution command.  */
+
+extern void thread_cancel_execution_command (struct thread_info *thr);
 
 extern struct thread_info *thread_list;
 

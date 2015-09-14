@@ -3442,12 +3442,6 @@ linux_nat_wait_1 (struct target_ops *ops,
 			    target_pid_to_str (lp->ptid));
     }
 
-  if (!target_is_async_p ())
-    {
-      /* Causes SIGINT to be passed on to the attached process.  */
-      set_sigint_trap ();
-    }
-
   /* But if we don't find a pending event, we'll have to wait.  Always
      pull all events out of the kernel.  We'll randomly select an
      event LWP out of all that have events, to prevent starvation.  */
@@ -3518,9 +3512,6 @@ linux_nat_wait_1 (struct target_ops *ops,
 
 	  ourstatus->kind = TARGET_WAITKIND_NO_RESUMED;
 
-	  if (!target_is_async_p ())
-	    clear_sigint_trap ();
-
 	  restore_child_signals_mask (&prev_mask);
 	  return minus_one_ptid;
 	}
@@ -3545,9 +3536,6 @@ linux_nat_wait_1 (struct target_ops *ops,
 	fprintf_unfiltered (gdb_stdlog, "LNW: about to sigsuspend\n");
       sigsuspend (&suspend_mask);
     }
-
-  if (!target_is_async_p ())
-    clear_sigint_trap ();
 
   gdb_assert (lp);
 
@@ -4629,17 +4617,6 @@ static int async_terminal_is_ours = 1;
 static void
 linux_nat_terminal_inferior (struct target_ops *self)
 {
-  /* Like target_terminal_inferior, use target_can_async_p, not
-     target_is_async_p, since at this point the target is not async
-     yet.  If it can async, then we know it will become async prior to
-     resume.  */
-  if (!target_can_async_p ())
-    {
-      /* Async mode is disabled.  */
-      child_terminal_inferior (self);
-      return;
-    }
-
   child_terminal_inferior (self);
 
   /* Calls to target_terminal_*() are meant to be idempotent.  */

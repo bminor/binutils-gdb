@@ -1,3 +1,16 @@
+2015-09-10  Erik Ackermann  <kurterikackermann@gmail.com>
+
+	* strings.c: Add -s/--output-separator option to specify custom
+	separator string.
+	* NEWS: Mention the new feature.
+	* doc/binutils.text (strings): Document the new command line
+	option.
+
+2015-09-09  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi (ar): Remove bogus sentance concerning thin
+	archives and invalid paths.
+
 2015-09-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/18879

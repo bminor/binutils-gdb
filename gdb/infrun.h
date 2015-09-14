@@ -23,6 +23,7 @@
 struct target_waitstatus;
 struct frame_info;
 struct address_space;
+struct return_value_info;
 
 /* True if we are debugging run control.  */
 extern unsigned int debug_infrun;
@@ -60,6 +61,11 @@ extern int non_stop;
    operating system's address space randomization feature when
    starting an inferior.  */
 extern int disable_randomization;
+
+/* Returns a unique identifier for the current stop.  This can be used
+   to tell whether a command has proceeded the inferior past the
+   current location.  */
+extern ULONGEST get_stop_id (void);
 
 /* Reverse execution.  */
 enum exec_direction_kind
@@ -99,7 +105,11 @@ extern ptid_t user_visible_resume_ptid (int step);
 
 extern void wait_for_inferior (void);
 
-extern void normal_stop (void);
+/* Return control to GDB when the inferior stops for real.  Print
+   appropriate messages, remove breakpoints, give terminal our modes,
+   and run the stop hook.  Returns true if the stop hook proceeded the
+   target, false otherwise.  */
+extern int normal_stop (void);
 
 extern void get_last_target_status (ptid_t *ptid,
 				    struct target_waitstatus *status);
@@ -148,7 +158,18 @@ extern void print_exited_reason (struct ui_out *uiout, int exitstatus);
    inferior has stopped.  */
 extern void print_no_history_reason (struct ui_out *uiout);
 
-extern void print_stop_event (struct target_waitstatus *ws);
+/* Print the result of a function at the end of a 'finish' command.
+   RV points at an object representing the captured return value/type
+   and its position in the value history.  */
+
+extern void print_return_value (struct ui_out *uiout,
+				struct return_value_info *rv);
+
+/* Print current location without a level number, if we have changed
+   functions or hit a breakpoint.  Print source line if we have one.
+   If the execution command captured a return value, print it.  */
+
+extern void print_stop_event (struct ui_out *uiout);
 
 /* Pretty print the results of target_wait, for debugging purposes.  */
 
@@ -197,8 +218,16 @@ enum gdb_signal gdb_signal_from_command (int num);
 /* Enables/disables infrun's async event source in the event loop.  */
 extern void infrun_async (int enable);
 
+/* Call infrun's event handler the next time through the event
+   loop.  */
+extern void mark_infrun_async_event_handler (void);
+
 /* The global queue of threads that need to do a step-over operation
    to get past e.g., a breakpoint.  */
 extern struct thread_info *step_over_queue_head;
+
+/* Remove breakpoints if possible (usually that means, if everything
+   is stopped).  On failure, print a message.  */
+extern void maybe_remove_breakpoints (void);
 
 #endif /* INFRUN_H */

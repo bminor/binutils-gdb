@@ -117,12 +117,6 @@ delegate_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *a
 }
 
 static ptid_t
-tdefault_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *arg2, int arg3)
-{
-  noprocess ();
-}
-
-static ptid_t
 debug_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *arg2, int arg3)
 {
   ptid_t result;
@@ -1212,6 +1206,32 @@ debug_remove_exec_catchpoint (struct target_ops *self, int arg1)
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
+}
+
+static void
+delegate_follow_exec (struct target_ops *self, struct inferior *arg1, char *arg2)
+{
+  self = self->beneath;
+  self->to_follow_exec (self, arg1, arg2);
+}
+
+static void
+tdefault_follow_exec (struct target_ops *self, struct inferior *arg1, char *arg2)
+{
+}
+
+static void
+debug_follow_exec (struct target_ops *self, struct inferior *arg1, char *arg2)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_follow_exec (...)\n", debug_target.to_shortname);
+  debug_target.to_follow_exec (&debug_target, arg1, arg2);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_follow_exec (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_struct_inferior_p (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_char_p (arg2);
+  fputs_unfiltered (")\n", gdb_stdlog);
 }
 
 static int
@@ -4038,6 +4058,8 @@ install_delegators (struct target_ops *ops)
     ops->to_insert_exec_catchpoint = delegate_insert_exec_catchpoint;
   if (ops->to_remove_exec_catchpoint == NULL)
     ops->to_remove_exec_catchpoint = delegate_remove_exec_catchpoint;
+  if (ops->to_follow_exec == NULL)
+    ops->to_follow_exec = delegate_follow_exec;
   if (ops->to_set_syscall_catchpoint == NULL)
     ops->to_set_syscall_catchpoint = delegate_set_syscall_catchpoint;
   if (ops->to_has_exited == NULL)
@@ -4251,7 +4273,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_detach = tdefault_detach;
   ops->to_disconnect = tdefault_disconnect;
   ops->to_resume = tdefault_resume;
-  ops->to_wait = tdefault_wait;
+  ops->to_wait = default_target_wait;
   ops->to_fetch_registers = tdefault_fetch_registers;
   ops->to_store_registers = tdefault_store_registers;
   ops->to_prepare_to_store = tdefault_prepare_to_store;
@@ -4291,6 +4313,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_follow_fork = default_follow_fork;
   ops->to_insert_exec_catchpoint = tdefault_insert_exec_catchpoint;
   ops->to_remove_exec_catchpoint = tdefault_remove_exec_catchpoint;
+  ops->to_follow_exec = tdefault_follow_exec;
   ops->to_set_syscall_catchpoint = tdefault_set_syscall_catchpoint;
   ops->to_has_exited = tdefault_has_exited;
   ops->to_mourn_inferior = default_mourn_inferior;
@@ -4442,6 +4465,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_follow_fork = debug_follow_fork;
   ops->to_insert_exec_catchpoint = debug_insert_exec_catchpoint;
   ops->to_remove_exec_catchpoint = debug_remove_exec_catchpoint;
+  ops->to_follow_exec = debug_follow_exec;
   ops->to_set_syscall_catchpoint = debug_set_syscall_catchpoint;
   ops->to_has_exited = debug_has_exited;
   ops->to_mourn_inferior = debug_mourn_inferior;

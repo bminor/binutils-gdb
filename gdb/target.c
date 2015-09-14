@@ -2233,6 +2233,17 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
   return (current_target.to_wait) (&current_target, ptid, status, options);
 }
 
+/* See target.h.  */
+
+ptid_t
+default_target_wait (struct target_ops *ops,
+		     ptid_t ptid, struct target_waitstatus *status,
+		     int options)
+{
+  status->kind = TARGET_WAITKIND_IGNORE;
+  return minus_one_ptid;
+}
+
 char *
 target_pid_to_str (ptid_t ptid)
 {
@@ -2291,6 +2302,14 @@ target_follow_fork (int follow_child, int detach_fork)
 {
   return current_target.to_follow_fork (&current_target,
 					follow_child, detach_fork);
+}
+
+/* Target wrapper for follow exec hook.  */
+
+void
+target_follow_exec (struct inferior *inf, char *execd_pathname)
+{
+  current_target.to_follow_exec (&current_target, inf, execd_pathname);
 }
 
 static void

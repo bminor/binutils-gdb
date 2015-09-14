@@ -59,6 +59,7 @@ int run_once;
 int multi_process;
 int report_fork_events;
 int report_vfork_events;
+int report_exec_events;
 int non_stop;
 int swbreak_feature;
 int hwbreak_feature;
@@ -2111,6 +2112,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		  if (target_supports_vfork_events ())
 		    report_vfork_events = 1;
 		}
+	      if (strcmp (p, "exec-events+") == 0)
+		{
+		  /* GDB supports and wants exec events if possible.  */
+		  if (target_supports_exec_events ())
+		    report_exec_events = 1;
+		}
 	      else
 		target_process_qsupported (p);
 
@@ -2166,6 +2173,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (target_supports_vfork_events ())
 	strcat (own_buf, ";vfork-events+");
+
+      if (target_supports_exec_events ())
+	strcat (own_buf, ";exec-events+");
 
       if (target_supports_non_stop ())
 	strcat (own_buf, ";QNonStop+");
@@ -3544,6 +3554,7 @@ captured_main (int argc, char *argv[])
       multi_process = 0;
       report_fork_events = 0;
       report_vfork_events = 0;
+      report_exec_events = 0;
       /* Be sure we're out of tfind mode.  */
       current_traceframe = -1;
       cont_thread = null_ptid;
