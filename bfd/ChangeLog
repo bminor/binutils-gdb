@@ -1,3 +1,9 @@
+2015-09-14  Rich Felker  <dalias@libc.org>
+
+	* elf32-sh.c (sh_elf_relocate_section): Set EF_SH_PIC flag
+	instead of clearing it on cross-section relocations.
+	(sh_elf_merge_private_data): Clear EF_SH_PIC flag by default.
+
 2015-09-12  Helge Deller  <deller@gmx.de>
 
 	PR ld/18514
