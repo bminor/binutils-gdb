@@ -62,6 +62,11 @@ extern int non_stop;
    starting an inferior.  */
 extern int disable_randomization;
 
+/* Returns a unique identifier for the current stop.  This can be used
+   to tell whether a command has proceeded the inferior past the
+   current location.  */
+extern ULONGEST get_stop_id (void);
+
 /* Reverse execution.  */
 enum exec_direction_kind
   {
@@ -100,7 +105,11 @@ extern ptid_t user_visible_resume_ptid (int step);
 
 extern void wait_for_inferior (void);
 
-extern void normal_stop (void);
+/* Return control to GDB when the inferior stops for real.  Print
+   appropriate messages, remove breakpoints, give terminal our modes,
+   and run the stop hook.  Returns true if the stop hook proceeded the
+   target, false otherwise.  */
+extern int normal_stop (void);
 
 extern void get_last_target_status (ptid_t *ptid,
 				    struct target_waitstatus *status);

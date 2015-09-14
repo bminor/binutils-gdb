@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2008-2015 Free Software Foundation, Inc.
+   Copyright 2009-2015 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,28 +15,24 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int
-funbreak (int i)
+void
+func (void)
 {
-  i = i * 2; /* set breakpoint here */
-  i = i + 10;
-  return i;
+  int a;
+
+  a = 1; /* set breakpoint here */
+  a = 2;
 }
 
 int
-func (int i)
+main (int argc, char **argv)
 {
-  return i * 2;
-}
+  int i;
 
-int
-main (int argc, char **argv, char **envp)
-{
-  func (1);
-  func (2);
-  func (3);
-  func (4);
-  funbreak (5);
+  i = 1;
+  i = 2;
+  i = 3;
+  func ();
 
   return 0;
 }

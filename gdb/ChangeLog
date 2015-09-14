@@ -1,3 +1,16 @@
+2015-09-14  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (current_stop_id): New global.
+	(get_stop_id, new_stop_id): New functions.
+	(fetch_inferior_event): Handle normal_stop proceeding the target.
+	(struct stop_context): New.
+	(save_stop_context, release_stop_context_cleanup)
+	(stop_context_changed): New functions.
+	(normal_stop): Return true if the hook-stop changes the stop
+	context.
+	* infrun.h (get_stop_id): Declare.
+	(normal_stop): Now returns int.  Add documentation.
+
 2015-09-14  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-lang.c (ada_value_ptr_subscript): Update the heading

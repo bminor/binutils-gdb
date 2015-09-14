@@ -2702,6 +2702,33 @@ resume (enum gdb_signal sig)
 
 /* Proceeding.  */
 
+/* See infrun.h.  */
+
+/* Counter that tracks number of user visible stops.  This can be used
+   to tell whether a command has proceeded the inferior past the
+   current location.  This allows e.g., inferior function calls in
+   breakpoint commands to not interrupt the command list.  When the
+   call finishes successfully, the inferior is standing at the same
+   breakpoint as if nothing happened (and so we don't call
+   normal_stop).  */
+static ULONGEST current_stop_id;
+
+/* See infrun.h.  */
+
+ULONGEST
+get_stop_id (void)
+{
+  return current_stop_id;
+}
+
+/* Called when we report a user visible stop.  */
+
+static void
+new_stop_id (void)
+{
+  current_stop_id++;
+}
+
 /* Clear out all variables saying what to do when inferior is continued.
    First do this, then set the ones you want, then call `proceed'.  */
 
@@ -3854,12 +3881,17 @@ fetch_inferior_event (void *client_data)
 
 	  if (should_notify_stop)
 	    {
+	      int proceeded = 0;
+
 	      /* We may not find an inferior if this was a process exit.  */
 	      if (inf == NULL || inf->control.stop_soon == NO_STOP_QUIETLY)
-		normal_stop ();
+		proceeded = normal_stop ();
 
-	      inferior_event_handler (INF_EXEC_COMPLETE, NULL);
-	      cmd_done = 1;
+	      if (!proceeded)
+		{
+		  inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+		  cmd_done = 1;
+		}
 	    }
 	}
     }
@@ -7829,15 +7861,83 @@ maybe_remove_breakpoints (void)
     }
 }
 
-/* Here to return control to GDB when the inferior stops for real.
-   Print appropriate messages, remove breakpoints, give terminal our modes.
+/* The execution context that just caused a normal stop.  */
 
-   STOP_PRINT_FRAME nonzero means print the executing frame
-   (pc, function, args, file, line number and line text).
-   BREAKPOINTS_FAILED nonzero means stop was due to error
-   attempting to insert breakpoints.  */
+struct stop_context
+{
+  /* The stop ID.  */
+  ULONGEST stop_id;
 
-void
+  /* The event PTID.  */
+
+  ptid_t ptid;
+
+  /* If stopp for a thread event, this is the thread that caused the
+     stop.  */
+  struct thread_info *thread;
+
+  /* The inferior that caused the stop.  */
+  int inf_num;
+};
+
+/* Returns a new stop context.  If stopped for a thread event, this
+   takes a strong reference to the thread.  */
+
+static struct stop_context *
+save_stop_context (void)
+{
+  struct stop_context *sc = xmalloc (sizeof (struct stop_context));
+
+  sc->stop_id = get_stop_id ();
+  sc->ptid = inferior_ptid;
+  sc->inf_num = current_inferior ()->num;
+
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    {
+      /* Take a strong reference so that the thread can't be deleted
+	 yet.  */
+      sc->thread = inferior_thread ();
+      sc->thread->refcount++;
+    }
+  else
+    sc->thread = NULL;
+
+  return sc;
+}
+
+/* Release a stop context previously created with save_stop_context.
+   Releases the strong reference to the thread as well. */
+
+static void
+release_stop_context_cleanup (void *arg)
+{
+  struct stop_context *sc = arg;
+
+  if (sc->thread != NULL)
+    sc->thread->refcount--;
+  xfree (sc);
+}
+
+/* Return true if the current context no longer matches the saved stop
+   context.  */
+
+static int
+stop_context_changed (struct stop_context *prev)
+{
+  if (!ptid_equal (prev->ptid, inferior_ptid))
+    return 1;
+  if (prev->inf_num != current_inferior ()->num)
+    return 1;
+  if (prev->thread != NULL && prev->thread->state != THREAD_STOPPED)
+    return 1;
+  if (get_stop_id () != prev->stop_id)
+    return 1;
+  return 0;
+}
+
+/* See infrun.h.  */
+
+int
 normal_stop (void)
 {
   struct target_waitstatus last;
@@ -7846,6 +7946,8 @@ normal_stop (void)
   ptid_t pid_ptid;
 
   get_last_target_status (&last_ptid, &last);
+
+  new_stop_id ();
 
   /* If an exception is thrown from this point on, make sure to
      propagate GDB's knowledge of the executing state to the
@@ -7966,9 +8068,27 @@ normal_stop (void)
 
   /* Look up the hook_stop and run it (CLI internally handles problem
      of stop_command's pre-hook not existing).  */
-  if (stop_command)
-    catch_errors (hook_stop_stub, stop_command,
-		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
+  if (stop_command != NULL)
+    {
+      struct stop_context *saved_context = save_stop_context ();
+      struct cleanup *old_chain
+	= make_cleanup (release_stop_context_cleanup, saved_context);
+
+      catch_errors (hook_stop_stub, stop_command,
+		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
+
+      /* If the stop hook resumes the target, then there's no point in
+	 trying to notify about the previous stop; its context is
+	 gone.  Likewise if the command switches thread or inferior --
+	 the observers would print a stop for the wrong
+	 thread/inferior.  */
+      if (stop_context_changed (saved_context))
+	{
+	  do_cleanups (old_chain);
+	  return 1;
+	}
+      do_cleanups (old_chain);
+    }
 
   /* Notify observers about the stop.  This is where the interpreters
      print the stop event.  */
@@ -7993,6 +8113,8 @@ normal_stop (void)
      longer needed.  Keeping those around slows down things linearly.
      Note that this never removes the current inferior.  */
   prune_inferiors ();
+
+  return 0;
 }
 
 static int

@@ -1,3 +1,12 @@
+2015-09-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/hook-stop-continue.c: Delete.
+	* gdb.base/hook-stop-continue.exp: Delete.
+	* gdb.base/hook-stop-frame.c: Delete.
+	* gdb.base/hook-stop-frame.exp: Delete.
+	* gdb.base/hook-stop.c: New file.
+	* gdb.base/hook-stop.exp: New file.
+
 2015-09-14  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/access_to_packed_array.exp: New testcase.
