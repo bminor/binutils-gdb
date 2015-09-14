@@ -34,18 +34,18 @@ int debug_linux_namespaces;
 
 /* Handle systems without setns.  */
 
-#ifndef HAVE_SETNS
-static int
-setns (int fd, int nstype)
+static inline int
+do_setns (int fd, int nstype)
 {
-#ifdef __NR_setns
+#ifdef HAVE_SETNS
+  return setns (fd, nstype);
+#elif defined __NR_setns
   return syscall (__NR_setns, fd, nstype);
 #else
   errno = ENOSYS;
   return -1;
 #endif
 }
-#endif
 
 /* Handle systems without MSG_CMSG_CLOEXEC.  */
 
@@ -495,7 +495,7 @@ mnsh_recv_message (int sock, enum mnsh_msg_type *type,
 static ssize_t
 mnsh_handle_setns (int sock, int fd, int nstype)
 {
-  int result = setns (fd, nstype);
+  int result = do_setns (fd, nstype);
 
   return mnsh_return_int (sock, result, errno);
 }
