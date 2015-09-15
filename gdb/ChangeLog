@@ -1,3 +1,10 @@
+2015-09-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* symtab.h (address_class): Document that TLS variables
+	are handled by LOC_UNRESOLVED.
+	* findvar.c (default_read_var_value): Don't relocate TLS variables.
+	* printcmd.c (address_info): Don't relocate TLS variables.
+
 2015-09-15  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* aarch64-tdep.c (decode_add_sub_imm): Use debug_printf.

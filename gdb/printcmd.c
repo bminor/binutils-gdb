@@ -1376,16 +1376,19 @@ address_info (char *exp, int from_tty)
 	else
 	  {
 	    section = MSYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
-	    load_addr = BMSYMBOL_VALUE_ADDRESS (msym);
 
 	    if (section
 		&& (section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
-	      printf_filtered (_("a thread-local variable at offset %s "
-				 "in the thread-local storage for `%s'"),
-			       paddress (gdbarch, load_addr),
-			       objfile_name (section->objfile));
+	      {
+		load_addr = MSYMBOL_VALUE_RAW_ADDRESS (msym.minsym);
+		printf_filtered (_("a thread-local variable at offset %s "
+				   "in the thread-local storage for `%s'"),
+				 paddress (gdbarch, load_addr),
+				 objfile_name (section->objfile));
+	      }
 	    else
 	      {
+		load_addr = BMSYMBOL_VALUE_ADDRESS (msym);
 		printf_filtered (_("static storage at address "));
 		fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
 		if (section_is_overlay (section))
