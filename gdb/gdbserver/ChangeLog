@@ -1,5 +1,25 @@
 2015-09-15  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (linux_supports_conditional_breakpoints): Rename
+	it to ...
+	(linux_supports_hardware_single_step): ... New function.
+	(linux_target_ops): Update.
+	* lynx-low.c (lynx_target_ops): Set field
+	supports_hardware_single_step to target_can_do_hardware_single_step.
+	* nto-low.c (nto_target_ops): Likewise.
+	* spu-low.c (spu_target_ops): Likewise.
+	* win32-low.c (win32_target_ops): Likewise.
+	* target.c (target_can_do_hardware_single_step): New function.
+	* target.h (struct target_ops) <supports_conditional_breakpoints>:
+	Remove.  <supports_hardware_single_step>: New field.
+	(target_supports_conditional_breakpoints): Remove.
+	(target_supports_hardware_single_step): New macro.
+	(target_can_do_hardware_single_step): Declare.
+	* server.c (handle_query): Use target_supports_hardware_single_step
+	instead of target_supports_conditional_breakpoints.
+
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_linux_siginfo_fixup): New
 	function.
 	(struct linux_target_ops the_low_target): Install
