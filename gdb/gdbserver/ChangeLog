@@ -1,5 +1,10 @@
 2015-09-15  Yao Qi  <yao.qi@linaro.org>
 
+	* server.c (handle_query): Check string comparison using
+	"else if" instead of "if".
+
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
 	* server.c (vCont_supported): New global variable.
 	(handle_query): Set vCont_supported to 1 if "vContSupported+"
 	matches.  Append ";vContSupported+" to own_buf.

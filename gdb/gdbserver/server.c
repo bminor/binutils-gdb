@@ -2117,7 +2117,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		  if (target_supports_vfork_events ())
 		    report_vfork_events = 1;
 		}
-	      if (strcmp (p, "exec-events+") == 0)
+	      else if (strcmp (p, "exec-events+") == 0)
 		{
 		  /* GDB supports and wants exec events if possible.  */
 		  if (target_supports_exec_events ())
