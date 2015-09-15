@@ -917,6 +917,11 @@ arm_linux_software_single_step (struct frame_info *frame)
   if (arm_deal_with_atomic_sequence (frame))
     return 1;
 
+  /* If the target does have hardware single step, GDB doesn't have
+     to bother software single step.  */
+  if (target_can_do_single_step () == 1)
+    return 0;
+
   next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
 
   /* The Linux kernel offers some user-mode helpers in a high page.  We can

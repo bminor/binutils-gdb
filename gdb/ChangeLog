@@ -1,5 +1,26 @@
 2015-09-15  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-linux-nat.c (aarch64_linux_can_do_single_step): New
+	function.
+	(_initialize_aarch64_linux_nat): Install it to to_can_do_single_step.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Return 0
+	if target_can_do_single_step returns 1.
+	* remote.c (struct vCont_action_support) <s, S>: New fields.
+	(PACKET_vContSupported): New enum.
+	(remote_protocol_features): New element for vContSupported.
+	(remote_query_supported): Append "vContSupported+".
+	(remote_vcont_probe): Remove support_s and support_S, use
+	rs->supports_vCont.s and rs->supports_vCont.S instead.  Disable
+	vCont packet if c and C actions are not supported.
+	(remote_can_do_single_step): New function.
+	(init_remote_ops): Install it to to_can_do_single_step.
+	(_initialize_remote): Call add_packet_config_cmd.
+	* target.h (struct target_ops) <to_can_do_single_step>: New field.
+	(target_can_do_single_step): New macro.
+	* target-delegates.c: Re-generated.
+
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-linux-nat.c (aarch64_linux_siginfo_fixup): New function.
 	(_initialize_aarch64_linux_nat): Call linux_nat_set_siginfo_fixup.
 	* nat/aarch64-linux.c (aarch64_compat_siginfo_from_siginfo):

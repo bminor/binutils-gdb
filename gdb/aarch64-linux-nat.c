@@ -807,6 +807,14 @@ aarch64_linux_watchpoint_addr_within_range (struct target_ops *target,
   return start <= addr && start + length - 1 >= addr;
 }
 
+/* Implement the "to_can_do_single_step" target_ops method.  */
+
+static int
+aarch64_linux_can_do_single_step (struct target_ops *target)
+{
+  return 1;
+}
+
 /* Define AArch64 maintenance commands.  */
 
 static void
@@ -858,6 +866,7 @@ _initialize_aarch64_linux_nat (void)
   t->to_stopped_data_address = aarch64_linux_stopped_data_address;
   t->to_watchpoint_addr_within_range =
     aarch64_linux_watchpoint_addr_within_range;
+  t->to_can_do_single_step = aarch64_linux_can_do_single_step;
 
   /* Override the GNU/Linux inferior startup hook.  */
   super_post_startup_inferior = t->to_post_startup_inferior;

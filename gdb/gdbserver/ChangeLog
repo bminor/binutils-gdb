@@ -1,5 +1,14 @@
 2015-09-15  Yao Qi  <yao.qi@linaro.org>
 
+	* server.c (vCont_supported): New global variable.
+	(handle_query): Set vCont_supported to 1 if "vContSupported+"
+	matches.  Append ";vContSupported+" to own_buf.
+	(handle_v_requests): Append ";s;S" to own_buf if target supports
+	hardware single step or vCont_supported is false.
+	(capture_main): Set vCont_supported to zero.
+
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (linux_supports_conditional_breakpoints): Rename
 	it to ...
 	(linux_supports_hardware_single_step): ... New function.

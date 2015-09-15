@@ -559,6 +559,12 @@ struct target_ops
     int (*to_masked_watch_num_registers) (struct target_ops *,
 					  CORE_ADDR, CORE_ADDR)
       TARGET_DEFAULT_RETURN (-1);
+
+    /* Return 1 for sure target can do single step.  Return -1 for
+       unknown.  Return 0 for target can't do.  */
+    int (*to_can_do_single_step) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (-1);
+
     void (*to_terminal_init) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_inferior) (struct target_ops *)
@@ -1909,6 +1915,9 @@ extern char *target_thread_name (struct thread_info *);
     (*current_target.to_region_ok_for_hw_watchpoint) (&current_target,	\
 						      addr, len)
 
+
+#define target_can_do_single_step() \
+  (*current_target.to_can_do_single_step) (&current_target)
 
 /* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.
    TYPE is 0 for write, 1 for read, and 2 for read/write accesses.
