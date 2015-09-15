@@ -1,6 +1,12 @@
 2015-09-15  Pedro Alves  <palves@redhat.com>
 
 	PR remote/18965
+	* gdb.texinfo (Stop Reply Packets): Revert previous change to
+	the vforkdone description.
+
+2015-09-15  Pedro Alves  <palves@redhat.com>
+
+	PR remote/18965
 	* gdb.texinfo (Stop Reply Packets): Explain that vforkdone's 'r'
 	part indicates the thread ID of the parent process.
 
