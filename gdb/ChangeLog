@@ -1,3 +1,11 @@
+2015-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linespec.c (minsym_found): Call gdbarch_skip_entrypoint.
+	* ppc64-tdep.c (ppc64_skip_trampoline_code): Rename to ...
+	(ppc64_skip_trampoline_code_1): ... here.
+	(ppc64_skip_trampoline_code): New wrapper function.
+	* symtab.c (find_function_start_sal): Call gdbarch_skip_entrypoint.
+
 2015-09-15  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_can_do_single_step): New
