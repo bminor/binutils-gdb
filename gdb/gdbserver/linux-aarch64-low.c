@@ -430,6 +430,27 @@ ps_get_thread_area (const struct ps_prochandle *ph,
   return PS_OK;
 }
 
+/* Implementation of linux_target_ops method "siginfo_fixup".  */
+
+static int
+aarch64_linux_siginfo_fixup (siginfo_t *native, void *inf, int direction)
+{
+  /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
+  if (!is_64bit_tdesc ())
+    {
+      if (direction == 0)
+	aarch64_compat_siginfo_from_siginfo ((struct compat_siginfo *) inf,
+					     native);
+      else
+	aarch64_siginfo_from_compat_siginfo (native,
+					     (struct compat_siginfo *) inf);
+
+      return 1;
+    }
+
+  return 0;
+}
+
 /* Implementation of linux_target_ops method "linux_new_process".  */
 
 static struct arch_process_info *
@@ -581,7 +602,7 @@ struct linux_target_ops the_low_target =
   aarch64_stopped_data_address,
   NULL, /* collect_ptrace_register */
   NULL, /* supply_ptrace_register */
-  NULL, /* siginfo_fixup */
+  aarch64_linux_siginfo_fixup,
   aarch64_linux_new_process,
   aarch64_linux_new_thread,
   aarch64_linux_new_fork,

@@ -1,3 +1,21 @@
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_siginfo_fixup): New function.
+	(_initialize_aarch64_linux_nat): Call linux_nat_set_siginfo_fixup.
+	* nat/aarch64-linux.c (aarch64_compat_siginfo_from_siginfo):
+	New function.
+	(aarch64_siginfo_from_compat_siginfo): New function.
+	* nat/aarch64-linux.h: Include signal.h.
+	(compat_int_t, compat_uptr_t, compat_time_t): Typedef.
+	(compat_timer_t, compat_clock_t): Likewise.
+	(struct compat_timeval): New.
+	(union compat_sigval): New.
+	(struct compat_siginfo): New.
+	(cpt_si_pid, cpt_si_uid, cpt_si_timerid): New macros.
+	(cpt_si_overrun, cpt_si_status, cpt_si_utime): Likewise.
+	(cpt_si_stime, cpt_si_ptr, cpt_si_addr): Likewise.
+	(cpt_si_band, cpt_si_fd): Likewise.
+
 2015-09-14  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (current_stop_id): New global.

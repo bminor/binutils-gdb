@@ -1,3 +1,10 @@
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_linux_siginfo_fixup): New
+	function.
+	(struct linux_target_ops the_low_target): Install
+	aarch64_linux_siginfo_fixup.
+
 2015-09-11  Don Breazeal  <donb@codesourcery.com>
 	    Luis Machado  <lgustavo@codesourcery.com>
 
