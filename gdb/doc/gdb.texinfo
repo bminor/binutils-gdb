@@ -35498,12 +35498,11 @@ indicating support.
 
 @cindex vforkdone events, remote reply
 @item vforkdone
-The packet indicates that a child process created by a vfork has
-either called @code{exec} or terminated, so that the address spaces of
-the parent and child process are no longer shared.  The @var{r} part
-is the thread ID of the parent process.  Refer to @ref{thread-id
-syntax} for the format of the @var{thread-id} field.  This packet is
-only applicable to targets that support vforkdone events.
+The packet indicates that a child process created by a vfork
+has either called @code{exec} or terminated, so that the
+address spaces of the parent and child process are no longer
+shared. The @var{r} part is ignored.  This packet is only
+applicable to targets that support vforkdone events.
 
 This packet should not be sent by default; older @value{GDBN} versions
 did not support it.  @value{GDBN} requests it, by supplying an
