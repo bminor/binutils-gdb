@@ -1,3 +1,8 @@
+2015-10-12  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.base/nested-addr.c: New file.
+	* gdb.base/nested-addr.exp: New testcase.
+
 2015-10-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/vdso.c (main): Remove breakpoint markers.

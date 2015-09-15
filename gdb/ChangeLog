@@ -1,3 +1,9 @@
+2015-10-12  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* eval.c (evaluate_subexp_standard) <STRUCTOP_STRUCT>: If
+	EVAL_AVOID_SIDE_EFFECTS mode, forward the VALUE_LVAL attribute
+	to the returned value.
+
 2015-10-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_unpack_from_contents): Add guard that unpacked
