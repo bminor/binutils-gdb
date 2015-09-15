@@ -261,10 +261,11 @@ decode_add_sub_imm (CORE_ADDR addr, uint32_t insn, unsigned *rd, unsigned *rn,
 	*imm = -*imm;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x add x%u, x%u, #%d\n",
-			    core_addr_to_string_nz (addr), insn, *rd, *rn,
-			    *imm);
+	{
+	  debug_printf ("decode: 0x%s 0x%x add x%u, x%u, #%d\n",
+			core_addr_to_string_nz (addr), insn, *rd, *rn,
+			*imm);
+	}
       return 1;
     }
   return 0;
@@ -286,9 +287,10 @@ decode_adrp (CORE_ADDR addr, uint32_t insn, unsigned *rd)
       *rd = (insn >> 0) & 0x1f;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x adrp x%u, #?\n",
-			    core_addr_to_string_nz (addr), insn, *rd);
+	{
+	  debug_printf ("decode: 0x%s 0x%x adrp x%u, #?\n",
+			core_addr_to_string_nz (addr), insn, *rd);
+	}
       return 1;
     }
   return 0;
@@ -315,11 +317,12 @@ decode_b (CORE_ADDR addr, uint32_t insn, int *is_bl, int32_t *offset)
       *offset = extract_signed_bitfield (insn, 26, 0) << 2;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x %s 0x%s\n",
-			    core_addr_to_string_nz (addr), insn,
-			    *is_bl ? "bl" : "b",
-			    core_addr_to_string_nz (addr + *offset));
+	{
+	  debug_printf ("decode: 0x%s 0x%x %s 0x%s\n",
+			core_addr_to_string_nz (addr), insn,
+			*is_bl ? "bl" : "b",
+			core_addr_to_string_nz (addr + *offset));
+	}
 
       return 1;
     }
@@ -346,10 +349,11 @@ decode_bcond (CORE_ADDR addr, uint32_t insn, unsigned *cond, int32_t *offset)
       *offset = extract_signed_bitfield (insn, 19, 5) << 2;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x b<%u> 0x%s\n",
-			    core_addr_to_string_nz (addr), insn, *cond,
-			    core_addr_to_string_nz (addr + *offset));
+	{
+	  debug_printf ("decode: 0x%s 0x%x b<%u> 0x%s\n",
+			core_addr_to_string_nz (addr), insn, *cond,
+			core_addr_to_string_nz (addr + *offset));
+	}
       return 1;
     }
   return 0;
@@ -376,10 +380,11 @@ decode_br (CORE_ADDR addr, uint32_t insn, int *is_blr, unsigned *rn)
       *rn = (insn >> 5) & 0x1f;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x %s 0x%x\n",
-			    core_addr_to_string_nz (addr), insn,
-			    *is_blr ? "blr" : "br", *rn);
+	{
+	  debug_printf ("decode: 0x%s 0x%x %s 0x%x\n",
+			core_addr_to_string_nz (addr), insn,
+			*is_blr ?  "blr" : "br", *rn);
+	}
 
       return 1;
     }
@@ -411,11 +416,12 @@ decode_cb (CORE_ADDR addr, uint32_t insn, int *is64, int *is_cbnz,
       *offset = extract_signed_bitfield (insn, 19, 5) << 2;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x %s 0x%s\n",
-			    core_addr_to_string_nz (addr), insn,
-			    *is_cbnz ? "cbnz" : "cbz",
-			    core_addr_to_string_nz (addr + *offset));
+	{
+	  debug_printf ("decode: 0x%s 0x%x %s 0x%s\n",
+			core_addr_to_string_nz (addr), insn,
+			*is_cbnz ? "cbnz" : "cbz",
+			core_addr_to_string_nz (addr + *offset));
+	}
       return 1;
     }
   return 0;
@@ -435,8 +441,10 @@ decode_eret (CORE_ADDR addr, uint32_t insn)
   if (insn == 0xd69f03e0)
     {
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog, "decode: 0x%s 0x%x eret\n",
-			    core_addr_to_string_nz (addr), insn);
+	{
+	  debug_printf ("decode: 0x%s 0x%x eret\n",
+			core_addr_to_string_nz (addr), insn);
+	}
       return 1;
     }
   return 0;
@@ -458,9 +466,10 @@ decode_movz (CORE_ADDR addr, uint32_t insn, unsigned *rd)
       *rd = (insn >> 0) & 0x1f;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x movz x%u, #?\n",
-			    core_addr_to_string_nz (addr), insn, *rd);
+	{
+	  debug_printf ("decode: 0x%s 0x%x movz x%u, #?\n",
+			core_addr_to_string_nz (addr), insn, *rd);
+	}
       return 1;
     }
   return 0;
@@ -491,10 +500,11 @@ decode_orr_shifted_register_x (CORE_ADDR addr,
       *imm = (insn >> 10) & 0x3f;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x orr x%u, x%u, x%u, #%u\n",
-			    core_addr_to_string_nz (addr), insn, *rd,
-			    *rn, *rm, *imm);
+	{
+	  debug_printf ("decode: 0x%s 0x%x orr x%u, x%u, x%u, #%u\n",
+			core_addr_to_string_nz (addr), insn, *rd, *rn,
+			*rm, *imm);
+	}
       return 1;
     }
   return 0;
@@ -515,9 +525,10 @@ decode_ret (CORE_ADDR addr, uint32_t insn, unsigned *rn)
     {
       *rn = (insn >> 5) & 0x1f;
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x ret x%u\n",
-			    core_addr_to_string_nz (addr), insn, *rn);
+	{
+	  debug_printf ("decode: 0x%s 0x%x ret x%u\n",
+			core_addr_to_string_nz (addr), insn, *rn);
+	}
       return 1;
     }
   return 0;
@@ -549,10 +560,11 @@ decode_stp_offset (CORE_ADDR addr,
       *imm <<= 3;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x stp x%u, x%u, [x%u + #%d]\n",
-			    core_addr_to_string_nz (addr), insn,
-			    *rt1, *rt2, *rn, *imm);
+	{
+	  debug_printf ("decode: 0x%s 0x%x stp x%u, x%u, [x%u + #%d]\n",
+			core_addr_to_string_nz (addr), insn, *rt1, *rt2,
+			*rn, *imm);
+	}
       return 1;
     }
   return 0;
@@ -585,10 +597,11 @@ decode_stp_offset_wb (CORE_ADDR addr,
       *imm <<= 3;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x stp x%u, x%u, [x%u + #%d]!\n",
-			    core_addr_to_string_nz (addr), insn,
-			    *rt1, *rt2, *rn, *imm);
+	{
+	  debug_printf ("decode: 0x%s 0x%x stp x%u, x%u, [x%u + #%d]!\n",
+			core_addr_to_string_nz (addr), insn, *rt1, *rt2,
+			*rn, *imm);
+	}
       return 1;
     }
   return 0;
@@ -618,10 +631,11 @@ decode_stur (CORE_ADDR addr, uint32_t insn, int *is64, unsigned *rt,
       *imm = extract_signed_bitfield (insn, 9, 12);
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x stur %c%u, [x%u + #%d]\n",
-			    core_addr_to_string_nz (addr), insn,
-			    *is64 ? 'x' : 'w', *rt, *rn, *imm);
+	{
+	  debug_printf ("decode: 0x%s 0x%x stur %c%u, [x%u + #%d]\n",
+			core_addr_to_string_nz (addr), insn,
+			*is64 ? 'x' : 'w', *rt, *rn, *imm);
+	}
       return 1;
     }
   return 0;
@@ -652,11 +666,12 @@ decode_tb (CORE_ADDR addr, uint32_t insn, int *is_tbnz, unsigned *bit,
       *imm = extract_signed_bitfield (insn, 14, 5) << 2;
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "decode: 0x%s 0x%x %s x%u, #%u, 0x%s\n",
-			    core_addr_to_string_nz (addr), insn,
-			    *is_tbnz ? "tbnz" : "tbz", *rt, *bit,
-			    core_addr_to_string_nz (addr + *imm));
+	{
+	  debug_printf ("decode: 0x%s 0x%x %s x%u, #%u, 0x%s\n",
+			core_addr_to_string_nz (addr), insn,
+			*is_tbnz ? "tbnz" : "tbz", *rt, *bit,
+			core_addr_to_string_nz (addr + *imm));
+	}
       return 1;
     }
   return 0;
@@ -742,12 +757,11 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  else
 	    {
 	      if (aarch64_debug)
-		fprintf_unfiltered
-		  (gdb_stdlog,
-		   "aarch64: prologue analysis gave up addr=0x%s "
-		   "opcode=0x%x (orr x register)\n",
-		   core_addr_to_string_nz (start),
-		   insn);
+		{
+		  debug_printf ("aarch64: prologue analysis gave up "
+				"addr=0x%s opcode=0x%x (orr x register)\n",
+				core_addr_to_string_nz (start), insn);
+		}
 	      break;
 	    }
 	}
@@ -806,10 +820,11 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       else
 	{
 	  if (aarch64_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"aarch64: prologue analysis gave up addr=0x%s"
-				" opcode=0x%x\n",
-				core_addr_to_string_nz (start), insn);
+	    {
+	      debug_printf ("aarch64: prologue analysis gave up addr=0x%s"
+			    " opcode=0x%x\n",
+			    core_addr_to_string_nz (start), insn);
+	    }
 	  break;
 	}
     }
@@ -1453,10 +1468,11 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 	regval <<= ((X_REGISTER_SIZE - partial_len) * TARGET_CHAR_BIT);
 
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog, "arg %d in %s = 0x%s\n",
-			    info->argnum,
-			    gdbarch_register_name (gdbarch, regnum),
-			    phex (regval, X_REGISTER_SIZE));
+	{
+	  debug_printf ("arg %d in %s = 0x%s\n", info->argnum,
+			gdbarch_register_name (gdbarch, regnum),
+			phex (regval, X_REGISTER_SIZE));
+	}
       regcache_cooked_write_unsigned (regcache, regnum, regval);
       len -= partial_len;
       buf += partial_len;
@@ -1485,9 +1501,10 @@ pass_in_v (struct gdbarch *gdbarch,
 
       regcache_cooked_write (regcache, regnum, buf);
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog, "arg %d in %s\n",
-			    info->argnum,
-			    gdbarch_register_name (gdbarch, regnum));
+	{
+	  debug_printf ("arg %d in %s\n", info->argnum,
+			gdbarch_register_name (gdbarch, regnum));
+	}
       return 1;
     }
   info->nsrn = 8;
@@ -1517,8 +1534,10 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
     align = 16;
 
   if (aarch64_debug)
-    fprintf_unfiltered (gdb_stdlog, "arg %d len=%d @ sp + %d\n",
-			info->argnum, len, info->nsaa);
+    {
+      debug_printf ("arg %d len=%d @ sp + %d\n", info->argnum, len,
+		    info->nsaa);
+    }
 
   item.len = len;
   item.data = buf;
@@ -1653,11 +1672,12 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (struct_return || lang_struct_return)
     {
       if (aarch64_debug)
-	fprintf_unfiltered (gdb_stdlog, "struct return in %s = 0x%s\n",
-			    gdbarch_register_name
-			    (gdbarch,
-			     AARCH64_STRUCT_RETURN_REGNUM),
-			    paddress (gdbarch, struct_addr));
+	{
+	  debug_printf ("struct return in %s = 0x%s\n",
+			gdbarch_register_name (gdbarch,
+					       AARCH64_STRUCT_RETURN_REGNUM),
+			paddress (gdbarch, struct_addr));
+	}
       regcache_cooked_write_unsigned (regcache, AARCH64_STRUCT_RETURN_REGNUM,
 				      struct_addr);
     }
@@ -2062,10 +2082,11 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	  bfd_byte buf[X_REGISTER_SIZE];
 
 	  if (aarch64_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"read HFA return value element %d from %s\n",
-				i + 1,
-				gdbarch_register_name (gdbarch, regno));
+	    {
+	      debug_printf ("read HFA return value element %d from %s\n",
+			    i + 1,
+			    gdbarch_register_name (gdbarch, regno));
+	    }
 	  regcache_cooked_read (regs, regno, buf);
 
 	  memcpy (valbuf, buf, len);
@@ -2190,10 +2211,11 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  bfd_byte tmpbuf[MAX_REGISTER_SIZE];
 
 	  if (aarch64_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"write HFA return value element %d to %s\n",
-				i + 1,
-				gdbarch_register_name (gdbarch, regno));
+	    {
+	      debug_printf ("write HFA return value element %d to %s\n",
+			    i + 1,
+			    gdbarch_register_name (gdbarch, regno));
+	    }
 
 	  memcpy (tmpbuf, valbuf, len);
 	  regcache_cooked_write (regs, regno, tmpbuf);
@@ -2236,7 +2258,7 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
       if (aarch64_return_in_memory (gdbarch, valtype))
 	{
 	  if (aarch64_debug)
-	    fprintf_unfiltered (gdb_stdlog, "return value in memory\n");
+	    debug_printf ("return value in memory\n");
 	  return RETURN_VALUE_STRUCT_CONVENTION;
 	}
     }
@@ -2248,7 +2270,7 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
     aarch64_extract_return_value (valtype, regcache, readbuf);
 
   if (aarch64_debug)
-    fprintf_unfiltered (gdb_stdlog, "return value in registers\n");
+    debug_printf ("return value in registers\n");
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
@@ -3185,10 +3207,7 @@ aarch64_record_asimd_load_store (insn_decode_record *aarch64_insn_r)
   regcache_raw_read_unsigned (aarch64_insn_r->regcache, reg_rn, &address);
 
   if (record_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Process record: Advanced SIMD load/store\n");
-    }
+    debug_printf ("Process record: Advanced SIMD load/store\n");
 
   /* Load/store single structure.  */
   if (bit (aarch64_insn_r->aarch64_insn, 24))
@@ -3362,10 +3381,7 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
   if (insn_bits24_27 == 0x08 && insn_bits28_29 == 0x00)
     {
       if (record_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Process record: load/store exclusive\n");
-	}
+	debug_printf ("Process record: load/store exclusive\n");
 
       if (ld_flag)
 	{
@@ -3400,10 +3416,7 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
   else if ((insn_bits24_27 & 0x0b) == 0x08 && insn_bits28_29 == 0x01)
     {
       if (record_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Process record: load register (literal)\n");
-	}
+	debug_printf ("Process record: load register (literal)\n");
       if (vector_flag)
         record_buf[0] = reg_rt + AARCH64_V0_REGNUM;
       else
@@ -3414,10 +3427,7 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
   else if ((insn_bits24_27 & 0x0a) == 0x08 && insn_bits28_29 == 0x02)
     {
       if (record_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Process record: load/store pair\n");
-	}
+	debug_printf ("Process record: load/store pair\n");
 
       if (ld_flag)
         {
@@ -3478,10 +3488,9 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
 
       if (record_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Process record: load/store (unsigned immediate):"
-			      " size %x V %d opc %x\n", size_bits, vector_flag,
-			      opc);
+	  debug_printf ("Process record: load/store (unsigned immediate):"
+			" size %x V %d opc %x\n", size_bits, vector_flag,
+			opc);
 	}
 
       if (!ld_flag)
@@ -3511,10 +3520,7 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
 	   && insn_bits10_11 == 0x02 && insn_bit21)
     {
       if (record_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Process record: load/store (register offset)\n");
-	}
+	debug_printf ("Process record: load/store (register offset)\n");
       opc = bits (aarch64_insn_r->aarch64_insn, 22, 23);
       if (!(opc >> 1))
         if (opc & 0x01)
@@ -3559,8 +3565,8 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
     {
       if (record_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Process record: load/store (immediate and unprivileged)\n");
+	  debug_printf ("Process record: load/store "
+			"(immediate and unprivileged)\n");
 	}
       opc = bits (aarch64_insn_r->aarch64_insn, 22, 23);
       if (!(opc >> 1))
@@ -3636,10 +3642,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
   insn_bit21 = bit (aarch64_insn_r->aarch64_insn, 21);
 
   if (record_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Process record: data processing SIMD/FP: ");
-    }
+    debug_printf ("Process record: data processing SIMD/FP: ");
 
   if ((insn_bits28_31 & 0x05) == 0x01 && insn_bits24_27 == 0x0e)
     {
@@ -3647,7 +3650,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
       if (!insn_bit21)
 	{
 	  if (record_debug)
-	    fprintf_unfiltered (gdb_stdlog, "FP - fixed point conversion");
+	    debug_printf ("FP - fixed point conversion");
 
 	  if ((opcode >> 1) == 0x0 && rmode == 0x03)
 	    record_buf[0] = reg_rd;
@@ -3658,7 +3661,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
       else if (insn_bits10_11 == 0x01)
 	{
 	  if (record_debug)
-	    fprintf_unfiltered (gdb_stdlog, "FP - conditional compare");
+	    debug_printf ("FP - conditional compare");
 
 	  record_buf[0] = AARCH64_CPSR_REGNUM;
 	}
@@ -3667,7 +3670,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
       else if (insn_bits10_11 == 0x02 || insn_bits10_11 == 0x03)
 	{
 	  if (record_debug)
-	    fprintf_unfiltered (gdb_stdlog, "FP - DP (2-source)");
+	    debug_printf ("FP - DP (2-source)");
 
 	  record_buf[0] = reg_rd + AARCH64_V0_REGNUM;
 	}
@@ -3678,14 +3681,14 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
 	      || (insn_bits12_15 & 0x07) == 0x04)
 	    {
 	      if (record_debug)
-		fprintf_unfiltered (gdb_stdlog, "FP - immediate");
+		debug_printf ("FP - immediate");
 	      record_buf[0] = reg_rd + AARCH64_V0_REGNUM;
 	    }
 	  /* Floating point - compare instructions.  */
 	  else if ((insn_bits12_15 & 0x03) == 0x02)
 	    {
 	      if (record_debug)
-		fprintf_unfiltered (gdb_stdlog, "FP - immediate");
+		debug_printf ("FP - immediate");
 	      record_buf[0] = AARCH64_CPSR_REGNUM;
 	    }
 	  /* Floating point - integer conversions instructions.  */
@@ -3695,7 +3698,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
 	      if (!(opcode >> 1) || ((opcode >> 1) == 0x02 && !rmode))
 		{
 		  if (record_debug)
-		    fprintf_unfiltered (gdb_stdlog, "float to int conversion");
+		    debug_printf ("float to int conversion");
 
 		  record_buf[0] = reg_rd + AARCH64_X0_REGNUM;
 		}
@@ -3703,7 +3706,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
 	      else if ((opcode >> 1) == 0x01 && !rmode)
 		{
 		  if (record_debug)
-		    fprintf_unfiltered (gdb_stdlog, "int to float conversion");
+		    debug_printf ("int to float conversion");
 
 		  record_buf[0] = reg_rd + AARCH64_V0_REGNUM;
 		}
@@ -3711,7 +3714,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
 	      else if ((opcode >> 1) == 0x03)
 		{
 		  if (record_debug)
-		    fprintf_unfiltered (gdb_stdlog, "move float to int");
+		    debug_printf ("move float to int");
 
 		  if (!(opcode & 0x01))
 		    record_buf[0] = reg_rd + AARCH64_X0_REGNUM;
@@ -3730,7 +3733,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
   else if ((insn_bits28_31 & 0x09) == 0x00 && insn_bits24_27 == 0x0e)
     {
       if (record_debug)
-	fprintf_unfiltered (gdb_stdlog, "SIMD copy");
+	debug_printf ("SIMD copy");
 
       /* Advanced SIMD copy instructions.  */
       if (!bits (aarch64_insn_r->aarch64_insn, 21, 23)
@@ -3749,13 +3752,13 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
   else
     {
       if (record_debug)
-	fprintf_unfiltered (gdb_stdlog, "all remain");
+	debug_printf ("all remain");
 
       record_buf[0] = reg_rd + AARCH64_V0_REGNUM;
     }
 
   if (record_debug)
-    fprintf_unfiltered (gdb_stdlog, "\n");
+    debug_printf ("\n");
 
   aarch64_insn_r->reg_rec_count++;
   gdb_assert (aarch64_insn_r->reg_rec_count == 1);

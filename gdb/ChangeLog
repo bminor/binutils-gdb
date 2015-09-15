@@ -1,3 +1,31 @@
+2015-09-15  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (decode_add_sub_imm): Use debug_printf.
+	(decode_adrp): Likewise.
+	(decode_b): Likewise.
+	(decode_bcond): Likewise.
+	(decode_br): Likewise.
+	(decode_cb): Likewise.
+	(decode_eret): Likewise.
+	(decode_movz): Likewise.
+	(decode_orr_shifted_register_x): Likewise.
+	(decode_ret): Likewise.
+	(decode_stp_offset): Likewise.
+	(decode_stp_offset_wb): Likewise.
+	(decode_stur): Likewise.
+	(decode_tb): Likewise.
+	(aarch64_analyze_prologue): Likewise.
+	(pass_in_x): Likewise.
+	(pass_in_v): Likewise.
+	(pass_on_stack): Likewise.
+	(aarch64_push_dummy_call): Likewise.
+	(aarch64_extract_return_value): Likewise.
+	(aarch64_store_return_value): Likewise.
+	(aarch64_return_value): Likewise.
+	(aarch64_record_asimd_load_store): Likewise.
+	(aarch64_record_load_store): Likewise.
+	(aarch64_record_data_proc_simd_fp): Likewise.
+
 2015-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linespec.c (minsym_found): Call gdbarch_skip_entrypoint.
