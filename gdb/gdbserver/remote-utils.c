@@ -1142,7 +1142,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 
 	    sprintf (buf, "T%02xvforkdone:;", signal);
 	  }
-	else if (status->kind == TARGET_WAITKIND_EXECD && multi_process)
+	else if (status->kind == TARGET_WAITKIND_EXECD && report_exec_events)
 	  {
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
 	    const char *event = "exec";

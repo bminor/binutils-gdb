@@ -1,5 +1,11 @@
 2015-09-15  Pedro Alves  <palves@redhat.com>
 
+	* remote-utils.c (prepare_resume_reply) <TARGET_WAITKIND_EXECD>:
+	Check whether to report exec events instead of checking whether
+	multiprocess is enabled.
+
+2015-09-15  Pedro Alves  <palves@redhat.com>
+
 	PR remote/18965
 	* remote-utils.c (prepare_resume_reply): Merge
 	TARGET_WAITKIND_VFORK_DONE switch case with the
