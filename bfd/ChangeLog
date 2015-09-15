@@ -1,3 +1,11 @@
+2015-09-15  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (elf_xtensa_be_plt_entry)
+	(elf_xtensa_le_plt_entry): Emit 'entry' instruction only for
+	windowed ABI.
+	(elf_xtensa_create_plt_entry): Generate 'l32r' offsets and fix
+	up instructions according to ABI.
+
 2015-09-14  Rich Felker  <dalias@libc.org>
 
 	* elf32-sh.c (sh_elf_relocate_section): Set EF_SH_PIC flag
