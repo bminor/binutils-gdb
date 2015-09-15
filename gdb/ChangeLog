@@ -1,3 +1,10 @@
+2015-09-15  Pedro Alves  <palves@redhat.com>
+
+	PR remote/18965
+	* remote-utils.c (prepare_resume_reply): Merge
+	TARGET_WAITKIND_VFORK_DONE switch case with the
+	TARGET_WAITKIND_FORKED case.
+
 2015-09-15  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_can_do_single_step): New
