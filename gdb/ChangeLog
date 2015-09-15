@@ -1,3 +1,8 @@
+2015-09-15  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-typeprint.c (print_array_type): Do not describe arrays as
+	packed when they embed dynamic elements.
+
 2015-09-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* symtab.h (address_class): Document that TLS variables

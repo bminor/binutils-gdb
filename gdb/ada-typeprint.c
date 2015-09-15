@@ -386,6 +386,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 {
   int bitsize;
   int n_indices;
+  struct type *elt_type = NULL;
 
   if (ada_is_constrained_packed_array_type (type))
     type = ada_coerce_to_simple_array_type (type);
@@ -448,11 +449,15 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	fprintf_filtered (stream, "%s<>", i == i0 ? "" : ", ");
     }
 
+  elt_type = ada_array_element_type (type, n_indices);
   fprintf_filtered (stream, ") of ");
   wrap_here ("");
-  ada_print_type (ada_array_element_type (type, n_indices), "", stream,
-		  show == 0 ? 0 : show - 1, level + 1, flags);
-  if (bitsize > 0)
+  ada_print_type (elt_type, "", stream, show == 0 ? 0 : show - 1, level + 1,
+		  flags);
+  /* Arrays with variable-length elements are never bit-packed in practice but
+     compilers have to describe their stride so that we can properly fetch
+     individual elements.  Do not say the array is packed in this case.  */
+  if (bitsize > 0 && !is_dynamic_type (elt_type))
     fprintf_filtered (stream, " <packed: %d-bit elements>", bitsize);
 }
 
