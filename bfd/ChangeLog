@@ -1,3 +1,10 @@
+2015-09-16  Alan Modra  <amodra@gmail.com>
+
+	PR 18867
+	* elflink.c (elf_link_adjust_relocs): Modify insertion sort to
+	insert a run.  Return status in case of malloc failure.
+	Adjust callers.
+
 2015-08-27  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
