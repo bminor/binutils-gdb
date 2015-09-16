@@ -8052,7 +8052,7 @@ ext64b_r_offset (const void *p)
    referenced must be updated.  Update all the relocations found in
    RELDATA.  */
 
-static void
+static bfd_boolean
 elf_link_adjust_relocs (bfd *abfd,
 			struct bfd_elf_section_reloc_data *reldata,
 			bfd_boolean sort)
@@ -8118,7 +8118,7 @@ elf_link_adjust_relocs (bfd *abfd,
       bfd_vma r_off;
       size_t elt_size;
       bfd_byte *base, *end, *p, *loc;
-      bfd_byte buf[sizeof (Elf64_External_Rela)];
+      bfd_byte *buf = NULL;
 
       if (bed->s->arch_size == 32)
 	{
@@ -8141,12 +8141,12 @@ elf_link_adjust_relocs (bfd *abfd,
 	    abort ();
 	}
 
-      /*  Must use a stable sort here.  Insertion sort, since the
-	  relocs are mostly sorted already.  */
+      /*  Must use a stable sort here.  A modified insertion sort,
+	  since the relocs are mostly sorted already.  */
       elt_size = reldata->hdr->sh_entsize;
       base = reldata->hdr->contents;
       end = base + count * elt_size;
-      if (elt_size > sizeof (buf))
+      if (elt_size > sizeof (Elf64_External_Rela))
 	abort ();
 
       /* Ensure the first element is lowest.  This acts as a sentinel,
@@ -8166,12 +8166,13 @@ elf_link_adjust_relocs (bfd *abfd,
 	  /* Don't just swap *base and *loc as that changes the order
 	     of the original base[0] and base[1] if they happen to
 	     have the same r_offset.  */
-	  memcpy (buf, loc, elt_size);
+	  bfd_byte onebuf[sizeof (Elf64_External_Rela)];
+	  memcpy (onebuf, loc, elt_size);
 	  memmove (base + elt_size, base, loc - base);
-	  memcpy (base, buf, elt_size);
+	  memcpy (base, onebuf, elt_size);
 	}
 
-      for (p = base + elt_size; (p += elt_size) < end; )
+      for (p = base + elt_size; p < end; )
 	{
 	  /* base to p is sorted, *p is next to insert.  */
 	  r_off = (*ext_r_off) (p);
@@ -8182,15 +8183,48 @@ elf_link_adjust_relocs (bfd *abfd,
 	  loc += elt_size;
 	  if (loc != p)
 	    {
-	      memcpy (buf, p, elt_size);
-	      memmove (loc + elt_size, loc, p - loc);
-	      memcpy (loc, buf, elt_size);
+	      /* Chances are there is a run of relocs to insert here,
+		 from one of more input files.  Files are not always
+		 linked in order due to the way elf_link_input_bfd is
+		 called.  See pr17666.  */
+	      size_t sortlen = p - loc;
+	      bfd_vma r_off2 = (*ext_r_off) (loc);
+	      size_t runlen = elt_size;
+	      size_t buf_size = 96 * 1024;
+	      while (p + runlen < end
+		     && (sortlen <= buf_size
+			 || runlen + elt_size <= buf_size)
+		     && r_off2 > (*ext_r_off) (p + runlen))
+		runlen += elt_size;
+	      if (buf == NULL)
+		{
+		  buf = bfd_malloc (buf_size);
+		  if (buf == NULL)
+		    return FALSE;
+		}
+	      if (runlen < sortlen)
+		{
+		  memcpy (buf, p, runlen);
+		  memmove (loc + runlen, loc, sortlen);
+		  memcpy (loc, buf, runlen);
+		}
+	      else
+		{
+		  memcpy (buf, loc, sortlen);
+		  memmove (loc, p, runlen);
+		  memcpy (loc + runlen, buf, sortlen);
+		}
+	      p += runlen;
 	    }
+	  else
+	    p += elt_size;
 	}
       /* Hashes are no longer valid.  */
       free (reldata->hashes);
       reldata->hashes = NULL;
+      free (buf);
     }
+  return TRUE;
 }
 
 struct elf_link_sort_rela
@@ -11337,10 +11371,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	continue;
 
       sort = bed->sort_relocs_p == NULL || (*bed->sort_relocs_p) (o);
-      if (esdo->rel.hdr != NULL)
-	elf_link_adjust_relocs (abfd, &esdo->rel, sort);
-      if (esdo->rela.hdr != NULL)
-	elf_link_adjust_relocs (abfd, &esdo->rela, sort);
+      if (esdo->rel.hdr != NULL
+	  && !elf_link_adjust_relocs (abfd, &esdo->rel, sort))
+	return FALSE;
+      if (esdo->rela.hdr != NULL
+	  && !elf_link_adjust_relocs (abfd, &esdo->rela, sort))
+	return FALSE;
 
       /* Set the reloc_count field to 0 to prevent write_relocs from
 	 trying to swap the relocs out itself.  */
