@@ -98,6 +98,29 @@ proc restart {} {
     delete_breakpoints
 }
 
+# Run command and wait for the prompt, without end anchor.
+
+proc gdb_test_no_anchor {cmd} {
+    global gdb_prompt
+
+    gdb_test_multiple $cmd $cmd {
+	-re "$gdb_prompt " {
+	    pass $cmd
+	}
+    }
+}
+
+# Enable/disable debugging.
+
+proc enable_debug {enable} {
+
+    # Comment out to debug problems with the test.
+    return
+
+    gdb_test_no_anchor "set debug infrun $enable"
+    gdb_test_no_anchor "set debug displaced $enable"
+}
+
 # The test proper.  SIGNAL_THREAD is the thread that has been elected
 # to receive the SIGUSR1 signal.
 
@@ -126,30 +149,55 @@ proc test {signal_thread} {
 
 	# Let the main thread queue the signal.
 	gdb_breakpoint "loop_broke"
+
+	enable_debug 1
+
+	set saw_continuing 0
 	set test "continue &"
 	gdb_test_multiple $test $test {
-	    -re "Continuing.\r\n$gdb_prompt " {
-		pass $test
+	    -re "Continuing.\r\n" {
+		set saw_continuing 1
+		exp_continue
+	    }
+	    -re "$gdb_prompt " {
+		gdb_assert $saw_continuing $test
+	    }
+	    -re "infrun:" {
+		exp_continue
 	    }
 	}
+
+	set gotit 0
 
 	# Wait for all threads to finish their steps, and for the main
 	# thread to hit the breakpoint.
 	for {set i 1} { $i <= $NUM_THREADS } { incr i } {
 	    set test "thread $i broke out of loop"
+	    set gotit 0
 	    gdb_test_multiple "" $test {
 		-re "loop_broke" {
 		    # The prompt was already matched in the "continue
 		    # &" test above.  We're now consuming asynchronous
 		    # output that comes after the prompt.
+		    set gotit 1
 		    pass $test
 		}
+		-re "infrun:" {
+		    exp_continue
+		}
+	    }
+	    if {!$gotit} {
+		break
 	    }
 	}
+
+	enable_debug 0
 
 	# It's helpful to have this in the log if the test ever
 	# happens to fail.
 	gdb_test "info threads"
+
+	return $gotit
     }
 }
 
@@ -158,5 +206,8 @@ proc test {signal_thread} {
 # with lowest kernel thread ID.  So test once with the signal pending
 # in each thread, except the main thread.
 for {set i 2} { $i <= $NUM_THREADS } { incr i } {
-    test $i
+    if {![test $i]} {
+	# Avoid cascading timeouts, and bail out.
+	return
+    }
 }

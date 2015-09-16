@@ -1,3 +1,10 @@
+2015-09-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/non-stop-fair-events.exp (gdb_test_no_anchor)
+	(enable_debug): New procedures.
+	(test): Use them.  Bail out if waiting for threads fails.
+	(top level): Bail out if a test fails.
+
 2015-09-16  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.asm/asm-source.exp: Set asm-arch for
