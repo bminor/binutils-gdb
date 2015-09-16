@@ -1,3 +1,8 @@
+2015-09-16  Wei-cheng Wang  <cole945@gmail.com>
+
+	* tracepoint.c (eval_result_type): Change prototype.
+	(condition_true_at_tracepoint): Fix argument to compiled_cond.
+
 2015-09-15  Pedro Alves  <palves@redhat.com>
 
 	* remote-utils.c (prepare_resume_reply) <TARGET_WAITKIND_EXECD>:
