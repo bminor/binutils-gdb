@@ -1888,32 +1888,17 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
 		      enum gdb_signal signal)
 {
   struct thread_info *tp;
-  enum btrace_thread_flag flag;
-  ptid_t orig_ptid;
+  enum btrace_thread_flag flag, cflag;
 
   DEBUG ("resume %s: %s%s", target_pid_to_str (ptid),
 	 execution_direction == EXEC_REVERSE ? "reverse-" : "",
 	 step ? "step" : "cont");
-
-  orig_ptid = ptid;
 
   /* Store the execution direction of the last resume.
 
      If there is more than one to_resume call, we have to rely on infrun
      to not change the execution direction in-between.  */
   record_btrace_resume_exec_dir = execution_direction;
-
-  /* For all-stop targets we pick the current thread when asked to resume an
-     entire process or everything.  */
-  if (!target_is_non_stop_p ())
-    {
-      if (ptid_equal (minus_one_ptid, ptid) || ptid_is_pid (ptid))
-	ptid = inferior_ptid;
-
-      tp = find_thread_ptid (ptid);
-      if (tp == NULL)
-	error (_("Cannot find thread to resume."));
-    }
 
   /* As long as we're not replaying, just forward the request.
 
@@ -1924,20 +1909,44 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
       && !record_btrace_is_replaying (ops, minus_one_ptid))
     {
       ops = ops->beneath;
-      return ops->to_resume (ops, orig_ptid, step, signal);
+      return ops->to_resume (ops, ptid, step, signal);
     }
 
   /* Compute the btrace thread flag for the requested move.  */
-  if (step == 0)
-    flag = execution_direction == EXEC_REVERSE ? BTHR_RCONT : BTHR_CONT;
+  if (execution_direction == EXEC_REVERSE)
+    {
+      flag = step == 0 ? BTHR_RCONT : BTHR_RSTEP;
+      cflag = BTHR_RCONT;
+    }
   else
-    flag = execution_direction == EXEC_REVERSE ? BTHR_RSTEP : BTHR_STEP;
+    {
+      flag = step == 0 ? BTHR_CONT : BTHR_STEP;
+      cflag = BTHR_CONT;
+    }
 
   /* We just indicate the resume intent here.  The actual stepping happens in
-     record_btrace_wait below.  */
-  ALL_NON_EXITED_THREADS (tp)
-    if (ptid_match (tp->ptid, ptid))
-      record_btrace_resume_thread (tp, flag);
+     record_btrace_wait below.
+
+     For all-stop targets, we only step INFERIOR_PTID and continue others.  */
+  if (!target_is_non_stop_p ())
+    {
+      gdb_assert (ptid_match (inferior_ptid, ptid));
+
+      ALL_NON_EXITED_THREADS (tp)
+	if (ptid_match (tp->ptid, ptid))
+	  {
+	    if (ptid_match (tp->ptid, inferior_ptid))
+	      record_btrace_resume_thread (tp, flag);
+	    else
+	      record_btrace_resume_thread (tp, cflag);
+	  }
+    }
+  else
+    {
+      ALL_NON_EXITED_THREADS (tp)
+	if (ptid_match (tp->ptid, ptid))
+	  record_btrace_resume_thread (tp, flag);
+    }
 
   /* Async support.  */
   if (target_can_async_p ())

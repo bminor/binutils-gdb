@@ -1,5 +1,10 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/multi-thread-step.exp: Test scheduler-locking on, step,
+	and replay.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/non-stop.c: New.
 	* gdb.btrace/non-stop.exp: New.
 

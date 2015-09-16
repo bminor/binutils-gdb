@@ -1,5 +1,9 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_resume): Honour scheduler-locking.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* NEWS: Announce new scheduler-locking mode.
 	* infrun.c (schedlock_replay): New.
 	(scheduler_enums): Add schedlock_replay.
