@@ -1,4 +1,15 @@
 2015-09-16  Pedro Alves  <palves@redhat.com>
+	    Sandra Loosemore <sandra@codesourcery.com>
+
+	* gdb.threads/non-stop-fair-events.c (timeout): New global.
+	(SECONDS): Redefine.
+	(main): Call pthread_kill and alarm early.
+	* gdb.threads/non-stop-fair-events.exp: Probe displaced stepping
+	support.
+	(test): If the target can't hardware step and doesn't support
+	displaced stepping, increase the timeout.
+
+2015-09-16  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/non-stop-fair-events.exp (gdb_test_no_anchor)
 	(enable_debug): New procedures.

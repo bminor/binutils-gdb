@@ -2150,15 +2150,10 @@ proc supports_get_siginfo_type {} {
     }
 }
 
-# Return 1 if target hardware or OS supports single stepping to signal
-# handler, otherwise, return 0.
+# Return 1 if the target supports hardware single stepping.
 
-proc can_single_step_to_signal_handler {} {
+proc can_hardware_single_step {} {
 
-    # Targets don't have hardware single step.  On these targets, when
-    # a signal is delivered during software single step, gdb is unable
-    # to determine the next instruction addresses, because start of signal
-    # handler is one of them.
     if { [istarget "arm*-*-*"] || [istarget "mips*-*-*"]
 	 || [istarget "tic6x-*-*"] || [istarget "sparc*-*-linux*"]
 	 || [istarget "nios2-*-*"] } {
@@ -2166,6 +2161,17 @@ proc can_single_step_to_signal_handler {} {
     }
 
     return 1
+}
+
+# Return 1 if target hardware or OS supports single stepping to signal
+# handler, otherwise, return 0.
+
+proc can_single_step_to_signal_handler {} {
+    # Targets don't have hardware single step.  On these targets, when
+    # a signal is delivered during software single step, gdb is unable
+    # to determine the next instruction addresses, because start of signal
+    # handler is one of them.
+    return [can_hardware_single_step]
 }
 
 # Return 1 if target supports process record, otherwise return 0.
