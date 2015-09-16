@@ -1,3 +1,9 @@
+2015-09-16  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.asm/asm-source.exp: Set asm-arch for
+	aarch64*-*-* target.
+	* gdb.asm/aarch64.inc: New file.
+
 2015-09-15  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/array_of_variable_length.exp: New testcase.

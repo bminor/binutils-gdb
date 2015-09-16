@@ -40,6 +40,9 @@ switch -glob -- [istarget] {
     "arm*-*-*" {
         set asm-arch arm
     }
+    "aarch64*-*-*" {
+	set asm-arch aarch64
+    }
     "bfin-*-*" {
         set asm-arch bfin
     }
