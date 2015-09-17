@@ -1,3 +1,9 @@
+2015-09-17  Pierre Langlois  <pierre.langlois@arm.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.trace/trace-condition.c: New file.
+	* gdb.trace/trace-condition.exp: New file.
+
 2015-09-16  Wei-cheng Wang  <cole945@gmail.com>
 
 	* gdb.trace/ftrace.exp: (test_ftrace_condition) New function
