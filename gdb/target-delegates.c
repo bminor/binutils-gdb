@@ -3630,6 +3630,37 @@ debug_record_is_replaying (struct target_ops *self, ptid_t arg1)
   return result;
 }
 
+static int
+delegate_record_will_replay (struct target_ops *self, ptid_t arg1, int arg2)
+{
+  self = self->beneath;
+  return self->to_record_will_replay (self, arg1, arg2);
+}
+
+static int
+tdefault_record_will_replay (struct target_ops *self, ptid_t arg1, int arg2)
+{
+  return 0;
+}
+
+static int
+debug_record_will_replay (struct target_ops *self, ptid_t arg1, int arg2)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_record_will_replay (...)\n", debug_target.to_shortname);
+  result = debug_target.to_record_will_replay (&debug_target, arg1, arg2);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_record_will_replay (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_ptid_t (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_int (arg2);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
 static void
 delegate_record_stop_replaying (struct target_ops *self)
 {
@@ -4289,6 +4320,8 @@ install_delegators (struct target_ops *ops)
     ops->to_delete_record = delegate_delete_record;
   if (ops->to_record_is_replaying == NULL)
     ops->to_record_is_replaying = delegate_record_is_replaying;
+  if (ops->to_record_will_replay == NULL)
+    ops->to_record_will_replay = delegate_record_will_replay;
   if (ops->to_record_stop_replaying == NULL)
     ops->to_record_stop_replaying = delegate_record_stop_replaying;
   if (ops->to_goto_record_begin == NULL)
@@ -4458,6 +4491,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_save_record = tdefault_save_record;
   ops->to_delete_record = tdefault_delete_record;
   ops->to_record_is_replaying = tdefault_record_is_replaying;
+  ops->to_record_will_replay = tdefault_record_will_replay;
   ops->to_record_stop_replaying = tdefault_record_stop_replaying;
   ops->to_goto_record_begin = tdefault_goto_record_begin;
   ops->to_goto_record_end = tdefault_goto_record_end;
@@ -4612,6 +4646,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_save_record = debug_save_record;
   ops->to_delete_record = debug_delete_record;
   ops->to_record_is_replaying = debug_record_is_replaying;
+  ops->to_record_will_replay = debug_record_will_replay;
   ops->to_record_stop_replaying = debug_record_stop_replaying;
   ops->to_goto_record_begin = debug_goto_record_begin;
   ops->to_goto_record_end = debug_goto_record_end;

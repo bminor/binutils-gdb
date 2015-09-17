@@ -1147,6 +1147,14 @@ record_btrace_is_replaying (struct target_ops *self, ptid_t ptid)
   return 0;
 }
 
+/* The to_record_will_replay method of target record-btrace.  */
+
+static int
+record_btrace_will_replay (struct target_ops *self, ptid_t ptid, int dir)
+{
+  return dir == EXEC_REVERSE || record_btrace_is_replaying (self, ptid);
+}
+
 /* The to_xfer_partial method of target record-btrace.  */
 
 static enum target_xfer_status
@@ -2657,6 +2665,7 @@ init_record_btrace_ops (void)
   ops->to_call_history_from = record_btrace_call_history_from;
   ops->to_call_history_range = record_btrace_call_history_range;
   ops->to_record_is_replaying = record_btrace_is_replaying;
+  ops->to_record_will_replay = record_btrace_will_replay;
   ops->to_record_stop_replaying = record_btrace_stop_replaying_all;
   ops->to_xfer_partial = record_btrace_xfer_partial;
   ops->to_remove_breakpoint = record_btrace_remove_breakpoint;

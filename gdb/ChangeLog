@@ -1,5 +1,16 @@
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c ((record_btrace_will_replay): New.
+	(init_record_btrace_ops): Initialize to_record_will_replay.
+	* record-full.c ((record_full_will_replay): New.
+	(init_record_full_ops): Initialize to_record_will_replay.
+	* target-delegates.c: Regenerated.
+	* target.c (target_record_will_replay): New.
+	* target.h (struct target_ops) <to_record_will_replay>: New.
+	(target_record_will_replay): New.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_resume): Call
 	target_record_stop_replaying.
 	(record_btrace_stop_replaying_all): New.

@@ -1157,6 +1157,11 @@ struct target_ops
     int (*to_record_is_replaying) (struct target_ops *, ptid_t ptid)
       TARGET_DEFAULT_RETURN (0);
 
+    /* Query if the record target will replay PTID if it were resumed in
+       execution direction DIR.  */
+    int (*to_record_will_replay) (struct target_ops *, ptid_t ptid, int dir)
+      TARGET_DEFAULT_RETURN (0);
+
     /* Stop replaying.  */
     void (*to_record_stop_replaying) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
@@ -2445,6 +2450,9 @@ extern void target_delete_record (void);
 
 /* See to_record_is_replaying in struct target_ops.  */
 extern int target_record_is_replaying (ptid_t ptid);
+
+/* See to_record_will_replay in struct target_ops.  */
+extern int target_record_will_replay (ptid_t ptid, int dir);
 
 /* See to_record_stop_replaying in struct target_ops.  */
 extern void target_record_stop_replaying (void);

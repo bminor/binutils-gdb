@@ -3663,6 +3663,14 @@ target_record_is_replaying (ptid_t ptid)
 
 /* See target.h.  */
 
+int
+target_record_will_replay (ptid_t ptid, int dir)
+{
+  return current_target.to_record_will_replay (&current_target, ptid, dir);
+}
+
+/* See target.h.  */
+
 void
 target_record_stop_replaying (void)
 {
