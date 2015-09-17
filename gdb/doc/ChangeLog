@@ -1,3 +1,22 @@
+2015-09-15  Pedro Alves  <palves@redhat.com>
+
+	PR remote/18965
+	* gdb.texinfo (Stop Reply Packets): Revert previous change to
+	the vforkdone description.
+
+2015-09-15  Pedro Alves  <palves@redhat.com>
+
+	PR remote/18965
+	* gdb.texinfo (Stop Reply Packets): Explain that vforkdone's 'r'
+	part indicates the thread ID of the parent process.
+
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (General Query Packets): Add vContSupported to
+	tables of 'gdbfeatures' and 'stub features' supported in the
+	qSupported packet, as well as to the list containing stub
+	feature details.
+
 2015-09-11  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.texinfo (Remote Configuration): Add exec event

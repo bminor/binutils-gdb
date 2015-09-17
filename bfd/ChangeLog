@@ -1,3 +1,24 @@
+2015-09-16  Alan Modra  <amodra@gmail.com>
+
+	PR 18867
+	* elflink.c (elf_link_adjust_relocs): Modify insertion sort to
+	insert a run.  Return status in case of malloc failure.
+	Adjust callers.
+
+2015-09-15  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (elf_xtensa_be_plt_entry)
+	(elf_xtensa_le_plt_entry): Emit 'entry' instruction only for
+	windowed ABI.
+	(elf_xtensa_create_plt_entry): Generate 'l32r' offsets and fix
+	up instructions according to ABI.
+
+2015-09-14  Rich Felker  <dalias@libc.org>
+
+	* elf32-sh.c (sh_elf_relocate_section): Set EF_SH_PIC flag
+	instead of clearing it on cross-section relocations.
+	(sh_elf_merge_private_data): Clear EF_SH_PIC flag by default.
+
 2015-09-12  Helge Deller  <deller@gmx.de>
 
 	PR ld/18514

@@ -1117,6 +1117,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     case TARGET_WAITKIND_STOPPED:
     case TARGET_WAITKIND_FORKED:
     case TARGET_WAITKIND_VFORKED:
+    case TARGET_WAITKIND_VFORK_DONE:
     case TARGET_WAITKIND_EXECD:
       {
 	struct thread_info *saved_thread;
@@ -1135,7 +1136,13 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    buf = write_ptid (buf, status->value.related_pid);
 	    strcat (buf, ";");
 	  }
-	else if (status->kind == TARGET_WAITKIND_EXECD && multi_process)
+	else if (status->kind == TARGET_WAITKIND_VFORK_DONE && report_vfork_events)
+	  {
+	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
+
+	    sprintf (buf, "T%02xvforkdone:;", signal);
+	  }
+	else if (status->kind == TARGET_WAITKIND_EXECD && report_exec_events)
 	  {
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
 	    const char *event = "exec";
@@ -1268,16 +1275,6 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 		 status->value.sig, ptid_get_pid (ptid));
       else
 	sprintf (buf, "X%02x", status->value.sig);
-      break;
-    case TARGET_WAITKIND_VFORK_DONE:
-      if (report_vfork_events)
-	{
-	  enum gdb_signal signal = GDB_SIGNAL_TRAP;
-
-	  sprintf (buf, "T%02xvforkdone:;", signal);
-	}
-      else
-	sprintf (buf, "T%02x", GDB_SIGNAL_0);
       break;
     default:
       error ("unhandled waitkind");

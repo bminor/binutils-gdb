@@ -739,14 +739,17 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 
 	if (msym == NULL)
 	  error (_("No global symbol \"%s\"."), SYMBOL_LINKAGE_NAME (var));
-	if (overlay_debugging)
-	  addr = symbol_overlayed_address (BMSYMBOL_VALUE_ADDRESS (lookup_data.result),
-					   MSYMBOL_OBJ_SECTION (lookup_data.result.objfile,
-								msym));
-	else
-	  addr = BMSYMBOL_VALUE_ADDRESS (lookup_data.result);
-
 	obj_section = MSYMBOL_OBJ_SECTION (lookup_data.result.objfile, msym);
+	/* Relocate address, unless there is no section or the variable is
+	   a TLS variable. */
+	if (obj_section == NULL
+	    || (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
+	   addr = MSYMBOL_VALUE_RAW_ADDRESS (msym);
+	else
+	   addr = BMSYMBOL_VALUE_ADDRESS (lookup_data.result);
+	if (overlay_debugging)
+	  addr = symbol_overlayed_address (addr, obj_section);
+	/* Determine address of TLS variable. */
 	if (obj_section
 	    && (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
 	  addr = target_translate_tls_address (obj_section->objfile, addr);

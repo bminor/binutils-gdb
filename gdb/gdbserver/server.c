@@ -64,6 +64,11 @@ int non_stop;
 int swbreak_feature;
 int hwbreak_feature;
 
+/* True if the "vContSupported" feature is active.  In that case, GDB
+   wants us to report whether single step is supported in the reply to
+   "vCont?" packet.  */
+static int vCont_supported;
+
 /* Whether we should attempt to disable the operating system's address
    space randomization feature before starting an inferior.  */
 int disable_randomization = 1;
@@ -2112,12 +2117,14 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		  if (target_supports_vfork_events ())
 		    report_vfork_events = 1;
 		}
-	      if (strcmp (p, "exec-events+") == 0)
+	      else if (strcmp (p, "exec-events+") == 0)
 		{
 		  /* GDB supports and wants exec events if possible.  */
 		  if (target_supports_exec_events ())
 		    report_exec_events = 1;
 		}
+	      else if (strcmp (p, "vContSupported+") == 0)
+		vCont_supported = 1;
 	      else
 		target_process_qsupported (p);
 
@@ -2202,9 +2209,15 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";tracenz+");
 	}
 
-      /* Support target-side breakpoint conditions and commands.  */
-      if (target_supports_conditional_breakpoints ())
-	strcat (own_buf, ";ConditionalBreakpoints+");
+      if (target_supports_hardware_single_step ())
+	{
+	  /* Support target-side breakpoint conditions and commands.
+	     GDBserver needs to step over the breakpoint if the condition
+	     is false.  GDBserver software single step is too simple, so
+	     disable conditional breakpoints if the target doesn't have
+	     hardware single step.  */
+	  strcat (own_buf, ";ConditionalBreakpoints+");
+	}
       strcat (own_buf, ";BreakpointCommands+");
 
       if (target_supports_agent ())
@@ -2220,6 +2233,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (the_target->pid_to_exec_file != NULL)
 	strcat (own_buf, ";qXfer:exec-file:read+");
+
+      strcat (own_buf, ";vContSupported+");
 
       /* Reinitialize components as needed for the new connection.  */
       hostio_handle_new_gdb_connection ();
@@ -2819,7 +2834,18 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 
       if (startswith (own_buf, "vCont?"))
 	{
-	  strcpy (own_buf, "vCont;c;C;s;S;t");
+	  strcpy (own_buf, "vCont;c;C;t");
+
+	  if (target_supports_hardware_single_step () || !vCont_supported)
+	    {
+	      /* If target supports hardware single step, add actions s
+		 and S to the list of supported actions.  On the other
+		 hand, if GDB doesn't request the supported vCont actions
+		 in qSupported packet, add s and S to the list too.  */
+	      own_buf = own_buf + strlen (own_buf);
+	      strcpy (own_buf, ";s;S");
+	    }
+
 	  if (target_supports_range_stepping ())
 	    {
 	      own_buf = own_buf + strlen (own_buf);
@@ -3560,6 +3586,7 @@ captured_main (int argc, char *argv[])
       cont_thread = null_ptid;
       swbreak_feature = 0;
       hwbreak_feature = 0;
+      vCont_supported = 0;
 
       remote_open (port);
 

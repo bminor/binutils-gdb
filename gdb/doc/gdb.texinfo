@@ -36132,6 +36132,10 @@ This feature indicates whether @value{GDBN} supports exec event
 extensions to the remote protocol.  @value{GDBN} does not use such
 extensions unless the stub also reports that it supports them by
 including @samp{exec-events+} in its @samp{qSupported} reply.
+
+@item vContSupported
+This feature indicates whether @value{GDBN} wants to know the
+supported actions in the reply to @samp{vCont?} packet.
 @end table
 
 Stubs should ignore any unknown values for
@@ -36607,6 +36611,10 @@ and vforkdone events.
 
 @item exec-events
 The remote stub reports the @samp{exec} stop reason for exec events.
+
+@item vContSupported
+The remote stub reports the supported actions in the reply to
+@samp{vCont?} packet.
 
 @end table
 

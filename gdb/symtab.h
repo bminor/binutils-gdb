@@ -584,7 +584,13 @@ enum address_class
      not find it in the full symbol table.  But a reference to an external
      symbol in a local block shadowing other definition requires full symbol
      without possibly having its address available for LOC_STATIC.  Testcase
-     is provided as `gdb.dwarf2/dw2-unresolved.exp'.  */
+     is provided as `gdb.dwarf2/dw2-unresolved.exp'.
+
+     This is also used for thread local storage (TLS) variables.  In this case,
+     the address of the TLS variable must be determined when the variable is
+     referenced, from the MSYMBOL_VALUE_RAW_ADDRESS, which is the offset
+     of the TLS variable in the thread local storage of the shared
+     library/object.  */
 
   LOC_UNRESOLVED,
 

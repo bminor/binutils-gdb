@@ -1810,10 +1810,7 @@ static struct target_ops win32_target_ops = {
   NULL, /* supports_stopped_by_sw_breakpoint */
   NULL, /* stopped_by_hw_breakpoint */
   NULL, /* supports_stopped_by_hw_breakpoint */
-  /* Although win32-i386 has hardware single step, still disable this
-     feature for win32, because it is implemented in linux-low.c instead
-     of in generic code.  */
-  NULL, /* supports_conditional_breakpoints */
+  target_can_do_hardware_single_step,
   win32_stopped_by_watchpoint,
   win32_stopped_data_address,
   NULL, /* read_offsets */

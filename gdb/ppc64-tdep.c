@@ -454,8 +454,8 @@ ppc64_standard_linkage4_target (struct frame_info *frame,
    When the execution direction is EXEC_REVERSE, scan backward to
    check whether we are in the middle of a PLT stub.  */
 
-CORE_ADDR
-ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+static CORE_ADDR
+ppc64_skip_trampoline_code_1 (struct frame_info *frame, CORE_ADDR pc)
 {
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
   unsigned int insns[MAX (MAX (MAX (ARRAY_SIZE (ppc64_standard_linkage1),
@@ -528,6 +528,20 @@ ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   }
 
   return 0;
+}
+
+/* Wrapper of ppc64_skip_trampoline_code_1 checking also
+   ppc_elfv2_skip_entrypoint.  */
+
+CORE_ADDR
+ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+
+  pc = ppc64_skip_trampoline_code_1 (frame, pc);
+  if (pc != 0 && gdbarch_skip_entrypoint_p (gdbarch))
+    pc = gdbarch_skip_entrypoint (gdbarch, pc);
+  return pc;
 }
 
 /* Support for convert_from_func_ptr_addr (ARCH, ADDR, TARG) on PPC64

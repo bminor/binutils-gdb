@@ -216,3 +216,11 @@ kill_inferior (int pid)
 
   return (*the_target->kill) (pid);
 }
+
+/* Target can do hardware single step.  */
+
+int
+target_can_do_hardware_single_step (void)
+{
+  return 1;
+}

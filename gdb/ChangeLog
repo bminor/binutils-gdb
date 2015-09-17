@@ -1,3 +1,90 @@
+2015-09-15  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-typeprint.c (print_array_type): Do not describe arrays as
+	packed when they embed dynamic elements.
+
+2015-09-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* symtab.h (address_class): Document that TLS variables
+	are handled by LOC_UNRESOLVED.
+	* findvar.c (default_read_var_value): Don't relocate TLS variables.
+	* printcmd.c (address_info): Don't relocate TLS variables.
+
+2015-09-15  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (decode_add_sub_imm): Use debug_printf.
+	(decode_adrp): Likewise.
+	(decode_b): Likewise.
+	(decode_bcond): Likewise.
+	(decode_br): Likewise.
+	(decode_cb): Likewise.
+	(decode_eret): Likewise.
+	(decode_movz): Likewise.
+	(decode_orr_shifted_register_x): Likewise.
+	(decode_ret): Likewise.
+	(decode_stp_offset): Likewise.
+	(decode_stp_offset_wb): Likewise.
+	(decode_stur): Likewise.
+	(decode_tb): Likewise.
+	(aarch64_analyze_prologue): Likewise.
+	(pass_in_x): Likewise.
+	(pass_in_v): Likewise.
+	(pass_on_stack): Likewise.
+	(aarch64_push_dummy_call): Likewise.
+	(aarch64_extract_return_value): Likewise.
+	(aarch64_store_return_value): Likewise.
+	(aarch64_return_value): Likewise.
+	(aarch64_record_asimd_load_store): Likewise.
+	(aarch64_record_load_store): Likewise.
+	(aarch64_record_data_proc_simd_fp): Likewise.
+
+2015-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linespec.c (minsym_found): Call gdbarch_skip_entrypoint.
+	* ppc64-tdep.c (ppc64_skip_trampoline_code): Rename to ...
+	(ppc64_skip_trampoline_code_1): ... here.
+	(ppc64_skip_trampoline_code): New wrapper function.
+	* symtab.c (find_function_start_sal): Call gdbarch_skip_entrypoint.
+
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_can_do_single_step): New
+	function.
+	(_initialize_aarch64_linux_nat): Install it to to_can_do_single_step.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Return 0
+	if target_can_do_single_step returns 1.
+	* remote.c (struct vCont_action_support) <s, S>: New fields.
+	(PACKET_vContSupported): New enum.
+	(remote_protocol_features): New element for vContSupported.
+	(remote_query_supported): Append "vContSupported+".
+	(remote_vcont_probe): Remove support_s and support_S, use
+	rs->supports_vCont.s and rs->supports_vCont.S instead.  Disable
+	vCont packet if c and C actions are not supported.
+	(remote_can_do_single_step): New function.
+	(init_remote_ops): Install it to to_can_do_single_step.
+	(_initialize_remote): Call add_packet_config_cmd.
+	* target.h (struct target_ops) <to_can_do_single_step>: New field.
+	(target_can_do_single_step): New macro.
+	* target-delegates.c: Re-generated.
+
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_siginfo_fixup): New function.
+	(_initialize_aarch64_linux_nat): Call linux_nat_set_siginfo_fixup.
+	* nat/aarch64-linux.c (aarch64_compat_siginfo_from_siginfo):
+	New function.
+	(aarch64_siginfo_from_compat_siginfo): New function.
+	* nat/aarch64-linux.h: Include signal.h.
+	(compat_int_t, compat_uptr_t, compat_time_t): Typedef.
+	(compat_timer_t, compat_clock_t): Likewise.
+	(struct compat_timeval): New.
+	(union compat_sigval): New.
+	(struct compat_siginfo): New.
+	(cpt_si_pid, cpt_si_uid, cpt_si_timerid): New macros.
+	(cpt_si_overrun, cpt_si_status, cpt_si_utime): Likewise.
+	(cpt_si_stime, cpt_si_ptr, cpt_si_addr): Likewise.
+	(cpt_si_band, cpt_si_fd): Likewise.
+
 2015-09-14  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (current_stop_id): New global.

@@ -1,3 +1,67 @@
+2015-09-17  Pierre Langlois  <pierre.langlois@arm.com>
+	    Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.trace/trace-condition.c: New file.
+	* gdb.trace/trace-condition.exp: New file.
+
+2015-09-16  Wei-cheng Wang  <cole945@gmail.com>
+
+	* gdb.trace/ftrace.exp: (test_ftrace_condition) New function
+	for testing bytecode compilation.
+
+2015-09-16  Pedro Alves  <palves@redhat.com>
+	    Sandra Loosemore <sandra@codesourcery.com>
+
+	* gdb.threads/non-stop-fair-events.c (timeout): New global.
+	(SECONDS): Redefine.
+	(main): Call pthread_kill and alarm early.
+	* gdb.threads/non-stop-fair-events.exp: Probe displaced stepping
+	support.
+	(test): If the target can't hardware step and doesn't support
+	displaced stepping, increase the timeout.
+
+2015-09-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/non-stop-fair-events.exp (gdb_test_no_anchor)
+	(enable_debug): New procedures.
+	(test): Use them.  Bail out if waiting for threads fails.
+	(top level): Bail out if a test fails.
+
+2015-09-16  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.asm/asm-source.exp: Set asm-arch for
+	aarch64*-*-* target.
+	* gdb.asm/aarch64.inc: New file.
+
+2015-09-15  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/array_of_variable_length.exp: New testcase.
+	* gdb.ada/array_of_variable_length/foo.adb: New file.
+	* gdb.ada/array_of_variable_length/pck.adb: New file.
+	* gdb.ada/array_of_variable_length/pck.ads: New file.
+
+2015-09-15  Doug Evans  <dje@google.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): Handle clang naming
+	of function static local variable.
+
+2015-09-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.threads/tls-so_extern.exp: New test file.
+	* gdb.threads/tls-so_extern.c: New test file.
+	* gdb.threads/tls-so_extern_main.c: New test file.
+
+2015-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.opt/solib-intra-step-lib.c: New file.
+	* gdb.opt/solib-intra-step-main.c: New file.
+	* gdb.opt/solib-intra-step.exp: New file.
+
+2015-09-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/non-ldr-exc-3.exp (do_test): Use
+	gdb_continue_to_breakpoint instead of gdb_test_multiple.
+
 2015-09-14  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/hook-stop-continue.c: Delete.

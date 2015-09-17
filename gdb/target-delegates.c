@@ -826,6 +826,33 @@ debug_masked_watch_num_registers (struct target_ops *self, CORE_ADDR arg1, CORE_
   return result;
 }
 
+static int
+delegate_can_do_single_step (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_can_do_single_step (self);
+}
+
+static int
+tdefault_can_do_single_step (struct target_ops *self)
+{
+  return -1;
+}
+
+static int
+debug_can_do_single_step (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_can_do_single_step (...)\n", debug_target.to_shortname);
+  result = debug_target.to_can_do_single_step (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_can_do_single_step (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
 static void
 delegate_terminal_init (struct target_ops *self)
 {
@@ -4028,6 +4055,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_accel_watchpoint_condition = delegate_can_accel_watchpoint_condition;
   if (ops->to_masked_watch_num_registers == NULL)
     ops->to_masked_watch_num_registers = delegate_masked_watch_num_registers;
+  if (ops->to_can_do_single_step == NULL)
+    ops->to_can_do_single_step = delegate_can_do_single_step;
   if (ops->to_terminal_init == NULL)
     ops->to_terminal_init = delegate_terminal_init;
   if (ops->to_terminal_inferior == NULL)
@@ -4298,6 +4327,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_region_ok_for_hw_watchpoint = default_region_ok_for_hw_watchpoint;
   ops->to_can_accel_watchpoint_condition = tdefault_can_accel_watchpoint_condition;
   ops->to_masked_watch_num_registers = tdefault_masked_watch_num_registers;
+  ops->to_can_do_single_step = tdefault_can_do_single_step;
   ops->to_terminal_init = tdefault_terminal_init;
   ops->to_terminal_inferior = tdefault_terminal_inferior;
   ops->to_terminal_ours_for_output = tdefault_terminal_ours_for_output;
@@ -4450,6 +4480,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_region_ok_for_hw_watchpoint = debug_region_ok_for_hw_watchpoint;
   ops->to_can_accel_watchpoint_condition = debug_can_accel_watchpoint_condition;
   ops->to_masked_watch_num_registers = debug_masked_watch_num_registers;
+  ops->to_can_do_single_step = debug_can_do_single_step;
   ops->to_terminal_init = debug_terminal_init;
   ops->to_terminal_inferior = debug_terminal_inferior;
   ops->to_terminal_ours_for_output = debug_terminal_ours_for_output;

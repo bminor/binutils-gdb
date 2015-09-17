@@ -260,6 +260,12 @@ struct vCont_action_support
 
   /* vCont;r */
   int r;
+
+  /* vCont;s */
+  int s;
+
+  /* vCont;S */
+  int S;
 };
 
 /* Controls whether GDB is willing to use range stepping.  */
@@ -1465,6 +1471,9 @@ enum {
 
   /* Support for exec events.  */
   PACKET_exec_event_feature,
+
+  /* Support for query supported vCont actions.  */
+  PACKET_vContSupported,
 
   PACKET_MAX
 };
@@ -4375,7 +4384,8 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "exec-events", PACKET_DISABLE, remote_supported_packet,
     PACKET_exec_event_feature },
   { "Qbtrace-conf:pt:size", PACKET_DISABLE, remote_supported_packet,
-    PACKET_Qbtrace_conf_pt_size }
+    PACKET_Qbtrace_conf_pt_size },
+  { "vContSupported", PACKET_DISABLE, remote_supported_packet, PACKET_vContSupported }
 };
 
 static char *remote_support_xml;
@@ -4467,6 +4477,9 @@ remote_query_supported (void)
 	      != AUTO_BOOLEAN_FALSE)
 	    q = remote_query_supported_append (q, "exec-events+");
 	}
+
+      if (packet_set_cmd_state (PACKET_vContSupported) != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "vContSupported+");
 
       q = reconcat (q, "qSupported:", q, (char *) NULL);
       putpkt (q);
@@ -5061,10 +5074,10 @@ remote_vcont_probe (struct remote_state *rs)
   if (startswith (buf, "vCont"))
     {
       char *p = &buf[5];
-      int support_s, support_S, support_c, support_C;
+      int support_c, support_C;
 
-      support_s = 0;
-      support_S = 0;
+      rs->supports_vCont.s = 0;
+      rs->supports_vCont.S = 0;
       support_c = 0;
       support_C = 0;
       rs->supports_vCont.t = 0;
@@ -5073,9 +5086,9 @@ remote_vcont_probe (struct remote_state *rs)
 	{
 	  p++;
 	  if (*p == 's' && (*(p + 1) == ';' || *(p + 1) == 0))
-	    support_s = 1;
+	    rs->supports_vCont.s = 1;
 	  else if (*p == 'S' && (*(p + 1) == ';' || *(p + 1) == 0))
-	    support_S = 1;
+	    rs->supports_vCont.S = 1;
 	  else if (*p == 'c' && (*(p + 1) == ';' || *(p + 1) == 0))
 	    support_c = 1;
 	  else if (*p == 'C' && (*(p + 1) == ';' || *(p + 1) == 0))
@@ -5088,9 +5101,9 @@ remote_vcont_probe (struct remote_state *rs)
 	  p = strchr (p, ';');
 	}
 
-      /* If s, S, c, and C are not all supported, we can't use vCont.  Clearing
-         BUF will make packet_ok disable the packet.  */
-      if (!support_s || !support_S || !support_c || !support_C)
+      /* If c, and C are not all supported, we can't use vCont.  Clearing
+	 BUF will make packet_ok disable the packet.  */
+      if (!support_c || !support_C)
 	buf[0] = 0;
     }
 
@@ -12653,6 +12666,29 @@ remote_pid_to_exec_file (struct target_ops *self, int pid)
   return filename;
 }
 
+/* Implement the to_can_do_single_step target_ops method.  */
+
+static int
+remote_can_do_single_step (struct target_ops *ops)
+{
+  /* We can only tell whether target supports single step or not by
+     supported s and S vCont actions if the stub supports vContSupported
+     feature.  If the stub doesn't support vContSupported feature,
+     we have conservatively to think target doesn't supports single
+     step.  */
+  if (packet_support (PACKET_vContSupported) == PACKET_ENABLE)
+    {
+      struct remote_state *rs = get_remote_state ();
+
+      if (packet_support (PACKET_vCont) == PACKET_SUPPORT_UNKNOWN)
+	remote_vcont_probe (rs);
+
+      return rs->supports_vCont.s && rs->supports_vCont.S;
+    }
+  else
+    return 0;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -12724,6 +12760,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_can_async_p = remote_can_async_p;
   remote_ops.to_is_async_p = remote_is_async_p;
   remote_ops.to_async = remote_async;
+  remote_ops.to_can_do_single_step = remote_can_do_single_step;
   remote_ops.to_terminal_inferior = remote_terminal_inferior;
   remote_ops.to_terminal_ours = remote_terminal_ours;
   remote_ops.to_supports_non_stop = remote_supports_non_stop;
@@ -13430,6 +13467,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_conf_pt_size],
        "Qbtrace-conf:pt:size", "btrace-conf-pt-size", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vContSupported],
+			 "vContSupported", "verbose-resume-supported", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_exec_event_feature],
 			 "exec-event-feature", "exec-event-feature", 0);

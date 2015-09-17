@@ -5496,7 +5496,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		   input_bfd, input_section, rel->r_offset, symname);
 	    }
 
-	  elf_elfheader (output_bfd)->e_flags &= ~EF_SH_PIC;
+	  elf_elfheader (output_bfd)->e_flags |= EF_SH_PIC;
 	}
 
       if (r != bfd_reloc_ok)
@@ -6653,7 +6653,7 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
       elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
       sh_elf_set_mach_from_flags (obfd);
       if (elf_elfheader (obfd)->e_flags & EF_SH_FDPIC)
-	elf_elfheader (obfd)->e_flags |= EF_SH_PIC;
+	elf_elfheader (obfd)->e_flags &= ~EF_SH_PIC;
     }
 
   if (! sh_merge_bfd_arch (ibfd, obfd))
