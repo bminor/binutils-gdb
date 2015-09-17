@@ -1,3 +1,9 @@
+2015-09-17  Alan Modra  <amodra@gmail.com>
+
+	PR 18867
+	* elflink.c (elf_link_adjust_relocs): Correct start of insertion
+	sort main loop.
+
 2015-09-16  Alan Modra  <amodra@gmail.com>
 
 	PR 18867
