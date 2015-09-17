@@ -8313,7 +8313,7 @@ elf_link_adjust_relocs (bfd *abfd,
 	  memcpy (base, onebuf, elt_size);
 	}
 
-      for (p = base + elt_size; p < end; )
+      for (p = base + elt_size; (p += elt_size) < end; )
 	{
 	  /* base to p is sorted, *p is next to insert.  */
 	  r_off = (*ext_r_off) (p);
@@ -8355,10 +8355,8 @@ elf_link_adjust_relocs (bfd *abfd,
 		  memmove (loc, p, runlen);
 		  memcpy (loc + runlen, buf, sortlen);
 		}
-	      p += runlen;
+	      p += runlen - elt_size;
 	    }
-	  else
-	    p += elt_size;
 	}
       /* Hashes are no longer valid.  */
       free (reldata->hashes);
