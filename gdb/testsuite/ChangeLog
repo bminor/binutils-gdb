@@ -1,6 +1,9 @@
 2015-09-18  Sandra Loosemore  <sandra@codesourcery.com>
 
-	gdb/testsuite/
+	* gdb.base/global-var-nested-by-dso.exp: Call gdb_load_shlibs.
+
+2015-09-18  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* gdb.linespec/explicit.exp: Check for readline support for
 	tab-completion tests.  Fix obvious typo.
 
