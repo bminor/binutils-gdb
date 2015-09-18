@@ -1,5 +1,10 @@
 2015-09-18  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gdb.base/dso2dso.exp: Don't use directory prefix when setting
+	the breakpoint.
+
+2015-09-18  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* gdb.mi/mi-pending.exp: Don't use directory prefix when setting
 	the pending breakpoint.  Remove timeout override for "Run till
 	MI pending breakpoint on pendfunc3 on thread 2" test.
