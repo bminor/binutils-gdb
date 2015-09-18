@@ -7126,6 +7126,16 @@ to control both @samp{foo} and @samp{.foo}.  The option
 dot-prefixed patterns.  Use @samp{--no-dotsyms} to disable this
 feature.
 
+@cindex PowerPC64 register save/restore functions
+@kindex --save-restore-funcs
+@kindex --no-save-restore-funcs
+@item --save-restore-funcs, --no-save-restore-funcs
+These two options control whether PowerPC64 @command{ld} automatically
+provides out-of-line register save and restore functions used by
+@samp{-Os} code.  The default is to provide any such referenced
+function for a normal final link, and to not do so for a relocatable
+link.
+
 @cindex PowerPC64 TLS optimization
 @kindex --no-tls-optimize
 @item --no-tls-optimize

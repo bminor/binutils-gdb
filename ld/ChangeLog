@@ -1,5 +1,9 @@
 2015-09-18  Alan Modra  <amodra@gmail.com>
 
+	* ld.texinfo: Document PowerPC64 --{no-,}save-restore-funcs.
+
+2015-09-18  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/ppc64elf.em (params): Init tls_get_addr_opt field to -1.
 	(OPTION_TLS_GET_ADDR_OPT): Define.
 	(PARSE_AND_LIST_LONGOPTS): Handle --tls-get-addr-opt.
