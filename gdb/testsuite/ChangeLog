@@ -1,3 +1,9 @@
+2015-09-18  Sandra Loosemore  <sandra@codesourcery.com>
+
+	gdb/testsuite/
+	* gdb.linespec/explicit.exp: Check for readline support for
+	tab-completion tests.  Fix obvious typo.
+
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/multi-thread-step.exp: Test scheduler-locking on, step,
