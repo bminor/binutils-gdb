@@ -1,3 +1,8 @@
+2015-09-18  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c: Don't include sys/uio.h.
+	(ps_get_thread_area): Call aarch64_ps_get_thread_area.
+
 2015-09-16  Wei-cheng Wang  <cole945@gmail.com>
 
 	* tracepoint.c (eval_result_type): Change prototype.

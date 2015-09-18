@@ -21,6 +21,9 @@
 
 #include <signal.h>
 
+/* Defines ps_err_e, struct ps_prochandle.  */
+#include "gdb_proc_service.h"
+
 typedef int compat_int_t;
 typedef unsigned int compat_uptr_t;
 
@@ -118,5 +121,9 @@ void aarch64_compat_siginfo_from_siginfo (compat_siginfo_t *to,
 void aarch64_linux_prepare_to_resume (struct lwp_info *lwp);
 
 void aarch64_linux_new_thread (struct lwp_info *lwp);
+
+ps_err_e aarch64_ps_get_thread_area (const struct ps_prochandle *ph,
+				       lwpid_t lwpid, int idx, void **base,
+				       int is_64bit_p);
 
 #endif /* AARCH64_LINUX_H */

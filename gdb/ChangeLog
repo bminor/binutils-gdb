@@ -1,3 +1,13 @@
+2015-09-18  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/aarch64-linux.c: Include elf/common.h,
+	nat/gdb_ptrace.h, asm/ptrace.h and sys/uio.h.
+	(aarch64_ps_get_thread_area): New function.
+	* nat/aarch64-linux.h: Include gdb_proc_service.h.
+	(aarch64_ps_get_thread_area): Declare.
+	* aarch64-linux-nat.c (ps_get_thread_area): Call
+	aarch64_ps_get_thread_area.
+
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record-btrace.c (record_btrace_resume): Honour scheduler-locking.

@@ -30,7 +30,6 @@
 #include <sys/user.h>
 #include "nat/gdb_ptrace.h"
 #include <asm/ptrace.h>
-#include <sys/uio.h>
 
 #include "gdb_proc_service.h"
 
@@ -413,21 +412,8 @@ ps_err_e
 ps_get_thread_area (const struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
-  struct iovec iovec;
-  uint64_t reg;
-
-  iovec.iov_base = &reg;
-  iovec.iov_len = sizeof (reg);
-
-  if (ptrace (PTRACE_GETREGSET, lwpid, NT_ARM_TLS, &iovec) != 0)
-    return PS_ERR;
-
-  /* IDX is the bias from the thread pointer to the beginning of the
-     thread descriptor.  It has to be subtracted due to implementation
-     quirks in libthread_db.  */
-  *base = (void *) (reg - idx);
-
-  return PS_OK;
+  return aarch64_ps_get_thread_area (ph, lwpid, idx, base,
+				     is_64bit_tdesc ());
 }
 
 /* Implementation of linux_target_ops method "siginfo_fixup".  */
