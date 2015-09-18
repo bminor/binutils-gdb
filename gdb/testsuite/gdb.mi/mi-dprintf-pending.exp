@@ -60,7 +60,7 @@ mi_gdb_test "-dprintf-insert -f pendfunc1 \"hello\"" \
     "mi set dprintf"
 
 mi_create_breakpoint $bp_location1 "mi insert breakpoint bp_location1" \
-    -type "breakpoint" -line $bp_location1 -file $srcdir/$subdir/$srcfile
+    -type "breakpoint" -line $bp_location1 -file ".*$srcfile"
 
 mi_run_cmd
 
