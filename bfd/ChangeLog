@@ -1,3 +1,11 @@
+2015-09-18  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.h (struct ppc64_elf_params <tls_get_addr_opt>): Rename
+	from no_tls_get_addr_opt.
+	* elf64-ppc.c: Update for rename and inversion of tls_get_addr_opt.
+	(ppc64_elf_tls_setup): Set tls_get_addr_opt to 0 only when at
+	default of -1.
+
 2015-09-17  Alan Modra  <amodra@gmail.com>
 
 	PR 18867

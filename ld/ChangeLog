@@ -1,5 +1,14 @@
 2015-09-18  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/ppc64elf.em (params): Init tls_get_addr_opt field to -1.
+	(OPTION_TLS_GET_ADDR_OPT): Define.
+	(PARSE_AND_LIST_LONGOPTS): Handle --tls-get-addr-opt.
+	(PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Likewise.
+	* ld.texinfo: Document --tls-get-addr-optimize and
+	--no-tls-get-addr-optimize.
+
+2015-09-18  Alan Modra  <amodra@gmail.com>
+
 	PR ld/18963
 	* ldexp.h (struct ldexp_control): Add rel_from_abs.
 	(ldexp_finalize_syms): Declare.

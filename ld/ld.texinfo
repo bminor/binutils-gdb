@@ -7133,6 +7133,21 @@ PowerPC64 @command{ld} normally performs some optimization of code
 sequences used to access Thread-Local Storage.  Use this option to
 disable the optimization.
 
+@cindex PowerPC64 __tls_get_addr optimization
+@kindex --tls-get-addr-optimize
+@kindex --no-tls-get-addr-optimize
+@item --tls-get-addr-optimize, --no-tls-get-addr-optimize
+These options control whether PowerPC64 @command{ld} uses a special
+stub to call __tls_get_addr.  PowerPC64 glibc 2.22 and later support
+an optimization that allows the second and subsequent calls to
+@code{__tls_get_addr} for a given symbol to be resolved by the special
+stub without calling in to glibc.  By default the linker enables this
+option when glibc advertises the availability of __tls_get_addr_opt.
+Forcing this option on when using an older glibc won't do much besides
+slow down your applications, but may be useful if linking an
+application against an older glibc with the expectation that it will
+normally be used on systems having a newer glibc.
+
 @cindex PowerPC64 OPD optimization
 @kindex --no-opd-optimize
 @item --no-opd-optimize
