@@ -184,7 +184,7 @@ mi_send_resuming_command "exec-continue" "-exec-continue to line \$line_main_hel
 
 set output [mi_gdb_expect_cli_output "\\*stopped" "collect CLI output for breakpoint hit"]
 set test "breakpoint hit produces CLI output"
-set pattern "\\\\nTemporary breakpoint 3, main \\(\\) at \[^\n\]+basics.c:$line_main_hello\\\\n\[^\n\]+Hello"
+set pattern "\\\\nTemporary breakpoint 3, main \\(\\) at \[^\n\]*basics.c:$line_main_hello\\\\n\[^\n\]+Hello"
 
 if {[regexp $pattern $output]} {
     pass $test

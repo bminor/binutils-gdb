@@ -1,5 +1,10 @@
 2015-09-18  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gdb.mi/mi-cli.exp: Don't require directory prefix in breakpoint
+	filename pattern.
+
+2015-09-18  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* gdb.mi/mi-dprintf-pending.exp: Don't require directory prefix
 	in breakpoint filename pattern.
 
