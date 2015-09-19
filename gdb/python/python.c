@@ -696,9 +696,9 @@ gdbpy_solib_name (PyObject *self, PyObject *args)
 {
   char *soname;
   PyObject *str_obj;
-  gdb_py_longest pc;
+  gdb_py_ulongest pc;
 
-  if (!PyArg_ParseTuple (args, GDB_PY_LL_ARG, &pc))
+  if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc))
     return NULL;
 
   soname = solib_name_from_address (current_program_space, pc);

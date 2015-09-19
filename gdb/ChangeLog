@@ -1,3 +1,8 @@
+2016-06-02  Tom Tromey  <tom@tromey.com>
+
+	PR python/18984:
+	* python/python.c (gdbpy_solib_name): Use GDB_PY_LLU_ARG.
+
 2016-06-01  Pedro Alves  <palves@redhat.com>
 
 	* remote-fileio.c (remote_fio_ctrl_c_flag, remote_fio_sa)
