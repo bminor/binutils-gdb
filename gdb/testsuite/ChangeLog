@@ -1,3 +1,8 @@
+2015-09-19  Andrew Pinski  <apinski@cavium.com>
+
+	* gdb.arch/aarch64-atomic-inst.c: Use unsigned long long
+	instead of unsigned long to fix for ILP32.
+
 2015-09-03  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/funcall_char.exp: New testcase.

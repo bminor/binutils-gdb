@@ -17,8 +17,8 @@
 
 int main(void)
 {
-  unsigned long tmp, cond;
-  unsigned long dword = 0;
+  unsigned long long tmp, cond;
+  unsigned long long dword = 0;
 
   /* Test that we can step over ldxr/stxr. This sequence should step from
      ldxr to the following __asm __volatile.  */
