@@ -1,5 +1,11 @@
 2015-09-18  Doug Evans  <xdje42@gmail.com>
 
+	* linux-thread-db.c (record_thread): Return the created thread.
+	(thread_from_lwp): Likewise.
+	(thread_db_get_thread_local_address): Update.
+
+2015-09-18  Doug Evans  <xdje42@gmail.com>
+
 	* symtab.h (general_symbol_info) <mangled_lang>: Delete struct,
 	move only member demangled_name up.  All uses updated.
 
