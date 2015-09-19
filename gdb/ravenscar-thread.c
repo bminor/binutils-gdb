@@ -341,7 +341,7 @@ ravenscar_inferior_created (struct target_ops *target, int from_tty)
   struct ravenscar_arch_ops *ops;
 
   if (!ravenscar_task_support
-      || gdbarch_ravenscar_ops (current_inferior ()->gdbarch) == NULL
+      || gdbarch_ravenscar_ops (target_gdbarch ()) == NULL
       || !has_ravenscar_runtime ())
     return;
 

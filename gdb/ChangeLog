@@ -1,3 +1,8 @@
+2015-09-19  Doug Evans  <xdje42@gmail.com>
+
+	* ravenscar-thread.c (ravenscar_inferior_created): Replace
+	current_inferior ()->gdbarch with its wrapper target_gdbarch.
+
 2015-09-18  Doug Evans  <xdje42@gmail.com>
 
 	* linux-thread-db.c (record_thread): Return the created thread.
