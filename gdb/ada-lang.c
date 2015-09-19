@@ -1414,7 +1414,7 @@ ada_decode_symbol (const struct general_symbol_info *arg)
 {
   struct general_symbol_info *gsymbol = (struct general_symbol_info *) arg;
   const char **resultp =
-    &gsymbol->language_specific.mangled_lang.demangled_name;
+    &gsymbol->language_specific.demangled_name;
 
   if (!gsymbol->ada_mangled)
     {

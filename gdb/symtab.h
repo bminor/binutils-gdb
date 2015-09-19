@@ -137,11 +137,7 @@ struct general_symbol_info
 
     /* This is used by languages which wish to store a demangled name.
        currently used by Ada, C++, Java, and Objective C.  */
-    struct mangled_lang
-    {
-      const char *demangled_name;
-    }
-    mangled_lang;
+    const char *demangled_name;
   }
   language_specific;
 

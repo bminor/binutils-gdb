@@ -1,5 +1,10 @@
 2015-09-18  Doug Evans  <xdje42@gmail.com>
 
+	* symtab.h (general_symbol_info) <mangled_lang>: Delete struct,
+	move only member demangled_name up.  All uses updated.
+
+2015-09-18  Doug Evans  <xdje42@gmail.com>
+
 	* findvar.c (default_read_var_value) <LOC_UNRESOLVED>: Include the
 	kind of minimal symbol in the error message.
 	* objfiles.c (objfile_flavour_name): New function.
