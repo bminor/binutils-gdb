@@ -737,8 +737,20 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
 	   symbol_objfile (var));
 	msym = lookup_data.result.minsym;
 
+	/* If we can't find the minsym there's a problem in the symbol info.
+	   The symbol exists in the debug info, but it's missing in the minsym
+	   table.  */
 	if (msym == NULL)
-	  error (_("No global symbol \"%s\"."), SYMBOL_LINKAGE_NAME (var));
+	  {
+	    const char *flavour_name
+	      = objfile_flavour_name (symbol_objfile (var));
+
+	    /* We can't get here unless we've opened the file, so flavour_name
+	       can't be NULL.  */
+	    gdb_assert (flavour_name != NULL);
+	    error (_("Missing %s symbol \"%s\"."),
+		   flavour_name, SYMBOL_LINKAGE_NAME (var));
+	  }
 	obj_section = MSYMBOL_OBJ_SECTION (lookup_data.result.objfile, msym);
 	/* Relocate address, unless there is no section or the variable is
 	   a TLS variable. */

@@ -744,6 +744,11 @@ const char *objfile_filename (const struct objfile *objfile);
 
 extern const char *objfile_debug_name (const struct objfile *objfile);
 
+/* Return the name of the file format of OBJFILE if the file has been opened,
+   otherwise return NULL.  */
+
+const char *objfile_flavour_name (struct objfile *objfile);
+
 /* Set the objfile's notion of the "main" name and language.  */
 
 extern void set_objfile_main_name (struct objfile *objfile,

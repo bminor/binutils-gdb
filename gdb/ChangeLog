@@ -1,3 +1,10 @@
+2015-09-18  Doug Evans  <xdje42@gmail.com>
+
+	* findvar.c (default_read_var_value) <LOC_UNRESOLVED>: Include the
+	kind of minimal symbol in the error message.
+	* objfiles.c (objfile_flavour_name): New function.
+	* objfiles.h (objfile_flavour_name): Declare.
+
 2015-09-18  Yao Qi  <yao.qi@linaro.org>
 
 	* nat/aarch64-linux.c: Include elf/common.h,

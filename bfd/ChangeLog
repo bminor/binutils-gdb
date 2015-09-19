@@ -1,3 +1,9 @@
+2015-09-18  Doug Evans  <xdje42@gmail.com>
+
+	* targets.c (enum bfd_flavour): Add comment.
+	(bfd_flavour_name): New function.
+	* bfd-in2.h: Regenerate.
+
 2015-09-18  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.h (struct ppc64_elf_params <tls_get_addr_opt>): Rename
