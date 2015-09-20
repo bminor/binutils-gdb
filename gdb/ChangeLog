@@ -1,3 +1,8 @@
+2015-09-20  Doug Evans  <xdje42@gmail.com>
+
+	* dwarf2read.c (dwarf2_compute_name): Add FIXME.  Don't use a local
+	variable name that collides with a parameter.
+
 2015-09-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2loc.c (locexpr_get_frame_base): Renames
