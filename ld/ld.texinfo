@@ -1455,6 +1455,13 @@ generating dynamically linked ELF executables.  The default dynamic
 linker is normally correct; don't use this unless you know what you are
 doing.
 
+@kindex --no-dynamic-linker
+@item --no-dynamic-linker
+When producing an executable file, omit the request for a dynamic
+linker to be used at load-time.  This is only meaningful for ELF
+executables that contain dynamic relocations, and usually requires
+entry point code that is capable of processing these relocations.
+
 @kindex --fatal-warnings
 @kindex --no-fatal-warnings
 @item --fatal-warnings

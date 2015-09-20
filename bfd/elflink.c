@@ -246,7 +246,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* A dynamically linked executable has a .interp section, but a
      shared library does not.  */
-  if (bfd_link_executable (info))
+  if (bfd_link_executable (info) && !info->nointerp)
     {
       s = bfd_make_section_anyway_with_flags (abfd, ".interp",
 					      flags | SEC_READONLY);
@@ -5763,7 +5763,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       bfd_boolean all_defined;
 
       *sinterpptr = bfd_get_linker_section (dynobj, ".interp");
-      BFD_ASSERT (*sinterpptr != NULL || !bfd_link_executable (info));
+      BFD_ASSERT (*sinterpptr != NULL || !bfd_link_executable (info) || info->nointerp);
 
       if (soname != NULL)
 	{

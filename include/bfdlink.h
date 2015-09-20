@@ -431,6 +431,9 @@ struct bfd_link_info
   /* TRUE if BND prefix in PLT entries is always generated.  */
   unsigned int bndplt: 1;
 
+  /* TRUE if generation of .interp/PT_INTERP should be suppressed.  */
+  unsigned int nointerp: 1;
+
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in
      wrap_hash.  Used by PowerPC Linux for 'dot' symbols.  */

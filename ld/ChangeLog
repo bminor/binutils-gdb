@@ -1,3 +1,9 @@
+2015-09-20  Rich Felker  <dalias@libc.org>
+
+	* ld.texinfo (--no-dynamic-linker): Document.
+	* ldlex.h (enum option_values): Add OPTION_NO_DYNAMIC_LINKER.
+	* lexsup.c (ld_options, parse_args): Handle --no-dynamic-linker.
+
 2015-09-18  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo: Document PowerPC64 --{no-,}save-restore-funcs.
