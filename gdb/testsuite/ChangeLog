@@ -1,5 +1,10 @@
 2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* gdb.arch/insn-reloc.c: New file.
+	* gdb.arch/ftrace-insn-reloc.exp: New file.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* gdb.trace/change-loc.h (func4) [__aarch64__]: Add a nop
 	instruction.
 	* gdb.trace/pendshr1.c (pendfunc): Likewise.
