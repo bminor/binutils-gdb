@@ -1,5 +1,72 @@
 2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* Makefile.in (linux-aarch64-ipa.o, aarch64-ipa.o): New rules.
+	* configure.srv (aarch64*-*-linux*): Add linux-aarch64-ipa.o and
+	aarch64-ipa.o.
+	* linux-aarch64-ipa.c: New file.
+	* linux-aarch64-low.c: Include arch/aarch64-insn.h, inttypes.h
+	and endian.h.
+	(aarch64_get_thread_area): New target method.
+	(extract_signed_bitfield): New helper function.
+	(aarch64_decode_ldr_literal): New function.
+	(enum aarch64_opcodes): New enum.
+	(struct aarch64_register): New struct.
+	(struct aarch64_operand): New struct.
+	(x0): New static global.
+	(x1): Likewise.
+	(x2): Likewise.
+	(x3): Likewise.
+	(x4): Likewise.
+	(w2): Likewise.
+	(ip0): Likewise.
+	(sp): Likewise.
+	(xzr): Likewise.
+	(aarch64_register): New helper function.
+	(register_operand): Likewise.
+	(immediate_operand): Likewise.
+	(struct aarch64_memory_operand): New struct.
+	(offset_memory_operand): New helper function.
+	(preindex_memory_operand): Likewise.
+	(enum aarch64_system_control_registers): New enum.
+	(ENCODE): New macro.
+	(emit_insn): New helper function.
+	(emit_b): New function.
+	(emit_bcond): Likewise.
+	(emit_cb): Likewise.
+	(emit_tb): Likewise.
+	(emit_blr): Likewise.
+	(emit_stp): Likewise.
+	(emit_ldp_q_offset): Likewise.
+	(emit_stp_q_offset): Likewise.
+	(emit_load_store): Likewise.
+	(emit_ldr): Likewise.
+	(emit_ldrsw): Likewise.
+	(emit_str): Likewise.
+	(emit_ldaxr): Likewise.
+	(emit_stxr): Likewise.
+	(emit_stlr): Likewise.
+	(emit_data_processing_reg): Likewise.
+	(emit_data_processing): Likewise.
+	(emit_add): Likewise.
+	(emit_sub): Likewise.
+	(emit_mov): Likewise.
+	(emit_movk): Likewise.
+	(emit_mov_addr): Likewise.
+	(emit_mrs): Likewise.
+	(emit_msr): Likewise.
+	(emit_sevl): Likewise.
+	(emit_wfe): Likewise.
+	(append_insns): Likewise.
+	(can_encode_int32_in): New helper function.
+	(aarch64_relocate_instruction): New function.
+	(aarch64_install_fast_tracepoint_jump_pad): Likewise.
+	(aarch64_get_min_fast_tracepoint_insn_len): Likewise.
+	(struct linux_target_ops): Install aarch64_get_thread_area,
+	aarch64_install_fast_tracepoint_jump_pad and
+	aarch64_get_min_fast_tracepoint_insn_len.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* Makefile.in (aarch64-insn.o): New rule.
 	* configure.srv (aarch64*-*-linux*): Add aarch64-insn.o.
 
