@@ -26,6 +26,8 @@
 #include "arch/aarch64-insn.h"
 #include "linux-aarch32-low.h"
 #include "elf/common.h"
+#include "ax.h"
+#include "tracepoint.h"
 
 #include <signal.h>
 #include <sys/user.h>
@@ -667,6 +669,8 @@ enum aarch64_opcodes
   TBNZ            = 0x37000000 | B,
   /* BLR            1101 0110 0011 1111 0000 00rr rrr0 0000 */
   BLR             = 0xd63f0000,
+  /* RET            1101 0110 0101 1111 0000 00rr rrr0 0000 */
+  RET             = 0xd65f0000,
   /* STP            s010 100o o0ii iiii irrr rrrr rrrr rrrr */
   /* LDP            s010 100o o1ii iiii irrr rrrr rrrr rrrr */
   /* STP (SIMD&VFP) ss10 110o o0ii iiii irrr rrrr rrrr rrrr */
@@ -696,6 +700,29 @@ enum aarch64_opcodes
   /* SUBS           s11o ooo1 xxxx xxxx xxxx xxxx xxxx xxxx */
   ADD             = 0x01000000,
   SUB             = 0x40000000 | ADD,
+  SUBS            = 0x20000000 | SUB,
+  /* AND            s000 1010 xx0x xxxx xxxx xxxx xxxx xxxx */
+  /* ORR            s010 1010 xx0x xxxx xxxx xxxx xxxx xxxx */
+  /* ORN            s010 1010 xx1x xxxx xxxx xxxx xxxx xxxx */
+  /* EOR            s100 1010 xx0x xxxx xxxx xxxx xxxx xxxx */
+  AND             = 0x0a000000,
+  ORR             = 0x20000000 | AND,
+  ORN             = 0x00200000 | ORR,
+  EOR             = 0x40000000 | AND,
+  /* LSLV           s001 1010 110r rrrr 0010 00rr rrrr rrrr */
+  /* LSRV           s001 1010 110r rrrr 0010 01rr rrrr rrrr */
+  /* ASRV           s001 1010 110r rrrr 0010 10rr rrrr rrrr */
+  LSLV             = 0x1ac02000,
+  LSRV             = 0x00000400 | LSLV,
+  ASRV             = 0x00000800 | LSLV,
+  /* SBFM           s001 0011 0nii iiii iiii iirr rrrr rrrr */
+  SBFM            = 0x13000000,
+  /* UBFM           s101 0011 0nii iiii iiii iirr rrrr rrrr */
+  UBFM            = 0x40000000 | SBFM,
+  /* CSINC          s001 1010 100r rrrr cccc 01rr rrrr rrrr */
+  CSINC           = 0x9a800400,
+  /* MUL            s001 1011 000r rrrr 0111 11rr rrrr rrrr */
+  MUL             = 0x1b007c00,
   /* MSR (register) 1101 0101 0001 oooo oooo oooo ooor rrrr */
   /* MRS            1101 0101 0011 oooo oooo oooo ooor rrrr */
   MSR             = 0xd5100000,
@@ -704,6 +731,20 @@ enum aarch64_opcodes
   HINT            = 0xd503201f,
   SEVL            = (5 << 5) | HINT,
   WFE             = (2 << 5) | HINT,
+  NOP             = (0 << 5) | HINT,
+};
+
+/* List of condition codes that we need.  */
+
+enum aarch64_condition_codes
+{
+  EQ = 0x0,
+  NE = 0x1,
+  LO = 0x3,
+  GE = 0xa,
+  LT = 0xb,
+  GT = 0xc,
+  LE = 0xd,
 };
 
 /* Representation of a general purpose register of the form xN or wN.
@@ -746,12 +787,15 @@ static const struct aarch64_register x3 = { 3, 1 };
 static const struct aarch64_register x4 = { 4, 1 };
 
 /* General purpose scratch registers (32 bit).  */
+static const struct aarch64_register w0 = { 0, 0 };
 static const struct aarch64_register w2 = { 2, 0 };
 
 /* Intra-procedure scratch registers.  */
 static const struct aarch64_register ip0 = { 16, 1 };
 
 /* Special purpose registers.  */
+static const struct aarch64_register fp = { 29, 1 };
+static const struct aarch64_register lr = { 30, 1 };
 static const struct aarch64_register sp = { 31, 1 };
 static const struct aarch64_register xzr = { 31, 1 };
 
@@ -804,8 +848,9 @@ immediate_operand (uint32_t imm)
 
    The types correspond to the following variants:
 
-   MEMORY_OPERAND_OFFSET:   LDR rt, [rn, #offset]
-   MEMORY_OPERAND_PREINDEX: LDR rt, [rn, #index]!  */
+   MEMORY_OPERAND_OFFSET:    LDR rt, [rn, #offset]
+   MEMORY_OPERAND_PREINDEX:  LDR rt, [rn, #index]!
+   MEMORY_OPERAND_POSTINDEX: LDR rt, [rn], #index  */
 
 struct aarch64_memory_operand
 {
@@ -814,6 +859,7 @@ struct aarch64_memory_operand
     {
       MEMORY_OPERAND_OFFSET,
       MEMORY_OPERAND_PREINDEX,
+      MEMORY_OPERAND_POSTINDEX,
     } type;
   /* Index from the base register.  */
   int32_t index;
@@ -839,6 +885,17 @@ static struct aarch64_memory_operand
 preindex_memory_operand (int32_t index)
 {
   return (struct aarch64_memory_operand) { MEMORY_OPERAND_PREINDEX, index };
+}
+
+/* Helper function to create a post-index memory operand.
+
+   For example:
+   p += emit_ldr (p, x0, sp, postindex_memory_operand (16));  */
+
+static struct aarch64_memory_operand
+postindex_memory_operand (int32_t index)
+{
+  return (struct aarch64_memory_operand) { MEMORY_OPERAND_POSTINDEX, index };
 }
 
 /* System control registers.  These special registers can be written and
@@ -973,20 +1030,24 @@ emit_blr (uint32_t *buf, struct aarch64_register rn)
   return emit_insn (buf, BLR | ENCODE (rn.num, 5, 5));
 }
 
-/* Write a STP instruction into *BUF.
+/* Write a RET instruction into *BUF.
 
-     STP rt, rt2, [rn, #offset]
-     STP rt, rt2, [rn, #index]!
+     RET xn
 
-   RT and RT2 are the registers to store.
-   RN is the base address register.
-   OFFSET is the immediate to add to the base address.  It is limited to a
-   -512 .. 504 range (7 bits << 3).  */
+   RN is the register to branch to.  */
 
 static int
-emit_stp (uint32_t *buf, struct aarch64_register rt,
-	  struct aarch64_register rt2, struct aarch64_register rn,
-	  struct aarch64_memory_operand operand)
+emit_ret (uint32_t *buf, struct aarch64_register rn)
+{
+  return emit_insn (buf, RET | ENCODE (rn.num, 5, 5));
+}
+
+static int
+emit_load_store_pair (uint32_t *buf, enum aarch64_opcodes opcode,
+		      struct aarch64_register rt,
+		      struct aarch64_register rt2,
+		      struct aarch64_register rn,
+		      struct aarch64_memory_operand operand)
 {
   uint32_t opc;
   uint32_t pre_index;
@@ -1005,6 +1066,12 @@ emit_stp (uint32_t *buf, struct aarch64_register rt,
 	write_back = ENCODE (0, 1, 23);
 	break;
       }
+    case MEMORY_OPERAND_POSTINDEX:
+      {
+	pre_index = ENCODE (0, 1, 24);
+	write_back = ENCODE (1, 1, 23);
+	break;
+      }
     case MEMORY_OPERAND_PREINDEX:
       {
 	pre_index = ENCODE (1, 1, 24);
@@ -1015,9 +1082,47 @@ emit_stp (uint32_t *buf, struct aarch64_register rt,
       return 0;
     }
 
-  return emit_insn (buf, STP | opc | pre_index | write_back
+  return emit_insn (buf, opcode | opc | pre_index | write_back
 		    | ENCODE (operand.index >> 3, 7, 15) | ENCODE (rt2.num, 5, 10)
 		    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+}
+
+/* Write a STP instruction into *BUF.
+
+     STP rt, rt2, [rn, #offset]
+     STP rt, rt2, [rn, #index]!
+     STP rt, rt2, [rn], #index
+
+   RT and RT2 are the registers to store.
+   RN is the base address register.
+   OFFSET is the immediate to add to the base address.  It is limited to a
+   -512 .. 504 range (7 bits << 3).  */
+
+static int
+emit_stp (uint32_t *buf, struct aarch64_register rt,
+	  struct aarch64_register rt2, struct aarch64_register rn,
+	  struct aarch64_memory_operand operand)
+{
+  return emit_load_store_pair (buf, STP, rt, rt2, rn, operand);
+}
+
+/* Write a LDP instruction into *BUF.
+
+     LDP rt, rt2, [rn, #offset]
+     LDP rt, rt2, [rn, #index]!
+     LDP rt, rt2, [rn], #index
+
+   RT and RT2 are the registers to store.
+   RN is the base address register.
+   OFFSET is the immediate to add to the base address.  It is limited to a
+   -512 .. 504 range (7 bits << 3).  */
+
+static int
+emit_ldp (uint32_t *buf, struct aarch64_register rt,
+	  struct aarch64_register rt2, struct aarch64_register rn,
+	  struct aarch64_memory_operand operand)
+{
+  return emit_load_store_pair (buf, LDP, rt, rt2, rn, operand);
 }
 
 /* Write a LDP (SIMD&VFP) instruction using Q registers into *BUF.
@@ -1081,6 +1186,16 @@ emit_load_store (uint32_t *buf, uint32_t size, enum aarch64_opcodes opcode,
 			  | ENCODE (operand.index >> 3, 12, 10)
 			  | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
       }
+    case MEMORY_OPERAND_POSTINDEX:
+      {
+	uint32_t post_index = ENCODE (1, 2, 10);
+
+	op = ENCODE (0, 1, 24);
+
+	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+			  | post_index | ENCODE (operand.index, 9, 12)
+			  | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+      }
     case MEMORY_OPERAND_PREINDEX:
       {
 	uint32_t pre_index = ENCODE (3, 2, 10);
@@ -1100,6 +1215,7 @@ emit_load_store (uint32_t *buf, uint32_t size, enum aarch64_opcodes opcode,
 
      LDR rt, [rn, #offset]
      LDR rt, [rn, #index]!
+     LDR rt, [rn], #index
 
    RT is the register to store.
    RN is the base address register.
@@ -1113,10 +1229,49 @@ emit_ldr (uint32_t *buf, struct aarch64_register rt,
   return emit_load_store (buf, rt.is64 ? 3 : 2, LDR, rt, rn, operand);
 }
 
+/* Write a LDRH instruction into *BUF.
+
+     LDRH wt, [xn, #offset]
+     LDRH wt, [xn, #index]!
+     LDRH wt, [xn], #index
+
+   RT is the register to store.
+   RN is the base address register.
+   OFFSET is the immediate to add to the base address.  It is limited to
+   0 .. 32760 range (12 bits << 3).  */
+
+static int
+emit_ldrh (uint32_t *buf, struct aarch64_register rt,
+	   struct aarch64_register rn,
+	   struct aarch64_memory_operand operand)
+{
+  return emit_load_store (buf, 1, LDR, rt, rn, operand);
+}
+
+/* Write a LDRB instruction into *BUF.
+
+     LDRB wt, [xn, #offset]
+     LDRB wt, [xn, #index]!
+     LDRB wt, [xn], #index
+
+   RT is the register to store.
+   RN is the base address register.
+   OFFSET is the immediate to add to the base address.  It is limited to
+   0 .. 32760 range (12 bits << 3).  */
+
+static int
+emit_ldrb (uint32_t *buf, struct aarch64_register rt,
+	   struct aarch64_register rn,
+	   struct aarch64_memory_operand operand)
+{
+  return emit_load_store (buf, 0, LDR, rt, rn, operand);
+}
+
 /* Write a LDRSW instruction into *BUF.  The register size is 64-bit.
 
      LDRSW xt, [rn, #offset]
      LDRSW xt, [rn, #index]!
+     LDRSW xt, [rn], #index
 
    RT is the register to store.
    RN is the base address register.
@@ -1135,6 +1290,7 @@ emit_ldrsw (uint32_t *buf, struct aarch64_register rt,
 
      STR rt, [rn, #offset]
      STR rt, [rn, #index]!
+     STR rt, [rn], #index
 
    RT is the register to store.
    RN is the base address register.
@@ -1377,6 +1533,165 @@ emit_mov_addr (uint32_t *buf, struct aarch64_register rd, CORE_ADDR addr)
   return p - buf;
 }
 
+/* Write a SUBS instruction into *BUF.
+
+     SUBS rd, rn, rm
+
+   This instruction update the condition flags.
+
+   RD is the destination register.
+   RN and RM are the source registers.  */
+
+static int
+emit_subs (uint32_t *buf, struct aarch64_register rd,
+	   struct aarch64_register rn, struct aarch64_operand operand)
+{
+  return emit_data_processing (buf, SUBS, rd, rn, operand);
+}
+
+/* Write a CMP instruction into *BUF.
+
+     CMP rn, rm
+
+   This instruction is an alias of SUBS xzr, rn, rm.
+
+   RN and RM are the registers to compare.  */
+
+static int
+emit_cmp (uint32_t *buf, struct aarch64_register rn,
+	      struct aarch64_operand operand)
+{
+  return emit_subs (buf, xzr, rn, operand);
+}
+
+/* Write a AND instruction into *BUF.
+
+     AND rd, rn, rm
+
+   RD is the destination register.
+   RN and RM are the source registers.  */
+
+static int
+emit_and (uint32_t *buf, struct aarch64_register rd,
+	  struct aarch64_register rn, struct aarch64_register rm)
+{
+  return emit_data_processing_reg (buf, AND, rd, rn, rm);
+}
+
+/* Write a ORR instruction into *BUF.
+
+     ORR rd, rn, rm
+
+   RD is the destination register.
+   RN and RM are the source registers.  */
+
+static int
+emit_orr (uint32_t *buf, struct aarch64_register rd,
+	  struct aarch64_register rn, struct aarch64_register rm)
+{
+  return emit_data_processing_reg (buf, ORR, rd, rn, rm);
+}
+
+/* Write a ORN instruction into *BUF.
+
+     ORN rd, rn, rm
+
+   RD is the destination register.
+   RN and RM are the source registers.  */
+
+static int
+emit_orn (uint32_t *buf, struct aarch64_register rd,
+	  struct aarch64_register rn, struct aarch64_register rm)
+{
+  return emit_data_processing_reg (buf, ORN, rd, rn, rm);
+}
+
+/* Write a EOR instruction into *BUF.
+
+     EOR rd, rn, rm
+
+   RD is the destination register.
+   RN and RM are the source registers.  */
+
+static int
+emit_eor (uint32_t *buf, struct aarch64_register rd,
+	  struct aarch64_register rn, struct aarch64_register rm)
+{
+  return emit_data_processing_reg (buf, EOR, rd, rn, rm);
+}
+
+/* Write a MVN instruction into *BUF.
+
+     MVN rd, rm
+
+   This is an alias for ORN rd, xzr, rm.
+
+   RD is the destination register.
+   RM is the source register.  */
+
+static int
+emit_mvn (uint32_t *buf, struct aarch64_register rd,
+	  struct aarch64_register rm)
+{
+  return emit_orn (buf, rd, xzr, rm);
+}
+
+/* Write a LSLV instruction into *BUF.
+
+     LSLV rd, rn, rm
+
+   RD is the destination register.
+   RN and RM are the source registers.  */
+
+static int
+emit_lslv (uint32_t *buf, struct aarch64_register rd,
+	   struct aarch64_register rn, struct aarch64_register rm)
+{
+  return emit_data_processing_reg (buf, LSLV, rd, rn, rm);
+}
+
+/* Write a LSRV instruction into *BUF.
+
+     LSRV rd, rn, rm
+
+   RD is the destination register.
+   RN and RM are the source registers.  */
+
+static int
+emit_lsrv (uint32_t *buf, struct aarch64_register rd,
+	   struct aarch64_register rn, struct aarch64_register rm)
+{
+  return emit_data_processing_reg (buf, LSRV, rd, rn, rm);
+}
+
+/* Write a ASRV instruction into *BUF.
+
+     ASRV rd, rn, rm
+
+   RD is the destination register.
+   RN and RM are the source registers.  */
+
+static int
+emit_asrv (uint32_t *buf, struct aarch64_register rd,
+	   struct aarch64_register rn, struct aarch64_register rm)
+{
+  return emit_data_processing_reg (buf, ASRV, rd, rn, rm);
+}
+
+/* Write a MUL instruction into *BUF.
+
+     MUL rd, rn, rm
+
+   RD is the destination register.
+   RN and RM are the source registers.  */
+
+static int
+emit_mul (uint32_t *buf, struct aarch64_register rd,
+	  struct aarch64_register rn, struct aarch64_register rm)
+{
+  return emit_data_processing_reg (buf, MUL, rd, rn, rm);
+}
+
 /* Write a MRS instruction into *BUF.  The register size is 64-bit.
 
      MRS xt, system_reg
@@ -1425,6 +1740,150 @@ static int
 emit_wfe (uint32_t *buf)
 {
   return emit_insn (buf, WFE);
+}
+
+/* Write a SBFM instruction into *BUF.
+
+     SBFM rd, rn, #immr, #imms
+
+   This instruction moves the bits from #immr to #imms into the
+   destination, sign extending the result.
+
+   RD is the destination register.
+   RN is the source register.
+   IMMR is the bit number to start at (least significant bit).
+   IMMS is the bit number to stop at (most significant bit).  */
+
+static int
+emit_sbfm (uint32_t *buf, struct aarch64_register rd,
+	   struct aarch64_register rn, uint32_t immr, uint32_t imms)
+{
+  uint32_t size = ENCODE (rd.is64, 1, 31);
+  uint32_t n = ENCODE (rd.is64, 1, 22);
+
+  return emit_insn (buf, SBFM | size | n | ENCODE (immr, 6, 16)
+		    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
+		    | ENCODE (rd.num, 5, 0));
+}
+
+/* Write a SBFX instruction into *BUF.
+
+     SBFX rd, rn, #lsb, #width
+
+   This instruction moves #width bits from #lsb into the destination, sign
+   extending the result.  This is an alias for:
+
+     SBFM rd, rn, #lsb, #(lsb + width - 1)
+
+   RD is the destination register.
+   RN is the source register.
+   LSB is the bit number to start at (least significant bit).
+   WIDTH is the number of bits to move.  */
+
+static int
+emit_sbfx (uint32_t *buf, struct aarch64_register rd,
+	   struct aarch64_register rn, uint32_t lsb, uint32_t width)
+{
+  return emit_sbfm (buf, rd, rn, lsb, lsb + width - 1);
+}
+
+/* Write a UBFM instruction into *BUF.
+
+     UBFM rd, rn, #immr, #imms
+
+   This instruction moves the bits from #immr to #imms into the
+   destination, extending the result with zeros.
+
+   RD is the destination register.
+   RN is the source register.
+   IMMR is the bit number to start at (least significant bit).
+   IMMS is the bit number to stop at (most significant bit).  */
+
+static int
+emit_ubfm (uint32_t *buf, struct aarch64_register rd,
+	   struct aarch64_register rn, uint32_t immr, uint32_t imms)
+{
+  uint32_t size = ENCODE (rd.is64, 1, 31);
+  uint32_t n = ENCODE (rd.is64, 1, 22);
+
+  return emit_insn (buf, UBFM | size | n | ENCODE (immr, 6, 16)
+		    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
+		    | ENCODE (rd.num, 5, 0));
+}
+
+/* Write a UBFX instruction into *BUF.
+
+     UBFX rd, rn, #lsb, #width
+
+   This instruction moves #width bits from #lsb into the destination,
+   extending the result with zeros.  This is an alias for:
+
+     UBFM rd, rn, #lsb, #(lsb + width - 1)
+
+   RD is the destination register.
+   RN is the source register.
+   LSB is the bit number to start at (least significant bit).
+   WIDTH is the number of bits to move.  */
+
+static int
+emit_ubfx (uint32_t *buf, struct aarch64_register rd,
+	   struct aarch64_register rn, uint32_t lsb, uint32_t width)
+{
+  return emit_ubfm (buf, rd, rn, lsb, lsb + width - 1);
+}
+
+/* Write a CSINC instruction into *BUF.
+
+     CSINC rd, rn, rm, cond
+
+   This instruction conditionally increments rn or rm and places the result
+   in rd.  rn is chosen is the condition is true.
+
+   RD is the destination register.
+   RN and RM are the source registers.
+   COND is the encoded condition.  */
+
+static int
+emit_csinc (uint32_t *buf, struct aarch64_register rd,
+	    struct aarch64_register rn, struct aarch64_register rm,
+	    unsigned cond)
+{
+  uint32_t size = ENCODE (rd.is64, 1, 31);
+
+  return emit_insn (buf, CSINC | size | ENCODE (rm.num, 5, 16)
+		    | ENCODE (cond, 4, 12) | ENCODE (rn.num, 5, 5)
+		    | ENCODE (rd.num, 5, 0));
+}
+
+/* Write a CSET instruction into *BUF.
+
+     CSET rd, cond
+
+   This instruction conditionally write 1 or 0 in the destination register.
+   1 is written if the condition is true.  This is an alias for:
+
+     CSINC rd, xzr, xzr, !cond
+
+   Note that the condition needs to be inverted.
+
+   RD is the destination register.
+   RN and RM are the source registers.
+   COND is the encoded condition.  */
+
+static int
+emit_cset (uint32_t *buf, struct aarch64_register rd, unsigned cond)
+{
+  /* The least significant bit of the condition needs toggling in order to
+     invert it.  */
+  return emit_csinc (buf, rd, xzr, xzr, cond ^ 0x1);
+}
+
+/* Write a NOP instruction into *BUF.  */
+
+static int
+emit_nop (uint32_t *buf)
+{
+  return emit_insn (buf, NOP);
 }
 
 /* Write LEN instructions from BUF into the inferior memory at *TO.
@@ -2011,6 +2470,746 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   return 0;
 }
 
+/* Helper function writing LEN instructions from START into
+   current_insn_ptr.  */
+
+static void
+emit_ops_insns (const uint32_t *start, int len)
+{
+  CORE_ADDR buildaddr = current_insn_ptr;
+
+  if (debug_threads)
+    debug_printf ("Adding %d instrucions at %s\n",
+		  len, paddress (buildaddr));
+
+  append_insns (&buildaddr, len, start);
+  current_insn_ptr = buildaddr;
+}
+
+/* Pop a register from the stack.  */
+
+static int
+emit_pop (uint32_t *buf, struct aarch64_register rt)
+{
+  return emit_ldr (buf, rt, sp, postindex_memory_operand (1 * 16));
+}
+
+/* Push a register on the stack.  */
+
+static int
+emit_push (uint32_t *buf, struct aarch64_register rt)
+{
+  return emit_str (buf, rt, sp, preindex_memory_operand (-1 * 16));
+}
+
+/* Implementation of emit_ops method "emit_prologue".  */
+
+static void
+aarch64_emit_prologue (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  /* This function emit a prologue for the following function prototype:
+
+     enum eval_result_type f (unsigned char *regs,
+			      ULONGEST *value);
+
+     The first argument is a buffer of raw registers.  The second
+     argument is the result of
+     evaluating the expression, which will be set to whatever is on top of
+     the stack at the end.
+
+     The stack set up by the prologue is as such:
+
+     High *------------------------------------------------------*
+	  | LR                                                   |
+	  | FP                                                   | <- FP
+	  | x1  (ULONGEST *value)                                |
+	  | x0  (unsigned char *regs)                            |
+     Low  *------------------------------------------------------*
+
+     As we are implementing a stack machine, each opcode can expand the
+     stack so we never know how far we are from the data saved by this
+     prologue.  In order to be able refer to value and regs later, we save
+     the current stack pointer in the frame pointer.  This way, it is not
+     clobbered when calling C functions.
+
+     Finally, throughtout every operation, we are using register x0 as the
+     top of the stack, and x1 as a scratch register.  */
+
+  p += emit_stp (p, x0, x1, sp, preindex_memory_operand (-2 * 16));
+  p += emit_str (p, lr, sp, offset_memory_operand (3 * 8));
+  p += emit_str (p, fp, sp, offset_memory_operand (2 * 8));
+
+  p += emit_add (p, fp, sp, immediate_operand (2 * 8));
+
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_epilogue".  */
+
+static void
+aarch64_emit_epilogue (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  /* Store the result of the expression (x0) in *value.  */
+  p += emit_sub (p, x1, fp, immediate_operand (1 * 8));
+  p += emit_ldr (p, x1, x1, offset_memory_operand (0));
+  p += emit_str (p, x0, x1, offset_memory_operand (0));
+
+  /* Restore the previous state.  */
+  p += emit_add (p, sp, fp, immediate_operand (2 * 8));
+  p += emit_ldp (p, fp, lr, fp, offset_memory_operand (0));
+
+  /* Return expr_eval_no_error.  */
+  p += emit_mov (p, x0, immediate_operand (expr_eval_no_error));
+  p += emit_ret (p, lr);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_add".  */
+
+static void
+aarch64_emit_add (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_add (p, x0, x0, register_operand (x1));
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_sub".  */
+
+static void
+aarch64_emit_sub (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_sub (p, x0, x0, register_operand (x1));
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_mul".  */
+
+static void
+aarch64_emit_mul (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_mul (p, x0, x1, x0);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_lsh".  */
+
+static void
+aarch64_emit_lsh (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_lslv (p, x0, x1, x0);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_rsh_signed".  */
+
+static void
+aarch64_emit_rsh_signed (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_asrv (p, x0, x1, x0);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_rsh_unsigned".  */
+
+static void
+aarch64_emit_rsh_unsigned (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_lsrv (p, x0, x1, x0);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_ext".  */
+
+static void
+aarch64_emit_ext (int arg)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_sbfx (p, x0, x0, 0, arg);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_log_not".  */
+
+static void
+aarch64_emit_log_not (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  /* If the top of the stack is 0, replace it with 1.  Else replace it with
+     0.  */
+
+  p += emit_cmp (p, x0, immediate_operand (0));
+  p += emit_cset (p, x0, EQ);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_bit_and".  */
+
+static void
+aarch64_emit_bit_and (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_and (p, x0, x0, x1);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_bit_or".  */
+
+static void
+aarch64_emit_bit_or (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_orr (p, x0, x0, x1);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_bit_xor".  */
+
+static void
+aarch64_emit_bit_xor (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_eor (p, x0, x0, x1);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_bit_not".  */
+
+static void
+aarch64_emit_bit_not (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_mvn (p, x0, x0);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_equal".  */
+
+static void
+aarch64_emit_equal (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_cmp (p, x0, register_operand (x1));
+  p += emit_cset (p, x0, EQ);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_less_signed".  */
+
+static void
+aarch64_emit_less_signed (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_cmp (p, x1, register_operand (x0));
+  p += emit_cset (p, x0, LT);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_less_unsigned".  */
+
+static void
+aarch64_emit_less_unsigned (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_cmp (p, x1, register_operand (x0));
+  p += emit_cset (p, x0, LO);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_ref".  */
+
+static void
+aarch64_emit_ref (int size)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  switch (size)
+    {
+    case 1:
+      p += emit_ldrb (p, w0, x0, offset_memory_operand (0));
+      break;
+    case 2:
+      p += emit_ldrh (p, w0, x0, offset_memory_operand (0));
+      break;
+    case 4:
+      p += emit_ldr (p, w0, x0, offset_memory_operand (0));
+      break;
+    case 8:
+      p += emit_ldr (p, x0, x0, offset_memory_operand (0));
+      break;
+    default:
+      /* Unknown size, bail on compilation.  */
+      emit_error = 1;
+      break;
+    }
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_if_goto".  */
+
+static void
+aarch64_emit_if_goto (int *offset_p, int *size_p)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  /* The Z flag is set or cleared here.  */
+  p += emit_cmp (p, x0, immediate_operand (0));
+  /* This instruction must not change the Z flag.  */
+  p += emit_pop (p, x0);
+  /* Branch over the next instruction if x0 == 0.  */
+  p += emit_bcond (p, EQ, 8);
+
+  /* The NOP instruction will be patched with an unconditional branch.  */
+  if (offset_p)
+    *offset_p = (p - buf) * 4;
+  if (size_p)
+    *size_p = 4;
+  p += emit_nop (p);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_goto".  */
+
+static void
+aarch64_emit_goto (int *offset_p, int *size_p)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  /* The NOP instruction will be patched with an unconditional branch.  */
+  if (offset_p)
+    *offset_p = 0;
+  if (size_p)
+    *size_p = 4;
+  p += emit_nop (p);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "write_goto_address".  */
+
+void
+aarch64_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
+{
+  uint32_t insn;
+
+  emit_b (&insn, 0, to - from);
+  append_insns (&from, 1, &insn);
+}
+
+/* Implementation of emit_ops method "emit_const".  */
+
+static void
+aarch64_emit_const (LONGEST num)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_mov_addr (p, x0, num);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_call".  */
+
+static void
+aarch64_emit_call (CORE_ADDR fn)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_mov_addr (p, ip0, fn);
+  p += emit_blr (p, ip0);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_reg".  */
+
+static void
+aarch64_emit_reg (int reg)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  /* Set x0 to unsigned char *regs.  */
+  p += emit_sub (p, x0, fp, immediate_operand (2 * 8));
+  p += emit_ldr (p, x0, x0, offset_memory_operand (0));
+  p += emit_mov (p, x1, immediate_operand (reg));
+
+  emit_ops_insns (buf, p - buf);
+
+  aarch64_emit_call (get_raw_reg_func_addr ());
+}
+
+/* Implementation of emit_ops method "emit_pop".  */
+
+static void
+aarch64_emit_pop (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x0);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_stack_flush".  */
+
+static void
+aarch64_emit_stack_flush (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_push (p, x0);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_zero_ext".  */
+
+static void
+aarch64_emit_zero_ext (int arg)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_ubfx (p, x0, x0, 0, arg);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_swap".  */
+
+static void
+aarch64_emit_swap (void)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_ldr (p, x1, sp, offset_memory_operand (0 * 16));
+  p += emit_str (p, x0, sp, offset_memory_operand (0 * 16));
+  p += emit_mov (p, x0, register_operand (x1));
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_stack_adjust".  */
+
+static void
+aarch64_emit_stack_adjust (int n)
+{
+  /* This is not needed with our design.  */
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_add (p, sp, sp, immediate_operand (n * 16));
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_int_call_1".  */
+
+static void
+aarch64_emit_int_call_1 (CORE_ADDR fn, int arg1)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_mov (p, x0, immediate_operand (arg1));
+
+  emit_ops_insns (buf, p - buf);
+
+  aarch64_emit_call (fn);
+}
+
+/* Implementation of emit_ops method "emit_void_call_2".  */
+
+static void
+aarch64_emit_void_call_2 (CORE_ADDR fn, int arg1)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  /* Push x0 on the stack.  */
+  aarch64_emit_stack_flush ();
+
+  /* Setup arguments for the function call:
+
+     x0: arg1
+     x1: top of the stack
+
+       MOV x1, x0
+       MOV x0, #arg1  */
+
+  p += emit_mov (p, x1, register_operand (x0));
+  p += emit_mov (p, x0, immediate_operand (arg1));
+
+  emit_ops_insns (buf, p - buf);
+
+  aarch64_emit_call (fn);
+
+  /* Restore x0.  */
+  aarch64_emit_pop ();
+}
+
+/* Implementation of emit_ops method "emit_eq_goto".  */
+
+static void
+aarch64_emit_eq_goto (int *offset_p, int *size_p)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_cmp (p, x1, register_operand (x0));
+  /* Branch over the next instruction if x0 != x1.  */
+  p += emit_bcond (p, NE, 8);
+  /* The NOP instruction will be patched with an unconditional branch.  */
+  if (offset_p)
+    *offset_p = (p - buf) * 4;
+  if (size_p)
+    *size_p = 4;
+  p += emit_nop (p);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_ne_goto".  */
+
+static void
+aarch64_emit_ne_goto (int *offset_p, int *size_p)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_cmp (p, x1, register_operand (x0));
+  /* Branch over the next instruction if x0 == x1.  */
+  p += emit_bcond (p, EQ, 8);
+  /* The NOP instruction will be patched with an unconditional branch.  */
+  if (offset_p)
+    *offset_p = (p - buf) * 4;
+  if (size_p)
+    *size_p = 4;
+  p += emit_nop (p);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_lt_goto".  */
+
+static void
+aarch64_emit_lt_goto (int *offset_p, int *size_p)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_cmp (p, x1, register_operand (x0));
+  /* Branch over the next instruction if x0 >= x1.  */
+  p += emit_bcond (p, GE, 8);
+  /* The NOP instruction will be patched with an unconditional branch.  */
+  if (offset_p)
+    *offset_p = (p - buf) * 4;
+  if (size_p)
+    *size_p = 4;
+  p += emit_nop (p);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_le_goto".  */
+
+static void
+aarch64_emit_le_goto (int *offset_p, int *size_p)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_cmp (p, x1, register_operand (x0));
+  /* Branch over the next instruction if x0 > x1.  */
+  p += emit_bcond (p, GT, 8);
+  /* The NOP instruction will be patched with an unconditional branch.  */
+  if (offset_p)
+    *offset_p = (p - buf) * 4;
+  if (size_p)
+    *size_p = 4;
+  p += emit_nop (p);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_gt_goto".  */
+
+static void
+aarch64_emit_gt_goto (int *offset_p, int *size_p)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_cmp (p, x1, register_operand (x0));
+  /* Branch over the next instruction if x0 <= x1.  */
+  p += emit_bcond (p, LE, 8);
+  /* The NOP instruction will be patched with an unconditional branch.  */
+  if (offset_p)
+    *offset_p = (p - buf) * 4;
+  if (size_p)
+    *size_p = 4;
+  p += emit_nop (p);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+/* Implementation of emit_ops method "emit_ge_got".  */
+
+static void
+aarch64_emit_ge_got (int *offset_p, int *size_p)
+{
+  uint32_t buf[16];
+  uint32_t *p = buf;
+
+  p += emit_pop (p, x1);
+  p += emit_cmp (p, x1, register_operand (x0));
+  /* Branch over the next instruction if x0 <= x1.  */
+  p += emit_bcond (p, LT, 8);
+  /* The NOP instruction will be patched with an unconditional branch.  */
+  if (offset_p)
+    *offset_p = (p - buf) * 4;
+  if (size_p)
+    *size_p = 4;
+  p += emit_nop (p);
+
+  emit_ops_insns (buf, p - buf);
+}
+
+static struct emit_ops aarch64_emit_ops_impl =
+{
+  aarch64_emit_prologue,
+  aarch64_emit_epilogue,
+  aarch64_emit_add,
+  aarch64_emit_sub,
+  aarch64_emit_mul,
+  aarch64_emit_lsh,
+  aarch64_emit_rsh_signed,
+  aarch64_emit_rsh_unsigned,
+  aarch64_emit_ext,
+  aarch64_emit_log_not,
+  aarch64_emit_bit_and,
+  aarch64_emit_bit_or,
+  aarch64_emit_bit_xor,
+  aarch64_emit_bit_not,
+  aarch64_emit_equal,
+  aarch64_emit_less_signed,
+  aarch64_emit_less_unsigned,
+  aarch64_emit_ref,
+  aarch64_emit_if_goto,
+  aarch64_emit_goto,
+  aarch64_write_goto_address,
+  aarch64_emit_const,
+  aarch64_emit_call,
+  aarch64_emit_reg,
+  aarch64_emit_pop,
+  aarch64_emit_stack_flush,
+  aarch64_emit_zero_ext,
+  aarch64_emit_swap,
+  aarch64_emit_stack_adjust,
+  aarch64_emit_int_call_1,
+  aarch64_emit_void_call_2,
+  aarch64_emit_eq_goto,
+  aarch64_emit_ne_goto,
+  aarch64_emit_lt_goto,
+  aarch64_emit_le_goto,
+  aarch64_emit_gt_goto,
+  aarch64_emit_ge_got,
+};
+
+/* Implementation of linux_target_ops method "emit_ops".  */
+
+static struct emit_ops *
+aarch64_emit_ops (void)
+{
+  return &aarch64_emit_ops_impl;
+}
+
 /* Implementation of linux_target_ops method
    "get_min_fast_tracepoint_insn_len".  */
 
@@ -2058,7 +3257,7 @@ struct linux_target_ops the_low_target =
   aarch64_supports_tracepoints,
   aarch64_get_thread_area,
   aarch64_install_fast_tracepoint_jump_pad,
-  NULL, /* emit_ops */
+  aarch64_emit_ops,
   aarch64_get_min_fast_tracepoint_insn_len,
   aarch64_supports_range_stepping,
 };
