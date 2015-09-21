@@ -1,5 +1,10 @@
 2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* gdb.trace/ftrace-lock.c: New file.
+	* gdb.trace/ftrace-lock.exp: New file.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* gdb.arch/insn-reloc.c: New file.
 	* gdb.arch/ftrace-insn-reloc.exp: New file.
 
