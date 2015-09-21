@@ -1,3 +1,8 @@
+2015-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-setshow.c (cmd_show_list): Constify a variable.
+	* linespec.c (linespec_lexer_lex_string): Same.
+
 2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* NEWS: Mention support for fast tracepoints on aarch64-linux.
