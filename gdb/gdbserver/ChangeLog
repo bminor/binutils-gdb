@@ -1,5 +1,9 @@
 2015-09-21  Yao Qi  <yao.qi@linaro.org>
 
+	* ax.c [!IN_PROCESS_AGENT] (gdb_agent_op_sizes): Define it.
+
+2015-09-21  Yao Qi  <yao.qi@linaro.org>
+
 	* tracepoint.c (max_jump_pad_size): Remove.
 
 2015-09-18  Yao Qi  <yao.qi@linaro.org>
