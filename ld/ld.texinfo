@@ -7122,7 +7122,8 @@ symbol that encodes the stub type and destination.
 @cindex PowerPC64 dot symbols
 @kindex --dotsyms
 @kindex --no-dotsyms
-@item --dotsyms, --no-dotsyms
+@item --dotsyms
+@itemx --no-dotsyms
 These two options control how @command{ld} interprets version patterns
 in a version script.  Older PowerPC64 compilers emitted both a
 function descriptor symbol with the same name as the function, and a
@@ -7136,7 +7137,8 @@ feature.
 @cindex PowerPC64 register save/restore functions
 @kindex --save-restore-funcs
 @kindex --no-save-restore-funcs
-@item --save-restore-funcs, --no-save-restore-funcs
+@item --save-restore-funcs
+@itemx --no-save-restore-funcs
 These two options control whether PowerPC64 @command{ld} automatically
 provides out-of-line register save and restore functions used by
 @samp{-Os} code.  The default is to provide any such referenced
@@ -7153,7 +7155,8 @@ disable the optimization.
 @cindex PowerPC64 __tls_get_addr optimization
 @kindex --tls-get-addr-optimize
 @kindex --no-tls-get-addr-optimize
-@item --tls-get-addr-optimize, --no-tls-get-addr-optimize
+@item --tls-get-addr-optimize
+@itemx --no-tls-get-addr-optimize
 These options control whether PowerPC64 @command{ld} uses a special
 stub to call __tls_get_addr.  PowerPC64 glibc 2.22 and later support
 an optimization that allows the second and subsequent calls to

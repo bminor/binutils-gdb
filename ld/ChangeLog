@@ -1,3 +1,8 @@
+2015-09-22  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo: Put --dotsyms/--no-dotsyms on separate lines.
+	Ditto for --save-restore-funcs and --tls-get-addr-optimize.
+
 2015-09-20  Rich Felker  <dalias@libc.org>
 
 	* ld.texinfo (--no-dynamic-linker): Document.
