@@ -18,6 +18,10 @@
   GDB now is able to debug both AArch64 applications and ARM applications
   at the same time.
 
+* Support for fast tracepoints on aarch64-linux was added in GDBserver,
+  including JIT compiling fast tracepoint's conditional expression bytecode
+  into native code.
+
 * New commands
 
 maint set target-non-stop (on|off|auto)

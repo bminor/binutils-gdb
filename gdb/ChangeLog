@@ -1,5 +1,9 @@
 2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* NEWS: Mention support for fast tracepoints on aarch64-linux.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* aarch64-tdep.c (aarch64_analyze_prologue): New is_adrp
 	variable.  Call aarch64_decode_adr instead of
 	aarch64_decode_adrp.
