@@ -36,6 +36,8 @@ func4 (void)
        SYMBOL(set_tracepoint) ":\n"
 #if (defined __x86_64__ || defined __i386__)
        "    call " SYMBOL(func5) "\n"
+#elif (defined __aarch64__)
+       "    nop\n"
 #endif
        );
 

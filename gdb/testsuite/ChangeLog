@@ -1,3 +1,18 @@
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* gdb.trace/change-loc.h (func4) [__aarch64__]: Add a nop
+	instruction.
+	* gdb.trace/pendshr1.c (pendfunc): Likewise.
+	* gdb.trace/pendshr2.c (pendfunc2): Likewise.
+	* gdb.trace/range-stepping.c: Likewise.
+	* gdb.trace/trace-break.c: Likewise.
+	* gdb.trace/trace-mt.c (thread_function): Likewise.
+	* gdb.trace/ftrace.c (marker): Likewise.
+	* gdb.trace/trace-condition.c (marker): Likewise.
+	* gdb.trace/ftrace.exp: Enable ftrace test if is_aarch64_target.
+	* gdb.trace/trace-condition.exp: Set pcreg to "\$pc" if
+	is_aarch64_target.
+
 2015-09-18  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.dwarf2/dw2-bad-unresolved.c: New file.
