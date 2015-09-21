@@ -625,6 +625,12 @@ linux-namespaces.o: ../nat/linux-namespaces.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
+# Architecture specific object files rules from ../arch
+
+aarch64-insn.o: ../arch/aarch64-insn.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
 aarch64.c : $(srcdir)/../regformats/aarch64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64.dat aarch64.c
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)

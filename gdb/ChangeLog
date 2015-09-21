@@ -1,3 +1,50 @@
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Add aarch64-insn.o.
+	(HFILES_NO_SRCDIR): Add arch/aarch64-insn.h.
+	(aarch64-insn.o): New rule.
+	* configure.tgt (aarch64*-*-elf): Add aarch64-insn.o.
+	(aarch64*-*-linux*): Likewise.
+	* arch/aarch64-insn.c: New file.
+	* arch/aarch64-insn.h: New file.
+	* aarch64-tdep.c: Include arch/aarch64-insn.h.
+	(aarch64_debug): Move to arch/aarch64-insn.c.  Declare in
+	arch/aarch64-insn.h.
+	(decode_add_sub_imm): Rename to ...
+	(aarch64_decode_add_sub_imm): ... this.
+	(decode_adrp): Rename to ...
+	(aarch64_decode_adrp): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(decode_b): Rename to ...
+	(aarch64_decode_b): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(decode_bcond): Rename to ...
+	(aarch64_decode_bcond): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(decode_br): Rename to ...
+	(aarch64_decode_br): ... this.
+	(decode_cb): Rename to ...
+	(aarch64_decode_cb): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(decode_eret): Rename to ...
+	(aarch64_decode_eret): ... this.
+	(decode_movz): Rename to ...
+	(aarch64_decode_movz): ... this.
+	(decode_orr_shifted_register_x): Rename to ...
+	(aarch64_decode_orr_shifted_register_x): ... this.
+	(decode_ret): Rename to ...
+	(aarch64_decode_ret): ... this.
+	(decode_stp_offset): Rename to ...
+	(aarch64_decode_stp_offset): ... this.
+	(decode_stp_offset_wb): Rename to ...
+	(aarch64_decode_stp_offset_wb): ... this.
+	(decode_stur): Rename to ...
+	(aarch64_decode_stur): ... this.
+	(decode_tb): Rename to ...
+	(aarch64_decode_tb): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(aarch64_analyze_prologue): Adjust calls to renamed functions.
+
 2015-09-20  Doug Evans  <xdje42@gmail.com>
 
 	* dwarf2read.c (add_partial_symbol): Remove outdated comments.

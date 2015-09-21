@@ -1,3 +1,8 @@
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* Makefile.in (aarch64-insn.o): New rule.
+	* configure.srv (aarch64*-*-linux*): Add aarch64-insn.o.
+
 2015-09-21  Yao Qi  <yao.qi@linaro.org>
 
 	* ax.c [!IN_PROCESS_AGENT] (gdb_agent_op_sizes): Define it.

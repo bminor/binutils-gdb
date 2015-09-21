@@ -644,7 +644,7 @@ TARGET_OBS = @TARGET_OBS@
 # All target-dependent objects files that require 64-bit CORE_ADDR
 # (used with --enable-targets=all --enable-64-bit-bfd).
 ALL_64_TARGET_OBS = \
-	aarch64-tdep.o aarch64-linux-tdep.o aarch64-newlib-tdep.o \
+	aarch64-tdep.o aarch64-linux-tdep.o aarch64-newlib-tdep.o aarch64-insn.o \
 	alphabsd-tdep.o alphafbsd-tdep.o alpha-linux-tdep.o alpha-mdebug-tdep.o \
 	alphanbsd-tdep.o alphaobsd-tdep.o alpha-tdep.o \
 	amd64fbsd-tdep.o amd64-darwin-tdep.o amd64-dicos-tdep.o \
@@ -986,7 +986,7 @@ common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
 common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h \
-nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h
+nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h arch/aarch64-insn.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -2334,6 +2334,15 @@ aarch64-linux-hw-point.o: ${srcdir}/nat/aarch64-linux-hw-point.c
 
 aarch64-linux.o: ${srcdir}/nat/aarch64-linux.c
 	$(COMPILE) $(srcdir)/nat/aarch64-linux.c
+	$(POSTCOMPILE)
+
+# gdb/arch/ dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the sub-directory.
+
+aarch64-insn.o: ${srcdir}/arch/aarch64-insn.c
+	$(COMPILE) $(srcdir)/arch/aarch64-insn.c
 	$(POSTCOMPILE)
 
 #
