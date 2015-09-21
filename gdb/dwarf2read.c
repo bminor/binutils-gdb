@@ -6887,8 +6887,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
              of the global scope.  But in Ada, we want to be able to access
              nested procedures globally.  So all Ada subprograms are stored
              in the global scope.  */
-	  /* prim_record_minimal_symbol (actual_name, addr, mst_text,
-	     objfile); */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
@@ -6897,8 +6895,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  /* prim_record_minimal_symbol (actual_name, addr, mst_file_text,
-	     objfile); */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
@@ -6967,8 +6963,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	      return;
 	    }
 
-	  /* prim_record_minimal_symbol (actual_name, addr + baseaddr,
-	     mst_file_data, objfile); */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_STATIC,
