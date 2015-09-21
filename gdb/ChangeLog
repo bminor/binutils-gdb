@@ -1,5 +1,16 @@
 2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
 
+	* aarch64-tdep.c (aarch64_analyze_prologue): New is_adrp
+	variable.  Call aarch64_decode_adr instead of
+	aarch64_decode_adrp.
+	* arch/aarch64-insn.h (aarch64_decode_adrp): Delete.
+	(aarch64_decode_adr): New function declaration.
+	* arch/aarch64-insn.c (aarch64_decode_adrp): Delete.
+	(aarch64_decode_adr): New function, factored out from
+	aarch64_decode_adrp to decode both adr and adrp instructions.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
 	* Makefile.in (ALL_64_TARGET_OBS): Add aarch64-insn.o.
 	(HFILES_NO_SRCDIR): Add arch/aarch64-insn.h.
 	(aarch64-insn.o): New rule.

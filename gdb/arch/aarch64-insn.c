@@ -55,25 +55,44 @@ decode_masked_match (uint32_t insn, uint32_t mask, uint32_t pattern)
   return (insn & mask) == pattern;
 }
 
-/* Decode an opcode if it represents an ADRP instruction.
+/* Decode an opcode if it represents an ADR or ADRP instruction.
 
    ADDR specifies the address of the opcode.
    INSN specifies the opcode to test.
+   IS_ADRP receives the 'op' field from the decoded instruction.
    RD receives the 'rd' field from the decoded instruction.
+   OFFSET receives the 'immhi:immlo' field from the decoded instruction.
 
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 int
-aarch64_decode_adrp (CORE_ADDR addr, uint32_t insn, unsigned *rd)
+aarch64_decode_adr (CORE_ADDR addr, uint32_t insn, int *is_adrp,
+		    unsigned *rd, int32_t *offset)
 {
-  if (decode_masked_match (insn, 0x9f000000, 0x90000000))
+  /* adr  0ii1 0000 iiii iiii iiii iiii iiir rrrr */
+  /* adrp 1ii1 0000 iiii iiii iiii iiii iiir rrrr */
+  if (decode_masked_match (insn, 0x1f000000, 0x10000000))
     {
+      uint32_t immlo = (insn >> 29) & 0x3;
+      int32_t immhi = extract_signed_bitfield (insn, 19, 5) << 2;
+
+      *is_adrp = (insn >> 31) & 0x1;
       *rd = (insn >> 0) & 0x1f;
+
+      if (*is_adrp)
+	{
+	  /* The ADRP instruction has an offset with a -/+ 4GB range,
+	     encoded as (immhi:immlo * 4096).  */
+	  *offset = (immhi | immlo) * 4096;
+	}
+      else
+	*offset = (immhi | immlo);
 
       if (aarch64_debug)
 	{
-	  debug_printf ("decode: 0x%s 0x%x adrp x%u, #?\n",
-			core_addr_to_string_nz (addr), insn, *rd);
+	  debug_printf ("decode: 0x%s 0x%x %s x%u, #?\n",
+			core_addr_to_string_nz (addr), insn,
+			*is_adrp ?  "adrp" : "adr", *rd);
 	}
       return 1;
     }

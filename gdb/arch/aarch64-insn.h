@@ -21,7 +21,8 @@
 
 extern int aarch64_debug;
 
-int aarch64_decode_adrp (CORE_ADDR addr, uint32_t insn, unsigned *rd);
+int aarch64_decode_adr (CORE_ADDR addr, uint32_t insn, int *is_adrp,
+			unsigned *rd, int32_t *offset);
 
 int aarch64_decode_b (CORE_ADDR addr, uint32_t insn, int *is_bl,
 		      int32_t *offset);

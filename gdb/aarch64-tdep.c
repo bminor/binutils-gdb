@@ -551,13 +551,15 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       int is_cbnz;
       int is_tbnz;
       unsigned bit;
+      int is_adrp;
       int32_t offset;
 
       insn = read_memory_unsigned_integer (start, 4, byte_order_for_code);
 
       if (aarch64_decode_add_sub_imm (start, insn, &rd, &rn, &imm))
 	regs[rd] = pv_add_constant (regs[rn], imm);
-      else if (aarch64_decode_adrp (start, insn, &rd))
+      else if (aarch64_decode_adr (start, insn, &is_adrp, &rd, &offset)
+	       && is_adrp)
 	regs[rd] = pv_unknown ();
       else if (aarch64_decode_b (start, insn, &is_link, &offset))
 	{
