@@ -38,6 +38,8 @@ typedef enum
   RX_SWord,
   RX_3Byte,
   RX_Long,
+  RX_Bad_Size,
+  RX_MAX_SIZE
 } RX_Size;
 
 typedef enum

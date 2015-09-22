@@ -1,3 +1,15 @@
+2015-09-22  Nick Clifton  <nickc@redhat.com>
+
+	* rx-decode.opc (bwl): Use RX_Bad_Size.
+	(sbwl): Likewise.
+	(ubwl): Likewise.  Rename to ubw.
+	(uBWL): Rename to uBW.
+	Replace all references to uBWL with uBW.
+	* rx-decode.c: Regenerate.
+	* rx-dis.c (size_names): Add entry for RX_Bad_Size.
+	(opsize_names): Likewise.
+	(print_insn_rx): Detect and report RX_Bad_Size.
+
 2015-09-22  Anton Blanchard  <anton@samba.org>
 
 	* ppc-opc.c (powerpc_opcodes): Add mfdscr, mfctrl, mtdscr and mtctrl.

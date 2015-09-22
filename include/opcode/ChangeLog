@@ -1,3 +1,7 @@
+2015-09-22  Nick Clifton  <nickc@redhat.com>
+
+	* rx.h (enum RX_Size): Add RX_Bad_Size entry.
+
 2015-09-09  Daniel Santos  <daniel.santos@pobox.com>
 
 	* visium.h (gen_reg_table): Make static.
