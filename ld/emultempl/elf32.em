@@ -49,7 +49,6 @@ fragment <<EOF
 #include "ldmain.h"
 #include "ldmisc.h"
 #include "ldexp.h"
-#include "ldlex.h"
 #include "ldlang.h"
 #include "ldfile.h"
 #include "ldemul.h"
@@ -61,6 +60,7 @@ fragment <<EOF
 
 /* Declare functions used by various EXTRA_EM_FILEs.  */
 static void gld${EMULATION_NAME}_before_parse (void);
+static void gld${EMULATION_NAME}_after_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static void gld${EMULATION_NAME}_after_allocation (void);
@@ -103,6 +103,21 @@ gld${EMULATION_NAME}_before_parse (void)
   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
+}
+
+EOF
+fi
+
+if test x"$LDEMUL_AFTER_PARSE" != xgld"$EMULATION_NAME"_after_parse; then
+fragment <<EOF
+
+static void
+gld${EMULATION_NAME}_after_parse (void)
+{
+  if (bfd_link_pie (&link_info))
+    link_info.flags_1 |= (bfd_vma) DF_1_PIE;
+
+  after_parse_default ();
 }
 
 EOF
@@ -2290,13 +2305,6 @@ fragment <<EOF
 
 EOF
 fi
-if test x"$GENERATE_PIE_SCRIPT" = xyes; then
-fragment <<EOF
-    case OPTION_PIE:
-      link_info.flags_1 |= (bfd_vma) DF_1_PIE;
-      break;
-EOF
-fi
 fragment <<EOF
     case 'z':
       if (strcmp (optarg, "defs") == 0)
@@ -2459,7 +2467,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_BEFORE_PARSE-gld${EMULATION_NAME}_before_parse},
   ${LDEMUL_SYSLIB-syslib_default},
   ${LDEMUL_HLL-hll_default},
-  ${LDEMUL_AFTER_PARSE-after_parse_default},
+  ${LDEMUL_AFTER_PARSE-gld${EMULATION_NAME}_after_parse},
   ${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open},
   ${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation},
   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},

@@ -94,7 +94,7 @@ nds32_elf_after_parse (void)
       target_optimize = target_optimize & (!NDS32_RELAX_EX9_ON);
     }
 
-  after_parse_default ();
+  gld${EMULATION_NAME}_after_parse ();
 }
 
 static void
