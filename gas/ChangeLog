@@ -1,3 +1,7 @@
+2015-09-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (nop_7): Recode using MAX.
+
 2015-09-05  Chen Gang  <gang.chen.5i5j@gmail.com>
 
 	* config/tc-avr.c (md_section_align): Append UL for -1 to avoid
