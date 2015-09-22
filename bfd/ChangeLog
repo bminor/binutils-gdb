@@ -1,3 +1,11 @@
+2015-09-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (bfd_update_compression_header): Use bfd_put_32 on
+	ch_type.
+	(bfd_check_compression_header): Use bfd_get_32 on ch_type.
+	(bfd_convert_section_contents): Use bfd_get_32 and bfd_put_32
+	on ch_type.
+
 2015-09-20  Rich Felker  <dalias@libc.org>
 
 	* elflink.c (_bfd_elf_link_create_dynamic_sections): Don't create
