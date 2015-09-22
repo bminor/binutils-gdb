@@ -1,3 +1,26 @@
+2015-09-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/alphaelf.em (alpha_after_parse): Call
+	gld${EMULATION_NAME}_after_parse instead of
+	after_parse_default.
+	* emultempl/cr16elf.em (cr16elf_after_parse): Likewise.
+	* emultempl/crxelf.em (crxelf_after_parse); Likewise.
+	* emultempl/hppaelf.em (hppaelf_after_parse): Likewise.
+	* emultempl/mipself.em (mips_after_parse): Likewise.
+	* emultempl/nds32elf.em (nds32_elf_after_parse): Likewise.
+	* emultempl/elf32.em: Don't include ldlex.h.
+	(gld${EMULATION_NAME}_after_parse): New function.
+	(gld${EMULATION_NAME}_handle_option) [GENERATE_PIE_SCRIPT]
+	<OPTION_PIE>: Removed.
+	(ld_${EMULATION_NAME}_emulation): Replace after_parse_default
+	with gld${EMULATION_NAME}_after_parse.
+	* emultempl/ia64elf.em (gld${EMULATION_NAME}_after_parse):
+	Renamed to ...
+	(ia64elf_after_parse): This.  Call
+	gld${EMULATION_NAME}_after_parse instead of after_parse_default.
+	(LDEMUL_AFTER_PARSE): Replace gld${EMULATION_NAME}_after_parse
+	with ia64elf_after_parse.
+
 2015-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* emulparams/solaris2.sh (GENERATE_PIE_SCRIPT): Set to yes.
