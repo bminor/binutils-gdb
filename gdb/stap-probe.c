@@ -1538,7 +1538,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
     }
 
   ret->args_parsed = 0;
-  ret->args_u.text = (void *) probe_args;
+  ret->args_u.text = probe_args;
 
   /* Successfully created probe.  */
   VEC_safe_push (probe_p, *probesp, (struct probe *) ret);

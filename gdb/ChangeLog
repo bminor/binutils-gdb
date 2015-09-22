@@ -1,3 +1,7 @@
+2015-09-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* stap-probe.c (handle_stap_probe): Remove unnecessary cast.
+
 2015-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli/cli-setshow.c (cmd_show_list): Constify a variable.
