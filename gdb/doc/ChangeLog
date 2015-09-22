@@ -1,3 +1,8 @@
+2015-09-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Specifying Source Directories): Fix
+	substitute-path example.
+
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (All-Stop Mode): Describe new scheduler-locking mode.

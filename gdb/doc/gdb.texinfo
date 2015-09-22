@@ -7983,11 +7983,11 @@ For example, if the file @file{/foo/bar/baz.c} was moved to
 @file{/mnt/cross/baz.c}, then the command
 
 @smallexample
-(@value{GDBP}) set substitute-path /usr/src /mnt/cross
+(@value{GDBP}) set substitute-path /foo/bar /mnt/cross
 @end smallexample
 
 @noindent
-will tell @value{GDBN} to replace @samp{/usr/src} with
+will tell @value{GDBN} to replace @samp{/foo/bar} with
 @samp{/mnt/cross}, which will allow @value{GDBN} to find the file
 @file{baz.c} even though it was moved.
 
