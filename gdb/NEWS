@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.10
 
+* Record btrace now supports non-stop mode.
+
 * Support for tracepoints on aarch64-linux was added in GDBserver.
 
 * The 'record instruction-history' command now indicates speculative execution
@@ -15,6 +17,10 @@
 * Multi-architecture debugging is supported on AArch64 GNU/Linux.
   GDB now is able to debug both AArch64 applications and ARM applications
   at the same time.
+
+* Support for fast tracepoints on aarch64-linux was added in GDBserver,
+  including JIT compiling fast tracepoint's conditional expression bytecode
+  into native code.
 
 * New commands
 
@@ -42,6 +48,9 @@ show remote multiprocess-extensions-packet
   - and source for all relevant files is now printed.
   The "/m" option is now considered deprecated: its "source-centric"
   output hasn't proved useful in practice.
+
+* The "set scheduler-locking" command supports a new mode "replay".
+  It behaves like "off" in record mode and like "on" in replay mode.
 
 * Support for various ROM monitors has been removed:
 

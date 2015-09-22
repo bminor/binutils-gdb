@@ -49,6 +49,7 @@ fragment <<EOF
 #include "ldmain.h"
 #include "ldmisc.h"
 #include "ldexp.h"
+#include "ldlex.h"
 #include "ldlang.h"
 #include "ldfile.h"
 #include "ldemul.h"
@@ -2287,6 +2288,13 @@ fragment <<EOF
 	einfo (_("%P%F: invalid hash style \`%s'\n"), optarg);
       break;
 
+EOF
+fi
+if test x"$GENERATE_PIE_SCRIPT" = xyes; then
+fragment <<EOF
+    case OPTION_PIE:
+      link_info.flags_1 |= (bfd_vma) DF_1_PIE;
+      break;
 EOF
 fi
 fragment <<EOF

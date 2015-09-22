@@ -1,3 +1,278 @@
+2015-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-setshow.c (cmd_show_list): Constify a variable.
+	* linespec.c (linespec_lexer_lex_string): Same.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* NEWS: Mention support for fast tracepoints on aarch64-linux.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* aarch64-tdep.c (aarch64_analyze_prologue): New is_adrp
+	variable.  Call aarch64_decode_adr instead of
+	aarch64_decode_adrp.
+	* arch/aarch64-insn.h (aarch64_decode_adrp): Delete.
+	(aarch64_decode_adr): New function declaration.
+	* arch/aarch64-insn.c (aarch64_decode_adrp): Delete.
+	(aarch64_decode_adr): New function, factored out from
+	aarch64_decode_adrp to decode both adr and adrp instructions.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Add aarch64-insn.o.
+	(HFILES_NO_SRCDIR): Add arch/aarch64-insn.h.
+	(aarch64-insn.o): New rule.
+	* configure.tgt (aarch64*-*-elf): Add aarch64-insn.o.
+	(aarch64*-*-linux*): Likewise.
+	* arch/aarch64-insn.c: New file.
+	* arch/aarch64-insn.h: New file.
+	* aarch64-tdep.c: Include arch/aarch64-insn.h.
+	(aarch64_debug): Move to arch/aarch64-insn.c.  Declare in
+	arch/aarch64-insn.h.
+	(decode_add_sub_imm): Rename to ...
+	(aarch64_decode_add_sub_imm): ... this.
+	(decode_adrp): Rename to ...
+	(aarch64_decode_adrp): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(decode_b): Rename to ...
+	(aarch64_decode_b): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(decode_bcond): Rename to ...
+	(aarch64_decode_bcond): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(decode_br): Rename to ...
+	(aarch64_decode_br): ... this.
+	(decode_cb): Rename to ...
+	(aarch64_decode_cb): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(decode_eret): Rename to ...
+	(aarch64_decode_eret): ... this.
+	(decode_movz): Rename to ...
+	(aarch64_decode_movz): ... this.
+	(decode_orr_shifted_register_x): Rename to ...
+	(aarch64_decode_orr_shifted_register_x): ... this.
+	(decode_ret): Rename to ...
+	(aarch64_decode_ret): ... this.
+	(decode_stp_offset): Rename to ...
+	(aarch64_decode_stp_offset): ... this.
+	(decode_stp_offset_wb): Rename to ...
+	(aarch64_decode_stp_offset_wb): ... this.
+	(decode_stur): Rename to ...
+	(aarch64_decode_stur): ... this.
+	(decode_tb): Rename to ...
+	(aarch64_decode_tb): ... this.  Move to arch/aarch64-insn.c.
+	Declare in arch/aarch64-insn.h.
+	(aarch64_analyze_prologue): Adjust calls to renamed functions.
+
+2015-09-20  Doug Evans  <xdje42@gmail.com>
+
+	* dwarf2read.c (add_partial_symbol): Remove outdated comments.
+
+2015-09-20  Doug Evans  <xdje42@gmail.com>
+
+	* dwarf2read.c (dwarf2_compute_name): Add FIXME.  Don't use a local
+	variable name that collides with a parameter.
+
+2015-09-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2loc.c (locexpr_get_frame_base): Renames
+	block_op_get_frame_base.
+	(dwarf2_block_frame_base_locexpr_funcs): Replace reference to
+	block_op_get_frame_base by reference to locexpr_get_frame_base.
+	(loclist_get_frame_base): New function, near identical copy of
+	locexpr_get_frame_base.
+	(dwarf2_block_frame_base_loclist_funcs): Replace reference to
+	block_op_get_frame_base by reference to loclist_get_frame_base.
+
+2015-09-19  Doug Evans  <xdje42@gmail.com>
+
+	* ravenscar-thread.c (ravenscar_inferior_created): Replace
+	current_inferior ()->gdbarch with its wrapper target_gdbarch.
+
+2015-09-18  Doug Evans  <xdje42@gmail.com>
+
+	* linux-thread-db.c (record_thread): Return the created thread.
+	(thread_from_lwp): Likewise.
+	(thread_db_get_thread_local_address): Update.
+
+2015-09-18  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (general_symbol_info) <mangled_lang>: Delete struct,
+	move only member demangled_name up.  All uses updated.
+
+2015-09-18  Doug Evans  <xdje42@gmail.com>
+
+	* findvar.c (default_read_var_value) <LOC_UNRESOLVED>: Include the
+	kind of minimal symbol in the error message.
+	* objfiles.c (objfile_flavour_name): New function.
+	* objfiles.h (objfile_flavour_name): Declare.
+
+2015-09-18  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/aarch64-linux.c: Include elf/common.h,
+	nat/gdb_ptrace.h, asm/ptrace.h and sys/uio.h.
+	(aarch64_ps_get_thread_area): New function.
+	* nat/aarch64-linux.h: Include gdb_proc_service.h.
+	(aarch64_ps_get_thread_area): Declare.
+	* aarch64-linux-nat.c (ps_get_thread_area): Call
+	aarch64_ps_get_thread_area.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_resume): Honour scheduler-locking.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* NEWS: Announce new scheduler-locking mode.
+	* infrun.c (schedlock_replay): New.
+	(scheduler_enums): Add schedlock_replay.
+	(scheduler_mode): Change default to schedlock_replay.
+	(user_visible_resume_ptid): Handle schedlock_replay.
+	(clear_proceed_status_thread): Stop replaying if resumed thread is
+	not replaying.
+	(schedlock_applies): Handle schedlock_replay.
+	(_initialize_infrun): Document new scheduler-locking mode.
+	* record-btrace.c (record_btrace_resume): Remove code to stop other
+	threads when not replaying the resumed thread.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c ((record_btrace_will_replay): New.
+	(init_record_btrace_ops): Initialize to_record_will_replay.
+	* record-full.c ((record_full_will_replay): New.
+	(init_record_full_ops): Initialize to_record_will_replay.
+	* target-delegates.c: Regenerated.
+	* target.c (target_record_will_replay): New.
+	* target.h (struct target_ops) <to_record_will_replay>: New.
+	(target_record_will_replay): New.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_resume): Call
+	target_record_stop_replaying.
+	(record_btrace_stop_replaying_all): New.
+	(init_record_btrace_ops): Initialize to_record_stop_replaying.
+	* record-full.c (record_full_stop_replaying): New.
+	(init_record_full_ops ): Initialize to_record_stop_replaying.
+	* target-delegates.c: Regenerated.
+	* target.c (target_record_stop_replaying): New.
+	* target.h (struct target_ops) <to_record_stop_replaying>: New.
+	(target_record_stop_replaying): New.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_xfer_partial)
+	(record_btrace_store_registers, record_btrace_prepare_to_store):
+	Call record_btrace_is_replaying with inferior_ptid instead of
+	minus_one_ptid.
+	(record_btrace_store_registers): Change error message.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_is_replaying): Add ptid argument.
+	Update users to pass minus_one_ptid.
+	* record-full.c (record_full_is_replaying): Add ptid argument (ignored).
+	* record.c (cmd_record_delete): Pass inferior_ptid to
+	target_record_is_replaying.
+	* target-delegates.c: Regenerated.
+	* target.c (target_record_is_replaying): Add ptid argument.
+	* target.h (struct target_ops) <to_record_is_replaying>: Add ptid
+	argument.
+	(target_record_is_replaying): Add ptid argument.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_open): Remove non_stop check.
+	* NEWS: Announce that record btrace supports non-stop mode.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* infrun.c (handle_inferior_event_1): Switch to the eventing thread
+	in the TARKET_WAITKIND_NO_HISTORY case.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_maybe_mark_async_event): New.
+	(record_btrace_wait): Call record_btrace_maybe_mark_async_event.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (get_thread_current_frame): New.
+	(record_btrace_start_replaying): Call get_thread_current_frame.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_resume_thread): A move request
+	overwrites a previous move request.
+	(record_btrace_find_resume_thread): Removed.
+	(record_btrace_resume): Resume all requested threads.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c: Include vec.h.
+	(record_btrace_find_thread_to_move): Removed.
+	(btrace_step_no_resumed, btrace_step_again)
+	(record_btrace_stop_replaying_at_end): New.
+	(record_btrace_cancel_resume): Call record_btrace_stop_replaying_at_end.
+	(record_btrace_single_step_forward): Remove calls to
+	record_btrace_stop_replaying.
+	(record_btrace_step_thread): Do only one step for BTHR_CONT and
+	BTHR_RCONT.  Keep threads at the end of their history moving.
+	(record_btrace_wait): Call record_btrace_step_thread for all threads
+	until one reports an event.  Call record_btrace_stop_replaying_at_end
+	for the eventing thread.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_single_step_forward): Return
+	NO_HISTORY if a step brings us to the end of the execution history.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_step_thread): Move breakpoint check
+	to ...
+	(record_btrace_single_step_forward): ... here and
+	(record_btrace_single_step_backward): ... here.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (btrace_step_spurious)
+	(record_btrace_single_step_forward)
+	(record_btrace_single_step_backward): New.
+	(record_btrace_step_thread): Call record_btrace_single_step_forward
+	and record_btrace_single_step_backward.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_replay_at_breakpoint): New.
+	(record_btrace_step_thread): Call record_btrace_replay_at_breakpoint.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (btrace_thread_flag_to_str)
+	(record_btrace_cancel_resume): New.
+	(record_btrace_step_thread): Call btrace_thread_flag_to_str.
+	(record_btrace_resume): Print execution direction.
+	(record_btrace_resume_thread): Call btrace_thread_flag_to_str.
+	(record_btrace_wait): Call record_btrace_cancel_resume.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.h (enum btrace_thread_flag) <BTHR_STOP>: New.
+	* record-btrace (record_btrace_resume_thread): Clear BTHR_STOP.
+	(record_btrace_find_thread_to_move): Also accept threads that have
+	BTHR_STOP set.
+	(btrace_step_stopped_on_request, record_btrace_stop): New.
+	(record_btrace_step_thread): Support BTHR_STOP.
+	(record_btrace_wait): Also clear BTHR_STOP when stopping other threads.
+	(init_record_btrace_ops): Initialize to_stop.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_wait): Replace non_stop check with
+	target_is_non_stop_p ().
+
 2015-09-15  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-typeprint.c (print_array_type): Do not describe arrays as

@@ -1,3 +1,7 @@
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (All-Stop Mode): Describe new scheduler-locking mode.
+
 2015-09-15  Pedro Alves  <palves@redhat.com>
 
 	PR remote/18965

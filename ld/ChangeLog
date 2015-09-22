@@ -1,3 +1,48 @@
+2015-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* emulparams/solaris2.sh (GENERATE_PIE_SCRIPT): Set to yes.
+
+	* emultempl/elf32.em: Include ldlex.h.
+	(gld${EMULATION_NAME}_handle_option) [GENERATE_PIE_SCRIPT]
+	<OPTION_PIE>: Set DF_1_PIE.
+
+2015-09-22  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo: Put --dotsyms/--no-dotsyms on separate lines.
+	Ditto for --save-restore-funcs and --tls-get-addr-optimize.
+
+2015-09-20  Rich Felker  <dalias@libc.org>
+
+	* ld.texinfo (--no-dynamic-linker): Document.
+	* ldlex.h (enum option_values): Add OPTION_NO_DYNAMIC_LINKER.
+	* lexsup.c (ld_options, parse_args): Handle --no-dynamic-linker.
+
+2015-09-18  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo: Document PowerPC64 --{no-,}save-restore-funcs.
+
+2015-09-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (params): Init tls_get_addr_opt field to -1.
+	(OPTION_TLS_GET_ADDR_OPT): Define.
+	(PARSE_AND_LIST_LONGOPTS): Handle --tls-get-addr-opt.
+	(PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Likewise.
+	* ld.texinfo: Document --tls-get-addr-optimize and
+	--no-tls-get-addr-optimize.
+
+2015-09-18  Alan Modra  <amodra@gmail.com>
+
+	PR ld/18963
+	* ldexp.h (struct ldexp_control): Add rel_from_abs.
+	(ldexp_finalize_syms): Declare.
+	* ldexp.c (new_rel_from_abs): Keep absolute for expressions
+	outside of output section statements.  Set rel_from_abs.
+	(make_abs, exp_fold_tree, exp_fold_tree_no_dot): Clear rel_from_abs.
+	(struct definedness_hash_entry): Add final_sec, and comment.
+	(update_definedness): Set final_sec.
+	(set_sym_sections, ldexp_finalize_syms): New functions.
+	* ldlang.c (lang_process): Call ldexp_finalize_syms.
+
 2015-09-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_CN.po: Updated simplified Chinese translation.

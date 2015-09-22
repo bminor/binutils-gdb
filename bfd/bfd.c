@@ -2000,7 +2000,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 		{
 		  Elf64_External_Chdr *echdr
 		    = (Elf64_External_Chdr *) contents;
-		  bfd_put_64 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+		  bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
 		  bfd_put_64 (abfd, sec->size, &echdr->ch_size);
 		  bfd_put_64 (abfd, 1 << sec->alignment_power,
 			      &echdr->ch_addralign);
@@ -2061,7 +2061,7 @@ bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
       else
 	{
 	  Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-	  chdr.ch_type = bfd_get_64 (abfd, &echdr->ch_type);
+	  chdr.ch_type = bfd_get_32 (abfd, &echdr->ch_type);
 	  chdr.ch_size = bfd_get_64 (abfd, &echdr->ch_size);
 	  chdr.ch_addralign = bfd_get_64 (abfd, &echdr->ch_addralign);
 	}
@@ -2222,7 +2222,7 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   else
     {
       Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-      chdr.ch_type = bfd_get_64 (ibfd, &echdr->ch_type);
+      chdr.ch_type = bfd_get_32 (ibfd, &echdr->ch_type);
       chdr.ch_size = bfd_get_64 (ibfd, &echdr->ch_size);
       chdr.ch_addralign = bfd_get_64 (ibfd, &echdr->ch_addralign);
 
@@ -2249,7 +2249,7 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   else
     {
       Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-      bfd_put_64 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+      bfd_put_32 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
       bfd_put_64 (obfd, chdr.ch_size, &echdr->ch_size);
       bfd_put_64 (obfd, chdr.ch_addralign, &echdr->ch_addralign);
     }

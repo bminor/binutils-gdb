@@ -1614,6 +1614,16 @@ objfile_debug_name (const struct objfile *objfile)
   return lbasename (objfile->original_name);
 }
 
+/* See objfiles.h.  */
+
+const char *
+objfile_flavour_name (struct objfile *objfile)
+{
+  if (objfile->obfd != NULL)
+    return bfd_flavour_name (bfd_get_flavour (objfile->obfd));
+  return NULL;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_objfiles;
 

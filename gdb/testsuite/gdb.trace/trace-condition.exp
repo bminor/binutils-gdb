@@ -25,6 +25,8 @@ if [is_amd64_regs_target] {
     set pcreg "\$rip"
 } elseif [is_x86_like_target] {
     set pcreg "\$eip"
+} elseif [is_aarch64_target] {
+    set pcreg "\$pc"
 } else {
     set pcreg "\$pc"
 }

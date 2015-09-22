@@ -22,6 +22,11 @@
 #include "nat/aarch64-linux-hw-point.h"
 #include "nat/aarch64-linux.h"
 
+#include "elf/common.h"
+#include "nat/gdb_ptrace.h"
+#include <asm/ptrace.h>
+#include <sys/uio.h>
+
 /* Called when resuming a thread LWP.
    The hardware debug registers are updated when there is any change.  */
 
@@ -194,4 +199,41 @@ aarch64_siginfo_from_compat_siginfo (siginfo_t *to, compat_siginfo_t *from)
 	  break;
 	}
     }
+}
+
+/* Called by libthread_db.  Returns a pointer to the thread local
+   storage (or its descriptor).  */
+
+ps_err_e
+aarch64_ps_get_thread_area (const struct ps_prochandle *ph,
+			    lwpid_t lwpid, int idx, void **base,
+			    int is_64bit_p)
+{
+  struct iovec iovec;
+  uint64_t reg64;
+  uint32_t reg32;
+
+  if (is_64bit_p)
+    {
+      iovec.iov_base = &reg64;
+      iovec.iov_len = sizeof (reg64);
+    }
+  else
+    {
+      iovec.iov_base = &reg32;
+      iovec.iov_len = sizeof (reg32);
+    }
+
+  if (ptrace (PTRACE_GETREGSET, lwpid, NT_ARM_TLS, &iovec) != 0)
+    return PS_ERR;
+
+  /* IDX is the bias from the thread pointer to the beginning of the
+     thread descriptor.  It has to be subtracted due to implementation
+     quirks in libthread_db.  */
+  if (is_64bit_p)
+    *base = (void *) (reg64 - idx);
+  else
+    *base = (void *) (uintptr_t) (reg32 - idx);
+
+  return PS_OK;
 }

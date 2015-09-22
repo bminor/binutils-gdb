@@ -1,3 +1,12 @@
+2015-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* common.h (DF_1_STUB, DF_1_PIE): Define.
+
+2015-09-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* external.h (Elf64_External_Chdr): Change ch_type to 4 bytes
+	and add ch_reserved.
+
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64.h (R_AARCH64_P32_TLSLD_ADD_DTPREL_LO12): Define.

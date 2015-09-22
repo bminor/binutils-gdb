@@ -240,7 +240,10 @@ enum btrace_thread_flag
   BTHR_RCONT = (1 << 3),
 
   /* The thread is to be moved.  */
-  BTHR_MOVE = (BTHR_STEP | BTHR_RSTEP | BTHR_CONT | BTHR_RCONT)
+  BTHR_MOVE = (BTHR_STEP | BTHR_RSTEP | BTHR_CONT | BTHR_RCONT),
+
+  /* The thread is to be stopped.  */
+  BTHR_STOP = (1 << 4)
 };
 
 #if defined (HAVE_LIBIPT)

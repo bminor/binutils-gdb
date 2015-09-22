@@ -1,3 +1,175 @@
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* linux-aarch64-low-.c: Include ax.h and tracepoint.h.
+	(enum aarch64_opcodes) <RET>, <SUBS>, <AND>, <ORR>, <ORN>,
+	<EOR>, <LSLV>, <LSRV>, <ASRV>, <SBFM>, <UBFM>, <CSINC>, <MUL>,
+	<NOP>: New.
+	(enum aarch64_condition_codes): New enum.
+	(w0): New static global.
+	(fp): Likewise.
+	(lr): Likewise.
+	(struct aarch64_memory_operand) <type>: New
+	MEMORY_OPERAND_POSTINDEX type.
+	(postindex_memory_operand): New helper function.
+	(emit_ret): New function.
+	(emit_load_store_pair): New function, factored out of emit_stp
+	with support for MEMORY_OPERAND_POSTINDEX.
+	(emit_stp): Rewrite using emit_load_store_pair.
+	(emit_ldp): New function.
+	(emit_load_store): Likewise.
+	(emit_ldr): Mention post-index instruction in comment.
+	(emit_ldrh): New function.
+	(emit_ldrb): New function.
+	(emit_ldrsw): Mention post-index instruction in comment.
+	(emit_str): Likewise.
+	(emit_subs): New function.
+	(emit_cmp): Likewise.
+	(emit_and): Likewise.
+	(emit_orr): Likewise.
+	(emit_orn): Likewise.
+	(emit_eor): Likewise.
+	(emit_mvn): Likewise.
+	(emit_lslv): Likewise.
+	(emit_lsrv): Likewise.
+	(emit_asrv): Likewise.
+	(emit_mul): Likewise.
+	(emit_sbfm): Likewise.
+	(emit_sbfx): Likewise.
+	(emit_ubfm): Likewise.
+	(emit_ubfx): Likewise.
+	(emit_csinc): Likewise.
+	(emit_cset): Likewise.
+	(emit_nop): Likewise.
+	(emit_ops_insns): New helper function.
+	(emit_pop): Likewise.
+	(emit_push): Likewise.
+	(aarch64_emit_prologue): New function.
+	(aarch64_emit_epilogue): Likewise.
+	(aarch64_emit_add): Likewise.
+	(aarch64_emit_sub): Likewise.
+	(aarch64_emit_mul): Likewise.
+	(aarch64_emit_lsh): Likewise.
+	(aarch64_emit_rsh_signed): Likewise.
+	(aarch64_emit_rsh_unsigned): Likewise.
+	(aarch64_emit_ext): Likewise.
+	(aarch64_emit_log_not): Likewise.
+	(aarch64_emit_bit_and): Likewise.
+	(aarch64_emit_bit_or): Likewise.
+	(aarch64_emit_bit_xor): Likewise.
+	(aarch64_emit_bit_not): Likewise.
+	(aarch64_emit_equal): Likewise.
+	(aarch64_emit_less_signed): Likewise.
+	(aarch64_emit_less_unsigned): Likewise.
+	(aarch64_emit_ref): Likewise.
+	(aarch64_emit_if_goto): Likewise.
+	(aarch64_emit_goto): Likewise.
+	(aarch64_write_goto_address): Likewise.
+	(aarch64_emit_const): Likewise.
+	(aarch64_emit_call): Likewise.
+	(aarch64_emit_reg): Likewise.
+	(aarch64_emit_pop): Likewise.
+	(aarch64_emit_stack_flush): Likewise.
+	(aarch64_emit_zero_ext): Likewise.
+	(aarch64_emit_swap): Likewise.
+	(aarch64_emit_stack_adjust): Likewise.
+	(aarch64_emit_int_call_1): Likewise.
+	(aarch64_emit_void_call_2): Likewise.
+	(aarch64_emit_eq_goto): Likewise.
+	(aarch64_emit_ne_goto): Likewise.
+	(aarch64_emit_lt_goto): Likewise.
+	(aarch64_emit_le_goto): Likewise.
+	(aarch64_emit_gt_goto): Likewise.
+	(aarch64_emit_ge_got): Likewise.
+	(aarch64_emit_ops_impl): New static global variable.
+	(aarch64_emit_ops): New target function, return
+	&aarch64_emit_ops_impl.
+	(struct linux_target_ops): Install it.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* Makefile.in (linux-aarch64-ipa.o, aarch64-ipa.o): New rules.
+	* configure.srv (aarch64*-*-linux*): Add linux-aarch64-ipa.o and
+	aarch64-ipa.o.
+	* linux-aarch64-ipa.c: New file.
+	* linux-aarch64-low.c: Include arch/aarch64-insn.h, inttypes.h
+	and endian.h.
+	(aarch64_get_thread_area): New target method.
+	(extract_signed_bitfield): New helper function.
+	(aarch64_decode_ldr_literal): New function.
+	(enum aarch64_opcodes): New enum.
+	(struct aarch64_register): New struct.
+	(struct aarch64_operand): New struct.
+	(x0): New static global.
+	(x1): Likewise.
+	(x2): Likewise.
+	(x3): Likewise.
+	(x4): Likewise.
+	(w2): Likewise.
+	(ip0): Likewise.
+	(sp): Likewise.
+	(xzr): Likewise.
+	(aarch64_register): New helper function.
+	(register_operand): Likewise.
+	(immediate_operand): Likewise.
+	(struct aarch64_memory_operand): New struct.
+	(offset_memory_operand): New helper function.
+	(preindex_memory_operand): Likewise.
+	(enum aarch64_system_control_registers): New enum.
+	(ENCODE): New macro.
+	(emit_insn): New helper function.
+	(emit_b): New function.
+	(emit_bcond): Likewise.
+	(emit_cb): Likewise.
+	(emit_tb): Likewise.
+	(emit_blr): Likewise.
+	(emit_stp): Likewise.
+	(emit_ldp_q_offset): Likewise.
+	(emit_stp_q_offset): Likewise.
+	(emit_load_store): Likewise.
+	(emit_ldr): Likewise.
+	(emit_ldrsw): Likewise.
+	(emit_str): Likewise.
+	(emit_ldaxr): Likewise.
+	(emit_stxr): Likewise.
+	(emit_stlr): Likewise.
+	(emit_data_processing_reg): Likewise.
+	(emit_data_processing): Likewise.
+	(emit_add): Likewise.
+	(emit_sub): Likewise.
+	(emit_mov): Likewise.
+	(emit_movk): Likewise.
+	(emit_mov_addr): Likewise.
+	(emit_mrs): Likewise.
+	(emit_msr): Likewise.
+	(emit_sevl): Likewise.
+	(emit_wfe): Likewise.
+	(append_insns): Likewise.
+	(can_encode_int32_in): New helper function.
+	(aarch64_relocate_instruction): New function.
+	(aarch64_install_fast_tracepoint_jump_pad): Likewise.
+	(aarch64_get_min_fast_tracepoint_insn_len): Likewise.
+	(struct linux_target_ops): Install aarch64_get_thread_area,
+	aarch64_install_fast_tracepoint_jump_pad and
+	aarch64_get_min_fast_tracepoint_insn_len.
+
+2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
+
+	* Makefile.in (aarch64-insn.o): New rule.
+	* configure.srv (aarch64*-*-linux*): Add aarch64-insn.o.
+
+2015-09-21  Yao Qi  <yao.qi@linaro.org>
+
+	* ax.c [!IN_PROCESS_AGENT] (gdb_agent_op_sizes): Define it.
+
+2015-09-21  Yao Qi  <yao.qi@linaro.org>
+
+	* tracepoint.c (max_jump_pad_size): Remove.
+
+2015-09-18  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c: Don't include sys/uio.h.
+	(ps_get_thread_area): Call aarch64_ps_get_thread_area.
+
 2015-09-16  Wei-cheng Wang  <cole945@gmail.com>
 
 	* tracepoint.c (eval_result_type): Change prototype.

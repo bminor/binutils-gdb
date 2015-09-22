@@ -6887,8 +6887,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
              of the global scope.  But in Ada, we want to be able to access
              nested procedures globally.  So all Ada subprograms are stored
              in the global scope.  */
-	  /* prim_record_minimal_symbol (actual_name, addr, mst_text,
-	     objfile); */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
@@ -6897,8 +6895,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  /* prim_record_minimal_symbol (actual_name, addr, mst_file_text,
-	     objfile); */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_BLOCK,
@@ -6967,8 +6963,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	      return;
 	    }
 
-	  /* prim_record_minimal_symbol (actual_name, addr + baseaddr,
-	     mst_file_data, objfile); */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       built_actual_name != NULL,
 			       VAR_DOMAIN, LOC_STATIC,
@@ -8431,8 +8425,13 @@ dwarf2_compute_name (const char *name,
   if (name == NULL)
     name = dwarf2_name (die, cu);
 
-  /* For Fortran GDB prefers DW_AT_*linkage_name if present but otherwise
-     compute it by typename_concat inside GDB.  */
+  /* For Fortran GDB prefers DW_AT_*linkage_name for the physname if present
+     but otherwise compute it by typename_concat inside GDB.
+     FIXME: Actually this is not really true, or at least not always true.
+     It's all very confusing.  SYMBOL_SET_NAMES doesn't try to demangle
+     Fortran names because there is no mangling standard.  So new_symbol_full
+     will set the demangled name to the result of dwarf2_full_name, and it is
+     the demangled name that GDB uses if it exists.  */
   if (cu->language == language_ada
       || (cu->language == language_fortran && physname))
     {
@@ -8441,13 +8440,13 @@ dwarf2_compute_name (const char *name,
 	 to be able to reference.  Ideally, we want the user to be able
 	 to reference this entity using either natural or linkage name,
 	 but we haven't started looking at this enhancement yet.  */
-      const char *name;
+      const char *linkage_name;
 
-      name = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
-      if (name == NULL)
-	name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
-      if (name != NULL)
-	return name;
+      linkage_name = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
+      if (linkage_name == NULL)
+	linkage_name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
+      if (linkage_name != NULL)
+	return linkage_name;
     }
 
   /* These are the only languages we know how to qualify names in.  */

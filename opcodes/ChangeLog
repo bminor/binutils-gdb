@@ -1,3 +1,7 @@
+2015-09-22  Anton Blanchard  <anton@samba.org>
+
+	* ppc-opc.c (powerpc_opcodes): Add mfdscr, mfctrl, mtdscr and mtctrl.
+
 2015-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-dis.c (print_insn_sparc): Handle the privileged register

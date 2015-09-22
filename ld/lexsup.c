@@ -138,6 +138,9 @@ static const struct ld_option ld_options[] =
   { {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
     'I', N_("PROGRAM"), N_("Set PROGRAM as the dynamic linker to use"),
     TWO_DASHES },
+  { {"no-dynamic-linker", no_argument, NULL, OPTION_NO_DYNAMIC_LINKER},
+    '\0', NULL, N_("Produce an executable with no program interpreter header"),
+    TWO_DASHES },
   { {"library", required_argument, NULL, 'l'},
     'l', N_("LIBNAME"), N_("Search for library LIBNAME"), TWO_DASHES },
   { {"library-path", required_argument, NULL, 'L'},
@@ -761,6 +764,10 @@ parse_args (unsigned argc, char **argv)
 	case 'I':		/* Used on Solaris.  */
 	case OPTION_DYNAMIC_LINKER:
 	  command_line.interpreter = optarg;
+	  link_info.nointerp = 0;
+	  break;
+	case OPTION_NO_DYNAMIC_LINKER:
+	  link_info.nointerp = 1;
 	  break;
 	case OPTION_SYSROOT:
 	  /* Already handled in ldmain.c.  */

@@ -2916,9 +2916,6 @@ in_readonly_region (CORE_ADDR addr, ULONGEST length)
   return 0;
 }
 
-/* The maximum size of a jump pad entry.  */
-static const int max_jump_pad_size = 0x100;
-
 static CORE_ADDR gdb_jump_pad_head;
 
 /* Return the address of the next free jump space.  */

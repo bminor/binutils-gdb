@@ -8136,7 +8136,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
   htab->tls_get_addr_fd = ((struct ppc_link_hash_entry *)
 			   elf_link_hash_lookup (&htab->elf, "__tls_get_addr",
 						 FALSE, FALSE, TRUE));
-  if (!htab->params->no_tls_get_addr_opt)
+  if (htab->params->tls_get_addr_opt)
     {
       struct elf_link_hash_entry *opt, *opt_fd, *tga, *tga_fd;
 
@@ -8203,8 +8203,8 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 		}
 	    }
 	}
-      else
-	htab->params->no_tls_get_addr_opt = TRUE;
+      else if (htab->params->tls_get_addr_opt < 0)
+	htab->params->tls_get_addr_opt = 0;
     }
   return _bfd_elf_tls_setup (info->output_bfd, info);
 }
@@ -9815,7 +9815,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
   if (htab->elf.dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (bfd_link_executable (info))
+      if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  if (s == NULL)
@@ -10125,7 +10125,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	    return FALSE;
 	}
 
-      tls_opt = (!htab->params->no_tls_get_addr_opt
+      tls_opt = (htab->params->tls_get_addr_opt
 		 && htab->tls_get_addr_fd != NULL
 		 && htab->tls_get_addr_fd->elf.plt.plist != NULL);
       if (tls_opt || !htab->opd_abi)
@@ -10310,7 +10310,7 @@ plt_stub_size (struct ppc_link_hash_table *htab,
   if (stub_entry->h != NULL
       && (stub_entry->h == htab->tls_get_addr_fd
 	  || stub_entry->h == htab->tls_get_addr)
-      && !htab->params->no_tls_get_addr_opt)
+      && htab->params->tls_get_addr_opt)
     size += 13 * 4;
   return size;
 }
@@ -10354,7 +10354,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
       && plt_thread_safe
       && !((stub_entry->h == htab->tls_get_addr_fd
 	    || stub_entry->h == htab->tls_get_addr)
-	   && !htab->params->no_tls_get_addr_opt))
+	   && htab->params->tls_get_addr_opt))
     {
       bfd_vma pltoff = stub_entry->plt_ent->plt.offset & ~1;
       bfd_vma pltindex = ((pltoff - PLT_INITIAL_ENTRY_SIZE (htab))
@@ -11005,7 +11005,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (stub_entry->h != NULL
 	  && (stub_entry->h == htab->tls_get_addr_fd
 	      || stub_entry->h == htab->tls_get_addr)
-	  && !htab->params->no_tls_get_addr_opt)
+	  && htab->params->tls_get_addr_opt)
 	p = build_tls_get_addr_stub (htab, stub_entry, loc, off, r);
       else
 	p = build_plt_stub (htab, stub_entry, loc, off, r);
@@ -13911,7 +13911,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			  if (h != NULL
 			      && (h == htab->tls_get_addr_fd
 				  || h == htab->tls_get_addr)
-			      && !htab->params->no_tls_get_addr_opt)
+			      && htab->params->tls_get_addr_opt)
 			    {
 			      /* Special stub used, leave nop alone.  */
 			    }

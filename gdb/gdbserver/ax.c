@@ -69,6 +69,7 @@ static const char *gdb_agent_op_names [gdb_agent_op_last] =
 #undef DEFOP
   };
 
+#ifndef IN_PROCESS_AGENT
 static const unsigned char gdb_agent_op_sizes [gdb_agent_op_last] =
   {
     0
@@ -76,6 +77,7 @@ static const unsigned char gdb_agent_op_sizes [gdb_agent_op_last] =
 #include "ax.def"
 #undef DEFOP
   };
+#endif
 
 /* A wrapper for gdb_agent_op_names that does some bounds-checking.  */
 

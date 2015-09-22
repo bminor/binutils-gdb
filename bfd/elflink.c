@@ -246,7 +246,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* A dynamically linked executable has a .interp section, but a
      shared library does not.  */
-  if (bfd_link_executable (info))
+  if (bfd_link_executable (info) && !info->nointerp)
     {
       s = bfd_make_section_anyway_with_flags (abfd, ".interp",
 					      flags | SEC_READONLY);
@@ -5763,7 +5763,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       bfd_boolean all_defined;
 
       *sinterpptr = bfd_get_linker_section (dynobj, ".interp");
-      BFD_ASSERT (*sinterpptr != NULL || !bfd_link_executable (info));
+      BFD_ASSERT (*sinterpptr != NULL || !bfd_link_executable (info) || info->nointerp);
 
       if (soname != NULL)
 	{
@@ -8313,7 +8313,7 @@ elf_link_adjust_relocs (bfd *abfd,
 	  memcpy (base, onebuf, elt_size);
 	}
 
-      for (p = base + elt_size; p < end; )
+      for (p = base + elt_size; (p += elt_size) < end; )
 	{
 	  /* base to p is sorted, *p is next to insert.  */
 	  r_off = (*ext_r_off) (p);
@@ -8355,10 +8355,8 @@ elf_link_adjust_relocs (bfd *abfd,
 		  memmove (loc, p, runlen);
 		  memcpy (loc + runlen, buf, sortlen);
 		}
-	      p += runlen;
+	      p += runlen - elt_size;
 	    }
-	  else
-	    p += elt_size;
 	}
       /* Hashes are no longer valid.  */
       free (reldata->hashes);

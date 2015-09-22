@@ -49,13 +49,25 @@ segment_type *segments;
 struct ldexp_control expld;
 
 /* This structure records symbols for which we need to keep track of
-   definedness for use in the DEFINED () test.  */
+   definedness for use in the DEFINED () test.  It is also used in
+   making absolute symbols section relative late in the link.   */
 
 struct definedness_hash_entry
 {
   struct bfd_hash_entry root;
+
+  /* If this symbol was assigned from "dot" outside of an output
+     section statement, the section we'd like it relative to.  */
+  asection *final_sec;
+
+  /* Symbol was defined by an object file.  */
   unsigned int by_object : 1;
+
+  /* Symbols was defined by a script.  */
   unsigned int by_script : 1;
+
+  /* Low bit of iteration count.  Symbols with matching iteration have
+     been defined in this pass over the script.  */
   unsigned int iteration : 1;
 };
 
@@ -174,6 +186,7 @@ make_abs (void)
   if (expld.result.section != NULL)
     expld.result.value += expld.result.section->vma;
   expld.result.section = bfd_abs_section_ptr;
+  expld.rel_from_abs = FALSE;
 }
 
 static void
@@ -249,8 +262,7 @@ new_rel_from_abs (bfd_vma value)
 {
   asection *s = expld.section;
 
-  if (s == bfd_abs_section_ptr && expld.phase == lang_final_phase_enum)
-    s = section_for_dot ();
+  expld.rel_from_abs = TRUE;
   expld.result.valid_p = TRUE;
   expld.result.value = value - s->vma;
   expld.result.str = NULL;
@@ -322,6 +334,11 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
 
   defentry->by_script = 1;
   defentry->iteration = lang_statement_iteration;
+  defentry->final_sec = bfd_abs_section_ptr;
+  if (expld.phase == lang_final_phase_enum
+      && expld.rel_from_abs
+      && expld.result.section == bfd_abs_section_ptr)
+    defentry->final_sec = section_for_dot ();
   return ret;
 }
 
@@ -1189,6 +1206,7 @@ exp_fold_tree_1 (etree_type *tree)
 void
 exp_fold_tree (etree_type *tree, asection *current_section, bfd_vma *dotp)
 {
+  expld.rel_from_abs = FALSE;
   expld.dot = *dotp;
   expld.dotp = dotp;
   expld.section = current_section;
@@ -1198,6 +1216,7 @@ exp_fold_tree (etree_type *tree, asection *current_section, bfd_vma *dotp)
 void
 exp_fold_tree_no_dot (etree_type *tree)
 {
+  expld.rel_from_abs = FALSE;
   expld.dot = 0;
   expld.dotp = NULL;
   expld.section = bfd_abs_section_ptr;
@@ -1579,6 +1598,36 @@ ldexp_init (void)
 			      sizeof (struct definedness_hash_entry),
 			      13))
     einfo (_("%P%F: can not create hash table: %E\n"));
+}
+
+/* Convert absolute symbols defined by a script from "dot" (also
+   SEGMENT_START or ORIGIN) outside of an output section statement,
+   to section relative.  */
+
+static bfd_boolean
+set_sym_sections (struct bfd_hash_entry *bh, void *inf ATTRIBUTE_UNUSED)
+{
+  struct definedness_hash_entry *def = (struct definedness_hash_entry *) bh;
+  if (def->final_sec != bfd_abs_section_ptr)
+    {
+      struct bfd_link_hash_entry *h;
+      h = bfd_link_hash_lookup (link_info.hash, bh->string,
+				FALSE, FALSE, TRUE);
+      if (h != NULL
+	  && h->type == bfd_link_hash_defined
+	  && h->u.def.section == bfd_abs_section_ptr)
+	{
+	  h->u.def.value -= def->final_sec->vma;
+	  h->u.def.section = def->final_sec;
+	}
+    }
+  return TRUE;
+}
+
+void
+ldexp_finalize_syms (void)
+{
+  bfd_hash_traverse (&definedness_table, set_sym_sections, NULL);
 }
 
 void

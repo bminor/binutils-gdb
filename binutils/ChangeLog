@@ -1,3 +1,7 @@
+2015-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* readelf.c (process_dynamic_section): Handle DF_1_STUB, DF_1_PIE.
+
 2015-09-10  Erik Ackermann  <kurterikackermann@gmail.com>
 
 	* strings.c: Add -s/--output-separator option to specify custom

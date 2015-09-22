@@ -57,6 +57,8 @@
 
 #include "features/aarch64.c"
 
+#include "arch/aarch64-insn.h"
+
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0
 #define AARCH64_D0_REGNUM (AARCH64_Q0_REGNUM + 32)
@@ -179,9 +181,6 @@ struct aarch64_prologue_cache
   struct trad_frame_saved_reg *saved_regs;
 };
 
-/* Toggle this file's internal debugging dump.  */
-static int aarch64_debug;
-
 static void
 show_aarch64_debug (struct ui_file *file, int from_tty,
                     struct cmd_list_element *c, const char *value)
@@ -231,8 +230,8 @@ decode_masked_match (uint32_t insn, uint32_t mask, uint32_t pattern)
 
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 static int
-decode_add_sub_imm (CORE_ADDR addr, uint32_t insn, unsigned *rd, unsigned *rn,
-		    int32_t *imm)
+aarch64_decode_add_sub_imm (CORE_ADDR addr, uint32_t insn, unsigned *rd,
+			    unsigned *rn, int32_t *imm)
 {
   if ((insn & 0x9f000000) == 0x91000000)
     {
@@ -271,94 +270,6 @@ decode_add_sub_imm (CORE_ADDR addr, uint32_t insn, unsigned *rd, unsigned *rn,
   return 0;
 }
 
-/* Decode an opcode if it represents an ADRP instruction.
-
-   ADDR specifies the address of the opcode.
-   INSN specifies the opcode to test.
-   RD receives the 'rd' field from the decoded instruction.
-
-   Return 1 if the opcodes matches and is decoded, otherwise 0.  */
-
-static int
-decode_adrp (CORE_ADDR addr, uint32_t insn, unsigned *rd)
-{
-  if (decode_masked_match (insn, 0x9f000000, 0x90000000))
-    {
-      *rd = (insn >> 0) & 0x1f;
-
-      if (aarch64_debug)
-	{
-	  debug_printf ("decode: 0x%s 0x%x adrp x%u, #?\n",
-			core_addr_to_string_nz (addr), insn, *rd);
-	}
-      return 1;
-    }
-  return 0;
-}
-
-/* Decode an opcode if it represents an branch immediate or branch
-   and link immediate instruction.
-
-   ADDR specifies the address of the opcode.
-   INSN specifies the opcode to test.
-   IS_BL receives the 'op' bit from the decoded instruction.
-   OFFSET receives the immediate offset from the decoded instruction.
-
-   Return 1 if the opcodes matches and is decoded, otherwise 0.  */
-
-static int
-decode_b (CORE_ADDR addr, uint32_t insn, int *is_bl, int32_t *offset)
-{
-  /* b  0001 01ii iiii iiii iiii iiii iiii iiii */
-  /* bl 1001 01ii iiii iiii iiii iiii iiii iiii */
-  if (decode_masked_match (insn, 0x7c000000, 0x14000000))
-    {
-      *is_bl = (insn >> 31) & 0x1;
-      *offset = extract_signed_bitfield (insn, 26, 0) << 2;
-
-      if (aarch64_debug)
-	{
-	  debug_printf ("decode: 0x%s 0x%x %s 0x%s\n",
-			core_addr_to_string_nz (addr), insn,
-			*is_bl ? "bl" : "b",
-			core_addr_to_string_nz (addr + *offset));
-	}
-
-      return 1;
-    }
-  return 0;
-}
-
-/* Decode an opcode if it represents a conditional branch instruction.
-
-   ADDR specifies the address of the opcode.
-   INSN specifies the opcode to test.
-   COND receives the branch condition field from the decoded
-   instruction.
-   OFFSET receives the immediate offset from the decoded instruction.
-
-   Return 1 if the opcodes matches and is decoded, otherwise 0.  */
-
-static int
-decode_bcond (CORE_ADDR addr, uint32_t insn, unsigned *cond, int32_t *offset)
-{
-  /* b.cond  0101 0100 iiii iiii iiii iiii iii0 cccc */
-  if (decode_masked_match (insn, 0xff000010, 0x54000000))
-    {
-      *cond = (insn >> 0) & 0xf;
-      *offset = extract_signed_bitfield (insn, 19, 5) << 2;
-
-      if (aarch64_debug)
-	{
-	  debug_printf ("decode: 0x%s 0x%x b<%u> 0x%s\n",
-			core_addr_to_string_nz (addr), insn, *cond,
-			core_addr_to_string_nz (addr + *offset));
-	}
-      return 1;
-    }
-  return 0;
-}
-
 /* Decode an opcode if it represents a branch via register instruction.
 
    ADDR specifies the address of the opcode.
@@ -369,7 +280,8 @@ decode_bcond (CORE_ADDR addr, uint32_t insn, unsigned *cond, int32_t *offset)
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_br (CORE_ADDR addr, uint32_t insn, int *is_blr, unsigned *rn)
+aarch64_decode_br (CORE_ADDR addr, uint32_t insn, int *is_blr,
+		   unsigned *rn)
 {
   /*         8   4   0   6   2   8   4   0 */
   /* blr  110101100011111100000000000rrrrr */
@@ -391,42 +303,6 @@ decode_br (CORE_ADDR addr, uint32_t insn, int *is_blr, unsigned *rn)
   return 0;
 }
 
-/* Decode an opcode if it represents a CBZ or CBNZ instruction.
-
-   ADDR specifies the address of the opcode.
-   INSN specifies the opcode to test.
-   IS64 receives the 'sf' field from the decoded instruction.
-   IS_CBNZ receives the 'op' field from the decoded instruction.
-   RN receives the 'rn' field from the decoded instruction.
-   OFFSET receives the 'imm19' field from the decoded instruction.
-
-   Return 1 if the opcodes matches and is decoded, otherwise 0.  */
-
-static int
-decode_cb (CORE_ADDR addr, uint32_t insn, int *is64, int *is_cbnz,
-	   unsigned *rn, int32_t *offset)
-{
-  /* cbz  T011 010o iiii iiii iiii iiii iiir rrrr */
-  /* cbnz T011 010o iiii iiii iiii iiii iiir rrrr */
-  if (decode_masked_match (insn, 0x7e000000, 0x34000000))
-    {
-      *rn = (insn >> 0) & 0x1f;
-      *is64 = (insn >> 31) & 0x1;
-      *is_cbnz = (insn >> 24) & 0x1;
-      *offset = extract_signed_bitfield (insn, 19, 5) << 2;
-
-      if (aarch64_debug)
-	{
-	  debug_printf ("decode: 0x%s 0x%x %s 0x%s\n",
-			core_addr_to_string_nz (addr), insn,
-			*is_cbnz ? "cbnz" : "cbz",
-			core_addr_to_string_nz (addr + *offset));
-	}
-      return 1;
-    }
-  return 0;
-}
-
 /* Decode an opcode if it represents a ERET instruction.
 
    ADDR specifies the address of the opcode.
@@ -435,7 +311,7 @@ decode_cb (CORE_ADDR addr, uint32_t insn, int *is64, int *is_cbnz,
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_eret (CORE_ADDR addr, uint32_t insn)
+aarch64_decode_eret (CORE_ADDR addr, uint32_t insn)
 {
   /* eret 1101 0110 1001 1111 0000 0011 1110 0000 */
   if (insn == 0xd69f03e0)
@@ -459,7 +335,7 @@ decode_eret (CORE_ADDR addr, uint32_t insn)
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_movz (CORE_ADDR addr, uint32_t insn, unsigned *rd)
+aarch64_decode_movz (CORE_ADDR addr, uint32_t insn, unsigned *rd)
 {
   if (decode_masked_match (insn, 0xff800000, 0x52800000))
     {
@@ -488,9 +364,9 @@ decode_movz (CORE_ADDR addr, uint32_t insn, unsigned *rd)
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_orr_shifted_register_x (CORE_ADDR addr,
-			       uint32_t insn, unsigned *rd, unsigned *rn,
-			       unsigned *rm, int32_t *imm)
+aarch64_decode_orr_shifted_register_x (CORE_ADDR addr, uint32_t insn,
+				       unsigned *rd, unsigned *rn,
+				       unsigned *rm, int32_t *imm)
 {
   if (decode_masked_match (insn, 0xff200000, 0xaa000000))
     {
@@ -519,7 +395,7 @@ decode_orr_shifted_register_x (CORE_ADDR addr,
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_ret (CORE_ADDR addr, uint32_t insn, unsigned *rn)
+aarch64_decode_ret (CORE_ADDR addr, uint32_t insn, unsigned *rn)
 {
   if (decode_masked_match (insn, 0xfffffc1f, 0xd65f0000))
     {
@@ -547,9 +423,8 @@ decode_ret (CORE_ADDR addr, uint32_t insn, unsigned *rn)
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_stp_offset (CORE_ADDR addr,
-		   uint32_t insn,
-		   unsigned *rt1, unsigned *rt2, unsigned *rn, int32_t *imm)
+aarch64_decode_stp_offset (CORE_ADDR addr, uint32_t insn, unsigned *rt1,
+			   unsigned *rt2, unsigned *rn, int32_t *imm)
 {
   if (decode_masked_match (insn, 0xffc00000, 0xa9000000))
     {
@@ -583,10 +458,8 @@ decode_stp_offset (CORE_ADDR addr,
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_stp_offset_wb (CORE_ADDR addr,
-		      uint32_t insn,
-		      unsigned *rt1, unsigned *rt2, unsigned *rn,
-		      int32_t *imm)
+aarch64_decode_stp_offset_wb (CORE_ADDR addr, uint32_t insn, unsigned *rt1,
+			      unsigned *rt2, unsigned *rn, int32_t *imm)
 {
   if (decode_masked_match (insn, 0xffc00000, 0xa9800000))
     {
@@ -620,8 +493,8 @@ decode_stp_offset_wb (CORE_ADDR addr,
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-decode_stur (CORE_ADDR addr, uint32_t insn, int *is64, unsigned *rt,
-	     unsigned *rn, int32_t *imm)
+aarch64_decode_stur (CORE_ADDR addr, uint32_t insn, int *is64,
+		     unsigned *rt, unsigned *rn, int32_t *imm)
 {
   if (decode_masked_match (insn, 0xbfe00c00, 0xb8000000))
     {
@@ -635,42 +508,6 @@ decode_stur (CORE_ADDR addr, uint32_t insn, int *is64, unsigned *rt,
 	  debug_printf ("decode: 0x%s 0x%x stur %c%u, [x%u + #%d]\n",
 			core_addr_to_string_nz (addr), insn,
 			*is64 ? 'x' : 'w', *rt, *rn, *imm);
-	}
-      return 1;
-    }
-  return 0;
-}
-
-/* Decode an opcode if it represents a TBZ or TBNZ instruction.
-
-   ADDR specifies the address of the opcode.
-   INSN specifies the opcode to test.
-   IS_TBNZ receives the 'op' field from the decoded instruction.
-   BIT receives the bit position field from the decoded instruction.
-   RT receives 'rt' field from the decoded instruction.
-   IMM receives 'imm' field from the decoded instruction.
-
-   Return 1 if the opcodes matches and is decoded, otherwise 0.  */
-
-static int
-decode_tb (CORE_ADDR addr, uint32_t insn, int *is_tbnz, unsigned *bit,
-	   unsigned *rt, int32_t *imm)
-{
-  /* tbz  b011 0110 bbbb biii iiii iiii iiir rrrr */
-  /* tbnz B011 0111 bbbb biii iiii iiii iiir rrrr */
-  if (decode_masked_match (insn, 0x7e000000, 0x36000000))
-    {
-      *rt = (insn >> 0) & 0x1f;
-      *is_tbnz = (insn >> 24) & 0x1;
-      *bit = ((insn >> (31 - 4)) & 0x20) | ((insn >> 19) & 0x1f);
-      *imm = extract_signed_bitfield (insn, 14, 5) << 2;
-
-      if (aarch64_debug)
-	{
-	  debug_printf ("decode: 0x%s 0x%x %s x%u, #%u, 0x%s\n",
-			core_addr_to_string_nz (addr), insn,
-			*is_tbnz ? "tbnz" : "tbz", *rt, *bit,
-			core_addr_to_string_nz (addr + *imm));
 	}
       return 1;
     }
@@ -714,43 +551,46 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       int is_cbnz;
       int is_tbnz;
       unsigned bit;
+      int is_adrp;
       int32_t offset;
 
       insn = read_memory_unsigned_integer (start, 4, byte_order_for_code);
 
-      if (decode_add_sub_imm (start, insn, &rd, &rn, &imm))
+      if (aarch64_decode_add_sub_imm (start, insn, &rd, &rn, &imm))
 	regs[rd] = pv_add_constant (regs[rn], imm);
-      else if (decode_adrp (start, insn, &rd))
+      else if (aarch64_decode_adr (start, insn, &is_adrp, &rd, &offset)
+	       && is_adrp)
 	regs[rd] = pv_unknown ();
-      else if (decode_b (start, insn, &is_link, &offset))
+      else if (aarch64_decode_b (start, insn, &is_link, &offset))
 	{
 	  /* Stop analysis on branch.  */
 	  break;
 	}
-      else if (decode_bcond (start, insn, &cond, &offset))
+      else if (aarch64_decode_bcond (start, insn, &cond, &offset))
 	{
 	  /* Stop analysis on branch.  */
 	  break;
 	}
-      else if (decode_br (start, insn, &is_link, &rn))
+      else if (aarch64_decode_br (start, insn, &is_link, &rn))
 	{
 	  /* Stop analysis on branch.  */
 	  break;
 	}
-      else if (decode_cb (start, insn, &is64, &is_cbnz, &rn, &offset))
+      else if (aarch64_decode_cb (start, insn, &is64, &is_cbnz, &rn,
+				  &offset))
 	{
 	  /* Stop analysis on branch.  */
 	  break;
 	}
-      else if (decode_eret (start, insn))
+      else if (aarch64_decode_eret (start, insn))
 	{
 	  /* Stop analysis on branch.  */
 	  break;
 	}
-      else if (decode_movz (start, insn, &rd))
+      else if (aarch64_decode_movz (start, insn, &rd))
 	regs[rd] = pv_unknown ();
-      else
-	if (decode_orr_shifted_register_x (start, insn, &rd, &rn, &rm, &imm))
+      else if (aarch64_decode_orr_shifted_register_x (start, insn, &rd,
+						      &rn, &rm, &imm))
 	{
 	  if (imm == 0 && rn == 31)
 	    regs[rd] = regs[rm];
@@ -765,17 +605,18 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	      break;
 	    }
 	}
-      else if (decode_ret (start, insn, &rn))
+      else if (aarch64_decode_ret (start, insn, &rn))
 	{
 	  /* Stop analysis on branch.  */
 	  break;
 	}
-      else if (decode_stur (start, insn, &is64, &rt, &rn, &offset))
+      else if (aarch64_decode_stur (start, insn, &is64, &rt, &rn, &offset))
 	{
 	  pv_area_store (stack, pv_add_constant (regs[rn], offset),
 			 is64 ? 8 : 4, regs[rt]);
 	}
-      else if (decode_stp_offset (start, insn, &rt1, &rt2, &rn, &imm))
+      else if (aarch64_decode_stp_offset (start, insn, &rt1, &rt2, &rn,
+					  &imm))
 	{
 	  /* If recording this store would invalidate the store area
 	     (perhaps because rn is not known) then we should abandon
@@ -793,7 +634,8 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  pv_area_store (stack, pv_add_constant (regs[rn], imm + 8), 8,
 			 regs[rt2]);
 	}
-      else if (decode_stp_offset_wb (start, insn, &rt1, &rt2, &rn, &imm))
+      else if (aarch64_decode_stp_offset_wb (start, insn, &rt1, &rt2, &rn,
+					     &imm))
 	{
 	  /* If recording this store would invalidate the store area
 	     (perhaps because rn is not known) then we should abandon
@@ -812,7 +654,8 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 			 regs[rt2]);
 	  regs[rn] = pv_add_constant (regs[rn], imm);
 	}
-      else if (decode_tb (start, insn, &is_tbnz, &bit, &rn, &offset))
+      else if (aarch64_decode_tb (start, insn, &is_tbnz, &bit, &rn,
+				  &offset))
 	{
 	  /* Stop analysis on branch.  */
 	  break;
@@ -2663,7 +2506,7 @@ aarch64_software_single_step (struct frame_info *frame)
 					   byte_order_for_code);
 
       /* Check if the instruction is a conditional branch.  */
-      if (decode_bcond (loc, insn, &cond, &offset))
+      if (aarch64_decode_bcond (loc, insn, &cond, &offset))
 	{
 	  if (bc_insn_count >= 1)
 	    return 0;

@@ -53,6 +53,7 @@ case "${target}" in
 			srv_tgtobj="linux-aarch64-low.o aarch64-linux-hw-point.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
 			srv_tgtobj="$srv_tgtobj aarch64-linux.o"
+			srv_tgtobj="$srv_tgtobj aarch64-insn.o"
 			srv_tgtobj="${srv_tgtobj} $srv_linux_obj"
 			srv_xmlfiles="aarch64.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-core.xml"
@@ -61,6 +62,7 @@ case "${target}" in
 			srv_xmlfiles="${srv_xmlfiles} arm-with-neon.xml"
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
+			ipa_obj="linux-aarch64-ipa.o aarch64-ipa.o"
 			;;
   arm*-*-linux*)	srv_regobj="reg-arm.o arm-with-iwmmxt.o"
 			srv_regobj="${srv_regobj} arm-with-vfpv2.o"

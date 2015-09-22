@@ -5836,17 +5836,20 @@ locking the OS scheduler to allow only a single thread to run.
 @item set scheduler-locking @var{mode}
 @cindex scheduler locking mode
 @cindex lock scheduler
-Set the scheduler locking mode.  If it is @code{off}, then there is no
-locking and any thread may run at any time.  If @code{on}, then only the
-current thread may run when the inferior is resumed.  The @code{step}
-mode optimizes for single-stepping; it prevents other threads 
-from preempting the current thread while you are stepping, so that 
-the focus of debugging does not change unexpectedly.
-Other threads never get a chance to run when you step, and they are
-completely free to run when you use commands
-like @samp{continue}, @samp{until}, or @samp{finish}.  However, unless another
-thread hits a breakpoint during its timeslice, @value{GDBN} does not change
-the current thread away from the thread that you are debugging.
+Set the scheduler locking mode.  It applies to normal execution,
+record mode, and replay mode.  If it is @code{off}, then there is no
+locking and any thread may run at any time.  If @code{on}, then only
+the current thread may run when the inferior is resumed.  The
+@code{step} mode optimizes for single-stepping; it prevents other
+threads from preempting the current thread while you are stepping, so
+that the focus of debugging does not change unexpectedly.  Other
+threads never get a chance to run when you step, and they are
+completely free to run when you use commands like @samp{continue},
+@samp{until}, or @samp{finish}.  However, unless another thread hits a
+breakpoint during its timeslice, @value{GDBN} does not change the
+current thread away from the thread that you are debugging.  The
+@code{replay} mode behaves like @code{off} in record mode and like
+@code{on} in replay mode.
 
 @item show scheduler-locking
 Display the current scheduler locking mode.

@@ -3656,9 +3656,25 @@ target_delete_record (void)
 /* See target.h.  */
 
 int
-target_record_is_replaying (void)
+target_record_is_replaying (ptid_t ptid)
 {
-  return current_target.to_record_is_replaying (&current_target);
+  return current_target.to_record_is_replaying (&current_target, ptid);
+}
+
+/* See target.h.  */
+
+int
+target_record_will_replay (ptid_t ptid, int dir)
+{
+  return current_target.to_record_will_replay (&current_target, ptid, dir);
+}
+
+/* See target.h.  */
+
+void
+target_record_stop_replaying (void)
+{
+  current_target.to_record_stop_replaying (&current_target);
 }
 
 /* See target.h.  */

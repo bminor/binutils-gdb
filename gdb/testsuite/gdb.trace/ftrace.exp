@@ -84,7 +84,7 @@ proc test_fast_tracepoints {} {
 
     gdb_test "print gdb_agent_gdb_trampoline_buffer_error" ".*" ""
 
-    if { [istarget "x86_64-*-*"] || [istarget "i\[34567\]86-*-*"] } {
+    if { [istarget "x86_64-*-*"] || [istarget "i\[34567\]86-*-*"] || [is_aarch64_target] } {
 
 	gdb_test "ftrace set_point" "Fast tracepoint .*" \
 	    "fast tracepoint at a long insn"

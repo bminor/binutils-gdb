@@ -596,11 +596,11 @@ symbol_set_demangled_name (struct general_symbol_info *gsymbol,
       else
 	{
 	  gsymbol->ada_mangled = 1;
-	  gsymbol->language_specific.mangled_lang.demangled_name = name;
+	  gsymbol->language_specific.demangled_name = name;
 	}
     }
   else
-    gsymbol->language_specific.mangled_lang.demangled_name = name;
+    gsymbol->language_specific.demangled_name = name;
 }
 
 /* Return the demangled name of GSYMBOL.  */
@@ -615,7 +615,7 @@ symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
       /* Fall through.  */
     }
 
-  return gsymbol->language_specific.mangled_lang.demangled_name;
+  return gsymbol->language_specific.demangled_name;
 }
 
 

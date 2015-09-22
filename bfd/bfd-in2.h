@@ -6980,6 +6980,7 @@ bfd_boolean generic_core_file_matches_executable_p
 
 enum bfd_flavour
 {
+  /* N.B. Update bfd_flavour_name if you change this.  */
   bfd_target_unknown_flavour,
   bfd_target_aout_flavour,
   bfd_target_coff_flavour,
@@ -7398,6 +7399,8 @@ const char ** bfd_target_list (void);
 const bfd_target *bfd_search_for_target
    (int (*search_func) (const bfd_target *, void *),
     void *);
+
+const char *bfd_flavour_name (enum bfd_flavour flavour);
 
 /* Extracted from format.c.  */
 bfd_boolean bfd_check_format (bfd *abfd, bfd_format format);

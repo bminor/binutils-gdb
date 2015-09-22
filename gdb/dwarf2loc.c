@@ -381,10 +381,11 @@ locexpr_find_frame_base_location (struct symbol *framefunc, CORE_ADDR pc,
   *start = symbaton->data;
 }
 
-/* Implement the struct symbol_block_ops::get_frame_base method.  */
+/* Implement the struct symbol_block_ops::get_frame_base method for
+   LOC_BLOCK functions using a DWARF expression as its DW_AT_frame_base.  */
 
 static CORE_ADDR
-block_op_get_frame_base (struct symbol *framefunc, struct frame_info *frame)
+locexpr_get_frame_base (struct symbol *framefunc, struct frame_info *frame)
 {
   struct gdbarch *gdbarch;
   struct type *type;
@@ -421,7 +422,7 @@ block_op_get_frame_base (struct symbol *framefunc, struct frame_info *frame)
 const struct symbol_block_ops dwarf2_block_frame_base_locexpr_funcs =
 {
   locexpr_find_frame_base_location,
-  block_op_get_frame_base
+  locexpr_get_frame_base
 };
 
 /* Implement find_frame_base_location method for LOC_BLOCK functions using
@@ -436,13 +437,48 @@ loclist_find_frame_base_location (struct symbol *framefunc, CORE_ADDR pc,
   *start = dwarf2_find_location_expression (symbaton, length, pc);
 }
 
+/* Implement the struct symbol_block_ops::get_frame_base method for
+   LOC_BLOCK functions using a DWARF location list as its DW_AT_frame_base.  */
+
+static CORE_ADDR
+loclist_get_frame_base (struct symbol *framefunc, struct frame_info *frame)
+{
+  struct gdbarch *gdbarch;
+  struct type *type;
+  struct dwarf2_loclist_baton *dlbaton;
+  const gdb_byte *start;
+  size_t length;
+  struct value *result;
+
+  /* If this method is called, then FRAMEFUNC is supposed to be a DWARF block.
+     Thus, it's supposed to provide the find_frame_base_location method as
+     well.  */
+  gdb_assert (SYMBOL_BLOCK_OPS (framefunc)->find_frame_base_location != NULL);
+
+  gdbarch = get_frame_arch (frame);
+  type = builtin_type (gdbarch)->builtin_data_ptr;
+  dlbaton = SYMBOL_LOCATION_BATON (framefunc);
+
+  SYMBOL_BLOCK_OPS (framefunc)->find_frame_base_location
+    (framefunc, get_frame_pc (frame), &start, &length);
+  result = dwarf2_evaluate_loc_desc (type, frame, start, length,
+				     dlbaton->per_cu);
+
+  /* The DW_AT_frame_base attribute contains a location description which
+     computes the base address itself.  However, the call to
+     dwarf2_evaluate_loc_desc returns a value representing a variable at
+     that address.  The frame base address is thus this variable's
+     address.  */
+  return value_address (result);
+}
+
 /* Vector for inferior functions as represented by LOC_BLOCK, if the inferior
    function uses DWARF location list for its DW_AT_frame_base.  */
 
 const struct symbol_block_ops dwarf2_block_frame_base_loclist_funcs =
 {
   loclist_find_frame_base_location,
-  block_op_get_frame_base
+  loclist_get_frame_base
 };
 
 /* See dwarf2loc.h.  */

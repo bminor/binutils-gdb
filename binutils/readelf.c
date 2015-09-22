@@ -9241,6 +9241,16 @@ process_dynamic_section (FILE * file)
 		      printf (" SINGLETON");
 		      val ^= DF_1_SINGLETON;
 		    }
+		  if (val & DF_1_STUB)
+		    {
+		      printf (" STUB");
+		      val ^= DF_1_STUB;
+		    }
+		  if (val & DF_1_PIE)
+		    {
+		      printf (" PIE");
+		      val ^= DF_1_PIE;
+		    }
 		  if (val != 0)
 		    printf (" %lx", val);
 		  puts ("");

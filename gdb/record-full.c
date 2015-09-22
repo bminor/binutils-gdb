@@ -1840,9 +1840,21 @@ record_full_delete (struct target_ops *self)
 /* The "to_record_is_replaying" target method.  */
 
 static int
-record_full_is_replaying (struct target_ops *self)
+record_full_is_replaying (struct target_ops *self, ptid_t ptid)
 {
   return RECORD_FULL_IS_REPLAY;
+}
+
+/* The "to_record_will_replay" target method.  */
+
+static int
+record_full_will_replay (struct target_ops *self, ptid_t ptid, int dir)
+{
+  /* We can currently only record when executing forwards.  Should we be able
+     to record when executing backwards on targets that support reverse
+     execution, this needs to be changed.  */
+
+  return RECORD_FULL_IS_REPLAY || dir == EXEC_REVERSE;
 }
 
 /* Go to a specific entry.  */
@@ -1917,6 +1929,14 @@ record_full_goto (struct target_ops *self, ULONGEST target_insn)
   record_full_goto_entry (p);
 }
 
+/* The "to_record_stop_replaying" target method.  */
+
+static void
+record_full_stop_replaying (struct target_ops *self)
+{
+  record_full_goto_end (self);
+}
+
 static void
 init_record_full_ops (void)
 {
@@ -1957,6 +1977,8 @@ init_record_full_ops (void)
   record_full_ops.to_save_record = record_full_save;
   record_full_ops.to_delete_record = record_full_delete;
   record_full_ops.to_record_is_replaying = record_full_is_replaying;
+  record_full_ops.to_record_will_replay = record_full_will_replay;
+  record_full_ops.to_record_stop_replaying = record_full_stop_replaying;
   record_full_ops.to_goto_record_begin = record_full_goto_begin;
   record_full_ops.to_goto_record_end = record_full_goto_end;
   record_full_ops.to_goto_record = record_full_goto;
@@ -2203,6 +2225,7 @@ init_record_full_core_ops (void)
   record_full_core_ops.to_info_record = record_full_info;
   record_full_core_ops.to_delete_record = record_full_delete;
   record_full_core_ops.to_record_is_replaying = record_full_is_replaying;
+  record_full_core_ops.to_record_will_replay = record_full_will_replay;
   record_full_core_ops.to_goto_record_begin = record_full_goto_begin;
   record_full_core_ops.to_goto_record_end = record_full_goto_end;
   record_full_core_ops.to_goto_record = record_full_goto;
