@@ -1,3 +1,11 @@
+2015-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* emulparams/solaris2.sh (GENERATE_PIE_SCRIPT): Set to yes.
+
+	* emultempl/elf32.em: Include ldlex.h.
+	(gld${EMULATION_NAME}_handle_option) [GENERATE_PIE_SCRIPT]
+	<OPTION_PIE>: Set DF_1_PIE.
+
 2015-09-22  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo: Put --dotsyms/--no-dotsyms on separate lines.
