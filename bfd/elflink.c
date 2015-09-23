@@ -11032,7 +11032,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    max_sym_count = sym_count;
 
 		  if (sym_count > max_sym_shndx_count
-		      && elf_symtab_shndx (sec->owner) != 0)
+		      && elf_symtab_shndx_list (sec->owner) != NULL)
 		    max_sym_shndx_count = sym_count;
 
 		  if ((sec->flags & SEC_RELOC) != 0)
@@ -11562,8 +11562,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       Elf_Internal_Shdr *symstrtab_hdr;
       file_ptr off = symtab_hdr->sh_offset + symtab_hdr->sh_size;
 
-      symtab_shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-      if (symtab_shndx_hdr->sh_name != 0)
+      symtab_shndx_hdr = & elf_symtab_shndx_list (abfd)->hdr;
+      if (symtab_shndx_hdr != NULL && symtab_shndx_hdr->sh_name != 0)
 	{
 	  symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
 	  symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);

@@ -1,3 +1,13 @@
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15835
+	* readelf.c (struct elf_section_list): New structure.
+	(symtab_shndx_hdr): Replace with symtab_shndx_list.
+	(get_32bit_elf_symbols): Scan for a symbol index table matching
+	the symbol table in use.
+	(get_64bit_elf_symbols): Likewise.
+	(process_section_headers): Handle multiple symbol index sections.
+
 2015-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* readelf.c (process_dynamic_section): Handle DF_1_STUB, DF_1_PIE.

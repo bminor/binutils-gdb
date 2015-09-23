@@ -1,3 +1,28 @@
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15835
+	* elf-bfd.h (struct elf_section_list): New structure.
+	(struct elf_obj_tdata): Replace symtab_shndx_hdr with
+	symtab_shndx_list.  Delete symtab_shndx_section.
+	(elf_symtab_shndx): Replace macro with elf_symtab_shndx_list.
+	* elf.c (bfd_elf_get_syms): If symtab index sections are present,
+	scan them for the section that matches the provided symbol table.
+	(bfd_section_from_shdr): Record all SHT_SYMTAB_SHNDX sections.
+	(assign_section_numbers): Use the first symtab index table in the
+	list.
+	(_bfd_elf_compute_section_file_positions): Replace use of
+	symtab_shndx_hdr with use of symtab_shndx_list.
+	(find_section_in_list): New function.
+	(assign_file_postions_except_relocs): Use new function.
+	(_bfd_elf_copy_private_symbol_data): Likewise.
+	(swap_out_syms): Handle multiple symbol table index sections.
+	* elf32-m32c.c (m32c_elf_relax_section): Replace use of
+	symtab_shndx_hdr with use of symtab_shndx_list.
+	* elf32-rl78.c (rl78_elf_relax_section): Likewise.
+	* elf32-rx.c (rx_relax_section): Likewise.
+	* elf32-v850.c (v850_elf_relax_delete_bytes): Likewise.
+	* elflink.c (bfd_elf_final_link): Likewise.
+
 2015-09-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (bfd_update_compression_header): Use bfd_put_32 on
