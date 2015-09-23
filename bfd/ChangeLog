@@ -1,5 +1,27 @@
 2015-09-23  Nick Clifton  <nickc@redhat.com>
 
+	* bout.c (b_out_slurp_reloc_table): Cast constant to unsigned in
+	order to avoid problems with left shifting negative values.
+	(abs32code): Likewise.
+	* mach-o.c (FILE_ALIGN): Likewise.
+	* coff-rs6000.c (xcoff_debug_sections): Delete unused static
+	array.
+	* elf32-visium.c (visium_reloc_map): Likewise.
+	* elf32-arm.c (elf32_arm_final_link_relocate): Remove useless
+	calls to abs function.
+	* elf32-frv.c (_frvfdpic_relax_tls_entries): Likewise.
+	* elf32-score.c (score_elf_final_link_relocate): Likewise.
+	* elf32-score7.c (score_elf_final_link_relocate): Likewise.
+	* elf32-i860.c (i860_howto_pc26_reloc): Use multiplication instead
+	of shifting to create a negative mask.
+	* elf32-msp430.c (elf_backend_special_sections): Define.
+	* elfxx-mips.c (got_ofst_reloc_p): Delete unused function.
+	(got_hi16_reloc_p): Delete unused function.
+	* ppcboot.c (ppcboot_bfd_print_private_bfd_data): Fix test of
+	partition name.
+
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/15835
 	* elf-bfd.h (struct elf_section_list): New structure.
 	(struct elf_obj_tdata): Replace symtab_shndx_hdr with

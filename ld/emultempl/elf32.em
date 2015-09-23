@@ -1449,6 +1449,11 @@ gld${EMULATION_NAME}_append_to_separated_string (char **to, char *op_arg)
     }
 }
 
+#if defined(__GNUC__) && GCC_VERSION < 4006
+  /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
+static struct bfd_link_hash_entry ehdr_start_empty;
+#endif
+
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
 
@@ -1461,7 +1466,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   struct elf_link_hash_entry *ehdr_start = NULL;
 #if defined(__GNUC__) && GCC_VERSION < 4006
   /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
-  struct bfd_link_hash_entry ehdr_start_save = ehdr_start_save;
+  struct bfd_link_hash_entry ehdr_start_save = ehdr_start_empty;
 #else
   struct bfd_link_hash_entry ehdr_start_save;
 #endif

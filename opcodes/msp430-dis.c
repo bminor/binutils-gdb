@@ -229,10 +229,10 @@ msp430_singleoperand (disassemble_info *info,
 		{
 		  dst |= extended_dst << 16;
 		  if (dst & 0x80000)
-		    dst |= -1 << 20;
+		    dst |= -1U << 20;
 		}
 	      else if (dst & 0x8000)
-		dst |= -1 << 16;
+		dst |= -1U << 16;
 	      sprintf (op, "%d(r%d)", dst, regd);
 	    }
 	}
@@ -273,7 +273,7 @@ msp430_singleoperand (disassemble_info *info,
 		{
 		  dst |= extended_dst << 16;
 		  if (dst & 0x80000)
-		    dst |= -1 << 20;
+		    dst |= -1U << 20;
 		  sprintf (op, "#%d", dst);
 		  if (dst > 9 || dst < 0)
 		    sprintf (comm, "#0x%05x", dst);
@@ -328,10 +328,10 @@ msp430_singleoperand (disassemble_info *info,
 		{
 		  dst |= extended_dst << 16;
 		  if (dst & 0x80000)
-		    dst |= -1 << 20;
+		    dst |= -1U << 20;
 		}
 	      else if (dst & 0x8000)
-		dst |= -1 << 16;
+		dst |= -1U << 16;
 	      sprintf (op, "%d(r%d)", dst, regd);
 	      if (dst > 9 || dst < 0)
 		sprintf (comm, "%05x", dst);
@@ -431,7 +431,7 @@ msp430_doubleoperand (disassemble_info *info,
 		{
 		  dst |= extended_dst << 16;
 		  if (dst & 0x80000)
-		    dst |= -1 << 20;
+		    dst |= -1U << 20;
 		  sprintf (op1, "0x%05x", dst & 0xfffff);
 		  sprintf (comm1, "PC rel. 0x%05lx",
 			   (long)((addr + 2 + dst) & 0xfffff));
@@ -462,10 +462,10 @@ msp430_doubleoperand (disassemble_info *info,
 		{
 		  dst |= extended_dst << 16;
 		  if (dst & 0x80000)
-		    dst |= -1 << 20;
+		    dst |= -1U << 20;
 		}
 	      else if (dst & 0x8000)
-		dst |= -1 << 16;
+		dst |= -1U << 16;
 	      cmd_len += 4;
 	      *cycles = 6;
 	      sprintf (op1, "%d(r%d)", dst, regd);
@@ -523,7 +523,7 @@ msp430_doubleoperand (disassemble_info *info,
 	    {
 	      dst |= extended_src << 16;
 	      if (dst & 0x80000)
-		dst |= -1 << 20;
+		dst |= -1U << 20;
 	      sprintf (op1, "#%d", dst);
 	      if (dst > 9 || dst < 0)
 		sprintf (comm1, "0x%05x", dst & 0xfffff);
@@ -547,7 +547,7 @@ msp430_doubleoperand (disassemble_info *info,
 	    {
 	      dst |= extended_src << 16;
 	      if (dst & 0x80000)
-		dst |= -1 << 20;
+		dst |= -1U << 20;
 	      sprintf (op1, "0x%05x", dst & 0xfffff);
 	      sprintf (comm1, "PC rel. 0x%05lx",
 		       (long) ((addr + 2 + dst) & 0xfffff));
@@ -584,10 +584,10 @@ msp430_doubleoperand (disassemble_info *info,
 	    {
 	      dst |= extended_src << 16;
 	      if (dst & 0x80000)
-		dst |= -1 << 20;
+		dst |= -1U << 20;
 	    }
 	  else if (dst & 0x8000)
-	    dst |= -1 << 16;
+	    dst |= -1U << 16;
 	  sprintf (op1, "%d(r%d)", dst, regs);
 	  if (dst > 9 || dst < -9)
 	    sprintf (comm1, "0x%05x", dst);
@@ -629,7 +629,7 @@ msp430_doubleoperand (disassemble_info *info,
 	    {
 	      dst |= extended_dst << 16;
 	      if (dst & 0x80000)
-		dst |= -1 << 20;
+		dst |= -1U << 20;
 	      sprintf (op2, "0x%05x", dst & 0xfffff);
 	      sprintf (comm2, "PC rel. 0x%05lx",
 		       (long)((addr + cmd_len + dst) & 0xfffff));
@@ -653,14 +653,14 @@ msp430_doubleoperand (disassemble_info *info,
 	  dst = msp430dis_opcode (addr + cmd_len, info);
 	  cmd_len += 2;
 	  if (dst & 0x8000)
-	    dst |= -1 << 16;
+	    dst |= -1U << 16;
 	  if (dst > 9 || dst < 0)
 	    sprintf (comm2, "0x%04x", PS (dst));
 	  if (extension_word)
 	    {
 	      dst |= extended_dst << 16;
 	      if (dst & 0x80000)
-		dst |= -1 << 20;
+		dst |= -1U << 20;
 	      if (dst > 9 || dst < 0)
 		sprintf (comm2, "0x%05x", dst & 0xfffff);
 	    }
@@ -759,7 +759,7 @@ msp430_branchinstr (disassemble_info *info,
 	  dst = msp430dis_opcode (addr + 2, info);
 	  cmd_len += 2;
 	  if (dst & 0x8000)
-	    dst |= -1 << 16;
+	    dst |= -1U << 16;
 	  sprintf (op1, "%d(r%d)", dst, regs);
 	}
     }
@@ -1013,7 +1013,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  reg = n;
 		  n = msp430dis_opcode (addr + 2, info);
 		  if (n & 0x8000)
-		    n |= -1 << 16;
+		    n |= -1U << 16;
 		  sprintf (op1, "%d(r%d)", n, reg);
 		  if (n > 9 || n < 0)
 		    {
@@ -1040,7 +1040,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  sprintf (op1, "r%d", n);
 		  n = msp430dis_opcode (addr + 2, info);
 		  if (n & 0x8000)
-		    n |= -1 << 16;
+		    n |= -1U << 16;
 		  sprintf (op2, "%d(r%d)", n, reg);
 		  if (n > 9 || n < 0)
 		    {
@@ -1057,7 +1057,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  n <<= 16;
 		  n |= msp430dis_opcode (addr + 2, info);
 		  if (n & 0x80000)
-		    n |= -1 << 20;
+		    n |= -1U << 20;
 		  sprintf (op1, "#%d", n);
 		  if (n > 9 || n < 0)
 		    sprintf (comm1, "0x%05x", n);

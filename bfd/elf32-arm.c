@@ -8816,7 +8816,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			  + input_section->output_offset
 			  + rel->r_offset);
 
-	value = abs (relocation);
+	value = relocation;
 
 	if (value >= 0x1000)
 	  return bfd_reloc_overflow;
@@ -8851,7 +8851,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			  + input_section->output_offset
 			  + rel->r_offset);
 
-	value = abs (relocation);
+	value = relocation;
 
 	/* We do not check for overflow of this reloc.  Although strictly
 	   speaking this is incorrect, it appears to be necessary in order
@@ -8888,7 +8888,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			  + input_section->output_offset
 			  + rel->r_offset);
 
-	value = abs (relocation);
+	value = relocation;
 
 	if (value >= 0x1000)
 	  return bfd_reloc_overflow;
@@ -10125,8 +10125,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	/* Calculate the value of the relevant G_n, in encoded
 	   constant-with-rotation format.  */
-	g_n = calculate_group_reloc_mask (abs (signed_value), group,
-					  &residual);
+	g_n = calculate_group_reloc_mask (signed_value < 0 ? - signed_value : signed_value,
+					  group, &residual);
 
 	/* Check for overflow if required.  */
 	if ((r_type == R_ARM_ALU_PC_G0
@@ -10139,7 +10139,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    (*_bfd_error_handler)
 	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
 	      input_bfd, input_section,
-	      (long) rel->r_offset, abs (signed_value), howto->name);
+	       (long) rel->r_offset, signed_value < 0 ? - signed_value : signed_value,
+	       howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -10219,15 +10220,16 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	/* Calculate the value of the relevant G_{n-1} to obtain
 	   the residual at that stage.  */
-	calculate_group_reloc_mask (abs (signed_value), group - 1, &residual);
+	calculate_group_reloc_mask (signed_value < 0 ? - signed_value : signed_value,
+				    group - 1, &residual);
 
 	/* Check for overflow.  */
 	if (residual >= 0x1000)
 	  {
 	    (*_bfd_error_handler)
 	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
-	      input_bfd, input_section,
-	      (long) rel->r_offset, abs (signed_value), howto->name);
+	       input_bfd, input_section,
+	       (long) rel->r_offset, labs (signed_value), howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -10303,15 +10305,16 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	/* Calculate the value of the relevant G_{n-1} to obtain
 	   the residual at that stage.  */
-	calculate_group_reloc_mask (abs (signed_value), group - 1, &residual);
+	calculate_group_reloc_mask (signed_value < 0 ? - signed_value : signed_value,
+				    group - 1, &residual);
 
 	/* Check for overflow.  */
 	if (residual >= 0x100)
 	  {
 	    (*_bfd_error_handler)
 	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
-	      input_bfd, input_section,
-	      (long) rel->r_offset, abs (signed_value), howto->name);
+	       input_bfd, input_section,
+	       (long) rel->r_offset, labs (signed_value), howto->name);
 	    return bfd_reloc_overflow;
 	  }
 
@@ -10387,7 +10390,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	/* Calculate the value of the relevant G_{n-1} to obtain
 	   the residual at that stage.  */
-	calculate_group_reloc_mask (abs (signed_value), group - 1, &residual);
+	calculate_group_reloc_mask (signed_value < 0 ? - signed_value : signed_value,
+				    group - 1, &residual);
 
 	/* Check for overflow.  (The absolute value to go in the place must be
 	   divisible by four and, after having been divided by four, must
@@ -10397,7 +10401,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    (*_bfd_error_handler)
 	      (_("%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"),
 	      input_bfd, input_section,
-	      (long) rel->r_offset, abs (signed_value), howto->name);
+	      (long) rel->r_offset, labs (signed_value), howto->name);
 	    return bfd_reloc_overflow;
 	  }
 

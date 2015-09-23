@@ -1,3 +1,21 @@
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* bfin-dis.c (fmtconst): Remove unnecessary call to the abs
+	function.
+	* tic30-dis.c (print_branch): Likewise.
+	* cgen-asm.c (cgen_parse_signed_integer): Cast integer to signed
+	value before left shifting.
+	* fr30-ibld.c (fr30_cgen_extract_operand): Likewise.
+	* hppa-dis.c (print_insn_hppa): Likewise.
+	* mips-dis.c (mips_cp0sel_names_mipsr5900): Delete unused static
+	array.
+	* msp430-dis.c (msp430_singleoperand): Likewise.
+	(msp430_doubleoperand): Likewise.
+	(print_insn_msp430): Likewise.
+	* nds32-asm.c (parse_operand): Likewise.
+	* sh-opc.h (MASK): Likewise.
+	* v850-dis.c (get_operand_value): Likewise.
+
 2015-09-22  Nick Clifton  <nickc@redhat.com>
 
 	* rx-decode.opc (bwl): Use RX_Bad_Size.

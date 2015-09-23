@@ -2629,4 +2629,7 @@ static const struct bfd_elf_special_section msp430_ti_elf_special_sections[] =
   { NULL, 0,                                0, 0,                      0 }
 };
 
+#undef  elf_backend_special_sections
+#define elf_backend_special_sections 		msp430_ti_elf_special_sections
+
 #include "elf32-target.h"

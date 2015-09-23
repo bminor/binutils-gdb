@@ -276,32 +276,6 @@ static reloc_howto_type visium_elf_vtentry_howto =
 	 0,			   /* dst_mask */
 	 FALSE);		   /* pcrel_offset */
 
-/* Map BFD reloc types to VISIUM ELF reloc types.  */
-struct visium_reloc_map
-{
-  bfd_reloc_code_real_type bfd_reloc_val;
-  unsigned int visium_reloc_val;
-};
-
-static const struct visium_reloc_map visium_reloc_map[] = {
-  {BFD_RELOC_NONE, 		R_VISIUM_NONE},
-  {BFD_RELOC_8, 		R_VISIUM_8},
-  {BFD_RELOC_16,		R_VISIUM_16},
-  {BFD_RELOC_32, 		R_VISIUM_32},
-  {BFD_RELOC_8_PCREL,		R_VISIUM_8_PCREL},
-  {BFD_RELOC_16_PCREL,		R_VISIUM_16_PCREL},
-  {BFD_RELOC_32_PCREL,		R_VISIUM_32_PCREL},
-  {BFD_RELOC_VISIUM_REL16,	R_VISIUM_PC16},
-  {BFD_RELOC_VISIUM_HI16,	R_VISIUM_HI16},
-  {BFD_RELOC_VISIUM_LO16,	R_VISIUM_LO16},
-  {BFD_RELOC_VISIUM_IM16,	R_VISIUM_IM16},
-  {BFD_RELOC_VISIUM_HI16_PCREL,	R_VISIUM_HI16_PCREL},
-  {BFD_RELOC_VISIUM_LO16_PCREL,	R_VISIUM_LO16_PCREL},
-  {BFD_RELOC_VISIUM_IM16_PCREL,	R_VISIUM_IM16_PCREL},
-  {BFD_RELOC_VTABLE_INHERIT,	R_VISIUM_GNU_VTINHERIT},
-  {BFD_RELOC_VTABLE_ENTRY,	R_VISIUM_GNU_VTENTRY},
-};
-
 /* Return the parity bit for INSN shifted to its final position.  */
 
 static bfd_vma

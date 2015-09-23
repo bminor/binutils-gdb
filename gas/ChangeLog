@@ -1,3 +1,7 @@
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ppc.c (insn_validate): Cast PPC_OPSHIFT_INV to an int.
+
 2015-09-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-rx.c (nop_7): Recode using MAX.

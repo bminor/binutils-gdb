@@ -402,34 +402,6 @@ _bfd_xcoff_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED,
 {
   return FALSE;
 }
-
-static const struct dwarf_debug_section xcoff_debug_sections[] =
-{
-  { ".dwabrev",		NULL },
-  { ".dwarnge",		NULL },
-  { NULL,	NULL }, /* .debug_frame */
-  { ".dwinfo",		NULL },
-  { ".dwline",		NULL },
-  { NULL,	NULL }, /* .debug_loc */
-  { NULL,	NULL }, /* .debug_macinfo */
-  { NULL,	NULL }, /* .debug_macro */
-  { ".dwpbnms",		NULL },
-  { ".dwpbtyp",		NULL },
-  { ".dwrnges",		NULL },
-  { NULL,	NULL }, /* .debug_static_func */
-  { NULL,	NULL }, /* .debug_static_vars */
-  { ".dwstr",	NULL },
-  { NULL,	NULL }, /* .debug_types */
-  /* GNU DWARF 1 extensions */
-  { NULL,	NULL }, /* .debug_sfnames */
-  { NULL,	NULL }, /* .debug_srcinfo */
-  /* SGI/MIPS DWARF 2 extensions */
-  { NULL,	NULL }, /* .debug_funcnames */
-  { NULL,	NULL }, /* .debug_typenames */
-  { NULL,	NULL }, /* .debug_varnames */
-  { NULL,	NULL }, /* .debug_weaknames */
-  { NULL,	NULL },
-};
 
 void
 _bfd_xcoff_swap_sym_in (bfd *abfd, void * ext1, void * in1)

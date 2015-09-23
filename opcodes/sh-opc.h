@@ -201,10 +201,10 @@ typedef enum
 sh_dsp_reg_nums;
 
 /* Return a mask with bits LO to HI (inclusive) set.  */
-#define MASK(LO,HI)  (  LO < 1   ? ((1 << (HI + 1)) - 1) \
-		      : HI > 30  ? (-1 << LO) \
-		      : LO == HI ? (1 << LO) \
-		      :            (((1 << (HI + 1)) - 1) & (-1 << LO)))
+#define MASK(LO,HI)  (  LO < 1   ? ((1U << (HI + 1)) - 1) \
+		      : HI > 30  ? (-1U << LO)	 \
+		      : LO == HI ? (1U << LO) \
+		      :            (((1U << (HI + 1)) - 1) & (-1U << LO)))
 
 #define arch_sh1_base	    (1 << 0)
 #define arch_sh2_base	    (1 << 1)
