@@ -169,6 +169,8 @@ static uint32_t cpu_mem_read (SIM_DESC sd, uint32_t dw, uint32_t ea)
       /* Simulate some IO devices */
       switch (ea)
 	{
+	case 0x10000:
+	  return getchar ();
 	case 0x1fff4:
 	  /* Read the simulator cycle timer.  */
 	  return cpu->state.cycles / 100;

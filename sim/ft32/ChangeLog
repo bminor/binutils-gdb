@@ -1,3 +1,7 @@
+2015-09-22  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32/interp.c (cpu_mem_read): Call getchar when ea is 0x10000.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
