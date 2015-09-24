@@ -1,3 +1,10 @@
+2015-09-24  Alan Modra  <amodra@gmail.com>
+
+	PR ld/18992
+	* ldmain.c (main): Always enable --sysroot.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Don't
+	prepend sysroot to relative rpath/runpath.
+
 2015-09-23  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/elf32.em (ehdr_start_empty): New static variable.

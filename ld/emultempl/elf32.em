@@ -1256,12 +1256,16 @@ fragment <<EOF
 	  rp = bfd_elf_get_runpath_list (link_info.output_bfd, &link_info);
 	  for (; !found && rp != NULL; rp = rp->next)
 	    {
-	      char *tmpname = gld${EMULATION_NAME}_add_sysroot (rp->name);
+	      const char *tmpname = rp->name;
+
+	      if (IS_ABSOLUTE_PATH (tmpname))
+		tmpname = gld${EMULATION_NAME}_add_sysroot (tmpname);
 	      found = (rp->by == l->by
 		       && gld${EMULATION_NAME}_search_needed (tmpname,
 							      &n,
 							      force));
-	      free (tmpname);
+	      if (tmpname != rp->name)
+		free ((char *) tmpname);
 	    }
 	  if (found)
 	    break;

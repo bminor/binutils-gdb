@@ -222,15 +222,7 @@ main (int argc, char **argv)
   /* Set up the sysroot directory.  */
   ld_sysroot = get_sysroot (argc, argv);
   if (*ld_sysroot)
-    {
-      if (*TARGET_SYSTEM_ROOT == 0)
-	{
-	  einfo ("%P%F: this linker was not configured to use sysroots\n");
-	  ld_sysroot = "";
-	}
-      else
-	ld_canon_sysroot = lrealpath (ld_sysroot);
-    }
+    ld_canon_sysroot = lrealpath (ld_sysroot);
   if (ld_canon_sysroot)
     ld_canon_sysroot_len = strlen (ld_canon_sysroot);
   else
