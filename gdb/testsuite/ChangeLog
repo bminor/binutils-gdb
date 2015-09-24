@@ -1,3 +1,8 @@
+2015-09-23 Sandra Loosemore <sandra@codesourcery.com>
+
+	* gdb.cp/var-tag.exp (do_global_tests): Generalize opt_underlying
+	to allow any size enum.
+
 2015-09-23  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/array_ptr_renaming.exp: New testcase.

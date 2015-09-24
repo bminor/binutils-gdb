@@ -30,7 +30,7 @@ proc do_global_tests {lang} {
     set invalid_print "Attempt to use a type name as an expression"
 
     if {$lang == "c++"} {
-	set opt_underlying "(: unsigned int )?"
+	set opt_underlying "(: unsigned (int|short|char) )?"
     } else {
 	set opt_underlying ""
     }
