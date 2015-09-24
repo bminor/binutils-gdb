@@ -1,3 +1,18 @@
+2015-09-23  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-tdep.c (ft32_register_type): Return gdbarch_tdep (gdbarch)->pc_type
+	instead of builtin_func_ptr.
+	(ft32_pointer_to_address): New function.
+	(ft32_address_class_type_flags): New function.
+	(ft32_address_class_type_flags_to_name): New function.
+	(ft32_address_class_name_to_type_flags): New function.
+	(ft32_gdbarch_init): Set tdep->pc_type.  Call
+	set_gdbarch_pointer_to_address,
+	set_gdbarch_address_class_type_flags
+	set_gdbarch_address_class_name_to_type_flags,
+	and set_gdbarch_address_class_type_flags_to_name.
+	* ft32-tdep.h (struct gdbarch_tdep) <pc_type>: New field.
+
 2015-09-23  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp) <OP_FUNCALL>: When the input
