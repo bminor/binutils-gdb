@@ -1,3 +1,7 @@
+2015-09-25  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-dis.c (print_insn_ft32): Fix incorrect data field mask.
+
 2015-09-23  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15835
