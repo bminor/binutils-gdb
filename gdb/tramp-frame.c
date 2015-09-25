@@ -43,7 +43,8 @@ static struct trad_frame_cache *
 tramp_frame_cache (struct frame_info *this_frame,
 		   void **this_cache)
 {
-  struct tramp_frame_cache *tramp_cache = (*this_cache);
+  struct tramp_frame_cache *tramp_cache
+    = (struct tramp_frame_cache *) *this_cache;
 
   if (tramp_cache->trad_cache == NULL)
     {

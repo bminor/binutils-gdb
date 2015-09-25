@@ -1185,7 +1185,7 @@ static struct {
 static int
 do_remote_fileio_request (struct ui_out *uiout, void *buf_arg)
 {
-  char *buf = buf_arg;
+  char *buf = (char *) buf_arg;
   char *c;
   int idx;
 

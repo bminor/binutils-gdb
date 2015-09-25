@@ -83,7 +83,7 @@ static const struct program_space_data *objfiles_pspace_data;
 static void
 objfiles_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct objfile_pspace_info *info = arg;
+  struct objfile_pspace_info *info = (struct objfile_pspace_info *) arg;
 
   xfree (info->sections);
   xfree (info);
@@ -97,7 +97,8 @@ get_objfile_pspace_data (struct program_space *pspace)
 {
   struct objfile_pspace_info *info;
 
-  info = program_space_data (pspace, objfiles_pspace_data);
+  info = ((struct objfile_pspace_info *)
+	  program_space_data (pspace, objfiles_pspace_data));
   if (info == NULL)
     {
       info = XCNEW (struct objfile_pspace_info);
@@ -127,7 +128,8 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
   struct objfile_per_bfd_storage *storage = NULL;
 
   if (abfd != NULL)
-    storage = bfd_data (abfd, objfiles_bfd_data);
+    storage = ((struct objfile_per_bfd_storage *)
+	       bfd_data (abfd, objfiles_bfd_data));
 
   if (storage == NULL)
     {
@@ -176,7 +178,7 @@ free_objfile_per_bfd_storage (struct objfile_per_bfd_storage *storage)
 static void
 objfile_bfd_data_free (struct bfd *unused, void *d)
 {
-  free_objfile_per_bfd_storage (d);
+  free_objfile_per_bfd_storage ((struct objfile_per_bfd_storage *) d);
 }
 
 /* See objfiles.h.  */
@@ -320,7 +322,7 @@ static void
 add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
 			 void *objfilep)
 {
-  add_to_objfile_sections_full (abfd, asect, objfilep, 0);
+  add_to_objfile_sections_full (abfd, asect, (struct objfile *) objfilep, 0);
 }
 
 /* Builds a section table for OBJFILE.
@@ -755,7 +757,7 @@ free_objfile (struct objfile *objfile)
 static void
 do_free_objfile_cleanup (void *obj)
 {
-  free_objfile (obj);
+  free_objfile ((struct objfile *) obj);
 }
 
 struct cleanup *
@@ -1522,7 +1524,7 @@ resume_section_map_updates (struct program_space *pspace)
 void
 resume_section_map_updates_cleanup (void *arg)
 {
-  resume_section_map_updates (arg);
+  resume_section_map_updates ((struct program_space *) arg);
 }
 
 /* Return 1 if ADDR maps into one of the sections of OBJFILE and 0

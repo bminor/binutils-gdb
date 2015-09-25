@@ -1950,10 +1950,11 @@ mep_analyze_frame_prologue (struct frame_info *this_frame,
         stop_addr = func_start;
 
       mep_analyze_prologue (get_frame_arch (this_frame),
-			    func_start, stop_addr, *this_prologue_cache);
+			    func_start, stop_addr,
+			    (struct mep_prologue *) *this_prologue_cache);
     }
 
-  return *this_prologue_cache;
+  return (struct mep_prologue *) *this_prologue_cache;
 }
 
 

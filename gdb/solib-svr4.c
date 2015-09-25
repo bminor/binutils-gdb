@@ -405,7 +405,7 @@ free_solib_list (struct svr4_info *info)
 static void
 svr4_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct svr4_info *info = arg;
+  struct svr4_info *info = (struct svr4_info *) arg;
 
   free_probes_table (info);
   free_solib_list (info);
@@ -421,7 +421,8 @@ get_svr4_info (void)
 {
   struct svr4_info *info;
 
-  info = program_space_data (current_program_space, solib_svr4_pspace_data);
+  info = (struct svr4_info *) program_space_data (current_program_space,
+						  solib_svr4_pspace_data);
   if (info != NULL)
     return info;
 
@@ -1161,11 +1162,15 @@ library_list_start_library (struct gdb_xml_parser *parser,
 			    const struct gdb_xml_element *element,
 			    void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  struct svr4_library_list *list = user_data;
-  const char *name = xml_find_attribute (attributes, "name")->value;
-  ULONGEST *lmp = xml_find_attribute (attributes, "lm")->value;
-  ULONGEST *l_addrp = xml_find_attribute (attributes, "l_addr")->value;
-  ULONGEST *l_ldp = xml_find_attribute (attributes, "l_ld")->value;
+  struct svr4_library_list *list = (struct svr4_library_list *) user_data;
+  const char *name
+    = (const char *) xml_find_attribute (attributes, "name")->value;
+  ULONGEST *lmp
+    = (long unsigned int *) xml_find_attribute (attributes, "lm")->value;
+  ULONGEST *l_addrp
+    = (long unsigned int *) xml_find_attribute (attributes, "l_addr")->value;
+  ULONGEST *l_ldp
+    = (long unsigned int *) xml_find_attribute (attributes, "l_ld")->value;
   struct so_list *new_elem;
 
   new_elem = XCNEW (struct so_list);
@@ -1189,8 +1194,9 @@ svr4_library_list_start_list (struct gdb_xml_parser *parser,
 			      const struct gdb_xml_element *element,
 			      void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  struct svr4_library_list *list = user_data;
-  const char *version = xml_find_attribute (attributes, "version")->value;
+  struct svr4_library_list *list = (struct svr4_library_list *) user_data;
+  const char *version
+    = (const char *) xml_find_attribute (attributes, "version")->value;
   struct gdb_xml_value *main_lm = xml_find_attribute (attributes, "main-lm");
 
   if (strcmp (version, "1.0") != 0)
@@ -1699,7 +1705,7 @@ struct probe_and_action
 static hashval_t
 hash_probe_and_action (const void *p)
 {
-  const struct probe_and_action *pa = p;
+  const struct probe_and_action *pa = (const struct probe_and_action *) p;
 
   return (hashval_t) pa->address;
 }
@@ -1710,8 +1716,8 @@ hash_probe_and_action (const void *p)
 static int
 equal_probe_and_action (const void *p1, const void *p2)
 {
-  const struct probe_and_action *pa1 = p1;
-  const struct probe_and_action *pa2 = p2;
+  const struct probe_and_action *pa1 = (const struct probe_and_action *) p1;
+  const struct probe_and_action *pa2 = (const struct probe_and_action *) p2;
 
   return pa1->address == pa2->address;
 }
@@ -2055,7 +2061,8 @@ svr4_update_solib_event_breakpoint (struct breakpoint *b, void *arg)
       struct svr4_info *info;
       struct probe_and_action *pa;
 
-      info = program_space_data (loc->pspace, solib_svr4_pspace_data);
+      info = ((struct svr4_info *)
+	      program_space_data (loc->pspace, solib_svr4_pspace_data));
       if (info == NULL || info->probes_table == NULL)
 	continue;
 
@@ -3176,7 +3183,8 @@ void
 set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
                                        struct link_map_offsets *(*flmo) (void))
 {
-  struct solib_svr4_ops *ops = gdbarch_data (gdbarch, solib_svr4_data);
+  struct solib_svr4_ops *ops
+    = (struct solib_svr4_ops *) gdbarch_data (gdbarch, solib_svr4_data);
 
   ops->fetch_link_map_offsets = flmo;
 
@@ -3189,7 +3197,9 @@ set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
 static struct link_map_offsets *
 svr4_fetch_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops = gdbarch_data (target_gdbarch (), solib_svr4_data);
+  struct solib_svr4_ops *ops
+    = (struct solib_svr4_ops *) gdbarch_data (target_gdbarch (),
+					      solib_svr4_data);
 
   gdb_assert (ops->fetch_link_map_offsets);
   return ops->fetch_link_map_offsets ();
@@ -3200,7 +3210,9 @@ svr4_fetch_link_map_offsets (void)
 static int
 svr4_have_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops = gdbarch_data (target_gdbarch (), solib_svr4_data);
+  struct solib_svr4_ops *ops
+    = (struct solib_svr4_ops *) gdbarch_data (target_gdbarch (),
+					      solib_svr4_data);
 
   return (ops->fetch_link_map_offsets != NULL);
 }

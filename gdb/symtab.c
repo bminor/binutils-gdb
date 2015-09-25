@@ -473,7 +473,7 @@ iterate_over_symtabs (const char *name,
 static int
 lookup_symtab_callback (struct symtab *symtab, void *data)
 {
-  struct symtab **result_ptr = data;
+  struct symtab **result_ptr = (struct symtab **) data;
 
   *result_ptr = symtab;
   return 1;
@@ -663,7 +663,8 @@ struct demangled_name_entry
 static hashval_t
 hash_demangled_name_entry (const void *data)
 {
-  const struct demangled_name_entry *e = data;
+  const struct demangled_name_entry *e
+    = (const struct demangled_name_entry *) data;
 
   return htab_hash_string (e->mangled);
 }
@@ -673,8 +674,10 @@ hash_demangled_name_entry (const void *data)
 static int
 eq_demangled_name_entry (const void *a, const void *b)
 {
-  const struct demangled_name_entry *da = a;
-  const struct demangled_name_entry *db = b;
+  const struct demangled_name_entry *da
+    = (const struct demangled_name_entry *) a;
+  const struct demangled_name_entry *db
+    = (const struct demangled_name_entry *) b;
 
   return strcmp (da->mangled, db->mangled) == 0;
 }
@@ -1331,7 +1334,8 @@ free_symbol_cache (struct symbol_cache *cache)
 static struct symbol_cache *
 get_symbol_cache (struct program_space *pspace)
 {
-  struct symbol_cache *cache = program_space_data (pspace, symbol_cache_key);
+  struct symbol_cache *cache
+    = (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
 
   if (cache == NULL)
     {
@@ -1348,7 +1352,7 @@ get_symbol_cache (struct program_space *pspace)
 static void
 symbol_cache_cleanup (struct program_space *pspace, void *data)
 {
-  struct symbol_cache *cache = data;
+  struct symbol_cache *cache = (struct symbol_cache *) data;
 
   free_symbol_cache (cache);
 }
@@ -1363,7 +1367,7 @@ set_symbol_cache_size (unsigned int new_size)
   ALL_PSPACES (pspace)
     {
       struct symbol_cache *cache
-	= program_space_data (pspace, symbol_cache_key);
+	= (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
 
       /* The pspace could have been created but not have a cache yet.  */
       if (cache != NULL)
@@ -1519,7 +1523,8 @@ symbol_cache_mark_not_found (struct block_symbol_cache *bsc,
 static void
 symbol_cache_flush (struct program_space *pspace)
 {
-  struct symbol_cache *cache = program_space_data (pspace, symbol_cache_key);
+  struct symbol_cache *cache
+    = (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
   int pass;
   size_t total_size;
 
@@ -1634,7 +1639,8 @@ maintenance_print_symbol_cache (char *args, int from_tty)
 		       : "(no object file)");
 
       /* If the cache hasn't been created yet, avoid creating one.  */
-      cache = program_space_data (pspace, symbol_cache_key);
+      cache
+	= (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
       if (cache == NULL)
 	printf_filtered ("  <empty>\n");
       else
@@ -1705,7 +1711,8 @@ maintenance_print_symbol_cache_statistics (char *args, int from_tty)
 		       : "(no object file)");
 
       /* If the cache hasn't been created yet, avoid creating one.  */
-      cache = program_space_data (pspace, symbol_cache_key);
+      cache
+	= (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
       if (cache == NULL)
  	printf_filtered ("  empty, no stats available\n");
       else
@@ -4167,7 +4174,7 @@ clear_filename_seen_cache (struct filename_seen_cache *cache)
 static void
 delete_filename_seen_cache (void *ptr)
 {
-  struct filename_seen_cache *cache = ptr;
+  struct filename_seen_cache *cache = (struct filename_seen_cache *) ptr;
 
   htab_delete (cache->tab);
   xfree (cache);
@@ -4247,7 +4254,8 @@ static void
 output_partial_symbol_filename (const char *filename, const char *fullname,
 				void *data)
 {
-  output_source_filename (fullname ? fullname : filename, data);
+  output_source_filename (fullname ? fullname : filename,
+			  (struct output_source_filename_data *) data);
 }
 
 static void
@@ -4434,7 +4442,7 @@ static int
 search_symbols_file_matches (const char *filename, void *user_data,
 			     int basenames)
 {
-  struct search_symbols_data *data = user_data;
+  struct search_symbols_data *data = (struct search_symbols_data *) user_data;
 
   return file_matches (filename, data->files, data->nfiles, basenames);
 }
@@ -4444,7 +4452,7 @@ search_symbols_file_matches (const char *filename, void *user_data,
 static int
 search_symbols_name_matches (const char *symname, void *user_data)
 {
-  struct search_symbols_data *data = user_data;
+  struct search_symbols_data *data = (struct search_symbols_data *) user_data;
 
   return !data->preg_p || regexec (&data->preg, symname, 0, NULL, 0) == 0;
 }
@@ -5035,7 +5043,7 @@ free_completion_list (VEC (char_ptr) **list_ptr)
 static void
 do_free_completion_list (void *list)
 {
-  free_completion_list (list);
+  free_completion_list ((VEC (char_ptr) **) list);
 }
 
 /* Helper routine for make_symbol_completion_list.  */
@@ -5801,7 +5809,8 @@ static void
 maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 				   void *user_data)
 {
-  struct add_partial_filename_data *data = user_data;
+  struct add_partial_filename_data *data
+    = (struct add_partial_filename_data *) user_data;
 
   if (not_interesting_fname (filename))
     return;
@@ -5898,7 +5907,8 @@ make_source_files_completion_list (const char *text, const char *word)
 static struct main_info *
 get_main_info (void)
 {
-  struct main_info *info = program_space_data (current_program_space,
+  struct main_info *info
+    = (struct main_info *) program_space_data (current_program_space,
 					       main_progspace_key);
 
   if (info == NULL)
@@ -5924,7 +5934,7 @@ get_main_info (void)
 static void
 main_info_cleanup (struct program_space *pspace, void *data)
 {
-  struct main_info *info = data;
+  struct main_info *info = (struct main_info *) data;
 
   if (info != NULL)
     xfree (info->name_of_main);

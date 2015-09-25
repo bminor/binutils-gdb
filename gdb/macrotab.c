@@ -130,7 +130,7 @@ macro_bcache (struct macro_table *t, const void *addr, int len)
 static const char *
 macro_bcache_str (struct macro_table *t, const char *s)
 {
-  return macro_bcache (t, s, strlen (s) + 1);
+  return (const char *) macro_bcache (t, s, strlen (s) + 1);
 }
 
 
@@ -575,7 +575,8 @@ new_macro_definition (struct macro_table *t,
         cached_argv[i] = macro_bcache_str (t, argv[i]);
 
       /* Now bcache the array of argument pointers itself.  */
-      d->argv = macro_bcache (t, cached_argv, cached_argv_size);
+      d->argv = ((const char * const *)
+		 macro_bcache (t, cached_argv, cached_argv_size));
     }
 
   /* We don't bcache the entire definition structure because it's got

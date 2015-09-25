@@ -749,7 +749,7 @@ delete_exited_threads (void)
 static void
 disable_thread_stack_temporaries (void *data)
 {
-  ptid_t *pd = data;
+  ptid_t *pd = (ptid_t *) data;
   struct thread_info *tp = find_thread_ptid (*pd);
 
   if (tp != NULL)
@@ -1082,7 +1082,7 @@ finish_thread_state (ptid_t ptid)
 void
 finish_thread_state_cleanup (void *arg)
 {
-  ptid_t *ptid_p = arg;
+  ptid_t *ptid_p = (ptid_t *) arg;
 
   gdb_assert (arg);
 
@@ -1457,7 +1457,7 @@ static void
 do_restore_current_thread_cleanup (void *arg)
 {
   struct thread_info *tp;
-  struct current_thread_cleanup *old = arg;
+  struct current_thread_cleanup *old = (struct current_thread_cleanup *) arg;
 
   tp = find_thread_ptid (old->inferior_ptid);
 
@@ -1489,7 +1489,7 @@ do_restore_current_thread_cleanup (void *arg)
 static void
 restore_current_thread_cleanup_dtor (void *arg)
 {
-  struct current_thread_cleanup *old = arg;
+  struct current_thread_cleanup *old = (struct current_thread_cleanup *) arg;
   struct thread_info *tp;
   struct inferior *inf;
 
@@ -1510,7 +1510,8 @@ static void
 set_thread_refcount (void *data)
 {
   int k;
-  struct thread_array_cleanup *ta_cleanup = data;
+  struct thread_array_cleanup *ta_cleanup
+    = (struct thread_array_cleanup *) data;
 
   for (k = 0; k != ta_cleanup->count; k++)
     ta_cleanup->tp_array[k]->refcount--;
@@ -1573,8 +1574,10 @@ static int tp_array_compar_ascending;
 static int
 tp_array_compar (const void *ap_voidp, const void *bp_voidp)
 {
-  const struct thread_info *const *ap = ap_voidp;
-  const struct thread_info *const *bp = bp_voidp;
+  const struct thread_info *const *ap
+    = (const struct thread_info * const*) ap_voidp;
+  const struct thread_info *const *bp
+    = (const struct thread_info * const*) bp_voidp;
 
   return ((((*ap)->num > (*bp)->num) - ((*ap)->num < (*bp)->num))
 	  * (tp_array_compar_ascending ? +1 : -1));
@@ -1834,7 +1837,7 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
   int num;
   struct thread_info *tp;
 
-  num = value_as_long (parse_and_eval (tidstr));
+  num = value_as_long (parse_and_eval ((const char *) tidstr));
 
   tp = find_thread_id (num);
 

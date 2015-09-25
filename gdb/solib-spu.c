@@ -105,7 +105,8 @@ append_ocl_sos (struct so_list **link_ptr)
 
   ALL_OBJFILES (objfile)
     {
-      ocl_program_addr_base = objfile_data (objfile, ocl_program_data_key);
+      ocl_program_addr_base
+	= (CORE_ADDR *) objfile_data (objfile, ocl_program_data_key);
       if (ocl_program_addr_base != NULL)
         {
 	  enum bfd_endian byte_order = bfd_big_endian (objfile->obfd)?

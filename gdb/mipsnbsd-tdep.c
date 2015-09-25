@@ -56,7 +56,7 @@ mipsnbsd_supply_fpregset (const struct regset *regset,
 			  int regnum, const void *fpregs, size_t len)
 {
   size_t regsize = mips_isa_regsize (get_regcache_arch (regcache));
-  const char *regs = fpregs;
+  const char *regs = (const char *) fpregs;
   int i;
 
   gdb_assert (len >= MIPSNBSD_NUM_FPREGS * regsize);
@@ -79,7 +79,7 @@ mipsnbsd_supply_gregset (const struct regset *regset,
 			 const void *gregs, size_t len)
 {
   size_t regsize = mips_isa_regsize (get_regcache_arch (regcache));
-  const char *regs = gregs;
+  const char *regs = (const char *) gregs;
   int i;
 
   gdb_assert (len >= MIPSNBSD_NUM_GREGS * regsize);

@@ -229,7 +229,7 @@ mi_parse_free (struct mi_parse *parse)
 static void
 mi_parse_cleanup (void *arg)
 {
-  mi_parse_free (arg);
+  mi_parse_free ((struct mi_parse *) arg);
 }
 
 struct mi_parse *

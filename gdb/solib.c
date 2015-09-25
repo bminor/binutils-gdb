@@ -65,7 +65,8 @@ solib_init (struct obstack *obstack)
 static const struct target_so_ops *
 solib_ops (struct gdbarch *gdbarch)
 {
-  const struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
+  const struct target_so_ops **ops
+    = (const struct target_so_ops **) gdbarch_data (gdbarch, solib_data);
 
   return *ops;
 }
@@ -75,7 +76,8 @@ solib_ops (struct gdbarch *gdbarch)
 void
 set_solib_ops (struct gdbarch *gdbarch, const struct target_so_ops *new_ops)
 {
-  const struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
+  const struct target_so_ops **ops
+    = (const struct target_so_ops **) gdbarch_data (gdbarch, solib_data);
 
   *ops = new_ops;
 }

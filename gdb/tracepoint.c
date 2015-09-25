@@ -860,7 +860,8 @@ static int memrange_cmp (const void *, const void *);
 static int
 memrange_cmp (const void *va, const void *vb)
 {
-  const struct memrange *a = va, *b = vb;
+  const struct memrange *a = (const struct memrange *) va;
+  const struct memrange *b = (const struct memrange *) vb;
 
   if (a->type < b->type)
     return -1;
@@ -1137,7 +1138,7 @@ do_collect_symbol (const char *print_name,
 		   struct symbol *sym,
 		   void *cb_data)
 {
-  struct add_local_symbols_data *p = cb_data;
+  struct add_local_symbols_data *p = (struct add_local_symbols_data *) cb_data;
 
   collect_symbol (p->collect, sym, p->gdbarch, p->frame_regno,
 		  p->frame_offset, p->pc, p->trace_string);
@@ -1231,7 +1232,7 @@ clear_collection_list (struct collection_list *list)
 static void
 do_clear_collection_list (void *list)
 {
-  struct collection_list *l = list;
+  struct collection_list *l = (struct collection_list *) list;
 
   clear_collection_list (l);
 }
@@ -3234,7 +3235,8 @@ struct current_traceframe_cleanup
 static void
 do_restore_current_traceframe_cleanup (void *arg)
 {
-  struct current_traceframe_cleanup *old = arg;
+  struct current_traceframe_cleanup *old
+    = (struct current_traceframe_cleanup *) arg;
 
   set_current_traceframe (old->traceframe_number);
 }
@@ -3242,7 +3244,8 @@ do_restore_current_traceframe_cleanup (void *arg)
 static void
 restore_current_traceframe_cleanup_dtor (void *arg)
 {
-  struct current_traceframe_cleanup *old = arg;
+  struct current_traceframe_cleanup *old
+    = (struct current_traceframe_cleanup *) arg;
 
   xfree (old);
 }
@@ -3892,7 +3895,8 @@ parse_tsv_definition (char *line, struct uploaded_tsv **utsvp)
 void
 free_current_marker (void *arg)
 {
-  struct static_tracepoint_marker **marker_p = arg;
+  struct static_tracepoint_marker **marker_p
+    = (struct static_tracepoint_marker **) arg;
 
   if (*marker_p != NULL)
     {
@@ -4185,12 +4189,14 @@ traceframe_info_start_memory (struct gdb_xml_parser *parser,
 			      const struct gdb_xml_element *element,
 			      void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  struct traceframe_info *info = user_data;
+  struct traceframe_info *info = (struct traceframe_info *) user_data;
   struct mem_range *r = VEC_safe_push (mem_range_s, info->memory, NULL);
   ULONGEST *start_p, *length_p;
 
-  start_p = xml_find_attribute (attributes, "start")->value;
-  length_p = xml_find_attribute (attributes, "length")->value;
+  start_p
+    = (long unsigned int *) xml_find_attribute (attributes, "start")->value;
+  length_p
+    = (long unsigned int *) xml_find_attribute (attributes, "length")->value;
 
   r->start = *start_p;
   r->length = *length_p;
@@ -4204,8 +4210,9 @@ traceframe_info_start_tvar (struct gdb_xml_parser *parser,
 			     void *user_data,
 			     VEC(gdb_xml_value_s) *attributes)
 {
-  struct traceframe_info *info = user_data;
-  const char *id_attrib = xml_find_attribute (attributes, "id")->value;
+  struct traceframe_info *info = (struct traceframe_info *) user_data;
+  const char *id_attrib
+    = (const char *) xml_find_attribute (attributes, "id")->value;
   int id = gdb_xml_parse_ulongest (parser, id_attrib);
 
   VEC_safe_push (int, info->tvars, id);
@@ -4216,7 +4223,7 @@ traceframe_info_start_tvar (struct gdb_xml_parser *parser,
 static void
 free_result (void *p)
 {
-  struct traceframe_info *result = p;
+  struct traceframe_info *result = (struct traceframe_info *) p;
 
   free_traceframe_info (result);
 }

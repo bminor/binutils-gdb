@@ -173,7 +173,7 @@ mi_interpreter_init (struct interp *interp, int top_level)
 static int
 mi_interpreter_resume (void *data)
 {
-  struct mi_interp *mi = data;
+  struct mi_interp *mi = (struct mi_interp *) data;
 
   /* As per hack note in mi_interpreter_init, swap in the output
      channels... */
@@ -355,7 +355,7 @@ mi_command_loop (void *data)
 static void
 mi_new_thread (struct thread_info *t)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
   struct inferior *inf = find_inferior_ptid (t->ptid);
 
   gdb_assert (inf);
@@ -378,7 +378,7 @@ mi_thread_exit (struct thread_info *t, int silent)
 
   inf = find_inferior_ptid (t->ptid);
 
-  mi = top_level_interpreter_data ();
+  mi = (struct mi_interp *) top_level_interpreter_data ();
   old_chain = make_cleanup_restore_target_terminal ();
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel, 
@@ -394,7 +394,7 @@ mi_thread_exit (struct thread_info *t, int silent)
 static void
 mi_record_changed (struct inferior *inferior, int started)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   fprintf_unfiltered (mi->event_channel,  "record-%s,thread-group=\"i%d\"",
 		      started ? "started" : "stopped", inferior->num);
@@ -405,7 +405,7 @@ mi_record_changed (struct inferior *inferior, int started)
 static void
 mi_inferior_added (struct inferior *inf)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel,
@@ -417,7 +417,7 @@ mi_inferior_added (struct inferior *inf)
 static void
 mi_inferior_appeared (struct inferior *inf)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel,
@@ -429,7 +429,7 @@ mi_inferior_appeared (struct inferior *inf)
 static void
 mi_inferior_exit (struct inferior *inf)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   target_terminal_ours ();
   if (inf->has_exit_code)
@@ -446,7 +446,7 @@ mi_inferior_exit (struct inferior *inf)
 static void
 mi_inferior_removed (struct inferior *inf)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel,
@@ -484,7 +484,7 @@ mi_interp_data (void)
   struct interp *interp = find_mi_interpreter ();
 
   if (interp != NULL)
-    return interp_data (interp);
+    return (struct mi_interp *) interp_data (interp);
   return NULL;
 }
 
@@ -611,7 +611,8 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	  || (tp->control.command_interp != NULL
 	      && tp->control.command_interp != top_level_interpreter ()))
 	{
-	  struct mi_interp *mi = top_level_interpreter_data ();
+	  struct mi_interp *mi
+	    = (struct mi_interp *) top_level_interpreter_data ();
 
 	  print_stop_event (mi->cli_uiout);
 	}
@@ -674,7 +675,7 @@ struct mi_suppress_notification mi_suppress_notification =
 static void
 mi_traceframe_changed (int tfnum, int tpnum)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   if (mi_suppress_notification.traceframe)
     return;
@@ -696,7 +697,7 @@ mi_traceframe_changed (int tfnum, int tpnum)
 static void
 mi_tsv_created (const struct trace_state_variable *tsv)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   target_terminal_ours ();
 
@@ -712,7 +713,7 @@ mi_tsv_created (const struct trace_state_variable *tsv)
 static void
 mi_tsv_deleted (const struct trace_state_variable *tsv)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   target_terminal_ours ();
 
@@ -730,7 +731,7 @@ mi_tsv_deleted (const struct trace_state_variable *tsv)
 static void
 mi_tsv_modified (const struct trace_state_variable *tsv)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
 
   target_terminal_ours ();
@@ -756,7 +757,7 @@ mi_tsv_modified (const struct trace_state_variable *tsv)
 static void
 mi_breakpoint_created (struct breakpoint *b)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
 
   if (mi_suppress_notification.breakpoint)
@@ -795,7 +796,7 @@ mi_breakpoint_created (struct breakpoint *b)
 static void
 mi_breakpoint_deleted (struct breakpoint *b)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
 
   if (mi_suppress_notification.breakpoint)
     return;
@@ -816,7 +817,7 @@ mi_breakpoint_deleted (struct breakpoint *b)
 static void
 mi_breakpoint_modified (struct breakpoint *b)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
 
   if (mi_suppress_notification.breakpoint)
@@ -853,7 +854,7 @@ mi_breakpoint_modified (struct breakpoint *b)
 static int
 mi_output_running_pid (struct thread_info *info, void *arg)
 {
-  ptid_t *ptid = arg;
+  ptid_t *ptid = (ptid_t *) arg;
 
   if (ptid_get_pid (*ptid) == ptid_get_pid (info->ptid))
     fprintf_unfiltered (raw_stdout,
@@ -868,7 +869,7 @@ mi_inferior_count (struct inferior *inf, void *arg)
 {
   if (inf->pid != 0)
     {
-      int *count_p = arg;
+      int *count_p = (int *) arg;
       (*count_p)++;
     }
 
@@ -944,7 +945,7 @@ mi_on_resume (ptid_t ptid)
 static void
 mi_solib_loaded (struct so_list *solib)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
   struct ui_out *uiout = interp_ui_out (top_level_interpreter ());
 
   target_terminal_ours ();
@@ -970,7 +971,7 @@ mi_solib_loaded (struct so_list *solib)
 static void
 mi_solib_unloaded (struct so_list *solib)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
   struct ui_out *uiout = interp_ui_out (top_level_interpreter ());
 
   target_terminal_ours ();
@@ -997,7 +998,7 @@ mi_solib_unloaded (struct so_list *solib)
 static void
 mi_command_param_changed (const char *param, const char *value)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
 
   if (mi_suppress_notification.cmd_param_changed)
@@ -1024,7 +1025,7 @@ static void
 mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
 		   ssize_t len, const bfd_byte *myaddr)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter_data ();
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
   struct obj_section *sec;
 
@@ -1066,7 +1067,7 @@ report_initial_inferior (struct inferior *inf, void *closure)
      mi_inferior_added assumes that inferior is fully initialized
      and top_level_interpreter_data is set, we cannot call
      it here.  */
-  struct mi_interp *mi = closure;
+  struct mi_interp *mi = (struct mi_interp *) closure;
 
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel,
@@ -1079,7 +1080,7 @@ report_initial_inferior (struct inferior *inf, void *closure)
 static struct ui_out *
 mi_ui_out (struct interp *interp)
 {
-  struct mi_interp *mi = interp_data (interp);
+  struct mi_interp *mi = (struct mi_interp *) interp_data (interp);
 
   return mi->mi_uiout;
 }
@@ -1096,7 +1097,7 @@ static int
 mi_set_logging (struct interp *interp, int start_log,
 		struct ui_file *out, struct ui_file *logfile)
 {
-  struct mi_interp *mi = interp_data (interp);
+  struct mi_interp *mi = (struct mi_interp *) interp_data (interp);
 
   if (!mi)
     return 0;

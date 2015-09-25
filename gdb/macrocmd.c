@@ -196,7 +196,7 @@ print_macro_callback (const char *name, const struct macro_definition *macro,
 		   struct macro_source_file *source, int line,
 		   void *user_data)
 {
-  if (! user_data || strcmp (user_data, name) == 0)
+  if (! user_data || strcmp ((const char *) user_data, name) == 0)
     print_macro_definition (name, macro, source, line);
 }
 

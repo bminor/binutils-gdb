@@ -182,7 +182,7 @@ make_cleanup_dyn_string_delete (dyn_string_t arg)
 static void
 do_bfd_close_cleanup (void *arg)
 {
-  gdb_bfd_unref (arg);
+  gdb_bfd_unref ((bfd *) arg);
 }
 
 struct cleanup *
@@ -196,7 +196,7 @@ make_cleanup_bfd_unref (bfd *abfd)
 static void
 do_fclose_cleanup (void *arg)
 {
-  FILE *file = arg;
+  FILE *file = (FILE *) arg;
 
   fclose (file);
 }
@@ -214,7 +214,7 @@ make_cleanup_fclose (FILE *file)
 static void
 do_obstack_free (void *arg)
 {
-  struct obstack *ob = arg;
+  struct obstack *ob = (struct obstack *) arg;
 
   obstack_free (ob, NULL);
 }
@@ -230,7 +230,7 @@ make_cleanup_obstack_free (struct obstack *obstack)
 static void
 do_ui_file_delete (void *arg)
 {
-  ui_file_delete (arg);
+  ui_file_delete ((struct ui_file *) arg);
 }
 
 struct cleanup *
@@ -244,7 +244,7 @@ make_cleanup_ui_file_delete (struct ui_file *arg)
 static void
 do_ui_out_redirect_pop (void *arg)
 {
-  struct ui_out *uiout = arg;
+  struct ui_out *uiout = (struct ui_out *) arg;
 
   if (ui_out_redirect (uiout, NULL) < 0)
     warning (_("Cannot restore redirection of the current output protocol"));
@@ -262,7 +262,7 @@ make_cleanup_ui_out_redirect_pop (struct ui_out *uiout)
 static void
 do_free_section_addr_info (void *arg)
 {
-  free_section_addr_info (arg);
+  free_section_addr_info ((struct section_addr_info *) arg);
 }
 
 struct cleanup *
@@ -280,7 +280,8 @@ struct restore_integer_closure
 static void
 restore_integer (void *p)
 {
-  struct restore_integer_closure *closure = p;
+  struct restore_integer_closure *closure
+    = (struct restore_integer_closure *) p;
 
   *(closure->variable) = closure->value;
 }
@@ -313,7 +314,7 @@ make_cleanup_restore_uinteger (unsigned int *variable)
 static void
 do_unpush_target (void *arg)
 {
-  struct target_ops *ops = arg;
+  struct target_ops *ops = (struct target_ops *) arg;
 
   unpush_target (ops);
 }
@@ -331,7 +332,7 @@ make_cleanup_unpush_target (struct target_ops *ops)
 static void
 do_htab_delete_cleanup (void *htab_voidp)
 {
-  htab_t htab = htab_voidp;
+  htab_t htab = (htab_t) htab_voidp;
 
   htab_delete (htab);
 }
@@ -353,7 +354,8 @@ struct restore_ui_file_closure
 static void
 do_restore_ui_file (void *p)
 {
-  struct restore_ui_file_closure *closure = p;
+  struct restore_ui_file_closure *closure
+    = (struct restore_ui_file_closure *) p;
 
   *(closure->variable) = closure->value;
 }
@@ -394,7 +396,7 @@ make_cleanup_value_free_to_mark (struct value *mark)
 static void
 do_value_free (void *value)
 {
-  value_free (value);
+  value_free ((struct value *) value);
 }
 
 /* Free VALUE.  */
@@ -410,7 +412,7 @@ make_cleanup_value_free (struct value *value)
 static void
 do_free_so (void *arg)
 {
-  struct so_list *so = arg;
+  struct so_list *so = (struct so_list *) arg;
 
   free_so (so);
 }
@@ -474,7 +476,7 @@ make_cleanup_clear_parser_state (struct parser_state **p)
 void
 free_current_contents (void *ptr)
 {
-  void **location = ptr;
+  void **location = (void **) ptr;
 
   if (location == NULL)
     internal_error (__FILE__, __LINE__,
@@ -1130,7 +1132,7 @@ make_hex_string (const gdb_byte *data, size_t length)
 static void
 do_regfree_cleanup (void *r)
 {
-  regfree (r);
+  regfree ((regex_t *) r);
 }
 
 /* Create a new cleanup that frees the compiled regular expression R.  */
@@ -2781,7 +2783,7 @@ print_core_address (struct gdbarch *gdbarch, CORE_ADDR address)
 hashval_t
 core_addr_hash (const void *ap)
 {
-  const CORE_ADDR *addrp = ap;
+  const CORE_ADDR *addrp = (const CORE_ADDR *) ap;
 
   return *addrp;
 }
@@ -2791,8 +2793,8 @@ core_addr_hash (const void *ap)
 int
 core_addr_eq (const void *ap, const void *bp)
 {
-  const CORE_ADDR *addr_ap = ap;
-  const CORE_ADDR *addr_bp = bp;
+  const CORE_ADDR *addr_ap = (const CORE_ADDR *) ap;
+  const CORE_ADDR *addr_bp = (const CORE_ADDR *) bp;
 
   return *addr_ap == *addr_bp;
 }
@@ -3198,7 +3200,7 @@ producer_is_gcc (const char *producer, int *major, int *minor)
 static void
 do_free_char_ptr_vec (void *arg)
 {
-  VEC (char_ptr) *char_ptr_vec = arg;
+  VEC (char_ptr) *char_ptr_vec = (VEC (char_ptr) *) arg;
 
   free_char_ptr_vec (char_ptr_vec);
 }

@@ -347,7 +347,7 @@ complete_target_initialization (struct target_ops *t)
 static void
 open_target (char *args, int from_tty, struct cmd_list_element *command)
 {
-  struct target_ops *ops = get_cmd_context (command);
+  struct target_ops *ops = (struct target_ops *) get_cmd_context (command);
 
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog, "-> %s->to_open (...)\n",
@@ -531,7 +531,7 @@ target_supports_terminal_ours (void)
 static void
 cleanup_restore_target_terminal (void *arg)
 {
-  enum terminal_state *previous_state = arg;
+  enum terminal_state *previous_state = (enum terminal_state *) arg;
 
   switch (*previous_state)
     {
@@ -1768,7 +1768,7 @@ read_whatever_is_readable (struct target_ops *ops,
 void
 free_memory_read_result_vector (void *x)
 {
-  VEC(memory_read_result_s) *v = x;
+  VEC(memory_read_result_s) *v = (VEC(memory_read_result_s) *) x;
   memory_read_result_s *current;
   int ix;
 

@@ -200,7 +200,8 @@ struct rx_get_opcode_byte_handle
 static int
 rx_get_opcode_byte (void *handle)
 {
-  struct rx_get_opcode_byte_handle *opcdata = handle;
+  struct rx_get_opcode_byte_handle *opcdata
+    = (struct rx_get_opcode_byte_handle *) handle;
   int status;
   gdb_byte byte;
 
@@ -445,10 +446,10 @@ rx_analyze_frame_prologue (struct frame_info *this_frame,
 	stop_addr = func_start;
 
       rx_analyze_prologue (func_start, stop_addr, frame_type,
-                           *this_prologue_cache);
+			   (struct rx_prologue *) *this_prologue_cache);
     }
 
-  return *this_prologue_cache;
+  return (struct rx_prologue *) *this_prologue_cache;
 }
 
 /* Determine type of frame by scanning the function for a return
@@ -469,7 +470,7 @@ rx_frame_type (struct frame_info *this_frame, void **this_cache)
 
   if (*this_cache != NULL)
     {
-      struct rx_prologue *p = *this_cache;
+      struct rx_prologue *p = (struct rx_prologue *) *this_cache;
 
       return p->frame_type;
     }
@@ -643,7 +644,7 @@ rx_frame_sniffer_common (const struct frame_unwind *self,
     }
   else
     {
-      struct rx_prologue *p = *this_cache;
+      struct rx_prologue *p = (struct rx_prologue *) *this_cache;
 
       return sniff_p (p->frame_type);
     }

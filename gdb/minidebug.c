@@ -76,7 +76,7 @@ struct gdb_lzma_stream
 static void *
 lzma_open (struct bfd *nbfd, void *open_closure)
 {
-  asection *section = open_closure;
+  asection *section = (asection *) open_closure;
   bfd_size_type size, offset;
   lzma_stream_flags options;
   gdb_byte footer[LZMA_STREAM_HEADER_SIZE];
@@ -133,7 +133,7 @@ static file_ptr
 lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
 	    file_ptr offset)
 {
-  struct gdb_lzma_stream *lstream = stream;
+  struct gdb_lzma_stream *lstream = (struct gdb_lzma_stream *) stream;
   bfd_size_type chunk_size;
   lzma_index_iter iter;
   gdb_byte *compressed, *uncompressed;
@@ -220,7 +220,7 @@ static int
 lzma_close (struct bfd *nbfd,
 	    void *stream)
 {
-  struct gdb_lzma_stream *lstream = stream;
+  struct gdb_lzma_stream *lstream = (struct gdb_lzma_stream *) stream;
 
   lzma_index_end (lstream->index, &gdb_lzma_allocator);
   xfree (lstream->data);
@@ -239,7 +239,7 @@ lzma_stat (struct bfd *abfd,
 	   void *stream,
 	   struct stat *sb)
 {
-  struct gdb_lzma_stream *lstream = stream;
+  struct gdb_lzma_stream *lstream = (struct gdb_lzma_stream *) stream;
 
   memset (sb, 0, sizeof (struct stat));
   sb->st_size = lzma_index_uncompressed_size (lstream->index);

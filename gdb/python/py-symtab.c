@@ -380,8 +380,10 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
      objfile cleanup observer linked list.  */
   if (sal_obj->symtab != (symtab_object *)Py_None)
     {
-      sal_obj->next = objfile_data (SYMTAB_OBJFILE (sal_obj->symtab->symtab),
-				    salpy_objfile_data_key);
+      sal_obj->next
+	= ((struct salpy_sal_object *)
+	   objfile_data (SYMTAB_OBJFILE (sal_obj->symtab->symtab),
+			 salpy_objfile_data_key));
       if (sal_obj->next)
 	sal_obj->next->prev = sal_obj;
 
@@ -406,8 +408,9 @@ set_symtab (symtab_object *obj, struct symtab *symtab)
   obj->prev = NULL;
   if (symtab)
     {
-      obj->next = objfile_data (SYMTAB_OBJFILE (symtab),
-				stpy_objfile_data_key);
+      obj->next
+	= ((struct stpy_symtab_object *)
+	   objfile_data (SYMTAB_OBJFILE (symtab), stpy_objfile_data_key));
       if (obj->next)
 	obj->next->prev = obj;
       set_objfile_data (SYMTAB_OBJFILE (symtab), stpy_objfile_data_key, obj);
@@ -478,7 +481,7 @@ symtab_object_to_symtab (PyObject *obj)
 static void
 del_objfile_symtab (struct objfile *objfile, void *datum)
 {
-  symtab_object *obj = datum;
+  symtab_object *obj = (symtab_object *) datum;
 
   while (obj)
     {
@@ -499,7 +502,7 @@ del_objfile_symtab (struct objfile *objfile, void *datum)
 static void
 del_objfile_sal (struct objfile *objfile, void *datum)
 {
-  sal_object *obj = datum;
+  sal_object *obj = (sal_object *) datum;
 
   while (obj)
     {

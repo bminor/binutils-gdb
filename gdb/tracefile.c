@@ -41,7 +41,7 @@
 static void
 trace_file_writer_xfree (void *arg)
 {
-  struct trace_file_writer *writer = arg;
+  struct trace_file_writer *writer = (struct trace_file_writer *) arg;
 
   writer->ops->dtor (writer);
   xfree (writer);

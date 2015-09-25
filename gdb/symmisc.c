@@ -876,7 +876,7 @@ static int
 maintenance_expand_file_matcher (const char *filename, void *data,
 				 int basenames)
 {
-  const char *regexp = data;
+  const char *regexp = (const char *) data;
 
   QUIT;
 

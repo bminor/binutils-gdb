@@ -498,7 +498,7 @@ static struct value *
 pyuw_prev_register (struct frame_info *this_frame, void **cache_ptr,
                     int regnum)
 {
-  cached_frame_info *cached_frame = *cache_ptr;
+  cached_frame_info *cached_frame = (cached_frame_info *) *cache_ptr;
   struct reg_info *reg_info = cached_frame->reg;
   struct reg_info *reg_info_end = reg_info + cached_frame->reg_count;
 
@@ -636,8 +636,9 @@ pyuw_gdbarch_data_init (struct gdbarch *gdbarch)
 static void
 pyuw_on_new_gdbarch (struct gdbarch *newarch)
 {
-  struct pyuw_gdbarch_data_type *data =
-      gdbarch_data (newarch, pyuw_gdbarch_data);
+  struct pyuw_gdbarch_data_type *data
+    = (struct pyuw_gdbarch_data_type *) gdbarch_data (newarch,
+						      pyuw_gdbarch_data);
 
   if (!data->unwinder_registered)
     {
@@ -648,7 +649,7 @@ pyuw_on_new_gdbarch (struct gdbarch *newarch)
       unwinder->stop_reason = default_frame_unwind_stop_reason;
       unwinder->this_id = pyuw_this_id;
       unwinder->prev_register = pyuw_prev_register;
-      unwinder->unwind_data = (void *) newarch;
+      unwinder->unwind_data = (const struct frame_data *) newarch;
       unwinder->sniffer = pyuw_sniffer;
       unwinder->dealloc_cache = pyuw_dealloc_cache;
       frame_unwind_prepend_unwinder (newarch, unwinder);

@@ -651,7 +651,8 @@ struct record_full_message_args {
 static int
 record_full_message_wrapper (void *args)
 {
-  struct record_full_message_args *record_full_args = args;
+  struct record_full_message_args *record_full_args
+    = (struct record_full_message_args *) args;
 
   return record_full_message (record_full_args->regcache,
 			      record_full_args->signal);
@@ -2521,7 +2522,7 @@ cmd_record_full_restore (char *args, int from_tty)
 static void
 record_full_save_cleanups (void *data)
 {
-  bfd *obfd = data;
+  bfd *obfd = (bfd *) data;
   char *pathname = xstrdup (bfd_get_filename (obfd));
 
   gdb_bfd_unref (obfd);

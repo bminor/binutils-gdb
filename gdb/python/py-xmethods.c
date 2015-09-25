@@ -54,7 +54,7 @@ void
 gdbpy_free_xmethod_worker_data (const struct extension_language_defn *extlang,
 				void *data)
 {
-  struct gdbpy_worker_data *worker_data = data;
+  struct gdbpy_worker_data *worker_data = (struct gdbpy_worker_data *) data;
   struct cleanup *cleanups;
 
   gdb_assert (worker_data->worker != NULL && worker_data->this_type != NULL);
@@ -75,7 +75,8 @@ void *
 gdbpy_clone_xmethod_worker_data (const struct extension_language_defn *extlang,
 				 void *data)
 {
-  struct gdbpy_worker_data *worker_data = data, *new_data;
+  struct gdbpy_worker_data *worker_data
+    = (struct gdbpy_worker_data *) data, *new_data;
   struct cleanup *cleanups;
 
   gdb_assert (worker_data->worker != NULL && worker_data->this_type != NULL);
@@ -379,7 +380,8 @@ gdbpy_get_xmethod_arg_types (const struct extension_language_defn *extlang,
 			     struct xmethod_worker *worker,
 			     int *nargs, struct type ***arg_types)
 {
-  struct gdbpy_worker_data *worker_data = worker->data;
+  struct gdbpy_worker_data *worker_data
+    = (struct gdbpy_worker_data *) worker->data;
   PyObject *py_worker = worker_data->worker;
   PyObject *get_arg_types_method;
   PyObject *py_argtype_list, *list_iter = NULL, *item;
@@ -513,7 +515,8 @@ gdbpy_get_xmethod_result_type (const struct extension_language_defn *extlang,
 			       struct value **args, int nargs,
 			       struct type **result_type_ptr)
 {
-  struct gdbpy_worker_data *worker_data = worker->data;
+  struct gdbpy_worker_data *worker_data
+    = (struct gdbpy_worker_data *) worker->data;
   PyObject *py_worker = worker_data->worker;
   PyObject *py_value_obj, *py_arg_tuple, *py_result_type;
   PyObject *get_result_type_method;
@@ -616,7 +619,8 @@ gdbpy_invoke_xmethod (const struct extension_language_defn *extlang,
   PyObject *py_value_obj, *py_arg_tuple, *py_result;
   struct type *obj_type, *this_type;
   struct value *res = NULL;
-  struct gdbpy_worker_data *worker_data = worker->data;
+  struct gdbpy_worker_data *worker_data
+    = (struct gdbpy_worker_data *) worker->data;
   PyObject *xmethod_worker = worker_data->worker;
 
   cleanups = ensure_python_env (get_current_arch (), current_language);

@@ -129,7 +129,7 @@ syscalls_info_free_syscalls_desc (struct syscall_desc *sd)
 static void
 free_syscalls_info (void *arg)
 {
-  struct syscalls_info *syscalls_info = arg;
+  struct syscalls_info *syscalls_info = (struct syscalls_info *) arg;
   struct syscall_desc *sysdesc;
   int i;
 
@@ -171,7 +171,7 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
                        const struct gdb_xml_element *element,
                        void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  struct syscall_parsing_data *data = user_data;
+  struct syscall_parsing_data *data = (struct syscall_parsing_data *) user_data;
   struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
   int len, i;
   /* syscall info.  */
@@ -183,7 +183,7 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
   for (i = 0; i < len; i++)
     {
       if (strcmp (attrs[i].name, "name") == 0)
-        name = attrs[i].value;
+        name = (char *) attrs[i].value;
       else if (strcmp (attrs[i].name, "number") == 0)
         number = * (ULONGEST *) attrs[i].value;
       else

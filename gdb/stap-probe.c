@@ -1550,7 +1550,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 static void
 get_stap_base_address_1 (bfd *abfd, asection *sect, void *obj)
 {
-  asection **ret = obj;
+  asection **ret = (asection **) obj;
 
   if ((sect->flags & (SEC_DATA | SEC_ALLOC | SEC_HAS_CONTENTS))
       && sect->name && !strcmp (sect->name, STAP_BASE_SECTION_NAME))

@@ -720,7 +720,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 static int
 build_bp_list (struct breakpoint *b, void *arg)
 {
-  PyObject *list = arg;
+  PyObject *list = (PyObject *) arg;
   PyObject *bp = (PyObject *) b->py_bp_object;
   int iserr = 0;
 

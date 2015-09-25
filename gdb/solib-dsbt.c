@@ -175,7 +175,8 @@ get_dsbt_info (void)
 {
   struct dsbt_info *info;
 
-  info = program_space_data (current_program_space, solib_dsbt_pspace_data);
+  info = (struct dsbt_info *) program_space_data (current_program_space,
+						  solib_dsbt_pspace_data);
   if (info != NULL)
     return info;
 

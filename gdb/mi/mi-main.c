@@ -610,7 +610,7 @@ struct collect_cores_data
 static int
 collect_cores (struct thread_info *ti, void *xdata)
 {
-  struct collect_cores_data *data = xdata;
+  struct collect_cores_data *data = (struct collect_cores_data *) xdata;
 
   if (ptid_get_pid (ti->ptid) == data->pid)
     {
@@ -643,7 +643,8 @@ struct print_one_inferior_data
 static int
 print_one_inferior (struct inferior *inferior, void *xdata)
 {
-  struct print_one_inferior_data *top_data = xdata;
+  struct print_one_inferior_data *top_data
+    = (struct print_one_inferior_data *) xdata;
   struct ui_out *uiout = current_uiout;
 
   if (VEC_empty (int, top_data->inferiors)
@@ -728,7 +729,7 @@ output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
 static void
 free_vector_of_ints (void *xvector)
 {
-  VEC (int) **vector = xvector;
+  VEC (int) **vector = (VEC (int) **) xvector;
 
   VEC_free (int, *vector);
 }
@@ -759,7 +760,7 @@ splay_tree_int_comparator (splay_tree_key xa, splay_tree_key xb)
 static void
 free_splay_tree (void *xt)
 {
-  splay_tree t = xt;
+  splay_tree t = (splay_tree) xt;
   splay_tree_delete (t);
 }
 
@@ -2150,7 +2151,8 @@ mi_execute_command (const char *cmd, int from_tty)
 	     =thread-selected is supposed to indicate user's intentions.  */
 	  && strcmp (command->command, "thread-select") != 0)
 	{
-	  struct mi_interp *mi = top_level_interpreter_data ();
+	  struct mi_interp *mi
+	    = (struct mi_interp *) top_level_interpreter_data ();
 	  int report_change = 0;
 
 	  if (command->thread == -1)

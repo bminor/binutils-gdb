@@ -616,7 +616,8 @@ static struct remote_arch_state *
 get_remote_arch_state (void)
 {
   gdb_assert (target_gdbarch () != NULL);
-  return gdbarch_data (target_gdbarch (), remote_gdbarch_data_handle);
+  return ((struct remote_arch_state *)
+	  gdbarch_data (target_gdbarch (), remote_gdbarch_data_handle));
 }
 
 /* Fetch the global remote target state.  */
@@ -639,7 +640,7 @@ get_remote_state (void)
 static void
 remote_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  char *remote_exec_file = arg;
+  char *remote_exec_file = (char *) arg;
 
   xfree (remote_exec_file);
 }
@@ -651,8 +652,9 @@ get_remote_exec_file (void)
 {
   char *remote_exec_file;
 
-  remote_exec_file = program_space_data (current_program_space,
-					 remote_pspace_data);
+  remote_exec_file
+    = (char *) program_space_data (current_program_space,
+				   remote_pspace_data);
   if (remote_exec_file == NULL)
     return "";
 
@@ -665,7 +667,7 @@ static void
 set_pspace_remote_exec_file (struct program_space *pspace,
 			char *remote_exec_file)
 {
-  char *old_file = program_space_data (pspace, remote_pspace_data);
+  char *old_file = (char *) program_space_data (pspace, remote_pspace_data);
 
   xfree (old_file);
   set_program_space_data (pspace, remote_pspace_data,
@@ -694,8 +696,10 @@ show_remote_exec_file (struct ui_file *file, int from_tty,
 static int
 compare_pnums (const void *lhs_, const void *rhs_)
 {
-  const struct packet_reg * const *lhs = lhs_;
-  const struct packet_reg * const *rhs = rhs_;
+  const struct packet_reg * const *lhs
+    = (const struct packet_reg * const *) lhs_;
+  const struct packet_reg * const *rhs
+    = (const struct packet_reg * const *) rhs_;
 
   if ((*lhs)->pnum < (*rhs)->pnum)
     return -1;
@@ -2837,7 +2841,8 @@ struct threads_listing_context
 static void
 clear_threads_listing_context (void *p)
 {
-  struct threads_listing_context *context = p;
+  struct threads_listing_context *context
+    = (struct threads_listing_context *) p;
   int i;
   struct thread_item *item;
 
@@ -2871,7 +2876,8 @@ threads_listing_context_remove (struct target_waitstatus *ws,
 static int
 remote_newthread_step (threadref *ref, void *data)
 {
-  struct threads_listing_context *context = data;
+  struct threads_listing_context *context
+    = (struct threads_listing_context *) data;
   struct thread_item item;
   int pid = ptid_get_pid (inferior_ptid);
 
@@ -2929,13 +2935,14 @@ start_thread (struct gdb_xml_parser *parser,
 	      const struct gdb_xml_element *element,
 	      void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  struct threads_listing_context *data = user_data;
+  struct threads_listing_context *data
+    = (struct threads_listing_context *) user_data;
 
   struct thread_item item;
   char *id;
   struct gdb_xml_value *attr;
 
-  id = xml_find_attribute (attributes, "id")->value;
+  id = (char *) xml_find_attribute (attributes, "id")->value;
   item.ptid = read_ptid (id, NULL);
 
   attr = xml_find_attribute (attributes, "core");
@@ -2954,7 +2961,8 @@ end_thread (struct gdb_xml_parser *parser,
 	    const struct gdb_xml_element *element,
 	    void *user_data, const char *body_text)
 {
-  struct threads_listing_context *data = user_data;
+  struct threads_listing_context *data
+    = (struct threads_listing_context *) user_data;
 
   if (body_text && *body_text)
     VEC_last (thread_item_t, data->items)->extra = xstrdup (body_text);
@@ -5837,8 +5845,9 @@ remove_child_of_pending_fork (QUEUE (stop_reply_p) *q,
 			      stop_reply_p event,
 			      void *data)
 {
-  struct queue_iter_param *param = data;
-  struct threads_listing_context *context = param->input;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
+  struct threads_listing_context *context
+    = (struct threads_listing_context *) param->input;
 
   if (event->ws.kind == TARGET_WAITKIND_FORKED
       || event->ws.kind == TARGET_WAITKIND_VFORKED)
@@ -5894,8 +5903,8 @@ remove_stop_reply_for_inferior (QUEUE (stop_reply_p) *q,
 				stop_reply_p event,
 				void *data)
 {
-  struct queue_iter_param *param = data;
-  struct inferior *inf = param->input;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
+  struct inferior *inf = (struct inferior *) param->input;
 
   if (ptid_get_pid (event->ptid) == inf->pid)
     {
@@ -5948,8 +5957,8 @@ remove_stop_reply_of_remote_state (QUEUE (stop_reply_p) *q,
 				   stop_reply_p event,
 				   void *data)
 {
-  struct queue_iter_param *param = data;
-  struct remote_state *rs = param->input;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
+  struct remote_state *rs = (struct remote_state *) param->input;
 
   if (event->rs == rs)
     {
@@ -5983,8 +5992,8 @@ remote_notif_remove_once_on_match (QUEUE (stop_reply_p) *q,
 				   stop_reply_p event,
 				   void *data)
 {
-  struct queue_iter_param *param = data;
-  ptid_t *ptid = param->input;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
+  ptid_t *ptid = (ptid_t *) param->input;
 
   if (ptid_match (event->ptid, *ptid))
     {
@@ -6059,7 +6068,7 @@ stop_reply_match_ptid_and_ws (QUEUE (stop_reply_p) *q,
 			      struct stop_reply *event,
 			      void *data)
 {
-  ptid_t *ptid = data;
+  ptid_t *ptid = (ptid_t *) data;
 
   return !(ptid_equal (*ptid, event->ptid)
 	   && event->ws.kind == TARGET_WAITKIND_STOPPED);
@@ -8504,7 +8513,7 @@ kill_child_of_pending_fork (QUEUE (stop_reply_p) *q,
 			    stop_reply_p event,
 			    void *data)
 {
-  struct queue_iter_param *param = data;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
   int parent_pid = *(int *) param->input;
 
   if (is_pending_fork_parent (&event->ws, parent_pid, event->ptid))
@@ -10356,7 +10365,8 @@ register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 				const struct target_desc *tdesc)
 {
   struct remote_g_packet_data *data
-    = gdbarch_data (gdbarch, remote_g_packet_data_handle);
+    = ((struct remote_g_packet_data *)
+       gdbarch_data (gdbarch, remote_g_packet_data_handle));
   struct remote_g_packet_guess new_guess, *guess;
   int ix;
 
@@ -10382,7 +10392,8 @@ static int
 remote_read_description_p (struct target_ops *target)
 {
   struct remote_g_packet_data *data
-    = gdbarch_data (target_gdbarch (), remote_g_packet_data_handle);
+    = ((struct remote_g_packet_data *)
+       gdbarch_data (target_gdbarch (), remote_g_packet_data_handle));
 
   if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
     return 1;
@@ -10394,7 +10405,8 @@ static const struct target_desc *
 remote_read_description (struct target_ops *target)
 {
   struct remote_g_packet_data *data
-    = gdbarch_data (target_gdbarch (), remote_g_packet_data_handle);
+    = ((struct remote_g_packet_data *)
+       gdbarch_data (target_gdbarch (), remote_g_packet_data_handle));
 
   /* Do not try this during initial connection, when we do not know
      whether there is a running but stopped thread.  */
@@ -11458,7 +11470,7 @@ static void free_actions_list_cleanup_wrapper (void *);
 static void
 free_actions_list_cleanup_wrapper (void *al)
 {
-  free_actions_list (al);
+  free_actions_list ((char **) al);
 }
 
 static void
@@ -12898,7 +12910,7 @@ static serial_event_ftype remote_async_serial_handler;
 static void
 remote_async_serial_handler (struct serial *scb, void *context)
 {
-  struct remote_state *rs = context;
+  struct remote_state *rs = (struct remote_state *) context;
 
   /* Don't propogate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */

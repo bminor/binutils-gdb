@@ -2059,7 +2059,8 @@ do_print_variable_and_value (const char *print_name,
 			     struct symbol *sym,
 			     void *cb_data)
 {
-  struct print_variable_and_value_data *p = cb_data;
+  struct print_variable_and_value_data *p
+    = (struct print_variable_and_value_data *) cb_data;
   struct frame_info *frame;
 
   frame = frame_find_by_id (p->frame_id);

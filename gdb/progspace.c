@@ -215,7 +215,7 @@ set_current_program_space (struct program_space *pspace)
 static void
 restore_program_space (void *arg)
 {
-  struct program_space *saved_pspace = arg;
+  struct program_space *saved_pspace = (struct program_space *) arg;
 
   set_current_program_space (saved_pspace);
 }

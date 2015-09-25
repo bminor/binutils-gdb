@@ -915,7 +915,7 @@ mt_frame_unwind_cache (struct frame_info *this_frame,
   ULONGEST sp, fp;
 
   if ((*this_prologue_cache))
-    return (*this_prologue_cache);
+    return (struct mt_unwind_cache *) (*this_prologue_cache);
 
   gdbarch = get_frame_arch (this_frame);
   info = FRAME_OBSTACK_ZALLOC (struct mt_unwind_cache);

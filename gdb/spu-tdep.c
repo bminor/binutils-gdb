@@ -1000,7 +1000,7 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
   gdb_byte buf[16];
 
   if (*this_prologue_cache)
-    return *this_prologue_cache;
+    return (struct spu_unwind_cache *) *this_prologue_cache;
 
   info = FRAME_OBSTACK_ZALLOC (struct spu_unwind_cache);
   *this_prologue_cache = info;
@@ -1208,7 +1208,7 @@ struct spu2ppu_cache
 static struct gdbarch *
 spu2ppu_prev_arch (struct frame_info *this_frame, void **this_cache)
 {
-  struct spu2ppu_cache *cache = *this_cache;
+  struct spu2ppu_cache *cache = (struct spu2ppu_cache *) *this_cache;
   return get_regcache_arch (cache->regcache);
 }
 
@@ -1216,7 +1216,7 @@ static void
 spu2ppu_this_id (struct frame_info *this_frame,
 		 void **this_cache, struct frame_id *this_id)
 {
-  struct spu2ppu_cache *cache = *this_cache;
+  struct spu2ppu_cache *cache = (struct spu2ppu_cache *) *this_cache;
   *this_id = cache->frame_id;
 }
 
@@ -1224,7 +1224,7 @@ static struct value *
 spu2ppu_prev_register (struct frame_info *this_frame,
 		       void **this_cache, int regnum)
 {
-  struct spu2ppu_cache *cache = *this_cache;
+  struct spu2ppu_cache *cache = (struct spu2ppu_cache *) *this_cache;
   struct gdbarch *gdbarch = get_regcache_arch (cache->regcache);
   gdb_byte *buf;
 
@@ -1286,7 +1286,7 @@ spu2ppu_sniffer (const struct frame_unwind *self,
 static void
 spu2ppu_dealloc_cache (struct frame_info *self, void *this_cache)
 {
-  struct spu2ppu_cache *cache = this_cache;
+  struct spu2ppu_cache *cache = (struct spu2ppu_cache *) this_cache;
   regcache_xfree (cache->regcache);
 }
 
@@ -1725,8 +1725,10 @@ struct spu_dis_asm_data
 static void
 spu_dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
 {
-  struct spu_dis_asm_data *data = info->application_data;
-  print_address (data->gdbarch, SPUADDR (data->id, addr), info->stream);
+  struct spu_dis_asm_data *data
+    = (struct spu_dis_asm_data *) info->application_data;
+  print_address (data->gdbarch, SPUADDR (data->id, addr),
+		 (struct ui_file *) info->stream);
 }
 
 static int
@@ -1737,7 +1739,7 @@ gdb_print_insn_spu (bfd_vma memaddr, struct disassemble_info *info)
      call print_address.  */
   struct disassemble_info spu_info = *info;
   struct spu_dis_asm_data data;
-  data.gdbarch = info->application_data;
+  data.gdbarch = (struct gdbarch *) info->application_data;
   data.id = SPUADDR_SPU (memaddr);
 
   spu_info.application_data = &data;
@@ -1808,7 +1810,7 @@ spu_get_overlay_table (struct objfile *objfile)
   gdb_byte *ovly_table;
   int i;
 
-  tbl = objfile_data (objfile, spu_overlay_data);
+  tbl = (struct spu_overlay_table *) objfile_data (objfile, spu_overlay_data);
   if (tbl)
     return tbl;
 

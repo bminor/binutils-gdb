@@ -147,7 +147,8 @@ init_regcache_descr (struct gdbarch *gdbarch)
 static struct regcache_descr *
 regcache_descr (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, regcache_descr_handle);
+  return (struct regcache_descr *) gdbarch_data (gdbarch,
+						 regcache_descr_handle);
 }
 
 /* Utility functions returning useful register attributes stored in
@@ -256,7 +257,7 @@ regcache_xfree (struct regcache *regcache)
 static void
 do_regcache_xfree (void *data)
 {
-  regcache_xfree (data);
+  regcache_xfree ((struct regcache *) data);
 }
 
 struct cleanup *
@@ -276,7 +277,7 @@ struct register_to_invalidate
 static void
 do_regcache_invalidate (void *data)
 {
-  struct register_to_invalidate *reg = data;
+  struct register_to_invalidate *reg = (struct register_to_invalidate *) data;
 
   regcache_invalidate (reg->regcache, reg->regnum);
 }
@@ -386,7 +387,7 @@ regcache_restore (struct regcache *dst,
 static enum register_status
 do_cooked_read (void *src, int regnum, gdb_byte *buf)
 {
-  struct regcache *regcache = src;
+  struct regcache *regcache = (struct regcache *) src;
 
   return regcache_cooked_read (regcache, regnum, buf);
 }
@@ -1095,7 +1096,9 @@ regcache_transfer_regset (const struct regset *regset,
   const struct regcache_map_entry *map;
   int offs = 0, count;
 
-  for (map = regset->regmap; (count = map->count) != 0; map++)
+  for (map = (const struct regcache_map_entry *) regset->regmap;
+       (count = map->count) != 0;
+       map++)
     {
       int regno = map->regno;
       int slot_size = map->size;
