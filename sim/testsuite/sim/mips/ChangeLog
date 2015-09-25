@@ -1,3 +1,14 @@
+2015-09-25  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Ali Lown  <ali.lown@imgtec.com>
+
+	* basic.exp (run_micromips_test, run_sim_tests): New functions
+	Add support for micromips tests.
+	* hilo-hazard-4.s: New file.
+	* testutils.inc (_dowrite): Changed reserved instruction encoding.
+	(writemsg): Moved the la and li instructions before the data they are
+	assigned to, which prevents a bug where MIPS32 relocations are used
+	instead of micromips relocations when building for micromips.
+
 2015-04-13  Hans-Peter Nilsson  <hp@axis.com>
 
 	* basic.exp: Don't unset target ldscript here.
