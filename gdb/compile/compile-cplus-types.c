@@ -92,6 +92,17 @@ insert_type (struct compile_cplus_instance *context, struct type *type,
     }
 }
 
+/* Convert a reference type to its gcc representation.  */
+
+static gcc_type
+convert_reference (struct compile_cplus_instance *context, struct type *type)
+{
+  gcc_type target = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
+
+  return CP_CTX (context)->cp_ops->build_reference_type (CP_CTX (context),
+							 target, 0);
+}
+
 /* Convert a pointer type to its gcc representation.  */
 
 static gcc_type
@@ -100,7 +111,7 @@ convert_pointer (struct compile_cplus_instance *context, struct type *type)
   gcc_type target = convert_cplus_type (context, TYPE_TARGET_TYPE (type));
 
   return CP_CTX (context)->cp_ops->build_pointer_type (CP_CTX (context),
-						      target);
+							 target);
 }
 
 /* Convert an array type to its gcc representation.  */
@@ -205,7 +216,8 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
   const char *name = TYPE_NAME (type);
   const char *filename = NULL;
   unsigned short line = 0;
-
+  int len;
+  
   find_line_and_src_from_type (type, &line, &filename);
 
   CP_CTX (context)->cp_ops->push_namespace (CP_CTX (context), "");
@@ -278,8 +290,58 @@ convert_struct_or_union (struct compile_cplus_instance *context, struct type *ty
 					     field_type,
 					     bitsize,
 					     TYPE_FIELD_BITPOS (type, i));
-    }
 
+
+    }  
+
+  /* Methods. */
+  len = TYPE_NFN_FIELDS (type);
+  for (i = 0; i < len; i++)
+    {
+      struct fn_fieldlist fields = TYPE_FN_FIELDLIST (type, i);
+      struct fn_field *methods = TYPE_FN_FIELDLIST1 (type, i);
+      int j, no_of_methods_per_field = TYPE_FN_FIELDLIST_LENGTH (type, i);
+      const char *overloaded_name = TYPE_FN_FIELDLIST_NAME (type, i);
+      gcc_type method_type;
+      gcc_type method_result;
+      int qual_flags = 0;
+      /* pmuldoon: Need to detect LVALUE/RVALUE Qualifiers here. */
+      int ref_qual_flags = GCC_CP_REF_QUAL_NONE;
+
+      /* pmuldoon: SKIP artificial constructors/destructors? Methods
+      in a function are described thus. TYPE_NFN_FIELDS defines how
+      many methods there are. TYPE_FN_FIELDLIST retrieves each one,
+      and places it in FUNCS. It is an array, so FUNCS will be the
+      particular method pointed to by the index I. In each FIELDLIST
+      we have further fields. In the case of a constructor there will
+      be one for each, including artifically generated ones. */
+
+      for (j=0; j < no_of_methods_per_field; j++)
+	{
+	  /* Skip artificial methods (for now) */
+	  if (! TYPE_FN_FIELD_ARTIFICIAL (methods, j))
+	    {
+	      struct type *temp_type = TYPE_FN_FIELD_TYPE (methods, j);
+
+	      /* Convert to a function, first. */
+	      method_type = convert_cplus_type (context, temp_type);
+	      
+	      if (TYPE_CONST (temp_type))
+		qual_flags |= GCC_CP_QUALIFIER_CONST;
+	      if (TYPE_VOLATILE (temp_type))
+		qual_flags |= GCC_CP_QUALIFIER_VOLATILE;
+	      if (TYPE_RESTRICT (temp_type))
+		qual_flags |= GCC_CP_QUALIFIER_RESTRICT;
+	      
+	  
+	      CP_CTX (context)->cp_ops->build_method_type (CP_CTX (context),
+							   result,
+							   method_type,
+							   qual_flags,
+							   ref_qual_flags);
+	    }
+	}
+    }	  
   // FIXME: define member functions, typedefs and classes.  -lxo
 
   CP_CTX (context)->cp_ops->finish_record_or_union (CP_CTX (context), result,
@@ -358,6 +420,7 @@ convert_func (struct compile_cplus_instance *context, struct type *type)
 
   return result;
 }
+
 
 /* Convert an integer type to its gcc representation.  */
 
@@ -444,6 +507,9 @@ convert_type_cplus_basic (struct compile_cplus_instance *context, struct type *t
 
   switch (TYPE_CODE (type))
     {
+    case TYPE_CODE_REF:
+      return convert_reference (context, type);
+
     case TYPE_CODE_PTR:
       return convert_pointer (context, type);
 
@@ -457,6 +523,7 @@ convert_type_cplus_basic (struct compile_cplus_instance *context, struct type *t
     case TYPE_CODE_ENUM:
       return convert_enum (context, type);
 
+    case TYPE_CODE_METHOD:
     case TYPE_CODE_FUNC:
       return convert_func (context, type);
 

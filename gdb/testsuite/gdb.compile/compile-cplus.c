@@ -139,11 +139,39 @@ class Multiple : public Base, public Base2
     return a + 42;
   }
 };
-
-class VirtualBase : public virtual Base3
+//struct foo { foo(); virtual ~foo(); }; struct bar : virtual foo { bar(); ~bar(); }; struct baz : bar {}; bar::bar() {} bar::~bar() {} bar t; baz u;
+struct VirtualOnly
 {
-  int z = 99;
+  VirtualOnly();
+  virtual ~VirtualOnly()=0;
 };
+
+VirtualOnly::VirtualOnly ()
+{
+}
+
+VirtualOnly::~VirtualOnly ()
+{
+}
+
+struct VirtualBase : virtual VirtualOnly
+{
+  int z = 22;
+  VirtualBase (void);
+  ~VirtualBase (void);
+};
+
+struct VirtualBase2 : VirtualBase {};
+ 
+VirtualBase::VirtualBase (void)
+{
+  z = 24; 
+}
+
+VirtualBase::~VirtualBase (void)
+{
+  z = 22;
+}
 
 class Foo
 {
@@ -189,6 +217,7 @@ main (void)
   Foo foovar;
   Multiple *multivar = new Multiple;
   VirtualBase vbase;
+  VirtualBase2 vbase2;
   static int static_local = 77000;
 
   foovar.public_var = 42;
