@@ -1,3 +1,8 @@
+2015-09-24 Sandra Loosemore <sandra@codesourcery.com>
+
+	* gdb.cp/classes.exp (test_enums): Generalize regexp to allow
+	short or char as base type.
+
 2015-09-23 Sandra Loosemore <sandra@codesourcery.com>
 
 	* gdb.cp/var-tag.exp (do_global_tests): Generalize opt_underlying
