@@ -403,7 +403,7 @@ changequote([,])dnl
 
         # Decide features one by one.
         AC_MSG_CHECKING(for default configuration of --enable-dx-regs)
-	if test "x${enable_dx_regs}" == xyes; then
+	if test "x${enable_dx_regs}" = xyes; then
 	  AC_DEFINE(NDS32_DEFAULT_DX_REGS, 1,
 		    [Define value for nds32_dx_regs])
 	else
@@ -413,7 +413,7 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_dx_regs)
 
         AC_MSG_CHECKING(for default configuration of --enable-perf-ext)
-	if test "x${enable_perf_ext}" == xno; then
+	if test "x${enable_perf_ext}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT, 0,
 		    [Define value for nds32_perf_ext])
 	else
@@ -423,7 +423,7 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_perf_ext)
 
         AC_MSG_CHECKING(for default configuration of --enable-perf-ext2)
-	if test "x${enable_perf_ext2}" == xno; then
+	if test "x${enable_perf_ext2}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT2, 0,
 		    [Define value for nds32_perf_ext2])
 	else
@@ -433,7 +433,7 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_perf_ext2)
 
         AC_MSG_CHECKING(for default configuration of --enable-string-ext)
-	if test "x${enable_string_ext}" == xno; then
+	if test "x${enable_string_ext}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_STRING_EXT, 0,
 		    [Define value for nds32_string_ext])
 	else
@@ -443,7 +443,7 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_string_ext)
 
         AC_MSG_CHECKING(for default configuration of --enable-audio-ext)
-	if test "x${enable_audio_ext}" == xno; then
+	if test "x${enable_audio_ext}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_AUDIO_EXT, 0,
 		    [Define value for nds32_audio_ext])
 	else

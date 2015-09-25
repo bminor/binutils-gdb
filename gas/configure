@@ -12333,7 +12333,7 @@ $as_echo "$with_arch" >&6; }
         # Decide features one by one.
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-dx-regs" >&5
 $as_echo_n "checking for default configuration of --enable-dx-regs... " >&6; }
-	if test "x${enable_dx_regs}" == xyes; then
+	if test "x${enable_dx_regs}" = xyes; then
 
 $as_echo "#define NDS32_DEFAULT_DX_REGS 1" >>confdefs.h
 
@@ -12347,7 +12347,7 @@ $as_echo "$enable_dx_regs" >&6; }
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-perf-ext" >&5
 $as_echo_n "checking for default configuration of --enable-perf-ext... " >&6; }
-	if test "x${enable_perf_ext}" == xno; then
+	if test "x${enable_perf_ext}" = xno; then
 
 $as_echo "#define NDS32_DEFAULT_PERF_EXT 0" >>confdefs.h
 
@@ -12361,7 +12361,7 @@ $as_echo "$enable_perf_ext" >&6; }
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-perf-ext2" >&5
 $as_echo_n "checking for default configuration of --enable-perf-ext2... " >&6; }
-	if test "x${enable_perf_ext2}" == xno; then
+	if test "x${enable_perf_ext2}" = xno; then
 
 $as_echo "#define NDS32_DEFAULT_PERF_EXT2 0" >>confdefs.h
 
@@ -12375,7 +12375,7 @@ $as_echo "$enable_perf_ext2" >&6; }
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-string-ext" >&5
 $as_echo_n "checking for default configuration of --enable-string-ext... " >&6; }
-	if test "x${enable_string_ext}" == xno; then
+	if test "x${enable_string_ext}" = xno; then
 
 $as_echo "#define NDS32_DEFAULT_STRING_EXT 0" >>confdefs.h
 
@@ -12389,7 +12389,7 @@ $as_echo "$enable_string_ext" >&6; }
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-audio-ext" >&5
 $as_echo_n "checking for default configuration of --enable-audio-ext... " >&6; }
-	if test "x${enable_audio_ext}" == xno; then
+	if test "x${enable_audio_ext}" = xno; then
 
 $as_echo "#define NDS32_DEFAULT_AUDIO_EXT 0" >>confdefs.h
 
