@@ -985,7 +985,7 @@ new_completion_tracker (void)
 static void
 free_completion_tracker (void *p)
 {
-  completion_tracker_t *tracker_ptr = p;
+  completion_tracker_t *tracker_ptr = (completion_tracker_t *) p;
 
   htab_delete (*tracker_ptr);
   *tracker_ptr = NULL;

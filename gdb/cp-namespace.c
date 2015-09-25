@@ -343,7 +343,7 @@ cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
 static void
 reset_directive_searched (void *data)
 {
-  struct using_direct *direct = data;
+  struct using_direct *direct = (struct using_direct *) data;
   direct->searched = 0;
 }
 

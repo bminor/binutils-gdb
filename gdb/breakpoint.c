@@ -766,7 +766,7 @@ decref_counted_command_line (struct counted_command_line **cmdp)
 static void
 do_cleanup_counted_command_line (void *arg)
 {
-  decref_counted_command_line (arg);
+  decref_counted_command_line ((struct counted_command_line **) arg);
 }
 
 /* Create a cleanup that calls decref_counted_command_line on the
@@ -925,8 +925,8 @@ show_condition_evaluation_mode (struct ui_file *file, int from_tty,
 static int
 bp_location_compare_addrs (const void *ap, const void *bp)
 {
-  struct bp_location *a = *(void **) ap;
-  struct bp_location *b = *(void **) bp;
+  const struct bp_location *a = *(const struct bp_location **) ap;
+  const struct bp_location *b = *(const struct bp_location **) bp;
 
   if (a->address == b->address)
     return 0;
@@ -951,9 +951,10 @@ get_first_locp_gte_addr (CORE_ADDR address)
   dummy_loc.address = address;
 
   /* Find a close match to the first location at ADDRESS.  */
-  locp_found = bsearch (&dummy_locp, bp_location, bp_location_count,
-			sizeof (struct bp_location **),
-			bp_location_compare_addrs);
+  locp_found = ((struct bp_location **)
+		bsearch (&dummy_locp, bp_location, bp_location_count,
+			 sizeof (struct bp_location **),
+			 bp_location_compare_addrs));
 
   /* Nothing was found, nothing left to do.  */
   if (locp_found == NULL)
@@ -1323,7 +1324,7 @@ breakpoint_set_task (struct breakpoint *b, int task)
 void
 check_tracepoint_command (char *line, void *closure)
 {
-  struct breakpoint *b = closure;
+  struct breakpoint *b = (struct breakpoint *) closure;
 
   validate_actionline (line, b);
 }
@@ -1354,7 +1355,7 @@ struct commands_info
 static void
 do_map_commands_command (struct breakpoint *b, void *data)
 {
-  struct commands_info *info = data;
+  struct commands_info *info = (struct commands_info *) data;
 
   if (info->cmd == NULL)
     {
@@ -3393,7 +3394,8 @@ get_breakpoint_objfile_data (struct objfile *objfile)
 {
   struct breakpoint_objfile_data *bp_objfile_data;
 
-  bp_objfile_data = objfile_data (objfile, breakpoint_objfile_key);
+  bp_objfile_data = ((struct breakpoint_objfile_data *)
+		     objfile_data (objfile, breakpoint_objfile_key));
   if (bp_objfile_data == NULL)
     {
       bp_objfile_data =
@@ -3408,7 +3410,8 @@ get_breakpoint_objfile_data (struct objfile *objfile)
 static void
 free_breakpoint_probes (struct objfile *obj, void *data)
 {
-  struct breakpoint_objfile_data *bp_objfile_data = data;
+  struct breakpoint_objfile_data *bp_objfile_data
+    = (struct breakpoint_objfile_data *) data;
 
   VEC_free (probe_p, bp_objfile_data->longjmp_probes);
   VEC_free (probe_p, bp_objfile_data->exception_probes);
@@ -6651,7 +6654,8 @@ struct captured_breakpoint_query_args
 static int
 do_captured_breakpoint_query (struct ui_out *uiout, void *data)
 {
-  struct captured_breakpoint_query_args *args = data;
+  struct captured_breakpoint_query_args *args
+    = (struct captured_breakpoint_query_args *) data;
   struct breakpoint *b;
   struct bp_location *dummy_loc = NULL;
 
@@ -11852,9 +11856,9 @@ tcatch_command (char *arg, int from_tty)
 static int
 compare_breakpoints (const void *a, const void *b)
 {
-  const breakpoint_p *ba = a;
+  const breakpoint_p *ba = (const breakpoint_p *) a;
   uintptr_t ua = (uintptr_t) *ba;
-  const breakpoint_p *bb = b;
+  const breakpoint_p *bb = (const breakpoint_p *) b;
   uintptr_t ub = (uintptr_t) *bb;
 
   if ((*ba)->number < (*bb)->number)
@@ -12074,8 +12078,8 @@ breakpoint_auto_delete (bpstat bs)
 static int
 bp_location_compare (const void *ap, const void *bp)
 {
-  struct bp_location *a = *(void **) ap;
-  struct bp_location *b = *(void **) bp;
+  const struct bp_location *a = *(const struct bp_location **) ap;
+  const struct bp_location *b = *(const struct bp_location **) bp;
 
   if (a->address != b->address)
     return (a->address > b->address) - (a->address < b->address);
@@ -12676,7 +12680,7 @@ bpstat_remove_bp_location (bpstat bps, struct breakpoint *bpt)
 static int
 bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
 {
-  struct breakpoint *bpt = data;
+  struct breakpoint *bpt = (struct breakpoint *) data;
 
   bpstat_remove_bp_location (th->control.stop_bpstat, bpt);
   return 0;
@@ -13780,7 +13784,7 @@ delete_breakpoint (struct breakpoint *bpt)
 static void
 do_delete_breakpoint_cleanup (void *b)
 {
-  delete_breakpoint (b);
+  delete_breakpoint ((struct breakpoint *) b);
 }
 
 struct cleanup *

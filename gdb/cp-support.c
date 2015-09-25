@@ -1339,7 +1339,7 @@ make_symbol_overload_list_adl (struct type **arg_types, int nargs,
 static void
 reset_directive_searched (void *data)
 {
-  struct using_direct *direct = data;
+  struct using_direct *direct = (struct using_direct *) data;
   direct->searched = 0;
 }
 

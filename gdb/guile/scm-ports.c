@@ -269,9 +269,9 @@ ioscm_write (SCM port, const void *data, size_t size)
   TRY
     {
       if (scm_is_eq (port, error_port_scm))
-	fputsn_filtered (data, size, gdb_stderr);
+	fputsn_filtered ((const char *) data, size, gdb_stderr);
       else
-	fputsn_filtered (data, size, gdb_stdout);
+	fputsn_filtered ((const char *) data, size, gdb_stdout);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -430,7 +430,7 @@ gdbscm_error_port (void)
 static void
 ioscm_file_port_delete (struct ui_file *file)
 {
-  ioscm_file_port *stream = ui_file_data (file);
+  ioscm_file_port *stream = (ioscm_file_port *) ui_file_data (file);
 
   if (stream->magic != &file_port_magic)
     internal_error (__FILE__, __LINE__,
@@ -441,7 +441,7 @@ ioscm_file_port_delete (struct ui_file *file)
 static void
 ioscm_file_port_rewind (struct ui_file *file)
 {
-  ioscm_file_port *stream = ui_file_data (file);
+  ioscm_file_port *stream = (ioscm_file_port *) ui_file_data (file);
 
   if (stream->magic != &file_port_magic)
     internal_error (__FILE__, __LINE__,
@@ -455,7 +455,7 @@ ioscm_file_port_put (struct ui_file *file,
 		     ui_file_put_method_ftype *write,
 		     void *dest)
 {
-  ioscm_file_port *stream = ui_file_data (file);
+  ioscm_file_port *stream = (ioscm_file_port *) ui_file_data (file);
 
   if (stream->magic != &file_port_magic)
     internal_error (__FILE__, __LINE__,
@@ -469,7 +469,7 @@ ioscm_file_port_write (struct ui_file *file,
 		       const char *buffer,
 		       long length_buffer)
 {
-  ioscm_file_port *stream = ui_file_data (file);
+  ioscm_file_port *stream = (ioscm_file_port *) ui_file_data (file);
 
   if (stream->magic != &file_port_magic)
     internal_error (__FILE__, __LINE__,

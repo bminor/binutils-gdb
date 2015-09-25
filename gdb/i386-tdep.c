@@ -2050,7 +2050,7 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct i386_frame_cache *cache;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct i386_frame_cache *) *this_cache;
 
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
@@ -2220,7 +2220,7 @@ i386_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   CORE_ADDR sp;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct i386_frame_cache *) *this_cache;
 
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
@@ -2407,7 +2407,7 @@ i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   gdb_byte buf[4];
 
   if (*this_cache)
-    return *this_cache;
+    return (struct i386_frame_cache *) *this_cache;
 
   cache = i386_alloc_frame_cache ();
 
@@ -3732,7 +3732,7 @@ i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const gdb_byte *regs = gregs;
+  const gdb_byte *regs = (const gdb_byte *) gregs;
   int i;
 
   gdb_assert (len >= tdep->sizeof_gregset);
@@ -3757,7 +3757,7 @@ i386_collect_gregset (const struct regset *regset,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  gdb_byte *regs = gregs;
+  gdb_byte *regs = (gdb_byte *) gregs;
   int i;
 
   gdb_assert (len >= tdep->sizeof_gregset);
@@ -8478,7 +8478,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_insn_is_jump (gdbarch, i386_insn_is_jump);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  info.tdep_info = (void *) tdesc_data;
+  info.tdep_info = (struct gdbarch_tdep_info *) tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   if (!i386_validate_tdesc_p (tdep, tdesc_data))

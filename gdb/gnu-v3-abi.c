@@ -174,7 +174,8 @@ build_gdb_vtable_type (struct gdbarch *arch)
 static struct type *
 vtable_ptrdiff_type (struct gdbarch *gdbarch)
 {
-  struct type *vtable_type = gdbarch_data (gdbarch, vtable_type_gdbarch_data);
+  struct type *vtable_type
+    = (struct type *) gdbarch_data (gdbarch, vtable_type_gdbarch_data);
 
   /* The "offset_to_top" field has the appropriate (ptrdiff_t) type.  */
   return TYPE_FIELD_TYPE (vtable_type, vtable_field_offset_to_top);
@@ -186,7 +187,8 @@ vtable_ptrdiff_type (struct gdbarch *gdbarch)
 static int
 vtable_address_point_offset (struct gdbarch *gdbarch)
 {
-  struct type *vtable_type = gdbarch_data (gdbarch, vtable_type_gdbarch_data);
+  struct type *vtable_type
+    = (struct type *) gdbarch_data (gdbarch, vtable_type_gdbarch_data);
 
   return (TYPE_FIELD_BITPOS (vtable_type, vtable_field_virtual_functions)
           / TARGET_CHAR_BIT);
@@ -246,8 +248,8 @@ static struct value *
 gnuv3_get_vtable (struct gdbarch *gdbarch,
 		  struct type *container_type, CORE_ADDR container_addr)
 {
-  struct type *vtable_type = gdbarch_data (gdbarch,
-					   vtable_type_gdbarch_data);
+  struct type *vtable_type
+    = (struct type *) gdbarch_data (gdbarch, vtable_type_gdbarch_data);
   struct type *vtable_pointer_type;
   struct value *vtable_pointer;
   CORE_ADDR vtable_address;
@@ -778,7 +780,7 @@ DEF_VEC_P (value_and_voffset_p);
 static hashval_t
 hash_value_and_voffset (const void *p)
 {
-  const struct value_and_voffset *o = p;
+  const struct value_and_voffset *o = (const struct value_and_voffset *) p;
 
   return value_address (o->value) + value_embedded_offset (o->value);
 }
@@ -788,8 +790,8 @@ hash_value_and_voffset (const void *p)
 static int
 eq_value_and_voffset (const void *a, const void *b)
 {
-  const struct value_and_voffset *ova = a;
-  const struct value_and_voffset *ovb = b;
+  const struct value_and_voffset *ova = (const struct value_and_voffset *) a;
+  const struct value_and_voffset *ovb = (const struct value_and_voffset *) b;
 
   return (value_address (ova->value) + value_embedded_offset (ova->value)
 	  == value_address (ovb->value) + value_embedded_offset (ovb->value));
@@ -800,10 +802,12 @@ eq_value_and_voffset (const void *a, const void *b)
 static int
 compare_value_and_voffset (const void *a, const void *b)
 {
-  const struct value_and_voffset * const *ova = a;
+  const struct value_and_voffset * const *ova
+    = (const struct value_and_voffset * const *) a;
   CORE_ADDR addra = (value_address ((*ova)->value)
 		     + value_embedded_offset ((*ova)->value));
-  const struct value_and_voffset * const *ovb = b;
+  const struct value_and_voffset * const *ovb
+    = (const struct value_and_voffset * const *) b;
   CORE_ADDR addrb = (value_address ((*ovb)->value)
 		     + value_embedded_offset ((*ovb)->value));
 
@@ -841,7 +845,7 @@ compute_vtable_size (htab_t offset_hash,
   search_vo.value = value;
   slot = htab_find_slot (offset_hash, &search_vo, INSERT);
   if (*slot)
-    current_vo = *slot;
+    current_vo = (struct value_and_voffset *) *slot;
   else
     {
       current_vo = XNEW (struct value_and_voffset);
@@ -1064,7 +1068,8 @@ gnuv3_get_typeid_type (struct gdbarch *gdbarch)
   typeinfo = lookup_symbol ("std::type_info", NULL, STRUCT_DOMAIN,
 			    NULL).symbol;
   if (typeinfo == NULL)
-    typeinfo_type = gdbarch_data (gdbarch, std_type_info_gdbarch_data);
+    typeinfo_type
+      = (struct type *) gdbarch_data (gdbarch, std_type_info_gdbarch_data);
   else
     typeinfo_type = SYMBOL_TYPE (typeinfo);
 

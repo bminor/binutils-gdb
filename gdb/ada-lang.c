@@ -398,7 +398,7 @@ ada_inferior_data_cleanup (struct inferior *inf, void *arg)
 {
   struct ada_inferior_data *data;
 
-  data = inferior_data (inf, ada_inferior_data);
+  data = (struct ada_inferior_data *) inferior_data (inf, ada_inferior_data);
   if (data != NULL)
     xfree (data);
 }
@@ -416,7 +416,7 @@ get_ada_inferior_data (struct inferior *inf)
 {
   struct ada_inferior_data *data;
 
-  data = inferior_data (inf, ada_inferior_data);
+  data = (struct ada_inferior_data *) inferior_data (inf, ada_inferior_data);
   if (data == NULL)
     {
       data = XCNEW (struct ada_inferior_data);
@@ -459,7 +459,8 @@ get_ada_pspace_data (struct program_space *pspace)
 {
   struct ada_pspace_data *data;
 
-  data = program_space_data (pspace, ada_pspace_data_handle);
+  data = ((struct ada_pspace_data *)
+	  program_space_data (pspace, ada_pspace_data_handle));
   if (data == NULL)
     {
       data = XCNEW (struct ada_pspace_data);
@@ -474,7 +475,7 @@ get_ada_pspace_data (struct program_space *pspace)
 static void
 ada_pspace_data_cleanup (struct program_space *pspace, void *data)
 {
-  struct ada_pspace_data *pspace_data = data;
+  struct ada_pspace_data *pspace_data = (struct ada_pspace_data *) data;
 
   if (pspace_data->sym_cache != NULL)
     ada_free_symbol_cache (pspace_data->sym_cache);
@@ -6370,7 +6371,7 @@ struct add_partial_datum
 static int
 ada_complete_symbol_matcher (const char *name, void *user_data)
 {
-  struct add_partial_datum *data = user_data;
+  struct add_partial_datum *data = (struct add_partial_datum *) user_data;
   
   return symbol_completion_match (name, data->text, data->text_len,
                                   data->wild_match, data->encoded) != NULL;
@@ -13131,7 +13132,7 @@ sort_remove_dups_ada_exceptions_list (VEC(ada_exc_info) **exceptions,
 static int
 ada_exc_search_name_matches (const char *search_name, void *user_data)
 {
-  regex_t *preg = user_data;
+  regex_t *preg = (regex_t *) user_data;
 
   if (preg == NULL)
     return 1;

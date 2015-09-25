@@ -64,8 +64,9 @@ dwarf_gdbarch_types_init (struct gdbarch *gdbarch)
 static struct type *
 dwarf_expr_address_type (struct dwarf_expr_context *ctx)
 {
-  struct dwarf_gdbarch_types *types = gdbarch_data (ctx->gdbarch,
-						    dwarf_arch_cookie);
+  struct dwarf_gdbarch_types *types
+    = (struct dwarf_gdbarch_types *) gdbarch_data (ctx->gdbarch,
+						   dwarf_arch_cookie);
   int ndx;
 
   if (ctx->addr_size == 2)
@@ -119,7 +120,7 @@ free_dwarf_expr_context (struct dwarf_expr_context *ctx)
 static void
 free_dwarf_expr_context_cleanup (void *arg)
 {
-  free_dwarf_expr_context (arg);
+  free_dwarf_expr_context ((struct dwarf_expr_context *) arg);
 }
 
 /* Return a cleanup that calls free_dwarf_expr_context.  */

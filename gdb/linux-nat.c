@@ -438,7 +438,7 @@ num_lwps (int pid)
 static void
 delete_lwp_cleanup (void *lp_voidp)
 {
-  struct lwp_info *lp = lp_voidp;
+  struct lwp_info *lp = (struct lwp_info *) lp_voidp;
 
   delete_lwp (lp->ptid);
 }
@@ -2719,7 +2719,7 @@ running_callback (struct lwp_info *lp, void *data)
 static int
 count_events_callback (struct lwp_info *lp, void *data)
 {
-  int *count = data;
+  int *count = (int *) data;
 
   gdb_assert (count != NULL);
 
@@ -2758,7 +2758,7 @@ lwp_status_pending_p (struct lwp_info *lp)
 static int
 select_event_lwp_callback (struct lwp_info *lp, void *data)
 {
-  int *selector = data;
+  int *selector = (int *) data;
 
   gdb_assert (selector != NULL);
 
@@ -3641,7 +3641,7 @@ linux_nat_wait_1 (struct target_ops *ops,
 static int
 resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
 {
-  ptid_t *wait_ptid_p = data;
+  ptid_t *wait_ptid_p = (ptid_t *) data;
 
   if (!lp->stopped)
     {

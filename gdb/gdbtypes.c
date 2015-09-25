@@ -4308,7 +4308,7 @@ struct type_pair
 static hashval_t
 type_pair_hash (const void *item)
 {
-  const struct type_pair *pair = item;
+  const struct type_pair *pair = (const struct type_pair *) item;
 
   return htab_hash_pointer (pair->old);
 }
@@ -4316,7 +4316,8 @@ type_pair_hash (const void *item)
 static int
 type_pair_eq (const void *item_lhs, const void *item_rhs)
 {
-  const struct type_pair *lhs = item_lhs, *rhs = item_rhs;
+  const struct type_pair *lhs = (const struct type_pair *) item_lhs;
+  const struct type_pair *rhs = (const struct type_pair *) item_rhs;
 
   return lhs->old == rhs->old;
 }
@@ -4780,7 +4781,7 @@ static struct gdbarch_data *gdbtypes_data;
 const struct builtin_type *
 builtin_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, gdbtypes_data);
+  return (const struct builtin_type *) gdbarch_data (gdbarch, gdbtypes_data);
 }
 
 static void *
@@ -4925,7 +4926,7 @@ objfile_type (struct objfile *objfile)
 {
   struct gdbarch *gdbarch;
   struct objfile_type *objfile_type
-    = objfile_data (objfile, objfile_type_data);
+    = (struct objfile_type *) objfile_data (objfile, objfile_type_data);
 
   if (objfile_type)
     return objfile_type;

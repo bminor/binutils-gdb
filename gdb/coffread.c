@@ -572,7 +572,8 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
   struct cleanup *back_to, *cleanup_minimal_symbols;
   int stabstrsize;
   
-  info = objfile_data (objfile, coff_objfile_data_key);
+  info = (struct coff_symfile_info *) objfile_data (objfile,
+						    coff_objfile_data_key);
   dbxinfo = DBX_SYMFILE_INFO (objfile);
   symfile_bfd = abfd;		/* Kludge for swap routines.  */
 

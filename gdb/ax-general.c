@@ -73,7 +73,7 @@ free_agent_expr (struct agent_expr *x)
 static void
 do_free_agent_expr_cleanup (void *x)
 {
-  free_agent_expr (x);
+  free_agent_expr ((struct agent_expr *) x);
 }
 
 struct cleanup *

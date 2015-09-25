@@ -169,7 +169,7 @@ compile_code_command (char *arg, int from_tty)
 void
 compile_print_value (struct value *val, void *data_voidp)
 {
-  const struct format_data *fmtp = data_voidp;
+  const struct format_data *fmtp = (const struct format_data *) data_voidp;
 
   print_value (val, fmtp);
 }
@@ -214,7 +214,7 @@ compile_print_command (char *arg_param, int from_tty)
 static void
 do_rmdir (void *arg)
 {
-  const char *dir = arg;
+  const char *dir = (const char *) arg;
   char *zap;
   int wstat;
 
@@ -431,7 +431,7 @@ get_args (const struct compile_instance *compiler, struct gdbarch *gdbarch,
 static void
 cleanup_compile_instance (void *arg)
 {
-  struct compile_instance *inst = arg;
+  struct compile_instance *inst = (struct compile_instance *) arg;
 
   inst->destroy (inst);
 }
@@ -441,7 +441,7 @@ cleanup_compile_instance (void *arg)
 static void
 cleanup_unlink_file (void *arg)
 {
-  const char *filename = arg;
+  const char *filename = (const char *) arg;
 
   unlink (filename);
 }

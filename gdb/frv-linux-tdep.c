@@ -271,7 +271,7 @@ frv_linux_sigtramp_frame_cache (struct frame_info *this_frame,
   struct frame_id this_id;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct trad_frame_cache *) *this_cache;
 
   cache = trad_frame_cache_zalloc (this_frame);
 

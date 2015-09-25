@@ -410,7 +410,7 @@ gdb_pipe_cloexec (int filedes[2])
 static void
 do_close_cleanup (void *arg)
 {
-  int *fd = arg;
+  int *fd = (int *) arg;
 
   close (*fd);
 }

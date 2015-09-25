@@ -1,3 +1,8 @@
+2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Adjust expected
+	source line.
+
 2015-09-24 Sandra Loosemore <sandra@codesourcery.com>
 
 	* gdb.cp/classes.exp (test_enums): Generalize regexp to allow

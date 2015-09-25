@@ -322,7 +322,7 @@ static struct gdbarch_data *d_type_data;
 const struct builtin_d_type *
 builtin_d_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, d_type_data);
+  return (const struct builtin_d_type *) gdbarch_data (gdbarch, d_type_data);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

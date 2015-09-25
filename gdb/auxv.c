@@ -320,7 +320,7 @@ auxv_inferior_data_cleanup (struct inferior *inf, void *arg)
 {
   struct auxv_info *info;
 
-  info = inferior_data (inf, auxv_inferior_data);
+  info = (struct auxv_info *) inferior_data (inf, auxv_inferior_data);
   if (info != NULL)
     {
       xfree (info->data);
@@ -355,7 +355,7 @@ get_auxv_inferior_data (struct target_ops *ops)
   struct auxv_info *info;
   struct inferior *inf = current_inferior ();
 
-  info = inferior_data (inf, auxv_inferior_data);
+  info = (struct auxv_info *) inferior_data (inf, auxv_inferior_data);
   if (info == NULL)
     {
       info = XCNEW (struct auxv_info);

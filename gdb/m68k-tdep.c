@@ -882,7 +882,7 @@ m68k_frame_cache (struct frame_info *this_frame, void **this_cache)
   int i;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct m68k_frame_cache *) *this_cache;
 
   cache = m68k_alloc_frame_cache ();
   *this_cache = cache;

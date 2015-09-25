@@ -162,7 +162,7 @@ static htab_t frame_stash;
 static hashval_t
 frame_addr_hash (const void *ap)
 {
-  const struct frame_info *frame = ap;
+  const struct frame_info *frame = (const struct frame_info *) ap;
   const struct frame_id f_id = frame->this_id.value;
   hashval_t hash = 0;
 
@@ -189,8 +189,8 @@ frame_addr_hash (const void *ap)
 static int
 frame_addr_hash_eq (const void *a, const void *b)
 {
-  const struct frame_info *f_entry = a;
-  const struct frame_info *f_element = b;
+  const struct frame_info *f_entry = (const struct frame_info *) a;
+  const struct frame_info *f_element = (const struct frame_info *) b;
 
   return frame_id_eq (f_entry->this_id.value,
 		      f_element->this_id.value);
@@ -246,7 +246,7 @@ frame_stash_find (struct frame_id id)
   struct frame_info *frame;
 
   dummy.this_id.value = id;
-  frame = htab_find (frame_stash, &dummy);
+  frame = (struct frame_info *) htab_find (frame_stash, &dummy);
   return frame;
 }
 
@@ -930,7 +930,7 @@ get_frame_func (struct frame_info *this_frame)
 static enum register_status
 do_frame_register_read (void *src, int regnum, gdb_byte *buf)
 {
-  if (!deprecated_frame_register_read (src, regnum, buf))
+  if (!deprecated_frame_register_read ((struct frame_info *) src, regnum, buf))
     return REG_UNAVAILABLE;
   else
     return REG_VALID;
@@ -1447,7 +1447,7 @@ frame_obstack_zalloc (unsigned long size)
 static int
 unwind_to_current_frame (struct ui_out *ui_out, void *args)
 {
-  struct frame_info *frame = get_prev_frame (args);
+  struct frame_info *frame = get_prev_frame ((struct frame_info *) args);
 
   /* A sentinel frame can fail to unwind, e.g., because its PC value
      lands in somewhere like start.  */
@@ -2703,7 +2703,7 @@ frame_stop_reason_symbol_string (enum unwind_stop_reason reason)
 static void
 frame_cleanup_after_sniffer (void *arg)
 {
-  struct frame_info *frame = arg;
+  struct frame_info *frame = (struct frame_info *) arg;
 
   /* The sniffer should not allocate a prologue cache if it did not
      match this frame.  */

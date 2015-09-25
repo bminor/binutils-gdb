@@ -338,8 +338,9 @@ elf_symtab_read (struct objfile *objfile, int type,
 	continue;
       if (sym->flags & BSF_FILE)
 	{
-	  filesymname = bcache (sym->name, strlen (sym->name) + 1,
-				objfile->per_bfd->filename_cache);
+	  filesymname
+	    = (const char *) bcache (sym->name, strlen (sym->name) + 1,
+				     objfile->per_bfd->filename_cache);
 	}
       else if (sym->flags & BSF_SECTION_SYM)
 	continue;
@@ -638,7 +639,8 @@ struct elf_gnu_ifunc_cache
 static hashval_t
 elf_gnu_ifunc_cache_hash (const void *a_voidp)
 {
-  const struct elf_gnu_ifunc_cache *a = a_voidp;
+  const struct elf_gnu_ifunc_cache *a
+    = (const struct elf_gnu_ifunc_cache *) a_voidp;
 
   return htab_hash_string (a->name);
 }
@@ -648,8 +650,10 @@ elf_gnu_ifunc_cache_hash (const void *a_voidp)
 static int
 elf_gnu_ifunc_cache_eq (const void *a_voidp, const void *b_voidp)
 {
-  const struct elf_gnu_ifunc_cache *a = a_voidp;
-  const struct elf_gnu_ifunc_cache *b = b_voidp;
+  const struct elf_gnu_ifunc_cache *a
+    = (const struct elf_gnu_ifunc_cache *) a_voidp;
+  const struct elf_gnu_ifunc_cache *b
+    = (const struct elf_gnu_ifunc_cache *) b_voidp;
 
   return strcmp (a->name, b->name) == 0;
 }
@@ -687,7 +691,7 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   if (strcmp (bfd_get_section_name (objfile->obfd, sect), ".plt") == 0)
     return 0;
 
-  htab = objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
+  htab = (htab_t) objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
   if (htab == NULL)
     {
       htab = htab_create_alloc_ex (1, elf_gnu_ifunc_cache_hash,
@@ -708,7 +712,8 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   slot = htab_find_slot (htab, entry_p, INSERT);
   if (*slot != NULL)
     {
-      struct elf_gnu_ifunc_cache *entry_found_p = *slot;
+      struct elf_gnu_ifunc_cache *entry_found_p
+	= (struct elf_gnu_ifunc_cache *) *slot;
       struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
       if (entry_found_p->addr != addr)
@@ -747,7 +752,7 @@ elf_gnu_ifunc_resolve_by_cache (const char *name, CORE_ADDR *addr_p)
       struct elf_gnu_ifunc_cache *entry_p;
       void **slot;
 
-      htab = objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
+      htab = (htab_t) objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
       if (htab == NULL)
 	continue;
 
@@ -758,7 +763,7 @@ elf_gnu_ifunc_resolve_by_cache (const char *name, CORE_ADDR *addr_p)
       slot = htab_find_slot (htab, entry_p, NO_INSERT);
       if (slot == NULL)
 	continue;
-      entry_p = *slot;
+      entry_p = (struct elf_gnu_ifunc_cache *) *slot;
       gdb_assert (entry_p != NULL);
 
       if (addr_p)
@@ -1326,7 +1331,7 @@ elf_get_probes (struct objfile *objfile)
   VEC (probe_p) *probes_per_bfd;
 
   /* Have we parsed this objfile's probes already?  */
-  probes_per_bfd = bfd_data (objfile->obfd, probe_key);
+  probes_per_bfd = (VEC (probe_p) *) bfd_data (objfile->obfd, probe_key);
 
   if (!probes_per_bfd)
     {
@@ -1358,7 +1363,7 @@ static void
 probe_key_free (bfd *abfd, void *d)
 {
   int ix;
-  VEC (probe_p) *probes = d;
+  VEC (probe_p) *probes = (VEC (probe_p) *) d;
   struct probe *probe;
 
   for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)

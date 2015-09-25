@@ -1692,7 +1692,8 @@ displaced_step_clear (struct displaced_step_inferior_state *displaced)
 static void
 displaced_step_clear_cleanup (void *arg)
 {
-  struct displaced_step_inferior_state *state = arg;
+  struct displaced_step_inferior_state *state
+    = (struct displaced_step_inferior_state *) arg;
 
   displaced_step_clear (state);
 }
@@ -7835,7 +7836,7 @@ print_stop_location (struct target_waitstatus *ws)
 static void
 restore_current_uiout_cleanup (void *arg)
 {
-  struct ui_out *saved_uiout = arg;
+  struct ui_out *saved_uiout = (struct ui_out *) arg;
 
   current_uiout = saved_uiout;
 }
@@ -7941,7 +7942,7 @@ save_stop_context (void)
 static void
 release_stop_context_cleanup (void *arg)
 {
-  struct stop_context *sc = arg;
+  struct stop_context *sc = (struct stop_context *) arg;
 
   if (sc->thread != NULL)
     sc->thread->refcount--;
@@ -8727,7 +8728,7 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 static void
 do_restore_infcall_suspend_state_cleanup (void *state)
 {
-  restore_infcall_suspend_state (state);
+  restore_infcall_suspend_state ((struct infcall_suspend_state *) state);
 }
 
 struct cleanup *
@@ -8869,7 +8870,7 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
 static void
 do_restore_infcall_control_state_cleanup (void *sts)
 {
-  restore_infcall_control_state (sts);
+  restore_infcall_control_state ((struct infcall_control_state *) sts);
 }
 
 struct cleanup *
@@ -8903,7 +8904,7 @@ discard_infcall_control_state (struct infcall_control_state *inf_status)
 static void
 restore_inferior_ptid (void *arg)
 {
-  ptid_t *saved_ptid_ptr = arg;
+  ptid_t *saved_ptid_ptr = (ptid_t *) arg;
 
   inferior_ptid = *saved_ptid_ptr;
   xfree (arg);

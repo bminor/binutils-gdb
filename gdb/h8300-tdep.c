@@ -432,7 +432,7 @@ h8300_frame_cache (struct frame_info *this_frame, void **this_cache)
   CORE_ADDR current_pc;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct h8300_frame_cache *) *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct h8300_frame_cache);
   h8300_init_frame_cache (gdbarch, cache);

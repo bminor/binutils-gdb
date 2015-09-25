@@ -381,7 +381,7 @@ free_format_pieces (struct format_piece *pieces)
 void
 free_format_pieces_cleanup (void *ptr)
 {
-  void **location = ptr;
+  struct format_piece **location = (struct format_piece **) ptr;
 
   if (location == NULL)
     return;

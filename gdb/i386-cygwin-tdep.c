@@ -98,7 +98,7 @@ struct cpms_data
 static void
 core_process_module_section (bfd *abfd, asection *sect, void *obj)
 {
-  struct cpms_data *data = obj;
+  struct cpms_data *data = (struct cpms_data *) obj;
   enum bfd_endian byte_order = gdbarch_byte_order (data->gdbarch);
 
   char *module_name;

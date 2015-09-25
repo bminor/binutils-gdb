@@ -86,7 +86,7 @@ static const struct objfile_data *stscm_objfile_data_key;
 static hashval_t
 stscm_hash_symtab_smob (const void *p)
 {
-  const symtab_smob *st_smob = p;
+  const symtab_smob *st_smob = (const symtab_smob *) p;
 
   return htab_hash_pointer (st_smob->symtab);
 }
@@ -96,8 +96,8 @@ stscm_hash_symtab_smob (const void *p)
 static int
 stscm_eq_symtab_smob (const void *ap, const void *bp)
 {
-  const symtab_smob *a = ap;
-  const symtab_smob *b = bp;
+  const symtab_smob *a = (const symtab_smob *) ap;
+  const symtab_smob *b = (const symtab_smob *) bp;
 
   return (a->symtab == b->symtab
 	  && a->symtab != NULL);
@@ -110,7 +110,7 @@ static htab_t
 stscm_objfile_symtab_map (struct symtab *symtab)
 {
   struct objfile *objfile = SYMTAB_OBJFILE (symtab);
-  htab_t htab = objfile_data (objfile, stscm_objfile_data_key);
+  htab_t htab = (htab_t) objfile_data (objfile, stscm_objfile_data_key);
 
   if (htab == NULL)
     {
@@ -292,7 +292,7 @@ stscm_mark_symtab_invalid (void **slot, void *info)
 static void
 stscm_del_objfile_symtabs (struct objfile *objfile, void *datum)
 {
-  htab_t htab = datum;
+  htab_t htab = (htab_t) datum;
 
   if (htab != NULL)
     {

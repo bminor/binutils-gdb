@@ -580,7 +580,7 @@ static const struct program_space_data *auto_load_pspace_data;
 static void
 auto_load_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct auto_load_pspace_info *info = arg;
+  struct auto_load_pspace_info *info = (struct auto_load_pspace_info *) arg;
 
   if (info->loaded_script_files)
     htab_delete (info->loaded_script_files);
@@ -597,7 +597,8 @@ get_auto_load_pspace_data (struct program_space *pspace)
 {
   struct auto_load_pspace_info *info;
 
-  info = program_space_data (pspace, auto_load_pspace_data);
+  info = ((struct auto_load_pspace_info *)
+	  program_space_data (pspace, auto_load_pspace_data));
   if (info == NULL)
     {
       info = XCNEW (struct auto_load_pspace_info);
@@ -612,7 +613,7 @@ get_auto_load_pspace_data (struct program_space *pspace)
 static hashval_t
 hash_loaded_script_entry (const void *data)
 {
-  const struct loaded_script *e = data;
+  const struct loaded_script *e = (const struct loaded_script *) data;
 
   return htab_hash_string (e->name) ^ htab_hash_pointer (e->language);
 }
@@ -622,8 +623,8 @@ hash_loaded_script_entry (const void *data)
 static int
 eq_loaded_script_entry (const void *a, const void *b)
 {
-  const struct loaded_script *ea = a;
-  const struct loaded_script *eb = b;
+  const struct loaded_script *ea = (const struct loaded_script *) a;
+  const struct loaded_script *eb = (const struct loaded_script *) b;
 
   return strcmp (ea->name, eb->name) == 0 && ea->language == eb->language;
 }
@@ -762,7 +763,8 @@ clear_section_scripts (void)
   struct program_space *pspace = current_program_space;
   struct auto_load_pspace_info *info;
 
-  info = program_space_data (pspace, auto_load_pspace_data);
+  info = ((struct auto_load_pspace_info *)
+	  program_space_data (pspace, auto_load_pspace_data));
   if (info != NULL && info->loaded_script_files != NULL)
     {
       htab_delete (info->loaded_script_files);
@@ -1249,8 +1251,9 @@ struct collect_matching_scripts_data
 static int
 collect_matching_scripts (void **slot, void *info)
 {
-  struct loaded_script *script = *slot;
-  struct collect_matching_scripts_data *data = info;
+  struct loaded_script *script = (struct loaded_script *) *slot;
+  struct collect_matching_scripts_data *data
+    = (struct collect_matching_scripts_data *) info;
 
   if (script->language == data->language && re_exec (script->name))
     VEC_safe_push (loaded_script_ptr, *data->scripts_p, script);

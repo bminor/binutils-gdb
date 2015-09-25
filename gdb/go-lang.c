@@ -655,7 +655,7 @@ static struct gdbarch_data *go_type_data;
 const struct builtin_go_type *
 builtin_go_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, go_type_data);
+  return (const struct builtin_go_type *) gdbarch_data (gdbarch, go_type_data);
 }
 
 extern initialize_file_ftype _initialize_go_language;

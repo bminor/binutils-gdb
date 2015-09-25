@@ -79,11 +79,12 @@ struct jv_per_objfile_data
 static void
 jv_per_objfile_free (struct objfile *objfile, void *data)
 {
-  struct jv_per_objfile_data *jv_data = data;
+  struct jv_per_objfile_data *jv_data = (struct jv_per_objfile_data *) data;
   struct objfile *dynamics_objfile;
 
-  dynamics_objfile = program_space_data (current_program_space,
-					 jv_dynamics_progspace_key);
+  dynamics_objfile
+    = (struct objfile *) program_space_data (current_program_space,
+					     jv_dynamics_progspace_key);
   gdb_assert (objfile == dynamics_objfile);
 
   if (jv_data->dict)
@@ -106,8 +107,9 @@ get_dynamics_objfile (struct gdbarch *gdbarch)
 {
   struct objfile *dynamics_objfile;
 
-  dynamics_objfile = program_space_data (current_program_space,
-					 jv_dynamics_progspace_key);
+  dynamics_objfile
+    = (struct objfile *) program_space_data (current_program_space,
+					     jv_dynamics_progspace_key);
 
   if (dynamics_objfile == NULL)
     {
@@ -165,7 +167,8 @@ get_java_class_symtab (struct gdbarch *gdbarch)
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
 
       /* Arrange to free the dict.  */
-      jv_data = objfile_data (objfile, jv_dynamics_objfile_data_key);
+      jv_data = ((struct jv_per_objfile_data *)
+		 objfile_data (objfile, jv_dynamics_objfile_data_key));
       jv_data->dict = BLOCK_DICT (bl);
     }
   return class_symtab;
@@ -1236,7 +1239,8 @@ static struct gdbarch_data *java_type_data;
 const struct builtin_java_type *
 builtin_java_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, java_type_data);
+  return ((const struct builtin_java_type *)
+	  gdbarch_data (gdbarch, java_type_data));
 }
 
 void

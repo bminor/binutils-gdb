@@ -3947,7 +3947,7 @@ cmd_qtstmat (char *packet)
 static int
 same_process_p (struct inferior_list_entry *entry, void *data)
 {
-  int *pid = data;
+  int *pid = (int *) data;
 
   return ptid_get_pid (entry->id) == *pid;
 }
@@ -5066,7 +5066,7 @@ agent_tsv_read (struct eval_agent_expr_context *ctx, int n)
 static int
 match_blocktype (char blocktype, unsigned char *dataptr, void *data)
 {
-  char *wantedp = data;
+  char *wantedp = (char *) data;
 
   if (*wantedp == blocktype)
     return 1;
@@ -5412,7 +5412,7 @@ traceframe_read_sdata (int tfnum, ULONGEST offset,
 static int
 build_traceframe_info_xml (char blocktype, unsigned char *dataptr, void *data)
 {
-  struct buffer *buffer = data;
+  struct buffer *buffer = (struct buffer *) data;
 
   switch (blocktype)
     {

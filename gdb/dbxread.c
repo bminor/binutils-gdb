@@ -729,7 +729,7 @@ dbx_symfile_finish (struct objfile *objfile)
 static void
 dbx_free_symfile_info (struct objfile *objfile, void *arg)
 {
-  struct dbx_symfile_info *dbx = arg;
+  struct dbx_symfile_info *dbx = (struct dbx_symfile_info *) arg;
 
   if (dbx->header_files != NULL)
     {
@@ -942,7 +942,7 @@ free_bincl_list (struct objfile *objfile)
 static void
 do_free_bincl_list_cleanup (void *objfile)
 {
-  free_bincl_list (objfile);
+  free_bincl_list ((struct objfile *) objfile);
 }
 
 static struct cleanup *

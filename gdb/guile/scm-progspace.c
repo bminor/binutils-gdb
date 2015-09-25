@@ -126,7 +126,7 @@ psscm_release_pspace (pspace_smob *p_smob)
 static void
 psscm_handle_pspace_deleted (struct program_space *pspace, void *datum)
 {
-  pspace_smob *p_smob = datum;
+  pspace_smob *p_smob = (pspace_smob *) datum;
 
   gdb_assert (p_smob->pspace == pspace);
 
@@ -158,7 +158,7 @@ psscm_pspace_smob_from_pspace (struct program_space *pspace)
 {
   pspace_smob *p_smob;
 
-  p_smob = program_space_data (pspace, psscm_pspace_data_key);
+  p_smob = (pspace_smob *) program_space_data (pspace, psscm_pspace_data_key);
   if (p_smob == NULL)
     {
       SCM p_scm = psscm_make_pspace_smob ();

@@ -479,7 +479,8 @@ struct mutable_foreach_data
 static int
 addrmap_mutable_foreach_worker (splay_tree_node node, void *data)
 {
-  struct mutable_foreach_data *foreach_data = data;
+  struct mutable_foreach_data *foreach_data
+    = (struct mutable_foreach_data *) data;
 
   return foreach_data->fn (foreach_data->data,
 			   addrmap_node_key (node),
@@ -514,7 +515,7 @@ static const struct addrmap_funcs addrmap_mutable_funcs =
 static void *
 splay_obstack_alloc (int size, void *closure)
 {
-  struct addrmap_mutable *map = closure;
+  struct addrmap_mutable *map = (struct addrmap_mutable *) closure;
   splay_tree_node n;
 
   /* We should only be asked to allocate nodes and larger things.
@@ -536,8 +537,8 @@ splay_obstack_alloc (int size, void *closure)
 static void
 splay_obstack_free (void *obj, void *closure)
 {
-  struct addrmap_mutable *map = closure;
-  splay_tree_node n = obj;
+  struct addrmap_mutable *map = (struct addrmap_mutable *) closure;
+  splay_tree_node n = (splay_tree_node) obj;
 
   /* We've asserted in the allocation function that we only allocate
      nodes or larger things, so it should be safe to put whatever

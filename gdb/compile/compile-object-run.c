@@ -61,7 +61,7 @@ static dummy_frame_dtor_ftype do_module_cleanup;
 static void
 do_module_cleanup (void *arg, int registers_valid)
 {
-  struct do_module_cleanup *data = arg;
+  struct do_module_cleanup *data = (struct do_module_cleanup *) arg;
   struct objfile *objfile;
 
   if (data->executedp != NULL)

@@ -415,7 +415,7 @@ linux_fork_detach (const char *args, int from_tty)
 static void
 inferior_call_waitpid_cleanup (void *fp)
 {
-  struct fork_info *oldfp = fp;
+  struct fork_info *oldfp = (struct fork_info *) fp;
 
   if (oldfp)
     {

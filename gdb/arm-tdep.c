@@ -333,7 +333,8 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
 					    0 };
       unsigned int idx;
 
-      data = objfile_data (sec->objfile, arm_objfile_data_key);
+      data = (struct arm_per_objfile *) objfile_data (sec->objfile,
+						      arm_objfile_data_key);
       if (data != NULL)
 	{
 	  map = data->section_maps[sec->the_bfd_section->index];
@@ -2028,7 +2029,7 @@ arm_prologue_unwind_stop_reason (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* This is meant to halt the backtrace at "_start".  */
   pc = get_frame_pc (this_frame);
@@ -2056,7 +2057,7 @@ arm_prologue_this_id (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* Use function start address as part of the frame ID.  If we cannot
      identify the start address (due to missing symbol information),
@@ -2080,7 +2081,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* If we are asked to unwind the PC, then we need to return the LR
      instead.  The prologue may save PC, but it will point into this
@@ -2160,7 +2161,7 @@ struct arm_exidx_data
 static void
 arm_exidx_data_free (struct objfile *objfile, void *arg)
 {
-  struct arm_exidx_data *data = arg;
+  struct arm_exidx_data *data = (struct arm_exidx_data *) arg;
   unsigned int i;
 
   for (i = 0; i < objfile->obfd->section_count; i++)
@@ -2435,7 +2436,8 @@ arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
       struct arm_exidx_entry map_key = { memaddr - obj_section_addr (sec), 0 };
       unsigned int idx;
 
-      data = objfile_data (sec->objfile, arm_exidx_data_key);
+      data = ((struct arm_exidx_data *)
+	      objfile_data (sec->objfile, arm_exidx_data_key));
       if (data != NULL)
 	{
 	  map = data->section_maps[sec->the_bfd_section->index];
@@ -2960,7 +2962,7 @@ arm_stub_this_id (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_make_stub_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   *this_id = frame_id_build (cache->prev_sp, get_frame_pc (this_frame));
 }
@@ -3054,7 +3056,7 @@ arm_m_exception_this_id (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_m_exception_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* Our frame ID for a stub frame is the current SP and LR.  */
   *this_id = frame_id_build (cache->prev_sp,
@@ -3074,7 +3076,7 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_m_exception_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* The value was already reconstructed into PREV_SP.  */
   if (prev_regnum == ARM_SP_REGNUM)
@@ -3127,7 +3129,7 @@ arm_normal_frame_base (struct frame_info *this_frame, void **this_cache)
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   return cache->prev_sp - cache->framesize;
 }
@@ -8770,7 +8772,7 @@ arm_displaced_step_fixup (struct gdbarch *gdbarch,
 static int
 gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
 {
-  struct gdbarch *gdbarch = info->application_data;
+  struct gdbarch *gdbarch = (struct gdbarch *) info->application_data;
 
   if (arm_pc_is_thumb (gdbarch, memaddr))
     {
@@ -9598,7 +9600,7 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
 static void
 arm_objfile_data_free (struct objfile *objfile, void *arg)
 {
-  struct arm_per_objfile *data = arg;
+  struct arm_per_objfile *data = (struct arm_per_objfile *) arg;
   unsigned int i;
 
   for (i = 0; i < objfile->obfd->section_count; i++)
@@ -9618,7 +9620,8 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
   if (name[1] != 'a' && name[1] != 't' && name[1] != 'd')
     return;
 
-  data = objfile_data (objfile, arm_objfile_data_key);
+  data = (struct arm_per_objfile *) objfile_data (objfile,
+						  arm_objfile_data_key);
   if (data == NULL)
     {
       data = OBSTACK_ZALLOC (&objfile->objfile_obstack,
@@ -9822,7 +9825,7 @@ arm_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static struct value *
 value_of_arm_user_reg (struct frame_info *frame, const void *baton)
 {
-  const int *reg_p = baton;
+  const int *reg_p = (const int *) baton;
   return value_of_register (*reg_p, frame);
 }
 

@@ -874,7 +874,7 @@ thread_db_init (int use_events)
 static int
 any_thread_of (struct inferior_list_entry *entry, void *args)
 {
-  int *pid_p = args;
+  int *pid_p = (int *) args;
 
   if (ptid_get_pid (entry->id) == *pid_p)
     return 1;

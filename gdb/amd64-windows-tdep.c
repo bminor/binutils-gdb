@@ -1025,7 +1025,7 @@ amd64_windows_frame_cache (struct frame_info *this_frame, void **this_cache)
   CORE_ADDR unwind_info = 0;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct amd64_windows_frame_cache *) *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct amd64_windows_frame_cache);
   *this_cache = cache;

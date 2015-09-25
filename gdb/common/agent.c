@@ -93,9 +93,10 @@ agent_look_up_symbols (void *arg)
     {
       CORE_ADDR *addrp =
 	(CORE_ADDR *) ((char *) &ipa_sym_addrs + symbol_list[i].offset);
+      struct objfile *objfile = (struct objfile *) arg;
 
       if (find_minimal_symbol_address (symbol_list[i].name, addrp,
-				       arg) != 0)
+				       objfile) != 0)
 	{
 	  DEBUG_AGENT ("symbol `%s' not found\n", symbol_list[i].name);
 	  return -1;

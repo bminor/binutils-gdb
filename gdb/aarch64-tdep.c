@@ -846,7 +846,7 @@ aarch64_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
   struct aarch64_prologue_cache *cache;
 
   if (*this_cache != NULL)
-    return *this_cache;
+    return (struct aarch64_prologue_cache *) *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
@@ -971,7 +971,7 @@ aarch64_make_stub_cache (struct frame_info *this_frame, void **this_cache)
   struct aarch64_prologue_cache *cache;
 
   if (*this_cache != NULL)
-    return *this_cache;
+    return (struct aarch64_prologue_cache *) *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
@@ -2464,7 +2464,7 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static struct value *
 value_of_aarch64_user_reg (struct frame_info *frame, const void *baton)
 {
-  const int *reg_p = baton;
+  const int *reg_p = (const int *) baton;
 
   return value_of_register (*reg_p, frame);
 }

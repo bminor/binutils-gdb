@@ -2471,7 +2471,7 @@ amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct amd64_frame_cache *cache;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct amd64_frame_cache *) *this_cache;
 
   cache = amd64_alloc_frame_cache ();
   *this_cache = cache;
@@ -2590,7 +2590,7 @@ amd64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   int i;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct amd64_frame_cache *) *this_cache;
 
   cache = amd64_alloc_frame_cache ();
 
@@ -2766,7 +2766,7 @@ amd64_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   gdb_byte buf[8];
 
   if (*this_cache)
-    return *this_cache;
+    return (struct amd64_frame_cache *) *this_cache;
 
   cache = amd64_alloc_frame_cache ();
   *this_cache = cache;
@@ -3182,7 +3182,7 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
   if (fxsave
       && gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 64)
     {
-      const gdb_byte *regs = fxsave;
+      const gdb_byte *regs = (const gdb_byte *) fxsave;
 
       if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
 	regcache_raw_supply (regcache, I387_FISEG_REGNUM (tdep), regs + 12);
@@ -3205,7 +3205,7 @@ amd64_supply_xsave (struct regcache *regcache, int regnum,
   if (xsave
       && gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 64)
     {
-      const gdb_byte *regs = xsave;
+      const gdb_byte *regs = (const gdb_byte *) xsave;
 
       if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
 	regcache_raw_supply (regcache, I387_FISEG_REGNUM (tdep),
@@ -3227,7 +3227,7 @@ amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  gdb_byte *regs = fxsave;
+  gdb_byte *regs = (gdb_byte *) fxsave;
 
   i387_collect_fxsave (regcache, regnum, fxsave);
 
@@ -3248,7 +3248,7 @@ amd64_collect_xsave (const struct regcache *regcache, int regnum,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  gdb_byte *regs = xsave;
+  gdb_byte *regs = (gdb_byte *) xsave;
 
   i387_collect_xsave (regcache, regnum, xsave, gcore);
 

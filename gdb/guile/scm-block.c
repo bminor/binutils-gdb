@@ -85,7 +85,7 @@ static const struct objfile_data *bkscm_objfile_data_key;
 static hashval_t
 bkscm_hash_block_smob (const void *p)
 {
-  const block_smob *b_smob = p;
+  const block_smob *b_smob = (const block_smob *) p;
 
   return htab_hash_pointer (b_smob->block);
 }
@@ -95,8 +95,8 @@ bkscm_hash_block_smob (const void *p)
 static int
 bkscm_eq_block_smob (const void *ap, const void *bp)
 {
-  const block_smob *a = ap;
-  const block_smob *b = bp;
+  const block_smob *a = (const block_smob *) ap;
+  const block_smob *b = (const block_smob *) bp;
 
   return (a->block == b->block
 	  && a->block != NULL);
@@ -108,7 +108,7 @@ bkscm_eq_block_smob (const void *ap, const void *bp)
 static htab_t
 bkscm_objfile_block_map (struct objfile *objfile)
 {
-  htab_t htab = objfile_data (objfile, bkscm_objfile_data_key);
+  htab_t htab = (htab_t) objfile_data (objfile, bkscm_objfile_data_key);
 
   if (htab == NULL)
     {
@@ -347,7 +347,7 @@ bkscm_mark_block_invalid (void **slot, void *info)
 static void
 bkscm_del_objfile_blocks (struct objfile *objfile, void *datum)
 {
-  htab_t htab = datum;
+  htab_t htab = (htab_t) datum;
 
   if (htab != NULL)
     {

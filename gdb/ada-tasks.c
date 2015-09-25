@@ -248,7 +248,8 @@ get_ada_tasks_pspace_data (struct program_space *pspace)
 {
   struct ada_tasks_pspace_data *data;
 
-  data = program_space_data (pspace, ada_tasks_pspace_data_handle);
+  data = ((struct ada_tasks_pspace_data *)
+	  program_space_data (pspace, ada_tasks_pspace_data_handle));
   if (data == NULL)
     {
       data = XCNEW (struct ada_tasks_pspace_data);
@@ -275,7 +276,8 @@ get_ada_tasks_inferior_data (struct inferior *inf)
 {
   struct ada_tasks_inferior_data *data;
 
-  data = inferior_data (inf, ada_tasks_inferior_data_handle);
+  data = ((struct ada_tasks_inferior_data *)
+	  inferior_data (inf, ada_tasks_inferior_data_handle));
   if (data == NULL)
     {
       data = XCNEW (struct ada_tasks_inferior_data);

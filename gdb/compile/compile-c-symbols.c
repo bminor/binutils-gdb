@@ -51,7 +51,7 @@ struct symbol_error
 static hashval_t
 hash_symbol_error (const void *a)
 {
-  const struct symbol_error *se = a;
+  const struct symbol_error *se = (const struct symbol_error *) a;
 
   return htab_hash_pointer (se->sym);
 }
@@ -61,8 +61,8 @@ hash_symbol_error (const void *a)
 static int
 eq_symbol_error (const void *a, const void *b)
 {
-  const struct symbol_error *sea = a;
-  const struct symbol_error *seb = b;
+  const struct symbol_error *sea = (const struct symbol_error *) a;
+  const struct symbol_error *seb = (const struct symbol_error *) b;
 
   return sea->sym == seb->sym;
 }
@@ -72,7 +72,7 @@ eq_symbol_error (const void *a, const void *b)
 static void
 del_symbol_error (void *a)
 {
-  struct symbol_error *se = a;
+  struct symbol_error *se = (struct symbol_error *) a;
 
   xfree (se->message);
   xfree (se);
@@ -113,7 +113,7 @@ error_symbol_once (struct compile_c_instance *context,
     return;
 
   search.sym = sym;
-  err = htab_find (context->symbol_err_map, &search);
+  err = (struct symbol_error *) htab_find (context->symbol_err_map, &search);
   if (err == NULL || err->message == NULL)
     return;
 
@@ -421,7 +421,7 @@ gcc_convert_symbol (void *datum,
 		    enum gcc_c_oracle_request request,
 		    const char *identifier)
 {
-  struct compile_c_instance *context = datum;
+  struct compile_c_instance *context = (struct compile_c_instance *) datum;
   domain_enum domain;
   int found = 0;
 
@@ -484,7 +484,7 @@ gcc_address
 gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 		    const char *identifier)
 {
-  struct compile_c_instance *context = datum;
+  struct compile_c_instance *context = (struct compile_c_instance *) datum;
   gcc_address result = 0;
   int found = 0;
 
@@ -547,7 +547,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 static hashval_t
 hash_symname (const void *a)
 {
-  const struct symbol *sym = a;
+  const struct symbol *sym = (const struct symbol *) a;
 
   return htab_hash_string (SYMBOL_NATURAL_NAME (sym));
 }
@@ -558,8 +558,8 @@ hash_symname (const void *a)
 static int
 eq_symname (const void *a, const void *b)
 {
-  const struct symbol *syma = a;
-  const struct symbol *symb = b;
+  const struct symbol *syma = (const struct symbol *) a;
+  const struct symbol *symb = (const struct symbol *) b;
 
   return strcmp (SYMBOL_NATURAL_NAME (syma), SYMBOL_NATURAL_NAME (symb)) == 0;
 }

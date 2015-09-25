@@ -1,5 +1,23 @@
 2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dll.c (match_dll): Add cast(s).
+	(unloaded_dll): Likewise.
+	* linux-low.c (second_thread_of_pid_p): Likewise.
+	(delete_lwp_callback): Likewise.
+	(count_events_callback): Likewise.
+	(select_event_lwp_callback): Likewise.
+	(linux_set_resume_request): Likewise.
+	* server.c (accumulate_file_name_length): Likewise.
+	(emit_dll_description): Likewise.
+	(handle_qxfer_threads_worker): Likewise.
+	(visit_actioned_threads): Likewise.
+	* thread-db.c (any_thread_of): Likewise.
+	* tracepoint.c (same_process_p): Likewise.
+	(match_blocktype): Likewise.
+	(build_traceframe_info_xml): Likewise.
+
+2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* ax.c (gdb_parse_agent_expr): Add cast to allocation result
 	assignment.
 	(gdb_unparse_agent_expr): Likewise.

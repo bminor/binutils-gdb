@@ -1554,8 +1554,8 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
 static int
 compare_symtabs (const void *a, const void *b)
 {
-  const struct symtab_and_line *sala = a;
-  const struct symtab_and_line *salb = b;
+  const struct symtab_and_line *sala = (const struct symtab_and_line *) a;
+  const struct symtab_and_line *salb = (const struct symtab_and_line *) b;
   const char *dira = SYMTAB_DIRNAME (sala->symtab);
   const char *dirb = SYMTAB_DIRNAME (salb->symtab);
   int r;

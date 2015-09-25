@@ -307,7 +307,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 static void
 clear_hook_in_cleanup (void *data)
 {
-  struct cmd_list_element *c = data;
+  struct cmd_list_element *c = (struct cmd_list_element *) data;
 
   c->hook_in = 0; /* Allow hook to work again once it is complete.  */
 }
@@ -341,7 +341,7 @@ execute_cmd_post_hook (struct cmd_list_element *c)
 static void
 do_restore_user_call_depth (void * call_depth)
 {	
-  int *depth = call_depth;
+  int *depth = (int *) call_depth;
 
   (*depth)--;
   if ((*depth) == 0)
@@ -1390,7 +1390,7 @@ free_command_lines (struct command_line **lptr)
 static void
 do_free_command_lines_cleanup (void *arg)
 {
-  free_command_lines (arg);
+  free_command_lines ((struct command_line **) arg);
 }
 
 struct cleanup *

@@ -41,8 +41,8 @@ free_one_dll (struct inferior_list_entry *inf)
 static int
 match_dll (struct inferior_list_entry *inf, void *arg)
 {
-  struct dll_info *iter = (void *) inf;
-  struct dll_info *key = arg;
+  struct dll_info *iter = (struct dll_info *) inf;
+  struct dll_info *key = (struct dll_info *) arg;
 
   if (key->base_addr != UNSPECIFIED_CORE_ADDR
       && iter->base_addr == key->base_addr)
@@ -83,7 +83,7 @@ unloaded_dll (const char *name, CORE_ADDR base_addr)
   key_dll.name = (char *) name;
   key_dll.base_addr = base_addr;
 
-  dll = (void *) find_inferior (&all_dlls, match_dll, &key_dll);
+  dll = (struct dll_info *) find_inferior (&all_dlls, match_dll, &key_dll);
 
   if (dll == NULL)
     /* For some inferiors we might get unloaded_dll events without having

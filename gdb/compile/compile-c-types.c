@@ -39,7 +39,7 @@ struct type_map_instance
 static hashval_t
 hash_type_map_instance (const void *p)
 {
-  const struct type_map_instance *inst = p;
+  const struct type_map_instance *inst = (const struct type_map_instance *) p;
 
   return htab_hash_pointer (inst->type);
 }
@@ -49,8 +49,8 @@ hash_type_map_instance (const void *p)
 static int
 eq_type_map_instance (const void *a, const void *b)
 {
-  const struct type_map_instance *insta = a;
-  const struct type_map_instance *instb = b;
+  const struct type_map_instance *insta = (const struct type_map_instance *) a;
+  const struct type_map_instance *instb = (const struct type_map_instance *) b;
 
   return insta->type == instb->type;
 }
@@ -75,7 +75,7 @@ insert_type (struct compile_c_instance *context, struct type *type,
   inst.gcc_type = gcc_type;
   slot = htab_find_slot (context->type_map, &inst, INSERT);
 
-  add = *slot;
+  add = (struct type_map_instance *) *slot;
   /* The type might have already been inserted in order to handle
      recursive types.  */
   if (add != NULL && add->gcc_type != gcc_type)
@@ -386,7 +386,7 @@ convert_type (struct compile_c_instance *context, struct type *type)
   type = check_typedef (type);
 
   inst.type = type;
-  found = htab_find (context->type_map, &inst);
+  found = (struct type_map_instance *) htab_find (context->type_map, &inst);
   if (found != NULL)
     return found->gcc_type;
 

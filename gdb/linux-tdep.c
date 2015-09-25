@@ -171,7 +171,8 @@ init_linux_gdbarch_data (struct gdbarch *gdbarch)
 static struct linux_gdbarch_data *
 get_linux_gdbarch_data (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, linux_gdbarch_data_handle);
+  return ((struct linux_gdbarch_data *)
+	  gdbarch_data (gdbarch, linux_gdbarch_data_handle));
 }
 
 /* Per-inferior data key.  */
@@ -203,7 +204,7 @@ invalidate_linux_cache_inf (struct inferior *inf)
 {
   struct linux_info *info;
 
-  info = inferior_data (inf, linux_inferior_data);
+  info = (struct linux_info *) inferior_data (inf, linux_inferior_data);
   if (info != NULL)
     {
       xfree (info);
@@ -230,7 +231,7 @@ get_linux_inferior_data (void)
   struct linux_info *info;
   struct inferior *inf = current_inferior ();
 
-  info = inferior_data (inf, linux_inferior_data);
+  info = (struct linux_info *) inferior_data (inf, linux_inferior_data);
   if (info == NULL)
     {
       info = XCNEW (struct linux_info);
@@ -1306,7 +1307,8 @@ linux_find_memory_regions_thunk (ULONGEST vaddr, ULONGEST size,
 				 int read, int write, int exec, int modified,
 				 const char *filename, void *arg)
 {
-  struct linux_find_memory_regions_data *data = arg;
+  struct linux_find_memory_regions_data *data
+    = (struct linux_find_memory_regions_data *) arg;
 
   return data->func (vaddr, size, read, write, exec, modified, data->obfd);
 }
@@ -1454,7 +1456,8 @@ linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
 			      int read, int write, int exec, int modified,
 			      const char *filename, void *data)
 {
-  struct linux_make_mappings_data *map_data = data;
+  struct linux_make_mappings_data *map_data
+    = (struct linux_make_mappings_data *) data;
   gdb_byte buf[sizeof (ULONGEST)];
 
   if (*filename == '\0' || inode == 0)
@@ -1665,7 +1668,8 @@ struct linux_corefile_thread_data
 static int
 linux_corefile_thread_callback (struct thread_info *info, void *data)
 {
-  struct linux_corefile_thread_data *args = data;
+  struct linux_corefile_thread_data *args
+    = (struct linux_corefile_thread_data *) data;
 
   /* It can be current thread
      which cannot be removed by update_thread_list.  */
@@ -2252,7 +2256,7 @@ find_mapping_size (CORE_ADDR vaddr, unsigned long size,
 		   int read, int write, int exec, int modified,
 		   void *data)
 {
-  struct mem_range *range = data;
+  struct mem_range *range = (struct mem_range *) data;
 
   if (vaddr == range->start)
     {

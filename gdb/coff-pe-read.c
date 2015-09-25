@@ -125,7 +125,7 @@ struct pe_sections_info
 static void
 get_section_vmas (bfd *abfd, asection *sectp, void *context)
 {
-  struct pe_sections_info *data = context;
+  struct pe_sections_info *data = (struct pe_sections_info *) context;
   struct read_pe_section_data *sections = data->sections;
   int sectix = get_pe_section_index (sectp->name, sections,
 				     data->nb_sections);
@@ -313,7 +313,7 @@ pe_get32 (bfd *abfd, int where)
 static unsigned int
 pe_as16 (void *ptr)
 {
-  unsigned char *b = ptr;
+  unsigned char *b = (unsigned char *) ptr;
 
   return b[0] + (b[1] << 8);
 }
@@ -321,7 +321,7 @@ pe_as16 (void *ptr)
 static unsigned int
 pe_as32 (void *ptr)
 {
-  unsigned char *b = ptr;
+  unsigned char *b = (unsigned char *) ptr;
 
   return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
 }

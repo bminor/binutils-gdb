@@ -79,7 +79,7 @@ munmap_list_free (struct munmap_list *head)
 static void
 munmap_listp_free_cleanup (void *headp_voidp)
 {
-  struct munmap_list **headp = headp_voidp;
+  struct munmap_list **headp = (struct munmap_list **) headp_voidp;
 
   munmap_list_free (*headp);
 }
@@ -111,7 +111,7 @@ struct setup_sections_data
 static void
 setup_sections (bfd *abfd, asection *sect, void *data_voidp)
 {
-  struct setup_sections_data *data = data_voidp;
+  struct setup_sections_data *data = (struct setup_sections_data *) data_voidp;
   CORE_ADDR alignment;
   unsigned prot;
 
@@ -336,7 +336,8 @@ struct link_hash_table_cleanup_data
 static void
 link_hash_table_free (void *d)
 {
-  struct link_hash_table_cleanup_data *data = d;
+  struct link_hash_table_cleanup_data *data
+    = (struct link_hash_table_cleanup_data *) d;
 
   if (data->abfd->is_linker_output)
     (*data->abfd->link.hash->hash_table_free) (data->abfd);
@@ -348,7 +349,7 @@ link_hash_table_free (void *d)
 static void
 copy_sections (bfd *abfd, asection *sect, void *data)
 {
-  asymbol **symbol_table = data;
+  asymbol **symbol_table = (asymbol **) data;
   bfd_byte *sect_data, *sect_data_got;
   struct cleanup *cleanups;
   struct bfd_link_info link_info;
