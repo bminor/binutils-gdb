@@ -277,7 +277,7 @@ complete_command (char *arg, int from_tty)
       point--;
     }
 
-  arg_prefix = alloca (point - arg + 1);
+  arg_prefix = (char *) alloca (point - arg + 1);
   memcpy (arg_prefix, arg, point - arg);
   arg_prefix[point - arg] = 0;
 
@@ -1295,7 +1295,7 @@ make_command (char *arg, int from_tty)
     p = "make";
   else
     {
-      p = xmalloc (sizeof ("make ") + strlen (arg));
+      p = (char *) xmalloc (sizeof ("make ") + strlen (arg));
       strcpy (p, "make ");
       strcpy (p + sizeof ("make ") - 1, arg);
     }

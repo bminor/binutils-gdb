@@ -370,8 +370,9 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
       Py_INCREF (Py_None);
     }
 
-  sal_obj->sal = xmemdup (&sal, sizeof (struct symtab_and_line),
-			  sizeof (struct symtab_and_line));
+  sal_obj->sal = ((struct symtab_and_line *)
+		  xmemdup (&sal, sizeof (struct symtab_and_line),
+			   sizeof (struct symtab_and_line)));
   sal_obj->symtab = symtab_obj;
   sal_obj->prev = NULL;
 

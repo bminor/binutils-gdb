@@ -1210,9 +1210,9 @@ extern void allocate_gnat_aux_type (struct type *);
 
 #define INIT_FUNC_SPECIFIC(type)					       \
   (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FUNC,			       \
-   TYPE_MAIN_TYPE (type)->type_specific.func_stuff			       \
-     = TYPE_ZALLOC (type,						       \
-		    sizeof (*TYPE_MAIN_TYPE (type)->type_specific.func_stuff)))
+   TYPE_MAIN_TYPE (type)->type_specific.func_stuff = (struct func_type *)      \
+     TYPE_ZALLOC (type,							       \
+		  sizeof (*TYPE_MAIN_TYPE (type)->type_specific.func_stuff)))
 
 #define TYPE_INSTANCE_FLAGS(thistype) (thistype)->instance_flags
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type

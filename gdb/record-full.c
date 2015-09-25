@@ -725,7 +725,7 @@ record_full_exec_insn (struct regcache *regcache,
 	/* Nothing to do if the entry is flagged not_accessible.  */
         if (!entry->u.mem.mem_entry_not_accessible)
           {
-            gdb_byte *mem = alloca (entry->u.mem.len);
+            gdb_byte *mem = (gdb_byte *) alloca (entry->u.mem.len);
 
             if (record_debug > 1)
               fprintf_unfiltered (gdb_stdlog,
@@ -800,7 +800,7 @@ record_full_core_open_1 (const char *name, int from_tty)
 
   /* Get record_full_core_regbuf.  */
   target_fetch_registers (regcache, -1);
-  record_full_core_regbuf = xmalloc (MAX_REGISTER_SIZE * regnum);
+  record_full_core_regbuf = (gdb_byte *) xmalloc (MAX_REGISTER_SIZE * regnum);
   for (i = 0; i < regnum; i ++)
     regcache_raw_collect (regcache, i,
 			  record_full_core_regbuf + MAX_REGISTER_SIZE * i);

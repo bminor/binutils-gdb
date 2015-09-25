@@ -572,8 +572,10 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
     saved_reg *reg;
     int i;
 
-    cached_frame = xmalloc (sizeof (*cached_frame) +
-                            reg_count * sizeof (cached_frame->reg[0]));
+    cached_frame
+      = ((cached_frame_info *)
+	 xmalloc (sizeof (*cached_frame)
+		  + reg_count * sizeof (cached_frame->reg[0])));
     cached_frame->gdbarch = gdbarch;
     cached_frame->frame_id = unwind_info->frame_id;
     cached_frame->reg_count = reg_count;

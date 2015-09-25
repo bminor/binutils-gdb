@@ -810,7 +810,7 @@ add_sal_to_sals_basic (struct symtabs_and_lines *sals,
 		       struct symtab_and_line *sal)
 {
   ++sals->nelts;
-  sals->sals = xrealloc (sals->sals, sals->nelts * sizeof (sals->sals[0]));
+  sals->sals = XRESIZEVEC (struct symtab_and_line, sals->sals, sals->nelts);
   sals->sals[sals->nelts - 1] = *sal;
 }
 
@@ -833,9 +833,8 @@ add_sal_to_sals (struct linespec_state *self,
     {
       struct linespec_canonical_name *canonical;
 
-      self->canonical_names = xrealloc (self->canonical_names,
-					(sals->nelts
-					 * sizeof (*self->canonical_names)));
+      self->canonical_names = XRESIZEVEC (struct linespec_canonical_name,
+					  self->canonical_names, sals->nelts);
       canonical = &self->canonical_names[sals->nelts - 1];
       if (!literal_canonical && sal->symtab)
 	{
@@ -2758,7 +2757,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
     {
       char *saved_arg;
 
-      saved_arg = alloca (new_argptr - arg + 1);
+      saved_arg = (char *) alloca (new_argptr - arg + 1);
       memcpy (saved_arg, arg, new_argptr - arg);
       saved_arg[new_argptr - arg] = '\0';
 
@@ -3290,14 +3289,14 @@ find_linespec_symbols (struct linespec_state *state,
 
       /* LOOKUP_NAME points to the class name.
 	 LAST points to the method name.  */
-      klass = xmalloc ((last - lookup_name + 1) * sizeof (char));
+      klass = XNEWVEC (char, last - lookup_name + 1);
       make_cleanup (xfree, klass);
       strncpy (klass, lookup_name, last - lookup_name);
       klass[last - lookup_name] = '\0';
 
       /* Skip past the scope operator.  */
       last += strlen (scope_op);
-      method = xmalloc ((strlen (last) + 1) * sizeof (char));
+      method = XNEWVEC (char, strlen (last) + 1);
       make_cleanup (xfree, method);
       strcpy (method, last);
 

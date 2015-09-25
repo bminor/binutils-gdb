@@ -1028,7 +1028,7 @@ m68k_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
       return 0;
     }
 
-  buf = alloca (gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
+  buf = (gdb_byte *) alloca (gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
   sp = get_frame_register_unsigned (frame, gdbarch_sp_regnum (gdbarch));
 
   if (target_read_memory (sp + SP_ARG0,	/* Offset of first arg on stack.  */

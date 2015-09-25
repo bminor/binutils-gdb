@@ -364,7 +364,7 @@ jit_read_descriptor (struct gdbarch *gdbarch,
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   ptr_size = TYPE_LENGTH (ptr_type);
   desc_size = 8 + 2 * ptr_size;  /* Two 32-bit ints and two pointers.  */
-  desc_buf = alloca (desc_size);
+  desc_buf = (gdb_byte *) alloca (desc_size);
 
   /* Read the descriptor.  */
   err = target_read_memory (MSYMBOL_VALUE_ADDRESS (ps_data->objfile,
@@ -412,7 +412,7 @@ jit_read_code_entry (struct gdbarch *gdbarch,
   off = (off + (align_bytes - 1)) & ~(align_bytes - 1);
 
   entry_size = off + 8;  /* Three pointers and one 64-bit int.  */
-  entry_buf = alloca (entry_size);
+  entry_buf = (gdb_byte *) alloca (entry_size);
 
   /* Read the entry.  */
   err = target_read_memory (code_addr, entry_buf, entry_size);
@@ -603,12 +603,14 @@ jit_symtab_line_mapping_add_impl (struct gdb_symbol_callbacks *cb,
                                   struct gdb_line_mapping *map)
 {
   int i;
+  int alloc_len;
 
   if (nlines < 1)
     return;
 
-  stab->linetable = xmalloc (sizeof (struct linetable)
-                             + (nlines - 1) * sizeof (struct linetable_entry));
+  alloc_len = sizeof (struct linetable)
+	      + (nlines - 1) * sizeof (struct linetable_entry);
+  stab->linetable = (struct linetable *) xmalloc (alloc_len);
   stab->linetable->nitems = nlines;
   for (i = 0; i < nlines; i++)
     {
@@ -658,14 +660,15 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 		     * sizeof (struct linetable_entry)
 		     + sizeof (struct linetable));
       SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust))
-	= obstack_alloc (&objfile->objfile_obstack, size);
+	= (struct linetable *) obstack_alloc (&objfile->objfile_obstack, size);
       memcpy (SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust)), stab->linetable,
 	      size);
     }
 
   blockvector_size = (sizeof (struct blockvector)
                       + (actual_nblocks - 1) * sizeof (struct block *));
-  bv = obstack_alloc (&objfile->objfile_obstack, blockvector_size);
+  bv = (struct blockvector *) obstack_alloc (&objfile->objfile_obstack,
+					     blockvector_size);
   COMPUNIT_BLOCKVECTOR (cust) = bv;
 
   /* (begin, end) will contain the PC range this entire blockvector
@@ -702,9 +705,10 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       SYMBOL_TYPE (block_name) = lookup_function_type (block_type);
       SYMBOL_BLOCK_VALUE (block_name) = new_block;
 
-      block_name->ginfo.name = obstack_copy0 (&objfile->objfile_obstack,
-					      gdb_block_iter->name,
-					      strlen (gdb_block_iter->name));
+      block_name->ginfo.name
+	= (const char *) obstack_copy0 (&objfile->objfile_obstack,
+					gdb_block_iter->name,
+					strlen (gdb_block_iter->name));
 
       BLOCK_FUNCTION (new_block) = block_name;
 
@@ -1134,7 +1138,8 @@ jit_unwind_reg_get_impl (struct gdb_unwind_callbacks *cb, int regnum)
 
   gdb_reg = gdbarch_dwarf2_reg_to_regnum (frame_arch, regnum);
   size = register_size (frame_arch, gdb_reg);
-  value = xmalloc (sizeof (struct gdb_reg_value) + size - 1);
+  value = ((struct gdb_reg_value *)
+	   xmalloc (sizeof (struct gdb_reg_value) + size - 1));
   value->defined = deprecated_frame_register_read (priv->this_frame, gdb_reg,
 						   value->value);
   value->size = size;

@@ -166,8 +166,8 @@ d_lookup_symbol_in_module (const char *module, const char *name,
 
   if (module[0] != '\0')
     {
-      concatenated_name = alloca (strlen (module)
-				  + strlen (name) + 2);
+      concatenated_name
+	= (char *) alloca (strlen (module) + strlen (name) + 2);
       strcpy (concatenated_name, module);
       strcat (concatenated_name, ".");
       strcat (concatenated_name, name);
@@ -219,7 +219,7 @@ lookup_module_scope (const char *name, const struct block *block,
   /* Okay, we didn't find a match in our children, so look for the
      name in the current module.  */
 
-  module = alloca (scope_len + 1);
+  module = (char *) alloca (scope_len + 1);
   strncpy (module, scope, scope_len);
   module[scope_len] = '\0';
   return d_lookup_symbol_in_module (module, name,
@@ -261,7 +261,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
 	 things like typedefs in the class.  First search in this symtab,
 	 what we want is possibly there.  */
       len = strlen (base_name) + strlen (name) + 2;
-      concatenated_name = xrealloc (concatenated_name, len);
+      concatenated_name = (char *) xrealloc (concatenated_name, len);
       xsnprintf (concatenated_name, len, "%s.%s", base_name, name);
       sym = lookup_symbol_in_static_block (concatenated_name, block,
 					   VAR_DOMAIN);
@@ -327,7 +327,7 @@ d_lookup_nested_symbol (struct type *parent_type,
 	     module search is already not D compliant and more assumptions
 	     could make it too magic.  */
 	  size = strlen (parent_name) + strlen (nested_name) + 2;
-	  concatenated_name = alloca (size);
+	  concatenated_name = (char *) alloca (size);
 
 	  xsnprintf (concatenated_name, size, "%s.%s",
 		     parent_name, nested_name);

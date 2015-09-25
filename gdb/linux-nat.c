@@ -1540,7 +1540,7 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 
       /* Put the signal number in ARGS so that inf_ptrace_detach will
 	 pass it along with PTRACE_DETACH.  */
-      tem = alloca (8);
+      tem = (char *) alloca (8);
       xsnprintf (tem, 8, "%d", (int) WSTOPSIG (status));
       args = tem;
       if (debug_linux_nat)
@@ -4940,7 +4940,7 @@ linux_nat_fileio_readlink (struct target_ops *self,
       return NULL;
     }
 
-  ret = xmalloc (len + 1);
+  ret = (char *) xmalloc (len + 1);
   memcpy (ret, buf, len);
   ret[len] = '\0';
   return ret;

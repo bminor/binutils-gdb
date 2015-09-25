@@ -6205,7 +6205,7 @@ mips_read_fp_register_single (struct frame_info *frame, int regno,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int raw_size = register_size (gdbarch, regno);
-  gdb_byte *raw_buffer = alloca (raw_size);
+  gdb_byte *raw_buffer = (gdb_byte *) alloca (raw_size);
 
   if (!deprecated_frame_register_read (frame, regno, raw_buffer))
     error (_("can't read register %d (%s)"),
@@ -6281,8 +6281,9 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
   double doub, flt1;	/* Doubles extracted from raw hex data.  */
   int inv1, inv2;
 
-  raw_buffer = alloca (2 * register_size (gdbarch,
-					  mips_regnum (gdbarch)->fp0));
+  raw_buffer
+    = ((gdb_byte *)
+       alloca (2 * register_size (gdbarch, mips_regnum (gdbarch)->fp0)));
 
   fprintf_filtered (file, "%s:", gdbarch_register_name (gdbarch, regnum));
   fprintf_filtered (file, "%*s",

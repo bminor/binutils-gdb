@@ -297,8 +297,7 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 		fp->maxfd = tmp;
 	    }
 	  /* Allocate array of file positions.  */
-	  fp->filepos = xrealloc (fp->filepos,
-				  (fp->maxfd + 1) * sizeof (*fp->filepos));
+	  fp->filepos = XRESIZEVEC (off_t, fp->filepos, fp->maxfd + 1);
 
 	  /* Initialize to -1 (invalid).  */
 	  for (tmp = 0; tmp <= fp->maxfd; tmp++)

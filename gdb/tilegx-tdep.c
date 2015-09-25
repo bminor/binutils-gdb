@@ -333,7 +333,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
 
       typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
       slacklen = align_up (typelen, 8) - typelen;
-      val = xmalloc (typelen + slacklen);
+      val = (gdb_byte *) xmalloc (typelen + slacklen);
       back_to = make_cleanup (xfree, val);
       memcpy (val, contents, typelen);
       memset (val + typelen, 0, slacklen);

@@ -75,7 +75,7 @@ write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
   if (buffer != NULL)
     free (buffer);
 
-  buffer = xmalloc (len);
+  buffer = (unsigned char *) xmalloc (len);
   memcpy (buffer, myaddr, len);
   check_mem_write (memaddr, buffer, myaddr, len);
   res = (*the_target->write_memory) (memaddr, buffer, len);

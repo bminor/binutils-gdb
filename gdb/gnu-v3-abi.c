@@ -345,7 +345,7 @@ gnuv3_rtti_type (struct value *value,
     {
       char *copy;
 
-      copy = alloca (atsign - class_name + 1);
+      copy = (char *) alloca (atsign - class_name + 1);
       memcpy (copy, class_name, atsign - class_name);
       copy[atsign - class_name] = '\0';
       class_name = copy;

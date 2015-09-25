@@ -69,7 +69,7 @@ vaxobsd_sigtramp_sniffer (const struct frame_unwind *self,
   if (name)
     return 0;
 
-  buf = alloca(sizeof vaxobsd_sigreturn);
+  buf = (gdb_byte *) alloca (sizeof vaxobsd_sigreturn);
   if (!safe_frame_unwind_memory (this_frame, sigreturn_addr,
 				 buf, sizeof vaxobsd_sigreturn))
     return 0;

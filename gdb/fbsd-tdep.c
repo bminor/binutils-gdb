@@ -68,7 +68,7 @@ fbsd_collect_regset_section_cb (const char *sect_name, int size,
 
   gdb_assert (regset->collect_regset);
 
-  buf = xmalloc (size);
+  buf = (char *) xmalloc (size);
   regset->collect_regset (regset, data->regcache, -1, buf, size);
 
   /* PRSTATUS still needs to be treated specially.  */

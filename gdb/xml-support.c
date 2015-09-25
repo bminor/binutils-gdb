@@ -365,7 +365,7 @@ gdb_xml_end_element (void *data, const XML_Char *name)
 
 	  length = obstack_object_size (scope->body);
 	  obstack_1grow (scope->body, '\0');
-	  body = obstack_finish (scope->body);
+	  body = (char *) obstack_finish (scope->body);
 
 	  /* Strip leading and trailing whitespace.  */
 	  while (length > 0 && ISSPACE (body[length-1]))
@@ -905,7 +905,7 @@ xml_process_xincludes (const char *name, const char *text,
   if (gdb_xml_parse (parser, text) == 0)
     {
       obstack_1grow (&data->obstack, '\0');
-      result = xstrdup (obstack_finish (&data->obstack));
+      result = xstrdup ((const char *) obstack_finish (&data->obstack));
 
       if (depth == 0)
 	gdb_xml_debug (parser, _("XInclude processing succeeded."));
@@ -1041,7 +1041,7 @@ xml_fetch_content_from_file (const char *filename, void *baton)
   /* Read in the whole file, one chunk at a time.  */
   len = 4096;
   offset = 0;
-  text = xmalloc (len);
+  text = (char *) xmalloc (len);
   make_cleanup (free_current_contents, &text);
   while (1)
     {
@@ -1063,7 +1063,7 @@ xml_fetch_content_from_file (const char *filename, void *baton)
 	break;
 
       len = len * 2;
-      text = xrealloc (text, len);
+      text = (char *) xrealloc (text, len);
     }
 
   fclose (file);

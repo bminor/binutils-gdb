@@ -874,7 +874,8 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	gsymbol->name = linkage_name;
       else
 	{
-	  char *name = obstack_alloc (&per_bfd->storage_obstack, len + 1);
+	  char *name = (char *) obstack_alloc (&per_bfd->storage_obstack,
+					       len + 1);
 
 	  memcpy (name, linkage_name, len);
 	  name[len] = '\0';
@@ -896,7 +897,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       char *alloc_name;
 
       lookup_len = len + JAVA_PREFIX_LEN;
-      alloc_name = alloca (lookup_len + 1);
+      alloc_name = (char *) alloca (lookup_len + 1);
       memcpy (alloc_name, JAVA_PREFIX, JAVA_PREFIX_LEN);
       memcpy (alloc_name + JAVA_PREFIX_LEN, linkage_name, len);
       alloc_name[lookup_len] = '\0';
@@ -909,7 +910,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       char *alloc_name;
 
       lookup_len = len;
-      alloc_name = alloca (lookup_len + 1);
+      alloc_name = (char *) alloca (lookup_len + 1);
       memcpy (alloc_name, linkage_name, len);
       alloc_name[lookup_len] = '\0';
 
@@ -950,10 +951,11 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	 us better bcache hit rates for partial symbols.  */
       if (!copy_name && lookup_name == linkage_name)
 	{
-	  *slot = obstack_alloc (&per_bfd->storage_obstack,
-				 offsetof (struct demangled_name_entry,
-					   demangled)
-				 + demangled_len + 1);
+	  *slot
+	    = ((struct demangled_name_entry *)
+	       obstack_alloc (&per_bfd->storage_obstack,
+			      offsetof (struct demangled_name_entry, demangled)
+			      + demangled_len + 1));
 	  (*slot)->mangled = lookup_name;
 	}
       else
@@ -963,10 +965,11 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	  /* If we must copy the mangled name, put it directly after
 	     the demangled name so we can have a single
 	     allocation.  */
-	  *slot = obstack_alloc (&per_bfd->storage_obstack,
-				 offsetof (struct demangled_name_entry,
-					   demangled)
-				 + lookup_len + demangled_len + 2);
+	  *slot
+	    = ((struct demangled_name_entry *)
+	       obstack_alloc (&per_bfd->storage_obstack,
+			      offsetof (struct demangled_name_entry, demangled)
+			      + lookup_len + demangled_len + 2));
 	  mangled_ptr = &((*slot)->demangled[demangled_len + 1]);
 	  strcpy (mangled_ptr, lookup_name);
 	  (*slot)->mangled = mangled_ptr;
@@ -1291,8 +1294,10 @@ resize_symbol_cache (struct symbol_cache *cache, unsigned int new_size)
     {
       size_t total_size = symbol_cache_byte_size (new_size);
 
-      cache->global_symbols = xcalloc (1, total_size);
-      cache->static_symbols = xcalloc (1, total_size);
+      cache->global_symbols
+	= (struct block_symbol_cache *) xcalloc (1, total_size);
+      cache->static_symbols
+	= (struct block_symbol_cache *) xcalloc (1, total_size);
       cache->global_symbols->size = new_size;
       cache->static_symbols->size = new_size;
     }
@@ -4911,7 +4916,7 @@ rbreak_command (char *regexp, int from_tty)
 	  char *local_name;
 
 	  colon_index = colon - regexp;
-	  local_name = alloca (colon_index + 1);
+	  local_name = (char *) alloca (colon_index + 1);
 	  memcpy (local_name, regexp, colon_index);
 	  local_name[colon_index--] = 0;
 	  while (isspace (local_name[colon_index]))
@@ -4942,7 +4947,7 @@ rbreak_command (char *regexp, int from_tty)
 
 	  if (newlen > len)
 	    {
-	      string = xrealloc (string, newlen);
+	      string = (char *) xrealloc (string, newlen);
 	      len = newlen;
 	    }
 	  strcpy (string, fullname);
@@ -4961,7 +4966,7 @@ rbreak_command (char *regexp, int from_tty)
 
 	  if (newlen > len)
 	    {
-	      string = xrealloc (string, newlen);
+	      string = (char *) xrealloc (string, newlen);
 	      len = newlen;
 	    }
 	  strcpy (string, "'");
@@ -5076,19 +5081,19 @@ completion_list_add_name (const char *symname,
 
     if (word == sym_text)
       {
-	newobj = xmalloc (strlen (symname) + 5);
+	newobj = (char *) xmalloc (strlen (symname) + 5);
 	strcpy (newobj, symname);
       }
     else if (word > sym_text)
       {
 	/* Return some portion of symname.  */
-	newobj = xmalloc (strlen (symname) + 5);
+	newobj = (char *) xmalloc (strlen (symname) + 5);
 	strcpy (newobj, symname + (word - sym_text));
       }
     else
       {
 	/* Return some of SYM_TEXT plus symname.  */
-	newobj = xmalloc (strlen (symname) + (sym_text - word) + 5);
+	newobj = (char *) xmalloc (strlen (symname) + (sym_text - word) + 5);
 	strncpy (newobj, word, sym_text - word);
 	newobj[sym_text - word] = '\0';
 	strcat (newobj, symname);
@@ -5144,7 +5149,7 @@ completion_list_objc_symbol (struct minimal_symbol *msymbol,
 	tmplen = 1024;
       else
 	tmplen *= 2;
-      tmp = xrealloc (tmp, tmplen);
+      tmp = (char *) xrealloc (tmp, tmplen);
     }
   selector = strchr (method, ' ');
   if (selector != NULL)
@@ -5742,19 +5747,19 @@ add_filename_to_list (const char *fname, const char *text, const char *word,
   if (word == text)
     {
       /* Return exactly fname.  */
-      newobj = xmalloc (fnlen + 5);
+      newobj = (char *) xmalloc (fnlen + 5);
       strcpy (newobj, fname);
     }
   else if (word > text)
     {
       /* Return some portion of fname.  */
-      newobj = xmalloc (fnlen + 5);
+      newobj = (char *) xmalloc (fnlen + 5);
       strcpy (newobj, fname + (word - text));
     }
   else
     {
       /* Return some of TEXT plus fname.  */
-      newobj = xmalloc (fnlen + (text - word) + 5);
+      newobj = (char *) xmalloc (fnlen + (text - word) + 5);
       strncpy (newobj, word, text - word);
       newobj[text - word] = '\0';
       strcat (newobj, fname);

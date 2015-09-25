@@ -427,6 +427,7 @@ addrmap_mutable_create_fixed (struct addrmap *self, struct obstack *obstack)
   struct addrmap_mutable *mutable_obj = (struct addrmap_mutable *) self;
   struct addrmap_fixed *fixed;
   size_t num_transitions;
+  size_t alloc_len;
 
   /* Count the number of transitions in the tree.  */
   num_transitions = 0;
@@ -436,10 +437,9 @@ addrmap_mutable_create_fixed (struct addrmap *self, struct obstack *obstack)
      maps have, but mutable maps do not.)  */
   num_transitions++;
 
-  fixed = obstack_alloc (obstack,
-                         (sizeof (*fixed)
-                          + (num_transitions
-                             * sizeof (fixed->transitions[0]))));
+  alloc_len = sizeof (*fixed)
+	      + (num_transitions * sizeof (fixed->transitions[0]));
+  fixed = (struct addrmap_fixed *) obstack_alloc (obstack, alloc_len);
   fixed->addrmap.funcs = &addrmap_fixed_funcs;
   fixed->num_transitions = 1;
   fixed->transitions[0].addr = 0;

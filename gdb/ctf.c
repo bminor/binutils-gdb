@@ -1338,7 +1338,7 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 	      gdb_byte *contents;
 	      int k;
 
-	      contents = xmalloc (mlen);
+	      contents = (gdb_byte *) xmalloc (mlen);
 
 	      for (k = 0; k < mlen; k++)
 		{

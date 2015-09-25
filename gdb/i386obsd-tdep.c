@@ -92,7 +92,7 @@ i386obsd_sigtramp_p (struct frame_info *this_frame)
     return 0;
 
   /* Allocate buffer.  */
-  buf = alloca (buflen);
+  buf = (gdb_byte *) alloca (buflen);
 
   /* Loop over all offsets.  */
   for (offset = i386obsd_sigreturn_offset; *offset != -1; offset++)

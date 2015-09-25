@@ -1065,8 +1065,9 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
     {
       char *local_prompt;
 
-      local_prompt = alloca ((prompt == NULL ? 0 : strlen (prompt))
-			     + strlen (annotation_suffix) + 40);
+      local_prompt
+	= (char *) alloca ((prompt == NULL ? 0 : strlen (prompt))
+			   + strlen (annotation_suffix) + 40);
       if (prompt == NULL)
 	local_prompt[0] = '\0';
       else
@@ -1235,7 +1236,8 @@ command_line_input (const char *prompt_arg, int repeat, char *annotation_suffix)
     {
       if (linelength > saved_command_line_size)
 	{
-	  saved_command_line = xrealloc (saved_command_line, linelength);
+	  saved_command_line
+	    = (char *) xrealloc (saved_command_line, linelength);
 	  saved_command_line_size = linelength;
 	}
       strcpy (saved_command_line, linebuffer);

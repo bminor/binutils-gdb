@@ -1736,8 +1736,8 @@ add_cie (struct dwarf2_cie_table *cie_table, struct dwarf2_cie *cie)
   gdb_assert (n < 1
               || cie_table->entries[n - 1]->cie_pointer < cie->cie_pointer);
 
-  cie_table->entries =
-      xrealloc (cie_table->entries, (n + 1) * sizeof (cie_table->entries[0]));
+  cie_table->entries
+    = XRESIZEVEC (struct dwarf2_cie *, cie_table->entries, n + 1);
   cie_table->entries[n] = cie;
   cie_table->num_entries = n + 1;
 }
@@ -1811,9 +1811,8 @@ add_fde (struct dwarf2_fde_table *fde_table, struct dwarf2_fde *fde)
     return;
 
   fde_table->num_entries += 1;
-  fde_table->entries =
-      xrealloc (fde_table->entries,
-                fde_table->num_entries * sizeof (fde_table->entries[0]));
+  fde_table->entries = XRESIZEVEC (struct dwarf2_fde *, fde_table->entries,
+				   fde_table->num_entries);
   fde_table->entries[fde_table->num_entries - 1] = fde;
 }
 
@@ -2371,9 +2370,9 @@ dwarf2_build_frame_info (struct objfile *objfile)
 		}
 	      else
 		{
-		  fde_table.entries = xrealloc (fde_table.entries,
-						fde_table.num_entries *
-						sizeof (fde_table.entries[0]));
+		  fde_table.entries
+		    = XRESIZEVEC (struct dwarf2_fde *, fde_table.entries,
+				  fde_table.num_entries);
 		}
 	    }
 	  fde_table.num_entries = num_old_fde_entries;
@@ -2454,7 +2453,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  ++fde_table2->num_entries;
 	  fde_prev = fde;
 	}
-      fde_table2->entries = obstack_finish (&objfile->objfile_obstack);
+      fde_table2->entries
+	= (struct dwarf2_fde **) obstack_finish (&objfile->objfile_obstack);
 
       /* Discard the original fde_table.  */
       xfree (fde_table.entries);

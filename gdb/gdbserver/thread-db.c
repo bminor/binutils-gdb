@@ -749,7 +749,7 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
 
   if (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
     {
-      char *cp = xmalloc (dir_len + 1);
+      char *cp = (char *) xmalloc (dir_len + 1);
 
       memcpy (cp, dir, dir_len);
       cp[dir_len] = '\0';

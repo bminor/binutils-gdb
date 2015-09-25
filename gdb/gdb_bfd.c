@@ -523,7 +523,8 @@ gdb_bfd_ref (struct bfd *abfd)
   /* Ask BFD to decompress sections in bfd_get_full_section_contents.  */
   abfd->flags |= BFD_DECOMPRESS;
 
-  gdata = bfd_zalloc (abfd, sizeof (struct gdb_bfd_data));
+  gdata
+    = (struct gdb_bfd_data *) bfd_zalloc (abfd, sizeof (struct gdb_bfd_data));
   gdata->refc = 1;
   gdata->mtime = bfd_get_mtime (abfd);
   gdata->size = bfd_get_size (abfd);
@@ -630,7 +631,8 @@ get_section_descriptor (asection *section)
 
   if (result == NULL)
     {
-      result = bfd_zalloc (section->owner, sizeof (*result));
+      result = ((struct gdb_bfd_section_data *)
+		bfd_zalloc (section->owner, sizeof (*result)));
       bfd_set_section_userdata (section->owner, section, result);
     }
 

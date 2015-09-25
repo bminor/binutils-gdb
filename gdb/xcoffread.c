@@ -1079,7 +1079,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	      {
 		char *p;
 
-		p = obstack_alloc (&objfile->objfile_obstack, E_SYMNMLEN + 1);
+		p = (char *) obstack_alloc (&objfile->objfile_obstack,
+					    E_SYMNMLEN + 1);
 		strncpy (p, cs->c_name, E_SYMNMLEN);
 		p[E_SYMNMLEN] = '\0';
 		cs->c_name = p;
@@ -1561,7 +1562,8 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
          will be patched with the type from its stab entry later on in
          patch_block_stabs (), unless the file was compiled without -g.  */
 
-      SYMBOL_SET_LINKAGE_NAME (sym, SYMNAME_ALLOC (name, symname_alloced));
+      SYMBOL_SET_LINKAGE_NAME (sym, ((const char *)
+				     SYMNAME_ALLOC (name, symname_alloced)));
       SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_text_symbol;
 
       SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
@@ -2133,7 +2135,8 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
 	     into the minimal symbols.  */
 	  char *p;
 
-	  p = obstack_alloc (&objfile->objfile_obstack, E_SYMNMLEN + 1);
+	  p = (char *) obstack_alloc (&objfile->objfile_obstack,
+				      E_SYMNMLEN + 1);
 	  strncpy (p, symbol->n_name, E_SYMNMLEN);
 	  p[E_SYMNMLEN] = '\0';
 	  *name = p;
@@ -2789,7 +2792,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		if (! pst)
 		  {
 		    int name_len = p - namestring;
-		    char *name = xmalloc (name_len + 1);
+		    char *name = (char *) xmalloc (name_len + 1);
 
 		    memcpy (name, namestring, name_len);
 		    name[name_len] = '\0';
@@ -2812,7 +2815,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		if (! pst)
 		  {
 		    int name_len = p - namestring;
-		    char *name = xmalloc (name_len + 1);
+		    char *name = (char *) xmalloc (name_len + 1);
 
 		    memcpy (name, namestring, name_len);
 		    name[name_len] = '\0';
@@ -2963,7 +2966,9 @@ xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
 	    length = bfd_section_size (abfd, secp);
 	    if (length)
 	      {
-		debugsec = obstack_alloc (&objfile->objfile_obstack, length);
+		debugsec
+		  = (bfd_byte *) obstack_alloc (&objfile->objfile_obstack,
+						length);
 
 		if (!bfd_get_full_section_contents (abfd, secp, &debugsec))
 		  {
@@ -2983,7 +2988,7 @@ xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
     error (_("Error reading symbols from %s: %s"),
 	   name, bfd_errmsg (bfd_get_error ()));
   size = coff_data (abfd)->local_symesz * num_symbols;
-  info->symtbl = obstack_alloc (&objfile->objfile_obstack, size);
+  info->symtbl = (char *) obstack_alloc (&objfile->objfile_obstack, size);
   info->symtbl_num_syms = num_symbols;
 
   val = bfd_bread (info->symtbl, size, abfd);

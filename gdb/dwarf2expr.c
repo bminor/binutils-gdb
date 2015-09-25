@@ -140,8 +140,7 @@ dwarf_expr_grow_stack (struct dwarf_expr_context *ctx, size_t need)
     {
       size_t newlen = ctx->stack_len + need + 10;
 
-      ctx->stack = xrealloc (ctx->stack,
-			     newlen * sizeof (struct dwarf_stack_value));
+      ctx->stack = XRESIZEVEC (struct dwarf_stack_value, ctx->stack, newlen);
       ctx->stack_allocated = newlen;
     }
 }
@@ -270,7 +269,7 @@ dwarf_expr_fetch_address (struct dwarf_expr_context *ctx, int n)
      for those architectures which require it.  */
   if (gdbarch_integer_to_address_p (ctx->gdbarch))
     {
-      gdb_byte *buf = alloca (ctx->addr_size);
+      gdb_byte *buf = (gdb_byte *) alloca (ctx->addr_size);
       struct type *int_type = get_unsigned_type (ctx->gdbarch,
 						 value_type (result_val));
 
@@ -309,9 +308,8 @@ add_piece (struct dwarf_expr_context *ctx, ULONGEST size, ULONGEST offset)
 
   ctx->num_pieces++;
 
-  ctx->pieces = xrealloc (ctx->pieces,
-			  (ctx->num_pieces
-			   * sizeof (struct dwarf_expr_piece)));
+  ctx->pieces
+    = XRESIZEVEC (struct dwarf_expr_piece, ctx->pieces, ctx->num_pieces);
 
   p = &ctx->pieces[ctx->num_pieces - 1];
   p->location = ctx->location;
@@ -1025,7 +1023,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_GNU_deref_type:
 	  {
 	    int addr_size = (op == DW_OP_deref ? ctx->addr_size : *op_ptr++);
-	    gdb_byte *buf = alloca (addr_size);
+	    gdb_byte *buf = (gdb_byte *) alloca (addr_size);
 	    CORE_ADDR addr = dwarf_expr_fetch_address (ctx, 0);
 	    struct type *type;
 
@@ -1051,7 +1049,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		ULONGEST result =
 		  extract_unsigned_integer (buf, addr_size, byte_order);
 
-		buf = alloca (TYPE_LENGTH (type));
+		buf = (gdb_byte *) alloca (TYPE_LENGTH (type));
 		store_unsigned_integer (buf, TYPE_LENGTH (type),
 					byte_order, result);
 	      }

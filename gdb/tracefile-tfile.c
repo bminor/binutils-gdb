@@ -805,7 +805,7 @@ tfile_fetch_registers (struct target_ops *ops,
 
   if (traceframe_find_block_type ('R', 0) >= 0)
     {
-      gdb_byte *regs = alloca (trace_regblock_size);
+      gdb_byte *regs = (gdb_byte *) alloca (trace_regblock_size);
 
       tfile_read (regs, trace_regblock_size);
 

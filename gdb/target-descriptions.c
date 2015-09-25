@@ -1629,7 +1629,7 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
     error (_("The current target description did not come from an XML file."));
 
   filename = lbasename (target_description_filename);
-  function = alloca (strlen (filename) + 1);
+  function = (char *) alloca (strlen (filename) + 1);
   for (inp = filename, outp = function; *inp != '\0'; inp++)
     if (*inp == '.')
       break;

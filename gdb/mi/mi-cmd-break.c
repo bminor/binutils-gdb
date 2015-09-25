@@ -156,7 +156,7 @@ mi_argv_to_format (char **argv, int argc)
     }
   obstack_1grow (&obstack, '\0');
 
-  ret = xstrdup (obstack_finish (&obstack));
+  ret = xstrdup ((const char *) obstack_finish (&obstack));
   obstack_free (&obstack, NULL);
 
   return ret;

@@ -4896,7 +4896,7 @@ disable_regset (struct regsets_info *info, struct regset_info *regset)
 
   dr_offset = regset - info->regsets;
   if (info->disabled_regsets == NULL)
-    info->disabled_regsets = xcalloc (1, info->num_regsets);
+    info->disabled_regsets = (char *) xcalloc (1, info->num_regsets);
   info->disabled_regsets[dr_offset] = 1;
 }
 
@@ -5119,7 +5119,7 @@ fetch_register (const struct usrregs_info *usrregs,
   size = ((register_size (regcache->tdesc, regno)
 	   + sizeof (PTRACE_XFER_TYPE) - 1)
 	  & -sizeof (PTRACE_XFER_TYPE));
-  buf = alloca (size);
+  buf = (char *) alloca (size);
 
   pid = lwpid_of (current_thread);
   for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
@@ -5163,7 +5163,7 @@ store_register (const struct usrregs_info *usrregs,
   size = ((register_size (regcache->tdesc, regno)
 	   + sizeof (PTRACE_XFER_TYPE) - 1)
 	  & -sizeof (PTRACE_XFER_TYPE));
-  buf = alloca (size);
+  buf = (char *) alloca (size);
   memset (buf, 0, size);
 
   if (the_low_target.collect_ptrace_register)
@@ -6324,7 +6324,7 @@ get_dynamic (const int pid, const int is_elf64)
     return 0;
 
   gdb_assert (num_phdr < 100);  /* Basic sanity check.  */
-  phdr_buf = alloca (num_phdr * phdr_size);
+  phdr_buf = (unsigned char *) alloca (num_phdr * phdr_size);
 
   if (linux_read_memory (phdr_memaddr, phdr_buf, num_phdr * phdr_size))
     return 0;
@@ -6653,7 +6653,7 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	}
     }
 
-  document = xmalloc (allocated);
+  document = (char *) xmalloc (allocated);
   strcpy (document, "<library-list-svr4 version=\"1.0\"");
   p = document + strlen (document);
 
@@ -6714,7 +6714,7 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 		  /* Expand to guarantee sufficient storage.  */
 		  uintptr_t document_len = p - document;
 
-		  document = xrealloc (document, 2 * allocated);
+		  document = (char *) xrealloc (document, 2 * allocated);
 		  allocated *= 2;
 		  p = document + document_len;
 		}

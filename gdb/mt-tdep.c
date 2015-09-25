@@ -200,7 +200,7 @@ mt_register_name (struct gdbarch *gdbarch, int regnum)
 	array_names[regnum] = stub;
 	return stub;
       }
-    name = xmalloc (30);
+    name = (char *) xmalloc (30);
     sprintf (name, "copro_%d_%d_%s", dim_1, dim_2, stub);
     array_names[regnum] = name;
     return name;
@@ -680,7 +680,7 @@ mt_registers_info (struct gdbarch *gdbarch,
 
 	  regsize = register_size (gdbarch, regnum);
 
-	  buff = alloca (regsize);
+	  buff = (unsigned char *) alloca (regsize);
 	  bytes = XALLOCAVEC (unsigned int, regsize);
 
 	  deprecated_frame_register_read (frame, regnum, buff);
@@ -707,7 +707,7 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  gdb_byte *buf;
 	  struct value_print_options opts;
 
-	  buf = alloca (register_size (gdbarch, MT_COPRO_REGNUM));
+	  buf = (gdb_byte *) alloca (register_size (gdbarch, MT_COPRO_REGNUM));
 	  deprecated_frame_register_read (frame, MT_COPRO_REGNUM, buf);
 	  /* And print.  */
 	  regnum = MT_COPRO_PSEUDOREG_REGNUM;
@@ -849,7 +849,7 @@ mt_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* Right-justify the value in an aligned-length buffer.  */
       typelen = TYPE_LENGTH (value_type (args[j]));
       slacklen = (wordsize - (typelen % wordsize)) % wordsize;
-      val = xmalloc (typelen + slacklen);
+      val = (gdb_byte *) xmalloc (typelen + slacklen);
       back_to = make_cleanup (xfree, val);
       memcpy (val, contents, typelen);
       memset (val + typelen, 0, slacklen);

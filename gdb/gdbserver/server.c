@@ -959,7 +959,7 @@ handle_search_memory (char *own_buf, int packet_len)
   CORE_ADDR found_addr;
   int cmd_name_len = sizeof ("qSearch:memory:") - 1;
 
-  pattern = malloc (packet_len);
+  pattern = (gdb_byte *) malloc (packet_len);
   if (pattern == NULL)
     {
       error ("Unable to allocate memory to perform the search");
@@ -983,7 +983,7 @@ handle_search_memory (char *own_buf, int packet_len)
   if (search_space_len < search_buf_size)
     search_buf_size = search_space_len;
 
-  search_buf = malloc (search_buf_size);
+  search_buf = (gdb_byte *) malloc (search_buf_size);
   if (search_buf == NULL)
     {
       free (pattern);
@@ -1211,7 +1211,7 @@ handle_qxfer_exec_file (const char *const_annex,
     }
   else
     {
-      char *annex = alloca (strlen (const_annex) + 1);
+      char *annex = (char *) alloca (strlen (const_annex) + 1);
 
       strcpy (annex, const_annex);
       annex = unpack_varlen_hex (annex, &pid);
@@ -1334,7 +1334,7 @@ handle_qxfer_libraries (const char *annex,
   for_each_inferior_with_data (&all_dlls, accumulate_file_name_length,
 			       &total_len);
 
-  document = malloc (total_len);
+  document = (char *) malloc (total_len);
   if (document == NULL)
     return -1;
 
@@ -1795,7 +1795,7 @@ handle_qxfer (char *own_buf, int packet_len, int *new_packet_len_p)
 		 more.  */
 	      if (len > PBUFSIZ - 2)
 		len = PBUFSIZ - 2;
-	      data = malloc (len + 1);
+	      data = (unsigned char *) malloc (len + 1);
 	      if (data == NULL)
 		{
 		  write_enn (own_buf);
@@ -1829,7 +1829,7 @@ handle_qxfer (char *own_buf, int packet_len, int *new_packet_len_p)
 	      unsigned char *data;
 
 	      strcpy (own_buf, "E00");
-	      data = malloc (packet_len - (offset - own_buf));
+	      data = (unsigned char *) malloc (packet_len - (offset - own_buf));
 	      if (data == NULL)
 		{
 		  write_enn (own_buf);
@@ -2071,7 +2071,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	       p = strtok (NULL, ";"))
 	    {
 	      count++;
-	      qsupported = xrealloc (qsupported, count * sizeof (char *));
+	      qsupported = XRESIZEVEC (char *, qsupported, count);
 	      qsupported[count - 1] = xstrdup (p);
 	    }
 
@@ -2334,7 +2334,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   /* Handle "monitor" commands.  */
   if (startswith (own_buf, "qRcmd,"))
     {
-      char *mon = malloc (PBUFSIZ);
+      char *mon = (char *) malloc (PBUFSIZ);
       int len = strlen (own_buf + 6);
 
       if (mon == NULL)
@@ -2523,7 +2523,7 @@ handle_v_cont (char *own_buf)
       p = strchr (p, ';');
     }
 
-  resume_info = malloc (n * sizeof (resume_info[0]));
+  resume_info = (struct thread_resume *) malloc (n * sizeof (resume_info[0]));
   if (resume_info == NULL)
     goto err;
 
@@ -2718,7 +2718,7 @@ handle_v_run (char *own_buf)
       new_argc++;
     }
 
-  new_argv = calloc (new_argc + 2, sizeof (char *));
+  new_argv = (char **) calloc (new_argc + 2, sizeof (char *));
   if (new_argv == NULL)
     {
       write_enn (own_buf);
@@ -2737,7 +2737,7 @@ handle_v_run (char *own_buf)
       else
 	{
 	  /* FIXME: Fail request if out of memory instead of dying.  */
-	  new_argv[i] = xmalloc (1 + (next_p - p) / 2);
+	  new_argv[i] = (char *) xmalloc (1 + (next_p - p) / 2);
 	  hex2bin (p, (gdb_byte *) new_argv[i], (next_p - p) / 2);
 	  new_argv[i][(next_p - p) / 2] = '\0';
 	}
@@ -3524,15 +3524,15 @@ captured_main (int argc, char *argv[])
     initialize_tracepoint ();
   initialize_notif ();
 
-  own_buf = xmalloc (PBUFSIZ + 1);
-  mem_buf = xmalloc (PBUFSIZ);
+  own_buf = (char *) xmalloc (PBUFSIZ + 1);
+  mem_buf = (unsigned char *) xmalloc (PBUFSIZ);
 
   if (pid == 0 && *next_arg != NULL)
     {
       int i, n;
 
       n = argc - (next_arg - argv);
-      program_argv = xmalloc (sizeof (char *) * (n + 1));
+      program_argv = XNEWVEC (char *, n + 1);
       for (i = 0; i < n; i++)
 	program_argv[i] = xstrdup (next_arg[i]);
       program_argv[i] = NULL;

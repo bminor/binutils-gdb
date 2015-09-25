@@ -675,7 +675,7 @@ regcache_raw_read_signed (struct regcache *regcache, int regnum, LONGEST *val)
 
   gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
-  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  buf = (gdb_byte *) alloca (regcache->descr->sizeof_register[regnum]);
   status = regcache_raw_read (regcache, regnum, buf);
   if (status == REG_VALID)
     *val = extract_signed_integer
@@ -695,7 +695,7 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
 
   gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
-  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  buf = (gdb_byte *) alloca (regcache->descr->sizeof_register[regnum]);
   status = regcache_raw_read (regcache, regnum, buf);
   if (status == REG_VALID)
     *val = extract_unsigned_integer
@@ -822,7 +822,7 @@ regcache_cooked_read_signed (struct regcache *regcache, int regnum,
 
   gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_cooked_registers);
-  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  buf = (gdb_byte *) alloca (regcache->descr->sizeof_register[regnum]);
   status = regcache_cooked_read (regcache, regnum, buf);
   if (status == REG_VALID)
     *val = extract_signed_integer
@@ -842,7 +842,7 @@ regcache_cooked_read_unsigned (struct regcache *regcache, int regnum,
 
   gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_cooked_registers);
-  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  buf = (gdb_byte *) alloca (regcache->descr->sizeof_register[regnum]);
   status = regcache_cooked_read (regcache, regnum, buf);
   if (status == REG_VALID)
     *val = extract_unsigned_integer

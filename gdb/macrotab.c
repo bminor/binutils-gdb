@@ -352,7 +352,7 @@ new_macro_key (struct macro_table *t,
                struct macro_source_file *file,
                int line)
 {
-  struct macro_key *k = macro_alloc (sizeof (*k), t);
+  struct macro_key *k = (struct macro_key *) macro_alloc (sizeof (*k), t);
 
   memset (k, 0, sizeof (*k));
   k->table = t;
@@ -385,7 +385,8 @@ new_source_file (struct macro_table *t,
                  const char *filename)
 {
   /* Get space for the source file structure itself.  */
-  struct macro_source_file *f = macro_alloc (sizeof (*f), t);
+  struct macro_source_file *f
+    = (struct macro_source_file *) macro_alloc (sizeof (*f), t);
 
   memset (f, 0, sizeof (*f));
   f->table = t;
@@ -553,7 +554,8 @@ new_macro_definition (struct macro_table *t,
                       int argc, const char **argv,
                       const char *replacement)
 {
-  struct macro_definition *d = macro_alloc (sizeof (*d), t);
+  struct macro_definition *d
+    = (struct macro_definition *) macro_alloc (sizeof (*d), t);
 
   memset (d, 0, sizeof (*d));
   d->table = t;
@@ -568,7 +570,7 @@ new_macro_definition (struct macro_table *t,
       int cached_argv_size = argc * sizeof (*cached_argv);
 
       /* Bcache all the arguments.  */
-      cached_argv = alloca (cached_argv_size);
+      cached_argv = (const char **) alloca (cached_argv_size);
       for (i = 0; i < argc; i++)
         cached_argv[i] = macro_bcache_str (t, argv[i]);
 

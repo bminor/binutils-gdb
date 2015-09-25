@@ -1228,7 +1228,7 @@ spu2ppu_prev_register (struct frame_info *this_frame,
   struct gdbarch *gdbarch = get_regcache_arch (cache->regcache);
   gdb_byte *buf;
 
-  buf = alloca (register_size (gdbarch, regnum));
+  buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
   regcache_cooked_read (cache->regcache, regnum, buf);
   return frame_unwind_got_bytes (this_frame, regnum, buf);
 }
@@ -1827,7 +1827,7 @@ spu_get_overlay_table (struct objfile *objfile)
   ovly_buf_table_base = BMSYMBOL_VALUE_ADDRESS (ovly_buf_table_msym);
   ovly_buf_table_size = MSYMBOL_SIZE (ovly_buf_table_msym.minsym);
 
-  ovly_table = xmalloc (ovly_table_size);
+  ovly_table = (gdb_byte *) xmalloc (ovly_table_size);
   read_memory (ovly_table_base, ovly_table, ovly_table_size);
 
   tbl = OBSTACK_CALLOC (&objfile->objfile_obstack,

@@ -2324,7 +2324,7 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
       return;
     }
 
-  buf = obstack_alloc (&objfile->objfile_obstack, info->size);
+  buf = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, info->size);
   info->buffer = buf;
 
   /* When debugging .o files, we may need to apply relocations; see
@@ -4806,9 +4806,9 @@ add_type_unit (ULONGEST sig, void **slot)
 	dwarf2_per_objfile->n_allocated_type_units = 1;
       dwarf2_per_objfile->n_allocated_type_units *= 2;
       dwarf2_per_objfile->all_type_units
-	= xrealloc (dwarf2_per_objfile->all_type_units,
-		    dwarf2_per_objfile->n_allocated_type_units
-		    * sizeof (struct signatured_type *));
+	= XRESIZEVEC (struct signatured_type *,
+		      dwarf2_per_objfile->all_type_units,
+		      dwarf2_per_objfile->n_allocated_type_units);
       ++dwarf2_per_objfile->tu_stats.nr_all_type_units_reallocs;
     }
   dwarf2_per_objfile->n_type_units = n_type_units;
@@ -6571,9 +6571,8 @@ read_comp_units_from_section (struct objfile *objfile,
       if (*n_comp_units == *n_allocated)
 	{
 	  *n_allocated *= 2;
-	  *all_comp_units = xrealloc (*all_comp_units,
-				      *n_allocated
-				      * sizeof (struct dwarf2_per_cu_data *));
+	  *all_comp_units = XRESIZEVEC (struct dwarf2_per_cu_data *,
+					*all_comp_units, *n_allocated);
 	}
       (*all_comp_units)[*n_comp_units] = this_cu;
       ++*n_comp_units;
@@ -7829,9 +7828,9 @@ fixup_go_packaging (struct dwarf2_cu *cu)
     {
       struct objfile *objfile = cu->objfile;
       const char *saved_package_name
-	= obstack_copy0 (&objfile->per_bfd->storage_obstack,
-			 package_name,
-			 strlen (package_name));
+	= (const char *) obstack_copy0 (&objfile->per_bfd->storage_obstack,
+					package_name,
+					strlen (package_name));
       struct type *type = init_type (TYPE_CODE_MODULE, 0, 0,
 				     saved_package_name, objfile);
       struct symbol *sym;
@@ -8649,9 +8648,10 @@ dwarf2_compute_name (const char *name,
 	     INTERMEDIATE_NAME is already canonical, then we need to
 	     copy it to the appropriate obstack.  */
 	  if (canonical_name == NULL || canonical_name == intermediate_name)
-	    name = obstack_copy0 (&objfile->per_bfd->storage_obstack,
-				  intermediate_name,
-				  strlen (intermediate_name));
+	    name = ((const char *)
+		    obstack_copy0 (&objfile->per_bfd->storage_obstack,
+				   intermediate_name,
+				   strlen (intermediate_name)));
 	  else
 	    name = canonical_name;
 
@@ -8777,8 +8777,9 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
     retval = canon;
 
   if (need_copy)
-    retval = obstack_copy0 (&objfile->per_bfd->storage_obstack,
-			    retval, strlen (retval));
+    retval = ((const char *)
+	      obstack_copy0 (&objfile->per_bfd->storage_obstack,
+			     retval, strlen (retval)));
 
   do_cleanups (back_to);
   return retval;
@@ -10105,9 +10106,10 @@ create_dwo_unit_in_dwp_v1 (struct dwp_file *dwp_file,
 			      virtual_dwo_name);
 	}
       dwo_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_file);
-      dwo_file->dwo_name = obstack_copy0 (&objfile->objfile_obstack,
-					  virtual_dwo_name,
-					  strlen (virtual_dwo_name));
+      dwo_file->dwo_name
+	= (const char *) obstack_copy0 (&objfile->objfile_obstack,
+					virtual_dwo_name,
+					strlen (virtual_dwo_name));
       dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev = sections.abbrev;
       dwo_file->sections.line = sections.line;
@@ -10306,9 +10308,10 @@ create_dwo_unit_in_dwp_v2 (struct dwp_file *dwp_file,
 			      virtual_dwo_name);
 	}
       dwo_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_file);
-      dwo_file->dwo_name = obstack_copy0 (&objfile->objfile_obstack,
-					  virtual_dwo_name,
-					  strlen (virtual_dwo_name));
+      dwo_file->dwo_name
+	= (const char *) obstack_copy0 (&objfile->objfile_obstack,
+					virtual_dwo_name,
+					strlen (virtual_dwo_name));
       dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev =
 	create_dwp_v2_section (&dwp_file->sections.abbrev,
@@ -11393,8 +11396,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_static_link, cu);
   if (attr)
     {
-      newobj->static_link = obstack_alloc (&objfile->objfile_obstack,
-					sizeof (*newobj->static_link));
+      newobj->static_link
+	= XOBNEW (&objfile->objfile_obstack, struct dynamic_prop);
       attr_to_dynamic_prop (attr, die, cu, newobj->static_link);
     }
 
@@ -11615,10 +11618,11 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       nparams++;
     }
 
-  call_site = obstack_alloc (&objfile->objfile_obstack,
-			     (sizeof (*call_site)
-			      + (sizeof (*call_site->parameter)
-				 * (nparams - 1))));
+  call_site
+    = ((struct call_site *)
+       obstack_alloc (&objfile->objfile_obstack,
+		      sizeof (*call_site)
+		      + (sizeof (*call_site->parameter) * (nparams - 1))));
   *slot = call_site;
   memset (call_site, 0, sizeof (*call_site) - sizeof (*call_site->parameter));
   call_site->pc = pc;
@@ -12692,7 +12696,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
       unsigned char *pointer;
 
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
-      pointer = TYPE_ALLOC (type, num_bytes);
+      pointer = (unsigned char *) TYPE_ALLOC (type, num_bytes);
       TYPE_FIELD_VIRTUAL_BITS (type) = pointer;
       B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), fip->nbaseclasses);
       TYPE_N_BASECLASSES (type) = fip->nbaseclasses;
@@ -13383,7 +13387,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
 	  TYPE_TYPEDEF_FIELD_ARRAY (type)
-	    = TYPE_ALLOC (type, sizeof (TYPE_TYPEDEF_FIELD (type, 0)) * i);
+	    = ((struct typedef_field *)
+	       TYPE_ALLOC (type, sizeof (TYPE_TYPEDEF_FIELD (type, 0)) * i));
 	  TYPE_TYPEDEF_FIELD_COUNT (type) = i;
 
 	  /* Reverse the list order to keep the debug info elements order.  */
@@ -13904,7 +13909,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
   else
     baton->size += DW_BLOCK (member_loc)->size;
 
-  ptr = obstack_alloc (&objfile->objfile_obstack, baton->size);
+  ptr = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, baton->size);
   baton->data = ptr;
 
   *ptr++ = DW_OP_call4;
@@ -13980,7 +13985,9 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 
       size = (sizeof (struct common_block)
 	      + (n_entries - 1) * sizeof (struct symbol *));
-      common_block = obstack_alloc (&objfile->objfile_obstack, size);
+      common_block
+	= (struct common_block *) obstack_alloc (&objfile->objfile_obstack,
+						 size);
       memset (common_block->contents, 0, n_entries * sizeof (struct symbol *));
       common_block->n_entries = 0;
 
@@ -15360,8 +15367,7 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
 	    {
 	      allocated_attrs += ATTR_ALLOC_CHUNK;
 	      cur_attrs
-		= xrealloc (cur_attrs, (allocated_attrs
-					* sizeof (struct attr_abbrev)));
+		= XRESIZEVEC (struct attr_abbrev, cur_attrs, allocated_attrs);
 	    }
 
 	  cur_attrs[cur_abbrev->num_attrs].name
@@ -16098,9 +16104,10 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
 	  if (actual_class_name != NULL)
 	    {
 	      struct_pdi->name
-		= obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
-				 actual_class_name,
-				 strlen (actual_class_name));
+		= ((const char *)
+		   obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
+				  actual_class_name,
+				  strlen (actual_class_name)));
 	      xfree (actual_class_name);
 	    }
 	  break;
@@ -16185,8 +16192,9 @@ fixup_partial_die (struct partial_die_info *part_die,
 	    base = demangled;
 
 	  part_die->name
-	    = obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
-			     base, strlen (base));
+	    = ((const char *)
+	       obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
+			      base, strlen (base)));
 	  xfree (demangled);
 	}
     }
@@ -17233,9 +17241,8 @@ add_file_name (struct line_header *lh,
   else if (lh->num_file_names >= lh->file_names_size)
     {
       lh->file_names_size *= 2;
-      lh->file_names = xrealloc (lh->file_names,
-                                 (lh->file_names_size
-                                  * sizeof (*lh->file_names)));
+      lh->file_names
+	= XRESIZEVEC (struct file_entry, lh->file_names, lh->file_names_size);
     }
 
   fe = &lh->file_names[lh->num_file_names++];
@@ -18703,7 +18710,7 @@ dwarf2_const_value_data (const struct attribute *attr, struct obstack *obstack,
     *value = l;
   else
     {
-      gdb_byte *bytes = obstack_alloc (obstack, bits / 8);
+      gdb_byte *bytes = (gdb_byte *) obstack_alloc (obstack, bits / 8);
       store_unsigned_integer (bytes, bits / 8, byte_order, l);
       return bytes;
     }
@@ -18753,7 +18760,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 	gdb_assert ((*baton)->per_cu);
 
 	(*baton)->size = 2 + cu_header->addr_size;
-	data = obstack_alloc (obstack, (*baton)->size);
+	data = (gdb_byte *) obstack_alloc (obstack, (*baton)->size);
 	(*baton)->data = data;
 
 	data[0] = DW_OP_addr;
@@ -18947,8 +18954,8 @@ build_error_marker_type (struct dwarf2_cu *cu, struct die_info *die)
 			objfile_name (objfile),
 			cu->header.offset.sect_off,
 			die->offset.sect_off);
-  saved = obstack_copy0 (&objfile->objfile_obstack,
-			 message, strlen (message));
+  saved = (char *) obstack_copy0 (&objfile->objfile_obstack,
+				  message, strlen (message));
   xfree (message);
 
   return init_type (TYPE_CODE_ERROR, 0, 0, saved, objfile);
@@ -19187,10 +19194,9 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
 		      if (actual_name_len > die_name_len + 2
 			  && actual_name[actual_name_len
 					 - die_name_len - 1] == ':')
-			name =
-			  obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
-					 actual_name,
-					 actual_name_len - die_name_len - 2);
+			name = (char *) obstack_copy0 (
+			  &cu->objfile->per_bfd->storage_obstack,
+			  actual_name, actual_name_len - die_name_len - 2);
 		    }
 		}
 	      xfree (actual_name);
@@ -19233,8 +19239,9 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
   if (base == NULL || base == DW_STRING (attr) || base[-1] != ':')
     return "";
 
-  return obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
-			DW_STRING (attr), &base[-1] - DW_STRING (attr));
+  return (char *) obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
+				 DW_STRING (attr),
+				 &base[-1] - DW_STRING (attr));
 }
 
 /* Return the name of the namespace/class that DIE is defined within,
@@ -19448,7 +19455,8 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
   if (obs == NULL)
     {
       char *retval
-	= xmalloc (strlen (prefix) + MAX_SEP_LEN + strlen (suffix) + 1);
+	= ((char *)
+	   xmalloc (strlen (prefix) + MAX_SEP_LEN + strlen (suffix) + 1));
 
       strcpy (retval, lead);
       strcat (retval, prefix);
@@ -19484,7 +19492,8 @@ dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
       if (canon_name != NULL)
 	{
 	  if (strcmp (canon_name, name) != 0)
-	    name = obstack_copy0 (obstack, canon_name, strlen (canon_name));
+	    name = (const char *) obstack_copy0 (obstack, canon_name,
+						 strlen (canon_name));
 	  xfree (canon_name);
 	}
     }
@@ -19593,8 +19602,9 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 
 	      /* FIXME: we already did this for the partial symbol... */
 	      DW_STRING (attr)
-		= obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
-				 demangled, strlen (demangled));
+		= ((const char *)
+		   obstack_copy0 (&cu->objfile->per_bfd->storage_obstack,
+				  demangled, strlen (demangled)));
 	      DW_STRING_IS_CANONICAL (attr) = 1;
 	      xfree (demangled);
 
@@ -20122,7 +20132,7 @@ write_constant_as_bytes (struct obstack *obstack,
   gdb_byte *result;
 
   *len = TYPE_LENGTH (type);
-  result = obstack_alloc (obstack, *len);
+  result = (gdb_byte *) obstack_alloc (obstack, *len);
   store_unsigned_integer (result, *len, byte_order, value);
 
   return result;
@@ -20181,7 +20191,7 @@ dwarf2_fetch_constant_bytes (sect_offset offset,
 	gdb_byte *tem;
 
 	*len = cu->header.addr_size;
-	tem = obstack_alloc (obstack, *len);
+	tem = (gdb_byte *) obstack_alloc (obstack, *len);
 	store_unsigned_integer (tem, *len, byte_order, DW_ADDR (attr));
 	result = tem;
       }
@@ -20911,7 +20921,7 @@ macro_start_file (int file, int line,
 static char *
 copy_string (const char *buf, int len)
 {
-  char *s = xmalloc (len + 1);
+  char *s = (char *) xmalloc (len + 1);
 
   memcpy (s, buf, len);
   s[len] = '\0';
@@ -21022,7 +21032,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
               if (argc >= argv_size)
                 {
                   argv_size *= 2;
-                  argv = xrealloc (argv, argv_size * sizeof (*argv));
+                  argv = XRESIZEVEC (char *, argv, argv_size);
                 }
 
               argv[argc++] = copy_string (arg_start, p - arg_start);

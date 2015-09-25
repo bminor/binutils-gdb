@@ -1985,7 +1985,7 @@ get_prev_frame_always (struct frame_info *this_frame)
 	         pointer to the frame, this allows the STOP_STRING on the
 	         frame to be of type 'const char *'.  */
 	      size = strlen (ex.message) + 1;
-	      stop_string = frame_obstack_zalloc (size);
+	      stop_string = (char *) frame_obstack_zalloc (size);
 	      memcpy (stop_string, ex.message, size);
 	      this_frame->stop_string = stop_string;
 	    }

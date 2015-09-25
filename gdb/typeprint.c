@@ -297,8 +297,9 @@ find_global_typedef (const struct type_print_options *flags,
 
   if (applied != NULL)
     {
-      new_tf->name = obstack_copy0 (&flags->global_typedefs->storage, applied,
-				    strlen (applied));
+      new_tf->name
+	= (const char *) obstack_copy0 (&flags->global_typedefs->storage,
+					applied, strlen (applied));
       xfree (applied);
     }
 

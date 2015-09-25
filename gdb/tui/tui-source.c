@@ -62,7 +62,7 @@ tui_set_source_content (struct symtab *s,
 	      if (!noerror)
 		{
 		  const char *filename = symtab_to_filename_for_display (s);
-		  char *name = alloca (strlen (filename) + 100);
+		  char *name = (char *) alloca (strlen (filename) + 100);
 
 		  sprintf (name, "%s:%d", filename, line_no);
 		  print_sys_errmsg (name, errno);

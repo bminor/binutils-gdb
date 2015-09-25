@@ -132,7 +132,7 @@ perf_event_read (const struct perf_event_buffer *pev, __u64 data_head,
   start = begin + data_tail % buffer_size;
   stop = begin + data_head % buffer_size;
 
-  buffer = xmalloc (size);
+  buffer = (gdb_byte *) xmalloc (size);
 
   if (start < stop)
     memcpy (buffer, start, stop - start);
@@ -729,7 +729,8 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 	continue;
 
       /* The number of pages we request needs to be a power of two.  */
-      header = mmap (NULL, length, PROT_READ, MAP_SHARED, bts->file, 0);
+      header = ((struct perf_event_mmap_page *)
+		mmap (NULL, length, PROT_READ, MAP_SHARED, bts->file, 0));
       if (header != MAP_FAILED)
 	break;
     }

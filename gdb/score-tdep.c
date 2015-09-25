@@ -825,7 +825,7 @@ score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
   else if (size == 0)
     return NULL;
 
-  memblock = xmalloc (size);
+  memblock = (gdb_byte *) xmalloc (size);
   memset (memblock, 0, size);
   ret = target_read_memory (addr & ~0x3, memblock, size);
   if (ret)

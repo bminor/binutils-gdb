@@ -777,7 +777,7 @@ i386_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = xmalloc (len);
+  gdb_byte *buf = (gdb_byte *) xmalloc (len);
 
   read_memory (from, buf, len);
 
@@ -4051,7 +4051,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	return 0;
 
       len = s - start - 1;
-      regname = alloca (len + 1);
+      regname = (char *) alloca (len + 1);
 
       strncpy (regname, start, len);
       regname[len] = '\0';
@@ -4161,7 +4161,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	return 0;
 
       len_base = s - start;
-      base = alloca (len_base + 1);
+      base = (char *) alloca (len_base + 1);
       strncpy (base, start, len_base);
       base[len_base] = '\0';
 
@@ -4176,7 +4176,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	++s;
 
       len_index = s - start;
-      index = alloca (len_index + 1);
+      index = (char *) alloca (len_index + 1);
       strncpy (index, start, len_index);
       index[len_index] = '\0';
 

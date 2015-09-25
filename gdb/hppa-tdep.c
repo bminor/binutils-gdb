@@ -261,7 +261,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
       struct gdbarch *gdbarch = get_objfile_arch (objfile);
       unsigned long tmp;
       unsigned i;
-      char *buf = alloca (size);
+      char *buf = (char *) alloca (size);
       CORE_ADDR low_text_segment_address;
 
       /* For ELF targets, then unwinds are supposed to
@@ -434,7 +434,7 @@ read_unwind_info (struct objfile *objfile)
   if (stub_unwind_size > 0)
     {
       unsigned int i;
-      char *buf = alloca (stub_unwind_size);
+      char *buf = (char *) alloca (stub_unwind_size);
 
       /* Read in the stub unwind entries.  */
       bfd_get_section_contents (objfile->obfd, stub_unwind_sec, buf,

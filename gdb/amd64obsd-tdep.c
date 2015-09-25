@@ -114,7 +114,7 @@ amd64obsd_sigtramp_p (struct frame_info *this_frame)
     return 0;
 
   /* If we can't read the instructions at START_PC, return zero.  */
-  buf = alloca ((sizeof sigreturn) + 1);
+  buf = (gdb_byte *) alloca ((sizeof sigreturn) + 1);
   if (!safe_frame_unwind_memory (this_frame, start_pc + 6, buf, buflen))
     return 0;
 

@@ -948,8 +948,8 @@ add_memrange (struct collection_list *memranges,
   if (memranges->next_memrange >= memranges->listsize)
     {
       memranges->listsize *= 2;
-      memranges->list = xrealloc (memranges->list,
-				  memranges->listsize);
+      memranges->list = (struct memrange *) xrealloc (memranges->list,
+						      memranges->listsize);
     }
 
   if (type != memrange_absolute)    /* Better collect the base register!  */
@@ -1244,12 +1244,10 @@ init_collection_list (struct collection_list *clist)
   memset (clist, 0, sizeof *clist);
 
   clist->listsize = 128;
-  clist->list = xcalloc (clist->listsize,
-			 sizeof (struct memrange));
+  clist->list = XCNEWVEC (struct memrange, clist->listsize);
 
   clist->aexpr_listsize = 128;
-  clist->aexpr_list = xcalloc (clist->aexpr_listsize,
-			       sizeof (struct agent_expr *));
+  clist->aexpr_list = XCNEWVEC (struct agent_expr *, clist->aexpr_listsize);
 }
 
 /* Reduce a collection list to string form (for gdb protocol).  */
@@ -1708,9 +1706,9 @@ add_aexpr (struct collection_list *collect, struct agent_expr *aexpr)
 {
   if (collect->next_aexpr_elt >= collect->aexpr_listsize)
     {
-      collect->aexpr_list =
-	xrealloc (collect->aexpr_list,
-		  2 * collect->aexpr_listsize * sizeof (struct agent_expr *));
+      collect->aexpr_list = XRESIZEVEC (struct agent_expr *,
+					collect->aexpr_list,
+					2 * collect->aexpr_listsize);
       collect->aexpr_listsize *= 2;
     }
   collect->aexpr_list[collect->next_aexpr_elt] = aexpr;
@@ -2947,7 +2945,7 @@ trace_dump_actions (struct command_line *action,
 			{
 			  size_t len = next_comma - action_exp;
 
-			  cmd = xrealloc (cmd, len + 1);
+			  cmd = (char *) xrealloc (cmd, len + 1);
 			  memcpy (cmd, action_exp, len);
 			  cmd[len] = 0;
 			}
@@ -2955,7 +2953,7 @@ trace_dump_actions (struct command_line *action,
 			{
 			  size_t len = strlen (action_exp);
 
-			  cmd = xrealloc (cmd, len + 1);
+			  cmd = (char *) xrealloc (cmd, len + 1);
 			  memcpy (cmd, action_exp, len + 1);
 			}
 
@@ -3627,7 +3625,7 @@ Status line: '%s'\n"), p, line);
 	    }
 	  else if (p2 != p1)
 	    {
-	      ts->stop_desc = xmalloc (strlen (line));
+	      ts->stop_desc = (char *) xmalloc (strlen (line));
 	      end = hex2bin (p1, (gdb_byte *) ts->stop_desc, (p2 - p1) / 2);
 	      ts->stop_desc[end] = '\0';
 	    }
@@ -3647,7 +3645,7 @@ Status line: '%s'\n"), p, line);
 	  p2 = strchr (++p1, ':');
 	  if (p2 != p1)
 	    {
-	      ts->stop_desc = xmalloc ((p2 - p1) / 2 + 1);
+	      ts->stop_desc = (char *) xmalloc ((p2 - p1) / 2 + 1);
 	      end = hex2bin (p1, (gdb_byte *) ts->stop_desc, (p2 - p1) / 2);
 	      ts->stop_desc[end] = '\0';
 	    }
@@ -3701,7 +3699,7 @@ Status line: '%s'\n"), p, line);
       else if (strncmp (p, "username", p1 - p) == 0)
 	{
 	  ++p1;
-	  ts->user_name = xmalloc (strlen (p) / 2);
+	  ts->user_name = (char *) xmalloc (strlen (p) / 2);
 	  end = hex2bin (p1, (gdb_byte *) ts->user_name, (p3 - p1)  / 2);
 	  ts->user_name[end] = '\0';
 	  p = p3;
@@ -3709,7 +3707,7 @@ Status line: '%s'\n"), p, line);
       else if (strncmp (p, "notes", p1 - p) == 0)
 	{
 	  ++p1;
-	  ts->notes = xmalloc (strlen (p) / 2);
+	  ts->notes = (char *) xmalloc (strlen (p) / 2);
 	  end = hex2bin (p1, (gdb_byte *) ts->notes, (p3 - p1) / 2);
 	  ts->notes[end] = '\0';
 	  p = p3;
@@ -3836,7 +3834,7 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
       p = unpack_varlen_hex (p, &xlen);
       p++;  /* skip a colon */
 
-      buf = alloca (strlen (line));
+      buf = (char *) alloca (strlen (line));
 
       end = hex2bin (p, (gdb_byte *) buf, strlen (p) / 2);
       buf[end] = '\0';
@@ -3873,7 +3871,7 @@ parse_tsv_definition (char *line, struct uploaded_tsv **utsvp)
   int end;
   struct uploaded_tsv *utsv = NULL;
 
-  buf = alloca (strlen (line));
+  buf = (char *) alloca (strlen (line));
 
   p = line;
   p = unpack_varlen_hex (p, &num);
@@ -3929,14 +3927,14 @@ parse_static_tracepoint_marker_definition (char *line, char **pp,
   if (endp == NULL)
     error (_("bad marker definition: %s"), line);
 
-  marker->str_id = xmalloc (endp - p + 1);
+  marker->str_id = (char *) xmalloc (endp - p + 1);
   end = hex2bin (p, (gdb_byte *) marker->str_id, (endp - p + 1) / 2);
   marker->str_id[end] = '\0';
 
   p += 2 * end;
   p++;  /* skip a colon */
 
-  marker->extra = xmalloc (strlen (p) + 1);
+  marker->extra = (char *) xmalloc (strlen (p) + 1);
   end = hex2bin (p, (gdb_byte *) marker->extra, strlen (p) / 2);
   marker->extra[end] = '\0';
 

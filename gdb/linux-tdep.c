@@ -997,7 +997,7 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
   if (note_size < 2 * addr_size)
     error (_("malformed core note - too short for header"));
 
-  contents = xmalloc (note_size);
+  contents = (unsigned char *) xmalloc (note_size);
   cleanup = make_cleanup (xfree, contents);
   if (!bfd_get_section_contents (core_bfd, section, contents, 0, note_size))
     error (_("could not get core note contents"));
@@ -1562,7 +1562,7 @@ linux_collect_regset_section_cb (const char *sect_name, int size,
 
   gdb_assert (regset && regset->collect_regset);
 
-  buf = xmalloc (size);
+  buf = (char *) xmalloc (size);
   regset->collect_regset (regset, data->regcache, -1, buf, size);
 
   /* PRSTATUS still needs to be treated specially.  */
@@ -1630,7 +1630,7 @@ linux_get_siginfo_data (struct gdbarch *gdbarch, LONGEST *size)
   
   siginfo_type = gdbarch_get_siginfo_type (gdbarch);
 
-  buf = xmalloc (TYPE_LENGTH (siginfo_type));
+  buf = (gdb_byte *) xmalloc (TYPE_LENGTH (siginfo_type));
   cleanups = make_cleanup (xfree, buf);
 
   bytes_read = target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,

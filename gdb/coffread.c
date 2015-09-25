@@ -2104,7 +2104,8 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = newobj;
 
 	  /* Save the data.  */
-	  list->field.name = obstack_copy0 (&objfile->objfile_obstack,
+	  list->field.name
+	    = (const char *) obstack_copy0 (&objfile->objfile_obstack,
 					    name, strlen (name));
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type,
 						  &sub_aux, objfile);
@@ -2121,7 +2122,8 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = newobj;
 
 	  /* Save the data.  */
-	  list->field.name = obstack_copy0 (&objfile->objfile_obstack,
+	  list->field.name
+	    = (const char *) obstack_copy0 (&objfile->objfile_obstack,
 					    name, strlen (name));
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type,
 						  &sub_aux, objfile);
@@ -2192,9 +2194,9 @@ coff_read_enum_type (int index, int length, int lastsym,
 	case C_MOE:
 	  sym = allocate_symbol (objfile);
 
-	  SYMBOL_SET_LINKAGE_NAME (sym,
-				   obstack_copy0 (&objfile->objfile_obstack,
-						  name, strlen (name)));
+	  name = (char *) obstack_copy0 (&objfile->objfile_obstack, name,
+					 strlen (name));
+	  SYMBOL_SET_LINKAGE_NAME (sym, name);
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;

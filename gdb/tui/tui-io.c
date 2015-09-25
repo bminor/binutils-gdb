@@ -671,7 +671,7 @@ tui_expand_tabs (const char *string, int col)
     }
 
   /* Allocate the copy.  */
-  ret = q = xmalloc (strlen (string) + n_adjust + 1);
+  ret = q = (char *) xmalloc (strlen (string) + n_adjust + 1);
 
   /* 2. Copy the original string while replacing TABs with spaces.  */
   for (ncol = col, s = string; s; )

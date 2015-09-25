@@ -79,8 +79,8 @@ cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
 			      ? 0 : previous_component - 2);
 	      int src_len = next_component;
 
-	      char *dest = alloca (dest_len + 1);
-	      char *src = alloca (src_len + 1);
+	      char *dest = (char *) alloca (dest_len + 1);
+	      char *src = (char *) alloca (src_len + 1);
 
 	      memcpy (dest, name, dest_len);
 	      memcpy (src, name, src_len);
@@ -308,8 +308,8 @@ cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
 
   if (the_namespace[0] != '\0')
     {
-      concatenated_name = alloca (strlen (the_namespace) + 2
-				  + strlen (name) + 1);
+      concatenated_name
+	= (char *) alloca (strlen (the_namespace) + 2 + strlen (name) + 1);
       strcpy (concatenated_name, the_namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, name);
@@ -740,7 +740,7 @@ lookup_namespace_scope (const struct language_defn *langdef,
   if (scope_len == 0 && strchr (name, ':') == NULL)
     return cp_lookup_bare_symbol (langdef, name, block, domain, 1);
 
-  the_namespace = alloca (scope_len + 1);
+  the_namespace = (char *) alloca (scope_len + 1);
   strncpy (the_namespace, scope, scope_len);
   the_namespace[scope_len] = '\0';
   return cp_lookup_symbol_in_namespace (the_namespace, name,
@@ -846,7 +846,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
 	continue;
 
       len = strlen (base_name) + 2 + strlen (name) + 1;
-      concatenated_name = xrealloc (concatenated_name, len);
+      concatenated_name = (char *) xrealloc (concatenated_name, len);
       xsnprintf (concatenated_name, len, "%s::%s", base_name, name);
 
       sym = cp_lookup_nested_symbol_1 (base_type, name, concatenated_name,
@@ -977,7 +977,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
 	int is_in_anonymous;
 
 	size = strlen (parent_name) + 2 + strlen (nested_name) + 1;
-	concatenated_name = alloca (size);
+	concatenated_name = (char *) alloca (size);
 	xsnprintf (concatenated_name, size, "%s::%s",
 		   parent_name, nested_name);
 	is_in_anonymous = cp_is_in_anonymous (concatenated_name);
@@ -1076,7 +1076,7 @@ cp_lookup_transparent_type_loop (const char *name,
 	return retval;
     }
 
-  full_name = alloca (scope_length + 2 + strlen (name) + 1);
+  full_name = (char *) alloca (scope_length + 2 + strlen (name) + 1);
   strncpy (full_name, scope, scope_length);
   strncpy (full_name + scope_length, "::", 2);
   strcpy (full_name + scope_length + 2, name);

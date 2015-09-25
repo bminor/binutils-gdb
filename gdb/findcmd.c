@@ -75,7 +75,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
   if (args == NULL)
     error (_("Missing search parameters."));
 
-  pattern_buf = xmalloc (pattern_buf_size);
+  pattern_buf = (gdb_byte *) xmalloc (pattern_buf_size);
   pattern_buf_end = pattern_buf;
   old_cleanups = make_cleanup (free_current_contents, &pattern_buf);
 
@@ -184,7 +184,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 	  size_t current_offset = pattern_buf_end - pattern_buf;
 
 	  pattern_buf_size = pattern_buf_size_need * 2;
-	  pattern_buf = xrealloc (pattern_buf, pattern_buf_size);
+	  pattern_buf = (gdb_byte *) xrealloc (pattern_buf, pattern_buf_size);
 	  pattern_buf_end = pattern_buf + current_offset;
 	}
 

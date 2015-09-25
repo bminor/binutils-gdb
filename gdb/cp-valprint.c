@@ -535,7 +535,7 @@ cp_print_value (struct type *type, struct type *real_type,
 		  gdb_byte *buf;
 		  struct cleanup *back_to;
 
-		  buf = xmalloc (TYPE_LENGTH (baseclass));
+		  buf = (gdb_byte *) xmalloc (TYPE_LENGTH (baseclass));
 		  back_to = make_cleanup (xfree, buf);
 
 		  if (target_read_memory (address + boffset, buf,

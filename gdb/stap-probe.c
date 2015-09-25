@@ -653,7 +653,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 
   len = p->arg - start;
 
-  regname = alloca (len + gdb_reg_prefix_len + gdb_reg_suffix_len + 1);
+  regname = (char *) alloca (len + gdb_reg_prefix_len + gdb_reg_suffix_len + 1);
   regname[0] = '\0';
 
   /* We only add the GDB's register prefix/suffix if we are dealing with

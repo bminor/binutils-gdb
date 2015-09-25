@@ -224,7 +224,7 @@ get_java_utf8_name (struct obstack *obstack, struct value *name)
   temp = value_struct_elt (&temp, NULL, "length", NULL, "structure");
   name_length = (int) value_as_long (temp);
   data_addr = value_address (temp) + TYPE_LENGTH (value_type (temp));
-  chrs = obstack_alloc (obstack, name_length + 1);
+  chrs = (char *) obstack_alloc (obstack, name_length + 1);
   chrs[name_length] = '\0';
   read_memory (data_addr, (gdb_byte *) chrs, name_length);
   return chrs;
@@ -314,7 +314,7 @@ type_from_class (struct gdbarch *gdbarch, struct value *clas)
       int namelen = java_demangled_signature_length (signature);
 
       if (namelen > strlen (name))
-	name = obstack_alloc (&objfile->objfile_obstack, namelen + 1);
+	name = (char *) obstack_alloc (&objfile->objfile_obstack, namelen + 1);
       java_demangled_signature_copy (name, signature);
       name[namelen] = '\0';
       temp = clas;
@@ -806,7 +806,7 @@ char *
 java_demangle_type_signature (const char *signature)
 {
   int length = java_demangled_signature_length (signature);
-  char *result = xmalloc (length + 1);
+  char *result = (char *) xmalloc (length + 1);
 
   java_demangled_signature_copy (result, signature);
   result[length] = '\0';
@@ -1059,7 +1059,7 @@ java_class_name_from_physname (const char *physname)
   end = java_find_last_component (demangled_name);
   if (end != NULL)
     {
-      ret = xmalloc (end - demangled_name + 1);
+      ret = (char *) xmalloc (end - demangled_name + 1);
       memcpy (ret, demangled_name, end - demangled_name);
       ret[end - demangled_name] = '\0';
     }

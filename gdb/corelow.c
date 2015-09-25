@@ -547,7 +547,7 @@ get_core_register_section (struct regcache *regcache,
 	       section_name);
     }
 
-  contents = alloca (size);
+  contents = (char *) alloca (size);
   if (! bfd_get_section_contents (core_bfd, section, contents,
 				  (file_ptr) 0, size))
     {

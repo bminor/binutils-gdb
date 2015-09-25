@@ -197,7 +197,7 @@ lm_info_read (CORE_ADDR lm_addr)
   struct lm_info *lm_info;
   struct cleanup *back_to;
 
-  lm = xmalloc (lmo->link_map_size);
+  lm = (gdb_byte *) xmalloc (lmo->link_map_size);
   back_to = make_cleanup (xfree, lm);
 
   if (target_read_memory (lm_addr, lm, lmo->link_map_size) != 0)
@@ -567,7 +567,7 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
     }
 
   /* Read in requested program header.  */
-  buf = xmalloc (sect_size);
+  buf = (gdb_byte *) xmalloc (sect_size);
   if (target_read_memory (sect_addr, buf, sect_size))
     {
       xfree (buf);
@@ -602,7 +602,7 @@ find_program_interpreter (void)
       {
 	int sect_size = bfd_section_size (exec_bfd, interp_sect);
 
-	buf = xmalloc (sect_size);
+	buf = (gdb_byte *) xmalloc (sect_size);
 	bfd_get_section_contents (exec_bfd, interp_sect, buf, 0, sect_size);
       }
    }
@@ -666,7 +666,7 @@ scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
   /* Read in .dynamic from the BFD.  We will get the actual value
      from memory later.  */
   sect_size = bfd_section_size (abfd, sect);
-  buf = bufstart = alloca (sect_size);
+  buf = bufstart = (gdb_byte *) alloca (sect_size);
   if (!bfd_get_section_contents (abfd, sect,
 				 buf, 0, sect_size))
     return 0;
@@ -811,7 +811,7 @@ elf_locate_base (void)
       gdb_byte *pbuf;
       int pbuf_size = TYPE_LENGTH (ptr_type);
 
-      pbuf = alloca (pbuf_size);
+      pbuf = (gdb_byte *) alloca (pbuf_size);
       /* DT_MIPS_RLD_MAP contains a pointer to the address
 	 of the dynamic link structure.  */
       if (target_read_memory (dyn_ptr, pbuf, pbuf_size))
@@ -829,7 +829,7 @@ elf_locate_base (void)
       gdb_byte *pbuf;
       int pbuf_size = TYPE_LENGTH (ptr_type);
 
-      pbuf = alloca (pbuf_size);
+      pbuf = (gdb_byte *) alloca (pbuf_size);
       /* DT_MIPS_RLD_MAP_REL contains an offset from the address of the
 	 DT slot to the address of the dynamic link structure.  */
       if (target_read_memory (dyn_ptr + dyn_ptr_addr, pbuf, pbuf_size))
@@ -1018,7 +1018,7 @@ open_symbol_file_object (void *from_ttyp)
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   int l_name_size = TYPE_LENGTH (ptr_type);
-  gdb_byte *l_name_buf = xmalloc (l_name_size);
+  gdb_byte *l_name_buf = (gdb_byte *) xmalloc (l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
   struct svr4_info *info = get_svr4_info ();
 
@@ -2569,7 +2569,7 @@ read_program_headers_from_bfd (bfd *abfd, int *phdrs_size)
   if (*phdrs_size == 0)
     return NULL;
 
-  buf = xmalloc (*phdrs_size);
+  buf = (gdb_byte *) xmalloc (*phdrs_size);
   if (bfd_seek (abfd, ehdr->e_phoff, SEEK_SET) != 0
       || bfd_bread (buf, *phdrs_size, abfd) != *phdrs_size)
     {
@@ -3033,8 +3033,8 @@ svr4_relocate_main_executable (void)
       struct section_offsets *new_offsets;
       int i;
 
-      new_offsets = alloca (symfile_objfile->num_sections
-			    * sizeof (*new_offsets));
+      new_offsets = XALLOCAVEC (struct section_offsets,
+				symfile_objfile->num_sections);
 
       for (i = 0; i < symfile_objfile->num_sections; i++)
 	new_offsets->offsets[i] = displacement;

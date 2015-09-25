@@ -386,7 +386,7 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   link_order.size = bfd_get_section_size (sect);
   link_order.u.indirect.section = sect;
 
-  sect_data = xmalloc (bfd_get_section_size (sect));
+  sect_data = (bfd_byte *) xmalloc (bfd_get_section_size (sect));
   make_cleanup (xfree, sect_data);
 
   sect_data_got = bfd_get_relocated_section_contents (abfd, &link_info,
@@ -718,7 +718,8 @@ compile_object_load (const char *object_file, const char *source_file,
   /* The memory may be later needed
      by bfd_generic_get_relocated_section_contents
      called from default_symfile_relocate.  */
-  symbol_table = obstack_alloc (&objfile->objfile_obstack, storage_needed);
+  symbol_table = (asymbol **) obstack_alloc (&objfile->objfile_obstack,
+					     storage_needed);
   number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
   if (number_of_symbols < 0)
     error (_("Cannot parse symbols of compiled module \"%s\": %s"),

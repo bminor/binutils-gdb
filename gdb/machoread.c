@@ -783,7 +783,7 @@ macho_check_dsym (struct objfile *objfile, char **filenamep)
   size_t dsym_len = strlen (DSYM_SUFFIX);
   const char *base_name = lbasename (objfile_name (objfile));
   size_t base_len = strlen (base_name);
-  char *dsym_filename = alloca (name_len + dsym_len + base_len + 1);
+  char *dsym_filename = (char *) alloca (name_len + dsym_len + base_len + 1);
   bfd *dsym_bfd;
   bfd_mach_o_load_command *main_uuid;
   bfd_mach_o_load_command *dsym_uuid;

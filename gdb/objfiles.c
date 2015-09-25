@@ -136,7 +136,9 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 	 enough that this seems reasonable.  */
       if (abfd != NULL && !gdb_bfd_requires_relocations (abfd))
 	{
-	  storage = bfd_zalloc (abfd, sizeof (struct objfile_per_bfd_storage));
+	  storage
+	    = ((struct objfile_per_bfd_storage *)
+	       bfd_zalloc (abfd, sizeof (struct objfile_per_bfd_storage)));
 	  set_bfd_data (abfd, objfiles_bfd_data, storage);
 	}
       else
@@ -195,7 +197,8 @@ set_objfile_main_name (struct objfile *objfile,
   if (objfile->per_bfd->name_of_main == NULL
       || strcmp (objfile->per_bfd->name_of_main, name) != 0)
     objfile->per_bfd->name_of_main
-      = obstack_copy0 (&objfile->per_bfd->storage_obstack, name, strlen (name));
+      = (const char *) obstack_copy0 (&objfile->per_bfd->storage_obstack, name,
+				      strlen (name));
   objfile->per_bfd->language_of_main = lang;
 }
 
@@ -392,9 +395,10 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
     expanded_name = xstrdup (name);
   else
     expanded_name = gdb_abspath (name);
-  objfile->original_name = obstack_copy0 (&objfile->objfile_obstack,
-					  expanded_name,
-					  strlen (expanded_name));
+  objfile->original_name
+    = (char *) obstack_copy0 (&objfile->objfile_obstack,
+			      expanded_name,
+			      strlen (expanded_name));
   xfree (expanded_name);
 
   /* Update the per-objfile information that comes from the bfd, ensuring
@@ -951,7 +955,8 @@ objfile_relocate (struct objfile *objfile,
       gdb_assert (debug_objfile->num_sections
 		  == gdb_bfd_count_sections (debug_objfile->obfd));
       new_debug_offsets = 
-	xmalloc (SIZEOF_N_SECTION_OFFSETS (debug_objfile->num_sections));
+	((struct section_offsets *)
+	 xmalloc (SIZEOF_N_SECTION_OFFSETS (debug_objfile->num_sections)));
       make_cleanup (xfree, new_debug_offsets);
       relative_addr_info_to_section_offsets (new_debug_offsets,
 					     debug_objfile->num_sections,
@@ -1399,7 +1404,7 @@ update_section_map (struct program_space *pspace,
 
   if (map_size < alloc_size)
     /* Some sections were eliminated.  Trim excess space.  */
-    map = xrealloc (map, map_size * sizeof (*map));
+    map = XRESIZEVEC (struct obj_section *, map, map_size);
   else
     gdb_assert (alloc_size == map_size);
 

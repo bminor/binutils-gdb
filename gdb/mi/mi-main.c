@@ -1493,7 +1493,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 
   /* Create a buffer and read it in.  */
   total_bytes = word_size * nr_rows * nr_cols;
-  mbuf = xcalloc (total_bytes, 1);
+  mbuf = XCNEWVEC (gdb_byte, total_bytes);
   make_cleanup (xfree, mbuf);
 
   /* Dispatch memory reads to the topmost target, not the flattened
@@ -1645,14 +1645,15 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
       struct cleanup *t = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       char *data, *p;
       int i;
+      int alloc_len;
 
       ui_out_field_core_addr (uiout, "begin", gdbarch, read_result->begin);
       ui_out_field_core_addr (uiout, "offset", gdbarch, read_result->begin
 			      - addr);
       ui_out_field_core_addr (uiout, "end", gdbarch, read_result->end);
 
-      data = xmalloc (
-	  (read_result->end - read_result->begin) * 2 * unit_size + 1);
+      alloc_len = (read_result->end - read_result->begin) * 2 * unit_size + 1;
+      data = (char *) xmalloc (alloc_len);
 
       for (i = 0, p = data;
 	   i < ((read_result->end - read_result->begin) * unit_size);
@@ -1790,7 +1791,7 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
   else
     count_units = len_units;
 
-  databuf = xmalloc (len_bytes * sizeof (gdb_byte));
+  databuf = XNEWVEC (gdb_byte, len_bytes);
   back_to = make_cleanup (xfree, databuf);
 
   for (i = 0; i < len_bytes; ++i)
@@ -1805,7 +1806,7 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
     {
       /* Pattern is made of less units than count:
          repeat pattern to fill memory.  */
-      data = xmalloc (count_units * unit_size);
+      data = (gdb_byte *) xmalloc (count_units * unit_size);
       make_cleanup (xfree, data);
 
       /* Number of times the pattern is entirely repeated.  */
@@ -2902,7 +2903,7 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
 
 	if (tsv != NULL)
 	  {
-	    tsvname = xrealloc (tsvname, strlen (tsv->name) + 2);
+	    tsvname = (char *) xrealloc (tsvname, strlen (tsv->name) + 2);
 	    tsvname[0] = '$';
 	    strcpy (tsvname + 1, tsv->name);
 	    ui_out_field_string (uiout, "name", tsvname);
@@ -2946,7 +2947,7 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
 	ui_out_field_core_addr (uiout, "address", gdbarch, r->start);
 	ui_out_field_int (uiout, "length", r->length);
 
-	data = xmalloc (r->length);
+	data = (gdb_byte *) xmalloc (r->length);
 	make_cleanup (xfree, data);
 
 	if (memory_contents)
@@ -2956,7 +2957,7 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
 		int m;
 		char *data_str, *p;
 
-		data_str = xmalloc (r->length * 2 + 1);
+		data_str = (char *) xmalloc (r->length * 2 + 1);
 		make_cleanup (xfree, data_str);
 
 		for (m = 0, p = data_str; m < r->length; ++m, p += 2)

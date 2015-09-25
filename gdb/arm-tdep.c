@@ -2230,7 +2230,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
     {
       exidx_vma = bfd_section_vma (objfile->obfd, exidx);
       exidx_size = bfd_get_section_size (exidx);
-      exidx_data = xmalloc (exidx_size);
+      exidx_data = (gdb_byte *) xmalloc (exidx_size);
       make_cleanup (xfree, exidx_data);
 
       if (!bfd_get_section_contents (objfile->obfd, exidx,
@@ -2246,7 +2246,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
     {
       extab_vma = bfd_section_vma (objfile->obfd, extab);
       extab_size = bfd_get_section_size (extab);
-      extab_data = xmalloc (extab_size);
+      extab_data = (gdb_byte *) xmalloc (extab_size);
       make_cleanup (xfree, extab_data);
 
       if (!bfd_get_section_contents (objfile->obfd, extab,
@@ -2383,8 +2383,9 @@ arm_exidx_new_objfile (struct objfile *objfile)
 	 extab section starting at ADDR.  */
       if (n_bytes || n_words)
 	{
-	  gdb_byte *p = entry = obstack_alloc (&objfile->objfile_obstack,
-					       n_bytes + n_words * 4 + 1);
+	  gdb_byte *p = entry
+	    = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack,
+					  n_bytes + n_words * 4 + 1);
 
 	  while (n_bytes--)
 	    *p++ = (gdb_byte) ((word >> (8 * n_bytes)) & 0xff);
@@ -3883,7 +3884,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  CORE_ADDR regval = extract_unsigned_integer (val, len, byte_order);
 	  if (arm_pc_is_thumb (gdbarch, regval))
 	    {
-	      bfd_byte *copy = alloca (len);
+	      bfd_byte *copy = (bfd_byte *) alloca (len);
 	      store_unsigned_integer (copy, len, byte_order,
 				      MAKE_THUMB_ADDR (regval));
 	      val = copy;
@@ -5325,7 +5326,7 @@ extend_buffer_earlier (gdb_byte *buf, CORE_ADDR endaddr,
   gdb_byte *new_buf;
   int bytes_to_read = new_len - old_len;
 
-  new_buf = xmalloc (new_len);
+  new_buf = (gdb_byte *) xmalloc (new_len);
   memcpy (new_buf + bytes_to_read, buf, old_len);
   xfree (buf);
   if (target_read_memory (endaddr - new_len, new_buf, bytes_to_read) != 0)
@@ -5391,7 +5392,7 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
     /* No room for an IT instruction.  */
     return bpaddr;
 
-  buf = xmalloc (buf_len);
+  buf = (gdb_byte *) xmalloc (buf_len);
   if (target_read_memory (bpaddr - buf_len, buf, buf_len) != 0)
     return bpaddr;
   any = 0;
@@ -9353,7 +9354,7 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
       else
 	target_len -= strlen ("_from_arm");
 
-      target_name = alloca (target_len + 1);
+      target_name = (char *) alloca (target_len + 1);
       memcpy (target_name, name + 2, target_len);
       target_name[target_len] = '\0';
 

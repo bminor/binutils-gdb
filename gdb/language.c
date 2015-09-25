@@ -568,8 +568,9 @@ add_language (const struct language_defn *lang)
 
   /* Build the language names array, to be used as enumeration in the
      set language" enum command.  */
-  language_names = xrealloc (language_names,
-			     (languages_size + 1) * sizeof (const char *));
+  language_names = XRESIZEVEC (const char *, language_names,
+			       languages_size + 1);
+
   for (i = 0; i < languages_size; ++i)
     language_names[i] = languages[i]->la_name;
   language_names[i] = NULL;

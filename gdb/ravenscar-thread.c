@@ -167,7 +167,7 @@ get_running_thread_id (void)
   object_addr = BMSYMBOL_VALUE_ADDRESS (object_msym);
   object_size = TYPE_LENGTH (builtin_type_void_data_ptr);
   buf_size = object_size;
-  buf = alloca (buf_size);
+  buf = (gdb_byte *) alloca (buf_size);
   read_memory (object_addr, buf, buf_size);
   return extract_typed_address (buf, builtin_type_void_data_ptr);
 }

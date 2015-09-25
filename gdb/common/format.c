@@ -99,7 +99,7 @@ parse_format_string (const char **arg)
 
   /* Need extra space for the '\0's.  Doubling the size is sufficient.  */
 
-  current_substring = xmalloc (strlen (string) * 2 + 1000);
+  current_substring = (char *) xmalloc (strlen (string) * 2 + 1000);
 
   max_pieces = strlen (string) + 2;
 

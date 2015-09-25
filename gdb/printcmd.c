@@ -2064,7 +2064,7 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   struct type *wctype = lookup_typename (current_language, gdbarch,
 					 "wchar_t", NULL, 0);
   int wcwidth = TYPE_LENGTH (wctype);
-  gdb_byte *buf = alloca (wcwidth);
+  gdb_byte *buf = (gdb_byte *) alloca (wcwidth);
   struct obstack output;
   struct cleanup *inner_cleanup;
 
@@ -2203,7 +2203,7 @@ printf_pointer (struct ui_file *stream, const char *format,
   long val = value_as_long (value);
 #endif
 
-  fmt = alloca (strlen (format) + 5);
+  fmt = (char *) alloca (strlen (format) + 5);
 
   /* Copy up to the leading %.  */
   p = format;

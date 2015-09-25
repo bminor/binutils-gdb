@@ -333,9 +333,9 @@ do_ui_file_xstrdup (void *context, const char *buffer, long length)
   struct accumulated_ui_file *acc = context;
 
   if (acc->buffer == NULL)
-    acc->buffer = xmalloc (length + 1);
+    acc->buffer = (char *) xmalloc (length + 1);
   else
-    acc->buffer = xrealloc (acc->buffer, acc->length + length + 1);
+    acc->buffer = (char *) xrealloc (acc->buffer, acc->length + length + 1);
   memcpy (acc->buffer + acc->length, buffer, length);
   acc->length += length;
   acc->buffer[acc->length] = '\0';
@@ -371,7 +371,7 @@ ui_file_obsavestring (struct ui_file *file, struct obstack *obstack,
   ui_file_put (file, do_ui_file_obsavestring, obstack);
   *length = obstack_object_size (obstack);
   obstack_1grow (obstack, '\0');
-  return obstack_finish (obstack);
+  return (char *) obstack_finish (obstack);
 }
 
 /* A pure memory based ``struct ui_file'' that can be used an output
@@ -468,7 +468,7 @@ mem_file_write (struct ui_file *file,
     {
       stream->length_buffer = length_buffer;
       stream->sizeof_buffer = length_buffer;
-      stream->buffer = xmalloc (stream->sizeof_buffer);
+      stream->buffer = (char *) xmalloc (stream->sizeof_buffer);
       memcpy (stream->buffer, buffer, length_buffer);
     }
   else
@@ -478,7 +478,8 @@ mem_file_write (struct ui_file *file,
       if (new_length >= stream->sizeof_buffer)
 	{
 	  stream->sizeof_buffer = new_length;
-	  stream->buffer = xrealloc (stream->buffer, stream->sizeof_buffer);
+	  stream->buffer
+	    = (char *) xrealloc (stream->buffer, stream->sizeof_buffer);
 	}
       memcpy (stream->buffer + stream->length_buffer, buffer, length_buffer);
       stream->length_buffer = new_length;

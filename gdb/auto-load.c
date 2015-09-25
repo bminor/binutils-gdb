@@ -408,9 +408,9 @@ filename_is_in_pattern (const char *filename, const char *pattern)
 {
   char *filename_copy, *pattern_copy;
 
-  filename_copy = alloca (strlen (filename) + 1);
+  filename_copy = (char *) alloca (strlen (filename) + 1);
   strcpy (filename_copy, filename);
-  pattern_copy = alloca (strlen (pattern) + 1);
+  pattern_copy = (char *) alloca (strlen (pattern) + 1);
   strcpy (pattern_copy, pattern);
 
   return filename_is_in_pattern_1 (filename_copy, pattern_copy);
@@ -693,9 +693,10 @@ maybe_add_script_file (struct auto_load_pspace_info *pspace_info, int loaded,
       char *p;
 
       /* Allocate all space in one chunk so it's easier to free.  */
-      *slot = xmalloc (sizeof (**slot)
-		       + strlen (name) + 1
-		       + (full_path != NULL ? (strlen (full_path) + 1) : 0));
+      *slot = ((struct loaded_script *)
+	       xmalloc (sizeof (**slot)
+			+ strlen (name) + 1
+			+ (full_path != NULL ? (strlen (full_path) + 1) : 0)));
       p = ((char*) *slot) + sizeof (**slot);
       strcpy (p, name);
       (*slot)->name = p;
@@ -740,7 +741,8 @@ maybe_add_script_text (struct auto_load_pspace_info *pspace_info,
       char *p;
 
       /* Allocate all space in one chunk so it's easier to free.  */
-      *slot = xmalloc (sizeof (**slot) + strlen (name) + 1);
+      *slot = ((struct loaded_script *)
+	       xmalloc (sizeof (**slot) + strlen (name) + 1));
       p = ((char*) *slot) + sizeof (**slot);
       strcpy (p, name);
       (*slot)->name = p;
@@ -787,7 +789,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
   const char *suffix = ext_lang_auto_load_suffix (language);
 
   len = strlen (realname);
-  filename = xmalloc (len + strlen (suffix) + 1);
+  filename = (char *) xmalloc (len + strlen (suffix) + 1);
   memcpy (filename, realname, len);
   strcpy (filename + len, suffix);
 
@@ -818,7 +820,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
       for (ix = 0; VEC_iterate (char_ptr, vec, ix, dir); ++ix)
 	{
-	  debugfile = xmalloc (strlen (dir) + strlen (filename) + 1);
+	  debugfile = (char *) xmalloc (strlen (dir) + strlen (filename) + 1);
 	  strcpy (debugfile, dir);
 
 	  /* FILENAME is absolute, so we don't need a "/" here.  */

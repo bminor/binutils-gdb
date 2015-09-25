@@ -429,7 +429,7 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
 	      return;
 	    }
 
-	  regs = alloca (register_size (gdbarch, pc_regno));
+	  regs = (gdb_byte *) alloca (register_size (gdbarch, pc_regno));
 	  store_unsigned_integer (regs, register_size (gdbarch, pc_regno),
 				  gdbarch_byte_order (gdbarch),
 				  tp->base.loc->address);

@@ -850,7 +850,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
     AMD64_XMM0_REGNUM + 4, AMD64_XMM0_REGNUM + 5,
     AMD64_XMM0_REGNUM + 6, AMD64_XMM0_REGNUM + 7,
   };
-  struct value **stack_args = alloca (nargs * sizeof (struct value *));
+  struct value **stack_args = XALLOCAVEC (struct value *, nargs);
   int num_stack_args = 0;
   int num_elements = 0;
   int element = 0;
@@ -1351,8 +1351,9 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   /* Extra space for sentinels so fixup_{riprel,displaced_copy} don't have to
      continually watch for running off the end of the buffer.  */
   int fixup_sentinel_space = len;
-  struct displaced_step_closure *dsc =
-    xmalloc (sizeof (*dsc) + len + fixup_sentinel_space);
+  struct displaced_step_closure *dsc
+    = ((struct displaced_step_closure *)
+       xmalloc (sizeof (*dsc) + len + fixup_sentinel_space));
   gdb_byte *buf = &dsc->insn_buf[0];
   struct amd64_insn *details = &dsc->insn_details;
 
@@ -1514,7 +1515,7 @@ amd64_classify_insn_at (struct gdbarch *gdbarch, CORE_ADDR addr,
   int len, classification;
 
   len = gdbarch_max_insn_length (gdbarch);
-  buf = alloca (len);
+  buf = (gdb_byte *) alloca (len);
 
   read_code (addr, buf, len);
   amd64_get_insn_details (buf, &details);
@@ -1711,7 +1712,7 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
   int len = gdbarch_max_insn_length (gdbarch);
   /* Extra space for sentinels.  */
   int fixup_sentinel_space = len;
-  gdb_byte *buf = xmalloc (len + fixup_sentinel_space);
+  gdb_byte *buf = (gdb_byte *) xmalloc (len + fixup_sentinel_space);
   struct amd64_insn insn_details;
   int offset = 0;
   LONGEST rel32, newrel;

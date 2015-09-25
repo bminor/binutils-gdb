@@ -379,7 +379,7 @@ go_demangle (const char *mangled_name, int options)
     }
   obstack_grow_str0 (&tempbuf, "");
 
-  result = xstrdup (obstack_finish (&tempbuf));
+  result = xstrdup ((const char *) obstack_finish (&tempbuf));
   obstack_free (&tempbuf, NULL);
   xfree (name_buf);
   return result;

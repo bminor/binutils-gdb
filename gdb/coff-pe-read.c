@@ -211,7 +211,7 @@ add_pe_forwarded_sym (const char *sym_name, const char *forward_dll_name,
   int forward_dll_name_len = strlen (forward_dll_name);
   int forward_func_name_len = strlen (forward_func_name);
   int forward_len = forward_dll_name_len + forward_func_name_len + 2;
-  char *forward_qualified_name = alloca (forward_len);
+  char *forward_qualified_name = (char *) alloca (forward_len);
   short section;
 
   xsnprintf (forward_qualified_name, forward_len, "%s!%s", forward_dll_name,
@@ -492,8 +492,8 @@ read_pe_exported_syms (struct objfile *objfile)
 	{
 	  char *name;
 
-	  section_data = xrealloc (section_data, (otherix + 1)
-				   * sizeof (struct read_pe_section_data));
+	  section_data = XRESIZEVEC (struct read_pe_section_data, section_data,
+				     otherix + 1);
 	  name = xstrdup (sec_name);
 	  section_data[otherix].section_name = name;
 	  make_cleanup (xfree, name);
@@ -575,7 +575,7 @@ read_pe_exported_syms (struct objfile *objfile)
 	    {
 	      int len = (int) (sep - forward_name);
 
-	      forward_dll_name = alloca (len + 1);
+	      forward_dll_name = (char *) alloca (len + 1);
 	      strncpy (forward_dll_name, forward_name, len);
 	      forward_dll_name[len] = '\0';
 	      forward_func_name = ++sep;

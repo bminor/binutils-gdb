@@ -2160,7 +2160,7 @@ mips_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
   /* Round ending address up; get number of longwords that makes.  */
   count = (((memaddr + len) - addr) + 3) / 4;
   /* Allocate buffer of that many longwords.  */
-  buffer = alloca (count * 4);
+  buffer = (gdb_byte *) alloca (count * 4);
 
   if (writebuf != NULL)
     {
@@ -2814,7 +2814,7 @@ mips_load_srec (const char *args)
   struct cleanup *cleanup;
   static int hashmark = 1;
 
-  buffer = alloca (srec_frame * 2 + 256);
+  buffer = (bfd_byte *) alloca (srec_frame * 2 + 256);
 
   abfd = gdb_bfd_open (args, NULL, -1);
   if (!abfd)
@@ -3322,7 +3322,8 @@ pmon_end_download (int final, int bintotal)
 	mips_send_command ("initEther\r", -1);
 
       /* Send the load command.  */
-      cmd = xmalloc (strlen (load_cmd_prefix) + strlen (tftp_name) + 2);
+      cmd = (char *) xmalloc (strlen (load_cmd_prefix)
+			      + strlen (tftp_name) + 2);
       strcpy (cmd, load_cmd_prefix);
       strcat (cmd, tftp_name);
       strcat (cmd, "\r");

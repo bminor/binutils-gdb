@@ -458,7 +458,7 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
      compressed section.  But, since note sections are not compressed,
      deferring the reading until we recognize the section avoids any
      error.  */
-  note = alloca (sectsize);
+  note = (char *) alloca (sectsize);
 
   /* .note.ABI-tag notes, used by GNU/Linux and FreeBSD.  */
   if (strcmp (name, ".note.ABI-tag") == 0)

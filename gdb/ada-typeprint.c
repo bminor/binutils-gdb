@@ -64,7 +64,7 @@ decoded_type_name (struct type *type)
       if (name_buffer == NULL || name_buffer_len <= strlen (raw_name))
 	{
 	  name_buffer_len = 16 + 2 * strlen (raw_name);
-	  name_buffer = xrealloc (name_buffer, name_buffer_len);
+	  name_buffer = (char *) xrealloc (name_buffer, name_buffer_len);
 	}
       strcpy (name_buffer, raw_name);
 

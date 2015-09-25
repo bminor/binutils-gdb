@@ -376,7 +376,7 @@ xml_list_of_syscalls (struct gdbarch *gdbarch)
     return NULL;
 
   nsyscalls = VEC_length (syscall_desc_p, syscalls_info->syscalls);
-  names = xmalloc ((nsyscalls + 1) * sizeof (char *));
+  names = XNEWVEC (const char *, nsyscalls + 1);
 
   for (i = 0;
        VEC_iterate (syscall_desc_p, syscalls_info->syscalls, i, sysdesc);

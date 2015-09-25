@@ -784,7 +784,7 @@ read_known_tasks_array (struct ada_tasks_inferior_data *data)
 {
   const int target_ptr_byte = TYPE_LENGTH (data->known_tasks_element);
   const int known_tasks_size = target_ptr_byte * data->known_tasks_length;
-  gdb_byte *known_tasks = alloca (known_tasks_size);
+  gdb_byte *known_tasks = (gdb_byte *) alloca (known_tasks_size);
   int i;
 
   /* Build a new list by reading the ATCBs from the Known_Tasks array
@@ -810,7 +810,7 @@ static int
 read_known_tasks_list (struct ada_tasks_inferior_data *data)
 {
   const int target_ptr_byte = TYPE_LENGTH (data->known_tasks_element);
-  gdb_byte *known_tasks = alloca (target_ptr_byte);
+  gdb_byte *known_tasks = (gdb_byte *) alloca (target_ptr_byte);
   CORE_ADDR task_id;
   const struct ada_tasks_pspace_data *pspace_data
     = get_ada_tasks_pspace_data (current_program_space);

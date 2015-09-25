@@ -1600,7 +1600,7 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = xmalloc (len);
+  gdb_byte *buf = (gdb_byte *) xmalloc (len);
   struct cleanup *old_chain = make_cleanup (xfree, buf);
 
   read_memory (from, buf, len);

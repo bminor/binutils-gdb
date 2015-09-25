@@ -687,8 +687,7 @@ wchar_iterate (struct wchar_iterator *iter,
 	      if (out_request > iter->out_size)
 		{
 		  iter->out_size = out_request;
-		  iter->out = xrealloc (iter->out,
-					out_request * sizeof (gdb_wchar_t));
+		  iter->out = XRESIZEVEC (gdb_wchar_t, iter->out, out_request);
 		}
 	      continue;
 

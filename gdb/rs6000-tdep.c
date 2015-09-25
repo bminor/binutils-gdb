@@ -992,7 +992,7 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = xmalloc (len);
+  gdb_byte *buf = (gdb_byte *) xmalloc (len);
   struct cleanup *old_chain = make_cleanup (xfree, buf);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int insn;
@@ -3613,7 +3613,7 @@ bfd_uses_spe_extensions (bfd *abfd)
     return 0;
 
   size = bfd_get_section_size (sect);
-  contents = xmalloc (size);
+  contents = (gdb_byte *) xmalloc (size);
   if (!bfd_get_section_contents (abfd, sect, contents, 0, size))
     {
       xfree (contents);

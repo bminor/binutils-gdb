@@ -131,9 +131,11 @@ init_register_cache (struct regcache *regcache,
 	 fetches.  This way they'll read as zero instead of
 	 garbage.  */
       regcache->tdesc = tdesc;
-      regcache->registers = xcalloc (1, tdesc->registers_size);
+      regcache->registers
+	= (unsigned char *) xcalloc (1, tdesc->registers_size);
       regcache->registers_owned = 1;
-      regcache->register_status = xcalloc (1, tdesc->num_registers);
+      regcache->register_status
+	= (unsigned char *) xcalloc (1, tdesc->num_registers);
       gdb_assert (REG_UNAVAILABLE == 0);
 #else
       gdb_assert_not_reached ("can't allocate memory from the heap");

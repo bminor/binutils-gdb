@@ -366,7 +366,7 @@ target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 	  for (i = 0; VEC_iterate (memory_write_request_s, garbled, i, r); ++i)
 	    {
 	      gdb_assert (r->data == NULL);
-	      r->data = xmalloc (r->end - r->begin);
+	      r->data = (gdb_byte *) xmalloc (r->end - r->begin);
 	      err = target_read_memory (r->begin, r->data, r->end - r->begin);
 	      if (err != 0)
 		goto out;

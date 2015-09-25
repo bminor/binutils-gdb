@@ -226,7 +226,7 @@ objc_demangle (const char *mangled, int options)
      (mangled[1] == 'i' || mangled[1] == 'c') &&
       mangled[2] == '_')
     {
-      cp = demangled = xmalloc(strlen(mangled) + 2);
+      cp = demangled = (char *) xmalloc (strlen (mangled) + 2);
 
       if (mangled[1] == 'i')
 	*cp++ = '-';		/* for instance method */
@@ -1006,7 +1006,7 @@ find_methods (char type, const char *theclass, const char *category,
 	  while ((strlen (symname) + 1) >= tmplen)
 	    {
 	      tmplen = (tmplen == 0) ? 1024 : tmplen * 2;
-	      tmp = xrealloc (tmp, tmplen);
+	      tmp = (char *) xrealloc (tmp, tmplen);
 	    }
 	  strcpy (tmp, symname);
 

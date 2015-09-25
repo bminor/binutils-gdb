@@ -926,7 +926,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 
   /* Small for testing.  */
   buffer_allocated = 4;
-  buffer = xmalloc (buffer_allocated);
+  buffer = (char *) xmalloc (buffer_allocated);
   bufptr = buffer;
 
   while (len > 0)
@@ -953,7 +953,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 
 	  bytes = bufptr - buffer;
 	  buffer_allocated *= 2;
-	  buffer = xrealloc (buffer, buffer_allocated);
+	  buffer = (char *) xrealloc (buffer, buffer_allocated);
 	  bufptr = buffer + bytes;
 	}
 
@@ -1655,7 +1655,7 @@ read_whatever_is_readable (struct target_ops *ops,
 			   int unit_size,
 			   VEC(memory_read_result_s) **result)
 {
-  gdb_byte *buf = xmalloc (end - begin);
+  gdb_byte *buf = (gdb_byte *) xmalloc (end - begin);
   ULONGEST current_begin = begin;
   ULONGEST current_end = end;
   int forward;
@@ -1755,7 +1755,7 @@ read_whatever_is_readable (struct target_ops *ops,
       /* The [current_end, end) range has been read.  */
       LONGEST region_len = end - current_end;
 
-      r.data = xmalloc (region_len * unit_size);
+      r.data = (gdb_byte *) xmalloc (region_len * unit_size);
       memcpy (r.data, buf + (current_end - begin) * unit_size,
 	      region_len * unit_size);
       r.begin = current_end;
@@ -1923,7 +1923,7 @@ target_read_alloc_1 (struct target_ops *ops, enum target_object object,
   /* Start by reading up to 4K at a time.  The target will throttle
      this number down if necessary.  */
   buf_alloc = 4096;
-  buf = xmalloc (buf_alloc);
+  buf = (gdb_byte *) xmalloc (buf_alloc);
   buf_pos = 0;
   while (1)
     {
@@ -1956,7 +1956,7 @@ target_read_alloc_1 (struct target_ops *ops, enum target_object object,
       if (buf_alloc < buf_pos * 2)
 	{
 	  buf_alloc *= 2;
-	  buf = xrealloc (buf, buf_alloc);
+	  buf = (gdb_byte *) xrealloc (buf, buf_alloc);
 	}
 
       QUIT;
@@ -2363,7 +2363,7 @@ simple_search_memory (struct target_ops *ops,
   if (search_space_len < search_buf_size)
     search_buf_size = search_space_len;
 
-  search_buf = malloc (search_buf_size);
+  search_buf = (gdb_byte *) malloc (search_buf_size);
   if (search_buf == NULL)
     error (_("Unable to allocate memory to perform the search."));
   old_cleanups = make_cleanup (free_current_contents, &search_buf);
@@ -3049,7 +3049,7 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
   /* Start by reading up to 4K at a time.  The target will throttle
      this number down if necessary.  */
   buf_alloc = 4096;
-  buf = xmalloc (buf_alloc);
+  buf = (gdb_byte *) xmalloc (buf_alloc);
   buf_pos = 0;
   while (1)
     {
@@ -3080,7 +3080,7 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
       if (buf_alloc < buf_pos * 2)
 	{
 	  buf_alloc *= 2;
-	  buf = xrealloc (buf, buf_alloc);
+	  buf = (gdb_byte *) xrealloc (buf, buf_alloc);
 	}
 
       QUIT;

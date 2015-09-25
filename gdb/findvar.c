@@ -939,7 +939,7 @@ address_from_register (int regnum, struct frame_info *frame)
      pointer types.  Avoid constructing a value object in those cases.  */
   if (gdbarch_convert_register_p (gdbarch, regnum, type))
     {
-      gdb_byte *buf = alloca (TYPE_LENGTH (type));
+      gdb_byte *buf = (gdb_byte *) alloca (TYPE_LENGTH (type));
       int optim, unavail, ok;
 
       ok = gdbarch_register_to_value (gdbarch, frame, regnum, type,

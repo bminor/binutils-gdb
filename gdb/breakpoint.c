@@ -8982,7 +8982,7 @@ program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
   if (bpoint == NULL)
     return 0;
 
-  target_mem = alloca (len);
+  target_mem = (gdb_byte *) alloca (len);
 
   /* Enable the automatic memory restoration from breakpoints while
      we read the memory.  Otherwise we could say about our temporary

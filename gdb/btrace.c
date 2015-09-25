@@ -1441,7 +1441,7 @@ parse_xml_raw (struct gdb_xml_parser *parser, const char *body_text,
 
   size = len / 2;
 
-  bin = data = xmalloc (size);
+  bin = data = (gdb_byte *) xmalloc (size);
   cleanup = make_cleanup (xfree, data);
 
   /* We use hex encoding - see common/rsp-low.h.  */

@@ -823,8 +823,9 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
     {
       /* Create the initial chain containing all the passed PCs.  */
 
-      result = xmalloc (sizeof (*result) + sizeof (*result->call_site)
-					   * (length - 1));
+      result = ((struct call_site_chain *)
+		xmalloc (sizeof (*result)
+			 + sizeof (*result->call_site) * (length - 1)));
       result->length = length;
       result->callers = result->callees = length;
       if (!VEC_empty (call_sitep, chain))
@@ -1232,7 +1233,7 @@ dwarf_entry_parameter_to_value (struct call_site_parameter *parameter,
   /* DW_AT_GNU_call_site_value is a DWARF expression, not a DWARF
      location.  Postprocessing of DWARF_VALUE_MEMORY would lose the type from
      DWARF block.  */
-  data = alloca (size + 1);
+  data = (gdb_byte *) alloca (size + 1);
   memcpy (data, data_src, size);
   data[size] = DW_OP_stack_value;
 
@@ -1744,7 +1745,7 @@ read_pieced_value (struct value *v)
       if (buffer_size < this_size)
 	{
 	  buffer_size = this_size;
-	  buffer = xrealloc (buffer, buffer_size);
+	  buffer = (gdb_byte *) xrealloc (buffer, buffer_size);
 	}
       intermediate_buffer = buffer;
 
@@ -1935,7 +1936,7 @@ write_pieced_value (struct value *to, struct value *from)
 	  if (buffer_size < this_size)
 	    {
 	      buffer_size = this_size;
-	      buffer = xrealloc (buffer, buffer_size);
+	      buffer = (gdb_byte *) xrealloc (buffer, buffer_size);
 	    }
 	  source_buffer = buffer;
 	  need_bitwise = 1;

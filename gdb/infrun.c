@@ -1178,7 +1178,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
     {
       char *name = exec_file_find (execd_pathname, NULL);
 
-      execd_pathname = alloca (strlen (name) + 1);
+      execd_pathname = (char *) alloca (strlen (name) + 1);
       strcpy (execd_pathname, name);
       xfree (name);
     }
@@ -1789,7 +1789,7 @@ displaced_step_prepare_throw (ptid_t ptid)
   len = gdbarch_max_insn_length (gdbarch);
 
   /* Save the original contents of the copy area.  */
-  displaced->step_saved_copy = xmalloc (len);
+  displaced->step_saved_copy = (gdb_byte *) xmalloc (len);
   ignore_cleanups = make_cleanup (free_current_contents,
 				  &displaced->step_saved_copy);
   status = target_read_memory (copy, displaced->step_saved_copy, len);
@@ -7916,7 +7916,7 @@ struct stop_context
 static struct stop_context *
 save_stop_context (void)
 {
-  struct stop_context *sc = xmalloc (sizeof (struct stop_context));
+  struct stop_context *sc = XNEW (struct stop_context);
 
   sc->stop_id = get_stop_id ();
   sc->ptid = inferior_ptid;
@@ -8658,7 +8658,7 @@ save_infcall_suspend_state (void)
       size_t len = TYPE_LENGTH (type);
       struct cleanup *back_to;
 
-      siginfo_data = xmalloc (len);
+      siginfo_data = (gdb_byte *) xmalloc (len);
       back_to = make_cleanup (xfree, siginfo_data);
 
       if (target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,

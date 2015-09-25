@@ -525,7 +525,8 @@ lookup_function_type_with_arguments (struct type *type,
     }
 
   TYPE_NFIELDS (fn) = nparams;
-  TYPE_FIELDS (fn) = TYPE_ZALLOC (fn, nparams * sizeof (struct field));
+  TYPE_FIELDS (fn)
+    = (struct field *) TYPE_ZALLOC (fn, nparams * sizeof (struct field));
   for (i = 0; i < nparams; ++i)
     TYPE_FIELD_TYPE (fn, i) = param_types[i];
 
@@ -1191,7 +1192,8 @@ create_set_type (struct type *result_type, struct type *domain_type)
 
   TYPE_CODE (result_type) = TYPE_CODE_SET;
   TYPE_NFIELDS (result_type) = 1;
-  TYPE_FIELDS (result_type) = TYPE_ZALLOC (result_type, sizeof (struct field));
+  TYPE_FIELDS (result_type)
+    = (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
 
   if (!TYPE_STUB (domain_type))
     {
@@ -1433,7 +1435,7 @@ struct type *
 lookup_unsigned_typename (const struct language_defn *language,
 			  struct gdbarch *gdbarch, const char *name)
 {
-  char *uns = alloca (strlen (name) + 10);
+  char *uns = (char *) alloca (strlen (name) + 10);
 
   strcpy (uns, "unsigned ");
   strcpy (uns + 9, name);
@@ -1445,7 +1447,7 @@ lookup_signed_typename (const struct language_defn *language,
 			struct gdbarch *gdbarch, const char *name)
 {
   struct type *t;
-  char *uns = alloca (strlen (name) + 8);
+  char *uns = (char *) alloca (strlen (name) + 8);
 
   strcpy (uns, "signed ");
   strcpy (uns + 7, name);
@@ -1969,8 +1971,9 @@ resolve_dynamic_union (struct type *type,
 
   resolved_type = copy_type (type);
   TYPE_FIELDS (resolved_type)
-    = TYPE_ALLOC (resolved_type,
-		  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+    = (struct field *) TYPE_ALLOC (resolved_type,
+				   TYPE_NFIELDS (resolved_type)
+				   * sizeof (struct field));
   memcpy (TYPE_FIELDS (resolved_type),
 	  TYPE_FIELDS (type),
 	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
@@ -2009,8 +2012,9 @@ resolve_dynamic_struct (struct type *type,
 
   resolved_type = copy_type (type);
   TYPE_FIELDS (resolved_type)
-    = TYPE_ALLOC (resolved_type,
-		  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+    = (struct field *) TYPE_ALLOC (resolved_type,
+				   TYPE_NFIELDS (resolved_type)
+				   * sizeof (struct field));
   memcpy (TYPE_FIELDS (resolved_type),
 	  TYPE_FIELDS (type),
 	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
@@ -2187,8 +2191,7 @@ add_dyn_prop (enum dynamic_prop_node_kind prop_kind, struct dynamic_prop prop,
 
   gdb_assert (TYPE_OBJFILE_OWNED (type));
 
-  temp = obstack_alloc (&objfile->objfile_obstack,
-			sizeof (struct dynamic_prop_list));
+  temp = XOBNEW (&objfile->objfile_obstack, struct dynamic_prop_list);
   temp->prop_kind = prop_kind;
   temp->prop = prop;
   temp->next = TYPE_DYN_PROP_LIST (type);
@@ -4344,8 +4347,9 @@ copy_dynamic_prop_list (struct obstack *objfile_obstack,
     {
       struct dynamic_prop_list *node_copy;
 
-      node_copy = obstack_copy (objfile_obstack, *node_ptr,
-				sizeof (struct dynamic_prop_list));
+      node_copy = ((struct dynamic_prop_list *)
+		   obstack_copy (objfile_obstack, *node_ptr,
+				 sizeof (struct dynamic_prop_list)));
       node_copy->prop = (*node_ptr)->prop;
       *node_ptr = node_copy;
 
@@ -4658,7 +4662,8 @@ arch_flags_type (struct gdbarch *gdbarch, char *name, int length)
   type = arch_type (gdbarch, TYPE_CODE_FLAGS, length, name);
   TYPE_UNSIGNED (type) = 1;
   TYPE_NFIELDS (type) = nfields;
-  TYPE_FIELDS (type) = TYPE_ZALLOC (type, nfields * sizeof (struct field));
+  TYPE_FIELDS (type)
+    = (struct field *) TYPE_ZALLOC (type, nfields * sizeof (struct field));
 
   return type;
 }
@@ -4711,8 +4716,8 @@ append_composite_type_field_raw (struct type *t, char *name,
   struct field *f;
 
   TYPE_NFIELDS (t) = TYPE_NFIELDS (t) + 1;
-  TYPE_FIELDS (t) = xrealloc (TYPE_FIELDS (t),
-			      sizeof (struct field) * TYPE_NFIELDS (t));
+  TYPE_FIELDS (t) = XRESIZEVEC (struct field, TYPE_FIELDS (t),
+				TYPE_NFIELDS (t));
   f = &(TYPE_FIELDS (t)[TYPE_NFIELDS (t) - 1]);
   memset (f, 0, sizeof f[0]);
   FIELD_TYPE (f[0]) = field;

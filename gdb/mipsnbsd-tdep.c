@@ -263,7 +263,7 @@ mipsnbsd_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   CORE_ADDR jb_addr;
   gdb_byte *buf;
 
-  buf = alloca (NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch));
+  buf = (gdb_byte *) alloca (NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch));
 
   jb_addr = get_frame_register_unsigned (frame, MIPS_A0_REGNUM);
 

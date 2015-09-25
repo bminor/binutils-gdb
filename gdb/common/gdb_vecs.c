@@ -60,7 +60,7 @@ delim_string_to_char_ptr_vec_append (VEC (char_ptr) **vecp,
 	  next_field++;
 	}
 
-      this_field = xmalloc (this_len + 1);
+      this_field = (char *) xmalloc (this_len + 1);
       memcpy (this_field, str, this_len);
       this_field[this_len] = '\0';
       VEC_safe_push (char_ptr, *vecp, this_field);

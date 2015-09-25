@@ -587,7 +587,8 @@ char *
 gdbscm_gc_xstrdup (const char *str)
 {
   size_t len = strlen (str);
-  char *result = scm_gc_malloc_pointerless (len + 1, "gdbscm_gc_xstrdup");
+  char *result
+    = (char *) scm_gc_malloc_pointerless (len + 1, "gdbscm_gc_xstrdup");
 
   strcpy (result, str);
   return result;
@@ -607,8 +608,9 @@ gdbscm_gc_dup_argv (char **argv)
 
   /* Allocating "pointerless" works because the pointers are all
      self-contained within the object.  */
-  result = scm_gc_malloc_pointerless (((len + 1) * sizeof (char *))
-				      + string_space, "parameter enum list");
+  result = (char **) scm_gc_malloc_pointerless (((len + 1) * sizeof (char *))
+						+ string_space,
+						"parameter enum list");
   p = (char *) &result[len + 1];
 
   for (i = 0; i < len; ++i)

@@ -470,7 +470,7 @@ new_remote_state (void)
   /* The default buffer size is unimportant; it will be expanded
      whenever a larger buffer is needed. */
   result->buf_size = 400;
-  result->buf = xmalloc (result->buf_size);
+  result->buf = (char *) xmalloc (result->buf_size);
   result->remote_traceframe_number = -1;
   result->last_sent_signal = GDB_SIGNAL_0;
   result->fs_pid = -1;
@@ -728,8 +728,7 @@ map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
      with a remote protocol number, in order of ascending protocol
      number.  */
 
-  remote_regs = alloca (gdbarch_num_regs (gdbarch)
-			* sizeof (struct packet_reg *));
+  remote_regs = XALLOCAVEC (struct packet_reg *, gdbarch_num_regs (gdbarch));
   for (num_remote_regs = 0, regnum = 0;
        regnum < gdbarch_num_regs (gdbarch);
        regnum++)
@@ -765,7 +764,7 @@ remote_register_number_and_offset (struct gdbarch *gdbarch, int regnum,
 
   gdb_assert (regnum < gdbarch_num_regs (gdbarch));
 
-  regs = xcalloc (gdbarch_num_regs (gdbarch), sizeof (struct packet_reg));
+  regs = XCNEWVEC (struct packet_reg, gdbarch_num_regs (gdbarch));
   old_chain = make_cleanup (xfree, regs);
 
   sizeof_g_packet = map_regcache_remote_table (gdbarch, regs);
@@ -822,7 +821,7 @@ init_remote_state (struct gdbarch *gdbarch)
   if (rs->buf_size < rsa->remote_packet_size)
     {
       rs->buf_size = 2 * rsa->remote_packet_size;
-      rs->buf = xrealloc (rs->buf, rs->buf_size);
+      rs->buf = (char *) xrealloc (rs->buf, rs->buf_size);
     }
 
   return rsa;
@@ -1039,7 +1038,7 @@ get_memory_packet_size (struct memory_packet_config *config)
   if (rs->buf_size < what_they_get + 1)
     {
       rs->buf_size = 2 * what_they_get;
-      rs->buf = xrealloc (rs->buf, 2 * what_they_get);
+      rs->buf = (char *) xrealloc (rs->buf, 2 * what_they_get);
     }
 
   return what_they_get;
@@ -1938,7 +1937,7 @@ remote_pass_signals (struct target_ops *self,
 	  if (pass_signals[i])
 	    count++;
 	}
-      pass_packet = xmalloc (count * 3 + strlen ("QPassSignals:") + 1);
+      pass_packet = (char *) xmalloc (count * 3 + strlen ("QPassSignals:") + 1);
       strcpy (pass_packet, "QPassSignals:");
       p = pass_packet + strlen (pass_packet);
       for (i = 0; i < numsigs; i++)
@@ -1989,7 +1988,7 @@ remote_program_signals (struct target_ops *self,
 	  if (signals[i])
 	    count++;
 	}
-      packet = xmalloc (count * 3 + strlen ("QProgramSignals:") + 1);
+      packet = (char *) xmalloc (count * 3 + strlen ("QProgramSignals:") + 1);
       strcpy (packet, "QProgramSignals:");
       p = packet + strlen (packet);
       for (i = 0; i < numsigs; i++)
@@ -3882,7 +3881,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       else
 	{
 	  /* Save the reply for later.  */
-	  wait_status = alloca (strlen (rs->buf) + 1);
+	  wait_status = (char *) alloca (strlen (rs->buf) + 1);
 	  strcpy (wait_status, rs->buf);
 	}
 
@@ -4126,7 +4125,7 @@ remote_check_symbols (void)
 
   /* Allocate a message buffer.  We can't reuse the input buffer in RS,
      because we need both at the same time.  */
-  msg = xmalloc (get_remote_packet_size ());
+  msg = (char *) xmalloc (get_remote_packet_size ());
   old_chain = make_cleanup (xfree, msg);
 
   /* Invite target to request symbol lookups.  */
@@ -4580,7 +4579,7 @@ remote_query_supported (void)
   if (rs->buf_size < rs->explicit_packet_size)
     {
       rs->buf_size = rs->explicit_packet_size;
-      rs->buf = xrealloc (rs->buf, rs->buf_size);
+      rs->buf = (char *) xrealloc (rs->buf, rs->buf_size);
     }
 
   /* Handle the defaults for unmentioned features.  */
@@ -4969,7 +4968,7 @@ extended_remote_attach (struct target_ops *target, const char *args,
       if (!non_stop)
 	{
 	  /* Save the reply for later.  */
-	  wait_status = alloca (strlen (rs->buf) + 1);
+	  wait_status = (char *) alloca (strlen (rs->buf) + 1);
 	  strcpy (wait_status, rs->buf);
 	}
       else if (strcmp (rs->buf, "OK") != 0)
@@ -6877,7 +6876,7 @@ process_g_packet (struct regcache *regcache)
 	}
     }
 
-  regs = alloca (rsa->sizeof_g_packet);
+  regs = (char *) alloca (rsa->sizeof_g_packet);
 
   /* Unimplemented registers read as all bits zero.  */
   memset (regs, 0, rsa->sizeof_g_packet);
@@ -7085,7 +7084,7 @@ store_registers_using_G (const struct regcache *regcache)
   {
     int i;
 
-    regs = alloca (rsa->sizeof_g_packet);
+    regs = (gdb_byte *) alloca (rsa->sizeof_g_packet);
     memset (regs, 0, rsa->sizeof_g_packet);
     for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
       {
@@ -7939,7 +7938,7 @@ putpkt_binary (const char *buf, int cnt)
   struct remote_state *rs = get_remote_state ();
   int i;
   unsigned char csum = 0;
-  char *buf2 = xmalloc (cnt + 6);
+  char *buf2 = (char *) xmalloc (cnt + 6);
   struct cleanup *old_chain = make_cleanup (xfree, buf2);
 
   int ch;
@@ -8280,7 +8279,7 @@ read_frame (char **buf_p,
 		  {
 		    /* Make some more room in the buffer.  */
 		    *sizeof_buf += repeat;
-		    *buf_p = xrealloc (*buf_p, *sizeof_buf);
+		    *buf_p = (char *) xrealloc (*buf_p, *sizeof_buf);
 		    buf = *buf_p;
 		  }
 
@@ -8298,7 +8297,7 @@ read_frame (char **buf_p,
 	    {
 	      /* Make some more room in the buffer.  */
 	      *sizeof_buf *= 2;
-	      *buf_p = xrealloc (*buf_p, *sizeof_buf);
+	      *buf_p = (char *) xrealloc (*buf_p, *sizeof_buf);
 	      buf = *buf_p;
 	    }
 
@@ -9463,7 +9462,7 @@ compare_sections_command (char *args, int from_tty)
       matched = 1;		/* Do this section.  */
       lma = s->lma;
 
-      sectdata = xmalloc (size);
+      sectdata = (gdb_byte *) xmalloc (size);
       old_chain = make_cleanup (xfree, sectdata);
       bfd_get_section_contents (exec_bfd, s, sectdata, 0, size);
 
@@ -10849,7 +10848,7 @@ remote_hostio_pread (struct target_ops *self,
   cache->fd = fd;
   cache->offset = offset;
   cache->bufsize = get_remote_packet_size ();
-  cache->buf = xrealloc (cache->buf, cache->bufsize);
+  cache->buf = (gdb_byte *) xrealloc (cache->buf, cache->bufsize);
 
   ret = remote_hostio_pread_vFile (self, cache->fd, cache->buf, cache->bufsize,
 				   cache->offset, remote_errno);
@@ -10935,7 +10934,7 @@ remote_hostio_readlink (struct target_ops *self,
   if (len < 0)
     return NULL;
 
-  ret = xmalloc (len + 1);
+  ret = (char *) xmalloc (len + 1);
 
   read_len = remote_unescape_input ((gdb_byte *) attachment, attachment_len,
 				    (gdb_byte *) ret, len);
@@ -11158,7 +11157,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   /* Send up to this many bytes at once.  They won't all fit in the
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
-  buffer = xmalloc (io_size);
+  buffer = (gdb_byte *) xmalloc (io_size);
   make_cleanup (xfree, buffer);
 
   close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
@@ -11248,7 +11247,7 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   /* Send up to this many bytes at once.  They won't all fit in the
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
-  buffer = xmalloc (io_size);
+  buffer = (gdb_byte *) xmalloc (io_size);
   make_cleanup (xfree, buffer);
 
   close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
@@ -12656,7 +12655,7 @@ remote_pid_to_exec_file (struct target_ops *self, int pid)
     {
       const int annex_size = 9;
 
-      annex = alloca (annex_size);
+      annex = (char *) alloca (annex_size);
       xsnprintf (annex, annex_size, "%x", pid);
     }
 
@@ -13575,6 +13574,6 @@ stepping is supported by the target.  The default is on."),
   any_thread_ptid = ptid_build (42000, 0, 1);
 
   target_buf_size = 2048;
-  target_buf = xmalloc (target_buf_size);
+  target_buf = (char *) xmalloc (target_buf_size);
 }
 

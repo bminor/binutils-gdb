@@ -484,7 +484,7 @@ execute_control_command (struct command_line *cmd)
     case while_control:
       {
 	int len = strlen (cmd->line) + 7;
-	char *buffer = alloca (len);
+	char *buffer = (char *) alloca (len);
 
 	xsnprintf (buffer, len, "while %s", cmd->line);
 	print_command_trace (buffer);
@@ -553,7 +553,7 @@ execute_control_command (struct command_line *cmd)
     case if_control:
       {
 	int len = strlen (cmd->line) + 4;
-	char *buffer = alloca (len);
+	char *buffer = (char *) alloca (len);
 
 	xsnprintf (buffer, len, "if %s", cmd->line);
 	print_command_trace (buffer);

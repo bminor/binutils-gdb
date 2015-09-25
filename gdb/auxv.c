@@ -90,7 +90,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   size_t ptr_size = TYPE_LENGTH (ptr_type);
   size_t auxv_pair_size = 2 * ptr_size;
-  gdb_byte *ptr_buf = alloca (ptr_size);
+  gdb_byte *ptr_buf = (gdb_byte *) alloca (ptr_size);
   LONGEST retval;
   size_t block;
 

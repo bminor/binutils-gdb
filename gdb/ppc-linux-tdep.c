@@ -1079,7 +1079,7 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
 	}
 
       len = s - p->arg;
-      regname = alloca (len + 2);
+      regname = (char *) alloca (len + 2);
       regname[0] = 'r';
 
       strncpy (regname + 1, p->arg, len);
@@ -1277,7 +1277,7 @@ ppu2spu_prev_register (struct frame_info *this_frame,
   struct gdbarch *gdbarch = get_regcache_arch (cache->regcache);
   gdb_byte *buf;
 
-  buf = alloca (register_size (gdbarch, regnum));
+  buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
 
   if (regnum < gdbarch_num_regs (gdbarch))
     regcache_raw_read (cache->regcache, regnum, buf);

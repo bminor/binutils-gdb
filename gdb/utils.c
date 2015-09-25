@@ -1112,7 +1112,7 @@ gdb_print_host_address (const void *addr, struct ui_file *stream)
 char *
 make_hex_string (const gdb_byte *data, size_t length)
 {
-  char *result = xmalloc (length * 2 + 1);
+  char *result = (char *) xmalloc (length * 2 + 1);
   char *p;
   size_t i;
 
@@ -1148,7 +1148,7 @@ char *
 get_regcomp_error (int code, regex_t *rx)
 {
   size_t length = regerror (code, rx, NULL, 0);
-  char *result = xmalloc (length);
+  char *result = (char *) xmalloc (length);
 
   regerror (code, rx, result, length);
   return result;
@@ -1996,7 +1996,7 @@ puts_filtered_tabular (char *string, int width, int right)
   if (right)
     spaces += width - stringlen;
 
-  spacebuf = alloca (spaces + 1);
+  spacebuf = (char *) alloca (spaces + 1);
   spacebuf[spaces] = '\0';
   while (spaces--)
     spacebuf[spaces] = ' ';
@@ -2902,7 +2902,7 @@ gdb_realpath_keepfile (const char *filename)
   if (base_name == filename)
     return xstrdup (filename);
 
-  dir_name = alloca ((size_t) (base_name - filename + 2));
+  dir_name = (char *) alloca ((size_t) (base_name - filename + 2));
   /* Allocate enough space to store the dir_name + plus one extra
      character sometimes needed under Windows (see below), and
      then the closing \000 character.  */
@@ -3013,7 +3013,7 @@ ldirname (const char *filename)
   if (base == filename)
     return NULL;
 
-  dirname = xmalloc (base - filename + 2);
+  dirname = (char *) xmalloc (base - filename + 2);
   memcpy (dirname, filename, base - filename);
 
   /* On DOS based file systems, convert "d:foo" to "d:.", so that we
@@ -3079,7 +3079,7 @@ gdb_bfd_errmsg (bfd_error_type error_tag, char **matching)
             + strlen (AMBIGUOUS_MESS2);
   for (p = matching; *p; p++)
     ret_len += strlen (*p) + 1;
-  ret = xmalloc (ret_len + 1);
+  ret = (char *) xmalloc (ret_len + 1);
   retp = ret;
   make_cleanup (xfree, ret);
 
@@ -3241,7 +3241,8 @@ substitute_path_component (char **stringp, const char *from, const char *to)
 	{
 	  char *string_new;
 
-	  string_new = xrealloc (string, (strlen (string) + to_len + 1));
+	  string_new
+	    = (char *) xrealloc (string, (strlen (string) + to_len + 1));
 
 	  /* Relocate the current S pointer.  */
 	  s = s - string + string_new;

@@ -78,7 +78,7 @@ linux_common_core_of_thread (ptid_t ptid)
   for (;;)
     {
       int n;
-      content = xrealloc (content, content_read + 1024);
+      content = (char *) xrealloc (content, content_read + 1024);
       n = fread (content + content_read, 1, 1024, f);
       content_read += n;
       if (n < 1024)

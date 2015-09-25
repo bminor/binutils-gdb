@@ -482,7 +482,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
     sec_load_count -= sec_end - data->load_end;
 
   /* Get the data.  */
-  buf = xmalloc (size);
+  buf = (gdb_byte *) xmalloc (size);
   old_chain = make_cleanup (xfree, buf);
   if (!bfd_get_section_contents (ibfd, isec, buf, 0, size))
     error (_("Failed to read bfd file %s: '%s'."), bfd_get_filename (ibfd), 
@@ -553,7 +553,7 @@ restore_binary_file (const char *filename, struct callback_data *data)
     perror_with_name (filename);
 
   /* Now allocate a buffer and read the file contents.  */
-  buf = xmalloc (len);
+  buf = (gdb_byte *) xmalloc (len);
   make_cleanup (xfree, buf);
   if (fread (buf, 1, len, file) != len)
     perror_with_name (filename);

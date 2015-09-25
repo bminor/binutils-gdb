@@ -364,7 +364,7 @@ exp	:	exp '['
 			      struct stoken stringsval;
 			      char *buf;
 
-			      buf = alloca (strlen (arrayname) + 1);
+			      buf = (char *) alloca (strlen (arrayname) + 1);
 			      stringsval.ptr = buf;
 			      stringsval.length = strlen (arrayname);
 			      strcpy (buf, arrayname);
@@ -1530,7 +1530,7 @@ yylex (void)
         so in expression to enter hexadecimal values
         we still need to use C syntax with 0xff  */
       write_dollar_variable (pstate, yylval.sval);
-      tmp = alloca (namelen + 1);
+      tmp = (char *) alloca (namelen + 1);
       memcpy (tmp, tokstart, namelen);
       tmp[namelen] = '\0';
       intvar = lookup_only_internalvar (tmp + 1);
@@ -1676,7 +1676,9 @@ yylex (void)
 		      struct symbol *cur_sym;
 		      /* As big as the whole rest of the expression, which is
 			 at least big enough.  */
-		      char *ncopy = alloca (strlen (tmp)+strlen (namestart)+3);
+		      char *ncopy
+			= (char *) alloca (strlen (tmp) + strlen (namestart)
+					   + 3);
 		      char *tmp1;
 
 		      tmp1 = ncopy;

@@ -345,7 +345,9 @@ solib_target_relocate_section_addresses (struct so_list *so,
     {
       int num_sections = gdb_bfd_count_sections (so->abfd);
 
-      so->lm_info->offsets = xzalloc (SIZEOF_N_SECTION_OFFSETS (num_sections));
+      so->lm_info->offsets
+	= ((struct section_offsets *)
+	   xzalloc (SIZEOF_N_SECTION_OFFSETS (num_sections)));
 
       if (so->lm_info->section_bases)
 	{

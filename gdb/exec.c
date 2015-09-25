@@ -453,8 +453,8 @@ resize_section_table (struct target_section_table *table, int adjustment)
 
   if (new_count)
     {
-      table->sections = xrealloc (table->sections,
-				  sizeof (struct target_section) * new_count);
+      table->sections = XRESIZEVEC (struct target_section, table->sections,
+				    new_count);
       table->sections_end = table->sections + new_count;
     }
   else

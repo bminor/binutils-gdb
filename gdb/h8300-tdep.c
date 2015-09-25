@@ -671,7 +671,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       /* Pad the argument appropriately.  */
       int padded_len = align_up (len, wordsize);
-      gdb_byte *padded = xmalloc (padded_len);
+      gdb_byte *padded = (gdb_byte *) xmalloc (padded_len);
       back_to = make_cleanup (xfree, padded);
 
       memset (padded, 0, padded_len);

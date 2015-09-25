@@ -1,3 +1,51 @@
+2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ax.c (gdb_parse_agent_expr): Add cast to allocation result
+	assignment.
+	(gdb_unparse_agent_expr): Likewise.
+	* hostio.c (require_data): Likewise.
+	(handle_pread): Likewise.
+	* linux-low.c (disable_regset): Likewise.
+	(fetch_register): Likewise.
+	(store_register): Likewise.
+	(get_dynamic): Likewise.
+	(linux_qxfer_libraries_svr4): Likewise.
+	* mem-break.c (delete_fast_tracepoint_jump): Likewise.
+	(set_fast_tracepoint_jump): Likewise.
+	(uninsert_fast_tracepoint_jumps_at): Likewise.
+	(reinsert_fast_tracepoint_jumps_at): Likewise.
+	(validate_inserted_breakpoint): Likewise.
+	(clone_agent_expr): Likewise.
+	* regcache.c (init_register_cache): Likewise.
+	* remote-utils.c (putpkt_binary_1): Likewise.
+	(decode_M_packet): Likewise.
+	(decode_X_packet): Likewise.
+	(look_up_one_symbol): Likewise.
+	(relocate_instruction): Likewise.
+	(monitor_output): Likewise.
+	* server.c (handle_search_memory): Likewise.
+	(handle_qxfer_exec_file): Likewise.
+	(handle_qxfer_libraries): Likewise.
+	(handle_qxfer): Likewise.
+	(handle_query): Likewise.
+	(handle_v_cont): Likewise.
+	(handle_v_run): Likewise.
+	(captured_main): Likewise.
+	* target.c (write_inferior_memory): Likewise.
+	* thread-db.c (try_thread_db_load_from_dir): Likewise.
+	* tracepoint.c (init_trace_buffer): Likewise.
+	(add_tracepoint_action): Likewise.
+	(add_traceframe): Likewise.
+	(add_traceframe_block): Likewise.
+	(cmd_qtdpsrc): Likewise.
+	(cmd_qtdv): Likewise.
+	(cmd_qtstatus): Likewise.
+	(response_source): Likewise.
+	(response_tsv): Likewise.
+	(cmd_qtnotes): Likewise.
+	(gdb_collect): Likewise.
+	(initialize_tracepoint): Likewise.
+
 2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* linux-aarch64-low-.c: Include ax.h and tracepoint.h.

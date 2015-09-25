@@ -110,7 +110,7 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   if (!startswith (sect->name, ".module"))
     return;
 
-  buf = xmalloc (bfd_get_section_size (sect) + 1);
+  buf = (gdb_byte *) xmalloc (bfd_get_section_size (sect) + 1);
   if (!buf)
     {
       printf_unfiltered ("memory allocation failed for %s\n", sect->name);
@@ -163,7 +163,7 @@ windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 			 &data);
   obstack_grow_str0 (&obstack, "</library-list>\n");
 
-  buf = obstack_finish (&obstack);
+  buf = (const char *) obstack_finish (&obstack);
   len_avail = strlen (buf);
   if (offset >= len_avail)
     return 0;

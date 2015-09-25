@@ -118,11 +118,11 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
 
   arch_len = (strlen (nto_root) + strlen (arch) + strlen (endian) + 2
 	      + strlen (solib));
-  arch_path = alloca (arch_len);
+  arch_path = (char *) alloca (arch_len);
   xsnprintf (arch_path, arch_len, "%s/%s%s", nto_root, arch, endian);
 
   len = strlen (PATH_FMT) + strlen (arch_path) * 5 + 1;
-  buf = alloca (len);
+  buf = (char *) alloca (len);
   xsnprintf (buf, len, PATH_FMT, arch_path, arch_path, arch_path, arch_path,
 	     arch_path);
 
@@ -194,7 +194,7 @@ nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
   out = "";
   err = "";
 
-  argv = xcalloc (n + 1, sizeof argv[0]);
+  argv = XCNEWVEC (char *, n + 1);
   argc = n;
   for (i = 0, n = 0; n < argc; n++)
     {

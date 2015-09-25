@@ -326,7 +326,8 @@ ioscm_init_stdio_buffers (SCM port, long mode_bits)
 
   if (!writing && size > 0)
     {
-      pt->read_buf = scm_gc_malloc_pointerless (size, "port buffer");
+      pt->read_buf
+	= (unsigned char *) scm_gc_malloc_pointerless (size, "port buffer");
       pt->read_pos = pt->read_end = pt->read_buf;
       pt->read_buf_size = size;
     }
@@ -338,7 +339,8 @@ ioscm_init_stdio_buffers (SCM port, long mode_bits)
 
   if (writing && size > 0)
     {
-      pt->write_buf = scm_gc_malloc_pointerless (size, "port buffer");
+      pt->write_buf
+	= (unsigned char *) scm_gc_malloc_pointerless (size, "port buffer");
       pt->write_pos = pt->write_buf;
       pt->write_buf_size = size;
     }
@@ -1011,8 +1013,8 @@ ioscm_init_memory_port (SCM port, CORE_ADDR start, CORE_ADDR end)
   pt->write_buf_size = iomem->write_buf_size;
   if (buffered)
     {
-      pt->read_buf = xmalloc (pt->read_buf_size);
-      pt->write_buf = xmalloc (pt->write_buf_size);
+      pt->read_buf = (unsigned char *) xmalloc (pt->read_buf_size);
+      pt->write_buf = (unsigned char *) xmalloc (pt->write_buf_size);
     }
   else
     {
@@ -1076,7 +1078,7 @@ ioscm_reinit_memory_port (SCM port, size_t read_buf_size,
       iomem->read_buf_size = read_buf_size;
       pt->read_buf_size = read_buf_size;
       xfree (pt->read_buf);
-      pt->read_buf = xmalloc (pt->read_buf_size);
+      pt->read_buf = (unsigned char *) xmalloc (pt->read_buf_size);
       pt->read_pos = pt->read_end = pt->read_buf;
     }
 
@@ -1085,7 +1087,7 @@ ioscm_reinit_memory_port (SCM port, size_t read_buf_size,
       iomem->write_buf_size = write_buf_size;
       pt->write_buf_size = write_buf_size;
       xfree (pt->write_buf);
-      pt->write_buf = xmalloc (pt->write_buf_size);
+      pt->write_buf = (unsigned char *) xmalloc (pt->write_buf_size);
       pt->write_pos = pt->write_buf;
       pt->write_end = pt->write_buf + pt->write_buf_size;
     }

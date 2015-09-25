@@ -101,7 +101,7 @@ lzma_open (struct bfd *nbfd, void *open_closure)
     }
 
   offset -= options.backward_size;
-  indexdata = xmalloc (options.backward_size);
+  indexdata = (gdb_byte *) xmalloc (options.backward_size);
   index = NULL;
   pos = 0;
   if (bfd_seek (section->owner, offset, SEEK_SET) != 0
@@ -155,7 +155,7 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
 	  if (lzma_index_iter_locate (&iter, offset))
 	    break;
 
-	  compressed = xmalloc (iter.block.total_size);
+	  compressed = (gdb_byte *) xmalloc (iter.block.total_size);
 	  block_offset = section->filepos + iter.block.compressed_file_offset;
 	  if (bfd_seek (section->owner, block_offset, SEEK_SET) != 0
 	      || bfd_bread (compressed, iter.block.total_size, section->owner)
@@ -165,7 +165,7 @@ lzma_pread (struct bfd *nbfd, void *stream, void *buf, file_ptr nbytes,
 	      break;
 	    }
 
-	  uncompressed = xmalloc (iter.block.uncompressed_size);
+	  uncompressed = (gdb_byte *) xmalloc (iter.block.uncompressed_size);
 
 	  memset (&block, 0, sizeof (block));
 	  block.filters = filters;
