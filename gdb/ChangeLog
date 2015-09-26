@@ -1,3 +1,10 @@
+2015-09-26  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-namespace.c (d_lookup_symbol): New arg langdef.
+	All callers updated.  Support looking up symbol as a primitive type.
+	(lookup_module_scope): New arg langdef.  All callers updated.
+	Call d_lookup_symbol directly for simple bare symbols.
+
 2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* macrocmd.c (print_macro_callback): Add cast(s).
