@@ -1166,11 +1166,11 @@ library_list_start_library (struct gdb_xml_parser *parser,
   const char *name
     = (const char *) xml_find_attribute (attributes, "name")->value;
   ULONGEST *lmp
-    = (long unsigned int *) xml_find_attribute (attributes, "lm")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "lm")->value;
   ULONGEST *l_addrp
-    = (long unsigned int *) xml_find_attribute (attributes, "l_addr")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "l_addr")->value;
   ULONGEST *l_ldp
-    = (long unsigned int *) xml_find_attribute (attributes, "l_ld")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "l_ld")->value;
   struct so_list *new_elem;
 
   new_elem = XCNEW (struct so_list);

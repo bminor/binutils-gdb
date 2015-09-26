@@ -1418,8 +1418,8 @@ parse_xml_btrace_block (struct gdb_xml_parser *parser,
       gdb_xml_error (parser, _("Btrace format error."));
     }
 
-  begin = (long unsigned int *) xml_find_attribute (attributes, "begin")->value;
-  end = (long unsigned int *) xml_find_attribute (attributes, "end")->value;
+  begin = (ULONGEST *) xml_find_attribute (attributes, "begin")->value;
+  end = (ULONGEST *) xml_find_attribute (attributes, "end")->value;
 
   block = VEC_safe_push (btrace_block_s, btrace->variant.bts.blocks, NULL);
   block->begin = *begin;

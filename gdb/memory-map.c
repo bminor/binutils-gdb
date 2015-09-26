@@ -61,11 +61,11 @@ memory_map_start_memory (struct gdb_xml_parser *parser,
   ULONGEST *start_p, *length_p, *type_p;
 
   start_p
-    = (long unsigned int *) xml_find_attribute (attributes, "start")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "start")->value;
   length_p
-    = (long unsigned int *) xml_find_attribute (attributes, "length")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "length")->value;
   type_p
-    = (long unsigned int *) xml_find_attribute (attributes, "type")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "type")->value;
 
   mem_region_init (r);
   r->lo = *start_p;

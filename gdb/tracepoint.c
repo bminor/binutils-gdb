@@ -4194,9 +4194,9 @@ traceframe_info_start_memory (struct gdb_xml_parser *parser,
   ULONGEST *start_p, *length_p;
 
   start_p
-    = (long unsigned int *) xml_find_attribute (attributes, "start")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "start")->value;
   length_p
-    = (long unsigned int *) xml_find_attribute (attributes, "length")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "length")->value;
 
   r->start = *start_p;
   r->length = *length_p;

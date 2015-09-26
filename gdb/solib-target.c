@@ -83,7 +83,7 @@ library_list_start_segment (struct gdb_xml_parser *parser,
   VEC(lm_info_p) **list = (VEC(lm_info_p) **) user_data;
   struct lm_info *last = VEC_last (lm_info_p, *list);
   ULONGEST *address_p
-    = (long unsigned int *) xml_find_attribute (attributes, "address")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "address")->value;
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
   if (last->section_bases != NULL)
@@ -101,7 +101,7 @@ library_list_start_section (struct gdb_xml_parser *parser,
   VEC(lm_info_p) **list = (VEC(lm_info_p) **) user_data;
   struct lm_info *last = VEC_last (lm_info_p, *list);
   ULONGEST *address_p
-    = (long unsigned int *) xml_find_attribute (attributes, "address")->value;
+    = (ULONGEST *) xml_find_attribute (attributes, "address")->value;
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
   if (last->segment_bases != NULL)

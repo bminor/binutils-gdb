@@ -1,3 +1,13 @@
+2015-09-26  Simon Marchi  <simark@nova.polymtl.ca>
+
+	* btrace.c (parse_xml_btrace_block): Fix cast of
+	xml_find_attribute's return value.
+	* memory-map.c (memory_map_start_memory): Likewise.
+	* solib-svr4.c (library_list_start_library): Likewise.
+	* solib-target.c (library_list_start_segment): Likewise.
+	(library_list_start_section): Likewise.
+	* tracepoint.c (traceframe_info_start_memory): Likewise.
+
 2015-09-26  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* d-namespace.c (d_lookup_symbol): New arg langdef.
