@@ -1,6 +1,6 @@
 2015-09-28  Simon Marchi  <simon.marchi@ericsson.com>
 
-	* cli/cli-script.c (read_next_line): Fix stdout -> stdout in
+	* cli/cli-script.c (read_next_line): Fix stdout -> stdin in
 	comment.
 
 2015-09-28  Doug Evans  <dje@google.com>
