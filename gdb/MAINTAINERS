@@ -374,6 +374,7 @@ language support
   Ada			Joel Brobecker		brobecker@adacore.com
 			Paul Hilfinger		hilfinger@gnat.com
   C++			Daniel Jacobowitz	drow@false.org
+  D			Iain Buclaw		ibuclaw@gdcproject.org
   Objective C support   Adam Fedor		fedor@gnu.org
 shared libs		Kevin Buettner		kevinb@redhat.com
 MI interface		Vladimir Prus		vladimir@codesourcery.com
