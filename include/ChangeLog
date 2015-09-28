@@ -1,3 +1,7 @@
+2015-09-26  James Bowman  <james.bowman@ftdichip.com>
+
+	* opcode/ft32.h: Add instruction macros FT32_*()
+
 2015-09-20  Rich Felker  <dalias@libc.org>
 
 	* bfdlink.h (struct bfd_link_info): Add "nointerp" field.
