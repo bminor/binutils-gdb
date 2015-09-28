@@ -1,3 +1,7 @@
+2015-09-28  Doug Evans  <dje@google.com>
+
+	* gdb.base/gcore.c (array_func): Add reference to static_array.
+
 2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.gdb/selftest.exp (do_steps_and_nexts): Adjust expected
