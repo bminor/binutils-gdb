@@ -205,8 +205,12 @@ static void cpu_mem_write (SIM_DESC sd, uint32_t dw, uint32_t ea, uint32_t d)
 	  cpu->state.pm_addr = d;
 	  break;
 	case 0x1fc88:
-	  /* Write to PM */
-	  ft32_write_item (sd, dw, cpu->state.pm_addr, d);
+	  if (cpu->state.pm_unlock)
+	    {
+	      /* Write to PM.  */
+	      ft32_write_item (sd, dw, cpu->state.pm_addr, d);
+	      cpu->state.pm_addr += 4;
+	    }
 	  break;
 	case 0x1fffc:
 	  /* Normal exit.  */
