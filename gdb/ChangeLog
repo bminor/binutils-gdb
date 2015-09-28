@@ -1,3 +1,7 @@
+2015-09-28  Doug Evans  <dje@google.com>
+
+	* common/filestuff.c (make_cleanup_close): Update comment.
+
 2015-09-26  Simon Marchi  <simark@nova.polymtl.ca>
 
 	* btrace.c (parse_xml_btrace_block): Fix cast of
