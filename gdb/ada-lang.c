@@ -398,7 +398,7 @@ ada_inferior_data_cleanup (struct inferior *inf, void *arg)
 {
   struct ada_inferior_data *data;
 
-  data = inferior_data (inf, ada_inferior_data);
+  data = (struct ada_inferior_data *) inferior_data (inf, ada_inferior_data);
   if (data != NULL)
     xfree (data);
 }
@@ -416,7 +416,7 @@ get_ada_inferior_data (struct inferior *inf)
 {
   struct ada_inferior_data *data;
 
-  data = inferior_data (inf, ada_inferior_data);
+  data = (struct ada_inferior_data *) inferior_data (inf, ada_inferior_data);
   if (data == NULL)
     {
       data = XCNEW (struct ada_inferior_data);
@@ -459,7 +459,8 @@ get_ada_pspace_data (struct program_space *pspace)
 {
   struct ada_pspace_data *data;
 
-  data = program_space_data (pspace, ada_pspace_data_handle);
+  data = ((struct ada_pspace_data *)
+	  program_space_data (pspace, ada_pspace_data_handle));
   if (data == NULL)
     {
       data = XCNEW (struct ada_pspace_data);
@@ -474,7 +475,7 @@ get_ada_pspace_data (struct program_space *pspace)
 static void
 ada_pspace_data_cleanup (struct program_space *pspace, void *data)
 {
-  struct ada_pspace_data *pspace_data = data;
+  struct ada_pspace_data *pspace_data = (struct ada_pspace_data *) data;
 
   if (pspace_data->sym_cache != NULL)
     ada_free_symbol_cache (pspace_data->sym_cache);
@@ -1424,7 +1425,8 @@ ada_decode_symbol (const struct general_symbol_info *arg)
       gsymbol->ada_mangled = 1;
 
       if (obstack != NULL)
-	*resultp = obstack_copy0 (obstack, decoded, strlen (decoded));
+	*resultp
+	  = (const char *) obstack_copy0 (obstack, decoded, strlen (decoded));
       else
         {
 	  /* Sometimes, we can't find a corresponding objfile, in
@@ -2657,7 +2659,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       int len = (value_bitpos (toval)
 		 + bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
       int from_size;
-      gdb_byte *buffer = alloca (len);
+      gdb_byte *buffer = (gdb_byte *) alloca (len);
       struct value *val;
       CORE_ADDR to_addr = value_address (toval);
 
@@ -4401,7 +4403,7 @@ value_pointer (struct value *value, struct type *type)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
   unsigned len = TYPE_LENGTH (type);
-  gdb_byte *buf = alloca (len);
+  gdb_byte *buf = (gdb_byte *) alloca (len);
   CORE_ADDR addr;
 
   addr = value_address (value);
@@ -4596,7 +4598,8 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
 					    sizeof (*e));
   e->next = sym_cache->root[h];
   sym_cache->root[h] = e;
-  e->name = copy = obstack_alloc (&sym_cache->cache_space, strlen (name) + 1);
+  e->name = copy
+    = (char *) obstack_alloc (&sym_cache->cache_space, strlen (name) + 1);
   strcpy (copy, name);
   e->sym = sym;
   e->domain = domain;
@@ -4767,7 +4770,7 @@ static struct block_symbol *
 defns_collected (struct obstack *obstackp, int finish)
 {
   if (finish)
-    return obstack_finish (obstackp);
+    return (struct block_symbol *) obstack_finish (obstackp);
   else
     return (struct block_symbol *) obstack_base (obstackp);
 }
@@ -5535,7 +5538,7 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
     {
       ALL_OBJFILES (objfile)
         {
-	  char *name1 = alloca (strlen (name) + sizeof ("_ada_"));
+	  char *name1 = (char *) alloca (strlen (name) + sizeof ("_ada_"));
 	  strcpy (name1, "_ada_");
 	  strcpy (name1 + sizeof ("_ada_") - 1, name);
 	  data.objfile = objfile;
@@ -5728,7 +5731,7 @@ ada_name_for_lookup (const char *name)
 
   if (name[0] == '<' && name[nlen - 1] == '>')
     {
-      canon = xmalloc (nlen - 1);
+      canon = (char *) xmalloc (nlen - 1);
       memcpy (canon, name + 1, nlen - 2);
       canon[nlen - 2] = '\0';
     }
@@ -6329,19 +6332,19 @@ symbol_completion_add (VEC(char_ptr) **sv,
 
   if (word == orig_text)
     {
-      completion = xmalloc (strlen (match) + 5);
+      completion = (char *) xmalloc (strlen (match) + 5);
       strcpy (completion, match);
     }
   else if (word > orig_text)
     {
       /* Return some portion of sym_name.  */
-      completion = xmalloc (strlen (match) + 5);
+      completion = (char *) xmalloc (strlen (match) + 5);
       strcpy (completion, match + (word - orig_text));
     }
   else
     {
       /* Return some of ORIG_TEXT plus sym_name.  */
-      completion = xmalloc (strlen (match) + (orig_text - word) + 5);
+      completion = (char *) xmalloc (strlen (match) + (orig_text - word) + 5);
       strncpy (completion, word, orig_text - word);
       completion[orig_text - word] = '\0';
       strcat (completion, match);
@@ -6368,7 +6371,7 @@ struct add_partial_datum
 static int
 ada_complete_symbol_matcher (const char *name, void *user_data)
 {
-  struct add_partial_datum *data = user_data;
+  struct add_partial_datum *data = (struct add_partial_datum *) user_data;
   
   return symbol_completion_match (name, data->text, data->text_len,
                                   data->wild_match, data->encoded) != NULL;
@@ -8869,7 +8872,8 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
         else if (ada_type_name (fixed_record_type) != NULL)
           {
             const char *name = ada_type_name (fixed_record_type);
-            char *xvz_name = alloca (strlen (name) + 7 /* "___XVZ\0" */);
+            char *xvz_name
+	      = (char *) alloca (strlen (name) + 7 /* "___XVZ\0" */);
             int xvz_found = 0;
             LONGEST size;
 
@@ -10642,10 +10646,17 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	   therefore already coerced to a simple array.  Nothing further
 	   to do.  */
         ;
-      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_REF
-               || (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_ARRAY
-                   && VALUE_LVAL (argvec[0]) == lval_memory))
-        argvec[0] = value_addr (argvec[0]);
+      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_REF)
+	{
+	  /* Make sure we dereference references so that all the code below
+	     feels like it's really handling the referenced value.  Wrapping
+	     types (for alignment) may be there, so make sure we strip them as
+	     well.  */
+	  argvec[0] = ada_to_fixed_value (coerce_ref (argvec[0]));
+	}
+      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_ARRAY
+	       && VALUE_LVAL (argvec[0]) == lval_memory)
+	argvec[0] = value_addr (argvec[0]);
 
       type = ada_check_typedef (value_type (argvec[0]));
 
@@ -12681,7 +12692,7 @@ ada_get_next_arg (char **argsp)
 
   /* Make a copy of the current argument and return it.  */
 
-  result = xmalloc (end - args + 1);
+  result = (char *) xmalloc (end - args + 1);
   strncpy (result, args, end - args);
   result[end - args] = '\0';
   
@@ -13121,7 +13132,7 @@ sort_remove_dups_ada_exceptions_list (VEC(ada_exc_info) **exceptions,
 static int
 ada_exc_search_name_matches (const char *search_name, void *user_data)
 {
-  regex_t *preg = user_data;
+  regex_t *preg = (regex_t *) user_data;
 
   if (preg == NULL)
     return 1;

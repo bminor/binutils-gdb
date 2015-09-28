@@ -160,9 +160,7 @@ record_btrace_enable_warn (struct thread_info *tp)
 static void
 record_btrace_disable_callback (void *arg)
 {
-  struct thread_info *tp;
-
-  tp = arg;
+  struct thread_info *tp = (struct thread_info *) arg;
 
   btrace_disable (tp);
 }
@@ -1370,7 +1368,8 @@ static htab_t bfcache;
 static hashval_t
 bfcache_hash (const void *arg)
 {
-  const struct btrace_frame_cache *cache = arg;
+  const struct btrace_frame_cache *cache
+    = (const struct btrace_frame_cache *) arg;
 
   return htab_hash_pointer (cache->frame);
 }
@@ -1380,8 +1379,10 @@ bfcache_hash (const void *arg)
 static int
 bfcache_eq (const void *arg1, const void *arg2)
 {
-  const struct btrace_frame_cache *cache1 = arg1;
-  const struct btrace_frame_cache *cache2 = arg2;
+  const struct btrace_frame_cache *cache1
+    = (const struct btrace_frame_cache *) arg1;
+  const struct btrace_frame_cache *cache2
+    = (const struct btrace_frame_cache *) arg2;
 
   return cache1->frame == cache2->frame;
 }
@@ -1420,7 +1421,7 @@ btrace_get_frame_function (struct frame_info *frame)
   if (slot == NULL)
     return NULL;
 
-  cache = *slot;
+  cache = (const struct btrace_frame_cache *) *slot;
   return cache->bfun;
 }
 
@@ -1433,7 +1434,7 @@ record_btrace_frame_unwind_stop_reason (struct frame_info *this_frame,
   const struct btrace_frame_cache *cache;
   const struct btrace_function *bfun;
 
-  cache = *this_cache;
+  cache = (const struct btrace_frame_cache *) *this_cache;
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
 
@@ -1453,7 +1454,7 @@ record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
   const struct btrace_function *bfun;
   CORE_ADDR code, special;
 
-  cache = *this_cache;
+  cache = (const struct btrace_frame_cache *) *this_cache;
 
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
@@ -1492,7 +1493,7 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
     throw_error (NOT_AVAILABLE_ERROR,
 		 _("Registers are not available in btrace record history"));
 
-  cache = *this_cache;
+  cache = (const struct btrace_frame_cache *) *this_cache;
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
 
@@ -1615,7 +1616,7 @@ record_btrace_frame_dealloc_cache (struct frame_info *self, void *this_cache)
   struct btrace_frame_cache *cache;
   void **slot;
 
-  cache = this_cache;
+  cache = (struct btrace_frame_cache *) this_cache;
 
   slot = htab_find_slot (bfcache, cache, NO_INSERT);
   gdb_assert (slot != NULL);

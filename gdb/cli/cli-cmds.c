@@ -277,7 +277,7 @@ complete_command (char *arg, int from_tty)
       point--;
     }
 
-  arg_prefix = alloca (point - arg + 1);
+  arg_prefix = (char *) alloca (point - arg + 1);
   memcpy (arg_prefix, arg, point - arg);
   arg_prefix[point - arg] = 0;
 
@@ -1295,7 +1295,7 @@ make_command (char *arg, int from_tty)
     p = "make";
   else
     {
-      p = xmalloc (sizeof ("make ") + strlen (arg));
+      p = (char *) xmalloc (sizeof ("make ") + strlen (arg));
       strcpy (p, "make ");
       strcpy (p + sizeof ("make ") - 1, arg);
     }
@@ -1554,8 +1554,8 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
 static int
 compare_symtabs (const void *a, const void *b)
 {
-  const struct symtab_and_line *sala = a;
-  const struct symtab_and_line *salb = b;
+  const struct symtab_and_line *sala = (const struct symtab_and_line *) a;
+  const struct symtab_and_line *salb = (const struct symtab_and_line *) b;
   const char *dira = SYMTAB_DIRNAME (sala->symtab);
   const char *dirb = SYMTAB_DIRNAME (salb->symtab);
   int r;

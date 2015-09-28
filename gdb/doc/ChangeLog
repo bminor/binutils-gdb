@@ -1,3 +1,14 @@
+2015-09-25  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Process Record and Replay): Fix syntax of
+	"record instruction-history begin, end" and
+	"record function-call-history begin, end".
+
+2015-09-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Specifying Source Directories): Fix
+	substitute-path example.
+
 2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (All-Stop Mode): Describe new scheduler-locking mode.

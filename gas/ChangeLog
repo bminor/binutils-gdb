@@ -1,3 +1,24 @@
+2015-08-11  Peter Zotov  <whitequark@whitequark.org>
+
+	PR ld/18759
+	* config/tc-or1k.c (tc_gen_reloc): Correct computation of PC
+	relative relocs.
+	* config/tc-or1k.h (GAS_CGEN_PRCEL_R_TYPE): Delete.
+
+2015-09-25  Ryo ONODERA  <ryo_on@yk.rim.or.jp>
+
+	PR 18994
+	* configure.ac (nds32): Don't use bash == in tests.
+	* configure: Regenerate.
+
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ppc.c (insn_validate): Cast PPC_OPSHIFT_INV to an int.
+
+2015-09-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (nop_7): Recode using MAX.
+
 2015-09-05  Chen Gang  <gang.chen.5i5j@gmail.com>
 
 	* config/tc-avr.c (md_section_align): Append UL for -1 to avoid

@@ -777,7 +777,7 @@ i386_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = xmalloc (len);
+  gdb_byte *buf = (gdb_byte *) xmalloc (len);
 
   read_memory (from, buf, len);
 
@@ -2050,7 +2050,7 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct i386_frame_cache *cache;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct i386_frame_cache *) *this_cache;
 
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
@@ -2220,7 +2220,7 @@ i386_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   CORE_ADDR sp;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct i386_frame_cache *) *this_cache;
 
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
@@ -2407,7 +2407,7 @@ i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   gdb_byte buf[4];
 
   if (*this_cache)
-    return *this_cache;
+    return (struct i386_frame_cache *) *this_cache;
 
   cache = i386_alloc_frame_cache ();
 
@@ -3732,7 +3732,7 @@ i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const gdb_byte *regs = gregs;
+  const gdb_byte *regs = (const gdb_byte *) gregs;
   int i;
 
   gdb_assert (len >= tdep->sizeof_gregset);
@@ -3757,7 +3757,7 @@ i386_collect_gregset (const struct regset *regset,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  gdb_byte *regs = gregs;
+  gdb_byte *regs = (gdb_byte *) gregs;
   int i;
 
   gdb_assert (len >= tdep->sizeof_gregset);
@@ -4051,7 +4051,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	return 0;
 
       len = s - start - 1;
-      regname = alloca (len + 1);
+      regname = (char *) alloca (len + 1);
 
       strncpy (regname, start, len);
       regname[len] = '\0';
@@ -4161,7 +4161,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	return 0;
 
       len_base = s - start;
-      base = alloca (len_base + 1);
+      base = (char *) alloca (len_base + 1);
       strncpy (base, start, len_base);
       base[len_base] = '\0';
 
@@ -4176,7 +4176,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	++s;
 
       len_index = s - start;
-      index = alloca (len_index + 1);
+      index = (char *) alloca (len_index + 1);
       strncpy (index, start, len_index);
       index[len_index] = '\0';
 
@@ -8478,7 +8478,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_insn_is_jump (gdbarch, i386_insn_is_jump);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  info.tdep_info = (void *) tdesc_data;
+  info.tdep_info = (struct gdbarch_tdep_info *) tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   if (!i386_validate_tdesc_p (tdep, tdesc_data))

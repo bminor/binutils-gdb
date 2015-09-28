@@ -183,7 +183,7 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
   /* For non-numbers, reuse libiberty's logic to find the correct
      format.  We do not lose any precision in this case by passing
      through a double.  */
-  kind = floatformat_classify (fmt, from);
+  kind = floatformat_classify (fmt, (const bfd_byte *) from);
   if (kind == float_infinite || kind == float_nan)
     {
       double dto;

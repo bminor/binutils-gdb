@@ -352,7 +352,7 @@ inf_child_fileio_readlink (struct target_ops *self,
       return NULL;
     }
 
-  ret = xmalloc (len + 1);
+  ret = (char *) xmalloc (len + 1);
   memcpy (ret, buf, len);
   ret[len] = '\0';
   return ret;

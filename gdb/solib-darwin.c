@@ -96,7 +96,8 @@ get_darwin_info (void)
 {
   struct darwin_info *info;
 
-  info = program_space_data (current_program_space, solib_darwin_pspace_data);
+  info = (struct darwin_info *) program_space_data (current_program_space,
+						    solib_darwin_pspace_data);
   if (info != NULL)
     return info;
 

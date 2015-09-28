@@ -355,7 +355,7 @@ QualifiedName:
 		    {
 		      char *buf;
 
-		      buf = malloc ($$.length + 1);
+		      buf = (char *) malloc ($$.length + 1);
 		      make_cleanup (free, buf);
 		      sprintf (buf, "%.*s.%.*s",
 			       $1.length, $1.ptr, $3.length, $3.ptr);

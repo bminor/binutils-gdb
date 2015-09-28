@@ -749,7 +749,7 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
 
   if (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
     {
-      char *cp = xmalloc (dir_len + 1);
+      char *cp = (char *) xmalloc (dir_len + 1);
 
       memcpy (cp, dir, dir_len);
       cp[dir_len] = '\0';
@@ -874,7 +874,7 @@ thread_db_init (int use_events)
 static int
 any_thread_of (struct inferior_list_entry *entry, void *args)
 {
-  int *pid_p = args;
+  int *pid_p = (int *) args;
 
   if (ptid_get_pid (entry->id) == *pid_p)
     return 1;

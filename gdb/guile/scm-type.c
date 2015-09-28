@@ -139,7 +139,7 @@ tyscm_type_name (struct type *type, SCM *excp)
 static hashval_t
 tyscm_hash_type_smob (const void *p)
 {
-  const type_smob *t_smob = p;
+  const type_smob *t_smob = (const type_smob *) p;
 
   return htab_hash_pointer (t_smob->type);
 }
@@ -149,8 +149,8 @@ tyscm_hash_type_smob (const void *p)
 static int
 tyscm_eq_type_smob (const void *ap, const void *bp)
 {
-  const type_smob *a = ap;
-  const type_smob *b = bp;
+  const type_smob *a = (const type_smob *) ap;
+  const type_smob *b = (const type_smob *) bp;
 
   return (a->type == b->type
 	  && a->type != NULL);
@@ -170,7 +170,7 @@ tyscm_type_map (struct type *type)
   if (objfile == NULL)
     return global_types_map;
 
-  htab = objfile_data (objfile, tyscm_objfile_data_key);
+  htab = (htab_t) objfile_data (objfile, tyscm_objfile_data_key);
   if (htab == NULL)
     {
       htab = gdbscm_create_eqable_gsmob_ptr_map (tyscm_hash_type_smob,
@@ -353,7 +353,7 @@ static int
 tyscm_copy_type_recursive (void **slot, void *info)
 {
   type_smob *t_smob = (type_smob *) *slot;
-  htab_t copied_types = info;
+  htab_t copied_types = (htab_t) info;
   struct objfile *objfile = TYPE_OBJFILE (t_smob->type);
   htab_t htab;
   eqable_gdb_smob **new_slot;
@@ -388,7 +388,7 @@ tyscm_copy_type_recursive (void **slot, void *info)
 static void
 save_objfile_types (struct objfile *objfile, void *datum)
 {
-  htab_t htab = datum;
+  htab_t htab = (htab_t) datum;
   htab_t copied_types;
 
   if (!gdb_scheme_initialized)

@@ -65,7 +65,7 @@ struct syscm_gdbarch_data
 static hashval_t
 syscm_hash_symbol_smob (const void *p)
 {
-  const symbol_smob *s_smob = p;
+  const symbol_smob *s_smob = (const symbol_smob *) p;
 
   return htab_hash_pointer (s_smob->symbol);
 }
@@ -75,8 +75,8 @@ syscm_hash_symbol_smob (const void *p)
 static int
 syscm_eq_symbol_smob (const void *ap, const void *bp)
 {
-  const symbol_smob *a = ap;
-  const symbol_smob *b = bp;
+  const symbol_smob *a = (const symbol_smob *) ap;
+  const symbol_smob *b = (const symbol_smob *) bp;
 
   return (a->symbol == b->symbol
 	  && a->symbol != NULL);
@@ -105,7 +105,7 @@ syscm_get_symbol_map (struct symbol *symbol)
     {
       struct objfile *objfile = symbol_objfile (symbol);
 
-      htab = objfile_data (objfile, syscm_objfile_data_key);
+      htab = (htab_t) objfile_data (objfile, syscm_objfile_data_key);
       if (htab == NULL)
 	{
 	  htab = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
@@ -116,7 +116,8 @@ syscm_get_symbol_map (struct symbol *symbol)
   else
     {
       struct gdbarch *gdbarch = symbol_arch (symbol);
-      struct syscm_gdbarch_data *data = gdbarch_data (gdbarch,
+      struct syscm_gdbarch_data *data
+	= (struct syscm_gdbarch_data *) gdbarch_data (gdbarch,
 						      syscm_gdbarch_data_key);
 
       htab = data->htab;
@@ -311,7 +312,7 @@ syscm_mark_symbol_invalid (void **slot, void *info)
 static void
 syscm_del_objfile_symbols (struct objfile *objfile, void *datum)
 {
-  htab_t htab = datum;
+  htab_t htab = (htab_t) datum;
 
   if (htab != NULL)
     {

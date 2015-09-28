@@ -1,3 +1,24 @@
+2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Adjust expected
+	source line.
+
+2015-09-24 Sandra Loosemore <sandra@codesourcery.com>
+
+	* gdb.cp/classes.exp (test_enums): Generalize regexp to allow
+	short or char as base type.
+
+2015-09-23 Sandra Loosemore <sandra@codesourcery.com>
+
+	* gdb.cp/var-tag.exp (do_global_tests): Generalize opt_underlying
+	to allow any size enum.
+
+2015-09-23  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/array_ptr_renaming.exp: New testcase.
+	* gdb.ada/array_ptr_renaming/foo.adb: New file.
+	* gdb.ada/array_ptr_renaming/pack.ads: New file.
+
 2015-09-21  Pierre Langlois  <pierre.langlois@arm.com>
 
 	* gdb.trace/ftrace-lock.c: New file.

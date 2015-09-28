@@ -348,7 +348,7 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
-	  val_error = alloca (strlen (except.message) + 1);
+	  val_error = (char *) alloca (strlen (except.message) + 1);
 	  strcpy (val_error, except.message);
 	}
       END_CATCH
@@ -475,7 +475,7 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
-	      val_error = alloca (strlen (except.message) + 1);
+	      val_error = (char *) alloca (strlen (except.message) + 1);
 	      strcpy (val_error, except.message);
 	    }
 	  END_CATCH
@@ -1915,7 +1915,7 @@ backtrace_command (char *arg, int from_tty)
 	{
 	  if (arglen > 0)
 	    {
-	      arg = xmalloc (arglen + 1);
+	      arg = (char *) xmalloc (arglen + 1);
 	      make_cleanup (xfree, arg);
 	      arg[0] = 0;
 	      for (i = 0; i < argc; i++)
@@ -2059,7 +2059,8 @@ do_print_variable_and_value (const char *print_name,
 			     struct symbol *sym,
 			     void *cb_data)
 {
-  struct print_variable_and_value_data *p = cb_data;
+  struct print_variable_and_value_data *p
+    = (struct print_variable_and_value_data *) cb_data;
   struct frame_info *frame;
 
   frame = frame_find_by_id (p->frame_id);

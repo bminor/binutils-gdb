@@ -468,7 +468,7 @@ host_hex_value (char c)
 static void
 cleanup_iconv (void *p)
 {
-  iconv_t *descp = p;
+  iconv_t *descp = (iconv_t *) p;
   iconv_close (*descp);
 }
 
@@ -617,7 +617,7 @@ make_wchar_iterator (const gdb_byte *input, size_t bytes,
 static void
 do_cleanup_iterator (void *p)
 {
-  struct wchar_iterator *iter = p;
+  struct wchar_iterator *iter = (struct wchar_iterator *) p;
 
   iconv_close (iter->desc);
   xfree (iter->out);
@@ -687,8 +687,7 @@ wchar_iterate (struct wchar_iterator *iter,
 	      if (out_request > iter->out_size)
 		{
 		  iter->out_size = out_request;
-		  iter->out = xrealloc (iter->out,
-					out_request * sizeof (gdb_wchar_t));
+		  iter->out = XRESIZEVEC (gdb_wchar_t, iter->out, out_request);
 		}
 	      continue;
 

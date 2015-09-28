@@ -529,7 +529,7 @@ varobj_delete (struct varobj *var, char ***dellist, int only_children)
   /* We may have been asked to return a list of what has been deleted.  */
   if (dellist != NULL)
     {
-      *dellist = xmalloc ((delcount + 1) * sizeof (char *));
+      *dellist = XNEWVEC (char *, delcount + 1);
 
       cp = *dellist;
       mycount = delcount;
@@ -2196,7 +2196,7 @@ free_variable (struct varobj *var)
 static void
 do_free_variable_cleanup (void *var)
 {
-  free_variable (var);
+  free_variable ((struct varobj *) var);
 }
 
 static struct cleanup *
@@ -2610,7 +2610,7 @@ varobj_value_get_print_value (struct value *value,
 			    }
 
 			  len = strlen (s);
-			  thevalue = xmemdup (s, len + 1, len + 1);
+			  thevalue = (char *) xmemdup (s, len + 1, len + 1);
 			  type = builtin_type (gdbarch)->builtin_char;
 			  xfree (s);
 

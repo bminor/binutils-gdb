@@ -1497,7 +1497,7 @@ init_trace_buffer (LONGEST bufsize)
      marker.  */
   alloc_size = (bufsize < TRACEFRAME_EOB_MARKER_SIZE
 		? TRACEFRAME_EOB_MARKER_SIZE : bufsize);
-  trace_buffer_lo = xrealloc (trace_buffer_lo, alloc_size);
+  trace_buffer_lo = (unsigned char *) xrealloc (trace_buffer_lo, alloc_size);
 
   trace_buffer_hi = trace_buffer_lo + trace_buffer_size;
 
@@ -2024,13 +2024,11 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 	  tpoint->num_step_actions++;
 
 	  tpoint->step_actions
-	    = xrealloc (tpoint->step_actions,
-			(sizeof (*tpoint->step_actions)
-			 * tpoint->num_step_actions));
+	    = XRESIZEVEC (struct tracepoint_action *, tpoint->step_actions,
+			  tpoint->num_step_actions);
 	  tpoint->step_actions_str
-	    = xrealloc (tpoint->step_actions_str,
-			(sizeof (*tpoint->step_actions_str)
-			 * tpoint->num_step_actions));
+	    = XRESIZEVEC (char *, tpoint->step_actions_str,
+			  tpoint->num_step_actions);
 	  tpoint->step_actions[tpoint->num_step_actions - 1] = action;
 	  tpoint->step_actions_str[tpoint->num_step_actions - 1]
 	    = savestring (act_start, act - act_start);
@@ -2039,11 +2037,10 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 	{
 	  tpoint->numactions++;
 	  tpoint->actions
-	    = xrealloc (tpoint->actions,
-			sizeof (*tpoint->actions) * tpoint->numactions);
+	    = XRESIZEVEC (struct tracepoint_action *, tpoint->actions,
+			  tpoint->numactions);
 	  tpoint->actions_str
-	    = xrealloc (tpoint->actions_str,
-			sizeof (*tpoint->actions_str) * tpoint->numactions);
+	    = XRESIZEVEC (char *, tpoint->actions_str, tpoint->numactions);
 	  tpoint->actions[tpoint->numactions - 1] = action;
 	  tpoint->actions_str[tpoint->numactions - 1]
 	    = savestring (act_start, act - act_start);
@@ -2201,7 +2198,8 @@ add_traceframe (struct tracepoint *tpoint)
 {
   struct traceframe *tframe;
 
-  tframe = trace_buffer_alloc (sizeof (struct traceframe));
+  tframe
+    = (struct traceframe *) trace_buffer_alloc (sizeof (struct traceframe));
 
   if (tframe == NULL)
     return NULL;
@@ -2223,7 +2221,7 @@ add_traceframe_block (struct traceframe *tframe,
   if (!tframe)
     return NULL;
 
-  block = trace_buffer_alloc (amt);
+  block = (unsigned char *) trace_buffer_alloc (amt);
 
   if (!block)
     return NULL;
@@ -2685,7 +2683,7 @@ cmd_qtdpsrc (char *own_buf)
 
   saved = packet;
   packet = strchr (packet, ':');
-  srctype = xmalloc (packet - saved + 1);
+  srctype = (char *) xmalloc (packet - saved + 1);
   memcpy (srctype, saved, packet - saved);
   srctype[packet - saved] = '\0';
   ++packet;
@@ -2693,7 +2691,7 @@ cmd_qtdpsrc (char *own_buf)
   ++packet; /* skip a colon */
   packet = unpack_varlen_hex (packet, &slen);
   ++packet; /* skip a colon */
-  src = xmalloc (slen + 1);
+  src = (char *) xmalloc (slen + 1);
   nbytes = hex2bin (packet, (gdb_byte *) src, strlen (packet) / 2);
   src[nbytes] = '\0';
 
@@ -2735,7 +2733,7 @@ cmd_qtdv (char *own_buf)
   ++packet; /* skip a colon */
 
   nbytes = strlen (packet) / 2;
-  varname = xmalloc (nbytes + 1);
+  varname = (char *) xmalloc (nbytes + 1);
   nbytes = hex2bin (packet, (gdb_byte *) varname, nbytes);
   varname[nbytes] = '\0';
 
@@ -3659,7 +3657,8 @@ cmd_qtstatus (char *packet)
 
       result_name = stop_reason_rsp + strlen ("terror:");
       hexstr_len = strlen (result_name) * 2;
-      p = stop_reason_rsp = alloca (strlen ("terror:") + hexstr_len + 1);
+      p = stop_reason_rsp
+	= (char *) alloca (strlen ("terror:") + hexstr_len + 1);
       strcpy (p, "terror:");
       p += strlen (p);
       bin2hex ((gdb_byte *) result_name, p, strlen (result_name));
@@ -3668,7 +3667,7 @@ cmd_qtstatus (char *packet)
   /* If this was a forced stop, include any stop note that was supplied.  */
   if (strcmp (stop_reason_rsp, "tstop") == 0)
     {
-      stop_reason_rsp = alloca (strlen ("tstop:") + strlen (buf3) + 1);
+      stop_reason_rsp = (char *) alloca (strlen ("tstop:") + strlen (buf3) + 1);
       strcpy (stop_reason_rsp, "tstop:");
       strcat (stop_reason_rsp, buf3);
     }
@@ -3780,7 +3779,7 @@ response_source (char *packet,
   int len;
 
   len = strlen (src->str);
-  buf = alloca (len * 2 + 1);
+  buf = (char *) alloca (len * 2 + 1);
   bin2hex ((gdb_byte *) src->str, buf, len);
 
   sprintf (packet, "Z%x:%s:%s:%x:%x:%s",
@@ -3869,7 +3868,7 @@ response_tsv (char *packet, struct trace_state_variable *tsv)
   if (tsv->name)
     {
       namelen = strlen (tsv->name);
-      buf = alloca (namelen * 2 + 1);
+      buf = (char *) alloca (namelen * 2 + 1);
       bin2hex ((gdb_byte *) tsv->name, buf, namelen);
     }
 
@@ -3948,7 +3947,7 @@ cmd_qtstmat (char *packet)
 static int
 same_process_p (struct inferior_list_entry *entry, void *data)
 {
-  int *pid = data;
+  int *pid = (int *) data;
 
   return ptid_get_pid (entry->id) == *pid;
 }
@@ -4110,7 +4109,7 @@ cmd_qtnotes (char *own_buf)
 	  saved = packet;
 	  packet = strchr (packet, ';');
 	  nbytes = (packet - saved) / 2;
-	  user = xmalloc (nbytes + 1);
+	  user = (char *) xmalloc (nbytes + 1);
 	  nbytes = hex2bin (saved, (gdb_byte *) user, nbytes);
 	  user[nbytes] = '\0';
 	  ++packet; /* skip the semicolon */
@@ -4124,7 +4123,7 @@ cmd_qtnotes (char *own_buf)
 	  saved = packet;
 	  packet = strchr (packet, ';');
 	  nbytes = (packet - saved) / 2;
-	  notes = xmalloc (nbytes + 1);
+	  notes = (char *) xmalloc (nbytes + 1);
 	  nbytes = hex2bin (saved, (gdb_byte *) notes, nbytes);
 	  notes[nbytes] = '\0';
 	  ++packet; /* skip the semicolon */
@@ -4138,7 +4137,7 @@ cmd_qtnotes (char *own_buf)
 	  saved = packet;
 	  packet = strchr (packet, ';');
 	  nbytes = (packet - saved) / 2;
-	  stopnote = xmalloc (nbytes + 1);
+	  stopnote = (char *) xmalloc (nbytes + 1);
 	  nbytes = hex2bin (saved, (gdb_byte *) stopnote, nbytes);
 	  stopnote[nbytes] = '\0';
 	  ++packet; /* skip the semicolon */
@@ -5067,7 +5066,7 @@ agent_tsv_read (struct eval_agent_expr_context *ctx, int n)
 static int
 match_blocktype (char blocktype, unsigned char *dataptr, void *data)
 {
-  char *wantedp = data;
+  char *wantedp = (char *) data;
 
   if (*wantedp == blocktype)
     return 1;
@@ -5413,7 +5412,7 @@ traceframe_read_sdata (int tfnum, ULONGEST offset,
 static int
 build_traceframe_info_xml (char blocktype, unsigned char *dataptr, void *data)
 {
-  struct buffer *buffer = data;
+  struct buffer *buffer = (struct buffer *) data;
 
   switch (blocktype)
     {
@@ -5800,7 +5799,7 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
   ctx.regcache_initted = 0;
   /* Wrap the regblock in a register cache (in the stack, we don't
      want to malloc here).  */
-  ctx.regspace = alloca (ipa_tdesc->registers_size);
+  ctx.regspace = (unsigned char *) alloca (ipa_tdesc->registers_size);
   if (ctx.regspace == NULL)
     {
       trace_debug ("Trace buffer block allocation failed, skipping");
@@ -7365,7 +7364,7 @@ initialize_tracepoint (void)
     if (pagesize == -1)
       perror_with_name ("sysconf");
 
-    gdb_tp_heap_buffer = xmalloc (5 * 1024 * 1024);
+    gdb_tp_heap_buffer = (char *) xmalloc (5 * 1024 * 1024);
 
 #define SCRATCH_BUFFER_NPAGES 20
 
@@ -7373,10 +7372,12 @@ initialize_tracepoint (void)
        address (close to the main executable's code).  */
     for (addr = pagesize; addr != 0; addr += pagesize)
       {
-	gdb_jump_pad_buffer = mmap ((void *) addr, pagesize * SCRATCH_BUFFER_NPAGES,
-				    PROT_READ | PROT_WRITE | PROT_EXEC,
-				    MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-				    -1, 0);
+	gdb_jump_pad_buffer
+	  = (char *) mmap ((void *) addr,
+			   pagesize * SCRATCH_BUFFER_NPAGES,
+			   PROT_READ | PROT_WRITE | PROT_EXEC,
+			   MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
+			   -1, 0);
 	if (gdb_jump_pad_buffer != MAP_FAILED)
 	  break;
       }
@@ -7393,7 +7394,7 @@ initialize_tracepoint (void)
      buffer setup, but it can be mysterious, so create a channel to
      report back on what went wrong, using a fixed size since we may
      not be able to allocate space later when the problem occurs.  */
-  gdb_trampoline_buffer_error = xmalloc (IPA_BUFSIZ);
+  gdb_trampoline_buffer_error = (char *) xmalloc (IPA_BUFSIZ);
 
   strcpy (gdb_trampoline_buffer_error, "No errors reported");
 

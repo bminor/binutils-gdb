@@ -652,7 +652,7 @@ m88k_frame_cache (struct frame_info *this_frame, void **this_cache)
   CORE_ADDR frame_sp;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct m88k_frame_cache *) *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct m88k_frame_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
@@ -782,7 +782,7 @@ m88k_supply_gregset (const struct regset *regset,
 		     struct regcache *regcache,
 		     int regnum, const void *gregs, size_t len)
 {
-  const gdb_byte *regs = gregs;
+  const gdb_byte *regs = (const gdb_byte *) gregs;
   int i;
 
   for (i = 0; i < M88K_NUM_REGS; i++)

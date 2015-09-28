@@ -653,7 +653,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 
   len = p->arg - start;
 
-  regname = alloca (len + gdb_reg_prefix_len + gdb_reg_suffix_len + 1);
+  regname = (char *) alloca (len + gdb_reg_prefix_len + gdb_reg_suffix_len + 1);
   regname[0] = '\0';
 
   /* We only add the GDB's register prefix/suffix if we are dealing with
@@ -1538,7 +1538,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
     }
 
   ret->args_parsed = 0;
-  ret->args_u.text = (void *) probe_args;
+  ret->args_u.text = probe_args;
 
   /* Successfully created probe.  */
   VEC_safe_push (probe_p, *probesp, (struct probe *) ret);
@@ -1550,7 +1550,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 static void
 get_stap_base_address_1 (bfd *abfd, asection *sect, void *obj)
 {
-  asection **ret = obj;
+  asection **ret = (asection **) obj;
 
   if ((sect->flags & (SEC_DATA | SEC_ALLOC | SEC_HAS_CONTENTS))
       && sect->name && !strcmp (sect->name, STAP_BASE_SECTION_NAME))

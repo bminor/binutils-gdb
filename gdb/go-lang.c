@@ -379,7 +379,7 @@ go_demangle (const char *mangled_name, int options)
     }
   obstack_grow_str0 (&tempbuf, "");
 
-  result = xstrdup (obstack_finish (&tempbuf));
+  result = xstrdup ((const char *) obstack_finish (&tempbuf));
   obstack_free (&tempbuf, NULL);
   xfree (name_buf);
   return result;
@@ -655,7 +655,7 @@ static struct gdbarch_data *go_type_data;
 const struct builtin_go_type *
 builtin_go_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, go_type_data);
+  return (const struct builtin_go_type *) gdbarch_data (gdbarch, go_type_data);
 }
 
 extern initialize_file_ftype _initialize_go_language;

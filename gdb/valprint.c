@@ -1603,7 +1603,7 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
      as the base 16 number, which is 2 digits per byte.  */
 
   decimal_len = len * 2 * 2;
-  digits = xmalloc (decimal_len);
+  digits = (unsigned char *) xmalloc (decimal_len);
 
   for (i = 0; i < decimal_len; i++)
     {
@@ -2119,7 +2119,7 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
   else
     {				/* Length of string is really 0!  */
       /* We always allocate *buffer.  */
-      *buffer = bufptr = xmalloc (1);
+      *buffer = bufptr = (gdb_byte *) xmalloc (1);
       errcode = 0;
     }
 
@@ -2272,7 +2272,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
   struct wchar_iterator *iter;
   int need_escape = 0;
 
-  buf = alloca (TYPE_LENGTH (type));
+  buf = (gdb_byte *) alloca (TYPE_LENGTH (type));
   pack_long (buf, type, c);
 
   iter = make_wchar_iterator (buf, TYPE_LENGTH (type),

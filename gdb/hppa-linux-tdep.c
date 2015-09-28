@@ -205,7 +205,7 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   int i;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct hppa_linux_sigtramp_unwind_cache *) *this_cache;
 
   info = FRAME_OBSTACK_ZALLOC (struct hppa_linux_sigtramp_unwind_cache);
   *this_cache = info;

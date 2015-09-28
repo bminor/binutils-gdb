@@ -2157,18 +2157,6 @@ got_page_reloc_p (unsigned int r_type)
 }
 
 static inline bfd_boolean
-got_ofst_reloc_p (unsigned int r_type)
-{
-  return r_type == R_MIPS_GOT_OFST || r_type == R_MICROMIPS_GOT_OFST;
-}
-
-static inline bfd_boolean
-got_hi16_reloc_p (unsigned int r_type)
-{
-  return r_type == R_MIPS_GOT_HI16 || r_type == R_MICROMIPS_GOT_HI16;
-}
-
-static inline bfd_boolean
 got_lo16_reloc_p (unsigned int r_type)
 {
   return r_type == R_MIPS_GOT_LO16 || r_type == R_MICROMIPS_GOT_LO16;

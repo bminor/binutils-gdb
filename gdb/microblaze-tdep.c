@@ -441,7 +441,7 @@ microblaze_frame_cache (struct frame_info *next_frame, void **this_cache)
   int rn;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct microblaze_frame_cache *) *this_cache;
 
   cache = microblaze_alloc_frame_cache ();
   *this_cache = cache;

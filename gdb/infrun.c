@@ -1178,7 +1178,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
     {
       char *name = exec_file_find (execd_pathname, NULL);
 
-      execd_pathname = alloca (strlen (name) + 1);
+      execd_pathname = (char *) alloca (strlen (name) + 1);
       strcpy (execd_pathname, name);
       xfree (name);
     }
@@ -1692,7 +1692,8 @@ displaced_step_clear (struct displaced_step_inferior_state *displaced)
 static void
 displaced_step_clear_cleanup (void *arg)
 {
-  struct displaced_step_inferior_state *state = arg;
+  struct displaced_step_inferior_state *state
+    = (struct displaced_step_inferior_state *) arg;
 
   displaced_step_clear (state);
 }
@@ -1789,7 +1790,7 @@ displaced_step_prepare_throw (ptid_t ptid)
   len = gdbarch_max_insn_length (gdbarch);
 
   /* Save the original contents of the copy area.  */
-  displaced->step_saved_copy = xmalloc (len);
+  displaced->step_saved_copy = (gdb_byte *) xmalloc (len);
   ignore_cleanups = make_cleanup (free_current_contents,
 				  &displaced->step_saved_copy);
   status = target_read_memory (copy, displaced->step_saved_copy, len);
@@ -7835,7 +7836,7 @@ print_stop_location (struct target_waitstatus *ws)
 static void
 restore_current_uiout_cleanup (void *arg)
 {
-  struct ui_out *saved_uiout = arg;
+  struct ui_out *saved_uiout = (struct ui_out *) arg;
 
   current_uiout = saved_uiout;
 }
@@ -7916,7 +7917,7 @@ struct stop_context
 static struct stop_context *
 save_stop_context (void)
 {
-  struct stop_context *sc = xmalloc (sizeof (struct stop_context));
+  struct stop_context *sc = XNEW (struct stop_context);
 
   sc->stop_id = get_stop_id ();
   sc->ptid = inferior_ptid;
@@ -7941,7 +7942,7 @@ save_stop_context (void)
 static void
 release_stop_context_cleanup (void *arg)
 {
-  struct stop_context *sc = arg;
+  struct stop_context *sc = (struct stop_context *) arg;
 
   if (sc->thread != NULL)
     sc->thread->refcount--;
@@ -8658,7 +8659,7 @@ save_infcall_suspend_state (void)
       size_t len = TYPE_LENGTH (type);
       struct cleanup *back_to;
 
-      siginfo_data = xmalloc (len);
+      siginfo_data = (gdb_byte *) xmalloc (len);
       back_to = make_cleanup (xfree, siginfo_data);
 
       if (target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
@@ -8727,7 +8728,7 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 static void
 do_restore_infcall_suspend_state_cleanup (void *state)
 {
-  restore_infcall_suspend_state (state);
+  restore_infcall_suspend_state ((struct infcall_suspend_state *) state);
 }
 
 struct cleanup *
@@ -8869,7 +8870,7 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
 static void
 do_restore_infcall_control_state_cleanup (void *sts)
 {
-  restore_infcall_control_state (sts);
+  restore_infcall_control_state ((struct infcall_control_state *) sts);
 }
 
 struct cleanup *
@@ -8903,7 +8904,7 @@ discard_infcall_control_state (struct infcall_control_state *inf_status)
 static void
 restore_inferior_ptid (void *arg)
 {
-  ptid_t *saved_ptid_ptr = arg;
+  ptid_t *saved_ptid_ptr = (ptid_t *) arg;
 
   inferior_ptid = *saved_ptid_ptr;
   xfree (arg);

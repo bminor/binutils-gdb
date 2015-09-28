@@ -640,7 +640,7 @@ StringExp:
 
 		  vec->type = $1.type;
 		  vec->length = $1.length;
-		  vec->ptr = malloc ($1.length + 1);
+		  vec->ptr = (char *) malloc ($1.length + 1);
 		  memcpy (vec->ptr, $1.ptr, $1.length + 1);
 		}
 |	StringExp STRING_LITERAL
@@ -648,10 +648,10 @@ StringExp:
 		     for convenience.  */
 		  char *p;
 		  ++$$.len;
-		  $$.tokens = realloc ($$.tokens,
-				       $$.len * sizeof (struct typed_stoken));
+		  $$.tokens
+		    = XRESIZEVEC (struct typed_stoken, $$.tokens, $$.len);
 
-		  p = malloc ($2.length + 1);
+		  p = (char *) malloc ($2.length + 1);
 		  memcpy (p, $2.ptr, $2.length + 1);
 
 		  $$.tokens[$$.len - 1].type = $2.type;

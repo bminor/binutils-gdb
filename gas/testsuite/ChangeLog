@@ -1,3 +1,9 @@
+2015-09-28  Tom Rix  <tom@bumblecow.com>
+
+	* gas/ppc/e500-ill.s: New testcase for illegal ppc e500 ops.
+	* gas/ppc/e500-ill.l: Expected results.
+	* gas/ppc/ppc.exp: Run it.
+
 2015-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gas/sparc/wrpr.s: Test writing to the privileged %pmcdper

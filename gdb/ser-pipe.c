@@ -148,7 +148,7 @@ pipe_open (struct serial *scb, const char *name)
 static void
 pipe_close (struct serial *scb)
 {
-  struct pipe_state *state = scb->state;
+  struct pipe_state *state = (struct pipe_state *) scb->state;
 
   close (scb->fd);
   scb->fd = -1;

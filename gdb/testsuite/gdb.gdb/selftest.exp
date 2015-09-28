@@ -40,7 +40,7 @@ proc do_steps_and_nexts {} {
 	# me with GCC 3.1 on i686-pc-linux-gnu when I compile with
 	# optimization.
 	gdb_test_multiple "list" "list" {
-	    -re ".*context = data.*$gdb_prompt $" {
+	    -re ".*context = \\(struct captured_main_args \\*\\) data.*$gdb_prompt $" {
 		set description "step over context initialization"
 		set command "step"
 	    }

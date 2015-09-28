@@ -1457,7 +1457,7 @@ insn_validate (const struct powerpc_opcode *op)
       else
         {
 	  const struct powerpc_operand *operand = &powerpc_operands[*o];
-	  if (operand->shift != PPC_OPSHIFT_INV)
+	  if (operand->shift != (int) PPC_OPSHIFT_INV)
 	    {
 	      unsigned long mask;
 

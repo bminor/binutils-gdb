@@ -226,7 +226,7 @@ objc_demangle (const char *mangled, int options)
      (mangled[1] == 'i' || mangled[1] == 'c') &&
       mangled[2] == '_')
     {
-      cp = demangled = xmalloc(strlen(mangled) + 2);
+      cp = demangled = (char *) xmalloc (strlen (mangled) + 2);
 
       if (mangled[1] == 'i')
 	*cp++ = '-';		/* for instance method */
@@ -981,7 +981,7 @@ find_methods (char type, const char *theclass, const char *category,
 
       unsigned int objfile_csym = 0;
 
-      objc_csym = objfile_data (objfile, objc_objfile_data);
+      objc_csym = (unsigned int *) objfile_data (objfile, objc_objfile_data);
       if (objc_csym != NULL && *objc_csym == 0)
 	/* There are no ObjC symbols in this objfile.  Skip it entirely.  */
 	continue;
@@ -1006,7 +1006,7 @@ find_methods (char type, const char *theclass, const char *category,
 	  while ((strlen (symname) + 1) >= tmplen)
 	    {
 	      tmplen = (tmplen == 0) ? 1024 : tmplen * 2;
-	      tmp = xrealloc (tmp, tmplen);
+	      tmp = (char *) xrealloc (tmp, tmplen);
 	    }
 	  strcpy (tmp, symname);
 

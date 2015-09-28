@@ -61,7 +61,7 @@ nios2_supply_gregset (const struct regset *regset,
 		      struct regcache *regcache,
 		      int regnum, const void *gregs_buf, size_t len)
 {
-  const gdb_byte *gregs = gregs_buf;
+  const gdb_byte *gregs = (const gdb_byte *) gregs_buf;
   int regno;
   static const gdb_byte zero_buf[4] = {0, 0, 0, 0};
 
@@ -83,7 +83,7 @@ nios2_collect_gregset (const struct regset *regset,
 		       const struct regcache *regcache,
 		       int regnum, void *gregs_buf, size_t len)
 {
-  gdb_byte *gregs = gregs_buf;
+  gdb_byte *gregs = (gdb_byte *) gregs_buf;
   int regno;
 
   for (regno = NIOS2_Z_REGNUM; regno <= NIOS2_MPUACC_REGNUM; regno++)

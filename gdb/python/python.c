@@ -341,7 +341,7 @@ python_interactive_command (char *arg, int from_tty)
   if (arg && *arg)
     {
       int len = strlen (arg);
-      char *script = xmalloc (len + 2);
+      char *script = (char *) xmalloc (len + 2);
 
       strcpy (script, arg);
       script[len] = '\n';
@@ -428,7 +428,7 @@ compute_python_string (struct command_line *l)
   for (iter = l; iter; iter = iter->next)
     size += strlen (iter->line) + 1;
 
-  script = xmalloc (size + 1);
+  script = (char *) xmalloc (size + 1);
   here = 0;
   for (iter = l; iter; iter = iter->next)
     {
@@ -1458,7 +1458,7 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
   struct cleanup *cleanups;
   PyObject *type_obj, *type_module = NULL, *func = NULL;
   PyObject *result_obj = NULL;
-  PyObject *printers_obj = ext_printers->py_type_printers;
+  PyObject *printers_obj = (PyObject *) ext_printers->py_type_printers;
   char *result = NULL;
 
   if (printers_obj == NULL)
@@ -1524,7 +1524,7 @@ gdbpy_free_type_printers (const struct extension_language_defn *extlang,
 			  struct ext_lang_type_printers *ext_printers)
 {
   struct cleanup *cleanups;
-  PyObject *printers = ext_printers->py_type_printers;
+  PyObject *printers = (PyObject *) ext_printers->py_type_printers;
 
   if (printers == NULL)
     return;

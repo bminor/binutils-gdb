@@ -265,7 +265,8 @@ bcache_full (const void *addr, int length, struct bcache *bcache, int *added)
   /* The user's string isn't in the list.  Insert it after *ps.  */
   {
     struct bstring *newobj
-      = obstack_alloc (&bcache->cache, BSTRING_SIZE (length));
+      = (struct bstring *) obstack_alloc (&bcache->cache,
+					  BSTRING_SIZE (length));
 
     memcpy (&newobj->d.data, addr, length);
     newobj->length = length;

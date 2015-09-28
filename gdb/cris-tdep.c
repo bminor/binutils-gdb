@@ -320,7 +320,7 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   int i;
 
   if ((*this_cache))
-    return (*this_cache);
+    return (struct cris_unwind_cache *) (*this_cache);
 
   info = FRAME_OBSTACK_ZALLOC (struct cris_unwind_cache);
   (*this_cache) = info;
@@ -704,7 +704,7 @@ cris_frame_unwind_cache (struct frame_info *this_frame,
   struct cris_unwind_cache *info;
 
   if ((*this_prologue_cache))
-    return (*this_prologue_cache);
+    return (struct cris_unwind_cache *) (*this_prologue_cache);
 
   info = FRAME_OBSTACK_ZALLOC (struct cris_unwind_cache);
   (*this_prologue_cache) = info;

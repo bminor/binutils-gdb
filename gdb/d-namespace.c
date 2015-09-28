@@ -74,7 +74,8 @@ d_entire_prefix_len (const char *name)
    symbol.  Other arguments are as in d_lookup_symbol_nonlocal.  */
 
 static struct block_symbol
-d_lookup_symbol (const char *name, const struct block *block,
+d_lookup_symbol (const struct language_defn *langdef,
+		 const char *name, const struct block *block,
 		 const domain_enum domain, int search)
 {
   struct block_symbol sym;
@@ -82,6 +83,23 @@ d_lookup_symbol (const char *name, const struct block *block,
   sym = lookup_symbol_in_static_block (name, block, domain);
   if (sym.symbol != NULL)
     return sym;
+
+  /* If we didn't find a definition for a builtin type in the static block,
+     such as "ucent" which is a specialist type, search for it now.  */
+  if (langdef != NULL && domain == VAR_DOMAIN)
+    {
+      struct gdbarch *gdbarch;
+
+      if (block == NULL)
+	gdbarch = target_gdbarch ();
+      else
+	gdbarch = block_gdbarch (block);
+      sym.symbol
+	= language_lookup_primitive_type_as_symbol (langdef, gdbarch, name);
+      sym.block = NULL;
+      if (sym.symbol != NULL)
+	return sym;
+    }
 
   sym = lookup_global_symbol (name, block, domain);
 
@@ -166,15 +184,15 @@ d_lookup_symbol_in_module (const char *module, const char *name,
 
   if (module[0] != '\0')
     {
-      concatenated_name = alloca (strlen (module)
-				  + strlen (name) + 2);
+      concatenated_name
+	= (char *) alloca (strlen (module) + strlen (name) + 2);
       strcpy (concatenated_name, module);
       strcat (concatenated_name, ".");
       strcat (concatenated_name, name);
       name = concatenated_name;
     }
 
-  return d_lookup_symbol (name, block, domain, search);
+  return d_lookup_symbol (NULL, name, block, domain, search);
 }
 
 /* Lookup NAME at module scope.  SCOPE is the module that the current
@@ -190,7 +208,8 @@ d_lookup_symbol_in_module (const char *module, const char *name,
    and if that call fails, then the first call looks for "x".  */
 
 static struct block_symbol
-lookup_module_scope (const char *name, const struct block *block,
+lookup_module_scope (const struct language_defn *langdef,
+		     const char *name, const struct block *block,
 		     const domain_enum domain, const char *scope,
 		     int scope_len)
 {
@@ -210,16 +229,24 @@ lookup_module_scope (const char *name, const struct block *block,
 	  new_scope_len++;
 	}
       new_scope_len += d_find_first_component (scope + new_scope_len);
-      sym = lookup_module_scope (name, block, domain,
+      sym = lookup_module_scope (langdef, name, block, domain,
 				 scope, new_scope_len);
       if (sym.symbol != NULL)
 	return sym;
     }
 
   /* Okay, we didn't find a match in our children, so look for the
-     name in the current module.  */
+     name in the current module.
 
-  module = alloca (scope_len + 1);
+     If we there is no scope and we know we have a bare symbol, then short
+     circuit everything and call d_lookup_symbol directly.
+     This isn't an optimization, rather it allows us to pass LANGDEF which
+     is needed for primitive type lookup.  */
+
+  if (scope_len == 0 && strchr (name, '.') == NULL)
+    return d_lookup_symbol (langdef, name, block, domain, 1);
+
+  module = (char *) alloca (scope_len + 1);
   strncpy (module, scope, scope_len);
   module[scope_len] = '\0';
   return d_lookup_symbol_in_module (module, name,
@@ -261,7 +288,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
 	 things like typedefs in the class.  First search in this symtab,
 	 what we want is possibly there.  */
       len = strlen (base_name) + strlen (name) + 2;
-      concatenated_name = xrealloc (concatenated_name, len);
+      concatenated_name = (char *) xrealloc (concatenated_name, len);
       xsnprintf (concatenated_name, len, "%s.%s", base_name, name);
       sym = lookup_symbol_in_static_block (concatenated_name, block,
 					   VAR_DOMAIN);
@@ -327,7 +354,7 @@ d_lookup_nested_symbol (struct type *parent_type,
 	     module search is already not D compliant and more assumptions
 	     could make it too magic.  */
 	  size = strlen (parent_name) + strlen (nested_name) + 2;
-	  concatenated_name = alloca (size);
+	  concatenated_name = (char *) alloca (size);
 
 	  xsnprintf (concatenated_name, size, "%s.%s",
 		     parent_name, nested_name);
@@ -356,7 +383,7 @@ d_lookup_nested_symbol (struct type *parent_type,
 static void
 reset_directive_searched (void *data)
 {
-  struct using_direct *direct = data;
+  struct using_direct *direct = (struct using_direct *) data;
   direct->searched = 0;
 }
 
@@ -465,7 +492,7 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 		  /* If the alias matches the sought name.  Pass
 		     current->import_src as the NAME to direct the
 		     search towards the aliased module.  */
-		  sym = lookup_module_scope (current->import_src, block,
+		  sym = lookup_module_scope (NULL, current->import_src, block,
 					     domain, scope, 0);
 		}
 	      else
@@ -554,7 +581,7 @@ d_lookup_symbol_nonlocal (const struct language_defn *langdef,
   struct block_symbol sym;
   const char *scope = block_scope (block);
 
-  sym = lookup_module_scope (name, block, domain, scope, 0);
+  sym = lookup_module_scope (langdef, name, block, domain, scope, 0);
   if (sym.symbol != NULL)
     return sym;
 

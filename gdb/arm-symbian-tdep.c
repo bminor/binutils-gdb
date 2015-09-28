@@ -108,7 +108,7 @@ arm_symbian_osabi_sniffer (bfd *abfd)
   if (phdrs_size == -1)
     return GDB_OSABI_UNKNOWN;
 
-  phdrs = alloca (phdrs_size);
+  phdrs = (Elf_Internal_Phdr *) alloca (phdrs_size);
   num_phdrs = bfd_get_elf_phdrs (abfd, phdrs);
   if (num_phdrs == -1)
     return GDB_OSABI_UNKNOWN;

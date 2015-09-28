@@ -174,7 +174,8 @@ cli_interpreter_exec (void *data, const char *command_str)
 
   /* FIXME: cagney/2003-02-01: Need to const char *propogate
      safe_execute_command.  */
-  char *str = strcpy (alloca (strlen (command_str) + 1), command_str);
+  char *str = (char *) alloca (strlen (command_str) + 1);
+  strcpy (str, command_str);
 
   /* gdb_stdout could change between the time cli_uiout was
      initialized and now.  Since we're probably using a different

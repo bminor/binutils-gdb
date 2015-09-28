@@ -1,3 +1,14 @@
+2015-08-11  Peter Zotov  <whitequark@whitequark.org>
+
+	PR ld/18759
+	* ld-elf/eh-frame-hdr: Expect to pass on the or1k-linux target.
+
+2015-09-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-mips-elf/pie-n32.d: Updated.
+	* ld-mips-elf/pie-n64.d: Likewise.
+	* ld-mips-elf/pie-o32.d: Likewise.
+
 2015-09-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/pie.d: New test.

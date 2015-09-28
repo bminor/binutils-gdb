@@ -873,6 +873,7 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
   char *path, *cp;
   int result;
   const char *obj_name = objfile_name (obj);
+  int alloc_len;
 
   if (obj_name[0] != '/')
     {
@@ -881,8 +882,10 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
       return 0;
     }
 
-  path = xmalloc (strlen (obj_name) + (subdir ? strlen (subdir) + 1 : 0)
-		  + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  alloc_len = (strlen (obj_name)
+	       + (subdir ? strlen (subdir) + 1 : 0)
+	       + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  path = (char *) xmalloc (alloc_len);
   cleanup = make_cleanup (xfree, path);
 
   strcpy (path, obj_name);
@@ -959,7 +962,7 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
   if (!auto_load_thread_db)
     return 0;
 
-  path = xmalloc (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  path = (char *) xmalloc (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1);
   cleanup = make_cleanup (xfree, path);
 
   memcpy (path, dir, dir_len);
@@ -1004,7 +1007,7 @@ thread_db_load_search (void)
 
 	  if (this_dir[pdir_len] == '/')
 	    {
-	      subdir = xmalloc (strlen (this_dir));
+	      subdir = (char *) xmalloc (strlen (this_dir));
 	      make_cleanup (xfree, subdir);
 	      strcpy (subdir, this_dir + pdir_len + 1);
 	    }
@@ -1563,7 +1566,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   td_err_e err;
   ptid_t ptid;
   struct thread_info *tp;
-  struct callback_data *cb_data = data;
+  struct callback_data *cb_data = (struct callback_data *) data;
   struct thread_db_info *info = cb_data->info;
 
   err = info->td_thr_get_info_p (th_p, &ti);
@@ -2059,7 +2062,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   ui_out_table_header (uiout, pids_len, ui_left, "PIDs", "Pids");
   ui_out_table_body (uiout);
 
-  pids = xmalloc (max_pids_len + 1);
+  pids = (char *) xmalloc (max_pids_len + 1);
   make_cleanup (xfree, pids);
 
   /* Note I is incremented inside the cycle, not at its end.  */

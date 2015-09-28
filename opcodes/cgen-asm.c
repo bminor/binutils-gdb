@@ -280,7 +280,7 @@ cgen_parse_signed_integer (CGEN_CPU_DESC cd,
 	  && value > 0
 	  && (value & 0x80000000)
 	  && ((value >> 31) == 1))
-	value |= -1 << 31;
+	value |= ((bfd_vma) -1) << 31;
 
       *valuep = value;
     }

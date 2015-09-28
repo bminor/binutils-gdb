@@ -61,7 +61,7 @@ static dummy_frame_dtor_ftype do_module_cleanup;
 static void
 do_module_cleanup (void *arg, int registers_valid)
 {
-  struct do_module_cleanup *data = arg;
+  struct do_module_cleanup *data = (struct do_module_cleanup *) arg;
   struct objfile *objfile;
 
   if (data->executedp != NULL)
@@ -125,7 +125,8 @@ compile_object_run (struct compile_module *module)
   CORE_ADDR regs_addr = module->regs_addr;
   struct objfile *objfile = module->objfile;
 
-  data = xmalloc (sizeof (*data) + strlen (objfile_name_s));
+  data = (struct do_module_cleanup *) xmalloc (sizeof (*data)
+					       + strlen (objfile_name_s));
   data->executedp = &executed;
   data->source_file = xstrdup (module->source_file);
   strcpy (data->objfile_name_string, objfile_name_s);

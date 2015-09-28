@@ -69,7 +69,7 @@ d_grab (void)
     {
       if (demangle_info->next == NULL)
 	{
-	  more = malloc (sizeof (struct demangle_info));
+	  more = XNEW (struct demangle_info);
 	  more->next = NULL;
 	  demangle_info->next = more;
 	}
@@ -1977,7 +1977,7 @@ yyerror (char *msg)
 static struct demangle_info *
 allocate_info (void)
 {
-  struct demangle_info *info = malloc (sizeof (struct demangle_info));
+  struct demangle_info *info = XNEW (struct demangle_info);
 
   info->next = NULL;
   info->used = 0;
@@ -2007,7 +2007,7 @@ cp_new_demangle_parse_info (void)
 {
   struct demangle_parse_info *info;
 
-  info = malloc (sizeof (struct demangle_parse_info));
+  info = XNEW (struct demangle_parse_info);
   info->info = NULL;
   info->tree = NULL;
   obstack_init (&info->obstack);

@@ -2690,7 +2690,8 @@ struct attach_command_continuation_args
 static void
 attach_command_continuation (void *args, int err)
 {
-  struct attach_command_continuation_args *a = args;
+  struct attach_command_continuation_args *a
+    = (struct attach_command_continuation_args *) args;
 
   if (err)
     return;
@@ -2701,7 +2702,8 @@ attach_command_continuation (void *args, int err)
 static void
 attach_command_continuation_free_args (void *args)
 {
-  struct attach_command_continuation_args *a = args;
+  struct attach_command_continuation_args *a
+    = (struct attach_command_continuation_args *) args;
 
   xfree (a->args);
   xfree (a);

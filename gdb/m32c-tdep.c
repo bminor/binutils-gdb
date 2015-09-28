@@ -1875,10 +1875,11 @@ m32c_analyze_frame_prologue (struct frame_info *this_frame,
 
       *this_prologue_cache = FRAME_OBSTACK_ZALLOC (struct m32c_prologue);
       m32c_analyze_prologue (get_frame_arch (this_frame),
-			     func_start, stop_addr, *this_prologue_cache);
+			     func_start, stop_addr,
+			     (struct m32c_prologue *) *this_prologue_cache);
     }
 
-  return *this_prologue_cache;
+  return (struct m32c_prologue *) *this_prologue_cache;
 }
 
 
@@ -2467,7 +2468,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
                paddress (gdbarch, addr));
 
       func_name = MSYMBOL_LINKAGE_NAME (func_msym.minsym);
-      tramp_name = xmalloc (strlen (func_name) + 5);
+      tramp_name = (char *) xmalloc (strlen (func_name) + 5);
       strcpy (tramp_name, func_name);
       strcat (tramp_name, ".plt");
 
@@ -2554,7 +2555,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
                  Since the trampoline contains a jump instruction, we
                  could also just extract the jump's target address.  I
                  don't see much advantage one way or the other.  */
-              char *func_name = xmalloc (len - 4 + 1);
+              char *func_name = (char *) xmalloc (len - 4 + 1);
               memcpy (func_name, ptr_msym_name, len - 4);
               func_name[len - 4] = '\0';
               func_msym

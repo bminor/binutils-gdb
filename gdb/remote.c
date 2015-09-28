@@ -470,7 +470,7 @@ new_remote_state (void)
   /* The default buffer size is unimportant; it will be expanded
      whenever a larger buffer is needed. */
   result->buf_size = 400;
-  result->buf = xmalloc (result->buf_size);
+  result->buf = (char *) xmalloc (result->buf_size);
   result->remote_traceframe_number = -1;
   result->last_sent_signal = GDB_SIGNAL_0;
   result->fs_pid = -1;
@@ -616,7 +616,8 @@ static struct remote_arch_state *
 get_remote_arch_state (void)
 {
   gdb_assert (target_gdbarch () != NULL);
-  return gdbarch_data (target_gdbarch (), remote_gdbarch_data_handle);
+  return ((struct remote_arch_state *)
+	  gdbarch_data (target_gdbarch (), remote_gdbarch_data_handle));
 }
 
 /* Fetch the global remote target state.  */
@@ -639,7 +640,7 @@ get_remote_state (void)
 static void
 remote_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  char *remote_exec_file = arg;
+  char *remote_exec_file = (char *) arg;
 
   xfree (remote_exec_file);
 }
@@ -651,8 +652,9 @@ get_remote_exec_file (void)
 {
   char *remote_exec_file;
 
-  remote_exec_file = program_space_data (current_program_space,
-					 remote_pspace_data);
+  remote_exec_file
+    = (char *) program_space_data (current_program_space,
+				   remote_pspace_data);
   if (remote_exec_file == NULL)
     return "";
 
@@ -665,7 +667,7 @@ static void
 set_pspace_remote_exec_file (struct program_space *pspace,
 			char *remote_exec_file)
 {
-  char *old_file = program_space_data (pspace, remote_pspace_data);
+  char *old_file = (char *) program_space_data (pspace, remote_pspace_data);
 
   xfree (old_file);
   set_program_space_data (pspace, remote_pspace_data,
@@ -694,8 +696,10 @@ show_remote_exec_file (struct ui_file *file, int from_tty,
 static int
 compare_pnums (const void *lhs_, const void *rhs_)
 {
-  const struct packet_reg * const *lhs = lhs_;
-  const struct packet_reg * const *rhs = rhs_;
+  const struct packet_reg * const *lhs
+    = (const struct packet_reg * const *) lhs_;
+  const struct packet_reg * const *rhs
+    = (const struct packet_reg * const *) rhs_;
 
   if ((*lhs)->pnum < (*rhs)->pnum)
     return -1;
@@ -728,8 +732,7 @@ map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
      with a remote protocol number, in order of ascending protocol
      number.  */
 
-  remote_regs = alloca (gdbarch_num_regs (gdbarch)
-			* sizeof (struct packet_reg *));
+  remote_regs = XALLOCAVEC (struct packet_reg *, gdbarch_num_regs (gdbarch));
   for (num_remote_regs = 0, regnum = 0;
        regnum < gdbarch_num_regs (gdbarch);
        regnum++)
@@ -765,7 +768,7 @@ remote_register_number_and_offset (struct gdbarch *gdbarch, int regnum,
 
   gdb_assert (regnum < gdbarch_num_regs (gdbarch));
 
-  regs = xcalloc (gdbarch_num_regs (gdbarch), sizeof (struct packet_reg));
+  regs = XCNEWVEC (struct packet_reg, gdbarch_num_regs (gdbarch));
   old_chain = make_cleanup (xfree, regs);
 
   sizeof_g_packet = map_regcache_remote_table (gdbarch, regs);
@@ -822,7 +825,7 @@ init_remote_state (struct gdbarch *gdbarch)
   if (rs->buf_size < rsa->remote_packet_size)
     {
       rs->buf_size = 2 * rsa->remote_packet_size;
-      rs->buf = xrealloc (rs->buf, rs->buf_size);
+      rs->buf = (char *) xrealloc (rs->buf, rs->buf_size);
     }
 
   return rsa;
@@ -1039,7 +1042,7 @@ get_memory_packet_size (struct memory_packet_config *config)
   if (rs->buf_size < what_they_get + 1)
     {
       rs->buf_size = 2 * what_they_get;
-      rs->buf = xrealloc (rs->buf, 2 * what_they_get);
+      rs->buf = (char *) xrealloc (rs->buf, 2 * what_they_get);
     }
 
   return what_they_get;
@@ -1938,7 +1941,7 @@ remote_pass_signals (struct target_ops *self,
 	  if (pass_signals[i])
 	    count++;
 	}
-      pass_packet = xmalloc (count * 3 + strlen ("QPassSignals:") + 1);
+      pass_packet = (char *) xmalloc (count * 3 + strlen ("QPassSignals:") + 1);
       strcpy (pass_packet, "QPassSignals:");
       p = pass_packet + strlen (pass_packet);
       for (i = 0; i < numsigs; i++)
@@ -1989,7 +1992,7 @@ remote_program_signals (struct target_ops *self,
 	  if (signals[i])
 	    count++;
 	}
-      packet = xmalloc (count * 3 + strlen ("QProgramSignals:") + 1);
+      packet = (char *) xmalloc (count * 3 + strlen ("QProgramSignals:") + 1);
       strcpy (packet, "QProgramSignals:");
       p = packet + strlen (packet);
       for (i = 0; i < numsigs; i++)
@@ -2838,7 +2841,8 @@ struct threads_listing_context
 static void
 clear_threads_listing_context (void *p)
 {
-  struct threads_listing_context *context = p;
+  struct threads_listing_context *context
+    = (struct threads_listing_context *) p;
   int i;
   struct thread_item *item;
 
@@ -2872,7 +2876,8 @@ threads_listing_context_remove (struct target_waitstatus *ws,
 static int
 remote_newthread_step (threadref *ref, void *data)
 {
-  struct threads_listing_context *context = data;
+  struct threads_listing_context *context
+    = (struct threads_listing_context *) data;
   struct thread_item item;
   int pid = ptid_get_pid (inferior_ptid);
 
@@ -2930,13 +2935,14 @@ start_thread (struct gdb_xml_parser *parser,
 	      const struct gdb_xml_element *element,
 	      void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  struct threads_listing_context *data = user_data;
+  struct threads_listing_context *data
+    = (struct threads_listing_context *) user_data;
 
   struct thread_item item;
   char *id;
   struct gdb_xml_value *attr;
 
-  id = xml_find_attribute (attributes, "id")->value;
+  id = (char *) xml_find_attribute (attributes, "id")->value;
   item.ptid = read_ptid (id, NULL);
 
   attr = xml_find_attribute (attributes, "core");
@@ -2955,7 +2961,8 @@ end_thread (struct gdb_xml_parser *parser,
 	    const struct gdb_xml_element *element,
 	    void *user_data, const char *body_text)
 {
-  struct threads_listing_context *data = user_data;
+  struct threads_listing_context *data
+    = (struct threads_listing_context *) user_data;
 
   if (body_text && *body_text)
     VEC_last (thread_item_t, data->items)->extra = xstrdup (body_text);
@@ -3882,7 +3889,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       else
 	{
 	  /* Save the reply for later.  */
-	  wait_status = alloca (strlen (rs->buf) + 1);
+	  wait_status = (char *) alloca (strlen (rs->buf) + 1);
 	  strcpy (wait_status, rs->buf);
 	}
 
@@ -4126,7 +4133,7 @@ remote_check_symbols (void)
 
   /* Allocate a message buffer.  We can't reuse the input buffer in RS,
      because we need both at the same time.  */
-  msg = xmalloc (get_remote_packet_size ());
+  msg = (char *) xmalloc (get_remote_packet_size ());
   old_chain = make_cleanup (xfree, msg);
 
   /* Invite target to request symbol lookups.  */
@@ -4580,7 +4587,7 @@ remote_query_supported (void)
   if (rs->buf_size < rs->explicit_packet_size)
     {
       rs->buf_size = rs->explicit_packet_size;
-      rs->buf = xrealloc (rs->buf, rs->buf_size);
+      rs->buf = (char *) xrealloc (rs->buf, rs->buf_size);
     }
 
   /* Handle the defaults for unmentioned features.  */
@@ -4969,7 +4976,7 @@ extended_remote_attach (struct target_ops *target, const char *args,
       if (!non_stop)
 	{
 	  /* Save the reply for later.  */
-	  wait_status = alloca (strlen (rs->buf) + 1);
+	  wait_status = (char *) alloca (strlen (rs->buf) + 1);
 	  strcpy (wait_status, rs->buf);
 	}
       else if (strcmp (rs->buf, "OK") != 0)
@@ -5838,8 +5845,9 @@ remove_child_of_pending_fork (QUEUE (stop_reply_p) *q,
 			      stop_reply_p event,
 			      void *data)
 {
-  struct queue_iter_param *param = data;
-  struct threads_listing_context *context = param->input;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
+  struct threads_listing_context *context
+    = (struct threads_listing_context *) param->input;
 
   if (event->ws.kind == TARGET_WAITKIND_FORKED
       || event->ws.kind == TARGET_WAITKIND_VFORKED)
@@ -5895,8 +5903,8 @@ remove_stop_reply_for_inferior (QUEUE (stop_reply_p) *q,
 				stop_reply_p event,
 				void *data)
 {
-  struct queue_iter_param *param = data;
-  struct inferior *inf = param->input;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
+  struct inferior *inf = (struct inferior *) param->input;
 
   if (ptid_get_pid (event->ptid) == inf->pid)
     {
@@ -5949,8 +5957,8 @@ remove_stop_reply_of_remote_state (QUEUE (stop_reply_p) *q,
 				   stop_reply_p event,
 				   void *data)
 {
-  struct queue_iter_param *param = data;
-  struct remote_state *rs = param->input;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
+  struct remote_state *rs = (struct remote_state *) param->input;
 
   if (event->rs == rs)
     {
@@ -5984,8 +5992,8 @@ remote_notif_remove_once_on_match (QUEUE (stop_reply_p) *q,
 				   stop_reply_p event,
 				   void *data)
 {
-  struct queue_iter_param *param = data;
-  ptid_t *ptid = param->input;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
+  ptid_t *ptid = (ptid_t *) param->input;
 
   if (ptid_match (event->ptid, *ptid))
     {
@@ -6060,7 +6068,7 @@ stop_reply_match_ptid_and_ws (QUEUE (stop_reply_p) *q,
 			      struct stop_reply *event,
 			      void *data)
 {
-  ptid_t *ptid = data;
+  ptid_t *ptid = (ptid_t *) data;
 
   return !(ptid_equal (*ptid, event->ptid)
 	   && event->ws.kind == TARGET_WAITKIND_STOPPED);
@@ -6877,7 +6885,7 @@ process_g_packet (struct regcache *regcache)
 	}
     }
 
-  regs = alloca (rsa->sizeof_g_packet);
+  regs = (char *) alloca (rsa->sizeof_g_packet);
 
   /* Unimplemented registers read as all bits zero.  */
   memset (regs, 0, rsa->sizeof_g_packet);
@@ -7085,7 +7093,7 @@ store_registers_using_G (const struct regcache *regcache)
   {
     int i;
 
-    regs = alloca (rsa->sizeof_g_packet);
+    regs = (gdb_byte *) alloca (rsa->sizeof_g_packet);
     memset (regs, 0, rsa->sizeof_g_packet);
     for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
       {
@@ -7939,7 +7947,7 @@ putpkt_binary (const char *buf, int cnt)
   struct remote_state *rs = get_remote_state ();
   int i;
   unsigned char csum = 0;
-  char *buf2 = xmalloc (cnt + 6);
+  char *buf2 = (char *) xmalloc (cnt + 6);
   struct cleanup *old_chain = make_cleanup (xfree, buf2);
 
   int ch;
@@ -8280,7 +8288,7 @@ read_frame (char **buf_p,
 		  {
 		    /* Make some more room in the buffer.  */
 		    *sizeof_buf += repeat;
-		    *buf_p = xrealloc (*buf_p, *sizeof_buf);
+		    *buf_p = (char *) xrealloc (*buf_p, *sizeof_buf);
 		    buf = *buf_p;
 		  }
 
@@ -8298,7 +8306,7 @@ read_frame (char **buf_p,
 	    {
 	      /* Make some more room in the buffer.  */
 	      *sizeof_buf *= 2;
-	      *buf_p = xrealloc (*buf_p, *sizeof_buf);
+	      *buf_p = (char *) xrealloc (*buf_p, *sizeof_buf);
 	      buf = *buf_p;
 	    }
 
@@ -8505,7 +8513,7 @@ kill_child_of_pending_fork (QUEUE (stop_reply_p) *q,
 			    stop_reply_p event,
 			    void *data)
 {
-  struct queue_iter_param *param = data;
+  struct queue_iter_param *param = (struct queue_iter_param *) data;
   int parent_pid = *(int *) param->input;
 
   if (is_pending_fork_parent (&event->ws, parent_pid, event->ptid))
@@ -9463,7 +9471,7 @@ compare_sections_command (char *args, int from_tty)
       matched = 1;		/* Do this section.  */
       lma = s->lma;
 
-      sectdata = xmalloc (size);
+      sectdata = (gdb_byte *) xmalloc (size);
       old_chain = make_cleanup (xfree, sectdata);
       bfd_get_section_contents (exec_bfd, s, sectdata, 0, size);
 
@@ -10357,7 +10365,8 @@ register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 				const struct target_desc *tdesc)
 {
   struct remote_g_packet_data *data
-    = gdbarch_data (gdbarch, remote_g_packet_data_handle);
+    = ((struct remote_g_packet_data *)
+       gdbarch_data (gdbarch, remote_g_packet_data_handle));
   struct remote_g_packet_guess new_guess, *guess;
   int ix;
 
@@ -10383,7 +10392,8 @@ static int
 remote_read_description_p (struct target_ops *target)
 {
   struct remote_g_packet_data *data
-    = gdbarch_data (target_gdbarch (), remote_g_packet_data_handle);
+    = ((struct remote_g_packet_data *)
+       gdbarch_data (target_gdbarch (), remote_g_packet_data_handle));
 
   if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
     return 1;
@@ -10395,7 +10405,8 @@ static const struct target_desc *
 remote_read_description (struct target_ops *target)
 {
   struct remote_g_packet_data *data
-    = gdbarch_data (target_gdbarch (), remote_g_packet_data_handle);
+    = ((struct remote_g_packet_data *)
+       gdbarch_data (target_gdbarch (), remote_g_packet_data_handle));
 
   /* Do not try this during initial connection, when we do not know
      whether there is a running but stopped thread.  */
@@ -10849,7 +10860,7 @@ remote_hostio_pread (struct target_ops *self,
   cache->fd = fd;
   cache->offset = offset;
   cache->bufsize = get_remote_packet_size ();
-  cache->buf = xrealloc (cache->buf, cache->bufsize);
+  cache->buf = (gdb_byte *) xrealloc (cache->buf, cache->bufsize);
 
   ret = remote_hostio_pread_vFile (self, cache->fd, cache->buf, cache->bufsize,
 				   cache->offset, remote_errno);
@@ -10935,7 +10946,7 @@ remote_hostio_readlink (struct target_ops *self,
   if (len < 0)
     return NULL;
 
-  ret = xmalloc (len + 1);
+  ret = (char *) xmalloc (len + 1);
 
   read_len = remote_unescape_input ((gdb_byte *) attachment, attachment_len,
 				    (gdb_byte *) ret, len);
@@ -11158,7 +11169,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   /* Send up to this many bytes at once.  They won't all fit in the
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
-  buffer = xmalloc (io_size);
+  buffer = (gdb_byte *) xmalloc (io_size);
   make_cleanup (xfree, buffer);
 
   close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
@@ -11248,7 +11259,7 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   /* Send up to this many bytes at once.  They won't all fit in the
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
-  buffer = xmalloc (io_size);
+  buffer = (gdb_byte *) xmalloc (io_size);
   make_cleanup (xfree, buffer);
 
   close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
@@ -11459,7 +11470,7 @@ static void free_actions_list_cleanup_wrapper (void *);
 static void
 free_actions_list_cleanup_wrapper (void *al)
 {
-  free_actions_list (al);
+  free_actions_list ((char **) al);
 }
 
 static void
@@ -12656,7 +12667,7 @@ remote_pid_to_exec_file (struct target_ops *self, int pid)
     {
       const int annex_size = 9;
 
-      annex = alloca (annex_size);
+      annex = (char *) alloca (annex_size);
       xsnprintf (annex, annex_size, "%x", pid);
     }
 
@@ -12899,7 +12910,7 @@ static serial_event_ftype remote_async_serial_handler;
 static void
 remote_async_serial_handler (struct serial *scb, void *context)
 {
-  struct remote_state *rs = context;
+  struct remote_state *rs = (struct remote_state *) context;
 
   /* Don't propogate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */
@@ -13575,6 +13586,6 @@ stepping is supported by the target.  The default is on."),
   any_thread_ptid = ptid_build (42000, 0, 1);
 
   target_buf_size = 2048;
-  target_buf = xmalloc (target_buf_size);
+  target_buf = (char *) xmalloc (target_buf_size);
 }
 

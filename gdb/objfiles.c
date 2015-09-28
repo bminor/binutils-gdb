@@ -83,7 +83,7 @@ static const struct program_space_data *objfiles_pspace_data;
 static void
 objfiles_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct objfile_pspace_info *info = arg;
+  struct objfile_pspace_info *info = (struct objfile_pspace_info *) arg;
 
   xfree (info->sections);
   xfree (info);
@@ -97,7 +97,8 @@ get_objfile_pspace_data (struct program_space *pspace)
 {
   struct objfile_pspace_info *info;
 
-  info = program_space_data (pspace, objfiles_pspace_data);
+  info = ((struct objfile_pspace_info *)
+	  program_space_data (pspace, objfiles_pspace_data));
   if (info == NULL)
     {
       info = XCNEW (struct objfile_pspace_info);
@@ -127,7 +128,8 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
   struct objfile_per_bfd_storage *storage = NULL;
 
   if (abfd != NULL)
-    storage = bfd_data (abfd, objfiles_bfd_data);
+    storage = ((struct objfile_per_bfd_storage *)
+	       bfd_data (abfd, objfiles_bfd_data));
 
   if (storage == NULL)
     {
@@ -136,7 +138,9 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 	 enough that this seems reasonable.  */
       if (abfd != NULL && !gdb_bfd_requires_relocations (abfd))
 	{
-	  storage = bfd_zalloc (abfd, sizeof (struct objfile_per_bfd_storage));
+	  storage
+	    = ((struct objfile_per_bfd_storage *)
+	       bfd_zalloc (abfd, sizeof (struct objfile_per_bfd_storage)));
 	  set_bfd_data (abfd, objfiles_bfd_data, storage);
 	}
       else
@@ -174,7 +178,7 @@ free_objfile_per_bfd_storage (struct objfile_per_bfd_storage *storage)
 static void
 objfile_bfd_data_free (struct bfd *unused, void *d)
 {
-  free_objfile_per_bfd_storage (d);
+  free_objfile_per_bfd_storage ((struct objfile_per_bfd_storage *) d);
 }
 
 /* See objfiles.h.  */
@@ -195,7 +199,8 @@ set_objfile_main_name (struct objfile *objfile,
   if (objfile->per_bfd->name_of_main == NULL
       || strcmp (objfile->per_bfd->name_of_main, name) != 0)
     objfile->per_bfd->name_of_main
-      = obstack_copy0 (&objfile->per_bfd->storage_obstack, name, strlen (name));
+      = (const char *) obstack_copy0 (&objfile->per_bfd->storage_obstack, name,
+				      strlen (name));
   objfile->per_bfd->language_of_main = lang;
 }
 
@@ -317,7 +322,7 @@ static void
 add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
 			 void *objfilep)
 {
-  add_to_objfile_sections_full (abfd, asect, objfilep, 0);
+  add_to_objfile_sections_full (abfd, asect, (struct objfile *) objfilep, 0);
 }
 
 /* Builds a section table for OBJFILE.
@@ -392,9 +397,10 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
     expanded_name = xstrdup (name);
   else
     expanded_name = gdb_abspath (name);
-  objfile->original_name = obstack_copy0 (&objfile->objfile_obstack,
-					  expanded_name,
-					  strlen (expanded_name));
+  objfile->original_name
+    = (char *) obstack_copy0 (&objfile->objfile_obstack,
+			      expanded_name,
+			      strlen (expanded_name));
   xfree (expanded_name);
 
   /* Update the per-objfile information that comes from the bfd, ensuring
@@ -751,7 +757,7 @@ free_objfile (struct objfile *objfile)
 static void
 do_free_objfile_cleanup (void *obj)
 {
-  free_objfile (obj);
+  free_objfile ((struct objfile *) obj);
 }
 
 struct cleanup *
@@ -951,7 +957,8 @@ objfile_relocate (struct objfile *objfile,
       gdb_assert (debug_objfile->num_sections
 		  == gdb_bfd_count_sections (debug_objfile->obfd));
       new_debug_offsets = 
-	xmalloc (SIZEOF_N_SECTION_OFFSETS (debug_objfile->num_sections));
+	((struct section_offsets *)
+	 xmalloc (SIZEOF_N_SECTION_OFFSETS (debug_objfile->num_sections)));
       make_cleanup (xfree, new_debug_offsets);
       relative_addr_info_to_section_offsets (new_debug_offsets,
 					     debug_objfile->num_sections,
@@ -1399,7 +1406,7 @@ update_section_map (struct program_space *pspace,
 
   if (map_size < alloc_size)
     /* Some sections were eliminated.  Trim excess space.  */
-    map = xrealloc (map, map_size * sizeof (*map));
+    map = XRESIZEVEC (struct obj_section *, map, map_size);
   else
     gdb_assert (alloc_size == map_size);
 
@@ -1517,7 +1524,7 @@ resume_section_map_updates (struct program_space *pspace)
 void
 resume_section_map_updates_cleanup (void *arg)
 {
-  resume_section_map_updates (arg);
+  resume_section_map_updates ((struct program_space *) arg);
 }
 
 /* Return 1 if ADDR maps into one of the sections of OBJFILE and 0

@@ -4640,7 +4640,7 @@ _frvfdpic_relax_tls_entries (struct frvfdpic_relocs_info *entry,
 			    + 32768) < (bfd_vma)65536))
 	  || (entry->symndx != -1
 	      && (elf_hash_table (dinfo->info)->tls_sec->size
-		  + abs (entry->addend) < 32768 + FRVFDPIC_TLS_BIAS))))
+		  + entry->addend < 32768 + FRVFDPIC_TLS_BIAS))))
     {
       if (! changed)
 	{

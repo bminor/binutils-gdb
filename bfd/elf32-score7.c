@@ -2065,7 +2065,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
       if ((offset & 0x1000000) != 0)
         offset |= 0xfe000000;
       value += offset;
-      abs_value = abs (value - rel_addr);
+      abs_value = value - rel_addr;
       if ((abs_value & 0xfe000000) != 0)
         return bfd_reloc_overflow;
       addend = (addend & ~howto->src_mask)
@@ -2095,7 +2095,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
       if ((offset & 0x800) != 0)        /* Offset is negative.  */
         offset |= 0xfffff000;
       value += offset;
-      abs_value = abs (value - rel_addr);
+      abs_value = value - rel_addr;
       if ((abs_value & 0xfffff000) != 0)
         return bfd_reloc_overflow;
       addend = (addend & ~howto->src_mask) | (value & howto->src_mask);

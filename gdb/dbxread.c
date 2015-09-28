@@ -729,7 +729,7 @@ dbx_symfile_finish (struct objfile *objfile)
 static void
 dbx_free_symfile_info (struct objfile *objfile, void *arg)
 {
-  struct dbx_symfile_info *dbx = arg;
+  struct dbx_symfile_info *dbx = (struct dbx_symfile_info *) arg;
 
   if (dbx->header_files != NULL)
     {
@@ -942,7 +942,7 @@ free_bincl_list (struct objfile *objfile)
 static void
 do_free_bincl_list_cleanup (void *objfile)
 {
-  free_bincl_list (objfile);
+  free_bincl_list ((struct objfile *) objfile);
 }
 
 static struct cleanup *
@@ -1125,7 +1125,7 @@ find_stab_function_addr (char *namestring, const char *filename,
   if (p == NULL)
     p = namestring;
   n = p - namestring;
-  p = alloca (n + 2);
+  p = (char *) alloca (n + 2);
   strncpy (p, namestring, n);
   p[n] = 0;
 
@@ -1663,7 +1663,7 @@ read_dbx_symtab (struct objfile *objfile)
 	  sym_name = NULL;	/* pacify "gcc -Werror" */
  	  if (psymtab_language == language_cplus)
  	    {
- 	      char *new_name, *name = xmalloc (p - namestring + 1);
+	      char *new_name, *name = (char *) xmalloc (p - namestring + 1);
  	      memcpy (name, namestring, p - namestring);
 
  	      name[p - namestring] = '\0';
@@ -1671,8 +1671,8 @@ read_dbx_symtab (struct objfile *objfile)
  	      if (new_name != NULL)
  		{
  		  sym_len = strlen (new_name);
- 		  sym_name = obstack_copy0 (&objfile->objfile_obstack,
-					    new_name, sym_len);
+		  sym_name = (char *) obstack_copy0 (&objfile->objfile_obstack,
+						     new_name, sym_len);
  		  xfree (new_name);
  		}
               xfree (name);
@@ -1836,7 +1836,7 @@ read_dbx_symtab (struct objfile *objfile)
 	      if (! pst)
 		{
 		  int name_len = p - namestring;
-		  char *name = xmalloc (name_len + 1);
+		  char *name = (char *) xmalloc (name_len + 1);
 
 		  memcpy (name, namestring, name_len);
 		  name[name_len] = '\0';
@@ -1905,7 +1905,7 @@ read_dbx_symtab (struct objfile *objfile)
 	      if (! pst)
 		{
 		  int name_len = p - namestring;
-		  char *name = xmalloc (name_len + 1);
+		  char *name = (char *) xmalloc (name_len + 1);
 
 		  memcpy (name, namestring, name_len);
 		  name[name_len] = '\0';
@@ -2229,7 +2229,7 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       if (p == NULL)
 	p = last_function_name;
       n = p - last_function_name;
-      p = alloca (n + 2);
+      p = (char *) alloca (n + 2);
       strncpy (p, last_function_name, n);
       p[n] = 0;
 
@@ -2646,7 +2646,7 @@ cp_set_block_scope (const struct symbol *symbol,
       unsigned int prefix_len = cp_entire_prefix_len (name);
 
       block_set_scope (block,
-		       obstack_copy0 (obstack, name, prefix_len),
+		       (const char *) obstack_copy0 (obstack, name, prefix_len),
 		       obstack);
     }
 }

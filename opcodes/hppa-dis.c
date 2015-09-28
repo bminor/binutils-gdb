@@ -1103,7 +1103,7 @@ print_insn_hppa (bfd_vma memaddr, disassemble_info *info)
 		    int disp;
 
 		    if (sign)
-		      disp = (-1 << 10) | imm10;
+		      disp = (-1U << 10) | imm10;
 		    else
 		      disp = imm10;
 
@@ -1119,7 +1119,7 @@ print_insn_hppa (bfd_vma memaddr, disassemble_info *info)
 		    int disp;
 
 		    if (sign)
-		      disp = (-1 << 11) | imm11;
+		      disp = (-1U << 11) | imm11;
 		    else
 		      disp = imm11;
 

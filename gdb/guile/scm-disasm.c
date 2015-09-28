@@ -79,9 +79,11 @@ dascm_make_insn (CORE_ADDR pc, const char *assembly, int insn_len)
 static void *
 gdbscm_disasm_read_memory_worker (void *datap)
 {
-  struct gdbscm_disasm_read_data *data = datap;
+  struct gdbscm_disasm_read_data *data
+    = (struct gdbscm_disasm_read_data *) datap;
   struct disassemble_info *dinfo = data->dinfo;
-  struct gdbscm_disasm_data *disasm_data = dinfo->application_data;
+  struct gdbscm_disasm_data *disasm_data
+    = (struct gdbscm_disasm_data *) dinfo->application_data;
   SCM seekto, newpos, port = disasm_data->port;
   size_t bytes_read;
 
@@ -141,10 +143,11 @@ gdbscm_disasm_memory_error (int status, bfd_vma memaddr,
 static void
 gdbscm_disasm_print_address (bfd_vma addr, struct disassemble_info *info)
 {
-  struct gdbscm_disasm_data *data = info->application_data;
+  struct gdbscm_disasm_data *data
+    = (struct gdbscm_disasm_data *) info->application_data;
   struct gdbarch *gdbarch = data->gdbarch;
 
-  print_address (gdbarch, addr, info->stream);
+  print_address (gdbarch, addr, (struct ui_file *) info->stream);
 }
 
 /* Subroutine of gdbscm_arch_disassemble to simplify it.

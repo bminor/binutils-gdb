@@ -527,7 +527,7 @@ delete_fast_tracepoint_jump (struct fast_tracepoint_jump *todel)
 		 pass the current shadow contents, because
 		 write_inferior_memory updates any shadow memory with
 		 what we pass here, and we want that to be a nop.  */
-	      buf = alloca (bp->length);
+	      buf = (unsigned char *) alloca (bp->length);
 	      memcpy (buf, fast_tracepoint_jump_shadow (bp), bp->length);
 	      ret = write_inferior_memory (bp->pc, buf, bp->length);
 	      if (ret != 0)
@@ -585,12 +585,12 @@ set_fast_tracepoint_jump (CORE_ADDR where,
   /* We don't, so create a new object.  Double the length, because the
      flexible array member holds both the jump insn, and the
      shadow.  */
-  jp = xcalloc (1, sizeof (*jp) + (length * 2));
+  jp = (struct fast_tracepoint_jump *) xcalloc (1, sizeof (*jp) + (length * 2));
   jp->pc = where;
   jp->length = length;
   memcpy (fast_tracepoint_jump_insn (jp), insn, length);
   jp->refcount = 1;
-  buf = alloca (length);
+  buf = (unsigned char *) alloca (length);
 
   /* Note that there can be trap breakpoints inserted in the same
      address range.  To access the original memory contents, we use
@@ -670,7 +670,7 @@ uninsert_fast_tracepoint_jumps_at (CORE_ADDR pc)
 	 pass the current shadow contents, because
 	 write_inferior_memory updates any shadow memory with what we
 	 pass here, and we want that to be a nop.  */
-      buf = alloca (jp->length);
+      buf = (unsigned char *) alloca (jp->length);
       memcpy (buf, fast_tracepoint_jump_shadow (jp), jp->length);
       err = write_inferior_memory (jp->pc, buf, jp->length);
       if (err != 0)
@@ -717,7 +717,7 @@ reinsert_fast_tracepoint_jumps_at (CORE_ADDR where)
      to pass the current shadow contents, because
      write_inferior_memory updates any shadow memory with what we pass
      here, and we want that to be a nop.  */
-  buf = alloca (jp->length);
+  buf = (unsigned char *) alloca (jp->length);
   memcpy (buf, fast_tracepoint_jump_shadow (jp), jp->length);
   err = write_inferior_memory (where, buf, jp->length);
   if (err != 0)
@@ -1669,7 +1669,7 @@ validate_inserted_breakpoint (struct raw_breakpoint *bp)
   gdb_assert (bp->inserted);
   gdb_assert (bp->raw_type == raw_bkpt_type_sw);
 
-  buf = alloca (breakpoint_len);
+  buf = (unsigned char *) alloca (breakpoint_len);
   err = (*the_target->read_memory) (bp->pc, buf, breakpoint_len);
   if (err || memcmp (buf, breakpoint_data, breakpoint_len) != 0)
     {
@@ -1939,7 +1939,7 @@ clone_agent_expr (const struct agent_expr *src_ax)
 
   ax = XCNEW (struct agent_expr);
   ax->length = src_ax->length;
-  ax->bytes = xcalloc (ax->length, 1);
+  ax->bytes = (unsigned char *) xcalloc (ax->length, 1);
   memcpy (ax->bytes, src_ax->bytes, ax->length);
   return ax;
 }

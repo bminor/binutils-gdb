@@ -1920,7 +1920,7 @@ nios2_frame_unwind_cache (struct frame_info *this_frame,
   int i;
 
   if (*this_prologue_cache)
-    return *this_prologue_cache;
+    return (struct nios2_unwind_cache *) *this_prologue_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct nios2_unwind_cache);
   *this_prologue_cache = cache;
@@ -2028,7 +2028,7 @@ nios2_stub_frame_cache (struct frame_info *this_frame, void **this_cache)
   int num_regs = gdbarch_num_regs (gdbarch);
 
   if (*this_cache != NULL)
-    return *this_cache;
+    return (struct trad_frame_cache *) *this_cache;
   this_trad_cache = trad_frame_cache_zalloc (this_frame);
   *this_cache = this_trad_cache;
 

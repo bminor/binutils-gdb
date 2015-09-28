@@ -1,3 +1,75 @@
+2015-09-25  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Ali Lown  <ali.lown@imgtec.com>
+
+	* Makefile.in (tmp-micromips): New rule.
+	(tmp-mach-multi): Add support for micromips.
+	* configure.ac (mips*-sde-elf* | mips*-mti-elf*): Made a multi sim
+	that works for both mips64 and micromips64.
+	(mipsisa32r2*-*-*): Made a multi sim that works for mips32 and
+	micromips32.
+	Add build support for micromips.
+	* dsp.igen (do_ph_s_absq, do_w_s_absq, do_qb_s_absq, do_addsc,
+	do_addwc, do_bitrev, do_extpv, do_extrv, do_extrv_s_h, do_insv,
+	do_lxx do_modsub, do_mthlip, do_mulsaq_s_w_ph, do_ph_packrl, do_qb_pick
+	do_ph_pick, do_qb_ph_precequ, do_qb_ph_preceu, do_w_preceq
+	do_w_ph_precrq, do_ph_qb_precrq, do_w_ph_rs_precrq do_qb_w_raddu,
+	do_rddsp, do_repl, do_shilov, do_ph_shl, do_qb_shl do_w_s_shllv,
+	do_ph_shrlv, do_w_r_shrav, do_wrdsp, do_qb_shrav, do_append,
+	do_balign, do_ph_w_mulsa, do_ph_qb_precr, do_prepend): New functions.
+	Refactored instruction code to use these functions.
+	* dsp2.igen: Refactored instruction code to use the new functions.
+	* interp.c (decode_coproc): Refactored to work with any instruction
+	encoding.
+	(isa_mode): New variable
+	(RSVD_INSTRUCTION): Changed to 0x00000039.
+	* m16.igen (BREAK16): Refactored instruction to use do_break16.
+	(JALX32): Add mips32, mips64, mips32r2 and mips64r2 models.
+	* micromips.dc: New file.
+	* micromips.igen: New file.
+	* micromips16.dc: New file.
+	* micromipsdsp.igen: New file.
+	* micromipsrun.c: New file.
+	* mips.igen (do_swc1): Changed to work with any instruction encoding.
+	(do_add do_addi do_andi do_dadd do_daddi do_dsll32 do_dsra32
+	do_dsrl32, do_dsub, do_break, do_break16, do_clo, do_clz, do_dclo,
+	do_dclz, do_lb, do_lh, do_lwr, do_lwl, do_lwc, do_lw, do_lwu, do_lhu,
+	do_ldc, do_lbu, do_ll, do_lld, do_lui, do_madd, do_dsp_madd, do_maddu,
+	do_dsp_maddu, do_dsp_mfhi, do_dsp_mflo, do_movn, do_movz, do_msub,
+	do_dsp_msub, do_msubu, do_dsp_msubu, do_mthi, do_dsp_mthi, do_mtlo,
+	do_dsp_mtlo, do_mul, do_dsp_mult, do_dsp_multu, do_pref, do_sc,
+	do_scd, do_sub, do_sw, do_teq, do_teqi, do_tge, do_tgei, do_tgeiu,
+	do_tgeu, do_tlt do_tlti, do_tltiu, do_tltu, do_tne, do_tnei, do_abs_fmt,
+	do_add_fmt, do_alnv_ps, do_c_cond_fmt, do_ceil_fmt, do_cfc1, do_ctc1,
+	do_cvt_d_fmt, do_cvt_l_fmt, do_cvt_ps_s, do_cvt_s_fmt, do_cvt_s_pl,
+	do_cvt_s_pu, do_cvt_w_fmt, do_div_fmt, do_dmfc1b, do_dmtc1b, do_floor_fmt,
+	do_luxc1_32, do_luxc1_64, do_lwc1, do_lwxc1, do_madd_fmt, do_mfc1b,
+	do_mov_fmt, do_movtf, do_movtf_fmt, do_movn_fmt, do_movz_fmt, do_msub_fmt,
+	do_mtc1b, do_mul_fmt, do_neg_fmt, do_nmadd_fmt, do_nmsub_fmt, do_pll_ps,
+	do_plu_ps, do_pul_ps, do_puu_ps, do_recip_fmt, do_round_fmt, do_rsqrt_fmt,
+	do_prefx, do_sdc1, do_suxc1_32, do_suxc1_64, do_sqrt_fmt, do_sub_fmt,
+	do_swc1, do_swxc1, do_trunc_fmt): New functions, refactored from existing
+	instructions.
+	Refactored instruction code to use these functions.
+	(RSVD): Changed to use new reserved instruction.
+	(loadstore_ea, not_word_value, unpredictable, check_mt_hilo,
+	check_mf_hilo, check_mult_hilo, check_div_hilo, check_u64, do_luxc1_32,
+	do_sdc1, do_suxc1_32, check_fmt_p, check_fpu, do_load_double,
+	do_store_double):  Added micromips32 and micromips64 models.
+	Added include for micromips.igen and micromipsdsp.igen
+	Add micromips32 and micromips64 models.
+	(DecodeCoproc): Updated to use new macro definition.
+	* mips3264r2.igen (do_dsbh, do_dshd, do_dext, do_dextm, do_dextu, do_di,
+	do_dins, do_dinsm, do_ei, do_ext, do_mfhc1, do_mthc1, do_ins, do_dinsu,
+	do_seb, do_seh do_rdhwr, do_wsbh): New functions.
+	Refactored instruction code to use these functions.
+	* sim-main.h (CP0_operation): New enum.
+	(DecodeCoproc): Updated macro.
+	(IMEM32_MICROMIPS, IMEM16_MICROMIPS, MICROMIPS_MINOR_OPCODE,
+	MICROMIPS_DELAYSLOT_SIZE_ANY, MICROMIPS_DELAYSLOT_SIZE_16,
+	MICROMIPS_DELAYSLOT_SIZE_32, ISA_MODE_MIPS32 and
+	ISA_MODE_MICROMIPS): New defines.
+	(sim_state): Add isa_mode field.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

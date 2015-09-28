@@ -1,3 +1,1549 @@
+2015-09-26  Simon Marchi  <simark@nova.polymtl.ca>
+
+	* btrace.c (parse_xml_btrace_block): Fix cast of
+	xml_find_attribute's return value.
+	* memory-map.c (memory_map_start_memory): Likewise.
+	* solib-svr4.c (library_list_start_library): Likewise.
+	* solib-target.c (library_list_start_segment): Likewise.
+	(library_list_start_section): Likewise.
+	* tracepoint.c (traceframe_info_start_memory): Likewise.
+
+2015-09-26  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-namespace.c (d_lookup_symbol): New arg langdef.
+	All callers updated.  Support looking up symbol as a primitive type.
+	(lookup_module_scope): New arg langdef.  All callers updated.
+	Call d_lookup_symbol directly for simple bare symbols.
+
+2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* macrocmd.c (print_macro_callback): Add cast(s).
+	* macrotab.c (macro_bcache_str): Likewise.
+	(new_macro_definition): Likewise.
+	* main.c (captured_main): Likewise.
+	* maint.c (print_bfd_section_info): Likewise.
+	* mdebugread.c (mdebug_build_psymtabs): Likewise.
+	(basic_type): Likewise.
+	* memattr.c (mem_region_cmp): Likewise.
+	* memory-map.c (memory_map_start_memory): Likewise.
+	(memory_map_end_memory): Likewise.
+	(memory_map_start_property): Likewise.
+	(memory_map_end_property): Likewise.
+	(clear_result): Likewise.
+	* memrange.c (compare_mem_ranges): Likewise.
+	* mep-tdep.c (mep_analyze_frame_prologue): Likewise.
+	* mi/mi-cmd-var.c (mi_cmd_var_update_iter): Likewise.
+	* mi/mi-console.c (mi_console_file_delete): Likewise.
+	(mi_console_file_fputs): Likewise.
+	(mi_console_raw_packet): Likewise.
+	(mi_console_file_flush): Likewise.
+	(mi_console_set_raw): Likewise.
+	* mi/mi-interp.c (mi_interpreter_resume): Likewise.
+	(mi_new_thread): Likewise.
+	(mi_thread_exit): Likewise.
+	(mi_record_changed): Likewise.
+	(mi_inferior_added): Likewise.
+	(mi_inferior_appeared): Likewise.
+	(mi_inferior_exit): Likewise.
+	(mi_inferior_removed): Likewise.
+	(mi_interp_data): Likewise.
+	(mi_on_normal_stop): Likewise.
+	(mi_traceframe_changed): Likewise.
+	(mi_tsv_created): Likewise.
+	(mi_tsv_deleted): Likewise.
+	(mi_tsv_modified): Likewise.
+	(mi_breakpoint_created): Likewise.
+	(mi_breakpoint_deleted): Likewise.
+	(mi_breakpoint_modified): Likewise.
+	(mi_output_running_pid): Likewise.
+	(mi_inferior_count): Likewise.
+	(mi_solib_loaded): Likewise.
+	(mi_solib_unloaded): Likewise.
+	(mi_command_param_changed): Likewise.
+	(mi_memory_changed): Likewise.
+	(report_initial_inferior): Likewise.
+	(mi_ui_out): Likewise.
+	(mi_set_logging): Likewise.
+	* mi/mi-main.c (collect_cores): Likewise.
+	(print_one_inferior): Likewise.
+	(free_vector_of_ints): Likewise.
+	(free_splay_tree): Likewise.
+	(mi_execute_command): Likewise.
+	* mi/mi-out.c (mi_table_body): Likewise.
+	(mi_table_end): Likewise.
+	(mi_table_header): Likewise.
+	(mi_begin): Likewise.
+	(mi_end): Likewise.
+	(mi_field_int): Likewise.
+	(mi_field_string): Likewise.
+	(mi_field_fmt): Likewise.
+	(mi_flush): Likewise.
+	(mi_redirect): Likewise.
+	(field_separator): Likewise.
+	(mi_open): Likewise.
+	(mi_close): Likewise.
+	(mi_out_buffered): Likewise.
+	(mi_out_rewind): Likewise.
+	(mi_out_put): Likewise.
+	(mi_version): Likewise.
+	(mi_out_data_dtor): Likewise.
+	* mi/mi-parse.c (mi_parse_cleanup): Likewise.
+	* microblaze-tdep.c (microblaze_frame_cache): Likewise.
+	* minidebug.c (lzma_open): Likewise.
+	(lzma_pread): Likewise.
+	(lzma_close): Likewise.
+	(lzma_stat): Likewise.
+	* mips-linux-tdep.c (mips_linux_init_abi): Likewise.
+	* mips-sde-tdep.c (mips_sde_frame_cache): Likewise.
+	(mips_sde_elf_osabi_sniff_abi_tag_sections): Likewise.
+	* mips-tdep.c (mips_insn16_frame_cache): Likewise.
+	(mips_micro_frame_cache): Likewise.
+	(mips_insn32_frame_cache): Likewise.
+	(mips_stub_frame_cache): Likewise.
+	(gdb_print_insn_mips): Likewise.
+	(value_of_mips_user_reg): Likewise.
+	(mips_gdbarch_init): Likewise.
+	* mips64obsd-tdep.c (mips64obsd_supply_gregset): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_supply_fpregset): Likewise.
+	(mipsnbsd_supply_gregset): Likewise.
+	* mn10300-linux-tdep.c (am33_supply_fpregset_method): Likewise.
+	(am33_collect_gregset_method): Likewise.
+	(am33_collect_fpregset_method): Likewise.
+	* mn10300-tdep.c (mn10300_analyze_frame_prologue): Likewise.
+	* moxie-tdep.c (moxie_frame_cache): Likewise.
+	* msp430-tdep.c (msp430_get_opcode_byte): Likewise.
+	(msp430_analyze_frame_prologue): Likewise.
+	* mt-tdep.c (mt_frame_unwind_cache): Likewise.
+	* nios2-linux-tdep.c (nios2_supply_gregset): Likewise.
+	(nios2_collect_gregset): Likewise.
+	* nios2-tdep.c (nios2_frame_unwind_cache): Likewise.
+	(nios2_stub_frame_cache): Likewise.
+	* objc-lang.c (find_methods): Likewise.
+	* objfiles.c (objfiles_pspace_data_cleanup): Likewise.
+	(get_objfile_pspace_data): Likewise.
+	(get_objfile_bfd_data): Likewise.
+	(objfile_bfd_data_free): Likewise.
+	(add_to_objfile_sections): Likewise.
+	(do_free_objfile_cleanup): Likewise.
+	(resume_section_map_updates_cleanup): Likewise.
+	* opencl-lang.c (builtin_opencl_type): Likewise.
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Likewise.
+	* osdata.c (osdata_start_osdata): Likewise.
+	(osdata_start_item): Likewise.
+	(osdata_start_column): Likewise.
+	(osdata_end_column): Likewise.
+	(clear_parsing_data): Likewise.
+	(osdata_free_cleanup): Likewise.
+	* parse.c (type_stack_cleanup): Likewise.
+	(exp_uses_objfile_iter): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_supply_gregset): Likewise.
+	(ppc_linux_collect_gregset): Likewise.
+	(ppu2spu_prev_arch): Likewise.
+	(ppu2spu_this_id): Likewise.
+	(ppu2spu_prev_register): Likewise.
+	(ppu2spu_unwind_register): Likewise.
+	(ppu2spu_sniffer): Likewise.
+	(ppu2spu_dealloc_cache): Likewise.
+	(ppc_linux_init_abi): Likewise.
+	* ppcfbsd-tdep.c (ppcfbsd_sigtramp_frame_cache): Likewise.
+	* ppcobsd-tdep.c (ppcobsd_sigtramp_frame_cache): Likewise.
+	* progspace.c (restore_program_space): Likewise.
+	* psymtab.c (find_pc_sect_psymtab): Likewise.
+	(compare_psymbols): Likewise.
+	(psymbol_bcache_full): Likewise.
+	(allocate_psymtab): Likewise.
+	(discard_psymtabs_upto): Likewise.
+	* python/py-block.c (set_block): Likewise.
+	(del_objfile_blocks): Likewise.
+	* python/py-breakpoint.c (build_bp_list): Likewise.
+	* python/py-inferior.c (inferior_to_inferior_object): Likewise.
+	(build_inferior_list): Likewise.
+	(py_free_inferior): Likewise.
+	* python/py-objfile.c (py_free_objfile): Likewise.
+	(objfile_to_objfile_object): Likewise.
+	* python/py-prettyprint.c (py_restore_tstate): Likewise.
+	* python/py-progspace.c (py_free_pspace): Likewise.
+	(pspace_to_pspace_object): Likewise.
+	* python/py-symbol.c (set_symbol): Likewise.
+	(del_objfile_symbols): Likewise.
+	* python/py-symtab.c (set_sal): Likewise.
+	(set_symtab): Likewise.
+	(del_objfile_symtab): Likewise.
+	(del_objfile_sal): Likewise.
+	* python/py-type.c (save_objfile_types): Likewise.
+	(set_type): Likewise.
+	* python/py-unwind.c (pyuw_prev_register): Likewise.
+	(pyuw_on_new_gdbarch): Likewise.
+	* python/py-utils.c (py_decref): Likewise.
+	(py_xdecref): Likewise.
+	(gdb_py_generic_dict): Likewise.
+	* python/py-xmethods.c (gdbpy_free_xmethod_worker_data): Likewise.
+	(gdbpy_clone_xmethod_worker_data): Likewise.
+	(gdbpy_get_xmethod_arg_types): Likewise.
+	(gdbpy_get_xmethod_result_type): Likewise.
+	(gdbpy_invoke_xmethod): Likewise.
+	* python/python.c (gdbpy_apply_type_printers): Likewise.
+	(gdbpy_free_type_printers): Likewise.
+	* record-btrace.c (record_btrace_disable_callback): Likewise.
+	(bfcache_hash): Likewise.
+	(bfcache_eq): Likewise.
+	(btrace_get_frame_function): Likewise.
+	(record_btrace_frame_unwind_stop_reason): Likewise.
+	(record_btrace_frame_this_id): Likewise.
+	(record_btrace_frame_prev_register): Likewise.
+	(record_btrace_frame_dealloc_cache): Likewise.
+	* record-full.c (record_full_message_wrapper): Likewise.
+	(record_full_save_cleanups): Likewise.
+	* regcache.c (regcache_descr): Likewise.
+	(do_regcache_xfree): Likewise.
+	(do_regcache_invalidate): Likewise.
+	(do_cooked_read): Likewise.
+	(regcache_transfer_regset): Likewise.
+	* reggroups.c (reggroup_add): Likewise.
+	(reggroup_next): Likewise.
+	(reggroup_prev): Likewise.
+	* remote-fileio.c (do_remote_fileio_request): Likewise.
+	* remote-notif.c (remote_async_get_pending_events_handler): Likewise.
+	(do_notif_event_xfree): Likewise.
+	* remote.c (get_remote_arch_state): Likewise.
+	(remote_pspace_data_cleanup): Likewise.
+	(get_remote_exec_file): Likewise.
+	(set_pspace_remote_exec_file): Likewise.
+	(compare_pnums): Likewise.
+	(clear_threads_listing_context): Likewise.
+	(remote_newthread_step): Likewise.
+	(start_thread): Likewise.
+	(end_thread): Likewise.
+	(remove_child_of_pending_fork): Likewise.
+	(remove_stop_reply_for_inferior): Likewise.
+	(remove_stop_reply_of_remote_state): Likewise.
+	(remote_notif_remove_once_on_match): Likewise.
+	(stop_reply_match_ptid_and_ws): Likewise.
+	(kill_child_of_pending_fork): Likewise.
+	(register_remote_g_packet_guess): Likewise.
+	(remote_read_description_p): Likewise.
+	(remote_read_description): Likewise.
+	(free_actions_list_cleanup_wrapper): Likewise.
+	(remote_async_serial_handler): Likewise.
+	* rl78-tdep.c (rl78_get_opcode_byte): Likewise.
+	(rl78_analyze_frame_prologue): Likewise.
+	* rs6000-tdep.c (ppc_supply_gregset): Likewise.
+	(ppc_supply_fpregset): Likewise.
+	(ppc_supply_vsxregset): Likewise.
+	(ppc_supply_vrregset): Likewise.
+	(ppc_collect_gregset): Likewise.
+	(ppc_collect_fpregset): Likewise.
+	(ppc_collect_vsxregset): Likewise.
+	(ppc_collect_vrregset): Likewise.
+	(e500_move_ev_register): Likewise.
+	(do_regcache_raw_write): Likewise.
+	(rs6000_frame_cache): Likewise.
+	(rs6000_epilogue_frame_cache): Likewise.
+	(rs6000_gdbarch_init): Likewise.
+	* rx-tdep.c (rx_get_opcode_byte): Likewise.
+	(rx_analyze_frame_prologue): Likewise.
+	(rx_frame_type): Likewise.
+	(rx_frame_sniffer_common): Likewise.
+	* s390-linux-tdep.c (s390_check_for_saved): Likewise.
+	(s390_frame_unwind_cache): Likewise.
+	(s390_stub_frame_unwind_cache): Likewise.
+	(s390_sigtramp_frame_unwind_cache): Likewise.
+	* score-tdep.c (score_make_prologue_cache): Likewise.
+	* sentinel-frame.c (sentinel_frame_prev_register): Likewise.
+	(sentinel_frame_prev_arch): Likewise.
+	* ser-base.c (fd_event): Likewise.
+	(push_event): Likewise.
+	(ser_base_write): Likewise.
+	* ser-pipe.c (pipe_close): Likewise.
+	* serial.c (serial_write): Likewise.
+	* sh-tdep.c (sh_frame_cache): Likewise.
+	(sh_stub_this_id): Likewise.
+	* sh64-tdep.c (sh64_frame_cache): Likewise.
+	* solib-aix.c (get_solib_aix_inferior_data): Likewise.
+	(library_list_start_library): Likewise.
+	(library_list_start_list): Likewise.
+	(solib_aix_free_library_list): Likewise.
+	* solib-darwin.c (get_darwin_info): Likewise.
+	* solib-dsbt.c (get_dsbt_info): Likewise.
+	* solib-spu.c (append_ocl_sos): Likewise.
+	* solib-svr4.c (svr4_pspace_data_cleanup): Likewise.
+	(get_svr4_info): Likewise.
+	(library_list_start_library): Likewise.
+	(svr4_library_list_start_list): Likewise.
+	(hash_probe_and_action): Likewise.
+	(equal_probe_and_action): Likewise.
+	(svr4_update_solib_event_breakpoint): Likewise.
+	(set_solib_svr4_fetch_link_map_offsets): Likewise.
+	(svr4_fetch_link_map_offsets): Likewise.
+	(svr4_have_link_map_offsets): Likewise.
+	* solib-target.c (library_list_start_segment): Likewise.
+	(library_list_start_section): Likewise.
+	(library_list_start_library): Likewise.
+	(library_list_end_library): Likewise.
+	(library_list_start_list): Likewise.
+	(solib_target_free_library_list): Likewise.
+	* solib.c (solib_ops): Likewise.
+	(set_solib_ops): Likewise.
+	* sparc-sol2-tdep.c (sparc32_sol2_sigtramp_frame_cache): Likewise.
+	* sparc-tdep.c (sparc_frame_cache): Likewise.
+	(sparc32_frame_cache): Likewise.
+	(sparc32_supply_gregset): Likewise.
+	(sparc32_collect_gregset): Likewise.
+	(sparc32_supply_fpregset): Likewise.
+	(sparc32_collect_fpregset): Likewise.
+	* sparc64-sol2-tdep.c (sparc64_sol2_sigtramp_frame_cache): Likewise.
+	* sparc64-tdep.c (sparc64_supply_gregset): Likewise.
+	(sparc64_collect_gregset): Likewise.
+	(sparc64_supply_fpregset): Likewise.
+	(sparc64_collect_fpregset): Likewise.
+	* sparc64fbsd-tdep.c (sparc64fbsd_sigtramp_frame_cache): Likewise.
+	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_frame_cache): Likewise.
+	* sparc64obsd-tdep.c (sparc64obsd_frame_cache): Likewise.
+	(sparc64obsd_trapframe_cache): Likewise.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_frame_cache): Likewise.
+	* sparcobsd-tdep.c (sparc32obsd_sigtramp_frame_cache): Likewise.
+	* spu-multiarch.c (spu_gdbarch): Likewise.
+	* spu-tdep.c (spu_frame_unwind_cache): Likewise.
+	(spu2ppu_prev_arch): Likewise.
+	(spu2ppu_this_id): Likewise.
+	(spu2ppu_prev_register): Likewise.
+	(spu2ppu_dealloc_cache): Likewise.
+	(spu_dis_asm_print_address): Likewise.
+	(gdb_print_insn_spu): Likewise.
+	(spu_get_overlay_table): Likewise.
+	* stabsread.c (rs6000_builtin_type): Likewise.
+	* stack.c (do_print_variable_and_value): Likewise.
+	* stap-probe.c (get_stap_base_address_1): Likewise.
+	* symfile-debug.c (debug_qf_has_symbols): Likewise.
+	(debug_qf_find_last_source_symtab): Likewise.
+	(debug_qf_forget_cached_source_info): Likewise.
+	(debug_qf_map_symtabs_matching_filename): Likewise.
+	(debug_qf_lookup_symbol): Likewise.
+	(debug_qf_print_stats): Likewise.
+	(debug_qf_dump): Likewise.
+	(debug_qf_relocate): Likewise.
+	(debug_qf_expand_symtabs_for_function): Likewise.
+	(debug_qf_expand_all_symtabs): Likewise.
+	(debug_qf_expand_symtabs_with_fullname): Likewise.
+	(debug_qf_map_matching_symbols): Likewise.
+	(debug_qf_expand_symtabs_matching): Likewise.
+	(debug_qf_find_pc_sect_compunit_symtab): Likewise.
+	(debug_qf_map_symbol_filenames): Likewise.
+	(debug_sym_get_probes): Likewise.
+	(debug_sym_new_init): Likewise.
+	(debug_sym_init): Likewise.
+	(debug_sym_read): Likewise.
+	(debug_sym_read_psymbols): Likewise.
+	(debug_sym_finish): Likewise.
+	(debug_sym_offsets): Likewise.
+	(debug_sym_read_linetable): Likewise.
+	(debug_sym_relocate): Likewise.
+	(uninstall_symfile_debug_logging): Likewise.
+	* symfile-mem.c (symbol_file_add_from_memory_wrapper): Likewise.
+	* symfile.c (place_section): Likewise.
+	(add_section_size_callback): Likewise.
+	(load_progress): Likewise.
+	(load_section_callback): Likewise.
+	(clear_memory_write_data): Likewise.
+	(allocate_symtab): Likewise.
+	* symmisc.c (maintenance_expand_file_matcher): Likewise.
+	* symtab.c (lookup_symtab_callback): Likewise.
+	(hash_demangled_name_entry): Likewise.
+	(eq_demangled_name_entry): Likewise.
+	(get_symbol_cache): Likewise.
+	(symbol_cache_cleanup): Likewise.
+	(set_symbol_cache_size): Likewise.
+	(symbol_cache_flush): Likewise.
+	(maintenance_print_symbol_cache): Likewise.
+	(maintenance_print_symbol_cache_statistics): Likewise.
+	(delete_filename_seen_cache): Likewise.
+	(output_partial_symbol_filename): Likewise.
+	(search_symbols_file_matches): Likewise.
+	(search_symbols_name_matches): Likewise.
+	(do_free_completion_list): Likewise.
+	(maybe_add_partial_symtab_filename): Likewise.
+	(get_main_info): Likewise.
+	(main_info_cleanup): Likewise.
+	* target-dcache.c (target_dcache_cleanup): Likewise.
+	(target_dcache_init_p): Likewise.
+	(target_dcache_invalidate): Likewise.
+	(target_dcache_get): Likewise.
+	(target_dcache_get_or_init): Likewise.
+	* target-descriptions.c (target_find_description): Likewise.
+	(tdesc_find_type): Likewise.
+	(tdesc_data_cleanup): Likewise.
+	(tdesc_find_arch_register): Likewise.
+	(tdesc_register_name): Likewise.
+	(tdesc_register_type): Likewise.
+	(tdesc_register_reggroup_p): Likewise.
+	(set_tdesc_pseudo_register_name): Likewise.
+	(set_tdesc_pseudo_register_type): Likewise.
+	(set_tdesc_pseudo_register_reggroup_p): Likewise.
+	(tdesc_use_registers): Likewise.
+	(free_target_description): Likewise.
+	* target-memory.c (compare_block_starting_address): Likewise.
+	(cleanup_request_data): Likewise.
+	(cleanup_write_requests_vector): Likewise.
+	* target.c (open_target): Likewise.
+	(cleanup_restore_target_terminal): Likewise.
+	(free_memory_read_result_vector): Likewise.
+	* thread.c (disable_thread_stack_temporaries): Likewise.
+	(finish_thread_state_cleanup): Likewise.
+	(do_restore_current_thread_cleanup): Likewise.
+	(restore_current_thread_cleanup_dtor): Likewise.
+	(set_thread_refcount): Likewise.
+	(tp_array_compar): Likewise.
+	(do_captured_thread_select): Likewise.
+	* tic6x-tdep.c (tic6x_frame_unwind_cache): Likewise.
+	(tic6x_stub_this_id): Likewise.
+	* tilegx-tdep.c (tilegx_frame_cache): Likewise.
+	* top.c (do_restore_instream_cleanup): Likewise.
+	(gdb_readline_wrapper_cleanup): Likewise.
+	(kill_or_detach): Likewise.
+	(print_inferior_quit_action): Likewise.
+	* tracefile-tfile.c (match_blocktype): Likewise.
+	(build_traceframe_info): Likewise.
+	* tracefile.c (trace_file_writer_xfree): Likewise.
+	* tracepoint.c (memrange_cmp): Likewise.
+	(do_collect_symbol): Likewise.
+	(do_clear_collection_list): Likewise.
+	(do_restore_current_traceframe_cleanup): Likewise.
+	(restore_current_traceframe_cleanup_dtor): Likewise.
+	(free_current_marker): Likewise.
+	(traceframe_info_start_memory): Likewise.
+	(traceframe_info_start_tvar): Likewise.
+	(free_result): Likewise.
+	* tramp-frame.c (tramp_frame_cache): Likewise.
+	* tui/tui-file.c (tui_file_delete): Likewise.
+	(tui_fileopen): Likewise.
+	(tui_sfileopen): Likewise.
+	(tui_file_isatty): Likewise.
+	(tui_file_rewind): Likewise.
+	(tui_file_put): Likewise.
+	(tui_file_fputs): Likewise.
+	(tui_file_get_strbuf): Likewise.
+	(tui_file_adjust_strbuf): Likewise.
+	(tui_file_flush): Likewise.
+	* tui/tui-layout.c (make_command_window): Likewise.
+	(make_data_window): Likewise.
+	(show_source_disasm_command): Likewise.
+	(show_data): Likewise.
+	(make_source_or_disasm_window): Likewise.
+	(show_source_or_disasm_and_command): Likewise.
+	* tui/tui-out.c (tui_field_int): Likewise.
+	(tui_field_string): Likewise.
+	(tui_field_fmt): Likewise.
+	(tui_text): Likewise.
+	* typeprint.c (hash_typedef_field): Likewise.
+	(eq_typedef_field): Likewise.
+	(do_free_typedef_hash): Likewise.
+	(copy_typedef_hash_element): Likewise.
+	(do_free_global_table): Likewise.
+	(find_global_typedef): Likewise.
+	(find_typedef_in_hash): Likewise.
+	* ui-file.c (ui_file_write_for_put): Likewise.
+	(do_ui_file_xstrdup): Likewise.
+	(mem_file_delete): Likewise.
+	(mem_file_rewind): Likewise.
+	(mem_file_put): Likewise.
+	(mem_file_write): Likewise.
+	(stdio_file_delete): Likewise.
+	(stdio_file_flush): Likewise.
+	(stdio_file_read): Likewise.
+	(stdio_file_write): Likewise.
+	(stdio_file_write_async_safe): Likewise.
+	(stdio_file_fputs): Likewise.
+	(stdio_file_isatty): Likewise.
+	(stdio_file_fseek): Likewise.
+	(tee_file_delete): Likewise.
+	(tee_file_flush): Likewise.
+	(tee_file_write): Likewise.
+	(tee_file_fputs): Likewise.
+	(tee_file_isatty): Likewise.
+	* ui-out.c (do_cleanup_table_end): Likewise.
+	(do_cleanup_end): Likewise.
+	* user-regs.c (user_reg_add): Likewise.
+	(user_reg_map_name_to_regnum): Likewise.
+	(usernum_to_user_reg): Likewise.
+	(maintenance_print_user_registers): Likewise.
+	* utils.c (do_bfd_close_cleanup): Likewise.
+	(do_fclose_cleanup): Likewise.
+	(do_obstack_free): Likewise.
+	(do_ui_file_delete): Likewise.
+	(do_ui_out_redirect_pop): Likewise.
+	(do_free_section_addr_info): Likewise.
+	(restore_integer): Likewise.
+	(do_unpush_target): Likewise.
+	(do_htab_delete_cleanup): Likewise.
+	(do_restore_ui_file): Likewise.
+	(do_value_free): Likewise.
+	(do_free_so): Likewise.
+	(free_current_contents): Likewise.
+	(do_regfree_cleanup): Likewise.
+	(core_addr_hash): Likewise.
+	(core_addr_eq): Likewise.
+	(do_free_char_ptr_vec): Likewise.
+	* v850-tdep.c (v850_frame_cache): Likewise.
+	* varobj.c (do_free_variable_cleanup): Likewise.
+	* vax-tdep.c (vax_supply_gregset): Likewise.
+	(vax_frame_cache): Likewise.
+	* vaxobsd-tdep.c (vaxobsd_sigtramp_frame_cache): Likewise.
+	* xml-support.c (gdb_xml_body_text): Likewise.
+	(gdb_xml_values_cleanup): Likewise.
+	(gdb_xml_start_element): Likewise.
+	(gdb_xml_start_element_wrapper): Likewise.
+	(gdb_xml_end_element): Likewise.
+	(gdb_xml_end_element_wrapper): Likewise.
+	(gdb_xml_cleanup): Likewise.
+	(gdb_xml_fetch_external_entity): Likewise.
+	(gdb_xml_parse_attr_enum): Likewise.
+	(xinclude_start_include): Likewise.
+	(xinclude_end_include): Likewise.
+	(xml_xinclude_default): Likewise.
+	(xml_xinclude_start_doctype): Likewise.
+	(xml_xinclude_end_doctype): Likewise.
+	(xml_xinclude_cleanup): Likewise.
+	(xml_fetch_content_from_file): Likewise.
+	* xml-syscall.c (free_syscalls_info): Likewise.
+	(syscall_start_syscall): Likewise.
+	* xml-tdesc.c (tdesc_end_arch): Likewise.
+	(tdesc_end_osabi): Likewise.
+	(tdesc_end_compatible): Likewise.
+	(tdesc_start_target): Likewise.
+	(tdesc_start_feature): Likewise.
+	(tdesc_start_reg): Likewise.
+	(tdesc_start_union): Likewise.
+	(tdesc_start_struct): Likewise.
+	(tdesc_start_flags): Likewise.
+	(tdesc_start_field): Likewise.
+	(tdesc_start_vector): Likewise.
+	(fetch_available_features_from_target): Likewise.
+	* xstormy16-tdep.c (xstormy16_frame_cache): Likewise.
+	* xtensa-tdep.c (xtensa_supply_gregset): Likewise.
+	(xtensa_frame_cache): Likewise.
+	(xtensa_frame_prev_register): Likewise.
+	(xtensa_extract_return_value): Likewise.
+
+2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aarch64-tdep.c (aarch64_make_prologue_cache): Add cast(s).
+	(aarch64_make_stub_cache): Likewise.
+	(value_of_aarch64_user_reg): Likewise.
+	* ada-lang.c (ada_inferior_data_cleanup): Likewise.
+	(get_ada_inferior_data): Likewise.
+	(get_ada_pspace_data): Likewise.
+	(ada_pspace_data_cleanup): Likewise.
+	(ada_complete_symbol_matcher): Likewise.
+	(ada_exc_search_name_matches): Likewise.
+	* ada-tasks.c (get_ada_tasks_pspace_data): Likewise.
+	(get_ada_tasks_inferior_data): Likewise.
+	* addrmap.c (addrmap_mutable_foreach_worker): Likewise.
+	(splay_obstack_alloc): Likewise.
+	(splay_obstack_free): Likewise.
+	* alpha-linux-tdep.c (alpha_linux_supply_gregset): Likewise.
+	(alpha_linux_collect_gregset): Likewise.
+	(alpha_linux_supply_fpregset): Likewise.
+	(alpha_linux_collect_fpregset): Likewise.
+	* alpha-mdebug-tdep.c (alpha_mdebug_frame_unwind_cache): Likewise.
+	* alpha-tdep.c (alpha_lds): Likewise.
+	(alpha_sts): Likewise.
+	(alpha_sigtramp_frame_unwind_cache): Likewise.
+	(alpha_heuristic_frame_unwind_cache): Likewise.
+	(alpha_supply_int_regs): Likewise.
+	(alpha_fill_int_regs): Likewise.
+	(alpha_supply_fp_regs): Likewise.
+	(alpha_fill_fp_regs): Likewise.
+	* alphanbsd-tdep.c (alphanbsd_supply_fpregset): Likewise.
+	(alphanbsd_aout_supply_gregset): Likewise.
+	(alphanbsd_supply_gregset): Likewise.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Likewise.
+	(amd64_x32_linux_init_abi): Likewise.
+	* amd64-nat.c (amd64_supply_native_gregset): Likewise.
+	(amd64_collect_native_gregset): Likewise.
+	* amd64-tdep.c (amd64_frame_cache): Likewise.
+	(amd64_sigtramp_frame_cache): Likewise.
+	(amd64_epilogue_frame_cache): Likewise.
+	(amd64_supply_fxsave): Likewise.
+	(amd64_supply_xsave): Likewise.
+	(amd64_collect_fxsave): Likewise.
+	(amd64_collect_xsave): Likewise.
+	* amd64-windows-tdep.c (amd64_windows_frame_cache): Likewise.
+	* amd64obsd-tdep.c (amd64obsd_trapframe_cache): Likewise.
+	* arm-linux-tdep.c (arm_linux_supply_gregset): Likewise.
+	(arm_linux_collect_gregset): Likewise.
+	(arm_linux_supply_nwfpe): Likewise.
+	(arm_linux_collect_nwfpe): Likewise.
+	(arm_linux_supply_vfp): Likewise.
+	(arm_linux_collect_vfp): Likewise.
+	* arm-tdep.c (arm_find_mapping_symbol): Likewise.
+	(arm_prologue_unwind_stop_reason): Likewise.
+	(arm_prologue_this_id): Likewise.
+	(arm_prologue_prev_register): Likewise.
+	(arm_exidx_data_free): Likewise.
+	(arm_find_exidx_entry): Likewise.
+	(arm_stub_this_id): Likewise.
+	(arm_m_exception_this_id): Likewise.
+	(arm_m_exception_prev_register): Likewise.
+	(arm_normal_frame_base): Likewise.
+	(gdb_print_insn_arm): Likewise.
+	(arm_objfile_data_free): Likewise.
+	(arm_record_special_symbol): Likewise.
+	(value_of_arm_user_reg): Likewise.
+	* armbsd-tdep.c (armbsd_supply_fpregset): Likewise.
+	(armbsd_supply_gregset): Likewise.
+	* auto-load.c (auto_load_pspace_data_cleanup): Likewise.
+	(get_auto_load_pspace_data): Likewise.
+	(hash_loaded_script_entry): Likewise.
+	(eq_loaded_script_entry): Likewise.
+	(clear_section_scripts): Likewise.
+	(collect_matching_scripts): Likewise.
+	* auxv.c (auxv_inferior_data_cleanup): Likewise.
+	(get_auxv_inferior_data): Likewise.
+	* avr-tdep.c (avr_frame_unwind_cache): Likewise.
+	* ax-general.c (do_free_agent_expr_cleanup): Likewise.
+	* bfd-target.c (target_bfd_xfer_partial): Likewise.
+	(target_bfd_xclose): Likewise.
+	(target_bfd_get_section_table): Likewise.
+	* bfin-tdep.c (bfin_frame_cache): Likewise.
+	* block.c (find_block_in_blockvector): Likewise.
+	(call_site_for_pc): Likewise.
+	(block_find_non_opaque_type_preferred): Likewise.
+	* break-catch-sig.c (signal_catchpoint_insert_location): Likewise.
+	(signal_catchpoint_remove_location): Likewise.
+	(signal_catchpoint_breakpoint_hit): Likewise.
+	(signal_catchpoint_print_one): Likewise.
+	(signal_catchpoint_print_mention): Likewise.
+	(signal_catchpoint_print_recreate): Likewise.
+	* break-catch-syscall.c (get_catch_syscall_inferior_data): Likewise.
+	* breakpoint.c (do_cleanup_counted_command_line): Likewise.
+	(bp_location_compare_addrs): Likewise.
+	(get_first_locp_gte_addr): Likewise.
+	(check_tracepoint_command): Likewise.
+	(do_map_commands_command): Likewise.
+	(get_breakpoint_objfile_data): Likewise.
+	(free_breakpoint_probes): Likewise.
+	(do_captured_breakpoint_query): Likewise.
+	(compare_breakpoints): Likewise.
+	(bp_location_compare): Likewise.
+	(bpstat_remove_breakpoint_callback): Likewise.
+	(do_delete_breakpoint_cleanup): Likewise.
+	* bsd-uthread.c (bsd_uthread_set_supply_uthread): Likewise.
+	(bsd_uthread_set_collect_uthread): Likewise.
+	(bsd_uthread_activate): Likewise.
+	(bsd_uthread_fetch_registers): Likewise.
+	(bsd_uthread_store_registers): Likewise.
+	* btrace.c (check_xml_btrace_version): Likewise.
+	(parse_xml_btrace_block): Likewise.
+	(parse_xml_btrace_pt_config_cpu): Likewise.
+	(parse_xml_btrace_pt_raw): Likewise.
+	(parse_xml_btrace_pt): Likewise.
+	(parse_xml_btrace_conf_bts): Likewise.
+	(parse_xml_btrace_conf_pt): Likewise.
+	(do_btrace_data_cleanup): Likewise.
+	* c-typeprint.c (find_typedef_for_canonicalize): Likewise.
+	* charset.c (cleanup_iconv): Likewise.
+	(do_cleanup_iterator): Likewise.
+	* cli-out.c (cli_uiout_dtor): Likewise.
+	(cli_table_begin): Likewise.
+	(cli_table_body): Likewise.
+	(cli_table_end): Likewise.
+	(cli_table_header): Likewise.
+	(cli_begin): Likewise.
+	(cli_end): Likewise.
+	(cli_field_int): Likewise.
+	(cli_field_skip): Likewise.
+	(cli_field_string): Likewise.
+	(cli_field_fmt): Likewise.
+	(cli_spaces): Likewise.
+	(cli_text): Likewise.
+	(cli_message): Likewise.
+	(cli_wrap_hint): Likewise.
+	(cli_flush): Likewise.
+	(cli_redirect): Likewise.
+	(out_field_fmt): Likewise.
+	(field_separator): Likewise.
+	(cli_out_set_stream): Likewise.
+	* cli/cli-cmds.c (compare_symtabs): Likewise.
+	* cli/cli-dump.c (call_dump_func): Likewise.
+	(restore_section_callback): Likewise.
+	* cli/cli-script.c (clear_hook_in_cleanup): Likewise.
+	(do_restore_user_call_depth): Likewise.
+	(do_free_command_lines_cleanup): Likewise.
+	* coff-pe-read.c (get_section_vmas): Likewise.
+	(pe_as16): Likewise.
+	(pe_as32): Likewise.
+	* coffread.c (coff_symfile_read): Likewise.
+	* common/agent.c (agent_look_up_symbols): Likewise.
+	* common/filestuff.c (do_close_cleanup): Likewise.
+	* common/format.c (free_format_pieces_cleanup): Likewise.
+	* common/vec.c (vec_o_reserve): Likewise.
+	* compile/compile-c-support.c (print_one_macro): Likewise.
+	* compile/compile-c-symbols.c (hash_symbol_error): Likewise.
+	(eq_symbol_error): Likewise.
+	(del_symbol_error): Likewise.
+	(error_symbol_once): Likewise.
+	(gcc_convert_symbol): Likewise.
+	(gcc_symbol_address): Likewise.
+	(hash_symname): Likewise.
+	(eq_symname): Likewise.
+	* compile/compile-c-types.c (hash_type_map_instance): Likewise.
+	(eq_type_map_instance): Likewise.
+	(insert_type): Likewise.
+	(convert_type): Likewise.
+	* compile/compile-object-load.c (munmap_listp_free_cleanup): Likewise.
+	(setup_sections): Likewise.
+	(link_hash_table_free): Likewise.
+	(copy_sections): Likewise.
+	* compile/compile-object-run.c (do_module_cleanup): Likewise.
+	* compile/compile.c (compile_print_value): Likewise.
+	(do_rmdir): Likewise.
+	(cleanup_compile_instance): Likewise.
+	(cleanup_unlink_file): Likewise.
+	* completer.c (free_completion_tracker): Likewise.
+	* corelow.c (add_to_spuid_list): Likewise.
+	* cp-namespace.c (reset_directive_searched): Likewise.
+	* cp-support.c (reset_directive_searched): Likewise.
+	* cris-tdep.c (cris_sigtramp_frame_unwind_cache): Likewise.
+	(cris_frame_unwind_cache): Likewise.
+	* d-lang.c (builtin_d_type): Likewise.
+	* d-namespace.c (reset_directive_searched): Likewise.
+	* dbxread.c (dbx_free_symfile_info): Likewise.
+	(do_free_bincl_list_cleanup): Likewise.
+	* disasm.c (hash_dis_line_entry): Likewise.
+	(eq_dis_line_entry): Likewise.
+	(dis_asm_print_address): Likewise.
+	(fprintf_disasm): Likewise.
+	(do_ui_file_delete): Likewise.
+	* doublest.c (convert_floatformat_to_doublest): Likewise.
+	* dummy-frame.c (pop_dummy_frame_bpt): Likewise.
+	(dummy_frame_prev_register): Likewise.
+	(dummy_frame_this_id): Likewise.
+	* dwarf2-frame-tailcall.c (cache_hash): Likewise.
+	(cache_eq): Likewise.
+	(cache_find): Likewise.
+	(tailcall_frame_this_id): Likewise.
+	(dwarf2_tailcall_prev_register_first): Likewise.
+	(tailcall_frame_prev_register): Likewise.
+	(tailcall_frame_dealloc_cache): Likewise.
+	(tailcall_frame_prev_arch): Likewise.
+	* dwarf2-frame.c (dwarf2_frame_state_free): Likewise.
+	(dwarf2_frame_set_init_reg): Likewise.
+	(dwarf2_frame_init_reg): Likewise.
+	(dwarf2_frame_set_signal_frame_p): Likewise.
+	(dwarf2_frame_signal_frame_p): Likewise.
+	(dwarf2_frame_set_adjust_regnum): Likewise.
+	(dwarf2_frame_adjust_regnum): Likewise.
+	(clear_pointer_cleanup): Likewise.
+	(dwarf2_frame_cache): Likewise.
+	(find_cie): Likewise.
+	(dwarf2_frame_find_fde): Likewise.
+	* dwarf2expr.c (dwarf_expr_address_type): Likewise.
+	(free_dwarf_expr_context_cleanup): Likewise.
+	* dwarf2loc.c (locexpr_find_frame_base_location): Likewise.
+	(locexpr_get_frame_base): Likewise.
+	(loclist_find_frame_base_location): Likewise.
+	(loclist_get_frame_base): Likewise.
+	(dwarf_expr_dwarf_call): Likewise.
+	(dwarf_expr_get_base_type): Likewise.
+	(dwarf_expr_push_dwarf_reg_entry_value): Likewise.
+	(dwarf_expr_get_obj_addr): Likewise.
+	(entry_data_value_coerce_ref): Likewise.
+	(entry_data_value_copy_closure): Likewise.
+	(entry_data_value_free_closure): Likewise.
+	(get_frame_address_in_block_wrapper): Likewise.
+	(dwarf2_evaluate_property): Likewise.
+	(dwarf2_compile_property_to_c): Likewise.
+	(needs_frame_read_addr_from_reg): Likewise.
+	(needs_frame_get_reg_value): Likewise.
+	(needs_frame_frame_base): Likewise.
+	(needs_frame_frame_cfa): Likewise.
+	(needs_frame_tls_address): Likewise.
+	(needs_frame_dwarf_call): Likewise.
+	(needs_dwarf_reg_entry_value): Likewise.
+	(get_ax_pc): Likewise.
+	(locexpr_read_variable): Likewise.
+	(locexpr_read_variable_at_entry): Likewise.
+	(locexpr_read_needs_frame): Likewise.
+	(locexpr_describe_location): Likewise.
+	(locexpr_tracepoint_var_ref): Likewise.
+	(locexpr_generate_c_location): Likewise.
+	(loclist_read_variable): Likewise.
+	(loclist_read_variable_at_entry): Likewise.
+	(loclist_describe_location): Likewise.
+	(loclist_tracepoint_var_ref): Likewise.
+	(loclist_generate_c_location): Likewise.
+	* dwarf2read.c (line_header_hash_voidp): Likewise.
+	(line_header_eq_voidp): Likewise.
+	(dwarf2_has_info): Likewise.
+	(dwarf2_get_section_info): Likewise.
+	(locate_dwz_sections): Likewise.
+	(hash_file_name_entry): Likewise.
+	(eq_file_name_entry): Likewise.
+	(delete_file_name_entry): Likewise.
+	(dw2_setup): Likewise.
+	(dw2_get_file_names_reader): Likewise.
+	(dw2_find_pc_sect_compunit_symtab): Likewise.
+	(hash_signatured_type): Likewise.
+	(eq_signatured_type): Likewise.
+	(add_signatured_type_cu_to_table): Likewise.
+	(create_debug_types_hash_table): Likewise.
+	(lookup_dwo_signatured_type): Likewise.
+	(lookup_dwp_signatured_type): Likewise.
+	(lookup_signatured_type): Likewise.
+	(hash_type_unit_group): Likewise.
+	(eq_type_unit_group): Likewise.
+	(get_type_unit_group): Likewise.
+	(process_psymtab_comp_unit_reader): Likewise.
+	(sort_tu_by_abbrev_offset): Likewise.
+	(process_skeletonless_type_unit): Likewise.
+	(psymtabs_addrmap_cleanup): Likewise.
+	(dwarf2_read_symtab): Likewise.
+	(psymtab_to_symtab_1): Likewise.
+	(die_hash): Likewise.
+	(die_eq): Likewise.
+	(load_full_comp_unit_reader): Likewise.
+	(reset_die_in_process): Likewise.
+	(free_cu_line_header): Likewise.
+	(handle_DW_AT_stmt_list): Likewise.
+	(hash_dwo_file): Likewise.
+	(eq_dwo_file): Likewise.
+	(hash_dwo_unit): Likewise.
+	(eq_dwo_unit): Likewise.
+	(create_dwo_cu_reader): Likewise.
+	(create_dwo_unit_in_dwp_v1): Likewise.
+	(create_dwo_unit_in_dwp_v2): Likewise.
+	(lookup_dwo_unit_in_dwp): Likewise.
+	(dwarf2_locate_dwo_sections): Likewise.
+	(dwarf2_locate_common_dwp_sections): Likewise.
+	(dwarf2_locate_v2_dwp_sections): Likewise.
+	(hash_dwp_loaded_cutus): Likewise.
+	(eq_dwp_loaded_cutus): Likewise.
+	(lookup_dwo_cutu): Likewise.
+	(abbrev_table_free_cleanup): Likewise.
+	(dwarf2_free_abbrev_table): Likewise.
+	(find_partial_die_in_comp_unit): Likewise.
+	(free_line_header_voidp): Likewise.
+	(follow_die_offset): Likewise.
+	(follow_die_sig_1): Likewise.
+	(free_heap_comp_unit): Likewise.
+	(free_stack_comp_unit): Likewise.
+	(dwarf2_free_objfile): Likewise.
+	(per_cu_offset_and_type_hash): Likewise.
+	(per_cu_offset_and_type_eq): Likewise.
+	(get_die_type_at_offset): Likewise.
+	(partial_die_hash): Likewise.
+	(partial_die_eq): Likewise.
+	(dwarf2_per_objfile_free): Likewise.
+	(hash_strtab_entry): Likewise.
+	(eq_strtab_entry): Likewise.
+	(add_string): Likewise.
+	(hash_symtab_entry): Likewise.
+	(eq_symtab_entry): Likewise.
+	(delete_symtab_entry): Likewise.
+	(cleanup_mapped_symtab): Likewise.
+	(add_indices_to_cpool): Likewise.
+	(hash_psymtab_cu_index): Likewise.
+	(eq_psymtab_cu_index): Likewise.
+	(add_address_entry_worker): Likewise.
+	(unlink_if_set): Likewise.
+	(write_one_signatured_type): Likewise.
+	(save_gdb_index_command): Likewise.
+	* elfread.c (elf_symtab_read): Likewise.
+	(elf_gnu_ifunc_cache_hash): Likewise.
+	(elf_gnu_ifunc_cache_eq): Likewise.
+	(elf_gnu_ifunc_record_cache): Likewise.
+	(elf_gnu_ifunc_resolve_by_cache): Likewise.
+	(elf_get_probes): Likewise.
+	(probe_key_free): Likewise.
+	* f-lang.c (builtin_f_type): Likewise.
+	* frame-base.c (frame_base_append_sniffer): Likewise.
+	(frame_base_set_default): Likewise.
+	(frame_base_find_by_frame): Likewise.
+	* frame-unwind.c (frame_unwind_prepend_unwinder): Likewise.
+	(frame_unwind_append_unwinder): Likewise.
+	(frame_unwind_find_by_frame): Likewise.
+	* frame.c (frame_addr_hash): Likewise.
+	(frame_addr_hash_eq): Likewise.
+	(frame_stash_find): Likewise.
+	(do_frame_register_read): Likewise.
+	(unwind_to_current_frame): Likewise.
+	(frame_cleanup_after_sniffer): Likewise.
+	* frv-linux-tdep.c (frv_linux_sigtramp_frame_cache): Likewise.
+	* frv-tdep.c (frv_frame_unwind_cache): Likewise.
+	* ft32-tdep.c (ft32_frame_cache): Likewise.
+	* gcore.c (do_bfd_delete_cleanup): Likewise.
+	(gcore_create_callback): Likewise.
+	* gdb_bfd.c (hash_bfd): Likewise.
+	(eq_bfd): Likewise.
+	(gdb_bfd_open): Likewise.
+	(free_one_bfd_section): Likewise.
+	(gdb_bfd_ref): Likewise.
+	(gdb_bfd_unref): Likewise.
+	(get_section_descriptor): Likewise.
+	(gdb_bfd_map_section): Likewise.
+	(gdb_bfd_crc): Likewise.
+	(gdb_bfd_mark_parent): Likewise.
+	(gdb_bfd_record_inclusion): Likewise.
+	(gdb_bfd_requires_relocations): Likewise.
+	(print_one_bfd): Likewise.
+	* gdbtypes.c (type_pair_hash): Likewise.
+	(type_pair_eq): Likewise.
+	(builtin_type): Likewise.
+	(objfile_type): Likewise.
+	* gnu-v3-abi.c (vtable_ptrdiff_type): Likewise.
+	(vtable_address_point_offset): Likewise.
+	(gnuv3_get_vtable): Likewise.
+	(hash_value_and_voffset): Likewise.
+	(eq_value_and_voffset): Likewise.
+	(compare_value_and_voffset): Likewise.
+	(compute_vtable_size): Likewise.
+	(gnuv3_get_typeid_type): Likewise.
+	* go-lang.c (builtin_go_type): Likewise.
+	* guile/scm-block.c (bkscm_hash_block_smob): Likewise.
+	(bkscm_eq_block_smob): Likewise.
+	(bkscm_objfile_block_map): Likewise.
+	(bkscm_del_objfile_blocks): Likewise.
+	* guile/scm-breakpoint.c (bpscm_build_bp_list): Likewise.
+	* guile/scm-disasm.c (gdbscm_disasm_read_memory_worker): Likewise.
+	(gdbscm_disasm_print_address): Likewise.
+	* guile/scm-frame.c (frscm_hash_frame_smob): Likewise.
+	(frscm_eq_frame_smob): Likewise.
+	(frscm_inferior_frame_map): Likewise.
+	(frscm_del_inferior_frames): Likewise.
+	* guile/scm-gsmob.c (gdbscm_add_objfile_ref): Likewise.
+	* guile/scm-objfile.c (ofscm_handle_objfile_deleted): Likewise.
+	(ofscm_objfile_smob_from_objfile): Likewise.
+	* guile/scm-ports.c (ioscm_write): Likewise.
+	(ioscm_file_port_delete): Likewise.
+	(ioscm_file_port_rewind): Likewise.
+	(ioscm_file_port_put): Likewise.
+	(ioscm_file_port_write): Likewise.
+	* guile/scm-progspace.c (psscm_handle_pspace_deleted): Likewise.
+	(psscm_pspace_smob_from_pspace): Likewise.
+	* guile/scm-safe-call.c (scscm_recording_pre_unwind_handler): Likewise.
+	(scscm_recording_unwind_handler): Likewise.
+	(gdbscm_with_catch): Likewise.
+	(scscm_call_0_body): Likewise.
+	(scscm_call_1_body): Likewise.
+	(scscm_call_2_body): Likewise.
+	(scscm_call_3_body): Likewise.
+	(scscm_call_4_body): Likewise.
+	(scscm_apply_1_body): Likewise.
+	(scscm_eval_scheme_string): Likewise.
+	(gdbscm_safe_eval_string): Likewise.
+	(scscm_source_scheme_script): Likewise.
+	(gdbscm_safe_source_script): Likewise.
+	* guile/scm-string.c (gdbscm_call_scm_to_stringn): Likewise.
+	(gdbscm_call_scm_from_stringn): Likewise.
+	* guile/scm-symbol.c (syscm_hash_symbol_smob): Likewise.
+	(syscm_eq_symbol_smob): Likewise.
+	(syscm_get_symbol_map): Likewise.
+	(syscm_del_objfile_symbols): Likewise.
+	* guile/scm-symtab.c (stscm_hash_symtab_smob): Likewise.
+	(stscm_eq_symtab_smob): Likewise.
+	(stscm_objfile_symtab_map): Likewise.
+	(stscm_del_objfile_symtabs): Likewise.
+	* guile/scm-type.c (tyscm_hash_type_smob): Likewise.
+	(tyscm_eq_type_smob): Likewise.
+	(tyscm_type_map): Likewise.
+	(tyscm_copy_type_recursive): Likewise.
+	(save_objfile_types): Likewise.
+	* guile/scm-utils.c (extract_arg): Likewise.
+	* h8300-tdep.c (h8300_frame_cache): Likewise.
+	* hppa-linux-tdep.c (hppa_linux_sigtramp_frame_unwind_cache): Likewise.
+	* hppa-tdep.c (compare_unwind_entries): Likewise.
+	(find_unwind_entry): Likewise.
+	(hppa_frame_cache): Likewise.
+	(hppa_stub_frame_unwind_cache): Likewise.
+	* hppanbsd-tdep.c (hppanbsd_supply_gregset): Likewise.
+	* hppaobsd-tdep.c (hppaobsd_supply_gregset): Likewise.
+	(hppaobsd_supply_fpregset): Likewise.
+	* i386-cygwin-tdep.c (core_process_module_section): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* i386-tdep.c (i386_frame_cache): Likewise.
+	(i386_epilogue_frame_cache): Likewise.
+	(i386_sigtramp_frame_cache): Likewise.
+	(i386_supply_gregset): Likewise.
+	(i386_collect_gregset): Likewise.
+	(i386_gdbarch_init): Likewise.
+	* i386obsd-tdep.c (i386obsd_aout_supply_regset): Likewise.
+	(i386obsd_trapframe_cache): Likewise.
+	* i387-tdep.c (i387_supply_fsave): Likewise.
+	(i387_collect_fsave): Likewise.
+	(i387_supply_fxsave): Likewise.
+	(i387_collect_fxsave): Likewise.
+	(i387_supply_xsave): Likewise.
+	(i387_collect_xsave): Likewise.
+	* ia64-tdep.c (ia64_frame_cache): Likewise.
+	(ia64_sigtramp_frame_cache): Likewise.
+	* infcmd.c (attach_command_continuation): Likewise.
+	(attach_command_continuation_free_args): Likewise.
+	* inferior.c (restore_inferior): Likewise.
+	(delete_thread_of_inferior): Likewise.
+	* inflow.c (inflow_inferior_data_cleanup): Likewise.
+	(get_inflow_inferior_data): Likewise.
+	(inflow_inferior_exit): Likewise.
+	* infrun.c (displaced_step_clear_cleanup): Likewise.
+	(restore_current_uiout_cleanup): Likewise.
+	(release_stop_context_cleanup): Likewise.
+	(do_restore_infcall_suspend_state_cleanup): Likewise.
+	(do_restore_infcall_control_state_cleanup): Likewise.
+	(restore_inferior_ptid): Likewise.
+	* inline-frame.c (block_starting_point_at): Likewise.
+	* iq2000-tdep.c (iq2000_frame_cache): Likewise.
+	* jit.c (get_jit_objfile_data): Likewise.
+	(get_jit_program_space_data): Likewise.
+	(jit_object_close_impl): Likewise.
+	(jit_find_objf_with_entry_addr): Likewise.
+	(jit_breakpoint_deleted): Likewise.
+	(jit_unwind_reg_set_impl): Likewise.
+	(jit_unwind_reg_get_impl): Likewise.
+	(jit_dealloc_cache): Likewise.
+	(jit_frame_sniffer): Likewise.
+	(jit_frame_prev_register): Likewise.
+	(jit_prepend_unwinder): Likewise.
+	(jit_inferior_exit_hook): Likewise.
+	(free_objfile_data): Likewise.
+	* jv-lang.c (jv_per_objfile_free): Likewise.
+	(get_dynamics_objfile): Likewise.
+	(get_java_class_symtab): Likewise.
+	(builtin_java_type): Likewise.
+	* language.c (language_string_char_type): Likewise.
+	(language_bool_type): Likewise.
+	(language_lookup_primitive_type): Likewise.
+	(language_lookup_primitive_type_as_symbol): Likewise.
+	* linespec.c (hash_address_entry): Likewise.
+	(eq_address_entry): Likewise.
+	(iterate_inline_only): Likewise.
+	(iterate_name_matcher): Likewise.
+	(decode_line_2_compare_items): Likewise.
+	(collect_one_symbol): Likewise.
+	(compare_symbols): Likewise.
+	(compare_msymbols): Likewise.
+	(add_symtabs_to_list): Likewise.
+	(collect_symbols): Likewise.
+	(compare_msyms): Likewise.
+	(add_minsym): Likewise.
+	(cleanup_linespec_result): Likewise.
+	* linux-fork.c (inferior_call_waitpid_cleanup): Likewise.
+	* linux-nat.c (delete_lwp_cleanup): Likewise.
+	(count_events_callback): Likewise.
+	(select_event_lwp_callback): Likewise.
+	(resume_stopped_resumed_lwps): Likewise.
+	* linux-tdep.c (get_linux_gdbarch_data): Likewise.
+	(invalidate_linux_cache_inf): Likewise.
+	(get_linux_inferior_data): Likewise.
+	(linux_find_memory_regions_thunk): Likewise.
+	(linux_make_mappings_callback): Likewise.
+	(linux_corefile_thread_callback): Likewise.
+	(find_mapping_size): Likewise.
+	* linux-thread-db.c (find_new_threads_callback): Likewise.
+	* lm32-tdep.c (lm32_frame_cache): Likewise.
+	* m2-lang.c (builtin_m2_type): Likewise.
+	* m32c-tdep.c (m32c_analyze_frame_prologue): Likewise.
+	* m32r-linux-tdep.c (m32r_linux_sigtramp_frame_cache): Likewise.
+	(m32r_linux_supply_gregset): Likewise.
+	(m32r_linux_collect_gregset): Likewise.
+	* m32r-tdep.c (m32r_frame_unwind_cache): Likewise.
+	* m68hc11-tdep.c (m68hc11_frame_unwind_cache): Likewise.
+	* m68k-tdep.c (m68k_frame_cache): Likewise.
+	* m68kbsd-tdep.c (m68kbsd_supply_fpregset): Likewise.
+	(m68kbsd_supply_gregset): Likewise.
+	* m68klinux-tdep.c (m68k_linux_sigtramp_frame_cache): Likewise.
+	* m88k-tdep.c (m88k_frame_cache): Likewise.
+	(m88k_supply_gregset): Likewise.
+
+2015-09-25  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aarch64-linux-tdep.c (aarch64_stap_parse_special_token): Add cast
+	to allocation result assignment.
+	* ada-exp.y (write_object_renaming): Likewise.
+	(write_ambiguous_var): Likewise.
+	(ada_nget_field_index): Likewise.
+	(write_var_or_type): Likewise.
+	* ada-lang.c (ada_decode_symbol): Likewise.
+	(ada_value_assign): Likewise.
+	(value_pointer): Likewise.
+	(cache_symbol): Likewise.
+	(add_nonlocal_symbols): Likewise.
+	(ada_name_for_lookup): Likewise.
+	(symbol_completion_add): Likewise.
+	(ada_to_fixed_type_1): Likewise.
+	(ada_get_next_arg): Likewise.
+	(defns_collected): Likewise.
+	* ada-lex.l (processId): Likewise.
+	(processString): Likewise.
+	* ada-tasks.c (read_known_tasks_array): Likewise.
+	(read_known_tasks_list): Likewise.
+	* ada-typeprint.c (decoded_type_name): Likewise.
+	* addrmap.c (addrmap_mutable_create_fixed): Likewise.
+	* amd64-tdep.c (amd64_push_arguments): Likewise.
+	(amd64_displaced_step_copy_insn): Likewise.
+	(amd64_classify_insn_at): Likewise.
+	(amd64_relocate_instruction): Likewise.
+	* amd64obsd-tdep.c (amd64obsd_sigtramp_p): Likewise.
+	* arch-utils.c (simple_displaced_step_copy_insn): Likewise.
+	(initialize_current_architecture): Likewise.
+	* arm-linux-tdep.c (arm_stap_parse_special_token): Likewise.
+	* arm-symbian-tdep.c (arm_symbian_osabi_sniffer): Likewise.
+	* arm-tdep.c (arm_exidx_new_objfile): Likewise.
+	(arm_push_dummy_call): Likewise.
+	(extend_buffer_earlier): Likewise.
+	(arm_adjust_breakpoint_address): Likewise.
+	(arm_skip_stub): Likewise.
+	* auto-load.c (filename_is_in_pattern): Likewise.
+	(maybe_add_script_file): Likewise.
+	(maybe_add_script_text): Likewise.
+	(auto_load_objfile_script_1): Likewise.
+	* auxv.c (ld_so_xfer_auxv): Likewise.
+	* ax-general.c (new_agent_expr): Likewise.
+	(grow_expr): Likewise.
+	(ax_reg_mask): Likewise.
+	* bcache.c (bcache_full): Likewise.
+	* breakpoint.c (program_breakpoint_here_p): Likewise.
+	* btrace.c (parse_xml_raw): Likewise.
+	* build-id.c (build_id_to_debug_bfd): Likewise.
+	* buildsym.c (end_symtab_with_blockvector): Likewise.
+	* c-exp.y (string_exp): Likewise.
+	(qualified_name): Likewise.
+	(write_destructor_name): Likewise.
+	(operator_stoken): Likewise.
+	(parse_number): Likewise.
+	(scan_macro_expansion): Likewise.
+	(yylex): Likewise.
+	(c_print_token): Likewise.
+	* c-lang.c (c_get_string): Likewise.
+	(emit_numeric_character): Likewise.
+	* charset.c (wchar_iterate): Likewise.
+	* cli/cli-cmds.c (complete_command): Likewise.
+	(make_command): Likewise.
+	* cli/cli-dump.c (restore_section_callback): Likewise.
+	(restore_binary_file): Likewise.
+	* cli/cli-interp.c (cli_interpreter_exec): Likewise.
+	* cli/cli-script.c (execute_control_command): Likewise.
+	* cli/cli-setshow.c (do_set_command): Likewise.
+	* coff-pe-read.c (add_pe_forwarded_sym): Likewise.
+	(read_pe_exported_syms): Likewise.
+	* coffread.c (coff_read_struct_type): Likewise.
+	(coff_read_enum_type): Likewise.
+	* common/btrace-common.c (btrace_data_append): Likewise.
+	* common/buffer.c (buffer_grow): Likewise.
+	* common/filestuff.c (gdb_fopen_cloexec): Likewise.
+	* common/format.c (parse_format_string): Likewise.
+	* common/gdb_vecs.c (delim_string_to_char_ptr_vec_append): Likewise.
+	* common/xml-utils.c (xml_escape_text): Likewise.
+	* compile/compile-object-load.c (copy_sections): Likewise.
+	(compile_object_load): Likewise.
+	* compile/compile-object-run.c (compile_object_run): Likewise.
+	* completer.c (filename_completer): Likewise.
+	* corefile.c (read_memory_typed_address): Likewise.
+	(write_memory_unsigned_integer): Likewise.
+	(write_memory_signed_integer): Likewise.
+	(complete_set_gnutarget): Likewise.
+	* corelow.c (get_core_register_section): Likewise.
+	* cp-name-parser.y (d_grab): Likewise.
+	(allocate_info): Likewise.
+	(cp_new_demangle_parse_info): Likewise.
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Likewise.
+	(cp_lookup_symbol_in_namespace): Likewise.
+	(lookup_namespace_scope): Likewise.
+	(find_symbol_in_baseclass): Likewise.
+	(cp_lookup_nested_symbol): Likewise.
+	(cp_lookup_transparent_type_loop): Likewise.
+	* cp-support.c (copy_string_to_obstack): Likewise.
+	(make_symbol_overload_list): Likewise.
+	(make_symbol_overload_list_namespace): Likewise.
+	(make_symbol_overload_list_adl_namespace): Likewise.
+	(first_component_command): Likewise.
+	* cp-valprint.c (cp_print_value): Likewise.
+	* ctf.c (ctf_xfer_partial): Likewise.
+	* d-exp.y (StringExp): Likewise.
+	* d-namespace.c (d_lookup_symbol_in_module): Likewise.
+	(lookup_module_scope): Likewise.
+	(find_symbol_in_baseclass): Likewise.
+	(d_lookup_nested_symbol): Likewise.
+	* dbxread.c (find_stab_function_addr): Likewise.
+	(read_dbx_symtab): Likewise.
+	(dbx_end_psymtab): Likewise.
+	(cp_set_block_scope): Likewise.
+	* dcache.c (dcache_alloc): Likewise.
+	* demangle.c (_initialize_demangler): Likewise.
+	* dicos-tdep.c (dicos_load_module_p): Likewise.
+	* dictionary.c (dict_create_hashed_expandable): Likewise.
+	(dict_create_linear_expandable): Likewise.
+	(expand_hashtable): Likewise.
+	(add_symbol_linear_expandable): Likewise.
+	* dwarf2-frame.c (add_cie): Likewise.
+	(add_fde): Likewise.
+	(dwarf2_build_frame_info): Likewise.
+	* dwarf2expr.c (dwarf_expr_grow_stack): Likewise.
+	(dwarf_expr_fetch_address): Likewise.
+	(add_piece): Likewise.
+	(execute_stack_op): Likewise.
+	* dwarf2loc.c (chain_candidate): Likewise.
+	(dwarf_entry_parameter_to_value): Likewise.
+	(read_pieced_value): Likewise.
+	(write_pieced_value): Likewise.
+	* dwarf2read.c (dwarf2_read_section): Likewise.
+	(add_type_unit): Likewise.
+	(read_comp_units_from_section): Likewise.
+	(fixup_go_packaging): Likewise.
+	(dwarf2_compute_name): Likewise.
+	(dwarf2_physname): Likewise.
+	(create_dwo_unit_in_dwp_v1): Likewise.
+	(create_dwo_unit_in_dwp_v2): Likewise.
+	(read_func_scope): Likewise.
+	(read_call_site_scope): Likewise.
+	(dwarf2_attach_fields_to_type): Likewise.
+	(process_structure_scope): Likewise.
+	(mark_common_block_symbol_computed): Likewise.
+	(read_common_block): Likewise.
+	(abbrev_table_read_table): Likewise.
+	(guess_partial_die_structure_name): Likewise.
+	(fixup_partial_die): Likewise.
+	(add_file_name): Likewise.
+	(dwarf2_const_value_data): Likewise.
+	(dwarf2_const_value_attr): Likewise.
+	(build_error_marker_type): Likewise.
+	(guess_full_die_structure_name): Likewise.
+	(anonymous_struct_prefix): Likewise.
+	(typename_concat): Likewise.
+	(dwarf2_canonicalize_name): Likewise.
+	(dwarf2_name): Likewise.
+	(write_constant_as_bytes): Likewise.
+	(dwarf2_fetch_constant_bytes): Likewise.
+	(copy_string): Likewise.
+	(parse_macro_definition): Likewise.
+	* elfread.c (elf_symfile_segments): Likewise.
+	(elf_rel_plt_read): Likewise.
+	(elf_gnu_ifunc_resolve_by_cache): Likewise.
+	(elf_gnu_ifunc_resolve_by_got): Likewise.
+	(elf_read_minimal_symbols): Likewise.
+	(elf_gnu_ifunc_record_cache): Likewise.
+	* event-top.c (top_level_prompt): Likewise.
+	(command_line_handler): Likewise.
+	* exec.c (resize_section_table): Likewise.
+	* expprint.c (print_subexp_standard): Likewise.
+	* fbsd-tdep.c (fbsd_collect_regset_section_cb): Likewise.
+	* findcmd.c (parse_find_args): Likewise.
+	* findvar.c (address_from_register): Likewise.
+	* frame.c (get_prev_frame_always): Likewise.
+	* gdb_bfd.c (gdb_bfd_ref): Likewise.
+	(get_section_descriptor): Likewise.
+	* gdb_obstack.c (obconcat): Likewise.
+	(obstack_strdup): Likewise.
+	* gdbtypes.c (lookup_function_type_with_arguments): Likewise.
+	(create_set_type): Likewise.
+	(lookup_unsigned_typename): Likewise.
+	(lookup_signed_typename): Likewise.
+	(resolve_dynamic_union): Likewise.
+	(resolve_dynamic_struct): Likewise.
+	(add_dyn_prop): Likewise.
+	(copy_dynamic_prop_list): Likewise.
+	(arch_flags_type): Likewise.
+	(append_composite_type_field_raw): Likewise.
+	* gdbtypes.h (INIT_FUNC_SPECIFIC): Likewise.
+	* gnu-v3-abi.c (gnuv3_rtti_type): Likewise.
+	* go-exp.y (string_exp): Likewise.
+	* go-lang.c (go_demangle): Likewise.
+	* guile/guile.c (compute_scheme_string): Likewise.
+	* guile/scm-cmd.c (gdbscm_parse_command_name): Likewise.
+	(gdbscm_canonicalize_command_name): Likewise.
+	* guile/scm-ports.c (ioscm_init_stdio_buffers): Likewise.
+	(ioscm_init_memory_port): Likewise.
+	(ioscm_reinit_memory_port): Likewise.
+	* guile/scm-utils.c (gdbscm_gc_xstrdup): Likewise.
+	(gdbscm_gc_dup_argv): Likewise.
+	* h8300-tdep.c (h8300_push_dummy_call): Likewise.
+	* hppa-tdep.c (internalize_unwinds): Likewise.
+	(read_unwind_info): Likewise.
+	* i386-cygwin-tdep.c (core_process_module_section): Likewise.
+	(windows_core_xfer_shared_libraries): Likewise.
+	* i386-tdep.c (i386_displaced_step_copy_insn): Likewise.
+	(i386_stap_parse_special_token_triplet): Likewise.
+	(i386_stap_parse_special_token_three_arg_disp): Likewise.
+	* i386obsd-tdep.c (i386obsd_sigtramp_p): Likewise.
+	* inf-child.c (inf_child_fileio_readlink): Likewise.
+	* inf-ptrace.c (inf_ptrace_fetch_register): Likewise.
+	(inf_ptrace_store_register): Likewise.
+	* infrun.c (follow_exec): Likewise.
+	(displaced_step_prepare_throw): Likewise.
+	(save_stop_context): Likewise.
+	(save_infcall_suspend_state): Likewise.
+	* jit.c (jit_read_descriptor): Likewise.
+	(jit_read_code_entry): Likewise.
+	(jit_symtab_line_mapping_add_impl): Likewise.
+	(finalize_symtab): Likewise.
+	(jit_unwind_reg_get_impl): Likewise.
+	* jv-exp.y (QualifiedName): Likewise.
+	* jv-lang.c (get_java_utf8_name): Likewise.
+	(type_from_class): Likewise.
+	(java_demangle_type_signature): Likewise.
+	(java_class_name_from_physname): Likewise.
+	* jv-typeprint.c (java_type_print_base): Likewise.
+	* jv-valprint.c (java_value_print): Likewise.
+	* language.c (add_language): Likewise.
+	* linespec.c (add_sal_to_sals_basic): Likewise.
+	(add_sal_to_sals): Likewise.
+	(decode_objc): Likewise.
+	(find_linespec_symbols): Likewise.
+	* linux-fork.c (fork_save_infrun_state): Likewise.
+	* linux-nat.c (linux_nat_detach): Likewise.
+	(linux_nat_fileio_readlink): Likewise.
+	* linux-record.c (record_linux_sockaddr): Likewise.
+	(record_linux_msghdr): Likewise.
+	(Do): Likewise.
+	* linux-tdep.c (linux_core_info_proc_mappings): Likewise.
+	(linux_collect_regset_section_cb): Likewise.
+	(linux_get_siginfo_data): Likewise.
+	* linux-thread-db.c (try_thread_db_load_from_pdir_1): Likewise.
+	(try_thread_db_load_from_dir): Likewise.
+	(thread_db_load_search): Likewise.
+	(info_auto_load_libthread_db): Likewise.
+	* m32c-tdep.c (m32c_m16c_address_to_pointer): Likewise.
+	(m32c_m16c_pointer_to_address): Likewise.
+	* m68hc11-tdep.c (m68hc11_pseudo_register_write): Likewise.
+	* m68k-tdep.c (m68k_get_longjmp_target): Likewise.
+	* machoread.c (macho_check_dsym): Likewise.
+	* macroexp.c (resize_buffer): Likewise.
+	(gather_arguments): Likewise.
+	(maybe_expand): Likewise.
+	* macrotab.c (new_macro_key): Likewise.
+	(new_source_file): Likewise.
+	(new_macro_definition): Likewise.
+	* mdebugread.c (parse_symbol): Likewise.
+	(parse_type): Likewise.
+	(parse_partial_symbols): Likewise.
+	(psymtab_to_symtab_1): Likewise.
+	* mem-break.c (default_memory_insert_breakpoint): Likewise.
+	* mi/mi-cmd-break.c (mi_argv_to_format): Likewise.
+	* mi/mi-main.c (mi_cmd_data_read_memory): Likewise.
+	(mi_cmd_data_read_memory_bytes): Likewise.
+	(mi_cmd_data_write_memory_bytes): Likewise.
+	(mi_cmd_trace_frame_collected): Likewise.
+	* mi/mi-parse.c (mi_parse_argv): Likewise.
+	(mi_parse): Likewise.
+	* minidebug.c (lzma_open): Likewise.
+	(lzma_pread): Likewise.
+	* mips-tdep.c (mips_read_fp_register_single): Likewise.
+	(mips_print_fp_register): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_get_longjmp_target): Likewise.
+	* mipsread.c (read_alphacoff_dynamic_symtab): Likewise.
+	* mt-tdep.c (mt_register_name): Likewise.
+	(mt_registers_info): Likewise.
+	(mt_push_dummy_call): Likewise.
+	* namespace.c (add_using_directive): Likewise.
+	* nat/linux-btrace.c (perf_event_read): Likewise.
+	(linux_enable_bts): Likewise.
+	* nat/linux-osdata.c (linux_common_core_of_thread): Likewise.
+	* nat/linux-ptrace.c (linux_ptrace_test_ret_to_nx): Likewise.
+	* nto-tdep.c (nto_find_and_open_solib): Likewise.
+	(nto_parse_redirection): Likewise.
+	* objc-lang.c (objc_demangle): Likewise.
+	(find_methods): Likewise.
+	* objfiles.c (get_objfile_bfd_data): Likewise.
+	(set_objfile_main_name): Likewise.
+	(allocate_objfile): Likewise.
+	(objfile_relocate): Likewise.
+	(update_section_map): Likewise.
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Likewise.
+	* p-exp.y (exp): Likewise.
+	(yylex): Likewise.
+	* p-valprint.c (pascal_object_print_value): Likewise.
+	* parse.c (initialize_expout): Likewise.
+	(mark_completion_tag): Likewise.
+	(copy_name): Likewise.
+	(parse_float): Likewise.
+	(type_stack_reserve): Likewise.
+	* ppc-linux-tdep.c (ppc_stap_parse_special_token): Likewise.
+	(ppu2spu_prev_register): Likewise.
+	* ppc-ravenscar-thread.c (supply_register_at_address): Likewise.
+	* printcmd.c (printf_wide_c_string): Likewise.
+	(printf_pointer): Likewise.
+	* probe.c (parse_probes): Likewise.
+	* python/py-cmd.c (gdbpy_parse_command_name): Likewise.
+	(cmdpy_init): Likewise.
+	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Likewise.
+	* python/py-symtab.c (set_sal): Likewise.
+	* python/py-unwind.c (pyuw_sniffer): Likewise.
+	* python/python.c (python_interactive_command): Likewise.
+	(compute_python_string): Likewise.
+	* ravenscar-thread.c (get_running_thread_id): Likewise.
+	* record-full.c (record_full_exec_insn): Likewise.
+	(record_full_core_open_1): Likewise.
+	* regcache.c (regcache_raw_read_signed): Likewise.
+	(regcache_raw_read_unsigned): Likewise.
+	(regcache_cooked_read_signed): Likewise.
+	(regcache_cooked_read_unsigned): Likewise.
+	* remote-fileio.c (remote_fileio_func_open): Likewise.
+	(remote_fileio_func_rename): Likewise.
+	(remote_fileio_func_unlink): Likewise.
+	(remote_fileio_func_stat): Likewise.
+	(remote_fileio_func_system): Likewise.
+	* remote-mips.c (mips_xfer_memory): Likewise.
+	(mips_load_srec): Likewise.
+	(pmon_end_download): Likewise.
+	* remote.c (new_remote_state): Likewise.
+	(map_regcache_remote_table): Likewise.
+	(remote_register_number_and_offset): Likewise.
+	(init_remote_state): Likewise.
+	(get_memory_packet_size): Likewise.
+	(remote_pass_signals): Likewise.
+	(remote_program_signals): Likewise.
+	(remote_start_remote): Likewise.
+	(remote_check_symbols): Likewise.
+	(remote_query_supported): Likewise.
+	(extended_remote_attach): Likewise.
+	(process_g_packet): Likewise.
+	(store_registers_using_G): Likewise.
+	(putpkt_binary): Likewise.
+	(read_frame): Likewise.
+	(compare_sections_command): Likewise.
+	(remote_hostio_pread): Likewise.
+	(remote_hostio_readlink): Likewise.
+	(remote_file_put): Likewise.
+	(remote_file_get): Likewise.
+	(remote_pid_to_exec_file): Likewise.
+	(_initialize_remote): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix_ld_info_to_xml): Likewise.
+	(rs6000_aix_core_xfer_shared_libraries_aix): Likewise.
+	* rs6000-tdep.c (ppc_displaced_step_copy_insn): Likewise.
+	(bfd_uses_spe_extensions): Likewise.
+	* s390-linux-tdep.c (s390_displaced_step_copy_insn): Likewise.
+	* score-tdep.c (score7_malloc_and_get_memblock): Likewise.
+	* solib-dsbt.c (decode_loadmap): Likewise.
+	(fetch_loadmap): Likewise.
+	(scan_dyntag): Likewise.
+	(enable_break): Likewise.
+	(dsbt_relocate_main_executable): Likewise.
+	* solib-frv.c (fetch_loadmap): Likewise.
+	(enable_break2): Likewise.
+	(frv_relocate_main_executable): Likewise.
+	* solib-spu.c (spu_relocate_main_executable): Likewise.
+	(spu_bfd_open): Likewise.
+	* solib-svr4.c (lm_info_read): Likewise.
+	(read_program_header): Likewise.
+	(find_program_interpreter): Likewise.
+	(scan_dyntag): Likewise.
+	(elf_locate_base): Likewise.
+	(open_symbol_file_object): Likewise.
+	(read_program_headers_from_bfd): Likewise.
+	(svr4_relocate_main_executable): Likewise.
+	* solib-target.c (solib_target_relocate_section_addresses): Likewise.
+	* solib.c (solib_find_1): Likewise.
+	(exec_file_find): Likewise.
+	(solib_find): Likewise.
+	* source.c (openp): Likewise.
+	(print_source_lines_base): Likewise.
+	(forward_search_command): Likewise.
+	* sparc-ravenscar-thread.c (supply_register_at_address): Likewise.
+	* spu-tdep.c (spu2ppu_prev_register): Likewise.
+	(spu_get_overlay_table): Likewise.
+	* stabsread.c (patch_block_stabs): Likewise.
+	(define_symbol): Likewise.
+	(again:): Likewise.
+	(read_member_functions): Likewise.
+	(read_one_struct_field): Likewise.
+	(read_enum_type): Likewise.
+	(common_block_start): Likewise.
+	* stack.c (read_frame_arg): Likewise.
+	(backtrace_command): Likewise.
+	* stap-probe.c (stap_parse_register_operand): Likewise.
+	* symfile.c (syms_from_objfile_1): Likewise.
+	(find_separate_debug_file): Likewise.
+	(load_command): Likewise.
+	(load_progress): Likewise.
+	(load_section_callback): Likewise.
+	(reread_symbols): Likewise.
+	(add_filename_language): Likewise.
+	(allocate_compunit_symtab): Likewise.
+	(read_target_long_array): Likewise.
+	(simple_read_overlay_table): Likewise.
+	* symtab.c (symbol_set_names): Likewise.
+	(resize_symbol_cache): Likewise.
+	(rbreak_command): Likewise.
+	(completion_list_add_name): Likewise.
+	(completion_list_objc_symbol): Likewise.
+	(add_filename_to_list): Likewise.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Likewise.
+	* target-memory.c (target_write_memory_blocks): Likewise.
+	* target.c (target_read_string): Likewise.
+	(read_whatever_is_readable): Likewise.
+	(target_read_alloc_1): Likewise.
+	(simple_search_memory): Likewise.
+	(target_fileio_read_alloc_1): Likewise.
+	* tilegx-tdep.c (tilegx_push_dummy_call): Likewise.
+	* top.c (command_line_input): Likewise.
+	* tracefile-tfile.c (tfile_fetch_registers): Likewise.
+	* tracefile.c (tracefile_fetch_registers): Likewise.
+	* tracepoint.c (add_memrange): Likewise.
+	(init_collection_list): Likewise.
+	(add_aexpr): Likewise.
+	(trace_dump_actions): Likewise.
+	(parse_trace_status): Likewise.
+	(parse_tracepoint_definition): Likewise.
+	(parse_tsv_definition): Likewise.
+	(parse_static_tracepoint_marker_definition): Likewise.
+	* tui/tui-file.c (tui_sfileopen): Likewise.
+	(tui_file_adjust_strbuf): Likewise.
+	* tui/tui-io.c (tui_expand_tabs): Likewise.
+	* tui/tui-source.c (tui_set_source_content): Likewise.
+	* typeprint.c (find_global_typedef): Likewise.
+	* ui-file.c (do_ui_file_xstrdup): Likewise.
+	(ui_file_obsavestring): Likewise.
+	(mem_file_write): Likewise.
+	* utils.c (make_hex_string): Likewise.
+	(get_regcomp_error): Likewise.
+	(puts_filtered_tabular): Likewise.
+	(gdb_realpath_keepfile): Likewise.
+	(ldirname): Likewise.
+	(gdb_bfd_errmsg): Likewise.
+	(substitute_path_component): Likewise.
+	* valops.c (search_struct_method): Likewise.
+	(find_oload_champ_namespace_loop): Likewise.
+	* valprint.c (print_decimal_chars): Likewise.
+	(read_string): Likewise.
+	(generic_emit_char): Likewise.
+	* varobj.c (varobj_delete): Likewise.
+	(varobj_value_get_print_value): Likewise.
+	* vaxobsd-tdep.c (vaxobsd_sigtramp_sniffer): Likewise.
+	* windows-tdep.c (display_one_tib): Likewise.
+	* xcoffread.c (read_xcoff_symtab): Likewise.
+	(process_xcoff_symbol): Likewise.
+	(swap_sym): Likewise.
+	(scan_xcoff_symtab): Likewise.
+	(xcoff_initial_scan): Likewise.
+	* xml-support.c (gdb_xml_end_element): Likewise.
+	(xml_process_xincludes): Likewise.
+	(xml_fetch_content_from_file): Likewise.
+	* xml-syscall.c (xml_list_of_syscalls): Likewise.
+	* xstormy16-tdep.c (xstormy16_push_dummy_call): Likewise.
+
+2015-09-23  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-tdep.c (ft32_register_type): Return gdbarch_tdep (gdbarch)->pc_type
+	instead of builtin_func_ptr.
+	(ft32_pointer_to_address): New function.
+	(ft32_address_class_type_flags): New function.
+	(ft32_address_class_type_flags_to_name): New function.
+	(ft32_address_class_name_to_type_flags): New function.
+	(ft32_gdbarch_init): Set tdep->pc_type.  Call
+	set_gdbarch_pointer_to_address,
+	set_gdbarch_address_class_type_flags
+	set_gdbarch_address_class_name_to_type_flags,
+	and set_gdbarch_address_class_type_flags_to_name.
+	* ft32-tdep.h (struct gdbarch_tdep) <pc_type>: New field.
+
+2015-09-23  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) <OP_FUNCALL>: When the input
+	value is a reference, actually dereference it in order to get
+	the underlying value.
+
+2015-09-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* stap-probe.c (handle_stap_probe): Remove unnecessary cast.
+
 2015-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli/cli-setshow.c (cmd_show_list): Constify a variable.

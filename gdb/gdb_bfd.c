@@ -155,7 +155,7 @@ struct gdb_bfd_cache_search
 static hashval_t
 hash_bfd (const void *b)
 {
-  const bfd *abfd = b;
+  const bfd *abfd = (const struct bfd *) b;
 
   /* It is simplest to just hash the filename.  */
   return htab_hash_string (bfd_get_filename (abfd));
@@ -167,9 +167,10 @@ hash_bfd (const void *b)
 static int
 eq_bfd (const void *a, const void *b)
 {
-  const bfd *abfd = a;
-  const struct gdb_bfd_cache_search *s = b;
-  struct gdb_bfd_data *gdata = bfd_usrdata (abfd);
+  const bfd *abfd = (const struct bfd *) a;
+  const struct gdb_bfd_cache_search *s
+    = (const struct gdb_bfd_cache_search *) b;
+  struct gdb_bfd_data *gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
 
   return (gdata->mtime == s->mtime
 	  && gdata->size == s->size
@@ -417,7 +418,7 @@ gdb_bfd_open (const char *name, const char *target, int fd)
   /* Note that we cannot use htab_find_slot_with_hash here, because
      opening the BFD may fail; and this would violate hashtab
      invariants.  */
-  abfd = htab_find_with_hash (gdb_bfd_cache, &search, hash);
+  abfd = (struct bfd *) htab_find_with_hash (gdb_bfd_cache, &search, hash);
   if (bfd_sharing && abfd != NULL)
     {
       if (debug_bfd_cache)
@@ -457,7 +458,8 @@ gdb_bfd_open (const char *name, const char *target, int fd)
 static void
 free_one_bfd_section (bfd *abfd, asection *sectp, void *ignore)
 {
-  struct gdb_bfd_section_data *sect = bfd_get_section_userdata (abfd, sectp);
+  struct gdb_bfd_section_data *sect
+    = (struct gdb_bfd_section_data *) bfd_get_section_userdata (abfd, sectp);
 
   if (sect != NULL && sect->data != NULL)
     {
@@ -506,7 +508,7 @@ gdb_bfd_ref (struct bfd *abfd)
   if (abfd == NULL)
     return;
 
-  gdata = bfd_usrdata (abfd);
+  gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
 
   if (debug_bfd_cache)
     fprintf_unfiltered (gdb_stdlog,
@@ -523,7 +525,8 @@ gdb_bfd_ref (struct bfd *abfd)
   /* Ask BFD to decompress sections in bfd_get_full_section_contents.  */
   abfd->flags |= BFD_DECOMPRESS;
 
-  gdata = bfd_zalloc (abfd, sizeof (struct gdb_bfd_data));
+  gdata
+    = (struct gdb_bfd_data *) bfd_zalloc (abfd, sizeof (struct gdb_bfd_data));
   gdata->refc = 1;
   gdata->mtime = bfd_get_mtime (abfd);
   gdata->size = bfd_get_size (abfd);
@@ -562,7 +565,7 @@ gdb_bfd_unref (struct bfd *abfd)
   if (abfd == NULL)
     return;
 
-  gdata = bfd_usrdata (abfd);
+  gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
   gdb_assert (gdata->refc >= 1);
 
   gdata->refc -= 1;
@@ -626,11 +629,13 @@ get_section_descriptor (asection *section)
 {
   struct gdb_bfd_section_data *result;
 
-  result = bfd_get_section_userdata (section->owner, section);
+  result = ((struct gdb_bfd_section_data *)
+	    bfd_get_section_userdata (section->owner, section));
 
   if (result == NULL)
     {
-      result = bfd_zalloc (section->owner, sizeof (*result));
+      result = ((struct gdb_bfd_section_data *)
+		bfd_zalloc (section->owner, sizeof (*result)));
       bfd_set_section_userdata (section->owner, section, result);
     }
 
@@ -708,7 +713,7 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
  done:
   gdb_assert (descriptor->data != NULL);
   *size = descriptor->size;
-  return descriptor->data;
+  return (const gdb_byte *) descriptor->data;
 }
 
 /* Return 32-bit CRC for ABFD.  If successful store it to *FILE_CRC_RETURN and
@@ -753,7 +758,7 @@ get_file_crc (bfd *abfd, unsigned long *file_crc_return)
 int
 gdb_bfd_crc (struct bfd *abfd, unsigned long *crc_out)
 {
-  struct gdb_bfd_data *gdata = bfd_usrdata (abfd);
+  struct gdb_bfd_data *gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
 
   if (!gdata->crc_computed)
     gdata->crc_computed = get_file_crc (abfd, &gdata->crc);
@@ -844,7 +849,7 @@ gdb_bfd_mark_parent (bfd *child, bfd *parent)
   /* No need to stash the filename here, because we also keep a
      reference on the parent archive.  */
 
-  gdata = bfd_usrdata (child);
+  gdata = (struct gdb_bfd_data *) bfd_usrdata (child);
   if (gdata->archive_bfd == NULL)
     {
       gdata->archive_bfd = parent;
@@ -875,7 +880,7 @@ gdb_bfd_record_inclusion (bfd *includer, bfd *includee)
   struct gdb_bfd_data *gdata;
 
   gdb_bfd_ref (includee);
-  gdata = bfd_usrdata (includer);
+  gdata = (struct gdb_bfd_data *) bfd_usrdata (includer);
   VEC_safe_push (bfdp, gdata->included_bfds, includee);
 }
 
@@ -927,7 +932,7 @@ gdb_bfd_count_sections (bfd *abfd)
 int
 gdb_bfd_requires_relocations (bfd *abfd)
 {
-  struct gdb_bfd_data *gdata = bfd_usrdata (abfd);
+  struct gdb_bfd_data *gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
 
   if (gdata->relocation_computed == 0)
     {
@@ -953,9 +958,9 @@ gdb_bfd_requires_relocations (bfd *abfd)
 static int
 print_one_bfd (void **slot, void *data)
 {
-  bfd *abfd = *slot;
-  struct gdb_bfd_data *gdata = bfd_usrdata (abfd);
-  struct ui_out *uiout = data;
+  bfd *abfd = (struct bfd *) *slot;
+  struct gdb_bfd_data *gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
+  struct ui_out *uiout = (struct ui_out *) data;
   struct cleanup *inner;
 
   inner = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);

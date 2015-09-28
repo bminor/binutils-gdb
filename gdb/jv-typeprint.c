@@ -233,7 +233,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 		  p = strrchr (real_physname, ')');
 		  gdb_assert (p != NULL);
 		  ++p;   /* Keep the trailing ')'.  */
-		  physname = alloca (p - real_physname + 1);
+		  physname = (char *) alloca (p - real_physname + 1);
 		  memcpy (physname, real_physname, p - real_physname);
 		  physname[p - real_physname] = '\0';
 

@@ -140,7 +140,7 @@ find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
   /* If we have an addrmap mapping code addresses to blocks, then use
      that.  */
   if (BLOCKVECTOR_MAP (bl))
-    return addrmap_find (BLOCKVECTOR_MAP (bl), pc);
+    return (struct block *) addrmap_find (BLOCKVECTOR_MAP (bl), pc);
 
   /* Otherwise, use binary search to find the last block that starts
      before PC.
@@ -246,7 +246,7 @@ call_site_for_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
 		    : MSYMBOL_PRINT_NAME (msym.minsym)));
     }
 
-  return *slot;
+  return (struct call_site *) *slot;
 }
 
 /* Return the blockvector immediately containing the innermost lexical block
@@ -870,7 +870,7 @@ block_find_non_opaque_type (struct symbol *sym, void *data)
 int
 block_find_non_opaque_type_preferred (struct symbol *sym, void *data)
 {
-  struct symbol **best = data;
+  struct symbol **best = (struct symbol **) data;
 
   if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
     return 1;

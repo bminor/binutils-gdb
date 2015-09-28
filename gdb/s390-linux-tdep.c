@@ -1168,7 +1168,7 @@ static void
 s390_check_for_saved (void *data_untyped, pv_t addr,
 		      CORE_ADDR size, pv_t value)
 {
-  struct s390_prologue_data *data = data_untyped;
+  struct s390_prologue_data *data = (struct s390_prologue_data *) data_untyped;
   int i, offset;
 
   if (!pv_is_register (addr, S390_SP_REGNUM))
@@ -1600,7 +1600,7 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = xmalloc (len);
+  gdb_byte *buf = (gdb_byte *) xmalloc (len);
   struct cleanup *old_chain = make_cleanup (xfree, buf);
 
   read_memory (from, buf, len);
@@ -2081,7 +2081,7 @@ s390_frame_unwind_cache (struct frame_info *this_frame,
   struct s390_unwind_cache *info;
 
   if (*this_prologue_cache)
-    return *this_prologue_cache;
+    return (struct s390_unwind_cache *) *this_prologue_cache;
 
   info = FRAME_OBSTACK_ZALLOC (struct s390_unwind_cache);
   *this_prologue_cache = info;
@@ -2162,7 +2162,7 @@ s390_stub_frame_unwind_cache (struct frame_info *this_frame,
   ULONGEST reg;
 
   if (*this_prologue_cache)
-    return *this_prologue_cache;
+    return (struct s390_stub_unwind_cache *) *this_prologue_cache;
 
   info = FRAME_OBSTACK_ZALLOC (struct s390_stub_unwind_cache);
   *this_prologue_cache = info;
@@ -2246,7 +2246,7 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   int i;
 
   if (*this_prologue_cache)
-    return *this_prologue_cache;
+    return (struct s390_sigtramp_unwind_cache *) *this_prologue_cache;
 
   info = FRAME_OBSTACK_ZALLOC (struct s390_sigtramp_unwind_cache);
   *this_prologue_cache = info;

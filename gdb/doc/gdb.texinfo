@@ -6765,7 +6765,7 @@ Disassembles ten more instructions after the last disassembly.
 @item record instruction-history -
 Disassembles ten more instructions before the last disassembly.
 
-@item record instruction-history @var{begin} @var{end}
+@item record instruction-history @var{begin}, @var{end}
 Disassembles instructions beginning with instruction number
 @var{begin} until instruction number @var{end}.  The instruction
 number @var{end} is included.
@@ -6837,7 +6837,7 @@ Prints ten more functions after the last ten-line print.
 @item record function-call-history -
 Prints ten more functions before the last ten-line print.
 
-@item record function-call-history @var{begin} @var{end}
+@item record function-call-history @var{begin}, @var{end}
 Prints functions beginning with function number @var{begin} until
 function number @var{end}.  The function number @var{end} is included.
 @end table
@@ -7983,11 +7983,11 @@ For example, if the file @file{/foo/bar/baz.c} was moved to
 @file{/mnt/cross/baz.c}, then the command
 
 @smallexample
-(@value{GDBP}) set substitute-path /usr/src /mnt/cross
+(@value{GDBP}) set substitute-path /foo/bar /mnt/cross
 @end smallexample
 
 @noindent
-will tell @value{GDBN} to replace @samp{/usr/src} with
+will tell @value{GDBN} to replace @samp{/foo/bar} with
 @samp{/mnt/cross}, which will allow @value{GDBN} to find the file
 @file{baz.c} even though it was moved.
 

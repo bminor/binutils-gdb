@@ -405,7 +405,7 @@ tic6x_frame_unwind_cache (struct frame_info *this_frame,
   struct tic6x_unwind_cache *cache;
 
   if (*this_prologue_cache)
-    return *this_prologue_cache;
+    return (struct tic6x_unwind_cache *) *this_prologue_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct tic6x_unwind_cache);
   (*this_prologue_cache) = cache;
@@ -516,7 +516,7 @@ tic6x_stub_this_id (struct frame_info *this_frame, void **this_cache,
 
   if (*this_cache == NULL)
     *this_cache = tic6x_make_stub_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct tic6x_unwind_cache *) *this_cache;
 
   *this_id = frame_id_build (cache->cfa, get_frame_pc (this_frame));
 }

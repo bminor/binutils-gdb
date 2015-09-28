@@ -1256,12 +1256,16 @@ fragment <<EOF
 	  rp = bfd_elf_get_runpath_list (link_info.output_bfd, &link_info);
 	  for (; !found && rp != NULL; rp = rp->next)
 	    {
-	      char *tmpname = gld${EMULATION_NAME}_add_sysroot (rp->name);
+	      const char *tmpname = rp->name;
+
+	      if (IS_ABSOLUTE_PATH (tmpname))
+		tmpname = gld${EMULATION_NAME}_add_sysroot (tmpname);
 	      found = (rp->by == l->by
 		       && gld${EMULATION_NAME}_search_needed (tmpname,
 							      &n,
 							      force));
-	      free (tmpname);
+	      if (tmpname != rp->name)
+		free ((char *) tmpname);
 	    }
 	  if (found)
 	    break;
@@ -1449,6 +1453,11 @@ gld${EMULATION_NAME}_append_to_separated_string (char **to, char *op_arg)
     }
 }
 
+#if defined(__GNUC__) && GCC_VERSION < 4006
+  /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
+static struct bfd_link_hash_entry ehdr_start_empty;
+#endif
+
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
 
@@ -1461,7 +1470,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   struct elf_link_hash_entry *ehdr_start = NULL;
 #if defined(__GNUC__) && GCC_VERSION < 4006
   /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
-  struct bfd_link_hash_entry ehdr_start_save = ehdr_start_save;
+  struct bfd_link_hash_entry ehdr_start_save = ehdr_start_empty;
 #else
   struct bfd_link_hash_entry ehdr_start_save;
 #endif

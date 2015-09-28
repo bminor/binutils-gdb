@@ -1276,7 +1276,7 @@ write_build_id (bfd *abfd)
       struct bfd_link_order *l = NULL;
       for (l = asec->map_head.link_order; l != NULL; l = l->next)
         {
-          if ((l->type == bfd_indirect_link_order))
+          if (l->type == bfd_indirect_link_order)
             {
               if (l->u.indirect.section == t->build_id.sec)
                 {
@@ -1328,7 +1328,7 @@ write_build_id (bfd *abfd)
   if (bfd_seek (abfd, asec->filepos + link_order->offset, SEEK_SET) != 0)
     return 0;
 
-  if ((bfd_bwrite (contents, size, abfd) != size))
+  if (bfd_bwrite (contents, size, abfd) != size)
     return 0;
 
   /* Construct the CodeView record.  */

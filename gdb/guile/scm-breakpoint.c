@@ -509,7 +509,7 @@ gdbscm_delete_breakpoint_x (SCM self)
 static int
 bpscm_build_bp_list (struct breakpoint *bp, void *arg)
 {
-  SCM *list = arg;
+  SCM *list = (SCM *) arg;
   breakpoint_smob *bp_smob = bp->scm_bp_object;
 
   /* Lazily create wrappers for breakpoints created outside Scheme.  */

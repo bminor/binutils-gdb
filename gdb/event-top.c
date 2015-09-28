@@ -397,7 +397,7 @@ top_level_prompt (void)
     }
 
   prompt_length = strlen (prefix) + strlen (prompt) + strlen (suffix);
-  composed_prompt = xmalloc (prompt_length + 1);
+  composed_prompt = (char *) xmalloc (prompt_length + 1);
 
   strcpy (composed_prompt, prefix);
   strcat (composed_prompt, prompt);
@@ -681,7 +681,8 @@ command_line_handler (char *rl)
     {
       if (linelength > saved_command_line_size)
 	{
-	  saved_command_line = xrealloc (saved_command_line, linelength);
+	  saved_command_line
+	    = (char *) xrealloc (saved_command_line, linelength);
 	  saved_command_line_size = linelength;
 	}
       strcpy (saved_command_line, linebuffer);

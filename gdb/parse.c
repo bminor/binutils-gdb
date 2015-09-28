@@ -189,8 +189,9 @@ initialize_expout (struct parser_state *ps, size_t initial_size,
 {
   ps->expout_size = initial_size;
   ps->expout_ptr = 0;
-  ps->expout = xmalloc (sizeof (struct expression)
-			+ EXP_ELEM_TO_BYTES (ps->expout_size));
+  ps->expout
+    = (struct expression *) xmalloc (sizeof (struct expression)
+				     + EXP_ELEM_TO_BYTES (ps->expout_size));
   ps->expout->language_defn = lang;
   ps->expout->gdbarch = gdbarch;
 }
@@ -585,7 +586,7 @@ mark_completion_tag (enum type_code tag, const char *ptr, int length)
 	      || tag == TYPE_CODE_STRUCT
 	      || tag == TYPE_CODE_ENUM);
   expout_tag_completion_type = tag;
-  expout_completion_name = xmalloc (length + 1);
+  expout_completion_name = (char *) xmalloc (length + 1);
   memcpy (expout_completion_name, ptr, length);
   expout_completion_name[length] = '\0';
 }
@@ -795,7 +796,7 @@ copy_name (struct stoken token)
   if (namecopy_size < token.length + 1)
     {
       namecopy_size = token.length + 1;
-      namecopy = xrealloc (namecopy, token.length + 1);
+      namecopy = (char *) xrealloc (namecopy, token.length + 1);
     }
       
   memcpy (namecopy, token.ptr, token.length);
@@ -1373,7 +1374,7 @@ parse_float (const char *p, int len, DOUBLEST *d, const char **suffix)
   char *copy;
   int n, num;
 
-  copy = xmalloc (len + 1);
+  copy = (char *) xmalloc (len + 1);
   memcpy (copy, p, len);
   copy[len] = 0;
 
@@ -1439,8 +1440,8 @@ type_stack_reserve (struct type_stack *stack, int howmuch)
       stack->size *= 2;
       if (stack->size < howmuch)
 	stack->size = howmuch;
-      stack->elements = xrealloc (stack->elements,
-				  stack->size * sizeof (union type_stack_elt));
+      stack->elements = XRESIZEVEC (union type_stack_elt, stack->elements,
+				    stack->size);
     }
 }
 
@@ -1620,7 +1621,7 @@ get_type_stack (void)
 void
 type_stack_cleanup (void *arg)
 {
-  struct type_stack *stack = arg;
+  struct type_stack *stack = (struct type_stack *) arg;
 
   xfree (stack->elements);
   xfree (stack);
@@ -1897,7 +1898,7 @@ exp_iterate (struct expression *exp,
 static int
 exp_uses_objfile_iter (struct objfile *exp_objfile, void *objfile_voidp)
 {
-  struct objfile *objfile = objfile_voidp;
+  struct objfile *objfile = (struct objfile *) objfile_voidp;
 
   if (exp_objfile->separate_debug_objfile_backlink)
     exp_objfile = exp_objfile->separate_debug_objfile_backlink;

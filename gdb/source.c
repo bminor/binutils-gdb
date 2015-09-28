@@ -775,7 +775,7 @@ openp (const char *path, int opts, const char *string,
 
       if (is_regular_file (string))
 	{
-	  filename = alloca (strlen (string) + 1);
+	  filename = (char *) alloca (strlen (string) + 1);
 	  strcpy (filename, string);
 	  fd = gdb_open_cloexec (filename, mode, 0);
 	  if (fd >= 0)
@@ -806,7 +806,7 @@ openp (const char *path, int opts, const char *string,
     string += 2;
 
   alloclen = strlen (path) + strlen (string) + 2;
-  filename = alloca (alloclen);
+  filename = (char *) alloca (alloclen);
   fd = -1;
 
   dir_vec = dirnames_to_char_ptr_vec (path);
@@ -827,7 +827,7 @@ openp (const char *path, int opts, const char *string,
 	  if (newlen > alloclen)
 	    {
 	      alloclen = newlen;
-	      filename = alloca (alloclen);
+	      filename = (char *) alloca (alloclen);
 	    }
 	  strcpy (filename, current_directory);
 	}
@@ -845,7 +845,7 @@ openp (const char *path, int opts, const char *string,
 	  if (newlen > alloclen)
 	    {
 	      alloclen = newlen;
-	      filename = alloca (alloclen);
+	      filename = (char *) alloca (alloclen);
 	    }
 	  strcpy (filename, tilde_expanded);
 	  xfree (tilde_expanded);
@@ -1366,7 +1366,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	{
 	  const char *filename = symtab_to_filename_for_display (s);
 	  int len = strlen (filename) + 100;
-	  char *name = alloca (len);
+	  char *name = (char *) alloca (len);
 
 	  xsnprintf (name, len, "%d\t%s", line, filename);
 	  print_sys_errmsg (name, errno);
@@ -1393,7 +1393,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	      /* ui_out_field_string may free S_FULLNAME by calling
 		 open_source_file for it again.  See e.g.,
 		 tui_field_string->tui_show_source.  */
-	      local_fullname = alloca (strlen (s_fullname) + 1);
+	      local_fullname = (char *) alloca (strlen (s_fullname) + 1);
 	      strcpy (local_fullname, s_fullname);
 
 	      ui_out_field_string (uiout, "fullname", local_fullname);
@@ -1644,7 +1644,7 @@ forward_search_command (char *regex, int from_tty)
       int cursize, newsize;
 
       cursize = 256;
-      buf = xmalloc (cursize);
+      buf = (char *) xmalloc (cursize);
       p = buf;
 
       c = fgetc (stream);
@@ -1656,7 +1656,7 @@ forward_search_command (char *regex, int from_tty)
 	  if (p - buf == cursize)
 	    {
 	      newsize = cursize + cursize / 2;
-	      buf = xrealloc (buf, newsize);
+	      buf = (char *) xrealloc (buf, newsize);
 	      p = buf + cursize;
 	      cursize = newsize;
 	    }

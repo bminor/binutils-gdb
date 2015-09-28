@@ -316,7 +316,7 @@ gdb_fopen_cloexec (const char *filename, const char *opentype)
     {
       char *copy;
 
-      copy = alloca (strlen (opentype) + 2);
+      copy = (char *) alloca (strlen (opentype) + 2);
       strcpy (copy, opentype);
       /* This is a glibc extension but we try it unconditionally on
 	 this path.  */
@@ -410,7 +410,7 @@ gdb_pipe_cloexec (int filedes[2])
 static void
 do_close_cleanup (void *arg)
 {
-  int *fd = arg;
+  int *fd = (int *) arg;
 
   close (*fd);
 }
