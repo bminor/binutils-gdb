@@ -1,3 +1,7 @@
+2015-09-28  Tom Rix  <tom@bumblecow.com>
+
+	* ppc-opc.c (PPC500): Mark some opcodes as invalid
+
 2015-09-23  Nick Clifton  <nickc@redhat.com>
 
 	* bfin-dis.c (fmtconst): Remove unnecessary call to the abs
