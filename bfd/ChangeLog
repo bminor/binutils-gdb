@@ -1,3 +1,10 @@
+2015-09-29  Andrew Stubbs  <ams@codesourcery.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19020
+	* bfd.c (bfd_convert_section_contents): Add ptr_size parameter.
+	* bfd-in2.h: Regenerated.
+
 2015-08-11  Peter Zotov  <whitequark@whitequark.org>
 
 	PR ld/18759

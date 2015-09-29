@@ -6933,7 +6933,8 @@ bfd_size_type bfd_convert_section_size
    (bfd *ibfd, asection *isec, bfd *obfd, bfd_size_type size);
 
 bfd_boolean bfd_convert_section_contents
-   (bfd *ibfd, asection *isec, bfd *obfd, bfd_byte **ptr);
+   (bfd *ibfd, asection *isec, bfd *obfd,
+    bfd_byte **ptr, bfd_size_type *ptr_size);
 
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent

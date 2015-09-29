@@ -1,3 +1,12 @@
+2015-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19020
+	* binutils-all/objcopy.exp: Run pr19020a and pr19020b.
+	* lib/utils-lib.exp (run_dump_test): Support binary input.
+	* binutils-all/pr19020.in: New file.
+	* binutils-all/pr19020a.d: Likewise.
+	* binutils-all/pr19020b.d: Likewise.
+
 2015-08-11  Alan Modra  <amodra@gmail.com>
 
 	* binutils-all/strip-12.s: Align .bss section.

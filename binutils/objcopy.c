@@ -2212,24 +2212,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   bfd_map_over_sections (ibfd, copy_relocations_in_section, obfd);
 
   /* This has to happen after the symbol table has been set.  */
-  if (gap_fill_set)
-    {
-      /* Adjust the output section size to skip gap fills between
-	 sections.  */
-      c = bfd_count_sections (obfd);
-      for (i = 0; i < c; i++)
-	if (gaps[i] != 0)
-	  osections[i]->size -= gaps[i];
-    }
   bfd_map_over_sections (ibfd, copy_section, obfd);
-  if (gap_fill_set)
-    {
-      /* Restore the output section size for gap fills between
-	 sections.  */
-      for (i = 0; i < c; i++)
-	if (gaps[i] != 0)
-	  osections[i]->size += gaps[i];
-    }
 
   if (add_sections != NULL)
     {
@@ -3127,10 +3110,10 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   osection = isection->output_section;
   /* The output SHF_COMPRESSED section size is different from input if
-     ELF classes of input and output aren't the same.  We must use the
-     output section size here, which has been updated in setup_section
-     via bfd_convert_section_size.  */
-  size = bfd_get_section_size (osection);
+     ELF classes of input and output aren't the same.  We can't use
+     the output section size since --interleave will shrink the output
+     section.   Size will be updated if the section is converted.   */
+  size = bfd_get_section_size (isection);
 
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
@@ -3139,7 +3122,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
       if (!bfd_get_full_section_contents (ibfd, isection, &memhunk)
 	  || !bfd_convert_section_contents (ibfd, isection, obfd,
-					    &memhunk))
+					    &memhunk, &size))
 	{
 	  status = 1;
 	  bfd_nonfatal_message (NULL, ibfd, isection, NULL);
