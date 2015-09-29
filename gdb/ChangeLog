@@ -1,3 +1,9 @@
+2015-09-29  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-tdep.c (msp430_push_dummy_call): Treat reference, struct,
+	and union arguments the same as pointer arguments when determining
+	size of argument.
+
 2015-09-29  James Bowman  <james.bowman@ftdichip.com>
 
 	* ft32-tdep.c: #include "opcode/ft32.h".
