@@ -602,7 +602,7 @@ step_once (SIM_DESC sd)
 	    uint32_t src = r_1v;
 	    uint32_t dst = cpu->state.regs[r_d];
 	    uint32_t i;
-	    for (i = 0; i < rimmv; i++)
+	    for (i = 0; i < (rimmv & 0x7fff); i++)
 	      PUT_BYTE (dst + i, GET_BYTE (src + i));
 	  }
 	  break;
@@ -621,7 +621,7 @@ step_once (SIM_DESC sd)
 	    /* memset instruction.  */
 	    uint32_t dst = cpu->state.regs[r_d];
 	    uint32_t i;
-	    for (i = 0; i < rimmv; i++)
+	    for (i = 0; i < (rimmv & 0x7fff); i++)
 	      PUT_BYTE (dst + i, r_1v);
 	  }
 	  break;
