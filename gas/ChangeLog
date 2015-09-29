@@ -1,3 +1,19 @@
+2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* doc/c-s390.texi: Add documentation.
+	Add missing code markup.
+	* config/tc-s390.c (current_flags): New static variable.
+	(s390_parse_cpu): Parse cpu flags a la "+nohtm" etc.
+	(s390_setup_opcodes): Use cpu flags to determine the set of opcodes.
+	Fix indentation.
+	(md_parse_option): Call s390_parse_cpu with the new signature.
+	(s390_machine): Likewise.
+	Keep track of current_flags.
+	Simplify code a bit.
+	undefine MAX_HISTORY at end of function.
+	(s390_machinemode): undefine MAX_HISTORY at end of function.
+	Update an error message.
+
 2015-08-11  Peter Zotov  <whitequark@whitequark.org>
 
 	PR ld/18759
