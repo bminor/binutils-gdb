@@ -2363,10 +2363,10 @@ file.
 @kindex --disable-long-section-names
 @item --enable-long-section-names
 @itemx --disable-long-section-names
-The PE variants of the Coff object format add an extension that permits
+The PE variants of the COFF object format add an extension that permits
 the use of section names longer than eight characters, the normal limit
-for Coff.  By default, these names are only allowed in object files, as
-fully-linked executable images do not carry the Coff string table required
+for COFF.  By default, these names are only allowed in object files, as
+fully-linked executable images do not carry the COFF string table required
 to support the longer names.  As a GNU extension, it is possible to
 allow their use in executable images as well, or to (probably pointlessly!)
 disallow it in object files, by using these two options.  Executable images
@@ -2809,10 +2809,10 @@ The image is Terminal Server aware.
 Insert a real timestamp into the image.  This is the default behaviour
 as it matches legacy code and it means that the image will work with
 other, proprietary tools.  The problem with this default is that it
-will result in slightly different images being produced each tiem the
+will result in slightly different images being produced each time the
 same sources are linked.  The option @option{--no-insert-timestamp}
 can be used to insert a zero value for the timestamp, this ensuring
-that binaries produced from indentical sources will compare
+that binaries produced from identical sources will compare
 identically.
 @end table
 
@@ -2831,7 +2831,7 @@ all executables use an index of 0.
 
 @kindex --dsbt-size
 @item --dsbt-size @var{size}
-This option sets the number of entires in the DSBT of the current executable
+This option sets the number of entries in the DSBT of the current executable
 or shared library to @var{size}.  The default is to create a table with 64
 entries.
 

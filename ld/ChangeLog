@@ -1,3 +1,8 @@
+2015-09-29  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19014
+	* ld.texinfo (Options): Fix spelling mistake.
+
 2015-09-24  Alan Modra  <amodra@gmail.com>
 
 	PR ld/18992
