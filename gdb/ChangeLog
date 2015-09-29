@@ -1,3 +1,9 @@
+2015-09-29  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-tdep.c: #include "opcode/ft32.h".
+	Delete local macros IS_PUSH, PUSH_REG, IS_LINK, LINK_SIZE.
+	(ft32_analyze_prologue): Use FT32_* macros.
+
 2015-09-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* cli/cli-script.c (read_next_line): Fix stdout -> stdin in
