@@ -1640,6 +1640,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   void *dhandle;
   enum bfd_architecture iarch;
   unsigned int imach;
+  unsigned int c, i;
 
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
@@ -2071,11 +2072,11 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
-  if (bfd_count_sections (obfd) != 0
+  c = bfd_count_sections (obfd);
+  if (c != 0
       && (gap_fill_set || pad_to_set))
     {
       asection **set;
-      unsigned int c, i;
 
       /* We must fill in gaps between the sections and/or we must pad
 	 the last section to a specified address.  We do this by
@@ -2083,7 +2084,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	 increasing the section sizes as required to fill the gaps.
 	 We write out the gap contents below.  */
 
-      c = bfd_count_sections (obfd);
       osections = (asection **) xmalloc (c * sizeof (asection *));
       set = osections;
       bfd_map_over_sections (obfd, get_sections, &set);
@@ -2212,7 +2212,24 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   bfd_map_over_sections (ibfd, copy_relocations_in_section, obfd);
 
   /* This has to happen after the symbol table has been set.  */
+  if (gap_fill_set)
+    {
+      /* Adjust the output section size to skip gap fills between
+	 sections.  */
+      c = bfd_count_sections (obfd);
+      for (i = 0; i < c; i++)
+	if (gaps[i] != 0)
+	  osections[i]->size -= gaps[i];
+    }
   bfd_map_over_sections (ibfd, copy_section, obfd);
+  if (gap_fill_set)
+    {
+      /* Restore the output section size for gap fills between
+	 sections.  */
+      for (i = 0; i < c; i++)
+	if (gaps[i] != 0)
+	  osections[i]->size += gaps[i];
+    }
 
   if (add_sections != NULL)
     {
@@ -2264,7 +2281,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   if (gap_fill_set || pad_to_set)
     {
       bfd_byte *buf;
-      int c, i;
 
       /* Fill in the gaps.  */
       if (max_gap > 8192)

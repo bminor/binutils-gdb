@@ -1,3 +1,10 @@
+2015-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19005
+	* ld-elf/pr19005.d: New file.
+	* ld-elf/pr19005.s: Likewise.
+	* ld-elf/pr19005.t: Likewise.
+
 2015-08-11  Peter Zotov  <whitequark@whitequark.org>
 
 	PR ld/18759
