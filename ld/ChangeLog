@@ -1,3 +1,8 @@
+2015-09-30  Rich Felker  <dalias@libc.org>
+
+	* configure.tgt (targ_extra_emuls): Add fdpic and misc
+	emulations to sh*-*-linux* targets.
+
 2015-09-29  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/19014
