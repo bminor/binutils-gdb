@@ -4582,8 +4582,6 @@ linux_nat_supports_non_stop (struct target_ops *self)
 static int
 linux_nat_always_non_stop_p (struct target_ops *self)
 {
-  if (linux_ops->to_always_non_stop_p != NULL)
-    return linux_ops->to_always_non_stop_p (linux_ops);
   return 1;
 }
 
