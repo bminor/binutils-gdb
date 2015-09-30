@@ -1,3 +1,9 @@
+2015-09-30  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19013
+	* elflink.c (_bfd_elf_merge_sections): Only merge input bfds that
+	will be handled by elf_link_input_bfd.  Rename abfd param to obfd.
+
 2015-09-30  Rich Felker  <dalias@libc.org>
 
 	* config.bfd (targ_selvecs): Add fdpic and misc targets
