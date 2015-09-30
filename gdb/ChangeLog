@@ -1,5 +1,10 @@
 2015-09-29  Kevin Buettner  <kevinb@redhat.com>
 
+	* infcmd.c (finish_command_fsm_should_stop): Don't attempt to
+	record a NULL value.
+
+2015-09-29  Kevin Buettner  <kevinb@redhat.com>
+
 	* msp430-tdep.c (msp430_push_dummy_call): Treat reference, struct,
 	and union arguments the same as pointer arguments when determining
 	size of argument.
