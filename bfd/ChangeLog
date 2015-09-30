@@ -1,3 +1,8 @@
+2015-09-30  Rich Felker  <dalias@libc.org>
+
+	* config.bfd (targ_selvecs): Add fdpic and misc targets
+	for sh*-*-linux*.
+
 2015-09-29  Andrew Stubbs  <ams@codesourcery.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
