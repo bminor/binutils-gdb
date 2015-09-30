@@ -1,6 +1,5 @@
 # Motorola PowerPC e500 illegal instructions
 	.text
-	.machine e500
 start:
 	eciwx  3,4,5
 	ecowx  3,4,5

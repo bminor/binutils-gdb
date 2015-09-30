@@ -1,3 +1,34 @@
+2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19031
+	* elf32-i386.c (elf_i386_check_relocs): Set
+	pointer_equality_needed for R_386_PC32 reloc in non-code
+	sections.
+
+2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19013
+	* elflink.c (_bfd_elf_merge_sections): Only merge input bfds
+	that have the compatible ELF machine code with the output bfd.
+
+2015-09-30  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19013
+	* elflink.c (_bfd_elf_merge_sections): Only merge input bfds that
+	will be handled by elf_link_input_bfd.  Rename abfd param to obfd.
+
+2015-09-30  Rich Felker  <dalias@libc.org>
+
+	* config.bfd (targ_selvecs): Add fdpic and misc targets
+	for sh*-*-linux*.
+
+2015-09-29  Andrew Stubbs  <ams@codesourcery.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19020
+	* bfd.c (bfd_convert_section_contents): Add ptr_size parameter.
+	* bfd-in2.h: Regenerated.
+
 2015-08-11  Peter Zotov  <whitequark@whitequark.org>
 
 	PR ld/18759

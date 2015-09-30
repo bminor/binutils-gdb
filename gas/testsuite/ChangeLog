@@ -1,3 +1,25 @@
+2015-09-30  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/ppc.exp (e500-ill): Pass -me500.
+	* gas/ppc/e500-ill.s: Remove .machine.
+	* gas/ppc/e500-ill.l: Remove line numbers.
+
+2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* gas/s390/s390.exp: Add new tests.
+	* gas/s390/machine-parsing-1.s: New test file.
+	* gas/s390/machine-parsing-1.l: Likewise.
+	* gas/s390/machine-parsing-2.s: Likewise.
+	* gas/s390/machine-parsing-2.l: Likewise.
+	* gas/s390/machine-parsing-3.s: Likewise.
+	* gas/s390/machine-parsing-3.l: Likewise.
+	* gas/s390/machine-parsing-4.s: Likewise.
+	* gas/s390/machine-parsing-4.l: Likewise.
+	* gas/s390/machine-parsing-5.s: Likewise.
+	* gas/s390/machine-parsing-5.l: Likewise.
+	* gas/s390/machine-parsing-6.s: Likewise.
+	* gas/s390/machine-parsing-6.l: Likewise.
+
 2015-09-28  Tom Rix  <tom@bumblecow.com>
 
 	* gas/ppc/e500-ill.s: New testcase for illegal ppc e500 ops.

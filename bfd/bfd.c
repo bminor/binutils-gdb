@@ -2165,19 +2165,20 @@ FUNCTION
 
 SYNOPSIS
 	bfd_boolean bfd_convert_section_contents
-	  (bfd *ibfd, asection *isec, bfd *obfd, bfd_byte **ptr);
+	  (bfd *ibfd, asection *isec, bfd *obfd,
+	   bfd_byte **ptr, bfd_size_type *ptr_size);
 
 DESCRIPTION
 	Convert the contents, stored in @var{*ptr}, of the section
 	@var{isec} in input BFD @var{ibfd} to output BFD @var{obfd}
 	if needed.  The original buffer pointed to by @var{*ptr} may
 	be freed and @var{*ptr} is returned with memory malloc'd by this
-	function.
+	function, and the new size written to @var{ptr_size}.
 */
 
 bfd_boolean
 bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
-			      bfd_byte **ptr)
+			      bfd_byte **ptr, bfd_size_type *ptr_size)
 {
   bfd_byte *contents;
   bfd_size_type ihdr_size, ohdr_size, size;
@@ -2264,5 +2265,6 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
       *ptr = contents;
     }
 
+  *ptr_size = size;
   return TRUE;
 }

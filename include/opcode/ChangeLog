@@ -1,3 +1,9 @@
+2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* s390.h (S390_INSTR_FLAG_HTM): New flag.
+	(S390_INSTR_FLAG_VX): New flag.
+	(S390_INSTR_FLAG_FACILITY_MASK): New flag mask.
+
 2015-09-23  Nick Clifton  <nickc@redhat.com>
 
 	* ppc.h (PPC_OPSHIFT_INV): Use an unsigned constant when left

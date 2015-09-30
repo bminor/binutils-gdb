@@ -37,6 +37,8 @@
 #include "dis-asm.h"
 #include "record.h"
 
+#include "opcode/ft32.h"
+
 #include "ft32-tdep.h"
 #include "gdb/sim-ft32.h"
 
@@ -153,11 +155,6 @@ ft32_store_return_value (struct type *type, struct regcache *regcache,
 
    Returns the address of the first instruction after the prologue.  */
 
-#define IS_PUSH(inst)   (((inst) & 0xfff00000) == 0x84000000)
-#define PUSH_REG(inst)  (FT32_R0_REGNUM + (((inst) >> 15) & 0x1f))
-#define IS_LINK(inst)   (((inst) & 0xffff0000) == 0x95d00000)
-#define LINK_SIZE(inst) ((inst) & 0xffff)
-
 static CORE_ADDR
 ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 		       struct ft32_frame_cache *cache,
@@ -180,9 +177,9 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
     {
       inst = read_memory_unsigned_integer (next_addr, 4, byte_order);
 
-      if (IS_PUSH (inst))
+      if (FT32_IS_PUSH (inst))
 	{
-	  regnum = PUSH_REG (inst);
+	  regnum = FT32_R0_REGNUM + FT32_PUSH_REG (inst);
 	  cache->framesize += 4;
 	  cache->saved_regs[regnum] = cache->framesize;
 	  next_addr += 4;
@@ -201,7 +198,7 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   if (next_addr < end_addr)
     {
       inst = read_memory_unsigned_integer (next_addr, 4, byte_order);
-      if (IS_LINK (inst))
+      if (FT32_IS_LINK (inst))
 	{
 	  cache->established = 1;
 	  for (regnum = FT32_R0_REGNUM; regnum < FT32_PC_REGNUM; regnum++)
@@ -211,7 +208,7 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	    }
 	  cache->saved_regs[FT32_PC_REGNUM] = cache->framesize + 4;
 	  cache->saved_regs[FT32_FP_REGNUM] = 0;
-	  cache->framesize += LINK_SIZE (inst);
+	  cache->framesize += FT32_LINK_SIZE (inst);
 	  next_addr += 4;
 	}
     }

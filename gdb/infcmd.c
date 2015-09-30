@@ -1794,7 +1794,8 @@ finish_command_fsm_should_stop (struct thread_fsm *self)
 
 	  func = read_var_value (f->function, NULL, get_current_frame ());
 	  rv->value = get_return_value (func, rv->type);
-	  rv->value_history_index = record_latest_value (rv->value);
+	  if (rv->value != NULL)
+	    rv->value_history_index = record_latest_value (rv->value);
 	}
     }
   else if (tp->control.stop_step)

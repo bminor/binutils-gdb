@@ -32,6 +32,8 @@ proc build_inferior {exefile lang} {
       untested "Couldn't compile ${srcfile} in $lang mode"
       return -1
   }
+
+  return 0
 }
 
 # Restart GDB.
@@ -241,35 +243,38 @@ proc test_template {} {
 }
 
 # Perform C Tests.
-build_inferior "${binfile}" "c"
-restart_gdb "${binfile}"
+if { [build_inferior "${binfile}" "c"] == 0 } {
+  restart_gdb "${binfile}"
 
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
+  # Skip all tests if Python scripting is not enabled.
+  if { [skip_python_tests] } { continue }
 
-gdb_test "python print(gdb.lookup_type('char').array(1, 0))" \
-    "char \\\[0\\\]"
+  gdb_test "python print(gdb.lookup_type('char').array(1, 0))" \
+      "char \\\[0\\\]"
 
-gdb_test "python print(gdb.lookup_type('char').array(1, -1))" \
-    "Array length must not be negative.*"
+  gdb_test "python print(gdb.lookup_type('char').array(1, -1))" \
+      "Array length must not be negative.*"
 
-gdb_test "python print(gdb.lookup_type('int').optimized_out())" \
-    "<optimized out>"
+  gdb_test "python print(gdb.lookup_type('int').optimized_out())" \
+      "<optimized out>"
 
-with_test_prefix "lang_c" {
-    runto_bp "break to inspect struct and array."
-    test_fields "c"
-    test_enums
+  with_test_prefix "lang_c" {
+      runto_bp "break to inspect struct and array."
+      test_fields "c"
+      test_enums
+  }
 }
 
+
 # Perform C++ Tests.
-build_inferior "${binfile}-cxx" "c++"
-restart_gdb "${binfile}-cxx"
-with_test_prefix "lang_cpp" {
-    runto_bp "break to inspect struct and array."
-    test_fields "c++"
-    test_base_class
-    test_range
-    test_template
-    test_enums
+if { [build_inferior "${binfile}-cxx" "c++"] == 0 } {
+  restart_gdb "${binfile}-cxx"
+  with_test_prefix "lang_cpp" {
+      runto_bp "break to inspect struct and array."
+      test_fields "c++"
+      test_base_class
+      test_range
+      test_template
+      test_enums
+  }
 }

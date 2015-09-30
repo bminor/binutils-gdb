@@ -1561,7 +1561,7 @@ struct gdbarch_info
   bfd *abfd;
 
   /* Use default: NULL (ZERO).  */
-  struct gdbarch_tdep_info *tdep_info;
+  void *tdep_info;
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
   enum gdb_osabi osabi;

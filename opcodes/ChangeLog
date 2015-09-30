@@ -1,3 +1,9 @@
+2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Parse htm and vx flag.
+	* s390-opc.txt: Mark instructions from the hardware transactional
+	memory and vector facilities with the "htm"/"vx" flag.
+
 2015-09-28  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.

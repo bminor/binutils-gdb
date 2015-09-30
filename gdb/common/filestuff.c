@@ -415,7 +415,7 @@ do_close_cleanup (void *arg)
   close (*fd);
 }
 
-/* See cleanup-utils.h.  */
+/* See filestuff.h.  */
 
 struct cleanup *
 make_cleanup_close (int fd)

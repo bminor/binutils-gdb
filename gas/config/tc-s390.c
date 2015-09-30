@@ -42,6 +42,7 @@ static int s390_arch_size = 0;
    predecessors this will accept every valid asm input.  */
 static unsigned int current_cpu = S390_OPCODE_MAXCPU - 1;
 static unsigned int current_mode_mask = 0;
+static unsigned int current_flags = 0;
 
 /* Set to TRUE if the highgprs flag in the ELF header needs to be set
    for the output file.  */
@@ -254,37 +255,116 @@ s390_target_format (void)
   return s390_arch_size == 64 ? "elf64-s390" : "elf32-s390";
 }
 
-/* Map a CPU string as given with -march= or .machine to the
-   respective enum s390_opcode_cpu_val value.  0xffffffff is returned
-   in case of an error.  */
+/* Map a cpu string ARG as given with -march= or .machine to the respective
+   enum s390_opcode_cpu_val value.  If ALLOW_EXTENSIONS is TRUE, the cpu name
+   can be followed by a list of cpu facility flags each beginning with the
+   character '+'.  The active cpu flags are returned through *RET_FLAGS.
+   In case of an error, S390_OPCODE_MAXCPU is returned.  */
 
 static unsigned int
-s390_parse_cpu (char *arg)
+s390_parse_cpu (char *         arg,
+		unsigned int * ret_flags,
+		bfd_boolean    allow_extensions)
 {
-  if (strcmp (arg, "g5") == 0)
-    return S390_OPCODE_G5;
-  else if (strcmp (arg, "g6") == 0)
-    return S390_OPCODE_G6;
-  else if (strcmp (arg, "z900") == 0)
-    return S390_OPCODE_Z900;
-  else if (strcmp (arg, "z990") == 0)
-    return S390_OPCODE_Z990;
-  else if (strcmp (arg, "z9-109") == 0)
-    return S390_OPCODE_Z9_109;
-  else if (strcmp (arg, "z9-ec") == 0)
-    return S390_OPCODE_Z9_EC;
-  else if (strcmp (arg, "z10") == 0)
-    return S390_OPCODE_Z10;
-  else if (strcmp (arg, "z196") == 0)
-    return S390_OPCODE_Z196;
-  else if (strcmp (arg, "zEC12") == 0)
-    return S390_OPCODE_ZEC12;
-  else if (strcmp (arg, "z13") == 0)
-    return S390_OPCODE_Z13;
-  else if (strcmp (arg, "all") == 0)
-    return S390_OPCODE_MAXCPU - 1;
+  static struct
+  {
+    const char * name;
+    unsigned int len;
+    unsigned int flags;
+  } cpu_table[S390_OPCODE_MAXCPU] =
+  {
+    { STRING_COMMA_LEN ("g5"), 0 },
+    { STRING_COMMA_LEN ("g6"), 0 },
+    { STRING_COMMA_LEN ("z900"), 0 },
+    { STRING_COMMA_LEN ("z990"), 0 },
+    { STRING_COMMA_LEN ("z9-109"), 0 },
+    { STRING_COMMA_LEN ("z9-ec"), 0 },
+    { STRING_COMMA_LEN ("z10"), 0 },
+    { STRING_COMMA_LEN ("z196"), 0 },
+    { STRING_COMMA_LEN ("zEC12"), S390_INSTR_FLAG_HTM },
+    { STRING_COMMA_LEN ("z13"), S390_INSTR_FLAG_HTM | S390_INSTR_FLAG_VX }
+  };
+  static struct
+  {
+    const char * name;
+    unsigned int mask;
+    bfd_boolean  on;
+  } cpu_flags[] =
+  {
+    { "htm",   S390_INSTR_FLAG_HTM, TRUE },
+    { "nohtm", S390_INSTR_FLAG_HTM, FALSE },
+    { "vx",    S390_INSTR_FLAG_VX, TRUE },
+    { "novx",  S390_INSTR_FLAG_VX, FALSE }
+  };
+  unsigned int icpu;
+  char *ilp_bak;
+
+  icpu = S390_OPCODE_MAXCPU;
+  if (strncmp (arg, "all", 3) == 0 && (arg[3] == 0 || arg[3] == '+'))
+    {
+      icpu = S390_OPCODE_MAXCPU - 1;
+      arg += 3;
+    }
   else
-    return -1;
+    {
+      for (icpu = 0; icpu < S390_OPCODE_MAXCPU; icpu++)
+	{
+	  unsigned int l;
+
+	  l = cpu_table[icpu].len;
+	  if (strncmp (arg, cpu_table[icpu].name, l) == 0
+	      && (arg[l] == 0 || arg[l] == '+'))
+	    {
+	      arg += l;
+	      break;
+	    }
+	}
+    }
+
+  ilp_bak = input_line_pointer;
+  if (icpu != S390_OPCODE_MAXCPU)
+    {
+      input_line_pointer = arg;
+      *ret_flags = (cpu_table[icpu].flags & S390_INSTR_FLAG_FACILITY_MASK);
+
+      while (*input_line_pointer == '+' && allow_extensions)
+	{
+	  unsigned int iflag;
+	  char *sym;
+	  char c;
+
+	  input_line_pointer++;
+	  c = get_symbol_name (&sym);
+	  for (iflag = 0; iflag < ARRAY_SIZE (cpu_flags); iflag++)
+	    {
+	      if (strcmp (sym, cpu_flags[iflag].name) == 0)
+		{
+		  if (cpu_flags[iflag].on)
+		    *ret_flags |= cpu_flags[iflag].mask;
+		  else
+		    *ret_flags &= ~cpu_flags[iflag].mask;
+		  break;
+		}
+	    }
+	  if (iflag == ARRAY_SIZE (cpu_flags))
+	    as_bad (_("no such machine extension `%s'"), sym - 1);
+	  *input_line_pointer = c;
+	  if (iflag == ARRAY_SIZE (cpu_flags))
+	    break;
+	}
+    }
+
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer != 0 && *input_line_pointer != '\n')
+    {
+      as_bad (_("junk at end of machine string, first unrecognized character"
+		" is `%c'"), *input_line_pointer);
+      icpu = S390_OPCODE_MAXCPU;
+    }
+  input_line_pointer = ilp_bak;
+
+  return icpu;
 }
 
 int
@@ -323,9 +403,8 @@ md_parse_option (int c, char *arg)
 
       else if (arg != NULL && strncmp (arg, "arch=", 5) == 0)
 	{
-	  current_cpu = s390_parse_cpu (arg + 5);
-
-	  if (current_cpu == (unsigned int)-1)
+	  current_cpu = s390_parse_cpu (arg + 5, &current_flags, FALSE);
+	  if (current_cpu == S390_OPCODE_MAXCPU)
 	    {
 	      as_bad (_("invalid switch -m%s"), arg);
 	      return 0;
@@ -402,6 +481,8 @@ s390_setup_opcodes (void)
   op_end = s390_opcodes + s390_num_opcodes;
   for (op = s390_opcodes; op < op_end; op++)
     {
+      int use_opcode;
+
       while (op < op_end - 1 && strcmp(op->name, op[1].name) == 0)
 	{
           if (op->min_cpu <= current_cpu && (op->modes & current_mode_mask))
@@ -409,7 +490,24 @@ s390_setup_opcodes (void)
 	  op++;
         }
 
-      if (op->min_cpu <= current_cpu && (op->modes & current_mode_mask))
+      if ((op->modes & current_mode_mask) == 0)
+	use_opcode = 0;
+      else if ((op->flags & S390_INSTR_FLAG_FACILITY_MASK) == 0)
+	{
+	  /* Opcodes that do not belong to a specific facility are enabled if
+	     present in the selected cpu.  */
+	  use_opcode = (op->min_cpu <= current_cpu);
+	}
+      else
+	{
+	  unsigned int f;
+
+	  /* Opcodes of a specific facility are enabled if the facility is
+	     enabled.  Note: only some facilities are represented as flags.  */
+	  f = (op->flags & S390_INSTR_FLAG_FACILITY_MASK);
+	  use_opcode = ((f & current_flags) == f);
+	}
+      if (use_opcode)
 	{
 	  retval = hash_insert (s390_opcode_hash, op->name, (void *) op);
 	  if (retval != (const char *) NULL)
@@ -422,7 +520,7 @@ s390_setup_opcodes (void)
 
       while (op < op_end - 1 && strcmp (op->name, op[1].name) == 0)
 	op++;
-      }
+    }
 
   if (dup_insn)
     abort ();
@@ -1771,6 +1869,8 @@ s390_literals (int ignore ATTRIBUTE_UNUSED)
   lpe_count = 0;
 }
 
+#define MAX_HISTORY 100
+
 /* The .machine pseudo op allows to switch to a different CPU level in
    the asm listing.  The current CPU setting can be stored on a stack
    with .machine push and restored with .machine pop.  */
@@ -1779,8 +1879,11 @@ static void
 s390_machine (int ignore ATTRIBUTE_UNUSED)
 {
   char *cpu_string;
-#define MAX_HISTORY 100
-  static unsigned int *cpu_history;
+  static struct
+  {
+    unsigned int cpu;
+    unsigned int flags;
+  } *cpu_history;
   static int curr_hist;
 
   SKIP_WHITESPACE ();
@@ -1793,15 +1896,29 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
   else
     {
       char c;
-      c = get_symbol_name (&cpu_string);
+
+      cpu_string = input_line_pointer;
+      do
+	{
+	  char * str;
+
+	  c = get_symbol_name (&str);
+	  c = restore_line_pointer (c);
+	  if (c == '+')
+	    ++ input_line_pointer;
+	}
+      while (c == '+');
+
+      c = *input_line_pointer;
+      *input_line_pointer = 0;
       cpu_string = xstrdup (cpu_string);
       (void) restore_line_pointer (c);
     }
 
   if (cpu_string != NULL)
     {
-      unsigned int old_cpu = current_cpu;
-      unsigned int new_cpu;
+      unsigned int new_cpu = current_cpu;
+      unsigned int new_flags = current_flags;
 
       if (strcmp (cpu_string, "push") == 0)
 	{
@@ -1811,22 +1928,35 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
 	  if (curr_hist >= MAX_HISTORY)
 	    as_bad (_(".machine stack overflow"));
 	  else
-	    cpu_history[curr_hist++] = current_cpu;
+	    {
+	      cpu_history[curr_hist].cpu = current_cpu;
+	      cpu_history[curr_hist].flags = current_flags;
+	      curr_hist++;
+	    }
 	}
       else if (strcmp (cpu_string, "pop") == 0)
 	{
 	  if (curr_hist <= 0)
 	    as_bad (_(".machine stack underflow"));
 	  else
-	    current_cpu = cpu_history[--curr_hist];
+	    {
+	      curr_hist--;
+	      new_cpu = cpu_history[curr_hist].cpu;
+	      new_flags = cpu_history[curr_hist].flags;
+	    }
 	}
-      else if ((new_cpu = s390_parse_cpu (cpu_string)) != (unsigned int)-1)
-	current_cpu = new_cpu;
       else
+	new_cpu = s390_parse_cpu (cpu_string, &new_flags, TRUE);
+
+      if (new_cpu == S390_OPCODE_MAXCPU)
 	as_bad (_("invalid machine `%s'"), cpu_string);
 
-      if (current_cpu != old_cpu)
-	s390_setup_opcodes ();
+      if (new_cpu != current_cpu || new_flags != current_flags)
+	{
+	  current_cpu = new_cpu;
+	  current_flags = new_flags;
+	  s390_setup_opcodes ();
+	}
     }
 
   demand_empty_rest_of_line ();
@@ -1841,7 +1971,6 @@ static void
 s390_machinemode (int ignore ATTRIBUTE_UNUSED)
 {
   char *mode_string;
-#define MAX_HISTORY 100
   static unsigned int *mode_history;
   static int curr_hist;
 
@@ -1893,7 +2022,7 @@ s390_machinemode (int ignore ATTRIBUTE_UNUSED)
 	  else if (strcmp (mode_string, "zarch_nohighgprs") == 0)
 	    current_mode_mask = 1 << S390_OPCODE_ZARCH;
 	  else
-	    as_bad (_("invalid machine `%s'"), mode_string);
+	    as_bad (_("invalid machine mode `%s'"), mode_string);
 	}
 
       if (current_mode_mask != old_mode_mask)
@@ -1902,6 +2031,8 @@ s390_machinemode (int ignore ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 }
+
+#undef MAX_HISTORY
 
 char *
 md_atof (int type, char *litp, int *sizep)

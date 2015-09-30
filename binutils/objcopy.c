@@ -1640,6 +1640,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   void *dhandle;
   enum bfd_architecture iarch;
   unsigned int imach;
+  unsigned int c, i;
 
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
@@ -2071,11 +2072,11 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
-  if (bfd_count_sections (obfd) != 0
+  c = bfd_count_sections (obfd);
+  if (c != 0
       && (gap_fill_set || pad_to_set))
     {
       asection **set;
-      unsigned int c, i;
 
       /* We must fill in gaps between the sections and/or we must pad
 	 the last section to a specified address.  We do this by
@@ -2083,7 +2084,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	 increasing the section sizes as required to fill the gaps.
 	 We write out the gap contents below.  */
 
-      c = bfd_count_sections (obfd);
       osections = (asection **) xmalloc (c * sizeof (asection *));
       set = osections;
       bfd_map_over_sections (obfd, get_sections, &set);
@@ -2264,7 +2264,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   if (gap_fill_set || pad_to_set)
     {
       bfd_byte *buf;
-      int c, i;
 
       /* Fill in the gaps.  */
       if (max_gap > 8192)
@@ -3111,10 +3110,10 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   osection = isection->output_section;
   /* The output SHF_COMPRESSED section size is different from input if
-     ELF classes of input and output aren't the same.  We must use the
-     output section size here, which has been updated in setup_section
-     via bfd_convert_section_size.  */
-  size = bfd_get_section_size (osection);
+     ELF classes of input and output aren't the same.  We can't use
+     the output section size since --interleave will shrink the output
+     section.   Size will be updated if the section is converted.   */
+  size = bfd_get_section_size (isection);
 
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
@@ -3123,7 +3122,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
       if (!bfd_get_full_section_contents (ibfd, isection, &memhunk)
 	  || !bfd_convert_section_contents (ibfd, isection, obfd,
-					    &memhunk))
+					    &memhunk, &size))
 	{
 	  status = 1;
 	  bfd_nonfatal_message (NULL, ibfd, isection, NULL);

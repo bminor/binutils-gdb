@@ -1,3 +1,44 @@
+2015-09-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbarch.sh (struct gdbarch_info): Change tdep_info's type to void *.
+	* gdbarch.h: Regenerate.
+	* i386-tdep.c (i386_gdbarch_init): Remove cast to
+	struct gdbarch_tdep_info *.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* ppc-linux-tdep (ppu2spu_sniffer): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* spu-multiarch.c (spu_gdbarch): Likewise.
+
+2015-09-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* infcmd.c (finish_command_fsm_should_stop): Don't attempt to
+	record a NULL value.
+
+2015-09-29  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-tdep.c (msp430_push_dummy_call): Treat reference, struct,
+	and union arguments the same as pointer arguments when determining
+	size of argument.
+
+2015-09-29  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-tdep.c: #include "opcode/ft32.h".
+	Delete local macros IS_PUSH, PUSH_REG, IS_LINK, LINK_SIZE.
+	(ft32_analyze_prologue): Use FT32_* macros.
+
+2015-09-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cli/cli-script.c (read_next_line): Fix stdout -> stdin in
+	comment.
+
+2015-09-28  Doug Evans  <dje@google.com>
+
+	* MAINTAINERS: Add Iain Buclaw as D language maintainer.
+
+2015-09-28  Doug Evans  <dje@google.com>
+
+	* common/filestuff.c (make_cleanup_close): Update comment.
+
 2015-09-26  Simon Marchi  <simark@nova.polymtl.ca>
 
 	* btrace.c (parse_xml_btrace_block): Fix cast of

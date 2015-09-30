@@ -1083,7 +1083,8 @@ emit_load_store_pair (uint32_t *buf, enum aarch64_opcodes opcode,
     }
 
   return emit_insn (buf, opcode | opc | pre_index | write_back
-		    | ENCODE (operand.index >> 3, 7, 15) | ENCODE (rt2.num, 5, 10)
+		    | ENCODE (operand.index >> 3, 7, 15)
+		    | ENCODE (rt2.num, 5, 10)
 		    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
 }
 
@@ -1490,7 +1491,8 @@ emit_mov (uint32_t *buf, struct aarch64_register rd,
    SHIFT is the logical shift left to apply to IMM.   */
 
 static int
-emit_movk (uint32_t *buf, struct aarch64_register rd, uint32_t imm, unsigned shift)
+emit_movk (uint32_t *buf, struct aarch64_register rd, uint32_t imm,
+	   unsigned shift)
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 

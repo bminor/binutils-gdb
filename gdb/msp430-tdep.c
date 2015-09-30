@@ -772,10 +772,16 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  int size = 2;
 
 		  if (code_model == MSP_LARGE_CODE_MODEL
-		      && TYPE_CODE (arg_type) == TYPE_CODE_PTR)
+		      && (TYPE_CODE (arg_type) == TYPE_CODE_PTR
+		          || TYPE_CODE (arg_type) == TYPE_CODE_REF
+			  || TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
+			  || TYPE_CODE (arg_type) == TYPE_CODE_UNION))
 		    {
-		      /* Pointer arguments using large memory model are passed
-		         using entire register.  */
+		      /* When using the large memory model, pointer,
+			 reference, struct, and union arguments are
+			 passed using the entire register.  (As noted
+			 earlier, aggregates are always passed by
+			 reference.) */
 		      if (offset != 0)
 			continue;
 		      size = 4;

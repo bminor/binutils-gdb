@@ -1,3 +1,19 @@
+2015-09-29  Andrew Stubbs  <ams@codesourcery.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19020
+	* objcopy.c (copy_object): Don't adjust the output section size
+	when copying from input sections.
+	(copy_section): Use input section size for the copy.  Get the
+	updated section size from bfd_convert_section_contents.
+
+2015-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19005
+	* objcopy.c (copy_object): Adjust the output section size to
+	skip gap fills between sections when copying from input sections
+	to output sections.
+
 2015-09-28  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

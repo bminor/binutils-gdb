@@ -924,9 +924,9 @@ realloc_body_list (struct command_line *command, int new_length)
   command->body_count = new_length;
 }
 
-/* Read next line from stdout.  Passed to read_command_line_1 and
+/* Read next line from stdin.  Passed to read_command_line_1 and
    recurse_read_control_structure whenever we need to read commands
-   from stdout.  */
+   from stdin.  */
 
 static char *
 read_next_line (void)
