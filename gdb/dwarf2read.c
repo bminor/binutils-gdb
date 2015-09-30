@@ -9332,6 +9332,11 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct compunit_symtab *cust = dwarf2_start_symtab (cu, "", NULL, 0);
 
+      /* Note: We don't assign tu_group->compunit_symtab yet because we're
+	 still initializing it, and our caller (a few levels up)
+	 process_full_type_unit still needs to know if this is the first
+	 time.  */
+
       tu_group->num_symtabs = lh->num_file_names;
       tu_group->symtabs = XNEWVEC (struct symtab *, lh->num_file_names);
 

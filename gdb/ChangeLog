@@ -1,3 +1,7 @@
+2015-09-30  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (setup_type_unit_groups): Add comment.
+
 2015-09-30  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_nat_always_non_stop_p): Always return 1.
