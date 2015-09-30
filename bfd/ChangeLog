@@ -1,3 +1,8 @@
+2015-10-01  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19013
+	* elflink.c (_bfd_elf_merge_sections): Revert last change.
+
 2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19031

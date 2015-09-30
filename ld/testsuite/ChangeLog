@@ -1,3 +1,7 @@
+2015-10-01  Alan Modra  <amodra@gmail.com>
+
+	* ld-x86-64/pr19013-x32.d: Update.
+
 2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/pr19013.d (ld): Add -m elf_x86_64.
