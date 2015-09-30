@@ -1,5 +1,5 @@
 #as: --64
-#ld: --oformat elf32-i386
+#ld: --oformat elf32-i386 -m elf_x86_64
 #objdump: -s -j .rodata
 #notarget: x86_64-*-nacl*
 
