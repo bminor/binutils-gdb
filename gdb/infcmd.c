@@ -404,6 +404,7 @@ strip_bg_char (const char *args, int *bg_char_p)
 void
 post_create_inferior (struct target_ops *target, int from_tty)
 {
+  struct breakpoint_reset_reason r;
 
   /* Be sure we own the terminal in case write operations are performed.  */ 
   target_terminal_ours ();
@@ -466,7 +467,9 @@ post_create_inferior (struct target_ops *target, int from_tty)
      breakpoint_re_set is never called.  Call it now so that software
      watchpoints get a chance to be promoted to hardware watchpoints
      if the now pushed target supports hardware watchpoints.  */
-  breakpoint_re_set ();
+  init_breakpoint_reset_reason (&r);
+  r.where = __func__;
+  breakpoint_re_set (&r);
 
   observer_notify_inferior_created (target, from_tty);
 }

@@ -416,11 +416,16 @@ iterate_over_some_symtabs (const char *name,
    psymtabs.  *If* there is no '/' in the name, a match after a '/'
    in the symtab filename will also work.
 
+   If OBJFILES is NULL, iterate over all objfiles;  otherwise, limit
+   the search to those listed in OBJFILES.
+
    Calls CALLBACK with each symtab that is found and with the supplied
    DATA.  If CALLBACK returns true, the search stops.  */
 
+#define DEBUG_ME 0
+
 void
-iterate_over_symtabs (const char *name,
+iterate_over_symtabs (const char *name, VEC (objfilep) *objfiles,
 		      int (*callback) (struct symtab *symtab,
 				       void *data),
 		      void *data)
@@ -438,32 +443,117 @@ iterate_over_symtabs (const char *name,
       gdb_assert (IS_ABSOLUTE_PATH (real_path));
     }
 
-  ALL_OBJFILES (objfile)
-  {
-    if (iterate_over_some_symtabs (name, real_path, callback, data,
-				   objfile->compunit_symtabs, NULL))
+  if (objfiles == NULL)
+    {
+      ALL_OBJFILES (objfile)
       {
-	do_cleanups (cleanups);
-	return;
+#if DEBUG_ME
+	printf ("(all) looking for '%s' symtabs in %s ... ", name,
+		objfile->original_name);
+#endif
+	if (iterate_over_some_symtabs (name, real_path, callback, data,
+				       objfile->compunit_symtabs, NULL))
+	  {
+#if DEBUG_ME
+	    printf ("*** found ***\n");
+#endif
+	    do_cleanups (cleanups);
+	    return;
+	  }
+#if DEBUG_ME
+	else
+	  printf ("not found\n");
+#endif
       }
-  }
+    }
+  else
+    {
+      int i;
+      struct objfile *elt;
+
+      for (i = 0; VEC_iterate (objfilep, objfiles, i, elt); ++i)
+	{
+#if DEBUG_ME
+	  printf ("(limit) looking for '%s' symtabs in %s ... ", name,
+		  elt->original_name);
+#endif
+	  if (iterate_over_some_symtabs (name, real_path, callback,
+					 data, elt->compunit_symtabs, NULL))
+	    {
+#if DEBUG_ME
+	      printf ("found\n");
+#endif
+	      do_cleanups (cleanups);
+	      return;
+	    }
+#if DEBUG_ME
+	  else
+	    printf ("not found\n");
+#endif
+	}
+    }
 
   /* Same search rules as above apply here, but now we look thru the
      psymtabs.  */
 
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf
-	&& objfile->sf->qf->map_symtabs_matching_filename (objfile,
-							   name,
-							   real_path,
-							   callback,
-							   data))
+  if (objfiles == NULL)
+    {
+      ALL_OBJFILES (objfile)
       {
-	do_cleanups (cleanups);
-	return;
+#if DEBUG_ME
+	printf ("(all) looking for '%s' psymtabs in %s ... ", name,
+		objfile->original_name);
+#endif
+	if (objfile->sf
+	    && objfile->sf->qf->map_symtabs_matching_filename (objfile,
+							       name,
+							       real_path,
+							       callback,
+							       data))
+	  {
+#if DEBUG_ME
+	    printf ("found\n");
+#endif
+	    do_cleanups (cleanups);
+	    return;
+	  }
+#if DEBUG_ME
+	else
+	  printf ("not found\n");
+#endif
+
       }
-  }
+    }
+  else
+    {
+      int i;
+      struct objfile *elt;
+
+      for (i = 0; VEC_iterate (objfilep, objfiles, i, elt); ++i)
+	{
+#if DEBUG_ME
+	  printf ("(limit) looking for '%s' psymtabs in %s ... ", name,
+		  elt->original_name);
+#endif
+	  if (elt->sf != NULL
+	      && elt->sf->qf->map_symtabs_matching_filename (elt,
+							     name,
+							     real_path,
+							     callback,
+							     data))
+	    {
+#if DEBUG_ME
+	      printf ("found\n");
+#endif
+	      do_cleanups (cleanups);
+	      return;
+	    }
+#if DEBUG_ME
+	  else
+	    printf ("not found\n");
+#endif
+	}
+    }
 
   do_cleanups (cleanups);
 }
@@ -487,7 +577,7 @@ lookup_symtab (const char *name)
 {
   struct symtab *result = NULL;
 
-  iterate_over_symtabs (name, lookup_symtab_callback, &result);
+  iterate_over_symtabs (name, NULL, lookup_symtab_callback, &result);
   return result;
 }
 

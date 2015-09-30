@@ -26,6 +26,7 @@
 #include "command.h"
 #include "break-common.h"
 #include "probe.h"
+#include "linespec.h"
 
 struct value;
 struct block;
@@ -35,9 +36,11 @@ struct get_number_or_range_state;
 struct thread_info;
 struct bpstats;
 struct bp_location;
-struct linespec_result;
+struct linespec;
 struct linespec_sals;
 struct event_location;
+struct breakpoint_reset_reason;
+struct decode_line_limits;
 
 /* This is the maximum number of bytes a breakpoint instruction can
    take.  Feel free to increase it.  It's just used in a few places to
@@ -508,7 +511,8 @@ struct breakpoint_ops
   /* Reevaluate a breakpoint.  This is necessary after symbols change
      (e.g., an executable or DSO was loaded, or the inferior just
      started).  */
-  void (*re_set) (struct breakpoint *self);
+  void (*re_set) (struct breakpoint *self,
+		  struct breakpoint_reset_reason *reason);
 
   /* Insert the breakpoint or watchpoint or activate the catchpoint.
      Return 0 for success, 1 if the breakpoint, watchpoint or
@@ -606,6 +610,7 @@ struct breakpoint_ops
      This function is called inside `location_to_sals'.  */
   void (*decode_location) (struct breakpoint *b,
 			   const struct event_location *location,
+			   const struct decode_line_limits *,
 			   struct symtabs_and_lines *sals);
 
   /* Return true if this breakpoint explains a signal.  See
@@ -679,6 +684,8 @@ struct breakpoint
 
     /* Location(s) associated with this high-level breakpoint.  */
     struct bp_location *loc;
+    /* !!keiths: cache  */
+    struct linespec *linespec_cache;
 
     /* Non-zero means a silent breakpoint (don't print frame info
        if we stop here).  */
@@ -1198,7 +1205,26 @@ extern void update_breakpoint_locations (struct breakpoint *b,
 					 struct symtabs_and_lines sals,
 					 struct symtabs_and_lines sals_end);
 
-extern void breakpoint_re_set (void);
+/* Event types that cause breakpoints to re-set.  */
+enum breakpoint_reset_type
+{
+  BREAKPOINT_RESET_NONE,
+  BREAKPOINT_RESET_ADD_OBJFILE
+};
+
+struct breakpoint_reset_reason
+{
+  enum breakpoint_reset_type reason;
+  VEC (objfilep) *objfile_list;
+
+  /* for debugging  */
+  const char *where;
+};
+
+/* Initialize the given reset reason, R.  */
+extern void init_breakpoint_reset_reason (struct breakpoint_reset_reason *r);
+
+extern void breakpoint_re_set (struct breakpoint_reset_reason *r);
 
 extern void breakpoint_re_set_thread (struct breakpoint *);
 

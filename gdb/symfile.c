@@ -1114,7 +1114,13 @@ finish_new_objfile (struct objfile *objfile, int add_flags)
     }
   else if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
     {
-      breakpoint_re_set ();
+      struct breakpoint_reset_reason r;
+
+      init_breakpoint_reset_reason (&r);
+      /*r.reason = BREAKPOINT_RESET_???;*/
+      /*VEC_safe_push (objfilep, &(r.objfile_list), objfile);*/
+      r.where = __func__;
+      breakpoint_re_set (&r);
     }
 
   /* We're done reading the symbol file; finish off complaints.  */
@@ -2072,6 +2078,7 @@ generic_load (const char *args, int from_tty)
   struct load_section_data cbdata;
   struct load_progress_data total_progress;
   struct ui_out *uiout = current_uiout;
+  struct breakpoint_reset_reason reset_reason;
 
   CORE_ADDR entry;
   char **argv;
@@ -2154,7 +2161,11 @@ generic_load (const char *args, int from_tty)
      breakpoint locations.  Loading has changed the contents of that
      memory.  */
 
-  breakpoint_re_set ();
+  init_breakpoint_reset_reason (&reset_reason);
+  reset_reason.reason = BREAKPOINT_RESET_ADD_OBJFILE;
+  /*VEC_safe_push (objfilep, &(reset_reason.objfile_list), ???); */
+  reset_reason.where = __func__;
+  breakpoint_re_set (&reset_reason);
 
   /* FIXME: are we supposed to call symbol_file_add or not?  According
      to a comment from remote-mips.c (where a call to symbol_file_add
@@ -2457,10 +2468,6 @@ remove_symbol_file_command (char *args, int from_tty)
 
   do_cleanups (my_cleanups);
 }
-
-typedef struct objfile *objfilep;
-
-DEF_VEC_P (objfilep);
 
 /* Re-read symbols if a symbol-file has changed.  */
 
@@ -3022,7 +3029,14 @@ clear_symtab_users (int add_flags)
   /* Now that the various caches have been cleared, we can re_set
      our breakpoints without risking it using stale data.  */
   if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
-    breakpoint_re_set ();
+    {
+      struct breakpoint_reset_reason r;
+
+      init_breakpoint_reset_reason (&r);
+      /*r.reason = BREAKPOINT_RESET_???;*/
+      r.where = __func__;
+      breakpoint_re_set (&r);
+    }
 }
 
 static void

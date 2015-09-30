@@ -18,8 +18,27 @@
 #define LINESPEC_H 1
 
 struct symtab;
+struct bp_location;
+struct symbol;
+struct linespec;
 
-#include "vec.h"
+#include "gdb_vecs.h"
+
+enum decode_line_limits_op
+  {
+    DECODE_LINE_LIMITS_ADD,
+    DECODE_LINE_LIMITS_REMOVE,
+    DECODE_LINE_LIMITS_INVALIDATE
+  };
+
+struct decode_line_limits
+{
+  enum decode_line_limits_op op;
+  /* !!keiths: union? */
+  VEC (objfilep) *objfiles;
+};
+
+extern void init_decode_line_limits (struct decode_line_limits *);
 
 /* Flags to pass to decode_line_1 and decode_line_full.  */
 
@@ -32,8 +51,37 @@ enum decode_line_flags
     /* Set this flag if you want "list mode".  In this mode, a
        FILE:LINE linespec will always return a result, and such
        linespecs will not be expanded to all matches.  */
-    DECODE_LINE_LIST_MODE = 2
+    DECODE_LINE_LIST_MODE = 2,
+
+    DECODE_LINE_CREATE_CACHE = 4
   };
+
+/* Options for how decode_line_full and decode_line_1 behave.
+   Use init_decode_line_options to initialize it.  */
+
+struct decode_line_options
+{
+  /* One of the above decode_line_flags.  */
+  int flags;
+
+  /* The default location.  If NULL, use the current symtab
+     and line.  */
+  struct symtab *default_symtab;
+  int default_line;
+
+  /* One of the multiple_symbols_* constants or NULL, in which case
+     the appropriate CLI value is used.  */
+  const char *select_mode;
+
+  /* A string holding a canonical name used for (post-) filtering.
+     If NULL, no filtering is done.  Only valid when SELECT_MODE
+     is multiple_symbols_all.  */
+  const char *filter;
+
+  /* !!keiths  */
+  const struct decode_line_limits *limits;
+  struct linespec *cache;
+};
 
 /* decode_line_full returns a vector of these.  */
 
@@ -78,6 +126,9 @@ struct linespec_result
   /* The sals.  The vector will be freed by
      destroy_linespec_result.  */
   VEC (linespec_sals) *sals;
+
+  /* Cache used to generate the above SaLs.  */
+  struct linespec *cache;
 };
 
 /* Initialize a linespec_result.  */
@@ -93,11 +144,21 @@ extern void destroy_linespec_result (struct linespec_result *);
 extern struct cleanup *
         make_cleanup_destroy_linespec_result (struct linespec_result *);
 
-/* Decode a linespec using the provided default symtab and line.  */
+/* Invalidate the linespec cache pointed to by P.  */
+
+extern void invalidate_linespec_cache (struct linespec **p);
+
+/* Initialize a decode_line_options structure.
+   OPTS->FLAGS will be initialized to DECODE_LINE_FUNFIRSTLINE.  */
+
+extern void init_decode_line_options (struct decode_line_options *opts);
+
+/* Decode a linespec using the provided OPTIONS.  The only valid
+   members are OPTIONS->default_symtab and OPTIONS->default_line.  */
 
 extern struct symtabs_and_lines
-	decode_line_1 (const struct event_location *location, int flags,
-		       struct symtab *default_symtab, int default_line);
+	decode_line_1 (const struct event_location *location,
+		       const struct decode_line_options *options);
 
 /* Parse LOCATION and return results.  This is the "full"
    interface to this module, which handles multiple results
@@ -135,11 +196,9 @@ extern struct symtabs_and_lines
    strcmp sense) to FILTER will be returned; all others will be
    filtered out.  */
 
-extern void decode_line_full (const struct event_location *location, int flags,
-			      struct symtab *default_symtab, int default_line,
+extern void decode_line_full (const struct event_location *location,
 			      struct linespec_result *canonical,
-			      const char *select_mode,
-			      const char *filter);
+			      const struct decode_line_options *options);
 
 /* Given a string, return the line specified by it, using the current
    source symtab and line as defaults.

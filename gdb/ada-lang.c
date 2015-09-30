@@ -12248,11 +12248,13 @@ allocate_location_exception (enum ada_exception_catchpoint_kind ex,
 static void
 re_set_exception (enum ada_exception_catchpoint_kind ex, struct breakpoint *b)
 {
+  struct breakpoint_reset_reason reset_reason;
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
 
   /* Call the base class's method.  This updates the catchpoint's
      locations.  */
-  bkpt_breakpoint_ops.re_set (b);
+  init_breakpoint_reset_reason (&reset_reason);
+  bkpt_breakpoint_ops.re_set (b, &reset_reason);
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
@@ -12522,7 +12524,8 @@ allocate_location_catch_exception (struct breakpoint *self)
 }
 
 static void
-re_set_catch_exception (struct breakpoint *b)
+re_set_catch_exception (struct breakpoint *b,
+			struct breakpoint_reset_reason *reason)
 {
   re_set_exception (ada_catch_exception, b);
 }
@@ -12574,7 +12577,8 @@ allocate_location_catch_exception_unhandled (struct breakpoint *self)
 }
 
 static void
-re_set_catch_exception_unhandled (struct breakpoint *b)
+re_set_catch_exception_unhandled (struct breakpoint *b,
+				  struct breakpoint_reset_reason *reason)
 {
   re_set_exception (ada_catch_exception_unhandled, b);
 }
@@ -12628,7 +12632,8 @@ allocate_location_catch_assert (struct breakpoint *self)
 }
 
 static void
-re_set_catch_assert (struct breakpoint *b)
+re_set_catch_assert (struct breakpoint *b,
+		     struct breakpoint_reset_reason *reason)
 {
   re_set_exception (ada_catch_assert, b);
 }

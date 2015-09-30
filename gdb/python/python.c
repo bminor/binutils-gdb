@@ -748,7 +748,13 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   TRY
     {
       if (location != NULL)
-	sals = decode_line_1 (location, 0, 0, 0);
+	{
+	  struct decode_line_options options;
+
+	  init_decode_line_options (&options);
+	  options.flags = 0;
+	  sals = decode_line_1 (location, &options);
+	}
       else
 	{
 	  set_default_source_symtab_and_line ();

@@ -2713,6 +2713,7 @@ scope_info (char *args, int from_tty)
   int regno;
   struct event_location *location;
   struct cleanup *back_to;
+  struct decode_line_options options;
 
   if (args == 0 || *args == 0)
     error (_("requires an argument (function, "
@@ -2720,7 +2721,8 @@ scope_info (char *args, int from_tty)
 
   location = string_to_event_location (&args, current_language);
   back_to = make_cleanup_delete_event_location (location);
-  sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE, NULL, 0);
+  init_decode_line_options (&options);
+  sals = decode_line_1 (location, &options);
   if (sals.nelts == 0)
     {
       /* Presumably decode_line_1 has already warned.  */

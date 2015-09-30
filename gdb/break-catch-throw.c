@@ -205,7 +205,8 @@ check_status_exception_catchpoint (struct bpstats *bs)
 /* Implement the 're_set' method.  */
 
 static void
-re_set_exception_catchpoint (struct breakpoint *self)
+re_set_exception_catchpoint (struct breakpoint *self,
+			     struct breakpoint_reset_reason *reason)
 {
   struct symtabs_and_lines sals = {0};
   struct symtabs_and_lines sals_end = {0};
@@ -236,7 +237,7 @@ re_set_exception_catchpoint (struct breakpoint *self)
 	    = ASTRDUP (exception_functions[kind].function);
 	  location = new_explicit_location (&explicit_loc);
 	  cleanup = make_cleanup_delete_event_location (location);
-	  self->ops->decode_location (self, location, &sals);
+	  self->ops->decode_location (self, location, NULL, &sals);
 	  do_cleanups (cleanup);
 	}
       CATCH (ex, RETURN_MASK_ERROR)
@@ -393,6 +394,7 @@ static void
 handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
+  struct breakpoint_reset_reason reset_reason;
   struct exception_catchpoint *cp;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   regex_t *pattern = NULL;
@@ -418,7 +420,8 @@ handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
   cp->exception_rx = except_rx;
   cp->pattern = pattern;
 
-  re_set_exception_catchpoint (&cp->base);
+  init_breakpoint_reset_reason (&reset_reason);
+  re_set_exception_catchpoint (&cp->base, &reset_reason);
 
   install_breakpoint (0, &cp->base, 1);
   discard_cleanups (cleanup);

@@ -807,12 +807,15 @@ edit_command (char *arg, int from_tty)
       struct cleanup *cleanup;
       struct event_location *location;
       char *arg1;
+      struct decode_line_options options;
 
       /* Now should only be one argument -- decode it in SAL.  */
+      init_decode_line_options (&options);
+      options.flags = DECODE_LINE_LIST_MODE;
       arg1 = arg;
       location = string_to_event_location (&arg1, current_language);
       cleanup = make_cleanup_delete_event_location (location);
-      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
+      sals = decode_line_1 (location, &options);
 
       filter_sals (&sals);
       if (! sals.nelts)
@@ -963,10 +966,13 @@ list_command (char *arg, int from_tty)
   else
     {
       struct event_location *location;
+      struct decode_line_options options;
 
       location = string_to_event_location (&arg1, current_language);
       make_cleanup_delete_event_location (location);
-      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
+      init_decode_line_options (&options);
+      options.flags = DECODE_LINE_LIST_MODE;
+      sals = decode_line_1 (location, &options);
 
       filter_sals (&sals);
       if (!sals.nelts)
@@ -1005,15 +1011,20 @@ list_command (char *arg, int from_tty)
       else
 	{
 	  struct event_location *location;
+	  struct decode_line_options options;
 
 	  location = string_to_event_location (&arg1, current_language);
 	  make_cleanup_delete_event_location (location);
+	  init_decode_line_options (&options);
+	  options.flags = DECODE_LINE_LIST_MODE;
 	  if (dummy_beg)
-	    sals_end = decode_line_1 (location,
-				      DECODE_LINE_LIST_MODE, 0, 0);
+	    sals_end = decode_line_1 (location, &options);
 	  else
-	    sals_end = decode_line_1 (location, DECODE_LINE_LIST_MODE,
-				      sal.symtab, sal.line);
+	    {
+	      options.default_symtab = sal.symtab;
+	      options.default_line = sal.line;
+	      sals_end = decode_line_1 (location, &options);
+	    }
 
 	  filter_sals (&sals_end);
 	  if (sals_end.nelts == 0)

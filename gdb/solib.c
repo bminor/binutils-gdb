@@ -969,6 +969,11 @@ solib_add (const char *pattern, int from_tty,
 	   struct target_ops *target, int readsyms)
 {
   struct so_list *gdb;
+  struct breakpoint_reset_reason reset_reason;
+
+  init_breakpoint_reset_reason (&reset_reason);
+  reset_reason.reason = BREAKPOINT_RESET_ADD_OBJFILE;
+  reset_reason.where = __func__;
 
   if (print_symbol_loading_p (from_tty, 0, 0))
     {
@@ -1025,12 +1030,16 @@ solib_add (const char *pattern, int from_tty,
 				       gdb->so_name);
 		}
 	      else if (solib_read_symbols (gdb, flags))
-		loaded_any_symbols = 1;
+		{
+		  VEC_safe_push (objfilep, reset_reason.objfile_list,
+				 gdb->objfile);
+		  loaded_any_symbols = 1;
+		}
 	    }
 	}
 
     if (loaded_any_symbols)
-      breakpoint_re_set ();
+      breakpoint_re_set (&reset_reason);
 
     if (from_tty && pattern && ! any_matches)
       printf_unfiltered
@@ -1423,6 +1432,7 @@ reload_shared_libraries (char *ignored, int from_tty,
 			 struct cmd_list_element *e)
 {
   const struct target_so_ops *ops;
+  struct breakpoint_reset_reason reset_reason;
 
   reload_shared_libraries_1 (from_tty);
 
@@ -1460,7 +1470,10 @@ reload_shared_libraries (char *ignored, int from_tty,
 
   solib_add (NULL, 0, NULL, auto_solib_add);
 
-  breakpoint_re_set ();
+  init_breakpoint_reset_reason (&reset_reason);
+  /*reset_reason.reason = BREAKPOINT_RESET_???;*/
+  reset_reason.where = __func__;
+  breakpoint_re_set (&reset_reason);
 
   /* We may have loaded or unloaded debug info for some (or all)
      shared libraries.  However, frames may still reference them.  For

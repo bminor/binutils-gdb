@@ -816,6 +816,9 @@ struct symbol
   struct symbol *hash_next;
 };
 
+typedef struct symbol *symbolp;
+DEF_VEC_P (symbolp);
+
 /* Several lookup functions return both a symbol and the block in which the
    symbol is found.  This structure is used in these cases.  */
 
@@ -1603,6 +1606,7 @@ int iterate_over_some_symtabs (const char *name,
 			       struct compunit_symtab *after_last);
 
 void iterate_over_symtabs (const char *name,
+			   VEC (objfilep) *objfiles,
 			   int (*callback) (struct symtab *symtab,
 					    void *data),
 			   void *data);

@@ -80,12 +80,25 @@
 #include "mi/mi-common.h"
 #include "extension.h"
 
+#define DEBUG_ME 0
+
 /* Enums for exception-handling support.  */
 enum exception_event_kind
 {
   EX_EVENT_THROW,
   EX_EVENT_RETHROW,
   EX_EVENT_CATCH
+};
+
+/* Structure to wrap arguments to breakpoint_reset_one via catch_errors.  */
+
+struct breakpoint_re_set_one_info
+{
+  /* The breakpoint to re-set.  */
+  struct breakpoint *bp;
+
+  /* The reason for re-setting this breakpoint.  */
+  struct breakpoint_reset_reason *reason;
 };
 
 /* Prototypes for local functions.  */
@@ -108,7 +121,8 @@ static void ignore_command (char *, int);
 
 static int breakpoint_re_set_one (void *);
 
-static void breakpoint_re_set_default (struct breakpoint *);
+static void breakpoint_re_set_default (struct breakpoint *,
+				       struct breakpoint_reset_reason *);
 
 static void
   create_sals_from_location_default (const struct event_location *location,
@@ -125,6 +139,7 @@ static void create_breakpoints_sal_default (struct gdbarch *,
 
 static void decode_location_default (struct breakpoint *b,
 				     const struct event_location *location,
+				     const struct decode_line_limits *,
 				     struct symtabs_and_lines *sals);
 
 static void clear_command (char *, int);
@@ -3101,7 +3116,7 @@ insert_breakpoint_locations (void)
 
   struct ui_file *tmp_error_stream = mem_fileopen ();
   struct cleanup *cleanups = make_cleanup_ui_file_delete (tmp_error_stream);
-  
+
   /* Explicitly mark the warning -- this will only be printed if
      there was an error.  */
   fprintf_unfiltered (tmp_error_stream, "Warning:\n");
@@ -8770,8 +8785,12 @@ disable_breakpoints_before_startup (void)
 void
 enable_breakpoints_after_startup (void)
 {
+  struct breakpoint_reset_reason r;
+
+  init_breakpoint_reset_reason (&r);
+  r.where = __func__;
   current_program_space->executing_startup = 0;
-  breakpoint_re_set ();
+  breakpoint_re_set (&r);
 }
 
 /* Create a new single-step breakpoint for thread THREAD, with no
@@ -9363,6 +9382,7 @@ parse_breakpoint_sals (const struct event_location *location,
 		       struct linespec_result *canonical)
 {
   struct symtab_and_line cursal;
+  struct decode_line_options opts;
 
   if (event_location_type (location) == LINESPEC_LOCATION)
     {
@@ -9418,6 +9438,12 @@ parse_breakpoint_sals (const struct event_location *location,
      ObjC: However, don't match an Objective-C method name which
      may have a '+' or '-' succeeded by a '['.  */
   cursal = get_current_source_symtab_and_line ();
+
+  init_decode_line_options (&opts);
+  opts.default_symtab = cursal.symtab;
+  opts.default_line = cursal.line;
+  opts.flags |= DECODE_LINE_CREATE_CACHE;
+
   if (last_displayed_sal_is_valid ())
     {
       const char *address = NULL;
@@ -9430,16 +9456,19 @@ parse_breakpoint_sals (const struct event_location *location,
 	      && strchr ("+-", address[0]) != NULL
 	      && address[1] != '['))
 	{
-	  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE,
-			    get_last_displayed_symtab (),
-			    get_last_displayed_line (),
-			    canonical, NULL, NULL);
+	  opts.default_symtab = get_last_displayed_symtab ();
+	  opts.default_line = get_last_displayed_line ();
+	  decode_line_full (location, canonical, &opts);
+	  return;
+	}
+      else
+	{
+	  decode_line_full (location, canonical, &opts);
 	  return;
 	}
     }
 
-  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE,
-		    cursal.symtab, cursal.line, canonical, NULL, NULL);
+  decode_line_full (location, canonical, &opts);
 }
 
 
@@ -9779,6 +9808,17 @@ create_breakpoint (struct gdbarch *gdbarch,
 				   tempflag ? disp_del : disp_donttouch,
 				   thread, task, ignore_count, ops,
 				   from_tty, enabled, internal, flags);
+
+      /* !!keiths; Somewhere here I need to save the linespec cache
+	 into the struct.  Umm... Need the breakpoint!  LAME! */
+      {
+	struct breakpoint *b, *last;
+
+	ALL_BREAKPOINTS (b)
+	  last = b;
+	last->linespec_cache = canonical.cache;
+	canonical.cache = NULL;
+      }
     }
   else
     {
@@ -10283,6 +10323,7 @@ break_range_command (char *arg, int from_tty)
   struct cleanup *cleanup_bkpt;
   struct linespec_sals *lsal_start, *lsal_end;
   struct event_location *start_location, *end_location;
+  struct decode_line_options opts;
 
   /* We don't support software ranged breakpoints.  */
   if (target_ranged_break_num_registers () < 0)
@@ -10337,9 +10378,10 @@ break_range_command (char *arg, int from_tty)
      where +14 means 14 lines from the start location.  */
   end_location = string_to_event_location (&arg, current_language);
   make_cleanup_delete_event_location (end_location);
-  decode_line_full (end_location, DECODE_LINE_FUNFIRSTLINE,
-		    sal_start.symtab, sal_start.line,
-		    &canonical_end, NULL, NULL);
+  init_decode_line_options (&opts);
+  opts.default_symtab = sal_start.symtab;
+  opts.default_line = sal_start.line;
+  decode_line_full (end_location, &canonical_end, &opts);
 
   make_cleanup_destroy_linespec_result (&canonical_end);
 
@@ -10522,7 +10564,8 @@ dtor_watchpoint (struct breakpoint *self)
 /* Implement the "re_set" breakpoint_ops method for watchpoints.  */
 
 static void
-re_set_watchpoint (struct breakpoint *b)
+re_set_watchpoint (struct breakpoint *b,
+		   struct breakpoint_reset_reason *reason)
 {
   struct watchpoint *w = (struct watchpoint *) b;
 
@@ -11591,6 +11634,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
   struct thread_info *tp;
   struct event_location *location;
   struct until_break_fsm *sm;
+  struct decode_line_options options;
 
   clear_proceed_status (0);
 
@@ -11600,13 +11644,15 @@ until_break_command (char *arg, int from_tty, int anywhere)
   location = string_to_event_location (&arg, current_language);
   cleanup = make_cleanup_delete_event_location (location);
 
+  init_decode_line_options (&options);
   if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE,
-			  get_last_displayed_symtab (),
-			  get_last_displayed_line ());
+    {
+      options.default_symtab = get_last_displayed_symtab ();
+      options.default_line = get_last_displayed_line ();
+      sals = decode_line_1 (location, &options);
+    }
   else
-    sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE,
-			  (struct symtab *) NULL, 0);
+    sals = decode_line_1 (location, &options);
 
   if (sals.nelts != 1)
     error (_("Couldn't get information on specified line."));
@@ -12281,7 +12327,6 @@ force_breakpoint_reinsertion (struct bp_location *bl)
 /* Called whether new breakpoints are created, or existing breakpoints
    deleted, to update the global location list and recompute which
    locations are duplicate of which.
-
    The INSERT_MODE flag determines whether locations may not, may, or
    shall be inserted now.  See 'enum ugll_insert_mode' for more
    info.  */
@@ -12800,7 +12845,8 @@ base_breakpoint_allocate_location (struct breakpoint *self)
 }
 
 static void
-base_breakpoint_re_set (struct breakpoint *b)
+base_breakpoint_re_set (struct breakpoint *b,
+			struct breakpoint_reset_reason *reason)
 {
   /* Nothing to re-set. */
 }
@@ -12906,6 +12952,7 @@ base_breakpoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 base_breakpoint_decode_location (struct breakpoint *b,
 				 const struct event_location *location,
+				 const struct decode_line_limits *limits,
 				 struct symtabs_and_lines *sals)
 {
   internal_error_pure_virtual_called ();
@@ -12953,7 +13000,8 @@ struct breakpoint_ops base_breakpoint_ops =
 /* Default breakpoint_ops methods.  */
 
 static void
-bkpt_re_set (struct breakpoint *b)
+bkpt_re_set (struct breakpoint *b,
+	     struct breakpoint_reset_reason *reason)
 {
   /* FIXME: is this still reachable?  */
   if (event_location_empty_p (b->location))
@@ -12963,7 +13011,7 @@ bkpt_re_set (struct breakpoint *b)
       return;
     }
 
-  breakpoint_re_set_default (b);
+  breakpoint_re_set_default (b, reason);
 }
 
 static int
@@ -13153,15 +13201,17 @@ bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 bkpt_decode_location (struct breakpoint *b,
 		      const struct event_location *location,
+		      const struct decode_line_limits *limits,
 		      struct symtabs_and_lines *sals)
 {
-  decode_location_default (b, location, sals);
+  decode_location_default (b, location, limits, sals);
 }
 
 /* Virtual table for internal breakpoints.  */
 
 static void
-internal_bkpt_re_set (struct breakpoint *b)
+internal_bkpt_re_set (struct breakpoint *b,
+		      struct breakpoint_reset_reason *reason)
 {
   switch (b->type)
     {
@@ -13258,7 +13308,8 @@ internal_bkpt_print_mention (struct breakpoint *b)
 /* Virtual table for momentary breakpoints  */
 
 static void
-momentary_bkpt_re_set (struct breakpoint *b)
+momentary_bkpt_re_set (struct breakpoint *b,
+		       struct breakpoint_reset_reason *reason)
 {
   /* Keep temporary breakpoints, which can be encountered when we step
      over a dlopen call and solib_add is resetting the breakpoints.
@@ -13347,6 +13398,7 @@ bkpt_probe_create_sals_from_location (const struct event_location *location,
 static void
 bkpt_probe_decode_location (struct breakpoint *b,
 			    const struct event_location *location,
+			    const struct decode_line_limits *limits,
 			    struct symtabs_and_lines *sals)
 {
   *sals = parse_probes (location, NULL);
@@ -13357,9 +13409,10 @@ bkpt_probe_decode_location (struct breakpoint *b,
 /* The breakpoint_ops structure to be used in tracepoints.  */
 
 static void
-tracepoint_re_set (struct breakpoint *b)
+tracepoint_re_set (struct breakpoint *b,
+		   struct breakpoint_reset_reason *reason)
 {
-  breakpoint_re_set_default (b);
+  breakpoint_re_set_default (b, reason);
 }
 
 static int
@@ -13471,9 +13524,10 @@ tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 tracepoint_decode_location (struct breakpoint *b,
 			    const struct event_location *location,
+			    const struct decode_line_limits *limits,
 			    struct symtabs_and_lines *sals)
 {
-  decode_location_default (b, location, sals);
+  decode_location_default (b, location, limits, sals);
 }
 
 struct breakpoint_ops tracepoint_breakpoint_ops;
@@ -13494,10 +13548,11 @@ tracepoint_probe_create_sals_from_location
 static void
 tracepoint_probe_decode_location (struct breakpoint *b,
 				  const struct event_location *location,
+				  const struct decode_line_limits *limits,
 				  struct symtabs_and_lines *sals)
 {
   /* We use the same method for breakpoint on probes.  */
-  bkpt_probe_decode_location (b, location, sals);
+  bkpt_probe_decode_location (b, location, limits, sals);
 }
 
 static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
@@ -13505,9 +13560,10 @@ static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
 /* Dprintf breakpoint_ops methods.  */
 
 static void
-dprintf_re_set (struct breakpoint *b)
+dprintf_re_set (struct breakpoint *b,
+		struct breakpoint_reset_reason *reason)
 {
-  breakpoint_re_set_default (b);
+  breakpoint_re_set_default (b, reason);
 
   /* extra_string should never be non-NULL for dprintf.  */
   gdb_assert (b->extra_string != NULL);
@@ -13662,6 +13718,7 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 strace_marker_decode_location (struct breakpoint *b,
 			       const struct event_location *location,
+			       const struct decode_line_limits *limits,
 			       struct symtabs_and_lines *sals)
 {
   struct tracepoint *tp = (struct tracepoint *) b;
@@ -14129,6 +14186,10 @@ update_breakpoint_locations (struct breakpoint *b,
 
       switch_to_program_space_and_thread (sals.sals[i].pspace);
 
+#if DEBUG_ME
+      printf ("adding location for %s to bp #%d\n",
+	      core_addr_to_string (sals.sals[i].pc), b->number);
+#endif
       new_loc = add_location_to_breakpoint (b, &(sals.sals[i]));
 
       /* Reparse conditions, they might contain references to the
@@ -14207,12 +14268,18 @@ update_breakpoint_locations (struct breakpoint *b,
   update_global_location_list (UGLL_MAY_INSERT);
 }
 
+static int
+no_limits_p (const struct decode_line_limits *limits)
+{
+  return (limits == NULL || limits->objfiles == NULL);
+}
+
 /* Find the SaL locations corresponding to the given LOCATION.
    On return, FOUND will be 1 if any SaL was found, zero otherwise.  */
 
 static struct symtabs_and_lines
 location_to_sals (struct breakpoint *b, struct event_location *location,
-		  int *found)
+		  const struct decode_line_limits *limits, int *found)
 {
   struct symtabs_and_lines sals = {0};
   struct gdb_exception exception = exception_none;
@@ -14221,7 +14288,7 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 
   TRY
     {
-      b->ops->decode_location (b, location, &sals);
+      b->ops->decode_location (b, location, limits, &sals);
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
@@ -14240,7 +14307,8 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 	  && (b->condition_not_parsed 
 	      || (b->loc && b->loc->shlib_disabled)
 	      || (b->loc && b->loc->pspace->executing_startup)
-	      || b->enable_state == bp_disabled))
+	      || b->enable_state == bp_disabled
+	      || !no_limits_p (limits)))
 	not_found_and_ok = 1;
 
       if (!not_found_and_ok)
@@ -14257,7 +14325,8 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
     }
   END_CATCH
 
-  if (exception.reason == 0 || exception.error != NOT_FOUND_ERROR)
+  if (exception.reason == 0 || exception.error != NOT_FOUND_ERROR
+      /* KEITHS? && sals.nelts > 0*/)
     {
       int i;
 
@@ -14300,31 +14369,60 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
    locations.  */
 
 static void
-breakpoint_re_set_default (struct breakpoint *b)
+breakpoint_re_set_default (struct breakpoint *b,
+			   struct breakpoint_reset_reason *reason)
 {
-  int found;
+  int found, update;
   struct symtabs_and_lines sals, sals_end;
   struct symtabs_and_lines expanded = {0};
   struct symtabs_and_lines expanded_end = {0};
+  struct decode_line_limits limits;
 
-  sals = location_to_sals (b, b->location, &found);
+  /* If there is a reset reason, use that to "limit" SaL lookups.  */
+  update = 0;
+  init_decode_line_limits (&limits);
+  switch (reason->reason)
+    {
+    case BREAKPOINT_RESET_ADD_OBJFILE:
+#if 0
+      printf ("ignoring add objfile event\n");
+      return;
+#endif
+      limits.objfiles = reason->objfile_list;
+      break;
+
+    case BREAKPOINT_RESET_NONE:
+      invalidate_linespec_cache (&(b->linespec_cache));
+      /* Always update breakpoint locations in case.  */
+      update = 1;
+      break;
+
+    default:
+      break;
+    }
+
+  sals = location_to_sals (b, b->location, &limits, &found);
   if (found)
     {
       make_cleanup (xfree, sals.sals);
       expanded = sals;
+      update = 1;
     }
 
   if (b->location_range_end != NULL)
     {
-      sals_end = location_to_sals (b, b->location_range_end, &found);
+      sals_end = location_to_sals (b, b->location_range_end,
+				   &limits, &found);
       if (found)
 	{
 	  make_cleanup (xfree, sals_end.sals);
 	  expanded_end = sals_end;
+	  update = 1;
 	}
     }
 
-  update_breakpoint_locations (b, expanded, expanded_end);
+  if (update)
+    update_breakpoint_locations (b, expanded, expanded_end);
 }
 
 /* Default method for creating SALs from an address string.  It basically
@@ -14368,15 +14466,20 @@ create_breakpoints_sal_default (struct gdbarch *gdbarch,
 static void
 decode_location_default (struct breakpoint *b,
 			 const struct event_location *location,
+			 const struct decode_line_limits *limits,
 			 struct symtabs_and_lines *sals)
 {
   struct linespec_result canonical;
+  struct decode_line_options opts;
 
   init_linespec_result (&canonical);
-  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE,
-		    (struct symtab *) NULL, 0,
-		    &canonical, multiple_symbols_all,
-		    b->filter);
+  init_decode_line_options (&opts);
+  opts.select_mode = multiple_symbols_all;
+  opts.filter = b->filter;
+  opts.limits = limits;
+  opts.cache = b->linespec_cache;
+  opts.flags |= DECODE_LINE_CREATE_CACHE;
+  decode_line_full (location, &canonical, &opts);
 
   /* We should get 0 or 1 resulting SALs.  */
   gdb_assert (VEC_length (linespec_sals, canonical.sals) < 2);
@@ -14392,6 +14495,8 @@ decode_location_default (struct breakpoint *b,
       lsal->sals.sals = NULL;
     }
 
+  b->linespec_cache = canonical.cache;
+  canonical.cache = NULL;
   destroy_linespec_result (&canonical);
 }
 
@@ -14411,26 +14516,38 @@ prepare_re_set_context (struct breakpoint *b)
   return cleanups;
 }
 
-/* Reset a breakpoint given it's struct breakpoint * BINT.
+/* Reset a breakpoint.  DATA contains the information on which breakpoint
+   to reset and why it is being reset.
    The value we return ends up being the return value from catch_errors.
    Unused in this case.  */
 
 static int
-breakpoint_re_set_one (void *bint)
+breakpoint_re_set_one (void *data)
 {
   /* Get past catch_errs.  */
-  struct breakpoint *b = (struct breakpoint *) bint;
+  struct breakpoint_re_set_one_info *info
+    = (struct breakpoint_re_set_one_info *) data;
   struct cleanup *cleanups;
 
-  cleanups = prepare_re_set_context (b);
-  b->ops->re_set (b);
+  cleanups = prepare_re_set_context (info->bp);
+  info->bp->ops->re_set (info->bp, info->reason);
   do_cleanups (cleanups);
   return 0;
 }
 
+/* Initialize the given reset reason, R.  The reason is initialized
+   to BREAKPOINT_RESET_NONE.  */
+
+void
+init_breakpoint_reset_reason (struct breakpoint_reset_reason *reason)
+{
+  memset (reason, 0, sizeof (struct breakpoint_reset_reason));
+  reason->reason = BREAKPOINT_RESET_NONE;
+}
+
 /* Re-set all breakpoints after symbols have been re-loaded.  */
 void
-breakpoint_re_set (void)
+breakpoint_re_set (struct breakpoint_reset_reason *reset_reason)
 {
   struct breakpoint *b, *b_tmp;
   enum language save_language;
@@ -14441,15 +14558,38 @@ breakpoint_re_set (void)
   save_input_radix = input_radix;
   old_chain = save_current_program_space ();
 
+  /* !!keiths; Add a caller string or some way to identify where
+     the re set came from.  */
+  {
+    const char *type;
+
+    switch (reset_reason->reason)
+      {
+      case BREAKPOINT_RESET_ADD_OBJFILE:
+	type = "add objfile";
+	break;
+
+      default:
+	type = "??";
+      };
+
+    //printf ("breakpoint_re_set: %s\n", type);
+  }
+
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
   {
     /* Format possible error msg.  */
     char *message = xstrprintf ("Error in re-setting breakpoint %d: ",
 				b->number);
     struct cleanup *cleanups = make_cleanup (xfree, message);
-    catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
+    struct breakpoint_re_set_one_info info;
+
+    info.bp = b;
+    info.reason = reset_reason;
+    catch_errors (breakpoint_re_set_one, &info, message, RETURN_MASK_ALL);
     do_cleanups (cleanups);
   }
+  //printf ("breakpoint_re_set done\n");
   set_language (save_language);
   input_radix = save_input_radix;
 

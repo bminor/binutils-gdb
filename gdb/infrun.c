@@ -839,6 +839,7 @@ follow_fork (void)
 static void
 follow_inferior_reset_breakpoints (void)
 {
+  struct breakpoint_reset_reason reset_reason;
   struct thread_info *tp = inferior_thread ();
 
   /* Was there a step_resume breakpoint?  (There was if the user
@@ -872,7 +873,10 @@ follow_inferior_reset_breakpoints (void)
      were never set in the child, but only in the parent.  This makes
      sure the inserted breakpoints match the breakpoint list.  */
 
-  breakpoint_re_set ();
+  init_breakpoint_reset_reason (&reset_reason);
+  /*reset_reason.reason = BREAKPOINT_RESET_???;*/
+  reset_reason.where = __func__;
+  breakpoint_re_set (&reset_reason);
   insert_breakpoints ();
 }
 
@@ -1096,6 +1100,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
   struct inferior *inf = current_inferior ();
   int pid = ptid_get_pid (ptid);
   ptid_t process_ptid;
+  struct breakpoint_reset_reason reset_reason;
 
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
@@ -1246,11 +1251,29 @@ follow_exec (ptid_t ptid, char *execd_pathname)
      registers.  */
   target_find_description ();
 
-  solib_create_inferior_hook (0);
+  /* Errors on solib_create_inferior_hook are swallowed.  In all likelihood,
+     the user has a breakpoint on a user function (like `main') which appears
+     in both the old exec and the new.  solib_create_inferior_hook will
+     may call solib_add, which may call update_global_location_list, which
+     may attempt to insert the breakpoints.  Since we haven't/can't yet
+     reset all breakpoints, the user's breakpoint may fail to insert.
+     That does not mean, however, that we should just bail.  Any real errors
+     resetting/inserting breakpoints will also be triggered when we do reset
+     all the breakpoints, just below.  */
+  TRY
+    {
+      solib_create_inferior_hook (0);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+    }
+  END_CATCH
 
   jit_inferior_created_hook ();
 
-  breakpoint_re_set ();
+  init_breakpoint_reset_reason (&reset_reason);
+  reset_reason.where = __func__;
+  breakpoint_re_set (&reset_reason);
 
   /* Reinsert all breakpoints.  (Those which were symbolic have
      been reset to the proper address in the new a.out, thanks

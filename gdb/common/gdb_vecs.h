@@ -22,14 +22,18 @@
 
 #include "vec.h"
 
+struct objfile;
 typedef char *char_ptr;
 typedef const char *const_char_ptr;
+typedef struct objfile *objfilep;
 
 DEF_VEC_P (char_ptr);
 
 DEF_VEC_P (const_char_ptr);
 
 DEF_VEC_I (int);
+
+DEF_VEC_P (objfilep);
 
 extern void free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec);
 
