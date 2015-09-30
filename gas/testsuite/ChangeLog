@@ -1,3 +1,9 @@
+2015-09-30  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/ppc.exp (e500-ill): Pass -me500.
+	* gas/ppc/e500-ill.s: Remove .machine.
+	* gas/ppc/e500-ill.l: Remove line numbers.
+
 2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
 
 	* gas/s390/s390.exp: Add new tests.
