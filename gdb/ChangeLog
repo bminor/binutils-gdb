@@ -1,3 +1,14 @@
+2015-09-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbarch.sh (struct gdbarch_info): Change tdep_info's type to void *.
+	* gdbarch.h: Regenerate.
+	* i386-tdep.c (i386_gdbarch_init): Remove cast to
+	struct gdbarch_tdep_info *.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* ppc-linux-tdep (ppu2spu_sniffer): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* spu-multiarch.c (spu_gdbarch): Likewise.
+
 2015-09-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* infcmd.c (finish_command_fsm_should_stop): Don't attempt to
