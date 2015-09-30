@@ -327,6 +327,9 @@ run_dump_test "pr18160"
 run_dump_test "pr18176"
 run_dump_test "pr18801"
 run_dump_test "pr18815"
+run_dump_test "pr19013"
+run_dump_test "pr19013-x32"
+run_dump_test "pr19013-nacl"
 
 # Add $PLT_CFLAGS if PLT is expected.
 global PLT_CFLAGS

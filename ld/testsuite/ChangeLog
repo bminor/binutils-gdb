@@ -1,3 +1,12 @@
+2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19013
+	* ld-x86-64/pr19013-nacl.d: New file.
+	* ld-x86-64/pr19013-x32.d: Likewise.
+	* ld-x86-64/pr19013.d: Likewise.
+	* ld-x86-64/pr19013.s: Likewise.
+	* ld-x86-64/x86-64.exp: Run PR ld/19013 tests.
+
 2015-09-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/19005

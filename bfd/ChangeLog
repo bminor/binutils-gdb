@@ -1,3 +1,9 @@
+2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19013
+	* elflink.c (_bfd_elf_merge_sections): Only merge input bfds
+	that have the compatible ELF machine code with the output bfd.
+
 2015-09-30  Alan Modra  <amodra@gmail.com>
 
 	PR ld/19013

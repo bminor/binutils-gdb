@@ -6818,15 +6818,23 @@ _bfd_elf_merge_sections (bfd *obfd, struct bfd_link_info *info)
 {
   bfd *ibfd;
   asection *sec;
+  const struct elf_backend_data *bed;
 
   if (!is_elf_hash_table (info->hash))
     return FALSE;
 
+  bed = get_elf_backend_data (obfd);
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     if ((ibfd->flags & DYNAMIC) == 0
 	&& bfd_get_flavour (ibfd) == bfd_target_elf_flavour
-	&& (elf_elfheader (ibfd)->e_ident[EI_CLASS]
-	    == get_elf_backend_data (obfd)->s->elfclass))
+	&& (elf_elfheader (ibfd)->e_ident[EI_CLASS] == bed->s->elfclass)
+	&& (bed->elf_machine_code == elf_elfheader (ibfd)->e_machine
+	    || (bed->elf_machine_alt1 != 0
+		&& (bed->elf_machine_alt1
+		    == elf_elfheader (ibfd)->e_machine))
+	    || (bed->elf_machine_alt2 != 0
+		&& (bed->elf_machine_alt2
+		    == elf_elfheader (ibfd)->e_machine))))
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	if ((sec->flags & SEC_MERGE) != 0
 	    && !bfd_is_abs_section (sec->output_section))
