@@ -1,3 +1,8 @@
+2015-10-02  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-dis.c (disas_aarch64_insn): Remove argument PC.
+	(print_insn_aarch64_word): Caller updated.
+
 2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
 
 	* s390-mkopc.c (main): Parse htm and vx flag.

@@ -2032,8 +2032,7 @@ user_friendly_fixup (aarch64_inst *inst)
 /* Decode INSN and fill in *INST the instruction information.  */
 
 static int
-disas_aarch64_insn (uint64_t pc ATTRIBUTE_UNUSED, uint32_t insn,
-		    aarch64_inst *inst)
+disas_aarch64_insn (uint32_t insn, aarch64_inst *inst)
 {
   const aarch64_opcode *opcode = aarch64_opcode_lookup (insn);
 
@@ -2172,7 +2171,7 @@ print_insn_aarch64_word (bfd_vma pc,
        addresses, since the addend is not currently pc-relative.  */
     pc = 0;
 
-  ret = disas_aarch64_insn (pc, word, &inst);
+  ret = disas_aarch64_insn (word, &inst);
 
   if (((word >> 21) & 0x3ff) == 1)
     {
