@@ -6227,7 +6227,7 @@ Packet: '%s'\n"),
 	      event->ws.kind = TARGET_WAITKIND_VFORK_DONE;
 	      p = skip_to_semicolon (p1 + 1);
 	    }
-	  else if (strncmp (p, "exec", p1 - p) == 0)
+	  else if (strprefix (p, p1, "exec"))
 	    {
 	      ULONGEST ignored;
 	      char pathname[PATH_MAX];

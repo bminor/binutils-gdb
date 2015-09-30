@@ -1,3 +1,8 @@
+2015-09-30  Don Breazeal  <donb@codesourcery.com>
+
+	* remote.c (remote_parse_stop_reply): Call strprefix instead
+	of strncmp.
+
 2015-09-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdbarch.sh (struct gdbarch_info): Change tdep_info's type to void *.
