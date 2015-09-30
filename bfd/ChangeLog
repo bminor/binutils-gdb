@@ -1,5 +1,12 @@
 2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19031
+	* elf32-i386.c (elf_i386_check_relocs): Set
+	pointer_equality_needed for R_386_PC32 reloc in non-code
+	sections.
+
+2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19013
 	* elflink.c (_bfd_elf_merge_sections): Only merge input bfds
 	that have the compatible ELF machine code with the output bfd.

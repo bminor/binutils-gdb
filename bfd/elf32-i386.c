@@ -1772,7 +1772,15 @@ elf_i386_check_relocs (bfd *abfd,
 	      /* We may need a .plt entry if the function this reloc
 		 refers to is in a shared lib.  */
 	      h->plt.refcount += 1;
-	      if (r_type != R_386_PC32)
+	      if (r_type == R_386_PC32)
+		{
+		  /* Since something like ".long foo - ." may be used
+		     as pointer, make sure that PLT is used if foo is
+		     a function defined in a shared library.  */
+		  if ((sec->flags & SEC_CODE) == 0)
+		    h->pointer_equality_needed = 1;
+		}
+	      else
 		{
 		  h->pointer_equality_needed = 1;
 		  /* R_386_32 can be resolved at run-time.  */

@@ -1,5 +1,14 @@
 2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19031
+	* ld-i386/i386.exp: Run PR ld/19031 test.
+	* ld/testsuite/ld-i386/pr19031.out: New file.
+	* ld/testsuite/ld-i386/pr19031a.c: Likewise.
+	* ld/testsuite/ld-i386/pr19031b.S: Likewise.
+	* ld/testsuite/ld-i386/pr19031c.c: Likewise.
+
+2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19013
 	* ld-x86-64/pr19013-nacl.d: New file.
 	* ld-x86-64/pr19013-x32.d: Likewise.
