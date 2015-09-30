@@ -1,3 +1,8 @@
+2015-09-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-type.exp: Do not run tests if binaries fail to
+	build.
+
 2015-09-30  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/tsx.exp: Consider multiple correct outputs in the record
