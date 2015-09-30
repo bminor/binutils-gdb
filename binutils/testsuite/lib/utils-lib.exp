@@ -448,6 +448,13 @@ proc run_dump_test { name {extra_options {}} } {
     }
 
     if { $opts(as) == "binary" } {
+	while {[file type $srcfile] eq "link"} {
+	    set newfile [file readlink $srcfile]
+	    if {[string index $newfile 0] ne "/"} {
+		set newfile [file dirname $srcfile]/$newfile
+	    }
+	    set srcfile $newfile
+	}
 	file copy -force ${srcfile} $tempfile
     } else {
 	set exec_output [binutils_assemble_flags ${srcfile} $tempfile $opts(as)]

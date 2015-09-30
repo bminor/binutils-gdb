@@ -1,3 +1,8 @@
+2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/utils-lib.exp (run_dump_test): Handle symbolic link when
+	copying source file.
+
 2015-09-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/19020
