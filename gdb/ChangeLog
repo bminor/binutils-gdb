@@ -1,4 +1,4 @@
-2015-09-29  Kevin Buettner  <kevinb@redhat.com>
+2015-09-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* infcmd.c (finish_command_fsm_should_stop): Don't attempt to
 	record a NULL value.
