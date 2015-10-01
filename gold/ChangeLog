@@ -1,3 +1,7 @@
+2015-10-07  Andreas Schwab  <schwab@suse.de>
+
+	* aarch64.cc (aarch64_info): Set abi_pagesize to 64K.
+
 2015-10-06  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/18855
