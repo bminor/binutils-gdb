@@ -1,3 +1,7 @@
+2015-10-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/vec.h (VEC_OP (T,cleanup)): Add pointer cast.
+
 2015-09-30  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (setup_type_unit_groups): Add comment.
