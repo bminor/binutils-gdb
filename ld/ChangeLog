@@ -1,3 +1,8 @@
+2015-10-01  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* configure.tgt (targ_extra_emuls): Remove shlelf and
+	shelf from sh*-*-linux cases.
+
 2015-09-30  Rich Felker  <dalias@libc.org>
 
 	* configure.tgt (targ_extra_emuls): Add fdpic and misc
