@@ -1,3 +1,9 @@
+2015-10-01  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Run the new test.
+	* ld-aarch64/plt_mapping_symbol.d: New.
+	* ld-aarch64/plt_mapping_symbol.s: New.
+
 2015-10-01  Alan Modra  <amodra@gmail.com>
 
 	* ld-x86-64/pr19013-x32.d: Update.
