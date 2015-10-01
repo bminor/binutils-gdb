@@ -1,3 +1,8 @@
+2015-10-01  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config.bfd (targ_selvecs): Remove sh_elf32_vec and
+	sh_elf32_le_vec	from sh*-*-linux cases.
+
 2015-10-01  Alan Modra  <amodra@gmail.com>
 
 	PR ld/19013
