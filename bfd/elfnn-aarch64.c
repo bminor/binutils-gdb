@@ -4470,6 +4470,7 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
@@ -5456,6 +5457,16 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       *unresolved_reloc_p = FALSE;
       break;
 
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
+      if (globals->root.sgot == NULL)
+	return bfd_reloc_notsupported;
+
+      value = symbol_got_offset (input_bfd, h, r_symndx);
+      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+						   0, weak_undef_p);
+      *unresolved_reloc_p = FALSE;
+      break;
+
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
@@ -5994,6 +6005,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+	case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
 	case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
@@ -6529,6 +6541,7 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+	case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
 	case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
@@ -7002,6 +7015,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+	case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
 	case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
