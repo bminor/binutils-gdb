@@ -1616,7 +1616,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 12,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (TLSDESC_OFF_G1),	/* name */
 	 FALSE,			/* partial_inplace */
