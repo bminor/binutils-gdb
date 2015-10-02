@@ -5022,10 +5022,18 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    value = aarch64_calculate_got_entry_vma (h, globals, info,
 						     value, output_bfd,
 						     unresolved_reloc_p);
-	  if (bfd_r_type == BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15
-	      || bfd_r_type == BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14)
-	    addend = (globals->root.sgot->output_section->vma
-		      + globals->root.sgot->output_offset);
+
+	  switch (bfd_r_type)
+	    {
+	    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
+	    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
+	      addend = (globals->root.sgot->output_section->vma
+			+ globals->root.sgot->output_offset);
+	      break;
+	    default:
+	      break;
+	    }
+
 	  value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
 						       addend, weak_undef_p);
 	  return _bfd_aarch64_elf_put_addend (input_bfd, hit_data, bfd_r_type, howto, value);
