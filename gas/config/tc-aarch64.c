@@ -2500,6 +2500,15 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0},
 
+  /* Most significant bits 16-31 of address/value: MOVZ.  */
+  {"tlsgd_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSGD_MOVW_G1,
+   0,
+   0,
+   0},
+
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsdesc", 0,
    BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21, /* adr_type */
@@ -4670,6 +4679,7 @@ process_movw_reloc_info (void)
       case BFD_RELOC_AARCH64_MOVW_G0_S:
       case BFD_RELOC_AARCH64_MOVW_G1_S:
       case BFD_RELOC_AARCH64_MOVW_G2_S:
+      case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
@@ -4696,6 +4706,7 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
@@ -6915,6 +6926,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
@@ -7143,6 +7155,7 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
