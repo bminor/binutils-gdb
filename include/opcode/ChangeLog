@@ -1,5 +1,10 @@
 2015-10-02  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64.h (aarch64_zero_register_p): Move the declaration
+	to column one.
+
+2015-10-02  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64.h (aarch64_decode_insn): Declare it.
 
 2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
