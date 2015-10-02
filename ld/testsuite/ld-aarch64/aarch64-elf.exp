@@ -116,7 +116,8 @@ run_dump_test "emit-relocs-286"
 run_dump_test "emit-relocs-286-bad"
 # 287-298 are not done yet
 run_dump_test "emit-relocs-299"
-# 300-301 are not done yet
+# 300 is not done yet
+run_dump_test "emit-relocs-301"
 run_dump_test "emit-relocs-302"
 # 303-308 are not done yet
 run_dump_test "emit-relocs-309-up"

@@ -4447,6 +4447,7 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
     case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
       return GOT_NORMAL;
 
@@ -4995,6 +4996,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
 	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
+	case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
 	case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
 	case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
@@ -5064,6 +5066,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      addend = (globals->root.sgot->output_section->vma
 			+ globals->root.sgot->output_offset);
 	      break;
+	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
 	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
 	    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	      value = (value - globals->root.sgot->output_section->vma
@@ -5350,6 +5353,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       break;
 
     case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
       if (h != NULL)
 	  value = aarch64_calculate_got_entry_vma (h, globals, info, value,
@@ -6498,6 +6502,7 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+	case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
 	case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
 	case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
@@ -6854,6 +6859,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
 	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
 	    case BFD_RELOC_AARCH64_NN:
 	      if (htab->root.dynobj == NULL)
@@ -6969,6 +6975,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+	case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
 	case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
 	case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
