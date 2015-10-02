@@ -1,5 +1,10 @@
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Create GOT section
+	for TLSLE_MOVW_TPREL_G(1, 1_NC, 2) relocation.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
 	* reloc.c: Make AARCH64_TLSIE_MOVW_GOTTPREL_G1 and
 	AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC defined in alphabetical order.
 	* libbfd.h: Regenerate.
