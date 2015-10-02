@@ -1,5 +1,22 @@
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 
+	* reloc.c: Make AARCH64_TLSIE_MOVW_GOTTPREL_G1 and
+	AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC defined in alphabetical order.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Make
+	TLSIE_MOVW_GOTTPREL_G1 check overflow.
+	(aarch64_reloc_got_type): Add support for TLSIE_MOVW_GOTTPREL_G1
+	and TLSIE_MOVW_GOTTPREL_G0_NC.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
 	* elfnn-aarch64.c (aarch64_reloc_got_type): Add
 	BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC support.
 	(elfNN_aarch64_final_link_relocate): Likewise.

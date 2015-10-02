@@ -1,5 +1,12 @@
 2015-10-02  Renlin Li <renlin.li@arm.com>
 
+	* gas/aarch64/reloc-gottprel_g0_nc.d: New.
+	* gas/aarch64/reloc-gottprel_g0_nc.s: New.
+	* gas/aarch64/reloc-gottprel_g1.d: New.
+	* gas/aarch64/reloc-gottprel_g1.s: New.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
     * gas/aarch64/reloc-tlsgd_g0_nc.d: New.
     * gas/aarch64/reloc-tlsgd_g0_nc.s: New.
 

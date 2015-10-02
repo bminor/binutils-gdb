@@ -1038,34 +1038,6 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  HOWTO64 (AARCH64_R (TLSIE_MOVW_GOTTPREL_G1),	/* type */
-	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 AARCH64_R_STR (TLSIE_MOVW_GOTTPREL_G1),	/* name */
-	 FALSE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
-
-  HOWTO64 (AARCH64_R (TLSIE_MOVW_GOTTPREL_G0_NC),	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 AARCH64_R_STR (TLSIE_MOVW_GOTTPREL_G0_NC),	/* name */
-	 FALSE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
-
   HOWTO (AARCH64_R (TLSIE_ADR_GOTTPREL_PAGE21),	/* type */
 	 12,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1120,6 +1092,34 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 FALSE,			/* partial_inplace */
 	 0x1ffffc,		/* src_mask */
 	 0x1ffffc,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO64 (AARCH64_R (TLSIE_MOVW_GOTTPREL_G0_NC),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSIE_MOVW_GOTTPREL_G0_NC),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO64 (AARCH64_R (TLSIE_MOVW_GOTTPREL_G1),	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 AARCH64_R_STR (TLSIE_MOVW_GOTTPREL_G1),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* ADD: bit[23:12] of byte offset to module TLS base address.  */
@@ -4506,6 +4506,8 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
       return GOT_TLS_IE;
 
     default:
@@ -5476,6 +5478,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
     case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
       if (globals->root.sgot == NULL)
 	return bfd_reloc_notsupported;
 
@@ -6120,6 +6124,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
 	case BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+	case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+	case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
 	  if (! symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    {
 	      bfd_boolean need_relocs = FALSE;
@@ -6566,6 +6572,8 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+	case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+	case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
 	case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
@@ -7041,6 +7049,8 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+	case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+	case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
 	case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
