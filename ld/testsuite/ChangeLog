@@ -1,5 +1,15 @@
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+	* ld-aarch64/tls-large-desc.d: New.
+	* ld-aarch64/tls-large-desc.s: New.
+	* ld-aarch64/tls-relax-large-desc-ie.d: New.
+	* ld-aarch64/tls-relax-large-desc-ie.s: New.
+	* ld-aarch64/tls-relax-large-desc-le.d: New.
+	* ld-aarch64/tls-relax-large-desc-le.s: New.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
 	* ld-aarch64/aarch64-elf.exp: run new test
 	* ld-aarch64/tls-relax-large-gd-ie.d: New.
 	* ld-aarch64/tls-relax-large-gd-ie.s: New.
