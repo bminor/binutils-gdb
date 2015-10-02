@@ -4414,6 +4414,7 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
     case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
     case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
       return GOT_NORMAL;
@@ -4963,6 +4964,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
 	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
+	case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
 	  base_got = globals->root.sgot;
 	  off = h->got.offset;
@@ -5030,6 +5032,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      addend = (globals->root.sgot->output_section->vma
 			+ globals->root.sgot->output_offset);
 	      break;
+	    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+	      value = (value - globals->root.sgot->output_section->vma
+		       - globals->root.sgot->output_offset);
 	    default:
 	      break;
 	    }
@@ -5309,6 +5314,70 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 						     addend, weak_undef_p);
       }
 
+      break;
+
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+      if (h != NULL)
+	  value = aarch64_calculate_got_entry_vma (h, globals, info, value,
+						   output_bfd,
+						   unresolved_reloc_p);
+      else
+	{
+	  struct elf_aarch64_local_symbol *locals
+	    = elf_aarch64_locals (input_bfd);
+
+	  if (locals == NULL)
+	    {
+	      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+	      (*_bfd_error_handler)
+		(_("%B: Local symbol descriptor table be NULL when applying "
+		   "relocation %s against local symbol"),
+		 input_bfd, elfNN_aarch64_howto_table[howto_index].name);
+	      abort ();
+	    }
+
+	  off = symbol_got_offset (input_bfd, h, r_symndx);
+	  base_got = globals->root.sgot;
+	  if (base_got == NULL)
+	    abort ();
+
+	  bfd_vma got_entry_addr = (base_got->output_section->vma
+				    + base_got->output_offset + off);
+
+	  if (!symbol_got_offset_mark_p (input_bfd, h, r_symndx))
+	    {
+	      bfd_put_64 (output_bfd, value, base_got->contents + off);
+
+	      if (bfd_link_pic (info))
+		{
+		  asection *s;
+		  Elf_Internal_Rela outrel;
+
+		  /* For local symbol, we have done absolute relocation in static
+		     linking stage.  While for share library, we need to update
+		     the content of GOT entry according to the share objects
+		     loading base address.  So we need to generate a
+		     R_AARCH64_RELATIVE reloc for dynamic linker.  */
+		  s = globals->root.srelgot;
+		  if (s == NULL)
+		    abort ();
+
+		  outrel.r_offset = got_entry_addr;
+		  outrel.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
+		  outrel.r_addend = value;
+		  elf_append_rela (output_bfd, s, &outrel);
+		}
+
+	      symbol_got_offset_mark (input_bfd, h, r_symndx);
+	    }
+	}
+
+      /* Update the relocation value to GOT entry addr as we have transformed
+	 the direct data access into indirect data access through GOT.  */
+      value = symbol_got_offset (input_bfd, h, r_symndx);
+      value = _bfd_aarch64_elf_resolve_relocation (bfd_r_type, place, value,
+						   0, weak_undef_p);
+      *unresolved_reloc_p = FALSE;
       break;
 
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
@@ -6392,6 +6461,7 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	case BFD_RELOC_AARCH64_GOT_LD_PREL19:
 	case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+	case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
@@ -6746,6 +6816,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case BFD_RELOC_AARCH64_JUMP26:
 	    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+	    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
 	    case BFD_RELOC_AARCH64_NN:
@@ -6859,6 +6930,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_GOT_LD_PREL19:
 	case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+	case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:

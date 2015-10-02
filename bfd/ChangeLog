@@ -1,5 +1,15 @@
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Add
+	BFD_RELOC_AARCH64_LD_64_GOTOFF_LO15 support.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise
+	(elfNN_aarch64_final_link_relocate): Calculate offset within GOT.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Change if to
 	switch statement.
 

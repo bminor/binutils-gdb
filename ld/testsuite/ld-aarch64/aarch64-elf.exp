@@ -121,7 +121,7 @@ run_dump_test "emit-relocs-309-up"
 run_dump_test "emit-relocs-309-low"
 run_dump_test "emit-relocs-309-up-bad"
 run_dump_test "emit-relocs-309-low-bad"
-# 310 not done yet
+run_dump_test "emit-relocs-310"
 run_dump_test "emit-relocs-311"
 run_dump_test "emit-relocs-312"
 run_dump_test "emit-relocs-313"
