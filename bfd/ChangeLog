@@ -1,5 +1,13 @@
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 
+	* reloc.c (BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC): New.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry
+	MOVW_GOTOFF_G0_NC.
+	* libbfd.h: Regnerate.
+	* bfd-in2.h: Regenerate.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
 	* elfnn-aarch64.c (aarch64_reloc_got_type): Add support
 	for BFD_RELOC_AARCH64_MOVW_GOTOFF_G1.
 	(elfNN_aarch64_gc_sweep_hook): Likewise.

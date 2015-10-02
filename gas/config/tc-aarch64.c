@@ -2455,6 +2455,15 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_LD_GOT_LO12_NC,
    0},
 
+  /* 0-15 bits of address/value: MOVk, no check.  */
+  {"gotoff_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC,
+   0,
+   0,
+   0},
+
   /* Most significant bits 16-31 of address/value: MOVZ.  */
   {"gotoff_g1", 0,
    0,				/* adr_type */
@@ -4676,6 +4685,7 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G0:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
@@ -6799,6 +6809,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_MOVW_G0:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
       scale = 0;
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G1:
