@@ -7310,38 +7310,6 @@ elfNN_aarch64_output_map_sym (output_arch_syminfo *osi,
   return osi->func (osi->finfo, names[type], &sym, osi->sec, NULL) == 1;
 }
 
-
-
-/* Output mapping symbols for PLT entries associated with H.  */
-
-static bfd_boolean
-elfNN_aarch64_output_plt_map (struct elf_link_hash_entry *h, void *inf)
-{
-  output_arch_syminfo *osi = (output_arch_syminfo *) inf;
-  bfd_vma addr;
-
-  if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
-
-  if (h->root.type == bfd_link_hash_warning)
-    /* When warning symbols are created, they **replace** the "real"
-       entry in the hash table, thus we never get to see the real
-       symbol in a hash traversal.  So look at it now.  */
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-  if (h->plt.offset == (bfd_vma) - 1)
-    return TRUE;
-
-  addr = h->plt.offset;
-  if (addr == 32)
-    {
-      if (!elfNN_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
-	return FALSE;
-    }
-  return TRUE;
-}
-
-
 /* Output a single local symbol for a generated stub.  */
 
 static bfd_boolean
@@ -7474,13 +7442,11 @@ elfNN_aarch64_output_arch_local_syms (bfd *output_bfd,
   if (!htab->root.splt || htab->root.splt->size == 0)
     return TRUE;
 
-  /* For now live without mapping symbols for the plt.  */
   osi.sec_shndx = _bfd_elf_section_from_bfd_section
     (output_bfd, htab->root.splt->output_section);
   osi.sec = htab->root.splt;
 
-  elf_link_hash_traverse (&htab->root, elfNN_aarch64_output_plt_map,
-			  (void *) &osi);
+  elfNN_aarch64_output_map_sym (&osi, AARCH64_MAP_INSN, 0);
 
   return TRUE;
 

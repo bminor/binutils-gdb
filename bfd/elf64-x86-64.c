@@ -1961,9 +1961,16 @@ pointer:
 	      /* We may need a .plt entry if the function this reloc
 		 refers to is in a shared lib.  */
 	      h->plt.refcount += 1;
-	      if (r_type != R_X86_64_PC32
-		  && r_type != R_X86_64_PC32_BND
-		  && r_type != R_X86_64_PC64)
+	      if (r_type == R_X86_64_PC32)
+		{
+		  /* Since something like ".long foo - ." may be used
+		     as pointer, make sure that PLT is used if foo is
+		     a function defined in a shared library.  */
+		  if ((sec->flags & SEC_CODE) == 0)
+		    h->pointer_equality_needed = 1;
+		}
+	      else if (r_type != R_X86_64_PC32_BND
+		       && r_type != R_X86_64_PC64)
 		{
 		  h->pointer_equality_needed = 1;
 		  /* At run-time, R_X86_64_64 can be resolved for both

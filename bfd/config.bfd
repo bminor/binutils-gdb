@@ -1389,7 +1389,7 @@ case "${targ}" in
   sh-*-linux*)
     targ_defvec=sh_elf32_linux_be_vec
     targ_selvecs="sh_elf32_linux_vec sh64_elf32_linux_vec sh64_elf32_linux_be_vec sh64_elf64_linux_vec sh64_elf64_linux_be_vec"
-    targ_selvecs="${targ_selvecs} sh_elf32_vec sh_elf32_le_vec sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
+    targ_selvecs="${targ_selvecs} sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
     want64=true
     ;;
 #endif /* BFD64 */
@@ -1397,12 +1397,12 @@ case "${targ}" in
   sh*eb-*-linux*)
     targ_defvec=sh_elf32_linux_be_vec
     targ_selvecs=sh_elf32_linux_vec
-    targ_selvecs="${targ_selvecs} sh_elf32_vec sh_elf32_le_vec sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
+    targ_selvecs="${targ_selvecs} sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
     ;;
   sh*-*-linux*)
     targ_defvec=sh_elf32_linux_vec
     targ_selvecs=sh_elf32_linux_be_vec
-    targ_selvecs="${targ_selvecs} sh_elf32_vec sh_elf32_le_vec sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
+    targ_selvecs="${targ_selvecs} sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
     ;;
 
   sh-*-uclinux* | sh[12]-*-uclinux*)

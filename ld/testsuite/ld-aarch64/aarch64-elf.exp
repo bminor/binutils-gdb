@@ -254,6 +254,8 @@ run_dump_test "relocs-1027-symbolic-func"
 
 run_dump_test "dt_textrel"
 
+run_dump_test "plt_mapping_symbol"
+
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
   {} "copy-reloc-so.so"}
