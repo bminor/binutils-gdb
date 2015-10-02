@@ -1,3 +1,8 @@
+2015-10-02  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.dwarf2/staticvirtual.exp: Generalize regexp so it can match
+	whether or not address 0x1000 is mapped on the target.
+
 2015-09-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/py-type.exp: Do not run tests if binaries fail to
