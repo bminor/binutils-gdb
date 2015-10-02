@@ -2455,6 +2455,15 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_LD_GOT_LO12_NC,
    0},
 
+  /* Most significant bits 16-31 of address/value: MOVZ.  */
+  {"gotoff_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_GOTOFF_G1,
+   0,
+   0,
+   0},
+
   /* 15 bit offset into the page containing GOT entry for that symbol.  */
   {"gotoff_lo15", 0,
    0,				/* adr_type */
@@ -4676,6 +4685,7 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G1:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
@@ -6794,6 +6804,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_MOVW_G1:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
       scale = 16;
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G2:
@@ -6824,6 +6835,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 		case BFD_RELOC_AARCH64_MOVW_G1:
 		case BFD_RELOC_AARCH64_MOVW_G2:
 		case BFD_RELOC_AARCH64_MOVW_G3:
+		case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
 		  if (unsigned_overflow (value, scale + 16))
 		    as_bad_where (fixP->fx_file, fixP->fx_line,
 				  _("unsigned value out of range"));
