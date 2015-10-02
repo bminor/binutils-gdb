@@ -1,5 +1,12 @@
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 
+	* elfnn-aarch64.c(IS_AARCH64_TLS_RELAX_RELOC):
+	Add relaxation support for TLSGD_MOVW_G0_NC and TLSGD_MOVW_G1.
+	(aarch64_tls_transition_without_check): Likewise
+	(elfNN_aarch64_tls_relax): Likwise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
 	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Create GOT section
 	for TLSLE_MOVW_TPREL_G(1, 1_NC, 2) relocation.
 
