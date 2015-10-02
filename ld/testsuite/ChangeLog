@@ -1,5 +1,11 @@
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 
+	* ld-aarch64/emit-relocs-516.d: New.
+	* ld-aarch64/emit-relocs-516.s: New.
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
 	* ld-aarch64/emit-relocs-515.d: New.
 	* ld-aarch64/emit-relocs-515.s: New.
 	* ld-aarch64/aarch64-elf.exp: Run new test.
