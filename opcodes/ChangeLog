@@ -1,5 +1,12 @@
 2015-10-02  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-dis.c	(disas_aarch64_insn): Remove static.  Change
+	argument insn type to aarch64_insn.  Rename to ...
+	(aarch64_decode_insn): ... it.
+	(print_insn_aarch64_word): Caller updated.
+
+2015-10-02  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-dis.c (disas_aarch64_insn): Remove argument PC.
 	(print_insn_aarch64_word): Caller updated.
 

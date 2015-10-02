@@ -925,6 +925,9 @@ aarch64_stack_pointer_p (const aarch64_opnd_info *);
 extern
 int aarch64_zero_register_p (const aarch64_opnd_info *);
 
+extern int
+aarch64_decode_insn (aarch64_insn, aarch64_inst *);
+
 /* Given an operand qualifier, return the expected data element size
    of a qualified operand.  */
 extern unsigned char
