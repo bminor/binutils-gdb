@@ -6830,6 +6830,10 @@ ENUMDOC
   tls_index structure.  Used in conjunction with
   BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21.
 ENUM
+  BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC
+ENUMDOC
+  AArch64 TLS General Dynamic relocation.
+ENUM
   BFD_RELOC_AARCH64_TLSGD_MOVW_G1
 ENUMDOC
   AArch64 TLS General Dynamic relocation.

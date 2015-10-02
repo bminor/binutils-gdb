@@ -5787,6 +5787,9 @@ BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21.  */
   BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC,
 
 /* AArch64 TLS General Dynamic relocation.  */
+  BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC,
+
+/* AArch64 TLS General Dynamic relocation.  */
   BFD_RELOC_AARCH64_TLSGD_MOVW_G1,
 
 /* AArch64 TLS INITIAL EXEC relocation.  */
