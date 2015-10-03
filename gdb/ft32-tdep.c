@@ -164,25 +164,67 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   CORE_ADDR next_addr;
   ULONGEST inst, inst2;
   LONGEST offset;
-  int regnum;
+  int regnum, pushreg;
+  struct bound_minimal_symbol msymbol;
+  const int first_saved_reg = 13;	/* The first saved register.  */
+  /* PROLOGS are addresses of the subroutine prologs, PROLOGS[n]
+     is the address of __prolog_$rN.
+     __prolog_$rN pushes registers from 13 through n inclusive.
+     So for example CALL __prolog_$r15 is equivalent to:
+       PUSH $r13 
+       PUSH $r14 
+       PUSH $r15 
+     Note that PROLOGS[0] through PROLOGS[12] are unused.  */
+  CORE_ADDR prologs[32];
 
   cache->saved_regs[FT32_PC_REGNUM] = 0;
   cache->framesize = 0;
 
+  for (regnum = first_saved_reg; regnum < 32; regnum++)
+    {
+      char prolog_symbol[32];
+
+      snprintf (prolog_symbol, sizeof (prolog_symbol), "__prolog_$r%02d",
+		regnum);
+      msymbol = lookup_minimal_symbol (prolog_symbol, NULL, NULL);
+      if (msymbol.minsym)
+	prologs[regnum] = BMSYMBOL_VALUE_ADDRESS (msymbol);
+      else
+	prologs[regnum] = 0;
+    }
+
   if (start_addr >= end_addr)
-      return end_addr;
+    return end_addr;
 
   cache->established = 0;
-  for (next_addr = start_addr; next_addr < end_addr; )
+  for (next_addr = start_addr; next_addr < end_addr;)
     {
       inst = read_memory_unsigned_integer (next_addr, 4, byte_order);
 
       if (FT32_IS_PUSH (inst))
 	{
-	  regnum = FT32_R0_REGNUM + FT32_PUSH_REG (inst);
+	  pushreg = FT32_PUSH_REG (inst);
 	  cache->framesize += 4;
-	  cache->saved_regs[regnum] = cache->framesize;
+	  cache->saved_regs[FT32_R0_REGNUM + pushreg] = cache->framesize;
 	  next_addr += 4;
+	}
+      else if (FT32_IS_CALL (inst))
+	{
+	  for (regnum = first_saved_reg; regnum < 32; regnum++)
+	    {
+	      if ((4 * (inst & 0x3ffff)) == prologs[regnum])
+		{
+		  for (pushreg = first_saved_reg; pushreg <= regnum;
+		       pushreg++)
+		    {
+		      cache->framesize += 4;
+		      cache->saved_regs[FT32_R0_REGNUM + pushreg] =
+			cache->framesize;
+		    }
+		  next_addr += 4;
+		}
+	    }
+	  break;
 	}
       else
 	break;
@@ -190,7 +232,8 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   for (regnum = FT32_R0_REGNUM; regnum < FT32_PC_REGNUM; regnum++)
     {
       if (cache->saved_regs[regnum] != REG_UNAVAIL)
-	cache->saved_regs[regnum] = cache->framesize - cache->saved_regs[regnum];
+	cache->saved_regs[regnum] =
+	  cache->framesize - cache->saved_regs[regnum];
     }
   cache->saved_regs[FT32_PC_REGNUM] = cache->framesize;
 

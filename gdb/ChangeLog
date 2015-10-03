@@ -1,3 +1,8 @@
+2015-10-02  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-tdep.c (ft32_analyze_prologue): Add function prolog
+	subroutine handling.
+
 2015-10-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/vec.h (VEC_OP (T,cleanup)): Add pointer cast.
