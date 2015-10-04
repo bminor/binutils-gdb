@@ -1302,7 +1302,7 @@ class Chdr
 	   file->view(loc.file_offset, loc.data_size).data()))
   { }
 
-  typename Elf_types<size>::Elf_WXword
+  Elf_Word
   get_ch_type() const
   { return Convert<size, big_endian>::convert_host(this->p_->ch_type); }
 
