@@ -1,5 +1,12 @@
 2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	PR gold/18959
+	* stringpool.cc (Stringpool_template::new_key_offset): Align all
+	strings, even zero-length.
+	(Stringpool_template::set_string_offsets): Likewise.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* s390.cc: New file.
 	* Makefile.am (TARGETSOURCES): Add s390.cc.
 	(ALL_TARGETOBJS): Add s390.o.
