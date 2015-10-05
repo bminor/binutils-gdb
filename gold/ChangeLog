@@ -1,5 +1,15 @@
 2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* archive.cc (Archive::sym64name): New const.
+	(Archive::setup): Add support for SYM64 armap.
+	(Archive::read_armap): Likewise.
+	(Archive::interpret_header): Likewise.
+	(Archive::const_iterator::read_next_header): Likewise.
+	* archive.h (Archive::sym64name): New const.
+	(Archive::read_armap): Add mapsize template parameter.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* dynobj.cc (Dynobj::create_elf_hash_table): Create hash table with
 	target-specific entry size.
 	(Dynobj::sized_create_elf_hash_table): Add size template parameter.
