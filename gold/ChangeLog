@@ -1,5 +1,12 @@
 2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* testsuite/binary_test.cc: Add __attribute__((aligned(1))).
+	* testsuite/script_test_12a.c: Likewise.
+	* testsuite/script_test_1a.cc: Likewise.
+	* testsuite/script_test_2.cc: Likewise.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* testsuite/debug_msg.sh: Accept more fuzz in line numbers.
 
 2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>

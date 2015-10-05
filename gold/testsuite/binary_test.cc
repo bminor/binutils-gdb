@@ -28,9 +28,9 @@
 #include <cstring>
 #include <stdint.h>
 
-extern char _binary_binary_txt_start[];
-extern char _binary_binary_txt_end[];
-extern char _binary_binary_txt_size[];
+extern char _binary_binary_txt_start[] __attribute__((__aligned__(1)));
+extern char _binary_binary_txt_end[] __attribute__((__aligned__(1)));
+extern char _binary_binary_txt_size[] __attribute__((__aligned__(1)));
 
 int
 main(int, char**)

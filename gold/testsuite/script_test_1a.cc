@@ -24,7 +24,14 @@
 
 #include "script_test_1.h"
 
-extern char a, b, c, d, e, f, g;
+extern char
+  a __attribute__((__aligned__(1))),
+  b __attribute__((__aligned__(1))),
+  c __attribute__((__aligned__(1))),
+  d __attribute__((__aligned__(1))),
+  e __attribute__((__aligned__(1))),
+  f __attribute__((__aligned__(1))),
+  g __attribute__((__aligned__(1)));
 int sym = 3;
 int common_sym;
 
