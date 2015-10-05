@@ -2029,11 +2029,13 @@ user_friendly_fixup (aarch64_inst *inst)
     }
 }
 
-/* Decode INSN and fill in *INST the instruction information.  Return zero
-   on success.  */
+/* Decode INSN and fill in *INST the instruction information.  An alias
+   opcode may be filled in *INSN if NOALIASES_P is FALSE.  Return zero on
+   success.  */
 
 int
-aarch64_decode_insn (aarch64_insn insn, aarch64_inst *inst)
+aarch64_decode_insn (aarch64_insn insn, aarch64_inst *inst,
+		     bfd_boolean noaliases_p)
 {
   const aarch64_opcode *opcode = aarch64_opcode_lookup (insn);
 
@@ -2060,7 +2062,7 @@ aarch64_decode_insn (aarch64_insn insn, aarch64_inst *inst)
     {
       /* But only one opcode can be decoded successfully for, as the
 	 decoding routine will check the constraint carefully.  */
-      if (aarch64_opcode_decode (opcode, insn, inst, no_aliases) == 1)
+      if (aarch64_opcode_decode (opcode, insn, inst, noaliases_p) == 1)
 	return ERR_OK;
       opcode = aarch64_find_next_opcode (opcode);
     }
@@ -2172,7 +2174,7 @@ print_insn_aarch64_word (bfd_vma pc,
        addresses, since the addend is not currently pc-relative.  */
     pc = 0;
 
-  ret = aarch64_decode_insn (word, &inst);
+  ret = aarch64_decode_insn (word, &inst, no_aliases);
 
   if (((word >> 21) & 0x3ff) == 1)
     {

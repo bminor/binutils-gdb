@@ -2499,7 +2499,7 @@ aarch64_software_single_step (struct frame_info *frame)
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
   aarch64_inst inst;
 
-  if (aarch64_decode_insn (insn, &inst) != 0)
+  if (aarch64_decode_insn (insn, &inst, 1) != 0)
     return 0;
 
   /* Look for a Load Exclusive instruction which begins the sequence.  */
@@ -2512,7 +2512,7 @@ aarch64_software_single_step (struct frame_info *frame)
       insn = read_memory_unsigned_integer (loc, insn_size,
 					   byte_order_for_code);
 
-      if (aarch64_decode_insn (insn, &inst) != 0)
+      if (aarch64_decode_insn (insn, &inst, 1) != 0)
 	return 0;
       /* Check if the instruction is a conditional branch.  */
       if (inst.opcode->iclass == condbranch)

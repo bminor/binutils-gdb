@@ -930,7 +930,7 @@ extern int
 aarch64_zero_register_p (const aarch64_opnd_info *);
 
 extern int
-aarch64_decode_insn (aarch64_insn, aarch64_inst *);
+aarch64_decode_insn (aarch64_insn, aarch64_inst *, bfd_boolean);
 
 /* Given an operand qualifier, return the expected data element size
    of a qualified operand.  */

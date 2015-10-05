@@ -1,3 +1,7 @@
+2015-10-28  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64.h (aarch64_decode_insn): Update declaration.
+
 2015-10-07  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64.h (aarch64_sys_ins_reg) <template>: Removed.

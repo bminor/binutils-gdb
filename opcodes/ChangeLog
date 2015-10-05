@@ -1,3 +1,11 @@
+2015-10-28  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-dis.c	(aarch64_decode_insn): Add one argument
+	noaliases_p.  Update comments.  Pass noaliases_p rather than
+	no_aliases to aarch64_opcode_decode.
+	(print_insn_aarch64_word): Pass no_aliases to
+	aarch64_decode_insn.
+
 2015-10-27  Vinay  <Vinay.G@kpit.com>
 
 	PR binutils/19159

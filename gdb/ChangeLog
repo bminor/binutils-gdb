@@ -1,3 +1,8 @@
+2015-10-28  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_software_single_step): Pass 1 to
+	aarch64_decode_insn.
+
 2015-10-27  Pedro Alves  <palves@redhat.com>
 
 	* common/print-utils.c (host_address_to_string): Rename to ...
