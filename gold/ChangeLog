@@ -1,3 +1,29 @@
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* dynobj.cc (Dynobj::create_elf_hash_table): Create hash table with
+	target-specific entry size.
+	(Dynobj::sized_create_elf_hash_table): Add size template parameter.
+	* dynobj.h (Dynobj::sized_create_elf_hash_table): Likewise.
+	* layout.cc (Layout::create_dynamic_symtab): Set entsize to
+	hash_entry_size.
+	* target.h (Target::hash_entry_size): New method.
+	(Target::Target_info::hash_entry_size): New data member.
+
+	* aarch64.cc (Target_aarch64::aarch64_info): Add hash_entry_size.
+	* arm.cc (Target_arm::arm_info): Likewise.
+	(Target_arm_nacl::arm_nacl_info): Likewise.
+	* i386.cc (Target_i386::i386_info): Likewise.
+	(Target_i386_nacl::i386_nacl_info): Likewise.
+	(Target_iamcu::iamcu_info): Likewise.
+	* mips.cc (Target_mips::mips_info): Likewise.
+	(Target_mips_nacl::mips_nacl_info): Likewise.
+	* powerpc.cc (Target_powerpc::powerpc_info): Likewise.
+	* sparc.cc (Target_sparc::sparc_info): Likewise.
+	* tilegx.cc (Target_tilegx::tilegx_info): Likewise.
+	* x86_64.cc (Target_x86_64::x86_64_info): Likewise.
+	(Target_x86_64_nacl::x86_64_nacl_info): Likewise.
+	* testsuite/testfile.cc (Target_test::test_target_info): Likewise.
+
 2015-10-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/19177

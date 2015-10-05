@@ -10490,7 +10490,8 @@ const Target::Target_info Target_mips<size, big_endian>::mips_info =
   0,                    // large_common_section_flags
   NULL,                 // attributes_section
   NULL,                 // attributes_vendor
-  "__start"		// entry_symbol_name
+  "__start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 template<int size, bool big_endian>
@@ -10529,7 +10530,8 @@ const Target::Target_info Target_mips_nacl<size, big_endian>::mips_nacl_info =
   0,                    // large_common_section_flags
   NULL,                 // attributes_section
   NULL,                 // attributes_vendor
-  "_start"              // entry_symbol_name
+  "_start",             // entry_symbol_name
+  32,			// hash_entry_size
 };
 
 // Target selector for Mips.  Note this is never instantiated directly.

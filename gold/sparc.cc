@@ -482,7 +482,8 @@ Target::Target_info Target_sparc<32, true>::sparc_info =
   0,			// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 template<>
@@ -509,7 +510,8 @@ Target::Target_info Target_sparc<64, true>::sparc_info =
   0,			// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 // We have to take care here, even when operating in little-endian
