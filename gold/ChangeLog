@@ -1,5 +1,9 @@
 2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* testsuite/debug_msg.sh: Accept more fuzz in line numbers.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	PR gold/18959
 	* stringpool.cc (Stringpool_template::new_key_offset): Align all
 	strings, even zero-length.
