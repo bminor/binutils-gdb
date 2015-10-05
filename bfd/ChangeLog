@@ -1,3 +1,9 @@
+2015-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18914
+	* elflink.c (elf_link_add_object_symbols): Don't re-export a
+	symbol if it isn't undefined.
+
 2015-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config.bfd (targ_selvecs, targ64_selvecs): Add iamcu_elf32_vec,

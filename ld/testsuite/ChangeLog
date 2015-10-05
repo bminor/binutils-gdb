@@ -1,3 +1,9 @@
+2015-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18914
+	* ld-elf/exclude.exp: Also check exclude_common.
+	* ld-elf/exclude2.s: Add exclude_common.
+
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp (tls-relax-large-le-ie): Run new test.

@@ -4216,7 +4216,7 @@ error_free_dyn:
 
 	  /* If this symbol has default visibility and the user has
 	     requested we not re-export it, then mark it as hidden.  */
-	  if (definition
+	  if (!bfd_is_und_section (sec)
 	      && !dynamic
 	      && abfd->no_export
 	      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
