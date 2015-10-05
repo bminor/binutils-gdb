@@ -1,5 +1,17 @@
 2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* s390.cc: New file.
+	* Makefile.am (TARGETSOURCES): Add s390.cc.
+	(ALL_TARGETOBJS): Add s390.o.
+	* Makefile.in: Regenerate.
+	* configure.ac: Add s390 support.
+	* configure: Regenerate.
+	* configure.tgt: Add s390-*-* and s390x-*-*.
+	* testsuite/icf_safe_test.sh (arch_specific_safe_fold): Add s390
+	support.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* archive.cc (Archive::sym64name): New const.
 	(Archive::setup): Add support for SYM64 armap.
 	(Archive::read_armap): Likewise.
