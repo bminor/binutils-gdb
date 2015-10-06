@@ -1107,13 +1107,12 @@ public:
   // R_SPARC_GOTDATA_OP_HIX22: @gdopoff(Symbol + Addend) >> 10
   static inline void
   gdop_hix22(unsigned char* view,
-	     typename elfcpp::Elf_types<size>::Elf_Addr value,
-	     typename elfcpp::Elf_types<size>::Elf_Addr addend)
+	     typename elfcpp::Elf_types<size>::Elf_Addr value)
   {
     typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<32, true>::readval(wv);
-    int32_t reloc = static_cast<int32_t>(value + addend);
+    int32_t reloc = static_cast<int32_t>(value);
 
     val &= ~0x3fffff;
 
@@ -1170,13 +1169,12 @@ public:
   // R_SPARC_GOTDATA_OP_LOX10: (@gdopoff(Symbol + Addend) & 0x3ff) | 0x1c00
   static inline void
   gdop_lox10(unsigned char* view,
-	     typename elfcpp::Elf_types<size>::Elf_Addr value,
-	     typename elfcpp::Elf_types<size>::Elf_Addr addend)
+	     typename elfcpp::Elf_types<size>::Elf_Addr value)
   {
     typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<32, true>::readval(wv);
-    int32_t reloc = static_cast<int32_t>(value + addend);
+    int32_t reloc = static_cast<int32_t>(value);
 
     if (reloc < 0)
       reloc = (reloc & 0x3ff) | 0x1c00;
@@ -3244,7 +3242,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	      && !gsym->is_preemptible()
 	      && !orig_is_ifunc))
 	{
-	  got_offset = psymval->value(object, 0) - target->got_address();
+	  got_offset = psymval->value(object, addend) - target->got_address();
 	  gdop_valid = true;
 	  break;
 	}
@@ -3384,7 +3382,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
       if (gdop_valid)
 	{
-	  Reloc::gdop_lox10(view, got_offset, addend);
+	  Reloc::gdop_lox10(view, got_offset);
 	  break;
 	}
       /* Fall through.  */
@@ -3395,7 +3393,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
       if (gdop_valid)
 	{
-	  Reloc::gdop_hix22(view, got_offset, addend);
+	  Reloc::gdop_hix22(view, got_offset);
 	  break;
 	}
       /* Fall through.  */
