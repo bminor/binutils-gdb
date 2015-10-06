@@ -1,3 +1,11 @@
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (parse_sys_reg): New parameter.  Check target
+	support.  Fix whitespace.
+	(parse_operands): Update for parse_sys_reg changes.
+	(aarch64_features): Add "pan".
+	* doc/c-aarch64.texi (Aarch64 Extensions): Add "pan".
+
 2015-02-03  Renlin Li  <renlin.li@arm.com>
 
 	* doc/c-aarch64.texi (.arch): Document the directive.

@@ -1,3 +1,9 @@
+2015-06-01  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* pan-directive.d: New.
+	* pan.d: New.
+	* pan.s: New
+
 2014-11-18  Jan Beulich  <jbeulich@suse.com>
 
 	* gas/aarch64/crc32-directive.d: New.
