@@ -1,3 +1,9 @@
+2015-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (bfd_update_compression_header): Clear the ch_reserved
+	field in 64-bit output.
+	(bfd_convert_section_contents): Likewise.
+
 2015-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18914
