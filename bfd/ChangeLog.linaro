@@ -1,3 +1,9 @@
+2015-10-06  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
+
+	Linaro binutils 2.25-2015.10 released.
+
+	* version.h: Bump VERSION.
+
 2015-01-05  Will Newton  <will.newton@linaro.org>
 
 	* version.h: Bump VERSION.
