@@ -596,8 +596,9 @@ restore_command (char *args_in, int from_tty)
 	}
       /* Parse offset (optional).  */
       if (args != NULL && *args != '\0')
-      data.load_offset = 
-	parse_and_eval_address (scan_expression_with_cleanup (&args, NULL));
+	data.load_offset = binary_flag ?
+	  parse_and_eval_address (scan_expression_with_cleanup (&args, NULL)) :
+	  parse_and_eval_long (scan_expression_with_cleanup (&args, NULL));
       if (args != NULL && *args != '\0')
 	{
 	  /* Parse start address (optional).  */

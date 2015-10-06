@@ -1,3 +1,8 @@
+2015-10-06  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* cli/cli-dump.c (restore_command): Parse load_offset (bias) as address
+	only when the file is binary.
+
 2015-10-02  James Bowman  <james.bowman@ftdichip.com>
 
 	* ft32-tdep.c (ft32_analyze_prologue): Add function prolog
