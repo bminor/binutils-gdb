@@ -652,7 +652,7 @@ extern bfd_boolean aarch64_pstatefield_supported_p (const aarch64_feature_set,
 
 typedef struct
 {
-  const char *template;
+  const char *name;
   uint32_t value;
   int has_xt;
 } aarch64_sys_ins_reg;

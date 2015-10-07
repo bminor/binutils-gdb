@@ -1027,12 +1027,12 @@ aarch64_ext_sysins_op (const aarch64_operand *self ATTRIBUTE_UNUSED,
     default: assert (0); return 0;
     }
 
-  for (i = 0; sysins_ops[i].template != NULL; ++i)
+  for (i = 0; sysins_ops[i].name != NULL; ++i)
     if (sysins_ops[i].value == value)
       {
 	info->sysins_op = sysins_ops + i;
 	DEBUG_TRACE ("%s found value: %x, has_xt: %d, i: %d.",
-		     info->sysins_op->template,
+		     info->sysins_op->name,
 		     (unsigned)info->sysins_op->value,
 		     info->sysins_op->has_xt, i);
 	return 1;

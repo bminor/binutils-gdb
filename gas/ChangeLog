@@ -1,3 +1,8 @@
+2015-10-07  Yao Qi  <yao.qi@linaro.org>
+
+	* config/tc-aarch64.c (md_begin): Access field 'name' rather
+	than 'template'.
+
 2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
         * config/tc-arc.c: Revamped file for ARC support.
