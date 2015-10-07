@@ -3,7 +3,7 @@
 _start:
         .org 0x20
         nop
-        .org 0x44
+        .org 0x44,5
         nop
 
 
@@ -14,7 +14,7 @@ text2:
         nop
         .align 4
         nop
-        .align 4
+        .align 4,3
         nop
         .org 0x200
         nop

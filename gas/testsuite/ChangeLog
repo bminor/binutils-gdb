@@ -1,3 +1,8 @@
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gas/avr/avr-prop-1.s: Use fill in some cases.
+	* gas/avr/avr-prop-1.d: Update expected results.
+
 2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* gas/arc/adc.s: Update test for ARCv1/ARCv2.

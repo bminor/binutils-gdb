@@ -1,3 +1,11 @@
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-avr.c (avr_output_property_record): Fix overwrite bug
+	for align and fill records.
+	(avr_handle_align): Record fill information for align frags.
+	(create_record_for_frag): Add next frag assertion, use correct
+	address for align records.
+
 2015-10-10  Alan Modra  <amodra@gmail.com>
 
 	PR gas/19113

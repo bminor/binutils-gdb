@@ -1993,7 +1993,7 @@ avr_output_property_record (char * const frag_base, char *frag_ptr,
 
     case RECORD_ALIGN_AND_FILL:
       md_number_to_chars (frag_ptr, record->data.align.bytes, 4);
-      md_number_to_chars (frag_ptr, record->data.align.fill, 4);
+      md_number_to_chars (frag_ptr + 4, record->data.align.fill, 4);
       frag_ptr += 8;
       break;
 
@@ -2038,11 +2038,14 @@ avr_handle_align (fragS *fragP)
          alignment mechanism.  */
       if ((fragP->fr_type == rs_align
            || fragP->fr_type == rs_align_code)
-          && fragP->fr_address > 0
           && fragP->fr_offset > 0)
         {
+          char *p = fragP->fr_literal + fragP->fr_fix;
+
           fragP->tc_frag_data.is_align = TRUE;
           fragP->tc_frag_data.alignment = fragP->fr_offset;
+          fragP->tc_frag_data.fill = *p;
+          fragP->tc_frag_data.has_fill = (fragP->tc_frag_data.fill != 0);
         }
 
       if (fragP->fr_type == rs_org && fragP->fr_offset > 0)
@@ -2078,6 +2081,7 @@ create_record_for_frag (segT sec, fragS *fragP)
 
   prop_rec_link = xmalloc (sizeof (struct avr_property_record_link));
   memset (prop_rec_link, 0, sizeof (*prop_rec_link));
+  gas_assert (fragP->fr_next != NULL);
 
   if (fragP->tc_frag_data.is_org)
     {
@@ -2094,7 +2098,7 @@ create_record_for_frag (segT sec, fragS *fragP)
     }
   else
     {
-      prop_rec_link->record.offset = fragP->fr_address;
+      prop_rec_link->record.offset = fragP->fr_next->fr_address;
       prop_rec_link->record.section = sec;
 
       gas_assert (fragP->tc_frag_data.is_align);

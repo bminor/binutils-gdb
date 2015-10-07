@@ -1,3 +1,8 @@
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* od-elf32_avr.c (elf32_avr_dump_avr_prop): Fix printing of align
+	specific data, fix formatting for align and org data.
+
 2015-09-01  Claudiu Zissulescu  <claziss@synopsys.com>
 	    Cupertino Miranda  <cmiranda@synopsys.com>
 
