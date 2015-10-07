@@ -59,6 +59,12 @@
 
 #include "arch/aarch64-insn.h"
 
+#include "opcode/aarch64.h"
+
+#define submask(x) ((1L << ((x) + 1)) - 1)
+#define bit(obj,st) (((obj) >> (st)) & 1)
+#define bits(obj,st,fn) (((obj) >> (st)) & submask ((fn) - (st)))
+
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0
 #define AARCH64_D0_REGNUM (AARCH64_Q0_REGNUM + 32)
@@ -2491,35 +2497,40 @@ aarch64_software_single_step (struct frame_info *frame)
   int insn_count;
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
+  aarch64_inst inst;
+
+  if (aarch64_decode_insn (insn, &inst) != 0)
+    return 0;
 
   /* Look for a Load Exclusive instruction which begins the sequence.  */
-  if (!decode_masked_match (insn, 0x3fc00000, 0x08400000))
+  if (inst.opcode->iclass != ldstexcl || bit (insn, 22) == 0)
     return 0;
 
   for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
     {
-      int32_t offset;
-      unsigned cond;
-
       loc += insn_size;
       insn = read_memory_unsigned_integer (loc, insn_size,
 					   byte_order_for_code);
 
+      if (aarch64_decode_insn (insn, &inst) != 0)
+	return 0;
       /* Check if the instruction is a conditional branch.  */
-      if (aarch64_decode_bcond (loc, insn, &cond, &offset))
+      if (inst.opcode->iclass == condbranch)
 	{
+	  gdb_assert (inst.operands[0].type == AARCH64_OPND_ADDR_PCREL19);
+
 	  if (bc_insn_count >= 1)
 	    return 0;
 
 	  /* It is, so we'll try to set a breakpoint at the destination.  */
-	  breaks[1] = loc + offset;
+	  breaks[1] = loc + inst.operands[0].imm.value;
 
 	  bc_insn_count++;
 	  last_breakpoint++;
 	}
 
       /* Look for the Store Exclusive which closes the atomic sequence.  */
-      if (decode_masked_match (insn, 0x3fc00000, 0x08000000))
+      if (inst.opcode->iclass == ldstexcl && bit (insn, 22) == 0)
 	{
 	  closing_insn = loc;
 	  break;
@@ -2770,10 +2781,6 @@ When on, AArch64 specific debugging is enabled."),
 }
 
 /* AArch64 process record-replay related structures, defines etc.  */
-
-#define submask(x) ((1L << ((x) + 1)) - 1)
-#define bit(obj,st) (((obj) >> (st)) & 1)
-#define bits(obj,st,fn) (((obj) >> (st)) & submask ((fn) - (st)))
 
 #define REG_ALLOC(REGS, LENGTH, RECORD_BUF) \
         do  \
