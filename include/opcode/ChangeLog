@@ -1,3 +1,7 @@
+2015-10-07  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64.h [__cplusplus]: Wrap in extern "C".
+
 2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
             Cupertino Miranda  <cmiranda@synopsys.com>
 

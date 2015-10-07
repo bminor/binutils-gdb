@@ -27,6 +27,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* The offset for pc-relative addressing is currently defined to be 0.  */
 #define AARCH64_PCREL_OFFSET		0
 
@@ -963,5 +967,9 @@ aarch64_verbose (const char *, ...) __attribute__ ((format (printf, 1, 2)));
 #define DEBUG_TRACE(M, ...) ;
 #define DEBUG_TRACE_IF(C, M, ...) ;
 #endif /* DEBUG_AARCH64 */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OPCODE_AARCH64_H */
