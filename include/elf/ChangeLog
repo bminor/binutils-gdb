@@ -1,3 +1,12 @@
+2015-10-07  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-reloc.def: Macro file with definition of all relocation
+	types.
+	* arc.h: Changed macros for the newly supported ARC cpus.  Altered
+	enum defining the supported relocations.
+	* common.h: Changed EM_ARC_A5 definition to EM_ARC_COMPACT. Added
+	macro for EM_ARC_COMPACT2.
+
 2015-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* common.h (DF_1_STUB, DF_1_PIE): Define.

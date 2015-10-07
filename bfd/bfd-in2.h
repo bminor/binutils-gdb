@@ -2148,10 +2148,12 @@ enum bfd_architecture
 #define bfd_mach_v850e2v3      0x45325633
 #define bfd_mach_v850e3v5      0x45335635 /* ('E'|'3'|'V'|'5') */
   bfd_arch_arc,       /* ARC Cores */
-#define bfd_mach_arc_5         5
-#define bfd_mach_arc_6         6
-#define bfd_mach_arc_7         7
-#define bfd_mach_arc_8         8
+#define bfd_mach_arc_a4        0
+#define bfd_mach_arc_a5        1
+#define bfd_mach_arc_arc600    2
+#define bfd_mach_arc_arc601    4
+#define bfd_mach_arc_arc700    3
+#define bfd_mach_arc_arcv2     5
  bfd_arch_m32c,     /* Renesas M16C/M32C.  */
 #define bfd_mach_m16c        0x75
 #define bfd_mach_m32c        0x78
@@ -3620,16 +3622,72 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_SH_GOTOFFFUNCDESC20,
   BFD_RELOC_SH_FUNCDESC,
 
-/* ARC Cores relocs.
-ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
-not stored in the instruction.  The high 20 bits are installed in bits 26
-through 7 of the instruction.  */
-  BFD_RELOC_ARC_B22_PCREL,
-
-/* ARC 26 bit absolute branch.  The lowest two bits must be zero and are not
-stored in the instruction.  The high 24 bits are installed in bits 23
-through 0.  */
-  BFD_RELOC_ARC_B26,
+/* ARC relocs.  */
+  BFD_RELOC_ARC_NONE,
+  BFD_RELOC_ARC_8,
+  BFD_RELOC_ARC_16,
+  BFD_RELOC_ARC_24,
+  BFD_RELOC_ARC_32,
+  BFD_RELOC_ARC_N8,
+  BFD_RELOC_ARC_N16,
+  BFD_RELOC_ARC_N24,
+  BFD_RELOC_ARC_N32,
+  BFD_RELOC_ARC_SDA,
+  BFD_RELOC_ARC_SECTOFF,
+  BFD_RELOC_ARC_S21H_PCREL,
+  BFD_RELOC_ARC_S21W_PCREL,
+  BFD_RELOC_ARC_S25H_PCREL,
+  BFD_RELOC_ARC_S25W_PCREL,
+  BFD_RELOC_ARC_SDA32,
+  BFD_RELOC_ARC_SDA_LDST,
+  BFD_RELOC_ARC_SDA_LDST1,
+  BFD_RELOC_ARC_SDA_LDST2,
+  BFD_RELOC_ARC_SDA16_LD,
+  BFD_RELOC_ARC_SDA16_LD1,
+  BFD_RELOC_ARC_SDA16_LD2,
+  BFD_RELOC_ARC_S13_PCREL,
+  BFD_RELOC_ARC_W,
+  BFD_RELOC_ARC_32_ME,
+  BFD_RELOC_ARC_32_ME_S,
+  BFD_RELOC_ARC_N32_ME,
+  BFD_RELOC_ARC_SECTOFF_ME,
+  BFD_RELOC_ARC_SDA32_ME,
+  BFD_RELOC_ARC_W_ME,
+  BFD_RELOC_AC_SECTOFF_U8,
+  BFD_RELOC_AC_SECTOFF_U8_1,
+  BFD_RELOC_AC_SECTOFF_U8_2,
+  BFD_RELOC_AC_SECTFOFF_S9,
+  BFD_RELOC_AC_SECTFOFF_S9_1,
+  BFD_RELOC_AC_SECTFOFF_S9_2,
+  BFD_RELOC_ARC_SECTOFF_ME_1,
+  BFD_RELOC_ARC_SECTOFF_ME_2,
+  BFD_RELOC_ARC_SECTOFF_1,
+  BFD_RELOC_ARC_SECTOFF_2,
+  BFD_RELOC_ARC_SDA16_ST2,
+  BFD_RELOC_ARC_PC32,
+  BFD_RELOC_ARC_GOT32,
+  BFD_RELOC_ARC_GOTPC32,
+  BFD_RELOC_ARC_PLT32,
+  BFD_RELOC_ARC_COPY,
+  BFD_RELOC_ARC_GLOB_DAT,
+  BFD_RELOC_ARC_JMP_SLOT,
+  BFD_RELOC_ARC_RELATIVE,
+  BFD_RELOC_ARC_GOTOFF,
+  BFD_RELOC_ARC_GOTPC,
+  BFD_RELOC_ARC_S21W_PCREL_PLT,
+  BFD_RELOC_ARC_S25H_PCREL_PLT,
+  BFD_RELOC_ARC_TLS_DTPMOD,
+  BFD_RELOC_ARC_TLS_TPOFF,
+  BFD_RELOC_ARC_TLS_GD_GOT,
+  BFD_RELOC_ARC_TLS_GD_LD,
+  BFD_RELOC_ARC_TLS_GD_CALL,
+  BFD_RELOC_ARC_TLS_IE_GOT,
+  BFD_RELOC_ARC_TLS_DTPOFF,
+  BFD_RELOC_ARC_TLS_DTPOFF_S9,
+  BFD_RELOC_ARC_TLS_LE_S9,
+  BFD_RELOC_ARC_TLS_LE_32,
+  BFD_RELOC_ARC_S25W_PCREL_PLT,
+  BFD_RELOC_ARC_S21H_PCREL_PLT,
 
 /* ADI Blackfin 16 bit immediate absolute reloc.  */
   BFD_RELOC_BFIN_16_IMM,

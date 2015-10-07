@@ -265,7 +265,9 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset ARC
 
 @emph{Target ARC options:}
-   [@b{-marc[5|6|7|8]}]
+   [@b{-mcpu=@var{cpu}}]
+   [@b{-mA6}|@b{-mARC600}|@b{-mARC601}|@b{-mA7}|@b{-mARC700}|@b{-mEM}|@b{-mHS}]
+   [@b{-mcode-density}]
    [@b{-EB}|@b{-EL}]
 @end ifset
 @ifset ARM
@@ -860,14 +862,16 @@ processor.
 
 @c man begin OPTIONS
 @ifset ARC
-The following options are available when @value{AS} is configured for
-an ARC processor.
+The following options are available when @value{AS} is configured for an ARC
+processor.
 
 @table @gcctabopt
-@item -marc[5|6|7|8]
+@item -mcpu=@var{cpu}
 This option selects the core processor variant.
 @item -EB | -EL
 Select either big-endian (-EB) or little-endian (-EL) output.
+@item -mcode-density
+Enable Code Density extenssion instructions.
 @end table
 @end ifset
 

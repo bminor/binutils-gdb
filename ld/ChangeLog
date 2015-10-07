@@ -1,3 +1,25 @@
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+	    Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* configure.tgt: Added target arc-*-elf* and arc*-*-linux-uclibc*.
+	* emulparams/arcebelf_prof.sh: New file
+	* emulparams/arcebelf.sh: Likewise.
+	* emulparams/arceblinux_prof.sh: Likewise.
+	* emulparams/arceblinux.sh: Likewise.
+	* emulparams/arcelf_prof.sh: Likewise.
+	* emulparams/arcelf.sh: Likewise.
+	* emulparams/arclinux_prof.sh: Likewise.
+	* emulparams/arclinux.sh: Likewise.
+	* emulparams/arcv2elfx.sh: Likewise.
+	* emulparams/arcv2elf.sh: Likewise.
+	* emultempl/arclinux.em: Likewise.
+	* scripttempl/arclinux.sc: Likewise.
+	* scripttempl/elfarc.sc: Likewise.
+	* scripttempl/elfarcv2.sc: Likewise
+	* Makefile.am: Add new ARC emulations.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention the new feature.
+
 2015-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt (targ_extra_emuls): Add elf_iamcu for Solaris2/x86.

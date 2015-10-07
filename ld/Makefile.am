@@ -156,7 +156,12 @@ ALL_EMULATION_SOURCES = \
 	eaixrs6.c \
 	ealpha.c \
 	ealphavms.c \
+	earcv2elf.c \
+	earcv2elfx.c \
 	earcelf.c \
+	earcelf_prof.c \
+	earclinux.c \
+	earclinux_prof.c \
 	earm_epoc_pe.c \
 	earm_wince_pe.c \
 	earmaoutb.c \
@@ -692,8 +697,26 @@ ealphavms.c: $(srcdir)/emulparams/alphavms.sh \
   $(srcdir)/emultempl/vms.em $(srcdir)/scripttempl/alphavms.sc \
   ${GEN_DEPENDS}
 
+earcv2elf.c: $(srcdir)/emulparams/arcv2elf.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elfarcv2.sc ${GEN_DEPENDS}
+
+earcv2elfx.c: $(srcdir)/emulparams/arcv2elfx.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elfarcv2.sc ${GEN_DEPENDS}
+
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elfarc.sc ${GEN_DEPENDS}
+
+earcelf_prof.c: $(srcdir)/emulparams/arcelf_prof.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elfarc.sc ${GEN_DEPENDS}
+
+#for linux on arc
+earclinux.c: $(srcdir)/emulparams/arclinux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
+  $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
+
+earclinux_prof.c: $(srcdir)/emulparams/arclinux_prof.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
+  $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
 
 earm_epoc_pe.c: $(srcdir)/emulparams/arm_epoc_pe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/epocpe.sc ${GEN_DEPENDS}

@@ -1,3 +1,7 @@
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* dis-asm.h (arc_get_disassembler): Correct declaration.
+
 2015-09-30  Nick Clifton  <nickc@redhat.com>
 
 	Import the following patches from the GCC mainline:

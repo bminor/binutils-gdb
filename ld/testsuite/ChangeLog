@@ -1,3 +1,7 @@
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* ld-elf/linkonce1.d: Skip extra relocs before .debug_frame.
+
 2015-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18914

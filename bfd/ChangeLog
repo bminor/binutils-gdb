@@ -1,3 +1,15 @@
+2015-10-07  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* archures.c: Remove support for older ARC. Added support for new
+	ARC cpus (ARC600, ARC601, ARC700, ARCV2).
+	* bfd-in2.h: Likewise.
+	* config.bfd: Likewise.
+	* cpu-arc.c: Likewise.
+	* elf32-arc.c: Totally changed file with a refactored
+	inplementation of the ARC port.
+	* libbfd.h: Added ARC specific relocation types.
+	* reloc.c: Likewise.
+
 2015-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (bfd_update_compression_header): Clear the ch_reserved

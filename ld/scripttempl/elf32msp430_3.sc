@@ -154,7 +154,6 @@ SECTIONS
     *(.bss)
     *(COMMON)
     ${RELOCATING+ PROVIDE (__bss_end = .) ; }
-    ${RELOCATING+ _end = . ;  }
   } ${RELOCATING+ > data}
 
   .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} :
@@ -163,8 +162,16 @@ SECTIONS
     *(.noinit)
     *(COMMON)
     ${RELOCATING+ PROVIDE (__noinit_end = .) ; }
-    ${RELOCATING+ _end = . ;  }
   } ${RELOCATING+ > data}
+
+  .persistent ${RELOCATING+ SIZEOF(.noinit) + ADDR(.noinit)} :
+  {
+    ${RELOCATING+ PROVIDE (__persistent_start = .) ; }
+    *(.persistent)
+    ${RELOCATING+ PROVIDE (__persistent_end = .) ; }
+  } ${RELOCATING+ > data}
+
+  ${RELOCATING+ _end = . ;}
 
   .vectors ${RELOCATING-0}:
   {

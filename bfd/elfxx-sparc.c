@@ -3468,9 +3468,9 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 		memset (&outrel, 0, sizeof outrel);
 	      /* h->dynindx may be -1 if the symbol was marked to
 		 become local.  */
-	      else if (h != NULL &&
-		       h->dynindx != -1
-		       && (! is_plt
+	      else if (h != NULL
+		       && h->dynindx != -1
+		       && (_bfd_sparc_elf_howto_table[r_type].pc_relative
 			   || !bfd_link_pic (info)
 			   || !SYMBOLIC_BIND (info, h)
 			   || !h->def_regular))
