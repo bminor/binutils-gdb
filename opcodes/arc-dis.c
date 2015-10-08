@@ -118,7 +118,8 @@ print_insn_arc (bfd_vma memaddr,
   int status;
   unsigned int i;
   int insnLen = 0;
-  unsigned insn[2], isa_mask;
+  unsigned insn[2] = { 0, 0 };
+  unsigned isa_mask;
   const unsigned char *opidx;
   const unsigned char *flgidx;
   const struct arc_opcode *opcode;
