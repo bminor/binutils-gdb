@@ -1,3 +1,10 @@
+2015-10-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19060
+	* elfcpp.h (Chdr::get_ch_type): Change return type to Elf_Word.
+	* elfcpp_internal.h (Chdr_data<64>): Change ch_type to 4 bytes
+	and add ch_reserved.
+
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfcpp.h (Elf_sizes): Add chdr_size.

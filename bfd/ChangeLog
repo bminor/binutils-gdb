@@ -1,3 +1,182 @@
+2015-10-07  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* archures.c: Remove support for older ARC. Added support for new
+	ARC cpus (ARC600, ARC601, ARC700, ARCV2).
+	* bfd-in2.h: Likewise.
+	* config.bfd: Likewise.
+	* cpu-arc.c: Likewise.
+	* elf32-arc.c: Totally changed file with a refactored
+	inplementation of the ARC port.
+	* libbfd.h: Added ARC specific relocation types.
+	* reloc.c: Likewise.
+
+2015-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (bfd_update_compression_header): Clear the ch_reserved
+	field in 64-bit output.
+	(bfd_convert_section_contents): Likewise.
+
+2015-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18914
+	* elflink.c (elf_link_add_object_symbols): Don't re-export a
+	symbol if it isn't undefined.
+
+2015-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config.bfd (targ_selvecs, targ64_selvecs): Add iamcu_elf32_vec,
+	i386_pei_vec and x86_64_pei_vec for Solaris2/x86.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (IS_AARCH64_TLS_RELAX_RELOC): Add
+	TLSIE_MOVW_GOTTPREL_G1.
+	(aarch64_tls_transition_without_check): Add
+	TLSIE_MOVW_GOTTPREL_G1 to TLSLE_MOVW_TPREL_G2
+	transition for local symbol.
+	(elfNN_aarch64_tls_relax): Add a argument to pass tp offset.
+	Add TLSIE_MOVW_GOTTPREL_G1 relaxation.
+	(elfNN_aarch64_relocate_section): Call elfNN_aarch64_tls_relax
+	with new argument.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (aarch64_tls_transition_without_check):  Add
+	relax transitions for TLSDESC_ADD, TLSDESC_LDR, TLSDESC_OFF_G0_NC,
+	TLSDESC_OFF_G1.
+	(aarch64_tls_transition_without_check): Add relaxation support.
+	(aarch64_reloc_got_type): Add support.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_tls_relax): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Check overflow for
+	BFD_RELOC_AARCH64_TLSDESC_OFF_G1.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c(IS_AARCH64_TLS_RELAX_RELOC):
+	Add relaxation support for TLSGD_MOVW_G0_NC and TLSGD_MOVW_G1.
+	(aarch64_tls_transition_without_check): Likewise
+	(elfNN_aarch64_tls_relax): Likwise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Create GOT section
+	for TLSLE_MOVW_TPREL_G(1, 1_NC, 2) relocation.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* reloc.c: Make AARCH64_TLSIE_MOVW_GOTTPREL_G1 and
+	AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC defined in alphabetical order.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Make
+	TLSIE_MOVW_GOTTPREL_G1 check overflow.
+	(aarch64_reloc_got_type): Add support for TLSIE_MOVW_GOTTPREL_G1
+	and TLSIE_MOVW_GOTTPREL_G0_NC.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Add
+	BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC support.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC): New entry.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Likewise
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Add
+	BFD_RELOC_AARCH64_TLSGD_MOVW_G1 support.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_TLSGD_MOVW_G1): New entry.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	BFD_RELOC_AARCH64_TLSGD_MOVW_G1.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Add
+	BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC support.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC): New.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry
+	MOVW_GOTOFF_G0_NC.
+	* libbfd.h: Regnerate.
+	* bfd-in2.h: Regenerate.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Add support
+	for BFD_RELOC_AARCH64_MOVW_GOTOFF_G1.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise
+	(elfNN_aarch64_final_link_relocate): Likewise
+
+2015-010-02  Renlin Li  <renlin.li@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_MOVW_GOTOFF_G1): New.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): New entry for
+	MOVW_GOTOFF_G1.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (aarch64_reloc_got_type): Add
+	BFD_RELOC_AARCH64_LD_64_GOTOFF_LO15 support.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend): Likewise.
+	(_bfd_aarch64_elf_resolve_relocation): Likewise
+	(elfNN_aarch64_final_link_relocate): Calculate offset within GOT.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Change if to
+	switch statement.
+
 2015-10-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19031

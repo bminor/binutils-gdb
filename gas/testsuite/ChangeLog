@@ -1,3 +1,116 @@
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* gas/arc/adc.s: Update test for ARCv1/ARCv2.
+	* gas/arc/adc.d: Expected output.
+	* gas/arc/add.s: Update test for ARCv1/ARCv2.
+	* gas/arc/add.d: Expected output.
+	* gas/arc/and.s: Update test for ARCv1/ARCv2.
+	* gas/arc/and.d: Expected output.
+	* gas/arc/arc.exp: Cleanup.
+	* gas/arc/asl.s: Update test for ARCv1/ARCv2.
+	* gas/arc/asl.d: Expected output.
+	* gas/arc/asr.s: Update test for ARCv1/ARCv2.
+	* gas/arc/asr.d: Expected output.
+	* gas/arc/b.s: Update test for ARCv1/ARCv2.
+	* gas/arc/b.d: Expected output.
+	* gas/arc/bic.s: Update test for ARCv1/ARCv2.
+	* gas/arc/bic.d: Expected output.
+	* gas/arc/bl.s: Update test for ARCv1/ARCv2.
+	* gas/arc/bl.d: Expected output.
+	* gas/arc/brk.s: Update test for ARCv1/ARCv2.
+	* gas/arc/brk.d: Expected output.
+	* gas/arc/extb.s: Update test for ARCv1/ARCv2.
+	* gas/arc/extb.d: Expected output.
+	* gas/arc/extw.s: Update test for ARCv1/ARCv2.
+	* gas/arc/extw.d: Expected output.
+	* gas/arc/flag.d: Update output for ARCv1/ARCv2.
+	* gas/arc/j.s: Update test for ARCv1/ARCv2.
+	* gas/arc/j.d: Expected output.
+	* gas/arc/jl.s: Update test for ARCv1/ARCv2.
+	* gas/arc/jl.d: Expected output.
+	* gas/arc/ld.s: Update test for ARCv1/ARCv2.
+	* gas/arc/ld.d: Expected output.
+	* gas/arc/ld2.s: Update test for ARCv1/ARCv2.
+	* gas/arc/ld2.d: Expected output.
+	* gas/arc/lp.s: Update test for ARCv1/ARCv2.
+	* gas/arc/lp.d: Expected output.
+	* gas/arc/lsr.s: Update test for ARCv1/ARCv2.
+	* gas/arc/lsr.d: Expected output.
+	* gas/arc/mov.s: Update test for ARCv1/ARCv2.
+	* gas/arc/mov.d: Expected output.
+	* gas/arc/nop.s: Update test for ARCv1/ARCv2.
+	* gas/arc/nop.d: Expected output.
+	* gas/arc/or.s: Update test for ARCv1/ARCv2.
+	* gas/arc/or.d: Expected output.
+	* gas/arc/rlc.s: Update test for ARCv1/ARCv2.
+	* gas/arc/rlc.d: Expected output.
+	* gas/arc/ror.s: Update test for ARCv1/ARCv2.
+	* gas/arc/ror.d: Expected output.
+	* gas/arc/rrc.s: Update test for ARCv1/ARCv2.
+	* gas/arc/rrc.d: Expected output.
+	* gas/arc/sbc.s: Update test for ARCv1/ARCv2.
+	* gas/arc/sbc.d: Expected output.
+	* gas/arc/sexb.s: Update test for ARCv1/ARCv2.
+	* gas/arc/sexb.d: Expected output.
+	* gas/arc/sexw.s: Update test for ARCv1/ARCv2.
+	* gas/arc/sexw.d: Expected output.
+	* gas/arc/sleep.s: Update test for ARCv1/ARCv2.
+	* gas/arc/sleep.d: Expected output.
+	* gas/arc/st.s: Update test for ARCv1/ARCv2.
+	* gas/arc/st.d: Expected output.
+	* gas/arc/sub.s: Update test for ARCv1/ARCv2.
+	* gas/arc/sub.d: Expected output.
+	* gas/arc/swi.d: Update expected output for ARCv1/ARCv2.
+	* gas/arc/warn.exp: Cleanup
+	* gas/arc/xor.s: Update test for ARCv1/ARCv2.
+	* gas/arc/xor.d: Expected output.
+	* gas/arc/alias.d: Removed.
+	* gas/arc/alias.s: Likewise.
+	* gas/arc/branch.d: Likewise.
+	* gas/arc/branch.s: Likewise.
+	* gas/arc/insn3.d: Likewise.
+	* gas/arc/insn3.s: Likewise.
+	* gas/arc/math.d: Likewise.
+	* gas/arc/math.s: Likewise.
+	* gas/arc/sshift.d: Likewise.
+	* gas/arc/sshift.s: Likewise.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+	* gas/aarch64/reloc-tlsdesc_off_g0_nc.d: New.
+	* gas/aarch64/reloc-tlsdesc_off_g0_nc.s: New.
+	* gas/aarch64/reloc-tlsdesc_off_g1.d: New.
+	* gas/aarch64/reloc-tlsdesc_off_g1.s: New.
+	* gas/aarch64/tls-desc.d: New.
+	* gas/aarch64/tls-desc.s: New.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+	* gas/aarch64/reloc-gottprel_g0_nc.d: New.
+	* gas/aarch64/reloc-gottprel_g0_nc.s: New.
+	* gas/aarch64/reloc-gottprel_g1.d: New.
+	* gas/aarch64/reloc-gottprel_g1.s: New.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+    * gas/aarch64/reloc-tlsgd_g0_nc.d: New.
+    * gas/aarch64/reloc-tlsgd_g0_nc.s: New.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+	* gas/aarch64/reloc-tlsgd_g1.s: New.
+	* gas/aarch64/reloc-tlsgd_g1.s: New.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+	* gas/aarch64/reloc-gotoff_g0_nc.s: New.
+	* gas/aarch64/reloc-gotoff_g0_nc.d: New.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* gas/aarch64/reloc-gotoff_g1.s: New.
+	* gas/aarch64/reloc-gotoff_g1.d: New.
+
 2015-09-30  Alan Modra  <amodra@gmail.com>
 
 	* gas/ppc/ppc.exp (e500-ill): Pass -me500.

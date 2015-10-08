@@ -1,3 +1,16 @@
+2015-09-01  Claudiu Zissulescu  <claziss@synopsys.com>
+	    Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* readelf.c (get_machine_name): Remove A5 reference. Add ARCompact
+	and ARCv2.
+	(get_machine_flags): Handle EM_ARCV2 and EM_ARCOMPACT.
+	(guess_is_rela): Likewise.
+	(dump_relocations): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_16bit_abs_reloc): Likewise.
+	(is_none_reloc): Likewise.
+	* NEWS: Mention the new feature.
+
 2015-09-29  Andrew Stubbs  <ams@codesourcery.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

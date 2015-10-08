@@ -1,3 +1,16 @@
+2015-10-07  Andreas Schwab  <schwab@suse.de>
+
+	* aarch64.cc (aarch64_info): Set abi_pagesize to 64K.
+
+2015-10-06  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18855
+	* sparc.cc (Sparc_relocate_functions::gdop_hix22): Remove addend
+	parameter.
+	(Sparc_relocate_functions::gdop_lox10): Likewise.
+	(Target_sparc::Relocate::relocate): Use addend when computing
+	symbol value for R_SPARC_GOTDATA_OP*.
+
 2015-09-07  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/18930

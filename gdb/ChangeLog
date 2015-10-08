@@ -1,3 +1,27 @@
+2015-10-08  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_resume): Fix void return.
+
+2015-10-07  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c: Include opcode/aarch64.h.
+	(submask): Move it above.
+	(bit): Likewise.
+	(bits): Likewise.
+	(aarch64_software_single_step): Call aarch64_decode_insn.
+	Decode instruction by aarch64_inst instead of using
+	aarch64_decode_bcond and decode_masked_match.
+
+2015-10-06  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* cli/cli-dump.c (restore_command): Parse load_offset (bias) as address
+	only when the file is binary.
+
+2015-10-02  James Bowman  <james.bowman@ftdichip.com>
+
+	* ft32-tdep.c (ft32_analyze_prologue): Add function prolog
+	subroutine handling.
+
 2015-10-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/vec.h (VEC_OP (T,cleanup)): Add pointer cast.

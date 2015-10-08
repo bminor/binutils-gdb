@@ -1892,6 +1892,21 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
 }
 
 #ifdef OBJ_ELF
+/* Emit BFD_RELOC_AARCH64_TLSDESC_ADD on the next ADD instruction.  */
+
+static void
+s_tlsdescadd (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+
+  expression (&exp);
+  frag_grow (4);
+  fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 4, &exp, 0,
+		   BFD_RELOC_AARCH64_TLSDESC_ADD);
+
+  demand_empty_rest_of_line ();
+}
+
 /* Emit BFD_RELOC_AARCH64_TLSDESC_CALL on the next BLR instruction.  */
 
 static void
@@ -1908,6 +1923,21 @@ s_tlsdesccall (int ignored ATTRIBUTE_UNUSED)
   frag_grow (4);
   fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 4, &exp, 0,
 		   BFD_RELOC_AARCH64_TLSDESC_CALL);
+
+  demand_empty_rest_of_line ();
+}
+
+/* Emit BFD_RELOC_AARCH64_TLSDESC_LDR on the next LDR instruction.  */
+
+static void
+s_tlsdescldr (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+
+  expression (&exp);
+  frag_grow (4);
+  fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 4, &exp, 0,
+		   BFD_RELOC_AARCH64_TLSDESC_LDR);
 
   demand_empty_rest_of_line ();
 }
@@ -1936,7 +1966,9 @@ const pseudo_typeS md_pseudo_table[] = {
   {"arch_extension", s_aarch64_arch_extension, 0},
   {"inst", s_aarch64_inst, 0},
 #ifdef OBJ_ELF
+  {"tlsdescadd", s_tlsdescadd, 0},
   {"tlsdesccall", s_tlsdesccall, 0},
+  {"tlsdescldr", s_tlsdescldr, 0},
   {"word", s_aarch64_elf_cons, 4},
   {"long", s_aarch64_elf_cons, 4},
   {"xword", s_aarch64_elf_cons, 8},
@@ -2455,6 +2487,24 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_LD_GOT_LO12_NC,
    0},
 
+  /* 0-15 bits of address/value: MOVk, no check.  */
+  {"gotoff_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 16-31 of address/value: MOVZ.  */
+  {"gotoff_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_GOTOFF_G1,
+   0,
+   0,
+   0},
+
   /* 15 bit offset into the page containing GOT entry for that symbol.  */
   {"gotoff_lo15", 0,
    0,				/* adr_type */
@@ -2462,6 +2512,24 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0,
    BFD_RELOC_AARCH64_LD64_GOTOFF_LO15,
+   0},
+
+  /* Get to the page containing GOT TLS entry for a symbol */
+  {"gottprel_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC,
+   0,
+   0,
+   0},
+
+  /* Get to the page containing GOT TLS entry for a symbol */
+  {"gottprel_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1,
+   0,
+   0,
    0},
 
   /* Get to the page containing GOT TLS entry for a symbol */
@@ -2479,6 +2547,24 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0,
    BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC,
+   0,
+   0},
+
+  /* Lower 16 bits address/value: MOVk.  */
+  {"tlsgd_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 16-31 of address/value: MOVZ.  */
+  {"tlsgd_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSGD_MOVW_G1,
+   0,
    0,
    0},
 
@@ -2590,6 +2676,24 @@ static struct reloc_table_entry reloc_table[] = {
    0,				/* adr_type */
    0,
    BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2,
+   0,
+   0,
+   0},
+
+  /* Lower 16 bit offset into GOT entry for a symbol */
+  {"tlsdesc_off_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC,
+   0,
+   0,
+   0},
+
+  /* Higher 16 bit offset into GOT entry for a symbol */
+  {"tlsdesc_off_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSDESC_OFF_G1,
    0,
    0,
    0},
@@ -4652,6 +4756,7 @@ process_movw_reloc_info (void)
       case BFD_RELOC_AARCH64_MOVW_G0_S:
       case BFD_RELOC_AARCH64_MOVW_G1_S:
       case BFD_RELOC_AARCH64_MOVW_G2_S:
+      case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
@@ -4667,6 +4772,10 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G0:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
@@ -4676,6 +4785,10 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G1:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
@@ -6789,12 +6902,30 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_MOVW_G0:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
       scale = 0;
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G1:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
       scale = 16;
+      goto movw_common;
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
+      scale = 0;
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* Should always be exported to object file, see
+	 aarch64_force_relocation().  */
+      gas_assert (!fixP->fx_done);
+      gas_assert (seg->use_rela_p);
+      goto movw_common;
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
+      scale = 16;
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* Should always be exported to object file, see
+	 aarch64_force_relocation().  */
+      gas_assert (!fixP->fx_done);
+      gas_assert (seg->use_rela_p);
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G2:
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
@@ -6824,6 +6955,8 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 		case BFD_RELOC_AARCH64_MOVW_G1:
 		case BFD_RELOC_AARCH64_MOVW_G2:
 		case BFD_RELOC_AARCH64_MOVW_G3:
+		case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+		case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
 		  if (unsigned_overflow (value, scale + 16))
 		    as_bad_where (fixP->fx_file, fixP->fx_line,
 				  _("unsigned value out of range"));
@@ -6892,10 +7025,14 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
@@ -7117,14 +7254,20 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
-    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
+   case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
@@ -7368,24 +7511,24 @@ md_begin (void)
 			 aarch64_pstatefields[i].name,
 			 (void *) (aarch64_pstatefields + i));
 
-  for (i = 0; aarch64_sys_regs_ic[i].template != NULL; i++)
+  for (i = 0; aarch64_sys_regs_ic[i].name != NULL; i++)
     checked_hash_insert (aarch64_sys_regs_ic_hsh,
-			 aarch64_sys_regs_ic[i].template,
+			 aarch64_sys_regs_ic[i].name,
 			 (void *) (aarch64_sys_regs_ic + i));
 
-  for (i = 0; aarch64_sys_regs_dc[i].template != NULL; i++)
+  for (i = 0; aarch64_sys_regs_dc[i].name != NULL; i++)
     checked_hash_insert (aarch64_sys_regs_dc_hsh,
-			 aarch64_sys_regs_dc[i].template,
+			 aarch64_sys_regs_dc[i].name,
 			 (void *) (aarch64_sys_regs_dc + i));
 
-  for (i = 0; aarch64_sys_regs_at[i].template != NULL; i++)
+  for (i = 0; aarch64_sys_regs_at[i].name != NULL; i++)
     checked_hash_insert (aarch64_sys_regs_at_hsh,
-			 aarch64_sys_regs_at[i].template,
+			 aarch64_sys_regs_at[i].name,
 			 (void *) (aarch64_sys_regs_at + i));
 
-  for (i = 0; aarch64_sys_regs_tlbi[i].template != NULL; i++)
+  for (i = 0; aarch64_sys_regs_tlbi[i].name != NULL; i++)
     checked_hash_insert (aarch64_sys_regs_tlbi_hsh,
-			 aarch64_sys_regs_tlbi[i].template,
+			 aarch64_sys_regs_tlbi[i].name,
 			 (void *) (aarch64_sys_regs_tlbi + i));
 
   for (i = 0; i < ARRAY_SIZE (reg_names); i++)

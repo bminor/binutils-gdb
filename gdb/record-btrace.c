@@ -1910,7 +1910,8 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
       && !record_btrace_is_replaying (ops, minus_one_ptid))
     {
       ops = ops->beneath;
-      return ops->to_resume (ops, ptid, step, signal);
+      ops->to_resume (ops, ptid, step, signal);
+      return;
     }
 
   /* Compute the btrace thread flag for the requested move.  */

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the ARC EM/HS, and ARC600/700 architectures.
+
 * Experimental support for linker garbage collection (--gc-sections)
   has been enabled for COFF and PE based targets.
 

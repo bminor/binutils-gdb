@@ -1,3 +1,73 @@
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* ld-elf/linkonce1.d: Skip extra relocs before .debug_frame.
+
+2015-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18914
+	* ld-elf/exclude.exp: Also check exclude_common.
+	* ld-elf/exclude2.s: Add exclude_common.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp (tls-relax-large-le-ie): Run new test.
+	* ld-aarch64/tls-relax-large-ie-le.d: New.
+	* ld-aarch64/tls-relax-large-ie-le.s: New.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+	* ld-aarch64/tls-large-desc.d: New.
+	* ld-aarch64/tls-large-desc.s: New.
+	* ld-aarch64/tls-relax-large-desc-ie.d: New.
+	* ld-aarch64/tls-relax-large-desc-ie.s: New.
+	* ld-aarch64/tls-relax-large-desc-le.d: New.
+	* ld-aarch64/tls-relax-large-desc-le.s: New.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: run new test
+	* ld-aarch64/tls-relax-large-gd-ie.d: New.
+	* ld-aarch64/tls-relax-large-gd-ie.s: New.
+	* ld-aarch64/tls-relax-large-gd-le.d: New.
+	* ld-aarch64/tls-relax-large-gd-le.s: New.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/tls-large-ie.d: New.
+	* ld-aarch64/tls-large-ie.s: New.
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/emit-relocs-516.d: New.
+	* ld-aarch64/emit-relocs-516.s: New.
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/emit-relocs-515.d: New.
+	* ld-aarch64/emit-relocs-515.s: New.
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: Run new test.
+	* ld-aarch64/emit-relocs-301.d: New.
+	* ld-aarch64/emit-relocs-301.s: New.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/emit-relocs-302.d: New.
+	* ld-aarch64/emit-relocs-302.s: New.
+	* ld-aarch64/aarch64-elf.exp: Run the test.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* ld-aarch64/emit-relocs-310.d: New.
+	* ld-aarch64/emit-relocs-310.s: New.
+	* ld-aarch64/aarch64-elf.exp: Run the test.
+
 2015-10-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19031
