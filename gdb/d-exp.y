@@ -368,6 +368,8 @@ UnaryExpression:
 		{ write_exp_elt_opcode (pstate, UNOP_LOGICAL_NOT); }
 |	'~' UnaryExpression
 		{ write_exp_elt_opcode (pstate, UNOP_COMPLEMENT); }
+|	TypeExp '.' SIZEOF_KEYWORD
+		{ write_exp_elt_opcode (pstate, UNOP_SIZEOF); }
 |	CastExpression
 |	PowExpression
 ;
@@ -410,6 +412,8 @@ PostfixExpression:
 		  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 		  write_exp_string (pstate, $3);
 		  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
+|	PostfixExpression '.' SIZEOF_KEYWORD
+		{ write_exp_elt_opcode (pstate, UNOP_SIZEOF); }
 |	PostfixExpression INCREMENT
 		{ write_exp_elt_opcode (pstate, UNOP_POSTINCREMENT); }
 |	PostfixExpression DECREMENT
@@ -616,6 +620,8 @@ PrimaryExpression:
 		  write_exp_elt_longcst (pstate, (LONGEST) 0);
 		  write_exp_elt_longcst (pstate, (LONGEST) $1 - 1);
 		  write_exp_elt_opcode (pstate, OP_ARRAY); }
+|	TYPEOF_KEYWORD '(' Expression ')'
+		{ write_exp_elt_opcode (pstate, OP_TYPEOF); }
 ;
 
 ArrayLiteral:

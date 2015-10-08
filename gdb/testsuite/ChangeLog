@@ -1,3 +1,7 @@
+2015-10-08  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/properties.exp: New file.
+
 2015-10-02  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.dwarf2/staticvirtual.exp: Generalize regexp so it can match
