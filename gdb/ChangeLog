@@ -1,5 +1,10 @@
 2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* cris-tdep.c (struct instruction_environment): Change type of
+	byte_order to enum bfd_endian.
+
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* arm-linux-tdep.c (arm_canonicalize_syscall): Add
 	enum gdb_syscall casts.
 

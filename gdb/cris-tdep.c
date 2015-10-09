@@ -485,7 +485,7 @@ struct instruction_environment
   int   delay_slot_pc_active;
   int   xflag_found;
   int   disable_interrupt;
-  int   byte_order;
+  enum bfd_endian byte_order;
 } inst_env_type;
 
 /* Machine-dependencies in CRIS for opcodes.  */
