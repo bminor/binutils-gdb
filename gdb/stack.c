@@ -141,7 +141,7 @@ frame_show_address (struct frame_info *frame,
   return get_frame_pc (frame) != sal.pc;
 }
 
-/* Show or print a stack frame FRAME briefly.  The output is format
+/* Show or print a stack frame FRAME briefly.  The output is formatted
    according to PRINT_LEVEL and PRINT_WHAT printing the frame's
    relative level, function name, argument list, and file name and
    line number.  If the frame's PC is not at the beginning of the
