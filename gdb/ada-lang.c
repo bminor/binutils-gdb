@@ -2517,7 +2517,6 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 {
   struct value *v;
   gdb_byte *src;                /* First byte containing data to unpack */
-  int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
   gdb_byte *unpacked;
   const int is_scalar = is_scalar_type (type);
   const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
@@ -2550,6 +2549,17 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 				is_big_endian, has_negatives (type),
 				is_scalar);
       type = resolve_dynamic_type (type, staging, 0);
+      if (TYPE_LENGTH (type) < (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
+	{
+	  /* This happens when the length of the object is dynamic,
+	     and is actually smaller than the space reserved for it.
+	     For instance, in an array of variant records, the bit_size
+	     we're given is the array stride, which is constant and
+	     normally equal to the maximum size of its element.
+	     But, in reality, each element only actually spans a portion
+	     of that stride.  */
+	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
+	}
     }
 
   if (obj == NULL)
@@ -2559,6 +2569,8 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
+      int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
+
       v = value_at (type, value_address (obj) + offset);
       src = alloca (src_len);
       read_memory (value_address (v), src, src_len);

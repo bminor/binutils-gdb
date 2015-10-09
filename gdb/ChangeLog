@@ -1,5 +1,11 @@
 2015-10-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_value_primitive_packed_val): Move
+	src_len variable to local block where used.  Override
+	BIT_SIZE if bigger than size of resolved type.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbtypes.h (is_scalar_type): Add extern declaration.
 	* gdbtypes.c (is_scalar_type): Make non-static.
 	* ada-lang.c (ada_value_primitive_packed_val): Use is_scalar_type
