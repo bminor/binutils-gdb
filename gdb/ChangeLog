@@ -1,5 +1,10 @@
 2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* i386-tdep.h (struct gdbarch_tdep): Change type of
+	register_reggroup_p to gdbarch_register_reggroup_p_ftype.
+
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* cris-tdep.c (struct instruction_environment): Change type of
 	byte_order to enum bfd_endian.
 
