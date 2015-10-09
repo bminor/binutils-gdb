@@ -1161,7 +1161,7 @@ aarch64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 typedef struct
 {
   /* Value to pass on stack.  */
-  const void *data;
+  const gdb_byte *data;
 
   /* Size in bytes of value to pass on stack.  */
   int len;

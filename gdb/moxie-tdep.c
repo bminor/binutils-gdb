@@ -117,7 +117,7 @@ moxie_register_type (struct gdbarch *gdbarch, int reg_nr)
 
 static void
 moxie_store_return_value (struct type *type, struct regcache *regcache,
-			 const void *valbuf)
+			 const gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -129,8 +129,7 @@ moxie_store_return_value (struct type *type, struct regcache *regcache,
   regcache_cooked_write_unsigned (regcache, RET1_REGNUM, regval);
   if (len > 4)
     {
-      regval = extract_unsigned_integer ((gdb_byte *) valbuf + 4,
-					 len - 4, byte_order);
+      regval = extract_unsigned_integer (valbuf + 4, len - 4, byte_order);
       regcache_cooked_write_unsigned (regcache, RET1_REGNUM + 1, regval);
     }
 }
@@ -499,25 +498,24 @@ moxie_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
 static void
 moxie_extract_return_value (struct type *type, struct regcache *regcache,
-			   void *dst)
+			    gdb_byte *dst)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  bfd_byte *valbuf = dst;
   int len = TYPE_LENGTH (type);
   ULONGEST tmp;
 
   /* By using store_unsigned_integer we avoid having to do
      anything special for small big-endian values.  */
   regcache_cooked_read_unsigned (regcache, RET1_REGNUM, &tmp);
-  store_unsigned_integer (valbuf, (len > 4 ? len - 4 : len), byte_order, tmp);
+  store_unsigned_integer (dst, (len > 4 ? len - 4 : len), byte_order, tmp);
 
   /* Ignore return values more than 8 bytes in size because the moxie
      returns anything more than 8 bytes in the stack.  */
   if (len > 4)
     {
       regcache_cooked_read_unsigned (regcache, RET1_REGNUM + 1, &tmp);
-      store_unsigned_integer (valbuf + len - 4, 4, byte_order, tmp);
+      store_unsigned_integer (dst + len - 4, 4, byte_order, tmp);
     }
 }
 

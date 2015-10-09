@@ -1126,7 +1126,7 @@ static enum register_status
 mep_pseudo_cr32_read (struct gdbarch *gdbarch,
                       struct regcache *regcache,
                       int cookednum,
-                      void *buf)
+                      gdb_byte *buf)
 {
   enum register_status status;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1152,7 +1152,7 @@ static enum register_status
 mep_pseudo_cr64_read (struct gdbarch *gdbarch,
                       struct regcache *regcache,
                       int cookednum,
-                      void *buf)
+                      gdb_byte *buf)
 {
   return regcache_raw_read (regcache, mep_pseudo_to_raw[cookednum], buf);
 }
@@ -1182,7 +1182,7 @@ static void
 mep_pseudo_csr_write (struct gdbarch *gdbarch,
                       struct regcache *regcache,
                       int cookednum,
-                      const void *buf)
+                      const gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int size = register_size (gdbarch, cookednum);
@@ -1213,7 +1213,7 @@ static void
 mep_pseudo_cr32_write (struct gdbarch *gdbarch,
                        struct regcache *regcache,
                        int cookednum,
-                       const void *buf)
+                       const gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* Expand the 32-bit value into a 64-bit value, and write that to
@@ -1234,7 +1234,7 @@ static void
 mep_pseudo_cr64_write (struct gdbarch *gdbarch,
                      struct regcache *regcache,
                      int cookednum,
-                     const void *buf)
+                     const gdb_byte *buf)
 {
   regcache_raw_write (regcache, mep_pseudo_to_raw[cookednum], buf);
 }

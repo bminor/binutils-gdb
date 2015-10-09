@@ -1904,7 +1904,7 @@ extern int field_is_static (struct field *);
 
 /* printcmd.c */
 
-extern void print_scalar_formatted (const void *, struct type *,
+extern void print_scalar_formatted (const gdb_byte *, struct type *,
 				    const struct value_print_options *,
 				    int, struct ui_file *);
 

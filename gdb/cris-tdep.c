@@ -665,14 +665,14 @@ struct stack_item
 {
   int len;
   struct stack_item *prev;
-  void *data;
+  gdb_byte *data;
 };
 
 static struct stack_item *
 push_stack_item (struct stack_item *prev, const gdb_byte *contents, int len)
 {
   struct stack_item *si = XNEW (struct stack_item);
-  si->data = xmalloc (len);
+  si->data = (gdb_byte *) xmalloc (len);
   si->len = len;
   si->prev = prev;
   memcpy (si->data, contents, len);

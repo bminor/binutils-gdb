@@ -1,5 +1,59 @@
 2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* aarch64-tdep.c (stack_item_t): Change type of data to gdb_byte*.
+	* arm-tdep.c (struct stack_item): Likewise.
+	(push_stack_item): Add gdb_byte* cast.
+	* avr-tdep.c (struct stack_item): Change type of data to gdb_byte*.
+	(push_stack_item): Add gdb_byte* cast.
+	* cli/cli-dump.c (dump_memory_to_file): Change type of buf to gdb_byte*
+	and add cast.
+	* cris-tdep.c (struct stack_item): Change type of data to gdb_byte*.
+	(push_stack_item): Add gdb_byte* cast.
+	* gcore.c (gcore_copy_callback): Change type of memhunk to gdb_byte* and
+	add cast.
+	* gdbtypes.h (print_scalar_formatted): Change type of first parameter to
+	gdb_byte*.
+	* h8300-tdep.c (h8300_extract_return_value): Change type of valbuf to
+	gdb_byte* and remove unnecessary cast.
+	(h8300h_extract_return_value): Likewise.
+	(h8300_store_return_value): Change type of valbuf to gdb_byte*.
+	(h8300h_store_return_value): Likewise.
+	* iq2000-tdep.c (iq2000_extract_return_value): Change type of valbuf to
+	gdb_byte* and remove unnecessary cast.
+	* jit.c (jit_reader_try_read_symtab): Change type of gdb_mem to gdb_byte*
+	and add cast.
+	* m32r-tdep.c (m32r_store_return_value): Change type of valbuf to
+	gdb_byte* and remove unnecessary cast.
+	(m32r_extract_return_value): Change type of dst to gdb_byte* and remove
+	valbuf.
+	* mep-tdep.c (mep_pseudo_cr32_read): Change type of buf to gdb_byte*.
+	(mep_pseudo_cr64_read): Likewise.
+	(mep_pseudo_csr_write): Likewise.
+	(mep_pseudo_cr32_write): Likewise.
+	(mep_pseudo_cr64_write): Likewise.
+	* mi/mi-main.c (mi_cmd_data_write_memory): Change type of buffer to
+	gdb_byte* and add cast.
+	* moxie-tdep.c (moxie_store_return_value): Change type of valbuf to
+	gdb_byte* and remove unnecessary cast.
+	(moxie_extract_return_value): Change type of dst to gdb_byte* and remove
+	valbuf.
+	* p-valprint.c (print_scalar_formatted): Change type of valaddr to
+	gdb_byte*.
+	* printcmd.c (void): Likewise.
+	* python/py-inferior.c (infpy_read_memory): Change type of buffer to
+	gdb_byte* and add cast.
+	(infpy_write_memory): Likewise.
+	(infpy_search_memory): Likewise.
+	* regcache.c (regcache_raw_write_signed): Change type of buf to gdb_byte*
+	and add cast.
+	(regcache_raw_write_unsigned): Likewise.
+	(regcache_cooked_write_signed): Likewise.
+	(regcache_cooked_write_unsigned): Likewise.
+	* sh64-tdep.c (h64_extract_return_value): Change type of valbuf to
+	gdb_byte*.
+
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* fbsd-tdep.c (fbsd_collect_regset_section_cb): Add cast.
 	* linux-tdep.c (linux_collect_regset_section_cb_data): Likewise.
 

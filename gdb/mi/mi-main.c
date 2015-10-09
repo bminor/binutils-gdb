@@ -1696,7 +1696,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   /* FIXME: ezannoni 2000-02-17 LONGEST could possibly not be big
      enough when using a compiler other than GCC.  */
   LONGEST value;
-  void *buffer;
+  gdb_byte *buffer;
   struct cleanup *old_chain;
   long offset = 0;
   int oind = 0;
@@ -1744,7 +1744,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   /* Get the value as a number.  */
   value = parse_and_eval_address (argv[3]);
   /* Get the value into an array.  */
-  buffer = xmalloc (word_size);
+  buffer = (gdb_byte *) xmalloc (word_size);
   old_chain = make_cleanup (xfree, buffer);
   store_signed_integer (buffer, word_size, byte_order, value);
   /* Write it down to memory.  */
