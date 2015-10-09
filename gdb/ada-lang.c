@@ -2520,8 +2520,49 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
   gdb_byte *unpacked;
   int is_scalar;
+  const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
+  gdb_byte *staging = NULL;
+  int staging_len = 0;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   type = ada_check_typedef (type);
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_STRUCT:
+      is_scalar = 0;
+      break;
+    default:
+      is_scalar = 1;
+      break;
+    }
+
+  if (obj == NULL)
+    src = (gdb_byte *) valaddr + offset;
+  else
+    src = (gdb_byte *) value_contents (obj) + offset;
+
+  if (is_dynamic_type (type))
+    {
+      /* The length of TYPE might by dynamic, so we need to resolve
+	 TYPE in order to know its actual size, which we then use
+	 to create the contents buffer of the value we return.
+	 The difficulty is that the data containing our object is
+	 packed, and therefore maybe not at a byte boundary.  So, what
+	 we do, is unpack the data into a byte-aligned buffer, and then
+	 use that buffer as our object's value for resolving the type.  */
+      staging_len = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+      staging = malloc (staging_len);
+      make_cleanup (xfree, staging);
+
+      ada_unpack_from_contents (src, bit_offset, bit_size,
+			        staging, staging_len,
+				is_big_endian, has_negatives (type),
+				is_scalar);
+      type = resolve_dynamic_type (type, staging, 0);
+    }
 
   if (obj == NULL)
     {
@@ -2531,18 +2572,6 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
       v = value_at (type, value_address (obj) + offset);
-      type = value_type (v);
-      if (TYPE_LENGTH (type) * HOST_CHAR_BIT < bit_size)
-	{
-	  /* This can happen in the case of an array of dynamic objects,
-	     where the size of each element changes from element to element.
-	     In that case, we're initially given the array stride, but
-	     after resolving the element type, we find that its size is
-	     less than this stride.  In that case, adjust bit_size to
-	     match TYPE's length, and recompute LEN accordingly.  */
-	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
-	  src_len = TYPE_LENGTH (type) + (bit_offset + HOST_CHAR_BIT - 1) / 8;
-	}
       src = alloca (src_len);
       read_memory (value_address (v), src, src_len);
     }
@@ -2577,29 +2606,23 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   if (bit_size == 0)
     {
       memset (unpacked, 0, TYPE_LENGTH (type));
+      do_cleanups (old_chain);
       return v;
     }
 
-  switch (TYPE_CODE (type))
+  if (staging != NULL && staging_len == TYPE_LENGTH (type))
     {
-    case TYPE_CODE_ARRAY:
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_STRUCT:
-      is_scalar = 0;
-      break;
-    default:
-      is_scalar = 1;
-      break;
+      /* Small short-cut: If we've unpacked the data into a buffer
+	 of the same size as TYPE's length, then we can reuse that,
+	 instead of doing the unpacking again.  */
+      memcpy (unpacked, staging, staging_len);
     }
+  else
+    ada_unpack_from_contents (src, bit_offset, bit_size,
+			      unpacked, TYPE_LENGTH (type),
+			      is_big_endian, has_negatives (type), is_scalar);
 
-  ada_unpack_from_contents (src, bit_offset, bit_size,
-			    unpacked, TYPE_LENGTH (type),
-			    gdbarch_bits_big_endian (get_type_arch (type)),
-			    has_negatives (type), is_scalar);
-
-  if (is_dynamic_type (value_type (v)))
-    v = value_from_contents_and_address (value_type (v), value_contents (v),
-					 0);
+  do_cleanups (old_chain);
   return v;
 }
 
