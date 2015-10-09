@@ -64,7 +64,8 @@ fbsd_collect_regset_section_cb (const char *sect_name, int size,
 				const char *human_name, void *cb_data)
 {
   char *buf;
-  struct fbsd_collect_regset_section_cb_data *data = cb_data;
+  struct fbsd_collect_regset_section_cb_data *data
+    = (struct fbsd_collect_regset_section_cb_data *) cb_data;
 
   gdb_assert (regset->collect_regset);
 

@@ -1,3 +1,8 @@
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* fbsd-tdep.c (fbsd_collect_regset_section_cb): Add cast.
+	* linux-tdep.c (linux_collect_regset_section_cb_data): Likewise.
+
 2015-10-09  Eli Zaretskii  <eliz@gnu.org>
 
 	* stack.c (print_stack_frame):

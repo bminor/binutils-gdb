@@ -1558,7 +1558,8 @@ linux_collect_regset_section_cb (const char *sect_name, int size,
 				 const char *human_name, void *cb_data)
 {
   char *buf;
-  struct linux_collect_regset_section_cb_data *data = cb_data;
+  struct linux_collect_regset_section_cb_data *data
+    = (struct linux_collect_regset_section_cb_data *) cb_data;
 
   if (data->abort_iteration)
     return;
