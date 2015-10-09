@@ -1,5 +1,10 @@
 2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* arm-linux-tdep.c (arm_canonicalize_syscall): Add
+	enum gdb_syscall casts.
+
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* aarch64-tdep.c (stack_item_t): Change type of data to gdb_byte*.
 	* arm-tdep.c (struct stack_item): Likewise.
 	(push_stack_item): Add gdb_byte* cast.

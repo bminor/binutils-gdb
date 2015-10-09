@@ -1265,11 +1265,11 @@ arm_canonicalize_syscall (int syscall)
   enum { sys_process_vm_writev = 377 };
 
   if (syscall <= gdb_sys_sched_getaffinity)
-    return syscall;
+    return (enum gdb_syscall) syscall;
   else if (syscall >= 243 && syscall <= 247)
-    return syscall + 2;
+    return (enum gdb_syscall) (syscall + 2);
   else if (syscall >= 248 && syscall <= 253)
-    return syscall + 4;
+    return (enum gdb_syscall) (syscall + 4);
 
   return gdb_sys_no_syscall;
 }
