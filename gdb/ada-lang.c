@@ -2406,8 +2406,8 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     unusedLS,                   /* Number of bits in next significant
                                    byte of source that are unused */
     accumSize;                  /* Number of meaningful bits in accum */
-  unsigned char *src;           /* First byte containing data to unpack */
-  unsigned char *unpacked;
+  gdb_byte *src;                /* First byte containing data to unpack */
+  gdb_byte *unpacked;
   unsigned long accum;          /* Staging area for bits being transferred */
   unsigned char sign;
   int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
@@ -2420,7 +2420,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   if (obj == NULL)
     {
       v = allocate_value (type);
-      src = (unsigned char *) valaddr + offset;
+      src = (gdb_byte *) valaddr + offset;
     }
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
@@ -2443,7 +2443,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   else
     {
       v = allocate_value (type);
-      src = (unsigned char *) value_contents (obj) + offset;
+      src = (gdb_byte *) value_contents (obj) + offset;
     }
 
   if (obj != NULL)
@@ -2466,7 +2466,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else
     set_value_bitsize (v, bit_size);
-  unpacked = (unsigned char *) value_contents (v);
+  unpacked = (gdb_byte *) value_contents (v);
 
   srcBitsLeft = bit_size;
   src_bytes_left = src_len;
