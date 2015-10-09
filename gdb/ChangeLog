@@ -1,3 +1,9 @@
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Make the name
+	of various local variables more explicit and consistent.
+	No real code change otherwise.
+
 2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* i386-tdep.h (struct gdbarch_tdep): Change type of

@@ -2398,18 +2398,19 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
                                 struct type *type)
 {
   struct value *v;
-  int src,                      /* Index into the source area */
-    targ,                       /* Index into the target area */
+  int src_idx,                  /* Index into the source area */
+    unpacked_idx,               /* Index into the unpacked buffer */
     srcBitsLeft,                /* Number of source bits left to move */
-    nsrc, ntarg,                /* Number of source and target bytes */
+    src_bytes_left,             /* Number of source bytes left to process.  */
+    unpacked_bytes_left,        /* Number of bytes left to set in unpacked.  */
     unusedLS,                   /* Number of bits in next significant
                                    byte of source that are unused */
     accumSize;                  /* Number of meaningful bits in accum */
-  unsigned char *bytes;         /* First byte containing data to unpack */
+  unsigned char *src;           /* First byte containing data to unpack */
   unsigned char *unpacked;
   unsigned long accum;          /* Staging area for bits being transferred */
   unsigned char sign;
-  int len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
+  int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
   /* Transmit bytes from least to most significant; delta is the direction
      the indices move.  */
   int delta = gdbarch_bits_big_endian (get_type_arch (type)) ? -1 : 1;
@@ -2419,7 +2420,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   if (obj == NULL)
     {
       v = allocate_value (type);
-      bytes = (unsigned char *) (valaddr + offset);
+      src = (unsigned char *) valaddr + offset;
     }
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
@@ -2434,15 +2435,15 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 	     less than this stride.  In that case, adjust bit_size to
 	     match TYPE's length, and recompute LEN accordingly.  */
 	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
-	  len = TYPE_LENGTH (type) + (bit_offset + HOST_CHAR_BIT - 1) / 8;
+	  src_len = TYPE_LENGTH (type) + (bit_offset + HOST_CHAR_BIT - 1) / 8;
 	}
-      bytes = (unsigned char *) alloca (len);
-      read_memory (value_address (v), bytes, len);
+      src = alloca (src_len);
+      read_memory (value_address (v), src, src_len);
     }
   else
     {
       v = allocate_value (type);
-      bytes = (unsigned char *) value_contents (obj) + offset;
+      src = (unsigned char *) value_contents (obj) + offset;
     }
 
   if (obj != NULL)
@@ -2468,8 +2469,8 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   unpacked = (unsigned char *) value_contents (v);
 
   srcBitsLeft = bit_size;
-  nsrc = len;
-  ntarg = TYPE_LENGTH (type);
+  src_bytes_left = src_len;
+  unpacked_bytes_left = TYPE_LENGTH (type);
   sign = 0;
   if (bit_size == 0)
     {
@@ -2478,9 +2479,9 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else if (gdbarch_bits_big_endian (get_type_arch (type)))
     {
-      src = len - 1;
+      src_idx = src_len - 1;
       if (has_negatives (type)
-          && ((bytes[0] << bit_offset) & (1 << (HOST_CHAR_BIT - 1))))
+          && ((src[0] << bit_offset) & (1 << (HOST_CHAR_BIT - 1))))
         sign = ~0;
 
       unusedLS =
@@ -2497,12 +2498,12 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
             (HOST_CHAR_BIT - bit_size % HOST_CHAR_BIT) % HOST_CHAR_BIT;
           /* ... And are placed at the beginning (most-significant) bytes
              of the target.  */
-          targ = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
-          ntarg = targ + 1;
+          unpacked_idx = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
+          unpacked_bytes_left = unpacked_idx + 1;
           break;
         default:
           accumSize = 0;
-          targ = TYPE_LENGTH (type) - 1;
+          unpacked_idx = TYPE_LENGTH (type) - 1;
           break;
         }
     }
@@ -2510,16 +2511,16 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     {
       int sign_bit_offset = (bit_size + bit_offset - 1) % 8;
 
-      src = targ = 0;
+      src_idx = unpacked_idx = 0;
       unusedLS = bit_offset;
       accumSize = 0;
 
-      if (has_negatives (type) && (bytes[len - 1] & (1 << sign_bit_offset)))
+      if (has_negatives (type) && (src[src_len - 1] & (1 << sign_bit_offset)))
         sign = ~0;
     }
 
   accum = 0;
-  while (nsrc > 0)
+  while (src_bytes_left > 0)
     {
       /* Mask for removing bits of the next source byte that are not
          part of the value.  */
@@ -2530,31 +2531,31 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       unsigned int signMask = sign & ~unusedMSMask;
 
       accum |=
-        (((bytes[src] >> unusedLS) & unusedMSMask) | signMask) << accumSize;
+        (((src[src_idx] >> unusedLS) & unusedMSMask) | signMask) << accumSize;
       accumSize += HOST_CHAR_BIT - unusedLS;
       if (accumSize >= HOST_CHAR_BIT)
         {
-          unpacked[targ] = accum & ~(~0L << HOST_CHAR_BIT);
+          unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
           accumSize -= HOST_CHAR_BIT;
           accum >>= HOST_CHAR_BIT;
-          ntarg -= 1;
-          targ += delta;
+          unpacked_bytes_left -= 1;
+          unpacked_idx += delta;
         }
       srcBitsLeft -= HOST_CHAR_BIT - unusedLS;
       unusedLS = 0;
-      nsrc -= 1;
-      src += delta;
+      src_bytes_left -= 1;
+      src_idx += delta;
     }
-  while (ntarg > 0)
+  while (unpacked_bytes_left > 0)
     {
       accum |= sign << accumSize;
-      unpacked[targ] = accum & ~(~0L << HOST_CHAR_BIT);
+      unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
       accumSize -= HOST_CHAR_BIT;
       if (accumSize < 0)
 	accumSize = 0;
       accum >>= HOST_CHAR_BIT;
-      ntarg -= 1;
-      targ += delta;
+      unpacked_bytes_left -= 1;
+      unpacked_idx += delta;
     }
 
   if (is_dynamic_type (value_type (v)))
