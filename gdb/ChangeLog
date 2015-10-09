@@ -1,5 +1,12 @@
 2015-10-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_unpack_from_contents): New function,
+	extracted from ada_value_primitive_packed_val.
+	(ada_value_primitive_packed_val): Replace extracted out code
+	by call to ada_unpack_from_contents.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_value_primitive_packed_val): Reorder local
 	variable declarations.
 

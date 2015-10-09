@@ -2382,6 +2382,124 @@ has_negatives (struct type *type)
     }
 }
 
+/* With SRC being a buffer containing BIT_SIZE bits of data at BIT_OFFSET,
+   unpack that data into UNPACKED. UNPACKED_LEN is the size in bytes of
+   the unpacked buffer.
+
+   IS_BIG_ENDIAN is nonzero if the data is stored in big endian mode,
+   zero otherwise.
+
+   IS_SIGNED_TYPE is nonzero if the data corresponds to a signed type.
+
+   IS_SCALAR is nonzero if the data corresponds to a signed type.  */
+
+static void
+ada_unpack_from_contents (const gdb_byte *src, int bit_offset, int bit_size,
+			  gdb_byte *unpacked, int unpacked_len,
+			  int is_big_endian, int is_signed_type,
+			  int is_scalar)
+{
+  int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
+  int src_idx;                  /* Index into the source area */
+  int src_bytes_left;           /* Number of source bytes left to process.  */
+  int srcBitsLeft;              /* Number of source bits left to move */
+  int unusedLS;                 /* Number of bits in next significant
+                                   byte of source that are unused */
+
+  int unpacked_idx;             /* Index into the unpacked buffer */
+  int unpacked_bytes_left;      /* Number of bytes left to set in unpacked.  */
+
+  unsigned long accum;          /* Staging area for bits being transferred */
+  int accumSize;                /* Number of meaningful bits in accum */
+  unsigned char sign;
+
+  /* Transmit bytes from least to most significant; delta is the direction
+     the indices move.  */
+  int delta = is_big_endian ? -1 : 1;
+
+  srcBitsLeft = bit_size;
+  src_bytes_left = src_len;
+  unpacked_bytes_left = unpacked_len;
+  sign = 0;
+
+  if (is_big_endian)
+    {
+      src_idx = src_len - 1;
+      if (is_signed_type
+	  && ((src[0] << bit_offset) & (1 << (HOST_CHAR_BIT - 1))))
+        sign = ~0;
+
+      unusedLS =
+        (HOST_CHAR_BIT - (bit_size + bit_offset) % HOST_CHAR_BIT)
+        % HOST_CHAR_BIT;
+
+      if (is_scalar)
+	{
+          accumSize = 0;
+          unpacked_idx = unpacked_len - 1;
+	}
+      else
+	{
+          /* Non-scalar values must be aligned at a byte boundary...  */
+          accumSize =
+            (HOST_CHAR_BIT - bit_size % HOST_CHAR_BIT) % HOST_CHAR_BIT;
+          /* ... And are placed at the beginning (most-significant) bytes
+             of the target.  */
+          unpacked_idx = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
+          unpacked_bytes_left = unpacked_idx + 1;
+	}
+    }
+  else
+    {
+      int sign_bit_offset = (bit_size + bit_offset - 1) % 8;
+
+      src_idx = unpacked_idx = 0;
+      unusedLS = bit_offset;
+      accumSize = 0;
+
+      if (is_signed_type && (src[src_len - 1] & (1 << sign_bit_offset)))
+        sign = ~0;
+    }
+
+  accum = 0;
+  while (src_bytes_left > 0)
+    {
+      /* Mask for removing bits of the next source byte that are not
+         part of the value.  */
+      unsigned int unusedMSMask =
+        (1 << (srcBitsLeft >= HOST_CHAR_BIT ? HOST_CHAR_BIT : srcBitsLeft)) -
+        1;
+      /* Sign-extend bits for this byte.  */
+      unsigned int signMask = sign & ~unusedMSMask;
+
+      accum |=
+        (((src[src_idx] >> unusedLS) & unusedMSMask) | signMask) << accumSize;
+      accumSize += HOST_CHAR_BIT - unusedLS;
+      if (accumSize >= HOST_CHAR_BIT)
+        {
+          unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+          accumSize -= HOST_CHAR_BIT;
+          accum >>= HOST_CHAR_BIT;
+          unpacked_bytes_left -= 1;
+          unpacked_idx += delta;
+        }
+      srcBitsLeft -= HOST_CHAR_BIT - unusedLS;
+      unusedLS = 0;
+      src_bytes_left -= 1;
+      src_idx += delta;
+    }
+  while (unpacked_bytes_left > 0)
+    {
+      accum |= sign << accumSize;
+      unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+      accumSize -= HOST_CHAR_BIT;
+      if (accumSize < 0)
+	accumSize = 0;
+      accum >>= HOST_CHAR_BIT;
+      unpacked_bytes_left -= 1;
+      unpacked_idx += delta;
+    }
+}
 
 /* Create a new value of type TYPE from the contents of OBJ starting
    at byte OFFSET, and bit offset BIT_OFFSET within that byte,
@@ -2398,26 +2516,10 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
                                 struct type *type)
 {
   struct value *v;
-
   gdb_byte *src;                /* First byte containing data to unpack */
   int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
-  int src_idx;                  /* Index into the source area */
-  int src_bytes_left;           /* Number of source bytes left to process.  */
-  int srcBitsLeft;              /* Number of source bits left to move */
-  int unusedLS;                 /* Number of bits in next significant
-                                   byte of source that are unused */
-
   gdb_byte *unpacked;
-  int unpacked_idx;             /* Index into the unpacked buffer */
-  int unpacked_bytes_left;      /* Number of bytes left to set in unpacked.  */
-
-  unsigned long accum;          /* Staging area for bits being transferred */
-  int accumSize;                /* Number of meaningful bits in accum */
-  unsigned char sign;
-
-  /* Transmit bytes from least to most significant; delta is the direction
-     the indices move.  */
-  int delta = gdbarch_bits_big_endian (get_type_arch (type)) ? -1 : 1;
+  int is_scalar;
 
   type = ada_check_typedef (type);
 
@@ -2472,95 +2574,28 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     set_value_bitsize (v, bit_size);
   unpacked = (gdb_byte *) value_contents (v);
 
-  srcBitsLeft = bit_size;
-  src_bytes_left = src_len;
-  unpacked_bytes_left = TYPE_LENGTH (type);
-  sign = 0;
   if (bit_size == 0)
     {
       memset (unpacked, 0, TYPE_LENGTH (type));
       return v;
     }
-  else if (gdbarch_bits_big_endian (get_type_arch (type)))
+
+  switch (TYPE_CODE (type))
     {
-      src_idx = src_len - 1;
-      if (has_negatives (type)
-          && ((src[0] << bit_offset) & (1 << (HOST_CHAR_BIT - 1))))
-        sign = ~0;
-
-      unusedLS =
-        (HOST_CHAR_BIT - (bit_size + bit_offset) % HOST_CHAR_BIT)
-        % HOST_CHAR_BIT;
-
-      switch (TYPE_CODE (type))
-        {
-        case TYPE_CODE_ARRAY:
-        case TYPE_CODE_UNION:
-        case TYPE_CODE_STRUCT:
-          /* Non-scalar values must be aligned at a byte boundary...  */
-          accumSize =
-            (HOST_CHAR_BIT - bit_size % HOST_CHAR_BIT) % HOST_CHAR_BIT;
-          /* ... And are placed at the beginning (most-significant) bytes
-             of the target.  */
-          unpacked_idx = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
-          unpacked_bytes_left = unpacked_idx + 1;
-          break;
-        default:
-          accumSize = 0;
-          unpacked_idx = TYPE_LENGTH (type) - 1;
-          break;
-        }
-    }
-  else
-    {
-      int sign_bit_offset = (bit_size + bit_offset - 1) % 8;
-
-      src_idx = unpacked_idx = 0;
-      unusedLS = bit_offset;
-      accumSize = 0;
-
-      if (has_negatives (type) && (src[src_len - 1] & (1 << sign_bit_offset)))
-        sign = ~0;
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_STRUCT:
+      is_scalar = 0;
+      break;
+    default:
+      is_scalar = 1;
+      break;
     }
 
-  accum = 0;
-  while (src_bytes_left > 0)
-    {
-      /* Mask for removing bits of the next source byte that are not
-         part of the value.  */
-      unsigned int unusedMSMask =
-        (1 << (srcBitsLeft >= HOST_CHAR_BIT ? HOST_CHAR_BIT : srcBitsLeft)) -
-        1;
-      /* Sign-extend bits for this byte.  */
-      unsigned int signMask = sign & ~unusedMSMask;
-
-      accum |=
-        (((src[src_idx] >> unusedLS) & unusedMSMask) | signMask) << accumSize;
-      accumSize += HOST_CHAR_BIT - unusedLS;
-      if (accumSize >= HOST_CHAR_BIT)
-        {
-          unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
-          accumSize -= HOST_CHAR_BIT;
-          accum >>= HOST_CHAR_BIT;
-          unpacked_bytes_left -= 1;
-          unpacked_idx += delta;
-        }
-      srcBitsLeft -= HOST_CHAR_BIT - unusedLS;
-      unusedLS = 0;
-      src_bytes_left -= 1;
-      src_idx += delta;
-    }
-  while (unpacked_bytes_left > 0)
-    {
-      accum |= sign << accumSize;
-      unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
-      accumSize -= HOST_CHAR_BIT;
-      if (accumSize < 0)
-	accumSize = 0;
-      accum >>= HOST_CHAR_BIT;
-      unpacked_bytes_left -= 1;
-      unpacked_idx += delta;
-    }
+  ada_unpack_from_contents (src, bit_offset, bit_size,
+			    unpacked, TYPE_LENGTH (type),
+			    gdbarch_bits_big_endian (get_type_arch (type)),
+			    has_negatives (type), is_scalar);
 
   if (is_dynamic_type (value_type (v)))
     v = value_from_contents_and_address (value_type (v), value_contents (v),
