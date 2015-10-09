@@ -2717,7 +2717,7 @@ is_integral_type (struct type *t)
 
 /* Return true if TYPE is scalar.  */
 
-static int
+int
 is_scalar_type (struct type *type)
 {
   type = check_typedef (type);

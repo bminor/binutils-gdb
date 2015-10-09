@@ -2519,25 +2519,13 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   gdb_byte *src;                /* First byte containing data to unpack */
   int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
   gdb_byte *unpacked;
-  int is_scalar;
+  const int is_scalar = is_scalar_type (type);
   const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
   gdb_byte *staging = NULL;
   int staging_len = 0;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   type = ada_check_typedef (type);
-
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_ARRAY:
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_STRUCT:
-      is_scalar = 0;
-      break;
-    default:
-      is_scalar = 1;
-      break;
-    }
 
   if (obj == NULL)
     src = (gdb_byte *) valaddr + offset;

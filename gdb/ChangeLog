@@ -1,5 +1,12 @@
 2015-10-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbtypes.h (is_scalar_type): Add extern declaration.
+	* gdbtypes.c (is_scalar_type): Make non-static.
+	* ada-lang.c (ada_value_primitive_packed_val): Use is_scalar_type
+	to compute IS_SCALAR instead of doing it ourselves.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_value_primitive_packed_val): Rework handling
 	of case where TYPE is dynamic.
 
