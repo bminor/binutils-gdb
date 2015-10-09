@@ -2383,8 +2383,11 @@ has_negatives (struct type *type)
 }
 
 /* With SRC being a buffer containing BIT_SIZE bits of data at BIT_OFFSET,
-   unpack that data into UNPACKED. UNPACKED_LEN is the size in bytes of
+   unpack that data into UNPACKED.  UNPACKED_LEN is the size in bytes of
    the unpacked buffer.
+
+   The size of the unpacked buffer (UNPACKED_LEN) is expected to be large
+   enough to contain at least BIT_OFFSET bits.  If not, an error is raised.
 
    IS_BIG_ENDIAN is nonzero if the data is stored in big endian mode,
    zero otherwise.
@@ -2416,6 +2419,12 @@ ada_unpack_from_contents (const gdb_byte *src, int bit_offset, int bit_size,
   /* Transmit bytes from least to most significant; delta is the direction
      the indices move.  */
   int delta = is_big_endian ? -1 : 1;
+
+  /* Make sure that unpacked is large enough to receive the BIT_SIZE
+     bits from SRC.  .*/
+  if ((bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT > unpacked_len)
+    error (_("Cannot unpack %d bits into buffer of %d bytes"),
+	   bit_size, unpacked_len);
 
   srcBitsLeft = bit_size;
   src_bytes_left = src_len;
