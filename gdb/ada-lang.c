@@ -2398,19 +2398,23 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
                                 struct type *type)
 {
   struct value *v;
-  int src_idx,                  /* Index into the source area */
-    unpacked_idx,               /* Index into the unpacked buffer */
-    srcBitsLeft,                /* Number of source bits left to move */
-    src_bytes_left,             /* Number of source bytes left to process.  */
-    unpacked_bytes_left,        /* Number of bytes left to set in unpacked.  */
-    unusedLS,                   /* Number of bits in next significant
-                                   byte of source that are unused */
-    accumSize;                  /* Number of meaningful bits in accum */
+
   gdb_byte *src;                /* First byte containing data to unpack */
-  gdb_byte *unpacked;
-  unsigned long accum;          /* Staging area for bits being transferred */
-  unsigned char sign;
   int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
+  int src_idx;                  /* Index into the source area */
+  int src_bytes_left;           /* Number of source bytes left to process.  */
+  int srcBitsLeft;              /* Number of source bits left to move */
+  int unusedLS;                 /* Number of bits in next significant
+                                   byte of source that are unused */
+
+  gdb_byte *unpacked;
+  int unpacked_idx;             /* Index into the unpacked buffer */
+  int unpacked_bytes_left;      /* Number of bytes left to set in unpacked.  */
+
+  unsigned long accum;          /* Staging area for bits being transferred */
+  int accumSize;                /* Number of meaningful bits in accum */
+  unsigned char sign;
+
   /* Transmit bytes from least to most significant; delta is the direction
      the indices move.  */
   int delta = gdbarch_bits_big_endian (get_type_arch (type)) ? -1 : 1;

@@ -1,5 +1,10 @@
 2015-10-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_value_primitive_packed_val): Reorder local
+	variable declarations.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_value_primitive_packed_val): Change the type
 	of local variables src and unpacked to "gdb_type *" instead of
 	"unsigned char *".
