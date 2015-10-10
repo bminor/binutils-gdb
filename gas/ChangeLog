@@ -1,3 +1,9 @@
+2015-10-10  Alan Modra  <amodra@gmail.com>
+
+	PR gas/19113
+	* read.c (next_char_of_string): Mask char after escape.  Use
+	CHAR_MASK rather than 0xff.
+
 2015-10-07  Yao Qi  <yao.qi@linaro.org>
 
 	* config/tc-aarch64.c (md_begin): Access field 'name' rather

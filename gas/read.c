@@ -5415,7 +5415,7 @@ next_char_of_string (void)
 
 #ifndef NO_STRING_ESCAPES
     case '\\':
-      switch (c = *input_line_pointer++)
+      switch (c = *input_line_pointer++ & CHAR_MASK)
 	{
 	case 'b':
 	  c = '\b';
@@ -5466,7 +5466,7 @@ next_char_of_string (void)
 		number = number * 8 + c - '0';
 	      }
 
-	    c = number & 0xff;
+	    c = number & CHAR_MASK;
 	  }
 	  --input_line_pointer;
 	  break;
@@ -5488,7 +5488,7 @@ next_char_of_string (void)
 		  number = number * 16 + c - 'a' + 10;
 		c = *input_line_pointer++;
 	      }
-	    c = number & 0xff;
+	    c = number & CHAR_MASK;
 	    --input_line_pointer;
 	  }
 	  break;
