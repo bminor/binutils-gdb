@@ -1,3 +1,8 @@
+2015-10-11  John David Anglin  <danglin@gcc.gnu.org>
+
+	* elf-hppa.h (elf_hppa_action_discarded): Ignore relocations in
+	.data.rel.ro.local.
+
 2015-10-07  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* archures.c: Remove support for older ARC. Added support for new
