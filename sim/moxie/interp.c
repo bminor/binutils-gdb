@@ -1273,6 +1273,7 @@ load_dtb (SIM_DESC sd, const char *filename)
   if (size != fread (buf, 1, size, f))
     {
       sim_io_eprintf (sd, "ERROR: error reading ``%s''.\n", filename);
+      fclose (f);
       return;
     }
   sim_core_write_buffer (sd, scpu, write_map, buf, 0xE0000000, size);
