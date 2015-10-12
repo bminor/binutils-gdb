@@ -3416,17 +3416,16 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
-      if (s390_is_ifunc_symbol_p (h))
+      if (s390_is_ifunc_symbol_p (h) && h->def_regular)
 	{
-	  /* If we can resolve the IFUNC symbol locally we generate an
-	     IRELATIVE reloc.  */
-	  elf_s390_finish_ifunc_symbol (output_bfd, info, h, htab, h->plt.offset,
-					eh->ifunc_resolver_address +
-					eh->ifunc_resolver_section->output_offset +
-					eh->ifunc_resolver_section->output_section->vma);
-				 ;
-	  /* Fallthrough.  Handling of explicit GOT slots of IFUNC
-	     symbols is below.  */
+	  elf_s390_finish_ifunc_symbol (output_bfd, info, h,
+	    htab, h->plt.offset,
+	    eh->ifunc_resolver_address +
+	    eh->ifunc_resolver_section->output_offset +
+	    eh->ifunc_resolver_section->output_section->vma);
+
+	  /* Do not return yet.  Handling of explicit GOT slots of
+	     IFUNC symbols is below.  */
 	}
       else
 	{

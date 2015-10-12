@@ -1,5 +1,11 @@
 2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
+	* elf32-s390.c (elf_s390_finish_dynamic_symbol): Call
+	elf_s390_finish_ifunc_symbol only for actually defined symbols.
+	* elf64-s390.c (elf_s390_finish_dynamic_symbol): Likewise.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
 	* elf-s390-common.c (s390_elf_allocate_ifunc_dyn_relocs): Remove
 	`head' parameter.
 	* elf32-s390.c (allocate_dynrelocs): Don't use last parameter.
