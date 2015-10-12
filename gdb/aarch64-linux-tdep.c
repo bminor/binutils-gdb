@@ -872,7 +872,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (move_pages);
 
   default:
-    return -1;
+    return gdb_sys_no_syscall;
   }
 }
 
