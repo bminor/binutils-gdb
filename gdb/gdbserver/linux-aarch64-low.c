@@ -1924,8 +1924,278 @@ can_encode_int32 (int32_t val, unsigned bits)
   return rest == 0 || rest == -1;
 }
 
-/* Relocate an instruction INSN from OLDLOC to TO and save the relocated
-   instructions in BUF.  The number of instructions in BUF is returned.
+/* Data passed to each method of aarch64_insn_visitor.  */
+
+struct aarch64_insn_data
+{
+  /* The instruction address.  */
+  CORE_ADDR insn_addr;
+};
+
+/* Visit different instructions by different methods.  */
+
+struct aarch64_insn_visitor
+{
+  /* Visit instruction B/BL OFFSET.  */
+  void (*b) (const int is_bl, const int32_t offset,
+	     struct aarch64_insn_data *data);
+
+  /* Visit instruction B.COND OFFSET.  */
+  void (*b_cond) (const unsigned cond, const int32_t offset,
+		  struct aarch64_insn_data *data);
+
+  /* Visit instruction CBZ/CBNZ Rn, OFFSET.  */
+  void (*cb) (const int32_t offset, const int is_cbnz,
+	      const unsigned rn, int is64,
+	      struct aarch64_insn_data *data);
+
+  /* Visit instruction TBZ/TBNZ Rt, #BIT, OFFSET.  */
+  void (*tb) (const int32_t offset, int is_tbnz,
+	      const unsigned rt, unsigned bit,
+	      struct aarch64_insn_data *data);
+
+  /* Visit instruction ADR/ADRP Rd, OFFSET.  */
+  void (*adr) (const int32_t offset, const unsigned rd,
+	       const int is_adrp, struct aarch64_insn_data *data);
+
+  /* Visit instruction LDR/LDRSW Rt, OFFSET.  */
+  void (*ldr_literal) (const int32_t offset, const int is_sw,
+		       const unsigned rt, const int is64,
+		       struct aarch64_insn_data *data);
+
+  /* Visit instruction INSN of other kinds.  */
+  void (*others) (const uint32_t insn, struct aarch64_insn_data *data);
+};
+
+/* Sub-class of struct aarch64_insn_data, store information of
+   instruction relocation for fast tracepoint.  Visitor can
+   relocate an instruction from BASE.INSN_ADDR to NEW_ADDR and save
+   the relocated instructions in buffer pointed by INSN_PTR.  */
+
+struct aarch64_insn_relocation_data
+{
+  struct aarch64_insn_data base;
+
+  /* The new address the instruction is relocated to.  */
+  CORE_ADDR new_addr;
+  /* Pointer to the buffer of relocated instruction(s).  */
+  uint32_t *insn_ptr;
+};
+
+/* Implementation of aarch64_insn_visitor method "b".  */
+
+static void
+aarch64_ftrace_insn_reloc_b (const int is_bl, const int32_t offset,
+			     struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  int32_t new_offset
+    = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
+
+  if (can_encode_int32 (new_offset, 28))
+    insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, is_bl, new_offset);
+}
+
+/* Implementation of aarch64_insn_visitor method "b_cond".  */
+
+static void
+aarch64_ftrace_insn_reloc_b_cond (const unsigned cond, const int32_t offset,
+				  struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  int32_t new_offset
+    = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
+
+  if (can_encode_int32 (new_offset, 21))
+    {
+      insn_reloc->insn_ptr += emit_bcond (insn_reloc->insn_ptr, cond,
+					  new_offset);
+    }
+  else if (can_encode_int32 (new_offset, 28))
+    {
+      /* The offset is out of range for a conditional branch
+	 instruction but not for a unconditional branch.  We can use
+	 the following instructions instead:
+
+	 B.COND TAKEN    ; If cond is true, then jump to TAKEN.
+	 B NOT_TAKEN     ; Else jump over TAKEN and continue.
+	 TAKEN:
+	 B #(offset - 8)
+	 NOT_TAKEN:
+
+      */
+
+      insn_reloc->insn_ptr += emit_bcond (insn_reloc->insn_ptr, cond, 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, new_offset - 8);
+    }
+}
+
+/* Implementation of aarch64_insn_visitor method "cb".  */
+
+static void
+aarch64_ftrace_insn_reloc_cb (const int32_t offset, const int is_cbnz,
+			      const unsigned rn, int is64,
+			      struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  int32_t new_offset
+    = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
+
+  if (can_encode_int32 (new_offset, 21))
+    {
+      insn_reloc->insn_ptr += emit_cb (insn_reloc->insn_ptr, is_cbnz,
+				       aarch64_register (rn, is64), new_offset);
+    }
+  else if (can_encode_int32 (new_offset, 28))
+    {
+      /* The offset is out of range for a compare and branch
+	 instruction but not for a unconditional branch.  We can use
+	 the following instructions instead:
+
+	 CBZ xn, TAKEN   ; xn == 0, then jump to TAKEN.
+	 B NOT_TAKEN     ; Else jump over TAKEN and continue.
+	 TAKEN:
+	 B #(offset - 8)
+	 NOT_TAKEN:
+
+      */
+      insn_reloc->insn_ptr += emit_cb (insn_reloc->insn_ptr, is_cbnz,
+				       aarch64_register (rn, is64), 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, new_offset - 8);
+    }
+}
+
+/* Implementation of aarch64_insn_visitor method "tb".  */
+
+static void
+aarch64_ftrace_insn_reloc_tb (const int32_t offset, int is_tbnz,
+			      const unsigned rt, unsigned bit,
+			      struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  int32_t new_offset
+    = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
+
+  if (can_encode_int32 (new_offset, 16))
+    {
+      insn_reloc->insn_ptr += emit_tb (insn_reloc->insn_ptr, is_tbnz, bit,
+				       aarch64_register (rt, 1), new_offset);
+    }
+  else if (can_encode_int32 (new_offset, 28))
+    {
+      /* The offset is out of range for a test bit and branch
+	 instruction but not for a unconditional branch.  We can use
+	 the following instructions instead:
+
+	 TBZ xn, #bit, TAKEN ; xn[bit] == 0, then jump to TAKEN.
+	 B NOT_TAKEN         ; Else jump over TAKEN and continue.
+	 TAKEN:
+	 B #(offset - 8)
+	 NOT_TAKEN:
+
+      */
+      insn_reloc->insn_ptr += emit_tb (insn_reloc->insn_ptr, is_tbnz, bit,
+				       aarch64_register (rt, 1), 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0,
+				      new_offset - 8);
+    }
+}
+
+/* Implementation of aarch64_insn_visitor method "adr".  */
+
+static void
+aarch64_ftrace_insn_reloc_adr (const int32_t offset, const unsigned rd,
+			       const int is_adrp,
+			       struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  /* We know exactly the address the ADR{P,} instruction will compute.
+     We can just write it to the destination register.  */
+  CORE_ADDR address = data->insn_addr + offset;
+
+  if (is_adrp)
+    {
+      /* Clear the lower 12 bits of the offset to get the 4K page.  */
+      insn_reloc->insn_ptr += emit_mov_addr (insn_reloc->insn_ptr,
+					     aarch64_register (rd, 1),
+					     address & ~0xfff);
+    }
+  else
+    insn_reloc->insn_ptr += emit_mov_addr (insn_reloc->insn_ptr,
+					   aarch64_register (rd, 1), address);
+}
+
+/* Implementation of aarch64_insn_visitor method "ldr_literal".  */
+
+static void
+aarch64_ftrace_insn_reloc_ldr_literal (const int32_t offset, const int is_sw,
+				       const unsigned rt, const int is64,
+				       struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  CORE_ADDR address = data->insn_addr + offset;
+
+  insn_reloc->insn_ptr += emit_mov_addr (insn_reloc->insn_ptr,
+					 aarch64_register (rt, 1), address);
+
+  /* We know exactly what address to load from, and what register we
+     can use:
+
+     MOV xd, #(oldloc + offset)
+     MOVK xd, #((oldloc + offset) >> 16), lsl #16
+     ...
+
+     LDR xd, [xd] ; or LDRSW xd, [xd]
+
+  */
+
+  if (is_sw)
+    insn_reloc->insn_ptr += emit_ldrsw (insn_reloc->insn_ptr,
+					aarch64_register (rt, 1),
+					aarch64_register (rt, 1),
+					offset_memory_operand (0));
+  else
+    insn_reloc->insn_ptr += emit_ldr (insn_reloc->insn_ptr,
+				      aarch64_register (rt, is64),
+				      aarch64_register (rt, 1),
+				      offset_memory_operand (0));
+}
+
+/* Implementation of aarch64_insn_visitor method "others".  */
+
+static void
+aarch64_ftrace_insn_reloc_others (const uint32_t insn,
+				  struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+
+  /* The instruction is not PC relative.  Just re-emit it at the new
+     location.  */
+  insn_reloc->insn_ptr += emit_insn (insn_reloc->insn_ptr, insn);
+}
+
+static const struct aarch64_insn_visitor visitor =
+{
+  aarch64_ftrace_insn_reloc_b,
+  aarch64_ftrace_insn_reloc_b_cond,
+  aarch64_ftrace_insn_reloc_cb,
+  aarch64_ftrace_insn_reloc_tb,
+  aarch64_ftrace_insn_reloc_adr,
+  aarch64_ftrace_insn_reloc_ldr_literal,
+  aarch64_ftrace_insn_reloc_others,
+};
+
+/* Visit an instruction INSN by VISITOR with all needed information in DATA.
 
    PC relative instructions need to be handled specifically:
 
@@ -1936,12 +2206,11 @@ can_encode_int32 (int32_t val, unsigned bits)
    - ADR/ADRP
    - LDR/LDRSW (literal)  */
 
-static int
-aarch64_relocate_instruction (const CORE_ADDR to, const CORE_ADDR oldloc,
-			      uint32_t insn, uint32_t *buf)
+static void
+aarch64_relocate_instruction (uint32_t insn,
+			      const struct aarch64_insn_visitor *visitor,
+			      struct aarch64_insn_data *data)
 {
-  uint32_t *p = buf;
-
   int is_bl;
   int is64;
   int is_sw;
@@ -1955,144 +2224,23 @@ aarch64_relocate_instruction (const CORE_ADDR to, const CORE_ADDR oldloc,
   unsigned bit;
   int32_t offset;
 
-  if (aarch64_decode_b (oldloc, insn, &is_bl, &offset))
-    {
-      offset = (oldloc - to + offset);
-
-      if (can_encode_int32 (offset, 28))
-	p += emit_b (p, is_bl, offset);
-      else
-	return 0;
-    }
-  else if (aarch64_decode_bcond (oldloc, insn, &cond, &offset))
-    {
-      offset = (oldloc - to + offset);
-
-      if (can_encode_int32 (offset, 21))
-	p += emit_bcond (p, cond, offset);
-      else if (can_encode_int32 (offset, 28))
-	{
-	  /* The offset is out of range for a conditional branch
-	     instruction but not for a unconditional branch.  We can use
-	     the following instructions instead:
-
-	       B.COND TAKEN    ; If cond is true, then jump to TAKEN.
-	       B NOT_TAKEN     ; Else jump over TAKEN and continue.
-	     TAKEN:
-	       B #(offset - 8)
-	     NOT_TAKEN:
-
-	     */
-
-	  p += emit_bcond (p, cond, 8);
-	  p += emit_b (p, 0, 8);
-	  p += emit_b (p, 0, offset - 8);
-	}
-      else
-	return 0;
-    }
-  else if (aarch64_decode_cb (oldloc, insn, &is64, &is_cbnz, &rn, &offset))
-    {
-      offset = (oldloc - to + offset);
-
-      if (can_encode_int32 (offset, 21))
-	p += emit_cb (p, is_cbnz, aarch64_register (rn, is64), offset);
-      else if (can_encode_int32 (offset, 28))
-	{
-	  /* The offset is out of range for a compare and branch
-	     instruction but not for a unconditional branch.  We can use
-	     the following instructions instead:
-
-	       CBZ xn, TAKEN   ; xn == 0, then jump to TAKEN.
-	       B NOT_TAKEN     ; Else jump over TAKEN and continue.
-	     TAKEN:
-	       B #(offset - 8)
-	     NOT_TAKEN:
-
-	     */
-	  p += emit_cb (p, is_cbnz, aarch64_register (rn, is64), 8);
-	  p += emit_b (p, 0, 8);
-	  p += emit_b (p, 0, offset - 8);
-	}
-      else
-	return 0;
-    }
-  else if (aarch64_decode_tb (oldloc, insn, &is_tbnz, &bit, &rt, &offset))
-    {
-      offset = (oldloc - to + offset);
-
-      if (can_encode_int32 (offset, 16))
-	p += emit_tb (p, is_tbnz, bit, aarch64_register (rt, 1), offset);
-      else if (can_encode_int32 (offset, 28))
-	{
-	  /* The offset is out of range for a test bit and branch
-	     instruction but not for a unconditional branch.  We can use
-	     the following instructions instead:
-
-	       TBZ xn, #bit, TAKEN ; xn[bit] == 0, then jump to TAKEN.
-	       B NOT_TAKEN         ; Else jump over TAKEN and continue.
-	     TAKEN:
-	       B #(offset - 8)
-	     NOT_TAKEN:
-
-	     */
-	  p += emit_tb (p, is_tbnz, bit, aarch64_register (rt, 1), 8);
-	  p += emit_b (p, 0, 8);
-	  p += emit_b (p, 0, offset - 8);
-	}
-      else
-	return 0;
-    }
-  else if (aarch64_decode_adr (oldloc, insn, &is_adrp, &rd, &offset))
-    {
-
-      /* We know exactly the address the ADR{P,} instruction will compute.
-	 We can just write it to the destination register.  */
-      CORE_ADDR address = oldloc + offset;
-
-      if (is_adrp)
-	{
-	  /* Clear the lower 12 bits of the offset to get the 4K page.  */
-	  p += emit_mov_addr (p, aarch64_register (rd, 1),
-			      address & ~0xfff);
-	}
-      else
-	p += emit_mov_addr (p, aarch64_register (rd, 1), address);
-    }
-  else if (aarch64_decode_ldr_literal (oldloc, insn, &is_sw, &is64, &rt,
-				       &offset))
-    {
-      /* We know exactly what address to load from, and what register we
-	 can use:
-
-	   MOV xd, #(oldloc + offset)
-	   MOVK xd, #((oldloc + offset) >> 16), lsl #16
-	   ...
-
-	   LDR xd, [xd] ; or LDRSW xd, [xd]
-
-	 */
-      CORE_ADDR address = oldloc + offset;
-
-      p += emit_mov_addr (p, aarch64_register (rt, 1), address);
-
-      if (is_sw)
-	p += emit_ldrsw (p, aarch64_register (rt, 1),
-			 aarch64_register (rt, 1),
-			 offset_memory_operand (0));
-      else
-	p += emit_ldr (p, aarch64_register (rt, is64),
-		       aarch64_register (rt, 1),
-		       offset_memory_operand (0));
-    }
+  if (aarch64_decode_b (data->insn_addr, insn, &is_bl, &offset))
+    visitor->b (is_bl, offset, data);
+  else if (aarch64_decode_bcond (data->insn_addr, insn, &cond, &offset))
+    visitor->b_cond (cond, offset, data);
+  else if (aarch64_decode_cb (data->insn_addr, insn, &is64, &is_cbnz, &rn,
+			      &offset))
+    visitor->cb (offset, is_cbnz, rn, is64, data);
+  else if (aarch64_decode_tb (data->insn_addr, insn, &is_tbnz, &bit, &rt,
+			      &offset))
+    visitor->tb (offset, is_tbnz, rt, bit, data);
+  else if (aarch64_decode_adr (data->insn_addr, insn, &is_adrp, &rd, &offset))
+    visitor->adr (offset, rd, is_adrp, data);
+  else if (aarch64_decode_ldr_literal (data->insn_addr, insn, &is_sw, &is64,
+				       &rt, &offset))
+    visitor->ldr_literal (offset, is_sw, rt, is64, data);
   else
-    {
-      /* The instruction is not PC relative.  Just re-emit it at the new
-	 location.  */
-      p += emit_insn (p, insn);
-    }
-
-  return (int) (p - buf);
+    visitor->others (insn, data);
 }
 
 /* Implementation of linux_target_ops method
@@ -2119,6 +2267,7 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   int i;
   uint32_t insn;
   CORE_ADDR buildaddr = *jump_entry;
+  struct aarch64_insn_relocation_data insn_data;
 
   /* We need to save the current state on the stack both to restore it
      later and to collect register values when the tracepoint is hit.
@@ -2421,9 +2570,16 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   /* Now emit the relocated instruction.  */
   *adjusted_insn_addr = buildaddr;
   target_read_uint32 (tpaddr, &insn);
-  i = aarch64_relocate_instruction (buildaddr, tpaddr, insn, buf);
+
+  insn_data.base.insn_addr = tpaddr;
+  insn_data.new_addr = buildaddr;
+  insn_data.insn_ptr = buf;
+
+  aarch64_relocate_instruction (insn, &visitor,
+				(struct aarch64_insn_data *) &insn_data);
+
   /* We may not have been able to relocate the instruction.  */
-  if (i == 0)
+  if (insn_data.insn_ptr == buf)
     {
       sprintf (err,
 	       "E.Could not relocate instruction from %s to %s.",
@@ -2432,7 +2588,7 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
       return 1;
     }
   else
-    append_insns (&buildaddr, i, buf);
+    append_insns (&buildaddr, insn_data.insn_ptr - buf, buf);
   *adjusted_insn_addr_end = buildaddr;
 
   /* Go back to the start of the buffer.  */

@@ -1,5 +1,20 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (struct aarch64_insn_data): New.
+	(struct aarch64_insn_visitor): New.
+	(struct aarch64_insn_relocation_data): New.
+	(aarch64_ftrace_insn_reloc_b): New function.
+	(aarch64_ftrace_insn_reloc_b_cond): Likewise.
+	(aarch64_ftrace_insn_reloc_cb): Likewise.
+	(aarch64_ftrace_insn_reloc_tb): Likewise.
+	(aarch64_ftrace_insn_reloc_adr): Likewise.
+	(aarch64_ftrace_insn_reloc_ldr_literal): Likewise.
+	(aarch64_ftrace_insn_reloc_others): Likewise.
+	(visitor): New.
+	(aarch64_relocate_instruction): Use visitor.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_relocate_instruction): Return
 	int.  Add argument buf.
 	(aarch64_install_fast_tracepoint_jump_pad): Pass buf to
