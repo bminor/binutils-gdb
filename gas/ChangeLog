@@ -1,3 +1,11 @@
+2015-10-12  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (msp430_mcu_names): Rename to
+	msp430_mcu_data.  Add fields for the ISA and hardware multiply
+	support.  Update with information from the latest devices.csv
+	file.
+	(md_parse_option): Make use of the new array.
+
 2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-avr.c (avr_output_property_record): Fix overwrite bug
