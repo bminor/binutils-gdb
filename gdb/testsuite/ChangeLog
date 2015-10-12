@@ -1,3 +1,13 @@
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/insn-reloc.c (can_relocate_bcond): Rename to ...
+	(can_relocate_bcond_true): ... it.
+	(can_relocate_bcond_false): New function.
+	(foo): Likewise.
+	(can_relocate_bl): Likewise.
+	(testcases) [__aarch64__]: Add can_relocate_bcond_false and
+	can_relocate_bl.
+
 2015-10-12  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.base/nested-addr.c: New file.
