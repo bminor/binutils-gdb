@@ -1,5 +1,9 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.arch/disp-step-insn-reloc.exp: New test case.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* lib/gdb.exp (support_displaced_stepping): Return 1 if target
 	is aarch64*-*-linux*.
 
