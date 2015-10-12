@@ -1924,8 +1924,8 @@ can_encode_int32 (int32_t val, unsigned bits)
   return rest == 0 || rest == -1;
 }
 
-/* Relocate an instruction from OLDLOC to *TO.  This function will also
-   increment TO by the number of bytes the new instruction(s) take(s).
+/* Relocate an instruction INSN from OLDLOC to *TO.  This function will
+    also increment TO by the number of bytes the new instruction(s) take(s).
 
    PC relative instructions need to be handled specifically:
 
@@ -1937,11 +1937,10 @@ can_encode_int32 (int32_t val, unsigned bits)
    - LDR/LDRSW (literal)  */
 
 static void
-aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
+aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc, uint32_t insn)
 {
   uint32_t buf[32];
   uint32_t *p = buf;
-  uint32_t insn;
 
   int is_bl;
   int is64;
@@ -1955,8 +1954,6 @@ aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
   unsigned cond;
   unsigned bit;
   int32_t offset;
-
-  target_read_uint32 (oldloc, &insn);
 
   if (aarch64_decode_b (oldloc, insn, &is_bl, &offset))
     {
@@ -2120,6 +2117,7 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   uint32_t *p = buf;
   int32_t offset;
   int i;
+  uint32_t insn;
   CORE_ADDR buildaddr = *jump_entry;
 
   /* We need to save the current state on the stack both to restore it
@@ -2422,7 +2420,8 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
 
   /* Now emit the relocated instruction.  */
   *adjusted_insn_addr = buildaddr;
-  aarch64_relocate_instruction (&buildaddr, tpaddr);
+  target_read_uint32 (tpaddr, &insn);
+  aarch64_relocate_instruction (&buildaddr, tpaddr, insn);
   *adjusted_insn_addr_end = buildaddr;
 
   /* We may not have been able to relocate the instruction.  */
