@@ -1,5 +1,10 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c: Update all callers of function renaming
+	from emit_insn to aarch64_emit_insn.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (enum aarch64_opcodes): Move to
 	arch/aarch64-insn.h.
 	(struct aarch64_memory_operand): Likewise.

@@ -223,7 +223,7 @@ void aarch64_relocate_instruction (uint32_t insn,
    +/- 128MB (26 bits << 2).  */
 
 #define emit_b(buf, is_bl, offset) \
-  emit_insn (buf, ((is_bl) ? BL : B) | (ENCODE ((offset) >> 2, 26, 0)))
+  aarch64_emit_insn (buf, ((is_bl) ? BL : B) | (ENCODE ((offset) >> 2, 26, 0)))
 
 /* Write a BCOND instruction into *BUF.
 
@@ -234,10 +234,10 @@ void aarch64_relocate_instruction (uint32_t insn,
    byte-addressed but should be 4 bytes aligned.  It has a limited range of
    +/- 1MB (19 bits << 2).  */
 
-#define emit_bcond(buf, cond, offset)			\
-  emit_insn (buf,					\
-	     BCOND | ENCODE ((offset) >> 2, 19, 5)	\
-	     | ENCODE ((cond), 4, 0))
+#define emit_bcond(buf, cond, offset)				\
+  aarch64_emit_insn (buf,					\
+		     BCOND | ENCODE ((offset) >> 2, 19, 5)	\
+		     | ENCODE ((cond), 4, 0))
 
 /* Write a CBZ or CBNZ instruction into *BUF.
 
@@ -250,12 +250,12 @@ void aarch64_relocate_instruction (uint32_t insn,
    byte-addressed but should be 4 bytes aligned.  It has a limited range of
    +/- 1MB (19 bits << 2).  */
 
-#define emit_cb(buf, is_cbnz, rt, offset)		\
-  emit_insn (buf,					\
-	     ((is_cbnz) ? CBNZ : CBZ)			\
-	     | ENCODE (rt.is64, 1, 31)  /* sf */	\
-	     | ENCODE (offset >> 2, 19, 5) /* imm19 */	\
-	     | ENCODE (rt.num, 5, 0))
+#define emit_cb(buf, is_cbnz, rt, offset)			\
+  aarch64_emit_insn (buf,					\
+		     ((is_cbnz) ? CBNZ : CBZ)			\
+		     | ENCODE (rt.is64, 1, 31)  /* sf */	\
+		     | ENCODE (offset >> 2, 19, 5) /* imm19 */	\
+		     | ENCODE (rt.num, 5, 0))
 
 /* Write a LDR instruction into *BUF.
 
@@ -298,19 +298,19 @@ void aarch64_relocate_instruction (uint32_t insn,
    byte-addressed but should be 4 bytes aligned.  It has a limited range of
    +/- 32KB (14 bits << 2).  */
 
-#define emit_tb(buf, is_tbnz, bit, rt, offset)	       \
-  emit_insn (buf,				       \
-	     ((is_tbnz) ? TBNZ: TBZ)		       \
-	     | ENCODE (bit >> 5, 1, 31) /* b5 */       \
-	     | ENCODE (bit, 5, 19) /* b40 */	       \
-	     | ENCODE (offset >> 2, 14, 5) /* imm14 */ \
-	     | ENCODE (rt.num, 5, 0))
+#define emit_tb(buf, is_tbnz, bit, rt, offset)		       \
+  aarch64_emit_insn (buf,				       \
+		     ((is_tbnz) ? TBNZ: TBZ)		       \
+		     | ENCODE (bit >> 5, 1, 31) /* b5 */       \
+		     | ENCODE (bit, 5, 19) /* b40 */	       \
+		     | ENCODE (offset >> 2, 14, 5) /* imm14 */ \
+		     | ENCODE (rt.num, 5, 0))
 
 /* Write a NOP instruction into *BUF.  */
 
-#define emit_nop(buf) emit_insn (buf, NOP)
+#define emit_nop(buf) aarch64_emit_insn (buf, NOP)
 
-int emit_insn (uint32_t *buf, uint32_t insn);
+int aarch64_emit_insn (uint32_t *buf, uint32_t insn);
 
 int emit_load_store (uint32_t *buf, uint32_t size,
 		     enum aarch64_opcodes opcode,

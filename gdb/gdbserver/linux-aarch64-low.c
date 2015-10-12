@@ -743,7 +743,7 @@ enum aarch64_system_control_registers
 static int
 emit_blr (uint32_t *buf, struct aarch64_register rn)
 {
-  return emit_insn (buf, BLR | ENCODE (rn.num, 5, 5));
+  return aarch64_emit_insn (buf, BLR | ENCODE (rn.num, 5, 5));
 }
 
 /* Write a RET instruction into *BUF.
@@ -755,7 +755,7 @@ emit_blr (uint32_t *buf, struct aarch64_register rn)
 static int
 emit_ret (uint32_t *buf, struct aarch64_register rn)
 {
-  return emit_insn (buf, RET | ENCODE (rn.num, 5, 5));
+  return aarch64_emit_insn (buf, RET | ENCODE (rn.num, 5, 5));
 }
 
 static int
@@ -798,10 +798,10 @@ emit_load_store_pair (uint32_t *buf, enum aarch64_opcodes opcode,
       return 0;
     }
 
-  return emit_insn (buf, opcode | opc | pre_index | write_back
-		    | ENCODE (operand.index >> 3, 7, 15)
-		    | ENCODE (rt2.num, 5, 10)
-		    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+  return aarch64_emit_insn (buf, opcode | opc | pre_index | write_back
+			    | ENCODE (operand.index >> 3, 7, 15)
+			    | ENCODE (rt2.num, 5, 10)
+			    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a STP instruction into *BUF.
@@ -858,9 +858,10 @@ emit_ldp_q_offset (uint32_t *buf, unsigned rt, unsigned rt2,
   uint32_t opc = ENCODE (2, 2, 30);
   uint32_t pre_index = ENCODE (1, 1, 24);
 
-  return emit_insn (buf, LDP_SIMD_VFP | opc | pre_index
-		    | ENCODE (offset >> 4, 7, 15) | ENCODE (rt2, 5, 10)
-		    | ENCODE (rn.num, 5, 5) | ENCODE (rt, 5, 0));
+  return aarch64_emit_insn (buf, LDP_SIMD_VFP | opc | pre_index
+			    | ENCODE (offset >> 4, 7, 15)
+			    | ENCODE (rt2, 5, 10)
+			    | ENCODE (rn.num, 5, 5) | ENCODE (rt, 5, 0));
 }
 
 /* Write a STP (SIMD&VFP) instruction using Q registers into *BUF.
@@ -879,7 +880,7 @@ emit_stp_q_offset (uint32_t *buf, unsigned rt, unsigned rt2,
   uint32_t opc = ENCODE (2, 2, 30);
   uint32_t pre_index = ENCODE (1, 1, 24);
 
-  return emit_insn (buf, STP_SIMD_VFP | opc | pre_index
+  return aarch64_emit_insn (buf, STP_SIMD_VFP | opc | pre_index
 			    | ENCODE (offset >> 4, 7, 15)
 			    | ENCODE (rt2, 5, 10)
 			    | ENCODE (rn.num, 5, 5) | ENCODE (rt, 5, 0));
@@ -954,9 +955,9 @@ emit_load_store_exclusive (uint32_t *buf, uint32_t size,
 			   struct aarch64_register rt2,
 			   struct aarch64_register rn)
 {
-  return emit_insn (buf, opcode | ENCODE (size, 2, 30)
-		    | ENCODE (rs.num, 5, 16) | ENCODE (rt2.num, 5, 10)
-		    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+  return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30)
+			    | ENCODE (rs.num, 5, 16) | ENCODE (rt2.num, 5, 10)
+			    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a LAXR instruction into *BUF.
@@ -1015,8 +1016,8 @@ emit_data_processing_reg (uint32_t *buf, enum aarch64_opcodes opcode,
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 
-  return emit_insn (buf, opcode | size | ENCODE (rm.num, 5, 16)
-		    | ENCODE (rn.num, 5, 5) | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, opcode | size | ENCODE (rm.num, 5, 16)
+			    | ENCODE (rn.num, 5, 5) | ENCODE (rd.num, 5, 0));
 }
 
 /* Helper function for data processing instructions taking either a register
@@ -1037,9 +1038,10 @@ emit_data_processing (uint32_t *buf, enum aarch64_opcodes opcode,
       /* xxx1 000x xxxx xxxx xxxx xxxx xxxx xxxx */
       operand_opcode = ENCODE (8, 4, 25);
 
-      return emit_insn (buf, opcode | operand_opcode | size
-			| ENCODE (operand.imm, 12, 10)
-			| ENCODE (rn.num, 5, 5) | ENCODE (rd.num, 5, 0));
+      return aarch64_emit_insn (buf, opcode | operand_opcode | size
+				| ENCODE (operand.imm, 12, 10)
+				| ENCODE (rn.num, 5, 5)
+				| ENCODE (rd.num, 5, 0));
     }
   else
     {
@@ -1112,9 +1114,9 @@ emit_mov (uint32_t *buf, struct aarch64_register rd,
       /* Do not shift the immediate.  */
       uint32_t shift = ENCODE (0, 2, 21);
 
-      return emit_insn (buf, MOV | size | shift
-			| ENCODE (operand.imm, 16, 5)
-			| ENCODE (rd.num, 5, 0));
+      return aarch64_emit_insn (buf, MOV | size | shift
+				| ENCODE (operand.imm, 16, 5)
+				| ENCODE (rd.num, 5, 0));
     }
   else
     return emit_add (buf, rd, operand.reg, immediate_operand (0));
@@ -1134,8 +1136,8 @@ emit_movk (uint32_t *buf, struct aarch64_register rd, uint32_t imm,
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 
-  return emit_insn (buf, MOVK | size | ENCODE (shift, 2, 21) |
-		    ENCODE (imm, 16, 5) | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, MOVK | size | ENCODE (shift, 2, 21) |
+			    ENCODE (imm, 16, 5) | ENCODE (rd.num, 5, 0));
 }
 
 /* Write instructions into *BUF in order to move ADDR into a register.
@@ -1343,8 +1345,8 @@ static int
 emit_mrs (uint32_t *buf, struct aarch64_register rt,
 	  enum aarch64_system_control_registers system_reg)
 {
-  return emit_insn (buf, MRS | ENCODE (system_reg, 15, 5)
-		    | ENCODE (rt.num, 5, 0));
+  return aarch64_emit_insn (buf, MRS | ENCODE (system_reg, 15, 5)
+			    | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a MSR instruction into *BUF.  The register size is 64-bit.
@@ -1358,8 +1360,8 @@ static int
 emit_msr (uint32_t *buf, enum aarch64_system_control_registers system_reg,
 	  struct aarch64_register rt)
 {
-  return emit_insn (buf, MSR | ENCODE (system_reg, 15, 5)
-		    | ENCODE (rt.num, 5, 0));
+  return aarch64_emit_insn (buf, MSR | ENCODE (system_reg, 15, 5)
+			    | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a SEVL instruction into *BUF.
@@ -1369,7 +1371,7 @@ emit_msr (uint32_t *buf, enum aarch64_system_control_registers system_reg,
 static int
 emit_sevl (uint32_t *buf)
 {
-  return emit_insn (buf, SEVL);
+  return aarch64_emit_insn (buf, SEVL);
 }
 
 /* Write a WFE instruction into *BUF.
@@ -1379,7 +1381,7 @@ emit_sevl (uint32_t *buf)
 static int
 emit_wfe (uint32_t *buf)
 {
-  return emit_insn (buf, WFE);
+  return aarch64_emit_insn (buf, WFE);
 }
 
 /* Write a SBFM instruction into *BUF.
@@ -1401,9 +1403,9 @@ emit_sbfm (uint32_t *buf, struct aarch64_register rd,
   uint32_t size = ENCODE (rd.is64, 1, 31);
   uint32_t n = ENCODE (rd.is64, 1, 22);
 
-  return emit_insn (buf, SBFM | size | n | ENCODE (immr, 6, 16)
-		    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
-		    | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, SBFM | size | n | ENCODE (immr, 6, 16)
+			    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
+			    | ENCODE (rd.num, 5, 0));
 }
 
 /* Write a SBFX instruction into *BUF.
@@ -1446,9 +1448,9 @@ emit_ubfm (uint32_t *buf, struct aarch64_register rd,
   uint32_t size = ENCODE (rd.is64, 1, 31);
   uint32_t n = ENCODE (rd.is64, 1, 22);
 
-  return emit_insn (buf, UBFM | size | n | ENCODE (immr, 6, 16)
-		    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
-		    | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, UBFM | size | n | ENCODE (immr, 6, 16)
+			    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
+			    | ENCODE (rd.num, 5, 0));
 }
 
 /* Write a UBFX instruction into *BUF.
@@ -1490,9 +1492,9 @@ emit_csinc (uint32_t *buf, struct aarch64_register rd,
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 
-  return emit_insn (buf, CSINC | size | ENCODE (rm.num, 5, 16)
-		    | ENCODE (cond, 4, 12) | ENCODE (rn.num, 5, 5)
-		    | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, CSINC | size | ENCODE (rm.num, 5, 16)
+			    | ENCODE (cond, 4, 12) | ENCODE (rn.num, 5, 5)
+			    | ENCODE (rd.num, 5, 0));
 }
 
 /* Write a CSET instruction into *BUF.
@@ -1757,7 +1759,7 @@ aarch64_ftrace_insn_reloc_others (const uint32_t insn,
 
   /* The instruction is not PC relative.  Just re-emit it at the new
      location.  */
-  insn_reloc->insn_ptr += emit_insn (insn_reloc->insn_ptr, insn);
+  insn_reloc->insn_ptr += aarch64_emit_insn (insn_reloc->insn_ptr, insn);
 }
 
 static const struct aarch64_insn_visitor visitor =

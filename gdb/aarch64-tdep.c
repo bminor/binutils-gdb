@@ -2771,7 +2771,7 @@ aarch64_displaced_step_others (const uint32_t insn,
   struct aarch64_displaced_step_data *dsd
     = (struct aarch64_displaced_step_data *) data;
 
-  emit_insn (dsd->insn_buf, insn);
+  aarch64_emit_insn (dsd->insn_buf, insn);
   dsd->insn_count = 1;
 
   if ((insn & 0xfffffc1f) == 0xd65f0000)

@@ -1,5 +1,10 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* arch/aarch64-insn.c (emit_insn): Rename to ...
+	(aarch64_emit_insn): ... it.  All callers updated.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-linux-tdep.c: Include arch-utils.h.
 	(aarch64_linux_init_abi): Call set_gdbarch_max_insn_length,
 	set_gdbarch_displaced_step_copy_insn,

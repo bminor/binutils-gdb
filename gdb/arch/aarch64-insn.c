@@ -333,7 +333,7 @@ aarch64_relocate_instruction (uint32_t insn,
    instructions written (aka. 1).  */
 
 int
-emit_insn (uint32_t *buf, uint32_t insn)
+aarch64_emit_insn (uint32_t *buf, uint32_t insn)
 {
   *buf = insn;
   return 1;
@@ -356,10 +356,10 @@ emit_load_store (uint32_t *buf, uint32_t size,
       {
 	op = ENCODE (1, 1, 24);
 
-	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
-			  | ENCODE (operand.index >> 3, 12, 10)
-			  | ENCODE (rn.num, 5, 5)
-			  | ENCODE (rt.num, 5, 0));
+	return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+				  | ENCODE (operand.index >> 3, 12, 10)
+				  | ENCODE (rn.num, 5, 5)
+				  | ENCODE (rt.num, 5, 0));
       }
     case MEMORY_OPERAND_POSTINDEX:
       {
@@ -367,9 +367,10 @@ emit_load_store (uint32_t *buf, uint32_t size,
 
 	op = ENCODE (0, 1, 24);
 
-	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
-			  | post_index | ENCODE (operand.index, 9, 12)
-			  | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+	return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+				  | post_index | ENCODE (operand.index, 9, 12)
+				  | ENCODE (rn.num, 5, 5)
+				  | ENCODE (rt.num, 5, 0));
       }
     case MEMORY_OPERAND_PREINDEX:
       {
@@ -377,10 +378,10 @@ emit_load_store (uint32_t *buf, uint32_t size,
 
 	op = ENCODE (0, 1, 24);
 
-	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
-			  | pre_index | ENCODE (operand.index, 9, 12)
-			  | ENCODE (rn.num, 5, 5)
-			  | ENCODE (rt.num, 5, 0));
+	return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+				  | pre_index | ENCODE (operand.index, 9, 12)
+				  | ENCODE (rn.num, 5, 5)
+				  | ENCODE (rt.num, 5, 0));
       }
     default:
       return 0;
