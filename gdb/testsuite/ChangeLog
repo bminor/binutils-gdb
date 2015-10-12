@@ -1,5 +1,10 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* lib/gdb.exp (support_displaced_stepping): Return 1 if target
+	is aarch64*-*-linux*.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.arch/insn-reloc.c (can_relocate_bcond): Rename to ...
 	(can_relocate_bcond_true): ... it.
 	(can_relocate_bcond_false): New function.
