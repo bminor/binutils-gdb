@@ -1,5 +1,26 @@
 2015-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* m32c-tdep.c (m32c_move_reg_t): Replace with...
+	(m32c_write_reg_t): ...this and...
+	(m32c_read_reg_t): ...this.
+	(struct m32c_reg): Update types of read and write.
+	(m32c_raw_read): Change declaration type to m32c_read_reg_t and
+	adjust definition.
+	(m32c_banked_read): Likewise.
+	(m32c_sb_read): Likewise.
+	(m32c_part_read): Likewise.
+	(m32c_cat_read): Likewise.
+	(m32c_r3r2r1r0_read): Likewise.
+	(m32c_raw_write): Change declaration type to m32c_write_reg_t
+	and adjust definition.
+	(m32c_banked_write): Likewise.
+	(m32c_sb_write): Likewise.
+	(m32c_part_write): Likewise.
+	(m32c_cat_write): Likewise.
+	(m32c_r3r2r1r0_write): Likewise.
+
+2015-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* aarch64-linux-tdep.c (aarch64_linux_syscall_record): Add cast.
 
 2015-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
