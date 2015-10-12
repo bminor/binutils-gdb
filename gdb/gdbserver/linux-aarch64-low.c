@@ -1924,8 +1924,8 @@ can_encode_int32 (int32_t val, unsigned bits)
   return rest == 0 || rest == -1;
 }
 
-/* Relocate an instruction INSN from OLDLOC to *TO.  This function will
-    also increment TO by the number of bytes the new instruction(s) take(s).
+/* Relocate an instruction INSN from OLDLOC to TO and save the relocated
+   instructions in BUF.  The number of instructions in BUF is returned.
 
    PC relative instructions need to be handled specifically:
 
@@ -1936,10 +1936,10 @@ can_encode_int32 (int32_t val, unsigned bits)
    - ADR/ADRP
    - LDR/LDRSW (literal)  */
 
-static void
-aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc, uint32_t insn)
+static int
+aarch64_relocate_instruction (const CORE_ADDR to, const CORE_ADDR oldloc,
+			      uint32_t insn, uint32_t *buf)
 {
-  uint32_t buf[32];
   uint32_t *p = buf;
 
   int is_bl;
@@ -1957,16 +1957,16 @@ aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc, uint32_t insn)
 
   if (aarch64_decode_b (oldloc, insn, &is_bl, &offset))
     {
-      offset = (oldloc - *to + offset);
+      offset = (oldloc - to + offset);
 
       if (can_encode_int32 (offset, 28))
 	p += emit_b (p, is_bl, offset);
       else
-	return;
+	return 0;
     }
   else if (aarch64_decode_bcond (oldloc, insn, &cond, &offset))
     {
-      offset = (oldloc - *to + offset);
+      offset = (oldloc - to + offset);
 
       if (can_encode_int32 (offset, 21))
 	p += emit_bcond (p, cond, offset);
@@ -1989,11 +1989,11 @@ aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc, uint32_t insn)
 	  p += emit_b (p, 0, offset - 8);
 	}
       else
-	return;
+	return 0;
     }
   else if (aarch64_decode_cb (oldloc, insn, &is64, &is_cbnz, &rn, &offset))
     {
-      offset = (oldloc - *to + offset);
+      offset = (oldloc - to + offset);
 
       if (can_encode_int32 (offset, 21))
 	p += emit_cb (p, is_cbnz, aarch64_register (rn, is64), offset);
@@ -2015,11 +2015,11 @@ aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc, uint32_t insn)
 	  p += emit_b (p, 0, offset - 8);
 	}
       else
-	return;
+	return 0;
     }
   else if (aarch64_decode_tb (oldloc, insn, &is_tbnz, &bit, &rt, &offset))
     {
-      offset = (oldloc - *to + offset);
+      offset = (oldloc - to + offset);
 
       if (can_encode_int32 (offset, 16))
 	p += emit_tb (p, is_tbnz, bit, aarch64_register (rt, 1), offset);
@@ -2041,7 +2041,7 @@ aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc, uint32_t insn)
 	  p += emit_b (p, 0, offset - 8);
 	}
       else
-	return;
+	return 0;
     }
   else if (aarch64_decode_adr (oldloc, insn, &is_adrp, &rd, &offset))
     {
@@ -2092,7 +2092,7 @@ aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc, uint32_t insn)
       p += emit_insn (p, insn);
     }
 
-  append_insns (to, p - buf, buf);
+  return (int) (p - buf);
 }
 
 /* Implementation of linux_target_ops method
@@ -2421,11 +2421,9 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   /* Now emit the relocated instruction.  */
   *adjusted_insn_addr = buildaddr;
   target_read_uint32 (tpaddr, &insn);
-  aarch64_relocate_instruction (&buildaddr, tpaddr, insn);
-  *adjusted_insn_addr_end = buildaddr;
-
+  i = aarch64_relocate_instruction (buildaddr, tpaddr, insn, buf);
   /* We may not have been able to relocate the instruction.  */
-  if (*adjusted_insn_addr == *adjusted_insn_addr_end)
+  if (i == 0)
     {
       sprintf (err,
 	       "E.Could not relocate instruction from %s to %s.",
@@ -2433,6 +2431,9 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
 	       core_addr_to_string_nz (buildaddr));
       return 1;
     }
+  else
+    append_insns (&buildaddr, i, buf);
+  *adjusted_insn_addr_end = buildaddr;
 
   /* Go back to the start of the buffer.  */
   p = buf;

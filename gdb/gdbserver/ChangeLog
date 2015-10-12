@@ -1,5 +1,12 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_relocate_instruction): Return
+	int.  Add argument buf.
+	(aarch64_install_fast_tracepoint_jump_pad): Pass buf to
+	aarch64_relocate_instruction.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_relocate_instruction): Add
 	argument insn.  Remove local variable insn.  Don't call
 	target_read_uint32.
