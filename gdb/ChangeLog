@@ -1,3 +1,14 @@
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/aarch64-insn.c (aarch64_decode_ldr_literal): Moved from
+	gdbserver/linux-aarch64-low.c.
+	(aarch64_relocate_instruction): Likewise.
+	* arch/aarch64-insn.h (aarch64_decode_ldr_literal): Declare.
+	(struct aarch64_insn_data): Moved from
+	gdbserver/linux-aarch64-low.c.
+	(struct aarch64_insn_visitor): Likewise.
+	(aarch64_relocate_instruction): Declare.
+
 2015-10-12  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* eval.c (evaluate_subexp_standard) <STRUCTOP_STRUCT>: If

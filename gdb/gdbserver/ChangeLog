@@ -1,5 +1,13 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (extract_signed_bitfield): Remove.
+	(aarch64_decode_ldr_literal): Move to gdb/arch/aarch64-insn.c.
+	(aarch64_relocate_instruction): Likewise.
+	(struct aarch64_insn_data): Move to gdb/arch/aarch64-insn.h.
+	(struct aarch64_insn_visitor): Likewise.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (struct aarch64_insn_data): New.
 	(struct aarch64_insn_visitor): New.
 	(struct aarch64_insn_relocation_data): New.

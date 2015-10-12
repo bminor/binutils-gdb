@@ -36,4 +36,54 @@ int aarch64_decode_cb (CORE_ADDR addr, uint32_t insn, int *is64,
 int aarch64_decode_tb (CORE_ADDR addr, uint32_t insn, int *is_tbnz,
 		       unsigned *bit, unsigned *rt, int32_t *imm);
 
+int aarch64_decode_ldr_literal (CORE_ADDR addr, uint32_t insn, int *is_w,
+				int *is64, unsigned *rt, int32_t *offset);
+
+/* Data passed to each method of aarch64_insn_visitor.  */
+
+struct aarch64_insn_data
+{
+  /* The instruction address.  */
+  CORE_ADDR insn_addr;
+};
+
+/* Visit different instructions by different methods.  */
+
+struct aarch64_insn_visitor
+{
+  /* Visit instruction B/BL OFFSET.  */
+  void (*b) (const int is_bl, const int32_t offset,
+	     struct aarch64_insn_data *data);
+
+  /* Visit instruction B.COND OFFSET.  */
+  void (*b_cond) (const unsigned cond, const int32_t offset,
+		  struct aarch64_insn_data *data);
+
+  /* Visit instruction CBZ/CBNZ Rn, OFFSET.  */
+  void (*cb) (const int32_t offset, const int is_cbnz,
+	      const unsigned rn, int is64,
+	      struct aarch64_insn_data *data);
+
+  /* Visit instruction TBZ/TBNZ Rt, #BIT, OFFSET.  */
+  void (*tb) (const int32_t offset, int is_tbnz,
+	      const unsigned rt, unsigned bit,
+	      struct aarch64_insn_data *data);
+
+  /* Visit instruction ADR/ADRP Rd, OFFSET.  */
+  void (*adr) (const int32_t offset, const unsigned rd,
+	       const int is_adrp, struct aarch64_insn_data *data);
+
+  /* Visit instruction LDR/LDRSW Rt, OFFSET.  */
+  void (*ldr_literal) (const int32_t offset, const int is_sw,
+		       const unsigned rt, const int is64,
+		       struct aarch64_insn_data *data);
+
+  /* Visit instruction INSN of other kinds.  */
+  void (*others) (const uint32_t insn, struct aarch64_insn_data *data);
+};
+
+void aarch64_relocate_instruction (uint32_t insn,
+				   const struct aarch64_insn_visitor *visitor,
+				   struct aarch64_insn_data *data);
+
 #endif
