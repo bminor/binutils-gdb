@@ -848,7 +848,7 @@ current_me_module (void)
       ULONGEST regval;
       regcache_cooked_read_unsigned (get_current_regcache (),
 				     MEP_MODULE_REGNUM, &regval);
-      return regval;
+      return (CONFIG_ATTR) regval;
     }
   else
     return gdbarch_tdep (target_gdbarch ())->me_module;
@@ -2396,7 +2396,10 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* The way to get the me_module code depends on the object file
          format.  At the moment, we only know how to handle ELF.  */
       if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
-        me_module = elf_elfheader (info.abfd)->e_flags & EF_MEP_INDEX_MASK;
+	{
+	  int flag = elf_elfheader (info.abfd)->e_flags & EF_MEP_INDEX_MASK;
+	  me_module = (CONFIG_ATTR) flag;
+	}
       else
         me_module = CONFIG_NONE;
     }
