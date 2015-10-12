@@ -902,7 +902,8 @@ aarch64_linux_syscall_record (struct regcache *regcache,
   int ret = 0;
   enum gdb_syscall syscall_gdb;
 
-  syscall_gdb = aarch64_canonicalize_syscall (svc_number);
+  syscall_gdb =
+    aarch64_canonicalize_syscall ((enum aarch64_syscall) svc_number);
 
   if (syscall_gdb < 0)
     {
