@@ -1,5 +1,10 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c: Update all callers as emit_load_store
+	is renamed to aarch64_emit_load_store.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c: Update all callers of function renaming
 	from emit_insn to aarch64_emit_insn.
 

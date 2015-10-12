@@ -902,7 +902,7 @@ emit_ldrh (uint32_t *buf, struct aarch64_register rt,
 	   struct aarch64_register rn,
 	   struct aarch64_memory_operand operand)
 {
-  return emit_load_store (buf, 1, LDR, rt, rn, operand);
+  return aarch64_emit_load_store (buf, 1, LDR, rt, rn, operand);
 }
 
 /* Write a LDRB instruction into *BUF.
@@ -921,7 +921,7 @@ emit_ldrb (uint32_t *buf, struct aarch64_register rt,
 	   struct aarch64_register rn,
 	   struct aarch64_memory_operand operand)
 {
-  return emit_load_store (buf, 0, LDR, rt, rn, operand);
+  return aarch64_emit_load_store (buf, 0, LDR, rt, rn, operand);
 }
 
 
@@ -942,7 +942,7 @@ emit_str (uint32_t *buf, struct aarch64_register rt,
 	  struct aarch64_register rn,
 	  struct aarch64_memory_operand operand)
 {
-  return emit_load_store (buf, rt.is64 ? 3 : 2, STR, rt, rn, operand);
+  return aarch64_emit_load_store (buf, rt.is64 ? 3 : 2, STR, rt, rn, operand);
 }
 
 /* Helper function emitting an exclusive load or store instruction.  */

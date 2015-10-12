@@ -269,7 +269,7 @@ void aarch64_relocate_instruction (uint32_t insn,
    0 .. 32760 range (12 bits << 3).  */
 
 #define emit_ldr(buf, rt, rn, operand) \
-  emit_load_store (buf, rt.is64 ? 3 : 2, LDR, rt, rn, operand)
+  aarch64_emit_load_store (buf, rt.is64 ? 3 : 2, LDR, rt, rn, operand)
 
 /* Write a LDRSW instruction into *BUF.  The register size is 64-bit.
 
@@ -283,7 +283,7 @@ void aarch64_relocate_instruction (uint32_t insn,
    0 .. 16380 range (12 bits << 2).  */
 
 #define emit_ldrsw(buf, rt, rn, operand)		\
-  emit_load_store (buf, 3, LDRSW, rt, rn, operand)
+  aarch64_emit_load_store (buf, 3, LDRSW, rt, rn, operand)
 
 
 /* Write a TBZ or TBNZ instruction into *BUF.
@@ -312,10 +312,10 @@ void aarch64_relocate_instruction (uint32_t insn,
 
 int aarch64_emit_insn (uint32_t *buf, uint32_t insn);
 
-int emit_load_store (uint32_t *buf, uint32_t size,
-		     enum aarch64_opcodes opcode,
-		     struct aarch64_register rt,
-		     struct aarch64_register rn,
-		     struct aarch64_memory_operand operand);
+int aarch64_emit_load_store (uint32_t *buf, uint32_t size,
+			     enum aarch64_opcodes opcode,
+			     struct aarch64_register rt,
+			     struct aarch64_register rn,
+			     struct aarch64_memory_operand operand);
 
 #endif

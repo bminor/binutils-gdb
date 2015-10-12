@@ -1,5 +1,10 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* arch/aarch64-insn.c (emit_load_store): Rename to ...
+	(aarch64_emit_load_store): ... it.  All callers updated.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* arch/aarch64-insn.c (emit_insn): Rename to ...
 	(aarch64_emit_insn): ... it.  All callers updated.
 

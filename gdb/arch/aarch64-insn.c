@@ -342,11 +342,11 @@ aarch64_emit_insn (uint32_t *buf, uint32_t insn)
 /* Helper function emitting a load or store instruction.  */
 
 int
-emit_load_store (uint32_t *buf, uint32_t size,
-		 enum aarch64_opcodes opcode,
-		 struct aarch64_register rt,
-		 struct aarch64_register rn,
-		 struct aarch64_memory_operand operand)
+aarch64_emit_load_store (uint32_t *buf, uint32_t size,
+			 enum aarch64_opcodes opcode,
+			 struct aarch64_register rt,
+			 struct aarch64_register rn,
+			 struct aarch64_memory_operand operand)
 {
   uint32_t op;
 
