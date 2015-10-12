@@ -1,5 +1,9 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* NEWS: Mention the change.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* arch/aarch64-insn.c (emit_load_store): Rename to ...
 	(aarch64_emit_load_store): ... it.  All callers updated.
 

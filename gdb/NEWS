@@ -22,6 +22,8 @@
   including JIT compiling fast tracepoint's conditional expression bytecode
   into native code.
 
+* GDB now supports displaced stepping on AArch64 GNU/Linux.
+
 * New commands
 
 maint set target-non-stop (on|off|auto)
