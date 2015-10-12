@@ -1,3 +1,10 @@
+2015-10-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	PR ld/19083
+	* elf32-s390.c (elf_s390_gc_sweep_hook): Do not reduce got
+	refcount for relocs not really requiring a got slot.
+	* elf64-s390.c (elf_s390_gc_sweep_hook): Likewise.
+
 2015-10-11  John David Anglin  <danglin@gcc.gnu.org>
 
 	* elf-hppa.h (elf_hppa_action_discarded): Ignore relocations in
