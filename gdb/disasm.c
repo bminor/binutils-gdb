@@ -170,6 +170,92 @@ compare_lines (const void *mle1p, const void *mle2p)
   return val;
 }
 
+/* Prints the instruction at PC into UIOUT and returns the length of the
+   printed instruction in bytes.  */
+
+static int
+gdb_pretty_print_insn (struct gdbarch *gdbarch, struct ui_out *uiout,
+		       struct disassemble_info * di, CORE_ADDR pc, int flags,
+		       struct ui_file *stb)
+{
+  /* parts of the symbolic representation of the address */
+  int unmapped;
+  int offset;
+  int line;
+  int size;
+  struct cleanup *ui_out_chain;
+  char *filename = NULL;
+  char *name = NULL;
+
+  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+  if ((flags & DISASSEMBLY_OMIT_PC) == 0)
+    ui_out_text (uiout, pc_prefix (pc));
+  ui_out_field_core_addr (uiout, "address", gdbarch, pc);
+
+  if (!build_address_symbolic (gdbarch, pc, 0, &name, &offset, &filename,
+			       &line, &unmapped))
+    {
+      /* We don't care now about line, filename and unmapped.  But we might in
+	 the future.  */
+      ui_out_text (uiout, " <");
+      if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
+	ui_out_field_string (uiout, "func-name", name);
+      ui_out_text (uiout, "+");
+      ui_out_field_int (uiout, "offset", offset);
+      ui_out_text (uiout, ">:\t");
+    }
+  else
+    ui_out_text (uiout, ":\t");
+
+  if (filename != NULL)
+    xfree (filename);
+  if (name != NULL)
+    xfree (name);
+
+  ui_file_rewind (stb);
+  if (flags & DISASSEMBLY_RAW_INSN)
+    {
+      CORE_ADDR end_pc;
+      bfd_byte data;
+      int err;
+      const char *spacer = "";
+
+      /* Build the opcodes using a temporary stream so we can
+	 write them out in a single go for the MI.  */
+      struct ui_file *opcode_stream = mem_fileopen ();
+      struct cleanup *cleanups =
+	make_cleanup_ui_file_delete (opcode_stream);
+
+      size = gdbarch_print_insn (gdbarch, pc, di);
+      end_pc = pc + size;
+
+      for (;pc < end_pc; ++pc)
+	{
+	  err = (*di->read_memory_func) (pc, &data, 1, di);
+	  if (err != 0)
+	    (*di->memory_error_func) (err, pc, di);
+	  fprintf_filtered (opcode_stream, "%s%02x",
+			    spacer, (unsigned) data);
+	  spacer = " ";
+	}
+
+      ui_out_field_stream (uiout, "opcodes", opcode_stream);
+      ui_out_text (uiout, "\t");
+
+      do_cleanups (cleanups);
+    }
+  else
+    size = gdbarch_print_insn (gdbarch, pc, di);
+
+  ui_out_field_stream (uiout, "inst", stb);
+  ui_file_rewind (stb);
+  do_cleanups (ui_out_chain);
+  ui_out_text (uiout, "\n");
+
+  return size;
+}
+
 static int
 dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 	    struct disassemble_info * di,
@@ -178,92 +264,25 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 	    CORE_ADDR *end_pc)
 {
   int num_displayed = 0;
-  CORE_ADDR pc;
 
-  /* parts of the symbolic representation of the address */
-  int unmapped;
-  int offset;
-  int line;
-  struct cleanup *ui_out_chain;
-
-  for (pc = low; pc < high;)
+  while (low < high && (how_many < 0 || num_displayed < how_many))
     {
-      char *filename = NULL;
-      char *name = NULL;
+      int size;
 
+      size = gdb_pretty_print_insn (gdbarch, uiout, di, low, flags, stb);
+      if (size <= 0)
+	break;
+
+      ++num_displayed;
+      low += size;
+
+      /* Allow user to bail out with ^C.  */
       QUIT;
-      if (how_many >= 0)
-	{
-	  if (num_displayed >= how_many)
-	    break;
-	  else
-	    num_displayed++;
-	}
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-
-      if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	ui_out_text (uiout, pc_prefix (pc));
-      ui_out_field_core_addr (uiout, "address", gdbarch, pc);
-
-      if (!build_address_symbolic (gdbarch, pc, 0, &name, &offset, &filename,
-				   &line, &unmapped))
-	{
-	  /* We don't care now about line, filename and
-	     unmapped. But we might in the future.  */
-	  ui_out_text (uiout, " <");
-	  if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
-	    ui_out_field_string (uiout, "func-name", name);
-	  ui_out_text (uiout, "+");
-	  ui_out_field_int (uiout, "offset", offset);
-	  ui_out_text (uiout, ">:\t");
-	}
-      else
-	ui_out_text (uiout, ":\t");
-
-      if (filename != NULL)
-	xfree (filename);
-      if (name != NULL)
-	xfree (name);
-
-      ui_file_rewind (stb);
-      if (flags & DISASSEMBLY_RAW_INSN)
-        {
-          CORE_ADDR old_pc = pc;
-          bfd_byte data;
-          int err;
-          const char *spacer = "";
-
-          /* Build the opcodes using a temporary stream so we can
-             write them out in a single go for the MI.  */
-          struct ui_file *opcode_stream = mem_fileopen ();
-          struct cleanup *cleanups =
-            make_cleanup_ui_file_delete (opcode_stream);
-
-          pc += gdbarch_print_insn (gdbarch, pc, di);
-          for (;old_pc < pc; old_pc++)
-            {
-              err = (*di->read_memory_func) (old_pc, &data, 1, di);
-              if (err != 0)
-                (*di->memory_error_func) (err, old_pc, di);
-              fprintf_filtered (opcode_stream, "%s%02x",
-                                spacer, (unsigned) data);
-              spacer = " ";
-            }
-          ui_out_field_stream (uiout, "opcodes", opcode_stream);
-          ui_out_text (uiout, "\t");
-
-          do_cleanups (cleanups);
-        }
-      else
-        pc += gdbarch_print_insn (gdbarch, pc, di);
-      ui_out_field_stream (uiout, "inst", stb);
-      ui_file_rewind (stb);
-      do_cleanups (ui_out_chain);
-      ui_out_text (uiout, "\n");
     }
 
   if (end_pc != NULL)
-    *end_pc = pc;
+    *end_pc = low;
+
   return num_displayed;
 }
 
