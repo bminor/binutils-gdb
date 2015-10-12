@@ -1,5 +1,45 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-linux-tdep.c: Include arch-utils.h.
+	(aarch64_linux_init_abi): Call set_gdbarch_max_insn_length,
+	set_gdbarch_displaced_step_copy_insn,
+	set_gdbarch_displaced_step_fixup,
+	set_gdbarch_displaced_step_free_closure,
+	set_gdbarch_displaced_step_location,
+	and set_gdbarch_displaced_step_hw_singlestep.
+	* aarch64-tdep.c (struct displaced_step_closure): New.
+	(struct aarch64_displaced_step_data): New.
+	(aarch64_displaced_step_b): New function.
+	(aarch64_displaced_step_b_cond): Likewise.
+	(aarch64_register): Likewise.
+	(aarch64_displaced_step_cb): Likewise.
+	(aarch64_displaced_step_tb): Likewise.
+	(aarch64_displaced_step_adr): Likewise.
+	(aarch64_displaced_step_ldr_literal): Likewise.
+	(aarch64_displaced_step_others): Likewise.
+	(aarch64_displaced_step_copy_insn): Likewise.
+	(aarch64_displaced_step_fixup): Likewise.
+	(aarch64_displaced_step_hw_singlestep): Likewise.
+	* aarch64-tdep.h (DISPLACED_MODIFIED_INSNS): New macro.
+	(aarch64_displaced_step_copy_insn): Declare.
+	(aarch64_displaced_step_fixup): Declare.
+	(aarch64_displaced_step_hw_singlestep): Declare.
+	* arch/aarch64-insn.c (emit_insn): Moved from
+	gdbserver/linux-aarch64-low.c.
+	(emit_load_store): Likewise.
+	* arch/aarch64-insn.h (enum aarch64_opcodes): Moved from
+	gdbserver/linux-aarch64-low.c.
+	(struct aarch64_register): Likewise.
+	(struct aarch64_memory_operand): Likewise.
+	(ENCODE): Likewise.
+	(can_encode_int32): New macro.
+	(emit_b, emit_bcond, emit_cb, emit_ldr, emit_ldrsw): Likewise.
+	(emit_tb, emit_nop): Likewise.
+	(emit_insn): Declare.
+	(emit_load_store): Declare.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* arch/aarch64-insn.c (aarch64_decode_ldr_literal): Moved from
 	gdbserver/linux-aarch64-low.c.
 	(aarch64_relocate_instruction): Likewise.

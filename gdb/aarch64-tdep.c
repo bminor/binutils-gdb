@@ -2559,6 +2559,343 @@ aarch64_software_single_step (struct frame_info *frame)
   return 1;
 }
 
+struct displaced_step_closure
+{
+  /* It is true when condition instruction, such as B.CON, TBZ, etc,
+     is being displaced stepping.  */
+  int cond;
+
+  /* PC adjustment offset after displaced stepping.  */
+  int32_t pc_adjust;
+};
+
+/* Data when visiting instructions for displaced stepping.  */
+
+struct aarch64_displaced_step_data
+{
+  struct aarch64_insn_data base;
+
+  /* The address where the instruction will be executed at.  */
+  CORE_ADDR new_addr;
+  /* Buffer of instructions to be copied to NEW_ADDR to execute.  */
+  uint32_t insn_buf[DISPLACED_MODIFIED_INSNS];
+  /* Number of instructions in INSN_BUF.  */
+  unsigned insn_count;
+  /* Registers when doing displaced stepping.  */
+  struct regcache *regs;
+
+  struct displaced_step_closure *dsc;
+};
+
+/* Implementation of aarch64_insn_visitor method "b".  */
+
+static void
+aarch64_displaced_step_b (const int is_bl, const int32_t offset,
+			  struct aarch64_insn_data *data)
+{
+  struct aarch64_displaced_step_data *dsd
+    = (struct aarch64_displaced_step_data *) data;
+  int32_t new_offset = data->insn_addr - dsd->new_addr + offset;
+
+  if (can_encode_int32 (new_offset, 28))
+    {
+      /* Emit B rather than BL, because executing BL on a new address
+	 will get the wrong address into LR.  In order to avoid this,
+	 we emit B, and update LR if the instruction is BL.  */
+      emit_b (dsd->insn_buf, 0, new_offset);
+      dsd->insn_count++;
+    }
+  else
+    {
+      /* Write NOP.  */
+      emit_nop (dsd->insn_buf);
+      dsd->insn_count++;
+      dsd->dsc->pc_adjust = offset;
+    }
+
+  if (is_bl)
+    {
+      /* Update LR.  */
+      regcache_cooked_write_unsigned (dsd->regs, AARCH64_LR_REGNUM,
+				      data->insn_addr + 4);
+    }
+}
+
+/* Implementation of aarch64_insn_visitor method "b_cond".  */
+
+static void
+aarch64_displaced_step_b_cond (const unsigned cond, const int32_t offset,
+			       struct aarch64_insn_data *data)
+{
+  struct aarch64_displaced_step_data *dsd
+    = (struct aarch64_displaced_step_data *) data;
+  int32_t new_offset = data->insn_addr - dsd->new_addr + offset;
+
+  /* GDB has to fix up PC after displaced step this instruction
+     differently according to the condition is true or false.  Instead
+     of checking COND against conditional flags, we can use
+     the following instructions, and GDB can tell how to fix up PC
+     according to the PC value.
+
+     B.COND TAKEN    ; If cond is true, then jump to TAKEN.
+     INSN1     ;
+     TAKEN:
+     INSN2
+  */
+
+  emit_bcond (dsd->insn_buf, cond, 8);
+  dsd->dsc->cond = 1;
+  dsd->dsc->pc_adjust = offset;
+  dsd->insn_count = 1;
+}
+
+/* Dynamically allocate a new register.  If we know the register
+   statically, we should make it a global as above instead of using this
+   helper function.  */
+
+static struct aarch64_register
+aarch64_register (unsigned num, int is64)
+{
+  return (struct aarch64_register) { num, is64 };
+}
+
+/* Implementation of aarch64_insn_visitor method "cb".  */
+
+static void
+aarch64_displaced_step_cb (const int32_t offset, const int is_cbnz,
+			   const unsigned rn, int is64,
+			   struct aarch64_insn_data *data)
+{
+  struct aarch64_displaced_step_data *dsd
+    = (struct aarch64_displaced_step_data *) data;
+  int32_t new_offset = data->insn_addr - dsd->new_addr + offset;
+
+  /* The offset is out of range for a compare and branch
+     instruction.  We can use the following instructions instead:
+
+	 CBZ xn, TAKEN   ; xn == 0, then jump to TAKEN.
+	 INSN1     ;
+	 TAKEN:
+	 INSN2
+  */
+  emit_cb (dsd->insn_buf, is_cbnz, aarch64_register (rn, is64), 8);
+  dsd->insn_count = 1;
+  dsd->dsc->cond = 1;
+  dsd->dsc->pc_adjust = offset;
+}
+
+/* Implementation of aarch64_insn_visitor method "tb".  */
+
+static void
+aarch64_displaced_step_tb (const int32_t offset, int is_tbnz,
+			   const unsigned rt, unsigned bit,
+			   struct aarch64_insn_data *data)
+{
+  struct aarch64_displaced_step_data *dsd
+    = (struct aarch64_displaced_step_data *) data;
+  int32_t new_offset = data->insn_addr - dsd->new_addr + offset;
+
+  /* The offset is out of range for a test bit and branch
+     instruction We can use the following instructions instead:
+
+     TBZ xn, #bit, TAKEN ; xn[bit] == 0, then jump to TAKEN.
+     INSN1         ;
+     TAKEN:
+     INSN2
+
+  */
+  emit_tb (dsd->insn_buf, is_tbnz, bit, aarch64_register (rt, 1), 8);
+  dsd->insn_count = 1;
+  dsd->dsc->cond = 1;
+  dsd->dsc->pc_adjust = offset;
+}
+
+/* Implementation of aarch64_insn_visitor method "adr".  */
+
+static void
+aarch64_displaced_step_adr (const int32_t offset, const unsigned rd,
+			    const int is_adrp, struct aarch64_insn_data *data)
+{
+  struct aarch64_displaced_step_data *dsd
+    = (struct aarch64_displaced_step_data *) data;
+  /* We know exactly the address the ADR{P,} instruction will compute.
+     We can just write it to the destination register.  */
+  CORE_ADDR address = data->insn_addr + offset;
+
+  if (is_adrp)
+    {
+      /* Clear the lower 12 bits of the offset to get the 4K page.  */
+      regcache_cooked_write_unsigned (dsd->regs, AARCH64_X0_REGNUM + rd,
+				      address & ~0xfff);
+    }
+  else
+      regcache_cooked_write_unsigned (dsd->regs, AARCH64_X0_REGNUM + rd,
+				      address);
+
+  dsd->dsc->pc_adjust = 4;
+  emit_nop (dsd->insn_buf);
+  dsd->insn_count = 1;
+}
+
+/* Implementation of aarch64_insn_visitor method "ldr_literal".  */
+
+static void
+aarch64_displaced_step_ldr_literal (const int32_t offset, const int is_sw,
+				    const unsigned rt, const int is64,
+				    struct aarch64_insn_data *data)
+{
+  struct aarch64_displaced_step_data *dsd
+    = (struct aarch64_displaced_step_data *) data;
+  CORE_ADDR address = data->insn_addr + offset;
+  struct aarch64_memory_operand zero = { MEMORY_OPERAND_OFFSET, 0 };
+
+  regcache_cooked_write_unsigned (dsd->regs, AARCH64_X0_REGNUM + rt,
+				  address);
+
+  if (is_sw)
+    dsd->insn_count = emit_ldrsw (dsd->insn_buf, aarch64_register (rt, 1),
+				  aarch64_register (rt, 1), zero);
+  else
+    dsd->insn_count = emit_ldr (dsd->insn_buf, aarch64_register (rt, is64),
+				aarch64_register (rt, 1), zero);
+
+  dsd->dsc->pc_adjust = 4;
+}
+
+/* Implementation of aarch64_insn_visitor method "others".  */
+
+static void
+aarch64_displaced_step_others (const uint32_t insn,
+			       struct aarch64_insn_data *data)
+{
+  struct aarch64_displaced_step_data *dsd
+    = (struct aarch64_displaced_step_data *) data;
+
+  emit_insn (dsd->insn_buf, insn);
+  dsd->insn_count = 1;
+
+  if ((insn & 0xfffffc1f) == 0xd65f0000)
+    {
+      /* RET */
+      dsd->dsc->pc_adjust = 0;
+    }
+  else
+    dsd->dsc->pc_adjust = 4;
+}
+
+static const struct aarch64_insn_visitor visitor =
+{
+  aarch64_displaced_step_b,
+  aarch64_displaced_step_b_cond,
+  aarch64_displaced_step_cb,
+  aarch64_displaced_step_tb,
+  aarch64_displaced_step_adr,
+  aarch64_displaced_step_ldr_literal,
+  aarch64_displaced_step_others,
+};
+
+/* Implement the "displaced_step_copy_insn" gdbarch method.  */
+
+struct displaced_step_closure *
+aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
+				  CORE_ADDR from, CORE_ADDR to,
+				  struct regcache *regs)
+{
+  struct displaced_step_closure *dsc = NULL;
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  uint32_t insn = read_memory_unsigned_integer (from, 4, byte_order_for_code);
+  struct aarch64_displaced_step_data dsd;
+
+  /* Look for a Load Exclusive instruction which begins the sequence.  */
+  if (decode_masked_match (insn, 0x3fc00000, 0x08400000))
+    {
+      /* We can't displaced step atomic sequences.  */
+      return NULL;
+    }
+
+  dsc = XCNEW (struct displaced_step_closure);
+  dsd.base.insn_addr = from;
+  dsd.new_addr = to;
+  dsd.regs = regs;
+  dsd.dsc = dsc;
+  aarch64_relocate_instruction (insn, &visitor,
+				(struct aarch64_insn_data *) &dsd);
+  gdb_assert (dsd.insn_count <= DISPLACED_MODIFIED_INSNS);
+
+  if (dsd.insn_count != 0)
+    {
+      int i;
+
+      /* Instruction can be relocated to scratch pad.  Copy
+	 relocated instruction(s) there.  */
+      for (i = 0; i < dsd.insn_count; i++)
+	{
+	  if (debug_displaced)
+	    {
+	      debug_printf ("displaced: writing insn ");
+	      debug_printf ("%.8x", dsd.insn_buf[i]);
+	      debug_printf (" at %s\n", paddress (gdbarch, to + i * 4));
+	    }
+	  write_memory_unsigned_integer (to + i * 4, 4, byte_order_for_code,
+					 (ULONGEST) dsd.insn_buf[i]);
+	}
+    }
+  else
+    {
+      xfree (dsc);
+      dsc = NULL;
+    }
+
+  return dsc;
+}
+
+/* Implement the "displaced_step_fixup" gdbarch method.  */
+
+void
+aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
+			      struct displaced_step_closure *dsc,
+			      CORE_ADDR from, CORE_ADDR to,
+			      struct regcache *regs)
+{
+  if (dsc->cond)
+    {
+      ULONGEST pc;
+
+      regcache_cooked_read_unsigned (regs, AARCH64_PC_REGNUM, &pc);
+      if (pc - to == 8)
+	{
+	  /* Condition is true.  */
+	}
+      else if (pc - to == 4)
+	{
+	  /* Condition is false.  */
+	  dsc->pc_adjust = 4;
+	}
+      else
+	gdb_assert_not_reached ("Unexpected PC value after displaced stepping");
+    }
+
+  if (dsc->pc_adjust != 0)
+    {
+      if (debug_displaced)
+	{
+	  debug_printf ("displaced: fixup: set PC to %s:%d\n",
+			paddress (gdbarch, from), dsc->pc_adjust);
+	}
+      regcache_cooked_write_unsigned (regs, AARCH64_PC_REGNUM,
+				      from + dsc->pc_adjust);
+    }
+}
+
+/* Implement the "displaced_step_hw_singlestep" gdbarch method.  */
+
+int
+aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
+				      struct displaced_step_closure *closure)
+{
+  return 1;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.

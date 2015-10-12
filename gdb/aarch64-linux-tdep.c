@@ -21,6 +21,7 @@
 #include "defs.h"
 
 #include "gdbarch.h"
+#include "arch-utils.h"
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
 #include "aarch64-tdep.h"
@@ -1151,6 +1152,17 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/aarch64-linux.xml");
   set_gdbarch_get_syscall_number (gdbarch, aarch64_linux_get_syscall_number);
+
+  /* Displaced stepping.  */
+  set_gdbarch_max_insn_length (gdbarch, 4 * DISPLACED_MODIFIED_INSNS);
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+					aarch64_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, aarch64_displaced_step_fixup);
+  set_gdbarch_displaced_step_free_closure (gdbarch,
+					   simple_displaced_step_free_closure);
+  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
+  set_gdbarch_displaced_step_hw_singlestep (gdbarch,
+					    aarch64_displaced_step_hw_singlestep);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

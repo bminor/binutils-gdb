@@ -328,3 +328,61 @@ aarch64_relocate_instruction (uint32_t insn,
   else
     visitor->others (insn, data);
 }
+
+/* Write a 32-bit unsigned integer INSN info *BUF.  Return the number of
+   instructions written (aka. 1).  */
+
+int
+emit_insn (uint32_t *buf, uint32_t insn)
+{
+  *buf = insn;
+  return 1;
+}
+
+/* Helper function emitting a load or store instruction.  */
+
+int
+emit_load_store (uint32_t *buf, uint32_t size,
+		 enum aarch64_opcodes opcode,
+		 struct aarch64_register rt,
+		 struct aarch64_register rn,
+		 struct aarch64_memory_operand operand)
+{
+  uint32_t op;
+
+  switch (operand.type)
+    {
+    case MEMORY_OPERAND_OFFSET:
+      {
+	op = ENCODE (1, 1, 24);
+
+	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+			  | ENCODE (operand.index >> 3, 12, 10)
+			  | ENCODE (rn.num, 5, 5)
+			  | ENCODE (rt.num, 5, 0));
+      }
+    case MEMORY_OPERAND_POSTINDEX:
+      {
+	uint32_t post_index = ENCODE (1, 2, 10);
+
+	op = ENCODE (0, 1, 24);
+
+	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+			  | post_index | ENCODE (operand.index, 9, 12)
+			  | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+      }
+    case MEMORY_OPERAND_PREINDEX:
+      {
+	uint32_t pre_index = ENCODE (3, 2, 10);
+
+	op = ENCODE (0, 1, 24);
+
+	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+			  | pre_index | ENCODE (operand.index, 9, 12)
+			  | ENCODE (rn.num, 5, 5)
+			  | ENCODE (rt.num, 5, 0));
+      }
+    default:
+      return 0;
+    }
+}

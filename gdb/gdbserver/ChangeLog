@@ -1,5 +1,17 @@
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (enum aarch64_opcodes): Move to
+	arch/aarch64-insn.h.
+	(struct aarch64_memory_operand): Likewise.
+	(ENCODE): Likewise.
+	(emit_insn): Move to arch/aarch64-insn.c.
+	(emit_b, emit_bcond, emit_cb, emit_tb): Remove.
+	(emit_load_store): Move to arch/aarch64-insn.c.
+	(emit_ldr, emit_ldrb, emit_ldrsw, emit_nop): Remove.
+	(can_encode_int32): Remove.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (extract_signed_bitfield): Remove.
 	(aarch64_decode_ldr_literal): Move to gdb/arch/aarch64-insn.c.
 	(aarch64_relocate_instruction): Likewise.
