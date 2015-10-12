@@ -1715,6 +1715,13 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	    h->versioned = versioned;
 	}
     }
+  else
+    {
+      /* PR ld/19073: We may see an unversioned definition after the
+	 default version.  */
+      if (p == NULL)
+	return TRUE;
+    }
 
   bed = get_elf_backend_data (abfd);
   collect = bed->collect;
