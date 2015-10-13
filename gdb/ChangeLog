@@ -1,3 +1,8 @@
+2015-10-13  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Add casts to malloc
+	and alloca calls.
+
 2015-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* lm32-tdep.c (lm32_push_dummy_call): Replace call to

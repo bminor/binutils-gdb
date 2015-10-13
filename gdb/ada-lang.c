@@ -2550,7 +2550,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 	 we do, is unpack the data into a byte-aligned buffer, and then
 	 use that buffer as our object's value for resolving the type.  */
       staging_len = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
-      staging = malloc (staging_len);
+      staging = (gdb_byte *) malloc (staging_len);
       make_cleanup (xfree, staging);
 
       ada_unpack_from_contents (src, bit_offset, bit_size,
@@ -2581,7 +2581,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
 
       v = value_at (type, value_address (obj) + offset);
-      src = alloca (src_len);
+      src = (gdb_byte *) alloca (src_len);
       read_memory (value_address (v), src, src_len);
     }
   else
