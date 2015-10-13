@@ -1,3 +1,11 @@
+2015-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19118
+	* i386.cc (Target_iamcu): New class.
+	(Target_selector_iamcu): Likewise.
+	(Target_iamcu::iamcu_info): New variable.
+	(target_selector_iamcu): Likewise.
+
 2015-10-07  Andreas Schwab  <schwab@suse.de>
 
 	* aarch64.cc (aarch64_info): Set abi_pagesize to 64K.

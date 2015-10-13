@@ -4252,4 +4252,60 @@ class Target_selector_i386_nacl
 
 Target_selector_i386_nacl target_selector_i386;
 
+// IAMCU variant.  It uses EM_IAMCU, not EM_386.
+
+class Target_iamcu : public Target_i386
+{
+ public:
+  Target_iamcu()
+    : Target_i386(&iamcu_info)
+  { }
+
+ private:
+  // Information about this specific target which we pass to the
+  // general Target structure.
+  static const Target::Target_info iamcu_info;
+};
+
+const Target::Target_info Target_iamcu::iamcu_info =
+{
+  32,			// size
+  false,		// is_big_endian
+  elfcpp::EM_IAMCU,	// machine_code
+  false,		// has_make_symbol
+  false,		// has_resolve
+  true,			// has_code_fill
+  true,			// is_default_stack_executable
+  true,			// can_icf_inline_merge_sections
+  '\0',			// wrap_char
+  "/usr/lib/libc.so.1",	// dynamic_linker
+  0x08048000,		// default_text_segment_address
+  0x1000,		// abi_pagesize (overridable by -z max-page-size)
+  0x1000,		// common_pagesize (overridable by -z common-page-size)
+  false,                // isolate_execinstr
+  0,                    // rosegment_gap
+  elfcpp::SHN_UNDEF,	// small_common_shndx
+  elfcpp::SHN_UNDEF,	// large_common_shndx
+  0,			// small_common_section_flags
+  0,			// large_common_section_flags
+  NULL,			// attributes_section
+  NULL,			// attributes_vendor
+  "_start"		// entry_symbol_name
+};
+
+class Target_selector_iamcu : public Target_selector
+{
+public:
+  Target_selector_iamcu()
+    : Target_selector(elfcpp::EM_IAMCU, 32, false, "elf32-iamcu",
+		      "elf_iamcu")
+  { }
+
+  Target*
+  do_instantiate_target()
+  { return new Target_iamcu(); }
+};
+
+Target_selector_iamcu target_selector_iamcu;
+
 } // End anonymous namespace.

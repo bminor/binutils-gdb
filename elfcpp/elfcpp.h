@@ -173,7 +173,7 @@ enum EM
   EM_386 = 3,
   EM_68K = 4,
   EM_88K = 5,
-  // 6 used to be EM_486
+  EM_IAMCU = 6,
   EM_860 = 7,
   EM_MIPS = 8,
   EM_S370 = 9,
