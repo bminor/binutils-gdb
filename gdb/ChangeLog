@@ -1,5 +1,14 @@
 2015-10-13  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (restore_execution_direction): New function.
+	(fetch_inferior_event): Use it instead of
+	make_cleanup_restore_integer.
+	(execution_direction): Change type to enum
+	exec_direction_kind.
+	* infrun.h (execution_direction): Likewise.
+
+2015-10-13  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_value_primitive_packed_val): Constify
 	locals.  Use value_contents_writeable.  Remove casts.
 
