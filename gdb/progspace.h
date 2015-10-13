@@ -206,6 +206,9 @@ struct program_space
        This is so we can properly report solib changes to the user.  */
     VEC (char_ptr) *deleted_solibs;
 
+    /* Binary file diddling handle for the core file.  */
+    bfd *cbfd;
+
     /* Per pspace data-pointers required by other GDB modules.  */
     REGISTRY_FIELDS;
   };
