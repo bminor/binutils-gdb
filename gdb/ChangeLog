@@ -1,5 +1,22 @@
 2015-10-13  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_enum_name): Constify local.
+	* ada-typeprint.c (print_range_bound): Constify locals.
+	* c-varobj.c (c_describe_child): Likewise.
+	* cli/cli-setshow.c (do_set_command): Likewise.
+	* gdb_vecs.c (delim_string_to_char_ptr_vec_append): Likewise.
+	* dwarf2read.c (find_file_and_directory): Likewise.
+	(anonymous_struct_prefix, dwarf2_name): Likewise.
+	* gnu-v3-abi.c (gnuv3_rtti_type): Likewise.
+	* go-lang.c (unpack_mangled_go_symbol): Likewise.
+	* jv-typeprint.c (java_type_print_base): Likewise.
+	* ser-tcp.c (net_open): Likewise.
+	* symfile.c (deduce_language_from_filename): Likewise.
+	* symtab.c (gdb_mangle_name): Likewise.
+	* tui/tui-io.c (tui_redisplay_readline): Likewise.
+
+2015-10-13  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (restore_execution_direction): New function.
 	(fetch_inferior_event): Use it instead of
 	make_cleanup_restore_integer.

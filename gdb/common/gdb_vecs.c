@@ -49,7 +49,8 @@ delim_string_to_char_ptr_vec_append (VEC (char_ptr) **vecp,
   do
     {
       size_t this_len;
-      char *next_field, *this_field;
+      const char *next_field;
+      char *this_field;
 
       next_field = strchr (str, delimiter);
       if (next_field == NULL)

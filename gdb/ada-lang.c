@@ -9430,7 +9430,7 @@ ada_enum_name (const char *name)
 {
   static char *result;
   static size_t result_len = 0;
-  char *tmp;
+  const char *tmp;
 
   /* First, unqualify the enumeration name:
      1. Search for the last '.' character.  If we find one, then skip
