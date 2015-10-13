@@ -4646,9 +4646,6 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		goto error_return;
 	      m->next = NULL;
 	      m->p_type = PT_GNU_RELRO;
-	      m->p_flags = PF_R;
-	      m->p_flags_valid = 1;
-
 	      *pm = m;
 	      pm = &m->next;
 	    }
@@ -5480,7 +5477,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      if (!m->p_align_valid)
 		p->p_align = 1;
 	      if (!m->p_flags_valid)
-		p->p_flags = (lp->p_flags & ~PF_W);
+		p->p_flags = PF_R;
 	    }
 	  else
 	    {

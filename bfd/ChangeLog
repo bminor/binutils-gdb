@@ -1,3 +1,10 @@
+2015-10-13  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Don't set
+	PT_GNU_RELRO p_flags.
+	(assign_file_positions_for_non_load_sections): Set PT_GNU_RELRO
+	flags to PF_R here.
+
 2015-10-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19073
