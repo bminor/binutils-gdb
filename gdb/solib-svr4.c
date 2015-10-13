@@ -2220,7 +2220,7 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 /* Helper function for gdb_bfd_lookup_symbol.  */
 
 static int
-cmp_name_and_sec_flags (asymbol *sym, void *data)
+cmp_name_and_sec_flags (const asymbol *sym, const void *data)
 {
   return (strcmp (sym->name, (const char *) data) == 0
 	  && (sym->section->flags & (SEC_CODE | SEC_DATA)) != 0);
@@ -2480,7 +2480,7 @@ enable_break (struct svr4_info *info, int from_tty)
       for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
 	  sym_addr = gdb_bfd_lookup_symbol (tmp_bfd, cmp_name_and_sec_flags,
-					    (void *) *bkpt_namep);
+					    *bkpt_namep);
 	  if (sym_addr != 0)
 	    break;
 	}

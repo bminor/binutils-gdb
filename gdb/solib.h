@@ -80,15 +80,17 @@ extern int libpthread_name_p (const char *name);
 /* Look up symbol from both symbol table and dynamic string table.  */
 
 extern CORE_ADDR gdb_bfd_lookup_symbol (bfd *abfd,
-					int (*match_sym) (asymbol *, void *),
-					void *data);
+					int (*match_sym) (const asymbol *,
+							  const void *),
+					const void *data);
 
 /* Look up symbol from symbol table.  */
 
 extern CORE_ADDR gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
-						    int (*match_sym) (asymbol *,
-								      void *),
-						    void *data);
+						    int (*match_sym)
+						      (const asymbol *,
+						       const void *),
+						    const void *data);
 
 /* Enable or disable optional solib event breakpoints as appropriate.  */
 

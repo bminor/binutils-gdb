@@ -1,3 +1,14 @@
+2015-10-13  Simon Marchi  <thundersim@gmail.com>
+
+	* solib-dsbt.c (cmp_name): Constify arguments.
+	* solib-frv.c (cmp_name): Likewise.
+	* solib-svr4.c (svr4_create_solib_event_breakpoints): Likewise.
+	* solib.c (gdb_bfd_lookup_symbol_from_symtab): Likewise.
+	(bfd_lookup_symbol_from_dyn_symtab): Likewise.
+	(gdb_bfd_lookup_symbol): Likewise.
+	* solib.h (gdb_bfd_lookup_symbol): Likewise.
+	(gdb_bfd_lookup_symbol_from_symtab): Likewise.
+
 2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* stack.c (parse_frame_specification): Remove message parameter,
