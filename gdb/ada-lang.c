@@ -2525,7 +2525,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
                                 struct type *type)
 {
   struct value *v;
-  gdb_byte *src;                /* First byte containing data to unpack */
+  const gdb_byte *src;                /* First byte containing data to unpack */
   gdb_byte *unpacked;
   const int is_scalar = is_scalar_type (type);
   const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
@@ -2536,9 +2536,9 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   type = ada_check_typedef (type);
 
   if (obj == NULL)
-    src = (gdb_byte *) valaddr + offset;
+    src = valaddr + offset;
   else
-    src = (gdb_byte *) value_contents (obj) + offset;
+    src = value_contents (obj) + offset;
 
   if (is_dynamic_type (type))
     {
@@ -2574,20 +2574,22 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   if (obj == NULL)
     {
       v = allocate_value (type);
-      src = (gdb_byte *) valaddr + offset;
+      src = valaddr + offset;
     }
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
       int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
+      gdb_byte *buf;
 
       v = value_at (type, value_address (obj) + offset);
-      src = (gdb_byte *) alloca (src_len);
-      read_memory (value_address (v), src, src_len);
+      buf = (gdb_byte *) alloca (src_len);
+      read_memory (value_address (v), buf, src_len);
+      src = buf;
     }
   else
     {
       v = allocate_value (type);
-      src = (gdb_byte *) value_contents (obj) + offset;
+      src = value_contents (obj) + offset;
     }
 
   if (obj != NULL)
@@ -2610,7 +2612,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else
     set_value_bitsize (v, bit_size);
-  unpacked = (gdb_byte *) value_contents (v);
+  unpacked = value_contents_writeable (v);
 
   if (bit_size == 0)
     {

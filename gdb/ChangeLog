@@ -1,5 +1,10 @@
 2015-10-13  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_value_primitive_packed_val): Constify
+	locals.  Use value_contents_writeable.  Remove casts.
+
+2015-10-13  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_value_primitive_packed_val): Add casts to malloc
 	and alloca calls.
 
