@@ -1,3 +1,8 @@
+2015-10-15  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* gdbarch.sh (core_regset_section): Remove.
+	* gdbarch.h: Regenerate.
+
 2015-10-14  Yao Qi  <yao.qi@linaro.org>
 
 	* arch/aarch64-insn.h (struct aarch64_memory_operand): Move enum
