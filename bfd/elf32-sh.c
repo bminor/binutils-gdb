@@ -3608,8 +3608,7 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      || ! add_dynamic_entry (DT_JMPREL, 0))
 	    return FALSE;
 	}
-      else if ((elf_elfheader (output_bfd)->e_flags & EF_SH_FDPIC)
-	       && htab->sgot->size != 0)
+      else if ((elf_elfheader (output_bfd)->e_flags & EF_SH_FDPIC))
 	{
 	  if (! add_dynamic_entry (DT_PLTGOT, 0))
 	    return FALSE;

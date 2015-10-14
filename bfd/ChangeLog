@@ -1,3 +1,9 @@
+2015-10-14  Rich Felker  <dalias@libc.org>
+
+	PR ld/19091
+	* elf32-sh.c (sh_elf_size_dynamic_sections): Always emit
+	DT_PLTGOT for FDPIC output.
+
 2015-10-13  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (_bfd_elf_map_sections_to_segments): Don't set
