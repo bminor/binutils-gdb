@@ -464,11 +464,11 @@ Disassembly of section .text:
 .*:	01 ff [	 ]*trap2
 .*:	b2 ff 5f ff [	 ]*trap4	4095\(%r5\)
 .*:	b2 a5 00 69 [	 ]*tre	%r6,%r9
-.*:	b9 93 00 68 [	 ]*troo	%r6,%r8
-.*:	b9 92 00 68 [	 ]*trot	%r6,%r8
+.*:	b9 93 00 69 [	 ]*troo	%r6,%r9
+.*:	b9 92 00 69 [	 ]*trot	%r6,%r9
 .*:	dd ff 5f ff af ff [	 ]*trt	4095\(256,%r5\),4095\(%r10\)
-.*:	b9 91 00 68 [	 ]*trto	%r6,%r8
-.*:	b9 90 00 68 [	 ]*trtt	%r6,%r8
+.*:	b9 91 00 69 [	 ]*trto	%r6,%r9
+.*:	b9 90 00 69 [	 ]*trtt	%r6,%r9
 .*:	93 00 5f ff [	 ]*ts	4095\(%r5\)
 .*:	b2 35 5f ff [	 ]*tsch	4095\(%r5\)
 .*:	f3 58 5f ff af ff [	 ]*unpk	4095\(6,%r5\),4095\(9,%r10\)

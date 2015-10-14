@@ -767,10 +767,10 @@ b9aa lptea RRF_RURR2 "load page-table-entry address" z9-109 zarch
 # z9-109 conditional sske facility, sske instruction entered twice
 b22b sske RRF_U0RR "set storage key extended" z9-109 zarch optparm
 # z9-109 etf2-enhancement facility, instructions entered twice
-b993 troo RRF_U0RERE "translate one to one" z9-109 esa,zarch optparm
-b992 trot RRF_U0RERE "translate one to two" z9-109 esa,zarch optparm
-b991 trto RRF_U0RERE "translate two to one" z9-109 esa,zarch optparm
-b990 trtt RRF_U0RERE "translate two to two" z9-109 esa,zarch optparm
+b993 troo RRF_U0RER "translate one to one" z9-109 esa,zarch optparm
+b992 trot RRF_U0RER "translate one to two" z9-109 esa,zarch optparm
+b991 trto RRF_U0RER "translate two to one" z9-109 esa,zarch optparm
+b990 trtt RRF_U0RER "translate two to two" z9-109 esa,zarch optparm
 # z9-109 etf3-enhancement facility, some instructions entered twice
 b9b1 cu24 RRF_U0RERE "convert utf-16 to utf-32" z9-109 zarch optparm
 b2a6 cu21 RRF_U0RERE "convert utf-16 to utf-8" z9-109 zarch optparm
