@@ -117,6 +117,13 @@ struct aarch64_register
   int is64;
 };
 
+enum aarch64_memory_operand_type
+{
+  MEMORY_OPERAND_OFFSET,
+  MEMORY_OPERAND_PREINDEX,
+  MEMORY_OPERAND_POSTINDEX,
+};
+
 /* Representation of a memory operand, used for load and store
    instructions.
 
@@ -129,12 +136,8 @@ struct aarch64_register
 struct aarch64_memory_operand
 {
   /* Type of the operand.  */
-  enum
-    {
-      MEMORY_OPERAND_OFFSET,
-      MEMORY_OPERAND_PREINDEX,
-      MEMORY_OPERAND_POSTINDEX,
-    } type;
+  enum aarch64_memory_operand_type type;
+
   /* Index from the base register.  */
   int32_t index;
 };
