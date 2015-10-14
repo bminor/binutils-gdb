@@ -339,6 +339,8 @@ complete_target_initialization (struct target_ops *t)
   gdb_assert (t->to_can_run == NULL || (t->to_can_async_p != NULL
 					&& t->to_supports_non_stop != NULL));
 
+  t->to_identity = t;
+
   install_delegators (t);
 }
 
@@ -722,7 +724,7 @@ unpush_target (struct target_ops *t)
 
   for (cur = &target_stack; (*cur) != NULL; cur = &(*cur)->beneath)
     {
-      if ((*cur) == t)
+      if ((*cur) == t || (*cur)->to_identity == t)
 	break;
     }
 
@@ -741,7 +743,7 @@ unpush_target (struct target_ops *t)
   /* Finally close the target.  Note we do this after unchaining, so
      any target method calls from within the target_close
      implementation don't end up in T anymore.  */
-  target_close (t);
+  target_close (tmp);
 
   return 1;
 }
@@ -788,7 +790,7 @@ target_is_pushed (struct target_ops *t)
     }
 
   for (cur = target_stack; cur != NULL; cur = cur->beneath)
-    if (cur == t)
+    if (cur == t || cur->to_identity == t)
       return 1;
 
   return 0;

@@ -1241,6 +1241,12 @@ struct target_ops
     void (*to_done_generating_core) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
 
+    /* This points to an "original" target_ops from which a particular
+       instance may have been cloned.  This is useful if a to_xclose
+       target clones some other target_ops, but still wants to call
+       target_is_pushed or unpush_target.  */
+    struct target_ops *to_identity;
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
