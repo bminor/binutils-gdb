@@ -1,3 +1,10 @@
+2015-10-14  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-opc.c: Fix comment.
+	* s390-opc.txt: Change instruction type for troo, trot, trto, and
+	trtt to RRF_U0RER since the second parameter does not need to be a
+	register pair.
+
 2015-10-08  Nick Clifton  <nickc@redhat.com>
 
 	* arc-dis.c (print_insn_arc): Initiallise insn array.
