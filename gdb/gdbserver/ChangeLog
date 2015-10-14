@@ -1,3 +1,8 @@
+2015-10-29 Henrik Wallin <henrik.wallin@windriver.com>
+
+	* linux-arm-low.c (arm_new_thread): Move pointer dereference
+	to after assert checks.
+
 2015-10-29  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* proc-service.c (ps_pdread): Add/adjust casts.

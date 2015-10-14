@@ -706,8 +706,8 @@ arm_new_thread (struct lwp_info *lwp)
 static void
 arm_new_fork (struct process_info *parent, struct process_info *child)
 {
-  struct arch_process_info *parent_proc_info = parent->priv->arch_private;
-  struct arch_process_info *child_proc_info = child->priv->arch_private;
+  struct arch_process_info *parent_proc_info;
+  struct arch_process_info *child_proc_info;
   struct lwp_info *child_lwp;
   struct arch_lwp_info *child_lwp_info;
   int i;
@@ -717,6 +717,9 @@ arm_new_fork (struct process_info *parent, struct process_info *child)
 	      && parent->priv->arch_private != NULL);
   gdb_assert (child->priv != NULL
 	      && child->priv->arch_private != NULL);
+
+  parent_proc_info = parent->priv->arch_private;
+  child_proc_info = child->priv->arch_private;
 
   /* Linux kernel before 2.6.33 commit
      72f674d203cd230426437cdcf7dd6f681dad8b0d
