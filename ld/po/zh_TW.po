@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: ld 2.24.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2014-02-10 09:42+1030\n"
-"PO-Revision-Date: 2015-10-08 13:09+0800\n"
+"PO-Revision-Date: 2015-10-13 23:09+0800\n"
 "Last-Translator: Wei-Lun Chao <bluebat@member.fsf.org>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@linux.org.tw>\n"
 "Language: zh_TW\n"
@@ -26,7 +26,7 @@ msgstr "  --support-old-code          支援與舊式程式碼的交互作用\n"
 #: emultempl/armcoff.em:74
 #, c-format
 msgid "  --thumb-entry=<sym>         Set the entry point to be Thumb symbol <sym>\n"
-msgstr "  --thumb-entry=<sym>         設定進入點為縮圖符號<sym>\n"
+msgstr "  --thumb-entry=<sym>         設定進入點為縮碼符號 <sym>\n"
 
 #: emultempl/armcoff.em:122
 #, c-format
@@ -39,7 +39,7 @@ msgstr "%P: 警告: '--thumb-entry %s' 會蓋過 '-e %s'\n"
 
 #: emultempl/armcoff.em:197 emultempl/pe.em:1832
 msgid "%P: warning: cannot find thumb start symbol %s\n"
-msgstr "%P: 警告: 無法找到縮圖開始符號 %s\n"
+msgstr "%P: 警告: 無法找到縮碼啟始符號 %s\n"
 
 #: emultempl/pe.em:425
 #, c-format
@@ -124,7 +124,7 @@ msgstr "  --[no-]leading-underscore          設定明確的符號底線前綴�
 #: emultempl/pe.em:441
 #, c-format
 msgid "  --thumb-entry=<symbol>             Set the entry point to be Thumb <symbol>\n"
-msgstr "  --thumb-entry=<符號>             設定進入點到是縮圖<符號>\n"
+msgstr "  --thumb-entry=<符號>             設定進入點為縮碼 <符號>\n"
 
 #: emultempl/pe.em:442
 #, c-format
@@ -383,7 +383,7 @@ msgstr "%P: 警告，檔案對齊 > 區段對齊。\n"
 
 #: emultempl/pe.em:994
 msgid "%P: warning: --export-dynamic is not supported for PE targets, did you mean --export-all-symbols?\n"
-msgstr "%P: 警告: --export-dynamic 未被支援用於 PE 目標，did 您平均 --export-all-symbols？\n"
+msgstr "%P: 警告: --export-dynamic 未被支援用於 PE 目標，還是說您想用 --export-all-symbols？\n"
 
 #: emultempl/pe.em:1070 emultempl/pe.em:1097
 #, c-format
@@ -802,7 +802,7 @@ msgstr "%P%F:%s: 無法設定架構: %E\n"
 
 #: ldlang.c:3322
 msgid "%P: warning: %s contains output sections; did you forget -T?\n"
-msgstr "%P: 警告: %s 含有輸出區段；您忘記了 -T？\n"
+msgstr "%P: 警告: %s 含有輸出區段；還是說您忘記了 -T？\n"
 
 #: ldlang.c:3372
 msgid "%P%F: bfd_hash_allocate failed creating symbol %s\n"
