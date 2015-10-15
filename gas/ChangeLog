@@ -1,3 +1,8 @@
+2015-10-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (insns): Guard cps by arm_ext_v6_notm instead of
+	arm_ext_v6_dsp.
+
 2015-10-28  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* config/tc-arc.c (tokenize_arguments): Avoid creating unused
