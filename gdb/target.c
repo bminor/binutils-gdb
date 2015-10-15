@@ -706,6 +706,26 @@ push_target (struct target_ops *t)
   update_current_target ();
 }
 
+/* See target.h.  */
+
+struct target_ops *
+allocate_target (struct target_ops *ops, size_t alloc)
+{
+  char *mem;
+
+  gdb_assert (ops->to_identity != NULL);
+  gdb_assert (ops->to_xclose != NULL);
+  gdb_assert (alloc >= sizeof (struct target_ops));
+
+  mem = xmalloc (alloc);
+  memcpy (mem, ops, sizeof (struct target_ops));
+  if (alloc > sizeof (struct target_ops))
+    memset (&mem[sizeof (struct target_ops)], 0,
+	    alloc - sizeof (struct target_ops));
+
+  return (struct target_ops *) mem;
+}
+
 /* Remove a target_ops vector from the stack, wherever it may be.
    Return how many times it was removed (0 or 1).  */
 

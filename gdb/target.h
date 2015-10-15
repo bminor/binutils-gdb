@@ -2289,6 +2289,21 @@ extern void push_target (struct target_ops *);
 
 extern int unpush_target (struct target_ops *);
 
+/* Allocate a new target object.  OPS is the "prototype"
+   implementation of the new target; it is copied into the new object.
+   ALLOC is the number of bytes to allocate.  It may be larger than
+   sizeof (struct target_ops) if the target subclasses target_ops to
+   store extra data.  Returns the new target object.  Extra space
+   beyond the initial OPS component of the result is zeroed.  */
+
+extern struct target_ops *allocate_target (struct target_ops *ops,
+					   size_t alloc);
+
+/* A typed convenience wrapper for allocate_target.  T is the type of
+   the subclass of target_ops to allocate.  */
+
+#define TARGET_NEW(T, OPS) ((T *) (allocate_target ((OPS), sizeof (T))))
+
 extern void target_pre_inferior (int);
 
 extern void target_preopen (int);
