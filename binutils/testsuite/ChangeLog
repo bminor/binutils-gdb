@@ -1,3 +1,14 @@
+2015-10-15  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/objcopy.exp: Delete trailing whitespace.  Use
+	"string equal" rather than "string match" when making simple
+	string comparisons.  Revert 2008-07-08 host_triplet checks.
+	Perform non-run tests when we can build executable.
+	(strip_executable, strip_executable_with_saving_a_symbol): Move
+	run test later.  Take extra param on whether to perform run test.
+	Update callers.
+	(keep_debug_symbols_and_test_copy): Delete unused vars.
+
 2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lib/utils-lib.exp (run_dump_test): Handle symbolic link when
