@@ -1,3 +1,9 @@
+2015-10-15  Alan Modra  <amodra@gmail.com>
+
+	* elf32-v850.c (v850_elf_copy_private_bfd_data): Remove assertion
+	that input and output .note.renesas sections are same size.
+	Instead, only copy input to output if they are.
+
 2015-10-15  Riku Voipio  <riku.voipio@iki.fi>
 
 	PR ld/19123

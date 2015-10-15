@@ -2305,11 +2305,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
-  /* Do not copy backend data if --extract-symbol is passed; anything
-     that needs to look at the section contents will fail.  */
-  if (extract_symbol)
-    return TRUE;
-
   /* Allow the BFD backend to copy any private data it understands
      from the input BFD to the output BFD.  This is done last to
      permit the routine to look at the filtered symbol table, which is

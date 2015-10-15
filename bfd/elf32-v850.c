@@ -2442,12 +2442,13 @@ v850_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
   if ((onotes = bfd_get_section_by_name (obfd, V850_NOTE_SECNAME)) == NULL)
     return TRUE;
 
-  if ((inotes = bfd_get_section_by_name (ibfd, V850_NOTE_SECNAME)) != NULL)
+  if ((inotes = bfd_get_section_by_name (ibfd, V850_NOTE_SECNAME)) == NULL)
+    return TRUE;
+
+  if (bfd_section_size (ibfd, inotes) == bfd_section_size (obfd, onotes))
     {
       bfd_byte * icont;
       bfd_byte * ocont;
-
-      BFD_ASSERT (bfd_section_size (ibfd, inotes) == bfd_section_size (obfd, onotes));
 
       if ((icont = elf_section_data (inotes)->this_hdr.contents) == NULL)
 	BFD_ASSERT (bfd_malloc_and_get_section (ibfd, inotes, & icont));
