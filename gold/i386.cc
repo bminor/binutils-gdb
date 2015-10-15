@@ -1690,6 +1690,7 @@ Target_i386::Scan::get_reference_flags(unsigned int r_type)
       return Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
 
     case elfcpp::R_386_GOT32:
+    case elfcpp::R_386_GOT32X:
       // Absolute in GOT.
       return Symbol::ABSOLUTE_REF;
 
@@ -1854,6 +1855,7 @@ Target_i386::Scan::local(Symbol_table* symtab,
       break;
 
     case elfcpp::R_386_GOT32:
+    case elfcpp::R_386_GOT32X:
       {
 	// We need GOT section.
 	Output_data_got<32, false>* got = target->got_section(symtab, layout);
@@ -2105,6 +2107,7 @@ Target_i386::Scan::possible_function_pointer_reloc(unsigned int r_type)
     case elfcpp::R_386_8:
     case elfcpp::R_386_GOTOFF:
     case elfcpp::R_386_GOT32:
+    case elfcpp::R_386_GOT32X:
       {
 	return true;
       }
@@ -2266,6 +2269,7 @@ Target_i386::Scan::global(Symbol_table* symtab,
       break;
 
     case elfcpp::R_386_GOT32:
+    case elfcpp::R_386_GOT32X:
       {
 	// The symbol requires a GOT section.
 	Output_data_got<32, false>* got = target->got_section(symtab, layout);
@@ -2834,6 +2838,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_GOT32:
+    case elfcpp::R_386_GOT32X:
       // Convert
       // mov foo@GOT(%reg), %reg
       // to
@@ -3617,6 +3622,7 @@ Target_i386::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_386_32:
     case elfcpp::R_386_PC32:
     case elfcpp::R_386_GOT32:
+    case elfcpp::R_386_GOT32X:
     case elfcpp::R_386_PLT32:
     case elfcpp::R_386_GOTOFF:
     case elfcpp::R_386_GOTPC:
