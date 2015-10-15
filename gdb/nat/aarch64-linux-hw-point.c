@@ -18,6 +18,7 @@
 
 #include "common-defs.h"
 #include "break-common.h"
+#include "common-regcache.h"
 #include "nat/linux-nat.h"
 #include "aarch64-linux-hw-point.h"
 
@@ -112,8 +113,23 @@ aarch64_point_encode_ctrl_reg (enum target_hw_bp_type type, int len)
 static int
 aarch64_point_is_aligned (int is_watchpoint, CORE_ADDR addr, int len)
 {
-  unsigned int alignment = is_watchpoint ? AARCH64_HWP_ALIGNMENT
-    : AARCH64_HBP_ALIGNMENT;
+  unsigned int alignment = 0;
+
+  if (is_watchpoint)
+    alignment = AARCH64_HWP_ALIGNMENT;
+  else
+    {
+      struct regcache *regcache
+	= get_thread_regcache_for_ptid (current_lwp_ptid ());
+
+      /* Set alignment to 2 only if the current process is 32-bit,
+	 since thumb instruction can be 2-byte aligned.  Otherwise, set
+	 alignment to AARCH64_HBP_ALIGNMENT.  */
+      if (regcache_register_size (regcache, 0) == 8)
+	alignment = AARCH64_HBP_ALIGNMENT;
+      else
+	alignment = 2;
+    }
 
   if (addr & (alignment - 1))
     return 0;
@@ -445,7 +461,7 @@ aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			   struct aarch64_debug_reg_state *state)
 {
   /* The hardware breakpoint on AArch64 should always be 4-byte
-     aligned.  */
+     aligned, but on AArch32, it can be 2-byte aligned.  */
   if (!aarch64_point_is_aligned (0 /* is_watchpoint */ , addr, len))
     return -1;
 

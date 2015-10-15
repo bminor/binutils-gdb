@@ -179,6 +179,14 @@ register_size (struct gdbarch *gdbarch, int regnum)
   return size;
 }
 
+/* See common/common-regcache.h.  */
+
+int
+regcache_register_size (const struct regcache *regcache, int n)
+{
+  return register_size (get_regcache_arch (regcache), n);
+}
+
 /* The register cache for storing raw register values.  */
 
 struct regcache

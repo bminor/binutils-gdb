@@ -1,3 +1,10 @@
+2015-10-15  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_insert_point): Set len to 2
+	if it is 3.
+	(aarch64_remove_point): Likewise.
+	* regcache.c (regcache_register_size): New function.
+
 2015-10-12  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c: Update all callers as emit_load_store

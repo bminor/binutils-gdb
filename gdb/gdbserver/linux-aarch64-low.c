@@ -315,9 +315,17 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	ret = -1;
     }
   else
-    ret =
-      aarch64_handle_breakpoint (targ_type, addr, len, 1 /* is_insert */,
-				 state);
+    {
+      if (len == 3)
+	{
+	  /* LEN is 3 means the breakpoint is set on a 32-bit thumb
+	     instruction.   Set it to 2 to correctly encode length bit
+	     mask in hardware/watchpoint control register.  */
+	  len = 2;
+	}
+      ret = aarch64_handle_breakpoint (targ_type, addr, len,
+				       1 /* is_insert */, state);
+    }
 
   if (show_debug_regs)
     aarch64_show_debug_reg_state (state, "insert_point", addr, len,
@@ -353,9 +361,17 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
       aarch64_handle_watchpoint (targ_type, addr, len, 0 /* is_insert */,
 				 state);
   else
-    ret =
-      aarch64_handle_breakpoint (targ_type, addr, len, 0 /* is_insert */,
-				 state);
+    {
+      if (len == 3)
+	{
+	  /* LEN is 3 means the breakpoint is set on a 32-bit thumb
+	     instruction.   Set it to 2 to correctly encode length bit
+	     mask in hardware/watchpoint control register.  */
+	  len = 2;
+	}
+      ret = aarch64_handle_breakpoint (targ_type, addr, len,
+				       0 /* is_insert */,  state);
+    }
 
   if (show_debug_regs)
     aarch64_show_debug_reg_state (state, "remove_point", addr, len,

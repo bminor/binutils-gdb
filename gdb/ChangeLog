@@ -1,3 +1,15 @@
+2015-10-15  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint):
+	Call gdbarch_breakpoint_from_pc to instruction length.
+	(aarch64_linux_remove_hw_breakpoint): Likewise.
+	* common/common-regcache.h (regcache_register_size): Declare.
+	* nat/aarch64-linux-hw-point.c: Include "common-regcache.h".
+	(aarch64_point_is_aligned): Set alignment to 2 for breakpoint if
+	the process is 32bit, otherwise set alignment to 4.
+	(aarch64_handle_breakpoint): Update comments.
+	* regcache.c (regcache_register_size): New function.
+
 2015-10-15  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* gdbarch.sh (core_regset_section): Remove.
