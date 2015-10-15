@@ -54,7 +54,7 @@
 	* lm32-tdep.c (lm32_push_dummy_call): Replace call to
 	write_memory with write_memory_unsigned_integer.
 
-2015-10-13  Simon Marchi  <thundersim@gmail.com>
+2015-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* solib-dsbt.c (cmp_name): Constify arguments.
 	* solib-frv.c (cmp_name): Likewise.
@@ -423,7 +423,7 @@
 
 	* common/filestuff.c (make_cleanup_close): Update comment.
 
-2015-09-26  Simon Marchi  <simark@nova.polymtl.ca>
+2015-09-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* btrace.c (parse_xml_btrace_block): Fix cast of
 	xml_find_attribute's return value.
