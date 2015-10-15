@@ -1,3 +1,10 @@
+2015-10-15  Riku Voipio  <riku.voipio@iki.fi>
+
+	PR ld/19123
+	* elfcore.h (elf_core_file_p): Use the file_ptr type to hold the
+	offset for bfd_seek.
+	* elfcode.h (elf_object_p): Likewise.
+
 2015-10-14  Rich Felker  <dalias@libc.org>
 
 	PR ld/19091
