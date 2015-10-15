@@ -271,13 +271,13 @@ elf32_avr_dump_avr_prop (bfd *abfd)
                   r_list->records [i].data.org.fill);
           break;
         case RECORD_ALIGN:
-          printf ("    Align: %#08lx\n",
+          printf ("     Align: %#08lx\n",
                   r_list->records [i].data.align.bytes);
           break;
         case RECORD_ALIGN_AND_FILL:
-          printf ("    Align: %#08lx, Fill: %#08lx\n",
+          printf ("     Align: %#08lx, Fill: %#08lx\n",
                   r_list->records [i].data.align.bytes,
-                  r_list->records [i].data.org.fill);
+                  r_list->records [i].data.align.fill);
           break;
         }
     }

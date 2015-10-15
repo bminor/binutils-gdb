@@ -1,3 +1,20 @@
+2015-10-15  Alan Modra  <amodra@gmail.com>
+
+	* config/default.exp (size): New global.
+	* ld-elf/extract-symbol-1.s,
+	* ld-elf/extract-symbol-1.ld,
+	* ld-elf/extract-symbol-1sec.d,
+	* ld-elf/extract-symbol-1sym.d: Delete.
+	* ld-scripts/script.exp (extract_symbol_test): New.
+
+2015-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19073
+	* ld-elf/pr19073.map: New file.
+	* ld-elf/pr19073.rd: Likewise.
+	* ld-elf/pr19073.s: Likewise.
+	* ld-elf/shared.exp (build_tests): Add tests for PR ld/19073.
+
 2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* ld-elf/linkonce1.d: Skip extra relocs before .debug_frame.

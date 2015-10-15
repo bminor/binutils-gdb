@@ -203,7 +203,7 @@ print_range (struct type *type, struct ui_file *stream,
    set *N past the bound and its delimiter, if any.  */
 
 static void
-print_range_bound (struct type *type, char *bounds, int *n,
+print_range_bound (struct type *type, const char *bounds, int *n,
 		   struct ui_file *stream)
 {
   LONGEST B;
@@ -230,8 +230,8 @@ print_range_bound (struct type *type, char *bounds, int *n,
   else
     {
       int bound_len;
-      char *bound = bounds + *n;
-      char *pend;
+      const char *bound = bounds + *n;
+      const char *pend;
 
       pend = strstr (bound, "__");
       if (pend == NULL)
@@ -300,7 +300,7 @@ print_range_type (struct type *raw_type, struct ui_file *stream,
   else
     {
       int prefix_len = subtype_info - name;
-      char *bounds_str;
+      const char *bounds_str;
       int n;
 
       subtype_info += 5;

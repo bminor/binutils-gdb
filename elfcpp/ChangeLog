@@ -1,3 +1,8 @@
+2015-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19118
+	* elfcpp.h (EM): Add EM_IAMCU.
+
 2015-10-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/19060

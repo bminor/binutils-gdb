@@ -2881,7 +2881,7 @@ enum language
 deduce_language_from_filename (const char *filename)
 {
   int i;
-  char *cp;
+  const char *cp;
 
   if (filename != NULL)
     if ((cp = strrchr (filename, '.')) != NULL)

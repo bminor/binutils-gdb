@@ -235,3 +235,155 @@ aarch64_decode_tb (CORE_ADDR addr, uint32_t insn, int *is_tbnz,
     }
   return 0;
 }
+
+/* Decode an opcode if it represents an LDR or LDRSW instruction taking a
+   literal offset from the current PC.
+
+   ADDR specifies the address of the opcode.
+   INSN specifies the opcode to test.
+   IS_W is set if the instruction is LDRSW.
+   IS64 receives size field from the decoded instruction.
+   RT receives the 'rt' field from the decoded instruction.
+   OFFSET receives the 'imm' field from the decoded instruction.
+
+   Return 1 if the opcodes matches and is decoded, otherwise 0.  */
+
+int
+aarch64_decode_ldr_literal (CORE_ADDR addr, uint32_t insn, int *is_w,
+			    int *is64, unsigned *rt, int32_t *offset)
+{
+  /* LDR    0T01 1000 iiii iiii iiii iiii iiir rrrr */
+  /* LDRSW  1001 1000 iiii iiii iiii iiii iiir rrrr */
+  if ((insn & 0x3f000000) == 0x18000000)
+    {
+      *is_w = (insn >> 31) & 0x1;
+
+      if (*is_w)
+	{
+	  /* LDRSW always takes a 64-bit destination registers.  */
+	  *is64 = 1;
+	}
+      else
+	*is64 = (insn >> 30) & 0x1;
+
+      *rt = (insn >> 0) & 0x1f;
+      *offset = extract_signed_bitfield (insn, 19, 5) << 2;
+
+      if (aarch64_debug)
+	debug_printf ("decode: %s 0x%x %s %s%u, #?\n",
+		      core_addr_to_string_nz (addr), insn,
+		      *is_w ? "ldrsw" : "ldr",
+		      *is64 ? "x" : "w", *rt);
+
+      return 1;
+    }
+
+  return 0;
+}
+
+/* Visit an instruction INSN by VISITOR with all needed information in DATA.
+
+   PC relative instructions need to be handled specifically:
+
+   - B/BL
+   - B.COND
+   - CBZ/CBNZ
+   - TBZ/TBNZ
+   - ADR/ADRP
+   - LDR/LDRSW (literal)  */
+
+void
+aarch64_relocate_instruction (uint32_t insn,
+			      const struct aarch64_insn_visitor *visitor,
+			      struct aarch64_insn_data *data)
+{
+  int is_bl;
+  int is64;
+  int is_sw;
+  int is_cbnz;
+  int is_tbnz;
+  int is_adrp;
+  unsigned rn;
+  unsigned rt;
+  unsigned rd;
+  unsigned cond;
+  unsigned bit;
+  int32_t offset;
+
+  if (aarch64_decode_b (data->insn_addr, insn, &is_bl, &offset))
+    visitor->b (is_bl, offset, data);
+  else if (aarch64_decode_bcond (data->insn_addr, insn, &cond, &offset))
+    visitor->b_cond (cond, offset, data);
+  else if (aarch64_decode_cb (data->insn_addr, insn, &is64, &is_cbnz, &rn,
+			      &offset))
+    visitor->cb (offset, is_cbnz, rn, is64, data);
+  else if (aarch64_decode_tb (data->insn_addr, insn, &is_tbnz, &bit, &rt,
+			      &offset))
+    visitor->tb (offset, is_tbnz, rt, bit, data);
+  else if (aarch64_decode_adr (data->insn_addr, insn, &is_adrp, &rd, &offset))
+    visitor->adr (offset, rd, is_adrp, data);
+  else if (aarch64_decode_ldr_literal (data->insn_addr, insn, &is_sw, &is64,
+				       &rt, &offset))
+    visitor->ldr_literal (offset, is_sw, rt, is64, data);
+  else
+    visitor->others (insn, data);
+}
+
+/* Write a 32-bit unsigned integer INSN info *BUF.  Return the number of
+   instructions written (aka. 1).  */
+
+int
+aarch64_emit_insn (uint32_t *buf, uint32_t insn)
+{
+  *buf = insn;
+  return 1;
+}
+
+/* Helper function emitting a load or store instruction.  */
+
+int
+aarch64_emit_load_store (uint32_t *buf, uint32_t size,
+			 enum aarch64_opcodes opcode,
+			 struct aarch64_register rt,
+			 struct aarch64_register rn,
+			 struct aarch64_memory_operand operand)
+{
+  uint32_t op;
+
+  switch (operand.type)
+    {
+    case MEMORY_OPERAND_OFFSET:
+      {
+	op = ENCODE (1, 1, 24);
+
+	return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+				  | ENCODE (operand.index >> 3, 12, 10)
+				  | ENCODE (rn.num, 5, 5)
+				  | ENCODE (rt.num, 5, 0));
+      }
+    case MEMORY_OPERAND_POSTINDEX:
+      {
+	uint32_t post_index = ENCODE (1, 2, 10);
+
+	op = ENCODE (0, 1, 24);
+
+	return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+				  | post_index | ENCODE (operand.index, 9, 12)
+				  | ENCODE (rn.num, 5, 5)
+				  | ENCODE (rt.num, 5, 0));
+      }
+    case MEMORY_OPERAND_PREINDEX:
+      {
+	uint32_t pre_index = ENCODE (3, 2, 10);
+
+	op = ENCODE (0, 1, 24);
+
+	return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
+				  | pre_index | ENCODE (operand.index, 9, 12)
+				  | ENCODE (rn.num, 5, 5)
+				  | ENCODE (rt.num, 5, 0));
+      }
+    default:
+      return 0;
+    }
+}

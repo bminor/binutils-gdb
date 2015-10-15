@@ -819,7 +819,7 @@ static int
 jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
                             CORE_ADDR entry_addr)
 {
-  void *gdb_mem;
+  gdb_byte *gdb_mem;
   int status;
   jit_dbg_reader_data priv_data;
   struct gdb_reader_funcs *funcs;
@@ -842,7 +842,7 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
   if (!loaded_jit_reader)
     return 0;
 
-  gdb_mem = xmalloc (code_entry->symfile_size);
+  gdb_mem = (gdb_byte *) xmalloc (code_entry->symfile_size);
 
   status = 1;
   TRY

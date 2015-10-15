@@ -742,7 +742,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 static void
 h8300_extract_return_value (struct type *type, struct regcache *regcache,
-			    void *valbuf)
+			    gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -760,7 +760,7 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
       regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
       store_unsigned_integer (valbuf, 2, byte_order, c);
       regcache_cooked_read_unsigned (regcache, E_RET1_REGNUM, &c);
-      store_unsigned_integer ((void *)((char *) valbuf + 2), 2, byte_order, c);
+      store_unsigned_integer (valbuf + 2, 2, byte_order, c);
       break;
     case 8:			/* long long is now 8 bytes.  */
       if (TYPE_CODE (type) == TYPE_CODE_INT)
@@ -779,7 +779,7 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
 
 static void
 h8300h_extract_return_value (struct type *type, struct regcache *regcache,
-			     void *valbuf)
+			     gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -799,8 +799,7 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
 	  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
 	  store_unsigned_integer (valbuf, 4, byte_order, c);
 	  regcache_cooked_read_unsigned (regcache, E_RET1_REGNUM, &c);
-	  store_unsigned_integer ((void *) ((char *) valbuf + 4), 4,
-				  byte_order, c);
+	  store_unsigned_integer (valbuf + 4, 4, byte_order, c);
 	}
       else
 	{
@@ -845,7 +844,7 @@ h8300h_use_struct_convention (struct type *value_type)
 
 static void
 h8300_store_return_value (struct type *type, struct regcache *regcache,
-			  const void *valbuf)
+			  const gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -874,7 +873,7 @@ h8300_store_return_value (struct type *type, struct regcache *regcache,
 
 static void
 h8300h_store_return_value (struct type *type, struct regcache *regcache,
-			   const void *valbuf)
+			   const gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

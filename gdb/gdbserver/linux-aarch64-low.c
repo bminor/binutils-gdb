@@ -315,9 +315,17 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 	ret = -1;
     }
   else
-    ret =
-      aarch64_handle_breakpoint (targ_type, addr, len, 1 /* is_insert */,
-				 state);
+    {
+      if (len == 3)
+	{
+	  /* LEN is 3 means the breakpoint is set on a 32-bit thumb
+	     instruction.   Set it to 2 to correctly encode length bit
+	     mask in hardware/watchpoint control register.  */
+	  len = 2;
+	}
+      ret = aarch64_handle_breakpoint (targ_type, addr, len,
+				       1 /* is_insert */, state);
+    }
 
   if (show_debug_regs)
     aarch64_show_debug_reg_state (state, "insert_point", addr, len,
@@ -353,9 +361,17 @@ aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
       aarch64_handle_watchpoint (targ_type, addr, len, 0 /* is_insert */,
 				 state);
   else
-    ret =
-      aarch64_handle_breakpoint (targ_type, addr, len, 0 /* is_insert */,
-				 state);
+    {
+      if (len == 3)
+	{
+	  /* LEN is 3 means the breakpoint is set on a 32-bit thumb
+	     instruction.   Set it to 2 to correctly encode length bit
+	     mask in hardware/watchpoint control register.  */
+	  len = 2;
+	}
+      ret = aarch64_handle_breakpoint (targ_type, addr, len,
+				       0 /* is_insert */,  state);
+    }
 
   if (show_debug_regs)
     aarch64_show_debug_reg_state (state, "remove_point", addr, len,
@@ -584,156 +600,6 @@ aarch64_get_thread_area (int lwpid, CORE_ADDR *addrp)
   return 0;
 }
 
-/* Extract a signed value from a bit field within an instruction
-   encoding.
-
-   INSN is the instruction opcode.
-
-   WIDTH specifies the width of the bit field to extract (in bits).
-
-   OFFSET specifies the least significant bit of the field where bits
-   are numbered zero counting from least to most significant.  */
-
-static int32_t
-extract_signed_bitfield (uint32_t insn, unsigned width, unsigned offset)
-{
-  unsigned shift_l = sizeof (int32_t) * 8 - (offset + width);
-  unsigned shift_r = sizeof (int32_t) * 8 - width;
-
-  return ((int32_t) insn << shift_l) >> shift_r;
-}
-
-/* Decode an opcode if it represents an LDR or LDRSW instruction taking a
-   literal offset from the current PC.
-
-   ADDR specifies the address of the opcode.
-   INSN specifies the opcode to test.
-   IS_W is set if the instruction is LDRSW.
-   IS64 receives size field from the decoded instruction.
-   RT receives the 'rt' field from the decoded instruction.
-   OFFSET receives the 'imm' field from the decoded instruction.
-
-   Return 1 if the opcodes matches and is decoded, otherwise 0.  */
-
-int
-aarch64_decode_ldr_literal (CORE_ADDR addr, uint32_t insn, int *is_w,
-			    int *is64, unsigned *rt, int32_t *offset)
-{
-  /* LDR    0T01 1000 iiii iiii iiii iiii iiir rrrr */
-  /* LDRSW  1001 1000 iiii iiii iiii iiii iiir rrrr */
-  if ((insn & 0x3f000000) == 0x18000000)
-    {
-      *is_w = (insn >> 31) & 0x1;
-
-      if (*is_w)
-	{
-	  /* LDRSW always takes a 64-bit destination registers.  */
-	  *is64 = 1;
-	}
-      else
-	*is64 = (insn >> 30) & 0x1;
-
-      *rt = (insn >> 0) & 0x1f;
-      *offset = extract_signed_bitfield (insn, 19, 5) << 2;
-
-      if (aarch64_debug)
-	debug_printf ("decode: %s 0x%x %s %s%u, #?\n",
-		      core_addr_to_string_nz (addr), insn,
-		      *is_w ? "ldrsw" : "ldr",
-		      *is64 ? "x" : "w", *rt);
-
-      return 1;
-    }
-
-  return 0;
-}
-
-/* List of opcodes that we need for building the jump pad and relocating
-   an instruction.  */
-
-enum aarch64_opcodes
-{
-  /* B              0001 01ii iiii iiii iiii iiii iiii iiii */
-  /* BL             1001 01ii iiii iiii iiii iiii iiii iiii */
-  /* B.COND         0101 0100 iiii iiii iiii iiii iii0 cccc */
-  /* CBZ            s011 0100 iiii iiii iiii iiii iiir rrrr */
-  /* CBNZ           s011 0101 iiii iiii iiii iiii iiir rrrr */
-  /* TBZ            b011 0110 bbbb biii iiii iiii iiir rrrr */
-  /* TBNZ           b011 0111 bbbb biii iiii iiii iiir rrrr */
-  B               = 0x14000000,
-  BL              = 0x80000000 | B,
-  BCOND           = 0x40000000 | B,
-  CBZ             = 0x20000000 | B,
-  CBNZ            = 0x21000000 | B,
-  TBZ             = 0x36000000 | B,
-  TBNZ            = 0x37000000 | B,
-  /* BLR            1101 0110 0011 1111 0000 00rr rrr0 0000 */
-  BLR             = 0xd63f0000,
-  /* RET            1101 0110 0101 1111 0000 00rr rrr0 0000 */
-  RET             = 0xd65f0000,
-  /* STP            s010 100o o0ii iiii irrr rrrr rrrr rrrr */
-  /* LDP            s010 100o o1ii iiii irrr rrrr rrrr rrrr */
-  /* STP (SIMD&VFP) ss10 110o o0ii iiii irrr rrrr rrrr rrrr */
-  /* LDP (SIMD&VFP) ss10 110o o1ii iiii irrr rrrr rrrr rrrr */
-  STP             = 0x28000000,
-  LDP             = 0x28400000,
-  STP_SIMD_VFP    = 0x04000000 | STP,
-  LDP_SIMD_VFP    = 0x04000000 | LDP,
-  /* STR            ss11 100o 00xi iiii iiii xxrr rrrr rrrr */
-  /* LDR            ss11 100o 01xi iiii iiii xxrr rrrr rrrr */
-  /* LDRSW          1011 100o 10xi iiii iiii xxrr rrrr rrrr */
-  STR             = 0x38000000,
-  LDR             = 0x00400000 | STR,
-  LDRSW           = 0x80800000 | STR,
-  /* LDAXR          ss00 1000 0101 1111 1111 11rr rrrr rrrr */
-  LDAXR           = 0x085ffc00,
-  /* STXR           ss00 1000 000r rrrr 0111 11rr rrrr rrrr */
-  STXR            = 0x08007c00,
-  /* STLR           ss00 1000 1001 1111 1111 11rr rrrr rrrr */
-  STLR            = 0x089ffc00,
-  /* MOV            s101 0010 1xxi iiii iiii iiii iiir rrrr */
-  /* MOVK           s111 0010 1xxi iiii iiii iiii iiir rrrr */
-  MOV             = 0x52800000,
-  MOVK            = 0x20000000 | MOV,
-  /* ADD            s00o ooo1 xxxx xxxx xxxx xxxx xxxx xxxx */
-  /* SUB            s10o ooo1 xxxx xxxx xxxx xxxx xxxx xxxx */
-  /* SUBS           s11o ooo1 xxxx xxxx xxxx xxxx xxxx xxxx */
-  ADD             = 0x01000000,
-  SUB             = 0x40000000 | ADD,
-  SUBS            = 0x20000000 | SUB,
-  /* AND            s000 1010 xx0x xxxx xxxx xxxx xxxx xxxx */
-  /* ORR            s010 1010 xx0x xxxx xxxx xxxx xxxx xxxx */
-  /* ORN            s010 1010 xx1x xxxx xxxx xxxx xxxx xxxx */
-  /* EOR            s100 1010 xx0x xxxx xxxx xxxx xxxx xxxx */
-  AND             = 0x0a000000,
-  ORR             = 0x20000000 | AND,
-  ORN             = 0x00200000 | ORR,
-  EOR             = 0x40000000 | AND,
-  /* LSLV           s001 1010 110r rrrr 0010 00rr rrrr rrrr */
-  /* LSRV           s001 1010 110r rrrr 0010 01rr rrrr rrrr */
-  /* ASRV           s001 1010 110r rrrr 0010 10rr rrrr rrrr */
-  LSLV             = 0x1ac02000,
-  LSRV             = 0x00000400 | LSLV,
-  ASRV             = 0x00000800 | LSLV,
-  /* SBFM           s001 0011 0nii iiii iiii iirr rrrr rrrr */
-  SBFM            = 0x13000000,
-  /* UBFM           s101 0011 0nii iiii iiii iirr rrrr rrrr */
-  UBFM            = 0x40000000 | SBFM,
-  /* CSINC          s001 1010 100r rrrr cccc 01rr rrrr rrrr */
-  CSINC           = 0x9a800400,
-  /* MUL            s001 1011 000r rrrr 0111 11rr rrrr rrrr */
-  MUL             = 0x1b007c00,
-  /* MSR (register) 1101 0101 0001 oooo oooo oooo ooor rrrr */
-  /* MRS            1101 0101 0011 oooo oooo oooo ooor rrrr */
-  MSR             = 0xd5100000,
-  MRS             = 0x00200000 | MSR,
-  /* HINT           1101 0101 0000 0011 0010 oooo ooo1 1111 */
-  HINT            = 0xd503201f,
-  SEVL            = (5 << 5) | HINT,
-  WFE             = (2 << 5) | HINT,
-  NOP             = (0 << 5) | HINT,
-};
-
 /* List of condition codes that we need.  */
 
 enum aarch64_condition_codes
@@ -745,16 +611,6 @@ enum aarch64_condition_codes
   LT = 0xb,
   GT = 0xc,
   LE = 0xd,
-};
-
-/* Representation of a general purpose register of the form xN or wN.
-
-   This type is used by emitting functions that take registers as operands.  */
-
-struct aarch64_register
-{
-  unsigned num;
-  int is64;
 };
 
 /* Representation of an operand.  At this time, it only supports register
@@ -843,28 +699,6 @@ immediate_operand (uint32_t imm)
   return operand;
 }
 
-/* Representation of a memory operand, used for load and store
-   instructions.
-
-   The types correspond to the following variants:
-
-   MEMORY_OPERAND_OFFSET:    LDR rt, [rn, #offset]
-   MEMORY_OPERAND_PREINDEX:  LDR rt, [rn, #index]!
-   MEMORY_OPERAND_POSTINDEX: LDR rt, [rn], #index  */
-
-struct aarch64_memory_operand
-{
-  /* Type of the operand.  */
-  enum
-    {
-      MEMORY_OPERAND_OFFSET,
-      MEMORY_OPERAND_PREINDEX,
-      MEMORY_OPERAND_POSTINDEX,
-    } type;
-  /* Index from the base register.  */
-  int32_t index;
-};
-
 /* Helper function to create an offset memory operand.
 
    For example:
@@ -916,108 +750,6 @@ enum aarch64_system_control_registers
   TPIDR_EL0 = (0x1 << 14) | (0x3 << 11) | (0xd << 7) | (0x0 << 3) | 0x2
 };
 
-/* Helper macro to mask and shift a value into a bitfield.  */
-
-#define ENCODE(val, size, offset) \
-  ((uint32_t) ((val & ((1ULL << size) - 1)) << offset))
-
-/* Write a 32-bit unsigned integer INSN info *BUF.  Return the number of
-   instructions written (aka. 1).  */
-
-static int
-emit_insn (uint32_t *buf, uint32_t insn)
-{
-  *buf = insn;
-  return 1;
-}
-
-/* Write a B or BL instruction into *BUF.
-
-     B  #offset
-     BL #offset
-
-   IS_BL specifies if the link register should be updated.
-   OFFSET is the immediate offset from the current PC.  It is
-   byte-addressed but should be 4 bytes aligned.  It has a limited range of
-   +/- 128MB (26 bits << 2).  */
-
-static int
-emit_b (uint32_t *buf, int is_bl, int32_t offset)
-{
-  uint32_t imm26 = ENCODE (offset >> 2, 26, 0);
-
-  if (is_bl)
-    return emit_insn (buf, BL | imm26);
-  else
-    return emit_insn (buf, B | imm26);
-}
-
-/* Write a BCOND instruction into *BUF.
-
-     B.COND #offset
-
-   COND specifies the condition field.
-   OFFSET is the immediate offset from the current PC.  It is
-   byte-addressed but should be 4 bytes aligned.  It has a limited range of
-   +/- 1MB (19 bits << 2).  */
-
-static int
-emit_bcond (uint32_t *buf, unsigned cond, int32_t offset)
-{
-  return emit_insn (buf, BCOND | ENCODE (offset >> 2, 19, 5)
-		    | ENCODE (cond, 4, 0));
-}
-
-/* Write a CBZ or CBNZ instruction into *BUF.
-
-     CBZ  rt, #offset
-     CBNZ rt, #offset
-
-   IS_CBNZ distinguishes between CBZ and CBNZ instructions.
-   RN is the register to test.
-   OFFSET is the immediate offset from the current PC.  It is
-   byte-addressed but should be 4 bytes aligned.  It has a limited range of
-   +/- 1MB (19 bits << 2).  */
-
-static int
-emit_cb (uint32_t *buf, int is_cbnz, struct aarch64_register rt,
-	 int32_t offset)
-{
-  uint32_t imm19 = ENCODE (offset >> 2, 19, 5);
-  uint32_t sf = ENCODE (rt.is64, 1, 31);
-
-  if (is_cbnz)
-    return emit_insn (buf, CBNZ | sf | imm19 | ENCODE (rt.num, 5, 0));
-  else
-    return emit_insn (buf, CBZ | sf | imm19 | ENCODE (rt.num, 5, 0));
-}
-
-/* Write a TBZ or TBNZ instruction into *BUF.
-
-     TBZ  rt, #bit, #offset
-     TBNZ rt, #bit, #offset
-
-   IS_TBNZ distinguishes between TBZ and TBNZ instructions.
-   RT is the register to test.
-   BIT is the index of the bit to test in register RT.
-   OFFSET is the immediate offset from the current PC.  It is
-   byte-addressed but should be 4 bytes aligned.  It has a limited range of
-   +/- 32KB (14 bits << 2).  */
-
-static int
-emit_tb (uint32_t *buf, int is_tbnz, unsigned bit,
-	 struct aarch64_register rt, int32_t offset)
-{
-  uint32_t imm14 = ENCODE (offset >> 2, 14, 5);
-  uint32_t b40 = ENCODE (bit, 5, 19);
-  uint32_t b5 = ENCODE (bit >> 5, 1, 31);
-
-  if (is_tbnz)
-    return emit_insn (buf, TBNZ | b5 | b40 | imm14 | ENCODE (rt.num, 5, 0));
-  else
-    return emit_insn (buf, TBZ | b5 | b40 | imm14 | ENCODE (rt.num, 5, 0));
-}
-
 /* Write a BLR instruction into *BUF.
 
      BLR rn
@@ -1027,7 +759,7 @@ emit_tb (uint32_t *buf, int is_tbnz, unsigned bit,
 static int
 emit_blr (uint32_t *buf, struct aarch64_register rn)
 {
-  return emit_insn (buf, BLR | ENCODE (rn.num, 5, 5));
+  return aarch64_emit_insn (buf, BLR | ENCODE (rn.num, 5, 5));
 }
 
 /* Write a RET instruction into *BUF.
@@ -1039,7 +771,7 @@ emit_blr (uint32_t *buf, struct aarch64_register rn)
 static int
 emit_ret (uint32_t *buf, struct aarch64_register rn)
 {
-  return emit_insn (buf, RET | ENCODE (rn.num, 5, 5));
+  return aarch64_emit_insn (buf, RET | ENCODE (rn.num, 5, 5));
 }
 
 static int
@@ -1082,10 +814,10 @@ emit_load_store_pair (uint32_t *buf, enum aarch64_opcodes opcode,
       return 0;
     }
 
-  return emit_insn (buf, opcode | opc | pre_index | write_back
-		    | ENCODE (operand.index >> 3, 7, 15)
-		    | ENCODE (rt2.num, 5, 10)
-		    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+  return aarch64_emit_insn (buf, opcode | opc | pre_index | write_back
+			    | ENCODE (operand.index >> 3, 7, 15)
+			    | ENCODE (rt2.num, 5, 10)
+			    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a STP instruction into *BUF.
@@ -1142,9 +874,10 @@ emit_ldp_q_offset (uint32_t *buf, unsigned rt, unsigned rt2,
   uint32_t opc = ENCODE (2, 2, 30);
   uint32_t pre_index = ENCODE (1, 1, 24);
 
-  return emit_insn (buf, LDP_SIMD_VFP | opc | pre_index
-		    | ENCODE (offset >> 4, 7, 15) | ENCODE (rt2, 5, 10)
-		    | ENCODE (rn.num, 5, 5) | ENCODE (rt, 5, 0));
+  return aarch64_emit_insn (buf, LDP_SIMD_VFP | opc | pre_index
+			    | ENCODE (offset >> 4, 7, 15)
+			    | ENCODE (rt2, 5, 10)
+			    | ENCODE (rn.num, 5, 5) | ENCODE (rt, 5, 0));
 }
 
 /* Write a STP (SIMD&VFP) instruction using Q registers into *BUF.
@@ -1163,71 +896,10 @@ emit_stp_q_offset (uint32_t *buf, unsigned rt, unsigned rt2,
   uint32_t opc = ENCODE (2, 2, 30);
   uint32_t pre_index = ENCODE (1, 1, 24);
 
-  return emit_insn (buf, STP_SIMD_VFP | opc | pre_index
-		    | ENCODE (offset >> 4, 7, 15) | ENCODE (rt2, 5, 10)
-		    | ENCODE (rn.num, 5, 5) | ENCODE (rt, 5, 0));
-}
-
-/* Helper function emitting a load or store instruction.  */
-
-static int
-emit_load_store (uint32_t *buf, uint32_t size, enum aarch64_opcodes opcode,
-		 struct aarch64_register rt, struct aarch64_register rn,
-		 struct aarch64_memory_operand operand)
-{
-  uint32_t op;
-
-  switch (operand.type)
-    {
-    case MEMORY_OPERAND_OFFSET:
-      {
-	op = ENCODE (1, 1, 24);
-
-	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
-			  | ENCODE (operand.index >> 3, 12, 10)
-			  | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
-      }
-    case MEMORY_OPERAND_POSTINDEX:
-      {
-	uint32_t post_index = ENCODE (1, 2, 10);
-
-	op = ENCODE (0, 1, 24);
-
-	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
-			  | post_index | ENCODE (operand.index, 9, 12)
-			  | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
-      }
-    case MEMORY_OPERAND_PREINDEX:
-      {
-	uint32_t pre_index = ENCODE (3, 2, 10);
-
-	op = ENCODE (0, 1, 24);
-
-	return emit_insn (buf, opcode | ENCODE (size, 2, 30) | op
-			  | pre_index | ENCODE (operand.index, 9, 12)
-			  | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
-      }
-    default:
-      return 0;
-    }
-}
-
-/* Write a LDR instruction into *BUF.
-
-     LDR rt, [rn, #offset]
-     LDR rt, [rn, #index]!
-     LDR rt, [rn], #index
-
-   RT is the register to store.
-   RN is the base address register.
-   OFFSET is the immediate to add to the base address.  It is limited to
-   0 .. 32760 range (12 bits << 3).  */
-
-static int
-emit_ldr (uint32_t *buf, struct aarch64_register rt,
-	  struct aarch64_register rn, struct aarch64_memory_operand operand)
-{
-  return emit_load_store (buf, rt.is64 ? 3 : 2, LDR, rt, rn, operand);
+  return aarch64_emit_insn (buf, STP_SIMD_VFP | opc | pre_index
+			    | ENCODE (offset >> 4, 7, 15)
+			    | ENCODE (rt2, 5, 10)
+			    | ENCODE (rn.num, 5, 5) | ENCODE (rt, 5, 0));
 }
 
 /* Write a LDRH instruction into *BUF.
@@ -1246,7 +918,7 @@ emit_ldrh (uint32_t *buf, struct aarch64_register rt,
 	   struct aarch64_register rn,
 	   struct aarch64_memory_operand operand)
 {
-  return emit_load_store (buf, 1, LDR, rt, rn, operand);
+  return aarch64_emit_load_store (buf, 1, LDR, rt, rn, operand);
 }
 
 /* Write a LDRB instruction into *BUF.
@@ -1265,27 +937,10 @@ emit_ldrb (uint32_t *buf, struct aarch64_register rt,
 	   struct aarch64_register rn,
 	   struct aarch64_memory_operand operand)
 {
-  return emit_load_store (buf, 0, LDR, rt, rn, operand);
+  return aarch64_emit_load_store (buf, 0, LDR, rt, rn, operand);
 }
 
-/* Write a LDRSW instruction into *BUF.  The register size is 64-bit.
 
-     LDRSW xt, [rn, #offset]
-     LDRSW xt, [rn, #index]!
-     LDRSW xt, [rn], #index
-
-   RT is the register to store.
-   RN is the base address register.
-   OFFSET is the immediate to add to the base address.  It is limited to
-   0 .. 16380 range (12 bits << 2).  */
-
-static int
-emit_ldrsw (uint32_t *buf, struct aarch64_register rt,
-		   struct aarch64_register rn,
-		   struct aarch64_memory_operand operand)
-{
-  return emit_load_store (buf, 3, LDRSW, rt, rn, operand);
-}
 
 /* Write a STR instruction into *BUF.
 
@@ -1303,7 +958,7 @@ emit_str (uint32_t *buf, struct aarch64_register rt,
 	  struct aarch64_register rn,
 	  struct aarch64_memory_operand operand)
 {
-  return emit_load_store (buf, rt.is64 ? 3 : 2, STR, rt, rn, operand);
+  return aarch64_emit_load_store (buf, rt.is64 ? 3 : 2, STR, rt, rn, operand);
 }
 
 /* Helper function emitting an exclusive load or store instruction.  */
@@ -1316,9 +971,9 @@ emit_load_store_exclusive (uint32_t *buf, uint32_t size,
 			   struct aarch64_register rt2,
 			   struct aarch64_register rn)
 {
-  return emit_insn (buf, opcode | ENCODE (size, 2, 30)
-		    | ENCODE (rs.num, 5, 16) | ENCODE (rt2.num, 5, 10)
-		    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
+  return aarch64_emit_insn (buf, opcode | ENCODE (size, 2, 30)
+			    | ENCODE (rs.num, 5, 16) | ENCODE (rt2.num, 5, 10)
+			    | ENCODE (rn.num, 5, 5) | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a LAXR instruction into *BUF.
@@ -1377,8 +1032,8 @@ emit_data_processing_reg (uint32_t *buf, enum aarch64_opcodes opcode,
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 
-  return emit_insn (buf, opcode | size | ENCODE (rm.num, 5, 16)
-		    | ENCODE (rn.num, 5, 5) | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, opcode | size | ENCODE (rm.num, 5, 16)
+			    | ENCODE (rn.num, 5, 5) | ENCODE (rd.num, 5, 0));
 }
 
 /* Helper function for data processing instructions taking either a register
@@ -1399,9 +1054,10 @@ emit_data_processing (uint32_t *buf, enum aarch64_opcodes opcode,
       /* xxx1 000x xxxx xxxx xxxx xxxx xxxx xxxx */
       operand_opcode = ENCODE (8, 4, 25);
 
-      return emit_insn (buf, opcode | operand_opcode | size
-			| ENCODE (operand.imm, 12, 10)
-			| ENCODE (rn.num, 5, 5) | ENCODE (rd.num, 5, 0));
+      return aarch64_emit_insn (buf, opcode | operand_opcode | size
+				| ENCODE (operand.imm, 12, 10)
+				| ENCODE (rn.num, 5, 5)
+				| ENCODE (rd.num, 5, 0));
     }
   else
     {
@@ -1474,9 +1130,9 @@ emit_mov (uint32_t *buf, struct aarch64_register rd,
       /* Do not shift the immediate.  */
       uint32_t shift = ENCODE (0, 2, 21);
 
-      return emit_insn (buf, MOV | size | shift
-			| ENCODE (operand.imm, 16, 5)
-			| ENCODE (rd.num, 5, 0));
+      return aarch64_emit_insn (buf, MOV | size | shift
+				| ENCODE (operand.imm, 16, 5)
+				| ENCODE (rd.num, 5, 0));
     }
   else
     return emit_add (buf, rd, operand.reg, immediate_operand (0));
@@ -1496,8 +1152,8 @@ emit_movk (uint32_t *buf, struct aarch64_register rd, uint32_t imm,
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 
-  return emit_insn (buf, MOVK | size | ENCODE (shift, 2, 21) |
-		    ENCODE (imm, 16, 5) | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, MOVK | size | ENCODE (shift, 2, 21) |
+			    ENCODE (imm, 16, 5) | ENCODE (rd.num, 5, 0));
 }
 
 /* Write instructions into *BUF in order to move ADDR into a register.
@@ -1705,8 +1361,8 @@ static int
 emit_mrs (uint32_t *buf, struct aarch64_register rt,
 	  enum aarch64_system_control_registers system_reg)
 {
-  return emit_insn (buf, MRS | ENCODE (system_reg, 15, 5)
-		    | ENCODE (rt.num, 5, 0));
+  return aarch64_emit_insn (buf, MRS | ENCODE (system_reg, 15, 5)
+			    | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a MSR instruction into *BUF.  The register size is 64-bit.
@@ -1720,8 +1376,8 @@ static int
 emit_msr (uint32_t *buf, enum aarch64_system_control_registers system_reg,
 	  struct aarch64_register rt)
 {
-  return emit_insn (buf, MSR | ENCODE (system_reg, 15, 5)
-		    | ENCODE (rt.num, 5, 0));
+  return aarch64_emit_insn (buf, MSR | ENCODE (system_reg, 15, 5)
+			    | ENCODE (rt.num, 5, 0));
 }
 
 /* Write a SEVL instruction into *BUF.
@@ -1731,7 +1387,7 @@ emit_msr (uint32_t *buf, enum aarch64_system_control_registers system_reg,
 static int
 emit_sevl (uint32_t *buf)
 {
-  return emit_insn (buf, SEVL);
+  return aarch64_emit_insn (buf, SEVL);
 }
 
 /* Write a WFE instruction into *BUF.
@@ -1741,7 +1397,7 @@ emit_sevl (uint32_t *buf)
 static int
 emit_wfe (uint32_t *buf)
 {
-  return emit_insn (buf, WFE);
+  return aarch64_emit_insn (buf, WFE);
 }
 
 /* Write a SBFM instruction into *BUF.
@@ -1763,9 +1419,9 @@ emit_sbfm (uint32_t *buf, struct aarch64_register rd,
   uint32_t size = ENCODE (rd.is64, 1, 31);
   uint32_t n = ENCODE (rd.is64, 1, 22);
 
-  return emit_insn (buf, SBFM | size | n | ENCODE (immr, 6, 16)
-		    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
-		    | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, SBFM | size | n | ENCODE (immr, 6, 16)
+			    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
+			    | ENCODE (rd.num, 5, 0));
 }
 
 /* Write a SBFX instruction into *BUF.
@@ -1808,9 +1464,9 @@ emit_ubfm (uint32_t *buf, struct aarch64_register rd,
   uint32_t size = ENCODE (rd.is64, 1, 31);
   uint32_t n = ENCODE (rd.is64, 1, 22);
 
-  return emit_insn (buf, UBFM | size | n | ENCODE (immr, 6, 16)
-		    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
-		    | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, UBFM | size | n | ENCODE (immr, 6, 16)
+			    | ENCODE (imms, 6, 10) | ENCODE (rn.num, 5, 5)
+			    | ENCODE (rd.num, 5, 0));
 }
 
 /* Write a UBFX instruction into *BUF.
@@ -1852,9 +1508,9 @@ emit_csinc (uint32_t *buf, struct aarch64_register rd,
 {
   uint32_t size = ENCODE (rd.is64, 1, 31);
 
-  return emit_insn (buf, CSINC | size | ENCODE (rm.num, 5, 16)
-		    | ENCODE (cond, 4, 12) | ENCODE (rn.num, 5, 5)
-		    | ENCODE (rd.num, 5, 0));
+  return aarch64_emit_insn (buf, CSINC | size | ENCODE (rm.num, 5, 16)
+			    | ENCODE (cond, 4, 12) | ENCODE (rn.num, 5, 5)
+			    | ENCODE (rd.num, 5, 0));
 }
 
 /* Write a CSET instruction into *BUF.
@@ -1878,14 +1534,6 @@ emit_cset (uint32_t *buf, struct aarch64_register rd, unsigned cond)
   /* The least significant bit of the condition needs toggling in order to
      invert it.  */
   return emit_csinc (buf, rd, xzr, xzr, cond ^ 0x1);
-}
-
-/* Write a NOP instruction into *BUF.  */
-
-static int
-emit_nop (uint32_t *buf)
-{
-  return emit_insn (buf, NOP);
 }
 
 /* Write LEN instructions from BUF into the inferior memory at *TO.
@@ -1913,190 +1561,233 @@ append_insns (CORE_ADDR *to, size_t len, const uint32_t *buf)
   *to += byte_len;
 }
 
-/* Helper function.  Return 1 if VAL can be encoded in BITS bits.  */
+/* Sub-class of struct aarch64_insn_data, store information of
+   instruction relocation for fast tracepoint.  Visitor can
+   relocate an instruction from BASE.INSN_ADDR to NEW_ADDR and save
+   the relocated instructions in buffer pointed by INSN_PTR.  */
 
-static int
-can_encode_int32 (int32_t val, unsigned bits)
+struct aarch64_insn_relocation_data
 {
-  /* This must be an arithemic shift.  */
-  int32_t rest = val >> bits;
+  struct aarch64_insn_data base;
 
-  return rest == 0 || rest == -1;
-}
+  /* The new address the instruction is relocated to.  */
+  CORE_ADDR new_addr;
+  /* Pointer to the buffer of relocated instruction(s).  */
+  uint32_t *insn_ptr;
+};
 
-/* Relocate an instruction from OLDLOC to *TO.  This function will also
-   increment TO by the number of bytes the new instruction(s) take(s).
-
-   PC relative instructions need to be handled specifically:
-
-   - B/BL
-   - B.COND
-   - CBZ/CBNZ
-   - TBZ/TBNZ
-   - ADR/ADRP
-   - LDR/LDRSW (literal)  */
+/* Implementation of aarch64_insn_visitor method "b".  */
 
 static void
-aarch64_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
+aarch64_ftrace_insn_reloc_b (const int is_bl, const int32_t offset,
+			     struct aarch64_insn_data *data)
 {
-  uint32_t buf[32];
-  uint32_t *p = buf;
-  uint32_t insn;
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  int32_t new_offset
+    = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
 
-  int is_bl;
-  int is64;
-  int is_sw;
-  int is_cbnz;
-  int is_tbnz;
-  int is_adrp;
-  unsigned rn;
-  unsigned rt;
-  unsigned rd;
-  unsigned cond;
-  unsigned bit;
-  int32_t offset;
+  if (can_encode_int32 (new_offset, 28))
+    insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, is_bl, new_offset);
+}
 
-  target_read_uint32 (oldloc, &insn);
+/* Implementation of aarch64_insn_visitor method "b_cond".  */
 
-  if (aarch64_decode_b (oldloc, insn, &is_bl, &offset))
+static void
+aarch64_ftrace_insn_reloc_b_cond (const unsigned cond, const int32_t offset,
+				  struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  int32_t new_offset
+    = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
+
+  if (can_encode_int32 (new_offset, 21))
     {
-      offset = (oldloc - *to + offset);
-
-      if (can_encode_int32 (offset, 28))
-	p += emit_b (p, is_bl, offset);
-      else
-	return;
+      insn_reloc->insn_ptr += emit_bcond (insn_reloc->insn_ptr, cond,
+					  new_offset);
     }
-  else if (aarch64_decode_bcond (oldloc, insn, &cond, &offset))
+  else if (can_encode_int32 (new_offset, 28))
     {
-      offset = (oldloc - *to + offset);
+      /* The offset is out of range for a conditional branch
+	 instruction but not for a unconditional branch.  We can use
+	 the following instructions instead:
 
-      if (can_encode_int32 (offset, 21))
-	p += emit_bcond (p, cond, offset);
-      else if (can_encode_int32 (offset, 28))
-	{
-	  /* The offset is out of range for a conditional branch
-	     instruction but not for a unconditional branch.  We can use
-	     the following instructions instead:
+	 B.COND TAKEN    ; If cond is true, then jump to TAKEN.
+	 B NOT_TAKEN     ; Else jump over TAKEN and continue.
+	 TAKEN:
+	 B #(offset - 8)
+	 NOT_TAKEN:
 
-	       B.COND TAKEN    ; If cond is true, then jump to TAKEN.
-	       B NOT_TAKEN     ; Else jump over TAKEN and continue.
-	     TAKEN:
-	       B #(offset - 8)
-	     NOT_TAKEN:
+      */
 
-	     */
-
-	  p += emit_bcond (p, cond, 8);
-	  p += emit_b (p, 0, 8);
-	  p += emit_b (p, 0, offset - 8);
-	}
-      else
-	return;
+      insn_reloc->insn_ptr += emit_bcond (insn_reloc->insn_ptr, cond, 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, new_offset - 8);
     }
-  else if (aarch64_decode_cb (oldloc, insn, &is64, &is_cbnz, &rn, &offset))
+}
+
+/* Implementation of aarch64_insn_visitor method "cb".  */
+
+static void
+aarch64_ftrace_insn_reloc_cb (const int32_t offset, const int is_cbnz,
+			      const unsigned rn, int is64,
+			      struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  int32_t new_offset
+    = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
+
+  if (can_encode_int32 (new_offset, 21))
     {
-      offset = (oldloc - *to + offset);
-
-      if (can_encode_int32 (offset, 21))
-	p += emit_cb (p, is_cbnz, aarch64_register (rn, is64), offset);
-      else if (can_encode_int32 (offset, 28))
-	{
-	  /* The offset is out of range for a compare and branch
-	     instruction but not for a unconditional branch.  We can use
-	     the following instructions instead:
-
-	       CBZ xn, TAKEN   ; xn == 0, then jump to TAKEN.
-	       B NOT_TAKEN     ; Else jump over TAKEN and continue.
-	     TAKEN:
-	       B #(offset - 8)
-	     NOT_TAKEN:
-
-	     */
-	  p += emit_cb (p, is_cbnz, aarch64_register (rn, is64), 8);
-	  p += emit_b (p, 0, 8);
-	  p += emit_b (p, 0, offset - 8);
-	}
-      else
-	return;
+      insn_reloc->insn_ptr += emit_cb (insn_reloc->insn_ptr, is_cbnz,
+				       aarch64_register (rn, is64), new_offset);
     }
-  else if (aarch64_decode_tb (oldloc, insn, &is_tbnz, &bit, &rt, &offset))
+  else if (can_encode_int32 (new_offset, 28))
     {
-      offset = (oldloc - *to + offset);
+      /* The offset is out of range for a compare and branch
+	 instruction but not for a unconditional branch.  We can use
+	 the following instructions instead:
 
-      if (can_encode_int32 (offset, 16))
-	p += emit_tb (p, is_tbnz, bit, aarch64_register (rt, 1), offset);
-      else if (can_encode_int32 (offset, 28))
-	{
-	  /* The offset is out of range for a test bit and branch
-	     instruction but not for a unconditional branch.  We can use
-	     the following instructions instead:
+	 CBZ xn, TAKEN   ; xn == 0, then jump to TAKEN.
+	 B NOT_TAKEN     ; Else jump over TAKEN and continue.
+	 TAKEN:
+	 B #(offset - 8)
+	 NOT_TAKEN:
 
-	       TBZ xn, #bit, TAKEN ; xn[bit] == 0, then jump to TAKEN.
-	       B NOT_TAKEN         ; Else jump over TAKEN and continue.
-	     TAKEN:
-	       B #(offset - 8)
-	     NOT_TAKEN:
-
-	     */
-	  p += emit_tb (p, is_tbnz, bit, aarch64_register (rt, 1), 8);
-	  p += emit_b (p, 0, 8);
-	  p += emit_b (p, 0, offset - 8);
-	}
-      else
-	return;
+      */
+      insn_reloc->insn_ptr += emit_cb (insn_reloc->insn_ptr, is_cbnz,
+				       aarch64_register (rn, is64), 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, new_offset - 8);
     }
-  else if (aarch64_decode_adr (oldloc, insn, &is_adrp, &rd, &offset))
+}
+
+/* Implementation of aarch64_insn_visitor method "tb".  */
+
+static void
+aarch64_ftrace_insn_reloc_tb (const int32_t offset, int is_tbnz,
+			      const unsigned rt, unsigned bit,
+			      struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  int32_t new_offset
+    = insn_reloc->base.insn_addr - insn_reloc->new_addr + offset;
+
+  if (can_encode_int32 (new_offset, 16))
     {
-
-      /* We know exactly the address the ADR{P,} instruction will compute.
-	 We can just write it to the destination register.  */
-      CORE_ADDR address = oldloc + offset;
-
-      if (is_adrp)
-	{
-	  /* Clear the lower 12 bits of the offset to get the 4K page.  */
-	  p += emit_mov_addr (p, aarch64_register (rd, 1),
-			      address & ~0xfff);
-	}
-      else
-	p += emit_mov_addr (p, aarch64_register (rd, 1), address);
+      insn_reloc->insn_ptr += emit_tb (insn_reloc->insn_ptr, is_tbnz, bit,
+				       aarch64_register (rt, 1), new_offset);
     }
-  else if (aarch64_decode_ldr_literal (oldloc, insn, &is_sw, &is64, &rt,
-				       &offset))
+  else if (can_encode_int32 (new_offset, 28))
     {
-      /* We know exactly what address to load from, and what register we
-	 can use:
+      /* The offset is out of range for a test bit and branch
+	 instruction but not for a unconditional branch.  We can use
+	 the following instructions instead:
 
-	   MOV xd, #(oldloc + offset)
-	   MOVK xd, #((oldloc + offset) >> 16), lsl #16
-	   ...
+	 TBZ xn, #bit, TAKEN ; xn[bit] == 0, then jump to TAKEN.
+	 B NOT_TAKEN         ; Else jump over TAKEN and continue.
+	 TAKEN:
+	 B #(offset - 8)
+	 NOT_TAKEN:
 
-	   LDR xd, [xd] ; or LDRSW xd, [xd]
+      */
+      insn_reloc->insn_ptr += emit_tb (insn_reloc->insn_ptr, is_tbnz, bit,
+				       aarch64_register (rt, 1), 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0, 8);
+      insn_reloc->insn_ptr += emit_b (insn_reloc->insn_ptr, 0,
+				      new_offset - 8);
+    }
+}
 
-	 */
-      CORE_ADDR address = oldloc + offset;
+/* Implementation of aarch64_insn_visitor method "adr".  */
 
-      p += emit_mov_addr (p, aarch64_register (rt, 1), address);
+static void
+aarch64_ftrace_insn_reloc_adr (const int32_t offset, const unsigned rd,
+			       const int is_adrp,
+			       struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  /* We know exactly the address the ADR{P,} instruction will compute.
+     We can just write it to the destination register.  */
+  CORE_ADDR address = data->insn_addr + offset;
 
-      if (is_sw)
-	p += emit_ldrsw (p, aarch64_register (rt, 1),
-			 aarch64_register (rt, 1),
-			 offset_memory_operand (0));
-      else
-	p += emit_ldr (p, aarch64_register (rt, is64),
-		       aarch64_register (rt, 1),
-		       offset_memory_operand (0));
+  if (is_adrp)
+    {
+      /* Clear the lower 12 bits of the offset to get the 4K page.  */
+      insn_reloc->insn_ptr += emit_mov_addr (insn_reloc->insn_ptr,
+					     aarch64_register (rd, 1),
+					     address & ~0xfff);
     }
   else
-    {
-      /* The instruction is not PC relative.  Just re-emit it at the new
-	 location.  */
-      p += emit_insn (p, insn);
-    }
-
-  append_insns (to, p - buf, buf);
+    insn_reloc->insn_ptr += emit_mov_addr (insn_reloc->insn_ptr,
+					   aarch64_register (rd, 1), address);
 }
+
+/* Implementation of aarch64_insn_visitor method "ldr_literal".  */
+
+static void
+aarch64_ftrace_insn_reloc_ldr_literal (const int32_t offset, const int is_sw,
+				       const unsigned rt, const int is64,
+				       struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+  CORE_ADDR address = data->insn_addr + offset;
+
+  insn_reloc->insn_ptr += emit_mov_addr (insn_reloc->insn_ptr,
+					 aarch64_register (rt, 1), address);
+
+  /* We know exactly what address to load from, and what register we
+     can use:
+
+     MOV xd, #(oldloc + offset)
+     MOVK xd, #((oldloc + offset) >> 16), lsl #16
+     ...
+
+     LDR xd, [xd] ; or LDRSW xd, [xd]
+
+  */
+
+  if (is_sw)
+    insn_reloc->insn_ptr += emit_ldrsw (insn_reloc->insn_ptr,
+					aarch64_register (rt, 1),
+					aarch64_register (rt, 1),
+					offset_memory_operand (0));
+  else
+    insn_reloc->insn_ptr += emit_ldr (insn_reloc->insn_ptr,
+				      aarch64_register (rt, is64),
+				      aarch64_register (rt, 1),
+				      offset_memory_operand (0));
+}
+
+/* Implementation of aarch64_insn_visitor method "others".  */
+
+static void
+aarch64_ftrace_insn_reloc_others (const uint32_t insn,
+				  struct aarch64_insn_data *data)
+{
+  struct aarch64_insn_relocation_data *insn_reloc
+    = (struct aarch64_insn_relocation_data *) data;
+
+  /* The instruction is not PC relative.  Just re-emit it at the new
+     location.  */
+  insn_reloc->insn_ptr += aarch64_emit_insn (insn_reloc->insn_ptr, insn);
+}
+
+static const struct aarch64_insn_visitor visitor =
+{
+  aarch64_ftrace_insn_reloc_b,
+  aarch64_ftrace_insn_reloc_b_cond,
+  aarch64_ftrace_insn_reloc_cb,
+  aarch64_ftrace_insn_reloc_tb,
+  aarch64_ftrace_insn_reloc_adr,
+  aarch64_ftrace_insn_reloc_ldr_literal,
+  aarch64_ftrace_insn_reloc_others,
+};
 
 /* Implementation of linux_target_ops method
    "install_fast_tracepoint_jump_pad".  */
@@ -2120,7 +1811,9 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
   uint32_t *p = buf;
   int32_t offset;
   int i;
+  uint32_t insn;
   CORE_ADDR buildaddr = *jump_entry;
+  struct aarch64_insn_relocation_data insn_data;
 
   /* We need to save the current state on the stack both to restore it
      later and to collect register values when the tracepoint is hit.
@@ -2422,11 +2115,17 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
 
   /* Now emit the relocated instruction.  */
   *adjusted_insn_addr = buildaddr;
-  aarch64_relocate_instruction (&buildaddr, tpaddr);
-  *adjusted_insn_addr_end = buildaddr;
+  target_read_uint32 (tpaddr, &insn);
+
+  insn_data.base.insn_addr = tpaddr;
+  insn_data.new_addr = buildaddr;
+  insn_data.insn_ptr = buf;
+
+  aarch64_relocate_instruction (insn, &visitor,
+				(struct aarch64_insn_data *) &insn_data);
 
   /* We may not have been able to relocate the instruction.  */
-  if (*adjusted_insn_addr == *adjusted_insn_addr_end)
+  if (insn_data.insn_ptr == buf)
     {
       sprintf (err,
 	       "E.Could not relocate instruction from %s to %s.",
@@ -2434,6 +2133,9 @@ aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
 	       core_addr_to_string_nz (buildaddr));
       return 1;
     }
+  else
+    append_insns (&buildaddr, insn_data.insn_ptr - buf, buf);
+  *adjusted_insn_addr_end = buildaddr;
 
   /* Go back to the start of the buffer.  */
   p = buf;

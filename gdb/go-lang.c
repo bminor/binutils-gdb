@@ -195,9 +195,9 @@ unpack_mangled_go_symbol (const char *mangled_name,
   /* Pointer to "N" if valid "N<digit(s)>_" found.  */
   char *method_type;
   /* Pointer to the first '.'.  */
-  char *first_dot;
+  const char *first_dot;
   /* Pointer to the last '.'.  */
-  char *last_dot;
+  const char *last_dot;
   /* Non-zero if we saw a pointer indicator.  */
   int saw_pointer;
 

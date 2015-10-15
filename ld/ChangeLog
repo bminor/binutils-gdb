@@ -1,3 +1,21 @@
+2015-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Fix a typo for "-z noextern-protected-data".
+
+2015-10-15  Simon Dardis  <Simon.Dardis@imgtec.com>
+
+	* ld/ldexp.c: (try_copy_symbol_flags): New. Factored out from...
+	(exp_fold_tree_1): Here.  Cope with ternary operator in
+	assignments.  Use new helper.
+
+2015-10-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_TW.po: Updated Chinese translation.
+
+2015-10-13  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_TW.po: Updated Chinese translation.
+
 2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
 	    Cupertino Miranda  <cmiranda@synopsys.com>
 

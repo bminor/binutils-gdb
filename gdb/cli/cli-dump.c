@@ -212,7 +212,7 @@ dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
   CORE_ADDR hi;
   ULONGEST count;
   const char *filename;
-  void *buf;
+  gdb_byte *buf;
   const char *lo_exp;
   const char *hi_exp;
 
@@ -237,7 +237,7 @@ dump_memory_to_file (const char *cmd, const char *mode, const char *file_format)
 
   /* FIXME: Should use read_memory_partial() and a magic blocking
      value.  */
-  buf = xmalloc (count);
+  buf = (gdb_byte *) xmalloc (count);
   make_cleanup (xfree, buf);
   read_memory (lo, buf, count);
   

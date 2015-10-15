@@ -107,6 +107,35 @@ proc check_script { } {
     }
 }
 
+proc extract_symbol_test { testfile testname } {
+    global objcopy
+    global nm
+    global size
+
+    set copyfile tmpdir/extract
+    set args "--extract-symbol $testfile $copyfile"
+    set exec_output [run_host_cmd $objcopy $args]
+    if ![string equal "" $exec_output] {
+	fail $testname
+	return
+    }
+
+    set orig_syms [run_host_cmd $nm $testfile]
+    set extract_syms [run_host_cmd $nm $copyfile]
+    if ![string equal $orig_syms $extract_syms] {
+	fail $testname
+	return
+    }
+
+    set exec_output [run_host_cmd $size $copyfile]
+    if ![regexp ".* 0\[	 \]+0\[	 \]+0\[	 \]+0\[	 \]+0\[	 \]+.*" $exec_output] {
+	fail $testname
+	return
+    }
+
+    pass $testname
+}
+
 # PE targets need to set the image base to 0 to avoid complications from nm.
 set flags ""
 if {[istarget "*-*-pe*"] \
@@ -143,8 +172,10 @@ if ![ld_simple_link $ld tmpdir/script "$flags -T $srcdir/$subdir/memory.t tmpdir
 set testname "MEMORY with symbols"
 if ![ld_simple_link $ld tmpdir/script "$flags -defsym DATA_ORIGIN=0x1000 -defsym DATA_LENGTH=0x10000 -T $srcdir/$subdir/memory_sym.t tmpdir/script.o"] {
     fail $testname
+    untested "extract symbols"
 } else {
     check_script
+    extract_symbol_test tmpdir/script "extract symbols"
 }
 
 set test_script_list [lsort [glob $srcdir/$subdir/region-alias-*.t]]

@@ -562,7 +562,7 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
   bfd_size_type size, total_size = bfd_section_size (obfd, osec);
   file_ptr offset = 0;
   struct cleanup *old_chain = NULL;
-  void *memhunk;
+  gdb_byte *memhunk;
 
   /* Read-only sections are marked; we don't have to copy their contents.  */
   if ((bfd_get_section_flags (obfd, osec) & SEC_LOAD) == 0)
@@ -573,7 +573,7 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
     return;
 
   size = min (total_size, MAX_COPY_BYTES);
-  memhunk = xmalloc (size);
+  memhunk = (gdb_byte *) xmalloc (size);
   old_chain = make_cleanup (xfree, memhunk);
 
   while (total_size > 0)

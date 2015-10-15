@@ -159,7 +159,7 @@ can_relocate_b (void)
    */
 
 static void
-can_relocate_bcond (void)
+can_relocate_bcond_true (void)
 {
   int ok = 0;
 
@@ -469,6 +469,48 @@ can_relocate_ldr (void)
   else
     fail ();
 }
+
+/* Make sure we can relocate a B.cond instruction and condition is false.  */
+
+static void
+can_relocate_bcond_false (void)
+{
+  int ok = 0;
+
+  asm ("  mov x0, #8\n"
+       "  tst x0, #8\n" /* Clear the Z flag.  */
+       "set_point10:\n" /* Set tracepoint here.  */
+       "  b.eq 0b\n"    /* Condition is false.  */
+       "  mov %[ok], #1\n"
+       "  b 1f\n"
+       "0:\n"
+       "  mov %[ok], #0\n"
+       "1:\n"
+       : [ok] "=r" (ok)
+       :
+       : "0", "cc");
+
+  if (ok == 1)
+    pass ();
+  else
+    fail ();
+}
+
+static void
+foo (void)
+{
+}
+
+/* Make sure we can relocate a BL instruction.  */
+
+static void
+can_relocate_bl (void)
+{
+  asm ("set_point11:\n"
+       "  bl foo\n"
+       "  bl pass\n"); /* Test that LR is updated correctly.  */
+}
+
 #endif
 
 /* Functions testing relocations need to be placed here.  GDB will read
@@ -482,7 +524,7 @@ static testcase_ftype testcases[] = {
   can_relocate_jump
 #elif (defined __aarch64__)
   can_relocate_b,
-  can_relocate_bcond,
+  can_relocate_bcond_true,
   can_relocate_cbz,
   can_relocate_cbnz,
   can_relocate_tbz,
@@ -490,7 +532,9 @@ static testcase_ftype testcases[] = {
   can_relocate_adr_forward,
   can_relocate_adr_backward,
   can_relocate_adrp,
-  can_relocate_ldr
+  can_relocate_ldr,
+  can_relocate_bcond_false,
+  can_relocate_bl,
 #endif
 };
 

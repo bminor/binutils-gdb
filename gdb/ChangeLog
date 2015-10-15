@@ -1,3 +1,355 @@
+2015-10-15  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint):
+	Call gdbarch_breakpoint_from_pc to instruction length.
+	(aarch64_linux_remove_hw_breakpoint): Likewise.
+	* common/common-regcache.h (regcache_register_size): Declare.
+	* nat/aarch64-linux-hw-point.c: Include "common-regcache.h".
+	(aarch64_point_is_aligned): Set alignment to 2 for breakpoint if
+	the process is 32bit, otherwise set alignment to 4.
+	(aarch64_handle_breakpoint): Update comments.
+	* regcache.c (regcache_register_size): New function.
+
+2015-10-15  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* gdbarch.sh (core_regset_section): Remove.
+	* gdbarch.h: Regenerate.
+
+2015-10-14  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/aarch64-insn.h (struct aarch64_memory_operand): Move enum
+	out of it.
+	(enum aarch64_memory_operand_type): New.
+
+2015-10-13  David Edelsohn  <dje.gcc@gmail.com>
+
+	* xcoffread.c (dwarf2_xcoff_names): Add .dwmac and .dwpbtyp.
+
+2015-10-13  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_enum_name): Constify local.
+	* ada-typeprint.c (print_range_bound): Constify locals.
+	* c-varobj.c (c_describe_child): Likewise.
+	* cli/cli-setshow.c (do_set_command): Likewise.
+	* gdb_vecs.c (delim_string_to_char_ptr_vec_append): Likewise.
+	* dwarf2read.c (find_file_and_directory): Likewise.
+	(anonymous_struct_prefix, dwarf2_name): Likewise.
+	* gnu-v3-abi.c (gnuv3_rtti_type): Likewise.
+	* go-lang.c (unpack_mangled_go_symbol): Likewise.
+	* jv-typeprint.c (java_type_print_base): Likewise.
+	* ser-tcp.c (net_open): Likewise.
+	* symfile.c (deduce_language_from_filename): Likewise.
+	* symtab.c (gdb_mangle_name): Likewise.
+	* tui/tui-io.c (tui_redisplay_readline): Likewise.
+
+2015-10-13  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (restore_execution_direction): New function.
+	(fetch_inferior_event): Use it instead of
+	make_cleanup_restore_integer.
+	(execution_direction): Change type to enum
+	exec_direction_kind.
+	* infrun.h (execution_direction): Likewise.
+
+2015-10-13  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Constify
+	locals.  Use value_contents_writeable.  Remove casts.
+
+2015-10-13  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Add casts to malloc
+	and alloca calls.
+
+2015-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lm32-tdep.c (lm32_push_dummy_call): Replace call to
+	write_memory with write_memory_unsigned_integer.
+
+2015-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* solib-dsbt.c (cmp_name): Constify arguments.
+	* solib-frv.c (cmp_name): Likewise.
+	* solib-svr4.c (svr4_create_solib_event_breakpoints): Likewise.
+	* solib.c (gdb_bfd_lookup_symbol_from_symtab): Likewise.
+	(bfd_lookup_symbol_from_dyn_symtab): Likewise.
+	(gdb_bfd_lookup_symbol): Likewise.
+	* solib.h (gdb_bfd_lookup_symbol): Likewise.
+	(gdb_bfd_lookup_symbol_from_symtab): Likewise.
+
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* stack.c (parse_frame_specification): Remove message parameter,
+	replace with fixed string in function body, update function
+	comment.
+	(frame_info): Remove message to parse_frame_specification.
+	(select_frame_command): Likewise.
+
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* stack.c (parse_frame_specification): Delete.
+	(parse_frame_specification_1): Rename to
+	parse_frame_specification.
+	(frame_info): Use parse_frame_specification.
+	(select_frame_command): Likewise.
+	(return_command): Use select_frame and print_stack_frame rather
+	than frame_command and select_frame_command.
+	(func_command): Use get_current_frame rather than
+	parse_frame_specification.
+
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* stack.c (func_command): Return early when there is no ARG
+	string.
+
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* stack.c: Include safe-ctype.h not ctype.h.
+	(parse_frame_specification): Use ISSPACE not isspace.
+	(backtrace_command): Use TOLOWER not tolower.
+
+2015-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* mep-tdep.c (current_me_module): Add cast.
+	(mep_gdbarch_init): Likewise.
+
+2015-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* m32c-tdep.c (m32c_move_reg_t): Replace with...
+	(m32c_write_reg_t): ...this and...
+	(m32c_read_reg_t): ...this.
+	(struct m32c_reg): Update types of read and write.
+	(m32c_raw_read): Change declaration type to m32c_read_reg_t and
+	adjust definition.
+	(m32c_banked_read): Likewise.
+	(m32c_sb_read): Likewise.
+	(m32c_part_read): Likewise.
+	(m32c_cat_read): Likewise.
+	(m32c_r3r2r1r0_read): Likewise.
+	(m32c_raw_write): Change declaration type to m32c_write_reg_t
+	and adjust definition.
+	(m32c_banked_write): Likewise.
+	(m32c_sb_write): Likewise.
+	(m32c_part_write): Likewise.
+	(m32c_cat_write): Likewise.
+	(m32c_r3r2r1r0_write): Likewise.
+
+2015-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* aarch64-linux-tdep.c (aarch64_linux_syscall_record): Add cast.
+
+2015-10-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* aarch64-linux-tdep.c (aarch64_canonicalize_syscall): Return
+	gdb_sys_no_syscall instead of -1.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* NEWS: Mention the change.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/aarch64-insn.c (emit_load_store): Rename to ...
+	(aarch64_emit_load_store): ... it.  All callers updated.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/aarch64-insn.c (emit_insn): Rename to ...
+	(aarch64_emit_insn): ... it.  All callers updated.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-tdep.c: Include arch-utils.h.
+	(aarch64_linux_init_abi): Call set_gdbarch_max_insn_length,
+	set_gdbarch_displaced_step_copy_insn,
+	set_gdbarch_displaced_step_fixup,
+	set_gdbarch_displaced_step_free_closure,
+	set_gdbarch_displaced_step_location,
+	and set_gdbarch_displaced_step_hw_singlestep.
+	* aarch64-tdep.c (struct displaced_step_closure): New.
+	(struct aarch64_displaced_step_data): New.
+	(aarch64_displaced_step_b): New function.
+	(aarch64_displaced_step_b_cond): Likewise.
+	(aarch64_register): Likewise.
+	(aarch64_displaced_step_cb): Likewise.
+	(aarch64_displaced_step_tb): Likewise.
+	(aarch64_displaced_step_adr): Likewise.
+	(aarch64_displaced_step_ldr_literal): Likewise.
+	(aarch64_displaced_step_others): Likewise.
+	(aarch64_displaced_step_copy_insn): Likewise.
+	(aarch64_displaced_step_fixup): Likewise.
+	(aarch64_displaced_step_hw_singlestep): Likewise.
+	* aarch64-tdep.h (DISPLACED_MODIFIED_INSNS): New macro.
+	(aarch64_displaced_step_copy_insn): Declare.
+	(aarch64_displaced_step_fixup): Declare.
+	(aarch64_displaced_step_hw_singlestep): Declare.
+	* arch/aarch64-insn.c (emit_insn): Moved from
+	gdbserver/linux-aarch64-low.c.
+	(emit_load_store): Likewise.
+	* arch/aarch64-insn.h (enum aarch64_opcodes): Moved from
+	gdbserver/linux-aarch64-low.c.
+	(struct aarch64_register): Likewise.
+	(struct aarch64_memory_operand): Likewise.
+	(ENCODE): Likewise.
+	(can_encode_int32): New macro.
+	(emit_b, emit_bcond, emit_cb, emit_ldr, emit_ldrsw): Likewise.
+	(emit_tb, emit_nop): Likewise.
+	(emit_insn): Declare.
+	(emit_load_store): Declare.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/aarch64-insn.c (aarch64_decode_ldr_literal): Moved from
+	gdbserver/linux-aarch64-low.c.
+	(aarch64_relocate_instruction): Likewise.
+	* arch/aarch64-insn.h (aarch64_decode_ldr_literal): Declare.
+	(struct aarch64_insn_data): Moved from
+	gdbserver/linux-aarch64-low.c.
+	(struct aarch64_insn_visitor): Likewise.
+	(aarch64_relocate_instruction): Declare.
+
+2015-10-12  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* eval.c (evaluate_subexp_standard) <STRUCTOP_STRUCT>: If
+	EVAL_AVOID_SIDE_EFFECTS mode, forward the VALUE_LVAL attribute
+	to the returned value.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_unpack_from_contents): Add guard that unpacked
+	is large enough for BIT_SIZE.  Update function comment.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Move
+	src_len variable to local block where used.  Override
+	BIT_SIZE if bigger than size of resolved type.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.h (is_scalar_type): Add extern declaration.
+	* gdbtypes.c (is_scalar_type): Make non-static.
+	* ada-lang.c (ada_value_primitive_packed_val): Use is_scalar_type
+	to compute IS_SCALAR instead of doing it ourselves.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Rework handling
+	of case where TYPE is dynamic.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_unpack_from_contents): New function,
+	extracted from ada_value_primitive_packed_val.
+	(ada_value_primitive_packed_val): Replace extracted out code
+	by call to ada_unpack_from_contents.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Reorder local
+	variable declarations.
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Change the type
+	of local variables src and unpacked to "gdb_type *" instead of
+	"unsigned char *".
+
+2015-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_packed_val): Make the name
+	of various local variables more explicit and consistent.
+	No real code change otherwise.
+
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* i386-tdep.h (struct gdbarch_tdep): Change type of
+	register_reggroup_p to gdbarch_register_reggroup_p_ftype.
+
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* cris-tdep.c (struct instruction_environment): Change type of
+	byte_order to enum bfd_endian.
+
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arm-linux-tdep.c (arm_canonicalize_syscall): Add
+	enum gdb_syscall casts.
+
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aarch64-tdep.c (stack_item_t): Change type of data to gdb_byte*.
+	* arm-tdep.c (struct stack_item): Likewise.
+	(push_stack_item): Add gdb_byte* cast.
+	* avr-tdep.c (struct stack_item): Change type of data to gdb_byte*.
+	(push_stack_item): Add gdb_byte* cast.
+	* cli/cli-dump.c (dump_memory_to_file): Change type of buf to gdb_byte*
+	and add cast.
+	* cris-tdep.c (struct stack_item): Change type of data to gdb_byte*.
+	(push_stack_item): Add gdb_byte* cast.
+	* gcore.c (gcore_copy_callback): Change type of memhunk to gdb_byte* and
+	add cast.
+	* gdbtypes.h (print_scalar_formatted): Change type of first parameter to
+	gdb_byte*.
+	* h8300-tdep.c (h8300_extract_return_value): Change type of valbuf to
+	gdb_byte* and remove unnecessary cast.
+	(h8300h_extract_return_value): Likewise.
+	(h8300_store_return_value): Change type of valbuf to gdb_byte*.
+	(h8300h_store_return_value): Likewise.
+	* iq2000-tdep.c (iq2000_extract_return_value): Change type of valbuf to
+	gdb_byte* and remove unnecessary cast.
+	* jit.c (jit_reader_try_read_symtab): Change type of gdb_mem to gdb_byte*
+	and add cast.
+	* m32r-tdep.c (m32r_store_return_value): Change type of valbuf to
+	gdb_byte* and remove unnecessary cast.
+	(m32r_extract_return_value): Change type of dst to gdb_byte* and remove
+	valbuf.
+	* mep-tdep.c (mep_pseudo_cr32_read): Change type of buf to gdb_byte*.
+	(mep_pseudo_cr64_read): Likewise.
+	(mep_pseudo_csr_write): Likewise.
+	(mep_pseudo_cr32_write): Likewise.
+	(mep_pseudo_cr64_write): Likewise.
+	* mi/mi-main.c (mi_cmd_data_write_memory): Change type of buffer to
+	gdb_byte* and add cast.
+	* moxie-tdep.c (moxie_store_return_value): Change type of valbuf to
+	gdb_byte* and remove unnecessary cast.
+	(moxie_extract_return_value): Change type of dst to gdb_byte* and remove
+	valbuf.
+	* p-valprint.c (print_scalar_formatted): Change type of valaddr to
+	gdb_byte*.
+	* printcmd.c (void): Likewise.
+	* python/py-inferior.c (infpy_read_memory): Change type of buffer to
+	gdb_byte* and add cast.
+	(infpy_write_memory): Likewise.
+	(infpy_search_memory): Likewise.
+	* regcache.c (regcache_raw_write_signed): Change type of buf to gdb_byte*
+	and add cast.
+	(regcache_raw_write_unsigned): Likewise.
+	(regcache_cooked_write_signed): Likewise.
+	(regcache_cooked_write_unsigned): Likewise.
+	* sh64-tdep.c (h64_extract_return_value): Change type of valbuf to
+	gdb_byte*.
+
+2015-10-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* fbsd-tdep.c (fbsd_collect_regset_section_cb): Add cast.
+	* linux-tdep.c (linux_collect_regset_section_cb_data): Likewise.
+
+2015-10-09  Eli Zaretskii  <eliz@gnu.org>
+
+	* stack.c (print_stack_frame):
+	* utils.c (printchar): Fix typos in commentary.
+
+2015-10-08  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y: (UnaryExpression): Support `type.sizeof' expressions.
+	(PostfixExpression): Support `expr.sizeof' expressions.
+	(PrimaryExpression): Support `typeof(expr)' expressions.
+
+2015-10-08  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* MAINTAINERS: Update my email address.
+
 2015-10-08  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record-btrace.c (record_btrace_resume): Fix void return.
@@ -83,7 +435,7 @@
 
 	* common/filestuff.c (make_cleanup_close): Update comment.
 
-2015-09-26  Simon Marchi  <simark@nova.polymtl.ca>
+2015-09-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* btrace.c (parse_xml_btrace_block): Fix cast of
 	xml_find_attribute's return value.

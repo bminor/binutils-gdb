@@ -608,10 +608,12 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
 {
   int ret;
   CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
-  const int len = 4;
+  int len;
   const enum target_hw_bp_type type = hw_execute;
   struct aarch64_debug_reg_state *state
     = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+  gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
 
   if (show_debug_regs)
     fprintf_unfiltered
@@ -640,10 +642,12 @@ aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
 {
   int ret;
   CORE_ADDR addr = bp_tgt->placed_address;
-  const int len = 4;
+  int len = 4;
   const enum target_hw_bp_type type = hw_execute;
   struct aarch64_debug_reg_state *state
     = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+  gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
 
   if (show_debug_regs)
     fprintf_unfiltered

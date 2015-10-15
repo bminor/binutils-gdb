@@ -6951,23 +6951,6 @@ it had a separate frame, which is numbered zero as usual, allowing
 correct tracing of the function call chain.  However, @value{GDBN} has
 no provision for frameless functions elsewhere in the stack.
 
-@table @code
-@kindex frame@r{, command}
-@cindex current stack frame
-@item frame @r{[}@var{framespec}@r{]}
-The @code{frame} command allows you to move from one stack frame to another,
-and to print the stack frame you select.  The @var{framespec} may be either the
-address of the frame or the stack frame number.  Without an argument,
-@code{frame} prints the current stack frame.
-
-@kindex select-frame
-@cindex selecting frame silently
-@item select-frame
-The @code{select-frame} command allows you to move from one stack frame
-to another without printing the frame.  This is the silent version of
-@code{frame}.
-@end table
-
 @node Backtrace
 @section Backtraces
 
@@ -7167,6 +7150,156 @@ Display an absolute filename.
 Show the current way to display filenames.
 @end table
 
+@node Selection
+@section Selecting a Frame
+
+Most commands for examining the stack and other data in your program work on
+whichever stack frame is selected at the moment.  Here are the commands for
+selecting a stack frame; all of them finish by printing a brief description
+of the stack frame just selected.
+
+@table @code
+@kindex frame@r{, selecting}
+@kindex f @r{(@code{frame})}
+@item frame @var{n}
+@itemx f @var{n}
+Select frame number @var{n}.  Recall that frame zero is the innermost
+(currently executing) frame, frame one is the frame that called the
+innermost one, and so on.  The highest-numbered frame is the one for
+@code{main}.
+
+@item frame @var{stack-addr} [ @var{pc-addr} ]
+@itemx f @var{stack-addr} [ @var{pc-addr} ]
+Select the frame at address @var{stack-addr}.  This is useful mainly if the
+chaining of stack frames has been damaged by a bug, making it
+impossible for @value{GDBN} to assign numbers properly to all frames.  In
+addition, this can be useful when your program has multiple stacks and
+switches between them.  The optional @var{pc-addr} can also be given to
+specify the value of PC for the stack frame.
+
+@kindex up
+@item up @var{n}
+Move @var{n} frames up the stack; @var{n} defaults to 1.  For positive
+numbers @var{n}, this advances toward the outermost frame, to higher
+frame numbers, to frames that have existed longer.
+
+@kindex down
+@kindex do @r{(@code{down})}
+@item down @var{n}
+Move @var{n} frames down the stack; @var{n} defaults to 1.  For
+positive numbers @var{n}, this advances toward the innermost frame, to
+lower frame numbers, to frames that were created more recently.
+You may abbreviate @code{down} as @code{do}.
+@end table
+
+All of these commands end by printing two lines of output describing the
+frame.  The first line shows the frame number, the function name, the
+arguments, and the source file and line number of execution in that
+frame.  The second line shows the text of that source line.
+
+@need 1000
+For example:
+
+@smallexample
+@group
+(@value{GDBP}) up
+#1  0x22f0 in main (argc=1, argv=0xf7fffbf4, env=0xf7fffbfc)
+    at env.c:10
+10              read_input_file (argv[i]);
+@end group
+@end smallexample
+
+After such a printout, the @code{list} command with no arguments
+prints ten lines centered on the point of execution in the frame.
+You can also edit the program at the point of execution with your favorite
+editing program by typing @code{edit}.
+@xref{List, ,Printing Source Lines},
+for details.
+
+@table @code
+@kindex select-frame
+@item select-frame
+The @code{select-frame} command is a variant of @code{frame} that does
+not display the new frame after selecting it.  This command is
+intended primarily for use in @value{GDBN} command scripts, where the
+output might be unnecessary and distracting.
+
+@kindex down-silently
+@kindex up-silently
+@item up-silently @var{n}
+@itemx down-silently @var{n}
+These two commands are variants of @code{up} and @code{down},
+respectively; they differ in that they do their work silently, without
+causing display of the new frame.  They are intended primarily for use
+in @value{GDBN} command scripts, where the output might be unnecessary and
+distracting.
+@end table
+
+@node Frame Info
+@section Information About a Frame
+
+There are several other commands to print information about the selected
+stack frame.
+
+@table @code
+@item frame
+@itemx f
+When used without any argument, this command does not change which
+frame is selected, but prints a brief description of the currently
+selected stack frame.  It can be abbreviated @code{f}.  With an
+argument, this command is used to select a stack frame.
+@xref{Selection, ,Selecting a Frame}.
+
+@kindex info frame
+@kindex info f @r{(@code{info frame})}
+@item info frame
+@itemx info f
+This command prints a verbose description of the selected stack frame,
+including:
+
+@itemize @bullet
+@item
+the address of the frame
+@item
+the address of the next frame down (called by this frame)
+@item
+the address of the next frame up (caller of this frame)
+@item
+the language in which the source code corresponding to this frame is written
+@item
+the address of the frame's arguments
+@item
+the address of the frame's local variables
+@item
+the program counter saved in it (the address of execution in the caller frame)
+@item
+which registers were saved in the frame
+@end itemize
+
+@noindent The verbose description is useful when
+something has gone wrong that has made the stack format fail to fit
+the usual conventions.
+
+@item info frame @var{addr}
+@itemx info f @var{addr}
+Print a verbose description of the frame at address @var{addr}, without
+selecting that frame.  The selected frame remains unchanged by this
+command.  This requires the same kind of address (more than one for some
+architectures) that you specify in the @code{frame} command.
+@xref{Selection, ,Selecting a Frame}.
+
+@kindex info args
+@item info args
+Print the arguments of the selected frame, each on a separate line.
+
+@item info locals
+@kindex info locals
+Print the local variables of the selected frame, each on a separate
+line.  These are all variables (declared either static or automatic)
+accessible at the point of execution of the selected frame.
+
+@end table
+
 @node Frame Filter Management
 @section Management of Frame Filters.
 @cindex managing frame filters
@@ -7309,150 +7442,6 @@ objfile /build/test frame-filters:
   999       No       BuildProgramFilter
 @end smallexample
 @end table
-
-@node Selection
-@section Selecting a Frame
-
-Most commands for examining the stack and other data in your program work on
-whichever stack frame is selected at the moment.  Here are the commands for
-selecting a stack frame; all of them finish by printing a brief description
-of the stack frame just selected.
-
-@table @code
-@kindex frame@r{, selecting}
-@kindex f @r{(@code{frame})}
-@item frame @var{n}
-@itemx f @var{n}
-Select frame number @var{n}.  Recall that frame zero is the innermost
-(currently executing) frame, frame one is the frame that called the
-innermost one, and so on.  The highest-numbered frame is the one for
-@code{main}.
-
-@item frame @var{stack-addr} [ @var{pc-addr} ]
-@itemx f @var{stack-addr} [ @var{pc-addr} ]
-Select the frame at address @var{stack-addr}.  This is useful mainly if the
-chaining of stack frames has been damaged by a bug, making it
-impossible for @value{GDBN} to assign numbers properly to all frames.  In
-addition, this can be useful when your program has multiple stacks and
-switches between them.  The optional @var{pc-addr} can also be given to
-specify the value of PC for the stack frame.
-
-@kindex up
-@item up @var{n}
-Move @var{n} frames up the stack; @var{n} defaults to 1.  For positive
-numbers @var{n}, this advances toward the outermost frame, to higher
-frame numbers, to frames that have existed longer.
-
-@kindex down
-@kindex do @r{(@code{down})}
-@item down @var{n}
-Move @var{n} frames down the stack; @var{n} defaults to 1.  For
-positive numbers @var{n}, this advances toward the innermost frame, to
-lower frame numbers, to frames that were created more recently.
-You may abbreviate @code{down} as @code{do}.
-@end table
-
-All of these commands end by printing two lines of output describing the
-frame.  The first line shows the frame number, the function name, the
-arguments, and the source file and line number of execution in that
-frame.  The second line shows the text of that source line.
-
-@need 1000
-For example:
-
-@smallexample
-@group
-(@value{GDBP}) up
-#1  0x22f0 in main (argc=1, argv=0xf7fffbf4, env=0xf7fffbfc)
-    at env.c:10
-10              read_input_file (argv[i]);
-@end group
-@end smallexample
-
-After such a printout, the @code{list} command with no arguments
-prints ten lines centered on the point of execution in the frame.
-You can also edit the program at the point of execution with your favorite
-editing program by typing @code{edit}.
-@xref{List, ,Printing Source Lines},
-for details.
-
-@table @code
-@kindex down-silently
-@kindex up-silently
-@item up-silently @var{n}
-@itemx down-silently @var{n}
-These two commands are variants of @code{up} and @code{down},
-respectively; they differ in that they do their work silently, without
-causing display of the new frame.  They are intended primarily for use
-in @value{GDBN} command scripts, where the output might be unnecessary and
-distracting.
-@end table
-
-@node Frame Info
-@section Information About a Frame
-
-There are several other commands to print information about the selected
-stack frame.
-
-@table @code
-@item frame
-@itemx f
-When used without any argument, this command does not change which
-frame is selected, but prints a brief description of the currently
-selected stack frame.  It can be abbreviated @code{f}.  With an
-argument, this command is used to select a stack frame.
-@xref{Selection, ,Selecting a Frame}.
-
-@kindex info frame
-@kindex info f @r{(@code{info frame})}
-@item info frame
-@itemx info f
-This command prints a verbose description of the selected stack frame,
-including:
-
-@itemize @bullet
-@item
-the address of the frame
-@item
-the address of the next frame down (called by this frame)
-@item
-the address of the next frame up (caller of this frame)
-@item
-the language in which the source code corresponding to this frame is written
-@item
-the address of the frame's arguments
-@item
-the address of the frame's local variables
-@item
-the program counter saved in it (the address of execution in the caller frame)
-@item
-which registers were saved in the frame
-@end itemize
-
-@noindent The verbose description is useful when
-something has gone wrong that has made the stack format fail to fit
-the usual conventions.
-
-@item info frame @var{addr}
-@itemx info f @var{addr}
-Print a verbose description of the frame at address @var{addr}, without
-selecting that frame.  The selected frame remains unchanged by this
-command.  This requires the same kind of address (more than one for some
-architectures) that you specify in the @code{frame} command.
-@xref{Selection, ,Selecting a Frame}.
-
-@kindex info args
-@item info args
-Print the arguments of the selected frame, each on a separate line.
-
-@item info locals
-@kindex info locals
-Print the local variables of the selected frame, each on a separate
-line.  These are all variables (declared either static or automatic)
-accessible at the point of execution of the selected frame.
-
-@end table
-
 
 @node Source
 @chapter Examining Source Files

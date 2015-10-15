@@ -316,6 +316,14 @@ register_size (const struct target_desc *tdesc, int n)
   return tdesc->reg_defs[n].size / 8;
 }
 
+/* See common/common-regcache.h.  */
+
+int
+regcache_register_size (const struct regcache *regcache, int n)
+{
+  return register_size (regcache->tdesc, n);
+}
+
 static unsigned char *
 register_data (struct regcache *regcache, int n, int fetch)
 {

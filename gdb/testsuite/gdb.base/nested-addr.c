@@ -1,8 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2014-2015 Free Software Foundation, Inc.
-
-   Contributed by Intel Corp. <markus.t.metzger@intel.com>
+   Copyright 2015 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,14 +15,21 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include <sys/time.h>
+#include <stdlib.h>
+
+typedef struct foo
+{
+  int a;
+  int b;
+} foo;
+
+static foo *foo_array = NULL;
 
 int
 main (void)
 {
-  struct timeval tv;
-
-  gettimeofday (&tv, 0);
-
-  return 0;
+  foo_array = calloc (3, sizeof (*foo_array));
+  foo_array[1].a = 10;
+  foo_array[2].b = 20;
+  return 0; /* BREAK */
 }

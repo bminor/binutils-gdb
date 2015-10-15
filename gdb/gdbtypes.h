@@ -1904,13 +1904,15 @@ extern int field_is_static (struct field *);
 
 /* printcmd.c */
 
-extern void print_scalar_formatted (const void *, struct type *,
+extern void print_scalar_formatted (const gdb_byte *, struct type *,
 				    const struct value_print_options *,
 				    int, struct ui_file *);
 
 extern int can_dereference (struct type *);
 
 extern int is_integral_type (struct type *);
+
+extern int is_scalar_type (struct type *type);
 
 extern int is_scalar_type_recursive (struct type *);
 

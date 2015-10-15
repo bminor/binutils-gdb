@@ -1495,7 +1495,7 @@ parse_escape (struct gdbarch *gdbarch, const char **string_ptr)
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that this routine should only
-   be call for printing things which are independent of the language
+   be called for printing things which are independent of the language
    of the program being debugged.
 
    printchar will normally escape backslashes and instances of QUOTER. If

@@ -2382,6 +2382,133 @@ has_negatives (struct type *type)
     }
 }
 
+/* With SRC being a buffer containing BIT_SIZE bits of data at BIT_OFFSET,
+   unpack that data into UNPACKED.  UNPACKED_LEN is the size in bytes of
+   the unpacked buffer.
+
+   The size of the unpacked buffer (UNPACKED_LEN) is expected to be large
+   enough to contain at least BIT_OFFSET bits.  If not, an error is raised.
+
+   IS_BIG_ENDIAN is nonzero if the data is stored in big endian mode,
+   zero otherwise.
+
+   IS_SIGNED_TYPE is nonzero if the data corresponds to a signed type.
+
+   IS_SCALAR is nonzero if the data corresponds to a signed type.  */
+
+static void
+ada_unpack_from_contents (const gdb_byte *src, int bit_offset, int bit_size,
+			  gdb_byte *unpacked, int unpacked_len,
+			  int is_big_endian, int is_signed_type,
+			  int is_scalar)
+{
+  int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
+  int src_idx;                  /* Index into the source area */
+  int src_bytes_left;           /* Number of source bytes left to process.  */
+  int srcBitsLeft;              /* Number of source bits left to move */
+  int unusedLS;                 /* Number of bits in next significant
+                                   byte of source that are unused */
+
+  int unpacked_idx;             /* Index into the unpacked buffer */
+  int unpacked_bytes_left;      /* Number of bytes left to set in unpacked.  */
+
+  unsigned long accum;          /* Staging area for bits being transferred */
+  int accumSize;                /* Number of meaningful bits in accum */
+  unsigned char sign;
+
+  /* Transmit bytes from least to most significant; delta is the direction
+     the indices move.  */
+  int delta = is_big_endian ? -1 : 1;
+
+  /* Make sure that unpacked is large enough to receive the BIT_SIZE
+     bits from SRC.  .*/
+  if ((bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT > unpacked_len)
+    error (_("Cannot unpack %d bits into buffer of %d bytes"),
+	   bit_size, unpacked_len);
+
+  srcBitsLeft = bit_size;
+  src_bytes_left = src_len;
+  unpacked_bytes_left = unpacked_len;
+  sign = 0;
+
+  if (is_big_endian)
+    {
+      src_idx = src_len - 1;
+      if (is_signed_type
+	  && ((src[0] << bit_offset) & (1 << (HOST_CHAR_BIT - 1))))
+        sign = ~0;
+
+      unusedLS =
+        (HOST_CHAR_BIT - (bit_size + bit_offset) % HOST_CHAR_BIT)
+        % HOST_CHAR_BIT;
+
+      if (is_scalar)
+	{
+          accumSize = 0;
+          unpacked_idx = unpacked_len - 1;
+	}
+      else
+	{
+          /* Non-scalar values must be aligned at a byte boundary...  */
+          accumSize =
+            (HOST_CHAR_BIT - bit_size % HOST_CHAR_BIT) % HOST_CHAR_BIT;
+          /* ... And are placed at the beginning (most-significant) bytes
+             of the target.  */
+          unpacked_idx = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
+          unpacked_bytes_left = unpacked_idx + 1;
+	}
+    }
+  else
+    {
+      int sign_bit_offset = (bit_size + bit_offset - 1) % 8;
+
+      src_idx = unpacked_idx = 0;
+      unusedLS = bit_offset;
+      accumSize = 0;
+
+      if (is_signed_type && (src[src_len - 1] & (1 << sign_bit_offset)))
+        sign = ~0;
+    }
+
+  accum = 0;
+  while (src_bytes_left > 0)
+    {
+      /* Mask for removing bits of the next source byte that are not
+         part of the value.  */
+      unsigned int unusedMSMask =
+        (1 << (srcBitsLeft >= HOST_CHAR_BIT ? HOST_CHAR_BIT : srcBitsLeft)) -
+        1;
+      /* Sign-extend bits for this byte.  */
+      unsigned int signMask = sign & ~unusedMSMask;
+
+      accum |=
+        (((src[src_idx] >> unusedLS) & unusedMSMask) | signMask) << accumSize;
+      accumSize += HOST_CHAR_BIT - unusedLS;
+      if (accumSize >= HOST_CHAR_BIT)
+        {
+          unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+          accumSize -= HOST_CHAR_BIT;
+          accum >>= HOST_CHAR_BIT;
+          unpacked_bytes_left -= 1;
+          unpacked_idx += delta;
+        }
+      srcBitsLeft -= HOST_CHAR_BIT - unusedLS;
+      unusedLS = 0;
+      src_bytes_left -= 1;
+      src_idx += delta;
+    }
+  while (unpacked_bytes_left > 0)
+    {
+      accum |= sign << accumSize;
+      unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+      accumSize -= HOST_CHAR_BIT;
+      if (accumSize < 0)
+	accumSize = 0;
+      accum >>= HOST_CHAR_BIT;
+      unpacked_bytes_left -= 1;
+      unpacked_idx += delta;
+    }
+}
 
 /* Create a new value of type TYPE from the contents of OBJ starting
    at byte OFFSET, and bit offset BIT_OFFSET within that byte,
@@ -2398,51 +2525,71 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
                                 struct type *type)
 {
   struct value *v;
-  int src,                      /* Index into the source area */
-    targ,                       /* Index into the target area */
-    srcBitsLeft,                /* Number of source bits left to move */
-    nsrc, ntarg,                /* Number of source and target bytes */
-    unusedLS,                   /* Number of bits in next significant
-                                   byte of source that are unused */
-    accumSize;                  /* Number of meaningful bits in accum */
-  unsigned char *bytes;         /* First byte containing data to unpack */
-  unsigned char *unpacked;
-  unsigned long accum;          /* Staging area for bits being transferred */
-  unsigned char sign;
-  int len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
-  /* Transmit bytes from least to most significant; delta is the direction
-     the indices move.  */
-  int delta = gdbarch_bits_big_endian (get_type_arch (type)) ? -1 : 1;
+  const gdb_byte *src;                /* First byte containing data to unpack */
+  gdb_byte *unpacked;
+  const int is_scalar = is_scalar_type (type);
+  const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
+  gdb_byte *staging = NULL;
+  int staging_len = 0;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   type = ada_check_typedef (type);
 
   if (obj == NULL)
+    src = valaddr + offset;
+  else
+    src = value_contents (obj) + offset;
+
+  if (is_dynamic_type (type))
+    {
+      /* The length of TYPE might by dynamic, so we need to resolve
+	 TYPE in order to know its actual size, which we then use
+	 to create the contents buffer of the value we return.
+	 The difficulty is that the data containing our object is
+	 packed, and therefore maybe not at a byte boundary.  So, what
+	 we do, is unpack the data into a byte-aligned buffer, and then
+	 use that buffer as our object's value for resolving the type.  */
+      staging_len = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+      staging = (gdb_byte *) malloc (staging_len);
+      make_cleanup (xfree, staging);
+
+      ada_unpack_from_contents (src, bit_offset, bit_size,
+			        staging, staging_len,
+				is_big_endian, has_negatives (type),
+				is_scalar);
+      type = resolve_dynamic_type (type, staging, 0);
+      if (TYPE_LENGTH (type) < (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
+	{
+	  /* This happens when the length of the object is dynamic,
+	     and is actually smaller than the space reserved for it.
+	     For instance, in an array of variant records, the bit_size
+	     we're given is the array stride, which is constant and
+	     normally equal to the maximum size of its element.
+	     But, in reality, each element only actually spans a portion
+	     of that stride.  */
+	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
+	}
+    }
+
+  if (obj == NULL)
     {
       v = allocate_value (type);
-      bytes = (unsigned char *) (valaddr + offset);
+      src = valaddr + offset;
     }
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
+      int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
+      gdb_byte *buf;
+
       v = value_at (type, value_address (obj) + offset);
-      type = value_type (v);
-      if (TYPE_LENGTH (type) * HOST_CHAR_BIT < bit_size)
-	{
-	  /* This can happen in the case of an array of dynamic objects,
-	     where the size of each element changes from element to element.
-	     In that case, we're initially given the array stride, but
-	     after resolving the element type, we find that its size is
-	     less than this stride.  In that case, adjust bit_size to
-	     match TYPE's length, and recompute LEN accordingly.  */
-	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
-	  len = TYPE_LENGTH (type) + (bit_offset + HOST_CHAR_BIT - 1) / 8;
-	}
-      bytes = (unsigned char *) alloca (len);
-      read_memory (value_address (v), bytes, len);
+      buf = (gdb_byte *) alloca (src_len);
+      read_memory (value_address (v), buf, src_len);
+      src = buf;
     }
   else
     {
       v = allocate_value (type);
-      bytes = (unsigned char *) value_contents (obj) + offset;
+      src = value_contents (obj) + offset;
     }
 
   if (obj != NULL)
@@ -2465,101 +2612,28 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else
     set_value_bitsize (v, bit_size);
-  unpacked = (unsigned char *) value_contents (v);
+  unpacked = value_contents_writeable (v);
 
-  srcBitsLeft = bit_size;
-  nsrc = len;
-  ntarg = TYPE_LENGTH (type);
-  sign = 0;
   if (bit_size == 0)
     {
       memset (unpacked, 0, TYPE_LENGTH (type));
+      do_cleanups (old_chain);
       return v;
     }
-  else if (gdbarch_bits_big_endian (get_type_arch (type)))
+
+  if (staging != NULL && staging_len == TYPE_LENGTH (type))
     {
-      src = len - 1;
-      if (has_negatives (type)
-          && ((bytes[0] << bit_offset) & (1 << (HOST_CHAR_BIT - 1))))
-        sign = ~0;
-
-      unusedLS =
-        (HOST_CHAR_BIT - (bit_size + bit_offset) % HOST_CHAR_BIT)
-        % HOST_CHAR_BIT;
-
-      switch (TYPE_CODE (type))
-        {
-        case TYPE_CODE_ARRAY:
-        case TYPE_CODE_UNION:
-        case TYPE_CODE_STRUCT:
-          /* Non-scalar values must be aligned at a byte boundary...  */
-          accumSize =
-            (HOST_CHAR_BIT - bit_size % HOST_CHAR_BIT) % HOST_CHAR_BIT;
-          /* ... And are placed at the beginning (most-significant) bytes
-             of the target.  */
-          targ = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
-          ntarg = targ + 1;
-          break;
-        default:
-          accumSize = 0;
-          targ = TYPE_LENGTH (type) - 1;
-          break;
-        }
+      /* Small short-cut: If we've unpacked the data into a buffer
+	 of the same size as TYPE's length, then we can reuse that,
+	 instead of doing the unpacking again.  */
+      memcpy (unpacked, staging, staging_len);
     }
   else
-    {
-      int sign_bit_offset = (bit_size + bit_offset - 1) % 8;
+    ada_unpack_from_contents (src, bit_offset, bit_size,
+			      unpacked, TYPE_LENGTH (type),
+			      is_big_endian, has_negatives (type), is_scalar);
 
-      src = targ = 0;
-      unusedLS = bit_offset;
-      accumSize = 0;
-
-      if (has_negatives (type) && (bytes[len - 1] & (1 << sign_bit_offset)))
-        sign = ~0;
-    }
-
-  accum = 0;
-  while (nsrc > 0)
-    {
-      /* Mask for removing bits of the next source byte that are not
-         part of the value.  */
-      unsigned int unusedMSMask =
-        (1 << (srcBitsLeft >= HOST_CHAR_BIT ? HOST_CHAR_BIT : srcBitsLeft)) -
-        1;
-      /* Sign-extend bits for this byte.  */
-      unsigned int signMask = sign & ~unusedMSMask;
-
-      accum |=
-        (((bytes[src] >> unusedLS) & unusedMSMask) | signMask) << accumSize;
-      accumSize += HOST_CHAR_BIT - unusedLS;
-      if (accumSize >= HOST_CHAR_BIT)
-        {
-          unpacked[targ] = accum & ~(~0L << HOST_CHAR_BIT);
-          accumSize -= HOST_CHAR_BIT;
-          accum >>= HOST_CHAR_BIT;
-          ntarg -= 1;
-          targ += delta;
-        }
-      srcBitsLeft -= HOST_CHAR_BIT - unusedLS;
-      unusedLS = 0;
-      nsrc -= 1;
-      src += delta;
-    }
-  while (ntarg > 0)
-    {
-      accum |= sign << accumSize;
-      unpacked[targ] = accum & ~(~0L << HOST_CHAR_BIT);
-      accumSize -= HOST_CHAR_BIT;
-      if (accumSize < 0)
-	accumSize = 0;
-      accum >>= HOST_CHAR_BIT;
-      ntarg -= 1;
-      targ += delta;
-    }
-
-  if (is_dynamic_type (value_type (v)))
-    v = value_from_contents_and_address (value_type (v), value_contents (v),
-					 0);
+  do_cleanups (old_chain);
   return v;
 }
 
@@ -9356,7 +9430,7 @@ ada_enum_name (const char *name)
 {
   static char *result;
   static size_t result_len = 0;
-  char *tmp;
+  const char *tmp;
 
   /* First, unqualify the enumeration name:
      1. Search for the last '.' character.  If we find one, then skip

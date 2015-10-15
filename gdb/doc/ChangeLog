@@ -1,3 +1,11 @@
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Frames): Remove 'frame' and 'select-frame'
+	description.
+	(Frame Filter Management): Move to later in the 'Examining the
+	Stack' chapter.
+	(Selection): Add entry for 'select-frame'.
+
 2015-09-25  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Process Record and Replay): Fix syntax of

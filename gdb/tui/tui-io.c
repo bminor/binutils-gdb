@@ -203,7 +203,7 @@ tui_redisplay_readline (void)
   int c_line;
   int in;
   WINDOW *w;
-  char *prompt;
+  const char *prompt;
   int start_line;
 
   /* Detect when we temporarily left SingleKey and now the readline

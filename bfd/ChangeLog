@@ -1,3 +1,51 @@
+2015-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Fix typos in comments
+
+2015-10-15  Alan Modra  <amodra@gmail.com>
+
+	* elf32-v850.c (v850_elf_copy_private_bfd_data): Remove assertion
+	that input and output .note.renesas sections are same size.
+	Instead, only copy input to output if they are.
+
+2015-10-15  Riku Voipio  <riku.voipio@iki.fi>
+
+	PR ld/19123
+	* elfcore.h (elf_core_file_p): Use the file_ptr type to hold the
+	offset for bfd_seek.
+	* elfcode.h (elf_object_p): Likewise.
+
+2015-10-14  Rich Felker  <dalias@libc.org>
+
+	PR ld/19091
+	* elf32-sh.c (sh_elf_size_dynamic_sections): Always emit
+	DT_PLTGOT for FDPIC output.
+
+2015-10-13  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Don't set
+	PT_GNU_RELRO p_flags.
+	(assign_file_positions_for_non_load_sections): Set PT_GNU_RELRO
+	flags to PF_R here.
+
+2015-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19073
+	* elflink.c (_bfd_elf_add_default_symbol): Skip the unversioned
+	definition after the default version.
+
+2015-10-12  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	PR ld/19083
+	* elf32-s390.c (elf_s390_gc_sweep_hook): Do not reduce got
+	refcount for relocs not really requiring a got slot.
+	* elf64-s390.c (elf_s390_gc_sweep_hook): Likewise.
+
+2015-10-11  John David Anglin  <danglin@gcc.gnu.org>
+
+	* elf-hppa.h (elf_hppa_action_discarded): Ignore relocations in
+	.data.rel.ro.local.
+
 2015-10-07  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* archures.c: Remove support for older ARC. Added support for new

@@ -1,3 +1,48 @@
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/dbx.exp (test_func): Remove xfails, update expected
+	results.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/disp-step-insn-reloc.exp: New test case.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/gdb.exp (support_displaced_stepping): Return 1 if target
+	is aarch64*-*-linux*.
+
+2015-10-12  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/insn-reloc.c (can_relocate_bcond): Rename to ...
+	(can_relocate_bcond_true): ... it.
+	(can_relocate_bcond_false): New function.
+	(foo): Likewise.
+	(can_relocate_bl): Likewise.
+	(testcases) [__aarch64__]: Add can_relocate_bcond_false and
+	can_relocate_bl.
+
+2015-10-12  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.base/nested-addr.c: New file.
+	* gdb.base/nested-addr.exp: New testcase.
+
+2015-10-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/vdso.c (main): Remove breakpoint markers.
+	* gdb.btrace/vdso.exp: Change stepping command to "next" and ignore
+	its output.  Ignore the output of "record goto begin" and instead
+	check that GDB is replaying.
+
+2015-10-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/a2-run.exp (maybe_exp_continue): New procedure.
+	(top level): Use it in the run with no args test.
+
+2015-10-08  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/properties.exp: New file.
+
 2015-10-02  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.dwarf2/staticvirtual.exp: Generalize regexp so it can match

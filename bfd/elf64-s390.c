@@ -1462,6 +1462,12 @@ elf_s390_gc_sweep_hook (bfd *abfd,
 	  if (htab->tls_ldm_got.refcount > 0)
 	    htab->tls_ldm_got.refcount -= 1;
 	  break;
+	case R_390_GOTOFF16:
+	case R_390_GOTOFF32:
+	case R_390_GOTOFF64:
+	case R_390_GOTPC:
+	case R_390_GOTPCDBL:
+	  break;
 
 	case R_390_TLS_GD64:
 	case R_390_TLS_IE64:
@@ -1474,11 +1480,6 @@ elf_s390_gc_sweep_hook (bfd *abfd,
 	case R_390_GOT20:
 	case R_390_GOT32:
 	case R_390_GOT64:
-	case R_390_GOTOFF16:
-	case R_390_GOTOFF32:
-	case R_390_GOTOFF64:
-	case R_390_GOTPC:
-	case R_390_GOTPCDBL:
 	case R_390_GOTENT:
 	  if (h != NULL)
 	    {

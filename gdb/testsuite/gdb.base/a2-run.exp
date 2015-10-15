@@ -39,57 +39,73 @@ set saw_spurious_output 0
 
 set test "run \"$testfile\" with no args"
 
+# Indirect spawn id lists.  Used to be able to disable the inferior
+# and gdb's spawn_ids and regexes as soon as we see the expected
+# output.
 set inferior_spawn_list "$inferior_spawn_id"
 set gdb_spawn_list "$gdb_spawn_id"
 
+# Clear either the gdb or the inferior spawn_id list and iff
+# afterwards we still have any spawn id in the indirect lists,
+# continue expecting.
+proc maybe_exp_continue {which} {
+    global inferior_spawn_list gdb_spawn_list
+
+    if {$which == "gdb"} {
+	set gdb_spawn_list ""
+    } elseif {$which == "inferior"} {
+	set inferior_spawn_list ""
+    } else {
+	error "invalid parameter"
+    }
+
+    if {$inferior_spawn_list != "" || $gdb_spawn_list != ""} {
+	exp_continue
+    }
+}
+
+# Note that if $inferior_spawn_id != $gdb_spawn_id the order we pick
+# output from each spawn id is undefined.
 set res [gdb_test_multiple "" $test {
     -i inferior_spawn_list
     -re "usage:  factorial <number>" {
 	set saw_usage 1
-	exp_continue
+	maybe_exp_continue inferior
     }
     -re "EXIT code 1" {
 	set saw_exit_wrapper 1
-	set inferior_spawn_list ""
-	exp_continue
+	maybe_exp_continue inferior
     }
     eof {
 	if {$inferior_spawn_id != $gdb_spawn_id} {
 	    # In this case we may see the server/inferior exit before
 	    # GDB's program exit output.  Remove from spawn list and
 	    # continue waiting.
-	    set inferior_spawn_list ""
-	    exp_continue
+	    maybe_exp_continue inferior
+	} else {
+	    # GDB crash.
+	    fail "$test (eof)"
 	}
-	# GDB crash.
-	fail "$test (eof)"
     }
 
     -i gdb_spawn_list
 
     -re "$inferior_exited_re with code 01.\r\n$gdb_prompt $" {
+	maybe_exp_continue gdb
     }
     -re "$inferior_exited_re with code 01.*$gdb_prompt $" {
 	set saw_spurious_output 1
+	maybe_exp_continue gdb
     }
 
     -re "$inferior_exited_re normally.\r\n$gdb_prompt $" {
 	# This is only considered a pass if we see the exit wrapper
-	# status.  Since if $inferior_spawn_id != $gdb_spawn_id the
-	# order we pick output from each spawn id isn't defined,
-	# remove gdb_spawn_id from the match lists and go back to
-	# waiting.  If we had already seen the status wrapper exit,
-	# gdb_test_multiple/expect has no spawn ids left, and thus
-	# returns.
-	set gdb_spawn_list ""
-	exp_continue
+	# status.
+	maybe_exp_continue gdb
     }
     -re "$inferior_exited_re normally.*$gdb_prompt $" {
 	set saw_spurious_output 1
-
-	# See above.
-	set gdb_spawn_list ""
-	exp_continue
+	maybe_exp_continue gdb
     }
 }]
 

@@ -777,7 +777,7 @@ enable_break_failure_warning (void)
 /* Helper function for gdb_bfd_lookup_symbol.  */
 
 static int
-cmp_name (asymbol *sym, void *data)
+cmp_name (const asymbol *sym, const void *data)
 {
   return (strcmp (sym->name, (const char *) data) == 0);
 }

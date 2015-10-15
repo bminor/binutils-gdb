@@ -1533,8 +1533,9 @@ solib_global_lookup (struct objfile *objfile,
 
 CORE_ADDR
 gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
-				   int (*match_sym) (asymbol *, void *),
-				   void *data)
+				   int (*match_sym) (const asymbol *,
+						     const void *),
+				   const void *data)
 {
   long storage_needed = bfd_get_symtab_upper_bound (abfd);
   CORE_ADDR symaddr = 0;
@@ -1592,8 +1593,9 @@ gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 
 static CORE_ADDR
 bfd_lookup_symbol_from_dyn_symtab (bfd *abfd,
-				   int (*match_sym) (asymbol *, void *),
-				   void *data)
+				   int (*match_sym) (const asymbol *,
+						     const void *),
+				   const void *data)
 {
   long storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
   CORE_ADDR symaddr = 0;
@@ -1630,8 +1632,8 @@ bfd_lookup_symbol_from_dyn_symtab (bfd *abfd,
 
 CORE_ADDR
 gdb_bfd_lookup_symbol (bfd *abfd,
-		       int (*match_sym) (asymbol *, void *),
-		       void *data)
+		       int (*match_sym) (const asymbol *, const void *),
+		       const void *data)
 {
   CORE_ADDR symaddr = gdb_bfd_lookup_symbol_from_symtab (abfd, match_sym, data);
 

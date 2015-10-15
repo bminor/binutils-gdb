@@ -1010,9 +1010,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	*matched = TRUE;
       else
 	{
-	  /* OLD_HIDDEN is true if the existing symbol is only visibile
+	  /* OLD_HIDDEN is true if the existing symbol is only visible
 	     to the symbol with the same symbol version.  NEW_HIDDEN is
-	     true if the new symbol is only visibile to the symbol with
+	     true if the new symbol is only visible to the symbol with
 	     the same symbol version.  */
 	  bfd_boolean old_hidden = h->versioned == versioned_hidden;
 	  bfd_boolean new_hidden = hi->versioned == versioned_hidden;
@@ -1714,6 +1714,13 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	  else
 	    h->versioned = versioned;
 	}
+    }
+  else
+    {
+      /* PR ld/19073: We may see an unversioned definition after the
+	 default version.  */
+      if (p == NULL)
+	return TRUE;
     }
 
   bed = get_elf_backend_data (abfd);

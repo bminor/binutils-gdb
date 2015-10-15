@@ -223,7 +223,8 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      for (j = 0; j < n_overloads; j++)
 		{
 		  const char *real_physname;
-		  char *physname, *p;
+		  const char *p;
+		  char *physname;
 		  int is_full_physname_constructor;
 
 		  real_physname = TYPE_FN_FIELD_PHYSNAME (f, j);
