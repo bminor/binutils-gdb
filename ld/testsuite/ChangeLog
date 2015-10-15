@@ -1,3 +1,12 @@
+2015-10-15  Alan Modra  <amodra@gmail.com>
+
+	* config/default.exp (size): New global.
+	* ld-elf/extract-symbol-1.s,
+	* ld-elf/extract-symbol-1.ld,
+	* ld-elf/extract-symbol-1sec.d,
+	* ld-elf/extract-symbol-1sym.d: Delete.
+	* ld-scripts/script.exp (extract_symbol_test): New.
+
 2015-10-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19073
