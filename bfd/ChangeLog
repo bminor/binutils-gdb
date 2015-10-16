@@ -1,5 +1,14 @@
 2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
+	* elf32-s390.c (elf_s390_check_relocs): Fallthrough to the PLT
+	slot allocating code for GOTOFF relocs on ifunc symbols.
+	(elf_s390_gc_sweep_hook): Decrement plt refcount for GOTOFF relocs
+	on ifunc symbols.
+	(elf_s390_relocate_section): Redirect a GOTOFF reloc to an iplt
+	slot.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
 	PR ld/18841
 	* elf32-s390.c (elf_s390_reloc_type_class): Return
 	reloc_class_ifunc for ifunc symbols.
