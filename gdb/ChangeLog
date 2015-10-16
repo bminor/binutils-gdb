@@ -1,3 +1,7 @@
+2015-10-16  Yao Qi  <yao.qi@arm.com>
+
+	* MAINTAINERS: Update my email address.
+
 2015-10-15  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint):
