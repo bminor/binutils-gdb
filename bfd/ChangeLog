@@ -1,3 +1,9 @@
+2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_convert_mov_to_lea): Don't check
+	def_regular.
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Likewise.
+
 2015-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Fix typos in comments

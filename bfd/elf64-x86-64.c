@@ -3074,8 +3074,7 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 	  /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation.  We also
 	     avoid optimizing _DYNAMIC since ld.so may use its link-time
 	     address.  */
-	  if (h->def_regular
-	      && h->type != STT_GNU_IFUNC
+	  if (h->type != STT_GNU_IFUNC
 	      && h != htab->elf.hdynamic
 	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
 	    {

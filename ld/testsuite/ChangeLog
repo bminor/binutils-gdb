@@ -1,3 +1,18 @@
+2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/lea1.s: Add a test for loading address of local common
+	symbol.
+	* ld-x86-64/lea1.s: Likewise.
+	* ld-i386/lea1a.d: Updated.
+	* ld-i386/lea1b.d: Likewise.
+	* ld-i386/lea1c.d: Likewise.
+	* ld-x86-64/lea1a.d: Likewise.
+	* ld-x86-64/lea1b.d: Likewise.
+	* ld-x86-64/lea1c.d: Likewise.
+	* ld-x86-64/lea1d.d: Likewise.
+	* ld-x86-64/lea1e.d: Likewise.
+	* ld-x86-64/lea1f.d: Likewise.
+
 2015-10-15  Alan Modra  <amodra@gmail.com>
 
 	* config/default.exp (size): New global.
