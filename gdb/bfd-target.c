@@ -23,10 +23,13 @@
 #include "exec.h"
 #include "gdb_bfd.h"
 
-/* The object that is stored in the target_ops->to_data field has this
-   type.  */
-struct target_bfd_data
+/* A subclass of target_ops that stores some extra data for use by the
+   BFD target.  */
+struct target_bfd_ops
 {
+  /* The base class.  */
+  struct target_ops base;
+
   /* The BFD we're wrapping.  */
   struct bfd *bfd;
 
@@ -48,7 +51,7 @@ target_bfd_xfer_partial (struct target_ops *ops,
     {
     case TARGET_OBJECT_MEMORY:
       {
-	struct target_bfd_data *data = (struct target_bfd_data *) ops->to_data;
+	struct target_bfd_ops *data = (struct target_bfd_ops *) ops;
 	return section_table_xfer_memory_partial (readbuf, writebuf,
 						  offset, len, xfered_len,
 						  data->table.sections,
@@ -63,42 +66,39 @@ target_bfd_xfer_partial (struct target_ops *ops,
 static struct target_section_table *
 target_bfd_get_section_table (struct target_ops *ops)
 {
-  struct target_bfd_data *data = (struct target_bfd_data *) ops->to_data;
+  struct target_bfd_ops *data = (struct target_bfd_ops *) ops;
   return &data->table;
 }
 
 static void
 target_bfd_xclose (struct target_ops *t)
 {
-  struct target_bfd_data *data = (struct target_bfd_data *) t->to_data;
+  struct target_bfd_ops *data = (struct target_bfd_ops *) t;
 
   gdb_bfd_unref (data->bfd);
   xfree (data->table.sections);
   xfree (data);
-  xfree (t);
 }
 
 struct target_ops *
 target_bfd_reopen (struct bfd *abfd)
 {
-  struct target_ops *t;
-  struct target_bfd_data *data;
+  struct target_bfd_ops *t;
 
-  data = XCNEW (struct target_bfd_data);
-  data->bfd = abfd;
+  t = XCNEW (struct target_bfd_ops);
+
+  t->bfd = abfd;
   gdb_bfd_ref (abfd);
-  build_section_table (abfd, &data->table.sections, &data->table.sections_end);
+  build_section_table (abfd, &t->table.sections, &t->table.sections_end);
 
-  t = XCNEW (struct target_ops);
-  t->to_shortname = "bfd";
-  t->to_longname = _("BFD backed target");
-  t->to_doc = _("You should never see this");
-  t->to_get_section_table = target_bfd_get_section_table;
-  t->to_xfer_partial = target_bfd_xfer_partial;
-  t->to_xclose = target_bfd_xclose;
-  t->to_data = data;
-  t->to_magic = OPS_MAGIC;
-  t->to_identity = t;
+  t->base.to_shortname = "bfd";
+  t->base.to_longname = _("BFD backed target");
+  t->base.to_doc = _("You should never see this");
+  t->base.to_get_section_table = target_bfd_get_section_table;
+  t->base.to_xfer_partial = target_bfd_xfer_partial;
+  t->base.to_xclose = target_bfd_xclose;
+  t->base.to_magic = OPS_MAGIC;
+  t->base.to_identity = &t->base;
 
-  return t;
+  return &t->base;
 }
