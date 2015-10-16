@@ -2815,7 +2815,9 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 
       /* STT_GNU_IFUNC must keep R_386_GOT32 relocation.  We also avoid
 	 optimizing _DYNAMIC since ld.so may use its link-time address.  */
-      if (h->type != STT_GNU_IFUNC
+      if ((h->root.type == bfd_link_hash_defined
+	   || h->root.type == bfd_link_hash_defweak)
+	  && h->type != STT_GNU_IFUNC
 	  && h != htab->elf.hdynamic
 	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
 	  && irel->r_offset >= 2
