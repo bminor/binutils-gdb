@@ -4326,6 +4326,16 @@ display_debug_abbrev (struct dwarf_section *section,
   return 1;
 }
 
+/* Return true when ADDR is the maximum address, when addresses are
+   POINTER_SIZE bytes long.  */
+
+static bfd_boolean
+is_max_address (dwarf_vma addr, unsigned int pointer_size)
+{
+  dwarf_vma mask = ~(~(dwarf_vma) 1 << (pointer_size * 8 - 1));
+  return ((addr & mask) == mask);
+}
+
 /* Display a location list from a normal (ie, non-dwo) .debug_loc section.  */
 
 static void
@@ -4380,10 +4390,6 @@ display_loc_list (struct dwarf_section *section,
 
       printf ("    %8.8lx ", off);
 
-      /* Note: we use sign extension here in order to be sure that we can detect
-	 the -1 escape value.  Sign extension into the top 32 bits of a 32-bit
-	 address will not affect the values that we display since we always show
-	 hex values, and always the bottom 32-bits.  */
       SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
       SAFE_BYTE_GET_AND_INC (end, start, pointer_size, section_end);
 
@@ -4404,7 +4410,8 @@ display_loc_list (struct dwarf_section *section,
 	}
 
       /* Check base address specifiers.  */
-      if (begin == (dwarf_vma) -1 && end != (dwarf_vma) -1)
+      if (is_max_address (begin, pointer_size)
+          && !is_max_address (end, pointer_size))
 	{
 	  base_address = end;
 	  print_dwarf_vma (begin, pointer_size);
@@ -5202,11 +5209,6 @@ display_debug_ranges (struct dwarf_section *section,
 	  dwarf_vma begin;
 	  dwarf_vma end;
 
-	  /* Note: we use sign extension here in order to be sure that
-	     we can detect the -1 escape value.  Sign extension into the
-	     top 32 bits of a 32-bit address will not affect the values
-	     that we display since we always show hex values, and always
-	     the bottom 32-bits.  */
 	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, finish);
 	  if (start >= finish)
 	    break;
@@ -5221,7 +5223,8 @@ display_debug_ranges (struct dwarf_section *section,
 	    }
 
 	  /* Check base address specifiers.  */
-	  if (begin == (dwarf_vma) -1 && end != (dwarf_vma) -1)
+          if (is_max_address (begin, pointer_size)
+              && !is_max_address (end, pointer_size))
 	    {
 	      base_address = end;
 	      print_dwarf_vma (begin, pointer_size);

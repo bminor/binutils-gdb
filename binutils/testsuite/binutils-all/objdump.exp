@@ -244,6 +244,35 @@ if { ![is_elf_format]
     }
 }
 
+# Test objdump -W on a file containing debug_ranges information.
+
+if { ![is_elf_format] } then {
+    unsupported "objdump debug_ranges test"
+} elseif { ![binutils_assemble $srcdir/$subdir/dw2-ranges.S tmpdir/dw2-ranges.o] } then {
+    fail "objdump debug_ranges test"
+} else {
+    if [is_remote host] {
+	set ranges_testfile [remote_download host tmpdir/dw2-ranges.o]
+    } else {
+	set ranges_testfile tmpdir/dw2-ranges.o
+    }
+
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS --dwarf=Ranges $ranges_testfile" "" "/dev/null" "objdump.out"]
+
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "objdump -W for debug_ranges (reason: unexpected output)"
+	send_log $got
+	send_log "\n"
+    }
+
+    if { [regexp_diff objdump.out $srcdir/$subdir/dw2-ranges.W] } then {
+	fail "objdump -W for debug_ranges"
+    } else {
+	pass "objdump -W for debug_ranges"
+    }
+}
+
+
 # Options which are not tested: -a -d -D -R -T -x -l --stabs
 # I don't see any generic way to test any of these other than -a.
 # Tests could be written for specific targets, and that should be done

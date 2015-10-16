@@ -1,3 +1,11 @@
+2015-12-10  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2015-11-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* binutils-all/objdump.exp: Add test for .debug_ranges decode.
+	* binutils-all/dw2-ranges.S: New file.
+	* binutils-all/dw2-ranges.W: New file.
+
 2015-10-22  Alan Modra  <amodra@gmail.com>
 
 	* binutils-all/add-symbol.d: Run test on mips.  Support either
