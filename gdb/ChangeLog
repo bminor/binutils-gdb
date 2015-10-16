@@ -1,3 +1,14 @@
+2015-10-16  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (common/filestuff.h): Include.
+	(procfs_can_use_hw_breakpoint): Fix enum name.
+	(procfs_open_1): Fix compiler warning.
+	(procfs_pidlist): Make static.
+	(procfs_meminfo): Make static, fix type name, add missing argument.
+	(procfs_store_registers): Make static.
+	(procfs_thread_info): Remove unused function.
+	(_initialize_procfs): Forward declare.
+
 2015-10-16  Yao Qi  <yao.qi@arm.com>
 
 	* MAINTAINERS: Update my email address.

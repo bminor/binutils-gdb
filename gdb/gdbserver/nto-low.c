@@ -794,7 +794,7 @@ nto_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   int wtype = _DEBUG_BREAK_HW; /* Always request HW.  */
 
-  TRACE ("%s type:%c addr: 0x%08lx len:%d\n", __func__, (int)type, addr, len);
+  TRACE ("%s type:%c addr: 0x%08lx len:%d\n", __func__, (int)type, addr, size);
   switch (type)
     {
     case raw_bkpt_type_sw:
@@ -826,7 +826,7 @@ nto_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   int wtype = _DEBUG_BREAK_HW; /* Always request HW.  */
 
-  TRACE ("%s type:%c addr: 0x%08lx len:%d\n", __func__, (int)type, addr, len);
+  TRACE ("%s type:%c addr: 0x%08lx len:%d\n", __func__, (int)type, addr, size);
   switch (type)
     {
     case raw_bkpt_type_sw:

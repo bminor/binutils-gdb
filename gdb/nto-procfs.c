@@ -40,6 +40,7 @@
 #include "regcache.h"
 #include "solib.h"
 #include "inf-child.h"
+#include "common/filestuff.h"
 
 #define NULL_PID		0
 #define _DEBUG_FLAG_TRACE	(_DEBUG_FLAG_TRACE_EXEC|_DEBUG_FLAG_TRACE_RD|\
@@ -54,7 +55,7 @@ static procfs_run run;
 static ptid_t do_attach (ptid_t ptid);
 
 static int procfs_can_use_hw_breakpoint (struct target_ops *self,
-					 enum target_hw_bp_type, int, int);
+					 enum bptype, int, int);
 
 static int procfs_insert_hw_watchpoint (struct target_ops *self,
 					CORE_ADDR addr, int len,
@@ -123,7 +124,7 @@ procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
      and only override it if there is a valid arg.  */
 
   nto_procfs_node = ND_LOCAL_NODE;
-  nodestr = arg ? xstrdup (arg) : arg;
+  nodestr = arg ? xstrdup (arg) : NULL;
 
   init_thread_list ();
 
@@ -353,7 +354,7 @@ do_closedir_cleanup (void *dir)
   closedir (dir);
 }
 
-void
+static void
 procfs_pidlist (char *args, int from_tty)
 {
   DIR *dp = NULL;
@@ -445,7 +446,7 @@ procfs_pidlist (char *args, int from_tty)
   return;
 }
 
-void
+static void
 procfs_meminfo (char *args, int from_tty)
 {
   procfs_mapinfo *mapinfos = NULL;
@@ -486,7 +487,7 @@ procfs_meminfo (char *args, int from_tty)
       return;
     }
 
-  mapinfos = XNEWVEC (procfs_mapping, num);
+  mapinfos = XNEWVEC (procfs_mapinfo, num);
 
   num_mapinfos = num;
   mapinfo_p = mapinfos;
@@ -873,7 +874,8 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
       return procfs_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
     default:
       return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					    readbuf, writebuf, offset, len);
+					    readbuf, writebuf, offset, len,
+					    xfered_len);
     }
 }
 
@@ -1267,7 +1269,7 @@ get_regset (int regset, char *buf, int bufsize, int *regsize)
   return dev_set;
 }
 
-void
+static void
 procfs_store_registers (struct target_ops *ops,
 			struct regcache *regcache, int regno)
 {
@@ -1347,13 +1349,6 @@ procfs_pass_signals (struct target_ops *self,
       if (target_signo < numsigs && pass_signals[target_signo])
         sigdelset (&run.trace, signo);
     }
-}
-
-static struct tidinfo *
-procfs_thread_info (pid_t pid, short tid)
-{
-/* NYI */
-  return NULL;
 }
 
 static char *
@@ -1467,6 +1462,8 @@ init_procfs_targets (void)
 }
 
 #define OSTYPE_NTO 1
+
+extern initialize_file_ftype _initialize_procfs;
 
 void
 _initialize_procfs (void)
