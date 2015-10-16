@@ -1,3 +1,8 @@
+2015-12-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2read.c (dwarf2_ranges_read): Unify and fix base address
+	reading code.
+
 2015-12-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Perform a pointer

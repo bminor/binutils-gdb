@@ -1,3 +1,13 @@
+2015-12-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-ranges-base.c: New file.
+	* gdb.dwarf2/dw2-ranges-base.exp: New file.
+	* lib/dwarf.exp (namespace eval Dwarf): Add new variables to
+	support additional line table, and debug ranges generation.
+	(Dwarf::ranges): New function, generate .debug_ranges.
+	(Dwarf::lines): Support generating simple line table programs.
+	(Dwarf::assemble): Initialise new namespace variables.
+
 2015-12-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/async.exp (proc test_background): Add case for
