@@ -1,3 +1,8 @@
+2015-10-17  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Correct __glink_PLTresolve
+	eh_frame FDE for ELFv1.
+
 2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_convert_mov_to_lea): Check if symbol
