@@ -1,3 +1,7 @@
+2015-10-18  Doug Evans  <xdje42@gmail.com>
+
+	* targets.c (bfd_flavour_name): "MMO" is spelled "mmo".
+
 2015-10-17  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_size_stubs): Correct __glink_PLTresolve

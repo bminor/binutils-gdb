@@ -1866,7 +1866,7 @@ bfd_flavour_name (enum bfd_flavour flavour)
     case bfd_target_msdos_flavour: return "MSDOS";
     case bfd_target_ovax_flavour: return "Ovax";
     case bfd_target_evax_flavour: return "Evax";
-    case bfd_target_mmo_flavour: return "MMO";
+    case bfd_target_mmo_flavour: return "mmo";
     case bfd_target_mach_o_flavour: return "MACH_O";
     case bfd_target_pef_flavour: return "PEF";
     case bfd_target_pef_xlib_flavour: return "PEF_XLIB";
