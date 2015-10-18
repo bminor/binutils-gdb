@@ -1,3 +1,8 @@
+2015-10-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR binutils/19147
+	* readelf.c (print_core_note): Fix off-by-one bug.
+
 2015-10-15  Alan Modra  <amodra@gmail.com>
 
 	* objcopy.c (copy_object): Don't omit bfd_copy_private_bfd_data

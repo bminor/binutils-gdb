@@ -15151,7 +15151,7 @@ print_core_note (Elf_Internal_Note *pnote)
 	  (int) (4 + 2 * addr_size), _("End"),
 	  (int) (4 + 2 * addr_size), _("Page Offset"));
   filenames = descdata + count * 3 * addr_size;
-  while (--count > 0)
+  while (count-- > 0)
     {
       bfd_vma start, end, file_ofs;
 
