@@ -1,3 +1,11 @@
+2015-10-22  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (stop_after_trap): Delete.
+	(clear_proceed_status, handle_signal_stop, struct
+	infcall_control_state, save_infcall_control_state)
+	(restore_infcall_control_state): Remove references to
+	stop_after_trap.
+
 2015-10-22  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python/python.c (_initialize_python): Add cast.
