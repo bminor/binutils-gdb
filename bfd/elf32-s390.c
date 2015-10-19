@@ -1787,8 +1787,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
   if (s390_is_ifunc_symbol_p (h) && h->def_regular)
-    return s390_elf_allocate_ifunc_dyn_relocs (info, h,
-					       &eh->dyn_relocs);
+    return s390_elf_allocate_ifunc_dyn_relocs (info, h);
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)
     {

@@ -1,3 +1,10 @@
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf-s390-common.c (s390_elf_allocate_ifunc_dyn_relocs): Remove
+	`head' parameter.
+	* elf32-s390.c (allocate_dynrelocs): Don't use last parameter.
+	* elf64-s390.c (allocate_dynrelocs): Don't use last parameter.
+
 2015-10-20  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c (mmo_write_symbols_and_terminator): Correct printed value
