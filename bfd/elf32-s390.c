@@ -1272,7 +1272,7 @@ elf_s390_check_relocs (bfd *abfd,
 	case R_390_PC24DBL:
 	case R_390_PC32DBL:
 	case R_390_PC32:
-	  if (h != NULL)
+	  if (h != NULL && bfd_link_executable (info))
 	    {
 	      /* If this reloc is in a read-only section, we might
 		 need a copy reloc.  We can't check reliably at this
@@ -2776,15 +2776,35 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  unresolved_reloc = FALSE;
 	  break;
 
-	case R_390_8:
-	case R_390_16:
-	case R_390_32:
 	case R_390_PC16:
 	case R_390_PC12DBL:
 	case R_390_PC16DBL:
 	case R_390_PC24DBL:
 	case R_390_PC32DBL:
 	case R_390_PC32:
+	  if (h != NULL
+	      && s390_is_ifunc_symbol_p (h)
+	      && h->def_regular
+	      && !bfd_link_executable (info))
+	    {
+	      /* This will not work our if the function does not
+		 happen to set up the GOT pointer for some other
+		 reason.  31 bit PLT entries require r12 to hold the
+		 GOT pointer.
+		 FIXME: Implement an errorcheck.
+		 NOTE: It will work when brasl is not available
+		 (e.g. with -m31 -march=g5) since a local function
+		 call then does use GOTOFF which implies r12 being set
+		 up.  */
+	      relocation = (htab->elf.iplt->output_section->vma
+			    + htab->elf.iplt->output_offset
+			    + h ->plt.offset);
+	      goto do_relocation;
+	    }
+
+	case R_390_8:
+	case R_390_16:
+	case R_390_32:
 	  if (h != NULL
 	      && s390_is_ifunc_symbol_p (h)
 	      && h->def_regular)

@@ -1205,7 +1205,7 @@ elf_s390_check_relocs (bfd *abfd,
 	case R_390_PC32:
 	case R_390_PC32DBL:
 	case R_390_PC64:
-	  if (h != NULL)
+	  if (h != NULL && bfd_link_executable (info))
 	    {
 	      /* If this reloc is in a read-only section, we might
 		 need a copy reloc.  We can't check reliably at this
@@ -2718,10 +2718,6 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  unresolved_reloc = FALSE;
 	  break;
 
-	case R_390_8:
-	case R_390_16:
-	case R_390_32:
-	case R_390_64:
 	case R_390_PC16:
 	case R_390_PC12DBL:
 	case R_390_PC16DBL:
@@ -2729,6 +2725,24 @@ elf_s390_relocate_section (bfd *output_bfd,
 	case R_390_PC32:
 	case R_390_PC32DBL:
 	case R_390_PC64:
+	  /* The target of these relocs are instruction operands
+	     residing in read-only sections.  We cannot emit a runtime
+	     reloc for it.  */
+	  if (h != NULL
+	      && s390_is_ifunc_symbol_p (h)
+	      && h->def_regular
+	      && bfd_link_pic (info))
+	    {
+	      relocation = (htab->elf.iplt->output_section->vma
+			    + htab->elf.iplt->output_offset
+			    + h->plt.offset);
+	      goto do_relocation;
+	    }
+
+	case R_390_8:
+	case R_390_16:
+	case R_390_32:
+	case R_390_64:
 
 	  if (h != NULL
 	      && s390_is_ifunc_symbol_p (h)

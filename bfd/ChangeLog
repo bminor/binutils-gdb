@@ -1,5 +1,16 @@
 2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
+	* elf32-s390.c (elf_s390_check_relocs): Set the non_got_ref marker
+	only when linking an executable.
+	(elf_s390_relocate_section): Redirect PC-relative relocs to a IPLT
+	slot.
+	* elf64-s390.c (elf_s390_check_relocs): Set the non_got_ref marker
+	only when linking an executable.
+	(elf_s390_relocate_section): Redirect PC-relative relocs to a IPLT
+	slot.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
 	* elf32-s390.c (elf_s390_adjust_dynamic_symbol): Set the PLT
 	reference counters for local IFUNC calls.
 	* elf64-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
