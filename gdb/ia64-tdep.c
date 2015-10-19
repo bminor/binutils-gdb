@@ -2682,7 +2682,7 @@ getunwind_table (gdb_byte **buf_p)
      we should find a way to override the corefile layer's
      xfer_partial method.  */
 
-  x = target_read_alloc (&current_target, TARGET_OBJECT_UNWIND_TABLE,
+  x = target_read_alloc (current_target, TARGET_OBJECT_UNWIND_TABLE,
 			 NULL, buf_p);
 
   return x;

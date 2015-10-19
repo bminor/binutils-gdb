@@ -269,7 +269,7 @@ find_function_addr (struct value *function, struct type **retval_type)
       if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
 	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
 	funaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
-						      &current_target);
+						      current_target);
     }
   if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
       || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
@@ -305,7 +305,7 @@ find_function_addr (struct value *function, struct type **retval_type)
 	      funaddr = value_as_address (value_addr (function));
 	      nfunaddr = funaddr;
 	      funaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
-							    &current_target);
+							    current_target);
 	      if (funaddr != nfunaddr)
 		found_descriptor = 1;
 	    }

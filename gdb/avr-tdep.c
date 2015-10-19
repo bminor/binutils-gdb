@@ -1563,7 +1563,7 @@ avr_io_reg_read_command (char *args, int from_tty)
   int i, j, k, step;
 
   /* Find out how many io registers the target has.  */
-  bufsiz = target_read_alloc (&current_target, TARGET_OBJECT_AVR,
+  bufsiz = target_read_alloc (current_target, TARGET_OBJECT_AVR,
 			      "avr.io_reg", &buf);
   bufstr = (const char *) buf;
 
@@ -1600,7 +1600,7 @@ avr_io_reg_read_command (char *args, int from_tty)
         j = nreg - i;           /* last block is less than 8 registers */
 
       snprintf (query, sizeof (query) - 1, "avr.io_reg:%x,%x", i, j);
-      bufsiz = target_read_alloc (&current_target, TARGET_OBJECT_AVR,
+      bufsiz = target_read_alloc (current_target, TARGET_OBJECT_AVR,
 				  query, &buf);
 
       p = (const char *) buf;

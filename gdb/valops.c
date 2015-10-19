@@ -967,7 +967,7 @@ read_value_memory (struct value *val, int embedded_offset,
       enum target_xfer_status status;
       ULONGEST xfered_partial;
 
-      status = target_xfer_partial (current_target.beneath,
+      status = target_xfer_partial (current_target->beneath,
 				    TARGET_OBJECT_MEMORY, NULL,
 				    buffer + xfered_total * unit_size, NULL,
 				    memaddr + xfered_total,
@@ -1203,7 +1203,7 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_register:
     case lval_computed:
 
-      observer_notify_target_changed (&current_target);
+      observer_notify_target_changed (current_target);
 
       /* Having destroyed the frame cache, restore the selected
 	 frame.  */

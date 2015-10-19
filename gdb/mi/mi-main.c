@@ -267,7 +267,7 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
 static void
 exec_continue (char **argv, int argc)
 {
-  prepare_execution_command (&current_target, mi_async_p ());
+  prepare_execution_command (current_target, mi_async_p ());
 
   if (non_stop)
     {
@@ -1498,8 +1498,8 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   make_cleanup (xfree, mbuf);
 
   /* Dispatch memory reads to the topmost target, not the flattened
-     current_target.  */
-  nr_bytes = target_read (current_target.beneath,
+     current_target->  */
+  nr_bytes = target_read (current_target->beneath,
 			  TARGET_OBJECT_MEMORY, NULL, mbuf,
 			  addr, total_bytes);
   if (nr_bytes <= 0)
@@ -1631,7 +1631,7 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
   addr = parse_and_eval_address (argv[0]) + offset;
   length = atol (argv[1]);
 
-  result = read_memory_robust (current_target.beneath, addr, length);
+  result = read_memory_robust (current_target->beneath, addr, length);
 
   cleanups = make_cleanup (free_memory_read_result_vector, result);
 

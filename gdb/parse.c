@@ -486,7 +486,7 @@ write_exp_msymbol (struct parser_state *ps,
 
   /* The minimal symbol might point to a function descriptor;
      resolve it to the actual code address instead.  */
-  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, addr, &current_target);
+  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, addr, current_target);
   if (pc != addr)
     {
       struct bound_minimal_symbol ifunc_msym = lookup_minimal_symbol_by_pc (pc);

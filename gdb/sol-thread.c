@@ -581,7 +581,7 @@ check_for_thread_db (void)
   ptid_t ptid;
 
   /* Don't attempt to use thread_db for remote targets.  */
-  if (!(target_can_run (&current_target) || core_bfd))
+  if (!(target_can_run (current_target) || core_bfd))
     return;
 
   /* Do nothing if we couldn't load libthread_db.so.1.  */
@@ -1203,7 +1203,7 @@ sol_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
     {
       /* The list of threads is probably not up to date.  Find any
          thread that is missing from the list, and try again.  */
-      sol_update_thread_list (&current_target);
+      sol_update_thread_list (current_target);
       thread_info = iterate_over_threads (thread_db_find_thread_from_tid,
                                           &thread);
     }

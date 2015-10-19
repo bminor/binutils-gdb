@@ -1340,7 +1340,7 @@ handle_solib_event (void)
      be adding them automatically.  Switch terminal for any messages
      produced by breakpoint_re_set.  */
   target_terminal_ours_for_output ();
-  solib_add (NULL, 0, &current_target, auto_solib_add);
+  solib_add (NULL, 0, current_target, auto_solib_add);
   target_terminal_inferior ();
 }
 

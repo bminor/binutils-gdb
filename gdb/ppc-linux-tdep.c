@@ -1194,7 +1194,7 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
   /* Look up cached address of thread-local variable.  */
   if (!ptid_equal (spe_context_cache_ptid, inferior_ptid))
     {
-      struct target_ops *target = &current_target;
+      struct target_ops *target = current_target;
 
       TRY
 	{
@@ -1358,7 +1358,7 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 	return 0;
 
       xsnprintf (annex, sizeof annex, "%d/regs", data.id);
-      if (target_read (&current_target, TARGET_OBJECT_SPU, annex,
+      if (target_read (current_target, TARGET_OBJECT_SPU, annex,
 		       data.gprs, 0, sizeof data.gprs)
 	  == sizeof data.gprs)
 	{

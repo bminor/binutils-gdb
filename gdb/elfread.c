@@ -820,7 +820,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
 	continue;
       addr = extract_typed_address (buf, ptr_type);
       addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
-						 &current_target);
+						 current_target);
       addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
       if (addr_p)
@@ -884,7 +884,7 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
   address_val = call_function_by_hand (function, 0, NULL);
   address = value_as_address (address_val);
   address = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
-						&current_target);
+						current_target);
   address = gdbarch_addr_bits_remove (gdbarch, address);
 
   if (name_at_pc)
@@ -993,7 +993,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   resolved_address = value_as_address (value);
   resolved_pc = gdbarch_convert_from_func_ptr_addr (gdbarch,
 						    resolved_address,
-						    &current_target);
+						    current_target);
   resolved_pc = gdbarch_addr_bits_remove (gdbarch, resolved_pc);
 
   gdb_assert (current_program_space == b->pspace || b->pspace == NULL);

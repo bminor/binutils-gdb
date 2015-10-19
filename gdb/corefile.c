@@ -245,7 +245,7 @@ read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
       enum target_xfer_status status;
       ULONGEST xfered_len;
 
-      status = target_xfer_partial (current_target.beneath,
+      status = target_xfer_partial (current_target->beneath,
 				    TARGET_OBJECT_MEMORY, NULL,
 				    myaddr + xfered, NULL,
 				    memaddr + xfered, len - xfered,

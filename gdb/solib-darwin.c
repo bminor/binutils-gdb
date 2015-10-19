@@ -482,7 +482,7 @@ darwin_solib_read_all_image_info_addr (struct darwin_info *info)
   LONGEST len;
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
-  len = target_read (&current_target, TARGET_OBJECT_DARWIN_DYLD_INFO, NULL,
+  len = target_read (current_target, TARGET_OBJECT_DARWIN_DYLD_INFO, NULL,
                      buf, 0, sizeof (buf));
   if (len != sizeof (buf))
     return;

@@ -480,7 +480,7 @@ enable_thread_event (td_event_e event, CORE_ADDR *bp)
 	    (bfd_get_sign_extend_vma (exec_bfd) > 0
 	     ? (CORE_ADDR) (intptr_t) notify.u.bptaddr
 	     : (CORE_ADDR) (uintptr_t) notify.u.bptaddr),
-	    &current_target));
+	    current_target));
   create_thread_event_breakpoint (target_gdbarch (), *bp);
 
   return TD_OK;
@@ -1074,7 +1074,7 @@ thread_db_load (void)
     return 0;
 
   /* Don't attempt to use thread_db for remote targets.  */
-  if (!(target_can_run (&current_target) || core_bfd))
+  if (!(target_can_run (current_target) || core_bfd))
     return 0;
 
   if (thread_db_load_search ())
@@ -1182,7 +1182,7 @@ static void
 check_pid_namespace_match (void)
 {
   /* Check is only relevant for local targets targets.  */
-  if (target_can_run (&current_target))
+  if (target_can_run (current_target))
     {
       /* If the child is in a different PID namespace, its idea of its
 	 PID will differ from our idea of its PID.  When we scan the

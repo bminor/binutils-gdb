@@ -459,11 +459,11 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
   int pt_phdr_p = 0;
 
   /* Get required auxv elements from target.  */
-  if (target_auxv_search (&current_target, AT_PHDR, &at_phdr) <= 0)
+  if (target_auxv_search (current_target, AT_PHDR, &at_phdr) <= 0)
     return 0;
-  if (target_auxv_search (&current_target, AT_PHENT, &at_phent) <= 0)
+  if (target_auxv_search (current_target, AT_PHENT, &at_phent) <= 0)
     return 0;
-  if (target_auxv_search (&current_target, AT_PHNUM, &at_phnum) <= 0)
+  if (target_auxv_search (current_target, AT_PHNUM, &at_phnum) <= 0)
     return 0;
   if (!at_phdr || !at_phnum)
     return 0;
@@ -1291,7 +1291,7 @@ svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list,
   gdb_assert (annex == NULL || target_augmented_libraries_svr4_read ());
 
   /* Fetch the list of shared libraries.  */
-  svr4_library_document = target_read_stralloc (&current_target,
+  svr4_library_document = target_read_stralloc (current_target,
 						TARGET_OBJECT_LIBRARIES_SVR4,
 						annex);
   if (svr4_library_document == NULL)
@@ -1614,7 +1614,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
 
   /* Cause svr4_current_sos() to be run if it hasn't been already.  */
   if (info->main_lm_addr == 0)
-    solib_add (NULL, 0, &current_target, auto_solib_add);
+    solib_add (NULL, 0, current_target, auto_solib_add);
 
   /* svr4_current_sos() will set main_lm_addr for the main executable.  */
   if (objfile == symfile_objfile)
@@ -2274,7 +2274,7 @@ enable_break (struct svr4_info *info, int from_tty)
      mean r_brk has already been relocated.  Assume the dynamic linker
      is the object containing r_brk.  */
 
-  solib_add (NULL, from_tty, &current_target, auto_solib_add);
+  solib_add (NULL, from_tty, current_target, auto_solib_add);
   sym_addr = 0;
   if (info->debug_base && solib_svr4_r_map (info) != 0)
     sym_addr = solib_svr4_r_brk (info);
@@ -2286,7 +2286,7 @@ enable_break (struct svr4_info *info, int from_tty)
       sym_addr = gdbarch_addr_bits_remove
 	(target_gdbarch (), gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							     sym_addr,
-							     &current_target));
+							     current_target));
 
       /* On at least some versions of Solaris there's a dynamic relocation
 	 on _r_debug.r_brk and SYM_ADDR may not be relocated yet, e.g., if
@@ -2403,7 +2403,7 @@ enable_break (struct svr4_info *info, int from_tty)
       /* If we were not able to find the base address of the loader
          from our so_list, then try using the AT_BASE auxilliary entry.  */
       if (!load_addr_found)
-        if (target_auxv_search (&current_target, AT_BASE, &load_addr) > 0)
+        if (target_auxv_search (current_target, AT_BASE, &load_addr) > 0)
 	  {
 	    int addr_bit = gdbarch_addr_bit (target_gdbarch ());
 
@@ -2452,7 +2452,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	  info->debug_loader_name = xstrdup (interp_name);
 	  info->debug_loader_offset_p = 1;
 	  info->debug_loader_offset = load_addr;
-	  solib_add (NULL, from_tty, &current_target, auto_solib_add);
+	  solib_add (NULL, from_tty, current_target, auto_solib_add);
 	}
 
       /* Record the relocated start and end address of the dynamic linker
@@ -2527,7 +2527,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	  sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							 sym_addr,
-							 &current_target);
+							 current_target);
 	  svr4_create_solib_event_breakpoints (target_gdbarch (), sym_addr);
 	  return 1;
 	}
@@ -2544,7 +2544,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	      sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 	      sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							     sym_addr,
-							     &current_target);
+							     current_target);
 	      svr4_create_solib_event_breakpoints (target_gdbarch (), sym_addr);
 	      return 1;
 	    }
@@ -2647,7 +2647,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
   if ((bfd_get_file_flags (exec_bfd) & DYNAMIC) == 0)
     return 0;
 
-  if (target_auxv_search (&current_target, AT_ENTRY, &entry_point) <= 0)
+  if (target_auxv_search (current_target, AT_ENTRY, &entry_point) <= 0)
     return 0;
 
   exec_displacement = entry_point - bfd_get_start_address (exec_bfd);

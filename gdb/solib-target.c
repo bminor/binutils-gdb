@@ -260,7 +260,7 @@ solib_target_current_sos (void)
   int ix;
 
   /* Fetch the list of shared libraries.  */
-  library_document = target_read_stralloc (&current_target,
+  library_document = target_read_stralloc (current_target,
 					   TARGET_OBJECT_LIBRARIES,
 					   NULL);
   if (library_document == NULL)

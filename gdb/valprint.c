@@ -1788,7 +1788,7 @@ print_function_pointer_address (const struct value_print_options *options,
 {
   CORE_ADDR func_addr
     = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
-					  &current_target);
+					  current_target);
 
   /* If the function pointer is represented by a description, print
      the address of the description.  */

@@ -946,7 +946,7 @@ init_entry_point_info (struct objfile *objfile)
       entry_point
 	= gdbarch_convert_from_func_ptr_addr (get_objfile_arch (objfile),
 					      entry_point,
-					      &current_target);
+					      current_target);
 
       /* Remove any ISA markers, so that this matches entries in the
 	 symbol table.  */

@@ -303,7 +303,7 @@ solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
   if (data->library_list != NULL)
     return data->library_list;
 
-  library_document = target_read_stralloc (&current_target,
+  library_document = target_read_stralloc (current_target,
                                            TARGET_OBJECT_LIBRARIES_AIX,
                                            NULL);
   if (library_document == NULL && warning_msg != NULL)
