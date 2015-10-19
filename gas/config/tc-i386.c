@@ -33,12 +33,6 @@
 #include "elf/x86-64.h"
 #include "opcodes/i386-init.h"
 
-#ifdef TE_LINUX
-/* Default to compress debug sections for Linux.  */
-enum compressed_debug_section_type flag_compress_debug
-  = COMPRESS_DEBUG_GABI_ZLIB;
-#endif
-
 #ifndef REGISTER_WARNINGS
 #define REGISTER_WARNINGS 1
 #endif

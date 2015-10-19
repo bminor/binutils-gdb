@@ -1,3 +1,19 @@
+2015-10-19  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19109
+	* configure.ac: Add option --enable-compressed-debug-sections.
+	This sets the default behaviour for compressing debug sections.
+	* as.c (flag_compress_debug): Define and initialise to
+	COMPRESS_DEBUG_GABI_ZLIB if DEFAULT_COMPRESS_DEBUG is set.
+	(show_usage): Indicate whether --no-compress-debug-sections
+	or --compress-debug-sections is the default.
+	* config/tc-i386.c (flag_compress_debug): Delete definition.
+	* doc/as.texinfo (--nocompress-debug-sectionas): Update
+	description.
+	* NEWS: Announce the new feature.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2015-10-12  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (msp430_mcu_names): Rename to

@@ -64,6 +64,18 @@ if test x$ac_checking != x ; then
   AC_DEFINE(ENABLE_CHECKING, 1, [Define if you want run-time sanity checks.])
 fi
 
+# PR gas/19109
+# Decide the default method for compressing debug sections.
+ac_default_compressed_debug_sections=unset
+# Provide a configure time option to override our default.
+AC_ARG_ENABLE(compressed_debug_sections,
+[  --enable-compressed-debug-sections  compress debug sections by default],
+[case "${enableval}" in
+  yes) ac_default_compressed_debug_sections=yes ;;
+  no)  ac_default_compressed_debug_sections=no ;;
+  *)   ac_default_compressed_debug_sections=unset ;;
+esac])dnl
+
 using_cgen=no
 
 AM_BINUTILS_WARNINGS
@@ -535,6 +547,10 @@ changequote([,])dnl
     emulations="$emulations $emulation"
 
 done
+
+if test x$ac_default_compressed_debug_sections == xyes ; then
+  AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])
+fi
 
 # Turn on all targets if possible
 if test ${all_targets} = "yes"; then

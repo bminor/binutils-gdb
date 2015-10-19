@@ -36,6 +36,9 @@
 /* Default emulation. */
 #undef DEFAULT_EMULATION
 
+/* Define if you want compressed debug sections by default. */
+#undef DEFAULT_FLAG_COMPRESS_DEBUG
+
 /* Supported emulations. */
 #undef EMULATIONS
 
