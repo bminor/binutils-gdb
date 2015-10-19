@@ -1,3 +1,9 @@
+2015-10-19  Luis Machado  <lgustavo@codesourcery.com>
+
+	* remote.c (remote_wait_as): Set rs->waiting_for_stop_reply to 0
+	when handling 'E', 'T', 'S', 'X' and 'W' packets.
+	Do not set rs->waiting_for_stop_reply back to 1.
+
 2015-10-16  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-procfs.c (common/filestuff.h): Include.

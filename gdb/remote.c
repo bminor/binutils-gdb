@@ -6635,9 +6635,6 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 
   rs->stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
-  /* We got something.  */
-  rs->waiting_for_stop_reply = 0;
-
   /* Assume that the target has acknowledged Ctrl-C unless we receive
      an 'F' or 'O' packet.  */
   if (buf[0] != 'F' && buf[0] != 'O')
@@ -6648,6 +6645,8 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
     case 'E':		/* Error of some sort.	*/
       /* We're out of sync with the target now.  Did it continue or
 	 not?  Not is more likely, so report a stop.  */
+      rs->waiting_for_stop_reply = 0;
+
       warning (_("Remote failure reply: %s"), buf);
       status->kind = TARGET_WAITKIND_STOPPED;
       status->value.sig = GDB_SIGNAL_0;
@@ -6658,7 +6657,12 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
       break;
     case 'T': case 'S': case 'X': case 'W':
       {
-	struct stop_reply *stop_reply
+	struct stop_reply *stop_reply;
+
+	/* There is a stop reply to handle.  */
+	rs->waiting_for_stop_reply = 0;
+
+	stop_reply
 	  = (struct stop_reply *) remote_notif_parse (&notif_client_stop,
 						      rs->buf);
 
@@ -6667,10 +6671,6 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
       }
     case 'O':		/* Console output.  */
       remote_console_output (buf + 1);
-
-      /* The target didn't really stop; keep waiting.  */
-      rs->waiting_for_stop_reply = 1;
-
       break;
     case '\0':
       if (rs->last_sent_signal != GDB_SIGNAL_0)
@@ -6686,17 +6686,11 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 
 	  strcpy ((char *) buf, rs->last_sent_step ? "s" : "c");
 	  putpkt ((char *) buf);
-
-	  /* We just told the target to resume, so a stop reply is in
-	     order.  */
-	  rs->waiting_for_stop_reply = 1;
 	  break;
 	}
       /* else fallthrough */
     default:
       warning (_("Invalid remote reply: %s"), buf);
-      /* Keep waiting.  */
-      rs->waiting_for_stop_reply = 1;
       break;
     }
 
