@@ -1032,9 +1032,9 @@ x86_64_mov_to_lea9: x86_64_mov_to_lea5.o
 	../ld-new -melf32_x86_64  -o $@ $<
 x86_64_mov_to_lea10: x86_64_mov_to_lea6.o
 	../ld-new -melf_x86_64  -o $@ $<
-x86_64_mov_to_lea11: x86_64_mov_to_lea1.o
+x86_64_mov_to_lea11: x86_64_mov_to_lea2.o
 	../ld-new -melf32_x86_64 -shared  -o $@ $<
-x86_64_mov_to_lea12: x86_64_mov_to_lea2.o
+x86_64_mov_to_lea12: x86_64_mov_to_lea1.o
 	../ld-new -melf_x86_64 -shared  -o $@ $<
 x86_64_mov_to_lea13: x86_64_mov_to_lea7.o
 	../ld-new -melf32_x86_64 -shared  -o $@ $<

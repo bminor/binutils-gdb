@@ -1,3 +1,11 @@
+2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/Makefile.am (x86_64_mov_to_lea11): Replace
+	x86_64_mov_to_lea1.o with x86_64_mov_to_lea2.o.
+	(x86_64_mov_to_lea12): Replace x86_64_mov_to_lea2.o with
+	x86_64_mov_to_lea1.o.
+	* testsuite/Makefile.in: Regenerated.
+
 2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/19119
