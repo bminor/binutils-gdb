@@ -1,3 +1,15 @@
+2015-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (nto_procfs_path): Rename to...
+	(nodestr): ... this, and change type.
+	(nto_node): Use new variable and logic accordingly.
+	(procfs_open_1): Use new variable name. Use local buffer to construct
+	procfrs path.
+	(procfs_pidlist): Use NODESTR to construct procfs path.
+	(procfs_files_info): Use NODESTR to output meaningful text.
+	(do_attach): Construct procfs using NODESTR.
+	(procfs_create_inferior): Compare pointer to NULL.
+
 2015-10-19  Josh Stone  <jistone@redhat.com>
 
 	* linux-nat.c (linux_handle_syscall_trap): Always update entry/

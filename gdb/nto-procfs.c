@@ -73,7 +73,7 @@ static int procfs_stopped_by_watchpoint (struct target_ops *ops);
    referenced elsewhere.  'nto_procfs_node' is a flag used to say
    whether we are local, or we should get the current node descriptor
    for the remote QNX node.  */
-static char nto_procfs_path[PATH_MAX] = { "/proc" };
+static char *nodestr;
 static unsigned nto_procfs_node = ND_LOCAL_NODE;
 
 /* Return the current QNX Node, or error out.  This is a simple
@@ -85,10 +85,11 @@ nto_node (void)
 {
   unsigned node;
 
-  if (ND_NODE_CMP (nto_procfs_node, ND_LOCAL_NODE) == 0)
+  if (ND_NODE_CMP (nto_procfs_node, ND_LOCAL_NODE) == 0
+      || nodestr == NULL)
     return ND_LOCAL_NODE;
 
-  node = netmgr_strtond (nto_procfs_path, 0);
+  node = netmgr_strtond (nodestr, 0);
   if (node == -1)
     error (_("Lost the QNX node.  Debug session probably over."));
 
@@ -108,12 +109,12 @@ procfs_is_nto_target (bfd *abfd)
 static void
 procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
 {
-  char *nodestr;
   char *endstr;
   char buffer[50];
   int fd, total_size;
   procfs_sysinfo *sysinfo;
   struct cleanup *cleanups;
+  char nto_procfs_path[PATH_MAX];
 
   /* Offer to kill previous inferiors before opening this target.  */
   target_preopen (from_tty);
@@ -123,8 +124,11 @@ procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
   /* Set the default node used for spawning to this one,
      and only override it if there is a valid arg.  */
 
+  xfree (nodestr);
+  nodestr = NULL;
+
   nto_procfs_node = ND_LOCAL_NODE;
-  nodestr = arg ? xstrdup (arg) : NULL;
+  nodestr = (arg != NULL) ? xstrdup (arg) : NULL;
 
   init_thread_list ();
 
@@ -149,10 +153,8 @@ procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
 	    *endstr = 0;
 	}
     }
-  snprintf (nto_procfs_path, PATH_MAX - 1, "%s%s", nodestr ? nodestr : "",
-	    "/proc");
-  if (nodestr)
-    xfree (nodestr);
+  snprintf (nto_procfs_path, PATH_MAX - 1, "%s%s",
+	    (nodestr != NULL) ? nodestr : "", "/proc");
 
   fd = open (nto_procfs_path, O_RDONLY);
   if (fd == -1)
@@ -174,7 +176,7 @@ procfs_open_1 (struct target_ops *ops, const char *arg, int from_tty)
     {
       total_size = sysinfo->total_size;
       sysinfo = alloca (total_size);
-      if (!sysinfo)
+      if (sysinfo == NULL)
 	{
 	  printf_filtered ("Memory error: %d (%s)\n", errno,
 			   safe_strerror (errno));
@@ -359,7 +361,7 @@ procfs_pidlist (char *args, int from_tty)
 {
   DIR *dp = NULL;
   struct dirent *dirp = NULL;
-  char buf[512];
+  char buf[PATH_MAX];
   procfs_info *pidinfo = NULL;
   procfs_debuginfo *info = NULL;
   procfs_status *status = NULL;
@@ -367,12 +369,16 @@ procfs_pidlist (char *args, int from_tty)
   pid_t pid;
   char name[512];
   struct cleanup *cleanups;
+  char procfs_dir[PATH_MAX];
 
-  dp = opendir (nto_procfs_path);
+  snprintf (procfs_dir, sizeof (procfs_dir), "%s%s",
+	    (nodestr != NULL) ? nodestr : "", "/proc");
+
+  dp = opendir (procfs_dir);
   if (dp == NULL)
     {
       fprintf_unfiltered (gdb_stderr, "failed to opendir \"%s\" - %d (%s)",
-			  nto_procfs_path, errno, safe_strerror (errno));
+			  procfs_dir, errno, safe_strerror (errno));
       return;
     }
 
@@ -395,7 +401,9 @@ procfs_pidlist (char *args, int from_tty)
 	      do_cleanups (cleanups);
 	      return;
 	    }
-	  snprintf (buf, 511, "%s/%s/as", nto_procfs_path, dirp->d_name);
+	  snprintf (buf, sizeof (buf), "%s%s/%s/as",
+		    (nodestr != NULL) ? nodestr : "",
+		    "/proc", dirp->d_name);
 	  pid = atoi (dirp->d_name);
 	}
       while (pid == 0);
@@ -406,8 +414,7 @@ procfs_pidlist (char *args, int from_tty)
 	{
 	  fprintf_unfiltered (gdb_stderr, "failed to open %s - %d (%s)\n",
 			      buf, errno, safe_strerror (errno));
-	  do_cleanups (cleanups);
-	  return;
+	  continue;
 	}
       inner_cleanup = make_cleanup_close (fd);
 
@@ -431,11 +438,16 @@ procfs_pidlist (char *args, int from_tty)
       status = (procfs_status *) buf;
       for (status->tid = 1; status->tid <= num_threads; status->tid++)
 	{
-	  if (devctl (fd, DCMD_PROC_TIDSTATUS, status, sizeof (buf), 0) != EOK
-	      && status->tid != 0)
-	    break;
-	  if (status->tid != 0)
-	    printf_filtered ("%s - %d/%d\n", name, pid, status->tid);
+	  const int err
+	    = devctl (fd, DCMD_PROC_TIDSTATUS, status, sizeof (buf), 0);
+	  printf_filtered ("%s - %d", name, pid);
+	  if (err == EOK && status->tid != 0)
+	    printf_filtered ("/%d\n", status->tid);
+	  else
+	    {
+	      printf_filtered ("\n");
+	      break;
+	    }
 	}
 
       do_cleanups (inner_cleanup);
@@ -599,7 +611,8 @@ procfs_files_info (struct target_ops *ignore)
 
   printf_unfiltered ("\tUsing the running image of %s %s via %s.\n",
 		     inf->attach_flag ? "attached" : "child",
-		     target_pid_to_str (inferior_ptid), nto_procfs_path);
+		     target_pid_to_str (inferior_ptid),
+		     (nodestr != NULL) ? nodestr : "local node");
 }
 
 /* Attach to process PID, then initialize for debugging it.  */
@@ -653,8 +666,8 @@ do_attach (ptid_t ptid)
   struct sigevent event;
   char path[PATH_MAX];
 
-  snprintf (path, PATH_MAX - 1, "%s/%d/as", nto_procfs_path,
-	    ptid_get_pid (ptid));
+  snprintf (path, PATH_MAX - 1, "%s%s/%d/as",
+	    (nodestr != NULL) ? nodestr : "", "/proc", ptid_get_pid (ptid));
   ctl_fd = open (path, O_RDWR);
   if (ctl_fd == -1)
     error (_("Couldn't open proc file %s, error %d (%s)"), path, errno,
@@ -1121,7 +1134,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
     }
 
   args = xstrdup (allargs);
-  breakup_args (args, exec_file ? &argv[1] : &argv[0]);
+  breakup_args (args, (exec_file != NULL) ? &argv[1] : &argv[0]);
 
   argv = nto_parse_redirection (argv, &in, &out, &err);
 
