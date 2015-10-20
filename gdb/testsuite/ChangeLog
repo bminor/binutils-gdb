@@ -1,3 +1,9 @@
+2015-10-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/dw2-regno-invalid.exp: New file.
+	* lib/dwarf.exp (Dwarf): Add DW_OP_bregx.
+
 2015-10-19  Josh Stone  <jistone@redhat.com>
 
 	* gdb.base/catch-syscall.c: Include <sched.h>.
