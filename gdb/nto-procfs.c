@@ -617,6 +617,33 @@ procfs_files_info (struct target_ops *ignore)
 		     (nodestr != NULL) ? nodestr : "local node");
 }
 
+/* Target to_pid_to_exec_file implementation.  */
+
+static char *
+procfs_pid_to_exec_file (struct target_ops *ops, const int pid)
+{
+  int proc_fd;
+  static char proc_path[PATH_MAX];
+  ssize_t rd;
+
+  /* Read exe file name.  */
+  snprintf (proc_path, sizeof (proc_path), "%s/proc/%d/exefile",
+	    (nodestr != NULL) ? nodestr : "", pid);
+  proc_fd = open (proc_path, O_RDONLY);
+  if (proc_fd == -1)
+    return NULL;
+
+  rd = read (proc_fd, proc_path, sizeof (proc_path) - 1);
+  close (proc_fd);
+  if (rd <= 0)
+    {
+      proc_path[0] = '\0';
+      return NULL;
+    }
+  proc_path[rd] = '\0';
+  return proc_path;
+}
+
 /* Attach to process PID, then initialize for debugging it.  */
 static void
 procfs_attach (struct target_ops *ops, const char *args, int from_tty)
@@ -1491,6 +1518,7 @@ init_procfs_targets (void)
   t->to_interrupt = procfs_interrupt;
   t->to_have_continuable_watchpoint = 1;
   t->to_extra_thread_info = nto_extra_thread_info;
+  t->to_pid_to_exec_file = procfs_pid_to_exec_file;
 
   nto_native_ops = t;
 

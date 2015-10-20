@@ -1,5 +1,10 @@
 2015-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* gdb/nto-procfs.c (procfs_pid_to_exec_file): New function.
+	(init_procfs_targets): Wire new function.
+
+2015-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* nto-procfs.c (sys/auxv.h): Include.
 	(procfs_xfer_partial): Implement TARGET_OBJECT_AUXV.
 	* nto-tdep.c (nto_read_auxv_from_initial_stack): New function.
