@@ -1,3 +1,11 @@
+2015-10-19  Josh Stone  <jistone@redhat.com>
+
+	* linux-nat.c (linux_handle_syscall_trap): Always update entry/
+	return state, even when not actively catching syscalls at all.
+	(linux_handle_extended_wait): Mark syscall_state like an entry.
+	(wait_lwp): Set syscall_state ignored for other traps.
+	(linux_nat_filter_event): Likewise.
+
 2015-10-19  Luis Machado  <lgustavo@codesourcery.com>
 
 	* remote.c (remote_wait_as): Set rs->waiting_for_stop_reply to 0
