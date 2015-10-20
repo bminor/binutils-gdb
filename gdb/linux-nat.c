@@ -1916,17 +1916,17 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
       return 1;
     }
 
+  /* Always update the entry/return state, even if this particular
+     syscall isn't interesting to the core now.  In async mode,
+     the user could install a new catchpoint for this syscall
+     between syscall enter/return, and we'll need to know to
+     report a syscall return if that happens.  */
+  lp->syscall_state = (lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY
+		       ? TARGET_WAITKIND_SYSCALL_RETURN
+		       : TARGET_WAITKIND_SYSCALL_ENTRY);
+
   if (catch_syscall_enabled ())
     {
-      /* Always update the entry/return state, even if this particular
-	 syscall isn't interesting to the core now.  In async mode,
-	 the user could install a new catchpoint for this syscall
-	 between syscall enter/return, and we'll need to know to
-	 report a syscall return if that happens.  */
-      lp->syscall_state = (lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY
-			   ? TARGET_WAITKIND_SYSCALL_RETURN
-			   : TARGET_WAITKIND_SYSCALL_ENTRY);
-
       if (catching_syscall_number (syscall_number))
 	{
 	  /* Alright, an event to report.  */
@@ -2005,6 +2005,11 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
   int pid = ptid_get_lwp (lp->ptid);
   struct target_waitstatus *ourstatus = &lp->waitstatus;
   int event = linux_ptrace_get_extended_event (status);
+
+  /* All extended events we currently use are mid-syscall.  Only
+     PTRACE_EVENT_STOP is delivered more like a signal-stop, but
+     you have to be using PTRACE_SEIZE to get that.  */
+  lp->syscall_state = TARGET_WAITKIND_SYSCALL_ENTRY;
 
   if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
       || event == PTRACE_EVENT_CLONE)
@@ -2323,6 +2328,12 @@ wait_lwp (struct lwp_info *lp)
       status = W_STOPCODE (SIGTRAP);
       if (linux_handle_syscall_trap (lp, 1))
 	return wait_lwp (lp);
+    }
+  else
+    {
+      /* Almost all other ptrace-stops are known to be outside of system
+	 calls, with further exceptions in linux_handle_extended_wait.  */
+      lp->syscall_state = TARGET_WAITKIND_IGNORE;
     }
 
   /* Handle GNU/Linux's extended waitstatus for trace events.  */
@@ -3125,6 +3136,12 @@ linux_nat_filter_event (int lwpid, int status)
       status = W_STOPCODE (SIGTRAP);
       if (linux_handle_syscall_trap (lp, 0))
 	return NULL;
+    }
+  else
+    {
+      /* Almost all other ptrace-stops are known to be outside of system
+	 calls, with further exceptions in linux_handle_extended_wait.  */
+      lp->syscall_state = TARGET_WAITKIND_IGNORE;
     }
 
   /* Handle GNU/Linux's extended waitstatus for trace events.  */

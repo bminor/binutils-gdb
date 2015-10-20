@@ -1,3 +1,17 @@
+2015-10-20  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (mmo_write_symbols_and_terminator): Correct printed value
+	of Main in error message.
+
+2015-10-18  Doug Evans  <xdje42@gmail.com>
+
+	* targets.c (bfd_flavour_name): "MMO" is spelled "mmo".
+
+2015-10-17  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs): Correct __glink_PLTresolve
+	eh_frame FDE for ELFv1.
+
 2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_convert_mov_to_lea): Check if symbol

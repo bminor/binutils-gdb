@@ -536,6 +536,15 @@ changequote([,])dnl
 
 done
 
+# For x86 Linux targets, default to compressing debug sections unless
+# configured otherwise.
+case x${enable_compressed_debug_sections}-${target_cpu_type}-${target_os} in
+x*gas*|xall*|x-i386-linux-gnu)
+  AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1,
+	    [Define if you want compressed debug sections by default.])
+  ;;
+esac
+
 # Turn on all targets if possible
 if test ${all_targets} = "yes"; then
   case ${target_cpu_type} in

@@ -1,3 +1,30 @@
+2015-10-19  Josh Stone  <jistone@redhat.com>
+
+	* gdb.base/catch-syscall.c: Include <sched.h>.
+	(unknown_syscall): New variable.
+	(main): Trigger a vfork and an unknown syscall.
+	* gdb.base/catch-syscall.exp (vfork_syscalls): New variable.
+	(unknown_syscall_number): Likewise.
+	(check_call_to_syscall): Accept an optional syscall pattern.
+	(check_return_from_syscall): Likewise.
+	(check_continue): Likewise.
+	(test_catch_syscall_without_args): Check for vfork and ENOSYS.
+	(test_catch_syscall_skipping_return): New test toggling off 'catch
+	syscall' to step over the syscall return, then toggling back on.
+	(test_catch_syscall_mid_vfork): New test turning on 'catch syscall'
+	during a PTRACE_EVENT_VFORK stop, in the middle of a vfork syscall.
+	(do_syscall_tests): Call test_catch_syscall_without_args and
+	test_catch_syscall_mid_vfork.
+	(test_catch_syscall_without_args_noxml): Check for vfork and ENOSYS.
+	(fill_all_syscalls_numbers): Initialize unknown_syscall_number.
+
+2015-10-19  Andrew Stubbs  <ams@codesourcery.com>
+
+	* gdb.cp/inherit.exp (print g_vB, print g_vC, print g_vD,
+	print g_vE): Add new pass patterns.
+	* gdb.cp/virtbase.exp (print *this, print *(D *) e): Allow GDB to
+	print various symbol names for vptr fields.
+
 2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/dbx.exp (test_func): Remove xfails, update expected

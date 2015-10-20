@@ -656,7 +656,9 @@ sections using zlib.  The debug sections are renamed to begin with
 @end ifset
 
 @item --nocompress-debug-sections
-Do not compress DWARF debug sections.  This is the default.
+Do not compress DWARF debug sections.  This is usually the default for all
+targets except the x86/x86_64, but a configure time option can be used to
+override this.
 
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to

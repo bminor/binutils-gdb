@@ -1,3 +1,56 @@
+2015-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* gdb/nto-procfs.c (procfs_pid_to_exec_file): New function.
+	(init_procfs_targets): Wire new function.
+
+2015-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (sys/auxv.h): Include.
+	(procfs_xfer_partial): Implement TARGET_OBJECT_AUXV.
+	* nto-tdep.c (nto_read_auxv_from_initial_stack): New function.
+	* nto-tdep.h (nto_read_auxv_from_initial_stack): New declaration.
+
+2015-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (nto_procfs_path): Rename to...
+	(nodestr): ... this, and change type.
+	(nto_node): Use new variable and logic accordingly.
+	(procfs_open_1): Use new variable name. Use local buffer to construct
+	procfrs path.
+	(procfs_pidlist): Use NODESTR to construct procfs path.
+	(procfs_files_info): Use NODESTR to output meaningful text.
+	(do_attach): Construct procfs using NODESTR.
+	(procfs_create_inferior): Compare pointer to NULL.
+
+2015-10-19  Josh Stone  <jistone@redhat.com>
+
+	* linux-nat.c (linux_handle_syscall_trap): Always update entry/
+	return state, even when not actively catching syscalls at all.
+	(linux_handle_extended_wait): Mark syscall_state like an entry.
+	(wait_lwp): Set syscall_state ignored for other traps.
+	(linux_nat_filter_event): Likewise.
+
+2015-10-19  Luis Machado  <lgustavo@codesourcery.com>
+
+	* remote.c (remote_wait_as): Set rs->waiting_for_stop_reply to 0
+	when handling 'E', 'T', 'S', 'X' and 'W' packets.
+	Do not set rs->waiting_for_stop_reply back to 1.
+
+2015-10-16  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (common/filestuff.h): Include.
+	(procfs_can_use_hw_breakpoint): Fix enum name.
+	(procfs_open_1): Fix compiler warning.
+	(procfs_pidlist): Make static.
+	(procfs_meminfo): Make static, fix type name, add missing argument.
+	(procfs_store_registers): Make static.
+	(procfs_thread_info): Remove unused function.
+	(_initialize_procfs): Forward declare.
+
+2015-10-16  Yao Qi  <yao.qi@arm.com>
+
+	* MAINTAINERS: Update my email address.
+
 2015-10-15  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint):

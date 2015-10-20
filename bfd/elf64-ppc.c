@@ -12583,7 +12583,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  *p++ = DW_CFA_advance_loc + 1;
 	  *p++ = DW_CFA_register;
 	  *p++ = 65;
-	  *p++ = 12;
+	  *p++ = htab->opd_abi ? 12 : 0;
 	  *p++ = DW_CFA_advance_loc + 4;
 	  *p++ = DW_CFA_restore_extended;
 	  *p++ = 65;

@@ -1,3 +1,10 @@
+2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19119
+	* options.h (General_options): Remove "obsolete" from -m.
+	* parameters.cc (set_parameters_target): Check if input target
+	is compatible with output emulation set by "-m emulation".
+
 2015-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/19118

@@ -1,3 +1,15 @@
+2015-10-16  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* gdbserver/nto-low.c (nto_insert_point, nto_remove_point): Fix
+	variable name.
+
+2015-10-16  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* inferiors.c (thread_pid_matches_callback): New function.
+	(find_thread_process): New function.
+	(remove_thread): Reset current_thread.
+	(remove_process): Assert threads have been removed first.
+
 2015-10-15  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_insert_point): Set len to 2
