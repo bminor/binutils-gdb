@@ -30,6 +30,8 @@
 #include <sys/syspage.h>
 #include <dirent.h>
 #include <sys/netmgr.h>
+#include <sys/auxv.h>
+
 #include "gdbcore.h"
 #include "inferior.h"
 #include "target.h"
@@ -885,6 +887,38 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
     {
     case TARGET_OBJECT_MEMORY:
       return procfs_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
+    case TARGET_OBJECT_AUXV:
+      if (readbuf != NULL)
+	{
+	  int err;
+	  CORE_ADDR initial_stack;
+	  debug_process_t procinfo;
+	  /* For 32-bit architecture, size of auxv_t is 8 bytes.  */
+	  const unsigned int sizeof_auxv_t = sizeof (auxv_t);
+	  const unsigned int sizeof_tempbuf = 20 * sizeof_auxv_t;
+	  int tempread;
+	  gdb_byte *const tempbuf = alloca (sizeof_tempbuf);
+
+	  if (tempbuf == NULL)
+	    return TARGET_XFER_E_IO;
+
+	  err = devctl (ctl_fd, DCMD_PROC_INFO, &procinfo,
+		        sizeof procinfo, 0);
+	  if (err != EOK)
+	    return TARGET_XFER_E_IO;
+
+	  initial_stack = procinfo.initial_stack;
+
+	  /* procfs is always 'self-hosted', no byte-order manipulation.  */
+	  tempread = nto_read_auxv_from_initial_stack (initial_stack, tempbuf,
+						       sizeof_tempbuf,
+						       sizeof (auxv_t));
+	  tempread = min (tempread, len) - offset;
+	  memcpy (readbuf, tempbuf + offset, tempread);
+	  *xfered_len = tempread;
+	  return tempread ? TARGET_XFER_OK : TARGET_XFER_EOF;
+	}
+	/* Fallthru */
     default:
       return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
 					    readbuf, writebuf, offset, len,

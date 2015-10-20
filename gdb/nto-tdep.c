@@ -394,3 +394,86 @@ nto_initialize_signals (void)
   signal_pass_update (SIGPHOTON, 1);
 #endif
 }
+
+/* Read AUXV from initial_stack.  */
+LONGEST
+nto_read_auxv_from_initial_stack (CORE_ADDR initial_stack, gdb_byte *readbuf,
+                                  LONGEST len, size_t sizeof_auxv_t)
+{
+  gdb_byte targ32[4]; /* For 32 bit target values.  */
+  gdb_byte targ64[8]; /* For 64 bit target values.  */
+  CORE_ADDR data_ofs = 0;
+  ULONGEST anint;
+  LONGEST len_read = 0;
+  gdb_byte *buff;
+  enum bfd_endian byte_order;
+  int ptr_size;
+
+  if (sizeof_auxv_t == 16)
+    ptr_size = 8;
+  else
+    ptr_size = 4;
+
+  /* Skip over argc, argv and envp... Comment from ldd.c:
+
+     The startup frame is set-up so that we have:
+     auxv
+     NULL
+     ...
+     envp2
+     envp1 <----- void *frame + (argc + 2) * sizeof(char *)
+     NULL
+     ...
+     argv2
+     argv1
+     argc  <------ void * frame
+
+     On entry to ldd, frame gives the address of argc on the stack.  */
+  /* Read argc. 4 bytes on both 64 and 32 bit arches and luckily little
+   * endian. So we just read first 4 bytes.  */
+  if (target_read_memory (initial_stack + data_ofs, targ32, 4) != 0)
+    return 0;
+
+  byte_order = gdbarch_byte_order (target_gdbarch ());
+
+  anint = extract_unsigned_integer (targ32, sizeof (targ32), byte_order);
+
+  /* Size of pointer is assumed to be 4 bytes (32 bit arch.) */
+  data_ofs += (anint + 2) * ptr_size; /* + 2 comes from argc itself and
+                                                NULL terminating pointer in
+                                                argv.  */
+
+  /* Now loop over env table:  */
+  anint = 0;
+  while (target_read_memory (initial_stack + data_ofs, targ64, ptr_size)
+         == 0)
+    {
+      if (extract_unsigned_integer (targ64, ptr_size, byte_order) == 0)
+	anint = 1; /* Keep looping until non-null entry is found.  */
+      else if (anint)
+	break;
+      data_ofs += ptr_size;
+    }
+  initial_stack += data_ofs;
+
+  memset (readbuf, 0, len);
+  buff = readbuf;
+  while (len_read <= len-sizeof_auxv_t)
+    {
+      if (target_read_memory (initial_stack + len_read, buff, sizeof_auxv_t)
+	  == 0)
+        {
+	  /* Both 32 and 64 bit structures have int as the first field.  */
+          const ULONGEST a_type
+	    = extract_unsigned_integer (buff, sizeof (targ32), byte_order);
+
+          if (a_type == AT_NULL)
+	    break;
+	  buff += sizeof_auxv_t;
+	  len_read += sizeof_auxv_t;
+        }
+      else
+        break;
+    }
+  return len_read;
+}

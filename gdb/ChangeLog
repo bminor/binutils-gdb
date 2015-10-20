@@ -1,5 +1,12 @@
 2015-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* nto-procfs.c (sys/auxv.h): Include.
+	(procfs_xfer_partial): Implement TARGET_OBJECT_AUXV.
+	* nto-tdep.c (nto_read_auxv_from_initial_stack): New function.
+	* nto-tdep.h (nto_read_auxv_from_initial_stack): New declaration.
+
+2015-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* nto-procfs.c (nto_procfs_path): Rename to...
 	(nodestr): ... this, and change type.
 	(nto_node): Use new variable and logic accordingly.
