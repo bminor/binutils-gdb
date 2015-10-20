@@ -2896,16 +2896,17 @@ mmo_write_symbols_and_terminator (bfd *abfd)
 	&& (table[i]->flags & (BSF_DEBUGGING|BSF_GLOBAL)) == BSF_GLOBAL)
       {
 	asymbol *mainsym = table[i];
-	memcpy (table + 1, orig_table, i * sizeof (asymbol *));
+	bfd_vma mainvalue
+	  = (mainsym->value
+	     + mainsym->section->output_section->vma
+	     + mainsym->section->output_offset);
+	  memcpy (table + 1, orig_table, i * sizeof (asymbol *));
 	table[0] = mainsym;
 
 	/* Check that the value assigned to :Main is the same as the entry
 	   address.  The default linker script asserts this.  This is as
 	   good a place as any to check this consistency. */
-	if ((mainsym->value
-	     + mainsym->section->output_section->vma
-	     + mainsym->section->output_offset)
-	    != bfd_get_start_address (abfd))
+	if (mainvalue != bfd_get_start_address (abfd))
 	  {
 	    /* Arbitrary buffer to hold the printable representation of a
 	       vma.  */
@@ -2913,7 +2914,7 @@ mmo_write_symbols_and_terminator (bfd *abfd)
 	    char vmas_start[40];
 	    bfd_vma vma_start = bfd_get_start_address (abfd);
 
-	    sprintf_vma (vmas_main, mainsym->value);
+	    sprintf_vma (vmas_main, mainvalue);
 	    sprintf_vma (vmas_start, vma_start);
 
 	    (*_bfd_error_handler)

@@ -1,3 +1,8 @@
+2015-10-20  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (mmo_write_symbols_and_terminator): Correct printed value
+	of Main in error message.
+
 2015-10-18  Doug Evans  <xdje42@gmail.com>
 
 	* targets.c (bfd_flavour_name): "MMO" is spelled "mmo".
