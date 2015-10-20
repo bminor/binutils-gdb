@@ -1,3 +1,10 @@
+2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19109
+	* configure.ac: Add
+	--enable-compressed-debug-sections={all,gas,gold,ld}.
+	* configure: Regenerated.
+
 2015-09-30  Nick Clifton  <nickc@redhat.com>
 
 	Import the following patches from the GCC mainline:

@@ -1,3 +1,14 @@
+2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19109
+	* NEWS: Update --enable-compressed-debug-sections=.
+	* configure.ac: Remove --enable-compressed-debug-sections.
+	(DEFAULT_FLAG_COMPRESS_DEBUG): Check
+	--enable-compressed-debug-sections={all,gas} instead of
+	--enable-compressed-debug-sections.  For x86 Linux targets,
+	default to compressing debug sections.
+	* configure: Regenerated.
+
 2015-10-19  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19109
