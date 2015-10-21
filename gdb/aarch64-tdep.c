@@ -2818,6 +2818,7 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   dsd.new_addr = to;
   dsd.regs = regs;
   dsd.dsc = dsc;
+  dsd.insn_count = 0;
   aarch64_relocate_instruction (insn, &visitor,
 				(struct aarch64_insn_data *) &dsd);
   gdb_assert (dsd.insn_count <= DISPLACED_MODIFIED_INSNS);

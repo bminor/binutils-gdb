@@ -1,3 +1,8 @@
+2015-10-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Set
+	dsd.insn_count to zero.
+
 2015-10-22  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (stop_after_trap): Delete.
