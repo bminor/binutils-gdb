@@ -1,3 +1,17 @@
+2015-10-21  Ronald Hoogenbllon  <rhoogenboom@irdeto.com>
+
+	PR binutils/19104
+	* objcopy.c (command_line_switch): Add OPTION_ADD_SYMBOL.
+	(copy_options): Add add-symbol.
+	(copy_usage): Likewise.
+	(parse_symflags): New function.
+	(need_sym_before): New function.
+	(create_new_symbol): New function.
+	(filter_symbols): Add code to insert new symbols.
+	(copy_main): Process OPTION_ADD_SYMBOL.
+	* doc/binutils.texi: Document new feature.
+	* NEWS: Add note about the new feature.
+
 2015-10-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR binutils/19147

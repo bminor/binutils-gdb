@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add option to objcopy to insert new symbols into a file:
+  --add-symbol <name>=[<section>:]<value>[,<flags>]
+
 * Add support for the ARC EM/HS, and ARC600/700 architectures.
 
 * Extend objcopy --compress-debug-sections option to support
