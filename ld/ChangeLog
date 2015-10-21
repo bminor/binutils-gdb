@@ -1,3 +1,18 @@
+2015-10-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19109
+	* configure.ac: Add --enable-compressed-debug-sections.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* ld.texinfo: Document how to determine the default action for
+	debug sections.
+	* ldmain.c (main): If DEFAULT_FLAG_COMPRESS_DEBUG is defined then
+	set the compress_debug field of the link_info structure to
+	zlib-gabi.
+	* lexsup.c (elf_static_list_options): Output the default setting
+	for the --compress-debug-sections option.
+	* NEWS: Mention the new configure option.
+
 2015-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Fix a typo for "-z noextern-protected-data".

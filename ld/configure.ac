@@ -143,6 +143,18 @@ case "${got_handling}" in
   *)  AC_MSG_ERROR(bad value ${got_handling} for --enable-got option) ;;
 esac
 
+# PR gas/19109
+# Decide the default method for compressing debug sections.
+ac_default_compressed_debug_sections=unset
+# Provide a configure time option to override our default.
+AC_ARG_ENABLE(compressed_debug_sections,
+[  --enable-compressed-debug-sections  compress debug sections by default],
+[case "${enableval}" in
+  yes | all | ld) ac_default_compressed_debug_sections=yes ;;
+  no | none)  ac_default_compressed_debug_sections=no ;;
+  *)   ac_default_compressed_debug_sections=unset ;;
+esac])dnl
+
 AM_BINUTILS_WARNINGS
 
 AM_LC_MESSAGES
@@ -371,6 +383,10 @@ do
 
   fi
 done
+
+if test x$ac_default_compressed_debug_sections == xyes ; then
+  AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])
+fi
 
 AC_SUBST(elf_list_options)
 AC_SUBST(elf_shlib_list_options)

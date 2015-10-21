@@ -1,3 +1,11 @@
+2015-10-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19109
+	* configure.ac: Restore --enable-compressed-debug-sections.
+	Do not enable compressed debug sections by default for x86 Linux
+	targets.
+	* configure: Regenerate.
+
 2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/19109

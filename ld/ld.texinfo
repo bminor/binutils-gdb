@@ -2275,6 +2275,9 @@ sections and rename debug section names to begin with @samp{.zdebug}
 instead of @samp{.debug}.  @option{--compress-debug-sections=zlib}
 and @option{--compress-debug-sections=zlib-gabi}
 compress DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
+The default behaviour varies depending upon the target involved and
+the configure options used to build the toolchain.  The default can be
+determined by examing the output from the linker's @option{--help} option.
 
 @kindex --reduce-memory-overheads
 @item --reduce-memory-overheads
