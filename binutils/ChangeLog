@@ -1,4 +1,4 @@
-2015-10-21  Ronald Hoogenbllon  <rhoogenboom@irdeto.com>
+2015-10-21  Ronald Hoogenboom  <rhoogenboom@irdeto.com>
 
 	PR binutils/19104
 	* objcopy.c (command_line_switch): Add OPTION_ADD_SYMBOL.
