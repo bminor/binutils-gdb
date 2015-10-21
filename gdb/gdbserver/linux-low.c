@@ -3012,7 +3012,12 @@ linux_wait_1 (ptid_t ptid,
   if (!ptid_equal (step_over_bkpt, null_ptid)
       && event_child->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT)
     {
-      unsigned int increment_pc = the_low_target.breakpoint_len;
+      int increment_pc = 0;
+      int breakpoint_kind = 0;
+      CORE_ADDR stop_pc = event_child->stop_pc;
+
+      breakpoint_kind = the_target->breakpoint_kind_from_pc (&stop_pc);
+      the_target->sw_breakpoint_from_kind (breakpoint_kind, &increment_pc);
 
       if (debug_threads)
 	{
@@ -6932,6 +6937,28 @@ current_lwp_ptid (void)
   return ptid_of (current_thread);
 }
 
+/* Implementation of the target_ops method "breakpoint_kind_from_pc".  */
+
+static int
+linux_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+{
+  if (the_low_target.breakpoint_kind_from_pc != NULL)
+    return (*the_low_target.breakpoint_kind_from_pc) (pcptr);
+  else
+    /* Default breakpoint kind value.  */
+    return 0;
+}
+
+/* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+linux_sw_breakpoint_from_kind (int kind, int *size)
+{
+  gdb_assert (the_low_target.sw_breakpoint_from_kind != NULL);
+
+  return (*the_low_target.sw_breakpoint_from_kind) (kind, size);
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_arch_setup,
@@ -7026,6 +7053,8 @@ static struct target_ops linux_target_ops = {
   linux_mntns_open_cloexec,
   linux_mntns_unlink,
   linux_mntns_readlink,
+  linux_breakpoint_kind_from_pc,
+  linux_sw_breakpoint_from_kind
 };
 
 static void
@@ -7053,10 +7082,20 @@ void
 initialize_low (void)
 {
   struct sigaction sigchld_action;
+  int breakpoint_kind = 0;
+  int breakpoint_size = 0;
+  const gdb_byte *breakpoint = NULL;
+
   memset (&sigchld_action, 0, sizeof (sigchld_action));
   set_target_ops (&linux_target_ops);
-  set_breakpoint_data (the_low_target.breakpoint,
-		       the_low_target.breakpoint_len);
+
+  breakpoint_kind = the_target->breakpoint_kind_from_pc (NULL);
+  breakpoint = the_target->sw_breakpoint_from_kind (breakpoint_kind,
+						    &breakpoint_size);
+
+  set_breakpoint_data (breakpoint,
+		       breakpoint_size);
+
   linux_init_signals ();
   linux_ptrace_init_warnings ();
 

@@ -171,6 +171,16 @@ extern struct linux_target_ops the_low_target;
 
 static int *tic6x_regmap;
 static unsigned int tic6x_breakpoint;
+#define tic6x_breakpoint_len 4
+
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+tic6x_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = tic6x_breakpoint_len;
+  return (const gdb_byte *) &tic6x_breakpoint;
+}
 
 /* Forward definition.  */
 static struct usrregs_info tic6x_usrregs_info;
@@ -246,8 +256,6 @@ tic6x_set_pc (struct regcache *regcache, CORE_ADDR pc)
   newpc.reg32 = pc;
   supply_register_by_name (regcache, "PC", newpc.buf);
 }
-
-#define tic6x_breakpoint_len 4
 
 static int
 tic6x_breakpoint_at (CORE_ADDR where)
@@ -367,8 +375,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   tic6x_get_pc,
   tic6x_set_pc,
-  (const unsigned char *) &tic6x_breakpoint,
-  tic6x_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  tic6x_sw_breakpoint_from_kind,
   NULL,
   0,
   tic6x_breakpoint_at,

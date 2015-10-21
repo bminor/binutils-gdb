@@ -141,8 +141,13 @@ struct linux_target_ops
 
   CORE_ADDR (*get_pc) (struct regcache *regcache);
   void (*set_pc) (struct regcache *regcache, CORE_ADDR newpc);
-  const unsigned char *breakpoint;
-  int breakpoint_len;
+
+  /* See target.h for details.  */
+  int (*breakpoint_kind_from_pc) (CORE_ADDR *pcptr);
+
+  /* See target.h for details.  */
+  const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
+
   CORE_ADDR (*breakpoint_reinsert_addr) (void);
 
   int decr_pc_after_break;

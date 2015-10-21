@@ -913,6 +913,24 @@ arm_regs_info (void)
     return &regs_info_arm;
 }
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+arm_sw_breakpoint_from_kind (int kind , int *size)
+{
+  *size = arm_breakpoint_len;
+  /* Define an ARM-mode breakpoint; we only set breakpoints in the C
+     library, which is most likely to be ARM.  If the kernel supports
+     clone events, we will never insert a breakpoint, so even a Thumb
+     C library will work; so will mixing EABI/non-EABI gdbserver and
+     application.  */
+#ifndef __ARM_EABI__
+  return (const gdb_byte *) &arm_breakpoint;
+#else
+  return (const gdb_byte *) &arm_eabi_breakpoint;
+#endif
+}
+
 struct linux_target_ops the_low_target = {
   arm_arch_setup,
   arm_regs_info,
@@ -921,18 +939,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   arm_get_pc,
   arm_set_pc,
-
-  /* Define an ARM-mode breakpoint; we only set breakpoints in the C
-     library, which is most likely to be ARM.  If the kernel supports
-     clone events, we will never insert a breakpoint, so even a Thumb
-     C library will work; so will mixing EABI/non-EABI gdbserver and
-     application.  */
-#ifndef __ARM_EABI__
-  (const unsigned char *) &arm_breakpoint,
-#else
-  (const unsigned char *) &arm_eabi_breakpoint,
-#endif
-  arm_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  arm_sw_breakpoint_from_kind,
   arm_reinsert_addr,
   0,
   arm_breakpoint_at,

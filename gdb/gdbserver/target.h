@@ -441,6 +441,16 @@ struct target_ops
      readlink(2).  */
   ssize_t (*multifs_readlink) (int pid, const char *filename,
 			       char *buf, size_t bufsiz);
+
+  /* Return the breakpoint kind for this target based on PC.  The PCPTR is
+     adjusted to the real memory location in case a flag (e.g., the Thumb bit on
+     ARM) was present in the PC.  */
+  int (*breakpoint_kind_from_pc) (CORE_ADDR *pcptr);
+
+  /* Return the software breakpoint from KIND.  KIND can have target
+     specific meaning like the Z0 kind parameter.
+     SIZE is set to the software breakpoint's length in memory.  */
+  const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
 };
 
 extern struct target_ops *the_target;

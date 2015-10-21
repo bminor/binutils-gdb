@@ -122,8 +122,17 @@ static struct regset_info m68k_regsets[] = {
   { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
-static const unsigned char m68k_breakpoint[] = { 0x4E, 0x4F };
+static const gdb_byte m68k_breakpoint[] = { 0x4E, 0x4F };
 #define m68k_breakpoint_len 2
+
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+m68k_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = m68k_breakpoint_len;
+  return m68k_breakpoint;
+}
 
 static CORE_ADDR
 m68k_get_pc (struct regcache *regcache)
@@ -215,8 +224,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   m68k_get_pc,
   m68k_set_pc,
-  m68k_breakpoint,
-  m68k_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  m68k_sw_breakpoint_from_kind,
   NULL,
   2,
   m68k_breakpoint_at,

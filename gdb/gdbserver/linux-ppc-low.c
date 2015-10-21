@@ -486,6 +486,15 @@ ppc_arch_setup (void)
 static const unsigned int ppc_breakpoint = 0x7d821008;
 #define ppc_breakpoint_len 4
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+ppc_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = ppc_breakpoint_len;
+  return (const gdb_byte *) &ppc_breakpoint;
+}
+
 static int
 ppc_breakpoint_at (CORE_ADDR where)
 {
@@ -685,8 +694,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   ppc_get_pc,
   ppc_set_pc,
-  (const unsigned char *) &ppc_breakpoint,
-  ppc_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  ppc_sw_breakpoint_from_kind,
   NULL,
   0,
   ppc_breakpoint_at,
