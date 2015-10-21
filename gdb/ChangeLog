@@ -1,3 +1,14 @@
+2015-10-21  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (procfs_wait): Set stopped_flags nad stopped_pc.
+	(procfs_stopped_by_watchpoint): Use flags stored in inferior data.
+	* nto-tdep.c (nto_new_inferior_data_reg): New definition.
+	(nto_new_inferior_data, nto_inferior_data_cleanup, nto_inferior_data):
+	New functions.
+	(_initialize_nto_tdep): New forward declaration, new function.
+	* nto-tdep.h (struct nto_inferior_data): New struct.
+	(nto_inferior_data): New function declaration.
+
 2015-10-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* findvar.c (address_from_register): Check REGNUM validity.
