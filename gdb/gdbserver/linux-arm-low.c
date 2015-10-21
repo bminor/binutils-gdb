@@ -545,6 +545,7 @@ arm_supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
+    case Z_PACKET_SW_BP:
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:

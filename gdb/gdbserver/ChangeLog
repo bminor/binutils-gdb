@@ -1,5 +1,10 @@
 2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* linux-arm-low.c (arm_supports_z_point_type): Add software
+	breakpoint support.
+
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* linux-arm-low.c: Refactor breakpoint definitions.
 	(arm_breakpoint_at): Adjust for arm_abi_breakpoint.
 	(arm_sw_breakpoint_from_kind): Adjust for arm_breakpoint.
