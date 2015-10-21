@@ -244,18 +244,25 @@ arm_set_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 /* Correct in either endianness.  */
-static const unsigned long arm_breakpoint = 0xef9f0001;
-#define arm_breakpoint_len 4
-static const unsigned short thumb_breakpoint = 0xde01;
-#define thumb_breakpoint_len 2
-static const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
-#define thumb2_breakpoint_len 4
+#define arm_abi_breakpoint 0xef9f0001UL
 
 /* For new EABI binaries.  We recognize it regardless of which ABI
    is used for gdbserver, so single threaded debugging should work
    OK, but for multi-threaded debugging we only insert the current
    ABI's breakpoint instruction.  For now at least.  */
-static const unsigned long arm_eabi_breakpoint = 0xe7f001f0;
+#define arm_eabi_breakpoint 0xe7f001f0UL
+
+#ifndef __ARM_EABI__
+static const unsigned long arm_breakpoint = arm_abi_breakpoint;
+#else
+static const unsigned long arm_breakpoint = arm_eabi_breakpoint;
+#endif
+
+#define arm_breakpoint_len 4
+static const unsigned short thumb_breakpoint = 0xde01;
+#define thumb_breakpoint_len 2
+static const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
+#define thumb2_breakpoint_len 4
 
 static int
 arm_breakpoint_at (CORE_ADDR where)
@@ -287,7 +294,7 @@ arm_breakpoint_at (CORE_ADDR where)
       unsigned long insn;
 
       (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
-      if (insn == arm_breakpoint)
+      if (insn == arm_abi_breakpoint)
 	return 1;
 
       if (insn == arm_eabi_breakpoint)
@@ -978,11 +985,7 @@ arm_sw_breakpoint_from_kind (int kind , int *size)
 	return (gdb_byte *) &thumb2_breakpoint;
       case ARM_BP_KIND_ARM:
 	*size = arm_breakpoint_len;
-#ifndef __ARM_EABI__
 	return (const gdb_byte *) &arm_breakpoint;
-#else
-	return (const gdb_byte *) &arm_eabi_breakpoint;
-#endif
       default:
        return NULL;
     }
