@@ -1,3 +1,8 @@
+2015-10-21  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/freebpcmd.exp: Use with_timeout_factor instead
+	of hardwired timeout value.
+
 2015-10-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
