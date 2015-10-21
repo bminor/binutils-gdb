@@ -1,3 +1,10 @@
+2015-10-21  Yao Qi  <yao.qi@linaro.org>
+
+	* lib/range-stepping-support.exp (exec_cmd_expect_vCont_count):
+	Remove argument exp_vCont_s.
+	* gdb.base/range-stepping.exp: Callers updated.
+	* gdb.trace/range-stepping.exp: Likewise.
+
 2015-10-21  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* gdb/nto-tdep.c (QNX_NOTE_NAME, QNX_INFO_SECT_NAME): New defines.

@@ -14,15 +14,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Execute command CMD and check that GDB sends the expected number of
-# vCont;s and vCont;r packets.  Returns 0 if the test passes,
-# otherwise returns 1.
+# vCont;r packet.  Returns 0 if the test passes, otherwise returns 1.
 
-proc exec_cmd_expect_vCont_count { cmd exp_vCont_s exp_vCont_r } {
+proc exec_cmd_expect_vCont_count { cmd exp_vCont_r } {
     global gdb_prompt
 
     gdb_test_no_output "set debug remote 1" ""
 
-    set test "${cmd}: vCont;s=${exp_vCont_s} vCont;r=${exp_vCont_r}"
+    set test "${cmd}: vCont;r=${exp_vCont_r}"
     set r_counter 0
     set s_counter 0
     set ret 1
@@ -40,7 +39,7 @@ proc exec_cmd_expect_vCont_count { cmd exp_vCont_s exp_vCont_r } {
 	    exp_continue
 	}
 	-re "$gdb_prompt $" {
-	    if { $r_counter == ${exp_vCont_r} && $s_counter == ${exp_vCont_s} } {
+	    if { $r_counter == ${exp_vCont_r} } {
 		pass $test
 		set ret 0
 	    } else {
