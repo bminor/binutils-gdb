@@ -495,10 +495,11 @@ typy_get_composite (struct type *type)
      exception.  */
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_UNION
-      && TYPE_CODE (type) != TYPE_CODE_ENUM)
+      && TYPE_CODE (type) != TYPE_CODE_ENUM
+      && TYPE_CODE (type) != TYPE_CODE_FUNC)
     {
       PyErr_SetString (PyExc_TypeError,
-		       "Type is not a structure, union, or enum type.");
+		       "Type is not a structure, union, enum, or function type.");
       return NULL;
     }
 

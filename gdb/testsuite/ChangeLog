@@ -1,3 +1,13 @@
+2015-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR python/18073
+	* gdb.python/py-type.c (C::a_method): New.
+	(C::a_const_method): New.
+	(C::a_static_method): New.
+	(a_function): New.
+	* gdb.python/py-type.exp (test_fields): Test getting fields
+	from function and method.
+
 2015-10-21  Keven Boell  <keven.boell@intel.com>
 
 	* gdb.fortran/vla-alloc-assoc.exp: New file.

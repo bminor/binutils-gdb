@@ -1,3 +1,9 @@
+2015-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR python/18073
+	* python/py-type.c (typy_get_composite): Allow returning a
+	function type.
+
 2015-10-21  Keven Boell  <keven.boell@intel.com>
 
 	* dwarf2read.c (set_die_type): Add read of
