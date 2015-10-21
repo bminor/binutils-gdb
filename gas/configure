@@ -1413,7 +1413,7 @@ Optional Features:
   --disable-largefile     omit support for large files
   --enable-targets        alternative target configurations besides the primary
   --enable-checking       enable run-time checks
-  --enable-compressed-debug-sections  compress debug sections by default
+  --enable-compressed-debug-sections={all,gas,none}  compress debug sections by default
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --disable-nls           do not use Native Language Support

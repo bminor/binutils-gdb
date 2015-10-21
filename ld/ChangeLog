@@ -1,7 +1,8 @@
 2015-10-21  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19109
-	* configure.ac: Add --enable-compressed-debug-sections.
+	* configure.ac: Add --enable-compressed-debug-sections with
+	options of all, none or ld.
 	* configure: Regenerate.
 	* config.in: Regenerate.
 	* ld.texinfo: Document how to determine the default action for

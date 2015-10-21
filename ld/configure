@@ -1445,7 +1445,7 @@ Optional Features:
   --enable-gold[=ARG]     build gold [ARG={default,yes,no}]
   --enable-got=<type>     GOT handling scheme (target, single, negative,
                           multigot)
-  --enable-compressed-debug-sections  compress debug sections by default
+  --enable-compressed-debug-sections={all,ld,none}  compress debug sections by default
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --disable-nls           do not use Native Language Support
