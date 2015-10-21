@@ -62,7 +62,7 @@ cris_cannot_fetch_register (int regno)
 extern int debug_threads;
 
 static CORE_ADDR
-cris_get_pc (struct regcache *regcache, void)
+cris_get_pc (struct regcache *regcache)
 {
   unsigned long pc;
   collect_register_by_name (regcache, "pc", &pc);

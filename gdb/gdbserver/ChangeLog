@@ -1,3 +1,7 @@
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-cris-low.c (cris_get_pc): Remove void arg.
+
 2015-10-16  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* gdbserver/nto-low.c (nto_insert_point, nto_remove_point): Fix
