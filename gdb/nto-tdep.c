@@ -32,6 +32,9 @@
 #include "gdbcore.h"
 #include "objfiles.h"
 
+#define QNX_NOTE_NAME	"QNX"
+#define QNX_INFO_SECT_NAME "QNX_info"
+
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>
 #endif
@@ -332,12 +335,51 @@ nto_dummy_supply_regset (struct regcache *regcache, char *regs)
   /* Do nothing.  */
 }
 
+static void
+nto_sniff_abi_note_section (bfd *abfd, asection *sect, void *obj)
+{
+  const char *sectname;
+  unsigned int sectsize;
+  /* Buffer holding the section contents.  */
+  char *note;
+  unsigned int namelen;
+  const char *name;
+  const unsigned sizeof_Elf_Nhdr = 12;
+
+  sectname = bfd_get_section_name (abfd, sect);
+  sectsize = bfd_section_size (abfd, sect);
+
+  if (sectsize > 128)
+    sectsize = 128;
+
+  if (sectname != NULL && strstr (sectname, QNX_INFO_SECT_NAME) != NULL)
+    *(enum gdb_osabi *) obj = GDB_OSABI_QNXNTO;
+  else if (sectname != NULL && strstr (sectname, "note") != NULL
+	   && sectsize > sizeof_Elf_Nhdr)
+    {
+      note = XNEWVEC (char, sectsize);
+      bfd_get_section_contents (abfd, sect, note, 0, sectsize);
+      namelen = (unsigned int) bfd_h_get_32 (abfd, note);
+      name = note + sizeof_Elf_Nhdr;
+      if (sectsize >= namelen + sizeof_Elf_Nhdr
+	  && namelen == sizeof (QNX_NOTE_NAME)
+	  && 0 == strcmp (name, QNX_NOTE_NAME))
+        *(enum gdb_osabi *) obj = GDB_OSABI_QNXNTO;
+
+      XDELETEVEC (note);
+    }
+}
+
 enum gdb_osabi
 nto_elf_osabi_sniffer (bfd *abfd)
 {
-  if (nto_is_nto_target)
-    return nto_is_nto_target (abfd);
-  return GDB_OSABI_UNKNOWN;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
+
+  bfd_map_over_sections (abfd,
+			 nto_sniff_abi_note_section,
+			 &osabi);
+
+  return osabi;
 }
 
 static const char *nto_thread_state_str[] =

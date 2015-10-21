@@ -1,5 +1,12 @@
 2015-10-21  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* gdb/nto-tdep.c (QNX_NOTE_NAME, QNX_INFO_SECT_NAME): New defines.
+	(nto_sniff_abi_note_section): New function.
+	(nto_elf_osabi_sniffer): Use new function to recognize nto specific
+	binary.
+
+2015-10-21  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* nto-procfs.c (procfs_wait): Set stopped_flags nad stopped_pc.
 	(procfs_stopped_by_watchpoint): Use flags stored in inferior data.
 	* nto-tdep.c (nto_new_inferior_data_reg): New definition.
