@@ -30,6 +30,8 @@
 #include "nat/gdb_ptrace.h"
 #include <signal.h>
 
+#include "arch/arm.h"
+
 /* Defined in auto-generated files.  */
 void init_registers_arm (void);
 extern const struct target_desc *tdesc_arm;
@@ -79,6 +81,14 @@ typedef enum
   arm_hwbp_store = 2,
   arm_hwbp_access = 3
 } arm_hwbp_type;
+
+/* Enum describing the different kinds of breakpoints.  */
+enum arm_breakpoint_kinds
+{
+   ARM_BP_KIND_THUMB = 2,
+   ARM_BP_KIND_THUMB2 = 3,
+   ARM_BP_KIND_ARM = 4,
+};
 
 /* Type describing an ARM Hardware Breakpoint Control register value.  */
 typedef unsigned int arm_hwbp_control_t;
@@ -237,7 +247,9 @@ arm_set_pc (struct regcache *regcache, CORE_ADDR pc)
 static const unsigned long arm_breakpoint = 0xef9f0001;
 #define arm_breakpoint_len 4
 static const unsigned short thumb_breakpoint = 0xde01;
+#define thumb_breakpoint_len 2
 static const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
+#define thumb2_breakpoint_len 4
 
 /* For new EABI binaries.  We recognize it regardless of which ABI
    is used for gdbserver, so single threaded debugging should work
@@ -913,7 +925,39 @@ arm_regs_info (void)
     return &regs_info_arm;
 }
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of linux_target_ops method "breakpoint_kind_from_pc".
+
+   Determine the type and size of breakpoint to insert at PCPTR.  Uses the
+   program counter value to determine whether a 16-bit or 32-bit breakpoint
+   should be used.  It returns the breakpoint's kind, and adjusts the program
+   counter (if necessary) to point to the actual memory location where the
+   breakpoint should be inserted.  */
+
+static int
+arm_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+{
+  if (IS_THUMB_ADDR (*pcptr))
+    {
+      gdb_byte buf[2];
+
+      *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
+
+      /* Check whether we are replacing a thumb2 32-bit instruction.  */
+      if ((*the_target->read_memory) (*pcptr, buf, 2) == 0)
+	{
+	  unsigned short inst1 = 0;
+
+	  (*the_target->read_memory) (*pcptr, (gdb_byte *) &inst1, 2);
+	  if (thumb_insn_size (inst1) == 4)
+	    return ARM_BP_KIND_THUMB2;
+	}
+      return ARM_BP_KIND_THUMB;
+    }
+  else
+    return ARM_BP_KIND_ARM;
+}
+
+/*  Implementation of the linux_target_ops method "sw_breakpoint_from_kind".  */
 
 static const gdb_byte *
 arm_sw_breakpoint_from_kind (int kind , int *size)
@@ -924,11 +968,25 @@ arm_sw_breakpoint_from_kind (int kind , int *size)
      clone events, we will never insert a breakpoint, so even a Thumb
      C library will work; so will mixing EABI/non-EABI gdbserver and
      application.  */
+  switch (kind)
+    {
+      case ARM_BP_KIND_THUMB:
+	*size = thumb_breakpoint_len;
+	return (gdb_byte *) &thumb_breakpoint;
+      case ARM_BP_KIND_THUMB2:
+	*size = thumb2_breakpoint_len;
+	return (gdb_byte *) &thumb2_breakpoint;
+      case ARM_BP_KIND_ARM:
+	*size = arm_breakpoint_len;
 #ifndef __ARM_EABI__
-  return (const gdb_byte *) &arm_breakpoint;
+	return (const gdb_byte *) &arm_breakpoint;
 #else
-  return (const gdb_byte *) &arm_eabi_breakpoint;
+	return (const gdb_byte *) &arm_eabi_breakpoint;
 #endif
+      default:
+       return NULL;
+    }
+  return NULL;
 }
 
 struct linux_target_ops the_low_target = {
@@ -939,7 +997,7 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   arm_get_pc,
   arm_set_pc,
-  NULL, /* breakpoint_kind_from_pc */
+  arm_breakpoint_kind_from_pc,
   arm_sw_breakpoint_from_kind,
   arm_reinsert_addr,
   0,

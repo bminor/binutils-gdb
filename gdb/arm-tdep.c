@@ -45,6 +45,7 @@
 #include "user-regs.h"
 #include "observer.h"
 
+#include "arch/arm.h"
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
 
@@ -235,8 +236,6 @@ static void arm_neon_quad_write (struct gdbarch *gdbarch,
 				 struct regcache *regcache,
 				 int regnum, const gdb_byte *buf);
 
-static int thumb_insn_size (unsigned short inst1);
-
 struct arm_prologue_cache
 {
   /* The stack pointer at the time this frame was created; i.e. the
@@ -266,12 +265,6 @@ static CORE_ADDR arm_analyze_prologue (struct gdbarch *gdbarch,
    certain instructions, and really should not be hard-wired.  */
 
 #define DISPLACED_STEPPING_ARCH_VERSION		5
-
-/* Addresses for calling Thumb functions have the bit 0 set.
-   Here are some macros to test, set, or clear bit 0 of addresses.  */
-#define IS_THUMB_ADDR(addr)	((addr) & 1)
-#define MAKE_THUMB_ADDR(addr)	((addr) | 1)
-#define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
 
 /* Set to true if the 32-bit mode is in use.  */
 
@@ -4362,18 +4355,6 @@ bitcount (unsigned long val)
   for (nbits = 0; val != 0; nbits++)
     val &= val - 1;		/* Delete rightmost 1-bit in val.  */
   return nbits;
-}
-
-/* Return the size in bytes of the complete Thumb instruction whose
-   first halfword is INST1.  */
-
-static int
-thumb_insn_size (unsigned short inst1)
-{
-  if ((inst1 & 0xe000) == 0xe000 && (inst1 & 0x1800) != 0)
-    return 4;
-  else
-    return 2;
 }
 
 static int

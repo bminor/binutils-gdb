@@ -1,5 +1,14 @@
 2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* Makefile.in: Add arm.c/o.
+	* configure.srv: Likewise.
+	* linux-arm-low.c (arm_breakpoint_kinds): New enum.
+	(arm_breakpoint_kind_from_pc): New function.
+	(arm_sw_breakpoint_from_kind): Return proper kind.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize.
+
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* linux-low.c (initialize_low): Ajdust for breakpoint global variables
 	removal.
 	* mem-break.c : Remove breakpoint_data/breakpoint_len global variables.

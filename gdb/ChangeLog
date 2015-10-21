@@ -1,3 +1,16 @@
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* Makefile.in: Add arm.c/o.
+	* arch/arm.c: New file.
+	* arch/arm.h: (IS_THUMB_ADDR): Move macro from arm-tdep.c.
+	(MAKE_THUMB_ADDR): Likewise.
+	(UNMAKE_THUMB_ADDR): Likewise.
+	* arm-tdep.c (int thumb_insn_size): Move to arm.c.
+	(IS_THUMB_ADDR): Move to arm.h.
+	(MAKE_THUMB_ADDR): Likewise.
+	(UNMAKE_THUMB_ADDR): Likewise.
+	* configure.tgt: Add arm.o to all ARM configs.
+
 2015-10-21  Yao Qi  <yao.qi@linaro.org>
 
 	* lib/range-stepping-support.exp (exec_cmd_expect_vCont_count):

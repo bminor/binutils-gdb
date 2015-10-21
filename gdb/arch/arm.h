@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on ARM systems.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 1988-2015 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,5 +57,15 @@ enum gdb_regnum {
   ARM_NUM_FP_ARG_REGS = 4,
   ARM_LAST_FP_ARG_REGNUM = ARM_F3_REGNUM
 };
+
+/* Addresses for calling Thumb functions have the bit 0 set.
+   Here are some macros to test, set, or clear bit 0 of addresses.  */
+#define IS_THUMB_ADDR(addr)    ((addr) & 1)
+#define MAKE_THUMB_ADDR(addr)  ((addr) | 1)
+#define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
+
+/* Return the size in bytes of the complete Thumb instruction whose
+   first halfword is INST1.  */
+int thumb_insn_size (unsigned short inst1);
 
 #endif

@@ -180,7 +180,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/common-debug.c $(srcdir)/common/cleanups.c \
 	$(srcdir)/common/common-exceptions.c $(srcdir)/symbol.c \
 	$(srcdir)/common/btrace-common.c \
-	$(srcdir)/common/fileio.c $(srcdir)/nat/linux-namespaces.c
+	$(srcdir)/common/fileio.c $(srcdir)/nat/linux-namespaces.c \
+	$(srcdir)/arch/arm.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -580,6 +581,12 @@ waitstatus.o: ../target/waitstatus.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 fileio.o: ../common/fileio.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+
+# Arch object files rules form ../arch
+
+arm.o: ../arch/arm.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
