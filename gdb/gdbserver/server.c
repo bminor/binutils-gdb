@@ -4069,20 +4069,20 @@ process_serial_event (void)
       {
 	char *dataptr;
 	ULONGEST addr;
-	int len;
+	int kind;
 	char type = own_buf[1];
 	int res;
 	const int insert = ch == 'Z';
 	char *p = &own_buf[3];
 
 	p = unpack_varlen_hex (p, &addr);
-	len = strtol (p + 1, &dataptr, 16);
+	kind = strtol (p + 1, &dataptr, 16);
 
 	if (insert)
 	  {
 	    struct breakpoint *bp;
 
-	    bp = set_gdb_breakpoint (type, addr, len, &res);
+	    bp = set_gdb_breakpoint (type, addr, kind, &res);
 	    if (bp != NULL)
 	      {
 		res = 0;
@@ -4097,7 +4097,7 @@ process_serial_event (void)
 	      }
 	  }
 	else
-	  res = delete_gdb_breakpoint (type, addr, len);
+	  res = delete_gdb_breakpoint (type, addr, kind);
 
 	if (res == 0)
 	  write_ok (own_buf);

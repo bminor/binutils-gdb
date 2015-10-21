@@ -1,5 +1,38 @@
 2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* linux-low.c (initialize_low): Ajdust for breakpoint global variables
+	removal.
+	* mem-break.c : Remove breakpoint_data/breakpoint_len global variables.
+	(struct raw_breakpoint) <size>: Remove.
+	(struct raw_breakpoint) <kind>: Add.
+	(bp_size): New function.
+	(bp_opcode): Likewise.
+	(find_raw_breakpoint_at): Adjust for kind.
+	(insert_memory_breakpoint): Adjust for kind call bp_size,bp_opcode.
+	(remove_memory_breakpoint): Adjust for kind call bp_size.
+	(set_raw_breakpoint_at): Adjust for kind.
+	(set_breakpoint): Likewise.
+	(set_breakpoint_at): Call breakpoint_kind_from_pc.
+	(delete_raw_breakpoint): Adjust for kind.
+	(delete_breakpoint): Likewise.
+	(find_gdb_breakpoint): Likewise.
+	(set_gdb_breakpoint_1): Likewise.
+	(set_gdb_breakpoint): Likewise.
+	(delete_gdb_breakpoint_1): Likewise.
+	(delete_gdb_breakpoint): Likewise.
+	(uninsert_raw_breakpoint): Likewise.
+	(reinsert_raw_breakpoint): Likewise.
+	(set_breakpoint_data): Remove.
+	(validate_inserted_breakpoint): Adjust for kind call bp_size,bp_opcode.
+	(check_mem_read): Adjust for kind call bp_size.
+	(check_mem_write): Adjust for kind call bp_size,bp_opcode.
+	(clone_one_breakpoint): Adjust for kind.
+	* mem-break.h (set_gdb_breakpoint): Likewise.
+	(delete_gdb_breakpoint): Likewise.
+	* server.c (process_serial_event): Likewise.
+
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* linux-aarch64-low.c (aarch64_sw_breakpoint_from_kind): New function.
 	(struct linux_target_ops) <breakpoint>: Remove.
 	(struct linux_target_ops) <breakpoint_len>: Remove.

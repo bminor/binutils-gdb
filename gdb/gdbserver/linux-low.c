@@ -7082,19 +7082,9 @@ void
 initialize_low (void)
 {
   struct sigaction sigchld_action;
-  int breakpoint_kind = 0;
-  int breakpoint_size = 0;
-  const gdb_byte *breakpoint = NULL;
 
   memset (&sigchld_action, 0, sizeof (sigchld_action));
   set_target_ops (&linux_target_ops);
-
-  breakpoint_kind = the_target->breakpoint_kind_from_pc (NULL);
-  breakpoint = the_target->sw_breakpoint_from_kind (breakpoint_kind,
-						    &breakpoint_size);
-
-  set_breakpoint_data (breakpoint,
-		       breakpoint_size);
 
   linux_init_signals ();
   linux_ptrace_init_warnings ();
