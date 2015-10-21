@@ -1,3 +1,21 @@
+2015-10-21  Keven Boell  <keven.boell@intel.com>
+
+	* gdb.fortran/vla-alloc-assoc.exp: New file.
+	* gdb.fortran/vla-datatypes.exp: New file.
+	* gdb.fortran/vla-datatypes.f90: New file.
+	* gdb.fortran/vla-history.exp: New file.
+	* gdb.fortran/vla-ptype-sub.exp: New file.
+	* gdb.fortran/vla-ptype.exp: New file.
+	* gdb.fortran/vla-sizeof.exp: New file.
+	* gdb.fortran/vla-sub.f90: New file.
+	* gdb.fortran/vla-value-sub-arbitrary.exp: New file.
+	* gdb.fortran/vla-value-sub-finish.exp: New file.
+	* gdb.fortran/vla-value-sub.exp: New file.
+	* gdb.fortran/vla-value.exp: New file.
+	* gdb.fortran/vla-ptr-info.exp: New file.
+	* gdb.mi/mi-vla-fortran.exp: New file.
+	* gdb.mi/vla.f90: New file.
+
 2015-10-21  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/freebpcmd.exp: Use with_timeout_factor instead

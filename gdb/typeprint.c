@@ -727,3 +727,20 @@ Show printing of typedefs defined in classes."), NULL,
 			   show_print_type_typedefs,
 			   &setprinttypelist, &showprinttypelist);
 }
+
+/* Print <not allocated> status to stream STREAM.  */
+
+void
+val_print_not_allocated (struct ui_file *stream)
+{
+  fprintf_filtered (stream, _("<not allocated>"));
+}
+
+/* Print <not associated> status to stream STREAM.  */
+
+void
+val_print_not_associated (struct ui_file *stream)
+{
+  fprintf_filtered (stream, _("<not associated>"));
+}
+

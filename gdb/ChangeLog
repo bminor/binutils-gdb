@@ -1,3 +1,36 @@
+2015-10-21  Keven Boell  <keven.boell@intel.com>
+
+	* dwarf2read.c (set_die_type): Add read of
+	DW_AT_allocated and DW_AT_associated.
+	* f-typeprint.c: New include of typeprint.h
+	(f_print_type): Add check for allocated/associated
+	status of type.
+	(f_type_print_varspec_suffix): Add check for
+	* gdbtypes.c (create_array_type_with_stride):
+	Add check for valid data location of type in
+	case allocated or associated attributes are set.
+	Length of an array should be only calculated if
+	allocated or associated is resolved as true.
+	(is_dynamic_type_internal): Add check for allocated/
+	associated.
+	(resolve_dynamic_array): Evaluate allocated/associated
+	properties.
+	* gdbtypes.h (enum dynamic_prop_node_kind): <DYN_PROP_ALLOCATED>
+	<DYN_PROP_ASSOCIATED>: New enums.
+	(TYPE_ALLOCATED_PROP, TYPE_ASSOCIATED_PROP): New macros.
+	(type_not_allocated): New function.
+	(type_not_associated): New function.
+	* valarith.c (value_subscripted_rvalue): Add check for
+	allocated/associated.
+	* valprint.c: New include of typeprint.h.
+	(valprint_check_validity): Add check for allocated/associated.
+	(value_check_printable): Add check for allocated/
+	associated.
+	* typeprint.h (val_print_not_allocated): New function.
+	(val_print_not_associated): New function.
+	* typeprint.c (val_print_not_allocated): New function.
+	(val_print_not_associated): New function.
+
 2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* Makefile.in: Add arm.c/o.
