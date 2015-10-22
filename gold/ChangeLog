@@ -1,3 +1,14 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386.cc (Target_i386::Scan::get_reference_flags(): Treat
+	R_386_GOT32X the same as R_386_GOT32.
+	(Target_i386::Scan::local): Likewise.
+	(Target_i386::Scan::possible_function_pointer_reloc): Likewise.
+	(Target_i386::Scan::global): Likewise.
+	(Target_i386::Relocate::relocate): Likewise.
+	(Target_i386::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
 2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/Makefile.am (x86_64_mov_to_lea11): Replace
