@@ -1,3 +1,13 @@
+2015-10-22  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (struct mmo_data_struct): New members
+	symbol_consistency_override_calculated and ignore_symbol_consistency.
+	(mmo_section_has_contents, mmo_ignore_symbol_consistency): New
+	functions.
+	(mmo_create_symbol): Check with mmo_ignore_symbol_consistency if to
+	report an error for unexpected value of Main.
+	(mmo_write_symbols_and_terminator): Similar.
+
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_convert_load): Use call_nop_byte and
