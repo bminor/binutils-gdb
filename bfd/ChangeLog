@@ -1,5 +1,12 @@
 2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
+	PR ld/18841
+	* elf32-s390.c (elf_s390_reloc_type_class): Return
+	reloc_class_ifunc for ifunc symbols.
+	* elf64-s390.c (elf_s390_reloc_type_class): Likewise.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
 	* elf32-s390.c (elf_s390_finish_dynamic_symbol): Call
 	elf_s390_finish_ifunc_symbol only for actually defined symbols.
 	* elf64-s390.c (elf_s390_finish_dynamic_symbol): Likewise.
