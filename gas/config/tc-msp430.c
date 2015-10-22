@@ -22,7 +22,6 @@
 
 #include "as.h"
 #include <limits.h>
-#define PUSH_1X_WORKAROUND
 #include "subsegs.h"
 #include "opcode/msp430.h"
 #include "safe-ctype.h"
@@ -681,6 +680,23 @@ static bfd_boolean warn_interrupt_nops = TRUE;
 #define OPTION_MOVE_DATA 'd'
 static bfd_boolean move_data = FALSE;
 
+enum
+{
+  OPTION_SILICON_ERRATA = OPTION_MD_BASE,
+  OPTION_SILICON_ERRATA_WARN,
+} option_numbers;
+
+static unsigned int silicon_errata_fix = 0;
+static unsigned int silicon_errata_warn = 0;
+#define SILICON_ERRATA_CPU4 		(1 << 0)
+#define SILICON_ERRATA_CPU8		(1 << 1)
+#define SILICON_ERRATA_CPU11 		(1 << 2)
+#define SILICON_ERRATA_CPU12 		(1 << 3)
+#define SILICON_ERRATA_CPU13 		(1 << 4)
+#define SILICON_ERRATA_CPU19 		(1 << 5)
+#define SILICON_ERRATA_CPU42 		(1 << 6)
+#define SILICON_ERRATA_CPU42_PLUS	(1 << 7)
+
 static void
 msp430_set_arch (int option)
 {
@@ -1305,6 +1321,55 @@ md_parse_option (int c, char * arg)
 {
   switch (c)
     {
+    case OPTION_SILICON_ERRATA:
+    case OPTION_SILICON_ERRATA_WARN:
+      {
+	signed int i;
+	const struct
+	{
+	  char *       name;
+	  unsigned int length;
+	  unsigned int bitfield;
+	} erratas[] =
+	{
+	  { STRING_COMMA_LEN ("cpu4"), SILICON_ERRATA_CPU4 },
+	  { STRING_COMMA_LEN ("cpu8"), SILICON_ERRATA_CPU8 },
+	  { STRING_COMMA_LEN ("cpu11"), SILICON_ERRATA_CPU11 },
+	  { STRING_COMMA_LEN ("cpu12"), SILICON_ERRATA_CPU12 },
+	  { STRING_COMMA_LEN ("cpu13"), SILICON_ERRATA_CPU13 },
+	  { STRING_COMMA_LEN ("cpu19"), SILICON_ERRATA_CPU19 },
+	  { STRING_COMMA_LEN ("cpu42"), SILICON_ERRATA_CPU42 },
+	  { STRING_COMMA_LEN ("cpu42+"), SILICON_ERRATA_CPU42_PLUS },
+	};
+
+	do
+	  {
+	    for (i = ARRAY_SIZE (erratas); i--;)
+	      if (strncasecmp (arg, erratas[i].name, erratas[i].length) == 0)
+		{
+		  if (c == OPTION_SILICON_ERRATA)
+		    silicon_errata_fix |= erratas[i].bitfield;
+		  else
+		    silicon_errata_warn |= erratas[i].bitfield;
+		  arg += erratas[i].length;
+		  break;
+		}
+	    if (i < 0)
+	      {
+		as_warn (_("Unrecognised CPU errata name starting here: %s"), arg);
+		break;
+	      }
+	    if (*arg == 0)
+	      break;
+	    if (*arg != ',')
+	      as_warn (_("Expecting comma after CPU errata name, not: %s"), arg);
+	    else
+	      arg ++;
+	  }
+	while (*arg != 0);
+      }
+      return 1;
+
     case OPTION_MMCU:
       if (arg == NULL)
 	as_fatal (_("MCU option requires a name\n"));
@@ -1487,6 +1552,8 @@ const char *md_shortopts = "mm:,mP,mQ,ml,mN,mn,my,mY";
 
 struct option md_longopts[] =
 {
+  {"msilicon-errata", required_argument, NULL, OPTION_SILICON_ERRATA},
+  {"msilicon-errata-warn", required_argument, NULL, OPTION_SILICON_ERRATA_WARN},
   {"mmcu", required_argument, NULL, OPTION_MMCU},
   {"mcpu", required_argument, NULL, OPTION_MCPU},
   {"mP", no_argument, NULL, OPTION_POLYMORPHS},
@@ -1509,6 +1576,10 @@ md_show_usage (FILE * stream)
 	   _("MSP430 options:\n"
 	     "  -mmcu=<msp430-name>     - select microcontroller type\n"
              "  -mcpu={430|430x|430xv2} - select microcontroller architecture\n"));
+  fprintf (stream,
+	   _("  -msilicon-errata=<name>[,<name>...] - enable fixups for silicon errata\n"
+	     "  -msilicon-errata-warn=<name>[,<name>...] - warn when a fixup might be needed\n"
+	     "   supported errata names: cpu4, cpu8, cpu11, cpu12, cpu13, cpu19, cpu42, cpu42+\n"));
   fprintf (stream,
 	   _("  -mQ - enable relaxation at assembly time. DANGEROUS!\n"
 	     "  -mP - enable polymorph instructions\n"));
@@ -1746,14 +1817,14 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	    }
 	  else if (x == 4)
 	    {
-#ifdef PUSH_1X_WORKAROUND
-	      if (bin == 0x1200)
+	      if (bin == 0x1200 && ! target_is_430x ())
 		{
-		  /* Remove warning as confusing.
-		     as_warn (_("Hardware push bug workaround")); */
+		  /* CPU4: The shorter form of PUSH #4 is not supported on MSP430.  */
+		  if (silicon_errata_warn & SILICON_ERRATA_CPU4)
+		    as_warn (_("cpu4: not converting PUSH #4 to shorter form"));
+		  /* No need to check silicon_errata_fixes - this fix is always implemented.  */
 		}
 	      else
-#endif
 		{
 		  op->reg = 2;
 		  op->am = 2;
@@ -1763,14 +1834,13 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	    }
 	  else if (x == 8)
 	    {
-#ifdef PUSH_1X_WORKAROUND
-	      if (bin == 0x1200)
+	      if (bin == 0x1200 && ! target_is_430x ())
 		{
-		  /* Remove warning as confusing.
-		     as_warn (_("Hardware push bug workaround")); */
+		  /* CPU4: The shorter form of PUSH #8 is not supported on MSP430.  */
+		  if (silicon_errata_warn & SILICON_ERRATA_CPU4)
+		    as_warn (_("cpu4: not converting PUSH #8 to shorter form"));
 		}
 	      else
-#endif
 		{
 		  op->reg = 2;
 		  op->am = 3;
@@ -2002,6 +2072,14 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	      op->am = 2;
 	      op->ol = 0;
 	      return 0;
+	    }
+
+	  if (op->reg == 1 && (x & 1))
+	    {
+	      if (silicon_errata_fix & SILICON_ERRATA_CPU8)
+		as_bad (_("CPU8: Stack pointer accessed with an odd offset"));
+	      else if (silicon_errata_warn & SILICON_ERRATA_CPU8)
+		as_warn (_("CPU8: Stack pointer accessed with an odd offset"));
 	    }
 	}
       else if (op->exp.X_op == O_symbol)
@@ -2353,7 +2431,11 @@ try_encode_mova (bfd_boolean imm_op,
   return 0;
 }
 
-static bfd_boolean check_for_nop = FALSE;
+#define NOP_CHECK_INTERRUPT  (1 << 0)
+#define NOP_CHECK_CPU12      (1 << 1)
+#define NOP_CHECK_CPU19      (1 << 2)
+
+static signed int check_for_nop = 0;
 
 #define is_opcode(NAME) (strcmp (opcode->name, NAME) == 0)
 
@@ -2380,7 +2462,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
   const char * error_message;
   static signed int repeat_count = 0;
   bfd_boolean fix_emitted;
-  bfd_boolean nop_check_needed = FALSE;
 
   /* Opcode is the one from opcodes table
      line contains something like
@@ -2513,8 +2594,68 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       repeat_count = 0;
     }
 
-  if (check_for_nop && is_opcode ("nop"))
-    check_for_nop = FALSE;
+  if (check_for_nop)
+    {
+      if (! is_opcode ("nop"))
+	{
+	  bfd_boolean doit = FALSE;
+
+	  do
+	    {
+	      switch (check_for_nop & - check_for_nop)
+		{
+		case NOP_CHECK_INTERRUPT:
+		  if (warn_interrupt_nops
+		      || silicon_errata_warn & SILICON_ERRATA_CPU42
+		      || silicon_errata_warn & SILICON_ERRATA_CPU42_PLUS)
+		    {
+		      if (gen_interrupt_nops)
+			as_warn (_("NOP inserted between two instructions that change interrupt state"));
+		      else
+			as_warn (_("a NOP might be needed here because of successive changes in interrupt state"));
+		    }
+
+		  if (gen_interrupt_nops
+		      || silicon_errata_fix & SILICON_ERRATA_CPU42_PLUS)
+		    /* Emit a NOP between interrupt enable/disable.
+		       See 1.3.4.1 of the MSP430x5xx User Guide.  */
+		    doit = TRUE;
+		  break;
+
+		case NOP_CHECK_CPU12:
+		  if (silicon_errata_warn & SILICON_ERRATA_CPU12)
+		    as_warn (_("CPU12: CMP/BIT with PC destinstion ignores next instruction"));
+
+		  if (silicon_errata_fix & SILICON_ERRATA_CPU12)
+		    doit = TRUE;
+		  break;
+
+		case NOP_CHECK_CPU19:
+		  if (silicon_errata_warn & SILICON_ERRATA_CPU19)
+		    as_warn (_("CPU19: Instruction setting CPUOFF must be followed by a NOP"));
+
+		  if (silicon_errata_fix & SILICON_ERRATA_CPU19)
+		    doit = TRUE;
+		  break;
+		  
+		default:
+		  as_bad (_("internal error: unknown nop check state"));
+		  break;
+		}
+	      check_for_nop &= ~ (check_for_nop & - check_for_nop);
+	    }
+	  while (check_for_nop);
+	  
+	  if (doit)
+	    {
+	      frag = frag_more (2);
+	      bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
+	      dwarf2_emit_insn (2);
+	    }
+	}
+
+      check_for_nop = 0;
+    }
 
   switch (fmt)
     {
@@ -2523,29 +2664,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	{
 	case 0:
 	  if (is_opcode ("eint") || is_opcode ("dint"))
-	    {
-	      if (check_for_nop)
-		{
-		  if (warn_interrupt_nops)
-		    {
-		      if (gen_interrupt_nops)
-			as_warn (_("NOP inserted between two instructions that change interrupt state"));
-		      else
-			as_warn (_("a NOP might be needed here because of successive changes in interrupt state"));
-		    }
-
-		  if (gen_interrupt_nops)
-		    {
-		      /* Emit a NOP between interrupt enable/disable.
-			 See 1.3.4.1 of the MSP430x5xx User Guide.  */
-		      insn_length += 2;
-		      frag = frag_more (2);
-		      bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
-		    }
-		}
-
-	      nop_check_needed = TRUE;
-	    }
+	    check_for_nop |= NOP_CHECK_INTERRUPT;
 
 	  /* Set/clear bits instructions.  */
 	  if (extended_op)
@@ -2574,30 +2693,37 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 	  bin |= (op1.reg | (op1.am << 7));
 
-	  if (is_opcode ("clr") && bin == 0x4302 /* CLR R2*/)
+	  /* If the PC is the destination...  */
+	  if (op1.am == 0 && op1.reg == 0
+	      /* ... and the opcode alters the SR.  */
+	      && !(is_opcode ("bic") || is_opcode ("bis") || is_opcode ("mov")
+		   || is_opcode ("bicx") || is_opcode ("bisx") || is_opcode ("movx")))
 	    {
-	      if (check_for_nop)
-		{
-		  if (warn_interrupt_nops)
-		    {
-		      if (gen_interrupt_nops)
-			as_warn (_("NOP inserted between two instructions that change interrupt state"));
-		      else
-			as_warn (_("a NOP might be needed here because of successive changes in interrupt state"));
-		    }
-
-		  if (gen_interrupt_nops)
-		    {
-		      /* Emit a NOP between interrupt enable/disable.
-			 See 1.3.4.1 of the MSP430x5xx User Guide.  */
-		      insn_length += 2;
-		      frag = frag_more (2);
-		      bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
-		    }
-		}
-
-	      nop_check_needed = TRUE;
+	      if (silicon_errata_fix & SILICON_ERRATA_CPU11)
+		as_bad (_("CPU11: PC is destinstion of SR altering instruction"));
+	      else if (silicon_errata_warn & SILICON_ERRATA_CPU11)
+		as_warn (_("CPU11: PC is destinstion of SR altering instruction"));
 	    }
+	  
+	  /* If the status register is the destination...  */
+	  if (op1.am == 0 && op1.reg == 2
+	      /* ... and the opcode alters the SR.  */
+	      && (is_opcode ("adc") || is_opcode ("dec") || is_opcode ("decd")
+		  || is_opcode ("inc") || is_opcode ("incd") || is_opcode ("inv")
+		  || is_opcode ("sbc") || is_opcode ("sxt")
+		  || is_opcode ("adcx") || is_opcode ("decx") || is_opcode ("decdx")
+		  || is_opcode ("incx") || is_opcode ("incdx") || is_opcode ("invx")
+		  || is_opcode ("sbcx")
+		  ))
+	    {
+	      if (silicon_errata_fix & SILICON_ERRATA_CPU13)
+		as_bad (_("CPU13: SR is destinstion of SR altering instruction"));
+	      else if (silicon_errata_warn & SILICON_ERRATA_CPU13)
+		as_warn (_("CPU13: SR is destinstion of SR altering instruction"));
+	    }
+	  
+	  if (is_opcode ("clr") && bin == 0x4302 /* CLR R2*/)
+	    check_for_nop |= NOP_CHECK_INTERRUPT;
 
 	  /* Compute the entire instruction length, in bytes.  */
 	  op_length = (extended_op ? 2 : 0) + 2 + (op1.ol * 2);
@@ -2691,6 +2817,19 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      break;
 	    }
 
+	  /* If the status register is the destination...  */
+	  if (op1.am == 0 && op1.reg == 2
+	      /* ... and the opcode alters the SR.  */
+	      && (is_opcode ("rla") || is_opcode ("rlc")
+		  || is_opcode ("rlax") || is_opcode ("rlcx")
+		  ))
+	    {
+	      if (silicon_errata_fix & SILICON_ERRATA_CPU13)
+		as_bad (_("CPU13: SR is destinstion of SR altering instruction"));
+	      else if (silicon_errata_warn & SILICON_ERRATA_CPU13)
+		as_warn (_("CPU13: SR is destinstion of SR altering instruction"));
+	    }
+	  
 	  if (extended_op)
 	    {
 	      if (!addr_op)
@@ -3297,32 +3436,55 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
       bin |= (op2.reg | (op1.reg << 8) | (op1.am << 4) | (op2.am << 7));
 
+      /* If the PC is the destination...  */
+      if (op2.am == 0 && op2.reg == 0
+	  /* ... and the opcode alters the SR.  */
+	  && !(is_opcode ("bic") || is_opcode ("bis") || is_opcode ("mov")
+	       || is_opcode ("bicx") || is_opcode ("bisx") || is_opcode ("movx")))
+	{
+	  if (silicon_errata_fix & SILICON_ERRATA_CPU11)
+	    as_bad (_("CPU11: PC is destinstion of SR altering instruction"));
+	  else if (silicon_errata_warn & SILICON_ERRATA_CPU11)
+	    as_warn (_("CPU11: PC is destinstion of SR altering instruction"));
+	}
+	  
+      /* If the status register is the destination...  */
+      if (op2.am == 0 && op2.reg == 2
+	  /* ... and the opcode alters the SR.  */
+	  && (is_opcode ("add") || is_opcode ("addc") || is_opcode ("and")
+	      || is_opcode ("dadd") || is_opcode ("sub") || is_opcode ("subc")
+	      || is_opcode ("xor")
+	      || is_opcode ("addx") || is_opcode ("addcx") || is_opcode ("andx")
+	      || is_opcode ("daddx") || is_opcode ("subx") || is_opcode ("subcx")
+	      || is_opcode ("xorx")
+	      ))
+	{
+	  if (silicon_errata_fix & SILICON_ERRATA_CPU13)
+	    as_bad (_("CPU13: SR is destinstion of SR altering instruction"));
+	  else if (silicon_errata_warn & SILICON_ERRATA_CPU13)
+	    as_warn (_("CPU13: SR is destinstion of SR altering instruction"));
+	}
+	  
       if (   (is_opcode ("bic") && bin == 0xc232)
 	  || (is_opcode ("bis") && bin == 0xd232)
 	  || (is_opcode ("mov") && op2.mode == OP_REG && op2.reg == 2))
 	{
-	  if (check_for_nop)
-	    {
-	      if (warn_interrupt_nops)
-		{
-		  if (gen_interrupt_nops)
-		    as_warn (_("NOP inserted between two instructions that change interrupt state"));
-		  else
-		    as_warn (_("a NOP might be needed here because of successive changes in interrupt state"));
-		}
-
-	      if (gen_interrupt_nops)
-		{
-		  /* Emit a NOP between interrupt enable/disable.
-		     See 1.3.4.1 of the MSP430x5xx User Guide.  */
-		  insn_length += 2;
-		  frag = frag_more (2);
-		  bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
-		}
-	    }
-
-	  nop_check_needed = TRUE;
+	  /* Avoid false checks when a constant value is being put into the SR.  */
+	  if (op1.mode == OP_EXP
+	      && op1.exp.X_op == O_constant
+	      && (op1.exp.X_add_number & 0x8) != 0x8)
+	    ;
+	  else
+	    check_for_nop |= NOP_CHECK_INTERRUPT;
 	}
+
+      if (((is_opcode ("bis") && bin == 0xd032)
+	   || (is_opcode ("mov") && bin == 0x4032)
+	   || (is_opcode ("xor") && bin == 0xe032))
+	  && op1.mode == OP_EXP
+	  && op1.exp.X_op == O_constant
+	  && (op1.exp.X_add_number & 0x10) == 0x10)
+	check_for_nop |= NOP_CHECK_CPU19;
 
       /* Compute the entire length of the instruction in bytes.  */
       op_length = (extended_op ? 2 : 0)	/* The extension word.  */
@@ -3433,6 +3595,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	}
 
       dwarf2_emit_insn (insn_length);
+
+      /* If the PC is the destination...  */
+      if (op2.am == 0 && op2.reg == 0
+	  /* ... but the opcode does not alter the destination.  */
+	  && (is_opcode ("cmp") || is_opcode ("bit") || is_opcode ("cmpx")))
+	check_for_nop |= NOP_CHECK_CPU12;
       break;
 
     case 2:			/* Single-operand mostly instr.  */
@@ -3464,6 +3632,17 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  break;
 	}
 
+      /* If the status register is the destination...  */
+      if (op1.am == 0 && op1.reg == 2
+	  /* ... and the opcode alters the SR.  */
+	  && (is_opcode ("rra") || is_opcode ("rrc") || is_opcode ("sxt")))
+	{
+	  if (silicon_errata_fix & SILICON_ERRATA_CPU13)
+	    as_bad (_("CPU13: SR is destinstion of SR altering instruction"));
+	  else if (silicon_errata_warn & SILICON_ERRATA_CPU13)
+	    as_warn (_("CPU13: SR is destinstion of SR altering instruction"));
+	}
+	  
       insn_length = (extended_op ? 2 : 0) + 2 + (op1.ol * 2);
       frag = frag_more (insn_length);
       where = frag - frag_now->fr_literal;
@@ -3726,7 +3905,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
     }
 
   input_line_pointer = line;
-  check_for_nop = nop_check_needed;
   return 0;
 }
 
@@ -4461,8 +4639,8 @@ msp430_fix_adjustable (struct fix *fixp ATTRIBUTE_UNUSED)
 void
 msp430_md_end (void)
 {
-  if (check_for_nop == TRUE && warn_interrupt_nops)
-    as_warn ("assembly finished with the last instruction changing interrupt state - a NOP might be needed");
+  if (check_for_nop)
+    as_warn ("assembly finished without a possibly needed NOP instruction");
 
   bfd_elf_add_proc_attr_int (stdoutput, OFBA_MSPABI_Tag_ISA,
 			     target_is_430x () ? 2 : 1);
