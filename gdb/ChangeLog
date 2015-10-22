@@ -1,3 +1,9 @@
+2015-10-22  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (do_initial_windows_stuff): Rewrite loop using
+	windows_wait and windows_resume directly instead of
+	wait_for_inferior and resume.
+
 2015-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* xtensa-tdep.h (XTREG): Add casts.
