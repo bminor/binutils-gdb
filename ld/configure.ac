@@ -151,7 +151,7 @@ AC_ARG_ENABLE(compressed_debug_sections,
 	      AS_HELP_STRING([--enable-compressed-debug-sections={all,ld,none}],
 	      [compress debug sections by default])],
 [case ,"${enableval}", in
-  *,yes,* | *,all,* | *,ld,*) ac_default_compressed_debug_sections=yes ;;
+  ,yes, | ,all, | *,ld,*) ac_default_compressed_debug_sections=yes ;;
   ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
 esac])dnl
 

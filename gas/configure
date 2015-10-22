@@ -11674,7 +11674,7 @@ ac_default_compressed_debug_sections=unset
 # Check whether --enable-compressed_debug_sections was given.
 if test "${enable_compressed_debug_sections+set}" = set; then :
   enableval=$enable_compressed_debug_sections; case ,"${enableval}", in
-  *,yes,* | *,all,* | *,gas,*) ac_default_compressed_debug_sections=yes ;;
+  ,yes, | ,all, | *,gas,*) ac_default_compressed_debug_sections=yes ;;
   ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
   *)   ac_default_compressed_debug_sections=unset ;;
 esac
