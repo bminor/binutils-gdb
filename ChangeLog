@@ -1,3 +1,10 @@
+2015-10-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19109
+	* configure.ac: Note the 'none' is an acceptable argument to
+	--enable-compressed-debug-sections.
+	* configure: Regenerate.
+
 2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/19109

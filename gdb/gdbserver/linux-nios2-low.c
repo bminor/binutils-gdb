@@ -127,8 +127,22 @@ nios2_set_pc (struct regcache *regcache, CORE_ADDR pc)
 #define NIOS2_BREAKPOINT 0x003b6ffa
 #endif
 
+/* We only register the 4-byte breakpoint, even on R2 targets which also
+   support 2-byte breakpoints.  Since there is no supports_z_point_type
+   function provided, gdbserver never inserts software breakpoints itself
+   and instead relies on GDB to insert the breakpoint of the correct length
+   via a memory write.  */
 static const unsigned int nios2_breakpoint = NIOS2_BREAKPOINT;
 #define nios2_breakpoint_len 4
+
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+nios2_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = nios2_breakpoint_len;
+  return (const gdb_byte *) &nios2_breakpoint;
+}
 
 /* Implement the breakpoint_reinsert_addr linux_target_ops method.  */
 
@@ -263,14 +277,8 @@ struct linux_target_ops the_low_target =
   NULL,
   nios2_get_pc,
   nios2_set_pc,
-
-  /* We only register the 4-byte breakpoint, even on R2 targets which also
-     support 2-byte breakpoints.  Since there is no supports_z_point_type
-     function provided, gdbserver never inserts software breakpoints itself
-     and instead relies on GDB to insert the breakpoint of the correct length
-     via a memory write.  */
-  (const unsigned char *) &nios2_breakpoint,
-  nios2_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  nios2_sw_breakpoint_from_kind,
   nios2_reinsert_addr,
   0,
   nios2_breakpoint_at,

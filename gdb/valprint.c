@@ -34,6 +34,7 @@
 #include "ada-lang.h"
 #include "gdb_obstack.h"
 #include "charset.h"
+#include "typeprint.h"
 #include <ctype.h>
 
 /* Maximum number of wchars returned from wchar_iterate.  */
@@ -302,6 +303,18 @@ valprint_check_validity (struct ui_file *stream,
 			 const struct value *val)
 {
   type = check_typedef (type);
+
+  if (type_not_associated (type))
+    {
+      val_print_not_associated (stream);
+      return 0;
+    }
+
+  if (type_not_allocated (type))
+    {
+      val_print_not_allocated (stream);
+      return 0;
+    }
 
   if (TYPE_CODE (type) != TYPE_CODE_UNION
       && TYPE_CODE (type) != TYPE_CODE_STRUCT
@@ -1040,6 +1053,18 @@ value_check_printable (struct value *val, struct ui_file *stream,
     {
       fprintf_filtered (stream, _("<internal function %s>"),
 			value_internal_function_name (val));
+      return 0;
+    }
+
+  if (type_not_associated (value_type (val)))
+    {
+      val_print_not_associated (stream);
+      return 0;
+    }
+
+  if (type_not_allocated (value_type (val)))
+    {
+      val_print_not_allocated (stream);
       return 0;
     }
 

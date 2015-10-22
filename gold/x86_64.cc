@@ -2191,6 +2191,8 @@ Target_x86_64<size>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       // Absolute in GOT.
       return Symbol::ABSOLUTE_REF;
@@ -2475,6 +2477,8 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       {
 	// The symbol requires a GOT section.
@@ -2485,7 +2489,9 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	// mov foo@GOTPCREL(%rip), %reg
 	// to lea foo(%rip), %reg.
 	// in Relocate::relocate.
-	if (r_type == elfcpp::R_X86_64_GOTPCREL
+	if ((r_type == elfcpp::R_X86_64_GOTPCREL
+	     || r_type == elfcpp::R_X86_64_GOTPCRELX
+	     || r_type == elfcpp::R_X86_64_REX_GOTPCRELX)
 	    && reloc.get_r_offset() >= 2
 	    && !is_ifunc)
 	  {
@@ -2713,6 +2719,8 @@ Target_x86_64<size>::Scan::possible_function_pointer_reloc(unsigned int r_type)
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       {
 	return true;
@@ -2901,6 +2909,8 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       {
 	// The symbol requires a GOT entry.
@@ -2910,7 +2920,9 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 	// mov foo@GOTPCREL(%rip), %reg
 	// to lea foo(%rip), %reg.
 	// in Relocate::relocate, then there is nothing to do here.
-	if (r_type == elfcpp::R_X86_64_GOTPCREL
+	if ((r_type == elfcpp::R_X86_64_GOTPCREL
+	     || r_type == elfcpp::R_X86_64_GOTPCRELX
+	     || r_type == elfcpp::R_X86_64_REX_GOTPCRELX)
 	    && reloc.get_r_offset() >= 2
 	    && Target_x86_64<size>::can_convert_mov_to_lea(gsym))
 	  {
@@ -3538,6 +3550,8 @@ Target_x86_64<size>::Relocate::relocate(
       break;
 
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
       {
       // Convert
       // mov foo@GOTPCREL(%rip), %reg
@@ -4320,6 +4334,8 @@ Target_x86_64<size>::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_X86_64_GOT64:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       return 8;
 

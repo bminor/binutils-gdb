@@ -2931,6 +2931,15 @@ aarch64_supports_range_stepping (void)
   return 1;
 }
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+aarch64_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = aarch64_breakpoint_len;
+  return aarch64_breakpoint;
+}
+
 struct linux_target_ops the_low_target =
 {
   aarch64_arch_setup,
@@ -2940,8 +2949,8 @@ struct linux_target_ops the_low_target =
   NULL, /* fetch_register */
   aarch64_get_pc,
   aarch64_set_pc,
-  (const unsigned char *) &aarch64_breakpoint,
-  aarch64_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  aarch64_sw_breakpoint_from_kind,
   NULL, /* breakpoint_reinsert_addr */
   0,    /* decr_pc_after_break */
   aarch64_breakpoint_at,

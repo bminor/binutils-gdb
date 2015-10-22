@@ -266,6 +266,15 @@ mips_set_pc (struct regcache *regcache, CORE_ADDR pc)
 static const unsigned int mips_breakpoint = 0x0005000d;
 #define mips_breakpoint_len 4
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+mips_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = mips_breakpoint_len;
+  return (const gdb_byte *) &mips_breakpoint;
+}
+
 /* We only place breakpoints in empty marker functions, and thread locking
    is outside of the function.  So rather than importing software single-step,
    we can just run until exit.  */
@@ -881,8 +890,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   mips_get_pc,
   mips_set_pc,
-  (const unsigned char *) &mips_breakpoint,
-  mips_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  mips_sw_breakpoint_from_kind,
   mips_reinsert_addr,
   0,
   mips_breakpoint_at,

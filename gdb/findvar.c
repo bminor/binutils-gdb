@@ -927,6 +927,12 @@ address_from_register (int regnum, struct frame_info *frame)
   struct type *type = builtin_type (gdbarch)->builtin_data_ptr;
   struct value *value;
   CORE_ADDR result;
+  int regnum_max_excl = (gdbarch_num_regs (gdbarch)
+			 + gdbarch_num_pseudo_regs (gdbarch));
+
+  if (regnum < 0 || regnum >= regnum_max_excl)
+    error (_("Invalid register #%d, expecting 0 <= # < %d"), regnum,
+	   regnum_max_excl);
 
   /* This routine may be called during early unwinding, at a time
      where the ID of FRAME is not yet known.  Calling value_from_register

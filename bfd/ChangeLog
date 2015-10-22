@@ -1,3 +1,112 @@
+2015-10-22  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (struct mmo_data_struct): New members
+	symbol_consistency_override_calculated and ignore_symbol_consistency.
+	(mmo_section_has_contents, mmo_ignore_symbol_consistency): New
+	functions.
+	(mmo_create_symbol): Check with mmo_ignore_symbol_consistency if to
+	report an error for unexpected value of Main.
+	(mmo_write_symbols_and_terminator): Similar.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_convert_load): Use call_nop_byte and
+	check call_nop_as_suffix for 1-byte NOP padding to pad call.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c: Include opcode/i386.h.
+	(x86_64_elf_howto_table): Add R_X86_64_GOTPCRELX and
+	R_X86_64_REX_GOTPCRELX.
+	(R_X86_64_standard): Replace R_X86_64_PLT32_BND with
+	R_X86_64_REX_GOTPCRELX.
+	(x86_64_reloc_map): Add BFD_RELOC_X86_64_GOTPCRELX and
+	BFD_RELOC_X86_64_REX_GOTPCRELX.
+	(need_convert_mov_to_lea): Renamed to ...
+	(need_convert_load): This.
+	(elf_x86_64_check_relocs): Handle R_X86_64_GOTPCRELX and
+	R_X86_64_REX_GOTPCRELX.  Replace need_convert_mov_to_lea with
+	need_convert_load.
+	(elf_x86_64_gc_sweep_hook): Handle R_X86_64_GOTPCRELX and
+	R_X86_64_REX_GOTPCRELX.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_convert_mov_to_lea): Renamed to ...
+	(elf_x86_64_convert_load): This.  Replace need_convert_mov_to_lea
+	with need_convert_load.  Support R_X86_64_GOTPCRELX and
+	R_X86_64_REX_GOTPCRELX transformations.
+	* reloc.c (BFD_RELOC_X86_64_GOTPCRELX): New.
+	(BFD_RELOC_X86_64_REX_GOTPCRELX): Likewise.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c: Include opcode/i386.h.
+	(elf_howto_table): Add R_386_GOT32X.
+	(R_386_ext2): Replace R_386_IRELATIVE with R_386_GOT32X.
+	(elf_i386_reloc_type_lookup): Handle BFD_RELOC_386_GOT32X.
+	(need_convert_mov_to_lea): Renamed to ...
+	(need_convert_load): This.
+	(elf_i386_check_relocs): Handle R_386_GOT32X.  Replace
+	need_convert_mov_to_lea with need_convert_load.
+	(elf_i386_gc_sweep_hook): Handle R_386_GOT32X.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_convert_mov_to_lea): Renamed to ...
+	(elf_i386_convert_load): This.  Replace need_convert_mov_to_lea
+	with need_convert_load.  Support R_386_GOT32X transformations.
+	* reloc.c (BFD_RELOC_386_GOT32X): New.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf32-s390.c (elf_s390_check_relocs): Set the non_got_ref marker
+	only when linking an executable.
+	(elf_s390_relocate_section): Redirect PC-relative relocs to a IPLT
+	slot.
+	* elf64-s390.c (elf_s390_check_relocs): Set the non_got_ref marker
+	only when linking an executable.
+	(elf_s390_relocate_section): Redirect PC-relative relocs to a IPLT
+	slot.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf32-s390.c (elf_s390_adjust_dynamic_symbol): Set the PLT
+	reference counters for local IFUNC calls.
+	* elf64-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf32-s390.c (elf_s390_check_relocs): Fallthrough to the PLT
+	slot allocating code for GOTOFF relocs on ifunc symbols.
+	(elf_s390_gc_sweep_hook): Decrement plt refcount for GOTOFF relocs
+	on ifunc symbols.
+	(elf_s390_relocate_section): Redirect a GOTOFF reloc to an iplt
+	slot.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	PR ld/18841
+	* elf32-s390.c (elf_s390_reloc_type_class): Return
+	reloc_class_ifunc for ifunc symbols.
+	* elf64-s390.c (elf_s390_reloc_type_class): Likewise.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf32-s390.c (elf_s390_finish_dynamic_symbol): Call
+	elf_s390_finish_ifunc_symbol only for actually defined symbols.
+	* elf64-s390.c (elf_s390_finish_dynamic_symbol): Likewise.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* elf-s390-common.c (s390_elf_allocate_ifunc_dyn_relocs): Remove
+	`head' parameter.
+	* elf32-s390.c (allocate_dynrelocs): Don't use last parameter.
+	* elf64-s390.c (allocate_dynrelocs): Don't use last parameter.
+
 2015-10-20  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c (mmo_write_symbols_and_terminator): Correct printed value

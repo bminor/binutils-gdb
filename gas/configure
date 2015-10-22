@@ -764,6 +764,7 @@ enable_plugins
 enable_largefile
 enable_targets
 enable_checking
+enable_compressed_debug_sections
 enable_werror
 enable_build_warnings
 enable_nls
@@ -1412,6 +1413,8 @@ Optional Features:
   --disable-largefile     omit support for large files
   --enable-targets        alternative target configurations besides the primary
   --enable-checking       enable run-time checks
+  --enable-compressed-debug-sections={all,gas,none}
+                          compress debug sections by default]
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --disable-nls           do not use Native Language Support
@@ -10969,7 +10972,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10972 "configure"
+#line 10975 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11075,7 +11078,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11078 "configure"
+#line 11081 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11662,6 +11665,19 @@ if test x$ac_checking != x ; then
 
 $as_echo "#define ENABLE_CHECKING 1" >>confdefs.h
 
+fi
+
+# PR gas/19109
+# Decide the default method for compressing debug sections.
+ac_default_compressed_debug_sections=unset
+# Provide a configure time option to override our default.
+# Check whether --enable-compressed_debug_sections was given.
+if test "${enable_compressed_debug_sections+set}" = set; then :
+  enableval=$enable_compressed_debug_sections; case ,"${enableval}", in
+  ,yes, | ,all, | *,gas,*) ac_default_compressed_debug_sections=yes ;;
+  ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
+  *)   ac_default_compressed_debug_sections=unset ;;
+esac
 fi
 
 using_cgen=no
@@ -12489,15 +12505,11 @@ _ACEOF
 
 done
 
-# For x86 Linux targets, default to compressing debug sections unless
-# configured otherwise.
-case x${enable_compressed_debug_sections}-${target_cpu_type}-${target_os} in
-x*gas*|xall*|x-i386-linux-gnu)
+if test x$ac_default_compressed_debug_sections == xyes ; then
 
 $as_echo "#define DEFAULT_FLAG_COMPRESS_DEBUG 1" >>confdefs.h
 
-  ;;
-esac
+fi
 
 # Turn on all targets if possible
 if test ${all_targets} = "yes"; then

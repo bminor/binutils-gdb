@@ -32,6 +32,9 @@
 #include "gdbcore.h"
 #include "objfiles.h"
 
+#define QNX_NOTE_NAME	"QNX"
+#define QNX_INFO_SECT_NAME "QNX_info"
+
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>
 #endif
@@ -45,6 +48,8 @@ static char default_nto_target[] = "";
 #endif
 
 struct nto_target_ops current_nto_target;
+
+static const struct inferior_data *nto_inferior_data_reg;
 
 static char *
 nto_target (void)
@@ -330,12 +335,51 @@ nto_dummy_supply_regset (struct regcache *regcache, char *regs)
   /* Do nothing.  */
 }
 
+static void
+nto_sniff_abi_note_section (bfd *abfd, asection *sect, void *obj)
+{
+  const char *sectname;
+  unsigned int sectsize;
+  /* Buffer holding the section contents.  */
+  char *note;
+  unsigned int namelen;
+  const char *name;
+  const unsigned sizeof_Elf_Nhdr = 12;
+
+  sectname = bfd_get_section_name (abfd, sect);
+  sectsize = bfd_section_size (abfd, sect);
+
+  if (sectsize > 128)
+    sectsize = 128;
+
+  if (sectname != NULL && strstr (sectname, QNX_INFO_SECT_NAME) != NULL)
+    *(enum gdb_osabi *) obj = GDB_OSABI_QNXNTO;
+  else if (sectname != NULL && strstr (sectname, "note") != NULL
+	   && sectsize > sizeof_Elf_Nhdr)
+    {
+      note = XNEWVEC (char, sectsize);
+      bfd_get_section_contents (abfd, sect, note, 0, sectsize);
+      namelen = (unsigned int) bfd_h_get_32 (abfd, note);
+      name = note + sizeof_Elf_Nhdr;
+      if (sectsize >= namelen + sizeof_Elf_Nhdr
+	  && namelen == sizeof (QNX_NOTE_NAME)
+	  && 0 == strcmp (name, QNX_NOTE_NAME))
+        *(enum gdb_osabi *) obj = GDB_OSABI_QNXNTO;
+
+      XDELETEVEC (note);
+    }
+}
+
 enum gdb_osabi
 nto_elf_osabi_sniffer (bfd *abfd)
 {
-  if (nto_is_nto_target)
-    return nto_is_nto_target (abfd);
-  return GDB_OSABI_UNKNOWN;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
+
+  bfd_map_over_sections (abfd,
+			 nto_sniff_abi_note_section,
+			 &osabi);
+
+  return osabi;
 }
 
 static const char *nto_thread_state_str[] =
@@ -476,4 +520,54 @@ nto_read_auxv_from_initial_stack (CORE_ADDR initial_stack, gdb_byte *readbuf,
         break;
     }
   return len_read;
+}
+
+/* Allocate new nto_inferior_data object.  */
+
+static struct nto_inferior_data *
+nto_new_inferior_data (void)
+{
+  struct nto_inferior_data *const inf_data
+    = XCNEW (struct nto_inferior_data);
+
+  return inf_data;
+}
+
+/* Free inferior data.  */
+
+static void
+nto_inferior_data_cleanup (struct inferior *const inf, void *const dat)
+{
+  xfree (dat);
+}
+
+/* Return nto_inferior_data for the given INFERIOR.  If not yet created,
+   construct it.  */
+
+struct nto_inferior_data *
+nto_inferior_data (struct inferior *const inferior)
+{
+  struct inferior *const inf = inferior ? inferior : current_inferior ();
+  struct nto_inferior_data *inf_data;
+
+  gdb_assert (inf != NULL);
+
+  inf_data = inferior_data (inf, nto_inferior_data_reg);
+  if (inf_data == NULL)
+    {
+      set_inferior_data (inf, nto_inferior_data_reg,
+			 (inf_data = nto_new_inferior_data ()));
+    }
+
+  return inf_data;
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_nto_tdep;
+
+void
+_initialize_nto_tdep (void)
+{
+  nto_inferior_data_reg
+    = register_inferior_data_with_cleanup (NULL, nto_inferior_data_cleanup);
 }

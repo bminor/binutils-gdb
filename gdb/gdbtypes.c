@@ -1080,7 +1080,9 @@ create_array_type_with_stride (struct type *result_type,
 
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
-  if (has_static_range (TYPE_RANGE_DATA (range_type)))
+  if (has_static_range (TYPE_RANGE_DATA (range_type))
+     && (!type_not_associated (result_type)
+        && !type_not_allocated (result_type)))
     {
       LONGEST low_bound, high_bound;
 
@@ -1819,6 +1821,12 @@ is_dynamic_type_internal (struct type *type, int top_level)
 	  || TYPE_DATA_LOCATION_KIND (type) == PROP_LOCLIST))
     return 1;
 
+  if (TYPE_ASSOCIATED_PROP (type))
+    return 1;
+
+  if (TYPE_ALLOCATED_PROP (type))
+    return 1;
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -1936,12 +1944,30 @@ resolve_dynamic_array (struct type *type,
   struct type *elt_type;
   struct type *range_type;
   struct type *ary_dim;
+  struct dynamic_prop *prop;
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY);
+
+  type = copy_type (type);
 
   elt_type = type;
   range_type = check_typedef (TYPE_INDEX_TYPE (elt_type));
   range_type = resolve_dynamic_range (range_type, addr_stack);
+
+  /* Resolve allocated/associated here before creating a new array type, which
+     will update the length of the array accordingly.  */
+  prop = TYPE_ALLOCATED_PROP (type);
+  if (prop != NULL && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+    {
+      TYPE_DYN_PROP_ADDR (prop) = value;
+      TYPE_DYN_PROP_KIND (prop) = PROP_CONST;
+    }
+  prop = TYPE_ASSOCIATED_PROP (type);
+  if (prop != NULL && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+    {
+      TYPE_DYN_PROP_ADDR (prop) = value;
+      TYPE_DYN_PROP_KIND (prop) = PROP_CONST;
+    }
 
   ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
@@ -1950,9 +1976,8 @@ resolve_dynamic_array (struct type *type,
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
-  return create_array_type_with_stride (copy_type (type),
-					elt_type, range_type,
-					TYPE_FIELD_BITSIZE (type, 0));
+  return create_array_type_with_stride (type, elt_type, range_type,
+                                        TYPE_FIELD_BITSIZE (type, 0));
 }
 
 /* Resolve dynamic bounds of members of the union TYPE to static
@@ -3374,6 +3399,30 @@ types_deeply_equal (struct type *type1, struct type *type2)
     throw_exception (except);
 
   return result;
+}
+
+/* Allocated status of type TYPE.  Return zero if type TYPE is allocated.
+   Otherwise return one.  */
+
+int
+type_not_allocated (const struct type *type)
+{
+  struct dynamic_prop *prop = TYPE_ALLOCATED_PROP (type);
+
+  return (prop && TYPE_DYN_PROP_KIND (prop) == PROP_CONST
+         && !TYPE_DYN_PROP_ADDR (prop));
+}
+
+/* Associated status of type TYPE.  Return zero if type TYPE is associated.
+   Otherwise return one.  */
+
+int
+type_not_associated (const struct type *type)
+{
+  struct dynamic_prop *prop = TYPE_ASSOCIATED_PROP (type);
+
+  return (prop && TYPE_DYN_PROP_KIND (prop) == PROP_CONST
+         && !TYPE_DYN_PROP_ADDR (prop));
 }
 
 /* Compare one type (PARM) for compatibility with another (ARG).

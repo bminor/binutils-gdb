@@ -1,3 +1,97 @@
+2015-10-22  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-scripts/script.exp (extract_symbol_test): Allow nm output of
+	objcopy --extract-symbols result to differ from original on
+	mmix-knuth-mmixware.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/call3.s: New file.
+	* ld-i386/call3a.d: Likewise.
+	* ld-i386/call3b.d: Likewise.
+	* ld-i386/call3c.d: Likewise.
+	* ld-i386/call3d.d: Likewise.
+	* ld-i386/call3e.d: Likewise.
+	* ld-i386/call3f.d: Likewise.
+	* ld-i386/call3g.d: Likewise.
+	* ld-i386/call3h.d: Likewise.
+	* ld-i386/load1-nacl.d: Likewise.
+	* ld-x86-64/call1.s: Likewise.
+	* ld-x86-64/call1a.d: Likewise.
+	* ld-x86-64/call1b.d: Likewise.
+	* ld-x86-64/call1c.d: Likewise.
+	* ld-x86-64/call1d.d: Likewise.
+	* ld-x86-64/call1e.d: Likewise.
+	* ld-x86-64/call1f.d: Likewise.
+	* ld-x86-64/call1g.d: Likewise.
+	* ld-x86-64/call1h.d: Likewise.
+	* ld-x86-64/call1i.d: Likewise.
+	* ld-x86-64/load1a-nacl.d: Likewise.
+	* ld-x86-64/load1b-nacl.d: Likewise.
+	* ld-x86-64/load1c-nacl.d: Likewise.
+	* ld-x86-64/load1d-nacl.d: Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc-5r-local-x86-64.d: Replace R_X86_64_GOTPCREL
+	with R_X86_64_REX_GOTPCRELX.
+	* ld-x86-64/plt-main1.rd: Likewise.
+	* ld-x86-64/plt-main3.rd: Likewise.
+	* ld-x86-64/plt-main4.rd: Likewise.
+	* ld-x86-64/gotpcrel1.dd: New file.
+	* ld-x86-64/gotpcrel1.out: Likewise.
+	* ld-x86-64/gotpcrel1a.S: Likewise.
+	* ld-x86-64/gotpcrel1b.c: Likewise.
+	* ld-x86-64/gotpcrel1c.c: Likewise.
+	* ld-x86-64/gotpcrel1d.S: Likewise.
+	* ld-x86-64/load1.s: Likewise.
+	* ld-x86-64/load1a.d: Likewise.
+	* ld-x86-64/load1b.d: Likewise.
+	* ld-x86-64/load1c.d: Likewise.
+	* ld-x86-64/load1d.d: Likewise.
+	* ld-x86-64/x86-64.exp: Run load1a, load1b, load1c and load1d
+	tests.  Run gotpcrel1 test.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/branch1.d: New file.
+	* ld-i386/branch1.s: Likewise.
+	* ld-i386/call1.d: Likewise.
+	* ld-i386/call1.s: Likewise.
+	* ld-i386/call2.d: Likewise.
+	* ld-i386/call2.s: Likewise.
+	* ld-i386/got1.dd: Likewise.
+	* ld-i386/got1.out: Likewise.
+	* ld-i386/got1a.S: Likewise.
+	* ld-i386/got1b.c: Likewise.
+	* ld-i386/got1c.c: Likewise.
+	* ld-i386/got1d.S: Likewise.
+	* ld-i386/jmp1.d: Likewise.
+	* ld-i386/jmp1.s: Likewise.
+	* ld-i386/jmp2.d: Likewise.
+	* ld-i386/jmp2.s: Likewise.
+	* ld-i386/load1.d: Likewise.
+	* ld-i386/load1.s: Likewise.
+	* ld-i386/load2.d: Likewise.
+	* ld-i386/load2.s: Likewise.
+	* ld-i386/load3.d: Likewise.
+	* ld-i386/load3.s: Likewise.
+	* ld-i386/load4.s: Likewise.
+	* ld-i386/load4a.d: Likewise.
+	* ld-i386/load4b.d: Likewise.
+	* ld-i386/load5.s: Likewise.
+	* ld-i386/load5a.d: Likewise.
+	* ld-i386/load5b.d: Likewise.
+	* ld-i386/load6.d: Likewise.
+	* ld-i386/load6.s: Likewise.
+	* ld-i386/i386.exp: Run branch1, call1, call2, jmp1, jmp2,
+	load1, load2, load3, load4a, load4b, load5a, load5b and load6
+	tests.  Run got1 test.
+
+2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* ld-ifunc/ifunc.exp: Run ifunc tests on s390* targets.
+
 2015-10-19  Simon Dardis  <Simon.Dardis@imgtec.com>
 
 	* ld-elf/attributes.d: New test for symbol attribute copying.

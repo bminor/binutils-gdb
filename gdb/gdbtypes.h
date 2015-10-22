@@ -440,6 +440,14 @@ enum dynamic_prop_node_kind
   /* A property providing a type's data location.
      Evaluating this field yields to the location of an object's data.  */
   DYN_PROP_DATA_LOCATION,
+
+  /* A property representing DW_AT_allocated.  The presence of this attribute
+     indicates that the object of the type can be allocated/deallocated.  */
+  DYN_PROP_ALLOCATED,
+
+  /* A property representing DW_AT_allocated.  The presence of this attribute
+     indicated that the object of the type can be associated.  */
+  DYN_PROP_ASSOCIATED,
 };
 
 /* * List for dynamic type attributes.  */
@@ -1258,6 +1266,12 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_DATA_LOCATION_KIND(thistype) \
   TYPE_DATA_LOCATION (thistype)->kind
 
+/* Property accessors for the type allocated/associated.  */
+#define TYPE_ALLOCATED_PROP(thistype) \
+  get_dyn_prop (DYN_PROP_ALLOCATED, thistype)
+#define TYPE_ASSOCIATED_PROP(thistype) \
+  get_dyn_prop (DYN_PROP_ASSOCIATED, thistype)
+
 /* Attribute accessors for dynamic properties.  */
 #define TYPE_DYN_PROP_LIST(thistype) \
   TYPE_MAIN_TYPE(thistype)->dyn_prop_list
@@ -1931,5 +1945,9 @@ extern struct type *copy_type (const struct type *type);
 extern int types_equal (struct type *, struct type *);
 
 extern int types_deeply_equal (struct type *, struct type *);
+
+extern int type_not_allocated (const struct type *type);
+
+extern int type_not_associated (const struct type *type);
 
 #endif /* GDBTYPES_H */

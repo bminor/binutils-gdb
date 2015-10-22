@@ -1,3 +1,8 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add call_nop_as_suffix and
+	call_nop_byte.
+
 2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* dis-asm.h (arc_get_disassembler): Correct declaration.

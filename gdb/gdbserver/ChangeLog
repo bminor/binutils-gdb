@@ -1,3 +1,151 @@
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-arm-low.c (arm_supports_z_point_type): Add software
+	breakpoint support.
+
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-arm-low.c: Refactor breakpoint definitions.
+	(arm_breakpoint_at): Adjust for arm_abi_breakpoint.
+	(arm_sw_breakpoint_from_kind): Adjust for arm_breakpoint.
+
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* Makefile.in: Add arm.c/o.
+	* configure.srv: Likewise.
+	* linux-arm-low.c (arm_breakpoint_kinds): New enum.
+	(arm_breakpoint_kind_from_pc): New function.
+	(arm_sw_breakpoint_from_kind): Return proper kind.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize.
+
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-low.c (initialize_low): Ajdust for breakpoint global variables
+	removal.
+	* mem-break.c : Remove breakpoint_data/breakpoint_len global variables.
+	(struct raw_breakpoint) <size>: Remove.
+	(struct raw_breakpoint) <kind>: Add.
+	(bp_size): New function.
+	(bp_opcode): Likewise.
+	(find_raw_breakpoint_at): Adjust for kind.
+	(insert_memory_breakpoint): Adjust for kind call bp_size,bp_opcode.
+	(remove_memory_breakpoint): Adjust for kind call bp_size.
+	(set_raw_breakpoint_at): Adjust for kind.
+	(set_breakpoint): Likewise.
+	(set_breakpoint_at): Call breakpoint_kind_from_pc.
+	(delete_raw_breakpoint): Adjust for kind.
+	(delete_breakpoint): Likewise.
+	(find_gdb_breakpoint): Likewise.
+	(set_gdb_breakpoint_1): Likewise.
+	(set_gdb_breakpoint): Likewise.
+	(delete_gdb_breakpoint_1): Likewise.
+	(delete_gdb_breakpoint): Likewise.
+	(uninsert_raw_breakpoint): Likewise.
+	(reinsert_raw_breakpoint): Likewise.
+	(set_breakpoint_data): Remove.
+	(validate_inserted_breakpoint): Adjust for kind call bp_size,bp_opcode.
+	(check_mem_read): Adjust for kind call bp_size.
+	(check_mem_write): Adjust for kind call bp_size,bp_opcode.
+	(clone_one_breakpoint): Adjust for kind.
+	* mem-break.h (set_gdb_breakpoint): Likewise.
+	(delete_gdb_breakpoint): Likewise.
+	* server.c (process_serial_event): Likewise.
+
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-aarch64-low.c (aarch64_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-arm-low.c (arm_breakpoint_kind_from_pc): New function.
+	(arm_sw_breakpoint_from_kind): New function.
+	* linux-bfin-low.c (bfin_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-cris-low.c (cris_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-crisv32-low.c (cris_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-low.c (linux_wait_1): Call breakpoint_kind_from_pc
+	and sw_breakpoint_from_kind to increment the pc.
+	(linux_breakpoint_kind_from_pc): New function.
+	(linux_sw_breakpoint_from_kind): New function.
+	(struct target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	(initialize_low): Call breakpoint_kind_from_pc and
+	sw_breakpoint_from_kind to replace breakpoint_data/len.
+	* linux-low.h (struct linux_target_ops) <breakpoint_kind_from_pc>:
+	New field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Likewise.
+	* linux-m32r-low.c (m32r_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-m68k-low.c (m68k_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-mips-low.c (mips_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-nios2-low.c (nios2_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-ppc-low.c (ppc_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-s390-low.c (s390_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-sh-low.c (sh_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-sparc-low.c (sparc_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-tic6x-low.c (tic6x_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-tile-low.c (tile_sw_breakpoint_from_kind): New function.
+	* linux-x86-low.c (x86_sw_breakpoint_from_kind): New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+	* linux-xtensa-low.c (xtensa_sw_breakpoint_from_kind) New function.
+	(struct linux_target_ops) <breakpoint>: Remove.
+	(struct linux_target_ops) <breakpoint_len>: Remove.
+	(struct linux_target_ops) <breakpoint_kind_from_pc>: Initialize field.
+	(struct linux_target_ops) <sw_breakpoint_from_kind>: Initialize field.
+
+2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-cris-low.c (cris_get_pc): Remove void arg.
+
 2015-10-16  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* gdbserver/nto-low.c (nto_insert_point, nto_remove_point): Fix

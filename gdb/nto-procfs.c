@@ -784,6 +784,9 @@ procfs_wait (struct target_ops *ops,
       devctl (ctl_fd, DCMD_PROC_STATUS, &status, sizeof (status), 0);
     }
 
+  nto_inferior_data (NULL)->stopped_flags = status.flags;
+  nto_inferior_data (NULL)->stopped_pc = status.ip;
+
   if (status.flags & _DEBUG_FLAG_SSTEP)
     {
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
@@ -1626,5 +1629,21 @@ procfs_insert_hw_watchpoint (struct target_ops *self,
 static int
 procfs_stopped_by_watchpoint (struct target_ops *ops)
 {
-  return 0;
+  /* NOTE: nto_stopped_by_watchpoint will be called ONLY while we are
+     stopped due to a SIGTRAP.  This assumes gdb works in 'all-stop' mode;
+     future gdb versions will likely run in 'non-stop' mode in which case
+     we will have to store/examine statuses per thread in question.
+     Until then, this will work fine.  */
+
+  struct inferior *inf = current_inferior ();
+  struct nto_inferior_data *inf_data;
+
+  gdb_assert (inf != NULL);
+
+  inf_data = nto_inferior_data (inf);
+
+  return inf_data->stopped_flags
+	 & (_DEBUG_FLAG_TRACE_RD
+	    | _DEBUG_FLAG_TRACE_WR
+	    | _DEBUG_FLAG_TRACE_MODIFY);
 }

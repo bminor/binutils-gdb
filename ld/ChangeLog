@@ -1,3 +1,47 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac: Properly check
+	--enable-compressed-debug-sections={yes,all}.
+	* configure: Regenerated.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19109
+	* configure.ac: Handle --enable-compressed-debug-sections=*,ld,*.
+	* configure: Regenerated.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld/ld.texinfo: Document "-z call-nop=PADDING" option.
+	* emulparams/call_nop.sh: New file.
+	* emulparams/elf_i386_be.sh: Source
+	${srcdir}/emulparams/call_nop.sh.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/elf_i386_vxworks.sh: Likewise.
+	* emulparams/elf_iamcu.sh: Likewise.
+	* emulparams/elf_k1om.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
+	link_info.call_nop_byte if $CALL_NOP_BYTE isn't empty.
+
+2015-10-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19109
+	* configure.ac: Add --enable-compressed-debug-sections with
+	options of all, none or ld.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* ld.texinfo: Document how to determine the default action for
+	debug sections.
+	* ldmain.c (main): If DEFAULT_FLAG_COMPRESS_DEBUG is defined then
+	set the compress_debug field of the link_info structure to
+	zlib-gabi.
+	* lexsup.c (elf_static_list_options): Output the default setting
+	for the --compress-debug-sections option.
+	* NEWS: Mention the new configure option.
+
 2015-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Fix a typo for "-z noextern-protected-data".

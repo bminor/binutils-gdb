@@ -22356,6 +22356,36 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
       && !HAVE_GNAT_AUX_INFO (type))
     INIT_GNAT_SPECIFIC (type);
 
+  /* Read DW_AT_allocated and set in type.  */
+  attr = dwarf2_attr (die, DW_AT_allocated, cu);
+  if (attr_form_is_block (attr))
+    {
+      if (attr_to_dynamic_prop (attr, die, cu, &prop))
+        add_dyn_prop (DYN_PROP_ALLOCATED, prop, type, objfile);
+    }
+  else if (attr != NULL)
+    {
+      complaint (&symfile_complaints,
+                _("DW_AT_allocated has the wrong form (%s) at DIE 0x%x"),
+                (attr != NULL ? dwarf_form_name (attr->form) : "n/a"),
+                die->offset.sect_off);
+    }
+
+  /* Read DW_AT_associated and set in type.  */
+  attr = dwarf2_attr (die, DW_AT_associated, cu);
+  if (attr_form_is_block (attr))
+    {
+      if (attr_to_dynamic_prop (attr, die, cu, &prop))
+        add_dyn_prop (DYN_PROP_ASSOCIATED, prop, type, objfile);
+    }
+  else if (attr != NULL)
+    {
+      complaint (&symfile_complaints,
+                _("DW_AT_associated has the wrong form (%s) at DIE 0x%x"),
+                (attr != NULL ? dwarf_form_name (attr->form) : "n/a"),
+                die->offset.sect_off);
+    }
+
   /* Read DW_AT_data_location and set in type.  */
   attr = dwarf2_attr (die, DW_AT_data_location, cu);
   if (attr_to_dynamic_prop (attr, die, cu, &prop))

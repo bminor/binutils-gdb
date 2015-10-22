@@ -111,6 +111,7 @@ proc extract_symbol_test { testfile testname } {
     global objcopy
     global nm
     global size
+    global target_triplet
 
     set copyfile tmpdir/extract
     set args "--extract-symbol $testfile $copyfile"
@@ -121,8 +122,22 @@ proc extract_symbol_test { testfile testname } {
     }
 
     set orig_syms [run_host_cmd $nm $testfile]
+    set syms_massaged $orig_syms
+    switch -regexp $target_triplet {
+	^mmix-knuth-mmixware$ {
+	    # Without section sizes (stripped together with the
+	    # contents for this target), we can't deduce the symbol
+	    # types.  Artificially tracking the symbol types is
+	    # considered not worthwhile as there's no known use-case
+	    # for --extract-symbols for this target.  The option is
+	    # supported just enough to emit the same symbol values,
+	    # but absolute symbol types are expected.
+	    regsub -all " \[TD\] " $syms_massaged " A " syms_massaged
+	}
+    }
+
     set extract_syms [run_host_cmd $nm $copyfile]
-    if ![string equal $orig_syms $extract_syms] {
+    if ![string equal $syms_massaged $extract_syms] {
 	fail $testname
 	return
     }

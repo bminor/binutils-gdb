@@ -1,3 +1,14 @@
+2015-10-22  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/add-symbol.d: Run test on mips.  Support either
+	order of NEW and NEWDATA symbols.
+
+2015-10-21  Ronald Hoogenboom  <rhoogenboom@irdeto.com>
+
+	PR binutils/19104
+	* binutils-all/add-symbol.d: New test.
+	* binutils-all/objcopy.exp: Run the new test.
+
 2015-10-15  Alan Modra  <amodra@gmail.com>
 
 	* binutils-all/objcopy.exp: Delete trailing whitespace.  Use

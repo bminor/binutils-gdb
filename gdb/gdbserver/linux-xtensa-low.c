@@ -151,8 +151,17 @@ static struct regset_info xtensa_regsets[] = {
 #define XTENSA_BREAKPOINT {0x2d,0xf0}
 #endif
 
-static const unsigned char xtensa_breakpoint[] = XTENSA_BREAKPOINT;
+static const gdb_byte xtensa_breakpoint[] = XTENSA_BREAKPOINT;
 #define xtensa_breakpoint_len 2
+
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+xtensa_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = xtensa_breakpoint_len;
+  return xtensa_breakpoint;
+}
 
 static CORE_ADDR
 xtensa_get_pc (struct regcache *regcache)
@@ -234,8 +243,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   xtensa_get_pc,
   xtensa_set_pc,
-  xtensa_breakpoint,
-  xtensa_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  xtensa_sw_breakpoint_from_kind,
   NULL,
   0,
   xtensa_breakpoint_at,
