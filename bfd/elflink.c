@@ -12101,7 +12101,7 @@ _bfd_elf_gc_mark_hook (asection *sec,
 		{
 		  sec = bfd_get_section_by_name (i, sec_name);
 		  if (sec)
-		    sec->flags |= SEC_KEEP;
+		    return sec;
 		}
 	    }
 	  break;
@@ -12449,8 +12449,7 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	      o->gc_mark = first->gc_mark;
 	    }
 
-	  /* Always keep sections marked with SEC_KEEP.  */
-	  if (o->gc_mark || (o->flags & SEC_KEEP))
+	  if (o->gc_mark)
 	    continue;
 
 	  /* Skip sweeping sections already excluded.  */

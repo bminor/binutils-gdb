@@ -1,3 +1,10 @@
+2015-10-23  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11133
+	PR ld/19161
+	* elflink.c (elf_gc_sweep): Revert last patch.
+	(_bfd_elf_gc_mark_hook): Don't set SEC_KEEP here.
+
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19161
