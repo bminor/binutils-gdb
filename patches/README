@@ -16,7 +16,6 @@ dir=`dirname $0`
 clean=$1
 
 patches="
-	binutils-got.patch
 	binutils-sharable.patch
 	binutils-lto-mixed.patch
 	binutils-pr12639.patch
