@@ -124,9 +124,13 @@ typedef struct
 
 /*  For xtensa-config.c to expand to the structure above.  */
 #define XTREG(index,ofs,bsz,sz,al,tnum,flg,cp,ty,gr,name,fet,sto,mas,ct,x,y) \
-	{#name, ofs, ty, ((gr) | ((xtRegisterGroupNCP >> 2) << (cp + 2))), \
+       {#name, ofs, (xtensa_register_type_t) (ty), \
+	((xtensa_register_group_t) \
+	 ((gr) | ((xtRegisterGroupNCP >> 2) << (cp + 2)))), \
 	 ct, bsz, sz, al, tnum, flg, cp, mas, fet, sto},
-#define XTREG_END {0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0},
+#define XTREG_END \
+  {0, 0, (xtensa_register_type_t) 0, (xtensa_register_group_t) 0,	\
+   0, 0, 0, 0, -1, 0, 0, 0, 0, 0},
 
 #define XTENSA_REGISTER_FLAGS_PRIVILEGED	0x0001
 #define XTENSA_REGISTER_FLAGS_READABLE		0x0002
