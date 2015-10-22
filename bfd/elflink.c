@@ -12449,7 +12449,8 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	      o->gc_mark = first->gc_mark;
 	    }
 
-	  if (o->gc_mark)
+	  /* Always keep sections marked with SEC_KEEP.  */
+	  if (o->gc_mark || (o->flags & SEC_KEEP))
 	    continue;
 
 	  /* Skip sweeping sections already excluded.  */

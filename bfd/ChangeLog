@@ -1,3 +1,9 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19161
+	* elflink.c (elf_gc_sweep): Always keep sections marked with
+	SEC_KEEP.
+
 2015-10-22  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c (struct mmo_data_struct): New members
