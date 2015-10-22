@@ -1,5 +1,32 @@
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c: Include opcode/i386.h.
+	(x86_64_elf_howto_table): Add R_X86_64_GOTPCRELX and
+	R_X86_64_REX_GOTPCRELX.
+	(R_X86_64_standard): Replace R_X86_64_PLT32_BND with
+	R_X86_64_REX_GOTPCRELX.
+	(x86_64_reloc_map): Add BFD_RELOC_X86_64_GOTPCRELX and
+	BFD_RELOC_X86_64_REX_GOTPCRELX.
+	(need_convert_mov_to_lea): Renamed to ...
+	(need_convert_load): This.
+	(elf_x86_64_check_relocs): Handle R_X86_64_GOTPCRELX and
+	R_X86_64_REX_GOTPCRELX.  Replace need_convert_mov_to_lea with
+	need_convert_load.
+	(elf_x86_64_gc_sweep_hook): Handle R_X86_64_GOTPCRELX and
+	R_X86_64_REX_GOTPCRELX.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_convert_mov_to_lea): Renamed to ...
+	(elf_x86_64_convert_load): This.  Replace need_convert_mov_to_lea
+	with need_convert_load.  Support R_X86_64_GOTPCRELX and
+	R_X86_64_REX_GOTPCRELX transformations.
+	* reloc.c (BFD_RELOC_X86_64_GOTPCRELX): New.
+	(BFD_RELOC_X86_64_REX_GOTPCRELX): Likewise.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c: Include opcode/i386.h.
 	(elf_howto_table): Add R_386_GOT32X.
 	(R_386_ext2): Replace R_386_IRELATIVE with R_386_GOT32X.

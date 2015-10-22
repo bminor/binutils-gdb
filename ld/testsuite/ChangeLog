@@ -1,5 +1,26 @@
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-ifunc/ifunc-5r-local-x86-64.d: Replace R_X86_64_GOTPCREL
+	with R_X86_64_REX_GOTPCRELX.
+	* ld-x86-64/plt-main1.rd: Likewise.
+	* ld-x86-64/plt-main3.rd: Likewise.
+	* ld-x86-64/plt-main4.rd: Likewise.
+	* ld-x86-64/gotpcrel1.dd: New file.
+	* ld-x86-64/gotpcrel1.out: Likewise.
+	* ld-x86-64/gotpcrel1a.S: Likewise.
+	* ld-x86-64/gotpcrel1b.c: Likewise.
+	* ld-x86-64/gotpcrel1c.c: Likewise.
+	* ld-x86-64/gotpcrel1d.S: Likewise.
+	* ld-x86-64/load1.s: Likewise.
+	* ld-x86-64/load1a.d: Likewise.
+	* ld-x86-64/load1b.d: Likewise.
+	* ld-x86-64/load1c.d: Likewise.
+	* ld-x86-64/load1d.d: Likewise.
+	* ld-x86-64/x86-64.exp: Run load1a, load1b, load1c and load1d
+	tests.  Run gotpcrel1 test.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-i386/branch1.d: New file.
 	* ld-i386/branch1.s: Likewise.
 	* ld-i386/call1.d: Likewise.

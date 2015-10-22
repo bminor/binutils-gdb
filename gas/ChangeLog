@@ -1,6 +1,17 @@
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (tc_i386_fix_adjustable): Handle
+	BFD_RELOC_X86_64_GOTPCRELX and BFD_RELOC_X86_64_REX_GOTPCRELX.
+	(tc_gen_reloc): Likewise.
+	(i386_validate_fix): Generate BFD_RELOC_X86_64_GOTPCRELX or
+	BFD_RELOC_X86_64_REX_GOTPCRELX if fx_tcbit2 is set.
+	* config/tc-i386.h (TC_FORCE_RELOCATION_LOCAL): Also return
+	true for BFD_RELOC_X86_64_GOTPCRELX and
+	BFD_RELOC_X86_64_REX_GOTPCRELX.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Handle
 	BFD_RELOC_386_GOT32X.
 	(tc_gen_reloc): Likewise.
 	(match_template): Force 0x8b encoding for "mov foo@GOT, %eax".

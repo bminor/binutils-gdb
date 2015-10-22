@@ -321,6 +321,10 @@ run_dump_test "mov1a"
 run_dump_test "mov1b"
 run_dump_test "mov1c"
 run_dump_test "mov1d"
+run_dump_test "load1a"
+run_dump_test "load1b"
+run_dump_test "load1c"
+run_dump_test "load1d"
 run_dump_test "pr17935-1"
 run_dump_test "pr17935-2"
 run_dump_test "pr18160"
@@ -511,6 +515,22 @@ if { [isnative] && [which $CC] != 0 } {
 	    "" \
 	    "pr19031.so" \
 	] \
+	[list \
+	    "Build gotpcrel1d.so" \
+	    "-shared" \
+	    "" \
+	    { gotpcrel1d.S } \
+	    "" \
+	    "gotpcrel1d.so" \
+	] \
+	[list \
+	    "Build gotpcrel1" \
+	    "tmpdir/gotpcrel1d.so" \
+	    "" \
+	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
+	    {{objdump {-dw} gotpcrel1.dd}} \
+	    "gotpcrel1" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
@@ -572,6 +592,14 @@ if { [isnative] && [which $CC] != 0 } {
 	    { pr19031b.S pr19031c.c } \
 	    "pr19031" \
 	    "pr19031.out" \
+	] \
+	[list \
+	    "Run gotpcrel1" \
+	    "tmpdir/gotpcrel1d.so" \
+	    "" \
+	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
+	    "gotpcrel1" \
+	    "gotpcrel1.out" \
 	] \
     ]
 
