@@ -6937,6 +6937,19 @@ current_lwp_ptid (void)
   return ptid_of (current_thread);
 }
 
+/* Return the default breakpoint kind as the size of the breakpoint.  */
+
+static int
+default_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+{
+  int size = 0;
+
+  gdb_assert (the_low_target.sw_breakpoint_from_kind != NULL);
+
+  (*the_low_target.sw_breakpoint_from_kind) (0, &size);
+  return size;
+}
+
 /* Implementation of the target_ops method "breakpoint_kind_from_pc".  */
 
 static int
@@ -6945,8 +6958,7 @@ linux_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
   if (the_low_target.breakpoint_kind_from_pc != NULL)
     return (*the_low_target.breakpoint_kind_from_pc) (pcptr);
   else
-    /* Default breakpoint kind value.  */
-    return 0;
+    return default_breakpoint_kind_from_pc (pcptr);
 }
 
 /* Implementation of the target_ops method "sw_breakpoint_from_kind".  */

@@ -1,3 +1,9 @@
+2015-10-22  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-low.c (default_breakpoint_kind_from_pc): New function.
+	(linux_breakpoint_kind_from_pc): Use default_breakpoint_kind_from_pc for
+	the default breakpoint kind.
+
 2015-10-21  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* linux-arm-low.c (arm_supports_z_point_type): Add software
