@@ -1,5 +1,18 @@
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* x86_64.cc (Target_x86_64<size>::Scan::get_reference_flags):
+	Treat R_X86_64_GOTPCRELX and R_X86_64_REX_GOTPCRELX the same
+	as R_X86_64_GOTPCREL.
+	(Target_x86_64<size>::Scan::local): Likewise.
+	(Target_x86_64<size>::Scan::possible_function_pointer_reloc):
+	Likewise.
+	(Target_x86_64<size>::Scan::global): Likewise.
+	(Target_x86_64<size>::Relocate::relocate): Likewise.
+	(Target_x86_64<size>::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386.cc (Target_i386::Scan::get_reference_flags(): Treat
 	R_386_GOT32X the same as R_386_GOT32.
 	(Target_i386::Scan::local): Likewise.
