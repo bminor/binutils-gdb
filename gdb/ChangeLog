@@ -1,5 +1,9 @@
 2015-10-22  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* python/python.c (_initialize_python): Add cast.
+
+2015-10-22  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* nto-tdep.c (nto_inferior_data): Add cast.
 
 2015-10-22  Pedro Alves  <palves@redhat.com>
