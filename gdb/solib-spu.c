@@ -296,7 +296,7 @@ spu_bfd_iovec_pread (bfd *abfd, void *stream, void *buf,
   CORE_ADDR addr = *(CORE_ADDR *)stream;
   int ret;
 
-  ret = target_read_memory (addr + offset, buf, nbytes);
+  ret = target_read_memory (addr + offset, (gdb_byte *) buf, nbytes);
   if (ret != 0)
     {
       bfd_set_error (bfd_error_invalid_operation);

@@ -1,5 +1,9 @@
 2015-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* solib-spu.c (spu_bfd_iovec_pread): Add (gdb_byte *) cast.
+
+2015-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* rs6000-tdep.c (variants): Add (enum bfd_architecture) cast.
 
 2015-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
