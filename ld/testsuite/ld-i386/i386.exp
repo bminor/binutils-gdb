@@ -293,6 +293,19 @@ run_dump_test "lea1e"
 run_dump_test "lea1f"
 run_dump_test "mov1a"
 run_dump_test "mov1b"
+run_dump_test "branch1"
+run_dump_test "call1"
+run_dump_test "call2"
+run_dump_test "jmp1"
+run_dump_test "jmp2"
+run_dump_test "load1"
+run_dump_test "load2"
+run_dump_test "load3"
+run_dump_test "load4a"
+run_dump_test "load4b"
+run_dump_test "load5a"
+run_dump_test "load5b"
+run_dump_test "load6"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
@@ -498,6 +511,22 @@ if { [isnative]
 	    "" \
 	    "pr19031.so" \
 	] \
+	[list \
+	    "Build got1d.so" \
+	    "-shared" \
+	    "" \
+	    { got1d.S } \
+	    "" \
+	    "got1d.so" \
+	] \
+	[list \
+	    "Build gotpc1" \
+	    "tmpdir/got1d.so" \
+	    "" \
+	    { got1a.S got1b.c got1c.c } \
+	    {{objdump {-dw} got1.dd}} \
+	    "got1" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
@@ -567,6 +596,14 @@ if { [isnative]
 	    { pr19031b.S pr19031c.c } \
 	    "pr19031" \
 	    "pr19031.out" \
+	] \
+	[list \
+	    "Run got1" \
+	    "tmpdir/got1d.so" \
+	    "" \
+	    { got1a.S got1b.c got1c.c } \
+	    "got1" \
+	    "got1.out" \
 	] \
     ]
 }

@@ -1,3 +1,23 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c: Include opcode/i386.h.
+	(elf_howto_table): Add R_386_GOT32X.
+	(R_386_ext2): Replace R_386_IRELATIVE with R_386_GOT32X.
+	(elf_i386_reloc_type_lookup): Handle BFD_RELOC_386_GOT32X.
+	(need_convert_mov_to_lea): Renamed to ...
+	(need_convert_load): This.
+	(elf_i386_check_relocs): Handle R_386_GOT32X.  Replace
+	need_convert_mov_to_lea with need_convert_load.
+	(elf_i386_gc_sweep_hook): Handle R_386_GOT32X.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_convert_mov_to_lea): Renamed to ...
+	(elf_i386_convert_load): This.  Replace need_convert_mov_to_lea
+	with need_convert_load.  Support R_386_GOT32X transformations.
+	* reloc.c (BFD_RELOC_386_GOT32X): New.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
 2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* elf32-s390.c (elf_s390_check_relocs): Set the non_got_ref marker

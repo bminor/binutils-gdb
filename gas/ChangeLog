@@ -1,3 +1,17 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Handle
+	BFD_RELOC_386_GOT32X.
+	(tc_gen_reloc): Likewise.
+	(match_template): Force 0x8b encoding for "mov foo@GOT, %eax".
+	(output_disp): Check for "call/jmp *mem", "mov mem, %reg",
+	"test %reg, mem" and "binop mem, %reg" where binop is one of
+	adc, add, and, cmp, or, sbb, sub, xor instructions.  Set
+	fx_tcbit if the REX prefix is generated.  Set fx_tcbit2 if
+	BFD_RELOC_386_GOT32X should be generated.
+	(i386_validate_fix): Generate BFD_RELOC_386_GOT32X if fx_tcbit2
+	is set.
+
 2015-10-21  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19109

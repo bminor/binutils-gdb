@@ -1,3 +1,39 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/branch1.d: New file.
+	* ld-i386/branch1.s: Likewise.
+	* ld-i386/call1.d: Likewise.
+	* ld-i386/call1.s: Likewise.
+	* ld-i386/call2.d: Likewise.
+	* ld-i386/call2.s: Likewise.
+	* ld-i386/got1.dd: Likewise.
+	* ld-i386/got1.out: Likewise.
+	* ld-i386/got1a.S: Likewise.
+	* ld-i386/got1b.c: Likewise.
+	* ld-i386/got1c.c: Likewise.
+	* ld-i386/got1d.S: Likewise.
+	* ld-i386/jmp1.d: Likewise.
+	* ld-i386/jmp1.s: Likewise.
+	* ld-i386/jmp2.d: Likewise.
+	* ld-i386/jmp2.s: Likewise.
+	* ld-i386/load1.d: Likewise.
+	* ld-i386/load1.s: Likewise.
+	* ld-i386/load2.d: Likewise.
+	* ld-i386/load2.s: Likewise.
+	* ld-i386/load3.d: Likewise.
+	* ld-i386/load3.s: Likewise.
+	* ld-i386/load4.s: Likewise.
+	* ld-i386/load4a.d: Likewise.
+	* ld-i386/load4b.d: Likewise.
+	* ld-i386/load5.s: Likewise.
+	* ld-i386/load5a.d: Likewise.
+	* ld-i386/load5b.d: Likewise.
+	* ld-i386/load6.d: Likewise.
+	* ld-i386/load6.s: Likewise.
+	* ld-i386/i386.exp: Run branch1, call1, call2, jmp1, jmp2,
+	load1, load2, load3, load4a, load4b, load5a, load5b and load6
+	tests.  Run got1 test.
+
 2015-10-22  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* ld-ifunc/ifunc.exp: Run ifunc tests on s390* targets.

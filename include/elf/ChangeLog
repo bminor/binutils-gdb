@@ -1,3 +1,7 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386.h (R_386_GOT32X): New relocation.
+
 2015-10-07  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* arc-reloc.def: Macro file with definition of all relocation
