@@ -1,3 +1,8 @@
+2015-10-22  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/add-symbol.d: Run test on mips.  Support either
+	order of NEW and NEWDATA symbols.
+
 2015-10-21  Ronald Hoogenboom  <rhoogenboom@irdeto.com>
 
 	PR binutils/19104
