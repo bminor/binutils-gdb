@@ -1,3 +1,8 @@
+2015-10-22  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* objcopy.c (setup_section): Don't omit bfd_copy_private_bfd_data
+	call when extract_symbol.
+
 2015-10-21  Ronald Hoogenboom  <rhoogenboom@irdeto.com>
 
 	PR binutils/19104

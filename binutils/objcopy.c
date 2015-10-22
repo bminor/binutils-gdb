@@ -3089,11 +3089,6 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   isection->output_section = osection;
   isection->output_offset = 0;
 
-  /* Do not copy backend data if --extract-symbol is passed; anything
-     that needs to look at the section contents will fail.  */
-  if (extract_symbol)
-    return;
-
   if ((isection->flags & SEC_GROUP) != 0)
     {
       asymbol *gsym = group_signature (isection);
