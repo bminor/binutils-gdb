@@ -1,5 +1,11 @@
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/19109
+	* configure.ac: Handle --enable-compressed-debug-sections=*,gas,*.
+	* configure: Regenerated.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (tc_i386_fix_adjustable): Handle
 	BFD_RELOC_X86_64_GOTPCRELX and BFD_RELOC_X86_64_REX_GOTPCRELX.
 	(tc_gen_reloc): Likewise.

@@ -148,11 +148,11 @@ esac
 ac_default_compressed_debug_sections=unset
 # Provide a configure time option to override our default.
 AC_ARG_ENABLE(compressed_debug_sections,
-[  --enable-compressed-debug-sections={all,ld,none}  compress debug sections by default],
-[case "${enableval}" in
-  yes | all | ld) ac_default_compressed_debug_sections=yes ;;
-  no | none)  ac_default_compressed_debug_sections=no ;;
-  *)   ac_default_compressed_debug_sections=unset ;;
+	      AS_HELP_STRING([--enable-compressed-debug-sections={all,ld,none}],
+	      [compress debug sections by default])],
+[case ,"${enableval}", in
+  *,yes,* | *,all,* | *,ld,*) ac_default_compressed_debug_sections=yes ;;
+  ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
 esac])dnl
 
 AM_BINUTILS_WARNINGS

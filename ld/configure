@@ -1445,7 +1445,8 @@ Optional Features:
   --enable-gold[=ARG]     build gold [ARG={default,yes,no}]
   --enable-got=<type>     GOT handling scheme (target, single, negative,
                           multigot)
-  --enable-compressed-debug-sections={all,ld,none}  compress debug sections by default
+  --enable-compressed-debug-sections={all,ld,none}
+                          compress debug sections by default]
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --disable-nls           do not use Native Language Support
@@ -11715,7 +11716,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11718 "configure"
+#line 11719 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11821,7 +11822,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11824 "configure"
+#line 11825 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15529,10 +15530,9 @@ ac_default_compressed_debug_sections=unset
 # Provide a configure time option to override our default.
 # Check whether --enable-compressed_debug_sections was given.
 if test "${enable_compressed_debug_sections+set}" = set; then :
-  enableval=$enable_compressed_debug_sections; case "${enableval}" in
-  yes | all | ld) ac_default_compressed_debug_sections=yes ;;
-  no | none)  ac_default_compressed_debug_sections=no ;;
-  *)   ac_default_compressed_debug_sections=unset ;;
+  enableval=$enable_compressed_debug_sections; case ,"${enableval}", in
+  *,yes,* | *,all,* | *,ld,*) ac_default_compressed_debug_sections=yes ;;
+  ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
 esac
 fi
 

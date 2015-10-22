@@ -1,5 +1,11 @@
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/19109
+	* configure.ac: Handle --enable-compressed-debug-sections=*,ld,*.
+	* configure: Regenerated.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld/ld.texinfo: Document "-z call-nop=PADDING" option.
 	* emulparams/call_nop.sh: New file.
 	* emulparams/elf_i386_be.sh: Source
