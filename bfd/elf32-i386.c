@@ -2924,8 +2924,14 @@ convert_branch:
 		  /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
 		     is a nop prefix.  */
 		  modrm = 0xe8;
-		  nop = ADDR_PREFIX_OPCODE;
-		  nop_offset = roff - 2;
+		  nop = link_info->call_nop_byte;
+		  if (link_info->call_nop_as_suffix)
+		    {
+		      nop_offset = roff + 3;
+		      irel->r_offset -= 1;
+		    }
+		  else
+		    nop_offset = roff - 2;
 		}
 	      else
 		{

@@ -1,5 +1,32 @@
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-i386/call3.s: New file.
+	* ld-i386/call3a.d: Likewise.
+	* ld-i386/call3b.d: Likewise.
+	* ld-i386/call3c.d: Likewise.
+	* ld-i386/call3d.d: Likewise.
+	* ld-i386/call3e.d: Likewise.
+	* ld-i386/call3f.d: Likewise.
+	* ld-i386/call3g.d: Likewise.
+	* ld-i386/call3h.d: Likewise.
+	* ld-i386/load1-nacl.d: Likewise.
+	* ld-x86-64/call1.s: Likewise.
+	* ld-x86-64/call1a.d: Likewise.
+	* ld-x86-64/call1b.d: Likewise.
+	* ld-x86-64/call1c.d: Likewise.
+	* ld-x86-64/call1d.d: Likewise.
+	* ld-x86-64/call1e.d: Likewise.
+	* ld-x86-64/call1f.d: Likewise.
+	* ld-x86-64/call1g.d: Likewise.
+	* ld-x86-64/call1h.d: Likewise.
+	* ld-x86-64/call1i.d: Likewise.
+	* ld-x86-64/load1a-nacl.d: Likewise.
+	* ld-x86-64/load1b-nacl.d: Likewise.
+	* ld-x86-64/load1c-nacl.d: Likewise.
+	* ld-x86-64/load1d-nacl.d: Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-ifunc/ifunc-5r-local-x86-64.d: Replace R_X86_64_GOTPCREL
 	with R_X86_64_REX_GOTPCRELX.
 	* ld-x86-64/plt-main1.rd: Likewise.

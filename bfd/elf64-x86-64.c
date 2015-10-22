@@ -3217,6 +3217,7 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	{
 	  /* We have "call/jmp *foo@GOTPCREL(%rip)".  */
 	  unsigned int nop;
+	  unsigned int disp;
 	  bfd_vma nop_offset;
 
 	  /* Convert R_X86_64_GOTPCRELX and R_X86_64_REX_GOTPCRELX to
@@ -3224,7 +3225,6 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	  modrm = bfd_get_8 (abfd, contents + roff - 1);
 	  if (modrm == 0x25)
 	    {
-	      unsigned int disp;
 	      /* Convert to "jmp foo nop".  */
 	      modrm = 0xe9;
 	      nop = NOP_OPCODE;
@@ -3238,8 +3238,16 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	      /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
 		 is a nop prefix.  */
 	      modrm = 0xe8;
-	      nop = ADDR_PREFIX_OPCODE;
-	      nop_offset = irel->r_offset - 2;
+	      nop = link_info->call_nop_byte;
+	      if (link_info->call_nop_as_suffix)
+		{
+		  nop_offset = irel->r_offset + 3;
+		  disp = bfd_get_32 (abfd, contents + irel->r_offset);
+		  irel->r_offset -= 1;
+		  bfd_put_32 (abfd, disp, contents + irel->r_offset);
+		}
+	      else
+		nop_offset = irel->r_offset - 2;
 	    }
 	  bfd_put_8 (abfd, nop, contents + nop_offset);
 	  bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);

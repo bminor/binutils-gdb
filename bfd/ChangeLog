@@ -1,5 +1,11 @@
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_convert_load): Use call_nop_byte and
+	check call_nop_as_suffix for 1-byte NOP padding to pad call.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c: Include opcode/i386.h.
 	(x86_64_elf_howto_table): Add R_X86_64_GOTPCRELX and
 	R_X86_64_REX_GOTPCRELX.

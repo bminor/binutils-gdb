@@ -1,3 +1,19 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld/ld.texinfo: Document "-z call-nop=PADDING" option.
+	* emulparams/call_nop.sh: New file.
+	* emulparams/elf_i386_be.sh: Source
+	${srcdir}/emulparams/call_nop.sh.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/elf_i386_vxworks.sh: Likewise.
+	* emulparams/elf_iamcu.sh: Likewise.
+	* emulparams/elf_k1om.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
+	link_info.call_nop_byte if $CALL_NOP_BYTE isn't empty.
+
 2015-10-21  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19109
