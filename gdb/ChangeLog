@@ -1,5 +1,9 @@
 2015-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* rs6000-tdep.c (variants): Add (enum bfd_architecture) cast.
+
+2015-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* mips-linux-tdep.c (mips64_linux_get_longjmp_target): Change type of
 	buf to gdb_byte*.
 	(supply_32bit_reg): Add cast.
