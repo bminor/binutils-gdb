@@ -2,6 +2,20 @@
 
 	PR ld/11133
 	PR ld/19161
+	PR ld/19167
+	* elflink.c (_bfd_elf_gc_mark_hook): Delete code handling __start_*
+	and __stop_* symbol refs.
+	(_bfd_elf_gc_mark_rsec): Add start_stop parameter.  Handle __start_*
+	and __stop_* symbol refs here..
+	(_bfd_elf_gc_mark_reloc): ..and here.
+	* elf-bfd.h (_bfd_elf_gc_mark_hook): Update prototype.
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Update
+	_bfd_elf_gc_mark_rsec call.
+
+2015-10-23  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11133
+	PR ld/19161
 	* elflink.c (elf_gc_sweep): Revert last patch.
 	(_bfd_elf_gc_mark_hook): Don't set SEC_KEEP here.
 

@@ -12066,8 +12066,6 @@ _bfd_elf_gc_mark_hook (asection *sec,
 		       struct elf_link_hash_entry *h,
 		       Elf_Internal_Sym *sym)
 {
-  const char *sec_name;
-
   if (h != NULL)
     {
       switch (h->root.type)
@@ -12078,33 +12076,6 @@ _bfd_elf_gc_mark_hook (asection *sec,
 
 	case bfd_link_hash_common:
 	  return h->root.u.c.p->section;
-
-	case bfd_link_hash_undefined:
-	case bfd_link_hash_undefweak:
-	  /* To work around a glibc bug, keep all XXX input sections
-	     when there is an as yet undefined reference to __start_XXX
-	     or __stop_XXX symbols.  The linker will later define such
-	     symbols for orphan input sections that have a name
-	     representable as a C identifier.  */
-	  if (strncmp (h->root.root.string, "__start_", 8) == 0)
-	    sec_name = h->root.root.string + 8;
-	  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
-	    sec_name = h->root.root.string + 7;
-	  else
-	    sec_name = NULL;
-
-	  if (sec_name && *sec_name != '\0')
-	    {
-	      bfd *i;
-
-	      for (i = info->input_bfds; i; i = i->link.next)
-		{
-		  sec = bfd_get_section_by_name (i, sec_name);
-		  if (sec)
-		    return sec;
-		}
-	    }
-	  break;
 
 	default:
 	  break;
@@ -12123,7 +12094,8 @@ _bfd_elf_gc_mark_hook (asection *sec,
 asection *
 _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 		       elf_gc_mark_hook_fn gc_mark_hook,
-		       struct elf_reloc_cookie *cookie)
+		       struct elf_reloc_cookie *cookie,
+		       bfd_boolean *start_stop)
 {
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
@@ -12152,6 +12124,38 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	 handling copy relocs.  */
       if (h->u.weakdef != NULL)
 	h->u.weakdef->mark = 1;
+
+      if (start_stop != NULL
+	  && (h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak))
+	{
+	  /* To work around a glibc bug, mark all XXX input sections
+	     when there is an as yet undefined reference to __start_XXX
+	     or __stop_XXX symbols.  The linker will later define such
+	     symbols for orphan input sections that have a name
+	     representable as a C identifier.  */
+	  const char *sec_name = NULL;
+	  if (strncmp (h->root.root.string, "__start_", 8) == 0)
+	    sec_name = h->root.root.string + 8;
+	  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
+	    sec_name = h->root.root.string + 7;
+
+	  if (sec_name != NULL && *sec_name != '\0')
+	    {
+	      bfd *i;
+
+	      for (i = info->input_bfds; i != NULL; i = i->link.next)
+		{
+		  asection *s = bfd_get_section_by_name (i, sec_name);
+		  if (s != NULL && !s->gc_mark)
+		    {
+		      *start_stop = TRUE;
+		      return s;
+		    }
+		}
+	    }
+	}
+
       return (*gc_mark_hook) (sec, info, cookie->rel, h, NULL);
     }
 
@@ -12170,15 +12174,39 @@ _bfd_elf_gc_mark_reloc (struct bfd_link_info *info,
 			struct elf_reloc_cookie *cookie)
 {
   asection *rsec;
+  bfd_boolean start_stop = FALSE;
 
-  rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie);
-  if (rsec && !rsec->gc_mark)
+  rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie, &start_stop);
+  while (rsec != NULL)
     {
-      if (bfd_get_flavour (rsec->owner) != bfd_target_elf_flavour
-	  || (rsec->owner->flags & DYNAMIC) != 0)
-	rsec->gc_mark = 1;
-      else if (!_bfd_elf_gc_mark (info, rsec, gc_mark_hook))
-	return FALSE;
+      asection *s;
+
+      if (!rsec->gc_mark)
+	{
+	  if (bfd_get_flavour (rsec->owner) != bfd_target_elf_flavour
+	      || (rsec->owner->flags & DYNAMIC) != 0)
+	    rsec->gc_mark = 1;
+	  else if (!_bfd_elf_gc_mark (info, rsec, gc_mark_hook))
+	    return FALSE;
+	}
+      if (!start_stop)
+	break;
+      s = bfd_get_next_section_by_name (rsec);
+      if (s == NULL)
+	{
+	  bfd *i = rsec->owner;
+
+	  if (i != NULL)
+	    {
+	      while ((i = i->link.next) != NULL)
+		{
+		  s = bfd_get_section_by_name (i, rsec->name);
+		  if (s != NULL)
+		    break;
+		}
+	    }
+	}
+      rsec = s;
     }
   return TRUE;
 }
