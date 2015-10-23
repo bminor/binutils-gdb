@@ -820,8 +820,9 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
     goto err;
 
   /* Allocate the configuration page. */
-  header = mmap (NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
-		 pt->file, 0);
+  header = ((struct perf_event_mmap_page *)
+	    mmap (NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
+		  pt->file, 0));
   if (header == MAP_FAILED)
     goto err_file;
 
@@ -862,8 +863,9 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
       header->aux_size = data_size;
       length = size;
 
-      pt->pt.mem = mmap (NULL, length, PROT_READ, MAP_SHARED, pt->file,
-			 header->aux_offset);
+      pt->pt.mem = ((const uint8_t *)
+		    mmap (NULL, length, PROT_READ, MAP_SHARED, pt->file,
+			  header->aux_offset));
       if (pt->pt.mem != MAP_FAILED)
 	break;
     }

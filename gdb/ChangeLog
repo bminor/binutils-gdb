@@ -1,3 +1,7 @@
+2015-10-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-btrace.c (linux_enable_pt): Add cast to mmap return.
+
 2015-10-23  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* observer.h (observer_${event}_notification_stub): Add cast.
