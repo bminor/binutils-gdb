@@ -633,6 +633,11 @@ int kill_inferior (int);
   (the_target->stopped_by_hw_breakpoint ? \
    (*the_target->stopped_by_hw_breakpoint) () : 0)
 
+#define target_breakpoint_kind_from_pc(pcptr) \
+  (the_target->breakpoint_kind_from_pc \
+   ? (*the_target->breakpoint_kind_from_pc) (pcptr) \
+   : default_breakpoint_kind_from_pc (pcptr))
+
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 
 int start_non_stop (int nonstop);
@@ -666,5 +671,7 @@ int set_desired_thread (int id);
 const char *target_pid_to_str (ptid_t);
 
 int target_can_do_hardware_single_step (void);
+
+int default_breakpoint_kind_from_pc (CORE_ADDR *pcptr);
 
 #endif /* TARGET_H */

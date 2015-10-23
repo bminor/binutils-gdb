@@ -224,3 +224,19 @@ target_can_do_hardware_single_step (void)
 {
   return 1;
 }
+
+/* Default implementation for breakpoint_kind_for_pc.
+
+   The default behavior for targets that don't implement breakpoint_kind_for_pc
+   is to use the size of a breakpoint as the kind.  */
+
+int
+default_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+{
+  int size = 0;
+
+  gdb_assert (the_target->sw_breakpoint_from_kind != NULL);
+
+  (*the_target->sw_breakpoint_from_kind) (0, &size);
+  return size;
+}
