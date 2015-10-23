@@ -194,11 +194,6 @@ void check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len);
 void check_mem_write (CORE_ADDR mem_addr,
 		      unsigned char *buf, const unsigned char *myaddr, int mem_len);
 
-/* Set the byte pattern to insert for memory breakpoints.  This function
-   must be called before any breakpoints are set.  */
-
-void set_breakpoint_data (const unsigned char *bp_data, int bp_len);
-
 /* Delete all breakpoints.  */
 
 void delete_all_breakpoints (void);

@@ -1,5 +1,9 @@
 2015-10-23  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* mem-break.h (set_breakpoint_data): Remove.
+
+2015-10-23  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* nto-low.c (nto_sw_breakpoint_from_kind): New function.
 	(struct target_ops) <sw_breakpoint_from_kind>: Initialize.
 	(initialize_low): Remove set_breakpoint_data call.
