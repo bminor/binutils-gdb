@@ -70,11 +70,6 @@ struct core_target_ops_with_data
 
   struct core_fns *core_vec;
 
-  /* FIXME: kettenis/20031023: Eventually this variable should
-     disappear.  */
-
-  struct gdbarch *core_gdbarch;
-
   /* The section table.  Note that these target sections are *not*
      mapped in the current address spaces' set of target sections ---
      those should come only from pure executable or shared library
@@ -303,6 +298,7 @@ core_open (const char *arg, int from_tty)
   volatile struct gdb_exception except;
   char *filename;
   struct core_target_ops_with_data *cops;
+  struct gdbarch *core_gdbarch;
 
   target_preopen (from_tty);
   if (!arg)
@@ -362,10 +358,10 @@ core_open (const char *arg, int from_tty)
   cops = TARGET_NEW (struct core_target_ops_with_data, &core_ops);
   old_chain = make_cleanup (core_close_cleanup, cops);
 
-  cops->core_gdbarch = gdbarch_from_bfd (core_bfd);
+  core_gdbarch = gdbarch_from_bfd (core_bfd);
 
   /* Find a suitable core file handler to munch on core_bfd */
-  cops->core_vec = sniff_core_bfd (core_bfd, cops->core_gdbarch);
+  cops->core_vec = sniff_core_bfd (core_bfd, core_gdbarch);
 
   validate_files ();
 
@@ -430,6 +426,10 @@ core_open (const char *arg, int from_tty)
 
   post_create_inferior (&cops->base, from_tty);
 
+  /* post_create_inferior has filled in the gdbarch of this inferior,
+     so work with that one from here onwards.  */
+  core_gdbarch = target_gdbarch ();
+
   /* Now go through the target stack looking for threads since there
      may be a thread_stratum target loaded on top of target core by
      now.  The layer above should claim threads found in the BFD
@@ -462,9 +462,9 @@ core_open (const char *arg, int from_tty)
 	 assume the host signal mapping.  It'll be correct for native
 	 cores, but most likely incorrect for cross-cores.  */
       enum gdb_signal sig
-	= (cops->core_gdbarch != NULL
-	   && gdbarch_gdb_signal_from_target_p (cops->core_gdbarch)
-	   ? gdbarch_gdb_signal_from_target (cops->core_gdbarch, siggy)
+	= (core_gdbarch != NULL
+	   && gdbarch_gdb_signal_from_target_p (core_gdbarch)
+	   ? gdbarch_gdb_signal_from_target (core_gdbarch, siggy)
 	   : gdb_signal_from_host (siggy));
 
       printf_filtered (_("Program terminated with signal %s, %s.\n"),
@@ -639,8 +639,7 @@ get_core_registers (struct target_ops *ops,
   int i;
   struct core_target_ops_with_data *cops = get_core_target_ops ();
 
-  if (!(cops->core_gdbarch
-	&& gdbarch_iterate_over_regset_sections_p (cops->core_gdbarch))
+  if (!(gdbarch_iterate_over_regset_sections_p (target_gdbarch ()))
       && (cops->core_vec == NULL
 	  || cops->core_vec->core_read_registers == NULL))
     {
@@ -649,8 +648,8 @@ get_core_registers (struct target_ops *ops,
       return;
     }
 
-  if (gdbarch_iterate_over_regset_sections_p (cops->core_gdbarch))
-    gdbarch_iterate_over_regset_sections (cops->core_gdbarch,
+  if (gdbarch_iterate_over_regset_sections_p (target_gdbarch ()))
+    gdbarch_iterate_over_regset_sections (target_gdbarch (),
 					  get_core_registers_cb,
 					  (void *) regcache, NULL);
   else
@@ -822,15 +821,14 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
       return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_LIBRARIES:
-      if (cops->core_gdbarch
-	  && gdbarch_core_xfer_shared_libraries_p (cops->core_gdbarch))
+      if (gdbarch_core_xfer_shared_libraries_p (target_gdbarch ()))
 	{
 	  if (writebuf)
 	    return TARGET_XFER_E_IO;
 	  else
 	    {
 	      *xfered_len
-		= gdbarch_core_xfer_shared_libraries (cops->core_gdbarch,
+		= gdbarch_core_xfer_shared_libraries (target_gdbarch (),
 						      readbuf,
 						      offset, len);
 
@@ -843,15 +841,14 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
       /* FALL THROUGH */
 
     case TARGET_OBJECT_LIBRARIES_AIX:
-      if (cops->core_gdbarch
-	  && gdbarch_core_xfer_shared_libraries_aix_p (cops->core_gdbarch))
+      if (gdbarch_core_xfer_shared_libraries_aix_p (target_gdbarch ()))
 	{
 	  if (writebuf)
 	    return TARGET_XFER_E_IO;
 	  else
 	    {
 	      *xfered_len
-		= gdbarch_core_xfer_shared_libraries_aix (cops->core_gdbarch,
+		= gdbarch_core_xfer_shared_libraries_aix (target_gdbarch (),
 							  readbuf, offset,
 							  len);
 
@@ -977,12 +974,11 @@ core_read_description (struct target_ops *target)
 {
   struct core_target_ops_with_data *cops = get_core_target_ops ();
 
-  if (cops->core_gdbarch
-      && gdbarch_core_read_description_p (cops->core_gdbarch))
+  if (gdbarch_core_read_description_p (target_gdbarch ()))
     {
       const struct target_desc *result;
 
-      result = gdbarch_core_read_description (cops->core_gdbarch, 
+      result = gdbarch_core_read_description (target_gdbarch (), 
 					      target, core_bfd);
       if (result != NULL)
 	return result;
@@ -1001,9 +997,8 @@ core_pid_to_str (struct target_ops *ops, ptid_t ptid)
 
   /* The preferred way is to have a gdbarch/OS specific
      implementation.  */
-  if (cops->core_gdbarch
-      && gdbarch_core_pid_to_str_p (cops->core_gdbarch))
-    return gdbarch_core_pid_to_str (cops->core_gdbarch, ptid);
+  if (gdbarch_core_pid_to_str_p (target_gdbarch ()))
+    return gdbarch_core_pid_to_str (target_gdbarch (), ptid);
 
   /* Otherwise, if we don't have one, we'll just fallback to
      "process", with normal_pid_to_str.  */
