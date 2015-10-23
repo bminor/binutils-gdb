@@ -56,6 +56,9 @@ int using_threads = 0;
 void init_registers_spu (void);
 extern const struct target_desc *tdesc_spu;
 
+/* Software breakpoint instruction.  */
+static const gdb_byte breakpoint[] = { 0x00, 0x00, 0x3f, 0xff };
+
 /* Fetch PPU register REGNO.  */
 static CORE_ADDR
 fetch_ppc_register (int regno)
@@ -639,6 +642,15 @@ spu_request_interrupt (void)
   syscall (SYS_tkill, lwpid_of (thr), SIGINT);
 }
 
+/* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+spu_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = sizeof breakpoint;
+  return breakpoint;
+}
+
 static struct target_ops spu_target_ops = {
   spu_create_inferior,
   NULL,  /* arch_setup */
@@ -673,14 +685,51 @@ static struct target_ops spu_target_ops = {
   NULL,
   spu_proc_xfer_spu,
   hostio_last_error_from_errno,
+  NULL, /* qxfer_osdata */
+  NULL, /* qxfer_siginfo */
+  NULL, /* supports_non_stop */
+  NULL, /* async */
+  NULL, /* start_non_stop */
+  NULL, /* supports_multi_process */
+  NULL, /* supports_fork_events */
+  NULL, /* supports_vfork_events */
+  NULL, /* supports_exec_events */
+  NULL, /* handle_new_gdb_connection */
+  NULL, /* handle_monitor_command */
+  NULL, /* core_of_thread */
+  NULL, /* read_loadmap */
+  NULL, /* process_qsupported */
+  NULL, /* supports_tracepoints */
+  NULL, /* read_pc */
+  NULL, /* write_pc */
+  NULL, /* thread_stopped */
+  NULL, /* get_tib_address */
+  NULL, /* pause_all */
+  NULL, /* unpause_all */
+  NULL, /* stabilize_threads */
+  NULL, /* install_fast_tracepoint_jump_pad */
+  NULL, /* emit_ops */
+  NULL, /* supports_disable_randomization */
+  NULL, /* get_min_fast_tracepoint_insn_len */
+  NULL, /* qxfer_libraries_svr4 */
+  NULL, /* support_agent */
+  NULL, /* support_btrace */
+  NULL, /* enable_btrace */
+  NULL, /* disable_btrace */
+  NULL, /* read_btrace */
+  NULL, /* read_btrace_conf */
+  NULL, /* supports_range_stepping */
+  NULL, /* pid_to_exec_file */
+  NULL, /* multifs_open */
+  NULL, /* multifs_unlink */
+  NULL, /* multifs_readlink */
+  NULL, /* breakpoint_kind_from_pc */
+  spu_sw_breakpoint_from_kind,
 };
 
 void
 initialize_low (void)
 {
-  static const unsigned char breakpoint[] = { 0x00, 0x00, 0x3f, 0xff };
-
   set_target_ops (&spu_target_ops);
-  set_breakpoint_data (breakpoint, sizeof breakpoint);
   init_registers_spu ();
 }
