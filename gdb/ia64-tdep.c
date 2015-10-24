@@ -1103,7 +1103,7 @@ ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       if ((cfm & 0x7f) > regnum - V32_REGNUM) 
 	{
 	  ULONGEST reg_addr = rse_address_add (bsp, (regnum - V32_REGNUM));
-	  write_memory (reg_addr, (void *) buf, 8);
+	  write_memory (reg_addr, buf, 8);
 	}
     }
   else if (IA64_NAT0_REGNUM <= regnum && regnum <= IA64_NAT31_REGNUM)
@@ -3854,11 +3854,11 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  len = TYPE_LENGTH (type);
 	  while (len > 0 && floatreg < IA64_FR16_REGNUM)
 	    {
-	      char to[MAX_REGISTER_SIZE];
+	      gdb_byte to[MAX_REGISTER_SIZE];
 	      convert_typed_floating (value_contents (arg) + argoffset,
 				      float_elt_type, to,
 				      ia64_ext_type (gdbarch));
-	      regcache_cooked_write (regcache, floatreg, (void *)to);
+	      regcache_cooked_write (regcache, floatreg, to);
 	      floatreg++;
 	      argoffset += TYPE_LENGTH (float_elt_type);
 	      len -= TYPE_LENGTH (float_elt_type);

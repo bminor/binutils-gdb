@@ -1,3 +1,9 @@
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ia64-tdep.c (ia64_pseudo_register_write): Remove cast.
+	(ia64_push_dummy_call): Remove cast and change type of "to" to
+	array of gdb_byte.
+
 2015-10-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* linux-btrace.c (linux_enable_pt): Add cast to mmap return.
