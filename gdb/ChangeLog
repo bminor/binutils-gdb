@@ -1,5 +1,10 @@
 2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* nat/linux-ptrace.c (linux_ptrace_test_ret_to_nx): Replace
+	(void *) cast with (gdb_byte *).
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* proc-service.c (ps_pdread): Add cast.
 
 2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>

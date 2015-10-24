@@ -204,7 +204,7 @@ linux_ptrace_test_ret_to_nx (void)
 	       safe_strerror (errno));
       return;
     }
-  pc = (void *) (uintptr_t) l;
+  pc = (gdb_byte *) (uintptr_t) l;
 
   kill (child, SIGKILL);
   ptrace (PTRACE_KILL, child, (PTRACE_TYPE_ARG3) NULL,
