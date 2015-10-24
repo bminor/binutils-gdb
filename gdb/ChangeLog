@@ -1,5 +1,9 @@
 2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* proc-service.c (ps_pdread): Add cast.
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* sparc64-tdep.c (sparc64_store_arguments): Split assignment of
 	valbuf.
 
