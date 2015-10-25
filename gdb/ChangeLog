@@ -1,5 +1,9 @@
 2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* cli/cli-setshow.c (do_set_command): Constify p.
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* nat/linux-ptrace.c (linux_ptrace_test_ret_to_nx): Replace
 	(void *) cast with (gdb_byte *).
 

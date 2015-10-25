@@ -361,7 +361,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	int len;
 	int nmatches;
 	const char *match = NULL;
-	char *p;
+	const char *p;
 
 	/* If no argument was supplied, print an informative error
 	   message.  */
