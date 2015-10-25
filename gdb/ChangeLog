@@ -1,5 +1,11 @@
 2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* tui/tui-data.c (tui_add_to_source_windows): Remove void *
+	cast.
+	(tui_add_content_elements): Likewise.
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli/cli-setshow.c (do_set_command): Constify p.
 
 2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
