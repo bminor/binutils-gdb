@@ -1,3 +1,8 @@
+2015-10-25  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y: Remove an obsolete comment and propagate the block
+	information to the produced expression.
+
 2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* tui/tui-data.c (tui_add_to_source_windows): Remove void *
