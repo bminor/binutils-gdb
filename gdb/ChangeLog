@@ -1,5 +1,10 @@
 2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* guile/scm-ports.c (ioscm_make_gdb_stdio_port): Pass non-const
+	char pointer to scm_mode_bits.
+
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* symtab.c (default_make_symbol_completion_list_break_on_1): Add
 	cast.
 
