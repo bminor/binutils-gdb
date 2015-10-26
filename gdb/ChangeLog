@@ -1,5 +1,11 @@
 2015-10-26  Doug Evans  <dje@google.com>
 
+	PR python/18938
+	* cli/cli-cmds (source_script_fron_sctream): New arg file_to_open.
+	All callers updated.
+
+2015-10-26  Doug Evans  <dje@google.com>
+
 	* psymtab.c (struct dump_psymtab_addrmap_data): Define.
 	(dump_psymtab_addrmap_1, dump_psymtab_addrmap): New functions.
 	(maintenance_print_psymbols): Print address map.

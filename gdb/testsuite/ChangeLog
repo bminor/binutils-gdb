@@ -1,3 +1,9 @@
+2015-10-26  Doug Evans  <dje@google.com>
+
+	PR python/18938
+	* gdb.python/python.exp: Add test for symlink from .py file to .notpy
+	file.
+
 2015-10-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.compile/compile.exp (compile code globalvar): Update expectation
