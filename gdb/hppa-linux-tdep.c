@@ -39,14 +39,13 @@ static int
 hppa_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   /* The general registers and the sar are the same in both sets.  */
-  if (reg <= 32)
+  if (reg >= 0 && reg <= 32)
     return reg;
 
   /* fr4-fr31 (left and right halves) are mapped from 72.  */
   if (reg >= 72 && reg <= 72 + 28 * 2)
     return HPPA_FP4_REGNUM + (reg - 72);
 
-  warning (_("Unmapped DWARF DBX Register #%d encountered."), reg);
   return -1;
 }
 

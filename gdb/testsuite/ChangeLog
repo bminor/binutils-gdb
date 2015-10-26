@@ -1,5 +1,12 @@
 2015-10-26  Doug Evans  <dje@google.com>
 
+	PR symtab/17391
+	* lib/dwarf.exp (_location): Add support for DW_OP_regx.
+	* gdb.dwarf2/bad-regnum.c: New file.
+	* gdb.dwarf2/bad-regnum.exp: New file.
+
+2015-10-26  Doug Evans  <dje@google.com>
+
 	PR python/18938
 	* gdb.python/python.exp: Add test for symlink from .py file to .notpy
 	file.

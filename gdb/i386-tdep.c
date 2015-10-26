@@ -502,11 +502,11 @@ i386_dbx_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 }
 
-/* Convert SVR4 register number REG to the appropriate register number
+/* Convert SVR4 DWARF register number REG to the appropriate register number
    used by GDB.  */
 
 static int
-i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
+i386_svr4_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -544,8 +544,20 @@ i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     case 45: return I386_GS_REGNUM;
     }
 
-  /* This will hopefully provoke a warning.  */
-  return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  return -1;
+}
+
+/* Wrapper on i386_svr4_dwarf_reg_to_regnum to return
+   num_regs + num_pseudo_regs for other debug formats.  */
+
+static int
+i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
+{
+  int regnum = i386_svr4_dwarf_reg_to_regnum (gdbarch, reg);
+
+  if (regnum == -1)
+    return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  return regnum;
 }
 
 
@@ -8349,7 +8361,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
 
   /* Use the SVR4 register numbering scheme for DWARF 2.  */
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_svr4_dwarf_reg_to_regnum);
 
   /* We don't set gdbarch_stab_reg_to_regnum, since ECOFF doesn't seem to
      be in use on any of the supported i386 targets.  */

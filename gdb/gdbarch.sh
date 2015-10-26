@@ -461,6 +461,7 @@ m:int:ecoff_reg_to_regnum:int ecoff_regnr:ecoff_regnr::no_op_reg_to_regnum::0
 # Convert from an sdb register number to an internal gdb register number.
 m:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr::no_op_reg_to_regnum::0
 # Provide a default mapping from a DWARF2 register number to a gdb REGNUM.
+# Return -1 for bad REGNUM.  Note: Several targets get this wrong.
 m:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr::no_op_reg_to_regnum::0
 m:const char *:register_name:int regnr:regnr::0
 

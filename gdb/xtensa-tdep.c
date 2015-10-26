@@ -356,9 +356,7 @@ xtensa_reg_to_regnum (struct gdbarch *gdbarch, int regnum)
     if (regnum == gdbarch_tdep (gdbarch)->regmap[i].target_number)
       return i;
 
-  internal_error (__FILE__, __LINE__,
-		  _("invalid dwarf/stabs register number %d"), regnum);
-  return 0;
+  return -1;
 }
 
 

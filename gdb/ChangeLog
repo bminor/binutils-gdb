@@ -1,5 +1,71 @@
 2015-10-26  Doug Evans  <dje@google.com>
 
+	PR symtab/17391
+	* dwarf2-frame.c (dwarf2_restore_rule): Call dwarf_reg_to_regnum
+	instead of gdbarch_dwarf2_reg_to_regnum.
+	(dwarf2_frame_cache): Ditto.
+	(read_addr_from_reg): Call dwarf_reg_to_regnum_or_error instead of
+	gdbarch_dwarf2_reg_to_regnum.
+	(get_reg_value): Ditto.
+	(dwarf2_fetch_cfa_info): Ditto.
+	(dwarf2_frame_prev_register): Ditto.
+	* dwarf2loc.c: #include "complaints.h".
+	(dwarf_expr_read_addr_from_reg): Call dwarf_reg_to_regnum_or_error
+	instead of gdbarch_dwarf2_reg_to_regnum.
+	(dwarf_expr_get_reg_value): Ditto.
+	(read_pieced_value): Ditto.
+	(write_pieced_value): Ditto.
+	(dwarf2_evaluate_loc_desc_full): Ditto.
+	(dwarf_reg_to_regnum): New function.
+	(throw_bad_regnum_error): New function.
+	(dwarf_reg_to_regnum_or_error): Renamed from
+	dwarf2_reg_to_regnum_or_errorChange to take a ULONGEST regnum.
+	All callers updated.  Call throw_bad_regnum_error.
+	(locexpr_regname): Improve text of bad register number.
+	* dwarf2loc.h (dwarf_reg_to_regnum): Declare.
+	(dwarf_reg_to_regnum_or_error): Update prototype.
+	* dwarf2expr.c: #include "dwarf2loc.h".
+	(dwarf_block_to_sp_offset): Call dwarf_reg_to_regnum instead of
+	gdbarch_dwarf2_reg_to_regnum.
+	* gdbarch.sh (dwarf2_reg_to_regnum): Add comment.
+	* gdbarch.h: Regenerate.
+	* amd64-tdep.c (amd64_dwarf_reg_to_regnum): Remove warning for bad
+	register.
+	* avr-tdep.c (avr_dwarf_reg_to_regnum): Ditto.
+	* cris-tdep.c (cris_dwarf2_reg_to_regnum): Ditto.
+	* bfin-tdep.c (bfin_reg_to_regnum): Fix error checking.
+	* hppa-linux-tdep.c (hppa_dwarf_reg_to_regnum): Improve error checking.
+	Remove warning for bad register.
+	* hppa-tdep.c (hppa64_dwarf_reg_to_regnum): Ditto.
+	* i386-tdep.c (i386_svr4_dwarf_reg_to_regnum): Renamed from
+	i386_svr4_reg_to_regnum.  Return -1 for bad registers.
+	(i386_svr4_reg_to_regnum): New function.
+	(i386_gdbarch_init): Update call to set_gdbarch_dwarf2_reg_to_regnum.
+	* microblaze-tdep.c (microblaze_dwarf2_reg_to_regnum): Don't assert
+	on bad registers, return -1.
+	* msp430-tdep.c (msp430_dwarf2_reg_to_regnum): Improve error checking.
+	Remove warning for bad register.
+	* nios2-tdep.c: Add static assert for NIOS2_NUM_REGS.
+	(nios2_dwarf_reg_to_regnum): Fix off-by-one error.
+	Remove warning for bad register.  Return -1 for bad register.
+	* rl78-tdep.c (rl78_dwarf_reg_to_regnum): Don't flag an internal error
+	for bad register, return -1.
+	* rx-tdep.c (rx_dwarf_reg_to_regnum): Ditto.
+	* m68k-tdep.c (m68k_dwarf_reg_to_regnum): Fix error result.
+	* mep-tdep.c (mep_debug_reg_to_regnum): Ditto.
+	* mips-tdep.c (mips_stab_reg_to_regnum): Ditto.
+	(mips_dwarf_dwarf2_ecoff_reg_to_regnum): Ditto.
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Remove warning
+	for bad regs.
+	* xtensa-tdep.c (xtensa_reg_to_regnum): Remove internal error for
+	bad regs.  Fix error result.
+	* stabsread.c (stab_reg_to_regnum): Watch for negative regno.
+	(reg_value_complaint): Update complaint text.
+	* mdebugread.c (reg_value_complaint): New function.
+	(mdebug_reg_to_regnum): Rewrite to watch for bad reg numbers.
+
+2015-10-26  Doug Evans  <dje@google.com>
+
 	PR python/18938
 	* cli/cli-cmds (source_script_fron_sctream): New arg file_to_open.
 	All callers updated.

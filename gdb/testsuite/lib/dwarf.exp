@@ -836,6 +836,10 @@ namespace eval Dwarf {
 		    _op .${_cu_addr_size}byte [lindex $line 1]
 		}
 
+		DW_OP_regx {
+		    _op .uleb128 [lindex $line 1]
+		}
+
 		DW_OP_pick -
 		DW_OP_const1u -
 		DW_OP_const1s {

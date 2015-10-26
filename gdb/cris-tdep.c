@@ -1790,9 +1790,6 @@ cris_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   if (reg >= 0 && reg < ARRAY_SIZE (cris_dwarf_regmap))
     regnum = cris_dwarf_regmap[reg];
 
-  if (regnum == -1)
-    warning (_("Unmapped DWARF Register #%d encountered."), reg);
-
   return regnum;
 }
 

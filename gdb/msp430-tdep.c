@@ -583,13 +583,9 @@ static const struct frame_unwind msp430_unwind = {
 static int
 msp430_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
-  if (reg < MSP430_NUM_REGS)
+  if (reg >= 0 && reg < MSP430_NUM_REGS)
     return reg + MSP430_NUM_REGS;
-  else
-    {
-      warning (_("Unmapped DWARF Register #%d encountered."), reg);
-      return -1;
-    }
+  return -1;
 }
 
 /* Implement the "return_value" gdbarch method.  */

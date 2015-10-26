@@ -138,17 +138,15 @@ static int nios2_dwarf2gdb_regno_map[] =
   NIOS2_MPUACC_REGNUM     /* 48 */
 };
 
+gdb_static_assert (ARRAY_SIZE (nios2_dwarf2gdb_regno_map) == NIOS2_NUM_REGS);
 
 /* Implement the dwarf2_reg_to_regnum gdbarch method.  */
 
 static int
 nios2_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dw_reg)
 {
-  if (dw_reg < 0 || dw_reg > NIOS2_NUM_REGS)
-    {
-      warning (_("Dwarf-2 uses unmapped register #%d"), dw_reg);
-      return dw_reg;
-    }
+  if (dw_reg < 0 || dw_reg >= NIOS2_NUM_REGS)
+    return -1;
 
   return nios2_dwarf2gdb_regno_map[dw_reg];
 }
