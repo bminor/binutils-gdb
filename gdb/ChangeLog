@@ -1,3 +1,8 @@
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* guile/scm-ports.c (ioscm_make_gdb_stdio_port): Do not pass a
+	local char array to scm_mode_bits, use a cast instead.
+
 2015-10-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* tui/tui-data.c (tui_alloc_content): Don't check xmalloc
