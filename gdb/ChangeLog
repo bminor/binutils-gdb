@@ -1,3 +1,8 @@
+2015-10-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* record-full.c (record_full_message_wrapper_safe): Pass empty string to
+	catch_errors call instead of NULL.
+
 2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* guile/scm-ports.c (ioscm_make_gdb_stdio_port): Pass non-const

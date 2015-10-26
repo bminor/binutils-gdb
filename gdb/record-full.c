@@ -667,7 +667,7 @@ record_full_message_wrapper_safe (struct regcache *regcache,
   args.regcache = regcache;
   args.signal = signal;
 
-  return catch_errors (record_full_message_wrapper, &args, NULL,
+  return catch_errors (record_full_message_wrapper, &args, "",
 		       RETURN_MASK_ALL);
 }
 
