@@ -49,7 +49,7 @@ proc get_topmost_target {test} {
     set topmost "unknown"
 
     gdb_test_multiple "maint print target-stack" $test {
-	-re "The current target stack is:\r\n  - (\[^ \]+) .*$gdb_prompt $" {
+	-re "Target stack 0x\[0-9a-f\]+ \\(current\\)\r\n  - (\[^ \]+) .*$gdb_prompt $" {
 	    set topmost $expect_out(1,string)
 	    pass $test
 	}
@@ -131,7 +131,7 @@ gdb_test "target native" \
 
 proc test_native_target_remains_pushed {} {
     gdb_test "maint print target-stack"  \
-	"The current target stack is:\r\n  .* native .* exec .*" \
+	"Target stack 0x\[0-9a-f\]+ \\(current\\)\r\n  .* native .* exec .*" \
 	"native target remains pushed"
 }
 

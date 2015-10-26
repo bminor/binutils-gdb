@@ -255,21 +255,21 @@ sub write_debugmethod($$$$@) {
 	print "  $return_type result;\n";
     }
 
-    print "  fprintf_unfiltered (gdb_stdlog, \"-> %s->$name (...)\\n\", debug_target.to_shortname);\n";
+    print "  fprintf_unfiltered (gdb_stdlog, \"-> %s->$name (...)\\n\", target_stack->debug_target.to_shortname);\n";
 
     # Delegate to the beneath target.
     print "  ";
     if ($return_type ne 'void') {
 	print "result = ";
     }
-    print "debug_target." . $name . " (";
+    print "target_stack->debug_target." . $name . " (";
     my @names2 = @names;
-    @names2[0] = "&debug_target";
+    @names2[0] = "&target_stack->debug_target";
     print join (', ', @names2);
     print ");\n";
 
     # Now print the arguments.
-    print "  fprintf_unfiltered (gdb_stdlog, \"<- %s->$name (\", debug_target.to_shortname);\n";
+    print "  fprintf_unfiltered (gdb_stdlog, \"<- %s->$name (\", target_stack->debug_target.to_shortname);\n";
     for my $i (0 .. $#argtypes) {
 	print "  fputs_unfiltered (\", \", gdb_stdlog);\n" if $i > 0;
 	my $printer = munge_type ($argtypes[$i]);

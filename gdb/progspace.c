@@ -133,6 +133,8 @@ add_program_space (struct address_space *aspace)
 
   program_space_alloc_data (pspace);
 
+  pspace->target_stack = target_stack_incref ();
+
   pspace->next = program_spaces;
   program_spaces = pspace;
 
@@ -162,6 +164,9 @@ release_program_space (struct program_space *pspace)
     free_address_space (pspace->aspace);
   clear_section_table (&pspace->target_sections);
   clear_program_space_solib_cache (pspace);
+
+  target_stack_decref (pspace->target_stack);
+
     /* Discard any data modules have associated with the PSPACE.  */
   program_space_free_data (pspace);
   xfree (pspace);
@@ -204,6 +209,7 @@ set_current_program_space (struct program_space *pspace)
   gdb_assert (pspace != NULL);
 
   current_program_space = pspace;
+  target_stack_set_current (pspace->target_stack);
 
   /* Different symbols change our view of the frame chain.  */
   reinit_frame_cache ();

@@ -209,6 +209,10 @@ struct program_space
     /* Binary file diddling handle for the core file.  */
     bfd *cbfd;
 
+    /* The target stack.  The program space owns a reference to
+       it.  */
+    struct target_stack *target_stack;
+
     /* Per pspace data-pointers required by other GDB modules.  */
     REGISTRY_FIELDS;
   };

@@ -107,11 +107,11 @@ static enum exec_direction_kind default_execution_direction
 
 static struct target_ops debug_target;
 
-#include "target-delegates.c"
-
 static void init_dummy_target (void);
 
 static void update_current_target (void);
+
+static int currently_multi_target (void);
 
 /* Vector of existing target structures. */
 typedef struct target_ops *target_ops_p;
@@ -123,14 +123,47 @@ static VEC (target_ops_p) *target_structs;
 
 static struct target_ops dummy_target;
 
-/* Top of target stack.  */
+/* The next available target id.  */
 
-static struct target_ops *target_stack;
+static int next_available_target_id;
+
+/* The type of the target stack.  */
+
+struct target_stack
+{
+  /* The targets making up the current stack.  */
+
+  struct target_ops *top;
+
+  /* Reference count.  */
+
+  int refc;
+
+  /* Target id.  */
+
+  int id;
+
+  /* The "smashed" target_ops.  */
+
+  struct target_ops smashed;
+
+  /* When the debug target is pushed, this holds a copy of the
+     previous smashed target.  */
+
+  struct target_ops debug_target;
+};
+
+/* The current target stack.  */
+
+static struct target_stack *target_stack;
 
 /* The target structure we are currently using to talk to a process
-   or file or whatever "inferior" we have.  */
+   or file or whatever "inferior" we have.  This is always equal to
+   TARGET_STACK->smashed.  */
 
 struct target_ops *current_target;
+
+#include "target-delegates.c"
 
 /* Command list for target.  */
 
@@ -627,7 +660,7 @@ update_current_target (void)
   /* Install the delegators.  */
   install_delegators (current_target);
 
-  current_target->to_stratum = target_stack->to_stratum;
+  current_target->to_stratum = target_stack->top->to_stratum;
 
 #define INHERIT(FIELD, TARGET) \
       if (!current_target->FIELD) \
@@ -635,7 +668,7 @@ update_current_target (void)
 
   /* Do not add any new INHERITs here.  Instead, use the delegation
      mechanism provided by make-target-delegates.  */
-  for (t = target_stack; t; t = t->beneath)
+  for (t = target_stack->top; t; t = t->beneath)
     {
       INHERIT (to_shortname, t);
       INHERIT (to_longname, t);
@@ -649,10 +682,38 @@ update_current_target (void)
   /* Finally, position the target-stack beneath the squashed
      "current_target".  That way code looking for a non-inherited
      target method can quickly and simply find it.  */
-  current_target->beneath = target_stack;
+  current_target->beneath = target_stack->top;
 
   if (targetdebug)
     setup_target_debug ();
+}
+
+/* Return true if target T is multi-target-compatible.  */
+
+static int
+multi_target_compatible (struct target_ops *t)
+{
+  /* The main sentinel is the existence of to_xclose.  Ideally all
+     targets would be converted to this approach.  */
+  if (t->to_xclose != NULL)
+    return 1;
+
+  /* Dummy target is always ok.  */
+  if (t == &dummy_target)
+    return 1;
+
+  /* "child" targets are native and thus always ok.  Super hack.  */
+  return strcmp (t->to_shortname, "child") == 0;
+}
+
+/* Require T to be multi-target-compatible.  */
+
+static void
+ensure_multi_target_ok (struct target_ops *t)
+{
+  if (!multi_target_compatible (t))
+    error (_("Target %s cannot be used in multi-target mode"),
+	   t->to_shortname);
 }
 
 /* Push a new target type into the stack of the existing target accessors,
@@ -679,13 +740,16 @@ push_target (struct target_ops *t)
     }
 
   /* Find the proper stratum to install this target in.  */
-  for (cur = &target_stack; (*cur) != NULL; cur = &(*cur)->beneath)
+  for (cur = &target_stack->top; (*cur) != NULL; cur = &(*cur)->beneath)
     {
       if ((int) (t->to_stratum) >= (int) (*cur)->to_stratum)
 	break;
     }
 
-  /* If there's already targets at this stratum, remove them.  */
+  if (currently_multi_target ())
+    ensure_multi_target_ok (t);
+
+  /* If there's already a target at this stratum, remove them.  */
   /* FIXME: cagney/2003-10-15: I think this should be popping all
      targets to CUR, and not just those at this stratum level.  */
   while ((*cur) != NULL && t->to_stratum == (*cur)->to_stratum)
@@ -742,7 +806,7 @@ unpush_target (struct target_ops *t)
   /* Look for the specified target.  Note that we assume that a target
      can only occur once in the target stack.  */
 
-  for (cur = &target_stack; (*cur) != NULL; cur = &(*cur)->beneath)
+  for (cur = &target_stack->top; (*cur) != NULL; cur = &(*cur)->beneath)
     {
       if ((*cur) == t || (*cur)->to_identity == t)
 	break;
@@ -773,11 +837,11 @@ pop_all_targets_above (enum strata above_stratum)
 {
   while ((int) (current_target->to_stratum) > (int) above_stratum)
     {
-      if (!unpush_target (target_stack))
+      if (!unpush_target (target_stack->top))
 	{
 	  fprintf_unfiltered (gdb_stderr,
 			      "pop_all_targets couldn't find target %s\n",
-			      target_stack->to_shortname);
+			      target_stack->top->to_shortname);
 	  internal_error (__FILE__, __LINE__,
 			  _("failed internal consistency check"));
 	  break;
@@ -809,7 +873,7 @@ target_is_pushed (struct target_ops *t)
 		      _("failed internal consistency check"));
     }
 
-  for (cur = target_stack; cur != NULL; cur = cur->beneath)
+  for (cur = target_stack->top; cur != NULL; cur = cur->beneath)
     if (cur == t || cur->to_identity == t)
       return 1;
 
@@ -2106,7 +2170,7 @@ target_info (char *args, int from_tty)
     printf_unfiltered (_("Symbols from \"%s\".\n"),
 		       objfile_name (symfile_objfile));
 
-  for (t = target_stack; t != NULL; t = t->beneath)
+  for (t = target_stack->top; t != NULL; t = t->beneath)
     {
       if (!(*t->to_has_memory) (t))
 	continue;
@@ -2508,7 +2572,7 @@ target_require_runnable (void)
 {
   struct target_ops *t;
 
-  for (t = target_stack; t != NULL; t = t->beneath)
+  for (t = target_stack->top; t != NULL; t = t->beneath)
     {
       /* If this target knows how to create a new program, then
 	 assume we will still be able to after killing the current
@@ -3806,10 +3870,150 @@ target_done_generating_core (void)
 static void
 setup_target_debug (void)
 {
-  memcpy (&debug_target, current_target, sizeof debug_target);
+  memcpy (&target_stack->debug_target, current_target,
+	  sizeof (struct target_ops));
 
   init_debug_target (current_target);
 }
+
+
+/* A set of all current target stacks.  */
+
+static htab_t target_stack_set;
+
+/* Return true if there are already multiple target stacks.  */
+
+static int
+currently_multi_target (void)
+{
+  return htab_elements (target_stack_set) > 1;
+}
+
+/* See target.h.  */
+
+struct target_stack *
+target_stack_incref (void)
+{
+  ++target_stack->refc;
+  return target_stack;
+}
+
+/* See target.h.  */
+
+void
+target_stack_decref (struct target_stack *tstack)
+{
+  --tstack->refc;
+  if (tstack->refc == 0)
+    {
+      /* It is ok to delete any random target stack as long as it only
+	 has the dummy target.  If any other target has been pushed,
+	 then the target stack being deleted must be the current
+	 target stack.  */
+      if (tstack->smashed.to_stratum != dummy_stratum)
+	{
+	  gdb_assert (tstack == target_stack);
+
+	  pop_all_targets ();
+	  target_stack = NULL;
+	  current_target = NULL;
+	}
+
+      htab_remove_elt (target_stack_set, tstack);
+      xfree (tstack);
+    }
+}
+
+/* See target.h.  */
+
+void
+target_stack_set_current (struct target_stack *tstack)
+{
+  target_stack = tstack;
+  current_target = &tstack->smashed;
+}
+
+/* See target.h.  */
+
+struct target_stack *
+new_target_stack (void)
+{
+  struct target_stack *save = target_stack;
+  struct target_stack *result;
+  void **slot;
+
+  if (!currently_multi_target () && target_stack != NULL)
+    {
+      struct target_ops *t;
+
+      for (t = target_stack->top; t != NULL; t = t->beneath)
+	ensure_multi_target_ok (t);
+    }
+
+  /* Overwrite the globals so that push_target can work.  */
+  target_stack = XCNEW (struct target_stack);
+  target_stack->refc = 1;
+  /* A subtlety here is that post-increment ensures that the first
+     target stack we create has an id of 0.  This will be handy once
+     we introduce a way to create a per-target ptid -- unconverted,
+     non-multi-capable targets will continue to do the right
+     thing.  */
+  target_stack->id = next_available_target_id++;
+  current_target = &target_stack->smashed;
+
+  slot = htab_find_slot (target_stack_set, target_stack, INSERT);
+  gdb_assert (*slot == NULL);
+  *slot = target_stack;
+
+  push_target (&dummy_target);
+
+  result = target_stack;
+  target_stack = save;
+  if (target_stack == NULL)
+    current_target = NULL;
+  else
+    current_target = &save->smashed;
+
+  return result;
+}
+
+/* See target.h.  */
+
+int target_stack_id (void)
+{
+  return target_stack->id;
+}
+
+/* Print a single target stack.  */
+
+static int
+print_one_target_stack (void **slot, void *arg)
+{
+  struct target_stack *stack = *slot;
+  struct target_ops *t;
+  int i;
+
+  printf_filtered (_("Target stack %s"), host_address_to_string (stack));
+  if (stack == target_stack)
+    printf_filtered (_(" (current)"));
+  printf_filtered (_("\n"));
+
+  for (t = stack->top; t != NULL; t = t->beneath)
+    {
+      printf_filtered ("  - %s (%s)\n", t->to_shortname, t->to_longname);
+    }
+
+  return 1;
+}
+
+/* Print the name of each layers of our target stack.  */
+
+static void
+maintenance_print_target_stack (char *cmd, int from_tty)
+{
+  htab_traverse (target_stack_set, print_one_target_stack, NULL);
+}
+
 
 
 static char targ_desc[] =
@@ -3829,21 +4033,6 @@ do_monitor_command (char *cmd,
 		 int from_tty)
 {
   target_rcmd (cmd, gdb_stdtarg);
-}
-
-/* Print the name of each layers of our target stack.  */
-
-static void
-maintenance_print_target_stack (char *cmd, int from_tty)
-{
-  struct target_ops *t;
-
-  printf_filtered (_("The current target stack is:\n"));
-
-  for (t = target_stack; t != NULL; t = t->beneath)
-    {
-      printf_filtered ("  - %s (%s)\n", t->to_shortname, t->to_longname);
-    }
 }
 
 /* See target.h.  */
@@ -4006,10 +4195,14 @@ set_write_memory_permission (char *args, int from_tty,
 void
 initialize_targets (void)
 {
-  current_target = XCNEW (struct target_ops);
-
   init_dummy_target ();
-  push_target (&dummy_target);
+
+  target_stack_set = htab_create_alloc (1, htab_hash_pointer,
+					htab_eq_pointer, NULL,
+					xcalloc, xfree);
+
+  target_stack = new_target_stack ();
+  current_target = &target_stack->smashed;
 
   add_info ("target", target_info, targ_desc);
   add_info ("files", target_info, targ_desc);
