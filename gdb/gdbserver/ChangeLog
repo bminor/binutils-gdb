@@ -1,5 +1,9 @@
 2015-10-26  Doug Evans  <dje@google.com>
 
+	* linux-low.c (W_STOPCODE): Moved to common/gdb_wait.h.
+
+2015-10-26  Doug Evans  <dje@google.com>
+
 	* thread-db.c (find_one_thread): Cast ti.ti_tid to unsigned long
 	for debug_printf.
 	(attach_thread, find_new_threads_callback): Ditto.

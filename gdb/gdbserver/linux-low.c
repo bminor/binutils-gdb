@@ -70,10 +70,6 @@
 #define O_LARGEFILE 0
 #endif
 
-#ifndef W_STOPCODE
-#define W_STOPCODE(sig) ((sig) << 8 | 0x7f)
-#endif
-
 /* This is the kernel's hard limit.  Not to be confused with
    SIGRTMIN.  */
 #ifndef __SIGRTMIN
