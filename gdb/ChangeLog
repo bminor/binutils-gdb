@@ -1,5 +1,10 @@
 2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* guile/scm-ports.c (gdbscm_memory_port_write): Declare new
+	"data" local variable and use it.
+
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* guile/scm-symbol.c (gdbscm_lookup_global_symbol): Add
 	domain_enum cast.
 	(gdbscm_lookup_symbol): Likewise.
