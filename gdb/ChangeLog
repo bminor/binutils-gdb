@@ -1,5 +1,10 @@
 2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* symtab.c (default_make_symbol_completion_list_break_on_1): Add
+	cast.
+
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* guile/scm-ports.c (gdbscm_memory_port_write): Declare new
 	"data" local variable and use it.
 
