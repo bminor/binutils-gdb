@@ -1,3 +1,9 @@
+2015-10-26  Doug Evans  <dje@google.com>
+
+	* thread-db.c (find_one_thread): Cast ti.ti_tid to unsigned long
+	for debug_printf.
+	(attach_thread, find_new_threads_callback): Ditto.
+
 2015-10-23  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* mem-break.h (set_breakpoint_data): Remove.

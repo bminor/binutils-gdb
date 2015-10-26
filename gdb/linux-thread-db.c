@@ -1585,7 +1585,8 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
       if (libthread_db_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "thread_db: skipping exited and "
-			    "joined thread (0x%lx)\n", ti.ti_tid);
+			    "joined thread (0x%lx)\n",
+			    (unsigned long) ti.ti_tid);
       return 0;
     }
 
@@ -1816,7 +1817,7 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
 
       tid = thread_info->priv->tid;
       snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
-		tid, ptid_get_lwp (ptid));
+		(unsigned long) tid, ptid_get_lwp (ptid));
 
       return buf;
     }

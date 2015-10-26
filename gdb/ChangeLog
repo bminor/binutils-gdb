@@ -1,3 +1,8 @@
+2015-10-26  Doug Evans  <dje@google.com>
+
+	* linux-thread-db.c (find_new_threads_callback): Ditto.
+	(thread_db_pid_to_str): Ditto.
+
 2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* guile/scm-ports.c (ioscm_make_gdb_stdio_port): Do not pass a
