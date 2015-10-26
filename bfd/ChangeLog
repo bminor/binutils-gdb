@@ -1,3 +1,14 @@
+2015-10-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19171
+	* elf32-i386.c (elf_i386_convert_load): Call
+	bfd_link_get_defined_symbol to check if a symbol is defined.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Call
+	bfd_link_get_defined_symbol to get defined symbol section and
+	value.
+	* linker.c (bfd_link_get_defined_symbol): New function.
+	* bfd-in2.h: Regenerated.
+
 2015-10-23  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11133

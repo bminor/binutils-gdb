@@ -1,3 +1,27 @@
+2015-10-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19171
+	* ld-i386/lea1.s: Add tests for address load of __start_XXX
+	and __stop_XXX.
+	* ld-i386/mov1.s: Likewise.
+	* ld-x86-64/lea1.s: Likewise.
+	* ld-x86-64/mov1.s: Likewise.
+	* ld-i386/lea1a.d: Updated.
+	* ld-i386/lea1b.d: Likewise.
+	* ld-i386/lea1c.d: Likewise.
+	* ld-i386/mov1a.d: Likewise.
+	* ld-i386/mov1b.d: Likewise.
+	* ld-x86-64/lea1a.d: Likewise.
+	* ld-x86-64/lea1b.d: Likewise.
+	* ld-x86-64/lea1c.d: Likewise.
+	* ld-x86-64/lea1d.d: Likewise.
+	* ld-x86-64/lea1e.d: Likewise.
+	* ld-x86-64/lea1f.d: Likewise.
+	* ld-x86-64/mov1a.d: Likewise.
+	* ld-x86-64/mov1b.d: Likewise.
+	* ld-x86-64/mov1c.d: Likewise.
+	* ld-x86-64/mov1d.d: Likewise.
+
 2015-10-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19167
