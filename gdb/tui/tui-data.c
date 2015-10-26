@@ -192,7 +192,7 @@ void
 tui_add_to_source_windows (struct tui_win_info *win_info)
 {
   if (source_windows.count < 2)
-    source_windows.list[source_windows.count++] = (void *) win_info;
+    source_windows.list[source_windows.count++] = win_info;
 }
 
 
@@ -636,7 +636,7 @@ tui_add_content_elements (struct tui_gen_win_info *win_info,
 	  element_ptr = XNEW (struct tui_win_element);
 	  if (element_ptr != NULL)
 	    {
-	      win_info->content[i] = (void *) element_ptr;
+	      win_info->content[i] = element_ptr;
 	      init_content_element (element_ptr, win_info->type);
 	      win_info->content_size++;
 	    }

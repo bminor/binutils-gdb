@@ -143,7 +143,7 @@ EOF
 
 	if test ! -z "${notify_args}"; then
 	    cat<<EOF >>${otmp}
-  const struct ${event}_args *args = args_data;
+  const struct ${event}_args *args = (const struct ${event}_args *) args_data;
 EOF
 	fi
 	cat <<EOF >>${otmp}

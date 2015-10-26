@@ -1,3 +1,8 @@
+2015-10-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.compile/compile.exp (compile code globalvar): Update expectation
+	for a change by "Mention language in compile error message".
+
 2015-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR python/18073

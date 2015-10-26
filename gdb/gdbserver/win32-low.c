@@ -1783,6 +1783,15 @@ win32_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
   return 1;
 }
 
+/* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+win32_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = the_low_target.breakpoint_len;
+  return the_low_target.breakpoint;
+}
+
 static struct target_ops win32_target_ops = {
   win32_create_inferior,
   NULL,  /* arch_setup */
@@ -1839,7 +1848,28 @@ static struct target_ops win32_target_ops = {
   NULL, /* read_pc */
   NULL, /* write_pc */
   NULL, /* thread_stopped */
-  win32_get_tib_address
+  win32_get_tib_address,
+  NULL, /* pause_all */
+  NULL, /* unpause_all */
+  NULL, /* stabilize_threads */
+  NULL, /* install_fast_tracepoint_jump_pad */
+  NULL, /* emit_ops */
+  NULL, /* supports_disable_randomization */
+  NULL, /* get_min_fast_tracepoint_insn_len */
+  NULL, /* qxfer_libraries_svr4 */
+  NULL, /* support_agent */
+  NULL, /* support_btrace */
+  NULL, /* enable_btrace */
+  NULL, /* disable_btrace */
+  NULL, /* read_btrace */
+  NULL, /* read_btrace_conf */
+  NULL, /* supports_range_stepping */
+  NULL, /* pid_to_exec_file */
+  NULL, /* multifs_open */
+  NULL, /* multifs_unlink */
+  NULL, /* multifs_readlink */
+  NULL, /* breakpoint_kind_from_pc */
+  win32_sw_breakpoint_from_kind,
 };
 
 /* Initialize the Win32 backend.  */
@@ -1847,8 +1877,5 @@ void
 initialize_low (void)
 {
   set_target_ops (&win32_target_ops);
-  if (the_low_target.breakpoint != NULL)
-    set_breakpoint_data (the_low_target.breakpoint,
-			 the_low_target.breakpoint_len);
   the_low_target.arch_setup ();
 }

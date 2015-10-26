@@ -5422,7 +5422,7 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
       /* These languages may have parameters entered by user but they are never
 	 present in the partial symbol tables.  */
 
-      const char *cs = memchr (sym_text, '(', sym_text_len);
+      const char *cs = (const char *) memchr (sym_text, '(', sym_text_len);
 
       if (cs)
 	sym_text_len = cs - sym_text;

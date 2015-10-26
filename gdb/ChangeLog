@@ -1,3 +1,99 @@
+2015-10-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* record-full.c (record_full_message_wrapper_safe): Pass empty string to
+	catch_errors call instead of NULL.
+
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* guile/scm-ports.c (ioscm_make_gdb_stdio_port): Pass non-const
+	char pointer to scm_mode_bits.
+
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* symtab.c (default_make_symbol_completion_list_break_on_1): Add
+	cast.
+
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* guile/scm-ports.c (gdbscm_memory_port_write): Declare new
+	"data" local variable and use it.
+
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* guile/scm-symbol.c (gdbscm_lookup_global_symbol): Add
+	domain_enum cast.
+	(gdbscm_lookup_symbol): Likewise.
+
+2015-10-25  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-exp.y: Remove an obsolete comment and propagate the block
+	information to the produced expression.
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* tui/tui-data.c (tui_add_to_source_windows): Remove void *
+	cast.
+	(tui_add_content_elements): Likewise.
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* cli/cli-setshow.c (do_set_command): Constify p.
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* nat/linux-ptrace.c (linux_ptrace_test_ret_to_nx): Replace
+	(void *) cast with (gdb_byte *).
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* proc-service.c (ps_pdread): Add cast.
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* sparc64-tdep.c (sparc64_store_arguments): Split assignment of
+	valbuf.
+
+2015-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ia64-tdep.c (ia64_pseudo_register_write): Remove cast.
+	(ia64_push_dummy_call): Remove cast and change type of "to" to
+	array of gdb_byte.
+
+2015-10-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-btrace.c (linux_enable_pt): Add cast to mmap return.
+
+2015-10-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* observer.h (observer_${event}_notification_stub): Add cast.
+
+2015-10-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Set
+	dsd.insn_count to zero.
+
+2015-10-22  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (stop_after_trap): Delete.
+	(clear_proceed_status, handle_signal_stop, struct
+	infcall_control_state, save_infcall_control_state)
+	(restore_infcall_control_state): Remove references to
+	stop_after_trap.
+
+2015-10-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/python.c (_initialize_python): Add cast.
+
+2015-10-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* nto-tdep.c (nto_inferior_data): Add cast.
+
+2015-10-22  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (do_initial_windows_stuff): Rewrite loop using
+	windows_wait and windows_resume directly instead of
+	wait_for_inferior and resume.
+
 2015-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* xtensa-tdep.h (XTREG): Add casts.

@@ -1,3 +1,16 @@
+2015-10-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (PUSH_1X_WORKAROUND): Delete.
+	(OPTION_SILICON_ERRATA): Define.
+	(OPTION_SILICON_WARN): Define.
+	(md_parse_opton): Handle silicon errata options.
+	(md_longopts): Add silicon errata options.
+	(ms_show_usage): Report silicon errata options.
+	(msp430_srcoperand): Handle silicon errata.
+	(msp430_operands): Likewise. Improve nop insertion.
+	(msp430_fix_adjustable): Update warning generation.
+	* doc/c-msp430.texi: Document silicon errata options.
+
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac: Properly check

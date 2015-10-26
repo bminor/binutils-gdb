@@ -7515,6 +7515,10 @@ struct bfd_elf_version_tree * bfd_find_version_for_sym
 bfd_boolean bfd_hide_sym_by_version
    (struct bfd_elf_version_tree *verdefs, const char *sym_name);
 
+bfd_boolean bfd_link_get_defined_symbol
+   (struct bfd_link_info *info, struct bfd_link_hash_entry *h,
+    asection **sec, bfd_vma *value);
+
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents
    (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);

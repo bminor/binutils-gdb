@@ -6945,8 +6945,7 @@ linux_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
   if (the_low_target.breakpoint_kind_from_pc != NULL)
     return (*the_low_target.breakpoint_kind_from_pc) (pcptr);
   else
-    /* Default breakpoint kind value.  */
-    return 0;
+    return default_breakpoint_kind_from_pc (pcptr);
 }
 
 /* Implementation of the target_ops method "sw_breakpoint_from_kind".  */

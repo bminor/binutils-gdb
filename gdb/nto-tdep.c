@@ -552,7 +552,8 @@ nto_inferior_data (struct inferior *const inferior)
 
   gdb_assert (inf != NULL);
 
-  inf_data = inferior_data (inf, nto_inferior_data_reg);
+  inf_data
+    = (struct nto_inferior_data *) inferior_data (inf, nto_inferior_data_reg);
   if (inf_data == NULL)
     {
       set_inferior_data (inf, nto_inferior_data_reg,

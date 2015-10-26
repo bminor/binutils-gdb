@@ -2296,7 +2296,7 @@ extern asection *_bfd_elf_gc_mark_hook
 
 extern asection *_bfd_elf_gc_mark_rsec
   (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn,
-   struct elf_reloc_cookie *);
+   struct elf_reloc_cookie *, bfd_boolean *);
 
 extern bfd_boolean _bfd_elf_gc_mark_reloc
   (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn,

@@ -1725,7 +1725,7 @@ message == an error message without a stack will be printed."),
       fprintf (stderr, "Could not convert python path to string\n");
       return;
     }
-  progname_copy = PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
+  progname_copy = (wchar_t *) PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
   if (!progname_copy)
     {
       fprintf (stderr, "out of memory\n");

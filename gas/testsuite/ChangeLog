@@ -1,3 +1,14 @@
+2015-10-22  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/errata_fixes.s: New test source file.
+	* gas/msp430/errata_fixes.d: New test control file.
+	* gas/msp430/errata_warns.s: New test source file.
+	* gas/msp430/errata_warns.d: New test control file.
+	* gas/msp430/errata_warns.l: New test message file.
+	* gas/msp430/msp430.exp: Run the new tests.
+	* gas/msp430/bad.l: Update expected warning messages
+	* gas/msp430/msp430.exp: Run the new tests.
+
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run x86-64-gotpcrel.

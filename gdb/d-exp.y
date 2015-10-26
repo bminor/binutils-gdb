@@ -487,9 +487,7 @@ PrimaryExpression:
 			}
 
 		      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-		      /* We want to use the selected frame, not another more inner frame
-			 which happens to be in the same block.  */
-		      write_exp_elt_block (pstate, NULL);
+		      write_exp_elt_block (pstate, sym.block);
 		      write_exp_elt_sym (pstate, sym.symbol);
 		      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 		    }

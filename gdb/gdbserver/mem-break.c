@@ -784,7 +784,7 @@ set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
 {
   int err_ignored;
   CORE_ADDR placed_address = where;
-  int breakpoint_kind = the_target->breakpoint_kind_from_pc (&placed_address);
+  int breakpoint_kind = target_breakpoint_kind_from_pc (&placed_address);
 
   return set_breakpoint (other_breakpoint, raw_bkpt_type_sw,
 			 placed_address, breakpoint_kind, handler,

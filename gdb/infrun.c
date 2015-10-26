@@ -387,11 +387,6 @@ show_stop_on_solib_events (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* Nonzero means expecting a trace trap
-   and should stop the inferior and return silently when it happens.  */
-
-int stop_after_trap;
-
 /* Nonzero after stop if current stack frame should be printed.  */
 
 static int stop_print_frame;
@@ -2856,8 +2851,6 @@ clear_proceed_status (int step)
       inferior = current_inferior ();
       inferior->control.stop_soon = NO_STOP_QUIETLY;
     }
-
-  stop_after_trap = 0;
 
   observer_notify_about_to_proceed ();
 }
@@ -5496,18 +5489,6 @@ handle_signal_stop (struct execution_control_state *ecs)
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
       stop_print_frame = 1;
-      stop_waiting (ecs);
-      return;
-    }
-
-  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-      && stop_after_trap)
-    {
-      if (!ptid_equal (ecs->ptid, inferior_ptid))
-	context_switch (ecs->ptid);
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
-      stop_print_frame = 0;
       stop_waiting (ecs);
       return;
     }
@@ -8776,7 +8757,6 @@ struct infcall_control_state
   /* Other fields:  */
   enum stop_stack_kind stop_stack_dummy;
   int stopped_by_random_signal;
-  int stop_after_trap;
 
   /* ID if the selected frame when the inferior function call was made.  */
   struct frame_id selected_frame_id;
@@ -8808,7 +8788,6 @@ save_infcall_control_state (void)
   /* Other fields:  */
   inf_status->stop_stack_dummy = stop_stack_dummy;
   inf_status->stopped_by_random_signal = stopped_by_random_signal;
-  inf_status->stop_after_trap = stop_after_trap;
 
   inf_status->selected_frame_id = get_frame_id (get_selected_frame (NULL));
 
@@ -8860,7 +8839,6 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
   /* Other fields:  */
   stop_stack_dummy = inf_status->stop_stack_dummy;
   stopped_by_random_signal = inf_status->stopped_by_random_signal;
-  stop_after_trap = inf_status->stop_after_trap;
 
   if (target_has_stack)
     {

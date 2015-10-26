@@ -2753,7 +2753,7 @@ elf_i386_readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 static bfd_boolean
 elf_i386_convert_load (bfd *abfd, asection *sec,
-			     struct bfd_link_info *link_info)
+		       struct bfd_link_info *link_info)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs;
@@ -2976,8 +2976,8 @@ convert_branch:
 	  if (h == htab->elf.hdynamic)
 	    continue;
 
-	  if ((h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak)
+	  if (bfd_link_get_defined_symbol (link_info, &h->root, NULL,
+					   NULL)
 	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
 	    {
 convert_load:
