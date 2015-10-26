@@ -1,5 +1,9 @@
 2015-10-26  Doug Evans  <dje@google.com>
 
+	* nat/linux-nat.h (__SIGRTMIN): Move here from gdbserver/linux-low.c.
+
+2015-10-26  Doug Evans  <dje@google.com>
+
 	* common/gdb_wait.h (W_STOPCODE): Define, moved here from
 	gdbserver/linux-low.c.
 	(WSETSTOP): Simplify.

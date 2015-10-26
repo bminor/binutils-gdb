@@ -1,5 +1,9 @@
 2015-10-26  Doug Evans  <dje@google.com>
 
+	* linux-low.c (__SIGRTMIN): Move to nat/linux-nat.h.
+
+2015-10-26  Doug Evans  <dje@google.com>
+
 	* linux-low.c (W_STOPCODE): Moved to common/gdb_wait.h.
 
 2015-10-26  Doug Evans  <dje@google.com>

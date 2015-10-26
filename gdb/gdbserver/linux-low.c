@@ -70,12 +70,6 @@
 #define O_LARGEFILE 0
 #endif
 
-/* This is the kernel's hard limit.  Not to be confused with
-   SIGRTMIN.  */
-#ifndef __SIGRTMIN
-#define __SIGRTMIN 32
-#endif
-
 /* Some targets did not define these ptrace constants from the start,
    so gdbserver defines them locally here.  In the future, these may
    be removed after they are added to asm/ptrace.h.  */

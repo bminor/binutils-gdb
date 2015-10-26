@@ -25,6 +25,11 @@
 struct lwp_info;
 struct arch_lwp_info;
 
+/* This is the kernel's hard limit.  Not to be confused with SIGRTMIN.  */
+#ifndef __SIGRTMIN
+#define __SIGRTMIN 32
+#endif
+
 /* Unlike other extended result codes, WSTOPSIG (status) on
    PTRACE_O_TRACESYSGOOD syscall events doesn't return SIGTRAP, but
    instead SIGTRAP with bit 7 set.  */
