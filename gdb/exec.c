@@ -113,10 +113,18 @@ exec_xclose_1 (struct target_ops *self)
 {
   struct program_space *ss;
   struct cleanup *old_chain;
+  struct target_stack *tstack = target_stack_incref ();
 
-  old_chain = save_current_program_space ();
+  old_chain = make_cleanup (target_stack_decref_cleanup, tstack);
+  save_current_program_space ();
+
   ALL_PSPACES (ss)
   {
+    /* Skip program spaces that are associated with some other
+       target.  */
+    if (ss->target_stack != tstack)
+      continue;
+
     set_current_program_space (ss);
     clear_section_table (current_target_sections);
     exec_close ();

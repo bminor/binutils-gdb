@@ -1265,6 +1265,10 @@ extern struct target_stack *target_stack_incref (void);
 
 extern void target_stack_decref (struct target_stack *);
 
+/* A wrapper for target_stack_decref suitable for use as a cleanup.  */
+
+extern void target_stack_decref_cleanup (void *arg);
+
 /* Set target_stack and current_target from TSTACK.  */
 
 extern void target_stack_set_current (struct target_stack *tstack);
