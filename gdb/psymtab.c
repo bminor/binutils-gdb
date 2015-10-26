@@ -1884,6 +1884,78 @@ make_cleanup_discard_psymtabs (struct objfile *objfile)
 
 
 
+/* We need to pass a couple of items to the addrmap_foreach function,
+   so use a struct.  */
+
+struct dump_psymtab_addrmap_data
+{
+  struct objfile *objfile;
+  struct partial_symtab *psymtab;
+  struct ui_file *outfile;
+
+  /* Non-zero if the previously printed addrmap entry was for PSYMTAB.
+     If so, we want to print the next one as well (since the next addrmap
+     entry defines the end of the range).  */
+  int previous_matched;
+};
+
+/* Helper function for dump_psymtab_addrmap to print an addrmap entry.  */
+
+static int
+dump_psymtab_addrmap_1 (void *datap, CORE_ADDR start_addr, void *obj)
+{
+  struct dump_psymtab_addrmap_data *data = datap;
+  struct gdbarch *gdbarch = get_objfile_arch (data->objfile);
+  struct partial_symtab *addrmap_psymtab = obj;
+  const char *psymtab_address_or_end = NULL;
+
+  QUIT;
+
+  if (data->psymtab == NULL
+      || data->psymtab == addrmap_psymtab)
+    psymtab_address_or_end = host_address_to_string (addrmap_psymtab);
+  else if (data->previous_matched)
+    psymtab_address_or_end = "<ends here>";
+
+  if (data->psymtab == NULL
+      || data->psymtab == addrmap_psymtab
+      || data->previous_matched)
+    {
+      fprintf_filtered (data->outfile, "  %s%s %s\n",
+			data->psymtab != NULL ? "  " : "",
+			paddress (gdbarch, start_addr),
+			psymtab_address_or_end);
+    }
+
+  data->previous_matched = (data->psymtab == NULL
+			    || data->psymtab == addrmap_psymtab);
+
+  return 0;
+}
+
+/* Helper function for maintenance_print_psymbols to print the addrmap
+   of PSYMTAB.  If PSYMTAB is NULL print the entire addrmap.  */
+
+static void
+dump_psymtab_addrmap (struct objfile *objfile, struct partial_symtab *psymtab,
+		      struct ui_file *outfile)
+{
+  struct dump_psymtab_addrmap_data addrmap_dump_data;
+
+  if (psymtab == NULL
+      || psymtab->psymtabs_addrmap_supported)
+    {
+      addrmap_dump_data.objfile = objfile;
+      addrmap_dump_data.psymtab = psymtab;
+      addrmap_dump_data.outfile = outfile;
+      addrmap_dump_data.previous_matched = 0;
+      fprintf_filtered (outfile, "%sddress map:\n",
+			psymtab == NULL ? "Entire a" : "  A");
+      addrmap_foreach (objfile->psymtabs_addrmap, dump_psymtab_addrmap_1,
+		       &addrmap_dump_data);
+    }
+}
+
 static void
 maintenance_print_psymbols (char *args, int from_tty)
 {
@@ -1923,12 +1995,30 @@ print-psymbols takes an output file name and optional symbol file name"));
     perror_with_name (filename);
   make_cleanup_ui_file_delete (outfile);
 
-  ALL_PSYMTABS (objfile, ps)
+  ALL_OBJFILES (objfile)
+  {
+    fprintf_filtered (outfile, "\nPartial symtabs for objfile %s\n",
+		      objfile_name (objfile));
+
+    ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
     {
       QUIT;
       if (symname == NULL || filename_cmp (symname, ps->filename) == 0)
-	dump_psymtab (objfile, ps, outfile);
+	{
+	  dump_psymtab (objfile, ps, outfile);
+	  dump_psymtab_addrmap (objfile, ps, outfile);
+	}
     }
+
+    /* If we're printing all symbols dump the full addrmap.  */
+
+    if (symname == NULL)
+      {
+	fprintf_filtered (outfile, "\n");
+	dump_psymtab_addrmap (objfile, NULL, outfile);
+      }
+  }
+
   do_cleanups (cleanups);
 }
 
