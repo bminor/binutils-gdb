@@ -1,5 +1,17 @@
 2015-10-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/19175
+	* ld-i386/i386.exp: Run pr19175.
+	* ld-x86-64/x86-64.exp: Likewise.
+	* ld-i386/pr19175.d: New file.
+	* ld-i386/pr19175.s: Likewise.
+	* ld-i386/pr19175.t: Likewise.
+	* ld-x86-64/pr19175.d: Likewise.
+	* ld-x86-64/pr19175.s: Likewise.
+	* ld-x86-64/pr19175.t: Likewise.
+
+2015-10-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19171
 	* ld-i386/lea1.s: Add tests for address load of __start_XXX
 	and __stop_XXX.

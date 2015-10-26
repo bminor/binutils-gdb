@@ -3116,8 +3116,6 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	}
       else
 	{
-	  bfd_boolean defined;
-
 	  indx = r_symndx - symtab_hdr->sh_info;
 	  h = elf_sym_hashes (abfd)[indx];
 	  BFD_ASSERT (h != NULL);
@@ -3126,17 +3124,26 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-	  defined = bfd_link_get_defined_symbol (link_info, &h->root,
-						 &tsec, &toff);
-
 	  /* STT_GNU_IFUNC must keep GOTPCREL relocations.  We also
 	     avoid optimizing GOTPCREL relocations againt _DYNAMIC
 	     since ld.so may use its link-time address.  */
-	  if (defined
+	  if ((h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak
+	       || h->root.type == bfd_link_hash_new)
 	      && h->type != STT_GNU_IFUNC
 	      && h != htab->elf.hdynamic
 	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
-	    symtype = h->type;
+	    {
+	      /* bfd_link_hash_new is set by an assignment in a linker
+		 script in bfd_elf_record_link_assignment.  FIXME: If
+		 we ever get a linker error due relocation overflow, we
+		 will skip this optimization.  */
+	      if (h->root.type == bfd_link_hash_new)
+		goto convert;
+	      tsec = h->root.u.def.section;
+	      toff = h->root.u.def.value;
+	      symtype = h->type;
+	    }
 	  else
 	    continue;
 	}
@@ -3213,6 +3220,7 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	    continue;
 	}
 
+convert:
       if (opcode == 0xff)
 	{
 	  /* We have "call/jmp *foo@GOTPCREL(%rip)".  */
