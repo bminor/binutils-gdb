@@ -1,3 +1,9 @@
+2015-10-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tui/tui-data.c (tui_alloc_content): Don't check xmalloc
+	result.  Change type of element_block_ptr.  Change allocation to
+	use XNEWVEC.
+
 2015-10-26  Luis Machado  <lgustavo@codesourcery.com>
 
 	* record-full.c (record_full_message_wrapper_safe): Pass empty string to
