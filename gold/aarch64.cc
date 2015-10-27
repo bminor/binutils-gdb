@@ -5987,6 +5987,29 @@ Target_aarch64<size, big_endian>::Scan::local(
     case elfcpp::R_AARCH64_PREL16:
       break;
 
+    case elfcpp::R_AARCH64_ADR_GOT_PAGE:
+    case elfcpp::R_AARCH64_LD64_GOT_LO12_NC:
+      // This pair of relocations is used to access a specific GOT entry.
+      {
+	bool is_new = false;
+	// This symbol requires a GOT entry.
+	if (is_ifunc)
+	  is_new = got->add_local_plt(object, r_sym, GOT_TYPE_STANDARD);
+	else
+	  is_new = got->add_local(object, r_sym, GOT_TYPE_STANDARD);
+	if (is_new && parameters->options().output_is_position_independent())
+	  target->rela_dyn_section(layout)->
+	    add_local_relative(object,
+			       r_sym,
+			       elfcpp::R_AARCH64_RELATIVE,
+			       got,
+			       object->local_got_offset(r_sym,
+							GOT_TYPE_STANDARD),
+			       0,
+			       false);
+      }
+      break;
+
     case elfcpp::R_AARCH64_LD_PREL_LO19:        // 273
     case elfcpp::R_AARCH64_ADR_PREL_LO21:       // 274
     case elfcpp::R_AARCH64_ADR_PREL_PG_HI21:    // 275
