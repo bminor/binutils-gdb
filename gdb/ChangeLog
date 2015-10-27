@@ -1,5 +1,10 @@
 2015-10-27  Pedro Alves  <palves@redhat.com>
 
+	* source.c (openp): New local 'last_errno'.  Use it to
+	save/restore errno.
+
+2015-10-27  Pedro Alves  <palves@redhat.com>
+
 	* psymtab.c (dump_psymtab_addrmap_1): Add casts.
 
 2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
