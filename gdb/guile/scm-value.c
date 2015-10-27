@@ -1158,7 +1158,7 @@ gdbscm_value_to_string (SCM self, SCM rest)
      Make sure we don't leak.  This is done via scm_dynwind_begin, et.al.  */
   discard_cleanups (cleanups);
 
-  scm_dynwind_begin (0);
+  scm_dynwind_begin ((scm_t_dynwind_flags) 0);
 
   gdbscm_dynwind_xfree (encoding);
   gdbscm_dynwind_xfree (buffer);

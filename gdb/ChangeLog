@@ -1,5 +1,13 @@
 2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* guile/scm-breakpoint.c (gdbscm_set_breakpoint_stop_x): Add
+	scm_t_dynwind_flags casts.
+	* guile/scm-cmd.c (gdbscm_parse_command_name): Likewise.
+	* guile/scm-ports.c (gdbscm_open_memory): Likewise.
+	* guile/scm-value.c (gdbscm_value_to_string): Likewise.
+
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ax.h (ax_raw_byte): New declaration.
 	* ax-general.c (ax_raw_byte): New function.
 	(ax_simple): Use ax_raw_byte.
