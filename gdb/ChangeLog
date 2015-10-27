@@ -1,3 +1,7 @@
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ada-lang.h (GROW_VECT): Add cast.
+
 2015-10-26  Doug Evans  <xdje42@gmail.com>
 
 	* symtab.h (struct general_symbol_info> <ada_mangled>: Update comment.
