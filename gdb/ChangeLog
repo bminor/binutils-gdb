@@ -1,5 +1,11 @@
 2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target.c (memory_xfer_partial): Change type of buf to gdb_byte
+	pointer.
+	(simple_search_memory): Cast return of memmem.
+
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* stap-probe.c (handle_stap_probe): Add (const char *) casts.
 
 2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
