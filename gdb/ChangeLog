@@ -1,5 +1,12 @@
 2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ax.h (ax_raw_byte): New declaration.
+	* ax-general.c (ax_raw_byte): New function.
+	(ax_simple): Use ax_raw_byte.
+	* ax-gdb.c (gen_printf): Likewise.
+
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ada-lang.h (GROW_VECT): Add cast.
 
 2015-10-26  Doug Evans  <xdje42@gmail.com>
