@@ -1,3 +1,7 @@
+2015-10-26  Doug Evans  <xdje42@gmail.com>
+
+	* symtab.h (struct general_symbol_info> <ada_mangled>: Update comment.
+
 2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target.c (memory_xfer_partial): Change type of buf to gdb_byte
