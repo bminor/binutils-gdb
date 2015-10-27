@@ -1,3 +1,7 @@
+2015-10-27  Stephen Fisher  <sfisher@panix.com>
+
+	* common.h (NT_NETBSD_MARCH): Define.
+
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* x86-64.h (R_X86_64_GOTPCRELX): New.
