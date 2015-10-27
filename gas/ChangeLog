@@ -1,3 +1,10 @@
+2015-10-27  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-arm.c (selected_cpu_name): Increase length of array to
+	accomodate "Samsung Exynos M1".
+	(arm_parse_cpu): Add assertion and length check to prevent
+	overfilling selected_cpu_name.
+
 2015-10-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (PUSH_1X_WORKAROUND): Delete.
