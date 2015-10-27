@@ -1,5 +1,16 @@
 2015-10-27  Pedro Alves  <palves@redhat.com>
 
+	* common/print-utils.c (host_address_to_string): Rename to ...
+	(host_address_to_string_1): ... this.
+	* common/print-utils.h (host_address_to_string): Reimplement as
+	wrapper around host_address_to_string_1.
+	* utils.c (gdb_print_host_address): Rename to ...
+	(gdb_print_host_address_1): ... this.
+	* utils.h (gdb_print_host_address): Reimplement as wrapper macro
+	around	host_address_to_string_1.
+
+2015-10-27  Pedro Alves  <palves@redhat.com>
+
 	* alpha-tdep.c (alpha_read_insn): Always pass TARGET_XFER_E_IO to
 	memory_error.  Rename local 'status' to 'res'.
 	* c-lang.c (c_get_string): Always pass TARGET_XFER_E_IO to
