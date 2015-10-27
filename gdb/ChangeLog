@@ -1,3 +1,21 @@
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* guile/guile-internal.h (gdbscm_with_guile): Change return
+	types to const char *.
+	* guile/scm-safe-call.c (gdbscm_with_guile): Likewise.
+	(struct c_data) <func>: Likewise.
+	(struct c_data) <result>: Change type to const char *.
+	(scscm_eval_scheme_string): Change return type to
+	const char *.
+	(scscm_source_scheme_script): Likewise.
+	(gdbscm_safe_eval_string): Change type of result variable to
+	const char * and remove cast.
+	(gdbscm_safe_source_script): Likewise.
+	* guile/scm-disasm.c (gdbscm_disasm_read_memory_worker):
+	Change return type to const char *.
+	(gdbscm_disasm_read_memory): Change type of status to
+	const char *.
+
 2015-10-27  Pedro Alves  <palves@redhat.com>
 
 	* source.c (openp): New local 'last_errno'.  Use it to
