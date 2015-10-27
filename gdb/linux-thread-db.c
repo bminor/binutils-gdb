@@ -782,7 +782,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
   /* The thread library was detected.  Activate the thread_db target
      if this is the first process using it.  */
   if (thread_db_list->next == NULL)
-    push_target (&thread_db_ops);
+    push_target (TARGET_NEW (struct target_ops, &thread_db_ops));
 
   /* Enable event reporting, but not when debugging a core file.  */
   if (target_has_execution && thread_db_use_events ())
@@ -2102,12 +2102,23 @@ info_auto_load_libthread_db (char *args, int from_tty)
     ui_out_message (uiout, 0, _("No auto-loaded libthread-db.\n"));
 }
 
+/* to_xclose implementation.  */
+
+static void
+thread_db_xclose (struct target_ops *self)
+{
+  /* Not much to do here, but this method is how we indicate that this
+     target is multi-capable.  */
+  xfree (self);
+}
+
 static void
 init_thread_db_ops (void)
 {
   thread_db_ops.to_shortname = "multi-thread";
   thread_db_ops.to_longname = "multi-threaded child process.";
   thread_db_ops.to_doc = "Threads and pthreads support.";
+  thread_db_ops.to_xclose = thread_db_xclose;
   thread_db_ops.to_detach = thread_db_detach;
   thread_db_ops.to_wait = thread_db_wait;
   thread_db_ops.to_resume = thread_db_resume;
