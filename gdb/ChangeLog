@@ -1,3 +1,8 @@
+2015-10-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ctf.c (ctf_xfer_partial): Return TARGET_XFER_E_IO instead of
+	-1 on error.
+
 2015-10-26  Doug Evans  <dje@google.com>
 
 	PR symtab/17391

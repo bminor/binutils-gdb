@@ -1273,7 +1273,7 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
 {
   /* We're only doing regular memory for now.  */
   if (object != TARGET_OBJECT_MEMORY)
-    return -1;
+    return TARGET_XFER_E_IO;
 
   if (readbuf == NULL)
     error (_("ctf_xfer_partial: trace file is read-only"));
