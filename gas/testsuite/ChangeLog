@@ -1,5 +1,12 @@
 2015-10-27  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/19158
+	* gas/rl78/pr19158.s: New test source file.
+	* gas/rl78/pr19158.d: New test case.
+	* gas/rl78/rl78.exp: Run the new test.
+
+2015-10-27  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/19157
 	* gas/rl78: New directory.
 	* gas/rl78/rl78.exp: New test driver.

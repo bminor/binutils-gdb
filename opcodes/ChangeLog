@@ -1,5 +1,14 @@
 2015-10-27  Vinay Kumar  <vinay.g@kpit.com>
 
+	PR binutils/19158
+	* rl78-decode.opc: Add 's' print operator to instructions that
+	access system registers.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c (print_insn_rl78_common): Decode all system
+	registers.
+
+2015-10-27  Vinay Kumar  <vinay.g@kpit.com>
+
 	PR binutils/19157
 	* rl78-decode.opc: Add 'a' print operator to mov instructions
 	using stack pointer plus index addressing.

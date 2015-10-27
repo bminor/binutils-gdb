@@ -776,7 +776,7 @@ rl78_decode_opcode (unsigned long pc AU,
 	break;
       }
 
-/** 1001 1110			mov	%0, %1				*/
+/** 1001 1110			mov	%s0, %1				*/
   ID(mov); DM(None, SFR); SR(A);
 
 /*----------------------------------------------------------------------*/
@@ -894,10 +894,10 @@ rl78_decode_opcode (unsigned long pc AU,
 /** 1011 1101			movw	%0, %1				*/
   ID(mov); W(); DM(None, SADDR); SR(AX);
 
-/** 1100 1011			movw	%0, #%1				*/
+/** 1100 1011			movw	%s0, #%1			*/
   ID(mov); W(); DM(None, SFR); SC(IMMU(2));
 
-/** 1011 1110			movw	%0, %1				*/
+/** 1011 1110			movw	%s0, %1				*/
   ID(mov); W(); DM(None, SFR); SR(AX);
 
 /*----------------------------------------------------------------------*/
@@ -1228,7 +1228,7 @@ rl78_decode_opcode (unsigned long pc AU,
 /** 0110 0001 1010 1000	       	xch	%0, %1				*/
   ID(xch); DR(A); SM(None, SADDR);
 
-/** 0110 0001 1010 1011	       	xch	%0, %1				*/
+/** 0110 0001 1010 1011	       	xch	%0, %s1				*/
   ID(xch); DR(A); SM(None, SFR);
 
 /** 0000 1000			xch	a, x				*/
