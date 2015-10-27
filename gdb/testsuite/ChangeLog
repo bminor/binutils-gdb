@@ -1,3 +1,7 @@
+2015-10-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.ada/access_to_packed_array.exp: Fix typos erroring the testfile.
+
 2015-10-26  Doug Evans  <dje@google.com>
 
 	PR symtab/17391
