@@ -1805,6 +1805,7 @@ lang_insert_orphan (asection *s,
 {
   lang_statement_list_type add;
   const char *ps;
+  lang_assignment_statement_type *start_assign;
   lang_output_section_statement_type *os;
   lang_output_section_statement_type **os_tail;
 
@@ -1827,6 +1828,7 @@ lang_insert_orphan (asection *s,
 					    NULL, NULL, NULL, constraint, 0);
 
   ps = NULL;
+  start_assign = NULL;
   if (config.build_constructors && *os_tail == os)
     {
       /* If the name of the section is representable in C, then create
@@ -1841,9 +1843,10 @@ lang_insert_orphan (asection *s,
 	  symname = (char *) xmalloc (ps - secname + sizeof "__start_" + 1);
 	  symname[0] = bfd_get_symbol_leading_char (link_info.output_bfd);
 	  sprintf (symname + (symname[0] != 0), "__start_%s", secname);
-	  lang_add_assignment (exp_provide (symname,
-					    exp_nameop (NAME, "."),
-					    FALSE));
+	  start_assign
+	    = lang_add_assignment (exp_provide (symname,
+						exp_nameop (NAME, "."),
+						FALSE));
 	}
     }
 
@@ -1866,16 +1869,25 @@ lang_insert_orphan (asection *s,
     lang_leave_output_section_statement (NULL, DEFAULT_MEMORY_REGION, NULL,
 					 NULL);
 
-  if (ps != NULL && *ps == '\0')
+  if (start_assign != NULL)
     {
       char *symname;
+      lang_assignment_statement_type *stop_assign;
+      bfd_vma dot;
 
       symname = (char *) xmalloc (ps - secname + sizeof "__stop_" + 1);
       symname[0] = bfd_get_symbol_leading_char (link_info.output_bfd);
       sprintf (symname + (symname[0] != 0), "__stop_%s", secname);
-      lang_add_assignment (exp_provide (symname,
-					exp_nameop (NAME, "."),
-					FALSE));
+      stop_assign
+	= lang_add_assignment (exp_provide (symname,
+					    exp_nameop (NAME, "."),
+					    FALSE));
+      /* Evaluate the expression to define the symbol if referenced,
+	 before sizing dynamic sections.  */
+      dot = os->bfd_section->vma;
+      exp_fold_tree (start_assign->exp, os->bfd_section, &dot);
+      dot += s->size;
+      exp_fold_tree (stop_assign->exp, os->bfd_section, &dot);
     }
 
   /* Restore the global list pointer.  */
