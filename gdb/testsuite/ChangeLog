@@ -1,3 +1,20 @@
+2015-10-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.ada/access_to_packed_array.exp: Fix typos erroring the testfile.
+
+2015-10-26  Doug Evans  <dje@google.com>
+
+	PR symtab/17391
+	* lib/dwarf.exp (_location): Add support for DW_OP_regx.
+	* gdb.dwarf2/bad-regnum.c: New file.
+	* gdb.dwarf2/bad-regnum.exp: New file.
+
+2015-10-26  Doug Evans  <dje@google.com>
+
+	PR python/18938
+	* gdb.python/python.exp: Add test for symlink from .py file to .notpy
+	file.
+
 2015-10-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.compile/compile.exp (compile code globalvar): Update expectation

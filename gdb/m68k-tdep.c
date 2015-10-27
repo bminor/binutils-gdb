@@ -573,7 +573,7 @@ m68k_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int num)
     /* pc */
     return M68K_PC_REGNUM;
   else
-    return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+    return -1;
 }
 
 

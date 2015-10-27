@@ -1385,10 +1385,7 @@ mn10300_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2)
 
   if (dwarf2 < 0
       || dwarf2 >= ARRAY_SIZE (dwarf2_to_gdb))
-    {
-      warning (_("Bogus register number in debug info: %d"), dwarf2);
-      return -1;
-    }
+    return -1;
 
   return dwarf2_to_gdb[dwarf2];
 }

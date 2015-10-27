@@ -26,6 +26,7 @@
 #include "gdbcore.h"
 #include "dwarf2.h"
 #include "dwarf2expr.h"
+#include "dwarf2loc.h"
 
 /* Local prototypes.  */
 
@@ -611,7 +612,7 @@ dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
 	return 0;
     }
 
-  if (gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_reg)
+  if (dwarf_reg_to_regnum (gdbarch, dwarf_reg)
       != gdbarch_sp_regnum (gdbarch))
     return 0;
 

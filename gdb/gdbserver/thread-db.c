@@ -278,7 +278,7 @@ find_one_thread (ptid_t ptid)
 
   if (debug_threads)
     debug_printf ("Found thread %ld (LWP %d)\n",
-		  ti.ti_tid, ti.ti_lid);
+		  (unsigned long) ti.ti_tid, ti.ti_lid);
 
   if (lwpid != ti.ti_lid)
     {
@@ -319,12 +319,12 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 
   if (debug_threads)
     debug_printf ("Attaching to thread %ld (LWP %d)\n",
-		  ti_p->ti_tid, ti_p->ti_lid);
+		  (unsigned long) ti_p->ti_tid, ti_p->ti_lid);
   err = linux_attach_lwp (ptid);
   if (err != 0)
     {
       warning ("Could not attach to thread %ld (LWP %d): %s\n",
-	       ti_p->ti_tid, ti_p->ti_lid,
+	       (unsigned long) ti_p->ti_tid, ti_p->ti_lid,
 	       linux_ptrace_attach_fail_reason_string (ptid, err));
       return 0;
     }
@@ -392,7 +392,8 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 	 glibc PR17707.  */
       if (debug_threads)
 	debug_printf ("thread_db: skipping exited and "
-		      "joined thread (0x%lx)\n", ti.ti_tid);
+		      "joined thread (0x%lx)\n",
+		      (unsigned long) ti.ti_tid);
       return 0;
     }
 

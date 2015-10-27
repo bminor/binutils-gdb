@@ -266,7 +266,7 @@ static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
 static arm_feature_set selected_cpu = ARM_ARCH_NONE;
 /* Must be long enough to hold any of the names in arm_cpus.  */
-static char selected_cpu_name[16];
+static char selected_cpu_name[20];
 
 extern FLONUM_TYPE generic_floating_point_number;
 
@@ -25132,10 +25132,16 @@ arm_parse_cpu (char *str)
 	mcpu_cpu_opt = &opt->value;
 	mcpu_fpu_opt = &opt->default_fpu;
 	if (opt->canonical_name)
-	  strcpy (selected_cpu_name, opt->canonical_name);
+	  {
+	    gas_assert (sizeof selected_cpu_name > strlen (opt->canonical_name));
+	    strcpy (selected_cpu_name, opt->canonical_name);
+	  }
 	else
 	  {
 	    size_t i;
+
+	    if (len >= sizeof selected_cpu_name)
+	      len = (sizeof selected_cpu_name) - 1;
 
 	    for (i = 0; i < len; i++)
 	      selected_cpu_name[i] = TOUPPER (opt->name[i]);

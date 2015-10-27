@@ -1364,9 +1364,6 @@ avr_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     return reg;
   if (reg == 32)
     return AVR_SP_REGNUM;
-
-  warning (_("Unmapped DWARF Register #%d encountered."), reg);
-
   return -1;
 }
 

@@ -32,7 +32,7 @@
 #include "objfiles.h"
 #include "block.h"
 #include "gdbcmd.h"
-
+#include "complaints.h"
 #include "dwarf2.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
@@ -312,7 +312,7 @@ dwarf_expr_read_addr_from_reg (void *baton, int dwarf_regnum)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
   struct gdbarch *gdbarch = get_frame_arch (debaton->frame);
-  int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_regnum);
+  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, dwarf_regnum);
 
   return address_from_register (regnum, debaton->frame);
 }
@@ -324,7 +324,7 @@ dwarf_expr_get_reg_value (void *baton, struct type *type, int dwarf_regnum)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
   struct gdbarch *gdbarch = get_frame_arch (debaton->frame);
-  int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_regnum);
+  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, dwarf_regnum);
 
   return value_from_register (type, regnum, debaton->frame);
 }
@@ -1757,40 +1757,31 @@ read_pieced_value (struct value *v)
 	case DWARF_VALUE_REGISTER:
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
-	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->v.regno);
+	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
+	    int optim, unavail;
+	    int reg_offset = source_offset;
 
-	    if (gdb_regnum != -1)
+	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
+		&& this_size < register_size (arch, gdb_regnum))
 	      {
-		int optim, unavail;
-		int reg_offset = source_offset;
-
-		if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		    && this_size < register_size (arch, gdb_regnum))
-		  {
-		    /* Big-endian, and we want less than full size.  */
-		    reg_offset = register_size (arch, gdb_regnum) - this_size;
-		    /* We want the lower-order THIS_SIZE_BITS of the bytes
-		       we extract from the register.  */
-		    source_offset_bits += 8 * this_size - this_size_bits;
-		 }
-
-		if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
-					       this_size, buffer,
-					       &optim, &unavail))
-		  {
-		    /* Just so garbage doesn't ever shine through.  */
-		    memset (buffer, 0, this_size);
-
-		    if (optim)
-		      mark_value_bits_optimized_out (v, offset, this_size_bits);
-		    if (unavail)
-		      mark_value_bits_unavailable (v, offset, this_size_bits);
-		  }
+		/* Big-endian, and we want less than full size.  */
+		reg_offset = register_size (arch, gdb_regnum) - this_size;
+		/* We want the lower-order THIS_SIZE_BITS of the bytes
+		   we extract from the register.  */
+		source_offset_bits += 8 * this_size - this_size_bits;
 	      }
-	    else
+
+	    if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
+					   this_size, buffer,
+					   &optim, &unavail))
 	      {
-		error (_("Unable to access DWARF register number %s"),
-		       paddress (arch, p->v.regno));
+		/* Just so garbage doesn't ever shine through.  */
+		memset (buffer, 0, this_size);
+
+		if (optim)
+		  mark_value_bits_optimized_out (v, offset, this_size_bits);
+		if (unavail)
+		  mark_value_bits_unavailable (v, offset, this_size_bits);
 	      }
 	  }
 	  break;
@@ -1949,52 +1940,43 @@ write_pieced_value (struct value *to, struct value *from)
 	case DWARF_VALUE_REGISTER:
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
-	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->v.regno);
+	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
+	    int reg_offset = dest_offset;
 
-	    if (gdb_regnum != -1)
+	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
+		&& this_size <= register_size (arch, gdb_regnum))
 	      {
-		int reg_offset = dest_offset;
-
-		if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		    && this_size <= register_size (arch, gdb_regnum))
-		  {
-		    /* Big-endian, and we want less than full size.  */
-		    reg_offset = register_size (arch, gdb_regnum) - this_size;
-		  }
-
-		if (need_bitwise)
-		  {
-		    int optim, unavail;
-
-		    if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
-						   this_size, buffer,
-						   &optim, &unavail))
-		      {
-			if (optim)
-			  throw_error (OPTIMIZED_OUT_ERROR,
-				       _("Can't do read-modify-write to "
-					 "update bitfield; containing word "
-					 "has been optimized out"));
-			if (unavail)
-			  throw_error (NOT_AVAILABLE_ERROR,
-				       _("Can't do read-modify-write to update "
-					 "bitfield; containing word "
-					 "is unavailable"));
-		      }
-		    copy_bitwise (buffer, dest_offset_bits,
-				  contents, source_offset_bits,
-				  this_size_bits,
-				  bits_big_endian);
-		  }
-
-		put_frame_register_bytes (frame, gdb_regnum, reg_offset, 
-					  this_size, source_buffer);
+		/* Big-endian, and we want less than full size.  */
+		reg_offset = register_size (arch, gdb_regnum) - this_size;
 	      }
-	    else
+
+	    if (need_bitwise)
 	      {
-		error (_("Unable to write to DWARF register number %s"),
-		       paddress (arch, p->v.regno));
+		int optim, unavail;
+
+		if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
+					       this_size, buffer,
+					       &optim, &unavail))
+		  {
+		    if (optim)
+		      throw_error (OPTIMIZED_OUT_ERROR,
+				   _("Can't do read-modify-write to "
+				     "update bitfield; containing word "
+				     "has been optimized out"));
+		    if (unavail)
+		      throw_error (NOT_AVAILABLE_ERROR,
+				   _("Can't do read-modify-write to update "
+				     "bitfield; containing word "
+				     "is unavailable"));
+		  }
+		copy_bitwise (buffer, dest_offset_bits,
+			      contents, source_offset_bits,
+			      this_size_bits,
+			      bits_big_endian);
 	      }
+
+	    put_frame_register_bytes (frame, gdb_regnum, reg_offset, 
+				      this_size, source_buffer);
 	  }
 	  break;
 	case DWARF_VALUE_MEMORY:
@@ -2335,30 +2317,27 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int dwarf_regnum
 	      = longest_to_int (value_as_long (dwarf_expr_fetch (ctx, 0)));
-	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_regnum);
+	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, dwarf_regnum);
 
 	    if (byte_offset != 0)
 	      error (_("cannot use offset on synthetic pointer to register"));
 	    do_cleanups (value_chain);
-	   if (gdb_regnum == -1)
-	      error (_("Unable to access DWARF register number %d"),
-		     dwarf_regnum);
-	   retval = value_from_register (type, gdb_regnum, frame);
-	   if (value_optimized_out (retval))
-	     {
-	       struct value *tmp;
+	    retval = value_from_register (type, gdb_regnum, frame);
+	    if (value_optimized_out (retval))
+	      {
+		struct value *tmp;
 
-	       /* This means the register has undefined value / was
-		  not saved.  As we're computing the location of some
-		  variable etc. in the program, not a value for
-		  inspecting a register ($pc, $sp, etc.), return a
-		  generic optimized out value instead, so that we show
-		  <optimized out> instead of <not saved>.  */
-	       do_cleanups (value_chain);
-	       tmp = allocate_value (type);
-	       value_contents_copy (tmp, 0, retval, 0, TYPE_LENGTH (type));
-	       retval = tmp;
-	     }
+		/* This means the register has undefined value / was
+		   not saved.  As we're computing the location of some
+		   variable etc. in the program, not a value for
+		   inspecting a register ($pc, $sp, etc.), return a
+		   generic optimized out value instead, so that we show
+		   <optimized out> instead of <not saved>.  */
+		do_cleanups (value_chain);
+		tmp = allocate_value (type);
+		value_contents_copy (tmp, 0, retval, 0, TYPE_LENGTH (type));
+		retval = tmp;
+	      }
 	  }
 	  break;
 
@@ -2858,14 +2837,54 @@ unimplemented (unsigned int op)
 	   op);
 }
 
+/* See dwarf2loc.h.
+
+   This is basically a wrapper on gdbarch_dwarf2_reg_to_regnum so that we
+   can issue a complaint, which is better than having every target's
+   implementation of dwarf2_reg_to_regnum do it.  */
+
+int
+dwarf_reg_to_regnum (struct gdbarch *arch, int dwarf_reg)
+{
+  int reg = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_reg);
+
+  if (reg == -1)
+    {
+      complaint (&symfile_complaints,
+		 _("bad DWARF register number %d"), dwarf_reg);
+    }
+  return reg;
+}
+
+/* Subroutine of dwarf_reg_to_regnum_or_error to simplify it.
+   Throw an error because DWARF_REG is bad.  */
+
+static void
+throw_bad_regnum_error (ULONGEST dwarf_reg)
+{
+  /* Still want to print -1 as "-1".
+     We *could* have int and ULONGEST versions of dwarf2_reg_to_regnum_or_error
+     but that's overkill for now.  */
+  if ((int) dwarf_reg == dwarf_reg)
+    error (_("Unable to access DWARF register number %d"), (int) dwarf_reg);
+  error (_("Unable to access DWARF register number %s"),
+	 pulongest (dwarf_reg));
+}
+
 /* See dwarf2loc.h.  */
 
 int
-dwarf2_reg_to_regnum_or_error (struct gdbarch *arch, int dwarf_reg)
+dwarf_reg_to_regnum_or_error (struct gdbarch *arch, ULONGEST dwarf_reg)
 {
-  int reg = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_reg);
+  int reg;
+
+  if (dwarf_reg > INT_MAX)
+    throw_bad_regnum_error (dwarf_reg);
+  /* Yes, we will end up issuing a complaint and an error if DWARF_REG is
+     bad, but that's ok.  */
+  reg = dwarf_reg_to_regnum (arch, (int) dwarf_reg);
   if (reg == -1)
-    error (_("Unable to access DWARF register number %d"), dwarf_reg);
+    throw_bad_regnum_error (dwarf_reg);
   return reg;
 }
 
@@ -3112,14 +3131,14 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	case DW_OP_reg30:
 	case DW_OP_reg31:
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
-	  loc->u.reg = dwarf2_reg_to_regnum_or_error (arch, op - DW_OP_reg0);
+	  loc->u.reg = dwarf_reg_to_regnum_or_error (arch, op - DW_OP_reg0);
 	  loc->kind = axs_lvalue_register;
 	  break;
 
 	case DW_OP_regx:
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
-	  loc->u.reg = dwarf2_reg_to_regnum_or_error (arch, reg);
+	  loc->u.reg = dwarf_reg_to_regnum_or_error (arch, reg);
 	  loc->kind = axs_lvalue_register;
 	  break;
 
@@ -3182,7 +3201,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	case DW_OP_breg30:
 	case DW_OP_breg31:
 	  op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	  i = dwarf2_reg_to_regnum_or_error (arch, op - DW_OP_breg0);
+	  i = dwarf_reg_to_regnum_or_error (arch, op - DW_OP_breg0);
 	  ax_reg (expr, i);
 	  if (offset != 0)
 	    {
@@ -3194,7 +3213,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  {
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    i = dwarf2_reg_to_regnum_or_error (arch, reg);
+	    i = dwarf_reg_to_regnum_or_error (arch, reg);
 	    ax_reg (expr, i);
 	    if (offset != 0)
 	      {
@@ -3659,7 +3678,17 @@ locexpr_regname (struct gdbarch *gdbarch, int dwarf_regnum)
 {
   int regnum;
 
-  regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_regnum);
+  /* This doesn't use dwarf_reg_to_regnum_or_error on purpose.
+     We'd rather print *something* here than throw an error.  */
+  regnum = dwarf_reg_to_regnum (gdbarch, dwarf_regnum);
+  /* gdbarch_register_name may just return "", return something more
+     descriptive for bad register numbers.  */
+  if (regnum == -1)
+    {
+      /* The text is output as "$bad_register_number".
+	 That is why we use the underscores.  */
+      return _("bad_register_number");
+    }
   return gdbarch_register_name (gdbarch, regnum);
 }
 

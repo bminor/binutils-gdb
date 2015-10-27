@@ -1126,11 +1126,14 @@ exp_fold_tree_1 (etree_type *tree)
 	      if (h == NULL
 		  || !(h->type == bfd_link_hash_new
 		       || h->type == bfd_link_hash_undefined
+		       || h->type == bfd_link_hash_undefweak
 		       || h->linker_def))
 		{
 		  /* Do nothing.  The symbol was never referenced, or
-		     was defined in some object file.  Undefined weak
-		     symbols stay undefined.  */
+		     was defined in some object file.  Note that
+		     undefweak symbols are defined by PROVIDE.  This
+		     is to support glibc use of __rela_iplt_start and
+		     similar weak references.  */
 		  break;
 		}
 	    }

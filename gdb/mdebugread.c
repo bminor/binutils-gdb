@@ -521,6 +521,14 @@ add_pending (FDR *fh, char *sh, struct type *t)
 
 /* Parsing Routines proper.  */
 
+static void
+reg_value_complaint (int regnum, int num_regs, const char *sym)
+{
+  complaint (&symfile_complaints,
+	     _("bad register number %d (max %d) in symbol %s"),
+             regnum, num_regs - 1, sym);
+}
+
 /* Parse a single symbol.  Mostly just make up a GDB symbol for it.
    For blocks, procedures and types we open a new lexical context.
    This is basically just a big switch on the symbol's type.  Argument
@@ -533,7 +541,21 @@ add_pending (FDR *fh, char *sh, struct type *t)
 static int
 mdebug_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
 {
-  return gdbarch_ecoff_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+  int regno = gdbarch_ecoff_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+
+  if (regno < 0
+      || regno >= (gdbarch_num_regs (gdbarch)
+		   + gdbarch_num_pseudo_regs (gdbarch)))
+    {
+      reg_value_complaint (regno,
+			   gdbarch_num_regs (gdbarch)
+			     + gdbarch_num_pseudo_regs (gdbarch),
+			   SYMBOL_PRINT_NAME (sym));
+
+      regno = gdbarch_sp_regnum (gdbarch); /* Known safe, though useless.  */
+    }
+
+  return regno;
 }
 
 static const struct symbol_register_ops mdebug_register_funcs = {

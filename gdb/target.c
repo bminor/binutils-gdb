@@ -1235,7 +1235,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
     }
   else
     {
-      void *buf;
+      gdb_byte *buf;
       struct cleanup *old_chain;
 
       /* A large write request is likely to be partially satisfied
@@ -1245,7 +1245,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 	 subset of it.  Cap writes to 4KB to mitigate this.  */
       len = min (4096, len);
 
-      buf = xmalloc (len);
+      buf = (gdb_byte *) xmalloc (len);
       old_chain = make_cleanup (xfree, buf);
       memcpy (buf, writebuf, len);
 
@@ -2391,8 +2391,8 @@ simple_search_memory (struct target_ops *ops,
       gdb_byte *found_ptr;
       unsigned nr_search_bytes = min (search_space_len, search_buf_size);
 
-      found_ptr = memmem (search_buf, nr_search_bytes,
-			  pattern, pattern_len);
+      found_ptr = (gdb_byte *) memmem (search_buf, nr_search_bytes,
+				       pattern, pattern_len);
 
       if (found_ptr != NULL)
 	{

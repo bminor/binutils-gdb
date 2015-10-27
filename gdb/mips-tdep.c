@@ -8024,9 +8024,7 @@ mips_stab_reg_to_regnum (struct gdbarch *gdbarch, int num)
   else if (mips_regnum (gdbarch)->dspacc != -1 && num >= 72 && num < 78)
     regnum = num + mips_regnum (gdbarch)->dspacc - 72;
   else
-    /* This will hopefully (eventually) provoke a warning.  Should
-       we be calling complaint() here?  */
-    return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+    return -1;
   return gdbarch_num_regs (gdbarch) + regnum;
 }
 
@@ -8049,9 +8047,7 @@ mips_dwarf_dwarf2_ecoff_reg_to_regnum (struct gdbarch *gdbarch, int num)
   else if (mips_regnum (gdbarch)->dspacc != -1 && num >= 66 && num < 72)
     regnum = num + mips_regnum (gdbarch)->dspacc - 66;
   else
-    /* This will hopefully (eventually) provoke a warning.  Should we
-       be calling complaint() here?  */
-    return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+    return -1;
   return gdbarch_num_regs (gdbarch) + regnum;
 }
 

@@ -2976,8 +2976,11 @@ convert_branch:
 	  if (h == htab->elf.hdynamic)
 	    continue;
 
-	  if (bfd_link_get_defined_symbol (link_info, &h->root, NULL,
-					   NULL)
+	  /* bfd_link_hash_new is set by an assignment in a linker
+	     script in bfd_elf_record_link_assignment.  */
+	  if ((h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak
+	       || h->root.type == bfd_link_hash_new)
 	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
 	    {
 convert_load:

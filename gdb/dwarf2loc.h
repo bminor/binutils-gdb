@@ -293,9 +293,18 @@ extern struct call_site_chain *call_site_find_chain (struct gdbarch *gdbarch,
 /* A helper function to convert a DWARF register to an arch register.
    ARCH is the architecture.
    DWARF_REG is the register.
-   This will throw an exception if the DWARF register cannot be
-   translated to an architecture register.  */
+   If DWARF_REG is bad then a complaint is issued and -1 is returned.
+   Note: Some targets get this wrong.  */
 
-extern int dwarf2_reg_to_regnum_or_error (struct gdbarch *arch, int dwarf_reg);
+extern int dwarf_reg_to_regnum (struct gdbarch *arch, int dwarf_reg);
+
+/* A wrapper on dwarf_reg_to_regnum to throw an exception if the
+   DWARF register cannot be translated to an architecture register.
+   This takes a ULONGEST instead of an int because some callers actually have
+   a ULONGEST.  Negative values passed as ints will still be flagged as
+   invalid.  */
+
+extern int dwarf_reg_to_regnum_or_error (struct gdbarch *arch,
+					 ULONGEST dwarf_reg);
 
 #endif /* dwarf2loc.h */

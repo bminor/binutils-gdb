@@ -147,7 +147,7 @@ struct general_symbol_info
 
   ENUM_BITFIELD(language) language : LANGUAGE_BITS;
 
-  /* This is only used by Ada.  If set, then the 'mangled_lang' field
+  /* This is only used by Ada.  If set, then the 'demangled_name' field
      of language_specific is valid.  Otherwise, the 'obstack' field is
      valid.  */
   unsigned int ada_mangled : 1;

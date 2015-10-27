@@ -1011,9 +1011,7 @@ rx_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   else if (reg == 17)
     return RX_PC_REGNUM;
   else
-    internal_error (__FILE__, __LINE__,
-                    _("Undefined dwarf2 register mapping of reg %d"),
-		    reg);
+    return -1;
 }
 
 /* Allocate and initialize a gdbarch object.  */

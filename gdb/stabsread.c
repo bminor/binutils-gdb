@@ -169,7 +169,7 @@ static void
 reg_value_complaint (int regnum, int num_regs, const char *sym)
 {
   complaint (&symfile_complaints,
-	     _("register number %d too large (max %d) in symbol %s"),
+	     _("bad register number %d (max %d) in symbol %s"),
              regnum, num_regs - 1, sym);
 }
 
@@ -597,8 +597,9 @@ stab_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
 {
   int regno = gdbarch_stab_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
 
-  if (regno >= gdbarch_num_regs (gdbarch)
-		+ gdbarch_num_pseudo_regs (gdbarch))
+  if (regno < 0
+      || regno >= (gdbarch_num_regs (gdbarch)
+		   + gdbarch_num_pseudo_regs (gdbarch)))
     {
       reg_value_complaint (regno,
 			   gdbarch_num_regs (gdbarch)

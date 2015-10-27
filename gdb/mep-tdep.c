@@ -784,7 +784,9 @@ static int
 mep_debug_reg_to_regnum (struct gdbarch *gdbarch, int debug_reg)
 {
   /* The debug info uses the raw register numbers.  */
-  return mep_raw_to_pseudo[debug_reg];
+  if (debug_reg >= 0 && debug_reg < ARRAY_SIZE (mep_raw_to_pseudo))
+    return mep_raw_to_pseudo[debug_reg];
+  return -1;
 }
 
 

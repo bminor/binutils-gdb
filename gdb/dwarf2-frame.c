@@ -292,7 +292,7 @@ read_addr_from_reg (void *baton, int reg)
 {
   struct frame_info *this_frame = (struct frame_info *) baton;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
+  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
 
   return address_from_register (regnum, this_frame);
 }
@@ -304,7 +304,7 @@ get_reg_value (void *baton, struct type *type, int reg)
 {
   struct frame_info *this_frame = (struct frame_info *) baton;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
+  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
 
   return value_from_register (type, regnum, this_frame);
 }
@@ -336,13 +336,15 @@ dwarf2_restore_rule (struct gdbarch *gdbarch, ULONGEST reg_num,
     fs->regs.reg[reg].how = DWARF2_FRAME_REG_UNSPECIFIED;
 
   if (fs->regs.reg[reg].how == DWARF2_FRAME_REG_UNSPECIFIED)
-    complaint (&symfile_complaints, _("\
+    {
+      int regnum = dwarf_reg_to_regnum (gdbarch, reg);
+
+      complaint (&symfile_complaints, _("\
 incomplete CFI data; DW_CFA_restore unspecified\n\
 register %s (#%d) at %s"),
-		       gdbarch_register_name
-		       (gdbarch, gdbarch_dwarf2_reg_to_regnum (gdbarch, reg)),
-		       gdbarch_dwarf2_reg_to_regnum (gdbarch, reg),
-		       paddress (gdbarch, fs->pc));
+		 gdbarch_register_name (gdbarch, regnum), regnum,
+		 paddress (gdbarch, fs->pc));
+    }
 }
 
 /* Virtual method table for execute_stack_op below.  */
@@ -942,11 +944,7 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
     {
     case CFA_REG_OFFSET:
       {
-	int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, fs.regs.cfa_reg);
-
-	if (regnum == -1)
-	  error (_("Unable to access DWARF register number %d"),
-		 (int) fs.regs.cfa_reg); /* FIXME */
+	int regnum = dwarf_reg_to_regnum_or_error (gdbarch, fs.regs.cfa_reg);
 
 	*regnum_out = regnum;
 	if (fs.armcc_cfa_offsets_reversed)
@@ -1093,7 +1091,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 				   entry_pc, fs);
 
       if (fs->regs.cfa_how == CFA_REG_OFFSET
-	  && (gdbarch_dwarf2_reg_to_regnum (gdbarch, fs->regs.cfa_reg)
+	  && (dwarf_reg_to_regnum (gdbarch, fs->regs.cfa_reg)
 	      == gdbarch_sp_regnum (gdbarch)))
 	{
 	  cache->entry_cfa_sp_offset = fs->regs.cfa_offset;
@@ -1156,19 +1154,16 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* Go through the DWARF2 CFI generated table and save its register
      location information in the cache.  Note that we don't skip the
      return address column; it's perfectly all right for it to
-     correspond to a real register.  If it doesn't correspond to a
-     real register, or if we shouldn't treat it as such,
-     gdbarch_dwarf2_reg_to_regnum should be defined to return a number outside
-     the range [0, gdbarch_num_regs).  */
+     correspond to a real register.  */
   {
     int column;		/* CFI speak for "register number".  */
 
     for (column = 0; column < fs->regs.num_regs; column++)
       {
 	/* Use the GDB register number as the destination index.  */
-	int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, column);
+	int regnum = dwarf_reg_to_regnum (gdbarch, column);
 
-	/* If there's no corresponding GDB register, ignore it.  */
+	/* Protect against a target returning a bad register.  */
 	if (regnum < 0 || regnum >= num_regs)
 	  continue;
 
@@ -1330,8 +1325,8 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
       return frame_unwind_got_memory (this_frame, regnum, addr);
 
     case DWARF2_FRAME_REG_SAVED_REG:
-      realnum
-	= gdbarch_dwarf2_reg_to_regnum (gdbarch, cache->reg[regnum].loc.reg);
+      realnum = dwarf_reg_to_regnum_or_error
+	(gdbarch, cache->reg[regnum].loc.reg);
       return frame_unwind_got_register (this_frame, regnum, realnum);
 
     case DWARF2_FRAME_REG_SAVED_EXP:
@@ -1374,7 +1369,7 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 
     case DWARF2_FRAME_REG_RA_OFFSET:
       addr = cache->reg[regnum].loc.offset;
-      regnum = gdbarch_dwarf2_reg_to_regnum
+      regnum = dwarf_reg_to_regnum_or_error
 	(gdbarch, cache->retaddr_reg.loc.reg);
       addr += get_frame_register_unsigned (this_frame, regnum);
       return frame_unwind_got_address (this_frame, regnum, addr);
