@@ -273,7 +273,7 @@ read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 
   status = target_read_stack (memaddr, myaddr, len);
   if (status != 0)
-    memory_error (status, memaddr);
+    memory_error (TARGET_XFER_E_IO, memaddr);
 }
 
 /* Same as target_read_code, but report an error if can't read.  */
@@ -285,7 +285,7 @@ read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 
   status = target_read_code (memaddr, myaddr, len);
   if (status != 0)
-    memory_error (status, memaddr);
+    memory_error (TARGET_XFER_E_IO, memaddr);
 }
 
 /* Read memory at MEMADDR of length LEN and put the contents in
@@ -392,7 +392,7 @@ write_memory (CORE_ADDR memaddr,
 
   status = target_write_memory (memaddr, myaddr, len);
   if (status != 0)
-    memory_error (status, memaddr);
+    memory_error (TARGET_XFER_E_IO, memaddr);
 }
 
 /* Same as write_memory, but notify 'memory_changed' observers.  */

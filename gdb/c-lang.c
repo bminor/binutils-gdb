@@ -327,10 +327,10 @@ c_get_string (struct value *value, gdb_byte **buffer,
 
       err = read_string (addr, *length, width, fetchlimit,
 			 byte_order, buffer, length);
-      if (err)
+      if (err != 0)
 	{
 	  xfree (*buffer);
-	  memory_error (err, addr);
+	  memory_error (TARGET_XFER_E_IO, addr);
 	}
     }
 

@@ -1,3 +1,25 @@
+2015-10-27  Pedro Alves  <palves@redhat.com>
+
+	* alpha-tdep.c (alpha_read_insn): Always pass TARGET_XFER_E_IO to
+	memory_error.  Rename local 'status' to 'res'.
+	* c-lang.c (c_get_string): Always pass TARGET_XFER_E_IO to
+	memory_error.
+	* corefile.c (read_stack, read_code, write_memory): Always pass
+	TARGET_XFER_E_IO to memory_error.
+	* disasm.c (dis_asm_memory_error): Always pass TARGET_XFER_E_IO to
+	memory_error.  Rename parameter 'status' to 'err'.
+	(dump_insns): Rename local 'status' to 'err'.
+	* mips-tdep.c (mips_fetch_instruction): Rename parameter 'statusp'
+	to 'errp'.  Rename local 'status' to 'err'.  Always pass
+	TARGET_XFER_E_IO to memory_error.
+	(mips_breakpoint_from_pc): Rename local 'status' to 'err'.
+	* target.c (target_read_memory, target_read_raw_memory)
+	(target_read_stack, target_read_code, target_write_memory)
+	(target_write_raw_memory): Return -1 on error instead of
+	TARGET_XFER_E_IO.
+	* valprint.c (val_print_string): Rename local 'errcode' to 'err'.
+	Always pass TARGET_XFER_E_IO to memory_error.  Update comment.
+
 2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* guile/guile-internal.h (gdbscm_with_guile): Change return
