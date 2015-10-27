@@ -635,10 +635,10 @@ rl78_decode_opcode (unsigned long pc AU,
 /** 0110 0001 1111 1001		mov	%e0, %1				*/
   ID(mov); DM2(HL, C, 0); SR(A);
 
-/** 1100 1000			mov	%0, #%1				*/
+/** 1100 1000			mov	%a0, #%1			*/
   ID(mov); DM(SP, IMMU(1)); SC(IMMU(1));
 
-/** 1001 1000			mov	%0, %1				*/
+/** 1001 1000			mov	%a0, %1				*/
   ID(mov); DM(SP, IMMU(1)); SR(A);
 
 /** 1000 1111			mov	%0, %e!1			*/
@@ -662,7 +662,7 @@ rl78_decode_opcode (unsigned long pc AU,
 /** 0110 0001 1110 1001		mov	%0, %e1				*/
   ID(mov); DR(A); SM2(HL, C, 0);
 
-/** 1000 1000			mov	%0, %e1				*/
+/** 1000 1000			mov	%0, %ea1			*/
   ID(mov); DR(A); SM(SP, IMMU(1));
 
 /** 0101 0reg			mov	%0, #%1				*/
@@ -827,7 +827,7 @@ rl78_decode_opcode (unsigned long pc AU,
 /** 1011 1100			movw	%ea0, %1			*/
   ID(mov); W(); DM(HL, IMMU(1)); SR(AX);
 
-/** 1011 1000			movw	%0, %1				*/
+/** 1011 1000			movw	%a0, %1				*/
   ID(mov); W(); DM(SP, IMMU(1)); SR(AX);
 
 /** 1010 1111			movw	%0, %e!1			*/
@@ -846,7 +846,7 @@ rl78_decode_opcode (unsigned long pc AU,
 /** 1010 1100			movw	%0, %ea1			*/
   ID(mov); W(); DR(AX); SM(HL, IMMU(1));
 
-/** 1010 1000			movw	%0, %1				*/
+/** 1010 1000			movw	%0, %a1				*/
   ID(mov); W(); DR(AX); SM(SP, IMMU(1));
 
 /** 0011 0rg0			movw	%0, #%1				*/

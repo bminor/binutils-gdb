@@ -1,3 +1,11 @@
+2015-10-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/19157
+	* gas/rl78: New directory.
+	* gas/rl78/rl78.exp: New test driver.
+	* gas/rl78/pr19157.s: New test source file.
+	* gas/rl78/pr19157.d: New test case.
+
 2015-10-22  Nick Clifton  <nickc@redhat.com>
 
 	* gas/msp430/errata_fixes.s: New test source file.

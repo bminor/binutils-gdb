@@ -1,3 +1,10 @@
+2015-10-27  Vinay Kumar  <vinay.g@kpit.com>
+
+	PR binutils/19157
+	* rl78-decode.opc: Add 'a' print operator to mov instructions
+	using stack pointer plus index addressing.
+	* rl78-decode.c: Regenerate.
+
 2015-10-14  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* s390-opc.c: Fix comment.
