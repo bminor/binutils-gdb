@@ -6681,6 +6681,48 @@ Further information is available in the ``ARM1176JZ-S and ARM1176JZF-S
 Programmer Advice Notice'' available on the ARM documentation website at:
 http://infocenter.arm.com/.
 
+@cindex STM32L4xx erratum workaround
+@kindex --fix-stm32l4xx-629360
+
+The @samp{--fix-stm32l4xx-629360} switch enables a link-time
+workaround for a bug in the bus matrix / memory controller for some of
+the STM32 Cortex-M4 based products (STM32L4xx).  When accessing
+off-chip memory via the affected bus for bus reads of 9 words or more,
+the bus can generate corrupt data and/or abort.  These are only
+core-initiated accesses (not DMA), and might affect any access:
+integer loads such as LDM, POP and floating-point loads such as VLDM,
+VPOP.  Stores are not affected.
+
+The bug can be avoided by splitting memory accesses into the
+necessary chunks to keep bus reads below 8 words.
+
+The workaround is not enabled by default, this is equivalent to use
+@samp{--fix-stm32l4xx-629360=none}.  If you know you are using buggy
+STM32L4xx hardware, you can enable the workaround by specifying the
+linker option @samp{--fix-stm32l4xx-629360}, or the equivalent
+@samp{--fix-stm32l4xx-629360=default}.
+
+If the workaround is enabled, instructions are scanned for
+potentially-troublesome sequences, and a veneer is created for each
+such sequence which may trigger the erratum.  The veneer consists in a
+replacement sequence emulating the behaviour of the original one and a
+branch back to the subsequent instruction.  The original instruction is
+then replaced with a branch to the veneer.
+
+The workaround does not always preserve the memory access order for
+the LDMDB instruction, when the instruction loads the PC.
+
+The workaround is not able to handle problematic instructions when
+they are in the middle of an IT block, since a branch is not allowed
+there.  In that case, the linker reports a warning and no replacement
+occurs.
+
+The workaround is not able to replace problematic instructions with a
+PC-relative branch instruction if the @samp{.text} section is too
+large.  In that case, when the branch that replaces the original code
+cannot be encoded, the linker reports a warning and no replacement
+occurs.
+
 @cindex NO_ENUM_SIZE_WARNING
 @kindex --no-enum-size-warning
 The @option{--no-enum-size-warning} switch prevents the linker from
