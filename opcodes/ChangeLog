@@ -1,3 +1,10 @@
+2015-10-27  Vinay  <Vinay.G@kpit.com>
+
+	PR binutils/19159
+	* rl78-decode.opc (MOV): Added offset to DE register in index
+	addressing mode.
+	* rl78-decode.c: Regenerate.
+
 2015-10-27  Vinay Kumar  <vinay.g@kpit.com>
 
 	PR binutils/19158

@@ -1,5 +1,5 @@
 #objdump: -d --prefix-addresses --show-raw-insn
-#name: PR19157: RL78: zero offset omitted
+#name: PR19157: RL78: zero offset omitted in stack based addressing
 
 .*: +file format .*rl78.*
 
