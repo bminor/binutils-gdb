@@ -1,5 +1,11 @@
 2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ctf.c (SET_ENUM_FIELD): New macro.
+	(ctf_read_status): Use it.
+	(ctf_read_tp): Use it.
+
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* guile/scm-breakpoint.c (gdbscm_set_breakpoint_stop_x): Add
 	scm_t_dynwind_flags casts.
 	* guile/scm-cmd.c (gdbscm_parse_command_name): Likewise.
