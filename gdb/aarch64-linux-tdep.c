@@ -21,6 +21,7 @@
 #include "defs.h"
 
 #include "gdbarch.h"
+#include "arch-utils.h"
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
 #include "aarch64-tdep.h"
@@ -279,7 +280,7 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 	return 0;
 
       len = tmp - start;
-      regname = alloca (len + 2);
+      regname = (char *) alloca (len + 2);
 
       strncpy (regname, start, len);
       regname[len] = '\0';
@@ -871,7 +872,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (move_pages);
 
   default:
-    return -1;
+    return gdb_sys_no_syscall;
   }
 }
 
@@ -901,7 +902,8 @@ aarch64_linux_syscall_record (struct regcache *regcache,
   int ret = 0;
   enum gdb_syscall syscall_gdb;
 
-  syscall_gdb = aarch64_canonicalize_syscall (svc_number);
+  syscall_gdb =
+    aarch64_canonicalize_syscall ((enum aarch64_syscall) svc_number);
 
   if (syscall_gdb < 0)
     {
@@ -961,6 +963,7 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
   tramp_frame_prepend_unwinder (gdbarch, &aarch64_linux_rt_sigframe);
 
@@ -1150,6 +1153,17 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/aarch64-linux.xml");
   set_gdbarch_get_syscall_number (gdbarch, aarch64_linux_get_syscall_number);
+
+  /* Displaced stepping.  */
+  set_gdbarch_max_insn_length (gdbarch, 4 * DISPLACED_MODIFIED_INSNS);
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+					aarch64_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, aarch64_displaced_step_fixup);
+  set_gdbarch_displaced_step_free_closure (gdbarch,
+					   simple_displaced_step_free_closure);
+  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
+  set_gdbarch_displaced_step_hw_singlestep (gdbarch,
+					    aarch64_displaced_step_hw_singlestep);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

@@ -1220,7 +1220,7 @@ v850_frame_cache (struct frame_info *this_frame, void **this_cache)
   int i;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct v850_frame_cache *) *this_cache;
 
   cache = v850_alloc_frame_cache (this_frame);
   *this_cache = cache;
@@ -1380,7 +1380,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       return arches->gdbarch;
     }
-  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
+  tdep = XNEW (struct gdbarch_tdep);
   tdep->e_flags = e_flags;
   tdep->e_machine = e_machine;
 

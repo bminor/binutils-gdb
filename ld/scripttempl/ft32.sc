@@ -14,10 +14,13 @@ OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 ${LIB_SEARCH_DIRS}
 
+PROVIDE( __PMSIZE = 256K );
+PROVIDE( __RAMSIZE = 64K );
+
 MEMORY
 {
-  flash     (rx)   : ORIGIN = 0, LENGTH = 256K
-  ram       (rw!x) : ORIGIN = 0x800000, LENGTH = 64K
+  flash     (rx)   : ORIGIN = 0, LENGTH = __PMSIZE
+  ram       (rw!x) : ORIGIN = 0x800000, LENGTH = __RAMSIZE
 }
 SECTIONS
 {

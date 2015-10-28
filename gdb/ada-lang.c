@@ -215,7 +215,7 @@ static struct value *value_val_atr (struct type *, struct value *);
 static struct symbol *standard_lookup (const char *, const struct block *,
                                        domain_enum);
 
-static struct value *ada_search_struct_field (char *, struct value *, int,
+static struct value *ada_search_struct_field (const char *, struct value *, int,
                                               struct type *);
 
 static struct value *ada_value_primitive_field (struct value *, int, int,
@@ -398,7 +398,7 @@ ada_inferior_data_cleanup (struct inferior *inf, void *arg)
 {
   struct ada_inferior_data *data;
 
-  data = inferior_data (inf, ada_inferior_data);
+  data = (struct ada_inferior_data *) inferior_data (inf, ada_inferior_data);
   if (data != NULL)
     xfree (data);
 }
@@ -416,7 +416,7 @@ get_ada_inferior_data (struct inferior *inf)
 {
   struct ada_inferior_data *data;
 
-  data = inferior_data (inf, ada_inferior_data);
+  data = (struct ada_inferior_data *) inferior_data (inf, ada_inferior_data);
   if (data == NULL)
     {
       data = XCNEW (struct ada_inferior_data);
@@ -459,7 +459,8 @@ get_ada_pspace_data (struct program_space *pspace)
 {
   struct ada_pspace_data *data;
 
-  data = program_space_data (pspace, ada_pspace_data_handle);
+  data = ((struct ada_pspace_data *)
+	  program_space_data (pspace, ada_pspace_data_handle));
   if (data == NULL)
     {
       data = XCNEW (struct ada_pspace_data);
@@ -474,7 +475,7 @@ get_ada_pspace_data (struct program_space *pspace)
 static void
 ada_pspace_data_cleanup (struct program_space *pspace, void *data)
 {
-  struct ada_pspace_data *pspace_data = data;
+  struct ada_pspace_data *pspace_data = (struct ada_pspace_data *) data;
 
   if (pspace_data->sym_cache != NULL)
     ada_free_symbol_cache (pspace_data->sym_cache);
@@ -1414,7 +1415,7 @@ ada_decode_symbol (const struct general_symbol_info *arg)
 {
   struct general_symbol_info *gsymbol = (struct general_symbol_info *) arg;
   const char **resultp =
-    &gsymbol->language_specific.mangled_lang.demangled_name;
+    &gsymbol->language_specific.demangled_name;
 
   if (!gsymbol->ada_mangled)
     {
@@ -1424,7 +1425,8 @@ ada_decode_symbol (const struct general_symbol_info *arg)
       gsymbol->ada_mangled = 1;
 
       if (obstack != NULL)
-	*resultp = obstack_copy0 (obstack, decoded, strlen (decoded));
+	*resultp
+	  = (const char *) obstack_copy0 (obstack, decoded, strlen (decoded));
       else
         {
 	  /* Sometimes, we can't find a corresponding objfile, in
@@ -2380,6 +2382,133 @@ has_negatives (struct type *type)
     }
 }
 
+/* With SRC being a buffer containing BIT_SIZE bits of data at BIT_OFFSET,
+   unpack that data into UNPACKED.  UNPACKED_LEN is the size in bytes of
+   the unpacked buffer.
+
+   The size of the unpacked buffer (UNPACKED_LEN) is expected to be large
+   enough to contain at least BIT_OFFSET bits.  If not, an error is raised.
+
+   IS_BIG_ENDIAN is nonzero if the data is stored in big endian mode,
+   zero otherwise.
+
+   IS_SIGNED_TYPE is nonzero if the data corresponds to a signed type.
+
+   IS_SCALAR is nonzero if the data corresponds to a signed type.  */
+
+static void
+ada_unpack_from_contents (const gdb_byte *src, int bit_offset, int bit_size,
+			  gdb_byte *unpacked, int unpacked_len,
+			  int is_big_endian, int is_signed_type,
+			  int is_scalar)
+{
+  int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
+  int src_idx;                  /* Index into the source area */
+  int src_bytes_left;           /* Number of source bytes left to process.  */
+  int srcBitsLeft;              /* Number of source bits left to move */
+  int unusedLS;                 /* Number of bits in next significant
+                                   byte of source that are unused */
+
+  int unpacked_idx;             /* Index into the unpacked buffer */
+  int unpacked_bytes_left;      /* Number of bytes left to set in unpacked.  */
+
+  unsigned long accum;          /* Staging area for bits being transferred */
+  int accumSize;                /* Number of meaningful bits in accum */
+  unsigned char sign;
+
+  /* Transmit bytes from least to most significant; delta is the direction
+     the indices move.  */
+  int delta = is_big_endian ? -1 : 1;
+
+  /* Make sure that unpacked is large enough to receive the BIT_SIZE
+     bits from SRC.  .*/
+  if ((bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT > unpacked_len)
+    error (_("Cannot unpack %d bits into buffer of %d bytes"),
+	   bit_size, unpacked_len);
+
+  srcBitsLeft = bit_size;
+  src_bytes_left = src_len;
+  unpacked_bytes_left = unpacked_len;
+  sign = 0;
+
+  if (is_big_endian)
+    {
+      src_idx = src_len - 1;
+      if (is_signed_type
+	  && ((src[0] << bit_offset) & (1 << (HOST_CHAR_BIT - 1))))
+        sign = ~0;
+
+      unusedLS =
+        (HOST_CHAR_BIT - (bit_size + bit_offset) % HOST_CHAR_BIT)
+        % HOST_CHAR_BIT;
+
+      if (is_scalar)
+	{
+          accumSize = 0;
+          unpacked_idx = unpacked_len - 1;
+	}
+      else
+	{
+          /* Non-scalar values must be aligned at a byte boundary...  */
+          accumSize =
+            (HOST_CHAR_BIT - bit_size % HOST_CHAR_BIT) % HOST_CHAR_BIT;
+          /* ... And are placed at the beginning (most-significant) bytes
+             of the target.  */
+          unpacked_idx = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
+          unpacked_bytes_left = unpacked_idx + 1;
+	}
+    }
+  else
+    {
+      int sign_bit_offset = (bit_size + bit_offset - 1) % 8;
+
+      src_idx = unpacked_idx = 0;
+      unusedLS = bit_offset;
+      accumSize = 0;
+
+      if (is_signed_type && (src[src_len - 1] & (1 << sign_bit_offset)))
+        sign = ~0;
+    }
+
+  accum = 0;
+  while (src_bytes_left > 0)
+    {
+      /* Mask for removing bits of the next source byte that are not
+         part of the value.  */
+      unsigned int unusedMSMask =
+        (1 << (srcBitsLeft >= HOST_CHAR_BIT ? HOST_CHAR_BIT : srcBitsLeft)) -
+        1;
+      /* Sign-extend bits for this byte.  */
+      unsigned int signMask = sign & ~unusedMSMask;
+
+      accum |=
+        (((src[src_idx] >> unusedLS) & unusedMSMask) | signMask) << accumSize;
+      accumSize += HOST_CHAR_BIT - unusedLS;
+      if (accumSize >= HOST_CHAR_BIT)
+        {
+          unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+          accumSize -= HOST_CHAR_BIT;
+          accum >>= HOST_CHAR_BIT;
+          unpacked_bytes_left -= 1;
+          unpacked_idx += delta;
+        }
+      srcBitsLeft -= HOST_CHAR_BIT - unusedLS;
+      unusedLS = 0;
+      src_bytes_left -= 1;
+      src_idx += delta;
+    }
+  while (unpacked_bytes_left > 0)
+    {
+      accum |= sign << accumSize;
+      unpacked[unpacked_idx] = accum & ~(~0L << HOST_CHAR_BIT);
+      accumSize -= HOST_CHAR_BIT;
+      if (accumSize < 0)
+	accumSize = 0;
+      accum >>= HOST_CHAR_BIT;
+      unpacked_bytes_left -= 1;
+      unpacked_idx += delta;
+    }
+}
 
 /* Create a new value of type TYPE from the contents of OBJ starting
    at byte OFFSET, and bit offset BIT_OFFSET within that byte,
@@ -2396,51 +2525,71 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
                                 struct type *type)
 {
   struct value *v;
-  int src,                      /* Index into the source area */
-    targ,                       /* Index into the target area */
-    srcBitsLeft,                /* Number of source bits left to move */
-    nsrc, ntarg,                /* Number of source and target bytes */
-    unusedLS,                   /* Number of bits in next significant
-                                   byte of source that are unused */
-    accumSize;                  /* Number of meaningful bits in accum */
-  unsigned char *bytes;         /* First byte containing data to unpack */
-  unsigned char *unpacked;
-  unsigned long accum;          /* Staging area for bits being transferred */
-  unsigned char sign;
-  int len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
-  /* Transmit bytes from least to most significant; delta is the direction
-     the indices move.  */
-  int delta = gdbarch_bits_big_endian (get_type_arch (type)) ? -1 : 1;
+  const gdb_byte *src;                /* First byte containing data to unpack */
+  gdb_byte *unpacked;
+  const int is_scalar = is_scalar_type (type);
+  const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
+  gdb_byte *staging = NULL;
+  int staging_len = 0;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   type = ada_check_typedef (type);
 
   if (obj == NULL)
+    src = valaddr + offset;
+  else
+    src = value_contents (obj) + offset;
+
+  if (is_dynamic_type (type))
+    {
+      /* The length of TYPE might by dynamic, so we need to resolve
+	 TYPE in order to know its actual size, which we then use
+	 to create the contents buffer of the value we return.
+	 The difficulty is that the data containing our object is
+	 packed, and therefore maybe not at a byte boundary.  So, what
+	 we do, is unpack the data into a byte-aligned buffer, and then
+	 use that buffer as our object's value for resolving the type.  */
+      staging_len = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+      staging = (gdb_byte *) malloc (staging_len);
+      make_cleanup (xfree, staging);
+
+      ada_unpack_from_contents (src, bit_offset, bit_size,
+			        staging, staging_len,
+				is_big_endian, has_negatives (type),
+				is_scalar);
+      type = resolve_dynamic_type (type, staging, 0);
+      if (TYPE_LENGTH (type) < (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
+	{
+	  /* This happens when the length of the object is dynamic,
+	     and is actually smaller than the space reserved for it.
+	     For instance, in an array of variant records, the bit_size
+	     we're given is the array stride, which is constant and
+	     normally equal to the maximum size of its element.
+	     But, in reality, each element only actually spans a portion
+	     of that stride.  */
+	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
+	}
+    }
+
+  if (obj == NULL)
     {
       v = allocate_value (type);
-      bytes = (unsigned char *) (valaddr + offset);
+      src = valaddr + offset;
     }
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
+      int src_len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
+      gdb_byte *buf;
+
       v = value_at (type, value_address (obj) + offset);
-      type = value_type (v);
-      if (TYPE_LENGTH (type) * HOST_CHAR_BIT < bit_size)
-	{
-	  /* This can happen in the case of an array of dynamic objects,
-	     where the size of each element changes from element to element.
-	     In that case, we're initially given the array stride, but
-	     after resolving the element type, we find that its size is
-	     less than this stride.  In that case, adjust bit_size to
-	     match TYPE's length, and recompute LEN accordingly.  */
-	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
-	  len = TYPE_LENGTH (type) + (bit_offset + HOST_CHAR_BIT - 1) / 8;
-	}
-      bytes = (unsigned char *) alloca (len);
-      read_memory (value_address (v), bytes, len);
+      buf = (gdb_byte *) alloca (src_len);
+      read_memory (value_address (v), buf, src_len);
+      src = buf;
     }
   else
     {
       v = allocate_value (type);
-      bytes = (unsigned char *) value_contents (obj) + offset;
+      src = value_contents (obj) + offset;
     }
 
   if (obj != NULL)
@@ -2463,101 +2612,28 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else
     set_value_bitsize (v, bit_size);
-  unpacked = (unsigned char *) value_contents (v);
+  unpacked = value_contents_writeable (v);
 
-  srcBitsLeft = bit_size;
-  nsrc = len;
-  ntarg = TYPE_LENGTH (type);
-  sign = 0;
   if (bit_size == 0)
     {
       memset (unpacked, 0, TYPE_LENGTH (type));
+      do_cleanups (old_chain);
       return v;
     }
-  else if (gdbarch_bits_big_endian (get_type_arch (type)))
+
+  if (staging != NULL && staging_len == TYPE_LENGTH (type))
     {
-      src = len - 1;
-      if (has_negatives (type)
-          && ((bytes[0] << bit_offset) & (1 << (HOST_CHAR_BIT - 1))))
-        sign = ~0;
-
-      unusedLS =
-        (HOST_CHAR_BIT - (bit_size + bit_offset) % HOST_CHAR_BIT)
-        % HOST_CHAR_BIT;
-
-      switch (TYPE_CODE (type))
-        {
-        case TYPE_CODE_ARRAY:
-        case TYPE_CODE_UNION:
-        case TYPE_CODE_STRUCT:
-          /* Non-scalar values must be aligned at a byte boundary...  */
-          accumSize =
-            (HOST_CHAR_BIT - bit_size % HOST_CHAR_BIT) % HOST_CHAR_BIT;
-          /* ... And are placed at the beginning (most-significant) bytes
-             of the target.  */
-          targ = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
-          ntarg = targ + 1;
-          break;
-        default:
-          accumSize = 0;
-          targ = TYPE_LENGTH (type) - 1;
-          break;
-        }
+      /* Small short-cut: If we've unpacked the data into a buffer
+	 of the same size as TYPE's length, then we can reuse that,
+	 instead of doing the unpacking again.  */
+      memcpy (unpacked, staging, staging_len);
     }
   else
-    {
-      int sign_bit_offset = (bit_size + bit_offset - 1) % 8;
+    ada_unpack_from_contents (src, bit_offset, bit_size,
+			      unpacked, TYPE_LENGTH (type),
+			      is_big_endian, has_negatives (type), is_scalar);
 
-      src = targ = 0;
-      unusedLS = bit_offset;
-      accumSize = 0;
-
-      if (has_negatives (type) && (bytes[len - 1] & (1 << sign_bit_offset)))
-        sign = ~0;
-    }
-
-  accum = 0;
-  while (nsrc > 0)
-    {
-      /* Mask for removing bits of the next source byte that are not
-         part of the value.  */
-      unsigned int unusedMSMask =
-        (1 << (srcBitsLeft >= HOST_CHAR_BIT ? HOST_CHAR_BIT : srcBitsLeft)) -
-        1;
-      /* Sign-extend bits for this byte.  */
-      unsigned int signMask = sign & ~unusedMSMask;
-
-      accum |=
-        (((bytes[src] >> unusedLS) & unusedMSMask) | signMask) << accumSize;
-      accumSize += HOST_CHAR_BIT - unusedLS;
-      if (accumSize >= HOST_CHAR_BIT)
-        {
-          unpacked[targ] = accum & ~(~0L << HOST_CHAR_BIT);
-          accumSize -= HOST_CHAR_BIT;
-          accum >>= HOST_CHAR_BIT;
-          ntarg -= 1;
-          targ += delta;
-        }
-      srcBitsLeft -= HOST_CHAR_BIT - unusedLS;
-      unusedLS = 0;
-      nsrc -= 1;
-      src += delta;
-    }
-  while (ntarg > 0)
-    {
-      accum |= sign << accumSize;
-      unpacked[targ] = accum & ~(~0L << HOST_CHAR_BIT);
-      accumSize -= HOST_CHAR_BIT;
-      if (accumSize < 0)
-	accumSize = 0;
-      accum >>= HOST_CHAR_BIT;
-      ntarg -= 1;
-      targ += delta;
-    }
-
-  if (is_dynamic_type (value_type (v)))
-    v = value_from_contents_and_address (value_type (v), value_contents (v),
-					 0);
+  do_cleanups (old_chain);
   return v;
 }
 
@@ -2657,7 +2733,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       int len = (value_bitpos (toval)
 		 + bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
       int from_size;
-      gdb_byte *buffer = alloca (len);
+      gdb_byte *buffer = (gdb_byte *) alloca (len);
       struct value *val;
       CORE_ADDR to_addr = value_address (toval);
 
@@ -2757,14 +2833,27 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
 
 /* Assuming ARR is a pointer to a GDB array, the value of the element
    of *ARR at the ARITY indices given in IND.
-   Does not read the entire array into memory.  */
+   Does not read the entire array into memory.
+
+   Note: Unlike what one would expect, this function is used instead of
+   ada_value_subscript for basically all non-packed array types.  The reason
+   for this is that a side effect of doing our own pointer arithmetics instead
+   of relying on value_subscript is that there is no implicit typedef peeling.
+   This is important for arrays of array accesses, where it allows us to
+   preserve the fact that the array's element is an array access, where the
+   access part os encoded in a typedef layer.  */
 
 static struct value *
 ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
 {
   int k;
+  struct value *array_ind = ada_value_ind (arr);
   struct type *type
-    = check_typedef (value_enclosing_type (ada_value_ind (arr)));
+    = check_typedef (value_enclosing_type (array_ind));
+
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+      && TYPE_FIELD_BITSIZE (type, 0) > 0)
+    return value_subscript_packed (array_ind, arity, ind);
 
   for (k = 0; k < arity; k += 1)
     {
@@ -3300,7 +3389,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
       error (_("Unexpected operator during name resolution"));
     }
 
-  argvec = (struct value * *) alloca (sizeof (struct value *) * (nargs + 1));
+  argvec = XALLOCAVEC (struct value *, nargs + 1);
   for (i = 0; i < nargs; i += 1)
     argvec[i] = resolve_subexp (expp, pos, 1, NULL);
   argvec[i] = NULL;
@@ -3655,9 +3744,13 @@ ada_resolve_function (struct block_symbol syms[],
         }
     }
 
+  /* If we got multiple matches, ask the user which one to use.  Don't do this
+     interactive thing during completion, though, as the purpose of the
+     completion is providing a list of all possible matches.  Prompting the
+     user to filter it down would be completely unexpected in this case.  */
   if (m == 0)
     return -1;
-  else if (m > 1)
+  else if (m > 1 && !parse_completion)
     {
       printf_filtered (_("Multiple matches for %s\n"), name);
       user_select_syms (syms, m, 1);
@@ -3741,7 +3834,7 @@ int
 user_select_syms (struct block_symbol *syms, int nsyms, int max_results)
 {
   int i;
-  int *chosen = (int *) alloca (sizeof (int) * nsyms);
+  int *chosen = XALLOCAVEC (int , nsyms);
   int n_chosen;
   int first_choice = (max_results == 1) ? 1 : 2;
   const char *select_mode = multiple_symbols_select_mode ();
@@ -4384,7 +4477,7 @@ value_pointer (struct value *value, struct type *type)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
   unsigned len = TYPE_LENGTH (type);
-  gdb_byte *buf = alloca (len);
+  gdb_byte *buf = (gdb_byte *) alloca (len);
   CORE_ADDR addr;
 
   addr = value_address (value);
@@ -4579,7 +4672,8 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
 					    sizeof (*e));
   e->next = sym_cache->root[h];
   sym_cache->root[h] = e;
-  e->name = copy = obstack_alloc (&sym_cache->cache_space, strlen (name) + 1);
+  e->name = copy
+    = (char *) obstack_alloc (&sym_cache->cache_space, strlen (name) + 1);
   strcpy (copy, name);
   e->sym = sym;
   e->domain = domain;
@@ -4750,7 +4844,7 @@ static struct block_symbol *
 defns_collected (struct obstack *obstackp, int finish)
 {
   if (finish)
-    return obstack_finish (obstackp);
+    return (struct block_symbol *) obstack_finish (obstackp);
   else
     return (struct block_symbol *) obstack_base (obstackp);
 }
@@ -5024,8 +5118,8 @@ xget_renaming_scope (struct type *renaming_type)
      and then backtrack until we find the first "__".  */
 
   const char *name = type_name_no_tag (renaming_type);
-  char *suffix = strstr (name, "___XR");
-  char *last;
+  const char *suffix = strstr (name, "___XR");
+  const char *last;
   int scope_len;
   char *scope;
 
@@ -5518,7 +5612,7 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
     {
       ALL_OBJFILES (objfile)
         {
-	  char *name1 = alloca (strlen (name) + sizeof ("_ada_"));
+	  char *name1 = (char *) alloca (strlen (name) + sizeof ("_ada_"));
 	  strcpy (name1, "_ada_");
 	  strcpy (name1 + sizeof ("_ada_") - 1, name);
 	  data.objfile = objfile;
@@ -5711,7 +5805,7 @@ ada_name_for_lookup (const char *name)
 
   if (name[0] == '<' && name[nlen - 1] == '>')
     {
-      canon = xmalloc (nlen - 1);
+      canon = (char *) xmalloc (nlen - 1);
       memcpy (canon, name + 1, nlen - 2);
       canon[nlen - 2] = '\0';
     }
@@ -6312,19 +6406,19 @@ symbol_completion_add (VEC(char_ptr) **sv,
 
   if (word == orig_text)
     {
-      completion = xmalloc (strlen (match) + 5);
+      completion = (char *) xmalloc (strlen (match) + 5);
       strcpy (completion, match);
     }
   else if (word > orig_text)
     {
       /* Return some portion of sym_name.  */
-      completion = xmalloc (strlen (match) + 5);
+      completion = (char *) xmalloc (strlen (match) + 5);
       strcpy (completion, match + (word - orig_text));
     }
   else
     {
       /* Return some of ORIG_TEXT plus sym_name.  */
-      completion = xmalloc (strlen (match) + (orig_text - word) + 5);
+      completion = (char *) xmalloc (strlen (match) + (orig_text - word) + 5);
       strncpy (completion, word, orig_text - word);
       completion[orig_text - word] = '\0';
       strcat (completion, match);
@@ -6351,7 +6445,7 @@ struct add_partial_datum
 static int
 ada_complete_symbol_matcher (const char *name, void *user_data)
 {
-  struct add_partial_datum *data = user_data;
+  struct add_partial_datum *data = (struct add_partial_datum *) user_data;
   
   return symbol_completion_match (name, data->text, data->text_len,
                                   data->wild_match, data->encoded) != NULL;
@@ -7217,7 +7311,7 @@ num_visible_fields (struct type *type)
    Searches recursively through wrapper fields (e.g., '_parent').  */
 
 static struct value *
-ada_search_struct_field (char *name, struct value *arg, int offset,
+ada_search_struct_field (const char *name, struct value *arg, int offset,
                          struct type *type)
 {
   int i;
@@ -8581,7 +8675,7 @@ ada_is_redundant_range_encoding (struct type *range_type,
 				 struct type *encoding_type)
 {
   struct type *fixed_range_type;
-  char *bounds_str;
+  const char *bounds_str;
   int n;
   LONGEST lo, hi;
 
@@ -8852,7 +8946,8 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
         else if (ada_type_name (fixed_record_type) != NULL)
           {
             const char *name = ada_type_name (fixed_record_type);
-            char *xvz_name = alloca (strlen (name) + 7 /* "___XVZ\0" */);
+            char *xvz_name
+	      = (char *) alloca (strlen (name) + 7 /* "___XVZ\0" */);
             int xvz_found = 0;
             LONGEST size;
 
@@ -9335,7 +9430,7 @@ ada_enum_name (const char *name)
 {
   static char *result;
   static size_t result_len = 0;
-  char *tmp;
+  const char *tmp;
 
   /* First, unqualify the enumeration name:
      1. Search for the last '.' character.  If we find one, then skip
@@ -9790,7 +9885,7 @@ assign_aggregate (struct value *container,
 
   num_specs = num_component_specs (exp, *pos - 3);
   max_indices = 4 * num_specs + 4;
-  indices = alloca (max_indices * sizeof (indices[0]));
+  indices = XALLOCAVEC (LONGEST, max_indices);
   indices[0] = indices[1] = low_index - 1;
   indices[2] = indices[3] = high_index + 1;
   num_indices = 4;
@@ -10600,8 +10695,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       /* Allocate arg vector, including space for the function to be
          called in argvec[0] and a terminating NULL.  */
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
-      argvec =
-        (struct value **) alloca (sizeof (struct value *) * (nargs + 2));
+      argvec = XALLOCAVEC (struct value *, nargs + 2);
 
       if (exp->elts[*pos].opcode == OP_VAR_VALUE
           && SYMBOL_DOMAIN (exp->elts[pc + 5].symbol) == UNDEF_DOMAIN)
@@ -10626,10 +10720,17 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	   therefore already coerced to a simple array.  Nothing further
 	   to do.  */
         ;
-      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_REF
-               || (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_ARRAY
-                   && VALUE_LVAL (argvec[0]) == lval_memory))
-        argvec[0] = value_addr (argvec[0]);
+      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_REF)
+	{
+	  /* Make sure we dereference references so that all the code below
+	     feels like it's really handling the referenced value.  Wrapping
+	     types (for alignment) may be there, so make sure we strip them as
+	     well.  */
+	  argvec[0] = ada_to_fixed_value (coerce_ref (argvec[0]));
+	}
+      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_ARRAY
+	       && VALUE_LVAL (argvec[0]) == lval_memory)
+	argvec[0] = value_addr (argvec[0]);
 
       type = ada_check_typedef (value_type (argvec[0]));
 
@@ -11424,30 +11525,34 @@ ada_float_to_fixed (struct type *type, DOUBLEST x)
    not alter *PX and *PNEW_K if unsuccessful.  */
 
 static int
-scan_discrim_bound (char *str, int k, struct value *dval, LONGEST * px,
+scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
                     int *pnew_k)
 {
   static char *bound_buffer = NULL;
   static size_t bound_buffer_len = 0;
-  char *bound;
-  char *pend;
+  const char *pstart, *pend, *bound;
   struct value *bound_val;
 
   if (dval == NULL || str == NULL || str[k] == '\0')
     return 0;
 
-  pend = strstr (str + k, "__");
+  pstart = str + k;
+  pend = strstr (pstart, "__");
   if (pend == NULL)
     {
-      bound = str + k;
+      bound = pstart;
       k += strlen (bound);
     }
   else
     {
-      GROW_VECT (bound_buffer, bound_buffer_len, pend - (str + k) + 1);
+      int len = pend - pstart;
+
+      /* Strip __ and beyond.  */
+      GROW_VECT (bound_buffer, bound_buffer_len, len + 1);
+      strncpy (bound_buffer, pstart, len);
+      bound_buffer[len] = '\0';
+
       bound = bound_buffer;
-      strncpy (bound_buffer, str + k, pend - (str + k));
-      bound[pend - (str + k)] = '\0';
       k = pend - str;
     }
 
@@ -11523,7 +11628,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
 {
   const char *name;
   struct type *base_type;
-  char *subtype_info;
+  const char *subtype_info;
 
   gdb_assert (raw_type != NULL);
   gdb_assert (TYPE_NAME (raw_type) != NULL);
@@ -11553,7 +11658,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       int prefix_len = subtype_info - name;
       LONGEST L, U;
       struct type *type;
-      char *bounds_str;
+      const char *bounds_str;
       int n;
 
       GROW_VECT (name_buf, name_len, prefix_len + 5);
@@ -12661,7 +12766,7 @@ ada_get_next_arg (char **argsp)
 
   /* Make a copy of the current argument and return it.  */
 
-  result = xmalloc (end - args + 1);
+  result = (char *) xmalloc (end - args + 1);
   strncpy (result, args, end - args);
   result[end - args] = '\0';
   
@@ -13101,7 +13206,7 @@ sort_remove_dups_ada_exceptions_list (VEC(ada_exc_info) **exceptions,
 static int
 ada_exc_search_name_matches (const char *search_name, void *user_data)
 {
-  regex_t *preg = user_data;
+  regex_t *preg = (regex_t *) user_data;
 
   if (preg == NULL)
     return 1;
@@ -13772,7 +13877,7 @@ ada_language_arch_info (struct gdbarch *gdbarch,
 			 0, "short_integer");
   lai->string_char_type
     = lai->primitive_type_vector [ada_primitive_type_char]
-    = arch_integer_type (gdbarch, TARGET_CHAR_BIT, 0, "character");
+    = arch_character_type (gdbarch, TARGET_CHAR_BIT, 0, "character");
   lai->primitive_type_vector [ada_primitive_type_float]
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
 		       "float", NULL);
@@ -13844,7 +13949,8 @@ ada_get_symbol_name_cmp (const char *lookup_name)
 /* Implement the "la_read_var_value" language_defn method for Ada.  */
 
 static struct value *
-ada_read_var_value (struct symbol *var, struct frame_info *frame)
+ada_read_var_value (struct symbol *var, const struct block *var_block,
+		    struct frame_info *frame)
 {
   const struct block *frame_block = NULL;
   struct symbol *renaming_sym = NULL;
@@ -13860,7 +13966,7 @@ ada_read_var_value (struct symbol *var, struct frame_info *frame)
 
   /* This is a typical case where we expect the default_read_var_value
      function to work.  */
-  return default_read_var_value (var, frame);
+  return default_read_var_value (var, var_block, frame);
 }
 
 const struct language_defn ada_language_defn = {

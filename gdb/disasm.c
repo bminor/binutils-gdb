@@ -59,7 +59,7 @@ struct dis_line_entry
 static hashval_t
 hash_dis_line_entry (const void *item)
 {
-  const struct dis_line_entry *dle = item;
+  const struct dis_line_entry *dle = (const struct dis_line_entry *) item;
 
   return htab_hash_pointer (dle->symtab) + dle->line;
 }
@@ -69,8 +69,8 @@ hash_dis_line_entry (const void *item)
 static int
 eq_dis_line_entry (const void *item_lhs, const void *item_rhs)
 {
-  const struct dis_line_entry *lhs = item_lhs;
-  const struct dis_line_entry *rhs = item_rhs;
+  const struct dis_line_entry *lhs = (const struct dis_line_entry *) item_lhs;
+  const struct dis_line_entry *rhs = (const struct dis_line_entry *) item_rhs;
 
   return (lhs->symtab == rhs->symtab
 	  && lhs->line == rhs->line);
@@ -129,19 +129,19 @@ dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr, unsigned int len,
 
 /* Like memory_error with slightly different parameters.  */
 static void
-dis_asm_memory_error (int status, bfd_vma memaddr,
+dis_asm_memory_error (int err, bfd_vma memaddr,
 		      struct disassemble_info *info)
 {
-  memory_error (status, memaddr);
+  memory_error (TARGET_XFER_E_IO, memaddr);
 }
 
 /* Like print_address with slightly different parameters.  */
 static void
 dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
 {
-  struct gdbarch *gdbarch = info->application_data;
+  struct gdbarch *gdbarch = (struct gdbarch *) info->application_data;
 
-  print_address (gdbarch, addr, info->stream);
+  print_address (gdbarch, addr, (struct ui_file *) info->stream);
 }
 
 static int
@@ -230,7 +230,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
         {
           CORE_ADDR old_pc = pc;
           bfd_byte data;
-          int status;
+          int err;
           const char *spacer = "";
 
           /* Build the opcodes using a temporary stream so we can
@@ -242,9 +242,9 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
           pc += gdbarch_print_insn (gdbarch, pc, di);
           for (;old_pc < pc; old_pc++)
             {
-              status = (*di->read_memory_func) (old_pc, &data, 1, di);
-              if (status != 0)
-                (*di->memory_error_func) (status, old_pc, di);
+              err = (*di->read_memory_func) (old_pc, &data, 1, di);
+              if (err != 0)
+                (*di->memory_error_func) (err, old_pc, di);
               fprintf_filtered (opcode_stream, "%s%02x",
                                 spacer, (unsigned) data);
               spacer = " ";
@@ -713,7 +713,7 @@ fprintf_disasm (void *stream, const char *format, ...)
   va_list args;
 
   va_start (args, format);
-  vfprintf_filtered (stream, format, args);
+  vfprintf_filtered ((struct ui_file *) stream, format, args);
   va_end (args);
   /* Something non -ve.  */
   return 0;
@@ -806,7 +806,7 @@ gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 static void
 do_ui_file_delete (void *arg)
 {
-  ui_file_delete (arg);
+  ui_file_delete ((struct ui_file *) arg);
 }
 
 /* Return the length in bytes of the instruction at address MEMADDR in

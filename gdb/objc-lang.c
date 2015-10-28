@@ -226,7 +226,7 @@ objc_demangle (const char *mangled, int options)
      (mangled[1] == 'i' || mangled[1] == 'c') &&
       mangled[2] == '_')
     {
-      cp = demangled = xmalloc(strlen(mangled) + 2);
+      cp = demangled = (char *) xmalloc (strlen (mangled) + 2);
 
       if (mangled[1] == 'i')
 	*cp++ = '-';		/* for instance method */
@@ -413,8 +413,7 @@ static char *msglist_sel;
 void
 start_msglist(void)
 {
-  struct selname *newobj =
-    (struct selname *) xmalloc (sizeof (struct selname));
+  struct selname *newobj = XNEW (struct selname);
 
   newobj->next = selname_chain;
   newobj->msglist_len = msglist_len;
@@ -626,7 +625,7 @@ selectors_info (char *regexp, int from_tty)
       printf_filtered (_("Selectors matching \"%s\":\n\n"), 
 		       regexp ? regexp : "*");
 
-      sym_arr = alloca (matches * sizeof (struct symbol *));
+      sym_arr = XALLOCAVEC (struct symbol *, matches);
       matches = 0;
       ALL_MSYMBOLS (objfile, msymbol)
 	{
@@ -763,7 +762,7 @@ classes_info (char *regexp, int from_tty)
     {
       printf_filtered (_("Classes matching \"%s\":\n\n"), 
 		       regexp ? regexp : "*");
-      sym_arr = alloca (matches * sizeof (struct symbol *));
+      sym_arr = XALLOCAVEC (struct symbol *, matches);
       matches = 0;
       ALL_MSYMBOLS (objfile, msymbol)
 	{
@@ -982,7 +981,7 @@ find_methods (char type, const char *theclass, const char *category,
 
       unsigned int objfile_csym = 0;
 
-      objc_csym = objfile_data (objfile, objc_objfile_data);
+      objc_csym = (unsigned int *) objfile_data (objfile, objc_objfile_data);
       if (objc_csym != NULL && *objc_csym == 0)
 	/* There are no ObjC symbols in this objfile.  Skip it entirely.  */
 	continue;
@@ -1007,7 +1006,7 @@ find_methods (char type, const char *theclass, const char *category,
 	  while ((strlen (symname) + 1) >= tmplen)
 	    {
 	      tmplen = (tmplen == 0) ? 1024 : tmplen * 2;
-	      tmp = xrealloc (tmp, tmplen);
+	      tmp = (char *) xrealloc (tmp, tmplen);
 	    }
 	  strcpy (tmp, symname);
 
@@ -1035,8 +1034,7 @@ find_methods (char type, const char *theclass, const char *category,
 
       if (objc_csym == NULL)
 	{
-	  objc_csym = obstack_alloc (&objfile->objfile_obstack,
-				     sizeof (*objc_csym));
+	  objc_csym = XOBNEW (&objfile->objfile_obstack, unsigned int);
 	  *objc_csym = objfile_csym;
 	  set_objfile_data (objfile, objc_objfile_data, objc_csym);
 	}

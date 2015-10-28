@@ -86,6 +86,7 @@ enum
   R_386_TLS_DESC = 41,      // TLS descriptor containing pointer to code and
                             // to argument, returning TLS offset for symbol
   R_386_IRELATIVE = 42,     // Adjust indirectly by program base
+  R_386_GOT32X = 43,        // 32 bit GOT entry, relaxable
   // Used by Intel.
   R_386_USED_BY_INTEL_200 = 200,
   // GNU vtable garbage collection extensions.

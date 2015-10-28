@@ -43,16 +43,17 @@ enum mi_print_types
    NAME is a  pass-through argument where the name of  the symbol will
    be written.  NAME is allocated in  this function, but the caller is
    responsible for clean up.  SYM is a pass-through argument where the
-   symbol will be written.  In the case of the API returning a string,
-   this will be set to NULL.  LANGUAGE is also a pass-through argument
-   denoting the language attributed to the Symbol.  In the case of SYM
-   being  NULL, this  will be  set to  the current  language.  Returns
-   EXT_LANG_BT_ERROR on error with the appropriate Python exception set, and
-   EXT_LANG_BT_OK on success.  */
+   symbol will be written and  SYM_BLOCK is a pass-through argument to
+   write  the block where the symbol lies in.  In the case of the  API
+   returning a  string,  this will be set to NULL.  LANGUAGE is also a
+   pass-through  argument  denoting  the  language  attributed  to the
+   Symbol.  In the case of SYM being  NULL, this  will be  set to  the
+   current  language.  Returns  EXT_LANG_BT_ERROR  on  error  with the
+   appropriate Python exception set, and EXT_LANG_BT_OK on success.  */
 
 static enum ext_lang_bt_status
 extract_sym (PyObject *obj, char **name, struct symbol **sym,
-	     const struct language_defn **language)
+	     struct block **sym_block, const struct language_defn **language)
 {
   PyObject *result = PyObject_CallMethod (obj, "symbol", NULL);
 
@@ -75,12 +76,18 @@ extract_sym (PyObject *obj, char **name, struct symbol **sym,
 	python_language.  */
       *language = python_language;
       *sym = NULL;
+      *sym_block = NULL;
     }
   else
     {
       /* This type checks 'result' during the conversion so we
 	 just call it unconditionally and check the return.  */
       *sym = symbol_object_to_symbol (result);
+      /* TODO: currently, we have no way to recover the block in which SYMBOL
+	 was found, so we have no block to return.  Trying to evaluate SYMBOL
+	 will yield an incorrect value when it's located in a FRAME and
+	 evaluated from another frame (as permitted in nested functions).  */
+      *sym_block = NULL;
 
       Py_DECREF (result);
 
@@ -537,10 +544,11 @@ enumerate_args (PyObject *iter,
       const struct language_defn *language;
       char *sym_name;
       struct symbol *sym;
+      struct block *sym_block;
       struct value *val;
       enum ext_lang_bt_status success = EXT_LANG_BT_ERROR;
 
-      success = extract_sym (item, &sym_name, &sym, &language);
+      success = extract_sym (item, &sym_name, &sym, &sym_block, &language);
       if (success == EXT_LANG_BT_ERROR)
 	{
 	  Py_DECREF (item);
@@ -736,12 +744,13 @@ enumerate_locals (PyObject *iter,
       struct value *val;
       enum ext_lang_bt_status success = EXT_LANG_BT_ERROR;
       struct symbol *sym;
+      struct block *sym_block;
       int local_indent = 8 + (8 * indent);
       struct cleanup *locals_cleanups;
 
       locals_cleanups = make_cleanup_py_decref (item);
 
-      success = extract_sym (item, &sym_name, &sym, &language);
+      success = extract_sym (item, &sym_name, &sym, &sym_block, &language);
       if (success == EXT_LANG_BT_ERROR)
 	{
 	  do_cleanups (locals_cleanups);
@@ -769,7 +778,7 @@ enumerate_locals (PyObject *iter,
 	{
 	  TRY
 	    {
-	      val = read_var_value (sym, frame);
+	      val = read_var_value (sym, sym_block, frame);
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {

@@ -336,7 +336,7 @@ lwp_stop_reason (struct lwp_info *lwp)
 static void
 add_to_pid_list (struct simple_pid_list **listp, int pid, int status)
 {
-  struct simple_pid_list *new_pid = xmalloc (sizeof (struct simple_pid_list));
+  struct simple_pid_list *new_pid = XNEW (struct simple_pid_list);
 
   new_pid->pid = pid;
   new_pid->status = status;
@@ -438,7 +438,7 @@ num_lwps (int pid)
 static void
 delete_lwp_cleanup (void *lp_voidp)
 {
-  struct lwp_info *lp = lp_voidp;
+  struct lwp_info *lp = (struct lwp_info *) lp_voidp;
 
   delete_lwp (lp->ptid);
 }
@@ -822,7 +822,7 @@ add_initial_lwp (ptid_t ptid)
 
   gdb_assert (ptid_lwp_p (ptid));
 
-  lp = (struct lwp_info *) xmalloc (sizeof (struct lwp_info));
+  lp = XNEW (struct lwp_info);
 
   memset (lp, 0, sizeof (struct lwp_info));
 
@@ -1540,7 +1540,7 @@ linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 
       /* Put the signal number in ARGS so that inf_ptrace_detach will
 	 pass it along with PTRACE_DETACH.  */
-      tem = alloca (8);
+      tem = (char *) alloca (8);
       xsnprintf (tem, 8, "%d", (int) WSTOPSIG (status));
       args = tem;
       if (debug_linux_nat)
@@ -1916,17 +1916,17 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
       return 1;
     }
 
+  /* Always update the entry/return state, even if this particular
+     syscall isn't interesting to the core now.  In async mode,
+     the user could install a new catchpoint for this syscall
+     between syscall enter/return, and we'll need to know to
+     report a syscall return if that happens.  */
+  lp->syscall_state = (lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY
+		       ? TARGET_WAITKIND_SYSCALL_RETURN
+		       : TARGET_WAITKIND_SYSCALL_ENTRY);
+
   if (catch_syscall_enabled ())
     {
-      /* Always update the entry/return state, even if this particular
-	 syscall isn't interesting to the core now.  In async mode,
-	 the user could install a new catchpoint for this syscall
-	 between syscall enter/return, and we'll need to know to
-	 report a syscall return if that happens.  */
-      lp->syscall_state = (lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY
-			   ? TARGET_WAITKIND_SYSCALL_RETURN
-			   : TARGET_WAITKIND_SYSCALL_ENTRY);
-
       if (catching_syscall_number (syscall_number))
 	{
 	  /* Alright, an event to report.  */
@@ -2005,6 +2005,11 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
   int pid = ptid_get_lwp (lp->ptid);
   struct target_waitstatus *ourstatus = &lp->waitstatus;
   int event = linux_ptrace_get_extended_event (status);
+
+  /* All extended events we currently use are mid-syscall.  Only
+     PTRACE_EVENT_STOP is delivered more like a signal-stop, but
+     you have to be using PTRACE_SEIZE to get that.  */
+  lp->syscall_state = TARGET_WAITKIND_SYSCALL_ENTRY;
 
   if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
       || event == PTRACE_EVENT_CLONE)
@@ -2323,6 +2328,12 @@ wait_lwp (struct lwp_info *lp)
       status = W_STOPCODE (SIGTRAP);
       if (linux_handle_syscall_trap (lp, 1))
 	return wait_lwp (lp);
+    }
+  else
+    {
+      /* Almost all other ptrace-stops are known to be outside of system
+	 calls, with further exceptions in linux_handle_extended_wait.  */
+      lp->syscall_state = TARGET_WAITKIND_IGNORE;
     }
 
   /* Handle GNU/Linux's extended waitstatus for trace events.  */
@@ -2719,7 +2730,7 @@ running_callback (struct lwp_info *lp, void *data)
 static int
 count_events_callback (struct lwp_info *lp, void *data)
 {
-  int *count = data;
+  int *count = (int *) data;
 
   gdb_assert (count != NULL);
 
@@ -2758,7 +2769,7 @@ lwp_status_pending_p (struct lwp_info *lp)
 static int
 select_event_lwp_callback (struct lwp_info *lp, void *data)
 {
-  int *selector = data;
+  int *selector = (int *) data;
 
   gdb_assert (selector != NULL);
 
@@ -2801,7 +2812,7 @@ check_stopped_by_breakpoint (struct lwp_info *lp)
     {
       if (siginfo.si_signo == SIGTRAP)
 	{
-	  if (siginfo.si_code == GDB_ARCH_TRAP_BRKPT)
+	  if (GDB_ARCH_IS_TRAP_BRKPT (siginfo.si_code))
 	    {
 	      if (debug_linux_nat)
 		fprintf_unfiltered (gdb_stdlog,
@@ -3126,6 +3137,12 @@ linux_nat_filter_event (int lwpid, int status)
       if (linux_handle_syscall_trap (lp, 0))
 	return NULL;
     }
+  else
+    {
+      /* Almost all other ptrace-stops are known to be outside of system
+	 calls, with further exceptions in linux_handle_extended_wait.  */
+      lp->syscall_state = TARGET_WAITKIND_IGNORE;
+    }
 
   /* Handle GNU/Linux's extended waitstatus for trace events.  */
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP
@@ -3442,12 +3459,6 @@ linux_nat_wait_1 (struct target_ops *ops,
 			    target_pid_to_str (lp->ptid));
     }
 
-  if (!target_is_async_p ())
-    {
-      /* Causes SIGINT to be passed on to the attached process.  */
-      set_sigint_trap ();
-    }
-
   /* But if we don't find a pending event, we'll have to wait.  Always
      pull all events out of the kernel.  We'll randomly select an
      event LWP out of all that have events, to prevent starvation.  */
@@ -3518,9 +3529,6 @@ linux_nat_wait_1 (struct target_ops *ops,
 
 	  ourstatus->kind = TARGET_WAITKIND_NO_RESUMED;
 
-	  if (!target_is_async_p ())
-	    clear_sigint_trap ();
-
 	  restore_child_signals_mask (&prev_mask);
 	  return minus_one_ptid;
 	}
@@ -3545,9 +3553,6 @@ linux_nat_wait_1 (struct target_ops *ops,
 	fprintf_unfiltered (gdb_stdlog, "LNW: about to sigsuspend\n");
       sigsuspend (&suspend_mask);
     }
-
-  if (!target_is_async_p ())
-    clear_sigint_trap ();
 
   gdb_assert (lp);
 
@@ -3653,7 +3658,7 @@ linux_nat_wait_1 (struct target_ops *ops,
 static int
 resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
 {
-  ptid_t *wait_ptid_p = data;
+  ptid_t *wait_ptid_p = (ptid_t *) data;
 
   if (!lp->stopped)
     {
@@ -4594,8 +4599,6 @@ linux_nat_supports_non_stop (struct target_ops *self)
 static int
 linux_nat_always_non_stop_p (struct target_ops *self)
 {
-  if (linux_ops->to_always_non_stop_p != NULL)
-    return linux_ops->to_always_non_stop_p (linux_ops);
   return 1;
 }
 
@@ -4629,17 +4632,6 @@ static int async_terminal_is_ours = 1;
 static void
 linux_nat_terminal_inferior (struct target_ops *self)
 {
-  /* Like target_terminal_inferior, use target_can_async_p, not
-     target_is_async_p, since at this point the target is not async
-     yet.  If it can async, then we know it will become async prior to
-     resume.  */
-  if (!target_can_async_p ())
-    {
-      /* Async mode is disabled.  */
-      child_terminal_inferior (self);
-      return;
-    }
-
   child_terminal_inferior (self);
 
   /* Calls to target_terminal_*() are meant to be idempotent.  */
@@ -4922,7 +4914,8 @@ linux_nat_fileio_pid_of (struct inferior *inf)
 static int
 linux_nat_fileio_open (struct target_ops *self,
 		       struct inferior *inf, const char *filename,
-		       int flags, int mode, int *target_errno)
+		       int flags, int mode, int warn_if_slow,
+		       int *target_errno)
 {
   int nat_flags;
   mode_t nat_mode;
@@ -4962,7 +4955,7 @@ linux_nat_fileio_readlink (struct target_ops *self,
       return NULL;
     }
 
-  ret = xmalloc (len + 1);
+  ret = (char *) xmalloc (len + 1);
   memcpy (ret, buf, len);
   ret[len] = '\0';
   return ret;

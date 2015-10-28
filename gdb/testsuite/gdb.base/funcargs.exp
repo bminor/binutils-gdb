@@ -894,19 +894,15 @@ proc recursive_structs_by_value {} {
     gdb_run_cmd
     gdb_test "" "Breakpoint $decimal, hitbottom .*" "run to hitbottom"
 
-    if ![istarget sparclet-*-*] {
-	gdb_test_sequence "backtrace 100" "recursive passing of structs by value" {
-	    "\[\r\n\]#0 .* hitbottom \\(\\) "
-	    "\[\r\n\]#1 .* recurse \\(a=\{s = 0, i = 0, l = 0\}, depth=0\\) "
-	    "\[\r\n\]#2 .* recurse \\(a=\{s = 1, i = 1, l = 1\}, depth=1\\) "
-	    "\[\r\n\]#3 .* recurse \\(a=\{s = 2, i = 2, l = 2\}, depth=2\\) "
-	    "\[\r\n\]#4 .* recurse \\(a=\{s = 3, i = 3, l = 3\}, depth=3\\) "
-	    "\[\r\n\]#5 .* recurse \\(a=\{s = 4, i = 4, l = 4\}, depth=4\\) "
-	    "\[\r\n\]#6 .* test_struct_args \\(\\) "
-	    "\[\r\n\]#7 .* main \\(.*\\) at "
-	}
-    } else {
-	fail "recursive passing of structs by value (sparclet)"
+    gdb_test_sequence "backtrace 100" "recursive passing of structs by value" {
+	"\[\r\n\]#0 .* hitbottom \\(\\) "
+	"\[\r\n\]#1 .* recurse \\(a=\{s = 0, i = 0, l = 0\}, depth=0\\) "
+	"\[\r\n\]#2 .* recurse \\(a=\{s = 1, i = 1, l = 1\}, depth=1\\) "
+	"\[\r\n\]#3 .* recurse \\(a=\{s = 2, i = 2, l = 2\}, depth=2\\) "
+	"\[\r\n\]#4 .* recurse \\(a=\{s = 3, i = 3, l = 3\}, depth=3\\) "
+	"\[\r\n\]#5 .* recurse \\(a=\{s = 4, i = 4, l = 4\}, depth=4\\) "
+	"\[\r\n\]#6 .* test_struct_args \\(\\) "
+	"\[\r\n\]#7 .* main \\(.*\\) at "
     }
     gdb_stop_suppressing_tests
 }

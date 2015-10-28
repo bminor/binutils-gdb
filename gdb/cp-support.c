@@ -92,7 +92,7 @@ copy_string_to_obstack (struct obstack *obstack, const char *string,
 			long *len)
 {
   *len = strlen (string);
-  return obstack_copy (obstack, string, *len);
+  return (char *) obstack_copy (obstack, string, *len);
 }
 
 /* A cleanup wrapper for cp_demangled_name_parse_free.  */
@@ -1192,8 +1192,7 @@ make_symbol_overload_list (const char *func_name,
 
   sym_return_val_size = 100;
   sym_return_val_index = 0;
-  sym_return_val = xmalloc ((sym_return_val_size + 1) *
-			    sizeof (struct symbol *));
+  sym_return_val = XNEWVEC (struct symbol *, sym_return_val_size + 1);
   sym_return_val[0] = NULL;
 
   old_cleanups = make_cleanup (xfree, sym_return_val);
@@ -1205,7 +1204,7 @@ make_symbol_overload_list (const char *func_name,
   else
     {
       char *concatenated_name
-	= alloca (strlen (the_namespace) + 2 + strlen (func_name) + 1);
+	= (char *) alloca (strlen (the_namespace) + 2 + strlen (func_name) + 1);
       strcpy (concatenated_name, the_namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, func_name);
@@ -1247,7 +1246,7 @@ make_symbol_overload_list_namespace (const char *func_name,
   else
     {
       char *concatenated_name
-	= alloca (strlen (the_namespace) + 2 + strlen (func_name) + 1);
+	= (char *) alloca (strlen (the_namespace) + 2 + strlen (func_name) + 1);
 
       strcpy (concatenated_name, the_namespace);
       strcat (concatenated_name, "::");
@@ -1298,7 +1297,7 @@ make_symbol_overload_list_adl_namespace (struct type *type,
 
   if (prefix_len != 0)
     {
-      the_namespace = alloca (prefix_len + 1);
+      the_namespace = (char *) alloca (prefix_len + 1);
       strncpy (the_namespace, type_name, prefix_len);
       the_namespace[prefix_len] = '\0';
 
@@ -1340,7 +1339,7 @@ make_symbol_overload_list_adl (struct type **arg_types, int nargs,
 static void
 reset_directive_searched (void *data)
 {
-  struct using_direct *direct = data;
+  struct using_direct *direct = (struct using_direct *) data;
   direct->searched = 0;
 }
 
@@ -1536,7 +1535,7 @@ gdb_demangle (const char *name, int options)
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
   struct sigaction sa, old_sa;
 #else
-  void (*ofunc) ();
+  sighandler_t ofunc;
 #endif
   static int core_dump_allowed = -1;
 
@@ -1560,7 +1559,7 @@ gdb_demangle (const char *name, int options)
 #endif
       sigaction (SIGSEGV, &sa, &old_sa);
 #else
-      ofunc = (void (*)()) signal (SIGSEGV, gdb_demangle_signal_handler);
+      ofunc = signal (SIGSEGV, gdb_demangle_signal_handler);
 #endif
 
       crash_signal = SIGSETJMP (gdb_demangle_jmp_buf);
@@ -1647,7 +1646,7 @@ first_component_command (char *arg, int from_tty)
     return;
 
   len = cp_find_first_component (arg);
-  prefix = alloca (len + 1);
+  prefix = (char *) alloca (len + 1);
 
   memcpy (prefix, arg, len);
   prefix[len] = '\0';

@@ -50,7 +50,7 @@ static void c_type_print_modifier (struct type *,
 static const char *
 find_typedef_for_canonicalize (struct type *t, void *data)
 {
-  return find_typedef_in_hash (data, t);
+  return find_typedef_in_hash ((const struct type_print_options *) data, t);
 }
 
 /* Print NAME on STREAM.  If the 'raw' field of FLAGS is not set,

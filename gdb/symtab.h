@@ -137,11 +137,7 @@ struct general_symbol_info
 
     /* This is used by languages which wish to store a demangled name.
        currently used by Ada, C++, Java, and Objective C.  */
-    struct mangled_lang
-    {
-      const char *demangled_name;
-    }
-    mangled_lang;
+    const char *demangled_name;
   }
   language_specific;
 
@@ -151,7 +147,7 @@ struct general_symbol_info
 
   ENUM_BITFIELD(language) language : LANGUAGE_BITS;
 
-  /* This is only used by Ada.  If set, then the 'mangled_lang' field
+  /* This is only used by Ada.  If set, then the 'demangled_name' field
      of language_specific is valid.  Otherwise, the 'obstack' field is
      valid.  */
   unsigned int ada_mangled : 1;
@@ -584,7 +580,13 @@ enum address_class
      not find it in the full symbol table.  But a reference to an external
      symbol in a local block shadowing other definition requires full symbol
      without possibly having its address available for LOC_STATIC.  Testcase
-     is provided as `gdb.dwarf2/dw2-unresolved.exp'.  */
+     is provided as `gdb.dwarf2/dw2-unresolved.exp'.
+
+     This is also used for thread local storage (TLS) variables.  In this case,
+     the address of the TLS variable must be determined when the variable is
+     referenced, from the MSYMBOL_VALUE_RAW_ADDRESS, which is the offset
+     of the TLS variable in the thread local storage of the shared
+     library/object.  */
 
   LOC_UNRESOLVED,
 
@@ -686,6 +688,25 @@ struct symbol_block_ops
      uninitialized in such case.  */
   void (*find_frame_base_location) (struct symbol *framefunc, CORE_ADDR pc,
 				    const gdb_byte **start, size_t *length);
+
+  /* Return the frame base address.  FRAME is the frame for which we want to
+     compute the base address while FRAMEFUNC is the symbol for the
+     corresponding function.  Return 0 on failure (FRAMEFUNC may not hold the
+     information we need).
+
+     This method is designed to work with static links (nested functions
+     handling).  Static links are function properties whose evaluation returns
+     the frame base address for the enclosing frame.  However, there are
+     multiple definitions for "frame base": the content of the frame base
+     register, the CFA as defined by DWARF unwinding information, ...
+
+     So this specific method is supposed to compute the frame base address such
+     as for nested fuctions, the static link computes the same address.  For
+     instance, considering DWARF debugging information, the static link is
+     computed with DW_AT_static_link and this method must be used to compute
+     the corresponding DW_AT_frame_base attribute.  */
+  CORE_ADDR (*get_frame_base) (struct symbol *framefunc,
+			       struct frame_info *frame);
 };
 
 /* Functions used with LOC_REGISTER and LOC_REGPARM_ADDR.  */
@@ -781,11 +802,10 @@ struct symbol
   /* An arbitrary data pointer, allowing symbol readers to record
      additional information on a per-symbol basis.  Note that this data
      must be allocated using the same obstack as the symbol itself.  */
-  /* So far it is only used by LOC_COMPUTED to
-     find the location information.  For a LOC_BLOCK symbol
-     for a function in a compilation unit compiled with DWARF 2
-     information, this is information used internally by the DWARF 2
-     code --- specifically, the location expression for the frame
+  /* So far it is only used by:
+     LOC_COMPUTED: to find the location information
+     LOC_BLOCK (DWARF2 function): information used internally by the
+     DWARF 2 code --- specifically, the location expression for the frame
      base for this function.  */
   /* FIXME drow/2003-02-21: For the LOC_BLOCK case, it might be better
      to add a magic symbol to the block containing this information,

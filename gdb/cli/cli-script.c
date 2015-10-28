@@ -109,15 +109,12 @@ build_command_line (enum command_control_type type, char *args)
     error (_("if/while commands require arguments."));
   gdb_assert (args != NULL);
 
-  cmd = (struct command_line *) xmalloc (sizeof (struct command_line));
+  cmd = XNEW (struct command_line);
   cmd->next = NULL;
   cmd->control_type = type;
 
   cmd->body_count = 1;
-  cmd->body_list
-    = (struct command_line **) xmalloc (sizeof (struct command_line *)
-					* cmd->body_count);
-  memset (cmd->body_list, 0, sizeof (struct command_line *) * cmd->body_count);
+  cmd->body_list = XCNEWVEC (struct command_line *, cmd->body_count);
   cmd->line = xstrdup (args);
 
   return cmd;
@@ -310,7 +307,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 static void
 clear_hook_in_cleanup (void *data)
 {
-  struct cmd_list_element *c = data;
+  struct cmd_list_element *c = (struct cmd_list_element *) data;
 
   c->hook_in = 0; /* Allow hook to work again once it is complete.  */
 }
@@ -344,7 +341,7 @@ execute_cmd_post_hook (struct cmd_list_element *c)
 static void
 do_restore_user_call_depth (void * call_depth)
 {	
-  int *depth = call_depth;
+  int *depth = (int *) call_depth;
 
   (*depth)--;
   if ((*depth) == 0)
@@ -487,7 +484,7 @@ execute_control_command (struct command_line *cmd)
     case while_control:
       {
 	int len = strlen (cmd->line) + 7;
-	char *buffer = alloca (len);
+	char *buffer = (char *) alloca (len);
 
 	xsnprintf (buffer, len, "while %s", cmd->line);
 	print_command_trace (buffer);
@@ -556,7 +553,7 @@ execute_control_command (struct command_line *cmd)
     case if_control:
       {
 	int len = strlen (cmd->line) + 4;
-	char *buffer = alloca (len);
+	char *buffer = (char *) alloca (len);
 
 	xsnprintf (buffer, len, "if %s", cmd->line);
 	print_command_trace (buffer);
@@ -722,7 +719,7 @@ setup_user_args (char *p)
   struct cleanup *old_chain;
   unsigned int arg_count = 0;
 
-  args = (struct user_args *) xmalloc (sizeof (struct user_args));
+  args = XNEW (struct user_args);
   memset (args, 0, sizeof (struct user_args));
 
   args->next = user_args;
@@ -918,20 +915,18 @@ realloc_body_list (struct command_line *command, int new_length)
   if (new_length <= n)
     return;
 
-  body_list = (struct command_line **)
-    xmalloc (sizeof (struct command_line *) * new_length);
+  body_list = XCNEWVEC (struct command_line *, new_length);
 
   memcpy (body_list, command->body_list, sizeof (struct command_line *) * n);
-  memset (body_list + n, 0, sizeof (struct command_line *) * (new_length - n));
 
   xfree (command->body_list);
   command->body_list = body_list;
   command->body_count = new_length;
 }
 
-/* Read next line from stdout.  Passed to read_command_line_1 and
+/* Read next line from stdin.  Passed to read_command_line_1 and
    recurse_read_control_structure whenever we need to read commands
-   from stdout.  */
+   from stdin.  */
 
 static char *
 read_next_line (void)
@@ -1076,8 +1071,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	}
       else if (p_end - p == 10 && startswith (p, "loop_break"))
 	{
-	  *command = (struct command_line *)
-	    xmalloc (sizeof (struct command_line));
+	  *command = XNEW (struct command_line);
 	  (*command)->next = NULL;
 	  (*command)->line = NULL;
 	  (*command)->control_type = break_control;
@@ -1086,8 +1080,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
 	}
       else if (p_end - p == 13 && startswith (p, "loop_continue"))
 	{
-	  *command = (struct command_line *)
-	    xmalloc (sizeof (struct command_line));
+	  *command = XNEW (struct command_line);
 	  (*command)->next = NULL;
 	  (*command)->line = NULL;
 	  (*command)->control_type = continue_control;
@@ -1101,8 +1094,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
   if (!parse_commands || not_handled)
     {
       /* A normal command.  */
-      *command = (struct command_line *)
-	xmalloc (sizeof (struct command_line));
+      *command = XNEW (struct command_line);
       (*command)->next = NULL;
       (*command)->line = savestring (p, p_end - p);
       (*command)->control_type = simple_control;
@@ -1398,7 +1390,7 @@ free_command_lines (struct command_line **lptr)
 static void
 do_free_command_lines_cleanup (void *arg)
 {
-  free_command_lines (arg);
+  free_command_lines ((struct command_line **) arg);
 }
 
 struct cleanup *
@@ -1414,7 +1406,7 @@ copy_command_lines (struct command_line *cmds)
 
   if (cmds)
     {
-      result = (struct command_line *) xmalloc (sizeof (struct command_line));
+      result = XNEW (struct command_line);
 
       result->next = copy_command_lines (cmds->next);
       result->line = xstrdup (cmds->line);
@@ -1424,8 +1416,7 @@ copy_command_lines (struct command_line *cmds)
         {
           int i;
 
-          result->body_list = (struct command_line **)
-            xmalloc (sizeof (struct command_line *) * cmds->body_count);
+          result->body_list = XNEWVEC (struct command_line *, cmds->body_count);
 
           for (i = 0; i < cmds->body_count; i++)
             result->body_list[i] = copy_command_lines (cmds->body_list[i]);

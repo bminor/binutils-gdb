@@ -1528,9 +1528,8 @@ hwdebug_find_thread_points_by_tid (int tid, int alloc_new)
      if the wanted one does not exist?  */
   if (alloc_new)
     {
-      t = xmalloc (sizeof (struct thread_points));
-      t->hw_breaks
-	= xzalloc (max_slots_number * sizeof (struct hw_break_tuple));
+      t = XNEW (struct thread_points);
+      t->hw_breaks = XCNEWVEC (struct hw_break_tuple, max_slots_number);
       t->tid = tid;
       VEC_safe_push (thread_points_p, ppc_threads, t);
     }
@@ -1546,7 +1545,7 @@ hwdebug_insert_point (struct ppc_hw_breakpoint *b, int tid)
 {
   int i;
   long slot;
-  struct ppc_hw_breakpoint *p = xmalloc (sizeof (struct ppc_hw_breakpoint));
+  struct ppc_hw_breakpoint *p = XNEW (struct ppc_hw_breakpoint);
   struct hw_break_tuple *hw_breaks;
   struct cleanup *c = make_cleanup (xfree, p);
   struct thread_points *t;

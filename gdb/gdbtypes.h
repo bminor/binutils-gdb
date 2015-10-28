@@ -440,6 +440,14 @@ enum dynamic_prop_node_kind
   /* A property providing a type's data location.
      Evaluating this field yields to the location of an object's data.  */
   DYN_PROP_DATA_LOCATION,
+
+  /* A property representing DW_AT_allocated.  The presence of this attribute
+     indicates that the object of the type can be allocated/deallocated.  */
+  DYN_PROP_ALLOCATED,
+
+  /* A property representing DW_AT_allocated.  The presence of this attribute
+     indicated that the object of the type can be associated.  */
+  DYN_PROP_ASSOCIATED,
 };
 
 /* * List for dynamic type attributes.  */
@@ -1210,9 +1218,9 @@ extern void allocate_gnat_aux_type (struct type *);
 
 #define INIT_FUNC_SPECIFIC(type)					       \
   (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FUNC,			       \
-   TYPE_MAIN_TYPE (type)->type_specific.func_stuff			       \
-     = TYPE_ZALLOC (type,						       \
-		    sizeof (*TYPE_MAIN_TYPE (type)->type_specific.func_stuff)))
+   TYPE_MAIN_TYPE (type)->type_specific.func_stuff = (struct func_type *)      \
+     TYPE_ZALLOC (type,							       \
+		  sizeof (*TYPE_MAIN_TYPE (type)->type_specific.func_stuff)))
 
 #define TYPE_INSTANCE_FLAGS(thistype) (thistype)->instance_flags
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
@@ -1257,6 +1265,12 @@ extern void allocate_gnat_aux_type (struct type *);
   TYPE_DATA_LOCATION (thistype)->data.const_val
 #define TYPE_DATA_LOCATION_KIND(thistype) \
   TYPE_DATA_LOCATION (thistype)->kind
+
+/* Property accessors for the type allocated/associated.  */
+#define TYPE_ALLOCATED_PROP(thistype) \
+  get_dyn_prop (DYN_PROP_ALLOCATED, thistype)
+#define TYPE_ASSOCIATED_PROP(thistype) \
+  get_dyn_prop (DYN_PROP_ASSOCIATED, thistype)
 
 /* Attribute accessors for dynamic properties.  */
 #define TYPE_DYN_PROP_LIST(thistype) \
@@ -1904,13 +1918,15 @@ extern int field_is_static (struct field *);
 
 /* printcmd.c */
 
-extern void print_scalar_formatted (const void *, struct type *,
+extern void print_scalar_formatted (const gdb_byte *, struct type *,
 				    const struct value_print_options *,
 				    int, struct ui_file *);
 
 extern int can_dereference (struct type *);
 
 extern int is_integral_type (struct type *);
+
+extern int is_scalar_type (struct type *type);
 
 extern int is_scalar_type_recursive (struct type *);
 
@@ -1929,5 +1945,9 @@ extern struct type *copy_type (const struct type *type);
 extern int types_equal (struct type *, struct type *);
 
 extern int types_deeply_equal (struct type *, struct type *);
+
+extern int type_not_allocated (const struct type *type);
+
+extern int type_not_associated (const struct type *type);
 
 #endif /* GDBTYPES_H */

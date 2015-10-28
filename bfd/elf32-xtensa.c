@@ -521,7 +521,9 @@ elf_xtensa_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
 
 static const bfd_byte elf_xtensa_be_plt_entry[PLT_ENTRY_SIZE] =
 {
+#if XSHAL_ABI == XTHAL_ABI_WINDOWED
   0x6c, 0x10, 0x04,	/* entry sp, 32 */
+#endif
   0x18, 0x00, 0x00,	/* l32r  a8, [got entry for rtld's resolver] */
   0x1a, 0x00, 0x00,	/* l32r  a10, [got entry for rtld's link map] */
   0x1b, 0x00, 0x00,	/* l32r  a11, [literal for reloc index] */
@@ -531,7 +533,9 @@ static const bfd_byte elf_xtensa_be_plt_entry[PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_xtensa_le_plt_entry[PLT_ENTRY_SIZE] =
 {
+#if XSHAL_ABI == XTHAL_ABI_WINDOWED
   0x36, 0x41, 0x00,	/* entry sp, 32 */
+#endif
   0x81, 0x00, 0x00,	/* l32r  a8, [got entry for rtld's resolver] */
   0xa1, 0x00, 0x00,	/* l32r  a10, [got entry for rtld's link map] */
   0xb1, 0x00, 0x00,	/* l32r  a11, [literal for reloc index] */
@@ -1637,7 +1641,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  && htab->sgotloc != NULL);
 
       /* Set the contents of the .interp section to the interpreter.  */
-      if (bfd_link_executable (info))
+      if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  if (s == NULL)
@@ -2317,7 +2321,7 @@ elf_xtensa_create_plt_entry (struct bfd_link_info *info,
 {
   asection *splt, *sgotplt;
   bfd_vma plt_base, got_base;
-  bfd_vma code_offset, lit_offset;
+  bfd_vma code_offset, lit_offset, abi_offset;
   int chunk;
 
   chunk = reloc_index / PLT_ENTRIES_PER_CHUNK;
@@ -2342,15 +2346,16 @@ elf_xtensa_create_plt_entry (struct bfd_link_info *info,
 	   ? elf_xtensa_be_plt_entry
 	   : elf_xtensa_le_plt_entry),
 	  PLT_ENTRY_SIZE);
+  abi_offset = XSHAL_ABI == XTHAL_ABI_WINDOWED ? 3 : 0;
   bfd_put_16 (output_bfd, l32r_offset (got_base + 0,
-				       plt_base + code_offset + 3),
-	      splt->contents + code_offset + 4);
+				       plt_base + code_offset + abi_offset),
+	      splt->contents + code_offset + abi_offset + 1);
   bfd_put_16 (output_bfd, l32r_offset (got_base + 4,
-				       plt_base + code_offset + 6),
-	      splt->contents + code_offset + 7);
+				       plt_base + code_offset + abi_offset + 3),
+	      splt->contents + code_offset + abi_offset + 4);
   bfd_put_16 (output_bfd, l32r_offset (got_base + lit_offset,
-				       plt_base + code_offset + 9),
-	      splt->contents + code_offset + 10);
+				       plt_base + code_offset + abi_offset + 6),
+	      splt->contents + code_offset + abi_offset + 7);
 
   return plt_base + code_offset;
 }

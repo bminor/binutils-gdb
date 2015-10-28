@@ -1654,6 +1654,14 @@ enum elf_gnu_symbols
     elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
   };
 
+typedef struct elf_section_list
+{
+  Elf_Internal_Shdr          hdr;
+  unsigned int               ndx;
+  struct elf_section_list *  next;
+} elf_section_list;
+  
+    
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -1670,7 +1678,7 @@ struct elf_obj_tdata
   Elf_Internal_Shdr dynversym_hdr;
   Elf_Internal_Shdr dynverref_hdr;
   Elf_Internal_Shdr dynverdef_hdr;
-  Elf_Internal_Shdr symtab_shndx_hdr;
+  elf_section_list * symtab_shndx_list;
   bfd_vma gp;				/* The gp value */
   unsigned int gp_size;			/* The gp size */
   unsigned int num_elf_sections;	/* elf_sect_ptr size */
@@ -1745,7 +1753,7 @@ struct elf_obj_tdata
   Elf_Internal_Shdr **group_sect_ptr;
   int num_group;
 
-  unsigned int symtab_section, symtab_shndx_section, dynsymtab_section;
+  unsigned int symtab_section, dynsymtab_section;
   unsigned int dynversym_section, dynverdef_section, dynverref_section;
 
   /* An identifier used to distinguish different target
@@ -1787,7 +1795,7 @@ struct elf_obj_tdata
 #define elf_stack_flags(bfd)	(elf_tdata(bfd) -> o->stack_flags)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> o->strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
-#define elf_symtab_shndx(bfd)	(elf_tdata(bfd) -> symtab_shndx_section)
+#define elf_symtab_shndx_list(bfd)	(elf_tdata(bfd) -> symtab_shndx_list)
 #define elf_strtab_sec(bfd)	(elf_tdata(bfd) -> o->strtab_section)
 #define elf_shstrtab_sec(bfd)	(elf_tdata(bfd) -> o->shstrtab_section)
 #define elf_symtab_hdr(bfd)	(elf_tdata(bfd) -> symtab_hdr)
@@ -2288,7 +2296,7 @@ extern asection *_bfd_elf_gc_mark_hook
 
 extern asection *_bfd_elf_gc_mark_rsec
   (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn,
-   struct elf_reloc_cookie *);
+   struct elf_reloc_cookie *, bfd_boolean *);
 
 extern bfd_boolean _bfd_elf_gc_mark_reloc
   (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn,

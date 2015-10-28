@@ -23,7 +23,7 @@
 #include "event-loop.h"
 
 #include "gdb_select.h"
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #ifdef USE_WIN32API
 #include <winsock2.h>
 #endif
@@ -153,7 +153,7 @@ run_async_handler_and_reschedule (struct serial *scb)
 static void
 fd_event (int error, void *context)
 {
-  struct serial *scb = context;
+  struct serial *scb = (struct serial *) context;
   if (error != 0)
     {
       scb->bufcnt = SERIAL_ERROR;
@@ -190,7 +190,7 @@ fd_event (int error, void *context)
 static void
 push_event (void *context)
 {
-  struct serial *scb = context;
+  struct serial *scb = (struct serial *) context;
 
   scb->async_state = NOTHING_SCHEDULED; /* Timers are one-off */
   run_async_handler_and_reschedule (scb);
@@ -440,7 +440,7 @@ ser_base_readchar (struct serial *scb, int timeout)
 int
 ser_base_write (struct serial *scb, const void *buf, size_t count)
 {
-  const char *str = buf;
+  const char *str = (const char *) buf;
   int cc;
 
   while (count > 0)

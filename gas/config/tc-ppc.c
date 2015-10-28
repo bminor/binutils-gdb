@@ -860,7 +860,7 @@ register_name (expressionS *expressionP)
   else if (!reg_names_p || !ISALPHA (name[0]))
     return FALSE;
 
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
 
   /* Put back the delimiting char.  */
@@ -1457,7 +1457,7 @@ insn_validate (const struct powerpc_opcode *op)
       else
         {
 	  const struct powerpc_operand *operand = &powerpc_operands[*o];
-	  if (operand->shift != PPC_OPSHIFT_INV)
+	  if (operand->shift != (int) PPC_OPSHIFT_INV)
 	    {
 	      unsigned long mask;
 
@@ -2142,13 +2142,12 @@ ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
   char *pfrag;
   int align2;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
 
-  /* just after name is now '\0'.  */
+  /* Just after name is now '\0'.  */
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       as_bad (_("expected comma after symbol-name: rest of line ignored."));
@@ -2238,8 +2237,8 @@ ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
 static void
 ppc_elf_localentry (int ignore ATTRIBUTE_UNUSED)
 {
-  char *name = input_line_pointer;
-  char c = get_symbol_end ();
+  char *name;
+  char c = get_symbol_name (&name);
   char *p;
   expressionS exp;
   symbolS *sym;
@@ -2248,7 +2247,7 @@ ppc_elf_localentry (int ignore ATTRIBUTE_UNUSED)
 
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       *p = 0;
@@ -2491,8 +2490,7 @@ parse_toc_entry (enum toc_size_qualifier *toc_kind)
   SKIP_WHITESPACE ();
 
   /* Find the spelling of the operand.  */
-  toc_spec = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&toc_spec);
 
   if (strcmp (toc_spec, "toc") == 0)
     {
@@ -2521,7 +2519,7 @@ parse_toc_entry (enum toc_size_qualifier *toc_kind)
   /* Now find the ']'.  */
   *input_line_pointer = c;
 
-  SKIP_WHITESPACE ();	     /* leading whitespace could be there.  */
+  SKIP_WHITESPACE_AFTER_NAME ();	/* leading whitespace could be there.  */
   c = *input_line_pointer++; /* input_line_pointer->past char in c.  */
 
   if (c != ']')
@@ -3630,10 +3628,9 @@ ppc_comm (int lcomm)
   symbolS *sym;
   char *pfrag;
 
-  name = input_line_pointer;
-  endc = get_symbol_end ();
+  endc = get_symbol_name (&name);
   end_name = input_line_pointer;
-  *end_name = endc;
+  (void) restore_line_pointer (endc);
 
   if (*input_line_pointer != ',')
     {
@@ -3684,12 +3681,11 @@ ppc_comm (int lcomm)
 	}
       ++input_line_pointer;
 
-      lcomm_name = input_line_pointer;
-      lcomm_endc = get_symbol_end ();
+      lcomm_endc = get_symbol_name (&lcomm_name);
 
       lcomm_sym = symbol_find_or_make (lcomm_name);
 
-      *input_line_pointer = lcomm_endc;
+      (void) restore_line_pointer (lcomm_endc);
 
       /* The fourth argument to .lcomm is the alignment.  */
       if (*input_line_pointer != ',')
@@ -3792,12 +3788,11 @@ ppc_csect (int ignore ATTRIBUTE_UNUSED)
   symbolS *sym;
   offsetT align;
 
-  name = input_line_pointer;
-  endc = get_symbol_end ();
+  endc = get_symbol_name (&name);
 
   sym = symbol_find_or_make (name);
 
-  *input_line_pointer = endc;
+  (void) restore_line_pointer (endc);
 
   if (S_GET_NAME (sym)[0] == '\0')
     {
@@ -3965,15 +3960,14 @@ ppc_dwsect (int ignore ATTRIBUTE_UNUSED)
   /* Parse opt-label.  */
   if (*input_line_pointer == ',')
     {
-      const char *label;
+      char *label;
       char c;
 
       ++input_line_pointer;
 
-      label = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&label);
       opt_label = symbol_find_or_make (label);
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
     }
   else
     opt_label = NULL;
@@ -4103,8 +4097,7 @@ ppc_named_section (int ignore ATTRIBUTE_UNUSED)
   char c;
   symbolS *sym;
 
-  user_name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&user_name);
 
   if (strcmp (user_name, ".text") == 0)
     real_name = ".text[PR]";
@@ -4113,12 +4106,12 @@ ppc_named_section (int ignore ATTRIBUTE_UNUSED)
   else
     {
       as_bad (_("the XCOFF file format does not support arbitrary sections"));
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
       ignore_rest_of_line ();
       return;
     }
 
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   sym = symbol_find_or_make (real_name);
 
@@ -4135,12 +4128,11 @@ ppc_extern (int ignore ATTRIBUTE_UNUSED)
   char *name;
   char endc;
 
-  name = input_line_pointer;
-  endc = get_symbol_end ();
+  endc = get_symbol_name (&name);
 
   (void) symbol_find_or_make (name);
 
-  *input_line_pointer = endc;
+  (void) restore_line_pointer (endc);
 
   demand_empty_rest_of_line ();
 }
@@ -4154,12 +4146,11 @@ ppc_lglobl (int ignore ATTRIBUTE_UNUSED)
   char endc;
   symbolS *sym;
 
-  name = input_line_pointer;
-  endc = get_symbol_end ();
+  endc = get_symbol_name (&name);
 
   sym = symbol_find_or_make (name);
 
-  *input_line_pointer = endc;
+  (void) restore_line_pointer (endc);
 
   symbol_get_tc (sym)->output = 1;
 
@@ -4192,14 +4183,13 @@ ppc_ref (int ignore ATTRIBUTE_UNUSED)
 
   do
     {
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
 
       fix_at_start (symbol_get_frag (ppc_current_csect), 0,
 		    symbol_find_or_make (name), 0, FALSE, BFD_RELOC_NONE);
 
       *input_line_pointer = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       c = *input_line_pointer;
       if (c == ',')
 	{
@@ -4229,12 +4219,11 @@ ppc_rename (int ignore ATTRIBUTE_UNUSED)
   symbolS *sym;
   int len;
 
-  name = input_line_pointer;
-  endc = get_symbol_end ();
+  endc = get_symbol_name (&name);
 
   sym = symbol_find_or_make (name);
 
-  *input_line_pointer = endc;
+  (void) restore_line_pointer (endc);
 
   if (*input_line_pointer != ',')
     {
@@ -4393,8 +4382,7 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
   symbolS *ext_sym;
   symbolS *lab_sym;
 
-  name = input_line_pointer;
-  endc = get_symbol_end ();
+  endc = get_symbol_name (&name);
 
   /* Ignore any [PR] suffix.  */
   name = ppc_canonicalize_symbol_name (name);
@@ -4405,7 +4393,7 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
 
   ext_sym = symbol_find_or_make (name);
 
-  *input_line_pointer = endc;
+  (void) restore_line_pointer (endc);
 
   if (*input_line_pointer != ',')
     {
@@ -4415,12 +4403,11 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
     }
   ++input_line_pointer;
 
-  name = input_line_pointer;
-  endc = get_symbol_end ();
+  endc = get_symbol_name (&name);
 
   lab_sym = symbol_find_or_make (name);
 
-  *input_line_pointer = endc;
+  (void) restore_line_pointer (endc);
 
   if (ext_sym != lab_sym)
     {
@@ -4599,12 +4586,11 @@ ppc_bs (int ignore ATTRIBUTE_UNUSED)
   if (ppc_current_block != NULL)
     as_bad (_("nested .bs blocks"));
 
-  name = input_line_pointer;
-  endc = get_symbol_end ();
+  endc = get_symbol_name (&name);
 
   csect = symbol_find_or_make (name);
 
-  *input_line_pointer = endc;
+  (void) restore_line_pointer (endc);
 
   sym = symbol_make (".bs");
   S_SET_SEGMENT (sym, now_seg);
@@ -4881,12 +4867,11 @@ ppc_tc (int ignore ATTRIBUTE_UNUSED)
 	return;
       }
 
-    name = input_line_pointer;
-    endc = get_symbol_end ();
+    endc = get_symbol_name (&name);
 
     sym = symbol_find_or_make (name);
 
-    *input_line_pointer = endc;
+    (void) restore_line_pointer (endc);
 
     if (S_IS_DEFINED (sym))
       {
@@ -4952,6 +4937,7 @@ ppc_tc (int ignore ATTRIBUTE_UNUSED)
 static void
 ppc_machine (int ignore ATTRIBUTE_UNUSED)
 {
+  char c;
   char *cpu_string;
 #define MAX_HISTORY 100
   static ppc_cpu_t *cpu_history;
@@ -4959,19 +4945,9 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
 
-  if (*input_line_pointer == '"')
-    {
-      int len;
-      cpu_string = demand_copy_C_string (&len);
-    }
-  else
-    {
-      char c;
-      cpu_string = input_line_pointer;
-      c = get_symbol_end ();
-      cpu_string = xstrdup (cpu_string);
-      *input_line_pointer = c;
-    }
+  c = get_symbol_name (&cpu_string);
+  cpu_string = xstrdup (cpu_string);
+  (void) restore_line_pointer (c);
 
   if (cpu_string != NULL)
     {
@@ -5210,8 +5186,7 @@ ppc_znop (int ignore ATTRIBUTE_UNUSED)
   char *name;
 
   /* Strip out the symbol name.  */
-  symbol_name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&symbol_name);
 
   name = xmalloc (input_line_pointer - symbol_name + 1);
   strcpy (name, symbol_name);
@@ -5220,7 +5195,7 @@ ppc_znop (int ignore ATTRIBUTE_UNUSED)
 
   *input_line_pointer = c;
 
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   /* Look up the opcode in the hash table.  */
   opcode = (const struct powerpc_opcode *) hash_find (ppc_hash, "nop");
@@ -5256,13 +5231,12 @@ ppc_pe_comm (int lcomm)
   symbolS *symbolP;
   offsetT align;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
 
   /* just after name is now '\0'.  */
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       as_bad (_("expected comma after symbol-name: rest of line ignored."));
@@ -5387,15 +5361,14 @@ ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
   segT sec;
   int align;
 
-  section_name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&section_name);
 
   name = xmalloc (input_line_pointer - section_name + 1);
   strcpy (name, section_name);
 
   *input_line_pointer = c;
 
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   exp = 0;
   flags = SEC_NO_FLAGS;
@@ -5543,12 +5516,11 @@ ppc_pe_function (int ignore ATTRIBUTE_UNUSED)
   char endc;
   symbolS *ext_sym;
 
-  name = input_line_pointer;
-  endc = get_symbol_end ();
+  endc = get_symbol_name (&name);
 
   ext_sym = symbol_find_or_make (name);
 
-  *input_line_pointer = endc;
+  (void) restore_line_pointer (endc);
 
   S_SET_DATA_TYPE (ext_sym, DT_FCN << N_BTSHFT);
   SF_SET_FUNCTION (ext_sym);

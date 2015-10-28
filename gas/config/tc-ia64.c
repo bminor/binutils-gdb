@@ -1084,19 +1084,18 @@ obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
-  sym_name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&sym_name);
 
   if (input_line_pointer == sym_name)
     {
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
       as_bad (_("expected symbol name"));
       ignore_rest_of_line ();
       return;
     }
 
   symbolP = symbol_find_or_make (sym_name);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   if ((S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
       && !S_IS_COMMON (symbolP))
@@ -3167,12 +3166,11 @@ dot_radix (int dummy ATTRIBUTE_UNUSED)
 
   if (is_it_end_of_statement ())
     return;
-  radix = input_line_pointer;
-  ch = get_symbol_end ();
+  ch = get_symbol_name (&radix);
   ia64_canonicalize_symbol_name (radix);
   if (strcasecmp (radix, "C"))
     as_bad (_("Radix `%s' unsupported or invalid"), radix);
-  *input_line_pointer = ch;
+  (void) restore_line_pointer (ch);
   demand_empty_rest_of_line ();
 }
 
@@ -3279,11 +3277,12 @@ add_unwind_entry (unw_rec_list *ptr, int sep)
 
   if (sep == ',')
     {
+      char *name;
       /* Parse a tag permitted for the current directive.  */
       int ch;
 
       SKIP_WHITESPACE ();
-      ch = get_symbol_end ();
+      ch = get_symbol_name (&name);
       /* FIXME: For now, just issue a warning that this isn't implemented.  */
       {
 	static int warned;
@@ -3294,7 +3293,7 @@ add_unwind_entry (unw_rec_list *ptr, int sep)
 	    as_warn (_("Tags on unwind pseudo-ops aren't supported, yet"));
 	  }
       }
-      *input_line_pointer = ch;
+      (void) restore_line_pointer (ch);
     }
   if (sep != NOT_A_CHAR)
     demand_empty_rest_of_line ();
@@ -4232,16 +4231,16 @@ static void
 dot_personality (int dummy ATTRIBUTE_UNUSED)
 {
   char *name, *p, c;
+
   if (!in_procedure ("personality"))
     return;
   SKIP_WHITESPACE ();
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   p = input_line_pointer;
   unwind.personality_routine = symbol_find_or_make (name);
   unwind.force_unwind_entry = 1;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   demand_empty_rest_of_line ();
 }
 
@@ -4271,8 +4270,7 @@ dot_proc (int dummy ATTRIBUTE_UNUSED)
   while (1)
     {
       SKIP_WHITESPACE ();
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       p = input_line_pointer;
       if (!*name)
 	as_bad (_("Empty argument of .proc"));
@@ -4295,7 +4293,7 @@ dot_proc (int dummy ATTRIBUTE_UNUSED)
 	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 	}
       *p = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       if (*input_line_pointer != ',')
 	break;
       ++input_line_pointer;
@@ -4529,8 +4527,7 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
       char *name, *p, c;
 
       SKIP_WHITESPACE ();
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       p = input_line_pointer;
       if (!*name)
 	(md.unwind_check == unwind_check_warning
@@ -4552,7 +4549,7 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
 	    as_warn (_("`%s' was not specified with previous .proc"), name);
 	}
       *p = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       if (*input_line_pointer != ',')
 	break;
       ++input_line_pointer;
@@ -4638,12 +4635,11 @@ dot_rot (int type)
   drpp = &md.dynreg[type];
   while (1)
     {
-      start = input_line_pointer;
-      ch = get_symbol_end ();
+      ch = get_symbol_name (&start);
       len = strlen (ia64_canonicalize_symbol_name (start));
       *input_line_pointer = ch;
 
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       if (*input_line_pointer != '[')
 	{
 	  as_bad (_("Expected '['"));
@@ -4769,8 +4765,7 @@ dot_psr (int dummy ATTRIBUTE_UNUSED)
 
   while (1)
     {
-      option = input_line_pointer;
-      ch = get_symbol_end ();
+      ch = get_symbol_name (&option);
       if (strcmp (option, "lsb") == 0)
 	md.flags &= ~EF_IA_64_BE;
       else if (strcmp (option, "msb") == 0)
@@ -4783,7 +4778,7 @@ dot_psr (int dummy ATTRIBUTE_UNUSED)
 	as_bad (_("Unknown psr option `%s'"), option);
       *input_line_pointer = ch;
 
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       if (*input_line_pointer != ',')
 	break;
 
@@ -4806,36 +4801,21 @@ cross_section (int ref, void (*builder) (int), int ua)
   char *start, *end;
   int saved_auto_align;
   unsigned int section_count;
+  char *name;
+  char c;
 
   SKIP_WHITESPACE ();
   start = input_line_pointer;
-  if (*start == '"')
+  c = get_symbol_name (&name);
+  if (input_line_pointer == start)
     {
-      int len;
-      char *name;
-
-      name = demand_copy_C_string (&len);
-      obstack_free(&notes, name);
-      if (!name)
-	{
-	  ignore_rest_of_line ();
-	  return;
-	}
+      as_bad (_("Missing section name"));
+      ignore_rest_of_line ();
+      return;
     }
-  else
-    {
-      char c = get_symbol_end ();
-
-      if (input_line_pointer == start)
-	{
-	  as_bad (_("Missing section name"));
-	  ignore_rest_of_line ();
-	  return;
-	}
-      *input_line_pointer = c;
-    }
+  * input_line_pointer = c;
+  SKIP_WHITESPACE_AFTER_NAME ();
   end = input_line_pointer;
-  SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
       as_bad (_("Comma expected after section name"));
@@ -5068,8 +5048,11 @@ dot_pred_rel (int type)
 	}
       else if (*input_line_pointer == '@')
 	{
-	  char *form = ++input_line_pointer;
-	  char c = get_symbol_end();
+	  char *form;
+	  char c;
+
+	  ++input_line_pointer;
+	  c = get_symbol_name (&form);
 
 	  if (strcmp (form, "mutex") == 0)
 	    type = 'm';
@@ -5077,7 +5060,7 @@ dot_pred_rel (int type)
 	    type = 'c';
 	  else if (strcmp (form, "imply") == 0)
 	    type = 'i';
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	}
       else
 	{
@@ -5215,8 +5198,7 @@ dot_entry (int dummy ATTRIBUTE_UNUSED)
 
   do
     {
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
 
       err = hash_insert (md.entry_hash, S_GET_NAME (symbolP), (void *) symbolP);
@@ -5225,7 +5207,7 @@ dot_entry (int dummy ATTRIBUTE_UNUSED)
 		  name, err);
 
       *input_line_pointer = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       c = *input_line_pointer;
       if (c == ',')
 	{
@@ -7748,8 +7730,7 @@ ia64_unrecognized_line (int ch)
 	   recognize labels.  */
 	if (is_name_beginner (*input_line_pointer))
 	  {
-	    s = input_line_pointer;
-	    c = get_symbol_end ();
+	    c = get_symbol_name (&s);
 	  }
 	else if (LOCAL_LABELS_FB
 		 && ISDIGIT (*input_line_pointer))
@@ -10720,12 +10701,11 @@ md_assemble (char *str)
 
   /* extract the opcode (mnemonic):  */
 
-  mnemonic = input_line_pointer;
-  ch = get_symbol_end ();
+  ch = get_symbol_name (&mnemonic);
   pdesc = (struct pseudo_opcode *) hash_find (md.pseudo_hash, mnemonic);
   if (pdesc)
     {
-      *input_line_pointer = ch;
+      (void) restore_line_pointer (ch);
       (*pdesc->handler) (pdesc->arg);
       goto done;
     }
@@ -10733,7 +10713,7 @@ md_assemble (char *str)
   /* Find the instruction descriptor matching the arguments.  */
 
   idesc = ia64_find_opcode (mnemonic);
-  *input_line_pointer = ch;
+  (void) restore_line_pointer (ch);
   if (!idesc)
     {
       as_bad (_("Unknown opcode `%s'"), mnemonic);
@@ -11805,8 +11785,7 @@ dot_alias (int section)
   struct hash_control *ahash, *nhash;
   const char *kind;
 
-  name = input_line_pointer;
-  delim = get_symbol_end ();
+  delim = get_symbol_name (&name);
   end_name = input_line_pointer;
   *end_name = delim;
 
@@ -11817,7 +11796,7 @@ dot_alias (int section)
       return;
     }
 
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   if (*input_line_pointer != ',')
     {

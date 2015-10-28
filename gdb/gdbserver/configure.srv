@@ -52,6 +52,8 @@ case "${target}" in
 			srv_regobj="${srv_regobj} arm-with-neon.o"
 			srv_tgtobj="linux-aarch64-low.o aarch64-linux-hw-point.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
+			srv_tgtobj="$srv_tgtobj aarch64-linux.o"
+			srv_tgtobj="$srv_tgtobj aarch64-insn.o"
 			srv_tgtobj="${srv_tgtobj} $srv_linux_obj"
 			srv_xmlfiles="aarch64.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-core.xml"
@@ -60,6 +62,7 @@ case "${target}" in
 			srv_xmlfiles="${srv_xmlfiles} arm-with-neon.xml"
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
+			ipa_obj="linux-aarch64-ipa.o aarch64-ipa.o"
 			;;
   arm*-*-linux*)	srv_regobj="reg-arm.o arm-with-iwmmxt.o"
 			srv_regobj="${srv_regobj} arm-with-vfpv2.o"
@@ -67,6 +70,7 @@ case "${target}" in
 			srv_regobj="${srv_regobj} arm-with-neon.o"
 			srv_tgtobj="$srv_linux_obj linux-arm-low.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
+			srv_tgtobj="${srv_tgtobj} arm.o"
 			srv_xmlfiles="arm-with-iwmmxt.xml"
 			srv_xmlfiles="${srv_xmlfiles} arm-with-vfpv2.xml"
 			srv_xmlfiles="${srv_xmlfiles} arm-with-vfpv3.xml"
@@ -352,6 +356,7 @@ case "${target}" in
   xtensa*-*-linux*)	srv_regobj=reg-xtensa.o
 			srv_tgtobj="$srv_linux_obj linux-xtensa-low.o"
 			srv_linux_regsets=yes
+			srv_linux_thread_db=yes
 			;;
   tilegx-*-linux*)	srv_regobj=reg-tilegx.o
 			srv_regobj="${srv_regobj} reg-tilegx32.o"

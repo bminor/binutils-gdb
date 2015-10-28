@@ -222,15 +222,7 @@ main (int argc, char **argv)
   /* Set up the sysroot directory.  */
   ld_sysroot = get_sysroot (argc, argv);
   if (*ld_sysroot)
-    {
-      if (*TARGET_SYSTEM_ROOT == 0)
-	{
-	  einfo ("%P%F: this linker was not configured to use sysroots\n");
-	  ld_sysroot = "";
-	}
-      else
-	ld_canon_sysroot = lrealpath (ld_sysroot);
-    }
+    ld_canon_sysroot = lrealpath (ld_sysroot);
   if (ld_canon_sysroot)
     ld_canon_sysroot_len = strlen (ld_canon_sysroot);
   else
@@ -289,6 +281,9 @@ main (int argc, char **argv)
   link_info.pei386_auto_import = -1;
   link_info.spare_dynamic_tags = 5;
   link_info.path_separator = ':';
+#ifdef DEFAULT_FLAG_COMPRESS_DEBUG
+  link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
+#endif
 
   ldfile_add_arch ("");
   emulation = get_emulation (argc, argv);

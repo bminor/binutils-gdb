@@ -50,7 +50,7 @@ static int bwl[] =
   RX_Byte,
   RX_Word,
   RX_Long,
-  0 /* Bogus instructions can have a size field set to 3.  */
+  RX_Bad_Size /* Bogus instructions can have a size field set to 3.  */
 };
 
 static int sbwl[] =
@@ -58,15 +58,15 @@ static int sbwl[] =
   RX_SByte,
   RX_SWord,
   RX_Long,
-  0 /* Bogus instructions can have a size field set to 3.  */
+  RX_Bad_Size /* Bogus instructions can have a size field set to 3.  */
 };
 
-static int ubwl[] =
+static int ubw[] =
 {
   RX_UByte,
   RX_UWord,
-  RX_Long,
-  0 /* Bogus instructions can have a size field set to 3.  */
+  RX_Bad_Size,/* Bogus instructions can have a size field set to 2.  */
+  RX_Bad_Size /* Bogus instructions can have a size field set to 3.  */
 };
 
 static int memex[] =
@@ -132,7 +132,7 @@ static int dsp3map[] = { 8, 9, 10, 3, 4, 5, 6, 7 };
 
 #define BWL(sz)     rx->op[0].size = rx->op[1].size = rx->op[2].size = rx->size = bwl[sz]
 #define sBWL(sz)    rx->op[0].size = rx->op[1].size = rx->op[2].size = rx->size = sbwl[sz]
-#define uBWL(sz)    rx->op[0].size = rx->op[1].size = rx->op[2].size = rx->size = ubwl[sz]
+#define uBW(sz)     rx->op[0].size = rx->op[1].size = rx->op[2].size = rx->size = ubw[sz]
 #define P(t, n)	    rx->op[n].size = (t!=3) ? RX_UByte : RX_Long;
 
 #define F(f) store_flags(rx, f)
@@ -4085,7 +4085,7 @@ rx_decode_opcode (unsigned long pc AU,
                   }
                 SYNTAX("movu%s	%1, %0");
 #line 355 "rx-decode.opc"
-                ID(mov); uBWL(s); SD(ss, rsrc, s); DR(rdst); F_____;
+                ID(mov); uBW(s); SD(ss, rsrc, s); DR(rdst); F_____;
 
               }
             break;
@@ -6171,7 +6171,7 @@ rx_decode_opcode (unsigned long pc AU,
                   }
                 SYNTAX("movu%s	%1, %0");
 #line 352 "rx-decode.opc"
-                ID(mov); uBWL(w); DR(dst); SIs(src, dsp*4+a*2+b, w); F_____;
+                ID(mov); uBW(w); DR(dst); SIs(src, dsp*4+a*2+b, w); F_____;
 
               }
             break;
@@ -9887,7 +9887,7 @@ rx_decode_opcode (unsigned long pc AU,
                         }
                       SYNTAX("movu%s	%1, %0");
 #line 358 "rx-decode.opc"
-                      ID(mov); uBWL (sz); DR(rdst); F_____;
+                      ID(mov); uBW (sz); DR(rdst); F_____;
                        OP(1, p ? RX_Operand_Predec : RX_Operand_Postinc, rsrc, 0);
 
                     /*----------------------------------------------------------------------*/
@@ -13586,7 +13586,7 @@ rx_decode_opcode (unsigned long pc AU,
                         }
                       SYNTAX("movu%s	[%1, %2], %0");
 #line 341 "rx-decode.opc"
-                      ID(movbi); uBWL(sz); DR(rdst); SRR(isrc); S2R(bsrc); F_____;
+                      ID(movbi); uBW(sz); DR(rdst); SRR(isrc); S2R(bsrc); F_____;
 
                     }
                   break;

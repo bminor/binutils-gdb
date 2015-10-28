@@ -976,7 +976,7 @@ gdbsim_wait (struct target_ops *ops,
 	     ptid_t ptid, struct target_waitstatus *status, int options)
 {
   struct sim_inferior_data *sim_data;
-  static RETSIGTYPE (*prev_sigint) ();
+  static sighandler_t prev_sigint;
   int sigrc = 0;
   enum sim_stop reason = sim_running;
 

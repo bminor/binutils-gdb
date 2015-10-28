@@ -983,7 +983,7 @@ rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch, const gdb_byte *ldi_buf,
 
   obstack_grow_str0 (&obstack, "</library-list-aix>\n");
 
-  buf = obstack_finish (&obstack);
+  buf = (const char *) obstack_finish (&obstack);
   len_avail = strlen (buf);
   if (offset >= len_avail)
     len= 0;
@@ -1018,7 +1018,7 @@ rs6000_aix_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 	   bfd_errmsg (bfd_get_error ()));
   ldinfo_size = bfd_get_section_size (ldinfo_sec);
 
-  ldinfo_buf = xmalloc (ldinfo_size);
+  ldinfo_buf = (gdb_byte *) xmalloc (ldinfo_size);
   cleanup = make_cleanup (xfree, ldinfo_buf);
 
   if (! bfd_get_section_contents (core_bfd, ldinfo_sec,

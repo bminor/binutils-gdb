@@ -203,11 +203,11 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  && addr != 0)
 	{
 	  ULONGEST string_length;
-	  void *buffer;
+	  gdb_byte *buffer;
 
 	  if (want_space)
 	    fputs_filtered (" ", stream);
-	  buffer = xmalloc (length_size);
+	  buffer = (gdb_byte *) xmalloc (length_size);
 	  read_memory (addr + length_pos, buffer, length_size);
 	  string_length = extract_unsigned_integer (buffer, length_size,
 						    byte_order);
@@ -239,9 +239,9 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  if (vt_address && options->vtblprint)
 	    {
 	      struct value *vt_val;
-	      struct symbol *wsym = (struct symbol *) NULL;
+	      struct symbol *wsym = NULL;
 	      struct type *wtype;
-	      struct block *block = (struct block *) NULL;
+	      struct block *block = NULL;
 	      struct field_of_this_result is_this_fld;
 
 	      if (want_space)
@@ -768,7 +768,7 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 	      gdb_byte *buf;
 	      struct cleanup *back_to;
 
-	      buf = xmalloc (TYPE_LENGTH (baseclass));
+	      buf = (gdb_byte *) xmalloc (TYPE_LENGTH (baseclass));
 	      back_to = make_cleanup (xfree, buf);
 
 	      base_valaddr = buf;

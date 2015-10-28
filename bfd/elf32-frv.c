@@ -4640,7 +4640,7 @@ _frvfdpic_relax_tls_entries (struct frvfdpic_relocs_info *entry,
 			    + 32768) < (bfd_vma)65536))
 	  || (entry->symndx != -1
 	      && (elf_hash_table (dinfo->info)->tls_sec->size
-		  + abs (entry->addend) < 32768 + FRVFDPIC_TLS_BIAS))))
+		  + entry->addend < 32768 + FRVFDPIC_TLS_BIAS))))
     {
       if (! changed)
 	{
@@ -5442,7 +5442,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (bfd_link_executable (info))
+      if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);

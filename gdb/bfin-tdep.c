@@ -292,7 +292,7 @@ bfin_frame_cache (struct frame_info *this_frame, void **this_cache)
   int i;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct bfin_frame_cache *) *this_cache;
 
   cache = bfin_alloc_frame_cache ();
   *this_cache = cache;
@@ -566,8 +566,8 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
 static int
 bfin_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
-  if (reg > ARRAY_SIZE (map_gcc_gdb))
-    return 0;
+  if (reg < 0 || reg >= ARRAY_SIZE (map_gcc_gdb))
+    return -1;
 
   return map_gcc_gdb[reg];
 }

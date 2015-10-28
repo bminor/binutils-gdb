@@ -1,3 +1,342 @@
+2015-10-27  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-arm.c (selected_cpu_name): Increase length of array to
+	accomodate "Samsung Exynos M1".
+	(arm_parse_cpu): Add assertion and length check to prevent
+	overfilling selected_cpu_name.
+
+2015-10-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (PUSH_1X_WORKAROUND): Delete.
+	(OPTION_SILICON_ERRATA): Define.
+	(OPTION_SILICON_WARN): Define.
+	(md_parse_opton): Handle silicon errata options.
+	(md_longopts): Add silicon errata options.
+	(ms_show_usage): Report silicon errata options.
+	(msp430_srcoperand): Handle silicon errata.
+	(msp430_operands): Likewise. Improve nop insertion.
+	(msp430_fix_adjustable): Update warning generation.
+	* doc/c-msp430.texi: Document silicon errata options.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac: Properly check
+	--enable-compressed-debug-sections={yes,all}.
+	* configure: Regenerated.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19109
+	* configure.ac: Handle --enable-compressed-debug-sections=*,gas,*.
+	* configure: Regenerated.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Handle
+	BFD_RELOC_X86_64_GOTPCRELX and BFD_RELOC_X86_64_REX_GOTPCRELX.
+	(tc_gen_reloc): Likewise.
+	(i386_validate_fix): Generate BFD_RELOC_X86_64_GOTPCRELX or
+	BFD_RELOC_X86_64_REX_GOTPCRELX if fx_tcbit2 is set.
+	* config/tc-i386.h (TC_FORCE_RELOCATION_LOCAL): Also return
+	true for BFD_RELOC_X86_64_GOTPCRELX and
+	BFD_RELOC_X86_64_REX_GOTPCRELX.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Handle
+	BFD_RELOC_386_GOT32X.
+	(tc_gen_reloc): Likewise.
+	(match_template): Force 0x8b encoding for "mov foo@GOT, %eax".
+	(output_disp): Check for "call/jmp *mem", "mov mem, %reg",
+	"test %reg, mem" and "binop mem, %reg" where binop is one of
+	adc, add, and, cmp, or, sbb, sub, xor instructions.  Set
+	fx_tcbit if the REX prefix is generated.  Set fx_tcbit2 if
+	BFD_RELOC_386_GOT32X should be generated.
+	(i386_validate_fix): Generate BFD_RELOC_386_GOT32X if fx_tcbit2
+	is set.
+
+2015-10-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19109
+	* configure.ac: Restore --enable-compressed-debug-sections, with
+	options of all, none or gas.
+	Do not enable compressed debug sections by default for x86 Linux
+	targets.
+	* configure: Regenerate.
+
+2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19109
+	* NEWS: Update --enable-compressed-debug-sections=.
+	* configure.ac: Remove --enable-compressed-debug-sections.
+	(DEFAULT_FLAG_COMPRESS_DEBUG): Check
+	--enable-compressed-debug-sections={all,gas} instead of
+	--enable-compressed-debug-sections.  For x86 Linux targets,
+	default to compressing debug sections.
+	* configure: Regenerated.
+
+2015-10-19  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19109
+	* configure.ac: Add option --enable-compressed-debug-sections.
+	This sets the default behaviour for compressing debug sections.
+	* as.c (flag_compress_debug): Define and initialise to
+	COMPRESS_DEBUG_GABI_ZLIB if DEFAULT_COMPRESS_DEBUG is set.
+	(show_usage): Indicate whether --no-compress-debug-sections
+	or --compress-debug-sections is the default.
+	* config/tc-i386.c (flag_compress_debug): Delete definition.
+	* doc/as.texinfo (--nocompress-debug-sectionas): Update
+	description.
+	* NEWS: Announce the new feature.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2015-10-12  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (msp430_mcu_names): Rename to
+	msp430_mcu_data.  Add fields for the ISA and hardware multiply
+	support.  Update with information from the latest devices.csv
+	file.
+	(md_parse_option): Make use of the new array.
+
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-avr.c (avr_output_property_record): Fix overwrite bug
+	for align and fill records.
+	(avr_handle_align): Record fill information for align frags.
+	(create_record_for_frag): Add next frag assertion, use correct
+	address for align records.
+
+2015-10-10  Alan Modra  <amodra@gmail.com>
+
+	PR gas/19113
+	* read.c (next_char_of_string): Mask char after escape.  Use
+	CHAR_MASK rather than 0xff.
+
+2015-10-07  Yao Qi  <yao.qi@linaro.org>
+
+	* config/tc-aarch64.c (md_begin): Access field 'name' rather
+	than 'template'.
+
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * config/tc-arc.c: Revamped file for ARC support.
+        * config/tc-arc.h: Likewise.
+        * doc/as.texinfo: Add new ARC options.
+        * doc/c-arc.texi: Likewise.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (s_tlsdescadd): New.
+	(s_tlsdescldr): New.
+	(md_pseudo_table): Handle tlsdescadd and tlsdescldr pseudo ops.
+	(reloc_table): Add entries for BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC and
+	BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC.
+	(process_movw_reloc_info): Support AARCH64_TLSDESC_OFF_G1 and
+	AARCH64_TLSDESC_OFF_G0_NC.
+	(md_apply_fix): Likewise.
+	(aarch64_force_relocation): Likewise.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): Add two entries for
+	gottprel_g0_nc and gottprel_g1.
+	(process_movw_reloc_info): Add support.
+	(md_apply_fix): Likewise.
+	(aarch64_force_relocation): Likewise.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifier tlsgd_g0_nc.
+	(process_movw_reloc_info): Support BFD_RELOC_AARCH64_TLSGD_MOVW_G1.
+	(md_apply_fix): Likewise.
+	(aarch64_force_relocation): Likewise.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifier tlsgd_g1.
+	(process_movw_reloc_info): Support BFD_RELOC_AARCH64_TLSGD_MOVW_G1.
+	(md_apply_fix): Likewise.
+	(aarch64_force_relocation): Likewise.
+
+2015-10-02  Renlin Li <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifier
+	gotoff_g0_nc.
+	(process_movw_reloc_info): Support gotoff_g0_nc.
+	(md_apply_fix): Likewise.
+
+2015-10-02  Renlin Li  <renlin.li@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): New relocation modifier
+	gotoff_g1.
+	(process_movw_reloc_info): Support newly added modifier.
+	(md_apply_fix): Likewise.
+
+2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* doc/c-s390.texi: Add documentation.
+	Add missing code markup.
+	* config/tc-s390.c (current_flags): New static variable.
+	(s390_parse_cpu): Parse cpu flags a la "+nohtm" etc.
+	(s390_setup_opcodes): Use cpu flags to determine the set of opcodes.
+	Fix indentation.
+	(md_parse_option): Call s390_parse_cpu with the new signature.
+	(s390_machine): Likewise.
+	Keep track of current_flags.
+	Simplify code a bit.
+	undefine MAX_HISTORY at end of function.
+	(s390_machinemode): undefine MAX_HISTORY at end of function.
+	Update an error message.
+
+2015-08-11  Peter Zotov  <whitequark@whitequark.org>
+
+	PR ld/18759
+	* config/tc-or1k.c (tc_gen_reloc): Correct computation of PC
+	relative relocs.
+	* config/tc-or1k.h (GAS_CGEN_PRCEL_R_TYPE): Delete.
+
+2015-09-25  Ryo ONODERA  <ryo_on@yk.rim.or.jp>
+
+	PR 18994
+	* configure.ac (nds32): Don't use bash == in tests.
+	* configure: Regenerate.
+
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ppc.c (insn_validate): Cast PPC_OPSHIFT_INV to an int.
+
+2015-09-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (nop_7): Recode using MAX.
+
+2015-09-05  Chen Gang  <gang.chen.5i5j@gmail.com>
+
+	* config/tc-avr.c (md_section_align): Append UL for -1 to avoid
+	the latest gcc's warning.
+
+2015-08-27  Alan Modra  <amodra@gmail.com>
+
+	PR gas/18581
+	* config/tc-aarch64.h (TC_START_LABEL): Redefine.
+	* config/tc-arm.c (tc_start_label_without_colon): Delete params.
+	Use input_line_pointer directly.
+	* config/tc-arm.h (TC_START_LABEL): Redefine.
+	(TC_START_LABEL_WITHOUT_COLON): Redefine.
+	(tc_start_label_without_colon): Update prototype.
+	* config/tc-bfin.c (bfin_start_label): Delete ptr param.  Check
+	for NUL instead.
+	* config/tc-bfin.h (bfin_start_label): Update prototype.
+	(TC_START_LABEL): Redefine.
+	* config/tc-d30v.h (TC_START_LABEL): Redefine.
+	* config/tc-fr30.c (restore_colon): Rewrite.
+	(fr30_is_colon_insn): Add nul_char param.  Return int.  Bump
+	i_l_p over quote.  Update restore_colon calls.
+	* config/tc-fr30.h (TC_START_LABEL): Redefine.
+	(fr30_is_colon_insn): Update prototype.
+	* config/tc-m32c.c (restore_colon, m32c_is_colon_insn): As above.
+	* config/tc-m32c.h (TC_START_LABEL): Redefine.
+	(m32c_is_colon_insn): Update prototype.
+	* config/tc-m32r.h (TC_START_LABEL): Redefine.
+	* config/tc-mep.h (TC_START_LABEL): Redefine.
+	* config/tc-nds32.h (TC_START_LABEL): Redefine.
+	* config/tc-tic54x.c (tic54x_start_label): Replace params with
+	nul_char and next_char.  Step over trailing quote.
+	* config/tc-tic54x.h (TC_START_LABEL_WITHOUT_COLON): Redefine.
+	(tic54x_start_label): Update prototype.
+	* read.c (TC_START_LABEL): Redefine.  Update invocation.
+	(TC_START_LABEL_WITHOUT_COLON): Update invocation.
+	* config/tc-nios2.c (s_nios2_set): Save initial input_line_pointer
+	and restore if calling s_set.  Don't restore delim again.
+
+2015-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR gas/18581
+	* config/tc-mn10200.c (md_assemble <mdr>): Move restore_line_pointer
+	call to where input line used to be restored.
+	* config/tc-mn10300.c (md_assemble <usp>): Remove redundant input
+	line restore.
+	* config/tc-tilepro.c (parse_reg_expression): Add regname var.
+
+2015-08-26  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18842
+	* configure.ac (AS_CHECK_DECLS): Add asprintf.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2015-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (priv_reg_table): New privileged register
+	%pmcdper.
+
+2015-08-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/18581
+	* expr.c (get_symbol_end): Rename to get_symbol_name.  Add a
+	return parameter pointing to the start of the symbol.  Allow
+	symbol names enclosed in double quotes.
+	(restore_line_pointer): New function.  Replace the NUL character
+	inserted into the input stream with the given character.  If the
+	character was a double quote, advance the input pointer.
+	* expr.h (get_symbol_end): Delete.
+	(get_symbol_name): Add prototype.
+	(restore_line_pointer): Prototype.
+	* read.h (SKIP_WHITESPACE_AFTER_NAME): New macro.
+	* doc/as.texinfo (Symbol Intro): Document that symbol names can
+	now be enclosed in double quotes.
+	* cond.c (s_ifdef): Replace get_symbol_end with get_symbol_name.
+	Use restore_line_pointer to replace the NUL in the input stream.
+	Use SKIP_WHITESPACE_AFTER_NAME to skip past the end of a symbol.
+	Check for the use of double quoted symbol names.
+	* expr.c: Likewise.
+	* config/obj-aout.c: Likewise.
+	* config/obj-coff-seh.c: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/obj-elf.c: Likewise.
+	* config/obj-evax.c: Likewise.
+	* config/obj-macho.c: Likewise.
+	* config/obj-som.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i386-intel.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-iq2000.c: Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-microblaze.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-mmix.c: Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-nios2.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-score.c: Likewise.
+	* config/tc-score7.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-tic6x.c: Likewise.
+	* config/tc-tilegx.c: Likewise.
+	* config/tc-tilepro.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-xtensa.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* dw2gencfi.c: Likewise.
+	* dwarf2dbgc.: Likewise.
+	* ecoff.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+
 2015-08-19  Jiong Wang  <jiong.wang@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): New relocation types support for

@@ -77,7 +77,7 @@ s_ifdef (int test_defined)
   SKIP_WHITESPACE ();
   name = input_line_pointer;
 
-  if (!is_name_beginner (*name))
+  if (!is_name_beginner (*name) && *name != '"')
     {
       as_bad (_("invalid identifier for \".ifdef\""));
       obstack_1grow (&cond_obstack, 0);
@@ -85,9 +85,9 @@ s_ifdef (int test_defined)
       return;
     }
 
-  c = get_symbol_end ();
+  c = get_symbol_name (& name);
   symbolP = symbol_find (name);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   initialize_cframe (&cframe);
 

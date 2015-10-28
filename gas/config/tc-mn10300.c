@@ -337,13 +337,13 @@ get_register_name (expressionS *           expressionP,
   char c;
 
   /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
+  start = input_line_pointer;
 
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   reg_number = reg_name_search (table, table_length, name);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   /* Look to see if it's in the register table.  */
   if (reg_number >= 0)
@@ -409,13 +409,13 @@ other_register_name (expressionS *expressionP)
   char c;
 
   /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
+  start = input_line_pointer;
 
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   reg_number = reg_name_search (other_registers, ARRAY_SIZE (other_registers), name);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   /* Look to see if it's in the register table.  */
   if (reg_number == 0
@@ -1346,17 +1346,17 @@ md_assemble (char *str)
 	    }
 	  else if (operand->flags & MN10300_OPERAND_SP)
 	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
+	      char *start;
+	      char c = get_symbol_name (&start);
 
 	      if (strcasecmp (start, "sp") != 0)
 		{
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_RREG)
@@ -1397,92 +1397,92 @@ md_assemble (char *str)
 	    }
 	  else if (operand->flags & MN10300_OPERAND_FPCR)
 	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
+	      char *start;
+	      char c = get_symbol_name (&start);
 
 	      if (strcasecmp (start, "fpcr") != 0)
 		{
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_USP)
 	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
+	      char *start;
+	      char c = get_symbol_name (&start);
 
 	      if (strcasecmp (start, "usp") != 0)
 		{
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_SSP)
 	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
+	      char *start;
+	      char c = get_symbol_name (&start);
 
 	      if (strcasecmp (start, "ssp") != 0)
 		{
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_MSP)
 	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
+	      char *start;
+	      char c = get_symbol_name (&start);
 
 	      if (strcasecmp (start, "msp") != 0)
 		{
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_PC)
 	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
+	      char *start;
+	      char c = get_symbol_name (&start);
 
 	      if (strcasecmp (start, "pc") != 0)
 		{
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_EPSW)
 	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
+	      char *start;
+	      char c = get_symbol_name (&start);
 
 	      if (strcasecmp (start, "epsw") != 0)
 		{
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_PLUS)
@@ -1498,32 +1498,32 @@ md_assemble (char *str)
 	    }
 	  else if (operand->flags & MN10300_OPERAND_PSW)
 	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
+	      char *start;
+	      char c = get_symbol_name (&start);
 
 	      if (strcasecmp (start, "psw") != 0)
 		{
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_MDR)
 	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
+	      char *start;
+	      char c = get_symbol_name (&start);
 
 	      if (strcasecmp (start, "mdr") != 0)
 		{
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      goto keep_going;
 	    }
 	  else if (operand->flags & MN10300_OPERAND_REG_LIST)
@@ -1554,57 +1554,56 @@ md_assemble (char *str)
 		  if (*input_line_pointer == ',')
 		    input_line_pointer++;
 
-		  start = input_line_pointer;
-		  c = get_symbol_end ();
+		  c = get_symbol_name (&start);
 
 		  if (strcasecmp (start, "d2") == 0)
 		    {
 		      value |= 0x80;
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		    }
 		  else if (strcasecmp (start, "d3") == 0)
 		    {
 		      value |= 0x40;
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		    }
 		  else if (strcasecmp (start, "a2") == 0)
 		    {
 		      value |= 0x20;
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		    }
 		  else if (strcasecmp (start, "a3") == 0)
 		    {
 		      value |= 0x10;
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		    }
 		  else if (strcasecmp (start, "other") == 0)
 		    {
 		      value |= 0x08;
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		    }
 		  else if (HAVE_AM33
 			   && strcasecmp (start, "exreg0") == 0)
 		    {
 		      value |= 0x04;
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		    }
 		  else if (HAVE_AM33
 			   && strcasecmp (start, "exreg1") == 0)
 		    {
 		      value |= 0x02;
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		    }
 		  else if (HAVE_AM33
 			   && strcasecmp (start, "exother") == 0)
 		    {
 		      value |= 0x01;
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		    }
 		  else if (HAVE_AM33
 			   && strcasecmp (start, "all") == 0)
 		    {
 		      value |= 0xff;
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		    }
 		  else
 		    {

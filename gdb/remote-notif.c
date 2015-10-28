@@ -117,7 +117,7 @@ static void
 remote_async_get_pending_events_handler (gdb_client_data data)
 {
   gdb_assert (non_stop);
-  remote_notif_process (data, NULL);
+  remote_notif_process ((struct remote_notif_state *) data, NULL);
 }
 
 /* Remote notification handler.  Parse BUF, queue notification and
@@ -230,7 +230,7 @@ notif_event_xfree (struct notif_event *event)
 static void
 do_notif_event_xfree (void *arg)
 {
-  notif_event_xfree (arg);
+  notif_event_xfree ((struct notif_event *) arg);
 }
 
 /* Return an allocated remote_notif_state.  */
@@ -238,7 +238,7 @@ do_notif_event_xfree (void *arg)
 struct remote_notif_state *
 remote_notif_state_allocate (void)
 {
-  struct remote_notif_state *notif_state = xzalloc (sizeof (*notif_state));
+  struct remote_notif_state *notif_state = XCNEW (struct remote_notif_state);
 
   notif_state->notif_queue = QUEUE_alloc (notif_client_p, NULL);
 

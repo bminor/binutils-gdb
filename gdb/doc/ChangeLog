@@ -1,3 +1,72 @@
+2015-10-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Frames): Remove 'frame' and 'select-frame'
+	description.
+	(Frame Filter Management): Move to later in the 'Examining the
+	Stack' chapter.
+	(Selection): Add entry for 'select-frame'.
+
+2015-09-25  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Process Record and Replay): Fix syntax of
+	"record instruction-history begin, end" and
+	"record function-call-history begin, end".
+
+2015-09-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Specifying Source Directories): Fix
+	substitute-path example.
+
+2015-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (All-Stop Mode): Describe new scheduler-locking mode.
+
+2015-09-15  Pedro Alves  <palves@redhat.com>
+
+	PR remote/18965
+	* gdb.texinfo (Stop Reply Packets): Revert previous change to
+	the vforkdone description.
+
+2015-09-15  Pedro Alves  <palves@redhat.com>
+
+	PR remote/18965
+	* gdb.texinfo (Stop Reply Packets): Explain that vforkdone's 'r'
+	part indicates the thread ID of the parent process.
+
+2015-09-15  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (General Query Packets): Add vContSupported to
+	tables of 'gdbfeatures' and 'stub features' supported in the
+	qSupported packet, as well as to the list containing stub
+	feature details.
+
+2015-09-11  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.texinfo (Remote Configuration): Add exec event
+	feature to table of packet settings.
+	(Stop Reply Packets): Add exec events to the list of stop
+	reasons.
+	(General Query Packets): Add exec events to tables of
+	'gdbfeatures' and 'stub features' supported in the qSupported
+	packet, as well as to the list containing stub feature
+	details.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Remote Configuration): Document the "set/show
+	remote multiprocess-extensions-packet" commands.
+
+2015-08-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Embedded Processors) <ARM>: Remove references to RDI.
+	<M32R>: Remove references to M32R/D.
+	<M68K>: Remove references to target dbug.
+	<MIPS Embedded>: Remove references to target r3900 and target
+	array.
+	<PowerPC Embedded>: Remove references to target dink32 and target
+	ppcbug, target sds
+	<PA, Sparclet, Sparclite, Z8000>: Delete nodes.
+
 2015-08-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (GDB Files): Add 'File Caching' menu entry.

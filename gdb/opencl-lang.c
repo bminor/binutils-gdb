@@ -69,7 +69,7 @@ static struct gdbarch_data *opencl_type_data;
 static struct type **
 builtin_opencl_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, opencl_type_data);
+  return (struct type **) gdbarch_data (gdbarch, opencl_type_data);
 }
 
 /* Returns the corresponding OpenCL vector type from the given type code,

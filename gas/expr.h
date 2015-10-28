@@ -170,7 +170,8 @@ extern LITTLENUM_TYPE generic_bignum[];
 
 typedef char operator_rankT;
 
-extern char get_symbol_end (void);
+extern char get_symbol_name (char **);
+extern char restore_line_pointer (char);
 extern void expr_begin (void);
 extern void expr_set_precedence (void);
 extern void expr_set_rank (operatorT, operator_rankT);

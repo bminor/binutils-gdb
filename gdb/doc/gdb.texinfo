@@ -5836,17 +5836,20 @@ locking the OS scheduler to allow only a single thread to run.
 @item set scheduler-locking @var{mode}
 @cindex scheduler locking mode
 @cindex lock scheduler
-Set the scheduler locking mode.  If it is @code{off}, then there is no
-locking and any thread may run at any time.  If @code{on}, then only the
-current thread may run when the inferior is resumed.  The @code{step}
-mode optimizes for single-stepping; it prevents other threads 
-from preempting the current thread while you are stepping, so that 
-the focus of debugging does not change unexpectedly.
-Other threads never get a chance to run when you step, and they are
-completely free to run when you use commands
-like @samp{continue}, @samp{until}, or @samp{finish}.  However, unless another
-thread hits a breakpoint during its timeslice, @value{GDBN} does not change
-the current thread away from the thread that you are debugging.
+Set the scheduler locking mode.  It applies to normal execution,
+record mode, and replay mode.  If it is @code{off}, then there is no
+locking and any thread may run at any time.  If @code{on}, then only
+the current thread may run when the inferior is resumed.  The
+@code{step} mode optimizes for single-stepping; it prevents other
+threads from preempting the current thread while you are stepping, so
+that the focus of debugging does not change unexpectedly.  Other
+threads never get a chance to run when you step, and they are
+completely free to run when you use commands like @samp{continue},
+@samp{until}, or @samp{finish}.  However, unless another thread hits a
+breakpoint during its timeslice, @value{GDBN} does not change the
+current thread away from the thread that you are debugging.  The
+@code{replay} mode behaves like @code{off} in record mode and like
+@code{on} in replay mode.
 
 @item show scheduler-locking
 Display the current scheduler locking mode.
@@ -6762,7 +6765,7 @@ Disassembles ten more instructions after the last disassembly.
 @item record instruction-history -
 Disassembles ten more instructions before the last disassembly.
 
-@item record instruction-history @var{begin} @var{end}
+@item record instruction-history @var{begin}, @var{end}
 Disassembles instructions beginning with instruction number
 @var{begin} until instruction number @var{end}.  The instruction
 number @var{end} is included.
@@ -6834,7 +6837,7 @@ Prints ten more functions after the last ten-line print.
 @item record function-call-history -
 Prints ten more functions before the last ten-line print.
 
-@item record function-call-history @var{begin} @var{end}
+@item record function-call-history @var{begin}, @var{end}
 Prints functions beginning with function number @var{begin} until
 function number @var{end}.  The function number @var{end} is included.
 @end table
@@ -6947,23 +6950,6 @@ has no stack frame, @value{GDBN} nevertheless regards it as though
 it had a separate frame, which is numbered zero as usual, allowing
 correct tracing of the function call chain.  However, @value{GDBN} has
 no provision for frameless functions elsewhere in the stack.
-
-@table @code
-@kindex frame@r{, command}
-@cindex current stack frame
-@item frame @r{[}@var{framespec}@r{]}
-The @code{frame} command allows you to move from one stack frame to another,
-and to print the stack frame you select.  The @var{framespec} may be either the
-address of the frame or the stack frame number.  Without an argument,
-@code{frame} prints the current stack frame.
-
-@kindex select-frame
-@cindex selecting frame silently
-@item select-frame
-The @code{select-frame} command allows you to move from one stack frame
-to another without printing the frame.  This is the silent version of
-@code{frame}.
-@end table
 
 @node Backtrace
 @section Backtraces
@@ -7164,6 +7150,156 @@ Display an absolute filename.
 Show the current way to display filenames.
 @end table
 
+@node Selection
+@section Selecting a Frame
+
+Most commands for examining the stack and other data in your program work on
+whichever stack frame is selected at the moment.  Here are the commands for
+selecting a stack frame; all of them finish by printing a brief description
+of the stack frame just selected.
+
+@table @code
+@kindex frame@r{, selecting}
+@kindex f @r{(@code{frame})}
+@item frame @var{n}
+@itemx f @var{n}
+Select frame number @var{n}.  Recall that frame zero is the innermost
+(currently executing) frame, frame one is the frame that called the
+innermost one, and so on.  The highest-numbered frame is the one for
+@code{main}.
+
+@item frame @var{stack-addr} [ @var{pc-addr} ]
+@itemx f @var{stack-addr} [ @var{pc-addr} ]
+Select the frame at address @var{stack-addr}.  This is useful mainly if the
+chaining of stack frames has been damaged by a bug, making it
+impossible for @value{GDBN} to assign numbers properly to all frames.  In
+addition, this can be useful when your program has multiple stacks and
+switches between them.  The optional @var{pc-addr} can also be given to
+specify the value of PC for the stack frame.
+
+@kindex up
+@item up @var{n}
+Move @var{n} frames up the stack; @var{n} defaults to 1.  For positive
+numbers @var{n}, this advances toward the outermost frame, to higher
+frame numbers, to frames that have existed longer.
+
+@kindex down
+@kindex do @r{(@code{down})}
+@item down @var{n}
+Move @var{n} frames down the stack; @var{n} defaults to 1.  For
+positive numbers @var{n}, this advances toward the innermost frame, to
+lower frame numbers, to frames that were created more recently.
+You may abbreviate @code{down} as @code{do}.
+@end table
+
+All of these commands end by printing two lines of output describing the
+frame.  The first line shows the frame number, the function name, the
+arguments, and the source file and line number of execution in that
+frame.  The second line shows the text of that source line.
+
+@need 1000
+For example:
+
+@smallexample
+@group
+(@value{GDBP}) up
+#1  0x22f0 in main (argc=1, argv=0xf7fffbf4, env=0xf7fffbfc)
+    at env.c:10
+10              read_input_file (argv[i]);
+@end group
+@end smallexample
+
+After such a printout, the @code{list} command with no arguments
+prints ten lines centered on the point of execution in the frame.
+You can also edit the program at the point of execution with your favorite
+editing program by typing @code{edit}.
+@xref{List, ,Printing Source Lines},
+for details.
+
+@table @code
+@kindex select-frame
+@item select-frame
+The @code{select-frame} command is a variant of @code{frame} that does
+not display the new frame after selecting it.  This command is
+intended primarily for use in @value{GDBN} command scripts, where the
+output might be unnecessary and distracting.
+
+@kindex down-silently
+@kindex up-silently
+@item up-silently @var{n}
+@itemx down-silently @var{n}
+These two commands are variants of @code{up} and @code{down},
+respectively; they differ in that they do their work silently, without
+causing display of the new frame.  They are intended primarily for use
+in @value{GDBN} command scripts, where the output might be unnecessary and
+distracting.
+@end table
+
+@node Frame Info
+@section Information About a Frame
+
+There are several other commands to print information about the selected
+stack frame.
+
+@table @code
+@item frame
+@itemx f
+When used without any argument, this command does not change which
+frame is selected, but prints a brief description of the currently
+selected stack frame.  It can be abbreviated @code{f}.  With an
+argument, this command is used to select a stack frame.
+@xref{Selection, ,Selecting a Frame}.
+
+@kindex info frame
+@kindex info f @r{(@code{info frame})}
+@item info frame
+@itemx info f
+This command prints a verbose description of the selected stack frame,
+including:
+
+@itemize @bullet
+@item
+the address of the frame
+@item
+the address of the next frame down (called by this frame)
+@item
+the address of the next frame up (caller of this frame)
+@item
+the language in which the source code corresponding to this frame is written
+@item
+the address of the frame's arguments
+@item
+the address of the frame's local variables
+@item
+the program counter saved in it (the address of execution in the caller frame)
+@item
+which registers were saved in the frame
+@end itemize
+
+@noindent The verbose description is useful when
+something has gone wrong that has made the stack format fail to fit
+the usual conventions.
+
+@item info frame @var{addr}
+@itemx info f @var{addr}
+Print a verbose description of the frame at address @var{addr}, without
+selecting that frame.  The selected frame remains unchanged by this
+command.  This requires the same kind of address (more than one for some
+architectures) that you specify in the @code{frame} command.
+@xref{Selection, ,Selecting a Frame}.
+
+@kindex info args
+@item info args
+Print the arguments of the selected frame, each on a separate line.
+
+@item info locals
+@kindex info locals
+Print the local variables of the selected frame, each on a separate
+line.  These are all variables (declared either static or automatic)
+accessible at the point of execution of the selected frame.
+
+@end table
+
 @node Frame Filter Management
 @section Management of Frame Filters.
 @cindex managing frame filters
@@ -7306,150 +7442,6 @@ objfile /build/test frame-filters:
   999       No       BuildProgramFilter
 @end smallexample
 @end table
-
-@node Selection
-@section Selecting a Frame
-
-Most commands for examining the stack and other data in your program work on
-whichever stack frame is selected at the moment.  Here are the commands for
-selecting a stack frame; all of them finish by printing a brief description
-of the stack frame just selected.
-
-@table @code
-@kindex frame@r{, selecting}
-@kindex f @r{(@code{frame})}
-@item frame @var{n}
-@itemx f @var{n}
-Select frame number @var{n}.  Recall that frame zero is the innermost
-(currently executing) frame, frame one is the frame that called the
-innermost one, and so on.  The highest-numbered frame is the one for
-@code{main}.
-
-@item frame @var{stack-addr} [ @var{pc-addr} ]
-@itemx f @var{stack-addr} [ @var{pc-addr} ]
-Select the frame at address @var{stack-addr}.  This is useful mainly if the
-chaining of stack frames has been damaged by a bug, making it
-impossible for @value{GDBN} to assign numbers properly to all frames.  In
-addition, this can be useful when your program has multiple stacks and
-switches between them.  The optional @var{pc-addr} can also be given to
-specify the value of PC for the stack frame.
-
-@kindex up
-@item up @var{n}
-Move @var{n} frames up the stack; @var{n} defaults to 1.  For positive
-numbers @var{n}, this advances toward the outermost frame, to higher
-frame numbers, to frames that have existed longer.
-
-@kindex down
-@kindex do @r{(@code{down})}
-@item down @var{n}
-Move @var{n} frames down the stack; @var{n} defaults to 1.  For
-positive numbers @var{n}, this advances toward the innermost frame, to
-lower frame numbers, to frames that were created more recently.
-You may abbreviate @code{down} as @code{do}.
-@end table
-
-All of these commands end by printing two lines of output describing the
-frame.  The first line shows the frame number, the function name, the
-arguments, and the source file and line number of execution in that
-frame.  The second line shows the text of that source line.
-
-@need 1000
-For example:
-
-@smallexample
-@group
-(@value{GDBP}) up
-#1  0x22f0 in main (argc=1, argv=0xf7fffbf4, env=0xf7fffbfc)
-    at env.c:10
-10              read_input_file (argv[i]);
-@end group
-@end smallexample
-
-After such a printout, the @code{list} command with no arguments
-prints ten lines centered on the point of execution in the frame.
-You can also edit the program at the point of execution with your favorite
-editing program by typing @code{edit}.
-@xref{List, ,Printing Source Lines},
-for details.
-
-@table @code
-@kindex down-silently
-@kindex up-silently
-@item up-silently @var{n}
-@itemx down-silently @var{n}
-These two commands are variants of @code{up} and @code{down},
-respectively; they differ in that they do their work silently, without
-causing display of the new frame.  They are intended primarily for use
-in @value{GDBN} command scripts, where the output might be unnecessary and
-distracting.
-@end table
-
-@node Frame Info
-@section Information About a Frame
-
-There are several other commands to print information about the selected
-stack frame.
-
-@table @code
-@item frame
-@itemx f
-When used without any argument, this command does not change which
-frame is selected, but prints a brief description of the currently
-selected stack frame.  It can be abbreviated @code{f}.  With an
-argument, this command is used to select a stack frame.
-@xref{Selection, ,Selecting a Frame}.
-
-@kindex info frame
-@kindex info f @r{(@code{info frame})}
-@item info frame
-@itemx info f
-This command prints a verbose description of the selected stack frame,
-including:
-
-@itemize @bullet
-@item
-the address of the frame
-@item
-the address of the next frame down (called by this frame)
-@item
-the address of the next frame up (caller of this frame)
-@item
-the language in which the source code corresponding to this frame is written
-@item
-the address of the frame's arguments
-@item
-the address of the frame's local variables
-@item
-the program counter saved in it (the address of execution in the caller frame)
-@item
-which registers were saved in the frame
-@end itemize
-
-@noindent The verbose description is useful when
-something has gone wrong that has made the stack format fail to fit
-the usual conventions.
-
-@item info frame @var{addr}
-@itemx info f @var{addr}
-Print a verbose description of the frame at address @var{addr}, without
-selecting that frame.  The selected frame remains unchanged by this
-command.  This requires the same kind of address (more than one for some
-architectures) that you specify in the @code{frame} command.
-@xref{Selection, ,Selecting a Frame}.
-
-@kindex info args
-@item info args
-Print the arguments of the selected frame, each on a separate line.
-
-@item info locals
-@kindex info locals
-Print the local variables of the selected frame, each on a separate
-line.  These are all variables (declared either static or automatic)
-accessible at the point of execution of the selected frame.
-
-@end table
-
 
 @node Source
 @chapter Examining Source Files
@@ -7980,11 +7972,11 @@ For example, if the file @file{/foo/bar/baz.c} was moved to
 @file{/mnt/cross/baz.c}, then the command
 
 @smallexample
-(@value{GDBP}) set substitute-path /usr/src /mnt/cross
+(@value{GDBP}) set substitute-path /foo/bar /mnt/cross
 @end smallexample
 
 @noindent
-will tell @value{GDBN} to replace @samp{/usr/src} with
+will tell @value{GDBN} to replace @samp{/foo/bar} with
 @samp{/mnt/cross}, which will allow @value{GDBN} to find the file
 @file{baz.c} even though it was moved.
 
@@ -20205,6 +20197,10 @@ are:
 @tab @code{Z0 and Z1}
 @tab @code{Support for target-side breakpoint condition evaluation}
 
+@item @code{multiprocess-extensions}
+@tab @code{multiprocess extensions}
+@tab Debug multiple processes and remote process PID awareness
+
 @item @code{swbreak-feature}
 @tab @code{swbreak stop reason}
 @tab @code{break}
@@ -20220,6 +20216,10 @@ are:
 @item @code{vfork-event-feature}
 @tab @code{vfork stop reason}
 @tab @code{vfork}
+
+@item @code{exec-event-feature}
+@tab @code{exec stop reason}
+@tab @code{exec}
 
 @end multitable
 
@@ -21426,16 +21426,12 @@ acceptable commands.
 
 
 @menu
-* ARM::                         ARM RDI
-* M32R/D::                      Renesas M32R/D
+* ARM::                         ARM
+* M32R/SDI::                    Renesas M32R/SDI
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
 * PowerPC Embedded::            PowerPC Embedded
-* PA::                          HP PA Embedded
-* Sparclet::                    Tsqware Sparclet
-* Sparclite::                   Fujitsu Sparclite
-* Z8000::                       Zilog Z8000
 * AVR::                         Atmel AVR
 * CRIS::                        CRIS
 * Super-H::                     Renesas Super-H
@@ -21443,20 +21439,6 @@ acceptable commands.
 
 @node ARM
 @subsection ARM
-@cindex ARM RDI
-
-@table @code
-@kindex target rdi
-@item target rdi @var{dev}
-ARM Angel monitor, via RDI library interface to ADP protocol.  You may
-use this target to communicate with both boards running the Angel
-monitor, or with the EmbeddedICE JTAG debug device.
-
-@kindex target rdp
-@item target rdp @var{dev}
-ARM Demon monitor.
-
-@end table
 
 @value{GDBN} provides the following ARM-specific commands:
 
@@ -21532,50 +21514,6 @@ target support subsystem.
 Show whether ARM-specific debugging messages are enabled.
 @end table
 
-The following commands are available when an ARM target is debugged
-using the RDI interface:
-
-@table @code
-@item rdilogfile @r{[}@var{file}@r{]}
-@kindex rdilogfile
-@cindex ADP (Angel Debugger Protocol) logging
-Set the filename for the ADP (Angel Debugger Protocol) packet log.
-With an argument, sets the log file to the specified @var{file}.  With
-no argument, show the current log file name.  The default log file is
-@file{rdi.log}.
-
-@item rdilogenable @r{[}@var{arg}@r{]}
-@kindex rdilogenable
-Control logging of ADP packets.  With an argument of 1 or @code{"yes"}
-enables logging, with an argument 0 or @code{"no"} disables it.  With
-no arguments displays the current setting.  When logging is enabled,
-ADP packets exchanged between @value{GDBN} and the RDI target device
-are logged to a file.
-
-@item set rdiromatzero
-@kindex set rdiromatzero
-@cindex ROM at zero address, RDI
-Tell @value{GDBN} whether the target has ROM at address 0.  If on,
-vector catching is disabled, so that zero address can be used.  If off
-(the default), vector catching is enabled.  For this command to take
-effect, it needs to be invoked prior to the @code{target rdi} command.
-
-@item show rdiromatzero
-@kindex show rdiromatzero
-Show the current setting of ROM at zero address.
-
-@item set rdiheartbeat
-@kindex set rdiheartbeat
-@cindex RDI heartbeat
-Enable or disable RDI heartbeat packets.  It is not recommended to
-turn on this option, since it confuses ARM and EPI JTAG interface, as
-well as the Angel monitor.
-
-@item show rdiheartbeat
-@kindex show rdiheartbeat
-Show the setting of RDI heartbeat packets.
-@end table
-
 @table @code
 @item target sim @r{[}@var{simargs}@r{]} @dots{} 
 The @value{GDBN} ARM simulator accepts the following optional arguments.
@@ -21596,60 +21534,8 @@ The default value is @code{all}.
 @end table
 @end table
 
-@node M32R/D
-@subsection Renesas M32R/D and M32R/SDI
-
-@table @code
-@kindex target m32r
-@item target m32r @var{dev}
-Renesas M32R/D ROM monitor.
-
-@kindex target m32rsdi
-@item target m32rsdi @var{dev}
-Renesas M32R SDI server, connected via parallel port to the board.
-@end table
-
-The following @value{GDBN} commands are specific to the M32R monitor:
-
-@table @code
-@item set download-path @var{path}
-@kindex set download-path
-@cindex find downloadable @sc{srec} files (M32R)
-Set the default path for finding downloadable @sc{srec} files.
-
-@item show download-path
-@kindex show download-path
-Show the default path for downloadable @sc{srec} files.
-
-@item set board-address @var{addr}
-@kindex set board-address
-@cindex M32-EVA target board address
-Set the IP address for the M32R-EVA target board.
-
-@item show board-address
-@kindex show board-address
-Show the current IP address of the target board.
-
-@item set server-address @var{addr}
-@kindex set server-address
-@cindex download server address (M32R)
-Set the IP address for the download server, which is the @value{GDBN}'s
-host machine.
-
-@item show server-address
-@kindex show server-address
-Display the IP address of the download server.
-
-@item upload @r{[}@var{file}@r{]}
-@kindex upload@r{, M32R}
-Upload the specified @sc{srec} @var{file} via the monitor's Ethernet
-upload capability.  If no @var{file} argument is given, the current
-executable file is uploaded.
-
-@item tload @r{[}@var{file}@r{]}
-@kindex tload@r{, M32R}
-Test the @code{upload} command.
-@end table
+@node M32R/SDI
+@subsection Renesas M32R/SDI
 
 The following commands are available for M32R/SDI:
 
@@ -21688,16 +21574,7 @@ Instructs the remote to set breakpoints by DBT.
 @node M68K
 @subsection M68k
 
-The Motorola m68k configuration includes ColdFire support, and a
-target command for the following ROM monitor.
-
-@table @code
-
-@kindex target dbug
-@item target dbug @var{dev}
-dBUG ROM monitor for Motorola ColdFire.
-
-@end table
+The Motorola m68k configuration includes ColdFire support.
 
 @node MicroBlaze
 @subsection MicroBlaze
@@ -21787,14 +21664,6 @@ NEC's DDB variant of PMON for Vr4300.
 @item target lsi @var{port}
 @kindex target lsi @var{port}
 LSI variant of PMON.
-
-@kindex target r3900
-@item target r3900 @var{dev}
-Densan DVE-R3900 ROM monitor for Toshiba R3900 Mips.
-
-@kindex target array
-@item target array @var{dev}
-Array Tech LSI33K RAID controller board.
 
 @end table
 
@@ -21982,269 +21851,7 @@ Allow @value{GDBN} to use only one debug register when watching a variable
 of scalar type, thus assuming that the variable is accessed through the
 address of its first byte.
 
-@kindex target dink32
-@item target dink32 @var{dev}
-DINK32 ROM monitor.
-
-@kindex target ppcbug
-@item target ppcbug @var{dev}
-@kindex target ppcbug1
-@item target ppcbug1 @var{dev}
-PPCBUG ROM monitor for PowerPC.
-
-@kindex target sds
-@item target sds @var{dev}
-SDS monitor, running on a PowerPC board (such as Motorola's ADS).
 @end table
-
-@cindex SDS protocol
-The following commands specific to the SDS protocol are supported
-by @value{GDBN}:
-
-@table @code
-@item set sdstimeout @var{nsec}
-@kindex set sdstimeout
-Set the timeout for SDS protocol reads to be @var{nsec} seconds.  The
-default is 2 seconds.
-
-@item show sdstimeout
-@kindex show sdstimeout
-Show the current value of the SDS timeout.
-
-@item sds @var{command}
-@kindex sds@r{, a command}
-Send the specified @var{command} string to the SDS monitor.
-@end table
-
-
-@node PA
-@subsection HP PA Embedded
-
-@table @code
-
-@kindex target op50n
-@item target op50n @var{dev}
-OP50N monitor, running on an OKI HPPA board.
-
-@kindex target w89k
-@item target w89k @var{dev}
-W89K monitor, running on a Winbond HPPA board.
-
-@end table
-
-@node Sparclet
-@subsection Tsqware Sparclet
-
-@cindex Sparclet
-
-@value{GDBN} enables developers to debug tasks running on
-Sparclet targets from a Unix host.
-@value{GDBN} uses code that runs on
-both the Unix host and on the Sparclet target.  The program
-@code{@value{GDBP}} is installed and executed on the Unix host.
-
-@table @code
-@item remotetimeout @var{args}
-@kindex remotetimeout
-@value{GDBN} supports the option @code{remotetimeout}.
-This option is set by the user, and @var{args} represents the number of
-seconds @value{GDBN} waits for responses.
-@end table
-
-@cindex compiling, on Sparclet
-When compiling for debugging, include the options @samp{-g} to get debug
-information and @samp{-Ttext} to relocate the program to where you wish to
-load it on the target.  You may also want to add the options @samp{-n} or
-@samp{-N} in order to reduce the size of the sections.  Example:
-
-@smallexample
-sparclet-aout-gcc prog.c -Ttext 0x12010000 -g -o prog -N
-@end smallexample
-
-You can use @code{objdump} to verify that the addresses are what you intended:
-
-@smallexample
-sparclet-aout-objdump --headers --syms prog
-@end smallexample
-
-@cindex running, on Sparclet
-Once you have set
-your Unix execution search path to find @value{GDBN}, you are ready to
-run @value{GDBN}.  From your Unix host, run @code{@value{GDBP}}
-(or @code{sparclet-aout-gdb}, depending on your installation).
-
-@value{GDBN} comes up showing the prompt:
-
-@smallexample
-(gdbslet)
-@end smallexample
-
-@menu
-* Sparclet File::                Setting the file to debug
-* Sparclet Connection::          Connecting to Sparclet
-* Sparclet Download::            Sparclet download
-* Sparclet Execution::           Running and debugging
-@end menu
-
-@node Sparclet File
-@subsubsection Setting File to Debug
-
-The @value{GDBN} command @code{file} lets you choose with program to debug.
-
-@smallexample
-(gdbslet) file prog
-@end smallexample
-
-@need 1000
-@value{GDBN} then attempts to read the symbol table of @file{prog}.
-@value{GDBN} locates
-the file by searching the directories listed in the command search
-path.
-If the file was compiled with debug information (option @samp{-g}), source
-files will be searched as well.
-@value{GDBN} locates
-the source files by searching the directories listed in the directory search
-path (@pxref{Environment, ,Your Program's Environment}).
-If it fails
-to find a file, it displays a message such as:
-
-@smallexample
-prog: No such file or directory.
-@end smallexample
-
-When this happens, add the appropriate directories to the search paths with
-the @value{GDBN} commands @code{path} and @code{dir}, and execute the
-@code{target} command again.
-
-@node Sparclet Connection
-@subsubsection Connecting to Sparclet
-
-The @value{GDBN} command @code{target} lets you connect to a Sparclet target.
-To connect to a target on serial port ``@code{ttya}'', type:
-
-@smallexample
-(gdbslet) target sparclet /dev/ttya
-Remote target sparclet connected to /dev/ttya
-main () at ../prog.c:3
-@end smallexample
-
-@need 750
-@value{GDBN} displays messages like these:
-
-@smallexample
-Connected to ttya.
-@end smallexample
-
-@node Sparclet Download
-@subsubsection Sparclet Download
-
-@cindex download to Sparclet
-Once connected to the Sparclet target,
-you can use the @value{GDBN}
-@code{load} command to download the file from the host to the target.
-The file name and load offset should be given as arguments to the @code{load}
-command.
-Since the file format is aout, the program must be loaded to the starting
-address.  You can use @code{objdump} to find out what this value is.  The load
-offset is an offset which is added to the VMA (virtual memory address)
-of each of the file's sections.
-For instance, if the program
-@file{prog} was linked to text address 0x1201000, with data at 0x12010160
-and bss at 0x12010170, in @value{GDBN}, type:
-
-@smallexample
-(gdbslet) load prog 0x12010000
-Loading section .text, size 0xdb0 vma 0x12010000
-@end smallexample
-
-If the code is loaded at a different address then what the program was linked
-to, you may need to use the @code{section} and @code{add-symbol-file} commands
-to tell @value{GDBN} where to map the symbol table.
-
-@node Sparclet Execution
-@subsubsection Running and Debugging
-
-@cindex running and debugging Sparclet programs
-You can now begin debugging the task using @value{GDBN}'s execution control
-commands, @code{b}, @code{step}, @code{run}, etc.  See the @value{GDBN}
-manual for the list of commands.
-
-@smallexample
-(gdbslet) b main
-Breakpoint 1 at 0x12010000: file prog.c, line 3.
-(gdbslet) run
-Starting program: prog
-Breakpoint 1, main (argc=1, argv=0xeffff21c) at prog.c:3
-3        char *symarg = 0;
-(gdbslet) step
-4        char *execarg = "hello!";
-(gdbslet)
-@end smallexample
-
-@node Sparclite
-@subsection Fujitsu Sparclite
-
-@table @code
-
-@kindex target sparclite
-@item target sparclite @var{dev}
-Fujitsu sparclite boards, used only for the purpose of loading.
-You must use an additional command to debug the program.
-For example: target remote @var{dev} using @value{GDBN} standard
-remote protocol.
-
-@end table
-
-@node Z8000
-@subsection Zilog Z8000
-
-@cindex Z8000
-@cindex simulator, Z8000
-@cindex Zilog Z8000 simulator
-
-When configured for debugging Zilog Z8000 targets, @value{GDBN} includes
-a Z8000 simulator.
-
-For the Z8000 family, @samp{target sim} simulates either the Z8002 (the
-unsegmented variant of the Z8000 architecture) or the Z8001 (the
-segmented variant).  The simulator recognizes which architecture is
-appropriate by inspecting the object code.
-
-@table @code
-@item target sim @var{args}
-@kindex sim
-@kindex target sim@r{, with Z8000}
-Debug programs on a simulated CPU.  If the simulator supports setup
-options, specify them via @var{args}.
-@end table
-
-@noindent
-After specifying this target, you can debug programs for the simulated
-CPU in the same style as programs for your host computer; use the
-@code{file} command to load a new program image, the @code{run} command
-to run your program, and so on.
-
-As well as making available all the usual machine registers
-(@pxref{Registers, ,Registers}), the Z8000 simulator provides three
-additional items of information as specially named registers:
-
-@table @code
-
-@item cycles
-Counts clock-ticks in the simulator.
-
-@item insts
-Counts instructions run in the simulator.
-
-@item time
-Execution time in 60ths of a second.
-
-@end table
-
-You can refer to these values in @value{GDBN} expressions with the usual
-conventions; for example, @w{@samp{b fputc if $cycles>5000}} sets a
-conditional breakpoint that suspends only after at least 5000
-simulated clock ticks.
 
 @node AVR
 @subsection Atmel AVR
@@ -35895,6 +35502,18 @@ appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
 remote stub must also supply the appropriate @samp{qSupported} feature
 indicating support.
 
+@cindex exec events, remote reply
+@item exec
+The packet indicates that @code{execve} was called, and @var{r}
+is the absolute pathname of the file that was executed, in hex.
+This packet is only applicable to targets that support exec events.
+
+This packet should not be sent by default; older @value{GDBN} versions
+did not support it.  @value{GDBN} requests it, by supplying an
+appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
+remote stub must also supply the appropriate @samp{qSupported} feature
+indicating support.
+
 @end table
 
 @item W @var{AA}
@@ -36499,6 +36118,16 @@ This feature indicates whether @value{GDBN} supports vfork event
 extensions to the remote protocol.  @value{GDBN} does not use such
 extensions unless the stub also reports that it supports them by
 including @samp{vfork-events+} in its @samp{qSupported} reply.
+
+@item exec-events
+This feature indicates whether @value{GDBN} supports exec event
+extensions to the remote protocol.  @value{GDBN} does not use such
+extensions unless the stub also reports that it supports them by
+including @samp{exec-events+} in its @samp{qSupported} reply.
+
+@item vContSupported
+This feature indicates whether @value{GDBN} wants to know the
+supported actions in the reply to @samp{vCont?} packet.
 @end table
 
 Stubs should ignore any unknown values for
@@ -36762,6 +36391,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{exec-events}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36966,6 +36600,13 @@ The remote stub reports the @samp{fork} stop reason for fork events.
 @item vfork-events
 The remote stub reports the @samp{vfork} stop reason for vfork events
 and vforkdone events.
+
+@item exec-events
+The remote stub reports the @samp{exec} stop reason for exec events.
+
+@item vContSupported
+The remote stub reports the supported actions in the reply to
+@samp{vCont?} packet.
 
 @end table
 

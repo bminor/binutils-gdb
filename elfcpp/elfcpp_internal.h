@@ -82,11 +82,23 @@ struct Shdr_data
 // An ELF compression header.
 
 template<int size>
-struct Chdr_data
+struct Chdr_data;
+
+template<>
+struct Chdr_data<32>
 {
-  typename Elf_types<size>::Elf_WXword ch_type;
-  typename Elf_types<size>::Elf_WXword ch_size;
-  typename Elf_types<size>::Elf_WXword ch_addralign;
+  Elf_Word ch_type;
+  Elf_Word ch_size;
+  Elf_Word ch_addralign;
+};
+
+template<>
+struct Chdr_data<64>
+{
+  Elf_Word ch_type;
+  Elf_Word ch_reserved;
+  Elf_Xword ch_size;
+  Elf_Xword ch_addralign;
 };
 
 // An ELF segment header.  We use template specialization for the

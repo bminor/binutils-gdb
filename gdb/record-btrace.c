@@ -37,6 +37,7 @@
 #include "infrun.h"
 #include "event-loop.h"
 #include "inf-loop.h"
+#include "vec.h"
 
 /* The target_ops of record-btrace.  */
 static struct target_ops record_btrace_ops;
@@ -159,9 +160,7 @@ record_btrace_enable_warn (struct thread_info *tp)
 static void
 record_btrace_disable_callback (void *arg)
 {
-  struct thread_info *tp;
-
-  tp = arg;
+  struct thread_info *tp = (struct thread_info *) arg;
 
   btrace_disable (tp);
 }
@@ -214,9 +213,6 @@ record_btrace_open (const char *args, int from_tty)
 
   if (!target_has_execution)
     error (_("The program is not being run."));
-
-  if (non_stop)
-    error (_("Record btrace can't debug inferior in non-stop mode."));
 
   gdb_assert (record_btrace_thread_observer == NULL);
 
@@ -1138,15 +1134,23 @@ record_btrace_call_history_from (struct target_ops *self,
 /* The to_record_is_replaying method of target record-btrace.  */
 
 static int
-record_btrace_is_replaying (struct target_ops *self)
+record_btrace_is_replaying (struct target_ops *self, ptid_t ptid)
 {
   struct thread_info *tp;
 
   ALL_NON_EXITED_THREADS (tp)
-    if (btrace_is_replaying (tp))
+    if (ptid_match (tp->ptid, ptid) && btrace_is_replaying (tp))
       return 1;
 
   return 0;
+}
+
+/* The to_record_will_replay method of target record-btrace.  */
+
+static int
+record_btrace_will_replay (struct target_ops *self, ptid_t ptid, int dir)
+{
+  return dir == EXEC_REVERSE || record_btrace_is_replaying (self, ptid);
 }
 
 /* The to_xfer_partial method of target record-btrace.  */
@@ -1162,7 +1166,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
   /* Filter out requests that don't make sense during replay.  */
   if (replay_memory_access == replay_memory_access_read_only
       && !record_btrace_generating_corefile
-      && record_btrace_is_replaying (ops))
+      && record_btrace_is_replaying (ops, inferior_ptid))
     {
       switch (object)
 	{
@@ -1315,8 +1319,9 @@ record_btrace_store_registers (struct target_ops *ops,
 {
   struct target_ops *t;
 
-  if (!record_btrace_generating_corefile && record_btrace_is_replaying (ops))
-    error (_("This record target does not allow writing registers."));
+  if (!record_btrace_generating_corefile
+      && record_btrace_is_replaying (ops, inferior_ptid))
+    error (_("Cannot write registers while replaying."));
 
   gdb_assert (may_write_registers != 0);
 
@@ -1332,7 +1337,8 @@ record_btrace_prepare_to_store (struct target_ops *ops,
 {
   struct target_ops *t;
 
-  if (!record_btrace_generating_corefile && record_btrace_is_replaying (ops))
+  if (!record_btrace_generating_corefile
+      && record_btrace_is_replaying (ops, inferior_ptid))
     return;
 
   t = ops->beneath;
@@ -1362,7 +1368,8 @@ static htab_t bfcache;
 static hashval_t
 bfcache_hash (const void *arg)
 {
-  const struct btrace_frame_cache *cache = arg;
+  const struct btrace_frame_cache *cache
+    = (const struct btrace_frame_cache *) arg;
 
   return htab_hash_pointer (cache->frame);
 }
@@ -1372,8 +1379,10 @@ bfcache_hash (const void *arg)
 static int
 bfcache_eq (const void *arg1, const void *arg2)
 {
-  const struct btrace_frame_cache *cache1 = arg1;
-  const struct btrace_frame_cache *cache2 = arg2;
+  const struct btrace_frame_cache *cache1
+    = (const struct btrace_frame_cache *) arg1;
+  const struct btrace_frame_cache *cache2
+    = (const struct btrace_frame_cache *) arg2;
 
   return cache1->frame == cache2->frame;
 }
@@ -1412,7 +1421,7 @@ btrace_get_frame_function (struct frame_info *frame)
   if (slot == NULL)
     return NULL;
 
-  cache = *slot;
+  cache = (const struct btrace_frame_cache *) *slot;
   return cache->bfun;
 }
 
@@ -1425,7 +1434,7 @@ record_btrace_frame_unwind_stop_reason (struct frame_info *this_frame,
   const struct btrace_frame_cache *cache;
   const struct btrace_function *bfun;
 
-  cache = *this_cache;
+  cache = (const struct btrace_frame_cache *) *this_cache;
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
 
@@ -1445,7 +1454,7 @@ record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
   const struct btrace_function *bfun;
   CORE_ADDR code, special;
 
-  cache = *this_cache;
+  cache = (const struct btrace_frame_cache *) *this_cache;
 
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
@@ -1484,7 +1493,7 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
     throw_error (NOT_AVAILABLE_ERROR,
 		 _("Registers are not available in btrace record history"));
 
-  cache = *this_cache;
+  cache = (const struct btrace_frame_cache *) *this_cache;
   bfun = cache->bfun;
   gdb_assert (bfun != NULL);
 
@@ -1607,7 +1616,7 @@ record_btrace_frame_dealloc_cache (struct frame_info *self, void *this_cache)
   struct btrace_frame_cache *cache;
   void **slot;
 
-  cache = this_cache;
+  cache = (struct btrace_frame_cache *) this_cache;
 
   slot = htab_find_slot (bfcache, cache, NO_INSERT);
   gdb_assert (slot != NULL);
@@ -1659,6 +1668,32 @@ record_btrace_to_get_tailcall_unwinder (struct target_ops *self)
   return &record_btrace_tailcall_frame_unwind;
 }
 
+/* Return a human-readable string for FLAG.  */
+
+static const char *
+btrace_thread_flag_to_str (enum btrace_thread_flag flag)
+{
+  switch (flag)
+    {
+    case BTHR_STEP:
+      return "step";
+
+    case BTHR_RSTEP:
+      return "reverse-step";
+
+    case BTHR_CONT:
+      return "cont";
+
+    case BTHR_RCONT:
+      return "reverse-cont";
+
+    case BTHR_STOP:
+      return "stop";
+    }
+
+  return "<invalid>";
+}
+
 /* Indicate that TP should be resumed according to FLAG.  */
 
 static void
@@ -1667,31 +1702,66 @@ record_btrace_resume_thread (struct thread_info *tp,
 {
   struct btrace_thread_info *btinfo;
 
-  DEBUG ("resuming %d (%s): %u", tp->num, target_pid_to_str (tp->ptid), flag);
+  DEBUG ("resuming thread %d (%s): %x (%s)", tp->num,
+	 target_pid_to_str (tp->ptid), flag, btrace_thread_flag_to_str (flag));
 
   btinfo = &tp->btrace;
-
-  if ((btinfo->flags & BTHR_MOVE) != 0)
-    error (_("Thread already moving."));
 
   /* Fetch the latest branch trace.  */
   btrace_fetch (tp);
 
+  /* A resume request overwrites a preceding resume or stop request.  */
+  btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
   btinfo->flags |= flag;
 }
 
-/* Find the thread to resume given a PTID.  */
+/* Get the current frame for TP.  */
 
-static struct thread_info *
-record_btrace_find_resume_thread (ptid_t ptid)
+static struct frame_info *
+get_thread_current_frame (struct thread_info *tp)
 {
-  struct thread_info *tp;
+  struct frame_info *frame;
+  ptid_t old_inferior_ptid;
+  int executing;
 
-  /* When asked to resume everything, we pick the current thread.  */
-  if (ptid_equal (minus_one_ptid, ptid) || ptid_is_pid (ptid))
-    ptid = inferior_ptid;
+  /* Set INFERIOR_PTID, which is implicitly used by get_current_frame.  */
+  old_inferior_ptid = inferior_ptid;
+  inferior_ptid = tp->ptid;
 
-  return find_thread_ptid (ptid);
+  /* Clear the executing flag to allow changes to the current frame.
+     We are not actually running, yet.  We just started a reverse execution
+     command or a record goto command.
+     For the latter, EXECUTING is false and this has no effect.
+     For the former, EXECUTING is true and we're in to_wait, about to
+     move the thread.  Since we need to recompute the stack, we temporarily
+     set EXECUTING to flase.  */
+  executing = is_executing (inferior_ptid);
+  set_executing (inferior_ptid, 0);
+
+  frame = NULL;
+  TRY
+    {
+      frame = get_current_frame ();
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      /* Restore the previous execution state.  */
+      set_executing (inferior_ptid, executing);
+
+      /* Restore the previous inferior_ptid.  */
+      inferior_ptid = old_inferior_ptid;
+
+      throw_exception (except);
+    }
+  END_CATCH
+
+  /* Restore the previous execution state.  */
+  set_executing (inferior_ptid, executing);
+
+  /* Restore the previous inferior_ptid.  */
+  inferior_ptid = old_inferior_ptid;
+
+  return frame;
 }
 
 /* Start replaying a thread.  */
@@ -1701,7 +1771,6 @@ record_btrace_start_replaying (struct thread_info *tp)
 {
   struct btrace_insn_iterator *replay;
   struct btrace_thread_info *btinfo;
-  int executing;
 
   btinfo = &tp->btrace;
   replay = NULL;
@@ -1709,16 +1778,6 @@ record_btrace_start_replaying (struct thread_info *tp)
   /* We can't start replaying without trace.  */
   if (btinfo->begin == NULL)
     return NULL;
-
-  /* Clear the executing flag to allow changes to the current frame.
-     We are not actually running, yet.  We just started a reverse execution
-     command or a record goto command.
-     For the latter, EXECUTING is false and this has no effect.
-     For the former, EXECUTING is true and we're in to_wait, about to
-     move the thread.  Since we need to recompute the stack, we temporarily
-     set EXECUTING to flase.  */
-  executing = is_executing (tp->ptid);
-  set_executing (tp->ptid, 0);
 
   /* GDB stores the current frame_id when stepping in order to detects steps
      into subroutines.
@@ -1732,7 +1791,7 @@ record_btrace_start_replaying (struct thread_info *tp)
       int upd_step_frame_id, upd_step_stack_frame_id;
 
       /* The current frame without replaying - computed via normal unwind.  */
-      frame = get_current_frame ();
+      frame = get_thread_current_frame (tp);
       frame_id = get_frame_id (frame);
 
       /* Check if we need to update any stepping-related frame id's.  */
@@ -1743,7 +1802,7 @@ record_btrace_start_replaying (struct thread_info *tp)
 
       /* We start replaying at the end of the branch trace.  This corresponds
 	 to the current instruction.  */
-      replay = xmalloc (sizeof (*replay));
+      replay = XNEW (struct btrace_insn_iterator);
       btrace_insn_end (replay, btinfo);
 
       /* Skip gaps at the end of the trace.  */
@@ -1764,7 +1823,7 @@ record_btrace_start_replaying (struct thread_info *tp)
       registers_changed_ptid (tp->ptid);
 
       /* The current frame with replaying - computed via btrace unwind.  */
-      frame = get_current_frame ();
+      frame = get_thread_current_frame (tp);
       frame_id = get_frame_id (frame);
 
       /* Replace stepping related frames where necessary.  */
@@ -1775,9 +1834,6 @@ record_btrace_start_replaying (struct thread_info *tp)
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      /* Restore the previous execution state.  */
-      set_executing (tp->ptid, executing);
-
       xfree (btinfo->replay);
       btinfo->replay = NULL;
 
@@ -1786,9 +1842,6 @@ record_btrace_start_replaying (struct thread_info *tp)
       throw_exception (except);
     }
   END_CATCH
-
-  /* Restore the previous execution state.  */
-  set_executing (tp->ptid, executing);
 
   return replay;
 }
@@ -1809,51 +1862,93 @@ record_btrace_stop_replaying (struct thread_info *tp)
   registers_changed_ptid (tp->ptid);
 }
 
+/* Stop replaying TP if it is at the end of its execution history.  */
+
+static void
+record_btrace_stop_replaying_at_end (struct thread_info *tp)
+{
+  struct btrace_insn_iterator *replay, end;
+  struct btrace_thread_info *btinfo;
+
+  btinfo = &tp->btrace;
+  replay = btinfo->replay;
+
+  if (replay == NULL)
+    return;
+
+  btrace_insn_end (&end, btinfo);
+
+  if (btrace_insn_cmp (replay, &end) == 0)
+    record_btrace_stop_replaying (tp);
+}
+
 /* The to_resume method of target record-btrace.  */
 
 static void
 record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
 		      enum gdb_signal signal)
 {
-  struct thread_info *tp, *other;
-  enum btrace_thread_flag flag;
+  struct thread_info *tp;
+  enum btrace_thread_flag flag, cflag;
 
-  DEBUG ("resume %s: %s", target_pid_to_str (ptid), step ? "step" : "cont");
+  DEBUG ("resume %s: %s%s", target_pid_to_str (ptid),
+	 execution_direction == EXEC_REVERSE ? "reverse-" : "",
+	 step ? "step" : "cont");
 
-  /* Store the execution direction of the last resume.  */
+  /* Store the execution direction of the last resume.
+
+     If there is more than one to_resume call, we have to rely on infrun
+     to not change the execution direction in-between.  */
   record_btrace_resume_exec_dir = execution_direction;
 
-  tp = record_btrace_find_resume_thread (ptid);
-  if (tp == NULL)
-    error (_("Cannot find thread to resume."));
+  /* As long as we're not replaying, just forward the request.
 
-  /* Stop replaying other threads if the thread to resume is not replaying.  */
-  if (!btrace_is_replaying (tp) && execution_direction != EXEC_REVERSE)
-    ALL_NON_EXITED_THREADS (other)
-      record_btrace_stop_replaying (other);
-
-  /* As long as we're not replaying, just forward the request.  */
-  if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
+     For non-stop targets this means that no thread is replaying.  In order to
+     make progress, we may need to explicitly move replaying threads to the end
+     of their execution history.  */
+  if ((execution_direction != EXEC_REVERSE)
+      && !record_btrace_is_replaying (ops, minus_one_ptid))
     {
       ops = ops->beneath;
-      return ops->to_resume (ops, ptid, step, signal);
+      ops->to_resume (ops, ptid, step, signal);
+      return;
     }
 
   /* Compute the btrace thread flag for the requested move.  */
-  if (step == 0)
-    flag = execution_direction == EXEC_REVERSE ? BTHR_RCONT : BTHR_CONT;
+  if (execution_direction == EXEC_REVERSE)
+    {
+      flag = step == 0 ? BTHR_RCONT : BTHR_RSTEP;
+      cflag = BTHR_RCONT;
+    }
   else
-    flag = execution_direction == EXEC_REVERSE ? BTHR_RSTEP : BTHR_STEP;
-
-  /* At the moment, we only move a single thread.  We could also move
-     all threads in parallel by single-stepping each resumed thread
-     until the first runs into an event.
-     When we do that, we would want to continue all other threads.
-     For now, just resume one thread to not confuse to_wait.  */
-  record_btrace_resume_thread (tp, flag);
+    {
+      flag = step == 0 ? BTHR_CONT : BTHR_STEP;
+      cflag = BTHR_CONT;
+    }
 
   /* We just indicate the resume intent here.  The actual stepping happens in
-     record_btrace_wait below.  */
+     record_btrace_wait below.
+
+     For all-stop targets, we only step INFERIOR_PTID and continue others.  */
+  if (!target_is_non_stop_p ())
+    {
+      gdb_assert (ptid_match (inferior_ptid, ptid));
+
+      ALL_NON_EXITED_THREADS (tp)
+	if (ptid_match (tp->ptid, ptid))
+	  {
+	    if (ptid_match (tp->ptid, inferior_ptid))
+	      record_btrace_resume_thread (tp, flag);
+	    else
+	      record_btrace_resume_thread (tp, cflag);
+	  }
+    }
+  else
+    {
+      ALL_NON_EXITED_THREADS (tp)
+	if (ptid_match (tp->ptid, ptid))
+	  record_btrace_resume_thread (tp, flag);
+    }
 
   /* Async support.  */
   if (target_can_async_p ())
@@ -1863,24 +1958,23 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
     }
 }
 
-/* Find a thread to move.  */
+/* Cancel resuming TP.  */
 
-static struct thread_info *
-record_btrace_find_thread_to_move (ptid_t ptid)
+static void
+record_btrace_cancel_resume (struct thread_info *tp)
 {
-  struct thread_info *tp;
+  enum btrace_thread_flag flags;
 
-  /* First check the parameter thread.  */
-  tp = find_thread_ptid (ptid);
-  if (tp != NULL && (tp->btrace.flags & BTHR_MOVE) != 0)
-    return tp;
+  flags = tp->btrace.flags & (BTHR_MOVE | BTHR_STOP);
+  if (flags == 0)
+    return;
 
-  /* Otherwise, find one other thread that has been resumed.  */
-  ALL_NON_EXITED_THREADS (tp)
-    if ((tp->btrace.flags & BTHR_MOVE) != 0)
-      return tp;
+  DEBUG ("cancel resume thread %d (%s): %x (%s)", tp->num,
+	 target_pid_to_str (tp->ptid), flags,
+	 btrace_thread_flag_to_str (flags));
 
-  return NULL;
+  tp->btrace.flags &= ~(BTHR_MOVE | BTHR_STOP);
+  record_btrace_stop_replaying_at_end (tp);
 }
 
 /* Return a target_waitstatus indicating that we ran out of history.  */
@@ -1908,6 +2002,56 @@ btrace_step_stopped (void)
   return status;
 }
 
+/* Return a target_waitstatus indicating that a thread was stopped as
+   requested.  */
+
+static struct target_waitstatus
+btrace_step_stopped_on_request (void)
+{
+  struct target_waitstatus status;
+
+  status.kind = TARGET_WAITKIND_STOPPED;
+  status.value.sig = GDB_SIGNAL_0;
+
+  return status;
+}
+
+/* Return a target_waitstatus indicating a spurious stop.  */
+
+static struct target_waitstatus
+btrace_step_spurious (void)
+{
+  struct target_waitstatus status;
+
+  status.kind = TARGET_WAITKIND_SPURIOUS;
+
+  return status;
+}
+
+/* Return a target_waitstatus indicating that the thread was not resumed.  */
+
+static struct target_waitstatus
+btrace_step_no_resumed (void)
+{
+  struct target_waitstatus status;
+
+  status.kind = TARGET_WAITKIND_NO_RESUMED;
+
+  return status;
+}
+
+/* Return a target_waitstatus indicating that we should wait again.  */
+
+static struct target_waitstatus
+btrace_step_again (void)
+{
+  struct target_waitstatus status;
+
+  status.kind = TARGET_WAITKIND_IGNORE;
+
+  return status;
+}
+
 /* Clear the record histories.  */
 
 static void
@@ -1920,157 +2064,215 @@ record_btrace_clear_histories (struct btrace_thread_info *btinfo)
   btinfo->call_history = NULL;
 }
 
+/* Check whether TP's current replay position is at a breakpoint.  */
+
+static int
+record_btrace_replay_at_breakpoint (struct thread_info *tp)
+{
+  struct btrace_insn_iterator *replay;
+  struct btrace_thread_info *btinfo;
+  const struct btrace_insn *insn;
+  struct inferior *inf;
+
+  btinfo = &tp->btrace;
+  replay = btinfo->replay;
+
+  if (replay == NULL)
+    return 0;
+
+  insn = btrace_insn_get (replay);
+  if (insn == NULL)
+    return 0;
+
+  inf = find_inferior_ptid (tp->ptid);
+  if (inf == NULL)
+    return 0;
+
+  return record_check_stopped_by_breakpoint (inf->aspace, insn->pc,
+					     &btinfo->stop_reason);
+}
+
+/* Step one instruction in forward direction.  */
+
+static struct target_waitstatus
+record_btrace_single_step_forward (struct thread_info *tp)
+{
+  struct btrace_insn_iterator *replay, end;
+  struct btrace_thread_info *btinfo;
+
+  btinfo = &tp->btrace;
+  replay = btinfo->replay;
+
+  /* We're done if we're not replaying.  */
+  if (replay == NULL)
+    return btrace_step_no_history ();
+
+  /* Check if we're stepping a breakpoint.  */
+  if (record_btrace_replay_at_breakpoint (tp))
+    return btrace_step_stopped ();
+
+  /* Skip gaps during replay.  */
+  do
+    {
+      unsigned int steps;
+
+      /* We will bail out here if we continue stepping after reaching the end
+	 of the execution history.  */
+      steps = btrace_insn_next (replay, 1);
+      if (steps == 0)
+	return btrace_step_no_history ();
+    }
+  while (btrace_insn_get (replay) == NULL);
+
+  /* Determine the end of the instruction trace.  */
+  btrace_insn_end (&end, btinfo);
+
+  /* The execution trace contains (and ends with) the current instruction.
+     This instruction has not been executed, yet, so the trace really ends
+     one instruction earlier.  */
+  if (btrace_insn_cmp (replay, &end) == 0)
+    return btrace_step_no_history ();
+
+  return btrace_step_spurious ();
+}
+
+/* Step one instruction in backward direction.  */
+
+static struct target_waitstatus
+record_btrace_single_step_backward (struct thread_info *tp)
+{
+  struct btrace_insn_iterator *replay;
+  struct btrace_thread_info *btinfo;
+
+  btinfo = &tp->btrace;
+  replay = btinfo->replay;
+
+  /* Start replaying if we're not already doing so.  */
+  if (replay == NULL)
+    replay = record_btrace_start_replaying (tp);
+
+  /* If we can't step any further, we reached the end of the history.
+     Skip gaps during replay.  */
+  do
+    {
+      unsigned int steps;
+
+      steps = btrace_insn_prev (replay, 1);
+      if (steps == 0)
+	return btrace_step_no_history ();
+    }
+  while (btrace_insn_get (replay) == NULL);
+
+  /* Check if we're stepping a breakpoint.
+
+     For reverse-stepping, this check is after the step.  There is logic in
+     infrun.c that handles reverse-stepping separately.  See, for example,
+     proceed and adjust_pc_after_break.
+
+     This code assumes that for reverse-stepping, PC points to the last
+     de-executed instruction, whereas for forward-stepping PC points to the
+     next to-be-executed instruction.  */
+  if (record_btrace_replay_at_breakpoint (tp))
+    return btrace_step_stopped ();
+
+  return btrace_step_spurious ();
+}
+
 /* Step a single thread.  */
 
 static struct target_waitstatus
 record_btrace_step_thread (struct thread_info *tp)
 {
-  struct btrace_insn_iterator *replay, end;
   struct btrace_thread_info *btinfo;
-  struct address_space *aspace;
-  struct inferior *inf;
+  struct target_waitstatus status;
   enum btrace_thread_flag flags;
-  unsigned int steps;
-
-  /* We can't step without an execution history.  */
-  if (btrace_is_empty (tp))
-    return btrace_step_no_history ();
 
   btinfo = &tp->btrace;
-  replay = btinfo->replay;
 
-  flags = btinfo->flags & BTHR_MOVE;
-  btinfo->flags &= ~BTHR_MOVE;
+  flags = btinfo->flags & (BTHR_MOVE | BTHR_STOP);
+  btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
 
-  DEBUG ("stepping %d (%s): %u", tp->num, target_pid_to_str (tp->ptid), flags);
+  DEBUG ("stepping thread %d (%s): %x (%s)", tp->num,
+	 target_pid_to_str (tp->ptid), flags,
+	 btrace_thread_flag_to_str (flags));
+
+  /* We can't step without an execution history.  */
+  if ((flags & BTHR_MOVE) != 0 && btrace_is_empty (tp))
+    return btrace_step_no_history ();
 
   switch (flags)
     {
     default:
       internal_error (__FILE__, __LINE__, _("invalid stepping type."));
 
+    case BTHR_STOP:
+      return btrace_step_stopped_on_request ();
+
     case BTHR_STEP:
-      /* We're done if we're not replaying.  */
-      if (replay == NULL)
-	return btrace_step_no_history ();
-
-      /* Skip gaps during replay.  */
-      do
-	{
-	  steps = btrace_insn_next (replay, 1);
-	  if (steps == 0)
-	    {
-	      record_btrace_stop_replaying (tp);
-	      return btrace_step_no_history ();
-	    }
-	}
-      while (btrace_insn_get (replay) == NULL);
-
-      /* Determine the end of the instruction trace.  */
-      btrace_insn_end (&end, btinfo);
-
-      /* We stop replaying if we reached the end of the trace.  */
-      if (btrace_insn_cmp (replay, &end) == 0)
-	record_btrace_stop_replaying (tp);
+      status = record_btrace_single_step_forward (tp);
+      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	break;
 
       return btrace_step_stopped ();
 
     case BTHR_RSTEP:
-      /* Start replaying if we're not already doing so.  */
-      if (replay == NULL)
-	replay = record_btrace_start_replaying (tp);
-
-      /* If we can't step any further, we reached the end of the history.
-	 Skip gaps during replay.  */
-      do
-	{
-	  steps = btrace_insn_prev (replay, 1);
-	  if (steps == 0)
-	    return btrace_step_no_history ();
-
-	}
-      while (btrace_insn_get (replay) == NULL);
+      status = record_btrace_single_step_backward (tp);
+      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	break;
 
       return btrace_step_stopped ();
 
     case BTHR_CONT:
-      /* We're done if we're not replaying.  */
-      if (replay == NULL)
-	return btrace_step_no_history ();
+      status = record_btrace_single_step_forward (tp);
+      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	break;
 
-      inf = find_inferior_ptid (tp->ptid);
-      aspace = inf->aspace;
-
-      /* Determine the end of the instruction trace.  */
-      btrace_insn_end (&end, btinfo);
-
-      for (;;)
-	{
-	  const struct btrace_insn *insn;
-
-	  /* Skip gaps during replay.  */
-	  do
-	    {
-	      steps = btrace_insn_next (replay, 1);
-	      if (steps == 0)
-		{
-		  record_btrace_stop_replaying (tp);
-		  return btrace_step_no_history ();
-		}
-
-	      insn = btrace_insn_get (replay);
-	    }
-	  while (insn == NULL);
-
-	  /* We stop replaying if we reached the end of the trace.  */
-	  if (btrace_insn_cmp (replay, &end) == 0)
-	    {
-	      record_btrace_stop_replaying (tp);
-	      return btrace_step_no_history ();
-	    }
-
-	  DEBUG ("stepping %d (%s) ... %s", tp->num,
-		 target_pid_to_str (tp->ptid),
-		 core_addr_to_string_nz (insn->pc));
-
-	  if (record_check_stopped_by_breakpoint (aspace, insn->pc,
-						  &btinfo->stop_reason))
-	    return btrace_step_stopped ();
-	}
+      btinfo->flags |= flags;
+      return btrace_step_again ();
 
     case BTHR_RCONT:
-      /* Start replaying if we're not already doing so.  */
-      if (replay == NULL)
-	replay = record_btrace_start_replaying (tp);
+      status = record_btrace_single_step_backward (tp);
+      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+	break;
 
-      inf = find_inferior_ptid (tp->ptid);
-      aspace = inf->aspace;
-
-      for (;;)
-	{
-	  const struct btrace_insn *insn;
-
-	  /* If we can't step any further, we reached the end of the history.
-	     Skip gaps during replay.  */
-	  do
-	    {
-	      steps = btrace_insn_prev (replay, 1);
-	      if (steps == 0)
-		return btrace_step_no_history ();
-
-	      insn = btrace_insn_get (replay);
-	    }
-	  while (insn == NULL);
-
-	  DEBUG ("reverse-stepping %d (%s) ... %s", tp->num,
-		 target_pid_to_str (tp->ptid),
-		 core_addr_to_string_nz (insn->pc));
-
-	  if (record_check_stopped_by_breakpoint (aspace, insn->pc,
-						  &btinfo->stop_reason))
-	    return btrace_step_stopped ();
-	}
+      btinfo->flags |= flags;
+      return btrace_step_again ();
     }
+
+  /* We keep threads moving at the end of their execution history.  The to_wait
+     method will stop the thread for whom the event is reported.  */
+  if (status.kind == TARGET_WAITKIND_NO_HISTORY)
+    btinfo->flags |= flags;
+
+  return status;
+}
+
+/* A vector of threads.  */
+
+typedef struct thread_info * tp_t;
+DEF_VEC_P (tp_t);
+
+/* Announce further events if necessary.  */
+
+static void
+record_btrace_maybe_mark_async_event (const VEC (tp_t) *moving,
+				      const VEC (tp_t) *no_history)
+{
+  int more_moving, more_no_history;
+
+  more_moving = !VEC_empty (tp_t, moving);
+  more_no_history = !VEC_empty (tp_t, no_history);
+
+  if (!more_moving && !more_no_history)
+    return;
+
+  if (more_moving)
+    DEBUG ("movers pending");
+
+  if (more_no_history)
+    DEBUG ("no-history pending");
+
+  mark_async_event_handler (record_btrace_async_inferior_event_handler);
 }
 
 /* The to_wait method of target record-btrace.  */
@@ -2079,43 +2281,160 @@ static ptid_t
 record_btrace_wait (struct target_ops *ops, ptid_t ptid,
 		    struct target_waitstatus *status, int options)
 {
-  struct thread_info *tp, *other;
+  VEC (tp_t) *moving, *no_history;
+  struct thread_info *tp, *eventing;
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
   DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid), options);
 
   /* As long as we're not replaying, just forward the request.  */
-  if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
+  if ((execution_direction != EXEC_REVERSE)
+      && !record_btrace_is_replaying (ops, minus_one_ptid))
     {
       ops = ops->beneath;
       return ops->to_wait (ops, ptid, status, options);
     }
 
-  /* Let's find a thread to move.  */
-  tp = record_btrace_find_thread_to_move (ptid);
-  if (tp == NULL)
-    {
-      DEBUG ("wait %s: no thread", target_pid_to_str (ptid));
+  moving = NULL;
+  no_history = NULL;
 
-      status->kind = TARGET_WAITKIND_IGNORE;
-      return minus_one_ptid;
+  make_cleanup (VEC_cleanup (tp_t), &moving);
+  make_cleanup (VEC_cleanup (tp_t), &no_history);
+
+  /* Keep a work list of moving threads.  */
+  ALL_NON_EXITED_THREADS (tp)
+    if (ptid_match (tp->ptid, ptid)
+	&& ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0))
+      VEC_safe_push (tp_t, moving, tp);
+
+  if (VEC_empty (tp_t, moving))
+    {
+      *status = btrace_step_no_resumed ();
+
+      DEBUG ("wait ended by %s: %s", target_pid_to_str (null_ptid),
+	     target_waitstatus_to_string (status));
+
+      do_cleanups (cleanups);
+      return null_ptid;
     }
 
-  /* We only move a single thread.  We're not able to correlate threads.  */
-  *status = record_btrace_step_thread (tp);
+  /* Step moving threads one by one, one step each, until either one thread
+     reports an event or we run out of threads to step.
+
+     When stepping more than one thread, chances are that some threads reach
+     the end of their execution history earlier than others.  If we reported
+     this immediately, all-stop on top of non-stop would stop all threads and
+     resume the same threads next time.  And we would report the same thread
+     having reached the end of its execution history again.
+
+     In the worst case, this would starve the other threads.  But even if other
+     threads would be allowed to make progress, this would result in far too
+     many intermediate stops.
+
+     We therefore delay the reporting of "no execution history" until we have
+     nothing else to report.  By this time, all threads should have moved to
+     either the beginning or the end of their execution history.  There will
+     be a single user-visible stop.  */
+  eventing = NULL;
+  while ((eventing == NULL) && !VEC_empty (tp_t, moving))
+    {
+      unsigned int ix;
+
+      ix = 0;
+      while ((eventing == NULL) && VEC_iterate (tp_t, moving, ix, tp))
+	{
+	  *status = record_btrace_step_thread (tp);
+
+	  switch (status->kind)
+	    {
+	    case TARGET_WAITKIND_IGNORE:
+	      ix++;
+	      break;
+
+	    case TARGET_WAITKIND_NO_HISTORY:
+	      VEC_safe_push (tp_t, no_history,
+			     VEC_ordered_remove (tp_t, moving, ix));
+	      break;
+
+	    default:
+	      eventing = VEC_unordered_remove (tp_t, moving, ix);
+	      break;
+	    }
+	}
+    }
+
+  if (eventing == NULL)
+    {
+      /* We started with at least one moving thread.  This thread must have
+	 either stopped or reached the end of its execution history.
+
+	 In the former case, EVENTING must not be NULL.
+	 In the latter case, NO_HISTORY must not be empty.  */
+      gdb_assert (!VEC_empty (tp_t, no_history));
+
+      /* We kept threads moving at the end of their execution history.  Stop
+	 EVENTING now that we are going to report its stop.  */
+      eventing = VEC_unordered_remove (tp_t, no_history, 0);
+      eventing->btrace.flags &= ~BTHR_MOVE;
+
+      *status = btrace_step_no_history ();
+    }
+
+  gdb_assert (eventing != NULL);
+
+  /* We kept threads replaying at the end of their execution history.  Stop
+     replaying EVENTING now that we are going to report its stop.  */
+  record_btrace_stop_replaying_at_end (eventing);
 
   /* Stop all other threads. */
-  if (!non_stop)
-    ALL_NON_EXITED_THREADS (other)
-      other->btrace.flags &= ~BTHR_MOVE;
+  if (!target_is_non_stop_p ())
+    ALL_NON_EXITED_THREADS (tp)
+      record_btrace_cancel_resume (tp);
+
+  /* In async mode, we need to announce further events.  */
+  if (target_is_async_p ())
+    record_btrace_maybe_mark_async_event (moving, no_history);
 
   /* Start record histories anew from the current position.  */
-  record_btrace_clear_histories (&tp->btrace);
+  record_btrace_clear_histories (&eventing->btrace);
 
   /* We moved the replay position but did not update registers.  */
-  registers_changed_ptid (tp->ptid);
+  registers_changed_ptid (eventing->ptid);
 
-  return tp->ptid;
+  DEBUG ("wait ended by thread %d (%s): %s", eventing->num,
+	 target_pid_to_str (eventing->ptid),
+	 target_waitstatus_to_string (status));
+
+  do_cleanups (cleanups);
+  return eventing->ptid;
 }
+
+/* The to_stop method of target record-btrace.  */
+
+static void
+record_btrace_stop (struct target_ops *ops, ptid_t ptid)
+{
+  DEBUG ("stop %s", target_pid_to_str (ptid));
+
+  /* As long as we're not replaying, just forward the request.  */
+  if ((execution_direction != EXEC_REVERSE)
+      && !record_btrace_is_replaying (ops, minus_one_ptid))
+    {
+      ops = ops->beneath;
+      ops->to_stop (ops, ptid);
+    }
+  else
+    {
+      struct thread_info *tp;
+
+      ALL_NON_EXITED_THREADS (tp)
+       if (ptid_match (tp->ptid, ptid))
+         {
+           tp->btrace.flags &= ~BTHR_MOVE;
+           tp->btrace.flags |= BTHR_STOP;
+         }
+    }
+ }
 
 /* The to_can_execute_reverse method of target record-btrace.  */
 
@@ -2130,7 +2449,7 @@ record_btrace_can_execute_reverse (struct target_ops *self)
 static int
 record_btrace_stopped_by_sw_breakpoint (struct target_ops *ops)
 {
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     {
       struct thread_info *tp = inferior_thread ();
 
@@ -2146,7 +2465,7 @@ record_btrace_stopped_by_sw_breakpoint (struct target_ops *ops)
 static int
 record_btrace_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
 {
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     return 1;
 
   return ops->beneath->to_supports_stopped_by_sw_breakpoint (ops->beneath);
@@ -2157,7 +2476,7 @@ record_btrace_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
 static int
 record_btrace_stopped_by_hw_breakpoint (struct target_ops *ops)
 {
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     {
       struct thread_info *tp = inferior_thread ();
 
@@ -2173,7 +2492,7 @@ record_btrace_stopped_by_hw_breakpoint (struct target_ops *ops)
 static int
 record_btrace_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
 {
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     return 1;
 
   return ops->beneath->to_supports_stopped_by_hw_breakpoint (ops->beneath);
@@ -2185,7 +2504,7 @@ static void
 record_btrace_update_thread_list (struct target_ops *ops)
 {
   /* We don't add or remove threads during replay.  */
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     return;
 
   /* Forward the request.  */
@@ -2199,7 +2518,7 @@ static int
 record_btrace_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   /* We don't add or remove threads during replay.  */
-  if (record_btrace_is_replaying (ops))
+  if (record_btrace_is_replaying (ops, minus_one_ptid))
     return find_thread_ptid (ptid) != NULL;
 
   /* Forward the request.  */
@@ -2289,6 +2608,17 @@ record_btrace_goto (struct target_ops *self, ULONGEST insn)
   record_btrace_set_replay (tp, &it);
 }
 
+/* The to_record_stop_replaying method of target record-btrace.  */
+
+static void
+record_btrace_stop_replaying_all (struct target_ops *self)
+{
+  struct thread_info *tp;
+
+  ALL_NON_EXITED_THREADS (tp)
+    record_btrace_stop_replaying (tp);
+}
+
 /* The to_execution_direction target method.  */
 
 static enum exec_direction_kind
@@ -2340,6 +2670,8 @@ init_record_btrace_ops (void)
   ops->to_call_history_from = record_btrace_call_history_from;
   ops->to_call_history_range = record_btrace_call_history_range;
   ops->to_record_is_replaying = record_btrace_is_replaying;
+  ops->to_record_will_replay = record_btrace_will_replay;
+  ops->to_record_stop_replaying = record_btrace_stop_replaying_all;
   ops->to_xfer_partial = record_btrace_xfer_partial;
   ops->to_remove_breakpoint = record_btrace_remove_breakpoint;
   ops->to_insert_breakpoint = record_btrace_insert_breakpoint;
@@ -2350,6 +2682,7 @@ init_record_btrace_ops (void)
   ops->to_get_tailcall_unwinder = &record_btrace_to_get_tailcall_unwinder;
   ops->to_resume = record_btrace_resume;
   ops->to_wait = record_btrace_wait;
+  ops->to_stop = record_btrace_stop;
   ops->to_update_thread_list = record_btrace_update_thread_list;
   ops->to_thread_alive = record_btrace_thread_alive;
   ops->to_goto_record_begin = record_btrace_goto_begin;

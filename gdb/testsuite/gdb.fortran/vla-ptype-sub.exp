@@ -1,0 +1,87 @@
+# Copyright 2015 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+standard_testfile "vla-sub.f90"
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
+    {debug f90 quiet}] } {
+    return -1
+}
+
+if ![runto_main] {
+    untested "could not run to main"
+    return -1
+}
+
+# Pass fixed array to function and handle them as vla in function.
+gdb_breakpoint [gdb_get_line_number "not-filled"]
+gdb_continue_to_breakpoint "not-filled (1st)"
+gdb_test "ptype array1" "type = integer\\\(kind=4\\\) \\\(42,42\\\)" \
+  "ptype array1 (passed fixed)"
+gdb_test "ptype array2" "type = real\\\(kind=4\\\) \\\(42,42,42\\\)" \
+  "ptype array2 (passed fixed)"
+gdb_test "ptype array1(40, 10)" "type = integer\\\(kind=4\\\)" \
+  "ptype array1(40, 10) (passed fixed)"
+gdb_test "ptype array2(13, 11, 5)" "type = real\\\(kind=4\\\)" \
+  "ptype array2(13, 11, 5) (passed fixed)"
+
+# Pass sub arrays to function and handle them as vla in function.
+gdb_continue_to_breakpoint "not-filled (2nd)"
+gdb_test "ptype array1" "type = integer\\\(kind=4\\\) \\\(6,6\\\)" \
+  "ptype array1 (passed sub-array)"
+gdb_test "ptype array2" "type = real\\\(kind=4\\\) \\\(6,6,6\\\)" \
+  "ptype array2 (passed sub-array)"
+gdb_test "ptype array1(3, 3)" "type = integer\\\(kind=4\\\)" \
+  "ptype array1(3, 3) (passed sub-array)"
+gdb_test "ptype array2(4, 4, 4)" "type = real\\\(kind=4\\\)" \
+  "ptype array2(4, 4, 4) (passed sub-array)"
+
+# Check ptype outside of bounds.  This should not crash GDB.
+gdb_test "ptype array1(100, 100)" "no such vector element" \
+  "ptype array1(100, 100) subarray do not crash (passed sub-array)"
+gdb_test "ptype array2(100, 100, 100)" "no such vector element" \
+  "ptype array2(100, 100, 100) subarray do not crash (passed sub-array)"
+
+# Pass vla to function.
+gdb_continue_to_breakpoint "not-filled (3rd)"
+gdb_test "ptype array1" "type = integer\\\(kind=4\\\) \\\(20,20\\\)" \
+  "ptype array1 (passed vla)"
+gdb_test "ptype array2" "type = real\\\(kind=4\\\) \\\(10,10,10\\\)" \
+  "ptype array2 (passed vla)"
+gdb_test "ptype array1(3, 3)" "type = integer\\\(kind=4\\\)" \
+  "ptype array1(3, 3) (passed vla)"
+gdb_test "ptype array2(4, 4, 4)" "type = real\\\(kind=4\\\)" \
+  "ptype array2(4, 4, 4) (passed vla)"
+
+# Check ptype outside of bounds.  This should not crash GDB.
+gdb_test "ptype array1(100, 100)" "no such vector element" \
+  "ptype array1(100, 100) VLA do not crash (passed vla)"
+gdb_test "ptype array2(100, 100, 100)" "no such vector element" \
+  "ptype array2(100, 100, 100) VLA do not crash (passed vla)"
+
+# Pass fixed array to function and handle it as VLA of arbitrary length in
+# function.
+gdb_breakpoint [gdb_get_line_number "end-of-bar"]
+gdb_continue_to_breakpoint "end-of-bar"
+gdb_test "ptype array1" \
+  "type = (PTR TO -> \\( )?integer(\\(kind=4\\)|\\*4) \\(\\*\\)\\)?" \
+  "ptype array1 (arbitrary length)"
+gdb_test "ptype array2" \
+  "type = (PTR TO -> \\( )?integer(\\(kind=4\\)|\\*4) \\(4:9,10:\\*\\)\\)?" \
+  "ptype array2 (arbitrary length)"
+gdb_test "ptype array1(100)" "type = integer\\\(kind=4\\\)" \
+  "ptype array1(100) (arbitrary length)"
+gdb_test "ptype array2(4,100)" "type = integer\\\(kind=4\\\)" \
+  "ptype array2(4,100) (arbitrary length)"

@@ -29,7 +29,7 @@
 static void
 py_decref (void *p)
 {
-  PyObject *py = p;
+  PyObject *py = (PyObject *) p;
 
   Py_DECREF (py);
 }
@@ -50,7 +50,7 @@ make_cleanup_py_decref (PyObject *py)
 static void
 py_xdecref (void *p)
 {
-  PyObject *py = p;
+  PyObject *py = (PyObject *) p;
 
   Py_XDECREF (py);
 }
@@ -420,7 +420,7 @@ PyObject *
 gdb_py_generic_dict (PyObject *self, void *closure)
 {
   PyObject *result;
-  PyTypeObject *type_obj = closure;
+  PyTypeObject *type_obj = (PyTypeObject *) closure;
   char *raw_ptr;
 
   raw_ptr = (char *) self + type_obj->tp_dictoffset;

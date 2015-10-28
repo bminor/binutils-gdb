@@ -64,6 +64,19 @@ if test x$ac_checking != x ; then
   AC_DEFINE(ENABLE_CHECKING, 1, [Define if you want run-time sanity checks.])
 fi
 
+# PR gas/19109
+# Decide the default method for compressing debug sections.
+ac_default_compressed_debug_sections=unset
+# Provide a configure time option to override our default.
+AC_ARG_ENABLE(compressed_debug_sections,
+	      AS_HELP_STRING([--enable-compressed-debug-sections={all,gas,none}],
+	      [compress debug sections by default])],
+[case ,"${enableval}", in
+  ,yes, | ,all, | *,gas,*) ac_default_compressed_debug_sections=yes ;;
+  ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
+  *)   ac_default_compressed_debug_sections=unset ;;
+esac])dnl
+
 using_cgen=no
 
 AM_BINUTILS_WARNINGS
@@ -403,7 +416,7 @@ changequote([,])dnl
 
         # Decide features one by one.
         AC_MSG_CHECKING(for default configuration of --enable-dx-regs)
-	if test "x${enable_dx_regs}" == xyes; then
+	if test "x${enable_dx_regs}" = xyes; then
 	  AC_DEFINE(NDS32_DEFAULT_DX_REGS, 1,
 		    [Define value for nds32_dx_regs])
 	else
@@ -413,7 +426,7 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_dx_regs)
 
         AC_MSG_CHECKING(for default configuration of --enable-perf-ext)
-	if test "x${enable_perf_ext}" == xno; then
+	if test "x${enable_perf_ext}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT, 0,
 		    [Define value for nds32_perf_ext])
 	else
@@ -423,7 +436,7 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_perf_ext)
 
         AC_MSG_CHECKING(for default configuration of --enable-perf-ext2)
-	if test "x${enable_perf_ext2}" == xno; then
+	if test "x${enable_perf_ext2}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT2, 0,
 		    [Define value for nds32_perf_ext2])
 	else
@@ -433,7 +446,7 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_perf_ext2)
 
         AC_MSG_CHECKING(for default configuration of --enable-string-ext)
-	if test "x${enable_string_ext}" == xno; then
+	if test "x${enable_string_ext}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_STRING_EXT, 0,
 		    [Define value for nds32_string_ext])
 	else
@@ -443,7 +456,7 @@ changequote([,])dnl
 	AC_MSG_RESULT($enable_string_ext)
 
         AC_MSG_CHECKING(for default configuration of --enable-audio-ext)
-	if test "x${enable_audio_ext}" == xno; then
+	if test "x${enable_audio_ext}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_AUDIO_EXT, 0,
 		    [Define value for nds32_audio_ext])
 	else
@@ -535,6 +548,10 @@ changequote([,])dnl
     emulations="$emulations $emulation"
 
 done
+
+if test x$ac_default_compressed_debug_sections == xyes ; then
+  AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])
+fi
 
 # Turn on all targets if possible
 if test ${all_targets} = "yes"; then
@@ -812,7 +829,7 @@ GAS_CHECK_DECL_NEEDED(malloc, f, char *(*f)(), $gas_test_headers)
 GAS_CHECK_DECL_NEEDED(sbrk, f, char *(*f)(), $gas_test_headers)
 GAS_CHECK_DECL_NEEDED(strstr, f, char *(*f)(), $gas_test_headers)
 
-AC_CHECK_DECLS([free, getenv, malloc, mempcpy, realloc, stpcpy, strstr, vsnprintf])
+AC_CHECK_DECLS([free, getenv, malloc, mempcpy, realloc, stpcpy, strstr, vsnprintf, asprintf])
 
 BFD_BINARY_FOPEN
 

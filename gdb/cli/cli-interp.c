@@ -40,6 +40,18 @@ static struct gdb_exception safe_execute_command (struct ui_out *uiout,
    quiet (i.e., another interpreter is being run with
    interpreter-exec), print nothing.  */
 
+/* Observer for the normal_stop notification.  */
+
+static void
+cli_on_normal_stop (struct bpstats *bs, int print_frame)
+{
+  if (!interp_quiet_p (cli_interp))
+    {
+      if (print_frame)
+	print_stop_event (cli_uiout);
+    }
+}
+
 /* Observer for the signal_received notification.  */
 
 static void
@@ -109,6 +121,7 @@ static void *
 cli_interpreter_init (struct interp *self, int top_level)
 {
   /* If changing this, remember to update tui-interp.c as well.  */
+  observer_attach_normal_stop (cli_on_normal_stop);
   observer_attach_end_stepping_range (cli_on_end_stepping_range);
   observer_attach_signal_received (cli_on_signal_received);
   observer_attach_signal_exited (cli_on_signal_exited);
@@ -161,7 +174,8 @@ cli_interpreter_exec (void *data, const char *command_str)
 
   /* FIXME: cagney/2003-02-01: Need to const char *propogate
      safe_execute_command.  */
-  char *str = strcpy (alloca (strlen (command_str) + 1), command_str);
+  char *str = (char *) alloca (strlen (command_str) + 1);
+  strcpy (str, command_str);
 
   /* gdb_stdout could change between the time cli_uiout was
      initialized and now.  Since we're probably using a different

@@ -101,8 +101,8 @@ inferior_process_group (void)
    we save our handlers in these two variables and set SIGINT and SIGQUIT
    to SIG_IGN.  */
 
-static void (*sigint_ours) ();
-static void (*sigquit_ours) ();
+static sighandler_t sigint_ours;
+static sighandler_t sigquit_ours;
 
 /* The name of the tty (from the `tty' command) that we're giving to
    the inferior when starting it up.  This is only (and should only
@@ -319,9 +319,9 @@ child_terminal_inferior (struct target_ops *self)
 
       if (!job_control)
 	{
-	  sigint_ours = (void (*)()) signal (SIGINT, SIG_IGN);
+	  sigint_ours = signal (SIGINT, SIG_IGN);
 #ifdef SIGQUIT
-	  sigquit_ours = (void (*)()) signal (SIGQUIT, SIG_IGN);
+	  sigquit_ours = signal (SIGQUIT, SIG_IGN);
 #endif
 	}
 
@@ -417,13 +417,13 @@ child_terminal_ours_1 (int output_only)
 #ifdef SIGTTOU
       /* Ignore this signal since it will happen when we try to set the
          pgrp.  */
-      void (*osigttou) () = NULL;
+      sighandler_t osigttou = NULL;
 #endif
       int result;
 
 #ifdef SIGTTOU
       if (job_control)
-	osigttou = (void (*)()) signal (SIGTTOU, SIG_IGN);
+	osigttou = signal (SIGTTOU, SIG_IGN);
 #endif
 
       xfree (tinfo->ttystate);
@@ -506,7 +506,7 @@ static const struct inferior_data *inflow_inferior_data;
 static void
 inflow_inferior_data_cleanup (struct inferior *inf, void *arg)
 {
-  struct terminal_info *info = arg;
+  struct terminal_info *info = (struct terminal_info *) arg;
 
   xfree (info->run_terminal);
   xfree (info->ttystate);
@@ -521,7 +521,7 @@ get_inflow_inferior_data (struct inferior *inf)
 {
   struct terminal_info *info;
 
-  info = inferior_data (inf, inflow_inferior_data);
+  info = (struct terminal_info *) inferior_data (inf, inflow_inferior_data);
   if (info == NULL)
     {
       info = XCNEW (struct terminal_info);
@@ -542,7 +542,7 @@ inflow_inferior_exit (struct inferior *inf)
 {
   struct terminal_info *info;
 
-  info = inferior_data (inf, inflow_inferior_data);
+  info = (struct terminal_info *) inferior_data (inf, inflow_inferior_data);
   if (info != NULL)
     {
       xfree (info->run_terminal);
@@ -711,9 +711,9 @@ new_tty (void)
   tty = open ("/dev/tty", O_RDWR);
   if (tty > 0)
     {
-      void (*osigttou) ();
+      sighandler_t osigttou;
 
-      osigttou = (void (*)()) signal (SIGTTOU, SIG_IGN);
+      osigttou = signal (SIGTTOU, SIG_IGN);
       ioctl (tty, TIOCNOTTY, 0);
       close (tty);
       signal (SIGTTOU, osigttou);
@@ -788,7 +788,7 @@ pass_signal (int signo)
 #endif
 }
 
-static void (*osig) ();
+static sighandler_t osig;
 static int osig_set;
 
 void
@@ -799,7 +799,7 @@ set_sigint_trap (void)
 
   if (inf->attach_flag || tinfo->run_terminal)
     {
-      osig = (void (*)()) signal (SIGINT, pass_signal);
+      osig = signal (SIGINT, pass_signal);
       osig_set = 1;
     }
   else

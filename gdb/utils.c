@@ -62,7 +62,7 @@
 
 #include "readline/readline.h"
 
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #include <time.h>
 
 #include "gdb_usleep.h"
@@ -182,7 +182,7 @@ make_cleanup_dyn_string_delete (dyn_string_t arg)
 static void
 do_bfd_close_cleanup (void *arg)
 {
-  gdb_bfd_unref (arg);
+  gdb_bfd_unref ((bfd *) arg);
 }
 
 struct cleanup *
@@ -196,7 +196,7 @@ make_cleanup_bfd_unref (bfd *abfd)
 static void
 do_fclose_cleanup (void *arg)
 {
-  FILE *file = arg;
+  FILE *file = (FILE *) arg;
 
   fclose (file);
 }
@@ -214,7 +214,7 @@ make_cleanup_fclose (FILE *file)
 static void
 do_obstack_free (void *arg)
 {
-  struct obstack *ob = arg;
+  struct obstack *ob = (struct obstack *) arg;
 
   obstack_free (ob, NULL);
 }
@@ -230,7 +230,7 @@ make_cleanup_obstack_free (struct obstack *obstack)
 static void
 do_ui_file_delete (void *arg)
 {
-  ui_file_delete (arg);
+  ui_file_delete ((struct ui_file *) arg);
 }
 
 struct cleanup *
@@ -244,7 +244,7 @@ make_cleanup_ui_file_delete (struct ui_file *arg)
 static void
 do_ui_out_redirect_pop (void *arg)
 {
-  struct ui_out *uiout = arg;
+  struct ui_out *uiout = (struct ui_out *) arg;
 
   if (ui_out_redirect (uiout, NULL) < 0)
     warning (_("Cannot restore redirection of the current output protocol"));
@@ -262,7 +262,7 @@ make_cleanup_ui_out_redirect_pop (struct ui_out *uiout)
 static void
 do_free_section_addr_info (void *arg)
 {
-  free_section_addr_info (arg);
+  free_section_addr_info ((struct section_addr_info *) arg);
 }
 
 struct cleanup *
@@ -280,7 +280,8 @@ struct restore_integer_closure
 static void
 restore_integer (void *p)
 {
-  struct restore_integer_closure *closure = p;
+  struct restore_integer_closure *closure
+    = (struct restore_integer_closure *) p;
 
   *(closure->variable) = closure->value;
 }
@@ -291,8 +292,7 @@ restore_integer (void *p)
 struct cleanup *
 make_cleanup_restore_integer (int *variable)
 {
-  struct restore_integer_closure *c =
-    xmalloc (sizeof (struct restore_integer_closure));
+  struct restore_integer_closure *c = XNEW (struct restore_integer_closure);
 
   c->variable = variable;
   c->value = *variable;
@@ -314,7 +314,7 @@ make_cleanup_restore_uinteger (unsigned int *variable)
 static void
 do_unpush_target (void *arg)
 {
-  struct target_ops *ops = arg;
+  struct target_ops *ops = (struct target_ops *) arg;
 
   unpush_target (ops);
 }
@@ -332,7 +332,7 @@ make_cleanup_unpush_target (struct target_ops *ops)
 static void
 do_htab_delete_cleanup (void *htab_voidp)
 {
-  htab_t htab = htab_voidp;
+  htab_t htab = (htab_t) htab_voidp;
 
   htab_delete (htab);
 }
@@ -354,7 +354,8 @@ struct restore_ui_file_closure
 static void
 do_restore_ui_file (void *p)
 {
-  struct restore_ui_file_closure *closure = p;
+  struct restore_ui_file_closure *closure
+    = (struct restore_ui_file_closure *) p;
 
   *(closure->variable) = closure->value;
 }
@@ -395,7 +396,7 @@ make_cleanup_value_free_to_mark (struct value *mark)
 static void
 do_value_free (void *value)
 {
-  value_free (value);
+  value_free ((struct value *) value);
 }
 
 /* Free VALUE.  */
@@ -411,7 +412,7 @@ make_cleanup_value_free (struct value *value)
 static void
 do_free_so (void *arg)
 {
-  struct so_list *so = arg;
+  struct so_list *so = (struct so_list *) arg;
 
   free_so (so);
 }
@@ -475,7 +476,7 @@ make_cleanup_clear_parser_state (struct parser_state **p)
 void
 free_current_contents (void *ptr)
 {
-  void **location = ptr;
+  void **location = (void **) ptr;
 
   if (location == NULL)
     internal_error (__FILE__, __LINE__,
@@ -860,8 +861,8 @@ add_internal_problem_command (struct internal_problem *problem)
   char *set_doc;
   char *show_doc;
 
-  set_cmd_list = xmalloc (sizeof (*set_cmd_list));
-  show_cmd_list = xmalloc (sizeof (*set_cmd_list));
+  set_cmd_list = XNEW (struct cmd_list_element *);
+  show_cmd_list = XNEW (struct cmd_list_element *);
   *set_cmd_list = NULL;
   *show_cmd_list = NULL;
 
@@ -1041,6 +1042,18 @@ quit (void)
 #endif
 }
 
+/* See defs.h.  */
+
+void
+maybe_quit (void)
+{
+  if (check_quit_flag () || sync_quit_force_run)
+    quit ();
+  if (deprecated_interactive_hook)
+    deprecated_interactive_hook ();
+  target_check_pending_interrupt ();
+}
+
 
 /* Called when a memory allocation fails, with the number of bytes of
    memory requested in SIZE.  */
@@ -1091,7 +1104,7 @@ print_spaces (int n, struct ui_file *file)
 /* Print a host address.  */
 
 void
-gdb_print_host_address (const void *addr, struct ui_file *stream)
+gdb_print_host_address_1 (const void *addr, struct ui_file *stream)
 {
   fprintf_filtered (stream, "%s", host_address_to_string (addr));
 }
@@ -1101,7 +1114,7 @@ gdb_print_host_address (const void *addr, struct ui_file *stream)
 char *
 make_hex_string (const gdb_byte *data, size_t length)
 {
-  char *result = xmalloc (length * 2 + 1);
+  char *result = (char *) xmalloc (length * 2 + 1);
   char *p;
   size_t i;
 
@@ -1119,7 +1132,7 @@ make_hex_string (const gdb_byte *data, size_t length)
 static void
 do_regfree_cleanup (void *r)
 {
-  regfree (r);
+  regfree ((regex_t *) r);
 }
 
 /* Create a new cleanup that frees the compiled regular expression R.  */
@@ -1137,7 +1150,7 @@ char *
 get_regcomp_error (int code, regex_t *rx)
 {
   size_t length = regerror (code, rx, NULL, 0);
-  char *result = xmalloc (length);
+  char *result = (char *) xmalloc (length);
 
   regerror (code, rx, result, length);
   return result;
@@ -1482,7 +1495,7 @@ parse_escape (struct gdbarch *gdbarch, const char **string_ptr)
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that this routine should only
-   be call for printing things which are independent of the language
+   be called for printing things which are independent of the language
    of the program being debugged.
 
    printchar will normally escape backslashes and instances of QUOTER. If
@@ -1985,7 +1998,7 @@ puts_filtered_tabular (char *string, int width, int right)
   if (right)
     spaces += width - stringlen;
 
-  spacebuf = alloca (spaces + 1);
+  spacebuf = (char *) alloca (spaces + 1);
   spacebuf[spaces] = '\0';
   while (spaces--)
     spacebuf[spaces] = ' ';
@@ -2770,7 +2783,7 @@ print_core_address (struct gdbarch *gdbarch, CORE_ADDR address)
 hashval_t
 core_addr_hash (const void *ap)
 {
-  const CORE_ADDR *addrp = ap;
+  const CORE_ADDR *addrp = (const CORE_ADDR *) ap;
 
   return *addrp;
 }
@@ -2780,8 +2793,8 @@ core_addr_hash (const void *ap)
 int
 core_addr_eq (const void *ap, const void *bp)
 {
-  const CORE_ADDR *addr_ap = ap;
-  const CORE_ADDR *addr_bp = bp;
+  const CORE_ADDR *addr_ap = (const CORE_ADDR *) ap;
+  const CORE_ADDR *addr_bp = (const CORE_ADDR *) bp;
 
   return *addr_ap == *addr_bp;
 }
@@ -2891,7 +2904,7 @@ gdb_realpath_keepfile (const char *filename)
   if (base_name == filename)
     return xstrdup (filename);
 
-  dir_name = alloca ((size_t) (base_name - filename + 2));
+  dir_name = (char *) alloca ((size_t) (base_name - filename + 2));
   /* Allocate enough space to store the dir_name + plus one extra
      character sometimes needed under Windows (see below), and
      then the closing \000 character.  */
@@ -3002,7 +3015,7 @@ ldirname (const char *filename)
   if (base == filename)
     return NULL;
 
-  dirname = xmalloc (base - filename + 2);
+  dirname = (char *) xmalloc (base - filename + 2);
   memcpy (dirname, filename, base - filename);
 
   /* On DOS based file systems, convert "d:foo" to "d:.", so that we
@@ -3068,7 +3081,7 @@ gdb_bfd_errmsg (bfd_error_type error_tag, char **matching)
             + strlen (AMBIGUOUS_MESS2);
   for (p = matching; *p; p++)
     ret_len += strlen (*p) + 1;
-  ret = xmalloc (ret_len + 1);
+  ret = (char *) xmalloc (ret_len + 1);
   retp = ret;
   make_cleanup (xfree, ret);
 
@@ -3187,7 +3200,7 @@ producer_is_gcc (const char *producer, int *major, int *minor)
 static void
 do_free_char_ptr_vec (void *arg)
 {
-  VEC (char_ptr) *char_ptr_vec = arg;
+  VEC (char_ptr) *char_ptr_vec = (VEC (char_ptr) *) arg;
 
   free_char_ptr_vec (char_ptr_vec);
 }
@@ -3230,7 +3243,8 @@ substitute_path_component (char **stringp, const char *from, const char *to)
 	{
 	  char *string_new;
 
-	  string_new = xrealloc (string, (strlen (string) + to_len + 1));
+	  string_new
+	    = (char *) xrealloc (string, (strlen (string) + to_len + 1));
 
 	  /* Relocate the current S pointer.  */
 	  s = s - string + string_new;
@@ -3291,9 +3305,9 @@ wait_to_die_with_timeout (pid_t pid, int *status, int timeout)
       sa.sa_flags = 0;
       sigaction (SIGALRM, &sa, &old_sa);
 #else
-      void (*ofunc) ();
+      sighandler_t ofunc;
 
-      ofunc = (void (*)()) signal (SIGALRM, sigalrm_handler);
+      ofunc = signal (SIGALRM, sigalrm_handler);
 #endif
 
       alarm (timeout);

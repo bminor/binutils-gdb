@@ -88,6 +88,15 @@ tile_set_pc (struct regcache *regcache, CORE_ADDR pc)
 static uint64_t tile_breakpoint = 0x400b3cae70166000ULL;
 #define tile_breakpoint_len 8
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+tile_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = tile_breakpoint_len;
+  return (const gdb_byte *) &tile_breakpoint;
+}
+
 static int
 tile_breakpoint_at (CORE_ADDR where)
 {
@@ -182,8 +191,8 @@ struct linux_target_ops the_low_target =
   NULL,
   tile_get_pc,
   tile_set_pc,
-  (const unsigned char *) &tile_breakpoint,
-  tile_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  tile_sw_breakpoint_from_kind,
   NULL,
   0,
   tile_breakpoint_at,

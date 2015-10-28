@@ -791,7 +791,7 @@ arm_linux_add_process (pid_t pid)
 {
   struct arm_linux_process_info *proc;
 
-  proc = xcalloc (1, sizeof (*proc));
+  proc = XCNEW (struct arm_linux_process_info);
   proc->pid = pid;
 
   proc->next = arm_linux_process_list;

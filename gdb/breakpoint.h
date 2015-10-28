@@ -1005,7 +1005,11 @@ struct bpstat_what
 
 /* Tell what to do about this bpstat.  */
 struct bpstat_what bpstat_what (bpstat);
-
+
+/* Run breakpoint event callbacks associated with the breakpoints that
+   triggered.  */
+extern void bpstat_run_callbacks (bpstat bs_head);
+
 /* Find the bpstat associated with a breakpoint.  NULL otherwise.  */
 bpstat bpstat_find_breakpoint (bpstat, struct breakpoint *);
 

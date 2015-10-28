@@ -332,6 +332,7 @@ z80_start_line_hook (void)
   /* Check for <label>[:] [.](EQU|DEFL) <value>.  */
   if (is_name_beginner (*input_line_pointer))
     {
+      char *name;
       char c, *rest, *line_start;
       int len;
 
@@ -339,7 +340,7 @@ z80_start_line_hook (void)
       if (ignore_input ())
 	return 0;
 
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       rest = input_line_pointer + 1;
 
       if (*rest == ':')
@@ -364,13 +365,13 @@ z80_start_line_hook (void)
 	    }
 	  input_line_pointer = rest + len - 1;
 	  /* Allow redefining with "DEFL" (len == 4), but not with "EQU".  */
-	  equals (line_start, len == 4);
+	  equals (name, len == 4);
 	  return 1;
 	}
       else
 	{
 	  /* Restore line and pointer.  */
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	  input_line_pointer = line_start;
 	}
     }

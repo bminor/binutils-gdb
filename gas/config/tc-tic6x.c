@@ -471,17 +471,15 @@ s_tic6x_personalityindex (int ignored ATTRIBUTE_UNUSED)
 static void
 s_tic6x_personality (int ignored ATTRIBUTE_UNUSED)
 {
-  char *name, *p, c;
+  char *name, c;
   tic6x_unwind_info *unwind = tic6x_get_unwind ();
 
   if (unwind->personality_routine || unwind->personality_index != -1)
     as_bad (_("duplicate .personality directive"));
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  p = input_line_pointer;
+  c = get_symbol_name (&name);
   unwind->personality_routine = symbol_find_or_make (name);
-  *p = c;
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
 
@@ -570,12 +568,11 @@ s_tic6x_scomm (int ignore ATTRIBUTE_UNUSED)
   offsetT align;
   int align2;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
 
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
-  *p = c;
+  (void) restore_line_pointer (c);
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {

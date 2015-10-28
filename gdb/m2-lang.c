@@ -425,7 +425,7 @@ static struct gdbarch_data *m2_type_data;
 const struct builtin_m2_type *
 builtin_m2_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, m2_type_data);
+  return (const struct builtin_m2_type *) gdbarch_data (gdbarch, m2_type_data);
 }
 
 

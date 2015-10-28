@@ -345,7 +345,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
      then use that to allocate the architecture vector.  */
   struct obstack *obstack = XNEW (struct obstack);
   obstack_init (obstack);
-  gdbarch = obstack_alloc (obstack, sizeof (*gdbarch));
+  gdbarch = XOBNEW (obstack, struct gdbarch);
   memset (gdbarch, 0, sizeof (*gdbarch));
   gdbarch->obstack = obstack;
 
@@ -447,6 +447,14 @@ gdbarch_obstack_zalloc (struct gdbarch *arch, long size)
 
   memset (data, 0, size);
   return data;
+}
+
+/* See gdbarch.h.  */
+
+char *
+gdbarch_obstack_strdup (struct gdbarch *arch, const char *string)
+{
+  return obstack_strdup (arch->obstack, string);
 }
 
 
@@ -4894,7 +4902,7 @@ static struct gdbarch_registration *gdbarch_registry = NULL;
 static void
 append_name (const char ***buf, int *nr, const char *name)
 {
-  *buf = xrealloc (*buf, sizeof (char**) * (*nr + 1));
+  *buf = XRESIZEVEC (const char *, *buf, *nr + 1);
   (*buf)[*nr] = name;
   *nr += 1;
 }

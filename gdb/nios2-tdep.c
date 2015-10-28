@@ -138,17 +138,15 @@ static int nios2_dwarf2gdb_regno_map[] =
   NIOS2_MPUACC_REGNUM     /* 48 */
 };
 
+gdb_static_assert (ARRAY_SIZE (nios2_dwarf2gdb_regno_map) == NIOS2_NUM_REGS);
 
 /* Implement the dwarf2_reg_to_regnum gdbarch method.  */
 
 static int
 nios2_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dw_reg)
 {
-  if (dw_reg < 0 || dw_reg > NIOS2_NUM_REGS)
-    {
-      warning (_("Dwarf-2 uses unmapped register #%d"), dw_reg);
-      return dw_reg;
-    }
+  if (dw_reg < 0 || dw_reg >= NIOS2_NUM_REGS)
+    return -1;
 
   return nios2_dwarf2gdb_regno_map[dw_reg];
 }
@@ -1920,7 +1918,7 @@ nios2_frame_unwind_cache (struct frame_info *this_frame,
   int i;
 
   if (*this_prologue_cache)
-    return *this_prologue_cache;
+    return (struct nios2_unwind_cache *) *this_prologue_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct nios2_unwind_cache);
   *this_prologue_cache = cache;
@@ -2028,7 +2026,7 @@ nios2_stub_frame_cache (struct frame_info *this_frame, void **this_cache)
   int num_regs = gdbarch_num_regs (gdbarch);
 
   if (*this_cache != NULL)
-    return *this_cache;
+    return (struct trad_frame_cache *) *this_cache;
   this_trad_cache = trad_frame_cache_zalloc (this_frame);
   *this_cache = this_trad_cache;
 
@@ -2284,7 +2282,7 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = xcalloc (1, sizeof (struct gdbarch_tdep));
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* longjmp support not enabled by default.  */

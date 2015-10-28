@@ -1,3 +1,34 @@
+2015-10-27  Stephen Fisher  <sfisher@panix.com>
+
+	* common.h (NT_NETBSD_MARCH): Define.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86-64.h (R_X86_64_GOTPCRELX): New.
+	(R_X86_64_REX_GOTPCRELX): Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386.h (R_386_GOT32X): New relocation.
+
+2015-10-07  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* arc-reloc.def: Macro file with definition of all relocation
+	types.
+	* arc.h: Changed macros for the newly supported ARC cpus.  Altered
+	enum defining the supported relocations.
+	* common.h: Changed EM_ARC_A5 definition to EM_ARC_COMPACT. Added
+	macro for EM_ARC_COMPACT2.
+
+2015-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* common.h (DF_1_STUB, DF_1_PIE): Define.
+
+2015-09-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* external.h (Elf64_External_Chdr): Change ch_type to 4 bytes
+	and add ch_reserved.
+
 2015-08-11  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64.h (R_AARCH64_P32_TLSLD_ADD_DTPREL_LO12): Define.

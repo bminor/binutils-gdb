@@ -62,7 +62,7 @@ cris_cannot_fetch_register (int regno)
 extern int debug_threads;
 
 static CORE_ADDR
-cris_get_pc (struct regcache *regcache, void)
+cris_get_pc (struct regcache *regcache)
 {
   unsigned long pc;
   collect_register_by_name (regcache, "pc", &pc);
@@ -80,6 +80,15 @@ cris_set_pc (struct regcache *regcache, CORE_ADDR pc)
 
 static const unsigned short cris_breakpoint = 0xe938;
 #define cris_breakpoint_len 2
+
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+cris_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = cris_breakpoint_len;
+  return (const gdb_byte *) &cris_breakpoint;
+}
 
 static int
 cris_breakpoint_at (CORE_ADDR where)
@@ -140,8 +149,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   cris_get_pc,
   cris_set_pc,
-  (const unsigned char *) &cris_breakpoint,
-  cris_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  cris_sw_breakpoint_from_kind,
   cris_reinsert_addr,
   0,
   cris_breakpoint_at,

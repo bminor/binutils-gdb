@@ -215,13 +215,13 @@ read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
   str_secsize = bfd_get_section_size (si.str_sect);
   dyninfo_secsize = bfd_get_section_size (si.dyninfo_sect);
   got_secsize = bfd_get_section_size (si.got_sect);
-  sym_secptr = xmalloc (sym_secsize);
+  sym_secptr = (char *) xmalloc (sym_secsize);
   cleanups = make_cleanup (xfree, sym_secptr);
-  str_secptr = xmalloc (str_secsize);
+  str_secptr = (char *) xmalloc (str_secsize);
   make_cleanup (xfree, str_secptr);
-  dyninfo_secptr = xmalloc (dyninfo_secsize);
+  dyninfo_secptr = (char *) xmalloc (dyninfo_secsize);
   make_cleanup (xfree, dyninfo_secptr);
-  got_secptr = xmalloc (got_secsize);
+  got_secptr = (char *) xmalloc (got_secsize);
   make_cleanup (xfree, got_secptr);
 
   if (!bfd_get_section_contents (abfd, si.sym_sect, sym_secptr,

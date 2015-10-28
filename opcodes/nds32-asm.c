@@ -2086,7 +2086,7 @@ done:
     {
       /* Sign-ext the value.  */
       if (((value >> 32) == 0) && (value & 0x80000000))
-	value |= (int64_t) -1 << 31;
+	value |= (int64_t) -1U << 31;
 
 
       /* Shift the value to positive domain.  */

@@ -453,8 +453,8 @@ resize_section_table (struct target_section_table *table, int adjustment)
 
   if (new_count)
     {
-      table->sections = xrealloc (table->sections,
-				  sizeof (struct target_section) * new_count);
+      table->sections = XRESIZEVEC (struct target_section, table->sections,
+				    new_count);
       table->sections_end = table->sections + new_count;
     }
   else
@@ -475,7 +475,7 @@ build_section_table (struct bfd *some_bfd, struct target_section **start,
   count = bfd_count_sections (some_bfd);
   if (*start)
     xfree (* start);
-  *start = (struct target_section *) xmalloc (count * sizeof (**start));
+  *start = XNEWVEC (struct target_section, count);
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);
   if (*end > *start + count)

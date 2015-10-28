@@ -35,7 +35,7 @@
 #include <sys/ioctl.h>  /* For FIONBIO.  */
 #endif
 
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 
 #ifdef USE_WIN32API
 #include <winsock2.h>
@@ -155,7 +155,8 @@ wait_for_connect (struct serial *scb, unsigned int *polls)
 int
 net_open (struct serial *scb, const char *name)
 {
-  char *port_str, hostname[100];
+  char hostname[100];
+  const char *port_str;
   int n, port, tmp;
   int use_udp;
   struct hostent *hostent;

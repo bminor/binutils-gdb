@@ -18,7 +18,7 @@ Disassembly of section \.text:
 .*[ 	]+R_386_PC32[ 	]+xtrn
 .*[ 	]+R_386_PC8[ 	]+xtrn
 .*[ 	]+R_386_GOT32[ 	]+xtrn
-.*[ 	]+R_386_GOT32[ 	]+xtrn
+.*[ 	]+R_386_GOT32X[ 	]+xtrn
 .*[ 	]+R_386_GOTOFF[ 	]+xtrn
 .*[ 	]+R_386_GOTOFF[ 	]+xtrn
 .*[ 	]+R_386_GOTPC[ 	]+_GLOBAL_OFFSET_TABLE_

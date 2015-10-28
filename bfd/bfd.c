@@ -2000,7 +2000,8 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 		{
 		  Elf64_External_Chdr *echdr
 		    = (Elf64_External_Chdr *) contents;
-		  bfd_put_64 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+		  bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+		  bfd_put_32 (abfd, 0, &echdr->ch_reserved);
 		  bfd_put_64 (abfd, sec->size, &echdr->ch_size);
 		  bfd_put_64 (abfd, 1 << sec->alignment_power,
 			      &echdr->ch_addralign);
@@ -2061,7 +2062,7 @@ bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
       else
 	{
 	  Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-	  chdr.ch_type = bfd_get_64 (abfd, &echdr->ch_type);
+	  chdr.ch_type = bfd_get_32 (abfd, &echdr->ch_type);
 	  chdr.ch_size = bfd_get_64 (abfd, &echdr->ch_size);
 	  chdr.ch_addralign = bfd_get_64 (abfd, &echdr->ch_addralign);
 	}
@@ -2165,19 +2166,20 @@ FUNCTION
 
 SYNOPSIS
 	bfd_boolean bfd_convert_section_contents
-	  (bfd *ibfd, asection *isec, bfd *obfd, bfd_byte **ptr);
+	  (bfd *ibfd, asection *isec, bfd *obfd,
+	   bfd_byte **ptr, bfd_size_type *ptr_size);
 
 DESCRIPTION
 	Convert the contents, stored in @var{*ptr}, of the section
 	@var{isec} in input BFD @var{ibfd} to output BFD @var{obfd}
 	if needed.  The original buffer pointed to by @var{*ptr} may
 	be freed and @var{*ptr} is returned with memory malloc'd by this
-	function.
+	function, and the new size written to @var{ptr_size}.
 */
 
 bfd_boolean
 bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
-			      bfd_byte **ptr)
+			      bfd_byte **ptr, bfd_size_type *ptr_size)
 {
   bfd_byte *contents;
   bfd_size_type ihdr_size, ohdr_size, size;
@@ -2222,7 +2224,7 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   else
     {
       Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-      chdr.ch_type = bfd_get_64 (ibfd, &echdr->ch_type);
+      chdr.ch_type = bfd_get_32 (ibfd, &echdr->ch_type);
       chdr.ch_size = bfd_get_64 (ibfd, &echdr->ch_size);
       chdr.ch_addralign = bfd_get_64 (ibfd, &echdr->ch_addralign);
 
@@ -2249,7 +2251,8 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   else
     {
       Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-      bfd_put_64 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+      bfd_put_32 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+      bfd_put_32 (obfd, 0, &echdr->ch_reserved);
       bfd_put_64 (obfd, chdr.ch_size, &echdr->ch_size);
       bfd_put_64 (obfd, chdr.ch_addralign, &echdr->ch_addralign);
     }
@@ -2264,5 +2267,6 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
       *ptr = contents;
     }
 
+  *ptr_size = size;
   return TRUE;
 }

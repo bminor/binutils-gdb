@@ -1,3 +1,24 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.h (R_X86_64_GOTPCRELX): New.
+	(R_X86_64_REX_GOTPCRELX): Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386.h (R_386_GOT32X): New.
+
+2015-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19118
+	* elfcpp.h (EM): Add EM_IAMCU.
+
+2015-10-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19060
+	* elfcpp.h (Chdr::get_ch_type): Change return type to Elf_Word.
+	* elfcpp_internal.h (Chdr_data<64>): Change ch_type to 4 bytes
+	and add ch_reserved.
+
 2015-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfcpp.h (Elf_sizes): Add chdr_size.

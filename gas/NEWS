@@ -1,6 +1,16 @@
 -*- text -*-
 
+* Add a configure option --enable-compressed-debug-sections={all,gas} to
+  decide whether DWARF debug sections should be compressed by default.
+
+* Add support for the ARC EM/HS, and ARC600/700 architectures.  Remove
+  assembler support for Argonaut RISC architectures.
+
 Changes in 2.26:
+
+* Symbol and label names can now be enclosed in double quotes (") which allows
+  them to contain characters that are not part of valid symbol names in high
+  level languages.
 
 * Added the correctly spelled -march=armv6kz, for ARMv6KZ support.  The
   previous spelling, -march=armv6zk, is still accepted.

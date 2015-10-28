@@ -607,7 +607,7 @@ windows_make_so (const char *name, LPVOID load_addr)
     }
 #endif
   so = XCNEW (struct so_list);
-  so->lm_info = (struct lm_info *) xmalloc (sizeof (struct lm_info));
+  so->lm_info = XNEW (struct lm_info);
   so->lm_info->load_addr = load_addr;
   strcpy (so->so_original_name, name);
 #ifndef __CYGWIN__
@@ -1642,7 +1642,6 @@ windows_add_all_dlls (void)
 static void
 do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
 {
-  extern int stop_after_trap;
   int i;
   struct inferior *inf;
   struct thread_info *tp;
@@ -1681,16 +1680,20 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
   target_terminal_inferior ();
 
   windows_initialization_done = 0;
-  inf->control.stop_soon = STOP_QUIETLY;
+
   while (1)
     {
-      stop_after_trap = 1;
-      wait_for_inferior ();
-      tp = inferior_thread ();
-      if (tp->suspend.stop_signal != GDB_SIGNAL_TRAP)
-	resume (tp->suspend.stop_signal);
-      else
+      struct target_waitstatus status;
+
+      windows_wait (ops, minus_one_ptid, &status, 0);
+
+      /* Note windows_wait returns TARGET_WAITKIND_SPURIOUS for thread
+	 events.  */
+      if (status.kind != TARGET_WAITKIND_LOADED
+	  && status.kind != TARGET_WAITKIND_SPURIOUS)
 	break;
+
+      windows_resume (ops, minus_one_ptid, 0, GDB_SIGNAL_0);
     }
 
   /* Now that the inferior has been started and all DLLs have been mapped,
@@ -1711,8 +1714,6 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
   windows_add_all_dlls ();
 
   windows_initialization_done = 1;
-  inf->control.stop_soon = NO_STOP_QUIETLY;
-  stop_after_trap = 0;
   return;
 }
 

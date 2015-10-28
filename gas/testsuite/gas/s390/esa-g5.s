@@ -458,11 +458,11 @@ foo:
 	trap2
 	trap4	4095(%r5)
 	tre	%r6,%r9
-	troo	%r6,%r8
-	trot	%r6,%r8
+	troo	%r6,%r9
+	trot	%r6,%r9
 	trt	4095(256,%r5),4095(%r10)
-	trto	%r6,%r8
-	trtt	%r6,%r8
+	trto	%r6,%r9
+	trtt	%r6,%r9
 	ts	4095(%r5)
 	tsch	4095(%r5)
 	unpk	4095(6,%r5),4095(9,%r10)

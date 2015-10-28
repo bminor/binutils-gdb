@@ -50,7 +50,7 @@ static short pe_minor_subsystem_version = -1;
 
 struct is_specified_symbol_predicate_data
 {
-  const char	*name;
+  const char *  name;
   bfd_boolean	found;
 };
 
@@ -60,6 +60,16 @@ struct redefine_node
   char *source;
   char *target;
   struct redefine_node *next;
+};
+
+struct addsym_node
+{
+  struct addsym_node *next;
+  char *    symdef;
+  long      symval;
+  flagword  flags;
+  char *    section;
+  char *    othersym;
 };
 
 typedef struct section_rename
@@ -88,26 +98,26 @@ static int deterministic = -1;		/* Enable deterministic archives.  */
 static int status = 0;		/* Exit status.  */
 
 enum strip_action
-  {
-    STRIP_UNDEF,
-    STRIP_NONE,			/* Don't strip.  */
-    STRIP_DEBUG,		/* Strip all debugger symbols.  */
-    STRIP_UNNEEDED,		/* Strip unnecessary symbols.  */
-    STRIP_NONDEBUG,		/* Strip everything but debug info.  */
-    STRIP_DWO,			/* Strip all DWO info.  */
-    STRIP_NONDWO,		/* Strip everything but DWO info.  */
-    STRIP_ALL			/* Strip all symbols.  */
-  };
+{
+  STRIP_UNDEF,
+  STRIP_NONE,		/* Don't strip.  */
+  STRIP_DEBUG,		/* Strip all debugger symbols.  */
+  STRIP_UNNEEDED,	/* Strip unnecessary symbols.  */
+  STRIP_NONDEBUG,	/* Strip everything but debug info.  */
+  STRIP_DWO,		/* Strip all DWO info.  */
+  STRIP_NONDWO,		/* Strip everything but DWO info.  */
+  STRIP_ALL		/* Strip all symbols.  */
+};
 
 /* Which symbols to remove.  */
 static enum strip_action strip_symbols = STRIP_UNDEF;
 
 enum locals_action
-  {
-    LOCALS_UNDEF,
-    LOCALS_START_L,		/* Discard locals starting with L.  */
-    LOCALS_ALL			/* Discard all locals.  */
-  };
+{
+  LOCALS_UNDEF,
+  LOCALS_START_L,	/* Discard locals starting with L.  */
+  LOCALS_ALL		/* Discard all locals.  */
+};
 
 /* Which local symbols to remove.  Overrides STRIP_ALL.  */
 static enum locals_action discard_locals;
@@ -232,6 +242,8 @@ static htab_t globalize_specific_htab = NULL;
 static htab_t keepglobal_specific_htab = NULL;
 static htab_t weaken_specific_htab = NULL;
 static struct redefine_node *redefine_sym_list = NULL;
+static struct addsym_node *add_sym_list = NULL, **add_sym_tail = &add_sym_list;
+static int add_symbols = 0;
 
 /* If this is TRUE, we weaken global symbols (set BSF_WEAK).  */
 static bfd_boolean weaken = FALSE;
@@ -254,11 +266,11 @@ static int reverse_bytes = 0;
 /* For Coff objects, we may want to allow or disallow long section names,
    or preserve them where found in the inputs.  Debug info relies on them.  */
 enum long_section_name_handling
-  {
-    DISABLE,
-    ENABLE,
-    KEEP
-  };
+{
+  DISABLE,
+  ENABLE,
+  KEEP
+};
 
 /* The default long section handling mode is to preserve them.
    This is also the only behaviour for 'strip'.  */
@@ -266,68 +278,69 @@ static enum long_section_name_handling long_section_names = KEEP;
 
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 enum command_line_switch
-  {
-    OPTION_ADD_SECTION=150,
-    OPTION_UPDATE_SECTION,
-    OPTION_DUMP_SECTION,
-    OPTION_CHANGE_ADDRESSES,
-    OPTION_CHANGE_LEADING_CHAR,
-    OPTION_CHANGE_START,
-    OPTION_CHANGE_SECTION_ADDRESS,
-    OPTION_CHANGE_SECTION_LMA,
-    OPTION_CHANGE_SECTION_VMA,
-    OPTION_CHANGE_WARNINGS,
-    OPTION_COMPRESS_DEBUG_SECTIONS,
-    OPTION_DEBUGGING,
-    OPTION_DECOMPRESS_DEBUG_SECTIONS,
-    OPTION_GAP_FILL,
-    OPTION_NO_CHANGE_WARNINGS,
-    OPTION_PAD_TO,
-    OPTION_REMOVE_LEADING_CHAR,
-    OPTION_SET_SECTION_FLAGS,
-    OPTION_SET_START,
-    OPTION_STRIP_UNNEEDED,
-    OPTION_WEAKEN,
-    OPTION_REDEFINE_SYM,
-    OPTION_REDEFINE_SYMS,
-    OPTION_SREC_LEN,
-    OPTION_SREC_FORCES3,
-    OPTION_STRIP_SYMBOLS,
-    OPTION_STRIP_UNNEEDED_SYMBOL,
-    OPTION_STRIP_UNNEEDED_SYMBOLS,
-    OPTION_KEEP_SYMBOLS,
-    OPTION_LOCALIZE_HIDDEN,
-    OPTION_LOCALIZE_SYMBOLS,
-    OPTION_LONG_SECTION_NAMES,
-    OPTION_GLOBALIZE_SYMBOL,
-    OPTION_GLOBALIZE_SYMBOLS,
-    OPTION_KEEPGLOBAL_SYMBOLS,
-    OPTION_WEAKEN_SYMBOLS,
-    OPTION_RENAME_SECTION,
-    OPTION_ALT_MACH_CODE,
-    OPTION_PREFIX_SYMBOLS,
-    OPTION_PREFIX_SECTIONS,
-    OPTION_PREFIX_ALLOC_SECTIONS,
-    OPTION_FORMATS_INFO,
-    OPTION_ADD_GNU_DEBUGLINK,
-    OPTION_ONLY_KEEP_DEBUG,
-    OPTION_KEEP_FILE_SYMBOLS,
-    OPTION_READONLY_TEXT,
-    OPTION_WRITABLE_TEXT,
-    OPTION_PURE,
-    OPTION_IMPURE,
-    OPTION_EXTRACT_SYMBOL,
-    OPTION_REVERSE_BYTES,
-    OPTION_FILE_ALIGNMENT,
-    OPTION_HEAP,
-    OPTION_IMAGE_BASE,
-    OPTION_SECTION_ALIGNMENT,
-    OPTION_STACK,
-    OPTION_INTERLEAVE_WIDTH,
-    OPTION_SUBSYSTEM,
-    OPTION_EXTRACT_DWO,
-    OPTION_STRIP_DWO
-  };
+{
+  OPTION_ADD_SECTION=150,
+  OPTION_ADD_GNU_DEBUGLINK,
+  OPTION_ADD_SYMBOL,
+  OPTION_ALT_MACH_CODE,
+  OPTION_CHANGE_ADDRESSES,
+  OPTION_CHANGE_LEADING_CHAR,
+  OPTION_CHANGE_SECTION_ADDRESS,
+  OPTION_CHANGE_SECTION_LMA,
+  OPTION_CHANGE_SECTION_VMA,
+  OPTION_CHANGE_START,
+  OPTION_CHANGE_WARNINGS,
+  OPTION_COMPRESS_DEBUG_SECTIONS,
+  OPTION_DEBUGGING,
+  OPTION_DECOMPRESS_DEBUG_SECTIONS,
+  OPTION_DUMP_SECTION,
+  OPTION_EXTRACT_DWO,
+  OPTION_EXTRACT_SYMBOL,
+  OPTION_FILE_ALIGNMENT,
+  OPTION_FORMATS_INFO,
+  OPTION_GAP_FILL,
+  OPTION_GLOBALIZE_SYMBOL,
+  OPTION_GLOBALIZE_SYMBOLS,
+  OPTION_HEAP,
+  OPTION_IMAGE_BASE,
+  OPTION_IMPURE,
+  OPTION_INTERLEAVE_WIDTH,
+  OPTION_KEEPGLOBAL_SYMBOLS,
+  OPTION_KEEP_FILE_SYMBOLS,
+  OPTION_KEEP_SYMBOLS,
+  OPTION_LOCALIZE_HIDDEN,
+  OPTION_LOCALIZE_SYMBOLS,
+  OPTION_LONG_SECTION_NAMES,
+  OPTION_NO_CHANGE_WARNINGS,
+  OPTION_ONLY_KEEP_DEBUG,
+  OPTION_PAD_TO,
+  OPTION_PREFIX_ALLOC_SECTIONS,
+  OPTION_PREFIX_SECTIONS,
+  OPTION_PREFIX_SYMBOLS,
+  OPTION_PURE,
+  OPTION_READONLY_TEXT,
+  OPTION_REDEFINE_SYM,
+  OPTION_REDEFINE_SYMS,
+  OPTION_REMOVE_LEADING_CHAR,
+  OPTION_RENAME_SECTION,
+  OPTION_REVERSE_BYTES,
+  OPTION_SECTION_ALIGNMENT,
+  OPTION_SET_SECTION_FLAGS,
+  OPTION_SET_START,
+  OPTION_SREC_FORCES3,
+  OPTION_SREC_LEN,
+  OPTION_STACK,
+  OPTION_STRIP_DWO,
+  OPTION_STRIP_SYMBOLS,
+  OPTION_STRIP_UNNEEDED,
+  OPTION_STRIP_UNNEEDED_SYMBOL,
+  OPTION_STRIP_UNNEEDED_SYMBOLS,
+  OPTION_SUBSYSTEM,
+  OPTION_UPDATE_SECTION,
+  OPTION_WEAKEN,
+  OPTION_WEAKEN_SYMBOLS,
+  OPTION_WRITABLE_TEXT
+};
 
 /* Options to handle if running as "strip".  */
 
@@ -345,16 +358,16 @@ static struct option strip_options[] =
   {"keep-file-symbols", no_argument, 0, OPTION_KEEP_FILE_SYMBOLS},
   {"keep-symbol", required_argument, 0, 'K'},
   {"only-keep-debug", no_argument, 0, OPTION_ONLY_KEEP_DEBUG},
+  {"output-file", required_argument, 0, 'o'},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
-  {"output-file", required_argument, 0, 'o'},
   {"preserve-dates", no_argument, 0, 'p'},
   {"remove-section", required_argument, 0, 'R'},
   {"strip-all", no_argument, 0, 's'},
   {"strip-debug", no_argument, 0, 'S'},
   {"strip-dwo", no_argument, 0, OPTION_STRIP_DWO},
-  {"strip-unneeded", no_argument, 0, OPTION_STRIP_UNNEEDED},
   {"strip-symbol", required_argument, 0, 'N'},
+  {"strip-unneeded", no_argument, 0, OPTION_STRIP_UNNEEDED},
   {"target", required_argument, 0, 'F'},
   {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, 'V'},
@@ -368,10 +381,10 @@ static struct option copy_options[] =
 {
   {"add-gnu-debuglink", required_argument, 0, OPTION_ADD_GNU_DEBUGLINK},
   {"add-section", required_argument, 0, OPTION_ADD_SECTION},
-  {"update-section", required_argument, 0, OPTION_UPDATE_SECTION},
+  {"add-symbol", required_argument, 0, OPTION_ADD_SYMBOL},
+  {"adjust-section-vma", required_argument, 0, OPTION_CHANGE_SECTION_ADDRESS},
   {"adjust-start", required_argument, 0, OPTION_CHANGE_START},
   {"adjust-vma", required_argument, 0, OPTION_CHANGE_ADDRESSES},
-  {"adjust-section-vma", required_argument, 0, OPTION_CHANGE_SECTION_ADDRESS},
   {"adjust-warnings", no_argument, 0, OPTION_CHANGE_WARNINGS},
   {"alt-machine-code", required_argument, 0, OPTION_ALT_MACH_CODE},
   {"binary-architecture", required_argument, 0, 'B'},
@@ -393,11 +406,14 @@ static struct option copy_options[] =
   {"enable-deterministic-archives", no_argument, 0, 'D'},
   {"extract-dwo", no_argument, 0, OPTION_EXTRACT_DWO},
   {"extract-symbol", no_argument, 0, OPTION_EXTRACT_SYMBOL},
+  {"file-alignment", required_argument, 0, OPTION_FILE_ALIGNMENT},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
   {"globalize-symbol", required_argument, 0, OPTION_GLOBALIZE_SYMBOL},
   {"globalize-symbols", required_argument, 0, OPTION_GLOBALIZE_SYMBOLS},
+  {"heap", required_argument, 0, OPTION_HEAP},
   {"help", no_argument, 0, 'h'},
+  {"image-base", required_argument, 0 , OPTION_IMAGE_BASE},
   {"impure", no_argument, 0, OPTION_IMPURE},
   {"info", no_argument, 0, OPTION_FORMATS_INFO},
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
@@ -420,9 +436,9 @@ static struct option copy_options[] =
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
   {"pad-to", required_argument, 0, OPTION_PAD_TO},
-  {"prefix-symbols", required_argument, 0, OPTION_PREFIX_SYMBOLS},
-  {"prefix-sections", required_argument, 0, OPTION_PREFIX_SECTIONS},
   {"prefix-alloc-sections", required_argument, 0, OPTION_PREFIX_ALLOC_SECTIONS},
+  {"prefix-sections", required_argument, 0, OPTION_PREFIX_SECTIONS},
+  {"prefix-symbols", required_argument, 0, OPTION_PREFIX_SYMBOLS},
   {"preserve-dates", no_argument, 0, 'p'},
   {"pure", no_argument, 0, OPTION_PURE},
   {"readonly-text", no_argument, 0, OPTION_READONLY_TEXT},
@@ -432,19 +448,23 @@ static struct option copy_options[] =
   {"remove-section", required_argument, 0, 'R'},
   {"rename-section", required_argument, 0, OPTION_RENAME_SECTION},
   {"reverse-bytes", required_argument, 0, OPTION_REVERSE_BYTES},
+  {"section-alignment", required_argument, 0, OPTION_SECTION_ALIGNMENT},
   {"set-section-flags", required_argument, 0, OPTION_SET_SECTION_FLAGS},
   {"set-start", required_argument, 0, OPTION_SET_START},
-  {"srec-len", required_argument, 0, OPTION_SREC_LEN},
   {"srec-forceS3", no_argument, 0, OPTION_SREC_FORCES3},
+  {"srec-len", required_argument, 0, OPTION_SREC_LEN},
+  {"stack", required_argument, 0, OPTION_STACK},
   {"strip-all", no_argument, 0, 'S'},
   {"strip-debug", no_argument, 0, 'g'},
   {"strip-dwo", no_argument, 0, OPTION_STRIP_DWO},
+  {"strip-symbol", required_argument, 0, 'N'},
+  {"strip-symbols", required_argument, 0, OPTION_STRIP_SYMBOLS},
   {"strip-unneeded", no_argument, 0, OPTION_STRIP_UNNEEDED},
   {"strip-unneeded-symbol", required_argument, 0, OPTION_STRIP_UNNEEDED_SYMBOL},
   {"strip-unneeded-symbols", required_argument, 0, OPTION_STRIP_UNNEEDED_SYMBOLS},
-  {"strip-symbol", required_argument, 0, 'N'},
-  {"strip-symbols", required_argument, 0, OPTION_STRIP_SYMBOLS},
+  {"subsystem", required_argument, 0, OPTION_SUBSYSTEM},
   {"target", required_argument, 0, 'F'},
+  {"update-section", required_argument, 0, OPTION_UPDATE_SECTION},
   {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, 'V'},
   {"weaken", no_argument, 0, OPTION_WEAKEN},
@@ -452,12 +472,6 @@ static struct option copy_options[] =
   {"weaken-symbols", required_argument, 0, OPTION_WEAKEN_SYMBOLS},
   {"wildcard", no_argument, 0, 'w'},
   {"writable-text", no_argument, 0, OPTION_WRITABLE_TEXT},
-  {"file-alignment", required_argument, 0, OPTION_FILE_ALIGNMENT},
-  {"heap", required_argument, 0, OPTION_HEAP},
-  {"image-base", required_argument, 0 , OPTION_IMAGE_BASE},
-  {"section-alignment", required_argument, 0, OPTION_SECTION_ALIGNMENT},
-  {"stack", required_argument, 0, OPTION_STACK},
-  {"subsystem", required_argument, 0, OPTION_SUBSYSTEM},
   {0, no_argument, 0, 0}
 };
 
@@ -585,6 +599,7 @@ copy_usage (FILE *stream, int exit_status)
      --globalize-symbols <file>    --globalize-symbol for all in <file>\n\
      --keep-global-symbols <file>  -G for all symbols listed in <file>\n\
      --weaken-symbols <file>       -W for all symbols listed in <file>\n\
+     --add-symbol <name>=[<section>:]<value>[,<flags>]  Add a symbol\n\
      --alt-machine-code <index>    Use the target's <index>'th alternative machine\n\
      --writable-text               Mark the output text as writable\n\
      --readonly-text               Make the output text write protected\n\
@@ -718,6 +733,78 @@ parse_flags (const char *s)
 	  non_fatal (_("unrecognized section flag `%s'"), copy);
 	  fatal (_("supported flags: %s"),
 		 "alloc, load, noload, readonly, debug, code, data, rom, share, contents, merge, strings");
+	}
+
+      s = snext;
+    }
+  while (s != NULL);
+
+  return ret;
+}
+
+/* Parse symbol flags into a flagword, with a fatal error if the
+   string can't be parsed.  */
+
+static flagword
+parse_symflags (const char *s, char **other)
+{
+  flagword ret;
+  const char *snext;
+  int len;
+
+  ret = BSF_NO_FLAGS;
+
+  do
+    {
+      snext = strchr (s, ',');
+      if (snext == NULL)
+	  len = strlen (s);
+      else
+	{
+	  len = snext - s;
+	  ++snext;
+	}
+
+#define PARSE_FLAG(fname,fval)							  \
+      else if (len == (int) sizeof fname - 1 && strncasecmp (fname, s, len) == 0) \
+	ret |= fval
+
+#define PARSE_OTHER(fname,fval)								   \
+      else if (len >= (int) sizeof fname && strncasecmp (fname, s, sizeof fname - 1) == 0) \
+	fval = strndup (s + sizeof fname - 1, len - sizeof fname + 1)
+      
+      if (0) ;
+      PARSE_FLAG ("local", BSF_LOCAL);
+      PARSE_FLAG ("global", BSF_GLOBAL);
+      PARSE_FLAG ("export", BSF_EXPORT);
+      PARSE_FLAG ("debug", BSF_DEBUGGING);
+      PARSE_FLAG ("function", BSF_FUNCTION);
+      PARSE_FLAG ("weak", BSF_WEAK);
+      PARSE_FLAG ("section", BSF_SECTION_SYM);
+      PARSE_FLAG ("constructor", BSF_CONSTRUCTOR);
+      PARSE_FLAG ("warning", BSF_WARNING);
+      PARSE_FLAG ("indirect", BSF_INDIRECT);
+      PARSE_FLAG ("file", BSF_FILE);
+      PARSE_FLAG ("object", BSF_OBJECT);
+      PARSE_FLAG ("synthetic", BSF_SYNTHETIC);
+      PARSE_FLAG ("indirect-function", BSF_GNU_INDIRECT_FUNCTION | BSF_FUNCTION);
+      PARSE_FLAG ("unique-object", BSF_GNU_UNIQUE | BSF_OBJECT);
+      PARSE_OTHER ("before=", *other);
+
+#undef PARSE_FLAG
+#undef PARSE_OTHER
+      else
+	{
+	  char *copy;
+
+	  copy = (char *) xmalloc (len + 1);
+	  strncpy (copy, s, len);
+	  copy[len] = '\0';
+	  non_fatal (_("unrecognized symbol flag `%s'"), copy);
+	  fatal (_("supported flags: %s"),
+		  "local, global, export, debug, function, weak, section, "
+		  "constructor, warning, indirect, file, object, synthetic, "
+		  "indirect-function, unique-object, before=<othersym>");
 	}
 
       s = snext;
@@ -1213,6 +1300,49 @@ is_hidden_symbol (asymbol *sym)
   return FALSE;
 }
 
+static bfd_boolean
+need_sym_before (struct addsym_node **node, const char *sym)
+{
+  int count;
+  struct addsym_node *ptr = add_sym_list;
+
+  /* 'othersym' symbols are at the front of the list.  */
+  for (count = 0; count < add_symbols; count++)
+    {
+      if (!ptr->othersym)
+	break;
+      else if (strcmp (ptr->othersym, sym) == 0)
+	{
+	  free (ptr->othersym);
+	  ptr->othersym = ""; /* Empty name is hopefully never a valid symbol name.  */
+	  *node = ptr;
+	  return TRUE;
+	}
+      ptr = ptr->next;
+    }
+  return FALSE;
+}
+
+static asymbol *
+create_new_symbol (struct addsym_node *ptr, bfd *obfd)
+{
+  asymbol *sym = bfd_make_empty_symbol(obfd);
+
+  bfd_asymbol_name(sym) = ptr->symdef;
+  sym->value = ptr->symval;
+  sym->flags = ptr->flags;
+  if (ptr->section)
+    {
+      asection *sec = bfd_get_section_by_name (obfd, ptr->section);
+      if (!sec)
+	fatal (_("Section %s not found"), ptr->section);
+      sym->section = sec;
+    }
+  else 
+      sym->section = bfd_abs_section_ptr;
+  return sym;
+}
+
 /* Choose which symbol entries to copy; put the result in OSYMS.
    We don't copy in place, because that confuses the relocs.
    Return the number of symbols to print.  */
@@ -1237,6 +1367,14 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
       bfd_boolean add_leading_char;
 
       undefined = bfd_is_und_section (bfd_get_section (sym));
+
+      if (add_sym_list)
+	{
+	  struct addsym_node *ptr;
+
+	  if (need_sym_before (&ptr, name))
+	    to[dst_count++] = create_new_symbol (ptr, obfd);
+	}
 
       if (redefine_sym_list)
 	{
@@ -1392,6 +1530,23 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	    }
 
 	  to[dst_count++] = sym;
+	}
+    }
+  if (add_sym_list)
+    {
+      struct addsym_node *ptr = add_sym_list;
+
+      for (src_count = 0; src_count < add_symbols; src_count++)
+	{
+	  if (ptr->othersym)
+	    {
+	      if (strcmp (ptr->othersym, ""))
+		fatal (_("'before=%s' not found"), ptr->othersym);
+	    }
+	  else
+	    to[dst_count++] = create_new_symbol (ptr, obfd);
+
+	  ptr = ptr->next;
 	}
     }
 
@@ -1640,6 +1795,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   void *dhandle;
   enum bfd_architecture iarch;
   unsigned int imach;
+  unsigned int c, i;
 
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
@@ -2071,11 +2227,11 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
-  if (bfd_count_sections (obfd) != 0
+  c = bfd_count_sections (obfd);
+  if (c != 0
       && (gap_fill_set || pad_to_set))
     {
       asection **set;
-      unsigned int c, i;
 
       /* We must fill in gaps between the sections and/or we must pad
 	 the last section to a specified address.  We do this by
@@ -2083,7 +2239,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	 increasing the section sizes as required to fill the gaps.
 	 We write out the gap contents below.  */
 
-      c = bfd_count_sections (obfd);
       osections = (asection **) xmalloc (c * sizeof (asection *));
       set = osections;
       bfd_map_over_sections (obfd, get_sections, &set);
@@ -2179,7 +2334,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       || change_leading_char
       || remove_leading_char
       || redefine_sym_list
-      || weaken)
+      || weaken
+      || add_symbols)
     {
       /* Mark symbols used in output relocations so that they
 	 are kept, even if they are local labels or static symbols.
@@ -2193,7 +2349,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	bfd_map_over_sections (ibfd,
 			       mark_symbols_used_in_relocations,
 			       isympp);
-      osympp = (asymbol **) xmalloc ((symcount + 1) * sizeof (asymbol *));
+      osympp = (asymbol **) xmalloc ((symcount + add_symbols + 1) * sizeof (asymbol *));
       symcount = filter_symbols (ibfd, obfd, osympp, isympp, symcount);
     }
 
@@ -2264,7 +2420,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   if (gap_fill_set || pad_to_set)
     {
       bfd_byte *buf;
-      int c, i;
 
       /* Fill in the gaps.  */
       if (max_gap > 8192)
@@ -2305,11 +2460,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	    }
 	}
     }
-
-  /* Do not copy backend data if --extract-symbol is passed; anything
-     that needs to look at the section contents will fail.  */
-  if (extract_symbol)
-    return TRUE;
 
   /* Allow the BFD backend to copy any private data it understands
      from the input BFD to the output BFD.  This is done last to
@@ -2939,11 +3089,6 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   isection->output_section = osection;
   isection->output_offset = 0;
 
-  /* Do not copy backend data if --extract-symbol is passed; anything
-     that needs to look at the section contents will fail.  */
-  if (extract_symbol)
-    return;
-
   if ((isection->flags & SEC_GROUP) != 0)
     {
       asymbol *gsym = group_signature (isection);
@@ -3111,10 +3256,10 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   osection = isection->output_section;
   /* The output SHF_COMPRESSED section size is different from input if
-     ELF classes of input and output aren't the same.  We must use the
-     output section size here, which has been updated in setup_section
-     via bfd_convert_section_size.  */
-  size = bfd_get_section_size (osection);
+     ELF classes of input and output aren't the same.  We can't use
+     the output section size since --interleave will shrink the output
+     section.   Size will be updated if the section is converted.   */
+  size = bfd_get_section_size (isection);
 
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
@@ -3123,7 +3268,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
       if (!bfd_get_full_section_contents (ibfd, isection, &memhunk)
 	  || !bfd_convert_section_contents (ibfd, isection, obfd,
-					    &memhunk))
+					    &memhunk, &size))
 	{
 	  status = 1;
 	  bfd_nonfatal_message (NULL, ibfd, isection, NULL);
@@ -3924,6 +4069,53 @@ copy_main (int argc, char *argv[])
 	case OPTION_DUMP_SECTION:
           dump_sections = init_section_add (optarg, dump_sections,
                                             "--dump-section");
+	  break;
+
+	case OPTION_ADD_SYMBOL:
+	  {
+	    char *s, *t;
+	    struct addsym_node *newsym = xmalloc (sizeof *newsym);
+
+	    newsym->next = NULL;
+	    s = strchr (optarg, '=');
+	    if (s == NULL)
+	      fatal (_("bad format for %s"), "--add-symbol");
+	    t = strchr (s + 1, ':');
+
+	    newsym->symdef = strndup (optarg, s - optarg);
+	    if (t)
+	      {
+		newsym->section = strndup (s + 1, t - (s + 1));
+		newsym->symval = strtol (t + 1, NULL, 0);
+	      }
+	    else
+	      {
+		newsym->section = NULL;
+		newsym->symval = strtol (s + 1, NULL, 0);
+		t = s;
+	      }
+
+	    t = strchr (t + 1, ',');
+	    if (t)
+	      newsym->flags = parse_symflags (t+1, &newsym->othersym);
+	    else
+	      newsym->flags = BSF_GLOBAL;
+
+	    /* Keep 'othersym' symbols at the front of the list.  */
+	    if (newsym->othersym)
+	      {
+		newsym->next = add_sym_list;
+		if (!add_sym_list)
+		  add_sym_tail = &newsym->next;
+		add_sym_list = newsym;
+	      }
+	    else
+	      {
+		*add_sym_tail = newsym;
+		add_sym_tail = &newsym->next;
+	      }
+	    add_symbols++;
+	  }
 	  break;
 
 	case OPTION_CHANGE_START:

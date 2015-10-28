@@ -37,6 +37,9 @@
 #include "gregset.h"
 #include "xtensa-tdep.h"
 
+/* Defines ps_err_e, struct ps_prochandle.  */
+#include "gdb_proc_service.h"
+
 /* Extended register set depends on hardware configs.
    Keeping these definitions separately allows to introduce
    hardware-specific overlays.  */
@@ -278,6 +281,25 @@ xtensa_linux_store_inferior_registers (struct target_ops *ops,
     store_gregs (regcache, regnum);
   else
     store_xtregs (regcache, regnum);
+}
+
+/* Called by libthread_db.  */
+
+ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph,
+                    lwpid_t lwpid, int idx, void **base)
+{
+  xtensa_elf_gregset_t regs;
+
+  if (ptrace (PTRACE_GETREGS, lwpid, NULL, &regs) != 0)
+    return PS_ERR;
+
+  /* IDX is the bias from the thread pointer to the beginning of the
+     thread descriptor.  It has to be subtracted due to implementation
+     quirks in libthread_db.  */
+  *base = (void *) ((char *) regs.threadptr - idx);
+
+  return PS_OK;
 }
 
 void _initialize_xtensa_linux_nat (void);

@@ -266,7 +266,7 @@ static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
 static arm_feature_set selected_cpu = ARM_ARCH_NONE;
 /* Must be long enough to hold any of the names in arm_cpus.  */
-static char selected_cpu_name[16];
+static char selected_cpu_name[20];
 
 extern FLONUM_TYPE generic_floating_point_number;
 
@@ -2868,10 +2868,9 @@ s_thumb_set (int equiv)
   /* Especial apologies for the random logic:
      This just grew, and could be parsed much more simply!
      Dean - in haste.  */
-  name	    = input_line_pointer;
-  delim	    = get_symbol_end ();
+  delim	    = get_symbol_name (& name);
   end_name  = input_line_pointer;
-  *end_name = delim;
+  (void) restore_line_pointer (delim);
 
   if (*input_line_pointer != ',')
     {
@@ -2951,8 +2950,7 @@ s_syntax (int unused ATTRIBUTE_UNUSED)
 {
   char *name, delim;
 
-  name = input_line_pointer;
-  delim = get_symbol_end ();
+  delim = get_symbol_name (& name);
 
   if (!strcasecmp (name, "unified"))
     unified_syntax = TRUE;
@@ -2963,7 +2961,7 @@ s_syntax (int unused ATTRIBUTE_UNUSED)
       as_bad (_("unrecognized syntax mode \"%s\""), name);
       return;
     }
-  *input_line_pointer = delim;
+  (void) restore_line_pointer (delim);
   demand_empty_rest_of_line ();
 }
 
@@ -3313,13 +3311,13 @@ add_to_lit_pool (unsigned int nbytes)
 }
 
 bfd_boolean
-tc_start_label_without_colon (char unused1 ATTRIBUTE_UNUSED, const char * rest)
+tc_start_label_without_colon (void)
 {
   bfd_boolean ret = TRUE;
 
   if (codecomposer_syntax && asmfunc_state == WAITING_ASMFUNC_NAME)
     {
-      const char *label = rest;
+      const char *label = input_line_pointer;
 
       while (!is_end_of_line[(int) label[-1]])
 	--label;
@@ -3880,9 +3878,10 @@ s_arm_unwind_personality (int ignored ATTRIBUTE_UNUSED)
   if (unwind.personality_routine || unwind.personality_index != -1)
     as_bad (_("duplicate .personality directive"));
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (& name);
   p = input_line_pointer;
+  if (c == '"')
+    ++ input_line_pointer;
   unwind.personality_routine = symbol_find_or_make (name);
   *p = c;
   demand_empty_rest_of_line ();
@@ -25133,10 +25132,16 @@ arm_parse_cpu (char *str)
 	mcpu_cpu_opt = &opt->value;
 	mcpu_fpu_opt = &opt->default_fpu;
 	if (opt->canonical_name)
-	  strcpy (selected_cpu_name, opt->canonical_name);
+	  {
+	    gas_assert (sizeof selected_cpu_name > strlen (opt->canonical_name));
+	    strcpy (selected_cpu_name, opt->canonical_name);
+	  }
 	else
 	  {
 	    size_t i;
+
+	    if (len >= sizeof selected_cpu_name)
+	      len = (sizeof selected_cpu_name) - 1;
 
 	    for (i = 0; i < len; i++)
 	      selected_cpu_name[i] = TOUPPER (opt->name[i]);

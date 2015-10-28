@@ -264,8 +264,8 @@ struct bfd_elf_version_tree;
 enum output_type
 {
   type_pde,
-  type_relocatable,
   type_pie,
+  type_relocatable,
   type_dll,
 };
 
@@ -430,6 +430,15 @@ struct bfd_link_info
 
   /* TRUE if BND prefix in PLT entries is always generated.  */
   unsigned int bndplt: 1;
+
+  /* TRUE if generation of .interp/PT_INTERP should be suppressed.  */
+  unsigned int nointerp: 1;
+
+  /* TRUE if generate a 1-byte NOP as suffix for x86 call instruction.  */
+  unsigned int call_nop_as_suffix : 1;
+
+  /* The 1-byte NOP for x86 call instruction.  */
+  char call_nop_byte;
 
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in

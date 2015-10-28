@@ -475,8 +475,7 @@ obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
 
       input_line_pointer++; /* Skip ',' */
       SKIP_WHITESPACE ();
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       /* Just after name is now '\0'.  */
       p = input_line_pointer;
       *p = c;
@@ -488,7 +487,7 @@ obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
 	  goto done;
 	}
 
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       if (*input_line_pointer == ',')
 	input_line_pointer++;
 
@@ -1133,12 +1132,11 @@ obj_mach_o_sym_qual (int ntype)
 
   do
     {
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
       obj_mach_o_set_symbol_qualifier (symbolP, ntype);
       *input_line_pointer = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       c = *input_line_pointer;
       if (c == ',')
 	{
@@ -1184,8 +1182,8 @@ obj_mach_o_indirect_symbol (int arg ATTRIBUTE_UNUSED)
       case BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS:
         {
           obj_mach_o_indirect_sym *isym;
-	  char *name = input_line_pointer;
-	  char c = get_symbol_end ();
+	  char *name;
+	  char c = get_symbol_name (&name);
 	  symbolS *sym = symbol_find_or_make (name);
 	  unsigned int elsize =
 			bfd_mach_o_section_get_entry_size (stdoutput, sec);
@@ -1195,11 +1193,11 @@ obj_mach_o_indirect_symbol (int arg ATTRIBUTE_UNUSED)
 	      as_bad (_("attempt to add an indirect_symbol to a stub or"
 			" reference section with a zero-sized element at %s"),
 			name);
-	      *input_line_pointer = c;
+	      (void) restore_line_pointer (c);
 	      ignore_rest_of_line ();
 	      return;
-	  }
-	  *input_line_pointer = c;
+	    }
+	  (void) restore_line_pointer (c);
 
 	  /* The indirect symbols are validated after the symbol table is
 	     frozen, we must make sure that if a local symbol is used as an

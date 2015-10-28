@@ -902,7 +902,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	      REQUIRE (GET_RELOC (buf));
 
 	      /* Chain together the FDEs for each section.  */
-	      rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie);
+	      rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook,
+					    cookie, NULL);
 	      /* RSEC will be NULL if FDE was cleared out as it was belonging to
 		 a discarded SHT_GROUP.  */
 	      if (rsec)

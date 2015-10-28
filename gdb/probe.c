@@ -146,9 +146,8 @@ parse_probes (const struct event_location *location,
 	      continue;
 
 	    ++result.nelts;
-	    result.sals = xrealloc (result.sals,
-				    result.nelts
-				    * sizeof (struct symtab_and_line));
+	    result.sals = XRESIZEVEC (struct symtab_and_line, result.sals,
+				      result.nelts);
 	    sal = &result.sals[result.nelts - 1];
 
 	    init_sal (sal);

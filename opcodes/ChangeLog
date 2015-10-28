@@ -1,3 +1,160 @@
+2015-10-27  Vinay  <Vinay.G@kpit.com>
+
+	PR binutils/19159
+	* rl78-decode.opc (MOV): Added offset to DE register in index
+	addressing mode.
+	* rl78-decode.c: Regenerate.
+
+2015-10-27  Vinay Kumar  <vinay.g@kpit.com>
+
+	PR binutils/19158
+	* rl78-decode.opc: Add 's' print operator to instructions that
+	access system registers.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c (print_insn_rl78_common): Decode all system
+	registers.
+
+2015-10-27  Vinay Kumar  <vinay.g@kpit.com>
+
+	PR binutils/19157
+	* rl78-decode.opc: Add 'a' print operator to mov instructions
+	using stack pointer plus index addressing.
+	* rl78-decode.c: Regenerate.
+
+2015-10-14  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	* s390-opc.c: Fix comment.
+	* s390-opc.txt: Change instruction type for troo, trot, trto, and
+	trtt to RRF_U0RER since the second parameter does not need to be a
+	register pair.
+
+2015-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* arc-dis.c (print_insn_arc): Initiallise insn array.
+
+2015-10-07  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-dis.c (aarch64_ext_sysins_op): Access field
+	'name' rather than 'template'.
+	* aarch64-opc.c (aarch64_print_operand): Likewise.
+
+2015-10-07  Claudiu Zissulescu <claziss@synopsys.com>
+
+	* arc-dis.c: Revamped file for ARC support
+	* arc-dis.h: Likewise.
+	* arc-ext.c: Likewise.
+	* arc-ext.h: Likewise.
+	* arc-opc.c: Likewise.
+	* arc-fxi.h: New file.
+	* arc-regs.h: Likewise.
+	* arc-tbl.h: Likewise.
+
+2015-10-02  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-dis.c	(disas_aarch64_insn): Remove static.  Change
+	argument insn type to aarch64_insn.  Rename to ...
+	(aarch64_decode_insn): ... it.
+	(print_insn_aarch64_word): Caller updated.
+
+2015-10-02  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-dis.c (disas_aarch64_insn): Remove argument PC.
+	(print_insn_aarch64_word): Caller updated.
+
+2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* s390-mkopc.c (main): Parse htm and vx flag.
+	* s390-opc.txt: Mark instructions from the hardware transactional
+	memory and vector facilities with the "htm"/"vx" flag.
+
+2015-09-28  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+
+2015-09-28  Tom Rix  <tom@bumblecow.com>
+
+	* ppc-opc.c (PPC500): Mark some opcodes as invalid
+
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* bfin-dis.c (fmtconst): Remove unnecessary call to the abs
+	function.
+	* tic30-dis.c (print_branch): Likewise.
+	* cgen-asm.c (cgen_parse_signed_integer): Cast integer to signed
+	value before left shifting.
+	* fr30-ibld.c (fr30_cgen_extract_operand): Likewise.
+	* hppa-dis.c (print_insn_hppa): Likewise.
+	* mips-dis.c (mips_cp0sel_names_mipsr5900): Delete unused static
+	array.
+	* msp430-dis.c (msp430_singleoperand): Likewise.
+	(msp430_doubleoperand): Likewise.
+	(print_insn_msp430): Likewise.
+	* nds32-asm.c (parse_operand): Likewise.
+	* sh-opc.h (MASK): Likewise.
+	* v850-dis.c (get_operand_value): Likewise.
+
+2015-09-22  Nick Clifton  <nickc@redhat.com>
+
+	* rx-decode.opc (bwl): Use RX_Bad_Size.
+	(sbwl): Likewise.
+	(ubwl): Likewise.  Rename to ubw.
+	(uBWL): Rename to uBW.
+	Replace all references to uBWL with uBW.
+	* rx-decode.c: Regenerate.
+	* rx-dis.c (size_names): Add entry for RX_Bad_Size.
+	(opsize_names): Likewise.
+	(print_insn_rx): Detect and report RX_Bad_Size.
+
+2015-09-22  Anton Blanchard  <anton@samba.org>
+
+	* ppc-opc.c (powerpc_opcodes): Add mfdscr, mfctrl, mtdscr and mtctrl.
+
+2015-08-25  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-dis.c (print_insn_sparc): Handle the privileged register
+	%pmcdper.
+
+2015-08-24  Jan Stancek  <jstancek@redhat.com>
+
+	* i386-dis.c (print_insn): Fix decoding of three byte operands.
+
+2015-08-21  Alexander Fomin  <alexander.fomin@intel.com>
+
+	PR binutils/18257
+	* i386-dis.c: Use MOD_TABLE for most of mask instructions.
+	(MOD enum): Add MOD_VEX_W_0_0F41_P_0_LEN_1,
+	MOD_VEX_W_1_0F41_P_0_LEN_1, MOD_VEX_W_0_0F41_P_2_LEN_1,
+	MOD_VEX_W_1_0F41_P_2_LEN_1, MOD_VEX_W_0_0F42_P_0_LEN_1,
+	MOD_VEX_W_1_0F42_P_0_LEN_1, MOD_VEX_W_0_0F42_P_2_LEN_1,
+	MOD_VEX_W_1_0F42_P_2_LEN_1, MOD_VEX_W_0_0F44_P_0_LEN_1,
+	MOD_VEX_W_1_0F44_P_0_LEN_1, MOD_VEX_W_0_0F44_P_2_LEN_1,
+	MOD_VEX_W_1_0F44_P_2_LEN_1, MOD_VEX_W_0_0F45_P_0_LEN_1,
+	MOD_VEX_W_1_0F45_P_0_LEN_1, MOD_VEX_W_0_0F45_P_2_LEN_1,
+	MOD_VEX_W_1_0F45_P_2_LEN_1, MOD_VEX_W_0_0F46_P_0_LEN_1,
+	MOD_VEX_W_1_0F46_P_0_LEN_1, MOD_VEX_W_0_0F46_P_2_LEN_1,
+	MOD_VEX_W_1_0F46_P_2_LEN_1, MOD_VEX_W_0_0F47_P_0_LEN_1,
+	MOD_VEX_W_1_0F47_P_0_LEN_1, MOD_VEX_W_0_0F47_P_2_LEN_1,
+	MOD_VEX_W_1_0F47_P_2_LEN_1, MOD_VEX_W_0_0F4A_P_0_LEN_1,
+	MOD_VEX_W_1_0F4A_P_0_LEN_1, MOD_VEX_W_0_0F4A_P_2_LEN_1,
+	MOD_VEX_W_1_0F4A_P_2_LEN_1, MOD_VEX_W_0_0F4B_P_0_LEN_1,
+	MOD_VEX_W_1_0F4B_P_0_LEN_1, MOD_VEX_W_0_0F4B_P_2_LEN_1,
+	MOD_VEX_W_0_0F91_P_0_LEN_0, MOD_VEX_W_1_0F91_P_0_LEN_0,
+	MOD_VEX_W_0_0F91_P_2_LEN_0, MOD_VEX_W_1_0F91_P_2_LEN_0,
+	MOD_VEX_W_0_0F92_P_0_LEN_0, MOD_VEX_W_0_0F92_P_2_LEN_0,
+	MOD_VEX_W_0_0F92_P_3_LEN_0, MOD_VEX_W_1_0F92_P_3_LEN_0,
+	MOD_VEX_W_0_0F93_P_0_LEN_0, MOD_VEX_W_0_0F93_P_2_LEN_0,
+	MOD_VEX_W_0_0F93_P_3_LEN_0, MOD_VEX_W_1_0F93_P_3_LEN_0,
+	MOD_VEX_W_0_0F98_P_0_LEN_0, MOD_VEX_W_1_0F98_P_0_LEN_0,
+	MOD_VEX_W_0_0F98_P_2_LEN_0, MOD_VEX_W_1_0F98_P_2_LEN_0,
+	MOD_VEX_W_0_0F99_P_0_LEN_0, MOD_VEX_W_1_0F99_P_0_LEN_0,
+	MOD_VEX_W_0_0F99_P_2_LEN_0, MOD_VEX_W_1_0F99_P_2_LEN_0,
+	MOD_VEX_W_0_0F3A30_P_2_LEN_0, MOD_VEX_W_1_0F3A30_P_2_LEN_0,
+	MOD_VEX_W_0_0F3A31_P_2_LEN_0, MOD_VEX_W_1_0F3A31_P_2_LEN_0,
+	MOD_VEX_W_0_0F3A32_P_2_LEN_0, MOD_VEX_W_1_0F3A32_P_2_LEN_0,
+	MOD_VEX_W_0_0F3A33_P_2_LEN_0, MOD_VEX_W_1_0F3A33_P_2_LEN_0.
+	(vex_w_table): Replace terminals with MOD_TABLE entries for
+	most of mask instructions.
+
 2015-08-17  Alan Modra  <amodra@gmail.com>
 
 	* cgen.sh: Trim trailing space from cgen output.

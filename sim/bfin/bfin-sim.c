@@ -6083,7 +6083,11 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       int count = imm6 (immag);
 
       TRACE_INSN (cpu, "R%i = R%i << %i (S);", dst0, src1, count);
-      STORE (DREG (dst0), lshift (cpu, DREG (src1), count, 32, 1, 1));
+
+      if (count < 0)
+	STORE (DREG (dst0), ashiftrt (cpu, DREG (src1), -count, 32));
+      else
+	STORE (DREG (dst0), lshift (cpu, DREG (src1), count, 32, 1, 1));
     }
   else if (sop == 2 && sopcde == 2)
     {

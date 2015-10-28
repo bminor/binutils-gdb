@@ -2165,7 +2165,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
       if ((offset & 0x1000000) != 0)
         offset |= 0xfe000000;
       value += offset;
-      abs_value = abs (value - rel_addr);
+      abs_value = value - rel_addr;
       if ((abs_value & 0xfe000000) != 0)
         return bfd_reloc_overflow;
       addend = (addend & ~howto->src_mask)
@@ -2241,7 +2241,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
       if ((offset & 0x800) != 0)        /* Offset is negative.  */
         offset |= 0xfffff000;
       value += offset;
-      abs_value = abs (value - rel_addr);
+      abs_value = value - rel_addr;
       if ((abs_value & 0xfffff000) != 0)
         return bfd_reloc_overflow;
       addend = (addend & ~howto->src_mask) | (value & howto->src_mask);
@@ -3269,7 +3269,7 @@ s3_bfd_score_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (!bfd_link_pic (info))
+      if (!bfd_link_pic (info) && !info->nointerp)
         {
           s = bfd_get_linker_section (dynobj, ".interp");
           BFD_ASSERT (s != NULL);

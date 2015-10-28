@@ -85,12 +85,12 @@
 # endif
 #endif
 
+#ifndef W_STOPCODE
+#define W_STOPCODE(sig) ((sig) << 8 | 0x7f)
+#endif
+
 #ifndef	WSETSTOP
-# ifdef	W_STOPCODE
 #define	WSETSTOP(w,sig)    ((w) = W_STOPCODE(sig))
-# else
-#define WSETSTOP(w,sig)	   ((w) = (0177 | ((sig) << 8)))
-# endif
 #endif
 
 /* For native GNU/Linux we may use waitpid and the __WCLONE option.

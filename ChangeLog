@@ -1,3 +1,41 @@
+2015-10-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19109
+	* configure.ac: Note the 'none' is an acceptable argument to
+	--enable-compressed-debug-sections.
+	* configure: Regenerate.
+
+2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19109
+	* configure.ac: Add
+	--enable-compressed-debug-sections={all,gas,gold,ld}.
+	* configure: Regenerated.
+
+2015-09-30  Nick Clifton  <nickc@redhat.com>
+
+	Import the following patches from the GCC mainline:
+
+	2015-08-23  Francois-Xavier Coudert  <fxcoudert@gcc.gnu.org>
+
+	PR libfortran/54572
+	* Makefile.def: Make libgfortran depend on libbacktrace.
+	* Makefile.in: Regenerate.
+
+	2015-08-12  Tom de Vries  <tom@codesourcery.com>
+
+	PR other/67092
+	PR other/67098
+	* configure.ac: Remove --with_host_libstdcxx support.
+	* configure: Regenerate.
+
+	2015-08-10  Thomas Schwinge  <thomas@codesourcery.com>
+	    Jakub Jelinek  <jakub@redhat.com>
+
+	* configure.ac (noconfigdirs): Don't add "target-libgomp" for target
+	nvptx*-*-*.
+	* configure: Regenerate.
+
 2015-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC

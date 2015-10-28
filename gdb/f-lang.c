@@ -343,7 +343,7 @@ static struct gdbarch_data *f_type_data;
 const struct builtin_f_type *
 builtin_f_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, f_type_data);
+  return (const struct builtin_f_type *) gdbarch_data (gdbarch, f_type_data);
 }
 
 void

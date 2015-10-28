@@ -113,7 +113,7 @@ py_varobj_iter_next (struct varobj_iter *self)
       error (_("Invalid item from the child list"));
     }
 
-  vitem = xmalloc (sizeof *vitem);
+  vitem = XNEW (struct varobj_item);
   vitem->value = convert_value_from_python (py_v);
   if (vitem->value == NULL)
     gdbpy_print_stack ();

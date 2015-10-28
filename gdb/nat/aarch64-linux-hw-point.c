@@ -18,6 +18,8 @@
 
 #include "common-defs.h"
 #include "break-common.h"
+#include "common-regcache.h"
+#include "nat/linux-nat.h"
 #include "aarch64-linux-hw-point.h"
 
 #include <sys/uio.h>
@@ -111,8 +113,23 @@ aarch64_point_encode_ctrl_reg (enum target_hw_bp_type type, int len)
 static int
 aarch64_point_is_aligned (int is_watchpoint, CORE_ADDR addr, int len)
 {
-  unsigned int alignment = is_watchpoint ? AARCH64_HWP_ALIGNMENT
-    : AARCH64_HBP_ALIGNMENT;
+  unsigned int alignment = 0;
+
+  if (is_watchpoint)
+    alignment = AARCH64_HWP_ALIGNMENT;
+  else
+    {
+      struct regcache *regcache
+	= get_thread_regcache_for_ptid (current_lwp_ptid ());
+
+      /* Set alignment to 2 only if the current process is 32-bit,
+	 since thumb instruction can be 2-byte aligned.  Otherwise, set
+	 alignment to AARCH64_HBP_ALIGNMENT.  */
+      if (regcache_register_size (regcache, 0) == 8)
+	alignment = AARCH64_HBP_ALIGNMENT;
+      else
+	alignment = 2;
+    }
 
   if (addr & (alignment - 1))
     return 0;
@@ -218,6 +235,93 @@ aarch64_align_watchpoint (CORE_ADDR addr, int len, CORE_ADDR *aligned_addr_p,
     *next_addr_p = addr;
   if (next_len_p)
     *next_len_p = len;
+}
+
+struct aarch64_dr_update_callback_param
+{
+  int is_watchpoint;
+  unsigned int idx;
+};
+
+/* Callback for iterate_over_lwps.  Records the
+   information about the change of one hardware breakpoint/watchpoint
+   setting for the thread LWP.
+   The information is passed in via PTR.
+   N.B.  The actual updating of hardware debug registers is not
+   carried out until the moment the thread is resumed.  */
+
+static int
+debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
+{
+  struct aarch64_dr_update_callback_param *param_p
+    = (struct aarch64_dr_update_callback_param *) ptr;
+  int tid = ptid_get_lwp (ptid_of_lwp (lwp));
+  int idx = param_p->idx;
+  int is_watchpoint = param_p->is_watchpoint;
+  struct arch_lwp_info *info = lwp_arch_private_info (lwp);
+  dr_changed_t *dr_changed_ptr;
+  dr_changed_t dr_changed;
+
+  if (info == NULL)
+    {
+      info = XCNEW (struct arch_lwp_info);
+      lwp_set_arch_private_info (lwp, info);
+    }
+
+  if (show_debug_regs)
+    {
+      debug_printf ("debug_reg_change_callback: \n\tOn entry:\n");
+      debug_printf ("\ttid%d, dr_changed_bp=0x%s, "
+		    "dr_changed_wp=0x%s\n", tid,
+		    phex (info->dr_changed_bp, 8),
+		    phex (info->dr_changed_wp, 8));
+    }
+
+  dr_changed_ptr = is_watchpoint ? &info->dr_changed_wp
+    : &info->dr_changed_bp;
+  dr_changed = *dr_changed_ptr;
+
+  gdb_assert (idx >= 0
+	      && (idx <= (is_watchpoint ? aarch64_num_wp_regs
+			  : aarch64_num_bp_regs)));
+
+  /* The actual update is done later just before resuming the lwp,
+     we just mark that one register pair needs updating.  */
+  DR_MARK_N_CHANGED (dr_changed, idx);
+  *dr_changed_ptr = dr_changed;
+
+  /* If the lwp isn't stopped, force it to momentarily pause, so
+     we can update its debug registers.  */
+  if (!lwp_is_stopped (lwp))
+    linux_stop_lwp (lwp);
+
+  if (show_debug_regs)
+    {
+      debug_printf ("\tOn exit:\n\ttid%d, dr_changed_bp=0x%s, "
+		    "dr_changed_wp=0x%s\n", tid,
+		    phex (info->dr_changed_bp, 8),
+		    phex (info->dr_changed_wp, 8));
+    }
+
+  return 0;
+}
+
+/* Notify each thread that their IDXth breakpoint/watchpoint register
+   pair needs to be updated.  The message will be recorded in each
+   thread's arch-specific data area, the actual updating will be done
+   when the thread is resumed.  */
+
+static void
+aarch64_notify_debug_reg_change (const struct aarch64_debug_reg_state *state,
+				 int is_watchpoint, unsigned int idx)
+{
+  struct aarch64_dr_update_callback_param param;
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
+
+  param.is_watchpoint = is_watchpoint;
+  param.idx = idx;
+
+  iterate_over_lwps (pid_ptid, debug_reg_change_callback, (void *) &param);
 }
 
 /* Record the insertion of one breakpoint/watchpoint, as represented
@@ -357,7 +461,7 @@ aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			   struct aarch64_debug_reg_state *state)
 {
   /* The hardware breakpoint on AArch64 should always be 4-byte
-     aligned.  */
+     aligned, but on AArch32, it can be 2-byte aligned.  */
   if (!aarch64_point_is_aligned (0 /* is_watchpoint */ , addr, len))
     return -1;
 
@@ -556,4 +660,44 @@ aarch64_linux_get_debug_reg_capacity (int tid)
 		 " available."));
       aarch64_num_bp_regs = 0;
     }
+}
+
+/* Return true if we can watch a memory region that starts address
+   ADDR and whose length is LEN in bytes.  */
+
+int
+aarch64_linux_region_ok_for_watchpoint (CORE_ADDR addr, int len)
+{
+  CORE_ADDR aligned_addr;
+
+  /* Can not set watchpoints for zero or negative lengths.  */
+  if (len <= 0)
+    return 0;
+
+  /* Must have hardware watchpoint debug register(s).  */
+  if (aarch64_num_wp_regs == 0)
+    return 0;
+
+  /* We support unaligned watchpoint address and arbitrary length,
+     as long as the size of the whole watched area after alignment
+     doesn't exceed size of the total area that all watchpoint debug
+     registers can watch cooperatively.
+
+     This is a very relaxed rule, but unfortunately there are
+     limitations, e.g. false-positive hits, due to limited support of
+     hardware debug registers in the kernel.  See comment above
+     aarch64_align_watchpoint for more information.  */
+
+  aligned_addr = addr & ~(AARCH64_HWP_MAX_LEN_PER_REG - 1);
+  if (aligned_addr + aarch64_num_wp_regs * AARCH64_HWP_MAX_LEN_PER_REG
+      < addr + len)
+    return 0;
+
+  /* All tests passed so we are likely to be able to set the watchpoint.
+     The reason that it is 'likely' rather than 'must' is because
+     we don't check the current usage of the watchpoint registers, and
+     there may not be enough registers available for this watchpoint.
+     Ideally we should check the cached debug register state, however
+     the checking is costly.  */
+  return 1;
 }

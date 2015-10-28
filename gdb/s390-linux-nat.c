@@ -558,7 +558,7 @@ s390_insert_watchpoint (struct target_ops *self,
 			struct expression *cond)
 {
   struct lwp_info *lp;
-  struct watch_area *area = xmalloc (sizeof (struct watch_area));
+  struct watch_area *area = XNEW (struct watch_area);
 
   if (!area)
     return -1;

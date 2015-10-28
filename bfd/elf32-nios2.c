@@ -1815,7 +1815,7 @@ struct elf32_nios2_link_hash_table
 
     /* Assorted information used by nios2_elf32_size_stubs.  */
     unsigned int bfd_count;
-    int top_index;
+    unsigned int top_index;
     asection **input_list;
     Elf_Internal_Sym **all_local_syms;
 
@@ -2245,7 +2245,7 @@ nios2_elf32_setup_section_lists (bfd *output_bfd, struct bfd_link_info *info)
 {
   bfd *input_bfd;
   unsigned int bfd_count;
-  int top_id, top_index;
+  unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
   bfd_size_type amt;
@@ -5849,7 +5849,7 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (bfd_link_executable (info))
+      if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);

@@ -117,11 +117,6 @@ gdb_test "delete display" \
 #test detach
 gdb_test "detach" ".*" "detach"
 
-if [istarget "h8300-*-hms"] then {
-    gdb_exit
-    gdb_start
-}
-
 #test directory
 # FIXME -- need to dump full output to detailed log
 
@@ -209,7 +204,7 @@ gdb_test "f" "No stack." "frame \"f\" abbreviation"
 gdb_test "frame" "No stack." "frame"
 #test fg
 gdb_test "fg" "The program is not being run." "fg"
-# FIXME: fg kills the udi connection
+
 #test file
 send_gdb "file\n"
 gdb_expect {
@@ -773,22 +768,20 @@ gdb_expect {
 	}
 
 #test target remote
-if ![istarget "*-*-udi*"] then {
-    send_gdb "target remote\n"
-    gdb_expect {
-	-re "To open a remote debug connection, you need to specify what.*serial.*device is attached to the remote system.*.e.g. .*$gdb_prompt $"\
-			{ pass "target remote" }
-	-re ".*A program is being debugged already.  Kill it. .y or n.*$" {
-	    send_gdb "n\n"
-	    if $verbose>1 then {
-		send_user "\t\tDidn't kill program being debugged\n"
-	    }
-	    gdb_expect -re "$gdb_prompt $" { }
-	    pass "target remote"
+send_gdb "target remote\n"
+gdb_expect {
+    -re "To open a remote debug connection, you need to specify what.*serial.*device is attached to the remote system.*.e.g. .*$gdb_prompt $"\
+	{ pass "target remote" }
+    -re ".*A program is being debugged already.  Kill it. .y or n.*$" {
+	send_gdb "n\n"
+	if $verbose>1 then {
+	    send_user "\t\tDidn't kill program being debugged\n"
 	}
-	-re ".*$gdb_prompt $"	{ fail "target remote" }
-	timeout		{ fail "(timeout) target remote" }
+	gdb_expect -re "$gdb_prompt $" { }
+	pass "target remote"
     }
+    -re ".*$gdb_prompt $"	{ fail "target remote" }
+    timeout		{ fail "(timeout) target remote" }
 }
 
 #test target

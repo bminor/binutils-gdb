@@ -14056,7 +14056,7 @@ if test "${target}" = "${host}"; then
   rs6000-*-lynx*)
 	COREFILE=lynx-core.lo
 	;;
-  rs6000-*-aix[5-9].* | powerpc-*-aix[5-9].*)
+  rs6000-*-aix[5-9].* | powerpc-*-aix[5-9].* | powerpc64-*-aix[5-9].*)
         COREFILE=rs6000-core.lo
 	COREFLAG="$COREFLAG -DAIX_5_CORE -DAIX_CORE_DUMPX_CORE"
 	;;
@@ -14092,6 +14092,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 	;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.lo ;;
   rs6000-*-*)		COREFILE=rs6000-core.lo ;;
+  powerpc64-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix4*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-beos*)	;;

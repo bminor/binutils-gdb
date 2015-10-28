@@ -900,7 +900,7 @@ tui_resize_all (void)
 	      && !tui_win_list[win_type]->generic.is_visible)
 	    {
 	      tui_free_window (tui_win_list[win_type]);
-	      tui_win_list[win_type] = (struct tui_win_info *) NULL;
+	      tui_win_list[win_type] = NULL;
 	    }
 	}
       /* Turn keypad back on, unless focus is in the command
@@ -1048,7 +1048,7 @@ tui_set_focus (char *arg, int from_tty)
     {
       char *buf_ptr = (char *) xstrdup (arg);
       int i;
-      struct tui_win_info *win_info = (struct tui_win_info *) NULL;
+      struct tui_win_info *win_info = NULL;
 
       for (i = 0; (i < strlen (buf_ptr)); i++)
 	buf_ptr[i] = tolower (arg[i]);
@@ -1170,7 +1170,7 @@ tui_set_win_height (char *arg, int from_tty)
     {
       char *buf = xstrdup (arg);
       char *buf_ptr = buf;
-      char *wname = (char *) NULL;
+      char *wname = NULL;
       int new_height, i;
       struct tui_win_info *win_info;
       struct cleanup *old_chain;
@@ -1457,7 +1457,7 @@ make_invisible_and_set_new_height (struct tui_win_info *win_info,
 	    &((struct tui_win_element *)
 	      win_info->generic.content[i])->which_element.data_window;
 	  tui_delete_win (gen_win_info->handle);
-	  gen_win_info->handle = (WINDOW *) NULL;
+	  gen_win_info->handle = NULL;
 	}
       break;
     default:
@@ -1525,8 +1525,6 @@ make_visible_with_new_height (struct tui_win_info *win_info)
       tui_display_all_data ();
       break;
     case CMD_WIN:
-      win_info->detail.command_info.cur_line = 0;
-      win_info->detail.command_info.curch = 0;
 #ifdef HAVE_WRESIZE
       wresize (TUI_CMD_WIN->generic.handle,
 	       TUI_CMD_WIN->generic.height,
@@ -1535,9 +1533,7 @@ make_visible_with_new_height (struct tui_win_info *win_info)
       mvwin (TUI_CMD_WIN->generic.handle,
 	     TUI_CMD_WIN->generic.origin.y,
 	     TUI_CMD_WIN->generic.origin.x);
-      wmove (win_info->generic.handle,
-	     win_info->detail.command_info.cur_line,
-	     win_info->detail.command_info.curch);
+      wmove (win_info->generic.handle, 0, 0);
       break;
     default:
       break;

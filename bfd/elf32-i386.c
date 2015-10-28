@@ -29,6 +29,7 @@
 #include "objalloc.h"
 #include "hashtab.h"
 #include "dwarf2.h"
+#include "opcode/i386.h"
 
 /* 386 uses REL relocations instead of RELA.  */
 #define USE_REL	1
@@ -146,10 +147,13 @@ static reloc_howto_type elf_howto_table[]=
   HOWTO(R_386_IRELATIVE, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_386_IRELATIVE",
 	TRUE, 0xffffffff, 0xffffffff, FALSE),
+  HOWTO(R_386_GOT32X, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_GOT32X",
+	TRUE, 0xffffffff, 0xffffffff, FALSE),
 
   /* Another gap.  */
-#define R_386_irelative (R_386_IRELATIVE + 1 - R_386_tls_offset)
-#define R_386_vt_offset (R_386_GNU_VTINHERIT - R_386_irelative)
+#define R_386_ext2 (R_386_GOT32X + 1 - R_386_tls_offset)
+#define R_386_vt_offset (R_386_GNU_VTINHERIT - R_386_ext2)
 
 /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_386_GNU_VTINHERIT,	/* type */
@@ -332,6 +336,10 @@ elf_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       TRACE ("BFD_RELOC_386_IRELATIVE");
       return &elf_howto_table[R_386_IRELATIVE - R_386_tls_offset];
 
+    case BFD_RELOC_386_GOT32X:
+      TRACE ("BFD_RELOC_386_GOT32X");
+      return &elf_howto_table[R_386_GOT32X - R_386_tls_offset];
+
     case BFD_RELOC_VTABLE_INHERIT:
       TRACE ("BFD_RELOC_VTABLE_INHERIT");
       return &elf_howto_table[R_386_GNU_VTINHERIT - R_386_vt_offset];
@@ -371,9 +379,9 @@ elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
       && ((indx = r_type - R_386_ext_offset) - R_386_standard
 	  >= R_386_ext - R_386_standard)
       && ((indx = r_type - R_386_tls_offset) - R_386_ext
-	  >= R_386_irelative - R_386_ext)
-      && ((indx = r_type - R_386_vt_offset) - R_386_irelative
-	  >= R_386_vt - R_386_irelative))
+	  >= R_386_ext2 - R_386_ext)
+      && ((indx = r_type - R_386_vt_offset) - R_386_ext2
+	  >= R_386_vt - R_386_ext2))
     {
       (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
 			     abfd, (int) r_type);
@@ -759,6 +767,10 @@ struct elf_i386_link_hash_entry
   /* Symbol is referenced by R_386_GOTOFF relocation.  */
   unsigned int gotoff_ref : 1;
 
+  /* Reference count of C/C++ function pointer relocations in read-write
+     section which can be resolved at run-time.  */
+  bfd_signed_vma func_pointer_refcount;
+
   /* Information about the GOT PLT entry. Filled when there are both
      GOT and PLT relocations against the same function.  */
   union gotplt_union plt_got;
@@ -883,6 +895,7 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->dyn_relocs = NULL;
       eh->tls_type = GOT_UNKNOWN;
       eh->gotoff_ref = 0;
+      eh->func_pointer_refcount = 0;
       eh->plt_got.offset = (bfd_vma) -1;
       eh->tlsdesc_got = (bfd_vma) -1;
     }
@@ -952,6 +965,7 @@ elf_i386_get_local_sym_hash (struct elf_i386_link_hash_table *htab,
       ret->elf.indx = sec->id;
       ret->elf.dynstr_index = ELF32_R_SYM (rel->r_info);
       ret->elf.dynindx = -1;
+      ret->func_pointer_refcount = 0;
       ret->plt_got.offset = (bfd_vma) -1;
       *slot = ret;
     }
@@ -1138,7 +1152,15 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
       dir->pointer_equality_needed |= ind->pointer_equality_needed;
     }
   else
-    _bfd_elf_link_hash_copy_indirect (info, dir, ind);
+    {
+      if (eind->func_pointer_refcount > 0)
+	{
+	  edir->func_pointer_refcount += eind->func_pointer_refcount;
+	  eind->func_pointer_refcount = 0;
+	}
+
+      _bfd_elf_link_hash_copy_indirect (info, dir, ind);
+    }
 }
 
 /* Return TRUE if the TLS access code sequence support transition
@@ -1454,7 +1476,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define need_convert_mov_to_lea sec_flg0
+#define need_convert_load sec_flg0
 
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
@@ -1566,6 +1588,7 @@ elf_i386_check_relocs (bfd *abfd,
 	    case R_386_PC32:
 	    case R_386_PLT32:
 	    case R_386_GOT32:
+	    case R_386_GOT32X:
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
 	      if (!_bfd_elf_create_ifunc_sections (htab->elf.dynobj, info))
@@ -1623,6 +1646,7 @@ elf_i386_check_relocs (bfd *abfd,
 	  /* Fall through */
 
 	case R_386_GOT32:
+	case R_386_GOT32X:
 	case R_386_TLS_GD:
 	case R_386_TLS_GOTDESC:
 	case R_386_TLS_DESC_CALL:
@@ -1633,7 +1657,10 @@ elf_i386_check_relocs (bfd *abfd,
 	    switch (r_type)
 	      {
 	      default:
-	      case R_386_GOT32: tls_type = GOT_NORMAL; break;
+	      case R_386_GOT32:
+	      case R_386_GOT32X:
+		tls_type = GOT_NORMAL;
+		break;
 	      case R_386_TLS_GD: tls_type = GOT_TLS_GD; break;
 	      case R_386_TLS_GOTDESC:
 	      case R_386_TLS_DESC_CALL:
@@ -1758,8 +1785,22 @@ elf_i386_check_relocs (bfd *abfd,
 	      /* We may need a .plt entry if the function this reloc
 		 refers to is in a shared lib.  */
 	      h->plt.refcount += 1;
-	      if (r_type != R_386_PC32)
-		h->pointer_equality_needed = 1;
+	      if (r_type == R_386_PC32)
+		{
+		  /* Since something like ".long foo - ." may be used
+		     as pointer, make sure that PLT is used if foo is
+		     a function defined in a shared library.  */
+		  if ((sec->flags & SEC_CODE) == 0)
+		    h->pointer_equality_needed = 1;
+		}
+	      else
+		{
+		  h->pointer_equality_needed = 1;
+		  /* R_386_32 can be resolved at run-time.  */
+		  if (r_type == R_386_32
+		      && (sec->flags & SEC_READONLY) == 0)
+		    eh->func_pointer_refcount += 1;
+		}
 	    }
 
 	  size_reloc = FALSE;
@@ -1920,9 +1961,9 @@ do_size:
 	    return FALSE;
 	}
 
-      if (r_type == R_386_GOT32
+      if ((r_type == R_386_GOT32 || r_type == R_386_GOT32X)
 	  && (h == NULL || h->type != STT_GNU_IFUNC))
-	sec->need_convert_mov_to_lea = 1;
+	sec->need_convert_load = 1;
     }
 
   return TRUE;
@@ -2046,6 +2087,7 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 	case R_386_TLS_IE:
 	case R_386_TLS_GOTIE:
 	case R_386_GOT32:
+	case R_386_GOT32X:
 	  if (h != NULL)
 	    {
 	      if (h->got.refcount > 0)
@@ -2076,6 +2118,14 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 	    {
 	      if (h->plt.refcount > 0)
 		h->plt.refcount -= 1;
+	      if (r_type == R_386_32
+		  && (sec->flags & SEC_READONLY) == 0)
+		{
+		  struct elf_i386_link_hash_entry *eh
+		    = (struct elf_i386_link_hash_entry *) h;
+		  if (eh->func_pointer_refcount > 0)
+		    eh->func_pointer_refcount -= 1;
+		}
 	    }
 	  break;
 
@@ -2298,6 +2348,11 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
 
+  /* Clear the reference count of function pointer relocations if
+     symbol isn't a normal function.  */
+  if (h->type != STT_FUNC)
+    eh->func_pointer_refcount = 0;
+
   /* We can't use the GOT PLT if pointer equality is needed since
      finish_dynamic_symbol won't clear symbol value and the dynamic
      linker won't update the GOT slot.  We will get into an infinite
@@ -2323,10 +2378,17 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
                                                plt_entry_size,
 					       plt_entry_size, 4);
+  /* Don't create the PLT entry if there are only function pointer
+     relocations which can be resolved at run-time.  */
   else if (htab->elf.dynamic_sections_created
-	   && (h->plt.refcount > 0 || eh->plt_got.refcount > 0))
+	   && (h->plt.refcount > eh->func_pointer_refcount
+	       || eh->plt_got.refcount > 0))
     {
       bfd_boolean use_plt_got;
+
+      /* Clear the reference count of function pointer relocations
+	 if PLT is used.  */
+      eh->func_pointer_refcount = 0;
 
       if ((info->flags & DF_BIND_NOW) && !h->pointer_equality_needed)
 	{
@@ -2570,9 +2632,10 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       /* For the non-shared case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
-	 dynamic.  */
+	 dynamic.  Keep dynamic relocations for run-time function
+	 pointer initialization.  */
 
-      if (!h->non_got_ref
+      if ((!h->non_got_ref || eh->func_pointer_refcount > 0)
 	  && ((h->def_dynamic
 	       && !h->def_regular)
 	      || (htab->elf.dynamic_sections_created
@@ -2595,6 +2658,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	}
 
       eh->dyn_relocs = NULL;
+      eh->func_pointer_refcount = 0;
 
     keep: ;
     }
@@ -2668,15 +2732,28 @@ elf_i386_readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-/* Convert
-   mov foo@GOT(%reg), %reg
+/* With the local symbol, foo, we convert
+   mov foo@GOT[(%reg1)], %reg2
    to
-   lea foo@GOTOFF(%reg), %reg
-   with the local symbol, foo.  */
+   lea foo[@GOTOFF(%reg1)], %reg2
+   and convert
+   call/jmp *foo@GOT[(%reg)]
+   to
+   nop call foo/jmp foo nop
+   When PIC is false, convert
+   test %reg1, foo@GOT[(%reg2)]
+   to
+   test $foo, %reg1
+   and convert
+   binop foo@GOT[(%reg1)], %reg2
+   to
+   binop $foo, %reg2
+   where binop is one of adc, add, and, cmp, or, sbb, sub, xor
+   instructions.  */
 
 static bfd_boolean
-elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
-			     struct bfd_link_info *link_info)
+elf_i386_convert_load (bfd *abfd, asection *sec,
+		       struct bfd_link_info *link_info)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs;
@@ -2693,7 +2770,7 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 
   /* Nothing to do if there is no need or no output.  */
   if ((sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
-      || sec->need_convert_mov_to_lea == 0
+      || sec->need_convert_load == 0
       || bfd_is_abs_section (sec->output_section))
     return TRUE;
 
@@ -2727,32 +2804,92 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
       unsigned int r_symndx = ELF32_R_SYM (irel->r_info);
       unsigned int indx;
       struct elf_link_hash_entry *h;
+      unsigned int opcode;
+      unsigned int modrm;
+      bfd_vma roff;
+      bfd_boolean baseless;
+      Elf_Internal_Sym *isym;
+      unsigned int addend;
+      unsigned int nop;
+      bfd_vma nop_offset;
 
-      if (r_type != R_386_GOT32)
+      if (r_type != R_386_GOT32 && r_type != R_386_GOT32X)
 	continue;
 
-      /* Get the symbol referred to by the reloc.  */
+      roff = irel->r_offset;
+      if (roff < 2)
+	continue;
+
+      modrm = bfd_get_8 (abfd, contents + roff - 1);
+      baseless = (modrm & 0xc7) == 0x5;
+
+      if (r_type == R_386_GOT32X
+	  && baseless
+	  && bfd_link_pic (link_info))
+	{
+	  /* For PIC, disallow R_386_GOT32X without a base register
+	     since we don't know what the GOT base is.   Allow
+	     R_386_GOT32 for existing object files.  */
+	  const char *name;
+
+	  if (r_symndx < symtab_hdr->sh_info)
+	    {
+	      isym = bfd_sym_from_r_symndx (&htab->sym_cache, abfd,
+					    r_symndx);
+	      name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
+	    }
+	  else
+	    {
+	      indx = r_symndx - symtab_hdr->sh_info;
+	      h = elf_sym_hashes (abfd)[indx];
+	      BFD_ASSERT (h != NULL);
+	      name = h->root.root.string;
+	    }
+
+	  (*_bfd_error_handler)
+	    (_("%B: direct GOT relocation R_386_GOT32X against `%s' without base register can not be used when making a shared object"),
+	     abfd, name);
+	  goto error_return;
+	}
+
+      opcode = bfd_get_8 (abfd, contents + roff - 2);
+
+      /* It is OK to convert mov to lea.  */
+      if (opcode != 0x8b)
+	{
+	  /* Only convert R_386_GOT32X relocation for call, jmp or
+	     one of adc, add, and, cmp, or, sbb, sub, test, xor
+	     instructions.  */
+	  if (r_type != R_386_GOT32X)
+	    continue;
+
+	  /* It is OK to convert indirect branch to direct branch.  It
+	     is OK to convert adc, add, and, cmp, or, sbb, sub, test,
+	     xor only when PIC is false.   */
+	  if (opcode != 0xff && bfd_link_pic (link_info))
+	    continue;
+	}
+
+      /* Try to convert R_386_GOT32 and R_386_GOT32X.  Get the symbol
+	 referred to by the reloc.  */
       if (r_symndx < symtab_hdr->sh_info)
 	{
-	  Elf_Internal_Sym *isym;
-
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 					abfd, r_symndx);
 
-	  /* STT_GNU_IFUNC must keep R_386_GOT32 relocation.  */
-	  if (ELF_ST_TYPE (isym->st_info) != STT_GNU_IFUNC
-	      && irel->r_offset >= 2
-	      && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
-	    {
-	      bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
-	      irel->r_info = ELF32_R_INFO (r_symndx, R_386_GOTOFF);
-	      if (local_got_refcounts != NULL
-		  && local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
-	      changed_contents = TRUE;
-	      changed_relocs = TRUE;
-	    }
-	  continue;
+	  /* STT_GNU_IFUNC must keep GOT32 relocations.  */
+	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+	    continue;
+
+	  h = NULL;
+	  if (opcode == 0x0ff)
+	    /* Convert "call/jmp *foo@GOT[(%reg)]".  */
+	    goto convert_branch;
+	  else
+	    /* Convert "mov foo@GOT[(%reg1)], %reg2",
+	       "test %reg1, foo@GOT(%reg2)" and
+	       "binop foo@GOT[(%reg1)], %reg2". */
+	    goto convert_load;
 	}
 
       indx = r_symndx - symtab_hdr->sh_info;
@@ -2763,21 +2900,156 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-      /* STT_GNU_IFUNC must keep R_386_GOT32 relocation.  We also avoid
-	 optimizing _DYNAMIC since ld.so may use its link-time address.  */
-      if (h->def_regular
-	  && h->type != STT_GNU_IFUNC
-	  && h != htab->elf.hdynamic
-	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
-	  && irel->r_offset >= 2
-	  && bfd_get_8 (abfd, contents + irel->r_offset - 2) == 0x8b)
+      /* STT_GNU_IFUNC must keep GOT32 relocations.  */
+      if (h->type == STT_GNU_IFUNC)
+	continue;
+
+      if (opcode == 0xff)
 	{
-	  bfd_put_8 (abfd, 0x8d, contents + irel->r_offset - 2);
-	  irel->r_info = ELF32_R_INFO (r_symndx, R_386_GOTOFF);
-	  if (h->got.refcount > 0)
-	    h->got.refcount -= 1;
-	  changed_contents = TRUE;
-	  changed_relocs = TRUE;
+	  /* We have "call/jmp *foo@GOT[(%reg)]".  */
+	  if ((h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak)
+	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	    {
+	      /* The function is locally defined.   */
+convert_branch:
+	      addend = bfd_get_32 (abfd, contents + roff);
+	      /* Addend for R_386_GOT32X relocation must be 0.  */
+	      if (addend != 0)
+		continue;
+
+	      /* Convert R_386_GOT32X to R_386_PC32.  */
+	      if (modrm == 0x15 || (modrm & 0xf8) == 0x90)
+		{
+		  /* Convert to "nop call foo".  ADDR_PREFIX_OPCODE
+		     is a nop prefix.  */
+		  modrm = 0xe8;
+		  nop = link_info->call_nop_byte;
+		  if (link_info->call_nop_as_suffix)
+		    {
+		      nop_offset = roff + 3;
+		      irel->r_offset -= 1;
+		    }
+		  else
+		    nop_offset = roff - 2;
+		}
+	      else
+		{
+		  /* Convert to "jmp foo nop".  */
+		  modrm = 0xe9;
+		  nop = NOP_OPCODE;
+		  nop_offset = roff + 3;
+		  irel->r_offset -= 1;
+		}
+
+	      bfd_put_8 (abfd, nop, contents + nop_offset);
+	      bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);
+	      /* When converting to PC-relative relocation, we
+		 need to adjust addend by -4.  */
+	      bfd_put_32 (abfd, -4, contents + irel->r_offset);
+	      irel->r_info = ELF32_R_INFO (r_symndx, R_386_PC32);
+
+	      if (h)
+		{
+		  if (h->got.refcount > 0)
+		    h->got.refcount -= 1;
+		}
+	      else
+		{
+		  if (local_got_refcounts != NULL
+		      && local_got_refcounts[r_symndx] > 0)
+		    local_got_refcounts[r_symndx] -= 1;
+		}
+
+	      changed_contents = TRUE;
+	      changed_relocs = TRUE;
+	    }
+	}
+      else
+	{
+	  /* We have "mov foo@GOT[(%re1g)], %reg2",
+	     "test %reg1, foo@GOT(%reg2)" and
+	     "binop foo@GOT[(%reg1)], %reg2".
+
+	     Avoid optimizing _DYNAMIC since ld.so may use its
+	     link-time address.  */
+	  if (h == htab->elf.hdynamic)
+	    continue;
+
+	  /* bfd_link_hash_new is set by an assignment in a linker
+	     script in bfd_elf_record_link_assignment.  */
+	  if ((h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak
+	       || h->root.type == bfd_link_hash_new)
+	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
+	    {
+convert_load:
+	      if (opcode == 0x8b)
+		{
+		  /* Convert "mov foo@GOT(%reg1), %reg2" to
+		     "lea foo@GOTOFF(%reg1), %reg2".  */
+		  if (r_type == R_386_GOT32X
+		      && (baseless || !bfd_link_pic (link_info)))
+		    {
+		      r_type = R_386_32;
+		      /* For R_386_32, convert
+			 "lea foo@GOTOFF(%reg1), %reg2" to
+			 "lea foo@GOT, %reg2".  */
+		      if (!baseless)
+			{
+			  modrm = 0x5 | (modrm & 0x38);
+			  bfd_put_8 (abfd, modrm, contents + roff - 1);
+			}
+		    }
+		  else
+		    r_type = R_386_GOTOFF;
+		  opcode = 0x8d;
+		}
+	      else
+		{
+		  /* Addend for R_386_GOT32X relocation must be 0.  */
+		  addend = bfd_get_32 (abfd, contents + roff);
+		  if (addend != 0)
+		    continue;
+
+		  if (opcode == 0x85)
+		    {
+		      /* Convert "test %reg1, foo@GOT(%reg2)" to
+			 "test $foo, %reg1".  */
+		      modrm = 0xc0 | (modrm & 0x38) >> 3;
+		      opcode = 0xf7;
+		    }
+		  else
+		    {
+		      /* Convert "binop foo@GOT(%reg1), %reg2" to
+			 "binop $foo, %reg2".  */
+		      modrm = (0xc0
+			       | (modrm & 0x38) >> 3
+			       | (opcode & 0x3c));
+		      opcode = 0x81;
+		    }
+		  bfd_put_8 (abfd, modrm, contents + roff - 1);
+		  r_type = R_386_32;
+		}
+
+	      bfd_put_8 (abfd, opcode, contents + roff - 2);
+	      irel->r_info = ELF32_R_INFO (r_symndx, r_type);
+
+	      if (h)
+		{
+		  if (h->got.refcount > 0)
+		    h->got.refcount -= 1;
+		}
+	      else
+		{
+		  if (local_got_refcounts != NULL
+		      && local_got_refcounts[r_symndx] > 0)
+		    local_got_refcounts[r_symndx] -= 1;
+		}
+
+	      changed_contents = TRUE;
+	      changed_relocs = TRUE;
+	    }
 	}
     }
 
@@ -2834,7 +3106,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   if (htab->elf.dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (bfd_link_executable (info))
+      if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  if (s == NULL)
@@ -2863,7 +3135,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	{
 	  struct elf_dyn_relocs *p;
 
-	  if (!elf_i386_convert_mov_to_lea (ibfd, s, info))
+	  if (!elf_i386_convert_load (ibfd, s, info))
 	    return FALSE;
 
 	  for (p = ((struct elf_dyn_relocs *)
@@ -3380,7 +3652,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  && ((indx = r_type - R_386_ext_offset) - R_386_standard
 	      >= R_386_ext - R_386_standard)
 	  && ((indx = r_type - R_386_tls_offset) - R_386_ext
-	      >= R_386_irelative - R_386_ext))
+	      >= R_386_ext2 - R_386_ext))
 	{
 	  (*_bfd_error_handler)
 	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
@@ -3613,6 +3885,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      goto do_relocation;
 
 	    case R_386_GOT32:
+	    case R_386_GOT32X:
 	      base_got = htab->elf.sgot;
 	      off = h->got.offset;
 
@@ -3687,9 +3960,64 @@ elf_i386_relocate_section (bfd *output_bfd,
 	    }
 	}
 
+      eh = (struct elf_i386_link_hash_entry *) h;
       switch (r_type)
 	{
+	case R_386_GOT32X:
+	  /* Avoid optimizing _DYNAMIC since ld.so may use its
+	     link-time address.  */
+	  if (h == htab->elf.hdynamic)
+	    goto r_386_got32;
+
+	  if (bfd_link_pic (info))
+	    {
+	      /* It is OK to convert mov to lea and convert indirect
+		 branch to direct branch.  It is OK to convert adc,
+		 add, and, cmp, or, sbb, sub, test, xor only when PIC
+		 is false.   */
+	      unsigned int opcode;
+	      opcode = bfd_get_8 (abfd, contents + rel->r_offset - 2);
+	      if (opcode != 0x8b && opcode != 0xff)
+		goto r_386_got32;
+	    }
+
+	  /* Resolve "mov GOT[(%reg)], %reg",
+	     "call/jmp *GOT[(%reg)]", "test %reg, foo@GOT[(%reg)]"
+	     and "binop foo@GOT[(%reg)], %reg".  */
+	  if (h == NULL
+	      || (h->plt.offset == (bfd_vma) -1
+		  && h->got.offset == (bfd_vma) -1)
+	      || htab->elf.sgotplt == NULL)
+	    abort ();
+
+	  offplt = (htab->elf.sgotplt->output_section->vma
+		    + htab->elf.sgotplt->output_offset);
+
+	  /* It is relative to .got.plt section.  */
+	  if (h->got.offset != (bfd_vma) -1)
+	    /* Use GOT entry.  */
+	    relocation = (htab->elf.sgot->output_section->vma
+			  + htab->elf.sgot->output_offset
+			  + h->got.offset - offplt);
+	  else
+	    /* Use GOTPLT entry.  */
+	    relocation = (h->plt.offset / plt_entry_size - 1 + 3) * 4;
+
+	  if (!bfd_link_pic (info))
+	    {
+	      /* If not PIC, add the .got.plt section address for
+		 baseless adressing.  */
+	      unsigned int modrm;
+	      modrm = bfd_get_8 (abfd, contents + rel->r_offset - 1);
+	      if ((modrm & 0xc7) == 0x5)
+		relocation += offplt;
+	    }
+
+	  unresolved_reloc = FALSE;
+	  break;
+
 	case R_386_GOT32:
+r_386_got32:
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table.  */
 	  if (htab->elf.sgot == NULL)
@@ -3855,7 +4183,6 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  if (h == NULL)
 	    break;
 
-	  eh = (struct elf_i386_link_hash_entry *) h;
 	  if ((h->plt.offset == (bfd_vma) -1
 	       && eh->plt_got.offset == (bfd_vma) -1)
 	      || htab->elf.splt == NULL)
@@ -3894,6 +4221,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      || is_vxworks_tls)
 	    break;
 
+	  /* Copy dynamic function pointer relocations.  */
 	  if ((bfd_link_pic (info)
 	       && (h == NULL
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -3904,7 +4232,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  && !bfd_link_pic (info)
 		  && h != NULL
 		  && h->dynindx != -1
-		  && !h->non_got_ref
+		  && (!h->non_got_ref || eh->func_pointer_refcount > 0)
 		  && ((h->def_dynamic
 		       && !h->def_regular)
 		      || h->root.type == bfd_link_hash_undefweak

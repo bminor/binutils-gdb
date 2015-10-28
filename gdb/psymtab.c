@@ -315,7 +315,8 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 
   if (objfile->psymtabs_addrmap != NULL)
     {
-      pst = addrmap_find (objfile->psymtabs_addrmap, pc);
+      pst = ((struct partial_symtab *)
+	     addrmap_find (objfile->psymtabs_addrmap, pc));
       if (pst != NULL)
 	{
 	  /* FIXME: addrmaps currently do not handle overlayed sections,
@@ -1489,8 +1490,8 @@ const struct quick_symbol_functions psym_functions =
 static int
 compare_psymbols (const void *s1p, const void *s2p)
 {
-  struct partial_symbol *const *s1 = s1p;
-  struct partial_symbol *const *s2 = s2p;
+  struct partial_symbol *const *s1 = (struct partial_symbol * const*) s1p;
+  struct partial_symbol *const *s2 = (struct partial_symbol * const*) s2p;
 
   return strcmp_iw_ordered (SYMBOL_SEARCH_NAME (*s1),
 			    SYMBOL_SEARCH_NAME (*s2));
@@ -1624,10 +1625,9 @@ psymbol_bcache_full (struct partial_symbol *sym,
                      struct psymbol_bcache *bcache,
                      int *added)
 {
-  return bcache_full (sym,
-                      sizeof (struct partial_symbol),
-                      bcache->bcache,
-                      added);
+  return ((const struct partial_symbol *)
+	  bcache_full (sym, sizeof (struct partial_symbol), bcache->bcache,
+		       added));
 }
 
 /* Helper function, initialises partial symbol structure and stashes
@@ -1676,8 +1676,7 @@ extend_psymbol_list (struct psymbol_allocation_list *listp,
   if (listp->size == 0)
     {
       new_size = 255;
-      listp->list = (struct partial_symbol **)
-	xmalloc (new_size * sizeof (struct partial_symbol *));
+      listp->list = XNEWVEC (struct partial_symbol *, new_size);
     }
   else
     {
@@ -1758,16 +1757,14 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
   if (objfile->global_psymbols.size > 0)
     {
       objfile->global_psymbols.next =
-	objfile->global_psymbols.list = (struct partial_symbol **)
-	xmalloc ((objfile->global_psymbols.size
-		  * sizeof (struct partial_symbol *)));
+	objfile->global_psymbols.list =
+	  XNEWVEC (struct partial_symbol *, objfile->global_psymbols.size);
     }
   if (objfile->static_psymbols.size > 0)
     {
       objfile->static_psymbols.next =
-	objfile->static_psymbols.list = (struct partial_symbol **)
-	xmalloc ((objfile->static_psymbols.size
-		  * sizeof (struct partial_symbol *)));
+	objfile->static_psymbols.list =
+	  XNEWVEC (struct partial_symbol *, objfile->static_psymbols.size);
     }
 }
 
@@ -1787,8 +1784,9 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
 		     sizeof (struct partial_symtab));
 
   memset (psymtab, 0, sizeof (struct partial_symtab));
-  psymtab->filename = bcache (filename, strlen (filename) + 1,
-			      objfile->per_bfd->filename_cache);
+  psymtab->filename
+    = (const char *) bcache (filename, strlen (filename) + 1,
+			     objfile->per_bfd->filename_cache);
   psymtab->compunit_symtab = NULL;
 
   /* Prepend it to the psymtab list for the objfile it belongs to.
@@ -1864,7 +1862,7 @@ struct psymtab_state
 static void
 discard_psymtabs_upto (void *arg)
 {
-  struct psymtab_state *state = arg;
+  struct psymtab_state *state = (struct psymtab_state *) arg;
 
   while (state->objfile->psymtabs != state->save)
     discard_psymtab (state->objfile, state->objfile->psymtabs);
@@ -1885,6 +1883,79 @@ make_cleanup_discard_psymtabs (struct objfile *objfile)
 }
 
 
+
+/* We need to pass a couple of items to the addrmap_foreach function,
+   so use a struct.  */
+
+struct dump_psymtab_addrmap_data
+{
+  struct objfile *objfile;
+  struct partial_symtab *psymtab;
+  struct ui_file *outfile;
+
+  /* Non-zero if the previously printed addrmap entry was for PSYMTAB.
+     If so, we want to print the next one as well (since the next addrmap
+     entry defines the end of the range).  */
+  int previous_matched;
+};
+
+/* Helper function for dump_psymtab_addrmap to print an addrmap entry.  */
+
+static int
+dump_psymtab_addrmap_1 (void *datap, CORE_ADDR start_addr, void *obj)
+{
+  struct dump_psymtab_addrmap_data *data
+    = (struct dump_psymtab_addrmap_data *) datap;
+  struct gdbarch *gdbarch = get_objfile_arch (data->objfile);
+  struct partial_symtab *addrmap_psymtab = (struct partial_symtab *) obj;
+  const char *psymtab_address_or_end = NULL;
+
+  QUIT;
+
+  if (data->psymtab == NULL
+      || data->psymtab == addrmap_psymtab)
+    psymtab_address_or_end = host_address_to_string (addrmap_psymtab);
+  else if (data->previous_matched)
+    psymtab_address_or_end = "<ends here>";
+
+  if (data->psymtab == NULL
+      || data->psymtab == addrmap_psymtab
+      || data->previous_matched)
+    {
+      fprintf_filtered (data->outfile, "  %s%s %s\n",
+			data->psymtab != NULL ? "  " : "",
+			paddress (gdbarch, start_addr),
+			psymtab_address_or_end);
+    }
+
+  data->previous_matched = (data->psymtab == NULL
+			    || data->psymtab == addrmap_psymtab);
+
+  return 0;
+}
+
+/* Helper function for maintenance_print_psymbols to print the addrmap
+   of PSYMTAB.  If PSYMTAB is NULL print the entire addrmap.  */
+
+static void
+dump_psymtab_addrmap (struct objfile *objfile, struct partial_symtab *psymtab,
+		      struct ui_file *outfile)
+{
+  struct dump_psymtab_addrmap_data addrmap_dump_data;
+
+  if (psymtab == NULL
+      || psymtab->psymtabs_addrmap_supported)
+    {
+      addrmap_dump_data.objfile = objfile;
+      addrmap_dump_data.psymtab = psymtab;
+      addrmap_dump_data.outfile = outfile;
+      addrmap_dump_data.previous_matched = 0;
+      fprintf_filtered (outfile, "%sddress map:\n",
+			psymtab == NULL ? "Entire a" : "  A");
+      addrmap_foreach (objfile->psymtabs_addrmap, dump_psymtab_addrmap_1,
+		       &addrmap_dump_data);
+    }
+}
 
 static void
 maintenance_print_psymbols (char *args, int from_tty)
@@ -1925,12 +1996,30 @@ print-psymbols takes an output file name and optional symbol file name"));
     perror_with_name (filename);
   make_cleanup_ui_file_delete (outfile);
 
-  ALL_PSYMTABS (objfile, ps)
+  ALL_OBJFILES (objfile)
+  {
+    fprintf_filtered (outfile, "\nPartial symtabs for objfile %s\n",
+		      objfile_name (objfile));
+
+    ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
     {
       QUIT;
       if (symname == NULL || filename_cmp (symname, ps->filename) == 0)
-	dump_psymtab (objfile, ps, outfile);
+	{
+	  dump_psymtab (objfile, ps, outfile);
+	  dump_psymtab_addrmap (objfile, ps, outfile);
+	}
     }
+
+    /* If we're printing all symbols dump the full addrmap.  */
+
+    if (symname == NULL)
+      {
+	fprintf_filtered (outfile, "\n");
+	dump_psymtab_addrmap (objfile, NULL, outfile);
+      }
+  }
+
   do_cleanups (cleanups);
 }
 

@@ -187,8 +187,7 @@ gdbarch_register_osabi (enum bfd_architecture arch, unsigned long machine,
 	}
     }
 
-  (*handler_p)
-    = (struct gdb_osabi_handler *) xmalloc (sizeof (struct gdb_osabi_handler));
+  (*handler_p) = XNEW (struct gdb_osabi_handler);
   (*handler_p)->next = NULL;
   (*handler_p)->arch_info = arch_info;
   (*handler_p)->osabi = osabi;
@@ -228,8 +227,7 @@ gdbarch_register_osabi_sniffer (enum bfd_architecture arch,
 {
   struct gdb_osabi_sniffer *sniffer;
 
-  sniffer =
-    (struct gdb_osabi_sniffer *) xmalloc (sizeof (struct gdb_osabi_sniffer));
+  sniffer = XNEW (struct gdb_osabi_sniffer);
   sniffer->arch = arch;
   sniffer->flavour = flavour;
   sniffer->sniffer = sniffer_fn;
@@ -443,7 +441,7 @@ check_note (bfd *abfd, asection *sect, char *note, unsigned int *sectsize,
 void
 generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 {
-  enum gdb_osabi *osabi = obj;
+  enum gdb_osabi *osabi = (enum gdb_osabi *) obj;
   const char *name;
   unsigned int sectsize;
   char *note;
@@ -460,7 +458,7 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
      compressed section.  But, since note sections are not compressed,
      deferring the reading until we recognize the section avoids any
      error.  */
-  note = alloca (sectsize);
+  note = (char *) alloca (sectsize);
 
   /* .note.ABI-tag notes, used by GNU/Linux and FreeBSD.  */
   if (strcmp (name, ".note.ABI-tag") == 0)

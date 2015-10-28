@@ -2442,12 +2442,13 @@ v850_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
   if ((onotes = bfd_get_section_by_name (obfd, V850_NOTE_SECNAME)) == NULL)
     return TRUE;
 
-  if ((inotes = bfd_get_section_by_name (ibfd, V850_NOTE_SECNAME)) != NULL)
+  if ((inotes = bfd_get_section_by_name (ibfd, V850_NOTE_SECNAME)) == NULL)
+    return TRUE;
+
+  if (bfd_section_size (ibfd, inotes) == bfd_section_size (obfd, onotes))
     {
       bfd_byte * icont;
       bfd_byte * ocont;
-
-      BFD_ASSERT (bfd_section_size (ibfd, inotes) == bfd_section_size (obfd, onotes));
 
       if ((icont = elf_section_data (inotes)->this_hdr.contents) == NULL)
 	BFD_ASSERT (bfd_malloc_and_get_section (ibfd, inotes, & icont));
@@ -3205,7 +3206,6 @@ v850_elf_relax_delete_bytes (bfd *abfd,
   Elf_Internal_Rela *irel;
   Elf_Internal_Rela *irelend;
   struct elf_link_hash_entry *sym_hash;
-  Elf_Internal_Shdr *shndx_hdr;
   Elf_External_Sym_Shndx *shndx;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -3230,8 +3230,17 @@ v850_elf_relax_delete_bytes (bfd *abfd,
   /* Adjust all the relocs.  */
   irel = elf_section_data (sec)->relocs;
   irelend = irel + sec->reloc_count;
-  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-  shndx = (Elf_External_Sym_Shndx *) shndx_hdr->contents;
+  if (elf_symtab_shndx_list (abfd))
+    {
+      Elf_Internal_Shdr *shndx_hdr;
+
+      shndx_hdr = & elf_symtab_shndx_list (abfd)->hdr;
+      shndx = (Elf_External_Sym_Shndx *) shndx_hdr->contents;
+    }
+  else
+    {
+      shndx = NULL;
+    }
 
   for (; irel < irelend; irel++)
     {

@@ -160,9 +160,12 @@ set lto_link_tests [list \
   [list "PR ld/13287" \
    "-flto -fuse-linker-plugin -Wl,--as-needed" "-flto" \
    {pr13287.cc} {} "pr13287.exe" "c++"] \
-  [list "PR ld/15323" \
+  [list "PR ld/15323 (1)" \
    "" "-O2" \
    {pr15323a.c} {} "" "c"] \
+  [list "PR ld/15323 (2)" \
+   "-O2 -flto -r -nostdlib" "-O2 -flto" \
+   {pr15323a.c} {} "pr15323a-r.o" "c"] \
   [list "Compile(1) PR ld/pr16846" \
    "" "-flto" \
    {pr16846a.c pr16846b.c} {} ""] \
@@ -315,9 +318,12 @@ set lto_run_tests [list \
   [list "PR ld/13201" \
    "-O2 -flto -fuse-linker-plugin -Wl,--as-needed tmpdir/pr13201.o -lm" "" \
    {dummy.c} "pr13201.exe" "pr13201.out" "" "c"] \
-  [list "PR ld/15323" \
+  [list "PR ld/15323 (3)" \
    "-O2 -flto -fuse-linker-plugin tmpdir/pr15323a.o" "" \
    {pr15323b.c} "pr15323.exe" "pr15323.out" "-flto -O2" "c"] \
+  [list "PR ld/15323 (4)" \
+   "-O2 -flto tmpdir/pr15323a-r.o" "" \
+   {dummy.c} "pr15323a.exe" "pr15323.out" "-flto -O2" "c"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {

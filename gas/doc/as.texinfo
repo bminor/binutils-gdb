@@ -265,7 +265,9 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset ARC
 
 @emph{Target ARC options:}
-   [@b{-marc[5|6|7|8]}]
+   [@b{-mcpu=@var{cpu}}]
+   [@b{-mA6}|@b{-mARC600}|@b{-mARC601}|@b{-mA7}|@b{-mARC700}|@b{-mEM}|@b{-mHS}]
+   [@b{-mcode-density}]
    [@b{-EB}|@b{-EL}]
 @end ifset
 @ifset ARM
@@ -654,7 +656,9 @@ sections using zlib.  The debug sections are renamed to begin with
 @end ifset
 
 @item --nocompress-debug-sections
-Do not compress DWARF debug sections.  This is the default.
+Do not compress DWARF debug sections.  This is usually the default for all
+targets except the x86/x86_64, but a configure time option can be used to
+override this.
 
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to
@@ -860,14 +864,16 @@ processor.
 
 @c man begin OPTIONS
 @ifset ARC
-The following options are available when @value{AS} is configured for
-an ARC processor.
+The following options are available when @value{AS} is configured for an ARC
+processor.
 
 @table @gcctabopt
-@item -marc[5|6|7|8]
+@item -mcpu=@var{cpu}
 This option selects the core processor variant.
 @item -EB | -EL
 Select either big-endian (-EB) or little-endian (-EL) output.
+@item -mcode-density
+Enable Code Density extenssion instructions.
 @end table
 @end ifset
 
@@ -2740,10 +2746,15 @@ On most machines, you can also use @code{$} in symbol names; exceptions
 are noted in @ref{Machine Dependencies}.
 @end ifset
 No symbol may begin with a digit.  Case is significant.
-There is no length limit: all characters are significant.  Multibyte characters
+There is no length limit; all characters are significant.  Multibyte characters
 are supported.  Symbols are delimited by characters not in that set, or by the
 beginning of a file (since the source program must end with a newline, the end
 of a file is not a possible symbol delimiter).  @xref{Symbols}.
+
+Symbol names may also be enclosed in double quote @code{"} characters.  In such
+cases any characters are allowed, except for the NUL character.  If a double
+quote character is to be included in the symbol name it must be preceeded by a
+backslash @code{\} character.
 @cindex length of symbols
 
 @node Statements

@@ -187,7 +187,7 @@ alloc_type (struct objfile *objfile)
 
 /* Allocate a new GDBARCH-associated type structure and fill it
    with some defaults.  Space for the type structure is allocated
-   on the heap.  */
+   on the obstack associated with GDBARCH.  */
 
 struct type *
 alloc_type_arch (struct gdbarch *gdbarch)
@@ -198,8 +198,8 @@ alloc_type_arch (struct gdbarch *gdbarch)
 
   /* Alloc the structure and start off with all fields zeroed.  */
 
-  type = XCNEW (struct type);
-  TYPE_MAIN_TYPE (type) = XCNEW (struct main_type);
+  type = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct type);
+  TYPE_MAIN_TYPE (type) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct main_type);
 
   TYPE_OBJFILE_OWNED (type) = 0;
   TYPE_OWNER (type).gdbarch = gdbarch;
@@ -525,7 +525,8 @@ lookup_function_type_with_arguments (struct type *type,
     }
 
   TYPE_NFIELDS (fn) = nparams;
-  TYPE_FIELDS (fn) = TYPE_ZALLOC (fn, nparams * sizeof (struct field));
+  TYPE_FIELDS (fn)
+    = (struct field *) TYPE_ZALLOC (fn, nparams * sizeof (struct field));
   for (i = 0; i < nparams; ++i)
     TYPE_FIELD_TYPE (fn, i) = param_types[i];
 
@@ -1079,7 +1080,9 @@ create_array_type_with_stride (struct type *result_type,
 
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
-  if (has_static_range (TYPE_RANGE_DATA (range_type)))
+  if (has_static_range (TYPE_RANGE_DATA (range_type))
+     && (!type_not_associated (result_type)
+        && !type_not_allocated (result_type)))
     {
       LONGEST low_bound, high_bound;
 
@@ -1191,7 +1194,8 @@ create_set_type (struct type *result_type, struct type *domain_type)
 
   TYPE_CODE (result_type) = TYPE_CODE_SET;
   TYPE_NFIELDS (result_type) = 1;
-  TYPE_FIELDS (result_type) = TYPE_ZALLOC (result_type, sizeof (struct field));
+  TYPE_FIELDS (result_type)
+    = (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
 
   if (!TYPE_STUB (domain_type))
     {
@@ -1433,7 +1437,7 @@ struct type *
 lookup_unsigned_typename (const struct language_defn *language,
 			  struct gdbarch *gdbarch, const char *name)
 {
-  char *uns = alloca (strlen (name) + 10);
+  char *uns = (char *) alloca (strlen (name) + 10);
 
   strcpy (uns, "unsigned ");
   strcpy (uns + 9, name);
@@ -1445,7 +1449,7 @@ lookup_signed_typename (const struct language_defn *language,
 			struct gdbarch *gdbarch, const char *name)
 {
   struct type *t;
-  char *uns = alloca (strlen (name) + 8);
+  char *uns = (char *) alloca (strlen (name) + 8);
 
   strcpy (uns, "signed ");
   strcpy (uns + 7, name);
@@ -1817,6 +1821,12 @@ is_dynamic_type_internal (struct type *type, int top_level)
 	  || TYPE_DATA_LOCATION_KIND (type) == PROP_LOCLIST))
     return 1;
 
+  if (TYPE_ASSOCIATED_PROP (type))
+    return 1;
+
+  if (TYPE_ALLOCATED_PROP (type))
+    return 1;
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -1885,7 +1895,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
   gdb_assert (TYPE_CODE (dyn_range_type) == TYPE_CODE_RANGE);
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->low;
-  if (dwarf2_evaluate_property (prop, addr_stack, &value))
+  if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
       low_bound.kind = PROP_CONST;
       low_bound.data.const_val = value;
@@ -1897,7 +1907,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
     }
 
   prop = &TYPE_RANGE_DATA (dyn_range_type)->high;
-  if (dwarf2_evaluate_property (prop, addr_stack, &value))
+  if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
       high_bound.kind = PROP_CONST;
       high_bound.data.const_val = value;
@@ -1934,12 +1944,30 @@ resolve_dynamic_array (struct type *type,
   struct type *elt_type;
   struct type *range_type;
   struct type *ary_dim;
+  struct dynamic_prop *prop;
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY);
+
+  type = copy_type (type);
 
   elt_type = type;
   range_type = check_typedef (TYPE_INDEX_TYPE (elt_type));
   range_type = resolve_dynamic_range (range_type, addr_stack);
+
+  /* Resolve allocated/associated here before creating a new array type, which
+     will update the length of the array accordingly.  */
+  prop = TYPE_ALLOCATED_PROP (type);
+  if (prop != NULL && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+    {
+      TYPE_DYN_PROP_ADDR (prop) = value;
+      TYPE_DYN_PROP_KIND (prop) = PROP_CONST;
+    }
+  prop = TYPE_ASSOCIATED_PROP (type);
+  if (prop != NULL && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+    {
+      TYPE_DYN_PROP_ADDR (prop) = value;
+      TYPE_DYN_PROP_KIND (prop) = PROP_CONST;
+    }
 
   ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
@@ -1948,9 +1976,8 @@ resolve_dynamic_array (struct type *type,
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
-  return create_array_type_with_stride (copy_type (type),
-					elt_type, range_type,
-					TYPE_FIELD_BITSIZE (type, 0));
+  return create_array_type_with_stride (type, elt_type, range_type,
+                                        TYPE_FIELD_BITSIZE (type, 0));
 }
 
 /* Resolve dynamic bounds of members of the union TYPE to static
@@ -1969,8 +1996,9 @@ resolve_dynamic_union (struct type *type,
 
   resolved_type = copy_type (type);
   TYPE_FIELDS (resolved_type)
-    = TYPE_ALLOC (resolved_type,
-		  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+    = (struct field *) TYPE_ALLOC (resolved_type,
+				   TYPE_NFIELDS (resolved_type)
+				   * sizeof (struct field));
   memcpy (TYPE_FIELDS (resolved_type),
 	  TYPE_FIELDS (type),
 	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
@@ -2009,8 +2037,9 @@ resolve_dynamic_struct (struct type *type,
 
   resolved_type = copy_type (type);
   TYPE_FIELDS (resolved_type)
-    = TYPE_ALLOC (resolved_type,
-		  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+    = (struct field *) TYPE_ALLOC (resolved_type,
+				   TYPE_NFIELDS (resolved_type)
+				   * sizeof (struct field));
   memcpy (TYPE_FIELDS (resolved_type),
 	  TYPE_FIELDS (type),
 	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
@@ -2139,7 +2168,8 @@ resolve_dynamic_type_internal (struct type *type,
 
   /* Resolve data_location attribute.  */
   prop = TYPE_DATA_LOCATION (resolved_type);
-  if (prop != NULL && dwarf2_evaluate_property (prop, addr_stack, &value))
+  if (prop != NULL
+      && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
       TYPE_DYN_PROP_ADDR (prop) = value;
       TYPE_DYN_PROP_KIND (prop) = PROP_CONST;
@@ -2186,8 +2216,7 @@ add_dyn_prop (enum dynamic_prop_node_kind prop_kind, struct dynamic_prop prop,
 
   gdb_assert (TYPE_OBJFILE_OWNED (type));
 
-  temp = obstack_alloc (&objfile->objfile_obstack,
-			sizeof (struct dynamic_prop_list));
+  temp = XOBNEW (&objfile->objfile_obstack, struct dynamic_prop_list);
   temp->prop_kind = prop_kind;
   temp->prop = prop;
   temp->next = TYPE_DYN_PROP_LIST (type);
@@ -2713,7 +2742,7 @@ is_integral_type (struct type *t)
 
 /* Return true if TYPE is scalar.  */
 
-static int
+int
 is_scalar_type (struct type *type)
 {
   type = check_typedef (type);
@@ -3021,10 +3050,9 @@ rank_function (struct type **parms, int nparms,
 	       struct value **args, int nargs)
 {
   int i;
-  struct badness_vector *bv;
+  struct badness_vector *bv = XNEW (struct badness_vector);
   int min_len = nparms < nargs ? nparms : nargs;
 
-  bv = xmalloc (sizeof (struct badness_vector));
   bv->length = nargs + 1;	/* add 1 for the length-match rank.  */
   bv->rank = XNEWVEC (struct rank, nargs + 1);
 
@@ -3371,6 +3399,30 @@ types_deeply_equal (struct type *type1, struct type *type2)
     throw_exception (except);
 
   return result;
+}
+
+/* Allocated status of type TYPE.  Return zero if type TYPE is allocated.
+   Otherwise return one.  */
+
+int
+type_not_allocated (const struct type *type)
+{
+  struct dynamic_prop *prop = TYPE_ALLOCATED_PROP (type);
+
+  return (prop && TYPE_DYN_PROP_KIND (prop) == PROP_CONST
+         && !TYPE_DYN_PROP_ADDR (prop));
+}
+
+/* Associated status of type TYPE.  Return zero if type TYPE is associated.
+   Otherwise return one.  */
+
+int
+type_not_associated (const struct type *type)
+{
+  struct dynamic_prop *prop = TYPE_ASSOCIATED_PROP (type);
+
+  return (prop && TYPE_DYN_PROP_KIND (prop) == PROP_CONST
+         && !TYPE_DYN_PROP_ADDR (prop));
 }
 
 /* Compare one type (PARM) for compatibility with another (ARG).
@@ -4305,7 +4357,7 @@ struct type_pair
 static hashval_t
 type_pair_hash (const void *item)
 {
-  const struct type_pair *pair = item;
+  const struct type_pair *pair = (const struct type_pair *) item;
 
   return htab_hash_pointer (pair->old);
 }
@@ -4313,7 +4365,8 @@ type_pair_hash (const void *item)
 static int
 type_pair_eq (const void *item_lhs, const void *item_rhs)
 {
-  const struct type_pair *lhs = item_lhs, *rhs = item_rhs;
+  const struct type_pair *lhs = (const struct type_pair *) item_lhs;
+  const struct type_pair *rhs = (const struct type_pair *) item_rhs;
 
   return lhs->old == rhs->old;
 }
@@ -4344,8 +4397,9 @@ copy_dynamic_prop_list (struct obstack *objfile_obstack,
     {
       struct dynamic_prop_list *node_copy;
 
-      node_copy = obstack_copy (objfile_obstack, *node_ptr,
-				sizeof (struct dynamic_prop_list));
+      node_copy = ((struct dynamic_prop_list *)
+		   obstack_copy (objfile_obstack, *node_ptr,
+				 sizeof (struct dynamic_prop_list)));
       node_copy->prop = (*node_ptr)->prop;
       *node_ptr = node_copy;
 
@@ -4356,9 +4410,9 @@ copy_dynamic_prop_list (struct obstack *objfile_obstack,
 }
 
 /* Recursively copy (deep copy) TYPE, if it is associated with
-   OBJFILE.  Return a new type allocated using malloc, a saved type if
-   we have already visited TYPE (using COPIED_TYPES), or TYPE if it is
-   not associated with OBJFILE.  */
+   OBJFILE.  Return a new type owned by the gdbarch associated with the type, a
+   saved type if we have already visited TYPE (using COPIED_TYPES), or TYPE if
+   it is not associated with OBJFILE.  */
 
 struct type *
 copy_type_recursive (struct objfile *objfile, 
@@ -4385,8 +4439,7 @@ copy_type_recursive (struct objfile *objfile,
 
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
-  stored
-    = obstack_alloc (&objfile->objfile_obstack, sizeof (struct type_pair));
+  stored = XOBNEW (&objfile->objfile_obstack, struct type_pair);
   stored->old = type;
   stored->newobj = new_type;
   *slot = stored;
@@ -4454,7 +4507,7 @@ copy_type_recursive (struct objfile *objfile,
   /* For range types, copy the bounds information.  */
   if (TYPE_CODE (type) == TYPE_CODE_RANGE)
     {
-      TYPE_RANGE_DATA (new_type) = xmalloc (sizeof (struct range_bounds));
+      TYPE_RANGE_DATA (new_type) = XNEW (struct range_bounds);
       *TYPE_RANGE_DATA (new_type) = *TYPE_RANGE_DATA (type);
     }
 
@@ -4550,7 +4603,7 @@ arch_type (struct gdbarch *gdbarch,
   TYPE_LENGTH (type) = length;
 
   if (name)
-    TYPE_NAME (type) = xstrdup (name);
+    TYPE_NAME (type) = gdbarch_obstack_strdup (gdbarch, name);
 
   return type;
 }
@@ -4659,7 +4712,8 @@ arch_flags_type (struct gdbarch *gdbarch, char *name, int length)
   type = arch_type (gdbarch, TYPE_CODE_FLAGS, length, name);
   TYPE_UNSIGNED (type) = 1;
   TYPE_NFIELDS (type) = nfields;
-  TYPE_FIELDS (type) = TYPE_ZALLOC (type, nfields * sizeof (struct field));
+  TYPE_FIELDS (type)
+    = (struct field *) TYPE_ZALLOC (type, nfields * sizeof (struct field));
 
   return type;
 }
@@ -4712,8 +4766,8 @@ append_composite_type_field_raw (struct type *t, char *name,
   struct field *f;
 
   TYPE_NFIELDS (t) = TYPE_NFIELDS (t) + 1;
-  TYPE_FIELDS (t) = xrealloc (TYPE_FIELDS (t),
-			      sizeof (struct field) * TYPE_NFIELDS (t));
+  TYPE_FIELDS (t) = XRESIZEVEC (struct field, TYPE_FIELDS (t),
+				TYPE_NFIELDS (t));
   f = &(TYPE_FIELDS (t)[TYPE_NFIELDS (t) - 1]);
   memset (f, 0, sizeof f[0]);
   FIELD_TYPE (f[0]) = field;
@@ -4776,7 +4830,7 @@ static struct gdbarch_data *gdbtypes_data;
 const struct builtin_type *
 builtin_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, gdbtypes_data);
+  return (const struct builtin_type *) gdbarch_data (gdbarch, gdbtypes_data);
 }
 
 static void *
@@ -4921,7 +4975,7 @@ objfile_type (struct objfile *objfile)
 {
   struct gdbarch *gdbarch;
   struct objfile_type *objfile_type
-    = objfile_data (objfile, objfile_type_data);
+    = (struct objfile_type *) objfile_data (objfile, objfile_type_data);
 
   if (objfile_type)
     return objfile_type;

@@ -1,3 +1,48 @@
+2015-10-07  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64.h (aarch64_sys_ins_reg) <template>: Removed.
+	<name>: New field.
+
+2015-10-07  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64.h [__cplusplus]: Wrap in extern "C".
+
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+            Cupertino Miranda  <cmiranda@synopsys.com>
+
+        * arc-func.h: New file.
+        * arc.h: Likewise.
+
+2015-10-02  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64.h (aarch64_zero_register_p): Move the declaration
+	to column one.
+
+2015-10-02  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64.h (aarch64_decode_insn): Declare it.
+
+2015-09-29  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* s390.h (S390_INSTR_FLAG_HTM): New flag.
+	(S390_INSTR_FLAG_VX): New flag.
+	(S390_INSTR_FLAG_FACILITY_MASK): New flag mask.
+
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* ppc.h (PPC_OPSHIFT_INV): Use an unsigned constant when left
+	shifting.
+
+2015-09-22  Nick Clifton  <nickc@redhat.com>
+
+	* rx.h (enum RX_Size): Add RX_Bad_Size entry.
+
+2015-09-09  Daniel Santos  <daniel.santos@pobox.com>
+
+	* visium.h (gen_reg_table): Make static.
+	(fp_reg_table): Likewise.
+	(cc_table): Likewise.
+
 2015-07-20  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* arm.h (ARM_AEXT_V6ZK): Rename to ARM_AEXT_V6KZ.

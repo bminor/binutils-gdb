@@ -293,6 +293,29 @@ run_dump_test "lea1e"
 run_dump_test "lea1f"
 run_dump_test "mov1a"
 run_dump_test "mov1b"
+run_dump_test "branch1"
+run_dump_test "call1"
+run_dump_test "call2"
+run_dump_test "call3a"
+run_dump_test "call3b"
+run_dump_test "call3c"
+run_dump_test "call3d"
+run_dump_test "call3e"
+run_dump_test "call3f"
+run_dump_test "call3g"
+run_dump_test "call3h"
+run_dump_test "jmp1"
+run_dump_test "jmp2"
+run_dump_test "load1"
+run_dump_test "load1-nacl"
+run_dump_test "load2"
+run_dump_test "load3"
+run_dump_test "load4a"
+run_dump_test "load4b"
+run_dump_test "load5a"
+run_dump_test "load5b"
+run_dump_test "load6"
+run_dump_test "pr19175"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
@@ -466,6 +489,54 @@ if { [isnative]
 	    {{readelf {-Wr} pr17827.rd}} \
 	    "pr17827" \
 	] \
+	[list \
+	    "Build pr18900.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr18900a.c } \
+	    "" \
+	    "pr18900.so" \
+	] \
+	[list \
+	    "Build pr18900a" \
+	    "tmpdir/pr18900.so" \
+	    "" \
+	    { pr18900b.c pr18900c.c } \
+	    {{readelf {-Wrd} pr18900a.rd}} \
+	    "pr18900a" \
+	] \
+	[list \
+	    "Build pr18900b" \
+	    "tmpdir/pr18900.so" \
+	    "" \
+	    { pr18900b.c pr18900c.c } \
+	    {{readelf {-Wrd} pr18900b.rd}} \
+	    "pr18900b" \
+	] \
+	[list \
+	    "Build pr19031.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr19031a.c } \
+	    "" \
+	    "pr19031.so" \
+	] \
+	[list \
+	    "Build got1d.so" \
+	    "-shared" \
+	    "" \
+	    { got1d.S } \
+	    "" \
+	    "got1d.so" \
+	] \
+	[list \
+	    "Build gotpc1" \
+	    "tmpdir/got1d.so" \
+	    "" \
+	    { got1a.S got1b.c got1c.c } \
+	    {{objdump {-dw} got1.dd}} \
+	    "got1" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
@@ -519,6 +590,30 @@ if { [isnative]
 	    { dummy.c } \
 	    "pr17689ver" \
 	    "pr17689.out" \
+	] \
+	[list \
+	    "Run pr18900" \
+	    "tmpdir/pr18900.so" \
+	    "" \
+	    { pr18900b.c pr18900c.c } \
+	    "pr18900" \
+	    "pr18900.out" \
+	] \
+	[list \
+	    "Run pr19031" \
+	    "tmpdir/pr19031.so" \
+	    "" \
+	    { pr19031b.S pr19031c.c } \
+	    "pr19031" \
+	    "pr19031.out" \
+	] \
+	[list \
+	    "Run got1" \
+	    "tmpdir/got1d.so" \
+	    "" \
+	    { got1a.S got1b.c got1c.c } \
+	    "got1" \
+	    "got1.out" \
 	] \
     ]
 }

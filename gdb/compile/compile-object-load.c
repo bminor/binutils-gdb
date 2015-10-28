@@ -46,7 +46,7 @@ struct munmap_list
 static void
 munmap_list_add (struct munmap_list **headp, CORE_ADDR addr, CORE_ADDR size)
 {
-  struct munmap_list *head_new = xmalloc (sizeof (*head_new));
+  struct munmap_list *head_new = XNEW (struct munmap_list);
 
   head_new->next = *headp;
   *headp = head_new;
@@ -79,7 +79,7 @@ munmap_list_free (struct munmap_list *head)
 static void
 munmap_listp_free_cleanup (void *headp_voidp)
 {
-  struct munmap_list **headp = headp_voidp;
+  struct munmap_list **headp = (struct munmap_list **) headp_voidp;
 
   munmap_list_free (*headp);
 }
@@ -111,7 +111,7 @@ struct setup_sections_data
 static void
 setup_sections (bfd *abfd, asection *sect, void *data_voidp)
 {
-  struct setup_sections_data *data = data_voidp;
+  struct setup_sections_data *data = (struct setup_sections_data *) data_voidp;
   CORE_ADDR alignment;
   unsigned prot;
 
@@ -336,7 +336,8 @@ struct link_hash_table_cleanup_data
 static void
 link_hash_table_free (void *d)
 {
-  struct link_hash_table_cleanup_data *data = d;
+  struct link_hash_table_cleanup_data *data
+    = (struct link_hash_table_cleanup_data *) d;
 
   if (data->abfd->is_linker_output)
     (*data->abfd->link.hash->hash_table_free) (data->abfd);
@@ -348,7 +349,7 @@ link_hash_table_free (void *d)
 static void
 copy_sections (bfd *abfd, asection *sect, void *data)
 {
-  asymbol **symbol_table = data;
+  asymbol **symbol_table = (asymbol **) data;
   bfd_byte *sect_data, *sect_data_got;
   struct cleanup *cleanups;
   struct bfd_link_info link_info;
@@ -386,7 +387,7 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   link_order.size = bfd_get_section_size (sect);
   link_order.u.indirect.section = sect;
 
-  sect_data = xmalloc (bfd_get_section_size (sect));
+  sect_data = (bfd_byte *) xmalloc (bfd_get_section_size (sect));
   make_cleanup (xfree, sect_data);
 
   sect_data_got = bfd_get_relocated_section_contents (abfd, &link_info,
@@ -718,7 +719,8 @@ compile_object_load (const char *object_file, const char *source_file,
   /* The memory may be later needed
      by bfd_generic_get_relocated_section_contents
      called from default_symfile_relocate.  */
-  symbol_table = obstack_alloc (&objfile->objfile_obstack, storage_needed);
+  symbol_table = (asymbol **) obstack_alloc (&objfile->objfile_obstack,
+					     storage_needed);
   number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
   if (number_of_symbols < 0)
     error (_("Cannot parse symbols of compiled module \"%s\": %s"),
@@ -827,7 +829,7 @@ compile_object_load (const char *object_file, const char *source_file,
 
   discard_cleanups (cleanups_free_objfile);
 
-  retval = xmalloc (sizeof (*retval));
+  retval = XNEW (struct compile_module);
   retval->objfile = objfile;
   retval->source_file = xstrdup (source_file);
   retval->func_sym = func_sym;

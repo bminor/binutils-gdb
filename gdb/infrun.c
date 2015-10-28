@@ -62,6 +62,7 @@
 #include "terminal.h"
 #include "solist.h"
 #include "event-loop.h"
+#include "thread-fsm.h"
 
 /* Prototypes for local functions */
 
@@ -129,6 +130,14 @@ infrun_async (int enable)
       else
 	clear_async_event_handler (infrun_async_inferior_event_token);
     }
+}
+
+/* See infrun.h.  */
+
+void
+mark_infrun_async_event_handler (void)
+{
+  mark_async_event_handler (infrun_async_inferior_event_token);
 }
 
 /* When set, stop the 'step' command if we enter a function which has
@@ -377,11 +386,6 @@ show_stop_on_solib_events (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Stopping for shared library events is %s.\n"),
 		    value);
 }
-
-/* Nonzero means expecting a trace trap
-   and should stop the inferior and return silently when it happens.  */
-
-int stop_after_trap;
 
 /* Nonzero after stop if current stack frame should be printed.  */
 
@@ -1086,6 +1090,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
   struct thread_info *th, *tmp;
   struct inferior *inf = current_inferior ();
   int pid = ptid_get_pid (ptid);
+  ptid_t process_ptid;
 
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
@@ -1152,8 +1157,9 @@ follow_exec (ptid_t ptid, char *execd_pathname)
   update_breakpoints_after_exec ();
 
   /* What is this a.out's name?  */
+  process_ptid = pid_to_ptid (pid);
   printf_unfiltered (_("%s is executing new program: %s\n"),
-		     target_pid_to_str (inferior_ptid),
+		     target_pid_to_str (process_ptid),
 		     execd_pathname);
 
   /* We've followed the inferior through an exec.  Therefore, the
@@ -1167,7 +1173,7 @@ follow_exec (ptid_t ptid, char *execd_pathname)
     {
       char *name = exec_file_find (execd_pathname, NULL);
 
-      execd_pathname = alloca (strlen (name) + 1);
+      execd_pathname = (char *) alloca (strlen (name) + 1);
       strcpy (execd_pathname, name);
       xfree (name);
     }
@@ -1182,20 +1188,21 @@ follow_exec (ptid_t ptid, char *execd_pathname)
 
   if (follow_exec_mode_string == follow_exec_mode_new)
     {
-      struct program_space *pspace;
-
       /* The user wants to keep the old inferior and program spaces
 	 around.  Create a new fresh one, and switch to it.  */
 
-      inf = add_inferior (current_inferior ()->pid);
-      pspace = add_program_space (maybe_new_address_space ());
-      inf->pspace = pspace;
-      inf->aspace = pspace->aspace;
-
+      /* Do exit processing for the original inferior before adding
+	 the new inferior so we don't have two active inferiors with
+	 the same ptid, which can confuse find_inferior_ptid.  */
       exit_inferior_num_silent (current_inferior ()->num);
 
+      inf = add_inferior_with_spaces ();
+      inf->pid = pid;
+      target_follow_exec (inf, execd_pathname);
+
       set_current_inferior (inf);
-      set_current_program_space (pspace);
+      set_current_program_space (inf->pspace);
+      add_thread (ptid);
     }
   else
     {
@@ -1558,7 +1565,7 @@ add_displaced_stepping_state (int pid)
     if (state->pid == pid)
       return state;
 
-  state = xcalloc (1, sizeof (*state));
+  state = XCNEW (struct displaced_step_inferior_state);
   state->pid = pid;
   state->next = displaced_step_inferior_states;
   displaced_step_inferior_states = state;
@@ -1680,7 +1687,8 @@ displaced_step_clear (struct displaced_step_inferior_state *displaced)
 static void
 displaced_step_clear_cleanup (void *arg)
 {
-  struct displaced_step_inferior_state *state = arg;
+  struct displaced_step_inferior_state *state
+    = (struct displaced_step_inferior_state *) arg;
 
   displaced_step_clear (state);
 }
@@ -1777,7 +1785,7 @@ displaced_step_prepare_throw (ptid_t ptid)
   len = gdbarch_max_insn_length (gdbarch);
 
   /* Save the original contents of the copy area.  */
-  displaced->step_saved_copy = xmalloc (len);
+  displaced->step_saved_copy = (gdb_byte *) xmalloc (len);
   ignore_cleanups = make_cleanup (free_current_contents,
 				  &displaced->step_saved_copy);
   status = target_read_memory (copy, displaced->step_saved_copy, len);
@@ -2154,13 +2162,15 @@ resume_cleanups (void *ignore)
 static const char schedlock_off[] = "off";
 static const char schedlock_on[] = "on";
 static const char schedlock_step[] = "step";
+static const char schedlock_replay[] = "replay";
 static const char *const scheduler_enums[] = {
   schedlock_off,
   schedlock_on,
   schedlock_step,
+  schedlock_replay,
   NULL
 };
-static const char *scheduler_mode = schedlock_off;
+static const char *scheduler_mode = schedlock_replay;
 static void
 show_scheduler_mode (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
@@ -2224,6 +2234,13 @@ user_visible_resume_ptid (int step)
     {
       /* User-settable 'scheduler' mode requires solo thread
 	 resume.  */
+      resume_ptid = inferior_ptid;
+    }
+  else if ((scheduler_mode == schedlock_replay)
+	   && target_record_will_replay (minus_one_ptid, execution_direction))
+    {
+      /* User-settable 'scheduler' mode requires solo thread resume in replay
+	 mode.  */
       resume_ptid = inferior_ptid;
     }
   else if (!sched_multi && target_supports_multi_process ())
@@ -2690,6 +2707,33 @@ resume (enum gdb_signal sig)
 
 /* Proceeding.  */
 
+/* See infrun.h.  */
+
+/* Counter that tracks number of user visible stops.  This can be used
+   to tell whether a command has proceeded the inferior past the
+   current location.  This allows e.g., inferior function calls in
+   breakpoint commands to not interrupt the command list.  When the
+   call finishes successfully, the inferior is standing at the same
+   breakpoint as if nothing happened (and so we don't call
+   normal_stop).  */
+static ULONGEST current_stop_id;
+
+/* See infrun.h.  */
+
+ULONGEST
+get_stop_id (void)
+{
+  return current_stop_id;
+}
+
+/* Called when we report a user visible stop.  */
+
+static void
+new_stop_id (void)
+{
+  current_stop_id++;
+}
+
 /* Clear out all variables saying what to do when inferior is continued.
    First do this, then set the ones you want, then call `proceed'.  */
 
@@ -2737,6 +2781,9 @@ clear_proceed_status_thread (struct thread_info *tp)
   if (!signal_pass_state (tp->suspend.stop_signal))
     tp->suspend.stop_signal = GDB_SIGNAL_0;
 
+  thread_fsm_delete (tp->thread_fsm);
+  tp->thread_fsm = NULL;
+
   tp->control.trap_expected = 0;
   tp->control.step_range_start = 0;
   tp->control.step_range_end = 0;
@@ -2761,6 +2808,18 @@ clear_proceed_status_thread (struct thread_info *tp)
 void
 clear_proceed_status (int step)
 {
+  /* With scheduler-locking replay, stop replaying other threads if we're
+     not replaying the user-visible resume ptid.
+
+     This is a convenience feature to not require the user to explicitly
+     stop replaying the other threads.  We're assuming that the user's
+     intent is to resume tracing the recorded process.  */
+  if (!non_stop && scheduler_mode == schedlock_replay
+      && target_record_is_replaying (minus_one_ptid)
+      && !target_record_will_replay (user_visible_resume_ptid (step),
+				     execution_direction))
+    target_record_stop_replaying ();
+
   if (!non_stop)
     {
       struct thread_info *tp;
@@ -2792,8 +2851,6 @@ clear_proceed_status (int step)
       inferior = current_inferior ();
       inferior->control.stop_soon = NO_STOP_QUIETLY;
     }
-
-  stop_after_trap = 0;
 
   observer_notify_about_to_proceed ();
 }
@@ -2848,7 +2905,10 @@ schedlock_applies (struct thread_info *tp)
 {
   return (scheduler_mode == schedlock_on
 	  || (scheduler_mode == schedlock_step
-	      && tp->control.stepping_command));
+	      && tp->control.stepping_command)
+	  || (scheduler_mode == schedlock_replay
+	      && target_record_will_replay (minus_one_ptid,
+					    execution_direction)));
 }
 
 /* Basic routine for continuing the program in various fashions.
@@ -3090,15 +3150,11 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   discard_cleanups (old_chain);
 
-  /* Wait for it to stop (if not standalone)
-     and in any case decode why it stopped, and act accordingly.  */
-  /* Do this only if we are not using the event loop, or if the target
-     does not support asynchronous execution.  */
+  /* Tell the event loop to wait for it to stop.  If the target
+     supports asynchronous execution, it'll do this from within
+     target_resume.  */
   if (!target_can_async_p ())
-    {
-      wait_for_inferior ();
-      normal_stop ();
-    }
+    mark_async_event_handler (infrun_async_inferior_event_token);
 }
 
 
@@ -3212,7 +3268,7 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 	 have consistent output as if the stop event had been
 	 reported.  */
       ecs->ptid = info->ptid;
-      ecs->event_thread = find_thread_ptid (info->ptid);
+      ecs->event_thread = info;
       ecs->ws.kind = TARGET_WAITKIND_STOPPED;
       ecs->ws.value.sig = GDB_SIGNAL_0;
 
@@ -3220,14 +3276,10 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 
       if (!ecs->wait_some_more)
 	{
-	  struct thread_info *tp;
+	  /* Cancel any running execution command.  */
+	  thread_cancel_execution_command (info);
 
 	  normal_stop ();
-
-	  /* Finish off the continuations.  */
-	  tp = inferior_thread ();
-	  do_all_intermediate_continuations_thread (tp, 1);
-	  do_all_continuations_thread (tp, 1);
 	}
 
       do_cleanups (old_chain);
@@ -3332,9 +3384,9 @@ delete_just_stopped_threads_infrun_breakpoints_cleanup (void *arg)
   delete_just_stopped_threads_infrun_breakpoints ();
 }
 
-/* Pretty print the results of target_wait, for debugging purposes.  */
+/* See infrun.h.  */
 
-static void
+void
 print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 			   const struct target_waitstatus *ws)
 {
@@ -3710,6 +3762,46 @@ reinstall_readline_callback_handler_cleanup (void *arg)
     gdb_rl_callback_handler_reinstall ();
 }
 
+/* Clean up the FSMs of threads that are now stopped.  In non-stop,
+   that's just the event thread.  In all-stop, that's all threads.  */
+
+static void
+clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
+{
+  struct thread_info *thr = ecs->event_thread;
+
+  if (thr != NULL && thr->thread_fsm != NULL)
+    thread_fsm_clean_up (thr->thread_fsm);
+
+  if (!non_stop)
+    {
+      ALL_NON_EXITED_THREADS (thr)
+        {
+	  if (thr->thread_fsm == NULL)
+	    continue;
+	  if (thr == ecs->event_thread)
+	    continue;
+
+	  switch_to_thread (thr->ptid);
+	  thread_fsm_clean_up (thr->thread_fsm);
+	}
+
+      if (ecs->event_thread != NULL)
+	switch_to_thread (ecs->event_thread->ptid);
+    }
+}
+
+/* A cleanup that restores the execution direction to the value saved
+   in *ARG.  */
+
+static void
+restore_execution_direction (void *arg)
+{
+  enum exec_direction_kind *save_exec_dir = (enum exec_direction_kind *) arg;
+
+  execution_direction = *save_exec_dir;
+}
+
 /* Asynchronous version of wait_for_inferior.  It is called by the
    event loop whenever a change of state is detected on the file
    descriptor corresponding to the target.  It can be called more than
@@ -3727,6 +3819,7 @@ fetch_inferior_event (void *client_data)
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   struct cleanup *ts_old_chain;
   int was_sync = sync_execution;
+  enum exec_direction_kind save_exec_dir = execution_direction;
   int cmd_done = 0;
   ptid_t waiton_ptid = minus_one_ptid;
 
@@ -3759,10 +3852,11 @@ fetch_inferior_event (void *client_data)
      event.  */
   target_dcache_invalidate ();
 
-  make_cleanup_restore_integer (&execution_direction);
+  make_cleanup (restore_execution_direction, &save_exec_dir);
   execution_direction = target_execution_direction ();
 
-  ecs->ptid = do_target_wait (waiton_ptid, &ecs->ws, TARGET_WNOHANG);
+  ecs->ptid = do_target_wait (waiton_ptid, &ecs->ws,
+			      target_can_async_p () ? TARGET_WNOHANG : 0);
 
   if (debug_infrun)
     print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);
@@ -3787,24 +3881,48 @@ fetch_inferior_event (void *client_data)
   if (!ecs->wait_some_more)
     {
       struct inferior *inf = find_inferior_ptid (ecs->ptid);
+      int should_stop = 1;
+      struct thread_info *thr = ecs->event_thread;
+      int should_notify_stop = 1;
 
       delete_just_stopped_threads_infrun_breakpoints ();
 
-      /* We may not find an inferior if this was a process exit.  */
-      if (inf == NULL || inf->control.stop_soon == NO_STOP_QUIETLY)
-	normal_stop ();
+      if (thr != NULL)
+	{
+	  struct thread_fsm *thread_fsm = thr->thread_fsm;
 
-      if (target_has_execution
-	  && ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED
-	  && ecs->ws.kind != TARGET_WAITKIND_EXITED
-	  && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
-	  && ecs->event_thread->step_multi
-	  && ecs->event_thread->control.stop_step)
-	inferior_event_handler (INF_EXEC_CONTINUE, NULL);
+	  if (thread_fsm != NULL)
+	    should_stop = thread_fsm_should_stop (thread_fsm);
+	}
+
+      if (!should_stop)
+	{
+	  keep_going (ecs);
+	}
       else
 	{
-	  inferior_event_handler (INF_EXEC_COMPLETE, NULL);
-	  cmd_done = 1;
+	  clean_up_just_stopped_threads_fsms (ecs);
+
+	  if (thr != NULL && thr->thread_fsm != NULL)
+	    {
+	      should_notify_stop
+		= thread_fsm_should_notify_stop (thr->thread_fsm);
+	    }
+
+	  if (should_notify_stop)
+	    {
+	      int proceeded = 0;
+
+	      /* We may not find an inferior if this was a process exit.  */
+	      if (inf == NULL || inf->control.stop_soon == NO_STOP_QUIETLY)
+		proceeded = normal_stop ();
+
+	      if (!proceeded)
+		{
+		  inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+		  cmd_done = 1;
+		}
+	    }
 	}
     }
 
@@ -4978,6 +5096,11 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
          stop.  */
       follow_exec (inferior_ptid, ecs->ws.value.execd_pathname);
 
+      /* In follow_exec we may have deleted the original thread and
+	 created a new one.  Make sure that the event thread is the
+	 execd thread for that case (this is a nop otherwise).  */
+      ecs->event_thread = inferior_thread ();
+
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
 			      stop_pc, ecs->ptid, &ecs->ws);
@@ -5033,8 +5156,14 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_NO_HISTORY\n");
       /* Reverse execution: target ran out of history info.  */
 
+      /* Switch to the stopped thread.  */
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
+
       delete_just_stopped_threads_single_step_breakpoints ();
-      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
+      stop_pc = regcache_read_pc (get_thread_regcache (inferior_ptid));
       observer_notify_no_history ();
       stop_waiting (ecs);
       return;
@@ -5360,18 +5489,6 @@ handle_signal_stop (struct execution_control_state *ecs)
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
       stop_print_frame = 1;
-      stop_waiting (ecs);
-      return;
-    }
-
-  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-      && stop_after_trap)
-    {
-      if (!ptid_equal (ecs->ptid, inferior_ptid))
-	context_switch (ecs->ptid);
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
-      stop_print_frame = 0;
       stop_waiting (ecs);
       return;
     }
@@ -5883,6 +6000,10 @@ process_event_stop_test (struct execution_control_state *ecs)
     {
       stop_stack_dummy = what.call_dummy;
     }
+
+  /* A few breakpoint types have callbacks associated (e.g.,
+     bp_jit_event).  Run them now.  */
+  bpstat_run_callbacks (ecs->event_thread->control.stop_bpstat);
 
   /* If we hit an internal event that triggers symbol changes, the
      current frame will be invalidated within bpstat_what (e.g., if we
@@ -7198,14 +7319,13 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 {
   TRY
     {
-      struct symbol *vsym;
+      struct block_symbol vsym;
       struct value *value;
       CORE_ADDR handler;
       struct breakpoint *bp;
 
-      vsym = lookup_symbol (SYMBOL_LINKAGE_NAME (sym), b, VAR_DOMAIN,
-			    NULL).symbol;
-      value = read_var_value (vsym, frame);
+      vsym = lookup_symbol (SYMBOL_LINKAGE_NAME (sym), b, VAR_DOMAIN, NULL);
+      value = read_var_value (vsym.symbol, vsym.block, frame);
       /* If the value was optimized out, revert to the old behavior.  */
       if (! value_optimized_out (value))
 	{
@@ -7512,10 +7632,10 @@ prepare_to_wait (struct execution_control_state *ecs)
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog, "infrun: prepare_to_wait\n");
 
-  /* This is the old end of the while loop.  Let everybody know we
-     want to wait for the inferior some more and get called again
-     soon.  */
   ecs->wait_some_more = 1;
+
+  if (!target_is_async_p ())
+    mark_infrun_async_event_handler ();
 }
 
 /* We are done with the step range of a step/next/si/ni command.
@@ -7650,8 +7770,8 @@ print_no_history_reason (struct ui_out *uiout)
    bpstat_print contains the logic deciding in detail what to print,
    based on the event(s) that just occurred.  */
 
-void
-print_stop_event (struct target_waitstatus *ws)
+static void
+print_stop_location (struct target_waitstatus *ws)
 {
   int bpstat_ret;
   enum print_what source_flag;
@@ -7702,20 +7822,146 @@ print_stop_event (struct target_waitstatus *ws)
      SRC_AND_LOC: Print location and source line.  */
   if (do_frame_printing)
     print_stack_frame (get_selected_frame (NULL), 0, source_flag, 1);
+}
+
+/* Cleanup that restores a previous current uiout.  */
+
+static void
+restore_current_uiout_cleanup (void *arg)
+{
+  struct ui_out *saved_uiout = (struct ui_out *) arg;
+
+  current_uiout = saved_uiout;
+}
+
+/* See infrun.h.  */
+
+void
+print_stop_event (struct ui_out *uiout)
+{
+  struct cleanup *old_chain;
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+  struct thread_info *tp;
+
+  get_last_target_status (&last_ptid, &last);
+
+  old_chain = make_cleanup (restore_current_uiout_cleanup, current_uiout);
+  current_uiout = uiout;
+
+  print_stop_location (&last);
 
   /* Display the auto-display expressions.  */
   do_displays ();
+
+  do_cleanups (old_chain);
+
+  tp = inferior_thread ();
+  if (tp->thread_fsm != NULL
+      && thread_fsm_finished_p (tp->thread_fsm))
+    {
+      struct return_value_info *rv;
+
+      rv = thread_fsm_return_value (tp->thread_fsm);
+      if (rv != NULL)
+	print_return_value (uiout, rv);
+    }
 }
 
-/* Here to return control to GDB when the inferior stops for real.
-   Print appropriate messages, remove breakpoints, give terminal our modes.
-
-   STOP_PRINT_FRAME nonzero means print the executing frame
-   (pc, function, args, file, line number and line text).
-   BREAKPOINTS_FAILED nonzero means stop was due to error
-   attempting to insert breakpoints.  */
+/* See infrun.h.  */
 
 void
+maybe_remove_breakpoints (void)
+{
+  if (!breakpoints_should_be_inserted_now () && target_has_execution)
+    {
+      if (remove_breakpoints ())
+	{
+	  target_terminal_ours_for_output ();
+	  printf_filtered (_("Cannot remove breakpoints because "
+			     "program is no longer writable.\nFurther "
+			     "execution is probably impossible.\n"));
+	}
+    }
+}
+
+/* The execution context that just caused a normal stop.  */
+
+struct stop_context
+{
+  /* The stop ID.  */
+  ULONGEST stop_id;
+
+  /* The event PTID.  */
+
+  ptid_t ptid;
+
+  /* If stopp for a thread event, this is the thread that caused the
+     stop.  */
+  struct thread_info *thread;
+
+  /* The inferior that caused the stop.  */
+  int inf_num;
+};
+
+/* Returns a new stop context.  If stopped for a thread event, this
+   takes a strong reference to the thread.  */
+
+static struct stop_context *
+save_stop_context (void)
+{
+  struct stop_context *sc = XNEW (struct stop_context);
+
+  sc->stop_id = get_stop_id ();
+  sc->ptid = inferior_ptid;
+  sc->inf_num = current_inferior ()->num;
+
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    {
+      /* Take a strong reference so that the thread can't be deleted
+	 yet.  */
+      sc->thread = inferior_thread ();
+      sc->thread->refcount++;
+    }
+  else
+    sc->thread = NULL;
+
+  return sc;
+}
+
+/* Release a stop context previously created with save_stop_context.
+   Releases the strong reference to the thread as well. */
+
+static void
+release_stop_context_cleanup (void *arg)
+{
+  struct stop_context *sc = (struct stop_context *) arg;
+
+  if (sc->thread != NULL)
+    sc->thread->refcount--;
+  xfree (sc);
+}
+
+/* Return true if the current context no longer matches the saved stop
+   context.  */
+
+static int
+stop_context_changed (struct stop_context *prev)
+{
+  if (!ptid_equal (prev->ptid, inferior_ptid))
+    return 1;
+  if (prev->inf_num != current_inferior ()->num)
+    return 1;
+  if (prev->thread != NULL && prev->thread->state != THREAD_STOPPED)
+    return 1;
+  if (get_stop_id () != prev->stop_id)
+    return 1;
+  return 0;
+}
+
+/* See infrun.h.  */
+
+int
 normal_stop (void)
 {
   struct target_waitstatus last;
@@ -7724,6 +7970,8 @@ normal_stop (void)
   ptid_t pid_ptid;
 
   get_last_target_status (&last_ptid, &last);
+
+  new_stop_id ();
 
   /* If an exception is thrown from this point on, make sure to
      propagate GDB's knowledge of the executing state to the
@@ -7800,16 +8048,7 @@ normal_stop (void)
     }
 
   /* Note: this depends on the update_thread_list call above.  */
-  if (!breakpoints_should_be_inserted_now () && target_has_execution)
-    {
-      if (remove_breakpoints ())
-	{
-	  target_terminal_ours_for_output ();
-	  printf_filtered (_("Cannot remove breakpoints because "
-			     "program is no longer writable.\nFurther "
-			     "execution is probably impossible.\n"));
-	}
-    }
+  maybe_remove_breakpoints ();
 
   /* If an auto-display called a function and that got a signal,
      delete that auto-display to avoid an infinite recursion.  */
@@ -7817,123 +8056,73 @@ normal_stop (void)
   if (stopped_by_random_signal)
     disable_current_display ();
 
-  /* Notify observers if we finished a "step"-like command, etc.  */
-  if (target_has_execution
-      && last.kind != TARGET_WAITKIND_SIGNALLED
-      && last.kind != TARGET_WAITKIND_EXITED
-      && inferior_thread ()->control.stop_step)
-    {
-      /* But not if in the middle of doing a "step n" operation for
-	 n > 1 */
-      if (inferior_thread ()->step_multi)
-	goto done;
-
-      observer_notify_end_stepping_range ();
-    }
-
   target_terminal_ours ();
   async_enable_stdin ();
 
-  /* Set the current source location.  This will also happen if we
-     display the frame below, but the current SAL will be incorrect
-     during a user hook-stop function.  */
-  if (has_stack_frames () && !stop_stack_dummy)
-    set_current_sal_from_frame (get_current_frame ());
+  /* Let the user/frontend see the threads as stopped.  */
+  do_cleanups (old_chain);
 
-  /* Let the user/frontend see the threads as stopped, but defer to
-     call_function_by_hand if the thread finished an infcall
-     successfully.  We may be e.g., evaluating a breakpoint condition.
-     In that case, the thread had state THREAD_RUNNING before the
-     infcall, and shall remain marked running, all without informing
-     the user/frontend about state transition changes.  */
-  if (target_has_execution
-      && inferior_thread ()->control.in_infcall
-      && stop_stack_dummy == STOP_STACK_DUMMY)
-    discard_cleanups (old_chain);
-  else
-    do_cleanups (old_chain);
+  /* Select innermost stack frame - i.e., current frame is frame 0,
+     and current location is based on that.  Handle the case where the
+     dummy call is returning after being stopped.  E.g. the dummy call
+     previously hit a breakpoint.  (If the dummy call returns
+     normally, we won't reach here.)  Do this before the stop hook is
+     run, so that it doesn't get to see the temporary dummy frame,
+     which is not where we'll present the stop.  */
+  if (has_stack_frames ())
+    {
+      if (stop_stack_dummy == STOP_STACK_DUMMY)
+	{
+	  /* Pop the empty frame that contains the stack dummy.  This
+	     also restores inferior state prior to the call (struct
+	     infcall_suspend_state).  */
+	  struct frame_info *frame = get_current_frame ();
+
+	  gdb_assert (get_frame_type (frame) == DUMMY_FRAME);
+	  frame_pop (frame);
+	  /* frame_pop calls reinit_frame_cache as the last thing it
+	     does which means there's now no selected frame.  */
+	}
+
+      select_frame (get_current_frame ());
+
+      /* Set the current source location.  */
+      set_current_sal_from_frame (get_current_frame ());
+    }
 
   /* Look up the hook_stop and run it (CLI internally handles problem
      of stop_command's pre-hook not existing).  */
-  if (stop_command)
-    catch_errors (hook_stop_stub, stop_command,
-		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
-
-  if (!has_stack_frames ())
-    goto done;
-
-  if (last.kind == TARGET_WAITKIND_SIGNALLED
-      || last.kind == TARGET_WAITKIND_EXITED)
-    goto done;
-
-  /* Select innermost stack frame - i.e., current frame is frame 0,
-     and current location is based on that.
-     Don't do this on return from a stack dummy routine,
-     or if the program has exited.  */
-
-  if (!stop_stack_dummy)
+  if (stop_command != NULL)
     {
-      select_frame (get_current_frame ());
+      struct stop_context *saved_context = save_stop_context ();
+      struct cleanup *old_chain
+	= make_cleanup (release_stop_context_cleanup, saved_context);
 
-      /* If --batch-silent is enabled then there's no need to print the current
-	 source location, and to try risks causing an error message about
-	 missing source files.  */
-      if (stop_print_frame && !batch_silent)
-	print_stop_event (&last);
+      catch_errors (hook_stop_stub, stop_command,
+		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
+
+      /* If the stop hook resumes the target, then there's no point in
+	 trying to notify about the previous stop; its context is
+	 gone.  Likewise if the command switches thread or inferior --
+	 the observers would print a stop for the wrong
+	 thread/inferior.  */
+      if (stop_context_changed (saved_context))
+	{
+	  do_cleanups (old_chain);
+	  return 1;
+	}
+      do_cleanups (old_chain);
     }
 
-  if (stop_stack_dummy == STOP_STACK_DUMMY)
-    {
-      /* Pop the empty frame that contains the stack dummy.
-	 This also restores inferior state prior to the call
-	 (struct infcall_suspend_state).  */
-      struct frame_info *frame = get_current_frame ();
+  /* Notify observers about the stop.  This is where the interpreters
+     print the stop event.  */
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    observer_notify_normal_stop (inferior_thread ()->control.stop_bpstat,
+				 stop_print_frame);
+  else
+    observer_notify_normal_stop (NULL, stop_print_frame);
 
-      gdb_assert (get_frame_type (frame) == DUMMY_FRAME);
-      frame_pop (frame);
-      /* frame_pop() calls reinit_frame_cache as the last thing it
-	 does which means there's currently no selected frame.  We
-	 don't need to re-establish a selected frame if the dummy call
-	 returns normally, that will be done by
-	 restore_infcall_control_state.  However, we do have to handle
-	 the case where the dummy call is returning after being
-	 stopped (e.g. the dummy call previously hit a breakpoint).
-	 We can't know which case we have so just always re-establish
-	 a selected frame here.  */
-      select_frame (get_current_frame ());
-    }
-
-done:
   annotate_stopped ();
-
-  /* Suppress the stop observer if we're in the middle of:
-
-     - a step n (n > 1), as there still more steps to be done.
-
-     - a "finish" command, as the observer will be called in
-       finish_command_continuation, so it can include the inferior
-       function's return value.
-
-     - calling an inferior function, as we pretend we inferior didn't
-       run at all.  The return value of the call is handled by the
-       expression evaluator, through call_function_by_hand.  */
-
-  if (!target_has_execution
-      || last.kind == TARGET_WAITKIND_SIGNALLED
-      || last.kind == TARGET_WAITKIND_EXITED
-      || last.kind == TARGET_WAITKIND_NO_RESUMED
-      || (!(inferior_thread ()->step_multi
-	    && inferior_thread ()->control.stop_step)
-	  && !(inferior_thread ()->control.stop_bpstat
-	       && inferior_thread ()->control.proceed_to_finish)
-	  && !inferior_thread ()->control.in_infcall))
-    {
-      if (!ptid_equal (inferior_ptid, null_ptid))
-	observer_notify_normal_stop (inferior_thread ()->control.stop_bpstat,
-				     stop_print_frame);
-      else
-	observer_notify_normal_stop (NULL, stop_print_frame);
-    }
 
   if (target_has_execution)
     {
@@ -7948,6 +8137,8 @@ done:
      longer needed.  Keeping those around slows down things linearly.
      Note that this never removes the current inferior.  */
   prune_inferiors ();
+
+  return 0;
 }
 
 static int
@@ -8461,7 +8652,7 @@ save_infcall_suspend_state (void)
       size_t len = TYPE_LENGTH (type);
       struct cleanup *back_to;
 
-      siginfo_data = xmalloc (len);
+      siginfo_data = (gdb_byte *) xmalloc (len);
       back_to = make_cleanup (xfree, siginfo_data);
 
       if (target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
@@ -8530,7 +8721,7 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 static void
 do_restore_infcall_suspend_state_cleanup (void *state)
 {
-  restore_infcall_suspend_state (state);
+  restore_infcall_suspend_state ((struct infcall_suspend_state *) state);
 }
 
 struct cleanup *
@@ -8566,7 +8757,6 @@ struct infcall_control_state
   /* Other fields:  */
   enum stop_stack_kind stop_stack_dummy;
   int stopped_by_random_signal;
-  int stop_after_trap;
 
   /* ID if the selected frame when the inferior function call was made.  */
   struct frame_id selected_frame_id;
@@ -8578,7 +8768,8 @@ struct infcall_control_state
 struct infcall_control_state *
 save_infcall_control_state (void)
 {
-  struct infcall_control_state *inf_status = xmalloc (sizeof (*inf_status));
+  struct infcall_control_state *inf_status =
+    XNEW (struct infcall_control_state);
   struct thread_info *tp = inferior_thread ();
   struct inferior *inf = current_inferior ();
 
@@ -8597,7 +8788,6 @@ save_infcall_control_state (void)
   /* Other fields:  */
   inf_status->stop_stack_dummy = stop_stack_dummy;
   inf_status->stopped_by_random_signal = stopped_by_random_signal;
-  inf_status->stop_after_trap = stop_after_trap;
 
   inf_status->selected_frame_id = get_frame_id (get_selected_frame (NULL));
 
@@ -8649,7 +8839,6 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
   /* Other fields:  */
   stop_stack_dummy = inf_status->stop_stack_dummy;
   stopped_by_random_signal = inf_status->stopped_by_random_signal;
-  stop_after_trap = inf_status->stop_after_trap;
 
   if (target_has_stack)
     {
@@ -8671,7 +8860,7 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
 static void
 do_restore_infcall_control_state_cleanup (void *sts)
 {
-  restore_infcall_control_state (sts);
+  restore_infcall_control_state ((struct infcall_control_state *) sts);
 }
 
 struct cleanup *
@@ -8705,7 +8894,7 @@ discard_infcall_control_state (struct infcall_control_state *inf_status)
 static void
 restore_inferior_ptid (void *arg)
 {
-  ptid_t *saved_ptid_ptr = arg;
+  ptid_t *saved_ptid_ptr = (ptid_t *) arg;
 
   inferior_ptid = *saved_ptid_ptr;
   xfree (arg);
@@ -8718,9 +8907,8 @@ restore_inferior_ptid (void *arg)
 struct cleanup *
 save_inferior_ptid (void)
 {
-  ptid_t *saved_ptid_ptr;
+  ptid_t *saved_ptid_ptr = XNEW (ptid_t);
 
-  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
   *saved_ptid_ptr = inferior_ptid;
   return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
 }
@@ -8739,7 +8927,7 @@ clear_exit_convenience_vars (void)
    Set exec-direction / show exec-direction commands
    (returns error unless target implements to_set_exec_direction method).  */
 
-int execution_direction = EXEC_FORWARD;
+enum exec_direction_kind execution_direction = EXEC_FORWARD;
 static const char exec_forward[] = "forward";
 static const char exec_reverse[] = "reverse";
 static const char *exec_direction = exec_forward;
@@ -8808,14 +8996,6 @@ static const struct internalvar_funcs siginfo_funcs =
 static void
 infrun_async_inferior_event_handler (gdb_client_data data)
 {
-  /* If the target is closed while this event source is marked, we
-     will reach here without execution, or a target to call
-     target_wait on, which is an error.  Instead of tracking whether
-     the target has been popped already, or whether we do have threads
-     with pending statutes, simply ignore the event.  */
-  if (!target_is_async_p ())
-    return;
-
   inferior_event_handler (INF_REG_EVENT, NULL);
 }
 
@@ -8906,15 +9086,11 @@ leave it stopped or free to run as needed."),
 			   &showlist);
 
   numsigs = (int) GDB_SIGNAL_LAST;
-  signal_stop = (unsigned char *) xmalloc (sizeof (signal_stop[0]) * numsigs);
-  signal_print = (unsigned char *)
-    xmalloc (sizeof (signal_print[0]) * numsigs);
-  signal_program = (unsigned char *)
-    xmalloc (sizeof (signal_program[0]) * numsigs);
-  signal_catch = (unsigned char *)
-    xmalloc (sizeof (signal_catch[0]) * numsigs);
-  signal_pass = (unsigned char *)
-    xmalloc (sizeof (signal_pass[0]) * numsigs);
+  signal_stop = XNEWVEC (unsigned char, numsigs);
+  signal_print = XNEWVEC (unsigned char, numsigs);
+  signal_program = XNEWVEC (unsigned char, numsigs);
+  signal_catch = XNEWVEC (unsigned char, numsigs);
+  signal_pass = XNEWVEC (unsigned char, numsigs);
   for (i = 0; i < numsigs; i++)
     {
       signal_stop[i] = 1;
@@ -9026,10 +9202,13 @@ By default, the debugger will use the same inferior."),
 			scheduler_enums, &scheduler_mode, _("\
 Set mode for locking scheduler during execution."), _("\
 Show mode for locking scheduler during execution."), _("\
-off  == no locking (threads may preempt at any time)\n\
-on   == full locking (no thread except the current thread may run)\n\
-step == scheduler locked during stepping commands (step, next, stepi, nexti).\n\
-	In this mode, other threads may run during other commands."),
+off    == no locking (threads may preempt at any time)\n\
+on     == full locking (no thread except the current thread may run)\n\
+          This applies to both normal execution and replay mode.\n\
+step   == scheduler locked during stepping commands (step, next, stepi, nexti).\n\
+          In this mode, other threads may run during other commands.\n\
+          This applies to both normal execution and replay mode.\n\
+replay == scheduler locked in replay mode and unlocked during normal execution."),
 			set_schedlock_func,	/* traps on target vector */
 			show_scheduler_mode,
 			&setlist, &showlist);

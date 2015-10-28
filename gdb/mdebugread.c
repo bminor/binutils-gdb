@@ -359,7 +359,7 @@ mdebug_build_psymtabs (struct objfile *objfile,
       info->fdr = (FDR *) obstack_alloc (&objfile->objfile_obstack,
 					 (info->symbolic_header.ifdMax
 					  * sizeof (FDR)));
-      fdr_src = info->external_fdr;
+      fdr_src = (char *) info->external_fdr;
       fdr_end = (fdr_src
 		 + info->symbolic_header.ifdMax * swap->external_fdr_size);
       fdr_ptr = info->fdr;
@@ -436,7 +436,7 @@ push_parse_stack (void)
   if (top_stack && top_stack->prev)
     newobj = top_stack->prev;
   else
-    newobj = (struct parse_stack *) xzalloc (sizeof (struct parse_stack));
+    newobj = XCNEW (struct parse_stack);
   /* Initialize new frame with previous content.  */
   if (top_stack)
     {
@@ -521,6 +521,14 @@ add_pending (FDR *fh, char *sh, struct type *t)
 
 /* Parsing Routines proper.  */
 
+static void
+reg_value_complaint (int regnum, int num_regs, const char *sym)
+{
+  complaint (&symfile_complaints,
+	     _("bad register number %d (max %d) in symbol %s"),
+             regnum, num_regs - 1, sym);
+}
+
 /* Parse a single symbol.  Mostly just make up a GDB symbol for it.
    For blocks, procedures and types we open a new lexical context.
    This is basically just a big switch on the symbol's type.  Argument
@@ -533,7 +541,21 @@ add_pending (FDR *fh, char *sh, struct type *t)
 static int
 mdebug_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
 {
-  return gdbarch_ecoff_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+  int regno = gdbarch_ecoff_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+
+  if (regno < 0
+      || regno >= (gdbarch_num_regs (gdbarch)
+		   + gdbarch_num_pseudo_regs (gdbarch)))
+    {
+      reg_value_complaint (regno,
+			   gdbarch_num_regs (gdbarch)
+			     + gdbarch_num_pseudo_regs (gdbarch),
+			   SYMBOL_PRINT_NAME (sym));
+
+      regno = gdbarch_sp_regnum (gdbarch); /* Known safe, though useless.  */
+    }
+
+  return regno;
 }
 
 static const struct symbol_register_ops mdebug_register_funcs = {
@@ -1050,8 +1072,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		enum_sym = allocate_symbol (mdebugread_objfile);
 		SYMBOL_SET_LINKAGE_NAME
 		  (enum_sym,
-		   obstack_copy0 (&mdebugread_objfile->objfile_obstack,
-				  f->name, strlen (f->name)));
+		   (char *) obstack_copy0 (&mdebugread_objfile->objfile_obstack,
+					   f->name, strlen (f->name)));
 		SYMBOL_ACLASS_INDEX (enum_sym) = LOC_CONST;
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_DOMAIN (enum_sym) = VAR_DOMAIN;
@@ -1348,7 +1370,8 @@ static struct type *
 basic_type (int bt, struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct type **map_bt = objfile_data (objfile, basic_type_data);
+  struct type **map_bt
+    = (struct type **) objfile_data (objfile, basic_type_data);
   struct type *tp;
 
   if (bt >= btMax)
@@ -1696,8 +1719,9 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  else if (TYPE_TAG_NAME (tp) == NULL
 		   || strcmp (TYPE_TAG_NAME (tp), name) != 0)
 	    TYPE_TAG_NAME (tp)
-	      = obstack_copy0 (&mdebugread_objfile->objfile_obstack,
-			       name, strlen (name));
+	      = ((const char *)
+		 obstack_copy0 (&mdebugread_objfile->objfile_obstack,
+				name, strlen (name)));
 	}
     }
 
@@ -1733,8 +1757,9 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  if (TYPE_NAME (tp) == NULL
 	      || strcmp (TYPE_NAME (tp), name) != 0)
 	    TYPE_NAME (tp)
-	      = obstack_copy0 (&mdebugread_objfile->objfile_obstack,
-			       name, strlen (name));
+	      = ((const char *)
+		 obstack_copy0 (&mdebugread_objfile->objfile_obstack,
+				name, strlen (name)));
 	}
     }
   if (t->bt == btTypedef)
@@ -2395,8 +2420,7 @@ parse_partial_symbols (struct objfile *objfile)
   /* Allocate the map FDR -> PST.
      Minor hack: -O3 images might claim some global data belongs
      to FDR -1.  We`ll go along with that.  */
-  fdr_to_pst = (struct pst_map *)
-    xzalloc ((hdr->ifdMax + 1) * sizeof *fdr_to_pst);
+  fdr_to_pst = XCNEWVEC (struct pst_map, hdr->ifdMax + 1);
   old_chain = make_cleanup (xfree, fdr_to_pst);
   fdr_to_pst++;
   {
@@ -2415,7 +2439,7 @@ parse_partial_symbols (struct objfile *objfile)
 	  hdr->ifdMax * sizeof (struct mdebug_pending *));
 
   /* Pass 0 over external syms: swap them in.  */
-  ext_block = (EXTR *) xmalloc (hdr->iextMax * sizeof (EXTR));
+  ext_block = XNEWVEC (EXTR, hdr->iextMax);
   make_cleanup (xfree, ext_block);
 
   ext_out = (char *) debug_info->external_ext;
@@ -2827,10 +2851,11 @@ parse_partial_symbols (struct objfile *objfile)
 		    /* Concatinate stabstring2 with stabstring1.  */
 		    if (stabstring
 		     && stabstring != debug_info->ss + fh->issBase + sh.iss)
-		      stabstring = xrealloc (stabstring, len + len2 + 1);
+		      stabstring
+			= (char *) xrealloc (stabstring, len + len2 + 1);
 		    else
 		      {
-			stabstring = xmalloc (len + len2 + 1);
+			stabstring = (char *) xmalloc (len + len2 + 1);
 			strcpy (stabstring, stabstring1);
 		      }
 		    strcpy (stabstring + len, stabstring2);
@@ -3250,7 +3275,7 @@ parse_partial_symbols (struct objfile *objfile)
 			if (! pst)
 			  {
 			    int name_len = p - namestring;
-			    char *name = xmalloc (name_len + 1);
+			    char *name = (char *) xmalloc (name_len + 1);
 
 			    memcpy (name, namestring, name_len);
 			    name[name_len] = '\0';
@@ -3274,7 +3299,7 @@ parse_partial_symbols (struct objfile *objfile)
 			if (! pst)
 			  {
 			    int name_len = p - namestring;
-			    char *name = xmalloc (name_len + 1);
+			    char *name = (char *) xmalloc (name_len + 1);
 
 			    memcpy (name, namestring, name_len);
 			    name[name_len] = '\0';
@@ -4135,7 +4160,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	  PDR *pdr_in;
 	  PDR *pdr_in_end;
 
-	  pr_block = (PDR *) xmalloc (fh->cpd * sizeof (PDR));
+	  pr_block = XNEWVEC (PDR, fh->cpd);
 	  old_chain = make_cleanup (xfree, pr_block);
 
 	  pdr_ptr = ((char *) debug_info->external_pdr
@@ -4238,7 +4263,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	      PDR *pdr_in;
 	      PDR *pdr_in_end;
 
-	      pr_block = (PDR *) xmalloc (fh->cpd * sizeof (PDR));
+	      pr_block = XNEWVEC (PDR, fh->cpd);
 
 	      old_chain = make_cleanup (xfree, pr_block);
 
@@ -4279,10 +4304,10 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       if (size > 1)
 	--size;
       SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust))
-	= obstack_copy (&mdebugread_objfile->objfile_obstack,
-			lines,
-			(sizeof (struct linetable)
-			 + size * sizeof (lines->item)));
+	= ((struct linetable *)
+	   obstack_copy (&mdebugread_objfile->objfile_obstack,
+			 lines, (sizeof (struct linetable)
+				 + size * sizeof (lines->item))));
       xfree (lines);
 
       /* .. and our share of externals.
@@ -4377,7 +4402,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
   int xref_fd;
   struct mdebug_pending *pend;
 
-  *tpp = (struct type *) NULL;
+  *tpp = NULL;
 
   (*debug_swap->swap_rndx_in) (bigend, &ax->a_rndx, rn);
 
@@ -4831,7 +4856,7 @@ new_block (enum block_type type)
   /* FIXME: carlton/2003-09-11: This should use allocate_block to
      allocate the block.  Which, in turn, suggests that the block
      should be allocated on an obstack.  */
-  struct block *retval = xzalloc (sizeof (struct block));
+  struct block *retval = XCNEW (struct block);
 
   if (type == FUNCTION_BLOCK)
     BLOCK_DICT (retval) = dict_create_linear_expandable ();

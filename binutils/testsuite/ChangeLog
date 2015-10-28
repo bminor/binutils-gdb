@@ -1,3 +1,39 @@
+2015-10-22  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/add-symbol.d: Run test on mips.  Support either
+	order of NEW and NEWDATA symbols.
+
+2015-10-21  Ronald Hoogenboom  <rhoogenboom@irdeto.com>
+
+	PR binutils/19104
+	* binutils-all/add-symbol.d: New test.
+	* binutils-all/objcopy.exp: Run the new test.
+
+2015-10-15  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/objcopy.exp: Delete trailing whitespace.  Use
+	"string equal" rather than "string match" when making simple
+	string comparisons.  Revert 2008-07-08 host_triplet checks.
+	Perform non-run tests when we can build executable.
+	(strip_executable, strip_executable_with_saving_a_symbol): Move
+	run test later.  Take extra param on whether to perform run test.
+	Update callers.
+	(keep_debug_symbols_and_test_copy): Delete unused vars.
+
+2015-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/utils-lib.exp (run_dump_test): Handle symbolic link when
+	copying source file.
+
+2015-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19020
+	* binutils-all/objcopy.exp: Run pr19020a and pr19020b.
+	* lib/utils-lib.exp (run_dump_test): Support binary input.
+	* binutils-all/pr19020.in: New file.
+	* binutils-all/pr19020a.d: Likewise.
+	* binutils-all/pr19020b.d: Likewise.
+
 2015-08-11  Alan Modra  <amodra@gmail.com>
 
 	* binutils-all/strip-12.s: Align .bss section.

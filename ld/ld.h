@@ -207,6 +207,25 @@ extern args_type command_line;
 
 typedef int token_code_type;
 
+/* Different ways we can handle orphan sections.  */
+
+enum orphan_handling_enum {
+  /* The classic strategy, find a suitable section to place the orphan
+     into.  */
+  orphan_handling_place = 0,
+
+  /* Discard any orphan sections as though they were assign to the section
+     /DISCARD/.  */
+  orphan_handling_discard,
+
+  /* Find somewhere to place the orphan section, as with
+     ORPHAN_HANDLING_PLACE, but also issue a warning.  */
+  orphan_handling_warn,
+
+  /* Issue a fatal error if any orphan sections are found.  */
+  orphan_handling_error,
+};
+
 typedef struct {
   bfd_boolean magic_demand_paged;
   bfd_boolean make_executable;
@@ -229,8 +248,8 @@ typedef struct {
   /* If TRUE, only warn once about a particular undefined symbol.  */
   bfd_boolean warn_once;
 
-  /* If TRUE, issue warning messages when orphan sections are encountered.  */
-  bfd_boolean warn_orphan;
+  /* How should we deal with orphan sections.  */
+  enum orphan_handling_enum orphan_handling;
 
   /* If TRUE, warn if multiple global-pointers are needed (Alpha
      only).  */

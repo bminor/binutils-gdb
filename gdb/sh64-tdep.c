@@ -1222,7 +1222,7 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
    TYPE, and copy that, in virtual format, into VALBUF.  */
 static void
 sh64_extract_return_value (struct type *type, struct regcache *regcache,
-			   void *valbuf)
+			   gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2210,7 +2210,7 @@ sh64_frame_cache (struct frame_info *this_frame, void **this_cache)
   int i;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct sh64_frame_cache *) *this_cache;
 
   gdbarch = get_frame_arch (this_frame);
   cache = sh64_alloc_frame_cache ();

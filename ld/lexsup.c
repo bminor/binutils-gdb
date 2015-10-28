@@ -138,6 +138,9 @@ static const struct ld_option ld_options[] =
   { {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
     'I', N_("PROGRAM"), N_("Set PROGRAM as the dynamic linker to use"),
     TWO_DASHES },
+  { {"no-dynamic-linker", no_argument, NULL, OPTION_NO_DYNAMIC_LINKER},
+    '\0', NULL, N_("Produce an executable with no program interpreter header"),
+    TWO_DASHES },
   { {"library", required_argument, NULL, 'l'},
     'l', N_("LIBNAME"), N_("Search for library LIBNAME"), TWO_DASHES },
   { {"library-path", required_argument, NULL, 'L'},
@@ -492,10 +495,6 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Warn if the multiple GP values are used"), TWO_DASHES },
   { {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
     '\0', NULL, N_("Warn only once per undefined symbol"), TWO_DASHES },
-  { {"warn-orphan", no_argument, NULL, OPTION_WARN_ORPHAN},
-    '\0', NULL, N_("Warn if any orphan sections are encountered"), TWO_DASHES },
-  { {"no-warn-orphan", no_argument, NULL, OPTION_NO_WARN_ORPHAN},
-    '\0', NULL, N_("Do not warn if orphan sections are encountered (default)"), TWO_DASHES },
   { {"warn-section-align", no_argument, NULL, OPTION_WARN_SECTION_ALIGN},
     '\0', NULL, N_("Warn if start of section changes due to alignment"),
     TWO_DASHES },
@@ -528,6 +527,9 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"print-memory-usage", no_argument, NULL, OPTION_PRINT_MEMORY_USAGE},
     '\0', NULL, N_("Report target memory usage"), TWO_DASHES },
+  { {"orphan-handling", required_argument, NULL, OPTION_ORPHAN_HANDLING},
+    '\0', N_("=MODE"), N_("Control how orphan sections are handled."),
+    TWO_DASHES },
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -762,6 +764,10 @@ parse_args (unsigned argc, char **argv)
 	case 'I':		/* Used on Solaris.  */
 	case OPTION_DYNAMIC_LINKER:
 	  command_line.interpreter = optarg;
+	  link_info.nointerp = 0;
+	  break;
+	case OPTION_NO_DYNAMIC_LINKER:
+	  link_info.nointerp = 1;
 	  break;
 	case OPTION_SYSROOT:
 	  /* Already handled in ldmain.c.  */
@@ -1375,12 +1381,6 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_WARN_ONCE:
 	  config.warn_once = TRUE;
 	  break;
-	case OPTION_WARN_ORPHAN:
-	  config.warn_orphan = TRUE;
-	  break;
-	case OPTION_NO_WARN_ORPHAN:
-	  config.warn_orphan = FALSE;
-	  break;
 	case OPTION_WARN_SECTION_ALIGN:
 	  config.warn_section_align = TRUE;
 	  break;
@@ -1514,6 +1514,20 @@ parse_args (unsigned argc, char **argv)
 
 	case OPTION_PRINT_MEMORY_USAGE:
 	  command_line.print_memory_usage = TRUE;
+	  break;
+
+	case OPTION_ORPHAN_HANDLING:
+	  if (strcasecmp (optarg, "place") == 0)
+	    config.orphan_handling = orphan_handling_place;
+	  else if (strcasecmp (optarg, "warn") == 0)
+	    config.orphan_handling = orphan_handling_warn;
+	  else if (strcasecmp (optarg, "error") == 0)
+	    config.orphan_handling = orphan_handling_error;
+	  else if (strcasecmp (optarg, "discard") == 0)
+	    config.orphan_handling = orphan_handling_discard;
+	  else
+	    einfo (_("%P%F: invalid argument to option"
+		     " \"--orphan-handling\"\n"));
 	  break;
 	}
     }
@@ -1742,6 +1756,13 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi]\n\
                               Compress DWARF debug sections using zlib\n"));
+#ifdef DEFAULT_FLAG_COMPRESS_DEBUG
+  fprintf (file, _("\
+                               Default: zlib-gabi\n"));
+#else
+  fprintf (file, _("\
+                               Default: none\n"));
+#endif
   fprintf (file, _("\
   -z common-page-size=SIZE    Set common page size to SIZE\n"));
   fprintf (file, _("\

@@ -93,7 +93,23 @@ class Memory_region
       script_exp_binary_add(this->start_,
 			    script_exp_integer(this->current_offset_));
   }
-  
+
+  void
+  set_address(uint64_t addr, const Symbol_table* symtab, const Layout* layout)
+  {
+    uint64_t start = this->start_->eval(symtab, layout, false);
+    uint64_t len = this->length_->eval(symtab, layout, false);
+    if (addr < start || addr >= start + len)
+      gold_error(_("address 0x%llx is not within region %s"),
+		 static_cast<unsigned long long>(addr),
+		 this->name_.c_str());
+    else if (addr < start + this->current_offset_)
+      gold_error(_("address 0x%llx moves dot backwards in region %s"),
+		 static_cast<unsigned long long>(addr),
+		 this->name_.c_str());
+    this->current_offset_ = addr - start;
+  }
+
   void
   increment_offset(std::string section_name, uint64_t amount,
 		   const Symbol_table* symtab, const Layout* layout)
@@ -105,7 +121,7 @@ class Memory_region
       gold_error(_("section %s overflows end of region %s"),
 		 section_name.c_str(), this->name_.c_str());
   }
-  
+
   // Returns true iff there is room left in this region
   // for AMOUNT more bytes of data.
   bool
@@ -120,7 +136,7 @@ class Memory_region
   // are compatible with this region's attributes.
   bool
   attributes_compatible(elfcpp::Elf_Xword flags, elfcpp::Elf_Xword type) const;
-  
+
   void
   add_section(Output_section_definition* sec, bool vma)
   {
@@ -2237,6 +2253,7 @@ Memory_region*
 Script_sections::find_memory_region(
     Output_section_definition* section,
     bool find_vma_region,
+    bool explicit_only,
     Output_section_definition** previous_section_return)
 {
   if (previous_section_return != NULL)
@@ -2282,15 +2299,18 @@ Script_sections::find_memory_region(
 	      }
 	}
 
-      // Make a note of the first memory region whose attributes
-      // are compatible with the section.  If we do not find an
-      // explicit region assignment, then we will return this region.
-      Output_section* out_sec = section->get_output_section();
-      if (first_match == NULL
-	  && out_sec != NULL
-	  && (*mr)->attributes_compatible(out_sec->flags(),
-					  out_sec->type()))
-	first_match = *mr;
+      if (!explicit_only)
+	{
+	  // Make a note of the first memory region whose attributes
+	  // are compatible with the section.  If we do not find an
+	  // explicit region assignment, then we will return this region.
+	  Output_section* out_sec = section->get_output_section();
+	  if (first_match == NULL
+	      && out_sec != NULL
+	      && (*mr)->attributes_compatible(out_sec->flags(),
+					      out_sec->type()))
+	    first_match = *mr;
+	}
     }
 
   // With LMA computations, if an explicit region has not been specified then
@@ -2350,8 +2370,7 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
     ;
   else if (this->address_ == NULL)
     {
-      vma_region = script_sections->find_memory_region(this, true, NULL);
-
+      vma_region = script_sections->find_memory_region(this, true, false, NULL);
       if (vma_region != NULL)
 	address = vma_region->get_current_address()->eval(symtab, layout,
 							  false);
@@ -2359,9 +2378,15 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
 	address = *dot_value;
     }
   else
-    address = this->address_->eval_with_dot(symtab, layout, true,
-					    *dot_value, NULL, NULL,
-					    dot_alignment, false);
+    {
+      vma_region = script_sections->find_memory_region(this, true, true, NULL);
+      address = this->address_->eval_with_dot(symtab, layout, true,
+					      *dot_value, NULL, NULL,
+					      dot_alignment, false);
+      if (vma_region != NULL)
+	vma_region->set_address(address, symtab, layout);
+    }
+
   uint64_t align;
   if (this->align_ == NULL)
     {
@@ -2405,7 +2430,7 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
       Output_section_definition* previous_section;
 
       // Determine if an LMA region has been set for this section.
-      lma_region = script_sections->find_memory_region(this, false,
+      lma_region = script_sections->find_memory_region(this, false, false,
 						       &previous_section);
 
       if (lma_region != NULL)

@@ -473,7 +473,7 @@ iterate_over_symtabs (const char *name,
 static int
 lookup_symtab_callback (struct symtab *symtab, void *data)
 {
-  struct symtab **result_ptr = data;
+  struct symtab **result_ptr = (struct symtab **) data;
 
   *result_ptr = symtab;
   return 1;
@@ -515,8 +515,8 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   int is_constructor;
   int is_destructor = is_destructor_name (physname);
   /* Need a new type prefix.  */
-  char *const_prefix = method->is_const ? "C" : "";
-  char *volatile_prefix = method->is_volatile ? "V" : "";
+  const char *const_prefix = method->is_const ? "C" : "";
+  const char *volatile_prefix = method->is_volatile ? "V" : "";
   char buf[20];
   int len = (newname == NULL ? 0 : strlen (newname));
 
@@ -596,11 +596,11 @@ symbol_set_demangled_name (struct general_symbol_info *gsymbol,
       else
 	{
 	  gsymbol->ada_mangled = 1;
-	  gsymbol->language_specific.mangled_lang.demangled_name = name;
+	  gsymbol->language_specific.demangled_name = name;
 	}
     }
   else
-    gsymbol->language_specific.mangled_lang.demangled_name = name;
+    gsymbol->language_specific.demangled_name = name;
 }
 
 /* Return the demangled name of GSYMBOL.  */
@@ -615,7 +615,7 @@ symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
       /* Fall through.  */
     }
 
-  return gsymbol->language_specific.mangled_lang.demangled_name;
+  return gsymbol->language_specific.demangled_name;
 }
 
 
@@ -663,7 +663,8 @@ struct demangled_name_entry
 static hashval_t
 hash_demangled_name_entry (const void *data)
 {
-  const struct demangled_name_entry *e = data;
+  const struct demangled_name_entry *e
+    = (const struct demangled_name_entry *) data;
 
   return htab_hash_string (e->mangled);
 }
@@ -673,8 +674,10 @@ hash_demangled_name_entry (const void *data)
 static int
 eq_demangled_name_entry (const void *a, const void *b)
 {
-  const struct demangled_name_entry *da = a;
-  const struct demangled_name_entry *db = b;
+  const struct demangled_name_entry *da
+    = (const struct demangled_name_entry *) a;
+  const struct demangled_name_entry *db
+    = (const struct demangled_name_entry *) b;
 
   return strcmp (da->mangled, db->mangled) == 0;
 }
@@ -874,7 +877,8 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	gsymbol->name = linkage_name;
       else
 	{
-	  char *name = obstack_alloc (&per_bfd->storage_obstack, len + 1);
+	  char *name = (char *) obstack_alloc (&per_bfd->storage_obstack,
+					       len + 1);
 
 	  memcpy (name, linkage_name, len);
 	  name[len] = '\0';
@@ -896,7 +900,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       char *alloc_name;
 
       lookup_len = len + JAVA_PREFIX_LEN;
-      alloc_name = alloca (lookup_len + 1);
+      alloc_name = (char *) alloca (lookup_len + 1);
       memcpy (alloc_name, JAVA_PREFIX, JAVA_PREFIX_LEN);
       memcpy (alloc_name + JAVA_PREFIX_LEN, linkage_name, len);
       alloc_name[lookup_len] = '\0';
@@ -909,7 +913,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       char *alloc_name;
 
       lookup_len = len;
-      alloc_name = alloca (lookup_len + 1);
+      alloc_name = (char *) alloca (lookup_len + 1);
       memcpy (alloc_name, linkage_name, len);
       alloc_name[lookup_len] = '\0';
 
@@ -950,10 +954,11 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	 us better bcache hit rates for partial symbols.  */
       if (!copy_name && lookup_name == linkage_name)
 	{
-	  *slot = obstack_alloc (&per_bfd->storage_obstack,
-				 offsetof (struct demangled_name_entry,
-					   demangled)
-				 + demangled_len + 1);
+	  *slot
+	    = ((struct demangled_name_entry *)
+	       obstack_alloc (&per_bfd->storage_obstack,
+			      offsetof (struct demangled_name_entry, demangled)
+			      + demangled_len + 1));
 	  (*slot)->mangled = lookup_name;
 	}
       else
@@ -963,10 +968,11 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	  /* If we must copy the mangled name, put it directly after
 	     the demangled name so we can have a single
 	     allocation.  */
-	  *slot = obstack_alloc (&per_bfd->storage_obstack,
-				 offsetof (struct demangled_name_entry,
-					   demangled)
-				 + lookup_len + demangled_len + 2);
+	  *slot
+	    = ((struct demangled_name_entry *)
+	       obstack_alloc (&per_bfd->storage_obstack,
+			      offsetof (struct demangled_name_entry, demangled)
+			      + lookup_len + demangled_len + 2));
 	  mangled_ptr = &((*slot)->demangled[demangled_len + 1]);
 	  strcpy (mangled_ptr, lookup_name);
 	  (*slot)->mangled = mangled_ptr;
@@ -1291,8 +1297,10 @@ resize_symbol_cache (struct symbol_cache *cache, unsigned int new_size)
     {
       size_t total_size = symbol_cache_byte_size (new_size);
 
-      cache->global_symbols = xcalloc (1, total_size);
-      cache->static_symbols = xcalloc (1, total_size);
+      cache->global_symbols
+	= (struct block_symbol_cache *) xcalloc (1, total_size);
+      cache->static_symbols
+	= (struct block_symbol_cache *) xcalloc (1, total_size);
       cache->global_symbols->size = new_size;
       cache->static_symbols->size = new_size;
     }
@@ -1326,7 +1334,8 @@ free_symbol_cache (struct symbol_cache *cache)
 static struct symbol_cache *
 get_symbol_cache (struct program_space *pspace)
 {
-  struct symbol_cache *cache = program_space_data (pspace, symbol_cache_key);
+  struct symbol_cache *cache
+    = (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
 
   if (cache == NULL)
     {
@@ -1343,7 +1352,7 @@ get_symbol_cache (struct program_space *pspace)
 static void
 symbol_cache_cleanup (struct program_space *pspace, void *data)
 {
-  struct symbol_cache *cache = data;
+  struct symbol_cache *cache = (struct symbol_cache *) data;
 
   free_symbol_cache (cache);
 }
@@ -1358,7 +1367,7 @@ set_symbol_cache_size (unsigned int new_size)
   ALL_PSPACES (pspace)
     {
       struct symbol_cache *cache
-	= program_space_data (pspace, symbol_cache_key);
+	= (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
 
       /* The pspace could have been created but not have a cache yet.  */
       if (cache != NULL)
@@ -1514,7 +1523,8 @@ symbol_cache_mark_not_found (struct block_symbol_cache *bsc,
 static void
 symbol_cache_flush (struct program_space *pspace)
 {
-  struct symbol_cache *cache = program_space_data (pspace, symbol_cache_key);
+  struct symbol_cache *cache
+    = (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
   int pass;
   size_t total_size;
 
@@ -1629,7 +1639,8 @@ maintenance_print_symbol_cache (char *args, int from_tty)
 		       : "(no object file)");
 
       /* If the cache hasn't been created yet, avoid creating one.  */
-      cache = program_space_data (pspace, symbol_cache_key);
+      cache
+	= (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
       if (cache == NULL)
 	printf_filtered ("  <empty>\n");
       else
@@ -1700,7 +1711,8 @@ maintenance_print_symbol_cache_statistics (char *args, int from_tty)
 		       : "(no object file)");
 
       /* If the cache hasn't been created yet, avoid creating one.  */
-      cache = program_space_data (pspace, symbol_cache_key);
+      cache
+	= (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
       if (cache == NULL)
  	printf_filtered ("  empty, no stats available\n");
       else
@@ -3629,7 +3641,11 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
 	  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
     {
+      struct gdbarch *gdbarch = symbol_arch (sym);
+
       sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      if (gdbarch_skip_entrypoint_p (gdbarch))
+	sal.pc = gdbarch_skip_entrypoint (gdbarch, sal.pc);
       return sal;
     }
 
@@ -4135,9 +4151,8 @@ struct filename_seen_cache
 static struct filename_seen_cache *
 create_filename_seen_cache (void)
 {
-  struct filename_seen_cache *cache;
+  struct filename_seen_cache *cache = XNEW (struct filename_seen_cache);
 
-  cache = XNEW (struct filename_seen_cache);
   cache->tab = htab_create_alloc (INITIAL_FILENAME_SEEN_CACHE_SIZE,
 				  filename_hash, filename_eq,
 				  NULL, xcalloc, xfree);
@@ -4159,7 +4174,7 @@ clear_filename_seen_cache (struct filename_seen_cache *cache)
 static void
 delete_filename_seen_cache (void *ptr)
 {
-  struct filename_seen_cache *cache = ptr;
+  struct filename_seen_cache *cache = (struct filename_seen_cache *) ptr;
 
   htab_delete (cache->tab);
   xfree (cache);
@@ -4239,7 +4254,8 @@ static void
 output_partial_symbol_filename (const char *filename, const char *fullname,
 				void *data)
 {
-  output_source_filename (fullname ? fullname : filename, data);
+  output_source_filename (fullname ? fullname : filename,
+			  (struct output_source_filename_data *) data);
 }
 
 static void
@@ -4372,8 +4388,8 @@ sort_search_symbols_remove_dups (struct symbol_search *found, int nfound,
   gdb_assert (found != NULL && nfound > 0);
 
   /* Build an array out of the list so we can easily sort them.  */
-  symbols = (struct symbol_search **) xmalloc (sizeof (struct symbol_search *)
-					       * nfound);
+  symbols = XNEWVEC (struct symbol_search *, nfound);
+
   symp = found;
   for (i = 0; i < nfound; i++)
     {
@@ -4426,7 +4442,7 @@ static int
 search_symbols_file_matches (const char *filename, void *user_data,
 			     int basenames)
 {
-  struct search_symbols_data *data = user_data;
+  struct search_symbols_data *data = (struct search_symbols_data *) user_data;
 
   return file_matches (filename, data->files, data->nfiles, basenames);
 }
@@ -4436,7 +4452,7 @@ search_symbols_file_matches (const char *filename, void *user_data,
 static int
 search_symbols_name_matches (const char *symname, void *user_data)
 {
-  struct search_symbols_data *data = user_data;
+  struct search_symbols_data *data = (struct search_symbols_data *) user_data;
 
   return !data->preg_p || regexec (&data->preg, symname, 0, NULL, 0) == 0;
 }
@@ -4659,11 +4675,10 @@ search_symbols (const char *regexp, enum search_domain kind,
 			    && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
 	      {
 		/* match */
-		struct symbol_search *psr = (struct symbol_search *)
-		  xmalloc (sizeof (struct symbol_search));
+		struct symbol_search *psr = XCNEW (struct symbol_search);
+
 		psr->block = i;
 		psr->symbol = sym;
-		memset (&psr->msymbol, 0, sizeof (psr->msymbol));
 		psr->next = NULL;
 		if (tail == NULL)
 		  found = psr;
@@ -4714,8 +4729,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 			.symbol == NULL)
 		      {
 			/* match */
-			struct symbol_search *psr = (struct symbol_search *)
-			  xmalloc (sizeof (struct symbol_search));
+			struct symbol_search *psr = XNEW (struct symbol_search);
 			psr->block = i;
 			psr->msymbol.minsym = msymbol;
 			psr->msymbol.objfile = objfile;
@@ -4910,7 +4924,7 @@ rbreak_command (char *regexp, int from_tty)
 	  char *local_name;
 
 	  colon_index = colon - regexp;
-	  local_name = alloca (colon_index + 1);
+	  local_name = (char *) alloca (colon_index + 1);
 	  memcpy (local_name, regexp, colon_index);
 	  local_name[colon_index--] = 0;
 	  while (isspace (local_name[colon_index]))
@@ -4941,7 +4955,7 @@ rbreak_command (char *regexp, int from_tty)
 
 	  if (newlen > len)
 	    {
-	      string = xrealloc (string, newlen);
+	      string = (char *) xrealloc (string, newlen);
 	      len = newlen;
 	    }
 	  strcpy (string, fullname);
@@ -4960,7 +4974,7 @@ rbreak_command (char *regexp, int from_tty)
 
 	  if (newlen > len)
 	    {
-	      string = xrealloc (string, newlen);
+	      string = (char *) xrealloc (string, newlen);
 	      len = newlen;
 	    }
 	  strcpy (string, "'");
@@ -5029,7 +5043,7 @@ free_completion_list (VEC (char_ptr) **list_ptr)
 static void
 do_free_completion_list (void *list)
 {
-  free_completion_list (list);
+  free_completion_list ((VEC (char_ptr) **) list);
 }
 
 /* Helper routine for make_symbol_completion_list.  */
@@ -5075,19 +5089,19 @@ completion_list_add_name (const char *symname,
 
     if (word == sym_text)
       {
-	newobj = xmalloc (strlen (symname) + 5);
+	newobj = (char *) xmalloc (strlen (symname) + 5);
 	strcpy (newobj, symname);
       }
     else if (word > sym_text)
       {
 	/* Return some portion of symname.  */
-	newobj = xmalloc (strlen (symname) + 5);
+	newobj = (char *) xmalloc (strlen (symname) + 5);
 	strcpy (newobj, symname + (word - sym_text));
       }
     else
       {
 	/* Return some of SYM_TEXT plus symname.  */
-	newobj = xmalloc (strlen (symname) + (sym_text - word) + 5);
+	newobj = (char *) xmalloc (strlen (symname) + (sym_text - word) + 5);
 	strncpy (newobj, word, sym_text - word);
 	newobj[sym_text - word] = '\0';
 	strcat (newobj, symname);
@@ -5143,7 +5157,7 @@ completion_list_objc_symbol (struct minimal_symbol *msymbol,
 	tmplen = 1024;
       else
 	tmplen *= 2;
-      tmp = xrealloc (tmp, tmplen);
+      tmp = (char *) xrealloc (tmp, tmplen);
     }
   selector = strchr (method, ' ');
   if (selector != NULL)
@@ -5408,7 +5422,7 @@ default_make_symbol_completion_list_break_on_1 (const char *text,
       /* These languages may have parameters entered by user but they are never
 	 present in the partial symbol tables.  */
 
-      const char *cs = memchr (sym_text, '(', sym_text_len);
+      const char *cs = (const char *) memchr (sym_text, '(', sym_text_len);
 
       if (cs)
 	sym_text_len = cs - sym_text;
@@ -5741,19 +5755,19 @@ add_filename_to_list (const char *fname, const char *text, const char *word,
   if (word == text)
     {
       /* Return exactly fname.  */
-      newobj = xmalloc (fnlen + 5);
+      newobj = (char *) xmalloc (fnlen + 5);
       strcpy (newobj, fname);
     }
   else if (word > text)
     {
       /* Return some portion of fname.  */
-      newobj = xmalloc (fnlen + 5);
+      newobj = (char *) xmalloc (fnlen + 5);
       strcpy (newobj, fname + (word - text));
     }
   else
     {
       /* Return some of TEXT plus fname.  */
-      newobj = xmalloc (fnlen + (text - word) + 5);
+      newobj = (char *) xmalloc (fnlen + (text - word) + 5);
       strncpy (newobj, word, text - word);
       newobj[text - word] = '\0';
       strcat (newobj, fname);
@@ -5795,7 +5809,8 @@ static void
 maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 				   void *user_data)
 {
-  struct add_partial_filename_data *data = user_data;
+  struct add_partial_filename_data *data
+    = (struct add_partial_filename_data *) user_data;
 
   if (not_interesting_fname (filename))
     return;
@@ -5892,7 +5907,8 @@ make_source_files_completion_list (const char *text, const char *word)
 static struct main_info *
 get_main_info (void)
 {
-  struct main_info *info = program_space_data (current_program_space,
+  struct main_info *info
+    = (struct main_info *) program_space_data (current_program_space,
 					       main_progspace_key);
 
   if (info == NULL)
@@ -5918,7 +5934,7 @@ get_main_info (void)
 static void
 main_info_cleanup (struct program_space *pspace, void *data)
 {
-  struct main_info *info = data;
+  struct main_info *info = (struct main_info *) data;
 
   if (info != NULL)
     xfree (info->name_of_main);

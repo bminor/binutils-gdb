@@ -74,4 +74,8 @@ void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
 void c_type_print_args (struct type *, struct ui_file *, int, enum language,
 			const struct type_print_options *);
 
+extern void val_print_not_allocated (struct ui_file *stream);
+
+extern void val_print_not_associated (struct ui_file *stream);
+
 #endif

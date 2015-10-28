@@ -428,7 +428,7 @@ processReal (struct parser_state *par_state, const char *num0)
 static struct stoken
 processId (const char *name0, int len)
 {
-  char *name = obstack_alloc (&temp_parse_space, len + 11);
+  char *name = (char *) obstack_alloc (&temp_parse_space, len + 11);
   int i0, i;
   struct stoken result;
 
@@ -499,7 +499,7 @@ processString (const char *text, int len)
   const char *lim = text + len;
   struct stoken result;
 
-  q = obstack_alloc (&temp_parse_space, len);
+  q = (char *) obstack_alloc (&temp_parse_space, len);
   result.ptr = q;
   p = text;
   while (p < lim)

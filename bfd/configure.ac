@@ -428,7 +428,7 @@ changequote([,])dnl
 	COREFILE=lynx-core.lo
 	;;
 changequote(,)dnl
-  rs6000-*-aix[5-9].* | powerpc-*-aix[5-9].*)
+  rs6000-*-aix[5-9].* | powerpc-*-aix[5-9].* | powerpc64-*-aix[5-9].*)
 changequote([,])dnl
         COREFILE=rs6000-core.lo
 	COREFLAG="$COREFLAG -DAIX_5_CORE -DAIX_CORE_DUMPX_CORE"
@@ -447,6 +447,7 @@ changequote([,])dnl
 	;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.lo ;;
   rs6000-*-*)		COREFILE=rs6000-core.lo ;;
+  powerpc64-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix4*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-beos*)	;;

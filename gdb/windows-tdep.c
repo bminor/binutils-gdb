@@ -321,7 +321,7 @@ display_one_tib (ptid_t ptid)
       max = tib_size / size;
     }
   
-  tib = alloca (tib_size);
+  tib = (gdb_byte *) alloca (tib_size);
 
   if (target_get_tib_address (ptid, &thread_local_base) == 0)
     {

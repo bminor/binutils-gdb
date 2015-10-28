@@ -674,9 +674,11 @@ struct value *value_of_register_lazy (struct frame_info *frame, int regnum);
 extern int symbol_read_needs_frame (struct symbol *);
 
 extern struct value *read_var_value (struct symbol *var,
+				     const struct block *var_block,
 				     struct frame_info *frame);
 
 extern struct value *default_read_var_value (struct symbol *var,
+					     const struct block *var_block,
 					     struct frame_info *frame);
 
 extern struct value *allocate_value (struct type *type);

@@ -50,13 +50,4 @@ extern struct value *
 			       dummy_frame_dtor_ftype *dummy_dtor,
 			       void *dummy_dtor_data);
 
-struct dummy_frame_context_saver;
-extern void dummy_frame_context_saver_drop
-  (struct dummy_frame_context_saver *data);
-extern void dummy_frame_context_saver_cleanup (void *data_voidp);
-extern struct regcache *dummy_frame_context_saver_get_regs
-  (struct dummy_frame_context_saver *saver);
-extern struct dummy_frame_context_saver *dummy_frame_context_saver_setup
-  (struct frame_id dummy_id, ptid_t ptid);
-
 #endif

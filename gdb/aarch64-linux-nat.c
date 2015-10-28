@@ -30,6 +30,7 @@
 #include "aarch64-tdep.h"
 #include "aarch64-linux-tdep.h"
 #include "aarch32-linux-nat.h"
+#include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
 
 #include "elf/external.h"
@@ -89,7 +90,7 @@ aarch64_add_process (pid_t pid)
 {
   struct aarch64_process_info *proc;
 
-  proc = xcalloc (1, sizeof (*proc));
+  proc = XCNEW (struct aarch64_process_info);
   proc->pid = pid;
 
   proc->next = aarch64_process_list;
@@ -141,98 +142,10 @@ aarch64_forget_process (pid_t pid)
 
 /* Get debug registers state for process PID.  */
 
-static struct aarch64_debug_reg_state *
+struct aarch64_debug_reg_state *
 aarch64_get_debug_reg_state (pid_t pid)
 {
   return &aarch64_process_info_get (pid)->state;
-}
-
-struct aarch64_dr_update_callback_param
-{
-  int is_watchpoint;
-  unsigned int idx;
-};
-
-/* Callback for iterate_over_lwps.  Records the
-   information about the change of one hardware breakpoint/watchpoint
-   setting for the thread LWP.
-   The information is passed in via PTR.
-   N.B.  The actual updating of hardware debug registers is not
-   carried out until the moment the thread is resumed.  */
-
-static int
-debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
-{
-  struct aarch64_dr_update_callback_param *param_p
-    = (struct aarch64_dr_update_callback_param *) ptr;
-  int pid = ptid_get_lwp (lwp->ptid);
-  int idx = param_p->idx;
-  int is_watchpoint = param_p->is_watchpoint;
-  struct arch_lwp_info *info = lwp->arch_private;
-  dr_changed_t *dr_changed_ptr;
-  dr_changed_t dr_changed;
-
-  if (info == NULL)
-    info = lwp->arch_private = XCNEW (struct arch_lwp_info);
-
-  if (show_debug_regs)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "debug_reg_change_callback: \n\tOn entry:\n");
-      fprintf_unfiltered (gdb_stdlog,
-			  "\tpid%d, dr_changed_bp=0x%s, "
-			  "dr_changed_wp=0x%s\n",
-			  pid, phex (info->dr_changed_bp, 8),
-			  phex (info->dr_changed_wp, 8));
-    }
-
-  dr_changed_ptr = is_watchpoint ? &info->dr_changed_wp
-    : &info->dr_changed_bp;
-  dr_changed = *dr_changed_ptr;
-
-  gdb_assert (idx >= 0
-	      && (idx <= (is_watchpoint ? aarch64_num_wp_regs
-			  : aarch64_num_bp_regs)));
-
-  /* The actual update is done later just before resuming the lwp,
-     we just mark that one register pair needs updating.  */
-  DR_MARK_N_CHANGED (dr_changed, idx);
-  *dr_changed_ptr = dr_changed;
-
-  /* If the lwp isn't stopped, force it to momentarily pause, so
-     we can update its debug registers.  */
-  if (!lwp->stopped)
-    linux_stop_lwp (lwp);
-
-  if (show_debug_regs)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "\tOn exit:\n\tpid%d, dr_changed_bp=0x%s, "
-			  "dr_changed_wp=0x%s\n",
-			  pid, phex (info->dr_changed_bp, 8),
-			  phex (info->dr_changed_wp, 8));
-    }
-
-  /* Continue the iteration.  */
-  return 0;
-}
-
-/* Notify each thread that their IDXth breakpoint/watchpoint register
-   pair needs to be updated.  The message will be recorded in each
-   thread's arch-specific data area, the actual updating will be done
-   when the thread is resumed.  */
-
-void
-aarch64_notify_debug_reg_change (const struct aarch64_debug_reg_state *state,
-				 int is_watchpoint, unsigned int idx)
-{
-  struct aarch64_dr_update_callback_param param;
-  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-
-  param.is_watchpoint = is_watchpoint;
-  param.idx = idx;
-
-  iterate_over_lwps (pid_ptid, debug_reg_change_callback, (void *) &param);
 }
 
 /* Fill GDB's register array with the general-purpose register values
@@ -513,59 +426,6 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 			  AARCH64_LINUX_SIZEOF_FPREGSET);
 }
 
-/* Called when resuming a thread.
-   The hardware debug registers are updated when there is any change.  */
-
-static void
-aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
-{
-  struct arch_lwp_info *info = lwp->arch_private;
-
-  /* NULL means this is the main thread still going through the shell,
-     or, no watchpoint has been set yet.  In that case, there's
-     nothing to do.  */
-  if (info == NULL)
-    return;
-
-  if (DR_HAS_CHANGED (info->dr_changed_bp)
-      || DR_HAS_CHANGED (info->dr_changed_wp))
-    {
-      int tid = ptid_get_lwp (lwp->ptid);
-      struct aarch64_debug_reg_state *state
-	= aarch64_get_debug_reg_state (ptid_get_pid (lwp->ptid));
-
-      if (show_debug_regs)
-	fprintf_unfiltered (gdb_stdlog, "prepare_to_resume thread %d\n", tid);
-
-      /* Watchpoints.  */
-      if (DR_HAS_CHANGED (info->dr_changed_wp))
-	{
-	  aarch64_linux_set_debug_regs (state, tid, 1);
-	  DR_CLEAR_CHANGED (info->dr_changed_wp);
-	}
-
-      /* Breakpoints.  */
-      if (DR_HAS_CHANGED (info->dr_changed_bp))
-	{
-	  aarch64_linux_set_debug_regs (state, tid, 0);
-	  DR_CLEAR_CHANGED (info->dr_changed_bp);
-	}
-    }
-}
-
-static void
-aarch64_linux_new_thread (struct lwp_info *lp)
-{
-  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
-
-  /* Mark that all the hardware breakpoint/watchpoint register pairs
-     for this thread need to be initialized.  */
-  DR_MARK_ALL_CHANGED (info->dr_changed_bp, aarch64_num_bp_regs);
-  DR_MARK_ALL_CHANGED (info->dr_changed_wp, aarch64_num_wp_regs);
-
-  lp->arch_private = info;
-}
-
 /* linux_nat_new_fork hook.   */
 
 static void
@@ -600,21 +460,10 @@ ps_err_e
 ps_get_thread_area (const struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
-  struct iovec iovec;
-  uint64_t reg;
+  int is_64bit_p
+    = (gdbarch_bfd_arch_info (target_gdbarch ())->bits_per_word == 64);
 
-  iovec.iov_base = &reg;
-  iovec.iov_len = sizeof (reg);
-
-  if (ptrace (PTRACE_GETREGSET, lwpid, NT_ARM_TLS, &iovec) != 0)
-    return PS_ERR;
-
-  /* IDX is the bias from the thread pointer to the beginning of the
-     thread descriptor.  It has to be subtracted due to implementation
-     quirks in libthread_db.  */
-  *base = (void *) (reg - idx);
-
-  return PS_OK;
+  return aarch64_ps_get_thread_area (ph, lwpid, idx, base, is_64bit_p);
 }
 
 
@@ -683,6 +532,34 @@ aarch64_linux_read_description (struct target_ops *ops)
   return tdesc_aarch64;
 }
 
+/* Convert a native/host siginfo object, into/from the siginfo in the
+   layout of the inferiors' architecture.  Returns true if any
+   conversion was done; false otherwise.  If DIRECTION is 1, then copy
+   from INF to NATIVE.  If DIRECTION is 0, copy from NATIVE to
+   INF.  */
+
+static int
+aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+{
+  struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
+
+  /* Is the inferior 32-bit?  If so, then do fixup the siginfo
+     object.  */
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
+    {
+      if (direction == 0)
+	aarch64_compat_siginfo_from_siginfo ((struct compat_siginfo *) inf,
+					     native);
+      else
+	aarch64_siginfo_from_compat_siginfo (native,
+					     (struct compat_siginfo *) inf);
+
+      return 1;
+    }
+
+  return 0;
+}
+
 /* Returns the number of hardware watchpoints of type TYPE that we can
    set.  Value is positive if we can set CNT watchpoints, zero if
    setting watchpoints of type TYPE is not supported, and negative if
@@ -731,10 +608,12 @@ aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
 {
   int ret;
   CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
-  const int len = 4;
+  int len;
   const enum target_hw_bp_type type = hw_execute;
   struct aarch64_debug_reg_state *state
     = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+  gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
 
   if (show_debug_regs)
     fprintf_unfiltered
@@ -763,10 +642,12 @@ aarch64_linux_remove_hw_breakpoint (struct target_ops *self,
 {
   int ret;
   CORE_ADDR addr = bp_tgt->placed_address;
-  const int len = 4;
+  int len = 4;
   const enum target_hw_bp_type type = hw_execute;
   struct aarch64_debug_reg_state *state
     = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+  gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
 
   if (show_debug_regs)
     fprintf_unfiltered
@@ -857,38 +738,7 @@ static int
 aarch64_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
 					   CORE_ADDR addr, int len)
 {
-  CORE_ADDR aligned_addr;
-
-  /* Can not set watchpoints for zero or negative lengths.  */
-  if (len <= 0)
-    return 0;
-
-  /* Must have hardware watchpoint debug register(s).  */
-  if (aarch64_num_wp_regs == 0)
-    return 0;
-
-  /* We support unaligned watchpoint address and arbitrary length,
-     as long as the size of the whole watched area after alignment
-     doesn't exceed size of the total area that all watchpoint debug
-     registers can watch cooperatively.
-
-     This is a very relaxed rule, but unfortunately there are
-     limitations, e.g. false-positive hits, due to limited support of
-     hardware debug registers in the kernel.  See comment above
-     aarch64_align_watchpoint for more information.  */
-
-  aligned_addr = addr & ~(AARCH64_HWP_MAX_LEN_PER_REG - 1);
-  if (aligned_addr + aarch64_num_wp_regs * AARCH64_HWP_MAX_LEN_PER_REG
-      < addr + len)
-    return 0;
-
-  /* All tests passed so we are likely to be able to set the watchpoint.
-     The reason that it is 'likely' rather than 'must' is because
-     we don't check the current usage of the watchpoint registers, and
-     there may not be enough registers available for this watchpoint.
-     Ideally we should check the cached debug register state, however
-     the checking is costly.  */
-  return 1;
+  return aarch64_linux_region_ok_for_watchpoint (addr, len);
 }
 
 /* Implement the "to_stopped_data_address" target_ops method.  */
@@ -950,6 +800,14 @@ aarch64_linux_watchpoint_addr_within_range (struct target_ops *target,
   return start <= addr && start + length - 1 >= addr;
 }
 
+/* Implement the "to_can_do_single_step" target_ops method.  */
+
+static int
+aarch64_linux_can_do_single_step (struct target_ops *target)
+{
+  return 1;
+}
+
 /* Define AArch64 maintenance commands.  */
 
 static void
@@ -1001,6 +859,7 @@ _initialize_aarch64_linux_nat (void)
   t->to_stopped_data_address = aarch64_linux_stopped_data_address;
   t->to_watchpoint_addr_within_range =
     aarch64_linux_watchpoint_addr_within_range;
+  t->to_can_do_single_step = aarch64_linux_can_do_single_step;
 
   /* Override the GNU/Linux inferior startup hook.  */
   super_post_startup_inferior = t->to_post_startup_inferior;
@@ -1012,4 +871,7 @@ _initialize_aarch64_linux_nat (void)
   linux_nat_set_new_fork (t, aarch64_linux_new_fork);
   linux_nat_set_forget_process (t, aarch64_forget_process);
   linux_nat_set_prepare_to_resume (t, aarch64_linux_prepare_to_resume);
+
+  /* Add our siginfo layout converter.  */
+  linux_nat_set_siginfo_fixup (t, aarch64_linux_siginfo_fixup);
 }

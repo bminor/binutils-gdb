@@ -93,7 +93,7 @@ struct scm_to_stringn_data
 static SCM
 gdbscm_call_scm_to_stringn (void *datap)
 {
-  struct scm_to_stringn_data *data = datap;
+  struct scm_to_stringn_data *data = (struct scm_to_stringn_data *) datap;
 
   data->result = scm_to_stringn (data->string, data->lenp, data->charset,
 				 data->conversion_kind);
@@ -161,7 +161,7 @@ struct scm_from_stringn_data
 static SCM
 gdbscm_call_scm_from_stringn (void *datap)
 {
-  struct scm_from_stringn_data *data = datap;
+  struct scm_from_stringn_data *data = (struct scm_from_stringn_data *) datap;
 
   data->result = scm_from_stringn (data->string, data->len, data->charset,
 				   data->conversion_kind);
@@ -268,7 +268,7 @@ gdbscm_string_to_argv (SCM string_scm)
 
 static const scheme_function string_functions[] =
 {
-  { "string->argv", 1, 0, 0, gdbscm_string_to_argv,
+  { "string->argv", 1, 0, 0, as_a_scm_t_subr (gdbscm_string_to_argv),
   "\
 Convert a string to a list of strings split up according to\n\
 gdb's argv parsing rules." },

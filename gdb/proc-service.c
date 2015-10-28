@@ -140,7 +140,7 @@ ps_err_e
 ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
-  return ps_xfer_memory (ph, addr, buf, size, 0);
+  return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 0);
 }
 
 /* Write SIZE bytes from BUF into the target process PH at address ADDR.  */

@@ -1,3 +1,142 @@
+2015-10.27  Han Shen  <shenhan@google.com>
+
+	PR gold/19042 - unsupported reloc 311/312.
+
+	* aarch64.cc (Target_aarch64::Scan::local): Add support for
+	reloc 311/312.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.cc (Target_x86_64<size>::Scan::get_reference_flags):
+	Treat R_X86_64_GOTPCRELX and R_X86_64_REX_GOTPCRELX the same
+	as R_X86_64_GOTPCREL.
+	(Target_x86_64<size>::Scan::local): Likewise.
+	(Target_x86_64<size>::Scan::possible_function_pointer_reloc):
+	Likewise.
+	(Target_x86_64<size>::Scan::global): Likewise.
+	(Target_x86_64<size>::Relocate::relocate): Likewise.
+	(Target_x86_64<size>::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386.cc (Target_i386::Scan::get_reference_flags(): Treat
+	R_386_GOT32X the same as R_386_GOT32.
+	(Target_i386::Scan::local): Likewise.
+	(Target_i386::Scan::possible_function_pointer_reloc): Likewise.
+	(Target_i386::Scan::global): Likewise.
+	(Target_i386::Relocate::relocate): Likewise.
+	(Target_i386::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
+2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/Makefile.am (x86_64_mov_to_lea11): Replace
+	x86_64_mov_to_lea1.o with x86_64_mov_to_lea2.o.
+	(x86_64_mov_to_lea12): Replace x86_64_mov_to_lea2.o with
+	x86_64_mov_to_lea1.o.
+	* testsuite/Makefile.in: Regenerated.
+
+2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19119
+	* options.h (General_options): Remove "obsolete" from -m.
+	* parameters.cc (set_parameters_target): Check if input target
+	is compatible with output emulation set by "-m emulation".
+
+2015-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19118
+	* i386.cc (Target_iamcu): New class.
+	(Target_selector_iamcu): Likewise.
+	(Target_iamcu::iamcu_info): New variable.
+	(target_selector_iamcu): Likewise.
+
+2015-10-07  Andreas Schwab  <schwab@suse.de>
+
+	* aarch64.cc (aarch64_info): Set abi_pagesize to 64K.
+
+2015-10-06  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18855
+	* sparc.cc (Sparc_relocate_functions::gdop_hix22): Remove addend
+	parameter.
+	(Sparc_relocate_functions::gdop_lox10): Likewise.
+	(Target_sparc::Relocate::relocate): Use addend when computing
+	symbol value for R_SPARC_GOTDATA_OP*.
+
+2015-09-07  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18930
+	PR gold/18886
+	* resolve.cc (Symbol::override_base): Don't convert IFUNC symbols here.
+	* symtab.cc (Symbol_table::add_from_dynobj): Convert them here instead.
+
+2015-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18886
+	* resolve.cc (Symbol::override_base): Turn IFUNC symbols from
+	shared libraries into normal FUNC symbols.
+	* symtab.cc (Symbol_table::sized_write_symbol): Assert IFUNC
+	symbols aren't from shared libraries.
+
+2015-09-02  Alan Modra  <amodra@gmail.com>
+
+	PR 18878
+	* powerpc.cc (Target_powerpc): Add savres_section_ and accessor.
+	(Target_powerpc::Branch_info::make_stub): Determine whether long
+	branch stub is for save/restore function.
+	(Branch_stub_ent): Add save_res_, and extra parm to constructor.
+	(Stub_table): Add need_save_res_.
+	(Stub_table:clear_stubs): Clear need_save_res_.
+	(Stub_table:set_address_and_size): Add save/restore section size.
+	(Stub_table::add_long_branch_entry): Add save_res param.  Set
+	need_save_res_, but don't add space for save/restore stubs.
+	(Stub_table::find_long_branch_entry): Return offset to local copy
+	of save/restore func.
+	(Stub_table::do_write): Don't output save/restore stubs.  Instead
+	copy the save/restore functions.
+	(Output_data_save_res:contents): New accessor.
+	(Target_powerpc::define_save_restore_funcs): Set savres_section_.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18847
+	* script-sections.cc (Memory_region::set_address): New method.
+	(Script_sections::find_memory_region): Add explicit_only parameter.
+	(Output_section_definition::set_section_addresses): Handle case where
+	script specifies both address and vma region.
+	* script-sections.h (Script_sections::find_memory_region): Add
+	explicit_only parameter.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18859
+	* object.cc (Input_objects::add_object): Store objects in a map,
+	indexed by soname; update as-needed flag when necessary.
+	* object.h (Object::clear_as_needed): New method.
+	(Input_objects::so_names_): Change from set to map.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/14746
+	* expression.cc (Expression::Expression_eval_info): Add
+	is_valid_pointer field.
+	(Expression::eval_maybe_dot): Add is_valid_pointer parameter.
+	Adjust all callers.
+	(Addr_expression::value_from_output_section): Check whether address
+	is valid.
+	* script.cc (Symbol_assignment::set_if_absolute): Defer assignment
+	if evaluation failed due to address that is not yet valid.
+	* script.h: (Expression::eval_maybe_dot): Add is_valid_pointer
+	parameter.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18866
+	PR gold/18703
+	* symtab.cc (Symbol_table): Reorder conditions to avoid internal error.
+
 2015-08-20  Alan Modra  <amodra@gmail.com>
 
 	PR gold/18846

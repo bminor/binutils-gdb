@@ -49,6 +49,10 @@ if ![info exists strip] then {
     set strip [findfile $base_dir/../binutils/strip-new $base_dir/../binutils/strip-new [transform strip]]
 }
 
+if ![info exists size] then {
+    set size [findfile $base_dir/../binutils/size]
+}
+
 remote_exec host "mkdir -p tmpdir"
 
 # Make symlinks from tmpdir/ld to the linker and assembler in the

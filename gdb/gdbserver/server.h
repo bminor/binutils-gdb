@@ -86,6 +86,7 @@ extern int run_once;
 extern int multi_process;
 extern int report_fork_events;
 extern int report_vfork_events;
+extern int report_exec_events;
 extern int non_stop;
 extern int extended_protocol;
 
@@ -114,6 +115,9 @@ typedef int gdb_fildes_t;
 /* Functions from server.c.  */
 extern int handle_serial_event (int err, gdb_client_data client_data);
 extern int handle_target_event (int err, gdb_client_data client_data);
+
+/* Get rid of the currently pending stop replies that match PTID.  */
+extern void discard_queued_stop_replies (ptid_t ptid);
 
 #include "remote-utils.h"
 

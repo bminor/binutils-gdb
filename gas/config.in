@@ -36,6 +36,9 @@
 /* Default emulation. */
 #undef DEFAULT_EMULATION
 
+/* Define if you want compressed debug sections by default. */
+#undef DEFAULT_FLAG_COMPRESS_DEBUG
+
 /* Supported emulations. */
 #undef EMULATIONS
 
@@ -52,6 +55,10 @@
 /* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
    */
 #undef HAVE_ALLOCA_H
+
+/* Define to 1 if you have the declaration of `asprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_ASPRINTF
 
 /* Define to 1 if you have the declaration of `free', and to 0 if you don't.
    */

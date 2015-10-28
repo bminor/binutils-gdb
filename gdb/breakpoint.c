@@ -68,6 +68,7 @@
 #include "interps.h"
 #include "format.h"
 #include "location.h"
+#include "thread-fsm.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -725,11 +726,11 @@ clear_breakpoint_hit_counts (void)
 static struct counted_command_line *
 alloc_counted_command_line (struct command_line *commands)
 {
-  struct counted_command_line *result
-    = xmalloc (sizeof (struct counted_command_line));
+  struct counted_command_line *result = XNEW (struct counted_command_line);
 
   result->refc = 1;
   result->commands = commands;
+
   return result;
 }
 
@@ -765,7 +766,7 @@ decref_counted_command_line (struct counted_command_line **cmdp)
 static void
 do_cleanup_counted_command_line (void *arg)
 {
-  decref_counted_command_line (arg);
+  decref_counted_command_line ((struct counted_command_line **) arg);
 }
 
 /* Create a cleanup that calls decref_counted_command_line on the
@@ -924,8 +925,8 @@ show_condition_evaluation_mode (struct ui_file *file, int from_tty,
 static int
 bp_location_compare_addrs (const void *ap, const void *bp)
 {
-  struct bp_location *a = *(void **) ap;
-  struct bp_location *b = *(void **) bp;
+  const struct bp_location *a = *(const struct bp_location **) ap;
+  const struct bp_location *b = *(const struct bp_location **) bp;
 
   if (a->address == b->address)
     return 0;
@@ -950,9 +951,10 @@ get_first_locp_gte_addr (CORE_ADDR address)
   dummy_loc.address = address;
 
   /* Find a close match to the first location at ADDRESS.  */
-  locp_found = bsearch (&dummy_locp, bp_location, bp_location_count,
-			sizeof (struct bp_location **),
-			bp_location_compare_addrs);
+  locp_found = ((struct bp_location **)
+		bsearch (&dummy_locp, bp_location, bp_location_count,
+			 sizeof (struct bp_location **),
+			 bp_location_compare_addrs));
 
   /* Nothing was found, nothing left to do.  */
   if (locp_found == NULL)
@@ -1322,7 +1324,7 @@ breakpoint_set_task (struct breakpoint *b, int task)
 void
 check_tracepoint_command (char *line, void *closure)
 {
-  struct breakpoint *b = closure;
+  struct breakpoint *b = (struct breakpoint *) closure;
 
   validate_actionline (line, b);
 }
@@ -1353,7 +1355,7 @@ struct commands_info
 static void
 do_map_commands_command (struct breakpoint *b, void *data)
 {
-  struct commands_info *info = data;
+  struct commands_info *info = (struct commands_info *) data;
 
   if (info->cmd == NULL)
     {
@@ -3392,11 +3394,12 @@ get_breakpoint_objfile_data (struct objfile *objfile)
 {
   struct breakpoint_objfile_data *bp_objfile_data;
 
-  bp_objfile_data = objfile_data (objfile, breakpoint_objfile_key);
+  bp_objfile_data = ((struct breakpoint_objfile_data *)
+		     objfile_data (objfile, breakpoint_objfile_key));
   if (bp_objfile_data == NULL)
     {
-      bp_objfile_data = obstack_alloc (&objfile->objfile_obstack,
-				       sizeof (*bp_objfile_data));
+      bp_objfile_data =
+	XOBNEW (&objfile->objfile_obstack, struct breakpoint_objfile_data);
 
       memset (bp_objfile_data, 0, sizeof (*bp_objfile_data));
       set_objfile_data (objfile, breakpoint_objfile_key, bp_objfile_data);
@@ -3407,7 +3410,8 @@ get_breakpoint_objfile_data (struct objfile *objfile)
 static void
 free_breakpoint_probes (struct objfile *obj, void *data)
 {
-  struct breakpoint_objfile_data *bp_objfile_data = data;
+  struct breakpoint_objfile_data *bp_objfile_data
+    = (struct breakpoint_objfile_data *) data;
 
   VEC_free (probe_p, bp_objfile_data->longjmp_probes);
   VEC_free (probe_p, bp_objfile_data->exception_probes);
@@ -4662,7 +4666,7 @@ bpstat_do_actions_1 (bpstat *bsp)
 
       if (breakpoint_proceeded)
 	{
-	  if (interpreter_async && target_can_async_p ())
+	  if (interpreter_async)
 	    /* If we are in async mode, then the target might be still
 	       running, not stopped at any breakpoint, so nothing for
 	       us to do here -- just return to the event loop.  */
@@ -5694,6 +5698,9 @@ handle_jit_event (void)
   struct frame_info *frame;
   struct gdbarch *gdbarch;
 
+  if (debug_infrun)
+    fprintf_unfiltered (gdb_stdlog, "handling bp_jit_event\n");
+
   /* Switch terminal for any messages produced by
      breakpoint_re_set.  */
   target_terminal_ours_for_output ();
@@ -5885,16 +5892,13 @@ bpstat_what (bpstat bs_head)
       retval.main_action = max (retval.main_action, this_action);
     }
 
-  /* These operations may affect the bs->breakpoint_at state so they are
-     delayed after MAIN_ACTION is decided above.  */
+  return retval;
+}
 
-  if (jit_event)
-    {
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "bpstat_what: bp_jit_event\n");
-
-      handle_jit_event ();
-    }
+void
+bpstat_run_callbacks (bpstat bs_head)
+{
+  bpstat bs;
 
   for (bs = bs_head; bs != NULL; bs = bs->next)
     {
@@ -5904,6 +5908,9 @@ bpstat_what (bpstat bs_head)
 	continue;
       switch (b->type)
 	{
+	case bp_jit_event:
+	  handle_jit_event ();
+	  break;
 	case bp_gnu_ifunc_resolver:
 	  gnu_ifunc_resolver_stop (b);
 	  break;
@@ -5912,8 +5919,6 @@ bpstat_what (bpstat bs_head)
 	  break;
 	}
     }
-
-  return retval;
 }
 
 /* Nonzero if we should step constantly (e.g. watchpoints on machines
@@ -6649,7 +6654,8 @@ struct captured_breakpoint_query_args
 static int
 do_captured_breakpoint_query (struct ui_out *uiout, void *data)
 {
-  struct captured_breakpoint_query_args *args = data;
+  struct captured_breakpoint_query_args *args
+    = (struct captured_breakpoint_query_args *) data;
   struct breakpoint *b;
   struct bp_location *dummy_loc = NULL;
 
@@ -8980,7 +8986,7 @@ program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address)
   if (bpoint == NULL)
     return 0;
 
-  target_mem = alloca (len);
+  target_mem = (gdb_byte *) alloca (len);
 
   /* Enable the automatic memory restoration from breakpoints while
      we read the memory.  Otherwise we could say about our temporary
@@ -9081,8 +9087,7 @@ update_dprintf_command_list (struct breakpoint *b)
   gdb_assert (printf_line != NULL);
   /* Manufacture a printf sequence.  */
   {
-    struct command_line *printf_cmd_line
-      = xmalloc (sizeof (struct command_line));
+    struct command_line *printf_cmd_line = XNEW (struct command_line);
 
     printf_cmd_line->control_type = simple_control;
     printf_cmd_line->body_count = 0;
@@ -9374,8 +9379,7 @@ parse_breakpoint_sals (const struct event_location *location,
 	      CORE_ADDR pc;
 
 	      init_sal (&sal);		/* Initialize to zeroes.  */
-	      lsal.sals.sals = (struct symtab_and_line *)
-		xmalloc (sizeof (struct symtab_and_line));
+	      lsal.sals.sals = XNEW (struct symtab_and_line);
 
 	      /* Set sal's pspace, pc, symtab, and line to the values
 		 corresponding to the last call to print_frame_info.
@@ -9602,7 +9606,7 @@ decode_static_tracepoint_spec (const char **arg_p)
     error (_("No known static tracepoint marker named %s"), marker_str);
 
   sals.nelts = VEC_length(static_tracepoint_marker_p, markers);
-  sals.sals = xmalloc (sizeof *sals.sals * sals.nelts);
+  sals.sals = XNEWVEC (struct symtab_and_line, sals.nelts);
 
   for (i = 0; i < sals.nelts; i++)
     {
@@ -11466,29 +11470,109 @@ awatch_command (char *arg, int from_tty)
 }
 
 
-/* Helper routines for the until_command routine in infcmd.c.  Here
-   because it uses the mechanisms of breakpoints.  */
+/* Data for the FSM that manages the until(location)/advance commands
+   in infcmd.c.  Here because it uses the mechanisms of
+   breakpoints.  */
 
-struct until_break_command_continuation_args
+struct until_break_fsm
 {
-  struct breakpoint *breakpoint;
-  struct breakpoint *breakpoint2;
-  int thread_num;
+  /* The base class.  */
+  struct thread_fsm thread_fsm;
+
+  /* The thread that as current when the command was executed.  */
+  int thread;
+
+  /* The breakpoint set at the destination location.  */
+  struct breakpoint *location_breakpoint;
+
+  /* Breakpoint set at the return address in the caller frame.  May be
+     NULL.  */
+  struct breakpoint *caller_breakpoint;
 };
 
-/* This function is called by fetch_inferior_event via the
-   cmd_continuation pointer, to complete the until command.  It takes
-   care of cleaning up the temporary breakpoints set up by the until
-   command.  */
-static void
-until_break_command_continuation (void *arg, int err)
-{
-  struct until_break_command_continuation_args *a = arg;
+static void until_break_fsm_clean_up (struct thread_fsm *self);
+static int until_break_fsm_should_stop (struct thread_fsm *self);
+static enum async_reply_reason
+  until_break_fsm_async_reply_reason (struct thread_fsm *self);
 
-  delete_breakpoint (a->breakpoint);
-  if (a->breakpoint2)
-    delete_breakpoint (a->breakpoint2);
-  delete_longjmp_breakpoint (a->thread_num);
+/* until_break_fsm's vtable.  */
+
+static struct thread_fsm_ops until_break_fsm_ops =
+{
+  NULL, /* dtor */
+  until_break_fsm_clean_up,
+  until_break_fsm_should_stop,
+  NULL, /* return_value */
+  until_break_fsm_async_reply_reason,
+};
+
+/* Allocate a new until_break_command_fsm.  */
+
+static struct until_break_fsm *
+new_until_break_fsm (int thread,
+		     struct breakpoint *location_breakpoint,
+		     struct breakpoint *caller_breakpoint)
+{
+  struct until_break_fsm *sm;
+
+  sm = XCNEW (struct until_break_fsm);
+  thread_fsm_ctor (&sm->thread_fsm, &until_break_fsm_ops);
+
+  sm->thread = thread;
+  sm->location_breakpoint = location_breakpoint;
+  sm->caller_breakpoint = caller_breakpoint;
+
+  return sm;
+}
+
+/* Implementation of the 'should_stop' FSM method for the
+   until(location)/advance commands.  */
+
+static int
+until_break_fsm_should_stop (struct thread_fsm *self)
+{
+  struct until_break_fsm *sm = (struct until_break_fsm *) self;
+  struct thread_info *tp = inferior_thread ();
+
+  if (bpstat_find_breakpoint (tp->control.stop_bpstat,
+			      sm->location_breakpoint) != NULL
+      || (sm->caller_breakpoint != NULL
+	  && bpstat_find_breakpoint (tp->control.stop_bpstat,
+				     sm->caller_breakpoint) != NULL))
+    thread_fsm_set_finished (self);
+
+  return 1;
+}
+
+/* Implementation of the 'clean_up' FSM method for the
+   until(location)/advance commands.  */
+
+static void
+until_break_fsm_clean_up (struct thread_fsm *self)
+{
+  struct until_break_fsm *sm = (struct until_break_fsm *) self;
+
+  /* Clean up our temporary breakpoints.  */
+  if (sm->location_breakpoint != NULL)
+    {
+      delete_breakpoint (sm->location_breakpoint);
+      sm->location_breakpoint = NULL;
+    }
+  if (sm->caller_breakpoint != NULL)
+    {
+      delete_breakpoint (sm->caller_breakpoint);
+      sm->caller_breakpoint = NULL;
+    }
+  delete_longjmp_breakpoint (sm->thread);
+}
+
+/* Implementation of the 'async_reply_reason' FSM method for the
+   until(location)/advance commands.  */
+
+static enum async_reply_reason
+until_break_fsm_async_reply_reason (struct thread_fsm *self)
+{
+  return EXEC_ASYNC_LOCATION_REACHED;
 }
 
 void
@@ -11500,12 +11584,13 @@ until_break_command (char *arg, int from_tty, int anywhere)
   struct gdbarch *frame_gdbarch;
   struct frame_id stack_frame_id;
   struct frame_id caller_frame_id;
-  struct breakpoint *breakpoint;
-  struct breakpoint *breakpoint2 = NULL;
+  struct breakpoint *location_breakpoint;
+  struct breakpoint *caller_breakpoint = NULL;
   struct cleanup *old_chain, *cleanup;
   int thread;
   struct thread_info *tp;
   struct event_location *location;
+  struct until_break_fsm *sm;
 
   clear_proceed_status (0);
 
@@ -11555,14 +11640,16 @@ until_break_command (char *arg, int from_tty, int anywhere)
   if (frame_id_p (caller_frame_id))
     {
       struct symtab_and_line sal2;
+      struct gdbarch *caller_gdbarch;
 
       sal2 = find_pc_line (frame_unwind_caller_pc (frame), 0);
       sal2.pc = frame_unwind_caller_pc (frame);
-      breakpoint2 = set_momentary_breakpoint (frame_unwind_caller_arch (frame),
-					      sal2,
-					      caller_frame_id,
-					      bp_until);
-      make_cleanup_delete_breakpoint (breakpoint2);
+      caller_gdbarch = frame_unwind_caller_arch (frame);
+      caller_breakpoint = set_momentary_breakpoint (caller_gdbarch,
+						    sal2,
+						    caller_frame_id,
+						    bp_until);
+      make_cleanup_delete_breakpoint (caller_breakpoint);
 
       set_longjmp_breakpoint (tp, caller_frame_id);
       make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
@@ -11574,38 +11661,21 @@ until_break_command (char *arg, int from_tty, int anywhere)
   if (anywhere)
     /* If the user told us to continue until a specified location,
        we don't specify a frame at which we need to stop.  */
-    breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
-					   null_frame_id, bp_until);
+    location_breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
+						    null_frame_id, bp_until);
   else
     /* Otherwise, specify the selected frame, because we want to stop
        only at the very same frame.  */
-    breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
-					   stack_frame_id, bp_until);
-  make_cleanup_delete_breakpoint (breakpoint);
+    location_breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
+						    stack_frame_id, bp_until);
+  make_cleanup_delete_breakpoint (location_breakpoint);
+
+  sm = new_until_break_fsm (tp->num, location_breakpoint, caller_breakpoint);
+  tp->thread_fsm = &sm->thread_fsm;
+
+  discard_cleanups (old_chain);
 
   proceed (-1, GDB_SIGNAL_DEFAULT);
-
-  /* If we are running asynchronously, and proceed call above has
-     actually managed to start the target, arrange for breakpoints to
-     be deleted when the target stops.  Otherwise, we're already
-     stopped and delete breakpoints via cleanup chain.  */
-
-  if (target_can_async_p () && is_running (inferior_ptid))
-    {
-      struct until_break_command_continuation_args *args;
-      args = xmalloc (sizeof (*args));
-
-      args->breakpoint = breakpoint;
-      args->breakpoint2 = breakpoint2;
-      args->thread_num = thread;
-
-      discard_cleanups (old_chain);
-      add_continuation (inferior_thread (),
-			until_break_command_continuation, args,
-			xfree);
-    }
-  else
-    do_cleanups (old_chain);
 
   do_cleanups (cleanup);
 }
@@ -11786,9 +11856,9 @@ tcatch_command (char *arg, int from_tty)
 static int
 compare_breakpoints (const void *a, const void *b)
 {
-  const breakpoint_p *ba = a;
+  const breakpoint_p *ba = (const breakpoint_p *) a;
   uintptr_t ua = (uintptr_t) *ba;
-  const breakpoint_p *bb = b;
+  const breakpoint_p *bb = (const breakpoint_p *) b;
   uintptr_t ub = (uintptr_t) *bb;
 
   if ((*ba)->number < (*bb)->number)
@@ -11827,8 +11897,7 @@ clear_command (char *arg, int from_tty)
     }
   else
     {
-      sals.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
+      sals.sals = XNEW (struct symtab_and_line);
       make_cleanup (xfree, sals.sals);
       init_sal (&sal);		/* Initialize to zeroes.  */
 
@@ -12009,8 +12078,8 @@ breakpoint_auto_delete (bpstat bs)
 static int
 bp_location_compare (const void *ap, const void *bp)
 {
-  struct bp_location *a = *(void **) ap;
-  struct bp_location *b = *(void **) bp;
+  const struct bp_location *a = *(const struct bp_location **) ap;
+  const struct bp_location *b = *(const struct bp_location **) bp;
 
   if (a->address != b->address)
     return (a->address > b->address) - (a->address < b->address);
@@ -12081,9 +12150,7 @@ download_tracepoint_locations (void)
 {
   struct breakpoint *b;
   struct cleanup *old_chain;
-
-  if (!target_can_download_tracepoint ())
-    return;
+  enum tribool can_download_tracepoint = TRIBOOL_UNKNOWN;
 
   old_chain = save_current_space_and_thread ();
 
@@ -12097,6 +12164,17 @@ download_tracepoint_locations (void)
 	   ? !may_insert_fast_tracepoints
 	   : !may_insert_tracepoints))
 	continue;
+
+      if (can_download_tracepoint == TRIBOOL_UNKNOWN)
+	{
+	  if (target_can_download_tracepoint ())
+	    can_download_tracepoint = TRIBOOL_TRUE;
+	  else
+	    can_download_tracepoint = TRIBOOL_FALSE;
+	}
+
+      if (can_download_tracepoint == TRIBOOL_FALSE)
+	break;
 
       for (bl = b->loc; bl; bl = bl->next)
 	{
@@ -12245,7 +12323,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
     for (loc = b->loc; loc; loc = loc->next)
       bp_location_count++;
 
-  bp_location = xmalloc (sizeof (*bp_location) * bp_location_count);
+  bp_location = XNEWVEC (struct bp_location *, bp_location_count);
   locp = bp_location;
   ALL_BREAKPOINTS (b)
     for (loc = b->loc; loc; loc = loc->next)
@@ -12602,7 +12680,7 @@ bpstat_remove_bp_location (bpstat bps, struct breakpoint *bpt)
 static int
 bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
 {
-  struct breakpoint *bpt = data;
+  struct breakpoint *bpt = (struct breakpoint *) data;
 
   bpstat_remove_bp_location (th->control.stop_bpstat, bpt);
   return 0;
@@ -13197,28 +13275,6 @@ momentary_bkpt_check_status (bpstat bs)
 static enum print_stop_action
 momentary_bkpt_print_it (bpstat bs)
 {
-  struct ui_out *uiout = current_uiout;
-
-  if (ui_out_is_mi_like_p (uiout))
-    {
-      struct breakpoint *b = bs->breakpoint_at;
-
-      switch (b->type)
-	{
-	case bp_finish:
-	  ui_out_field_string
-	    (uiout, "reason",
-	     async_reason_lookup (EXEC_ASYNC_FUNCTION_FINISHED));
-	  break;
-
-	case bp_until:
-	  ui_out_field_string
-	    (uiout, "reason",
-	     async_reason_lookup (EXEC_ASYNC_LOCATION_REACHED));
-	  break;
-	}
-    }
-
   return PRINT_UNKNOWN;
 }
 
@@ -13728,7 +13784,7 @@ delete_breakpoint (struct breakpoint *bpt)
 static void
 do_delete_breakpoint_cleanup (void *b)
 {
-  delete_breakpoint (b);
+  delete_breakpoint ((struct breakpoint *) b);
 }
 
 struct cleanup *

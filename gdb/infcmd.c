@@ -55,6 +55,7 @@
 #include "linespec.h"
 #include "cli/cli-utils.h"
 #include "infcall.h"
+#include "thread-fsm.h"
 
 /* Local functions: */
 
@@ -89,8 +90,6 @@ static void signal_command (char *, int);
 static void jump_command (char *, int);
 
 static void step_1 (int, int, char *);
-static void step_once (int skip_subroutines, int single_inst,
-		       int count, int thread);
 
 static void next_command (char *, int);
 
@@ -504,13 +503,12 @@ prepare_execution_command (struct target_ops *target, int background)
   if (background && !target->to_can_async_p (target))
     error (_("Asynchronous execution not supported on this target."));
 
-  /* If we don't get a request of running in the bg, then we need
-     to simulate synchronous (fg) execution.  */
-  if (!background && target->to_can_async_p (target))
+  if (!background)
     {
-      /* Simulate synchronous execution.  Note no cleanup is necessary
-	 for this.  stdin is re-enabled whenever an error reaches the
-	 top level.  */
+      /* If we get a request for running in the fg, then we need to
+	 simulate synchronous (fg) execution.  Note no cleanup is
+	 necessary for this.  stdin is re-enabled whenever an error
+	 reaches the top level.  */
       async_disable_stdin ();
     }
 }
@@ -901,14 +899,86 @@ delete_longjmp_breakpoint_cleanup (void *arg)
   delete_longjmp_breakpoint (thread);
 }
 
+/* Data for the FSM that manages the step/next/stepi/nexti
+   commands.  */
+
+struct step_command_fsm
+{
+  /* The base class.  */
+  struct thread_fsm thread_fsm;
+
+  /* How many steps left in a "step N"-like command.  */
+  int count;
+
+  /* If true, this is a next/nexti, otherwise a step/stepi.  */
+  int skip_subroutines;
+
+  /* If true, this is a stepi/nexti, otherwise a step/step.  */
+  int single_inst;
+
+  /* The thread that the command was run on.  */
+  int thread;
+};
+
+static void step_command_fsm_clean_up (struct thread_fsm *self);
+static int step_command_fsm_should_stop (struct thread_fsm *self);
+static enum async_reply_reason
+  step_command_fsm_async_reply_reason (struct thread_fsm *self);
+
+/* step_command_fsm's vtable.  */
+
+static struct thread_fsm_ops step_command_fsm_ops =
+{
+  NULL,
+  step_command_fsm_clean_up,
+  step_command_fsm_should_stop,
+  NULL,	/* return_value */
+  step_command_fsm_async_reply_reason,
+};
+
+/* Allocate a new step_command_fsm.  */
+
+static struct step_command_fsm *
+new_step_command_fsm (void)
+{
+  struct step_command_fsm *sm;
+
+  sm = XCNEW (struct step_command_fsm);
+  thread_fsm_ctor (&sm->thread_fsm, &step_command_fsm_ops);
+
+  return sm;
+}
+
+/* Prepare for a step/next/etc. command.  Any target resource
+   allocated here is undone in the FSM's clean_up method.  */
+
+static void
+step_command_fsm_prepare (struct step_command_fsm *sm,
+			  int skip_subroutines, int single_inst,
+			  int count, struct thread_info *thread)
+{
+  sm->skip_subroutines = skip_subroutines;
+  sm->single_inst = single_inst;
+  sm->count = count;
+  sm->thread = thread->num;
+
+  /* Leave the si command alone.  */
+  if (!sm->single_inst || sm->skip_subroutines)
+    set_longjmp_breakpoint (thread, get_frame_id (get_current_frame ()));
+
+  thread->control.stepping_command = 1;
+}
+
+static int prepare_one_step (struct step_command_fsm *sm);
+
 static void
 step_1 (int skip_subroutines, int single_inst, char *count_string)
 {
-  int count = 1;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  int count;
   int async_exec;
-  int thread = -1;
   struct cleanup *args_chain;
+  struct thread_info *thr;
+  struct step_command_fsm *step_sm;
 
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
@@ -925,129 +995,104 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   /* Done with ARGS.  */
   do_cleanups (args_chain);
 
-  if (!single_inst || skip_subroutines)		/* Leave si command alone.  */
-    {
-      struct thread_info *tp = inferior_thread ();
+  clear_proceed_status (1);
 
-      if (in_thread_list (inferior_ptid))
- 	thread = pid_to_thread_id (inferior_ptid);
+  /* Setup the execution command state machine to handle all the COUNT
+     steps.  */
+  thr = inferior_thread ();
+  step_sm = new_step_command_fsm ();
+  thr->thread_fsm = &step_sm->thread_fsm;
 
-      set_longjmp_breakpoint (tp, get_frame_id (get_current_frame ()));
+  step_command_fsm_prepare (step_sm, skip_subroutines,
+			    single_inst, count, thr);
 
-      make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
-    }
-
-  /* In synchronous case, all is well; each step_once call will step once.  */
-  if (!target_can_async_p ())
-    {
-      for (; count > 0; count--)
-	{
-	  step_once (skip_subroutines, single_inst, count, thread);
-
-	  if (!target_has_execution)
-	    break;
-	  else
-	    {
-	      struct thread_info *tp = inferior_thread ();
-
-	      if (!tp->control.stop_step || !tp->step_multi)
-		{
-		  /* If we stopped for some reason that is not stepping
-		     there are no further steps to make.  */
-		  tp->step_multi = 0;
-		  break;
-		}
-	    }
-	}
-
-      do_cleanups (cleanups);
-    }
+  /* Do only one step for now, before returning control to the event
+     loop.  Let the continuation figure out how many other steps we
+     need to do, and handle them one at the time, through
+     step_once.  */
+  if (!prepare_one_step (step_sm))
+    proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
   else
     {
-      /* In the case of an asynchronous target things get complicated;
-	 do only one step for now, before returning control to the
-	 event loop.  Let the continuation figure out how many other
-	 steps we need to do, and handle them one at the time, through
-	 step_once.  */
-      step_once (skip_subroutines, single_inst, count, thread);
-
-      /* We are running, and the continuation is installed.  It will
-	 disable the longjmp breakpoint as appropriate.  */
-      discard_cleanups (cleanups);
+      /* Stepped into an inline frame.  Pretend that we've
+	 stopped.  */
+      thread_fsm_clean_up (thr->thread_fsm);
+      normal_stop ();
+      inferior_event_handler (INF_EXEC_COMPLETE, NULL);
     }
 }
 
-struct step_1_continuation_args
+/* Implementation of the 'should_stop' FSM method for stepping
+   commands.  Called after we are done with one step operation, to
+   check whether we need to step again, before we print the prompt and
+   return control to the user.  If count is > 1, returns false, as we
+   will need to keep going.  */
+
+static int
+step_command_fsm_should_stop (struct thread_fsm *self)
 {
-  int count;
-  int skip_subroutines;
-  int single_inst;
-  int thread;
-};
+  struct step_command_fsm *sm = (struct step_command_fsm *) self;
+  struct thread_info *tp = find_thread_id (sm->thread);
 
-/* Called after we are done with one step operation, to check whether
-   we need to step again, before we print the prompt and return control
-   to the user.  If count is > 1, we will need to do one more call to
-   proceed(), via step_once().  Basically it is like step_once and
-   step_1_continuation are co-recursive.  */
-
-static void
-step_1_continuation (void *args, int err)
-{
-  struct step_1_continuation_args *a = args;
-
-  if (target_has_execution)
+  if (tp->control.stop_step)
     {
-      struct thread_info *tp;
+      /* There are more steps to make, and we did stop due to
+	 ending a stepping range.  Do another step.  */
+      if (--sm->count > 0)
+	return prepare_one_step (sm);
 
-      tp = inferior_thread ();
-      if (!err
-	  && tp->step_multi && tp->control.stop_step)
-	{
-	  /* There are more steps to make, and we did stop due to
-	     ending a stepping range.  Do another step.  */
-	  step_once (a->skip_subroutines, a->single_inst,
-		     a->count - 1, a->thread);
-	  return;
-	}
-      tp->step_multi = 0;
+      thread_fsm_set_finished (self);
     }
 
-  /* We either hit an error, or stopped for some reason that is
-     not stepping, or there are no further steps to make.
-     Cleanup.  */
-  if (!a->single_inst || a->skip_subroutines)
-    delete_longjmp_breakpoint (a->thread);
+  return 1;
 }
 
-/* Do just one step operation.  This is useful to implement the 'step
-   n' kind of commands.  In case of asynchronous targets, we will have
-   to set up a continuation to be done after the target stops (after
-   this one step).  For synch targets, the caller handles further
-   stepping.  */
+/* Implementation of the 'clean_up' FSM method for stepping commands.  */
 
 static void
-step_once (int skip_subroutines, int single_inst, int count, int thread)
+step_command_fsm_clean_up (struct thread_fsm *self)
 {
-  struct frame_info *frame = get_current_frame ();
+  struct step_command_fsm *sm = (struct step_command_fsm *) self;
 
-  if (count > 0)
+  if (!sm->single_inst || sm->skip_subroutines)
+    delete_longjmp_breakpoint (sm->thread);
+}
+
+/* Implementation of the 'async_reply_reason' FSM method for stepping
+   commands.  */
+
+static enum async_reply_reason
+step_command_fsm_async_reply_reason (struct thread_fsm *self)
+{
+  return EXEC_ASYNC_END_STEPPING_RANGE;
+}
+
+/* Prepare for one step in "step N".  The actual target resumption is
+   done by the caller.  Return true if we're done and should thus
+   report a stop to the user.  Returns false if the target needs to be
+   resumed.  */
+
+static int
+prepare_one_step (struct step_command_fsm *sm)
+{
+  if (sm->count > 0)
     {
+      struct frame_info *frame = get_current_frame ();
+
       /* Don't assume THREAD is a valid thread id.  It is set to -1 if
 	 the longjmp breakpoint was not required.  Use the
 	 INFERIOR_PTID thread instead, which is the same thread when
 	 THREAD is set.  */
       struct thread_info *tp = inferior_thread ();
 
-      clear_proceed_status (1);
       set_step_frame ();
 
-      if (!single_inst)
+      if (!sm->single_inst)
 	{
 	  CORE_ADDR pc;
 
 	  /* Step at an inlined function behaves like "down".  */
-	  if (!skip_subroutines
+	  if (!sm->skip_subroutines
 	      && inline_skipped_frames (inferior_ptid))
 	    {
 	      ptid_t resume_ptid;
@@ -1057,17 +1102,8 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	      set_running (resume_ptid, 1);
 
 	      step_into_inline_frame (inferior_ptid);
-	      if (count > 1)
-		step_once (skip_subroutines, single_inst, count - 1, thread);
-	      else
-		{
-		  /* Pretend that we've stopped.  */
-		  normal_stop ();
-
-		  if (target_can_async_p ())
-		    inferior_event_handler (INF_EXEC_COMPLETE, NULL);
-		}
-	      return;
+	      sm->count--;
+	      return prepare_one_step (sm);
 	    }
 
 	  pc = get_frame_pc (frame);
@@ -1102,36 +1138,22 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	{
 	  /* Say we are stepping, but stop after one insn whatever it does.  */
 	  tp->control.step_range_start = tp->control.step_range_end = 1;
-	  if (!skip_subroutines)
+	  if (!sm->skip_subroutines)
 	    /* It is stepi.
 	       Don't step over function calls, not even to functions lacking
 	       line numbers.  */
 	    tp->control.step_over_calls = STEP_OVER_NONE;
 	}
 
-      if (skip_subroutines)
+      if (sm->skip_subroutines)
 	tp->control.step_over_calls = STEP_OVER_ALL;
 
-      tp->step_multi = (count > 1);
-      tp->control.stepping_command = 1;
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
-
-      /* For async targets, register a continuation to do any
-	 additional steps.  For sync targets, the caller will handle
-	 further stepping.  */
-      if (target_can_async_p ())
-	{
-	  struct step_1_continuation_args *args;
-
-	  args = xmalloc (sizeof (*args));
-	  args->skip_subroutines = skip_subroutines;
-	  args->single_inst = single_inst;
-	  args->count = count;
-	  args->thread = thread;
-
-	  add_intermediate_continuation (tp, step_1_continuation, args, xfree);
-	}
+      return 0;
     }
+
+  /* Done.  */
+  thread_fsm_set_finished (&sm->thread_fsm);
+  return 1;
 }
 
 
@@ -1363,22 +1385,81 @@ queue_signal_command (char *signum_exp, int from_tty)
   tp->suspend.stop_signal = oursig;
 }
 
-/* Continuation args to be passed to the "until" command
-   continuation.  */
-struct until_next_continuation_args
+/* Data for the FSM that manages the until (with no argument)
+   command.  */
+
+struct until_next_fsm
 {
-  /* The thread that was current when the command was executed.  */
+  /* The base class.  */
+  struct thread_fsm thread_fsm;
+
+  /* The thread that as current when the command was executed.  */
   int thread;
 };
 
-/* A continuation callback for until_next_command.  */
+static int until_next_fsm_should_stop (struct thread_fsm *self);
+static void until_next_fsm_clean_up (struct thread_fsm *self);
+static enum async_reply_reason
+  until_next_fsm_async_reply_reason (struct thread_fsm *self);
+
+/* until_next_fsm's vtable.  */
+
+static struct thread_fsm_ops until_next_fsm_ops =
+{
+  NULL, /* dtor */
+  until_next_fsm_clean_up,
+  until_next_fsm_should_stop,
+  NULL, /* return_value */
+  until_next_fsm_async_reply_reason,
+};
+
+/* Allocate a new until_next_fsm.  */
+
+static struct until_next_fsm *
+new_until_next_fsm (int thread)
+{
+  struct until_next_fsm *sm;
+
+  sm = XCNEW (struct until_next_fsm);
+  thread_fsm_ctor (&sm->thread_fsm, &until_next_fsm_ops);
+
+  sm->thread = thread;
+
+  return sm;
+}
+
+/* Implementation of the 'should_stop' FSM method for the until (with
+   no arg) command.  */
+
+static int
+until_next_fsm_should_stop (struct thread_fsm *self)
+{
+  struct thread_info *tp = inferior_thread ();
+
+  if (tp->control.stop_step)
+    thread_fsm_set_finished (self);
+
+  return 1;
+}
+
+/* Implementation of the 'clean_up' FSM method for the until (with no
+   arg) command.  */
 
 static void
-until_next_continuation (void *arg, int err)
+until_next_fsm_clean_up (struct thread_fsm *self)
 {
-  struct until_next_continuation_args *a = arg;
+  struct until_next_fsm *sm = (struct until_next_fsm *) self;
 
-  delete_longjmp_breakpoint (a->thread);
+  delete_longjmp_breakpoint (sm->thread);
+}
+
+/* Implementation of the 'async_reply_reason' FSM method for the until
+   (with no arg) command.  */
+
+static enum async_reply_reason
+until_next_fsm_async_reply_reason (struct thread_fsm *self)
+{
+  return EXEC_ASYNC_END_STEPPING_RANGE;
 }
 
 /* Proceed until we reach a different source line with pc greater than
@@ -1399,6 +1480,7 @@ until_next_command (int from_tty)
   struct thread_info *tp = inferior_thread ();
   int thread = tp->num;
   struct cleanup *old_chain;
+  struct until_next_fsm *sm;
 
   clear_proceed_status (0);
   set_step_frame ();
@@ -1435,25 +1517,15 @@ until_next_command (int from_tty)
 
   tp->control.step_over_calls = STEP_OVER_ALL;
 
-  tp->step_multi = 0;		/* Only one call to proceed */
-
   set_longjmp_breakpoint (tp, get_frame_id (frame));
   old_chain = make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
 
+  sm = new_until_next_fsm (tp->num);
+  tp->thread_fsm = &sm->thread_fsm;
+  discard_cleanups (old_chain);
+
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 
-  if (target_can_async_p () && is_running (inferior_ptid))
-    {
-      struct until_next_continuation_args *cont_args;
-
-      discard_cleanups (old_chain);
-      cont_args = XNEW (struct until_next_continuation_args);
-      cont_args->thread = inferior_thread ()->num;
-
-      add_continuation (tp, until_next_continuation, cont_args, xfree);
-    }
-  else
-    do_cleanups (old_chain);
 }
 
 static void
@@ -1513,22 +1585,15 @@ advance_command (char *arg, int from_tty)
    right after an inferior call has finished.  */
 
 struct value *
-get_return_value (struct value *function, struct type *value_type,
-		  struct dummy_frame_context_saver *ctx_saver)
+get_return_value (struct value *function, struct type *value_type)
 {
-  struct regcache *stop_regs = NULL;
+  struct regcache *stop_regs;
   struct gdbarch *gdbarch;
   struct value *value;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+  struct cleanup *cleanup;
 
-  /* If registers were not saved, use the current registers.  */
-  if (ctx_saver != NULL)
-    stop_regs = dummy_frame_context_saver_get_regs (ctx_saver);
-  else
-    {
-      stop_regs = regcache_dup (get_current_regcache ());
-      make_cleanup_regcache_xfree (stop_regs);
-    }
+  stop_regs = regcache_dup (get_current_regcache ());
+  cleanup = make_cleanup_regcache_xfree (stop_regs);
 
   gdbarch = get_regcache_arch (stop_regs);
 
@@ -1564,18 +1629,29 @@ get_return_value (struct value *function, struct type *value_type,
   return value;
 }
 
-/* Print the result of a function at the end of a 'finish' command.
-   DTOR_DATA (if not NULL) can represent inferior registers right after
-   an inferior call has finished.  */
+/* The captured function return value/type and its position in the
+   value history.  */
+
+struct return_value_info
+{
+  /* The captured return value.  May be NULL if we weren't able to
+     retrieve it.  See get_return_value.  */
+  struct value *value;
+
+  /* The return type.  In some cases, we'll not be able extract the
+     return value, but we always know the type.  */
+  struct type *type;
+
+  /* If we captured a value, this is the value history index.  */
+  int value_history_index;
+};
+
+/* Helper for print_return_value.  */
 
 static void
-print_return_value (struct value *function, struct type *value_type,
-		    struct dummy_frame_context_saver *ctx_saver)
+print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
 {
-  struct value *value = get_return_value (function, value_type, ctx_saver);
-  struct ui_out *uiout = current_uiout;
-
-  if (value)
+  if (rv->value != NULL)
     {
       struct value_print_options opts;
       struct ui_file *stb;
@@ -1586,10 +1662,10 @@ print_return_value (struct value *function, struct type *value_type,
       old_chain = make_cleanup_ui_file_delete (stb);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
-			record_latest_value (value));
+			rv->value_history_index);
       ui_out_text (uiout, " = ");
       get_no_prettyformat_print_options (&opts);
-      value_print (value, stb, &opts);
+      value_print (rv->value, stb, &opts);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
       do_cleanups (old_chain);
@@ -1599,7 +1675,7 @@ print_return_value (struct value *function, struct type *value_type,
       struct cleanup *oldchain;
       char *type_name;
 
-      type_name = type_to_string (value_type);
+      type_name = type_to_string (rv->type);
       oldchain = make_cleanup (xfree, type_name);
       ui_out_text (uiout, "Value returned has type: ");
       ui_out_field_string (uiout, "return-type", type_name);
@@ -1609,100 +1685,174 @@ print_return_value (struct value *function, struct type *value_type,
     }
 }
 
-/* Stuff that needs to be done by the finish command after the target
-   has stopped.  In asynchronous mode, we wait for the target to stop
-   in the call to poll or select in the event loop, so it is
-   impossible to do all the stuff as part of the finish_command
-   function itself.  The only chance we have to complete this command
-   is in fetch_inferior_event, which is called by the event loop as
-   soon as it detects that the target has stopped.  */
+/* Print the result of a function at the end of a 'finish' command.
+   RV points at an object representing the captured return value/type
+   and its position in the value history.  */
 
-struct finish_command_continuation_args
+void
+print_return_value (struct ui_out *uiout, struct return_value_info *rv)
 {
-  /* The thread that as current when the command was executed.  */
-  int thread;
-  struct breakpoint *breakpoint;
-  struct symbol *function;
+  if (rv->type == NULL || TYPE_CODE (rv->type) == TYPE_CODE_VOID)
+    return;
 
-  /* Inferior registers stored right before dummy_frame has been freed
-     after an inferior call.  It can be NULL if no inferior call was
-     involved, GDB will then use current inferior registers.  */
-  struct dummy_frame_context_saver *ctx_saver;
-};
-
-static void
-finish_command_continuation (void *arg, int err)
-{
-  struct finish_command_continuation_args *a = arg;
-
-  if (!err)
+  TRY
     {
-      struct thread_info *tp = NULL;
-      bpstat bs = NULL;
-
-      if (!ptid_equal (inferior_ptid, null_ptid)
-	  && target_has_execution
-	  && is_stopped (inferior_ptid))
-	{
-	  tp = inferior_thread ();
-	  bs = tp->control.stop_bpstat;
-	}
-
-      if (bpstat_find_breakpoint (bs, a->breakpoint) != NULL
-	  && a->function != NULL)
-	{
-	  struct type *value_type;
-
-	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (a->function));
-	  if (!value_type)
-	    internal_error (__FILE__, __LINE__,
-			    _("finish_command: function has no target type"));
-
-	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
-	    {
-	      struct value *func;
-
-	      func = read_var_value (a->function, get_current_frame ());
-	      TRY
-		{
-		  /* print_return_value can throw an exception in some
-		     circumstances.  We need to catch this so that we still
-		     delete the breakpoint.  */
-		  print_return_value (func, value_type, a->ctx_saver);
-		}
-	      CATCH (ex, RETURN_MASK_ALL)
-		{
-		  exception_print (gdb_stdout, ex);
-		}
-	      END_CATCH
-	    }
-	}
-
-      /* We suppress normal call of normal_stop observer and do it
-	 here so that the *stopped notification includes the return
-	 value.  */
-      if (bs != NULL && tp->control.proceed_to_finish)
-	observer_notify_normal_stop (bs, 1 /* print frame */);
+      /* print_return_value_1 can throw an exception in some
+	 circumstances.  We need to catch this so that we still
+	 delete the breakpoint.  */
+      print_return_value_1 (uiout, rv);
     }
-
-  delete_breakpoint (a->breakpoint);
-  delete_longjmp_breakpoint (a->thread);
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      exception_print (gdb_stdout, ex);
+    }
+  END_CATCH
 }
 
-static void
-finish_command_continuation_free_arg (void *arg)
-{
-  struct finish_command_continuation_args *cargs = arg;
+/* Data for the FSM that manages the finish command.  */
 
-  if (cargs->ctx_saver != NULL)
-    dummy_frame_context_saver_drop (cargs->ctx_saver);
-  xfree (cargs);
+struct finish_command_fsm
+{
+  /* The base class.  */
+  struct thread_fsm thread_fsm;
+
+  /* The thread that was current when the command was executed.  */
+  int thread;
+
+  /* The momentary breakpoint set at the function's return address in
+     the caller.  */
+  struct breakpoint *breakpoint;
+
+  /* The function that we're stepping out of.  */
+  struct symbol *function;
+
+  /* If the FSM finishes successfully, this stores the function's
+     return value.  */
+  struct return_value_info return_value;
+};
+
+static int finish_command_fsm_should_stop (struct thread_fsm *self);
+static void finish_command_fsm_clean_up (struct thread_fsm *self);
+static struct return_value_info *
+  finish_command_fsm_return_value (struct thread_fsm *self);
+static enum async_reply_reason
+  finish_command_fsm_async_reply_reason (struct thread_fsm *self);
+
+/* finish_command_fsm's vtable.  */
+
+static struct thread_fsm_ops finish_command_fsm_ops =
+{
+  NULL, /* dtor */
+  finish_command_fsm_clean_up,
+  finish_command_fsm_should_stop,
+  finish_command_fsm_return_value,
+  finish_command_fsm_async_reply_reason,
+};
+
+/* Allocate a new finish_command_fsm.  */
+
+static struct finish_command_fsm *
+new_finish_command_fsm (int thread)
+{
+  struct finish_command_fsm *sm;
+
+  sm = XCNEW (struct finish_command_fsm);
+  thread_fsm_ctor (&sm->thread_fsm, &finish_command_fsm_ops);
+
+  sm->thread = thread;
+
+  return sm;
+}
+
+/* Implementation of the 'should_stop' FSM method for the finish
+   commands.  Detects whether the thread stepped out of the function
+   successfully, and if so, captures the function's return value and
+   marks the FSM finished.  */
+
+static int
+finish_command_fsm_should_stop (struct thread_fsm *self)
+{
+  struct finish_command_fsm *f = (struct finish_command_fsm *) self;
+  struct return_value_info *rv = &f->return_value;
+  struct thread_info *tp = find_thread_id (f->thread);
+
+  if (f->function != NULL
+      && bpstat_find_breakpoint (tp->control.stop_bpstat,
+				 f->breakpoint) != NULL)
+    {
+      /* We're done.  */
+      thread_fsm_set_finished (self);
+
+      rv->type = TYPE_TARGET_TYPE (SYMBOL_TYPE (f->function));
+      if (rv->type == NULL)
+	internal_error (__FILE__, __LINE__,
+			_("finish_command: function has no target type"));
+
+      if (TYPE_CODE (rv->type) != TYPE_CODE_VOID)
+	{
+	  struct value *func;
+
+	  func = read_var_value (f->function, NULL, get_current_frame ());
+	  rv->value = get_return_value (func, rv->type);
+	  if (rv->value != NULL)
+	    rv->value_history_index = record_latest_value (rv->value);
+	}
+    }
+  else if (tp->control.stop_step)
+    {
+      /* Finishing from an inline frame, or reverse finishing.  In
+	 either case, there's no way to retrieve the return value.  */
+      thread_fsm_set_finished (self);
+    }
+
+  return 1;
+}
+
+/* Implementation of the 'clean_up' FSM method for the finish
+   commands.  */
+
+static void
+finish_command_fsm_clean_up (struct thread_fsm *self)
+{
+  struct finish_command_fsm *f = (struct finish_command_fsm *) self;
+
+  if (f->breakpoint != NULL)
+    {
+      delete_breakpoint (f->breakpoint);
+      f->breakpoint = NULL;
+    }
+  delete_longjmp_breakpoint (f->thread);
+}
+
+/* Implementation of the 'return_value' FSM method for the finish
+   commands.  */
+
+static struct return_value_info *
+finish_command_fsm_return_value (struct thread_fsm *self)
+{
+  struct finish_command_fsm *f = (struct finish_command_fsm *) self;
+
+  return &f->return_value;
+}
+
+/* Implementation of the 'async_reply_reason' FSM method for the
+   finish commands.  */
+
+static enum async_reply_reason
+finish_command_fsm_async_reply_reason (struct thread_fsm *self)
+{
+  struct finish_command_fsm *f = (struct finish_command_fsm *) self;
+
+  if (execution_direction == EXEC_REVERSE)
+    return EXEC_ASYNC_END_STEPPING_RANGE;
+  else
+    return EXEC_ASYNC_FUNCTION_FINISHED;
 }
 
 /* finish_backward -- helper function for finish_command.  */
 
 static void
-finish_backward (struct symbol *function)
+finish_backward (struct finish_command_fsm *sm)
 {
   struct symtab_and_line sal;
   struct thread_info *tp = inferior_thread ();
@@ -1751,58 +1901,33 @@ finish_backward (struct symbol *function)
     }
 }
 
-/* finish_forward -- helper function for finish_command.  */
+/* finish_forward -- helper function for finish_command.  FRAME is the
+   frame that called the function we're about to step out of.  */
 
 static void
-finish_forward (struct symbol *function, struct frame_info *frame)
+finish_forward (struct finish_command_fsm *sm, struct frame_info *frame)
 {
   struct frame_id frame_id = get_frame_id (frame);
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct symtab_and_line sal;
   struct thread_info *tp = inferior_thread ();
-  struct breakpoint *breakpoint;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  struct finish_command_continuation_args *cargs;
-  int thread = tp->num;
-  struct dummy_frame_context_saver *saver = NULL;
 
   sal = find_pc_line (get_frame_pc (frame), 0);
   sal.pc = get_frame_pc (frame);
 
-  if (get_frame_type (frame) == DUMMY_FRAME)
-    {
-      saver = dummy_frame_context_saver_setup (get_stack_frame_id (frame),
-					       inferior_ptid);
-      make_cleanup (dummy_frame_context_saver_cleanup, saver);
-    }
-
-  breakpoint = set_momentary_breakpoint (gdbarch, sal,
-					 get_stack_frame_id (frame),
-                                         bp_finish);
+  sm->breakpoint = set_momentary_breakpoint (gdbarch, sal,
+					     get_stack_frame_id (frame),
+					     bp_finish);
 
   /* set_momentary_breakpoint invalidates FRAME.  */
   frame = NULL;
 
-  make_cleanup_delete_breakpoint (breakpoint);
-
   set_longjmp_breakpoint (tp, frame_id);
-  make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
 
   /* We want to print return value, please...  */
   tp->control.proceed_to_finish = 1;
-  cargs = xmalloc (sizeof (*cargs));
 
-  cargs->thread = thread;
-  cargs->breakpoint = breakpoint;
-  cargs->function = function;
-  cargs->ctx_saver = saver;
-  add_continuation (tp, finish_command_continuation, cargs,
-                    finish_command_continuation_free_arg);
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
-
-  discard_cleanups (old_chain);
-  if (!target_can_async_p ())
-    do_all_continuations (0);
 }
 
 /* "finish": Set a temporary breakpoint at the place the selected
@@ -1812,9 +1937,10 @@ static void
 finish_command (char *arg, int from_tty)
 {
   struct frame_info *frame;
-  struct symbol *function;
   int async_exec;
   struct cleanup *args_chain;
+  struct finish_command_fsm *sm;
+  struct thread_info *tp;
 
   ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
@@ -1839,9 +1965,14 @@ finish_command (char *arg, int from_tty)
 
   clear_proceed_status (0);
 
+  tp = inferior_thread ();
+
+  sm = new_finish_command_fsm (tp->num);
+
+  tp->thread_fsm = &sm->thread_fsm;
+
   /* Finishing from an inline frame is completely different.  We don't
-     try to show the "return value" - no way to locate it.  So we do
-     not need a completion.  */
+     try to show the "return value" - no way to locate it.  */
   if (get_frame_type (get_selected_frame (_("No selected frame.")))
       == INLINE_FRAME)
     {
@@ -1850,7 +1981,6 @@ finish_command (char *arg, int from_tty)
 	 called by that frame.  We don't use the magic "1" value for
 	 step_range_end, because then infrun will think this is nexti,
 	 and not step over the rest of this inlined function call.  */
-      struct thread_info *tp = inferior_thread ();
       struct symtab_and_line empty_sal;
 
       init_sal (&empty_sal);
@@ -1878,7 +2008,7 @@ finish_command (char *arg, int from_tty)
 
   /* Find the function we will return from.  */
 
-  function = find_pc_function (get_frame_pc (get_selected_frame (NULL)));
+  sm->function = find_pc_function (get_frame_pc (get_selected_frame (NULL)));
 
   /* Print info on the selected frame, including level number but not
      source.  */
@@ -1888,10 +2018,10 @@ finish_command (char *arg, int from_tty)
 	printf_filtered (_("Run back to call of "));
       else
 	{
-	  if (function != NULL && TYPE_NO_RETURN (function->type)
+	  if (sm->function != NULL && TYPE_NO_RETURN (sm->function->type)
 	      && !query (_("warning: Function %s does not return normally.\n"
 			   "Try to finish anyway? "),
-			 SYMBOL_PRINT_NAME (function)))
+			 SYMBOL_PRINT_NAME (sm->function)))
 	    error (_("Not confirmed."));
 	  printf_filtered (_("Run till exit from "));
 	}
@@ -1900,9 +2030,9 @@ finish_command (char *arg, int from_tty)
     }
 
   if (execution_direction == EXEC_REVERSE)
-    finish_backward (function);
+    finish_backward (sm);
   else
-    finish_forward (function, frame);
+    finish_forward (sm, frame);
 }
 
 
@@ -2532,8 +2662,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
       /* The user requested a plain `attach', so be sure to leave
 	 the inferior stopped.  */
 
-      if (target_can_async_p ())
-	async_enable_stdin ();
+      async_enable_stdin ();
 
       /* At least the current thread is already stopped.  */
 
@@ -2562,7 +2691,8 @@ struct attach_command_continuation_args
 static void
 attach_command_continuation (void *args, int err)
 {
-  struct attach_command_continuation_args *a = args;
+  struct attach_command_continuation_args *a
+    = (struct attach_command_continuation_args *) args;
 
   if (err)
     return;
@@ -2573,7 +2703,8 @@ attach_command_continuation (void *args, int err)
 static void
 attach_command_continuation_free_args (void *args)
 {
-  struct attach_command_continuation_args *a = args;
+  struct attach_command_continuation_args *a
+    = (struct attach_command_continuation_args *) args;
 
   xfree (a->args);
   xfree (a);
@@ -2663,6 +2794,7 @@ attach_command (char *args, int from_tty)
      E.g. Mach 3 or GNU hurd.  */
   if (!target_attach_no_wait)
     {
+      struct attach_command_continuation_args *a;
       struct inferior *inferior = current_inferior ();
 
       /* Careful here.  See comments in inferior.h.  Basically some
@@ -2672,25 +2804,19 @@ attach_command (char *args, int from_tty)
 	 STOP_QUIETLY_NO_SIGSTOP is for.  */
       inferior->control.stop_soon = STOP_QUIETLY_NO_SIGSTOP;
 
-      if (target_can_async_p ())
-	{
-	  /* sync_execution mode.  Wait for stop.  */
-	  struct attach_command_continuation_args *a;
+      /* sync_execution mode.  Wait for stop.  */
+      a = XNEW (struct attach_command_continuation_args);
+      a->args = xstrdup (args);
+      a->from_tty = from_tty;
+      a->async_exec = async_exec;
+      add_inferior_continuation (attach_command_continuation, a,
+				 attach_command_continuation_free_args);
+      /* Done with ARGS.  */
+      do_cleanups (args_chain);
 
-	  a = xmalloc (sizeof (*a));
-	  a->args = xstrdup (args);
-	  a->from_tty = from_tty;
-	  a->async_exec = async_exec;
-	  add_inferior_continuation (attach_command_continuation, a,
-				     attach_command_continuation_free_args);
-
-	  /* Done with ARGS.  */
-	  do_cleanups (args_chain);
-
-	  return;
-	}
-
-      wait_for_inferior ();
+      if (!target_is_async_p ())
+	mark_infrun_async_event_handler ();
+      return;
     }
 
   /* Done with ARGS.  */
@@ -2731,6 +2857,7 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
 
   if (is_executing (inferior_ptid))
     {
+      struct attach_command_continuation_args *a;
       struct inferior *inferior = current_inferior ();
 
       /* We're going to install breakpoints, and poke at memory,
@@ -2741,22 +2868,15 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
       inferior->control.stop_soon = STOP_QUIETLY_REMOTE;
 
       /* Wait for stop before proceeding.  */
-      if (target_can_async_p ())
-	{
-	  struct attach_command_continuation_args *a;
+      a = XNEW (struct attach_command_continuation_args);
+      a->args = xstrdup ("");
+      a->from_tty = from_tty;
+      a->async_exec = async_exec;
+      add_inferior_continuation (attach_command_continuation, a,
+				 attach_command_continuation_free_args);
 
-	  a = xmalloc (sizeof (*a));
-	  a->args = xstrdup ("");
-	  a->from_tty = from_tty;
-	  a->async_exec = async_exec;
-	  add_inferior_continuation (attach_command_continuation, a,
-				     attach_command_continuation_free_args);
-
-	  do_cleanups (old_chain);
-	  return;
-	}
-      else
-	wait_for_inferior ();
+      do_cleanups (old_chain);
+      return;
     }
 
   async_exec = leave_running;

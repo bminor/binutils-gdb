@@ -1112,8 +1112,6 @@ elf_s390_check_relocs (bfd *abfd,
 	}
       switch (r_type)
 	{
-	case R_390_GOTOFF16:
-	case R_390_GOTOFF32:
 	case R_390_GOTPC:
 	case R_390_GOTPCDBL:
 	  /* These relocs do not need a GOT slot.  They just load the
@@ -1121,6 +1119,10 @@ elf_s390_check_relocs (bfd *abfd,
 	     the GOT.  Since the GOT pointer has been set up above we
 	     are done.  */
 	  break;
+	case R_390_GOTOFF16:
+	case R_390_GOTOFF32:
+	  if (h == NULL || !s390_is_ifunc_symbol_p (h) || !h->def_regular)
+	    break;
 
 	case R_390_PLT12DBL:
 	case R_390_PLT16DBL:
@@ -1270,7 +1272,7 @@ elf_s390_check_relocs (bfd *abfd,
 	case R_390_PC24DBL:
 	case R_390_PC32DBL:
 	case R_390_PC32:
-	  if (h != NULL)
+	  if (h != NULL && bfd_link_executable (info))
 	    {
 	      /* If this reloc is in a read-only section, we might
 		 need a copy reloc.  We can't check reliably at this
@@ -1527,6 +1529,18 @@ elf_s390_gc_sweep_hook (bfd *abfd,
 	    elf_s390_hash_table (info)->tls_ldm_got.refcount -= 1;
 	  break;
 
+	case R_390_GOTOFF16:
+	case R_390_GOTOFF32:
+	  if (s390_is_ifunc_symbol_p (h) && h->def_regular)
+	    {
+	      h->plt.refcount--;
+	      break;
+	    }
+
+	case R_390_GOTPC:
+	case R_390_GOTPCDBL:
+	  break;
+
 	case R_390_TLS_GD32:
 	case R_390_TLS_IE32:
 	case R_390_TLS_GOTIE12:
@@ -1537,10 +1551,6 @@ elf_s390_gc_sweep_hook (bfd *abfd,
 	case R_390_GOT16:
 	case R_390_GOT20:
 	case R_390_GOT32:
-	case R_390_GOTOFF16:
-	case R_390_GOTOFF32:
-	case R_390_GOTPC:
-	case R_390_GOTPCDBL:
 	case R_390_GOTENT:
 	  if (h != NULL)
 	    {
@@ -1648,7 +1658,47 @@ elf_s390_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* STT_GNU_IFUNC symbol must go through PLT. */
   if (s390_is_ifunc_symbol_p (h))
-    return TRUE;
+    {
+      /* All local STT_GNU_IFUNC references must be treated as local
+	 calls via local PLT.  */
+      if (h->ref_regular && SYMBOL_CALLS_LOCAL (info, h))
+	{
+	  bfd_size_type pc_count = 0, count = 0;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_s390_link_hash_entry *eh;
+	  struct elf_dyn_relocs *p;
+
+	  eh = (struct elf_s390_link_hash_entry *) h;
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      pc_count += p->pc_count;
+	      p->count -= p->pc_count;
+	      p->pc_count = 0;
+	      count += p->count;
+	      if (p->count == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+
+	  if (pc_count || count)
+	    {
+	      h->needs_plt = 1;
+	      h->non_got_ref = 1;
+	      if (h->plt.refcount <= 0)
+		h->plt.refcount = 1;
+	      else
+		h->plt.refcount += 1;
+	    }
+	}
+
+      if (h->plt.refcount <= 0)
+	{
+	  h->plt.offset = (bfd_vma) -1;
+	  h->needs_plt = 0;
+	}
+      return TRUE;
+    }
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later
@@ -1785,8 +1835,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
   if (s390_is_ifunc_symbol_p (h) && h->def_regular)
-    return s390_elf_allocate_ifunc_dyn_relocs (info, h,
-					       &eh->dyn_relocs);
+    return s390_elf_allocate_ifunc_dyn_relocs (info, h);
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)
     {
@@ -2039,7 +2088,7 @@ elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (htab->elf.dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (bfd_link_executable (info))
+      if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  if (s == NULL)
@@ -2639,6 +2688,18 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  /* Relocation is relative to the start of the global offset
 	     table.  */
 
+	  if (h != NULL
+	      && s390_is_ifunc_symbol_p (h)
+	      && h->def_regular
+	      && !bfd_link_executable (info))
+	    {
+	      relocation = (htab->elf.iplt->output_section->vma
+			    + htab->elf.iplt->output_offset
+			    + h->plt.offset
+			    - htab->elf.sgot->output_section->vma);
+	      goto do_relocation;
+	    }
+
 	  /* Note that sgot->output_offset is not involved in this
 	     calculation.  We always want the start of .got.  If we
 	     defined _GLOBAL_OFFSET_TABLE in a different way, as is
@@ -2715,15 +2776,35 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  unresolved_reloc = FALSE;
 	  break;
 
-	case R_390_8:
-	case R_390_16:
-	case R_390_32:
 	case R_390_PC16:
 	case R_390_PC12DBL:
 	case R_390_PC16DBL:
 	case R_390_PC24DBL:
 	case R_390_PC32DBL:
 	case R_390_PC32:
+	  if (h != NULL
+	      && s390_is_ifunc_symbol_p (h)
+	      && h->def_regular
+	      && !bfd_link_executable (info))
+	    {
+	      /* This will not work our if the function does not
+		 happen to set up the GOT pointer for some other
+		 reason.  31 bit PLT entries require r12 to hold the
+		 GOT pointer.
+		 FIXME: Implement an errorcheck.
+		 NOTE: It will work when brasl is not available
+		 (e.g. with -m31 -march=g5) since a local function
+		 call then does use GOTOFF which implies r12 being set
+		 up.  */
+	      relocation = (htab->elf.iplt->output_section->vma
+			    + htab->elf.iplt->output_offset
+			    + h ->plt.offset);
+	      goto do_relocation;
+	    }
+
+	case R_390_8:
+	case R_390_16:
+	case R_390_32:
 	  if (h != NULL
 	      && s390_is_ifunc_symbol_p (h)
 	      && h->def_regular)
@@ -3553,16 +3634,15 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
-      if (s390_is_ifunc_symbol_p (h))
+      if (s390_is_ifunc_symbol_p (h) && h->def_regular)
 	{
-	  /* If we can resolve the IFUNC symbol locally we generate an
-	     IRELATIVE reloc.  */
-	  elf_s390_finish_ifunc_symbol (output_bfd, info, h, htab, h->plt.offset,
-					eh->ifunc_resolver_address +
-					eh->ifunc_resolver_section->output_offset +
-					eh->ifunc_resolver_section->output_section->vma);
-	  /* Fallthrough.  Handling of explicit GOT slots of IFUNC
-	     symbols is below.  */
+	  elf_s390_finish_ifunc_symbol (output_bfd, info, h,
+	    htab, h->plt.offset,
+	    eh->ifunc_resolver_address +
+	    eh->ifunc_resolver_section->output_offset +
+	    eh->ifunc_resolver_section->output_section->vma);
+	  /* Do not return yet.  Handling of explicit GOT slots of
+	     IFUNC symbols is below.  */
 	}
       else
 	{
@@ -3805,6 +3885,23 @@ elf_s390_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			   const asection *rel_sec ATTRIBUTE_UNUSED,
 			   const Elf_Internal_Rela *rela)
 {
+  bfd *abfd = info->output_bfd;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  struct elf_s390_link_hash_table *htab = elf_s390_hash_table (info);
+  unsigned long r_symndx = ELF32_R_SYM (rela->r_info);
+  Elf_Internal_Sym sym;
+
+  if (htab->elf.dynsym == NULL
+      || !bed->s->swap_symbol_in (abfd,
+				  (htab->elf.dynsym->contents
+				   + r_symndx * bed->s->sizeof_sym),
+				  0, &sym))
+    abort ();
+
+  /* Check relocation against STT_GNU_IFUNC symbol.  */
+  if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+    return reloc_class_ifunc;
+
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_390_RELATIVE:

@@ -278,7 +278,11 @@ sympy_value (PyObject *self, PyObject *args)
       if (symbol_read_needs_frame (symbol) && frame_info == NULL)
 	error (_("symbol requires a frame to compute its value"));
 
-      value = read_var_value (symbol, frame_info);
+      /* TODO: currently, we have no way to recover the block in which SYMBOL
+	 was found, so we have no block to pass to read_var_value.  This will
+	 yield an incorrect value when symbol is not local to FRAME_INFO (this
+	 can happen with nested functions).  */
+      value = read_var_value (symbol, NULL, frame_info);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -304,7 +308,8 @@ set_symbol (symbol_object *obj, struct symbol *symbol)
     {
       struct objfile *objfile = symbol_objfile (symbol);
 
-      obj->next = objfile_data (objfile, sympy_objfile_data_key);
+      obj->next = ((struct sympy_symbol_object *)
+		   objfile_data (objfile, sympy_objfile_data_key));
       if (obj->next)
 	obj->next->prev = obj;
       set_objfile_data (objfile, sympy_objfile_data_key, obj);
@@ -481,7 +486,7 @@ gdbpy_lookup_global_symbol (PyObject *self, PyObject *args, PyObject *kw)
 static void
 del_objfile_symbols (struct objfile *objfile, void *datum)
 {
-  symbol_object *obj = datum;
+  symbol_object *obj = (symbol_object *) datum;
   while (obj)
     {
       symbol_object *next = obj->next;

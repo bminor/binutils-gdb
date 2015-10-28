@@ -556,8 +556,7 @@ add_language (const struct language_defn *lang)
   if (!languages)
     {
       languages_allocsize = DEFAULT_ALLOCSIZE;
-      languages = (const struct language_defn **) xmalloc
-	(languages_allocsize * sizeof (*languages));
+      languages = XNEWVEC (const struct language_defn *, languages_allocsize);
     }
   if (languages_size >= languages_allocsize)
     {
@@ -569,8 +568,9 @@ add_language (const struct language_defn *lang)
 
   /* Build the language names array, to be used as enumeration in the
      set language" enum command.  */
-  language_names = xrealloc (language_names,
-			     (languages_size + 1) * sizeof (const char *));
+  language_names = XRESIZEVEC (const char *, language_names,
+			       languages_size + 1);
+
   for (i = 0; i < languages_size; ++i)
     language_names[i] = languages[i]->la_name;
   language_names[i] = NULL;
@@ -975,8 +975,8 @@ struct type *
 language_string_char_type (const struct language_defn *la,
 			   struct gdbarch *gdbarch)
 {
-  struct language_gdbarch *ld = gdbarch_data (gdbarch,
-					      language_gdbarch_data);
+  struct language_gdbarch *ld
+    = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
 
   return ld->arch_info[la->la_language].string_char_type;
 }
@@ -985,8 +985,8 @@ struct type *
 language_bool_type (const struct language_defn *la,
 		    struct gdbarch *gdbarch)
 {
-  struct language_gdbarch *ld = gdbarch_data (gdbarch,
-					      language_gdbarch_data);
+  struct language_gdbarch *ld
+    = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
 
   if (ld->arch_info[la->la_language].bool_type_symbol)
     {
@@ -1029,8 +1029,8 @@ language_lookup_primitive_type (const struct language_defn *la,
 				struct gdbarch *gdbarch,
 				const char *name)
 {
-  struct language_gdbarch *ld = gdbarch_data (gdbarch,
-					      language_gdbarch_data);
+  struct language_gdbarch *ld =
+    (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
   struct type **typep;
 
   typep = language_lookup_primitive_type_1 (&ld->arch_info[la->la_language],
@@ -1106,8 +1106,8 @@ language_lookup_primitive_type_as_symbol (const struct language_defn *la,
 					  struct gdbarch *gdbarch,
 					  const char *name)
 {
-  struct language_gdbarch *ld = gdbarch_data (gdbarch,
-					      language_gdbarch_data);
+  struct language_gdbarch *ld
+    = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
   struct language_arch_info *lai = &ld->arch_info[la->la_language];
   struct type **typep;
   struct symbol *sym;

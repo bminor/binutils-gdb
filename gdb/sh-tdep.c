@@ -1857,7 +1857,7 @@ sh_frame_cache (struct frame_info *this_frame, void **this_cache)
   int i;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct sh_frame_cache *) *this_cache;
 
   cache = sh_alloc_frame_cache ();
   *this_cache = cache;
@@ -2021,7 +2021,7 @@ sh_stub_this_id (struct frame_info *this_frame, void **this_cache,
 
   if (*this_cache == NULL)
     *this_cache = sh_make_stub_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct sh_frame_cache *) *this_cache;
 
   *this_id = frame_id_build (cache->saved_sp, get_frame_pc (this_frame));
 }

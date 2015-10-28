@@ -5703,7 +5703,7 @@ mri_chip (void)
   int i;
 
   s = input_line_pointer;
-  /* We can't use get_symbol_end since the processor names are not proper
+  /* We can't use get_symbol_name since the processor names are not proper
      symbols.  */
   while (is_part_of_name (c = *input_line_pointer++))
     ;
@@ -5731,7 +5731,7 @@ mri_chip (void)
     {
       ++input_line_pointer;
       s = input_line_pointer;
-      /* We can't use get_symbol_end since the processor names are not
+      /* We can't use get_symbol_name since the processor names are not
 	 proper symbols.  */
       while (is_part_of_name (c = *input_line_pointer++))
 	;
@@ -5896,8 +5896,7 @@ s_opt (int ignore ATTRIBUTE_UNUSED)
 	  t = 0;
 	}
 
-      s = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&s);
 
       for (i = 0, o = opt_table; i < OPTCOUNT; i++, o++)
 	{
@@ -5907,14 +5906,14 @@ s_opt (int ignore ATTRIBUTE_UNUSED)
 		{
 		  /* Restore input_line_pointer now in case the option
 		     takes arguments.  */
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  (*o->pfn) (o->arg, t);
 		}
 	      else if (o->pvar != NULL)
 		{
 		  if (! t && o->arg == o->notarg)
 		    as_bad (_("option `%s' may not be negated"), s);
-		  *input_line_pointer = c;
+		  restore_line_pointer (c);
 		  *o->pvar = t ? o->arg : o->notarg;
 		}
 	      else
@@ -5925,7 +5924,7 @@ s_opt (int ignore ATTRIBUTE_UNUSED)
       if (i >= OPTCOUNT)
 	{
 	  as_bad (_("option `%s' not recognized"), s);
-	  *input_line_pointer = c;
+	  restore_line_pointer (c);
 	}
     }
   while (*input_line_pointer++ == ',');

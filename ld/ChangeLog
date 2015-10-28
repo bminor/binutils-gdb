@@ -1,3 +1,271 @@
+2015-10-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19162
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Check flags
+	before calling _bfd_elf_match_sections_by_type.  Merge flags for
+	any other input sections that might match a new output section to
+	decide placement.
+
+2015-10-27  Laurent Alfonsi <laurent.alfonsi@st.com>
+            Christophe Monat <christophe.monat@st.com>
+
+	* ld.texinfo: Add description of the STM32L4xx erratum
+	workaround.
+	* NEWS: Mention the new feature.
+	* emultempl/armelf.em (stm32l4xx_fix): New.
+	(arm_elf_before_allocation): Choose the type of fix, scan for
+	erratum.
+	(gld${EMULATION_NAME}_finish): Fix veneer locations.
+	(arm_elf_create_output_section_statements): Propagate
+	stm32l4xx_fix value.
+	(PARSE_AND_LIST_PROLOGUE): Define OPTION_STM32L4XX_FIX.
+	(PARSE_AND_LIST_LONGOPTS): Add entry for handling
+	--fix-stm32l4xx-629360.
+	(PARSE_AND_LIST_OPTION): Add entry for helping on
+	--fix-stm32l4xx-629360.
+	(PARSE_AND_LIST_ARGS_CASES): Treat OPTION_STM32L4XX_FIX.
+
+2015-10-27  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19175
+	* ldlang.c (lang_insert_orphan): Evaluate __start_* and __stop_*
+	symbol PROVIDE expressions.
+	* ldexp.c (exp_fold_tree_1 <etree_provide>): Define undefweak
+	references.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac: Properly check
+	--enable-compressed-debug-sections={yes,all}.
+	* configure: Regenerated.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19109
+	* configure.ac: Handle --enable-compressed-debug-sections=*,ld,*.
+	* configure: Regenerated.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld/ld.texinfo: Document "-z call-nop=PADDING" option.
+	* emulparams/call_nop.sh: New file.
+	* emulparams/elf_i386_be.sh: Source
+	${srcdir}/emulparams/call_nop.sh.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/elf_i386_vxworks.sh: Likewise.
+	* emulparams/elf_iamcu.sh: Likewise.
+	* emulparams/elf_k1om.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
+	link_info.call_nop_byte if $CALL_NOP_BYTE isn't empty.
+
+2015-10-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19109
+	* configure.ac: Add --enable-compressed-debug-sections with
+	options of all, none or ld.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* ld.texinfo: Document how to determine the default action for
+	debug sections.
+	* ldmain.c (main): If DEFAULT_FLAG_COMPRESS_DEBUG is defined then
+	set the compress_debug field of the link_info structure to
+	zlib-gabi.
+	* lexsup.c (elf_static_list_options): Output the default setting
+	for the --compress-debug-sections option.
+	* NEWS: Mention the new configure option.
+
+2015-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Fix a typo for "-z noextern-protected-data".
+
+2015-10-15  Simon Dardis  <Simon.Dardis@imgtec.com>
+
+	* ld/ldexp.c: (try_copy_symbol_flags): New. Factored out from...
+	(exp_fold_tree_1): Here.  Cope with ternary operator in
+	assignments.  Use new helper.
+
+2015-10-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_TW.po: Updated Chinese translation.
+
+2015-10-13  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_TW.po: Updated Chinese translation.
+
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+	    Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* configure.tgt: Added target arc-*-elf* and arc*-*-linux-uclibc*.
+	* emulparams/arcebelf_prof.sh: New file
+	* emulparams/arcebelf.sh: Likewise.
+	* emulparams/arceblinux_prof.sh: Likewise.
+	* emulparams/arceblinux.sh: Likewise.
+	* emulparams/arcelf_prof.sh: Likewise.
+	* emulparams/arcelf.sh: Likewise.
+	* emulparams/arclinux_prof.sh: Likewise.
+	* emulparams/arclinux.sh: Likewise.
+	* emulparams/arcv2elfx.sh: Likewise.
+	* emulparams/arcv2elf.sh: Likewise.
+	* emultempl/arclinux.em: Likewise.
+	* scripttempl/arclinux.sc: Likewise.
+	* scripttempl/elfarc.sc: Likewise.
+	* scripttempl/elfarcv2.sc: Likewise
+	* Makefile.am: Add new ARC emulations.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention the new feature.
+
+2015-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt (targ_extra_emuls): Add elf_iamcu for Solaris2/x86.
+
+2015-10-01  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* configure.tgt (targ_extra_emuls): Remove shlelf and
+	shelf from sh*-*-linux cases.
+
+2015-09-30  Rich Felker  <dalias@libc.org>
+
+	* configure.tgt (targ_extra_emuls): Add fdpic and misc
+	emulations to sh*-*-linux* targets.
+
+2015-09-29  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19014
+	* ld.texinfo (Options): Fix spelling mistake.
+
+2015-09-24  Alan Modra  <amodra@gmail.com>
+
+	PR ld/18992
+	* ldmain.c (main): Always enable --sysroot.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Don't
+	prepend sysroot to relative rpath/runpath.
+
+2015-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (ehdr_start_empty): New static variable.
+	(before_allocation): Use it to initialise ehdr_start_save.
+	* emultempl/pe.em (write_build_id): Remove useless double
+	parenthesis.
+	* emultempl/pep.em (write_build_id): Likewise.
+
+2015-09-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/alphaelf.em (alpha_after_parse): Call
+	gld${EMULATION_NAME}_after_parse instead of
+	after_parse_default.
+	* emultempl/cr16elf.em (cr16elf_after_parse): Likewise.
+	* emultempl/crxelf.em (crxelf_after_parse); Likewise.
+	* emultempl/hppaelf.em (hppaelf_after_parse): Likewise.
+	* emultempl/mipself.em (mips_after_parse): Likewise.
+	* emultempl/nds32elf.em (nds32_elf_after_parse): Likewise.
+	* emultempl/elf32.em: Don't include ldlex.h.
+	(gld${EMULATION_NAME}_after_parse): New function.
+	(gld${EMULATION_NAME}_handle_option) [GENERATE_PIE_SCRIPT]
+	<OPTION_PIE>: Removed.
+	(ld_${EMULATION_NAME}_emulation): Replace after_parse_default
+	with gld${EMULATION_NAME}_after_parse.
+	* emultempl/ia64elf.em (gld${EMULATION_NAME}_after_parse):
+	Renamed to ...
+	(ia64elf_after_parse): This.  Call
+	gld${EMULATION_NAME}_after_parse instead of after_parse_default.
+	(LDEMUL_AFTER_PARSE): Replace gld${EMULATION_NAME}_after_parse
+	with ia64elf_after_parse.
+
+2015-09-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* emulparams/solaris2.sh (GENERATE_PIE_SCRIPT): Set to yes.
+
+	* emultempl/elf32.em: Include ldlex.h.
+	(gld${EMULATION_NAME}_handle_option) [GENERATE_PIE_SCRIPT]
+	<OPTION_PIE>: Set DF_1_PIE.
+
+2015-09-22  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo: Put --dotsyms/--no-dotsyms on separate lines.
+	Ditto for --save-restore-funcs and --tls-get-addr-optimize.
+
+2015-09-20  Rich Felker  <dalias@libc.org>
+
+	* ld.texinfo (--no-dynamic-linker): Document.
+	* ldlex.h (enum option_values): Add OPTION_NO_DYNAMIC_LINKER.
+	* lexsup.c (ld_options, parse_args): Handle --no-dynamic-linker.
+
+2015-09-18  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo: Document PowerPC64 --{no-,}save-restore-funcs.
+
+2015-09-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (params): Init tls_get_addr_opt field to -1.
+	(OPTION_TLS_GET_ADDR_OPT): Define.
+	(PARSE_AND_LIST_LONGOPTS): Handle --tls-get-addr-opt.
+	(PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Likewise.
+	* ld.texinfo: Document --tls-get-addr-optimize and
+	--no-tls-get-addr-optimize.
+
+2015-09-18  Alan Modra  <amodra@gmail.com>
+
+	PR ld/18963
+	* ldexp.h (struct ldexp_control): Add rel_from_abs.
+	(ldexp_finalize_syms): Declare.
+	* ldexp.c (new_rel_from_abs): Keep absolute for expressions
+	outside of output section statements.  Set rel_from_abs.
+	(make_abs, exp_fold_tree, exp_fold_tree_no_dot): Clear rel_from_abs.
+	(struct definedness_hash_entry): Add final_sec, and comment.
+	(update_definedness): Set final_sec.
+	(set_sym_sections, ldexp_finalize_syms): New functions.
+	* ldlang.c (lang_process): Call ldexp_finalize_syms.
+
+2015-09-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated simplified Chinese translation.
+
+2015-09-09  James Bowman  <james.bowman@ftdichip.com>
+
+	* scripttempl/ft32.sc: default linker script RAM and
+        FLASH size symbols
+
+2015-09-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated simplified Chinese translation.
+
+2015-09-08  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (Source Code Reference): Extend description to
+	include an example using arrays.
+
+2015-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ld.h (enum orphan_handling_enum): New.
+	(ld_config_type): Remove warn_orphan, add orphan_handling.
+	* ldemul.c (ldemul_place_orphan): Remove warning about orphan
+	sections.
+	* ldlang.c (ldlang_place_orphan): New function.
+	(lang_place_orphans): Call ldlang_place_orphan.
+	* ldlex.h (enum option_values): Remove OPTION_WARN_ORPHAN and
+	OPTION_NO_WARN_ORPHAN, add OPTION_ORPHAN_HANDLING.
+	* lexsup.c (ld_options): Remove 'warn-orphan' and
+	'no-warn-orphan', add 'orphan-handling'.
+	(parse_args): Remove handling for OPTION_WARN_ORPHAN and
+	OPTION_NO_WARN_ORPHAN, add handling for OPTION_ORPHAN_HANDLING.
+	* NEWS: Replace text about --warn-orphan with --orphan-handling.
+	* ld.texinfo (Options): Remove --warn-orphan entry and add
+	entry on --orphan-handling.
+	(Orphan Sections): Add reference to relevant command line options.
+
+2015-09-03  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (--build-id): Fix typo.  The COFF/PE build-id section
+	is called .buildid not .build-id.
+
+2015-09-03  Nick Clifton  <nickc@redhat.com>
+
+	(Source Code Reference): Fix off-by-one typo in example of how to
+	use linker script symbols in C source code.
+
 2015-08-19  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/aix.em: Don't set link_info.pic.

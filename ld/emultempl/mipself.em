@@ -47,7 +47,7 @@ mips_after_parse (void)
       link_info.emit_hash = TRUE;
       link_info.emit_gnu_hash = FALSE;
     }
-  after_parse_default ();
+  gld${EMULATION_NAME}_after_parse ();
 }
 
 struct hook_stub_info

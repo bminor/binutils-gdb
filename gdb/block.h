@@ -179,6 +179,17 @@ extern struct block *allocate_global_block (struct obstack *obstack);
 extern void set_block_compunit_symtab (struct block *,
 				       struct compunit_symtab *);
 
+/* Return a property to evaluate the static link associated to BLOCK.
+
+   In the context of nested functions (available in Pascal, Ada and GNU C, for
+   instance), a static link (as in DWARF's DW_AT_static_link attribute) for a
+   function is a way to get the frame corresponding to the enclosing function.
+
+   Note that only objfile-owned and function-level blocks can have a static
+   link.  Return NULL if there is no such property.  */
+
+extern struct dynamic_prop *block_static_link (const struct block *block);
+
 /* A block iterator.  This structure should be treated as though it
    were opaque; it is only defined here because we want to support
    stack allocation of iterators.  */

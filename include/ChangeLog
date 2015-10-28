@@ -1,3 +1,37 @@
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add call_nop_as_suffix and
+	call_nop_byte.
+
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* dis-asm.h (arc_get_disassembler): Correct declaration.
+
+2015-09-30  Nick Clifton  <nickc@redhat.com>
+
+	Import the following patches from the GCC mainline:
+
+	2015-08-14  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* dwarf2.def (DW_AT_GNU_bias): New attribute.
+
+	2015-08-14  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* dwarf2.def (DW_AT_GNU_numerator, DW_AT_GNU_denominator): New
+	attributes.
+
+2015-09-26  James Bowman  <james.bowman@ftdichip.com>
+
+	* opcode/ft32.h: Add instruction macros FT32_*()
+
+2015-09-20  Rich Felker  <dalias@libc.org>
+
+	* bfdlink.h (struct bfd_link_info): Add "nointerp" field.
+
+2015-08-23  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (enum output_type): Reorder enum.
+
 2015-08-19  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (enum output_type): Delete type_executable, add type_pde

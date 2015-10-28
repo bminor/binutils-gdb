@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.10
 
+* Record btrace now supports non-stop mode.
+
 * Support for tracepoints on aarch64-linux was added in GDBserver.
 
 * The 'record instruction-history' command now indicates speculative execution
@@ -11,6 +13,16 @@
 * GDB now allows users to specify explicit locations, bypassing
   the linespec parser.  This feature is also available to GDB/MI
   clients.
+
+* Multi-architecture debugging is supported on AArch64 GNU/Linux.
+  GDB now is able to debug both AArch64 applications and ARM applications
+  at the same time.
+
+* Support for fast tracepoints on aarch64-linux was added in GDBserver,
+  including JIT compiling fast tracepoint's conditional expression bytecode
+  into native code.
+
+* GDB now supports displaced stepping on AArch64 GNU/Linux.
 
 * New commands
 
@@ -28,12 +40,52 @@ set debug bfd-cache
 show debug bfd-cache
   Control display of debugging info regarding bfd caching.
 
+set remote multiprocess-extensions-packet
+show remote multiprocess-extensions-packet
+  Set/show the use of the remote protocol multiprocess extensions.
+
 * The "disassemble" command accepts a new modifier: /s.
   It prints mixed source+disassembly like /m with two differences:
   - disassembled instructions are now printed in program order, and
   - and source for all relevant files is now printed.
   The "/m" option is now considered deprecated: its "source-centric"
   output hasn't proved useful in practice.
+
+* The "set scheduler-locking" command supports a new mode "replay".
+  It behaves like "off" in record mode and like "on" in replay mode.
+
+* Support for various ROM monitors has been removed:
+
+  target dbug		dBUG ROM monitor for Motorola ColdFire
+  target picobug	Motorola picobug monitor
+  target dink32		DINK32 ROM monitor for PowerPC
+  target m32r		Renesas M32R/D ROM monitor
+  target mon2000	mon2000 ROM monitor
+  target ppcbug		PPCBUG ROM monitor for PowerPC
+
+* Support for reading/writing memory and extracting values on architectures
+  whose memory is addressable in units of any integral multiple of 8 bits.
+
+* New remote packets
+
+exec stop reason
+  Indicates that an exec system call was executed.
+
+exec-events feature in qSupported
+  The qSupported packet allows GDB to request support for exec
+  events using the new 'gdbfeature' exec-event, and the qSupported
+  response can contain the corresponding 'stubfeature'.  Set and
+  show commands can be used to display whether these features are enabled.
+
+* Extended-remote exec events
+
+  ** GDB now has support for exec events on extended-remote Linux targets.
+     For such targets with Linux kernels 2.5.46 and later, this enables
+     follow-exec-mode and exec catchpoints.
+
+set remote exec-event-feature-packet
+show remote exec-event-feature-packet
+  Set/show the use of the remote exec event feature.
 
 *** Changes in GDB 7.10
 
@@ -130,12 +182,6 @@ maint print symbol-cache-statistics
 
 maint flush-symbol-cache
   Flush the contents of the symbol cache.
-
-maint set target-non-stop (on|off|auto)
-maint show target-non-stop
-  Control whether GDB targets always operate in non-stop mode even if
-  "set non-stop" is "off".  The default is "auto", meaning non-stop
-  mode is enabled if supported by the target.
 
 record btrace bts
 record bts

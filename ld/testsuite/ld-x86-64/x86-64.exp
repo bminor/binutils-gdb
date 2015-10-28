@@ -321,12 +321,33 @@ run_dump_test "mov1a"
 run_dump_test "mov1b"
 run_dump_test "mov1c"
 run_dump_test "mov1d"
+run_dump_test "load1a"
+run_dump_test "load1b"
+run_dump_test "load1c"
+run_dump_test "load1d"
+run_dump_test "load1a-nacl"
+run_dump_test "load1b-nacl"
+run_dump_test "load1c-nacl"
+run_dump_test "load1d-nacl"
+run_dump_test "call1a"
+run_dump_test "call1b"
+run_dump_test "call1c"
+run_dump_test "call1d"
+run_dump_test "call1e"
+run_dump_test "call1f"
+run_dump_test "call1g"
+run_dump_test "call1h"
+run_dump_test "call1i"
 run_dump_test "pr17935-1"
 run_dump_test "pr17935-2"
 run_dump_test "pr18160"
 run_dump_test "pr18176"
 run_dump_test "pr18801"
 run_dump_test "pr18815"
+run_dump_test "pr19013"
+run_dump_test "pr19013-x32"
+run_dump_test "pr19013-nacl"
+run_dump_test "pr19175"
 
 # Add $PLT_CFLAGS if PLT is expected.
 global PLT_CFLAGS
@@ -476,6 +497,54 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{readelf {-Wr} pr17827.rd}} \
 	    "pr17827" \
 	] \
+	[list \
+	    "Build pr18900.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr18900a.c } \
+	    "" \
+	    "pr18900.so" \
+	] \
+	[list \
+	    "Build pr18900a" \
+	    "tmpdir/pr18900.so" \
+	    "" \
+	    { pr18900b.c pr18900c.c } \
+	    {{readelf {-Wrd} pr18900a.rd}} \
+	    "pr18900a" \
+	] \
+	[list \
+	    "Build pr18900b" \
+	    "tmpdir/pr18900.so" \
+	    "" \
+	    { pr18900b.c pr18900c.c } \
+	    {{readelf {-Wrd} pr18900b.rd}} \
+	    "pr18900b" \
+	] \
+	[list \
+	    "Build pr19031.so" \
+	    "-shared" \
+	    "-fPIC" \
+	    { pr19031a.c } \
+	    "" \
+	    "pr19031.so" \
+	] \
+	[list \
+	    "Build gotpcrel1d.so" \
+	    "-shared" \
+	    "" \
+	    { gotpcrel1d.S } \
+	    "" \
+	    "gotpcrel1d.so" \
+	] \
+	[list \
+	    "Build gotpcrel1" \
+	    "tmpdir/gotpcrel1d.so" \
+	    "" \
+	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
+	    {{objdump {-dw} gotpcrel1.dd}} \
+	    "gotpcrel1" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
@@ -521,6 +590,30 @@ if { [isnative] && [which $CC] != 0 } {
 	    { pr17689b.S } \
 	    "pr17689now" \
 	    "pr17689.out" \
+	] \
+	[list \
+	    "Run pr18900" \
+	    "tmpdir/pr18900.so" \
+	    "" \
+	    { pr18900b.c pr18900c.c } \
+	    "pr18900" \
+	    "pr18900.out" \
+	] \
+	[list \
+	    "Run pr19031" \
+	    "tmpdir/pr19031.so" \
+	    "" \
+	    { pr19031b.S pr19031c.c } \
+	    "pr19031" \
+	    "pr19031.out" \
+	] \
+	[list \
+	    "Run gotpcrel1" \
+	    "tmpdir/gotpcrel1d.so" \
+	    "" \
+	    { gotpcrel1a.S gotpcrel1b.c gotpcrel1c.c } \
+	    "gotpcrel1" \
+	    "gotpcrel1.out" \
 	] \
     ]
 

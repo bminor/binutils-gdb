@@ -99,7 +99,8 @@ java_value_print (struct value *val, struct ui_file *stream,
 	    {
 	      gdb_byte *buf;
 
-	      buf = alloca (gdbarch_ptr_bit (gdbarch) / HOST_CHAR_BIT);
+	      buf = ((gdb_byte *)
+		     alloca (gdbarch_ptr_bit (gdbarch) / HOST_CHAR_BIT));
 	      fputs_filtered (", ", stream);
 	      wrap_here (n_spaces (2));
 

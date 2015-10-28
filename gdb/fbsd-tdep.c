@@ -64,11 +64,12 @@ fbsd_collect_regset_section_cb (const char *sect_name, int size,
 				const char *human_name, void *cb_data)
 {
   char *buf;
-  struct fbsd_collect_regset_section_cb_data *data = cb_data;
+  struct fbsd_collect_regset_section_cb_data *data
+    = (struct fbsd_collect_regset_section_cb_data *) cb_data;
 
   gdb_assert (regset->collect_regset);
 
-  buf = xmalloc (size);
+  buf = (char *) xmalloc (size);
   regset->collect_regset (regset, data->regcache, -1, buf, size);
 
   /* PRSTATUS still needs to be treated specially.  */

@@ -87,8 +87,7 @@ ser_windows_open (struct serial *scb, const char *name)
       return -1;
     }
 
-  state = xmalloc (sizeof (struct ser_windows_state));
-  memset (state, 0, sizeof (struct ser_windows_state));
+  state = XCNEW (struct ser_windows_state);
   scb->state = state;
 
   /* Create a manual reset event to watch the input buffer.  */
@@ -720,8 +719,7 @@ ser_console_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
 	  return;
 	}
 
-      state = xmalloc (sizeof (struct ser_console_state));
-      memset (state, 0, sizeof (struct ser_console_state));
+      state = XCNEW (struct ser_console_state);
       scb->state = state;
 
       if (is_tty)
@@ -792,7 +790,7 @@ ser_console_get_tty_state (struct serial *scb)
     {
       struct ser_console_ttystate *state;
 
-      state = (struct ser_console_ttystate *) xmalloc (sizeof *state);
+      state = XNEW (struct ser_console_ttystate);
       state->is_a_tty = 1;
       return state;
     }
@@ -817,9 +815,8 @@ struct pipe_state
 static struct pipe_state *
 make_pipe_state (void)
 {
-  struct pipe_state *ps = XNEW (struct pipe_state);
+  struct pipe_state *ps = XCNEW (struct pipe_state);
 
-  memset (ps, 0, sizeof (*ps));
   ps->wait.read_event = INVALID_HANDLE_VALUE;
   ps->wait.except_event = INVALID_HANDLE_VALUE;
   ps->wait.start_select = INVALID_HANDLE_VALUE;
@@ -1208,8 +1205,7 @@ net_windows_open (struct serial *scb, const char *name)
   if (ret != 0)
     return ret;
 
-  state = xmalloc (sizeof (struct net_windows_state));
-  memset (state, 0, sizeof (struct net_windows_state));
+  state = XCNEW (struct net_windows_state);
   scb->state = state;
 
   /* Associate an event with the socket.  */

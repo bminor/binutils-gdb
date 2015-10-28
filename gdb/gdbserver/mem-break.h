@@ -65,20 +65,20 @@ enum raw_bkpt_type Z_packet_to_raw_bkpt_type (char z_type);
 enum target_hw_bp_type raw_bkpt_type_to_target_hw_bp_type
   (enum raw_bkpt_type raw_type);
 
-/* Create a new GDB breakpoint of type Z_TYPE at ADDR with size SIZE.
+/* Create a new GDB breakpoint of type Z_TYPE at ADDR with kind KIND.
    Returns a pointer to the newly created breakpoint on success.  On
    failure returns NULL and sets *ERR to either -1 for error, or 1 if
    Z_TYPE breakpoints are not supported on this target.  */
 
-struct breakpoint *set_gdb_breakpoint (char z_type, CORE_ADDR addr, int size,
+struct breakpoint *set_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind,
 				       int *err);
 
-/* Delete a GDB breakpoint of type Z_TYPE and size SIZE previously
+/* Delete a GDB breakpoint of type Z_TYPE and kind KIND previously
    inserted at ADDR with set_gdb_breakpoint_at.  Returns 0 on success,
    -1 on error, and 1 if Z_TYPE breakpoints are not supported on this
    target.  */
 
-int delete_gdb_breakpoint (char z_type, CORE_ADDR addr, int size);
+int delete_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind);
 
 /* Returns TRUE if there's a software or hardware (code) breakpoint at
    ADDR in our tables, inserted, or not.  */
@@ -193,11 +193,6 @@ void check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len);
 
 void check_mem_write (CORE_ADDR mem_addr,
 		      unsigned char *buf, const unsigned char *myaddr, int mem_len);
-
-/* Set the byte pattern to insert for memory breakpoints.  This function
-   must be called before any breakpoints are set.  */
-
-void set_breakpoint_data (const unsigned char *bp_data, int bp_len);
 
 /* Delete all breakpoints.  */
 

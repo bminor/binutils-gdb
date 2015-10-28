@@ -1805,6 +1805,7 @@ lang_insert_orphan (asection *s,
 {
   lang_statement_list_type add;
   const char *ps;
+  lang_assignment_statement_type *start_assign;
   lang_output_section_statement_type *os;
   lang_output_section_statement_type **os_tail;
 
@@ -1827,6 +1828,7 @@ lang_insert_orphan (asection *s,
 					    NULL, NULL, NULL, constraint, 0);
 
   ps = NULL;
+  start_assign = NULL;
   if (config.build_constructors && *os_tail == os)
     {
       /* If the name of the section is representable in C, then create
@@ -1841,9 +1843,10 @@ lang_insert_orphan (asection *s,
 	  symname = (char *) xmalloc (ps - secname + sizeof "__start_" + 1);
 	  symname[0] = bfd_get_symbol_leading_char (link_info.output_bfd);
 	  sprintf (symname + (symname[0] != 0), "__start_%s", secname);
-	  lang_add_assignment (exp_provide (symname,
-					    exp_nameop (NAME, "."),
-					    FALSE));
+	  start_assign
+	    = lang_add_assignment (exp_provide (symname,
+						exp_nameop (NAME, "."),
+						FALSE));
 	}
     }
 
@@ -1866,16 +1869,25 @@ lang_insert_orphan (asection *s,
     lang_leave_output_section_statement (NULL, DEFAULT_MEMORY_REGION, NULL,
 					 NULL);
 
-  if (ps != NULL && *ps == '\0')
+  if (start_assign != NULL)
     {
       char *symname;
+      lang_assignment_statement_type *stop_assign;
+      bfd_vma dot;
 
       symname = (char *) xmalloc (ps - secname + sizeof "__stop_" + 1);
       symname[0] = bfd_get_symbol_leading_char (link_info.output_bfd);
       sprintf (symname + (symname[0] != 0), "__stop_%s", secname);
-      lang_add_assignment (exp_provide (symname,
-					exp_nameop (NAME, "."),
-					FALSE));
+      stop_assign
+	= lang_add_assignment (exp_provide (symname,
+					    exp_nameop (NAME, "."),
+					    FALSE));
+      /* Evaluate the expression to define the symbol if referenced,
+	 before sizing dynamic sections.  */
+      dot = os->bfd_section->vma;
+      exp_fold_tree (start_assign->exp, os->bfd_section, &dot);
+      dot += s->size;
+      exp_fold_tree (stop_assign->exp, os->bfd_section, &dot);
     }
 
   /* Restore the global list pointer.  */
@@ -6102,6 +6114,55 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
   return TRUE;
 }
 
+/* Handle a single orphan section S, placing the orphan into an appropriate
+   output section.  The effects of the --orphan-handling command line
+   option are handled here.  */
+
+static void
+ldlang_place_orphan (asection *s)
+{
+  if (config.orphan_handling == orphan_handling_discard)
+    {
+      lang_output_section_statement_type *os;
+      os = lang_output_section_statement_lookup (DISCARD_SECTION_NAME, 0,
+						 TRUE);
+      if (os->addr_tree == NULL
+	  && (bfd_link_relocatable (&link_info)
+	      || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0))
+	os->addr_tree = exp_intop (0);
+      lang_add_section (&os->children, s, NULL, os);
+    }
+  else
+    {
+      lang_output_section_statement_type *os;
+      const char *name = s->name;
+      int constraint = 0;
+
+      if (config.orphan_handling == orphan_handling_error)
+	einfo ("%X%P: error: unplaced orphan section `%A' from `%B'.\n",
+	       s, s->owner);
+
+      if (config.unique_orphan_sections || unique_section_p (s, NULL))
+	constraint = SPECIAL;
+
+      os = ldemul_place_orphan (s, name, constraint);
+      if (os == NULL)
+	{
+	  os = lang_output_section_statement_lookup (name, constraint, TRUE);
+	  if (os->addr_tree == NULL
+	      && (bfd_link_relocatable (&link_info)
+		  || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0))
+	    os->addr_tree = exp_intop (0);
+	  lang_add_section (&os->children, s, NULL, os);
+	}
+
+      if (config.orphan_handling == orphan_handling_warn)
+	einfo ("%P: warning: orphan section `%A' from `%B' being "
+	       "placed in section `%s'.\n",
+	       s, s->owner, os->name);
+    }
+}
+
 /* Run through the input files and ensure that every input section has
    somewhere to go.  If one is found without a destination then create
    an input request and place it into the statement tree.  */
@@ -6141,27 +6202,7 @@ lang_place_orphans (void)
 		    }
 		}
 	      else
-		{
-		  const char *name = s->name;
-		  int constraint = 0;
-
-		  if (config.unique_orphan_sections
-		      || unique_section_p (s, NULL))
-		    constraint = SPECIAL;
-
-		  if (!ldemul_place_orphan (s, name, constraint))
-		    {
-		      lang_output_section_statement_type *os;
-		      os = lang_output_section_statement_lookup (name,
-								 constraint,
-								 TRUE);
-		      if (os->addr_tree == NULL
-			  && (bfd_link_relocatable (&link_info)
-			      || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0))
-			os->addr_tree = exp_intop (0);
-		      lang_add_section (&os->children, s, NULL, os);
-		    }
-		}
+		ldlang_place_orphan (s);
 	    }
 	}
     }
@@ -6852,6 +6893,9 @@ lang_process (void)
   lang_do_assignments (lang_final_phase_enum);
 
   ldemul_finish ();
+
+  /* Convert absolute symbols to section relative.  */
+  ldexp_finalize_syms ();
 
   /* Make sure that the section addresses make sense.  */
   if (command_line.check_section_addresses)

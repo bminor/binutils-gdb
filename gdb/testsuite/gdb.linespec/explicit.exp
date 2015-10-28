@@ -145,186 +145,193 @@ namespace eval $testfile {
 	gdb_test "break $linespec thread 123" "Unknown thread 123."
     }
 
-    # Test the explicit location completer
-    foreach abbrev {"fun" "so" "lab" "li"}  full {"function" "source" "label" "line"} {
-	set tst "complete 'break -$abbrev'"
-	send_gdb "break -${abbrev}\t"
-	gdb_test_multiple "" $tst {
-	    "break -$full " {
-		send_gdb "\n"
-		gdb_test_multiple "" $tst {
-		    -re "missing argument for \"-$full\".*$gdb_prompt " {
-			pass $tst
-		    }
-		}
-	    }
-	}
-	set tst "complete -$full with no value"
-	send_gdb "break -$full \t"
-	gdb_test_multiple "" $tst {
-	    -re ".*break -$full " {
-		send_gdb "\n"
-		gdb_test_multiple "" $tst {
-		    -re ".*Source filename requires function, label, or line offset\..*$gdb_prompt " {
-			if {[string equal $full "source"]} {
+    # Tests below are about tab-completion, which doesn't work if readline
+    # library isn't used.  Check it first.
+    if { [readline_is_used] } {
+
+	# Test the explicit location completer
+	foreach abbrev {"fun" "so" "lab" "li"}  full {"function" "source" "label" "line"} {
+	    set tst "complete 'break -$abbrev'"
+	    send_gdb "break -${abbrev}\t"
+	    gdb_test_multiple "" $tst {
+		"break -$full " {
+		    send_gdb "\n"
+		    gdb_test_multiple "" $tst {
+			-re "missing argument for \"-$full\".*$gdb_prompt " {
 			    pass $tst
-			} else {
-			    faill $tst
 			}
 		    }
-		    -re "missing argument for \"-$full\".*$gdb_prompt " {
-			pass $tst
+		}
+	    }
+	    set tst "complete -$full with no value"
+	    send_gdb "break -$full \t"
+	    gdb_test_multiple "" $tst {
+		-re ".*break -$full " {
+		    send_gdb "\n"
+		    gdb_test_multiple "" $tst {
+			-re ".*Source filename requires function, label, or line offset\..*$gdb_prompt " {
+			    if {[string equal $full "source"]} {
+				pass $tst
+			    } else {
+				fail $tst
+			    }
+			}
+			-re "missing argument for \"-$full\".*$gdb_prompt " {
+			    pass $tst
+			}
 		    }
 		}
 	    }
 	}
-    }
 
-    set tst "complete unique function name"
-    send_gdb "break -function mai\t"
-    gdb_test_multiple "" $tst {
-	"break -function mai\\\x07n" {
-	    send_gdb "\n"
-	    gdb_test "" ".*Breakpoint \[0-9\]+.*" $tst
-	    gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
-	}
-    }
-
-    set tst "complete non-unique function name"
-    send_gdb "break -function myfunc\t"
-    gdb_test_multiple "" $tst {
-	"break -function myfunc\\\x07tion" {
-	    send_gdb "\t\t"
-	    gdb_test_multiple "" $tst {
-		-re "\\\x07\r\nmyfunction\[ \t\]+myfunction2\[ \t\]+myfunction3\[ \t\]+myfunction4\[ \t\]+\r\n$gdb_prompt " {
-		    gdb_test "2" ".*Breakpoint \[0-9\]+.*" $tst
-		    gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
-		}
+	set tst "complete unique function name"
+	send_gdb "break -function mai\t"
+	gdb_test_multiple "" $tst {
+	    "break -function mai\\\x07n" {
+		send_gdb "\n"
+		gdb_test "" ".*Breakpoint \[0-9\]+.*" $tst
+		gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
 	    }
 	}
-    }
 
-    set tst "complete non-existant function name"
-    send_gdb "break -function foo\t"
-    gdb_test_multiple "" $tst {
-	"break -function foo\\\x07" {
-	    send_gdb "\t\t"
-	    gdb_test_multiple "" $tst {
-		-re "\\\x07\\\x07" {
-		    send_gdb "\n"
-		    gdb_test "" {Function "foo" not defined.} $tst
-		}
-	    }
-	}
-    }
-
-    set tst "complete unique file name"
-    send_gdb "break -source 3ex\t"
-    gdb_test_multiple "" $tst {
-	"break -source 3explicit.c " {
-	    send_gdb "\n"
-	    gdb_test "" \
-		{Source filename requires function, label, or line offset.} $tst
-	}
-    }
-
-    set tst "complete non-unique file name"
-    send_gdb "break -source exp\t"
-    gdb_test_multiple "" $tst {
-	"break -source exp\\\x07licit" {
-	    send_gdb "\t\t"
-	    gdb_test_multiple "" $tst {
-		-re "\\\x07\r\nexplicit.c\[ \t\]+explicit2.c\[ \t\]+\r\n$gdb_prompt" {
-		    send_gdb "\n"
-		    gdb_test "" \
-			{Source filename requires function, label, or line offset.} \
-			$tst
+	set tst "complete non-unique function name"
+	send_gdb "break -function myfunc\t"
+	gdb_test_multiple "" $tst {
+	    "break -function myfunc\\\x07tion" {
+		send_gdb "\t\t"
+		gdb_test_multiple "" $tst {
+		    -re "\\\x07\r\nmyfunction\[ \t\]+myfunction2\[ \t\]+myfunction3\[ \t\]+myfunction4\[ \t\]+\r\n$gdb_prompt " {
+			gdb_test "2" ".*Breakpoint \[0-9\]+.*" $tst
+			gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
+		    }
 		}
 	    }
 	}
 
-	"break -source exp\\\x07l" {
-	    # This pattern may occur when glibc debuginfo is installed.
-	    send_gdb "\t\t"
-	    gdb_test_multiple "" $tst {
-		-re "\\\x07\r\nexplicit.c\[ \t\]+explicit2.c\[ \t\]+expl.*\r\n$gdb_prompt" {
-		    send_gdb "\n"
-		    gdb_test "" \
-			{Source filename requires function, label, or line offset.} \
-			$tst
+	set tst "complete non-existant function name"
+	send_gdb "break -function foo\t"
+	gdb_test_multiple "" $tst {
+	    "break -function foo\\\x07" {
+		send_gdb "\t\t"
+		gdb_test_multiple "" $tst {
+		    -re "\\\x07\\\x07" {
+			send_gdb "\n"
+			gdb_test "" {Function "foo" not defined.} $tst
+		    }
 		}
 	    }
 	}
-    }
 
-    set tst "complete non-existant file name"
-    send_gdb "break -source foo\t"
-    gdb_test_multiple "" $tst {
-	"break -source foo" {
-	    send_gdb "\t\t"
-	    gdb_test_multiple "" $tst {
-		"\\\x07\\\x07" {
-		    send_gdb "\n"
-		    gdb_test "" \
-			{Source filename requires function, label, or line offset.} \
-			$tst
+	set tst "complete unique file name"
+	send_gdb "break -source 3ex\t"
+	gdb_test_multiple "" $tst {
+	    "break -source 3explicit.c " {
+		send_gdb "\n"
+		gdb_test "" \
+		    {Source filename requires function, label, or line offset.} $tst
+	    }
+	}
+
+	set tst "complete non-unique file name"
+	send_gdb "break -source exp\t"
+	gdb_test_multiple "" $tst {
+	    "break -source exp\\\x07licit" {
+		send_gdb "\t\t"
+		gdb_test_multiple "" $tst {
+		    -re "\\\x07\r\nexplicit.c\[ \t\]+explicit2.c\[ \t\]+\r\n$gdb_prompt" {
+			send_gdb "\n"
+			gdb_test "" \
+			    {Source filename requires function, label, or line offset.} \
+			    $tst
+		    }
+		}
+	    }
+
+	    "break -source exp\\\x07l" {
+		# This pattern may occur when glibc debuginfo is installed.
+		send_gdb "\t\t"
+		gdb_test_multiple "" $tst {
+		    -re "\\\x07\r\nexplicit.c\[ \t\]+explicit2.c\[ \t\]+expl.*\r\n$gdb_prompt" {
+			send_gdb "\n"
+			gdb_test "" \
+			    {Source filename requires function, label, or line offset.} \
+			    $tst
+		    }
 		}
 	    }
 	}
-    }
 
-    set tst "complete filename and unique function name"
-    send_gdb "break -source explicit.c -function ma\t"
-    gdb_test_multiple "" $tst {
-	"break -source explicit.c -function main " {
-	    send_gdb "\n"
-	    gdb_test "" ".*Breakpoint .*" $tst
-	    gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
-	}
-    }
-
-    set tst "complete filename and non-unique function name"
-    send_gdb "break -so 3explicit.c -func myfunc\t"
-    gdb_test_multiple "" $tst {
-	"break -so 3explicit.c -func myfunc\\\x07tion" {
-	    send_gdb "\t\t"
-	    gdb_test_multiple "" $tst {
-		-re "\\\x07\r\nmyfunction3\[ \t\]+myfunction4\[ \t\]+\r\n$gdb_prompt " {
-		    gdb_test "3" ".*Breakpoint \[0-9\]+.*" $tst
-		    gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
+	set tst "complete non-existant file name"
+	send_gdb "break -source foo\t"
+	gdb_test_multiple "" $tst {
+	    "break -source foo" {
+		send_gdb "\t\t"
+		gdb_test_multiple "" $tst {
+		    "\\\x07\\\x07" {
+			send_gdb "\n"
+			gdb_test "" \
+			    {Source filename requires function, label, or line offset.} \
+			    $tst
+		    }
 		}
 	    }
 	}
-    }
 
-    set tst "complete filename and non-existant function name"
-    send_gdb "break -sou 3explicit.c -fun foo\t"
-    gdb_test_multiple "" $tst {
-	"break -sou 3explicit.c -fun foo\\\x07" {
-	    send_gdb "\t\t"
-	    gdb_test_multiple "" $tst {
-		"\\\x07\\\x07" {
-		    send_gdb "\n"
-		    gdb_test "" \
-			{Function "foo" not defined in "3explicit.c".} $tst
+	set tst "complete filename and unique function name"
+	send_gdb "break -source explicit.c -function ma\t"
+	gdb_test_multiple "" $tst {
+	    "break -source explicit.c -function main " {
+		send_gdb "\n"
+		gdb_test "" ".*Breakpoint .*" $tst
+		gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
+	    }
+	}
+
+	set tst "complete filename and non-unique function name"
+	send_gdb "break -so 3explicit.c -func myfunc\t"
+	gdb_test_multiple "" $tst {
+	    "break -so 3explicit.c -func myfunc\\\x07tion" {
+		send_gdb "\t\t"
+		gdb_test_multiple "" $tst {
+		    -re "\\\x07\r\nmyfunction3\[ \t\]+myfunction4\[ \t\]+\r\n$gdb_prompt " {
+			gdb_test "3" ".*Breakpoint \[0-9\]+.*" $tst
+			gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
+		    }
 		}
 	    }
 	}
-    }
 
-    set tst "complete filename and function reversed"
-    send_gdb "break -func myfunction4 -source 3ex\t"
-    gdb_test_multiple "" $tst {
-	"break -func myfunction4 -source 3explicit.c " {
-	    send_gdb "\n"
-	    gdb_test "" "Breakpoint \[0-9\]+.*" $tst
-	    gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
+	set tst "complete filename and non-existant function name"
+	send_gdb "break -sou 3explicit.c -fun foo\t"
+	gdb_test_multiple "" $tst {
+	    "break -sou 3explicit.c -fun foo\\\x07" {
+		send_gdb "\t\t"
+		gdb_test_multiple "" $tst {
+		    "\\\x07\\\x07" {
+			send_gdb "\n"
+			gdb_test "" \
+			    {Function "foo" not defined in "3explicit.c".} $tst
+		    }
+		}
+	    }
 	}
-    }
 
-    # NOTE: We don't bother testing more elaborate combinations of options,
-    # such as "-func main -sour 3ex\t" (main is defined in explicit.c).  The
-    # completer cannot handle these yet.
+	set tst "complete filename and function reversed"
+	send_gdb "break -func myfunction4 -source 3ex\t"
+	gdb_test_multiple "" $tst {
+	    "break -func myfunction4 -source 3explicit.c " {
+		send_gdb "\n"
+		gdb_test "" "Breakpoint \[0-9\]+.*" $tst
+		gdb_test_no_output "delete \$bpnum" "delete $tst breakpoint"
+	    }
+	}
+
+	# NOTE: We don't bother testing more elaborate combinations of options,
+	# such as "-func main -sour 3ex\t" (main is defined in explicit.c).
+	# The completer cannot handle these yet.
+
+    }
+    # End of completion tests.
 
     # Test pending explicit breakpoints
     gdb_exit

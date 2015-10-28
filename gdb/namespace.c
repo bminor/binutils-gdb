@@ -45,6 +45,7 @@ add_using_directive (struct using_direct **using_directives,
 {
   struct using_direct *current;
   struct using_direct *newobj;
+  int alloc_len;
 
   /* Has it already been added?  */
 
@@ -81,15 +82,18 @@ add_using_directive (struct using_direct **using_directives,
       return;
     }
 
-  newobj = obstack_alloc (obstack, (sizeof (*newobj)
-				 + (VEC_length (const_char_ptr, excludes)
-				    * sizeof (*newobj->excludes))));
+  alloc_len = (sizeof(*newobj)
+	       + (VEC_length (const_char_ptr, excludes)
+		  * sizeof(*newobj->excludes)));
+  newobj = (struct using_direct *) obstack_alloc (obstack, alloc_len);
   memset (newobj, 0, sizeof (*newobj));
 
   if (copy_names)
     {
-      newobj->import_src = obstack_copy0 (obstack, src, strlen (src));
-      newobj->import_dest = obstack_copy0 (obstack, dest, strlen (dest));
+      newobj->import_src
+	= (const char *) obstack_copy0 (obstack, src, strlen (src));
+      newobj->import_dest
+	= (const char *) obstack_copy0 (obstack, dest, strlen (dest));
     }
   else
     {
@@ -98,13 +102,15 @@ add_using_directive (struct using_direct **using_directives,
     }
 
   if (alias != NULL && copy_names)
-    newobj->alias = obstack_copy0 (obstack, alias, strlen (alias));
+    newobj->alias
+      = (const char *) obstack_copy0 (obstack, alias, strlen (alias));
   else
     newobj->alias = alias;
 
   if (declaration != NULL && copy_names)
-    newobj->declaration = obstack_copy0 (obstack,
-				      declaration, strlen (declaration));
+    newobj->declaration
+      = (const char *) obstack_copy0 (obstack, declaration,
+				      strlen (declaration));
   else
     newobj->declaration = declaration;
 

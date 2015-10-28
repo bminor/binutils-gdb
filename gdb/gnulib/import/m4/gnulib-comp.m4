@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2012 Free Software Foundation, Inc.
+# Copyright (C) 2002-2015 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ AC_DEFUN([gl_EARLY],
   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
   AC_REQUIRE([gl_PROG_AR_RANLIB])
+  # Code from module absolute-header:
   # Code from module alloca:
   # Code from module alloca-opt:
   # Code from module canonicalize-lgpl:
@@ -60,6 +61,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module fpucw:
   # Code from module frexp:
   # Code from module frexpl:
+  # Code from module gettimeofday:
   # Code from module include_next:
   # Code from module inttypes:
   # Code from module inttypes-incomplete:
@@ -85,6 +87,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module rename:
   # Code from module rmdir:
   # Code from module same-inode:
+  # Code from module signal-h:
   # Code from module snippet/_Noreturn:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
@@ -103,6 +106,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module strstr-simple:
   # Code from module strtok_r:
   # Code from module sys_stat:
+  # Code from module sys_time:
   # Code from module sys_types:
   # Code from module time:
   # Code from module unistd:
@@ -176,6 +180,12 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([frexpl])
   fi
   gl_MATH_MODULE_INDICATOR([frexpl])
+  gl_FUNC_GETTIMEOFDAY
+  if test $HAVE_GETTIMEOFDAY = 0 || test $REPLACE_GETTIMEOFDAY = 1; then
+    AC_LIBOBJ([gettimeofday])
+    gl_PREREQ_GETTIMEOFDAY
+  fi
+  gl_SYS_TIME_MODULE_INDICATOR([gettimeofday])
   gl_INTTYPES_H
   gl_INTTYPES_INCOMPLETE
   gl_FUNC_ISNAND_NO_LIBM
@@ -257,6 +267,7 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([rmdir])
   fi
   gl_UNISTD_MODULE_INDICATOR([rmdir])
+  gl_SIGNAL_H
   gt_TYPE_SSIZE_T
   gl_FUNC_STAT
   if test $REPLACE_STAT = 1; then
@@ -286,6 +297,8 @@ AC_DEFUN([gl_INIT],
   fi
   gl_STRING_MODULE_INDICATOR([strtok_r])
   gl_HEADER_SYS_STAT_H
+  AC_PROG_MKDIR_P
+  gl_HEADER_SYS_TIME_H
   AC_PROG_MKDIR_P
   gl_SYS_TYPES_H
   AC_PROG_MKDIR_P
@@ -458,6 +471,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/fpucw.h
   lib/frexp.c
   lib/frexpl.c
+  lib/gettimeofday.c
   lib/inttypes.in.h
   lib/isnan.c
   lib/isnand-nolibm.h
@@ -489,11 +503,11 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/rename.c
   lib/rmdir.c
   lib/same-inode.h
+  lib/signal.in.h
   lib/stat.c
   lib/stdbool.in.h
   lib/stddef.in.h
   lib/stdint.in.h
-  lib/stdio.c
   lib/stdio.in.h
   lib/stdlib.in.h
   lib/str-two-way.h
@@ -505,6 +519,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strstr.c
   lib/strtok_r.c
   lib/sys_stat.in.h
+  lib/sys_time.in.h
   lib/sys_types.in.h
   lib/time.in.h
   lib/unistd.c
@@ -514,6 +529,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/wctype-h.c
   lib/wctype.in.h
   m4/00gnulib.m4
+  m4/absolute-header.m4
   m4/alloca.m4
   m4/canonicalize.m4
   m4/codeset.m4
@@ -534,6 +550,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/fpieee.m4
   m4/frexp.m4
   m4/frexpl.m4
+  m4/gettimeofday.m4
   m4/glibc21.m4
   m4/gnulib-common.m4
   m4/include_next.m4
@@ -565,6 +582,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/readlink.m4
   m4/rename.m4
   m4/rmdir.m4
+  m4/signal_h.m4
   m4/ssize_t.m4
   m4/stat.m4
   m4/stdbool.m4
@@ -575,7 +593,9 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/string_h.m4
   m4/strstr.m4
   m4/strtok_r.m4
+  m4/sys_socket_h.m4
   m4/sys_stat_h.m4
+  m4/sys_time_h.m4
   m4/sys_types_h.m4
   m4/time_h.m4
   m4/unistd_h.m4

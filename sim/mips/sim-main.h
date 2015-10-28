@@ -2,7 +2,7 @@
    Copyright (C) 1997-2015 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
-This file is part of GDB, the GNU debugger.
+This file is part of the MIPS sim.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -49,6 +49,20 @@ typedef unsigned64 uword64;
 #define NOTHALFWORDVALUE(v) ((((((uword64)(v)>>16) == 0) && !((v) & ((unsigned)1 << 15))) || (((((uword64)(v)>>32) == 0xFFFFFFFF) && ((((uword64)(v)>>16) & 0xFFFF) == 0xFFFF)) && ((v) & ((unsigned)1 << 15)))) ? (1 == 0) : (1 == 1))
 
 
+typedef enum {
+  cp0_dmfc0,
+  cp0_dmtc0,
+  cp0_mfc0,
+  cp0_mtc0,
+  cp0_tlbr,
+  cp0_tlbwi,
+  cp0_tlbwr,
+  cp0_tlbp,
+  cp0_cache,
+  cp0_eret,
+  cp0_deret,
+  cp0_rfe
+} CP0_operation;
 
 /* Floating-point operations: */
 
@@ -479,6 +493,9 @@ struct sim_state {
 
   sim_cpu *cpu[MAX_NR_PROCESSORS];
 
+  /* microMIPS ISA mode.  */
+  int isa_mode;
+
   sim_state_base base;
 };
 
@@ -690,9 +707,12 @@ cop_sw (SD, CPU, cia, coproc_num, coproc_reg)
 cop_sd (SD, CPU, cia, coproc_num, coproc_reg)
 
 
-void decode_coproc (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int instruction);
-#define DecodeCoproc(instruction) \
-decode_coproc (SD, CPU, cia, (instruction))
+void decode_coproc (SIM_DESC sd, sim_cpu *cpu, address_word cia,
+		    unsigned int instruction, int coprocnum, CP0_operation op,
+		    int rt, int rd, int sel);
+#define DecodeCoproc(instruction,coprocnum,op,rt,rd,sel) \
+  decode_coproc (SD, CPU, cia, (instruction), (coprocnum), (op), \
+		 (rt), (rd), (sel))
 
 int sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
   
@@ -956,6 +976,25 @@ INLINE_SIM_MAIN (unsigned32) ifetch32 (SIM_DESC sd, sim_cpu *cpu, address_word c
 INLINE_SIM_MAIN (unsigned16) ifetch16 (SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr);
 #define IMEM16(CIA) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1))
 #define IMEM16_IMMED(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
+#define IMEM32_MICROMIPS(CIA) \
+  (ifetch16 (SD, CPU, (CIA), (CIA)) << 16 | ifetch16 (SD, CPU, (CIA + 2), \
+						      (CIA + 2)))
+#define IMEM16_MICROMIPS(CIA) ifetch16 (SD, CPU, (CIA), ((CIA)))
+
+#define MICROMIPS_MINOR_OPCODE(INSN) ((INSN & 0x1C00) >> 10)
+
+#define MICROMIPS_DELAYSLOT_SIZE_ANY 0
+#define MICROMIPS_DELAYSLOT_SIZE_16 2
+#define MICROMIPS_DELAYSLOT_SIZE_32 4
+
+extern int isa_mode;
+
+#define ISA_MODE_MIPS32 0
+#define ISA_MODE_MICROMIPS 1
+
+address_word micromips_instruction_decode (SIM_DESC sd, sim_cpu * cpu,
+					   address_word cia,
+					   int instruction_size);
 
 #if WITH_TRACE_ANY_P
 void dotrace (SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...);

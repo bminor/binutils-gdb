@@ -24,7 +24,7 @@ main (void)
 {
   struct timeval tv;
 
-  gettimeofday (&tv, 0); /* main.1.  */
+  gettimeofday (&tv, 0);
 
-  return 0; /* main.2.  */
+  return 0;
 }

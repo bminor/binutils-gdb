@@ -60,6 +60,7 @@ fragment <<EOF
 
 /* Declare functions used by various EXTRA_EM_FILEs.  */
 static void gld${EMULATION_NAME}_before_parse (void);
+static void gld${EMULATION_NAME}_after_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static void gld${EMULATION_NAME}_after_allocation (void);
@@ -102,6 +103,22 @@ gld${EMULATION_NAME}_before_parse (void)
   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
+  `if test -n "$CALL_NOP_BYTE" ; then echo link_info.call_nop_byte = $CALL_NOP_BYTE; fi`;
+}
+
+EOF
+fi
+
+if test x"$LDEMUL_AFTER_PARSE" != xgld"$EMULATION_NAME"_after_parse; then
+fragment <<EOF
+
+static void
+gld${EMULATION_NAME}_after_parse (void)
+{
+  if (bfd_link_pie (&link_info))
+    link_info.flags_1 |= (bfd_vma) DF_1_PIE;
+
+  after_parse_default ();
 }
 
 EOF
@@ -1240,12 +1257,16 @@ fragment <<EOF
 	  rp = bfd_elf_get_runpath_list (link_info.output_bfd, &link_info);
 	  for (; !found && rp != NULL; rp = rp->next)
 	    {
-	      char *tmpname = gld${EMULATION_NAME}_add_sysroot (rp->name);
+	      const char *tmpname = rp->name;
+
+	      if (IS_ABSOLUTE_PATH (tmpname))
+		tmpname = gld${EMULATION_NAME}_add_sysroot (tmpname);
 	      found = (rp->by == l->by
 		       && gld${EMULATION_NAME}_search_needed (tmpname,
 							      &n,
 							      force));
-	      free (tmpname);
+	      if (tmpname != rp->name)
+		free ((char *) tmpname);
 	    }
 	  if (found)
 	    break;
@@ -1433,6 +1454,11 @@ gld${EMULATION_NAME}_append_to_separated_string (char **to, char *op_arg)
     }
 }
 
+#if defined(__GNUC__) && GCC_VERSION < 4006
+  /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
+static struct bfd_link_hash_entry ehdr_start_empty;
+#endif
+
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
 
@@ -1445,7 +1471,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   struct elf_link_hash_entry *ehdr_start = NULL;
 #if defined(__GNUC__) && GCC_VERSION < 4006
   /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
-  struct bfd_link_hash_entry ehdr_start_save = ehdr_start_save;
+  struct bfd_link_hash_entry ehdr_start_save = ehdr_start_empty;
 #else
   struct bfd_link_hash_entry ehdr_start_save;
 #endif
@@ -1826,6 +1852,8 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   int isdyn = 0;
   int iself = s->owner->xvec->flavour == bfd_target_elf_flavour;
   unsigned int sh_type = iself ? elf_section_type (s) : SHT_NULL;
+  flagword flags;
+  asection *nexts;
 
   if (!bfd_link_relocatable (&link_info)
       && link_info.combreloc
@@ -1864,11 +1892,11 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 
 	if (os->bfd_section != NULL
 	    && (os->bfd_section->flags == 0
-		|| (_bfd_elf_match_sections_by_type (link_info.output_bfd,
-						     os->bfd_section,
-						     s->owner, s)
-		    && ((s->flags ^ os->bfd_section->flags)
-			& (SEC_LOAD | SEC_ALLOC)) == 0)))
+		|| (((s->flags ^ os->bfd_section->flags)
+		     & (SEC_LOAD | SEC_ALLOC)) == 0
+		    && _bfd_elf_match_sections_by_type (link_info.output_bfd,
+							os->bfd_section,
+							s->owner, s))))
 	  {
 	    /* We already have an output section statement with this
 	       name, and its bfd section has compatible flags.
@@ -1924,28 +1952,41 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
      stored right after the program headers where the OS can read it
      in the first page.  */
 
+  flags = s->flags;
+  nexts = s;
+  while ((nexts = bfd_get_next_section_by_name (nexts->owner, nexts)) != NULL)
+    if (nexts->output_section == NULL
+	&& (nexts->flags & SEC_EXCLUDE) == 0
+	&& ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
+	&& (nexts->owner->flags & DYNAMIC) == 0
+	&& nexts->owner->usrdata != NULL
+	&& !(((lang_input_statement_type *) nexts->owner->usrdata)
+	     ->flags.just_syms)
+	&& _bfd_elf_match_sections_by_type (nexts->owner, nexts, s->owner, s))
+      flags = (((flags ^ SEC_READONLY) | (nexts->flags ^ SEC_READONLY))
+	       ^ SEC_READONLY);
   place = NULL;
-  if ((s->flags & (SEC_ALLOC | SEC_DEBUGGING)) == 0)
+  if ((flags & (SEC_ALLOC | SEC_DEBUGGING)) == 0)
     place = &hold[orphan_nonalloc];
-  else if ((s->flags & SEC_ALLOC) == 0)
+  else if ((flags & SEC_ALLOC) == 0)
     ;
-  else if ((s->flags & SEC_LOAD) != 0
+  else if ((flags & SEC_LOAD) != 0
 	   && ((iself && sh_type == SHT_NOTE)
 	       || (!iself && CONST_STRNEQ (secname, ".note"))))
     place = &hold[orphan_interp];
-  else if ((s->flags & (SEC_LOAD | SEC_HAS_CONTENTS | SEC_THREAD_LOCAL)) == 0)
+  else if ((flags & (SEC_LOAD | SEC_HAS_CONTENTS | SEC_THREAD_LOCAL)) == 0)
     place = &hold[orphan_bss];
-  else if ((s->flags & SEC_SMALL_DATA) != 0)
+  else if ((flags & SEC_SMALL_DATA) != 0)
     place = &hold[orphan_sdata];
-  else if ((s->flags & SEC_THREAD_LOCAL) != 0)
+  else if ((flags & SEC_THREAD_LOCAL) != 0)
     place = &hold[orphan_tdata];
-  else if ((s->flags & SEC_READONLY) == 0)
+  else if ((flags & SEC_READONLY) == 0)
     place = &hold[orphan_data];
   else if (((iself && (sh_type == SHT_RELA || sh_type == SHT_REL))
 	    || (!iself && CONST_STRNEQ (secname, ".rel")))
-	   && (s->flags & SEC_LOAD) != 0)
+	   && (flags & SEC_LOAD) != 0)
     place = &hold[orphan_rel];
-  else if ((s->flags & SEC_CODE) == 0)
+  else if ((flags & SEC_CODE) == 0)
     place = &hold[orphan_rodata];
   else
     place = &hold[orphan_text];
@@ -2451,7 +2492,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_BEFORE_PARSE-gld${EMULATION_NAME}_before_parse},
   ${LDEMUL_SYSLIB-syslib_default},
   ${LDEMUL_HLL-hll_default},
-  ${LDEMUL_AFTER_PARSE-after_parse_default},
+  ${LDEMUL_AFTER_PARSE-gld${EMULATION_NAME}_after_parse},
   ${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open},
   ${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation},
   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},

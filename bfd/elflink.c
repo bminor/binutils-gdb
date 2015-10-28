@@ -246,7 +246,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* A dynamically linked executable has a .interp section, but a
      shared library does not.  */
-  if (bfd_link_executable (info))
+  if (bfd_link_executable (info) && !info->nointerp)
     {
       s = bfd_make_section_anyway_with_flags (abfd, ".interp",
 					      flags | SEC_READONLY);
@@ -1010,9 +1010,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	*matched = TRUE;
       else
 	{
-	  /* OLD_HIDDEN is true if the existing symbol is only visibile
+	  /* OLD_HIDDEN is true if the existing symbol is only visible
 	     to the symbol with the same symbol version.  NEW_HIDDEN is
-	     true if the new symbol is only visibile to the symbol with
+	     true if the new symbol is only visible to the symbol with
 	     the same symbol version.  */
 	  bfd_boolean old_hidden = h->versioned == versioned_hidden;
 	  bfd_boolean new_hidden = hi->versioned == versioned_hidden;
@@ -1714,6 +1714,13 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	  else
 	    h->versioned = versioned;
 	}
+    }
+  else
+    {
+      /* PR ld/19073: We may see an unversioned definition after the
+	 default version.  */
+      if (p == NULL)
+	return TRUE;
     }
 
   bed = get_elf_backend_data (abfd);
@@ -3247,7 +3254,7 @@ elf_sort_symbol (const void *arg1, const void *arg2)
     return vdiff > 0 ? 1 : -1;
   else
     {
-      long sdiff = h1->root.u.def.section->id - h2->root.u.def.section->id;
+      int sdiff = h1->root.u.def.section->id - h2->root.u.def.section->id;
       if (sdiff != 0)
 	return sdiff > 0 ? 1 : -1;
     }
@@ -4216,7 +4223,7 @@ error_free_dyn:
 
 	  /* If this symbol has default visibility and the user has
 	     requested we not re-export it, then mark it as hidden.  */
-	  if (definition
+	  if (!bfd_is_und_section (sec)
 	      && !dynamic
 	      && abfd->no_export
 	      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
@@ -4830,7 +4837,7 @@ error_free_dyn:
 		i = idx + 1;
 	      else
 		{
-		  long sdiff = slook->id - h->root.u.def.section->id;
+		  int sdiff = slook->id - h->root.u.def.section->id;
 		  if (sdiff < 0)
 		    j = idx;
 		  else if (sdiff > 0)
@@ -5763,7 +5770,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       bfd_boolean all_defined;
 
       *sinterpptr = bfd_get_linker_section (dynobj, ".interp");
-      BFD_ASSERT (*sinterpptr != NULL || !bfd_link_executable (info));
+      BFD_ASSERT (*sinterpptr != NULL || !bfd_link_executable (info) || info->nointerp);
 
       if (soname != NULL)
 	{
@@ -6814,7 +6821,7 @@ merge_sections_remove_hook (bfd *abfd ATTRIBUTE_UNUSED,
 /* Finish SHF_MERGE section merging.  */
 
 bfd_boolean
-_bfd_elf_merge_sections (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_merge_sections (bfd *obfd, struct bfd_link_info *info)
 {
   bfd *ibfd;
   asection *sec;
@@ -6823,7 +6830,10 @@ _bfd_elf_merge_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
-    if ((ibfd->flags & DYNAMIC) == 0)
+    if ((ibfd->flags & DYNAMIC) == 0
+	&& bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+	&& (elf_elfheader (ibfd)->e_ident[EI_CLASS]
+	    == get_elf_backend_data (obfd)->s->elfclass))
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	if ((sec->flags & SEC_MERGE) != 0
 	    && !bfd_is_abs_section (sec->output_section))
@@ -6831,7 +6841,7 @@ _bfd_elf_merge_sections (bfd *abfd, struct bfd_link_info *info)
 	    struct bfd_elf_section_data *secdata;
 
 	    secdata = elf_section_data (sec);
-	    if (! _bfd_add_merge_section (abfd,
+	    if (! _bfd_add_merge_section (obfd,
 					  &elf_hash_table (info)->merge_info,
 					  sec, &secdata->sec_info))
 	      return FALSE;
@@ -6840,7 +6850,7 @@ _bfd_elf_merge_sections (bfd *abfd, struct bfd_link_info *info)
 	  }
 
   if (elf_hash_table (info)->merge_info != NULL)
-    _bfd_merge_sections (abfd, info, elf_hash_table (info)->merge_info,
+    _bfd_merge_sections (obfd, info, elf_hash_table (info)->merge_info,
 			 merge_sections_remove_hook);
   return TRUE;
 }
@@ -8102,10 +8112,12 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
   return r;
 }
 
-/* qsort comparison functions sorting external relocs by r_offset.  */
+/* Functions to read r_offset from external (target order) reloc
+   entry.  Faster than bfd_getl32 et al, because we let the compiler
+   know the value is aligned.  */
 
-static int
-cmp_ext32l_r_offset (const void *p, const void *q)
+static bfd_vma
+ext32l_r_offset (const void *p)
 {
   union aligned32
   {
@@ -8113,27 +8125,17 @@ cmp_ext32l_r_offset (const void *p, const void *q)
     unsigned char c[4];
   };
   const union aligned32 *a
-    = (const union aligned32 *) ((const Elf32_External_Rel *) p)->r_offset;
-  const union aligned32 *b
-    = (const union aligned32 *) ((const Elf32_External_Rel *) q)->r_offset;
+    = (const union aligned32 *) &((const Elf32_External_Rel *) p)->r_offset;
 
   uint32_t aval = (  (uint32_t) a->c[0]
 		   | (uint32_t) a->c[1] << 8
 		   | (uint32_t) a->c[2] << 16
 		   | (uint32_t) a->c[3] << 24);
-  uint32_t bval = (  (uint32_t) b->c[0]
-		   | (uint32_t) b->c[1] << 8
-		   | (uint32_t) b->c[2] << 16
-		   | (uint32_t) b->c[3] << 24);
-  if (aval < bval)
-    return -1;
-  else if (aval > bval)
-    return 1;
-  return 0;
+  return aval;
 }
 
-static int
-cmp_ext32b_r_offset (const void *p, const void *q)
+static bfd_vma
+ext32b_r_offset (const void *p)
 {
   union aligned32
   {
@@ -8141,28 +8143,18 @@ cmp_ext32b_r_offset (const void *p, const void *q)
     unsigned char c[4];
   };
   const union aligned32 *a
-    = (const union aligned32 *) ((const Elf32_External_Rel *) p)->r_offset;
-  const union aligned32 *b
-    = (const union aligned32 *) ((const Elf32_External_Rel *) q)->r_offset;
+    = (const union aligned32 *) &((const Elf32_External_Rel *) p)->r_offset;
 
   uint32_t aval = (  (uint32_t) a->c[0] << 24
 		   | (uint32_t) a->c[1] << 16
 		   | (uint32_t) a->c[2] << 8
 		   | (uint32_t) a->c[3]);
-  uint32_t bval = (  (uint32_t) b->c[0] << 24
-		   | (uint32_t) b->c[1] << 16
-		   | (uint32_t) b->c[2] << 8
-		   | (uint32_t) b->c[3]);
-  if (aval < bval)
-    return -1;
-  else if (aval > bval)
-    return 1;
-  return 0;
+  return aval;
 }
 
 #ifdef BFD_HOST_64_BIT
-static int
-cmp_ext64l_r_offset (const void *p, const void *q)
+static bfd_vma
+ext64l_r_offset (const void *p)
 {
   union aligned64
   {
@@ -8170,9 +8162,7 @@ cmp_ext64l_r_offset (const void *p, const void *q)
     unsigned char c[8];
   };
   const union aligned64 *a
-    = (const union aligned64 *) ((const Elf64_External_Rel *) p)->r_offset;
-  const union aligned64 *b
-    = (const union aligned64 *) ((const Elf64_External_Rel *) q)->r_offset;
+    = (const union aligned64 *) &((const Elf64_External_Rel *) p)->r_offset;
 
   uint64_t aval = (  (uint64_t) a->c[0]
 		   | (uint64_t) a->c[1] << 8
@@ -8182,23 +8172,11 @@ cmp_ext64l_r_offset (const void *p, const void *q)
 		   | (uint64_t) a->c[5] << 40
 		   | (uint64_t) a->c[6] << 48
 		   | (uint64_t) a->c[7] << 56);
-  uint64_t bval = (  (uint64_t) b->c[0]
-		   | (uint64_t) b->c[1] << 8
-		   | (uint64_t) b->c[2] << 16
-		   | (uint64_t) b->c[3] << 24
-		   | (uint64_t) b->c[4] << 32
-		   | (uint64_t) b->c[5] << 40
-		   | (uint64_t) b->c[6] << 48
-		   | (uint64_t) b->c[7] << 56);
-  if (aval < bval)
-    return -1;
-  else if (aval > bval)
-    return 1;
-  return 0;
+  return aval;
 }
 
-static int
-cmp_ext64b_r_offset (const void *p, const void *q)
+static bfd_vma
+ext64b_r_offset (const void *p)
 {
   union aligned64
   {
@@ -8206,9 +8184,7 @@ cmp_ext64b_r_offset (const void *p, const void *q)
     unsigned char c[8];
   };
   const union aligned64 *a
-    = (const union aligned64 *) ((const Elf64_External_Rel *) p)->r_offset;
-  const union aligned64 *b
-    = (const union aligned64 *) ((const Elf64_External_Rel *) q)->r_offset;
+    = (const union aligned64 *) &((const Elf64_External_Rel *) p)->r_offset;
 
   uint64_t aval = (  (uint64_t) a->c[0] << 56
 		   | (uint64_t) a->c[1] << 48
@@ -8218,19 +8194,7 @@ cmp_ext64b_r_offset (const void *p, const void *q)
 		   | (uint64_t) a->c[5] << 16
 		   | (uint64_t) a->c[6] << 8
 		   | (uint64_t) a->c[7]);
-  uint64_t bval = (  (uint64_t) b->c[0] << 56
-		   | (uint64_t) b->c[1] << 48
-		   | (uint64_t) b->c[2] << 40
-		   | (uint64_t) b->c[3] << 32
-		   | (uint64_t) b->c[4] << 24
-		   | (uint64_t) b->c[5] << 16
-		   | (uint64_t) b->c[6] << 8
-		   | (uint64_t) b->c[7]);
-  if (aval < bval)
-    return -1;
-  else if (aval > bval)
-    return 1;
-  return 0;
+  return aval;
 }
 #endif
 
@@ -8239,7 +8203,7 @@ cmp_ext64b_r_offset (const void *p, const void *q)
    referenced must be updated.  Update all the relocations found in
    RELDATA.  */
 
-static void
+static bfd_boolean
 elf_link_adjust_relocs (bfd *abfd,
 			struct bfd_elf_section_reloc_data *reldata,
 			bfd_boolean sort)
@@ -8299,16 +8263,20 @@ elf_link_adjust_relocs (bfd *abfd,
       (*swap_out) (abfd, irela, erela);
     }
 
-  if (sort)
+  if (sort && count != 0)
     {
-      int (*compare) (const void *, const void *);
+      bfd_vma (*ext_r_off) (const void *);
+      bfd_vma r_off;
+      size_t elt_size;
+      bfd_byte *base, *end, *p, *loc;
+      bfd_byte *buf = NULL;
 
       if (bed->s->arch_size == 32)
 	{
 	  if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
-	    compare = cmp_ext32l_r_offset;
+	    ext_r_off = ext32l_r_offset;
 	  else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
-	    compare = cmp_ext32b_r_offset;
+	    ext_r_off = ext32b_r_offset;
 	  else
 	    abort ();
 	}
@@ -8316,17 +8284,96 @@ elf_link_adjust_relocs (bfd *abfd,
 	{
 #ifdef BFD_HOST_64_BIT
 	  if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
-	    compare = cmp_ext64l_r_offset;
+	    ext_r_off = ext64l_r_offset;
 	  else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
-	    compare = cmp_ext64b_r_offset;
+	    ext_r_off = ext64b_r_offset;
 	  else
 #endif
 	    abort ();
 	}
-      qsort (reldata->hdr->contents, count, reldata->hdr->sh_entsize, compare);
+
+      /*  Must use a stable sort here.  A modified insertion sort,
+	  since the relocs are mostly sorted already.  */
+      elt_size = reldata->hdr->sh_entsize;
+      base = reldata->hdr->contents;
+      end = base + count * elt_size;
+      if (elt_size > sizeof (Elf64_External_Rela))
+	abort ();
+
+      /* Ensure the first element is lowest.  This acts as a sentinel,
+	 speeding the main loop below.  */
+      r_off = (*ext_r_off) (base);
+      for (p = loc = base; (p += elt_size) < end; )
+	{
+	  bfd_vma r_off2 = (*ext_r_off) (p);
+	  if (r_off > r_off2)
+	    {
+	      r_off = r_off2;
+	      loc = p;
+	    }
+	}
+      if (loc != base)
+	{
+	  /* Don't just swap *base and *loc as that changes the order
+	     of the original base[0] and base[1] if they happen to
+	     have the same r_offset.  */
+	  bfd_byte onebuf[sizeof (Elf64_External_Rela)];
+	  memcpy (onebuf, loc, elt_size);
+	  memmove (base + elt_size, base, loc - base);
+	  memcpy (base, onebuf, elt_size);
+	}
+
+      for (p = base + elt_size; (p += elt_size) < end; )
+	{
+	  /* base to p is sorted, *p is next to insert.  */
+	  r_off = (*ext_r_off) (p);
+	  /* Search the sorted region for location to insert.  */
+	  loc = p - elt_size;
+	  while (r_off < (*ext_r_off) (loc))
+	    loc -= elt_size;
+	  loc += elt_size;
+	  if (loc != p)
+	    {
+	      /* Chances are there is a run of relocs to insert here,
+		 from one of more input files.  Files are not always
+		 linked in order due to the way elf_link_input_bfd is
+		 called.  See pr17666.  */
+	      size_t sortlen = p - loc;
+	      bfd_vma r_off2 = (*ext_r_off) (loc);
+	      size_t runlen = elt_size;
+	      size_t buf_size = 96 * 1024;
+	      while (p + runlen < end
+		     && (sortlen <= buf_size
+			 || runlen + elt_size <= buf_size)
+		     && r_off2 > (*ext_r_off) (p + runlen))
+		runlen += elt_size;
+	      if (buf == NULL)
+		{
+		  buf = bfd_malloc (buf_size);
+		  if (buf == NULL)
+		    return FALSE;
+		}
+	      if (runlen < sortlen)
+		{
+		  memcpy (buf, p, runlen);
+		  memmove (loc + runlen, loc, sortlen);
+		  memcpy (loc, buf, runlen);
+		}
+	      else
+		{
+		  memcpy (buf, loc, sortlen);
+		  memmove (loc, p, runlen);
+		  memcpy (loc + runlen, buf, sortlen);
+		}
+	      p += runlen - elt_size;
+	    }
+	}
+      /* Hashes are no longer valid.  */
       free (reldata->hashes);
       reldata->hashes = NULL;
+      free (buf);
     }
+  return TRUE;
 }
 
 struct elf_link_sort_rela
@@ -10995,7 +11042,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    max_sym_count = sym_count;
 
 		  if (sym_count > max_sym_shndx_count
-		      && elf_symtab_shndx (sec->owner) != 0)
+		      && elf_symtab_shndx_list (sec->owner) != NULL)
 		    max_sym_shndx_count = sym_count;
 
 		  if ((sec->flags & SEC_RELOC) != 0)
@@ -11525,8 +11572,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       Elf_Internal_Shdr *symstrtab_hdr;
       file_ptr off = symtab_hdr->sh_offset + symtab_hdr->sh_size;
 
-      symtab_shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-      if (symtab_shndx_hdr->sh_name != 0)
+      symtab_shndx_hdr = & elf_symtab_shndx_list (abfd)->hdr;
+      if (symtab_shndx_hdr != NULL && symtab_shndx_hdr->sh_name != 0)
 	{
 	  symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
 	  symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);
@@ -11572,10 +11619,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	continue;
 
       sort = bed->sort_relocs_p == NULL || (*bed->sort_relocs_p) (o);
-      if (esdo->rel.hdr != NULL)
-	elf_link_adjust_relocs (abfd, &esdo->rel, sort);
-      if (esdo->rela.hdr != NULL)
-	elf_link_adjust_relocs (abfd, &esdo->rela, sort);
+      if (esdo->rel.hdr != NULL
+	  && !elf_link_adjust_relocs (abfd, &esdo->rel, sort))
+	return FALSE;
+      if (esdo->rela.hdr != NULL
+	  && !elf_link_adjust_relocs (abfd, &esdo->rela, sort))
+	return FALSE;
 
       /* Set the reloc_count field to 0 to prevent write_relocs from
 	 trying to swap the relocs out itself.  */
@@ -12017,8 +12066,6 @@ _bfd_elf_gc_mark_hook (asection *sec,
 		       struct elf_link_hash_entry *h,
 		       Elf_Internal_Sym *sym)
 {
-  const char *sec_name;
-
   if (h != NULL)
     {
       switch (h->root.type)
@@ -12029,33 +12076,6 @@ _bfd_elf_gc_mark_hook (asection *sec,
 
 	case bfd_link_hash_common:
 	  return h->root.u.c.p->section;
-
-	case bfd_link_hash_undefined:
-	case bfd_link_hash_undefweak:
-	  /* To work around a glibc bug, keep all XXX input sections
-	     when there is an as yet undefined reference to __start_XXX
-	     or __stop_XXX symbols.  The linker will later define such
-	     symbols for orphan input sections that have a name
-	     representable as a C identifier.  */
-	  if (strncmp (h->root.root.string, "__start_", 8) == 0)
-	    sec_name = h->root.root.string + 8;
-	  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
-	    sec_name = h->root.root.string + 7;
-	  else
-	    sec_name = NULL;
-
-	  if (sec_name && *sec_name != '\0')
-	    {
-	      bfd *i;
-
-	      for (i = info->input_bfds; i; i = i->link.next)
-		{
-		  sec = bfd_get_section_by_name (i, sec_name);
-		  if (sec)
-		    sec->flags |= SEC_KEEP;
-		}
-	    }
-	  break;
 
 	default:
 	  break;
@@ -12074,7 +12094,8 @@ _bfd_elf_gc_mark_hook (asection *sec,
 asection *
 _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 		       elf_gc_mark_hook_fn gc_mark_hook,
-		       struct elf_reloc_cookie *cookie)
+		       struct elf_reloc_cookie *cookie,
+		       bfd_boolean *start_stop)
 {
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
@@ -12103,6 +12124,38 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	 handling copy relocs.  */
       if (h->u.weakdef != NULL)
 	h->u.weakdef->mark = 1;
+
+      if (start_stop != NULL
+	  && (h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak))
+	{
+	  /* To work around a glibc bug, mark all XXX input sections
+	     when there is an as yet undefined reference to __start_XXX
+	     or __stop_XXX symbols.  The linker will later define such
+	     symbols for orphan input sections that have a name
+	     representable as a C identifier.  */
+	  const char *sec_name = NULL;
+	  if (strncmp (h->root.root.string, "__start_", 8) == 0)
+	    sec_name = h->root.root.string + 8;
+	  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
+	    sec_name = h->root.root.string + 7;
+
+	  if (sec_name != NULL && *sec_name != '\0')
+	    {
+	      bfd *i;
+
+	      for (i = info->input_bfds; i != NULL; i = i->link.next)
+		{
+		  asection *s = bfd_get_section_by_name (i, sec_name);
+		  if (s != NULL && !s->gc_mark)
+		    {
+		      *start_stop = TRUE;
+		      return s;
+		    }
+		}
+	    }
+	}
+
       return (*gc_mark_hook) (sec, info, cookie->rel, h, NULL);
     }
 
@@ -12121,15 +12174,22 @@ _bfd_elf_gc_mark_reloc (struct bfd_link_info *info,
 			struct elf_reloc_cookie *cookie)
 {
   asection *rsec;
+  bfd_boolean start_stop = FALSE;
 
-  rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie);
-  if (rsec && !rsec->gc_mark)
+  rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie, &start_stop);
+  while (rsec != NULL)
     {
-      if (bfd_get_flavour (rsec->owner) != bfd_target_elf_flavour
-	  || (rsec->owner->flags & DYNAMIC) != 0)
-	rsec->gc_mark = 1;
-      else if (!_bfd_elf_gc_mark (info, rsec, gc_mark_hook))
-	return FALSE;
+      if (!rsec->gc_mark)
+	{
+	  if (bfd_get_flavour (rsec->owner) != bfd_target_elf_flavour
+	      || (rsec->owner->flags & DYNAMIC) != 0)
+	    rsec->gc_mark = 1;
+	  else if (!_bfd_elf_gc_mark (info, rsec, gc_mark_hook))
+	    return FALSE;
+	}
+      if (!start_stop)
+	break;
+      rsec = bfd_get_next_section_by_name (rsec->owner, rsec);
     }
   return TRUE;
 }
@@ -12680,7 +12740,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 	      && (sec->flags & SEC_LINKER_CREATED) == 0)
 	    elf_eh_frame_section (sub) = sec;
 	  fini_reloc_cookie_for_section (&cookie, sec);
-	  sec = bfd_get_next_section_by_name (sec);
+	  sec = bfd_get_next_section_by_name (NULL, sec);
 	}
     }
 

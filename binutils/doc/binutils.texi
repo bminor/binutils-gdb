@@ -234,8 +234,7 @@ a normal archive.  Instead the elements of the first archive are added
 individually to the second archive.
 
 The paths to the elements of the archive are stored relative to the
-archive itself.  For security reasons absolute paths and paths with a
-@code{/../} component are not allowed.
+archive itself.
 
 @cindex compatibility, @command{ar}
 @cindex @command{ar} compatibility
@@ -1107,6 +1106,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--localize-symbols=}@var{filename}]
         [@option{--globalize-symbols=}@var{filename}]
         [@option{--weaken-symbols=}@var{filename}]
+        [@option{--add-symbol} @var{name}=[@var{section}:]@var{value}[,@var{flags}]
         [@option{--alt-machine-code=}@var{index}]
         [@option{--prefix-symbols=}@var{string}]
         [@option{--prefix-sections=}@var{string}]
@@ -1504,6 +1504,18 @@ Note - it is possible to use @option{--rename-section} and
 command line.  In this case, pass the original section name to
 @option{--update-section}, and the original and new section names to
 @option{--rename-section}.
+
+@item --add-symbol @var{name}=[@var{section}:]@var{value}[,@var{flags}]
+Add a new symbol named @var{name} while copying the file.  This option may be
+specified multiple times.  If the @var{section} is given, the symbol will be
+associated with and relative to that section, otherwise it will be an ABS
+symbol.  Specifying an undefined section will result in a fatal error.  There
+is no check for the value, it will be taken as specified.  Symbol flags can
+be specified and not all flags will be meaningful for all object file
+formats.  By default, the symbol will be global.  The special flag
+'before=@var{othersym}' will insert the new symbol in front of the specified
+@var{othersym}, otherwise the symbol(s) will be added at the end of the
+symbol table in the order they appear.
 
 @item --rename-section @var{oldname}=@var{newname}[,@var{flags}]
 Rename a section from @var{oldname} to @var{newname}, optionally
@@ -2791,6 +2803,7 @@ strings [@option{-afovV}] [@option{-}@var{min-len}]
         [@option{-}] [@option{--all}] [@option{--print-file-name}]
         [@option{-T} @var{bfdname}] [@option{--target=}@var{bfdname}]
         [@option{-w}] [@option{--include-all-whitespace}]
+        [@option{-s}] [@option{--output-separator}@var{sep_string}]
         [@option{--help}] [@option{--version}] @var{file}@dots{}
 @c man end
 @end smallexample
@@ -2895,6 +2908,13 @@ By default tab and space characters are included in the strings that
 are displayed, but other whitespace characters, such a newlines and
 carriage returns, are not.  The @option{-w} option changes this so
 that all whitespace characters are considered to be part of a string.
+
+@item -s
+@itemx --output-separator
+By default, output strings are delimited by a new-line. This option
+allows you to supply any string to be used as the output record
+separator.  Useful with --include-all-whitespace where strings
+may contain new-lines internally.
 @end table
 
 @c man end

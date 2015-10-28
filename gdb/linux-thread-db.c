@@ -198,10 +198,9 @@ static void thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new);
 
 static void check_thread_signals (void);
 
-static void record_thread (struct thread_db_info *info,
-			   struct thread_info *tp,
-			   ptid_t ptid, const td_thrhandle_t *th_p,
-			   const td_thrinfo_t *ti_p);
+static struct thread_info *record_thread
+  (struct thread_db_info *info, struct thread_info *tp,
+   ptid_t ptid, const td_thrhandle_t *th_p, const td_thrinfo_t *ti_p);
 
 /* Add the current inferior to the list of processes using libpthread.
    Return a pointer to the newly allocated object that was added to
@@ -211,9 +210,8 @@ static void record_thread (struct thread_db_info *info,
 static struct thread_db_info *
 add_thread_db_info (void *handle)
 {
-  struct thread_db_info *info;
+  struct thread_db_info *info = XCNEW (struct thread_db_info);
 
-  info = xcalloc (1, sizeof (*info));
   info->pid = ptid_get_pid (inferior_ptid);
   info->handle = handle;
 
@@ -387,7 +385,7 @@ have_threads (ptid_t ptid)
 
 /* Fetch the user-level thread id of PTID.  */
 
-static void
+static struct thread_info *
 thread_from_lwp (ptid_t ptid)
 {
   td_thrhandle_t th;
@@ -420,7 +418,7 @@ thread_from_lwp (ptid_t ptid)
 
   /* Fill the cache.  */
   tp = find_thread_ptid (ptid);
-  record_thread (info, tp, ptid, &th, &ti);
+  return record_thread (info, tp, ptid, &th, &ti);
 }
 
 
@@ -875,6 +873,7 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
   char *path, *cp;
   int result;
   const char *obj_name = objfile_name (obj);
+  int alloc_len;
 
   if (obj_name[0] != '/')
     {
@@ -883,8 +882,10 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
       return 0;
     }
 
-  path = xmalloc (strlen (obj_name) + (subdir ? strlen (subdir) + 1 : 0)
-		  + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  alloc_len = (strlen (obj_name)
+	       + (subdir ? strlen (subdir) + 1 : 0)
+	       + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  path = (char *) xmalloc (alloc_len);
   cleanup = make_cleanup (xfree, path);
 
   strcpy (path, obj_name);
@@ -961,7 +962,7 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
   if (!auto_load_thread_db)
     return 0;
 
-  path = xmalloc (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  path = (char *) xmalloc (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1);
   cleanup = make_cleanup (xfree, path);
 
   memcpy (path, dir, dir_len);
@@ -1006,7 +1007,7 @@ thread_db_load_search (void)
 
 	  if (this_dir[pdir_len] == '/')
 	    {
-	      subdir = xmalloc (strlen (this_dir));
+	      subdir = (char *) xmalloc (strlen (this_dir));
 	      make_cleanup (xfree, subdir);
 	      strcpy (subdir, this_dir + pdir_len + 1);
 	    }
@@ -1288,10 +1289,10 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 }
 
 /* Record a new thread in GDB's thread list.  Creates the thread's
-   private info.  If TP is NULL, creates a new thread.  Otherwise,
-   uses TP.  */
+   private info.  If TP is NULL or TP is marked as having exited,
+   creates a new thread.  Otherwise, uses TP.  */
 
-static void
+static struct thread_info *
 record_thread (struct thread_db_info *info,
 	       struct thread_info *tp,
 	       ptid_t ptid, const td_thrhandle_t *th_p,
@@ -1305,11 +1306,10 @@ record_thread (struct thread_db_info *info,
      initialized yet.  Leave private == NULL until the thread library
      has initialized.  */
   if (ti_p->ti_tid == 0)
-    return;
+    return tp;
 
   /* Construct the thread's private data.  */
-  priv = xmalloc (sizeof (struct private_thread_info));
-  memset (priv, 0, sizeof (struct private_thread_info));
+  priv = XCNEW (struct private_thread_info);
 
   priv->th = *th_p;
   priv->tid = ti_p->ti_tid;
@@ -1335,6 +1335,8 @@ record_thread (struct thread_db_info *info,
 
   if (target_has_execution)
     check_thread_signals ();
+
+  return tp;
 }
 
 static void
@@ -1564,7 +1566,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   td_err_e err;
   ptid_t ptid;
   struct thread_info *tp;
-  struct callback_data *cb_data = data;
+  struct callback_data *cb_data = (struct callback_data *) data;
   struct thread_db_info *info = cb_data->info;
 
   err = info->td_thr_get_info_p (th_p, &ti);
@@ -1583,7 +1585,8 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
       if (libthread_db_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "thread_db: skipping exited and "
-			    "joined thread (0x%lx)\n", ti.ti_tid);
+			    "joined thread (0x%lx)\n",
+			    (unsigned long) ti.ti_tid);
       return 0;
     }
 
@@ -1814,7 +1817,7 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
 
       tid = thread_info->priv->tid;
       snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
-		tid, ptid_get_lwp (ptid));
+		(unsigned long) tid, ptid_get_lwp (ptid));
 
       return buf;
     }
@@ -1851,12 +1854,12 @@ thread_db_get_thread_local_address (struct target_ops *ops,
   struct thread_info *thread_info;
   struct target_ops *beneath;
 
-  /* If we have not discovered any threads yet, check now.  */
-  if (!have_threads (ptid))
-    thread_db_find_new_threads_1 (ptid);
-
   /* Find the matching thread.  */
   thread_info = find_thread_ptid (ptid);
+
+  /* We may not have discovered the thread yet.  */
+  if (thread_info != NULL && thread_info->priv == NULL)
+    thread_info = thread_from_lwp (ptid);
 
   if (thread_info != NULL && thread_info->priv != NULL)
     {
@@ -1998,7 +2001,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
     if (info->filename != NULL)
       info_count++;
 
-  array = xmalloc (sizeof (*array) * info_count);
+  array = XNEWVEC (struct thread_db_info *, info_count);
   back_to = make_cleanup (xfree, array);
 
   info_count = 0;
@@ -2060,7 +2063,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   ui_out_table_header (uiout, pids_len, ui_left, "PIDs", "Pids");
   ui_out_table_body (uiout);
 
-  pids = xmalloc (max_pids_len + 1);
+  pids = (char *) xmalloc (max_pids_len + 1);
   make_cleanup (xfree, pids);
 
   /* Note I is incremented inside the cycle, not at its end.  */

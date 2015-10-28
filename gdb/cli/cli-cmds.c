@@ -277,7 +277,7 @@ complete_command (char *arg, int from_tty)
       point--;
     }
 
-  arg_prefix = alloca (point - arg + 1);
+  arg_prefix = (char *) alloca (point - arg + 1);
   memcpy (arg_prefix, arg, point - arg);
   arg_prefix[point - arg] = 0;
 
@@ -538,10 +538,16 @@ find_and_open_script (const char *script_file, int search_path,
   return 1;
 }
 
-/* Load script FILE, which has already been opened as STREAM.  */
+/* Load script FILE, which has already been opened as STREAM.
+   FILE_TO_OPEN is the form of FILE to use if one needs to open the file.
+   This is provided as FILE may have been found via the source search path.
+   An important thing to note here is that FILE may be a symlink to a file
+   with a different or non-existing suffix, and thus one cannot infer the
+   extension language from FILE_TO_OPEN.  */
 
 static void
-source_script_from_stream (FILE *stream, const char *file)
+source_script_from_stream (FILE *stream, const char *file,
+			   const char *file_to_open)
 {
   if (script_ext_mode != script_ext_off)
     {
@@ -556,7 +562,7 @@ source_script_from_stream (FILE *stream, const char *file)
 		= ext_lang_script_sourcer (extlang);
 
 	      gdb_assert (sourcer != NULL);
-	      sourcer (extlang, stream, file);
+	      sourcer (extlang, stream, file_to_open);
 	      return;
 	    }
 	  else if (script_ext_mode == script_ext_soft)
@@ -609,7 +615,7 @@ source_script_with_search (const char *file, int from_tty, int search_path)
      anyway so that error messages show the actual file used.  But only do
      this if we (may have) used search_path, as printing the full path in
      errors for the non-search case can be more noise than signal.  */
-  source_script_from_stream (stream, search_path ? full_path : file);
+  source_script_from_stream (stream, file, search_path ? full_path : file);
   do_cleanups (old_cleanups);
 }
 
@@ -636,7 +642,7 @@ source_command (char *args, int from_tty)
 {
   struct cleanup *old_cleanups;
   char *file = args;
-  int *old_source_verbose = xmalloc (sizeof(int));
+  int *old_source_verbose = XNEW (int);
   int search_path = 0;
 
   *old_source_verbose = source_verbose;
@@ -1295,7 +1301,7 @@ make_command (char *arg, int from_tty)
     p = "make";
   else
     {
-      p = xmalloc (sizeof ("make ") + strlen (arg));
+      p = (char *) xmalloc (sizeof ("make ") + strlen (arg));
       strcpy (p, "make ");
       strcpy (p + sizeof ("make ") - 1, arg);
     }
@@ -1554,8 +1560,8 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
 static int
 compare_symtabs (const void *a, const void *b)
 {
-  const struct symtab_and_line *sala = a;
-  const struct symtab_and_line *salb = b;
+  const struct symtab_and_line *sala = (const struct symtab_and_line *) a;
+  const struct symtab_and_line *salb = (const struct symtab_and_line *) b;
   const char *dira = SYMTAB_DIRNAME (sala->symtab);
   const char *dirb = SYMTAB_DIRNAME (salb->symtab);
   int r;

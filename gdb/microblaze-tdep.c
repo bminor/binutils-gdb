@@ -441,7 +441,7 @@ microblaze_frame_cache (struct frame_info *next_frame, void **this_cache)
   int rn;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct microblaze_frame_cache *) *this_cache;
 
   cache = microblaze_alloc_frame_cache ();
   *this_cache = cache;
@@ -638,8 +638,9 @@ static int dwarf2_to_reg_map[78] =
 static int
 microblaze_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
-  gdb_assert ((size_t) reg < sizeof (dwarf2_to_reg_map));
-  return dwarf2_to_reg_map[reg];
+  if (reg >= 0 && reg < sizeof (dwarf2_to_reg_map))
+    return dwarf2_to_reg_map[reg];
+  return -1;
 }
 
 static void
