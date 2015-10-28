@@ -1,3 +1,8 @@
+2015-10-28  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+        * gas/arm/pinsn.s: New.
+        * gas/arm/pinsn.d: Likewise.
+
 2015-10-27  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/19159
