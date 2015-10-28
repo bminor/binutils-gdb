@@ -1,3 +1,22 @@
+2015-11-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* lib/gdb.exp (gdb_target_symbol_prefix, gdb_target_symbol):
+	New procs.
+	* lib/dwarf.exp (_handle_DW_TAG): Handle attribute values,
+	representing expressions, of more than one list element.
+	* gdb.dwarf2/atomic-type.exp (Dwarf::assemble): Use gdb_target_symbol
+	to prepend linker symbol prefix to f.
+	* gdb.dwarf2/data-loc.exp (Dwarf::assemble): Likewise, for
+	table_1 and table_2.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp (Dwarf::assemble):
+	Likewise, for f and g.
+	* gdb.dwarf2/dw2-ifort-parameter.exp (Dwarf::assemble): Likewise,
+	for ptr.
+	* gdb.dwarf2/dw2-regno-invalid.exp (Dwarf::assemble): Likewise,
+	for main.
+	* gdb.dwarf2/dynarr-ptr.exp (Dwarf::assemble): Likewise, for
+	table_1_ptr and table_2_ptr.
+
 2015-11-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

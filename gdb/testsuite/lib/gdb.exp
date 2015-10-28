@@ -5523,6 +5523,54 @@ proc core_find {binfile {deletefiles {}} {arg ""}} {
     return $destcore
 }
 
+# gdb_target_symbol_prefix compiles a test program and then examines
+# the output from objdump to determine the prefix (such as underscore)
+# for linker symbol prefixes.
+
+gdb_caching_proc gdb_target_symbol_prefix {
+    # Set up and compile a simple test program...
+    set src [standard_temp_file main[pid].c]
+    set exe [standard_temp_file main[pid].x]
+
+    gdb_produce_source $src {
+	int main() {
+	    return 0;
+	}
+    }
+
+    verbose "compiling testfile $src" 2
+    set compile_flags {debug nowarnings quiet}
+    set lines [gdb_compile $src $exe executable $compile_flags]
+
+    set prefix ""
+
+    if ![string match "" $lines] then {
+        verbose "gdb_target_symbol_prefix: testfile compilation failed, returning null prefix" 2
+    } else {
+	set objdump_program [gdb_find_objdump]
+	set result [catch "exec $objdump_program --syms $exe" output]
+
+	if { $result == 0 \
+	     && ![regexp -lineanchor \
+	          { ([^ a-zA-Z0-9]*)main$} $output dummy prefix] } {
+	    verbose "gdb_target_symbol_prefix: Could not find main in objdump output; returning null prefix" 2
+	}
+    }
+
+    file delete $src
+    file delete $exe
+
+    return $prefix
+}
+
+# gdb_target_symbol returns the provided symbol with the correct prefix
+# prepended.  (See gdb_target_symbol_prefix, above.)
+
+proc gdb_target_symbol { symbol } {
+  set prefix [gdb_target_symbol_prefix]
+  return "${prefix}${symbol}"
+}
+
 # gdb_target_symbol_prefix_flags returns a string that can be added
 # to gdb_compile options to define SYMBOL_PREFIX macro value
 # symbol_prefix_flags returns a string that can be added

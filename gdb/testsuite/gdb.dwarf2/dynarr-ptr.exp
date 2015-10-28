@@ -85,7 +85,7 @@ Dwarf::assemble $asm_file {
                 {DW_AT_name foo__three_ptr}
                 {DW_AT_type :$array_ptr_label}
                 {DW_AT_location {
-                    DW_OP_addr table_1_ptr
+                    DW_OP_addr [gdb_target_symbol table_1_ptr]
                 } SPECIAL_expr}
                 {external 1 flag}
             }
@@ -93,7 +93,7 @@ Dwarf::assemble $asm_file {
                 {DW_AT_name foo__three_ptr_tdef}
                 {DW_AT_type :$array_typedef_label}
                 {DW_AT_location {
-                    DW_OP_addr table_1_ptr
+                    DW_OP_addr [gdb_target_symbol table_1_ptr]
                 } SPECIAL_expr}
                 {external 1 flag}
             }
@@ -101,7 +101,7 @@ Dwarf::assemble $asm_file {
                 {DW_AT_name foo__five_ptr}
                 {DW_AT_type :$array_ptr_label}
                 {DW_AT_location {
-                    DW_OP_addr table_2_ptr
+                    DW_OP_addr [gdb_target_symbol table_2_ptr]
                 } SPECIAL_expr}
                 {external 1 flag}
             }
@@ -109,7 +109,7 @@ Dwarf::assemble $asm_file {
                 {DW_AT_name foo__five_ptr_tdef}
                 {DW_AT_type :$array_typedef_label}
                 {DW_AT_location {
-                    DW_OP_addr table_2_ptr
+                    DW_OP_addr [gdb_target_symbol table_2_ptr]
                 } SPECIAL_expr}
                 {external 1 flag}
             }

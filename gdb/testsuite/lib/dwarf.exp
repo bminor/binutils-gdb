@@ -621,7 +621,18 @@ namespace eval Dwarf {
 
 	foreach attr $attrs {
 	    set attr_name [_map_name [lindex $attr 0] _AT]
-	    set attr_value [uplevel 2 [list subst [lindex $attr 1]]]
+
+	    # When the length of ATTR is greater than 2, the last
+	    # element of the list must be a form.  The second through
+	    # the penultimate elements are joined together and
+	    # evaluated using subst.  This allows constructs such as
+	    # [gdb_target_symbol foo] to be used.
+
+	    if {[llength $attr] > 2} {
+	        set attr_value [uplevel 2 [list subst [join [lrange $attr 1 end-1]]]]
+	    } else {
+	        set attr_value [uplevel 2 [list subst [lindex $attr 1]]]
+	    }
 
 	    if { [string equal "MACRO_AT_func" $attr_name] } {
 		_handle_macro_at_func $attr_value
@@ -629,7 +640,7 @@ namespace eval Dwarf {
 		_handle_macro_at_range $attr_value
 	    } else {
 		if {[llength $attr] > 2} {
-		    set attr_form [lindex $attr 2]
+		    set attr_form [lindex $attr end]
 		} else {
 		    # If the value looks like an integer, a form is required.
 		    if [string is integer $attr_value] {
