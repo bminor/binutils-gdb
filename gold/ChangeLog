@@ -1,3 +1,9 @@
+2015-10-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19177
+	* i386.cc (Target_i386::Relocate::relocate): Check R_386_GOT32
+	and R_386_GOT32X relocations without base register.
+
 2015-10.27  Han Shen  <shenhan@google.com>
 
 	PR gold/19042 - unsupported reloc 311/312.
