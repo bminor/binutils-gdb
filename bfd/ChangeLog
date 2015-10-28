@@ -1,3 +1,13 @@
+2015-10-28  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c (create_instruction_branch_absolute): Replace
+	pointer parameters with a simple integer parameter.
+	(stm32l4xx_create_replacing_stub_ldmia): Update calls to
+	create_instruction_branch_absolute.
+	(stm32l4xx_create_replacing_stub_ldmdb): Likewise.
+	(stm32l4xx_create_replacing_stub_vldm): Likewise.
+	(elf32_arm_write_section): Use pointer type for veneer addresses.
+
 2015-10-28  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* reloc.c (BFD_RELOC_ARC_32_PCREL): New entry.

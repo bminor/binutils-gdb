@@ -16159,8 +16159,7 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
    ARM DDI 0406C.b (ID072512).  */
 
 static inline bfd_vma
-create_instruction_branch_absolute (const void *const from,
-				    const void *const to)
+create_instruction_branch_absolute (int branch_offset)
 {
   /* A8.8.18 B (A8-334)
      B target_address (Encoding T4).  */
@@ -16168,7 +16167,6 @@ create_instruction_branch_absolute (const void *const from,
   /* jump offset is:  S:I1:I2:imm10:imm11:0.  */
   /* with : I1 = NOT (J1 EOR S) I2 = NOT (J2 EOR S).  */
 
-  int branch_offset = to - (from + 4);
   int s = ((branch_offset & 0x1000000) >> 24);
   int j1 = s ^ !((branch_offset & 0x800000) >> 23);
   int j2 = s ^ !((branch_offset & 0x400000) >> 22);
@@ -16381,8 +16379,8 @@ stm32l4xx_create_replacing_stub_ldmia (struct elf32_arm_link_hash_table * htab,
 	current_stub_contents =
 	  push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			      create_instruction_branch_absolute
-			      (current_stub_contents,
-			       (char*)initial_insn_addr + 4));
+			      (initial_insn_addr - current_stub_contents));
+			       
 
       /* Fill the remaining of the stub with deterministic contents.  */
       current_stub_contents =
@@ -16443,8 +16441,7 @@ stm32l4xx_create_replacing_stub_ldmia (struct elf32_arm_link_hash_table * htab,
 	  current_stub_contents =
 	    push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 				create_instruction_branch_absolute
-				(current_stub_contents,
-				 (char *) initial_insn_addr + 4));
+				(initial_insn_addr - current_stub_contents));
        }
     }
   else /* if (!wback).  */
@@ -16481,8 +16478,7 @@ stm32l4xx_create_replacing_stub_ldmia (struct elf32_arm_link_hash_table * htab,
 	  current_stub_contents =
 	    push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 				create_instruction_branch_absolute
-				(current_stub_contents,
-				 (char *) initial_insn_addr + 4));
+				(initial_insn_addr - current_stub_contents));
 	}
     }
 
@@ -16527,8 +16523,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
 
       /* Fill the remaining of the stub with deterministic contents.  */
       current_stub_contents =
@@ -16596,8 +16591,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
   else if (wback && !restore_pc && !restore_rn)
     {
@@ -16617,8 +16611,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
   else if (!wback && restore_pc && !restore_rn)
     {
@@ -16699,8 +16692,7 @@ stm32l4xx_create_replacing_stub_ldmdb (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char *) initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
   else if (!wback && restore_pc && restore_rn)
     {
@@ -16770,8 +16762,7 @@ stm32l4xx_create_replacing_stub_vldm (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
   else
     {
@@ -16848,8 +16839,7 @@ stm32l4xx_create_replacing_stub_vldm (struct elf32_arm_link_hash_table * htab,
       current_stub_contents =
 	push_thumb2_insn32 (htab, output_bfd, current_stub_contents,
 			    create_instruction_branch_absolute
-			    (current_stub_contents,
-			     (char*)initial_insn_addr + 4));
+			    (initial_insn_addr - current_stub_contents));
     }
 
   /* Fill the remaining of the stub with deterministic contents.  */
@@ -17029,8 +17019,7 @@ elf32_arm_write_section (bfd *output_bfd,
 		  }
 
 		insn = create_instruction_branch_absolute
-		  ((void *) stm32l4xx_errnode->vma-4,
-		   (void *) stm32l4xx_errnode->u.b.veneer->vma);
+		  (stm32l4xx_errnode->u.b.veneer->vma - stm32l4xx_errnode->vma);
 
 		/* The instruction is before the label.  */
 		target -= 4;
@@ -17042,13 +17031,14 @@ elf32_arm_write_section (bfd *output_bfd,
 
 	    case STM32L4XX_ERRATUM_VENEER:
 	      {
-		bfd_vma veneer, veneer_r;
+		bfd_byte * veneer;
+		bfd_byte * veneer_r;
 		unsigned int insn;
 
-		veneer = (bfd_vma) (contents + target);
-		veneer_r = (bfd_vma) (contents + target +
-				      stm32l4xx_errnode->u.b.veneer->vma -
-				      stm32l4xx_errnode->vma - 4);
+		veneer = contents + target;
+		veneer_r = veneer
+		  + stm32l4xx_errnode->u.b.veneer->vma
+		  - stm32l4xx_errnode->vma - 4;
 
 		if ((signed) (veneer_r - veneer -
 			      STM32L4XX_ERRATUM_VLDM_VENEER_SIZE >
