@@ -682,11 +682,11 @@ alpha_read_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[ALPHA_INSN_SIZE];
-  int status;
+  int res;
 
-  status = target_read_memory (pc, buf, sizeof (buf));
-  if (status)
-    memory_error (status, pc);
+  res = target_read_memory (pc, buf, sizeof (buf));
+  if (res != 0)
+    memory_error (TARGET_XFER_E_IO, pc);
   return extract_unsigned_integer (buf, sizeof (buf), byte_order);
 }
 

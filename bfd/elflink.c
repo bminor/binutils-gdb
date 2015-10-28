@@ -12179,8 +12179,6 @@ _bfd_elf_gc_mark_reloc (struct bfd_link_info *info,
   rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie, &start_stop);
   while (rsec != NULL)
     {
-      asection *s;
-
       if (!rsec->gc_mark)
 	{
 	  if (bfd_get_flavour (rsec->owner) != bfd_target_elf_flavour
@@ -12191,22 +12189,7 @@ _bfd_elf_gc_mark_reloc (struct bfd_link_info *info,
 	}
       if (!start_stop)
 	break;
-      s = bfd_get_next_section_by_name (rsec);
-      if (s == NULL)
-	{
-	  bfd *i = rsec->owner;
-
-	  if (i != NULL)
-	    {
-	      while ((i = i->link.next) != NULL)
-		{
-		  s = bfd_get_section_by_name (i, rsec->name);
-		  if (s != NULL)
-		    break;
-		}
-	    }
-	}
-      rsec = s;
+      rsec = bfd_get_next_section_by_name (rsec->owner, rsec);
     }
   return TRUE;
 }
@@ -12757,7 +12740,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 	      && (sec->flags & SEC_LINKER_CREATED) == 0)
 	    elf_eh_frame_section (sub) = sec;
 	  fini_reloc_cookie_for_section (&cookie, sec);
-	  sec = bfd_get_next_section_by_name (sec);
+	  sec = bfd_get_next_section_by_name (NULL, sec);
 	}
     }
 

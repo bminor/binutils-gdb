@@ -1,4 +1,7 @@
 -*- text -*-
+* Add --fix-stm32l4xx-629360 to the ARM linker to enable a link-time
+  workaround for a bug in the bus matrix / memory controller for some of
+  the STM32 Cortex-M4 based products (STM32L4xx)
 
 * Add a configure option --enable-compressed-debug-sections={all,ld} to
   decide whether DWARF debug sections should be compressed by default.

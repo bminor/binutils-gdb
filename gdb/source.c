@@ -746,6 +746,9 @@ openp (const char *path, int opts, const char *string,
   struct cleanup *back_to;
   int ix;
   char *dir;
+  /* The errno set for the last name we tried to open (and
+     failed).  */
+  int last_errno = 0;
 
   /* The open syscall MODE parameter is not specified.  */
   gdb_assert ((mode & O_CREAT) == 0);
@@ -786,6 +789,7 @@ openp (const char *path, int opts, const char *string,
 	  filename = NULL;
 	  fd = -1;
 	}
+      last_errno = errno;
 
       if (!(opts & OPF_SEARCH_IN_PATH))
 	for (i = 0; string[i]; i++)
@@ -808,6 +812,7 @@ openp (const char *path, int opts, const char *string,
   alloclen = strlen (path) + strlen (string) + 2;
   filename = (char *) alloca (alloclen);
   fd = -1;
+  last_errno = ENOENT;
 
   dir_vec = dirnames_to_char_ptr_vec (path);
   back_to = make_cleanup_free_char_ptr_vec (dir_vec);
@@ -878,6 +883,7 @@ openp (const char *path, int opts, const char *string,
 	  fd = gdb_open_cloexec (filename, mode, 0);
 	  if (fd >= 0)
 	    break;
+	  last_errno = errno;
 	}
     }
 
@@ -895,6 +901,7 @@ done:
 	*filename_opened = gdb_abspath (filename);
     }
 
+  errno = last_errno;
   return fd;
 }
 

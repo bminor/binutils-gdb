@@ -76,7 +76,7 @@ dascm_make_insn (CORE_ADDR pc, const char *assembly, int insn_len)
    Scheme port.  Called via gdbscm_call_guile.
    The result is a statically allocated error message or NULL if success.  */
 
-static void *
+static const char *
 gdbscm_disasm_read_memory_worker (void *datap)
 {
   struct gdbscm_disasm_read_data *data
@@ -109,7 +109,7 @@ gdbscm_disasm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
 			   struct disassemble_info *dinfo)
 {
   struct gdbscm_disasm_read_data data;
-  void *status;
+  const char *status;
 
   data.memaddr = memaddr;
   data.myaddr = myaddr;

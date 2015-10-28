@@ -133,13 +133,20 @@ read_const (struct agent_expr *x, int o, int n)
   return accum;
 }
 
+/* See ax.h.  */
+
+void
+ax_raw_byte (struct agent_expr *x, gdb_byte byte)
+{
+  grow_expr (x, 1);
+  x->buf[x->len++] = byte;
+}
 
 /* Append a simple operator OP to EXPR.  */
 void
 ax_simple (struct agent_expr *x, enum agent_op op)
 {
-  grow_expr (x, 1);
-  x->buf[x->len++] = op;
+  ax_raw_byte (x, op);
 }
 
 /* Append a pick operator to EXPR.  DEPTH is the stack item to pick,

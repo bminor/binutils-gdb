@@ -1,3 +1,8 @@
+2015-10-27  Stephen Fisher  <sfisher@panix.com>
+
+	* binutils.c (process_netbsd_elf_note): New function.
+	(process_note): Call the new function for NetBSD core notes.
+
 2015-10-22  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* objcopy.c (setup_section): Don't omit bfd_copy_private_bfd_data

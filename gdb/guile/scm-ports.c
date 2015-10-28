@@ -1139,7 +1139,7 @@ gdbscm_open_memory (SCM rest)
 			      &start_arg_pos, &start,
 			      &size_arg_pos, &size);
 
-  scm_dynwind_begin (0);
+  scm_dynwind_begin ((scm_t_dynwind_flags) 0);
 
   if (mode == NULL)
     mode = xstrdup ("r");

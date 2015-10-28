@@ -15365,6 +15365,40 @@ print_v850_note (Elf_Internal_Note * pnote)
   return 0;
 }
 
+static int 
+process_netbsd_elf_note (Elf_Internal_Note * pnote)
+{
+  unsigned int version;
+
+  switch (pnote->type)
+    {
+    case NT_NETBSD_IDENT:
+      version = byte_get ((unsigned char *) pnote->descdata, sizeof (version));
+      if ((version / 10000) % 100)
+        printf ("  NetBSD\t\t0x%08lx\tIDENT %u (%u.%u%s%c)\n", pnote->descsz,
+		version, version / 100000000, (version / 1000000) % 100,
+		(version / 10000) % 100 > 26 ? "Z" : "",
+		'A' + (version / 10000) % 26); 
+      else
+	printf ("  NetBSD\t\t0x%08lx\tIDENT %u (%u.%u.%u)\n", pnote->descsz,
+	        version, version / 100000000, (version / 1000000) % 100,
+		(version / 100) % 100); 
+      return 1;
+
+    case NT_NETBSD_MARCH:
+      printf ("  NetBSD\t0x%08lx\tMARCH <%s>\n", pnote->descsz,
+	      pnote->descdata);
+      return 1;
+
+    default:
+      break;
+    }
+
+  printf ("  NetBSD\t0x%08lx\tUnknown note type: (0x%08lx)\n", pnote->descsz,
+	  pnote->type);
+  return 1;
+}
+
 static const char *
 get_netbsd_elfcore_note_type (unsigned e_type)
 {
@@ -15617,6 +15651,10 @@ process_note (Elf_Internal_Note * pnote)
   else if (const_strneq (pnote->namedata, "NetBSD-CORE"))
     /* NetBSD-specific core file notes.  */
     nt = get_netbsd_elfcore_note_type (pnote->type);
+
+  else if (const_strneq (pnote->namedata, "NetBSD"))
+    /* NetBSD-specific core file notes.  */
+    return process_netbsd_elf_note (pnote);
 
   else if (strneq (pnote->namedata, "SPU/", 4))
     {

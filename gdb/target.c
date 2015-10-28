@@ -1380,7 +1380,7 @@ target_xfer_partial (struct target_ops *ops,
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the
    results in GDB's memory at MYADDR.  Returns either 0 for success or
-   TARGET_XFER_E_IO if any error occurs.
+   -1 if any error occurs.
 
    If an error occurs, no guarantee is made about the contents of the data at
    MYADDR.  In particular, the caller should not depend upon partial reads
@@ -1399,7 +1399,7 @@ target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 		   myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* See target/target.h.  */
@@ -1431,7 +1431,7 @@ target_read_raw_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 		   myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Like target_read_memory, but specify explicitly that this is a read from
@@ -1446,7 +1446,7 @@ target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 		   myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Like target_read_memory, but specify explicitly that this is a read from
@@ -1461,14 +1461,14 @@ target_read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 		   myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Write LEN bytes from MYADDR to target memory at address MEMADDR.
-   Returns either 0 for success or TARGET_XFER_E_IO if any
-   error occurs.  If an error occurs, no guarantee is made about how
-   much data got written.  Callers that can deal with partial writes
-   should call target_write.  */
+   Returns either 0 for success or -1 if any error occurs.  If an
+   error occurs, no guarantee is made about how much data got written.
+   Callers that can deal with partial writes should call
+   target_write.  */
 
 int
 target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
@@ -1479,14 +1479,14 @@ target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 		    myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Write LEN bytes from MYADDR to target raw memory at address
-   MEMADDR.  Returns either 0 for success or TARGET_XFER_E_IO
-   if any error occurs.  If an error occurs, no guarantee is made
-   about how much data got written.  Callers that can deal with
-   partial writes should call target_write.  */
+   MEMADDR.  Returns either 0 for success or -1 if any error occurs.
+   If an error occurs, no guarantee is made about how much data got
+   written.  Callers that can deal with partial writes should call
+   target_write.  */
 
 int
 target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
@@ -1497,7 +1497,7 @@ target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 		    myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Fetch the target's memory map.  */

@@ -1,3 +1,93 @@
+2015-10-28  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_software_single_step): Pass 1 to
+	aarch64_decode_insn.
+
+2015-10-27  Pedro Alves  <palves@redhat.com>
+
+	* common/print-utils.c (host_address_to_string): Rename to ...
+	(host_address_to_string_1): ... this.
+	* common/print-utils.h (host_address_to_string): Reimplement as
+	wrapper around host_address_to_string_1.
+	* utils.c (gdb_print_host_address): Rename to ...
+	(gdb_print_host_address_1): ... this.
+	* utils.h (gdb_print_host_address): Reimplement as wrapper macro
+	around	host_address_to_string_1.
+
+2015-10-27  Pedro Alves  <palves@redhat.com>
+
+	* alpha-tdep.c (alpha_read_insn): Always pass TARGET_XFER_E_IO to
+	memory_error.  Rename local 'status' to 'res'.
+	* c-lang.c (c_get_string): Always pass TARGET_XFER_E_IO to
+	memory_error.
+	* corefile.c (read_stack, read_code, write_memory): Always pass
+	TARGET_XFER_E_IO to memory_error.
+	* disasm.c (dis_asm_memory_error): Always pass TARGET_XFER_E_IO to
+	memory_error.  Rename parameter 'status' to 'err'.
+	(dump_insns): Rename local 'status' to 'err'.
+	* mips-tdep.c (mips_fetch_instruction): Rename parameter 'statusp'
+	to 'errp'.  Rename local 'status' to 'err'.  Always pass
+	TARGET_XFER_E_IO to memory_error.
+	(mips_breakpoint_from_pc): Rename local 'status' to 'err'.
+	* target.c (target_read_memory, target_read_raw_memory)
+	(target_read_stack, target_read_code, target_write_memory)
+	(target_write_raw_memory): Return -1 on error instead of
+	TARGET_XFER_E_IO.
+	* valprint.c (val_print_string): Rename local 'errcode' to 'err'.
+	Always pass TARGET_XFER_E_IO to memory_error.  Update comment.
+
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* guile/guile-internal.h (gdbscm_with_guile): Change return
+	types to const char *.
+	* guile/scm-safe-call.c (gdbscm_with_guile): Likewise.
+	(struct c_data) <func>: Likewise.
+	(struct c_data) <result>: Change type to const char *.
+	(scscm_eval_scheme_string): Change return type to
+	const char *.
+	(scscm_source_scheme_script): Likewise.
+	(gdbscm_safe_eval_string): Change type of result variable to
+	const char * and remove cast.
+	(gdbscm_safe_source_script): Likewise.
+	* guile/scm-disasm.c (gdbscm_disasm_read_memory_worker):
+	Change return type to const char *.
+	(gdbscm_disasm_read_memory): Change type of status to
+	const char *.
+
+2015-10-27  Pedro Alves  <palves@redhat.com>
+
+	* source.c (openp): New local 'last_errno'.  Use it to
+	save/restore errno.
+
+2015-10-27  Pedro Alves  <palves@redhat.com>
+
+	* psymtab.c (dump_psymtab_addrmap_1): Add casts.
+
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ctf.c (SET_ENUM_FIELD): New macro.
+	(ctf_read_status): Use it.
+	(ctf_read_tp): Use it.
+
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* guile/scm-breakpoint.c (gdbscm_set_breakpoint_stop_x): Add
+	scm_t_dynwind_flags casts.
+	* guile/scm-cmd.c (gdbscm_parse_command_name): Likewise.
+	* guile/scm-ports.c (gdbscm_open_memory): Likewise.
+	* guile/scm-value.c (gdbscm_value_to_string): Likewise.
+
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ax.h (ax_raw_byte): New declaration.
+	* ax-general.c (ax_raw_byte): New function.
+	(ax_simple): Use ax_raw_byte.
+	* ax-gdb.c (gen_printf): Likewise.
+
+2015-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ada-lang.h (GROW_VECT): Add cast.
+
 2015-10-26  Doug Evans  <xdje42@gmail.com>
 
 	* symtab.h (struct general_symbol_info> <ada_mangled>: Update comment.

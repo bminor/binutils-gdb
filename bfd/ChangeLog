@@ -1,3 +1,101 @@
+2015-10-28  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c (create_instruction_branch_absolute): Replace
+	pointer parameters with a simple integer parameter.
+	(stm32l4xx_create_replacing_stub_ldmia): Update calls to
+	create_instruction_branch_absolute.
+	(stm32l4xx_create_replacing_stub_ldmdb): Likewise.
+	(stm32l4xx_create_replacing_stub_vldm): Likewise.
+	(elf32_arm_write_section): Use pointer type for veneer addresses.
+
+2015-10-28  Cupertino Miranda  <cmiranda@synopsys.com>
+
+	* reloc.c (BFD_RELOC_ARC_32_PCREL): New entry.
+	* elf32-arc.c (arc_elf_howto_ini): Update formula.
+	(get_middle_endian_relocation): New function.
+	(PDATA): Define.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+
+2015-10-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19162
+	* elflink.c (_bfd_elf_gc_mark_reloc): Move code iterating over
+	linker input bfds..
+	* section.c (bfd_get_next_section_by_name): ..to here.  Add ibfd param.
+	(bfd_get_linker_section): Adjust bfd_get_next_section_by_name call.
+	* tekhex.c (first_phase): Likewise.
+	* elflink.c (bfd_elf_gc_sections): Likewise.
+	* bfd-in2.h: Regenerate.
+
+2015-10-27  Laurent Alfonsi <laurent.alfonsi@st.com>
+            Christophe Monat <christophe.monat@st.com>
+
+	* bfd-in2.h: Regenerate.
+	* bfd-in.h (bfd_arm_stm32l4xx_fix): New enum. Specify how
+	STM32L4XX instruction scanning should be done.
+	(bfd_elf32_arm_set_stm32l4xx_fix)
+	(bfd_elf32_arm_stm32l4xx_erratum_scan)
+	(bfd_elf32_arm_stm32l4xx_fix_veneer_locations): Add prototypes.
+	(bfd_elf32_arm_set_target_relocs): Add stm32l4xx fix type argument
+	to prototype.
+	* elf32-arm.c (STM32L4XX_ERRATUM_VENEER_SECTION_NAME)
+	(STM32L4XX_ERRATUM_VENEER_ENTRY_NAME): Define macros.
+	(elf32_stm32l4xx_erratum_type): New enum.
+	(elf32_stm32l4xx_erratum_list): New struct. List of veneers or
+	jumps to veneers.
+	(_arm_elf_section_data): Add stm32l4xx_erratumcount,
+	stm32l4xx_erratumlist.
+	(elf32_arm_link_hash_table): Add stm32l4xx_erratum_glue_size,
+	stm32l4xx_fix and num_stm32l4xx_fixes fields.
+	(ctz): New function.
+	(popcount): New function.
+	(elf32_arm_link_hash_table_create): Initialize stm32l4xx_fix.
+	(put_thumb2_insn): New function.
+	(STM32L4XX_ERRATUM_LDM_VENEER_SIZE): Define. Size of a veneer for
+	LDM instructions.
+	(STM32L4XX_ERRATUM_VLDM_VENEER_SIZE): Define. Size of a veneer for
+	VLDM instructions.
+	(bfd_elf32_arm_allocate_interworking_sections): Initialise erratum
+	glue section.
+	(record_stm32l4xx_erratum_veneer) : New function. Create a single
+	veneer, and its associated symbols.
+	(bfd_elf32_arm_add_glue_sections_to_bfd): Add STM32L4XX erratum glue.
+	(bfd_elf32_arm_set_stm32l4xx_fix): New function. Set the type of
+	erratum workaround required.
+	(bfd_elf32_arm_stm32l4xx_fix_veneer_locations): New function. Find
+	out where veneers and branches to veneers have been placed in
+	virtual memory after layout.
+	(is_thumb2_ldmia): New function.
+	(is_thumb2_ldmdb): Likewise.
+	(is_thumb2_vldm ): Likewise.
+	(stm32l4xx_need_create_replacing_stub): New function. Decide if a
+	veneer must be emitted.
+	(bfd_elf32_arm_stm32l4xx_erratum_scan): Scan the sections of an
+	input BFD for potential erratum-triggering insns. Record results.
+	(bfd_elf32_arm_set_target_relocs): Set stm32l4xx_fix field in
+	global hash table.
+	(elf32_arm_size_dynamic_sections): Collect glue information.
+	(create_instruction_branch_absolute): New function.
+	(create_instruction_ldmia): Likewise.
+	(create_instruction_ldmdb): Likewise.
+	(create_instruction_mov): Likewise.
+	(create_instruction_sub): Likewise.
+	(create_instruction_vldmia): Likewise.
+	(create_instruction_vldmdb): Likewise.
+	(create_instruction_udf_w): Likewise.
+	(create_instruction_udf): Likewise.
+	(push_thumb2_insn32): Likewise.
+	(push_thumb2_insn16): Likewise.
+	(stm32l4xx_fill_stub_udf): Likewise.
+	(stm32l4xx_create_replacing_stub_ldmia): New function. Expands the
+	replacing stub for ldmia instructions.
+	(stm32l4xx_create_replacing_stub_ldmdb): Likewise for ldmdb.
+	(stm32l4xx_create_replacing_stub_vldm): Likewise for vldm.
+	(stm32l4xx_create_replacing_stub): New function. Dispatches the
+	stub emission to the appropriate functions.
+	(elf32_arm_write_section): Output veneers, and branches to veneers.
+
 2015-10-27  Sangamesh Mallayya  <nickc@redhat.com>sangamesh.swamy@in.ibm.com>
 
 	* configure.ac (powerpc64-*-aix[5-9].*): Match powerpc64 running

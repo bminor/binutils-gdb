@@ -190,6 +190,9 @@ extern struct agent_expr *new_agent_expr (struct gdbarch *, CORE_ADDR);
 extern void free_agent_expr (struct agent_expr *);
 extern struct cleanup *make_cleanup_free_agent_expr (struct agent_expr *);
 
+/* Append a raw byte to EXPR.  */
+extern void ax_raw_byte (struct agent_expr *expr, gdb_byte byte);
+
 /* Append a simple operator OP to EXPR.  */
 extern void ax_simple (struct agent_expr *EXPR, enum agent_op OP);
 

@@ -1,3 +1,11 @@
+2015-10-28  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (tokenize_arguments): Avoid creating unused
+	symbols when parsing relocation types.
+	(md_apply_fix): Handle TLS relocations. Fix BFD_RELOC_ARC_32_PCREL
+	relocation.
+	(arc_check_reloc): Emit BFD_RELOC_ARC_32_PCREL relocation.
+
 2015-10-27  Jim Wilson  <jim.wilson@linaro.org>
 
 	* config/tc-arm.c (selected_cpu_name): Increase length of array to

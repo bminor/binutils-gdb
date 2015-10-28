@@ -229,7 +229,8 @@ static struct reloc_howto_struct elf_arc_howto_table[] =
 static void arc_elf_howto_init (void)
 {
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
-  elf_arc_howto_table[TYPE].pc_relative = (strstr (#FORMULA, " P ") != NULL);
+  elf_arc_howto_table[TYPE].pc_relative = \
+    (strstr (#FORMULA, " P ") != NULL || strstr (#FORMULA, " PDATA ") != NULL);
 
   #include "elf/arc-reloc.def"
 }
@@ -473,6 +474,17 @@ debug_arc_reloc (struct arc_relocation_data reloc_data)
     fprintf (stderr, "	input section is NULL\n");
 }
 
+static ATTRIBUTE_UNUSED bfd_vma
+get_middle_endian_relocation (bfd_vma reloc)
+{
+  bfd_vma ret =
+	      ((reloc & 0xffff0000) >> 16) |
+	      ((reloc & 0xffff) << 16);
+  return ret;
+}
+
+#define ME(RELOC) (get_middle_endian_reloction(RELOC))
+
 #define S (reloc_data.sym_value \
 	   + reloc_data.sym_section->output_offset \
 	   + reloc_data.sym_section->output_section->vma)
@@ -490,6 +502,11 @@ debug_arc_reloc (struct arc_relocation_data reloc_data)
 	    (reloc_data.input_section->output_section->vma \
 	     + reloc_data.input_section->output_offset \
 	     + (reloc_data.reloc_offset - (bitsize >= 32 ? 4 : 0)) \
+	    ) & ~0x3)
+#define PDATA ( \
+	    (reloc_data.input_section->output_section->vma \
+	     + reloc_data.input_section->output_offset \
+	     + (reloc_data.reloc_offset) \
 	    ) & ~0x3)
 #define SECTSTAR (reloc_data.input_section->output_offset)
 #define SECTSTART (reloc_data.input_section->output_offset)

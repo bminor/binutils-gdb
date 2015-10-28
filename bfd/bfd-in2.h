@@ -856,6 +856,23 @@ extern bfd_boolean bfd_elf32_arm_vfp11_erratum_scan
 extern void bfd_elf32_arm_vfp11_fix_veneer_locations
   (bfd *, struct bfd_link_info *);
 
+/* ARM STM STM32L4XX erratum workaround support.  */
+typedef enum
+{
+  BFD_ARM_STM32L4XX_FIX_NONE,
+  BFD_ARM_STM32L4XX_FIX_DEFAULT,
+  BFD_ARM_STM32L4XX_FIX_ALL
+} bfd_arm_stm32l4xx_fix;
+
+extern void bfd_elf32_arm_set_stm32l4xx_fix
+  (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean bfd_elf32_arm_stm32l4xx_erratum_scan
+  (bfd *, struct bfd_link_info *);
+
+extern void bfd_elf32_arm_stm32l4xx_fix_veneer_locations
+  (bfd *, struct bfd_link_info *);
+
 /* ARM Interworking support.  Called from linker.  */
 extern bfd_boolean bfd_arm_allocate_interworking_sections
   (struct bfd_link_info *);
@@ -885,7 +902,7 @@ extern bfd_boolean bfd_elf32_arm_process_before_allocation
 
 void bfd_elf32_arm_set_target_relocs
   (bfd *, struct bfd_link_info *, int, char *, int, int, bfd_arm_vfp11_fix,
-   int, int, int, int, int);
+   bfd_arm_stm32l4xx_fix, int, int, int, int, int);
 
 extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
   (bfd *, struct bfd_link_info *);
@@ -1793,7 +1810,7 @@ void bfd_section_list_clear (bfd *);
 
 asection *bfd_get_section_by_name (bfd *abfd, const char *name);
 
-asection *bfd_get_next_section_by_name (asection *sec);
+asection *bfd_get_next_section_by_name (bfd *ibfd, asection *sec);
 
 asection *bfd_get_linker_section (bfd *abfd, const char *name);
 
@@ -3667,6 +3684,7 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARC_SECTOFF_1,
   BFD_RELOC_ARC_SECTOFF_2,
   BFD_RELOC_ARC_SDA16_ST2,
+  BFD_RELOC_ARC_32_PCREL,
   BFD_RELOC_ARC_PC32,
   BFD_RELOC_ARC_GOT32,
   BFD_RELOC_ARC_GOTPC32,

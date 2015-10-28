@@ -1,3 +1,34 @@
+2015-10-28  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-dis.c	(aarch64_decode_insn): Add one argument
+	noaliases_p.  Update comments.  Pass noaliases_p rather than
+	no_aliases to aarch64_opcode_decode.
+	(print_insn_aarch64_word): Pass no_aliases to
+	aarch64_decode_insn.
+
+2015-10-27  Vinay  <Vinay.G@kpit.com>
+
+	PR binutils/19159
+	* rl78-decode.opc (MOV): Added offset to DE register in index
+	addressing mode.
+	* rl78-decode.c: Regenerate.
+
+2015-10-27  Vinay Kumar  <vinay.g@kpit.com>
+
+	PR binutils/19158
+	* rl78-decode.opc: Add 's' print operator to instructions that
+	access system registers.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c (print_insn_rl78_common): Decode all system
+	registers.
+
+2015-10-27  Vinay Kumar  <vinay.g@kpit.com>
+
+	PR binutils/19157
+	* rl78-decode.opc: Add 'a' print operator to mov instructions
+	using stack pointer plus index addressing.
+	* rl78-decode.c: Regenerate.
+
 2015-10-14  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	* s390-opc.c: Fix comment.

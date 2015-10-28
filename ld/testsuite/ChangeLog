@@ -1,3 +1,29 @@
+2015-10-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19162
+	* ld-x86-64/x86-64.exp: Run pr19162.
+	* ld-x86-64/pr19162.d: New file.
+	* ld-x86-64/pr19162a.s: Likewise.
+	* ld-x86-64/pr19162b.s: Likewise.
+
+2015-10-27  Laurent Alfonsi <laurent.alfonsi@st.com>
+            Christophe Monat <christophe.monat@st.com>
+
+	* ld-arm/arm-elf.exp (armelftests_common): Add STM32L4XX
+	tests.
+	* ld-arm/stm32l4xx-cannot-fix-far-ldm.d: New.
+	* ld-arm/stm32l4xx-cannot-fix-far-ldm.s: Likewise.
+	* ld-arm/stm32l4xx-cannot-fix-it-block.d: Likewise.
+	* ld-arm/stm32l4xx-cannot-fix-it-block.s: Likewise.
+	* ld-arm/stm32l4xx-fix-all.d: Likewise.
+	* ld-arm/stm32l4xx-fix-all.s: Likewise.
+	* ld-arm/stm32l4xx-fix-it-block.d: Likewise.
+	* ld-arm/stm32l4xx-fix-it-block.s: Likewise.
+	* ld-arm/stm32l4xx-fix-ldm.d: Likewise.
+	* ld-arm/stm32l4xx-fix-ldm.s: Likewise.
+	* ld-arm/stm32l4xx-fix-vldm.d: Likewise.
+	* ld-arm/stm32l4xx-fix-vldm.s: Likewise.
+
 2015-10-27  Alan Modra  <amodra@gmail.com>
 
 	* ld-gc/pr19161.d: xfail hppa-*-*.

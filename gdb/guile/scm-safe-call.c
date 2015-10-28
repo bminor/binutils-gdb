@@ -28,10 +28,10 @@
 
 struct c_data
 {
-  void *(*func) (void *);
+  const char *(*func) (void *);
   void *data;
   /* An error message or NULL for success.  */
-  void *result;
+  const char *result;
 };
 
 /* Struct to marshall args through gdbscm_with_catch.  */
@@ -167,8 +167,8 @@ gdbscm_with_catch (void *data)
    The result if NULL if no exception occurred, otherwise it is a statically
    allocated error message (caller must *not* free).  */
 
-void *
-gdbscm_with_guile (void *(*func) (void *), void *data)
+const char *
+gdbscm_with_guile (const char *(*func) (void *), void *data)
 {
   struct c_data c_data;
   struct with_catch_data catch_data;
@@ -369,7 +369,7 @@ struct eval_scheme_string_data
 /* Wrapper to eval a C string in the Guile interpreter.
    This is passed to gdbscm_with_guile.  */
 
-static void *
+static const char *
 scscm_eval_scheme_string (void *datap)
 {
   struct eval_scheme_string_data *data
@@ -398,12 +398,12 @@ char *
 gdbscm_safe_eval_string (const char *string, int display_result)
 {
   struct eval_scheme_string_data data = { string, display_result };
-  void *result;
+  const char *result;
 
   result = gdbscm_with_guile (scscm_eval_scheme_string, (void *) &data);
 
   if (result != NULL)
-    return xstrdup ((char *) result);
+    return xstrdup (result);
   return NULL;
 }
 
@@ -411,7 +411,7 @@ gdbscm_safe_eval_string (const char *string, int display_result)
 
 /* Helper function for gdbscm_safe_source_scheme_script.  */
 
-static void *
+static const char *
 scscm_source_scheme_script (void *data)
 {
   const char *filename = (const char *) data;
@@ -439,7 +439,7 @@ gdbscm_safe_source_script (const char *filename)
      by default.  This function is invoked by the "source" GDB command which
      already has its own path search support.  */
   char *abs_filename = NULL;
-  void *result;
+  const char *result;
 
   if (!IS_ABSOLUTE_PATH (filename))
     {
@@ -452,7 +452,7 @@ gdbscm_safe_source_script (const char *filename)
 
   xfree (abs_filename);
   if (result != NULL)
-    return xstrdup ((char *) result);
+    return xstrdup (result);
   return NULL;
 }
 

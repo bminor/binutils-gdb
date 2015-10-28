@@ -1904,9 +1904,10 @@ struct dump_psymtab_addrmap_data
 static int
 dump_psymtab_addrmap_1 (void *datap, CORE_ADDR start_addr, void *obj)
 {
-  struct dump_psymtab_addrmap_data *data = datap;
+  struct dump_psymtab_addrmap_data *data
+    = (struct dump_psymtab_addrmap_data *) datap;
   struct gdbarch *gdbarch = get_objfile_arch (data->objfile);
-  struct partial_symtab *addrmap_psymtab = obj;
+  struct partial_symtab *addrmap_psymtab = (struct partial_symtab *) obj;
   const char *psymtab_address_or_end = NULL;
 
   QUIT;

@@ -1,3 +1,30 @@
+2015-10-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19162
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Check flags
+	before calling _bfd_elf_match_sections_by_type.  Merge flags for
+	any other input sections that might match a new output section to
+	decide placement.
+
+2015-10-27  Laurent Alfonsi <laurent.alfonsi@st.com>
+            Christophe Monat <christophe.monat@st.com>
+
+	* ld.texinfo: Add description of the STM32L4xx erratum
+	workaround.
+	* NEWS: Mention the new feature.
+	* emultempl/armelf.em (stm32l4xx_fix): New.
+	(arm_elf_before_allocation): Choose the type of fix, scan for
+	erratum.
+	(gld${EMULATION_NAME}_finish): Fix veneer locations.
+	(arm_elf_create_output_section_statements): Propagate
+	stm32l4xx_fix value.
+	(PARSE_AND_LIST_PROLOGUE): Define OPTION_STM32L4XX_FIX.
+	(PARSE_AND_LIST_LONGOPTS): Add entry for handling
+	--fix-stm32l4xx-629360.
+	(PARSE_AND_LIST_OPTION): Add entry for helping on
+	--fix-stm32l4xx-629360.
+	(PARSE_AND_LIST_ARGS_CASES): Treat OPTION_STM32L4XX_FIX.
+
 2015-10-27  Alan Modra  <amodra@gmail.com>
 
 	PR ld/19175

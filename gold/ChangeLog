@@ -1,3 +1,10 @@
+2015-10.27  Han Shen  <shenhan@google.com>
+
+	PR gold/19042 - unsupported reloc 311/312.
+
+	* aarch64.cc (Target_aarch64::Scan::local): Add support for
+	reloc 311/312.
+
 2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* x86_64.cc (Target_x86_64<size>::Scan::get_reference_flags):

@@ -129,10 +129,10 @@ dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr, unsigned int len,
 
 /* Like memory_error with slightly different parameters.  */
 static void
-dis_asm_memory_error (int status, bfd_vma memaddr,
+dis_asm_memory_error (int err, bfd_vma memaddr,
 		      struct disassemble_info *info)
 {
-  memory_error (status, memaddr);
+  memory_error (TARGET_XFER_E_IO, memaddr);
 }
 
 /* Like print_address with slightly different parameters.  */
@@ -230,7 +230,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
         {
           CORE_ADDR old_pc = pc;
           bfd_byte data;
-          int status;
+          int err;
           const char *spacer = "";
 
           /* Build the opcodes using a temporary stream so we can
@@ -242,9 +242,9 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
           pc += gdbarch_print_insn (gdbarch, pc, di);
           for (;old_pc < pc; old_pc++)
             {
-              status = (*di->read_memory_func) (old_pc, &data, 1, di);
-              if (status != 0)
-                (*di->memory_error_func) (status, old_pc, di);
+              err = (*di->read_memory_func) (old_pc, &data, 1, di);
+              if (err != 0)
+                (*di->memory_error_func) (err, old_pc, di);
               fprintf_filtered (opcode_stream, "%s%02x",
                                 spacer, (unsigned) data);
               spacer = " ";

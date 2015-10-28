@@ -1104,7 +1104,7 @@ print_spaces (int n, struct ui_file *file)
 /* Print a host address.  */
 
 void
-gdb_print_host_address (const void *addr, struct ui_file *stream)
+gdb_print_host_address_1 (const void *addr, struct ui_file *stream)
 {
   fprintf_filtered (stream, "%s", host_address_to_string (addr));
 }
