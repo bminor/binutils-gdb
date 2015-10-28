@@ -33,6 +33,8 @@
 
 
 
+#define DEBUG 0
+
 /* Object of this type are stored in the compiler's symbol_err_map.  */
 
 struct symbol_error
@@ -173,7 +175,10 @@ convert_one_symbol (struct compile_cplus_instance *context,
       switch (SYMBOL_CLASS (sym.symbol))
 	{
 	case LOC_TYPEDEF:
-	  kind = GCC_CP_SYMBOL_TYPEDEF;
+	  if (TYPE_CODE (SYMBOL_TYPE (sym.symbol)) == TYPE_CODE_TYPEDEF)
+	    kind = GCC_CP_SYMBOL_TYPEDEF;
+	  else  if (TYPE_CODE (SYMBOL_TYPE (sym.symbol)) == TYPE_CODE_NAMESPACE)
+	    return;
 	  break;
 
 	case LOC_LABEL:
@@ -458,6 +463,11 @@ gcc_cplus_convert_symbol (void *datum,
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
+#if DEBUG
+  printf ("got oracle request for %s in domain %s\n", identifier,
+	  domain_name (domain));
+#endif
+
   TRY
     {
       struct block_symbol sym;
@@ -494,6 +504,14 @@ gcc_cplus_convert_symbol (void *datum,
     fprintf_unfiltered (gdb_stdout,
 			"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
 			identifier);
+
+#if DEBUG
+  if (found)
+    printf ("found type for %s!\n", identifier);
+  else
+    printf ("did not find type for %s\n", identifier);
+#endif
+
   return;
 }
 

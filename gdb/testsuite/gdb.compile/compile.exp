@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+load_lib compiler-support.exp
+
 standard_testfile .c compile-shlib.c compile-constvar.S compile-nodebug.c
 
 get_compiler_info

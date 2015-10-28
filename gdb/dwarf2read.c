@@ -1320,10 +1320,10 @@ struct fnfieldlist
   struct nextfnfield *head;
 };
 
-struct typedef_field_list
+struct decl_field_list
 {
-  struct typedef_field field;
-  struct typedef_field_list *next;
+  struct decl_field field;
+  struct decl_field_list *next;
 };
 
 /* The routines that read and process dies for a C struct or C++ class
@@ -1355,10 +1355,11 @@ struct field_info
     /* Number of entries in the fnfieldlists array.  */
     int nfnfields;
 
-    /* typedefs defined inside this class.  TYPEDEF_FIELD_LIST contains head of
-       a NULL terminated list of TYPEDEF_FIELD_LIST_COUNT elements.  */
-    struct typedef_field_list *typedef_field_list;
-    unsigned typedef_field_list_count;
+    /* Types/typedefs defined inside this class.  TYPE_DEFN_FIELD_LIST
+       contains head of a NULL-terminated list of TYPE_DEFN_FIELD_LIST_COUNT
+       elements.  */
+    struct decl_field_list *type_defn_field_list;
+    unsigned type_defn_field_list_count;
   };
 
 /* One item on the queue of compilation units to read in full symbols
@@ -12646,23 +12647,28 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     }
 }
 
-/* Add a typedef defined in the scope of the FIP's class.  */
+/* Add a type definition defined in the scope of the FIP's class.  */
 
 static void
-dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
-		    struct dwarf2_cu *cu)
+dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
+		 struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct typedef_field_list *new_field;
+  struct decl_field_list *new_field;
   struct attribute *attr;
-  struct typedef_field *fp;
+  struct decl_field *fp;
   char *fieldname = "";
 
   /* Allocate a new field list entry and link it in.  */
-  new_field = XCNEW (struct typedef_field_list);
+  new_field = XCNEW (struct decl_field_list);
   make_cleanup (xfree, new_field);
 
-  gdb_assert (die->tag == DW_TAG_typedef);
+  gdb_assert (die->tag == DW_TAG_typedef
+	      || die->tag == DW_TAG_class_type
+	      || die->tag == DW_TAG_structure_type
+	      || die->tag == DW_TAG_union_type
+	      || die->tag == DW_TAG_enumeration_type
+	      /*|| die->tag == DW_TAG_namespace*/);
 
   fp = &new_field->field;
 
@@ -12673,9 +12679,9 @@ dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
 
   fp->type = read_type_die (die, cu);
 
-  new_field->next = fip->typedef_field_list;
-  fip->typedef_field_list = new_field;
-  fip->typedef_field_list_count++;
+  new_field->next = fip->type_defn_field_list;
+  fip->type_defn_field_list = new_field;
+  fip->type_defn_field_list_count++;
 }
 
 /* Create the vector of fields, and attach it to the type.  */
@@ -13299,8 +13305,13 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      /* C++ base class field.  */
 	      dwarf2_add_field (&fi, child_die, cu);
 	    }
-	  else if (child_die->tag == DW_TAG_typedef)
-	    dwarf2_add_typedef (&fi, child_die, cu);
+	  else if (child_die->tag == DW_TAG_typedef
+		   || child_die->tag == DW_TAG_class_type
+		   || child_die->tag == DW_TAG_structure_type
+		   || child_die->tag == DW_TAG_union_type
+		   || child_die->tag == DW_TAG_enumeration_type
+		   /*|| child_die->tag == DW_TAG_namespace*/)
+	    dwarf2_add_type_defn (&fi, child_die, cu);
 	  else if (child_die->tag == DW_TAG_template_type_param
 		   || child_die->tag == DW_TAG_template_value_param)
 	    {
@@ -13401,26 +13412,26 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	}
 
-      /* Copy fi.typedef_field_list linked list elements content into the
-	 allocated array TYPE_TYPEDEF_FIELD_ARRAY (type).  */
-      if (fi.typedef_field_list)
+      /* Copy fi.type_defn_field_list linked list elements content into the
+	 allocated array TYPE_TYPE_DEFN_FIELD_ARRAY (type).  */
+      if (fi.type_defn_field_list)
 	{
-	  int i = fi.typedef_field_list_count;
+	  int i = fi.type_defn_field_list_count;
 
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
-	  TYPE_TYPEDEF_FIELD_ARRAY (type)
-	    = ((struct typedef_field *)
-	       TYPE_ALLOC (type, sizeof (TYPE_TYPEDEF_FIELD (type, 0)) * i));
-	  TYPE_TYPEDEF_FIELD_COUNT (type) = i;
+	  TYPE_TYPE_DEFN_FIELD_ARRAY (type)
+	    = ((struct decl_field *)
+	       TYPE_ALLOC (type, sizeof (TYPE_TYPE_DEFN_FIELD (type, 0)) * i));
+	  TYPE_TYPE_DEFN_FIELD_COUNT (type) = i;
 
 	  /* Reverse the list order to keep the debug info elements order.  */
 	  while (--i >= 0)
 	    {
-	      struct typedef_field *dest, *src;
+	      struct decl_field *dest, *src;
 
-	      dest = &TYPE_TYPEDEF_FIELD (type, i);
-	      src = &fi.typedef_field_list->field;
-	      fi.typedef_field_list = fi.typedef_field_list->next;
+	      dest = &TYPE_TYPE_DEFN_FIELD (type, i);
+	      src = &fi.type_defn_field_list->field;
+	      fi.type_defn_field_list = fi.type_defn_field_list->next;
 	      *dest = *src;
 	    }
 	}
@@ -14133,6 +14144,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
+#if 1
   if (die->child != NULL)
     {
       struct die_info *child_die = die->child;
@@ -14143,6 +14155,11 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	  child_die = sibling_die (child_die);
 	}
     }
+#else
+  /* !!keiths: HACK!  This works around GDB not being able to
+     define the contents of a namespace.  */
+  process_structure_scope (die, cu);
+#endif
 }
 
 /* Read a Fortran module as type.  This DIE can be only a declaration used for

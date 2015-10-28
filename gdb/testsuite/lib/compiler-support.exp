@@ -1,0 +1,162 @@
+# Copyright 2015 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Generic/oft used support routines for testing GDB's compile feature.
+
+# Return 1 if we should skip tests of the "compile" feature.
+# This must be invoked after the inferior has been started.
+
+proc skip_compile_feature_tests {} {
+    global gdb_prompt
+
+    set result 0
+    gdb_test_multiple "compile code -- ;" "check for working compile command" {
+	"Could not load libcc1.*\r\n$gdb_prompt $" {
+	    set result 1
+	}
+	-re "Command not supported on this host\\..*\r\n$gdb_prompt $" {
+	    set result 1
+	}
+	-re "\r\n$gdb_prompt $" {
+	}
+    }
+    return $result
+}
+
+# This namespace provides some convenience functions for running
+# "compile code" and "compile print" tests.
+#
+# Exported functions are defined inline below.
+#
+# General usage:
+#
+# Start a new session, noting that the variable "var" will be used for
+# "compile code" expressions.
+# CompileExpression::new "var"
+#
+# Add the expression "foo;" with result/value 3.
+# CompileExpression::add_imp "foo;" 3
+#
+# Add the expression "a = function (3); var = a;" with the result 21.
+# CompileExpression::add_exp "a = function (3); var = a;" 21
+#
+# Run tests using "compile print".
+# CompileExpression::run_tests "print"
+# ---> Runs the following tests (name of tests ignored for illustration)
+#    gdb_test "compile print foo;" "= 3"
+#    # "explicit" expressions are ignored
+#
+# Run the tests using "compile code".
+# CompileExpression::run_tests "code"
+# ---> Runs the following tests (name of tests ignored for illustration)
+#    gdb_test_no_output "compile code var = foo;"
+#    gdb_test "p var" "= 3"
+#    gdb_test_no_output "compoile code a = function (3); var = a;"
+#    gdb_test "p var" "= 21"
+
+namespace eval ::CompileExpression {
+
+    # The variable name to check testing results.  This variable
+    # must be in scope when tests are run.
+    variable varName_ {}
+
+    # A list containing all the expressions to test.
+    # The format is EXPR RESULT IS_EXPLICIT TEST_NAME
+    variable expr_list_ {}
+
+    # Start a new expression list.  VARNAME is the name of the variable
+    # that will be printed to check if the result of the test was
+    # successful.
+    proc new {varname} {
+	variable varName_
+	variable expr_list_
+
+	set varName_ $varname
+	set expr_list_ {}
+    }
+
+    # Add an "implicit" expression to the list of tests to run.
+    #
+    # Implicit expressions will be sent to GDB in the form
+    # "$varName = $EXP".  "p $varName" will be used to decide the pass
+    # or fail status of the test.
+    #
+    # The name of the test may be optionally specified.
+    #
+    # Unlike explicit expressions, implicit expressions may be tested
+    # with both "compile print" and "compile code".
+
+    proc add_imp {exp result {tst ""}} {
+	variable expr_list_
+
+	lappend expr_list_ [list $exp $result 0 $tst]
+    }
+
+    # Add an "explicit" expression to the list of tests to run.
+    #
+    # Explicit expressions will be sent to GDB as-is.  The expression
+    # should set the value of the variable $varName, which is then printed
+    # to determine whether the test passed or failed.
+    #
+    # The name of the test may be optionally specified.
+    #
+    # Unlike implicit expressions, explicit expressions cannot be tested
+    # with "compile print."  If run_tests is called with "print", any
+    # explicit expressions in the expression list will be ignored.
+
+    proc add_exp {exp result {tst ""}} {
+	variable expr_list_
+
+	lappend expr_list_ [list $exp $result 1 $tst]
+    }
+
+    # Run compile tests for CMD ("print" or "code").
+
+    proc run_tests {cmd} {
+	variable varName_
+	variable expr_list_
+
+	if {![string match $cmd "code"]
+	    && ![string match $cmd "print"]} {
+	    error "invalid command, $cmd; should be \"print\" or \"compile\""
+	}
+
+	foreach exp_test $expr_list_ {
+	    set exp [lindex $exp_test 0]
+	    set result [lindex $exp_test 1]
+	    set is_explicit [lindex $exp_test 2]
+	    set tst [lindex $exp_test 3]
+
+	    # Set a test name if one hasn't been provided.
+	    if {$tst == ""} {
+		set tst "compile $cmd $exp"
+	    }
+
+	    if {[string match $cmd "print"]} {
+		if {!$is_expilcit} {
+		    gdb_test "compile print $exp" $result $tst
+		}
+	    } else {
+		if {$is_explicit} {
+		    set command "compile code $exp"
+		} else {
+		    set command "compile code $varName_ = $exp"
+		}
+		gdb_test_no_output $command
+		gdb_test "p $varName_" "= $result" $tst
+	    }
+	}
+    }
+}

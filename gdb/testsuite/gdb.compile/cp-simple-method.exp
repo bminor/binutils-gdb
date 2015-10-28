@@ -1,0 +1,59 @@
+# Copyright 2015 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# (Very) simple method tests.
+
+load_lib compiler-support.exp
+
+standard_testfile .cc
+
+if {[skip_cplus_tests]} {
+    untested "skipping C++ tests"
+    return
+}
+
+if {[prepare_for_testing $testfile $testfile $srcfile \
+	 {debug nowarnings c++}]} {
+    return -1
+}
+
+if {![runto_main]} {
+    return -1
+}
+
+if {[skip_compile_feature_tests]} {
+    untested \
+	"compile command not supported (could not find libcc1 shared library?)"
+    return -1
+}
+
+gdb_breakpoint [gdb_get_line_number "break here" $srcfile]
+gdb_continue_to_breakpoint "testing location"
+
+CompileExpression::new "var"
+CompileExpression::add_imp "a->get_var ();" 21
+CompileExpression::add_imp "a->get_var (static_cast<unsigned long> (1));" 100
+CompileExpression::add_imp "a->get_var (static_cast<int> (1));" 101
+CompileExpression::add_imp "a->get_var (static_cast<float> (1));" 102
+CompileExpression::add_imp "a->get_var (static_cast<void *> (a));" 103
+CompileExpression::add_imp "a->get_var1 (1);" 42
+CompileExpression::add_imp "a->get_var2 (1, 2);" 88
+CompileExpression::add_imp "A::get_1 (1);" 2
+CompileExpression::add_imp "A::get_2 (1, 2);" 5
+CompileExpression::add_imp "A::get_1 (a->get_var ());" 22
+CompileExpression::add_imp "a->get_var1 (a->get_var () - 16);" 672
+CompileExpression::add_imp "a->get_var2 (a->get_var (), A::get_1 (2));" 336
+CompileExpression::run_tests "code"
+#CompileExpression::run_tests "print"

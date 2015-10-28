@@ -896,7 +896,7 @@ struct fn_field
 
 };
 
-struct typedef_field
+struct decl_field
 {
   /* * Unqualified name to be prefixed by owning class qualified
      name.  */
@@ -1006,12 +1006,12 @@ struct cplus_struct_type
 
     struct fn_fieldlist *fn_fieldlists;
 
-    /* * typedefs defined inside this class.  typedef_field points to
-       an array of typedef_field_count elements.  */
+    /* * Types and typedefs defined inside this class.  type_defn_field points
+       to an array of type_defn_field_count elements.  */
 
-    struct typedef_field *typedef_field;
+    struct decl_field *type_defn_field;
 
-    unsigned typedef_field_count;
+    unsigned type_defn_field_count;
 
     /* * The template arguments.  This is an array with
        N_TEMPLATE_ARGUMENTS elements.  This is NULL for non-template
@@ -1447,16 +1447,17 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
 #define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
 
-#define TYPE_TYPEDEF_FIELD_ARRAY(thistype) \
-  TYPE_CPLUS_SPECIFIC (thistype)->typedef_field
-#define TYPE_TYPEDEF_FIELD(thistype, n) \
-  TYPE_CPLUS_SPECIFIC (thistype)->typedef_field[n]
-#define TYPE_TYPEDEF_FIELD_NAME(thistype, n) \
-  TYPE_TYPEDEF_FIELD (thistype, n).name
-#define TYPE_TYPEDEF_FIELD_TYPE(thistype, n) \
-  TYPE_TYPEDEF_FIELD (thistype, n).type
-#define TYPE_TYPEDEF_FIELD_COUNT(thistype) \
-  TYPE_CPLUS_SPECIFIC (thistype)->typedef_field_count
+/* Accessors for types and typedefs defined by a class.  */
+#define TYPE_TYPE_DEFN_FIELD_ARRAY(thistype)	\
+  TYPE_CPLUS_SPECIFIC (thistype)->type_defn_field
+#define TYPE_TYPE_DEFN_FIELD(thistype, n) \
+  TYPE_CPLUS_SPECIFIC (thistype)->type_defn_field[n]
+#define TYPE_TYPE_DEFN_FIELD_NAME(thistype, n) \
+  TYPE_TYPE_DEFN_FIELD (thistype, n).name
+#define TYPE_TYPE_DEFN_FIELD_TYPE(thistype, n) \
+  TYPE_TYPE_DEFN_FIELD (thistype, n).type
+#define TYPE_TYPE_DEFN_FIELD_COUNT(thistype) \
+  TYPE_CPLUS_SPECIFIC (thistype)->type_defn_field_count
 
 #define TYPE_IS_OPAQUE(thistype) \
   (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) \

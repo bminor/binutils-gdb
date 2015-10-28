@@ -87,7 +87,7 @@ struct typedef_hash_table
 static hashval_t
 hash_typedef_field (const void *p)
 {
-  const struct typedef_field *tf = (const struct typedef_field *) p;
+  const struct decl_field *tf = (const struct decl_field *) p;
   struct type *t = check_typedef (tf->type);
 
   return htab_hash_string (TYPE_SAFE_NAME (t));
@@ -98,8 +98,8 @@ hash_typedef_field (const void *p)
 static int
 eq_typedef_field (const void *a, const void *b)
 {
-  const struct typedef_field *tfa = (const struct typedef_field *) a;
-  const struct typedef_field *tfb = (const struct typedef_field *) b;
+  const struct decl_field *tfa = (const struct decl_field *) a;
+  const struct decl_field *tfb = (const struct decl_field *) b;
 
   return types_equal (tfa->type, tfb->type);
 }
@@ -115,10 +115,14 @@ recursively_update_typedef_hash (struct typedef_hash_table *table,
   if (table == NULL)
     return;
 
-  for (i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (t); ++i)
+  for (i = 0; i < TYPE_TYPE_DEFN_FIELD_COUNT (t); ++i)
     {
-      struct typedef_field *tdef = &TYPE_TYPEDEF_FIELD (t, i);
+      struct decl_field *tdef = &TYPE_TYPE_DEFN_FIELD (t, i);
       void **slot;
+
+      /* Skip non-typedef definitions in this class.  */
+      if (TYPE_CODE (TYPE_TYPE_DEFN_FIELD_TYPE (t, i)) != TYPE_CODE_TYPEDEF)
+	continue;
 
       slot = htab_find_slot (table->table, tdef, INSERT);
       /* Only add a given typedef name once.  Really this shouldn't
@@ -145,14 +149,14 @@ add_template_parameters (struct typedef_hash_table *table, struct type *t)
 
   for (i = 0; i < TYPE_N_TEMPLATE_ARGUMENTS (t); ++i)
     {
-      struct typedef_field *tf;
+      struct decl_field *tf;
       void **slot;
 
       /* We only want type-valued template parameters in the hash.  */
       if (SYMBOL_CLASS (TYPE_TEMPLATE_ARGUMENT (t, i)) != LOC_TYPEDEF)
 	continue;
 
-      tf = XOBNEW (&table->storage, struct typedef_field);
+      tf = XOBNEW (&table->storage, struct decl_field);
       tf->name = SYMBOL_LINKAGE_NAME (TYPE_TEMPLATE_ARGUMENT (t, i));
       tf->type = SYMBOL_TYPE (TYPE_TEMPLATE_ARGUMENT (t, i));
 
@@ -270,7 +274,7 @@ find_global_typedef (const struct type_print_options *flags,
 {
   char *applied;
   void **slot;
-  struct typedef_field tf, *new_tf;
+  struct decl_field tf, *new_tf;
 
   if (flags->global_typedefs == NULL)
     return NULL;
@@ -281,13 +285,13 @@ find_global_typedef (const struct type_print_options *flags,
   slot = htab_find_slot (flags->global_typedefs->table, &tf, INSERT);
   if (*slot != NULL)
     {
-      new_tf = (struct typedef_field *) *slot;
+      new_tf = (struct decl_field *) *slot;
       return new_tf->name;
     }
 
   /* Put an entry into the hash table now, in case
      apply_ext_lang_type_printers recurses.  */
-  new_tf = XOBNEW (&flags->global_typedefs->storage, struct typedef_field);
+  new_tf = XOBNEW (&flags->global_typedefs->storage, struct decl_field);
   new_tf->name = NULL;
   new_tf->type = t;
 
@@ -316,12 +320,12 @@ find_typedef_in_hash (const struct type_print_options *flags, struct type *t)
 {
   if (flags->local_typedefs != NULL)
     {
-      struct typedef_field tf, *found;
+      struct decl_field tf, *found;
 
       tf.name = NULL;
       tf.type = t;
-      found = (struct typedef_field *) htab_find (flags->local_typedefs->table,
-						  &tf);
+      found = (struct decl_field *) htab_find (flags->local_typedefs->table,
+					       &tf);
 
       if (found != NULL)
 	return found->name;

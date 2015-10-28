@@ -2998,26 +2998,6 @@ proc skip_libstdcxx_probe_tests {} {
     return $ok
 }
 
-# Return 1 if we should skip tests of the "compile" feature.
-# This must be invoked after the inferior has been started.
-
-proc skip_compile_feature_tests {} {
-    global gdb_prompt
-
-    set result 0
-    gdb_test_multiple "compile code -- ;" "check for working compile command" {
-	"Could not load libcc1.*\r\n$gdb_prompt $" {
-	    set result 1
-	}
-	-re "Command not supported on this host\\..*\r\n$gdb_prompt $" {
-	    set result 1
-	}
-	-re "\r\n$gdb_prompt $" {
-	}
-    }
-    return $result
-}
-
 # Check whether we're testing with the remote or extended-remote
 # targets.
 

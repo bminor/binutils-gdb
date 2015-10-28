@@ -17,6 +17,7 @@
 # integration.
 
 load_lib dwarf.exp
+load_lib compiler-support.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
 if {![dwarf2_support]} {
