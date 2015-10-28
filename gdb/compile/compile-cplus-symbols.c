@@ -144,22 +144,22 @@ symbol_substitution_name (struct symbol *sym)
 
 static void
 convert_one_symbol (struct compile_cplus_instance *context,
-		    struct symbol *sym,
+		    struct block_symbol sym,
 		    int is_global,
 		    int is_local)
 {
   gcc_type sym_type;
-  const char *filename = symbol_symtab (sym)->filename;
-  unsigned short line = SYMBOL_LINE (sym);
+  const char *filename = symbol_symtab (sym.symbol)->filename;
+  unsigned short line = SYMBOL_LINE (sym.symbol);
 
-  error_symbol_once (context, sym);
+  error_symbol_once (context, sym.symbol);
 
-  if (SYMBOL_CLASS (sym) == LOC_LABEL)
+  if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
     sym_type = 0;
   else
-    sym_type = convert_cplus_type (context, SYMBOL_TYPE (sym));
+    sym_type = convert_cplus_type (context, SYMBOL_TYPE (sym.symbol));
 
-  if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN)
+  if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
     {
       /* Nothing to do.  */
     }
@@ -170,7 +170,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
       CORE_ADDR addr = 0;
       char *symbol_name = NULL;
 
-      switch (SYMBOL_CLASS (sym))
+      switch (SYMBOL_CLASS (sym.symbol))
 	{
 	case LOC_TYPEDEF:
 	  kind = GCC_CP_SYMBOL_TYPEDEF;
@@ -178,45 +178,46 @@ convert_one_symbol (struct compile_cplus_instance *context,
 
 	case LOC_LABEL:
 	  kind = GCC_CP_SYMBOL_LABEL;
-	  addr = SYMBOL_VALUE_ADDRESS (sym);
+	  addr = SYMBOL_VALUE_ADDRESS (sym.symbol);
 	  break;
 
 	case LOC_BLOCK:
 	  kind = GCC_CP_SYMBOL_FUNCTION;
-	  addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-	  if (is_global && TYPE_GNU_IFUNC (SYMBOL_TYPE (sym)))
+	  addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
+	  if (is_global && TYPE_GNU_IFUNC (SYMBOL_TYPE (sym.symbol)))
 	    addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
 	  break;
 
 	case LOC_CONST:
-	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_ENUM)
+	  if (TYPE_CODE (SYMBOL_TYPE (sym.symbol)) == TYPE_CODE_ENUM)
 	    {
 	      /* Already handled by convert_enum.  */
 	      return;
 	    }
-	  CP_CTX (context)->cp_ops->build_constant (CP_CTX (context), sym_type,
-						    SYMBOL_NATURAL_NAME (sym),
-						    SYMBOL_VALUE (sym),
-						    filename, line);
+	  CP_CTX (context)->cp_ops->build_constant
+	    (CP_CTX (context), sym_type,
+	     SYMBOL_NATURAL_NAME (sym.symbol),
+	     SYMBOL_VALUE (sym.symbol),
+	     filename, line);
 	  return;
 
 	case LOC_CONST_BYTES:
 	  error (_("Unsupported LOC_CONST_BYTES for symbol \"%s\"."),
-		 SYMBOL_PRINT_NAME (sym));
+		 SYMBOL_PRINT_NAME (sym.symbol));
 
 	case LOC_UNDEF:
 	  internal_error (__FILE__, __LINE__, _("LOC_UNDEF found for \"%s\"."),
-			  SYMBOL_PRINT_NAME (sym));
+			  SYMBOL_PRINT_NAME (sym.symbol));
 
 	case LOC_COMMON_BLOCK:
 	  error (_("Fortran common block is unsupported for compilation "
 		   "evaluaton of symbol \"%s\"."),
-		 SYMBOL_PRINT_NAME (sym));
+		 SYMBOL_PRINT_NAME (sym.symbol));
 
 	case LOC_OPTIMIZED_OUT:
 	  error (_("Symbol \"%s\" cannot be used for compilation evaluation "
 		   "as it is optimized out."),
-		 SYMBOL_PRINT_NAME (sym));
+		 SYMBOL_PRINT_NAME (sym.symbol));
 
 	case LOC_COMPUTED:
 	  if (is_local)
@@ -225,7 +226,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	  warning (_("Symbol \"%s\" is thread-local and currently can only "
 		     "be referenced from the current thread in "
 		     "compiled code."),
-		   SYMBOL_PRINT_NAME (sym));
+		   SYMBOL_PRINT_NAME (sym.symbol));
 	  /* FALLTHROUGH */
 	case LOC_UNRESOLVED:
 	  /* 'symbol_name' cannot be used here as that one is used only for
@@ -236,20 +237,20 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	    struct value *val;
 	    struct frame_info *frame = NULL;
 
-	    if (symbol_read_needs_frame (sym))
+	    if (symbol_read_needs_frame (sym.symbol))
 	      {
 		frame = get_selected_frame (NULL);
 		if (frame == NULL)
 		  error (_("Symbol \"%s\" cannot be used because "
 			   "there is no selected frame"),
-			 SYMBOL_PRINT_NAME (sym));
+			 SYMBOL_PRINT_NAME (sym.symbol));
 	      }
 
-	    val = read_var_value (sym, frame);
+	    val = read_var_value (sym.symbol, sym.block, frame);
 	    if (VALUE_LVAL (val) != lval_memory)
 	      error (_("Symbol \"%s\" cannot be used for compilation "
 		       "evaluation as its address has not been found."),
-		     SYMBOL_PRINT_NAME (sym));
+		     SYMBOL_PRINT_NAME (sym.symbol));
 
 	    kind = GCC_CP_SYMBOL_VARIABLE;
 	    addr = value_address (val);
@@ -264,12 +265,12 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	case LOC_LOCAL:
 	substitution:
 	  kind = GCC_CP_SYMBOL_VARIABLE;
-	  symbol_name = symbol_substitution_name (sym);
+	  symbol_name = symbol_substitution_name (sym.symbol);
 	  break;
 
 	case LOC_STATIC:
 	  kind = GCC_CP_SYMBOL_VARIABLE;
-	  addr = SYMBOL_VALUE_ADDRESS (sym);
+	  addr = SYMBOL_VALUE_ADDRESS (sym.symbol);
 	  break;
 
 	case LOC_FINAL_VALUE:
@@ -292,12 +293,13 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	  // FIXME: drop any namespace and class names from before
 	  // the symbol name, and any function signatures from
 	  // after it.  -lxo
-	  decl = CP_CTX (context)->cp_ops->new_decl (CP_CTX (context),
-						     SYMBOL_NATURAL_NAME (sym),
-						     kind,
-						     sym_type,
-						     symbol_name, addr,
-						     filename, line);
+	  decl = CP_CTX (context)->cp_ops->new_decl
+	    (CP_CTX (context),
+	     SYMBOL_NATURAL_NAME (sym.symbol),
+	     kind,
+	     sym_type,
+	     symbol_name, addr,
+	     filename, line);
 	  if (is_global)
 	    {
 	      // FIXME: pop other namespaces, if any.
@@ -349,7 +351,7 @@ convert_symbol_sym (struct compile_cplus_instance *context, const char *identifi
 	    fprintf_unfiltered (gdb_stdout,
 				"gcc_convert_symbol \"%s\": global symbol\n",
 				identifier);
-	  convert_one_symbol (context, global_sym.symbol, 1, 0);
+	  convert_one_symbol (context, global_sym, 1, 0);
 	}
     }
 
@@ -357,7 +359,7 @@ convert_symbol_sym (struct compile_cplus_instance *context, const char *identifi
     fprintf_unfiltered (gdb_stdout,
 			"gcc_convert_symbol \"%s\": local symbol\n",
 			identifier);
-  convert_one_symbol (context, sym.symbol, 0, is_local_symbol);
+  convert_one_symbol (context, sym, 0, is_local_symbol);
 }
 
 /* Convert a minimal symbol to its gcc form.  CONTEXT is the compiler
