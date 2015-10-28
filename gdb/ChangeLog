@@ -1,3 +1,8 @@
+2015-10-28  Simon Dardis  <Simon.Dardis@imgtec.com>
+
+	* mips-linux-tdep.c (mips_linux_in_dynsym_stub): Recognise 'or'
+	as move along with [d]addu.
+
 2015-10-28  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_software_single_step): Pass 1 to
