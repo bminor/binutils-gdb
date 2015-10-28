@@ -1852,6 +1852,8 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   int isdyn = 0;
   int iself = s->owner->xvec->flavour == bfd_target_elf_flavour;
   unsigned int sh_type = iself ? elf_section_type (s) : SHT_NULL;
+  flagword flags;
+  asection *nexts;
 
   if (!bfd_link_relocatable (&link_info)
       && link_info.combreloc
@@ -1890,11 +1892,11 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 
 	if (os->bfd_section != NULL
 	    && (os->bfd_section->flags == 0
-		|| (_bfd_elf_match_sections_by_type (link_info.output_bfd,
-						     os->bfd_section,
-						     s->owner, s)
-		    && ((s->flags ^ os->bfd_section->flags)
-			& (SEC_LOAD | SEC_ALLOC)) == 0)))
+		|| (((s->flags ^ os->bfd_section->flags)
+		     & (SEC_LOAD | SEC_ALLOC)) == 0
+		    && _bfd_elf_match_sections_by_type (link_info.output_bfd,
+							os->bfd_section,
+							s->owner, s))))
 	  {
 	    /* We already have an output section statement with this
 	       name, and its bfd section has compatible flags.
@@ -1950,28 +1952,41 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
      stored right after the program headers where the OS can read it
      in the first page.  */
 
+  flags = s->flags;
+  nexts = s;
+  while ((nexts = bfd_get_next_section_by_name (nexts->owner, nexts)) != NULL)
+    if (nexts->output_section == NULL
+	&& (nexts->flags & SEC_EXCLUDE) == 0
+	&& ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
+	&& (nexts->owner->flags & DYNAMIC) == 0
+	&& nexts->owner->usrdata != NULL
+	&& !(((lang_input_statement_type *) nexts->owner->usrdata)
+	     ->flags.just_syms)
+	&& _bfd_elf_match_sections_by_type (nexts->owner, nexts, s->owner, s))
+      flags = (((flags ^ SEC_READONLY) | (nexts->flags ^ SEC_READONLY))
+	       ^ SEC_READONLY);
   place = NULL;
-  if ((s->flags & (SEC_ALLOC | SEC_DEBUGGING)) == 0)
+  if ((flags & (SEC_ALLOC | SEC_DEBUGGING)) == 0)
     place = &hold[orphan_nonalloc];
-  else if ((s->flags & SEC_ALLOC) == 0)
+  else if ((flags & SEC_ALLOC) == 0)
     ;
-  else if ((s->flags & SEC_LOAD) != 0
+  else if ((flags & SEC_LOAD) != 0
 	   && ((iself && sh_type == SHT_NOTE)
 	       || (!iself && CONST_STRNEQ (secname, ".note"))))
     place = &hold[orphan_interp];
-  else if ((s->flags & (SEC_LOAD | SEC_HAS_CONTENTS | SEC_THREAD_LOCAL)) == 0)
+  else if ((flags & (SEC_LOAD | SEC_HAS_CONTENTS | SEC_THREAD_LOCAL)) == 0)
     place = &hold[orphan_bss];
-  else if ((s->flags & SEC_SMALL_DATA) != 0)
+  else if ((flags & SEC_SMALL_DATA) != 0)
     place = &hold[orphan_sdata];
-  else if ((s->flags & SEC_THREAD_LOCAL) != 0)
+  else if ((flags & SEC_THREAD_LOCAL) != 0)
     place = &hold[orphan_tdata];
-  else if ((s->flags & SEC_READONLY) == 0)
+  else if ((flags & SEC_READONLY) == 0)
     place = &hold[orphan_data];
   else if (((iself && (sh_type == SHT_RELA || sh_type == SHT_REL))
 	    || (!iself && CONST_STRNEQ (secname, ".rel")))
-	   && (s->flags & SEC_LOAD) != 0)
+	   && (flags & SEC_LOAD) != 0)
     place = &hold[orphan_rel];
-  else if ((s->flags & SEC_CODE) == 0)
+  else if ((flags & SEC_CODE) == 0)
     place = &hold[orphan_rodata];
   else
     place = &hold[orphan_text];

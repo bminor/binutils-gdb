@@ -1810,7 +1810,7 @@ void bfd_section_list_clear (bfd *);
 
 asection *bfd_get_section_by_name (bfd *abfd, const char *name);
 
-asection *bfd_get_next_section_by_name (asection *sec);
+asection *bfd_get_next_section_by_name (bfd *ibfd, asection *sec);
 
 asection *bfd_get_linker_section (bfd *abfd, const char *name);
 

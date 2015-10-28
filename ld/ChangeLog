@@ -1,3 +1,11 @@
+2015-10-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19162
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Check flags
+	before calling _bfd_elf_match_sections_by_type.  Merge flags for
+	any other input sections that might match a new output section to
+	decide placement.
+
 2015-10-27  Laurent Alfonsi <laurent.alfonsi@st.com>
             Christophe Monat <christophe.monat@st.com>
 

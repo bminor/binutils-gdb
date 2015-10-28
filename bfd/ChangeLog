@@ -1,3 +1,14 @@
+2015-10-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19162
+	* elflink.c (_bfd_elf_gc_mark_reloc): Move code iterating over
+	linker input bfds..
+	* section.c (bfd_get_next_section_by_name): ..to here.  Add ibfd param.
+	(bfd_get_linker_section): Adjust bfd_get_next_section_by_name call.
+	* tekhex.c (first_phase): Likewise.
+	* elflink.c (bfd_elf_gc_sections): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2015-10-27  Laurent Alfonsi <laurent.alfonsi@st.com>
             Christophe Monat <christophe.monat@st.com>
 
