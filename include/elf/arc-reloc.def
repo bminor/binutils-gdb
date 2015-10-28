@@ -1,4 +1,3 @@
-
 ARC_RELOC_HOWTO(ARC_NONE, 0, \
                 2, \
                 32, \
@@ -286,6 +285,13 @@ ARC_RELOC_HOWTO(ARC_SDA16_ST2, 48, \
                 signed, \
                 ( ( ( S + A ) - _SDA_BASE_ ) >> 2 ))
 
+ARC_RELOC_HOWTO(ARC_32_PCREL, 49, \
+                2, \
+                32, \
+                replace_word32, \
+                signed, \
+                ( ( S + A ) - PDATA ))
+
 ARC_RELOC_HOWTO(ARC_PC32, 50, \
                 2, \
                 32, \
@@ -377,13 +383,6 @@ ARC_RELOC_HOWTO(ARC_TLS_DTPMOD, 66, \
                 dont, \
                 0)
 
-ARC_RELOC_HOWTO(ARC_TLS_DTPOFF, 67, \
-                2, \
-                32, \
-                replace_word32, \
-                dont, \
-                0)
-
 ARC_RELOC_HOWTO(ARC_TLS_TPOFF, 68, \
                 2, \
                 32, \
@@ -413,6 +412,13 @@ ARC_RELOC_HOWTO(ARC_TLS_GD_CALL, 71, \
                 0)
 
 ARC_RELOC_HOWTO(ARC_TLS_IE_GOT, 72, \
+                2, \
+                32, \
+                replace_word32, \
+                dont, \
+                0)
+
+ARC_RELOC_HOWTO(ARC_TLS_DTPOFF, 67, \
                 2, \
                 32, \
                 replace_word32, \
