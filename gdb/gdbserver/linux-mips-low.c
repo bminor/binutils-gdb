@@ -837,7 +837,7 @@ static struct regset_info mips_regsets[] = {
   { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, 33 * 8, FP_REGS,
     mips_fill_fpregset, mips_store_fpregset },
 #endif /* HAVE_PTRACE_GETREGS */
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info mips_regsets_info =

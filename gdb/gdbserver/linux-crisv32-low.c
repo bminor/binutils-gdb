@@ -391,7 +391,7 @@ cris_arch_setup (void)
 static struct regset_info cris_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, cris_num_regs * 4,
     GENERAL_REGS, cris_fill_gregset, cris_store_gregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 

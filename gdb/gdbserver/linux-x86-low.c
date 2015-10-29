@@ -463,7 +463,7 @@ static struct regset_info x86_regsets[] =
     FP_REGS,
     x86_fill_fpregset, x86_store_fpregset },
 #endif /* HAVE_PTRACE_GETREGS */
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static CORE_ADDR
