@@ -168,7 +168,10 @@ convert_one_symbol (struct compile_cplus_instance *context,
   else
     {
       gcc_decl decl;
-      enum gcc_cp_symbol_kind kind;
+      /* pmuldoon: As far as I can tell, kind is properly assigned in
+	 all scenarios, but GCC on compiling GDB still complains about "use
+	 maybe uninitialized".  Add temporary pacifier.  */
+      enum gcc_cp_symbol_kind kind = -1;
       CORE_ADDR addr = 0;
       char *symbol_name = NULL;
 
