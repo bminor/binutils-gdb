@@ -448,37 +448,39 @@ py_print_single_arg (struct ui_out *out,
 	    {
 	      retval = EXT_LANG_BT_ERROR;
 	      do_cleanups (cleanups);
-	      continue;
 	    }
 	}
 
-      if (val != NULL)
-	annotate_arg_value (value_type (val));
-
-      /* If the output is to the CLI, and the user option "set print
-	 frame-arguments" is set to none, just output "...".  */
-      if (! ui_out_is_mi_like_p (out) && args_type == NO_VALUES)
-	ui_out_field_string (out, "value", "...");
-      else
+      if (retval != EXT_LANG_BT_ERROR)
 	{
-	  /* Otherwise, print the value for both MI and the CLI, except
-	     for the case of MI_PRINT_NO_VALUES.  */
-	  if (args_type != NO_VALUES)
-	    {
-	      if (val == NULL)
-		{
-		  gdb_assert (fa != NULL && fa->error != NULL);
-		  ui_out_field_fmt (out, "value",
-				    _("<error reading variable: %s>"),
-				    fa->error);
-		}
-	      else if (py_print_value (out, val, opts, 0, args_type, language)
-		       == EXT_LANG_BT_ERROR)
-		retval = EXT_LANG_BT_ERROR;
-	    }
-	}
+	  if (val != NULL)
+	    annotate_arg_value (value_type (val));
 
-      do_cleanups (cleanups);
+	  /* If the output is to the CLI, and the user option "set print
+	     frame-arguments" is set to none, just output "...".  */
+	  if (! ui_out_is_mi_like_p (out) && args_type == NO_VALUES)
+	    ui_out_field_string (out, "value", "...");
+	  else
+	    {
+	      /* Otherwise, print the value for both MI and the CLI, except
+		 for the case of MI_PRINT_NO_VALUES.  */
+	      if (args_type != NO_VALUES)
+		{
+		  if (val == NULL)
+		    {
+		      gdb_assert (fa != NULL && fa->error != NULL);
+		      ui_out_field_fmt (out, "value",
+					_("<error reading variable: %s>"),
+					fa->error);
+		    }
+		  else if (py_print_value (out, val, opts, 0, args_type, language)
+			   == EXT_LANG_BT_ERROR)
+		    retval = EXT_LANG_BT_ERROR;
+		}
+	    }
+
+	  do_cleanups (cleanups);
+	}
     }
   CATCH (except, RETURN_MASK_ERROR)
     {

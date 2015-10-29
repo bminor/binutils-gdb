@@ -1,3 +1,20 @@
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2-frame-tailcall.c (dwarf2_tailcall_sniffer_first): Don't
+	assume that "break" breaks out of a TRY/CATCH.
+	* python/py-framefilter.c (py_print_single_arg): Don't assume
+	"continue" breaks out of a TRY/CATCH.
+	* python/py-value.c (valpy_binop_throw): New function, factored
+	out from ...
+	(valpy_binop): ... this.
+	(valpy_richcompare_throw): New function, factored
+	out from ...
+	(valpy_richcompare): ... this.
+	* solib.c (solib_read_symbols): Don't assume "break" breaks out
+	of a TRY/CATCH.
+	* common/common-exceptions.h [USE_RAW_CXX_TRY]
+	<TRY/CATCH/END_CATCH>: Define as 1-1 wrappers around try/catch.
+
 2015-10-28  Simon Dardis  <Simon.Dardis@imgtec.com>
 
 	* mips-linux-tdep.c (mips_linux_in_dynsym_stub): Recognise 'or'
