@@ -1,3 +1,16 @@
+2015-10-29  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19162
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Pass
+	updated flags to lang_output_section_find_by_flags.
+	* emultempl/mmo.em (mmo_place_orphan): Merge flags for any
+	other input sections that might match a new output section to
+	decide placement.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* ldlang.c (lang_output_section_find_by_flags): Add sec_flags param.
+	* ldlang.h (lang_output_section_find_by_flags): Update prototype.
+
 2015-10-29  Matthias Klose  <doko@ubuntu.com>
 
 	* ld.texinfo (Options <-rpath>): Fix typo.
