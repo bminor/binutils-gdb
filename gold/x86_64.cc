@@ -594,6 +594,11 @@ class Target_x86_64 : public Sized_target<size, false>
   unsigned int
   plt_entry_size() const;
 
+  // Return the size of each GOT entry.
+  unsigned int
+  got_entry_size() const
+  { return 8; };
+
   // Create the GOT section for an incremental update.
   Output_data_got_base*
   init_got_plt_for_update(Symbol_table* symtab,

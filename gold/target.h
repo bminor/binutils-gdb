@@ -1004,6 +1004,14 @@ class Sized_target : public Target
   plt_entry_size() const
   { gold_unreachable(); }
 
+  // Return the size of each GOT entry.  This is only used for
+  // laying out the incremental link info sections.  A target needs
+  // to implement this if its GOT size is different.
+
+  virtual unsigned int
+  got_entry_size() const
+  { return size / 8; }
+
   // Create the GOT and PLT sections for an incremental update.
   // A target needs to implement this to support incremental linking.
 

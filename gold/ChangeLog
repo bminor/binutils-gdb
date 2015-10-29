@@ -1,3 +1,18 @@
+2015-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19184
+	* incremental.cc (Got_plt_view_info): Add got_entry_size.
+	(Local_got_offset_visitor::visit): Replace got_entry_size_
+	with info_.got_entry_size.
+	(Local_got_offset_visitor::got_entry_size_): Removed.
+	(Global_got_offset_visitor::visit): Replace got_entry_size_
+	with info_.got_entry_size.
+	(Global_got_offset_visitor::got_entry_size_): Removed.
+	(Output_section_incremental_inputs::write_got_plt): Initialize
+	view_info.got_entry_size.
+	* target.h (Sized_target::got_entry_size): New virtual function.
+	* x86_64.cc (Target_x86_64::got_entry_size): New function.
+
 2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* testsuite/binary_test.cc: Add __attribute__((aligned(1))).
