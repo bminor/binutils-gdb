@@ -1,3 +1,8 @@
+2015-10-29  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* proc-service.c (ps_pdread): Add/adjust casts.
+	(ps_pdwrite): Add/adjust casts.
+
 2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* server.c (handle_search_memory_1): Cast return value of
