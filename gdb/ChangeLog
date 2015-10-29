@@ -1,5 +1,9 @@
 2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* jit.c (jit_target_read_impl): Add cast.
+
+2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.c (jit_reader_load): Add cast.
 
 2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>

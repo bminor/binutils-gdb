@@ -491,7 +491,8 @@ typedef CORE_ADDR jit_dbg_reader_data;
 static enum gdb_status
 jit_target_read_impl (GDB_CORE_ADDR target_mem, void *gdb_buf, int len)
 {
-  int result = target_read_memory ((CORE_ADDR) target_mem, gdb_buf, len);
+  int result = target_read_memory ((CORE_ADDR) target_mem,
+				   (gdb_byte *) gdb_buf, len);
   if (result == 0)
     return GDB_SUCCESS;
   else
