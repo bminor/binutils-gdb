@@ -16,6 +16,24 @@
 	* linux-x86-low.c (x86_regsets): Likewise.
 	* linux-xtensa-low.c (xtensa_regsets): Likewise.
 
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.h (NULL_REGSET): Define.
+	* linux-aarch64-low.c (aarch64_regsets): Use NULL_REGSET.
+	* linux-arm-low.c (arm_regsets): Likewise.
+	* linux-crisv32-low.c (cris_regsets): Likewise.
+	* linux-m68k-low.c (m68k_regsets): Likewise.
+	* linux-mips-low.c (mips_regsets): Likewise.
+	* linux-nios2-low.c (nios2_regsets): Likewise.
+	* linux-ppc-low.c (ppc_regsets): Likewise.
+	* linux-s390-low.c (s390_regsets): Likewise.
+	* linux-sh-low.c (sh_regsets): Likewise.
+	* linux-sparc-low.c (sparc_regsets): Likewise.
+	* linux-tic6x-low.c (tic6x_regsets): Likewise.
+	* linux-tile-low.c (tile_regsets): Likewise.
+	* linux-x86-low.c (x86_regsets): Likewise.
+	* linux-xtensa-low.c (xtensa_regsets): Likewise.
+
 2015-10-26  Doug Evans  <dje@google.com>
 
 	* linux-low.c (__SIGRTMIN): Move to nat/linux-nat.h.
