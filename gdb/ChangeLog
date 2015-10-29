@@ -1,5 +1,9 @@
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.c (exception_none): Add cast.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
 	* compile/compile-c-types.c (struct type_map_instance)
 	<gcc_type>: Rename to gcc_type_handle.
 	(insert_type, convert_type): Adjust.
