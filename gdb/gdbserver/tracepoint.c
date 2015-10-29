@@ -2448,10 +2448,20 @@ clear_installed_tracepoints (void)
       switch (tpoint->type)
 	{
 	case trap_tracepoint:
-	  delete_breakpoint (tpoint->handle);
+	  {
+	    struct breakpoint *bp
+	      = (struct breakpoint *) tpoint->handle;
+
+	    delete_breakpoint (bp);
+	  }
 	  break;
 	case fast_tracepoint:
-	  delete_fast_tracepoint_jump (tpoint->handle);
+	  {
+	    struct fast_tracepoint_jump *jump
+	      = (struct fast_tracepoint_jump *) tpoint->handle;
+
+	    delete_fast_tracepoint_jump (jump);
+	  }
 	  break;
 	case static_tracepoint:
 	  if (prev_stpoint != NULL

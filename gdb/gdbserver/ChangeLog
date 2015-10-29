@@ -1,5 +1,9 @@
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
+	* tracepoint.c (clear_installed_tracepoints): Add casts.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
 	* server.c (handle_v_cont, process_serial_event): Add enum
 	gdb_signal casts to signal parsing code.
 
