@@ -1,3 +1,10 @@
+2015-10-29  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19146
+	* lexsup.c (parse_args): Correct error message for an option that
+	is missing its argument if that option is the last one on the
+	command line.
+
 2015-10-29  Alan Modra  <amodra@gmail.com>
 
 	PR ld/19162
