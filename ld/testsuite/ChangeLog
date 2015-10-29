@@ -1,3 +1,7 @@
+2015-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/plt-main3.rd: Also check GOTPCRELX.
+
 2015-10-29  Catherine Moore  <clm@codesourcery.com>
     
     	* ld-mips-elf/mips16-fp-stub-1.s: New.
