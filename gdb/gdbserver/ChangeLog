@@ -1,5 +1,10 @@
 2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* server.c (handle_search_memory_1): Cast return value of
+	memmem.
+
+2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* server.c (write_qxfer_response): Change type of data to
 	gdb_byte *.
 
