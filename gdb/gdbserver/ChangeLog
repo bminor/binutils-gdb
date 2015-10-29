@@ -1,5 +1,9 @@
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
+	* mem-break.c (Z_packet_to_bkpt_type): Add cast.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
 	* tracepoint.c (clear_installed_tracepoints): Add casts.
 
 2015-10-29  Pedro Alves  <palves@redhat.com>
