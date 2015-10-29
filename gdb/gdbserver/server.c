@@ -2555,9 +2555,9 @@ handle_v_cont (char *own_buf)
 	    goto err;
 	  p = q;
 
-	  if (!gdb_signal_to_host_p (sig))
+	  if (!gdb_signal_to_host_p ((enum gdb_signal) sig))
 	    goto err;
-	  resume_info[i].sig = gdb_signal_to_host (sig);
+	  resume_info[i].sig = gdb_signal_to_host ((enum gdb_signal) sig);
 	}
       else if (p[0] == 'r')
 	{
@@ -4039,8 +4039,8 @@ process_serial_event (void)
     case 'C':
       require_running (own_buf);
       hex2bin (own_buf + 1, &sig, 1);
-      if (gdb_signal_to_host_p (sig))
-	signal = gdb_signal_to_host (sig);
+      if (gdb_signal_to_host_p ((enum gdb_signal) sig))
+	signal = gdb_signal_to_host ((enum gdb_signal) sig);
       else
 	signal = 0;
       myresume (own_buf, 0, signal);
@@ -4048,8 +4048,8 @@ process_serial_event (void)
     case 'S':
       require_running (own_buf);
       hex2bin (own_buf + 1, &sig, 1);
-      if (gdb_signal_to_host_p (sig))
-	signal = gdb_signal_to_host (sig);
+      if (gdb_signal_to_host_p ((enum gdb_signal) sig))
+	signal = gdb_signal_to_host ((enum gdb_signal) sig);
       else
 	signal = 0;
       myresume (own_buf, 1, signal);

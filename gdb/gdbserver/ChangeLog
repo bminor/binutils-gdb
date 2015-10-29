@@ -1,5 +1,10 @@
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
+	* server.c (handle_v_cont, process_serial_event): Add enum
+	gdb_signal casts to signal parsing code.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.h (NULL_REGSET): Define.
 	* linux-aarch64-low.c (aarch64_regsets): Use NULL_REGSET.
 	* linux-arm-low.c (arm_regsets): Likewise.
