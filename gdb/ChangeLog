@@ -1,3 +1,9 @@
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* mdebugread.c (add_data_symbol): New function, factored out from
+	...
+	(parse_symbol): ... here.  Delete 'theclass' local.
+
 2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* jit.c (jit_target_read_impl): Add cast.
