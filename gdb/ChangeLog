@@ -1,3 +1,8 @@
+2015-10-29  Eli Zaretskii  <eliz@gnu.org>
+
+	* utils.c (init_page_info): Disable paging if INSIDE_EMACS is set
+	in the environment.
+
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
 	* gnu-v2-abi.c (gnuv2_is_destructor_name)
