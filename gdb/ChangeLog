@@ -1,3 +1,7 @@
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* guile/scm-frame.c (gdbscm_unwind_stop_reason_string): Add cast.
+
 2015-10-29  Eli Zaretskii  <eliz@gnu.org>
 
 	* utils.c (init_page_info): Disable paging if INSIDE_EMACS is set
