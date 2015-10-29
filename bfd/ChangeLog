@@ -1,3 +1,7 @@
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* libhppa.h (bfd_hppa_insn2fmt): Add cast.
+
 2015-10-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Fix a typo in
