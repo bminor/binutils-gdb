@@ -1,3 +1,8 @@
+2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* server.c (write_qxfer_response): Change type of data to
+	gdb_byte *.
+
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
 	* mem-break.c (Z_packet_to_bkpt_type): Add cast.
