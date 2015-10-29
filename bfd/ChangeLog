@@ -1,3 +1,8 @@
+2015-10-29  Catherine Moore  <clm@codesourcery.com>
+    
+    	* elfxx-mips.c (mips_elf_check_mips16_stubs): Set a stub's output
+    	section to bfd_abs_section_ptr if the stub is discarded.
+
 2015-10-29  Ed Schouten  <ed@nuxi.nl>
 
 	* config.bfd (targ_defvec): Add support for CloudABI on aarch64.

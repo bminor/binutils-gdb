@@ -1707,6 +1707,7 @@ mips_elf_check_mips16_stubs (struct bfd_link_info *info,
       h->fn_stub->flags &= ~SEC_RELOC;
       h->fn_stub->reloc_count = 0;
       h->fn_stub->flags |= SEC_EXCLUDE;
+      h->fn_stub->output_section = bfd_abs_section_ptr;
     }
 
   if (h->call_stub != NULL
@@ -1719,6 +1720,7 @@ mips_elf_check_mips16_stubs (struct bfd_link_info *info,
       h->call_stub->flags &= ~SEC_RELOC;
       h->call_stub->reloc_count = 0;
       h->call_stub->flags |= SEC_EXCLUDE;
+      h->call_stub->output_section = bfd_abs_section_ptr;
     }
 
   if (h->call_fp_stub != NULL
@@ -1731,6 +1733,7 @@ mips_elf_check_mips16_stubs (struct bfd_link_info *info,
       h->call_fp_stub->flags &= ~SEC_RELOC;
       h->call_fp_stub->reloc_count = 0;
       h->call_fp_stub->flags |= SEC_EXCLUDE;
+      h->call_fp_stub->output_section = bfd_abs_section_ptr;
     }
 }
 
