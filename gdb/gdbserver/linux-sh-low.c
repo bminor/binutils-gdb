@@ -114,7 +114,7 @@ static void sh_fill_gregset (struct regcache *regcache, void *buf)
 
 static struct regset_info sh_regsets[] = {
   { 0, 0, 0, 0, GENERAL_REGS, sh_fill_gregset, NULL },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info sh_regsets_info =

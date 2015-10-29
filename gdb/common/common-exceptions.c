@@ -20,7 +20,7 @@
 #include "common-defs.h"
 #include "common-exceptions.h"
 
-const struct gdb_exception exception_none = { 0, GDB_NO_ERROR, NULL };
+const struct gdb_exception exception_none = { (enum return_reason) 0, GDB_NO_ERROR, NULL };
 
 #ifndef __cplusplus
 

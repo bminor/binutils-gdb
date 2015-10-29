@@ -167,6 +167,20 @@ mips*-*-*)
  targ_big_endian=true
  targ_extra_big_endian=false
  ;;
+s390-*-*)
+ targ_obj=s390
+ targ_machine=EM_S390
+ targ_size=32
+ targ_big_endian=true
+ targ_extra_big_endian=false
+ ;;
+s390x-*-*)
+ targ_obj=s390
+ targ_machine=EM_S390
+ targ_size=64
+ targ_big_endian=true
+ targ_extra_big_endian=false
+ ;;
 *)
   targ_obj=UNKNOWN
   ;;

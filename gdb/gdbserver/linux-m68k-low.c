@@ -119,7 +119,7 @@ static struct regset_info m68k_regsets[] = {
     FP_REGS,
     m68k_fill_fpregset, m68k_store_fpregset },
 #endif /* HAVE_PTRACE_GETREGS */
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static const gdb_byte m68k_breakpoint[] = { 0x4E, 0x4F };

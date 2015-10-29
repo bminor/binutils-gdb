@@ -657,7 +657,7 @@ static struct regset_info ppc_regsets[] = {
   { PTRACE_GETEVRREGS, PTRACE_SETEVRREGS, 0, 32 * 4 + 8 + 4, EXTENDED_REGS,
     ppc_fill_evrregset, ppc_store_evrregset },
   { 0, 0, 0, 0, GENERAL_REGS, ppc_fill_gregset, NULL },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct usrregs_info ppc_usrregs_info =

@@ -390,7 +390,7 @@ static struct regset_info s390_regsets[] = {
     EXTENDED_REGS, s390_fill_vxrs_low, s390_store_vxrs_low },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_S390_VXRS_HIGH, 0,
     EXTENDED_REGS, s390_fill_vxrs_high, s390_store_vxrs_high },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 

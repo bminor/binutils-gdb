@@ -239,7 +239,7 @@ static struct regset_info nios2_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
     nios2_num_regs * 4, GENERAL_REGS,
     nios2_fill_gregset, nios2_store_gregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info nios2_regsets_info =

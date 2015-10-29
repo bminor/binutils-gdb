@@ -1499,11 +1499,12 @@ next_matching_output_section_statement (lang_output_section_statement_type *os,
 
 lang_output_section_statement_type *
 lang_output_section_find_by_flags (const asection *sec,
+				   flagword sec_flags,
 				   lang_output_section_statement_type **exact,
 				   lang_match_sec_type_func match_type)
 {
   lang_output_section_statement_type *first, *look, *found;
-  flagword look_flags, sec_flags, differ;
+  flagword look_flags, differ;
 
   /* We know the first statement on this list is *ABS*.  May as well
      skip it.  */
@@ -1511,7 +1512,6 @@ lang_output_section_find_by_flags (const asection *sec,
   first = first->next;
 
   /* First try for an exact match.  */
-  sec_flags = sec->flags;
   found = NULL;
   for (look = first; look; look = look->next)
     {
@@ -1695,7 +1695,7 @@ lang_output_section_find_by_flags (const asection *sec,
   if (found || !match_type)
     return found;
 
-  return lang_output_section_find_by_flags (sec, NULL, NULL);
+  return lang_output_section_find_by_flags (sec, sec_flags, NULL, NULL);
 }
 
 /* Find the last output section before given output statement.

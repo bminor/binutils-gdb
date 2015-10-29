@@ -51,7 +51,7 @@
 
 extern int test_array_start;
 extern int test_array_end;
-extern char interleaved;
+extern char interleaved __attribute__((__aligned__(1)));
 
 int
 main(void)

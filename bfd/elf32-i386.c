@@ -4006,7 +4006,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  if (!bfd_link_pic (info))
 	    {
 	      /* If not PIC, add the .got.plt section address for
-		 baseless adressing.  */
+		 baseless addressing.  */
 	      unsigned int modrm;
 	      modrm = bfd_get_8 (abfd, contents + rel->r_offset - 1);
 	      if ((modrm & 0xc7) == 0x5)

@@ -898,7 +898,7 @@ static struct regset_info arm_regsets[] = {
   { PTRACE_GETVFPREGS, PTRACE_SETVFPREGS, 0, 32 * 8 + 4,
     EXTENDED_REGS,
     arm_fill_vfpregset, arm_store_vfpregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info arm_regsets_info =

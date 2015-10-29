@@ -462,7 +462,7 @@ enum hppa_opcode_type
 static inline int
 bfd_hppa_insn2fmt (bfd *abfd, int insn)
 {
-  enum hppa_opcode_type op = get_opcode (insn);
+  enum hppa_opcode_type op = (enum hppa_opcode_type) get_opcode (insn);
 
   switch (op)
     {

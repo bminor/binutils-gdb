@@ -193,6 +193,8 @@ const char Archive::armagt[sarmag] =
 
 const char Archive::arfmag[2] = { '`', '\n' };
 
+const char Archive::sym64name[7] = { '/', 'S', 'Y', 'M', '6', '4', '/' };
+
 Archive::Archive(const std::string& name, Input_file* input_file,
                  bool is_thin_archive, Dirsearch* dirpath, Task* task)
   : Library_base(task), name_(name), input_file_(input_file), armap_(),
@@ -225,7 +227,12 @@ Archive::setup()
   off_t off = sarmag;
   if (armap_name.empty())
     {
-      this->read_armap(sarmag + sizeof(Archive_header), armap_size);
+      this->read_armap<32>(sarmag + sizeof(Archive_header), armap_size);
+      off = sarmag + sizeof(Archive_header) + armap_size;
+    }
+  else if (armap_name == "/SYM64/")
+    {
+      this->read_armap<64>(sarmag + sizeof(Archive_header), armap_size);
       off = sarmag + sizeof(Archive_header) + armap_size;
     }
   else if (!this->input_file_->options().whole_archive())
@@ -277,6 +284,7 @@ Archive::unlock_nested_archives()
 
 // Read the archive symbol map.
 
+template<int mapsize>
 void
 Archive::read_armap(off_t start, section_size_type size)
 {
@@ -290,8 +298,10 @@ Archive::read_armap(off_t start, section_size_type size)
   const unsigned char* p = this->get_view(start, size, true, false);
 
   // Numbers in the armap are always big-endian.
-  const elfcpp::Elf_Word* pword = reinterpret_cast<const elfcpp::Elf_Word*>(p);
-  unsigned int nsyms = elfcpp::Swap<32, true>::readval(pword);
+  typedef typename elfcpp::Elf_types<mapsize>::Elf_Addr Entry_type;
+  const Entry_type* pword = reinterpret_cast<const Entry_type*>(p);
+  unsigned long nsyms = convert_types<unsigned long, Entry_type>(
+    elfcpp::Swap<mapsize, true>::readval(pword));
   ++pword;
 
   // Note that the addition is in units of sizeof(elfcpp::Elf_Word).
@@ -303,10 +313,11 @@ Archive::read_armap(off_t start, section_size_type size)
   this->armap_.resize(nsyms);
 
   section_offset_type name_offset = 0;
-  for (unsigned int i = 0; i < nsyms; ++i)
+  for (unsigned long i = 0; i < nsyms; ++i)
     {
       this->armap_[i].name_offset = name_offset;
-      this->armap_[i].file_offset = elfcpp::Swap<32, true>::readval(pword);
+      this->armap_[i].file_offset = convert_types<off_t, Entry_type>(
+        elfcpp::Swap<mapsize, true>::readval(pword));
       name_offset += strlen(pnames + name_offset) + 1;
       ++pword;
       if (this->armap_[i].file_offset != last_seen_offset)
@@ -393,6 +404,11 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
       // This is the symbol table.
       if (!pname->empty())
 	pname->clear();
+    }
+  else if (memcmp(hdr->ar_name, sym64name, sizeof sym64name) == 0)
+    {
+      // This is the symbol table, 64-bit version.
+      pname->assign(sym64name, sizeof sym64name);
     }
   else if (hdr->ar_name[1] == '/')
     {
@@ -544,7 +560,9 @@ Archive::const_iterator::read_next_header()
       this->header_.off = this->off_;
 
       // Skip special members.
-      if (!this->header_.name.empty() && this->header_.name != "/")
+      if (!this->header_.name.empty()
+	  && this->header_.name != "/"
+	  && this->header_.name != "/SYM64/")
 	return;
 
       this->off_ += sizeof(Archive_header) + this->header_.size;

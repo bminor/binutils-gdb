@@ -1,3 +1,27 @@
+2015-10-29  Catherine Moore  <clm@codesourcery.com>
+    
+    	* elfxx-mips.c (mips_elf_check_mips16_stubs): Set a stub's output
+    	section to bfd_abs_section_ptr if the stub is discarded.
+
+2015-10-29  Ed Schouten  <ed@nuxi.nl>
+
+	* config.bfd (targ_defvec): Add support for CloudABI on aarch64.
+	For this target we have to make sure we use ELFOSABI_CLOUDABI
+	instead of ELFOSABI_NONE.
+	* configure.ac (tb): Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* targets.c (_bfd_target_vector): Likewise.
+	* configure: Regenerate.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* libhppa.h (bfd_hppa_insn2fmt): Add cast.
+
+2015-10-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Fix a typo in
+	comment.
+
 2015-10-28  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.c (create_instruction_branch_absolute): Replace

@@ -696,16 +696,16 @@ solib_read_symbols (struct so_list *so, int flags)
 		  && so->objfile->addr_low == so->addr_low)
 		break;
 	    }
-	  if (so->objfile != NULL)
-	    break;
-
-	  sap = build_section_addr_info_from_section_table (so->sections,
-							    so->sections_end);
-	  so->objfile = symbol_file_add_from_bfd (so->abfd, so->so_name,
-						  flags, sap, OBJF_SHARED,
-						  NULL);
-	  so->objfile->addr_low = so->addr_low;
-	  free_section_addr_info (sap);
+	  if (so->objfile == NULL)
+	    {
+	      sap = build_section_addr_info_from_section_table (so->sections,
+								so->sections_end);
+	      so->objfile = symbol_file_add_from_bfd (so->abfd, so->so_name,
+						      flags, sap, OBJF_SHARED,
+						      NULL);
+	      so->objfile->addr_low = so->addr_low;
+	      free_section_addr_info (sap);
+	    }
 
 	  so->symbols_loaded = 1;
 	}

@@ -6815,7 +6815,7 @@ linux_low_encode_raw (struct buffer *buffer, const gdb_byte *data,
 
 static int
 linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
-		       int type)
+		       enum btrace_read_type type)
 {
   struct btrace_data btrace;
   struct btrace_block *block;

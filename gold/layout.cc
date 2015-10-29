@@ -4409,7 +4409,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 	{
 	  if (dynsym != NULL)
 	    hashsec->set_link_section(dynsym);
-	  hashsec->set_entsize(4);
+	  hashsec->set_entsize(parameters->target().hash_entry_size() / 8);
 	}
 
       if (odyn != NULL)

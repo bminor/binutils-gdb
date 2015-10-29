@@ -241,7 +241,7 @@ Z_packet_to_bkpt_type (char z_type)
 {
   gdb_assert ('0' <= z_type && z_type <= '4');
 
-  return gdb_breakpoint_Z0 + (z_type - '0');
+  return (enum bkpt_type) (gdb_breakpoint_Z0 + (z_type - '0'));
 }
 
 /* See mem-break.h.  */

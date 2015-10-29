@@ -38,6 +38,11 @@ enum regset_type {
   EXTENDED_REGS,
 };
 
+/* The arch's regsets array initializer must be terminated with a NULL
+   regset.  */
+#define NULL_REGSET \
+  { 0, 0, 0, -1, (enum regset_type) -1, NULL, NULL }
+
 struct regset_info
 {
   int get_request, set_request;

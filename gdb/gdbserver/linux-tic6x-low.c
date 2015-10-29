@@ -332,7 +332,7 @@ tic6x_store_gregset (struct regcache *regcache, const void *buf)
 static struct regset_info tic6x_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, TIC6X_NUM_REGS * 4, GENERAL_REGS,
     tic6x_fill_gregset, tic6x_store_gregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static void

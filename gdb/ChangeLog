@@ -1,3 +1,35 @@
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (exception_none): Add cast.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* compile/compile-c-types.c (struct type_map_instance)
+	<gcc_type>: Rename to gcc_type_handle.
+	(insert_type, convert_type): Adjust.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2-frame-tailcall.c (dwarf2_tailcall_sniffer_first): Don't
+	assume that "break" breaks out of a TRY/CATCH.
+	* python/py-framefilter.c (py_print_single_arg): Don't assume
+	"continue" breaks out of a TRY/CATCH.
+	* python/py-value.c (valpy_binop_throw): New function, factored
+	out from ...
+	(valpy_binop): ... this.
+	(valpy_richcompare_throw): New function, factored
+	out from ...
+	(valpy_richcompare): ... this.
+	* solib.c (solib_read_symbols): Don't assume "break" breaks out
+	of a TRY/CATCH.
+	* common/common-exceptions.h [USE_RAW_CXX_TRY]
+	<TRY/CATCH/END_CATCH>: Define as 1-1 wrappers around try/catch.
+
+2015-10-28  Simon Dardis  <Simon.Dardis@imgtec.com>
+
+	* mips-linux-tdep.c (mips_linux_in_dynsym_stub): Recognise 'or'
+	as move along with [d]addu.
+
 2015-10-28  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_software_single_step): Pass 1 to

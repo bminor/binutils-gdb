@@ -539,7 +539,7 @@ static struct regset_info aarch64_regsets[] =
     sizeof (struct user_fpsimd_state), FP_REGS,
     aarch64_fill_fpregset, aarch64_store_fpregset
   },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info aarch64_regsets_info =

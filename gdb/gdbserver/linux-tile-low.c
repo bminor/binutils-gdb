@@ -135,7 +135,7 @@ static struct regset_info tile_regsets[] =
 {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, tile_num_regs * 8,
     GENERAL_REGS, tile_fill_gregset, tile_store_gregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info tile_regsets_info =

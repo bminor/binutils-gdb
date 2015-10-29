@@ -291,7 +291,7 @@ static struct regset_info sparc_regsets[] = {
   { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, sizeof (fpregset_t),
     FP_REGS,
     sparc_fill_fpregset, sparc_store_fpregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info sparc_regsets_info =

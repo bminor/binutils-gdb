@@ -31,7 +31,7 @@ struct type_map_instance
 
   /* The corresponding gcc type handle.  */
 
-  gcc_type gcc_type;
+  gcc_type gcc_type_handle;
 };
 
 /* Hash a type_map_instance.  */
@@ -72,13 +72,13 @@ insert_type (struct compile_c_instance *context, struct type *type,
   void **slot;
 
   inst.type = type;
-  inst.gcc_type = gcc_type;
+  inst.gcc_type_handle = gcc_type;
   slot = htab_find_slot (context->type_map, &inst, INSERT);
 
   add = (struct type_map_instance *) *slot;
   /* The type might have already been inserted in order to handle
      recursive types.  */
-  if (add != NULL && add->gcc_type != gcc_type)
+  if (add != NULL && add->gcc_type_handle != gcc_type)
     error (_("Unexpected type id from GCC, check you use recent enough GCC."));
 
   if (add == NULL)
@@ -388,7 +388,7 @@ convert_type (struct compile_c_instance *context, struct type *type)
   inst.type = type;
   found = (struct type_map_instance *) htab_find (context->type_map, &inst);
   if (found != NULL)
-    return found->gcc_type;
+    return found->gcc_type_handle;
 
   result = convert_type_basic (context, type);
   insert_type (context, type, result);

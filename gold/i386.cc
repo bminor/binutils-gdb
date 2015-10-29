@@ -898,7 +898,8 @@ const Target::Target_info Target_i386::i386_info =
   0,			// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 // Get the GOT section, creating it if necessary.
@@ -2790,6 +2791,8 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 	}
     }
 
+  bool baseless;
+
   switch (r_type)
     {
     case elfcpp::R_386_NONE:
@@ -2839,6 +2842,22 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 
     case elfcpp::R_386_GOT32:
     case elfcpp::R_386_GOT32X:
+      baseless = (view[-1] & 0xc7) == 0x5;
+      // R_386_GOT32 and R_386_GOT32X don't work without base register
+      // when generating a position-independent output file.
+      if (baseless
+	  && parameters->options().output_is_position_independent())
+	{
+	  if(gsym)
+	    gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+				   _("unexpected reloc %u against global symbol %s without base register in object file when generating a position-independent output file"),
+				   r_type, gsym->demangled_name().c_str());
+	  else
+	    gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+				   _("unexpected reloc %u against local symbol without base register in object file when generating a position-independent output file"),
+				   r_type);
+	}
+
       // Convert
       // mov foo@GOT(%reg), %reg
       // to
@@ -2852,8 +2871,11 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 	{
 	  view[-2] = 0x8d;
 	  elfcpp::Elf_types<32>::Elf_Addr value;
-	  value = (psymval->value(object, 0)
-	           - target->got_plt_section()->address());
+	  value = psymval->value(object, 0);
+	  // Don't subtract the .got.plt section address for baseless
+	  // addressing.
+	  if (!baseless)
+	    value -= target->got_plt_section()->address();
 	  Relocate_functions<32, false>::rel32(view, value);
 	}
       else
@@ -2875,6 +2897,9 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 	      got_offset = (object->local_got_offset(r_sym, GOT_TYPE_STANDARD)
 			    - target->got_size());
 	    }
+	  // Add the .got.plt section address for baseless addressing.
+	  if (baseless)
+	    got_offset += target->got_plt_section()->address();
 	  Relocate_functions<32, false>::rel32(view, got_offset);
 	}
       break;
@@ -4060,7 +4085,8 @@ const Target::Target_info Target_i386_nacl::i386_nacl_info =
   0,			// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 #define	NACLMASK	0xe0            // 32-byte alignment mask
@@ -4296,7 +4322,8 @@ const Target::Target_info Target_iamcu::iamcu_info =
   0,			// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 class Target_selector_iamcu : public Target_selector

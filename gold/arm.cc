@@ -2997,7 +2997,8 @@ const Target::Target_info Target_arm<big_endian>::arm_info =
   0,			// large_common_section_flags
   ".ARM.attributes",	// attributes_section
   "aeabi",		// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 // Arm relocate functions class
@@ -12744,7 +12745,8 @@ const Target::Target_info Target_arm_nacl<big_endian>::arm_nacl_info =
   0,			// large_common_section_flags
   ".ARM.attributes",	// attributes_section
   "aeabi",		// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 template<bool big_endian>

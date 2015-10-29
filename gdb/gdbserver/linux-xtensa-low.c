@@ -142,7 +142,7 @@ static struct regset_info xtensa_regsets[] = {
   { PTRACE_GETXTREGS, PTRACE_SETXTREGS, 0, XTENSA_ELF_XTREG_SIZE,
     EXTENDED_REGS,
     xtensa_fill_xtregset, xtensa_store_xtregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 #if XCHAL_HAVE_BE

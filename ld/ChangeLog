@@ -1,3 +1,37 @@
+2015-10-29  Ed Schouten  <ed@nuxi.nl>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add support for
+	CloudABI on aarch64. For this target we have to make sure we use
+	ELFOSABI_CLOUDABI instead of ELFOSABI_NONE.
+	* configure.tgt (targ_emul): Likewise.
+	* emulparams/aarch64cloudabi.sh: New file.
+	* emulparams/aarch64cloudabib.sh: New file.
+	* Makefile.in: Regenerate.
+
+2015-10-29  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19146
+	* lexsup.c (parse_args): Correct error message for an option that
+	is missing its argument if that option is the last one on the
+	command line.
+
+2015-10-29  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19162
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Pass
+	updated flags to lang_output_section_find_by_flags.
+	* emultempl/mmo.em (mmo_place_orphan): Merge flags for any
+	other input sections that might match a new output section to
+	decide placement.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* ldlang.c (lang_output_section_find_by_flags): Add sec_flags param.
+	* ldlang.h (lang_output_section_find_by_flags): Update prototype.
+
+2015-10-29  Matthias Klose  <doko@ubuntu.com>
+
+	* ld.texinfo (Options <-rpath>): Fix typo.
+
 2015-10-28  Alan Modra  <amodra@gmail.com>
 
 	PR ld/19162

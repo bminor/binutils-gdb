@@ -2003,8 +2003,9 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	}
       after = place->os;
       if (after == NULL)
-	after = lang_output_section_find_by_flags
-	  (s, &place->os, _bfd_elf_match_sections_by_type);
+	after
+	  = lang_output_section_find_by_flags (s, flags, &place->os,
+					       _bfd_elf_match_sections_by_type);
       if (after == NULL)
 	/* *ABS* is always the first output section statement.  */
 	after = &lang_output_section_statement.head->output_section_statement;
