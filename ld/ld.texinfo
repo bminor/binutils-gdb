@@ -1801,7 +1801,7 @@ ELF executable, the contents of the environment variable
 @code{LD_RUN_PATH} will be used if it is defined.
 
 The @option{-rpath} option may also be used on SunOS.  By default, on
-SunOS, the linker will form a runtime search patch out of all the
+SunOS, the linker will form a runtime search path out of all the
 @option{-L} options it is given.  If a @option{-rpath} option is used, the
 runtime search path will be formed exclusively using the @option{-rpath}
 options, ignoring the @option{-L} options.  This can be useful when using

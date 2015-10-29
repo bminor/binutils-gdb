@@ -1,3 +1,7 @@
+2015-10-29  Matthias Klose  <doko@ubuntu.com>
+
+	* ld.texinfo (Options <-rpath>): Fix typo.
+
 2015-10-28  Alan Modra  <amodra@gmail.com>
 
 	PR ld/19162
