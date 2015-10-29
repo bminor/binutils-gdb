@@ -177,7 +177,7 @@ jit_reader_load (const char *file_name)
   so = gdb_dlopen (file_name);
   old_cleanups = make_cleanup_dlclose (so);
 
-  init_fn = gdb_dlsym (so, reader_init_fn_sym);
+  init_fn = (reader_init_fn_type *) gdb_dlsym (so, reader_init_fn_sym);
   if (!init_fn)
     error (_("Could not locate initialization function: %s."),
           reader_init_fn_sym);

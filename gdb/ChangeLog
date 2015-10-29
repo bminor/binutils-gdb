@@ -1,5 +1,9 @@
 2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* jit.c (jit_reader_load): Add cast.
+
+2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2read.c (partial_die_full_name): Add cast.
 
 2015-10-29  Pedro Alves  <palves@redhat.com>
