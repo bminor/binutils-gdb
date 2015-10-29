@@ -7309,6 +7309,11 @@ aarch64_force_relocation (struct fix *fixp)
 const char *
 elf64_aarch64_target_format (void)
 {
+  if (strcmp (TARGET_OS, "cloudabi") == 0)
+    {
+      /* FIXME: What to do for ilp32_p ?  */
+      return target_big_endian ? "elf64-bigaarch64-cloudabi" : "elf64-littleaarch64-cloudabi";
+    }
   if (target_big_endian)
     return ilp32_p ? "elf32-bigaarch64" : "elf64-bigaarch64";
   else

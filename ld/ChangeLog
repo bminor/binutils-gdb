@@ -1,3 +1,13 @@
+2015-10-29  Ed Schouten  <ed@nuxi.nl>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add support for
+	CloudABI on aarch64. For this target we have to make sure we use
+	ELFOSABI_CLOUDABI instead of ELFOSABI_NONE.
+	* configure.tgt (targ_emul): Likewise.
+	* emulparams/aarch64cloudabi.sh: New file.
+	* emulparams/aarch64cloudabib.sh: New file.
+	* Makefile.in: Regenerate.
+
 2015-10-29  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/19146
