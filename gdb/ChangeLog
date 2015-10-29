@@ -1,5 +1,10 @@
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
+	* gnu-v2-abi.c (gnuv2_is_destructor_name)
+	(gnuv2_is_constructor_name): Add casts.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
 	* common/common-exceptions.c (exception_none): Add cast.
 
 2015-10-29  Pedro Alves  <palves@redhat.com>
