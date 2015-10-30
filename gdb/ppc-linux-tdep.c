@@ -1455,7 +1455,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_pollfd = 8;
       record_tdep->size_NFS_FHSIZE = 32;
       record_tdep->size_knfsd_fh = 132;
-      record_tdep->size_TASK_COMM_LEN = 32;
+      record_tdep->size_TASK_COMM_LEN = 16;
       record_tdep->size_sigaction = 32;
       record_tdep->size_sigset_t = 8;
       record_tdep->size_siginfo_t = 128;
@@ -1522,7 +1522,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_pollfd = 8;
       record_tdep->size_NFS_FHSIZE = 32;
       record_tdep->size_knfsd_fh = 132;
-      record_tdep->size_TASK_COMM_LEN = 32;
+      record_tdep->size_TASK_COMM_LEN = 16;
       record_tdep->size_sigaction = 20;
       record_tdep->size_sigset_t = 8;
       record_tdep->size_siginfo_t = 128;
