@@ -1,5 +1,24 @@
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Remove
+	size_dirent{,64}, add size_old_dirent.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Remove size_dirent{,64},
+	add size_old_dirent.
+	(amd64_x32_linux_init_abi): Remove size_dirent{,64}, add
+	size_old_dirent.
+	* arm-linux-tdep.c (arm_linux_init_abi): Remove size_dirent{,64},
+	add size_old_dirent.
+	* i386-linux-tdep.c (i386_linux_init_abi): Remove size_dirent{,64},
+	add size_old_dirent.
+	* linux-record.c (record_linux_system_call): Fix handling of readdir
+	and getdents{,64}.
+	* linux-record.h (struct linux_record_tdep): Remove size_dirent{,64},
+	add size_old_dirent.
+	* ppc-linux-tdep.c (ppc_init_linux_record_tdep): Remove
+	size_dirent{,64}, add size_old_dirent.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Fix size_sigaction,
 	size_sigset_t, size_old_sigaction, size_old_sigset_t.
 	* amd64-linux-tdep.c (amd64_linux_init_abi): Fix size_sigaction,

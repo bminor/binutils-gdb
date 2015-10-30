@@ -1009,8 +1009,7 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_old_gid_t = 2;
   aarch64_linux_record_tdep.size_old_uid_t = 2;
   aarch64_linux_record_tdep.size_fd_set = 128;
-  aarch64_linux_record_tdep.size_dirent = 280;
-  aarch64_linux_record_tdep.size_dirent64 = 280;
+  aarch64_linux_record_tdep.size_old_dirent = 280;
   aarch64_linux_record_tdep.size_statfs = 120;
   aarch64_linux_record_tdep.size_statfs64 = 120;
   aarch64_linux_record_tdep.size_sockaddr = 16;

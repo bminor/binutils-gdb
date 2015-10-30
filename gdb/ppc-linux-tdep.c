@@ -1432,8 +1432,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_old_gid_t = 4;
       record_tdep->size_old_uid_t = 4;
       record_tdep->size_fd_set = 128;
-      record_tdep->size_dirent = 280;
-      record_tdep->size_dirent64 = 280;
+      record_tdep->size_old_dirent = 280;
       record_tdep->size_statfs = 120;
       record_tdep->size_statfs64 = 120;
       record_tdep->size_sockaddr = 16;
@@ -1499,8 +1498,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_old_gid_t = 4;
       record_tdep->size_old_uid_t = 4;
       record_tdep->size_fd_set = 128;
-      record_tdep->size_dirent = 268;
-      record_tdep->size_dirent64 = 280;
+      record_tdep->size_old_dirent = 268;
       record_tdep->size_statfs = 64;
       record_tdep->size_statfs64 = 88;
       record_tdep->size_sockaddr = 16;

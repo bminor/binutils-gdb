@@ -39,8 +39,7 @@ struct linux_record_tdep
   int size_old_gid_t;
   int size_old_uid_t;
   int size_fd_set;
-  int size_dirent;
-  int size_dirent64;
+  int size_old_dirent;
   int size_statfs;
   int size_statfs64;
   int size_sockaddr;

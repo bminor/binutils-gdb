@@ -1905,8 +1905,8 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      but sys_getresuid.  */
   amd64_linux_record_tdep.size_old_uid_t = 2;
   amd64_linux_record_tdep.size_fd_set = 128;
-  amd64_linux_record_tdep.size_dirent = 280;
-  amd64_linux_record_tdep.size_dirent64 = 280;
+  /* ADM64 doesn't need this size because it doesn't have sys_readdir. */
+  amd64_linux_record_tdep.size_old_dirent = 280;
   amd64_linux_record_tdep.size_statfs = 120;
   amd64_linux_record_tdep.size_statfs64 = 120;
   amd64_linux_record_tdep.size_sockaddr = 16;
@@ -2121,8 +2121,8 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      but sys_getresuid.  */
   amd64_x32_linux_record_tdep.size_old_uid_t = 2;
   amd64_x32_linux_record_tdep.size_fd_set = 128;
-  amd64_x32_linux_record_tdep.size_dirent = 280;
-  amd64_x32_linux_record_tdep.size_dirent64 = 280;
+  /* ADM64 doesn't need this size because it doesn't have sys_readdir. */
+  amd64_x32_linux_record_tdep.size_old_dirent = 268;
   amd64_x32_linux_record_tdep.size_statfs = 120;
   amd64_x32_linux_record_tdep.size_statfs64 = 120;
   amd64_x32_linux_record_tdep.size_sockaddr = 16;

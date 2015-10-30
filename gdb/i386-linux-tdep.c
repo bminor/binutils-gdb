@@ -815,8 +815,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_old_gid_t = 2;
   i386_linux_record_tdep.size_old_uid_t = 2;
   i386_linux_record_tdep.size_fd_set = 128;
-  i386_linux_record_tdep.size_dirent = 268;
-  i386_linux_record_tdep.size_dirent64 = 276;
+  i386_linux_record_tdep.size_old_dirent = 268;
   i386_linux_record_tdep.size_statfs = 64;
   i386_linux_record_tdep.size_statfs64 = 84;
   i386_linux_record_tdep.size_sockaddr = 16;

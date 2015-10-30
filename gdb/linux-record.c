@@ -689,7 +689,7 @@ record_linux_system_call (enum gdb_syscall syscall,
     case gdb_old_readdir:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
-					 tdep->size_dirent))
+					 tdep->size_old_dirent))
         return -1;
       break;
 
@@ -1344,14 +1344,14 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_getdents:
+    case gdb_sys_getdents64:
       {
         ULONGEST count;
 
         regcache_raw_read_unsigned (regcache, tdep->arg2,
                                     &tmpulongest);
         regcache_raw_read_unsigned (regcache, tdep->arg3, &count);
-        if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
-					   tdep->size_dirent * count))
+        if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest, count))
           return -1;
       }
       break;
@@ -1743,19 +1743,6 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_madvise:
-      break;
-
-    case gdb_sys_getdents64:
-      {
-        ULONGEST count;
-
-        regcache_raw_read_unsigned (regcache, tdep->arg2,
-                                    &tmpulongest);
-        regcache_raw_read_unsigned (regcache, tdep->arg3, &count);
-        if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
-					   tdep->size_dirent64 * count))
-          return -1;
-      }
       break;
 
     case gdb_sys_fcntl64:
