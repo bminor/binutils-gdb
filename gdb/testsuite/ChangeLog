@@ -1,3 +1,11 @@
+2015-10-30  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/wp-replication.c (watch_count_done): Remove.
+	(empty_cycle): Remove.
+	(main): Don't call empty_cycle.  Don't use watch_count_done.
+	* gdb.threads/wp-replication.exp: Don't set breakpoint on
+	empty_cycle.  Rewrite the code counting HW watchpoints.
+
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.reverse/fstatat-reverse.c: New test.
