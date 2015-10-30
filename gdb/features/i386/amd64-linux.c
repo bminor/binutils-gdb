@@ -151,5 +151,9 @@ initialize_tdesc_amd64_linux (void)
   feature = tdesc_create_feature (result, "org.gnu.gdb.i386.linux");
   tdesc_create_reg (feature, "orig_rax", 57, 1, NULL, 64, "int");
 
+  feature = tdesc_create_feature (result, "org.gnu.gdb.i386.seg");
+  tdesc_create_reg (feature, "fs_base", 58, 1, NULL, 64, "data_ptr");
+  tdesc_create_reg (feature, "gs_base", 59, 1, NULL, 64, "data_ptr");
+
   tdesc_amd64_linux = result;
 }

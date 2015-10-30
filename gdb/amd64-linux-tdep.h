@@ -26,7 +26,7 @@
 /* Register number for the "orig_rax" register.  If this register
    contains a value >= 0 it is interpreted as the system call number
    that the kernel is supposed to restart.  */
-#define AMD64_LINUX_ORIG_RAX_REGNUM (AMD64_ZMM31H_REGNUM + 1)
+#define AMD64_LINUX_ORIG_RAX_REGNUM (AMD64_NUM_REGS)
 
 /* Total number of registers for GNU/Linux.  */
 #define AMD64_LINUX_NUM_REGS (AMD64_LINUX_ORIG_RAX_REGNUM + 1)

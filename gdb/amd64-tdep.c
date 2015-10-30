@@ -2943,6 +2943,7 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 								    NULL };
   static const char *const stap_register_indirection_suffixes[] = { ")",
 								    NULL };
+  const struct tdesc_feature *feature;
 
   /* AMD64 generally uses `fxsave' instead of `fsave' for saving its
      floating-point registers.  */
@@ -2985,6 +2986,17 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       tdep->mpx_register_names = amd64_mpx_names;
       tdep->bndcfgu_regnum = AMD64_BNDCFGU_REGNUM;
       tdep->bnd0r_regnum = AMD64_BND0R_REGNUM;
+    }
+
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.seg");
+  if (feature != NULL)
+    {
+      struct tdesc_arch_data *tdesc_data
+	= (struct tdesc_arch_data *) info.tdep_info;
+      tdesc_numbered_register (feature, tdesc_data,
+                               AMD64_FSBASE_REGNUM, "fs_base");
+      tdesc_numbered_register (feature, tdesc_data,
+                               AMD64_GSBASE_REGNUM, "gs_base");
     }
 
   tdep->num_byte_regs = 20;

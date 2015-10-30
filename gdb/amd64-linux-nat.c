@@ -170,6 +170,21 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
 
 	  amd64_supply_fxsave (regcache, -1, &fpregs);
 	}
+
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
+	   fs_base and gs_base fields of user_regs_struct can be
+	   used directly.  */
+	unsigned long base;
+	if ((regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+	    && ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_FS) == 0)
+	  regcache_raw_supply (regcache, AMD64_FSBASE_REGNUM, &base);
+	if ((regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+	    && ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_GS) == 0)
+	  regcache_raw_supply (regcache, AMD64_GSBASE_REGNUM, &base);
+      }
+#endif
     }
 }
 
@@ -236,6 +251,27 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
 	  if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
 	    perror_with_name (_("Couldn't write floating point status"));
 	}
+
+#ifndef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+      {
+	/* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
+	   fs_base and gs_base fields of user_regs_struct can be
+	   used directly.  */
+	unsigned long base;
+	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
+	  {
+	    regcache_raw_collect (regcache, AMD64_FSBASE_REGNUM, &base);
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_SET_FS) < 0)
+	      perror_with_name (_("Couldn't write fs_base"));
+	  }
+	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
+	  {
+	    regcache_raw_collect (regcache, AMD64_GSBASE_REGNUM, &base);
+	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_SET_GS) < 0)
+	      perror_with_name (_("Couldn't write gs_base"));
+	  }
+      }
+#endif
     }
 }
 

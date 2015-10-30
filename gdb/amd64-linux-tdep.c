@@ -102,6 +102,11 @@ int amd64_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+  21 * 8, 22 * 8,		/* fs_base, gs_base */
+#else
+  -1, -1,
+#endif
   15 * 8			      /* "orig_rax" */
 };
 
