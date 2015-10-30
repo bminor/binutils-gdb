@@ -861,7 +861,6 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_itimerspec
     = i386_linux_record_tdep.size_timespec * 2;
   i386_linux_record_tdep.size_mq_attr = 32;
-  i386_linux_record_tdep.size_siginfo = 128;
   i386_linux_record_tdep.size_termios = 36;
   i386_linux_record_tdep.size_termios2 = 44;
   i386_linux_record_tdep.size_pid_t = 4;

@@ -1542,7 +1542,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_itimerspec
     = arm_linux_record_tdep.size_timespec * 2;
   arm_linux_record_tdep.size_mq_attr = 32;
-  arm_linux_record_tdep.size_siginfo = 128;
   arm_linux_record_tdep.size_termios = 36;
   arm_linux_record_tdep.size_termios2 = 44;
   arm_linux_record_tdep.size_pid_t = 4;

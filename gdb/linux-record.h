@@ -81,7 +81,6 @@ struct linux_record_tdep
   int size_epoll_event;
   int size_itimerspec;
   int size_mq_attr;
-  int size_siginfo;
   int size_termios;
   int size_termios2;
   int size_pid_t;

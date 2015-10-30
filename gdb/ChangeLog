@@ -1,3 +1,15 @@
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Remove size_siginfo.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Remove size_siginfo.
+	(amd64_x32_linux_init_abi): Remove size_siginfo.
+	* arm-linux-tdep.c (arm_linux_init_abi): Remove size_siginfo.
+	* i386-linux-tdep.c (i386_linux_init_abi): Remove size_siginfo.
+	* linux-record.c (record_linux_system_call): Change size_siginfo
+	to size_siginfo_t.
+	* linux-record.h (struct linux_record_tdep): Remove size_siginfo.
+	* ppc-linux-tdep.c (ppc_init_linux_record_tdep): Remove size_siginfo.
+
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
 	* mdebugread.c (add_data_symbol): New function, factored out from

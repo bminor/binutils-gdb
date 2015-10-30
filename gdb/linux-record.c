@@ -2092,7 +2092,7 @@ Do you want to stop the program?"),
     case gdb_sys_waitid:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
-					 tdep->size_siginfo))
+					 tdep->size_siginfo_t))
         return -1;
       regcache_raw_read_unsigned (regcache, tdep->arg5, &tmpulongest);
       if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,

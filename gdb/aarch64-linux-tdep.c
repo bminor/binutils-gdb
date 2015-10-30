@@ -1054,7 +1054,6 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_epoll_event = 12;
   aarch64_linux_record_tdep.size_itimerspec = 32;
   aarch64_linux_record_tdep.size_mq_attr = 64;
-  aarch64_linux_record_tdep.size_siginfo = 128;
   aarch64_linux_record_tdep.size_termios = 60;
   aarch64_linux_record_tdep.size_termios2 = 44;
   aarch64_linux_record_tdep.size_pid_t = 4;

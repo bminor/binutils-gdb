@@ -1473,7 +1473,6 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_epoll_event = 16;
       record_tdep->size_itimerspec = 32;
       record_tdep->size_mq_attr = 64;
-      record_tdep->size_siginfo = 128;
       record_tdep->size_termios = 44;
       record_tdep->size_pid_t = 4;
       record_tdep->size_winsize = 8;
@@ -1541,7 +1540,6 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_epoll_event = 16;
       record_tdep->size_itimerspec = 16;
       record_tdep->size_mq_attr = 32;
-      record_tdep->size_siginfo = 128;
       record_tdep->size_termios = 44;
       record_tdep->size_pid_t = 4;
       record_tdep->size_winsize = 8;
