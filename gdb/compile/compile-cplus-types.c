@@ -820,7 +820,8 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 				      TYPE_FN_FIELD_TYPE (methods, j));
 
 	      if (TYPE_FN_FIELD_VIRTUAL_P (methods, j))
-		sym_kind = GCC_CP_SYMBOL_VIRTUAL_FUNCTION;
+		sym_kind = GCC_CP_SYMBOL_FUNCTION
+		  | GCC_CP_FLAG_VIRTUAL_FUNCTION;
 	    }
 
 	  /* !!keiths: Is this sufficient?  */
