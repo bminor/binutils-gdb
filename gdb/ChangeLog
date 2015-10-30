@@ -1,5 +1,9 @@
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* linux-record.c (record_linux_system_call): Fix old_select.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* linux-record.c (record_linux_system_call): Fix newstatat.
 
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>

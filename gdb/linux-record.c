@@ -645,38 +645,45 @@ record_linux_system_call (enum gdb_syscall syscall,
 
     case gdb_old_select:
       {
-        struct sel_arg_struct
-        {
-          CORE_ADDR n;
-          CORE_ADDR inp;
-          CORE_ADDR outp;
-          CORE_ADDR exp;
-          CORE_ADDR tvp;
-        } sel;
+        unsigned long sz_sel_arg = tdep->size_long + tdep->size_pointer * 4;
+        gdb_byte *a = (gdb_byte *) alloca (sz_sel_arg);
+        CORE_ADDR inp, outp, exp, tvp;
 
         regcache_raw_read_unsigned (regcache, tdep->arg1,
                                     &tmpulongest);
         if (tmpulongest)
           {
-            if (target_read_memory (tmpulongest, (gdb_byte *) &sel,
-                                    sizeof(sel)))
+            if (target_read_memory (tmpulongest, a, sz_sel_arg))
               {
                 if (record_debug)
                   fprintf_unfiltered (gdb_stdlog,
                                       "Process record: error reading memory "
                                       "at addr = 0x%s len = %lu.\n",
                                       OUTPUT_REG (tmpulongest, tdep->arg1),
-                                      (unsigned long) sizeof (sel));
+                                      sz_sel_arg);
                 return -1;
               }
-            if (record_full_arch_list_add_mem (sel.inp, tdep->size_fd_set))
-              return -1;
-            if (record_full_arch_list_add_mem (sel.outp, tdep->size_fd_set))
-              return -1;
-            if (record_full_arch_list_add_mem (sel.exp, tdep->size_fd_set))
-              return -1;
-            if (record_full_arch_list_add_mem (sel.tvp, tdep->size_timeval))
-              return -1;
+            /* Skip n. */
+            a += tdep->size_long;
+            inp = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
+            a += tdep->size_pointer;
+            outp = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
+            a += tdep->size_pointer;
+            exp = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
+            a += tdep->size_pointer;
+            tvp = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
+            if (inp)
+              if (record_full_arch_list_add_mem (inp, tdep->size_fd_set))
+                return -1;
+            if (outp)
+              if (record_full_arch_list_add_mem (outp, tdep->size_fd_set))
+                return -1;
+            if (exp)
+              if (record_full_arch_list_add_mem (exp, tdep->size_fd_set))
+                return -1;
+            if (tvp)
+              if (record_full_arch_list_add_mem (tvp, tdep->size_timeval))
+                return -1;
           }
       }
       break;
