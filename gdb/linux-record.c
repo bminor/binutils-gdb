@@ -162,7 +162,9 @@ record_linux_msghdr (struct regcache *regcache,
 				       tdep->size_int,
 				       byte_order)))
     return -1;
-  a += tdep->size_int;
+  /* We have read an int, but skip size_pointer bytes to account for alignment
+     of the next field on 64-bit targets. */
+  a += tdep->size_pointer;
 
   /* msg_iov msg_iovlen */
   addr = extract_unsigned_integer (a, tdep->size_pointer, byte_order);

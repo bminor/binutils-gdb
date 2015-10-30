@@ -1,5 +1,9 @@
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* linux-record.c (record_linux_msghdr): Fix msg_namelen handling.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Remove
 	size_dirent{,64}, add size_old_dirent.
 	* amd64-linux-tdep.c (amd64_linux_init_abi): Remove size_dirent{,64},
