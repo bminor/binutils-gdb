@@ -1,3 +1,11 @@
+2015-10-30  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (breakpoint_in_range_p)
+	(breakpoint_location_address_range_overlap): New functions.
+	* breakpoint.h (breakpoint_in_range_p): New declaration.
+	* infrun.c (displaced_step_prepare_throw): If there's a breakpoint
+	in the scratch pad range, don't displaced step.
+
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* amd64-linux-tdep.c (amd64_x32_linux_init_abi): Fix size_msghdr,
