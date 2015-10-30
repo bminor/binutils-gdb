@@ -628,16 +628,19 @@ record_linux_system_call (enum gdb_syscall syscall,
 
     case gdb_sys_getgroups16:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
-      if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
-					 tdep->size_old_gid_t))
-        return -1;
+      if (tmpulongest)
+        {
+          ULONGEST gidsetsize;
+
+          regcache_raw_read_unsigned (regcache, tdep->arg1,
+                                      &gidsetsize);
+          tmpint = tdep->size_old_gid_t * (int) gidsetsize;
+          if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest, tmpint))
+            return -1;
+        }
       break;
 
     case gdb_sys_setgroups16:
-      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
-      if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
-					 tdep->size_old_gid_t))
-        return -1;
       break;
 
     case gdb_old_select:

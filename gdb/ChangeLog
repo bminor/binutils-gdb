@@ -1,5 +1,9 @@
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* linux-record.c (record_linux_system_call): Fix [gs]etgroups16.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Add size_time_t.
 	* amd64-linux-tdep.c (amd64_linux_init_abi): Add size_time_t.
 	(amd64_x32_linux_init_abi): Add size_time_t.
