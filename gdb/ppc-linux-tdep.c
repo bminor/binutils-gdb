@@ -1423,8 +1423,8 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_flock = 32;
       record_tdep->size_oldold_utsname = 45;
       record_tdep->size_ustat = 32;
-      record_tdep->size_old_sigaction = 152;
-      record_tdep->size_old_sigset_t = 128;
+      record_tdep->size_old_sigaction = 32;
+      record_tdep->size_old_sigset_t = 8;
       record_tdep->size_rlimit = 16;
       record_tdep->size_rusage = 144;
       record_tdep->size_timeval = 16;
@@ -1457,8 +1457,8 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_NFS_FHSIZE = 32;
       record_tdep->size_knfsd_fh = 132;
       record_tdep->size_TASK_COMM_LEN = 32;
-      record_tdep->size_sigaction = 152;
-      record_tdep->size_sigset_t = 128;
+      record_tdep->size_sigaction = 32;
+      record_tdep->size_sigset_t = 8;
       record_tdep->size_siginfo_t = 128;
       record_tdep->size_cap_user_data_t = 8;
       record_tdep->size_stack_t = 24;
@@ -1490,8 +1490,8 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_flock = 16;
       record_tdep->size_oldold_utsname = 45;
       record_tdep->size_ustat = 20;
-      record_tdep->size_old_sigaction = 152;
-      record_tdep->size_old_sigset_t = 128;
+      record_tdep->size_old_sigaction = 16;
+      record_tdep->size_old_sigset_t = 4;
       record_tdep->size_rlimit = 8;
       record_tdep->size_rusage = 72;
       record_tdep->size_timeval = 8;
@@ -1524,8 +1524,8 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_NFS_FHSIZE = 32;
       record_tdep->size_knfsd_fh = 132;
       record_tdep->size_TASK_COMM_LEN = 32;
-      record_tdep->size_sigaction = 140;
-      record_tdep->size_sigset_t = 128;
+      record_tdep->size_sigaction = 20;
+      record_tdep->size_sigset_t = 8;
       record_tdep->size_siginfo_t = 128;
       record_tdep->size_cap_user_data_t = 4;
       record_tdep->size_stack_t = 12;

@@ -1000,8 +1000,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_flock = 32;
   aarch64_linux_record_tdep.size_oldold_utsname = 45;
   aarch64_linux_record_tdep.size_ustat = 32;
-  aarch64_linux_record_tdep.size_old_sigaction = 152;
-  aarch64_linux_record_tdep.size_old_sigset_t = 128;
+  aarch64_linux_record_tdep.size_old_sigaction = 32;
+  aarch64_linux_record_tdep.size_old_sigset_t = 8;
   aarch64_linux_record_tdep.size_rlimit = 16;
   aarch64_linux_record_tdep.size_rusage = 144;
   aarch64_linux_record_tdep.size_timeval = 16;
@@ -1037,8 +1037,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_NFS_FHSIZE = 32;
   aarch64_linux_record_tdep.size_knfsd_fh = 132;
   aarch64_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  aarch64_linux_record_tdep.size_sigaction = 152;
-  aarch64_linux_record_tdep.size_sigset_t = 128;
+  aarch64_linux_record_tdep.size_sigaction = 32;
+  aarch64_linux_record_tdep.size_sigset_t = 8;
   aarch64_linux_record_tdep.size_siginfo_t = 128;
   aarch64_linux_record_tdep.size_cap_user_data_t = 8;
   aarch64_linux_record_tdep.size_stack_t = 24;

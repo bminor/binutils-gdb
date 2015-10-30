@@ -1487,8 +1487,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_flock = 16;
   arm_linux_record_tdep.size_oldold_utsname = 45;
   arm_linux_record_tdep.size_ustat = 20;
-  arm_linux_record_tdep.size_old_sigaction = 140;
-  arm_linux_record_tdep.size_old_sigset_t = 128;
+  arm_linux_record_tdep.size_old_sigaction = 16;
+  arm_linux_record_tdep.size_old_sigset_t = 4;
   arm_linux_record_tdep.size_rlimit = 8;
   arm_linux_record_tdep.size_rusage = 72;
   arm_linux_record_tdep.size_timeval = 8;
@@ -1524,7 +1524,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_NFS_FHSIZE = 32;
   arm_linux_record_tdep.size_knfsd_fh = 132;
   arm_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  arm_linux_record_tdep.size_sigaction = 140;
+  arm_linux_record_tdep.size_sigaction = 20;
   arm_linux_record_tdep.size_sigset_t = 8;
   arm_linux_record_tdep.size_siginfo_t = 128;
   arm_linux_record_tdep.size_cap_user_data_t = 12;

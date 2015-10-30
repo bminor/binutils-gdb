@@ -1890,10 +1890,10 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_linux_record_tdep.size_ustat = 32;
   /* ADM64 doesn't need this size because it doesn't have sys_sigaction
      but sys_rt_sigaction.  */
-  amd64_linux_record_tdep.size_old_sigaction = 152;
+  amd64_linux_record_tdep.size_old_sigaction = 32;
   /* ADM64 doesn't need this size because it doesn't have sys_sigpending
      but sys_rt_sigpending.  */
-  amd64_linux_record_tdep.size_old_sigset_t = 128;
+  amd64_linux_record_tdep.size_old_sigset_t = 8;
   amd64_linux_record_tdep.size_rlimit = 16;
   amd64_linux_record_tdep.size_rusage = 144;
   amd64_linux_record_tdep.size_timeval = 16;
@@ -1933,8 +1933,8 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_linux_record_tdep.size_NFS_FHSIZE = 32;
   amd64_linux_record_tdep.size_knfsd_fh = 132;
   amd64_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  amd64_linux_record_tdep.size_sigaction = 152;
-  amd64_linux_record_tdep.size_sigset_t = 128;
+  amd64_linux_record_tdep.size_sigaction = 32;
+  amd64_linux_record_tdep.size_sigset_t = 8;
   amd64_linux_record_tdep.size_siginfo_t = 128;
   amd64_linux_record_tdep.size_cap_user_data_t = 8;
   amd64_linux_record_tdep.size_stack_t = 24;
@@ -2106,10 +2106,10 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_x32_linux_record_tdep.size_ustat = 32;
   /* ADM64 doesn't need this size because it doesn't have sys_sigaction
      but sys_rt_sigaction.  */
-  amd64_x32_linux_record_tdep.size_old_sigaction = 152;
+  amd64_x32_linux_record_tdep.size_old_sigaction = 16;
   /* ADM64 doesn't need this size because it doesn't have sys_sigpending
      but sys_rt_sigpending.  */
-  amd64_x32_linux_record_tdep.size_old_sigset_t = 128;
+  amd64_x32_linux_record_tdep.size_old_sigset_t = 4;
   amd64_x32_linux_record_tdep.size_rlimit = 16;
   amd64_x32_linux_record_tdep.size_rusage = 144;
   amd64_x32_linux_record_tdep.size_timeval = 16;
@@ -2149,8 +2149,8 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_x32_linux_record_tdep.size_NFS_FHSIZE = 32;
   amd64_x32_linux_record_tdep.size_knfsd_fh = 132;
   amd64_x32_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  amd64_x32_linux_record_tdep.size_sigaction = 152;
-  amd64_x32_linux_record_tdep.size_sigset_t = 128;
+  amd64_x32_linux_record_tdep.size_sigaction = 20;
+  amd64_x32_linux_record_tdep.size_sigset_t = 8;
   amd64_x32_linux_record_tdep.size_siginfo_t = 128;
   amd64_x32_linux_record_tdep.size_cap_user_data_t = 8;
   amd64_x32_linux_record_tdep.size_stack_t = 24;
