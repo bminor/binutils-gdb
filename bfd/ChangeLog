@@ -1,5 +1,9 @@
+2015-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated (simplified) Chinese translation.
+
 2015-10-29  Catherine Moore  <clm@codesourcery.com>
-    
+
     	* elfxx-mips.c (mips_elf_check_mips16_stubs): Set a stub's output
     	section to bfd_abs_section_ptr if the stub is discarded.
 

@@ -1,3 +1,7 @@
+2015-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated (simplified) Chinese translation.
+
 2015-10-29  Ed Schouten  <ed@nuxi.nl>
 
 	* Makefile.am (ALL_64_EMULATION_SOURCES): Add support for
