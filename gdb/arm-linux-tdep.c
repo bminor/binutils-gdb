@@ -1550,6 +1550,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_hayes_esp_config = 12;
   arm_linux_record_tdep.size_size_t = 4;
   arm_linux_record_tdep.size_iovec = 8;
+  arm_linux_record_tdep.size_time_t = 4;
 
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.  */

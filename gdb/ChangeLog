@@ -1,5 +1,17 @@
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Add size_time_t.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Add size_time_t.
+	(amd64_x32_linux_init_abi): Add size_time_t.
+	* arm-linux-tdep.c (arm_linux_init_abi): Add size_time_t.
+	* i386-linux-tdep.c (i386_linux_init_abi): Add size_time_t.
+	* linux-record.c (record_linux_system_call): Add time, waitpid, pipe
+	handling.
+	* linux-record.h (struct linux_record_tdep): Add size_time_t.
+	* ppc-linux-tdep.c (ppc_init_linux_record_tdep): Add size_time_t.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* linux-record.c (record_linux_msghdr): Fix msg_namelen handling.
 
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>

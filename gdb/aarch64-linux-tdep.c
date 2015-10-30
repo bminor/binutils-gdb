@@ -1062,6 +1062,7 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_hayes_esp_config = 12;
   aarch64_linux_record_tdep.size_size_t = 8;
   aarch64_linux_record_tdep.size_iovec = 16;
+  aarch64_linux_record_tdep.size_time_t = 8;
 
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.  */

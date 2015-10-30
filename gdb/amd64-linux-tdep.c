@@ -1959,6 +1959,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_linux_record_tdep.size_hayes_esp_config = 12;
   amd64_linux_record_tdep.size_size_t = 8;
   amd64_linux_record_tdep.size_iovec = 16;
+  amd64_linux_record_tdep.size_time_t = 8;
 
   /* These values are the second argument of system call "sys_fcntl"
      and "sys_fcntl64".  They are obtained from Linux Kernel source.  */
@@ -2175,6 +2176,7 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_x32_linux_record_tdep.size_hayes_esp_config = 12;
   amd64_x32_linux_record_tdep.size_size_t = 8;
   amd64_x32_linux_record_tdep.size_iovec = 16;
+  amd64_x32_linux_record_tdep.size_time_t = 8;
 
   /* These values are the second argument of system call "sys_fcntl"
      and "sys_fcntl64".  They are obtained from Linux Kernel source.  */

@@ -1479,6 +1479,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_serial_icounter_struct = 80;
       record_tdep->size_size_t = 8;
       record_tdep->size_iovec = 16;
+      record_tdep->size_time_t = 8;
     }
   else if (wordsize == 4)
     {
@@ -1545,6 +1546,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_serial_icounter_struct = 80;
       record_tdep->size_size_t = 4;
       record_tdep->size_iovec = 8;
+      record_tdep->size_time_t = 4;
     }
   else
     internal_error (__FILE__, __LINE__, _("unexpected wordsize"));

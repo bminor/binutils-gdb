@@ -89,6 +89,7 @@ struct linux_record_tdep
   int size_hayes_esp_config;
   int size_size_t;
   int size_iovec;
+  int size_time_t;
 
   /* The values of the second argument of system call "sys_ioctl".  */
   int ioctl_TCGETS;

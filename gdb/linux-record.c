@@ -272,13 +272,31 @@ record_linux_system_call (enum gdb_syscall syscall,
     case gdb_sys_write:
     case gdb_sys_open:
     case gdb_sys_close:
+      break;
+
     case gdb_sys_waitpid:
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest)
+        if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+					   tdep->size_int))
+          return -1;
+      break;
+
     case gdb_sys_creat:
     case gdb_sys_link:
     case gdb_sys_unlink:
     case gdb_sys_execve:
     case gdb_sys_chdir:
+      break;
+
     case gdb_sys_time:
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest)
+        if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+					   tdep->size_time_t))
+          return -1;
+      break;
+
     case gdb_sys_mknod:
     case gdb_sys_chmod:
     case gdb_sys_lchown16:
@@ -330,7 +348,12 @@ record_linux_system_call (enum gdb_syscall syscall,
     case gdb_sys_mkdir:
     case gdb_sys_rmdir:
     case gdb_sys_dup:
+      break;
+
     case gdb_sys_pipe:
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+					 tdep->size_int * 2))
       break;
 
     case gdb_sys_times:

@@ -869,6 +869,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_hayes_esp_config = 12;
   i386_linux_record_tdep.size_size_t = 4;
   i386_linux_record_tdep.size_iovec = 8;
+  i386_linux_record_tdep.size_time_t = 4;
 
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.  */
