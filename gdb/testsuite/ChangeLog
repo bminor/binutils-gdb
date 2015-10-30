@@ -1,5 +1,13 @@
 2015-11-07  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.dwarf2/data-loc.exp (Dwarf::assemble): Don't hardcode
+	value associated with DW_AT_byte_size.
+	* gdb.dwarf2/dynarr-ptr.exp (Dwarf::assemble): Don't hardcode
+	constants for DW_AT_byte_size, DW_AT_lower_bound, and
+	DW_AT_upper_bound.
+
+2015-11-07  Kevin Buettner  <kevinb@redhat.com>
+
 	* lib/gdb (gdb_target_symbol_prefix_flags_asm): New proc.
 	(gdb_target_symbol_prefix_flags): Define in terms of _asm
 	version.
