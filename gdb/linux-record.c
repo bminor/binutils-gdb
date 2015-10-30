@@ -1112,8 +1112,14 @@ Do you want to stop the program?"),
     case gdb_sys_newstat:
     case gdb_sys_newlstat:
     case gdb_sys_newfstat:
-    case gdb_sys_newfstatat:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+					 tdep->size_stat))
+        return -1;
+      break;
+
+    case gdb_sys_newfstatat:
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
 					 tdep->size_stat))
         return -1;
