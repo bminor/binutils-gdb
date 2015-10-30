@@ -80,7 +80,7 @@ ps_err_e
 ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
-  read_inferior_memory ((CORE_ADDR) addr, (gdb_byte *) buf, size);
+  read_inferior_memory ((uintptr_t) addr, (gdb_byte *) buf, size);
   return PS_OK;
 }
 
@@ -90,7 +90,7 @@ ps_err_e
 ps_pdwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
-  if (write_inferior_memory ((CORE_ADDR) addr, (const gdb_byte *) buf, size)
+  if (write_inferior_memory ((uintptr_t) addr, (const gdb_byte *) buf, size)
       != 0)
     return PS_ERR;
   return PS_OK;
