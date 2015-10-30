@@ -60,18 +60,119 @@ GCC_METHOD0 (gcc_decl, get_current_binding_level)
    Note that, since access controls are disabled, we have no means to
    express private, protected and public.
 
-   We have no means to introduce friend declarations, but since we
-   disable access control, they make no difference whatsoever.
+   There are various flags that can be set in SYM_KIND to specify
+   additional semantics.  Look for GCC_CP_FLAGs in the definition of
+   enum gcc_cp_symbol_kind in gcc-cp-interface.h.
+
+   In order to define member functions, pass GCC_CP_SYMBOL_FUNCTION in
+   SYM_KIND, and a function_type for static member functions or a
+   method type for non-static member functions, including constructors
+   and destructors.  Use build_function_type to create a function
+   type; for a method type, start by creating a function type without
+   any compiler-introduced artificial arguments (the implicit this
+   pointer, and the __in_chrg added to constructors and destructors,
+   and __vtt_parm added to the former), and then use build_method_type
+   to create the method type out of the class type and the function
+   type.
+
+   For constructors, destructors and operator functions, set
+   GCC_CP_FLAG_SPECIAL_FUNCTION in SYM_KIND, in addition to any other
+   applicable flags, and pass as NAME a string starting with the
+   two-character mangling for the constructor or destructor variant
+   (C1, C2, D0, D1, or D2, see below) or for the operator name: "ps"
+   for unary plus, "mL" for multiply and assign, *=; etc.  Use "cv"
+   for type converstion operators (the target type portion may be
+   omitted, as it is taken from the return type in SYM_TYPE).  For
+   operator"", use "li" followed by the identifier (the mangled name
+   mandates digits specifying the length of the identifier; if
+   present, they determine the end of the identifier, otherwise, the
+   identifier extents to the end of the string, so that "li3_Kme" and
+   "li_Km" are equivalent).
+
+   Constructors and destructors need special care, since for each
+   constructor prototype defined in the sources, two symbols are
+   defined in the object code: C1 initializes an instance of the class
+   (rather than of derived classes), including virtual base classes,
+   whereas C2 initializes a sub-object (of the given class type) of an
+   instance of some derived class (or a full object that doesn't have
+   any virtual base classes); for the destructor of each class, there
+   may be up to three variants (not counting virtual thunks): D0 and
+   D1 destruct an instance of the class, including virtual base
+   classes, but only the former calls operator delete to release the
+   object's storage at the end; D2 destructs a sub-object (of the
+   given class type) of an instance of a derived class (or a full
+   object that doesn't have any virtual base classes).  new_decl
+   expects to be called once for each constructor and destructor
+   variant; the first time it sees a constructor or destructor with a
+   given prototype, it will create the member declaration and all
+   appropriate variants; then, and at subsequent calls for other
+   variants, it will select the artificial clone declaration for the
+   chosen variant, and set up the address or substitution name for
+   that variant only.
+
+   NAMEs for GCC_CP_FLAG_SPECIAL_FUNCTION:
+
+     NAME    meaning
+     C1      in-charge constructor
+     C2      not-in-charge constructor
+     D0      deleting destructor
+     D1      in-charge destructor
+     D2      not-in-charge destructor
+     nw      operator new
+     na      operator new[]
+     dl      operator delete
+     da      operator delete[]
+     ps      operator + (unary)
+     ng      operator - (unary)
+     ad      operator & (unary)
+     de      operator * (unary)
+     co      operator ~
+     pl      operator +
+     mi      operator -
+     ml      operator *
+     dv      operator /
+     rm      operator %
+     an      operator &
+     or      operator |
+     eo      operator ^
+     aS      operator =
+     pL      operator +=
+     mI      operator -=
+     mL      operator *=
+     dV      operator /=
+     rM      operator %=
+     aN      operator &=
+     oR      operator |=
+     eO      operator ^=
+     ls      operator <<
+     rs      operator >>
+     lS      operator <<=
+     rS      operator >>=
+     eq      operator ==
+     ne      operator !=
+     lt      operator <
+     gt      operator >
+     le      operator <=
+     ge      operator >=
+     nt      operator !
+     aa      operator &&
+     oo      operator ||
+     pp      operator ++
+     mm      operator --
+     cm      operator ,
+     pm      operator ->*
+     pt      operator ->
+     cl      operator ()
+     ix      operator []
+     qu      operator ?
+     cv      operator <T> (conversion operator)
+     li<id>  operator "" <id>
 
    FIXME: we would benefit from a gcc_decl argument, to be able to
    introduce using declarations, using directives and namespace
    aliases.
 
-   FIXME: How about override and final virtual functions; =delete and
-   =default ctor, dtor and copy-assignment declarations; explicit
-   ctors and conversion operators; thread_local variables; other
-   attributes?  Do we need an extra flags parameter, or just
-   additional gcc_cp_symbol_kinds?  */
+   FIXME: How about attributes; static_assert; lambdas?  */
 
 GCC_METHOD7 (gcc_decl, new_decl,
 	     const char *,	      /* Argument NAME.  */
@@ -183,7 +284,9 @@ GCC_METHOD1 (int /* bool */, finish_enum_type,
 /* Create a new function type.  RETURN_TYPE is the type returned by
    the function, and ARGUMENT_TYPES is a vector, of length NARGS, of
    the argument types.  IS_VARARGS is true if the function is
-   varargs.  */
+   varargs.
+
+   FIXME: default arguments?  */
 
 GCC_METHOD3 (gcc_type, build_function_type,
 	     gcc_type,			   /* Argument RETURN_TYPE.  */
