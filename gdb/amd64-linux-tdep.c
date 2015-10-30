@@ -2133,7 +2133,7 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   amd64_x32_linux_record_tdep.size_ulong
     = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
-  amd64_x32_linux_record_tdep.size_msghdr = 56;
+  amd64_x32_linux_record_tdep.size_msghdr = 28;
   amd64_x32_linux_record_tdep.size_itimerval = 32;
   amd64_x32_linux_record_tdep.size_stat = 144;
   amd64_x32_linux_record_tdep.size_old_utsname = 325;
@@ -2154,7 +2154,7 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_x32_linux_record_tdep.size_sigset_t = 8;
   amd64_x32_linux_record_tdep.size_siginfo_t = 128;
   amd64_x32_linux_record_tdep.size_cap_user_data_t = 8;
-  amd64_x32_linux_record_tdep.size_stack_t = 24;
+  amd64_x32_linux_record_tdep.size_stack_t = 12;
   amd64_x32_linux_record_tdep.size_off_t = 8;
   amd64_x32_linux_record_tdep.size_stat64 = 144;
   amd64_x32_linux_record_tdep.size_gid_t = 4;
@@ -2174,8 +2174,8 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_x32_linux_record_tdep.size_serial_struct = 72;
   amd64_x32_linux_record_tdep.size_serial_icounter_struct = 80;
   amd64_x32_linux_record_tdep.size_hayes_esp_config = 12;
-  amd64_x32_linux_record_tdep.size_size_t = 8;
-  amd64_x32_linux_record_tdep.size_iovec = 16;
+  amd64_x32_linux_record_tdep.size_size_t = 4;
+  amd64_x32_linux_record_tdep.size_iovec = 8;
   amd64_x32_linux_record_tdep.size_time_t = 8;
 
   /* These values are the second argument of system call "sys_fcntl"

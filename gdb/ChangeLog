@@ -1,5 +1,10 @@
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* amd64-linux-tdep.c (amd64_x32_linux_init_abi): Fix size_msghdr,
+	size_stack_t, size_size_t, size_iovec.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Fix size_termios.
 	* amd64-linux-tdep.c (amd64_linux_init_abi): Fix size_termios.
 	(amd64_x32_linux_init_abi): Fix size_termios.
