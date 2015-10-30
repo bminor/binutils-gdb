@@ -1,3 +1,20 @@
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.reverse/fstatat-reverse.c: New test.
+	* gdb.reverse/fstatat-reverse.exp: New file.
+	* gdb.reverse/getresuid-reverse.c: New test.
+	* gdb.reverse/getresuid-reverse.exp: New file.
+	* gdb.reverse/pipe-reverse.c: New test.
+	* gdb.reverse/pipe-reverse.exp: New file.
+	* gdb.reverse/readv-reverse.c: New test.
+	* gdb.reverse/readv-reverse.exp: New file.
+	* gdb.reverse/recvmsg-reverse.c: New test.
+	* gdb.reverse/recvmsg-reverse.exp: New file.
+	* gdb.reverse/time-reverse.c: New test.
+	* gdb.reverse/time-reverse.exp: New file.
+	* gdb.reverse/waitpid-reverse.c: New test.
+	* gdb.reverse/waitpid-reverse.exp: New file.
+
 2015-10-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.ada/access_to_packed_array.exp: Fix typos erroring the testfile.
