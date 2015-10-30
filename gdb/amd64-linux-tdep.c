@@ -1950,7 +1950,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_linux_record_tdep.size_epoll_event = 12;
   amd64_linux_record_tdep.size_itimerspec = 32;
   amd64_linux_record_tdep.size_mq_attr = 64;
-  amd64_linux_record_tdep.size_termios = 60;
+  amd64_linux_record_tdep.size_termios = 36;
   amd64_linux_record_tdep.size_termios2 = 44;
   amd64_linux_record_tdep.size_pid_t = 4;
   amd64_linux_record_tdep.size_winsize = 8;
@@ -2167,7 +2167,7 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_x32_linux_record_tdep.size_epoll_event = 12;
   amd64_x32_linux_record_tdep.size_itimerspec = 32;
   amd64_x32_linux_record_tdep.size_mq_attr = 64;
-  amd64_x32_linux_record_tdep.size_termios = 60;
+  amd64_x32_linux_record_tdep.size_termios = 36;
   amd64_x32_linux_record_tdep.size_termios2 = 44;
   amd64_x32_linux_record_tdep.size_pid_t = 4;
   amd64_x32_linux_record_tdep.size_winsize = 8;
