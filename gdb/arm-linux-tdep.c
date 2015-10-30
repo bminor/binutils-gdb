@@ -1531,8 +1531,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_stack_t = 12;
   arm_linux_record_tdep.size_off_t = arm_linux_record_tdep.size_long;
   arm_linux_record_tdep.size_stat64 = 96;
-  arm_linux_record_tdep.size_gid_t = 2;
-  arm_linux_record_tdep.size_uid_t = 2;
+  arm_linux_record_tdep.size_gid_t = 4;
+  arm_linux_record_tdep.size_uid_t = 4;
   arm_linux_record_tdep.size_PAGE_SIZE = 4096;
   arm_linux_record_tdep.size_flock64 = 24;
   arm_linux_record_tdep.size_user_desc = 16;

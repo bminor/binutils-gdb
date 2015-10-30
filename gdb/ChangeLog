@@ -1,5 +1,10 @@
 2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* arm-linux-tdep.c (arm_linux_init_abi): Fix size_[ug]id.
+	* i386-linux-tdep.c (i386_linux_init_abi): Fix size_[ug]id.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Remove size_siginfo.
 	* amd64-linux-tdep.c (amd64_linux_init_abi): Remove size_siginfo.
 	(amd64_x32_linux_init_abi): Remove size_siginfo.
