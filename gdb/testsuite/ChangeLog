@@ -1,3 +1,14 @@
+2015-11-02  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.reverse/fstatat-reverse.exp: Set breakpoint on marker1 after
+	reaching marker2.
+	* gdb.reverse/getresuid-reverse.exp: Likewise.
+	* gdb.reverse/pipe-reverse.exp: Likewise.
+	* gdb.reverse/readv-reverse.exp: Likewise.
+	* gdb.reverse/recvmsg-reverse.exp: Likewise.
+	* gdb.reverse/time-reverse.exp: Likewise.
+	* gdb.reverse/waitpid-reverse.exp: Likewise and add KFAILs.
+
 2015-10-30  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.threads/wp-replication.c (watch_count_done): Remove.

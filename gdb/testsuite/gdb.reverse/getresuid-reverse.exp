@@ -36,15 +36,15 @@ if [supports_process_record] {
     gdb_test_no_output "record" "Turn on process record"
 }
 
-gdb_test "break marker1" \
-    "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal.*" \
-    "set breakpoint at marker1"
-
 gdb_test "break marker2" \
     "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal.*" \
     "set breakpoint at marker2"
 
 gdb_continue_to_breakpoint "marker2" ".*$srcfile:.*"
+
+gdb_test "break marker1" \
+    "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal.*" \
+    "set breakpoint at marker1"
 
 gdb_test "reverse-continue" ".*$srcfile:$decimal.*" "reverse to marker1"
 
