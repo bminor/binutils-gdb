@@ -1,3 +1,8 @@
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (parse_rx_section): Align parameter provides a
+	multiple of n argument, not a power of n argument.
+
 2015-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-aarch64.c (elf64_aarch64_target_format): Select the
