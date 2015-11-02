@@ -1,5 +1,9 @@
 2015-11-02  Nick Clifton  <nickc@redhat.com>
 
+	* config/rx-parse.y: Allow zero value for 5-bit displacements.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
 	* config/tc-rx.c (parse_rx_section): Align parameter provides a
 	multiple of n argument, not a power of n argument.
 

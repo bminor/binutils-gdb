@@ -48,6 +48,7 @@ typedef enum
   RX_Operand_Immediate,	/* #addend */
   RX_Operand_Register,	/* Rn */
   RX_Operand_Indirect,	/* [Rn + addend] */
+  RX_Operand_Zero_Indirect,/* [Rn] */
   RX_Operand_Postinc,	/* [Rn+] */
   RX_Operand_Predec,	/* [-Rn] */
   RX_Operand_Condition,	/* eq, gtu, etc */

@@ -1,3 +1,7 @@
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* rx.h (enum RX_Operand_Type): Add RX_Operand_Zero_Indirect.
+
 2015-10-28  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64.h (aarch64_decode_insn): Update declaration.

@@ -1405,13 +1405,13 @@ rx_disp5op (expressionS * exp, int msize)
   switch (msize)
     {
     case BSIZE:
-      if (0 < v && v <= 31)
+      if (0 <= v && v <= 31)
 	return 1;
       break;
     case WSIZE:
       if (v & 1)
 	return 0;
-      if (0 < v && v <= 63)
+      if (0 <= v && v <= 63)
 	{
 	  exp->X_add_number >>= 1;
 	  return 1;
@@ -1420,7 +1420,7 @@ rx_disp5op (expressionS * exp, int msize)
     case LSIZE:
       if (v & 3)
 	return 0;
-      if (0 < v && v <= 127)
+      if (0 <= v && v <= 127)
 	{
 	  exp->X_add_number >>= 2;
 	  return 1;

@@ -1,3 +1,10 @@
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* rx-decode.opc (rx_disp): If the displacement is zero, set the
+	type to RX_Operand_Zero_Indirect.
+	* rx-decode.c: Regenerate.
+	* rx-dis (print_insn): Handle RX_Operand_Zero_Indirect.
+
 2015-10-28  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-dis.c	(aarch64_decode_insn): Add one argument

@@ -221,7 +221,7 @@ rx_disp (int n, int type, int reg, int size, LocalData * ld)
       ld->rx->op[n].type = RX_Operand_Register;
       break;
     case 0:
-      ld->rx->op[n].type = RX_Operand_Indirect;
+      ld->rx->op[n].type = RX_Operand_Zero_Indirect;
       ld->rx->op[n].addend = 0;
       break;
     case 1:
