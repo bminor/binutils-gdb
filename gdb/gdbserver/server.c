@@ -1911,11 +1911,6 @@ handle_qxfer (char *own_buf, int packet_len, int *new_packet_len_p)
   return 0;
 }
 
-/* Table used by the crc32 function to calcuate the checksum.  */
-
-static unsigned int crc32_table[256] =
-{0, 0};
-
 /* Compute 32 bit CRC from inferior memory.
 
    On success, return 32 bit CRC.
@@ -1924,20 +1919,6 @@ static unsigned int crc32_table[256] =
 static unsigned long long
 crc32 (CORE_ADDR base, int len, unsigned int crc)
 {
-  if (!crc32_table[1])
-    {
-      /* Initialize the CRC table and the decoding table.  */
-      int i, j;
-      unsigned int c;
-
-      for (i = 0; i < 256; i++)
-	{
-	  for (c = i << 24, j = 8; j > 0; --j)
-	    c = c & 0x80000000 ? (c << 1) ^ 0x04c11db7 : (c << 1);
-	  crc32_table[i] = c;
-	}
-    }
-
   while (len--)
     {
       unsigned char byte = 0;
@@ -1946,7 +1927,7 @@ crc32 (CORE_ADDR base, int len, unsigned int crc)
       if (read_inferior_memory (base, &byte, 1) != 0)
 	return (unsigned long long) -1;
 
-      crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ byte) & 255];
+      crc = xcrc32 (&byte, 1, crc);
       base++;
     }
   return (unsigned long long) crc;

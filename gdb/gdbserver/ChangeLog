@@ -1,3 +1,8 @@
+2015-12-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* server.c (crc32_table): Delete.
+	(crc32): Use libiberty's xcrc32 function.
+
 2015-12-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* lynx-low.c (lynx_delete_thread_callback): New function.
