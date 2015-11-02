@@ -1,5 +1,9 @@
 2015-11-02  Nick Clifton  <nickc@redhat.com>
 
+	* rx.h (enum RX_Opcode_ID): Add more NOP opcodes.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
 	* rx.h (enum RX_Operand_Type): Add RX_Operand_Zero_Indirect.
 
 2015-10-28  Yao Qi  <yao.qi@linaro.org>

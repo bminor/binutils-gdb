@@ -1,5 +1,11 @@
 2015-11-02  Nick Clifton  <nickc@redhat.com>
 
+	* gas/rx/max.d: Update expected disassembly.
+	* gas/rx/nod.d: Likewise.
+	* gas/rx/nop.sm: Add tests of more NOP instructions.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
 	* gas/rx/mov.sm: Add tests for zero offset indirect moves.
 	* gas/rx/mov.d: Update expected output.
 

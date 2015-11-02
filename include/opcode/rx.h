@@ -104,6 +104,10 @@ typedef enum
   RXO_nop,
   RXO_nop2,
   RXO_nop3,
+  RXO_nop4,
+  RXO_nop5,
+  RXO_nop6,
+  RXO_nop7,
 
   RXO_scmpu,
   RXO_smovu,

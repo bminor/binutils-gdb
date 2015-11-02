@@ -310,7 +310,7 @@ rx_decode_opcode (unsigned long pc AU,
   if (sd == 3 && ss == 3 && sz == 2 && rsrc == 0 && rdst == 0)
     {
       ID(nop2);
-      rx->syntax = "nop";
+      SYNTAX ("nop\t; mov.l\tr0, r0");
     }
   else
     {
@@ -567,13 +567,23 @@ rx_decode_opcode (unsigned long pc AU,
 /* MAX									*/
 
 /** 1111 1101 0111 im00 0100rdst	max	#%1, %0 */
-  ID(max); DR(rdst); SC(IMMex(im));
+  int val = IMMex (im);
+  if (im == 0 && (unsigned) val == 0x80000000 && rdst == 0)
+    {
+      ID (nop7);
+      SYNTAX("nop\t; max\t#0x80000000, r0");
+    }
+  else
+    {
+      ID(max);
+    }
+  DR(rdst); SC(val);
 
 /** 1111 1100 0001 00ss rsrc rdst	max	%1%S1, %0 */
   if (ss == 3 && rsrc == 0 && rdst == 0)
     {
       ID(nop3);
-      rx->syntax = "nop";
+      SYNTAX("nop\t; max\tr0, r0");
     }
   else
     {
@@ -599,10 +609,38 @@ rx_decode_opcode (unsigned long pc AU,
 /* MUL									*/
 
 /** 0110 0011 immm rdst			mul	#%1, %0 */
-  ID(mul); DR(rdst); SC(immm); F_____;
+  if (immm == 1 && rdst == 0)
+    {
+      ID(nop2);
+      SYNTAX ("nop\t; mul\t#1, r0");
+    }
+  else
+    {
+      ID(mul);
+    }
+  DR(rdst); SC(immm); F_____;
 
 /** 0111 01im 0001rdst			mul	#%1, %0 */
-  ID(mul); DR(rdst); SC(IMMex(im)); F_____;
+  int val = IMMex(im);
+  if (val == 1 && rdst == 0)
+    {
+      SYNTAX("nop\t; mul\t#1, r0");
+      switch (im)
+	{
+	case 2: ID(nop4); break;
+	case 3: ID(nop5); break;
+	case 0: ID(nop6); break;
+	default:
+	  ID(mul);
+	  SYNTAX("mul	#%1, %0");
+	  break;
+	}
+    }
+  else
+    {
+      ID(mul);
+    }
+  DR(rdst); SC(val); F_____;
 
 /** 0100 11ss rsrc rdst			mul	%1%S1, %0 */
   ID(mul); SP(ss, rsrc); DR(rdst); F_____;

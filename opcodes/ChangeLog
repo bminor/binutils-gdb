@@ -1,5 +1,11 @@
 2015-11-02  Nick Clifton  <nickc@redhat.com>
 
+	* rx-decode.opc (rx_decode_opcode): Decode extra NOP
+	instructions.
+	* rx-decode.c: Regenerate.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
 	* rx-decode.opc (rx_disp): If the displacement is zero, set the
 	type to RX_Operand_Zero_Indirect.
 	* rx-decode.c: Regenerate.
