@@ -1,5 +1,27 @@
 2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	PR/18376
+	* gdb/configure.tgt: Add linux-record.o to s390*-linux.
+	* gdb/s390-linux-tdep.c: #include "linux-record.h", "record-full.h"
+	(s390_linux_record_tdep): New static global variable.
+	(s390x_linux_record_tdep): New static global variable.
+	(s390_all_but_pc_registers_record): New function.
+	(s390_canonicalize_syscall): New function.
+	(s390_linux_syscall_record): New function.
+	(s390_linux_record_signal): New function.
+	(s390_record_calc_disp_common): New function.
+	(s390_record_calc_disp): New function.
+	(s390_record_calc_disp_vsce): New function.
+	(s390_record_calc_rl): New function.
+	(s390_record_gpr_g): New function.
+	(s390_record_gpr_h): New function.
+	(s390_record_vr): New function.
+	(s390_process_record): New function.
+	(s390_init_linux_record_tdep): New function.
+	(s390_gdbarch_init): Fill record function slots.
+
+2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* record-full.c (record_full_exec_insn): Use xmalloc for temporary
 	memory storage.
 
