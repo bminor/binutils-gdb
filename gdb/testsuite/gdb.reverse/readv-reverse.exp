@@ -16,7 +16,7 @@
 # This file is part of the gdb testsuite.
 
 #
-# This test tests pipe syscall for reverse execution.
+# This test tests readv syscall for reverse execution.
 #
 
 if ![supports_reverse] {

@@ -1,5 +1,9 @@
 2015-11-02  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* gdb.reverse/readv-reverse.exp: Obvious typo fixed.
+
+2015-11-02  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* gdb.reverse/fstatat-reverse.exp: Set breakpoint on marker1 after
 	reaching marker2.
 	* gdb.reverse/getresuid-reverse.exp: Likewise.
