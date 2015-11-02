@@ -526,6 +526,119 @@ s390_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 }
 
 
+/* A helper for s390_software_single_step, decides if an instruction
+   is a partial-execution instruction that needs to be executed until
+   completion when in record mode.  If it is, returns 1 and writes
+   instruction length to a pointer.  */
+
+static int
+s390_is_partial_instruction (struct gdbarch *gdbarch, CORE_ADDR loc, int *len)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  uint16_t insn;
+
+  insn = read_memory_integer (loc, 2, byte_order);
+
+  switch (insn >> 8)
+    {
+    case 0xa8: /* MVCLE */
+      *len = 4;
+      return 1;
+
+    case 0xeb:
+      {
+        insn = read_memory_integer (loc + 4, 2, byte_order);
+        if ((insn & 0xff) == 0x8e)
+          {
+            /* MVCLU */
+            *len = 6;
+            return 1;
+          }
+      }
+      break;
+    }
+
+  switch (insn)
+    {
+    case 0xb255: /* MVST */
+    case 0xb263: /* CMPSC */
+    case 0xb2a5: /* TRE */
+    case 0xb2a6: /* CU21 */
+    case 0xb2a7: /* CU12 */
+    case 0xb9b0: /* CU14 */
+    case 0xb9b1: /* CU24 */
+    case 0xb9b2: /* CU41 */
+    case 0xb9b3: /* CU42 */
+    case 0xb92a: /* KMF */
+    case 0xb92b: /* KMO */
+    case 0xb92f: /* KMC */
+    case 0xb92d: /* KMCTR */
+    case 0xb92e: /* KM */
+    case 0xb93c: /* PPNO */
+    case 0xb990: /* TRTT */
+    case 0xb991: /* TRTO */
+    case 0xb992: /* TROT */
+    case 0xb993: /* TROO */
+      *len = 4;
+      return 1;
+    }
+
+  return 0;
+}
+
+/* Implement the "software_single_step" gdbarch method, needed to single step
+   through instructions like MVCLE in record mode, to make sure they are
+   executed to completion.  Without that, record will save the full length
+   of destination buffer on every iteration, even though the CPU will only
+   process about 4kiB of it each time, leading to O(n**2) memory and time
+   complexity.  */
+
+static int
+s390_software_single_step (struct frame_info *frame)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct address_space *aspace = get_frame_address_space (frame);
+  CORE_ADDR loc = get_frame_pc (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int len;
+  uint16_t insn;
+
+  /* Special handling only if recording.  */
+  if (!record_full_is_used ())
+    return 0;
+
+  /* First, match a partial instruction.  */
+  if (!s390_is_partial_instruction (gdbarch, loc, &len))
+    return 0;
+
+  loc += len;
+
+  /* Second, look for a branch back to it.  */
+  insn = read_memory_integer (loc, 2, byte_order);
+  if (insn != 0xa714) /* BRC with mask 1 */
+    return 0;
+
+  insn = read_memory_integer (loc + 2, 2, byte_order);
+  if (insn != (uint16_t) -(len / 2))
+    return 0;
+
+  loc += 4;
+
+  /* Found it, step past the whole thing.  */
+
+  insert_single_step_breakpoint (gdbarch, aspace, loc);
+
+  return 1;
+}
+
+static int
+s390_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
+				   struct displaced_step_closure *closure)
+{
+  return 1;
+}
+
+
 /* Maps for register sets.  */
 
 static const struct regcache_map_entry s390_gregmap[] =
@@ -7721,6 +7834,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, s390_breakpoint_from_pc);
+  set_gdbarch_software_single_step (gdbarch, s390_software_single_step);
+  set_gdbarch_displaced_step_hw_singlestep (gdbarch, s390_displaced_step_hw_singlestep);
   set_gdbarch_skip_prologue (gdbarch, s390_skip_prologue);
   set_gdbarch_stack_frame_destroyed_p (gdbarch, s390_stack_frame_destroyed_p);
 

@@ -1,6 +1,14 @@
 2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	PR/18376
+	* gdb/s390-linux-tdep.c (s390_is_partial_instruction): New function.
+	(s390_software_single_step): New function.
+	(s390_displaced_step_hw_singlestep): New function.
+	(s390_gdbarch_init): Fill gdbarch slots with the above.
+
+2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	PR/18376
 	* gdb/configure.tgt: Add linux-record.o to s390*-linux.
 	* gdb/s390-linux-tdep.c: #include "linux-record.h", "record-full.h"
 	(s390_linux_record_tdep): New static global variable.
