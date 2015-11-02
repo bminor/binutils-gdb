@@ -726,7 +726,8 @@ record_full_exec_insn (struct regcache *regcache,
 	/* Nothing to do if the entry is flagged not_accessible.  */
         if (!entry->u.mem.mem_entry_not_accessible)
           {
-            gdb_byte *mem = (gdb_byte *) alloca (entry->u.mem.len);
+            gdb_byte *mem = (gdb_byte *) xmalloc (entry->u.mem.len);
+            struct cleanup *cleanup = make_cleanup (xfree, mem);
 
             if (record_debug > 1)
               fprintf_unfiltered (gdb_stdlog,
@@ -771,6 +772,8 @@ record_full_exec_insn (struct regcache *regcache,
 		      record_full_stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
 		  }
               }
+
+	    do_cleanups (cleanup);
           }
       }
       break;

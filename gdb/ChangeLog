@@ -1,3 +1,8 @@
+2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* record-full.c (record_full_exec_insn): Use xmalloc for temporary
+	memory storage.
+
 2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record.c (get_insn_history_modifiers): Set DISASSEMBLY_SOURCE
