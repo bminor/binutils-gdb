@@ -1,3 +1,7 @@
+2015-11-03  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* MAINTAINERS (Write After Approval): Add Marcin Kościelnicki.
+
 2015-10-30  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (breakpoint_in_range_p)
