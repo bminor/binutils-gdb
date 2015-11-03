@@ -804,7 +804,7 @@ arm_prepare_to_resume (struct lwp_info *lwp)
 static int
 arm_get_hwcap (unsigned long *valp)
 {
-  unsigned char *data = alloca (8);
+  unsigned char *data = (unsigned char *) alloca (8);
   int offset = 0;
 
   while ((*the_target->read_auxv) (offset, data, 8) == 8)
@@ -855,7 +855,7 @@ arm_read_description (void)
       /* Now make sure that the kernel supports reading these
 	 registers.  Support was added in 2.6.30.  */
       errno = 0;
-      buf = xmalloc (32 * 8 + 4);
+      buf = (char *) xmalloc (32 * 8 + 4);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
 	  && errno == EIO)
 	result = tdesc_arm;

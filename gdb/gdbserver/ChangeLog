@@ -1,5 +1,12 @@
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-aarch32-low.c (arm_fill_gregset): Add cast.
+	(arm_store_gregset): Likewise.
+	* linux-arm-low.c (arm_get_hwcap): Likewise.
+	(arm_read_description): Likewise.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-aarch32-low.c (aarch32_regsets): Use NULL_REGSET.
 
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
