@@ -1,6 +1,6 @@
 #source: tls-relax-large-desc-ie.s
 #ld: -T relocs.ld -e0
-#notarget: aarch64_be-*-*
+#notarget: aarch64-*-*
 #objdump: -dr
 #...
 
@@ -15,5 +15,5 @@ Disassembly of section .text:
   +10014:	f8606a40 	ldr	x0, \[x18,x0\]
   +10018:	d503201f 	nop
   +1001c:	d503201f 	nop
-  +10020:	0000ffe0 	.word	0x0000ffe0
-  +10024:	00000000 	.word	0x00000000
+  +10020:	00000000 	.word	0x00000000
+  +10024:	0000ffe0 	.word	0x0000ffe0

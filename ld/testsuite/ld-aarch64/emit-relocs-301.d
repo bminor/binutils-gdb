@@ -1,5 +1,6 @@
 #source: emit-relocs-301.s
 #ld: -T relocs.ld --defsym globala=0x11000 --defsym globalb=0x45000 --defsym globalc=0x1234  -e0 --emit-relocs
+#notarget: aarch64_be-*-*
 #objdump: -dr
 
 .*: +file format .*

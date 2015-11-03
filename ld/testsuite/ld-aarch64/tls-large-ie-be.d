@@ -1,6 +1,6 @@
 #source: tls-large-ie.s
 #ld: -shared -T relocs.ld -e0
-#notarget: aarch64_be-*-*
+#notarget: aarch64-*-*
 #objdump: -dr
 #...
 
@@ -16,5 +16,5 @@ Disassembly of section .text:
    10018:	f8606820 	ldr	x0, \[x1,x0\]
    1001c:	8b020000 	add	x0, x0, x2
    10020:	d503201f 	nop
-   10024:	0000ffdc 	.word	0x0000ffdc
-   10028:	00000000 	.word	0x00000000
+   10024:	0000(ffdc|0000) 	.word	0x0000(ffdc|0000)
+   10028:	0000(0000|ffdc) 	.word	0x0000(0000|ffdc)

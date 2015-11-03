@@ -1,6 +1,6 @@
 #source: tls-large-desc.s
 #ld: -shared -T relocs.ld -e0
-#notarget: aarch64_be-*-*
+#notarget: aarch64-*-*
 #objdump: -dr
 #...
 
@@ -15,8 +15,8 @@ Disassembly of section .text:
   +10014:	f8606a41 	ldr	x1, \[x18,x0\]
   +10018:	8b000240 	add	x0, x18, x0
   +1001c:	d63f0020 	blr	x1
-  +10020:	0000ffe0 	.word	0x0000ffe0
-  +10024:	00000000 	.word	0x00000000
+  +10020:	00000000 	.word	0x00000000
+  +10024:	0000ffe0 	.word	0x0000ffe0
 
 Disassembly of section .plt:
 

@@ -1,6 +1,6 @@
 #source: emit-relocs-310.s
 #ld: -T relocs.ld --defsym globala=0x11000 --defsym globalb=0x45000 --defsym globalc=0x1234  -e0 --emit-relocs
-#notarget: aarch64_be-*-*
+#notarget: aarch64-*-*
 #objdump: -dr
 
 .*: +file format .*
@@ -17,6 +17,6 @@ Disassembly of section .text:
 			10010: R_AARCH64_LD64_GOTOFF_LO15	globalb
    10014:	f9400420 	ldr	x0, \[x1,#8\]
 			10014: R_AARCH64_LD64_GOTOFF_LO15	globalc
-   10018:	0000ffe8 	.word	0x0000ffe8
+   10018:	00000000 	.word	0x00000000
 			10018: R_AARCH64_PREL64	_GLOBAL_OFFSET_TABLE_
-   1001c:	00000000 	.word	0x00000000
+   1001c:	0000ffe8 	.word	0x0000ffe8

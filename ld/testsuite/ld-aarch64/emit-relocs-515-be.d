@@ -1,6 +1,6 @@
 #source: emit-relocs-515.s
 #ld: -shared -T relocs.ld -e0
-#notarget: aarch64_be-*-*
+#notarget: aarch64-*-*
 #objdump: -dr
 #...
 
@@ -14,8 +14,8 @@ Disassembly of section .text:
    10010:	8b000020 	add	x0, x1, x0
    10014:	9400000c 	bl	10044 \<test\+0x44\>
    10018:	d503201f 	nop
-   1001c:	0000ffe4 	.word	0x0000ffe4
-   10020:	00000000 	.word	0x00000000
+   1001c:	00000000 	.word	0x00000000
+   10020:	0000ffe4 	.word	0x0000ffe4
 
 Disassembly of section .plt:
 
