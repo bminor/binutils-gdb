@@ -377,108 +377,10 @@ ppc_get_hwcap (unsigned long *valp)
   return 0;
 }
 
-/* Forward declaration.  */
-static struct usrregs_info ppc_usrregs_info;
 #ifndef __powerpc64__
 static int ppc_regmap_adjusted;
 #endif
 
-static void
-ppc_arch_setup (void)
-{
-  const struct target_desc *tdesc;
-#ifdef __powerpc64__
-  long msr;
-  struct regcache *regcache;
-
-  /* On a 64-bit host, assume 64-bit inferior process with no
-     AltiVec registers.  Reset ppc_hwcap to ensure that the
-     collect_register call below does not fail.  */
-  tdesc = tdesc_powerpc_64l;
-  current_process ()->tdesc = tdesc;
-  ppc_hwcap = 0;
-
-  regcache = new_register_cache (tdesc);
-  fetch_inferior_registers (regcache, find_regno (tdesc, "msr"));
-  collect_register_by_name (regcache, "msr", &msr);
-  free_register_cache (regcache);
-  if (ppc64_64bit_inferior_p (msr))
-    {
-      ppc_get_hwcap (&ppc_hwcap);
-      if (ppc_hwcap & PPC_FEATURE_CELL)
-	tdesc = tdesc_powerpc_cell64l;
-      else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
-	{
-	  /* Power ISA 2.05 (implemented by Power 6 and newer processors)
-	     increases the FPSCR from 32 bits to 64 bits. Even though Power 7
-	     supports this ISA version, it doesn't have PPC_FEATURE_ARCH_2_05
-	     set, only PPC_FEATURE_ARCH_2_06.  Since for now the only bits
-	     used in the higher half of the register are for Decimal Floating
-	     Point, we check if that feature is available to decide the size
-	     of the FPSCR.  */
-	  if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
-	    tdesc = tdesc_powerpc_isa205_vsx64l;
-	  else
-	    tdesc = tdesc_powerpc_vsx64l;
-	}
-      else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
-	{
-	  if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
-	    tdesc = tdesc_powerpc_isa205_altivec64l;
-	  else
-	    tdesc = tdesc_powerpc_altivec64l;
-	}
-
-      current_process ()->tdesc = tdesc;
-      return;
-    }
-#endif
-
-  /* OK, we have a 32-bit inferior.  */
-  tdesc = tdesc_powerpc_32l;
-  current_process ()->tdesc = tdesc;
-
-  ppc_get_hwcap (&ppc_hwcap);
-  if (ppc_hwcap & PPC_FEATURE_CELL)
-    tdesc = tdesc_powerpc_cell32l;
-  else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
-    {
-      if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
-	tdesc = tdesc_powerpc_isa205_vsx32l;
-      else
-	tdesc = tdesc_powerpc_vsx32l;
-    }
-  else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
-    {
-      if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
-	tdesc = tdesc_powerpc_isa205_altivec32l;
-      else
-	tdesc = tdesc_powerpc_altivec32l;
-    }
-
-  /* On 32-bit machines, check for SPE registers.
-     Set the low target's regmap field as appropriately.  */
-#ifndef __powerpc64__
-  if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
-    tdesc = tdesc_powerpc_e500l;
-
-  if (!ppc_regmap_adjusted)
-    {
-      if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
-	ppc_usrregs_info.regmap = ppc_regmap_e500;
-
-      /* If the FPSCR is 64-bit wide, we need to fetch the whole
-	 64-bit slot and not just its second word.  The PT_FPSCR
-	 supplied in a 32-bit GDB compilation doesn't reflect
-	 this.  */
-      if (register_size (tdesc, 70) == 8)
-	ppc_regmap[70] = (48 + 2*32) * sizeof (long);
-
-      ppc_regmap_adjusted = 1;
-   }
-#endif
-  current_process ()->tdesc = tdesc;
-}
 
 /* Correct in either endianness.
    This instruction is "twge r2, r2", which GDB uses as a software
@@ -684,6 +586,103 @@ static const struct regs_info *
 ppc_regs_info (void)
 {
   return &regs_info;
+}
+
+static void
+ppc_arch_setup (void)
+{
+  const struct target_desc *tdesc;
+#ifdef __powerpc64__
+  long msr;
+  struct regcache *regcache;
+
+  /* On a 64-bit host, assume 64-bit inferior process with no
+     AltiVec registers.  Reset ppc_hwcap to ensure that the
+     collect_register call below does not fail.  */
+  tdesc = tdesc_powerpc_64l;
+  current_process ()->tdesc = tdesc;
+  ppc_hwcap = 0;
+
+  regcache = new_register_cache (tdesc);
+  fetch_inferior_registers (regcache, find_regno (tdesc, "msr"));
+  collect_register_by_name (regcache, "msr", &msr);
+  free_register_cache (regcache);
+  if (ppc64_64bit_inferior_p (msr))
+    {
+      ppc_get_hwcap (&ppc_hwcap);
+      if (ppc_hwcap & PPC_FEATURE_CELL)
+	tdesc = tdesc_powerpc_cell64l;
+      else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
+	{
+	  /* Power ISA 2.05 (implemented by Power 6 and newer processors)
+	     increases the FPSCR from 32 bits to 64 bits. Even though Power 7
+	     supports this ISA version, it doesn't have PPC_FEATURE_ARCH_2_05
+	     set, only PPC_FEATURE_ARCH_2_06.  Since for now the only bits
+	     used in the higher half of the register are for Decimal Floating
+	     Point, we check if that feature is available to decide the size
+	     of the FPSCR.  */
+	  if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
+	    tdesc = tdesc_powerpc_isa205_vsx64l;
+	  else
+	    tdesc = tdesc_powerpc_vsx64l;
+	}
+      else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
+	{
+	  if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
+	    tdesc = tdesc_powerpc_isa205_altivec64l;
+	  else
+	    tdesc = tdesc_powerpc_altivec64l;
+	}
+
+      current_process ()->tdesc = tdesc;
+      return;
+    }
+#endif
+
+  /* OK, we have a 32-bit inferior.  */
+  tdesc = tdesc_powerpc_32l;
+  current_process ()->tdesc = tdesc;
+
+  ppc_get_hwcap (&ppc_hwcap);
+  if (ppc_hwcap & PPC_FEATURE_CELL)
+    tdesc = tdesc_powerpc_cell32l;
+  else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
+    {
+      if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
+	tdesc = tdesc_powerpc_isa205_vsx32l;
+      else
+	tdesc = tdesc_powerpc_vsx32l;
+    }
+  else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
+    {
+      if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
+	tdesc = tdesc_powerpc_isa205_altivec32l;
+      else
+	tdesc = tdesc_powerpc_altivec32l;
+    }
+
+  /* On 32-bit machines, check for SPE registers.
+     Set the low target's regmap field as appropriately.  */
+#ifndef __powerpc64__
+  if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
+    tdesc = tdesc_powerpc_e500l;
+
+  if (!ppc_regmap_adjusted)
+    {
+      if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
+	ppc_usrregs_info.regmap = ppc_regmap_e500;
+
+      /* If the FPSCR is 64-bit wide, we need to fetch the whole
+	 64-bit slot and not just its second word.  The PT_FPSCR
+	 supplied in a 32-bit GDB compilation doesn't reflect
+	 this.  */
+      if (register_size (tdesc, 70) == 8)
+	ppc_regmap[70] = (48 + 2*32) * sizeof (long);
+
+      ppc_regmap_adjusted = 1;
+   }
+#endif
+  current_process ()->tdesc = tdesc;
 }
 
 struct linux_target_ops the_low_target = {
