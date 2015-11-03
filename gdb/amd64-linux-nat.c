@@ -283,10 +283,11 @@ ps_err_e
 ps_get_thread_area (const struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
+  ps_err_e result;
+
   if (gdbarch_bfd_arch_info (target_gdbarch ())->bits_per_word == 32)
     {
       unsigned int base_addr;
-      ps_err_e result;
 
       result = x86_linux_get_thread_area (lwpid, (void *) (long) idx,
 					  &base_addr);
@@ -296,63 +297,33 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 	     a "long" and a "void *" are the same.  */
 	  (*base) = (void *) (long) base_addr;
 	}
-      return result;
     }
   else
     {
-      /* This definition comes from prctl.h, but some kernels may not
-         have it.  */
-#ifndef PTRACE_ARCH_PRCTL
-#define PTRACE_ARCH_PRCTL      30
-#endif
+      struct cleanup *old_chain;
+      struct regcache *regcache;
+      enum amd64_regnum gdb_regnum;
+
       /* FIXME: ezannoni-2003-07-09 see comment above about include
 	 file order.  We could be getting bogus values for these two.  */
       gdb_assert (FS < ELF_NGREG);
       gdb_assert (GS < ELF_NGREG);
-      switch (idx)
-	{
-	case FS:
-#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
-	    {
-	      /* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
-		 fs_base and gs_base fields of user_regs_struct can be
-		 used directly.  */
-	      unsigned long fs;
-	      errno = 0;
-	      fs = ptrace (PTRACE_PEEKUSER, lwpid,
-			   offsetof (struct user_regs_struct, fs_base), 0);
-	      if (errno == 0)
-		{
-		  *base = (void *) fs;
-		  return PS_OK;
-		}
-	    }
-#endif
-	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
-	    return PS_OK;
-	  break;
-	case GS:
-#ifdef HAVE_STRUCT_USER_REGS_STRUCT_GS_BASE
-	    {
-	      unsigned long gs;
-	      errno = 0;
-	      gs = ptrace (PTRACE_PEEKUSER, lwpid,
-			   offsetof (struct user_regs_struct, gs_base), 0);
-	      if (errno == 0)
-		{
-		  *base = (void *) gs;
-		  return PS_OK;
-		}
-	    }
-#endif
-	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
-	    return PS_OK;
-	  break;
-	default:                   /* Should not happen.  */
-	  return PS_BADADDR;
-	}
+      if (idx == FS)
+	gdb_regnum = AMD64_FSBASE_REGNUM;
+      else if (idx == GS)
+	gdb_regnum = AMD64_GSBASE_REGNUM;
+      else
+	return PS_BADADDR;
+
+      old_chain = save_inferior_ptid ();
+      inferior_ptid = ptid_build (ptid_get_pid (ph->ptid), lwpid, 0);
+      regcache = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
+      result = (regcache_raw_read (regcache, gdb_regnum, (gdb_byte *) base)
+		== REG_VALID ? PS_OK : PS_ERR);
+      do_cleanups (old_chain);
     }
-  return PS_ERR;               /* ptrace failed.  */
+
+  return result;
 }
 
 
