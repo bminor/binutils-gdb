@@ -346,7 +346,7 @@ ppc_get_hwcap (unsigned long *valp)
 {
   const struct target_desc *tdesc = current_process ()->tdesc;
   int wordsize = register_size (tdesc, 0);
-  unsigned char *data = alloca (2 * wordsize);
+  unsigned char *data = (unsigned char *) alloca (2 * wordsize);
   int offset = 0;
 
   while ((*the_target->read_auxv) (offset, data, 2 * wordsize) == 2 * wordsize)
@@ -446,7 +446,7 @@ static void
 ppc_fill_vsxregset (struct regcache *regcache, void *buf)
 {
   int i, base;
-  char *regset = buf;
+  char *regset = (char *) buf;
 
   if (!(ppc_hwcap & PPC_FEATURE_HAS_VSX))
     return;
@@ -460,7 +460,7 @@ static void
 ppc_store_vsxregset (struct regcache *regcache, const void *buf)
 {
   int i, base;
-  const char *regset = buf;
+  const char *regset = (const char *) buf;
 
   if (!(ppc_hwcap & PPC_FEATURE_HAS_VSX))
     return;
@@ -476,7 +476,7 @@ static void
 ppc_fill_vrregset (struct regcache *regcache, void *buf)
 {
   int i, base;
-  char *regset = buf;
+  char *regset = (char *) buf;
 
   if (!(ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC))
     return;
@@ -493,7 +493,7 @@ static void
 ppc_store_vrregset (struct regcache *regcache, const void *buf)
 {
   int i, base;
-  const char *regset = buf;
+  const char *regset = (const char *) buf;
 
   if (!(ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC))
     return;
@@ -517,7 +517,7 @@ static void
 ppc_fill_evrregset (struct regcache *regcache, void *buf)
 {
   int i, ev0;
-  struct gdb_evrregset_t *regset = buf;
+  struct gdb_evrregset_t *regset = (struct gdb_evrregset_t *) buf;
 
   if (!(ppc_hwcap & PPC_FEATURE_HAS_SPE))
     return;
@@ -534,7 +534,7 @@ static void
 ppc_store_evrregset (struct regcache *regcache, const void *buf)
 {
   int i, ev0;
-  const struct gdb_evrregset_t *regset = buf;
+  const struct gdb_evrregset_t *regset = (const struct gdb_evrregset_t *) buf;
 
   if (!(ppc_hwcap & PPC_FEATURE_HAS_SPE))
     return;
