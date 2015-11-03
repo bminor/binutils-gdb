@@ -96,7 +96,7 @@ fill_gregset (const struct regcache *regcache,
     }
 }
 
-void
+static void
 supply_gregset_reg (struct regcache *regcache,
 		    const gdb_gregset_t *gregsetp, int regnum)
 {
@@ -253,7 +253,7 @@ store_xtregs (struct regcache *regcache, int regnum)
     perror_with_name (_("Couldn't write extended registers"));
 }
 
-void
+static void
 xtensa_linux_fetch_inferior_registers (struct target_ops *ops,
 				       struct regcache *regcache, int regnum)
 {
@@ -268,7 +268,7 @@ xtensa_linux_fetch_inferior_registers (struct target_ops *ops,
     fetch_xtregs (regcache, regnum);
 }
 
-void
+static void
 xtensa_linux_store_inferior_registers (struct target_ops *ops,
 				       struct regcache *regcache, int regnum)
 {

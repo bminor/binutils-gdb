@@ -1,5 +1,11 @@
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* xtensa-linux-nat.c (supply_gregset_reg): Make static.
+	(xtensa_linux_fetch_inferior_registers): Likewise.
+	(xtensa_linux_store_inferior_registers): Likewise.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* arm-linux-nat.c (arm_linux_read_description): Add cast.
 
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
