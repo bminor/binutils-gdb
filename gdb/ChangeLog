@@ -1,5 +1,9 @@
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* arm-linux-nat.c (arm_linux_read_description): Add cast.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ppc-linux-nat.c (ppc_linux_insert_mask_watchpoint): Change
 	type of rw to enum target_hw_bp_type.
 	(ppc_linux_remove_mask_watchpoint): Likewise.
