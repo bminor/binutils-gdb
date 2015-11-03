@@ -1,3 +1,14 @@
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* remote-sim.c (check_for_duplicate_sim_descriptor): Add casts.
+	(get_sim_inferior_data): Likewise.
+	(sim_inferior_data_cleanup): Likewise.
+	(gdbsim_close_inferior): Likewise.
+	(gdbsim_resume_inferior): Likewise.
+	(gdbsim_wait): Likewise.
+	(simulator_command): Likewise.
+	(sim_command_completer): Likewise.
+
 2015-11-03  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* MAINTAINERS (Write After Approval): Add Marcin Kościelnicki.

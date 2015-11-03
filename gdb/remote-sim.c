@@ -152,9 +152,10 @@ static int
 check_for_duplicate_sim_descriptor (struct inferior *inf, void *arg)
 {
   struct sim_inferior_data *sim_data;
-  SIM_DESC new_sim_desc = arg;
+  SIM_DESC new_sim_desc = (SIM_DESC) arg;
 
-  sim_data = inferior_data (inf, sim_inferior_data_key);
+  sim_data = ((struct sim_inferior_data *)
+	      inferior_data (inf, sim_inferior_data_key));
 
   return (sim_data != NULL && sim_data->gdbsim_desc == new_sim_desc);
 }
@@ -172,7 +173,7 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
 {
   SIM_DESC sim_desc = NULL;
   struct sim_inferior_data *sim_data
-    = inferior_data (inf, sim_inferior_data_key);
+    = (struct sim_inferior_data *) inferior_data (inf, sim_inferior_data_key);
 
   /* Try to allocate a new sim instance, if needed.  We do this ahead of
      a potential allocation of a sim_inferior_data struct in order to
@@ -257,7 +258,7 @@ get_sim_inferior_data_by_ptid (ptid_t ptid, int sim_instance_needed)
 static void
 sim_inferior_data_cleanup (struct inferior *inf, void *data)
 {
-  struct sim_inferior_data *sim_data = data;
+  struct sim_inferior_data *sim_data = (struct sim_inferior_data *) data;
 
   if (sim_data != NULL)
     {
@@ -766,8 +767,8 @@ gdbsim_open (const char *args, int from_tty)
 static int
 gdbsim_close_inferior (struct inferior *inf, void *arg)
 {
-  struct sim_inferior_data *sim_data = inferior_data (inf,
-						      sim_inferior_data_key);
+  struct sim_inferior_data *sim_data
+    = (struct sim_inferior_data *) inferior_data (inf, sim_inferior_data_key);
   if (sim_data != NULL)
     {
       ptid_t ptid = sim_data->remote_sim_ptid;
@@ -849,7 +850,7 @@ gdbsim_resume_inferior (struct inferior *inf, void *arg)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (inf, SIM_INSTANCE_NOT_NEEDED);
-  struct resume_data *rd = arg;
+  struct resume_data *rd = (struct resume_data *) arg;
 
   if (sim_data)
     {
@@ -1034,13 +1035,13 @@ gdbsim_wait (struct target_ops *ops,
 	case GDB_SIGNAL_TRAP:
 	default:
 	  status->kind = TARGET_WAITKIND_STOPPED;
-	  status->value.sig = sigrc;
+	  status->value.sig = (enum gdb_signal) sigrc;
 	  break;
 	}
       break;
     case sim_signalled:
       status->kind = TARGET_WAITKIND_SIGNALLED;
-      status->value.sig = sigrc;
+      status->value.sig = (enum gdb_signal) sigrc;
       break;
     case sim_running:
     case sim_polling:
@@ -1198,7 +1199,8 @@ simulator_command (char *args, int from_tty)
      thus allocating memory that would not be garbage collected until
      the ultimate destruction of the associated inferior.  */
 
-  sim_data  = inferior_data (current_inferior (), sim_inferior_data_key);
+  sim_data  = ((struct sim_inferior_data *)
+	       inferior_data (current_inferior (), sim_inferior_data_key));
   if (sim_data == NULL || sim_data->gdbsim_desc == NULL)
     {
 
@@ -1231,7 +1233,8 @@ sim_command_completer (struct cmd_list_element *ignore, const char *text,
   int i;
   VEC (char_ptr) *result = NULL;
 
-  sim_data = inferior_data (current_inferior (), sim_inferior_data_key);
+  sim_data = ((struct sim_inferior_data *)
+	      inferior_data (current_inferior (), sim_inferior_data_key));
   if (sim_data == NULL || sim_data->gdbsim_desc == NULL)
     return NULL;
 
