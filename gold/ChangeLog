@@ -1,3 +1,7 @@
+2015-11-03  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2015-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_CN.po: New (simplified) Chinese translation.
