@@ -120,7 +120,7 @@ static struct regset_info aarch32_regsets[] = {
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_VFP, 32 * 8 + 4,
     EXTENDED_REGS,
     arm_fill_vfpregset, arm_store_vfpregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info aarch32_regsets_info =
