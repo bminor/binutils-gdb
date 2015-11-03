@@ -1,3 +1,12 @@
+2015-11-03  Alan Modra  <amodra@gmail.com>
+
+	* readelf (process_version_sections): Check DT_VERNEED and
+	DT_VERDEF for all symbols.  Report "*both*" should a symbol
+	have both a verneed and verdef.
+	(get_symbol_version_string): Reduce indentation by early
+	exits.  Don't use SHT_NOBITS heuristic to detect case where a
+	defined symbol has a verneed entry.
+
 2015-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_CN.po: Updated (simplified) Chinese translation.
