@@ -1,5 +1,12 @@
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-mips-low.c (mips_fill_gregset): Add cast.
+	(mips_store_gregset): Likewise.
+	(mips_fill_fpregset): Likewise.
+	(mips_store_fpregset): Likewise.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-mips-low.c (mips_add_watchpoint): Rename private to
 	priv.
 
