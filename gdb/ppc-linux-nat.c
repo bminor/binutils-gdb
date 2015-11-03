@@ -1719,7 +1719,7 @@ get_trigger_type (enum target_hw_bp_type type)
 
 static int
 ppc_linux_insert_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
-				  CORE_ADDR mask, int rw)
+				  CORE_ADDR mask, enum target_hw_bp_type rw)
 {
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
@@ -1747,7 +1747,7 @@ ppc_linux_insert_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
 
 static int
 ppc_linux_remove_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
-				  CORE_ADDR mask, int rw)
+				  CORE_ADDR mask, enum target_hw_bp_type rw)
 {
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;

@@ -1,5 +1,18 @@
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ppc-linux-nat.c (ppc_linux_insert_mask_watchpoint): Change
+	type of rw to enum target_hw_bp_type.
+	(ppc_linux_remove_mask_watchpoint): Likewise.
+	* target.c (target_insert_mask_watchpoint): Likewise.
+	(target_remove_mask_watchpoint): Likewise.
+	* target.h (target_insert_mask_watchpoint): Likewise.
+	(target_remove_mask_watchpoint): Likewise.
+	(struct target_ops) <to_insert_mask_watchpoint>: Likewise.
+	(struct target_ops) <to_remove_mask_watchpoint>: Likewise.
+	* target-delegates.c: Regenerate.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* remote-sim.c (check_for_duplicate_sim_descriptor): Add casts.
 	(get_sim_inferior_data): Likewise.
 	(sim_inferior_data_cleanup): Likewise.

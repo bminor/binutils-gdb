@@ -587,20 +587,20 @@ debug_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum
 }
 
 static int
-delegate_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+delegate_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   self = self->beneath;
   return self->to_insert_mask_watchpoint (self, arg1, arg2, arg3);
 }
 
 static int
-tdefault_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+tdefault_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   return 1;
 }
 
 static int
-debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insert_mask_watchpoint (...)\n", debug_target.to_shortname);
@@ -612,7 +612,7 @@ debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);
@@ -620,20 +620,20 @@ debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR
 }
 
 static int
-delegate_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+delegate_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   self = self->beneath;
   return self->to_remove_mask_watchpoint (self, arg1, arg2, arg3);
 }
 
 static int
-tdefault_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+tdefault_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   return 1;
 }
 
 static int
-debug_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+debug_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_remove_mask_watchpoint (...)\n", debug_target.to_shortname);
@@ -645,7 +645,7 @@ debug_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);

@@ -3529,7 +3529,8 @@ target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
    target.h.  */
 
 int
-target_insert_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask, int rw)
+target_insert_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask,
+			       enum target_hw_bp_type rw)
 {
   return current_target.to_insert_mask_watchpoint (&current_target,
 						   addr, mask, rw);
@@ -3539,7 +3540,8 @@ target_insert_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask, int rw)
    target.h.  */
 
 int
-target_remove_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask, int rw)
+target_remove_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask,
+			       enum target_hw_bp_type rw)
 {
   return current_target.to_remove_mask_watchpoint (&current_target,
 						   addr, mask, rw);
