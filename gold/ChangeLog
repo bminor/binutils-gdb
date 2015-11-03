@@ -1,3 +1,8 @@
+2015-11-09  Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
+
+	* layout.h (Layout::is_debug_info_section): Recognize .pdr debug
+	sections.
+
 2015-11-09  Cary Coutant  <ccoutant@gmail.com>
 	    Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
 
