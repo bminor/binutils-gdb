@@ -426,7 +426,7 @@ arm_linux_hw_breakpoint_equal (const struct arm_linux_hw_breakpoint *p1,
 
 /* Convert a raw breakpoint type to an enum arm_hwbp_type.  */
 
-static int
+static arm_hwbp_type
 raw_bkpt_type_to_arm_hwbp_type (enum raw_bkpt_type raw_type)
 {
   switch (raw_type)
