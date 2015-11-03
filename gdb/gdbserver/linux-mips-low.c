@@ -356,8 +356,8 @@ mips_linux_new_thread (struct lwp_info *lwp)
 /* Create a new mips_watchpoint and add it to the list.  */
 
 static void
-mips_add_watchpoint (struct arch_process_info *private, CORE_ADDR addr,
-		     int len, int watch_type)
+mips_add_watchpoint (struct arch_process_info *private, CORE_ADDR addr, int len,
+		     enum target_hw_bp_type watch_type)
 {
   struct mips_watchpoint *new_watch;
   struct mips_watchpoint **pw;

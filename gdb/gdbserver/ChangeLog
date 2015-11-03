@@ -1,5 +1,10 @@
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* linux-mips-low.c (mips_linux_new_thread): Change type of
+	watch_type to enum target_hw_bp_type.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
 		* linux-arm-low.c (raw_bkpt_type_to_arm_hwbp_type):
 		Change return type to arm_hwbp_type.
 
