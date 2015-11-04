@@ -8694,7 +8694,8 @@ i386_mpx_get_bt_entry (CORE_ADDR ptr, CORE_ADDR bd_base)
       bt_mask = (CORE_ADDR) MPX_BT_MASK;
 
       if ( sizeof (CORE_ADDR) == 4)
-	error (_("operation not supported"));
+	error (_("bound table examination not supported\
+ for 64-bit process with 32-bit GDB"));
     }
   else
     {
