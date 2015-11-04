@@ -70,8 +70,9 @@ foo (T *p)
 #if defined  __GNUC__ && !defined __INTEL_COMPILER
   __bnd_store_ptr_bounds (x, &x);
 #endif
-
-  return;			/* after-assign */
+  /* Dummy assign.  */
+  x = x + 1;			/* after-assign */
+  return;
 }
 
 int
