@@ -1,3 +1,8 @@
+2015-11-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-vla-fortran.exp (evaluate allocated vla): Permit any data.
+
 2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.reverse/s390-mvcle.c: New test.
