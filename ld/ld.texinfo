@@ -6108,7 +6108,8 @@ This is equivalent to either
 @end smallexample
 or
 @smallexample
-(ALIGN(@var{maxpagesize}) + (. & (@var{maxpagesize} - @var{commonpagesize})))
+(ALIGN(@var{maxpagesize})
+ + ((. + @var{commonpagesize} - 1) & (@var{maxpagesize} - @var{commonpagesize})))
 @end smallexample
 @noindent
 depending on whether the latter uses fewer @var{commonpagesize} sized pages
