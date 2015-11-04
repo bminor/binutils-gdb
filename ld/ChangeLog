@@ -1,5 +1,9 @@
 2015-11-05  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.in: Regenerate.
+
+2015-11-05  Alan Modra  <amodra@gmail.com>
+
 	PR ld/19203
 	* ld.texinfo (DATA_SEGMENT_ALIGN): Correct second expression.
 
