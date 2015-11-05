@@ -1,5 +1,20 @@
 2015-11-05  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (extract_signed_bitfield): Remove.
+	(decode_masked_match): Remove.
+	(aarch64_decode_add_sub_imm): Remove.
+	(aarch64_decode_br): Remove.
+	(aarch64_decode_eret): Remove.
+	(aarch64_decode_movz): Remove.
+	(aarch64_decode_orr_shifted_register_x): Remove.
+	(aarch64_decode_ret): Remove.
+	(aarch64_decode_stp_offset): Remove.
+	(aarch64_decode_stur): Remove.
+	(aarch64_analyze_prologue): Call aarch64_decode_insn
+	and use aarch64_inst to decode instructions.
+
+2015-11-05  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (aarch64_decode_stp_offset): New argument
 	wback.
 	(aarch64_decode_stp_offset_wb): Removed.
