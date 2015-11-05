@@ -939,7 +939,7 @@ class General_options
 		N_("OFFSET"));
 
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
-		N_("Set GNU linker emulation"), N_("EMULATION"));
+		N_("Set GNU linker emulation; obsolete"), N_("EMULATION"));
 
   DEFINE_bool(mmap_output_file, options::TWO_DASHES, '\0', true,
 	      N_("Map the output file for writing (default)."),

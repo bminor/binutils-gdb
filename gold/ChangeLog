@@ -1,5 +1,16 @@
 2015-11-05  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/19119
+	PR gold/19172
+	PR gold/19197
+	Revert commit 6457197210144f50a696097c0d308d81d46d5510:
+	2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+		* options.h (General_options): Remove "obsolete" from -m.
+		* parameters.cc (set_parameters_target): Check if input target
+		is compatible with output emulation set by "-m emulation".
+
+2015-11-05  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/19163
 	* aarch64.cc (Target_aarch64::Relocate::relocate): Don't apply
 	certain relocations if --no-apply-dynamic-relocs is set.
