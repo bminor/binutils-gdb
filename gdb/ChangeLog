@@ -1,5 +1,10 @@
 2015-11-05  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Call
+	aarch64_decode_insn and decode instruction by aarch64_inst.
+
+2015-11-05  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (extract_signed_bitfield): Remove.
 	(decode_masked_match): Remove.
 	(aarch64_decode_add_sub_imm): Remove.

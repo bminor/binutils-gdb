@@ -2500,9 +2500,13 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   uint32_t insn = read_memory_unsigned_integer (from, 4, byte_order_for_code);
   struct aarch64_displaced_step_data dsd;
+  aarch64_inst inst;
+
+  if (aarch64_decode_insn (insn, &inst, 1) != 0)
+    return NULL;
 
   /* Look for a Load Exclusive instruction which begins the sequence.  */
-  if (decode_masked_match (insn, 0x3fc00000, 0x08400000))
+  if (inst.opcode->iclass == ldstexcl && bit (insn, 22))
     {
       /* We can't displaced step atomic sequences.  */
       return NULL;
