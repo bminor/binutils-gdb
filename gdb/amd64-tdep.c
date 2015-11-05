@@ -2934,9 +2934,64 @@ amd64_address_class_name_to_type_flags (struct gdbarch *gdbarch,
   return 0;
 }
 
-/* ??? We ought to fill in address_to_pointer and pointer_to_address,
-   except that these hooks do not have access to the thread, or a
-   regcache for the thread.  */
+static void
+amd64_address_to_pointer (struct gdbarch *gdbarch, struct type *type,
+			  gdb_byte *buf, CORE_ADDR addr)
+{
+  int regnum = -1;
+
+  switch (TYPE_ADDRESS_CLASS_ALL (type))
+    {
+    case TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1:
+      regnum = AMD64_FSBASE_REGNUM;
+      break;
+    case TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2:
+      regnum = AMD64_GSBASE_REGNUM;
+      break;
+    }
+  if (regnum >= 0)
+    {
+      struct regcache *regcache = get_current_regcache ();
+      ULONGEST base;
+
+      if (regcache_raw_read_unsigned (regcache, regnum, &base) == REG_VALID)
+	addr -= base;
+      /* ??? else error, but we have no way to signal that here.  */
+    }
+
+  store_unsigned_integer (buf, TYPE_LENGTH (type), BFD_ENDIAN_LITTLE, addr);
+}
+
+static CORE_ADDR
+amd64_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
+			  const gdb_byte *buf)
+{
+  ULONGEST addr = extract_unsigned_integer (buf, TYPE_LENGTH (type),
+					    BFD_ENDIAN_LITTLE);
+  int regnum = -1;
+
+  switch (TYPE_ADDRESS_CLASS_ALL (type))
+    {
+    case TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1:
+      regnum = AMD64_FSBASE_REGNUM;
+      break;
+    case TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2:
+      regnum = AMD64_GSBASE_REGNUM;
+      break;
+    }
+  if (regnum >= 0)
+    {
+      struct regcache *regcache = get_current_regcache ();
+      ULONGEST base;
+
+      if (regcache_raw_read_unsigned (regcache, regnum, &base) == REG_VALID)
+	addr += base;
+      /* ??? else error, but we have no way to signal that here.  */
+    }
+
+  return addr;
+}
+
 
 
 /* Figure out where the longjmp will land.  Slurp the jmp_buf out of
@@ -3149,6 +3204,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, amd64_address_class_type_flags_to_name);
   set_gdbarch_address_class_name_to_type_flags
     (gdbarch, amd64_address_class_name_to_type_flags);
+  set_gdbarch_address_to_pointer (gdbarch, amd64_address_to_pointer);
+  set_gdbarch_pointer_to_address (gdbarch, amd64_pointer_to_address);
 }
 
 
