@@ -416,42 +416,9 @@ aarch64_decode_ret (CORE_ADDR addr, uint32_t insn, unsigned *rn)
   return 0;
 }
 
-/* Decode an opcode if it represents the following instruction:
+/* Decode an opcode if it represents the following instructions:
+
    STP rt, rt2, [rn, #imm]
-
-   ADDR specifies the address of the opcode.
-   INSN specifies the opcode to test.
-   RT1 receives the 'rt' field from the decoded instruction.
-   RT2 receives the 'rt2' field from the decoded instruction.
-   RN receives the 'rn' field from the decoded instruction.
-   IMM receives the 'imm' field from the decoded instruction.
-
-   Return 1 if the opcodes matches and is decoded, otherwise 0.  */
-
-static int
-aarch64_decode_stp_offset (CORE_ADDR addr, uint32_t insn, unsigned *rt1,
-			   unsigned *rt2, unsigned *rn, int32_t *imm)
-{
-  if (decode_masked_match (insn, 0xffc00000, 0xa9000000))
-    {
-      *rt1 = (insn >> 0) & 0x1f;
-      *rn = (insn >> 5) & 0x1f;
-      *rt2 = (insn >> 10) & 0x1f;
-      *imm = extract_signed_bitfield (insn, 7, 15);
-      *imm <<= 3;
-
-      if (aarch64_debug)
-	{
-	  debug_printf ("decode: 0x%s 0x%x stp x%u, x%u, [x%u + #%d]\n",
-			core_addr_to_string_nz (addr), insn, *rt1, *rt2,
-			*rn, *imm);
-	}
-      return 1;
-    }
-  return 0;
-}
-
-/* Decode an opcode if it represents the following instruction:
    STP rt, rt2, [rn, #imm]!
 
    ADDR specifies the address of the opcode.
@@ -460,26 +427,29 @@ aarch64_decode_stp_offset (CORE_ADDR addr, uint32_t insn, unsigned *rt1,
    RT2 receives the 'rt2' field from the decoded instruction.
    RN receives the 'rn' field from the decoded instruction.
    IMM receives the 'imm' field from the decoded instruction.
+   *WBACK receives the bit 23 from the decoded instruction.
 
    Return 1 if the opcodes matches and is decoded, otherwise 0.  */
 
 static int
-aarch64_decode_stp_offset_wb (CORE_ADDR addr, uint32_t insn, unsigned *rt1,
-			      unsigned *rt2, unsigned *rn, int32_t *imm)
+aarch64_decode_stp_offset (CORE_ADDR addr, uint32_t insn, unsigned *rt1,
+			   unsigned *rt2, unsigned *rn, int32_t *imm,
+			   int *wback)
 {
-  if (decode_masked_match (insn, 0xffc00000, 0xa9800000))
+  if (decode_masked_match (insn, 0xff400000, 0xa9000000))
     {
       *rt1 = (insn >> 0) & 0x1f;
       *rn = (insn >> 5) & 0x1f;
       *rt2 = (insn >> 10) & 0x1f;
       *imm = extract_signed_bitfield (insn, 7, 15);
       *imm <<= 3;
+      *wback = bit (insn, 23);
 
       if (aarch64_debug)
 	{
-	  debug_printf ("decode: 0x%s 0x%x stp x%u, x%u, [x%u + #%d]!\n",
+	  debug_printf ("decode: 0x%s 0x%x stp x%u, x%u, [x%u + #%d]%s\n",
 			core_addr_to_string_nz (addr), insn, *rt1, *rt2,
-			*rn, *imm);
+			*rn, *imm, *wback ? "" : "!");
 	}
       return 1;
     }
@@ -550,6 +520,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       unsigned rt1;
       unsigned rt2;
       int op_is_sub;
+      int wback;
       int32_t imm;
       unsigned cond;
       int is64;
@@ -622,7 +593,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 			 is64 ? 8 : 4, regs[rt]);
 	}
       else if (aarch64_decode_stp_offset (start, insn, &rt1, &rt2, &rn,
-					  &imm))
+					  &imm, &wback))
 	{
 	  /* If recording this store would invalidate the store area
 	     (perhaps because rn is not known) then we should abandon
@@ -639,26 +610,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 			 regs[rt1]);
 	  pv_area_store (stack, pv_add_constant (regs[rn], imm + 8), 8,
 			 regs[rt2]);
-	}
-      else if (aarch64_decode_stp_offset_wb (start, insn, &rt1, &rt2, &rn,
-					     &imm))
-	{
-	  /* If recording this store would invalidate the store area
-	     (perhaps because rn is not known) then we should abandon
-	     further prologue analysis.  */
-	  if (pv_area_store_would_trash (stack,
-					 pv_add_constant (regs[rn], imm)))
-	    break;
 
-	  if (pv_area_store_would_trash (stack,
-					 pv_add_constant (regs[rn], imm + 8)))
-	    break;
+	  if (wback)
+	    regs[rn] = pv_add_constant (regs[rn], imm);
 
-	  pv_area_store (stack, pv_add_constant (regs[rn], imm), 8,
-			 regs[rt1]);
-	  pv_area_store (stack, pv_add_constant (regs[rn], imm + 8), 8,
-			 regs[rt2]);
-	  regs[rn] = pv_add_constant (regs[rn], imm);
 	}
       else if (aarch64_decode_tb (start, insn, &is_tbnz, &bit, &rn,
 				  &offset))

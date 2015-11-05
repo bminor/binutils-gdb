@@ -1,3 +1,11 @@
+2015-11-05  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_decode_stp_offset): New argument
+	wback.
+	(aarch64_decode_stp_offset_wb): Removed.
+	(aarch64_analyze_prologue): Don't use
+	aarch64_decode_stp_offset_wb.
+
 2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	PR/18376
