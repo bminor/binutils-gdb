@@ -19,7 +19,12 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-if { [prepare_for_testing dw2-unresolved.exp "dw2-unresolved" {dw2-unresolved-main.c dw2-unresolved.S} {nodebug}] } {
+# Some targets have leading underscores on assembly symbols.
+set additional_flags [gdb_target_symbol_prefix_flags_asm]
+
+if { [prepare_for_testing dw2-unresolved.exp "dw2-unresolved" \
+	{dw2-unresolved-main.c dw2-unresolved.S} \
+	[list nodebug $additional_flags]] } {
     return -1
 }
 

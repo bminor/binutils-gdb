@@ -5571,18 +5571,48 @@ proc gdb_target_symbol { symbol } {
   return "${prefix}${symbol}"
 }
 
-# gdb_target_symbol_prefix_flags returns a string that can be added
-# to gdb_compile options to define SYMBOL_PREFIX macro value
-# symbol_prefix_flags returns a string that can be added
-# for targets that use underscore as symbol prefix.
-# TODO: find out automatically if the target needs this.
+# gdb_target_symbol_prefix_flags_asm returns a string that can be
+# added to gdb_compile options to define the C-preprocessor macro
+# SYMBOL_PREFIX with a value that can be prepended to symbols
+# for targets which require a prefix, such as underscore.
+#
+# This version (_asm) defines the prefix without double quotes
+# surrounding the prefix.  It is used to define the macro
+# SYMBOL_PREFIX for assembly language files.  Another version, below,
+# is used for symbols in inline assembler in C/C++ files.
+# 
+# The lack of quotes in this version (_asm) makes it possible to
+# define supporting macros in the .S file.  (The version which
+# uses quotes for the prefix won't work for such files since it's
+# impossible to define a quote-stripping macro in C.)
+#
+# It's possible to use this version (_asm) for C/C++ source files too,
+# but a string is usually required in such files; providing a version
+# (no _asm) which encloses the prefix with double quotes makes it
+# somewhat easier to define the supporting macros in the test case.
+
+proc gdb_target_symbol_prefix_flags_asm {} {
+    set prefix [gdb_target_symbol_prefix]
+    if {$prefix ne ""} {
+	return "additional_flags=-DSYMBOL_PREFIX=$prefix"
+    } else {
+	return "";
+    }
+}
+
+# gdb_target_symbol_prefix_flags returns the same string as
+# gdb_target_symbol_prefix_flags_asm, above, but with the prefix
+# enclosed in double quotes if there is a prefix.
+#
+# See the comment for gdb_target_symbol_prefix_flags_asm for an
+# extended discussion.
 
 proc gdb_target_symbol_prefix_flags {} {
-    if { [istarget "i?86-*-cygwin*"] || [istarget "i?86-*-mingw*"]
-	 || [istarget "*-*-msdosdjgpp*"] || [istarget "*-*-go32*"] } {
-	return "additional_flags=-DSYMBOL_PREFIX=\"_\""
+    set prefix [gdb_target_symbol_prefix]
+    if {$prefix ne ""} {
+	return "additional_flags=-DSYMBOL_PREFIX=\"$prefix\""
     } else {
-	return ""
+	return "";
     }
 }
 

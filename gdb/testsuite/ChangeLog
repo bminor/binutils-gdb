@@ -1,3 +1,22 @@
+2015-11-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* lib/gdb (gdb_target_symbol_prefix_flags_asm): New proc.
+	(gdb_target_symbol_prefix_flags): Define in terms of _asm
+	version.
+	* gdb.arch/i386-float.exp, gdb.arch/i386-permbkpt.exp,
+	gdb.dwarf2/dw2-canonicalize-type.exp,
+	gdb.dwarf2/dw2-compdir-oldgcc.exp, gdb.dwarf2/dw2-minsym-in-cu.exp,
+	gdb.dwarf2/dw2-op-stack-value.exp, gdb.dwarf2/dw2-unresolved.exp,
+	gdb.dwarf2/fission-reread.exp, gdb.dwarf2/pr13961.exp: Use flags
+	provided by gdb_target_symbol_prefix_flags_asm.
+	* gdb.dwarf2/dw2-canonicalize-type.S, gdb.dwarf2/dw2-compdir-oldgcc.S,
+	testsuite/gdb.dwarf2/dw2-minsym-in-cu.S,
+	testsuite/gdb.dwarf2/dw2-unresolved-main.c,
+	testsuite/gdb.dwarf2/dw2-unresolved.S, gdb.dwarf2/fission-reread.S,
+	gdb.dwarf2/pr13961.S: Define and use SYMBOL macro (and supporting
+	macros where needed).  Use this macro for symbols which require
+	the prefix provided by SYMBOL_PREFIX.
+
 2015-11-05  Kevin Buettner  <kevinb@redhat.com>
 
 	* lib/gdb.exp (gdb_target_symbol_prefix, gdb_target_symbol):
