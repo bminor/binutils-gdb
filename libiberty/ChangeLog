@@ -1,3 +1,9 @@
+2015-11-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Set AC_CV_FUNC_GETPAGESIZE to "yes" on
+	Android hosts.
+	* configure: Regenerate.
+
 2015-09-30  Nick Clifton  <nickc@redhat.com>
 
 	Import the following patches from the GCC mainline:
