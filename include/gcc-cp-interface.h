@@ -120,6 +120,9 @@ enum gcc_cp_symbol_kind
      prototype in a base class) declared as such.  */
   GCC_CP_FLAG_VIRTUAL_FUNCTION = GCC_CP_FLAG_BASE << 1,
 
+  /* The following two flags should only be set when the flag above is
+     set.  */
+
   /* This indicates a pure virtual member function, i.e., one that is
      declared with "= 0", even if a body is provided in the
      definition.  */
