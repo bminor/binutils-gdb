@@ -1,3 +1,7 @@
+2015-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-decode.c (add_info): Switch to class_info.
+
 2015-11-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_is_wrapper_field): Add special handling
