@@ -522,21 +522,18 @@ expression work together to yield a pre-processed expression."),
 	   &macrolist);
   add_alias_cmd ("exp1", "expand-once", no_class, 1, &macrolist);
 
-  add_cmd ("macro", no_class, info_macro_command,
-	   _("Show the definition of MACRO, and it's source location.\n\
+  add_info ("macro", info_macro_command,
+	    _("Show the definition of MACRO, and it's source location.\n\
 Usage: info macro [-a|-all] [--] MACRO\n\
 Options: \n\
   -a, --all    Output all definitions of MACRO in the current compilation\
  unit.\n\
-  --           Specify the end of arguments and the beginning of the MACRO."),
+  --           Specify the end of arguments and the beginning of the MACRO."));
 
-	   &infolist);
-
-  add_cmd ("macros", no_class, info_macros_command,
-	   _("Show the definitions of all macros at LINESPEC, or the current \
+  add_info ("macros", info_macros_command,
+	    _("Show the definitions of all macros at LINESPEC, or the current \
 source location.\n\
-Usage: info macros [LINESPEC]"),
-	   &infolist);
+Usage: info macros [LINESPEC]"));
 
   add_cmd ("define", no_class, macro_define_command, _("\
 Define a new C/C++ preprocessor macro.\n\

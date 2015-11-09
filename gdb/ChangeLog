@@ -1,5 +1,12 @@
 2015-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* avr-tdep.c (_initialize_avr_tdep): Switch to 'add_info' for creating
+	info sub-commands.
+	* gnu-nat.c (add_task_commands): Likewise.
+	* macrocmd.c (_initialize_macrocmd): Likewise.
+
+2015-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cli/cli-decode.c (add_info): Switch to class_info.
 
 2015-11-09  Joel Brobecker  <brobecker@adacore.com>

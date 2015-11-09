@@ -1632,7 +1632,6 @@ _initialize_avr_tdep (void)
   /* FIXME: TRoth/2002-02-18: This should probably be changed to 'info avr
      io_registers' to signify it is not available on other platforms.  */
 
-  add_cmd ("io_registers", class_info, avr_io_reg_read_command,
-	   _("query remote avr target for io space register values"),
-	   &infolist);
+  add_info ("io_registers", avr_io_reg_read_command,
+	    _("query remote avr target for io space register values"));
 }
