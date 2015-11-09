@@ -1,3 +1,8 @@
+2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* linux-s390-low.c (s390_supports_tracepoints): New function.
+	(struct linux_target_ops): Fill supports_tracepoints hook.
+
 2016-03-18  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-low.c (lwp_signal_can_be_delivered): New function.

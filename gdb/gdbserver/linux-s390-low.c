@@ -745,6 +745,14 @@ s390_regs_info (void)
   return &regs_info;
 }
 
+/* The "supports_tracepoints" linux_target_ops method.  */
+
+static int
+s390_supports_tracepoints (void)
+{
+  return 1;
+}
+
 struct linux_target_ops the_low_target = {
   s390_arch_setup,
   s390_regs_info,
@@ -771,7 +779,7 @@ struct linux_target_ops the_low_target = {
   NULL, /* new_fork */
   NULL, /* prepare_to_resume */
   NULL, /* process_qsupported */
-  NULL, /* supports_tracepoints */
+  s390_supports_tracepoints,
   NULL, /* get_thread_area */
   NULL, /* install_fast_tracepoint_jump_pad */
   NULL, /* emit_ops */

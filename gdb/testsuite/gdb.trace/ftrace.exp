@@ -244,6 +244,11 @@ if [is_amd64_regs_target] {
     set arg0exp "\$x0"
 } elseif [istarget "powerpc*-*-*"] {
     set arg0exp "\$r3"
+} elseif { [istarget "s390x-*-*"] } {
+    set arg0exp "\$r2"
+} elseif { [istarget "s390-*-*"] } {
+    # On targets with 64-bit GPRs, avoid the high part.
+    set arg0exp "(\$r2 & 0xffffffff)"
 } else {
     set arg0exp ""
 }

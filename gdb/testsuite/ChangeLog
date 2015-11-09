@@ -1,3 +1,12 @@
+2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/ftrace.exp: Set arg0exp for s390.
+	* gdb.trace/mi-trace-frame-collected.exp: Expect 4 registers on s390.
+	* gdb.trace/mi-trace-unavailable.exp: Set pcnum for s390, add gpr0num
+	variable for GPR 0 instead of assuming it is register 0.
+	* gdb.trace/trace-common.h: Add s390 fast tracepoint placeholder.
+	* lib/trace-support.exp: Add s390 registers.
+
 2016-03-29  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.arch/arm-neon.exp: Pass debug to prepare_for_testing.
