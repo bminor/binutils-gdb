@@ -1750,17 +1750,6 @@ store2 (SIM_DESC sd, ea_type *arg, int n)
   return store_1 (sd, arg, n, 1);
 }
 
-static union
-{
-  short int i;
-  struct
-    {
-      char low;
-      char high;
-    }
-  u;
-} littleendian;
-
 /* Flag to be set whenever a new SIM_DESC object is created.  */
 static int init_pointers_needed = 1;
 
@@ -1770,8 +1759,6 @@ init_pointers (SIM_DESC sd)
   if (init_pointers_needed)
     {
       int i;
-
-      littleendian.i = 1;
 
       if (h8300smode && !h8300_normal_mode)
 	memory_size = H8300S_MSIZE;
