@@ -1,3 +1,12 @@
+2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs, ppc64_elf_build_stubs): Fix left
+	shift of negative value.
+	* libbfd.c (safe_read_leb128): Likewise.
+	* dwarf2.c (place_sections): Likewise.
+	* bfd-in.h (align_power): Likewise.
+	* bfd-in2.h (align_power): Likewise.
+
 2015-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_CN.po: Updated (simplified) Chinese translation.

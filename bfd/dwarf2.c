@@ -3354,8 +3354,8 @@ place_sections (bfd *orig_bfd, struct dwarf2_debug *stash)
 		  /* Align the new address to the current section
 		     alignment.  */
 		  last_vma = ((last_vma
-			       + ~((bfd_vma) -1 << sect->alignment_power))
-			      & ((bfd_vma) -1 << sect->alignment_power));
+			       + ~(-((bfd_vma) 1 << sect->alignment_power)))
+			      & (-((bfd_vma) 1 << sect->alignment_power)));
 		  sect->vma = last_vma;
 		  last_vma += sz;
 		}
