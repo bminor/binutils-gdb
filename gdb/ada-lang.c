@@ -6984,6 +6984,17 @@ ada_is_wrapper_field (struct type *type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (type, field_num);
 
+  if (name != NULL && strcmp (name, "RETVAL") == 0)
+    {
+      /* This happens in functions with "out" or "in out" parameters
+	 which are passed by copy.  For such functions, GNAT describes
+	 the function's return type as being a struct where the return
+	 value is in a field called RETVAL, and where the other "out"
+	 or "in out" parameters are fields of that struct.  This is not
+	 a wrapper.  */
+      return 0;
+    }
+
   return (name != NULL
           && (startswith (name, "PARENT")
               || strcmp (name, "REP") == 0

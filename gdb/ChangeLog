@@ -1,3 +1,8 @@
+2015-11-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_is_wrapper_field): Add special handling
+	for fields called "RETVAL".
+
 2015-11-09  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (arm_exidx_new_objfile): Use

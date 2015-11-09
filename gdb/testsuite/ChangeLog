@@ -1,3 +1,7 @@
+2015-11-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/fin_fun_out: New testcase.
+
 2015-11-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.dwarf2/data-loc.exp (Dwarf::assemble): Don't hardcode
