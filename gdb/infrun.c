@@ -1536,6 +1536,21 @@ displaced_step_in_progress_any_inferior (void)
   return 0;
 }
 
+/* Return true if thread represented by PTID is doing a displaced
+   step.  */
+
+static int
+displaced_step_in_progress_thread (ptid_t ptid)
+{
+  struct displaced_step_inferior_state *displaced;
+
+  gdb_assert (!ptid_equal (ptid, null_ptid));
+
+  displaced = get_displaced_stepping_state (ptid_get_pid (ptid));
+
+  return (displaced != NULL && ptid_equal (displaced->step_ptid, ptid));
+}
+
 /* Return true if process PID has a thread doing a displaced step.  */
 
 static int
@@ -4946,12 +4961,10 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       {
 	struct regcache *regcache = get_thread_regcache (ecs->ptid);
 	struct gdbarch *gdbarch = get_regcache_arch (regcache);
-	struct displaced_step_inferior_state *displaced
-	  = get_displaced_stepping_state (ptid_get_pid (ecs->ptid));
 
 	/* If checking displaced stepping is supported, and thread
 	   ecs->ptid is displaced stepping.  */
-	if (displaced && ptid_equal (displaced->step_ptid, ecs->ptid))
+	if (displaced_step_in_progress_thread (ecs->ptid))
 	  {
 	    struct inferior *parent_inf
 	      = find_inferior_ptid (ecs->ptid);
@@ -4970,6 +4983,9 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 
 	    if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
 	      {
+		struct displaced_step_inferior_state *displaced
+		  = get_displaced_stepping_state (ptid_get_pid (ecs->ptid));
+
 		/* Restore scratch pad for child process.  */
 		displaced_step_restore (displaced, ecs->ws.value.related_pid);
 	      }

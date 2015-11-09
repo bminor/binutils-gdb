@@ -1,3 +1,8 @@
+2015-11-09  Yao Qi  <yao.qi@linaro.org>
+
+	* infrun.c (displaced_step_in_progress_thread): New function.
+	(handle_inferior_event_1): Call it.
+
 2015-11-05  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Call
