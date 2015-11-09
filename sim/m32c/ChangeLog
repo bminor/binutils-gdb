@@ -1,3 +1,7 @@
+2015-11-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Delete redundant dependency info.
+
 2015-08-05  Nick Clifton  <nickc@redhat.com>
 
 	* gdb-if.c (sim_info): Stub function to allow GDB to be built
