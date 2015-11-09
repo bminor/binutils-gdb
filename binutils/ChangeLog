@@ -1,3 +1,7 @@
+2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* dwarf.c (read_leb128): Fix left shift of negative value.
+
 2015-11-03  Alan Modra  <amodra@gmail.com>
 
 	* readelf (process_version_sections): Check DT_VERNEED and
