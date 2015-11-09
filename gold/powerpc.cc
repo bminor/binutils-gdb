@@ -1207,10 +1207,13 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rela<size, big_endian>& reloc)
   {
+    unsigned int r_type = elfcpp::elf_r_type<size>(reloc.get_r_info());
     this->copy_relocs_.copy_reloc(symtab, layout,
 				  symtab->get_sized_symbol<size>(sym),
 				  object, shndx, output_section,
-				  reloc, this->rela_dyn_section(layout));
+				  r_type, reloc.get_r_offset(),
+				  reloc.get_r_addend(),
+				  this->rela_dyn_section(layout));
   }
 
   // Look over all the input sections, deciding where to place stubs.
