@@ -2219,7 +2219,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
   cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Read contents of exception table and index.  */
-  exidx = bfd_get_section_by_name (objfile->obfd, ".ARM.exidx");
+  exidx = bfd_get_section_by_name (objfile->obfd, ELF_STRING_ARM_unwind);
   if (exidx)
     {
       exidx_vma = bfd_section_vma (objfile->obfd, exidx);

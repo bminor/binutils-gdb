@@ -1,5 +1,10 @@
 2015-11-09  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-tdep.c (arm_exidx_new_objfile): Use
+	ELF_STRING_ARM_unwind.
+
+2015-11-09  Yao Qi  <yao.qi@linaro.org>
+
 	* infrun.c (displaced_step_in_progress_thread): New function.
 	(handle_inferior_event_1): Call it.
 
