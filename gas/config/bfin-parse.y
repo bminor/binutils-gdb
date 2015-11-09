@@ -4505,7 +4505,7 @@ static int
 value_match (Expr_Node *exp, int sz, int sign, int mul, int issigned)
 {
   int umax = (1 << sz) - 1;
-  int min = -1 << (sz - 1);
+  int min = -(1 << (sz - 1));
   int max = (1 << (sz - 1)) - 1;
 
   int v = (EXPR_VALUE (exp)) & 0xffffffff;

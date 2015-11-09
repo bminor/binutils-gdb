@@ -796,7 +796,7 @@ md_section_align (segment, size)
      valueT size;
 {
   int boundary = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << boundary) - 1) & (-1 << boundary));
+  return ((size + (1 << boundary) - 1) & -(1 << boundary));
 }
 
 

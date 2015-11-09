@@ -21019,7 +21019,7 @@ md_section_align (segT	 segment ATTRIBUTE_UNUSED,
       int align;
 
       align = bfd_get_section_alignment (stdoutput, segment);
-      size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+      size = ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
     }
 #endif
 

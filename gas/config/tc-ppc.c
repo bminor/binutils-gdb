@@ -6090,7 +6090,7 @@ md_section_align (asection *seg ATTRIBUTE_UNUSED, valueT addr)
 #else
   int align = bfd_get_section_alignment (stdoutput, seg);
 
-  return ((addr + (1 << align) - 1) & (-1 << align));
+  return ((addr + (1 << align) - 1) & -(1 << align));
 #endif
 }
 

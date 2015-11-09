@@ -16500,7 +16500,7 @@ md_section_align (asection *seg, valueT addr)
   if (align > 4)
     align = 4;
 
-  return ((addr + (1 << align) - 1) & (-1 << align));
+  return ((addr + (1 << align) - 1) & -(1 << align));
 }
 
 /* Utility routine, called from above as well.  If called while the

@@ -1,3 +1,51 @@
+2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* read.c (parse_bitfield_cons): Fix left shift of negative value.
+	* config/tc-xstormy16.c (md_section_align): Likewise.
+	* config/tc-xgate.c (md_section_align): Likewise.
+	* config/tc-visium.c (md_section_align): Likewise.
+	* config/tc-v850.c (md_section_align): Likewise.
+	* config/tc-tic6x.c (md_section_align): Likewise.
+	* config/tc-sh.c (SH64PCREL32_M, SH64PCREL48_M, SH64PCREL32_M)
+	(MOVI_32_M, MOVI_48_M, MOVI_32_M, md_section_align): Likewise.
+	* config/tc-sh64.c (shmedia_md_estimate_size_before_relax): Likewise.
+	* config/tc-score.c (s3_section_align): Likewise.
+	* config/tc-score7.c (s7_section_align): Likewise.
+	* config/tc-s390.c (md_section_align): Likewise.
+	* config/tc-rx.c (md_section_align): Likewise.
+	* config/tc-rl78.c (md_section_align): Likewise.
+	* config/tc-ppc.c (md_section_align): Likewise.
+	* config/tc-or1k.c (md_section_align): Likewise.
+	* config/tc-nds32.c (md_section_align): Likewise.
+	* config/tc-mt.c (md_section_align): Likewise.
+	* config/tc-msp430.c (md_section_align): Likewise.
+	* config/tc-mn10300.c (md_section_align): Likewise.
+	* config/tc-mn10200.c (md_section_align): Likewise.
+	* config/tc-mips.c (md_section_align): Likewise.
+	* config/tc-microblaze.c (parse_imm): Likewise.
+	* config/tc-mep.c (md_section_align): Likewise.
+	* config/tc-m68k.c (md_section_align): Likewise.
+	* config/tc-m68hc11.c (md_section_align): Likewise.
+	* config/tc-m32r.c (md_section_align): Likewise.
+	* config/tc-m32c.c (md_section_align): Likewise.
+	* config/tc-lm32.c (md_section_align): Likewise.
+	* config/tc-iq2000.c (md_section_align): Likewise.
+	* config/tc-ip2k.c (md_section_align): Likewise.
+	* config/tc-ia64.c (dot_save, dot_vframe): Likewise.
+	* config/tc-i960.c (md_number_to_field, md_section_align): Likewise.
+	* config/tc-i386.c (md_section_align): Likewise.
+	* config/tc-i370.c (md_section_align): Likewise.
+	* config/tc-frv.c (md_section_align): Likewise.
+	* config/tc-fr30.c (md_section_align): Likewise.
+	* config/tc-epiphany.c (md_section_align): Likewise.
+	* config/tc-d30v.c (md_section_align): Likewise.
+	* config/tc-d10v.c (md_section_align): Likewise.
+	* config/tc-cr16.c (l_cons): Likewise.
+	* config/tc-bfin.c (md_section_align): Likewise.
+	* config/tc-arm.c (md_section_align): Likewise.
+	* config/tc-arc.c (md_section_align): Likewise.
+	* config/bfin-parse.y (expr_1): Likewise.
+
 2015-11-02  Nick Clifton  <nickc@redhat.com>
 
 	* config/rx-parse.y: Allow zero value for 5-bit displacements.

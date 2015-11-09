@@ -3339,7 +3339,7 @@ dot_vframe (int dummy ATTRIBUTE_UNUSED)
   if (! (unwind.prologue_mask & 2))
     add_unwind_entry (output_psp_gr (reg), NOT_A_CHAR);
   else if (reg != unwind.prologue_gr
-		  + (unsigned) popcount (unwind.prologue_mask & (-2 << 1)))
+		  + (unsigned) popcount (unwind.prologue_mask & -(2 << 1)))
     as_warn (_("Operand of .vframe contradicts .prologue"));
 }
 
@@ -3421,7 +3421,7 @@ dot_save (int dummy ATTRIBUTE_UNUSED)
       if (! (unwind.prologue_mask & 4))
 	add_unwind_entry (output_pfs_gr (reg2), NOT_A_CHAR);
       else if (reg2 != unwind.prologue_gr
-		       + (unsigned) popcount (unwind.prologue_mask & (-4 << 1)))
+		       + (unsigned) popcount (unwind.prologue_mask & -(4 << 1)))
 	as_warn (_("Second operand of .save contradicts .prologue"));
       break;
     case REG_AR + AR_LC:
@@ -3440,7 +3440,7 @@ dot_save (int dummy ATTRIBUTE_UNUSED)
       if (! (unwind.prologue_mask & 1))
 	add_unwind_entry (output_preds_gr (reg2), NOT_A_CHAR);
       else if (reg2 != unwind.prologue_gr
-		       + (unsigned) popcount (unwind.prologue_mask & (-1 << 1)))
+		       + (unsigned) popcount (unwind.prologue_mask & -(1 << 1)))
 	as_warn (_("Second operand of .save contradicts .prologue"));
       break;
     case REG_PRIUNAT:

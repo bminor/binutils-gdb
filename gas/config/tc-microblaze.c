@@ -739,7 +739,7 @@ parse_imm (char * s, expressionS * e, offsetT min, offsetT max)
     {
       /* Special case: sign extend negative 32-bit values to 64-bits.  */
       if ((e->X_add_number >> 31) == 1)
-	e->X_add_number |= (-1 << 31);
+	e->X_add_number |= -(1 << 31);
 
       if (e->X_add_number < min || e->X_add_number > max)
 	{

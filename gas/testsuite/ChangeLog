@@ -1,3 +1,8 @@
+2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* gas/all/test-gen.c (random_order_16s, random_order_24s)
+	(random_order_32s): Fix left shift of negative value.
+
 2015-11-02  Nick Clifton  <nickc@redhat.com>
 
 	* gas/rx/max.d: Update expected disassembly.
