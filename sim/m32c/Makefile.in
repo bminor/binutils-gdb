@@ -40,8 +40,6 @@ SIM_OBJS = \
 	trace.o \
 	$(ENDLIST)
 
-# SIM_EXTRA_ALL = sample.x sample2.x
-
 LIBS = $B/bfd/libbfd.a $B/libiberty/libiberty.a
 
 ## COMMON_POST_CONFIG_FRAG
@@ -56,22 +54,6 @@ m32c.c : m32c.opc opc2c
 
 opc2c : opc2c.o safe-fgets.o
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) $^ -o $@ $(BUILD_LIBS)
-
-sample.x : $(srcdir)/sample.S $(srcdir)/sample.ld
-	../../gcc/xgcc $(CPUFLAGS) -B../../gcc/ -c $(srcdir)/sample.S -o sample.o
-	../../ld/ld-new sample.o -o sample.x -T$(srcdir)/sample.ld
-
-sample.mot : sample.x
-	../../binutils/objcopy --srec-forceS3 -O srec sample.x sample.mot
-
-sample2.x : sample2.o gloss.o $(srcdir)/sample.ld
-	../../ld/ld-new sample2.o gloss.o -o sample2.x -T$(srcdir)/sample.ld
-
-sample2.o : $(srcdir)/sample2.c
-	../../gcc/xgcc $(CPUFLAGS) -B../../gcc/ -c $(srcdir)/sample2.c -o sample2.o
-
-gloss.o : $(srcdir)/gloss.S
-	../../gcc/xgcc $(CPUFLAGS) -B../../gcc/ -c $(srcdir)/gloss.S -o gloss.o
 
 encodings:
 	grep '/\* [01]' $(srcdir)/r8c.opc | sort

@@ -1,5 +1,5 @@
-;;; sample.S --- simple test program for M32C simulator
-;;; 
+;;; blinky.s --- sample program to blink LED's on M32C simulator
+;;;
 ;;; Copyright (C) 2005-2015 Free Software Foundation, Inc.
 ;;; Contributed by Red Hat, Inc.
 ;;;
@@ -18,12 +18,17 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; See the 'sample.x' and sample.mot targets in Makefile.in.
-
 	.text
 
 	.global _start
 _start:
-	mov.w	#0x1234,r1
-	mov.w r1,r3 | sha.w #-8,r3 | sha.w #-7,r3
-	brk
+	mov.w	#0xe1,a0
+top:
+	sub.w	#1,r0
+	mov.b	r0h,[a0]
+
+	mov.w	#1000,r1
+loop:
+	adjnz.w	#-1,r1,loop
+
+	jmp.w	top

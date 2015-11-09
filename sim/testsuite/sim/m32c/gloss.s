@@ -1,5 +1,5 @@
-;;; gloss.S --- system calls for sample2.x
-;;; 
+;;; gloss.s --- system calls for sample2.x
+;;;
 ;;; Copyright (C) 2005-2015 Free Software Foundation, Inc.
 ;;; Contributed by Red Hat, Inc.
 ;;;
