@@ -1,3 +1,9 @@
+2015-11-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_d10v_translate_dmap_addr): Mark static.
+	(sim_d10v_translate_imap_addr): Likewise.
+	(sim_d10v_translate_addr): Likewise.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

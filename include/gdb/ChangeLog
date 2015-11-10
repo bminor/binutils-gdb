@@ -1,3 +1,12 @@
+2015-11-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-cr16.h (sim_cr16_translate_dmap_addr): Delete.
+	(sim_cr16_translate_imap_addr): Likewise.
+	(sim_cr16_translate_addr): Likewise.
+	* sim-d10v.h (sim_d10v_translate_dmap_addr): Delete.
+	(sim_d10v_translate_imap_addr): Likewise.
+	(sim_d10v_translate_addr): Likewise.
+
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* callback.h (CB_TARGET_DEFS_MAP): Add name member.
