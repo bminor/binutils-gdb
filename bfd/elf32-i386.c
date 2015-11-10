@@ -3599,6 +3599,7 @@ elf_i386_relocate_section (bfd *output_bfd,
   bfd_vma *local_got_offsets;
   bfd_vma *local_tlsdesc_gotents;
   Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *wrel;
   Elf_Internal_Rela *relend;
   bfd_boolean is_vxworks_tls;
   unsigned plt_entry_size;
@@ -3623,9 +3624,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 
   plt_entry_size = GET_PLT_ENTRY_SIZE (output_bfd);
 
-  rel = relocs;
+  rel = wrel = relocs;
   relend = relocs + input_section->reloc_count;
-  for (; rel < relend; rel++)
+  for (; rel < relend; wrel++, rel++)
     {
       unsigned int r_type;
       reloc_howto_type *howto;
@@ -3772,8 +3773,22 @@ elf_i386_relocate_section (bfd *output_bfd,
 	}
 
       if (sec != NULL && discarded_section (sec))
-	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
-					 rel, 1, relend, howto, 0, contents);
+	{
+	  _bfd_clear_contents (howto, input_bfd, input_section,
+			       contents + rel->r_offset);
+	  wrel->r_offset = rel->r_offset;
+	  wrel->r_info = 0;
+	  wrel->r_addend = 0;
+
+	  /* For ld -r, remove relocations in debug sections against
+	     sections defined in discarded sections.  Not done for
+	     eh_frame editing code expects to be present.  */
+	   if (bfd_link_relocatable (info)
+	       && (input_section->flags & SEC_DEBUGGING))
+	     wrel--;
+
+	   continue;
+	}
 
       if (bfd_link_relocatable (info))
 	continue;
@@ -4365,6 +4380,7 @@ r_386_got32:
 			      contents + roff);
 		  /* Skip R_386_PC32/R_386_PLT32.  */
 		  rel++;
+		  wrel++;
 		  continue;
 		}
 	      else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTDESC)
@@ -4704,6 +4720,7 @@ r_386_got32:
 			  contents + roff + 8);
 	      /* Skip R_386_PLT32.  */
 	      rel++;
+	      wrel++;
 	      continue;
 	    }
 	  else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTDESC)
@@ -4801,6 +4818,7 @@ r_386_got32:
 		      "\x65\xa1\0\0\0\0\x90\x8d\x74\x26", 11);
 	      /* Skip R_386_PC32/R_386_PLT32.  */
 	      rel++;
+	      wrel++;
 	      continue;
 	    }
 
@@ -4942,6 +4960,29 @@ check_relocation_error:
 	      return FALSE;
 	    }
 	}
+
+      if (wrel != rel)
+	*wrel = *rel;
+    }
+
+  if (wrel != rel)
+    {
+      Elf_Internal_Shdr *rel_hdr;
+      size_t deleted = rel - wrel;
+
+      rel_hdr = _bfd_elf_single_rel_hdr (input_section->output_section);
+      rel_hdr->sh_size -= rel_hdr->sh_entsize * deleted;
+      if (rel_hdr->sh_size == 0)
+	{
+	  /* It is too late to remove an empty reloc section.  Leave
+	     one NONE reloc.
+	     ??? What is wrong with an empty section???  */
+	  rel_hdr->sh_size = rel_hdr->sh_entsize;
+	  deleted -= 1;
+	}
+      rel_hdr = _bfd_elf_single_rel_hdr (input_section);
+      rel_hdr->sh_size -= rel_hdr->sh_entsize * deleted;
+      input_section->reloc_count -= deleted;
     }
 
   return TRUE;
