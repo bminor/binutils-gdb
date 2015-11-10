@@ -1,3 +1,35 @@
+2015-11-11  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/change-loc.h: include "trace-common.h", remove SYMBOL
+	macro.
+	(func5): Removed.
+	(func4): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/ftrace-lock.c: include "trace-common.h", remove SYMBOL
+	macro.
+	(func): Removed.
+	(thread_function): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/ftrace.c: include "trace-common.h", remove SYMBOL macro.
+	(func): Remove.
+	(marker): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/pendshr1.c: include "trace-common.h", remove SYMBOL macro.
+	(pendfunc1): Remove.
+	(pendfunc): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/pendshr2.c: include "trace-common.h", remove SYMBOL macro.
+	(foo): Remove.
+	(pendfunc2): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/trace-break.c: include "trace-common.h", remove SYMBOL
+	macro.
+	(func): Remove.
+	(marker): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/trace-common.h: New header.
+	* gdb.trace/trace-condition.c: include "trace-common.h", remove SYMBOL
+	macro.
+	(func): Remove.
+	(marker): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/trace-mt.c: include "trace-common.h", remove SYMBOL macro.
+	(func): Remove.
+	(thread_function): Use FAST_TRACEPOINT_LABEL.
+
 2015-11-10  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/backtrace.exp: Use global fpreg/spreg definition, add $

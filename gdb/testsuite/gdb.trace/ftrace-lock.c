@@ -16,12 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <pthread.h>
-
-#ifdef SYMBOL_PREFIX
-#define SYMBOL(str)     SYMBOL_PREFIX #str
-#else
-#define SYMBOL(str)     #str
-#endif
+#include "trace-common.h"
 
 /* Called if the testcase failed.  */
 static void
@@ -61,26 +56,10 @@ gdb_agent_gdb_collect (void *tpoint, unsigned char *regs)
     }
 }
 
-/* Called from asm.  */
-static void __attribute__((used))
-func (void)
-{
-}
-
 static void *
 thread_function (void *arg)
 {
-  /* `set_point' is the label at which to set a fast tracepoint.  The
-     insn at the label must be large enough to fit a fast tracepoint
-     jump.  */
-  asm ("    .global " SYMBOL (set_point) "\n"
-       SYMBOL (set_point) ":\n"
-#if (defined __x86_64__ || defined __i386__)
-       "    call " SYMBOL (func) "\n"
-#elif (defined __aarch64__)
-       "    nop\n"
-#endif
-       );
+  FAST_TRACEPOINT_LABEL(set_point);
 }
 
 static void
