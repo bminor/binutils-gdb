@@ -1,3 +1,9 @@
+2015-11-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Properly move
+	kept relocations when deleting relocations.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
 2015-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Use read and write

@@ -3791,7 +3791,11 @@ elf_i386_relocate_section (bfd *output_bfd,
 	}
 
       if (bfd_link_relocatable (info))
-	continue;
+	{
+	  if (wrel != rel)
+	    *wrel = *rel;
+	  continue;
+	}
 
       /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
 	 it here if it is defined in a non-shared object.  */

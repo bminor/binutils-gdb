@@ -3980,7 +3980,11 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	}
 
       if (bfd_link_relocatable (info))
-	continue;
+	{
+	  if (wrel != rel)
+	    *wrel = *rel;
+	  continue;
+	}
 
       if (rel->r_addend == 0 && !ABI_64_P (output_bfd))
 	{
