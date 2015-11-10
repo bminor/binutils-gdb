@@ -58,14 +58,6 @@ if { ![gdb_target_supports_trace] } then {
     return -1
 }
 
-if [is_amd64_regs_target] {
-    set pcreg "rip"
-} elseif [is_x86_like_target] {
-    set pcreg "eip"
-} else {
-    set pcreg "pc"
-}
-
 
 # Set tracepoint during tracing experiment.
 

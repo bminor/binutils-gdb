@@ -1,3 +1,22 @@
+2015-11-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/backtrace.exp: Use global fpreg/spreg definition, add $
+	in front.
+	* gdb.trace/change-loc.exp: Use global pcreg definition.
+	* gdb.trace/collection.exp: Use global pcreg/fpreg/spreg definition.
+	* gdb.trace/entry-values.exp: Use global spreg definition, add $
+	in front.
+	* gdb.trace/mi-trace-frame-collected.exp: Use global pcreg definition.
+	* gdb.trace/pending.exp: Likewise.
+	* gdb.trace/report.exp: Use global pcreg/fpreg/spreg definition.
+	* gdb.trace/trace-break.exp: Likewise.
+	* gdb.trace/trace-condition.exp: Use global pcreg definition, add $
+	in front.
+	* gdb.trace/unavailable.exp: Use global pcreg/fpreg/spreg definition.
+	* gdb.trace/while-dyn.exp: Use global fpreg definition, add $
+	in front.
+	* lib/trace-support.exp: Define fpreg, spreg, pcreg variables.
+
 2015-11-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/fin_fun_out: New testcase.
