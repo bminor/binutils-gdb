@@ -1,3 +1,9 @@
+2015-11-09  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add qdf24xx.
+	* config/tc-arm.c (arm_cpus): Likewise.
+	* doc/c-arm.texi, doc/c-aarch64.texi: Likewise.
+
 2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
 
 	* read.c (parse_bitfield_cons): Fix left shift of negative value.
