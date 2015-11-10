@@ -316,10 +316,17 @@ typedef struct
   unsigned long coproc;
 } arm_feature_set;
 
+/* Returns whether one of the feature bits set in FEAT is also set in CPU.  */
 #define ARM_CPU_HAS_FEATURE(CPU,FEAT) \
   (((CPU).core[0] & (FEAT).core[0]) != 0 \
    || ((CPU).core[1] & (FEAT).core[1]) != 0 \
    || ((CPU).coproc & (FEAT).coproc) != 0)
+
+/* Tests whether the features of A are a subset of B.  */
+#define ARM_FSET_CPU_SUBSET(A,B) \
+  (((A).core[0] & (B).core[0]) == (A).core[0] \
+   && ((A).core[1] & (B).core[1]) == (A).core[1] \
+   && ((A).coproc & (B).coproc) == (A).coproc)
 
 #define ARM_CPU_IS_ANY(CPU) \
   ((CPU).core[0] == ((arm_feature_set)ARM_ANY).core[0] \
