@@ -20,10 +20,6 @@
 #if !defined (SIM_D10V_H)
 #define SIM_D10V_H
 
-#ifdef __cplusplus
-extern "C" { // }
-#endif
-
 /* GDB interprets addresses as:
 
    0x00xxxxxx: Physical unified memory segment     (Unified memory)
@@ -110,9 +106,5 @@ enum
   SIM_D10V_NR_DMAP_REGS = 4,
   SIM_D10V_NR_CR_REGS = 16
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

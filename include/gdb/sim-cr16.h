@@ -20,10 +20,6 @@
 #if !defined (SIM_CR16_H)
 #define SIM_CR16_H
 
-#ifdef __cplusplus
-extern "C" { // }
-#endif
-
 enum
   {
     SIM_CR16_MEMORY_UNIFIED = 0x00000000,
@@ -75,9 +71,5 @@ enum
   SIM_CR16_NR_DMAP_REGS = 4,
   SIM_CR16_NR_CR_REGS = 11
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
