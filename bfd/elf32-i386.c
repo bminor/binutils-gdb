@@ -3647,7 +3647,11 @@ elf_i386_relocate_section (bfd *output_bfd,
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == R_386_GNU_VTINHERIT
 	  || r_type == R_386_GNU_VTENTRY)
-	continue;
+	{
+	  if (wrel != rel)
+	    *wrel = *rel;
+	  continue;
+	}
 
       if ((indx = r_type) >= R_386_standard
 	  && ((indx = r_type - R_386_ext_offset) - R_386_standard
