@@ -1,3 +1,9 @@
+2015-11-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inf-ptrace.c (inf_ptrace_fetch_register): Change long int *
+	cast to PTRACE_TYPE_RET *.
+	(inf_ptrace_store_register): Likewise.
+
 2015-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* avr-tdep.c (_initialize_avr_tdep): Switch to 'add_info' for creating
