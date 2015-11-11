@@ -407,6 +407,12 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_FEATURE_COPROC (FPU_FPA_EXT_V2),
     0x0c100200, 0x0e100f00, "lfm%c\t%12-14f, %F, %A"},
 
+  /* ARMv8-M Mainline Security Extensions instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M_MAIN),
+    0xec300a00, 0xfff0ffff, "vlldm\t%16-19r"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M_MAIN),
+    0xec200a00, 0xfff0ffff, "vlstm\t%16-19r"},
+
   /* Register load/store.  */
   {ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD | FPU_NEON_EXT_V1),
     0x0d2d0b00, 0x0fbf0f01, "vpush%c\t%B"},
@@ -2320,6 +2326,10 @@ static const struct opcode16 thumb_opcodes[] =
 {
   /* Thumb instructions.  */
 
+  /* ARMv8-M Security Extensions instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M), 0x4784, 0xff87, "blxns\t%3-6r"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M), 0x4704, 0xff07, "bxns\t%3-6r"},
+
   /* ARM V8 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),  0xbf50, 0xffff, "sevl%c"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),  0xba80, 0xffc0, "hlt\t%0-5x"},
@@ -2525,11 +2535,16 @@ static const struct opcode16 thumb_opcodes[] =
    makes heavy use of special-case bit patterns.  */
 static const struct opcode32 thumb32_opcodes[] =
 {
-  /* V8-M instructions.  */
+  /* ARMv8-M and ARMv8-M Security Extensions instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M), 0xe97fe97f, 0xffffffff, "sg"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M),
     0xe840f000, 0xfff0f0ff, "tt\t%8-11r, %16-19r"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M),
     0xe840f040, 0xfff0f0ff, "ttt\t%8-11r, %16-19r"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M),
+    0xe840f080, 0xfff0f0ff, "tta\t%8-11r, %16-19r"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M),
+    0xe840f0c0, 0xfff0f0ff, "ttat\t%8-11r, %16-19r"},
 
   /* V8 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),
@@ -5241,6 +5256,8 @@ psr_name (int regno)
     case 18: return "BASEPRI_MAX";
     case 19: return "FAULTMASK";
     case 20: return "CONTROL";
+    case 0x88: return "MSP_NS";
+    case 0x89: return "PSP_NS";
     default: return "<unknown>";
     }
 }

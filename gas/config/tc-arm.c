@@ -201,7 +201,8 @@ static const arm_feature_set arm_ext_v7r = ARM_FEATURE_CORE_LOW (ARM_EXT_V7R);
 static const arm_feature_set arm_ext_v7m = ARM_FEATURE_CORE_LOW (ARM_EXT_V7M);
 static const arm_feature_set arm_ext_v8 = ARM_FEATURE_CORE_LOW (ARM_EXT_V8);
 static const arm_feature_set arm_ext_m =
-  ARM_FEATURE_CORE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M, ARM_EXT2_V8M);
+  ARM_FEATURE_CORE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M,
+		    ARM_EXT2_V8M | ARM_EXT2_V8M_MAIN);
 static const arm_feature_set arm_ext_mp = ARM_FEATURE_CORE_LOW (ARM_EXT_MP);
 static const arm_feature_set arm_ext_sec = ARM_FEATURE_CORE_LOW (ARM_EXT_SEC);
 static const arm_feature_set arm_ext_os = ARM_FEATURE_CORE_LOW (ARM_EXT_OS);
@@ -209,6 +210,11 @@ static const arm_feature_set arm_ext_adiv = ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV);
 static const arm_feature_set arm_ext_virt = ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT);
 static const arm_feature_set arm_ext_pan = ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN);
 static const arm_feature_set arm_ext_v8m = ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M);
+static const arm_feature_set arm_ext_v8m_main =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M_MAIN);
+/* Instructions in ARMv8-M only found in M profile architectures.  */
+static const arm_feature_set arm_ext_v8m_m_only =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M | ARM_EXT2_V8M_MAIN);
 static const arm_feature_set arm_ext_v6t2_v8m =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V6T2_V8M);
 /* Instructions shared between ARMv8-A and ARMv8-M.  */
@@ -8105,6 +8111,12 @@ static void
 do_rd (void)
 {
   inst.instruction |= inst.operands[0].reg << 12;
+}
+
+static void
+do_rn (void)
+{
+  inst.instruction |= inst.operands[0].reg << 16;
 }
 
 static void
@@ -17804,8 +17816,8 @@ known_t32_only_insn (const struct asm_opcode *opcode)
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier))
     return TRUE;
 
-  /* Wide-only instruction added to ARMv8-M.  */
-  if (ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_v8m)
+  /* Wide-only instruction added to ARMv8-M Baseline.  */
+  if (ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_v8m_m_only)
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_atomics)
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_v6t2_v8m)
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_div))
@@ -18381,14 +18393,16 @@ static const struct asm_psr v7m_psrs[] =
   {"ipsr",	  5 }, {"IPSR",		5 },
   {"epsr",	  6 }, {"EPSR",		6 },
   {"iepsr",	  7 }, {"IEPSR",	7 },
-  {"msp",	  8 }, {"MSP",		8 },
-  {"psp",	  9 }, {"PSP",		9 },
+  {"msp",	  8 }, {"MSP",		8 }, {"msp_s",     8 }, {"MSP_S",     8 },
+  {"psp",	  9 }, {"PSP",		9 }, {"psp_s",     9 }, {"PSP_S",     9 },
   {"primask",	  16}, {"PRIMASK",	16},
   {"basepri",	  17}, {"BASEPRI",	17},
   {"basepri_max", 18}, {"BASEPRI_MAX",	18},
   {"basepri_max", 18}, {"BASEPRI_MASK",	18}, /* Typo, preserved for backwards compatibility.  */
   {"faultmask",	  19}, {"FAULTMASK",	19},
-  {"control",	  20}, {"CONTROL",	20}
+  {"control",	  20}, {"CONTROL",	20},
+  {"msp_ns",	0x88}, {"MSP_NS",     0x88},
+  {"psp_ns",	0x89}, {"PSP_NS",     0x89}
 };
 
 /* Table of all shift-in-operand names.	 */
@@ -20547,12 +20561,25 @@ static const struct asm_opcode insns[] =
  cCE("cfmadda32", e200600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
  cCE("cfmsuba32", e300600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
 
+ /* ARMv8-M instructions.  */
 #undef  ARM_VARIANT
 #define ARM_VARIANT NULL
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8m
+ TUE("sg", 0, e97fe97f, 0, (), 0, noargs),
+ TUE("blxns", 0, 4784, 1, (RRnpc), 0, t_blx),
+ TUE("bxns", 0, 4704, 1, (RRnpc), 0, t_bx),
  TUE("tt", 0, e840f000, 2, (RRnpc, RRnpc), 0, tt),
  TUE("ttt", 0, e840f040, 2, (RRnpc, RRnpc), 0, tt),
+ TUE("tta", 0, e840f080, 2, (RRnpc, RRnpc), 0, tt),
+ TUE("ttat", 0, e840f0c0, 2, (RRnpc, RRnpc), 0, tt),
+
+ /* FP for ARMv8-M Mainline.  Enabled for ARMv8-M Mainline because the
+    instructions behave as nop if no VFP is present.  */
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8m_main
+ TUEc("vlldm",	0,	 ec300a00, 1, (RRnpc),	rn),
+ TUEc("vlstm",	0,	 ec200a00, 1, (RRnpc),	rn),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
@@ -25670,7 +25697,7 @@ aeabi_set_public_attributes (void)
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
       || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
       || (ARM_CPU_HAS_FEATURE (flags, arm_ext_atomics)
-	  && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m)))
+	  && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m_m_only)))
     profile = 'A';
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
     profile = 'R';
@@ -25694,7 +25721,7 @@ aeabi_set_public_attributes (void)
       int thumb_isa_use;
 
       if (!ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
-	  && ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m))
+	  && ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m_m_only))
 	thumb_isa_use = 3;
       else if (ARM_CPU_HAS_FEATURE (flags, arm_arch_t2))
 	thumb_isa_use = 2;

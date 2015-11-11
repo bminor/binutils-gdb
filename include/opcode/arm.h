@@ -60,6 +60,7 @@
 #define ARM_EXT2_V8M	 0x00000004	/* ARM V8M.  */
 #define ARM_EXT2_ATOMICS 0x00000008	/* ARMv8 atomics.  */
 #define ARM_EXT2_V6T2_V8M 0x00000010	/* V8M Baseline from V6T2.  */
+#define ARM_EXT2_V8M_MAIN 0x00000020	/* ARMv8-M Mainline.  */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00000001	/* Allow MIA etc.          */
@@ -147,6 +148,7 @@
 #define ARM_AEXT_V8M_BASE (ARM_AEXT_V6SM | ARM_EXT_DIV)
 #define ARM_AEXT_V8M_MAIN ARM_AEXT_V7M
 #define ARM_AEXT2_V8M	(ARM_EXT2_V8M | ARM_EXT2_ATOMICS | ARM_EXT2_V6T2_V8M)
+#define ARM_AEXT2_V8M_MAIN (ARM_AEXT2_V8M | ARM_EXT2_V8M_MAIN)
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	ARM_FEATURE_LOW (ARM_AEXT_V5TE, ARM_CEXT_XSCALE)
@@ -260,7 +262,8 @@
 #define ARM_ARCH_V8_1A	ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A,	\
 				     CRC_EXT_ARMV8)
 #define ARM_ARCH_V8M_BASE ARM_FEATURE_CORE (ARM_AEXT_V8M_BASE, ARM_AEXT2_V8M)
-#define ARM_ARCH_V8M_MAIN ARM_FEATURE_CORE (ARM_AEXT_V8M_MAIN, ARM_AEXT2_V8M)
+#define ARM_ARCH_V8M_MAIN ARM_FEATURE_CORE (ARM_AEXT_V8M_MAIN, \
+					    ARM_AEXT2_V8M_MAIN)
 
 /* Some useful combinations:  */
 #define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)

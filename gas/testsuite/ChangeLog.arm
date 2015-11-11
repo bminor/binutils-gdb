@@ -1,5 +1,18 @@
 2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* gas/arm/archv8m-cmse.s: New file.
+	* gas/arm/archv8m-cmse-main.s: Likewise..
+	* gas/arm/archv8m-cmse-msr.s: Likewise.
+	* gas/arm/any-cmse.d: Likewise.
+	* gas/arm/any-cmse-main.d: Likewise.
+	* gas/arm/archv8m-cmse-base.d: Likewise.
+	* gas/arm/archv8m-cmse-msr-base.d: Likewise.
+	* gas/arm/archv8m-cmse-main-1.d: Likewise.
+	* gas/arm/archv8m-cmse-main-2.d: Likewise.
+	* gas/arm/archv8m-cmse-msr-main.d: Likewise.
+
+2016-03-29  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	Revert
 	2015-12-17  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
