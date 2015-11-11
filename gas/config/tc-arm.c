@@ -20550,8 +20550,13 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT NULL
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8m
+ TUE("sg", 0, e97fe97f, 0, (), 0, noargs),
+ TUE("blxns", 0, 4784, 1, (RRnpc), 0, t_blx),
+ TUE("bxns", 0, 4704, 1, (RRnpc), 0, t_bx),
  TUE("tt", 0, e840f000, 2, (RRnpc, RRnpc), 0, tt),
  TUE("ttt", 0, e840f040, 2, (RRnpc, RRnpc), 0, tt),
+ TUE("tta", 0, e840f080, 2, (RRnpc, RRnpc), 0, tt),
+ TUE("ttat", 0, e840f0c0, 2, (RRnpc, RRnpc), 0, tt),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
