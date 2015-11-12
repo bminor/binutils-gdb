@@ -3,7 +3,7 @@
 	* config/tc-arm.c (arm_cpus): Likewise.
 	* doc/c-arm.texi (-mcpu=): Likewise.
 
-2015-11-11  Matthew Wahab  <matthew.wahab@arm.com>
+2015-11-12  Matthew Wahab  <matthew.wahab@arm.com>
 
 	PR gas/19217
 	* config/tc-arm.c (move_or_literal_pool): Remove redundant feature

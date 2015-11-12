@@ -1,4 +1,4 @@
-2015-11-11  Matthew Wahab  <matthew.wahab@arm.com>
+2015-11-12  Matthew Wahab  <matthew.wahab@arm.com>
 
 	PR gas/19217
 	* gas/arm/thumb2_ldr_immediate_armv6t2.d: Update expected output.
