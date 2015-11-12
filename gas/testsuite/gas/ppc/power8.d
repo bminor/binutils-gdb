@@ -152,4 +152,12 @@ Disassembly of section \.text:
  238:	(fe c7 2f 8c|8c 2f c7 fe) 	fmrgew  f22,f7,f5
  23c:	(7c 00 71 9c|9c 71 00 7c) 	msgsnd  r14
  240:	(7c 00 b9 dc|dc b9 00 7c) 	msgclr  r23
+.*:	(7d 00 2e 99|99 2e 00 7d) 	lxvd2x  vs40,0,r5
+.*:	(7d 00 2e 99|99 2e 00 7d) 	lxvd2x  vs40,0,r5
+.*:	(7d 54 36 98|98 36 54 7d) 	lxvd2x  vs10,r20,r6
+.*:	(7d 54 36 98|98 36 54 7d) 	lxvd2x  vs10,r20,r6
+.*:	(7d 20 3f 99|99 3f 20 7d) 	stxvd2x vs41,0,r7
+.*:	(7d 20 3f 99|99 3f 20 7d) 	stxvd2x vs41,0,r7
+.*:	(7d 75 47 98|98 47 75 7d) 	stxvd2x vs11,r21,r8
+.*:	(7d 75 47 98|98 47 75 7d) 	stxvd2x vs11,r21,r8
 #pass

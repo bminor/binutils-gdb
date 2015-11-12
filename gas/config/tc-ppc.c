@@ -1294,6 +1294,7 @@ PowerPC options:\n\
 -mpower6, -mpwr6        generate code for Power6 architecture\n\
 -mpower7, -mpwr7        generate code for Power7 architecture\n\
 -mpower8, -mpwr8        generate code for Power8 architecture\n\
+-mpower9, -mpwr9        generate code for Power9 architecture\n\
 -mcell                  generate code for Cell Broadband Engine architecture\n\
 -mcom                   generate code Power/PowerPC common instructions\n\
 -many                   generate code for any architecture (PWR/PWRX/PPC)\n"));
@@ -3084,6 +3085,11 @@ md_assemble (char *str)
 		  reloc = BFD_RELOC_PPC_TPREL16;
 		  break;
 		}
+
+	      /* addpcis.  */
+	      if (opcode->opcode == (19 << 26) + (2 << 1)
+		  && reloc == BFD_RELOC_HI16_S)
+		reloc = BFD_RELOC_PPC_REL16DX_HA;
 
 	      /* If VLE-mode convert LO/HI/HA relocations.  */
       	      if (opcode->flags & PPC_OPCODE_VLE)
@@ -6415,13 +6421,14 @@ ppc_handle_align (struct frag *fragP)
 
       if ((ppc_cpu & PPC_OPCODE_POWER6) != 0
 	  || (ppc_cpu & PPC_OPCODE_POWER7) != 0
-	  || (ppc_cpu & PPC_OPCODE_POWER8) != 0)
+	  || (ppc_cpu & PPC_OPCODE_POWER8) != 0
+	  || (ppc_cpu & PPC_OPCODE_POWER9) != 0)
 	{
-	  /* For power6, power7 and power8, we want the last nop to be a group
-	     terminating one.  Do this by inserting an rs_fill frag immediately
-	     after this one, with its address set to the last nop location.
-	     This will automatically reduce the number of nops in the current
-	     frag by one.  */
+	  /* For power6, power7, power8 and power9, we want the last nop to be
+	     a group terminating one.  Do this by inserting an rs_fill frag
+	     immediately after this one, with its address set to the last nop
+	     location.  This will automatically reduce the number of nops in
+	     the current frag by one.  */
 	  if (count > 4)
 	    {
 	      struct frag *group_nop = xmalloc (SIZEOF_STRUCT_FRAG + 4);
@@ -6436,13 +6443,14 @@ ppc_handle_align (struct frag *fragP)
 	    }
 
 	  if ((ppc_cpu & PPC_OPCODE_POWER7) != 0
-	      || (ppc_cpu & PPC_OPCODE_POWER8) != 0)
+	      || (ppc_cpu & PPC_OPCODE_POWER8) != 0
+	      || (ppc_cpu & PPC_OPCODE_POWER9) != 0)
 	    {
 	      if (ppc_cpu & PPC_OPCODE_E500MC)
 		/* e500mc group terminating nop: "ori 0,0,0".  */
 		md_number_to_chars (dest, 0x60000000, 4);
 	      else
-		/* power7/power8 group terminating nop: "ori 2,2,0".  */
+		/* power7/power8/power9 group terminating nop: "ori 2,2,0".  */
 		md_number_to_chars (dest, 0x60420000, 4);
 	    }
 	  else
@@ -6460,6 +6468,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
   valueT value = * valP;
   offsetT fieldval;
+  unsigned long insn = 0;
   const struct powerpc_operand *operand;
 
 #ifdef OBJ_ELF
@@ -6468,6 +6477,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       /* Hack around bfd_install_relocation brain damage.  */
       if (fixP->fx_pcrel)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
+
+      if (fixP->fx_addsy == abs_section_sym)
+	fixP->fx_done = 1;
     }
   else
     fixP->fx_done = 1;
@@ -6578,6 +6590,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
     case BFD_RELOC_HI16_S:
     case BFD_RELOC_HI16_S_PCREL:
+    case BFD_RELOC_PPC_REL16DX_HA:
 #ifdef OBJ_ELF
       if (REPORT_OVERFLOW_HI && ppc_obj64)
 	{
@@ -6624,7 +6637,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
     {
       /* Handle relocs in an insn.  */
       char *where;
-      unsigned long insn;
 
       switch (fixP->fx_r_type)
 	{
@@ -7037,6 +7049,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_LO16_PCREL:
 	case BFD_RELOC_HI16_PCREL:
 	case BFD_RELOC_HI16_S_PCREL:
+	case BFD_RELOC_PPC_REL16DX_HA:
 	case BFD_RELOC_64_PCREL:
 	case BFD_RELOC_32_PCREL:
 	case BFD_RELOC_16_PCREL:

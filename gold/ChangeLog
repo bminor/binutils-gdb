@@ -1,3 +1,12 @@
+2015-11-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner <bergner@vnet.ibm.com>
+
+	* gold/powerpc.cc (Powerpc_relocate_functions::addr16_dq): New function.
+	(Powerpc_relocate_functions::addr16dx_ha): Likewise.
+	(Target_powerpc::Scan::local): Handle R_POWERPC_REL16DX_HA.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.
+
 2015-11-09  Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
 
 	* layout.h (Layout::is_debug_info_section): Recognize .pdr debug

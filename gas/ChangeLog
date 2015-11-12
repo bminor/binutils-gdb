@@ -1,3 +1,13 @@
+2015-11-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner <bergner@vnet.ibm.com>
+
+	* doc/as.texinfo (Target PowerPC): Document -mpower9 and -mpwr9.
+	* doc/c-ppc.texi (PowerPC-Opts):  Likewise.
+	* config/tc-ppc.c (md_show_usage): Likewise.
+	(md_assemble): Handle BFD_RELOC_PPC_REL16DX_HA.
+	(md_apply_fix): Likewise.
+	(ppc_handle_align): Handle power9's group ending nop.
+
 2015-11-09  Jim Wilson  <jim.wilson@linaro.org>
 
 	* config/tc-aarch64.c (aarch64_cpus): Add qdf24xx.

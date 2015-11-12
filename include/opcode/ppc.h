@@ -204,6 +204,12 @@ extern const int vle_num_opcodes;
 /* Opcode is supported by ppc821/850/860.  */
 #define PPC_OPCODE_860	      0x10000000000ull
 
+/* Opcode is only supported by Power9 architecture.  */
+#define PPC_OPCODE_POWER9     0x20000000000ull
+
+/* Opcode is supported by Vector-Scalar (VSX) Unit from ISA 2.08.  */
+#define PPC_OPCODE_VSX3       0x40000000000ull
+
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)
 

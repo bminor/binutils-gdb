@@ -2022,6 +2022,21 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
+  /* Like R_PPC64_REL16_HA but for split field in addpcis.  */
+  HOWTO (R_PPC64_REL16DX_HA,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 ppc64_elf_ha_reloc,	/* special_function */
+	 "R_PPC64_REL16DX_HA",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x1fffc1,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
   /* Like R_PPC64_ADDR16_HI, but no overflow.  */
   HOWTO (R_PPC64_ADDR16_HIGH,	/* type */
 	 16,			/* rightshift */
@@ -2412,6 +2427,8 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       break;
     case BFD_RELOC_HI16_S_PCREL:		r = R_PPC64_REL16_HA;
       break;
+    case BFD_RELOC_PPC_REL16DX_HA:		r = R_PPC64_REL16DX_HA;
+      break;
     case BFD_RELOC_PPC64_ADDR64_LOCAL:		r = R_PPC64_ADDR64_LOCAL;
       break;
     case BFD_RELOC_VTABLE_INHERIT:		r = R_PPC64_GNU_VTINHERIT;
@@ -2466,6 +2483,11 @@ ppc64_elf_ha_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 		    void *data, asection *input_section,
 		    bfd *output_bfd, char **error_message)
 {
+  enum elf_ppc64_reloc_type r_type;
+  long insn;
+  bfd_size_type octets;
+  bfd_vma value;
+
   /* If this is a relocatable link (output_bfd test tells us), just
      call the generic function.  Any adjustment will be done at final
      link time.  */
@@ -2477,7 +2499,29 @@ ppc64_elf_ha_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
      We won't actually be using the low 16 bits, so trashing them
      doesn't matter.  */
   reloc_entry->addend += 0x8000;
-  return bfd_reloc_continue;
+  r_type = reloc_entry->howto->type;
+  if (r_type != R_PPC64_REL16DX_HA)
+    return bfd_reloc_continue;
+
+  value = 0;
+  if (!bfd_is_com_section (symbol->section))
+    value = symbol->value;
+  value += (reloc_entry->addend
+	    + symbol->section->output_offset
+	    + symbol->section->output_section->vma);
+  value -= (reloc_entry->address
+	    + input_section->output_offset
+	    + input_section->output_section->vma);
+  value = (bfd_signed_vma) value >> 16;
+
+  octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
+  insn &= ~0x1fffc1;
+  insn |= (value & 0xffc1) | ((value & 0x3e) << 15);
+  bfd_put_32 (abfd, insn, (bfd_byte *) data + octets);
+  if (value + 0x8000 > 0xffff)
+    return bfd_reloc_overflow;
+  return bfd_reloc_ok;
 }
 
 static bfd_reloc_status_type
@@ -5502,6 +5546,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_REL16_LO:
 	case R_PPC64_REL16_HI:
 	case R_PPC64_REL16_HA:
+	case R_PPC64_REL16DX_HA:
 	  break;
 
 	  /* Not supported as a dynamic relocation.  */
@@ -14430,6 +14475,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_REL16_LO:
 	case R_PPC64_REL16_HI:
 	case R_PPC64_REL16_HA:
+	case R_PPC64_REL16DX_HA:
 	  break;
 
 	case R_PPC64_REL14:
@@ -14842,6 +14888,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_PPC64_REL16_HA:
+	case R_PPC64_REL16DX_HA:
 	case R_PPC64_ADDR16_HA:
 	case R_PPC64_ADDR16_HIGHA:
 	case R_PPC64_ADDR16_HIGHERA:
@@ -14897,16 +14944,20 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_DTPREL16_LO_DS:
 	  insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
 	  mask = 3;
-	  /* If this reloc is against an lq insn, then the value must be
-	     a multiple of 16.  This is somewhat of a hack, but the
-	     "correct" way to do this by defining _DQ forms of all the
-	     _DS relocs bloats all reloc switches in this file.  It
-	     doesn't seem to make much sense to use any of these relocs
-	     in data, so testing the insn should be safe.  */
-	  if ((insn & (0x3f << 26)) == (56u << 26))
+	  /* If this reloc is against an lq, lxv, or stxv insn, then
+	     the value must be a multiple of 16.  This is somewhat of
+	     a hack, but the "correct" way to do this by defining _DQ
+	     forms of all the _DS relocs bloats all reloc switches in
+	     this file.  It doesn't make much sense to use these
+	     relocs in data, so testing the insn should be safe.  */
+	  if ((insn & (0x3f << 26)) == (56u << 26)
+	      || ((insn & (0x3f << 26)) == (61u << 26) && (insn & 3) == 1))
 	    mask = 15;
-	  if (((relocation + addend) & mask) != 0)
+	  relocation += addend;
+	  addend = insn & (mask ^ 3);
+	  if ((relocation & mask) != 0)
 	    {
+	      relocation ^= relocation & mask;
 	      info->callbacks->einfo
 		(_("%P: %H: error: %s not a multiple of %u\n"),
 		 input_bfd, input_section, rel->r_offset,
@@ -14964,8 +15015,30 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    }
 	}
 
-      r = _bfd_final_link_relocate (howto, input_bfd, input_section, contents,
-				    rel->r_offset, relocation, addend);
+      if (r_type == R_PPC64_REL16DX_HA)
+	{
+	  /* Split field reloc isn't handled by _bfd_final_link_relocate.  */
+	  if (rel->r_offset + 4 > input_section->size)
+	    r = bfd_reloc_outofrange;
+	  else
+	    {
+	      relocation += addend;
+	      relocation -= (rel->r_offset
+			     + input_section->output_offset
+			     + input_section->output_section->vma);
+	      relocation = (bfd_signed_vma) relocation >> 16;
+	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      insn &= ~0x1fffc1;
+	      insn |= (relocation & 0xffc1) | ((relocation & 0x3e) << 15);
+	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+	      r = bfd_reloc_ok;
+	      if (relocation + 0x8000 > 0xffff)
+		r = bfd_reloc_overflow;
+	    }
+	}
+      else
+	r = _bfd_final_link_relocate (howto, input_bfd, input_section, contents,
+				      rel->r_offset, relocation, addend);
 
       if (r != bfd_reloc_ok)
 	{

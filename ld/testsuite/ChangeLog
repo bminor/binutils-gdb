@@ -1,3 +1,10 @@
+2015-11-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner <bergner@vnet.ibm.com>
+
+	* ld-powerpc/addpcis.d: New test.
+	* ld-powerpc/addpcis.s: New test.
+	* ld-powerpc/powerpc.exp: Run it.
+
 2015-11-03  Renlin Li  <renlin.li@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp: Run newly added test cases.

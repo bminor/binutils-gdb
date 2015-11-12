@@ -1,3 +1,19 @@
+2015-11-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner <bergner@vnet.ibm.com>
+
+	* gas/ppc/altivec3.s: New test.
+	* gas/ppc/altivec3.d: Likewise.
+	* gas/ppc/vsx3.s: Likewise.
+	* gas/ppc/vsx3.d: Likewise.
+	* gas/ppc/power9.s: Likewise.
+	* gas/ppc/power9.d: Likewise.
+	* gas/ppc/ppc.exp: Run them.
+	* gas/ppc/power8.s <lxvx, lxvd2x, stxvx, stxvd2x>: Add new tests.
+	* gas/ppc/power8.d: Likewise.
+	* gas/ppc/vsx.s: <lxvx, stxvx>: Rename invalid mnemonics ...
+	<lxvd2x, stxvd2x>: ...to this.
+	* gas/ppc/vsx.d: Likewise.
+
 2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
 
 	* gas/all/test-gen.c (random_order_16s, random_order_24s)

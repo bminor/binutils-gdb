@@ -1731,6 +1731,21 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
+  /* Like R_PPC_REL16_HA but for split field in addpcis.  */
+  HOWTO (R_PPC_REL16DX_HA,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 ppc_elf_addr16_ha_reloc, /* special_function */
+	 "R_PPC_REL16DX_HA",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x1fffc1,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_PPC_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
@@ -1989,6 +2004,7 @@ ppc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_LO16_PCREL:		r = R_PPC_REL16_LO;		break;
     case BFD_RELOC_HI16_PCREL:		r = R_PPC_REL16_HI;		break;
     case BFD_RELOC_HI16_S_PCREL:	r = R_PPC_REL16_HA;		break;
+    case BFD_RELOC_PPC_REL16DX_HA:	r = R_PPC_REL16DX_HA;		break;
     case BFD_RELOC_VTABLE_INHERIT:	r = R_PPC_GNU_VTINHERIT;	break;
     case BFD_RELOC_VTABLE_ENTRY:	r = R_PPC_GNU_VTENTRY;		break;
     }
@@ -2058,7 +2074,10 @@ ppc_elf_addr16_ha_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 			 bfd *output_bfd,
 			 char **error_message ATTRIBUTE_UNUSED)
 {
-  bfd_vma relocation;
+  enum elf_ppc_reloc_type r_type;
+  long insn;
+  bfd_size_type octets;
+  bfd_vma value;
 
   if (output_bfd != NULL)
     {
@@ -2066,20 +2085,28 @@ ppc_elf_addr16_ha_reloc (bfd *abfd ATTRIBUTE_UNUSED,
       return bfd_reloc_ok;
     }
 
-  if (bfd_is_com_section (symbol->section))
-    relocation = 0;
-  else
-    relocation = symbol->value;
+  reloc_entry->addend += 0x8000;
+  r_type = reloc_entry->howto->type;
+  if (r_type != R_PPC_REL16DX_HA)
+    return bfd_reloc_continue;
 
-  relocation += symbol->section->output_section->vma;
-  relocation += symbol->section->output_offset;
-  relocation += reloc_entry->addend;
-  if (reloc_entry->howto->pc_relative)
-    relocation -= reloc_entry->address;
+  value = 0;
+  if (!bfd_is_com_section (symbol->section))
+    value = symbol->value;
+  value += (reloc_entry->addend
+	    + symbol->section->output_offset
+	    + symbol->section->output_section->vma);
+  value -= (reloc_entry->address
+	    + input_section->output_offset
+	    + input_section->output_section->vma);
+  value >>= 16;
 
-  reloc_entry->addend += (relocation & 0x8000) << 1;
-
-  return bfd_reloc_continue;
+  octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
+  insn &= ~0x1fffc1;
+  insn |= (value & 0xffc1) | ((value & 0x3e) << 15);
+  bfd_put_32 (abfd, insn, (bfd_byte *) data + octets);
+  return bfd_reloc_ok;
 }
 
 static bfd_reloc_status_type
@@ -4247,6 +4274,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_REL16_LO:
 	case R_PPC_REL16_HI:
 	case R_PPC_REL16_HA:
+	case R_PPC_REL16DX_HA:
 	  ppc_elf_tdata (abfd)->has_rel16 = 1;
 	  break;
 
@@ -7604,7 +7632,9 @@ is_insn_ds_form (unsigned int insn)
 static bfd_boolean
 is_insn_dq_form (unsigned int insn)
 {
-  return (insn & (0x3f << 26)) == 56u << 26; /* lq */
+  return ((insn & (0x3f << 26)) == 56u << 26 /* lq */
+	  || ((insn & (0x3f << 26)) == (61u << 26) /* lxv, stxv */
+	      && (insn & 3) == 1));
 }
 
 /* The RELOCATE_SECTION function is called by the ELF backend linker
@@ -8605,6 +8635,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_REL16_LO:
 	case R_PPC_REL16_HI:
 	case R_PPC_REL16_HA:
+	case R_PPC_REL16DX_HA:
 	  break;
 
 	case R_PPC_REL32:
@@ -9311,6 +9342,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC_ADDR16_HA:
 	case R_PPC_REL16_HA:
+	case R_PPC_REL16DX_HA:
 	case R_PPC_SECTOFF_HA:
 	case R_PPC_TPREL16_HA:
 	case R_PPC_DTPREL16_HA:
@@ -9369,10 +9401,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      mask = 15;
 	    else
 	      break;
-	    lobit = mask & (relocation + addend);
+	    relocation += addend;
+	    addend = insn & mask;
+	    lobit = mask & relocation;
 	    if (lobit != 0)
 	      {
-		addend -= lobit;
+		relocation ^= lobit;
 		info->callbacks->einfo
 		  (_("%P: %H: error: %s against `%s' not a multiple of %u\n"),
 		   input_bfd, input_section, rel->r_offset,
@@ -9380,7 +9414,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		bfd_set_error (bfd_error_bad_value);
 		ret = FALSE;
 	      }
-	    addend += insn & mask;
 	  }
 	  break;
 	}
@@ -9439,8 +9472,30 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    }
 	}
 
-      r = _bfd_final_link_relocate (howto, input_bfd, input_section, contents,
-				    rel->r_offset, relocation, addend);
+      if (r_type == R_PPC_REL16DX_HA)
+	{
+	  /* Split field reloc isn't handled by _bfd_final_link_relocate.  */
+	  if (rel->r_offset + 4 > input_section->size)
+	    r = bfd_reloc_outofrange;
+	  else
+	    {
+	      unsigned int insn;
+
+	      relocation += addend;
+	      relocation -= (rel->r_offset
+			     + input_section->output_offset
+			     + input_section->output_section->vma);
+	      relocation >>= 16;
+	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      insn &= ~0x1fffc1;
+	      insn |= (relocation & 0xffc1) | ((relocation & 0x3e) << 15);
+	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+	      r = bfd_reloc_ok;
+	    }
+	}
+      else
+	r = _bfd_final_link_relocate (howto, input_bfd, input_section, contents,
+				      rel->r_offset, relocation, addend);
 
       if (r != bfd_reloc_ok)
 	{
