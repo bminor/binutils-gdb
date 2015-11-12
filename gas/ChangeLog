@@ -1,5 +1,10 @@
 2015-11-12  James Greenhalgh  <james.greenhalgh@arm.com>
 
+	* config/tc-aarch64.c (aarch64_cpus): Add cortex-a35.
+	* doc/c-aarch64.texi (-mcpu=): Likewise.
+
+2015-11-12  James Greenhalgh  <james.greenhalgh@arm.com>
+
 	* config/tc-arm.c (arm_cpus): Likewise.
 	* doc/c-arm.texi (-mcpu=): Likewise.
 
