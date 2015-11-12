@@ -228,7 +228,6 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC	\
-   || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_ADR_PREL21)
@@ -4494,11 +4493,6 @@ aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
       return is_local
 	? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2
 	: BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1;
-
-    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
-      return is_local
-	? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2
-	: r_type;
 #endif
 
     default:
@@ -5633,8 +5627,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 static bfd_reloc_status_type
 elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 			 bfd *input_bfd, bfd_byte *contents,
-			 Elf_Internal_Rela *rel, struct elf_link_hash_entry *h,
-			 bfd_vma relocation ATTRIBUTE_UNUSED)
+			 Elf_Internal_Rela *rel, struct elf_link_hash_entry *h)
 {
   bfd_boolean is_local = h == NULL;
   unsigned int r_type = ELFNN_R_TYPE (rel->r_info);
@@ -5799,47 +5792,6 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
       return bfd_reloc_continue;
 
     case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
-      return bfd_reloc_continue;
-
-    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
-      if (is_local)
-	{
-	  /* Large IE->LE relaxation:
-	     mrs tp, tpidr_el0
-	     movz tx, #:gottprel_g1:var    => movz tx, #:tprel_g2:var, lsl #32
-	     movk tx, #:gottprel_g0_nc:var => movk tx, #:tprel_g1_nc:var, lsl #16
-	     ldr tx, [gp, tx]		   => movk tx, #:tprel_g0_nc:var
-	     add tx, tx, tp
-	   */
-	  uint32_t value;
-	  BFD_ASSERT (ELFNN_R_TYPE (rel[1].r_info)
-		      == AARCH64_R (TLSIE_MOVW_GOTTPREL_G0_NC));
-	  BFD_ASSERT (rel->r_offset + 4 == rel[1].r_offset);
-
-	  value = (relocation & ~(bfd_vma) 0xffffffff) >>  32;
-	  insn = bfd_getl32 (contents + rel->r_offset);
-	  insn &= 0xff80001f;
-	  insn |= (0x400000 + (value << 5));
-	  bfd_putl32 (insn, contents + rel->r_offset + 0);
-
-	  value = (relocation & (bfd_vma) 0xffff0000) >> 16;
-	  insn = bfd_getl32 (contents + rel->r_offset + 4);
-	  insn &= 0xff80001f;
-	  insn |= (0x200000 + (value << 5));
-	  bfd_putl32 (insn, contents + rel->r_offset + 4);
-
-	  value = relocation & (bfd_vma) 0xffff;
-	  insn = bfd_getl32 (contents + rel->r_offset + 4);
-	  insn &= 0xff80001f;
-	  insn |= (value << 5);
-	  bfd_putl32 (insn, contents + rel->r_offset + 8);
-
-	  /* Relocations are already resolved here.  */
-	  rel->r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
-	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
-	  return bfd_reloc_ok;
-	}
-
       return bfd_reloc_continue;
 #endif
 
@@ -6199,8 +6151,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  howto = elfNN_aarch64_howto_from_bfd_reloc (bfd_r_type);
 	  BFD_ASSERT (howto != NULL);
 	  r_type = howto->type;
-	  r = elfNN_aarch64_tls_relax (globals, input_bfd, contents, rel, h,
-				       relocation - tpoff_base (info));
+	  r = elfNN_aarch64_tls_relax (globals, input_bfd, contents, rel, h);
 	  unresolved_reloc = 0;
 	}
       else

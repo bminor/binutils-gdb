@@ -461,18 +461,6 @@
 
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 
-	* elfnn-aarch64.c (IS_AARCH64_TLS_RELAX_RELOC): Add
-	TLSIE_MOVW_GOTTPREL_G1.
-	(aarch64_tls_transition_without_check): Add
-	TLSIE_MOVW_GOTTPREL_G1 to TLSLE_MOVW_TPREL_G2
-	transition for local symbol.
-	(elfNN_aarch64_tls_relax): Add a argument to pass tp offset.
-	Add TLSIE_MOVW_GOTTPREL_G1 relaxation.
-	(elfNN_aarch64_relocate_section): Call elfNN_aarch64_tls_relax
-	with new argument.
-
-2015-10-02  Renlin Li  <renlin.li@arm.com>
-
 	* elfnn-aarch64.c (aarch64_tls_transition_without_check):  Add
 	relax transitions for TLSDESC_ADD, TLSDESC_LDR, TLSDESC_OFF_G0_NC,
 	TLSDESC_OFF_G1.
