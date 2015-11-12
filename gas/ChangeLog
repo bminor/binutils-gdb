@@ -1,3 +1,10 @@
+2015-11-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	PR gas/19217
+	* config/tc-arm.c (move_or_literal_pool): Remove redundant feature
+	check.  Fix some code formatting.  Drop use of MOVT.  Add some
+	comments.
+
 2015-11-11  Alan Modra  <amodra@gmail.com>
 	    Peter Bergner <bergner@vnet.ibm.com>
 

@@ -7847,10 +7847,10 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		  return TRUE;
 		}
 
-	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2)
-		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
+	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2))
 		{
-		  /* Check if on thumb2 it can be done with a mov.w or mvn.w instruction.  */
+		  /* Check if on thumb2 it can be done with a mov.w or mvn.w
+		     instruction.  */
 		  unsigned int newimm;
 		  bfd_boolean isNegated;
 
@@ -7859,36 +7859,27 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		    isNegated = FALSE;
 		  else
 		    {
-		      newimm = encode_thumb32_immediate (~ v);
+		      newimm = encode_thumb32_immediate (~v);
 		      if (newimm != (unsigned int) FAIL)
 			isNegated = TRUE;
 		    }
 
 		  if (newimm != (unsigned int) FAIL)
 		    {
-		      inst.instruction = 0xf04f0000 | (inst.operands[i].reg << 8);
-		      inst.instruction |= (isNegated?0x200000:0);
+		      inst.instruction = (0xf04f0000
+					  | (inst.operands[i].reg << 8));
+		      inst.instruction |= (isNegated ? 0x200000 : 0);
 		      inst.instruction |= (newimm & 0x800) << 15;
 		      inst.instruction |= (newimm & 0x700) << 4;
 		      inst.instruction |= (newimm & 0x0ff);
 		      return TRUE;
 		    }
-		  else if ((v & ~0xFFFF) == 0 || (v & ~0xFFFF0000) == 0)
+		  else if ((v & ~0xFFFF) == 0)
 		    {
-		      /* The number may be loaded with a movw/movt instruction.  */
-		      int imm;
+		      /* The number can be loaded with a mov.w instruction.  */
+		      int imm = v & 0xFFFF;
 
-		      if ((inst.reloc.exp.X_add_number & ~0xFFFF) == 0)
-			{
-			  inst.instruction= 0xf2400000;
-			  imm = v;
-			}
-		      else
-			{
-			  inst.instruction = 0xf2c00000;
-			  imm = v >> 16;
-			}
-
+		      inst.instruction = 0xf2400000;  /* MOVW.  */
 		      inst.instruction |= (inst.operands[i].reg << 8);
 		      inst.instruction |= (imm & 0xf000) << 4;
 		      inst.instruction |= (imm & 0x0800) << 15;

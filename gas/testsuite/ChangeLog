@@ -1,3 +1,8 @@
+2015-11-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	PR gas/19217
+	* gas/arm/thumb2_ldr_immediate_armv6t2.d: Update expected output.
+
 2015-11-11  Alan Modra  <amodra@gmail.com>
 	    Peter Bergner <bergner@vnet.ibm.com>
 
