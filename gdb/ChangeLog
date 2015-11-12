@@ -1,3 +1,8 @@
+2015-11-12  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (push_stack_item): Change contents type to
+	const gdb_byte *.
+
 2015-11-11  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* inf-ptrace.c (inf_ptrace_fetch_register): Change long int *
