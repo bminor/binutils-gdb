@@ -1057,6 +1057,8 @@ extern struct value *varying_to_slice (struct value *);
 
 extern struct value *value_slice (struct value *, int, int);
 
+extern struct value *value_slice_1 (struct value *, int, int, int);
+
 extern struct value *value_literal_complex (struct value *, struct value *,
 					    struct type *);
 

@@ -253,6 +253,8 @@ arglist :	subrange
    
 arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 			{ arglist_len++; }
+	|	arglist ',' subrange	%prec ABOVE_COMMA
+			{ arglist_len++; }
 	;
 
 /* There are four sorts of subrange types in F90.  */

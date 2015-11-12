@@ -3775,56 +3775,152 @@ value_of_this_silent (const struct language_defn *lang)
 struct value *
 value_slice (struct value *array, int lowbound, int length)
 {
-  struct type *slice_range_type, *slice_type, *range_type;
-  LONGEST lowerbound, upperbound;
-  struct value *slice;
-  struct type *array_type;
+  /* Pass unaltered arguments to VALUE_SLICE_1, plus a CALL_COUNT of '1' as we
+     are only considering the highest dimension, or we are working on a one
+     dimensional array.  So we call VALUE_SLICE_1 exactly once.  */
+  return value_slice_1 (array, lowbound, length, 1);
+}
 
-  array_type = check_typedef (value_type (array));
+/* VALUE_SLICE_1 is called for each array dimension to calculate the number
+   of elements as defined by the subscript expression.
+   CALL_COUNT is used to determine if we are calling the function once, e.g.
+   we are working on the current dimension of ARRAY, or if we are calling
+   the function repeatedly.  In the later case we need to take elements
+   from the TARGET_TYPE of ARRAY.
+   With a CALL_COUNT greater than 1 we calculate the offsets for every element
+   that should be in the result array.  Then we fetch the contents and then
+   copy them into the result array.  The result array will have one dimension
+   less than the input array, so later on we need to recreate the indices and
+   ranges in the calling function.  */
+
+struct value *
+value_slice_1 (struct value *array, int lowbound, int length, int call_count)
+{
+  struct type *slice_range_type, *slice_type, *range_type;
+  struct type *array_type = check_typedef (value_type (array));
+  struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
+  unsigned int elt_size, elt_offs;
+  LONGEST ary_high_bound, ary_low_bound;
+  struct value *v;
+  int slice_range_size, i = 0, row_count = 1, elem_count = 1;
+
+  /* Check for legacy code if we are actually dealing with an array or
+     string.  */
   if (TYPE_CODE (array_type) != TYPE_CODE_ARRAY
       && TYPE_CODE (array_type) != TYPE_CODE_STRING)
     error (_("cannot take slice of non-array"));
 
-  range_type = TYPE_INDEX_TYPE (array_type);
-  if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
-    error (_("slice from bad array or bitstring"));
+  ary_low_bound = TYPE_LOW_BOUND (TYPE_INDEX_TYPE (array_type));
+  ary_high_bound = TYPE_HIGH_BOUND (TYPE_INDEX_TYPE (array_type));
 
-  if (lowbound < lowerbound || length < 0
-      || lowbound + length - 1 > upperbound)
-    error (_("slice out of range"));
+  /* When we are working on a multi-dimensional array, we need to get the
+     attributes of the underlying type.  */
+  if (call_count > 1)
+    {
+      elt_type = check_typedef (TYPE_TARGET_TYPE (elt_type));
+      row_count = TYPE_LENGTH (array_type)
+		    / TYPE_LENGTH (TYPE_TARGET_TYPE (array_type));
+    }
+
+  elem_count = length;
+  elt_size = TYPE_LENGTH (elt_type);
+  elt_offs = longest_to_int (lowbound - ary_low_bound);
+
+  elt_offs *= elt_size;
+
+  /* Check for valid user input.  In case of Fortran this was already done
+     in the calling function.  */
+  if (call_count == 1
+	&& (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)
+	      && elt_offs >= TYPE_LENGTH (array_type)))
+    error (_("no such vector element"));
+
+  /* CALL_COUNT is 1 when we are dealing either with the highest dimension
+     of the array, or a one dimensional array.  Set RANGE_TYPE accordingly.
+     In both cases we calculate how many rows/elements will be in the output
+     array by setting slice_range_size.  */
+  if (call_count == 1)
+    {
+      range_type = TYPE_INDEX_TYPE (array_type);
+      slice_range_size = elem_count;
+
+      /* Check if the array bounds are valid.  */
+      if (get_discrete_bounds (range_type, &ary_low_bound, &ary_high_bound) < 0)
+	error (_("slice from bad array or bitstring"));
+    }
+  /* When CALL_COUNT is greater than 1, we are dealing with an array of arrays.
+     So we need to get the type below the current one and set the RANGE_TYPE
+     accordingly.  */
+  else
+    {
+      range_type = TYPE_INDEX_TYPE (TYPE_TARGET_TYPE (array_type));
+      slice_range_size = (ary_low_bound + row_count - 1) * (elem_count);
+      ary_low_bound = TYPE_LOW_BOUND (range_type);
+    }
 
   /* FIXME-type-allocation: need a way to free this type when we are
-     done with it.  */
-  slice_range_type = create_static_range_type ((struct type *) NULL,
-					       TYPE_TARGET_TYPE (range_type),
-					       lowbound,
-					       lowbound + length - 1);
+      done with it.  */
 
+  slice_range_type = create_static_range_type (NULL, TYPE_TARGET_TYPE (range_type),
+					       ary_low_bound, slice_range_size);
   {
-    struct type *element_type = TYPE_TARGET_TYPE (array_type);
-    LONGEST offset
-      = (lowbound - lowerbound) * TYPE_LENGTH (check_typedef (element_type));
+    struct type *element_type;
 
-    slice_type = create_array_type ((struct type *) NULL,
-				    element_type,
-				    slice_range_type);
-    TYPE_CODE (slice_type) = TYPE_CODE (array_type);
+    /* When CALL_COUNT equals 1 we can use the legacy code for subarrays.  */
+    if (call_count == 1)
+      {
+	element_type = TYPE_TARGET_TYPE (array_type);
 
-    if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
-      slice = allocate_value_lazy (slice_type);
+	slice_type = create_array_type (NULL, element_type, slice_range_type);
+
+	TYPE_CODE (slice_type) = TYPE_CODE (array_type);
+
+	if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
+	  v = allocate_value_lazy (slice_type);
+	else
+	  {
+	    v = allocate_value (slice_type);
+	    value_contents_copy (v,
+				 value_embedded_offset (v),
+				 array,
+				 value_embedded_offset (array) + elt_offs,
+				 elt_size * longest_to_int (length));
+	  }
+
+      }
+    /* When CALL_COUNT is larger than 1 we are working on a range of ranges.
+       So we copy the relevant elements into the new array we return.  */
     else
       {
-	slice = allocate_value (slice_type);
-	value_contents_copy (slice, 0, array, offset,
-			     type_length_units (slice_type));
+	LONGEST dst_offset = 0;
+	LONGEST src_row_length = TYPE_LENGTH (TYPE_TARGET_TYPE (array_type));
+
+	element_type = TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (array_type));
+	slice_type = create_array_type (NULL, element_type, slice_range_type);
+
+	TYPE_CODE (slice_type) = TYPE_CODE (TYPE_TARGET_TYPE (array_type));
+
+	v = allocate_value (slice_type);
+	for (i = 0; i < longest_to_int (row_count); i++)
+	  {
+	    /* Fetches the contents of ARRAY and copies them into V.  */
+	    value_contents_copy (v,
+				 dst_offset,
+				 array,
+				 elt_offs,
+				 elt_size * elem_count);
+	    elt_offs += src_row_length;
+	    dst_offset += elt_size * elem_count;
+	  }
       }
 
-    set_value_component_location (slice, array);
-    VALUE_FRAME_ID (slice) = VALUE_FRAME_ID (array);
-    set_value_offset (slice, value_offset (array) + offset);
+    set_value_component_location (v, array);
+    VALUE_REGNUM (v) = VALUE_REGNUM (array);
+    VALUE_FRAME_ID (v) = VALUE_FRAME_ID (array);
+    set_value_offset (v, value_offset (array) + elt_offs);
   }
 
-  return slice;
+  return v;
 }
 
 /* Create a value for a FORTRAN complex number.  Currently most of the

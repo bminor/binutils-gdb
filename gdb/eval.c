@@ -399,29 +399,254 @@ init_array_element (struct value *array, struct value *element,
   return index;
 }
 
+/* Evaluates any operation on Fortran arrays or strings with at least
+   one user provided parameter.  Expects the input ARRAY to be either
+   an array, or a string.  Evaluates EXP by incrementing POS, and
+   writes the content from the elt stack into a local struct.  NARGS
+   specifies number of literal or range arguments the user provided.
+   NARGS must be the same number as ARRAY has dimensions.  */
+
 static struct value *
-value_f90_subarray (struct value *array,
-		    struct expression *exp, int *pos, enum noside noside)
+value_f90_subarray (struct value *array, struct expression *exp,
+		    int *pos, int nargs, enum noside noside)
 {
-  int pc = (*pos) + 1;
+  int i, dim_count = 0;
   LONGEST low_bound, high_bound;
-  struct type *range = check_typedef (TYPE_INDEX_TYPE (value_type (array)));
-  enum range_type range_type
-    = (enum range_type) longest_to_int (exp->elts[pc].longconst);
- 
-  *pos += 3;
+  struct value *new_array = array;
+  struct type *array_type = check_typedef (value_type (new_array));
+  struct type *elt_type;
 
-  if (range_type == LOW_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
-    low_bound = TYPE_LOW_BOUND (range);
-  else
-    low_bound = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+  typedef struct subscript_range
+  {
+    enum range_type f90_range_type;
+    LONGEST low, high;
+  } subscript_range;
 
-  if (range_type == HIGH_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
-    high_bound = TYPE_HIGH_BOUND (range);
-  else
-    high_bound = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+  typedef enum subscript_kind
+  {
+    SUBSCRIPT_RANGE,    /* e.g. "(lowbound:highbound)"  */
+    SUBSCRIPT_INDEX    /* e.g. "(literal)"  */
+  } kind;
 
-  return value_slice (array, low_bound, high_bound - low_bound + 1);
+  /* Local struct to hold user data for Fortran subarray dimensions.  */
+  struct subscript_store
+  {
+    /* For every dimension, we are either working on a range or an index
+       expression, so we store this info separately for later.  */
+    enum subscript_kind kind;
+
+    /* We also store either the lower and upper bound info, or the index
+       number.  Before evaluation of the input values, we do not know if we are
+       actually working on a range of ranges, or an index in a range.  So as a
+       first step we store all input in a union.  The array calculation itself
+       deals with this later on.  */
+    union element_range
+    {
+      subscript_range range;
+      LONGEST number;
+    } U;
+  } *subscript_array;
+
+  /* Check if the number of arguments provided by the user matches
+     the number of dimension of the array.  A string has only one
+     dimension.  */
+  if (nargs != calc_f77_array_dims (value_type (new_array)))
+    error (_("Wrong number of subscripts"));
+
+  subscript_array = (struct subscript_store*) alloca (sizeof (*subscript_array) * nargs);
+
+  /* Parse the user input into the SUBSCRIPT_ARRAY to store it.  We need
+     to evaluate it first, as the input is from left-to-right.  The
+     array is stored from right-to-left.  So we have to use the user
+     input in reverse order.  Later on, we need the input information to
+     re-calculate the output array.  For multi-dimensional arrays, we
+     can be dealing with any possible combination of ranges and indices
+     for every dimension.  */
+  for (i = 0; i < nargs; i++)
+    {
+      struct subscript_store *index = &subscript_array[i];
+
+      /* The user input is a range, with or without lower and upper bound.
+	 E.g.: "p arry(2:5)", "p arry( :5)", "p arry( : )", etc.  */
+      if (exp->elts[*pos].opcode == OP_RANGE)
+	{
+	  int pc = (*pos) + 1;
+	  subscript_range *range;
+
+	  index->kind = SUBSCRIPT_RANGE;
+	  range = &index->U.range;
+
+	  *pos += 3;
+	  range->f90_range_type = (enum range_type) longest_to_int (exp->elts[pc].longconst);
+
+	  /* If a lower bound was provided by the user, the bit has been
+	     set and we can assign the value from the elt stack.  Same for
+	     upper bound.  */
+	  if ((range->f90_range_type == HIGH_BOUND_DEFAULT)
+	      || range->f90_range_type == NONE_BOUND_DEFAULT)
+	    range->low = value_as_long (evaluate_subexp (NULL_TYPE, exp,
+							 pos, noside));
+	  if ((range->f90_range_type == LOW_BOUND_DEFAULT)
+	      || range->f90_range_type == NONE_BOUND_DEFAULT)
+	    range->high = value_as_long (evaluate_subexp (NULL_TYPE, exp,
+							  pos, noside));
+	}
+      /* User input is an index.  E.g.: "p arry(5)".  */
+      else
+	{
+	  struct value *val;
+
+	  index->kind = SUBSCRIPT_INDEX;
+
+	  /* Evaluate each subscript; it must be a legal integer in F77.  This
+	     ensures the validity of the provided index.  */
+	  val = evaluate_subexp_with_coercion (exp, pos, noside);
+	  index->U.number = value_as_long (val);
+	}
+
+    }
+
+  /* Traverse the array from right to left and evaluate each corresponding
+     user input.  VALUE_SUBSCRIPT is called for every index, until a range
+     expression is evaluated.  After a range expression has been evaluated,
+     every subsequent expression is also treated as a range.  */
+  for (i = nargs - 1; i >= 0; i--)
+    {
+      struct subscript_store *index = &subscript_array[i];
+      struct type *index_type = TYPE_INDEX_TYPE (array_type);
+
+      switch (index->kind)
+	{
+	case SUBSCRIPT_RANGE:
+	  {
+
+	    /* When we hit the first range specified by the user, we must
+	       treat any subsequent user entry as a range.  We simply
+	       increment DIM_COUNT which tells us how many times we are
+	       calling VALUE_SLICE_1.  */
+	    subscript_range *range = &index->U.range;
+
+	    /* If no lower bound was provided by the user, we take the
+	       default boundary.  Same for the high bound.  */
+	    if ((range->f90_range_type == LOW_BOUND_DEFAULT)
+		|| (range->f90_range_type == BOTH_BOUND_DEFAULT))
+	      range->low = TYPE_LOW_BOUND (index_type);
+
+	    if ((range->f90_range_type == HIGH_BOUND_DEFAULT)
+		|| (range->f90_range_type == BOTH_BOUND_DEFAULT))
+	      range->high = TYPE_HIGH_BOUND (index_type);
+
+	    /* Both user provided low and high bound have to be inside the
+	       array bounds.  Throw an error if not.  */
+	    if (range->low < TYPE_LOW_BOUND (index_type)
+		|| range->low > TYPE_HIGH_BOUND (index_type)
+		|| range->high < TYPE_LOW_BOUND (index_type)
+		|| range->high > TYPE_HIGH_BOUND (index_type))
+	      error (_("provided bound(s) outside array bound(s)"));
+
+	    /* DIM_COUNT counts every user argument that is treated as a range.
+	       This is necessary for expressions like 'print array(7, 8:9).
+	       Here the first argument is a literal, but must be treated as a
+	       range argument to allow the correct output representation.  */
+	    dim_count++;
+
+	    new_array
+	      = value_slice_1 (new_array,
+			       longest_to_int (range->low),
+			       longest_to_int (range->high - range->low + 1),
+			       dim_count);
+	  }
+	  break;
+
+	case SUBSCRIPT_INDEX:
+	  {
+	    /* DIM_COUNT only stays '0' when no range argument was processed
+	       before, starting from the last dimension.  This way we can
+	       reduce the number of dimensions from the result array.
+	       However, if a range has been processed before an index, we
+	       treat the index like a range with equal low- and high bounds
+	       to get the value offset right.  */
+	    if (dim_count == 0)
+	      new_array
+	        = value_subscripted_rvalue (new_array, index->U.number,
+					    f77_get_lowerbound (value_type
+								  (new_array)));
+	    else
+	      {
+		/* Check for valid index input.  */
+		if (index->U.number < TYPE_LOW_BOUND (index_type)
+		    || index->U.number > TYPE_HIGH_BOUND (index_type))
+		  error (_("error no such vector element"));
+
+		dim_count++;
+		new_array = value_slice_1 (new_array,
+					   longest_to_int (index->U.number),
+					   1, /* length is '1' element  */
+					   dim_count);
+	      }
+
+	  }
+	  break;
+	}
+    }
+
+  /* With DIM_COUNT > 1 we currently have a one dimensional array, but expect
+     an array of arrays, depending on how many ranges have been provided by
+     the user.  So we need to rebuild the array dimensions for printing it
+     correctly.
+     Starting from right to left in the user input, after we hit the first
+     range argument every subsequent argument is also treated as a range.
+     E.g.:
+     "p ary(3, 7, 2:15)" in Fortran has only 1 dimension, but we calculated 3
+     ranges.
+     "p ary(3, 7:12, 4)" in Fortran has only 1 dimension, but we calculated 2
+     ranges.
+     "p ary(2:4, 5, 7)" in Fortran has only 1 dimension, and we calculated 1
+     range.  */
+  if (dim_count > 1)
+    {
+      struct value *v = NULL;
+
+      elt_type = TYPE_TARGET_TYPE (value_type (new_array));
+
+      /* Every SUBSCRIPT_RANGE in the user input signifies an actual range in
+	 the output array.  So we traverse the SUBSCRIPT_ARRAY again, looking
+	 for a range entry.  When we find one, we use the range info to create
+	 an additional range_type to set the correct bounds and dimensions for
+	 the output array.  */
+      for (i = 0; i < nargs; i++)
+	{
+	  struct subscript_store *index = &subscript_array[i];
+
+	  if (index->kind == SUBSCRIPT_RANGE)
+	    {
+	      struct type *range_type, *interim_array_type;
+
+	      range_type
+		= create_static_range_type (NULL,
+					    elt_type,
+					    1,
+					    index->U.range.high
+					      - index->U.range.low + 1);
+
+	      interim_array_type = create_array_type (NULL,
+						      elt_type,
+						      range_type);
+
+	      TYPE_CODE (interim_array_type)
+		= TYPE_CODE (value_type (new_array));
+
+	      v = allocate_value (interim_array_type);
+
+	      elt_type = value_type (v);
+	    }
+
+	}
+      value_contents_copy (v, 0, new_array, 0, TYPE_LENGTH (elt_type));
+      return v;
+    }
+
+  return new_array;
 }
 
 
@@ -1810,14 +2035,11 @@ evaluate_subexp_standard (struct type *expect_type,
       switch (code)
 	{
 	case TYPE_CODE_ARRAY:
-	  if (exp->elts[*pos].opcode == OP_RANGE)
-	    return value_f90_subarray (arg1, exp, pos, noside);
-	  else
-	    goto multi_f77_subscript;
+	  return value_f90_subarray (arg1, exp, pos, nargs, noside);
 
 	case TYPE_CODE_STRING:
 	  if (exp->elts[*pos].opcode == OP_RANGE)
-	    return value_f90_subarray (arg1, exp, pos, noside);
+	    return value_f90_subarray (arg1, exp, pos, 1, noside);
 	  else
 	    {
 	      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -2222,49 +2444,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	}
       return (arg1);
-
-    multi_f77_subscript:
-      {
-	LONGEST subscript_array[MAX_FORTRAN_DIMS];
-	int ndimensions = 1, i;
-	struct value *array = arg1;
-
-	if (nargs > MAX_FORTRAN_DIMS)
-	  error (_("Too many subscripts for F77 (%d Max)"), MAX_FORTRAN_DIMS);
-
-	ndimensions = calc_f77_array_dims (type);
-
-	if (nargs != ndimensions)
-	  error (_("Wrong number of subscripts"));
-
-	gdb_assert (nargs > 0);
-
-	/* Now that we know we have a legal array subscript expression 
-	   let us actually find out where this element exists in the array.  */
-
-	/* Take array indices left to right.  */
-	for (i = 0; i < nargs; i++)
-	  {
-	    /* Evaluate each subscript; it must be a legal integer in F77.  */
-	    arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-
-	    /* Fill in the subscript array.  */
-
-	    subscript_array[i] = value_as_long (arg2);
-	  }
-
-	/* Internal type of array is arranged right to left.  */
-	for (i = nargs; i > 0; i--)
-	  {
-	    struct type *array_type = check_typedef (value_type (array));
-	    LONGEST index = subscript_array[i - 1];
-
-	    array = value_subscripted_rvalue (array, index,
-					      f77_get_lowerbound (array_type));
-	  }
-
-	return array;
-      }
 
     case BINOP_LOGICAL_AND:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -3122,6 +3301,9 @@ calc_f77_array_dims (struct type *array_type)
 {
   int ndimen = 1;
   struct type *tmp_type;
+
+  if (TYPE_CODE (array_type) == TYPE_CODE_STRING)
+    return 1;
 
   if ((TYPE_CODE (array_type) != TYPE_CODE_ARRAY))
     error (_("Can't get dimensions for a non-array type"));
