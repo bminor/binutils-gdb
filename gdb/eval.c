@@ -2035,16 +2035,8 @@ evaluate_subexp_standard (struct type *expect_type,
       switch (code)
 	{
 	case TYPE_CODE_ARRAY:
-	  return value_f90_subarray (arg1, exp, pos, nargs, noside);
-
 	case TYPE_CODE_STRING:
-	  if (exp->elts[*pos].opcode == OP_RANGE)
-	    return value_f90_subarray (arg1, exp, pos, 1, noside);
-	  else
-	    {
-	      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-	      return value_subscript (arg1, value_as_long (arg2));
-	    }
+	  return value_f90_subarray (arg1, exp, pos, nargs, noside);
 
 	case TYPE_CODE_PTR:
 	case TYPE_CODE_FUNC:
