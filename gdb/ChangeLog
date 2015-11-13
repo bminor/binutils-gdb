@@ -1,3 +1,9 @@
+2015-11-13  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_return_in_memory): Rewrite it.
+	(arm_return_value): Call arm_return_in_memory for
+	TYPE_CODE_COMPLEX.
+
 2015-11-12  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c (push_stack_item): Change contents type to
