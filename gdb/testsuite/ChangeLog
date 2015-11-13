@@ -1,3 +1,9 @@
+2015-11-13  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/gnu_vector.exp: Check the return value by "p res".
+	* gdb.base/gnu_vector.c: Don't include stdio.h.
+	(main): Don't print res and call add_some_intvecs.
+
 2015-11-11  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/change-loc.h: include "trace-common.h", remove SYMBOL
