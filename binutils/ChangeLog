@@ -1,3 +1,7 @@
+2015-11-13  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.26.
+
 2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
 
 	* dwarf.c (read_leb128): Fix left shift of negative value.

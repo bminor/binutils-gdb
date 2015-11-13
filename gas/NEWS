@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.26:
+
 * Add a configure option --enable-compressed-debug-sections={all,gas} to
   decide whether DWARF debug sections should be compressed by default.
 

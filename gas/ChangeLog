@@ -1,3 +1,7 @@
+2015-11-13  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.26.
+
 2015-11-12  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Add cortex-a35.
