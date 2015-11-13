@@ -1,5 +1,14 @@
 2015-11-13  Yao Qi  <yao.qi@linaro.org>
 
+	PR tdep/19051
+	* arm-tdep.c (arm_type_align): Return the right alignment
+	value for vector.
+	(arm_vfp_cprc_sub_candidate): Return true for 64-bit and
+	128-bit vector types.
+	(arm_return_in_memory): Handel vector type.
+
+2015-11-13  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-tdep.c (arm_return_in_memory): Rewrite it.
 	(arm_return_value): Call arm_return_in_memory for
 	TYPE_CODE_COMPLEX.
