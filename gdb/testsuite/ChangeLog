@@ -1,5 +1,17 @@
 2015-11-13  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/call-sc.exp (test_scalar_returns): Remove the
+	comments about d10v.
+	(test_scalar_returns): Likewise.
+	* gdb.base/d10v.ld: Remove.
+	* gdb.base/overlays.exp: Remove the target triplet checking for
+	d10v-*-*.
+	* gdb.base/structs.exp (test_struct_returns): Remove the
+	comments about d10v.
+	(test_struct_calls): Likewise.
+
+2015-11-13  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.base/gnu_vector.exp: Check the return value by "p res".
 	* gdb.base/gnu_vector.c: Don't include stdio.h.
 	(main): Don't print res and call add_some_intvecs.
