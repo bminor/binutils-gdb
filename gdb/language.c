@@ -43,6 +43,7 @@
 #include "demangle.h"
 #include "symfile.h"
 #include "cp-support.h"
+#include "frame.h"
 
 extern void _initialize_language (void);
 
@@ -118,7 +119,7 @@ static void
 show_language_command (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  enum language flang;		/* The language of the current frame.  */
+  enum language flang;		/* The language of the frame.  */
 
   if (language_mode == language_mode_auto)
     fprintf_filtered (gdb_stdout,
@@ -130,11 +131,17 @@ show_language_command (struct ui_file *file, int from_tty,
 		      _("The current source language is \"%s\".\n"),
 		      current_language->la_name);
 
-  flang = get_frame_language ();
-  if (flang != language_unknown &&
-      language_mode == language_mode_manual &&
-      current_language->la_language != flang)
-    printf_filtered ("%s\n", lang_frame_mismatch_warn);
+  if (has_stack_frames ())
+    {
+      struct frame_info *frame;
+
+      frame = get_selected_frame (NULL);
+      flang = get_frame_language (frame);
+      if (flang != language_unknown
+	  && language_mode == language_mode_manual
+	  && current_language->la_language != flang)
+	printf_filtered ("%s\n", lang_frame_mismatch_warn);
+    }
 }
 
 /* Set command.  Change the current working language.  */
@@ -142,7 +149,7 @@ static void
 set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
   int i;
-  enum language flang;
+  enum language flang = language_unknown;
 
   /* Search the list of languages for a match.  */
   for (i = 0; i < languages_size; i++)
@@ -155,7 +162,19 @@ set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 	      /* Enter auto mode.  Set to the current frame's language, if
                  known, or fallback to the initial language.  */
 	      language_mode = language_mode_auto;
-	      flang = get_frame_language ();
+	      TRY
+		{
+		  struct frame_info *frame;
+
+		  frame = get_selected_frame (NULL);
+		  flang = get_frame_language (frame);
+		}
+	      CATCH (ex, RETURN_MASK_ERROR)
+		{
+		  flang = language_unknown;
+		}
+	      END_CATCH
+
 	      if (flang != language_unknown)
 		set_language (flang);
 	      else
@@ -537,8 +556,7 @@ add_language (const struct language_defn *lang)
   if (!languages)
     {
       languages_allocsize = DEFAULT_ALLOCSIZE;
-      languages = (const struct language_defn **) xmalloc
-	(languages_allocsize * sizeof (*languages));
+      languages = XNEWVEC (const struct language_defn *, languages_allocsize);
     }
   if (languages_size >= languages_allocsize)
     {
@@ -550,8 +568,9 @@ add_language (const struct language_defn *lang)
 
   /* Build the language names array, to be used as enumeration in the
      set language" enum command.  */
-  language_names = xrealloc (language_names,
-			     (languages_size + 1) * sizeof (const char *));
+  language_names = XRESIZEVEC (const char *, language_names,
+			       languages_size + 1);
+
   for (i = 0; i < languages_size; ++i)
     language_names[i] = languages[i]->la_name;
   language_names[i] = NULL;
@@ -956,8 +975,8 @@ struct type *
 language_string_char_type (const struct language_defn *la,
 			   struct gdbarch *gdbarch)
 {
-  struct language_gdbarch *ld = gdbarch_data (gdbarch,
-					      language_gdbarch_data);
+  struct language_gdbarch *ld
+    = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
 
   return ld->arch_info[la->la_language].string_char_type;
 }
@@ -966,15 +985,15 @@ struct type *
 language_bool_type (const struct language_defn *la,
 		    struct gdbarch *gdbarch)
 {
-  struct language_gdbarch *ld = gdbarch_data (gdbarch,
-					      language_gdbarch_data);
+  struct language_gdbarch *ld
+    = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
 
   if (ld->arch_info[la->la_language].bool_type_symbol)
     {
       struct symbol *sym;
 
       sym = lookup_symbol (ld->arch_info[la->la_language].bool_type_symbol,
-			   NULL, VAR_DOMAIN, NULL);
+			   NULL, VAR_DOMAIN, NULL).symbol;
       if (sym)
 	{
 	  struct type *type = SYMBOL_TYPE (sym);
@@ -1010,8 +1029,8 @@ language_lookup_primitive_type (const struct language_defn *la,
 				struct gdbarch *gdbarch,
 				const char *name)
 {
-  struct language_gdbarch *ld = gdbarch_data (gdbarch,
-					      language_gdbarch_data);
+  struct language_gdbarch *ld =
+    (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
   struct type **typep;
 
   typep = language_lookup_primitive_type_1 (&ld->arch_info[la->la_language],
@@ -1075,10 +1094,9 @@ language_init_primitive_type_symbols (struct language_arch_info *lai,
     }
 
   /* Note: The result of symbol lookup is normally a symbol *and* the block
-     it was found in (returned in global block_found).  Builtin types don't
-     live in blocks.  We *could* give them one, but there is no current need
-     so to keep things simple symbol lookup is extended to allow for
-     BLOCK_FOUND to be NULL.  */
+     it was found in.  Builtin types don't live in blocks.  We *could* give
+     them one, but there is no current need so to keep things simple symbol
+     lookup is extended to allow for BLOCK_FOUND to be NULL.  */
 }
 
 /* See language.h.  */
@@ -1088,8 +1106,8 @@ language_lookup_primitive_type_as_symbol (const struct language_defn *la,
 					  struct gdbarch *gdbarch,
 					  const char *name)
 {
-  struct language_gdbarch *ld = gdbarch_data (gdbarch,
-					      language_gdbarch_data);
+  struct language_gdbarch *ld
+    = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
   struct language_arch_info *lai = &ld->arch_info[la->la_language];
   struct type **typep;
   struct symbol *sym;

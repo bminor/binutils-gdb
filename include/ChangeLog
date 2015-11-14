@@ -1,3 +1,110 @@
+2015-11-09  Alan Modra  <amodra@gmail.com>
+
+	PR gdb/17133
+	* obstack.h (__attribute_pure__): Expand _GL_ATTRIBUTE_PURE.
+
+2015-11-09  Alan Modra  <amodra@gmail.com>
+
+	PR gdb/17133
+	* obstack.h: Import current gnulib file.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add call_nop_as_suffix and
+	call_nop_byte.
+
+2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* dis-asm.h (arc_get_disassembler): Correct declaration.
+
+2015-09-30  Nick Clifton  <nickc@redhat.com>
+
+	Import the following patches from the GCC mainline:
+
+	2015-08-14  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* dwarf2.def (DW_AT_GNU_bias): New attribute.
+
+	2015-08-14  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* dwarf2.def (DW_AT_GNU_numerator, DW_AT_GNU_denominator): New
+	attributes.
+
+2015-09-26  James Bowman  <james.bowman@ftdichip.com>
+
+	* opcode/ft32.h: Add instruction macros FT32_*()
+
+2015-09-20  Rich Felker  <dalias@libc.org>
+
+	* bfdlink.h (struct bfd_link_info): Add "nointerp" field.
+
+2015-08-23  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (enum output_type): Reorder enum.
+
+2015-08-19  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (enum output_type): Delete type_executable, add type_pde
+	and type_pie.  Reorder.
+	(struct bfd_link_info): Delete pic field.
+	(bfd_link_executable, bfd_link_pde, bfd_link_pie, bfd_link_pic): Adjust.
+
+2015-08-19  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (bfd_link_pde): Define.
+
+2015-08-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* include/bfdlink.h (output_type): New enum.
+	(bfd_link_executable): New macro.
+	(bfd_link_dll): Likewise.
+	(bfd_link_relocatable): Likewise.
+	(bfd_link_pic): Likewise.
+	(bfd_link_pie): Likewise.
+	(bfd_link_info): Remove shared, executable, pie and relocatable.
+	Add output_type and pic.
+
+2015-08-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-08-11  Trevor Saunders  <tbsaunde+gcc@tbsaunde.org>
+
+	* ansidecl.h (GCC_FINAL): New macro.
+
+2015-07-16  Jiong Wang  <jiong.wang@arm.com>
+
+	* elf/aarch64.h (R_AARCH64_P32_TLSLD_ADR_PREL21): New enumeration.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2014-10-28  Richard Henderson  <rth@redhat.com>
+
+	* longlong.h [__alpha] (umul_ppmm): Disable for c++.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2014-12-09  Trevor Saunders  <tsaunders@mozilla.com>
+
+	* hashtab.h, splay-tree.h: Remove GTY markers.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-03-02  Markus Trippelsdorf  <markus@trippelsdorf.de>
+
+	PR target/65261
+	* ansidecl.h (ATTRIBUTE_NO_SANITIZE_UNDEFINED): New macro.
+
+2015-07-09  Catherine Moore  <clm@codesourcery.com>
+
+	* elf/mips/mips.h (Val_GNU_MIPS_ABI_FP_NAN2008): New.
+
+2015-07-08  Pitchumani Sivanupandi <pitchumani.s@atmel.com>
+
+	* elf/avr.h: Add new 32 bit PC relative relocation.
+
 2015-06-26  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* elf/mips.h (DT_MIPS_RLD_MAP_REL): New macro.
@@ -111,8 +218,8 @@
 	* gcc-interface.h: New file.
 
 2014-12-11  Uros Bizjak  <ubizjak@gmail.com>
-            Ben Elliston  <bje@au.ibm.com>
-            Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
+	    Ben Elliston  <bje@au.ibm.com>
+	    Manuel Lopez-Ibanez  <manu@gcc.gnu.org>
 
 	* libiberty.h (xvasprintf): Declare.
 
@@ -301,7 +408,7 @@
 2013-10-10  Sean Keys <skeys@ipdatasys.com>
 
 	* xgate.h : Cleanup after opcode
-        table modification..
+	table modification..
 
 2013-08-20  Alan Modra  <amodra@gmail.com>
 
@@ -318,7 +425,7 @@
 	* vtv-change-permission.h: New file.
 
 2013-08-05  Eric Botcazou  <ebotcazou@adacore.com>
-            Konrad Eisele  <konrad@gaisler.com>
+	    Konrad Eisele  <konrad@gaisler.com>
 
 	* opcode/sparc.h (sparc_opcode_arch_val): Add SPARC_OPCODE_ARCH_LEON.
 
@@ -339,8 +446,8 @@
 
 2013-05-06  Paul Brook  <paul@codesourcery.com>
 
-        include/elf/
-        * mips.h (R_MIPS_PC32): Update comment.
+	include/elf/
+	* mips.h (R_MIPS_PC32): Update comment.
 
 2013-04-03  Jason Merrill  <jason@redhat.com>
 
@@ -377,7 +484,7 @@
 	explicitly for all values.
 
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
-            Andrew Jenner <andrew@codesourcery.com>
+	    Andrew Jenner <andrew@codesourcery.com>
 
 	Based on patches from Altera Corporation.
 
@@ -422,7 +529,7 @@
 	DEMANGLE_COMPONENT_TAGGED_NAME.
 
 2012-10-29  Sterling Augustine  <saugustine@google.com>
-            Cary Coutant  <ccoutant@google.com>
+	    Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2.h (dwarf_location_list_entry_type): New enum with fields
 	DW_LLE_GNU_end_of_list_entry, DW_LLE_GNU_base_address_selection_entry,
@@ -510,15 +617,15 @@
 	(ARM_ARCH_V8A_CRYPTO): Likewise.
 
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
-            Laurent Desnogues  <laurent.desnogues@arm.com>
-            Jim MacArthur  <jim.macarthur@arm.com>
-            Marcus Shawcroft  <marcus.shawcroft@arm.com>
-            Nigel Stephens  <nigel.stephens@arm.com>
-            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
-            Richard Earnshaw  <rearnsha@arm.com>
-            Sofiane Naci  <sofiane.naci@arm.com>
-            Tejas Belagod  <tejas.belagod@arm.com>
-            Yufeng Zhang  <yufeng.zhang@arm.com>
+	    Laurent Desnogues  <laurent.desnogues@arm.com>
+	    Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+	    Sofiane Naci  <sofiane.naci@arm.com>
+	    Tejas Belagod  <tejas.belagod@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* dis-asm.h (print_insn_aarch64): New declaration.
 	(print_aarch64_disassembler_options): New declaration.
@@ -529,7 +636,7 @@
 	* elf/m68hc11.h: #define E_M68HC11_NO_BANK_WARNING 0x000000200
 
 2012-07-24  Stephan McCamant  <smcc@cs.berkeley.edu>
-            Dr David Alan Gilbert  <dave@treblig.org>
+	    Dr David Alan Gilbert  <dave@treblig.org>
 
 	PR binutils/13135
 	* dis-asm.h (fprintf_ftype): Add ATTRIBUTE_FPTR_PRINTF_2.
@@ -1617,9 +1724,9 @@
 	override_segment_assignment field.
 
 2007-02-17  Mark Mitchell  <mark@codesourcery.com>
-            Nathan Sidwell  <nathan@codesourcery.com>
-            Vladimir Prus  <vladimir@codesourcery.com
-            Joseph Myers  <joseph@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+	    Vladimir Prus  <vladimir@codesourcery.com
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* bin-bugs.h: Remove.
 
@@ -1722,8 +1829,8 @@
 	relax_pass.
 
 2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
-            Anil Paranjape   <anilp1@kpitcummins.com>
-            Shilin Shakti    <shilins@kpitcummins.com>
+	    Anil Paranjape   <anilp1@kpitcummins.com>
+	    Shilin Shakti    <shilins@kpitcummins.com>
 
 	* dis-asm.h (print_insn_xc16c): New prototype.
 

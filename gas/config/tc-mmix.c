@@ -587,8 +587,10 @@ get_putget_operands (struct mmix_opcode *insn, char *operands,
 	    p++;
 	  sregp = p;
 	  input_line_pointer = sregp;
-	  c = get_symbol_end ();
+	  c = get_symbol_name (&sregp);
 	  sregend = input_line_pointer;
+	  if (c == '"')
+	    ++ input_line_pointer;
 	}
     }
   else
@@ -596,10 +598,10 @@ get_putget_operands (struct mmix_opcode *insn, char *operands,
       expp_sreg = &exp[0];
       expp_reg = &exp[1];
 
-      sregp = p;
-      c = get_symbol_end ();
-      sregend = p = input_line_pointer;
-      *p = c;
+      c = get_symbol_name (&sregp);
+      sregend = input_line_pointer;
+      restore_line_pointer (c);
+      p = input_line_pointer;
 
       /* Skip whitespace */
       while (*p == ' ' || *p == '\t')
@@ -1475,8 +1477,8 @@ md_assemble (char *str)
 		&& ((exp[1].X_op == O_register
 		     && exp[1].X_add_number < 512)
 		    || (exp[1].X_op == O_constant
-			&& exp[1].X_add_number < 0
-			&& exp[1].X_add_number > 4)
+			&& (exp[1].X_add_number < 0
+			    || exp[1].X_add_number > 4))
 		    || (exp[1].X_op != O_register
 			&& exp[1].X_op != O_constant))))
 	  {
@@ -1939,10 +1941,8 @@ s_prefix (int unused ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
 
-  p = input_line_pointer;
-
-  c = get_symbol_end ();
-
+  c = get_symbol_name (&p);
+  
   /* Reseting prefix?  */
   if (*p == ':' && p[1] == 0)
     mmix_current_prefix = NULL;
@@ -1961,7 +1961,7 @@ s_prefix (int unused ATTRIBUTE_UNUSED)
       mmix_current_prefix = p;
     }
 
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   mmix_handle_rest_of_empty_line ();
 }
@@ -2057,13 +2057,15 @@ s_greg (int unused ATTRIBUTE_UNUSED)
 {
   char *p;
   char c;
-  p = input_line_pointer;
 
   /* This will skip over what can be a symbol and zero out the next
      character, which we assume is a ',' or other meaningful delimiter.
      What comes after that is the initializer expression for the
      register.  */
-  c = get_symbol_end ();
+  c = get_symbol_name (&p);
+
+  if (c == '"')
+    c = * ++ input_line_pointer;
 
   if (! is_end_of_line[(unsigned char) c])
     input_line_pointer++;
@@ -2973,7 +2975,7 @@ mmix_handle_mmixal (void)
   if (*s == 0 || is_end_of_line[(unsigned int) *s])
     /* We avoid handling empty lines here.  */
     return;
-      
+
   if (is_name_beginner (*s))
     label = s;
 
@@ -3413,7 +3415,7 @@ mmix_md_relax_frag (segT seg, fragS *fragP, long stretch)
 	fragP->fr_subtype = ENCODE_RELAX (STATE_PUSHJSTUB, STATE_ZERO);
       }
       /* FALLTHROUGH.  */
-    
+
       /* See if this PUSHJ is redirectable to a stub.  */
     case ENCODE_RELAX (STATE_PUSHJSTUB, STATE_ZERO):
       {

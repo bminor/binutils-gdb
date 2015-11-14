@@ -1868,7 +1868,7 @@ mips_clear_insn_labels (void)
     {
       for (pl = &free_insn_labels; *pl != NULL; pl = &(*pl)->next)
 	;
-      
+
       si = seg_info (now_seg);
       *pl = si->label_list;
       si->label_list = NULL;
@@ -2542,7 +2542,7 @@ struct regname {
     {"$28",	RTYPE_NUM | 28}, \
     {"$29",	RTYPE_NUM | 29}, \
     {"$30",	RTYPE_NUM | 30}, \
-    {"$31",	RTYPE_NUM | 31} 
+    {"$31",	RTYPE_NUM | 31}
 
 #define FPU_REGISTER_NAMES       \
     {"$f0",	RTYPE_FPU | 0},  \
@@ -2624,7 +2624,7 @@ struct regname {
     {"$ta0",	RTYPE_GP | 12}, /* alias for $t4 */ \
     {"$ta1",	RTYPE_GP | 13}, /* alias for $t5 */ \
     {"$ta2",	RTYPE_GP | 14}, /* alias for $t6 */ \
-    {"$ta3",	RTYPE_GP | 15}  /* alias for $t7 */ 
+    {"$ta3",	RTYPE_GP | 15}  /* alias for $t7 */
 
 /* Remaining symbolic register names */
 #define SYMBOLIC_REGISTER_NAMES \
@@ -2720,7 +2720,7 @@ static const struct regname reg_names[] = {
 
   /* The $txx registers depends on the abi,
      these will be added later into the symbol table from
-     one of the tables below once mips_abi is set after 
+     one of the tables below once mips_abi is set after
      parsing of arguments from the command line. */
   SYMBOLIC_REGISTER_NAMES,
 
@@ -3578,17 +3578,17 @@ md_begin (void)
 
   /* We add all the general register names to the symbol table.  This
      helps us detect invalid uses of them.  */
-  for (i = 0; reg_names[i].name; i++) 
+  for (i = 0; reg_names[i].name; i++)
     symbol_table_insert (symbol_new (reg_names[i].name, reg_section,
 				     reg_names[i].num, /* & RNUM_MASK, */
 				     &zero_address_frag));
   if (HAVE_NEWABI)
-    for (i = 0; reg_names_n32n64[i].name; i++) 
+    for (i = 0; reg_names_n32n64[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_n32n64[i].name, reg_section,
 				       reg_names_n32n64[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
   else
-    for (i = 0; reg_names_o32[i].name; i++) 
+    for (i = 0; reg_names_o32[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
 				       reg_names_o32[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
@@ -3795,6 +3795,10 @@ check_fpabi (int fpabi)
     case Val_GNU_MIPS_ABI_FP_OLD_64:
       as_warn (_(".gnu_attribute %d,%d is no longer supported"),
 	       Tag_GNU_MIPS_ABI_FP, fpabi);
+      break;
+
+    case Val_GNU_MIPS_ABI_FP_NAN2008:
+      /* Silently ignore compatibility value.  */
       break;
 
     default:
@@ -6362,7 +6366,7 @@ fix_24k_record_store_info (struct fix_24k_store_info *stinfo,
    * Run the data cache in write-through mode.
    * Insert a non-store instruction between
      Store A and Store B or Store B and Store C.  */
-  
+
 static int
 nops_for_24k (int ignore, const struct mips_cl_insn *hist,
 	      const struct mips_cl_insn *insn)
@@ -9321,8 +9325,7 @@ move_register (int dest, int source)
       && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
     macro_build (NULL, "move", "mp,mj", dest, source);
   else
-    macro_build (NULL, GPR_SIZE == 32 ? "addu" : "daddu", "d,v,t",
-		 dest, source, 0);
+    macro_build (NULL, "or", "d,v,t", dest, source, 0);
 }
 
 /* Emit an SVR4 PIC sequence to load address LOCAL into DEST, where
@@ -12484,7 +12487,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	abort ();
 
       break;
-	
+
     case M_SAA_AB:
       s = "saa";
       goto saa_saad;
@@ -15131,10 +15134,9 @@ get_symbol (void)
   char *name;
   symbolS *p;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   p = (symbolS *) symbol_find_or_make (name);
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
   return p;
 }
 
@@ -15277,28 +15279,34 @@ s_change_sec (int sec)
 void
 s_change_section (int ignore ATTRIBUTE_UNUSED)
 {
+  char *saved_ilp;
   char *section_name;
-  char c;
+  char c, endc;
   char next_c = 0;
   int section_type;
   int section_flag;
   int section_entry_size;
   int section_alignment;
 
-  section_name = input_line_pointer;
-  c = get_symbol_end ();
+  saved_ilp = input_line_pointer;
+  endc = get_symbol_name (&section_name);
+  c = (endc == '"' ? input_line_pointer[1] : endc);
   if (c)
-    next_c = *(input_line_pointer + 1);
+    next_c = input_line_pointer [(endc == '"' ? 2 : 1)];
 
   /* Do we have .section Name<,"flags">?  */
   if (c != ',' || (c == ',' && next_c == '"'))
     {
-      /* just after name is now '\0'.  */
-      *input_line_pointer = c;
-      input_line_pointer = section_name;
+      /* Just after name is now '\0'.  */
+      (void) restore_line_pointer (endc);
+      input_line_pointer = saved_ilp;
       obj_elf_section (ignore);
       return;
     }
+
+  section_name = xstrdup (section_name);
+  c = restore_line_pointer (endc);
+
   input_line_pointer++;
 
   /* Do we have .section Name<,type><,flag><,entry_size><,alignment>  */
@@ -15306,22 +15314,24 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
     section_type = get_absolute_expression ();
   else
     section_type = 0;
+
   if (*input_line_pointer++ == ',')
     section_flag = get_absolute_expression ();
   else
     section_flag = 0;
+
   if (*input_line_pointer++ == ',')
     section_entry_size = get_absolute_expression ();
   else
     section_entry_size = 0;
+
   if (*input_line_pointer++ == ',')
     section_alignment = get_absolute_expression ();
   else
     section_alignment = 0;
+
   /* FIXME: really ignore?  */
   (void) section_alignment;
-
-  section_name = xstrdup (section_name);
 
   /* When using the generic form of .section (as implemented by obj-elf.c),
      there's no way to set the section type to SHT_MIPS_DWARF.  Users have
@@ -15401,13 +15411,12 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
 
   do
     {
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
       S_SET_EXTERNAL (symbolP);
 
       *input_line_pointer = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
 
       /* On Irix 5, every global symbol that is not explicitly labelled as
          being a function is apparently labelled as being an object.  */
@@ -15419,12 +15428,11 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
 	  char *secname;
 	  asection *sec;
 
-	  secname = input_line_pointer;
-	  c = get_symbol_end ();
+	  c = get_symbol_name (&secname);
 	  sec = bfd_get_section_by_name (stdoutput, secname);
 	  if (sec == NULL)
 	    as_bad (_("%s: no such section"), secname);
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 
 	  if (sec != NULL && (sec->flags & SEC_CODE) != 0)
 	    flag = BSF_FUNCTION;
@@ -15452,8 +15460,7 @@ s_option (int x ATTRIBUTE_UNUSED)
   char *opt;
   char c;
 
-  opt = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&opt);
 
   if (*opt == 'O')
     {
@@ -15485,7 +15492,7 @@ s_option (int x ATTRIBUTE_UNUSED)
   else
     as_warn (_("unrecognized option \"%s\""), opt);
 
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
 
@@ -15882,7 +15889,7 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
      daddu	$gp, $gp, $reg1
 
    If $reg2 is given, this results in:
-     daddu	$reg2, $gp, $0
+     or		$reg2, $gp, $0
      lui	$gp, %hi(%neg(%gp_rel(label)))
      addiu	$gp, $gp, %lo(%neg(%gp_rel(label)))
      daddu	$gp, $gp, $reg1
@@ -15962,8 +15969,7 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
 		   BFD_RELOC_LO16, SP);
     }
   else
-    macro_build (NULL, "daddu", "d,v,t", mips_cpreturn_register,
-		 mips_gp_register, 0);
+    move_register (mips_cpreturn_register, mips_gp_register);
 
   if (mips_in_shared || HAVE_64BIT_SYMBOLS)
     {
@@ -16076,7 +16082,7 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
      ld		$gp, offset($sp)
 
    If a register $reg2 was given there, it results in:
-     daddu	$gp, $reg2, $0  */
+     or		$gp, $reg2, $0  */
 
 static void
 s_cpreturn (int ignore ATTRIBUTE_UNUSED)
@@ -16114,8 +16120,8 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
       macro_build (&ex, "ld", "t,o(b)", mips_gp_register, BFD_RELOC_LO16, SP);
     }
   else
-    macro_build (NULL, "daddu", "d,v,t", mips_gp_register,
-		 mips_cpreturn_register, 0);
+    move_register (mips_gp_register, mips_cpreturn_register);
+
   macro_end ();
 
   mips_assembling_insn = FALSE;
@@ -16423,13 +16429,12 @@ s_mips_weakext (int ignore ATTRIBUTE_UNUSED)
   symbolS *symbolP;
   expressionS exp;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   symbolP = symbol_find_or_make (name);
   S_SET_WEAK (symbolP);
   *input_line_pointer = c;
 
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   if (! is_end_of_line[(unsigned char) *input_line_pointer])
     {
@@ -16495,7 +16500,7 @@ md_section_align (asection *seg, valueT addr)
   if (align > 4)
     align = 4;
 
-  return ((addr + (1 << align) - 1) & (-1 << align));
+  return ((addr + (1 << align) - 1) & -(1 << align));
 }
 
 /* Utility routine, called from above as well.  If called while the
@@ -18662,6 +18667,11 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "1004kf2_1",      0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
   { "1004kf",         0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
   { "1004kf1_1",      0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  /* interaptiv is the new name for 1004kf */
+  { "interaptiv",     0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  /* M5100 family */
+  { "m5100",          0, ASE_MCU,		ISA_MIPS32R5, CPU_MIPS32R5 },
+  { "m5101",          0, ASE_MCU,		ISA_MIPS32R5, CPU_MIPS32R5 },
   /* P5600 with EVA and Virtualization ASEs, other ASEs are optional.  */
   { "p5600",          0, ASE_VIRT | ASE_EVA | ASE_XPA, 	ISA_MIPS32R5, CPU_MIPS32R5 },
 
@@ -18675,7 +18685,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "sb1",            0, ASE_MIPS3D | ASE_MDMX,	ISA_MIPS64,   CPU_SB1 },
   /* Broadcom SB-1A CPU core */
   { "sb1a",           0, ASE_MIPS3D | ASE_MDMX,	ISA_MIPS64,   CPU_SB1 },
-  
+
   { "loongson3a",     0, 0,			ISA_MIPS64R2, CPU_LOONGSON_3A },
 
   /* MIPS 64 Release 2 */
@@ -18915,7 +18925,7 @@ MIPS options:\n\
 -mno-micromips		do not generate microMIPS instructions\n"));
   fprintf (stream, _("\
 -msmartmips		generate smartmips instructions\n\
--mno-smartmips		do not generate smartmips instructions\n"));  
+-mno-smartmips		do not generate smartmips instructions\n"));
   fprintf (stream, _("\
 -mdsp			generate DSP instructions\n\
 -mno-dsp		do not generate DSP instructions\n"));

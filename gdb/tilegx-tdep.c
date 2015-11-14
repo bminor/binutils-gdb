@@ -333,7 +333,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
 
       typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
       slacklen = align_up (typelen, 8) - typelen;
-      val = xmalloc (typelen + slacklen);
+      val = (gdb_byte *) xmalloc (typelen + slacklen);
       back_to = make_cleanup (xfree, val);
       memcpy (val, contents, typelen);
       memset (val + typelen, 0, slacklen);
@@ -437,7 +437,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 	  status = safe_frame_unwind_memory (next_frame, instbuf_start,
 					     instbuf, instbuf_size);
 	  if (status == 0)
-	    memory_error (status, next_addr);
+	    memory_error (TARGET_XFER_E_IO, next_addr);
 	}
 
       reverse_frame_valid = 0;
@@ -869,7 +869,7 @@ tilegx_frame_cache (struct frame_info *this_frame, void **this_cache)
   int i;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct tilegx_frame_cache *) *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct tilegx_frame_cache);
   *this_cache = cache;

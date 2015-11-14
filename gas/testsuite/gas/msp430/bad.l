@@ -7,8 +7,9 @@
 [^:]*:11: Error: instruction bis.a does not exist
 [^:]*:19: Warning: a NOP might be needed here because of successive changes in interrupt state
 [^:]*:20: Warning: a NOP might be needed here because of successive changes in interrupt state
+[^:]*:23: Warning: a NOP might be needed here because of successive changes in interrupt state
 [^:]*:25: Warning: a NOP might be needed here because of successive changes in interrupt state
 [^:]*:26: Warning: a NOP might be needed here because of successive changes in interrupt state
 [^:]*:27: Warning: a NOP might be needed here because of successive changes in interrupt state
 [^:]*:28: Warning: a NOP might be needed here because of successive changes in interrupt state
-[^:]*: Warning: assembly finished with the last instruction changing interrupt state - a NOP might be needed
+[^:]*: Warning: assembly finished without a possibly needed NOP instruction

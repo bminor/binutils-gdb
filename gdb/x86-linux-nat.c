@@ -21,7 +21,7 @@
 #include "inferior.h"
 #include "elf/common.h"
 #include "gdb_proc_service.h"
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/user.h>
 #include <sys/procfs.h>
 #include <sys/uio.h>
@@ -264,12 +264,6 @@ x86_linux_enable_btrace (struct target_ops *self, ptid_t ptid,
     error (_("Could not enable branch tracing for %s: %s."),
 	   target_pid_to_str (ptid), safe_strerror (errno));
 
-  /* Fill in the size of a pointer in bits.  */
-  if (tinfo->ptr_bits == 0)
-    {
-      gdbarch = target_thread_architecture (ptid);
-      tinfo->ptr_bits = gdbarch_ptr_bit (gdbarch);
-    }
   return tinfo;
 }
 

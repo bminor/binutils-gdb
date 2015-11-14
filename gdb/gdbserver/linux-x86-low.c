@@ -25,6 +25,7 @@
 #include "i387-fp.h"
 #include "x86-low.h"
 #include "x86-xstate.h"
+#include "nat/gdb_ptrace.h"
 
 #include "gdb_proc_service.h"
 /* Don't include elf/common.h if linux/elf.h got included by
@@ -117,7 +118,7 @@ static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 
 #include <sys/reg.h>
 #include <sys/procfs.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/uio.h>
 
 #ifndef PTRACE_GET_THREAD_AREA
@@ -462,7 +463,7 @@ static struct regset_info x86_regsets[] =
     FP_REGS,
     x86_fill_fpregset, x86_store_fpregset },
 #endif /* HAVE_PTRACE_GETREGS */
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static CORE_ADDR
@@ -501,7 +502,7 @@ x86_set_pc (struct regcache *regcache, CORE_ADDR pc)
     }
 }
 
-static const unsigned char x86_breakpoint[] = { 0xCC };
+static const gdb_byte x86_breakpoint[] = { 0xCC };
 #define x86_breakpoint_len 1
 
 static int
@@ -1140,9 +1141,6 @@ int have_ptrace_getfpxregs =
   0
 #endif
 ;
-
-/* Does the current host support PTRACE_GETREGSET?  */
-static int have_ptrace_getregset = -1;
 
 /* Get Linux/x86 target description from running target.  */
 
@@ -3245,6 +3243,15 @@ x86_emit_ops (void)
     return &i386_emit_ops;
 }
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+x86_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = x86_breakpoint_len;
+  return x86_breakpoint;
+}
+
 static int
 x86_supports_range_stepping (void)
 {
@@ -3263,8 +3270,8 @@ struct linux_target_ops the_low_target =
   NULL, /* fetch_register */
   x86_get_pc,
   x86_set_pc,
-  x86_breakpoint,
-  x86_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  x86_sw_breakpoint_from_kind,
   NULL,
   1,
   x86_breakpoint_at,
@@ -3307,7 +3314,7 @@ initialize_low_arch (void)
   init_registers_x32_avx_linux ();
   init_registers_x32_avx512_linux ();
 
-  tdesc_amd64_linux_no_xml = xmalloc (sizeof (struct target_desc));
+  tdesc_amd64_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_amd64_linux_no_xml, tdesc_amd64_linux);
   tdesc_amd64_linux_no_xml->xmltarget = xmltarget_amd64_linux_no_xml;
 #endif
@@ -3317,7 +3324,7 @@ initialize_low_arch (void)
   init_registers_i386_avx512_linux ();
   init_registers_i386_mpx_linux ();
 
-  tdesc_i386_linux_no_xml = xmalloc (sizeof (struct target_desc));
+  tdesc_i386_linux_no_xml = XNEW (struct target_desc);
   copy_target_description (tdesc_i386_linux_no_xml, tdesc_i386_linux);
   tdesc_i386_linux_no_xml->xmltarget = xmltarget_i386_linux_no_xml;
 

@@ -487,7 +487,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  write_exp_elt_type (pstate,
 					      parse_f_type (pstate)
 					      ->builtin_integer);
-			  CHECK_TYPEDEF ($3);
+			  $3 = check_typedef ($3);
 			  write_exp_elt_longcst (pstate,
 						 (LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (pstate, OP_LONG); }
@@ -509,23 +509,20 @@ exp	:	STRING_LITERAL
 	;
 
 variable:	name_not_typename
-			{ struct symbol *sym = $1.sym;
+			{ struct block_symbol sym = $1.sym;
 
-			  if (sym)
+			  if (sym.symbol)
 			    {
-			      if (symbol_read_needs_frame (sym))
+			      if (symbol_read_needs_frame (sym.symbol))
 				{
 				  if (innermost_block == 0
-				      || contained_in (block_found, 
+				      || contained_in (sym.block,
 						       innermost_block))
-				    innermost_block = block_found;
+				    innermost_block = sym.block;
 				}
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      /* We want to use the selected frame, not
-				 another more inner frame which happens to
-				 be in the same block.  */
-			      write_exp_elt_block (pstate, NULL);
-			      write_exp_elt_sym (pstate, sym);
+			      write_exp_elt_block (pstate, sym.block);
+			      write_exp_elt_sym (pstate, sym.symbol);
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			      break;
 			    }
@@ -859,7 +856,7 @@ static const struct token dot_ops[] =
   { ".GT.", GREATERTHAN, BINOP_END },
   { ".lt.", LESSTHAN, BINOP_END },
   { ".LT.", LESSTHAN, BINOP_END },
-  { NULL, 0, 0 }
+  { NULL, 0, BINOP_END }
 };
 
 struct f77_boolean_val 
@@ -894,7 +891,7 @@ static const struct token f77_keywords[] =
   { "sizeof", SIZEOF, BINOP_END },
   { "real_8", REAL_S8_KEYWORD, BINOP_END },
   { "real", REAL_KEYWORD, BINOP_END },
-  { NULL, 0, 0 }
+  { NULL, 0, BINOP_END }
 }; 
 
 /* Implementation of a dynamically expandable buffer for processing input
@@ -1198,7 +1195,7 @@ yylex (void)
      The caller is not constrained to care about the distinction.  */
   {
     char *tmp = copy_name (yylval.sval);
-    struct symbol *sym;
+    struct block_symbol result;
     struct field_of_this_result is_a_field_of_this;
     enum domain_enum_tag lookup_domains[] =
     {
@@ -1215,17 +1212,18 @@ yylex (void)
 	   way we can refer to it unconditionally below.  */
 	memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
 
-	sym = lookup_symbol (tmp, expression_context_block,
-			     lookup_domains[i],
-			     parse_language (pstate)->la_language
-			     == language_cplus ? &is_a_field_of_this : NULL);
-	if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+	result = lookup_symbol (tmp, expression_context_block,
+				lookup_domains[i],
+				parse_language (pstate)->la_language
+				== language_cplus
+				  ? &is_a_field_of_this : NULL);
+	if (result.symbol && SYMBOL_CLASS (result.symbol) == LOC_TYPEDEF)
 	  {
-	    yylval.tsym.type = SYMBOL_TYPE (sym);
+	    yylval.tsym.type = SYMBOL_TYPE (result.symbol);
 	    return TYPENAME;
 	  }
 
-	if (sym)
+	if (result.symbol)
 	  break;
       }
 
@@ -1238,7 +1236,7 @@ yylex (void)
     /* Input names that aren't symbols but ARE valid hex numbers,
        when the input radix permits them, can be names or numbers
        depending on the parse.  Note we support radixes > 16 here.  */
-    if (!sym
+    if (!result.symbol
 	&& ((tokstart[0] >= 'a' && tokstart[0] < 'a' + input_radix - 10)
 	    || (tokstart[0] >= 'A' && tokstart[0] < 'A' + input_radix - 10)))
       {
@@ -1246,14 +1244,14 @@ yylex (void)
 	hextype = parse_number (pstate, tokstart, namelen, 0, &newlval);
 	if (hextype == INT)
 	  {
-	    yylval.ssym.sym = sym;
+	    yylval.ssym.sym = result;
 	    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	    return NAME_OR_INT;
 	  }
       }
     
     /* Any other kind of symbol */
-    yylval.ssym.sym = sym;
+    yylval.ssym.sym = result;
     yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
     return NAME;
   }

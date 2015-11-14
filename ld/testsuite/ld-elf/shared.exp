@@ -273,6 +273,12 @@ set build_tests {
   {"Build libpr18458b.so"
    "-shared -Wl,-z,now tmpdir/libpr18458a.so" "-fPIC"
    {pr18458b.c} {} "libpr18458b.so"}
+  {"Build pr19073a.o"
+   "-r -nostdlib" ""
+   {pr19073.s} {} "pr19073a.o"}
+  {"Build libpr19073.so"
+   "-shared -Wl,--version-script=pr19073.map tmpdir/pr19073a.o" "-fPIC"
+   {dummy.c} {{readelf {--dyn-syms --wide} pr19073.rd}} "libpr19073.so"}
 }
 
 run_cc_link_tests $build_tests
@@ -528,6 +534,51 @@ if { [istarget *-*-linux*]
 	    "pr2404pie" \
 	    "pr2404.out" \
 	    "-fPIE" \
+	] \
+	[list \
+	    "Run pr18718" \
+	    "" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718" \
+	    "pass.out" \
+	    "-O2 -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIE (1)" \
+	    "-pie" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pie1" \
+	    "pass.out" \
+	    "-O2 -fPIE -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIE (2)" \
+	    "" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pie2" \
+	    "pass.out" \
+	    "-O2 -fPIE -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIC (1)" \
+	    "" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pic1" \
+	    "pass.out" \
+	    "-O2 -fPIC -I../bfd" \
+	] \
+	[list \
+	    "Run pr18718 with PIC (2)" \
+	    "-pie" \
+	    "" \
+	    { pr18718.c check-ptr-eq.c } \
+	    "pr18718pic2" \
+	    "pass.out" \
+	    "-O2 -fPIC -I../bfd" \
 	] \
     ]
 }

@@ -77,6 +77,15 @@ sh_set_pc (struct regcache *regcache, CORE_ADDR pc)
 static const unsigned short sh_breakpoint = 0xc3c3;
 #define sh_breakpoint_len 2
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+sh_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = sh_breakpoint_len;
+  return (const gdb_byte *) &sh_breakpoint;
+}
+
 static int
 sh_breakpoint_at (CORE_ADDR where)
 {
@@ -105,7 +114,7 @@ static void sh_fill_gregset (struct regcache *regcache, void *buf)
 
 static struct regset_info sh_regsets[] = {
   { 0, 0, 0, 0, GENERAL_REGS, sh_fill_gregset, NULL },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info sh_regsets_info =
@@ -148,8 +157,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   sh_get_pc,
   sh_set_pc,
-  (const unsigned char *) &sh_breakpoint,
-  sh_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  sh_sw_breakpoint_from_kind,
   NULL,
   0,
   sh_breakpoint_at,

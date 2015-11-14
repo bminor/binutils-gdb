@@ -534,10 +534,10 @@ void
 ld_abort (const char *file, int line, const char *fn)
 {
   if (fn != NULL)
-    einfo (_("%P: internal error: aborting at %s line %d in %s\n"),
+    einfo (_("%P: internal error: aborting at %s:%d in %s\n"),
 	   file, line, fn);
   else
-    einfo (_("%P: internal error: aborting at %s line %d\n"),
+    einfo (_("%P: internal error: aborting at %s:%d\n"),
 	   file, line);
   einfo (_("%P%F: please report this bug\n"));
   xexit (1);

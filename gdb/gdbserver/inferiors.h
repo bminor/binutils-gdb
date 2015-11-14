@@ -33,6 +33,7 @@ struct inferior_list_entry
 };
 
 struct thread_info;
+struct regcache;
 struct target_desc;
 struct sym_cache;
 struct breakpoint;
@@ -127,6 +128,9 @@ void remove_inferior (struct inferior_list *list,
 
 struct inferior_list_entry *get_first_inferior (struct inferior_list *list);
 
+/* Return the first process in the processes list.  */
+struct process_info *get_first_process (void);
+
 struct process_info *add_process (int pid, int attached);
 void remove_process (struct process_info *process);
 struct process_info *find_process_pid (int pid);
@@ -147,7 +151,7 @@ struct inferior_list_entry *find_inferior_id (struct inferior_list *list,
 
 void *inferior_target_data (struct thread_info *);
 void set_inferior_target_data (struct thread_info *, void *);
-void *inferior_regcache_data (struct thread_info *);
-void set_inferior_regcache_data (struct thread_info *, void *);
+struct regcache *inferior_regcache_data (struct thread_info *);
+void set_inferior_regcache_data (struct thread_info *, struct regcache *);
 
 #endif /* INFERIORS_H */

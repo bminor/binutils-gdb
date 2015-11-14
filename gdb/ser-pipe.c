@@ -27,7 +27,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #include <fcntl.h>
 #include "filestuff.h"
 
@@ -148,7 +148,7 @@ pipe_open (struct serial *scb, const char *name)
 static void
 pipe_close (struct serial *scb)
 {
-  struct pipe_state *state = scb->state;
+  struct pipe_state *state = (struct pipe_state *) scb->state;
 
   close (scb->fd);
   scb->fd = -1;

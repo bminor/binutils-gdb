@@ -92,15 +92,6 @@ foreach nonstop { 0 1 } { with_test_prefix "non-stop $nonstop" {
 	}
     }
 
-    if $nonstop {
-	set test "non-stop interior stop"
-	gdb_test_multiple "" $test {
-	    -re " #1 stopped\\.\r\n" {
-		pass $test
-	    }
-	}
-    }
-
     gdb_test "continue" "Program received signal SIGUSR1, .*"
     gdb_test "sharedlibrary" ".*"
     gdb_test "p libvar" " = 23"

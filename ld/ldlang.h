@@ -592,7 +592,7 @@ extern void lang_process
 extern void ldlang_add_file
   (lang_input_statement_type *);
 extern lang_output_section_statement_type *lang_output_section_find_by_flags
-  (const asection *, lang_output_section_statement_type **,
+  (const asection *, flagword, lang_output_section_statement_type **,
    lang_match_sec_type_func);
 extern lang_output_section_statement_type *lang_insert_orphan
   (asection *, const char *, int, lang_output_section_statement_type *,
@@ -609,6 +609,8 @@ extern lang_output_section_statement_type *next_matching_output_section_statemen
   (lang_output_section_statement_type *, int);
 extern void ldlang_add_undef
   (const char *const, bfd_boolean);
+extern void ldlang_add_require_defined
+  (const char *const);
 extern void lang_add_output_format
   (const char *, const char *, const char *, int);
 extern void lang_list_init

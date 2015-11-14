@@ -241,13 +241,19 @@ struct language_defn
     void (*la_value_print) (struct value *, struct ui_file *,
 			    const struct value_print_options *);
 
-    /* Given a symbol VAR, and a stack frame id FRAME, read the value
-       of the variable an return (pointer to a) struct value containing
-       the value.
+    /* Given a symbol VAR, the corresponding block VAR_BLOCK (if any) and a
+       stack frame id FRAME, read the value of the variable and return (pointer
+       to a) struct value containing the value.
+
+       VAR_BLOCK is needed if there's a possibility for VAR to be outside
+       FRAME.  This is what happens if FRAME correspond to a nested function
+       and VAR is defined in the outer function.  If callers know that VAR is
+       located in FRAME or is global/static, NULL can be passed as VAR_BLOCK.
 
        Throw an error if the variable cannot be found.  */
 
     struct value *(*la_read_var_value) (struct symbol *var,
+					const struct block *var_block,
 					struct frame_info *frame);
 
     /* PC is possibly an unknown languages trampoline.
@@ -267,10 +273,11 @@ struct language_defn
        the part of symbol lookup where C looks up static and global
        variables.  */
 
-    struct symbol *(*la_lookup_symbol_nonlocal) (const struct language_defn *,
-						 const char *,
-						 const struct block *,
-						 const domain_enum);
+    struct block_symbol (*la_lookup_symbol_nonlocal)
+      (const struct language_defn *,
+       const char *,
+       const struct block *,
+       const domain_enum);
 
     /* Find the definition of the type with the given name.  */
     struct type *(*la_lookup_transparent_type) (const char *);
@@ -542,8 +549,6 @@ extern const char *language_str (enum language);
 /* Add a language to the set known by GDB (at initialization time).  */
 
 extern void add_language (const struct language_defn *);
-
-extern enum language get_frame_language (void);	/* In stack.c */
 
 /* Check for a language-specific trampoline.  */
 

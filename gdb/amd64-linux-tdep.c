@@ -995,7 +995,7 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
 
   case amd64_sys_arch_prctl:
   case amd64_x32_sys_arch_prctl:
-    return -1;	/* Note */
+    return gdb_sys_no_syscall;	/* Note */
 
   case amd64_sys_adjtimex:
   case amd64_x32_sys_adjtimex:
@@ -1429,7 +1429,7 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
     return gdb_sys_move_pages;
 
   default:
-    return -1;
+    return gdb_sys_no_syscall;
   }
 }
 
@@ -1451,7 +1451,7 @@ amd64_linux_syscall_record_common (struct regcache *regcache,
 {
   int ret;
   ULONGEST syscall_native;
-  enum gdb_syscall syscall_gdb = -1;
+  enum gdb_syscall syscall_gdb = gdb_sys_no_syscall;
 
   regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &syscall_native);
 
@@ -1486,9 +1486,10 @@ amd64_linux_syscall_record_common (struct regcache *regcache,
       break;
     }
 
-  syscall_gdb = amd64_canonicalize_syscall (syscall_native);
+  syscall_gdb
+    = amd64_canonicalize_syscall ((enum amd64_syscall) syscall_native);
 
-  if (syscall_gdb < 0)
+  if (syscall_gdb == gdb_sys_no_syscall)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
                            "support syscall number %s\n"), 
@@ -1844,7 +1845,8 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct target_desc *tdesc = info.target_desc;
-  struct tdesc_arch_data *tdesc_data = (void *) info.tdep_info;
+  struct tdesc_arch_data *tdesc_data
+    = (struct tdesc_arch_data *) info.tdep_info;
   const struct tdesc_feature *feature;
   int valid_p;
 
@@ -1888,10 +1890,10 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_linux_record_tdep.size_ustat = 32;
   /* ADM64 doesn't need this size because it doesn't have sys_sigaction
      but sys_rt_sigaction.  */
-  amd64_linux_record_tdep.size_old_sigaction = 152;
+  amd64_linux_record_tdep.size_old_sigaction = 32;
   /* ADM64 doesn't need this size because it doesn't have sys_sigpending
      but sys_rt_sigpending.  */
-  amd64_linux_record_tdep.size_old_sigset_t = 128;
+  amd64_linux_record_tdep.size_old_sigset_t = 8;
   amd64_linux_record_tdep.size_rlimit = 16;
   amd64_linux_record_tdep.size_rusage = 144;
   amd64_linux_record_tdep.size_timeval = 16;
@@ -1903,8 +1905,8 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      but sys_getresuid.  */
   amd64_linux_record_tdep.size_old_uid_t = 2;
   amd64_linux_record_tdep.size_fd_set = 128;
-  amd64_linux_record_tdep.size_dirent = 280;
-  amd64_linux_record_tdep.size_dirent64 = 280;
+  /* ADM64 doesn't need this size because it doesn't have sys_readdir. */
+  amd64_linux_record_tdep.size_old_dirent = 280;
   amd64_linux_record_tdep.size_statfs = 120;
   amd64_linux_record_tdep.size_statfs64 = 120;
   amd64_linux_record_tdep.size_sockaddr = 16;
@@ -1931,8 +1933,8 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_linux_record_tdep.size_NFS_FHSIZE = 32;
   amd64_linux_record_tdep.size_knfsd_fh = 132;
   amd64_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  amd64_linux_record_tdep.size_sigaction = 152;
-  amd64_linux_record_tdep.size_sigset_t = 128;
+  amd64_linux_record_tdep.size_sigaction = 32;
+  amd64_linux_record_tdep.size_sigset_t = 8;
   amd64_linux_record_tdep.size_siginfo_t = 128;
   amd64_linux_record_tdep.size_cap_user_data_t = 8;
   amd64_linux_record_tdep.size_stack_t = 24;
@@ -1948,8 +1950,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_linux_record_tdep.size_epoll_event = 12;
   amd64_linux_record_tdep.size_itimerspec = 32;
   amd64_linux_record_tdep.size_mq_attr = 64;
-  amd64_linux_record_tdep.size_siginfo = 128;
-  amd64_linux_record_tdep.size_termios = 60;
+  amd64_linux_record_tdep.size_termios = 36;
   amd64_linux_record_tdep.size_termios2 = 44;
   amd64_linux_record_tdep.size_pid_t = 4;
   amd64_linux_record_tdep.size_winsize = 8;
@@ -1958,6 +1959,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_linux_record_tdep.size_hayes_esp_config = 12;
   amd64_linux_record_tdep.size_size_t = 8;
   amd64_linux_record_tdep.size_iovec = 16;
+  amd64_linux_record_tdep.size_time_t = 8;
 
   /* These values are the second argument of system call "sys_fcntl"
      and "sys_fcntl64".  They are obtained from Linux Kernel source.  */
@@ -2056,11 +2058,12 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 static void
-amd64_x32_linux_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
+amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct target_desc *tdesc = info.target_desc;
-  struct tdesc_arch_data *tdesc_data = (void *) info.tdep_info;
+  struct tdesc_arch_data *tdesc_data
+    = (struct tdesc_arch_data *) info.tdep_info;
   const struct tdesc_feature *feature;
   int valid_p;
 
@@ -2104,10 +2107,10 @@ amd64_x32_linux_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_x32_linux_record_tdep.size_ustat = 32;
   /* ADM64 doesn't need this size because it doesn't have sys_sigaction
      but sys_rt_sigaction.  */
-  amd64_x32_linux_record_tdep.size_old_sigaction = 152;
+  amd64_x32_linux_record_tdep.size_old_sigaction = 16;
   /* ADM64 doesn't need this size because it doesn't have sys_sigpending
      but sys_rt_sigpending.  */
-  amd64_x32_linux_record_tdep.size_old_sigset_t = 128;
+  amd64_x32_linux_record_tdep.size_old_sigset_t = 4;
   amd64_x32_linux_record_tdep.size_rlimit = 16;
   amd64_x32_linux_record_tdep.size_rusage = 144;
   amd64_x32_linux_record_tdep.size_timeval = 16;
@@ -2119,8 +2122,8 @@ amd64_x32_linux_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
      but sys_getresuid.  */
   amd64_x32_linux_record_tdep.size_old_uid_t = 2;
   amd64_x32_linux_record_tdep.size_fd_set = 128;
-  amd64_x32_linux_record_tdep.size_dirent = 280;
-  amd64_x32_linux_record_tdep.size_dirent64 = 280;
+  /* ADM64 doesn't need this size because it doesn't have sys_readdir. */
+  amd64_x32_linux_record_tdep.size_old_dirent = 268;
   amd64_x32_linux_record_tdep.size_statfs = 120;
   amd64_x32_linux_record_tdep.size_statfs64 = 120;
   amd64_x32_linux_record_tdep.size_sockaddr = 16;
@@ -2130,7 +2133,7 @@ amd64_x32_linux_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
     = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   amd64_x32_linux_record_tdep.size_ulong
     = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
-  amd64_x32_linux_record_tdep.size_msghdr = 56;
+  amd64_x32_linux_record_tdep.size_msghdr = 28;
   amd64_x32_linux_record_tdep.size_itimerval = 32;
   amd64_x32_linux_record_tdep.size_stat = 144;
   amd64_x32_linux_record_tdep.size_old_utsname = 325;
@@ -2147,11 +2150,11 @@ amd64_x32_linux_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_x32_linux_record_tdep.size_NFS_FHSIZE = 32;
   amd64_x32_linux_record_tdep.size_knfsd_fh = 132;
   amd64_x32_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  amd64_x32_linux_record_tdep.size_sigaction = 152;
-  amd64_x32_linux_record_tdep.size_sigset_t = 128;
+  amd64_x32_linux_record_tdep.size_sigaction = 20;
+  amd64_x32_linux_record_tdep.size_sigset_t = 8;
   amd64_x32_linux_record_tdep.size_siginfo_t = 128;
   amd64_x32_linux_record_tdep.size_cap_user_data_t = 8;
-  amd64_x32_linux_record_tdep.size_stack_t = 24;
+  amd64_x32_linux_record_tdep.size_stack_t = 12;
   amd64_x32_linux_record_tdep.size_off_t = 8;
   amd64_x32_linux_record_tdep.size_stat64 = 144;
   amd64_x32_linux_record_tdep.size_gid_t = 4;
@@ -2164,16 +2167,16 @@ amd64_x32_linux_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
   amd64_x32_linux_record_tdep.size_epoll_event = 12;
   amd64_x32_linux_record_tdep.size_itimerspec = 32;
   amd64_x32_linux_record_tdep.size_mq_attr = 64;
-  amd64_x32_linux_record_tdep.size_siginfo = 128;
-  amd64_x32_linux_record_tdep.size_termios = 60;
+  amd64_x32_linux_record_tdep.size_termios = 36;
   amd64_x32_linux_record_tdep.size_termios2 = 44;
   amd64_x32_linux_record_tdep.size_pid_t = 4;
   amd64_x32_linux_record_tdep.size_winsize = 8;
   amd64_x32_linux_record_tdep.size_serial_struct = 72;
   amd64_x32_linux_record_tdep.size_serial_icounter_struct = 80;
   amd64_x32_linux_record_tdep.size_hayes_esp_config = 12;
-  amd64_x32_linux_record_tdep.size_size_t = 8;
-  amd64_x32_linux_record_tdep.size_iovec = 16;
+  amd64_x32_linux_record_tdep.size_size_t = 4;
+  amd64_x32_linux_record_tdep.size_iovec = 8;
+  amd64_x32_linux_record_tdep.size_time_t = 8;
 
   /* These values are the second argument of system call "sys_fcntl"
      and "sys_fcntl64".  They are obtained from Linux Kernel source.  */

@@ -1892,6 +1892,21 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
 }
 
 #ifdef OBJ_ELF
+/* Emit BFD_RELOC_AARCH64_TLSDESC_ADD on the next ADD instruction.  */
+
+static void
+s_tlsdescadd (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+
+  expression (&exp);
+  frag_grow (4);
+  fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 4, &exp, 0,
+		   BFD_RELOC_AARCH64_TLSDESC_ADD);
+
+  demand_empty_rest_of_line ();
+}
+
 /* Emit BFD_RELOC_AARCH64_TLSDESC_CALL on the next BLR instruction.  */
 
 static void
@@ -1908,6 +1923,21 @@ s_tlsdesccall (int ignored ATTRIBUTE_UNUSED)
   frag_grow (4);
   fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 4, &exp, 0,
 		   BFD_RELOC_AARCH64_TLSDESC_CALL);
+
+  demand_empty_rest_of_line ();
+}
+
+/* Emit BFD_RELOC_AARCH64_TLSDESC_LDR on the next LDR instruction.  */
+
+static void
+s_tlsdescldr (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+
+  expression (&exp);
+  frag_grow (4);
+  fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 4, &exp, 0,
+		   BFD_RELOC_AARCH64_TLSDESC_LDR);
 
   demand_empty_rest_of_line ();
 }
@@ -1936,7 +1966,9 @@ const pseudo_typeS md_pseudo_table[] = {
   {"arch_extension", s_aarch64_arch_extension, 0},
   {"inst", s_aarch64_inst, 0},
 #ifdef OBJ_ELF
+  {"tlsdescadd", s_tlsdescadd, 0},
   {"tlsdesccall", s_tlsdesccall, 0},
+  {"tlsdescldr", s_tlsdescldr, 0},
   {"word", s_aarch64_elf_cons, 4},
   {"long", s_aarch64_elf_cons, 4},
   {"xword", s_aarch64_elf_cons, 8},
@@ -2455,6 +2487,24 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_LD_GOT_LO12_NC,
    0},
 
+  /* 0-15 bits of address/value: MOVk, no check.  */
+  {"gotoff_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 16-31 of address/value: MOVZ.  */
+  {"gotoff_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_MOVW_GOTOFF_G1,
+   0,
+   0,
+   0},
+
   /* 15 bit offset into the page containing GOT entry for that symbol.  */
   {"gotoff_lo15", 0,
    0,				/* adr_type */
@@ -2462,6 +2512,24 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0,
    BFD_RELOC_AARCH64_LD64_GOTOFF_LO15,
+   0},
+
+  /* Get to the page containing GOT TLS entry for a symbol */
+  {"gottprel_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC,
+   0,
+   0,
+   0},
+
+  /* Get to the page containing GOT TLS entry for a symbol */
+  {"gottprel_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1,
+   0,
+   0,
    0},
 
   /* Get to the page containing GOT TLS entry for a symbol */
@@ -2482,6 +2550,24 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0},
 
+  /* Lower 16 bits address/value: MOVk.  */
+  {"tlsgd_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC,
+   0,
+   0,
+   0},
+
+  /* Most significant bits 16-31 of address/value: MOVZ.  */
+  {"tlsgd_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSGD_MOVW_G1,
+   0,
+   0,
+   0},
+
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsdesc", 0,
    BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21, /* adr_type */
@@ -2498,6 +2584,118 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
    BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC,
+   0},
+
+  /* Get to the page containing GOT TLS entry for a symbol.
+     The same as GD, we allocate two consecutive GOT slots
+     for module index and module offset, the only difference
+     with GD is the module offset should be intialized to
+     zero without any outstanding runtime relocation. */
+  {"tlsldm", 0,
+   BFD_RELOC_AARCH64_TLSLD_ADR_PREL21, /* adr_type */
+   BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21,
+   0,
+   0,
+   0,
+   0},
+
+  /* 12 bit offset into the page containing GOT TLS entry for a symbol */
+  {"tlsldm_lo12_nc", 0,
+   0,				/* adr_type */
+   0,
+   0,
+   BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC,
+   0,
+   0},
+
+  /* 12 bit offset into the module TLS base address.  */
+  {"dtprel_lo12", 0,
+   0,				/* adr_type */
+   0,
+   0,
+   BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12,
+   BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12,
+   0},
+
+  /* Same as dtprel_lo12, no overflow check.  */
+  {"dtprel_lo12_nc", 0,
+   0,				/* adr_type */
+   0,
+   0,
+   BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC,
+   BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC,
+   0},
+
+  /* bits[23:12] of offset to the module TLS base address.  */
+  {"dtprel_hi12", 0,
+   0,				/* adr_type */
+   0,
+   0,
+   BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12,
+   0,
+   0},
+
+  /* bits[15:0] of offset to the module TLS base address.  */
+  {"dtprel_g0", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0,
+   0,
+   0,
+   0},
+
+  /* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0.  */
+  {"dtprel_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC,
+   0,
+   0,
+   0},
+
+  /* bits[31:16] of offset to the module TLS base address.  */
+  {"dtprel_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1,
+   0,
+   0,
+   0},
+
+  /* No overflow check version of BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1.  */
+  {"dtprel_g1_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC,
+   0,
+   0,
+   0},
+
+  /* bits[47:32] of offset to the module TLS base address.  */
+  {"dtprel_g2", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2,
+   0,
+   0,
+   0},
+
+  /* Lower 16 bit offset into GOT entry for a symbol */
+  {"tlsdesc_off_g0_nc", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC,
+   0,
+   0,
+   0},
+
+  /* Higher 16 bit offset into GOT entry for a symbol */
+  {"tlsdesc_off_g1", 0,
+   0,				/* adr_type */
+   0,
+   BFD_RELOC_AARCH64_TLSDESC_OFF_G1,
+   0,
+   0,
    0},
 
   /* Get to the page containing GOT TLS entry for a symbol */
@@ -4558,6 +4756,7 @@ process_movw_reloc_info (void)
       case BFD_RELOC_AARCH64_MOVW_G0_S:
       case BFD_RELOC_AARCH64_MOVW_G1_S:
       case BFD_RELOC_AARCH64_MOVW_G2_S:
+      case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
       case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
@@ -4573,6 +4772,12 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G0:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
       shift = 0;
@@ -4580,6 +4785,12 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G1:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
       shift = 16;
@@ -4587,6 +4798,7 @@ process_movw_reloc_info (void)
     case BFD_RELOC_AARCH64_MOVW_G2:
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
     case BFD_RELOC_AARCH64_MOVW_G2_S:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
     case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
       if (is32)
 	{
@@ -4640,17 +4852,38 @@ get_logsz (unsigned int size)
 static inline bfd_reloc_code_real_type
 ldst_lo12_determine_real_reloc_type (void)
 {
-  int logsz;
+  unsigned logsz;
   enum aarch64_opnd_qualifier opd0_qlf = inst.base.operands[0].qualifier;
   enum aarch64_opnd_qualifier opd1_qlf = inst.base.operands[1].qualifier;
 
-  const bfd_reloc_code_real_type reloc_ldst_lo12[5] = {
-      BFD_RELOC_AARCH64_LDST8_LO12, BFD_RELOC_AARCH64_LDST16_LO12,
-      BFD_RELOC_AARCH64_LDST32_LO12, BFD_RELOC_AARCH64_LDST64_LO12,
+  const bfd_reloc_code_real_type reloc_ldst_lo12[3][5] = {
+    {
+      BFD_RELOC_AARCH64_LDST8_LO12,
+      BFD_RELOC_AARCH64_LDST16_LO12,
+      BFD_RELOC_AARCH64_LDST32_LO12,
+      BFD_RELOC_AARCH64_LDST64_LO12,
       BFD_RELOC_AARCH64_LDST128_LO12
+    },
+    {
+      BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12,
+      BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12,
+      BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12,
+      BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12,
+      BFD_RELOC_AARCH64_NONE
+    },
+    {
+      BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC,
+      BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC,
+      BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC,
+      BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC,
+      BFD_RELOC_AARCH64_NONE
+    }
   };
 
-  gas_assert (inst.reloc.type == BFD_RELOC_AARCH64_LDST_LO12);
+  gas_assert (inst.reloc.type == BFD_RELOC_AARCH64_LDST_LO12
+	      || inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12
+	      || (inst.reloc.type
+		  == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC));
   gas_assert (inst.base.opcode->operands[1] == AARCH64_OPND_ADDR_UIMM12);
 
   if (opd1_qlf == AARCH64_OPND_QLF_NIL)
@@ -4660,9 +4893,16 @@ ldst_lo12_determine_real_reloc_type (void)
   gas_assert (opd1_qlf != AARCH64_OPND_QLF_NIL);
 
   logsz = get_logsz (aarch64_get_qualifier_esize (opd1_qlf));
-  gas_assert (logsz >= 0 && logsz <= 4);
+  if (inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12
+      || inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC)
+    gas_assert (logsz <= 3);
+  else
+    gas_assert (logsz <= 4);
 
-  return reloc_ldst_lo12[logsz];
+  /* In reloc.c, these pseudo relocation types should be defined in similar
+     order as above reloc_ldst_lo12 array. Because the array index calcuation
+     below relies on this.  */
+  return reloc_ldst_lo12[inst.reloc.type - BFD_RELOC_AARCH64_LDST_LO12][logsz];
 }
 
 /* Check whether a register list REGINFO is valid.  The registers must be
@@ -5298,7 +5538,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  if (inst.reloc.type == BFD_RELOC_UNUSED)
 	    aarch64_set_gas_internal_fixup (&inst.reloc, info, 1);
-	  else if (inst.reloc.type == BFD_RELOC_AARCH64_LDST_LO12)
+	  else if (inst.reloc.type == BFD_RELOC_AARCH64_LDST_LO12
+		   || (inst.reloc.type
+		       == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12)
+		   || (inst.reloc.type
+		       == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC))
 	    inst.reloc.type = ldst_lo12_determine_real_reloc_type ();
 	  /* Leave qualifier to be determined by libopcodes.  */
 	  break;
@@ -6658,12 +6902,30 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_MOVW_G0:
     case BFD_RELOC_AARCH64_MOVW_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_G0_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
       scale = 0;
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G1:
     case BFD_RELOC_AARCH64_MOVW_G1_NC:
     case BFD_RELOC_AARCH64_MOVW_G1_S:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
       scale = 16;
+      goto movw_common;
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
+      scale = 0;
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* Should always be exported to object file, see
+	 aarch64_force_relocation().  */
+      gas_assert (!fixP->fx_done);
+      gas_assert (seg->use_rela_p);
+      goto movw_common;
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
+      scale = 16;
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* Should always be exported to object file, see
+	 aarch64_force_relocation().  */
+      gas_assert (!fixP->fx_done);
+      gas_assert (seg->use_rela_p);
       goto movw_common;
     case BFD_RELOC_AARCH64_MOVW_G2:
     case BFD_RELOC_AARCH64_MOVW_G2_NC:
@@ -6693,6 +6955,8 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 		case BFD_RELOC_AARCH64_MOVW_G1:
 		case BFD_RELOC_AARCH64_MOVW_G2:
 		case BFD_RELOC_AARCH64_MOVW_G3:
+		case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+		case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
 		  if (unsigned_overflow (value, scale + 16))
 		    as_bad_where (fixP->fx_file, fixP->fx_line,
 				  _("unsigned value out of range"));
@@ -6761,10 +7025,33 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -6967,13 +7254,38 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
+   case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -6997,6 +7309,11 @@ aarch64_force_relocation (struct fix *fixp)
 const char *
 elf64_aarch64_target_format (void)
 {
+  if (strcmp (TARGET_OS, "cloudabi") == 0)
+    {
+      /* FIXME: What to do for ilp32_p ?  */
+      return target_big_endian ? "elf64-bigaarch64-cloudabi" : "elf64-littleaarch64-cloudabi";
+    }
   if (target_big_endian)
     return ilp32_p ? "elf32-bigaarch64" : "elf64-bigaarch64";
   else
@@ -7199,24 +7516,24 @@ md_begin (void)
 			 aarch64_pstatefields[i].name,
 			 (void *) (aarch64_pstatefields + i));
 
-  for (i = 0; aarch64_sys_regs_ic[i].template != NULL; i++)
+  for (i = 0; aarch64_sys_regs_ic[i].name != NULL; i++)
     checked_hash_insert (aarch64_sys_regs_ic_hsh,
-			 aarch64_sys_regs_ic[i].template,
+			 aarch64_sys_regs_ic[i].name,
 			 (void *) (aarch64_sys_regs_ic + i));
 
-  for (i = 0; aarch64_sys_regs_dc[i].template != NULL; i++)
+  for (i = 0; aarch64_sys_regs_dc[i].name != NULL; i++)
     checked_hash_insert (aarch64_sys_regs_dc_hsh,
-			 aarch64_sys_regs_dc[i].template,
+			 aarch64_sys_regs_dc[i].name,
 			 (void *) (aarch64_sys_regs_dc + i));
 
-  for (i = 0; aarch64_sys_regs_at[i].template != NULL; i++)
+  for (i = 0; aarch64_sys_regs_at[i].name != NULL; i++)
     checked_hash_insert (aarch64_sys_regs_at_hsh,
-			 aarch64_sys_regs_at[i].template,
+			 aarch64_sys_regs_at[i].name,
 			 (void *) (aarch64_sys_regs_at + i));
 
-  for (i = 0; aarch64_sys_regs_tlbi[i].template != NULL; i++)
+  for (i = 0; aarch64_sys_regs_tlbi[i].name != NULL; i++)
     checked_hash_insert (aarch64_sys_regs_tlbi_hsh,
-			 aarch64_sys_regs_tlbi[i].template,
+			 aarch64_sys_regs_tlbi[i].name,
 			 (void *) (aarch64_sys_regs_tlbi + i));
 
   for (i = 0; i < ARRAY_SIZE (reg_names); i++)
@@ -7359,6 +7676,8 @@ struct aarch64_cpu_option_table
    recognized by GCC.  */
 static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"all", AARCH64_ANY, NULL},
+  {"cortex-a35", AARCH64_FEATURE (AARCH64_ARCH_V8,
+				  AARCH64_FEATURE_CRC), "Cortex-A35"},
   {"cortex-a53", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				  AARCH64_FEATURE_CRC), "Cortex-A53"},
   {"cortex-a57", AARCH64_FEATURE (AARCH64_ARCH_V8,
@@ -7368,6 +7687,9 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"exynos-m1", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				 AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
 				"Samsung Exynos M1"},
+  {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8,
+			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
+   "Qualcomm QDF24XX"},
   {"thunderx", AARCH64_FEATURE (AARCH64_ARCH_V8,
 				AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO),
    "Cavium ThunderX"},

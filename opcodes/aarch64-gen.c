@@ -209,7 +209,7 @@ static int max_num_opcodes_at_leaf_node = 0;
    is decided to be undividable and OPCODE will be assigned to BITTREE->LIST.
 
    The function recursively call itself until OPCODE is undividable.
-   
+
    N.B. the nature of this algrithm determines that given any value in the
    32-bit space, the computed decision tree will always be able to find one or
    more opcodes entries for it, regardless whether there is a valid instruction

@@ -1092,10 +1092,12 @@ mn10300_analyze_frame_prologue (struct frame_info *this_frame,
         stop_addr = func_start;
 
       mn10300_analyze_prologue (get_frame_arch (this_frame),
-                                func_start, stop_addr, *this_prologue_cache);
+				func_start, stop_addr,
+				((struct mn10300_prologue *)
+				 *this_prologue_cache));
     }
 
-  return *this_prologue_cache;
+  return (struct mn10300_prologue *) *this_prologue_cache;
 }
 
 /* Given the next frame and a prologue cache, return this frame's
@@ -1383,10 +1385,7 @@ mn10300_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2)
 
   if (dwarf2 < 0
       || dwarf2 >= ARRAY_SIZE (dwarf2_to_gdb))
-    {
-      warning (_("Bogus register number in debug info: %d"), dwarf2);
-      return -1;
-    }
+    return -1;
 
   return dwarf2_to_gdb[dwarf2];
 }
@@ -1403,7 +1402,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  tdep = XNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   switch (info.bfd_arch_info->mach)

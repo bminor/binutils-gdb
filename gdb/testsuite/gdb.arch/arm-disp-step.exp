@@ -17,7 +17,7 @@
 
 # Test arm displaced stepping.
 
-if {![istarget "arm*-*-*"]} then {
+if {![is_aarch32_target]} then {
     verbose "Skipping arm displaced stepping tests."
     return
 }

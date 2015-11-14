@@ -594,6 +594,11 @@ class Target_x86_64 : public Sized_target<size, false>
   unsigned int
   plt_entry_size() const;
 
+  // Return the size of each GOT entry.
+  unsigned int
+  got_entry_size() const
+  { return 8; };
+
   // Create the GOT section for an incremental update.
   Output_data_got_base*
   init_got_plt_for_update(Symbol_table* symtab,
@@ -963,10 +968,13 @@ class Target_x86_64 : public Sized_target<size, false>
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rela<size, false>& reloc)
   {
+    unsigned int r_type = elfcpp::elf_r_type<size>(reloc.get_r_info());
     this->copy_relocs_.copy_reloc(symtab, layout,
 				  symtab->get_sized_symbol<size>(sym),
 				  object, shndx, output_section,
-				  reloc, this->rela_dyn_section(layout));
+				  r_type, reloc.get_r_offset(),
+				  reloc.get_r_addend(),
+				  this->rela_dyn_section(layout));
   }
 
   // Information about this specific target which we pass to the
@@ -1052,7 +1060,8 @@ const Target::Target_info Target_x86_64<64>::x86_64_info =
   elfcpp::SHF_X86_64_LARGE,	// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 template<>
@@ -1079,7 +1088,8 @@ const Target::Target_info Target_x86_64<32>::x86_64_info =
   elfcpp::SHF_X86_64_LARGE,	// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 // This is called when a new output section is created.  This is where
@@ -2191,6 +2201,8 @@ Target_x86_64<size>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       // Absolute in GOT.
       return Symbol::ABSOLUTE_REF;
@@ -2475,6 +2487,8 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       {
 	// The symbol requires a GOT section.
@@ -2485,7 +2499,9 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	// mov foo@GOTPCREL(%rip), %reg
 	// to lea foo(%rip), %reg.
 	// in Relocate::relocate.
-	if (r_type == elfcpp::R_X86_64_GOTPCREL
+	if ((r_type == elfcpp::R_X86_64_GOTPCREL
+	     || r_type == elfcpp::R_X86_64_GOTPCRELX
+	     || r_type == elfcpp::R_X86_64_REX_GOTPCRELX)
 	    && reloc.get_r_offset() >= 2
 	    && !is_ifunc)
 	  {
@@ -2713,6 +2729,8 @@ Target_x86_64<size>::Scan::possible_function_pointer_reloc(unsigned int r_type)
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       {
 	return true;
@@ -2901,6 +2919,8 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       {
 	// The symbol requires a GOT entry.
@@ -2910,7 +2930,9 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 	// mov foo@GOTPCREL(%rip), %reg
 	// to lea foo(%rip), %reg.
 	// in Relocate::relocate, then there is nothing to do here.
-	if (r_type == elfcpp::R_X86_64_GOTPCREL
+	if ((r_type == elfcpp::R_X86_64_GOTPCREL
+	     || r_type == elfcpp::R_X86_64_GOTPCRELX
+	     || r_type == elfcpp::R_X86_64_REX_GOTPCRELX)
 	    && reloc.get_r_offset() >= 2
 	    && Target_x86_64<size>::can_convert_mov_to_lea(gsym))
 	  {
@@ -3538,6 +3560,8 @@ Target_x86_64<size>::Relocate::relocate(
       break;
 
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
       {
       // Convert
       // mov foo@GOTPCREL(%rip), %reg
@@ -4320,6 +4344,8 @@ Target_x86_64<size>::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_X86_64_GOT64:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPCRELX:
+    case elfcpp::R_X86_64_REX_GOTPCRELX:
     case elfcpp::R_X86_64_GOTPLT64:
       return 8;
 
@@ -4802,7 +4828,8 @@ const Target::Target_info Target_x86_64_nacl<64>::x86_64_nacl_info =
   elfcpp::SHF_X86_64_LARGE,	// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 template<>
@@ -4829,7 +4856,8 @@ const Target::Target_info Target_x86_64_nacl<32>::x86_64_nacl_info =
   elfcpp::SHF_X86_64_LARGE,	// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 #define	NACLMASK	0xe0            // 32-byte alignment mask.

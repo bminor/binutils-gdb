@@ -20,6 +20,29 @@
 
 
 #
+# Program counter / stack pointer / frame pointer for supported targets.
+# Used in many tests, kept here to avoid duplication.
+#
+
+if [is_amd64_regs_target] {
+    set fpreg "rbp"
+    set spreg "rsp"
+    set pcreg "rip"
+} elseif [is_x86_like_target] {
+    set fpreg "ebp"
+    set spreg "esp"
+    set pcreg "eip"
+} elseif [is_aarch64_target] {
+    set fpreg "x29"
+    set spreg "sp"
+    set pcreg "pc"
+} else {
+    set fpreg "fp"
+    set spreg "sp"
+    set pcreg "pc"
+}
+
+#
 # Procedure: gdb_target_supports_trace
 # Returns true if GDB is connected to a target that supports tracing.
 # Allows tests to abort early if not running on a trace-aware target.

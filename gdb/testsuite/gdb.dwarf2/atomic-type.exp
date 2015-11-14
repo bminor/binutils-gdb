@@ -68,7 +68,7 @@ Dwarf::assemble $asm_file {
 
             DW_TAG_subprogram {
                 {name f}
-                {low_pc f addr}
+                {low_pc [gdb_target_symbol f] addr}
                 {high_pc f_end_lbl addr}
                 {type :$i_l}
             } {

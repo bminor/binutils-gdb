@@ -38,13 +38,13 @@ struct perf_event_buffer
   const uint8_t *mem;
 
   /* The size of the mapped memory in bytes.  */
-  unsigned long long size;
+  size_t size;
 
   /* A pointer to the data_head field for this buffer. */
-  volatile unsigned long long *data_head;
+  volatile __u64 *data_head;
 
   /* The data_head value from the last read.  */
-  unsigned long long last_head;
+  __u64 last_head;
 };
 
 /* Branch trace target information for BTS tracing.  */
@@ -61,6 +61,22 @@ struct btrace_tinfo_bts
 
   /* The BTS perf event buffer.  */
   struct perf_event_buffer bts;
+};
+
+/* Branch trace target information for Intel(R) Processor Trace.  */
+struct btrace_tinfo_pt
+{
+  /* The Linux perf_event configuration for collecting the branch trace.  */
+  struct perf_event_attr attr;
+
+  /* The perf event file.  */
+  int file;
+
+  /* The perf event configuration page. */
+  volatile struct perf_event_mmap_page *header;
+
+  /* The trace perf event buffer.  */
+  struct perf_event_buffer pt;
 };
 #endif /* HAVE_LINUX_PERF_EVENT_H */
 
@@ -79,13 +95,11 @@ struct btrace_target_info
   {
     /* CONF.FORMAT == BTRACE_FORMAT_BTS.  */
     struct btrace_tinfo_bts bts;
+
+    /* CONF.FORMAT == BTRACE_FORMAT_PT.  */
+    struct btrace_tinfo_pt pt;
   } variant;
 #endif /* HAVE_LINUX_PERF_EVENT_H */
-
-  /* The size of a pointer in bits for this thread.
-     The information is used to identify kernel addresses in order to skip
-     records from/to kernel space.  */
-  int ptr_bits;
 };
 
 /* See to_supports_btrace in target.h.  */

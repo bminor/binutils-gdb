@@ -1,0 +1,4 @@
+2015-11-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* blinky.s: Moved from ../../../m32c/.
+	* gloss.s, sample.ld, sample.s, sample2.c: Likewise.

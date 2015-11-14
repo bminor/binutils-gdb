@@ -44,7 +44,7 @@ simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
                                  struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = xmalloc (len);
+  gdb_byte *buf = (gdb_byte *) xmalloc (len);
 
   read_memory (from, buf, len);
   write_memory (to, buf, len);
@@ -273,7 +273,7 @@ default_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
 
 /* Functions to manipulate the endianness of the target.  */
 
-static int target_byte_order_user = BFD_ENDIAN_UNKNOWN;
+static enum bfd_endian target_byte_order_user = BFD_ENDIAN_UNKNOWN;
 
 static const char endian_big[] = "big";
 static const char endian_little[] = "little";
@@ -603,7 +603,7 @@ static const bfd_target *default_bfd_vec = &DEFAULT_BFD_VEC;
 static const bfd_target *default_bfd_vec;
 #endif
 
-static int default_byte_order = BFD_ENDIAN_UNKNOWN;
+static enum bfd_endian default_byte_order = BFD_ENDIAN_UNKNOWN;
 
 void
 initialize_current_architecture (void)
@@ -684,7 +684,7 @@ initialize_current_architecture (void)
     /* Append ``auto''.  */
     int nr;
     for (nr = 0; arches[nr] != NULL; nr++);
-    arches = xrealloc (arches, sizeof (char*) * (nr + 2));
+    arches = XRESIZEVEC (const char *, arches, nr + 2);
     arches[nr + 0] = "auto";
     arches[nr + 1] = NULL;
     add_setshow_enum_cmd ("architecture", class_support,
@@ -795,8 +795,8 @@ default_has_shared_address_space (struct gdbarch *gdbarch)
 }
 
 int
-default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
-				  CORE_ADDR addr, int *isize, char **msg)
+default_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
+				  char **msg)
 {
   /* We don't know if maybe the target has some way to do fast
      tracepoints that doesn't need gdbarch, so always say yes.  */

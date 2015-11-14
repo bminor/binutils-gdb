@@ -39,8 +39,7 @@ struct linux_record_tdep
   int size_old_gid_t;
   int size_old_uid_t;
   int size_fd_set;
-  int size_dirent;
-  int size_dirent64;
+  int size_old_dirent;
   int size_statfs;
   int size_statfs64;
   int size_sockaddr;
@@ -81,7 +80,6 @@ struct linux_record_tdep
   int size_epoll_event;
   int size_itimerspec;
   int size_mq_attr;
-  int size_siginfo;
   int size_termios;
   int size_termios2;
   int size_pid_t;
@@ -91,6 +89,7 @@ struct linux_record_tdep
   int size_hayes_esp_config;
   int size_size_t;
   int size_iovec;
+  int size_time_t;
 
   /* The values of the second argument of system call "sys_ioctl".  */
   int ioctl_TCGETS;
@@ -182,6 +181,9 @@ struct linux_record_tdep
    each must provide a mapping from their set to this one.  */
 
 enum gdb_syscall {
+  /* An unknown GDB syscall, not a real syscall.  */
+  gdb_sys_no_syscall = -1,
+
   gdb_sys_restart_syscall = 0,
   gdb_sys_exit = 1,
   gdb_sys_fork = 2,

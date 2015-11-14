@@ -21,6 +21,7 @@
 #include "defs.h"
 
 #include "gdbarch.h"
+#include "arch-utils.h"
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
 #include "aarch64-tdep.h"
@@ -279,7 +280,7 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 	return 0;
 
       len = tmp - start;
-      regname = alloca (len + 2);
+      regname = (char *) alloca (len + 2);
 
       strncpy (regname, start, len);
       regname[len] = '\0';
@@ -871,7 +872,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (move_pages);
 
   default:
-    return -1;
+    return gdb_sys_no_syscall;
   }
 }
 
@@ -901,7 +902,8 @@ aarch64_linux_syscall_record (struct regcache *regcache,
   int ret = 0;
   enum gdb_syscall syscall_gdb;
 
-  syscall_gdb = aarch64_canonicalize_syscall (svc_number);
+  syscall_gdb =
+    aarch64_canonicalize_syscall ((enum aarch64_syscall) svc_number);
 
   if (syscall_gdb < 0)
     {
@@ -961,6 +963,7 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
   tramp_frame_prepend_unwinder (gdbarch, &aarch64_linux_rt_sigframe);
 
@@ -997,8 +1000,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_flock = 32;
   aarch64_linux_record_tdep.size_oldold_utsname = 45;
   aarch64_linux_record_tdep.size_ustat = 32;
-  aarch64_linux_record_tdep.size_old_sigaction = 152;
-  aarch64_linux_record_tdep.size_old_sigset_t = 128;
+  aarch64_linux_record_tdep.size_old_sigaction = 32;
+  aarch64_linux_record_tdep.size_old_sigset_t = 8;
   aarch64_linux_record_tdep.size_rlimit = 16;
   aarch64_linux_record_tdep.size_rusage = 144;
   aarch64_linux_record_tdep.size_timeval = 16;
@@ -1006,8 +1009,7 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_old_gid_t = 2;
   aarch64_linux_record_tdep.size_old_uid_t = 2;
   aarch64_linux_record_tdep.size_fd_set = 128;
-  aarch64_linux_record_tdep.size_dirent = 280;
-  aarch64_linux_record_tdep.size_dirent64 = 280;
+  aarch64_linux_record_tdep.size_old_dirent = 280;
   aarch64_linux_record_tdep.size_statfs = 120;
   aarch64_linux_record_tdep.size_statfs64 = 120;
   aarch64_linux_record_tdep.size_sockaddr = 16;
@@ -1034,8 +1036,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_NFS_FHSIZE = 32;
   aarch64_linux_record_tdep.size_knfsd_fh = 132;
   aarch64_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  aarch64_linux_record_tdep.size_sigaction = 152;
-  aarch64_linux_record_tdep.size_sigset_t = 128;
+  aarch64_linux_record_tdep.size_sigaction = 32;
+  aarch64_linux_record_tdep.size_sigset_t = 8;
   aarch64_linux_record_tdep.size_siginfo_t = 128;
   aarch64_linux_record_tdep.size_cap_user_data_t = 8;
   aarch64_linux_record_tdep.size_stack_t = 24;
@@ -1051,8 +1053,7 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_epoll_event = 12;
   aarch64_linux_record_tdep.size_itimerspec = 32;
   aarch64_linux_record_tdep.size_mq_attr = 64;
-  aarch64_linux_record_tdep.size_siginfo = 128;
-  aarch64_linux_record_tdep.size_termios = 60;
+  aarch64_linux_record_tdep.size_termios = 36;
   aarch64_linux_record_tdep.size_termios2 = 44;
   aarch64_linux_record_tdep.size_pid_t = 4;
   aarch64_linux_record_tdep.size_winsize = 8;
@@ -1061,6 +1062,7 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   aarch64_linux_record_tdep.size_hayes_esp_config = 12;
   aarch64_linux_record_tdep.size_size_t = 8;
   aarch64_linux_record_tdep.size_iovec = 16;
+  aarch64_linux_record_tdep.size_time_t = 8;
 
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.  */
@@ -1150,6 +1152,17 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/aarch64-linux.xml");
   set_gdbarch_get_syscall_number (gdbarch, aarch64_linux_get_syscall_number);
+
+  /* Displaced stepping.  */
+  set_gdbarch_max_insn_length (gdbarch, 4 * DISPLACED_MODIFIED_INSNS);
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+					aarch64_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, aarch64_displaced_step_fixup);
+  set_gdbarch_displaced_step_free_closure (gdbarch,
+					   simple_displaced_step_free_closure);
+  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
+  set_gdbarch_displaced_step_hw_singlestep (gdbarch,
+					    aarch64_displaced_step_hw_singlestep);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

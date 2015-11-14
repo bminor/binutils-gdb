@@ -62,7 +62,7 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
 	insn = (insn & 0xf) | ((insn & 0x0200) >> 5); /* Source register.  */
       else
 	insn = (insn & 0x01f0) >> 4; /* Destination register.  */
-      
+
       sprintf (buf, "r%d", insn);
       break;
 
@@ -72,11 +72,11 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
       else
 	sprintf (buf, "r%d", 16 + ((insn & 0xf0) >> 4));
       break;
-      
+
     case 'w':
       sprintf (buf, "r%d", 24 + ((insn & 0x30) >> 3));
       break;
-      
+
     case 'a':
       if (regs)
 	sprintf (buf, "r%d", 16 + (insn & 7));
@@ -138,11 +138,11 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
     case 'b':
       {
 	unsigned int x;
-	
+
 	x = (insn & 7);
 	x |= (insn >> 7) & (3 << 3);
 	x |= (insn >> 8) & (1 << 5);
-	
+
 	if (insn & 0x8)
 	  *buf++ = 'Y';
 	else
@@ -151,17 +151,17 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
 	sprintf (comment, "0x%02x", x);
       }
       break;
-      
+
     case 'h':
       *sym = 1;
       *sym_addr = ((((insn & 1) | ((insn & 0x1f0) >> 3)) << 16) | insn2) * 2;
       /* See PR binutils/2454.  Ideally we would like to display the hex
 	 value of the address only once, but this would mean recoding
 	 objdump_print_address() which would affect many targets.  */
-      sprintf (buf, "%#lx", (unsigned long) *sym_addr);      
+      sprintf (buf, "%#lx", (unsigned long) *sym_addr);
       strcpy (comment, comment_start);
       break;
-      
+
     case 'L':
       {
 	int rel_addr = (((insn & 0xfff) ^ 0x800) - 0x800) * 2;
@@ -197,7 +197,7 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
         sprintf (buf, "%d", val);
       }
       break;
-      
+
     case 'M':
       sprintf (buf, "0x%02X", ((insn & 0xf00) >> 4) | (insn & 0xf));
       sprintf (comment, "%d", ((insn & 0xf00) >> 4) | (insn & 0xf));
@@ -208,7 +208,7 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
       fprintf (stderr, _("Internal disassembler error"));
       ok = 0;
       break;
-      
+
     case 'K':
       {
 	unsigned int x;
@@ -218,15 +218,15 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
 	sprintf (comment, "%d", x);
       }
       break;
-      
+
     case 's':
       sprintf (buf, "%d", insn & 7);
       break;
-      
+
     case 'S':
       sprintf (buf, "%d", (insn >> 4) & 7);
       break;
-      
+
     case 'P':
       {
 	unsigned int x;
@@ -241,21 +241,21 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
     case 'p':
       {
 	unsigned int x;
-	
+
 	x = (insn >> 3) & 0x1f;
 	sprintf (buf, "0x%02x", x);
 	sprintf (comment, "%d", x);
       }
       break;
-      
+
     case 'E':
       sprintf (buf, "%d", (insn >> 4) & 15);
       break;
-      
+
     case '?':
       *buf = '\0';
       break;
-      
+
     default:
       sprintf (buf, "??");
       fprintf (stderr, _("unknown constraint `%c'"), constraint);
@@ -309,7 +309,7 @@ print_insn_avr (bfd_vma addr, disassemble_info *info)
 	comment_start = " ";
 
       nopcodes = sizeof (avr_opcodes) / sizeof (struct avr_opcodes_s);
-      
+
       avr_bin_masks = xmalloc (nopcodes * sizeof (unsigned int));
 
       for (opcode = avr_opcodes, maskptr = avr_bin_masks;
@@ -319,7 +319,7 @@ print_insn_avr (bfd_vma addr, disassemble_info *info)
 	  char * s;
 	  unsigned int bin = 0;
 	  unsigned int mask = 0;
-	
+
 	  for (s = opcode->opcode; *s; ++s)
 	    {
 	      bin <<= 1;
@@ -336,7 +336,7 @@ print_insn_avr (bfd_vma addr, disassemble_info *info)
     }
 
   insn = avrdis_opcode (addr, info);
-  
+
   for (opcode = avr_opcodes, maskptr = avr_bin_masks;
        opcode->name;
        opcode++, maskptr++)
@@ -346,7 +346,7 @@ print_insn_avr (bfd_vma addr, disassemble_info *info)
       if ((insn & *maskptr) == opcode->bin_opcode)
         break;
     }
-  
+
   /* Special case: disassemble `ldd r,b+0' as `ld r,b', and
      `std b+0,r' as `st b,r' (next entry in the table).  */
 

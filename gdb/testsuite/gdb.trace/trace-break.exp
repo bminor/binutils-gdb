@@ -37,20 +37,6 @@ if ![gdb_target_supports_trace] {
     return -1
 }
 
-set fpreg "fp"
-set spreg "sp"
-set pcreg "pc"
-
-if [is_amd64_regs_target] {
-    set fpreg "rbp"
-    set spreg "rsp"
-    set pcreg "rip"
-} elseif [is_x86_like_target] {
-    set fpreg "ebp"
-    set spreg "esp"
-    set pcreg "eip"
-}
-
 # Set breakpoint and tracepoint at the same address.
 
 proc break_trace_same_addr_1 { trace_type option } \

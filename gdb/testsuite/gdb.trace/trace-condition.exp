@@ -1,0 +1,160 @@
+# Copyright 2011-2015 Free Software Foundation, Inc.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+load_lib "trace-support.exp"
+
+standard_testfile
+set executable $testfile
+set expfile $testfile.exp
+
+# Some targets have leading underscores on assembly symbols.
+set additional_flags [gdb_target_symbol_prefix_flags]
+
+if [prepare_for_testing $expfile $executable $srcfile \
+	[list debug $additional_flags]] {
+    untested "failed to prepare for trace tests"
+    return -1
+}
+
+if ![runto_main] {
+    fail "Can't run to main to check for trace support"
+    return -1
+}
+
+if ![gdb_target_supports_trace] {
+    unsupported "target does not support trace"
+    return -1
+}
+
+set libipa [get_in_proc_agent]
+gdb_load_shlibs $libipa
+
+# Can't use prepare_for_testing, because that splits compiling into
+# building objects and then linking, and we'd fail with "linker input
+# file unused because linking not done" when building the object.
+
+if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
+	  executable [list debug $additional_flags shlib=$libipa] ] != "" } {
+    untested "failed to compile ftrace tests"
+    return -1
+}
+
+clean_restart ${executable}
+
+if ![runto_main] {
+    fail "Can't run to main for ftrace tests"
+    return 0
+}
+
+if { [gdb_test "info sharedlibrary" ".*${libipa}.*" "IPA loaded"] != 0 } {
+    untested "Could not find IPA lib loaded"
+    return 1
+}
+
+proc test_tracepoints { trace_command condition num_frames { kfail_proc 0 } } {
+    global executable gdb_prompt
+
+    clean_restart ${executable}
+
+    if ![runto_main] {
+	fail "Can't run to main for ftrace tests"
+	return 0
+    }
+
+    gdb_test "break begin" ".*" ""
+
+    gdb_test "break end" ".*" ""
+
+    with_test_prefix "${trace_command}: ${condition}" {
+
+	gdb_test "${trace_command} set_point if ${condition}" \
+	    "\(Fast t|T\)racepoint .*" \
+	    "set tracepoint"
+
+	gdb_test "continue" ".*Breakpoint \[0-9\]+, begin .*" \
+	    "advance to trace begin"
+
+	gdb_test_no_output "tstart" "start trace experiment"
+
+	gdb_test_multiple "continue" "advance through tracing" {
+	    -re ".*Breakpoint \[0-9\]+, end .*$gdb_prompt $" {
+		pass "advance through tracing"
+	    }
+	    -re "Program received signal SIGSEGV, Segmentation fault\\..*$gdb_prompt $" {
+		if { $kfail_proc != 0 } {
+		    $kfail_proc $trace_command
+		}
+		fail "advance through tracing"
+	    }
+	}
+
+	if { $kfail_proc != 0 } {
+	    $kfail_proc $trace_command
+	}
+	gdb_test "tstatus" \
+	    ".*Trace .*Collected $num_frames .*" \
+	    "check $num_frames frames were collected."
+
+	gdb_test "tstop" "" ""
+    }
+}
+
+# These callbacks identify known failures for certain architectures.  They
+# are called either if GDBserver crashes or has not traced the correct
+# number of frames.
+
+proc 18955_x86_64_failure { trace_command } {
+    if { $trace_command == "ftrace" } {
+	setup_kfail "gdb/18955" "x86_64-*-linux*"
+    }
+}
+
+proc 18955_i386_failure { trace_command } {
+    if { $trace_command == "ftrace" } {
+	setup_kfail "gdb/18955" "i\[34567\]86-*-*"
+    }
+}
+
+foreach trace_command { "trace" "ftrace" } {
+    # This condition is always true as the PC should be set to the tracepoint
+    # address when hit.
+    test_tracepoints $trace_command "\$$pcreg == *set_point" 10
+
+    # Can we read local variables?
+    test_tracepoints $trace_command "anarg == 100 || anarg == 200" 2 18955_x86_64_failure
+    # Can we read global variables?
+    test_tracepoints $trace_command "anarg == 100 && globvar == 1" 1 18955_x86_64_failure
+
+    # Test various operations to cover as many opcodes as possible.
+    test_tracepoints $trace_command "21 + 21 == 42" 10
+    test_tracepoints $trace_command "21 - 21 == 0" 10
+    test_tracepoints $trace_command "21 * 2 == 42" 10
+    test_tracepoints $trace_command "21 << 1 == 42" 10
+    test_tracepoints $trace_command "42 >> 1 == 21" 10
+    test_tracepoints $trace_command "-21 << 1 == -42" 10
+    test_tracepoints $trace_command "-42 >> 1 == -21" 10
+    test_tracepoints $trace_command "(0xabababab & 0x0000ffff) == 0xabab" 10
+    test_tracepoints $trace_command "(0xabababab | 0x0000ffff) == 0xababffff" 10
+    test_tracepoints $trace_command "(0xaaaaaaaa ^ 0x55555555) == 0xffffffff" 10
+    test_tracepoints $trace_command "~0xaaaaaaaa == 0x55555555" 10
+    test_tracepoints $trace_command "21 < 42" 10
+    test_tracepoints $trace_command "42 <= 42" 10
+    test_tracepoints $trace_command "42 >= 42" 10
+    test_tracepoints $trace_command "42 > 21" 10
+    test_tracepoints $trace_command "(21 < 42 ? 0 : 1) == 0" 10 18955_i386_failure
+    test_tracepoints $trace_command "(42 <= 42 ? 0 : 1) == 0" 10
+    test_tracepoints $trace_command "(42 >= 42 ? 0 : 1) == 0" 10
+    test_tracepoints $trace_command "(42 > 21 ? 0 : 1) == 0" 10 18955_i386_failure
+    test_tracepoints $trace_command "\$trace_timestamp >= 0" 10
+}

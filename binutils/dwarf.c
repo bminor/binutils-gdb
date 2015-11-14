@@ -292,7 +292,7 @@ read_leb128 (unsigned char *data,
     *length_return = num_read;
 
   if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
-    result |= (dwarf_vma) -1 << shift;
+    result |= -((dwarf_vma) 1 << shift);
 
   return result;
 }
@@ -7154,7 +7154,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 			row, ncols);
 		  return 0;
 		}
- 
+
 	      if (do_display)
 		printf (_("  [%3d] 0x%s"),
 			i, dwarf_vmatoa64 (signature_high, signature_low,

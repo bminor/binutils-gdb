@@ -499,7 +499,7 @@ write_res_info (windres_bfd *wrbfd, rc_uint_type off, const rc_res_res_info *inf
   if (wrbfd)
     {
       struct bin_res_info l;
-      
+
       windres_put_32 (wrbfd, l.version, info->version);
       windres_put_16 (wrbfd, l.memflags, info->memflags);
       windres_put_16 (wrbfd, l.language, info->language);

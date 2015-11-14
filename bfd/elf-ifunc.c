@@ -53,7 +53,7 @@ _bfd_elf_create_ifunc_sections (bfd *abfd, struct bfd_link_info *info)
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  if (info->shared)
+  if (bfd_link_pic (info))
     {
       /* We need to create .rel[a].ifunc for shared objects.  */
       const char *rel_sec = (bed->rela_plts_and_copies_p
@@ -125,7 +125,7 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
      But in non-shared executable, the address of its .plt slot may
      be used.  Pointer equality may not work correctly.  PIE should
      be used if pointer equality is required here.  */
-  if (!info->shared
+  if (!bfd_link_pic (info)
       && (h->dynindx != -1
 	  || info->export_dynamic)
       && h->pointer_equality_needed)
@@ -145,7 +145,7 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
   /* When building shared library, we need to handle the case where it is
      marked with regular reference, but not non-GOT reference since the
      non-GOT reference bit may not be set here.  */
-  if (info->shared && !h->non_got_ref && h->ref_regular)
+  if (bfd_link_pic (info) && !h->non_got_ref && h->ref_regular)
     for (p = *head; p != NULL; p = p->next)
       if (p->count)
 	{
@@ -220,7 +220,7 @@ keep:
 
   /* We need dynamic relocation for STT_GNU_IFUNC symbol only when
      there is a non-GOT reference in a shared object.  */
-  if (!info->shared
+  if (!bfd_link_pic (info)
       || !h->non_got_ref)
     *head = NULL;
 
@@ -252,12 +252,12 @@ keep:
      objects at run-time.
      We only need to relocate .got entry in shared object.  */
   if (h->got.refcount <= 0
-      || (info->shared
+      || (bfd_link_pic (info)
 	  && (h->dynindx == -1
 	      || h->forced_local))
-      || (!info->shared
+      || (!bfd_link_pic (info)
 	  && !h->pointer_equality_needed)
-      || (info->executable && info->shared)
+      || bfd_link_pie (info)
       || htab->sgot == NULL)
     {
       /* Use .got.plt.  */
@@ -267,7 +267,7 @@ keep:
     {
       h->got.offset = htab->sgot->size;
       htab->sgot->size += got_entry_size;
-      if (info->shared)
+      if (bfd_link_pic (info))
 	htab->srelgot->size += sizeof_reloc;
     }
 

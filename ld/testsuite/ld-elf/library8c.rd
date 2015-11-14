@@ -1,5 +1,5 @@
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 #...
- +[0-9]+: +0+ +0+ +FUNC +GLOBAL +DEFAULT +UND +_?bar@@VERS_1
+ +[0-9]+: +0+ +0+ +FUNC +GLOBAL +DEFAULT +UND +_?bar@VERS_1 +\([0-9]+\)
 #...

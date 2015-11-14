@@ -444,11 +444,10 @@ get_sym_from_input_line_and_check (void)
   char c;
   symbolS *sym;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (& name);
   sym = symbol_find_or_make (name);
   *input_line_pointer = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   /* There is no symbol name if input_line_pointer has not moved.  */
   if (name == input_line_pointer)
@@ -1111,9 +1110,9 @@ obj_elf_section (int push)
 		}
 	      else if (c == '@' || c == '%')
 		{
-		  beg = ++input_line_pointer;
-		  c = get_symbol_end ();
-		  *input_line_pointer = c;
+		  ++input_line_pointer;
+		  c = get_symbol_name (& beg);
+		  (void) restore_line_pointer (c);
 		  type = obj_elf_section_type (beg, input_line_pointer - beg, TRUE);
 		}
 	      else
@@ -1193,9 +1192,9 @@ obj_elf_section (int push)
 		  ignore_rest_of_line ();
 		  return;
 		}
-	      beg = ++input_line_pointer;
-	      c = get_symbol_end ();
-	      *input_line_pointer = c;
+	      ++input_line_pointer;
+	      c = get_symbol_name (& beg);
+	      (void) restore_line_pointer (c);
 
 	      attr |= obj_elf_section_word (beg, input_line_pointer - beg, & type);
 
@@ -1387,19 +1386,18 @@ obj_elf_symver (int ignore ATTRIBUTE_UNUSED)
 
   ++input_line_pointer;
   SKIP_WHITESPACE ();
-  name = input_line_pointer;
 
   /* Temporarily include '@' in symbol names.  */
   old_lexat = lex_type[(unsigned char) '@'];
   lex_type[(unsigned char) '@'] |= LEX_NAME;
-  c = get_symbol_end ();
+  c = get_symbol_name (& name);
   lex_type[(unsigned char) '@'] = old_lexat;
 
   if (symbol_get_obj (sym)->versioned_name == NULL)
     {
       symbol_get_obj (sym)->versioned_name = xstrdup (name);
 
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
 
       if (strchr (symbol_get_obj (sym)->versioned_name,
 		  ELF_VER_CHR) == NULL)
@@ -1422,7 +1420,7 @@ obj_elf_symver (int ignore ATTRIBUTE_UNUSED)
 	  return;
 	}
 
-      *input_line_pointer = c;
+      (void) restore_line_pointer (c);
     }
 
   demand_empty_rest_of_line ();
@@ -1442,8 +1440,7 @@ obj_elf_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
   if (*input_line_pointer == '#')
     ++input_line_pointer;
 
-  cname = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (& cname);
   csym = symbol_find (cname);
 
   /* GCFIXME: should check that we don't have two .vtable_inherits for
@@ -1459,7 +1456,7 @@ obj_elf_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
 
   *input_line_pointer = c;
 
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       as_bad (_("expected comma after name in .vtable_inherit"));
@@ -1482,10 +1479,9 @@ obj_elf_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      pname = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (& pname);
       psym = symbol_find_or_make (pname);
-      *input_line_pointer = c;
+      restore_line_pointer (c);
     }
 
   demand_empty_rest_of_line ();
@@ -1835,15 +1831,15 @@ obj_elf_version (int ignore ATTRIBUTE_UNUSED)
 static void
 obj_elf_size (int ignore ATTRIBUTE_UNUSED)
 {
-  char *name = input_line_pointer;
-  char c = get_symbol_end ();
+  char *name;
+  char c = get_symbol_name (&name);
   char *p;
   expressionS exp;
   symbolS *sym;
 
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       *p = 0;
@@ -1915,7 +1911,7 @@ obj_elf_type_name (char *cp)
       *input_line_pointer = '\0';
     }
   else
-    *cp = get_symbol_end ();
+    *cp = get_symbol_name (&p);
 
   return p;
 }
@@ -2395,7 +2391,7 @@ elf_adjust_symtab (void)
   list.elt_count = NULL;
   list.indexes = hash_new ();
   bfd_map_over_sections (stdoutput, build_group_lists, &list);
-  
+
   /* Make the SHT_GROUP sections that describe each section group.  We
      can't set up the section contents here yet, because elf section
      indices have yet to be calculated.  elf.c:set_group_contents does

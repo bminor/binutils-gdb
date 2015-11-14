@@ -402,9 +402,12 @@ const pseudo_typeS md_pseudo_table[] =
   { NULL, 	NULL, 		0 }
 };
 
+static symbolS * rl78_abs_sym = NULL;
+
 void
 md_begin (void)
 {
+  rl78_abs_sym = symbol_make ("__rl78_abs__");
 }
 
 void
@@ -1145,7 +1148,7 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 	  fprintf(stderr, "Missed case %d %d at 0x%lx\n",
 		  rl78_opcode_type (fragP->fr_opcode), fragP->fr_subtype, mypc);
 	  abort ();
-	  
+
 	}
       break;
 
@@ -1240,7 +1243,17 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
   reloc[rp]->address       = fixp->fx_frag->fr_address + fixp->fx_where;	\
   reloc[++rp] = NULL
 #define OPSYM(SYM) OPX(BFD_RELOC_RL78_SYM, SYM, 0)
-#define OPIMM(IMM) OPX(BFD_RELOC_RL78_SYM, abs_symbol.bsym, IMM)
+
+  /* FIXME: We cannot do the normal thing for an immediate value reloc,
+     ie creating a RL78_SYM reloc in the *ABS* section with an offset
+     equal to the immediate value we want to store.  This fails because
+     the reloc processing in bfd_perform_relocation and bfd_install_relocation
+     will short circuit such relocs and never pass them on to the special
+     reloc processing code.  So instead we create a RL78_SYM reloc against
+     the __rl78_abs__ symbol and arrange for the linker scripts to place
+     this symbol at address 0.  */
+#define OPIMM(IMM) OPX (BFD_RELOC_RL78_SYM, symbol_get_bfdsym (rl78_abs_sym), IMM)
+
 #define OP(OP) OPX(BFD_RELOC_RL78_##OP, *reloc[0]->sym_ptr_ptr, 0)
 #define SYM0() reloc[0]->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RL78_SYM)
 
@@ -1456,5 +1469,5 @@ valueT
 md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << align) - 1) & (-1 << align));
+  return ((size + (1 << align) - 1) & -(1 << align));
 }

@@ -45,6 +45,7 @@
 #include "bcache.h"
 #include "gdb_bfd.h"
 #include "build-id.h"
+#include "location.h"
 
 extern void _initialize_elfread (void);
 
@@ -88,13 +89,13 @@ elf_symfile_segments (bfd *abfd)
   if (phdrs_size == -1)
     return NULL;
 
-  phdrs = alloca (phdrs_size);
+  phdrs = (Elf_Internal_Phdr *) alloca (phdrs_size);
   num_phdrs = bfd_get_elf_phdrs (abfd, phdrs);
   if (num_phdrs == -1)
     return NULL;
 
   num_segments = 0;
-  segments = alloca (sizeof (Elf_Internal_Phdr *) * num_phdrs);
+  segments = XALLOCAVEC (Elf_Internal_Phdr *, num_phdrs);
   for (i = 0; i < num_phdrs; i++)
     if (phdrs[i].p_type == PT_LOAD)
       segments[num_segments++] = &phdrs[i];
@@ -337,8 +338,9 @@ elf_symtab_read (struct objfile *objfile, int type,
 	continue;
       if (sym->flags & BSF_FILE)
 	{
-	  filesymname = bcache (sym->name, strlen (sym->name) + 1,
-				objfile->per_bfd->filename_cache);
+	  filesymname
+	    = (const char *) bcache (sym->name, strlen (sym->name) + 1,
+				     objfile->per_bfd->filename_cache);
 	}
       else if (sym->flags & BSF_SECTION_SYM)
 	continue;
@@ -602,7 +604,7 @@ elf_rel_plt_read (struct objfile *objfile, asymbol **dyn_symbol_table)
       if (string_buffer_size < name_len + got_suffix_len + 1)
 	{
 	  string_buffer_size = 2 * (name_len + got_suffix_len);
-	  string_buffer = xrealloc (string_buffer, string_buffer_size);
+	  string_buffer = (char *) xrealloc (string_buffer, string_buffer_size);
 	}
       memcpy (string_buffer, name, name_len);
       memcpy (&string_buffer[name_len], SYMBOL_GOT_PLT_SUFFIX,
@@ -637,7 +639,8 @@ struct elf_gnu_ifunc_cache
 static hashval_t
 elf_gnu_ifunc_cache_hash (const void *a_voidp)
 {
-  const struct elf_gnu_ifunc_cache *a = a_voidp;
+  const struct elf_gnu_ifunc_cache *a
+    = (const struct elf_gnu_ifunc_cache *) a_voidp;
 
   return htab_hash_string (a->name);
 }
@@ -647,8 +650,10 @@ elf_gnu_ifunc_cache_hash (const void *a_voidp)
 static int
 elf_gnu_ifunc_cache_eq (const void *a_voidp, const void *b_voidp)
 {
-  const struct elf_gnu_ifunc_cache *a = a_voidp;
-  const struct elf_gnu_ifunc_cache *b = b_voidp;
+  const struct elf_gnu_ifunc_cache *a
+    = (const struct elf_gnu_ifunc_cache *) a_voidp;
+  const struct elf_gnu_ifunc_cache *b
+    = (const struct elf_gnu_ifunc_cache *) b_voidp;
 
   return strcmp (a->name, b->name) == 0;
 }
@@ -686,7 +691,7 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   if (strcmp (bfd_get_section_name (objfile->obfd, sect), ".plt") == 0)
     return 0;
 
-  htab = objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
+  htab = (htab_t) objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
   if (htab == NULL)
     {
       htab = htab_create_alloc_ex (1, elf_gnu_ifunc_cache_hash,
@@ -701,12 +706,14 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   obstack_grow (&objfile->objfile_obstack, &entry_local,
 		offsetof (struct elf_gnu_ifunc_cache, name));
   obstack_grow_str0 (&objfile->objfile_obstack, name);
-  entry_p = obstack_finish (&objfile->objfile_obstack);
+  entry_p
+    = (struct elf_gnu_ifunc_cache *) obstack_finish (&objfile->objfile_obstack);
 
   slot = htab_find_slot (htab, entry_p, INSERT);
   if (*slot != NULL)
     {
-      struct elf_gnu_ifunc_cache *entry_found_p = *slot;
+      struct elf_gnu_ifunc_cache *entry_found_p
+	= (struct elf_gnu_ifunc_cache *) *slot;
       struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
       if (entry_found_p->addr != addr)
@@ -745,17 +752,18 @@ elf_gnu_ifunc_resolve_by_cache (const char *name, CORE_ADDR *addr_p)
       struct elf_gnu_ifunc_cache *entry_p;
       void **slot;
 
-      htab = objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
+      htab = (htab_t) objfile_data (objfile, elf_objfile_gnu_ifunc_cache_data);
       if (htab == NULL)
 	continue;
 
-      entry_p = alloca (sizeof (*entry_p) + strlen (name));
+      entry_p = ((struct elf_gnu_ifunc_cache *)
+		 alloca (sizeof (*entry_p) + strlen (name)));
       strcpy (entry_p->name, name);
 
       slot = htab_find_slot (htab, entry_p, NO_INSERT);
       if (slot == NULL)
 	continue;
-      entry_p = *slot;
+      entry_p = (struct elf_gnu_ifunc_cache *) *slot;
       gdb_assert (entry_p != NULL);
 
       if (addr_p)
@@ -781,7 +789,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
   struct objfile *objfile;
   const size_t got_suffix_len = strlen (SYMBOL_GOT_PLT_SUFFIX);
 
-  name_got_plt = alloca (strlen (name) + got_suffix_len + 1);
+  name_got_plt = (char *) alloca (strlen (name) + got_suffix_len + 1);
   sprintf (name_got_plt, "%s" SYMBOL_GOT_PLT_SUFFIX, name);
 
   ALL_PSPACE_OBJFILES (current_program_space, objfile)
@@ -792,7 +800,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
       size_t ptr_size = TYPE_LENGTH (ptr_type);
       CORE_ADDR pointer_address, addr;
       asection *plt;
-      gdb_byte *buf = alloca (ptr_size);
+      gdb_byte *buf = (gdb_byte *) alloca (ptr_size);
       struct bound_minimal_symbol msym;
 
       msym = lookup_minimal_symbol (name_got_plt, NULL, objfile);
@@ -989,7 +997,8 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   resolved_pc = gdbarch_addr_bits_remove (gdbarch, resolved_pc);
 
   gdb_assert (current_program_space == b->pspace || b->pspace == NULL);
-  elf_gnu_ifunc_record_cache (b->addr_string, resolved_pc);
+  elf_gnu_ifunc_record_cache (event_location_to_string (b->location),
+			      resolved_pc);
 
   sal = find_pc_line (resolved_pc, 0);
   sals.nelts = 1;
@@ -1056,7 +1065,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
       /* Memory gets permanently referenced from ABFD after
 	 bfd_canonicalize_symtab so it must not get freed before ABFD gets.  */
 
-      symbol_table = bfd_alloc (abfd, storage_needed);
+      symbol_table = (asymbol **) bfd_alloc (abfd, storage_needed);
       symcount = bfd_canonicalize_symtab (objfile->obfd, symbol_table);
 
       if (symcount < 0)
@@ -1080,7 +1089,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 	 done by _bfd_elf_get_synthetic_symtab which is all a bfd
 	 implementation detail, though.  */
 
-      dyn_symbol_table = bfd_alloc (abfd, storage_needed);
+      dyn_symbol_table = (asymbol **) bfd_alloc (abfd, storage_needed);
       dynsymcount = bfd_canonicalize_dynamic_symtab (objfile->obfd,
 						     dyn_symbol_table);
 
@@ -1122,7 +1131,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
       long i;
 
       make_cleanup (xfree, synthsyms);
-      synth_symbol_table = xmalloc (sizeof (asymbol *) * synthcount);
+      synth_symbol_table = XNEWVEC (asymbol *, synthcount);
       for (i = 0; i < synthcount; i++)
 	synth_symbol_table[i] = synthsyms + i;
       make_cleanup (xfree, synth_symbol_table);
@@ -1322,7 +1331,7 @@ elf_get_probes (struct objfile *objfile)
   VEC (probe_p) *probes_per_bfd;
 
   /* Have we parsed this objfile's probes already?  */
-  probes_per_bfd = bfd_data (objfile->obfd, probe_key);
+  probes_per_bfd = (VEC (probe_p) *) bfd_data (objfile->obfd, probe_key);
 
   if (!probes_per_bfd)
     {
@@ -1354,7 +1363,7 @@ static void
 probe_key_free (bfd *abfd, void *d)
 {
   int ix;
-  VEC (probe_p) *probes = d;
+  VEC (probe_p) *probes = (VEC (probe_p) *) d;
   struct probe *probe;
 
   for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)

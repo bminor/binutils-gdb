@@ -886,7 +886,7 @@ coff_grok (bfd *inabfd)
       non_fatal (_("%s: is not a COFF format file"), bfd_get_filename (abfd));
       return NULL;
     }
-  
+
   storage = bfd_get_symtab_upper_bound (abfd);
 
   if (storage < 0)

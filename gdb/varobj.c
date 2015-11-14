@@ -529,7 +529,7 @@ varobj_delete (struct varobj *var, char ***dellist, int only_children)
   /* We may have been asked to return a list of what has been deleted.  */
   if (dellist != NULL)
     {
-      *dellist = xmalloc ((delcount + 1) * sizeof (char *));
+      *dellist = XNEWVEC (char *, delcount + 1);
 
       cp = *dellist;
       mycount = delcount;
@@ -1955,7 +1955,7 @@ install_variable (struct varobj *var)
     error (_("Duplicate variable object name"));
 
   /* Add varobj to hash table.  */
-  newvl = xmalloc (sizeof (struct vlist));
+  newvl = XNEW (struct vlist);
   newvl->next = *(varobj_table + index);
   newvl->var = var;
   *(varobj_table + index) = newvl;
@@ -2113,7 +2113,7 @@ new_variable (void)
 {
   struct varobj *var;
 
-  var = (struct varobj *) xmalloc (sizeof (struct varobj));
+  var = XNEW (struct varobj);
   var->name = NULL;
   var->path_expr = NULL;
   var->obj_name = NULL;
@@ -2123,14 +2123,13 @@ new_variable (void)
   var->num_children = -1;
   var->parent = NULL;
   var->children = NULL;
-  var->format = 0;
+  var->format = FORMAT_NATURAL;
   var->root = NULL;
   var->updated = 0;
   var->print_value = NULL;
   var->frozen = 0;
   var->not_fetched = 0;
-  var->dynamic
-    = (struct varobj_dynamic *) xmalloc (sizeof (struct varobj_dynamic));
+  var->dynamic = XNEW (struct varobj_dynamic);
   var->dynamic->children_requested = 0;
   var->from = -1;
   var->to = -1;
@@ -2148,7 +2147,7 @@ new_root_variable (void)
 {
   struct varobj *var = new_variable ();
 
-  var->root = (struct varobj_root *) xmalloc (sizeof (struct varobj_root));
+  var->root = XNEW (struct varobj_root);
   var->root->lang_ops = NULL;
   var->root->exp = NULL;
   var->root->valid_block = NULL;
@@ -2197,7 +2196,7 @@ free_variable (struct varobj *var)
 static void
 do_free_variable_cleanup (void *var)
 {
-  free_variable (var);
+  free_variable ((struct varobj *) var);
 }
 
 static struct cleanup *
@@ -2251,7 +2250,7 @@ cppush (struct cpstack **pstack, char *name)
 {
   struct cpstack *s;
 
-  s = (struct cpstack *) xmalloc (sizeof (struct cpstack));
+  s = XNEW (struct cpstack);
   s->name = name;
   s->next = *pstack;
   *pstack = s;
@@ -2611,7 +2610,7 @@ varobj_value_get_print_value (struct value *value,
 			    }
 
 			  len = strlen (s);
-			  thevalue = xmemdup (s, len + 1, len + 1);
+			  thevalue = (char *) xmemdup (s, len + 1, len + 1);
 			  type = builtin_type (gdbarch)->builtin_char;
 			  xfree (s);
 
@@ -2792,10 +2791,7 @@ extern void _initialize_varobj (void);
 void
 _initialize_varobj (void)
 {
-  int sizeof_table = sizeof (struct vlist *) * VAROBJ_TABLE_SIZE;
-
-  varobj_table = xmalloc (sizeof_table);
-  memset (varobj_table, 0, sizeof_table);
+  varobj_table = XCNEWVEC (struct vlist *, VAROBJ_TABLE_SIZE);
 
   add_setshow_zuinteger_cmd ("varobj", class_maintenance,
 			     &varobjdebug,

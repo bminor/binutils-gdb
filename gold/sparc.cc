@@ -415,10 +415,13 @@ class Target_sparc : public Sized_target<size, big_endian>
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rela<size, big_endian>& reloc)
   {
+    unsigned int r_type = elfcpp::elf_r_type<size>(reloc.get_r_info());
     this->copy_relocs_.copy_reloc(symtab, layout,
 				  symtab->get_sized_symbol<size>(sym),
 				  object, shndx, output_section,
-				  reloc, this->rela_dyn_section(layout));
+				  r_type, reloc.get_r_offset(),
+				  reloc.get_r_addend(),
+				  this->rela_dyn_section(layout));
   }
 
   // Information about this specific target which we pass to the
@@ -482,7 +485,8 @@ Target::Target_info Target_sparc<32, true>::sparc_info =
   0,			// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 template<>
@@ -509,7 +513,8 @@ Target::Target_info Target_sparc<64, true>::sparc_info =
   0,			// large_common_section_flags
   NULL,			// attributes_section
   NULL,			// attributes_vendor
-  "_start"		// entry_symbol_name
+  "_start",		// entry_symbol_name
+  32,			// hash_entry_size
 };
 
 // We have to take care here, even when operating in little-endian
@@ -1107,13 +1112,12 @@ public:
   // R_SPARC_GOTDATA_OP_HIX22: @gdopoff(Symbol + Addend) >> 10
   static inline void
   gdop_hix22(unsigned char* view,
-	     typename elfcpp::Elf_types<size>::Elf_Addr value,
-	     typename elfcpp::Elf_types<size>::Elf_Addr addend)
+	     typename elfcpp::Elf_types<size>::Elf_Addr value)
   {
     typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<32, true>::readval(wv);
-    int32_t reloc = static_cast<int32_t>(value + addend);
+    int32_t reloc = static_cast<int32_t>(value);
 
     val &= ~0x3fffff;
 
@@ -1170,13 +1174,12 @@ public:
   // R_SPARC_GOTDATA_OP_LOX10: (@gdopoff(Symbol + Addend) & 0x3ff) | 0x1c00
   static inline void
   gdop_lox10(unsigned char* view,
-	     typename elfcpp::Elf_types<size>::Elf_Addr value,
-	     typename elfcpp::Elf_types<size>::Elf_Addr addend)
+	     typename elfcpp::Elf_types<size>::Elf_Addr value)
   {
     typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<32, true>::readval(wv);
-    int32_t reloc = static_cast<int32_t>(value + addend);
+    int32_t reloc = static_cast<int32_t>(value);
 
     if (reloc < 0)
       reloc = (reloc & 0x3ff) | 0x1c00;
@@ -3244,7 +3247,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	      && !gsym->is_preemptible()
 	      && !orig_is_ifunc))
 	{
-	  got_offset = psymval->value(object, 0) - target->got_address();
+	  got_offset = psymval->value(object, addend) - target->got_address();
 	  gdop_valid = true;
 	  break;
 	}
@@ -3384,7 +3387,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
       if (gdop_valid)
 	{
-	  Reloc::gdop_lox10(view, got_offset, addend);
+	  Reloc::gdop_lox10(view, got_offset);
 	  break;
 	}
       /* Fall through.  */
@@ -3395,7 +3398,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
       if (gdop_valid)
 	{
-	  Reloc::gdop_hix22(view, got_offset, addend);
+	  Reloc::gdop_hix22(view, got_offset);
 	  break;
 	}
       /* Fall through.  */

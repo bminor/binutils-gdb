@@ -37,7 +37,7 @@ static void ppc_layout_sections_again (void);
 static struct ppc64_elf_params params = { NULL,
 					  &ppc_add_stub_section,
 					  &ppc_layout_sections_again,
-					  1, 0, 0,
+					  1, -1, 0,
 					  ${DEFAULT_PLT_STATIC_CHAIN-0}, -1, 0,
 					  0, -1, -1, 0};
 
@@ -95,7 +95,7 @@ ppc_create_output_section_statements (void)
   ldlang_add_file (stub_file);
   params.stub_bfd = stub_file->the_bfd;
   if (params.save_restore_funcs < 0)
-    params.save_restore_funcs = !link_info.relocatable;
+    params.save_restore_funcs = !bfd_link_relocatable (&link_info);
   if (!ppc64_elf_init_stub_bfd (&link_info, &params))
     einfo ("%F%P: can not init BFD: %E\n");
 }
@@ -295,7 +295,7 @@ ppc_before_allocation (void)
 	}
 
       if (!no_toc_opt
-	  && !link_info.relocatable)
+	  && !bfd_link_relocatable (&link_info))
 	{
 	  prelim_size_sections ();
 
@@ -445,7 +445,7 @@ ppc_layout_sections_again (void)
      add even more stubs.  */
   gld${EMULATION_NAME}_map_segments (TRUE);
 
-  if (!link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     ppc64_elf_set_toc (&link_info, link_info.output_bfd);
 
   need_laying_out = -1;
@@ -498,7 +498,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 
   /* If generating a relocatable output file, then we don't have any
      stubs.  */
-  if (stub_file != NULL && !link_info.relocatable)
+  if (stub_file != NULL && !bfd_link_relocatable (&link_info))
     {
       ret = ppc64_elf_setup_section_lists (&link_info);
       if (ret < 0)
@@ -554,7 +554,7 @@ gld${EMULATION_NAME}_after_allocation (void)
      innocuous except for confusing ELF_SECTION_IN_SEGMENT.  */
   gld${EMULATION_NAME}_map_segments (need_laying_out > 0);
 
-  if (need_laying_out != -1 && !link_info.relocatable)
+  if (need_laying_out != -1 && !bfd_link_relocatable (&link_info))
     ppc64_elf_set_toc (&link_info, link_info.output_bfd);
 }
 
@@ -577,7 +577,7 @@ ppc_finish (void)
   if (params.emit_stub_syms < 0)
     params.emit_stub_syms = 1;
   if (stub_file != NULL
-      && !link_info.relocatable
+      && !bfd_link_relocatable (&link_info)
       && !ppc64_elf_build_stubs (&link_info, config.stats ? &msg : NULL))
     einfo ("%X%P: can not build stubs: %E\n");
 
@@ -699,7 +699,8 @@ PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
 #define OPTION_DOTSYMS			(OPTION_NO_SAVRES + 1)
 #define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
 #define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
-#define OPTION_NO_TLS_GET_ADDR_OPT	(OPTION_NO_TLS_OPT + 1)
+#define OPTION_TLS_GET_ADDR_OPT		(OPTION_NO_TLS_OPT + 1)
+#define OPTION_NO_TLS_GET_ADDR_OPT	(OPTION_TLS_GET_ADDR_OPT + 1)
 #define OPTION_NO_OPD_OPT		(OPTION_NO_TLS_GET_ADDR_OPT + 1)
 #define OPTION_NO_TOC_OPT		(OPTION_NO_OPD_OPT + 1)
 #define OPTION_NO_MULTI_TOC		(OPTION_NO_TOC_OPT + 1)
@@ -722,6 +723,7 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "save-restore-funcs", no_argument, NULL, OPTION_SAVRES },
   { "no-save-restore-funcs", no_argument, NULL, OPTION_NO_SAVRES },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
+  { "tls-get-addr-optimize", no_argument, NULL, OPTION_TLS_GET_ADDR_OPT },
   { "no-tls-get-addr-optimize", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_OPT },
   { "no-opd-optimize", no_argument, NULL, OPTION_NO_OPD_OPT },
   { "no-toc-optimize", no_argument, NULL, OPTION_NO_TOC_OPT },
@@ -784,6 +786,9 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
 		   ));
   fprintf (file, _("\
   --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n"
+		   ));
+  fprintf (file, _("\
+  --tls-get-addr-optimize     Force use of special __tls_get_addr call.\n"
 		   ));
   fprintf (file, _("\
   --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n"
@@ -877,8 +882,12 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
       no_tls_opt = 1;
       break;
 
+    case OPTION_TLS_GET_ADDR_OPT:
+      params.tls_get_addr_opt = 1;
+      break;
+
     case OPTION_NO_TLS_GET_ADDR_OPT:
-      params.no_tls_get_addr_opt = 1;
+      params.tls_get_addr_opt = 0;
       break;
 
     case OPTION_NO_OPD_OPT:
@@ -903,7 +912,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_TRADITIONAL_FORMAT:
       no_tls_opt = 1;
-      params.no_tls_get_addr_opt = 1;
+      params.tls_get_addr_opt = 0;
       no_opd_opt = 1;
       no_toc_opt = 1;
       params.no_multi_toc = 1;

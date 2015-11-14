@@ -195,6 +195,14 @@ struct exception_try_scope
   void *saved_state;
 };
 
+/* Define this to build with TRY/CATCH mapped directly to raw
+   try/catch.  GDB won't work correctly, but building that way catches
+   code tryin to break/continue out of the try block, along with
+   spurious code between the TRY and the CATCH block.  */
+//#define USE_RAW_CXX_TRY
+
+#ifndef USE_RAW_CXX_TRY
+
 /* We still need to wrap TRY/CATCH in C++ so that cleanups and C++
    exceptions can coexist.  The TRY blocked is wrapped in a
    do/while(0) so that break/continue within the block works the same
@@ -216,6 +224,14 @@ struct exception_try_scope
   {						\
     exception_rethrow ();			\
   }
+#else
+
+#define TRY try
+#define CATCH(EXCEPTION, MASK) \
+  catch (struct gdb_exception ## _ ## MASK &EXCEPTION)
+#define END_CATCH
+
+#endif
 
 /* The exception types client code may catch.  They're just shims
    around gdb_exception that add nothing but type info.  Which is used

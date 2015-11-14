@@ -100,7 +100,7 @@ gdb_test_sequence $test $test {
     "need to step-over"
     "resume \\(step=1"
     "signal arrived while stepping over breakpoint"
-    "switching back to stepped thread"
+    "(restart threads|switching back to stepped thread)"
     "stepped to a different line"
     "callme"
 }

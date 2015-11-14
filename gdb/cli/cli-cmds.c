@@ -38,6 +38,7 @@
 #include "disasm.h"
 #include "tracepoint.h"
 #include "filestuff.h"
+#include "location.h"
 
 #include "ui-out.h"
 
@@ -276,7 +277,7 @@ complete_command (char *arg, int from_tty)
       point--;
     }
 
-  arg_prefix = alloca (point - arg + 1);
+  arg_prefix = (char *) alloca (point - arg + 1);
   memcpy (arg_prefix, arg, point - arg);
   arg_prefix[point - arg] = 0;
 
@@ -537,10 +538,16 @@ find_and_open_script (const char *script_file, int search_path,
   return 1;
 }
 
-/* Load script FILE, which has already been opened as STREAM.  */
+/* Load script FILE, which has already been opened as STREAM.
+   FILE_TO_OPEN is the form of FILE to use if one needs to open the file.
+   This is provided as FILE may have been found via the source search path.
+   An important thing to note here is that FILE may be a symlink to a file
+   with a different or non-existing suffix, and thus one cannot infer the
+   extension language from FILE_TO_OPEN.  */
 
 static void
-source_script_from_stream (FILE *stream, const char *file)
+source_script_from_stream (FILE *stream, const char *file,
+			   const char *file_to_open)
 {
   if (script_ext_mode != script_ext_off)
     {
@@ -555,7 +562,7 @@ source_script_from_stream (FILE *stream, const char *file)
 		= ext_lang_script_sourcer (extlang);
 
 	      gdb_assert (sourcer != NULL);
-	      sourcer (extlang, stream, file);
+	      sourcer (extlang, stream, file_to_open);
 	      return;
 	    }
 	  else if (script_ext_mode == script_ext_soft)
@@ -608,7 +615,7 @@ source_script_with_search (const char *file, int from_tty, int search_path)
      anyway so that error messages show the actual file used.  But only do
      this if we (may have) used search_path, as printing the full path in
      errors for the non-search case can be more noise than signal.  */
-  source_script_from_stream (stream, search_path ? full_path : file);
+  source_script_from_stream (stream, file, search_path ? full_path : file);
   do_cleanups (old_cleanups);
 }
 
@@ -635,7 +642,7 @@ source_command (char *args, int from_tty)
 {
   struct cleanup *old_cleanups;
   char *file = args;
-  int *old_source_verbose = xmalloc (sizeof(int));
+  int *old_source_verbose = XNEW (int);
   int search_path = 0;
 
   *old_source_verbose = source_verbose;
@@ -782,7 +789,6 @@ edit_command (char *arg, int from_tty)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct symbol *sym;
-  char *arg1;
   char *editor;
   char *p;
   const char *fn;
@@ -804,21 +810,28 @@ edit_command (char *arg, int from_tty)
     }
   else
     {
-      /* Now should only be one argument -- decode it in SAL.  */
+      struct cleanup *cleanup;
+      struct event_location *location;
+      char *arg1;
 
+      /* Now should only be one argument -- decode it in SAL.  */
       arg1 = arg;
-      sals = decode_line_1 (&arg1, DECODE_LINE_LIST_MODE, 0, 0);
+      location = string_to_event_location (&arg1, current_language);
+      cleanup = make_cleanup_delete_event_location (location);
+      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
 
       filter_sals (&sals);
       if (! sals.nelts)
 	{
 	  /*  C++  */
+	  do_cleanups (cleanup);
 	  return;
 	}
       if (sals.nelts > 1)
 	{
 	  ambiguous_line_spec (&sals);
 	  xfree (sals.sals);
+	  do_cleanups (cleanup);
 	  return;
 	}
 
@@ -860,6 +873,7 @@ edit_command (char *arg, int from_tty)
 
       if (sal.symtab == 0)
         error (_("No line number known for %s."), arg);
+      do_cleanups (cleanup);
     }
 
   if ((editor = (char *) getenv ("EDITOR")) == NULL)
@@ -888,6 +902,9 @@ list_command (char *arg, int from_tty)
   int dummy_beg = 0;
   int linenum_beg = 0;
   char *p;
+  struct cleanup *cleanup;
+
+  cleanup = make_cleanup (null_cleanup, NULL);
 
   /* Pull in the current default source line if necessary.  */
   if (arg == 0 || arg[0] == '+' || arg[0] == '-')
@@ -951,15 +968,24 @@ list_command (char *arg, int from_tty)
     dummy_beg = 1;
   else
     {
-      sals = decode_line_1 (&arg1, DECODE_LINE_LIST_MODE, 0, 0);
+      struct event_location *location;
+
+      location = string_to_event_location (&arg1, current_language);
+      make_cleanup_delete_event_location (location);
+      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
 
       filter_sals (&sals);
       if (!sals.nelts)
-	return;			/*  C++  */
+	{
+	  /*  C++  */
+	  do_cleanups (cleanup);
+	  return;
+	}
       if (sals.nelts > 1)
 	{
 	  ambiguous_line_spec (&sals);
 	  xfree (sals.sals);
+	  do_cleanups (cleanup);
 	  return;
 	}
 
@@ -984,18 +1010,28 @@ list_command (char *arg, int from_tty)
 	dummy_end = 1;
       else
 	{
+	  struct event_location *location;
+
+	  location = string_to_event_location (&arg1, current_language);
+	  make_cleanup_delete_event_location (location);
 	  if (dummy_beg)
-	    sals_end = decode_line_1 (&arg1, DECODE_LINE_LIST_MODE, 0, 0);
+	    sals_end = decode_line_1 (location,
+				      DECODE_LINE_LIST_MODE, 0, 0);
 	  else
-	    sals_end = decode_line_1 (&arg1, DECODE_LINE_LIST_MODE,
+	    sals_end = decode_line_1 (location, DECODE_LINE_LIST_MODE,
 				      sal.symtab, sal.line);
+
 	  filter_sals (&sals_end);
 	  if (sals_end.nelts == 0)
-	    return;
+	    {
+	      do_cleanups (cleanup);
+	      return;
+	    }
 	  if (sals_end.nelts > 1)
 	    {
 	      ambiguous_line_spec (&sals_end);
 	      xfree (sals_end.sals);
+	      do_cleanups (cleanup);
 	      return;
 	    }
 	  sal_end = sals_end.sals[0];
@@ -1076,6 +1112,7 @@ list_command (char *arg, int from_tty)
 			 ? sal.line + get_lines_to_list ()
 			 : sal_end.line + 1),
 			0);
+  do_cleanups (cleanup);
 }
 
 /* Subroutine of disassemble_command to simplify it.
@@ -1144,16 +1181,26 @@ disassemble_current_function (int flags)
 /* Dump a specified section of assembly code.
 
    Usage:
-     disassemble [/mr]
+     disassemble [/mrs]
        - dump the assembly code for the function of the current pc
-     disassemble [/mr] addr
+     disassemble [/mrs] addr
        - dump the assembly code for the function at ADDR
-     disassemble [/mr] low,high
-     disassemble [/mr] low,+length
+     disassemble [/mrs] low,high
+     disassemble [/mrs] low,+length
        - dump the assembly code in the range [LOW,HIGH), or [LOW,LOW+length)
 
-   A /m modifier will include source code with the assembly.
-   A /r modifier will include raw instructions in hex with the assembly.  */
+   A /m modifier will include source code with the assembly in a
+   "source centric" view.  This view lists only the file of the first insn,
+   even if other source files are involved (e.g., inlined functions), and
+   the output is in source order, even with optimized code.  This view is
+   considered deprecated as it hasn't been useful in practice.
+
+   A /r modifier will include raw instructions in hex with the assembly.
+
+   A /s modifier will include source code with the assembly, like /m, with
+   two important differences:
+   1) The output is still in pc address order.
+   2) File names and contents for all relevant source files are displayed.  */
 
 static void
 disassemble_command (char *arg, int from_tty)
@@ -1181,10 +1228,13 @@ disassemble_command (char *arg, int from_tty)
 	  switch (*p++)
 	    {
 	    case 'm':
-	      flags |= DISASSEMBLY_SOURCE;
+	      flags |= DISASSEMBLY_SOURCE_DEPRECATED;
 	      break;
 	    case 'r':
 	      flags |= DISASSEMBLY_RAW_INSN;
+	      break;
+	    case 's':
+	      flags |= DISASSEMBLY_SOURCE;
 	      break;
 	    default:
 	      error (_("Invalid disassembly modifier."));
@@ -1193,6 +1243,10 @@ disassemble_command (char *arg, int from_tty)
 
       p = skip_spaces_const (p);
     }
+
+  if ((flags & (DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_SOURCE))
+      == (DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_SOURCE))
+    error (_("Cannot specify both /m and /s."));
 
   if (! p || ! *p)
     {
@@ -1247,7 +1301,7 @@ make_command (char *arg, int from_tty)
     p = "make";
   else
     {
-      p = xmalloc (sizeof ("make ") + strlen (arg));
+      p = (char *) xmalloc (sizeof ("make ") + strlen (arg));
       strcpy (p, "make ");
       strcpy (p + sizeof ("make ") - 1, arg);
     }
@@ -1506,8 +1560,8 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
 static int
 compare_symtabs (const void *a, const void *b)
 {
-  const struct symtab_and_line *sala = a;
-  const struct symtab_and_line *salb = b;
+  const struct symtab_and_line *sala = (const struct symtab_and_line *) a;
+  const struct symtab_and_line *salb = (const struct symtab_and_line *) b;
   const char *dira = SYMTAB_DIRNAME (sala->symtab);
   const char *dirb = SYMTAB_DIRNAME (salb->symtab);
   int r;
@@ -1854,8 +1908,21 @@ the other arg."));
   c = add_com ("disassemble", class_vars, disassemble_command, _("\
 Disassemble a specified section of memory.\n\
 Default is the function surrounding the pc of the selected frame.\n\
+\n\
 With a /m modifier, source lines are included (if available).\n\
+This view is \"source centric\": the output is in source line order,\n\
+regardless of any optimization that is present.  Only the main source file\n\
+is displayed, not those of, e.g., any inlined functions.\n\
+This modifier hasn't proved useful in practice and is deprecated\n\
+in favor of /s.\n\
+\n\
+With a /s modifier, source lines are included (if available).\n\
+This differs from /m in two important respects:\n\
+- the output is still in pc address order, and\n\
+- file names and contents for all relevant source files are displayed.\n\
+\n\
 With a /r modifier, raw instructions in hex are included.\n\
+\n\
 With a single argument, the function surrounding that address is dumped.\n\
 Two arguments (separated by a comma) are taken as a range of memory to dump,\n\
   in the form of \"start,end\", or \"start,+length\".\n\

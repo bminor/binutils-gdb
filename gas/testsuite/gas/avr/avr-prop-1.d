@@ -12,15 +12,18 @@ Contents of `\.avr\.prop' section:
   Flags:   0
 
    0 ORG @ \.text\.1 \+ 0x000020 \(0x000020\)
-   1 ORG @ \.text\.1 \+ 0x000044 \(0x000044\)
+   1 ORG\+FILL @ \.text\.1 \+ 0x000044 \(0x000044\)
+     Fill: 0x000005
    2 ORG @ \.text\.2 \+ 0x000020 \(0x000020\)
-   3 ALIGN @ \.text\.2 \+ 0x000020 \(0x000020\)
-    Align: 0x000004
-   4 ALIGN @ \.text\.2 \+ 0x000030 \(0x000030\)
-    Align: 0x000004
+   3 ALIGN @ \.text\.2 \+ 0x000030 \(0x000030\)
+     Align: 0x000004
+   4 ALIGN\+FILL @ \.text\.2 \+ 0x000040 \(0x000040\)
+     Align: 0x000004, Fill: 0x000003
    5 ORG @ \.text\.2 \+ 0x000200 \(0x000200\)
-   6 ALIGN @ \.text\.2 \+ 0x000200 \(0x000200\)
-    Align: 0x000004
+   6 ALIGN @ \.text\.2 \+ 0x000210 \(0x000210\)
+     Align: 0x000004
    7 ALIGN @ \.text\.3 \+ 0x000100 \(0x000100\)
-    Align: 0x000008
+     Align: 0x000008
+   8 ALIGN @ \.text\.3 \+ 0x000200 \(0x000200\)
+     Align: 0x000008
 

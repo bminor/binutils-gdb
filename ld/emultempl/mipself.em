@@ -47,7 +47,7 @@ mips_after_parse (void)
       link_info.emit_hash = TRUE;
       link_info.emit_gnu_hash = FALSE;
     }
-  after_parse_default ();
+  gld${EMULATION_NAME}_after_parse ();
 }
 
 struct hook_stub_info
@@ -216,7 +216,7 @@ mips_before_allocation (void)
   flagword flags;
 
   flags = elf_elfheader (link_info.output_bfd)->e_flags;
-  if (!link_info.shared
+  if (!bfd_link_pic (&link_info)
       && !link_info.nocopyreloc
       && (flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) == EF_MIPS_CPIC)
     _bfd_mips_elf_use_plts_and_copy_relocs (&link_info);

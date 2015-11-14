@@ -23,7 +23,7 @@
 
 struct target_ops *the_target;
 
-void
+int
 set_desired_thread (int use_general)
 {
   struct thread_info *found;
@@ -33,10 +33,8 @@ set_desired_thread (int use_general)
   else
     found = find_thread_ptid (cont_thread);
 
-  if (found == NULL)
-    current_thread = get_first_thread ();
-  else
-    current_thread = found;
+  current_thread = found;
+  return (current_thread != NULL);
 }
 
 int
@@ -77,7 +75,7 @@ write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
   if (buffer != NULL)
     free (buffer);
 
-  buffer = xmalloc (len);
+  buffer = (unsigned char *) xmalloc (len);
   memcpy (buffer, myaddr, len);
   check_mem_write (memaddr, buffer, myaddr, len);
   res = (*the_target->write_memory) (memaddr, buffer, len);
@@ -183,7 +181,7 @@ start_non_stop (int nonstop)
 void
 set_target_ops (struct target_ops *target)
 {
-  the_target = (struct target_ops *) xmalloc (sizeof (*the_target));
+  the_target = XNEW (struct target_ops);
   memcpy (the_target, target, sizeof (*the_target));
 }
 
@@ -217,4 +215,28 @@ kill_inferior (int pid)
   gdb_agent_about_to_close (pid);
 
   return (*the_target->kill) (pid);
+}
+
+/* Target can do hardware single step.  */
+
+int
+target_can_do_hardware_single_step (void)
+{
+  return 1;
+}
+
+/* Default implementation for breakpoint_kind_for_pc.
+
+   The default behavior for targets that don't implement breakpoint_kind_for_pc
+   is to use the size of a breakpoint as the kind.  */
+
+int
+default_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+{
+  int size = 0;
+
+  gdb_assert (the_target->sw_breakpoint_from_kind != NULL);
+
+  (*the_target->sw_breakpoint_from_kind) (0, &size);
+  return size;
 }

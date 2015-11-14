@@ -370,7 +370,7 @@ typedef struct dll_name_list_t
 {
   dll_name_list_node_type * head;
   dll_name_list_node_type * tail;
-} dll_name_list_type; 
+} dll_name_list_type;
 
 /* Types used to pass data to iterator functions.  */
 typedef struct symname_search_data_t
@@ -383,7 +383,7 @@ typedef struct identify_data_t
 {
    dll_name_list_type * list;
    bfd_boolean          ms_style_implib;
-} identify_data_type; 
+} identify_data_type;
 
 
 static char *head_label;
@@ -482,7 +482,7 @@ static char * mcore_elf_linker_flags = NULL;
 #endif
 
 /* What's the right name for this ?  */
-#define PATHMAX 250		
+#define PATHMAX 250
 
 /* External name alias numbering starts here.  */
 #define PREFIX_ALIAS_BASE	20000
@@ -588,7 +588,7 @@ static const unsigned char ppc_jtab[] =
 static bfd_vma ppc_glue_insn = 0x80410004;
 #endif
 
-static const char i386_trampoline[] =  
+static const char i386_trampoline[] =
   "\tpushl %%ecx\n"
   "\tpushl %%edx\n"
   "\tpushl %%eax\n"
@@ -598,7 +598,7 @@ static const char i386_trampoline[] =
   "\tpopl %%ecx\n"
   "\tjmp *%%eax\n";
 
-static const char i386_x64_trampoline[] =  
+static const char i386_x64_trampoline[] =
   "\tpushq %%rcx\n"
   "\tpushq %%rdx\n"
   "\tpushq %%r8\n"
@@ -1084,7 +1084,7 @@ set_dll_name_from_def (const char *name, char is_dll)
   if (image_basename != name)
     non_fatal (_("%s: Path components stripped from image name, '%s'."),
 	      def_file, name);
-  /* Append the default suffix, if none specified.  */ 
+  /* Append the default suffix, if none specified.  */
   if (strchr (image_basename, '.') == 0)
     {
       const char * suffix = is_dll ? ".dll" : ".exe";
@@ -2036,7 +2036,7 @@ gen_exp_file (void)
     fatal (_("Unable to open temporary assembler file: %s"), TMP_ASM);
 
   temp_file_to_remove[TEMP_EXPORT_FILE] = TMP_ASM;
-  
+
   /* xgettext:c-format */
   inform (_("Opened temporary file: %s"), TMP_ASM);
 
@@ -2746,7 +2746,7 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	    {
 	      si->data = xmalloc (4);
 	      si->size = 4;
-	      
+
 	      if (exp->noname)
 	        {
 		  si->data[0] = exp->ordinal ;
@@ -2953,7 +2953,7 @@ make_one_lib_file (export_type *exp, int i, int delay)
     /* xgettext:c-format */
     fatal (_("bfd_open failed reopen stub file: %s: %s"),
 	   outname, bfd_get_errmsg ());
- 
+
   return abfd;
 }
 
@@ -3219,7 +3219,7 @@ gen_lib_file (int delay)
   inform (_("Creating library file: %s"), imp_name);
 
   xatexit (unlink_temp_files);
-  
+
   bfd_set_format (outarch, bfd_archive);
   outarch->has_armap = 1;
   outarch->is_thin_archive = 0;
@@ -3344,7 +3344,7 @@ dll_name_list_append (dll_name_list_type * list, bfd_byte * data)
 
 /* Count the number of entries in list.  */
 
-static int 
+static int
 dll_name_list_count (dll_name_list_type * list)
 {
   dll_name_list_node_type * p;
@@ -3366,7 +3366,7 @@ dll_name_list_count (dll_name_list_type * list)
 
 /* Print each entry in list to stdout.  */
 
-static void 
+static void
 dll_name_list_print (dll_name_list_type * list)
 {
   dll_name_list_node_type * p;
@@ -3401,7 +3401,7 @@ dll_name_list_free (dll_name_list_type * list)
 /* Recursive function to free all nodes entry->next->next...
    as well as entry itself.  */
 
-static void 
+static void
 dll_name_list_free_contents (dll_name_list_node_type * entry)
 {
   if (entry)
@@ -3422,7 +3422,7 @@ dll_name_list_free_contents (dll_name_list_node_type * entry)
 
 /* Allocate and initialize a dll_name_list_type object,
    including its sentinel node.  Caller is responsible
-   for calling dll_name_list_free when finished with 
+   for calling dll_name_list_free when finished with
    the list.  */
 
 static dll_name_list_type *
@@ -3446,9 +3446,9 @@ dll_name_list_create (void)
    OBJ (where obj is cast to const char *).  If found, set global variable
    identify_member_contains_symname_result TRUE.  It is the caller's
    responsibility to set the result variable FALSE before iterating with
-   this function.  */   
+   this function.  */
 
-static void 
+static void
 identify_member_contains_symname (bfd  * abfd,
 				  bfd  * archive_bfd ATTRIBUTE_UNUSED,
 				  void * obj)
@@ -3504,9 +3504,9 @@ identify_member_contains_symname (bfd  * abfd,
    of all sections which meet the criteria to a linked list of dll names.
 
    Finally, print them all to stdout. (If --identify-strict, an error is
-   reported if more than one match was found).  */   
+   reported if more than one match was found).  */
 
-static void 
+static void
 identify_dll_for_implib (void)
 {
   bfd * abfd = NULL;
@@ -3544,7 +3544,7 @@ identify_dll_for_implib (void)
 			   (void *)(& search_data));
   if (search_data.found)
     identify_data.ms_style_implib = TRUE;
-  
+
   /* Rewind the bfd.  */
   if (! bfd_close (abfd))
     bfd_fatal (identify_imp_name);
@@ -3559,7 +3559,7 @@ identify_dll_for_implib (void)
 
       fatal (_("%s is not a library"), identify_imp_name);
     }
- 
+
   /* Now search for the dll name.  */
   identify_search_archive (abfd,
 			   identify_search_member,
@@ -3593,10 +3593,10 @@ identify_dll_for_implib (void)
 
 /* Loop over all members of the archive, applying the supplied function to
    each member that is a bfd_object.  The function will be called as if:
-      func (member_bfd, abfd, user_storage)  */   
+      func (member_bfd, abfd, user_storage)  */
 
 static void
-identify_search_archive (bfd * abfd, 
+identify_search_archive (bfd * abfd,
 			 void (* operation) (bfd *, bfd *, void *),
 			 void * user_storage)
 {
@@ -3644,7 +3644,7 @@ identify_search_archive (bfd * abfd,
 }
 
 /* Call the identify_search_section() function for each section of this
-   archive member.  */   
+   archive member.  */
 
 static void
 identify_search_member (bfd  *abfd,
@@ -3656,7 +3656,7 @@ identify_search_member (bfd  *abfd,
 
 /* This predicate returns true if section->name matches the desired value.
    By default, this is .idata$7 (.idata$6 on PPC, or if the import
-   library is ms-style).  */   
+   library is ms-style).  */
 
 static bfd_boolean
 identify_process_section_p (asection * section, bfd_boolean ms_style_implib)
@@ -3669,10 +3669,10 @@ identify_process_section_p (asection * section, bfd_boolean ms_style_implib)
   ".idata$7";
 #endif
   static const char * MS_SECTION_NAME = ".idata$6";
-  
+
   const char * section_name =
     (ms_style_implib ? MS_SECTION_NAME : SECTION_NAME);
-  
+
   if (strcmp (section_name, section->name) == 0)
     return TRUE;
   return FALSE;
@@ -3719,7 +3719,7 @@ identify_search_section (bfd * abfd, asection * section, void * obj)
 
   /* Use a heuristic to determine if data is a dll name.
      Possible to defeat this if (a) the library has MANY
-     (more than 0x302f) imports, (b) it is an ms-style 
+     (more than 0x302f) imports, (b) it is an ms-style
      import library, but (c) it is buggy, in that the SEC_DATA
      flag is set on the "wrong" sections.  This heuristic might
      also fail to record a valid dll name if the dllname uses
@@ -4263,8 +4263,8 @@ main (int ac, char **av)
     {
       /* If we are inferring dll_name from exp_name,
          strip off any path components, without emitting
-         a warning.  */  
-      const char* exp_basename = lbasename (exp_name); 
+         a warning.  */
+      const char* exp_basename = lbasename (exp_name);
       const int len = strlen (exp_basename) + 5;
       dll_name = xmalloc (len);
       strcpy (dll_name, exp_basename);

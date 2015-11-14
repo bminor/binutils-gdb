@@ -24,31 +24,22 @@
 proc test_histsize_history_setting { histsize size { env_var "GDBHISTSIZE" } } {
     global env
 
-    set have_old_gdbhistsize 0
-    if [info exists env($env_var)] {
-        set have_old_gdbhistsize 1
-        set old_gdbhistsize $env($env_var)
-    }
-    set env($env_var) $histsize
+    save_vars { env($env_var) } {
+	set env($env_var) $histsize
 
-    with_test_prefix "histsize=$histsize" {
-	gdb_exit
-	gdb_start
+	with_test_prefix "histsize=$histsize" {
+	    gdb_exit
+	    gdb_start
 
-	gdb_test "show history size" "The size of the command history is $size."
+	    gdb_test "show history size" "The size of the command history is $size."
 
-	if { $size == "0" } {
-	    gdb_test_no_output "show commands"
-	} elseif { $size != "1" } {
-	    gdb_test "show commands" \
-		     "    .  show history size\r\n    .  show commands"
-	}
-
-	if { $have_old_gdbhistsize } {
-	    set env($env_var) $old_gdbhistsize
-	} else {
-	    unset env($env_var)
-	}
+	    if { $size == "0" } {
+		gdb_test_no_output "show commands"
+	    } elseif { $size != "1" } {
+		gdb_test "show commands" \
+		         "    .  show history size\r\n    .  show commands"
+	    }
+        }
     }
 }
 

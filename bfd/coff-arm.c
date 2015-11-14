@@ -1222,7 +1222,7 @@ coff_arm_relocate_section (bfd *output_bfd,
          relocations to be reflected in section's data.  */
       if (rel->r_type == ARM_26
           && h != NULL
-          && info->relocatable
+          && bfd_link_relocatable (info)
           && (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
           && (h->root.u.def.section->output_section
@@ -1255,7 +1255,7 @@ coff_arm_relocate_section (bfd *output_bfd,
 #ifdef ARM_WINCE
       /* MS ARM-CE makes the reloc relative to the opcode's pc, not
 	 the next opcode's pc, so is off by one.  */
-      if (howto->pc_relative && !info->relocatable)
+      if (howto->pc_relative && !bfd_link_relocatable (info))
 	addend -= 8;
 #endif
 
@@ -1265,7 +1265,7 @@ coff_arm_relocate_section (bfd *output_bfd,
          then we should ignore the symbol value.  */
       if (howto->pc_relative && howto->pcrel_offset)
         {
-          if (info->relocatable)
+          if (bfd_link_relocatable (info))
             continue;
 	  /* FIXME - it is not clear which targets need this next test
 	     and which do not.  It is known that it is needed for the
@@ -1311,7 +1311,7 @@ coff_arm_relocate_section (bfd *output_bfd,
              stub generation to the final linker pass. If we fail to
 	     verify that the name is defined, we'll try to build stubs
 	     for an undefined name...  */
-          if (! info->relocatable
+          if (! bfd_link_relocatable (info)
 	      && (   h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak))
             {
@@ -1561,7 +1561,7 @@ coff_arm_relocate_section (bfd *output_bfd,
 		     + sec->output_offset);
 	      }
 
-	  else if (! info->relocatable)
+	  else if (! bfd_link_relocatable (info))
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
@@ -1582,7 +1582,7 @@ coff_arm_relocate_section (bfd *output_bfd,
 	rstat = bfd_reloc_ok;
 #ifndef ARM_WINCE
       /* Only perform this fix during the final link, not a relocatable link.  */
-      else if (! info->relocatable
+      else if (! bfd_link_relocatable (info)
 	       && howto->type == ARM_THUMB23)
         {
           /* This is pretty much a copy of what the default
@@ -1698,7 +1698,7 @@ coff_arm_relocate_section (bfd *output_bfd,
         }
 #endif
       else
-        if (info->relocatable && ! howto->partial_inplace)
+        if (bfd_link_relocatable (info) && ! howto->partial_inplace)
             rstat = bfd_reloc_ok;
         else
 	  rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
@@ -1706,7 +1706,7 @@ coff_arm_relocate_section (bfd *output_bfd,
 					    rel->r_vaddr - input_section->vma,
 					    val, addend);
       /* Only perform this fix during the final link, not a relocatable link.  */
-      if (! info->relocatable
+      if (! bfd_link_relocatable (info)
 	  && (rel->r_type == ARM_32 || rel->r_type == ARM_RVA32))
 	{
 	  /* Determine if we need to set the bottom bit of a relocated address
@@ -1968,7 +1968,7 @@ bfd_arm_get_bfd_for_interworking (bfd * 		 abfd,
 
   /* If we are only performing a partial link do not bother
      getting a bfd to hold the glue.  */
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   globals = coff_arm_hash_table (info);
@@ -2021,7 +2021,7 @@ bfd_arm_process_before_allocation (bfd *                   abfd,
 
   /* If we are only performing a partial link do not bother
      to construct any glue.  */
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   /* Here we have a bfd that is to be included on the link.  We have a hook

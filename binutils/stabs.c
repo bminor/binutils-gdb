@@ -1774,7 +1774,7 @@ parse_stab_range_type (void *dhandle, struct stab_handle *info, const char *type
 	  else if (n3 == (bfd_signed_vma) 0xffffffff)
 	    return debug_make_int_type (dhandle, 4, TRUE);
 #ifdef BFD64
-	  else if (n3 == ((((bfd_signed_vma) 0xffffffff) << 32) | 0xffffffff))
+	  else if (n3 == (bfd_signed_vma) 0xffffffffffffffffLL)
 	    return debug_make_int_type (dhandle, 8, TRUE);
 #endif
 	}
@@ -5175,7 +5175,7 @@ stab_demangle_v3_arglist (void *dhandle, struct stab_handle *info,
 	 context for a function with no arguments.  */
       if (dc->u.s_binary.left == NULL)
 	break;
- 
+
       arg = stab_demangle_v3_arg (dhandle, info, dc->u.s_binary.left,
 				  NULL, &varargs);
       if (arg == NULL)

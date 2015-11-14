@@ -670,8 +670,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
       char *p, c;
       offsetT value;
 
-      p = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (& p);
 
       if (strcmp (p, "basic_block") == 0)
 	{
@@ -690,7 +689,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	}
       else if (strcmp (p, "is_stmt") == 0)
 	{
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	  value = get_absolute_expression ();
 	  if (value == 0)
 	    current.flags &= ~DWARF2_FLAG_IS_STMT;
@@ -704,7 +703,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	}
       else if (strcmp (p, "isa") == 0)
 	{
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	  value = get_absolute_expression ();
 	  if (value >= 0)
 	    current.isa = value;
@@ -716,7 +715,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	}
       else if (strcmp (p, "discriminator") == 0)
 	{
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	  value = get_absolute_expression ();
 	  if (value >= 0)
 	    current.discriminator = value;
@@ -729,11 +728,11 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
       else
 	{
 	  as_bad (_("unknown .loc sub-directive `%s'"), p);
-	  *input_line_pointer = c;
+	  (void) restore_line_pointer (c);
 	  return;
 	}
 
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
     }
 
   demand_empty_rest_of_line ();
@@ -1296,7 +1295,7 @@ process_entries (segT seg, struct line_entry *e)
 	 section, as well as our sub-sections, and we have to ensure
 	 that all of the sub-sections are merged into a proper
 	 .debug_line section before a debugger sees them.  */
-	 
+
       sec_name = bfd_get_section_name (stdoutput, seg);
       if (strcmp (sec_name, ".text") != 0)
 	{

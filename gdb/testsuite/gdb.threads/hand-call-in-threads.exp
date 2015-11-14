@@ -84,10 +84,25 @@ set total_nr_threads [expr $NR_THREADS + 1]
 # Thread numbering in gdb is origin-1, so begin numbering at 1.
 for { set i 1 } { $i <= $total_nr_threads } { incr i } {
     set thread_nr $i
-    gdb_test "thread $thread_nr" ".*" \
+    gdb_test "thread $thread_nr" \
+	".*Switching to thread $thread_nr.*" \
 	"prepare to make hand call, thread $thread_nr"
-    gdb_test "call hand_call()" "Breakpoint 3, .*" \
-	"hand call, thread $thread_nr"
+    gdb_test_multiple "call hand_call()" "" {
+	-re "Breakpoint 3, .*$gdb_prompt $" {
+	    pass "hand call, thread $thread_nr"
+	}
+	-re "$gdb_prompt $" {
+	    fail "hand call, thread $thread_nr (got gdb prompt)"
+	}
+	timeout {
+	    # If the target fails to stop at the breakpoint, it just ends
+	    # up in an infinite loop in hand_call().  If this happens
+	    # and we have lost the GDB prompt, no further tests in
+	    # this file will work and there is no point in continuing.
+	    fail "hand call, thread $thread_nr (runaway target)"
+	    return 0
+	}
+    }
 }
 
 # Now have each hand-called function return.

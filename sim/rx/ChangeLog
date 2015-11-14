@@ -1,3 +1,12 @@
+2015-11-10  Nick Clifton  <nickc@redhat.com>
+
+	* rx.c (id_names): Add nop4, nop5, nop6 and nop7.
+	(decode_opcode): Likewise.
+	(get_op): Handle RX_Operand_Zero_Indirect.
+	Handle RX_Bad_Size and RX_MAX_SIZE.
+	(put_op): Likewise.
+	(N_MAP): Increase to 90.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_ARG_ENABLE(cycle-accurate)): Call AS_HELP_STRING.
@@ -84,7 +93,7 @@
 
 	PR gdb/7205
 
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 
@@ -258,10 +267,10 @@
 
 2010-01-30  Masaki Muranaka  <monaka@monami-software.com>
 
-        * configure.in: Check if the host has getopt.h.
-        * configure: Regenerate.
-        * config.in: Regenerate.
-        * main.c: Include config.h.
+	* configure.in: Check if the host has getopt.h.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* main.c: Include config.h.
 	Use HAVE_STDLIB_H, HAVE_UNISTD_H, HAVE_GETOPT_H.
 	Include getopt.h in case HAVE_GETOPT_H is defined.
 

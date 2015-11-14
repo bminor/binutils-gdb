@@ -230,11 +230,10 @@ s_proc (int end_p)
 	  return;
 	}
 
-      name = input_line_pointer;
-      delim1 = get_symbol_end ();
+      delim1 = get_symbol_name (&name);
       name = xstrdup (name);
       *input_line_pointer = delim1;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
 
       if (*input_line_pointer != ',')
 	{
@@ -257,10 +256,9 @@ s_proc (int end_p)
 	{
 	  ++input_line_pointer;
 	  SKIP_WHITESPACE ();
-	  label = input_line_pointer;
-	  delim2 = get_symbol_end ();
+	  delim2 = get_symbol_name (&label);
 	  label = xstrdup (label);
-	  *input_line_pointer = delim2;
+	  (void) restore_line_pointer (delim2);
 	}
 
       current_name = name;
@@ -803,7 +801,7 @@ machine_ip (char *str)
 	      continue;
 	    }
 
-	  the_insn.reloc        = (the_insn.HI) ? RELOC_DLX_HI16 
+	  the_insn.reloc        = (the_insn.HI) ? RELOC_DLX_HI16
 	    : (the_insn.LO ? RELOC_DLX_LO16 : RELOC_DLX_16);
 	  the_insn.reloc_offset = 2;
 	  the_insn.size         = 2;

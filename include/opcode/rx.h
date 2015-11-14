@@ -38,6 +38,8 @@ typedef enum
   RX_SWord,
   RX_3Byte,
   RX_Long,
+  RX_Bad_Size,
+  RX_MAX_SIZE
 } RX_Size;
 
 typedef enum
@@ -46,6 +48,7 @@ typedef enum
   RX_Operand_Immediate,	/* #addend */
   RX_Operand_Register,	/* Rn */
   RX_Operand_Indirect,	/* [Rn + addend] */
+  RX_Operand_Zero_Indirect,/* [Rn] */
   RX_Operand_Postinc,	/* [Rn+] */
   RX_Operand_Predec,	/* [-Rn] */
   RX_Operand_Condition,	/* eq, gtu, etc */
@@ -101,6 +104,10 @@ typedef enum
   RXO_nop,
   RXO_nop2,
   RXO_nop3,
+  RXO_nop4,
+  RXO_nop5,
+  RXO_nop6,
+  RXO_nop7,
 
   RXO_scmpu,
   RXO_smovu,

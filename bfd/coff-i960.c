@@ -322,7 +322,7 @@ coff_i960_start_final_link (bfd *abfd, struct bfd_link_info *info)
   asection *o;
   bfd_byte *esym;
 
-  if (! info->relocatable)
+  if (! bfd_link_relocatable (info))
     return TRUE;
 
   esym = (bfd_byte *) bfd_malloc (symesz);
@@ -447,7 +447,7 @@ coff_i960_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		     + sec->output_section->vma
 		     + sec->output_offset);
 	    }
-	  else if (! info->relocatable)
+	  else if (! bfd_link_relocatable (info))
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
@@ -458,7 +458,7 @@ coff_i960_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       done = FALSE;
 
-      if (howto->type == R_OPTCALL && ! info->relocatable && symndx != -1)
+      if (howto->type == R_OPTCALL && ! bfd_link_relocatable (info) && symndx != -1)
 	{
 	  int class_val;
 

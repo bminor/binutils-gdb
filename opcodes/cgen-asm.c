@@ -212,7 +212,7 @@ cgen_parse_keyword (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
      character of the suffix ('.') is special.  */
   if (*p)
     ++p;
-  
+
   /* Allow letters, digits, and any special characters.  */
   while (((p - start) < (int) sizeof (buf))
 	 && *p
@@ -280,7 +280,7 @@ cgen_parse_signed_integer (CGEN_CPU_DESC cd,
 	  && value > 0
 	  && (value & 0x80000000)
 	  && ((value >> 31) == 1))
-	value |= -1 << 31;
+	value |= ((bfd_vma) -1) << 31;
 
       *valuep = value;
     }

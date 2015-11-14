@@ -33,12 +33,6 @@
 #include "elf/x86-64.h"
 #include "opcodes/i386-init.h"
 
-#ifdef TE_LINUX
-/* Default to compress debug sections for Linux.  */
-enum compressed_debug_section_type flag_compress_debug
-  = COMPRESS_DEBUG_GNU_ZLIB;
-#endif
-
 #ifndef REGISTER_WARNINGS
 #define REGISTER_WARNINGS 1
 #endif
@@ -797,7 +791,7 @@ static const arch_entry cpu_arch[] =
   { STRING_COMMA_LEN ("bdver4"), PROCESSOR_BD,
     CPU_BDVER4_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("znver1"), PROCESSOR_ZNVER,
-    CPU_ZNVER1_FLAGS, 0, 0 }, 
+    CPU_ZNVER1_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("btver1"), PROCESSOR_BT,
     CPU_BTVER1_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("btver2"), PROCESSOR_BT,
@@ -954,6 +948,8 @@ static const arch_entry cpu_arch[] =
     CPU_AVX512VBMI_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".clzero"), PROCESSOR_UNKNOWN,
     CPU_CLZERO_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".mwaitx"), PROCESSOR_UNKNOWN,
+    CPU_MWAITX_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF
@@ -2196,8 +2192,8 @@ set_intel_syntax (int syntax_flag)
   SKIP_WHITESPACE ();
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      char *string = input_line_pointer;
-      int e = get_symbol_end ();
+      char *string;
+      int e = get_symbol_name (&string);
 
       if (strcmp (string, "prefix") == 0)
 	ask_naked_reg = 1;
@@ -2205,7 +2201,7 @@ set_intel_syntax (int syntax_flag)
 	ask_naked_reg = -1;
       else
 	as_bad (_("bad argument to syntax directive."));
-      *input_line_pointer = e;
+      (void) restore_line_pointer (e);
     }
   demand_empty_rest_of_line ();
 
@@ -2257,8 +2253,8 @@ set_check (int what)
 
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      char *string = input_line_pointer;
-      int e = get_symbol_end ();
+      char *string;
+      int e = get_symbol_name (&string);
 
       if (strcmp (string, "none") == 0)
 	*kind = check_none;
@@ -2268,7 +2264,7 @@ set_check (int what)
 	*kind = check_error;
       else
 	as_bad (_("bad argument to %s_check directive."), str);
-      *input_line_pointer = e;
+      (void) restore_line_pointer (e);
     }
   else
     as_bad (_("missing argument for %s_check directive"), str);
@@ -2322,8 +2318,8 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      char *string = input_line_pointer;
-      int e = get_symbol_end ();
+      char *string;
+      int e = get_symbol_name (&string);
       unsigned int j;
       i386_cpu_flags flags;
 
@@ -2383,7 +2379,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  cpu_arch_flags = flags;
 		  cpu_arch_isa_flags = flags;
 		}
-	      *input_line_pointer = e;
+	      (void) restore_line_pointer (e);
 	      demand_empty_rest_of_line ();
 	      return;
 	    }
@@ -2400,8 +2396,11 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
   if (*input_line_pointer == ','
       && !is_end_of_line[(unsigned char) input_line_pointer[1]])
     {
-      char *string = ++input_line_pointer;
-      int e = get_symbol_end ();
+      char *string;
+      char e;
+
+      ++input_line_pointer;
+      e = get_symbol_name (&string);
 
       if (strcmp (string, "nojumps") == 0)
 	no_cond_jump_promotion = 1;
@@ -2410,7 +2409,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
       else
 	as_bad (_("no such architecture modifier: `%s'"), string);
 
-      *input_line_pointer = e;
+      (void) restore_line_pointer (e);
     }
 
   demand_empty_rest_of_line ();
@@ -2929,6 +2928,7 @@ tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
       || fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
       || fixP->fx_r_type == BFD_RELOC_386_GOT32
+      || fixP->fx_r_type == BFD_RELOC_386_GOT32X
       || fixP->fx_r_type == BFD_RELOC_386_TLS_GD
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LDM
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LDO_32
@@ -2942,6 +2942,8 @@ tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
       || fixP->fx_r_type == BFD_RELOC_X86_64_PLT32
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOT32
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOTPCREL
+      || fixP->fx_r_type == BFD_RELOC_X86_64_GOTPCRELX
+      || fixP->fx_r_type == BFD_RELOC_X86_64_REX_GOTPCRELX
       || fixP->fx_r_type == BFD_RELOC_X86_64_TLSGD
       || fixP->fx_r_type == BFD_RELOC_X86_64_TLSLD
       || fixP->fx_r_type == BFD_RELOC_X86_64_DTPOFF32
@@ -3343,6 +3345,34 @@ process_immext (void)
 	  as_bad (_("can't use register '%s%s' as operand %d in '%s'."),
 		  register_prefix, i.op[x].regs->reg_name, x + 1,
 		  i.tm.name);
+
+      i.operands = 0;
+    }
+
+  if (i.tm.cpu_flags.bitfield.cpumwaitx && i.operands > 0)
+    {
+      /* MONITORX/MWAITX instructions have fixed operands with an opcode
+	 suffix which is coded in the same place as an 8-bit immediate
+	 field would be.
+	 Here we check those operands and remove them afterwards.  */
+      unsigned int x;
+
+      if (i.operands != 3)
+	abort();
+
+      for (x = 0; x < 2; x++)
+	if (register_number (i.op[x].regs) != x)
+	  goto bad_register_operand;
+
+      /* Check for third operand for mwaitx/monitorx insn.  */
+      if (register_number (i.op[x].regs)
+	  != (x + (i.tm.extension_opcode == 0xfb)))
+	{
+bad_register_operand:
+	  as_bad (_("can't use register '%s%s' as operand %d in '%s'."),
+		  register_prefix, i.op[x].regs->reg_name, x+1,
+		  i.tm.name);
+	}
 
       i.operands = 0;
     }
@@ -3937,14 +3967,14 @@ parse_operands (char *l, const char *mnemonic)
       /* Skip optional white space before operand.  */
       if (is_space_char (*l))
 	++l;
-      if (!is_operand_char (*l) && *l != END_OF_INSN)
+      if (!is_operand_char (*l) && *l != END_OF_INSN && *l != '"')
 	{
 	  as_bad (_("invalid character %s before operand %d"),
 		  output_invalid (*l),
 		  i.operands + 1);
 	  return NULL;
 	}
-      token_start = l;	/* after white space */
+      token_start = l;	/* After white space.  */
       paren_not_balanced = 0;
       while (paren_not_balanced || *l != ',')
 	{
@@ -3963,7 +3993,7 @@ parse_operands (char *l, const char *mnemonic)
 	      else
 		break;	/* we are done */
 	    }
-	  else if (!is_operand_char (*l) && !is_space_char (*l))
+	  else if (!is_operand_char (*l) && !is_space_char (*l) && *l != '"')
 	    {
 	      as_bad (_("invalid character %s in operand %d"),
 		      output_invalid (*l),
@@ -4763,6 +4793,10 @@ match_template (void)
 	      break;
 	    }
 	  }
+
+      /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
+      if (i.reloc[0] == BFD_RELOC_386_GOT32 && t->base_opcode == 0xa0)
+	continue;
 
       /* We check register size if needed.  */
       check_register = t->opcode_modifier.checkregsize;
@@ -7130,6 +7164,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	      int size = disp_size (n);
 	      int sign = i.types[n].bitfield.disp32s;
 	      int pcrel = (i.flags[n] & Operand_PCrel) != 0;
+	      fixS *fixP;
 
 	      /* We can't have 8 bit displacement here.  */
 	      gas_assert (!i.types[n].bitfield.disp8);
@@ -7198,8 +7233,34 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		       insn, and that is taken care of in other code.  */
 		    reloc_type = BFD_RELOC_X86_64_GOTPC32;
 		}
-	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-			   i.op[n].disps, pcrel, reloc_type);
+	      fixP = fix_new_exp (frag_now, p - frag_now->fr_literal,
+				  size, i.op[n].disps, pcrel,
+				  reloc_type);
+	      /* Check for "call/jmp *mem", "mov mem, %reg",
+		 "test %reg, mem" and "binop mem, %reg" where binop
+		 is one of adc, add, and, cmp, or, sbb, sub, xor
+		 instructions.  */
+	      if ((i.rm.mode == 2
+		   || (i.rm.mode == 0 && i.rm.regmem == 5))
+		  && ((i.operands == 1
+		       && i.tm.base_opcode == 0xff
+		       && (i.rm.reg == 2 || i.rm.reg == 4))
+		      || (i.operands == 2
+			  && (i.tm.base_opcode == 0x8b
+			      || i.tm.base_opcode == 0x85
+			      || (i.tm.base_opcode & 0xc7) == 0x03))))
+		{
+		  if (object_64bit)
+		    {
+		      fixP->fx_tcbit = i.rex != 0;
+		      if (i.base_reg
+			  && (i.base_reg->reg_num == RegRip
+			      || i.base_reg->reg_num == RegEip))
+		      fixP->fx_tcbit2 = 1;
+		    }
+		  else
+		    fixP->fx_tcbit2 = 1;
+		}
 	    }
 	}
     }
@@ -8607,6 +8668,7 @@ i386_att_operand (char *operand_string)
     }
   else if (is_digit_char (*op_string)
 	   || is_identifier_char (*op_string)
+	   || *op_string == '"'
 	   || *op_string == '(')
     {
       /* This is a memory reference of some sort.  */
@@ -9441,7 +9503,7 @@ parse_register (char *reg_string, char **end_op)
       symbolS *symbolP;
 
       input_line_pointer = reg_string;
-      c = get_symbol_end ();
+      c = get_symbol_name (&reg_string);
       symbolP = symbol_find (reg_string);
       if (symbolP && S_GET_SEGMENT (symbolP) == reg_section)
 	{
@@ -10255,7 +10317,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
       int align;
 
       align = bfd_get_section_alignment (stdoutput, segment);
-      size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+      size = ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
     }
 #endif
 
@@ -10293,23 +10355,41 @@ s_bss (int ignore ATTRIBUTE_UNUSED)
 void
 i386_validate_fix (fixS *fixp)
 {
-  if (fixp->fx_subsy && fixp->fx_subsy == GOT_symbol)
+  if (fixp->fx_subsy)
     {
-      if (fixp->fx_r_type == BFD_RELOC_32_PCREL)
+      if (fixp->fx_subsy == GOT_symbol)
 	{
-	  if (!object_64bit)
-	    abort ();
-	  fixp->fx_r_type = BFD_RELOC_X86_64_GOTPCREL;
-	}
-      else
-	{
-	  if (!object_64bit)
-	    fixp->fx_r_type = BFD_RELOC_386_GOTOFF;
+	  if (fixp->fx_r_type == BFD_RELOC_32_PCREL)
+	    {
+	      if (!object_64bit)
+		abort ();
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+	      if (fixp->fx_tcbit2)
+		fixp->fx_r_type = (fixp->fx_tcbit
+				   ? BFD_RELOC_X86_64_REX_GOTPCRELX
+				   : BFD_RELOC_X86_64_GOTPCRELX);
+	      else
+#endif
+		fixp->fx_r_type = BFD_RELOC_X86_64_GOTPCREL;
+	    }
 	  else
-	    fixp->fx_r_type = BFD_RELOC_X86_64_GOTOFF64;
+	    {
+	      if (!object_64bit)
+		fixp->fx_r_type = BFD_RELOC_386_GOTOFF;
+	      else
+		fixp->fx_r_type = BFD_RELOC_X86_64_GOTOFF64;
+	    }
+	  fixp->fx_subsy = 0;
 	}
-      fixp->fx_subsy = 0;
     }
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  else if (!object_64bit)
+    {
+      if (fixp->fx_r_type == BFD_RELOC_386_GOT32
+	  && fixp->fx_tcbit2)
+	fixp->fx_r_type = BFD_RELOC_386_GOT32X;
+    }
+#endif
 }
 
 arelent *
@@ -10343,8 +10423,11 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     case BFD_RELOC_X86_64_PLT32:
     case BFD_RELOC_X86_64_GOT32:
     case BFD_RELOC_X86_64_GOTPCREL:
+    case BFD_RELOC_X86_64_GOTPCRELX:
+    case BFD_RELOC_X86_64_REX_GOTPCRELX:
     case BFD_RELOC_386_PLT32:
     case BFD_RELOC_386_GOT32:
+    case BFD_RELOC_386_GOT32X:
     case BFD_RELOC_386_GOTOFF:
     case BFD_RELOC_386_GOTPC:
     case BFD_RELOC_386_TLS_GD:
@@ -10496,6 +10579,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  case BFD_RELOC_X86_64_PLT32:
 	  case BFD_RELOC_X86_64_GOT32:
 	  case BFD_RELOC_X86_64_GOTPCREL:
+	  case BFD_RELOC_X86_64_GOTPCRELX:
+	  case BFD_RELOC_X86_64_REX_GOTPCRELX:
 	  case BFD_RELOC_X86_64_TLSGD:
 	  case BFD_RELOC_X86_64_TLSLD:
 	  case BFD_RELOC_X86_64_GOTTPOFF:

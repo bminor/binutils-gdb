@@ -269,6 +269,16 @@ struct coff_link_hash_table
   struct stab_info stab_info;
 };
 
+struct coff_reloc_cookie
+{
+  struct internal_reloc *         rels;
+  struct internal_reloc *         rel;
+  struct internal_reloc *         relend;
+  struct coff_symbol_struct *     symbols;	/* Symtab for input bfd.  */
+  bfd *                           abfd;
+  struct coff_link_hash_entry **  sym_hashes;
+};
+
 /* Look up an entry in a COFF linker hash table.  */
 
 #define coff_link_hash_lookup(table, string, create, copy, follow)	\
@@ -566,6 +576,8 @@ extern bfd_boolean _bfd_coff_link_input_bfd
 extern bfd_boolean _bfd_coff_reloc_link_order
   (bfd *, struct coff_final_link_info *, asection *,
    struct bfd_link_order *);
+extern bfd_boolean bfd_coff_gc_sections
+  (bfd *, struct bfd_link_info *);
 
 
 #define coff_get_section_contents_in_window \
@@ -672,6 +684,10 @@ enum coff_symbol_classification
   /* PE section symbol.  */
   COFF_SYMBOL_PE_SECTION
 };
+
+typedef asection * (*coff_gc_mark_hook_fn)
+  (asection *, struct bfd_link_info *, struct internal_reloc *,
+   struct coff_link_hash_entry *, struct internal_syment *);
 
 typedef struct
 {

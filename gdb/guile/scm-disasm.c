@@ -76,12 +76,14 @@ dascm_make_insn (CORE_ADDR pc, const char *assembly, int insn_len)
    Scheme port.  Called via gdbscm_call_guile.
    The result is a statically allocated error message or NULL if success.  */
 
-static void *
+static const char *
 gdbscm_disasm_read_memory_worker (void *datap)
 {
-  struct gdbscm_disasm_read_data *data = datap;
+  struct gdbscm_disasm_read_data *data
+    = (struct gdbscm_disasm_read_data *) datap;
   struct disassemble_info *dinfo = data->dinfo;
-  struct gdbscm_disasm_data *disasm_data = dinfo->application_data;
+  struct gdbscm_disasm_data *disasm_data
+    = (struct gdbscm_disasm_data *) dinfo->application_data;
   SCM seekto, newpos, port = disasm_data->port;
   size_t bytes_read;
 
@@ -107,7 +109,7 @@ gdbscm_disasm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
 			   struct disassemble_info *dinfo)
 {
   struct gdbscm_disasm_read_data data;
-  void *status;
+  const char *status;
 
   data.memaddr = memaddr;
   data.myaddr = myaddr;
@@ -141,10 +143,11 @@ gdbscm_disasm_memory_error (int status, bfd_vma memaddr,
 static void
 gdbscm_disasm_print_address (bfd_vma addr, struct disassemble_info *info)
 {
-  struct gdbscm_disasm_data *data = info->application_data;
+  struct gdbscm_disasm_data *data
+    = (struct gdbscm_disasm_data *) info->application_data;
   struct gdbarch *gdbarch = data->gdbarch;
 
-  print_address (gdbarch, addr, info->stream);
+  print_address (gdbarch, addr, (struct ui_file *) info->stream);
 }
 
 /* Subroutine of gdbscm_arch_disassemble to simplify it.
@@ -318,7 +321,7 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
 
 static const scheme_function disasm_functions[] =
 {
-  { "arch-disassemble", 2, 0, 1, gdbscm_arch_disassemble,
+  { "arch-disassemble", 2, 0, 1, as_a_scm_t_subr (gdbscm_arch_disassemble),
     "\
 Return list of disassembled instructions in memory.\n\
 \n\

@@ -57,8 +57,6 @@ extern long md_pcrel_from_section (struct fix *, segT);
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
-#define GAS_CGEN_PCREL_R_TYPE(r_type) gas_cgen_pcrel_r_type(r_type)
-
 #define elf_tc_final_processing or1k_elf_final_processing
 void or1k_elf_final_processing (void);
 

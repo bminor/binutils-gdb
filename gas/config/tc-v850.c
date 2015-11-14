@@ -270,8 +270,7 @@ v850_comm (int area)
   symbolS *symbolP;
   int have_align;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
 
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
@@ -1005,15 +1004,14 @@ register_name (expressionS *expressionP)
   char c;
 
   /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
+  start = input_line_pointer;
+  c = get_symbol_name (&name);
 
   reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT,
 				name, FALSE);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   expressionP->X_add_symbol = NULL;
   expressionP->X_op_symbol  = NULL;
@@ -1057,14 +1055,13 @@ system_register_name (expressionS *expressionP,
   char c;
 
   /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
+  start = input_line_pointer;
+  c = get_symbol_name (&name);
   reg_number = reg_name_search (system_registers, SYSREG_NAME_CNT, name,
 				accept_numbers);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   if (reg_number < 0
       && accept_numbers)
@@ -1118,13 +1115,12 @@ cc_name (expressionS *expressionP,
   char c;
 
   /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
+  start = input_line_pointer;
+  c = get_symbol_name (&name);
   reg_number = reg_name_search (cc_names, CC_NAME_CNT, name, accept_numbers);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   if (reg_number < 0
       && accept_numbers)
@@ -1169,13 +1165,12 @@ float_cc_name (expressionS *expressionP,
   char c;
 
   /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
+  start = input_line_pointer;
+  c = get_symbol_name (&name);
   reg_number = reg_name_search (float_cc_names, FLOAT_CC_NAME_CNT, name, accept_numbers);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   if (reg_number < 0
       && accept_numbers)
@@ -1220,13 +1215,12 @@ cacheop_name (expressionS * expressionP,
   char c;
 
   /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
+  start = input_line_pointer;
+  c = get_symbol_name (&name);
   reg_number = reg_name_search (cacheop_names, CACHEOP_NAME_CNT, name, accept_numbers);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   if (reg_number < 0
       && accept_numbers)
@@ -1269,13 +1263,12 @@ prefop_name (expressionS * expressionP,
   char c;
 
   /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
+  start = input_line_pointer;
+  c = get_symbol_name (&name);
   reg_number = reg_name_search (prefop_names, PREFOP_NAME_CNT, name, accept_numbers);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   if (reg_number < 0
       && accept_numbers)
@@ -1317,15 +1310,14 @@ vector_register_name (expressionS *expressionP)
   char c;
 
   /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
+  start = input_line_pointer;
+  c = get_symbol_name (&name);
 
   reg_number = reg_name_search (vector_registers, VREG_NAME_CNT,
 				name, FALSE);
 
   /* Put back the delimiting char.  */
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   expressionP->X_add_symbol = NULL;
   expressionP->X_op_symbol  = NULL;
@@ -1767,7 +1759,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   /* Out of range conditional branch.  Emit a branch around a 22bit jump.  */
   else if (fragP->fr_subtype == SUBYPTE_COND_9_22 + 1
 	   || fragP->fr_subtype == SUBYPTE_COND_9_22_32 + 1
-	   || fragP->fr_subtype == SUBYPTE_COND_9_17_22 + 2 
+	   || fragP->fr_subtype == SUBYPTE_COND_9_17_22 + 2
 	   || fragP->fr_subtype == SUBYPTE_COND_9_17_22_32 + 2)
     {
       unsigned char *buffer =
@@ -1887,7 +1879,7 @@ valueT
 md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
-  return ((addr + (1 << align) - 1) & (-1 << align));
+  return ((addr + (1 << align) - 1) & -(1 << align));
 }
 
 void
@@ -2792,18 +2784,19 @@ md_assemble (char *str)
 	      else if ((operand->flags & V850_OPERAND_EP) != 0)
 		{
 		  char *start = input_line_pointer;
-		  char c = get_symbol_end ();
+		  char *name;
+		  char c = get_symbol_name (&name);
 
-		  if (strcmp (start, "ep") != 0 && strcmp (start, "r30") != 0)
+		  if (strcmp (name, "ep") != 0 && strcmp (name, "r30") != 0)
 		    {
 		      /* Put things back the way we found them.  */
-		      *input_line_pointer = c;
+		      (void) restore_line_pointer (c);
 		      input_line_pointer = start;
 		      errmsg = _("expected EP register");
 		      goto error;
 		    }
 
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  str = input_line_pointer;
 		  input_line_pointer = hold;
 
@@ -2850,6 +2843,7 @@ md_assemble (char *str)
 	      else if ((register_name (&ex)
 			&& (operand->flags & V850_OPERAND_REG) == 0))
 		{
+		  char *name;
 		  char c;
 		  int exists = 0;
 
@@ -2862,12 +2856,12 @@ md_assemble (char *str)
 
 		  input_line_pointer = str;
 
-		  c = get_symbol_end ();
+		  c = get_symbol_name (&name);
 
-		  if (symbol_find (str) != NULL)
+		  if (symbol_find (name) != NULL)
 		    exists = 1;
 
-		  *input_line_pointer = c;
+		  (void) restore_line_pointer (c);
 		  input_line_pointer = str;
 
 		  expression (&ex);

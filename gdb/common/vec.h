@@ -496,7 +496,7 @@ static inline void VEC_OP (T,free)					  \
 static inline void VEC_OP (T,cleanup)					  \
      (void *arg_)							  \
 {									  \
-  VEC(T) **vec_ = arg_;							  \
+  VEC(T) **vec_ = (VEC(T) **) arg_;					  \
   if (*vec_)								  \
     vec_free_ (*vec_);							  \
   *vec_ = NULL;								  \
@@ -573,7 +573,7 @@ static inline int VEC_OP (T,iterate)					  \
     }									  \
   else									  \
     {									  \
-      *ptr = 0;								  \
+      *ptr = (T) 0;							  \
       return 0;								  \
     }									  \
 }									  \
@@ -743,7 +743,7 @@ static inline void VEC_OP (T,free)					  \
 static inline void VEC_OP (T,cleanup)					  \
      (void *arg_)							  \
 {									  \
-  VEC(T) **vec_ = arg_;							  \
+  VEC(T) **vec_ = (VEC(T) **) arg_;					  \
   if (*vec_)								  \
     vec_free_ (*vec_);							  \
   *vec_ = NULL;								  \
@@ -1053,7 +1053,7 @@ static inline void VEC_OP (T,free)					  \
 static inline void VEC_OP (T,cleanup)					  \
      (void *arg_)							  \
 {									  \
-  VEC(T) **vec_ = arg_;							  \
+  VEC(T) **vec_ = (VEC(T) **) arg_;					  \
   if (*vec_)								  \
     vec_free_ (*vec_);							  \
   *vec_ = NULL;								  \

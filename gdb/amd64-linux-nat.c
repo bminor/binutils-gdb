@@ -23,7 +23,7 @@
 #include "regcache.h"
 #include "elf/common.h"
 #include <sys/uio.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/prctl.h>
 #include <sys/reg.h>
 #include "gregset.h"

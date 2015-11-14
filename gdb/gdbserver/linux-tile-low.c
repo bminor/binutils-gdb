@@ -21,7 +21,7 @@
 #include "linux-low.h"
 
 #include <arch/abi.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 /* Defined in auto-generated file reg-tilegx.c.  */
 void init_registers_tilegx (void);
@@ -88,6 +88,15 @@ tile_set_pc (struct regcache *regcache, CORE_ADDR pc)
 static uint64_t tile_breakpoint = 0x400b3cae70166000ULL;
 #define tile_breakpoint_len 8
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+tile_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = tile_breakpoint_len;
+  return (const gdb_byte *) &tile_breakpoint;
+}
+
 static int
 tile_breakpoint_at (CORE_ADDR where)
 {
@@ -126,7 +135,7 @@ static struct regset_info tile_regsets[] =
 {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, tile_num_regs * 8,
     GENERAL_REGS, tile_fill_gregset, tile_store_gregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info tile_regsets_info =
@@ -182,8 +191,8 @@ struct linux_target_ops the_low_target =
   NULL,
   tile_get_pc,
   tile_set_pc,
-  (const unsigned char *) &tile_breakpoint,
-  tile_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  tile_sw_breakpoint_from_kind,
   NULL,
   0,
   tile_breakpoint_at,

@@ -19,6 +19,9 @@ if {![dwarf2_support]} {
     return 0   
 }
 
+# Some targets have leading underscores on assembly symbols.
+set additional_flags [gdb_target_symbol_prefix_flags_asm]
+
 standard_testfile .S
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" $binfile \

@@ -18,7 +18,7 @@
 
 #include "server.h"
 #include "linux-low.h"
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 /* Defined in auto-generated file reg-crisv32.c.  */
 void init_registers_crisv32 (void);
@@ -76,6 +76,15 @@ cris_set_pc (struct regcache *regcache, CORE_ADDR pc)
 
 static const unsigned short cris_breakpoint = 0xe938;
 #define cris_breakpoint_len 2
+
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+cris_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = cris_breakpoint_len;
+  return (const gdb_byte *) &cris_breakpoint;
+}
 
 static int
 cris_breakpoint_at (CORE_ADDR where)
@@ -382,7 +391,7 @@ cris_arch_setup (void)
 static struct regset_info cris_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, cris_num_regs * 4,
     GENERAL_REGS, cris_fill_gregset, cris_store_gregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 
@@ -420,8 +429,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   cris_get_pc,
   cris_set_pc,
-  (const unsigned char *) &cris_breakpoint,
-  cris_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  cris_sw_breakpoint_from_kind,
   cris_reinsert_addr,
   0,
   cris_breakpoint_at,

@@ -51,18 +51,6 @@ mi_gdb_test "-break-insert -a gdb_recursion_test" \
 mi_gdb_test "-trace-define-variable \$tsv 1" {.*\^done} \
     "-trace-define-variable"
 
-set pcreg ""
-if [is_amd64_regs_target] {
-    set pcreg "rip"
-} elseif [is_x86_like_target] {
-    set pcreg "eip"
-} else {
-    # Other ports that support tracepoints should set the name of pc
-    # register here.
-    fail "set the name of pc register"
-    return -1
-}
-
 mi_gdb_test "-break-commands 3 \"collect gdb_char_test\" \"collect gdb_union1_test\" \"collect gdb_struct1_test.l\" \"collect gdb_arr_test\[0\]\" \"collect $${pcreg}\" \"teval \$tsv += 1\" \"collect \$tsv\" \"end\" " \
     {\^done} "set action"
 

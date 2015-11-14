@@ -1032,9 +1032,9 @@ x86_64_mov_to_lea9: x86_64_mov_to_lea5.o
 	../ld-new -melf32_x86_64  -o $@ $<
 x86_64_mov_to_lea10: x86_64_mov_to_lea6.o
 	../ld-new -melf_x86_64  -o $@ $<
-x86_64_mov_to_lea11: x86_64_mov_to_lea1.o
+x86_64_mov_to_lea11: x86_64_mov_to_lea2.o
 	../ld-new -melf32_x86_64 -shared  -o $@ $<
-x86_64_mov_to_lea12: x86_64_mov_to_lea2.o
+x86_64_mov_to_lea12: x86_64_mov_to_lea1.o
 	../ld-new -melf_x86_64 -shared  -o $@ $<
 x86_64_mov_to_lea13: x86_64_mov_to_lea7.o
 	../ld-new -melf32_x86_64 -shared  -o $@ $<
@@ -1353,9 +1353,9 @@ flagstest_compress_debug_sections.stdout: flagstest_compress_debug_sections
 	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
 	mv -f $@.tmp $@
 
-# Check there are compressed DWARF .zdebug_* sections.
+# Check there are compressed DWARF .debug_* sections.
 flagstest_compress_debug_sections.check: flagstest_compress_debug_sections
-	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+	$(TEST_READELF) -SW $< | egrep ".debug_.* C *" > $@.tmp
 	mv -f $@.tmp $@
 
 # Compare DWARF debug info.
@@ -1423,6 +1423,22 @@ flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
 	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
 	chmod a+x $@
 	test -s $@
+
+check_SCRIPTS += pr18689.sh
+check_DATA += pr18689.stdout
+MOSTLYCLEANFILES += pr18689a.o pr18689b.o
+
+pr18689.stdout: pr18689b.o
+	$(TEST_READELF) -SW $< > $@
+
+pr18689a.o: pr18689.o ../ld-new
+	../ld-new -r -o $@ $<
+
+pr18689b.o: pr18689a.o ../ld-new
+	../ld-new -r -o $@ $<
+
+pr18689.o: pr18689.c gcctestdir/as
+	$(COMPILE) -Bgcctestdir/ -ggdb3 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/pr18689.c
 
 # Test -TText and -Tdata.
 check_PROGRAMS += flagstest_o_ttext_1
@@ -1547,6 +1563,15 @@ ver_test_12_LDADD = ver_test_12.o
 ver_test_12.o: gcctestdir/ld ver_test_1.o ver_test_2.o ver_test_4.o
 	gcctestdir/ld -r -o $@ ver_test_1.o ver_test_2.o ver_test_4.o
 
+check_SCRIPTS += ver_test_13.sh
+check_DATA += ver_test_13.syms
+ver_test_13.syms: ver_test_13.so
+	$(TEST_READELF) -s $< >$@ 2>/dev/null
+ver_test_13.so: gcctestdir/ld ver_test_13.o ver_test_13.script
+	$(LINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_13.script ver_test_13.o
+ver_test_13.o: ver_test_13.c
+	$(COMPILE) -c -fpic -o $@ $<
+
 check_PROGRAMS += protected_1
 protected_1_SOURCES = \
 	protected_main_1.cc protected_main_2.cc protected_main_3.cc
@@ -1620,7 +1645,7 @@ relro_script_test.so: gcctestdir/ld relro_script_test.t relro_test_pic.o
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro -Wl,-T,$(srcdir)/relro_script_test.t relro_test_pic.o
 
 check_PROGRAMS += script_test_1
-script_test_1_SOURCES = script_test_1.cc
+script_test_1_SOURCES = script_test_1a.cc script_test_1b.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -Wl,-T,$(srcdir)/script_test_1.t
 script_test_1_LDADD =
@@ -1753,9 +1778,11 @@ script_test_9.stdout: script_test_9
 check_PROGRAMS += script_test_11
 script_test_11: gcctestdir/ld script_test_11_r.o
 	$(LINK) -Bgcctestdir/ script_test_11_r.o
-script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
-	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
-script_test_11.o: script_test_11.c
+script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11a.o script_test_11b.o
+	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11a.o script_test_11b.o
+script_test_11a.o: script_test_11a.c
+	$(COMPILE) -c -g -o $@ $<
+script_test_11b.o: script_test_11b.c
 	$(COMPILE) -c -g -o $@ $<
 
 # Test difference between "*(a b)" and "*(a) *(b)" in input section spec.
@@ -2099,11 +2126,13 @@ endif MCMODEL_MEDIUM
 # referenced by a shared library.
 check_SCRIPTS += hidden_test.sh
 check_DATA += hidden_test.err
-MOSTLYCLEANFILES += hidden_test hidden_test.err
+MOSTLYCLEANFILES += hidden_test hidden_test.err hidden_test.syms
 libhidden.so: hidden_test_1.c gcctestdir/ld
 	$(COMPILE) -Bgcctestdir/ -g -shared -fPIC -w -o $@ $(srcdir)/hidden_test_1.c
 hidden_test: hidden_test_main.o libhidden.so gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -Wl,-R,. hidden_test_main.o libhidden.so 2>hidden_test.err
+hidden_test.syms: hidden_test
+	$(TEST_NM) -D hidden_test > $@
 hidden_test.err: hidden_test
 	@touch hidden_test.err
 

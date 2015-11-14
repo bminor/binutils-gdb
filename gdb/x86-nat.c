@@ -75,11 +75,9 @@ x86_find_process_pid (pid_t pid)
 static struct x86_process_info *
 x86_add_process (pid_t pid)
 {
-  struct x86_process_info *proc;
+  struct x86_process_info *proc = XCNEW (struct x86_process_info);
 
-  proc = xcalloc (1, sizeof (*proc));
   proc->pid = pid;
-
   proc->next = x86_process_list;
   x86_process_list = proc;
 
@@ -149,9 +147,8 @@ x86_cleanup_dregs (void)
    of the type TYPE.  Return 0 on success, -1 on failure.  */
 
 static int
-x86_insert_watchpoint (struct target_ops *self,
-		       CORE_ADDR addr, int len, int type,
-		       struct expression *cond)
+x86_insert_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
+		       enum target_hw_bp_type type, struct expression *cond)
 {
   struct x86_debug_reg_state *state
     = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
@@ -163,9 +160,8 @@ x86_insert_watchpoint (struct target_ops *self,
    address ADDR, whose length is LEN bytes, and for accesses of the
    type TYPE.  Return 0 on success, -1 on failure.  */
 static int
-x86_remove_watchpoint (struct target_ops *self,
-		       CORE_ADDR addr, int len, int type,
-		       struct expression *cond)
+x86_remove_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
+		       enum target_hw_bp_type type, struct expression *cond)
 {
   struct x86_debug_reg_state *state
     = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
@@ -259,7 +255,7 @@ x86_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 
 static int
 x86_can_use_hw_breakpoint (struct target_ops *self,
-			   int type, int cnt, int othertype)
+			   enum bptype type, int cnt, int othertype)
 {
   return 1;
 }

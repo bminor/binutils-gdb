@@ -99,6 +99,10 @@ struct value *value_next (struct value *);
 
 extern struct type *value_type (const struct value *);
 
+/* Return the gdbarch associated with the value. */
+
+extern struct gdbarch *get_value_arch (const struct value *value);
+
 /* This is being used to change the type of an existing value, that
    code should instead be creating a new value with the changed type
    (but possibly shared content).  */
@@ -361,7 +365,7 @@ extern const gdb_byte *value_contents_for_printing (struct value *value);
 extern const gdb_byte *
   value_contents_for_printing_const (const struct value *value);
 
-extern int value_fetch_lazy (struct value *val);
+extern void value_fetch_lazy (struct value *val);
 
 /* If nonzero, this is the value of a variable which does not actually
    exist in the program, at least partially.  If the value is lazy,
@@ -567,8 +571,8 @@ extern int value_contents_eq (const struct value *val1, int offset1,
 			      const struct value *val2, int offset2,
 			      int length);
 
-/* Read LENGTH bytes of memory starting at MEMADDR into BUFFER, which
-   is (or will be copied to) VAL's contents buffer offset by
+/* Read LENGTH addressable memory units starting at MEMADDR into BUFFER,
+   which is (or will be copied to) VAL's contents buffer offset by
    EMBEDDED_OFFSET (that is, to &VAL->contents[EMBEDDED_OFFSET]).
    Marks value contents ranges as unavailable if the corresponding
    memory is likewise unavailable.  STACK indicates whether the memory
@@ -670,9 +674,11 @@ struct value *value_of_register_lazy (struct frame_info *frame, int regnum);
 extern int symbol_read_needs_frame (struct symbol *);
 
 extern struct value *read_var_value (struct symbol *var,
+				     const struct block *var_block,
 				     struct frame_info *frame);
 
 extern struct value *default_read_var_value (struct symbol *var,
+					     const struct block *var_block,
 					     struct frame_info *frame);
 
 extern struct value *allocate_value (struct type *type);

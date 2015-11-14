@@ -632,7 +632,7 @@ rx_elf_relocate_section
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	{
 	  /* This is a relocatable link.  We don't have to change
              anything, unless the reloc is against a section symbol,
@@ -2003,14 +2003,17 @@ elf32_rx_relax_section (bfd *                  abfd,
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)
     return TRUE;
 
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  symtab_hdr = & elf_symtab_hdr (abfd);
+  if (elf_symtab_shndx_list (abfd))
+    shndx_hdr = & elf_symtab_shndx_list (abfd)->hdr;
+  else
+    shndx_hdr = NULL;
 
   sec_start = sec->output_section->vma + sec->output_offset;
 
@@ -2035,7 +2038,7 @@ elf32_rx_relax_section (bfd *                  abfd,
       symtab_hdr->contents = (bfd_byte *) intsyms;
     }
 
-  if (shndx_hdr->sh_size != 0)
+  if (shndx_hdr && shndx_hdr->sh_size != 0)
     {
       bfd_size_type amt;
 

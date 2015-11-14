@@ -30,7 +30,7 @@
 #include "gdbthread.h"
 #include "gdb_bfd.h"
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/ptrace.h>
 #include <sys/types.h>
 
@@ -324,7 +324,7 @@ spu_bfd_open (ULONGEST addr)
   struct bfd *nbfd;
   asection *spu_name;
 
-  ULONGEST *open_closure = xmalloc (sizeof (ULONGEST));
+  ULONGEST *open_closure = XNEW (ULONGEST);
   *open_closure = addr;
 
   nbfd = gdb_bfd_openr_iovec ("<in-memory>", "elf32-spu",
@@ -625,7 +625,7 @@ spu_xfer_partial (struct target_ops *ops,
 /* Override the to_can_use_hw_breakpoint routine.  */
 static int
 spu_can_use_hw_breakpoint (struct target_ops *self,
-			   int type, int cnt, int othertype)
+			   enum bptype type, int cnt, int othertype)
 {
   return 0;
 }

@@ -1367,7 +1367,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"sqrdmlah", 0x2f00d000, 0xbf00f400, asimdelem, 0, RDMA, OP3 (Vd, Vn, Em), QL_ELEMENT, F_SIZEQ},
   {"sqrdmlsh", 0x2f00f000, 0xbf00f400, asimdelem, 0, RDMA, OP3 (Vd, Vn, Em), QL_ELEMENT, F_SIZEQ},
   /* AdvSIMD EXT.  */
-  {"ext", 0x2e000000, 0xbfe0c400, asimdext, 0, SIMD, OP4 (Vd, Vn, Vm, IDX), QL_VEXT, F_SIZEQ},
+  {"ext", 0x2e000000, 0xbfe08400, asimdext, 0, SIMD, OP4 (Vd, Vn, Vm, IDX), QL_VEXT, F_SIZEQ},
   /* AdvSIMD modified immediate.  */
   {"movi", 0xf000400, 0xbff89c00, asimdimm, 0, SIMD, OP2 (Vd, SIMD_IMM_SFT), QL_SIMD_IMM_S0W, F_SIZEQ},
   {"orr", 0xf001400, 0xbff89c00, asimdimm, 0, SIMD, OP2 (Vd, SIMD_IMM_SFT), QL_SIMD_IMM_S0W, F_SIZEQ},

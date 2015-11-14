@@ -55,7 +55,7 @@
 #include "gdbcmd.h"
 
 #include <ctype.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 
 #if defined HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
@@ -610,7 +610,7 @@ struct collect_cores_data
 static int
 collect_cores (struct thread_info *ti, void *xdata)
 {
-  struct collect_cores_data *data = xdata;
+  struct collect_cores_data *data = (struct collect_cores_data *) xdata;
 
   if (ptid_get_pid (ti->ptid) == data->pid)
     {
@@ -643,7 +643,8 @@ struct print_one_inferior_data
 static int
 print_one_inferior (struct inferior *inferior, void *xdata)
 {
-  struct print_one_inferior_data *top_data = xdata;
+  struct print_one_inferior_data *top_data
+    = (struct print_one_inferior_data *) xdata;
   struct ui_out *uiout = current_uiout;
 
   if (VEC_empty (int, top_data->inferiors)
@@ -728,7 +729,7 @@ output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
 static void
 free_vector_of_ints (void *xvector)
 {
-  VEC (int) **vector = xvector;
+  VEC (int) **vector = (VEC (int) **) xvector;
 
   VEC_free (int, *vector);
 }
@@ -759,7 +760,7 @@ splay_tree_int_comparator (splay_tree_key xa, splay_tree_key xb)
 static void
 free_splay_tree (void *xt)
 {
-  splay_tree t = xt;
+  splay_tree t = (splay_tree) xt;
   splay_tree_delete (t);
 }
 
@@ -1493,7 +1494,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 
   /* Create a buffer and read it in.  */
   total_bytes = word_size * nr_rows * nr_cols;
-  mbuf = xcalloc (total_bytes, 1);
+  mbuf = XCNEWVEC (gdb_byte, total_bytes);
   make_cleanup (xfree, mbuf);
 
   /* Dispatch memory reads to the topmost target, not the flattened
@@ -1645,14 +1646,15 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
       struct cleanup *t = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       char *data, *p;
       int i;
+      int alloc_len;
 
       ui_out_field_core_addr (uiout, "begin", gdbarch, read_result->begin);
       ui_out_field_core_addr (uiout, "offset", gdbarch, read_result->begin
 			      - addr);
       ui_out_field_core_addr (uiout, "end", gdbarch, read_result->end);
 
-      data = xmalloc (
-	  (read_result->end - read_result->begin) * 2 * unit_size + 1);
+      alloc_len = (read_result->end - read_result->begin) * 2 * unit_size + 1;
+      data = (char *) xmalloc (alloc_len);
 
       for (i = 0, p = data;
 	   i < ((read_result->end - read_result->begin) * unit_size);
@@ -1694,7 +1696,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   /* FIXME: ezannoni 2000-02-17 LONGEST could possibly not be big
      enough when using a compiler other than GCC.  */
   LONGEST value;
-  void *buffer;
+  gdb_byte *buffer;
   struct cleanup *old_chain;
   long offset = 0;
   int oind = 0;
@@ -1742,7 +1744,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   /* Get the value as a number.  */
   value = parse_and_eval_address (argv[3]);
   /* Get the value into an array.  */
-  buffer = xmalloc (word_size);
+  buffer = (gdb_byte *) xmalloc (word_size);
   old_chain = make_cleanup (xfree, buffer);
   store_signed_integer (buffer, word_size, byte_order, value);
   /* Write it down to memory.  */
@@ -1790,7 +1792,7 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
   else
     count_units = len_units;
 
-  databuf = xmalloc (len_bytes * sizeof (gdb_byte));
+  databuf = XNEWVEC (gdb_byte, len_bytes);
   back_to = make_cleanup (xfree, databuf);
 
   for (i = 0; i < len_bytes; ++i)
@@ -1805,7 +1807,7 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
     {
       /* Pattern is made of less units than count:
          repeat pattern to fill memory.  */
-      data = xmalloc (count_units * unit_size);
+      data = (gdb_byte *) xmalloc (count_units * unit_size);
       make_cleanup (xfree, data);
 
       /* Number of times the pattern is entirely repeated.  */
@@ -1964,7 +1966,7 @@ mi_cmd_remove_inferior (char *command, char **argv, int argc)
       set_current_program_space (new_inferior->pspace);
     }
 
-  delete_inferior_1 (inf, 1 /* silent */);
+  delete_inferior (inf);
 }
 
 
@@ -2119,8 +2121,7 @@ mi_execute_command (const char *cmd, int from_tty)
 
       if (do_timings)
 	{
-	  command->cmd_start = (struct mi_timestamp *)
-	    xmalloc (sizeof (struct mi_timestamp));
+	  command->cmd_start = XNEW (struct mi_timestamp);
 	  timestamp (command->cmd_start);
 	}
 
@@ -2150,7 +2151,8 @@ mi_execute_command (const char *cmd, int from_tty)
 	     =thread-selected is supposed to indicate user's intentions.  */
 	  && strcmp (command->command, "thread-select") != 0)
 	{
-	  struct mi_interp *mi = top_level_interpreter_data ();
+	  struct mi_interp *mi
+	    = (struct mi_interp *) top_level_interpreter_data ();
 	  int report_change = 0;
 
 	  if (command->thread == -1)
@@ -2755,8 +2757,8 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
   struct collection_list tracepoint_list, stepping_list;
   struct traceframe_info *tinfo;
   int oind = 0;
-  int var_print_values = PRINT_ALL_VALUES;
-  int comp_print_values = PRINT_ALL_VALUES;
+  enum print_values var_print_values = PRINT_ALL_VALUES;
+  enum print_values comp_print_values = PRINT_ALL_VALUES;
   int registers_format = 'x';
   int memory_contents = 0;
   struct ui_out *uiout = current_uiout;
@@ -2903,7 +2905,7 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
 
 	if (tsv != NULL)
 	  {
-	    tsvname = xrealloc (tsvname, strlen (tsv->name) + 2);
+	    tsvname = (char *) xrealloc (tsvname, strlen (tsv->name) + 2);
 	    tsvname[0] = '$';
 	    strcpy (tsvname + 1, tsv->name);
 	    ui_out_field_string (uiout, "name", tsvname);
@@ -2947,7 +2949,7 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
 	ui_out_field_core_addr (uiout, "address", gdbarch, r->start);
 	ui_out_field_int (uiout, "length", r->length);
 
-	data = xmalloc (r->length);
+	data = (gdb_byte *) xmalloc (r->length);
 	make_cleanup (xfree, data);
 
 	if (memory_contents)
@@ -2957,7 +2959,7 @@ mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
 		int m;
 		char *data_str, *p;
 
-		data_str = xmalloc (r->length * 2 + 1);
+		data_str = (char *) xmalloc (r->length * 2 + 1);
 		make_cleanup (xfree, data_str);
 
 		for (m = 0, p = data_str; m < r->length; ++m, p += 2)

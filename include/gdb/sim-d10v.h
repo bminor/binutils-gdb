@@ -53,29 +53,6 @@ enum
     SIM_D10V_MEMORY_IMAP = 0x11000000
   };
 
-extern unsigned long sim_d10v_translate_dmap_addr
-  (unsigned long offset,
-   int nr_bytes,
-   unsigned long *phys,
-   void *regcache,
-   unsigned long (*dmap_register) (void *regcache, int reg_nr));
-
-extern unsigned long sim_d10v_translate_imap_addr
-  (unsigned long offset,
-   int nr_bytes,
-   unsigned long *phys,
-   void *regcache,
-   unsigned long (*imap_register) (void *regcache, int reg_nr));
-
-extern unsigned long sim_d10v_translate_addr
-  (unsigned long vaddr,
-   int nr_bytes,
-   unsigned long *phys,
-   void *regcache,
-   unsigned long (*dmap_register) (void *regcache, int reg_nr),
-   unsigned long (*imap_register) (void *regcache, int reg_nr));
-
-
 /* The simulator makes use of the following register information. */
 
 enum sim_d10v_regs

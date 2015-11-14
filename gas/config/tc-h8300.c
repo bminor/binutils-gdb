@@ -251,7 +251,7 @@ md_begin (void)
   prev_buffer[0] = 0;
 
   nopcodes = sizeof (h8_opcodes) / sizeof (struct h8_opcode);
-  
+
   h8_instructions = (struct h8_instruction *)
     xmalloc (nopcodes * sizeof (struct h8_instruction));
 
@@ -384,7 +384,7 @@ parse_reg (char *src, op_type *mode, unsigned int *reg, int direction)
   char *end;
   int len;
 
-  /* Cribbed from get_symbol_end.  */
+  /* Cribbed from get_symbol_name.  */
   if (!is_name_beginner (*src) || *src == '\001')
     return 0;
   end = src + 1;
@@ -398,36 +398,36 @@ parse_reg (char *src, op_type *mode, unsigned int *reg, int direction)
       *reg = 7;
       return len;
     }
-  if (len == 3 && 
-      TOLOWER (src[0]) == 'c' && 
-      TOLOWER (src[1]) == 'c' && 
+  if (len == 3 &&
+      TOLOWER (src[0]) == 'c' &&
+      TOLOWER (src[1]) == 'c' &&
       TOLOWER (src[2]) == 'r')
     {
       *mode = CCR;
       *reg = 0;
       return len;
     }
-  if (len == 3 && 
-      TOLOWER (src[0]) == 'e' && 
-      TOLOWER (src[1]) == 'x' && 
+  if (len == 3 &&
+      TOLOWER (src[0]) == 'e' &&
+      TOLOWER (src[1]) == 'x' &&
       TOLOWER (src[2]) == 'r')
     {
       *mode = EXR;
       *reg = 1;
       return len;
     }
-  if (len == 3 && 
-      TOLOWER (src[0]) == 'v' && 
-      TOLOWER (src[1]) == 'b' && 
+  if (len == 3 &&
+      TOLOWER (src[0]) == 'v' &&
+      TOLOWER (src[1]) == 'b' &&
       TOLOWER (src[2]) == 'r')
     {
       *mode = VBR;
       *reg = 6;
       return len;
     }
-  if (len == 3 && 
-      TOLOWER (src[0]) == 's' && 
-      TOLOWER (src[1]) == 'b' && 
+  if (len == 3 &&
+      TOLOWER (src[0]) == 's' &&
+      TOLOWER (src[1]) == 'b' &&
       TOLOWER (src[2]) == 'r')
     {
       *mode = SBR;
@@ -621,7 +621,7 @@ get_operand (char **ptr, struct h8_op *op, int direction)
 
   /* Gross.  Gross.  ldm and stm have a format not easily handled
      by get_operand.  We deal with it explicitly here.  */
-  if (TOLOWER (src[0]) == 'e' && TOLOWER (src[1]) == 'r' && 
+  if (TOLOWER (src[0]) == 'e' && TOLOWER (src[1]) == 'r' &&
       ISDIGIT (src[2]) && src[3] == '-' &&
       TOLOWER (src[4]) == 'e' && TOLOWER (src[5]) == 'r' && ISDIGIT (src[6]))
     {
@@ -764,7 +764,7 @@ get_operand (char **ptr, struct h8_op *op, int direction)
 		}
 	      if (mode
 		  && src[len + 2] == ','
-		  && TOLOWER (src[len + 3]) != 'p' 
+		  && TOLOWER (src[len + 3]) != 'p'
 		  && TOLOWER (src[len + 4]) != 'c'
 		  && src[len + 5] != ')')
 		{
@@ -878,9 +878,9 @@ get_operand (char **ptr, struct h8_op *op, int direction)
       *ptr = parse_exp (src + 1, op);
       return;
     }
-  else if (strncmp (src, "mach", 4) == 0 || 
+  else if (strncmp (src, "mach", 4) == 0 ||
 	   strncmp (src, "macl", 4) == 0 ||
-	   strncmp (src, "MACH", 4) == 0 || 
+	   strncmp (src, "MACH", 4) == 0 ||
 	   strncmp (src, "MACL", 4) == 0)
     {
       op->reg = TOLOWER (src[3]) == 'l';
@@ -979,7 +979,7 @@ get_mova_operands (char *op_end, struct h8_op *operand)
     }
   else if ((operand[1].mode & MODE) == LOWREG)
     {
-      switch (operand[1].mode & SIZE) 
+      switch (operand[1].mode & SIZE)
 	{
 	case L_8:
 	  operand[0].mode = (operand[0].mode & ~MODE) | INDEXB;
@@ -1483,12 +1483,12 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
   if (!Hmode && this_try->opcode->available != AV_H8)
     as_warn (_("Opcode `%s' with these operand types not available in H8/300 mode"),
 	     this_try->opcode->name);
-  else if (!Smode 
-	   && this_try->opcode->available != AV_H8 
+  else if (!Smode
+	   && this_try->opcode->available != AV_H8
 	   && this_try->opcode->available != AV_H8H)
     as_warn (_("Opcode `%s' with these operand types not available in H8/300H mode"),
 	     this_try->opcode->name);
-  else if (!SXmode 
+  else if (!SXmode
 	   && this_try->opcode->available != AV_H8
 	   && this_try->opcode->available != AV_H8H
 	   && this_try->opcode->available != AV_H8S)
@@ -1748,7 +1748,7 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
 	  /* To be compatible with the proposed H8 ELF format, we
 	     want the relocation's offset to point to the first byte
 	     that will be modified, not to the start of the instruction.  */
-	  
+
 	  if ((operand->mode & SIZE) == L_32)
 	    {
 	      where = 2;
@@ -1760,8 +1760,8 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
 
 	  /* This jmp may be a jump or a branch.  */
 
-	  check_operand (operand + i, 
-			 SXmode ? 0xffffffff : Hmode ? 0xffffff : 0xffff, 
+	  check_operand (operand + i,
+			 SXmode ? 0xffffffff : Hmode ? 0xffffff : 0xffff,
 			 "@");
 
 	  if (operand[i].exp.X_add_number & 1)
@@ -1891,7 +1891,7 @@ fix_operand_size (struct h8_op *operand, int size)
 	   is safe.  get_specific() will relax L_24 into L_32 where
 	   necessary.  */
 	if (Hmode
-	    && !Nmode 
+	    && !Nmode
 	    && ((((addressT) operand->exp.X_add_number + 0x8000)
 		 & 0xffffffff) > 0xffff
 		|| operand->exp.X_add_symbol != 0

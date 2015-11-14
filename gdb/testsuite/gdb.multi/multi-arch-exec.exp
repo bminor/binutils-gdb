@@ -44,6 +44,9 @@ set binfile2 [standard_output_file ${exec2}]
 if [istarget "s390*-*-*"] {
     set march1 "-m64"
     set march2 "-m31"
+} elseif { [istarget "aarch64*-*-*"] } {
+    set march1 ""
+    set march2 ""
 } else {
     set march1 "-m64"
     set march2 "-m32"
@@ -57,8 +60,21 @@ if { [prepare_for_testing ${testfile}.exp ${exec1} "${srcfile1}" \
     return -1
 }
 
+set options [list debug nowarnings]
+
+if { [istarget "aarch64*-*-*"] } {
+    if {[info exists ARM_CC_FOR_TARGET]} {
+	lappend options "compiler=${ARM_CC_FOR_TARGET}"
+    } else {
+	unsupported "ARM compiler is not known"
+	return -1
+    }
+} else {
+    lappend options "additional_flags=${march2}"
+}
+
 if { [prepare_for_testing ${testfile}.exp ${exec2} "${srcfile2}" \
-	  [list debug nowarnings additional_flags=${march2}]] } {
+	  $options] } {
     return -1
 }
 

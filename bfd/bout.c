@@ -783,7 +783,7 @@ b_out_slurp_reloc_table (bfd *abfd, sec_ptr asect, asymbol **symbols)
 	/* Sign-extend symnum from 24 bits to whatever host uses.  */
 	s = symnum;
 	if (s & (1 << 23))
-	  s |= (~0) << 24;
+	  s |= (~0U) << 24;
 
 	cache_ptr->sym_ptr_ptr = (asymbol **)NULL;
 	switch (s)
@@ -1069,7 +1069,7 @@ abs32code (bfd *abfd,
      jump we were going to.  */
   gap = value - (dot - shrink);
 
-  if (-1 << 23 < (long)gap && (long)gap < 1 << 23)
+  if ((long)(-1UL << 23) < (long)gap && (long)gap < 1L << 23)
     {
       /* Change the reloc type from 32bitcode possible 24, to 24bit
 	 possible 32.  */
@@ -1139,7 +1139,7 @@ b_out_bfd_relax_section (bfd *abfd,
   arelent **reloc_vector = NULL;
   long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
 
-  if (link_info->relocatable)
+  if (bfd_link_relocatable (link_info))
     (*link_info->callbacks->einfo)
       (_("%P%F: --relax and -r may not be used together\n"));
 

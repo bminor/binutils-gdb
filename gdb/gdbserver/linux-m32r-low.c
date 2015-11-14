@@ -73,6 +73,15 @@ m32r_set_pc (struct regcache *regcache, CORE_ADDR pc)
 static const unsigned short m32r_breakpoint = 0x10f1;
 #define m32r_breakpoint_len 2
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+m32r_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = m32r_breakpoint_len;
+  return (const gdb_byte *) &m32r_breakpoint;
+}
+
 static int
 m32r_breakpoint_at (CORE_ADDR where)
 {
@@ -120,8 +129,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   m32r_get_pc,
   m32r_set_pc,
-  (const unsigned char *) &m32r_breakpoint,
-  m32r_breakpoint_len,
+  NULL, /* breakpoint_from_pc */
+  m32r_sw_breakpoint_from_kind,
   NULL,
   0,
   m32r_breakpoint_at,

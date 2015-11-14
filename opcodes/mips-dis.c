@@ -157,18 +157,6 @@ static const char * const mips_cp0_names_r5900[32] =
   "c0_taglo",     "c0_taghi",     "c0_errorepc",  "$31"
 };
 
-static const struct mips_cp0sel_name mips_cp0sel_names_mipsr5900[] =
-{
-  { 24, 2, "c0_iab"			},
-  { 24, 3, "c0_iabm"		},
-  { 24, 4, "c0_dab"			},
-  { 24, 5, "c0_dabm"		},
-  { 24, 6, "c0_dvb"			},
-  { 24, 7, "c0_dvbm"		},
-  { 25, 1, "c0_perfcnt,1"	},
-  { 25, 2, "c0_perfcnt,2"	}
-};
-
 static const char * const mips_cp0_names_mips3264[32] =
 {
   "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
@@ -875,8 +863,8 @@ parse_mips_dis_option (const char *option, unsigned int len)
       mips_ase |= ASE_XPA;
       return;
     }
-  
-  
+
+
   /* Look for the = that delimits the end of the option name.  */
   for (i = 0; i < len; i++)
     if (option[i] == '=')
@@ -1709,7 +1697,7 @@ print_insn_mips (bfd_vma memaddr,
     {
       for (; op < &mips_opcodes[NUMOPCODES]; op++)
 	{
-	  if (op->pinfo != INSN_MACRO 
+	  if (op->pinfo != INSN_MACRO
 	      && !(no_aliases && (op->pinfo2 & INSN2_ALIAS))
 	      && (word & op->mask) == op->match)
 	    {

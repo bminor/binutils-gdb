@@ -31,7 +31,7 @@ struct ui_out_hdr
   {
     int colno;
     int width;
-    int alignment;
+    enum ui_align alignment;
     char *col_name;
     char *colhdr;
     struct ui_out_hdr *next;
@@ -213,7 +213,7 @@ const struct ui_out_impl default_ui_out_impl =
   default_message,
   default_wrap_hint,
   default_flush,
-  NULL,
+  NULL, /* redirect */
   default_data_destroy,
   0, /* Does not need MI hacks.  */
 };
@@ -269,14 +269,14 @@ static void uo_data_destroy (struct ui_out *uiout);
 
 extern void _initialize_ui_out (void);
 static void append_header_to_list (struct ui_out *uiout, int width,
-				   int alignment, const char *col_name,
+				   enum ui_align alignment, const char *col_name,
 				   const char *colhdr);
 static int get_next_header (struct ui_out *uiout, int *colno, int *width,
-			    int *alignment, char **colhdr);
+			    enum ui_align *alignment, char **colhdr);
 static void clear_header_list (struct ui_out *uiout);
 static void clear_table (struct ui_out *uiout);
 static void verify_field (struct ui_out *uiout, int *fldno, int *width,
-			  int *align);
+			  enum ui_align *align);
 
 /* exported functions (ui_out API) */
 
@@ -360,7 +360,7 @@ and before table_body."));
 static void
 do_cleanup_table_end (void *data)
 {
-  struct ui_out *ui_out = data;
+  struct ui_out *ui_out = (struct ui_out *) data;
 
   ui_out_table_end (ui_out);
 }
@@ -395,7 +395,7 @@ specified after table_body."));
   {
     int fldno;
     int width;
-    int align;
+    enum ui_align align;
 
     verify_field (uiout, &fldno, &width, &align);
   }
@@ -429,7 +429,8 @@ struct ui_out_end_cleanup_data
 static void
 do_cleanup_end (void *data)
 {
-  struct ui_out_end_cleanup_data *end_cleanup_data = data;
+  struct ui_out_end_cleanup_data *end_cleanup_data
+    = (struct ui_out_end_cleanup_data *) data;
 
   ui_out_end (end_cleanup_data->uiout, end_cleanup_data->type);
   xfree (end_cleanup_data);
@@ -470,7 +471,7 @@ ui_out_field_int (struct ui_out *uiout,
 {
   int fldno;
   int width;
-  int align;
+  enum ui_align align;
 
   verify_field (uiout, &fldno, &width, &align);
 
@@ -486,7 +487,7 @@ ui_out_field_fmt_int (struct ui_out *uiout,
 {
   int fldno;
   int width;
-  int align;
+  enum ui_align align;
 
   verify_field (uiout, &fldno, &width, &align);
 
@@ -530,7 +531,7 @@ ui_out_field_skip (struct ui_out *uiout,
 {
   int fldno;
   int width;
-  int align;
+  enum ui_align align;
 
   verify_field (uiout, &fldno, &width, &align);
 
@@ -544,7 +545,7 @@ ui_out_field_string (struct ui_out *uiout,
 {
   int fldno;
   int width;
-  int align;
+  enum ui_align align;
 
   verify_field (uiout, &fldno, &width, &align);
 
@@ -560,7 +561,7 @@ ui_out_field_fmt (struct ui_out *uiout,
   va_list args;
   int fldno;
   int width;
-  int align;
+  enum ui_align align;
 
   /* Will not align, but has to call anyway.  */
   verify_field (uiout, &fldno, &width, &align);
@@ -956,7 +957,7 @@ clear_header_list (struct ui_out *uiout)
 static void
 append_header_to_list (struct ui_out *uiout,
 		       int width,
-		       int alignment,
+		       enum ui_align alignment,
 		       const char *col_name,
 		       const char *colhdr)
 {
@@ -1002,7 +1003,7 @@ static int
 get_next_header (struct ui_out *uiout,
 		 int *colno,
 		 int *width,
-		 int *alignment,
+		 enum ui_align *alignment,
 		 char **colhdr)
 {
   /* There may be no headers at all or we may have used all columns.  */
@@ -1023,7 +1024,8 @@ get_next_header (struct ui_out *uiout,
    available/applicable).  */
 
 static void
-verify_field (struct ui_out *uiout, int *fldno, int *width, int *align)
+verify_field (struct ui_out *uiout, int *fldno, int *width,
+	      enum ui_align *align)
 {
   struct ui_out_level *current = current_level (uiout);
   char *text;

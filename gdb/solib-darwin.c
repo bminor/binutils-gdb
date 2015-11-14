@@ -96,7 +96,8 @@ get_darwin_info (void)
 {
   struct darwin_info *info;
 
-  info = program_space_data (current_program_space, solib_darwin_pspace_data);
+  info = (struct darwin_info *) program_space_data (current_program_space,
+						    solib_darwin_pspace_data);
   if (info != NULL)
     return info;
 
@@ -569,12 +570,12 @@ darwin_relocate_section_addresses (struct so_list *so,
     so->addr_low = sec->addr;
 }
 
-static struct symbol *
+static struct block_symbol
 darwin_lookup_lib_symbol (struct objfile *objfile,
 			  const char *name,
 			  const domain_enum domain)
 {
-  return NULL;
+  return (struct block_symbol) {NULL, NULL};
 }
 
 static bfd *

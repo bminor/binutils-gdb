@@ -228,9 +228,8 @@ Stringpool_template<Stringpool_char>::new_key_offset(size_t length)
   else
     {
       offset = this->offset_;
-      // Align non-zero length strings.
-      if (length != 0)
-	offset = align_address(offset, this->addralign_);
+      // Align strings.
+      offset = align_address(offset, this->addralign_);
       this->offset_ = offset + (length + 1) * sizeof(Stringpool_char);
     }
   this->key_to_offset_.push_back(offset);
@@ -421,6 +420,8 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
           if (this->zero_null_ && (*curr)->first.string[0] == 0)
             this_offset = 0;
           else if (last != v.end()
+                   && ((((*curr)->first.length - (*last)->first.length)
+			% this->addralign_) == 0)
                    && is_suffix((*curr)->first.string,
 				(*curr)->first.length,
                                 (*last)->first.string,

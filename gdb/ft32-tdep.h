@@ -22,7 +22,8 @@
 
 struct gdbarch_tdep
 {
-  /* gdbarch target dependent data here.  Currently unused for FT32.  */
+  /* Type for a pointer to a function.  Used for the type of PC.  */
+  struct type *pc_type;
 };
 
 #endif /* FT32_TDEP_H */

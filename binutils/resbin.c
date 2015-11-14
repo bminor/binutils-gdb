@@ -1067,7 +1067,7 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	      verlen -= off;
 
 	  stverlen -= off;
- 
+
 	  vst->strings = NULL;
 	  ppvs = &vst->strings;
 
@@ -1318,7 +1318,7 @@ resid_to_bin (windres_bfd *wrbfd, rc_uint_type off, rc_res_id id)
       if (wrbfd)
 	{
 	  struct bin_res_id bri;
-	  
+
 	  windres_put_16 (wrbfd, bri.sig, 0xffff);
 	  windres_put_16 (wrbfd, bri.id, id.u.id);
 	  set_windres_bfd_content (wrbfd, &bri, off, BIN_RES_ID);
@@ -1556,7 +1556,7 @@ res_to_bin_dialog (windres_bfd *wrbfd, rc_uint_type off, const rc_dialog *dialog
 	      windres_put_32 (wrbfd, bdc.id, dc->id);
 	      set_windres_bfd_content (wrbfd, &bdc, off, BIN_DIALOGEX_CONTROL_SIZE);
 	    }
-	}      
+	}
       off += (dialogex != 0 ? BIN_DIALOGEX_CONTROL_SIZE : BIN_DIALOG_CONTROL_SIZE);
 
       off = resid_to_bin (wrbfd, off, dc->class);

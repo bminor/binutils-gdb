@@ -255,8 +255,8 @@
 	* config.in: Ditto.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -336,11 +336,11 @@ Fri Feb 21 19:49:45 2003  J"orn Rennecke <joern.rennecke@superh.com>
 
 2002-06-24  Richard Sandiford  <rsandifo@redhat.com>
 
-        * sh64.c: Update path of "callback.h".
+	* sh64.c: Update path of "callback.h".
 
 2002-06-20  Elena Zannoni  <ezannoni@redhat.com>
 
-        * sh64.c: Include correct file for register numbers.
+	* sh64.c: Include correct file for register numbers.
 
 Fri May 17 14:27:41 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
@@ -607,7 +607,7 @@ Fri May 17 14:27:41 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	(stamp-all, stamp-mloop, stamp-decode, stamp-defs): New targets.
 	(stamp-desc, stamp-cpu): Likewise.
 	(stamp-defs-compact, stamp-defs-media): Likewise.
-	(stamp-decode-compact, stamp-decode-media): Likewise.	
+	(stamp-decode-compact, stamp-decode-media): Likewise.
 
 	* defs-compact.h, defs-media.h: Regenerate.
 

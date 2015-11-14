@@ -152,7 +152,7 @@ case $target_triplet in {
 	run_dump_test redef
 	# These targets fail redef2 because they disallow redefined
 	# symbols on relocs.
-	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*"
+	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "arc-*-*"
 	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*"
@@ -433,6 +433,8 @@ run_dump_test string
 if [is_elf_format] {
     run_dump_test none
 }
+
+run_dump_test quoted-sym-names
 
 load_lib gas-dg.exp
 dg-init

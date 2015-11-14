@@ -77,7 +77,7 @@ if { ![istarget hppa64*-hpux*] } {
     }
 }
 
-# Only run these tests on targets thats support creating shared libraries.
+# Only run these tests on targets that support creating shared libraries.
 if { [check_shared_lib_support] } then {
     # Run a test to check linking a shared library with a broken linker
     # script that accidentally marks dynamic sections as notes.  The
@@ -107,6 +107,14 @@ if { [check_shared_lib_support] } then {
 	    "--as-needed" "--start-group tmpdir/pr17068a.a tmpdir/pr17068.so tmpdir/pr17068b.a --end-group" ""
 	    {start.s pr17068.s} {} "pr17068"}
     }
+    # xfail on tic6x due to non-PIC/non-PID warnings
+    setup_xfail "tic6x-*-*"
+    run_ld_link_tests {
+	{"-Bsymbolic-functions"
+	    "-shared -Bsymbolic-functions" "" ""
+	    {symbolic-func.s} {{readelf {-r --wide} symbolic-func.r}}
+	    "symbolic-func.so"}
+    }
 }
 
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
@@ -114,18 +122,6 @@ foreach t $test_list {
     # We need to strip the ".d", but can leave the dirname.
     verbose [file rootname $t]
     run_dump_test [file rootname $t]
-}
-
-# Check that the --warn-orphan option works correctly.
-run_ld_link_tests {
-    {"Report orphan sections"
-	"--script orphan.ld --warn-orphan"
-	""
-	""
-	{orphan.s}
-	{ { ld "orphan-5.l" } }
-	"orphan"
-    }
 }
 
 if { [istarget *-*-linux*]

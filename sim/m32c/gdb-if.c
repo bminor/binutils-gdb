@@ -705,3 +705,9 @@ sim_complete_command (SIM_DESC sd, const char *text, const char *word)
 {
   return NULL;
 }
+
+void
+sim_info (SIM_DESC sd, int verbose)
+{
+  printf ("The m32c minisim doesn't collect any statistics.\n");
+}

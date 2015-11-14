@@ -2667,7 +2667,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SYSREG_DC:
     case AARCH64_OPND_SYSREG_IC:
     case AARCH64_OPND_SYSREG_TLBI:
-      snprintf (buf, size, "%s", opnd->sysins_op->template);
+      snprintf (buf, size, "%s", opnd->sysins_op->name);
       break;
 
     case AARCH64_OPND_BARRIER:

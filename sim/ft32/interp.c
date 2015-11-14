@@ -169,6 +169,8 @@ static uint32_t cpu_mem_read (SIM_DESC sd, uint32_t dw, uint32_t ea)
       /* Simulate some IO devices */
       switch (ea)
 	{
+	case 0x10000:
+	  return getchar ();
 	case 0x1fff4:
 	  /* Read the simulator cycle timer.  */
 	  return cpu->state.cycles / 100;
@@ -203,8 +205,12 @@ static void cpu_mem_write (SIM_DESC sd, uint32_t dw, uint32_t ea, uint32_t d)
 	  cpu->state.pm_addr = d;
 	  break;
 	case 0x1fc88:
-	  /* Write to PM */
-	  ft32_write_item (sd, dw, cpu->state.pm_addr, d);
+	  if (cpu->state.pm_unlock)
+	    {
+	      /* Write to PM.  */
+	      ft32_write_item (sd, dw, cpu->state.pm_addr, d);
+	      cpu->state.pm_addr += 4;
+	    }
 	  break;
 	case 0x1fffc:
 	  /* Normal exit.  */
@@ -596,7 +602,7 @@ step_once (SIM_DESC sd)
 	    uint32_t src = r_1v;
 	    uint32_t dst = cpu->state.regs[r_d];
 	    uint32_t i;
-	    for (i = 0; i < rimmv; i++)
+	    for (i = 0; i < (rimmv & 0x7fff); i++)
 	      PUT_BYTE (dst + i, GET_BYTE (src + i));
 	  }
 	  break;
@@ -615,7 +621,7 @@ step_once (SIM_DESC sd)
 	    /* memset instruction.  */
 	    uint32_t dst = cpu->state.regs[r_d];
 	    uint32_t i;
-	    for (i = 0; i < rimmv; i++)
+	    for (i = 0; i < (rimmv & 0x7fff); i++)
 	      PUT_BYTE (dst + i, r_1v);
 	  }
 	  break;

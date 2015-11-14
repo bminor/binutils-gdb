@@ -234,10 +234,13 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
  [@b{-K}] [@b{-L}] [@b{--listing-lhs-width}=@var{NUM}]
  [@b{--listing-lhs-width2}=@var{NUM}] [@b{--listing-rhs-width}=@var{NUM}]
- [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}] [@b{-o}
- @var{objfile}] [@b{-R}] [@b{--reduce-memory-overheads}] [@b{--statistics}]
- [@b{-v}] [@b{-version}] [@b{--version}] [@b{-W}] [@b{--warn}]
- [@b{--fatal-warnings}] [@b{-w}] [@b{-x}] [@b{-Z}] [@b{@@@var{FILE}}]
+ [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}]
+ [@b{-o} @var{objfile}] [@b{-R}]
+ [@b{--hash-size}=@var{NUM}] [@b{--reduce-memory-overheads}]
+ [@b{--statistics}]
+ [@b{-v}] [@b{-version}] [@b{--version}]
+ [@b{-W}] [@b{--warn}] [@b{--fatal-warnings}] [@b{-w}] [@b{-x}]
+ [@b{-Z}] [@b{@@@var{FILE}}]
  [@b{--sectname-subst}] [@b{--size-check=[error|warning]}]
  [@b{--target-help}] [@var{target-options}]
  [@b{--}|@var{files} @dots{}]
@@ -262,7 +265,9 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset ARC
 
 @emph{Target ARC options:}
-   [@b{-marc[5|6|7|8]}]
+   [@b{-mcpu=@var{cpu}}]
+   [@b{-mA6}|@b{-mARC600}|@b{-mARC601}|@b{-mA7}|@b{-mARC700}|@b{-mEM}|@b{-mHS}]
+   [@b{-mcode-density}]
    [@b{-EB}|@b{-EL}]
 @end ifset
 @ifset ARM
@@ -473,7 +478,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
     @b{-m440}|@b{-m464}|@b{-m476}|@b{-m7400}|@b{-m7410}|@b{-m7450}|@b{-m7455}|@b{-m750cl}|@b{-mppc64}|
     @b{-m620}|@b{-me500}|@b{-e500x2}|@b{-me500mc}|@b{-me500mc64}|@b{-me5500}|@b{-me6500}|@b{-mppc64bridge}|
     @b{-mbooke}|@b{-mpower4}|@b{-mpwr4}|@b{-mpower5}|@b{-mpwr5}|@b{-mpwr5x}|@b{-mpower6}|@b{-mpwr6}|
-    @b{-mpower7}|@b{-mpwr7}|@b{-mpower8}|@b{-mpwr8}|@b{-ma2}|@b{-mcell}|@b{-mspe}|@b{-mtitan}|@b{-me300}|@b{-mcom}]
+    @b{-mpower7}|@b{-mpwr7}|@b{-mpower8}|@b{-mpwr8}|@b{-mpower9}|@b{-mpwr9}@b{-ma2}|
+    @b{-mcell}|@b{-mspe}|@b{-mtitan}|@b{-me300}|@b{-mcom}]
    [@b{-many}] [@b{-maltivec}|@b{-mvsx}|@b{-mhtm}|@b{-mvle}]
    [@b{-mregnames}|@b{-mno-regnames}]
    [@b{-mrelocatable}|@b{-mrelocatable-lib}|@b{-K PIC}] [@b{-memb}]
@@ -552,7 +558,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset XTENSA
 
 @emph{Target Xtensa options:}
- [@b{--[no-]text-section-literals}] [@b{--[no-]absolute-literals}]
+ [@b{--[no-]text-section-literals}] [@b{--[no-]auto-litpools}]
+ [@b{--[no-]absolute-literals}]
  [@b{--[no-]target-align}] [@b{--[no-]longcalls}]
  [@b{--[no-]transform}]
  [@b{--rename-section} @var{oldname}=@var{newname}]
@@ -625,10 +632,10 @@ Begin in alternate macro mode.
 @end ifclear
 
 @item --compress-debug-sections
-Compress DWARF debug sections using zlib.  The debug sections are renamed
-to begin with @samp{.zdebug}, and the resulting object file may not be
-compatible with older linkers and object file utilities.  Note if compression
-would make a given section @emph{larger} then it is not compressed or renamed.
+Compress DWARF debug sections using zlib with SHF_COMPRESSED from the
+ELF ABI.  The resulting object file may not be compatible with older
+linkers and object file utilities.  Note if compression would make a
+given section @emph{larger} then it is not compressed.
 
 @ifset ELF
 @cindex @samp{--compress-debug-sections=} option
@@ -640,14 +647,19 @@ These options control how DWARF debug sections are compressed.
 @option{--compress-debug-sections=none} is equivalent to
 @option{--nocompress-debug-sections}.
 @option{--compress-debug-sections=zlib} and
-@option{--compress-debug-sections=zlib-gnu} are equivalent to
+@option{--compress-debug-sections=zlib-gabi} are equivalent to
 @option{--compress-debug-sections}.
-@option{--compress-debug-sections=zlib-gabi} compresses
-DWARF debug sections with SHF_COMPRESSED from the ELF ABI.
+@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
+sections using zlib.  The debug sections are renamed to begin with
+@samp{.zdebug}.  Note if compression would make a given section
+@emph{larger} then it is not compressed nor renamed.
+
 @end ifset
 
 @item --nocompress-debug-sections
-Do not compress DWARF debug sections.  This is the default.
+Do not compress DWARF debug sections.  This is usually the default for all
+targets except the x86/x86_64, but a configure time option can be used to
+override this.
 
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to
@@ -754,7 +766,7 @@ Name the object-file output from @command{@value{AS}} @var{objfile}.
 @item -R
 Fold the data section into the text section.
 
-@kindex --hash-size=@var{number}
+@item --hash-size=@var{number}
 Set the default size of GAS's hash tables to a prime number close to
 @var{number}.  Increasing this value can reduce the length of time it takes the
 assembler to perform its tasks, at the expense of increasing the assembler's
@@ -853,14 +865,16 @@ processor.
 
 @c man begin OPTIONS
 @ifset ARC
-The following options are available when @value{AS} is configured for
-an ARC processor.
+The following options are available when @value{AS} is configured for an ARC
+processor.
 
 @table @gcctabopt
-@item -marc[5|6|7|8]
+@item -mcpu=@var{cpu}
 This option selects the core processor variant.
 @item -EB | -EL
 Select either big-endian (-EB) or little-endian (-EL) output.
+@item -mcode-density
+Enable Code Density extenssion instructions.
 @end table
 @end ifset
 
@@ -2733,10 +2747,15 @@ On most machines, you can also use @code{$} in symbol names; exceptions
 are noted in @ref{Machine Dependencies}.
 @end ifset
 No symbol may begin with a digit.  Case is significant.
-There is no length limit: all characters are significant.  Multibyte characters
+There is no length limit; all characters are significant.  Multibyte characters
 are supported.  Symbols are delimited by characters not in that set, or by the
 beginning of a file (since the source program must end with a newline, the end
 of a file is not a possible symbol delimiter).  @xref{Symbols}.
+
+Symbol names may also be enclosed in double quote @code{"} characters.  In such
+cases any characters are allowed, except for the NUL character.  If a double
+quote character is to be included in the symbol name it must be preceeded by a
+backslash @code{\} character.
 @cindex length of symbols
 
 @node Statements
@@ -3700,11 +3719,11 @@ Local labels are different from local symbols.  Local labels help compilers and
 programmers use names temporarily.  They create symbols which are guaranteed to
 be unique over the entire scope of the input source code and which can be
 referred to by a simple notation.  To define a local label, write a label of
-the form @samp{@b{N}:} (where @b{N} represents any positive integer).  To refer
-to the most recent previous definition of that label write @samp{@b{N}b}, using
-the same number as when you defined the label.  To refer to the next definition
-of a local label, write @samp{@b{N}f}---the @samp{b} stands for ``backwards''
-and the @samp{f} stands for ``forwards''.
+the form @samp{@b{N}:} (where @b{N} represents any non-negative integer).
+To refer to the most recent previous definition of that label write
+@samp{@b{N}b}, using the same number as when you defined the label.  To refer
+to the next definition of a local label, write @samp{@b{N}f}.  The @samp{b}
+stands for ``backwards'' and the @samp{f} stands for ``forwards''.
 
 There is no restriction on how you can use these labels, and you can reuse them
 too.  So that it is possible to repeatedly define the same local label (using
@@ -4205,7 +4224,8 @@ address; you can only have a defined section in one of the two arguments.
 @cindex pseudo-ops, machine independent
 @cindex machine independent directives
 All assembler directives have names that begin with a period (@samp{.}).
-The rest of the name is letters, usually in lower case.
+The names are case insensitive for most targets, and usually written
+in lower case.
 
 This chapter discusses directives that are available regardless of the
 target machine configuration for the @sc{gnu} assembler.

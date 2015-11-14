@@ -44,13 +44,13 @@
 #define	yylval	m68k_lval
 #define	yychar	m68k_char
 #define	yydebug	m68k_debug
-#define	yypact	m68k_pact	
-#define	yyr1	m68k_r1			
-#define	yyr2	m68k_r2			
-#define	yydef	m68k_def		
-#define	yychk	m68k_chk		
-#define	yypgo	m68k_pgo		
-#define	yyact	m68k_act		
+#define	yypact	m68k_pact
+#define	yyr1	m68k_r1
+#define	yyr2	m68k_r2
+#define	yydef	m68k_def
+#define	yychk	m68k_chk
+#define	yypgo	m68k_pgo
+#define	yyact	m68k_act
 #define	yyexca	m68k_exca
 #define yyerrflag m68k_errflag
 #define yynerrs	m68k_nerrs
@@ -1042,12 +1042,12 @@ yylex (void)
 	  {
 	    yylval.exp.pic_reloc = pic_tls_ie;
 	    tail += 6;
-	  }	
+	  }
 	else if (strncmp (cp - 6, "@TLSLE", 6) == 0)
 	  {
 	    yylval.exp.pic_reloc = pic_tls_le;
 	    tail += 6;
-	  }	
+	  }
       }
     else if (cp - 4 > str && cp[-4] == '@')
       {

@@ -1212,6 +1212,11 @@ elf_hppa_sort_unwind (bfd *abfd)
 static unsigned int
 elf_hppa_action_discarded (asection *sec)
 {
+  /* Ignore relocations in .data.rel.ro.local.  This section can contain
+     PLABEL32 relocations to functions in discarded COMDAT groups.  */
+  if (strcmp (".data.rel.ro.local", sec->name) == 0)
+    return 0;
+
   if (strcmp (".PARISC.unwind", sec->name) == 0)
     return 0;
 

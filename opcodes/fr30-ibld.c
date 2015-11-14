@@ -154,7 +154,7 @@ insert_normal (CGEN_CPU_DESC cd,
     {
       long minval = - (1L << (length - 1));
       unsigned long maxval = mask;
-      
+
       if ((value > 0 && (unsigned long) value > maxval)
 	  || value < minval)
 	{
@@ -192,7 +192,7 @@ insert_normal (CGEN_CPU_DESC cd,
 	{
 	  long minval = - (1L << (length - 1));
 	  long maxval =   (1L << (length - 1)) - 1;
-	  
+
 	  if (value < minval || value > maxval)
 	    {
 	      sprintf
@@ -874,7 +874,7 @@ fr30_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 8, 4, 16, total_length, pc, & value);
-        value = ((value) | (((-1) << (4))));
+        value = ((value) | (((-1UL) << (4))));
         fields->f_m4 = value;
       }
       break;
@@ -936,12 +936,12 @@ fr30_cgen_extract_operand (CGEN_CPU_DESC cd,
   return length;
 }
 
-cgen_insert_fn * const fr30_cgen_insert_handlers[] = 
+cgen_insert_fn * const fr30_cgen_insert_handlers[] =
 {
   insert_insn_normal,
 };
 
-cgen_extract_fn * const fr30_cgen_extract_handlers[] = 
+cgen_extract_fn * const fr30_cgen_extract_handlers[] =
 {
   extract_insn_normal,
 };

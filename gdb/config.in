@@ -234,6 +234,9 @@
 /* Define to 1 if you have the `libiconvlist' function. */
 #undef HAVE_LIBICONVLIST
 
+/* Define if you have the ipt library. */
+#undef HAVE_LIBIPT
+
 /* Define if you have the lzma library. */
 #undef HAVE_LIBLZMA
 
@@ -650,6 +653,9 @@
    assorted other type changes. */
 #undef PROC_SERVICE_IS_OLD
 
+/* Define to the type of arg 1 for ptrace. */
+#undef PTRACE_TYPE_ARG1
+
 /* Define to the type of arg 3 for ptrace. */
 #undef PTRACE_TYPE_ARG3
 
@@ -670,9 +676,6 @@
 
 /* Bug reporting address */
 #undef REPORT_BUGS_TO
-
-/* Define as the return type of signal handlers (`int' or `void'). */
-#undef RETSIGTYPE
 
 /* Define to 1 if the "%Lg" format works to scan long doubles. */
 #undef SCANF_HAS_LONG_DOUBLE

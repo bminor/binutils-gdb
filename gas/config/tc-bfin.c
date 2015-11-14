@@ -796,7 +796,7 @@ md_section_align (segment, size)
      valueT size;
 {
   int boundary = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << boundary) - 1) & (-1 << boundary));
+  return ((size + (1 << boundary) - 1) & -(1 << boundary));
 }
 
 
@@ -1970,9 +1970,9 @@ bfin_eol_in_insn (char *line)
 }
 
 bfd_boolean
-bfin_start_label (char *s, char *ptr)
+bfin_start_label (char *s)
 {
-  while (s != ptr)
+  while (*s != 0)
     {
       if (*s == '(' || *s == '[')
 	return FALSE;

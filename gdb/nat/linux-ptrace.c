@@ -22,6 +22,7 @@
 #include "linux-waitpid.h"
 #include "buffer.h"
 #include "gdb_wait.h"
+#include "gdb_ptrace.h"
 
 /* Stores the ptrace options supported by the running kernel.
    A value of -1 means we did not check for features yet.  A value
@@ -100,7 +101,8 @@ linux_ptrace_test_ret_to_nx (void)
   long l;
   int status, kill_status;
 
-  return_address = mmap (NULL, 2, PROT_READ | PROT_WRITE,
+  return_address
+    = (gdb_byte *) mmap (NULL, 2, PROT_READ | PROT_WRITE,
 			 MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (return_address == MAP_FAILED)
     {
@@ -202,7 +204,7 @@ linux_ptrace_test_ret_to_nx (void)
 	       safe_strerror (errno));
       return;
     }
-  pc = (void *) (uintptr_t) l;
+  pc = (gdb_byte *) (uintptr_t) l;
 
   kill (child, SIGKILL);
   ptrace (PTRACE_KILL, child, (PTRACE_TYPE_ARG3) NULL,
@@ -535,6 +537,17 @@ int
 linux_supports_tracefork (void)
 {
   return ptrace_supports_feature (PTRACE_O_TRACEFORK);
+}
+
+/* Returns non-zero if PTRACE_EVENT_EXEC is supported by ptrace,
+   0 otherwise.  Note that if PTRACE_EVENT_FORK is supported so is
+   PTRACE_EVENT_CLONE, PTRACE_EVENT_FORK and PTRACE_EVENT_VFORK,
+   since they were all added to the kernel at the same time.  */
+
+int
+linux_supports_traceexec (void)
+{
+  return ptrace_supports_feature (PTRACE_O_TRACEEXEC);
 }
 
 /* Returns non-zero if PTRACE_EVENT_CLONE is supported by ptrace,

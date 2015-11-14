@@ -131,7 +131,8 @@ extern void nds32_do_align (int);
 #define md_macro_start()			nds32_macro_start ()
 #define md_macro_end()				nds32_macro_end ()
 #define md_macro_info(args)			nds32_macro_info (args)
-#define TC_START_LABEL(C, S, STR)		(C == ':' && nds32_start_label (0, 0))
+#define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR)	\
+  (NEXT_CHAR == ':' && nds32_start_label (0, 0))
 #define tc_check_label(label)			nds32_check_label (label)
 #define tc_frob_label(label)			nds32_frob_label (label)
 #define md_end					md_end

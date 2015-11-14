@@ -149,17 +149,15 @@ extern int immediate_quit;
 
 extern void quit (void);
 
-/* FIXME: cagney/2000-03-13: It has been suggested that the peformance
-   benefits of having a ``QUIT'' macro rather than a function are
-   marginal.  If the overhead of a QUIT function call is proving
-   significant then its calling frequency should probably be reduced
-   [kingdon].  A profile analyzing the current situtation is
-   needed.  */
+/* Helper for the QUIT macro.  */
 
-#define QUIT { \
-  if (check_quit_flag () || sync_quit_force_run) quit (); \
-  if (deprecated_interactive_hook) deprecated_interactive_hook (); \
-}
+extern void maybe_quit (void);
+
+/* Check whether a Ctrl-C was typed, and if so, call quit.  The target
+   is given a chance to process the Ctrl-C.  E.g., it may detect that
+   repeated Ctrl-C requests were issued, and choose to close the
+   connection.  */
+#define QUIT maybe_quit ()
 
 /* * Languages represented in the symbol table and elsewhere.
    This should probably be in language.h, but since enum's can't
@@ -185,6 +183,11 @@ enum language
     language_minimal,		/* All other languages, minimal support only */
     nr_languages
   };
+
+/* The number of bits needed to represent all languages, with enough
+   padding to allow for reasonable growth.  */
+#define LANGUAGE_BITS 5
+gdb_static_assert (nr_languages <= (1 << LANGUAGE_BITS));
 
 enum precision_type
   {
@@ -649,7 +652,6 @@ extern void (*deprecated_readline_begin_hook) (char *, ...)
      ATTRIBUTE_FPTR_PRINTF_1;
 extern char *(*deprecated_readline_hook) (const char *);
 extern void (*deprecated_readline_end_hook) (void);
-extern void (*deprecated_register_changed_hook) (int regno);
 extern void (*deprecated_context_hook) (int);
 extern ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 					      struct target_waitstatus *status,

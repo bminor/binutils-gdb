@@ -6,12 +6,12 @@ dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
 dnl the Free Software Foundation; either version 3 of the License, or
 dnl (at your option) any later version.
-dnl 
+dnl
 dnl This program is distributed in the hope that it will be useful,
 dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
-dnl 
+dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
@@ -142,6 +142,18 @@ case "${got_handling}" in
               [Define to choose default GOT handling scheme]) ;;
   *)  AC_MSG_ERROR(bad value ${got_handling} for --enable-got option) ;;
 esac
+
+# PR gas/19109
+# Decide the default method for compressing debug sections.
+ac_default_compressed_debug_sections=unset
+# Provide a configure time option to override our default.
+AC_ARG_ENABLE(compressed_debug_sections,
+	      AS_HELP_STRING([--enable-compressed-debug-sections={all,ld,none}],
+	      [compress debug sections by default])],
+[case ,"${enableval}", in
+  ,yes, | ,all, | *,ld,*) ac_default_compressed_debug_sections=yes ;;
+  ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
+esac])dnl
 
 AM_BINUTILS_WARNINGS
 
@@ -371,6 +383,10 @@ do
 
   fi
 done
+
+if test x$ac_default_compressed_debug_sections == xyes ; then
+  AC_DEFINE(DEFAULT_FLAG_COMPRESS_DEBUG, 1, [Define if you want compressed debug sections by default.])
+fi
 
 AC_SUBST(elf_list_options)
 AC_SUBST(elf_shlib_list_options)

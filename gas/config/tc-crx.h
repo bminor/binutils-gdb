@@ -58,7 +58,7 @@ extern int crx_force_relocation (struct fix *);
 #define DWARF2_LINE_MIN_INSN_LENGTH 2
 
 /* This is called by emit_expr when creating a reloc for a cons.
-   We could use the definition there, except that we want to handle 
+   We could use the definition there, except that we want to handle
    the CRX reloc type specially, rather than the BFD_RELOC type.  */
 #define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP, RELOC) \
       (void) RELOC, \
@@ -68,7 +68,7 @@ extern int crx_force_relocation (struct fix *);
 	: LEN == 4 ? BFD_RELOC_CRX_NUM32 \
 	: BFD_RELOC_NONE);
 
-/* Give an error if a frag containing code is not aligned to a 2-byte 
+/* Give an error if a frag containing code is not aligned to a 2-byte
    boundary.  */
 #define md_frag_check(FRAGP) \
   if ((FRAGP)->has_code							\

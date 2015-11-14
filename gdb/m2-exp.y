@@ -564,7 +564,7 @@ fblock	:	BLOCKNAME
 			{ struct symbol *sym
 			    = lookup_symbol (copy_name ($1),
 					     expression_context_block,
-					     VAR_DOMAIN, 0);
+					     VAR_DOMAIN, 0).symbol;
 			  $$ = sym;}
 	;
 			     
@@ -573,7 +573,7 @@ fblock	:	BLOCKNAME
 fblock	:	block COLONCOLON BLOCKNAME
 			{ struct symbol *tem
 			    = lookup_symbol (copy_name ($3), $1,
-					     VAR_DOMAIN, 0);
+					     VAR_DOMAIN, 0).symbol;
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy_name ($3));
@@ -595,52 +595,50 @@ variable:	INTERNAL_VAR
 
 /* GDB scope operator */
 variable:	block COLONCOLON NAME
-			{ struct symbol *sym;
-			  sym = lookup_symbol (copy_name ($3), $1,
-					       VAR_DOMAIN, 0);
-			  if (sym == 0)
+			{ struct block_symbol sym
+			    = lookup_symbol (copy_name ($3), $1,
+					     VAR_DOMAIN, 0);
+
+			  if (sym.symbol == 0)
 			    error (_("No symbol \"%s\" in specified context."),
 				   copy_name ($3));
-			  if (symbol_read_needs_frame (sym))
+			  if (symbol_read_needs_frame (sym.symbol))
 			    {
 			      if (innermost_block == 0
-				  || contained_in (block_found,
+				  || contained_in (sym.block,
 						   innermost_block))
-				innermost_block = block_found;
+				innermost_block = sym.block;
 			    }
 
 			  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			  /* block_found is set by lookup_symbol.  */
-			  write_exp_elt_block (pstate, block_found);
-			  write_exp_elt_sym (pstate, sym);
+			  write_exp_elt_block (pstate, sym.block);
+			  write_exp_elt_sym (pstate, sym.symbol);
 			  write_exp_elt_opcode (pstate, OP_VAR_VALUE); }
 	;
 
 /* Base case for variables.  */
 variable:	NAME
-			{ struct symbol *sym;
+			{ struct block_symbol sym;
 			  struct field_of_this_result is_a_field_of_this;
 
- 			  sym = lookup_symbol (copy_name ($1),
+			  sym = lookup_symbol (copy_name ($1),
 					       expression_context_block,
 					       VAR_DOMAIN,
 					       &is_a_field_of_this);
-			  if (sym)
+
+			  if (sym.symbol)
 			    {
-			      if (symbol_read_needs_frame (sym))
+			      if (symbol_read_needs_frame (sym.symbol))
 				{
 				  if (innermost_block == 0 ||
-				      contained_in (block_found, 
+				      contained_in (sym.block,
 						    innermost_block))
-				    innermost_block = block_found;
+				    innermost_block = sym.block;
 				}
 
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      /* We want to use the selected frame, not
-				 another more inner frame which happens to
-				 be in the same block.  */
-			      write_exp_elt_block (pstate, NULL);
-			      write_exp_elt_sym (pstate, sym);
+			      write_exp_elt_block (pstate, sym.block);
+			      write_exp_elt_sym (pstate, sym.symbol);
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			    }
 			  else
@@ -1028,7 +1026,7 @@ yylex (void)
 
     if (lookup_symtab (tmp))
       return BLOCKNAME;
-    sym = lookup_symbol (tmp, expression_context_block, VAR_DOMAIN, 0);
+    sym = lookup_symbol (tmp, expression_context_block, VAR_DOMAIN, 0).symbol;
     if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
       return BLOCKNAME;
     if (lookup_typename (parse_language (pstate), parse_gdbarch (pstate),

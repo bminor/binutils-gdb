@@ -1385,15 +1385,15 @@ const struct v850_opcode v850_opcodes[] =
 { "bgt",  two (0x07ef, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
 { "ble",  two (0x07e7, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
 { "blt",  two (0x07e6, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
-/* Unsigned integer.  */			      	 
+/* Unsigned integer.  */
 { "bh",   two (0x07eb, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
 { "bl",   two (0x07e1, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
 { "bnh",  two (0x07e3, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
 { "bnl",  two (0x07e9, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
-/* Common.  */					      	 
+/* Common.  */
 { "be",   two (0x07e2, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
 { "bne",  two (0x07ea, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
-/* Others.  */					      	 
+/* Others.  */
 { "bc",   two (0x07e1, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
 { "bf",   two (0x07ea, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
 { "bn",   two (0x07e4, 0x0001), two (0xffef, 0x0001), IF7, 0, PROCESSOR_V850E3V5_UP },
@@ -1522,7 +1522,7 @@ const struct v850_opcode v850_opcodes[] =
 
 { "hvcall",	two (0xd7e0, 0x4160),	two (0xffe0, 0x41ff),	{VECTOR8}, 		0, PROCESSOR_V850E3V5_UP },
 { "hvtrap",	two (0x07e0, 0x0110),	two (0xffe0, 0xffff),	{VECTOR5}, 		0, PROCESSOR_V850E3V5_UP },
-  
+
 { "jarl",	two (0xc7e0, 0x0160),	two (0xffe0, 0x07ff),	{R1, R3_NOTR0},   	1, PROCESSOR_V850E3V5_UP},
 { "jarl",	two (0x0780, 0x0000),	two (0x07c0, 0x0001),	{D22, R2_NOTR0}, 	0, PROCESSOR_ALL},
 { "jarl",	one (0x02e0),		one (0xffe0),		{D32_31_PCREL, R1_NOTR0}, 	0, PROCESSOR_V850E2_UP },

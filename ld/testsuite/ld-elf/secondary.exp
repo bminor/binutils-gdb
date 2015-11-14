@@ -121,6 +121,16 @@ set build_tests {
    "-shared -Wl,--version-script=library8.map tmpdir/library8c.o tmpdir/library8a.so tmpdir/library8b.so"
    "-fPIC"
    {dummy.c} {{readelf {-s} library8c.rd}} "library8c.so"}
+  {"Build secondary8a.so"
+   "-shared -Wl,--version-script=secondary8a.map" "-fPIC"
+   {secondary8a.c} {{readelf {-s} secondary8a.rd}} "secondary8a.so"}
+  {"Build secondary8b.a"
+   "" "-fPIC"
+   {secondary8b.c} {} "secondary8b.a"}
+  {"Build secondary8b.so"
+   "-shared -Wl,--start-group tmpdir/secondary8a.so tmpdir/secondary8b.o"
+   "-fPIC"
+   {dummy.c} {{readelf {-s} secondary8b.rd}} "secondary8b.so"}
 }
 
 run_cc_link_tests $build_tests

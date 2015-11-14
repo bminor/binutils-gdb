@@ -162,7 +162,7 @@ static htab_t frame_stash;
 static hashval_t
 frame_addr_hash (const void *ap)
 {
-  const struct frame_info *frame = ap;
+  const struct frame_info *frame = (const struct frame_info *) ap;
   const struct frame_id f_id = frame->this_id.value;
   hashval_t hash = 0;
 
@@ -189,8 +189,8 @@ frame_addr_hash (const void *ap)
 static int
 frame_addr_hash_eq (const void *a, const void *b)
 {
-  const struct frame_info *f_entry = a;
-  const struct frame_info *f_element = b;
+  const struct frame_info *f_entry = (const struct frame_info *) a;
+  const struct frame_info *f_element = (const struct frame_info *) b;
 
   return frame_id_eq (f_entry->this_id.value,
 		      f_element->this_id.value);
@@ -246,7 +246,7 @@ frame_stash_find (struct frame_id id)
   struct frame_info *frame;
 
   dummy.this_id.value = id;
-  frame = htab_find (frame_stash, &dummy);
+  frame = (struct frame_info *) htab_find (frame_stash, &dummy);
   return frame;
 }
 
@@ -503,7 +503,7 @@ frame_unwind_caller_id (struct frame_info *next_frame)
     return null_frame_id;
 }
 
-const struct frame_id null_frame_id; /* All zeros.  */
+const struct frame_id null_frame_id = { 0 }; /* All zeros.  */
 const struct frame_id outer_frame_id = { 0, 0, 0, FID_STACK_INVALID, 0, 1, 0 };
 
 struct frame_id
@@ -930,7 +930,7 @@ get_frame_func (struct frame_info *this_frame)
 static enum register_status
 do_frame_register_read (void *src, int regnum, gdb_byte *buf)
 {
-  if (!deprecated_frame_register_read (src, regnum, buf))
+  if (!deprecated_frame_register_read ((struct frame_info *) src, regnum, buf))
     return REG_UNAVAILABLE;
   else
     return REG_VALID;
@@ -1447,7 +1447,7 @@ frame_obstack_zalloc (unsigned long size)
 static int
 unwind_to_current_frame (struct ui_out *ui_out, void *args)
 {
-  struct frame_info *frame = get_prev_frame (args);
+  struct frame_info *frame = get_prev_frame ((struct frame_info *) args);
 
   /* A sentinel frame can fail to unwind, e.g., because its PC value
      lands in somewhere like start.  */
@@ -1576,8 +1576,6 @@ select_frame (struct frame_info *fi)
   selected_frame = fi;
   /* NOTE: cagney/2002-05-04: FI can be NULL.  This occurs when the
      frame is being invalidated.  */
-  if (deprecated_selected_frame_level_changed_hook)
-    deprecated_selected_frame_level_changed_hook (frame_relative_level (fi));
 
   /* FIXME: kseitz/2002-08-28: It would be nice to call
      selected_frame_level_changed_event() right here, but due to limitations
@@ -1987,7 +1985,7 @@ get_prev_frame_always (struct frame_info *this_frame)
 	         pointer to the frame, this allows the STOP_STRING on the
 	         frame to be of type 'const char *'.  */
 	      size = strlen (ex.message) + 1;
-	      stop_string = frame_obstack_zalloc (size);
+	      stop_string = (char *) frame_obstack_zalloc (size);
 	      memcpy (stop_string, ex.message, size);
 	      this_frame->stop_string = stop_string;
 	    }
@@ -2573,6 +2571,48 @@ frame_unwind_caller_arch (struct frame_info *next_frame)
   return frame_unwind_arch (skip_artificial_frames (next_frame));
 }
 
+/* Gets the language of FRAME.  */
+
+enum language
+get_frame_language (struct frame_info *frame)
+{
+  CORE_ADDR pc = 0;
+  int pc_p = 0;
+
+  gdb_assert (frame!= NULL);
+
+    /* We determine the current frame language by looking up its
+       associated symtab.  To retrieve this symtab, we use the frame
+       PC.  However we cannot use the frame PC as is, because it
+       usually points to the instruction following the "call", which
+       is sometimes the first instruction of another function.  So
+       we rely on get_frame_address_in_block(), it provides us with
+       a PC that is guaranteed to be inside the frame's code
+       block.  */
+
+  TRY
+    {
+      pc = get_frame_address_in_block (frame);
+      pc_p = 1;
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw_exception (ex);
+    }
+  END_CATCH
+
+  if (pc_p)
+    {
+      struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
+
+      if (cust != NULL)
+	return compunit_language (cust);
+    }
+
+  return language_unknown;
+}
+
 /* Stack pointer methods.  */
 
 CORE_ADDR
@@ -2663,7 +2703,7 @@ frame_stop_reason_symbol_string (enum unwind_stop_reason reason)
 static void
 frame_cleanup_after_sniffer (void *arg)
 {
-  struct frame_info *frame = arg;
+  struct frame_info *frame = (struct frame_info *) arg;
 
   /* The sniffer should not allocate a prologue cache if it did not
      match this frame.  */

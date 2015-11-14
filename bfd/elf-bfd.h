@@ -108,6 +108,15 @@ struct elf_link_virtual_table_entry
     struct elf_link_hash_entry *parent;
   };
 
+/* ELF symbol version.  */
+enum elf_symbol_version
+  {
+    unknown = 0,
+    unversioned,
+    versioned,
+    versioned_hidden
+  };
+
 /* ELF linker hash table entries.  */
 
 struct elf_link_hash_entry
@@ -178,8 +187,8 @@ struct elf_link_hash_entry
   unsigned int needs_plt : 1;
   /* Symbol appears in a non-ELF input file.  */
   unsigned int non_elf : 1;
-  /* Symbol should be marked as hidden in the version information.  */
-  unsigned int hidden : 1;
+  /* Symbol version information.  */
+  ENUM_BITFIELD (elf_symbol_version) versioned : 2;
   /* Symbol was forced to local scope due to a version script file.  */
   unsigned int forced_local : 1;
   /* Symbol was forced to be dynamic due to a version script file.  */
@@ -586,6 +595,7 @@ struct elf_link_hash_table
   asection *iplt;
   asection *irelplt;
   asection *irelifunc;
+  asection *dynsym;
 };
 
 /* Look up an entry in an ELF linker hash table.  */
@@ -1550,7 +1560,7 @@ typedef struct obj_attribute
 typedef struct obj_attribute_list
 {
   struct obj_attribute_list *next;
-  int tag;
+  unsigned int tag;
   obj_attribute attr;
 } obj_attribute_list;
 
@@ -1633,6 +1643,26 @@ struct output_elf_obj_tdata
   bfd_boolean flags_init;
 };
 
+/* Indicate if the bfd contains symbols that have the STT_GNU_IFUNC
+   symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
+   field in the ELF header structure.  */
+enum elf_gnu_symbols
+  {
+    elf_gnu_symbol_none = 0,
+    elf_gnu_symbol_any = 1 << 0,
+    elf_gnu_symbol_ifunc = (elf_gnu_symbol_any | 1 << 1),
+    elf_gnu_symbol_unique = (elf_gnu_symbol_any | 1 << 2),
+    elf_gnu_symbol_all = (elf_gnu_symbol_ifunc | elf_gnu_symbol_unique)
+  };
+
+typedef struct elf_section_list
+{
+  Elf_Internal_Shdr          hdr;
+  unsigned int               ndx;
+  struct elf_section_list *  next;
+} elf_section_list;
+  
+    
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -1649,7 +1679,7 @@ struct elf_obj_tdata
   Elf_Internal_Shdr dynversym_hdr;
   Elf_Internal_Shdr dynverref_hdr;
   Elf_Internal_Shdr dynverdef_hdr;
-  Elf_Internal_Shdr symtab_shndx_hdr;
+  elf_section_list * symtab_shndx_list;
   bfd_vma gp;				/* The gp value */
   unsigned int gp_size;			/* The gp size */
   unsigned int num_elf_sections;	/* elf_sect_ptr size */
@@ -1724,7 +1754,7 @@ struct elf_obj_tdata
   Elf_Internal_Shdr **group_sect_ptr;
   int num_group;
 
-  unsigned int symtab_section, symtab_shndx_section, dynsymtab_section;
+  unsigned int symtab_section, dynsymtab_section;
   unsigned int dynversym_section, dynverdef_section, dynverref_section;
 
   /* An identifier used to distinguish different target
@@ -1743,10 +1773,7 @@ struct elf_obj_tdata
      symbols.  */
   bfd_boolean bad_symtab;
 
-  /* True if the bfd contains symbols that have the STT_GNU_IFUNC
-     symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
-     field in the ELF header structure.  */
-  bfd_boolean has_gnu_symbols;
+  enum elf_gnu_symbols has_gnu_symbols;
 
   /* Information grabbed from an elf core file.  */
   struct core_elf_obj_tdata *core;
@@ -1769,7 +1796,7 @@ struct elf_obj_tdata
 #define elf_stack_flags(bfd)	(elf_tdata(bfd) -> o->stack_flags)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> o->strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
-#define elf_symtab_shndx(bfd)	(elf_tdata(bfd) -> symtab_shndx_section)
+#define elf_symtab_shndx_list(bfd)	(elf_tdata(bfd) -> symtab_shndx_list)
 #define elf_strtab_sec(bfd)	(elf_tdata(bfd) -> o->strtab_section)
 #define elf_shstrtab_sec(bfd)	(elf_tdata(bfd) -> o->shstrtab_section)
 #define elf_symtab_hdr(bfd)	(elf_tdata(bfd) -> symtab_hdr)
@@ -2288,7 +2315,7 @@ extern asection *_bfd_elf_gc_mark_hook
 
 extern asection *_bfd_elf_gc_mark_rsec
   (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn,
-   struct elf_reloc_cookie *);
+   struct elf_reloc_cookie *, bfd_boolean *);
 
 extern bfd_boolean _bfd_elf_gc_mark_reloc
   (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn,
@@ -2431,22 +2458,22 @@ extern bfd *_bfd_elf64_bfd_from_remote_memory
 
 extern bfd_vma bfd_elf_obj_attr_size (bfd *);
 extern void bfd_elf_set_obj_attr_contents (bfd *, bfd_byte *, bfd_vma);
-extern int bfd_elf_get_obj_attr_int (bfd *, int, int);
-extern void bfd_elf_add_obj_attr_int (bfd *, int, int, unsigned int);
+extern int bfd_elf_get_obj_attr_int (bfd *, int, unsigned int);
+extern void bfd_elf_add_obj_attr_int (bfd *, int, unsigned int, unsigned int);
 #define bfd_elf_add_proc_attr_int(BFD, TAG, VALUE) \
   bfd_elf_add_obj_attr_int ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
-extern void bfd_elf_add_obj_attr_string (bfd *, int, int, const char *);
+extern void bfd_elf_add_obj_attr_string (bfd *, int, unsigned int, const char *);
 #define bfd_elf_add_proc_attr_string(BFD, TAG, VALUE) \
   bfd_elf_add_obj_attr_string ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
-extern void bfd_elf_add_obj_attr_int_string (bfd *, int, int, unsigned int,
-					     const char *);
+extern void bfd_elf_add_obj_attr_int_string (bfd *, int, unsigned int,
+					     unsigned int, const char *);
 #define bfd_elf_add_proc_attr_int_string(BFD, TAG, INTVAL, STRVAL) \
   bfd_elf_add_obj_attr_int_string ((BFD), OBJ_ATTR_PROC, (TAG), \
 				   (INTVAL), (STRVAL))
 
 extern char *_bfd_elf_attr_strdup (bfd *, const char *);
 extern void _bfd_elf_copy_obj_attributes (bfd *, bfd *);
-extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, int);
+extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, unsigned int);
 extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
 extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
 extern bfd_boolean _bfd_elf_merge_unknown_attribute_low (bfd *, bfd *, int);
@@ -2556,7 +2583,7 @@ extern asection _bfd_elf_large_com_section;
       else if (info->unresolved_syms_in_objects == RM_IGNORE		\
 	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)		\
 	ignored = TRUE;							\
-      else if (!info->relocatable)					\
+      else if (!bfd_link_relocatable (info))				\
 	{								\
 	  bfd_boolean err;						\
 	  err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
@@ -2591,7 +2618,7 @@ extern asection _bfd_elf_large_com_section;
     _bfd_clear_contents (howto, input_bfd, input_section,		\
 			 contents + rel[index].r_offset);		\
 									\
-    if (info->relocatable						\
+    if (bfd_link_relocatable (info)					\
 	&& (input_section->flags & SEC_DEBUGGING))			\
       {									\
 	/* Only remove relocations in debug sections since other	\

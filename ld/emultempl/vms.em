@@ -101,7 +101,7 @@ vms_place_orphan (asection *s,
 
   /* We have nothing to say for anything other than a final link or an excluded
      section.  */
-  if (link_info.relocatable
+  if (bfd_link_relocatable (&link_info)
       || (s->flags & (SEC_EXCLUDE | SEC_LOAD)) != SEC_LOAD)
     return NULL;
 

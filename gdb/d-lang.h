@@ -68,6 +68,16 @@ extern char *d_demangle (const char *mangled, int options);
 
 extern const struct builtin_d_type *builtin_d_type (struct gdbarch *);
 
+/* Defined in d-namespace.c  */
+
+extern struct block_symbol d_lookup_symbol_nonlocal (const struct language_defn *,
+						     const char *,
+						     const struct block *,
+						     const domain_enum);
+
+extern struct block_symbol d_lookup_nested_symbol (struct type *, const char *,
+						   const struct block *);
+
 /* Defined in d-valprint.c  */
 
 extern void d_val_print (struct type *type, const gdb_byte *valaddr,

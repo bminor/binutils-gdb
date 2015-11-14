@@ -156,7 +156,12 @@ ALL_EMULATION_SOURCES = \
 	eaixrs6.c \
 	ealpha.c \
 	ealphavms.c \
+	earcv2elf.c \
+	earcv2elfx.c \
 	earcelf.c \
+	earcelf_prof.c \
+	earclinux.c \
+	earclinux_prof.c \
 	earm_epoc_pe.c \
 	earm_wince_pe.c \
 	earmaoutb.c \
@@ -430,6 +435,8 @@ ALL_64_EMULATION_SOURCES = \
 	eaarch64elf32.c \
 	eaarch64elfb.c \
 	eaarch64elf32b.c \
+	eaarch64cloudabi.c \
+	eaarch64cloudabib.c \
 	eaarch64fbsd.c \
 	eaarch64fbsdb.c \
 	eaarch64linux.c \
@@ -692,8 +699,26 @@ ealphavms.c: $(srcdir)/emulparams/alphavms.sh \
   $(srcdir)/emultempl/vms.em $(srcdir)/scripttempl/alphavms.sc \
   ${GEN_DEPENDS}
 
+earcv2elf.c: $(srcdir)/emulparams/arcv2elf.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elfarcv2.sc ${GEN_DEPENDS}
+
+earcv2elfx.c: $(srcdir)/emulparams/arcv2elfx.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elfarcv2.sc ${GEN_DEPENDS}
+
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elfarc.sc ${GEN_DEPENDS}
+
+earcelf_prof.c: $(srcdir)/emulparams/arcelf_prof.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elfarc.sc ${GEN_DEPENDS}
+
+#for linux on arc
+earclinux.c: $(srcdir)/emulparams/arclinux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
+  $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
+
+earclinux_prof.c: $(srcdir)/emulparams/arclinux_prof.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em \
+  $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
 
 earm_epoc_pe.c: $(srcdir)/emulparams/arm_epoc_pe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/epocpe.sc ${GEN_DEPENDS}
@@ -1183,10 +1208,10 @@ eelf32mt.c: $(srcdir)/emulparams/elf32mt.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32or1k.c: $(srcdir)/emulparams/elf32or1k.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32or1k_linux.c: $(srcdir)/emulparams/elf32or1k_linux.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emulparams/elf32ppccommon.sh \
@@ -1592,6 +1617,14 @@ eaarch64elfb.c: $(srcdir)/emulparams/aarch64elfb.sh $(srcdir)/emulparams/aarch64
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eaarch64elf32b.c: $(srcdir)/emulparams/aarch64elf32b.sh $(srcdir)/emulparams/aarch64elf32.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/aarch64elf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+eaarch64cloudabi.c: $(srcdir)/emulparams/aarch64cloudabi.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/aarch64elf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+
+eaarch64cloudabib.c: $(srcdir)/emulparams/aarch64cloudabib.sh $(srcdir)/emulparams/aarch64cloudabi.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/aarch64elf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 

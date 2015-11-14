@@ -89,7 +89,7 @@ struct elf32_avr_link_hash_table
 
   /* Assorted information used by elf32_avr_size_stubs.  */
   unsigned int        bfd_count;
-  int                 top_index;
+  unsigned int        top_index;
   asection **         input_list;
   Elf_Internal_Sym ** all_local_syms;
 
@@ -641,7 +641,22 @@ static reloc_howto_type elf_avr_howto_table[] =
 	 FALSE,			/* partial_inplace */
 	 0xffffff,		/* src_mask */
 	 0xffffff,		/* dst_mask */
-	 FALSE) 		/* pcrel_offset */
+	 FALSE), 		/* pcrel_offset */
+
+  /* A 32 bit PC relative relocation.  */
+  HOWTO (R_AVR_32_PCREL,	/* type */
+	 0,				/* rightshift */
+	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_AVR_32_PCREL",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,	/* src_mask */
+	 0xffffffff,	/* dst_mask */
+	 TRUE),			/* pcrel_offset */
 };
 
 /* Map BFD reloc types to AVR ELF reloc types.  */
@@ -689,7 +704,8 @@ static const struct avr_reloc_map avr_reloc_map[] =
   { BFD_RELOC_AVR_DIFF32,           R_AVR_DIFF32 },
   { BFD_RELOC_AVR_LDS_STS_16,       R_AVR_LDS_STS_16},
   { BFD_RELOC_AVR_PORT6,            R_AVR_PORT6},
-  { BFD_RELOC_AVR_PORT5,            R_AVR_PORT5}
+  { BFD_RELOC_AVR_PORT5,            R_AVR_PORT5},
+  { BFD_RELOC_32_PCREL,             R_AVR_32_PCREL}
 };
 
 /* Meant to be filled one day with the wrap around address for the
@@ -1458,7 +1474,7 @@ elf32_avr_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	continue;
 
       r = avr_final_link_relocate (howto, input_bfd, input_section,
@@ -2359,7 +2375,7 @@ elf32_avr_relax_section (bfd *abfd,
       || !strcmp (sec->name,".jumptables"))
     shrinkable = FALSE;
 
-  if (link_info->relocatable)
+  if (bfd_link_relocatable (link_info))
     (*link_info->callbacks->einfo)
       (_("%P%F: --relax and -r may not be used together\n"));
 
@@ -2397,7 +2413,7 @@ elf32_avr_relax_section (bfd *abfd,
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocatable
+  if (bfd_link_relocatable (link_info)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)
@@ -3349,7 +3365,7 @@ elf32_avr_setup_section_lists (bfd *output_bfd,
 {
   bfd *input_bfd;
   unsigned int bfd_count;
-  int top_id, top_index;
+  unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
   bfd_size_type amt;
@@ -3625,7 +3641,7 @@ elf32_avr_size_stubs (bfd *output_bfd,
                         }
                       else if (hh->root.type == bfd_link_hash_undefweak)
                         {
-                          if (! info->shared)
+                          if (! bfd_link_pic (info))
                             continue;
                         }
                       else if (hh->root.type == bfd_link_hash_undefined)

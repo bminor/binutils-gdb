@@ -1769,7 +1769,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
 	  	.align 2
 	   0:	.long disp
 	   1:
-	  
+
 	   If the b!cond is 4 byte aligned, the literal which would
 	   go at x+4 will also be aligned.  */
 	int first_inst = fragP->fr_fix + fragP->fr_address;

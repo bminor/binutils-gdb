@@ -302,11 +302,10 @@ obj_som_weak (int ignore ATTRIBUTE_UNUSED)
 
   do
     {
-      name = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
       *input_line_pointer = c;
-      SKIP_WHITESPACE ();
+      SKIP_WHITESPACE_AFTER_NAME ();
       S_SET_WEAK (symbolP);
       if (c == ',')
 	{

@@ -15,26 +15,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef SYMBOL_PREFIX
-#define SYMBOL(str)     SYMBOL_PREFIX #str
-#else
-#define SYMBOL(str)     #str
-#endif
-
-static void
-foo ()
-{}
+#include "trace-common.h"
 
 void
 pendfunc2 (int x)
 {
-  /* `set_point2' is the label where we'll set multiple tracepoints and
-     breakpoints at.  The insn at the label must the large enough to
-     fit a fast tracepoint jump.  */
-  asm ("    .global " SYMBOL(set_point2) "\n"
-       SYMBOL(set_point2) ":\n"
-#if (defined __x86_64__ || defined __i386__)
-       "    call " SYMBOL(foo) "\n"
-#endif
-       );
+  FAST_TRACEPOINT_LABEL(set_point2);
 }

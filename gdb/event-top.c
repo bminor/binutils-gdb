@@ -397,7 +397,7 @@ top_level_prompt (void)
     }
 
   prompt_length = strlen (prefix) + strlen (prompt) + strlen (suffix);
-  composed_prompt = xmalloc (prompt_length + 1);
+  composed_prompt = (char *) xmalloc (prompt_length + 1);
 
   strcpy (composed_prompt, prefix);
   strcat (composed_prompt, prompt);
@@ -419,8 +419,6 @@ stdin_event_handler (int error, gdb_client_data client_data)
     {
       printf_unfiltered (_("error detected on stdin\n"));
       delete_file_handler (input_fd);
-      discard_all_continuations ();
-      discard_all_intermediate_continuations ();
       /* If stdin died, we may as well kill gdb.  */
       quit_command ((char *) 0, stdin == instream);
     }
@@ -683,7 +681,8 @@ command_line_handler (char *rl)
     {
       if (linelength > saved_command_line_size)
 	{
-	  saved_command_line = xrealloc (saved_command_line, linelength);
+	  saved_command_line
+	    = (char *) xrealloc (saved_command_line, linelength);
 	  saved_command_line_size = linelength;
 	}
       strcpy (saved_command_line, linebuffer);
@@ -876,15 +875,10 @@ handle_sigterm (int sig)
 {
   signal (sig, handle_sigterm);
 
-  /* Call quit_force in a signal safe way.
-     quit_force itself is not signal safe.  */
-  if (target_can_async_p ())
-    mark_async_signal_handler (async_sigterm_token);
-  else
-    {
-      sync_quit_force_run = 1;
-      set_quit_flag ();
-    }
+  sync_quit_force_run = 1;
+  set_quit_flag ();
+
+  mark_async_signal_handler (async_sigterm_token);
 }
 
 /* Do the quit.  All the checks have been done by the caller.  */

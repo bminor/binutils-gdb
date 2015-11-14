@@ -60,7 +60,7 @@ gld${EMULATION_NAME}_before_parse (void)
 
   /* The MSP430 port *needs* linker relaxtion in order to cope with large
      functions where conditional branches do not fit into a +/- 1024 byte range.  */
-  if (! link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     TARGET_ENABLE_RELAXATION;
 }
 
@@ -85,11 +85,11 @@ fragment <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (bfd_link_relocatable (&link_info) && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'      >> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_relocatable (&link_info)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
@@ -106,9 +106,9 @@ fragment <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (bfd_link_relocatable (&link_info) && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocatable)
+  else if (bfd_link_relocatable (&link_info))
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";
@@ -178,7 +178,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
   if ((s->flags & SEC_ALLOC) == 0)
     return NULL;
 
-  if (link_info.relocatable)
+  if (bfd_link_relocatable (&link_info))
     return NULL;
 
   /* If constraints are involved let the linker handle the placement normally.  */

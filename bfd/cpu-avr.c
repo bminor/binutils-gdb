@@ -141,19 +141,19 @@ static const bfd_arch_info_type arch_info_struct[] =
 
   /* Xmega 2.  */
   N (24, bfd_mach_avrxmega2, "avr:102", FALSE, & arch_info_struct[13]),
-  
+
   /* Xmega 3.  */
   N (24, bfd_mach_avrxmega3, "avr:103", FALSE, & arch_info_struct[14]),
-  
+
   /* Xmega 4.  */
   N (24, bfd_mach_avrxmega4, "avr:104", FALSE, & arch_info_struct[15]),
-  
+
   /* Xmega 5.  */
   N (24, bfd_mach_avrxmega5, "avr:105", FALSE, & arch_info_struct[16]),
-  
+
   /* Xmega 6.  */
   N (24, bfd_mach_avrxmega6, "avr:106", FALSE, & arch_info_struct[17]),
-  
+
   /* Xmega 7.  */
   N (24, bfd_mach_avrxmega7, "avr:107", FALSE, NULL)
 

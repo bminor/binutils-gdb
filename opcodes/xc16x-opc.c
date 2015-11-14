@@ -31,7 +31,7 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #include "libiberty.h"
 
 /* -- opc.c */
-                                                                                
+
 /* -- */
 /* The hash functions are recorded here to help keep assembler code out of
    the disassembler and vice versa.  */

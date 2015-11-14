@@ -29,6 +29,7 @@ struct symtab;
 #include "inferior.h"
 #include "btrace.h"
 #include "common/vec.h"
+#include "target/waitstatus.h"
 
 /* Frontend view of the thread state.  Possible extensions: stepping,
    finishing, until(ling),...  */
@@ -157,6 +158,23 @@ struct thread_suspend_state
      should be suppressed, the core will take care of clearing this
      before the target is resumed.  */
   enum gdb_signal stop_signal;
+
+  /* The reason the thread last stopped, if we need to track it
+     (breakpoint, watchpoint, etc.)  */
+  enum target_stop_reason stop_reason;
+
+  /* The waitstatus for this thread's last event.  */
+  struct target_waitstatus waitstatus;
+  /* If true WAITSTATUS hasn't been handled yet.  */
+  int waitstatus_pending_p;
+
+  /* Record the pc of the thread the last time it stopped.  (This is
+     not the current thread's PC as that may have changed since the
+     last stop, e.g., "return" command, or "p $pc = 0xf000").  This is
+     used in coordination with stop_reason and waitstatus_pending_p:
+     if the thread's PC is changed since it last stopped, a pending
+     breakpoint waitstatus is discarded.  */
+  CORE_ADDR stop_pc;
 };
 
 typedef struct value *value_ptr;
@@ -180,6 +198,15 @@ struct thread_info
      a breakpoint, for instance.  This is a real indicator whether the
      thread is off and running.  */
   int executing;
+
+  /* Non-zero if this thread is resumed from infrun's perspective.
+     Note that a thread can be marked both as not-executing and
+     resumed at the same time.  This happens if we try to resume a
+     thread that has a wait status pending.  We shouldn't let the
+     thread really run until that wait status has been processed, but
+     we should not process that wait status if we didn't try to let
+     the thread run.  */
+  int resumed;
 
   /* Frontend view of the thread state.  Note that the THREAD_RUNNING/
      THREAD_STOPPED states are different from EXECUTING.  When the
@@ -206,8 +233,10 @@ struct thread_info
 
   /* Internal stepping state.  */
 
-  /* Record the pc of the thread the last time it stopped.  This is
-     maintained by proceed and keep_going, and used in
+  /* Record the pc of the thread the last time it was resumed.  (It
+     can't be done on stop as the PC may change since the last stop,
+     e.g., "return" command, or "p $pc = 0xf000").  This is maintained
+     by proceed and keep_going, and among other things, it's used in
      adjust_pc_after_break to distinguish a hardware single-step
      SIGTRAP from a breakpoint SIGTRAP.  */
   CORE_ADDR prev_pc;
@@ -236,21 +265,10 @@ struct thread_info
      when GDB gets back SIGTRAP from step_resume_breakpoint.  */
   int step_after_step_resume_breakpoint;
 
-  /* Per-thread command support.  */
-
-  /* Pointer to what is left to do for an execution command after the
-     target stops.  Used only in asynchronous mode, by targets that
-     support async execution.  Several execution commands use it.  */
-  struct continuation *continuations;
-
-  /* Similar to the above, but used when a single execution command
-     requires several resume/stop iterations.  Used by the step
-     command.  */
-  struct continuation *intermediate_continuations;
-
-  /* If stepping, nonzero means step count is > 1 so don't print frame
-     next time inferior stops if it stops due to stepping.  */
-  int step_multi;
+  /* Pointer to the state machine manager object that handles what is
+     left to do for the thread's execution command after the target
+     stops.  Several execution commands use it.  */
+  struct thread_fsm *thread_fsm;
 
   /* This is used to remember when a fork or vfork event was caught by
      a catchpoint, and thus the event is to be followed at the next
@@ -283,6 +301,12 @@ struct thread_info
   /* Values that are stored as temporaries on stack while evaluating
      expressions.  */
   value_vec *stack_temporaries;
+
+  /* Step-over chain.  A thread is in the step-over queue if these are
+     non-NULL.  If only a single thread is in the chain, then these
+     fields point to self.  */
+  struct thread_info *step_over_prev;
+  struct thread_info *step_over_next;
 };
 
 /* Create an empty thread list, or empty the existing one.  */
@@ -389,6 +413,11 @@ extern int thread_count (void);
 
 /* Switch from one thread to another.  */
 extern void switch_to_thread (ptid_t ptid);
+
+/* Marks or clears thread(s) PTID as resumed.  If PTID is
+   MINUS_ONE_PTID, applies to all threads.  If ptid_is_pid(PTID) is
+   true, applies to all threads of the process pointed at by PTID.  */
+extern void set_resumed (ptid_t ptid, int resumed);
 
 /* Marks thread PTID is running, or stopped. 
    If PTID is minus_one_ptid, marks all threads.  */
@@ -499,6 +528,27 @@ extern void push_thread_stack_temporary (ptid_t ptid, struct value *v);
 extern struct value *get_last_thread_stack_temporary (ptid_t);
 
 extern int value_in_thread_stack_temporaries (struct value *, ptid_t);
+
+/* Add TP to the end of its inferior's pending step-over chain.  */
+
+extern void thread_step_over_chain_enqueue (struct thread_info *tp);
+
+/* Remove TP from its inferior's pending step-over chain.  */
+
+extern void thread_step_over_chain_remove (struct thread_info *tp);
+
+/* Return the next thread in the step-over chain starting at TP.  NULL
+   if TP is the last entry in the chain.  */
+
+extern struct thread_info *thread_step_over_chain_next (struct thread_info *tp);
+
+/* Return true if TP is in the step-over chain.  */
+
+extern int thread_is_in_step_over_chain (struct thread_info *tp);
+
+/* Cancel any ongoing execution command.  */
+
+extern void thread_cancel_execution_command (struct thread_info *thr);
 
 extern struct thread_info *thread_list;
 

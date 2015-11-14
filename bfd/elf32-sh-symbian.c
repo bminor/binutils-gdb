@@ -432,7 +432,7 @@ sh_symbian_relocate_section (bfd *                  output_bfd,
 			     asection **            local_sections)
 {
   /* When performing a final link we implement the IMPORT AS directives.  */
-  if (!info->relocatable)
+  if (!bfd_link_relocatable (info))
     {
       Elf_Internal_Rela *            rel;
       Elf_Internal_Rela *            relend;

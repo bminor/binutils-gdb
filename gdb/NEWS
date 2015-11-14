@@ -1,7 +1,96 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.9
+*** Changes since GDB 7.10
+
+* Record btrace now supports non-stop mode.
+
+* Support for tracepoints on aarch64-linux was added in GDBserver.
+
+* The 'record instruction-history' command now indicates speculative execution
+  when using the Intel(R) Processor Trace recording format.
+
+* GDB now allows users to specify explicit locations, bypassing
+  the linespec parser.  This feature is also available to GDB/MI
+  clients.
+
+* Multi-architecture debugging is supported on AArch64 GNU/Linux.
+  GDB now is able to debug both AArch64 applications and ARM applications
+  at the same time.
+
+* Support for fast tracepoints on aarch64-linux was added in GDBserver,
+  including JIT compiling fast tracepoint's conditional expression bytecode
+  into native code.
+
+* GDB now supports displaced stepping on AArch64 GNU/Linux.
+
+* New commands
+
+maint set target-non-stop (on|off|auto)
+maint show target-non-stop
+  Control whether GDB targets always operate in non-stop mode even if
+  "set non-stop" is "off".  The default is "auto", meaning non-stop
+  mode is enabled if supported by the target.
+
+maint set bfd-sharing
+maint show bfd-sharing
+  Control the reuse of bfd objects.
+
+set debug bfd-cache
+show debug bfd-cache
+  Control display of debugging info regarding bfd caching.
+
+set remote multiprocess-extensions-packet
+show remote multiprocess-extensions-packet
+  Set/show the use of the remote protocol multiprocess extensions.
+
+* The "disassemble" command accepts a new modifier: /s.
+  It prints mixed source+disassembly like /m with two differences:
+  - disassembled instructions are now printed in program order, and
+  - and source for all relevant files is now printed.
+  The "/m" option is now considered deprecated: its "source-centric"
+  output hasn't proved useful in practice.
+
+* The "record instruction-history" command accepts a new modifier: /s.
+  It behaves exactly like /m and prints mixed source+disassembly.
+
+* The "set scheduler-locking" command supports a new mode "replay".
+  It behaves like "off" in record mode and like "on" in replay mode.
+
+* Support for various ROM monitors has been removed:
+
+  target dbug		dBUG ROM monitor for Motorola ColdFire
+  target picobug	Motorola picobug monitor
+  target dink32		DINK32 ROM monitor for PowerPC
+  target m32r		Renesas M32R/D ROM monitor
+  target mon2000	mon2000 ROM monitor
+  target ppcbug		PPCBUG ROM monitor for PowerPC
+
+* Support for reading/writing memory and extracting values on architectures
+  whose memory is addressable in units of any integral multiple of 8 bits.
+
+* New remote packets
+
+exec stop reason
+  Indicates that an exec system call was executed.
+
+exec-events feature in qSupported
+  The qSupported packet allows GDB to request support for exec
+  events using the new 'gdbfeature' exec-event, and the qSupported
+  response can contain the corresponding 'stubfeature'.  Set and
+  show commands can be used to display whether these features are enabled.
+
+* Extended-remote exec events
+
+  ** GDB now has support for exec events on extended-remote Linux targets.
+     For such targets with Linux kernels 2.5.46 and later, this enables
+     follow-exec-mode and exec catchpoints.
+
+set remote exec-event-feature-packet
+show remote exec-event-feature-packet
+  Set/show the use of the remote exec event feature.
+
+*** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*
   targets has been added.  GDB now supports recording of A64 instruction set
@@ -112,6 +201,23 @@ show mpx bound
 set mpx bound on i386 and amd64
    Support for bound table investigation on Intel(R) MPX enabled applications.
 
+record btrace pt
+record pt
+  Start branch trace recording using Intel(R) Processor Trace format.
+
+maint info btrace
+  Print information about branch tracing internals.
+
+maint btrace packet-history
+  Print the raw branch tracing data.
+
+maint btrace clear-packet-history
+  Discard the stored raw branch tracing data.
+
+maint btrace clear
+  Discard all branch tracing data.  It will be fetched and processed
+  anew by the next "record" command.
+
 * New options
 
 set debug dwarf-die
@@ -163,6 +269,16 @@ set debug linux-namespaces
 show debug linux-namespaces
   Control display of debugging info regarding Linux namespaces.
 
+set|show record btrace pt buffer-size
+  Set and show the size of the ring buffer used for branch tracing in
+  Intel(R) Processor Trace format.
+  The obtained size may differ from the requested size.  Use "info
+  record" to see the obtained buffer size.
+
+maint set|show btrace pt skip-pad
+  Set and show whether PAD packets are skipped when computing the
+  packet history.
+
 * The command 'thread apply all' can now support new option '-ascending'
   to call its specified command for all threads in ascending order.
 
@@ -178,6 +294,15 @@ qXfer:btrace-conf:read
 
 Qbtrace-conf:bts:size
   Set the requested ring buffer size for branch tracing in BTS format.
+
+Qbtrace:pt
+  Enable Intel(R) Procesor Trace-based branch tracing for the current
+  process.  The remote stub reports support for this packet to GDB's
+  qSupported query.
+
+Qbtrace-conf:pt:size
+  Set the requested ring buffer size for branch tracing in Intel(R) Processor
+  Trace format.
 
 swbreak stop reason
   Indicates a memory breakpoint instruction was executed, irrespective
@@ -245,6 +370,17 @@ fork-events and vfork-events features in qSupported
 
 HP/PA running HP-UX           hppa*-*-hpux*
 Itanium running HP-UX         ia64-*-hpux*
+
+* New configure options
+
+--with-intel-pt
+  This configure option allows the user to build GDB with support for
+  Intel(R) Processor Trace (default: auto).  This requires libipt.
+
+--with-libipt-prefix=PATH
+  Specify the path to the version of libipt that GDB should use.
+  $PATH/include should contain the intel-pt.h header and
+  $PATH/lib should contain the libipt.so library.
 
 *** Changes in GDB 7.9.1
 

@@ -214,20 +214,12 @@ if ![gdb_target_supports_trace] {
 
 gdb_test "trace foo" "Tracepoint $decimal at .*"
 
-if [is_amd64_regs_target] {
-    set spreg "\$rsp"
-} elseif [is_x86_like_target] {
-    set spreg "\$esp"
-} else {
-    set spreg "\$sp"
-}
-
 # Collect arguments i and j.  Collect 'global1' which is entry value
 # of argument i.  Don't collect 'global2' to test the entry value of
 # argument j.
 
 gdb_trace_setactions "set action for tracepoint 1" "" \
-    "collect i, j, global1, \(\*\(void \*\*\) \($spreg\)\) @ 64" "^$"
+    "collect i, j, global1, \(\*\(void \*\*\) \(\$$spreg\)\) @ 64" "^$"
 
 gdb_test_no_output "tstart"
 

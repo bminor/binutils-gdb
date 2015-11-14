@@ -119,6 +119,7 @@ recognized:
 @code{cortex-a8},
 @code{cortex-a9},
 @code{cortex-a15},
+@code{cortex-a35},
 @code{cortex-a53},
 @code{cortex-a57},
 @code{cortex-a72},
@@ -135,6 +136,7 @@ recognized:
 @code{exynos-m1},
 @code{marvell-pj4},
 @code{marvell-whitney},
+@code{qdf24xx},
 @code{xgene1},
 @code{xgene2},
 @code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
@@ -210,7 +212,7 @@ names are recognized:
 @code{armv6j},
 @code{armv6k},
 @code{armv6z},
-@code{armv6zk},
+@code{armv6kz},
 @code{armv6-m},
 @code{armv6s-m},
 @code{armv7},
@@ -274,9 +276,10 @@ The following format options are recognized:
 @code{neon},
 @code{neon-vfpv4},
 @code{neon-fp-armv8},
-@code{crypto-neon-fp-armv8}.
+@code{crypto-neon-fp-armv8},
+@code{neon-fp-armv8.1}
 and
-@code{neon-fp-armv8-1},
+@code{crypto-neon-fp-armv8.1}.
 
 In addition to determining which instructions are assembled, this option
 also affects the way in which the @code{.double} assembler directive behaves

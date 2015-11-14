@@ -19,7 +19,7 @@
 #include "server.h"
 #include "linux-low.h"
 
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 
 #include "gdb_proc_service.h"
 
@@ -235,11 +235,19 @@ sparc_get_pc (struct regcache *regcache)
   return pc;
 }
 
-static const unsigned char sparc_breakpoint[INSN_SIZE] = {
+static const gdb_byte sparc_breakpoint[INSN_SIZE] = {
   0x91, 0xd0, 0x20, 0x01
 };
 #define sparc_breakpoint_len INSN_SIZE
 
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const unsigned char *
+sparc_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = sparc_breakpoint_len;
+  return sparc_breakpoint;
+}
 
 static int
 sparc_breakpoint_at (CORE_ADDR where)
@@ -283,7 +291,7 @@ static struct regset_info sparc_regsets[] = {
   { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, sizeof (fpregset_t),
     FP_REGS,
     sparc_fill_fpregset, sparc_store_fpregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info sparc_regsets_info =
@@ -323,8 +331,8 @@ struct linux_target_ops the_low_target = {
   sparc_get_pc,
   /* No sparc_set_pc is needed.  */
   NULL,
-  (const unsigned char *) sparc_breakpoint,
-  sparc_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  sparc_sw_breakpoint_from_kind,
   sparc_reinsert_addr,
   0,
   sparc_breakpoint_at,

@@ -31,12 +31,12 @@ fragment <<EOF
 static int itanium = 0;
 
 static void
-gld${EMULATION_NAME}_after_parse (void)
+ia64elf_after_parse (void)
 {
   link_info.relax_pass = 2;
   bfd_elf${ELFSIZE}_ia64_after_parse (itanium);
 
-  after_parse_default ();
+  gld${EMULATION_NAME}_after_parse ();
 }
 
 EOF
@@ -61,5 +61,5 @@ PARSE_AND_LIST_ARGS_CASES='
       break;
 '
 
-LDEMUL_AFTER_PARSE=gld${EMULATION_NAME}_after_parse
+LDEMUL_AFTER_PARSE=ia64elf_after_parse
 source_em ${srcdir}/emultempl/needrelax.em

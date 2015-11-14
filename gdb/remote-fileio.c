@@ -31,7 +31,7 @@
 #include "filestuff.h"
 
 #include <fcntl.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>		/* For cygwin_conv_path.  */
 #endif
@@ -57,7 +57,7 @@ remote_fileio_init_fd_map (void)
 
   if (!remote_fio_data.fd_map)
     {
-      remote_fio_data.fd_map = (int *) xmalloc (10 * sizeof (int));
+      remote_fio_data.fd_map = XNEWVEC (int, 10);
       remote_fio_data.fd_map_size = 10;
       remote_fio_data.fd_map[0] = FIO_FD_CONSOLE_IN;
       remote_fio_data.fd_map[1] = FIO_FD_CONSOLE_OUT;
@@ -450,7 +450,7 @@ remote_fileio_func_open (char *buf)
   mode = remote_fileio_mode_to_host (num, 1);
 
   /* Request pathname.  */
-  pathname = alloca (length);
+  pathname = (char *) alloca (length);
   if (target_read_memory (ptrval, (gdb_byte *) pathname, length) != 0)
     {
       remote_fileio_ioerror ();
@@ -794,7 +794,7 @@ remote_fileio_func_rename (char *buf)
     }
   
   /* Request oldpath using 'm' packet */
-  oldpath = alloca (old_len);
+  oldpath = (char *) alloca (old_len);
   if (target_read_memory (old_ptr, (gdb_byte *) oldpath, old_len) != 0)
     {
       remote_fileio_ioerror ();
@@ -802,7 +802,7 @@ remote_fileio_func_rename (char *buf)
     }
   
   /* Request newpath using 'm' packet */
-  newpath = alloca (new_len);
+  newpath = (char *) alloca (new_len);
   if (target_read_memory (new_ptr, (gdb_byte *) newpath, new_len) != 0)
     {
       remote_fileio_ioerror ();
@@ -880,7 +880,7 @@ remote_fileio_func_unlink (char *buf)
       return;
     }
   /* Request pathname using 'm' packet */
-  pathname = alloca (length);
+  pathname = (char *) alloca (length);
   if (target_read_memory (ptrval, (gdb_byte *) pathname, length) != 0)
     {
       remote_fileio_ioerror ();
@@ -930,7 +930,7 @@ remote_fileio_func_stat (char *buf)
   statptr = (CORE_ADDR) lnum;
   
   /* Request pathname using 'm' packet */
-  pathname = alloca (namelength);
+  pathname = (char *) alloca (namelength);
   if (target_read_memory (nameptr, (gdb_byte *) pathname, namelength) != 0)
     {
       remote_fileio_ioerror ();
@@ -1131,7 +1131,7 @@ remote_fileio_func_system (char *buf)
   if (length)
     {
       /* Request commandline using 'm' packet */
-      cmdline = alloca (length);
+      cmdline = (char *) alloca (length);
       if (target_read_memory (ptrval, (gdb_byte *) cmdline, length) != 0)
 	{
 	  remote_fileio_ioerror ();
@@ -1185,7 +1185,7 @@ static struct {
 static int
 do_remote_fileio_request (struct ui_out *uiout, void *buf_arg)
 {
-  char *buf = buf_arg;
+  char *buf = (char *) buf_arg;
   char *c;
   int idx;
 

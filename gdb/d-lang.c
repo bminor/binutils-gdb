@@ -90,7 +90,7 @@ static const struct op_print d_op_print_tab[] =
   {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
   {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
   {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-  {NULL, 0, 0, 0}
+  {NULL, OP_NULL, PREC_PREFIX, 0}
 };
 
 /* Mapping of all D basic data types into the language vector.  */
@@ -214,7 +214,7 @@ static const struct language_defn d_language_defn =
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline.  */
   "this",
-  basic_lookup_symbol_nonlocal, 
+  d_lookup_symbol_nonlocal,
   basic_lookup_transparent_type,
   d_demangle,			/* Language specific symbol demangler.  */
   NULL,				/* Language specific
@@ -322,7 +322,7 @@ static struct gdbarch_data *d_type_data;
 const struct builtin_d_type *
 builtin_d_type (struct gdbarch *gdbarch)
 {
-  return gdbarch_data (gdbarch, d_type_data);
+  return (const struct builtin_d_type *) gdbarch_data (gdbarch, d_type_data);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

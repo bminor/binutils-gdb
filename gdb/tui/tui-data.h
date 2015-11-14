@@ -60,10 +60,10 @@ struct tui_gen_win_info
 #define NO_REGS_STRING          "[ Register Values Unavailable ]"
 #define NO_DATA_STRING          "[ No Data Values Displayed ]"
 #define MAX_CONTENT_COUNT       100
-#define SRC_NAME                "SRC"
-#define CMD_NAME                "CMD"
-#define DATA_NAME               "REGS"
-#define DISASSEM_NAME           "ASM"
+#define SRC_NAME                "src"
+#define CMD_NAME                "cmd"
+#define DATA_NAME               "regs"
+#define DISASSEM_NAME           "asm"
 #define TUI_NULL_STR            ""
 #define DEFAULT_HISTORY_COUNT	25
 #define BOX_WINDOW              TRUE
@@ -265,8 +265,6 @@ struct tui_source_info
 
 struct tui_command_info
 {
-  int cur_line;			/* The current line position.  */
-  int curch;			/* The current cursor position.  */
   int start_line;
 };
 
@@ -320,7 +318,7 @@ extern void tui_free_all_source_wins_content (void);
 extern void tui_del_window (struct tui_win_info *);
 extern void tui_del_data_windows (tui_win_content, int);
 extern struct tui_win_info *tui_partial_win_by_name (char *);
-extern char *tui_win_name (struct tui_gen_win_info *);
+extern const char *tui_win_name (const struct tui_gen_win_info *);
 extern enum tui_layout_type tui_current_layout (void);
 extern void tui_set_current_layout_to (enum tui_layout_type);
 extern int tui_term_height (void);

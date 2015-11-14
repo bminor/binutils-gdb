@@ -1,38 +1,586 @@
+2015-11-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner <bergner@vnet.ibm.com>
+
+	* gold/powerpc.cc (Powerpc_relocate_functions::addr16_dq): New function.
+	(Powerpc_relocate_functions::addr16dx_ha): Likewise.
+	(Target_powerpc::Scan::local): Handle R_POWERPC_REL16DX_HA.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.
+
+2015-11-09  Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
+
+	* layout.h (Layout::is_debug_info_section): Recognize .pdr debug
+	sections.
+
+2015-11-09  Cary Coutant  <ccoutant@gmail.com>
+	    Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
+
+	* copy-relocs.h (Copy_relocs::copy_reloc): Replace reloc parameter
+	with type, offset, addend.
+	(Copy_relocs::save): Likewise.
+	* copy-relocs.cc (Copy_relocs::copy_reloc): Likewise.
+	(Copy_relocs::save): Likewise.
+	* aarch64.cc (Target_aarch64::copy_reloc): Pass r_type, r_offset,
+	and r_addend to Copy_relocs::copy_reloc.
+	* arm.cc (Target_arm::copy_reloc): Likewise.
+	* i386.cc (Target_i386::copy_reloc): Likewise.
+	* mips.cc (Target_mips::copy_reloc): Likewise.
+	* powerpc.cc (Target_powerpc::copy_reloc): Likewise.
+	* s390.cc (Target_s390::copy_reloc): Likewise.
+	* sparc.cc (Target_sparc::copy_reloc): Likewise.
+	* tilegx.cc (Target_tilegx::copy_reloc): Likewise.
+	* x86_64.cc (Target_x86_64::copy_reloc): Likewise.
+
+2015-11-05  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19119
+	PR gold/19172
+	PR gold/19197
+	Revert commit 6457197210144f50a696097c0d308d81d46d5510:
+	2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+		* options.h (General_options): Remove "obsolete" from -m.
+		* parameters.cc (set_parameters_target): Check if input target
+		is compatible with output emulation set by "-m emulation".
+
+2015-11-05  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19163
+	* aarch64.cc (Target_aarch64::Relocate::relocate): Don't apply
+	certain relocations if --no-apply-dynamic-relocs is set.
+	* options.h (--apply-dynamic-relocs): New aarch64-specific option.
+
+2015-11-03  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
+2015-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: New (simplified) Chinese translation.
+
+2015-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19184
+	* incremental.cc (Got_plt_view_info): Add got_entry_size.
+	(Local_got_offset_visitor::visit): Replace got_entry_size_
+	with info_.got_entry_size.
+	(Local_got_offset_visitor::got_entry_size_): Removed.
+	(Global_got_offset_visitor::visit): Replace got_entry_size_
+	with info_.got_entry_size.
+	(Global_got_offset_visitor::got_entry_size_): Removed.
+	(Output_section_incremental_inputs::write_got_plt): Initialize
+	view_info.got_entry_size.
+	* target.h (Sized_target::got_entry_size): New virtual function.
+	* x86_64.cc (Target_x86_64::got_entry_size): New function.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* testsuite/binary_test.cc: Add __attribute__((aligned(1))).
+	* testsuite/script_test_12a.c: Likewise.
+	* testsuite/script_test_1a.cc: Likewise.
+	* testsuite/script_test_2.cc: Likewise.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* testsuite/debug_msg.sh: Accept more fuzz in line numbers.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	PR gold/18959
+	* stringpool.cc (Stringpool_template::new_key_offset): Align all
+	strings, even zero-length.
+	(Stringpool_template::set_string_offsets): Likewise.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* s390.cc: New file.
+	* Makefile.am (TARGETSOURCES): Add s390.cc.
+	(ALL_TARGETOBJS): Add s390.o.
+	* Makefile.in: Regenerate.
+	* configure.ac: Add s390 support.
+	* configure: Regenerate.
+	* configure.tgt: Add s390-*-* and s390x-*-*.
+	* testsuite/icf_safe_test.sh (arch_specific_safe_fold): Add s390
+	support.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* archive.cc (Archive::sym64name): New const.
+	(Archive::setup): Add support for SYM64 armap.
+	(Archive::read_armap): Likewise.
+	(Archive::interpret_header): Likewise.
+	(Archive::const_iterator::read_next_header): Likewise.
+	* archive.h (Archive::sym64name): New const.
+	(Archive::read_armap): Add mapsize template parameter.
+
+2015-10-28  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* dynobj.cc (Dynobj::create_elf_hash_table): Create hash table with
+	target-specific entry size.
+	(Dynobj::sized_create_elf_hash_table): Add size template parameter.
+	* dynobj.h (Dynobj::sized_create_elf_hash_table): Likewise.
+	* layout.cc (Layout::create_dynamic_symtab): Set entsize to
+	hash_entry_size.
+	* target.h (Target::hash_entry_size): New method.
+	(Target::Target_info::hash_entry_size): New data member.
+
+	* aarch64.cc (Target_aarch64::aarch64_info): Add hash_entry_size.
+	* arm.cc (Target_arm::arm_info): Likewise.
+	(Target_arm_nacl::arm_nacl_info): Likewise.
+	* i386.cc (Target_i386::i386_info): Likewise.
+	(Target_i386_nacl::i386_nacl_info): Likewise.
+	(Target_iamcu::iamcu_info): Likewise.
+	* mips.cc (Target_mips::mips_info): Likewise.
+	(Target_mips_nacl::mips_nacl_info): Likewise.
+	* powerpc.cc (Target_powerpc::powerpc_info): Likewise.
+	* sparc.cc (Target_sparc::sparc_info): Likewise.
+	* tilegx.cc (Target_tilegx::tilegx_info): Likewise.
+	* x86_64.cc (Target_x86_64::x86_64_info): Likewise.
+	(Target_x86_64_nacl::x86_64_nacl_info): Likewise.
+	* testsuite/testfile.cc (Target_test::test_target_info): Likewise.
+
+2015-10-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19177
+	* i386.cc (Target_i386::Relocate::relocate): Check R_386_GOT32
+	and R_386_GOT32X relocations without base register.
+
+2015-10.27  Han Shen  <shenhan@google.com>
+
+	PR gold/19042 - unsupported reloc 311/312.
+
+	* aarch64.cc (Target_aarch64::Scan::local): Add support for
+	reloc 311/312.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.cc (Target_x86_64<size>::Scan::get_reference_flags):
+	Treat R_X86_64_GOTPCRELX and R_X86_64_REX_GOTPCRELX the same
+	as R_X86_64_GOTPCREL.
+	(Target_x86_64<size>::Scan::local): Likewise.
+	(Target_x86_64<size>::Scan::possible_function_pointer_reloc):
+	Likewise.
+	(Target_x86_64<size>::Scan::global): Likewise.
+	(Target_x86_64<size>::Relocate::relocate): Likewise.
+	(Target_x86_64<size>::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
+2015-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386.cc (Target_i386::Scan::get_reference_flags(): Treat
+	R_386_GOT32X the same as R_386_GOT32.
+	(Target_i386::Scan::local): Likewise.
+	(Target_i386::Scan::possible_function_pointer_reloc): Likewise.
+	(Target_i386::Scan::global): Likewise.
+	(Target_i386::Relocate::relocate): Likewise.
+	(Target_i386::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
+2015-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/Makefile.am (x86_64_mov_to_lea11): Replace
+	x86_64_mov_to_lea1.o with x86_64_mov_to_lea2.o.
+	(x86_64_mov_to_lea12): Replace x86_64_mov_to_lea2.o with
+	x86_64_mov_to_lea1.o.
+	* testsuite/Makefile.in: Regenerated.
+
+2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19119
+	* options.h (General_options): Remove "obsolete" from -m.
+	* parameters.cc (set_parameters_target): Check if input target
+	is compatible with output emulation set by "-m emulation".
+
+2015-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/19118
+	* i386.cc (Target_iamcu): New class.
+	(Target_selector_iamcu): Likewise.
+	(Target_iamcu::iamcu_info): New variable.
+	(target_selector_iamcu): Likewise.
+
+2015-10-07  Andreas Schwab  <schwab@suse.de>
+
+	* aarch64.cc (aarch64_info): Set abi_pagesize to 64K.
+
+2015-10-06  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18855
+	* sparc.cc (Sparc_relocate_functions::gdop_hix22): Remove addend
+	parameter.
+	(Sparc_relocate_functions::gdop_lox10): Likewise.
+	(Target_sparc::Relocate::relocate): Use addend when computing
+	symbol value for R_SPARC_GOTDATA_OP*.
+
+2015-09-07  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18930
+	PR gold/18886
+	* resolve.cc (Symbol::override_base): Don't convert IFUNC symbols here.
+	* symtab.cc (Symbol_table::add_from_dynobj): Convert them here instead.
+
+2015-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18886
+	* resolve.cc (Symbol::override_base): Turn IFUNC symbols from
+	shared libraries into normal FUNC symbols.
+	* symtab.cc (Symbol_table::sized_write_symbol): Assert IFUNC
+	symbols aren't from shared libraries.
+
+2015-09-02  Alan Modra  <amodra@gmail.com>
+
+	PR 18878
+	* powerpc.cc (Target_powerpc): Add savres_section_ and accessor.
+	(Target_powerpc::Branch_info::make_stub): Determine whether long
+	branch stub is for save/restore function.
+	(Branch_stub_ent): Add save_res_, and extra parm to constructor.
+	(Stub_table): Add need_save_res_.
+	(Stub_table:clear_stubs): Clear need_save_res_.
+	(Stub_table:set_address_and_size): Add save/restore section size.
+	(Stub_table::add_long_branch_entry): Add save_res param.  Set
+	need_save_res_, but don't add space for save/restore stubs.
+	(Stub_table::find_long_branch_entry): Return offset to local copy
+	of save/restore func.
+	(Stub_table::do_write): Don't output save/restore stubs.  Instead
+	copy the save/restore functions.
+	(Output_data_save_res:contents): New accessor.
+	(Target_powerpc::define_save_restore_funcs): Set savres_section_.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18847
+	* script-sections.cc (Memory_region::set_address): New method.
+	(Script_sections::find_memory_region): Add explicit_only parameter.
+	(Output_section_definition::set_section_addresses): Handle case where
+	script specifies both address and vma region.
+	* script-sections.h (Script_sections::find_memory_region): Add
+	explicit_only parameter.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18859
+	* object.cc (Input_objects::add_object): Store objects in a map,
+	indexed by soname; update as-needed flag when necessary.
+	* object.h (Object::clear_as_needed): New method.
+	(Input_objects::so_names_): Change from set to map.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/14746
+	* expression.cc (Expression::Expression_eval_info): Add
+	is_valid_pointer field.
+	(Expression::eval_maybe_dot): Add is_valid_pointer parameter.
+	Adjust all callers.
+	(Addr_expression::value_from_output_section): Check whether address
+	is valid.
+	* script.cc (Symbol_assignment::set_if_absolute): Defer assignment
+	if evaluation failed due to address that is not yet valid.
+	* script.h: (Expression::eval_maybe_dot): Add is_valid_pointer
+	parameter.
+
+2015-08-25  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18866
+	PR gold/18703
+	* symtab.cc (Symbol_table): Reorder conditions to avoid internal error.
+
+2015-08-20  Alan Modra  <amodra@gmail.com>
+
+	PR gold/18846
+	* target-reloc.h (relocate_relocs <RELOC_ADJUST_FOR_SECTION_RELA>):
+	Subtract os->address() from addend.
+	* powerpc.cc (relocate_relocs): Likewise.
+
+2015-08-12  Simon Dardis  <simon.dardis@imgtec.com>
+
+	* mips.cc (plt0_entry_o32, plt0_entry_n32, plt0_entry_n64,
+	lazy_stub_normal_1, lazy_stub_normal_1_n64,
+	lazy_stub_normal_2, lazy_stub_normal_2_n64, lazy_stub_big,
+	lazy_stub_big_n64, lazy_stub_micromips32_normal_1_n64,
+	lazy_stub_micromips32_normal_2_n64, lazy_stub_micromips32_big,
+	lazy_stub_micromips32_big_n64): Update to use 'or' for move instead
+	of 'addu/daddu'.
+
+2015-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
+2015-07-26  Doug Kwan  <dougkwan@google.com>
+
+	* testsuite/arm_unaligned_reloc.{s,sh}: Make test less sensitive to
+	  disassembler output format.
+
+2015-07-23  Ian Coolidge  <icoolidge@google.com>
+	Plumb --pic-veneer option for gold.
+
+	* arm.cc (Reloc_stub::stub_type_for_reloc): Plumb to stub
+	generation.
+	* options.h (General_options): Add --pic-veneer option.
+
+2015-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18663
+	* testsuite/Makefile.am (script_test_1_SOURCES): Set to
+	script_test_1a.cc script_test_1b.cc.
+	(script_test_11_r.o): Replace script_test_11.o with
+	script_test_11a.o script_test_11b.o.
+	(script_test_11.o): Removed.
+	(script_test_11a.o): New.
+	(script_test_11b.o): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/script_test_1.h: New file.
+	* testsuite/script_test_1b.cc: Likewise.
+	* testsuite/script_test_11.h: Likewise.
+	* testsuite/script_test_11b.c: Likewise.
+	* testsuite/script_test_1.cc: Renamed to ...
+	* testsuite/script_test_1a.cc: This.
+	Include "script_test_1.h".
+	(main): Call check_int and check_ptr.
+	* testsuite/script_test_11.c: Renamed to ...
+	* testsuite/script_test_11a.c: This.
+	Include "script_test_11.h".
+	(main): Call ptr_equal.
+
+2015-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18628
+	* testsuite/ifuncdep2.c (global): Change protected to hidden.
+	* testsuite/ifuncmod1.c (global): Likewise.
+	* testsuite/ifuncmod5.c (global): Likewise.
+
+2015-07-22  Alan Modra  <amodra@gmail.com>
+
+	* aarch64.cc (try_fix_erratum_843419_optimized): Warning fix.
+
+2015-07-21  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18548
+	* symtab.cc (Symbol_table::do_define_in_output_data): Check for
+	forced local symbol even when oldsym != NULL.
+	(Symbol_table::do_define_in_output_segment): Likewise.
+	(Symbol_table::do_define_as_constant): Likewise.
+
+2015-07-21  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18698
+	* archive.cc (Library_base::should_include_member): Don't use entry
+	point for relocatable links, or if target is not yet valid.
+	* parameters.cc (Parameters::entry): Check target_valid().
+
+2015-07-20  Han Shen  <shenhan@google.com>
+
+	Optimize erratum 843419 fix.
+
+	* aarch64.cc (AArch64_insn_utilities::is_adr): New method.
+	(AArch64_insn_utilities::aarch64_adr_encode_imm): New method.
+	(AArch64_insn_utilities::aarch64_adrp_decode_imm): New method.
+	(E843419_stub): New sub-class of Erratum_stub.
+	(AArch64_relobj::try_fix_erratum_843419_optimized): New method.
+	(AArch64_relobj::section_needs_reloc_stub_scanning): Try optimized fix.
+	(AArch64_relobj::create_erratum_stub): Add 1 argument.
+	(Target_aarch64::scan_erratum_843419_span): Pass in adrp insn offset.
+
+2015-07-20  Han Shen  <shenhan@google.com>
+
+	Fix arm elf header flags wrt hardfp bit.
+
+	* arm.cc (Target_arm::do_adjust_elf_header): Set flags into view.
+
+2015-07-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18689
+	* layout.cc (Layout::layout): Clear the SHF_COMPRESSED flag bit
+	from input group section for relocatable link.
+	* testsuite/Makefile.am (check_SCRIPTS): Add pr18689.sh.
+	(check_DATA): Add pr18689.stdout.
+	(MOSTLYCLEANFILES): Add pr18689a.o pr18689b.o.
+	(pr18689.stdout): New rule.
+	(pr18689a.o): Likewise.
+	(pr18689b.o): Likewise.
+	(pr18689.o): Likewise.
+	* testsuite/pr18689.c: New file.
+	* testsuite/pr18689.sh: Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
+2015-07-20  Yiran Wang  <yiran@google.com>
+	Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/15574
+	* resolve.cc (Symbol_table): Remove warning about references
+	from shared objects to hidden symbols.
+	* testsuite/Makefile.am (hidden_test): Add hidden_test.syms.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/hidden_test.sh: Check dynamic symbol table; update
+	expected error messages.
+
+2015-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* compressed_output.cc (Output_compressed_section::set_final_data_size):
+	Make --compress-debug-sections=zlib the same as
+	--compress-debug-sections=zlib-gabi.
+	* testsuite/Makefile.am (flagstest_compress_debug_sections.check):
+	Expect ".debug_.*" with the SHF_COMPRESSED bit, instead of
+	".zdebug_".
+	* testsuite/Makefile.in: Regenerated.
+
+2015-07-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18322
+	* compressed_output.cc (zlib_compress): Add argument for
+	compression header size.  Set header size to compression header
+	size if it isn't 0.  Don't write out the zlib header here.
+	(Output_compressed_section::set_final_data_size): Support
+	zlib-gnu and zlib-gabi compressions.  Pass compression header
+	size to zlib_compress and write out compression header.  Set
+	the SHF_COMPRESSED bit for zlib-gabi compression.  Otherwise
+	clear the SHF_COMPRESSED bit
+	* options.h (compress_debug_sections): Add zlib-gnu and
+	zlib-gabi.
+	* output.h (Output_section::set_flags): New.
+	* testsuite/Makefile.am (check_PROGRAMS): Add
+	flagstest_compress_debug_sections_none,
+	flagstest_compress_debug_sections_gnu and
+	flagstest_compress_debug_sections_gabi.
+	(check_DATA): Add flagstest_compress_debug_sections_none.stdout.
+	flagstest_compress_debug_sections.stdout,
+	flagstest_compress_debug_sections.cmp,
+	flagstest_compress_debug_sections.check,
+	flagstest_compress_debug_sections_gnu.stdout,
+	flagstest_compress_debug_sections_gnu.cmp,
+	flagstest_compress_debug_sections_gnu.check,
+	flagstest_compress_debug_sections_gabi.stdout,
+	flagstest_compress_debug_sections_gabi.cmp and
+	flagstest_compress_debug_sections_gabi.check.
+	(flagstest_compress_debug_sections_none): New.
+	(flagstest_compress_debug_sections_none.stdout): Likewise.
+	(flagstest_compress_debug_sections.stdout): Likewise.
+	(flagstest_compress_debug_sections.check): Likewise.
+	(flagstest_compress_debug_sections.cmp): Likewise.
+	(flagstest_compress_debug_sections_gnu): Likewise.
+	(flagstest_compress_debug_sections_gnu.stdout): Likewise.
+	(flagstest_compress_debug_sections_gnu.check): Likewise.
+	(flagstest_compress_debug_sections_gnu.cmp): Likewise.
+	(flagstest_compress_debug_sections_gabi): Likewise.
+	(flagstest_compress_debug_sections_gabi.stdout): Likewise.
+	(flagstest_compress_debug_sections_gnu.check): Likewise.
+	(flagstest_compress_debug_sections_gnu.cmp): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
+2015-07-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/18321
+	* compressed_output.h (decompress_input_section): Add arguments
+	for ELF class, big endian and sh_flags.
+	* compressed_output.cc (decompress_input_section): Likewise.
+	Support the SHF_COMPRESSED section.
+	* dynobj.h (Dynobj): Add elfsize and is_big_endian member
+	functions.
+	* plugin.h (Pluginobj): Likewise.
+	* layout.cc (Layout::get_output_section_flags): Also clear the
+	SHF_COMPRESSED bit.
+	* object.h (Compressed_section_info): Add flag to store sh_flags.
+	(Object): Add pure virtual elfsize and is_big_endian member
+	functions.
+	* object.cc (need_decompressed_section): Don't skip the ".zdebug"
+	prefix here.
+	(build_compressed_section_map): Check SHF_COMPRESSED for
+	uncompressed size.  Store sh_flags in Compressed_section_info.
+	Pass size, big_endian and sh_flags to decompress_input_section.
+	Skip the ".debug"/".zdebug" prefix when passing section name to
+	need_decompressed_section.
+	(Sized_relobj_file<size, big_endian>::do_find_special_section):
+	Don't check ".zdebug_*" sections.
+	(Object::decompressed_section_contents): Pass ELF class, big
+	endian and sh_flags to decompress_input_section.
+	* reloc.cc (Sized_relobj_file<size, big_endian>::write_sections):
+	Likewise.
+	* testsuite/Makefile.am (check_DATA): Add
+	debug_msg_cdebug_gabi.err and gdb_index_test_2_gabi.stdout.
+	(MOSTLYCLEANFILES): Add debug_msg_cdebug_gabi.err and
+	gdb_index_test_2_gabi.stdout.
+	(debug_msg_cdebug_gabi.o): New.
+	(odr_violation1_cdebug_gabi.o): Likewise.
+	(odr_violation2_cdebug_gabi.o): Likewise.
+	(debug_msg_cdebug_gabi.err): Likewise.
+	(check_SCRIPTS): Add gdb_index_test_2_gabi.sh.
+	(gdb_index_test_cdebug_gabi.o): Likewise.
+	(gdb_index_test_2_gabi): Likewise.
+	(gdb_index_test_2_gabi.stdout): Likewise.
+	* testsuite/gdb_index_test_2_gabi.sh: New file.
+	* testsuite/Makefile.in: Regenerated.
+
+2015-07-09  Han Shen  <shenhan@google.com>
+
+	Use "gold_info" instead of "gold_warning" for erratum fix.
+
+	* aarch64.cc (Target_aarch64::scan_erratum_843419_span): Use
+	'gold_info'.
+	(Target_aarch64::scan_erratum_835769_span): USe 'gold_info'.
+
+2015-07-09  Han Shen  <shenhan@google.com>
+
+	Drop missing symbol warning for arm/aarch64.
+
+	* aarch64.cc (AArch64_relobj::scan_errata): Drop missing symbol warning.
+	* arm.cc (Arm_relobj::scan_section_for_cortex_a8_erratum): Drop missing
+	symbol warning.
+
+2015-07-07  Han Shen  <shenhan@google.com>
+
+	Make gold aarch64 accept long form of mapping symbols.
+
+	* aarch64.cc (AArch64_relobj::do_count_local_symbols): Make legal
+	of mapping symbols.
+
+2015-06-29  Doug Kwan  <dougkwan@google.com>
+
+	* testsuite/arm_bl_out_of_range.s: Align stub table so that it appears
+	  at address expected by test.
+	* testsuite/arm_cortex_a8_b.s: Ditto.
+	* testsuite/arm_cortex_a8_b_cond.s: Ditto.
+	* testsuite/arm_cortex_a8_bl.s: Ditto.
+	* testsuite/arm_cortex_a8_blx.s: Ditto.
+	* testsuite/arm_cortex_a8_local.s: Ditto.
+	* testsuite/arm_fix_v4bx.s: Ditto.
+	* testsuite/arm_unaligned_reloc.s: Ditto.
+	* testsuite/thumb_bl_out_of_range.s: Ditto.
+	* testsuite/thumb_bl_out_of_range_local.s: Ditto.
+	* testsuite/thumb_blx_out_of_range.s: Ditto.
+
 2015-06-29  Han Shen  <shenhan@google.com>
 
 	Patch for erratum 843419 internal error.
 
-        * AArch64.cc (Erratum_stub::Insn_utilities): New typedef.
-        (Erratum_stub::update_erratum_insn): New method.
-        (Stub_table::relocate_stubs): Modified to place relocated insn.
-        (AArch64_relobj::fix_errata): Modified gold_assert.
+	* aarch64.cc (Erratum_stub::Insn_utilities): New typedef.
+	(Erratum_stub::update_erratum_insn): New method.
+	(Stub_table::relocate_stubs): Modified to place relocated insn.
+	(AArch64_relobj::fix_errata): Modified gold_assert.
 
 2015-06-12  Han Shen  <shenhan@google.com>
 
 	Fix erratum 835769.
 
-        * aarch64.cc (AArch64_insn_utilities::BYTES_PER_INSN): Move
-        defintion outside class definition.
-        (AArch64_insn_utilities::AARCH64_ZR): New static constant.
-        (AArch64_insn_utilities::aarch64_op31): New member.
-        (AArch64_insn_utilities::aarch64_ra): New member.
-        (AArch64_insn_utilities::aarch64_mac): New member.
-        (AArch64_insn_utilities::aarch64_mlxl): New member.
-        (ST_E_835769): New global enum member.
-        (Stub_table::relocate_stubs): Add 835769 handler.
-        (Stub_template_repertoire::Stub_template_repertoire): Install new
-        stub type.
-        (AArch64_relobj::scan_errata): This func is renamed from
-        scan_erratum_843419.
-        (AArch64_relobj::do_count_local_symbols): Add 835769 handler.
-        (AArch64_relobj::do_relocate_sections): Add 835769 handler.
-        (AArch64_relobj::scan_sections_for_stubs): Add 835769 handler.
-        (Target_aarch64::scan_erratum_835769_span): New method.
-        (Target_aarch64::create_erratum_stub): New method.
-        (Target_aarch64::is_erratum_835769_sequence): New method.
-        (Target_aarch64::scan_erratum_843419_sequence): Move part of the
-        code into create_erratum_stub.
-        * options.h (fix_cortex_a53_835769): New option.
+	* aarch64.cc (AArch64_insn_utilities::BYTES_PER_INSN): Move
+	defintion outside class definition.
+	(AArch64_insn_utilities::AARCH64_ZR): New static constant.
+	(AArch64_insn_utilities::aarch64_op31): New member.
+	(AArch64_insn_utilities::aarch64_ra): New member.
+	(AArch64_insn_utilities::aarch64_mac): New member.
+	(AArch64_insn_utilities::aarch64_mlxl): New member.
+	(ST_E_835769): New global enum member.
+	(Stub_table::relocate_stubs): Add 835769 handler.
+	(Stub_template_repertoire::Stub_template_repertoire): Install new
+	stub type.
+	(AArch64_relobj::scan_errata): This func is renamed from
+	scan_erratum_843419.
+	(AArch64_relobj::do_count_local_symbols): Add 835769 handler.
+	(AArch64_relobj::do_relocate_sections): Add 835769 handler.
+	(AArch64_relobj::scan_sections_for_stubs): Add 835769 handler.
+	(Target_aarch64::scan_erratum_835769_span): New method.
+	(Target_aarch64::create_erratum_stub): New method.
+	(Target_aarch64::is_erratum_835769_sequence): New method.
+	(Target_aarch64::scan_erratum_843419_sequence): Move part of the
+	code into create_erratum_stub.
+	* options.h (fix_cortex_a53_835769): New option.
 
 2015-06-11  Cary Coutant  <ccoutant@gmail.com>
 
@@ -183,33 +731,33 @@
 
 2015-06-03  Cary Coutant  <ccoutant@gmail.com>
 
-        PR gold/17819
-        * gold.cc (queue_final_tasks): When --build-id=tree, queue a
-        separate task to schedule the build id computation.
-        * layout.cc (Hash_task::Hash_task): Remove build_id_blocker,
-        add Output_file and offset.
-        (Hash_task::run): Get and release the input views.
-        (Hash_task::is_runnable): Always return NULL (always runnable).
-        (Layout::queue_build_id_tasks): Remove.
-        (Layout::write_build_id): Add array_of_hashes and size_of_hashes
-        parameters; use them instead of class members.
-        (Build_id_task_runner::run): New function.
-        (Close_task_runner::run): Pass array_of_hashes and size_of_hashes
-        to write_build_id.
-        * layout.h (Layout::queue_build_id_tasks): Remove.
-        (Layout::write_build_id): Add array_of_hashes and size_of_hashes
-        parameters.
-        (Layout::array_of_hashes_): Remove.
-        (Layout::size_of_array_of_hashes_): Remove.
-        (Layout::input_view_): Remove.
-        (Build_id_task_runner): New class.
-        (Close_task_runner::Close_task_runner): Add array_of_hashes and
-        size_of_hashes parameters.
-        (Close_task_runner::array_of_hashes_): New data member.
-        (Close_task_runner::size_of_hashes_): New data member.
-        * testsuite/Makefile.am
-        (flagstest_compress_debug_sections_and_build_id_tree): New test.
-        * testsuite/Makefile.in: Regenerate.
+	PR gold/17819
+	* gold.cc (queue_final_tasks): When --build-id=tree, queue a
+	separate task to schedule the build id computation.
+	* layout.cc (Hash_task::Hash_task): Remove build_id_blocker,
+	add Output_file and offset.
+	(Hash_task::run): Get and release the input views.
+	(Hash_task::is_runnable): Always return NULL (always runnable).
+	(Layout::queue_build_id_tasks): Remove.
+	(Layout::write_build_id): Add array_of_hashes and size_of_hashes
+	parameters; use them instead of class members.
+	(Build_id_task_runner::run): New function.
+	(Close_task_runner::run): Pass array_of_hashes and size_of_hashes
+	to write_build_id.
+	* layout.h (Layout::queue_build_id_tasks): Remove.
+	(Layout::write_build_id): Add array_of_hashes and size_of_hashes
+	parameters.
+	(Layout::array_of_hashes_): Remove.
+	(Layout::size_of_array_of_hashes_): Remove.
+	(Layout::input_view_): Remove.
+	(Build_id_task_runner): New class.
+	(Close_task_runner::Close_task_runner): Add array_of_hashes and
+	size_of_hashes parameters.
+	(Close_task_runner::array_of_hashes_): New data member.
+	(Close_task_runner::size_of_hashes_): New data member.
+	* testsuite/Makefile.am
+	(flagstest_compress_debug_sections_and_build_id_tree): New test.
+	* testsuite/Makefile.in: Regenerate.
 
 2015-06-01  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
@@ -693,7 +1241,7 @@
 	object->merge_output_offset.
 
 2015-03-02  Peter Collingbourne  <pcc@google.com>
-            Cary Coutant  <ccoutant@google.com>
+	    Cary Coutant  <ccoutant@google.com>
 
 	* output.cc (Output_section::add_merge_input_section): Do not
 	attempt to merge sections with an entsize of 0.
@@ -1244,7 +1792,7 @@ gold/
 	Add "typename" keyword.
 
 2014-10-15  Han Shen  <shenhan@google.com>
-            Jing Yu   <jingyu@google.com>
+	    Jing Yu   <jingyu@google.com>
 
 	Patch for gold aarch64 backend to support relaxation.
 	* aarch64-reloc.def: Change format.
@@ -1304,7 +1852,7 @@ gold/
 	* po/POTFILES.in: Regenerate.
 
 2014-09-23  Taiju Tsuiki  <tzik@google.com>
-            Cary Coutant  <ccoutant@google.com>
+	    Cary Coutant  <ccoutant@google.com>
 
 	PR gold/14860
 	* gold.cc (queue_final_tasks): Add Write_sections_task as a blocker

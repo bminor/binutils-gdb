@@ -98,7 +98,7 @@ struct lwp_info
      Values:
      - TARGET_WAITKIND_SYSCALL_ENTRY
      - TARGET_WAITKIND_SYSCALL_RETURN */
-  int syscall_state;
+  enum target_waitkind syscall_state;
 
   /* The processor core this LWP was last seen on.  */
   int core;
@@ -116,7 +116,6 @@ struct lwp_info
 extern struct lwp_info *lwp_list;
 
 /* Does the current host support PTRACE_GETREGSET?  */
-enum tribool { TRIBOOL_UNKNOWN = -1, TRIBOOL_FALSE = 0, TRIBOOL_TRUE = 1 };
 extern enum tribool have_ptrace_getregset;
 
 /* Iterate over each active thread (light-weight process).  */

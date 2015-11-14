@@ -48,10 +48,10 @@ static char *tui_get_function_from_frame (struct frame_info *fi);
 static void tui_set_locator_fullname (const char *fullname);
 
 /* Update the locator, with the provided arguments.  */
-static void tui_set_locator_info (struct gdbarch *gdbarch,
-				  const char *fullname,
-				  const char *procname,
-                                  int lineno, CORE_ADDR addr);
+static int tui_set_locator_info (struct gdbarch *gdbarch,
+				 const char *fullname,
+				 const char *procname,
+                                 int lineno, CORE_ADDR addr);
 
 static void tui_update_command (char *, int);
 
@@ -292,8 +292,12 @@ tui_set_locator_fullname (const char *fullname)
   strcat_to_buf (element->full_name, MAX_LOCATOR_ELEMENT_LEN, fullname);
 }
 
-/* Update the locator, with the provided arguments.  */
-static void
+/* Update the locator, with the provided arguments.
+
+   Returns 1 if any of the locator's fields were actually changed,
+   and 0 otherwise.  */
+
+static int
 tui_set_locator_info (struct gdbarch *gdbarch,
 		      const char *fullname,
 		      const char *procname, 
@@ -302,21 +306,40 @@ tui_set_locator_info (struct gdbarch *gdbarch,
 {
   struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
   struct tui_locator_element *element;
+  int locator_changed_p = 0;
 
   /* Allocate the locator content if necessary.  */
   if (locator->content_size <= 0)
     {
-      locator->content = tui_alloc_content (1, locator->type);
+      locator->content = tui_alloc_content (1, LOCATOR_WIN);
       locator->content_size = 1;
+      locator_changed_p = 1;
     }
 
+  if (procname == NULL)
+    procname = "";
+
+  if (fullname == NULL)
+    fullname = "";
+
   element = &locator->content[0]->which_element.locator;
+
+  locator_changed_p |= strncmp (element->proc_name, procname,
+				MAX_LOCATOR_ELEMENT_LEN) != 0;
+  locator_changed_p |= lineno != element->line_no;
+  locator_changed_p |= addr != element->addr;
+  locator_changed_p |= gdbarch != element->gdbarch;
+  locator_changed_p |= strncmp (element->full_name, fullname,
+				MAX_LOCATOR_ELEMENT_LEN) != 0;
+
   element->proc_name[0] = (char) 0;
   strcat_to_buf (element->proc_name, MAX_LOCATOR_ELEMENT_LEN, procname);
   element->line_no = lineno;
   element->addr = addr;
   element->gdbarch = gdbarch;
   tui_set_locator_fullname (fullname);
+
+  return locator_changed_p;
 }
 
 /* Update only the full_name portion of the locator.  */
@@ -327,11 +350,17 @@ tui_update_locator_fullname (const char *fullname)
   tui_show_locator_content ();
 }
 
-/* Function to print the frame information for the TUI.  */
-void
+/* Function to print the frame information for the TUI.  The windows are
+   refreshed only if frame information has changed since the last refresh.
+
+   Return 1 if frame information has changed (and windows subsequently
+   refreshed), 0 otherwise.  */
+
+int
 tui_show_frame_info (struct frame_info *fi)
 {
   struct tui_win_info *win_info;
+  int locator_changed_p;
   int i;
 
   if (fi)
@@ -349,15 +378,23 @@ tui_show_frame_info (struct frame_info *fi)
         && tui_source_is_displayed (symtab_to_fullname (sal.symtab));
 
       if (get_frame_pc_if_available (fi, &pc))
-	tui_set_locator_info (get_frame_arch (fi),
-			      (sal.symtab == 0
-			       ? "??" : symtab_to_fullname (sal.symtab)),
-			      tui_get_function_from_frame (fi),
-			      sal.line,
-			      pc);
+	locator_changed_p
+	  = tui_set_locator_info (get_frame_arch (fi),
+				  (sal.symtab == 0
+				   ? "??" : symtab_to_fullname (sal.symtab)),
+				  tui_get_function_from_frame (fi),
+				  sal.line,
+				  pc);
       else
-	tui_set_locator_info (get_frame_arch (fi),
-			      "??", _("<unavailable>"), sal.line, 0);
+	locator_changed_p
+	  = tui_set_locator_info (get_frame_arch (fi),
+				  "??", _("<unavailable>"), sal.line, 0);
+
+      /* If the locator information has not changed, then frame information has
+	 not changed.  If frame information has not changed, then the windows'
+	 contents will not change.  So don't bother refreshing the windows.  */
+      if (!locator_changed_p)
+	return 0;
 
       tui_show_locator_content ();
       start_line = 0;
@@ -428,10 +465,17 @@ tui_show_frame_info (struct frame_info *fi)
 	    }
 	  tui_update_exec_info (win_info);
 	}
+
+      return 1;
     }
   else
     {
-      tui_set_locator_info (NULL, NULL, NULL, 0, (CORE_ADDR) 0);
+      locator_changed_p
+	= tui_set_locator_info (NULL, NULL, NULL, 0, (CORE_ADDR) 0);
+
+      if (!locator_changed_p)
+	return 0;
+
       tui_show_locator_content ();
       for (i = 0; i < (tui_source_windows ())->count; i++)
 	{
@@ -439,6 +483,8 @@ tui_show_frame_info (struct frame_info *fi)
 	  tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);
 	  tui_update_exec_info (win_info);
 	}
+
+      return 1;
     }
 }
 

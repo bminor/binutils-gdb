@@ -118,4 +118,7 @@ extern int nios2_regname_to_dw2regnum (char *regname);
 #define tc_cfi_frame_initial_instructions  nios2_frame_initial_instructions
 extern void nios2_frame_initial_instructions (void);
 
+#define elf_tc_final_processing nios2_elf_final_processing
+extern void nios2_elf_final_processing (void);
+
 #endif /* TC_NIOS2 */

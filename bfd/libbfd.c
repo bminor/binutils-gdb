@@ -1037,7 +1037,7 @@ safe_read_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
     *length_return = num_read;
 
   if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
-    result |= (bfd_vma) -1 << shift;
+    result |= -((bfd_vma) 1 << shift);
 
   return result;
 }

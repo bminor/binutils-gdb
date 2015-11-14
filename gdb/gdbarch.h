@@ -54,7 +54,6 @@ struct target_desc;
 struct objfile;
 struct symbol;
 struct displaced_step_closure;
-struct core_regset_section;
 struct syscall;
 struct agent_expr;
 struct axs_value;
@@ -335,7 +334,8 @@ typedef int (gdbarch_sdb_reg_to_regnum_ftype) (struct gdbarch *gdbarch, int sdb_
 extern int gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, int sdb_regnr);
 extern void set_gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_sdb_reg_to_regnum_ftype *sdb_reg_to_regnum);
 
-/* Provide a default mapping from a DWARF2 register number to a gdb REGNUM. */
+/* Provide a default mapping from a DWARF2 register number to a gdb REGNUM.
+   Return -1 for bad REGNUM.  Note: Several targets get this wrong. */
 
 typedef int (gdbarch_dwarf2_reg_to_regnum_ftype) (struct gdbarch *gdbarch, int dwarf2_regnr);
 extern int gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2_regnr);
@@ -923,7 +923,11 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
   
    If your architecture doesn't need to adjust instructions before
    single-stepping them, consider using simple_displaced_step_copy_insn
-   here. */
+   here.
+  
+   If the instruction cannot execute out of line, return NULL.  The
+   core falls back to stepping past the instruction in-line instead in
+   that case. */
 
 extern int gdbarch_displaced_step_copy_insn_p (struct gdbarch *gdbarch);
 
@@ -1310,8 +1314,8 @@ extern void set_gdbarch_has_shared_address_space (struct gdbarch *gdbarch, gdbar
 
 /* True if a fast tracepoint can be set at an address. */
 
-typedef int (gdbarch_fast_tracepoint_valid_at_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, int *isize, char **msg);
-extern int gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr, int *isize, char **msg);
+typedef int (gdbarch_fast_tracepoint_valid_at_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, char **msg);
+extern int gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr, char **msg);
 extern void set_gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, gdbarch_fast_tracepoint_valid_at_ftype *fast_tracepoint_valid_at);
 
 /* Return the "auto" target charset. */
@@ -1557,7 +1561,7 @@ struct gdbarch_info
   bfd *abfd;
 
   /* Use default: NULL (ZERO).  */
-  struct gdbarch_tdep_info *tdep_info;
+  void *tdep_info;
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
   enum gdb_osabi osabi;
@@ -1614,6 +1618,11 @@ extern void *gdbarch_obstack_zalloc (struct gdbarch *gdbarch, long size);
 #define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), (NR) * sizeof (TYPE)))
 #define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), sizeof (TYPE)))
 
+/* Duplicate STRING, returning an equivalent string that's allocated on the
+   obstack associated with GDBARCH.  The string is freed when the corresponding
+   architecture is also freed.  */
+
+extern char *gdbarch_obstack_strdup (struct gdbarch *arch, const char *string);
 
 /* Helper function.  Force an update of the current architecture.
 

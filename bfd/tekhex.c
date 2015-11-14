@@ -459,7 +459,8 @@ first_phase (bfd *abfd, int type, char *src, char * src_end)
 		    else
 		      {
 			if (alt_section == NULL)
-			  alt_section = bfd_get_next_section_by_name (section);
+			  alt_section
+			    = bfd_get_next_section_by_name (NULL, section);
 			if (alt_section == NULL)
 			  alt_section = bfd_make_section_anyway_with_flags
 			    (abfd, section->name,
@@ -476,7 +477,8 @@ first_phase (bfd *abfd, int type, char *src, char * src_end)
 		    else
 		      {
 			if (alt_section == NULL)
-			  alt_section = bfd_get_next_section_by_name (section);
+			  alt_section
+			    = bfd_get_next_section_by_name (NULL, section);
 			if (alt_section == NULL)
 			  alt_section = bfd_make_section_anyway_with_flags
 			    (abfd, section->name,

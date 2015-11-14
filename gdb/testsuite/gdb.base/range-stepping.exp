@@ -27,27 +27,6 @@ if ![runto_main] {
     return -1
 }
 
-# Check whether range stepping is supported by the target.
-
-proc gdb_range_stepping_enabled { } {
-    global gdb_prompt
-
-    set command "set range-stepping on"
-    set message "probe range-stepping support"
-    gdb_test_multiple $command $message {
-        -re "Range stepping is not supported.*\r\n$gdb_prompt $" {
-	    pass $message
-	    return 0
-	}
-        -re "^$command\r\n$gdb_prompt $" {
-	    pass $message
-	    return 1
-	}
-    }
-
-    return 0
-}
-
 if ![gdb_range_stepping_enabled] {
     unsupported "range stepping not supported by the target"
     return -1
@@ -76,7 +55,7 @@ with_test_prefix "multi insns" {
     # <-- T05
     # --> vCont;rSTART,END  (range step)
     # <-- T05
-    set result [exec_cmd_expect_vCont_count "next" 1 1]
+    set result [exec_cmd_expect_vCont_count "next" 1]
     if { $result } {
 	# This is the first range-stepping test, and the simplest
 	# one.  If it fails, probably the rest of the tests would
@@ -132,7 +111,7 @@ with_test_prefix "step over func" {
     # <-- T05  (target stops at ADDR2)
     # --> vCont;rADDR1,ADDR3  (continues range stepping)
     # <-- T05
-    exec_cmd_expect_vCont_count "next" 0 2
+    exec_cmd_expect_vCont_count "next" 2
 }
 
 # Check that breakpoints interrupt range stepping correctly.
@@ -145,14 +124,14 @@ with_test_prefix "breakpoint" {
     # --> $Z0,ADDR2  (step-resume breakpoint at ADDR2)
     # --> vCont;c  (resume)
     # <-- T05  (target hits the breakpoint at func1)
-    exec_cmd_expect_vCont_count "next" 0 1
+    exec_cmd_expect_vCont_count "next" 1
 
     gdb_test "backtrace" "#0 .* func1 .*#1 .* main .*" \
 	"backtrace from func1"
 
     # A cancelled range step should not confuse the following
     # execution commands.
-    exec_cmd_expect_vCont_count "stepi" 1 0
+    exec_cmd_expect_vCont_count "stepi" 0
     gdb_test "finish" ".*"
     gdb_test "next" ".*"
     delete_breakpoints
@@ -166,7 +145,7 @@ with_test_prefix "loop" {
     # GDB should send one vCont;r and receive one stop reply:
     # --> vCont;rSTART,END  (range step)
     # <-- T05
-    exec_cmd_expect_vCont_count "next" 0 1
+    exec_cmd_expect_vCont_count "next" 1
 
     # Confirm the loop completed.
     gdb_test "print a" " = 15"
@@ -183,7 +162,7 @@ with_test_prefix "loop 2" {
     # GDB should send one vCont;r and receive one stop reply:
     # --> vCont;rSTART,END  (range step)
     # <-- T05
-    exec_cmd_expect_vCont_count "next" 0 1
+    exec_cmd_expect_vCont_count "next" 1
 
     # Confirm the loop completed.
     gdb_test "print a" " = 15"
@@ -228,7 +207,7 @@ with_test_prefix "interrupt" {
 
     # Break the loop earlier and continue range stepping.
     gdb_test "set variable c = 0"
-    exec_cmd_expect_vCont_count "next" 0 1
+    exec_cmd_expect_vCont_count "next" 1
 }
 
 # Check that range stepping doesn't break software watchpoints.  With

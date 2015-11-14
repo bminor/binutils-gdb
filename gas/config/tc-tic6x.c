@@ -471,17 +471,15 @@ s_tic6x_personalityindex (int ignored ATTRIBUTE_UNUSED)
 static void
 s_tic6x_personality (int ignored ATTRIBUTE_UNUSED)
 {
-  char *name, *p, c;
+  char *name, c;
   tic6x_unwind_info *unwind = tic6x_get_unwind ();
 
   if (unwind->personality_routine || unwind->personality_index != -1)
     as_bad (_("duplicate .personality directive"));
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  p = input_line_pointer;
+  c = get_symbol_name (&name);
   unwind->personality_routine = symbol_find_or_make (name);
-  *p = c;
+  (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
 
@@ -570,12 +568,11 @@ s_tic6x_scomm (int ignore ATTRIBUTE_UNUSED)
   offsetT align;
   int align2;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
 
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
-  *p = c;
+  (void) restore_line_pointer (c);
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
@@ -2068,7 +2065,7 @@ tic6x_fix_adjustable (fixS *fixP)
     case BFD_RELOC_C6000_PCR_H16:
     case BFD_RELOC_C6000_PCR_L16:
       return 0;
-      
+
     default:
       return 1;
     }
@@ -4487,7 +4484,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED,
   /* Round up section sizes to ensure that text sections consist of
      whole fetch packets.  */
   int align = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << align) - 1) & ((valueT) -1 << align));
+  return ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
 }
 
 /* No special undefined symbol handling needed for now.  */
@@ -4680,18 +4677,18 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
 
 
 static const int
-tic6x_unwind_frame_regs[TIC6X_NUM_UNWIND_REGS] = 
+tic6x_unwind_frame_regs[TIC6X_NUM_UNWIND_REGS] =
 /* A15 B15 B14 B13 B12 B11 B10  B3 A14 A13 A12 A11 A10.  */
   { 15, 31, 30, 29, 28, 27, 26, 19, 14, 13, 12, 11, 10 };
 
 /* Register save offsets for __c6xabi_push_rts.  */
 static const int
-tic6x_pop_rts_offset_little[TIC6X_NUM_UNWIND_REGS] = 
+tic6x_pop_rts_offset_little[TIC6X_NUM_UNWIND_REGS] =
 /* A15 B15 B14 B13 B12 B11 B10  B3 A14 A13 A12 A11 A10.  */
   { -1,  1,  0, -3, -4, -7, -8,-11, -2, -5, -6, -9,-10};
 
 static const int
-tic6x_pop_rts_offset_big[TIC6X_NUM_UNWIND_REGS] = 
+tic6x_pop_rts_offset_big[TIC6X_NUM_UNWIND_REGS] =
 /* A15 B15 B14 B13 B12 B11 B10  B3 A14 A13 A12 A11 A10.  */
   { -2,  1,  0, -4, -3, -8, -7,-12, -1, -6, -5,-10, -9};
 
@@ -5340,7 +5337,7 @@ tic6x_cfi_endproc (struct fde_entry *fde)
 	    continue;
 
 	  unwind->saved_reg_count++;
-	  /* Encoding uses 4 bits per word, so size of unwinding opcode data 
+	  /* Encoding uses 4 bits per word, so size of unwinding opcode data
 	     limits the save area size.  The exact cap will be figured out
 	     later due to overflow, the 0x800 here is just a quick sanity
 	     check to weed out obviously excessive offsets.  */

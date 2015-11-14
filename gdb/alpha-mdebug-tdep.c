@@ -107,7 +107,8 @@ find_proc_desc (CORE_ADDR pc)
 	   symbol reading.  */
 	sym = NULL;
       else
-	sym = lookup_symbol (MDEBUG_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, 0);
+	sym = lookup_symbol (MDEBUG_EFI_SYMBOL_NAME, b, LABEL_DOMAIN,
+			     0).symbol;
     }
 
   if (sym)
@@ -196,7 +197,7 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
   int ireg, returnreg;
 
   if (*this_prologue_cache)
-    return *this_prologue_cache;
+    return (struct alpha_mdebug_unwind_cache *) *this_prologue_cache;
 
   info = FRAME_OBSTACK_ZALLOC (struct alpha_mdebug_unwind_cache);
   *this_prologue_cache = info;

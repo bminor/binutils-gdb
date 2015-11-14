@@ -281,8 +281,8 @@
 	* config.in: Ditto.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -361,15 +361,15 @@
 
 2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
-        * configure.in: Changed for dummy simulator of m32r-linux.
+	* configure.in: Changed for dummy simulator of m32r-linux.
 	* configure: Regenerate.
-        * Makefile.in: Added traps-linux.o for dummy simulator of m32r-linux.
-        * traps-linux.c: Added for dummy simulator of m32r-linux.
-        * syscall.h: Ditto.
-        * sim-if.c (sim_create_inferior): Changed to setup SP for dummy
-        simulator for m32r-linux.
-        * sim-main.h (M32R_DEFAULT_MEM_SIZE): Changed for dummy simulator of
-        m32r-linux.
+	* Makefile.in: Added traps-linux.o for dummy simulator of m32r-linux.
+	* traps-linux.c: Added for dummy simulator of m32r-linux.
+	* syscall.h: Ditto.
+	* sim-if.c (sim_create_inferior): Changed to setup SP for dummy
+	simulator for m32r-linux.
+	* sim-main.h (M32R_DEFAULT_MEM_SIZE): Changed for dummy simulator of
+	m32r-linux.
 
 2003-12-11  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
@@ -555,7 +555,7 @@ Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-05-08  Felix Lee  <flee@cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
-	
+
 Fri Apr 16 16:47:43 1999  Doug Evans  <devans@charmed.cygnus.com>
 
 	* devices.c (device_io_read_buffer): New arg `sd'.
@@ -1025,7 +1025,7 @@ Wed May  6 14:51:39 1998  Doug Evans  <devans@seba.cygnus.com>
 
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
-        * configure: Regenerated to track ../common/aclocal.m4 changes.
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
 
 Tue Apr 28 18:05:53 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -1376,7 +1376,7 @@ Tue Sep 23 10:19:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* Makefile.in (SIM_ENDIAN, SIM_HOSTENDIAN, SIM_SCACHE,
  	SIM_DEFAULT_MODEL): Delete, moved to common.
 	(SIM_EXTRA_CFLAGS): Update.
-	
+
 Mon Sep 22 11:46:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (sim_link_links): Configure non-strict memory
@@ -1497,7 +1497,7 @@ Sat Apr 12 12:57:33 1997  Felix Lee  <flee@yin.cygnus.com>
 
 	* Makefile.in, seman-cache.c: new file, for wingdb build.
 	* sim-alloca.h: fixed for wingdb.
-	
+
 Mon Apr  7 13:33:29 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* decode.c (*): m32r_cgen_insn_table renamed to ..._entries.

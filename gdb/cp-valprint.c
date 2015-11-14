@@ -165,7 +165,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
   int fields_seen = 0;
   static int last_set_recurse = -1;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   
   if (recurse == 0)
     {
@@ -535,7 +535,7 @@ cp_print_value (struct type *type, struct type *real_type,
 		  gdb_byte *buf;
 		  struct cleanup *back_to;
 
-		  buf = xmalloc (TYPE_LENGTH (baseclass));
+		  buf = (gdb_byte *) xmalloc (TYPE_LENGTH (baseclass));
 		  back_to = make_cleanup (xfree, buf);
 
 		  if (target_read_memory (address + boffset, buf,
@@ -669,7 +669,7 @@ cp_print_static_field (struct type *type,
       addr = value_address (val);
       obstack_grow (&dont_print_statmem_obstack, (char *) &addr,
 		    sizeof (CORE_ADDR));
-      CHECK_TYPEDEF (type);
+      type = check_typedef (type);
       cp_print_value_fields (type, value_enclosing_type (val),
 			     value_contents_for_printing (val),
 			     value_embedded_offset (val), addr,

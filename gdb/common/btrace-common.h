@@ -58,7 +58,10 @@ enum btrace_format
 
   /* Branch trace is in Branch Trace Store (BTS) format.
      Actually, the format is a sequence of blocks derived from BTS.  */
-  BTRACE_FORMAT_BTS
+  BTRACE_FORMAT_BTS,
+
+  /* Branch trace is in Intel(R) Processor Trace format.  */
+  BTRACE_FORMAT_PT
 };
 
 /* An enumeration of cpu vendors.  */
@@ -93,7 +96,21 @@ struct btrace_cpu
 
 struct btrace_config_bts
 {
-  /* The size of the branch trace buffer in bytes.  */
+  /* The size of the branch trace buffer in bytes.
+
+     This is unsigned int and not size_t since it is registered as
+     control variable for "set record btrace bts buffer-size".  */
+  unsigned int size;
+};
+
+/* An Intel(R) Processor Trace configuration.  */
+
+struct btrace_config_pt
+{
+  /* The size of the branch trace buffer in bytes.
+
+     This is unsigned int and not size_t since it is registered as
+     control variable for "set record btrace pt buffer-size".  */
   unsigned int size;
 };
 
@@ -111,6 +128,9 @@ struct btrace_config
 
   /* The BTS format configuration.  */
   struct btrace_config_bts bts;
+
+  /* The Intel(R) Processor Trace format configuration.  */
+  struct btrace_config_pt pt;
 };
 
 /* Branch trace in BTS format.  */
@@ -119,6 +139,26 @@ struct btrace_data_bts
   /* Branch trace is represented as a vector of branch trace blocks starting
      with the most recent block.  */
   VEC (btrace_block_s) *blocks;
+};
+
+/* Configuration information to go with the trace data.  */
+struct btrace_data_pt_config
+{
+  /* The processor on which the trace has been collected.  */
+  struct btrace_cpu cpu;
+};
+
+/* Branch trace in Intel(R) Processor Trace format.  */
+struct btrace_data_pt
+{
+  /* Some configuration information to go with the data.  */
+  struct btrace_data_pt_config config;
+
+  /* The trace data.  */
+  gdb_byte *data;
+
+  /* The size of DATA in bytes.  */
+  size_t size;
 };
 
 /* The branch trace data.  */
@@ -130,6 +170,9 @@ struct btrace_data
   {
     /* Format == BTRACE_FORMAT_BTS.  */
     struct btrace_data_bts bts;
+
+    /* Format == BTRACE_FORMAT_PT.  */
+    struct btrace_data_pt pt;
   } variant;
 };
 
@@ -177,7 +220,16 @@ extern void btrace_data_init (struct btrace_data *data);
 /* Cleanup DATA.  */
 extern void btrace_data_fini (struct btrace_data *data);
 
+/* Clear DATA.  */
+extern void btrace_data_clear (struct btrace_data *data);
+
 /* Return non-zero if DATA is empty; zero otherwise.  */
 extern int btrace_data_empty (struct btrace_data *data);
+
+/* Append the branch trace data from SRC to the end of DST.
+   Both SRC and DST must use the same format.
+   Returns zero on success; a negative number otherwise.  */
+extern int btrace_data_append (struct btrace_data *dst,
+			       const struct btrace_data *src);
 
 #endif /* BTRACE_COMMON_H */

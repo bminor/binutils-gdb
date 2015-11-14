@@ -189,6 +189,7 @@ accept various extension mnemonics.  For example,
 @code{rtm},
 @code{invpcid},
 @code{clflush},
+@code{mwaitx},
 @code{clzero},
 @code{lwp},
 @code{fma4},
@@ -1112,7 +1113,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
-@item @samp{.padlock} @tab @samp{.clzero}
+@item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx}
 @end multitable
 
 Apart from the warning, there are only two other effects on

@@ -515,7 +515,7 @@ set_entry_point (void)
   /* Entry point name for arbitrary subsystem numbers.  */
   static const char default_entry[] = "mainCRTStartup";
 
-  if (link_info.shared || dll)
+  if (bfd_link_pic (&link_info) || dll)
     {
       entry = "DllMainCRTStartup";
     }
@@ -903,9 +903,9 @@ gld_${EMULATION_NAME}_set_symbols (void)
 
   if (!init[IMAGEBASEOFF].inited)
     {
-      if (link_info.relocatable)
+      if (bfd_link_relocatable (&link_info))
 	init[IMAGEBASEOFF].value = 0;
-      else if (init[DLLOFF].value || (link_info.shared && !link_info.pie))
+      else if (init[DLLOFF].value || bfd_link_dll (&link_info))
 	{
 #ifdef DLL_SUPPORT
 	  init[IMAGEBASEOFF].value = (pep_enable_auto_image_base
@@ -921,7 +921,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
     }
 
   /* Don't do any symbol assignments if this is a relocatable link.  */
-  if (link_info.relocatable)
+  if (bfd_link_relocatable (&link_info))
     return;
 
   /* Glue the assignments into the abs section.  */
@@ -1276,7 +1276,7 @@ write_build_id (bfd *abfd)
       struct bfd_link_order *l = NULL;
       for (l = asec->map_head.link_order; l != NULL; l = l->next)
         {
-          if ((l->type == bfd_indirect_link_order))
+          if (l->type == bfd_indirect_link_order)
             {
               if (l->u.indirect.section == t->build_id.sec)
                 {
@@ -1328,7 +1328,7 @@ write_build_id (bfd *abfd)
   if (bfd_seek (abfd, asec->filepos + link_order->offset, SEEK_SET) != 0)
     return 0;
 
-  if ((bfd_bwrite (contents, size, abfd) != size))
+  if (bfd_bwrite (contents, size, abfd) != size)
     return 0;
 
   /* Construct the CodeView record.  */
@@ -1459,7 +1459,7 @@ gld_${EMULATION_NAME}_after_open (void)
      find it, so enable it in that case.  */
   if (pep_use_coff_long_section_names < 0 && link_info.strip == strip_none)
     {
-      if (link_info.relocatable)
+      if (bfd_link_relocatable (&link_info))
 	pep_use_coff_long_section_names = 1;
       else
 	{
@@ -1495,9 +1495,9 @@ gld_${EMULATION_NAME}_after_open (void)
     pep_fixup_stdcalls ();
 
 #ifndef TARGET_IS_i386pep
-  if (link_info.shared)
+  if (bfd_link_pic (&link_info))
 #else
-  if (!link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
 #endif
     pep_dll_build_sections (link_info.output_bfd, &link_info);
 
@@ -1789,7 +1789,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 
 	  /* def_file_print (stdout, pep_def_file); */
 	  if (pep_def_file->is_dll == 1)
-	    link_info.shared = 1;
+	    link_info.type = type_dll;
 
 	  if (pep_def_file->base_address != (bfd_vma)(-1))
 	    {
@@ -1846,8 +1846,9 @@ gld_${EMULATION_NAME}_finish (void)
   finish_default ();
 
 #ifdef DLL_SUPPORT
-  if (link_info.shared
-      || (!link_info.relocatable && pep_def_file->num_exports != 0))
+  if (bfd_link_pic (&link_info)
+      || (!bfd_link_relocatable (&link_info)
+	  && pep_def_file->num_exports != 0))
     {
       pep_dll_fill_sections (link_info.output_bfd, &link_info);
       if (pep_implib_filename)
@@ -1897,7 +1898,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
   lang_statement_union_type **pl;
 
   /* Look through the script to see where to place this section.  */
-  if (!link_info.relocatable
+  if (!bfd_link_relocatable (&link_info)
       && (dollar = strchr (secname, '\$')) != NULL)
     {
       size_t len = dollar - secname;
@@ -1979,6 +1980,8 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
       struct orphan_save *place;
       lang_output_section_statement_type *after;
       etree_type *address;
+      flagword flags;
+      asection *nexts;
 
       if (!orphan_init_done)
 	{
@@ -1996,14 +1999,26 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
       /* Try to put the new output section in a reasonable place based
 	 on the section name and section flags.  */
 
+      flags = s->flags;
+      nexts = s;
+      while ((nexts = bfd_get_next_section_by_name (nexts->owner, nexts)))
+	if (nexts->output_section == NULL
+	    && (nexts->flags & SEC_EXCLUDE) == 0
+	    && ((nexts->flags ^ flags) & (SEC_LOAD | SEC_ALLOC)) == 0
+	    && (nexts->owner->flags & DYNAMIC) == 0
+	    && nexts->owner->usrdata != NULL
+	    && !(((lang_input_statement_type *) nexts->owner->usrdata)
+		 ->flags.just_syms))
+	  flags = (((flags ^ SEC_READONLY) | (nexts->flags ^ SEC_READONLY))
+		   ^ SEC_READONLY);
       place = NULL;
-      if ((s->flags & SEC_ALLOC) == 0)
+      if ((flags & SEC_ALLOC) == 0)
 	;
-      else if ((s->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+      else if ((flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
 	place = &hold[orphan_bss];
-      else if ((s->flags & SEC_READONLY) == 0)
+      else if ((flags & SEC_READONLY) == 0)
 	place = &hold[orphan_data];
-      else if ((s->flags & SEC_CODE) == 0)
+      else if ((flags & SEC_CODE) == 0)
 	{
 	  place = (!strncmp (secname, ".idata\$", 7) ? &hold[orphan_idata]
 						     : &hold[orphan_rodata]);
@@ -2018,7 +2033,8 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 	    place->os = lang_output_section_find (place->name);
 	  after = place->os;
 	  if (after == NULL)
-	    after = lang_output_section_find_by_flags (s, &place->os, NULL);
+	    after = lang_output_section_find_by_flags (s, flags, &place->os,
+						       NULL);
 	  if (after == NULL)
 	    /* *ABS* is always the first output section statement.  */
 	    after = (&lang_output_section_statement.head
@@ -2031,7 +2047,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
       address = exp_unop (ALIGN_K, exp_nameop (NAME, "__section_alignment__"));
       os = lang_insert_orphan (s, secname, constraint, after, place, address,
 			       &add_child);
-      if (link_info.relocatable)
+      if (bfd_link_relocatable (&link_info))
 	{
 	  os->section_alignment = s->alignment_power;
 	  os->bfd_section->alignment_power = s->alignment_power;
@@ -2187,11 +2203,11 @@ fragment <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocatable && config.build_constructors)
+  if (bfd_link_relocatable (&link_info) && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu			>> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'	>> e${EMULATION_NAME}.c
+echo '  ; else if (bfd_link_relocatable (&link_info)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr			>> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn			>> e${EMULATION_NAME}.c

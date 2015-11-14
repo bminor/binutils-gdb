@@ -34,6 +34,7 @@
 #include "extension-priv.h"
 #include "cli/cli-utils.h"
 #include <ctype.h>
+#include "location.h"
 
 /* Declared constants and enum for python stack printing.  */
 static const char python_excp_none[] = "none";
@@ -247,7 +248,7 @@ struct cleanup *
 ensure_python_env (struct gdbarch *gdbarch,
                    const struct language_defn *language)
 {
-  struct python_env *env = xmalloc (sizeof *env);
+  struct python_env *env = XNEW (struct python_env);
 
   /* We should not ever enter Python unless initialized.  */
   if (!gdb_python_initialized)
@@ -340,7 +341,7 @@ python_interactive_command (char *arg, int from_tty)
   if (arg && *arg)
     {
       int len = strlen (arg);
-      char *script = xmalloc (len + 2);
+      char *script = (char *) xmalloc (len + 2);
 
       strcpy (script, arg);
       script[len] = '\n';
@@ -427,7 +428,7 @@ compute_python_string (struct command_line *l)
   for (iter = l; iter; iter = iter->next)
     size += strlen (iter->line) + 1;
 
-  script = xmalloc (size + 1);
+  script = (char *) xmalloc (size + 1);
   here = 0;
   for (iter = l; iter; iter = iter->next)
     {
@@ -724,12 +725,12 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   struct symtabs_and_lines sals = { NULL, 0 }; /* Initialize to
 						  appease gcc.  */
   struct symtab_and_line sal;
-  const char *arg = NULL;
-  char *copy_to_free = NULL, *copy = NULL;
+  char *arg = NULL;
   struct cleanup *cleanups;
   PyObject *result = NULL;
   PyObject *return_result = NULL;
   PyObject *unparsed = NULL;
+  struct event_location *location = NULL;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
@@ -738,14 +739,16 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
   sals.sals = NULL;
 
+  if (arg != NULL)
+    {
+      location = new_linespec_location (&arg);
+      make_cleanup_delete_event_location (location);
+    }
+
   TRY
     {
-      if (arg)
-	{
-	  copy = xstrdup (arg);
-	  copy_to_free = copy;
-	  sals = decode_line_1 (&copy, 0, 0, 0);
-	}
+      if (location != NULL)
+	sals = decode_line_1 (location, 0, 0, 0);
       else
 	{
 	  set_default_source_symtab_and_line ();
@@ -761,10 +764,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   END_CATCH
 
   if (sals.sals != NULL && sals.sals != &sal)
-    {
-      make_cleanup (xfree, copy_to_free);
-      make_cleanup (xfree, sals.sals);
-    }
+    make_cleanup (xfree, sals.sals);
 
   if (except.reason < 0)
     {
@@ -808,9 +808,9 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
       goto error;
     }
 
-  if (copy && strlen (copy) > 0)
+  if (arg != NULL && strlen (arg) > 0)
     {
-      unparsed = PyString_FromString (copy);
+      unparsed = PyString_FromString (arg);
       if (unparsed == NULL)
 	{
 	  Py_DECREF (result);
@@ -1458,7 +1458,7 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
   struct cleanup *cleanups;
   PyObject *type_obj, *type_module = NULL, *func = NULL;
   PyObject *result_obj = NULL;
-  PyObject *printers_obj = ext_printers->py_type_printers;
+  PyObject *printers_obj = (PyObject *) ext_printers->py_type_printers;
   char *result = NULL;
 
   if (printers_obj == NULL)
@@ -1524,7 +1524,7 @@ gdbpy_free_type_printers (const struct extension_language_defn *extlang,
 			  struct ext_lang_type_printers *ext_printers)
 {
   struct cleanup *cleanups;
-  PyObject *printers = ext_printers->py_type_printers;
+  PyObject *printers = (PyObject *) ext_printers->py_type_printers;
 
   if (printers == NULL)
     return;
@@ -1725,7 +1725,7 @@ message == an error message without a stack will be printed."),
       fprintf (stderr, "Could not convert python path to string\n");
       return;
     }
-  progname_copy = PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
+  progname_copy = (wchar_t *) PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
   if (!progname_copy)
     {
       fprintf (stderr, "out of memory\n");

@@ -793,7 +793,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 					      (parse_language (pstate),
 					       parse_gdbarch (pstate),
 					       "int"));
-			  CHECK_TYPEDEF (type);
+			  type = check_typedef (type);
 
 			    /* $5.3.3/2 of the C++ Standard (n3290 draft)
 			       says of sizeof:  "When applied to a reference
@@ -839,7 +839,7 @@ string_exp:
 
 			  vec->type = $1.type;
 			  vec->length = $1.length;
-			  vec->ptr = malloc ($1.length + 1);
+			  vec->ptr = (char *) malloc ($1.length + 1);
 			  memcpy (vec->ptr, $1.ptr, $1.length + 1);
 			}
 
@@ -849,10 +849,10 @@ string_exp:
 			     for convenience.  */
 			  char *p;
 			  ++$$.len;
-			  $$.tokens = realloc ($$.tokens,
-					       $$.len * sizeof (struct typed_stoken));
+			  $$.tokens = XRESIZEVEC (struct typed_stoken,
+						  $$.tokens, $$.len);
 
-			  p = malloc ($2.length + 1);
+			  p = (char *) malloc ($2.length + 1);
 			  memcpy (p, $2.ptr, $2.length + 1);
 
 			  $$.tokens[$$.len - 1].type = $2.type;
@@ -878,7 +878,7 @@ exp	:	string_exp
 				  if (type != C_STRING
 				      && type != $1.tokens[i].type)
 				    error (_("Undefined string concatenation."));
-				  type = $1.tokens[i].type;
+				  type = (enum c_string_type) $1.tokens[i].type;
 				  break;
 				default:
 				  /* internal error */
@@ -923,8 +923,8 @@ exp     :       FALSEKEYWORD
 
 block	:	BLOCKNAME
 			{
-			  if ($1.sym)
-			    $$ = SYMBOL_BLOCK_VALUE ($1.sym);
+			  if ($1.sym.symbol)
+			    $$ = SYMBOL_BLOCK_VALUE ($1.sym.symbol);
 			  else
 			    error (_("No file or function \"%s\"."),
 				   copy_name ($1.stoken));
@@ -938,7 +938,8 @@ block	:	BLOCKNAME
 block	:	block COLONCOLON name
 			{ struct symbol *tem
 			    = lookup_symbol (copy_name ($3), $1,
-					     VAR_DOMAIN, NULL);
+					     VAR_DOMAIN, NULL).symbol;
+
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy_name ($3));
@@ -946,7 +947,7 @@ block	:	block COLONCOLON name
 	;
 
 variable:	name_not_typename ENTRY
-			{ struct symbol *sym = $1.sym;
+			{ struct symbol *sym = $1.sym.symbol;
 
 			  if (sym == NULL || !SYMBOL_IS_ARGUMENT (sym)
 			      || !symbol_read_needs_frame (sym))
@@ -961,31 +962,31 @@ variable:	name_not_typename ENTRY
 	;
 
 variable:	block COLONCOLON name
-			{ struct symbol *sym;
-			  sym = lookup_symbol (copy_name ($3), $1,
-					       VAR_DOMAIN, NULL);
-			  if (sym == 0)
+			{ struct block_symbol sym
+			    = lookup_symbol (copy_name ($3), $1,
+					     VAR_DOMAIN, NULL);
+
+			  if (sym.symbol == 0)
 			    error (_("No symbol \"%s\" in specified context."),
 				   copy_name ($3));
-			  if (symbol_read_needs_frame (sym))
+			  if (symbol_read_needs_frame (sym.symbol))
 			    {
 			      if (innermost_block == 0
-				  || contained_in (block_found,
+				  || contained_in (sym.block,
 						   innermost_block))
-				innermost_block = block_found;
+				innermost_block = sym.block;
 			    }
 
 			  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			  /* block_found is set by lookup_symbol.  */
-			  write_exp_elt_block (pstate, block_found);
-			  write_exp_elt_sym (pstate, sym);
+			  write_exp_elt_block (pstate, sym.block);
+			  write_exp_elt_sym (pstate, sym.symbol);
 			  write_exp_elt_opcode (pstate, OP_VAR_VALUE); }
 	;
 
 qualified_name:	TYPENAME COLONCOLON name
 			{
 			  struct type *type = $1.type;
-			  CHECK_TYPEDEF (type);
+			  type = check_typedef (type);
 			  if (!type_aggregate_p (type))
 			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_SAFE_NAME (type));
@@ -1001,11 +1002,11 @@ qualified_name:	TYPENAME COLONCOLON name
 			  struct stoken tmp_token;
 			  char *buf;
 
-			  CHECK_TYPEDEF (type);
+			  type = check_typedef (type);
 			  if (!type_aggregate_p (type))
 			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_SAFE_NAME (type));
-			  buf = alloca ($4.length + 2);
+			  buf = (char *) alloca ($4.length + 2);
 			  tmp_token.ptr = buf;
 			  tmp_token.length = $4.length + 1;
 			  buf[0] = '~';
@@ -1035,9 +1036,9 @@ variable:	qualified_name
 			  struct symbol *sym;
 			  struct bound_minimal_symbol msymbol;
 
-			  sym =
-			    lookup_symbol (name, (const struct block *) NULL,
-					   VAR_DOMAIN, NULL);
+			  sym
+			    = lookup_symbol (name, (const struct block *) NULL,
+					     VAR_DOMAIN, NULL).symbol;
 			  if (sym)
 			    {
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
@@ -1058,24 +1059,21 @@ variable:	qualified_name
 	;
 
 variable:	name_not_typename
-			{ struct symbol *sym = $1.sym;
+			{ struct block_symbol sym = $1.sym;
 
-			  if (sym)
+			  if (sym.symbol)
 			    {
-			      if (symbol_read_needs_frame (sym))
+			      if (symbol_read_needs_frame (sym.symbol))
 				{
 				  if (innermost_block == 0
-				      || contained_in (block_found,
+				      || contained_in (sym.block,
 						       innermost_block))
-				    innermost_block = block_found;
+				    innermost_block = sym.block;
 				}
 
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      /* We want to use the selected frame, not
-				 another more inner frame which happens to
-				 be in the same block.  */
-			      write_exp_elt_block (pstate, NULL);
-			      write_exp_elt_sym (pstate, sym);
+			      write_exp_elt_block (pstate, sym.block);
+			      write_exp_elt_sym (pstate, sym.symbol);
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			    }
 			  else if ($1.is_a_field_of_this)
@@ -1084,9 +1082,9 @@ variable:	name_not_typename
 			         not inadvertently convert from a method call
 				 to data ref.  */
 			      if (innermost_block == 0
-				  || contained_in (block_found,
+				  || contained_in (sym.block,
 						   innermost_block))
-				innermost_block = block_found;
+				innermost_block = sym.block;
 			      write_exp_elt_opcode (pstate, OP_THIS);
 			      write_exp_elt_opcode (pstate, OP_THIS);
 			      write_exp_elt_opcode (pstate, STRUCTOP_PTR);
@@ -1666,7 +1664,7 @@ name_not_typename :	NAME
 static void
 write_destructor_name (struct parser_state *par_state, struct stoken token)
 {
-  char *copy = alloca (token.length + 1);
+  char *copy = (char *) alloca (token.length + 1);
 
   copy[0] = '~';
   memcpy (&copy[1], token.ptr, token.length);
@@ -1688,7 +1686,7 @@ operator_stoken (const char *op)
   char *buf;
 
   st.length = strlen (operator_string) + strlen (op);
-  buf = malloc (st.length + 1);
+  buf = (char *) malloc (st.length + 1);
   strcpy (buf, operator_string);
   strcat (buf, op);
   st.ptr = buf;
@@ -1773,7 +1771,7 @@ parse_number (struct parser_state *par_state,
   struct type *unsigned_type;
   char *p;
 
-  p = alloca (len);
+  p = (char *) alloca (len);
   memcpy (p, buf, len);
 
   if (parsed_float)
@@ -2401,7 +2399,8 @@ scan_macro_expansion (char *expansion)
 
   /* Copy to the obstack, and then free the intermediate
      expansion.  */
-  copy = obstack_copy0 (&expansion_obstack, expansion, strlen (expansion));
+  copy = (char *) obstack_copy0 (&expansion_obstack, expansion,
+				 strlen (expansion));
   xfree (expansion);
 
   /* Save the old lexptr value, so we can return to it when we're done
@@ -2817,7 +2816,7 @@ lex_one_token (struct parser_state *par_state, int *is_quoted_name)
 			       VAR_DOMAIN,
 			       (parse_language (par_state)->la_language
 			        == language_cplus ? &is_a_field_of_this
-				: NULL))
+				: NULL)).symbol
 		!= NULL)
 	      {
 		/* The keyword is shadowed.  */
@@ -2838,7 +2837,8 @@ lex_one_token (struct parser_state *par_state, int *is_quoted_name)
     saw_name_at_eof = 1;
 
   yylval.ssym.stoken = yylval.sval;
-  yylval.ssym.sym = NULL;
+  yylval.ssym.sym.symbol = NULL;
+  yylval.ssym.sym.block = NULL;
   yylval.ssym.is_a_field_of_this = 0;
   return NAME;
 }
@@ -2873,7 +2873,7 @@ static int
 classify_name (struct parser_state *par_state, const struct block *block,
 	       int is_quoted_name)
 {
-  struct symbol *sym;
+  struct block_symbol bsym;
   char *copy;
   struct field_of_this_result is_a_field_of_this;
 
@@ -2883,17 +2883,17 @@ classify_name (struct parser_state *par_state, const struct block *block,
      we can refer to it unconditionally below.  */
   memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
 
-  sym = lookup_symbol (copy, block, VAR_DOMAIN,
-		       parse_language (par_state)->la_name_of_this
-		       ? &is_a_field_of_this : NULL);
+  bsym = lookup_symbol (copy, block, VAR_DOMAIN,
+			parse_language (par_state)->la_name_of_this
+			? &is_a_field_of_this : NULL);
 
-  if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+  if (bsym.symbol && SYMBOL_CLASS (bsym.symbol) == LOC_BLOCK)
     {
-      yylval.ssym.sym = sym;
+      yylval.ssym.sym = bsym;
       yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
       return BLOCKNAME;
     }
-  else if (!sym)
+  else if (!bsym.symbol)
     {
       /* If we found a field of 'this', we might have erroneously
 	 found a constructor where we wanted a type name.  Handle this
@@ -2906,11 +2906,11 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	{
 	  struct field_of_this_result inner_is_a_field_of_this;
 
-	  sym = lookup_symbol (copy, block, STRUCT_DOMAIN,
-			       &inner_is_a_field_of_this);
-	  if (sym != NULL)
+	  bsym = lookup_symbol (copy, block, STRUCT_DOMAIN,
+				&inner_is_a_field_of_this);
+	  if (bsym.symbol != NULL)
 	    {
-	      yylval.tsym.type = SYMBOL_TYPE (sym);
+	      yylval.tsym.type = SYMBOL_TYPE (bsym.symbol);
 	      return TYPENAME;
 	    }
 	}
@@ -2934,18 +2934,20 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	}
     }
 
-  if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+  if (bsym.symbol && SYMBOL_CLASS (bsym.symbol) == LOC_TYPEDEF)
     {
-      yylval.tsym.type = SYMBOL_TYPE (sym);
+      yylval.tsym.type = SYMBOL_TYPE (bsym.symbol);
       return TYPENAME;
     }
 
   /* See if it's an ObjC classname.  */
-  if (parse_language (par_state)->la_language == language_objc && !sym)
+  if (parse_language (par_state)->la_language == language_objc && !bsym.symbol)
     {
       CORE_ADDR Class = lookup_objc_class (parse_gdbarch (par_state), copy);
       if (Class)
 	{
+	  struct symbol *sym;
+
 	  yylval.theclass.theclass = Class;
 	  sym = lookup_struct_typedef (copy, expression_context_block, 1);
 	  if (sym)
@@ -2957,26 +2959,27 @@ classify_name (struct parser_state *par_state, const struct block *block,
   /* Input names that aren't symbols but ARE valid hex numbers, when
      the input radix permits them, can be names or numbers depending
      on the parse.  Note we support radixes > 16 here.  */
-  if (!sym
+  if (!bsym.symbol
       && ((copy[0] >= 'a' && copy[0] < 'a' + input_radix - 10)
 	  || (copy[0] >= 'A' && copy[0] < 'A' + input_radix - 10)))
     {
       YYSTYPE newlval;	/* Its value is ignored.  */
       int hextype = parse_number (par_state, copy, yylval.sval.length,
 				  0, &newlval);
+
       if (hextype == INT)
 	{
-	  yylval.ssym.sym = sym;
+	  yylval.ssym.sym = bsym;
 	  yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	  return NAME_OR_INT;
 	}
     }
 
   /* Any other kind of symbol */
-  yylval.ssym.sym = sym;
+  yylval.ssym.sym = bsym;
   yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 
-  if (sym == NULL
+  if (bsym.symbol == NULL
       && parse_language (par_state)->la_language == language_cplus
       && is_a_field_of_this.type == NULL
       && lookup_minimal_symbol (copy, NULL, NULL).minsym == NULL)
@@ -3010,7 +3013,7 @@ classify_inner_name (struct parser_state *par_state,
   /* If no symbol was found, search for a matching base class named
      COPY.  This will allow users to enter qualified names of class members
      relative to the `this' pointer.  */
-  if (yylval.ssym.sym == NULL)
+  if (yylval.ssym.sym.symbol == NULL)
     {
       struct type *base_type = cp_find_type_baseclass_by_name (type, copy);
 
@@ -3023,7 +3026,7 @@ classify_inner_name (struct parser_state *par_state,
       return ERROR;
     }
 
-  switch (SYMBOL_CLASS (yylval.ssym.sym))
+  switch (SYMBOL_CLASS (yylval.ssym.sym.symbol))
     {
     case LOC_BLOCK:
     case LOC_LABEL:
@@ -3042,7 +3045,7 @@ classify_inner_name (struct parser_state *par_state,
       return ERROR;
 
     case LOC_TYPEDEF:
-      yylval.tsym.type = SYMBOL_TYPE (yylval.ssym.sym);
+      yylval.tsym.type = SYMBOL_TYPE (yylval.ssym.sym.symbol);
       return TYPENAME;
 
     default:
@@ -3194,9 +3197,10 @@ yylex (void)
      the FIFO, and delete the other constituent tokens.  */
   if (checkpoint > 0)
     {
-      current.value.sval.ptr = obstack_copy0 (&expansion_obstack,
-					      current.value.sval.ptr,
-					      current.value.sval.length);
+      current.value.sval.ptr
+	= (const char *) obstack_copy0 (&expansion_obstack,
+					current.value.sval.ptr,
+					current.value.sval.length);
 
       VEC_replace (token_and_value, token_fifo, 0, &current);
       if (checkpoint > 1)
@@ -3276,7 +3280,7 @@ c_print_token (FILE *file, int type, YYSTYPE value)
     case CHAR:
     case STRING:
       {
-	char *copy = alloca (value.tsval.length + 1);
+	char *copy = (char *) alloca (value.tsval.length + 1);
 
 	memcpy (copy, value.tsval.ptr, value.tsval.length);
 	copy[value.tsval.length] = '\0';
@@ -3302,8 +3306,8 @@ c_print_token (FILE *file, int type, YYSTYPE value)
     case BLOCKNAME:
       fprintf (file, "ssym<name=%s, sym=%s, field_of_this=%d>",
 	       copy_name (value.ssym.stoken),
-	       (value.ssym.sym == NULL
-		? "(null)" : SYMBOL_PRINT_NAME (value.ssym.sym)),
+	       (value.ssym.sym.symbol == NULL
+		? "(null)" : SYMBOL_PRINT_NAME (value.ssym.sym.symbol)),
 	       value.ssym.is_a_field_of_this);
       break;
 

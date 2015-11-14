@@ -50,7 +50,7 @@ static void c_type_print_modifier (struct type *,
 static const char *
 find_typedef_for_canonicalize (struct type *t, void *data)
 {
-  return find_typedef_in_hash (data, t);
+  return find_typedef_in_hash ((const struct type_print_options *) data, t);
 }
 
 /* Print NAME on STREAM.  If the 'raw' field of FLAGS is not set,
@@ -89,7 +89,7 @@ c_print_type (struct type *type,
   const char *local_name;
 
   if (show > 0)
-    CHECK_TYPEDEF (type);
+    type = check_typedef (type);
 
   local_name = find_typedef_in_hash (flags, type);
   if (local_name != NULL)
@@ -144,7 +144,7 @@ c_print_typedef (struct type *type,
 		 struct symbol *new_symbol,
 		 struct ui_file *stream)
 {
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
   fprintf_filtered (stream, "typedef ");
   type_print (type, "", stream, 0);
   if (TYPE_NAME ((SYMBOL_TYPE (new_symbol))) == 0
@@ -876,7 +876,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
       return;
     }
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
   switch (TYPE_CODE (type))
     {

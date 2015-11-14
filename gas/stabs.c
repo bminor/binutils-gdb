@@ -457,11 +457,10 @@ s_desc (ignore)
   symbolS *symbolP;
   int temp;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       *p = 0;

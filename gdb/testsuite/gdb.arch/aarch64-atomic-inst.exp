@@ -19,7 +19,7 @@
 # Test single stepping through atomic sequences beginning with
 # a ldxr instruction and ending with a stxr instruction.
 
-if {![istarget "aarch64*"]} {
+if {![is_aarch64_target]} {
     verbose "Skipping ${gdb_test_file_name}."
     return
 }

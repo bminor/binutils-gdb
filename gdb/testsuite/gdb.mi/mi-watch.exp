@@ -131,14 +131,10 @@ proc test_watchpoint_triggering {type} {
         {"" "wpt=\{number=\"2\",exp=\"C\"\},value=\{old=\".*\",new=\"3\"\}"} \
         "watchpoint trigger"
 
-    if { $type == "sw" } {
-      setup_xfail *-*-*
-    }
     mi_execute_to "exec-continue" "watchpoint-scope" "callee3" ".*" \
         ".*basics.c" $line_callee3_close_brace \
         {"" "wpnum=\"2\""} \
         "watchpoint trigger"
-    clear_xfail *-*-*
 }
 
 proc test_watchpoint_all {type} {

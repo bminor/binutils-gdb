@@ -28,6 +28,11 @@
 
 extern struct regcache *get_thread_regcache_for_ptid (ptid_t ptid);
 
+/* Return the size of register numbered N in REGCACHE.  This function
+   must be provided by the client.  */
+
+extern int regcache_register_size (const struct regcache *regcache, int n);
+
 /* Read the PC register.  This function must be provided by the
    client.  */
 

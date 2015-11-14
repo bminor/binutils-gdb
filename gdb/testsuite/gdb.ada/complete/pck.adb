@@ -21,4 +21,9 @@ package body Pck is
       Inner.Inside_Variable := Not_In_Scope + I;
    end Proc;
 
+   procedure Ambiguous_Func is
+   begin
+      null;
+   end Ambiguous_Func;
+
 end Pck;

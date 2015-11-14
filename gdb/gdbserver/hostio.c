@@ -126,7 +126,7 @@ require_data (char *p, int p_len, char **data, int *data_len)
 {
   int input_index, output_index, escaped;
 
-  *data = xmalloc (p_len);
+  *data = (char *) xmalloc (p_len);
 
   output_index = 0;
   escaped = 0;
@@ -331,7 +331,7 @@ handle_open (char *own_buf)
     }
 
   /* Record the new file descriptor.  */
-  new_fd = xmalloc (sizeof (struct fd_list));
+  new_fd = XNEW (struct fd_list);
   new_fd->fd = fd;
   new_fd->next = open_fds;
   open_fds = new_fd;
@@ -344,6 +344,7 @@ handle_pread (char *own_buf, int *new_packet_len)
 {
   int fd, ret, len, offset, bytes_sent;
   char *p, *data;
+  static int max_reply_size = -1;
 
   p = own_buf + strlen ("vFile:pread:");
 
@@ -359,7 +360,18 @@ handle_pread (char *own_buf, int *new_packet_len)
       return;
     }
 
-  data = xmalloc (len);
+  /* Do not attempt to read more than the maximum number of bytes
+     hostio_reply_with_data can fit in a packet.  We may still read
+     too much because of escaping, but this is handled below.  */
+  if (max_reply_size == -1)
+    {
+      sprintf (own_buf, "F%x;", PBUFSIZ);
+      max_reply_size = PBUFSIZ - strlen (own_buf);
+    }
+  if (len > max_reply_size)
+    len = max_reply_size;
+
+  data = (char *) xmalloc (len);
 #ifdef HAVE_PREAD
   ret = pread (fd, data, len, offset);
 #else

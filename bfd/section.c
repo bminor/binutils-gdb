@@ -155,10 +155,10 @@ CODE_FRAGMENT
 .  const char *name;
 .
 .  {* A unique sequence number.  *}
-.  int id;
+.  unsigned int id;
 .
 .  {* Which section in the bfd; 0..n-1 as sections are created in a bfd.  *}
-.  int index;
+.  unsigned int index;
 .
 .  {* The next section in the list belonging to the BFD, or NULL.  *}
 .  struct bfd_section *next;
@@ -824,13 +824,13 @@ _bfd_generic_new_section_hook (bfd *abfd, asection *newsect)
   return TRUE;
 }
 
+static unsigned int section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
+
 /* Initializes a new section.  NEWSECT->NAME is already set.  */
 
 static asection *
 bfd_section_init (bfd *abfd, asection *newsect)
 {
-  static int section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
-
   newsect->id = section_id;
   newsect->index = abfd->section_count;
   newsect->owner = abfd;
@@ -906,16 +906,18 @@ FUNCTION
        bfd_get_next_section_by_name
 
 SYNOPSIS
-       asection *bfd_get_next_section_by_name (asection *sec);
+       asection *bfd_get_next_section_by_name (bfd *ibfd, asection *sec);
 
 DESCRIPTION
        Given @var{sec} is a section returned by @code{bfd_get_section_by_name},
        return the next most recently created section attached to the same
-       BFD with the same name.  Return NULL if no such section exists.
+       BFD with the same name, or if no such section exists in the same BFD and
+       IBFD is non-NULL, the next section with the same name in any input
+       BFD following IBFD.  Return NULL on finding no section.
 */
 
 asection *
-bfd_get_next_section_by_name (asection *sec)
+bfd_get_next_section_by_name (bfd *ibfd, asection *sec)
 {
   struct section_hash_entry *sh;
   const char *name;
@@ -932,6 +934,16 @@ bfd_get_next_section_by_name (asection *sec)
     if (sh->root.hash == hash
        && strcmp (sh->root.string, name) == 0)
       return &sh->section;
+
+  if (ibfd != NULL)
+    {
+      while ((ibfd = ibfd->link.next) != NULL)
+	{
+	  asection *s = bfd_get_section_by_name (ibfd, name);
+	  if (s != NULL)
+	    return s;
+	}
+    }
 
   return NULL;
 }
@@ -954,7 +966,7 @@ bfd_get_linker_section (bfd *abfd, const char *name)
   asection *sec = bfd_get_section_by_name (abfd, name);
 
   while (sec != NULL && (sec->flags & SEC_LINKER_CREATED) == 0)
-    sec = bfd_get_next_section_by_name (sec);
+    sec = bfd_get_next_section_by_name (NULL, sec);
   return sec;
 }
 
@@ -997,14 +1009,11 @@ bfd_get_section_by_name_if (bfd *abfd, const char *name,
     return NULL;
 
   hash = sh->root.hash;
-  do
-    {
-      if ((*operation) (abfd, &sh->section, user_storage))
-	return &sh->section;
-      sh = (struct section_hash_entry *) sh->root.next;
-    }
-  while (sh != NULL && sh->root.hash == hash
-	 && strcmp (sh->root.string, name) == 0);
+  for (; sh != NULL; sh = (struct section_hash_entry *) sh->root.next)
+    if (sh->root.hash == hash
+	&& strcmp (sh->root.string, name) == 0
+	&& (*operation) (abfd, &sh->section, user_storage))
+      return &sh->section;
 
   return NULL;
 }
@@ -1277,6 +1286,23 @@ asection *
 bfd_make_section (bfd *abfd, const char *name)
 {
   return bfd_make_section_with_flags (abfd, name, 0);
+}
+
+/*
+FUNCTION
+	bfd_get_next_section_id
+
+SYNOPSIS
+	int bfd_get_next_section_id (void);
+
+DESCRIPTION
+	Returns the id that the next section created will have.
+*/
+
+int
+bfd_get_next_section_id (void)
+{
+  return section_id;
 }
 
 /*

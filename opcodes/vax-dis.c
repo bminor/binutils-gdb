@@ -131,14 +131,14 @@ parse_disassembler_options (char * options)
 	  /* A guesstimate of the number of entries we will have to create.  */
 	  entry_addr_total_slots +=
 	    strlen (options) / (strlen (entry_switch) + 5);
-	  
+
 	  entry_addr = realloc (entry_addr, sizeof (bfd_vma)
 				* entry_addr_total_slots);
 	}
 
       if (entry_addr == NULL)
 	return FALSE;
-	  
+
       entry_addr[entry_addr_occupied_slots] = bfd_scan_vma (options, NULL, 0);
       entry_addr_occupied_slots ++;
     }

@@ -173,7 +173,7 @@ enum EM
   EM_386 = 3,
   EM_68K = 4,
   EM_88K = 5,
-  // 6 used to be EM_486
+  EM_IAMCU = 6,
   EM_860 = 7,
   EM_MIPS = 8,
   EM_S370 = 9,
@@ -1302,7 +1302,7 @@ class Chdr
 	   file->view(loc.file_offset, loc.data_size).data()))
   { }
 
-  typename Elf_types<size>::Elf_WXword
+  Elf_Word
   get_ch_type() const
   { return Convert<size, big_endian>::convert_host(this->p_->ch_type); }
 

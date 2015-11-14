@@ -280,7 +280,7 @@ static struct sparc_arch {
   { "v8pluse", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VE, 0 },
   { "v8plusv", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VV, 0 },
   { "v8plusm", "v9b", v9,  0, 1, HWCAP_V8PLUS|HWS_VM, 0 },
-  
+
   { "v9",      "v9",  v9,  0, 1, HWS_V9, 0 },
   { "v9a",     "v9a", v9,  0, 1, HWS_VA, 0 },
   { "v9b",     "v9b", v9,  0, 1, HWS_VB, 0 },
@@ -805,6 +805,7 @@ struct priv_reg_entry priv_reg_table[] =
   {"wstate", 14},
   {"fq", 15},
   {"gl", 16},
+  {"pmcdper", 23},
   {"ver", 31},
   {"", -1},			/* End marker.  */
 };
@@ -3975,11 +3976,10 @@ s_reserve (int ignore ATTRIBUTE_UNUSED)
   int temp;
   symbolS *symbolP;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
 
   if (*input_line_pointer != ',')
     {
@@ -4117,12 +4117,11 @@ s_common (int ignore ATTRIBUTE_UNUSED)
   offsetT temp, size;
   symbolS *symbolP;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
+  c = get_symbol_name (&name);
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE ();
+  SKIP_WHITESPACE_AFTER_NAME ();
   if (*input_line_pointer != ',')
     {
       as_bad (_("Expected comma after symbol-name"));
@@ -4388,7 +4387,7 @@ s_register (int ignore ATTRIBUTE_UNUSED)
   char c;
   int reg;
   int flags;
-  const char *regname;
+  char *regname;
 
   if (input_line_pointer[0] != '%'
       || input_line_pointer[1] != 'g'
@@ -4402,8 +4401,7 @@ s_register (int ignore ATTRIBUTE_UNUSED)
   if (*input_line_pointer == '#')
     {
       ++input_line_pointer;
-      regname = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&regname);
       if (strcmp (regname, "scratch") && strcmp (regname, "ignore"))
 	as_bad (_("register syntax is .register %%g[2367],{#scratch|symbolname|#ignore}"));
       if (regname[0] == 'i')
@@ -4413,9 +4411,9 @@ s_register (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      regname = input_line_pointer;
-      c = get_symbol_end ();
+      c = get_symbol_name (&regname);
     }
+
   if (sparc_arch_size == 64)
     {
       if (globals[reg])
@@ -4462,7 +4460,7 @@ s_register (int ignore ATTRIBUTE_UNUSED)
 	}
     }
 
-  *input_line_pointer = c;
+  (void) restore_line_pointer (c);
 
   demand_empty_rest_of_line ();
 }

@@ -692,6 +692,8 @@ DEFAULT_TARGET_X32_FALSE
 DEFAULT_TARGET_X32_TRUE
 DEFAULT_TARGET_X86_64_FALSE
 DEFAULT_TARGET_X86_64_TRUE
+DEFAULT_TARGET_S390_FALSE
+DEFAULT_TARGET_S390_TRUE
 DEFAULT_TARGET_SPARC_FALSE
 DEFAULT_TARGET_SPARC_TRUE
 DEFAULT_TARGET_POWERPC_FALSE
@@ -3475,6 +3477,14 @@ fi
 else
   DEFAULT_TARGET_SPARC_TRUE='#'
   DEFAULT_TARGET_SPARC_FALSE=
+fi
+
+	 if test "$targ_obj" = "s390"; then
+  DEFAULT_TARGET_S390_TRUE=
+  DEFAULT_TARGET_S390_FALSE='#'
+else
+  DEFAULT_TARGET_S390_TRUE='#'
+  DEFAULT_TARGET_S390_FALSE=
 fi
 
 	target_x86_64=no
@@ -6328,6 +6338,7 @@ fi
     powerpc*) false;;
     x86_64) false;;
     sparc64) false;;
+    s390x) false;;
     *) true;;
   esac; then
   FN_PTRS_IN_SO_WITHOUT_PIC_TRUE=
@@ -7755,6 +7766,10 @@ if test -z "${DEFAULT_TARGET_SPARC_TRUE}" && test -z "${DEFAULT_TARGET_SPARC_FAL
   as_fn_error "conditional \"DEFAULT_TARGET_SPARC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${DEFAULT_TARGET_S390_TRUE}" && test -z "${DEFAULT_TARGET_S390_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_S390\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${DEFAULT_TARGET_X86_64_TRUE}" && test -z "${DEFAULT_TARGET_X86_64_FALSE}"; then
   as_fn_error "conditional \"DEFAULT_TARGET_X86_64\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -9164,14 +9179,14 @@ $as_echo X"$file" |
           if test -f "$ac_given_srcdir/$ac_dir/LINGUAS"; then
             # The LINGUAS file contains the set of available languages.
             if test -n "$OBSOLETE_ALL_LINGUAS"; then
-              test -n "$as_me" && echo "$as_me: setting ALL_LINGUAS in configure.in is obsolete" || echo "setting ALL_LINGUAS in configure.in is obsolete"
+              test -n "$as_me" && echo "$as_me: setting ALL_LINGUAS in configure.ac is obsolete" || echo "setting ALL_LINGUAS in configure.ac is obsolete"
             fi
             ALL_LINGUAS_=`sed -e "/^#/d" "$ac_given_srcdir/$ac_dir/LINGUAS"`
             # Hide the ALL_LINGUAS assigment from automake.
             eval 'ALL_LINGUAS''=$ALL_LINGUAS_'
             POMAKEFILEDEPS="$POMAKEFILEDEPS LINGUAS"
           else
-            # The set of available languages was given in configure.in.
+            # The set of available languages was given in configure.ac.
             eval 'ALL_LINGUAS''=$OBSOLETE_ALL_LINGUAS'
           fi
           case "$ac_given_srcdir" in

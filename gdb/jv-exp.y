@@ -355,7 +355,7 @@ QualifiedName:
 		    {
 		      char *buf;
 
-		      buf = malloc ($$.length + 1);
+		      buf = (char *) malloc ($$.length + 1);
 		      make_cleanup (free, buf);
 		      sprintf (buf, "%.*s.%.*s",
 			       $1.length, $1.ptr, $3.length, $3.ptr);
@@ -1270,24 +1270,22 @@ push_variable (struct parser_state *par_state, struct stoken name)
 {
   char *tmp = copy_name (name);
   struct field_of_this_result is_a_field_of_this;
-  struct symbol *sym;
+  struct block_symbol sym;
 
   sym = lookup_symbol (tmp, expression_context_block, VAR_DOMAIN,
 		       &is_a_field_of_this);
-  if (sym && SYMBOL_CLASS (sym) != LOC_TYPEDEF)
+  if (sym.symbol && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
     {
-      if (symbol_read_needs_frame (sym))
+      if (symbol_read_needs_frame (sym.symbol))
 	{
 	  if (innermost_block == 0 ||
-	      contained_in (block_found, innermost_block))
-	    innermost_block = block_found;
+	      contained_in (sym.block, innermost_block))
+	    innermost_block = sym.block;
 	}
 
       write_exp_elt_opcode (par_state, OP_VAR_VALUE);
-      /* We want to use the selected frame, not another more inner frame
-	 which happens to be in the same block.  */
-      write_exp_elt_block (par_state, NULL);
-      write_exp_elt_sym (par_state, sym);
+      write_exp_elt_block (par_state, sym.block);
+      write_exp_elt_sym (par_state, sym.symbol);
       write_exp_elt_opcode (par_state, OP_VAR_VALUE);
       return 1;
     }
@@ -1296,8 +1294,8 @@ push_variable (struct parser_state *par_state, struct stoken name)
       /* it hangs off of `this'.  Must not inadvertently convert from a
 	 method call to data ref.  */
       if (innermost_block == 0 || 
-	  contained_in (block_found, innermost_block))
-	innermost_block = block_found;
+	  contained_in (sym.block, innermost_block))
+	innermost_block = sym.block;
       write_exp_elt_opcode (par_state, OP_THIS);
       write_exp_elt_opcode (par_state, OP_THIS);
       write_exp_elt_opcode (par_state, STRUCTOP_PTR);

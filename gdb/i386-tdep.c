@@ -502,11 +502,11 @@ i386_dbx_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 }
 
-/* Convert SVR4 register number REG to the appropriate register number
+/* Convert SVR4 DWARF register number REG to the appropriate register number
    used by GDB.  */
 
 static int
-i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
+i386_svr4_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -544,8 +544,20 @@ i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     case 45: return I386_GS_REGNUM;
     }
 
-  /* This will hopefully provoke a warning.  */
-  return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  return -1;
+}
+
+/* Wrapper on i386_svr4_dwarf_reg_to_regnum to return
+   num_regs + num_pseudo_regs for other debug formats.  */
+
+static int
+i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
+{
+  int regnum = i386_svr4_dwarf_reg_to_regnum (gdbarch, reg);
+
+  if (regnum == -1)
+    return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  return regnum;
 }
 
 
@@ -777,7 +789,7 @@ i386_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  gdb_byte *buf = xmalloc (len);
+  gdb_byte *buf = (gdb_byte *) xmalloc (len);
 
   read_memory (from, buf, len);
 
@@ -2050,7 +2062,7 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct i386_frame_cache *cache;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct i386_frame_cache *) *this_cache;
 
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
@@ -2220,7 +2232,7 @@ i386_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   CORE_ADDR sp;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct i386_frame_cache *) *this_cache;
 
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
@@ -2407,7 +2419,7 @@ i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   gdb_byte buf[4];
 
   if (*this_cache)
-    return *this_cache;
+    return (struct i386_frame_cache *) *this_cache;
 
   cache = i386_alloc_frame_cache ();
 
@@ -3732,7 +3744,7 @@ i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const gdb_byte *regs = gregs;
+  const gdb_byte *regs = (const gdb_byte *) gregs;
   int i;
 
   gdb_assert (len >= tdep->sizeof_gregset);
@@ -3757,7 +3769,7 @@ i386_collect_gregset (const struct regset *regset,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  gdb_byte *regs = gregs;
+  gdb_byte *regs = (gdb_byte *) gregs;
   int i;
 
   gdb_assert (len >= tdep->sizeof_gregset);
@@ -4051,7 +4063,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	return 0;
 
       len = s - start - 1;
-      regname = alloca (len + 1);
+      regname = (char *) alloca (len + 1);
 
       strncpy (regname, start, len);
       regname[len] = '\0';
@@ -4161,7 +4173,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	return 0;
 
       len_base = s - start;
-      base = alloca (len_base + 1);
+      base = (char *) alloca (len_base + 1);
       strncpy (base, start, len_base);
       base[len_base] = '\0';
 
@@ -4176,7 +4188,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	++s;
 
       len_index = s - start;
-      index = alloca (len_index + 1);
+      index = (char *) alloca (len_index + 1);
       strncpy (index, start, len_index);
       index[len_index] = '\0';
 
@@ -8045,8 +8057,8 @@ static const int i386_record_regmap[] =
    string.  */
 
 static int
-i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
-			       CORE_ADDR addr, int *isize, char **msg)
+i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr,
+			       char **msg)
 {
   int len, jumplen;
   static struct ui_file *gdb_null = NULL;
@@ -8078,8 +8090,6 @@ i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
 
   /* Check for fit.  */
   len = gdb_print_insn (gdbarch, addr, gdb_null, NULL);
-  if (isize)
-    *isize = len;
 
   if (len < jumplen)
     {
@@ -8351,7 +8361,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
 
   /* Use the SVR4 register numbering scheme for DWARF 2.  */
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_svr4_dwarf_reg_to_regnum);
 
   /* We don't set gdbarch_stab_reg_to_regnum, since ECOFF doesn't seem to
      be in use on any of the supported i386 targets.  */
@@ -8480,7 +8490,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_insn_is_jump (gdbarch, i386_insn_is_jump);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  info.tdep_info = (void *) tdesc_data;
+  info.tdep_info = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   if (!i386_validate_tdesc_p (tdep, tdesc_data))
@@ -8684,7 +8694,8 @@ i386_mpx_get_bt_entry (CORE_ADDR ptr, CORE_ADDR bd_base)
       bt_mask = (CORE_ADDR) MPX_BT_MASK;
 
       if ( sizeof (CORE_ADDR) == 4)
-	error (_("operation not supported"));
+	error (_("bound table examination not supported\
+ for 64-bit process with 32-bit GDB"));
     }
   else
     {
@@ -8775,11 +8786,17 @@ i386_mpx_info_bounds (char *args, int from_tty)
   struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
   if (!i386_mpx_enabled ())
-    error (_("Intel(R) Memory Protection Extensions not\
- supported on this target."));
+    {
+      printf_unfiltered (_("Intel(R) Memory Protection Extensions not "
+			   "supported on this target.\n"));
+      return;
+    }
 
   if (args == NULL)
-    error (_("Address of pointer variable expected."));
+    {
+      printf_unfiltered (_("Address of pointer variable expected.\n"));
+      return;
+    }
 
   addr = parse_and_eval_address (args);
 
@@ -8854,7 +8871,7 @@ static struct cmd_list_element *mpx_set_cmdlist, *mpx_show_cmdlist;
 static void
 set_mpx_cmd (char *args, int from_tty)
 {
-  help_list (mpx_set_cmdlist, "set mpx", all_commands, gdb_stdout);
+  help_list (mpx_set_cmdlist, "set mpx ", all_commands, gdb_stdout);
 }
 
 /* Helper function for the CLI commands.  */
@@ -8899,7 +8916,7 @@ is \"default\"."),
 
   add_prefix_cmd ("mpx", class_support, set_mpx_cmd, _("\
 Set Intel(R) Memory Protection Extensions specific variables."),
-		  &mpx_set_cmdlist, "set tdesc ",
+		  &mpx_set_cmdlist, "set mpx ",
 		  0 /* allow-unknown */, &setlist);
 
   /* Add "mpx" prefix for the show commands.  */

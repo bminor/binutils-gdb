@@ -94,7 +94,7 @@
 
 	PR gdb/7205
 
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 

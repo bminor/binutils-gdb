@@ -798,6 +798,7 @@ _start:
 	vcvtps2qq	zmm30, [rdx+512]{1to8}	 # AVX512DQ
 	vcvtps2qq	zmm30, [rdx-512]{1to8}	 # AVX512DQ Disp8
 	vcvtps2qq	zmm30, [rdx-516]{1to8}	 # AVX512DQ
+	vcvtps2qq	zmm30, DWORD PTR [rdx+508]{1to8}	 # AVX512DQ Disp8
 	vcvtps2uqq	zmm30, ymm29	 # AVX512DQ
 	vcvtps2uqq	zmm30{k7}, ymm29	 # AVX512DQ
 	vcvtps2uqq	zmm30{k7}{z}, ymm29	 # AVX512DQ
@@ -816,6 +817,7 @@ _start:
 	vcvtps2uqq	zmm30, [rdx+512]{1to8}	 # AVX512DQ
 	vcvtps2uqq	zmm30, [rdx-512]{1to8}	 # AVX512DQ Disp8
 	vcvtps2uqq	zmm30, [rdx-516]{1to8}	 # AVX512DQ
+	vcvtps2uqq	zmm30, DWORD PTR [rdx+508]{1to8}	 # AVX512DQ Disp8
 	vcvtqq2pd	zmm30, zmm29	 # AVX512DQ
 	vcvtqq2pd	zmm30{k7}, zmm29	 # AVX512DQ
 	vcvtqq2pd	zmm30{k7}{z}, zmm29	 # AVX512DQ
@@ -1382,6 +1384,7 @@ _start:
 	vcvttps2qq	zmm30, [rdx+512]{1to8}	 # AVX512DQ
 	vcvttps2qq	zmm30, [rdx-512]{1to8}	 # AVX512DQ Disp8
 	vcvttps2qq	zmm30, [rdx-516]{1to8}	 # AVX512DQ
+	vcvttps2qq	zmm30, DWORD PTR [rdx+508]{1to8}	 # AVX512DQ Disp8
 	vcvttps2uqq	zmm30, ymm29	 # AVX512DQ
 	vcvttps2uqq	zmm30{k7}, ymm29	 # AVX512DQ
 	vcvttps2uqq	zmm30{k7}{z}, ymm29	 # AVX512DQ
@@ -1397,6 +1400,7 @@ _start:
 	vcvttps2uqq	zmm30, [rdx+512]{1to8}	 # AVX512DQ
 	vcvttps2uqq	zmm30, [rdx-512]{1to8}	 # AVX512DQ Disp8
 	vcvttps2uqq	zmm30, [rdx-516]{1to8}	 # AVX512DQ
+	vcvttps2uqq	zmm30, DWORD PTR [rdx+508]{1to8}	 # AVX512DQ Disp8
 	vpmovd2m	k5, zmm30	 # AVX512DQ
 	vpmovq2m	k5, zmm30	 # AVX512DQ
 	vpmovm2d	zmm30, k5	 # AVX512DQ

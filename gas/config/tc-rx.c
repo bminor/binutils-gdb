@@ -400,7 +400,7 @@ parse_rx_section (char * name)
   asection * sec;
   int   type;
   int   attr = SHF_ALLOC | SHF_EXECINSTR;
-  int   align = 2;
+  int   align = 1;
   char  end_char;
 
   do
@@ -428,9 +428,9 @@ parse_rx_section (char * name)
 		p++;
 	      switch (*p)
 		{
-		case '2': align = 2; break;
-		case '4': align = 4; break;
-		case '8': align = 8; break;
+		case '2': align = 1; break;
+		case '4': align = 2; break;
+		case '8': align = 3; break;
 		default:
 		  as_bad (_("unrecognised alignment value in .SECTION directive: %s"), p);
 		  ignore_rest_of_line ();
@@ -1248,7 +1248,7 @@ valueT
 md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << align) - 1) & (-1 << align));
+  return ((size + (1 << align) - 1) & -(1 << align));
 }
 
 				/* NOP - 1 cycle */
@@ -1263,8 +1263,8 @@ static unsigned char nop_4[] = { 0x76, 0x10, 0x01, 0x00 };
 static unsigned char nop_5[] = { 0x77, 0x10, 0x01, 0x00, 0x00 };
 				/* MUL #1,R0 - 1 cycle */
 static unsigned char nop_6[] = { 0x74, 0x10, 0x01, 0x00, 0x00, 0x00 };
-				/* BRA.S .+7 - 1 cycle */
-static unsigned char nop_7[] = { 0x0F, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03 };
+				/* MAX 0x80000000,R0 - 1 cycle */
+static unsigned char nop_7[] = { 0xFD, 0x70, 0x40, 0x00, 0x00, 0x00, 0x80 };
 
 static unsigned char *nops[] = { NULL, nop_1, nop_2, nop_3, nop_4, nop_5, nop_6, nop_7 };
 #define BIGGEST_NOP 7
@@ -2440,7 +2440,7 @@ tc_gen_reloc (asection * sec ATTRIBUTE_UNUSED, fixS * fixp)
     }
   else if (sec)
     is_opcode = sec->flags & SEC_CODE;
-      
+
   /* Certain BFD relocations cannot be translated directly into
      a single (non-Red Hat) RX relocation, but instead need
      multiple RX relocations - handle them here.  */

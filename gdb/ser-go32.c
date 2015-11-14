@@ -643,7 +643,7 @@ dos_get_tty_state (struct serial *scb)
 	return NULL;
     }
 
-  state = (struct dos_ttystate *) xmalloc (sizeof *state);
+  state = XNEW (struct dos_ttystate);
   *state = *port;
   return (serial_ttystate) state;
 }
@@ -653,7 +653,7 @@ dos_copy_tty_state (struct serial *scb, serial_ttystate ttystate)
 {
   struct dos_ttystate *state;
 
-  state = (struct dos_ttystate *) xmalloc (sizeof *state);
+  state = XNEW (struct dos_ttystate);
   *state = *(struct dos_ttystate *) ttystate;
 
   return (serial_ttystate) state;

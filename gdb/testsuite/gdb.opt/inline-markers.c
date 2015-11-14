@@ -14,6 +14,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 extern int x, y;
+extern volatile int z;
 
 void bar(void)
 {
@@ -22,12 +23,12 @@ void bar(void)
 
 void marker(void)
 {
-  x += y; /* set breakpoint 2 here */
+  x += y - z; /* set breakpoint 2 here */
 }
 
 inline void inlined_fn(void)
 {
-  x += y;
+  x += y + z;
 }
 
 void noinline(void)

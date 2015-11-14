@@ -53,7 +53,7 @@ elf_solaris2_before_allocation (void)
   const char **sym;
 
   /* Do this for both executables and shared objects.  */
-  if (!link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     {
       for (sym = global_syms; *sym != NULL; sym++)
 	{
@@ -75,7 +75,7 @@ elf_solaris2_before_allocation (void)
     }
 
   /* Only do this if emitting a shared object and versioning is in place. */
-  if (link_info.shared
+  if (bfd_link_dll (&link_info)
       && (link_info.version_info != NULL
 	  || link_info.create_default_symver))
     {
@@ -127,7 +127,7 @@ elf_solaris2_after_allocation (void)
   const char **sym;
 
   /* Do this for both executables and shared objects.  */
-  if (!link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     {
       for (sym = local_syms; *sym != NULL; sym++)
 	{

@@ -347,7 +347,7 @@ complete_target_initialization (struct target_ops *t)
 static void
 open_target (char *args, int from_tty, struct cmd_list_element *command)
 {
-  struct target_ops *ops = get_cmd_context (command);
+  struct target_ops *ops = (struct target_ops *) get_cmd_context (command);
 
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog, "-> %s->to_open (...)\n",
@@ -444,7 +444,7 @@ enum terminal_state
     terminal_is_ours = 2
   };
 
-static enum terminal_state terminal_state;
+static enum terminal_state terminal_state = terminal_is_ours;
 
 /* See target.h.  */
 
@@ -531,7 +531,7 @@ target_supports_terminal_ours (void)
 static void
 cleanup_restore_target_terminal (void *arg)
 {
-  enum terminal_state *previous_state = arg;
+  enum terminal_state *previous_state = (enum terminal_state *) arg;
 
   switch (*previous_state)
     {
@@ -552,7 +552,7 @@ cleanup_restore_target_terminal (void *arg)
 struct cleanup *
 make_cleanup_restore_target_terminal (void)
 {
-  enum terminal_state *ts = xmalloc (sizeof (*ts));
+  enum terminal_state *ts = XNEW (enum terminal_state);
 
   *ts = terminal_state;
 
@@ -926,7 +926,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 
   /* Small for testing.  */
   buffer_allocated = 4;
-  buffer = xmalloc (buffer_allocated);
+  buffer = (char *) xmalloc (buffer_allocated);
   bufptr = buffer;
 
   while (len > 0)
@@ -953,7 +953,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 
 	  bytes = bufptr - buffer;
 	  buffer_allocated *= 2;
-	  buffer = xrealloc (buffer, buffer_allocated);
+	  buffer = (char *) xrealloc (buffer, buffer_allocated);
 	  bufptr = buffer + bytes;
 	}
 
@@ -1060,7 +1060,7 @@ memory_xfer_check_region (gdb_byte *readbuf, const gdb_byte *writebuf,
    instance, could have some of memory but delegate other bits to
    the target below it.  So, we must manually try all targets.  */
 
-static enum target_xfer_status
+enum target_xfer_status
 raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
 			 const gdb_byte *writebuf, ULONGEST memaddr, LONGEST len,
 			 ULONGEST *xfered_len)
@@ -1235,7 +1235,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
     }
   else
     {
-      void *buf;
+      gdb_byte *buf;
       struct cleanup *old_chain;
 
       /* A large write request is likely to be partially satisfied
@@ -1245,7 +1245,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 	 subset of it.  Cap writes to 4KB to mitigate this.  */
       len = min (4096, len);
 
-      buf = xmalloc (len);
+      buf = (gdb_byte *) xmalloc (len);
       old_chain = make_cleanup (xfree, buf);
       memcpy (buf, writebuf, len);
 
@@ -1380,7 +1380,7 @@ target_xfer_partial (struct target_ops *ops,
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the
    results in GDB's memory at MYADDR.  Returns either 0 for success or
-   TARGET_XFER_E_IO if any error occurs.
+   -1 if any error occurs.
 
    If an error occurs, no guarantee is made about the contents of the data at
    MYADDR.  In particular, the caller should not depend upon partial reads
@@ -1399,7 +1399,7 @@ target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 		   myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* See target/target.h.  */
@@ -1431,7 +1431,7 @@ target_read_raw_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 		   myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Like target_read_memory, but specify explicitly that this is a read from
@@ -1446,7 +1446,7 @@ target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 		   myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Like target_read_memory, but specify explicitly that this is a read from
@@ -1461,14 +1461,14 @@ target_read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 		   myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Write LEN bytes from MYADDR to target memory at address MEMADDR.
-   Returns either 0 for success or TARGET_XFER_E_IO if any
-   error occurs.  If an error occurs, no guarantee is made about how
-   much data got written.  Callers that can deal with partial writes
-   should call target_write.  */
+   Returns either 0 for success or -1 if any error occurs.  If an
+   error occurs, no guarantee is made about how much data got written.
+   Callers that can deal with partial writes should call
+   target_write.  */
 
 int
 target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
@@ -1479,14 +1479,14 @@ target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 		    myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Write LEN bytes from MYADDR to target raw memory at address
-   MEMADDR.  Returns either 0 for success or TARGET_XFER_E_IO
-   if any error occurs.  If an error occurs, no guarantee is made
-   about how much data got written.  Callers that can deal with
-   partial writes should call target_write.  */
+   MEMADDR.  Returns either 0 for success or -1 if any error occurs.
+   If an error occurs, no guarantee is made about how much data got
+   written.  Callers that can deal with partial writes should call
+   target_write.  */
 
 int
 target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
@@ -1497,7 +1497,7 @@ target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 		    myaddr, memaddr, len) == len)
     return 0;
   else
-    return TARGET_XFER_E_IO;
+    return -1;
 }
 
 /* Fetch the target's memory map.  */
@@ -1655,7 +1655,7 @@ read_whatever_is_readable (struct target_ops *ops,
 			   int unit_size,
 			   VEC(memory_read_result_s) **result)
 {
-  gdb_byte *buf = xmalloc (end - begin);
+  gdb_byte *buf = (gdb_byte *) xmalloc (end - begin);
   ULONGEST current_begin = begin;
   ULONGEST current_end = end;
   int forward;
@@ -1755,7 +1755,7 @@ read_whatever_is_readable (struct target_ops *ops,
       /* The [current_end, end) range has been read.  */
       LONGEST region_len = end - current_end;
 
-      r.data = xmalloc (region_len * unit_size);
+      r.data = (gdb_byte *) xmalloc (region_len * unit_size);
       memcpy (r.data, buf + (current_end - begin) * unit_size,
 	      region_len * unit_size);
       r.begin = current_end;
@@ -1768,7 +1768,7 @@ read_whatever_is_readable (struct target_ops *ops,
 void
 free_memory_read_result_vector (void *x)
 {
-  VEC(memory_read_result_s) *v = x;
+  VEC(memory_read_result_s) *v = (VEC(memory_read_result_s) *) x;
   memory_read_result_s *current;
   int ix;
 
@@ -1923,7 +1923,7 @@ target_read_alloc_1 (struct target_ops *ops, enum target_object object,
   /* Start by reading up to 4K at a time.  The target will throttle
      this number down if necessary.  */
   buf_alloc = 4096;
-  buf = xmalloc (buf_alloc);
+  buf = (gdb_byte *) xmalloc (buf_alloc);
   buf_pos = 0;
   while (1)
     {
@@ -1956,7 +1956,7 @@ target_read_alloc_1 (struct target_ops *ops, enum target_object object,
       if (buf_alloc < buf_pos * 2)
 	{
 	  buf_alloc *= 2;
-	  buf = xrealloc (buf, buf_alloc);
+	  buf = (gdb_byte *) xrealloc (buf, buf_alloc);
 	}
 
       QUIT;
@@ -2138,6 +2138,10 @@ target_pre_inferior (int from_tty)
       target_clear_description ();
     }
 
+  /* attach_flag may be set if the previous process associated with
+     the inferior was attached to.  */
+  current_inferior ()->attach_flag = 0;
+
   agent_capability_invalidate ();
 }
 
@@ -2229,6 +2233,17 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
   return (current_target.to_wait) (&current_target, ptid, status, options);
 }
 
+/* See target.h.  */
+
+ptid_t
+default_target_wait (struct target_ops *ops,
+		     ptid_t ptid, struct target_waitstatus *status,
+		     int options)
+{
+  status->kind = TARGET_WAITKIND_IGNORE;
+  return minus_one_ptid;
+}
+
 char *
 target_pid_to_str (ptid_t ptid)
 {
@@ -2289,6 +2304,14 @@ target_follow_fork (int follow_child, int detach_fork)
 					follow_child, detach_fork);
 }
 
+/* Target wrapper for follow exec hook.  */
+
+void
+target_follow_exec (struct inferior *inf, char *execd_pathname)
+{
+  current_target.to_follow_exec (&current_target, inf, execd_pathname);
+}
+
 static void
 default_mourn_inferior (struct target_ops *self)
 {
@@ -2340,7 +2363,7 @@ simple_search_memory (struct target_ops *ops,
   if (search_space_len < search_buf_size)
     search_buf_size = search_space_len;
 
-  search_buf = malloc (search_buf_size);
+  search_buf = (gdb_byte *) malloc (search_buf_size);
   if (search_buf == NULL)
     error (_("Unable to allocate memory to perform the search."));
   old_cleanups = make_cleanup (free_current_contents, &search_buf);
@@ -2368,8 +2391,8 @@ simple_search_memory (struct target_ops *ops,
       gdb_byte *found_ptr;
       unsigned nr_search_bytes = min (search_space_len, search_buf_size);
 
-      found_ptr = memmem (search_buf, nr_search_bytes,
-			  pattern, pattern_len);
+      found_ptr = (gdb_byte *) memmem (search_buf, nr_search_bytes,
+				       pattern, pattern_len);
 
       if (found_ptr != NULL)
 	{
@@ -2779,11 +2802,13 @@ release_fileio_fd (int fd, fileio_fh_t *fh)
 #define fileio_fd_to_fh(fd) \
   VEC_index (fileio_fh_t, fileio_fhandles, (fd))
 
-/* See target.h.  */
+/* Helper for target_fileio_open and
+   target_fileio_open_warn_if_slow.  */
 
-int
-target_fileio_open (struct inferior *inf, const char *filename,
-		    int flags, int mode, int *target_errno)
+static int
+target_fileio_open_1 (struct inferior *inf, const char *filename,
+		      int flags, int mode, int warn_if_slow,
+		      int *target_errno)
 {
   struct target_ops *t;
 
@@ -2792,7 +2817,7 @@ target_fileio_open (struct inferior *inf, const char *filename,
       if (t->to_fileio_open != NULL)
 	{
 	  int fd = t->to_fileio_open (t, inf, filename, flags, mode,
-				      target_errno);
+				      warn_if_slow, target_errno);
 
 	  if (fd < 0)
 	    fd = -1;
@@ -2801,17 +2826,39 @@ target_fileio_open (struct inferior *inf, const char *filename,
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_open (%d,%s,0x%x,0%o)"
+				"target_fileio_open (%d,%s,0x%x,0%o,%d)"
 				" = %d (%d)\n",
 				inf == NULL ? 0 : inf->num,
 				filename, flags, mode,
-				fd, fd != -1 ? 0 : *target_errno);
+				warn_if_slow, fd,
+				fd != -1 ? 0 : *target_errno);
 	  return fd;
 	}
     }
 
   *target_errno = FILEIO_ENOSYS;
   return -1;
+}
+
+/* See target.h.  */
+
+int
+target_fileio_open (struct inferior *inf, const char *filename,
+		    int flags, int mode, int *target_errno)
+{
+  return target_fileio_open_1 (inf, filename, flags, mode, 0,
+			       target_errno);
+}
+
+/* See target.h.  */
+
+int
+target_fileio_open_warn_if_slow (struct inferior *inf,
+				 const char *filename,
+				 int flags, int mode, int *target_errno)
+{
+  return target_fileio_open_1 (inf, filename, flags, mode, 1,
+			       target_errno);
 }
 
 /* See target.h.  */
@@ -3002,7 +3049,7 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
   /* Start by reading up to 4K at a time.  The target will throttle
      this number down if necessary.  */
   buf_alloc = 4096;
-  buf = xmalloc (buf_alloc);
+  buf = (gdb_byte *) xmalloc (buf_alloc);
   buf_pos = 0;
   while (1)
     {
@@ -3033,7 +3080,7 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
       if (buf_alloc < buf_pos * 2)
 	{
 	  buf_alloc *= 2;
-	  buf = xrealloc (buf, buf_alloc);
+	  buf = (gdb_byte *) xrealloc (buf, buf_alloc);
 	}
 
       QUIT;
@@ -3273,6 +3320,26 @@ target_stop (ptid_t ptid)
   (*current_target.to_stop) (&current_target, ptid);
 }
 
+void
+target_interrupt (ptid_t ptid)
+{
+  if (!may_stop)
+    {
+      warning (_("May not interrupt or stop the target, ignoring attempt"));
+      return;
+    }
+
+  (*current_target.to_interrupt) (&current_target, ptid);
+}
+
+/* See target.h.  */
+
+void
+target_check_pending_interrupt (void)
+{
+  (*current_target.to_check_pending_interrupt) (&current_target);
+}
+
 /* See target/target.h.  */
 
 void
@@ -3462,7 +3529,8 @@ target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
    target.h.  */
 
 int
-target_insert_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask, int rw)
+target_insert_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask,
+			       enum target_hw_bp_type rw)
 {
   return current_target.to_insert_mask_watchpoint (&current_target,
 						   addr, mask, rw);
@@ -3472,7 +3540,8 @@ target_insert_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask, int rw)
    target.h.  */
 
 int
-target_remove_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask, int rw)
+target_remove_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask,
+			       enum target_hw_bp_type rw)
 {
   return current_target.to_remove_mask_watchpoint (&current_target,
 						   addr, mask, rw);
@@ -3589,9 +3658,25 @@ target_delete_record (void)
 /* See target.h.  */
 
 int
-target_record_is_replaying (void)
+target_record_is_replaying (ptid_t ptid)
 {
-  return current_target.to_record_is_replaying (&current_target);
+  return current_target.to_record_is_replaying (&current_target, ptid);
+}
+
+/* See target.h.  */
+
+int
+target_record_will_replay (ptid_t ptid, int dir)
+{
+  return current_target.to_record_will_replay (&current_target, ptid, dir);
+}
+
+/* See target.h.  */
+
+void
+target_record_stop_replaying (void)
+{
+  current_target.to_record_stop_replaying (&current_target);
 }
 
 /* See target.h.  */
@@ -3741,6 +3826,15 @@ maintenance_print_target_stack (char *cmd, int from_tty)
     }
 }
 
+/* See target.h.  */
+
+void
+target_async (int enable)
+{
+  infrun_async (enable);
+  current_target.to_async (&current_target, enable);
+}
+
 /* Controls if targets can report that they can/are async.  This is
    just for maintainers to use when debugging gdb.  */
 int target_async_permitted = 1;
@@ -3770,6 +3864,67 @@ maint_show_target_async_command (struct ui_file *file, int from_tty,
   fprintf_filtered (file,
 		    _("Controlling the inferior in "
 		      "asynchronous mode is %s.\n"), value);
+}
+
+/* Return true if the target operates in non-stop mode even with "set
+   non-stop off".  */
+
+static int
+target_always_non_stop_p (void)
+{
+  return current_target.to_always_non_stop_p (&current_target);
+}
+
+/* See target.h.  */
+
+int
+target_is_non_stop_p (void)
+{
+  return (non_stop
+	  || target_non_stop_enabled == AUTO_BOOLEAN_TRUE
+	  || (target_non_stop_enabled == AUTO_BOOLEAN_AUTO
+	      && target_always_non_stop_p ()));
+}
+
+/* Controls if targets can report that they always run in non-stop
+   mode.  This is just for maintainers to use when debugging gdb.  */
+enum auto_boolean target_non_stop_enabled = AUTO_BOOLEAN_AUTO;
+
+/* The set command writes to this variable.  If the inferior is
+   executing, target_non_stop_enabled is *not* updated.  */
+static enum auto_boolean target_non_stop_enabled_1 = AUTO_BOOLEAN_AUTO;
+
+/* Implementation of "maint set target-non-stop".  */
+
+static void
+maint_set_target_non_stop_command (char *args, int from_tty,
+				   struct cmd_list_element *c)
+{
+  if (have_live_inferiors ())
+    {
+      target_non_stop_enabled_1 = target_non_stop_enabled;
+      error (_("Cannot change this setting while the inferior is running."));
+    }
+
+  target_non_stop_enabled = target_non_stop_enabled_1;
+}
+
+/* Implementation of "maint show target-non-stop".  */
+
+static void
+maint_show_target_non_stop_command (struct ui_file *file, int from_tty,
+				    struct cmd_list_element *c,
+				    const char *value)
+{
+  if (target_non_stop_enabled == AUTO_BOOLEAN_AUTO)
+    fprintf_filtered (file,
+		      _("Whether the target is always in non-stop mode "
+			"is %s (currently %s).\n"), value,
+		      target_always_non_stop_p () ? "on" : "off");
+  else
+    fprintf_filtered (file,
+		      _("Whether the target is always in non-stop mode "
+			"is %s.\n"), value);
 }
 
 /* Temporary copies of permission settings.  */
@@ -3871,6 +4026,16 @@ Show whether gdb controls the inferior in asynchronous mode."), _("\
 Tells gdb whether to control the inferior in asynchronous mode."),
 			   maint_set_target_async_command,
 			   maint_show_target_async_command,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
+
+  add_setshow_auto_boolean_cmd ("target-non-stop", no_class,
+				&target_non_stop_enabled_1, _("\
+Set whether gdb always controls the inferior in non-stop mode."), _("\
+Show whether gdb always controls the inferior in non-stop mode."), _("\
+Tells gdb whether to control the inferior in non-stop mode."),
+			   maint_set_target_non_stop_command,
+			   maint_show_target_non_stop_command,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 

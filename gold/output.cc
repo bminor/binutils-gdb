@@ -2265,9 +2265,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     info_symndx_(NULL),
     info_(0),
     type_(type),
-    // Clear the elfcpp::SHF_COMPRESSED bit.  It will be set by
-    // --compress-debug-sections=zlib-gabi.
-    flags_(flags & ~elfcpp::SHF_COMPRESSED),
+    flags_(flags),
     order_(ORDER_INVALID),
     out_shndx_(-1U),
     symtab_index_(0),

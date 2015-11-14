@@ -393,7 +393,7 @@ print_string_repr (PyObject *printer, const char *hint,
 static void
 py_restore_tstate (void *p)
 {
-  PyFrameObject *frame = p;
+  PyFrameObject *frame = (PyFrameObject *) p;
   PyThreadState *tstate = PyThreadState_GET ();
 
   tstate->frame = frame;

@@ -50,6 +50,9 @@ extern void execute_command (char *, int);
 
 extern void maybe_wait_sync_command_done (int was_sync);
 
+/* Wait for a synchronous execution command to end.  */
+extern void wait_sync_command_done (void);
+
 extern void check_frame_language_change (void);
 
 /* Prepare for execution of a command.
@@ -64,6 +67,10 @@ extern char *get_prompt (void);
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt.  */
 extern void set_prompt (const char *s);
+
+/* Return 1 if the current input handler is a secondary prompt, 0 otherwise.  */
+
+extern int gdb_in_secondary_prompt_p (void);
 
 /* From random places.  */
 extern int readnow_symbol_files;

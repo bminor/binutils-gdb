@@ -55,6 +55,18 @@ tui_exit (void)
    quiet (i.e., another interpreter is being run with
    interpreter-exec), print nothing.  */
 
+/* Observer for the normal_stop notification.  */
+
+static void
+tui_on_normal_stop (struct bpstats *bs, int print_frame)
+{
+  if (!interp_quiet_p (tui_interp))
+    {
+      if (print_frame)
+	print_stop_event (tui_ui_out (tui_interp));
+    }
+}
+
 /* Observer for the signal_received notification.  */
 
 static void
@@ -134,6 +146,7 @@ tui_init (struct interp *self, int top_level)
     tui_initialize_readline ();
 
   /* If changing this, remember to update cli-interp.c as well.  */
+  observer_attach_normal_stop (tui_on_normal_stop);
   observer_attach_signal_received (tui_on_signal_received);
   observer_attach_end_stepping_range (tui_on_end_stepping_range);
   observer_attach_signal_exited (tui_on_signal_exited);

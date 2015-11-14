@@ -138,6 +138,14 @@ struct ldexp_control {
 
   /* Principally used for diagnostics.  */
   bfd_boolean assigning_to_dot;
+
+  /* Set if the current expression used "dot", SEGMENT_START or
+     ORIGIN, but not ABSOLUTE or combined symbols in a way that forces
+     an absolute result.  Used in tracking symbols assigned from dot
+     outside of output section statements, in order to later convert
+     them from absolute.  */
+  bfd_boolean rel_from_abs;
+
   /* If evaluating an assignment, the destination.  Cleared if an
      etree_name NAME matches this, to signal a self-assignment.
      Note that an etree_name DEFINED does not clear this field, nor
@@ -222,6 +230,7 @@ fill_type *exp_get_fill
 bfd_vma exp_get_abs_int
   (etree_type *, int, char *);
 void ldexp_init (bfd_boolean);
+void ldexp_finalize_syms (void);
 void ldexp_finish (bfd_boolean);
 
 #endif

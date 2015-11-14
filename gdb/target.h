@@ -41,6 +41,7 @@ struct dcache_struct;
 struct inferior;
 
 #include "infrun.h" /* For enum exec_direction_kind.  */
+#include "breakpoint.h" /* For enum bptype.  */
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -72,6 +73,8 @@ struct inferior;
 #include "gdb_signals.h"
 #include "btrace.h"
 #include "command.h"
+
+#include "break-common.h" /* For enum target_hw_bp_type.  */
 
 enum strata
   {
@@ -119,15 +122,8 @@ enum inferior_event_type
     /* Process a normal inferior event which will result in target_wait
        being called.  */
     INF_REG_EVENT,
-    /* We are called because a timer went off.  */
-    INF_TIMER,
     /* We are called to do stuff after the inferior stops.  */
     INF_EXEC_COMPLETE,
-    /* We are called to do some stuff after the inferior stops, but we
-       are expected to reenter the proceed() and
-       handle_inferior_event() functions.  This is used only in case of
-       'step n' like commands.  */
-    INF_EXEC_CONTINUE
   };
 
 /* Target objects which can be transfered using target_read,
@@ -264,6 +260,11 @@ typedef enum target_xfer_status
 			     ULONGEST offset,
 			     ULONGEST len,
 			     ULONGEST *xfered_len);
+
+enum target_xfer_status
+  raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
+			   const gdb_byte *writebuf, ULONGEST memaddr,
+			   LONGEST len, ULONGEST *xfered_len);
 
 /* Request that OPS transfer up to LEN addressable units of the target's
    OBJECT.  When reading from a memory object, the size of an addressable unit
@@ -463,7 +464,7 @@ struct target_ops
     ptid_t (*to_wait) (struct target_ops *,
 		       ptid_t, struct target_waitstatus *,
 		       int TARGET_DEBUG_PRINTER (target_debug_print_options))
-      TARGET_DEFAULT_NORETURN (noprocess ());
+      TARGET_DEFAULT_FUNC (default_target_wait);
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int)
       TARGET_DEFAULT_IGNORE ();
     void (*to_store_registers) (struct target_ops *, struct regcache *, int)
@@ -508,7 +509,8 @@ struct target_ops
     int (*to_supports_stopped_by_hw_breakpoint) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
 
-    int (*to_can_use_hw_breakpoint) (struct target_ops *, int, int, int)
+    int (*to_can_use_hw_breakpoint) (struct target_ops *,
+				     enum bptype, int, int)
       TARGET_DEFAULT_RETURN (0);
     int (*to_ranged_break_num_registers) (struct target_ops *)
       TARGET_DEFAULT_RETURN (-1);
@@ -521,18 +523,20 @@ struct target_ops
 
     /* Documentation of what the two routines below are expected to do is
        provided with the corresponding target_* macros.  */
-    int (*to_remove_watchpoint) (struct target_ops *,
-				 CORE_ADDR, int, int, struct expression *)
+    int (*to_remove_watchpoint) (struct target_ops *, CORE_ADDR, int,
+				 enum target_hw_bp_type, struct expression *)
       TARGET_DEFAULT_RETURN (-1);
-    int (*to_insert_watchpoint) (struct target_ops *,
-				 CORE_ADDR, int, int, struct expression *)
+    int (*to_insert_watchpoint) (struct target_ops *, CORE_ADDR, int,
+				 enum target_hw_bp_type, struct expression *)
       TARGET_DEFAULT_RETURN (-1);
 
     int (*to_insert_mask_watchpoint) (struct target_ops *,
-				      CORE_ADDR, CORE_ADDR, int)
+				      CORE_ADDR, CORE_ADDR,
+				      enum target_hw_bp_type)
       TARGET_DEFAULT_RETURN (1);
     int (*to_remove_mask_watchpoint) (struct target_ops *,
-				      CORE_ADDR, CORE_ADDR, int)
+				      CORE_ADDR, CORE_ADDR,
+				      enum target_hw_bp_type)
       TARGET_DEFAULT_RETURN (1);
     int (*to_stopped_by_watchpoint) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
@@ -557,6 +561,12 @@ struct target_ops
     int (*to_masked_watch_num_registers) (struct target_ops *,
 					  CORE_ADDR, CORE_ADDR)
       TARGET_DEFAULT_RETURN (-1);
+
+    /* Return 1 for sure target can do single step.  Return -1 for
+       unknown.  Return 0 for target can't do.  */
+    int (*to_can_do_single_step) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (-1);
+
     void (*to_terminal_init) (struct target_ops *)
       TARGET_DEFAULT_IGNORE ();
     void (*to_terminal_inferior) (struct target_ops *)
@@ -594,6 +604,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     int (*to_remove_exec_catchpoint) (struct target_ops *, int)
       TARGET_DEFAULT_RETURN (1);
+    void (*to_follow_exec) (struct target_ops *, struct inferior *, char *)
+      TARGET_DEFAULT_IGNORE ();
     int (*to_set_syscall_catchpoint) (struct target_ops *,
 				      int, int, int, int, int *)
       TARGET_DEFAULT_RETURN (1);
@@ -631,6 +643,10 @@ struct target_ops
       TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
+    void (*to_interrupt) (struct target_ops *, ptid_t)
+      TARGET_DEFAULT_IGNORE ();
+    void (*to_check_pending_interrupt) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_rcmd) (struct target_ops *,
 		     const char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
@@ -659,6 +675,10 @@ struct target_ops
     /* This method must be implemented in some situations.  See the
        comment on 'to_can_run'.  */
     int (*to_supports_non_stop) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
+    /* Return true if the target operates in non-stop mode even with
+       "set non-stop off".  */
+    int (*to_always_non_stop_p) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
     /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (struct target_ops *,
@@ -858,11 +878,14 @@ struct target_ops
     /* Open FILENAME on the target, in the filesystem as seen by INF,
        using FLAGS and MODE.  If INF is NULL, use the filesystem seen
        by the debugger (GDB or, for remote targets, the remote stub).
-       Return a target file descriptor, or -1 if an error occurs (and
-       set *TARGET_ERRNO).  */
+       If WARN_IF_SLOW is nonzero, print a warning message if the file
+       is being accessed over a link that may be slow.  Return a
+       target file descriptor, or -1 if an error occurs (and set
+       *TARGET_ERRNO).  */
     int (*to_fileio_open) (struct target_ops *,
 			   struct inferior *inf, const char *filename,
-			   int flags, int mode, int *target_errno);
+			   int flags, int mode, int warn_if_slow,
+			   int *target_errno);
 
     /* Write up to LEN bytes from WRITE_BUF to FD on the target.
        Return the number of bytes written, or -1 if an error occurs
@@ -1132,9 +1155,18 @@ struct target_ops
     void (*to_delete_record) (struct target_ops *)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
-    /* Query if the record target is currently replaying.  */
-    int (*to_record_is_replaying) (struct target_ops *)
+    /* Query if the record target is currently replaying PTID.  */
+    int (*to_record_is_replaying) (struct target_ops *, ptid_t ptid)
       TARGET_DEFAULT_RETURN (0);
+
+    /* Query if the record target will replay PTID if it were resumed in
+       execution direction DIR.  */
+    int (*to_record_will_replay) (struct target_ops *, ptid_t ptid, int dir)
+      TARGET_DEFAULT_RETURN (0);
+
+    /* Stop replaying.  */
+    void (*to_record_stop_replaying) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
 
     /* Go to the begin of the execution trace.  */
     void (*to_goto_record_begin) (struct target_ops *)
@@ -1283,8 +1315,8 @@ extern void target_detach (const char *, int);
 extern void target_disconnect (const char *, int);
 
 /* Resume execution of the target process PTID (or a group of
-   threads).  STEP says whether to single-step or to run free; SIGGNAL
-   is the signal to be given to the target, or GDB_SIGNAL_0 for no
+   threads).  STEP says whether to hardware single-step or to run free;
+   SIGGNAL is the signal to be given to the target, or GDB_SIGNAL_0 for no
    signal.  The caller may not pass GDB_SIGNAL_DEFAULT.  A specific
    PTID means `step/resume only this process id'.  A wildcard PTID
    (all threads, or all threads of process) means `step/resume
@@ -1306,6 +1338,13 @@ extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
 
 extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status,
 			   int options);
+
+/* The default target_ops::to_wait implementation.  */
+
+extern ptid_t default_target_wait (struct target_ops *ops,
+				   ptid_t ptid,
+				   struct target_waitstatus *status,
+				   int options);
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
@@ -1557,6 +1596,11 @@ extern void target_load (const char *arg, int from_tty);
 
 int target_follow_fork (int follow_child, int detach_fork);
 
+/* Handle the target-specific bookkeeping required when the inferior
+   makes an exec call.  INF is the exec'd inferior.  */
+
+void target_follow_exec (struct inferior *inf, char *execd_pathname);
+
 /* On some targets, we can catch an inferior exec event when it
    occurs.  These functions insert/remove an already-created
    catchpoint for such events.  They return  0 for success, 1 if the
@@ -1660,6 +1704,20 @@ extern void target_update_thread_list (void);
 
 extern void target_stop (ptid_t ptid);
 
+/* Interrupt the target just like the user typed a ^C on the
+   inferior's controlling terminal.  (For instance, under Unix, this
+   should act like SIGINT).  This function is asynchronous.  */
+
+extern void target_interrupt (ptid_t ptid);
+
+/* Some targets install their own SIGINT handler while the target is
+   running.  This method is called from the QUIT macro to give such
+   targets a chance to process a Ctrl-C.  The target may e.g., choose
+   to interrupt the (potentially) long running operation, or give up
+   waiting and disconnect.  */
+
+extern void target_check_pending_interrupt (void);
+
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is
    placed in OUTBUF.  */
@@ -1733,8 +1791,16 @@ extern int target_async_permitted;
 #define target_is_async_p() (current_target.to_is_async_p (&current_target))
 
 /* Enables/disabled async target events.  */
-#define target_async(ENABLE) \
-     (current_target.to_async (&current_target, (ENABLE)))
+extern void target_async (int enable);
+
+/* Whether support for controlling the target backends always in
+   non-stop mode is enabled.  */
+extern enum auto_boolean target_non_stop_enabled;
+
+/* Is the target in non-stop mode?  Some targets control the inferior
+   in non-stop mode even with "set non-stop off".  Always true if "set
+   non-stop" is on.  */
+extern int target_is_non_stop_p (void);
 
 #define target_execution_direction() \
   (current_target.to_execution_direction (&current_target))
@@ -1861,6 +1927,9 @@ extern char *target_thread_name (struct thread_info *);
 						      addr, len)
 
 
+#define target_can_do_single_step() \
+  (*current_target.to_can_do_single_step) (&current_target)
+
 /* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.
    TYPE is 0 for write, 1 for read, and 2 for read/write accesses.
    COND is the expression for its condition, or NULL if there's none.
@@ -1880,14 +1949,16 @@ extern char *target_thread_name (struct thread_info *);
    or hw_access for an access watchpoint.  Returns 0 for success, 1 if
    masked watchpoints are not supported, -1 for failure.  */
 
-extern int target_insert_mask_watchpoint (CORE_ADDR, CORE_ADDR, int);
+extern int target_insert_mask_watchpoint (CORE_ADDR, CORE_ADDR,
+					  enum target_hw_bp_type);
 
 /* Remove a masked watchpoint at ADDR with the mask MASK.
    RW may be hw_read for a read watchpoint, hw_write for a write watchpoint
    or hw_access for an access watchpoint.  Returns 0 for success, non-zero
    for failure.  */
 
-extern int target_remove_mask_watchpoint (CORE_ADDR, CORE_ADDR, int);
+extern int target_remove_mask_watchpoint (CORE_ADDR, CORE_ADDR,
+					  enum target_hw_bp_type);
 
 /* Insert a hardware breakpoint at address BP_TGT->placed_address in
    the target machine.  Returns 0 for success, and returns non-zero or
@@ -1977,6 +2048,14 @@ extern int target_search_memory (CORE_ADDR start_addr,
 extern int target_fileio_open (struct inferior *inf,
 			       const char *filename, int flags,
 			       int mode, int *target_errno);
+
+/* Like target_fileio_open, but print a warning message if the
+   file is being accessed over a link that may be slow.  */
+extern int target_fileio_open_warn_if_slow (struct inferior *inf,
+					    const char *filename,
+					    int flags,
+					    int mode,
+					    int *target_errno);
 
 /* Write up to LEN bytes from WRITE_BUF to FD on the target.
    Return the number of bytes written, or -1 if an error occurs
@@ -2374,7 +2453,13 @@ extern int target_supports_delete_record (void);
 extern void target_delete_record (void);
 
 /* See to_record_is_replaying in struct target_ops.  */
-extern int target_record_is_replaying (void);
+extern int target_record_is_replaying (ptid_t ptid);
+
+/* See to_record_will_replay in struct target_ops.  */
+extern int target_record_will_replay (ptid_t ptid, int dir);
+
+/* See to_record_stop_replaying in struct target_ops.  */
+extern void target_record_stop_replaying (void);
 
 /* See to_goto_record_begin in struct target_ops.  */
 extern void target_goto_record_begin (void);

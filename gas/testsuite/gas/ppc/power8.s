@@ -144,3 +144,11 @@ power8:
 	fmrgew       22,7,5
 	msgsnd       14
 	msgclr       23
+	lxvx         40,0,5
+	lxvd2x       40,0,5
+	lxvx         10,20,6
+	lxvd2x       10,20,6
+	stxvx        41,0,7
+	stxvd2x      41,0,7
+	stxvx        11,21,8
+	stxvd2x      11,21,8

@@ -174,37 +174,19 @@ struct thread_db_info
 
   /* Pointers to the libthread_db functions.  */
 
-  td_err_e (*td_init_p) (void);
-
-  td_err_e (*td_ta_new_p) (struct ps_prochandle * ps,
-				td_thragent_t **ta);
-  td_err_e (*td_ta_map_lwp2thr_p) (const td_thragent_t *ta,
-				   lwpid_t lwpid, td_thrhandle_t *th);
-  td_err_e (*td_ta_thr_iter_p) (const td_thragent_t *ta,
-				td_thr_iter_f *callback, void *cbdata_p,
-				td_thr_state_e state, int ti_pri,
-				sigset_t *ti_sigmask_p,
-				unsigned int ti_user_flags);
-  td_err_e (*td_ta_event_addr_p) (const td_thragent_t *ta,
-				  td_event_e event, td_notify_t *ptr);
-  td_err_e (*td_ta_set_event_p) (const td_thragent_t *ta,
-				 td_thr_events_t *event);
-  td_err_e (*td_ta_clear_event_p) (const td_thragent_t *ta,
-				   td_thr_events_t *event);
-  td_err_e (*td_ta_event_getmsg_p) (const td_thragent_t *ta,
-				    td_event_msg_t *msg);
-
-  td_err_e (*td_thr_get_info_p) (const td_thrhandle_t *th,
-				 td_thrinfo_t *infop);
-  td_err_e (*td_thr_event_enable_p) (const td_thrhandle_t *th,
-				     int event);
-
-  td_err_e (*td_thr_tls_get_addr_p) (const td_thrhandle_t *th,
-				     psaddr_t map_address,
-				     size_t offset, psaddr_t *address);
-  td_err_e (*td_thr_tlsbase_p) (const td_thrhandle_t *th,
-				unsigned long int modid,
-				psaddr_t *base);
+  td_init_ftype *td_init_p;
+  td_ta_new_ftype *td_ta_new_p;
+  td_ta_map_lwp2thr_ftype *td_ta_map_lwp2thr_p;
+  td_ta_thr_iter_ftype *td_ta_thr_iter_p;
+  td_ta_event_addr_ftype *td_ta_event_addr_p;
+  td_ta_set_event_ftype *td_ta_set_event_p;
+  td_ta_clear_event_ftype *td_ta_clear_event_p;
+  td_ta_event_getmsg_ftype * td_ta_event_getmsg_p;
+  td_thr_validate_ftype *td_thr_validate_p;
+  td_thr_get_info_ftype *td_thr_get_info_p;
+  td_thr_event_enable_ftype *td_thr_event_enable_p;
+  td_thr_tls_get_addr_ftype *td_thr_tls_get_addr_p;
+  td_thr_tlsbase_ftype *td_thr_tlsbase_p;
 };
 
 /* List of known processes using thread_db, and the required
@@ -216,10 +198,9 @@ static void thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new);
 
 static void check_thread_signals (void);
 
-static void record_thread (struct thread_db_info *info,
-			   struct thread_info *tp,
-			   ptid_t ptid, const td_thrhandle_t *th_p,
-			   const td_thrinfo_t *ti_p);
+static struct thread_info *record_thread
+  (struct thread_db_info *info, struct thread_info *tp,
+   ptid_t ptid, const td_thrhandle_t *th_p, const td_thrinfo_t *ti_p);
 
 /* Add the current inferior to the list of processes using libpthread.
    Return a pointer to the newly allocated object that was added to
@@ -229,9 +210,8 @@ static void record_thread (struct thread_db_info *info,
 static struct thread_db_info *
 add_thread_db_info (void *handle)
 {
-  struct thread_db_info *info;
+  struct thread_db_info *info = XCNEW (struct thread_db_info);
 
-  info = xcalloc (1, sizeof (*info));
   info->pid = ptid_get_pid (inferior_ptid);
   info->handle = handle;
 
@@ -405,7 +385,7 @@ have_threads (ptid_t ptid)
 
 /* Fetch the user-level thread id of PTID.  */
 
-static void
+static struct thread_info *
 thread_from_lwp (ptid_t ptid)
 {
   td_thrhandle_t th;
@@ -438,7 +418,7 @@ thread_from_lwp (ptid_t ptid)
 
   /* Fill the cache.  */
   tp = find_thread_ptid (ptid);
-  record_thread (info, tp, ptid, &th, &ti);
+  return record_thread (info, tp, ptid, &th, &ti);
 }
 
 
@@ -476,7 +456,7 @@ verbose_dlsym (void *handle, const char *name)
 }
 
 static td_err_e
-enable_thread_event (int event, CORE_ADDR *bp)
+enable_thread_event (td_event_e event, CORE_ADDR *bp)
 {
   td_notify_t notify;
   td_err_e err;
@@ -677,9 +657,20 @@ try_thread_db_load_1 (struct thread_db_info *info)
   /* Initialize pointers to the dynamic library functions we will use.
      Essential functions first.  */
 
-  info->td_init_p = verbose_dlsym (info->handle, "td_init");
-  if (info->td_init_p == NULL)
-    return 0;
+#define TDB_VERBOSE_DLSYM(info, func)			\
+  info->func ## _p = (func ## _ftype *) verbose_dlsym (info->handle, #func)
+
+#define TDB_DLSYM(info, func)			\
+  info->func ## _p = (func ## _ftype *) dlsym (info->handle, #func)
+
+#define CHK(a)								\
+  do									\
+    {									\
+      if ((a) == NULL)							\
+	return 0;							\
+  } while (0)
+
+  CHK (TDB_VERBOSE_DLSYM (info, td_init));
 
   err = info->td_init_p ();
   if (err != TD_OK)
@@ -689,9 +680,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
       return 0;
     }
 
-  info->td_ta_new_p = verbose_dlsym (info->handle, "td_ta_new");
-  if (info->td_ta_new_p == NULL)
-    return 0;
+  CHK (TDB_VERBOSE_DLSYM (info, td_ta_new));
 
   /* Initialize the structure that identifies the child process.  */
   info->proc_handle.ptid = inferior_ptid;
@@ -720,27 +709,24 @@ try_thread_db_load_1 (struct thread_db_info *info)
       return 0;
     }
 
-  info->td_ta_map_lwp2thr_p = verbose_dlsym (info->handle,
-					     "td_ta_map_lwp2thr");
-  if (info->td_ta_map_lwp2thr_p == NULL)
-    return 0;
-
-  info->td_ta_thr_iter_p = verbose_dlsym (info->handle, "td_ta_thr_iter");
-  if (info->td_ta_thr_iter_p == NULL)
-    return 0;
-
-  info->td_thr_get_info_p = verbose_dlsym (info->handle, "td_thr_get_info");
-  if (info->td_thr_get_info_p == NULL)
-    return 0;
+  /* These are essential.  */
+  CHK (TDB_VERBOSE_DLSYM (info, td_ta_map_lwp2thr));
+  CHK (TDB_VERBOSE_DLSYM (info, td_ta_thr_iter));
+  CHK (TDB_VERBOSE_DLSYM (info, td_thr_validate));
+  CHK (TDB_VERBOSE_DLSYM (info, td_thr_get_info));
 
   /* These are not essential.  */
-  info->td_ta_event_addr_p = dlsym (info->handle, "td_ta_event_addr");
-  info->td_ta_set_event_p = dlsym (info->handle, "td_ta_set_event");
-  info->td_ta_clear_event_p = dlsym (info->handle, "td_ta_clear_event");
-  info->td_ta_event_getmsg_p = dlsym (info->handle, "td_ta_event_getmsg");
-  info->td_thr_event_enable_p = dlsym (info->handle, "td_thr_event_enable");
-  info->td_thr_tls_get_addr_p = dlsym (info->handle, "td_thr_tls_get_addr");
-  info->td_thr_tlsbase_p = dlsym (info->handle, "td_thr_tlsbase");
+  TDB_DLSYM (info, td_ta_event_addr);
+  TDB_DLSYM (info, td_ta_set_event);
+  TDB_DLSYM (info, td_ta_clear_event);
+  TDB_DLSYM (info, td_ta_event_getmsg);
+  TDB_DLSYM (info, td_thr_event_enable);
+  TDB_DLSYM (info, td_thr_tls_get_addr);
+  TDB_DLSYM (info, td_thr_tlsbase);
+
+#undef TDB_VERBOSE_DLSYM
+#undef TDB_DLSYM
+#undef CHK
 
   /* It's best to avoid td_ta_thr_iter if possible.  That walks data
      structures in the inferior's address space that may be corrupted,
@@ -887,6 +873,7 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
   char *path, *cp;
   int result;
   const char *obj_name = objfile_name (obj);
+  int alloc_len;
 
   if (obj_name[0] != '/')
     {
@@ -895,8 +882,10 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
       return 0;
     }
 
-  path = xmalloc (strlen (obj_name) + (subdir ? strlen (subdir) + 1 : 0)
-		  + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  alloc_len = (strlen (obj_name)
+	       + (subdir ? strlen (subdir) + 1 : 0)
+	       + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  path = (char *) xmalloc (alloc_len);
   cleanup = make_cleanup (xfree, path);
 
   strcpy (path, obj_name);
@@ -973,7 +962,7 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
   if (!auto_load_thread_db)
     return 0;
 
-  path = xmalloc (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  path = (char *) xmalloc (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1);
   cleanup = make_cleanup (xfree, path);
 
   memcpy (path, dir, dir_len);
@@ -1018,7 +1007,7 @@ thread_db_load_search (void)
 
 	  if (this_dir[pdir_len] == '/')
 	    {
-	      subdir = xmalloc (strlen (this_dir));
+	      subdir = (char *) xmalloc (strlen (this_dir));
 	      make_cleanup (xfree, subdir);
 	      strcpy (subdir, this_dir + pdir_len + 1);
 	    }
@@ -1300,10 +1289,10 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 }
 
 /* Record a new thread in GDB's thread list.  Creates the thread's
-   private info.  If TP is NULL, creates a new thread.  Otherwise,
-   uses TP.  */
+   private info.  If TP is NULL or TP is marked as having exited,
+   creates a new thread.  Otherwise, uses TP.  */
 
-static void
+static struct thread_info *
 record_thread (struct thread_db_info *info,
 	       struct thread_info *tp,
 	       ptid_t ptid, const td_thrhandle_t *th_p,
@@ -1317,11 +1306,10 @@ record_thread (struct thread_db_info *info,
      initialized yet.  Leave private == NULL until the thread library
      has initialized.  */
   if (ti_p->ti_tid == 0)
-    return;
+    return tp;
 
   /* Construct the thread's private data.  */
-  priv = xmalloc (sizeof (struct private_thread_info));
-  memset (priv, 0, sizeof (struct private_thread_info));
+  priv = XCNEW (struct private_thread_info);
 
   priv->th = *th_p;
   priv->tid = ti_p->ti_tid;
@@ -1347,6 +1335,8 @@ record_thread (struct thread_db_info *info,
 
   if (target_has_execution)
     check_thread_signals ();
+
+  return tp;
 }
 
 static void
@@ -1576,7 +1566,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   td_err_e err;
   ptid_t ptid;
   struct thread_info *tp;
-  struct callback_data *cb_data = data;
+  struct callback_data *cb_data = (struct callback_data *) data;
   struct thread_db_info *info = cb_data->info;
 
   err = info->td_thr_get_info_p (th_p, &ti);
@@ -1595,7 +1585,8 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
       if (libthread_db_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "thread_db: skipping exited and "
-			    "joined thread (0x%lx)\n", ti.ti_tid);
+			    "joined thread (0x%lx)\n",
+			    (unsigned long) ti.ti_tid);
       return 0;
     }
 
@@ -1826,7 +1817,7 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
 
       tid = thread_info->priv->tid;
       snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
-		tid, ptid_get_lwp (ptid));
+		(unsigned long) tid, ptid_get_lwp (ptid));
 
       return buf;
     }
@@ -1863,12 +1854,12 @@ thread_db_get_thread_local_address (struct target_ops *ops,
   struct thread_info *thread_info;
   struct target_ops *beneath;
 
-  /* If we have not discovered any threads yet, check now.  */
-  if (!have_threads (ptid))
-    thread_db_find_new_threads_1 (ptid);
-
   /* Find the matching thread.  */
   thread_info = find_thread_ptid (ptid);
+
+  /* We may not have discovered the thread yet.  */
+  if (thread_info != NULL && thread_info->priv == NULL)
+    thread_info = thread_from_lwp (ptid);
 
   if (thread_info != NULL && thread_info->priv != NULL)
     {
@@ -2010,7 +2001,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
     if (info->filename != NULL)
       info_count++;
 
-  array = xmalloc (sizeof (*array) * info_count);
+  array = XNEWVEC (struct thread_db_info *, info_count);
   back_to = make_cleanup (xfree, array);
 
   info_count = 0;
@@ -2072,7 +2063,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   ui_out_table_header (uiout, pids_len, ui_left, "PIDs", "Pids");
   ui_out_table_body (uiout);
 
-  pids = xmalloc (max_pids_len + 1);
+  pids = (char *) xmalloc (max_pids_len + 1);
   make_cleanup (xfree, pids);
 
   /* Note I is incremented inside the cycle, not at its end.  */

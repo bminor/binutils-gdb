@@ -1,3 +1,12 @@
+2015-11-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-cr16.h (sim_cr16_translate_dmap_addr): Delete.
+	(sim_cr16_translate_imap_addr): Likewise.
+	(sim_cr16_translate_addr): Likewise.
+	* sim-d10v.h (sim_d10v_translate_dmap_addr): Delete.
+	(sim_d10v_translate_imap_addr): Likewise.
+	(sim_d10v_translate_addr): Likewise.
+
 2015-06-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* callback.h (CB_TARGET_DEFS_MAP): Add name member.
@@ -58,7 +67,7 @@
 
 	PR gdb/7205
 
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
@@ -122,7 +131,7 @@
 
 2009-05-18  Jon Beniston <jon@beniston.com>
 
-        * sim-lm32.h: New file.
+	* sim-lm32.h: New file.
 
 2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
 
@@ -289,7 +298,7 @@ Wed Jul 17 19:36:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
-        * sim-sh.h: New file, for sh gdb<->sim interface.
+	* sim-sh.h: New file, for sh gdb<->sim interface.
 
 2002-05-09  Daniel Jacobowitz  <drow@mvista.com>
 

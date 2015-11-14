@@ -69,6 +69,8 @@
 
    */
 
+#include "language.h"
+
 struct symtab_and_line;
 struct frame_unwind;
 struct frame_base;
@@ -763,8 +765,6 @@ extern void args_info (char *, int);
 
 extern void locals_info (char *, int);
 
-extern void (*deprecated_selected_frame_level_changed_hook) (int);
-
 extern void return_command (char *, int);
 
 /* Set FRAME's unwinder temporarily, so that we can call a sniffer.
@@ -815,5 +815,10 @@ extern struct frame_info *create_new_frame (CORE_ADDR base, CORE_ADDR pc);
 
 extern int frame_unwinder_is (struct frame_info *fi,
 			      const struct frame_unwind *unwinder);
+
+/* Return the language of FRAME.  */
+
+extern enum language get_frame_language (struct frame_info *frame);
+
 
 #endif /* !defined (FRAME_H)  */

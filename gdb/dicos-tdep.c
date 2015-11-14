@@ -90,7 +90,7 @@ dicos_load_module_p (bfd *abfd, int header_size)
     {
       long i, symcount;
 
-      symbol_table = xmalloc (storage_needed);
+      symbol_table = (asymbol **) xmalloc (storage_needed);
       symcount = bfd_canonicalize_symtab (abfd, symbol_table);
 
       if (symcount < 0)

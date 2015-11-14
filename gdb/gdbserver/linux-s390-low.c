@@ -24,7 +24,7 @@
 #include "elf/common.h"
 
 #include <asm/ptrace.h>
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/uio.h>
 #include <elf.h>
 
@@ -390,12 +390,21 @@ static struct regset_info s390_regsets[] = {
     EXTENDED_REGS, s390_fill_vxrs_low, s390_store_vxrs_low },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_S390_VXRS_HIGH, 0,
     EXTENDED_REGS, s390_fill_vxrs_high, s390_store_vxrs_high },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 
-static const unsigned char s390_breakpoint[] = { 0, 1 };
+static const gdb_byte s390_breakpoint[] = { 0, 1 };
 #define s390_breakpoint_len 2
+
+/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+
+static const gdb_byte *
+s390_sw_breakpoint_from_kind (int kind, int *size)
+{
+  *size = s390_breakpoint_len;
+  return s390_breakpoint;
+}
 
 static CORE_ADDR
 s390_get_pc (struct regcache *regcache)
@@ -665,8 +674,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* fetch_register */
   s390_get_pc,
   s390_set_pc,
-  s390_breakpoint,
-  s390_breakpoint_len,
+  NULL, /* breakpoint_kind_from_pc */
+  s390_sw_breakpoint_from_kind,
   NULL,
   s390_breakpoint_len,
   s390_breakpoint_at,

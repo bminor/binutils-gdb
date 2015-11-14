@@ -6,12 +6,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING3.  If not see
 # <http://www.gnu.org/licenses/>.
@@ -93,6 +93,7 @@ case "${targ_cpu}" in
 aarch64*)	 targ_archs="bfd_aarch64_arch bfd_arm_arch";;
 alpha*)		 targ_archs=bfd_alpha_arch ;;
 am34*|am33_2.0*) targ_archs=bfd_mn10300_arch ;;
+arc*)		 targ_archs=bfd_arc_arch ;;
 arm*)		 targ_archs=bfd_arm_arch ;;
 bfin*)		 targ_archs=bfd_bfin_arch ;;
 c30*)		 targ_archs=bfd_tic30_arch ;;
@@ -183,6 +184,11 @@ case "${targ}" in
     targ_selvecs="aarch64_elf64_be_vec arm_elf32_le_vec arm_elf32_be_vec"
     want64=true
     ;;
+  aarch64-*-cloudabi*)
+    targ_defvec=aarch64_elf64_le_cloudabi_vec
+    targ_selvecs=aarch64_elf64_be_cloudabi_vec
+    want64=true
+    ;;
   aarch64-*-linux*)
     targ_defvec=aarch64_elf64_le_vec
     targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec"
@@ -262,7 +268,7 @@ case "${targ}" in
     targ_defvec=am33_elf32_linux_vec
     ;;
 
-  arc-*-elf*)
+  arc*-*-elf* | arc*-*-linux-uclibc*)
     targ_defvec=arc_elf32_le_vec
     targ_selvecs=arc_elf32_be_vec
     ;;
@@ -535,14 +541,14 @@ case "${targ}" in
     ;;
   i[3-7]86-*-solaris2*)
     targ_defvec=i386_elf32_sol2_vec
-    targ_selvecs="i386_coff_vec"
-    targ64_selvecs="x86_64_elf64_sol2_vec l1om_elf64_vec k1om_elf64_vec"
+    targ_selvecs="iamcu_elf32_vec i386_coff_vec i386_pei_vec"
+    targ64_selvecs="x86_64_elf64_sol2_vec l1om_elf64_vec k1om_elf64_vec x86_64_pei_vec"
     want64=true
     ;;
 #ifdef BFD64
   x86_64-*-solaris2*)
     targ_defvec=i386_elf32_sol2_vec
-    targ_selvecs="x86_64_elf64_sol2_vec l1om_elf64_vec k1om_elf64_vec i386_coff_vec"
+    targ_selvecs="x86_64_elf64_sol2_vec l1om_elf64_vec k1om_elf64_vec iamcu_elf32_vec i386_coff_vec i386_pei_vec x86_64_pei_vec"
     want64=true
     ;;
 #endif
@@ -1389,6 +1395,7 @@ case "${targ}" in
   sh-*-linux*)
     targ_defvec=sh_elf32_linux_be_vec
     targ_selvecs="sh_elf32_linux_vec sh64_elf32_linux_vec sh64_elf32_linux_be_vec sh64_elf64_linux_vec sh64_elf64_linux_be_vec"
+    targ_selvecs="${targ_selvecs} sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
     want64=true
     ;;
 #endif /* BFD64 */
@@ -1396,10 +1403,12 @@ case "${targ}" in
   sh*eb-*-linux*)
     targ_defvec=sh_elf32_linux_be_vec
     targ_selvecs=sh_elf32_linux_vec
+    targ_selvecs="${targ_selvecs} sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
     ;;
   sh*-*-linux*)
     targ_defvec=sh_elf32_linux_vec
     targ_selvecs=sh_elf32_linux_be_vec
+    targ_selvecs="${targ_selvecs} sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
     ;;
 
   sh-*-uclinux* | sh[12]-*-uclinux*)
@@ -1683,7 +1692,7 @@ case "${targ}" in
   visium-*-elf)
     targ_defvec=visium_elf32_vec
     ;;
- 
+
   we32k-*-*)
     targ_defvec=we32k_coff_vec
     ;;
@@ -1691,12 +1700,12 @@ case "${targ}" in
   w65-*-*)
     targ_defvec=w65_coff_vec
     ;;
-    
+
   xgate-*-*)
     targ_defvec=xgate_elf32_vec
     targ_selvecs="xgate_elf32_vec"
     ;;
- 	
+
   xstormy16-*-elf)
     targ_defvec=xstormy16_elf32_vec
     ;;

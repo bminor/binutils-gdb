@@ -46,10 +46,17 @@ set aarch64elftests {
 }
 
 proc aarch64_choose_ilp32_emul {} {
-    if [istarget aarch64_be*-*-*] then {
+    if [istarget aarch64-*-linux*] then {
+        return "aarch64linux32"
+    } elseif [istarget aarch64-*-elf] {
+        return "aarch64elf32"
+    } elseif [istarget aarch64_be-*-linux*] {
+        return "aarch64linux32b"
+    } elseif [istarget aarch64_be-*-elf] {
         return "aarch64elf32b"
     } else {
-        return "aarch64linux32"
+      perror "Unknown target triple."
+      exit 1
     }
 }
 
@@ -59,6 +66,15 @@ run_dump_test "erratum843419"
 # Relocation Tests
 run_dump_test "weak-undefined"
 run_dump_test "emit-relocs-28"
+run_dump_test "emit-relocs-86"
+run_dump_test "emit-relocs-86-overflow"
+run_dump_test "emit-relocs-87"
+run_dump_test "emit-relocs-88"
+run_dump_test "emit-relocs-88-overflow"
+run_dump_test "emit-relocs-89"
+run_dump_test "emit-relocs-90"
+run_dump_test "emit-relocs-90-overflow"
+run_dump_test "emit-relocs-92"
 run_dump_test "emit-relocs-257"
 run_dump_test "emit-relocs-257-be"
 # 258 is tested in 257
@@ -100,15 +116,48 @@ run_dump_test "emit-relocs-286"
 run_dump_test "emit-relocs-286-bad"
 # 287-298 are not done yet
 run_dump_test "emit-relocs-299"
-# 300-308 are not done yet
+# 300 is not done yet
+run_dump_test "emit-relocs-301"
+run_dump_test "emit-relocs-301-be"
+run_dump_test "emit-relocs-302"
+run_dump_test "emit-relocs-302-be"
+# 303-308 are not done yet
 run_dump_test "emit-relocs-309-up"
 run_dump_test "emit-relocs-309-low"
 run_dump_test "emit-relocs-309-up-bad"
 run_dump_test "emit-relocs-309-low-bad"
-# 310 not done yet
+run_dump_test "emit-relocs-310"
+run_dump_test "emit-relocs-310-be"
 run_dump_test "emit-relocs-311"
 run_dump_test "emit-relocs-312"
 run_dump_test "emit-relocs-313"
+run_dump_test "emit-relocs-515"
+run_dump_test "emit-relocs-515-be"
+run_dump_test "emit-relocs-516"
+run_dump_test "emit-relocs-516-be"
+run_dump_test "emit-relocs-523"
+run_dump_test "emit-relocs-524"
+run_dump_test "emit-relocs-525"
+run_dump_test "emit-relocs-526"
+run_dump_test "emit-relocs-526-overflow"
+run_dump_test "emit-relocs-527"
+run_dump_test "emit-relocs-528"
+run_dump_test "emit-relocs-528-overflow"
+run_dump_test "emit-relocs-529"
+run_dump_test "emit-relocs-529-overflow"
+run_dump_test "emit-relocs-530"
+run_dump_test "emit-relocs-531"
+run_dump_test "emit-relocs-531-overflow"
+run_dump_test "emit-relocs-532"
+run_dump_test "emit-relocs-533"
+run_dump_test "emit-relocs-533-overflow"
+run_dump_test "emit-relocs-534"
+run_dump_test "emit-relocs-535"
+run_dump_test "emit-relocs-535-overflow"
+run_dump_test "emit-relocs-536"
+run_dump_test "emit-relocs-537"
+run_dump_test "emit-relocs-537-overflow"
+run_dump_test "emit-relocs-538"
 
 # test addend correctness when --emit-relocs specified for non-relocatable obj.
 run_dump_test "emit-relocs-local-addend"
@@ -123,6 +172,11 @@ run_dump_test "limit-b"
 run_dump_test "limit-bl"
 run_dump_test "farcall-section"
 run_dump_test "farcall-back"
+run_dump_test "farcall-b-defsym"
+run_dump_test "farcall-bl-defsym"
+run_dump_test "farcall-b-gsym"
+run_dump_test "farcall-b-plt"
+run_dump_test "farcall-bl-plt"
 run_dump_test "farcall-bl"
 run_dump_test "farcall-b"
 run_dump_test "farcall-b-none-function"
@@ -132,8 +186,18 @@ run_dump_test "tls-relax-all"
 run_dump_test "tls-relax-gd-le"
 run_dump_test "tls-relax-gdesc-le"
 run_dump_test "tls-relax-gd-ie"
+run_dump_test "tls-relax-large-gd-ie"
+run_dump_test "tls-relax-large-gd-ie-be"
+run_dump_test "tls-relax-large-gd-le"
+run_dump_test "tls-relax-large-gd-le-be"
+run_dump_test "tls-relax-large-desc-ie"
+run_dump_test "tls-relax-large-desc-ie-be"
+run_dump_test "tls-relax-large-desc-le"
+run_dump_test "tls-relax-large-desc-le-be"
 run_dump_test "tls-relax-gdesc-ie"
 run_dump_test "tls-relax-ie-le"
+run_dump_test "tls-relax-ld-le-small"
+run_dump_test "tls-relax-ld-le-tiny"
 run_dump_test "tls-desc-ie"
 run_dump_test "tls-relax-gdesc-ie-2"
 run_dump_test "tls-relax-gdesc-le-2"
@@ -146,6 +210,12 @@ run_dump_test "tls-tiny-desc"
 run_dump_test "tls-tiny-desc-ie"
 run_dump_test "tls-tiny-desc-le"
 run_dump_test "tls-tiny-ie"
+run_dump_test "tls-large-ie"
+run_dump_test "tls-large-ie-be"
+run_dump_test "tls-large-desc"
+run_dump_test "tls-large-desc-be"
+run_dump_test "tls-tiny-ld"
+run_dump_test "tls-small-ld"
 run_dump_test "tlsle"
 run_dump_test "tlsle-symbol-offset"
 run_dump_test "gc-got-relocs"
@@ -156,6 +226,7 @@ run_dump_test "gc-relocs-257"
 run_dump_test "pr17415"
 run_dump_test "tprel_g2_overflow"
 run_dump_test "tprel_add_lo12_overflow"
+run_dump_test "protected-data"
 
 # ifunc tests
 run_dump_test "ifunc-1"
@@ -201,9 +272,11 @@ run_dump_test "ifunc-21"
 run_dump_test "ifunc-22"
 
 run_dump_test "relasz"
-run_dump_test "relocs-257-symbolic-func"
+run_dump_test "relocs-1027-symbolic-func"
 
 run_dump_test "dt_textrel"
+
+run_dump_test "plt_mapping_symbol"
 
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}

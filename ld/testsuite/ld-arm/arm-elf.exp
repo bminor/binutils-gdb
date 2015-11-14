@@ -159,6 +159,22 @@ set armelftests_common {
      "-EL --vfp11-denorm-fix=scalar -Ttext=0x8000" "" "-EL -mfpu=vfpxd" {vfp11-fix-none.s}
      {{objdump -dr vfp11-fix-none.d}}
      "vfp11-fix-none"}
+    {"STM32L4XX erratum fix LDM"
+     "-EL --fix-stm32l4xx-629360 -Ttext=0x8000" "" "-EL -mcpu=cortex-m4 -mfpu=fpv4-sp-d16" {stm32l4xx-fix-ldm.s}
+     {{objdump -dr stm32l4xx-fix-ldm.d}}
+     "stm32l4xx-fix-ldm"}
+    {"STM32L4XX erratum fix VLDM"
+     "-EL --fix-stm32l4xx-629360 -Ttext=0x8000" "" "-EL -mcpu=cortex-m4 -mfpu=fpv4-sp-d16" {stm32l4xx-fix-vldm.s}
+     {{objdump -dr stm32l4xx-fix-vldm.d}}
+     "stm32l4xx-fix-vldm"}
+    {"STM32L4XX erratum fix ALL"
+     "-EL --fix-stm32l4xx-629360=all -Ttext=0x8000" "" "-EL -mcpu=cortex-m4 -mfpu=fpv4-sp-d16" {stm32l4xx-fix-all.s}
+     {{objdump -dr stm32l4xx-fix-all.d}}
+     "stm32l4xx-fix-vldm-all"}
+    {"STM32L4XX erratum fix in IT context"
+     "-EL --fix-stm32l4xx-629360 -Ttext=0x8000" "" "-EL -mcpu=cortex-m4 -mfpu=fpv4-sp-d16" {stm32l4xx-fix-it-block.s}
+     {{objdump -dr stm32l4xx-fix-it-block.d}}
+     "stm32l4xx-fix-it-block"}
     {"Unwinding and -gc-sections" "-gc-sections" "" "" {gc-unwind.s}
      {{objdump -sj.data gc-unwind.d}}
      "gc-unwind"}
@@ -904,3 +920,6 @@ if { ![istarget "arm*-*-nacl*"] } {
 }
 run_dump_test "unresolved-2"
 run_dump_test "gc-hidden-1"
+run_dump_test "protected-data"
+run_dump_test "stm32l4xx-cannot-fix-it-block"
+run_dump_test "stm32l4xx-cannot-fix-far-ldm"

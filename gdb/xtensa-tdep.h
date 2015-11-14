@@ -18,6 +18,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include "arch/xtensa.h"
+
 /* XTENSA_TDEP_VERSION can/should be changed along with XTENSA_CONFIG_VERSION
    whenever the "tdep" structure changes in an incompatible way.  */
 
@@ -81,28 +83,6 @@ typedef enum
 } xtensa_target_flags_t;
 
 
-/* Xtensa ELF core file register set representation ('.reg' section).
-   Copied from target-side ELF header <xtensa/elf.h>.  */
-
-typedef uint32_t xtensa_elf_greg_t;
-
-typedef struct
-{
-  xtensa_elf_greg_t pc;
-  xtensa_elf_greg_t ps;
-  xtensa_elf_greg_t lbeg;
-  xtensa_elf_greg_t lend;
-  xtensa_elf_greg_t lcount;
-  xtensa_elf_greg_t sar;
-  xtensa_elf_greg_t windowstart;
-  xtensa_elf_greg_t windowbase;
-  xtensa_elf_greg_t reserved[8+48];
-  xtensa_elf_greg_t ar[64];
-} xtensa_elf_gregset_t;
-
-#define XTENSA_ELF_NGREG (sizeof (xtensa_elf_gregset_t) \
-			  / sizeof (xtensa_elf_greg_t))
-
 /*  Mask.  */
 
 typedef struct 
@@ -144,9 +124,13 @@ typedef struct
 
 /*  For xtensa-config.c to expand to the structure above.  */
 #define XTREG(index,ofs,bsz,sz,al,tnum,flg,cp,ty,gr,name,fet,sto,mas,ct,x,y) \
-	{#name, ofs, ty, ((gr) | ((xtRegisterGroupNCP >> 2) << (cp + 2))), \
+       {#name, ofs, (xtensa_register_type_t) (ty), \
+	((xtensa_register_group_t) \
+	 ((gr) | ((xtRegisterGroupNCP >> 2) << (cp + 2)))), \
 	 ct, bsz, sz, al, tnum, flg, cp, mas, fet, sto},
-#define XTREG_END {0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0},
+#define XTREG_END \
+  {0, 0, (xtensa_register_type_t) 0, (xtensa_register_group_t) 0,	\
+   0, 0, 0, 0, -1, 0, 0, 0, 0, 0},
 
 #define XTENSA_REGISTER_FLAGS_PRIVILEGED	0x0001
 #define XTENSA_REGISTER_FLAGS_READABLE		0x0002
@@ -246,7 +230,9 @@ struct gdbarch_tdep
 	  .spill_location = -1,					\
 	  .spill_size = (spillsz),				\
 	  .unused = 0,						\
-	  .call_abi = 0,					\
+	  .call_abi = (XSHAL_ABI == XTHAL_ABI_CALL0		\
+		       ? CallAbiCall0Only			\
+		       : CallAbiDefault),			\
 	  .debug_interrupt_level = XCHAL_DEBUGLEVEL,		\
 	  .icache_line_bytes = XCHAL_ICACHE_LINESIZE,		\
 	  .dcache_line_bytes = XCHAL_DCACHE_LINESIZE,		\

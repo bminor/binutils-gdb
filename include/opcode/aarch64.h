@@ -27,6 +27,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* The offset for pc-relative addressing is currently defined to be 0.  */
 #define AARCH64_PCREL_OFFSET		0
 
@@ -648,7 +652,7 @@ extern bfd_boolean aarch64_pstatefield_supported_p (const aarch64_feature_set,
 
 typedef struct
 {
-  const char *template;
+  const char *name;
   uint32_t value;
   int has_xt;
 } aarch64_sys_ins_reg;
@@ -922,8 +926,11 @@ aarch64_num_of_operands (const aarch64_opcode *);
 extern int
 aarch64_stack_pointer_p (const aarch64_opnd_info *);
 
-extern
-int aarch64_zero_register_p (const aarch64_opnd_info *);
+extern int
+aarch64_zero_register_p (const aarch64_opnd_info *);
+
+extern int
+aarch64_decode_insn (aarch64_insn, aarch64_inst *, bfd_boolean);
 
 /* Given an operand qualifier, return the expected data element size
    of a qualified operand.  */
@@ -960,5 +967,9 @@ aarch64_verbose (const char *, ...) __attribute__ ((format (printf, 1, 2)));
 #define DEBUG_TRACE(M, ...) ;
 #define DEBUG_TRACE_IF(C, M, ...) ;
 #endif /* DEBUG_AARCH64 */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OPCODE_AARCH64_H */

@@ -262,22 +262,30 @@ struct flag_info
 struct bfd_elf_dynamic_list;
 struct bfd_elf_version_tree;
 
+/* Types of output.  */
+
+enum output_type
+{
+  type_pde,
+  type_pie,
+  type_relocatable,
+  type_dll,
+};
+
+#define bfd_link_pde(info)	   ((info)->type == type_pde)
+#define bfd_link_dll(info)	   ((info)->type == type_dll)
+#define bfd_link_relocatable(info) ((info)->type == type_relocatable)
+#define bfd_link_pie(info)	   ((info)->type == type_pie)
+#define bfd_link_executable(info)  (bfd_link_pde (info) || bfd_link_pie (info))
+#define bfd_link_pic(info)	   (bfd_link_dll (info) || bfd_link_pie (info))
+
 /* This structure holds all the information needed to communicate
    between BFD and the linker when doing a link.  */
 
 struct bfd_link_info
 {
-  /* TRUE if BFD should generate a shared object (or a pie).  */
-  unsigned int shared: 1;
-
-  /* TRUE if generating an executable, position independent or not.  */
-  unsigned int executable : 1;
-
-  /* TRUE if generating a position independent executable.  */
-  unsigned int pie: 1;
-
-  /* TRUE if BFD should generate a relocatable object file.  */
-  unsigned int relocatable: 1;
+  /* Output type.  */
+  ENUM_BITFIELD (output_type) type : 2;
 
   /* TRUE if BFD should pre-bind symbols in a shared object.  */
   unsigned int symbolic: 1;
@@ -437,6 +445,15 @@ struct bfd_link_info
 
   /* TRUE if BND prefix in PLT entries is always generated.  */
   unsigned int bndplt: 1;
+
+  /* TRUE if generation of .interp/PT_INTERP should be suppressed.  */
+  unsigned int nointerp: 1;
+
+  /* TRUE if generate a 1-byte NOP as suffix for x86 call instruction.  */
+  unsigned int call_nop_as_suffix : 1;
+
+  /* The 1-byte NOP for x86 call instruction.  */
+  char call_nop_byte;
 
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in

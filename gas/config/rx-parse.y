@@ -889,7 +889,7 @@ float2_op
 	;
 
 float2_op_ni
-	: { rx_check_float_support (); } 
+	: { rx_check_float_support (); }
 	  REG ',' REG
 	  { id24 (1, 0x83 + (sub_op << 2), 0); F ($2, 16, 4); F ($4, 20, 4); }
 	| { rx_check_float_support (); }
@@ -1405,13 +1405,13 @@ rx_disp5op (expressionS * exp, int msize)
   switch (msize)
     {
     case BSIZE:
-      if (0 < v && v <= 31)
+      if (0 <= v && v <= 31)
 	return 1;
       break;
     case WSIZE:
       if (v & 1)
 	return 0;
-      if (0 < v && v <= 63)
+      if (0 <= v && v <= 63)
 	{
 	  exp->X_add_number >>= 1;
 	  return 1;
@@ -1420,7 +1420,7 @@ rx_disp5op (expressionS * exp, int msize)
     case LSIZE:
       if (v & 3)
 	return 0;
-      if (0 < v && v <= 127)
+      if (0 <= v && v <= 127)
 	{
 	  exp->X_add_number >>= 2;
 	  return 1;

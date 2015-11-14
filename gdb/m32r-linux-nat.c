@@ -23,7 +23,7 @@
 #include "regcache.h"
 #include "linux-nat.h"
 #include "target.h"
-#include <sys/ptrace.h>
+#include "nat/gdb_ptrace.h"
 #include <sys/user.h>
 #include <sys/procfs.h>
 

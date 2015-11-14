@@ -24,7 +24,7 @@
 #include "terminal.h"
 #include "gdbcore.h"
 #include "regcache.h"
-#include "gdb_ptrace.h"
+#include "nat/gdb_ptrace.h"
 #include "gdb_wait.h"
 #include <signal.h>
 
@@ -288,10 +288,10 @@ inf_ptrace_kill (struct target_ops *ops)
   target_mourn_inferior ();
 }
 
-/* Stop the inferior.  */
+/* Interrupt the inferior.  */
 
 static void
-inf_ptrace_stop (struct target_ops *self, ptid_t ptid)
+inf_ptrace_interrupt (struct target_ops *self, ptid_t ptid)
 {
   /* Send a SIGINT to the process group.  This acts just like the user
      typed a ^C on the controlling terminal.  Note that using a
@@ -686,7 +686,7 @@ inf_ptrace_target (void)
   t->to_mourn_inferior = inf_ptrace_mourn_inferior;
   t->to_thread_alive = inf_ptrace_thread_alive;
   t->to_pid_to_str = inf_ptrace_pid_to_str;
-  t->to_stop = inf_ptrace_stop;
+  t->to_interrupt = inf_ptrace_interrupt;
   t->to_xfer_partial = inf_ptrace_xfer_partial;
 #if defined (PT_IO) && defined (PIOD_READ_AUXV)
   t->to_auxv_parse = inf_ptrace_auxv_parse;
@@ -728,7 +728,7 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
 
   size = register_size (gdbarch, regnum);
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
-  buf = alloca (size);
+  buf = (PTRACE_TYPE_RET *) alloca (size);
 
   /* Read the register contents from the inferior a chunk at a time.  */
   for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
@@ -786,7 +786,7 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
 
   size = register_size (gdbarch, regnum);
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
-  buf = alloca (size);
+  buf = (PTRACE_TYPE_RET *) alloca (size);
 
   /* Write the register contents into the inferior a chunk at a time.  */
   regcache_raw_collect (regcache, regnum, buf);

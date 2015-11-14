@@ -94,6 +94,10 @@ enum
   R_X86_64_RELATIVE64 = 38,      // 64-bit adjust by program base
   R_X86_64_PC32_BND = 39,  // PC relative 32 bit signed with BND prefix
   R_X86_64_PLT32_BND = 40, // 32 bit PLT address with BND prefix
+  R_X86_64_GOTPCRELX = 41, // 32 bit signed PC relative offset to GOT
+			   // without REX prefix, relaxable.
+  R_X86_64_REX_GOTPCRELX = 42, // 32 bit signed PC relative offset to GOT
+			       // with REX prefix, relaxable.
   // GNU vtable garbage collection extensions.
   R_X86_64_GNU_VTINHERIT = 250,
   R_X86_64_GNU_VTENTRY = 251

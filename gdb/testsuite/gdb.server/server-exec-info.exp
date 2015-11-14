@@ -27,6 +27,10 @@ if [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] {
     return -1
 }
 
+# Make sure we're disconnected, in case we're testing with an
+# extended-remote board, therefore already connected.
+gdb_test "disconnect" ".*"
+
 gdb_test_no_output "set remote pid-to-exec-file-packet off"
 gdb_test "file" ".*" "file" \
 	 {Discard symbol table from `.*'\? \(y or n\) } "y"

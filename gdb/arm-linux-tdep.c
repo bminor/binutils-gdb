@@ -506,7 +506,7 @@ arm_linux_supply_gregset (const struct regset *regset,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  const gdb_byte *gregs = gregs_buf;
+  const gdb_byte *gregs = (const gdb_byte *) gregs_buf;
   int regno;
   CORE_ADDR reg_pc;
   gdb_byte pc_buf[INT_REGISTER_SIZE];
@@ -542,7 +542,7 @@ arm_linux_collect_gregset (const struct regset *regset,
 			   const struct regcache *regcache,
 			   int regnum, void *gregs_buf, size_t len)
 {
-  gdb_byte *gregs = gregs_buf;
+  gdb_byte *gregs = (gdb_byte *) gregs_buf;
   int regno;
 
   for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
@@ -649,7 +649,7 @@ arm_linux_supply_nwfpe (const struct regset *regset,
 			struct regcache *regcache,
 			int regnum, const void *regs_buf, size_t len)
 {
-  const gdb_byte *regs = regs_buf;
+  const gdb_byte *regs = (const gdb_byte *) regs_buf;
   int regno;
 
   if (regnum == ARM_FPS_REGNUM || regnum == -1)
@@ -666,7 +666,7 @@ arm_linux_collect_nwfpe (const struct regset *regset,
 			 const struct regcache *regcache,
 			 int regnum, void *regs_buf, size_t len)
 {
-  gdb_byte *regs = regs_buf;
+  gdb_byte *regs = (gdb_byte *) regs_buf;
   int regno;
 
   for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
@@ -687,7 +687,7 @@ arm_linux_supply_vfp (const struct regset *regset,
 		      struct regcache *regcache,
 		      int regnum, const void *regs_buf, size_t len)
 {
-  const gdb_byte *regs = regs_buf;
+  const gdb_byte *regs = (const gdb_byte *) regs_buf;
   int regno;
 
   if (regnum == ARM_FPSCR_REGNUM || regnum == -1)
@@ -704,7 +704,7 @@ arm_linux_collect_vfp (const struct regset *regset,
 			 const struct regcache *regcache,
 			 int regnum, void *regs_buf, size_t len)
 {
-  gdb_byte *regs = regs_buf;
+  gdb_byte *regs = (gdb_byte *) regs_buf;
   int regno;
 
   if (regnum == ARM_FPSCR_REGNUM || regnum == -1)
@@ -917,6 +917,11 @@ arm_linux_software_single_step (struct frame_info *frame)
   if (arm_deal_with_atomic_sequence (frame))
     return 1;
 
+  /* If the target does have hardware single step, GDB doesn't have
+     to bother software single step.  */
+  if (target_can_do_single_step () == 1)
+    return 0;
+
   next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
 
   /* The Linux kernel offers some user-mode helpers in a high page.  We can
@@ -1100,8 +1105,7 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				    CORE_ADDR from, CORE_ADDR to,
 				    struct regcache *regs)
 {
-  struct displaced_step_closure *dsc
-    = xmalloc (sizeof (struct displaced_step_closure));
+  struct displaced_step_closure *dsc = XNEW (struct displaced_step_closure);
 
   /* Detect when we enter an (inaccessible by GDB) Linux kernel helper, and
      stop at the return location.  */
@@ -1175,7 +1179,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 	return 0;
 
       len = tmp - start;
-      regname = alloca (len + 2);
+      regname = (char *) alloca (len + 2);
 
       offset = 0;
       if (isdigit (*start))
@@ -1261,13 +1265,13 @@ arm_canonicalize_syscall (int syscall)
   enum { sys_process_vm_writev = 377 };
 
   if (syscall <= gdb_sys_sched_getaffinity)
-    return syscall;
+    return (enum gdb_syscall) syscall;
   else if (syscall >= 243 && syscall <= 247)
-    return syscall + 2;
+    return (enum gdb_syscall) (syscall + 2);
   else if (syscall >= 248 && syscall <= 253)
-    return syscall + 4;
+    return (enum gdb_syscall) (syscall + 4);
 
-  return -1;
+  return gdb_sys_no_syscall;
 }
 
 /* Record all registers but PC register for process-record.  */
@@ -1299,7 +1303,7 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
 
   syscall_gdb = arm_canonicalize_syscall (svc_number);
 
-  if (syscall_gdb < 0)
+  if (syscall_gdb == gdb_sys_no_syscall)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
                            "support syscall number %s\n"),
@@ -1483,8 +1487,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_flock = 16;
   arm_linux_record_tdep.size_oldold_utsname = 45;
   arm_linux_record_tdep.size_ustat = 20;
-  arm_linux_record_tdep.size_old_sigaction = 140;
-  arm_linux_record_tdep.size_old_sigset_t = 128;
+  arm_linux_record_tdep.size_old_sigaction = 16;
+  arm_linux_record_tdep.size_old_sigset_t = 4;
   arm_linux_record_tdep.size_rlimit = 8;
   arm_linux_record_tdep.size_rusage = 72;
   arm_linux_record_tdep.size_timeval = 8;
@@ -1492,8 +1496,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_old_gid_t = 2;
   arm_linux_record_tdep.size_old_uid_t = 2;
   arm_linux_record_tdep.size_fd_set = 128;
-  arm_linux_record_tdep.size_dirent = 268;
-  arm_linux_record_tdep.size_dirent64 = 276;
+  arm_linux_record_tdep.size_old_dirent = 268;
   arm_linux_record_tdep.size_statfs = 64;
   arm_linux_record_tdep.size_statfs64 = 84;
   arm_linux_record_tdep.size_sockaddr = 16;
@@ -1520,15 +1523,15 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_NFS_FHSIZE = 32;
   arm_linux_record_tdep.size_knfsd_fh = 132;
   arm_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  arm_linux_record_tdep.size_sigaction = 140;
+  arm_linux_record_tdep.size_sigaction = 20;
   arm_linux_record_tdep.size_sigset_t = 8;
   arm_linux_record_tdep.size_siginfo_t = 128;
   arm_linux_record_tdep.size_cap_user_data_t = 12;
   arm_linux_record_tdep.size_stack_t = 12;
   arm_linux_record_tdep.size_off_t = arm_linux_record_tdep.size_long;
   arm_linux_record_tdep.size_stat64 = 96;
-  arm_linux_record_tdep.size_gid_t = 2;
-  arm_linux_record_tdep.size_uid_t = 2;
+  arm_linux_record_tdep.size_gid_t = 4;
+  arm_linux_record_tdep.size_uid_t = 4;
   arm_linux_record_tdep.size_PAGE_SIZE = 4096;
   arm_linux_record_tdep.size_flock64 = 24;
   arm_linux_record_tdep.size_user_desc = 16;
@@ -1538,7 +1541,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_itimerspec
     = arm_linux_record_tdep.size_timespec * 2;
   arm_linux_record_tdep.size_mq_attr = 32;
-  arm_linux_record_tdep.size_siginfo = 128;
   arm_linux_record_tdep.size_termios = 36;
   arm_linux_record_tdep.size_termios2 = 44;
   arm_linux_record_tdep.size_pid_t = 4;
@@ -1548,6 +1550,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_hayes_esp_config = 12;
   arm_linux_record_tdep.size_size_t = 4;
   arm_linux_record_tdep.size_iovec = 8;
+  arm_linux_record_tdep.size_time_t = 4;
 
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.  */

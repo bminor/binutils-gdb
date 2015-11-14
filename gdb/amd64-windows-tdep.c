@@ -158,7 +158,7 @@ amd64_windows_push_arguments (struct regcache *regcache, int nargs,
 {
   int reg_idx = 0;
   int i;
-  struct value **stack_args = alloca (nargs * sizeof (struct value *));
+  struct value **stack_args = XALLOCAVEC (struct value *, nargs);
   int num_stack_args = 0;
   int num_elements = 0;
   int element = 0;
@@ -169,7 +169,7 @@ amd64_windows_push_arguments (struct regcache *regcache, int nargs,
      in inferior memory.  So use a copy of the ARGS table, to avoid
      modifying the original one.  */
   {
-    struct value **args1 = alloca (nargs * sizeof (struct value *));
+    struct value **args1 = XALLOCAVEC (struct value *, nargs);
 
     memcpy (args1, args, nargs * sizeof (struct value *));
     sp = amd64_windows_adjust_args_passed_by_pointer (args1, nargs, sp);
@@ -1025,7 +1025,7 @@ amd64_windows_frame_cache (struct frame_info *this_frame, void **this_cache)
   CORE_ADDR unwind_info = 0;
 
   if (*this_cache)
-    return *this_cache;
+    return (struct amd64_windows_frame_cache *) *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct amd64_windows_frame_cache);
   *this_cache = cache;

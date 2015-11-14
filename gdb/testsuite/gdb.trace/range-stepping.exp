@@ -34,6 +34,11 @@ if ![gdb_target_supports_trace] {
     return -1
 }
 
+if ![gdb_range_stepping_enabled] {
+    unsupported "range stepping not supported by the target"
+    return -1
+}
+
 # Check that range stepping works well with tracepoints.
 
 proc range_stepping_with_tracepoint { type } {
@@ -47,8 +52,8 @@ proc range_stepping_with_tracepoint { type } {
 
 	# Step a line with a tracepoint in the middle.  The tracepoint
 	# itself shouldn't have any effect on range stepping.  We
-	# should see one vCont;r and no vCont;s's.
-	exec_cmd_expect_vCont_count "step" 0 1
+	# should see one vCont;r.
+	exec_cmd_expect_vCont_count "step" 1
 	gdb_test_no_output "tstop"
 	gdb_test "tfind" "Found trace frame .*" "first tfind"
 	gdb_test "tfind" \

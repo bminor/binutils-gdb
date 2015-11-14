@@ -20,7 +20,7 @@
 #ifndef MI_PARSE_H
 #define MI_PARSE_H
 
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 
 /* MI parser */
 

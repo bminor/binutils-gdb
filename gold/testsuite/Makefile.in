@@ -280,8 +280,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_cdebug_gabi.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err pr18689a.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr18689b.o flagstest_o_ttext_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_11.a protected_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_lib binary.txt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
@@ -323,10 +323,11 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # and --dynamic-list-cpp-typeinfo
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_35 = debug_msg.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	missing_key_func.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_1.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.sh ver_test_4.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.sh ver_test_7.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.sh relro_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh pr18689.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.sh ver_test_2.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh ver_test_10.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_13.sh relro_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh \
@@ -365,11 +366,12 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi.cmp \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections_gabi.check \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr18689.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.syms ver_test_2.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.syms ver_test_5.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.syms ver_test_10.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_3.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_13.syms protected_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
@@ -498,6 +500,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test1.out \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test2.out \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test hidden_test.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.in \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout \
@@ -1703,7 +1706,8 @@ relro_test_OBJECTS = $(am_relro_test_OBJECTS)
 relro_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(relro_test_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_script_test_1_OBJECTS =  \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1.$(OBJEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1a.$(OBJEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1b.$(OBJEXT)
 script_test_1_OBJECTS = $(am_script_test_1_OBJECTS)
 script_test_1_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(script_test_1_LDFLAGS) $(LDFLAGS) -o $@
@@ -2835,7 +2839,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test_DEPENDENCIES = gcctestdir/ld relro_script_test.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test_LDADD = relro_script_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_SOURCES = script_test_1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_SOURCES = script_test_1a.cc script_test_1b.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -Wl,-T,$(srcdir)/script_test_1.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDADD = 
@@ -3983,10 +3987,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/relro_test_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_11.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_12.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_12i.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1a.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1b.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2a.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2b.Po@am__quote@
@@ -4413,6 +4418,8 @@ missing_key_func.sh.log: missing_key_func.sh
 	@p='missing_key_func.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 undef_symbol.sh.log: undef_symbol.sh
 	@p='undef_symbol.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+pr18689.sh.log: pr18689.sh
+	@p='pr18689.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ver_test_1.sh.log: ver_test_1.sh
 	@p='ver_test_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ver_test_2.sh.log: ver_test_2.sh
@@ -4425,6 +4432,8 @@ ver_test_7.sh.log: ver_test_7.sh
 	@p='ver_test_7.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ver_test_10.sh.log: ver_test_10.sh
 	@p='ver_test_10.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_13.sh.log: ver_test_13.sh
+	@p='ver_test_13.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 relro_test.sh.log: relro_test.sh
 	@p='relro_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ver_matching_test.sh.log: ver_matching_test.sh
@@ -5404,9 +5413,9 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf32_x86_64  -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea10: x86_64_mov_to_lea6.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_x86_64  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea11: x86_64_mov_to_lea1.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea11: x86_64_mov_to_lea2.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf32_x86_64 -shared  -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea12: x86_64_mov_to_lea2.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea12: x86_64_mov_to_lea1.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf_x86_64 -shared  -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea13: x86_64_mov_to_lea7.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -melf32_x86_64 -shared  -o $@ $<
@@ -5618,9 +5627,9 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -w $< | sed -e "s/.zdebug_/.debug_/" > $@.tmp
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@
 
-# Check there are compressed DWARF .zdebug_* sections.
+# Check there are compressed DWARF .debug_* sections.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections.check: flagstest_compress_debug_sections
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SW $< | grep ".zdebug_" > $@.tmp
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SW $< | egrep ".debug_.* C *" > $@.tmp
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@
 
 # Compare DWARF debug info.
@@ -5674,6 +5683,18 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr18689.stdout: pr18689b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SW $< > $@
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr18689a.o: pr18689.o ../ld-new
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -r -o $@ $<
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr18689b.o: pr18689a.o ../ld-new
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	../ld-new -r -o $@ $<
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr18689.o: pr18689.c gcctestdir/as
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -Bgcctestdir/ -ggdb3 -g -Wa,--compress-debug-sections=zlib-gabi -c -w -o $@ $(srcdir)/pr18689.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_ttext_1: flagstest_debug.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,-Ttext,0x400000 -Wl,-Tdata,0x800000
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_ttext_2: flagstest_debug.o gcctestdir/ld
@@ -5728,6 +5749,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_12.o: gcctestdir/ld ver_test_1.o ver_test_2.o ver_test_4.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ ver_test_1.o ver_test_2.o ver_test_4.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_13.syms: ver_test_13.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_13.so: gcctestdir/ld ver_test_13.o ver_test_13.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_13.script ver_test_13.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_13.o: ver_test_13.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1.so: gcctestdir/ld protected_1_pic.o protected_2_pic.o protected_3_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared protected_1_pic.o protected_2_pic.o protected_3_pic.o
@@ -5811,9 +5838,11 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lW script_test_9 > script_test_9.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11: gcctestdir/ld script_test_11_r.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ script_test_11_r.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11.o: script_test_11.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11a.o script_test_11b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11a.o script_test_11b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11a.o: script_test_11a.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11b.o: script_test_11b.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_12: gcctestdir/ld $(srcdir)/script_test_12.t script_test_12a.o script_test_12b.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-T,$(srcdir)/script_test_12.t script_test_12a.o script_test_12b.o
@@ -6013,6 +6042,8 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -Bgcctestdir/ -g -shared -fPIC -w -o $@ $(srcdir)/hidden_test_1.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test: hidden_test_main.o libhidden.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-R,. hidden_test_main.o libhidden.so 2>hidden_test.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test.syms: hidden_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -D hidden_test > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test.err: hidden_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch hidden_test.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld

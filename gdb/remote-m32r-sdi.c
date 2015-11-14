@@ -36,7 +36,7 @@
 #include <netinet/in.h>
 #endif
 #include <sys/types.h>
-#include <sys/time.h>
+#include "gdb_sys_time.h"
 #include <time.h>
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"
@@ -701,7 +701,7 @@ static ptid_t
 m32r_wait (struct target_ops *ops,
 	   ptid_t ptid, struct target_waitstatus *status, int options)
 {
-  static RETSIGTYPE (*prev_sigint) ();
+  static sighandler_t prev_sigint;
   unsigned long bp_addr, pc_addr;
   int ib_breakpoints;
   long i;
@@ -1249,7 +1249,7 @@ m32r_load (struct target_ops *self, const char *args, int from_tty)
   int nostart;
   struct timeval start_time, end_time;
   unsigned long data_count;	/* Number of bytes transferred to memory.  */
-  static RETSIGTYPE (*prev_sigint) ();
+  static sighandler_t prev_sigint;
 
   /* for direct tcp connections, we can do a fast binary download.  */
   quiet = 0;
@@ -1407,10 +1407,10 @@ m32r_load (struct target_ops *self, const char *args, int from_tty)
 }
 
 static void
-m32r_stop (struct target_ops *self, ptid_t ptid)
+m32r_interrupt (struct target_ops *self, ptid_t ptid)
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "m32r_stop()\n");
+    fprintf_unfiltered (gdb_stdlog, "m32r_interrupt()\n");
 
   send_cmd (SDI_STOP_CPU);
 
@@ -1424,7 +1424,8 @@ m32r_stop (struct target_ops *self, ptid_t ptid)
 
 static int
 m32r_can_use_hw_watchpoint (struct target_ops *self,
-			    int type, int cnt, int othertype)
+			    enum bptype type,
+			    int cnt, int othertype)
 {
   return sdi_desc != NULL && cnt < max_access_breaks;
 }
@@ -1435,7 +1436,7 @@ m32r_can_use_hw_watchpoint (struct target_ops *self,
 
 static int
 m32r_insert_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
   int i;
@@ -1460,9 +1461,8 @@ m32r_insert_watchpoint (struct target_ops *self,
 }
 
 static int
-m32r_remove_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
-			struct expression *cond)
+m32r_remove_watchpoint (struct target_ops *self, CORE_ADDR addr, int len,
+			enum target_hw_bp_type type, struct expression *cond)
 {
   int i;
 
@@ -1664,7 +1664,7 @@ init_m32r_ops (void)
   m32r_ops.to_load = m32r_load;
   m32r_ops.to_create_inferior = m32r_create_inferior;
   m32r_ops.to_mourn_inferior = m32r_mourn_inferior;
-  m32r_ops.to_stop = m32r_stop;
+  m32r_ops.to_interrupt = m32r_interrupt;
   m32r_ops.to_log_command = serial_log_command;
   m32r_ops.to_thread_alive = m32r_thread_alive;
   m32r_ops.to_pid_to_str = m32r_pid_to_str;

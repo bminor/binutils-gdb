@@ -85,7 +85,8 @@ get_catch_syscall_inferior_data (struct inferior *inf)
 {
   struct catch_syscall_inferior_data *inf_data;
 
-  inf_data = inferior_data (inf, catch_syscall_inferior_data);
+  inf_data = ((struct catch_syscall_inferior_data *)
+	      inferior_data (inf, catch_syscall_inferior_data));
   if (inf_data == NULL)
     {
       inf_data = XCNEW (struct catch_syscall_inferior_data);

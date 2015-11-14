@@ -237,7 +237,7 @@ elf32_m68hc11_setup_section_lists (bfd *output_bfd, struct bfd_link_info *info)
 {
   bfd *input_bfd;
   unsigned int bfd_count;
-  int top_id, top_index;
+  unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
   bfd_size_type amt;
@@ -853,7 +853,7 @@ elf32_m68hc11_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *     rel;
   const Elf_Internal_Rela *     rel_end;
 
-  if (info->relocatable)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
@@ -998,7 +998,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, 1, relend, howto, 0, contents);
 
-      if (info->relocatable)
+      if (bfd_link_relocatable (info))
 	{
 	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,

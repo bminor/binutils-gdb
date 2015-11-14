@@ -962,7 +962,7 @@ handle_COMDAT (bfd * abfd,
 	  /* All 3 branches use this.  */
 	  symname = _bfd_coff_internal_syment_name (abfd, &isym, buf);
 
-	  /* PR 17512 file: 078-11867-0.004  */ 
+	  /* PR 17512 file: 078-11867-0.004  */
 	  if (symname == NULL)
 	    {
 	      _bfd_error_handler (_("%B: unable to load COMDAT section name"), abfd);
@@ -1351,6 +1351,10 @@ CODE_FRAGMENT
 .  {* PE section symbol.  *}
 .  COFF_SYMBOL_PE_SECTION
 .};
+.
+.typedef asection * (*coff_gc_mark_hook_fn)
+.  (asection *, struct bfd_link_info *, struct internal_reloc *,
+.   struct coff_link_hash_entry *, struct internal_syment *);
 .
 Special entry points for gdb to swap in coff symbol table parts:
 .typedef struct
@@ -2087,7 +2091,7 @@ coff_mkobject_hook (bfd * abfd,
     }
   if (coff->go32stub != NULL)
     memcpy (coff->go32stub, internal_f->go32stub, GO32_STUBSIZE);
-  
+
   return coff;
 }
 #endif
@@ -4680,7 +4684,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	      *p++ = &lineno_cache[i];
 
 	  BFD_ASSERT ((unsigned int) (p - func_table) == nbr_func);
-	  
+
 	  /* Sort by functions.  */
 	  qsort (func_table, nbr_func, sizeof (alent *), coff_sort_func_alent);
 
@@ -5151,7 +5155,7 @@ coff_classify_symbol (bfd *abfd,
 	  asection *sec;
 	  char * name;
  	  char buf[SYMNMLEN + 1];
- 
+
 	  name = _bfd_coff_internal_syment_name (abfd, syment, buf)
  	  sec = coff_section_from_bfd_index (abfd, syment->n_scnum);
 	  if (sec != NULL && name != NULL
@@ -5993,7 +5997,7 @@ static bfd_coff_backend_data bigobj_swap_table =
 #endif
 
 #ifndef coff_bfd_gc_sections
-#define coff_bfd_gc_sections		    bfd_generic_gc_sections
+#define coff_bfd_gc_sections		    bfd_coff_gc_sections
 #endif
 
 #ifndef coff_bfd_lookup_section_flags

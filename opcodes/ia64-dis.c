@@ -303,7 +303,7 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
 	  need_comma = 0;
 	}
     }
-  if (slotnum + 1 == ia64_templ_desc[template_val].group_boundary 
+  if (slotnum + 1 == ia64_templ_desc[template_val].group_boundary
       || ((slotnum == 2) && s_bit))
     (*info->fprintf_func) (info->stream, ";;");
 

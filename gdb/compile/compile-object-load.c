@@ -46,7 +46,7 @@ struct munmap_list
 static void
 munmap_list_add (struct munmap_list **headp, CORE_ADDR addr, CORE_ADDR size)
 {
-  struct munmap_list *head_new = xmalloc (sizeof (*head_new));
+  struct munmap_list *head_new = XNEW (struct munmap_list);
 
   head_new->next = *headp;
   *headp = head_new;
@@ -79,7 +79,7 @@ munmap_list_free (struct munmap_list *head)
 static void
 munmap_listp_free_cleanup (void *headp_voidp)
 {
-  struct munmap_list **headp = headp_voidp;
+  struct munmap_list **headp = (struct munmap_list **) headp_voidp;
 
   munmap_list_free (*headp);
 }
@@ -111,7 +111,7 @@ struct setup_sections_data
 static void
 setup_sections (bfd *abfd, asection *sect, void *data_voidp)
 {
-  struct setup_sections_data *data = data_voidp;
+  struct setup_sections_data *data = (struct setup_sections_data *) data_voidp;
   CORE_ADDR alignment;
   unsigned prot;
 
@@ -336,7 +336,8 @@ struct link_hash_table_cleanup_data
 static void
 link_hash_table_free (void *d)
 {
-  struct link_hash_table_cleanup_data *data = d;
+  struct link_hash_table_cleanup_data *data
+    = (struct link_hash_table_cleanup_data *) d;
 
   if (data->abfd->is_linker_output)
     (*data->abfd->link.hash->hash_table_free) (data->abfd);
@@ -348,7 +349,7 @@ link_hash_table_free (void *d)
 static void
 copy_sections (bfd *abfd, asection *sect, void *data)
 {
-  asymbol **symbol_table = data;
+  asymbol **symbol_table = (asymbol **) data;
   bfd_byte *sect_data, *sect_data_got;
   struct cleanup *cleanups;
   struct bfd_link_info link_info;
@@ -386,7 +387,7 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   link_order.size = bfd_get_section_size (sect);
   link_order.u.indirect.section = sect;
 
-  sect_data = xmalloc (bfd_get_section_size (sect));
+  sect_data = (bfd_byte *) xmalloc (bfd_get_section_size (sect));
   make_cleanup (xfree, sect_data);
 
   sect_data_got = bfd_get_relocated_section_contents (abfd, &link_info,
@@ -474,14 +475,14 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
 
   gdb_type = SYMBOL_TYPE (gdb_val_sym);
-  CHECK_TYPEDEF (gdb_type);
+  gdb_type = check_typedef (gdb_type);
 
   gdb_ptr_type_sym = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
 					  VAR_DOMAIN);
   if (gdb_ptr_type_sym == NULL)
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_ptr_type = SYMBOL_TYPE (gdb_ptr_type_sym);
-  CHECK_TYPEDEF (gdb_ptr_type);
+  gdb_ptr_type = check_typedef (gdb_ptr_type);
   if (TYPE_CODE (gdb_ptr_type) != TYPE_CODE_PTR)
     error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
   gdb_type_from_ptr = TYPE_TARGET_TYPE (gdb_ptr_type);
@@ -676,7 +677,7 @@ compile_object_load (const char *object_file, const char *source_file,
 
   func_sym = lookup_global_symbol_from_objfile (objfile,
 						GCC_FE_WRAPPER_FUNCTION,
-						VAR_DOMAIN);
+						VAR_DOMAIN).symbol;
   if (func_sym == NULL)
     error (_("Cannot find function \"%s\" in compiled module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
@@ -718,7 +719,8 @@ compile_object_load (const char *object_file, const char *source_file,
   /* The memory may be later needed
      by bfd_generic_get_relocated_section_contents
      called from default_symfile_relocate.  */
-  symbol_table = obstack_alloc (&objfile->objfile_obstack, storage_needed);
+  symbol_table = (asymbol **) obstack_alloc (&objfile->objfile_obstack,
+					     storage_needed);
   number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
   if (number_of_symbols < 0)
     error (_("Cannot parse symbols of compiled module \"%s\": %s"),
@@ -731,14 +733,18 @@ compile_object_load (const char *object_file, const char *source_file,
 
       if (sym->flags != 0)
 	continue;
-      if (compile_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "lookup undefined ELF symbol \"%s\"\n",
-			    sym->name);
       sym->flags = BSF_GLOBAL;
       sym->section = bfd_abs_section_ptr;
       if (strcmp (sym->name, "_GLOBAL_OFFSET_TABLE_") == 0)
 	{
+	  if (compile_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"ELF symbol \"%s\" relocated to zero\n",
+				sym->name);
+
+	  /* It seems to be a GCC bug, with -mcmodel=large there should be no
+	     need for _GLOBAL_OFFSET_TABLE_.  Together with -fPIE the data
+	     remain PC-relative even with _GLOBAL_OFFSET_TABLE_ as zero.  */
 	  sym->value = 0;
 	  continue;
 	}
@@ -748,10 +754,21 @@ compile_object_load (const char *object_file, const char *source_file,
 	{
 	case mst_text:
 	  sym->value = BMSYMBOL_VALUE_ADDRESS (bmsym);
+	  if (compile_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"ELF mst_text symbol \"%s\" relocated to %s\n",
+				sym->name,
+				paddress (target_gdbarch (), sym->value));
 	  break;
 	case mst_text_gnu_ifunc:
 	  sym->value = gnu_ifunc_resolve_addr (target_gdbarch (),
 					       BMSYMBOL_VALUE_ADDRESS (bmsym));
+	  if (compile_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"ELF mst_text_gnu_ifunc symbol \"%s\" "
+				"relocated to %s\n",
+				sym->name,
+				paddress (target_gdbarch (), sym->value));
 	  break;
 	default:
 	  warning (_("Could not find symbol \"%s\" "
@@ -812,7 +829,7 @@ compile_object_load (const char *object_file, const char *source_file,
 
   discard_cleanups (cleanups_free_objfile);
 
-  retval = xmalloc (sizeof (*retval));
+  retval = XNEW (struct compile_module);
   retval->objfile = objfile;
   retval->source_file = xstrdup (source_file);
   retval->func_sym = func_sym;

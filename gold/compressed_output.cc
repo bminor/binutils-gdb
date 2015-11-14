@@ -233,11 +233,10 @@ Output_compressed_section::set_final_data_size()
   enum { none, gnu_zlib, gabi_zlib } compress;
   int compression_header_size = 12;
   const int size = parameters->target().get_size();
-  if (strcmp(this->options_->compress_debug_sections(), "zlib") == 0)
+  if (strcmp(this->options_->compress_debug_sections(), "zlib-gnu") == 0)
     compress = gnu_zlib;
-  else if (strcmp(this->options_->compress_debug_sections(), "zlib-gnu") == 0)
-    compress = gnu_zlib;
-  else if (strcmp(this->options_->compress_debug_sections(), "zlib-gabi") == 0)
+  else if (strcmp(this->options_->compress_debug_sections(), "zlib-gabi") == 0
+	   || strcmp(this->options_->compress_debug_sections(), "zlib") == 0)
     {
       compress = gabi_zlib;
       if (size == 32)

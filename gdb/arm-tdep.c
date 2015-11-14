@@ -45,6 +45,7 @@
 #include "user-regs.h"
 #include "observer.h"
 
+#include "arch/arm.h"
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
 
@@ -235,8 +236,6 @@ static void arm_neon_quad_write (struct gdbarch *gdbarch,
 				 struct regcache *regcache,
 				 int regnum, const gdb_byte *buf);
 
-static int thumb_insn_size (unsigned short inst1);
-
 struct arm_prologue_cache
 {
   /* The stack pointer at the time this frame was created; i.e. the
@@ -266,12 +265,6 @@ static CORE_ADDR arm_analyze_prologue (struct gdbarch *gdbarch,
    certain instructions, and really should not be hard-wired.  */
 
 #define DISPLACED_STEPPING_ARCH_VERSION		5
-
-/* Addresses for calling Thumb functions have the bit 0 set.
-   Here are some macros to test, set, or clear bit 0 of addresses.  */
-#define IS_THUMB_ADDR(addr)	((addr) & 1)
-#define MAKE_THUMB_ADDR(addr)	((addr) | 1)
-#define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
 
 /* Set to true if the 32-bit mode is in use.  */
 
@@ -333,7 +326,8 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
 					    0 };
       unsigned int idx;
 
-      data = objfile_data (sec->objfile, arm_objfile_data_key);
+      data = (struct arm_per_objfile *) objfile_data (sec->objfile,
+						      arm_objfile_data_key);
       if (data != NULL)
 	{
 	  map = data->section_maps[sec->the_bfd_section->index];
@@ -2028,7 +2022,7 @@ arm_prologue_unwind_stop_reason (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* This is meant to halt the backtrace at "_start".  */
   pc = get_frame_pc (this_frame);
@@ -2056,7 +2050,7 @@ arm_prologue_this_id (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* Use function start address as part of the frame ID.  If we cannot
      identify the start address (due to missing symbol information),
@@ -2080,7 +2074,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* If we are asked to unwind the PC, then we need to return the LR
      instead.  The prologue may save PC, but it will point into this
@@ -2160,7 +2154,7 @@ struct arm_exidx_data
 static void
 arm_exidx_data_free (struct objfile *objfile, void *arg)
 {
-  struct arm_exidx_data *data = arg;
+  struct arm_exidx_data *data = (struct arm_exidx_data *) arg;
   unsigned int i;
 
   for (i = 0; i < objfile->obfd->section_count; i++)
@@ -2225,12 +2219,12 @@ arm_exidx_new_objfile (struct objfile *objfile)
   cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Read contents of exception table and index.  */
-  exidx = bfd_get_section_by_name (objfile->obfd, ".ARM.exidx");
+  exidx = bfd_get_section_by_name (objfile->obfd, ELF_STRING_ARM_unwind);
   if (exidx)
     {
       exidx_vma = bfd_section_vma (objfile->obfd, exidx);
       exidx_size = bfd_get_section_size (exidx);
-      exidx_data = xmalloc (exidx_size);
+      exidx_data = (gdb_byte *) xmalloc (exidx_size);
       make_cleanup (xfree, exidx_data);
 
       if (!bfd_get_section_contents (objfile->obfd, exidx,
@@ -2246,7 +2240,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
     {
       extab_vma = bfd_section_vma (objfile->obfd, extab);
       extab_size = bfd_get_section_size (extab);
-      extab_data = xmalloc (extab_size);
+      extab_data = (gdb_byte *) xmalloc (extab_size);
       make_cleanup (xfree, extab_data);
 
       if (!bfd_get_section_contents (objfile->obfd, extab,
@@ -2383,8 +2377,9 @@ arm_exidx_new_objfile (struct objfile *objfile)
 	 extab section starting at ADDR.  */
       if (n_bytes || n_words)
 	{
-	  gdb_byte *p = entry = obstack_alloc (&objfile->objfile_obstack,
-					       n_bytes + n_words * 4 + 1);
+	  gdb_byte *p = entry
+	    = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack,
+					  n_bytes + n_words * 4 + 1);
 
 	  while (n_bytes--)
 	    *p++ = (gdb_byte) ((word >> (8 * n_bytes)) & 0xff);
@@ -2434,7 +2429,8 @@ arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
       struct arm_exidx_entry map_key = { memaddr - obj_section_addr (sec), 0 };
       unsigned int idx;
 
-      data = objfile_data (sec->objfile, arm_exidx_data_key);
+      data = ((struct arm_exidx_data *)
+	      objfile_data (sec->objfile, arm_exidx_data_key));
       if (data != NULL)
 	{
 	  map = data->section_maps[sec->the_bfd_section->index];
@@ -2959,7 +2955,7 @@ arm_stub_this_id (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_make_stub_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   *this_id = frame_id_build (cache->prev_sp, get_frame_pc (this_frame));
 }
@@ -3053,7 +3049,7 @@ arm_m_exception_this_id (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_m_exception_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* Our frame ID for a stub frame is the current SP and LR.  */
   *this_id = frame_id_build (cache->prev_sp,
@@ -3073,7 +3069,7 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
 
   if (*this_cache == NULL)
     *this_cache = arm_m_exception_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   /* The value was already reconstructed into PREV_SP.  */
   if (prev_regnum == ARM_SP_REGNUM)
@@ -3126,7 +3122,7 @@ arm_normal_frame_base (struct frame_info *this_frame, void **this_cache)
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
-  cache = *this_cache;
+  cache = (struct arm_prologue_cache *) *this_cache;
 
   return cache->prev_sp - cache->framesize;
 }
@@ -3395,15 +3391,15 @@ struct stack_item
 {
   int len;
   struct stack_item *prev;
-  void *data;
+  gdb_byte *data;
 };
 
 static struct stack_item *
-push_stack_item (struct stack_item *prev, const void *contents, int len)
+push_stack_item (struct stack_item *prev, const gdb_byte *contents, int len)
 {
   struct stack_item *si;
-  si = xmalloc (sizeof (struct stack_item));
-  si->data = xmalloc (len);
+  si = XNEW (struct stack_item);
+  si->data = (gdb_byte *) xmalloc (len);
   si->len = len;
   si->prev = prev;
   memcpy (si->data, contents, len);
@@ -3450,8 +3446,18 @@ arm_type_align (struct type *t)
       return TYPE_LENGTH (t);
 
     case TYPE_CODE_ARRAY:
+      if (TYPE_VECTOR (t))
+	{
+	  /* Use the natural alignment for vector types (the same for
+	     scalar type), but the maximum alignment is 64-bit.  */
+	  if (TYPE_LENGTH (t) > 8)
+	    return 8;
+	  else
+	    return TYPE_LENGTH (t);
+	}
+      else
+	return arm_type_align (TYPE_TARGET_TYPE (t));
     case TYPE_CODE_COMPLEX:
-      /* TODO: What about vector types?  */
       return arm_type_align (TYPE_TARGET_TYPE (t));
 
     case TYPE_CODE_STRUCT:
@@ -3598,21 +3604,44 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 
     case TYPE_CODE_ARRAY:
       {
-	int count;
-	unsigned unitlen;
-	count = arm_vfp_cprc_sub_candidate (TYPE_TARGET_TYPE (t), base_type);
-	if (count == -1)
-	  return -1;
-	if (TYPE_LENGTH (t) == 0)
+	if (TYPE_VECTOR (t))
 	  {
-	    gdb_assert (count == 0);
-	    return 0;
+	    /* A 64-bit or 128-bit containerized vector type are VFP
+	       CPRCs.  */
+	    switch (TYPE_LENGTH (t))
+	      {
+	      case 8:
+		if (*base_type == VFP_CPRC_UNKNOWN)
+		  *base_type = VFP_CPRC_VEC64;
+		return 1;
+	      case 16:
+		if (*base_type == VFP_CPRC_UNKNOWN)
+		  *base_type = VFP_CPRC_VEC128;
+		return 1;
+	      default:
+		return -1;
+	      }
 	  }
-	else if (count == 0)
-	  return -1;
-	unitlen = arm_vfp_cprc_unit_length (*base_type);
-	gdb_assert ((TYPE_LENGTH (t) % unitlen) == 0);
-	return TYPE_LENGTH (t) / unitlen;
+	else
+	  {
+	    int count;
+	    unsigned unitlen;
+
+	    count = arm_vfp_cprc_sub_candidate (TYPE_TARGET_TYPE (t),
+						base_type);
+	    if (count == -1)
+	      return -1;
+	    if (TYPE_LENGTH (t) == 0)
+	      {
+		gdb_assert (count == 0);
+		return 0;
+	      }
+	    else if (count == 0)
+	      return -1;
+	    unitlen = arm_vfp_cprc_unit_length (*base_type);
+	    gdb_assert ((TYPE_LENGTH (t) % unitlen) == 0);
+	    return TYPE_LENGTH (t) / unitlen;
+	  }
       }
       break;
 
@@ -3883,7 +3912,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  CORE_ADDR regval = extract_unsigned_integer (val, len, byte_order);
 	  if (arm_pc_is_thumb (gdbarch, regval))
 	    {
-	      bfd_byte *copy = alloca (len);
+	      bfd_byte *copy = (bfd_byte *) alloca (len);
 	      store_unsigned_integer (copy, len, byte_order,
 				      MAKE_THUMB_ADDR (regval));
 	      val = copy;
@@ -4359,18 +4388,6 @@ bitcount (unsigned long val)
   for (nbits = 0; val != 0; nbits++)
     val &= val - 1;		/* Delete rightmost 1-bit in val.  */
   return nbits;
-}
-
-/* Return the size in bytes of the complete Thumb instruction whose
-   first halfword is INST1.  */
-
-static int
-thumb_insn_size (unsigned short inst1)
-{
-  if ((inst1 & 0xe000) == 0xe000 && (inst1 & 0x1800) != 0)
-    return 4;
-  else
-    return 2;
 }
 
 static int
@@ -5325,7 +5342,7 @@ extend_buffer_earlier (gdb_byte *buf, CORE_ADDR endaddr,
   gdb_byte *new_buf;
   int bytes_to_read = new_len - old_len;
 
-  new_buf = xmalloc (new_len);
+  new_buf = (gdb_byte *) xmalloc (new_len);
   memcpy (new_buf + bytes_to_read, buf, old_len);
   xfree (buf);
   if (target_read_memory (endaddr - new_len, new_buf, bytes_to_read) != 0)
@@ -5391,7 +5408,7 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
     /* No room for an IT instruction.  */
     return bpaddr;
 
-  buf = xmalloc (buf_len);
+  buf = (gdb_byte *) xmalloc (buf_len);
   if (target_read_memory (bpaddr - buf_len, buf, buf_len) != 0)
     return bpaddr;
   any = 0;
@@ -8737,8 +8754,8 @@ arm_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      CORE_ADDR from, CORE_ADDR to,
 			      struct regcache *regs)
 {
-  struct displaced_step_closure *dsc
-    = xmalloc (sizeof (struct displaced_step_closure));
+  struct displaced_step_closure *dsc = XNEW (struct displaced_step_closure);
+
   arm_process_displaced_insn (gdbarch, from, to, regs, dsc);
   arm_displaced_init_closure (gdbarch, from, to, dsc);
 
@@ -8769,7 +8786,7 @@ arm_displaced_step_fixup (struct gdbarch *gdbarch,
 static int
 gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
 {
-  struct gdbarch *gdbarch = info->application_data;
+  struct gdbarch *gdbarch = (struct gdbarch *) info->application_data;
 
   if (arm_pc_is_thumb (gdbarch, memaddr))
     {
@@ -9005,99 +9022,113 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 static int
 arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 {
-  int nRc;
   enum type_code code;
 
-  CHECK_TYPEDEF (type);
+  type = check_typedef (type);
 
-  /* In the ARM ABI, "integer" like aggregate types are returned in
-     registers.  For an aggregate type to be integer like, its size
-     must be less than or equal to INT_REGISTER_SIZE and the
-     offset of each addressable subfield must be zero.  Note that bit
-     fields are not addressable, and all addressable subfields of
-     unions always start at offset zero.
-
-     This function is based on the behaviour of GCC 2.95.1.
-     See: gcc/arm.c: arm_return_in_memory() for details.
-
-     Note: All versions of GCC before GCC 2.95.2 do not set up the
-     parameters correctly for a function returning the following
-     structure: struct { float f;}; This should be returned in memory,
-     not a register.  Richard Earnshaw sent me a patch, but I do not
-     know of any way to detect if a function like the above has been
-     compiled with the correct calling convention.  */
-
-  /* All aggregate types that won't fit in a register must be returned
-     in memory.  */
-  if (TYPE_LENGTH (type) > INT_REGISTER_SIZE)
-    {
-      return 1;
-    }
-
-  /* The AAPCS says all aggregates not larger than a word are returned
-     in a register.  */
-  if (gdbarch_tdep (gdbarch)->arm_abi != ARM_ABI_APCS)
+  /* Simple, non-aggregate types (ie not including vectors and
+     complex) are always returned in a register (or registers).  */
+  code = TYPE_CODE (type);
+  if (TYPE_CODE_STRUCT != code && TYPE_CODE_UNION != code
+      && TYPE_CODE_ARRAY != code && TYPE_CODE_COMPLEX != code)
     return 0;
 
-  /* The only aggregate types that can be returned in a register are
-     structs and unions.  Arrays must be returned in memory.  */
-  code = TYPE_CODE (type);
-  if ((TYPE_CODE_STRUCT != code) && (TYPE_CODE_UNION != code))
+  if (TYPE_CODE_ARRAY == code && TYPE_VECTOR (type))
     {
-      return 1;
+      /* Vector values should be returned using ARM registers if they
+	 are not over 16 bytes.  */
+      return (TYPE_LENGTH (type) > 16);
     }
 
-  /* Assume all other aggregate types can be returned in a register.
-     Run a check for structures, unions and arrays.  */
-  nRc = 0;
-
-  if ((TYPE_CODE_STRUCT == code) || (TYPE_CODE_UNION == code))
+  if (gdbarch_tdep (gdbarch)->arm_abi != ARM_ABI_APCS)
     {
-      int i;
-      /* Need to check if this struct/union is "integer" like.  For
-         this to be true, its size must be less than or equal to
-         INT_REGISTER_SIZE and the offset of each addressable
-         subfield must be zero.  Note that bit fields are not
-         addressable, and unions always start at offset zero.  If any
-         of the subfields is a floating point type, the struct/union
-         cannot be an integer type.  */
+      /* The AAPCS says all aggregates not larger than a word are returned
+	 in a register.  */
+      if (TYPE_LENGTH (type) <= INT_REGISTER_SIZE)
+	return 0;
 
-      /* For each field in the object, check:
-         1) Is it FP? --> yes, nRc = 1;
-         2) Is it addressable (bitpos != 0) and
-         not packed (bitsize == 0)?
-         --> yes, nRc = 1  
-       */
+      return 1;
+    }
+  else
+    {
+      int nRc;
 
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      /* All aggregate types that won't fit in a register must be returned
+	 in memory.  */
+      if (TYPE_LENGTH (type) > INT_REGISTER_SIZE)
+	return 1;
+
+      /* In the ARM ABI, "integer" like aggregate types are returned in
+	 registers.  For an aggregate type to be integer like, its size
+	 must be less than or equal to INT_REGISTER_SIZE and the
+	 offset of each addressable subfield must be zero.  Note that bit
+	 fields are not addressable, and all addressable subfields of
+	 unions always start at offset zero.
+
+	 This function is based on the behaviour of GCC 2.95.1.
+	 See: gcc/arm.c: arm_return_in_memory() for details.
+
+	 Note: All versions of GCC before GCC 2.95.2 do not set up the
+	 parameters correctly for a function returning the following
+	 structure: struct { float f;}; This should be returned in memory,
+	 not a register.  Richard Earnshaw sent me a patch, but I do not
+	 know of any way to detect if a function like the above has been
+	 compiled with the correct calling convention.  */
+
+      /* Assume all other aggregate types can be returned in a register.
+	 Run a check for structures, unions and arrays.  */
+      nRc = 0;
+
+      if ((TYPE_CODE_STRUCT == code) || (TYPE_CODE_UNION == code))
 	{
-	  enum type_code field_type_code;
-	  field_type_code = TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type,
-								       i)));
+	  int i;
+	  /* Need to check if this struct/union is "integer" like.  For
+	     this to be true, its size must be less than or equal to
+	     INT_REGISTER_SIZE and the offset of each addressable
+	     subfield must be zero.  Note that bit fields are not
+	     addressable, and unions always start at offset zero.  If any
+	     of the subfields is a floating point type, the struct/union
+	     cannot be an integer type.  */
 
-	  /* Is it a floating point type field?  */
-	  if (field_type_code == TYPE_CODE_FLT)
-	    {
-	      nRc = 1;
-	      break;
-	    }
+	  /* For each field in the object, check:
+	     1) Is it FP? --> yes, nRc = 1;
+	     2) Is it addressable (bitpos != 0) and
+	     not packed (bitsize == 0)?
+	     --> yes, nRc = 1
+	  */
 
-	  /* If bitpos != 0, then we have to care about it.  */
-	  if (TYPE_FIELD_BITPOS (type, i) != 0)
+	  for (i = 0; i < TYPE_NFIELDS (type); i++)
 	    {
-	      /* Bitfields are not addressable.  If the field bitsize is 
-	         zero, then the field is not packed.  Hence it cannot be
-	         a bitfield or any other packed type.  */
-	      if (TYPE_FIELD_BITSIZE (type, i) == 0)
+	      enum type_code field_type_code;
+
+	      field_type_code
+		= TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type,
+							     i)));
+
+	      /* Is it a floating point type field?  */
+	      if (field_type_code == TYPE_CODE_FLT)
 		{
 		  nRc = 1;
 		  break;
 		}
+
+	      /* If bitpos != 0, then we have to care about it.  */
+	      if (TYPE_FIELD_BITPOS (type, i) != 0)
+		{
+		  /* Bitfields are not addressable.  If the field bitsize is 
+		     zero, then the field is not packed.  Hence it cannot be
+		     a bitfield or any other packed type.  */
+		  if (TYPE_FIELD_BITSIZE (type, i) == 0)
+		    {
+		      nRc = 1;
+		      break;
+		    }
+		}
 	    }
 	}
-    }
 
-  return nRc;
+      return nRc;
+    }
 }
 
 /* Write into appropriate registers a function return value of type
@@ -9252,12 +9283,11 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
 	  || arm_return_in_memory (gdbarch, valtype))
 	return RETURN_VALUE_STRUCT_CONVENTION;
     }
-
-  /* AAPCS returns complex types longer than a register in memory.  */
-  if (tdep->arm_abi != ARM_ABI_APCS
-      && TYPE_CODE (valtype) == TYPE_CODE_COMPLEX
-      && TYPE_LENGTH (valtype) > INT_REGISTER_SIZE)
-    return RETURN_VALUE_STRUCT_CONVENTION;
+  else if (TYPE_CODE (valtype) == TYPE_CODE_COMPLEX)
+    {
+      if (arm_return_in_memory (gdbarch, valtype))
+	return RETURN_VALUE_STRUCT_CONVENTION;
+    }
 
   if (writebuf)
     arm_store_return_value (valtype, regcache, writebuf);
@@ -9353,7 +9383,7 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
       else
 	target_len -= strlen ("_from_arm");
 
-      target_name = alloca (target_len + 1);
+      target_name = (char *) alloca (target_len + 1);
       memcpy (target_name, name + 2, target_len);
       target_name[target_len] = '\0';
 
@@ -9408,7 +9438,7 @@ set_fp_model_sfunc (char *args, int from_tty,
   for (fp_model = ARM_FLOAT_AUTO; fp_model != ARM_FLOAT_LAST; fp_model++)
     if (strcmp (current_fp_model, fp_model_strings[fp_model]) == 0)
       {
-	arm_fp_model = fp_model;
+	arm_fp_model = (enum arm_float_model) fp_model;
 	break;
       }
 
@@ -9445,7 +9475,7 @@ arm_set_abi (char *args, int from_tty,
   for (arm_abi = ARM_ABI_AUTO; arm_abi != ARM_ABI_LAST; arm_abi++)
     if (strcmp (arm_abi_string, arm_abi_strings[arm_abi]) == 0)
       {
-	arm_abi_global = arm_abi;
+	arm_abi_global = (enum arm_abi_kind) arm_abi;
 	break;
       }
 
@@ -9597,7 +9627,7 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
 static void
 arm_objfile_data_free (struct objfile *objfile, void *arg)
 {
-  struct arm_per_objfile *data = arg;
+  struct arm_per_objfile *data = (struct arm_per_objfile *) arg;
   unsigned int i;
 
   for (i = 0; i < objfile->obfd->section_count; i++)
@@ -9617,7 +9647,8 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
   if (name[1] != 'a' && name[1] != 't' && name[1] != 'd')
     return;
 
-  data = objfile_data (objfile, arm_objfile_data_key);
+  data = (struct arm_per_objfile *) objfile_data (objfile,
+						  arm_objfile_data_key);
   if (data == NULL)
     {
       data = OBSTACK_ZALLOC (&objfile->objfile_obstack,
@@ -9821,7 +9852,7 @@ arm_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static struct value *
 value_of_arm_user_reg (struct frame_info *frame, const void *baton)
 {
-  const int *reg_p = baton;
+  const int *reg_p = (const int *) baton;
   return value_of_register (*reg_p, frame);
 }
 
@@ -10290,7 +10321,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return best_arch->gdbarch;
     }
 
-  tdep = xcalloc (1, sizeof (struct gdbarch_tdep));
+  tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Record additional information about the architecture we are defining.
@@ -10571,8 +10602,8 @@ _initialize_arm_tdep (void)
 
   /* Initialize the array that will be passed to
      add_setshow_enum_cmd().  */
-  valid_disassembly_styles
-    = xmalloc ((num_disassembly_options + 1) * sizeof (char *));
+  valid_disassembly_styles = XNEWVEC (const char *,
+				      num_disassembly_options + 1);
   for (i = 0; i < num_disassembly_options; i++)
     {
       numregs = get_arm_regnames (i, &setname, &setdesc, &regnames);

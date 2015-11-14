@@ -207,8 +207,8 @@ stpy_static_block (PyObject *self, PyObject *args)
   return block_to_block_object (block, SYMTAB_OBJFILE (symtab));
 }
 
-/* Implementation of gdb.Symtab.linetable (self) -> gdb.Linetable.
-   Returns a gdb.Linetable object corresponding to this symbol
+/* Implementation of gdb.Symtab.linetable (self) -> gdb.LineTable.
+   Returns a gdb.LineTable object corresponding to this symbol
    table.  */
 
 static PyObject *
@@ -370,8 +370,9 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
       Py_INCREF (Py_None);
     }
 
-  sal_obj->sal = xmemdup (&sal, sizeof (struct symtab_and_line),
-			  sizeof (struct symtab_and_line));
+  sal_obj->sal = ((struct symtab_and_line *)
+		  xmemdup (&sal, sizeof (struct symtab_and_line),
+			   sizeof (struct symtab_and_line)));
   sal_obj->symtab = symtab_obj;
   sal_obj->prev = NULL;
 
@@ -379,8 +380,10 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
      objfile cleanup observer linked list.  */
   if (sal_obj->symtab != (symtab_object *)Py_None)
     {
-      sal_obj->next = objfile_data (SYMTAB_OBJFILE (sal_obj->symtab->symtab),
-				    salpy_objfile_data_key);
+      sal_obj->next
+	= ((struct salpy_sal_object *)
+	   objfile_data (SYMTAB_OBJFILE (sal_obj->symtab->symtab),
+			 salpy_objfile_data_key));
       if (sal_obj->next)
 	sal_obj->next->prev = sal_obj;
 
@@ -405,8 +408,9 @@ set_symtab (symtab_object *obj, struct symtab *symtab)
   obj->prev = NULL;
   if (symtab)
     {
-      obj->next = objfile_data (SYMTAB_OBJFILE (symtab),
-				stpy_objfile_data_key);
+      obj->next
+	= ((struct stpy_symtab_object *)
+	   objfile_data (SYMTAB_OBJFILE (symtab), stpy_objfile_data_key));
       if (obj->next)
 	obj->next->prev = obj;
       set_objfile_data (SYMTAB_OBJFILE (symtab), stpy_objfile_data_key, obj);
@@ -477,7 +481,7 @@ symtab_object_to_symtab (PyObject *obj)
 static void
 del_objfile_symtab (struct objfile *objfile, void *datum)
 {
-  symtab_object *obj = datum;
+  symtab_object *obj = (symtab_object *) datum;
 
   while (obj)
     {
@@ -498,7 +502,7 @@ del_objfile_symtab (struct objfile *objfile, void *datum)
 static void
 del_objfile_sal (struct objfile *objfile, void *datum)
 {
-  sal_object *obj = datum;
+  sal_object *obj = (sal_object *) datum;
 
   while (obj)
     {
@@ -571,8 +575,8 @@ Return the global block of the symbol table." },
     "static_block () -> gdb.Block.\n\
 Return the static block of the symbol table." },
     { "linetable", stpy_get_linetable, METH_NOARGS,
-    "linetable () -> gdb.Linetable.\n\
-Return the Linetable associated with this symbol table" },
+    "linetable () -> gdb.LineTable.\n\
+Return the LineTable associated with this symbol table" },
   {NULL}  /* Sentinel */
 };
 

@@ -2160,7 +2160,7 @@ mips_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
   /* Round ending address up; get number of longwords that makes.  */
   count = (((memaddr + len) - addr) + 3) / 4;
   /* Allocate buffer of that many longwords.  */
-  buffer = alloca (count * 4);
+  buffer = (gdb_byte *) alloca (count * 4);
 
   if (writebuf != NULL)
     {
@@ -2402,7 +2402,7 @@ mips_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 
 static int
 mips_can_use_watchpoint (struct target_ops *self,
-			 int type, int cnt, int othertype)
+			 enum bptype type, int cnt, int othertype)
 {
   return cnt < MAX_LSI_BREAKPOINTS && strcmp (target_shortname, "lsi") == 0;
 }
@@ -2437,10 +2437,13 @@ calculate_mask (CORE_ADDR addr, int len)
 
 static int
 mips_insert_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
-  if (mips_set_breakpoint (addr, len, type))
+  /* These enum types are compatible by design.  */
+  enum break_type btype = (enum break_type) type;
+
+  if (mips_set_breakpoint (addr, len, btype))
     return -1;
 
   return 0;
@@ -2450,10 +2453,13 @@ mips_insert_watchpoint (struct target_ops *self,
 
 static int
 mips_remove_watchpoint (struct target_ops *self,
-			CORE_ADDR addr, int len, int type,
+			CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			struct expression *cond)
 {
-  if (mips_clear_breakpoint (addr, len, type))
+  /* These enum types are compatible by design.  */
+  enum break_type btype = (enum break_type) type;
+
+  if (mips_clear_breakpoint (addr, len, btype))
     return -1;
 
   return 0;
@@ -2808,7 +2814,7 @@ mips_load_srec (const char *args)
   struct cleanup *cleanup;
   static int hashmark = 1;
 
-  buffer = alloca (srec_frame * 2 + 256);
+  buffer = (bfd_byte *) alloca (srec_frame * 2 + 256);
 
   abfd = gdb_bfd_open (args, NULL, -1);
   if (!abfd)
@@ -3316,7 +3322,8 @@ pmon_end_download (int final, int bintotal)
 	mips_send_command ("initEther\r", -1);
 
       /* Send the load command.  */
-      cmd = xmalloc (strlen (load_cmd_prefix) + strlen (tftp_name) + 2);
+      cmd = (char *) xmalloc (strlen (load_cmd_prefix)
+			      + strlen (tftp_name) + 2);
       strcpy (cmd, load_cmd_prefix);
       strcat (cmd, tftp_name);
       strcat (cmd, "\r");

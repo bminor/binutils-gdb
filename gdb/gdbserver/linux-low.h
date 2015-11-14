@@ -38,6 +38,11 @@ enum regset_type {
   EXTENDED_REGS,
 };
 
+/* The arch's regsets array initializer must be terminated with a NULL
+   regset.  */
+#define NULL_REGSET \
+  { 0, 0, 0, -1, (enum regset_type) -1, NULL, NULL }
+
 struct regset_info
 {
   int get_request, set_request;
@@ -115,11 +120,6 @@ struct process_info_private
 
   /* &_r_debug.  0 if not yet determined.  -1 if no PT_DYNAMIC in Phdrs.  */
   CORE_ADDR r_debug;
-
-  /* This flag is true iff we've just created or attached to the first
-     LWP of this process but it has not stopped yet.  As soon as it
-     does, we need to call the low target's arch_setup callback.  */
-  int new_inferior;
 };
 
 struct lwp_info;
@@ -146,8 +146,13 @@ struct linux_target_ops
 
   CORE_ADDR (*get_pc) (struct regcache *regcache);
   void (*set_pc) (struct regcache *regcache, CORE_ADDR newpc);
-  const unsigned char *breakpoint;
-  int breakpoint_len;
+
+  /* See target.h for details.  */
+  int (*breakpoint_kind_from_pc) (CORE_ADDR *pcptr);
+
+  /* See target.h for details.  */
+  const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
+
   CORE_ADDR (*breakpoint_reinsert_addr) (void);
 
   int decr_pc_after_break;
@@ -266,16 +271,13 @@ struct lwp_info
      event already received in a wait()).  */
   int stopped;
 
-  /* If this flag is set, the lwp is known to be dead already (exit
-     event already received in a wait(), and is cached in
-     status_pending).  */
-  int dead;
-
   /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
 
-  /* This is used to store extended ptrace event information until
-     it is reported to GDB.  */
+  /* If WAITSTATUS->KIND != TARGET_WAITKIND_IGNORE, the waitstatus for
+     this LWP's last event, to pass to GDB without any further
+     processing.  This is used to store extended ptrace event
+     information or exit status until it can be reported to GDB.  */
   struct target_waitstatus waitstatus;
 
   /* When stopped is set, this is where the lwp last stopped, with
@@ -378,3 +380,5 @@ int thread_db_handle_monitor_command (char *);
 int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);
 int thread_db_look_up_one_symbol (const char *name, CORE_ADDR *addrp);
+
+extern int have_ptrace_getregset;

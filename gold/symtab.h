@@ -140,6 +140,11 @@ class Symbol
   set_is_default()
   { this->is_def_ = true; }
 
+  // Set that this version is not the default for this symbol name.
+  void
+  set_is_not_default()
+  { this->is_def_ = false; }
+
   // Return the symbol's name as name@version (or name@@version).
   std::string
   versioned_name() const;
@@ -1706,7 +1711,8 @@ class Symbol_table
 	  const elfcpp::Sym<size, big_endian>& sym,
 	  unsigned int st_shndx, bool is_ordinary,
 	  unsigned int orig_st_shndx,
-	  Object*, const char* version);
+	  Object*, const char* version,
+	  bool is_default_version);
 
   template<int size, bool big_endian>
   void
@@ -1725,7 +1731,7 @@ class Symbol_table
   // resolve.cc.
   static bool
   should_override(const Symbol*, unsigned int, elfcpp::STT, Defined,
-		  Object*, bool*, bool*);
+		  Object*, bool*, bool*, bool);
 
   // Report a problem in symbol resolution.
   static void

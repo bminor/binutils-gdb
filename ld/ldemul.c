@@ -120,10 +120,6 @@ ldemul_open_dynamic_archive (const char *arch, search_dirs_type *search,
 lang_output_section_statement_type *
 ldemul_place_orphan (asection *s, const char *name, int constraint)
 {
-  if (config.warn_orphan)
-    einfo (_("%P: Warning: input section '%s' from file '%B' is not mentioned in linker script\n"),
-	   name, s->owner);
-
   if (ld_emulation->place_orphan)
     return (*ld_emulation->place_orphan) (s, name, constraint);
   return NULL;
@@ -209,7 +205,7 @@ void
 after_parse_default (void)
 {
   if (entry_symbol.name != NULL
-      && (link_info.executable || entry_from_cmdline))
+      && (bfd_link_executable (&link_info) || entry_from_cmdline))
     {
       bfd_boolean is_vma = FALSE;
 
@@ -239,14 +235,14 @@ after_allocation_default (void)
 void
 before_allocation_default (void)
 {
-  if (!link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     strip_excluded_output_sections ();
 }
 
 void
 finish_default (void)
 {
-  if (!link_info.relocatable)
+  if (!bfd_link_relocatable (&link_info))
     _bfd_fix_excluded_sec_syms (link_info.output_bfd, &link_info);
 }
 

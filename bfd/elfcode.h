@@ -605,13 +605,10 @@ elf_object_p (bfd *abfd)
 
   if (i_ehdrp->e_shoff != 0)
     {
-      bfd_signed_vma where = i_ehdrp->e_shoff;
-
-      if (where != (file_ptr) where)
-	goto got_wrong_format_error;
+      file_ptr where = (file_ptr) i_ehdrp->e_shoff;
 
       /* Seek to the section header table in the file.  */
-      if (bfd_seek (abfd, (file_ptr) where, SEEK_SET) != 0)
+      if (bfd_seek (abfd, where, SEEK_SET) != 0)
 	goto got_no_match;
 
       /* Read the first section header at index 0, and convert to internal
@@ -657,19 +654,17 @@ elf_object_p (bfd *abfd)
 	    goto got_wrong_format_error;
 
 	  where += (i_ehdrp->e_shnum - 1) * sizeof (x_shdr);
-	  if (where != (file_ptr) where)
-	    goto got_wrong_format_error;
 	  if ((bfd_size_type) where <= i_ehdrp->e_shoff)
 	    goto got_wrong_format_error;
 
-	  if (bfd_seek (abfd, (file_ptr) where, SEEK_SET) != 0)
+	  if (bfd_seek (abfd, where, SEEK_SET) != 0)
 	    goto got_no_match;
 	  if (bfd_bread (&x_shdr, sizeof x_shdr, abfd) != sizeof (x_shdr))
 	    goto got_no_match;
 
 	  /* Back to where we were.  */
 	  where = i_ehdrp->e_shoff + sizeof (x_shdr);
-	  if (bfd_seek (abfd, (file_ptr) where, SEEK_SET) != 0)
+	  if (bfd_seek (abfd, where, SEEK_SET) != 0)
 	    goto got_no_match;
 	}
     }

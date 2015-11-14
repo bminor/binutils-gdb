@@ -90,7 +90,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   size_t ptr_size = TYPE_LENGTH (ptr_type);
   size_t auxv_pair_size = 2 * ptr_size;
-  gdb_byte *ptr_buf = alloca (ptr_size);
+  gdb_byte *ptr_buf = (gdb_byte *) alloca (ptr_size);
   LONGEST retval;
   size_t block;
 
@@ -320,7 +320,7 @@ auxv_inferior_data_cleanup (struct inferior *inf, void *arg)
 {
   struct auxv_info *info;
 
-  info = inferior_data (inf, auxv_inferior_data);
+  info = (struct auxv_info *) inferior_data (inf, auxv_inferior_data);
   if (info != NULL)
     {
       xfree (info->data);
@@ -355,7 +355,7 @@ get_auxv_inferior_data (struct target_ops *ops)
   struct auxv_info *info;
   struct inferior *inf = current_inferior ();
 
-  info = inferior_data (inf, auxv_inferior_data);
+  info = (struct auxv_info *) inferior_data (inf, auxv_inferior_data);
   if (info == NULL)
     {
       info = XCNEW (struct auxv_info);

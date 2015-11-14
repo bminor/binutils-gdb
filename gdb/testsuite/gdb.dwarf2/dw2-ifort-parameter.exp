@@ -53,7 +53,7 @@ Dwarf::assemble $asm_file {
 		    {variable_parameter 1 flag}
 		    {type :$int_label}
 		    {location {
-			addr ptr
+			addr [gdb_target_symbol ptr]
 			deref
 		    } SPECIAL_expr}
 		}

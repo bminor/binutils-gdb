@@ -1,3 +1,9 @@
+2015-11-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_cr16_translate_dmap_addr): Mark static.
+	(sim_cr16_translate_imap_addr): Likewise.
+	(sim_cr16_translate_addr): Likewise.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
@@ -202,7 +208,7 @@
 
 	PR gdb/7205
 
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 
@@ -253,8 +259,8 @@
 	* interp.c (hash): Remove incorrect prototype.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
 
@@ -266,6 +272,6 @@
 
 2008-02-12  M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 
-	* ChangeLog, Makefile.in, configure, configure.in, cr16_sim.h, 
+	* ChangeLog, Makefile.in, configure, configure.in, cr16_sim.h,
 	gencode.c, interp.c, simops.c, endian.c: Created.
 

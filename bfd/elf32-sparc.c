@@ -184,7 +184,7 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
        || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE)
       && (abfd->flags & DYNAMIC) == 0
       && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
+    elf_tdata (info->output_bfd)->has_gnu_symbols = elf_gnu_symbol_any;
   return TRUE;
 }
 

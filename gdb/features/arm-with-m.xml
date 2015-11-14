@@ -7,5 +7,6 @@
 
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target>
+  <architecture>arm</architecture>
   <xi:include href="arm-m-profile.xml"/>
 </target>

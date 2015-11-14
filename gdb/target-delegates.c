@@ -117,12 +117,6 @@ delegate_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *a
 }
 
 static ptid_t
-tdefault_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *arg2, int arg3)
-{
-  noprocess ();
-}
-
-static ptid_t
 debug_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *arg2, int arg3)
 {
   ptid_t result;
@@ -401,20 +395,20 @@ debug_supports_stopped_by_hw_breakpoint (struct target_ops *self)
 }
 
 static int
-delegate_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int arg3)
+delegate_can_use_hw_breakpoint (struct target_ops *self, enum bptype arg1, int arg2, int arg3)
 {
   self = self->beneath;
   return self->to_can_use_hw_breakpoint (self, arg1, arg2, arg3);
 }
 
 static int
-tdefault_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int arg3)
+tdefault_can_use_hw_breakpoint (struct target_ops *self, enum bptype arg1, int arg2, int arg3)
 {
   return 0;
 }
 
 static int
-debug_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int arg3)
+debug_can_use_hw_breakpoint (struct target_ops *self, enum bptype arg1, int arg2, int arg3)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_can_use_hw_breakpoint (...)\n", debug_target.to_shortname);
@@ -422,7 +416,7 @@ debug_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int ar
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_can_use_hw_breakpoint (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  target_debug_print_enum_bptype (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
@@ -523,20 +517,20 @@ debug_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *arg1, struc
 }
 
 static int
-delegate_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+delegate_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   self = self->beneath;
   return self->to_remove_watchpoint (self, arg1, arg2, arg3, arg4);
 }
 
 static int
-tdefault_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+tdefault_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   return -1;
 }
 
 static int
-debug_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+debug_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_remove_watchpoint (...)\n", debug_target.to_shortname);
@@ -548,7 +542,7 @@ debug_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int 
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_expression_p (arg4);
   fputs_unfiltered (") = ", gdb_stdlog);
@@ -558,20 +552,20 @@ debug_remove_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int 
 }
 
 static int
-delegate_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+delegate_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   self = self->beneath;
   return self->to_insert_watchpoint (self, arg1, arg2, arg3, arg4);
 }
 
 static int
-tdefault_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+tdefault_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   return -1;
 }
 
 static int
-debug_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+debug_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, enum target_hw_bp_type arg3, struct expression *arg4)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insert_watchpoint (...)\n", debug_target.to_shortname);
@@ -583,7 +577,7 @@ debug_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int 
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_expression_p (arg4);
   fputs_unfiltered (") = ", gdb_stdlog);
@@ -593,20 +587,20 @@ debug_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int 
 }
 
 static int
-delegate_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+delegate_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   self = self->beneath;
   return self->to_insert_mask_watchpoint (self, arg1, arg2, arg3);
 }
 
 static int
-tdefault_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+tdefault_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   return 1;
 }
 
 static int
-debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_insert_mask_watchpoint (...)\n", debug_target.to_shortname);
@@ -618,7 +612,7 @@ debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);
@@ -626,20 +620,20 @@ debug_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR
 }
 
 static int
-delegate_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+delegate_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   self = self->beneath;
   return self->to_remove_mask_watchpoint (self, arg1, arg2, arg3);
 }
 
 static int
-tdefault_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+tdefault_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   return 1;
 }
 
 static int
-debug_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+debug_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, enum target_hw_bp_type arg3)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_remove_mask_watchpoint (...)\n", debug_target.to_shortname);
@@ -651,7 +645,7 @@ debug_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg3);
+  target_debug_print_enum_target_hw_bp_type (arg3);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);
@@ -826,6 +820,33 @@ debug_masked_watch_num_registers (struct target_ops *self, CORE_ADDR arg1, CORE_
   target_debug_print_CORE_ADDR (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_CORE_ADDR (arg2);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static int
+delegate_can_do_single_step (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_can_do_single_step (self);
+}
+
+static int
+tdefault_can_do_single_step (struct target_ops *self)
+{
+  return -1;
+}
+
+static int
+debug_can_do_single_step (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_can_do_single_step (...)\n", debug_target.to_shortname);
+  result = debug_target.to_can_do_single_step (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_can_do_single_step (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);
@@ -1214,6 +1235,32 @@ debug_remove_exec_catchpoint (struct target_ops *self, int arg1)
   return result;
 }
 
+static void
+delegate_follow_exec (struct target_ops *self, struct inferior *arg1, char *arg2)
+{
+  self = self->beneath;
+  self->to_follow_exec (self, arg1, arg2);
+}
+
+static void
+tdefault_follow_exec (struct target_ops *self, struct inferior *arg1, char *arg2)
+{
+}
+
+static void
+debug_follow_exec (struct target_ops *self, struct inferior *arg1, char *arg2)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_follow_exec (...)\n", debug_target.to_shortname);
+  debug_target.to_follow_exec (&debug_target, arg1, arg2);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_follow_exec (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_struct_inferior_p (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_char_p (arg2);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
 static int
 delegate_set_syscall_catchpoint (struct target_ops *self, int arg1, int arg2, int arg3, int arg4, int *arg5)
 {
@@ -1537,6 +1584,52 @@ debug_stop (struct target_ops *self, ptid_t arg1)
 }
 
 static void
+delegate_interrupt (struct target_ops *self, ptid_t arg1)
+{
+  self = self->beneath;
+  self->to_interrupt (self, arg1);
+}
+
+static void
+tdefault_interrupt (struct target_ops *self, ptid_t arg1)
+{
+}
+
+static void
+debug_interrupt (struct target_ops *self, ptid_t arg1)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_interrupt (...)\n", debug_target.to_shortname);
+  debug_target.to_interrupt (&debug_target, arg1);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_interrupt (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_ptid_t (arg1);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+static void
+delegate_check_pending_interrupt (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_check_pending_interrupt (self);
+}
+
+static void
+tdefault_check_pending_interrupt (struct target_ops *self)
+{
+}
+
+static void
+debug_check_pending_interrupt (struct target_ops *self)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_check_pending_interrupt (...)\n", debug_target.to_shortname);
+  debug_target.to_check_pending_interrupt (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_check_pending_interrupt (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+static void
 delegate_rcmd (struct target_ops *self, const char *arg1, struct ui_file *arg2)
 {
   self = self->beneath;
@@ -1736,6 +1829,33 @@ debug_supports_non_stop (struct target_ops *self)
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_supports_non_stop (...)\n", debug_target.to_shortname);
   result = debug_target.to_supports_non_stop (&debug_target);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_supports_non_stop (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static int
+delegate_always_non_stop_p (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_always_non_stop_p (self);
+}
+
+static int
+tdefault_always_non_stop_p (struct target_ops *self)
+{
+  return 0;
+}
+
+static int
+debug_always_non_stop_p (struct target_ops *self)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_always_non_stop_p (...)\n", debug_target.to_shortname);
+  result = debug_target.to_always_non_stop_p (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_always_non_stop_p (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
@@ -3482,30 +3602,85 @@ debug_delete_record (struct target_ops *self)
 }
 
 static int
-delegate_record_is_replaying (struct target_ops *self)
+delegate_record_is_replaying (struct target_ops *self, ptid_t arg1)
 {
   self = self->beneath;
-  return self->to_record_is_replaying (self);
+  return self->to_record_is_replaying (self, arg1);
 }
 
 static int
-tdefault_record_is_replaying (struct target_ops *self)
+tdefault_record_is_replaying (struct target_ops *self, ptid_t arg1)
 {
   return 0;
 }
 
 static int
-debug_record_is_replaying (struct target_ops *self)
+debug_record_is_replaying (struct target_ops *self, ptid_t arg1)
 {
   int result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_record_is_replaying (...)\n", debug_target.to_shortname);
-  result = debug_target.to_record_is_replaying (&debug_target);
+  result = debug_target.to_record_is_replaying (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_record_is_replaying (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_ptid_t (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_int (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
+}
+
+static int
+delegate_record_will_replay (struct target_ops *self, ptid_t arg1, int arg2)
+{
+  self = self->beneath;
+  return self->to_record_will_replay (self, arg1, arg2);
+}
+
+static int
+tdefault_record_will_replay (struct target_ops *self, ptid_t arg1, int arg2)
+{
+  return 0;
+}
+
+static int
+debug_record_will_replay (struct target_ops *self, ptid_t arg1, int arg2)
+{
+  int result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_record_will_replay (...)\n", debug_target.to_shortname);
+  result = debug_target.to_record_will_replay (&debug_target, arg1, arg2);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_record_will_replay (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_ptid_t (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_int (arg2);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_int (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+static void
+delegate_record_stop_replaying (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_record_stop_replaying (self);
+}
+
+static void
+tdefault_record_stop_replaying (struct target_ops *self)
+{
+}
+
+static void
+debug_record_stop_replaying (struct target_ops *self)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_record_stop_replaying (...)\n", debug_target.to_shortname);
+  debug_target.to_record_stop_replaying (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_record_stop_replaying (", debug_target.to_shortname);
+  target_debug_print_struct_target_ops_p (&debug_target);
+  fputs_unfiltered (")\n", gdb_stdlog);
 }
 
 static void
@@ -3935,6 +4110,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_accel_watchpoint_condition = delegate_can_accel_watchpoint_condition;
   if (ops->to_masked_watch_num_registers == NULL)
     ops->to_masked_watch_num_registers = delegate_masked_watch_num_registers;
+  if (ops->to_can_do_single_step == NULL)
+    ops->to_can_do_single_step = delegate_can_do_single_step;
   if (ops->to_terminal_init == NULL)
     ops->to_terminal_init = delegate_terminal_init;
   if (ops->to_terminal_inferior == NULL)
@@ -3965,6 +4142,8 @@ install_delegators (struct target_ops *ops)
     ops->to_insert_exec_catchpoint = delegate_insert_exec_catchpoint;
   if (ops->to_remove_exec_catchpoint == NULL)
     ops->to_remove_exec_catchpoint = delegate_remove_exec_catchpoint;
+  if (ops->to_follow_exec == NULL)
+    ops->to_follow_exec = delegate_follow_exec;
   if (ops->to_set_syscall_catchpoint == NULL)
     ops->to_set_syscall_catchpoint = delegate_set_syscall_catchpoint;
   if (ops->to_has_exited == NULL)
@@ -3989,6 +4168,10 @@ install_delegators (struct target_ops *ops)
     ops->to_thread_name = delegate_thread_name;
   if (ops->to_stop == NULL)
     ops->to_stop = delegate_stop;
+  if (ops->to_interrupt == NULL)
+    ops->to_interrupt = delegate_interrupt;
+  if (ops->to_check_pending_interrupt == NULL)
+    ops->to_check_pending_interrupt = delegate_check_pending_interrupt;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_pid_to_exec_file == NULL)
@@ -4005,6 +4188,8 @@ install_delegators (struct target_ops *ops)
     ops->to_async = delegate_async;
   if (ops->to_supports_non_stop == NULL)
     ops->to_supports_non_stop = delegate_supports_non_stop;
+  if (ops->to_always_non_stop_p == NULL)
+    ops->to_always_non_stop_p = delegate_always_non_stop_p;
   if (ops->to_find_memory_regions == NULL)
     ops->to_find_memory_regions = delegate_find_memory_regions;
   if (ops->to_make_corefile_notes == NULL)
@@ -4135,6 +4320,10 @@ install_delegators (struct target_ops *ops)
     ops->to_delete_record = delegate_delete_record;
   if (ops->to_record_is_replaying == NULL)
     ops->to_record_is_replaying = delegate_record_is_replaying;
+  if (ops->to_record_will_replay == NULL)
+    ops->to_record_will_replay = delegate_record_will_replay;
+  if (ops->to_record_stop_replaying == NULL)
+    ops->to_record_stop_replaying = delegate_record_stop_replaying;
   if (ops->to_goto_record_begin == NULL)
     ops->to_goto_record_begin = delegate_goto_record_begin;
   if (ops->to_goto_record_end == NULL)
@@ -4172,7 +4361,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_detach = tdefault_detach;
   ops->to_disconnect = tdefault_disconnect;
   ops->to_resume = tdefault_resume;
-  ops->to_wait = tdefault_wait;
+  ops->to_wait = default_target_wait;
   ops->to_fetch_registers = tdefault_fetch_registers;
   ops->to_store_registers = tdefault_store_registers;
   ops->to_prepare_to_store = tdefault_prepare_to_store;
@@ -4197,6 +4386,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_region_ok_for_hw_watchpoint = default_region_ok_for_hw_watchpoint;
   ops->to_can_accel_watchpoint_condition = tdefault_can_accel_watchpoint_condition;
   ops->to_masked_watch_num_registers = tdefault_masked_watch_num_registers;
+  ops->to_can_do_single_step = tdefault_can_do_single_step;
   ops->to_terminal_init = tdefault_terminal_init;
   ops->to_terminal_inferior = tdefault_terminal_inferior;
   ops->to_terminal_ours_for_output = tdefault_terminal_ours_for_output;
@@ -4212,6 +4402,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_follow_fork = default_follow_fork;
   ops->to_insert_exec_catchpoint = tdefault_insert_exec_catchpoint;
   ops->to_remove_exec_catchpoint = tdefault_remove_exec_catchpoint;
+  ops->to_follow_exec = tdefault_follow_exec;
   ops->to_set_syscall_catchpoint = tdefault_set_syscall_catchpoint;
   ops->to_has_exited = tdefault_has_exited;
   ops->to_mourn_inferior = default_mourn_inferior;
@@ -4224,6 +4415,8 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_extra_thread_info = tdefault_extra_thread_info;
   ops->to_thread_name = tdefault_thread_name;
   ops->to_stop = tdefault_stop;
+  ops->to_interrupt = tdefault_interrupt;
+  ops->to_check_pending_interrupt = tdefault_check_pending_interrupt;
   ops->to_rcmd = default_rcmd;
   ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
   ops->to_log_command = tdefault_log_command;
@@ -4232,6 +4425,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_is_async_p = tdefault_is_async_p;
   ops->to_async = tdefault_async;
   ops->to_supports_non_stop = tdefault_supports_non_stop;
+  ops->to_always_non_stop_p = tdefault_always_non_stop_p;
   ops->to_find_memory_regions = dummy_find_memory_regions;
   ops->to_make_corefile_notes = dummy_make_corefile_notes;
   ops->to_get_bookmark = tdefault_get_bookmark;
@@ -4297,6 +4491,8 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_save_record = tdefault_save_record;
   ops->to_delete_record = tdefault_delete_record;
   ops->to_record_is_replaying = tdefault_record_is_replaying;
+  ops->to_record_will_replay = tdefault_record_will_replay;
+  ops->to_record_stop_replaying = tdefault_record_stop_replaying;
   ops->to_goto_record_begin = tdefault_goto_record_begin;
   ops->to_goto_record_end = tdefault_goto_record_end;
   ops->to_goto_record = tdefault_goto_record;
@@ -4345,6 +4541,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_region_ok_for_hw_watchpoint = debug_region_ok_for_hw_watchpoint;
   ops->to_can_accel_watchpoint_condition = debug_can_accel_watchpoint_condition;
   ops->to_masked_watch_num_registers = debug_masked_watch_num_registers;
+  ops->to_can_do_single_step = debug_can_do_single_step;
   ops->to_terminal_init = debug_terminal_init;
   ops->to_terminal_inferior = debug_terminal_inferior;
   ops->to_terminal_ours_for_output = debug_terminal_ours_for_output;
@@ -4360,6 +4557,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_follow_fork = debug_follow_fork;
   ops->to_insert_exec_catchpoint = debug_insert_exec_catchpoint;
   ops->to_remove_exec_catchpoint = debug_remove_exec_catchpoint;
+  ops->to_follow_exec = debug_follow_exec;
   ops->to_set_syscall_catchpoint = debug_set_syscall_catchpoint;
   ops->to_has_exited = debug_has_exited;
   ops->to_mourn_inferior = debug_mourn_inferior;
@@ -4372,6 +4570,8 @@ init_debug_target (struct target_ops *ops)
   ops->to_extra_thread_info = debug_extra_thread_info;
   ops->to_thread_name = debug_thread_name;
   ops->to_stop = debug_stop;
+  ops->to_interrupt = debug_interrupt;
+  ops->to_check_pending_interrupt = debug_check_pending_interrupt;
   ops->to_rcmd = debug_rcmd;
   ops->to_pid_to_exec_file = debug_pid_to_exec_file;
   ops->to_log_command = debug_log_command;
@@ -4380,6 +4580,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_is_async_p = debug_is_async_p;
   ops->to_async = debug_async;
   ops->to_supports_non_stop = debug_supports_non_stop;
+  ops->to_always_non_stop_p = debug_always_non_stop_p;
   ops->to_find_memory_regions = debug_find_memory_regions;
   ops->to_make_corefile_notes = debug_make_corefile_notes;
   ops->to_get_bookmark = debug_get_bookmark;
@@ -4445,6 +4646,8 @@ init_debug_target (struct target_ops *ops)
   ops->to_save_record = debug_save_record;
   ops->to_delete_record = debug_delete_record;
   ops->to_record_is_replaying = debug_record_is_replaying;
+  ops->to_record_will_replay = debug_record_will_replay;
+  ops->to_record_stop_replaying = debug_record_stop_replaying;
   ops->to_goto_record_begin = debug_goto_record_begin;
   ops->to_goto_record_end = debug_goto_record_end;
   ops->to_goto_record = debug_goto_record;

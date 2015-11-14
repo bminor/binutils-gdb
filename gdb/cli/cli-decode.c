@@ -192,8 +192,7 @@ struct cmd_list_element *
 add_cmd (const char *name, enum command_class theclass, cmd_cfunc_ftype *fun,
 	 const char *doc, struct cmd_list_element **list)
 {
-  struct cmd_list_element *c
-    = (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
+  struct cmd_list_element *c = XNEW (struct cmd_list_element);
   struct cmd_list_element *p, *iter;
 
   /* Turn each alias of the old command into an alias of the new
@@ -856,7 +855,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 struct cmd_list_element *
 add_info (const char *name, cmd_cfunc_ftype *fun, const char *doc)
 {
-  return add_cmd (name, no_class, fun, doc, &infolist);
+  return add_cmd (name, class_info, fun, doc, &infolist);
 }
 
 /* Add an alias to the list of info subcommands.  */
@@ -864,7 +863,7 @@ add_info (const char *name, cmd_cfunc_ftype *fun, const char *doc)
 struct cmd_list_element *
 add_info_alias (const char *name, const char *oldname, int abbrev_flag)
 {
-  return add_alias_cmd (name, oldname, 0, abbrev_flag, &infolist);
+  return add_alias_cmd (name, oldname, class_run, abbrev_flag, &infolist);
 }
 
 /* Add an element to the list of commands.  */
@@ -1220,7 +1219,7 @@ find_cmd (const char *command, int len, struct cmd_list_element *clist,
 {
   struct cmd_list_element *found, *c;
 
-  found = (struct cmd_list_element *) NULL;
+  found = NULL;
   *nfound = 0;
   for (c = clist; c; c = c->next)
     if (!strncmp (command, c->name, len)

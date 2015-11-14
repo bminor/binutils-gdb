@@ -240,7 +240,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  {
 	    char *s, *nextS;
 
-	    s = alloca (strlen (selector) + 1);
+	    s = (char *) alloca (strlen (selector) + 1);
 	    strcpy (s, selector);
 	    for (tem = 0; tem < nargs; tem++)
 	      {
@@ -280,7 +280,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 	     a simple string, revert back to array printing.  Note that
 	     the last expression element is an explicit null terminator
 	     byte, which doesn't get printed.  */
-	  tempstr = alloca (nargs);
+	  tempstr = (char *) alloca (nargs);
 	  pc += 4;
 	  while (tem < nargs)
 	    {

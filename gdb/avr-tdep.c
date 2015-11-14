@@ -987,7 +987,7 @@ avr_frame_unwind_cache (struct frame_info *this_frame,
   int i;
 
   if (*this_prologue_cache)
-    return *this_prologue_cache;
+    return (struct avr_unwind_cache *) *this_prologue_cache;
 
   info = FRAME_OBSTACK_ZALLOC (struct avr_unwind_cache);
   *this_prologue_cache = info;
@@ -1198,15 +1198,15 @@ struct stack_item
 {
   int len;
   struct stack_item *prev;
-  void *data;
+  gdb_byte *data;
 };
 
 static struct stack_item *
 push_stack_item (struct stack_item *prev, const bfd_byte *contents, int len)
 {
   struct stack_item *si;
-  si = xmalloc (sizeof (struct stack_item));
-  si->data = xmalloc (len);
+  si = XNEW (struct stack_item);
+  si->data = (gdb_byte *) xmalloc (len);
   si->len = len;
   si->prev = prev;
   memcpy (si->data, contents, len);
@@ -1364,9 +1364,6 @@ avr_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     return reg;
   if (reg == 32)
     return AVR_SP_REGNUM;
-
-  warning (_("Unmapped DWARF Register #%d encountered."), reg);
-
   return -1;
 }
 
@@ -1635,7 +1632,6 @@ _initialize_avr_tdep (void)
   /* FIXME: TRoth/2002-02-18: This should probably be changed to 'info avr
      io_registers' to signify it is not available on other platforms.  */
 
-  add_cmd ("io_registers", class_info, avr_io_reg_read_command,
-	   _("query remote avr target for io space register values"),
-	   &infolist);
+  add_info ("io_registers", avr_io_reg_read_command,
+	    _("query remote avr target for io space register values"));
 }

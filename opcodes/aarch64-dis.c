@@ -1027,12 +1027,12 @@ aarch64_ext_sysins_op (const aarch64_operand *self ATTRIBUTE_UNUSED,
     default: assert (0); return 0;
     }
 
-  for (i = 0; sysins_ops[i].template != NULL; ++i)
+  for (i = 0; sysins_ops[i].name != NULL; ++i)
     if (sysins_ops[i].value == value)
       {
 	info->sysins_op = sysins_ops + i;
 	DEBUG_TRACE ("%s found value: %x, has_xt: %d, i: %d.",
-		     info->sysins_op->template,
+		     info->sysins_op->name,
 		     (unsigned)info->sysins_op->value,
 		     info->sysins_op->has_xt, i);
 	return 1;
@@ -2029,11 +2029,13 @@ user_friendly_fixup (aarch64_inst *inst)
     }
 }
 
-/* Decode INSN and fill in *INST the instruction information.  */
+/* Decode INSN and fill in *INST the instruction information.  An alias
+   opcode may be filled in *INSN if NOALIASES_P is FALSE.  Return zero on
+   success.  */
 
-static int
-disas_aarch64_insn (uint64_t pc ATTRIBUTE_UNUSED, uint32_t insn,
-		    aarch64_inst *inst)
+int
+aarch64_decode_insn (aarch64_insn insn, aarch64_inst *inst,
+		     bfd_boolean noaliases_p)
 {
   const aarch64_opcode *opcode = aarch64_opcode_lookup (insn);
 
@@ -2060,7 +2062,7 @@ disas_aarch64_insn (uint64_t pc ATTRIBUTE_UNUSED, uint32_t insn,
     {
       /* But only one opcode can be decoded successfully for, as the
 	 decoding routine will check the constraint carefully.  */
-      if (aarch64_opcode_decode (opcode, insn, inst, no_aliases) == 1)
+      if (aarch64_opcode_decode (opcode, insn, inst, noaliases_p) == 1)
 	return ERR_OK;
       opcode = aarch64_find_next_opcode (opcode);
     }
@@ -2172,7 +2174,7 @@ print_insn_aarch64_word (bfd_vma pc,
        addresses, since the addend is not currently pc-relative.  */
     pc = 0;
 
-  ret = disas_aarch64_insn (pc, word, &inst);
+  ret = aarch64_decode_insn (word, &inst, no_aliases);
 
   if (((word >> 21) & 0x3ff) == 1)
     {

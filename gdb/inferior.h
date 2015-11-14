@@ -165,10 +165,8 @@ extern void detach_command (char *, int);
 
 extern void notice_new_inferior (ptid_t, int, int);
 
-struct dummy_frame_context_saver;
-extern struct value *get_return_value
-  (struct value *function, struct type *value_type,
-   struct dummy_frame_context_saver *ctx_saver);
+extern struct value *get_return_value (struct value *function,
+				       struct type *value_type);
 
 /* Prepare for execution command.  TARGET is the target that will run
    the command.  BACKGROUND determines whether this is a foreground
@@ -418,14 +416,7 @@ extern struct inferior *add_inferior (int pid);
    the CLI.  */
 extern struct inferior *add_inferior_silent (int pid);
 
-/* Delete an existing inferior list entry, due to inferior exit.  */
-extern void delete_inferior (int pid);
-
-extern void delete_inferior_1 (struct inferior *todel, int silent);
-
-/* Same as delete_inferior, but don't print new inferior notifications
-   to the CLI.  */
-extern void delete_inferior_silent (int pid);
+extern void delete_inferior (struct inferior *todel);
 
 /* Delete an existing inferior list entry, due to inferior detaching.  */
 extern void detach_inferior (int pid);

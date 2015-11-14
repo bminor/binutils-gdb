@@ -35,7 +35,7 @@ proc gdb_do_cache {name} {
     }
 
     if {[info exists GDB_PARALLEL]} {
-	set cache_filename [file join $objdir cache $cache_name]
+	set cache_filename [make_gdb_parallel_path cache $cache_name]
 	if {[file exists $cache_filename]} {
 	    set fd [open $cache_filename]
 	    set gdb_data_cache($cache_name) [read -nonewline $fd]

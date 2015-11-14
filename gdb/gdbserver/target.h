@@ -74,6 +74,9 @@ struct target_ops
 
   int (*create_inferior) (char *program, char **args);
 
+  /* Architecture-specific setup.  */
+  void (*arch_setup) (void);
+
   /* Attach to a running process.
 
      PID is the process ID to attach to, specified by the user
@@ -222,9 +225,8 @@ struct target_ops
      HW breakpoint triggering.  */
   int (*supports_stopped_by_hw_breakpoint) (void);
 
-  /* Returns true if the target can evaluate conditions of
-     breakpoints.  */
-  int (*supports_conditional_breakpoints) (void);
+  /* Returns true if the target can do hardware single step.  */
+  int (*supports_hardware_single_step) (void);
 
   /* Returns 1 if target was stopped due to a watchpoint hit, 0 otherwise.  */
 
@@ -286,6 +288,9 @@ struct target_ops
 
   /* Returns true if vfork events are supported.  */
   int (*supports_vfork_events) (void);
+
+  /* Returns true if exec events are supported.  */
+  int (*supports_exec_events) (void);
 
   /* Allows target to re-initialize connection-specific settings.  */
   void (*handle_new_gdb_connection) (void);
@@ -394,11 +399,11 @@ struct target_ops
      Returns zero on success, non-zero otherwise.  */
   int (*disable_btrace) (struct btrace_target_info *tinfo);
 
-  /* Read branch trace data into buffer.  We use an int to specify the type
-     to break a cyclic dependency.
+  /* Read branch trace data into buffer.
      Return 0 on success; print an error message into BUFFER and return -1,
      otherwise.  */
-  int (*read_btrace) (struct btrace_target_info *, struct buffer *, int type);
+  int (*read_btrace) (struct btrace_target_info *, struct buffer *,
+		      enum btrace_read_type type);
 
   /* Read the branch trace configuration into BUFFER.
      Return 0 on success; print an error message into BUFFER and return -1
@@ -436,6 +441,16 @@ struct target_ops
      readlink(2).  */
   ssize_t (*multifs_readlink) (int pid, const char *filename,
 			       char *buf, size_t bufsiz);
+
+  /* Return the breakpoint kind for this target based on PC.  The PCPTR is
+     adjusted to the real memory location in case a flag (e.g., the Thumb bit on
+     ARM) was present in the PC.  */
+  int (*breakpoint_kind_from_pc) (CORE_ADDR *pcptr);
+
+  /* Return the software breakpoint from KIND.  KIND can have target
+     specific meaning like the Z0 kind parameter.
+     SIZE is set to the software breakpoint's length in memory.  */
+  const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
 };
 
 extern struct target_ops *the_target;
@@ -444,6 +459,13 @@ void set_target_ops (struct target_ops *);
 
 #define create_inferior(program, args) \
   (*the_target->create_inferior) (program, args)
+
+#define target_arch_setup()			 \
+  do						 \
+    {						 \
+      if (the_target->arch_setup != NULL)	 \
+	(*the_target->arch_setup) ();		 \
+    } while (0)
 
 #define myattach(pid) \
   (*the_target->attach) (pid)
@@ -457,6 +479,10 @@ int kill_inferior (int);
 #define target_supports_vfork_events() \
   (the_target->supports_vfork_events ? \
    (*the_target->supports_vfork_events) () : 0)
+
+#define target_supports_exec_events() \
+  (the_target->supports_exec_events ? \
+   (*the_target->supports_exec_events) () : 0)
 
 #define target_handle_new_gdb_connection()		 \
   do							 \
@@ -599,13 +625,18 @@ int kill_inferior (int);
   (the_target->supports_stopped_by_hw_breakpoint ? \
    (*the_target->supports_stopped_by_hw_breakpoint) () : 0)
 
-#define target_supports_conditional_breakpoints() \
-  (the_target->supports_conditional_breakpoints ? \
-   (*the_target->supports_conditional_breakpoints) () : 0)
+#define target_supports_hardware_single_step() \
+  (the_target->supports_hardware_single_step ? \
+   (*the_target->supports_hardware_single_step) () : 0)
 
 #define target_stopped_by_hw_breakpoint() \
   (the_target->stopped_by_hw_breakpoint ? \
    (*the_target->stopped_by_hw_breakpoint) () : 0)
+
+#define target_breakpoint_kind_from_pc(pcptr) \
+  (the_target->breakpoint_kind_from_pc \
+   ? (*the_target->breakpoint_kind_from_pc) (pcptr) \
+   : default_breakpoint_kind_from_pc (pcptr))
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 
@@ -635,8 +666,12 @@ int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 int write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 			   int len);
 
-void set_desired_thread (int id);
+int set_desired_thread (int id);
 
 const char *target_pid_to_str (ptid_t);
+
+int target_can_do_hardware_single_step (void);
+
+int default_breakpoint_kind_from_pc (CORE_ADDR *pcptr);
 
 #endif /* TARGET_H */

@@ -455,6 +455,11 @@ class Target
   entry_symbol_name() const
   { return this->pti_->entry_symbol_name; }
 
+  // Return the size in bits of SHT_HASH entry.
+  int
+  hash_entry_size() const
+  { return this->pti_->hash_entry_size; }
+
   // Whether the target has a custom set_dynsym_indexes method.
   bool
   has_custom_set_dynsym_indexes() const
@@ -540,6 +545,9 @@ class Target
     const char* attributes_vendor;
     // Name of the main entry point to the program.
     const char* entry_symbol_name;
+    // Size (in bits) of SHT_HASH entry. Always equal to 32, except for
+    // 64-bit S/390.
+    const int hash_entry_size;
   };
 
   Target(const Target_info* pti)
@@ -995,6 +1003,14 @@ class Sized_target : public Target
   virtual unsigned int
   plt_entry_size() const
   { gold_unreachable(); }
+
+  // Return the size of each GOT entry.  This is only used for
+  // laying out the incremental link info sections.  A target needs
+  // to implement this if its GOT size is different.
+
+  virtual unsigned int
+  got_entry_size() const
+  { return size / 8; }
 
   // Create the GOT and PLT sections for an incremental update.
   // A target needs to implement this to support incremental linking.

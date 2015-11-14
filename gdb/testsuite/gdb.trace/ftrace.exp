@@ -84,7 +84,7 @@ proc test_fast_tracepoints {} {
 
     gdb_test "print gdb_agent_gdb_trampoline_buffer_error" ".*" ""
 
-    if { [istarget "x86_64-*-*"] || [istarget "i\[34567\]86-*-*"] } {
+    if { [istarget "x86_64-*-*"] || [istarget "i\[34567\]86-*-*"] || [is_aarch64_target] } {
 
 	gdb_test "ftrace set_point" "Fast tracepoint .*" \
 	    "fast tracepoint at a long insn"
@@ -178,6 +178,42 @@ proc test_fast_tracepoints {} {
     }
 }
 
+# Test compiled-condition
+# CONDEXP is the condition expression to be compiled.
+# VAR is the variable to be collected for testing.
+# LIST is a list of expected values of VAR should be collected
+# based on the CONDEXP.
+proc test_ftrace_condition { condexp var list } \
+{ with_test_prefix "ond $condexp" \
+{
+    global executable
+    global hex
+
+    clean_restart ${executable}
+    if ![runto_main] {
+	fail "Can't run to main to check for trace support"
+	return -1
+    }
+
+    gdb_test "break end" ".*" ""
+    gdb_test "tvariable \$tsv = 0"
+    gdb_test "ftrace set_point if $condexp" "Fast tracepoint .*"
+    gdb_trace_setactions "set action for tracepoint .*" "" \
+	"collect $var" "^$"
+
+    gdb_test_no_output "tstart" ""
+    gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" ""
+    gdb_test_no_output "tstop" ""
+
+    set i 0
+    foreach expval $list {
+	gdb_test "tfind" "Found trace frame $i, tracepoint .*" "tfind frame $i"
+	gdb_test "print $var" "\\$\[0-9\]+ = $expval\[\r\n\]" "expect $expval"
+	set i [expr $i + 1]
+    }
+    gdb_test "tfind" "Target failed to find requested trace frame\."
+}}
+
 gdb_reinitialize_dir $srcdir/$subdir
 
 if { [gdb_test "info sharedlibrary" ".*${libipa}.*" "IPA loaded"] != 0 } {
@@ -186,3 +222,31 @@ if { [gdb_test "info sharedlibrary" ".*${libipa}.*" "IPA loaded"] != 0 } {
 }
 
 test_fast_tracepoints
+
+# Test conditional goto and simple expression.
+test_ftrace_condition "globvar > 7" "globvar" { 8 9 10 }
+test_ftrace_condition "globvar < 4" "globvar" { 1 2 3 }
+test_ftrace_condition "globvar >= 7" "globvar" { 7 8 9 10 }
+test_ftrace_condition "globvar <= 4" "globvar" { 1 2 3 4 }
+test_ftrace_condition "globvar == 5" "globvar" { 5 }
+test_ftrace_condition "globvar != 5" "globvar" { 1 2 3 4 6 7 8 9 10 }
+test_ftrace_condition "globvar > 3 && globvar < 7" "globvar" { 4 5 6 }
+test_ftrace_condition "globvar < 3 || globvar > 7" "globvar" { 1 2 8 9 10 }
+test_ftrace_condition "(globvar << 2) + 1 == 29" "globvar" { 7 }
+test_ftrace_condition "(globvar >> 2) == 2" "globvar" { 8 9 10 }
+
+# Test emit_call by accessing trace state variables.
+test_ftrace_condition "(\$tsv = \$tsv + 2) > 10" "globvar" { 6 7 8 9 10 }
+
+# This expression is used for testing emit_reg.
+if [is_amd64_regs_target] {
+    set arg0exp "\$rdi"
+} elseif [is_x86_like_target] {
+    set arg0exp "*(int *) (\$ebp + 8)"
+} else {
+    set arg0exp ""
+}
+
+if { "$arg0exp" != "" } {
+    test_ftrace_condition "($arg0exp > 500)" "globvar" { 6 7 8 9 10 }
+}

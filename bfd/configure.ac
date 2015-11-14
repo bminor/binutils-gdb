@@ -6,12 +6,12 @@ dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
 dnl the Free Software Foundation; either version 3 of the License, or
 dnl (at your option) any later version.
-dnl 
+dnl
 dnl This program is distributed in the hope that it will be useful,
 dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
-dnl 
+dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
@@ -232,6 +232,8 @@ AC_CHECK_DECLS(malloc)
 AC_CHECK_DECLS(realloc)
 AC_CHECK_DECLS(stpcpy)
 AC_CHECK_DECLS(strstr)
+AC_CHECK_DECLS(asprintf)
+AC_CHECK_DECLS(vasprintf)
 AC_CHECK_DECLS(snprintf)
 AC_CHECK_DECLS(vsnprintf)
 AC_CHECK_DECLS(strnlen)
@@ -426,7 +428,7 @@ changequote([,])dnl
 	COREFILE=lynx-core.lo
 	;;
 changequote(,)dnl
-  rs6000-*-aix[5-9].* | powerpc-*-aix[5-9].*)
+  rs6000-*-aix[5-9].* | powerpc-*-aix[5-9].* | powerpc64-*-aix[5-9].*)
 changequote([,])dnl
         COREFILE=rs6000-core.lo
 	COREFLAG="$COREFLAG -DAIX_5_CORE -DAIX_CORE_DUMPX_CORE"
@@ -445,6 +447,7 @@ changequote([,])dnl
 	;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.lo ;;
   rs6000-*-*)		COREFILE=rs6000-core.lo ;;
+  powerpc64-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix4*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-beos*)	;;
@@ -692,8 +695,10 @@ do
     # use one entry per line, even though this leads to long lines.
     aarch64_elf32_be_vec)	 tb="$tb elf32-aarch64.lo elfxx-aarch64.lo elf-ifunc.lo elf32.lo $elf"; target_size=64 ;;
     aarch64_elf32_le_vec)	 tb="$tb elf32-aarch64.lo elfxx-aarch64.lo elf-ifunc.lo elf32.lo $elf"; target_size=64 ;;
-    aarch64_elf64_be_vec)	 tb="$tb elf64-aarch64.lo elfxx-aarch64.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
-    aarch64_elf64_le_vec)	 tb="$tb elf64-aarch64.lo elfxx-aarch64.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
+    aarch64_elf64_be_vec)	   tb="$tb elf64-aarch64.lo elfxx-aarch64.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
+    aarch64_elf64_be_cloudabi_vec) tb="$tb elf64-aarch64.lo elfxx-aarch64.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
+    aarch64_elf64_le_vec)	   tb="$tb elf64-aarch64.lo elfxx-aarch64.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
+    aarch64_elf64_le_cloudabi_vec) tb="$tb elf64-aarch64.lo elfxx-aarch64.lo elf-ifunc.lo elf64.lo $elf"; target_size=64 ;;
     alpha_ecoff_le_vec)		 tb="$tb coff-alpha.lo ecoff.lo $ecoff"; target_size=64 ;;
     alpha_elf64_vec)		 tb="$tb elf64-alpha.lo elf64.lo $elf"; target_size=64 ;;
     alpha_elf64_fbsd_vec)	 tb="$tb elf64-alpha.lo elf64.lo $elf"; target_size=64 ;;

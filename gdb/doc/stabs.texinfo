@@ -3,6 +3,10 @@
 @setchapternewpage odd
 @settitle STABS
 
+@c man begin INCLUDE
+@include gdb-cfg.texi
+@c man end
+
 @c @finalout
 
 @c This is a dir.info fragment to support semi-automated addition of

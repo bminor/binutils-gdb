@@ -115,11 +115,10 @@ proc do_test { displaced with_bp } {
 		gdb_test "thread 1" "Switching to .*"
 		gdb_test_no_output "set scheduler-locking off"
 
-		# Thread 2 is still stopped at a breakpoint that needs to be
-		# stepped over before proceeding thread 1.  However, the
-		# instruction that is under the breakpoint triggers a
-		# watchpoint, which should trap and be reported to the
-		# user.
+		# Thread 2 is still stopped at a breakpoint that needs
+		# to be stepped over.  However, the instruction that
+		# is under the breakpoint triggers a watchpoint, which
+		# should trap and be reported to the user.
 		gdb_test "$command" "Hardware watchpoint.*: watch_me.*New value = 1.*"
 	    }
 	}
