@@ -639,6 +639,20 @@ s390_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
   return 0;
 }
 
+/* The "gen_return_address" gdbarch method.  Since this is supposed to be
+   just a best-effort method, and we don't really have the means to run
+   the full unwinder here, just collect the link register.  */
+
+static void
+s390_gen_return_address (struct gdbarch *gdbarch,
+			 struct agent_expr *ax, struct axs_value *value,
+			 CORE_ADDR scope)
+{
+  value->type = register_type (gdbarch, S390_R14_REGNUM);
+  value->kind = axs_lvalue_register;
+  value->u.reg = S390_R14_REGNUM;
+}
+
 
 /* A helper for s390_software_single_step, decides if an instruction
    is a partial-execution instruction that needs to be executed until
@@ -8002,6 +8016,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					  s390_ax_pseudo_register_collect);
   set_gdbarch_ax_pseudo_register_push_stack
       (gdbarch, s390_ax_pseudo_register_push_stack);
+  set_gdbarch_gen_return_address (gdbarch, s390_gen_return_address);
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
   set_gdbarch_register_name (gdbarch, s390_register_name);
 
