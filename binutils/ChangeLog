@@ -1,3 +1,24 @@
+2015-11-13  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.26.
+
+2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* dwarf.c (read_leb128): Fix left shift of negative value.
+
+2015-11-03  Alan Modra  <amodra@gmail.com>
+
+	* readelf (process_version_sections): Check DT_VERNEED and
+	DT_VERDEF for all symbols.  Report "*both*" should a symbol
+	have both a verneed and verdef.
+	(get_symbol_version_string): Reduce indentation by early
+	exits.  Don't use SHT_NOBITS heuristic to detect case where a
+	defined symbol has a verneed entry.
+
+2015-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated (simplified) Chinese translation.
+
 2015-10-27  Stephen Fisher  <sfisher@panix.com>
 
 	* binutils.c (process_netbsd_elf_note): New function.

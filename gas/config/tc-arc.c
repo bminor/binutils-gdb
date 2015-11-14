@@ -1067,7 +1067,7 @@ md_section_align (segT segment,
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
 
-  return ((size + (1 << align) - 1) & (-1 << align));
+  return ((size + (1 << align) - 1) & -(1 << align));
 }
 
 /* The location from which a PC relative jump should be calculated,

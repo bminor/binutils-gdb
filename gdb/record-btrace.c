@@ -526,6 +526,140 @@ ui_out_field_uint (struct ui_out *uiout, const char *fld, unsigned int val)
   ui_out_field_fmt (uiout, fld, "%u", val);
 }
 
+/* A range of source lines.  */
+
+struct btrace_line_range
+{
+  /* The symtab this line is from.  */
+  struct symtab *symtab;
+
+  /* The first line (inclusive).  */
+  int begin;
+
+  /* The last line (exclusive).  */
+  int end;
+};
+
+/* Construct a line range.  */
+
+static struct btrace_line_range
+btrace_mk_line_range (struct symtab *symtab, int begin, int end)
+{
+  struct btrace_line_range range;
+
+  range.symtab = symtab;
+  range.begin = begin;
+  range.end = end;
+
+  return range;
+}
+
+/* Add a line to a line range.  */
+
+static struct btrace_line_range
+btrace_line_range_add (struct btrace_line_range range, int line)
+{
+  if (range.end <= range.begin)
+    {
+      /* This is the first entry.  */
+      range.begin = line;
+      range.end = line + 1;
+    }
+  else if (line < range.begin)
+    range.begin = line;
+  else if (range.end < line)
+    range.end = line;
+
+  return range;
+}
+
+/* Return non-zero if RANGE is empty, zero otherwise.  */
+
+static int
+btrace_line_range_is_empty (struct btrace_line_range range)
+{
+  return range.end <= range.begin;
+}
+
+/* Return non-zero if LHS contains RHS, zero otherwise.  */
+
+static int
+btrace_line_range_contains_range (struct btrace_line_range lhs,
+				  struct btrace_line_range rhs)
+{
+  return ((lhs.symtab == rhs.symtab)
+	  && (lhs.begin <= rhs.begin)
+	  && (rhs.end <= lhs.end));
+}
+
+/* Find the line range associated with PC.  */
+
+static struct btrace_line_range
+btrace_find_line_range (CORE_ADDR pc)
+{
+  struct btrace_line_range range;
+  struct linetable_entry *lines;
+  struct linetable *ltable;
+  struct symtab *symtab;
+  int nlines, i;
+
+  symtab = find_pc_line_symtab (pc);
+  if (symtab == NULL)
+    return btrace_mk_line_range (NULL, 0, 0);
+
+  ltable = SYMTAB_LINETABLE (symtab);
+  if (ltable == NULL)
+    return btrace_mk_line_range (symtab, 0, 0);
+
+  nlines = ltable->nitems;
+  lines = ltable->item;
+  if (nlines <= 0)
+    return btrace_mk_line_range (symtab, 0, 0);
+
+  range = btrace_mk_line_range (symtab, 0, 0);
+  for (i = 0; i < nlines - 1; i++)
+    {
+      if ((lines[i].pc == pc) && (lines[i].line != 0))
+	range = btrace_line_range_add (range, lines[i].line);
+    }
+
+  return range;
+}
+
+/* Print source lines in LINES to UIOUT.
+
+   UI_ITEM_CHAIN is a cleanup chain for the last source line and the
+   instructions corresponding to that source line.  When printing a new source
+   line, we do the cleanups for the open chain and open a new cleanup chain for
+   the new source line.  If the source line range in LINES is not empty, this
+   function will leave the cleanup chain for the last printed source line open
+   so instructions can be added to it.  */
+
+static void
+btrace_print_lines (struct btrace_line_range lines, struct ui_out *uiout,
+		    struct cleanup **ui_item_chain, int flags)
+{
+  enum print_source_lines_flags psl_flags;
+  int line;
+
+  psl_flags = 0;
+  if (flags & DISASSEMBLY_FILENAME)
+    psl_flags |= PRINT_SOURCE_LINES_FILENAME;
+
+  for (line = lines.begin; line < lines.end; ++line)
+    {
+      if (*ui_item_chain != NULL)
+	do_cleanups (*ui_item_chain);
+
+      *ui_item_chain
+	= make_cleanup_ui_out_tuple_begin_end (uiout, "src_and_asm_line");
+
+      print_source_lines (lines.symtab, line, line + 1, psl_flags);
+
+      make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+    }
+}
+
 /* Disassemble a section of the recorded instruction trace.  */
 
 static void
@@ -534,13 +668,29 @@ btrace_insn_history (struct ui_out *uiout,
 		     const struct btrace_insn_iterator *begin,
 		     const struct btrace_insn_iterator *end, int flags)
 {
+  struct ui_file *stb;
+  struct cleanup *cleanups, *ui_item_chain;
+  struct disassemble_info di;
   struct gdbarch *gdbarch;
   struct btrace_insn_iterator it;
+  struct btrace_line_range last_lines;
 
   DEBUG ("itrace (0x%x): [%u; %u)", flags, btrace_insn_number (begin),
 	 btrace_insn_number (end));
 
+  flags |= DISASSEMBLY_SPECULATIVE;
+
   gdbarch = target_gdbarch ();
+  stb = mem_fileopen ();
+  cleanups = make_cleanup_ui_file_delete (stb);
+  di = gdb_disassemble_info (gdbarch, stb);
+  last_lines = btrace_mk_line_range (NULL, 0, 0);
+
+  make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
+
+  /* UI_ITEM_CHAIN is a cleanup chain for the last source line and the
+     instructions corresponding to that line.  */
+  ui_item_chain = NULL;
 
   for (it = *begin; btrace_insn_cmp (&it, end) != 0; btrace_insn_next (&it, 1))
     {
@@ -563,37 +713,43 @@ btrace_insn_history (struct ui_out *uiout,
 	}
       else
 	{
-	  char prefix[4];
+	  struct disasm_insn dinsn;
 
-	  /* We may add a speculation prefix later.  We use the same space
-	     that is used for the pc prefix.  */
-	  if ((flags & DISASSEMBLY_OMIT_PC) == 0)
-	    strncpy (prefix, pc_prefix (insn->pc), 3);
-	  else
+	  if ((flags & DISASSEMBLY_SOURCE) != 0)
 	    {
-	      prefix[0] = ' ';
-	      prefix[1] = ' ';
-	      prefix[2] = ' ';
+	      struct btrace_line_range lines;
+
+	      lines = btrace_find_line_range (insn->pc);
+	      if (!btrace_line_range_is_empty (lines)
+		  && !btrace_line_range_contains_range (last_lines, lines))
+		{
+		  btrace_print_lines (lines, uiout, &ui_item_chain, flags);
+		  last_lines = lines;
+		}
+	      else if (ui_item_chain == NULL)
+		{
+		  ui_item_chain
+		    = make_cleanup_ui_out_tuple_begin_end (uiout,
+							   "src_and_asm_line");
+		  /* No source information.  */
+		  make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
+		}
+
+	      gdb_assert (ui_item_chain != NULL);
 	    }
-	  prefix[3] = 0;
 
-	  /* Print the instruction index.  */
-	  ui_out_field_uint (uiout, "index", btrace_insn_number (&it));
-	  ui_out_text (uiout, "\t");
+	  memset (&dinsn, 0, sizeof (dinsn));
+	  dinsn.number = btrace_insn_number (&it);
+	  dinsn.addr = insn->pc;
 
-	  /* Indicate speculative execution by a leading '?'.  */
 	  if ((insn->flags & BTRACE_INSN_FLAG_SPECULATIVE) != 0)
-	    prefix[0] = '?';
+	    dinsn.is_speculative = 1;
 
-	  /* Print the prefix; we tell gdb_disassembly below to omit it.  */
-	  ui_out_field_fmt (uiout, "prefix", "%s", prefix);
-
-	  /* Disassembly with '/m' flag may not produce the expected result.
-	     See PR gdb/11833.  */
-	  gdb_disassembly (gdbarch, uiout, NULL, flags | DISASSEMBLY_OMIT_PC,
-			   1, insn->pc, insn->pc + 1);
+	  gdb_pretty_print_insn (gdbarch, uiout, &di, &dinsn, flags, stb);
 	}
     }
+
+  do_cleanups (cleanups);
 }
 
 /* The to_insn_history method of target record-btrace.  */

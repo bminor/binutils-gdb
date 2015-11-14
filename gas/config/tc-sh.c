@@ -281,15 +281,15 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #if BFD_HOST_64BIT_LONG
 /* The "reach" type is long, so we can only do this for a 64-bit-long
    host.  */
-#define SH64PCREL32_M (((long) -1 << 30) * 2 - 4)
+#define SH64PCREL32_M ((-((long) 1 << 30)) * 2 - 4)
 #define SH64PCREL48_F ((((long) 1 << 47) - 1) - 4)
-#define SH64PCREL48_M (((long) -1 << 47) - 4)
+#define SH64PCREL48_M ((-((long) 1 << 47)) - 4)
 #define SH64PCREL48_LENGTH (3 * 4)
 #else
 /* If the host does not have 64-bit longs, just make this state identical
    in reach to the 32-bit state.  Note that we have a slightly incorrect
    reach, but the correct one above will overflow a 32-bit number.  */
-#define SH64PCREL32_M (((long) -1 << 30) * 2)
+#define SH64PCREL32_M ((-((long) 1 << 30)) * 2)
 #define SH64PCREL48_F SH64PCREL32_F
 #define SH64PCREL48_M SH64PCREL32_M
 #define SH64PCREL48_LENGTH (3 * 4)
@@ -313,14 +313,14 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #if BFD_HOST_64BIT_LONG
 /* The "reach" type is long, so we can only do this for a 64-bit-long
    host.  */
-#define MOVI_32_M (((long) -1 << 30) * 2 - 4)
+#define MOVI_32_M ((-((long) 1 << 30)) * 2 - 4)
 #define MOVI_48_F ((((long) 1 << 47) - 1) - 4)
-#define MOVI_48_M (((long) -1 << 47) - 4)
+#define MOVI_48_M ((-((long) 1 << 47)) - 4)
 #else
 /* If the host does not have 64-bit longs, just make this state identical
    in reach to the 32-bit state.  Note that we have a slightly incorrect
    reach, but the correct one above will overflow a 32-bit number.  */
-#define MOVI_32_M (((long) -1 << 30) * 2)
+#define MOVI_32_M ((-((long) 1 << 30)) * 2)
 #define MOVI_48_F MOVI_32_F
 #define MOVI_48_M MOVI_32_M
 #endif /* BFD_HOST_64BIT_LONG */
@@ -3692,7 +3692,7 @@ md_section_align (segT seg ATTRIBUTE_UNUSED, valueT size)
   return size;
 #else /* ! OBJ_ELF */
   return ((size + (1 << bfd_get_section_alignment (stdoutput, seg)) - 1)
-	  & (-1 << bfd_get_section_alignment (stdoutput, seg)));
+	  & -(1 << bfd_get_section_alignment (stdoutput, seg)));
 #endif /* ! OBJ_ELF */
 }
 

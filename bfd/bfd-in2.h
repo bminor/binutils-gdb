@@ -279,7 +279,7 @@ alent;
 /* Object and core file sections.  */
 
 #define	align_power(addr, align)	\
-  (((addr) + ((bfd_vma) 1 << (align)) - 1) & ((bfd_vma) -1 << (align)))
+  (((addr) + ((bfd_vma) 1 << (align)) - 1) & (-((bfd_vma) 1 << (align))))
 
 typedef struct bfd_section *sec_ptr;
 
@@ -3303,6 +3303,7 @@ instruction.  */
   BFD_RELOC_PPC_VLE_SDAREL_HI16D,
   BFD_RELOC_PPC_VLE_SDAREL_HA16A,
   BFD_RELOC_PPC_VLE_SDAREL_HA16D,
+  BFD_RELOC_PPC_REL16DX_HA,
   BFD_RELOC_PPC64_HIGHER,
   BFD_RELOC_PPC64_HIGHER_S,
   BFD_RELOC_PPC64_HIGHEST,

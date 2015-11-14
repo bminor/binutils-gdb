@@ -1,3 +1,62 @@
+2015-11-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner <bergner@vnet.ibm.com>
+
+	* gold/powerpc.cc (Powerpc_relocate_functions::addr16_dq): New function.
+	(Powerpc_relocate_functions::addr16dx_ha): Likewise.
+	(Target_powerpc::Scan::local): Handle R_POWERPC_REL16DX_HA.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.
+
+2015-11-09  Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
+
+	* layout.h (Layout::is_debug_info_section): Recognize .pdr debug
+	sections.
+
+2015-11-09  Cary Coutant  <ccoutant@gmail.com>
+	    Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
+
+	* copy-relocs.h (Copy_relocs::copy_reloc): Replace reloc parameter
+	with type, offset, addend.
+	(Copy_relocs::save): Likewise.
+	* copy-relocs.cc (Copy_relocs::copy_reloc): Likewise.
+	(Copy_relocs::save): Likewise.
+	* aarch64.cc (Target_aarch64::copy_reloc): Pass r_type, r_offset,
+	and r_addend to Copy_relocs::copy_reloc.
+	* arm.cc (Target_arm::copy_reloc): Likewise.
+	* i386.cc (Target_i386::copy_reloc): Likewise.
+	* mips.cc (Target_mips::copy_reloc): Likewise.
+	* powerpc.cc (Target_powerpc::copy_reloc): Likewise.
+	* s390.cc (Target_s390::copy_reloc): Likewise.
+	* sparc.cc (Target_sparc::copy_reloc): Likewise.
+	* tilegx.cc (Target_tilegx::copy_reloc): Likewise.
+	* x86_64.cc (Target_x86_64::copy_reloc): Likewise.
+
+2015-11-05  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19119
+	PR gold/19172
+	PR gold/19197
+	Revert commit 6457197210144f50a696097c0d308d81d46d5510:
+	2015-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+		* options.h (General_options): Remove "obsolete" from -m.
+		* parameters.cc (set_parameters_target): Check if input target
+		is compatible with output emulation set by "-m emulation".
+
+2015-11-05  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19163
+	* aarch64.cc (Target_aarch64::Relocate::relocate): Don't apply
+	certain relocations if --no-apply-dynamic-relocs is set.
+	* options.h (--apply-dynamic-relocs): New aarch64-specific option.
+
+2015-11-03  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
+2015-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: New (simplified) Chinese translation.
+
 2015-10-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/19184

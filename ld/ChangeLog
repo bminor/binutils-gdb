@@ -1,3 +1,20 @@
+2015-11-13  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.26.
+
+2015-11-05  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+
+2015-11-05  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19203
+	* ld.texinfo (DATA_SEGMENT_ALIGN): Correct second expression.
+
+2015-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated (simplified) Chinese translation.
+
 2015-10-29  Ed Schouten  <ed@nuxi.nl>
 
 	* Makefile.am (ALL_64_EMULATION_SOURCES): Add support for

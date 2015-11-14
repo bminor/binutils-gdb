@@ -69,7 +69,7 @@ mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
 mi_gdb_test "510-data-evaluate-expression vla1" \
-  "510\\^done,value=\"\\(0, 0, 0, 0, 0\\)\"" "evaluate allocated vla"
+  "510\\^done,value=\"\\(.*\\)\"" "evaluate allocated vla"
 
 mi_create_varobj_checked vla1_allocated vla1 "real\\\(kind=4\\\) \\\(5\\\)" \
   "create local variable vla1_allocated"

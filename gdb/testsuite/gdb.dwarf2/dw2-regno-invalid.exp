@@ -29,8 +29,8 @@ set asm_file [standard_output_file $srcfile]
 Dwarf::assemble $asm_file {
     cu {} {
 	compile_unit {
-	    {low_pc main DW_FORM_addr}
-	    {high_pc main+0x10000 DW_FORM_addr}
+	    {low_pc [gdb_target_symbol main] DW_FORM_addr}
+	    {high_pc [gdb_target_symbol main]+0x10000 DW_FORM_addr}
 	} {
 	    declare_labels integer_label
 
@@ -43,8 +43,8 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_subprogram {
 		{name main}
 		{DW_AT_external 1 flag}
-		{low_pc main DW_FORM_addr}
-		{high_pc main+0x10000 DW_FORM_addr}
+		{low_pc [gdb_target_symbol main] DW_FORM_addr}
+		{high_pc [gdb_target_symbol main]+0x10000 DW_FORM_addr}
 	    } {
 		DW_TAG_variable {
 		    {DW_AT_name bregx}

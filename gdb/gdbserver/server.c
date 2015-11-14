@@ -385,7 +385,7 @@ decode_xfer (char *buf, char **object, char **rw, char **annex, char **offset)
    to as much of DATA/LEN as we could fit.  IS_MORE controls
    the first character of the response.  */
 static int
-write_qxfer_response (char *buf, const void *data, int len, int is_more)
+write_qxfer_response (char *buf, const gdb_byte *data, int len, int is_more)
 {
   int out_len;
 
@@ -891,7 +891,8 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 				  ? search_space_len
 				  : search_buf_size);
 
-      found_ptr = memmem (search_buf, nr_search_bytes, pattern, pattern_len);
+      found_ptr = (gdb_byte *) memmem (search_buf, nr_search_bytes, pattern,
+				       pattern_len);
 
       if (found_ptr != NULL)
 	{

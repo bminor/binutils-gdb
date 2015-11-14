@@ -222,7 +222,7 @@ rx_disp (int n, int type, int reg, int size, LocalData * ld)
       ld->rx->op[n].type = RX_Operand_Register;
       break;
     case 0:
-      ld->rx->op[n].type = RX_Operand_Indirect;
+      ld->rx->op[n].type = RX_Operand_Zero_Indirect;
       ld->rx->op[n].addend = 0;
       break;
     case 1:
@@ -4256,8 +4256,16 @@ rx_decode_opcode (unsigned long pc AU,
                   }
                 SYNTAX("mul	#%1, %0");
 #line 602 "rx-decode.opc"
-                ID(mul); DR(rdst); SC(immm); F_____;
-
+		if (immm == 1 && rdst == 0)
+		  {
+		    ID(nop2);
+		    SYNTAX ("nop\t; mul\t#1, r0");
+		  }
+		else
+		  {
+		    ID(mul);
+	          }
+		DR(rdst); SC(immm); F_____;
               }
             break;
         }
@@ -4624,6 +4632,7 @@ rx_decode_opcode (unsigned long pc AU,
                 int im AU = op[0] & 0x03;
 #line 605 "rx-decode.opc"
                 int rdst AU = op[1] & 0x0f;
+		int val = IMMex(im);
                 if (trace)
                   {
                     printf ("\033[33m%s\033[0m  %02x %02x\n",
@@ -4634,7 +4643,25 @@ rx_decode_opcode (unsigned long pc AU,
                   }
                 SYNTAX("mul	#%1, %0");
 #line 605 "rx-decode.opc"
-                ID(mul); DR(rdst); SC(IMMex(im)); F_____;
+		if (val == 1 && rdst == 0)
+		  {
+		    SYNTAX("nop\t; mul\t#1, r0");
+		    switch (im)
+		      {
+		      case 2: ID(nop4); break;
+		      case 3: ID(nop5); break;
+		      case 0: ID(nop6); break;
+		      default:
+			ID(mul);
+			SYNTAX("mul	#%1, %0");
+			break;
+		      }
+		  }
+		else
+		  {
+		    ID(mul);
+		  }
+		DR(rdst); SC(val); F_____;
 
               }
             break;
@@ -6346,19 +6373,19 @@ rx_decode_opcode (unsigned long pc AU,
                 if (sd == 3 && ss == 3 && sz == 2 && rsrc == 0 && rdst == 0)
                   {
                     ID(nop2);
-                    rx->syntax = "nop";
+                    SYNTAX ("nop\t; mov.l\tr0, r0");
                   }
                 else
                   {
                     ID(mov); sBWL(sz); F_____;
                     if ((ss == 3) && (sd != 3))
-              	{
-              	  SD(ss, rdst, sz); DD(sd, rsrc, sz);
-              	}
+		      {
+			SD(ss, rdst, sz); DD(sd, rsrc, sz);
+		      }
                     else
-              	{
-              	  SD(ss, rsrc, sz); DD(sd, rdst, sz);
-              	}
+		      {
+			SD(ss, rsrc, sz); DD(sd, rdst, sz);
+		      }
                   }
 
               }
@@ -7204,7 +7231,7 @@ rx_decode_opcode (unsigned long pc AU,
                       if (ss == 3 && rsrc == 0 && rdst == 0)
                         {
                           ID(nop3);
-                          rx->syntax = "nop";
+                          SYNTAX ("nop\t; max\tr0, r0");
                         }
                       else
                         {
@@ -10331,6 +10358,7 @@ rx_decode_opcode (unsigned long pc AU,
                       int im AU = (op[1] >> 2) & 0x03;
 #line 570 "rx-decode.opc"
                       int rdst AU = op[2] & 0x0f;
+		      int val = IMMex (im);
                       if (trace)
                         {
                           printf ("\033[33m%s\033[0m  %02x %02x %02x\n",
@@ -10341,8 +10369,16 @@ rx_decode_opcode (unsigned long pc AU,
                         }
                       SYNTAX("max	#%1, %0");
 #line 570 "rx-decode.opc"
-                      ID(max); DR(rdst); SC(IMMex(im));
-
+		      if (im == 0 && (unsigned) val == 0x80000000 && rdst == 0)
+			{
+			  ID(nop7);
+			  SYNTAX ("nop\t; max\t#0x80000000, r0");
+			}
+		      else
+			{
+			  ID(max); 
+			}
+		      DR(rdst); SC(val);
                     }
                   break;
                 case 0x50:

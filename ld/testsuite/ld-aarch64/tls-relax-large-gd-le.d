@@ -1,5 +1,6 @@
 #source: tls-relax-large-gd-le.s
 #ld: -T relocs.ld -e0
+#notarget: aarch64_be-*-*
 #objdump: -dr
 #...
 0000000000010000 <test>:

@@ -80,6 +80,10 @@ static const char * id_names[] = {
   "RXO_nop",
   "RXO_nop2",
   "RXO_nop3",
+  "RXO_nop4",
+  "RXO_nop5",
+  "RXO_nop6",
+  "RXO_nop7",
 
   "RXO_scmpu",
   "RXO_smovu",
@@ -149,7 +153,7 @@ static const char * optype_names[] = {
 
 #define N_RXO (sizeof(id_names)/sizeof(id_names[0]))
 #define N_RXT (sizeof(optype_names)/sizeof(optype_names[0]))
-#define N_MAP 30
+#define N_MAP 90
 
 static unsigned long long benchmark_start_cycle;
 static unsigned long long benchmark_end_cycle;
@@ -406,6 +410,7 @@ get_op (const RX_Opcode_Decoded *rd, int i)
       put_reg (o->reg, get_reg (o->reg) - size2bytes[o->size]);
       /* fall through */
     case RX_Operand_Postinc:	/* [Rn+] */
+    case RX_Operand_Zero_Indirect:	/* [Rn + 0] */
     case RX_Operand_Indirect:	/* [Rn + addend] */
     case RX_Operand_TwoReg:	/* [Rn + scale * R2] */
 #ifdef CYCLE_ACCURATE
@@ -433,6 +438,7 @@ get_op (const RX_Opcode_Decoded *rd, int i)
 
       switch (o->size)
 	{
+	default:
 	case RX_AnySize:
 	  rx_abort ();
 
@@ -473,6 +479,7 @@ get_op (const RX_Opcode_Decoded *rd, int i)
      to the size.  */
   switch (o->size)
     {
+    default:
     case RX_AnySize:
       rx_abort ();
 
@@ -518,6 +525,7 @@ put_op (const RX_Opcode_Decoded *rd, int i, int v)
 
   switch (o->size)
     {
+    default:
     case RX_AnySize:
       if (o->type != RX_Operand_Register)
 	rx_abort ();
@@ -574,6 +582,7 @@ put_op (const RX_Opcode_Decoded *rd, int i, int v)
       put_reg (o->reg, get_reg (o->reg) - size2bytes[o->size]);
       /* fall through */
     case RX_Operand_Postinc:	/* [Rn+] */
+    case RX_Operand_Zero_Indirect:	/* [Rn + 0] */
     case RX_Operand_Indirect:	/* [Rn + addend] */
     case RX_Operand_TwoReg:	/* [Rn + scale * R2] */
 
@@ -597,6 +606,7 @@ put_op (const RX_Opcode_Decoded *rd, int i, int v)
 
       switch (o->size)
 	{
+	default:
 	case RX_AnySize:
 	  rx_abort ();
 
@@ -1504,6 +1514,10 @@ decode_opcode ()
     case RXO_nop:
     case RXO_nop2:
     case RXO_nop3:
+    case RXO_nop4:
+    case RXO_nop5:
+    case RXO_nop6:
+    case RXO_nop7:
       E1;
       break;
 

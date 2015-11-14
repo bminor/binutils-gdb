@@ -2185,7 +2185,8 @@ proc supports_process_record {} {
     if { [istarget "arm*-*-linux*"] || [istarget "x86_64-*-linux*"]
          || [istarget "i\[34567\]86-*-linux*"]
          || [istarget "aarch64*-*-linux*"]
-         || [istarget "powerpc*-*-linux*"] } {
+         || [istarget "powerpc*-*-linux*"]
+         || [istarget "s390*-*-linux*"] } {
 	return 1
     }
 
@@ -2203,7 +2204,8 @@ proc supports_reverse {} {
     if { [istarget "arm*-*-linux*"] || [istarget "x86_64-*-linux*"]
          || [istarget "i\[34567\]86-*-linux*"]
          || [istarget "aarch64*-*-linux*"]
-         || [istarget "powerpc*-*-linux*"] } {
+         || [istarget "powerpc*-*-linux*"]
+         || [istarget "s390*-*-linux*"] } {
 	return 1
     }
 
@@ -5521,18 +5523,96 @@ proc core_find {binfile {deletefiles {}} {arg ""}} {
     return $destcore
 }
 
-# gdb_target_symbol_prefix_flags returns a string that can be added
-# to gdb_compile options to define SYMBOL_PREFIX macro value
-# symbol_prefix_flags returns a string that can be added
-# for targets that use underscore as symbol prefix.
-# TODO: find out automatically if the target needs this.
+# gdb_target_symbol_prefix compiles a test program and then examines
+# the output from objdump to determine the prefix (such as underscore)
+# for linker symbol prefixes.
+
+gdb_caching_proc gdb_target_symbol_prefix {
+    # Set up and compile a simple test program...
+    set src [standard_temp_file main[pid].c]
+    set exe [standard_temp_file main[pid].x]
+
+    gdb_produce_source $src {
+	int main() {
+	    return 0;
+	}
+    }
+
+    verbose "compiling testfile $src" 2
+    set compile_flags {debug nowarnings quiet}
+    set lines [gdb_compile $src $exe executable $compile_flags]
+
+    set prefix ""
+
+    if ![string match "" $lines] then {
+        verbose "gdb_target_symbol_prefix: testfile compilation failed, returning null prefix" 2
+    } else {
+	set objdump_program [gdb_find_objdump]
+	set result [catch "exec $objdump_program --syms $exe" output]
+
+	if { $result == 0 \
+	     && ![regexp -lineanchor \
+	          { ([^ a-zA-Z0-9]*)main$} $output dummy prefix] } {
+	    verbose "gdb_target_symbol_prefix: Could not find main in objdump output; returning null prefix" 2
+	}
+    }
+
+    file delete $src
+    file delete $exe
+
+    return $prefix
+}
+
+# gdb_target_symbol returns the provided symbol with the correct prefix
+# prepended.  (See gdb_target_symbol_prefix, above.)
+
+proc gdb_target_symbol { symbol } {
+  set prefix [gdb_target_symbol_prefix]
+  return "${prefix}${symbol}"
+}
+
+# gdb_target_symbol_prefix_flags_asm returns a string that can be
+# added to gdb_compile options to define the C-preprocessor macro
+# SYMBOL_PREFIX with a value that can be prepended to symbols
+# for targets which require a prefix, such as underscore.
+#
+# This version (_asm) defines the prefix without double quotes
+# surrounding the prefix.  It is used to define the macro
+# SYMBOL_PREFIX for assembly language files.  Another version, below,
+# is used for symbols in inline assembler in C/C++ files.
+# 
+# The lack of quotes in this version (_asm) makes it possible to
+# define supporting macros in the .S file.  (The version which
+# uses quotes for the prefix won't work for such files since it's
+# impossible to define a quote-stripping macro in C.)
+#
+# It's possible to use this version (_asm) for C/C++ source files too,
+# but a string is usually required in such files; providing a version
+# (no _asm) which encloses the prefix with double quotes makes it
+# somewhat easier to define the supporting macros in the test case.
+
+proc gdb_target_symbol_prefix_flags_asm {} {
+    set prefix [gdb_target_symbol_prefix]
+    if {$prefix ne ""} {
+	return "additional_flags=-DSYMBOL_PREFIX=$prefix"
+    } else {
+	return "";
+    }
+}
+
+# gdb_target_symbol_prefix_flags returns the same string as
+# gdb_target_symbol_prefix_flags_asm, above, but with the prefix
+# enclosed in double quotes if there is a prefix.
+#
+# See the comment for gdb_target_symbol_prefix_flags_asm for an
+# extended discussion.
 
 proc gdb_target_symbol_prefix_flags {} {
-    if { [istarget "i?86-*-cygwin*"] || [istarget "i?86-*-mingw*"]
-	 || [istarget "*-*-msdosdjgpp*"] || [istarget "*-*-go32*"] } {
-	return "additional_flags=-DSYMBOL_PREFIX=\"_\""
+    set prefix [gdb_target_symbol_prefix]
+    if {$prefix ne ""} {
+	return "additional_flags=-DSYMBOL_PREFIX=\"$prefix\""
     } else {
-	return ""
+	return "";
     }
 }
 

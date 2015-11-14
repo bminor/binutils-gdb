@@ -39,7 +39,7 @@ void
 arm_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
-  uint32_t *regs = buf;
+  uint32_t *regs = (uint32_t *) buf;
 
   for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
     collect_register (regcache, i, &regs[i]);
@@ -54,7 +54,7 @@ arm_store_gregset (struct regcache *regcache, const void *buf)
 {
   int i;
   char zerobuf[8];
-  const uint32_t *regs = buf;
+  const uint32_t *regs = (const uint32_t *) buf;
 
   memset (zerobuf, 0, 8);
   for (i = ARM_A1_REGNUM; i <= ARM_PC_REGNUM; i++)
@@ -120,7 +120,7 @@ static struct regset_info aarch32_regsets[] = {
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_VFP, 32 * 8 + 4,
     EXTENDED_REGS,
     arm_fill_vfpregset, arm_store_vfpregset },
-  { 0, 0, 0, -1, -1, NULL, NULL }
+  NULL_REGSET
 };
 
 static struct regsets_info aarch32_regsets_info =

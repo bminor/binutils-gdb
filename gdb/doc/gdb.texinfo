@@ -6741,6 +6741,20 @@ default, ten instructions are disassembled.  This can be changed using
 the @code{set record instruction-history-size} command.  Instructions
 are printed in execution order.
 
+It can also print mixed source+disassembly if you specify the the
+@code{/m} or @code{/s} modifier, and print the raw instructions in hex
+as well as in symbolic form by specifying the @code{/r} modifier.
+
+The current position marker is printed for the instruction at the
+current program counter value.  This instruction can appear multiple
+times in the trace and the current position marker will be printed
+every time.  To omit the current position marker, specify the
+@code{/p} modifier.
+
+To better align the printed instructions when the trace contains
+instructions from more than one function, the function name may be
+omitted by specifying the @code{/f} modifier.
+
 Speculatively executed instructions are prefixed with @samp{?}.  This
 feature is not available for all recording formats.
 

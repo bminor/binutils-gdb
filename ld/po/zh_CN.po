@@ -260,7 +260,7 @@ msgid ""
 "                                       runtime.\n"
 msgstr ""
 "  --enable-runtime-pseudo-reloc      利用在运行阶段加入已解析的假性重寻址\n"
-"                                       来做为自动导入限制的解决方法。\n"
+"                                       来作为自动导入限制的解决方法。\n"
 
 #: emultempl/pe.em:473
 #, c-format
@@ -1921,7 +1921,7 @@ msgstr "读取版本信息脚本"
 msgid ""
 "Take export symbols list from .exports, using\n"
 "                                SYMBOL as the version."
-msgstr "从 .exports 取得导出符号清单，使用 SYMBOL 做为版本。"
+msgstr "从 .exports 取得导出符号清单，使用 SYMBOL 作为版本。"
 
 #: lexsup.c:470
 msgid "Add data symbols to dynamic list"
@@ -1981,7 +1981,7 @@ msgstr "包含下述文件中的所有对象"
 
 #: lexsup.c:505
 msgid "Use wrapper functions for SYMBOL"
-msgstr "使用包装函数做为[符号]"
+msgstr "使用包装函数作为[符号]"
 
 #: lexsup.c:509
 msgid "Unresolved SYMBOL will not cause an error or warning"

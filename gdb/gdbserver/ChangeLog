@@ -1,3 +1,77 @@
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-mips-low.c (mips_fill_gregset): Add cast.
+	(mips_store_gregset): Likewise.
+	(mips_fill_fpregset): Likewise.
+	(mips_store_fpregset): Likewise.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-mips-low.c (mips_add_watchpoint): Rename private to
+	priv.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-mips-low.c (mips_linux_new_thread): Change type of
+	watch_type to enum target_hw_bp_type.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+		* linux-arm-low.c (raw_bkpt_type_to_arm_hwbp_type):
+		Change return type to arm_hwbp_type.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-aarch32-low.c (arm_fill_gregset): Add cast.
+	(arm_store_gregset): Likewise.
+	* linux-arm-low.c (arm_get_hwcap): Likewise.
+	(arm_read_description): Likewise.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-aarch32-low.c (aarch32_regsets): Use NULL_REGSET.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-ppc-low.c (ppc_get_hwcap): Add cast.
+	(ppc_fill_vsxregset): Likewise.
+	(ppc_store_vsxregset): Likewise.
+	(ppc_fill_vrregset): Likewise.
+	(ppc_store_vrregset): Likewise.
+	(ppc_fill_evrregset): Likewise.
+	(ppc_store_evrregset): Likewise.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-ppc-low.c (ppc_usrregs_info): Remove
+	forward-declaration.
+	(ppc_arch_setup): Move lower in file.
+
+2015-10-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* proc-service.c (ps_pdread): Change CORE_ADDR cast to uintptr_t.
+	(ps_pdwrite): Likewise.
+
+2015-10-29 Henrik Wallin <henrik.wallin@windriver.com>
+
+	* linux-arm-low.c (arm_new_thread): Move pointer dereference
+	to after assert checks.
+
+2015-10-29  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* proc-service.c (ps_pdread): Add/adjust casts.
+	(ps_pdwrite): Add/adjust casts.
+
+2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* server.c (handle_search_memory_1): Cast return value of
+	memmem.
+
+2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* server.c (write_qxfer_response): Change type of data to
+	gdb_byte *.
+
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
 	* mem-break.c (Z_packet_to_bkpt_type): Add cast.

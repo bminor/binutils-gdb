@@ -1,3 +1,67 @@
+2015-11-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (ppc_opts): Add "power9" and "pwr9" entries.
+	Add PPC_OPCODE_VSX3 to the vsx entry.
+	(powerpc_init_dialect): Set default dialect to power9.
+	* ppc-opc.c (insert_dcmxs, extract_dcmxs, insert_dxd, extract_dxd,
+	insert_dxdn, extract_dxdn, insert_l0, extract_l0, insert_l1,
+	extract_l1 insert_xtq6, extract_xtq6): New static functions.
+	(insert_esync): Test for illegal L operand value.
+	(DCMX, DCMXS, DXD, NDXD, L0, L1, RC, FC, UIM6, X_R, RIC, PRS, XSQ6,
+	XTQ6, LRAND, IMM8, DQX, DQX_MASK, DX, DX_MASK, VXVAPS_MASK, VXVA,XVA,
+	XX2VA, XVARC, XBF_MASK, XX2UIM4_MASK, XX2BFD_MASK, XX2DCMXS_MASK,
+	XVA_MASK, XRLA_MASK, XBFRARB_MASK, XLRAND_MASK, POWER9, PPCVEC3,
+	PPCVSX3): New defines.
+	(powerpc_opcodes) <ps_cmpu0, ps_cmpo0, ps_cmpu1, ps_cmpo1, fcmpu,
+	fcmpo, ftdiv, ftsqrt>: Use XBF_MASK.
+	<mcrxr>: Use XBFRARB_MASK.
+	<addpcis, bcdcfn., bcdcfsq., bcdcfz., bcdcpsgn., bcdctn., bcdctsq.,
+	bcdctz., bcds., bcdsetsgn., bcdsr., bcdtrunc., bcdus., bcdutrunc.,
+	cmpeqb, cmprb, cnttzd, cnttzd., cnttzw, cnttzw., copy, copy_first,
+	cp_abort, darn, dtstsfi, dtstsfiq, extswsli, extswsli., ldat, ldmx,
+	lwat, lxsd, lxsibzx, lxsihzx, lxssp, lxv, lxvb16x, lxvh8x, lxvl, lxvll,
+	lxvwsx, lxvx, maddhd, maddhdu, maddld, mcrxrx, mfvsrld, modsd, modsw,
+	modud, moduw, msgsync, mtvsrdd, mtvsrws, paste, paste., paste_last,
+	rmieg, setb, slbieg, slbsync, stdat, stop, stwat, stxsd, stxsibx,
+	stxsihx, stxssp, stxv, stxvb16x, stxvh8x, stxvl, stxvll, stxvx,
+	subpcis, urfid, vbpermd, vclzlsbb, vcmpneb, vcmpneb., vcmpneh,
+	vcmpneh., vcmpnew, vcmpnew., vcmpnezb, vcmpnezb., vcmpnezh, vcmpnezh.,
+	vcmpnezw, vcmpnezw., vctzb, vctzd, vctzh, vctzlsbb, vctzw, vextractd,
+	vextractub, vextractuh, vextractuw, vextsb2d, vextsb2w, vextsh2d,
+	vextsh2w, vextsw2d, vextublx, vextubrx, vextuhlx, vextuhrx, vextuwlx,
+	vextuwrx, vinsertb, vinsertd, vinserth, vinsertw, vmul10cuq,
+	vmul10ecuq, vmul10euq, vmul10uq, vnegd, vnegw, vpermr, vprtybd,
+	vprtybq, vprtybw, vrldmi, vrldnm, vrlwmi, vrlwnm, vslv, vsrv, wait,
+	xsabsqp, xsaddqp, xsaddqpo, xscmpeqdp, xscmpexpdp, xscmpexpqp,
+	xscmpgedp, xscmpgtdp, xscmpnedp, xscmpoqp, xscmpuqp, xscpsgnqp,
+	xscvdphp, xscvdpqp, xscvhpdp, xscvqpdp, xscvqpdpo, xscvqpsdz,
+	xscvqpswz, xscvqpudz, xscvqpuwz, xscvsdqp, xscvudqp, xsdivqp,
+	xsdivqpo, xsiexpdp, xsiexpqp, xsmaddqp, xsmaddqpo, xsmaxcdp,
+	xsmaxjdp, xsmincdp, xsminjdp, xsmsubqp, xsmsubqpo, xsmulqp, xsmulqpo,
+	xsnabsqp, xsnegqp, xsnmaddqp, xsnmaddqpo, xsnmsubqp, xsnmsubqpo,
+	xsrqpi, xsrqpix, xsrqpxp, xssqrtqp, xssqrtqpo, xssubqp, xssubqpo,
+	xststdcdp, xststdcqp, xststdcsp, xsxexpdp, xsxexpqp, xsxsigdp,
+	xsxsigqp, xvcmpnedp, xvcmpnedp., xvcmpnesp, xvcmpnesp., xvcvhpsp,
+	xvcvsphp, xviexpdp, xviexpsp, xvtstdcdp, xvtstdcsp, xvxexpdp,
+	xvxexpsp, xvxsigdp, xvxsigsp, xxbrd, xxbrh, xxbrq, xxbrw, xxextractuw,
+	xxinsertw, xxperm, xxpermr, xxspltib>: New instructions.
+	<doze, nap, sleep, rvwinkle, waitasec, lxvx, stxvx>: Disable on POWER9.
+	<tlbiel, tlbie, sync, slbmfev, slbmfee>: Add additional operands.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* rx-decode.opc (rx_decode_opcode): Decode extra NOP
+	instructions.
+	* rx-decode.c: Regenerate.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* rx-decode.opc (rx_disp): If the displacement is zero, set the
+	type to RX_Operand_Zero_Indirect.
+	* rx-decode.c: Regenerate.
+	* rx-dis (print_insn): Handle RX_Operand_Zero_Indirect.
+
 2015-10-28  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-dis.c	(aarch64_decode_insn): Add one argument

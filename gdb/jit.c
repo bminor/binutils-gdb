@@ -177,7 +177,7 @@ jit_reader_load (const char *file_name)
   so = gdb_dlopen (file_name);
   old_cleanups = make_cleanup_dlclose (so);
 
-  init_fn = gdb_dlsym (so, reader_init_fn_sym);
+  init_fn = (reader_init_fn_type *) gdb_dlsym (so, reader_init_fn_sym);
   if (!init_fn)
     error (_("Could not locate initialization function: %s."),
           reader_init_fn_sym);
@@ -491,7 +491,8 @@ typedef CORE_ADDR jit_dbg_reader_data;
 static enum gdb_status
 jit_target_read_impl (GDB_CORE_ADDR target_mem, void *gdb_buf, int len)
 {
-  int result = target_read_memory ((CORE_ADDR) target_mem, gdb_buf, len);
+  int result = target_read_memory ((CORE_ADDR) target_mem,
+				   (gdb_byte *) gdb_buf, len);
   if (result == 0)
     return GDB_SUCCESS;
   else

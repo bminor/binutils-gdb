@@ -1751,7 +1751,7 @@ md_number_to_field (char *instrP,		/* Pointer to instruction to be fixed.  */
     {
       /* Put bit field into instruction and write back in target
          * byte order.  */
-      val &= ~(-1 << (int) numbits);	/* Clear unused sign bits.  */
+      val &= ~(-(1 << (int) numbits));	/* Clear unused sign bits.  */
       instr |= val;
       md_number_to_chars (instrP, instr, 4);
     }
@@ -2466,7 +2466,7 @@ md_section_align (segT seg,
   int align;
 
   align = bfd_get_section_alignment (stdoutput, seg);
-  return (addr + (1 << align) - 1) & (-1 << align);
+  return (addr + (1 << align) - 1) & -(1 << align);
 }
 
 extern int coff_flags;

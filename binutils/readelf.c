@@ -9889,8 +9889,8 @@ process_version_sections (FILE * file)
 	    for (cnt = 0; cnt < total; cnt += 4)
 	      {
 		int j, nn;
-		int check_def, check_need;
-		char * name;
+		char *name;
+		char *invalid = _("*invalid*");
 
 		printf ("  %03x:", cnt);
 
@@ -9917,20 +9917,8 @@ process_version_sections (FILE * file)
 		          break;
 			}
 
-		      check_def = 1;
-		      check_need = 1;
-		      if (symbols[cnt + j].st_shndx >= elf_header.e_shnum
-			  || section_headers[symbols[cnt + j].st_shndx].sh_type
-			     != SHT_NOBITS)
-			{
-			  if (symbols[cnt + j].st_shndx == SHN_UNDEF)
-			    check_def = 0;
-			  else
-			    check_need = 0;
-			}
-
-		      if (check_need
-			  && version_info[DT_VERSIONTAGIDX (DT_VERNEED)])
+		      name = NULL;
+		      if (version_info[DT_VERSIONTAGIDX (DT_VERNEED)])
 			{
 			  Elf_Internal_Verneed ivn;
 			  unsigned long offset;
@@ -9979,14 +9967,9 @@ process_version_sections (FILE * file)
 				  ivna.vna_name = BYTE_GET (evna.vna_name);
 
 				  if (ivna.vna_name >= string_sec->sh_size)
-				    name = _("*invalid*");
+				    name = invalid;
 				  else
 				    name = strtab + ivna.vna_name;
-				  nn += printf ("(%s%-*s",
-						name,
-						12 - (int) strlen (name),
-						")");
-				  check_def = 0;
 				  break;
 				}
 
@@ -9995,7 +9978,7 @@ process_version_sections (FILE * file)
 			  while (ivn.vn_next);
 			}
 
-		      if (check_def && data[cnt + j] != 0x8001
+		      if (data[cnt + j] != 0x8001
 			  && version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
 			{
 			  Elf_Internal_Verdef ivd;
@@ -10043,15 +10026,18 @@ process_version_sections (FILE * file)
 			      ivda.vda_name = BYTE_GET (evda.vda_name);
 
 			      if (ivda.vda_name >= string_sec->sh_size)
-				name = _("*invalid*");
+				name = invalid;
+			      else if (name != NULL && name != invalid)
+				name = _("*both*");
 			      else
 				name = strtab + ivda.vda_name;
-			      nn += printf ("(%s%-*s",
-					    name,
-					    12 - (int) strlen (name),
-					    ")");
 			    }
 			}
+		      if (name != NULL)
+			nn += printf ("(%s%-*s",
+				      name,
+				      12 - (int) strlen (name),
+				      ")");
 
 		      if (nn < 18)
 			printf ("%*c", 18 - nn, ' ');
@@ -10460,172 +10446,156 @@ get_symbol_version_string (FILE *file, int is_dynsym,
 			   enum versioned_symbol_info *sym_info,
 			   unsigned short *vna_other)
 {
-  const char *version_string = NULL;
+  unsigned char data[2];
+  unsigned short vers_data;
+  unsigned long offset;
 
-  if (is_dynsym
-      && version_info[DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
+  if (!is_dynsym
+      || version_info[DT_VERSIONTAGIDX (DT_VERSYM)] == 0)
+    return NULL;
+
+  offset = offset_from_vma (file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
+			    sizeof data + si * sizeof (vers_data));
+
+  if (get_data (&data, file, offset + si * sizeof (vers_data),
+		sizeof (data), 1, _("version data")) == NULL)
+    return NULL;
+
+  vers_data = byte_get (data, 2);
+
+  if ((vers_data & VERSYM_HIDDEN) == 0 && vers_data <= 1)
+    return NULL;
+
+  /* Usually we'd only see verdef for defined symbols, and verneed for
+     undefined symbols.  However, symbols defined by the linker in
+     .dynbss for variables copied from a shared library in order to
+     avoid text relocations are defined yet have verneed.  We could
+     use a heuristic to detect the special case, for example, check
+     for verneed first on symbols defined in SHT_NOBITS sections, but
+     it is simpler and more reliable to just look for both verdef and
+     verneed.  .dynbss might not be mapped to a SHT_NOBITS section.  */
+
+  if (psym->st_shndx != SHN_UNDEF
+      && vers_data != 0x8001
+      && version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
     {
-      unsigned char data[2];
-      unsigned short vers_data;
-      unsigned long offset;
-      int is_nobits;
-      int check_def;
+      Elf_Internal_Verdef ivd;
+      Elf_Internal_Verdaux ivda;
+      Elf_External_Verdaux evda;
+      unsigned long off;
 
-      offset = offset_from_vma
-	(file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
-	 sizeof data + si * sizeof (vers_data));
+      off = offset_from_vma (file,
+			     version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
+			     sizeof (Elf_External_Verdef));
 
-      if (get_data (&data, file, offset + si * sizeof (vers_data),
-		    sizeof (data), 1, _("version data")) == NULL)
-	return NULL;
-
-      vers_data = byte_get (data, 2);
-
-      is_nobits = (section_headers != NULL
-		   && psym->st_shndx < elf_header.e_shnum
-		   && section_headers[psym->st_shndx].sh_type
-		   == SHT_NOBITS);
-
-      check_def = (psym->st_shndx != SHN_UNDEF);
-
-      if ((vers_data & VERSYM_HIDDEN) || vers_data > 1)
+      do
 	{
-	  if (version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
-	      && (is_nobits || ! check_def))
+	  Elf_External_Verdef evd;
+
+	  if (get_data (&evd, file, off, sizeof (evd), 1,
+			_("version def")) == NULL)
 	    {
-	      Elf_External_Verneed evn;
-	      Elf_Internal_Verneed ivn;
-	      Elf_Internal_Vernaux ivna;
-
-	      /* We must test both.  */
-	      offset = offset_from_vma
-		(file, version_info[DT_VERSIONTAGIDX (DT_VERNEED)],
-		 sizeof evn);
-
-	      do
-		{
-		  unsigned long vna_off;
-
-		  if (get_data (&evn, file, offset, sizeof (evn), 1,
-				_("version need")) == NULL)
-		    {
-		      ivna.vna_next = 0;
-		      ivna.vna_other = 0;
-		      ivna.vna_name = 0;
-		      break;
-		    }
-
-		  ivn.vn_aux  = BYTE_GET (evn.vn_aux);
-		  ivn.vn_next = BYTE_GET (evn.vn_next);
-
-		  vna_off = offset + ivn.vn_aux;
-
-		  do
-		    {
-		      Elf_External_Vernaux evna;
-
-		      if (get_data (&evna, file, vna_off,
-				    sizeof (evna), 1,
-				    _("version need aux (3)")) == NULL)
-			{
-			  ivna.vna_next = 0;
-			  ivna.vna_other = 0;
-			  ivna.vna_name = 0;
-			}
-		      else
-			{
-			  ivna.vna_other = BYTE_GET (evna.vna_other);
-			  ivna.vna_next  = BYTE_GET (evna.vna_next);
-			  ivna.vna_name  = BYTE_GET (evna.vna_name);
-			}
-
-		      vna_off += ivna.vna_next;
-		    }
-		  while (ivna.vna_other != vers_data
-			 && ivna.vna_next != 0);
-
-		  if (ivna.vna_other == vers_data)
-		    break;
-
-		  offset += ivn.vn_next;
-		}
-	      while (ivn.vn_next != 0);
-
-	      if (ivna.vna_other == vers_data)
-		{
-		  *sym_info = symbol_undefined;
-		  *vna_other = ivna.vna_other;
-		  version_string = (ivna.vna_name < strtab_size
-				    ? strtab + ivna.vna_name
-				    : _("<corrupt>"));
-		  check_def = 0;
-		}
-	      else if (! is_nobits)
-		error (_("bad dynamic symbol\n"));
-	      else
-		check_def = 1;
+	      ivd.vd_ndx = 0;
+	      ivd.vd_aux = 0;
+	      ivd.vd_next = 0;
+	    }
+	  else
+	    {
+	      ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
+	      ivd.vd_aux = BYTE_GET (evd.vd_aux);
+	      ivd.vd_next = BYTE_GET (evd.vd_next);
 	    }
 
-	  if (check_def)
+	  off += ivd.vd_next;
+	}
+      while (ivd.vd_ndx != (vers_data & VERSYM_VERSION) && ivd.vd_next != 0);
+
+      if (ivd.vd_ndx == (vers_data & VERSYM_VERSION))
+	{
+	  off -= ivd.vd_next;
+	  off += ivd.vd_aux;
+
+	  if (get_data (&evda, file, off, sizeof (evda), 1,
+			_("version def aux")) != NULL)
 	    {
-	      if (vers_data != 0x8001
-		  && version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
+	      ivda.vda_name = BYTE_GET (evda.vda_name);
+
+	      if (psym->st_name != ivda.vda_name)
 		{
-		  Elf_Internal_Verdef ivd;
-		  Elf_Internal_Verdaux ivda;
-		  Elf_External_Verdaux evda;
-		  unsigned long off;
-
-		  off = offset_from_vma
-		    (file,
-		     version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
-		     sizeof (Elf_External_Verdef));
-
-		  do
-		    {
-		      Elf_External_Verdef evd;
-
-		      if (get_data (&evd, file, off, sizeof (evd),
-				    1, _("version def")) == NULL)
-			{
-			  ivd.vd_ndx = 0;
-			  ivd.vd_aux = 0;
-			  ivd.vd_next = 0;
-			}
-		      else
-			{
-			  ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
-			  ivd.vd_aux = BYTE_GET (evd.vd_aux);
-			  ivd.vd_next = BYTE_GET (evd.vd_next);
-			}
-
-		      off += ivd.vd_next;
-		    }
-		  while (ivd.vd_ndx != (vers_data & VERSYM_VERSION)
-			 && ivd.vd_next != 0);
-
-		  off -= ivd.vd_next;
-		  off += ivd.vd_aux;
-
-		  if (get_data (&evda, file, off, sizeof (evda),
-				1, _("version def aux")) == NULL)
-		    return version_string;
-
-		  ivda.vda_name = BYTE_GET (evda.vda_name);
-
-		  if (psym->st_name != ivda.vda_name)
-		    {
-		      *sym_info = ((vers_data & VERSYM_HIDDEN) != 0
-				   ? symbol_hidden : symbol_public);
-		      version_string = (ivda.vda_name < strtab_size
-					? strtab + ivda.vda_name
-					: _("<corrupt>"));
-		    }
+		  *sym_info = ((vers_data & VERSYM_HIDDEN) != 0
+			       ? symbol_hidden : symbol_public);
+		  return (ivda.vda_name < strtab_size
+			  ? strtab + ivda.vda_name : _("<corrupt>"));
 		}
 	    }
 	}
     }
-  return version_string;
+
+  if (version_info[DT_VERSIONTAGIDX (DT_VERNEED)])
+    {
+      Elf_External_Verneed evn;
+      Elf_Internal_Verneed ivn;
+      Elf_Internal_Vernaux ivna;
+
+      offset = offset_from_vma (file,
+				version_info[DT_VERSIONTAGIDX (DT_VERNEED)],
+				sizeof evn);
+      do
+	{
+	  unsigned long vna_off;
+
+	  if (get_data (&evn, file, offset, sizeof (evn), 1,
+			_("version need")) == NULL)
+	    {
+	      ivna.vna_next = 0;
+	      ivna.vna_other = 0;
+	      ivna.vna_name = 0;
+	      break;
+	    }
+
+	  ivn.vn_aux  = BYTE_GET (evn.vn_aux);
+	  ivn.vn_next = BYTE_GET (evn.vn_next);
+
+	  vna_off = offset + ivn.vn_aux;
+
+	  do
+	    {
+	      Elf_External_Vernaux evna;
+
+	      if (get_data (&evna, file, vna_off, sizeof (evna), 1,
+			    _("version need aux (3)")) == NULL)
+		{
+		  ivna.vna_next = 0;
+		  ivna.vna_other = 0;
+		  ivna.vna_name = 0;
+		}
+	      else
+		{
+		  ivna.vna_other = BYTE_GET (evna.vna_other);
+		  ivna.vna_next  = BYTE_GET (evna.vna_next);
+		  ivna.vna_name  = BYTE_GET (evna.vna_name);
+		}
+
+	      vna_off += ivna.vna_next;
+	    }
+	  while (ivna.vna_other != vers_data && ivna.vna_next != 0);
+
+	  if (ivna.vna_other == vers_data)
+	    break;
+
+	  offset += ivn.vn_next;
+	}
+      while (ivn.vn_next != 0);
+
+      if (ivna.vna_other == vers_data)
+	{
+	  *sym_info = symbol_undefined;
+	  *vna_other = ivna.vna_other;
+	  return (ivna.vna_name < strtab_size
+		  ? strtab + ivna.vna_name : _("<corrupt>"));
+	}
+    }
+  return NULL;
 }
 
 /* Dump the symbol table.  */

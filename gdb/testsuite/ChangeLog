@@ -1,3 +1,173 @@
+2015-11-13  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/call-sc.exp (test_scalar_returns): Remove the
+	comments about d10v.
+	(test_scalar_returns): Likewise.
+	* gdb.base/d10v.ld: Remove.
+	* gdb.base/overlays.exp: Remove the target triplet checking for
+	d10v-*-*.
+	* gdb.base/structs.exp (test_struct_returns): Remove the
+	comments about d10v.
+	(test_struct_calls): Likewise.
+
+2015-11-13  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/gnu_vector.exp: Check the return value by "p res".
+	* gdb.base/gnu_vector.c: Don't include stdio.h.
+	(main): Don't print res and call add_some_intvecs.
+
+2015-11-11  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/change-loc.h: include "trace-common.h", remove SYMBOL
+	macro.
+	(func5): Removed.
+	(func4): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/ftrace-lock.c: include "trace-common.h", remove SYMBOL
+	macro.
+	(func): Removed.
+	(thread_function): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/ftrace.c: include "trace-common.h", remove SYMBOL macro.
+	(func): Remove.
+	(marker): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/pendshr1.c: include "trace-common.h", remove SYMBOL macro.
+	(pendfunc1): Remove.
+	(pendfunc): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/pendshr2.c: include "trace-common.h", remove SYMBOL macro.
+	(foo): Remove.
+	(pendfunc2): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/trace-break.c: include "trace-common.h", remove SYMBOL
+	macro.
+	(func): Remove.
+	(marker): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/trace-common.h: New header.
+	* gdb.trace/trace-condition.c: include "trace-common.h", remove SYMBOL
+	macro.
+	(func): Remove.
+	(marker): Use FAST_TRACEPOINT_LABEL.
+	* gdb.trace/trace-mt.c: include "trace-common.h", remove SYMBOL macro.
+	(func): Remove.
+	(thread_function): Use FAST_TRACEPOINT_LABEL.
+
+2015-11-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/backtrace.exp: Use global fpreg/spreg definition, add $
+	in front.
+	* gdb.trace/change-loc.exp: Use global pcreg definition.
+	* gdb.trace/collection.exp: Use global pcreg/fpreg/spreg definition.
+	* gdb.trace/entry-values.exp: Use global spreg definition, add $
+	in front.
+	* gdb.trace/mi-trace-frame-collected.exp: Use global pcreg definition.
+	* gdb.trace/pending.exp: Likewise.
+	* gdb.trace/report.exp: Use global pcreg/fpreg/spreg definition.
+	* gdb.trace/trace-break.exp: Likewise.
+	* gdb.trace/trace-condition.exp: Use global pcreg definition, add $
+	in front.
+	* gdb.trace/unavailable.exp: Use global pcreg/fpreg/spreg definition.
+	* gdb.trace/while-dyn.exp: Use global fpreg definition, add $
+	in front.
+	* lib/trace-support.exp: Define fpreg, spreg, pcreg variables.
+
+2015-11-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/fin_fun_out: New testcase.
+
+2015-11-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.dwarf2/data-loc.exp (Dwarf::assemble): Don't hardcode
+	value associated with DW_AT_byte_size.
+	* gdb.dwarf2/dynarr-ptr.exp (Dwarf::assemble): Don't hardcode
+	constants for DW_AT_byte_size, DW_AT_lower_bound, and
+	DW_AT_upper_bound.
+
+2015-11-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* lib/gdb (gdb_target_symbol_prefix_flags_asm): New proc.
+	(gdb_target_symbol_prefix_flags): Define in terms of _asm
+	version.
+	* gdb.arch/i386-float.exp, gdb.arch/i386-permbkpt.exp,
+	gdb.dwarf2/dw2-canonicalize-type.exp,
+	gdb.dwarf2/dw2-compdir-oldgcc.exp, gdb.dwarf2/dw2-minsym-in-cu.exp,
+	gdb.dwarf2/dw2-op-stack-value.exp, gdb.dwarf2/dw2-unresolved.exp,
+	gdb.dwarf2/fission-reread.exp, gdb.dwarf2/pr13961.exp: Use flags
+	provided by gdb_target_symbol_prefix_flags_asm.
+	* gdb.dwarf2/dw2-canonicalize-type.S, gdb.dwarf2/dw2-compdir-oldgcc.S,
+	testsuite/gdb.dwarf2/dw2-minsym-in-cu.S,
+	testsuite/gdb.dwarf2/dw2-unresolved-main.c,
+	testsuite/gdb.dwarf2/dw2-unresolved.S, gdb.dwarf2/fission-reread.S,
+	gdb.dwarf2/pr13961.S: Define and use SYMBOL macro (and supporting
+	macros where needed).  Use this macro for symbols which require
+	the prefix provided by SYMBOL_PREFIX.
+
+2015-11-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* lib/gdb.exp (gdb_target_symbol_prefix, gdb_target_symbol):
+	New procs.
+	* lib/dwarf.exp (_handle_DW_TAG): Handle attribute values,
+	representing expressions, of more than one list element.
+	* gdb.dwarf2/atomic-type.exp (Dwarf::assemble): Use gdb_target_symbol
+	to prepend linker symbol prefix to f.
+	* gdb.dwarf2/data-loc.exp (Dwarf::assemble): Likewise, for
+	table_1 and table_2.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp (Dwarf::assemble):
+	Likewise, for f and g.
+	* gdb.dwarf2/dw2-ifort-parameter.exp (Dwarf::assemble): Likewise,
+	for ptr.
+	* gdb.dwarf2/dw2-regno-invalid.exp (Dwarf::assemble): Likewise,
+	for main.
+	* gdb.dwarf2/dynarr-ptr.exp (Dwarf::assemble): Likewise, for
+	table_1_ptr and table_2_ptr.
+
+2015-11-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-vla-fortran.exp (evaluate allocated vla): Permit any data.
+
+2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.reverse/s390-mvcle.c: New test.
+	* gdb.reverse/s390-mvcle.exp: New file.
+	* lib/gdb.exp: Enable reverse tests on s390*-linux.
+
+2015-11-02  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.reverse/readv-reverse.exp: Obvious typo fixed.
+
+2015-11-02  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.reverse/fstatat-reverse.exp: Set breakpoint on marker1 after
+	reaching marker2.
+	* gdb.reverse/getresuid-reverse.exp: Likewise.
+	* gdb.reverse/pipe-reverse.exp: Likewise.
+	* gdb.reverse/readv-reverse.exp: Likewise.
+	* gdb.reverse/recvmsg-reverse.exp: Likewise.
+	* gdb.reverse/time-reverse.exp: Likewise.
+	* gdb.reverse/waitpid-reverse.exp: Likewise and add KFAILs.
+
+2015-10-30  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/wp-replication.c (watch_count_done): Remove.
+	(empty_cycle): Remove.
+	(main): Don't call empty_cycle.  Don't use watch_count_done.
+	* gdb.threads/wp-replication.exp: Don't set breakpoint on
+	empty_cycle.  Rewrite the code counting HW watchpoints.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.reverse/fstatat-reverse.c: New test.
+	* gdb.reverse/fstatat-reverse.exp: New file.
+	* gdb.reverse/getresuid-reverse.c: New test.
+	* gdb.reverse/getresuid-reverse.exp: New file.
+	* gdb.reverse/pipe-reverse.c: New test.
+	* gdb.reverse/pipe-reverse.exp: New file.
+	* gdb.reverse/readv-reverse.c: New test.
+	* gdb.reverse/readv-reverse.exp: New file.
+	* gdb.reverse/recvmsg-reverse.c: New test.
+	* gdb.reverse/recvmsg-reverse.exp: New file.
+	* gdb.reverse/time-reverse.c: New test.
+	* gdb.reverse/time-reverse.exp: New file.
+	* gdb.reverse/waitpid-reverse.c: New test.
+	* gdb.reverse/waitpid-reverse.exp: New file.
+
 2015-10-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.ada/access_to_packed_array.exp: Fix typos erroring the testfile.

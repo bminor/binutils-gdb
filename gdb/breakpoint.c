@@ -173,6 +173,10 @@ static int breakpoint_location_address_match (struct bp_location *bl,
 					      struct address_space *aspace,
 					      CORE_ADDR addr);
 
+static int breakpoint_location_address_range_overlap (struct bp_location *,
+						      struct address_space *,
+						      CORE_ADDR, int);
+
 static void breakpoints_info (char *, int);
 
 static void watchpoints_info (char *, int);
@@ -4243,6 +4247,40 @@ breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
   return any_breakpoint_here ? ordinary_breakpoint_here : no_breakpoint_here;
 }
 
+/* See breakpoint.h.  */
+
+int
+breakpoint_in_range_p (struct address_space *aspace,
+		       CORE_ADDR addr, ULONGEST len)
+{
+  struct bp_location *bl, **blp_tmp;
+
+  ALL_BP_LOCATIONS (bl, blp_tmp)
+    {
+      if (bl->loc_type != bp_loc_software_breakpoint
+	  && bl->loc_type != bp_loc_hardware_breakpoint)
+	continue;
+
+      if ((breakpoint_enabled (bl->owner)
+	   || bl->permanent)
+	  && breakpoint_location_address_range_overlap (bl, aspace,
+							addr, len))
+	{
+	  if (overlay_debugging
+	      && section_is_overlay (bl->section)
+	      && !section_is_mapped (bl->section))
+	    {
+	      /* Unmapped overlay -- can't be a match.  */
+	      continue;
+	    }
+
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
 /* Return true if there's a moribund breakpoint at PC.  */
 
 int
@@ -7077,6 +7115,28 @@ breakpoint_location_address_match (struct bp_location *bl,
 	      && breakpoint_address_match_range (bl->pspace->aspace,
 						 bl->address, bl->length,
 						 aspace, addr)));
+}
+
+/* Returns true if the [ADDR,ADDR+LEN) range in ASPACE overlaps
+   breakpoint BL.  BL may be a ranged breakpoint.  In most targets, a
+   match happens only if ASPACE matches the breakpoint's address
+   space.  On targets that have global breakpoints, the address space
+   doesn't really matter.  */
+
+static int
+breakpoint_location_address_range_overlap (struct bp_location *bl,
+					   struct address_space *aspace,
+					   CORE_ADDR addr, int len)
+{
+  if (gdbarch_has_global_breakpoints (target_gdbarch ())
+      || bl->pspace->aspace == aspace)
+    {
+      int bl_len = bl->length != 0 ? bl->length : 1;
+
+      if (mem_ranges_overlap (addr, len, bl->address, bl_len))
+	return 1;
+    }
+  return 0;
 }
 
 /* If LOC1 and LOC2's owners are not tracepoints, returns false directly.

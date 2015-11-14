@@ -1,5 +1,6 @@
 #source: emit-relocs-515.s
 #ld: -shared -T relocs.ld -e0
+#notarget: aarch64_be-*-*
 #objdump: -dr
 #...
 

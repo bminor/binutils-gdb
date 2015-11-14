@@ -3338,10 +3338,13 @@ class Target_aarch64 : public Sized_target<size, big_endian>
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rela<size, big_endian>& reloc)
   {
+    unsigned int r_type = elfcpp::elf_r_type<size>(reloc.get_r_info());
     this->copy_relocs_.copy_reloc(symtab, layout,
 				  symtab->get_sized_symbol<size>(sym),
 				  object, shndx, output_section,
-				  reloc, this->rela_dyn_section(layout));
+				  r_type, reloc.get_r_offset(),
+				  reloc.get_r_addend(),
+				  this->rela_dyn_section(layout));
   }
 
   // Information about this specific target which we pass to the
@@ -6911,16 +6914,41 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_AARCH64_ABS64:
+      if (!parameters->options().apply_dynamic_relocs()
+          && parameters->options().output_is_position_independent()
+          && gsym != NULL
+          && gsym->needs_dynamic_reloc(reloc_property->reference_flags())
+          && !gsym->can_use_relative_reloc(false))
+        // We have generated an absolute dynamic relocation, so do not
+        // apply the relocation statically. (Works around bugs in older
+        // Android dynamic linkers.)
+        break;
       reloc_status = Reloc::template rela_ua<64>(
 	view, object, psymval, addend, reloc_property);
       break;
 
     case elfcpp::R_AARCH64_ABS32:
+      if (!parameters->options().apply_dynamic_relocs()
+          && parameters->options().output_is_position_independent()
+          && gsym != NULL
+          && gsym->needs_dynamic_reloc(reloc_property->reference_flags()))
+        // We have generated an absolute dynamic relocation, so do not
+        // apply the relocation statically. (Works around bugs in older
+        // Android dynamic linkers.)
+        break;
       reloc_status = Reloc::template rela_ua<32>(
 	view, object, psymval, addend, reloc_property);
       break;
 
     case elfcpp::R_AARCH64_ABS16:
+      if (!parameters->options().apply_dynamic_relocs()
+          && parameters->options().output_is_position_independent()
+          && gsym != NULL
+          && gsym->needs_dynamic_reloc(reloc_property->reference_flags()))
+        // We have generated an absolute dynamic relocation, so do not
+        // apply the relocation statically. (Works around bugs in older
+        // Android dynamic linkers.)
+        break;
       reloc_status = Reloc::template rela_ua<16>(
 	view, object, psymval, addend, reloc_property);
       break;

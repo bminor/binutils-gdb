@@ -400,7 +400,7 @@ parse_rx_section (char * name)
   asection * sec;
   int   type;
   int   attr = SHF_ALLOC | SHF_EXECINSTR;
-  int   align = 2;
+  int   align = 1;
   char  end_char;
 
   do
@@ -428,9 +428,9 @@ parse_rx_section (char * name)
 		p++;
 	      switch (*p)
 		{
-		case '2': align = 2; break;
-		case '4': align = 4; break;
-		case '8': align = 8; break;
+		case '2': align = 1; break;
+		case '4': align = 2; break;
+		case '8': align = 3; break;
 		default:
 		  as_bad (_("unrecognised alignment value in .SECTION directive: %s"), p);
 		  ignore_rest_of_line ();
@@ -1248,7 +1248,7 @@ valueT
 md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << align) - 1) & (-1 << align));
+  return ((size + (1 << align) - 1) & -(1 << align));
 }
 
 				/* NOP - 1 cycle */

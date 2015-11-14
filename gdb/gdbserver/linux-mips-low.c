@@ -356,8 +356,8 @@ mips_linux_new_thread (struct lwp_info *lwp)
 /* Create a new mips_watchpoint and add it to the list.  */
 
 static void
-mips_add_watchpoint (struct arch_process_info *private, CORE_ADDR addr,
-		     int len, int watch_type)
+mips_add_watchpoint (struct arch_process_info *priv, CORE_ADDR addr, int len,
+		     enum target_hw_bp_type watch_type)
 {
   struct mips_watchpoint *new_watch;
   struct mips_watchpoint **pw;
@@ -368,7 +368,7 @@ mips_add_watchpoint (struct arch_process_info *private, CORE_ADDR addr,
   new_watch->type = watch_type;
   new_watch->next = NULL;
 
-  pw = &private->current_watches;
+  pw = &priv->current_watches;
   while (*pw != NULL)
     pw = &(*pw)->next;
   *pw = new_watch;
@@ -724,7 +724,7 @@ mips_supply_register_32bit (struct regcache *regcache,
 static void
 mips_fill_gregset (struct regcache *regcache, void *buf)
 {
-  union mips_register *regset = buf;
+  union mips_register *regset = (union mips_register *) buf;
   int i, use_64bit;
   const struct target_desc *tdesc = regcache->tdesc;
 
@@ -753,7 +753,7 @@ mips_fill_gregset (struct regcache *regcache, void *buf)
 static void
 mips_store_gregset (struct regcache *regcache, const void *buf)
 {
-  const union mips_register *regset = buf;
+  const union mips_register *regset = (const union mips_register *) buf;
   int i, use_64bit;
 
   use_64bit = (register_size (regcache->tdesc, 0) == 8);
@@ -781,7 +781,7 @@ mips_store_gregset (struct regcache *regcache, const void *buf)
 static void
 mips_fill_fpregset (struct regcache *regcache, void *buf)
 {
-  union mips_register *regset = buf;
+  union mips_register *regset = (union mips_register *) buf;
   int i, use_64bit, first_fp, big_endian;
 
   use_64bit = (register_size (regcache->tdesc, 0) == 8);
@@ -806,7 +806,7 @@ mips_fill_fpregset (struct regcache *regcache, void *buf)
 static void
 mips_store_fpregset (struct regcache *regcache, const void *buf)
 {
-  const union mips_register *regset = buf;
+  const union mips_register *regset = (const union mips_register *) buf;
   int i, use_64bit, first_fp, big_endian;
 
   use_64bit = (register_size (regcache->tdesc, 0) == 8);

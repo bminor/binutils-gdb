@@ -7089,7 +7089,7 @@ static valueT
 s3_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
-  return ((size + (1 << align) - 1) & (-1 << align));
+  return ((size + (1 << align) - 1) & -(1 << align));
 }
 
 static void

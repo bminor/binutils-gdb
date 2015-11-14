@@ -644,6 +644,11 @@ class General_options
 	      N_("Allow unresolved references in shared libraries"),
 	      N_("Do not allow unresolved references in shared libraries"));
 
+  DEFINE_bool(apply_dynamic_relocs, options::TWO_DASHES, '\0', true,
+	      N_("Apply link-time values for dynamic relocations (default)"),
+	      N_("(aarch64 only) Do not apply link-time values "
+	         "for dynamic relocations"));
+
   DEFINE_bool(as_needed, options::TWO_DASHES, '\0', false,
 	      N_("Only set DT_NEEDED for shared libraries if used"),
 	      N_("Always DT_NEEDED for shared libraries"));
@@ -934,7 +939,7 @@ class General_options
 		N_("OFFSET"));
 
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
-		N_("Set GNU linker emulation"), N_("EMULATION"));
+		N_("Set GNU linker emulation; obsolete"), N_("EMULATION"));
 
   DEFINE_bool(mmap_output_file, options::TWO_DASHES, '\0', true,
 	      N_("Map the output file for writing (default)."),

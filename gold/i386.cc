@@ -828,9 +828,11 @@ class Target_i386 : public Sized_target<32, false>
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rel<32, false>& reloc)
   {
+    unsigned int r_type = elfcpp::elf_r_type<32>(reloc.get_r_info());
     this->copy_relocs_.copy_reloc(symtab, layout,
 				  symtab->get_sized_symbol<32>(sym),
-				  object, shndx, output_section, reloc,
+				  object, shndx, output_section,
+				  r_type, reloc.get_r_offset(), 0,
 				  this->rel_dyn_section(layout));
   }
 

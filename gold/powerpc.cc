@@ -1207,10 +1207,13 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rela<size, big_endian>& reloc)
   {
+    unsigned int r_type = elfcpp::elf_r_type<size>(reloc.get_r_info());
     this->copy_relocs_.copy_reloc(symtab, layout,
 				  symtab->get_sized_symbol<size>(sym),
 				  object, shndx, output_section,
-				  reloc, this->rela_dyn_section(layout));
+				  r_type, reloc.get_r_offset(),
+				  reloc.get_r_addend(),
+				  this->rela_dyn_section(layout));
   }
 
   // Look over all the input sections, deciding where to place stubs.
@@ -1517,6 +1520,7 @@ public:
 private:
   typedef Powerpc_relocate_functions<size, big_endian> This;
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+  typedef typename elfcpp::Elf_types<size>::Elf_Swxword SignedAddress;
 
   template<int valsize>
   static inline bool
@@ -1677,6 +1681,16 @@ public:
     return stat;
   }
 
+  // R_POWERPC_ADDR16_DQ: (Symbol + Addend) & 0xfff0
+  static inline Status
+  addr16_dq(unsigned char* view, Address value, Overflow_check overflow)
+  {
+    Status stat = This::template rela<16,16>(view, 0, 0xfff0, value, overflow);
+    if ((value & 15) != 0)
+      stat = STATUS_OVERFLOW;
+    return stat;
+  }
+
   // R_POWERPC_ADDR16_HI: ((Symbol + Addend) >> 16) & 0xffff
   static inline void
   addr16_hi(unsigned char* view, Address value)
@@ -1715,6 +1729,20 @@ public:
     if (overflow != CHECK_NONE && (value & 3) != 0)
       stat = STATUS_OVERFLOW;
     return stat;
+  }
+
+  // R_POWERPC_REL16DX_HA
+  static inline Status
+  addr16dx_ha(unsigned char *view, Address value, Overflow_check overflow)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+    value += 0x8000;
+    value = static_cast<SignedAddress>(value) >> 16;
+    val |= (value & 0xffc1) | ((value & 0x3e) << 15);
+    elfcpp::Swap<32, big_endian>::writeval(wv, val);
+    return overflowed<16>(value, overflow);
   }
 };
 
@@ -5686,6 +5714,7 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_REL16_LO:
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
+    case elfcpp::R_POWERPC_REL16DX_HA:
     case elfcpp::R_POWERPC_SECTOFF:
     case elfcpp::R_POWERPC_SECTOFF_LO:
     case elfcpp::R_POWERPC_SECTOFF_HI:
@@ -6135,6 +6164,7 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_REL16_LO:
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
+    case elfcpp::R_POWERPC_REL16DX_HA:
     case elfcpp::R_POWERPC_SECTOFF:
     case elfcpp::R_POWERPC_SECTOFF_LO:
     case elfcpp::R_POWERPC_SECTOFF_HI:
@@ -7438,6 +7468,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_REL16_LO:
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
+    case elfcpp::R_POWERPC_REL16DX_HA:
     case elfcpp::R_POWERPC_REL14:
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
@@ -7636,6 +7667,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_POWERPC_REL32:
+    case elfcpp::R_POWERPC_REL16DX_HA:
       if (size == 64)
 	overflow = Reloc::CHECK_SIGNED;
       break;
@@ -7716,11 +7748,13 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       break;
     }
 
+  Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+  Insn insn = 0;
+
   if (overflow == Reloc::CHECK_LOW_INSN
       || overflow == Reloc::CHECK_HIGH_INSN)
     {
-      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
-      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
+      insn = elfcpp::Swap<32, big_endian>::readval(iview);
 
       if ((insn & (0x3f << 26)) == 10u << 26 /* cmpli */)
 	overflow = Reloc::CHECK_BITFIELD;
@@ -7736,6 +7770,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	overflow = Reloc::CHECK_SIGNED;
     }
 
+  bool maybe_dq_reloc = false;
   typename Powerpc_relocate_functions<size, big_endian>::Status status
     = Powerpc_relocate_functions<size, big_endian>::STATUS_OK;
   switch (r_type)
@@ -7788,7 +7823,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 64)
 	{
 	  // On ppc64 these are all ds form
-	  status = Reloc::addr16_ds(view, value, overflow);
+	  maybe_dq_reloc = true;
 	  break;
 	}
     case elfcpp::R_POWERPC_ADDR16:
@@ -7809,7 +7844,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_DTPREL16_LO:
     case elfcpp::R_POWERPC_GOT_TLSGD16_LO:
     case elfcpp::R_POWERPC_GOT_TLSLD16_LO:
-      status = Reloc::addr16(view, value, overflow);
+      if (size == 64)
+	status = Reloc::addr16(view, value, overflow);
+      else
+	maybe_dq_reloc = true;
       break;
 
     case elfcpp::R_POWERPC_UADDR16:
@@ -7854,6 +7892,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_GOT_TPREL16_HA:
     case elfcpp::R_POWERPC_GOT_DTPREL16_HA:
       Reloc::addr16_ha(view, value);
+      break;
+
+    case elfcpp::R_POWERPC_REL16DX_HA:
+      status = Reloc::addr16dx_ha(view, value, overflow);
       break;
 
     case elfcpp::R_PPC64_DTPREL16_HIGHER:
@@ -7910,7 +7952,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_PPC64_GOT16_LO_DS:
     case elfcpp::R_PPC64_SECTOFF_DS:
     case elfcpp::R_PPC64_SECTOFF_LO_DS:
-      status = Reloc::addr16_ds(view, value, overflow);
+      maybe_dq_reloc = true;
       break;
 
     case elfcpp::R_POWERPC_ADDR14:
@@ -7975,6 +8017,26 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 			     r_type);
       break;
     }
+
+  if (maybe_dq_reloc)
+    {
+      if (insn == 0)
+	insn = elfcpp::Swap<32, big_endian>::readval(iview);
+
+      if ((insn & (0x3f << 26)) == 56u << 26 /* lq */
+	  || ((insn & (0x3f << 26)) == (61u << 26) /* lxv, stxv */
+	      && (insn & 3) == 1))
+	status = Reloc::addr16_dq(view, value, overflow);
+      else if (size == 64
+	       || (insn & (0x3f << 26)) == 58u << 26 /* ld,ldu,lwa */
+	       || (insn & (0x3f << 26)) == 62u << 26 /* std,stdu,stq */
+	       || (insn & (0x3f << 26)) == 57u << 26 /* lfdp */
+	       || (insn & (0x3f << 26)) == 61u << 26 /* stfdp */)
+	status = Reloc::addr16_ds(view, value, overflow);
+      else
+	status = Reloc::addr16(view, value, overflow);
+    }
+
   if (status != Powerpc_relocate_functions<size, big_endian>::STATUS_OK
       && (has_stub_value
 	  || !(gsym != NULL

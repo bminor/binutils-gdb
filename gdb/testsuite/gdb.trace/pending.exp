@@ -421,6 +421,7 @@ proc pending_tracepoint_with_action_resolved { trace_type } \
     global srcfile
     global lib_sl1
     global gdb_prompt
+    global pcreg
 
     # Start with a fresh gdb.
     clean_restart $executable
@@ -434,13 +435,6 @@ proc pending_tracepoint_with_action_resolved { trace_type } \
 	    gdb_test "y" "\(Fast t|T\)racepoint.*set_point2.*pending." \
 		"set pending tracepoint (without symbols)"
 	}
-    }
-
-    set pcreg "pc"
-    if [is_amd64_regs_target] {
-	set pcreg "rip"
-    } elseif [is_x86_like_target] {
-	set pcreg "eip"
     }
 
     gdb_trace_setactions "set action for pending tracepoint" "" \

@@ -1,3 +1,323 @@
+2015-11-13  Yao Qi  <yao.qi@linaro.org>
+
+	PR tdep/19051
+	* arm-tdep.c (arm_type_align): Return the right alignment
+	value for vector.
+	(arm_vfp_cprc_sub_candidate): Return true for 64-bit and
+	128-bit vector types.
+	(arm_return_in_memory): Handel vector type.
+
+2015-11-13  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_return_in_memory): Rewrite it.
+	(arm_return_value): Call arm_return_in_memory for
+	TYPE_CODE_COMPLEX.
+
+2015-11-12  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (push_stack_item): Change contents type to
+	const gdb_byte *.
+
+2015-11-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inf-ptrace.c (inf_ptrace_fetch_register): Change long int *
+	cast to PTRACE_TYPE_RET *.
+	(inf_ptrace_store_register): Likewise.
+
+2015-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* avr-tdep.c (_initialize_avr_tdep): Switch to 'add_info' for creating
+	info sub-commands.
+	* gnu-nat.c (add_task_commands): Likewise.
+	* macrocmd.c (_initialize_macrocmd): Likewise.
+
+2015-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-decode.c (add_info): Switch to class_info.
+
+2015-11-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_is_wrapper_field): Add special handling
+	for fields called "RETVAL".
+
+2015-11-09  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_exidx_new_objfile): Use
+	ELF_STRING_ARM_unwind.
+
+2015-11-09  Yao Qi  <yao.qi@linaro.org>
+
+	* infrun.c (displaced_step_in_progress_thread): New function.
+	(handle_inferior_event_1): Call it.
+
+2015-11-05  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Call
+	aarch64_decode_insn and decode instruction by aarch64_inst.
+
+2015-11-05  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (extract_signed_bitfield): Remove.
+	(decode_masked_match): Remove.
+	(aarch64_decode_add_sub_imm): Remove.
+	(aarch64_decode_br): Remove.
+	(aarch64_decode_eret): Remove.
+	(aarch64_decode_movz): Remove.
+	(aarch64_decode_orr_shifted_register_x): Remove.
+	(aarch64_decode_ret): Remove.
+	(aarch64_decode_stp_offset): Remove.
+	(aarch64_decode_stur): Remove.
+	(aarch64_analyze_prologue): Call aarch64_decode_insn
+	and use aarch64_inst to decode instructions.
+
+2015-11-05  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_decode_stp_offset): New argument
+	wback.
+	(aarch64_decode_stp_offset_wb): Removed.
+	(aarch64_analyze_prologue): Don't use
+	aarch64_decode_stp_offset_wb.
+
+2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	PR/18376
+	* gdb/s390-linux-tdep.c (s390_is_partial_instruction): New function.
+	(s390_software_single_step): New function.
+	(s390_displaced_step_hw_singlestep): New function.
+	(s390_gdbarch_init): Fill gdbarch slots with the above.
+
+2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	PR/18376
+	* gdb/configure.tgt: Add linux-record.o to s390*-linux.
+	* gdb/s390-linux-tdep.c: #include "linux-record.h", "record-full.h"
+	(s390_linux_record_tdep): New static global variable.
+	(s390x_linux_record_tdep): New static global variable.
+	(s390_all_but_pc_registers_record): New function.
+	(s390_canonicalize_syscall): New function.
+	(s390_linux_syscall_record): New function.
+	(s390_linux_record_signal): New function.
+	(s390_record_calc_disp_common): New function.
+	(s390_record_calc_disp): New function.
+	(s390_record_calc_disp_vsce): New function.
+	(s390_record_calc_rl): New function.
+	(s390_record_gpr_g): New function.
+	(s390_record_gpr_h): New function.
+	(s390_record_vr): New function.
+	(s390_process_record): New function.
+	(s390_init_linux_record_tdep): New function.
+	(s390_gdbarch_init): Fill record function slots.
+
+2015-11-04  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* record-full.c (record_full_exec_insn): Use xmalloc for temporary
+	memory storage.
+
+2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record.c (get_insn_history_modifiers): Set DISASSEMBLY_SOURCE
+	instead of DISASSEMBLY_SOURCE_DEPRECATED.  Also accept /s.
+	(_initialize_record): Document the /s modifier.
+	* NEWS: Announce record instruction-history's new /s modifier.
+
+2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (struct btrace_line_range): New.
+	(btrace_mk_line_range, btrace_line_range_add)
+	(btrace_line_range_is_empty, btrace_line_range_contains_range)
+	(btrace_find_line_range, btrace_print_lines): New.
+	(btrace_insn_history): Add source interleaving algorithm.
+
+2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* disasm.h (DISASSEMBLY_SPECULATION): New.
+	(struct disasm_insn): New.
+	(gdb_pretty_print_insn): New.
+	* disasm.c (gdb_pretty_print_insn): Replace parameter PC with INSN.
+	Update users.  Print instruction number and indicate speculative
+	execution, if requested.
+
+2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* disasm.c (dump_insns): Split into this and ...
+	(gdb_pretty_print_insn): ... this.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* xtensa-linux-nat.c (supply_gregset_reg): Make static.
+	(xtensa_linux_fetch_inferior_registers): Likewise.
+	(xtensa_linux_store_inferior_registers): Likewise.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-linux-nat.c (arm_linux_read_description): Add cast.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ppc-linux-nat.c (ppc_linux_insert_mask_watchpoint): Change
+	type of rw to enum target_hw_bp_type.
+	(ppc_linux_remove_mask_watchpoint): Likewise.
+	* target.c (target_insert_mask_watchpoint): Likewise.
+	(target_remove_mask_watchpoint): Likewise.
+	* target.h (target_insert_mask_watchpoint): Likewise.
+	(target_remove_mask_watchpoint): Likewise.
+	(struct target_ops) <to_insert_mask_watchpoint>: Likewise.
+	(struct target_ops) <to_remove_mask_watchpoint>: Likewise.
+	* target-delegates.c: Regenerate.
+
+2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* remote-sim.c (check_for_duplicate_sim_descriptor): Add casts.
+	(get_sim_inferior_data): Likewise.
+	(sim_inferior_data_cleanup): Likewise.
+	(gdbsim_close_inferior): Likewise.
+	(gdbsim_resume_inferior): Likewise.
+	(gdbsim_wait): Likewise.
+	(simulator_command): Likewise.
+	(sim_command_completer): Likewise.
+
+2015-11-03  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* MAINTAINERS (Write After Approval): Add Marcin Kościelnicki.
+
+2015-10-30  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (breakpoint_in_range_p)
+	(breakpoint_location_address_range_overlap): New functions.
+	* breakpoint.h (breakpoint_in_range_p): New declaration.
+	* infrun.c (displaced_step_prepare_throw): If there's a breakpoint
+	in the scratch pad range, don't displaced step.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* amd64-linux-tdep.c (amd64_x32_linux_init_abi): Fix size_msghdr,
+	size_stack_t, size_size_t, size_iovec.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Fix size_termios.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Fix size_termios.
+	(amd64_x32_linux_init_abi): Fix size_termios.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* ppc-linux-tdep.c (ppc_init_linux_record_tdep): Fix TASK_COMM_LEN.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* linux-record.c (record_linux_system_call): Fix old_select.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* linux-record.c (record_linux_system_call): Fix newstatat.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* linux-record.c (record_linux_system_call): Fix [gs]etgroups16.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Add size_time_t.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Add size_time_t.
+	(amd64_x32_linux_init_abi): Add size_time_t.
+	* arm-linux-tdep.c (arm_linux_init_abi): Add size_time_t.
+	* i386-linux-tdep.c (i386_linux_init_abi): Add size_time_t.
+	* linux-record.c (record_linux_system_call): Add time, waitpid, pipe
+	handling.
+	* linux-record.h (struct linux_record_tdep): Add size_time_t.
+	* ppc-linux-tdep.c (ppc_init_linux_record_tdep): Add size_time_t.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* linux-record.c (record_linux_msghdr): Fix msg_namelen handling.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Remove
+	size_dirent{,64}, add size_old_dirent.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Remove size_dirent{,64},
+	add size_old_dirent.
+	(amd64_x32_linux_init_abi): Remove size_dirent{,64}, add
+	size_old_dirent.
+	* arm-linux-tdep.c (arm_linux_init_abi): Remove size_dirent{,64},
+	add size_old_dirent.
+	* i386-linux-tdep.c (i386_linux_init_abi): Remove size_dirent{,64},
+	add size_old_dirent.
+	* linux-record.c (record_linux_system_call): Fix handling of readdir
+	and getdents{,64}.
+	* linux-record.h (struct linux_record_tdep): Remove size_dirent{,64},
+	add size_old_dirent.
+	* ppc-linux-tdep.c (ppc_init_linux_record_tdep): Remove
+	size_dirent{,64}, add size_old_dirent.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Fix size_sigaction,
+	size_sigset_t, size_old_sigaction, size_old_sigset_t.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Fix size_sigaction,
+	size_sigset_t, size_old_sigaction, size_old_sigset_t.
+	(amd64_x32_linux_init_abi): Fix size_sigaction, size_sigset_t,
+	size_old_sigaction, size_old_sigset_t.
+	* arm-linux-tdep.c (arm_linux_init_abi): Fix size_sigaction,
+	size_old_sigaction, size_old_sigset_t.
+	* i386-linux-tdep.c (i386_linux_init_abi): Fix size_sigaction,
+	size_old_sigaction, size_old_sigset_t.
+	* ppc-linux-tdep.c (ppc_init_linux_record_tdep): Fix size_sigaction,
+	size_sigset_t, size_old_sigaction, size_old_sigset_t.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* arm-linux-tdep.c (arm_linux_init_abi): Fix size_[ug]id.
+	* i386-linux-tdep.c (i386_linux_init_abi): Fix size_[ug]id.
+
+2015-10-30  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Remove size_siginfo.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Remove size_siginfo.
+	(amd64_x32_linux_init_abi): Remove size_siginfo.
+	* arm-linux-tdep.c (arm_linux_init_abi): Remove size_siginfo.
+	* i386-linux-tdep.c (i386_linux_init_abi): Remove size_siginfo.
+	* linux-record.c (record_linux_system_call): Change size_siginfo
+	to size_siginfo_t.
+	* linux-record.h (struct linux_record_tdep): Remove size_siginfo.
+	* ppc-linux-tdep.c (ppc_init_linux_record_tdep): Remove size_siginfo.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* mdebugread.c (add_data_symbol): New function, factored out from
+	...
+	(parse_symbol): ... here.  Delete 'theclass' local.
+
+2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (jit_target_read_impl): Add cast.
+
+2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (jit_reader_load): Add cast.
+
+2015-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2read.c (partial_die_full_name): Add cast.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* common/vec.h (DEF_VEC_FUNC_P) [iterate]: Cast 0 to type T.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* guile/scm-frame.c (gdbscm_unwind_stop_reason_string): Add cast.
+
+2015-10-29  Eli Zaretskii  <eliz@gnu.org>
+
+	* utils.c (init_page_info): Disable paging if INSIDE_EMACS is set
+	in the environment.
+
+2015-10-29  Pedro Alves  <palves@redhat.com>
+
+	* gnu-v2-abi.c (gnuv2_is_destructor_name)
+	(gnuv2_is_constructor_name): Add casts.
+
 2015-10-29  Pedro Alves  <palves@redhat.com>
 
 	* common/common-exceptions.c (exception_none): Add cast.

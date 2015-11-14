@@ -1,5 +1,64 @@
+2015-11-11  Alan Modra  <amodra@gmail.com>
+            Peter Bergner <bergner@vnet.ibm.com>
+
+	* elf32-ppc.c (ppc_elf_howto_raw): Add R_PPC_REL16DX_HA.
+	(ppc_elf_reloc_type_lookup): Handle R_PPC_REL16DX_HA.
+	(ppc_elf_addr16_ha_reloc): Likewise.
+	(ppc_elf_check_relocs): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	(is_insn_dq_form): Handle lxv and stxv instructions.
+	* elf64-ppc.c (ppc64_elf_howto_raw): Add R_PPC64_REL16DX_HA.
+	(ppc64_elf_reloc_type_lookup): Handle R_PPC64_REL16DX_HA.
+	(ppc64_elf_ha_reloc): Likewise.
+	(ppc64_elf_check_relocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+	* reloc.c (BFD_RELOC_PPC_REL16DX_HA): New.
+
+2015-11-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Handle VTINHERIT
+	and VTENTRY relocations when deleting relocations.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
+2015-11-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Properly move
+	kept relocations when deleting relocations.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
+2015-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Use read and write
+	pointers to reloc array, rather than memmove when deleting a
+	reloc.  Don't use RELOC_AGAINST_DISCARDED_SECTION.  Adjust
+	reloc counts at end of loop.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
+2015-11-10  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Use read and write
+	pointers to reloc array, rather than memmove when deleting a
+	reloc.  Don't use RELOC_AGAINST_DISCARDED_SECTION.  Adjust
+	reloc counts at end of loop.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+
+2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* elf64-ppc.c (ppc64_elf_size_stubs, ppc64_elf_build_stubs): Fix left
+	shift of negative value.
+	* libbfd.c (safe_read_leb128): Likewise.
+	* dwarf2.c (place_sections): Likewise.
+	* bfd-in.h (align_power): Likewise.
+	* bfd-in2.h (align_power): Likewise.
+
+2015-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated (simplified) Chinese translation.
+
 2015-10-29  Catherine Moore  <clm@codesourcery.com>
-    
+
     	* elfxx-mips.c (mips_elf_check_mips16_stubs): Set a stub's output
     	section to bfd_abs_section_ptr if the stub is discarded.
 
@@ -399,18 +458,6 @@
 
 	* config.bfd (targ_selvecs, targ64_selvecs): Add iamcu_elf32_vec,
 	i386_pei_vec and x86_64_pei_vec for Solaris2/x86.
-
-2015-10-02  Renlin Li  <renlin.li@arm.com>
-
-	* elfnn-aarch64.c (IS_AARCH64_TLS_RELAX_RELOC): Add
-	TLSIE_MOVW_GOTTPREL_G1.
-	(aarch64_tls_transition_without_check): Add
-	TLSIE_MOVW_GOTTPREL_G1 to TLSLE_MOVW_TPREL_G2
-	transition for local symbol.
-	(elfNN_aarch64_tls_relax): Add a argument to pass tp offset.
-	Add TLSIE_MOVW_GOTTPREL_G1 relaxation.
-	(elfNN_aarch64_relocate_section): Call elfNN_aarch64_tls_relax
-	with new argument.
 
 2015-10-02  Renlin Li  <renlin.li@arm.com>
 

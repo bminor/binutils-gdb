@@ -6854,7 +6854,7 @@ partial_die_full_name (struct partial_die_info *pdi,
 	  struct dwarf2_cu *ref_cu = cu;
 
 	  /* DW_FORM_ref_addr is using section offset.  */
-	  attr.name = 0;
+	  attr.name = (enum dwarf_attribute) 0;
 	  attr.form = DW_FORM_ref_addr;
 	  attr.u.unsnd = pdi->offset.sect_off;
 	  die = follow_die_ref (NULL, &attr, &ref_cu);

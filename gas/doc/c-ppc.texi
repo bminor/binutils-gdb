@@ -141,6 +141,9 @@ Generate code for Power7 architecture.
 @item -mpower8, -mpwr8
 Generate code for Power8 architecture.
 
+@item -mpower9, -mpwr9
+Generate code for Power9 architecture.
+
 @item -mcell
 @item -mcell
 Generate code for Cell Broadband Engine architecture.

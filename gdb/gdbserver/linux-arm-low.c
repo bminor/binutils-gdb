@@ -426,7 +426,7 @@ arm_linux_hw_breakpoint_equal (const struct arm_linux_hw_breakpoint *p1,
 
 /* Convert a raw breakpoint type to an enum arm_hwbp_type.  */
 
-static int
+static arm_hwbp_type
 raw_bkpt_type_to_arm_hwbp_type (enum raw_bkpt_type raw_type)
 {
   switch (raw_type)
@@ -706,8 +706,8 @@ arm_new_thread (struct lwp_info *lwp)
 static void
 arm_new_fork (struct process_info *parent, struct process_info *child)
 {
-  struct arch_process_info *parent_proc_info = parent->priv->arch_private;
-  struct arch_process_info *child_proc_info = child->priv->arch_private;
+  struct arch_process_info *parent_proc_info;
+  struct arch_process_info *child_proc_info;
   struct lwp_info *child_lwp;
   struct arch_lwp_info *child_lwp_info;
   int i;
@@ -717,6 +717,9 @@ arm_new_fork (struct process_info *parent, struct process_info *child)
 	      && parent->priv->arch_private != NULL);
   gdb_assert (child->priv != NULL
 	      && child->priv->arch_private != NULL);
+
+  parent_proc_info = parent->priv->arch_private;
+  child_proc_info = child->priv->arch_private;
 
   /* Linux kernel before 2.6.33 commit
      72f674d203cd230426437cdcf7dd6f681dad8b0d
@@ -801,7 +804,7 @@ arm_prepare_to_resume (struct lwp_info *lwp)
 static int
 arm_get_hwcap (unsigned long *valp)
 {
-  unsigned char *data = alloca (8);
+  unsigned char *data = (unsigned char *) alloca (8);
   int offset = 0;
 
   while ((*the_target->read_auxv) (offset, data, 8) == 8)
@@ -852,7 +855,7 @@ arm_read_description (void)
       /* Now make sure that the kernel supports reading these
 	 registers.  Support was added in 2.6.30.  */
       errno = 0;
-      buf = xmalloc (32 * 8 + 4);
+      buf = (char *) xmalloc (32 * 8 + 4);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
 	  && errno == EIO)
 	result = tdesc_arm;

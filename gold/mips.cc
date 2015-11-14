@@ -3602,10 +3602,12 @@ class Target_mips : public Sized_target<size, big_endian>
              unsigned int shndx, Output_section* output_section,
              Symbol* sym, const elfcpp::Rel<size, big_endian>& reloc)
   {
+    unsigned int r_type = elfcpp::elf_r_type<size>(reloc.get_r_info());
     this->copy_relocs_.copy_reloc(symtab, layout,
                                   symtab->get_sized_symbol<size>(sym),
                                   object, shndx, output_section,
-                                  reloc, this->rel_dyn_section(layout));
+				  r_type, reloc.get_r_offset(), 0,
+                                  this->rel_dyn_section(layout));
   }
 
   void

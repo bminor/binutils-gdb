@@ -4602,7 +4602,7 @@ parse_bitfield_cons (exp, nbytes)
 	      return;
 	    }			/* Too complex.  */
 
-	  value |= ((~(-1 << width) & exp->X_add_number)
+	  value |= ((~(-(1 << width)) & exp->X_add_number)
 		    << ((BITS_PER_CHAR * nbytes) - bits_available));
 
 	  if ((bits_available -= width) == 0

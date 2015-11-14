@@ -21,16 +21,6 @@ set expfile $testfile.exp
 # Some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]
 
-if [is_amd64_regs_target] {
-    set pcreg "\$rip"
-} elseif [is_x86_like_target] {
-    set pcreg "\$eip"
-} elseif [is_aarch64_target] {
-    set pcreg "\$pc"
-} else {
-    set pcreg "\$pc"
-}
-
 if [prepare_for_testing $expfile $executable $srcfile \
 	[list debug $additional_flags]] {
     untested "failed to prepare for trace tests"
@@ -139,7 +129,7 @@ proc 18955_i386_failure { trace_command } {
 foreach trace_command { "trace" "ftrace" } {
     # This condition is always true as the PC should be set to the tracepoint
     # address when hit.
-    test_tracepoints $trace_command "$pcreg == *set_point" 10
+    test_tracepoints $trace_command "\$$pcreg == *set_point" 10
 
     # Can we read local variables?
     test_tracepoints $trace_command "anarg == 100 || anarg == 200" 2 18955_x86_64_failure

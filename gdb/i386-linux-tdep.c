@@ -806,8 +806,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_flock = 16;
   i386_linux_record_tdep.size_oldold_utsname = 45;
   i386_linux_record_tdep.size_ustat = 20;
-  i386_linux_record_tdep.size_old_sigaction = 140;
-  i386_linux_record_tdep.size_old_sigset_t = 128;
+  i386_linux_record_tdep.size_old_sigaction = 16;
+  i386_linux_record_tdep.size_old_sigset_t = 4;
   i386_linux_record_tdep.size_rlimit = 8;
   i386_linux_record_tdep.size_rusage = 72;
   i386_linux_record_tdep.size_timeval = 8;
@@ -815,8 +815,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_old_gid_t = 2;
   i386_linux_record_tdep.size_old_uid_t = 2;
   i386_linux_record_tdep.size_fd_set = 128;
-  i386_linux_record_tdep.size_dirent = 268;
-  i386_linux_record_tdep.size_dirent64 = 276;
+  i386_linux_record_tdep.size_old_dirent = 268;
   i386_linux_record_tdep.size_statfs = 64;
   i386_linux_record_tdep.size_statfs64 = 84;
   i386_linux_record_tdep.size_sockaddr = 16;
@@ -843,15 +842,15 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_NFS_FHSIZE = 32;
   i386_linux_record_tdep.size_knfsd_fh = 132;
   i386_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  i386_linux_record_tdep.size_sigaction = 140;
+  i386_linux_record_tdep.size_sigaction = 20;
   i386_linux_record_tdep.size_sigset_t = 8;
   i386_linux_record_tdep.size_siginfo_t = 128;
   i386_linux_record_tdep.size_cap_user_data_t = 12;
   i386_linux_record_tdep.size_stack_t = 12;
   i386_linux_record_tdep.size_off_t = i386_linux_record_tdep.size_long;
   i386_linux_record_tdep.size_stat64 = 96;
-  i386_linux_record_tdep.size_gid_t = 2;
-  i386_linux_record_tdep.size_uid_t = 2;
+  i386_linux_record_tdep.size_gid_t = 4;
+  i386_linux_record_tdep.size_uid_t = 4;
   i386_linux_record_tdep.size_PAGE_SIZE = 4096;
   i386_linux_record_tdep.size_flock64 = 24;
   i386_linux_record_tdep.size_user_desc = 16;
@@ -861,7 +860,6 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_itimerspec
     = i386_linux_record_tdep.size_timespec * 2;
   i386_linux_record_tdep.size_mq_attr = 32;
-  i386_linux_record_tdep.size_siginfo = 128;
   i386_linux_record_tdep.size_termios = 36;
   i386_linux_record_tdep.size_termios2 = 44;
   i386_linux_record_tdep.size_pid_t = 4;
@@ -871,6 +869,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_hayes_esp_config = 12;
   i386_linux_record_tdep.size_size_t = 4;
   i386_linux_record_tdep.size_iovec = 8;
+  i386_linux_record_tdep.size_time_t = 4;
 
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.  */

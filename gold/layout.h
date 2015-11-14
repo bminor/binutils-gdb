@@ -764,7 +764,8 @@ class Layout
 	    || strncmp(name, ".gnu.linkonce.wi.",
 		       sizeof(".gnu.linkonce.wi.") - 1) == 0
 	    || strncmp(name, ".line", sizeof(".line") - 1) == 0
-	    || strncmp(name, ".stab", sizeof(".stab") - 1) == 0);
+	    || strncmp(name, ".stab", sizeof(".stab") - 1) == 0
+	    || strncmp(name, ".pdr", sizeof(".pdr") - 1) == 0);
   }
 
   // Return true if RELOBJ is an input file whose base name matches

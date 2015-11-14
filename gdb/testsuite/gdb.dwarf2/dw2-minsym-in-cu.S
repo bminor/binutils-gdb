@@ -15,16 +15,25 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#define CONCAT1(a, b) CONCAT2(a, b)
+#define CONCAT2(a, b) a ## b
+
+#ifdef SYMBOL_PREFIX
+# define SYMBOL(str)     CONCAT1(SYMBOL_PREFIX, str)
+#else
+# define SYMBOL(str)     str
+#endif
+
 	.text
 .Lbegin_text1:
 
-	.globl main
-	.type main, %function
-main:
+	.globl SYMBOL(main)
+	.type SYMBOL(main), %function
+SYMBOL(main):
 .Lbegin_main:
 	.int 0
 .Lend_main:
-	.size main, .-main
+	.size SYMBOL(main), .-SYMBOL(main)
 
 	.globl func2
 	.type func2, %function

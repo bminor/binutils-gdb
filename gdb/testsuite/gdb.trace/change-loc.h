@@ -15,30 +15,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef SYMBOL_PREFIX
-#define SYMBOL(str)     SYMBOL_PREFIX #str
-#else
-#define SYMBOL(str)     #str
-#endif
-
-/* Called from asm.  */
-static void __attribute__((used))
-func5 (void)
-{}
+#include "trace-common.h"
 
 static void
 func4 (void)
 {
-  /* `set_tracepoint' is the label where we'll set multiple tracepoints and
-     breakpoints at.  The insn at the label must the large enough to
-     fit a fast tracepoint jump.  */
-  asm ("    .global " SYMBOL(set_tracepoint) "\n"
-       SYMBOL(set_tracepoint) ":\n"
-#if (defined __x86_64__ || defined __i386__)
-       "    call " SYMBOL(func5) "\n"
-#elif (defined __aarch64__)
-       "    nop\n"
-#endif
-       );
-
+  FAST_TRACEPOINT_LABEL(set_tracepoint);
 }

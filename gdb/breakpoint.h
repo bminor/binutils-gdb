@@ -1146,6 +1146,11 @@ extern int program_breakpoint_here_p (struct gdbarch *gdbarch, CORE_ADDR address
 extern enum breakpoint_here breakpoint_here_p (struct address_space *, 
 					       CORE_ADDR);
 
+/* Return true if an enabled breakpoint exists in the range defined by
+   ADDR and LEN, in ASPACE.  */
+extern int breakpoint_in_range_p (struct address_space *aspace,
+				  CORE_ADDR addr, ULONGEST len);
+
 extern int moribund_breakpoint_here_p (struct address_space *, CORE_ADDR);
 
 extern int breakpoint_inserted_here_p (struct address_space *, CORE_ADDR);

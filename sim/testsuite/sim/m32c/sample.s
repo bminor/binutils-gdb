@@ -1,5 +1,5 @@
-;;; blinky.S --- sample program to blink LED's on M32C simulator
-;;; 
+;;; sample.s --- simple test program for M32C simulator
+;;;
 ;;; Copyright (C) 2005-2015 Free Software Foundation, Inc.
 ;;; Contributed by Red Hat, Inc.
 ;;;
@@ -22,13 +22,6 @@
 
 	.global _start
 _start:
-	mov.w	#0xe1,a0
-top:
-	sub.w	#1,r0
-	mov.b	r0h,[a0]
-
-	mov.w	#1000,r1
-loop:
-	adjnz.w	#-1,r1,loop
-
-	jmp.w	top
+	mov.w	#0x1234,r1
+	mov.w r1,r3 | sha.w #-8,r3 | sha.w #-7,r3
+	brk

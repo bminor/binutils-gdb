@@ -1487,8 +1487,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_flock = 16;
   arm_linux_record_tdep.size_oldold_utsname = 45;
   arm_linux_record_tdep.size_ustat = 20;
-  arm_linux_record_tdep.size_old_sigaction = 140;
-  arm_linux_record_tdep.size_old_sigset_t = 128;
+  arm_linux_record_tdep.size_old_sigaction = 16;
+  arm_linux_record_tdep.size_old_sigset_t = 4;
   arm_linux_record_tdep.size_rlimit = 8;
   arm_linux_record_tdep.size_rusage = 72;
   arm_linux_record_tdep.size_timeval = 8;
@@ -1496,8 +1496,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_old_gid_t = 2;
   arm_linux_record_tdep.size_old_uid_t = 2;
   arm_linux_record_tdep.size_fd_set = 128;
-  arm_linux_record_tdep.size_dirent = 268;
-  arm_linux_record_tdep.size_dirent64 = 276;
+  arm_linux_record_tdep.size_old_dirent = 268;
   arm_linux_record_tdep.size_statfs = 64;
   arm_linux_record_tdep.size_statfs64 = 84;
   arm_linux_record_tdep.size_sockaddr = 16;
@@ -1524,15 +1523,15 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_NFS_FHSIZE = 32;
   arm_linux_record_tdep.size_knfsd_fh = 132;
   arm_linux_record_tdep.size_TASK_COMM_LEN = 16;
-  arm_linux_record_tdep.size_sigaction = 140;
+  arm_linux_record_tdep.size_sigaction = 20;
   arm_linux_record_tdep.size_sigset_t = 8;
   arm_linux_record_tdep.size_siginfo_t = 128;
   arm_linux_record_tdep.size_cap_user_data_t = 12;
   arm_linux_record_tdep.size_stack_t = 12;
   arm_linux_record_tdep.size_off_t = arm_linux_record_tdep.size_long;
   arm_linux_record_tdep.size_stat64 = 96;
-  arm_linux_record_tdep.size_gid_t = 2;
-  arm_linux_record_tdep.size_uid_t = 2;
+  arm_linux_record_tdep.size_gid_t = 4;
+  arm_linux_record_tdep.size_uid_t = 4;
   arm_linux_record_tdep.size_PAGE_SIZE = 4096;
   arm_linux_record_tdep.size_flock64 = 24;
   arm_linux_record_tdep.size_user_desc = 16;
@@ -1542,7 +1541,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_itimerspec
     = arm_linux_record_tdep.size_timespec * 2;
   arm_linux_record_tdep.size_mq_attr = 32;
-  arm_linux_record_tdep.size_siginfo = 128;
   arm_linux_record_tdep.size_termios = 36;
   arm_linux_record_tdep.size_termios2 = 44;
   arm_linux_record_tdep.size_pid_t = 4;
@@ -1552,6 +1550,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   arm_linux_record_tdep.size_hayes_esp_config = 12;
   arm_linux_record_tdep.size_size_t = 4;
   arm_linux_record_tdep.size_iovec = 8;
+  arm_linux_record_tdep.size_time_t = 4;
 
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.  */

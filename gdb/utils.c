@@ -1677,8 +1677,9 @@ init_page_info (void)
          Only try to use tgetnum function if rl_get_screen_size
          did not return a useful value. */
       if (((rows <= 0) && (tgetnum ("li") < 0))
-	/* Also disable paging if inside EMACS.  */
-	  || getenv ("EMACS"))
+	/* Also disable paging if inside Emacs.  $EMACS was used
+	   before Emacs v25.1, $INSIDE_EMACS is used since then.  */
+	  || getenv ("EMACS") || getenv ("INSIDE_EMACS"))
 	{
 	  /* The number of lines per page is not mentioned in the terminal
 	     description or EMACS evironment variable is set.  This probably

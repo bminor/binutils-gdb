@@ -2219,7 +2219,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
   cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Read contents of exception table and index.  */
-  exidx = bfd_get_section_by_name (objfile->obfd, ".ARM.exidx");
+  exidx = bfd_get_section_by_name (objfile->obfd, ELF_STRING_ARM_unwind);
   if (exidx)
     {
       exidx_vma = bfd_section_vma (objfile->obfd, exidx);
@@ -3395,7 +3395,7 @@ struct stack_item
 };
 
 static struct stack_item *
-push_stack_item (struct stack_item *prev, const void *contents, int len)
+push_stack_item (struct stack_item *prev, const gdb_byte *contents, int len)
 {
   struct stack_item *si;
   si = XNEW (struct stack_item);
@@ -3446,8 +3446,18 @@ arm_type_align (struct type *t)
       return TYPE_LENGTH (t);
 
     case TYPE_CODE_ARRAY:
+      if (TYPE_VECTOR (t))
+	{
+	  /* Use the natural alignment for vector types (the same for
+	     scalar type), but the maximum alignment is 64-bit.  */
+	  if (TYPE_LENGTH (t) > 8)
+	    return 8;
+	  else
+	    return TYPE_LENGTH (t);
+	}
+      else
+	return arm_type_align (TYPE_TARGET_TYPE (t));
     case TYPE_CODE_COMPLEX:
-      /* TODO: What about vector types?  */
       return arm_type_align (TYPE_TARGET_TYPE (t));
 
     case TYPE_CODE_STRUCT:
@@ -3594,21 +3604,44 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 
     case TYPE_CODE_ARRAY:
       {
-	int count;
-	unsigned unitlen;
-	count = arm_vfp_cprc_sub_candidate (TYPE_TARGET_TYPE (t), base_type);
-	if (count == -1)
-	  return -1;
-	if (TYPE_LENGTH (t) == 0)
+	if (TYPE_VECTOR (t))
 	  {
-	    gdb_assert (count == 0);
-	    return 0;
+	    /* A 64-bit or 128-bit containerized vector type are VFP
+	       CPRCs.  */
+	    switch (TYPE_LENGTH (t))
+	      {
+	      case 8:
+		if (*base_type == VFP_CPRC_UNKNOWN)
+		  *base_type = VFP_CPRC_VEC64;
+		return 1;
+	      case 16:
+		if (*base_type == VFP_CPRC_UNKNOWN)
+		  *base_type = VFP_CPRC_VEC128;
+		return 1;
+	      default:
+		return -1;
+	      }
 	  }
-	else if (count == 0)
-	  return -1;
-	unitlen = arm_vfp_cprc_unit_length (*base_type);
-	gdb_assert ((TYPE_LENGTH (t) % unitlen) == 0);
-	return TYPE_LENGTH (t) / unitlen;
+	else
+	  {
+	    int count;
+	    unsigned unitlen;
+
+	    count = arm_vfp_cprc_sub_candidate (TYPE_TARGET_TYPE (t),
+						base_type);
+	    if (count == -1)
+	      return -1;
+	    if (TYPE_LENGTH (t) == 0)
+	      {
+		gdb_assert (count == 0);
+		return 0;
+	      }
+	    else if (count == 0)
+	      return -1;
+	    unitlen = arm_vfp_cprc_unit_length (*base_type);
+	    gdb_assert ((TYPE_LENGTH (t) % unitlen) == 0);
+	    return TYPE_LENGTH (t) / unitlen;
+	  }
       }
       break;
 
@@ -8989,99 +9022,113 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 static int
 arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 {
-  int nRc;
   enum type_code code;
 
   type = check_typedef (type);
 
-  /* In the ARM ABI, "integer" like aggregate types are returned in
-     registers.  For an aggregate type to be integer like, its size
-     must be less than or equal to INT_REGISTER_SIZE and the
-     offset of each addressable subfield must be zero.  Note that bit
-     fields are not addressable, and all addressable subfields of
-     unions always start at offset zero.
-
-     This function is based on the behaviour of GCC 2.95.1.
-     See: gcc/arm.c: arm_return_in_memory() for details.
-
-     Note: All versions of GCC before GCC 2.95.2 do not set up the
-     parameters correctly for a function returning the following
-     structure: struct { float f;}; This should be returned in memory,
-     not a register.  Richard Earnshaw sent me a patch, but I do not
-     know of any way to detect if a function like the above has been
-     compiled with the correct calling convention.  */
-
-  /* All aggregate types that won't fit in a register must be returned
-     in memory.  */
-  if (TYPE_LENGTH (type) > INT_REGISTER_SIZE)
-    {
-      return 1;
-    }
-
-  /* The AAPCS says all aggregates not larger than a word are returned
-     in a register.  */
-  if (gdbarch_tdep (gdbarch)->arm_abi != ARM_ABI_APCS)
+  /* Simple, non-aggregate types (ie not including vectors and
+     complex) are always returned in a register (or registers).  */
+  code = TYPE_CODE (type);
+  if (TYPE_CODE_STRUCT != code && TYPE_CODE_UNION != code
+      && TYPE_CODE_ARRAY != code && TYPE_CODE_COMPLEX != code)
     return 0;
 
-  /* The only aggregate types that can be returned in a register are
-     structs and unions.  Arrays must be returned in memory.  */
-  code = TYPE_CODE (type);
-  if ((TYPE_CODE_STRUCT != code) && (TYPE_CODE_UNION != code))
+  if (TYPE_CODE_ARRAY == code && TYPE_VECTOR (type))
     {
-      return 1;
+      /* Vector values should be returned using ARM registers if they
+	 are not over 16 bytes.  */
+      return (TYPE_LENGTH (type) > 16);
     }
 
-  /* Assume all other aggregate types can be returned in a register.
-     Run a check for structures, unions and arrays.  */
-  nRc = 0;
-
-  if ((TYPE_CODE_STRUCT == code) || (TYPE_CODE_UNION == code))
+  if (gdbarch_tdep (gdbarch)->arm_abi != ARM_ABI_APCS)
     {
-      int i;
-      /* Need to check if this struct/union is "integer" like.  For
-         this to be true, its size must be less than or equal to
-         INT_REGISTER_SIZE and the offset of each addressable
-         subfield must be zero.  Note that bit fields are not
-         addressable, and unions always start at offset zero.  If any
-         of the subfields is a floating point type, the struct/union
-         cannot be an integer type.  */
+      /* The AAPCS says all aggregates not larger than a word are returned
+	 in a register.  */
+      if (TYPE_LENGTH (type) <= INT_REGISTER_SIZE)
+	return 0;
 
-      /* For each field in the object, check:
-         1) Is it FP? --> yes, nRc = 1;
-         2) Is it addressable (bitpos != 0) and
-         not packed (bitsize == 0)?
-         --> yes, nRc = 1  
-       */
+      return 1;
+    }
+  else
+    {
+      int nRc;
 
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      /* All aggregate types that won't fit in a register must be returned
+	 in memory.  */
+      if (TYPE_LENGTH (type) > INT_REGISTER_SIZE)
+	return 1;
+
+      /* In the ARM ABI, "integer" like aggregate types are returned in
+	 registers.  For an aggregate type to be integer like, its size
+	 must be less than or equal to INT_REGISTER_SIZE and the
+	 offset of each addressable subfield must be zero.  Note that bit
+	 fields are not addressable, and all addressable subfields of
+	 unions always start at offset zero.
+
+	 This function is based on the behaviour of GCC 2.95.1.
+	 See: gcc/arm.c: arm_return_in_memory() for details.
+
+	 Note: All versions of GCC before GCC 2.95.2 do not set up the
+	 parameters correctly for a function returning the following
+	 structure: struct { float f;}; This should be returned in memory,
+	 not a register.  Richard Earnshaw sent me a patch, but I do not
+	 know of any way to detect if a function like the above has been
+	 compiled with the correct calling convention.  */
+
+      /* Assume all other aggregate types can be returned in a register.
+	 Run a check for structures, unions and arrays.  */
+      nRc = 0;
+
+      if ((TYPE_CODE_STRUCT == code) || (TYPE_CODE_UNION == code))
 	{
-	  enum type_code field_type_code;
-	  field_type_code = TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type,
-								       i)));
+	  int i;
+	  /* Need to check if this struct/union is "integer" like.  For
+	     this to be true, its size must be less than or equal to
+	     INT_REGISTER_SIZE and the offset of each addressable
+	     subfield must be zero.  Note that bit fields are not
+	     addressable, and unions always start at offset zero.  If any
+	     of the subfields is a floating point type, the struct/union
+	     cannot be an integer type.  */
 
-	  /* Is it a floating point type field?  */
-	  if (field_type_code == TYPE_CODE_FLT)
-	    {
-	      nRc = 1;
-	      break;
-	    }
+	  /* For each field in the object, check:
+	     1) Is it FP? --> yes, nRc = 1;
+	     2) Is it addressable (bitpos != 0) and
+	     not packed (bitsize == 0)?
+	     --> yes, nRc = 1
+	  */
 
-	  /* If bitpos != 0, then we have to care about it.  */
-	  if (TYPE_FIELD_BITPOS (type, i) != 0)
+	  for (i = 0; i < TYPE_NFIELDS (type); i++)
 	    {
-	      /* Bitfields are not addressable.  If the field bitsize is 
-	         zero, then the field is not packed.  Hence it cannot be
-	         a bitfield or any other packed type.  */
-	      if (TYPE_FIELD_BITSIZE (type, i) == 0)
+	      enum type_code field_type_code;
+
+	      field_type_code
+		= TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type,
+							     i)));
+
+	      /* Is it a floating point type field?  */
+	      if (field_type_code == TYPE_CODE_FLT)
 		{
 		  nRc = 1;
 		  break;
 		}
+
+	      /* If bitpos != 0, then we have to care about it.  */
+	      if (TYPE_FIELD_BITPOS (type, i) != 0)
+		{
+		  /* Bitfields are not addressable.  If the field bitsize is 
+		     zero, then the field is not packed.  Hence it cannot be
+		     a bitfield or any other packed type.  */
+		  if (TYPE_FIELD_BITSIZE (type, i) == 0)
+		    {
+		      nRc = 1;
+		      break;
+		    }
+		}
 	    }
 	}
-    }
 
-  return nRc;
+      return nRc;
+    }
 }
 
 /* Write into appropriate registers a function return value of type
@@ -9236,12 +9283,11 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
 	  || arm_return_in_memory (gdbarch, valtype))
 	return RETURN_VALUE_STRUCT_CONVENTION;
     }
-
-  /* AAPCS returns complex types longer than a register in memory.  */
-  if (tdep->arm_abi != ARM_ABI_APCS
-      && TYPE_CODE (valtype) == TYPE_CODE_COMPLEX
-      && TYPE_LENGTH (valtype) > INT_REGISTER_SIZE)
-    return RETURN_VALUE_STRUCT_CONVENTION;
+  else if (TYPE_CODE (valtype) == TYPE_CODE_COMPLEX)
+    {
+      if (arm_return_in_memory (gdbarch, valtype))
+	return RETURN_VALUE_STRUCT_CONVENTION;
+    }
 
   if (writebuf)
     arm_store_return_value (valtype, regcache, writebuf);

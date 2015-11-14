@@ -42,14 +42,14 @@ Dwarf::assemble $asm_file {
 	    }
             DW_TAG_subprogram {
                 {name f}
-                {low_pc f addr}
+                {low_pc [gdb_target_symbol f] addr}
                 {high_pc f_end_lbl addr}
                 {type :$b_l}
 		{DW_AT_MIPS_linkage_name _Z1fv}
 	    }
             DW_TAG_subprogram {
                 {name g}
-                {low_pc g addr}
+                {low_pc [gdb_target_symbol g] addr}
                 {high_pc g_end_lbl addr}
                 {type :$b_l}
 		{DW_AT_MIPS_linkage_name 42 DW_FORM_data1}

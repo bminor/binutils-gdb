@@ -531,10 +531,12 @@ struct target_ops
       TARGET_DEFAULT_RETURN (-1);
 
     int (*to_insert_mask_watchpoint) (struct target_ops *,
-				      CORE_ADDR, CORE_ADDR, int)
+				      CORE_ADDR, CORE_ADDR,
+				      enum target_hw_bp_type)
       TARGET_DEFAULT_RETURN (1);
     int (*to_remove_mask_watchpoint) (struct target_ops *,
-				      CORE_ADDR, CORE_ADDR, int)
+				      CORE_ADDR, CORE_ADDR,
+				      enum target_hw_bp_type)
       TARGET_DEFAULT_RETURN (1);
     int (*to_stopped_by_watchpoint) (struct target_ops *)
       TARGET_DEFAULT_RETURN (0);
@@ -1947,14 +1949,16 @@ extern char *target_thread_name (struct thread_info *);
    or hw_access for an access watchpoint.  Returns 0 for success, 1 if
    masked watchpoints are not supported, -1 for failure.  */
 
-extern int target_insert_mask_watchpoint (CORE_ADDR, CORE_ADDR, int);
+extern int target_insert_mask_watchpoint (CORE_ADDR, CORE_ADDR,
+					  enum target_hw_bp_type);
 
 /* Remove a masked watchpoint at ADDR with the mask MASK.
    RW may be hw_read for a read watchpoint, hw_write for a write watchpoint
    or hw_access for an access watchpoint.  Returns 0 for success, non-zero
    for failure.  */
 
-extern int target_remove_mask_watchpoint (CORE_ADDR, CORE_ADDR, int);
+extern int target_remove_mask_watchpoint (CORE_ADDR, CORE_ADDR,
+					  enum target_hw_bp_type);
 
 /* Insert a hardware breakpoint at address BP_TGT->placed_address in
    the target machine.  Returns 0 for success, and returns non-zero or

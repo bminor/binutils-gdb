@@ -157,6 +157,10 @@ START_RELOC_NUMBERS (elf_ppc64_reloc_type)
 /* Fake relocation only used internally by ld.  */
   RELOC_NUMBER (R_PPC64_LO_DS_OPT,	   128)
 #endif
+
+/* Power9 split rel16 for addpcis.  */
+  RELOC_NUMBER (R_PPC64_REL16DX_HA,	   246)
+
 /* Support STT_GNU_IFUNC plt calls.  */
   RELOC_NUMBER (R_PPC64_JMP_IREL,	   247)
   RELOC_NUMBER (R_PPC64_IRELATIVE,	   248)

@@ -3264,21 +3264,16 @@ This is the same as setting `task pause', `exceptions', and\n\
 	   &setlist);
 
   /* Commands to show information about the task's ports.  */
-  add_cmd ("send-rights", class_info, info_send_rights_cmd,
-	   _("Show information about the task's send rights"),
-	   &infolist);
-  add_cmd ("receive-rights", class_info, info_recv_rights_cmd,
-	   _("Show information about the task's receive rights"),
-	   &infolist);
-  add_cmd ("port-rights", class_info, info_port_rights_cmd,
-	   _("Show information about the task's port rights"),
-	   &infolist);
-  add_cmd ("port-sets", class_info, info_port_sets_cmd,
-	   _("Show information about the task's port sets"),
-	   &infolist);
-  add_cmd ("dead-names", class_info, info_dead_names_cmd,
-	   _("Show information about the task's dead names"),
-	   &infolist);
+  add_info ("send-rights", info_send_rights_cmd,
+	    _("Show information about the task's send rights"));
+  add_info ("receive-rights", info_recv_rights_cmd,
+	    _("Show information about the task's receive rights"));
+  add_info ("port-rights", info_port_rights_cmd,
+	    _("Show information about the task's port rights"));
+  add_info ("port-sets", info_port_sets_cmd,
+	    _("Show information about the task's port sets"));
+  add_info ("dead-names", info_dead_names_cmd,
+	    _("Show information about the task's dead names"));
   add_info_alias ("ports", "port-rights", 1);
   add_info_alias ("port", "port-rights", 1);
   add_info_alias ("psets", "port-sets", 1);

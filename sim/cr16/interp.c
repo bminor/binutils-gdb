@@ -426,7 +426,7 @@ imap_register (void *regcache, int reg_nr)
 /* Given a virtual address in the DMAP address space, translate it
    into a physical address. */
 
-unsigned long
+static unsigned long
 sim_cr16_translate_dmap_addr (unsigned long offset,
                               int nr_bytes,
                               unsigned long *phys,
@@ -489,7 +489,7 @@ sim_cr16_translate_dmap_addr (unsigned long offset,
 /* Given a virtual address in the IMAP address space, translate it
    into a physical address. */
 
-unsigned long
+static unsigned long
 sim_cr16_translate_imap_addr (unsigned long offset,
                               int nr_bytes,
                               unsigned long *phys,
@@ -542,7 +542,7 @@ sim_cr16_translate_imap_addr (unsigned long offset,
   return nr_bytes;
 }
 
-unsigned long
+static unsigned long
 sim_cr16_translate_addr (unsigned long memaddr, int nr_bytes,
                          unsigned long *targ_addr, void *regcache,
                          unsigned long (*dmap_register) (void *regcache,

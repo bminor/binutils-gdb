@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.26:
+
 * Add option to objcopy to insert new symbols into a file:
   --add-symbol <name>=[<section>:]<value>[,<flags>]
 

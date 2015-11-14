@@ -1,3 +1,97 @@
+2015-11-13  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.26.
+
+2015-11-12  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add cortex-a35.
+	* doc/c-aarch64.texi (-mcpu=): Likewise.
+
+2015-11-12  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Likewise.
+	* doc/c-arm.texi (-mcpu=): Likewise.
+
+2015-11-12  Matthew Wahab  <matthew.wahab@arm.com>
+
+	PR gas/19217
+	* config/tc-arm.c (move_or_literal_pool): Remove redundant feature
+	check.  Fix some code formatting.  Drop use of MOVT.  Add some
+	comments.
+
+2015-11-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner <bergner@vnet.ibm.com>
+
+	* doc/as.texinfo (Target PowerPC): Document -mpower9 and -mpwr9.
+	* doc/c-ppc.texi (PowerPC-Opts):  Likewise.
+	* config/tc-ppc.c (md_show_usage): Likewise.
+	(md_assemble): Handle BFD_RELOC_PPC_REL16DX_HA.
+	(md_apply_fix): Likewise.
+	(ppc_handle_align): Handle power9's group ending nop.
+
+2015-11-09  Jim Wilson  <jim.wilson@linaro.org>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add qdf24xx.
+	* config/tc-arm.c (arm_cpus): Likewise.
+	* doc/c-arm.texi, doc/c-aarch64.texi: Likewise.
+
+2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* read.c (parse_bitfield_cons): Fix left shift of negative value.
+	* config/tc-xstormy16.c (md_section_align): Likewise.
+	* config/tc-xgate.c (md_section_align): Likewise.
+	* config/tc-visium.c (md_section_align): Likewise.
+	* config/tc-v850.c (md_section_align): Likewise.
+	* config/tc-tic6x.c (md_section_align): Likewise.
+	* config/tc-sh.c (SH64PCREL32_M, SH64PCREL48_M, SH64PCREL32_M)
+	(MOVI_32_M, MOVI_48_M, MOVI_32_M, md_section_align): Likewise.
+	* config/tc-sh64.c (shmedia_md_estimate_size_before_relax): Likewise.
+	* config/tc-score.c (s3_section_align): Likewise.
+	* config/tc-score7.c (s7_section_align): Likewise.
+	* config/tc-s390.c (md_section_align): Likewise.
+	* config/tc-rx.c (md_section_align): Likewise.
+	* config/tc-rl78.c (md_section_align): Likewise.
+	* config/tc-ppc.c (md_section_align): Likewise.
+	* config/tc-or1k.c (md_section_align): Likewise.
+	* config/tc-nds32.c (md_section_align): Likewise.
+	* config/tc-mt.c (md_section_align): Likewise.
+	* config/tc-msp430.c (md_section_align): Likewise.
+	* config/tc-mn10300.c (md_section_align): Likewise.
+	* config/tc-mn10200.c (md_section_align): Likewise.
+	* config/tc-mips.c (md_section_align): Likewise.
+	* config/tc-microblaze.c (parse_imm): Likewise.
+	* config/tc-mep.c (md_section_align): Likewise.
+	* config/tc-m68k.c (md_section_align): Likewise.
+	* config/tc-m68hc11.c (md_section_align): Likewise.
+	* config/tc-m32r.c (md_section_align): Likewise.
+	* config/tc-m32c.c (md_section_align): Likewise.
+	* config/tc-lm32.c (md_section_align): Likewise.
+	* config/tc-iq2000.c (md_section_align): Likewise.
+	* config/tc-ip2k.c (md_section_align): Likewise.
+	* config/tc-ia64.c (dot_save, dot_vframe): Likewise.
+	* config/tc-i960.c (md_number_to_field, md_section_align): Likewise.
+	* config/tc-i386.c (md_section_align): Likewise.
+	* config/tc-i370.c (md_section_align): Likewise.
+	* config/tc-frv.c (md_section_align): Likewise.
+	* config/tc-fr30.c (md_section_align): Likewise.
+	* config/tc-epiphany.c (md_section_align): Likewise.
+	* config/tc-d30v.c (md_section_align): Likewise.
+	* config/tc-d10v.c (md_section_align): Likewise.
+	* config/tc-cr16.c (l_cons): Likewise.
+	* config/tc-bfin.c (md_section_align): Likewise.
+	* config/tc-arm.c (md_section_align): Likewise.
+	* config/tc-arc.c (md_section_align): Likewise.
+	* config/bfin-parse.y (expr_1): Likewise.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/rx-parse.y: Allow zero value for 5-bit displacements.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (parse_rx_section): Align parameter provides a
+	multiple of n argument, not a power of n argument.
+
 2015-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-aarch64.c (elf64_aarch64_target_format): Select the

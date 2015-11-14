@@ -51,6 +51,9 @@ show remote multiprocess-extensions-packet
   The "/m" option is now considered deprecated: its "source-centric"
   output hasn't proved useful in practice.
 
+* The "record instruction-history" command accepts a new modifier: /s.
+  It behaves exactly like /m and prints mixed source+disassembly.
+
 * The "set scheduler-locking" command supports a new mode "replay".
   It behaves like "off" in record mode and like "on" in replay mode.
 

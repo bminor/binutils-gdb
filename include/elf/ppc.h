@@ -149,6 +149,9 @@ START_RELOC_NUMBERS (elf_ppc_reloc_type)
   RELOC_NUMBER (R_PPC_VLE_SDAREL_HA16A,	231)
   RELOC_NUMBER (R_PPC_VLE_SDAREL_HA16D,	232)
 
+/* Power9 split rel16 for addpcis.  */
+  RELOC_NUMBER (R_PPC_REL16DX_HA,	246)
+
 /* Support STT_GNU_IFUNC plt calls.  */
   RELOC_NUMBER (R_PPC_IRELATIVE,	248)
 

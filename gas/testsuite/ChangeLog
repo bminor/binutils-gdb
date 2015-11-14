@@ -1,3 +1,40 @@
+2015-11-12  Matthew Wahab  <matthew.wahab@arm.com>
+
+	PR gas/19217
+	* gas/arm/thumb2_ldr_immediate_armv6t2.d: Update expected output.
+
+2015-11-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner <bergner@vnet.ibm.com>
+
+	* gas/ppc/altivec3.s: New test.
+	* gas/ppc/altivec3.d: Likewise.
+	* gas/ppc/vsx3.s: Likewise.
+	* gas/ppc/vsx3.d: Likewise.
+	* gas/ppc/power9.s: Likewise.
+	* gas/ppc/power9.d: Likewise.
+	* gas/ppc/ppc.exp: Run them.
+	* gas/ppc/power8.s <lxvx, lxvd2x, stxvx, stxvd2x>: Add new tests.
+	* gas/ppc/power8.d: Likewise.
+	* gas/ppc/vsx.s: <lxvx, stxvx>: Rename invalid mnemonics ...
+	<lxvd2x, stxvd2x>: ...to this.
+	* gas/ppc/vsx.d: Likewise.
+
+2015-11-09  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* gas/all/test-gen.c (random_order_16s, random_order_24s)
+	(random_order_32s): Fix left shift of negative value.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* gas/rx/max.d: Update expected disassembly.
+	* gas/rx/nod.d: Likewise.
+	* gas/rx/nop.sm: Add tests of more NOP instructions.
+
+2015-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* gas/rx/mov.sm: Add tests for zero offset indirect moves.
+	* gas/rx/mov.d: Update expected output.
+
 2015-10-28  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
         * gas/arm/pinsn.s: New.
