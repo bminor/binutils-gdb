@@ -1986,8 +1986,9 @@ Symbol_table::do_define_in_output_data(
     return sym;
   else
     {
-      if (binding == elfcpp::STB_LOCAL
-	  || this->version_script_.symbol_is_local(name))
+      if (defined == PREDEFINED
+	  && (binding == elfcpp::STB_LOCAL
+	      || this->version_script_.symbol_is_local(name)))
 	this->force_local(oldsym);
       delete sym;
       return oldsym;

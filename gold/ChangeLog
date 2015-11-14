@@ -1,3 +1,12 @@
+2015-12-10  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2015-11-14  Cary Coutant  <ccoutant@gmail.com>
+	PR gold/19244
+	PR gold/18548
+	* symtab.cc (Symbol_table::do_define_in_output_data): Check for forced
+	local symbols only for predefined symbols.
+
 2015-11-11  Alan Modra  <amodra@gmail.com>
 	    Peter Bergner <bergner@vnet.ibm.com>
 
