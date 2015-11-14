@@ -1,3 +1,10 @@
+2016-03-11  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* s390-linux-tdep.c (s390_ax_pseudo_register_collect): New function.
+	(s390_ax_pseudo_register_push_stack): New function.
+	(s390_gdbarch_init): Fill ax_pseudo_register_collect and
+	ax_pseudo_register_push_stack hooks.
+
 2016-03-10  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* data-directory/Makefile.in (PYTHON_FILE_LIST): Install

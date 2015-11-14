@@ -559,6 +559,86 @@ s390_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
 
+/* The "ax_pseudo_register_collect" gdbarch method.  */
+
+static int
+s390_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+				 struct agent_expr *ax, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  if (regnum == tdep->pc_regnum)
+    {
+      ax_reg_mask (ax, S390_PSWA_REGNUM);
+    }
+  else if (regnum == tdep->cc_regnum)
+    {
+      ax_reg_mask (ax, S390_PSWM_REGNUM);
+    }
+  else if (regnum_is_gpr_full (tdep, regnum))
+    {
+      regnum -= tdep->gpr_full_regnum;
+      ax_reg_mask (ax, S390_R0_REGNUM + regnum);
+      ax_reg_mask (ax, S390_R0_UPPER_REGNUM + regnum);
+    }
+  else if (regnum_is_vxr_full (tdep, regnum))
+    {
+      regnum -= tdep->v0_full_regnum;
+      ax_reg_mask (ax, S390_F0_REGNUM + regnum);
+      ax_reg_mask (ax, S390_V0_LOWER_REGNUM + regnum);
+    }
+  else
+    {
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+    }
+  return 0;
+}
+
+/* The "ax_pseudo_register_push_stack" gdbarch method.  */
+
+static int
+s390_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
+				    struct agent_expr *ax, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  if (regnum == tdep->pc_regnum)
+    {
+      ax_reg (ax, S390_PSWA_REGNUM);
+      if (register_size (gdbarch, S390_PSWA_REGNUM) == 4)
+	{
+	  ax_zero_ext (ax, 31);
+	}
+    }
+  else if (regnum == tdep->cc_regnum)
+    {
+      ax_reg (ax, S390_PSWM_REGNUM);
+      if (register_size (gdbarch, S390_PSWA_REGNUM) == 4)
+	ax_const_l (ax, 12);
+      else
+	ax_const_l (ax, 44);
+      ax_simple (ax, aop_rsh_unsigned);
+      ax_zero_ext (ax, 2);
+    }
+  else if (regnum_is_gpr_full (tdep, regnum))
+    {
+      regnum -= tdep->gpr_full_regnum;
+      ax_reg (ax, S390_R0_REGNUM + regnum);
+      ax_reg (ax, S390_R0_UPPER_REGNUM + regnum);
+      ax_const_l (ax, 32);
+      ax_simple (ax, aop_lsh);
+      ax_simple (ax, aop_bit_or);
+    }
+  else if (regnum_is_vxr_full (tdep, regnum))
+    {
+      /* Too large to stuff on the stack.  */
+      return 1;
+    }
+  else
+    {
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+    }
+  return 0;
+}
+
 
 /* A helper for s390_software_single_step, decides if an instruction
    is a partial-execution instruction that needs to be executed until
@@ -7918,6 +7998,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_tdesc_pseudo_register_type (gdbarch, s390_pseudo_register_type);
   set_tdesc_pseudo_register_reggroup_p (gdbarch,
 					s390_pseudo_register_reggroup_p);
+  set_gdbarch_ax_pseudo_register_collect (gdbarch,
+					  s390_ax_pseudo_register_collect);
+  set_gdbarch_ax_pseudo_register_push_stack
+      (gdbarch, s390_ax_pseudo_register_push_stack);
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
   set_gdbarch_register_name (gdbarch, s390_register_name);
 
