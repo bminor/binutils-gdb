@@ -226,7 +226,6 @@ struct d10v_memory
   uint8 *insn[IMEM_SEGMENTS];
   uint8 *data[DMEM_SEGMENTS];
   uint8 *unif[UMEM_SEGMENTS];
-  uint8 fault[16];
 };
 
 struct _state
@@ -262,7 +261,6 @@ struct _state
   } trace;
 
   uint8 exe;
-  int	exception;
   int	pc_changed;
 
   /* NOTE: everything below this line is not reset by

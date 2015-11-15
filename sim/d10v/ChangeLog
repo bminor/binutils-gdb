@@ -1,5 +1,35 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Add sim-reason.o, sim-resume.o, and
+	sim-stop.o.
+	* d10v_sim.h (struct d10v_memory): Delete fault member.
+	(struct _state): Delete exception member.
+	* interp.c (lookup_hash): Call sim_engine_halt instead of setting
+	State.exception.
+	(do_2_short, do_parallel): Delete State.exception checks.
+	(sim_size): Mark static.
+	(map_memory): Call sim_engine_halt instead of returning fault.
+	Call xcalloc instead of calloc and checking the return.
+	(dmem_addr): Call sim_engine_halt when phys_size is 0.
+	(imem_addr): Likewise.
+	(stop_simulator, sim_stop, sim_stop_reason): Delete.
+	(sim_resume): Rename to ...
+	(step_once): ... this.  Delete State.exception code and move
+	siggnal checking to sim_engine_run.
+	(sim_engine_run): New function.
+	* simops.c (EXCEPTION): Define.
+	(move_to_cr): Call EXCEPTION instead of setting State.exception.
+	(OP_30000000, OP_6401, OP_6001, OP_6000, OP_32010000, OP_31000000,
+	OP_6601, OP_6201, OP_6200, OP_33010000, OP_5201, OP_27000000,
+	OP_2F000000, OP_3220, OP_3200, OP_3400, OP_3000, OP_34000000,
+	OP_6800, OP_6C1F, OP_6801, OP_6C01, OP_36010000, OP_35000000,
+	OP_6A00, OP_6E1F, OP_6A01, OP_6E01, OP_37010000, OP_5FE0): Likewise.
+	(OP_5F20): Call sim_engine_halt instead of setting State.exception.
+	(OP_5F00): Call sim_engine_halt and EXCEPTION instead of setting
+	State.exception.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* d10v_sim.h (struct simops): Add SIM_DESC and SIM_CPU to func args.
 	(SET_CREG, SET_HW_CREG, SET_PSW_BIT): Pass sd and cpu to move_to_cr.
 	(dmem_addr, imem_addr, move_to_cr): Add SIM_DESC and SIM_CPU args.

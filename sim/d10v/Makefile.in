@@ -21,6 +21,9 @@ SIM_OBJS = \
 	interp.o \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-hload.o \
+	sim-reason.o \
+	sim-resume.o \
+	sim-stop.o \
 	table.o \
 	simops.o \
 	endian.o

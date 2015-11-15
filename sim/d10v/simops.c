@@ -15,6 +15,8 @@
 #include "simops.h"
 #include "targ-vals.h"
 
+#define EXCEPTION(sig) sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, sig)
+
 enum op_types {
   OP_VOID,
   OP_REG,
@@ -92,7 +94,7 @@ move_to_cr (SIM_DESC sd, SIM_CPU *cpu, int cr, reg_t mask, reg_t val, int psw_hw
 		(d10v_callback,
 		 "ERROR at PC 0x%x: ST can only be set when FX is set.\n",
 		 PC<<2);
-	      State.exception = SIGILL;
+	      EXCEPTION (SIM_SIGILL);
 	    }
 	}
       /* keep an up-to-date psw around for tracing */
@@ -1138,9 +1140,7 @@ OP_5F20 (SIM_DESC sd, SIM_CPU *cpu)
       trace_output_void (sd);
     }
   else
-    {
-      State.exception = SIGTRAP;
-    }
+    sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, SIM_SIGTRAP);
 }
 
 /* divs */
@@ -1320,10 +1320,8 @@ OP_30000000 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
@@ -1339,10 +1337,8 @@ OP_6401 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
@@ -1360,10 +1356,8 @@ OP_6001 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld", OP_REG_OUTPUT, OP_POSTINC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
@@ -1381,10 +1375,8 @@ OP_6000 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
@@ -1400,10 +1392,8 @@ OP_32010000 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF3, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
@@ -1419,10 +1409,8 @@ OP_31000000 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
@@ -1438,10 +1426,8 @@ OP_6601 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
@@ -1459,10 +1445,8 @@ OP_6201 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTINC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
@@ -1480,10 +1464,8 @@ OP_6200 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
@@ -1499,10 +1481,8 @@ OP_33010000 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF3, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
@@ -2225,7 +2205,7 @@ OP_5201 (SIM_DESC sd, SIM_CPU *cpu)
       (*d10v_callback->printf_filtered) (d10v_callback,
 					 "ERROR at PC 0x%x: instruction only valid for A0\n",
 					 PC<<2);
-      State.exception = SIGILL;
+      EXCEPTION (SIM_SIGILL);
     }
 
   SET_PSW_F1 (PSW_F0);
@@ -2300,12 +2280,12 @@ OP_27000000 (SIM_DESC sd, SIM_CPU *cpu)
   if (GPR (OP[0]) == 0)
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: rep with count=0 is illegal.\n");
-      State.exception = SIGILL;
+      EXCEPTION (SIM_SIGILL);
     }
   if (OP[1] < 4)
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: rep must include at least 4 instructions.\n");
-      State.exception = SIGILL;
+      EXCEPTION (SIM_SIGILL);
     }
   trace_output_void (sd);
 }
@@ -2322,12 +2302,12 @@ OP_2F000000 (SIM_DESC sd, SIM_CPU *cpu)
   if (OP[0] == 0)
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: repi with count=0 is illegal.\n");
-      State.exception = SIGILL;
+      EXCEPTION (SIM_SIGILL);
     }
   if (OP[1] < 4)
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: repi must include at least 4 instructions.\n");
-      State.exception = SIGILL;
+      EXCEPTION (SIM_SIGILL);
     }
   trace_output_void (sd);
 }
@@ -2476,8 +2456,7 @@ OP_3220 (SIM_DESC sd, SIM_CPU *cpu)
   if (reg >= 17 || reg <= -17)
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", reg);
-      State.exception = SIGILL;
-      return;
+      EXCEPTION (SIM_SIGILL);
     }
 
   tmp = SEXT40 (ACC (OP[0]));
@@ -2485,8 +2464,7 @@ OP_3220 (SIM_DESC sd, SIM_CPU *cpu)
   if (PSW_ST && (tmp < SEXT40 (MIN32) || tmp > SEXT40 (MAX32)))
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: accumulator value 0x%.2x%.8lx out of range\n", ((int)(tmp >> 32) & 0xff), ((unsigned long) tmp) & 0xffffffff);
-      State.exception = SIGILL;
-      return;
+      EXCEPTION (SIM_SIGILL);
     }
 
   if (reg >= 0 && reg <= 16)
@@ -2545,8 +2523,7 @@ OP_3200 (SIM_DESC sd, SIM_CPU *cpu)
   else
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", GPR (OP[1]) & 31);
-      State.exception = SIGILL;
-      return;
+      EXCEPTION (SIM_SIGILL);
     }
 
   if (PSW_ST)
@@ -2638,8 +2615,7 @@ OP_3400 (SIM_DESC sd, SIM_CPU *cpu)
   else
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", GPR (OP[1]) & 31);
-      State.exception = SIGILL;
-      return;
+      EXCEPTION (SIM_SIGILL);
     }
 }
 
@@ -2693,8 +2669,7 @@ OP_3000 (SIM_DESC sd, SIM_CPU *cpu)
   else
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", GPR (OP[1]) & 31);
-      State.exception = SIGILL;
-      return;
+      EXCEPTION (SIM_SIGILL);
     }
 
 }
@@ -2744,10 +2719,8 @@ OP_34000000 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st", OP_REG, OP_MEMREF2, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr, GPR (OP[0]));
   trace_output_void (sd);
@@ -2761,10 +2734,8 @@ OP_6800 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st", OP_REG, OP_MEMREF, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr, GPR (OP[0]));
   trace_output_void (sd);
@@ -2780,15 +2751,12 @@ OP_6C1F (SIM_DESC sd, SIM_CPU *cpu)
   if (OP[1] != 15)
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot pre-decrement any registers but r15 (SP).\n");
-      State.exception = SIGILL;
-      return;
+      EXCEPTION (SIM_SIGILL);
     }
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr, GPR (OP[0]));
   SET_GPR (OP[1], addr);
@@ -2803,10 +2771,8 @@ OP_6801 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st", OP_REG, OP_POSTINC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr, GPR (OP[0]));
   INC_ADDR (OP[1], 2);
@@ -2822,15 +2788,12 @@ OP_6C01 (SIM_DESC sd, SIM_CPU *cpu)
   if ( OP[1] == 15 )
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
-      State.exception = SIGILL;
-      return;
+      EXCEPTION (SIM_SIGILL);
     }
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr, GPR (OP[0]));
   INC_ADDR (OP[1], -2);
@@ -2845,10 +2808,8 @@ OP_36010000 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st", OP_REG, OP_MEMREF3, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr, GPR (OP[0]));
   trace_output_void (sd);
@@ -2862,10 +2823,8 @@ OP_35000000 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st2w", OP_DREG, OP_MEMREF2, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
@@ -2880,10 +2839,8 @@ OP_6A00 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st2w", OP_DREG, OP_MEMREF, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
@@ -2899,15 +2856,12 @@ OP_6E1F (SIM_DESC sd, SIM_CPU *cpu)
   if ( OP[1] != 15 )
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot pre-decrement any registers but r15 (SP).\n");
-      State.exception = SIGILL;
-      return;
+      EXCEPTION (SIM_SIGILL);
     }
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
@@ -2923,10 +2877,8 @@ OP_6A01 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st2w", OP_DREG, OP_POSTINC, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
@@ -2943,15 +2895,12 @@ OP_6E01 (SIM_DESC sd, SIM_CPU *cpu)
   if ( OP[1] == 15 )
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
-      State.exception = SIGILL;
-      return;
+      EXCEPTION (SIM_SIGILL);
     }
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
@@ -2967,10 +2916,8 @@ OP_37010000 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st2w", OP_DREG, OP_MEMREF3, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_D10V_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
@@ -3000,8 +2947,8 @@ void
 OP_5FE0 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("stop", OP_VOID, OP_VOID, OP_VOID);
-  State.exception = SIG_D10V_STOP;
   trace_output_void (sd);
+  sim_engine_halt (sd, cpu, NULL, PC, sim_exited, 0);
 }
 
 /* sub */
@@ -3276,7 +3223,7 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	    if (PARM1 == getpid ())
 	      {
 		trace_output_void (sd);
-		State.exception = PARM2;
+		sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, PARM2);
 	      }
 	    else
 	      {
@@ -3389,7 +3336,7 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 		    trace_output_void (sd);
 		    (*d10v_callback->printf_filtered) (d10v_callback, "Unknown signal %d\n", PARM2);
 		    (*d10v_callback->flush_stdout) (d10v_callback);
-		    State.exception = SIGILL;
+		    EXCEPTION (SIM_SIGILL);
 		  }
 		else
 		  {
@@ -3453,7 +3400,7 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	  case TARGET_SYS_kill:
 	    trace_input ("<kill>", OP_REG, OP_REG, OP_VOID);
 	    trace_output_void (sd);
-	    State.exception = PARM2;
+	    sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, PARM2);
 	    break;
 #endif
 
@@ -3498,8 +3445,8 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 
 	  case TARGET_SYS_exit:
 	    trace_input ("<exit>", OP_R0, OP_VOID, OP_VOID);
-	    State.exception = SIG_D10V_EXIT;
 	    trace_output_void (sd);
+	    sim_engine_halt (sd, cpu, NULL, PC, sim_exited, GPR (0));
 	    break;
 
 #ifdef TARGET_SYS_stat

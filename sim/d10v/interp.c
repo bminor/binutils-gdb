@@ -79,11 +79,7 @@ lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint32 ins, int size)
   while ((ins & h->mask) != h->opcode || h->size != size)
     {
       if (h->next == NULL)
-	{
-	  State.exception = GDB_SIGNAL_ILL;
-	  State.pc_changed = 1; /* Don't increment the PC. */
-	  return NULL;
-	}
+	sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, SIM_SIGILL);
       h = h->next;
     }
   return (h);
@@ -159,7 +155,7 @@ do_2_short (SIM_DESC sd, SIM_CPU *cpu, uint16 ins1, uint16 ins2, enum _leftright
   (h->ops->func) (sd, cpu);
 
   /* Issue the second instruction (if the PC hasn't changed) */
-  if (!State.pc_changed && !State.exception)
+  if (!State.pc_changed)
     {
       /* finish any existing instructions */
       SLOT_FLUSH ();
@@ -172,7 +168,7 @@ do_2_short (SIM_DESC sd, SIM_CPU *cpu, uint16 ins1, uint16 ins2, enum _leftright
       ins_type_counters[ (int)INS_CYCLES ]++;
       (h->ops->func) (sd, cpu);
     }
-  else if (!State.exception)
+  else
     ins_type_counters[ (int)INS_COND_JUMP ]++;
 }
 
@@ -232,13 +228,10 @@ do_parallel (SIM_DESC sd, SIM_CPU *cpu, uint16 ins1, uint16 ins2)
       State.ins_type = INS_LEFT_PARALLEL;
       ins_type_counters[ (int)State.ins_type ]++;
       (h1->ops->func) (sd, cpu);
-      if (!State.exception)
-	{
-	  get_operands (h2->ops, ins2);
-	  State.ins_type = INS_RIGHT_PARALLEL;
-	  ins_type_counters[ (int)State.ins_type ]++;
-	  (h2->ops->func) (sd, cpu);
-	}
+      get_operands (h2->ops, ins2);
+      State.ins_type = INS_RIGHT_PARALLEL;
+      ins_type_counters[ (int)State.ins_type ]++;
+      (h2->ops->func) (sd, cpu);
     }
 }
  
@@ -262,7 +255,7 @@ add_commas (char *buf, int sizeof_buf, unsigned long value)
   return endbuf;
 }
 
-void
+static void
 sim_size (int power)
 {
   int i;
@@ -655,18 +648,11 @@ map_memory (SIM_DESC sd, SIM_CPU *cpu, unsigned phys_addr)
     default:
       /* OOPS! */
       last_segname = "scrap";
-      return State.mem.fault;
+      sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, SIM_SIGBUS);
     }
   
   if (*memory == NULL)
-    {
-      *memory = calloc (1, SEGMENT_SIZE);
-      if (*memory == NULL)
-	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "Malloc failed.\n");
-	  return State.mem.fault;
-	}
-    }
+    *memory = xcalloc (1, SEGMENT_SIZE);
   
   offset = (phys_addr % SEGMENT_SIZE);
   raw = *memory + offset;
@@ -893,11 +879,8 @@ dmem_addr (SIM_DESC sd, SIM_CPU *cpu, uint16 offset)
   phys_size = sim_d10v_translate_dmap_addr (sd, cpu, offset, 1, &phys, NULL,
 					    dmap_register);
   if (phys_size == 0)
-    {
-      mem = State.mem.fault;
-    }
-  else
-    mem = map_memory (sd, cpu, phys);
+    sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, SIM_SIGBUS);
+  mem = map_memory (sd, cpu, phys);
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMORY))
     {
@@ -920,9 +903,7 @@ imem_addr (SIM_DESC sd, SIM_CPU *cpu, uint32 offset)
   int phys_size = sim_d10v_translate_imap_addr (sd, cpu, offset, 1, &phys, NULL,
 						imap_register);
   if (phys_size == 0)
-    {
-      return State.mem.fault;
-    }
+    sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, SIM_SIGBUS);
   mem = map_memory (sd, cpu, phys);
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMORY))
@@ -938,60 +919,15 @@ imem_addr (SIM_DESC sd, SIM_CPU *cpu, uint32 offset)
   return mem;
 }
 
-static int stop_simulator = 0;
-
-int
-sim_stop (SIM_DESC sd)
+static void
+step_once (SIM_DESC sd, SIM_CPU *cpu)
 {
-  stop_simulator = 1;
-  return 1;
-}
-
-
-/* Run (or resume) the program.  */
-void
-sim_resume (SIM_DESC sd, int step, int siggnal)
-{
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
   uint32 inst;
   uint8 *iaddr;
 
-/*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); */
-  State.exception = 0;
-  if (step)
-    sim_stop (sd);
-
-  switch (siggnal)
-    {
-    case 0:
-      break;
-    case GDB_SIGNAL_BUS:
-      SET_BPC (PC);
-      SET_BPSW (PSW);
-      SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
-      JMP (AE_VECTOR_START);
-      SLOT_FLUSH ();
-      break;
-    case GDB_SIGNAL_ILL:
-      SET_BPC (PC);
-      SET_BPSW (PSW);
-      SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
-      JMP (RIE_VECTOR_START);
-      SLOT_FLUSH ();
-      break;
-    default:
-      /* just ignore it */
-      break;
-    }
-
-  do
+  /* TODO: Unindent this block.  */
     {
       iaddr = imem_addr (sd, cpu, (uint32)PC << 2);
-      if (iaddr == State.mem.fault)
- 	{
-	  State.exception = GDB_SIGNAL_BUS;
- 	  break;
- 	}
  
       inst = get_longword( iaddr ); 
  
@@ -1058,10 +994,49 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
       /* Writeback all the DATA / PC changes */
       SLOT_FLUSH ();
     }
-  while ( !State.exception && !stop_simulator);
-  
-  if (step && !State.exception)
-    State.exception = GDB_SIGNAL_TRAP;
+}
+
+void
+sim_engine_run (SIM_DESC sd,
+		int next_cpu_nr,  /* ignore  */
+		int nr_cpus,      /* ignore  */
+		int siggnal)
+{
+  sim_cpu *cpu;
+
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  cpu = STATE_CPU (sd, 0);
+
+  switch (siggnal)
+    {
+    case 0:
+      break;
+    case GDB_SIGNAL_BUS:
+      SET_BPC (PC);
+      SET_BPSW (PSW);
+      SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
+      JMP (AE_VECTOR_START);
+      SLOT_FLUSH ();
+      break;
+    case GDB_SIGNAL_ILL:
+      SET_BPC (PC);
+      SET_BPSW (PSW);
+      SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
+      JMP (RIE_VECTOR_START);
+      SLOT_FLUSH ();
+      break;
+    default:
+      /* just ignore it */
+      break;
+    }
+
+  while (1)
+    {
+      step_once (sd, cpu);
+      if (sim_events_tick (sd))
+	sim_events_process (sd);
+    }
 }
 
 void
@@ -1224,40 +1199,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 
   SLOT_FLUSH ();
   return SIM_RC_OK;
-}
-
-void
-sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
-{
-/*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_stop_reason:  PC=0x%x\n",PC<<2); */
-
-  switch (State.exception)
-    {
-    case SIG_D10V_STOP:			/* stop instruction */
-      *reason = sim_exited;
-      *sigrc = 0;
-      break;
-
-    case SIG_D10V_EXIT:			/* exit trap */
-      *reason = sim_exited;
-      *sigrc = GPR (0);
-      break;
-
-    case SIG_D10V_BUS:
-      *reason = sim_stopped;
-      *sigrc = GDB_SIGNAL_BUS;
-      break;
-
-    default:				/* some signal */
-      *reason = sim_stopped;
-      if (stop_simulator && !State.exception)
-	*sigrc = GDB_SIGNAL_INT;
-      else
-	*sigrc = State.exception;
-      break;
-    }
-
-  stop_simulator = 0;
 }
 
 int
