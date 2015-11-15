@@ -1,5 +1,11 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* cr16_sim.h (get_longlong, write_longlong, WRITE_16, READ_64,
+	WRITE_64): Delete.
+	* endian.c (get_longlong, write_longlong): Likewise.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Add sim-reg.o.
 	* interp.c (cr16_reg_fetch, cr16_reg_store): Add prototypes.
 	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.

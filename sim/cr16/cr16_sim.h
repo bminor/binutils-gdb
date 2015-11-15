@@ -436,10 +436,8 @@ extern bfd_vma decode_pc (void);
 #else
 extern uint32 get_longword (uint8 *);
 extern uint16 get_word (uint8 *);
-extern int64 get_longlong (uint8 *);
 extern void write_word (uint8 *addr, uint16 data);
 extern void write_longword (uint8 *addr, uint32 data);
-extern void write_longlong (uint8 *addr, int64 data);
 #endif
 
 #define SW(addr,data)		write_word(dmem_addr(addr),data)
@@ -447,9 +445,6 @@ extern void write_longlong (uint8 *addr, int64 data);
 #define SLW(addr,data)  	write_longword(dmem_addr(addr),data)
 #define RLW(x)			get_longword(dmem_addr(x))
 #define READ_16(x)		get_word(x)
-#define WRITE_16(addr,data)	write_word(addr,data)
-#define READ_64(x)		get_longlong(x)
-#define WRITE_64(addr,data)	write_longlong(addr,data)
 
 #define JMP(x)			do { SET_PC (x); State.pc_changed = 1; } while (0)
 
