@@ -63,7 +63,7 @@ enum {
 };
 
 reg_t
-move_to_cr (int cr, reg_t mask, reg_t val, int psw_hw_p)
+move_to_cr (SIM_DESC sd, SIM_CPU *cpu, int cr, reg_t mask, reg_t val, int psw_hw_p)
 {
   /* A MASK bit is set when the corresponding bit in the CR should
      be left alone */
@@ -120,12 +120,13 @@ move_to_cr (int cr, reg_t mask, reg_t val, int psw_hw_p)
 }
 
 #ifdef DEBUG
-static void trace_input_func (const char *name,
+static void trace_input_func (SIM_DESC sd,
+			      const char *name,
 			      enum op_types in1,
 			      enum op_types in2,
 			      enum op_types in3);
 
-#define trace_input(name, in1, in2, in3) do { if (d10v_debug) trace_input_func (name, in1, in2, in3); } while (0)
+#define trace_input(name, in1, in2, in3) do { if (d10v_debug) trace_input_func (sd, name, in1, in2, in3); } while (0)
 
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 8
@@ -152,7 +153,7 @@ static void trace_input_func (const char *name,
 #endif
 
 static void
-trace_input_func (const char *name, enum op_types in1, enum op_types in2, enum op_types in3)
+trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_types in2, enum op_types in3)
 {
   char *comma;
   enum op_types in[3];
@@ -193,21 +194,19 @@ trace_input_func (const char *name, enum op_types in1, enum op_types in2, enum o
 
   else
     {
-      extern SIM_DESC trace_sd;
-
       buf[0] = '\0';
       byte_pc = PC;
-      if (STATE_TEXT_SECTION (trace_sd)
-	  && byte_pc >= STATE_TEXT_START (trace_sd)
-	  && byte_pc < STATE_TEXT_END (trace_sd))
+      if (STATE_TEXT_SECTION (sd)
+	  && byte_pc >= STATE_TEXT_START (sd)
+	  && byte_pc < STATE_TEXT_END (sd))
 	{
 	  filename = (const char *)0;
 	  functionname = (const char *)0;
 	  linenumber = 0;
-	  if (bfd_find_nearest_line (STATE_PROG_BFD (trace_sd),
-				     STATE_TEXT_SECTION (trace_sd),
+	  if (bfd_find_nearest_line (STATE_PROG_BFD (sd),
+				     STATE_TEXT_SECTION (sd),
 				     (struct bfd_symbol **)0,
-				     byte_pc - STATE_TEXT_START (trace_sd),
+				     byte_pc - STATE_TEXT_START (sd),
 				     &filename, &functionname, &linenumber))
 	    {
 	      p = buf;
@@ -490,13 +489,13 @@ trace_input_func (const char *name, enum op_types in1, enum op_types in2, enum o
 }
 
 static void
-do_trace_output_flush (void)
+do_trace_output_flush (SIM_DESC sd)
 {
   (*d10v_callback->flush_stdout) (d10v_callback);
 }
 
 static void
-do_trace_output_finish (void)
+do_trace_output_finish (SIM_DESC sd)
 {
   (*d10v_callback->printf_filtered) (d10v_callback,
 				     " F0=%d F1=%d C=%d\n",
@@ -507,7 +506,7 @@ do_trace_output_finish (void)
 }
 
 static void
-trace_output_40 (uint64 val)
+trace_output_40 (SIM_DESC sd, uint64 val)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
@@ -517,12 +516,12 @@ trace_output_40 (uint64 val)
 					 "",
 					 ((int)(val >> 32) & 0xff),
 					 ((unsigned long) val) & 0xffffffff);
-      do_trace_output_finish ();
+      do_trace_output_finish (sd);
     }
 }
 
 static void
-trace_output_32 (uint32 val)
+trace_output_32 (SIM_DESC sd, uint32 val)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
@@ -531,12 +530,12 @@ trace_output_32 (uint32 val)
 					 SIZE_VALUES - 10,
 					 "",
 					 (int) val);
-      do_trace_output_finish ();
+      do_trace_output_finish (sd);
     }
 }
 
 static void
-trace_output_16 (uint16 val)
+trace_output_16 (SIM_DESC sd, uint16 val)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
@@ -545,22 +544,22 @@ trace_output_16 (uint16 val)
 					 SIZE_VALUES - 6,
 					 "",
 					 (int) val);
-      do_trace_output_finish ();
+      do_trace_output_finish (sd);
     }
 }
 
 static void
-trace_output_void (void)
+trace_output_void (SIM_DESC sd)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "\n");
-      do_trace_output_flush ();
+      do_trace_output_flush (sd);
     }
 }
 
 static void
-trace_output_flag (void)
+trace_output_flag (SIM_DESC sd)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
@@ -568,7 +567,7 @@ trace_output_flag (void)
 					 " :: %*s",
 					 SIZE_VALUES,
 					 "");
-      do_trace_output_finish ();
+      do_trace_output_finish (sd);
     }
 }
 
@@ -582,7 +581,7 @@ trace_output_flag (void)
 
 /* abs */
 void
-OP_4607 (void)
+OP_4607 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("abs", OP_REG, OP_VOID, OP_VOID);
@@ -596,12 +595,12 @@ OP_4607 (void)
   else
     SET_PSW_F0 (0);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* abs */
 void
-OP_5607 (void)
+OP_5607 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   trace_input ("abs", OP_ACCUM, OP_VOID, OP_VOID);
@@ -630,12 +629,12 @@ OP_5607 (void)
       SET_PSW_F0 (0);
     }
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* add */
 void
-OP_200 (void)
+OP_200 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 a = GPR (OP[0]);
   uint16 b = GPR (OP[1]);
@@ -643,12 +642,12 @@ OP_200 (void)
   trace_input ("add", OP_REG, OP_REG, OP_VOID);
   SET_PSW_C (a > tmp);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* add */
 void
-OP_1201 (void)
+OP_1201 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   tmp = SEXT40(ACC (OP[0])) + (SEXT16 (GPR (OP[1])) << 16 | GPR (OP[1] + 1));
@@ -666,12 +665,12 @@ OP_1201 (void)
   else
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* add */
 void
-OP_1203 (void)
+OP_1203 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   tmp = SEXT40(ACC (OP[0])) + SEXT40(ACC (OP[1]));
@@ -689,12 +688,12 @@ OP_1203 (void)
   else
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* add2w */
 void
-OP_1200 (void)
+OP_1200 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint32 tmp;
   uint32 a = (GPR (OP[0])) << 16 | GPR (OP[0] + 1);
@@ -704,12 +703,12 @@ OP_1200 (void)
   SET_PSW_C (tmp < a);
   SET_GPR (OP[0] + 0, (tmp >> 16));
   SET_GPR (OP[0] + 1, (tmp & 0xFFFF));
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* add3 */
 void
-OP_1000000 (void)
+OP_1000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 a = GPR (OP[1]);
   uint16 b = OP[2];
@@ -717,12 +716,12 @@ OP_1000000 (void)
   trace_input ("add3", OP_REG_OUTPUT, OP_REG, OP_CONSTANT16);
   SET_PSW_C (tmp < a);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* addac3 */
 void
-OP_17000200 (void)
+OP_17000200 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   tmp = SEXT40(ACC (OP[2])) + SEXT40 ((GPR (OP[1]) << 16) | GPR (OP[1] + 1));
@@ -730,12 +729,12 @@ OP_17000200 (void)
   trace_input ("addac3", OP_DREG_OUTPUT, OP_DREG, OP_ACCUM);
   SET_GPR (OP[0] + 0, ((tmp >> 16) & 0xffff));
   SET_GPR (OP[0] + 1, (tmp & 0xffff));
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* addac3 */
 void
-OP_17000202 (void)
+OP_17000202 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   tmp = SEXT40(ACC (OP[1])) + SEXT40(ACC (OP[2]));
@@ -743,12 +742,12 @@ OP_17000202 (void)
   trace_input ("addac3", OP_DREG_OUTPUT, OP_ACCUM, OP_ACCUM);
   SET_GPR (OP[0] + 0, (tmp >> 16) & 0xffff);
   SET_GPR (OP[0] + 1, tmp & 0xffff);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* addac3s */
 void
-OP_17001200 (void)
+OP_17001200 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   SET_PSW_F1 (PSW_F0);
@@ -771,12 +770,12 @@ OP_17001200 (void)
     }      
   SET_GPR (OP[0] + 0, (tmp >> 16) & 0xffff);
   SET_GPR (OP[0] + 1, (tmp & 0xffff));
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* addac3s */
 void
-OP_17001202 (void)
+OP_17001202 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   SET_PSW_F1 (PSW_F0);
@@ -799,12 +798,12 @@ OP_17001202 (void)
     }      
   SET_GPR (OP[0] + 0, (tmp >> 16) & 0xffff);
   SET_GPR (OP[0] + 1, (tmp & 0xffff));
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* addi */
 void
-OP_201 (void)
+OP_201 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 a = GPR (OP[0]);
   uint16 b;
@@ -816,262 +815,262 @@ OP_201 (void)
   trace_input ("addi", OP_REG, OP_CONSTANT16, OP_VOID);
   SET_PSW_C (tmp < a);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* and */
 void
-OP_C00 (void)
+OP_C00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 tmp = GPR (OP[0]) & GPR (OP[1]);
   trace_input ("and", OP_REG, OP_REG, OP_VOID);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* and3 */
 void
-OP_6000000 (void)
+OP_6000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 tmp = GPR (OP[1]) & OP[2];
   trace_input ("and3", OP_REG_OUTPUT, OP_REG, OP_CONSTANT16);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* bclri */
 void
-OP_C01 (void)
+OP_C01 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("bclri", OP_REG, OP_CONSTANT16, OP_VOID);
   tmp = (GPR (OP[0]) &~(0x8000 >> OP[1]));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* bl.s */
 void
-OP_4900 (void)
+OP_4900 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("bl.s", OP_CONSTANT8, OP_R0, OP_R1);
   SET_GPR (13, PC + 1);
   JMP( PC + SEXT8 (OP[0]));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* bl.l */
 void
-OP_24800000 (void)
+OP_24800000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("bl.l", OP_CONSTANT16, OP_R0, OP_R1);
   SET_GPR (13, (PC + 1));
   JMP (PC + OP[0]);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* bnoti */
 void
-OP_A01 (void)
+OP_A01 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("bnoti", OP_REG, OP_CONSTANT16, OP_VOID);
   tmp = (GPR (OP[0]) ^ (0x8000 >> OP[1]));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* bra.s */
 void
-OP_4800 (void)
+OP_4800 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("bra.s", OP_CONSTANT8, OP_VOID, OP_VOID);
   JMP (PC + SEXT8 (OP[0]));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* bra.l */
 void
-OP_24000000 (void)
+OP_24000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("bra.l", OP_CONSTANT16, OP_VOID, OP_VOID);
   JMP (PC + OP[0]);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* brf0f.s */
 void
-OP_4A00 (void)
+OP_4A00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("brf0f.s", OP_CONSTANT8, OP_VOID, OP_VOID);
   if (!PSW_F0)
     JMP (PC + SEXT8 (OP[0]));
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* brf0f.l */
 void
-OP_25000000 (void)
+OP_25000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("brf0f.l", OP_CONSTANT16, OP_VOID, OP_VOID);
   if (!PSW_F0)
     JMP (PC + OP[0]);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* brf0t.s */
 void
-OP_4B00 (void)
+OP_4B00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("brf0t.s", OP_CONSTANT8, OP_VOID, OP_VOID);
   if (PSW_F0)
     JMP (PC + SEXT8 (OP[0]));
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* brf0t.l */
 void
-OP_25800000 (void)
+OP_25800000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("brf0t.l", OP_CONSTANT16, OP_VOID, OP_VOID);
   if (PSW_F0)
     JMP (PC + OP[0]);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* bseti */
 void
-OP_801 (void)
+OP_801 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("bseti", OP_REG, OP_CONSTANT16, OP_VOID);
   tmp = (GPR (OP[0]) | (0x8000 >> OP[1]));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* btsti */
 void
-OP_E01 (void)
+OP_E01 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("btsti", OP_REG, OP_CONSTANT16, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 ((GPR (OP[0]) & (0x8000 >> OP[1])) ? 1 : 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* clrac */
 void
-OP_5601 (void)
+OP_5601 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("clrac", OP_ACCUM_OUTPUT, OP_VOID, OP_VOID);
   SET_ACC (OP[0], 0);
-  trace_output_40 (0);
+  trace_output_40 (sd, 0);
 }
 
 /* cmp */
 void
-OP_600 (void)
+OP_600 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmp", OP_REG, OP_REG, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 (((int16)(GPR (OP[0])) < (int16)(GPR (OP[1]))) ? 1 : 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cmp */
 void
-OP_1603 (void)
+OP_1603 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmp", OP_ACCUM, OP_ACCUM, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 ((SEXT40(ACC (OP[0])) < SEXT40(ACC (OP[1]))) ? 1 : 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cmpeq */
 void
-OP_400 (void)
+OP_400 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmpeq", OP_REG, OP_REG, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 ((GPR (OP[0]) == GPR (OP[1])) ? 1 : 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cmpeq */
 void
-OP_1403 (void)
+OP_1403 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmpeq", OP_ACCUM, OP_ACCUM, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 (((ACC (OP[0]) & MASK40) == (ACC (OP[1]) & MASK40)) ? 1 : 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cmpeqi.s */
 void
-OP_401 (void)
+OP_401 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmpeqi.s", OP_REG, OP_CONSTANT4, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 ((GPR (OP[0]) == (reg_t) SEXT4 (OP[1])) ? 1 : 0);  
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cmpeqi.l */
 void
-OP_2000000 (void)
+OP_2000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmpeqi.l", OP_REG, OP_CONSTANT16, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 ((GPR (OP[0]) == (reg_t)OP[1]) ? 1 : 0);  
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cmpi.s */
 void
-OP_601 (void)
+OP_601 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmpi.s", OP_REG, OP_CONSTANT4, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 (((int16)(GPR (OP[0])) < (int16)SEXT4(OP[1])) ? 1 : 0);  
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cmpi.l */
 void
-OP_3000000 (void)
+OP_3000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmpi.l", OP_REG, OP_CONSTANT16, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 (((int16)(GPR (OP[0])) < (int16)(OP[1])) ? 1 : 0);  
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cmpu */
 void
-OP_4600 (void)
+OP_4600 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmpu", OP_REG, OP_REG, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 ((GPR (OP[0]) < GPR (OP[1])) ? 1 : 0);  
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cmpui */
 void
-OP_23000000 (void)
+OP_23000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("cmpui", OP_REG, OP_CONSTANT16, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 ((GPR (OP[0]) < (reg_t)OP[1]) ? 1 : 0);  
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cpfg */
 void
-OP_4E09 (void)
+OP_4E09 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint8 val;
   
@@ -1088,12 +1087,12 @@ OP_4E09 (void)
   else
     SET_PSW_F1 (val);
 
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* cpfg */
 void
-OP_4E0F (void)
+OP_4E0F (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint8 val;
   
@@ -1110,12 +1109,12 @@ OP_4E0F (void)
   else
     SET_PSW_F1 (val);
 
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* dbt */
 void
-OP_5F20 (void)
+OP_5F20 (SIM_DESC sd, SIM_CPU *cpu)
 {
   /* d10v_callback->printf_filtered(d10v_callback, "***** DBT *****  PC=%x\n",PC); */
 
@@ -1136,7 +1135,7 @@ OP_5F20 (void)
       SET_DPSW (PSW);
       SET_HW_PSW (PSW_DM_BIT | (PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
       JMP (DBT_VECTOR_START);
-      trace_output_void ();
+      trace_output_void (sd);
     }
   else
     {
@@ -1146,7 +1145,7 @@ OP_5F20 (void)
 
 /* divs */
 void
-OP_14002800 (void)
+OP_14002800 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 foo, tmp, tmpf;
   uint16 hi;
@@ -1160,84 +1159,84 @@ OP_14002800 (void)
   lo = ((GPR (OP[0] + 1) << 1) | tmpf);
   SET_GPR (OP[0] + 0, hi);
   SET_GPR (OP[0] + 1, lo);
-  trace_output_32 (((uint32) hi << 16) | lo);
+  trace_output_32 (sd, ((uint32) hi << 16) | lo);
 }
 
 /* exef0f */
 void
-OP_4E04 (void)
+OP_4E04 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("exef0f", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (PSW_F0 == 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* exef0t */
 void
-OP_4E24 (void)
+OP_4E24 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("exef0t", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (PSW_F0 != 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* exef1f */
 void
-OP_4E40 (void)
+OP_4E40 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("exef1f", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (PSW_F1 == 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* exef1t */
 void
-OP_4E42 (void)
+OP_4E42 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("exef1t", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (PSW_F1 != 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* exefaf */
 void
-OP_4E00 (void)
+OP_4E00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("exefaf", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (PSW_F0 == 0) & (PSW_F1 == 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* exefat */
 void
-OP_4E02 (void)
+OP_4E02 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("exefat", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (PSW_F0 == 0) & (PSW_F1 != 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* exetaf */
 void
-OP_4E20 (void)
+OP_4E20 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("exetaf", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (PSW_F0 != 0) & (PSW_F1 == 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* exetat */
 void
-OP_4E22 (void)
+OP_4E22 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("exetat", OP_VOID, OP_VOID, OP_VOID);
   State.exe = (PSW_F0 != 0) & (PSW_F1 != 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* exp */
 void
-OP_15002A00 (void)
+OP_15002A00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint32 tmp, foo;
   int i;
@@ -1254,18 +1253,18 @@ OP_15002A00 (void)
       if (tmp & foo)
 	{
 	  SET_GPR (OP[0], (i - 1));
-	  trace_output_16 (i - 1);
+	  trace_output_16 (sd, i - 1);
 	  return;
 	}
       foo >>= 1;
     }
   SET_GPR (OP[0], 16);
-  trace_output_16 (16);
+  trace_output_16 (sd, 16);
 }
 
 /* exp */
 void
-OP_15002A02 (void)
+OP_15002A02 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp, foo;
   int i;
@@ -1281,40 +1280,40 @@ OP_15002A02 (void)
       if (tmp & foo)
 	{
 	  SET_GPR (OP[0], i - 9);
-	  trace_output_16 (i - 9);
+	  trace_output_16 (sd, i - 9);
 	  return;
 	}
       foo >>= 1;
     }
   SET_GPR (OP[0], 16);
-  trace_output_16 (16);
+  trace_output_16 (sd, 16);
 }
 
 /* jl */
 void
-OP_4D00 (void)
+OP_4D00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("jl", OP_REG, OP_R0, OP_R1);
   SET_GPR (13, PC + 1);
   JMP (GPR (OP[0]));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* jmp */
 void
-OP_4C00 (void)
+OP_4C00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("jmp", OP_REG,
 	       (OP[0] == 13) ? OP_R0 : OP_VOID,
 	       (OP[0] == 13) ? OP_R1 : OP_VOID);
 
   JMP (GPR (OP[0]));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* ld */
 void
-OP_30000000 (void)
+OP_30000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 tmp;
   uint16 addr = OP[1] + GPR (OP[2]);
@@ -1323,17 +1322,17 @@ OP_30000000 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ld */
 void
-OP_6401 (void)
+OP_6401 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 tmp;
   uint16 addr = GPR (OP[1]);
@@ -1342,19 +1341,19 @@ OP_6401 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
   if (OP[0] != OP[1])
     INC_ADDR (OP[1], -2);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ld */
 void
-OP_6001 (void)
+OP_6001 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 tmp;
   uint16 addr = GPR (OP[1]);
@@ -1363,19 +1362,19 @@ OP_6001 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
   if (OP[0] != OP[1])
     INC_ADDR (OP[1], 2);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ld */
 void
-OP_6000 (void)
+OP_6000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 tmp;
   uint16 addr = GPR (OP[1]);
@@ -1384,17 +1383,17 @@ OP_6000 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ld */
 void
-OP_32010000 (void)
+OP_32010000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 tmp;
   uint16 addr = OP[1];
@@ -1403,17 +1402,17 @@ OP_32010000 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RW (addr);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ld2w */
 void
-OP_31000000 (void)
+OP_31000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int32 tmp;
   uint16 addr = OP[1] + GPR (OP[2]);
@@ -1422,17 +1421,17 @@ OP_31000000 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* ld2w */
 void
-OP_6601 (void)
+OP_6601 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]);
   int32 tmp;
@@ -1441,19 +1440,19 @@ OP_6601 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
   if (OP[0] != OP[1] && ((OP[0] + 1) != OP[1]))
     INC_ADDR (OP[1], -4);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* ld2w */
 void
-OP_6201 (void)
+OP_6201 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int32 tmp;
   uint16 addr = GPR (OP[1]);
@@ -1462,19 +1461,19 @@ OP_6201 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
   if (OP[0] != OP[1] && ((OP[0] + 1) != OP[1]))
     INC_ADDR (OP[1], 4);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* ld2w */
 void
-OP_6200 (void)
+OP_6200 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]);
   int32 tmp;
@@ -1483,17 +1482,17 @@ OP_6200 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* ld2w */
 void
-OP_33010000 (void)
+OP_33010000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int32 tmp;
   uint16 addr = OP[1];
@@ -1502,83 +1501,83 @@ OP_33010000 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   tmp = RLW (addr);
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* ldb */
 void
-OP_38000000 (void)
+OP_38000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("ldb", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   tmp = SEXT8 (RB (OP[1] + GPR (OP[2])));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ldb */
 void
-OP_7000 (void)
+OP_7000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("ldb", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   tmp = SEXT8 (RB (GPR (OP[1])));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ldi.s */
 void
-OP_4001 (void)
+OP_4001 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("ldi.s", OP_REG_OUTPUT, OP_CONSTANT4, OP_VOID);
   tmp = SEXT4 (OP[1]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ldi.l */
 void
-OP_20000000 (void)
+OP_20000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("ldi.l", OP_REG_OUTPUT, OP_CONSTANT16, OP_VOID);
   tmp = OP[1];
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ldub */
 void
-OP_39000000 (void)
+OP_39000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("ldub", OP_REG_OUTPUT, OP_MEMREF2, OP_VOID);
   tmp = RB (OP[1] + GPR (OP[2]));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* ldub */
 void
-OP_7200 (void)
+OP_7200 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("ldub", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   tmp = RB (GPR (OP[1]));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mac */
 void
-OP_2A00 (void)
+OP_2A00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -1604,12 +1603,12 @@ OP_2A00 (void)
   else
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* macsu */
 void
-OP_1A00 (void)
+OP_1A00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -1619,12 +1618,12 @@ OP_1A00 (void)
     tmp = SEXT40 ((tmp << 1) & MASK40);
   tmp = ((SEXT40 (ACC (OP[0])) + tmp) & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* macu */
 void
-OP_3A00 (void)
+OP_3A00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint64 tmp;
   uint32 src1;
@@ -1638,12 +1637,12 @@ OP_3A00 (void)
     tmp = (tmp << 1);
   tmp = ((ACC (OP[0]) + tmp) & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* max */
 void
-OP_2600 (void)
+OP_2600 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("max", OP_REG, OP_REG, OP_VOID);
@@ -1659,12 +1658,12 @@ OP_2600 (void)
       SET_PSW_F0 (0);    
     }
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* max */
 void
-OP_3600 (void)
+OP_3600 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -1682,12 +1681,12 @@ OP_3600 (void)
       SET_PSW_F0 (0);
     }
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* max */
 void
-OP_3602 (void)
+OP_3602 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   trace_input ("max", OP_ACCUM, OP_ACCUM, OP_VOID);
@@ -1703,13 +1702,13 @@ OP_3602 (void)
       SET_PSW_F0 (0);
     }
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 
 /* min */
 void
-OP_2601 (void)
+OP_2601 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("min", OP_REG, OP_REG, OP_VOID);
@@ -1725,12 +1724,12 @@ OP_2601 (void)
       SET_PSW_F0 (0);    
     }
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* min */
 void
-OP_3601 (void)
+OP_3601 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -1748,12 +1747,12 @@ OP_3601 (void)
       SET_PSW_F0 (0);
     }
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* min */
 void
-OP_3603 (void)
+OP_3603 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   trace_input ("min", OP_ACCUM, OP_ACCUM, OP_VOID);
@@ -1769,12 +1768,12 @@ OP_3603 (void)
       SET_PSW_F0 (0);
     }
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* msb */
 void
-OP_2800 (void)
+OP_2800 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -1802,12 +1801,12 @@ OP_2800 (void)
       tmp = (tmp & MASK40);
     }
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* msbsu */
 void
-OP_1800 (void)
+OP_1800 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -1817,12 +1816,12 @@ OP_1800 (void)
     tmp = SEXT40( (tmp << 1) & MASK40);
   tmp = ((SEXT40 (ACC (OP[0])) - tmp) & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* msbu */
 void
-OP_3800 (void)
+OP_3800 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint64 tmp;
   uint32 src1;
@@ -1836,23 +1835,23 @@ OP_3800 (void)
     tmp = (tmp << 1);
   tmp = ((ACC (OP[0]) - tmp) & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* mul */
 void
-OP_2E00 (void)
+OP_2E00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mul", OP_REG, OP_REG, OP_VOID);
   tmp = GPR (OP[0]) * GPR (OP[1]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mulx */
 void
-OP_2C00 (void)
+OP_2C00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -1867,12 +1866,12 @@ OP_2C00 (void)
   else
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* mulxsu */
 void
-OP_1C00 (void)
+OP_1C00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -1883,12 +1882,12 @@ OP_1C00 (void)
     tmp <<= 1;
   tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* mulxu */
 void
-OP_3C00 (void)
+OP_3C00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint64 tmp;
   uint32 src1;
@@ -1902,78 +1901,78 @@ OP_3C00 (void)
     tmp <<= 1;
   tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* mv */
 void
-OP_4000 (void)
+OP_4000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mv", OP_REG_OUTPUT, OP_REG, OP_VOID);
   tmp = GPR (OP[1]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mv2w */
 void
-OP_5000 (void)
+OP_5000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int32 tmp;
   trace_input ("mv2w", OP_DREG_OUTPUT, OP_DREG, OP_VOID);
   tmp = GPR32 (OP[1]);
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* mv2wfac */
 void
-OP_3E00 (void)
+OP_3E00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int32 tmp;
   trace_input ("mv2wfac", OP_DREG_OUTPUT, OP_ACCUM, OP_VOID);
   tmp = ACC (OP[1]);
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* mv2wtac */
 void
-OP_3E01 (void)
+OP_3E01 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   trace_input ("mv2wtac", OP_DREG, OP_ACCUM_OUTPUT, OP_VOID);
   tmp = ((SEXT16 (GPR (OP[0])) << 16 | GPR (OP[0] + 1)) & MASK40);
   SET_ACC (OP[1], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* mvac */
 void
-OP_3E03 (void)
+OP_3E03 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   trace_input ("mvac", OP_ACCUM_OUTPUT, OP_ACCUM, OP_VOID);
   tmp = ACC (OP[1]);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* mvb */
 void
-OP_5400 (void)
+OP_5400 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mvb", OP_REG_OUTPUT, OP_REG, OP_VOID);
   tmp = SEXT8 (GPR (OP[1]) & 0xff);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mvf0f */
 void
-OP_4400 (void)
+OP_4400 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mvf0f", OP_REG_OUTPUT, OP_REG, OP_VOID);
@@ -1984,12 +1983,12 @@ OP_4400 (void)
     }
   else
     tmp = GPR (OP[0]);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mvf0t */
 void
-OP_4401 (void)
+OP_4401 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mvf0t", OP_REG_OUTPUT, OP_REG, OP_VOID);
@@ -2000,124 +1999,124 @@ OP_4401 (void)
     }
   else
     tmp = GPR (OP[0]);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mvfacg */
 void
-OP_1E04 (void)
+OP_1E04 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mvfacg", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
   tmp = ((ACC (OP[1]) >> 32) & 0xff);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mvfachi */
 void
-OP_1E00 (void)
+OP_1E00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mvfachi", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
   tmp = (ACC (OP[1]) >> 16);  
   SET_GPR (OP[0], tmp);  
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mvfaclo */
 void
-OP_1E02 (void)
+OP_1E02 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mvfaclo", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
   tmp = ACC (OP[1]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mvfc */
 void
-OP_5200 (void)
+OP_5200 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mvfc", OP_REG_OUTPUT, OP_CR, OP_VOID);
   tmp = CREG (OP[1]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mvtacg */
 void
-OP_1E41 (void)
+OP_1E41 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   trace_input ("mvtacg", OP_REG, OP_ACCUM, OP_VOID);
   tmp = ((ACC (OP[1]) & MASK32)
 	 | ((int64)(GPR (OP[0]) & 0xff) << 32));
   SET_ACC (OP[1], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* mvtachi */
 void
-OP_1E01 (void)
+OP_1E01 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint64 tmp;
   trace_input ("mvtachi", OP_REG, OP_ACCUM, OP_VOID);
   tmp = ACC (OP[1]) & 0xffff;
   tmp = ((SEXT16 (GPR (OP[0])) << 16 | tmp) & MASK40);
   SET_ACC (OP[1], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* mvtaclo */
 void
-OP_1E21 (void)
+OP_1E21 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   trace_input ("mvtaclo", OP_REG, OP_ACCUM, OP_VOID);
   tmp = ((SEXT16 (GPR (OP[0]))) & MASK40);
   SET_ACC (OP[1], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* mvtc */
 void
-OP_5600 (void)
+OP_5600 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mvtc", OP_REG, OP_CR_OUTPUT, OP_VOID);
   tmp = GPR (OP[0]);
   tmp = SET_CREG (OP[1], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* mvub */
 void
-OP_5401 (void)
+OP_5401 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("mvub", OP_REG_OUTPUT, OP_REG, OP_VOID);
   tmp = (GPR (OP[1]) & 0xff);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* neg */
 void
-OP_4605 (void)
+OP_4605 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("neg", OP_REG, OP_VOID, OP_VOID);
   tmp = - GPR (OP[0]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* neg */
 void
-OP_5605 (void)
+OP_5605 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -2135,13 +2134,13 @@ OP_5605 (void)
   else
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 
 /* nop */
 void
-OP_5E00 (void)
+OP_5E00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("nop", OP_VOID, OP_VOID, OP_VOID);
 
@@ -2177,45 +2176,45 @@ OP_5E00 (void)
       break;
     }
 
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* not */
 void
-OP_4603 (void)
+OP_4603 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("not", OP_REG, OP_VOID, OP_VOID);
   tmp = ~GPR (OP[0]);  
   SET_GPR (OP[0], tmp);  
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* or */
 void
-OP_800 (void)
+OP_800 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("or", OP_REG, OP_REG, OP_VOID);
   tmp = (GPR (OP[0]) | GPR (OP[1]));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* or3 */
 void
-OP_4000000 (void)
+OP_4000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("or3", OP_REG_OUTPUT, OP_REG, OP_CONSTANT16);
   tmp = (GPR (OP[1]) | OP[2]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* rac */
 void
-OP_5201 (void)
+OP_5201 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   int shift = SEXT3 (OP[2]);
@@ -2252,12 +2251,12 @@ OP_5201 (void)
       SET_PSW_F0 (0);
     }
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* rachi */
 void
-OP_4201 (void)
+OP_4201 (SIM_DESC sd, SIM_CPU *cpu)
 {
   signed64 tmp;
   int shift = SEXT3 (OP[2]);
@@ -2286,12 +2285,12 @@ OP_4201 (void)
       SET_PSW_F0 (0);
     }
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* rep */
 void
-OP_27000000 (void)
+OP_27000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("rep", OP_REG, OP_CONSTANT16, OP_VOID);
   SET_RPT_S (PC + 1);
@@ -2308,12 +2307,12 @@ OP_27000000 (void)
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: rep must include at least 4 instructions.\n");
       State.exception = SIGILL;
     }
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* repi */
 void
-OP_2F000000 (void)
+OP_2F000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("repi", OP_CONSTANT16, OP_CONSTANT16, OP_VOID);
   SET_RPT_S (PC + 1);
@@ -2330,31 +2329,31 @@ OP_2F000000 (void)
       (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: repi must include at least 4 instructions.\n");
       State.exception = SIGILL;
     }
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* rtd */
 void
-OP_5F60 (void)
+OP_5F60 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("rtd", OP_VOID, OP_VOID, OP_VOID);
   SET_CREG (PSW_CR, DPSW);
   JMP(DPC);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* rte */
 void
-OP_5F40 (void)
+OP_5F40 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("rte", OP_VOID, OP_VOID, OP_VOID);
   SET_CREG (PSW_CR, BPSW);
   JMP(BPC);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* sac */
-void OP_5209 (void)
+void OP_5209 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -2382,12 +2381,12 @@ void OP_5209 (void)
 
   SET_GPR32 (OP[0], tmp);
 
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* sachi */
 void
-OP_4209 (void)
+OP_4209 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -2415,12 +2414,12 @@ OP_4209 (void)
 
   SET_GPR (OP[0], tmp);
 
-  trace_output_16 (OP[0]);
+  trace_output_16 (sd, OP[0]);
 }
 
 /* sadd */
 void
-OP_1223 (void)
+OP_1223 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -2438,34 +2437,34 @@ OP_1223 (void)
   else
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* setf0f */
 void
-OP_4611 (void)
+OP_4611 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("setf0f", OP_REG_OUTPUT, OP_VOID, OP_VOID);
   tmp = ((PSW_F0 == 0) ? 1 : 0);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* setf0t */
 void
-OP_4613 (void)
+OP_4613 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("setf0t", OP_REG_OUTPUT, OP_VOID, OP_VOID);
   tmp = ((PSW_F0 == 1) ? 1 : 0);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* slae */
 void
-OP_3220 (void)
+OP_3220 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   int16 reg;
@@ -2512,32 +2511,32 @@ OP_3220 (void)
 
   SET_ACC(OP[0], tmp);
 
-  trace_output_40(tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* sleep */
 void
-OP_5FC0 (void)
+OP_5FC0 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("sleep", OP_VOID, OP_VOID, OP_VOID);
   SET_PSW_IE (1);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* sll */
 void
-OP_2200 (void)
+OP_2200 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("sll", OP_REG, OP_REG, OP_VOID);
   tmp = (GPR (OP[0]) << (GPR (OP[1]) & 0xf));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* sll */
 void
-OP_3200 (void)
+OP_3200 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   trace_input ("sll", OP_ACCUM, OP_REG, OP_VOID);
@@ -2562,23 +2561,23 @@ OP_3200 (void)
   else
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* slli */
 void
-OP_2201 (void)
+OP_2201 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("slli", OP_REG, OP_CONSTANT16, OP_VOID);
   tmp = (GPR (OP[0]) << OP[1]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* slli */
 void
-OP_3201 (void)
+OP_3201 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -2600,41 +2599,41 @@ OP_3201 (void)
   else
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* slx */
 void
-OP_460B (void)
+OP_460B (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("slx", OP_REG, OP_VOID, OP_VOID);
   tmp = ((GPR (OP[0]) << 1) | PSW_F0);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* sra */
 void
-OP_2400 (void)
+OP_2400 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("sra", OP_REG, OP_REG, OP_VOID);
   tmp = (((int16)(GPR (OP[0]))) >> (GPR (OP[1]) & 0xf));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* sra */
 void
-OP_3400 (void)
+OP_3400 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("sra", OP_ACCUM, OP_REG, OP_VOID);
   if ((GPR (OP[1]) & 31) <= 16)
     {
       int64 tmp = ((SEXT40(ACC (OP[0])) >> (GPR (OP[1]) & 31)) & MASK40);
       SET_ACC (OP[0], tmp);
-      trace_output_40 (tmp);
+      trace_output_40 (sd, tmp);
     }
   else
     {
@@ -2646,18 +2645,18 @@ OP_3400 (void)
 
 /* srai */
 void
-OP_2401 (void)
+OP_2401 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("srai", OP_REG, OP_CONSTANT16, OP_VOID);
   tmp = (((int16)(GPR (OP[0]))) >> OP[1]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* srai */
 void
-OP_3401 (void)
+OP_3401 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   if (OP[1] == 0)
@@ -2666,30 +2665,30 @@ OP_3401 (void)
   trace_input ("srai", OP_ACCUM, OP_CONSTANT16, OP_VOID);
   tmp = ((SEXT40(ACC (OP[0])) >> OP[1]) & MASK40);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* srl */
 void
-OP_2000 (void)
+OP_2000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("srl", OP_REG, OP_REG, OP_VOID);
   tmp = (GPR (OP[0]) >>  (GPR (OP[1]) & 0xf));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* srl */
 void
-OP_3000 (void)
+OP_3000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("srl", OP_ACCUM, OP_REG, OP_VOID);
   if ((GPR (OP[1]) & 31) <= 16)
     {
       int64 tmp = ((uint64)((ACC (OP[0]) & MASK40) >> (GPR (OP[1]) & 31)));
       SET_ACC (OP[0], tmp);
-      trace_output_40 (tmp);
+      trace_output_40 (sd, tmp);
     }
   else
     {
@@ -2702,18 +2701,18 @@ OP_3000 (void)
 
 /* srli */
 void
-OP_2001 (void)
+OP_2001 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("srli", OP_REG, OP_CONSTANT16, OP_VOID);
   tmp = (GPR (OP[0]) >> OP[1]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* srli */
 void
-OP_3001 (void)
+OP_3001 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
   if (OP[1] == 0)
@@ -2722,24 +2721,24 @@ OP_3001 (void)
   trace_input ("srli", OP_ACCUM, OP_CONSTANT16, OP_VOID);
   tmp = ((uint64)(ACC (OP[0]) & MASK40) >> OP[1]);
   SET_ACC (OP[0], tmp);
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* srx */
 void
-OP_4609 (void)
+OP_4609 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 tmp;
   trace_input ("srx", OP_REG, OP_VOID, OP_VOID);
   tmp = PSW_F0 << 15;
   tmp = ((GPR (OP[0]) >> 1) | tmp);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* st */
 void
-OP_34000000 (void)
+OP_34000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = OP[1] + GPR (OP[2]);
   trace_input ("st", OP_REG, OP_MEMREF2, OP_VOID);
@@ -2747,16 +2746,16 @@ OP_34000000 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr, GPR (OP[0]));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st */
 void
-OP_6800 (void)
+OP_6800 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]);
   trace_input ("st", OP_REG, OP_MEMREF, OP_VOID);
@@ -2764,17 +2763,17 @@ OP_6800 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr, GPR (OP[0]));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st */
 /* st Rsrc1,@-SP */
 void
-OP_6C1F (void)
+OP_6C1F (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]) - 2;
   trace_input ("st", OP_REG, OP_PREDEC, OP_VOID);
@@ -2788,17 +2787,17 @@ OP_6C1F (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr, GPR (OP[0]));
   SET_GPR (OP[1], addr);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st */
 void
-OP_6801 (void)
+OP_6801 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]);
   trace_input ("st", OP_REG, OP_POSTINC, OP_VOID);
@@ -2806,17 +2805,17 @@ OP_6801 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr, GPR (OP[0]));
   INC_ADDR (OP[1], 2);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st */
 void
-OP_6C01 (void)
+OP_6C01 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]);
   trace_input ("st", OP_REG, OP_POSTDEC, OP_VOID);
@@ -2830,17 +2829,17 @@ OP_6C01 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr, GPR (OP[0]));
   INC_ADDR (OP[1], -2);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st */
 void
-OP_36010000 (void)
+OP_36010000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = OP[1];
   trace_input ("st", OP_REG, OP_MEMREF3, OP_VOID);
@@ -2848,16 +2847,16 @@ OP_36010000 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr, GPR (OP[0]));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st2w */
 void
-OP_35000000 (void)
+OP_35000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[2])+ OP[1];
   trace_input ("st2w", OP_DREG, OP_MEMREF2, OP_VOID);
@@ -2865,17 +2864,17 @@ OP_35000000 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st2w */
 void
-OP_6A00 (void)
+OP_6A00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]);
   trace_input ("st2w", OP_DREG, OP_MEMREF, OP_VOID);
@@ -2883,17 +2882,17 @@ OP_6A00 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st2w */
 void
-OP_6E1F (void)
+OP_6E1F (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]) - 4;
   trace_input ("st2w", OP_DREG, OP_PREDEC, OP_VOID);
@@ -2907,18 +2906,18 @@ OP_6E1F (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
   SET_GPR (OP[1], addr);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st2w */
 void
-OP_6A01 (void)
+OP_6A01 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]);
   trace_input ("st2w", OP_DREG, OP_POSTINC, OP_VOID);
@@ -2926,18 +2925,18 @@ OP_6A01 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
   INC_ADDR (OP[1], 4);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st2w */
 void
-OP_6E01 (void)
+OP_6E01 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = GPR (OP[1]);
   trace_input ("st2w", OP_DREG, OP_POSTDEC, OP_VOID);
@@ -2951,18 +2950,18 @@ OP_6E01 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
   INC_ADDR (OP[1], -4);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* st2w */
 void
-OP_37010000 (void)
+OP_37010000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 addr = OP[1];
   trace_input ("st2w", OP_DREG, OP_MEMREF3, OP_VOID);
@@ -2970,44 +2969,44 @@ OP_37010000 (void)
     {
       State.exception = SIG_D10V_BUS;
       State.pc_changed = 1; /* Don't increment the PC. */
-      trace_output_void ();
+      trace_output_void (sd);
       return;
     }
   SW (addr + 0, GPR (OP[0] + 0));
   SW (addr + 2, GPR (OP[0] + 1));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* stb */
 void
-OP_3C000000 (void)
+OP_3C000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("stb", OP_REG, OP_MEMREF2, OP_VOID);
   SB (GPR (OP[2]) + OP[1], GPR (OP[0]));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* stb */
 void
-OP_7800 (void)
+OP_7800 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("stb", OP_REG, OP_MEMREF, OP_VOID);
   SB (GPR (OP[1]), GPR (OP[0]));
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* stop */
 void
-OP_5FE0 (void)
+OP_5FE0 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("stop", OP_VOID, OP_VOID, OP_VOID);
   State.exception = SIG_D10V_STOP;
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* sub */
 void
-OP_0 (void)
+OP_0 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint16 a = GPR (OP[0]);
   uint16 b = GPR (OP[1]);
@@ -3017,12 +3016,12 @@ OP_0 (void)
      compute the carry/overflow bits. */
   SET_PSW_C (a >= b);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* sub */
 void
-OP_1001 (void)
+OP_1001 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -3041,13 +3040,13 @@ OP_1001 (void)
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
 
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* sub */
 
 void
-OP_1003 (void)
+OP_1003 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -3066,12 +3065,12 @@ OP_1003 (void)
     tmp = (tmp & MASK40);
   SET_ACC (OP[0], tmp);
 
-  trace_output_40 (tmp);
+  trace_output_40 (sd, tmp);
 }
 
 /* sub2w */
 void
-OP_1000 (void)
+OP_1000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   uint32 tmp, a, b;
 
@@ -3083,36 +3082,36 @@ OP_1000 (void)
   tmp = a - b;
   SET_PSW_C (a >= b);
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* subac3 */
 void
-OP_17000000 (void)
+OP_17000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
   trace_input ("subac3", OP_DREG_OUTPUT, OP_DREG, OP_ACCUM);
   tmp = SEXT40 ((GPR (OP[1]) << 16) | GPR (OP[1] + 1)) - SEXT40 (ACC (OP[2]));
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* subac3 */
 void
-OP_17000002 (void)
+OP_17000002 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
   trace_input ("subac3", OP_DREG_OUTPUT, OP_ACCUM, OP_ACCUM);
   tmp = SEXT40 (ACC (OP[1])) - SEXT40(ACC (OP[2]));
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* subac3s */
 void
-OP_17001000 (void)
+OP_17001000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -3134,12 +3133,12 @@ OP_17001000 (void)
       SET_PSW_F0 (0);
     }      
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* subac3s */
 void
-OP_17001002 (void)
+OP_17001002 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int64 tmp;
 
@@ -3161,12 +3160,12 @@ OP_17001002 (void)
       SET_PSW_F0 (0);
     }      
   SET_GPR32 (OP[0], tmp);
-  trace_output_32 (tmp);
+  trace_output_32 (sd, tmp);
 }
 
 /* subi */
 void
-OP_1 (void)
+OP_1 (SIM_DESC sd, SIM_CPU *cpu)
 {
   unsigned tmp;
   if (OP[1] == 0)
@@ -3180,15 +3179,15 @@ OP_1 (void)
 	 + (unsigned)(unsigned16) ( - OP[1]));
   SET_PSW_C (tmp >= (1 << 16));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* trap */
 void
-OP_5F00 (void)
+OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("trap", OP_CONSTANT4, OP_VOID, OP_VOID);
-  trace_output_void ();
+  trace_output_void (sd);
 
   switch (OP[0])
     {
@@ -3254,7 +3253,7 @@ OP_5F00 (void)
 
 /* Turn a pointer in a register into a pointer into real memory. */
 
-#define MEMPTR(x) ((char *)(dmem_addr(x)))
+#define MEMPTR(x) ((char *)(dmem_addr (sd, cpu, x)))
 
 	switch (FUNC)
 	  {
@@ -3262,21 +3261,21 @@ OP_5F00 (void)
 	  case TARGET_SYS_fork:
 	    trace_input ("<fork>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL (fork ());
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 #define getpid() 47
 	  case TARGET_SYS_getpid:
 	    trace_input ("<getpid>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL (getpid ());
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_kill:
 	    trace_input ("<kill>", OP_R0, OP_R1, OP_VOID);
 	    if (PARM1 == getpid ())
 	      {
-		trace_output_void ();
+		trace_output_void (sd);
 		State.exception = PARM2;
 	      }
 	    else
@@ -3387,7 +3386,7 @@ OP_5F00 (void)
 
 		if (os_sig == -1)
 		  {
-		    trace_output_void ();
+		    trace_output_void (sd);
 		    (*d10v_callback->printf_filtered) (d10v_callback, "Unknown signal %d\n", PARM2);
 		    (*d10v_callback->flush_stdout) (d10v_callback);
 		    State.exception = SIGILL;
@@ -3395,7 +3394,7 @@ OP_5F00 (void)
 		else
 		  {
 		    RETVAL (kill (PARM1, PARM2));
-		    trace_output_16 (result);
+		    trace_output_16 (sd, result);
 		  }
 	      }
 	    break;
@@ -3404,14 +3403,14 @@ OP_5F00 (void)
 	    trace_input ("<execve>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
 			     (char **)MEMPTR (PARM3)));
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 #ifdef TARGET_SYS_execv
 	  case TARGET_SYS_execv:
 	    trace_input ("<execv>", OP_R0, OP_R1, OP_VOID);
 	    RETVAL (execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL));
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 #endif
 
@@ -3426,7 +3425,7 @@ OP_5F00 (void)
 	      SW (buf, host_fd[0]);
 	      buf += sizeof(uint16);
 	      SW (buf, host_fd[1]);
-	      trace_output_16 (result);
+	      trace_output_16 (sd, result);
 	    }
 	  break;
 
@@ -3439,7 +3438,7 @@ OP_5F00 (void)
 	      RETVAL (wait (&status));
 	      if (PARM1)
 		SW (PARM1, status);
-	      trace_output_16 (result);
+	      trace_output_16 (sd, result);
 	    }
 	  break;
 #endif
@@ -3448,12 +3447,12 @@ OP_5F00 (void)
 	  case TARGET_SYS_getpid:
 	    trace_input ("<getpid>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL (1);
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_kill:
 	    trace_input ("<kill>", OP_REG, OP_REG, OP_VOID);
-	    trace_output_void ();
+	    trace_output_void (sd);
 	    State.exception = PARM2;
 	    break;
 #endif
@@ -3462,7 +3461,7 @@ OP_5F00 (void)
 	    trace_input ("<read>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (d10v_callback->read (d10v_callback, PARM1, MEMPTR (PARM2),
 					  PARM3));
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_write:
@@ -3473,7 +3472,7 @@ OP_5F00 (void)
 	    else
 	      RETVAL ((int)d10v_callback->write (d10v_callback, PARM1,
 						  MEMPTR (PARM2), PARM3));
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_lseek:
@@ -3482,25 +3481,25 @@ OP_5F00 (void)
 					    ((((unsigned long) PARM2) << 16)
 					     || (unsigned long) PARM3),
 					    PARM4));
-	    trace_output_32 (result);
+	    trace_output_32 (sd, result);
 	    break;
 
 	  case TARGET_SYS_close:
 	    trace_input ("<close>", OP_R0, OP_VOID, OP_VOID);
 	    RETVAL (d10v_callback->close (d10v_callback, PARM1));
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_open:
 	    trace_input ("<open>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (d10v_callback->open (d10v_callback, MEMPTR (PARM1), PARM2));
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_exit:
 	    trace_input ("<exit>", OP_R0, OP_VOID, OP_VOID);
 	    State.exception = SIG_D10V_EXIT;
-	    trace_output_void ();
+	    trace_output_void (sd);
 	    break;
 
 #ifdef TARGET_SYS_stat
@@ -3530,20 +3529,20 @@ OP_5F00 (void)
 	      SLW (buf+28, host_stat.st_mtime);
 	      SLW (buf+36, host_stat.st_ctime);
 	    }
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 #endif
 
 	  case TARGET_SYS_chown:
 	    trace_input ("<chown>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (chown (MEMPTR (PARM1), PARM2, PARM3));
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_chmod:
 	    trace_input ("<chmod>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (chmod (MEMPTR (PARM1), PARM2));
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 
 #if 0
@@ -3553,7 +3552,7 @@ OP_5F00 (void)
 	    /* Cast the second argument to void *, to avoid type mismatch
 	       if a prototype is present.  */
 	    RETVAL (utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2)));
-	    trace_output_16 (result);
+	    trace_output_16 (sd, result);
 	    break;
 #endif
 #endif
@@ -3563,7 +3562,7 @@ OP_5F00 (void)
 	  case TARGET_SYS_time:
 	    trace_input ("<time>", OP_R0, OP_R1, OP_R2);
 	    RETVAL32 (time (PARM1 ? MEMPTR (PARM1) : NULL));
-	    trace_output_32 (result);
+	    trace_output_32 (sd, result);
 	    break;
 #endif
 #endif
@@ -3582,51 +3581,51 @@ OP_5F00 (void)
 
 /* tst0i */
 void
-OP_7000000 (void)
+OP_7000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("tst0i", OP_REG, OP_CONSTANT16, OP_VOID);
   SET_PSW_F1 (PSW_F0);;
   SET_PSW_F0 ((GPR (OP[0]) & OP[1]) ? 1 : 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* tst1i */
 void
-OP_F000000 (void)
+OP_F000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("tst1i", OP_REG, OP_CONSTANT16, OP_VOID);
   SET_PSW_F1 (PSW_F0);
   SET_PSW_F0 ((~(GPR (OP[0])) & OP[1]) ? 1 : 0);
-  trace_output_flag ();
+  trace_output_flag (sd);
 }
 
 /* wait */
 void
-OP_5F80 (void)
+OP_5F80 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("wait", OP_VOID, OP_VOID, OP_VOID);
   SET_PSW_IE (1);
-  trace_output_void ();
+  trace_output_void (sd);
 }
 
 /* xor */
 void
-OP_A00 (void)
+OP_A00 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("xor", OP_REG, OP_REG, OP_VOID);
   tmp = (GPR (OP[0]) ^ GPR (OP[1]));
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }
 
 /* xor3 */
 void
-OP_5000000 (void)
+OP_5000000 (SIM_DESC sd, SIM_CPU *cpu)
 {
   int16 tmp;
   trace_input ("xor3", OP_REG_OUTPUT, OP_REG, OP_CONSTANT16);
   tmp = (GPR (OP[1]) ^ OP[2]);
   SET_GPR (OP[0], tmp);
-  trace_output_16 (tmp);
+  trace_output_16 (sd, tmp);
 }

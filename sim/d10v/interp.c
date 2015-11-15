@@ -37,13 +37,13 @@ unsigned long ins_type_counters[ (int)INS_MAX ];
 uint16 OP[4];
 
 static long hash (long insn, int format);
-static struct hash_entry *lookup_hash (uint32 ins, int size);
+static struct hash_entry *lookup_hash (SIM_DESC, SIM_CPU *, uint32 ins, int size);
 static void get_operands (struct simops *s, uint32 ins);
-static void do_long (uint32 ins);
-static void do_2_short (uint16 ins1, uint16 ins2, enum _leftright leftright);
-static void do_parallel (uint16 ins1, uint16 ins2);
+static void do_long (SIM_DESC, SIM_CPU *, uint32 ins);
+static void do_2_short (SIM_DESC, SIM_CPU *, uint16 ins1, uint16 ins2, enum _leftright leftright);
+static void do_parallel (SIM_DESC, SIM_CPU *, uint16 ins1, uint16 ins2);
 static char *add_commas (char *buf, int sizeof_buf, unsigned long value);
-static INLINE uint8 *map_memory (unsigned phys_addr);
+static INLINE uint8 *map_memory (SIM_DESC, SIM_CPU *, unsigned phys_addr);
 
 #define MAX_HASH  63
 struct hash_entry
@@ -67,7 +67,7 @@ hash (long insn, int format)
 }
 
 INLINE static struct hash_entry *
-lookup_hash (uint32 ins, int size)
+lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint32 ins, int size)
 {
   struct hash_entry *h;
 
@@ -108,24 +108,24 @@ get_operands (struct simops *s, uint32 ins)
 }
 
 static void
-do_long (uint32 ins)
+do_long (SIM_DESC sd, SIM_CPU *cpu, uint32 ins)
 {
   struct hash_entry *h;
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
     (*d10v_callback->printf_filtered) (d10v_callback, "do_long 0x%x\n", ins);
 #endif
-  h = lookup_hash (ins, 1);
+  h = lookup_hash (sd, cpu, ins, 1);
   if (h == NULL)
     return;
   get_operands (h->ops, ins);
   State.ins_type = INS_LONG;
   ins_type_counters[ (int)State.ins_type ]++;
-  (h->ops->func)();
+  (h->ops->func) (sd, cpu);
 }
 
 static void
-do_2_short (uint16 ins1, uint16 ins2, enum _leftright leftright)
+do_2_short (SIM_DESC sd, SIM_CPU *cpu, uint16 ins1, uint16 ins2, enum _leftright leftright)
 {
   struct hash_entry *h;
   enum _ins_type first, second;
@@ -150,34 +150,34 @@ do_2_short (uint16 ins1, uint16 ins2, enum _leftright leftright)
     }
 
   /* Issue the first instruction */
-  h = lookup_hash (ins1, 0);
+  h = lookup_hash (sd, cpu, ins1, 0);
   if (h == NULL)
     return;
   get_operands (h->ops, ins1);
   State.ins_type = first;
   ins_type_counters[ (int)State.ins_type ]++;
-  (h->ops->func)();
+  (h->ops->func) (sd, cpu);
 
   /* Issue the second instruction (if the PC hasn't changed) */
   if (!State.pc_changed && !State.exception)
     {
       /* finish any existing instructions */
       SLOT_FLUSH ();
-      h = lookup_hash (ins2, 0);
+      h = lookup_hash (sd, cpu, ins2, 0);
       if (h == NULL)
 	return;
       get_operands (h->ops, ins2);
       State.ins_type = second;
       ins_type_counters[ (int)State.ins_type ]++;
       ins_type_counters[ (int)INS_CYCLES ]++;
-      (h->ops->func)();
+      (h->ops->func) (sd, cpu);
     }
   else if (!State.exception)
     ins_type_counters[ (int)INS_COND_JUMP ]++;
 }
 
 static void
-do_parallel (uint16 ins1, uint16 ins2)
+do_parallel (SIM_DESC sd, SIM_CPU *cpu, uint16 ins1, uint16 ins2)
 {
   struct hash_entry *h1, *h2;
 #ifdef DEBUG
@@ -185,10 +185,10 @@ do_parallel (uint16 ins1, uint16 ins2)
     (*d10v_callback->printf_filtered) (d10v_callback, "do_parallel 0x%x || 0x%x\n", ins1, ins2);
 #endif
   ins_type_counters[ (int)INS_PARALLEL ]++;
-  h1 = lookup_hash (ins1, 0);
+  h1 = lookup_hash (sd, cpu, ins1, 0);
   if (h1 == NULL)
     return;
-  h2 = lookup_hash (ins2, 0);
+  h2 = lookup_hash (sd, cpu, ins2, 0);
   if (h2 == NULL)
     return;
 
@@ -197,14 +197,14 @@ do_parallel (uint16 ins1, uint16 ins2)
       get_operands (h1->ops, ins1);
       State.ins_type = INS_LEFT_COND_TEST;
       ins_type_counters[ (int)State.ins_type ]++;
-      (h1->ops->func)();
+      (h1->ops->func) (sd, cpu);
       if (State.exe)
 	{
 	  ins_type_counters[ (int)INS_COND_TRUE ]++;
 	  get_operands (h2->ops, ins2);
 	  State.ins_type = INS_RIGHT_COND_EXE;
 	  ins_type_counters[ (int)State.ins_type ]++;
-	  (h2->ops->func)();
+	  (h2->ops->func) (sd, cpu);
 	}
       else
 	ins_type_counters[ (int)INS_COND_FALSE ]++;
@@ -214,14 +214,14 @@ do_parallel (uint16 ins1, uint16 ins2)
       get_operands (h2->ops, ins2);
       State.ins_type = INS_RIGHT_COND_TEST;
       ins_type_counters[ (int)State.ins_type ]++;
-      (h2->ops->func)();
+      (h2->ops->func) (sd, cpu);
       if (State.exe)
 	{
 	  ins_type_counters[ (int)INS_COND_TRUE ]++;
 	  get_operands (h1->ops, ins1);
 	  State.ins_type = INS_LEFT_COND_EXE;
 	  ins_type_counters[ (int)State.ins_type ]++;
-	  (h1->ops->func)();
+	  (h1->ops->func) (sd, cpu);
 	}
       else
 	ins_type_counters[ (int)INS_COND_FALSE ]++;
@@ -231,13 +231,13 @@ do_parallel (uint16 ins1, uint16 ins2)
       get_operands (h1->ops, ins1);
       State.ins_type = INS_LEFT_PARALLEL;
       ins_type_counters[ (int)State.ins_type ]++;
-      (h1->ops->func)();
+      (h1->ops->func) (sd, cpu);
       if (!State.exception)
 	{
 	  get_operands (h2->ops, ins2);
 	  State.ins_type = INS_RIGHT_PARALLEL;
 	  ins_type_counters[ (int)State.ins_type ]++;
-	  (h2->ops->func)();
+	  (h2->ops->func) (sd, cpu);
 	}
     }
 }
@@ -300,9 +300,9 @@ enum
   };
 
 static void
-set_dmap_register (int reg_nr, unsigned long value)
+set_dmap_register (SIM_DESC sd, int reg_nr, unsigned long value)
 {
-  uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
+  uint8 *raw = map_memory (sd, NULL, SIM_D10V_MEMORY_DATA
 			   + DMAP0_OFFSET + 2 * reg_nr);
   WRITE_16 (raw, value);
 #ifdef DEBUG
@@ -315,17 +315,17 @@ set_dmap_register (int reg_nr, unsigned long value)
 }
 
 static unsigned long
-dmap_register (void *regcache, int reg_nr)
+dmap_register (SIM_DESC sd, SIM_CPU *cpu, void *regcache, int reg_nr)
 {
-  uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
+  uint8 *raw = map_memory (sd, cpu, SIM_D10V_MEMORY_DATA
 			   + DMAP0_OFFSET + 2 * reg_nr);
   return READ_16 (raw);
 }
 
 static void
-set_imap_register (int reg_nr, unsigned long value)
+set_imap_register (SIM_DESC sd, int reg_nr, unsigned long value)
 {
-  uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
+  uint8 *raw = map_memory (sd, NULL, SIM_D10V_MEMORY_DATA
 			   + IMAP0_OFFSET + 2 * reg_nr);
   WRITE_16 (raw, value);
 #ifdef DEBUG
@@ -338,9 +338,9 @@ set_imap_register (int reg_nr, unsigned long value)
 }
 
 static unsigned long
-imap_register (void *regcache, int reg_nr)
+imap_register (SIM_DESC sd, SIM_CPU *cpu, void *regcache, int reg_nr)
 {
-  uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
+  uint8 *raw = map_memory (sd, cpu, SIM_D10V_MEMORY_DATA
 			   + IMAP0_OFFSET + 2 * reg_nr);
   return READ_16 (raw);
 }
@@ -389,11 +389,15 @@ set_spu_register  (unsigned long value)
    into a physical address. */
 
 static unsigned long
-sim_d10v_translate_dmap_addr (unsigned long offset,
+sim_d10v_translate_dmap_addr (SIM_DESC sd,
+			      SIM_CPU *cpu,
+			      unsigned long offset,
 			      int nr_bytes,
 			      unsigned long *phys,
 			      void *regcache,
-			      unsigned long (*dmap_register) (void *regcache,
+			      unsigned long (*dmap_register) (SIM_DESC,
+							      SIM_CPU *,
+							      void *regcache,
 							      int reg_nr))
 {
   short map;
@@ -411,7 +415,7 @@ sim_d10v_translate_dmap_addr (unsigned long offset,
       /* Don't cross a BLOCK boundary */
       nr_bytes = DMAP_BLOCK_SIZE - (offset % DMAP_BLOCK_SIZE);
     }
-  map = dmap_register (regcache, regno);
+  map = dmap_register (sd, cpu, regcache, regno);
   if (regno == 3)
     {
       /* Always maps to data memory */
@@ -449,11 +453,15 @@ sim_d10v_translate_dmap_addr (unsigned long offset,
    into a physical address. */
 
 static unsigned long
-sim_d10v_translate_imap_addr (unsigned long offset,
+sim_d10v_translate_imap_addr (SIM_DESC sd,
+			      SIM_CPU *cpu,
+			      unsigned long offset,
 			      int nr_bytes,
 			      unsigned long *phys,
 			      void *regcache,
-			      unsigned long (*imap_register) (void *regcache,
+			      unsigned long (*imap_register) (SIM_DESC,
+							      SIM_CPU *,
+							      void *regcache,
 							      int reg_nr))
 {
   short map;
@@ -473,7 +481,7 @@ sim_d10v_translate_imap_addr (unsigned long offset,
       /* Don't cross a BLOCK boundary */
       nr_bytes = IMAP_BLOCK_SIZE - offset;
     }
-  map = imap_register (regcache, regno);
+  map = imap_register (sd, cpu, regcache, regno);
   sp = (map & 0x3000) >> 12;
   segno = (map & 0x007f);
   switch (sp)
@@ -502,13 +510,19 @@ sim_d10v_translate_imap_addr (unsigned long offset,
 }
 
 static unsigned long
-sim_d10v_translate_addr (unsigned long memaddr,
+sim_d10v_translate_addr (SIM_DESC sd,
+			 SIM_CPU *cpu,
+			 unsigned long memaddr,
 			 int nr_bytes,
 			 unsigned long *targ_addr,
 			 void *regcache,
-			 unsigned long (*dmap_register) (void *regcache,
+			 unsigned long (*dmap_register) (SIM_DESC,
+							 SIM_CPU *,
+							 void *regcache,
 							 int reg_nr),
-			 unsigned long (*imap_register) (void *regcache,
+			 unsigned long (*imap_register) (SIM_DESC,
+							 SIM_CPU *,
+							 void *regcache,
 							 int reg_nr))
 {
   unsigned long phys;
@@ -573,13 +587,13 @@ sim_d10v_translate_addr (unsigned long memaddr,
       break;
 
     case 0x10:			/* in logical data address segment */
-      nr_bytes = sim_d10v_translate_dmap_addr (off, nr_bytes, &phys, regcache,
-					       dmap_register);
+      nr_bytes = sim_d10v_translate_dmap_addr (sd, cpu, off, nr_bytes, &phys,
+					       regcache, dmap_register);
       break;
 
     case 0x11:			/* in logical instruction address segment */
-      nr_bytes = sim_d10v_translate_imap_addr (off, nr_bytes, &phys, regcache,
-					       imap_register);
+      nr_bytes = sim_d10v_translate_imap_addr (sd, cpu, off, nr_bytes, &phys,
+					       regcache, imap_register);
       break;
 
     default:
@@ -595,7 +609,7 @@ sim_d10v_translate_addr (unsigned long memaddr,
    isn't going to cross a segment boundary. */
 
 uint8 *
-map_memory (unsigned phys_addr)
+map_memory (SIM_DESC sd, SIM_CPU *cpu, unsigned phys_addr)
 {
   uint8 **memory;
   uint8 *raw;
@@ -667,7 +681,8 @@ map_memory (unsigned phys_addr)
    than aborting the entire run. */
 
 static int
-xfer_mem (SIM_ADDR virt,
+xfer_mem (SIM_DESC sd,
+	  SIM_ADDR virt,
 	  unsigned char *buffer,
 	  int size,
 	  int write_p)
@@ -675,12 +690,12 @@ xfer_mem (SIM_ADDR virt,
   uint8 *memory;
   unsigned long phys;
   int phys_size;
-  phys_size = sim_d10v_translate_addr (virt, size, &phys, NULL,
+  phys_size = sim_d10v_translate_addr (sd, NULL, virt, size, &phys, NULL,
 				       dmap_register, imap_register);
   if (phys_size == 0)
     return 0;
 
-  memory = map_memory (phys);
+  memory = map_memory (sd, NULL, phys);
 
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
@@ -712,14 +727,14 @@ int
 sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
-  return xfer_mem( addr, buffer, size, 1);
+  return xfer_mem (sd, addr, buffer, size, 1);
 }
 
 int
 sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
-  return xfer_mem( addr, buffer, size, 0);
+  return xfer_mem (sd, addr, buffer, size, 0);
 }
 
 static sim_cia
@@ -731,6 +746,7 @@ d10v_pc_get (sim_cpu *cpu)
 static void
 d10v_pc_set (sim_cpu *cpu, sim_cia pc)
 {
+  SIM_DESC sd = CPU_STATE (cpu);
   SET_PC (pc);
 }
 
@@ -742,8 +758,6 @@ free_state (SIM_DESC sd)
   sim_cpu_free_all (sd);
   sim_state_free (sd);
 }
-
-SIM_DESC trace_sd = NULL;
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
@@ -813,7 +827,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
       CPU_PC_STORE (cpu) = d10v_pc_set;
     }
 
-  trace_sd = sd;
   d10v_callback = cb;
   old_segment_mapping = 0;
 
@@ -867,7 +880,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 }
 
 uint8 *
-dmem_addr (uint16 offset)
+dmem_addr (SIM_DESC sd, SIM_CPU *cpu, uint16 offset)
 {
   unsigned long phys;
   uint8 *mem;
@@ -877,14 +890,14 @@ dmem_addr (uint16 offset)
      things like ``0xfffe + 0x0e60 == 0x10e5d''.  Since offset's type
      is uint16 this is modulo'ed onto 0x0e5d. */
 
-  phys_size = sim_d10v_translate_dmap_addr (offset, 1, &phys, NULL,
+  phys_size = sim_d10v_translate_dmap_addr (sd, cpu, offset, 1, &phys, NULL,
 					    dmap_register);
   if (phys_size == 0)
     {
       mem = State.mem.fault;
     }
   else
-    mem = map_memory (phys);
+    mem = map_memory (sd, cpu, phys);
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMORY))
     {
@@ -900,17 +913,17 @@ dmem_addr (uint16 offset)
 }
 
 uint8 *
-imem_addr (uint32 offset)
+imem_addr (SIM_DESC sd, SIM_CPU *cpu, uint32 offset)
 {
   unsigned long phys;
   uint8 *mem;
-  int phys_size = sim_d10v_translate_imap_addr (offset, 1, &phys, NULL,
+  int phys_size = sim_d10v_translate_imap_addr (sd, cpu, offset, 1, &phys, NULL,
 						imap_register);
   if (phys_size == 0)
     {
       return State.mem.fault;
     }
-  mem = map_memory (phys); 
+  mem = map_memory (sd, cpu, phys);
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMORY))
     {
@@ -939,6 +952,7 @@ sim_stop (SIM_DESC sd)
 void
 sim_resume (SIM_DESC sd, int step, int siggnal)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   uint32 inst;
   uint8 *iaddr;
 
@@ -972,7 +986,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
   do
     {
-      iaddr = imem_addr ((uint32)PC << 2);
+      iaddr = imem_addr (sd, cpu, (uint32)PC << 2);
       if (iaddr == State.mem.fault)
  	{
 	  State.exception = GDB_SIGNAL_BUS;
@@ -988,18 +1002,18 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	{
 	case 0xC0000000:
 	  /* long instruction */
-	  do_long (inst & 0x3FFFFFFF);
+	  do_long (sd, cpu, inst & 0x3FFFFFFF);
 	  break;
 	case 0x80000000:
 	  /* R -> L */
-	  do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, RIGHT_FIRST);
+	  do_2_short (sd, cpu, inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, RIGHT_FIRST);
 	  break;
 	case 0x40000000:
 	  /* L -> R */
-	  do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, LEFT_FIRST);
+	  do_2_short (sd, cpu, (inst & 0x3FFF8000) >> 15, inst & 0x7FFF, LEFT_FIRST);
 	  break;
 	case 0:
-	  do_parallel ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
+	  do_parallel (sd, cpu, (inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
 	  break;
 	}
       
@@ -1178,7 +1192,10 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
   if (d10v_debug)
     (*d10v_callback->printf_filtered) (d10v_callback, "sim_create_inferior:  PC=0x%lx\n", (long) start_address);
 #endif
-  SET_CREG (PC_CR, start_address >> 2);
+  {
+    SIM_CPU *cpu = STATE_CPU (sd, 0);
+    SET_CREG (PC_CR, start_address >> 2);
+  }
 
   /* cpu resets imap0 to 0 and imap1 to 0x7f, but D10V-EVA board
      initializes imap0 and imap1 to 0x1000 as part of its ROM
@@ -1186,23 +1203,23 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
   if (old_segment_mapping)
     {
       /* External memory startup.  This is the HARD reset state. */
-      set_imap_register (0, 0x0000);
-      set_imap_register (1, 0x007f);
-      set_dmap_register (0, 0x2000);
-      set_dmap_register (1, 0x2000);
-      set_dmap_register (2, 0x0000); /* Old DMAP */
-      set_dmap_register (3, 0x0000);
+      set_imap_register (sd, 0, 0x0000);
+      set_imap_register (sd, 1, 0x007f);
+      set_dmap_register (sd, 0, 0x2000);
+      set_dmap_register (sd, 1, 0x2000);
+      set_dmap_register (sd, 2, 0x0000); /* Old DMAP */
+      set_dmap_register (sd, 3, 0x0000);
     }
   else
     {
       /* Internal memory startup. This is the ROM intialized state. */
-      set_imap_register (0, 0x1000);
-      set_imap_register (1, 0x1000);
-      set_dmap_register (0, 0x2000);
-      set_dmap_register (1, 0x2000);
-      set_dmap_register (2, 0x2000); /* DMAP2 initial internal value is
-					0x2000 on the new board. */
-      set_dmap_register (3, 0x0000);
+      set_imap_register (sd, 0, 0x1000);
+      set_imap_register (sd, 1, 0x1000);
+      set_dmap_register (sd, 0, 0x2000);
+      set_dmap_register (sd, 1, 0x2000);
+      set_dmap_register (sd, 2, 0x2000); /* DMAP2 initial internal value is
+					    0x2000 on the new board. */
+      set_dmap_register (sd, 3, 0x0000);
     }
 
   SLOT_FLUSH ();
@@ -1246,6 +1263,7 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 int
 sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   int size;
   switch ((enum sim_d10v_regs) rn)
     {
@@ -1306,14 +1324,14 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
       break;
     case SIM_D10V_IMAP0_REGNUM:
     case SIM_D10V_IMAP1_REGNUM:
-      WRITE_16 (memory, imap_register (NULL, rn - SIM_D10V_IMAP0_REGNUM));
+      WRITE_16 (memory, imap_register (sd, cpu, NULL, rn - SIM_D10V_IMAP0_REGNUM));
       size = 2;
       break;
     case SIM_D10V_DMAP0_REGNUM:
     case SIM_D10V_DMAP1_REGNUM:
     case SIM_D10V_DMAP2_REGNUM:
     case SIM_D10V_DMAP3_REGNUM:
-      WRITE_16 (memory, dmap_register (NULL, rn - SIM_D10V_DMAP0_REGNUM));
+      WRITE_16 (memory, dmap_register (sd, cpu, NULL, rn - SIM_D10V_DMAP0_REGNUM));
       size = 2;
       break;
     case SIM_D10V_TS2_DMAP_REGNUM:
@@ -1329,6 +1347,7 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 int
 sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   int size;
   switch ((enum sim_d10v_regs) rn)
     {
@@ -1387,14 +1406,14 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
       break;
     case SIM_D10V_IMAP0_REGNUM:
     case SIM_D10V_IMAP1_REGNUM:
-      set_imap_register (rn - SIM_D10V_IMAP0_REGNUM, READ_16(memory));
+      set_imap_register (sd, rn - SIM_D10V_IMAP0_REGNUM, READ_16(memory));
       size = 2;
       break;
     case SIM_D10V_DMAP0_REGNUM:
     case SIM_D10V_DMAP1_REGNUM:
     case SIM_D10V_DMAP2_REGNUM:
     case SIM_D10V_DMAP3_REGNUM:
-      set_dmap_register (rn - SIM_D10V_DMAP0_REGNUM, READ_16(memory));
+      set_dmap_register (sd, rn - SIM_D10V_DMAP0_REGNUM, READ_16(memory));
       size = 2;
       break;
     case SIM_D10V_TS2_DMAP_REGNUM:

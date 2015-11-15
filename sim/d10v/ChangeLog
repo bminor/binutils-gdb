@@ -1,3 +1,28 @@
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* d10v_sim.h (struct simops): Add SIM_DESC and SIM_CPU to func args.
+	(SET_CREG, SET_HW_CREG, SET_PSW_BIT): Pass sd and cpu to move_to_cr.
+	(dmem_addr, imem_addr, move_to_cr): Add SIM_DESC and SIM_CPU args.
+	(RB, SW, RW, SLW, RLW): Pass sd and cpu to dmem_addr.
+	* endian.c: Change d10v_sim.h include to sim-main.h.
+	* gencode.c: Likewise.  Add SIM_DESC and SIM_CPU args to all OPs.
+	* interp.c (lookup_hash, do_long, do_2_short, do_parallel,
+	map_memory, set_dmap_register, dmap_register, set_imap_register,
+	imap_register, sim_d10v_translate_dmap_addr, xfer_mem,
+	sim_d10v_translate_imap_addr, sim_d10v_translate_addr): Add
+	SIM_DESC and SIM_CPU args and adjust all callers.
+	(trace_sd): Delete.
+	(sim_open): Do not assign trace_sd.
+	(sim_resume, sim_create_inferior, sim_fetch_register,
+	sim_store_register): Set up cpu from the first one in sd.
+	* simops.c (move_to_cr): Add SIM_DESC and SIM_CPU args.
+	(trace_input_func, trace_input, do_trace_output_finish,
+	do_trace_output_finish, trace_output_40, trace_output_32,
+	trace_output_16, trace_output_void, trace_output_flag): Add
+	SIM_DESC arg.
+	(trace_input_func): Likewise.  Change trace_sd to sd.
+	(OP_*): Add SIM_DESC and SIM_CPU args to all OP funcs.
+
 2015-11-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_close): Delete.
