@@ -40,9 +40,9 @@ host_callback *cr16_callback;
 uint32 OP[4];
 uint32 sign_flag;
 
-static struct hash_entry *lookup_hash (uint64 ins, int size);
+static struct hash_entry *lookup_hash (SIM_DESC, SIM_CPU *, uint64 ins, int size);
 static void get_operands (operand_desc *s, uint64 mcode, int isize, int nops);
-static INLINE uint8 *map_memory (unsigned phys_addr);
+static INLINE uint8 *map_memory (SIM_DESC, SIM_CPU *, unsigned phys_addr);
 
 #define MAX_HASH  16
 
@@ -73,7 +73,7 @@ hash(unsigned long long insn, int format)
 
 
 INLINE static struct hash_entry *
-lookup_hash (uint64 ins, int size)
+lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint64 ins, int size)
 {
   uint32 mask;
   struct hash_entry *h;
@@ -329,7 +329,7 @@ get_operands (operand_desc *s, uint64 ins, int isize, int nops)
 }
 
 static int
-do_run (SIM_DESC sd, uint64 mcode)
+do_run (SIM_DESC sd, SIM_CPU *cpu, uint64 mcode)
 {
   host_callback *cr16_callback = STATE_CALLBACK (sd);
   struct simops *s= Simops;
@@ -340,15 +340,15 @@ do_run (SIM_DESC sd, uint64 mcode)
   if ((cr16_debug & DEBUG_INSTRUCTION) != 0)
     (*cr16_callback->printf_filtered) (cr16_callback, "do_long 0x%x\n", mcode);
 #endif
-  
-   h =  lookup_hash(mcode, 1);
+
+   h = lookup_hash (sd, cpu, mcode, 1);
 
   if ((h == NULL) || (h->opcode == 0))
     return 0;
 
    if (h->size == 3)
     {
-      iaddr = imem_addr ((uint32)PC + 2);
+      iaddr = imem_addr (sd, cpu, (uint32)PC + 2);
        mcode = (mcode << 16) | get_longword( iaddr );
     }
 
@@ -365,7 +365,7 @@ do_run (SIM_DESC sd, uint64 mcode)
 
   //State.ins_type = h->flags;
 
-  (h->ops->func)();
+  (h->ops->func) (sd, cpu);
 
   return h->size;
 }
@@ -408,17 +408,17 @@ enum
   };
 
 static unsigned long
-dmap_register (void *regcache, int reg_nr)
+dmap_register (SIM_DESC sd, SIM_CPU *cpu, void *regcache, int reg_nr)
 {
-  uint8 *raw = map_memory (SIM_CR16_MEMORY_DATA
+  uint8 *raw = map_memory (sd, cpu, SIM_CR16_MEMORY_DATA
                            + DMAP0_OFFSET + 2 * reg_nr);
   return READ_16 (raw);
 }
 
 static unsigned long
-imap_register (void *regcache, int reg_nr)
+imap_register (SIM_DESC sd, SIM_CPU *cpu, void *regcache, int reg_nr)
 {
-  uint8 *raw = map_memory (SIM_CR16_MEMORY_DATA
+  uint8 *raw = map_memory (sd, cpu, SIM_CR16_MEMORY_DATA
                            + IMAP0_OFFSET + 2 * reg_nr);
   return READ_16 (raw);
 }
@@ -427,11 +427,15 @@ imap_register (void *regcache, int reg_nr)
    into a physical address. */
 
 static unsigned long
-sim_cr16_translate_dmap_addr (unsigned long offset,
+sim_cr16_translate_dmap_addr (SIM_DESC sd,
+			      SIM_CPU *cpu,
+			      unsigned long offset,
                               int nr_bytes,
                               unsigned long *phys,
                               void *regcache,
-                              unsigned long (*dmap_register) (void *regcache,
+			      unsigned long (*dmap_register) (SIM_DESC,
+							      SIM_CPU *,
+							      void *regcache,
                                                               int reg_nr))
 {
   short map;
@@ -451,7 +455,7 @@ sim_cr16_translate_dmap_addr (unsigned long offset,
       /* Don't cross a BLOCK boundary */
       nr_bytes = DMAP_BLOCK_SIZE - (offset % DMAP_BLOCK_SIZE);
     }
-  map = dmap_register (regcache, regno);
+  map = dmap_register (sd, cpu, regcache, regno);
   if (regno == 3)
     {
       /* Always maps to data memory */
@@ -490,11 +494,15 @@ sim_cr16_translate_dmap_addr (unsigned long offset,
    into a physical address. */
 
 static unsigned long
-sim_cr16_translate_imap_addr (unsigned long offset,
+sim_cr16_translate_imap_addr (SIM_DESC sd,
+			      SIM_CPU *cpu,
+			      unsigned long offset,
                               int nr_bytes,
                               unsigned long *phys,
                               void *regcache,
-                              unsigned long (*imap_register) (void *regcache,
+			      unsigned long (*imap_register) (SIM_DESC,
+							      SIM_CPU *,
+							      void *regcache,
                                                               int reg_nr))
 {
   short map;
@@ -514,7 +522,7 @@ sim_cr16_translate_imap_addr (unsigned long offset,
       /* Don't cross a BLOCK boundary */
       nr_bytes = IMAP_BLOCK_SIZE - offset;
     }
-  map = imap_register (regcache, regno);
+  map = imap_register (sd, cpu, regcache, regno);
   sp = (map & 0x3000) >> 12;
   segno = (map & 0x007f);
   switch (sp)
@@ -543,12 +551,20 @@ sim_cr16_translate_imap_addr (unsigned long offset,
 }
 
 static unsigned long
-sim_cr16_translate_addr (unsigned long memaddr, int nr_bytes,
-                         unsigned long *targ_addr, void *regcache,
-                         unsigned long (*dmap_register) (void *regcache,
-                                                         int reg_nr),
-                         unsigned long (*imap_register) (void *regcache,
-                                                         int reg_nr))
+sim_cr16_translate_addr (SIM_DESC sd,
+			 SIM_CPU *cpu,
+			 unsigned long memaddr,
+			 int nr_bytes,
+			 unsigned long *targ_addr,
+			 void *regcache,
+			 unsigned long (*dmap_register) (SIM_DESC,
+							 SIM_CPU *,
+							 void *regcache,
+							 int reg_nr),
+			 unsigned long (*imap_register) (SIM_DESC,
+							 SIM_CPU *,
+							 void *regcache,
+							 int reg_nr))
 {
   unsigned long phys;
   unsigned long seg;
@@ -587,13 +603,13 @@ sim_cr16_translate_addr (unsigned long memaddr, int nr_bytes,
       break;
 
     case 0x10:                        /* in logical data address segment */
-      nr_bytes = sim_cr16_translate_dmap_addr (off, nr_bytes, &phys, regcache,
-                                               dmap_register);
+      nr_bytes = sim_cr16_translate_dmap_addr (sd, cpu, off, nr_bytes, &phys,
+                                               regcache, dmap_register);
       break;
 
     case 0x11:                        /* in logical instruction address segment */
-      nr_bytes = sim_cr16_translate_imap_addr (off, nr_bytes, &phys, regcache,
-                                               imap_register);
+      nr_bytes = sim_cr16_translate_imap_addr (sd, cpu, off, nr_bytes, &phys,
+                                               regcache, imap_register);
       break;
 
     default:
@@ -609,7 +625,7 @@ sim_cr16_translate_addr (unsigned long memaddr, int nr_bytes,
    isn't going to cross a segment boundary. */
 
 uint8 *
-map_memory (unsigned phys_addr)
+map_memory (SIM_DESC sd, SIM_CPU *cpu, unsigned phys_addr)
 {
   uint8 **memory;
   uint8 *raw;
@@ -690,12 +706,12 @@ xfer_mem (SIM_DESC sd, SIM_ADDR virt,
   uint8 *memory;
   unsigned long phys;
   int phys_size;
-  phys_size = sim_cr16_translate_addr (virt, size, &phys, NULL,
+  phys_size = sim_cr16_translate_addr (sd, NULL, virt, size, &phys, NULL,
                                        dmap_register, imap_register);
   if (phys_size == 0)
     return 0;
 
-  memory = map_memory (phys);
+  memory = map_memory (sd, NULL, phys);
 
 #ifdef DEBUG
   if ((cr16_debug & DEBUG_INSTRUCTION) != 0)
@@ -746,6 +762,7 @@ cr16_pc_get (sim_cpu *cpu)
 static void
 cr16_pc_set (sim_cpu *cpu, sim_cia pc)
 {
+  SIM_DESC sd = CPU_STATE (cpu);
   SET_PC (pc);
 }
 
@@ -760,8 +777,6 @@ free_state (SIM_DESC sd)
 
 static int cr16_reg_fetch (SIM_CPU *, int, unsigned char *, int);
 static int cr16_reg_store (SIM_CPU *, int, unsigned char *, int);
-
-SIM_DESC trace_sd = NULL;
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd, char **argv)
@@ -833,7 +848,6 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd,
       CPU_PC_STORE (cpu) = cr16_pc_set;
     }
 
-  trace_sd = sd;
   cr16_callback = cb;
 
   /* put all the opcodes in the hash table.  */
@@ -950,7 +964,7 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd,
 }
 
 uint8 *
-dmem_addr (uint32 offset)
+dmem_addr (SIM_DESC sd, SIM_CPU *cpu, uint32 offset)
 {
   unsigned long phys;
   uint8 *mem;
@@ -960,14 +974,14 @@ dmem_addr (uint32 offset)
      things like ``0xfffe + 0x0e60 == 0x10e5d''.  Since offset's type
      is uint16 this is modulo'ed onto 0x0e5d. */
 
-  phys_size = sim_cr16_translate_dmap_addr (offset, 1, &phys, NULL,
+  phys_size = sim_cr16_translate_dmap_addr (sd, cpu, offset, 1, &phys, NULL,
                                             dmap_register);
   if (phys_size == 0)
     {
       mem = State.mem.fault;
     }
   else
-    mem = map_memory (phys);
+    mem = map_memory (sd, cpu, phys);
 #ifdef DEBUG
   if ((cr16_debug & DEBUG_MEMORY))
     {
@@ -983,17 +997,17 @@ dmem_addr (uint32 offset)
 }
 
 uint8 *
-imem_addr (uint32 offset)
+imem_addr (SIM_DESC sd, SIM_CPU *cpu, uint32 offset)
 {
   unsigned long phys;
   uint8 *mem;
-  int phys_size = sim_cr16_translate_imap_addr (offset, 1, &phys, NULL,
+  int phys_size = sim_cr16_translate_imap_addr (sd, cpu, offset, 1, &phys, NULL,
                                                 imap_register);
   if (phys_size == 0)
     {
       return State.mem.fault;
     }
-  mem = map_memory (phys); 
+  mem = map_memory (sd, cpu, phys);
 #ifdef DEBUG
   if ((cr16_debug & DEBUG_MEMORY))
     {
@@ -1022,6 +1036,7 @@ sim_stop (SIM_DESC sd)
 void
 sim_resume (SIM_DESC sd, int step, int siggnal)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   uint32 curr_ins_size = 0;
   uint64 mcode = 0;
   uint8 *iaddr;
@@ -1061,7 +1076,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
   do
     {
-      iaddr = imem_addr ((uint32)PC);
+      iaddr = imem_addr (sd, cpu, (uint32)PC);
       if (iaddr == State.mem.fault)
         {
 #ifdef SIGBUS
@@ -1076,7 +1091,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
  
       State.pc_changed = 0;
       
-      curr_ins_size = do_run(sd, mcode);
+      curr_ins_size = do_run (sd, cpu, mcode);
 
 #if CR16_DEBUG
  (*cr16_callback->printf_filtered) (cr16_callback, "INS: PC=0x%X, mcode=0x%X\n",PC,mcode); 
@@ -1138,7 +1153,10 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
   if (cr16_debug)
     (*cr16_callback->printf_filtered) (cr16_callback, "sim_create_inferior:  PC=0x%lx\n", (long) start_address);
 #endif
-  SET_CREG (PC_CR, start_address);
+  {
+    SIM_CPU *cpu = STATE_CPU (sd, 0);
+    SET_CREG (PC_CR, start_address);
+  }
 
   SLOT_FLUSH ();
   return SIM_RC_OK;
@@ -1265,6 +1283,7 @@ cr16_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 static int
 cr16_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
+  SIM_DESC sd = CPU_STATE (cpu);
   int size;
   switch ((enum sim_cr16_regs) rn)
     {
