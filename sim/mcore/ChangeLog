@@ -1,5 +1,14 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Add sim-reg.o.
+	* interp.c (sim_store_register): Rename to ...
+	(mcore_reg_store): ... this.  Change SIM_DESC to SIM_CPU.
+	(sim_fetch_register): Rename to ...
+	(mcore_reg_fetch): ... this.  Change SIM_DESC to SIM_CPU.
+	(sim_open): Call CPU_REG_FETCH and CPU_REG_STORE.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Add sim-reason.o and sim-resume.o.
 	* interp.c (struct mcore_regset): Delete exception.
 	(util): Add SIM_DESC and SIM_CPU args.  Call sim_engine_halt instead
