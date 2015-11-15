@@ -1,5 +1,9 @@
 2015-11-13  Tristan Gingold  <gingold@adacore.com>
 
+	* configure: Regenerate.
+
+2015-11-13  Tristan Gingold  <gingold@adacore.com>
+
 	* NEWS: Add marker for 2.26.
 
 2015-11-12  James Greenhalgh  <james.greenhalgh@arm.com>
