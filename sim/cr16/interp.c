@@ -758,6 +758,9 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
+static int cr16_reg_fetch (SIM_CPU *, int, unsigned char *, int);
+static int cr16_reg_store (SIM_CPU *, int, unsigned char *, int);
+
 SIM_DESC trace_sd = NULL;
 
 SIM_DESC
@@ -824,6 +827,8 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd,
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = cr16_reg_fetch;
+      CPU_REG_STORE (cpu) = cr16_reg_store;
       CPU_PC_FETCH (cpu) = cr16_pc_get;
       CPU_PC_STORE (cpu) = cr16_pc_set;
     }
@@ -1178,8 +1183,38 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
   stop_simulator = 0;
 }
 
-int
-sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static uint32
+cr16_extract_unsigned_integer (unsigned char *addr, int len)
+{
+  uint32 retval;
+  unsigned char * p;
+  unsigned char * startaddr = (unsigned char *)addr;
+  unsigned char * endaddr = startaddr + len;
+
+  retval = 0;
+
+  for (p = endaddr; p > startaddr;)
+    retval = (retval << 8) | *--p;
+
+  return retval;
+}
+
+static void
+cr16_store_unsigned_integer (unsigned char *addr, int len, uint32 val)
+{
+  unsigned char *p;
+  unsigned char *startaddr = addr;
+  unsigned char *endaddr = startaddr + len;
+
+  for (p = startaddr; p < endaddr;)
+    {
+      *p++ = val & 0xff;
+      val >>= 8;
+    }
+}
+
+static int
+cr16_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   int size;
   switch ((enum sim_cr16_regs) rn)
@@ -1196,15 +1231,14 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     case SIM_CR16_R9_REGNUM:
     case SIM_CR16_R10_REGNUM:
     case SIM_CR16_R11_REGNUM:
-      WRITE_16 (memory, GPR (rn - SIM_CR16_R0_REGNUM));
+      cr16_store_unsigned_integer (memory, 2, GPR (rn - SIM_CR16_R0_REGNUM));
       size = 2;
       break;
     case SIM_CR16_R12_REGNUM:
     case SIM_CR16_R13_REGNUM:
     case SIM_CR16_R14_REGNUM:
     case SIM_CR16_R15_REGNUM:
-      //WRITE_32 (memory, GPR (rn - SIM_CR16_R0_REGNUM));
-      write_longword (memory, GPR (rn - SIM_CR16_R0_REGNUM));
+      cr16_store_unsigned_integer (memory, 4, GPR (rn - SIM_CR16_R0_REGNUM));
       size = 4;
       break;
     case SIM_CR16_PC_REGNUM:
@@ -1218,8 +1252,7 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     case SIM_CR16_DSR_REGNUM:
     case SIM_CR16_CAR0_REGNUM:
     case SIM_CR16_CAR1_REGNUM:
-      //WRITE_32 (memory, CREG (rn - SIM_CR16_PC_REGNUM));
-      write_longword (memory, CREG (rn - SIM_CR16_PC_REGNUM));
+      cr16_store_unsigned_integer (memory, 4, CREG (rn - SIM_CR16_PC_REGNUM));
       size = 4;
       break;
     default:
@@ -1228,9 +1261,9 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     }
   return size;
 }
- 
-int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+
+static int
+cr16_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   int size;
   switch ((enum sim_cr16_regs) rn)
@@ -1247,14 +1280,14 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     case SIM_CR16_R9_REGNUM:
     case SIM_CR16_R10_REGNUM:
     case SIM_CR16_R11_REGNUM:
-      SET_GPR (rn - SIM_CR16_R0_REGNUM, READ_16 (memory));
+      SET_GPR (rn - SIM_CR16_R0_REGNUM, cr16_extract_unsigned_integer (memory, 2));
       size = 2;
       break;
     case SIM_CR16_R12_REGNUM:
     case SIM_CR16_R13_REGNUM:
     case SIM_CR16_R14_REGNUM:
     case SIM_CR16_R15_REGNUM:
-      SET_GPR32 (rn - SIM_CR16_R0_REGNUM, get_longword (memory));
+      SET_GPR32 (rn - SIM_CR16_R0_REGNUM, cr16_extract_unsigned_integer (memory, 2));
       size = 4;
       break;
     case SIM_CR16_PC_REGNUM:
@@ -1268,7 +1301,7 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     case SIM_CR16_DSR_REGNUM:
     case SIM_CR16_CAR0_REGNUM:
     case SIM_CR16_CAR1_REGNUM:
-      SET_CREG (rn - SIM_CR16_PC_REGNUM, get_longword (memory));
+      SET_CREG (rn - SIM_CR16_PC_REGNUM, cr16_extract_unsigned_integer (memory, 4));
       size = 4;
       break;
     default:

@@ -20,6 +20,7 @@
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-hload.o \
+	sim-reg.o \
 	interp.o \
 	table.o \
 	simops.o \

@@ -1,5 +1,19 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Add sim-reg.o.
+	* interp.c (cr16_reg_fetch, cr16_reg_store): Add prototypes.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+	(cr16_extract_unsigned_integer, cr16_store_unsigned_integer):
+	New helper functions.
+	(sim_fetch_register): Rename to ...
+	(cr16_reg_fetch): ... this.  Use cr16_store_unsigned_integer
+	to write out the updated register values.
+	(sim_store_register): Rename to ...
+	(cr16_reg_store): ... this.  Use cr16_extract_unsigned_integer
+	to read in the updated register values.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (sim_open): Delete sim_create_inferior call.
 
 2015-11-14  Mike Frysinger  <vapier@gentoo.org>
