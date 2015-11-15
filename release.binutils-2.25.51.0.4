@@ -1,5 +1,5 @@
-This is the beta release of binutils 2.25.51.0.3 for Linux, which is
-based on binutils 2015 0630 master branch on sourceware.org plus
+This is the beta release of binutils 2.25.51.0.4 for Linux, which is
+based on binutils 2015 1114 master branch on sourceware.org plus
 various changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
@@ -53,15 +53,15 @@ index ae6588b..b91a00c 100644
 @@ -339,8 +339,8 @@ early_idt_handlers:
  	i = i + 1
  	.endr
- 
+
 -/* This is global to keep gas from relaxing the jumps */
 -ENTRY(early_idt_handler)
 +/* This is weak to keep gas from relaxing the jumps */
 +WEAK(early_idt_handler)
  	cld
- 
+
  	cmpl $2,(%rsp)		# X86_TRAP_NMI
--- 
+--
 
 Starting from the 2.18.50.0.4 release, the x86 assembler no longer
 accepts
@@ -143,12 +143,82 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.25.51.0.3 to
+Please report any bugs related to binutils 2.25.51.0.4 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.25.51.0.3:
+
+1. Update from binutils 2015 1114.
+2. Add support for Intel IA MCU psABI.
+3. Implement new R_386_GOT32X, R_X86_64_GOTPCRELX and
+R_X86_64_REX_GOTPCRELX relocations with linker optimization in ld.
+4. Fix x86 assembler bugs.  PRs 18631/18257/13571.
+5. Add monitorx/mwaitx instructions to x86 assembler/disassembler.
+6. Change --compress-debug-sections and --compress-debug-sections=zlib
+to zlib-gabi for gas, ld and gold.
+7. Fix a SHF_COMPRESSED bug.  PR 18656.
+8. Remove unnecessary x86 PLT entry for function pointer initialization.
+PR 18900.
+9. Add --enable-compressed-debug-sections to configure to enable
+compressed debug sections in ld and gas by default.  Currently, it
+is off by default.
+10. Speed up "ld -r" for x86 and ppc.
+11. Improve "ld -r".  PR 18867.
+12. Always enable --sysroot in ld.  PR 18992.
+13. Remove --warn-orphan and --orphan-handling for ld.
+14. Reduce binary size after linking sections with "a" and "wa" flags.
+PR 19162.
+15. Properly handle __start_* and __stop_* symbols in --gc-sections.
+PRs 19161/19167.
+16. Properly handle > 2GB elf file on 32bit hosts.  PR 19123.
+17. Properly handle R_386_PC32 and R_X86_64_PC32 relocations in non-code
+sections.  PR 19031.
+18. Properly sort x86 IFUNC relocations.  PR 18841.
+19. Fix symbol versioning without PLT.  PR 18718.
+20. Issue an error for read-only segment with dynamic x86 IFUNC
+relocations.  PR 18801.
+21. Skip IFUNC relocations in debug sections.  PR 18808.
+22. Properly merge hidden versioned symbol.  PRs 18720/18785.
+23. Properly copy sh_link and sh_info fields of sections for objcopy
+with --only-keep-debug.
+24. Don't change the default symbol for relocatable link.  PR 18735.
+25. Support more than one SHT_SYMTAB_SHNDX sections.  PR 15835.
+26. Properly merge input string sections.  PR 19013.
+27. Don't re-export a symbol if it isn't undefined.  PR 18914.
+28. Fix objcopy with --pad-to= --reverse-bytes= -interleave=.  PRs
+19005/19020.
+29. Add static PIE support to ld.
+30. Fix an objdump crash.  PR 18570.
+31. Add --gc-sections support for COFF.  PR 11539.
+32. Improve DT_VERNEED and DT_VERDEF support in readelf.
+33. Add --add-symbol to objcopy.
+34. Add -s/--output-separator to strings.
+35. Remove support for older ARC. Added support for new ARC cpus (ARC600,
+ARC601, ARC700, ARCV2).
+36. Add support for CloudABI on aarch64.
+37. Improve gold support.
+38. Improve PE support.
+39. Improve aarch64 support.
+40. Improve alpha support.
+41. Improve arm support.
+42. Improve avr support.
+43. Improve cris support.
+44. Improve hppa support.
+45. Improve mips support.
+46. Improve msp430 support.
+47. Improve nios2 support.
+48. Improve or1k support.
+49. Improve ppc support.
+50. Improve rl78 support.
+51. Improve rx support.
+52. Improve s390 support.
+53. Improve sh support.
+54. Improve v850 support.
+55. Improve xtensa support.
 
 Changes from binutils 2.25.51.0.2:
 
@@ -627,7 +697,7 @@ Changes from binutils 2.23.51.0.3:
 10. Add --debug-dump=addr, --debug_dump=cu_index options to readelf and
 objdump.
 11. Add dwp, DWARF packaging utility.
-12. Add compressed debug section support to Windows.  PR 14067. 
+12. Add compressed debug section support to Windows.  PR 14067.
 13. Improve gold.
 14. Improve aarch64 support.
 15. Improve arm support.
@@ -640,7 +710,7 @@ objdump.
 Changes from binutils 2.23.51.0.2:
 
 1. Update from binutils 2012 0918.
-2. Properly handle versioned STB_SECONDARY symbols. 
+2. Properly handle versioned STB_SECONDARY symbols.
 3. Fix wrong symbol type with common symbol and weak function.  PR 14591.
 4. Ignore discarded sections when converting mov to lea.
 5. Improve gold.
@@ -725,7 +795,7 @@ Changes from binutils 2.22.52.0.3:
 2. Check addend overflow for R_X86_64_RELATIVE64.
 3. Fix ar/nm/ranlib with --plugin.
 4. Create .eh_frame_hdr section only if needed.  PR 13909.
-5. Properly create .eh_frame section for PLT.  PR 14105. 
+5. Properly create .eh_frame section for PLT.  PR 14105.
 6. Fix a linker crash. PR 14170.
 7. Fix readelf to properly display addend.
 8. Don't make _DYNAMIC/_GLOBAL_OFFSET_TABLE_/_PROCEDURE_LINKAGE_TABLE_
@@ -765,7 +835,7 @@ Changes from binutils 2.22.52.0.1:
 4. Fix -Bsymbolic with protected function pointer.  PR 13880.
 5. Fix an IFUNC regression.  PR 13817.
 6. Fix x86 NOP fill regression.  PR 13675.
-7. Fix a linker regression.  PR 13991. 
+7. Fix a linker regression.  PR 13991.
 8. Fix dangling global hidden symbol in symtab.  PR 13621.
 9. Fix objcopy, strip and ld for --emit-relocs.  PR 13947.
 10. Improve gold.
@@ -856,7 +926,7 @@ Changes from binutils 2.21.53.0.1:
 3. Allow R_X86_64_64 relocation for x32 and check x32 relocation overflow.
 PR ld/13048.
 4. Support direct call in x86-64 assembly code.  PR gas/13046.
-5. Add ia32 Google Native Client support. 
+5. Add ia32 Google Native Client support.
 6. Add .debug_macro section support.
 7. Improve gold.
 8. Improve VMS support.
@@ -951,7 +1021,7 @@ Changes from binutils 2.21.51.0.8:
 11. Fix a linker script regression.  PR 12726.
 12. Support new GNU DWARF extensions.
 13. Initial support for SystemTap note sections.
-14. Add --dwarf-start and --dwarf-end to readelf and objdump. 
+14. Add --dwarf-start and --dwarf-end to readelf and objdump.
 15. Disable 3dnow and 3dnowa for bdver1 in x86 assembler.
 16. Improve gold.
 17. Improve VMS support.
@@ -1003,7 +1073,7 @@ PR 12519,
 11. Properly handle PT_DYNAMIC segment with zero size sections.  PR 12516.
 12.  Add a new linker option, --verbose=2, to report plugin symbol
 status.
-13. Properly handle entry symbols in linker LTO support.  PR 12507.  
+13. Properly handle entry symbols in linker LTO support.  PR 12507.
 14. Improve gold.
 15. Improve arm support.
 16. Improve bfin support.
@@ -1123,7 +1193,7 @@ already been defined.  PR 12001.
 16. Improve ppc support.
 17. Improve tic6x support.
 
-It is available as users/hjl/linux/release/2.25.51.0.3 tag at
+It is available as users/hjl/linux/release/2.25.51.0.4 tag at
 
 https://sourceware.org/git/?p=binutils-gdb.git;a=summary
 
@@ -1132,4 +1202,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-07/06/2015
+11/14/2015
