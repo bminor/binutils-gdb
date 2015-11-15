@@ -1,3 +1,8 @@
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Add sim-reason.o and sim-stop.o.
+	* compile.c (sim_stop, sim_stop_reason): Delete.
+
 2015-11-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-load.o.

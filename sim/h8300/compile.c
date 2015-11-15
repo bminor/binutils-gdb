@@ -1847,14 +1847,6 @@ init_pointers (SIM_DESC sd)
     }
 }
 
-int
-sim_stop (SIM_DESC sd)
-{
-  /* FIXME: use a real signal value.  */
-  sim_engine_set_run_state (sd, sim_stopped, SIGINT);
-  return 1;
-}
-
 #define OBITOP(name, f, s, op) 			\
 case O (name, SB):				\
 {						\
@@ -4761,12 +4753,6 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
       buf[1] = v;
     }
   return -1;
-}
-
-void
-sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
-{
-  sim_engine_get_run_state (sd, reason, sigrc);
 }
 
 static void
