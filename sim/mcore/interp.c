@@ -113,7 +113,6 @@ struct mcore_regset
   int		  stalls;
   int		  cycles;
   int		  insts;
-  int		  exception;
   word *          active_gregs;
 };
 
@@ -234,12 +233,12 @@ process_stub (SIM_DESC sd, int what)
 }
 
 static void
-util (SIM_DESC sd, unsigned what)
+util (SIM_DESC sd, SIM_CPU *scpu, unsigned what)
 {
   switch (what)
     {
     case 0:	/* exit */
-      cpu.asregs.exception = SIGQUIT;
+      sim_engine_halt (sd, scpu, NULL, scpu->pc, sim_exited, cpu.gr[PARM1]);
       break;
 
     case 1:	/* printf */
@@ -314,10 +313,12 @@ int WLW;
 
 static int tracing = 0;
 
-void
-sim_resume (SIM_DESC sd, int step, int siggnal)
+#define ILLEGAL() \
+  sim_engine_halt (sd, scpu, NULL, pc, sim_stopped, SIM_SIGILL)
+
+static void
+step_once (SIM_DESC sd, SIM_CPU *scpu)
 {
-  SIM_CPU *scpu = STATE_CPU (sd, 0);
   int needfetch;
   word ibuf;
   word pc;
@@ -331,7 +332,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   word WLhash;
 #endif
 
-  cpu.asregs.exception = step ? SIGTRAP: 0;
   pc = CPU_PC_GET (scpu);
 
   /* Fetch the initial instructions that we'll decode. */
@@ -356,7 +356,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
     WLhash = WLhash & WL[w];
 #endif
 
-  do
+  /* TODO: Unindent this block.  */
     {
       word oldpc;
 
@@ -447,8 +447,9 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      switch RD
 		{
 		case 0x0:				/* bkpt */
-		  cpu.asregs.exception = SIGTRAP;
 		  pc -= 2;
+		  sim_engine_halt (sd, scpu, NULL, pc - 2,
+				   sim_stopped, SIM_SIGTRAP);
 		  break;
 
 		case 0x1:				/* sync */
@@ -492,23 +493,25 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 		  break;
 
 		case 0x7:
-		  cpu.asregs.exception = SIGILL;	/* illegal */
+		  ILLEGAL ();				/* illegal */
 		  break;
 
 		case 0x8:				/* trap 0 */
 		case 0xA:				/* trap 2 */
 		case 0xB:				/* trap 3 */
-		  cpu.asregs.exception = SIGTRAP;
+		  sim_engine_halt (sd, scpu, NULL, pc,
+				   sim_stopped, SIM_SIGTRAP);
 		  break;
 
 		case 0xC:				/* trap 4 */
 		case 0xD:				/* trap 5 */
 		case 0xE:				/* trap 6 */
-		  cpu.asregs.exception = SIGILL;	/* illegal */
+		  ILLEGAL ();				/* illegal */
 		  break;
 
 		case 0xF: 				/* trap 7 */
-		  cpu.asregs.exception = SIGTRAP;	/* integer div-by-0 */
+		  sim_engine_halt (sd, scpu, NULL, pc,	/* integer div-by-0 */
+				   sim_stopped, SIM_SIGTRAP);
 		  break;
 
 		case 0x9:				/* trap 1 */
@@ -518,7 +521,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      break;
 
 	    case 0x1:
-	      cpu.asregs.exception = SIGILL;		/* illegal */
+	      ILLEGAL ();				/* illegal */
 	      break;
 
 	    case 0x2:					/* mvc */
@@ -778,7 +781,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  break;
 	case 0x08:					/* illegal */
 	case 0x09:					/* illegal*/
-	  cpu.asregs.exception = SIGILL;
+	  ILLEGAL ();
 	  break;
 	case 0x0A:					/* movf */
 	  if (C_OFF())
@@ -815,7 +818,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    if (r <= LAST_VALID_CREG)
 	      cpu.gr[RD] = cpu.cr[r];
 	    else
-	      cpu.asregs.exception = SIGILL;
+	      ILLEGAL ();
 	  }
 	  break;
 
@@ -855,7 +858,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    if (r <= LAST_VALID_CREG)
 	      cpu.cr[r] = cpu.gr[RD];
 	    else
-	      cpu.asregs.exception = SIGILL;
+	      ILLEGAL ();
 
 	    /* we might have changed register sets... */
 	    if (SR_AF ())
@@ -917,7 +920,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    cpu.gr[RD] - (IMM5 + 1);
 	  break;
 	case 0x26: case 0x27:				/* illegal */
-	  cpu.asregs.exception = SIGILL;
+	  ILLEGAL ();
 	  break;
 	case 0x28: case 0x29:				/* rsubi */
 	  cpu.gr[RD] =
@@ -979,7 +982,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    else
 	      {
 		/* illegal */
-		cpu.asregs.exception = SIGILL;
+		ILLEGAL ();
 	      }
 	  }
 	  break;
@@ -1038,7 +1041,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    else
 	      {
 		/* illegal */
-		cpu.asregs.exception = SIGILL;
+		ILLEGAL ();
 	      }
 	    break;
 	  }
@@ -1106,16 +1109,16 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	case 0x44: case 0x45: case 0x46: case 0x47:
 	case 0x48: case 0x49: case 0x4A: case 0x4B:
 	case 0x4C: case 0x4D: case 0x4E: case 0x4F:
-	  cpu.asregs.exception = SIGILL;
+	  ILLEGAL ();
 	  break;
 	case 0x50:
-	  util (sd, inst & 0xFF);
+	  util (sd, scpu, inst & 0xFF);
 	  break;
 	case 0x51: case 0x52: case 0x53:
 	case 0x54: case 0x55: case 0x56: case 0x57:
 	case 0x58: case 0x59: case 0x5A: case 0x5B:
 	case 0x5C: case 0x5D: case 0x5E: case 0x5F:
-	  cpu.asregs.exception = SIGILL;
+	  ILLEGAL ();
 	  break;
 	case 0x60: case 0x61: case 0x62: case 0x63:	/* movi  */
 	case 0x64: case 0x65: case 0x66: case 0x67:
@@ -1123,7 +1126,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  break;
 	case 0x68: case 0x69: case 0x6A: case 0x6B:
 	case 0x6C: case 0x6D: case 0x6E: case 0x6F:	/* illegal */
-	  cpu.asregs.exception = SIGILL;
+	  ILLEGAL ();
 	  break;
 	case 0x71: case 0x72: case 0x73:
 	case 0x74: case 0x75: case 0x76: case 0x77:
@@ -1253,7 +1256,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  needfetch = 0;
 	}
     }
-  while (!cpu.asregs.exception);
 
   /* Hide away the things we've cached while executing.  */
   CPU_PC_SET (scpu, pc);
@@ -1261,6 +1263,26 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   cpu.asregs.cycles += insts;		/* and each takes a cycle */
   cpu.asregs.cycles += bonus_cycles;	/* and extra cycles for branches */
   cpu.asregs.cycles += memops * memcycles;	/* and memop cycle delays */
+}
+
+void
+sim_engine_run (SIM_DESC sd,
+		int next_cpu_nr,  /* ignore  */
+		int nr_cpus,      /* ignore  */
+		int siggnal)      /* ignore  */
+{
+  sim_cpu *scpu;
+
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  scpu = STATE_CPU (sd, 0);
+
+  while (1)
+    {
+      step_once (sd, scpu);
+      if (sim_events_tick (sd))
+	sim_events_process (sd);
+    }
 }
 
 int
@@ -1300,21 +1322,6 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     }
   else
     return 0;
-}
-
-void
-sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
-{
-  if (cpu.asregs.exception == SIGQUIT)
-    {
-      * reason = sim_exited;
-      * sigrc = cpu.gr[PARM1];
-    }
-  else
-    {
-      * reason = sim_stopped;
-      * sigrc = cpu.asregs.exception;
-    }
 }
 
 void

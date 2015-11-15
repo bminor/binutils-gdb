@@ -1,3 +1,18 @@
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Add sim-reason.o and sim-resume.o.
+	* interp.c (struct mcore_regset): Delete exception.
+	(util): Add SIM_DESC and SIM_CPU args.  Call sim_engine_halt instead
+	of setting cpu.asregs.exception.
+	(ILLEGAL): Define.
+	(sim_resume): Rename to ...
+	(step_once): ... this.  Delete cpu.asregs.exception initialization.
+	Delete do/while statements while keeping the body.  Replace SIGTRAP
+	usage with sim_engine_halt(SIM_SIGTRAP).  Replace SIGILL usage with
+	ILLEGAL.  Pass sd and cpu down to util.
+	(sim_engine_run): Define.
+	(sim_stop_reason): Delete.
+
 2015-11-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_close): Delete.
