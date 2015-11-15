@@ -5143,7 +5143,7 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 
 /* Turn a pointer in a register into a pointer into real memory. */
 
-#define MEMPTR(x) ((char *)(dmem_addr (sd, cpu, x)))
+#define MEMPTR(x) sim_core_trans_addr (sd, cpu, read_map, x)
 
 	switch (FUNC)
 	  {

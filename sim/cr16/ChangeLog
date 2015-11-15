@@ -1,5 +1,33 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Delete endian.o.
+	(INCLUDE): Delete endian.c.
+	* configure.ac (SIM_AC_OPTION_ENDIAN): Declare little endian.
+	(SIM_AC_OPTION_ALIGNMENT): release unaligned loads.
+	* configure: Regenerate.
+	* cr16_sim.h (IMAP_BLOCK_SIZE, DMAP_BLOCK_SIZE, SEGMENT_SIZE,
+	IMEM_SEGMENTS, DMEM_SEGMENTS, UMEM_SEGMENTS, cr16_memory, dmem_addr,
+	imem_addr, decode_pc, get_longword, get_word, write_word,
+	write_longword, READ_16): Delete.
+	(struct _state): Delete mem member.
+	(endian.c): Delete include.
+	(SB, RB, SW, RW, SLW): Rewrite to use sim-core functions.
+	(get_longword): New function.
+	(RLW): Rewrite to use get_longword.
+	* endian.c: Delete file.
+	* interp.c (map_memory, sim_size, last_segname, last_from, last_to,
+	IMAP0_OFFSET, DMAP0_OFFSET, DMAP2_SHADDOW, DMAP2_OFFSET,
+	dmap_register, imap_register, sim_cr16_translate_dmap_addr,
+	sim_cr16_translate_imap_addr, sim_cr16_translate_addr, map_memory,
+	xfer_mem, sim_write, sim_read, dmem_addr, imem_addr): Delete.
+	(do_run): Delete iaddr and replace imem_addr/get_longword with RW.
+	(sim_open): Call sim_do_commandf.  Delete sim_size call.
+	(sim_resume): Delete iaddr and replace imem_addr/get_longword with
+	RLW.
+	* simops.c (MEMPTR): Rewrite to use sim_core_trans_addr.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* cr16_sim.h (struct simops): Add SIM_DESC and SIM_CPU to func args.
 	(SET_CREG, SET_HW_CREG, SET_PSR_BIT): Pass sd and cpu to move_to_cr.
 	(dmem_addr, imem_addr, move_to_cr): Add SIM_DESC and SIM_CPU args.

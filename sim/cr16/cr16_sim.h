@@ -198,37 +198,6 @@ enum {
     } \
   while (0)
 
-/* cr16 memory: There are three separate cr16 memory regions IMEM,
-   UMEM and DMEM.  The IMEM and DMEM are further broken down into
-   blocks (very like VM pages). */
-
-enum
-{
-  IMAP_BLOCK_SIZE = 0x2000000,
-  DMAP_BLOCK_SIZE = 0x4000000
-};
-
-/* Implement the three memory regions using sparse arrays.  Allocate
-   memory using ``segments''.  A segment must be at least as large as
-   a BLOCK - ensures that an access that doesn't cross a block
-   boundary can't cross a segment boundary */
-
-enum
-{
-  SEGMENT_SIZE = 0x2000000, /* 128KB - MAX(IMAP_BLOCK_SIZE,DMAP_BLOCK_SIZE) */
-  IMEM_SEGMENTS = 8, /* 1MB */
-  DMEM_SEGMENTS = 8, /* 1MB */
-  UMEM_SEGMENTS = 128 /* 16MB */
-};
-
-struct cr16_memory
-{
-  uint8 *insn[IMEM_SEGMENTS];
-  uint8 *data[DMEM_SEGMENTS];
-  uint8 *unif[UMEM_SEGMENTS];
-  uint8 fault[16];
-};
-
 struct _state
 {
   creg_t regs[16];		/* general-purpose registers */
@@ -273,8 +242,6 @@ struct _state
 
   /* NOTE: everything below this line is not reset by
      sim_create_inferior() */
-
-  struct cr16_memory mem;
 
   enum _ins_type ins_type;
 
@@ -421,30 +388,19 @@ enum
 /* sign-extend a 32-bit number */
 #define SEXT32(x)	((((x)&0xffffffff)^(~0x7fffffff))+0x80000000)
 
-extern uint8 *dmem_addr (SIM_DESC, SIM_CPU *, uint32 offset);
-extern uint8 *imem_addr (SIM_DESC, SIM_CPU *, uint32);
-extern bfd_vma decode_pc (void);
+#define SB(addr, data)		sim_core_write_1 (cpu, PC, read_map, addr, data)
+#define RB(addr)		sim_core_read_1 (cpu, PC, read_map, addr)
+#define SW(addr, data)		sim_core_write_unaligned_2 (cpu, PC, read_map, addr, data)
+#define RW(addr)		sim_core_read_unaligned_2 (cpu, PC, read_map, addr)
+#define SLW(addr, data)		sim_core_write_unaligned_4 (cpu, PC, read_map, addr, data)
 
-#define	RB(x)	(*(dmem_addr (sd, cpu, x)))
-#define SB(addr,data)	( RB(addr) = (data & 0xff))
-
-#if defined(__GNUC__) && defined(__OPTIMIZE__) && !defined(NO_ENDIAN_INLINE)
-#define ENDIAN_INLINE static __inline__
-#include "endian.c"
-#undef ENDIAN_INLINE
-
-#else
-extern uint32 get_longword (uint8 *);
-extern uint16 get_word (uint8 *);
-extern void write_word (uint8 *addr, uint16 data);
-extern void write_longword (uint8 *addr, uint32 data);
-#endif
-
-#define SW(addr,data)		write_word (dmem_addr (sd, cpu, addr), data)
-#define RW(x)			get_word (dmem_addr (sd, cpu, x))
-#define SLW(addr,data)  	write_longword (dmem_addr (sd, cpu, addr), data)
-#define RLW(x)			get_longword (dmem_addr (sd, cpu, x))
-#define READ_16(x)		get_word(x)
+/* Yes, this is as whacked as it looks.  The sim currently reads little endian
+   for 16 bits, but then merge them like big endian to get 32 bits.  */
+static inline uint32 get_longword (SIM_CPU *cpu, address_word addr)
+{
+  return (RW (addr) << 16) | RW (addr + 2);
+}
+#define RLW(addr)		get_longword (cpu, addr)
 
 #define JMP(x)			do { SET_PC (x); State.pc_changed = 1; } while (0)
 

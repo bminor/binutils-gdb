@@ -20,15 +20,6 @@
 #if !defined (SIM_CR16_H)
 #define SIM_CR16_H
 
-enum
-  {
-    SIM_CR16_MEMORY_UNIFIED = 0x00000000,
-    SIM_CR16_MEMORY_INSN    = 0x10000000,
-    SIM_CR16_MEMORY_DATA    = 0x10000000,
-    SIM_CR16_MEMORY_DMAP    = 0x10000000,
-    SIM_CR16_MEMORY_IMAP    = 0x10000000
-  };
-
 /* The simulator makes use of the following register information. */
 
 enum sim_cr16_regs

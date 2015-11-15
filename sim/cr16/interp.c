@@ -42,7 +42,6 @@ uint32 sign_flag;
 
 static struct hash_entry *lookup_hash (SIM_DESC, SIM_CPU *, uint64 ins, int size);
 static void get_operands (operand_desc *s, uint64 mcode, int isize, int nops);
-static INLINE uint8 *map_memory (SIM_DESC, SIM_CPU *, unsigned phys_addr);
 
 #define MAX_HASH  16
 
@@ -335,7 +334,6 @@ do_run (SIM_DESC sd, SIM_CPU *cpu, uint64 mcode)
   struct simops *s= Simops;
   struct hash_entry *h;
   char func[12]="\0";
-  uint8 *iaddr;
 #ifdef DEBUG
   if ((cr16_debug & DEBUG_INSTRUCTION) != 0)
     (*cr16_callback->printf_filtered) (cr16_callback, "do_long 0x%x\n", mcode);
@@ -346,11 +344,8 @@ do_run (SIM_DESC sd, SIM_CPU *cpu, uint64 mcode)
   if ((h == NULL) || (h->opcode == 0))
     return 0;
 
-   if (h->size == 3)
-    {
-      iaddr = imem_addr (sd, cpu, (uint32)PC + 2);
-       mcode = (mcode << 16) | get_longword( iaddr );
-    }
+  if (h->size == 3)
+    mcode = (mcode << 16) | RW (PC + 4);
 
   /* Re-set OP list.  */
   OP[0] = OP[1] = OP[2] = OP[3] = sign_flag = 0;
@@ -368,389 +363,6 @@ do_run (SIM_DESC sd, SIM_CPU *cpu, uint64 mcode)
   (h->ops->func) (sd, cpu);
 
   return h->size;
-}
-
-static void
-sim_size (int power)
-{
-  int i;
-  for (i = 0; i < IMEM_SEGMENTS; i++)
-    {
-      if (State.mem.insn[i])
-        free (State.mem.insn[i]);
-    }
-  for (i = 0; i < DMEM_SEGMENTS; i++)
-    {
-      if (State.mem.data[i])
-        free (State.mem.data[i]);
-    }
-  for (i = 0; i < UMEM_SEGMENTS; i++)
-    {
-      if (State.mem.unif[i])
-        free (State.mem.unif[i]);
-    }
-  /* Always allocate dmem segment 0.  This contains the IMAP and DMAP
-     registers. */
-  State.mem.data[0] = calloc (1, SEGMENT_SIZE);
-}
-
-/* For tracing - leave info on last access around. */
-static char *last_segname = "invalid";
-static char *last_from = "invalid";
-static char *last_to = "invalid";
-
-enum
-  {
-    IMAP0_OFFSET = 0xff00,
-    DMAP0_OFFSET = 0xff08,
-    DMAP2_SHADDOW = 0xff04,
-    DMAP2_OFFSET = 0xff0c
-  };
-
-static unsigned long
-dmap_register (SIM_DESC sd, SIM_CPU *cpu, void *regcache, int reg_nr)
-{
-  uint8 *raw = map_memory (sd, cpu, SIM_CR16_MEMORY_DATA
-                           + DMAP0_OFFSET + 2 * reg_nr);
-  return READ_16 (raw);
-}
-
-static unsigned long
-imap_register (SIM_DESC sd, SIM_CPU *cpu, void *regcache, int reg_nr)
-{
-  uint8 *raw = map_memory (sd, cpu, SIM_CR16_MEMORY_DATA
-                           + IMAP0_OFFSET + 2 * reg_nr);
-  return READ_16 (raw);
-}
-
-/* Given a virtual address in the DMAP address space, translate it
-   into a physical address. */
-
-static unsigned long
-sim_cr16_translate_dmap_addr (SIM_DESC sd,
-			      SIM_CPU *cpu,
-			      unsigned long offset,
-                              int nr_bytes,
-                              unsigned long *phys,
-                              void *regcache,
-			      unsigned long (*dmap_register) (SIM_DESC,
-							      SIM_CPU *,
-							      void *regcache,
-                                                              int reg_nr))
-{
-  short map;
-  int regno;
-  last_from = "logical-data";
-  if (offset >= DMAP_BLOCK_SIZE * SIM_CR16_NR_DMAP_REGS)
-    {
-      /* Logical address out side of data segments, not supported */
-      return 0;
-    }
-  regno = (offset / DMAP_BLOCK_SIZE);
-  offset = (offset % DMAP_BLOCK_SIZE);
-
-#if 1
-  if ((offset % DMAP_BLOCK_SIZE) + nr_bytes > DMAP_BLOCK_SIZE)
-    {
-      /* Don't cross a BLOCK boundary */
-      nr_bytes = DMAP_BLOCK_SIZE - (offset % DMAP_BLOCK_SIZE);
-    }
-  map = dmap_register (sd, cpu, regcache, regno);
-  if (regno == 3)
-    {
-      /* Always maps to data memory */
-      int iospi = (offset / 0x1000) % 4;
-      int iosp = (map >> (4 * (3 - iospi))) % 0x10;
-      last_to = "io-space";
-      *phys = (SIM_CR16_MEMORY_DATA + (iosp * 0x10000) + 0xc000 + offset);
-    }
-  else
-    {
-      int sp = ((map & 0x3000) >> 12);
-      int segno = (map & 0x3ff);
-      switch (sp)
-        {
-        case 0: /* 00: Unified memory */
-          *phys = SIM_CR16_MEMORY_UNIFIED + (segno * DMAP_BLOCK_SIZE) + offset;
-          last_to = "unified";
-          break;
-        case 1: /* 01: Instruction Memory */
-          *phys = SIM_CR16_MEMORY_INSN + (segno * DMAP_BLOCK_SIZE) + offset;
-          last_to = "chip-insn";
-          break;
-        case 2: /* 10: Internal data memory */
-          *phys = SIM_CR16_MEMORY_DATA + (segno << 16) + (regno * DMAP_BLOCK_SIZE) + offset;
-          last_to = "chip-data";
-          break;
-        case 3: /* 11: Reserved */
-          return 0;
-        }
-    }
-#endif
-  return nr_bytes;
-}
-
-/* Given a virtual address in the IMAP address space, translate it
-   into a physical address. */
-
-static unsigned long
-sim_cr16_translate_imap_addr (SIM_DESC sd,
-			      SIM_CPU *cpu,
-			      unsigned long offset,
-                              int nr_bytes,
-                              unsigned long *phys,
-                              void *regcache,
-			      unsigned long (*imap_register) (SIM_DESC,
-							      SIM_CPU *,
-							      void *regcache,
-                                                              int reg_nr))
-{
-  short map;
-  int regno;
-  int sp;
-  int segno;
-  last_from = "logical-insn";
-  if (offset >= (IMAP_BLOCK_SIZE * SIM_CR16_NR_IMAP_REGS))
-    {
-      /* Logical address outside of IMAP segments, not supported */
-      return 0;
-    }
-  regno = (offset / IMAP_BLOCK_SIZE);
-  offset = (offset % IMAP_BLOCK_SIZE);
-  if (offset + nr_bytes > IMAP_BLOCK_SIZE)
-    {
-      /* Don't cross a BLOCK boundary */
-      nr_bytes = IMAP_BLOCK_SIZE - offset;
-    }
-  map = imap_register (sd, cpu, regcache, regno);
-  sp = (map & 0x3000) >> 12;
-  segno = (map & 0x007f);
-  switch (sp)
-    {
-    case 0: /* 00: unified memory */
-      *phys = SIM_CR16_MEMORY_UNIFIED + (segno << 17) + offset;
-      last_to = "unified";
-      break;
-    case 1: /* 01: instruction memory */
-      *phys = SIM_CR16_MEMORY_INSN + (IMAP_BLOCK_SIZE * regno) + offset;
-      last_to = "chip-insn";
-      break;
-    case 2: /*10*/
-      /* Reserved. */
-      return 0;
-    case 3: /* 11: for testing  - instruction memory */
-      offset = (offset % 0x800);
-      *phys = SIM_CR16_MEMORY_INSN + offset;
-      if (offset + nr_bytes > 0x800)
-        /* don't cross VM boundary */
-        nr_bytes = 0x800 - offset;
-      last_to = "test-insn";
-      break;
-    }
-  return nr_bytes;
-}
-
-static unsigned long
-sim_cr16_translate_addr (SIM_DESC sd,
-			 SIM_CPU *cpu,
-			 unsigned long memaddr,
-			 int nr_bytes,
-			 unsigned long *targ_addr,
-			 void *regcache,
-			 unsigned long (*dmap_register) (SIM_DESC,
-							 SIM_CPU *,
-							 void *regcache,
-							 int reg_nr),
-			 unsigned long (*imap_register) (SIM_DESC,
-							 SIM_CPU *,
-							 void *regcache,
-							 int reg_nr))
-{
-  unsigned long phys;
-  unsigned long seg;
-  unsigned long off;
-
-  last_from = "unknown";
-  last_to = "unknown";
-
-  seg = (memaddr >> 24);
-  off = (memaddr & 0xffffffL);
-
-  switch (seg)
-    {
-    case 0x00:                        /* Physical unified memory */
-      last_from = "phys-unified";
-      last_to = "unified";
-      phys = SIM_CR16_MEMORY_UNIFIED + off;
-      if ((off % SEGMENT_SIZE) + nr_bytes > SEGMENT_SIZE)
-        nr_bytes = SEGMENT_SIZE - (off % SEGMENT_SIZE);
-      break;
-
-    case 0x01:                        /* Physical instruction memory */
-      last_from = "phys-insn";
-      last_to = "chip-insn";
-      phys = SIM_CR16_MEMORY_INSN + off;
-      if ((off % SEGMENT_SIZE) + nr_bytes > SEGMENT_SIZE)
-        nr_bytes = SEGMENT_SIZE - (off % SEGMENT_SIZE);
-      break;
-
-    case 0x02:                        /* Physical data memory segment */
-      last_from = "phys-data";
-      last_to = "chip-data";
-      phys = SIM_CR16_MEMORY_DATA + off;
-      if ((off % SEGMENT_SIZE) + nr_bytes > SEGMENT_SIZE)
-        nr_bytes = SEGMENT_SIZE - (off % SEGMENT_SIZE);
-      break;
-
-    case 0x10:                        /* in logical data address segment */
-      nr_bytes = sim_cr16_translate_dmap_addr (sd, cpu, off, nr_bytes, &phys,
-                                               regcache, dmap_register);
-      break;
-
-    case 0x11:                        /* in logical instruction address segment */
-      nr_bytes = sim_cr16_translate_imap_addr (sd, cpu, off, nr_bytes, &phys,
-                                               regcache, imap_register);
-      break;
-
-    default:
-      return 0;
-    }
-
-  *targ_addr = phys;
-  return nr_bytes;
-}
-
-/* Return a pointer into the raw buffer designated by phys_addr.  It
-   is assumed that the client has already ensured that the access
-   isn't going to cross a segment boundary. */
-
-uint8 *
-map_memory (SIM_DESC sd, SIM_CPU *cpu, unsigned phys_addr)
-{
-  uint8 **memory;
-  uint8 *raw;
-  unsigned offset;
-  int segment = ((phys_addr >> 24) & 0xff);
-  
-  switch (segment)
-    {
-      
-    case 0x00: /* Unified memory */
-      {
-        memory = &State.mem.unif[(phys_addr / SEGMENT_SIZE) % UMEM_SEGMENTS];
-        last_segname = "umem";
-        break;
-      }
-    
-    case 0x01: /* On-chip insn memory */
-      {
-        memory = &State.mem.insn[(phys_addr / SEGMENT_SIZE) % IMEM_SEGMENTS];
-        last_segname = "imem";
-        break;
-      }
-    
-    case 0x02: /* On-chip data memory */
-      {
-        if ((phys_addr & 0xff00) == 0xff00)
-          {
-            phys_addr = (phys_addr & 0xffff);
-            if (phys_addr == DMAP2_SHADDOW)
-              {
-                phys_addr = DMAP2_OFFSET;
-                last_segname = "dmap";
-              }
-            else
-              last_segname = "reg";
-          }
-        else
-          last_segname = "dmem";
-        memory = &State.mem.data[(phys_addr / SEGMENT_SIZE) % DMEM_SEGMENTS];
-        break;
-      }
-    
-    default:
-      /* OOPS! */
-      last_segname = "scrap";
-      return State.mem.fault;
-    }
-  
-  if (*memory == NULL)
-    {
-      *memory = calloc (1, SEGMENT_SIZE);
-      if (*memory == NULL)
-        {
-          (*cr16_callback->printf_filtered) (cr16_callback, "Malloc failed.\n");
-          return State.mem.fault;
-        }
-    }
-  
-  offset = (phys_addr % SEGMENT_SIZE);
-  raw = *memory + offset;
-  return raw;
-}
-  
-/* Transfer data to/from simulated memory.  Since a bug in either the
-   simulated program or in gdb or the simulator itself may cause a
-   bogus address to be passed in, we need to do some sanity checking
-   on addresses to make sure they are within bounds.  When an address
-   fails the bounds check, treat it as a zero length read/write rather
-   than aborting the entire run. */
-
-static int
-xfer_mem (SIM_DESC sd, SIM_ADDR virt,
-          unsigned char *buffer,
-          int size,
-          int write_p)
-{
-  host_callback *cr16_callback = STATE_CALLBACK (sd);
-  uint8 *memory;
-  unsigned long phys;
-  int phys_size;
-  phys_size = sim_cr16_translate_addr (sd, NULL, virt, size, &phys, NULL,
-                                       dmap_register, imap_register);
-  if (phys_size == 0)
-    return 0;
-
-  memory = map_memory (sd, NULL, phys);
-
-#ifdef DEBUG
-  if ((cr16_debug & DEBUG_INSTRUCTION) != 0)
-    {
-      (*cr16_callback->printf_filtered)
-        (cr16_callback,
-         "sim_%s %d bytes: 0x%08lx (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
-             (write_p ? "write" : "read"),
-         phys_size, virt, last_from,
-         phys, last_to,
-         (long) memory, last_segname);
-    }
-#endif
-
-  if (write_p)
-    {
-      memcpy (memory, buffer, phys_size);
-    }
-  else
-    {
-      memcpy (buffer, memory, phys_size);
-    }
-  
-  return phys_size;
-}
-
-
-int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
-{
-  /* FIXME: this should be performing a virtual transfer */
-  return xfer_mem (sd, addr, buffer, size, 1);
-}
-
-int
-sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
-{
-  /* FIXME: this should be performing a virtual transfer */
-  return xfer_mem (sd, addr, buffer, size, 0);
 }
 
 static sim_cia
@@ -847,6 +459,14 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd,
       CPU_PC_FETCH (cpu) = cr16_pc_get;
       CPU_PC_STORE (cpu) = cr16_pc_set;
     }
+
+  /* The CR16 has an interrupt controller at 0xFC00, but we don't currently
+     handle that.  Revisit if anyone ever implements operating mode.  */
+  /* cr16 memory: There are three separate cr16 memory regions IMEM,
+     UMEM and DMEM.  The IMEM and DMEM are further broken down into
+     blocks (very like VM pages).  This might not match the hardware,
+     but it matches what the toolchain currently expects.  Ugh.  */
+  sim_do_commandf (sd, "memory-size %#x", 20 * 1024 * 1024);
 
   cr16_callback = cb;
 
@@ -956,70 +576,7 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd,
         }
     }
 
-  /* reset the processor state */
-  if (!State.mem.data[0])
-    sim_size (1);
-
   return sd;
-}
-
-uint8 *
-dmem_addr (SIM_DESC sd, SIM_CPU *cpu, uint32 offset)
-{
-  unsigned long phys;
-  uint8 *mem;
-  int phys_size;
-
-  /* Note: DMEM address range is 0..0x10000. Calling code can compute
-     things like ``0xfffe + 0x0e60 == 0x10e5d''.  Since offset's type
-     is uint16 this is modulo'ed onto 0x0e5d. */
-
-  phys_size = sim_cr16_translate_dmap_addr (sd, cpu, offset, 1, &phys, NULL,
-                                            dmap_register);
-  if (phys_size == 0)
-    {
-      mem = State.mem.fault;
-    }
-  else
-    mem = map_memory (sd, cpu, phys);
-#ifdef DEBUG
-  if ((cr16_debug & DEBUG_MEMORY))
-    {
-      (*cr16_callback->printf_filtered)
-        (cr16_callback,
-         "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> 0x%08lx (%s)\n",
-         offset, last_from,
-         phys, phys_size, last_to,
-         (long) mem, last_segname);
-    }
-#endif
-  return mem;
-}
-
-uint8 *
-imem_addr (SIM_DESC sd, SIM_CPU *cpu, uint32 offset)
-{
-  unsigned long phys;
-  uint8 *mem;
-  int phys_size = sim_cr16_translate_imap_addr (sd, cpu, offset, 1, &phys, NULL,
-                                                imap_register);
-  if (phys_size == 0)
-    {
-      return State.mem.fault;
-    }
-  mem = map_memory (sd, cpu, phys);
-#ifdef DEBUG
-  if ((cr16_debug & DEBUG_MEMORY))
-    {
-      (*cr16_callback->printf_filtered)
-        (cr16_callback,
-         "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> 0x%08lx (%s)\n",
-         offset, last_from,
-         phys, phys_size, last_to,
-         (long) mem, last_segname);
-    }
-#endif
-  return mem;
 }
 
 static int stop_simulator = 0;
@@ -1038,8 +595,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   uint32 curr_ins_size = 0;
-  uint64 mcode = 0;
-  uint8 *iaddr;
+  uint64 mcode;
 
 #ifdef DEBUG
 //  (*cr16_callback->printf_filtered) (cr16_callback, "sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); 
@@ -1076,19 +632,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
   do
     {
-      iaddr = imem_addr (sd, cpu, (uint32)PC);
-      if (iaddr == State.mem.fault)
-        {
-#ifdef SIGBUS
-          State.exception = SIGBUS;
-#else
-          State.exception = SIGSEGV;
-#endif
-          break;
-        }
- 
-      mcode = get_longword( iaddr ); 
- 
+      mcode = RLW (PC);
+
       State.pc_changed = 0;
       
       curr_ins_size = do_run (sd, cpu, mcode);
@@ -1134,7 +679,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
   bfd_vma start_address;
 
   /* reset all state information */
-  memset (&State.regs, 0, (uintptr_t)&State.mem - (uintptr_t)&State.regs);
+  memset (&State, 0, sizeof (State));
 
   /* There was a hack here to copy the values of argc and argv into r0
      and r1.  The values were also saved into some high memory that
