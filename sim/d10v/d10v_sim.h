@@ -273,7 +273,6 @@ struct _state
 } State;
 
 
-extern host_callback *d10v_callback;
 extern uint16 OP[4];
 extern struct simops Simops[];
 

@@ -31,7 +31,6 @@ int d10v_debug;
 
 int old_segment_mapping;
 
-host_callback *d10v_callback;
 unsigned long ins_type_counters[ (int)INS_MAX ];
 
 uint16 OP[4];
@@ -109,7 +108,7 @@ do_long (SIM_DESC sd, SIM_CPU *cpu, uint32 ins)
   struct hash_entry *h;
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
-    (*d10v_callback->printf_filtered) (d10v_callback, "do_long 0x%x\n", ins);
+    sim_io_printf (sd, "do_long 0x%x\n", ins);
 #endif
   h = lookup_hash (sd, cpu, ins, 1);
   if (h == NULL)
@@ -128,8 +127,8 @@ do_2_short (SIM_DESC sd, SIM_CPU *cpu, uint16 ins1, uint16 ins2, enum _leftright
 
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
-    (*d10v_callback->printf_filtered) (d10v_callback, "do_2_short 0x%x (%s) -> 0x%x\n",
-				       ins1, (leftright) ? "left" : "right", ins2);
+    sim_io_printf (sd, "do_2_short 0x%x (%s) -> 0x%x\n", ins1,
+		   leftright ? "left" : "right", ins2);
 #endif
 
   if (leftright == LEFT_FIRST)
@@ -178,7 +177,7 @@ do_parallel (SIM_DESC sd, SIM_CPU *cpu, uint16 ins1, uint16 ins2)
   struct hash_entry *h1, *h2;
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
-    (*d10v_callback->printf_filtered) (d10v_callback, "do_parallel 0x%x || 0x%x\n", ins1, ins2);
+    sim_io_printf (sd, "do_parallel 0x%x || 0x%x\n", ins1, ins2);
 #endif
   ins_type_counters[ (int)INS_PARALLEL ]++;
   h1 = lookup_hash (sd, cpu, ins1, 0);
@@ -301,8 +300,7 @@ set_dmap_register (SIM_DESC sd, int reg_nr, unsigned long value)
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMORY))
     {
-      (*d10v_callback->printf_filtered)
-	(d10v_callback, "mem: dmap%d=0x%04lx\n", reg_nr, value);
+      sim_io_printf (sd, "mem: dmap%d=0x%04lx\n", reg_nr, value);
     }
 #endif
 }
@@ -324,8 +322,7 @@ set_imap_register (SIM_DESC sd, int reg_nr, unsigned long value)
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMORY))
     {
-      (*d10v_callback->printf_filtered)
-	(d10v_callback, "mem: imap%d=0x%04lx\n", reg_nr, value);
+      sim_io_printf (sd, "mem: imap%d=0x%04lx\n", reg_nr, value);
     }
 #endif
 }
@@ -686,10 +683,10 @@ xfer_mem (SIM_DESC sd,
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
     {
-      (*d10v_callback->printf_filtered)
-	(d10v_callback,
+      sim_io_printf
+	(sd,
 	 "sim_%s %d bytes: 0x%08lx (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
-	     (write_p ? "write" : "read"),
+	 write_p ? "write" : "read",
 	 phys_size, virt, last_from,
 	 phys, last_to,
 	 (long) memory, last_segname);
@@ -813,7 +810,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
       CPU_PC_STORE (cpu) = d10v_pc_set;
     }
 
-  d10v_callback = cb;
   old_segment_mapping = 0;
 
   /* NOTE: This argument parsing is only effective when this function
@@ -884,8 +880,8 @@ dmem_addr (SIM_DESC sd, SIM_CPU *cpu, uint16 offset)
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMORY))
     {
-      (*d10v_callback->printf_filtered)
-	(d10v_callback,
+      sim_io_printf
+	(sd,
 	 "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> 0x%08lx (%s)\n",
 	 offset, last_from,
 	 phys, phys_size, last_to,
@@ -908,8 +904,8 @@ imem_addr (SIM_DESC sd, SIM_CPU *cpu, uint32 offset)
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMORY))
     {
-      (*d10v_callback->printf_filtered)
-	(d10v_callback,
+      sim_io_printf
+	(sd,
 	 "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> 0x%08lx (%s)\n",
 	 offset, last_from,
 	 phys, phys_size, last_to,
@@ -1077,69 +1073,69 @@ sim_info (SIM_DESC sd, int verbose)
   int nop_size			= strlen (add_commas (buf1, sizeof (buf1), (left_nops > right_nops) ? left_nops : right_nops));
   int normal_size		= strlen (add_commas (buf1, sizeof (buf1), (left > right) ? left : right));
 
-  (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*s left  instruction(s), %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
-				     size, add_commas (buf1, sizeof (buf1), left_total),
-				     normal_size, add_commas (buf2, sizeof (buf2), left),
-				     parallel_size, add_commas (buf3, sizeof (buf3), left_parallel),
-				     cond_size, add_commas (buf4, sizeof (buf4), left_cond),
-				     nop_size, add_commas (buf5, sizeof (buf5), left_nops));
+  sim_io_printf (sd,
+		 "executed %*s left  instruction(s), %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
+		 size, add_commas (buf1, sizeof (buf1), left_total),
+		 normal_size, add_commas (buf2, sizeof (buf2), left),
+		 parallel_size, add_commas (buf3, sizeof (buf3), left_parallel),
+		 cond_size, add_commas (buf4, sizeof (buf4), left_cond),
+		 nop_size, add_commas (buf5, sizeof (buf5), left_nops));
 
-  (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*s right instruction(s), %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
-				     size, add_commas (buf1, sizeof (buf1), right_total),
-				     normal_size, add_commas (buf2, sizeof (buf2), right),
-				     parallel_size, add_commas (buf3, sizeof (buf3), right_parallel),
-				     cond_size, add_commas (buf4, sizeof (buf4), right_cond),
-				     nop_size, add_commas (buf5, sizeof (buf5), right_nops));
+  sim_io_printf (sd,
+		 "executed %*s right instruction(s), %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
+		 size, add_commas (buf1, sizeof (buf1), right_total),
+		 normal_size, add_commas (buf2, sizeof (buf2), right),
+		 parallel_size, add_commas (buf3, sizeof (buf3), right_parallel),
+		 cond_size, add_commas (buf4, sizeof (buf4), right_cond),
+		 nop_size, add_commas (buf5, sizeof (buf5), right_nops));
 
   if (ins_long)
-    (*d10v_callback->printf_filtered) (d10v_callback,
-				       "executed %*s long instruction(s)\n",
-				       size, add_commas (buf1, sizeof (buf1), ins_long));
+    sim_io_printf (sd,
+		   "executed %*s long instruction(s)\n",
+		   size, add_commas (buf1, sizeof (buf1), ins_long));
 
   if (parallel)
-    (*d10v_callback->printf_filtered) (d10v_callback,
-				       "executed %*s parallel instruction(s)\n",
-				       size, add_commas (buf1, sizeof (buf1), parallel));
+    sim_io_printf (sd,
+		   "executed %*s parallel instruction(s)\n",
+		   size, add_commas (buf1, sizeof (buf1), parallel));
 
   if (leftright)
-    (*d10v_callback->printf_filtered) (d10v_callback,
-				       "executed %*s instruction(s) encoded L->R\n",
-				       size, add_commas (buf1, sizeof (buf1), leftright));
+    sim_io_printf (sd,
+		   "executed %*s instruction(s) encoded L->R\n",
+		   size, add_commas (buf1, sizeof (buf1), leftright));
 
   if (rightleft)
-    (*d10v_callback->printf_filtered) (d10v_callback,
-				       "executed %*s instruction(s) encoded R->L\n",
-				       size, add_commas (buf1, sizeof (buf1), rightleft));
+    sim_io_printf (sd,
+		   "executed %*s instruction(s) encoded R->L\n",
+		   size, add_commas (buf1, sizeof (buf1), rightleft));
 
   if (unknown)
-    (*d10v_callback->printf_filtered) (d10v_callback,
-				       "executed %*s unknown instruction(s)\n",
-				       size, add_commas (buf1, sizeof (buf1), unknown));
+    sim_io_printf (sd,
+		   "executed %*s unknown instruction(s)\n",
+		   size, add_commas (buf1, sizeof (buf1), unknown));
 
   if (cond_true)
-    (*d10v_callback->printf_filtered) (d10v_callback,
-				       "executed %*s instruction(s) due to EXExxx condition being true\n",
-				       size, add_commas (buf1, sizeof (buf1), cond_true));
+    sim_io_printf (sd,
+		   "executed %*s instruction(s) due to EXExxx condition being true\n",
+		   size, add_commas (buf1, sizeof (buf1), cond_true));
 
   if (cond_false)
-    (*d10v_callback->printf_filtered) (d10v_callback,
-				       "skipped  %*s instruction(s) due to EXExxx condition being false\n",
-				       size, add_commas (buf1, sizeof (buf1), cond_false));
+    sim_io_printf (sd,
+		   "skipped  %*s instruction(s) due to EXExxx condition being false\n",
+		   size, add_commas (buf1, sizeof (buf1), cond_false));
 
   if (cond_jump)
-    (*d10v_callback->printf_filtered) (d10v_callback,
-				       "skipped  %*s instruction(s) due to conditional branch succeeding\n",
-				       size, add_commas (buf1, sizeof (buf1), cond_jump));
+    sim_io_printf (sd,
+		   "skipped  %*s instruction(s) due to conditional branch succeeding\n",
+		   size, add_commas (buf1, sizeof (buf1), cond_jump));
 
-  (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*s cycle(s)\n",
-				     size, add_commas (buf1, sizeof (buf1), cycles));
+  sim_io_printf (sd,
+		 "executed %*s cycle(s)\n",
+		 size, add_commas (buf1, sizeof (buf1), cycles));
 
-  (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*s total instructions\n",
-				     size, add_commas (buf1, sizeof (buf1), total));
+  sim_io_printf (sd,
+		 "executed %*s total instructions\n",
+		 size, add_commas (buf1, sizeof (buf1), total));
 }
 
 SIM_RC
@@ -1165,7 +1161,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
     start_address = 0xffc0 << 2;
 #ifdef DEBUG
   if (d10v_debug)
-    (*d10v_callback->printf_filtered) (d10v_callback, "sim_create_inferior:  PC=0x%lx\n", (long) start_address);
+    sim_io_printf (sd, "sim_create_inferior:  PC=0x%lx\n", (long) start_address);
 #endif
   {
     SIM_CPU *cpu = STATE_CPU (sd, 0);

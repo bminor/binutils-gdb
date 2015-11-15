@@ -90,8 +90,8 @@ move_to_cr (SIM_DESC sd, SIM_CPU *cpu, int cr, reg_t mask, reg_t val, int psw_hw
 	{
 	  if (val & PSW_ST_BIT && !(val & PSW_FX_BIT))
 	    {
-	      (*d10v_callback->printf_filtered)
-		(d10v_callback,
+	      sim_io_printf
+		(sd,
 		 "ERROR at PC 0x%x: ST can only be set when FX is set.\n",
 		 PC<<2);
 	      EXCEPTION (SIM_SIGILL);
@@ -188,7 +188,7 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
     }
 
   if ((d10v_debug & DEBUG_LINE_NUMBER) == 0)
-    (*d10v_callback->printf_filtered) (d10v_callback,
+    sim_io_printf (sd,
 				       "0x%.*x %s: %-*s ",
 				       SIZE_PC, (unsigned)PC,
 				       type,
@@ -240,7 +240,7 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
 	    }
 	}
 
-      (*d10v_callback->printf_filtered) (d10v_callback,
+      sim_io_printf (sd,
 					 "0x%.*x %s: %-*.*s %-*s ",
 					 SIZE_PC, (unsigned)PC,
 					 type,
@@ -369,12 +369,12 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
     {
       *p++ = '\n';
       *p = '\0';
-      (*d10v_callback->printf_filtered) (d10v_callback, "%s", buf);
+      sim_io_printf (sd, "%s", buf);
     }
   else
     {
       *p = '\0';
-      (*d10v_callback->printf_filtered) (d10v_callback, "%-*s", SIZE_OPERANDS, buf);
+      sim_io_printf (sd, "%-*s", SIZE_OPERANDS, buf);
 
       p = buf;
       for (i = 0; i < 3; i++)
@@ -383,7 +383,7 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
 	  switch (in[i])
 	    {
 	    case OP_VOID:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s", SIZE_VALUES, "");
+	      sim_io_printf (sd, "%*s", SIZE_VALUES, "");
 	      break;
 
 	    case OP_REG_OUTPUT:
@@ -391,7 +391,7 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
 	    case OP_CR_OUTPUT:
 	    case OP_ACCUM_OUTPUT:
 	    case OP_FLAG_OUTPUT:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s", SIZE_VALUES, "---");
+	      sim_io_printf (sd, "%*s", SIZE_VALUES, "---");
 	      break;
 
 	    case OP_REG:
@@ -399,87 +399,87 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
 	    case OP_POSTDEC:
 	    case OP_POSTINC:
 	    case OP_PREDEC:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16) GPR (OP[i]));
 	      break;
 
 	    case OP_MEMREF3:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "", (uint16) OP[i]);
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "", (uint16) OP[i]);
 	      break;
 
 	    case OP_DREG:
 	      tmp = (long)((((uint32) GPR (OP[i])) << 16) | ((uint32) GPR (OP[i] + 1)));
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.8lx", SIZE_VALUES-10, "", tmp);
+	      sim_io_printf (sd, "%*s0x%.8lx", SIZE_VALUES-10, "", tmp);
 	      break;
 
 	    case OP_CR:
 	    case OP_CR_REVERSE:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16) CREG (OP[i]));
 	      break;
 
 	    case OP_ACCUM:
 	    case OP_ACCUM_REVERSE:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.2x%.8lx", SIZE_VALUES-12, "",
+	      sim_io_printf (sd, "%*s0x%.2x%.8lx", SIZE_VALUES-12, "",
 						 ((int)(ACC (OP[i]) >> 32) & 0xff),
 						 ((unsigned long) ACC (OP[i])) & 0xffffffff);
 	      break;
 
 	    case OP_CONSTANT16:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)OP[i]);
 	      break;
 
 	    case OP_CONSTANT4:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)SEXT4(OP[i]));
 	      break;
 
 	    case OP_CONSTANT8:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)SEXT8(OP[i]));
 	      break;
 
 	    case OP_CONSTANT3:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)SEXT3(OP[i]));
 	      break;
 
 	    case OP_FLAG:
 	      if (OP[i] == 0)
-		(*d10v_callback->printf_filtered) (d10v_callback, "%*sF0 = %d", SIZE_VALUES-6, "",
+		sim_io_printf (sd, "%*sF0 = %d", SIZE_VALUES-6, "",
 						   PSW_F0 != 0);
 
 	      else if (OP[i] == 1)
-		(*d10v_callback->printf_filtered) (d10v_callback, "%*sF1 = %d", SIZE_VALUES-6, "",
+		sim_io_printf (sd, "%*sF1 = %d", SIZE_VALUES-6, "",
 						   PSW_F1 != 0);
 
 	      else
-		(*d10v_callback->printf_filtered) (d10v_callback, "%*sC = %d", SIZE_VALUES-5, "",
+		sim_io_printf (sd, "%*sC = %d", SIZE_VALUES-5, "",
 						   PSW_C != 0);
 
 	      break;
 
 	    case OP_MEMREF2:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)OP[i]);
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)GPR (OP[i + 1]));
 	      i++;
 	      break;
 
 	    case OP_R0:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16) GPR (0));
 	      break;
 
 	    case OP_R1:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16) GPR (1));
 	      break;
 
 	    case OP_R2:
-	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16) GPR (2));
 	      break;
 
@@ -487,24 +487,24 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
 	}
     }
 
-  (*d10v_callback->flush_stdout) (d10v_callback);
+  sim_io_flush_stdout (sd);
 }
 
 static void
 do_trace_output_flush (SIM_DESC sd)
 {
-  (*d10v_callback->flush_stdout) (d10v_callback);
+  sim_io_flush_stdout (sd);
 }
 
 static void
 do_trace_output_finish (SIM_DESC sd)
 {
-  (*d10v_callback->printf_filtered) (d10v_callback,
+  sim_io_printf (sd,
 				     " F0=%d F1=%d C=%d\n",
 				     (State.trace.psw & PSW_F0_BIT) != 0,
 				     (State.trace.psw & PSW_F1_BIT) != 0,
 				     (State.trace.psw & PSW_C_BIT) != 0);
-  (*d10v_callback->flush_stdout) (d10v_callback);
+  sim_io_flush_stdout (sd);
 }
 
 static void
@@ -512,7 +512,7 @@ trace_output_40 (SIM_DESC sd, uint64 val)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*d10v_callback->printf_filtered) (d10v_callback,
+      sim_io_printf (sd,
 					 " :: %*s0x%.2x%.8lx",
 					 SIZE_VALUES - 12,
 					 "",
@@ -527,7 +527,7 @@ trace_output_32 (SIM_DESC sd, uint32 val)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*d10v_callback->printf_filtered) (d10v_callback,
+      sim_io_printf (sd,
 					 " :: %*s0x%.8x",
 					 SIZE_VALUES - 10,
 					 "",
@@ -541,7 +541,7 @@ trace_output_16 (SIM_DESC sd, uint16 val)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*d10v_callback->printf_filtered) (d10v_callback,
+      sim_io_printf (sd,
 					 " :: %*s0x%.4x",
 					 SIZE_VALUES - 6,
 					 "",
@@ -555,7 +555,7 @@ trace_output_void (SIM_DESC sd)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "\n");
+      sim_io_printf (sd, "\n");
       do_trace_output_flush (sd);
     }
 }
@@ -565,7 +565,7 @@ trace_output_flag (SIM_DESC sd)
 {
   if ((d10v_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*d10v_callback->printf_filtered) (d10v_callback,
+      sim_io_printf (sd,
 					 " :: %*s",
 					 SIZE_VALUES,
 					 "");
@@ -1118,7 +1118,7 @@ OP_4E0F (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_5F20 (SIM_DESC sd, SIM_CPU *cpu)
 {
-  /* d10v_callback->printf_filtered(d10v_callback, "***** DBT *****  PC=%x\n",PC); */
+  /* sim_io_printf (sd, "***** DBT *****  PC=%x\n",PC); */
 
   /* GDB uses the instruction pair ``dbt || nop'' as a break-point.
      The conditional below is for either of the instruction pairs
@@ -2202,7 +2202,7 @@ OP_5201 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("rac", OP_DREG_OUTPUT, OP_ACCUM, OP_CONSTANT3);
   if (OP[1] != 0)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback,
+      sim_io_printf (sd,
 					 "ERROR at PC 0x%x: instruction only valid for A0\n",
 					 PC<<2);
       EXCEPTION (SIM_SIGILL);
@@ -2279,12 +2279,12 @@ OP_27000000 (SIM_DESC sd, SIM_CPU *cpu)
   SET_PSW_RP (1);
   if (GPR (OP[0]) == 0)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: rep with count=0 is illegal.\n");
+      sim_io_printf (sd, "ERROR: rep with count=0 is illegal.\n");
       EXCEPTION (SIM_SIGILL);
     }
   if (OP[1] < 4)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: rep must include at least 4 instructions.\n");
+      sim_io_printf (sd, "ERROR: rep must include at least 4 instructions.\n");
       EXCEPTION (SIM_SIGILL);
     }
   trace_output_void (sd);
@@ -2301,12 +2301,12 @@ OP_2F000000 (SIM_DESC sd, SIM_CPU *cpu)
   SET_PSW_RP (1);
   if (OP[0] == 0)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: repi with count=0 is illegal.\n");
+      sim_io_printf (sd, "ERROR: repi with count=0 is illegal.\n");
       EXCEPTION (SIM_SIGILL);
     }
   if (OP[1] < 4)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: repi must include at least 4 instructions.\n");
+      sim_io_printf (sd, "ERROR: repi must include at least 4 instructions.\n");
       EXCEPTION (SIM_SIGILL);
     }
   trace_output_void (sd);
@@ -2455,7 +2455,7 @@ OP_3220 (SIM_DESC sd, SIM_CPU *cpu)
 
   if (reg >= 17 || reg <= -17)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", reg);
+      sim_io_printf (sd, "ERROR: shift value %d too large.\n", reg);
       EXCEPTION (SIM_SIGILL);
     }
 
@@ -2463,7 +2463,7 @@ OP_3220 (SIM_DESC sd, SIM_CPU *cpu)
 
   if (PSW_ST && (tmp < SEXT40 (MIN32) || tmp > SEXT40 (MAX32)))
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: accumulator value 0x%.2x%.8lx out of range\n", ((int)(tmp >> 32) & 0xff), ((unsigned long) tmp) & 0xffffffff);
+      sim_io_printf (sd, "ERROR: accumulator value 0x%.2x%.8lx out of range\n", ((int)(tmp >> 32) & 0xff), ((unsigned long) tmp) & 0xffffffff);
       EXCEPTION (SIM_SIGILL);
     }
 
@@ -2522,7 +2522,7 @@ OP_3200 (SIM_DESC sd, SIM_CPU *cpu)
     tmp = SEXT40 (ACC (OP[0])) << (GPR (OP[1]) & 31);
   else
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", GPR (OP[1]) & 31);
+      sim_io_printf (sd, "ERROR: shift value %d too large.\n", GPR (OP[1]) & 31);
       EXCEPTION (SIM_SIGILL);
     }
 
@@ -2614,7 +2614,7 @@ OP_3400 (SIM_DESC sd, SIM_CPU *cpu)
     }
   else
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", GPR (OP[1]) & 31);
+      sim_io_printf (sd, "ERROR: shift value %d too large.\n", GPR (OP[1]) & 31);
       EXCEPTION (SIM_SIGILL);
     }
 }
@@ -2668,7 +2668,7 @@ OP_3000 (SIM_DESC sd, SIM_CPU *cpu)
     }
   else
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", GPR (OP[1]) & 31);
+      sim_io_printf (sd, "ERROR: shift value %d too large.\n", GPR (OP[1]) & 31);
       EXCEPTION (SIM_SIGILL);
     }
 
@@ -2750,7 +2750,7 @@ OP_6C1F (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st", OP_REG, OP_PREDEC, OP_VOID);
   if (OP[1] != 15)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot pre-decrement any registers but r15 (SP).\n");
+      sim_io_printf (sd, "ERROR: cannot pre-decrement any registers but r15 (SP).\n");
       EXCEPTION (SIM_SIGILL);
     }
   if ((addr & 1))
@@ -2787,7 +2787,7 @@ OP_6C01 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st", OP_REG, OP_POSTDEC, OP_VOID);
   if ( OP[1] == 15 )
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
+      sim_io_printf (sd, "ERROR: cannot post-decrement register r15 (SP).\n");
       EXCEPTION (SIM_SIGILL);
     }
   if ((addr & 1))
@@ -2855,7 +2855,7 @@ OP_6E1F (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st2w", OP_DREG, OP_PREDEC, OP_VOID);
   if ( OP[1] != 15 )
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot pre-decrement any registers but r15 (SP).\n");
+      sim_io_printf (sd, "ERROR: cannot pre-decrement any registers but r15 (SP).\n");
       EXCEPTION (SIM_SIGILL);
     }
   if ((addr & 1))
@@ -2894,7 +2894,7 @@ OP_6E01 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("st2w", OP_DREG, OP_POSTDEC, OP_VOID);
   if ( OP[1] == 15 )
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
+      sim_io_printf (sd, "ERROR: cannot post-decrement register r15 (SP).\n");
       EXCEPTION (SIM_SIGILL);
     }
   if ((addr & 1))
@@ -3133,6 +3133,8 @@ OP_1 (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 {
+  host_callback *cb = STATE_CALLBACK (sd);
+
   trace_input ("trap", OP_CONSTANT4, OP_VOID, OP_VOID);
   trace_output_void (sd);
 
@@ -3156,25 +3158,25 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	if (first_time)
 	  {
 	    first_time = 0;
-	    (*d10v_callback->printf_filtered) (d10v_callback, "Trap  #     PC ");
+	    sim_io_printf (sd, "Trap  #     PC ");
 	    for (i = 0; i < 16; i++)
-	      (*d10v_callback->printf_filtered) (d10v_callback, "  %sr%d", (i > 9) ? "" : " ", i);
-	    (*d10v_callback->printf_filtered) (d10v_callback, "         a0         a1 f0 f1 c\n");
+	      sim_io_printf (sd, "  %sr%d", (i > 9) ? "" : " ", i);
+	    sim_io_printf (sd, "         a0         a1 f0 f1 c\n");
 	  }
 
-	(*d10v_callback->printf_filtered) (d10v_callback, "Trap %2d 0x%.4x:", (int)OP[0], (int)PC);
+	sim_io_printf (sd, "Trap %2d 0x%.4x:", (int)OP[0], (int)PC);
 
 	for (i = 0; i < 16; i++)
-	  (*d10v_callback->printf_filtered) (d10v_callback, " %.4x", (int) GPR (i));
+	  sim_io_printf (sd, " %.4x", (int) GPR (i));
 
 	for (i = 0; i < 2; i++)
-	  (*d10v_callback->printf_filtered) (d10v_callback, " %.2x%.8lx",
+	  sim_io_printf (sd, " %.2x%.8lx",
 					     ((int)(ACC (i) >> 32) & 0xff),
 					     ((unsigned long) ACC (i)) & 0xffffffff);
 
-	(*d10v_callback->printf_filtered) (d10v_callback, "  %d  %d %d\n",
+	sim_io_printf (sd, "  %d  %d %d\n",
 					   PSW_F0 != 0, PSW_F1 != 0, PSW_C != 0);
-	(*d10v_callback->flush_stdout) (d10v_callback);
+	sim_io_flush_stdout (sd);
 	break;
       }
 #endif
@@ -3334,8 +3336,8 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 		if (os_sig == -1)
 		  {
 		    trace_output_void (sd);
-		    (*d10v_callback->printf_filtered) (d10v_callback, "Unknown signal %d\n", PARM2);
-		    (*d10v_callback->flush_stdout) (d10v_callback);
+		    sim_io_printf (sd, "Unknown signal %d\n", PARM2);
+		    sim_io_flush_stdout (sd);
 		    EXCEPTION (SIM_SIGILL);
 		  }
 		else
@@ -3406,40 +3408,37 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 
 	  case TARGET_SYS_read:
 	    trace_input ("<read>", OP_R0, OP_R1, OP_R2);
-	    RETVAL (d10v_callback->read (d10v_callback, PARM1, MEMPTR (PARM2),
-					  PARM3));
+	    RETVAL (cb->read (cb, PARM1, MEMPTR (PARM2), PARM3));
 	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_write:
 	    trace_input ("<write>", OP_R0, OP_R1, OP_R2);
 	    if (PARM1 == 1)
-	      RETVAL ((int)d10v_callback->write_stdout (d10v_callback,
-							 MEMPTR (PARM2), PARM3));
+	      RETVAL ((int)cb->write_stdout (cb, MEMPTR (PARM2), PARM3));
 	    else
-	      RETVAL ((int)d10v_callback->write (d10v_callback, PARM1,
-						  MEMPTR (PARM2), PARM3));
+	      RETVAL ((int)cb->write (cb, PARM1, MEMPTR (PARM2), PARM3));
 	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_lseek:
 	    trace_input ("<lseek>", OP_R0, OP_R1, OP_R2);
-	    RETVAL32 (d10v_callback->lseek (d10v_callback, PARM1,
-					    ((((unsigned long) PARM2) << 16)
-					     || (unsigned long) PARM3),
-					    PARM4));
+	    RETVAL32 (cb->lseek (cb, PARM1,
+				 ((((unsigned long) PARM2) << 16)
+				  || (unsigned long) PARM3),
+				 PARM4));
 	    trace_output_32 (sd, result);
 	    break;
 
 	  case TARGET_SYS_close:
 	    trace_input ("<close>", OP_R0, OP_VOID, OP_VOID);
-	    RETVAL (d10v_callback->close (d10v_callback, PARM1));
+	    RETVAL (cb->close (cb, PARM1));
 	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_open:
 	    trace_input ("<open>", OP_R0, OP_R1, OP_R2);
-	    RETVAL (d10v_callback->open (d10v_callback, MEMPTR (PARM1), PARM2));
+	    RETVAL (cb->open (cb, MEMPTR (PARM1), PARM2));
 	    trace_output_16 (sd, result);
 	    break;
 
@@ -3515,10 +3514,10 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 #endif
 	    
 	  default:
-	    d10v_callback->error (d10v_callback, "Unknown syscall %d", FUNC);
+	    cb->error (cb, "Unknown syscall %d", FUNC);
 	  }
 	if ((uint16) result == (uint16) -1)
-	  RETERR (d10v_callback->get_errno(d10v_callback));
+	  RETERR (cb->get_errno (cb));
 	else
 	  RETERR (0);
 	break;

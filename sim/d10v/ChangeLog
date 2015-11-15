@@ -1,5 +1,23 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* d10v_sim.h (d10v_callback): Delete.
+	* interp.c (d10v_callback): Delete.
+	(do_long, do_2_short, do_parallel, set_dmap_register,
+	set_imap_register, xfer_mem, dmem_addr, imem_addr, sim_info,
+	sim_create_inferior): Replace d10v_callback->printf_filtered
+	with sim_io_printf.
+	(sim_open): Delete d10v_callback assignment.
+	* simops.c (move_to_cr, trace_input_func, do_trace_output_flush,
+	do_trace_output_finish, trace_output_40, trace_output_32,
+	trace_output_16, trace_output_void, trace_output_flag, OP_5F20,
+	OP_5201, OP_27000000, OP_3220, OP_3400, OP_3000, OP_6C1F, OP_6C01,
+	OP_6E1F, OP_6E01): Replace d10v_callback->printf_filtered with
+	sim_io_printf and d10v_callback->flush_stdout with
+	sim_io_flush_stdout.
+	(OP_5F00): Likewise.  Rename d10v_callback to cb.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Add sim-reason.o, sim-resume.o, and
 	sim-stop.o.
 	* d10v_sim.h (struct d10v_memory): Delete fault member.
