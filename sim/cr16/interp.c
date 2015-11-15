@@ -91,11 +91,7 @@ lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint64 ins, int size)
   while ((ins & mask) != (BIN(h->opcode, h->mask)))
     {
       if (h->next == NULL)
-        {
-          State.exception = SIGILL;
-          State.pc_changed = 1; /* Don't increment the PC. */
-          return NULL;
-        }
+	sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, SIM_SIGILL);
       h = h->next;
 
       mask = (((1 << (32 - h->mask)) -1) << h->mask);
@@ -331,9 +327,8 @@ static int
 do_run (SIM_DESC sd, SIM_CPU *cpu, uint64 mcode)
 {
   host_callback *cr16_callback = STATE_CALLBACK (sd);
-  struct simops *s= Simops;
   struct hash_entry *h;
-  char func[12]="\0";
+
 #ifdef DEBUG
   if ((cr16_debug & DEBUG_INSTRUCTION) != 0)
     (*cr16_callback->printf_filtered) (cr16_callback, "do_long 0x%x\n", mcode);
@@ -579,46 +574,64 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd,
   return sd;
 }
 
-static int stop_simulator = 0;
-
-int
-sim_stop (SIM_DESC sd)
+static void
+step_once (SIM_DESC sd, SIM_CPU *cpu)
 {
-  stop_simulator = 1;
-  return 1;
-}
-
-
-/* Run (or resume) the program.  */
-void
-sim_resume (SIM_DESC sd, int step, int siggnal)
-{
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
   uint32 curr_ins_size = 0;
-  uint64 mcode;
+  uint64 mcode = RLW (PC);
 
-#ifdef DEBUG
-//  (*cr16_callback->printf_filtered) (cr16_callback, "sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); 
+  State.pc_changed = 0;
+
+  curr_ins_size = do_run (sd, cpu, mcode);
+
+#if CR16_DEBUG
+  (*cr16_callback->printf_filtered) (cr16_callback, "INS: PC=0x%X, mcode=0x%X\n", PC, mcode);
 #endif
 
-  State.exception = 0;
-  if (step)
-    sim_stop (sd);
+  if (curr_ins_size == 0)
+    sim_engine_halt (sd, cpu, NULL, PC, sim_exited, GPR (2));
+  else if (!State.pc_changed)
+    SET_PC (PC + (curr_ins_size * 2)); /* For word instructions.  */
+
+#if 0
+  /* Check for a breakpoint trap on this instruction.  This
+     overrides any pending branches or loops */
+  if (PSR_DB && PC == DBS)
+    {
+      SET_BPC (PC);
+      SET_BPSR (PSR);
+      SET_PC (SDBT_VECTOR_START);
+    }
+#endif
+
+  /* Writeback all the DATA / PC changes */
+  SLOT_FLUSH ();
+}
+
+void
+sim_engine_run (SIM_DESC sd,
+		int next_cpu_nr,  /* ignore  */
+		int nr_cpus,      /* ignore  */
+		int siggnal)
+{
+  sim_cpu *cpu;
+
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  cpu = STATE_CPU (sd, 0);
 
   switch (siggnal)
     {
     case 0:
       break;
-#ifdef SIGBUS
-    case SIGBUS:
-#endif
-    case SIGSEGV:
+    case GDB_SIGNAL_BUS:
+    case GDB_SIGNAL_SEGV:
       SET_PC (PC);
       SET_PSR (PSR);
       JMP (AE_VECTOR_START);
       SLOT_FLUSH ();
       break;
-    case SIGILL:
+    case GDB_SIGNAL_ILL:
       SET_PC (PC);
       SET_PSR (PSR);
       SET_HW_PSR ((PSR & (PSR_C_BIT)));
@@ -630,47 +643,12 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
       break;
     }
 
-  do
+  while (1)
     {
-      mcode = RLW (PC);
-
-      State.pc_changed = 0;
-      
-      curr_ins_size = do_run (sd, cpu, mcode);
-
-#if CR16_DEBUG
- (*cr16_callback->printf_filtered) (cr16_callback, "INS: PC=0x%X, mcode=0x%X\n",PC,mcode); 
-#endif
-
-      if (!State.pc_changed)
-        {
-          if (curr_ins_size == 0) 
-           {
-             State.exception = SIG_CR16_EXIT; /* exit trap */
-             break;
-           }
-          else
-           SET_PC (PC + (curr_ins_size * 2)); /* For word instructions.  */
-        }
-
-#if 0
-      /* Check for a breakpoint trap on this instruction.  This
-         overrides any pending branches or loops */
-      if (PSR_DB && PC == DBS)
-        {
-          SET_BPC (PC);
-          SET_BPSR (PSR);
-          SET_PC (SDBT_VECTOR_START);
-        }
-#endif
-
-      /* Writeback all the DATA / PC changes */
-      SLOT_FLUSH ();
+      step_once (sd, cpu);
+      if (sim_events_tick (sd))
+	sim_events_process (sd);
     }
-  while ( !State.exception && !stop_simulator);
-  
-  if (step && !State.exception)
-    State.exception = SIGTRAP;
 }
 
 SIM_RC
@@ -705,45 +683,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 
   SLOT_FLUSH ();
   return SIM_RC_OK;
-}
-
-void
-sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
-{
-/*   (*cr16_callback->printf_filtered) (cr16_callback, "sim_stop_reason:  PC=0x%x\n",PC<<2); */
-
-  switch (State.exception)
-    {
-    case SIG_CR16_STOP:                        /* stop instruction */
-      *reason = sim_stopped;
-      *sigrc = 0;
-      break;
-
-    case SIG_CR16_EXIT:                        /* exit trap */
-      *reason = sim_exited;
-      *sigrc = GPR (2);
-      break;
-
-    case SIG_CR16_BUS:
-      *reason = sim_stopped;
-      *sigrc = GDB_SIGNAL_BUS;
-      break;
-//
-//    case SIG_CR16_IAD:
-//      *reason = sim_stopped;
-//      *sigrc = GDB_SIGNAL_IAD;
-//      break;
-
-    default:                                /* some signal */
-      *reason = sim_stopped;
-      if (stop_simulator && !State.exception)
-        *sigrc = GDB_SIGNAL_INT;
-      else
-        *sigrc = State.exception;
-      break;
-    }
-
-  stop_simulator = 0;
 }
 
 static uint32

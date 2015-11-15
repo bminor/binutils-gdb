@@ -1,5 +1,27 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Add sim-reason.o, sim-resume.o, and
+	sim-stop.o.
+	* cr16_sim.h (struct _state): Delete exe and exception.
+	* interp.c (lookup_hash): Call sim_engine_halt instead of setting
+	State.exception.
+	(do_run): Delete unused s and func variables.
+	(stop_simulator, sim_stop, sim_stop_reason): Delete.
+	(sim_resume): Rename to ...
+	(step_once): ... this.  Delete State.exception code and move
+	siggnal checking to sim_engine_run.
+	(sim_engine_run): New function.
+	* simops.c (EXCEPTION): Define.
+	(move_to_cr): Call EXCEPTION instead of setting State.exception.
+	(OP_1_4, OP_18_8, OP_10_10, OP_C0_8, OP_102_14, OP_148_14, OP_D_C,
+	OP_14_D, OP_15_D, OP_2C00_10, OP_16_D, OP_17_D, OP_31E_10, OP_6_10):
+	Likewise.
+	(OP_C_C): Likewise.  Call sim_engine_halt instead of setting
+	State.exception.
+	(OP_0_20): Call sim_engine_halt instead of setting State.exception.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Delete endian.o.
 	(INCLUDE): Delete endian.c.
 	* configure.ac (SIM_AC_OPTION_ENDIAN): Declare little endian.

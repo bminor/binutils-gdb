@@ -236,8 +236,6 @@ struct _state
     uint16 psw;
   } trace;
 
-  uint8 exe;
-  int	exception;
   int	pc_changed;
 
   /* NOTE: everything below this line is not reset by

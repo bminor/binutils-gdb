@@ -48,6 +48,8 @@
 #include <sys/wait.h>
 #endif
 
+#define EXCEPTION(sig) sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, sig)
+
 enum op_types {
   OP_VOID,
   OP_CONSTANT3,
@@ -184,7 +186,7 @@ move_to_cr (SIM_DESC sd, SIM_CPU *cpu, int cr, creg_t mask, creg_t val, int psw_
 	      (*cr16_callback->printf_filtered)
 		(cr16_callback,
 		 "ERROR at PC 0x%x: ST can only be set when FX is set.\n", PC);
-	      State.exception = SIGILL;
+	  EXCEPTION (SIM_SIGILL);
 #endif
       /* keep an up-to-date psw around for tracing.  */
       State.trace.psw = (State.trace.psw & mask) | val;
@@ -999,10 +1001,8 @@ OP_1_4 (SIM_DESC sd, SIM_CPU *cpu)
 
       if ((tmp < 0x000000) || (tmp > 0xFFFFFF))
         {
-          State.exception = SIG_CR16_BUS;
-          State.pc_changed = 1; /* Don't increment the PC. */
           trace_output_void (sd);
-          return;
+          EXCEPTION (SIM_SIGBUS);
         }
       else
         JMP (tmp);
@@ -1028,10 +1028,8 @@ OP_18_8 (SIM_DESC sd, SIM_CPU *cpu)
 
       if ((tmp < 0x000000) || (tmp > 0xFFFFFF))
         {
-          State.exception = SIG_CR16_BUS;
-          State.pc_changed = 1; /* Don't increment the PC. */
           trace_output_void (sd);
-          return;
+          EXCEPTION (SIM_SIGBUS);
         }
       else
         JMP (tmp);
@@ -1057,10 +1055,8 @@ OP_10_10 (SIM_DESC sd, SIM_CPU *cpu)
 
       if ((tmp < 0x000000) || (tmp > 0xFFFFFF))
         {
-          State.exception = SIG_CR16_BUS;
-          State.pc_changed = 1; /* Don't increment the PC. */
           trace_output_void (sd);
-          return;
+          EXCEPTION (SIM_SIGBUS);
         }
       else
         JMP (tmp);
@@ -1087,10 +1083,8 @@ OP_C0_8 (SIM_DESC sd, SIM_CPU *cpu)
 
   if ((tmp < 0x000000) || (tmp > 0xFFFFFF))
     {
-      State.exception = SIG_CR16_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   else
     JMP (tmp);
@@ -1116,10 +1110,8 @@ OP_102_14 (SIM_DESC sd, SIM_CPU *cpu)
 
   if ((tmp < 0x000000) || (tmp > 0xFFFFFF))
     {
-      State.exception = SIG_CR16_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   else
     JMP (tmp);
@@ -1141,10 +1133,8 @@ OP_148_14 (SIM_DESC sd, SIM_CPU *cpu)
 
   if ((tmp < 0x0) || (tmp > 0xFFFFFF))
     {
-      State.exception = SIG_CR16_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   else
     JMP (tmp);
@@ -1167,10 +1157,8 @@ OP_D_C (SIM_DESC sd, SIM_CPU *cpu)
 
   if ((tmp < 0x0) || (tmp > 0xFFFFFF))
     {
-      State.exception = SIG_CR16_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   else
     JMP (tmp);
@@ -2722,10 +2710,8 @@ OP_14_D (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("loadm", OP_CONSTANT4, OP_VOID, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_CR16_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
 
   while (count)
@@ -2752,10 +2738,8 @@ OP_15_D (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("loadm", OP_CONSTANT4, OP_VOID, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_CR16_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
 
   while (count)
@@ -4359,7 +4343,6 @@ OP_2C00_10 (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("nop", OP_VOID, OP_VOID, OP_VOID);
 
 #if 0
-  State.exception = SIGTRAP;
   ins_type_counters[ (int)State.ins_type ]--;	/* don't count nops as normal instructions */
   switch (State.ins_type)
     {
@@ -4368,7 +4351,7 @@ OP_2C00_10 (SIM_DESC sd, SIM_CPU *cpu)
       break;
 
     }
-
+  EXCEPTION (SIM_SIGTRAP);
 #endif
   trace_output_void (sd);
 }
@@ -4789,10 +4772,8 @@ OP_16_D (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("storm", OP_CONSTANT4, OP_VOID, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_CR16_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
 
   while (count)
@@ -4819,10 +4800,8 @@ OP_17_D (SIM_DESC sd, SIM_CPU *cpu)
   trace_input ("stormp", OP_CONSTANT4, OP_VOID, OP_VOID);
   if ((addr & 1))
     {
-      State.exception = SIG_CR16_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
 
   while (count)
@@ -5168,7 +5147,7 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 	    if (PARM1 == getpid ())
 	      {
 		trace_output_void (sd);
-		State.exception = PARM2;
+		EXCEPTION (PARM2);
 	      }
 	    else
 	      {
@@ -5281,7 +5260,7 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 		    trace_output_void (sd);
 		    (*cr16_callback->printf_filtered) (cr16_callback, "Unknown signal %d\n", PARM2);
 		    (*cr16_callback->flush_stdout) (cr16_callback);
-		    State.exception = SIGILL;
+		    EXCEPTION (SIM_SIGILL);
 		  }
 		else
 		  {
@@ -5347,7 +5326,7 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 	  case TARGET_SYS_kill:
 	    trace_input ("<kill>", OP_REG, OP_REG, OP_VOID);
 	    trace_output_void (sd);
-	    State.exception = PARM2;
+	    EXCEPTION (PARM2);
 	    break;
 #endif
 
@@ -5406,8 +5385,8 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 
 	  case TARGET_SYS_exit:
 	    trace_input ("<exit>", OP_VOID, OP_VOID, OP_VOID);
-	    State.exception = SIG_CR16_EXIT;
 	    trace_output_void (sd);
+	    sim_engine_halt (sd, cpu, NULL, PC, sim_exited, GPR (2));
 	    break;
 
 	  case TARGET_SYS_unlink:
@@ -5486,14 +5465,14 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 	    switch (a)
 	    {
 	      case TRAP_BREAKPOINT:
-		State.exception = SIGTRAP;
 		tmp = (PC);
 		JMP(tmp);
 		trace_output_void (sd);
+		EXCEPTION (SIM_SIGTRAP);
 		break;
 	      case SIGTRAP:  /* supervisor call ?  */
-		State.exception = SIG_CR16_EXIT;
 		trace_output_void (sd);
+		sim_engine_halt (sd, cpu, NULL, PC, sim_exited, GPR (2));
 		break;
 	      default:
 		cr16_callback->error (cr16_callback, "Unknown syscall %d", FUNC);
@@ -5789,10 +5768,8 @@ OP_31E_10 (SIM_DESC sd, SIM_CPU *cpu)
 
   if ((tmp < 0x0) || (tmp > 0xFFFFFF))
     {
-      State.exception = SIG_CR16_BUS;
-      State.pc_changed = 1; /* Don't increment the PC. */
       trace_output_void (sd);
-      return;
+      EXCEPTION (SIM_SIGBUS);
     }
   else
     JMP (tmp);
@@ -5887,8 +5864,8 @@ void
 OP_6_10 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("wait", OP_VOID, OP_VOID, OP_VOID);
-  State.exception = SIGTRAP;
   trace_output_void (sd);
+  EXCEPTION (SIM_SIGTRAP);
 }
 
 /* ewait.  */
@@ -6013,5 +5990,5 @@ void
 OP_0_20 (SIM_DESC sd, SIM_CPU *cpu)
 {
   trace_input ("null", OP_VOID, OP_VOID, OP_VOID);
-  State.exception = SIG_CR16_STOP;
+  sim_engine_halt (sd, cpu, NULL, PC, sim_exited, 0);
 }
