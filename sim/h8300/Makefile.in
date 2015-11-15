@@ -18,8 +18,7 @@
 ## COMMON_PRE_CONFIG_FRAG
 
 SIM_OBJS = compile.o \
-	   $(SIM_NEW_COMMON_OBJS) \
-	   sim-load.o
+	   $(SIM_NEW_COMMON_OBJS)
 
 ## COMMON_POST_CONFIG_FRAG
 

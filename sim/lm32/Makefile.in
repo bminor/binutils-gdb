@@ -9,7 +9,6 @@ SIM_OBJS = \
 	sim-hload.o \
 	sim-model.o \
 	sim-reg.o \
-	sim-signal.o \
         cgen-utils.o cgen-trace.o cgen-scache.o \
         cgen-run.o sim-reason.o sim-stop.o \
         sim-if.o arch.o \

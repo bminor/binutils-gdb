@@ -1,5 +1,9 @@
 2015-11-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Delete sim-load.o.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (sim_close): Delete.
 
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>

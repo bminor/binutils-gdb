@@ -1,5 +1,9 @@
 2015-11-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Delete sim-signal.o.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-if.c (sim_close): Delete.
 
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
