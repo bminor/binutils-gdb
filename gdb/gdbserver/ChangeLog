@@ -1,6 +1,87 @@
 2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	PR 18377
+	* linux-s390-low.c (add_insns): New function.
+	(s390_emit_prologue): New function.
+	(s390_emit_epilogue): New function.
+	(s390_emit_add): New function.
+	(s390_emit_sub): New function.
+	(s390_emit_mul): New function.
+	(s390_emit_lsh): New function.
+	(s390_emit_rsh_signed): New function.
+	(s390_emit_rsh_unsigned): New function.
+	(s390_emit_ext): New function.
+	(s390_emit_log_not): New function.
+	(s390_emit_bit_and): New function.
+	(s390_emit_bit_or): New function.
+	(s390_emit_bit_xor): New function.
+	(s390_emit_bit_not): New function.
+	(s390_emit_equal): New function.
+	(s390_emit_less_signed): New function.
+	(s390_emit_less_unsigned): New function.
+	(s390_emit_ref): New function.
+	(s390_emit_if_goto): New function.
+	(s390_emit_goto): New function.
+	(s390_write_goto_address): New function.
+	(s390_emit_litpool): New function.
+	(s390_emit_const): New function.
+	(s390_emit_call): New function.
+	(s390_emit_reg): New function.
+	(s390_emit_pop): New function.
+	(s390_emit_stack_flush): New function.
+	(s390_emit_zero_ext): New function.
+	(s390_emit_swap): New function.
+	(s390_emit_stack_adjust): New function.
+	(s390_emit_set_r2): New function.
+	(s390_emit_int_call_1): New function.
+	(s390_emit_void_call_2): New function.
+	(s390_emit_eq_goto): New function.
+	(s390_emit_ne_goto): New function.
+	(s390_emit_lt_goto): New function.
+	(s390_emit_le_goto): New function.
+	(s390_emit_gt_goto): New function.
+	(s390_emit_ge_goto): New function.
+	(s390x_emit_prologue): New function.
+	(s390x_emit_epilogue): New function.
+	(s390x_emit_add): New function.
+	(s390x_emit_sub): New function.
+	(s390x_emit_mul): New function.
+	(s390x_emit_lsh): New function.
+	(s390x_emit_rsh_signed): New function.
+	(s390x_emit_rsh_unsigned): New function.
+	(s390x_emit_ext): New function.
+	(s390x_emit_log_not): New function.
+	(s390x_emit_bit_and): New function.
+	(s390x_emit_bit_or): New function.
+	(s390x_emit_bit_xor): New function.
+	(s390x_emit_bit_not): New function.
+	(s390x_emit_equal): New function.
+	(s390x_emit_less_signed): New function.
+	(s390x_emit_less_unsigned): New function.
+	(s390x_emit_ref): New function.
+	(s390x_emit_if_goto): New function.
+	(s390x_emit_const): New function.
+	(s390x_emit_call): New function.
+	(s390x_emit_reg): New function.
+	(s390x_emit_pop): New function.
+	(s390x_emit_stack_flush): New function.
+	(s390x_emit_zero_ext): New function.
+	(s390x_emit_swap): New function.
+	(s390x_emit_stack_adjust): New function.
+	(s390x_emit_int_call_1): New function.
+	(s390x_emit_void_call_2): New function.
+	(s390x_emit_eq_goto): New function.
+	(s390x_emit_ne_goto): New function.
+	(s390x_emit_lt_goto): New function.
+	(s390x_emit_le_goto): New function.
+	(s390x_emit_gt_goto): New function.
+	(s390x_emit_ge_goto): New function.
+	(s390_emit_ops): New function.
+	(struct linux_target_ops): Fill in emit_ops hook.
+
+2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	PR 18377
 	* Makefile.in: Add s390 IPA files.
 	* configure.srv: Build IPA for s390.
 	* linux-s390-ipa.c: New file.

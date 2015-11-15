@@ -22,6 +22,8 @@
 #include "server.h"
 #include "linux-low.h"
 #include "elf/common.h"
+#include "ax.h"
+#include "tracepoint.h"
 
 #include <asm/ptrace.h>
 #include "nat/gdb_ptrace.h"
@@ -1401,6 +1403,1348 @@ s390_get_ipa_tdesc_idx (void)
   return 0;
 }
 
+/* Appends given buffer to current_insn_ptr in the target.  */
+
+static void
+add_insns (const unsigned char *start, int len)
+{
+  CORE_ADDR buildaddr = current_insn_ptr;
+
+  if (debug_threads)
+    debug_printf ("Adding %d bytes of insn at %s\n",
+		  len, paddress (buildaddr));
+
+  append_insns (&buildaddr, len, start);
+  current_insn_ptr = buildaddr;
+}
+
+/* Register usage in emit:
+
+   - %r0, %r1: temp
+   - %r2: top of stack (high word for 31-bit)
+   - %r3: low word of top of stack (for 31-bit)
+   - %r4, %r5: temp
+   - %r6, %r7, %r8: don't use
+   - %r9: saved arg1
+   - %r10: saved arg2
+   - %r11: frame pointer
+   - %r12: saved top of stack for void_call_2 (high word for 31-bit)
+   - %r13: low word of saved top of stack (for 31-bit)
+   - %r14: return address for calls
+   - %r15: stack pointer
+
+  */
+
+/* The "emit_prologue" emit_ops method for s390.  */
+
+static void
+s390_emit_prologue (void)
+{
+  static const unsigned char buf[] = {
+    0x90, 0x9f, 0xf0, 0x24,		/* stm %r9, %r15, 0x24(%r15) */
+    0x18, 0x92,				/* lr %r9, %r2 */
+    0x18, 0xa3,				/* lr %r10, %r3 */
+    0x18, 0xbf,				/* lr %r11, %r15 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_epilogue" emit_ops method for s390.  */
+
+static void
+s390_emit_epilogue (void)
+{
+  static const unsigned char buf[] = {
+    0x90, 0x23, 0xa0, 0x00,		/* stm %r2, %r3, 0(%r10) */
+    0xa7, 0x28, 0x00, 0x00,		/* lhi %r2, 0 */
+    0x98, 0x9f, 0xb0, 0x24,		/* lm %r9, %r15, 0x24(%r11) */
+    0x07, 0xfe,				/* br %r14 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_add" emit_ops method for s390.  */
+
+static void
+s390_emit_add (void)
+{
+  static const unsigned char buf[] = {
+    0x5e, 0x30, 0xf0, 0x04,		/* al %r3, 4(%r15) */
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x98,	/* al %r2, 0(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_sub" emit_ops method for s390.  */
+
+static void
+s390_emit_sub (void)
+{
+  static const unsigned char buf[] = {
+    0x98, 0x45, 0xf0, 0x00,	/* lm %r4, %r5, 0(%r15) */
+    0x1f, 0x53,			/* slr %r5, %r3 */
+    0xb9, 0x99, 0x00, 0x42,	/* slbr %r4, %r2 */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+    0x18, 0x35,			/* lr %r3, %r5 */
+    0x18, 0x24,			/* lr %r2, %r4 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_mul" emit_ops method for s390.  */
+
+static void
+s390_emit_mul (void)
+{
+  emit_error = 1;
+}
+
+/* The "emit_lsh" emit_ops method for s390.  */
+
+static void
+s390_emit_lsh (void)
+{
+  static const unsigned char buf[] = {
+    0x18, 0x43,			/* lr %r4, %r3 */
+    0x98, 0x23, 0xf0, 0x00,	/* lm %r2, %r3, 0(%r15) */
+    0x8d, 0x20, 0x40, 0x00,	/* sldl %r2, 0(%r4) */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_rsh_signed" emit_ops method for s390.  */
+
+static void
+s390_emit_rsh_signed (void)
+{
+  static const unsigned char buf[] = {
+    0x18, 0x43,			/* lr %r4, %r3 */
+    0x98, 0x23, 0xf0, 0x00,	/* lm %r2, %r3, 0(%r15) */
+    0x8e, 0x20, 0x40, 0x00,	/* srda %r2, 0(%r4) */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_rsh_unsigned" emit_ops method for s390.  */
+
+static void
+s390_emit_rsh_unsigned (void)
+{
+  static const unsigned char buf[] = {
+    0x18, 0x43,			/* lr %r4, %r3 */
+    0x98, 0x23, 0xf0, 0x00,	/* lm %r2, %r3, 0(%r15) */
+    0x8c, 0x20, 0x40, 0x00,	/* srdl %r2, 0(%r4) */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_ext" emit_ops method for s390.  */
+
+static void
+s390_emit_ext (int arg)
+{
+  unsigned char buf[] = {
+    0x8d, 0x20, 0x00, 64 - arg,	/* sldl %r2, <64-arg> */
+    0x8e, 0x20, 0x00, 64 - arg,	/* srda %r2, <64-arg> */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_log_not" emit_ops method for s390.  */
+
+static void
+s390_emit_log_not (void)
+{
+  static const unsigned char buf[] = {
+    0x16, 0x23,			/* or %r2, %r3 */
+    0xa7, 0x28, 0x00, 0x00,	/* lhi %r2, 0 */
+    0xa7, 0x38, 0x00, 0x00,	/* lhi %r3, 0 */
+    0xa7, 0x74, 0x00, 0x04,	/* jne .Lskip */
+    0xa7, 0x38, 0x00, 0x01,	/* lhi %r3, 1 */
+    /* .Lskip: */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_bit_and" emit_ops method for s390.  */
+
+static void
+s390_emit_bit_and (void)
+{
+  static const unsigned char buf[] = {
+    0x54, 0x20, 0xf0, 0x00,	/* n %r2, 0(%r15) */
+    0x54, 0x30, 0xf0, 0x04,	/* n %r3, 4(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_bit_or" emit_ops method for s390.  */
+
+static void
+s390_emit_bit_or (void)
+{
+  static const unsigned char buf[] = {
+    0x56, 0x20, 0xf0, 0x00,	/* o %r2, 0(%r15) */
+    0x56, 0x30, 0xf0, 0x04,	/* o %r3, 4(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_bit_xor" emit_ops method for s390.  */
+
+static void
+s390_emit_bit_xor (void)
+{
+  static const unsigned char buf[] = {
+    0x57, 0x20, 0xf0, 0x00,	/* x %r2, 0(%r15) */
+    0x57, 0x30, 0xf0, 0x04,	/* x %r3, 4(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_bit_not" emit_ops method for s390.  */
+
+static void
+s390_emit_bit_not (void)
+{
+  static const unsigned char buf[] = {
+    0xa7, 0x48, 0xff, 0xff,	/* lhi %r4, -1 */
+    0x17, 0x24,			/* xr %r2, %r4 */
+    0x17, 0x34,			/* xr %r3, %r4 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_equal" emit_ops method for s390.  */
+
+static void
+s390_emit_equal (void)
+{
+  s390_emit_bit_xor ();
+  s390_emit_log_not ();
+}
+
+/* The "emit_less_signed" emit_ops method for s390.  */
+
+static void
+s390_emit_less_signed (void)
+{
+  static const unsigned char buf[] = {
+    0x59, 0x20, 0xf0, 0x00,	/* c %r2, 0(%r15) */
+    0xa7, 0x24, 0x00, 0x0c,	/* jh .Lless */
+    0xa7, 0x44, 0x00, 0x06,	/* jl .Lhigh */
+    0x55, 0x30, 0xf0, 0x04,	/* cl %r3, 4(%r15) */
+    0xa7, 0x24, 0x00, 0x06,	/* jh .Lless */
+    /* .Lhigh: */
+    0xa7, 0x38, 0x00, 0x00,	/* lhi %r3, 0 */
+    0xa7, 0xf4, 0x00, 0x04,	/* j .Lend */
+    /* .Lless: */
+    0xa7, 0x38, 0x00, 0x01,	/* lhi %r3, 1 */
+    /* .Lend: */
+    0xa7, 0x28, 0x00, 0x00,	/* lhi %r2, 0 */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_less_unsigned" emit_ops method for s390.  */
+
+static void
+s390_emit_less_unsigned (void)
+{
+  static const unsigned char buf[] = {
+    0x55, 0x20, 0xf0, 0x00,	/* cl %r2, 0(%r15) */
+    0xa7, 0x24, 0x00, 0x0c,	/* jh .Lless */
+    0xa7, 0x44, 0x00, 0x06,	/* jl .Lhigh */
+    0x55, 0x30, 0xf0, 0x04,	/* cl %r3, 4(%r15) */
+    0xa7, 0x24, 0x00, 0x06,	/* jh .Lless */
+    /* .Lhigh: */
+    0xa7, 0x38, 0x00, 0x00,	/* lhi %r3, 0 */
+    0xa7, 0xf4, 0x00, 0x04,	/* j .Lend */
+    /* .Lless: */
+    0xa7, 0x38, 0x00, 0x01,	/* lhi %r3, 1 */
+    /* .Lend: */
+    0xa7, 0x28, 0x00, 0x00,	/* lhi %r2, 0 */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_ref" emit_ops method for s390.  */
+
+static void
+s390_emit_ref (int size)
+{
+  static const unsigned char buf1[] = {
+    0xa7, 0x28, 0x00, 0x00,	/* lhi %r2, 0 */
+    0x43, 0x30, 0x30, 0x00,	/* ic %r3, 0(%r3) */
+  };
+  static const unsigned char buf2[] = {
+    0xa7, 0x28, 0x00, 0x00,	/* lhi %r2, 0 */
+    0x48, 0x30, 0x30, 0x00,	/* lh %r3, 0(%r3) */
+  };
+  static const unsigned char buf4[] = {
+    0xa7, 0x28, 0x00, 0x00,	/* lhi %r2, 0 */
+    0x58, 0x30, 0x30, 0x00,	/* l %r3, 0(%r3) */
+  };
+  static const unsigned char buf8[] = {
+    0x98, 0x23, 0x30, 0x00,	/* lm %r2, %r3, 0(%r3) */
+  };
+  switch (size)
+    {
+    case 1:
+      add_insns (buf1, sizeof buf1);
+      break;
+    case 2:
+      add_insns (buf2, sizeof buf2);
+      break;
+    case 4:
+      add_insns (buf4, sizeof buf4);
+      break;
+    case 8:
+      add_insns (buf8, sizeof buf8);
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+/* The "emit_if_goto" emit_ops method for s390.  */
+
+static void
+s390_emit_if_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0x16, 0x23,				/* or %r2, %r3 */
+    0x98, 0x23, 0xf0, 0x00,		/* lm %r2, %r3, 0(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+    0xc0, 0x74, 0x00, 0x00, 0x00, 0x00	/* jgne <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 12;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_goto" emit_ops method for s390 and s390x.  */
+
+static void
+s390_emit_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0xc0, 0xf4, 0x00, 0x00, 0x00, 0x00,	/* jg <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 2;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "write_goto_address" emit_ops method for s390 and s390x.  */
+
+static void
+s390_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
+{
+  long diff = ((long) (to - (from - 2))) / 2;
+  int sdiff = diff;
+  unsigned char buf[sizeof sdiff];
+
+  /* We're only doing 4-byte sizes at the moment.  */
+  if (size != sizeof sdiff || sdiff != diff)
+    {
+      emit_error = 1;
+      return;
+    }
+
+  memcpy (buf, &sdiff, sizeof sdiff);
+  write_inferior_memory (from, buf, sizeof sdiff);
+}
+
+/* Preparation for emitting a literal pool of given size.  Loads the address
+   of the pool into %r1, and jumps over it.  Called should emit the pool data
+   immediately afterwards.  Used for both s390 and s390x.  */
+
+static void
+s390_emit_litpool (int size)
+{
+  static const unsigned char nop[] = {
+    0x07, 0x07,
+  };
+  unsigned char buf[] = {
+    0xa7, 0x15, 0x00, (size + 4) / 2,	/* bras %r1, .Lend+size */
+    /* .Lend: */
+  };
+  if (size == 4)
+    {
+      /* buf needs to start at even halfword for litpool to be aligned */
+      if (current_insn_ptr & 2)
+	add_insns (nop, sizeof nop);
+    }
+  else
+    {
+      while ((current_insn_ptr & 6) != 4)
+	add_insns (nop, sizeof nop);
+    }
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_const" emit_ops method for s390.  */
+
+static void
+s390_emit_const (LONGEST num)
+{
+  unsigned long long n = num;
+  unsigned char buf_s[] = {
+    0xa7, 0x38, num >> 8, num,	/* lhi %r3, <num> */
+    0x17, 0x22,			/* xr %r2, %r2 */
+  };
+  static const unsigned char buf_l[] = {
+    0x98, 0x23, 0x10, 0x00,	/* lm %r2, %r3, 0(%r1) */
+  };
+  if (num < 0x8000 && num >= 0)
+  {
+    add_insns (buf_s, sizeof buf_s);
+  }
+  else
+  {
+    s390_emit_litpool (8);
+    add_insns ((unsigned char *) &n, sizeof n);
+    add_insns (buf_l, sizeof buf_l);
+  }
+}
+
+/* The "emit_call" emit_ops method for s390.  */
+
+static void
+s390_emit_call (CORE_ADDR fn)
+{
+  unsigned int n = fn;
+  static const unsigned char buf[] = {
+    0x58, 0x10, 0x10, 0x00,	/* l %r1, 0(%r1) */
+    0xa7, 0xfa, 0xff, 0xa0,	/* ahi %r15, -0x60 */
+    0x0d, 0xe1,			/* basr %r14, %r1 */
+    0xa7, 0xfa, 0x00, 0x60,	/* ahi %r15, 0x60 */
+  };
+  s390_emit_litpool (4);
+  add_insns ((unsigned char *) &n, sizeof n);
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_reg" emit_ops method for s390.  */
+
+static void
+s390_emit_reg (int reg)
+{
+  unsigned char bufpre[] = {
+    0x18, 0x29,			/* lr %r2, %r9 */
+    0xa7, 0x38, reg >> 8, reg,	/* lhi %r3, <reg> */
+  };
+  add_insns (bufpre, sizeof bufpre);
+  s390_emit_call (get_raw_reg_func_addr ());
+}
+
+/* The "emit_pop" emit_ops method for s390.  */
+
+static void
+s390_emit_pop (void)
+{
+  static const unsigned char buf[] = {
+    0x98, 0x23, 0xf0, 0x00,	/* lm %r2, %r3, 0(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,	/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_stack_flush" emit_ops method for s390.  */
+
+static void
+s390_emit_stack_flush (void)
+{
+  static const unsigned char buf[] = {
+    0xa7, 0xfa, 0xff, 0xf8,	/* ahi %r15, -8 */
+    0x90, 0x23, 0xf0, 0x00,	/* stm %r2, %r3, 0(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_zero_ext" emit_ops method for s390.  */
+
+static void
+s390_emit_zero_ext (int arg)
+{
+  unsigned char buf[] = {
+    0x8d, 0x20, 0x00, 64 - arg,	/* sldl %r2, <64-arg> */
+    0x8c, 0x20, 0x00, 64 - arg,	/* srdl %r2, <64-arg> */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_swap" emit_ops method for s390.  */
+
+static void
+s390_emit_swap (void)
+{
+  static const unsigned char buf[] = {
+    0x98, 0x45, 0xf0, 0x00,	/* lm %r4, %r5, 0(%r15) */
+    0x90, 0x23, 0xf0, 0x00,	/* stm %r2, %r3, 0(%r15) */
+    0x18, 0x24,			/* lr %r2, %r4 */
+    0x18, 0x35,			/* lr %r3, %r5 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_stack_adjust" emit_ops method for s390.  */
+
+static void
+s390_emit_stack_adjust (int n)
+{
+  unsigned char buf[] = {
+    0xa7, 0xfa, n * 8 >> 8, n * 8,	/* ahi %r15, 8*n */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* Sets %r2 to a 32-bit constant.  */
+
+static void
+s390_emit_set_r2 (int arg1)
+{
+  unsigned char buf_s[] = {
+    0xa7, 0x28, arg1 >> 8, arg1,	/* lhi %r2, <arg1> */
+  };
+  static const unsigned char buf_l[] = {
+    0x58, 0x20, 0x10, 0x00,	/* l %r2, 0(%r1) */
+  };
+  if (arg1 < 0x8000 && arg1 >= -0x8000)
+  {
+    add_insns (buf_s, sizeof buf_s);
+  }
+  else
+  {
+    s390_emit_litpool (4);
+    add_insns ((unsigned char *) &arg1, sizeof arg1);
+    add_insns (buf_l, sizeof buf_l);
+  }
+}
+
+/* The "emit_int_call_1" emit_ops method for s390.  */
+
+static void
+s390_emit_int_call_1 (CORE_ADDR fn, int arg1)
+{
+  /* FN's prototype is `LONGEST(*fn)(int)'.  */
+  s390_emit_set_r2 (arg1);
+  s390_emit_call (fn);
+}
+
+/* The "emit_void_call_2" emit_ops method for s390.  */
+
+static void
+s390_emit_void_call_2 (CORE_ADDR fn, int arg1)
+{
+  /* FN's prototype is `void(*fn)(int,LONGEST)'.  */
+  static const unsigned char buf[] = {
+    0x18, 0xc2,			/* lr %r12, %r2 */
+    0x18, 0xd3,			/* lr %r13, %r3 */
+    0x18, 0x43,			/* lr %r4, %r3 */
+    0x18, 0x32,			/* lr %r3, %r2 */
+  };
+  static const unsigned char buf2[] = {
+    0x18, 0x2c,			/* lr %r2, %r12 */
+    0x18, 0x3d,			/* lr %r3, %r13 */
+  };
+  add_insns (buf, sizeof buf);
+  s390_emit_set_r2 (arg1);
+  s390_emit_call (fn);
+  add_insns (buf2, sizeof buf2);
+}
+
+/* The "emit_eq_goto" emit_ops method for s390.  */
+
+void
+s390_emit_eq_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0x57, 0x20, 0xf0, 0x00,		/* x %r2, 0(%r15) */
+    0x57, 0x30, 0xf0, 0x04,		/* x %r3, 4(%r15) */
+    0x16, 0x23,				/* or %r2, %r3 */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0x84, 0x00, 0x00, 0x00, 0x00,	/* jge <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 20;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_ne_goto" emit_ops method for s390.  */
+
+void
+s390_emit_ne_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0x57, 0x20, 0xf0, 0x00,		/* x %r2, 0(%r15) */
+    0x57, 0x30, 0xf0, 0x04,		/* x %r3, 4(%r15) */
+    0x16, 0x23,				/* or %r2, %r3 */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0x74, 0x00, 0x00, 0x00, 0x00,	/* jgne <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 20;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_lt_goto" emit_ops method for s390.  */
+
+void
+s390_emit_lt_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0x59, 0x20, 0xf0, 0x00,		/* c %r2, 0(%r15) */
+    0xa7, 0x24, 0x00, 0x0e,		/* jh .Ltrue */
+    0xa7, 0x44, 0x00, 0x06,		/* jl .Lfalse */
+    0x55, 0x30, 0xf0, 0x04,		/* cl %r3, 4(%r15) */
+    0xa7, 0x24, 0x00, 0x08,		/* jh .Ltrue */
+    /* .Lfalse: */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xa7, 0xf4, 0x00, 0x09,		/* j .Lend */
+    /* .Ltrue: */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0xf4, 0x00, 0x00, 0x00, 0x00,	/* jg <fillme> */
+    /* .Lend: */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 42;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_le_goto" emit_ops method for s390.  */
+
+void
+s390_emit_le_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0x59, 0x20, 0xf0, 0x00,		/* c %r2, 0(%r15) */
+    0xa7, 0x24, 0x00, 0x0e,		/* jh .Ltrue */
+    0xa7, 0x44, 0x00, 0x06,		/* jl .Lfalse */
+    0x55, 0x30, 0xf0, 0x04,		/* cl %r3, 4(%r15) */
+    0xa7, 0xa4, 0x00, 0x08,		/* jhe .Ltrue */
+    /* .Lfalse: */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xa7, 0xf4, 0x00, 0x09,		/* j .Lend */
+    /* .Ltrue: */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0xf4, 0x00, 0x00, 0x00, 0x00,	/* jg <fillme> */
+    /* .Lend: */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 42;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_gt_goto" emit_ops method for s390.  */
+
+void
+s390_emit_gt_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0x59, 0x20, 0xf0, 0x00,		/* c %r2, 0(%r15) */
+    0xa7, 0x44, 0x00, 0x0e,		/* jl .Ltrue */
+    0xa7, 0x24, 0x00, 0x06,		/* jh .Lfalse */
+    0x55, 0x30, 0xf0, 0x04,		/* cl %r3, 4(%r15) */
+    0xa7, 0x44, 0x00, 0x08,		/* jl .Ltrue */
+    /* .Lfalse: */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xa7, 0xf4, 0x00, 0x09,		/* j .Lend */
+    /* .Ltrue: */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0xf4, 0x00, 0x00, 0x00, 0x00,	/* jg <fillme> */
+    /* .Lend: */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 42;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_ge_goto" emit_ops method for s390.  */
+
+void
+s390_emit_ge_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0x59, 0x20, 0xf0, 0x00,		/* c %r2, 0(%r15) */
+    0xa7, 0x44, 0x00, 0x0e,		/* jl .Ltrue */
+    0xa7, 0x24, 0x00, 0x06,		/* jh .Lfalse */
+    0x55, 0x30, 0xf0, 0x04,		/* cl %r3, 4(%r15) */
+    0xa7, 0xc4, 0x00, 0x08,		/* jle .Ltrue */
+    /* .Lfalse: */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xa7, 0xf4, 0x00, 0x09,		/* j .Lend */
+    /* .Ltrue: */
+    0x98, 0x23, 0xf0, 0x08,		/* lm %r2, %r3, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0xf4, 0x00, 0x00, 0x00, 0x00,	/* jg <fillme> */
+    /* .Lend: */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 42;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_ops" structure for s390.  Named _impl to avoid name
+   collision with s390_emit_ops function.  */
+
+struct emit_ops s390_emit_ops_impl =
+  {
+    s390_emit_prologue,
+    s390_emit_epilogue,
+    s390_emit_add,
+    s390_emit_sub,
+    s390_emit_mul,
+    s390_emit_lsh,
+    s390_emit_rsh_signed,
+    s390_emit_rsh_unsigned,
+    s390_emit_ext,
+    s390_emit_log_not,
+    s390_emit_bit_and,
+    s390_emit_bit_or,
+    s390_emit_bit_xor,
+    s390_emit_bit_not,
+    s390_emit_equal,
+    s390_emit_less_signed,
+    s390_emit_less_unsigned,
+    s390_emit_ref,
+    s390_emit_if_goto,
+    s390_emit_goto,
+    s390_write_goto_address,
+    s390_emit_const,
+    s390_emit_call,
+    s390_emit_reg,
+    s390_emit_pop,
+    s390_emit_stack_flush,
+    s390_emit_zero_ext,
+    s390_emit_swap,
+    s390_emit_stack_adjust,
+    s390_emit_int_call_1,
+    s390_emit_void_call_2,
+    s390_emit_eq_goto,
+    s390_emit_ne_goto,
+    s390_emit_lt_goto,
+    s390_emit_le_goto,
+    s390_emit_gt_goto,
+    s390_emit_ge_goto
+  };
+
+#ifdef __s390x__
+
+/* The "emit_prologue" emit_ops method for s390x.  */
+
+static void
+s390x_emit_prologue (void)
+{
+  static const unsigned char buf[] = {
+    0xeb, 0x9f, 0xf0, 0x48, 0x00, 0x24,	/* stmg %r9, %r15, 0x48(%r15) */
+    0xb9, 0x04, 0x00, 0x92,		/* lgr %r9, %r2 */
+    0xb9, 0x04, 0x00, 0xa3,		/* lgr %r10, %r3 */
+    0xb9, 0x04, 0x00, 0xbf,		/* lgr %r11, %r15 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_epilogue" emit_ops method for s390x.  */
+
+static void
+s390x_emit_epilogue (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xa0, 0x00, 0x00, 0x24,	/* stg %r2, 0(%r10) */
+    0xa7, 0x29, 0x00, 0x00,		/* lghi %r2, 0 */
+    0xeb, 0x9f, 0xf0, 0x48, 0x00, 0x04,	/* lmg %r9, %r15, 0x48(%r15) */
+    0x07, 0xfe,				/* br %r14 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_add" emit_ops method for s390x.  */
+
+static void
+s390x_emit_add (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x0a,	/* alg %r2, 0(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_sub" emit_ops method for s390x.  */
+
+static void
+s390x_emit_sub (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x30, 0xf0, 0x00, 0x00, 0x04,	/* lg %r3, 0(%r15) */
+    0xb9, 0x0b, 0x00, 0x32,		/* slgr %r3, %r2 */
+    0xb9, 0x04, 0x00, 0x23,		/* lgr %r2, %r3 */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_mul" emit_ops method for s390x.  */
+
+static void
+s390x_emit_mul (void)
+{
+  emit_error = 1;
+}
+
+/* The "emit_lsh" emit_ops method for s390x.  */
+
+static void
+s390x_emit_lsh (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x30, 0xf0, 0x00, 0x00, 0x04,	/* lg %r3, 0(%r15) */
+    0xeb, 0x23, 0x20, 0x00, 0x00, 0x0d,	/* sllg %r2, %r3, 0(%r2) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_rsh_signed" emit_ops method for s390x.  */
+
+static void
+s390x_emit_rsh_signed (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x30, 0xf0, 0x00, 0x00, 0x04,	/* lg %r3, 0(%r15) */
+    0xeb, 0x23, 0x20, 0x00, 0x00, 0x0a,	/* srag %r2, %r3, 0(%r2) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_rsh_unsigned" emit_ops method for s390x.  */
+
+static void
+s390x_emit_rsh_unsigned (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x30, 0xf0, 0x00, 0x00, 0x04,	/* lg %r3, 0(%r15) */
+    0xeb, 0x23, 0x20, 0x00, 0x00, 0x0c,	/* srlg %r2, %r3, 0(%r2) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_ext" emit_ops method for s390x.  */
+
+static void
+s390x_emit_ext (int arg)
+{
+  unsigned char buf[] = {
+    0xeb, 0x22, 0x00, 64 - arg, 0x00, 0x0d,	/* sllg %r2, %r2, <64-arg> */
+    0xeb, 0x22, 0x00, 64 - arg, 0x00, 0x0a,	/* srag %r2, %r2, <64-arg> */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_log_not" emit_ops method for s390x.  */
+
+static void
+s390x_emit_log_not (void)
+{
+  static const unsigned char buf[] = {
+    0xb9, 0x00, 0x00, 0x22,		/* lpgr %r2, %r2 */
+    0xa7, 0x2b, 0xff, 0xff,		/* aghi %r2, -1 */
+    0xeb, 0x22, 0x00, 0x3f, 0x00, 0x0c,	/* srlg %r2, %r2, 63 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_bit_and" emit_ops method for s390x.  */
+
+static void
+s390x_emit_bit_and (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x80,	/* ng %r2, 0(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_bit_or" emit_ops method for s390x.  */
+
+static void
+s390x_emit_bit_or (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x81,	/* og %r2, 0(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_bit_xor" emit_ops method for s390x.  */
+
+static void
+s390x_emit_bit_xor (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x82,	/* xg %r2, 0(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_bit_not" emit_ops method for s390x.  */
+
+static void
+s390x_emit_bit_not (void)
+{
+  static const unsigned char buf[] = {
+    0xa7, 0x39, 0xff, 0xff,	/* lghi %r3, -1 */
+    0xb9, 0x82, 0x00, 0x23,	/* xgr %r2, %r3 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_equal" emit_ops method for s390x.  */
+
+static void
+s390x_emit_equal (void)
+{
+  s390x_emit_bit_xor ();
+  s390x_emit_log_not ();
+}
+
+/* The "emit_less_signed" emit_ops method for s390x.  */
+
+static void
+s390x_emit_less_signed (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x20,	/* cg %r2, 0(%r15) */
+    0xa7, 0x29, 0x00, 0x01,		/* lghi %r2, 1 */
+    0xa7, 0x24, 0x00, 0x04,		/* jh .Lend */
+    0xa7, 0x29, 0x00, 0x00,		/* lghi %r2, 0 */
+    /* .Lend: */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_less_unsigned" emit_ops method for s390x.  */
+
+static void
+s390x_emit_less_unsigned (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x21,	/* clg %r2, 0(%r15) */
+    0xa7, 0x29, 0x00, 0x01,		/* lghi %r2, 1 */
+    0xa7, 0x24, 0x00, 0x04,		/* jh .Lend */
+    0xa7, 0x29, 0x00, 0x00,		/* lghi %r2, 0 */
+    /* .Lend: */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_ref" emit_ops method for s390x.  */
+
+static void
+s390x_emit_ref (int size)
+{
+  static const unsigned char buf1[] = {
+    0xe3, 0x20, 0x20, 0x00, 0x00, 0x90,	/* llgc %r2, 0(%r2) */
+  };
+  static const unsigned char buf2[] = {
+    0xe3, 0x20, 0x20, 0x00, 0x00, 0x91	/* llgh %r2, 0(%r2) */
+  };
+  static const unsigned char buf4[] = {
+    0xe3, 0x20, 0x20, 0x00, 0x00, 0x16,	/* llgf %r2, 0(%r2) */
+  };
+  static const unsigned char buf8[] = {
+    0xe3, 0x20, 0x20, 0x00, 0x00, 0x04,	/* lg %r2, 0(%r2) */
+  };
+  switch (size)
+    {
+    case 1:
+      add_insns (buf1, sizeof buf1);
+      break;
+    case 2:
+      add_insns (buf2, sizeof buf2);
+      break;
+    case 4:
+      add_insns (buf4, sizeof buf4);
+      break;
+    case 8:
+      add_insns (buf8, sizeof buf8);
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+/* The "emit_if_goto" emit_ops method for s390x.  */
+
+static void
+s390x_emit_if_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0xb9, 0x02, 0x00, 0x22,		/* ltgr %r2, %r2 */
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x04,	/* lg %r2, 0(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+    0xc0, 0x74, 0x00, 0x00, 0x00, 0x00,	/* jgne <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 16;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_const" emit_ops method for s390x.  */
+
+static void
+s390x_emit_const (LONGEST num)
+{
+  unsigned long long n = num;
+  unsigned char buf_s[] = {
+    0xa7, 0x29, num >> 8, num,		/* lghi %r2, <num> */
+  };
+  static const unsigned char buf_l[] = {
+    0xe3, 0x20, 0x10, 0x00, 0x00, 0x04,	/* lg %r2, 0(%r1) */
+  };
+  if (num < 0x8000 && num >= -0x8000)
+  {
+    add_insns (buf_s, sizeof buf_s);
+  }
+  else
+  {
+    s390_emit_litpool (8);
+    add_insns ((unsigned char *) &n, sizeof n);
+    add_insns (buf_l, sizeof buf_l);
+  }
+}
+
+/* The "emit_call" emit_ops method for s390x.  */
+
+static void
+s390x_emit_call (CORE_ADDR fn)
+{
+  unsigned long n = fn;
+  static const unsigned char buf[] = {
+    0xe3, 0x10, 0x10, 0x00, 0x00, 0x04,	/* lg %r1, 0(%r1) */
+    0xa7, 0xfb, 0xff, 0x60,		/* aghi %r15, -0xa0 */
+    0x0d, 0xe1,				/* basr %r14, %r1 */
+    0xa7, 0xfb, 0x00, 0xa0,		/* aghi %r15, 0xa0 */
+  };
+  s390_emit_litpool (8);
+  add_insns ((unsigned char *) &n, sizeof n);
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_reg" emit_ops method for s390x.  */
+
+static void
+s390x_emit_reg (int reg)
+{
+  unsigned char buf[] = {
+    0xb9, 0x04, 0x00, 0x29,		/* lgr %r2, %r9 */
+    0xa7, 0x39, reg >> 8, reg,		/* lghi %r3, <reg> */
+  };
+  add_insns (buf, sizeof buf);
+  s390x_emit_call (get_raw_reg_func_addr ());
+}
+
+/* The "emit_pop" emit_ops method for s390x.  */
+
+static void
+s390x_emit_pop (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x04,	/* lg %r2, 0(%r15) */
+    0x41, 0xf0, 0xf0, 0x08,		/* la %r15, 8(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_stack_flush" emit_ops method for s390x.  */
+
+static void
+s390x_emit_stack_flush (void)
+{
+  static const unsigned char buf[] = {
+    0xa7, 0xfb, 0xff, 0xf8,		/* aghi %r15, -8 */
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x24,	/* stg %r2, 0(%r15) */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_zero_ext" emit_ops method for s390x.  */
+
+static void
+s390x_emit_zero_ext (int arg)
+{
+  unsigned char buf[] = {
+    0xeb, 0x22, 0x00, 64 - arg, 0x00, 0x0d,	/* sllg %r2, %r2, <64-arg> */
+    0xeb, 0x22, 0x00, 64 - arg, 0x00, 0x0c,	/* srlg %r2, %r2, <64-arg> */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_swap" emit_ops method for s390x.  */
+
+static void
+s390x_emit_swap (void)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x30, 0xf0, 0x00, 0x00, 0x04,	/* lg %r3, 0(%r15) */
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x24,	/* stg %r2, 0(%r15) */
+    0xb9, 0x04, 0x00, 0x23,		/* lgr %r2, %r3 */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_stack_adjust" emit_ops method for s390x.  */
+
+static void
+s390x_emit_stack_adjust (int n)
+{
+  unsigned char buf[] = {
+    0xa7, 0xfb, n * 8 >> 8, n * 8,	/* aghi %r15, 8*n */
+  };
+  add_insns (buf, sizeof buf);
+}
+
+/* The "emit_int_call_1" emit_ops method for s390x.  */
+
+static void
+s390x_emit_int_call_1 (CORE_ADDR fn, int arg1)
+{
+  /* FN's prototype is `LONGEST(*fn)(int)'.  */
+  s390x_emit_const (arg1);
+  s390x_emit_call (fn);
+}
+
+/* The "emit_void_call_2" emit_ops method for s390x.  */
+
+static void
+s390x_emit_void_call_2 (CORE_ADDR fn, int arg1)
+{
+  /* FN's prototype is `void(*fn)(int,LONGEST)'.  */
+  static const unsigned char buf[] = {
+    0xb9, 0x04, 0x00, 0x32,		/* lgr %r3, %r2 */
+    0xb9, 0x04, 0x00, 0xc2,		/* lgr %r12, %r2 */
+  };
+  static const unsigned char buf2[] = {
+    0xb9, 0x04, 0x00, 0x2c,		/* lgr %r2, %r12 */
+  };
+  add_insns (buf, sizeof buf);
+  s390x_emit_const (arg1);
+  s390x_emit_call (fn);
+  add_insns (buf2, sizeof buf2);
+}
+
+/* The "emit_eq_goto" emit_ops method for s390x.  */
+
+void
+s390x_emit_eq_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x20,	/* cg %r2, 0(%r15) */
+    0xe3, 0x20, 0xf0, 0x08, 0x00, 0x04, /* lg %r2, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0x84, 0x00, 0x00, 0x00, 0x00,	/* jge <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 18;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_ne_goto" emit_ops method for s390x.  */
+
+void
+s390x_emit_ne_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x20,	/* cg %r2, 0(%r15) */
+    0xe3, 0x20, 0xf0, 0x08, 0x00, 0x04, /* lg %r2, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0x74, 0x00, 0x00, 0x00, 0x00,	/* jgne <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 18;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_lt_goto" emit_ops method for s390x.  */
+
+void
+s390x_emit_lt_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x20,	/* cg %r2, 0(%r15) */
+    0xe3, 0x20, 0xf0, 0x08, 0x00, 0x04, /* lg %r2, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0x24, 0x00, 0x00, 0x00, 0x00,	/* jgh <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 18;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_le_goto" emit_ops method for s390x.  */
+
+void
+s390x_emit_le_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x20,	/* cg %r2, 0(%r15) */
+    0xe3, 0x20, 0xf0, 0x08, 0x00, 0x04, /* lg %r2, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0xa4, 0x00, 0x00, 0x00, 0x00,	/* jghe <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 18;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_gt_goto" emit_ops method for s390x.  */
+
+void
+s390x_emit_gt_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x20,	/* cg %r2, 0(%r15) */
+    0xe3, 0x20, 0xf0, 0x08, 0x00, 0x04, /* lg %r2, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0x44, 0x00, 0x00, 0x00, 0x00,	/* jgl <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 18;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_ge_goto" emit_ops method for s390x.  */
+
+void
+s390x_emit_ge_goto (int *offset_p, int *size_p)
+{
+  static const unsigned char buf[] = {
+    0xe3, 0x20, 0xf0, 0x00, 0x00, 0x20,	/* cg %r2, 0(%r15) */
+    0xe3, 0x20, 0xf0, 0x08, 0x00, 0x04, /* lg %r2, 8(%r15) */
+    0x41, 0xf0, 0xf0, 0x10,		/* la %r15, 16(%r15) */
+    0xc0, 0xc4, 0x00, 0x00, 0x00, 0x00,	/* jgle <fillme> */
+  };
+  add_insns (buf, sizeof buf);
+  if (offset_p)
+    *offset_p = 18;
+  if (size_p)
+    *size_p = 4;
+}
+
+/* The "emit_ops" structure for s390x.  */
+
+struct emit_ops s390x_emit_ops =
+  {
+    s390x_emit_prologue,
+    s390x_emit_epilogue,
+    s390x_emit_add,
+    s390x_emit_sub,
+    s390x_emit_mul,
+    s390x_emit_lsh,
+    s390x_emit_rsh_signed,
+    s390x_emit_rsh_unsigned,
+    s390x_emit_ext,
+    s390x_emit_log_not,
+    s390x_emit_bit_and,
+    s390x_emit_bit_or,
+    s390x_emit_bit_xor,
+    s390x_emit_bit_not,
+    s390x_emit_equal,
+    s390x_emit_less_signed,
+    s390x_emit_less_unsigned,
+    s390x_emit_ref,
+    s390x_emit_if_goto,
+    s390_emit_goto,
+    s390_write_goto_address,
+    s390x_emit_const,
+    s390x_emit_call,
+    s390x_emit_reg,
+    s390x_emit_pop,
+    s390x_emit_stack_flush,
+    s390x_emit_zero_ext,
+    s390x_emit_swap,
+    s390x_emit_stack_adjust,
+    s390x_emit_int_call_1,
+    s390x_emit_void_call_2,
+    s390x_emit_eq_goto,
+    s390x_emit_ne_goto,
+    s390x_emit_lt_goto,
+    s390x_emit_le_goto,
+    s390x_emit_gt_goto,
+    s390x_emit_ge_goto
+  };
+#endif
+
+/* The "emit_ops" linux_target_ops method.  */
+
+static struct emit_ops *
+s390_emit_ops (void)
+{
+#ifdef __s390x__
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+
+  if (register_size (regcache->tdesc, 0) == 8)
+    return &s390x_emit_ops;
+  else
+#endif
+    return &s390_emit_ops_impl;
+}
+
 struct linux_target_ops the_low_target = {
   s390_arch_setup,
   s390_regs_info,
@@ -1430,7 +2774,7 @@ struct linux_target_ops the_low_target = {
   s390_supports_tracepoints,
   s390_get_thread_area,
   s390_install_fast_tracepoint_jump_pad,
-  NULL, /* emit_ops */
+  s390_emit_ops,
   s390_get_min_fast_tracepoint_insn_len,
   NULL, /* supports_range_stepping */
   NULL, /* breakpoint_kind_from_current_state */
