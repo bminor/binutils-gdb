@@ -35,8 +35,6 @@
 
 int cr16_debug;
 
-host_callback *cr16_callback;
-
 uint32 OP[4];
 uint32 sign_flag;
 
@@ -326,12 +324,11 @@ get_operands (operand_desc *s, uint64 ins, int isize, int nops)
 static int
 do_run (SIM_DESC sd, SIM_CPU *cpu, uint64 mcode)
 {
-  host_callback *cr16_callback = STATE_CALLBACK (sd);
   struct hash_entry *h;
 
 #ifdef DEBUG
   if ((cr16_debug & DEBUG_INSTRUCTION) != 0)
-    (*cr16_callback->printf_filtered) (cr16_callback, "do_long 0x%x\n", mcode);
+    sim_io_printf (sd, "do_long 0x%x\n", mcode);
 #endif
 
    h = lookup_hash (sd, cpu, mcode, 1);
@@ -463,8 +460,6 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd,
      but it matches what the toolchain currently expects.  Ugh.  */
   sim_do_commandf (sd, "memory-size %#x", 20 * 1024 * 1024);
 
-  cr16_callback = cb;
-
   /* put all the opcodes in the hash table.  */
   if (!init_p++)
     {
@@ -585,7 +580,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
   curr_ins_size = do_run (sd, cpu, mcode);
 
 #if CR16_DEBUG
-  (*cr16_callback->printf_filtered) (cr16_callback, "INS: PC=0x%X, mcode=0x%X\n", PC, mcode);
+  sim_io_printf (sd, "INS: PC=0x%X, mcode=0x%X\n", PC, mcode);
 #endif
 
   if (curr_ins_size == 0)
@@ -674,7 +669,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
     start_address = 0x0;
 #ifdef DEBUG
   if (cr16_debug)
-    (*cr16_callback->printf_filtered) (cr16_callback, "sim_create_inferior:  PC=0x%lx\n", (long) start_address);
+    sim_io_printf (sd, "sim_create_inferior:  PC=0x%lx\n", (long) start_address);
 #endif
   {
     SIM_CPU *cpu = STATE_CPU (sd, 0);

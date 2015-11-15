@@ -183,8 +183,8 @@ move_to_cr (SIM_DESC sd, SIM_CPU *cpu, int cr, creg_t mask, creg_t val, int psw_
 #if 0
       else
 	val &= PSR_MASK;
-	      (*cr16_callback->printf_filtered)
-		(cr16_callback,
+	  sim_io_printf
+		(sd,
 		 "ERROR at PC 0x%x: ST can only be set when FX is set.\n", PC);
 	  EXCEPTION (SIM_SIGILL);
 #endif
@@ -259,7 +259,7 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
     }
 
   if ((cr16_debug & DEBUG_LINE_NUMBER) == 0)
-    (*cr16_callback->printf_filtered) (cr16_callback,
+    sim_io_printf (sd,
 				       "0x%.*x %s: %-*s ",
 				       SIZE_PC, (unsigned)PC,
 				       type,
@@ -311,7 +311,7 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
 	    }
 	}
 
-      (*cr16_callback->printf_filtered) (cr16_callback,
+      sim_io_printf (sd,
 					 "0x%.*x %s: %-*.*s %-*s ",
 					 SIZE_PC, (unsigned)PC,
 					 type,
@@ -386,12 +386,12 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
     {
       *p++ = '\n';
       *p = '\0';
-      (*cr16_callback->printf_filtered) (cr16_callback, "%s", buf);
+      sim_io_printf (sd, "%s", buf);
     }
   else
     {
       *p = '\0';
-      (*cr16_callback->printf_filtered) (cr16_callback, "%-*s", SIZE_OPERANDS, buf);
+      sim_io_printf (sd, "%-*s", SIZE_OPERANDS, buf);
 
       p = buf;
       for (i = 0; i < 3; i++)
@@ -400,43 +400,43 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
 	  switch (in[i])
 	    {
 	    case OP_VOID:
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s", SIZE_VALUES, "");
+	      sim_io_printf (sd, "%*s", SIZE_VALUES, "");
 	      break;
 
 	    case OP_REG:
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16) GPR (OP[i]));
 	      break;
 
 	    case OP_REGP:
 	      tmp = (long)((((uint32) GPR (OP[i])) << 16) | ((uint32) GPR (OP[i] + 1)));
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s0x%.8lx", SIZE_VALUES-10, "", tmp);
+	      sim_io_printf (sd, "%*s0x%.8lx", SIZE_VALUES-10, "", tmp);
 	      break;
 
 	    case OP_PROC_REG:
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16) CREG (OP[i]));
 	      break;
 
 	    case OP_CONSTANT16:
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)OP[i]);
 	      break;
 
 	    case OP_CONSTANT4:
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)SEXT4(OP[i]));
 	      break;
 
 	    case OP_CONSTANT3:
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)SEXT3(OP[i]));
 	      break;
 
 	    case OP_MEMREF2:
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)OP[i]);
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
+	      sim_io_printf (sd, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16)GPR (OP[i + 1]));
 	      i++;
 	      break;
@@ -444,24 +444,24 @@ trace_input_func (SIM_DESC sd, const char *name, enum op_types in1, enum op_type
 	}
     }
 
-  (*cr16_callback->flush_stdout) (cr16_callback);
+  sim_io_flush_stdout (sd);
 }
 
 static void
 do_trace_output_flush (SIM_DESC sd)
 {
-  (*cr16_callback->flush_stdout) (cr16_callback);
+  sim_io_flush_stdout (sd);
 }
 
 static void
 do_trace_output_finish (SIM_DESC sd)
 {
-  (*cr16_callback->printf_filtered) (cr16_callback,
+  sim_io_printf (sd,
 				     " F0=%d F1=%d C=%d\n",
 				     (State.trace.psw & PSR_F_BIT) != 0,
 				     (State.trace.psw & PSR_F_BIT) != 0,
 				     (State.trace.psw & PSR_C_BIT) != 0);
-  (*cr16_callback->flush_stdout) (cr16_callback);
+  sim_io_flush_stdout (sd);
 }
 
 #if 0
@@ -470,7 +470,7 @@ trace_output_40 (SIM_DESC sd, uint64 val)
 {
   if ((cr16_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*cr16_callback->printf_filtered) (cr16_callback,
+      sim_io_printf (sd,
 					 " :: %*s0x%.2x%.8lx",
 					 SIZE_VALUES - 12,
 					 "",
@@ -486,7 +486,7 @@ trace_output_32 (SIM_DESC sd, uint32 val)
 {
   if ((cr16_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*cr16_callback->printf_filtered) (cr16_callback,
+      sim_io_printf (sd,
 					 " :: %*s0x%.8x",
 					 SIZE_VALUES - 10,
 					 "",
@@ -500,7 +500,7 @@ trace_output_16 (SIM_DESC sd, uint16 val)
 {
   if ((cr16_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*cr16_callback->printf_filtered) (cr16_callback,
+      sim_io_printf (sd,
 					 " :: %*s0x%.4x",
 					 SIZE_VALUES - 6,
 					 "",
@@ -514,7 +514,7 @@ trace_output_void (SIM_DESC sd)
 {
   if ((cr16_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*cr16_callback->printf_filtered) (cr16_callback, "\n");
+      sim_io_printf (sd, "\n");
       do_trace_output_flush (sd);
     }
 }
@@ -524,7 +524,7 @@ trace_output_flag (SIM_DESC sd)
 {
   if ((cr16_debug & (DEBUG_TRACE | DEBUG_VALUES)) == (DEBUG_TRACE | DEBUG_VALUES))
     {
-      (*cr16_callback->printf_filtered) (cr16_callback,
+      sim_io_printf (sd,
 					 " :: %*s",
 					 SIZE_VALUES,
 					 "");
@@ -5053,6 +5053,7 @@ OP_14C_14 (SIM_DESC sd, SIM_CPU *cpu)
 void
 OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 {
+  host_callback *cb = STATE_CALLBACK (sd);
   uint32 tmp;
   uint16 a;
   trace_input ("excp", OP_CONSTANT4, OP_VOID, OP_VOID);
@@ -5078,25 +5079,25 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 	if (first_time)
 	  {
 	    first_time = 0;
-	    (*cr16_callback->printf_filtered) (cr16_callback, "Trap  #     PC ");
+	    sim_io_printf (sd, "Trap  #     PC ");
 	    for (i = 0; i < 16; i++)
-	      (*cr16_callback->printf_filtered) (cr16_callback, "  %sr%d", (i > 9) ? "" : " ", i);
-	    (*cr16_callback->printf_filtered) (cr16_callback, "         a0         a1 f0 f1 c\n");
+	      sim_io_printf (sd, "  %sr%d", (i > 9) ? "" : " ", i);
+	    sim_io_printf (sd, "         a0         a1 f0 f1 c\n");
 	  }
 
-	(*cr16_callback->printf_filtered) (cr16_callback, "Trap %2d 0x%.4x:", (int)OP[0], (int)PC);
+	sim_io_printf (sd, "Trap %2d 0x%.4x:", (int)OP[0], (int)PC);
 
 	for (i = 0; i < 16; i++)
-	  (*cr16_callback->printf_filtered) (cr16_callback, " %.4x", (int) GPR (i));
+	  sim_io_printf (sd, " %.4x", (int) GPR (i));
 
 	for (i = 0; i < 2; i++)
-	  (*cr16_callback->printf_filtered) (cr16_callback, " %.2x%.8lx",
+	  sim_io_printf (sd, " %.2x%.8lx",
 					     ((int)(ACC (i) >> 32) & 0xff),
 					     ((unsigned long) ACC (i)) & 0xffffffff);
 
-	(*cr16_callback->printf_filtered) (cr16_callback, "  %d  %d %d\n",
+	sim_io_printf (sd, "  %d  %d %d\n",
 					   PSR_F != 0, PSR_F != 0, PSR_C != 0);
-	(*cr16_callback->flush_stdout) (cr16_callback);
+	sim_io_flush_stdout (sd);
 	break;
       }
 #endif
@@ -5258,8 +5259,8 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 		if (os_sig == -1)
 		  {
 		    trace_output_void (sd);
-		    (*cr16_callback->printf_filtered) (cr16_callback, "Unknown signal %d\n", PARM2);
-		    (*cr16_callback->flush_stdout) (cr16_callback);
+		    sim_io_printf (sd, "Unknown signal %d\n", PARM2);
+		    sim_io_flush_stdout (sd);
 		    EXCEPTION (SIM_SIGILL);
 		  }
 		else
@@ -5332,47 +5333,45 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 
 	  case TARGET_SYS_read:
 	    trace_input ("<read>", OP_REG, OP_MEMREF, OP_REG);
-	    RETVAL (cr16_callback->read (cr16_callback, PARM1,
-	  	        MEMPTR (((unsigned long)PARM3 << 16)
-		    	        |((unsigned long)PARM2)), PARM4));
+	    RETVAL (cb->read (cb, PARM1,
+			      MEMPTR (((unsigned long)PARM3 << 16)
+				      | ((unsigned long)PARM2)), PARM4));
 	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_write:
 	    trace_input ("<write>", OP_REG, OP_MEMREF, OP_REG);
-	    RETVAL ((int)cr16_callback->write (cr16_callback, PARM1,
-		       MEMPTR (((unsigned long)PARM3 << 16) | PARM2), PARM4));
+	    RETVAL ((int)cb->write (cb, PARM1,
+				    MEMPTR (((unsigned long)PARM3 << 16)
+					    | PARM2), PARM4));
 	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_lseek:
 	    trace_input ("<lseek>", OP_REG, OP_REGP, OP_REG);
-	    RETVAL32 (cr16_callback->lseek (cr16_callback, PARM1,
-					    ((((long) PARM3) << 16) | PARM2), 
-					    PARM4));
+	    RETVAL32 (cb->lseek (cb, PARM1, ((((long) PARM3) << 16) | PARM2),
+				 PARM4));
 	    trace_output_32 (sd, result);
 	    break;
 
 	  case TARGET_SYS_close:
 	    trace_input ("<close>", OP_REG, OP_VOID, OP_VOID);
-	    RETVAL (cr16_callback->close (cr16_callback, PARM1));
+	    RETVAL (cb->close (cb, PARM1));
 	    trace_output_16 (sd, result);
 	    break;
 
 	  case TARGET_SYS_open:
 	    trace_input ("<open>", OP_MEMREF, OP_REG, OP_VOID);
-	    RETVAL32 (cr16_callback->open (cr16_callback, 
-				 MEMPTR ((((unsigned long)PARM2)<<16)|PARM1), 
-				 PARM3));
+	    RETVAL32 (cb->open (cb, MEMPTR ((((unsigned long)PARM2) << 16)
+					    | PARM1), PARM3));
 	    trace_output_32 (sd, result);
 	    break;
 
 #ifdef TARGET_SYS_rename
 	  case TARGET_SYS_rename:
 	    trace_input ("<rename>", OP_MEMREF, OP_MEMREF, OP_VOID);
-	    RETVAL (cr16_callback->rename (cr16_callback, 
-				   MEMPTR ((((unsigned long)PARM2)<<16) |PARM1),
-				   MEMPTR ((((unsigned long)PARM4)<<16) |PARM3)));
+	    RETVAL (cb->rename (cb, MEMPTR ((((unsigned long)PARM2) << 16) | PARM1),
+				    MEMPTR ((((unsigned long)PARM4) << 16) | PARM3)));
 	    trace_output_16 (sd, result);
 	    break;
 #endif
@@ -5391,8 +5390,7 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 
 	  case TARGET_SYS_unlink:
 	    trace_input ("<unlink>", OP_MEMREF, OP_VOID, OP_VOID);
-	    RETVAL (cr16_callback->unlink (cr16_callback, 
-				 MEMPTR (((unsigned long)PARM2<<16)|PARM1)));
+	    RETVAL (cb->unlink (cb, MEMPTR (((unsigned long)PARM2 << 16) | PARM1)));
 	    trace_output_16 (sd, result);
 	    break;
 
@@ -5475,12 +5473,12 @@ OP_C_C (SIM_DESC sd, SIM_CPU *cpu)
 		sim_engine_halt (sd, cpu, NULL, PC, sim_exited, GPR (2));
 		break;
 	      default:
-		cr16_callback->error (cr16_callback, "Unknown syscall %d", FUNC);
+		cb->error (cb, "Unknown syscall %d", FUNC);
 		break;
 	    }
 	  }
 	if ((uint16) result == (uint16) -1)
-	  RETERR (cr16_callback->get_errno(cr16_callback));
+	  RETERR (cb->get_errno (cb));
 	else
 	  RETERR (0);
 	break;

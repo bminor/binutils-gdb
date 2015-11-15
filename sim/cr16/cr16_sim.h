@@ -246,7 +246,6 @@ struct _state
 } State;
 
 
-extern host_callback *cr16_callback;
 extern uint32 OP[4];
 extern uint32 sign_flag;
 extern struct simops Simops[];

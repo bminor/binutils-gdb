@@ -1,5 +1,21 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* cr16_sim.h (cr16_callback): Delete.
+	* interp.c (cr16_callback): Delete.
+	(do_run): Delete cr16_callback.  Replace
+	cr16_callback->printf_filtered with sim_io_printf.
+	(sim_open): Delete cr16_callback assignment.
+	(step_once, sim_create_inferior): Replace
+	cr16_callback->printf_filtered with sim_io_printf.
+	* simops.c (move_to_cr, trace_input_func, do_trace_output_flush,
+	do_trace_output_finish, trace_output_40, trace_output_32,
+	trace_output_16, trace_output_void, trace_output_flag): Replace
+	cr16_callback->printf_filtered with sim_io_printf and
+	cr16_callback->flush_stdout with sim_io_flush_stdout.
+	(OP_14C_14): Likewise.  Rename cr16_callback to cb.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Add sim-reason.o, sim-resume.o, and
 	sim-stop.o.
 	* cr16_sim.h (struct _state): Delete exe and exception.
