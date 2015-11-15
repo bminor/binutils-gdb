@@ -1,5 +1,9 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (sim_open): Delete sim_create_inferior call.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* d10v_sim.h (d10v_callback): Delete.
 	* interp.c (d10v_callback): Delete.
 	(do_long, do_2_short, do_parallel, set_dmap_register,

@@ -940,7 +940,6 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd,
   /* reset the processor state */
   if (!State.mem.data[0])
     sim_size (1);
-  sim_create_inferior ((SIM_DESC) 1, NULL, NULL, NULL);
 
   return sd;
 }

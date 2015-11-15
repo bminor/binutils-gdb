@@ -856,7 +856,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   /* reset the processor state */
   if (!State.mem.data[0])
     sim_size (1);
-  sim_create_inferior ((SIM_DESC) 1, NULL, NULL, NULL);
 
   return sd;
 }
