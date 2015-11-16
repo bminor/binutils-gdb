@@ -1,5 +1,10 @@
 2015-11-16  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_extract_return_value):  Change array
+	buf's length to V_REGISTER_SIZE.
+
+2015-11-16  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (pass_in_x_or_stack): Change argument type
 	from bfd_byte * to value *.  Caller updated.
 	(pass_in_x): Likewise.

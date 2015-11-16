@@ -1620,7 +1620,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       for (i = 0; i < elements; i++)
 	{
 	  int regno = AARCH64_V0_REGNUM + i;
-	  bfd_byte buf[X_REGISTER_SIZE];
+	  bfd_byte buf[V_REGISTER_SIZE];
 
 	  if (aarch64_debug)
 	    {
