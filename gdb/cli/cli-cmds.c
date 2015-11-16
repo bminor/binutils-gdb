@@ -907,7 +907,7 @@ list_command (char *arg, int from_tty)
   cleanup = make_cleanup (null_cleanup, NULL);
 
   /* Pull in the current default source line if necessary.  */
-  if (arg == 0 || arg[0] == '+' || arg[0] == '-')
+  if (arg == NULL || arg[0] == '+' || arg[0] == '-')
     {
       set_default_source_symtab_and_line ();
       cursal = get_current_source_symtab_and_line ();
@@ -936,7 +936,7 @@ list_command (char *arg, int from_tty)
 
   /* "l" or "l +" lists next ten lines.  */
 
-  if (arg == 0 || strcmp (arg, "+") == 0)
+  if (arg == NULL || strcmp (arg, "+") == 0)
     {
       print_source_lines (cursal.symtab, cursal.line,
 			  cursal.line + get_lines_to_list (), 0);
