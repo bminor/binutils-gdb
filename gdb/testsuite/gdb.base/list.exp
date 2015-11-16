@@ -505,6 +505,24 @@ proc test_only_end {} {
     gdb_test "list ,5" "list ,5\r\n4\[ \t\]\[^\r\n\]*\r\n5\[ \t\]\[^\r\n\]*"
 }
 
+proc test_list_invalid_args {} {
+    global binfile
+
+    clean_restart ${binfile}
+    gdb_test "list -INVALID" \
+	"invalid explicit location argument, \"-INVALID\"" \
+	"first use of \"list -INVALID\""
+    gdb_test "list -INVALID" \
+	"invalid explicit location argument, \"-INVALID\"" \
+	"second use of \"list -INVALID\""
+
+    clean_restart ${binfile}
+    gdb_test "list +INVALID" "Function \"\\+INVALID\" not defined." \
+	"first use of \"list +INVALID\""
+    gdb_test "list +INVALID" "Function \"\\+INVALID\" not defined." \
+	"second use of \"list +INVALID\""
+}
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -527,6 +545,7 @@ if [ set_listsize 10 ] then {
     test_list_filename_and_function
     test_forward_search
     test_only_end
+    test_list_invalid_args
 }
 
 # Follows tests that require execution.

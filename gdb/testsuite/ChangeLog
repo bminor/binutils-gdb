@@ -1,5 +1,10 @@
 2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/list.exp (test_list_invalid_args): New function,
+	defined, and called.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/list.exp (test_list): Make test names unique.
 
 2015-12-11  Yao Qi  <yao.qi@linaro.org>
