@@ -1,5 +1,11 @@
 2015-11-16  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (aarch64_push_dummy_call): Call value_contents
+	instead of value_contents_writeable.
+	* bfin-tdep.c (bfin_push_dummy_call): Likewise.
+
+2015-11-16  Yao Qi  <yao.qi@linaro.org>
+
 	* arm-tdep.c (arm_push_dummy_call): New array buf.  Store regval
 	to buf.  Pass buf instead of val to push_stack_item.
 

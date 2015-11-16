@@ -1300,7 +1300,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			check_typedef (value_type (field));
 
 		      pass_in_v_or_stack (gdbarch, regcache, &info, field_type,
-					  value_contents_writeable (field));
+					  value_contents (field));
 		    }
 		}
 	      else
