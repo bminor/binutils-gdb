@@ -36,9 +36,7 @@ sim_close (SIM_DESC sd, int quitting)
 
   /* If cgen is active, close it down.  */
 #ifdef CGEN_ARCH
-# define __cgen_cpu_close(arch) arch##_cgen_cpu_close
-# define _cgen_cpu_close(arch) __cgen_cpu_close (arch)
-# define cgen_cpu_close _cgen_cpu_close (CGEN_ARCH)
+# define cgen_cpu_close XCONCAT2 (CGEN_ARCH,_cgen_cpu_close)
   cgen_cpu_close (CPU_CPU_DESC (STATE_CPU (sd, 0)));
 #endif
 
