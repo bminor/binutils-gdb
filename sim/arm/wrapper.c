@@ -163,14 +163,6 @@ ARMul_ConsolePrint (ARMul_State * state,
     }
 }
 
-ARMword
-ARMul_Debug (ARMul_State * state ATTRIBUTE_UNUSED,
-	     ARMword       pc    ATTRIBUTE_UNUSED,
-	     ARMword       instr ATTRIBUTE_UNUSED)
-{
-  return 0;
-}
-
 int
 sim_write (SIM_DESC sd ATTRIBUTE_UNUSED,
 	   SIM_ADDR addr,

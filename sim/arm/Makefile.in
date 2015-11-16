@@ -25,7 +25,7 @@ SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-hload.o \
 	armemu26.o armemu32.o arminit.o armos.o armsupp.o \
-	armvirt.o bag.o thumbemu.o \
+	armvirt.o thumbemu.o \
 	armcopro.o maverick.o iwmmxt.o
 
 ## COMMON_POST_CONFIG_FRAG

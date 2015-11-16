@@ -38,23 +38,6 @@
 #include <unistd.h>		/* For SEEK_SET etc.  */
 #endif
 
-#ifdef __riscos
-extern int _fisatty (FILE *);
-#define isatty_(f) _fisatty(f)
-#else
-#ifdef __ZTC__
-#include <io.h>
-#define isatty_(f) isatty((f)->_file)
-#else
-#ifdef macintosh
-#include <ioctl.h>
-#define isatty_(f) (~ioctl ((f)->_file, FIOINTERACTIVE, NULL))
-#else
-#define isatty_(f) isatty (fileno (f))
-#endif
-#endif
-#endif
-
 #include "armdefs.h"
 #include "armos.h"
 #include "armemu.h"
@@ -74,17 +57,11 @@ extern int _fisatty (FILE *);
 extern host_callback *sim_callback;
 
 extern unsigned ARMul_OSInit       (ARMul_State *);
-extern void     ARMul_OSExit       (ARMul_State *);
 extern unsigned ARMul_OSHandleSWI  (ARMul_State *, ARMword);
-extern unsigned ARMul_OSException  (ARMul_State *, ARMword, ARMword);
-extern ARMword  ARMul_OSLastErrorP (ARMul_State *);
-extern ARMword  ARMul_Debug        (ARMul_State *, ARMword, ARMword);
 
-#define BUFFERSIZE 4096
 #ifndef FOPEN_MAX
 #define FOPEN_MAX 64
 #endif
-#define UNIQUETEMPS 256
 #ifndef PATH_MAX
 #define PATH_MAX 1024
 #endif
@@ -93,27 +70,8 @@ extern ARMword  ARMul_Debug        (ARMul_State *, ARMword, ARMword);
 
 struct OSblock
 {
-  ARMword Time0;
-  ARMword ErrorP;
   ARMword ErrorNo;
-  FILE *FileTable[FOPEN_MAX];
-  char FileFlags[FOPEN_MAX];
-  char *tempnames[UNIQUETEMPS];
 };
-
-#define NOOP 0
-#define BINARY 1
-#define READOP 2
-#define WRITEOP 4
-
-#ifdef macintosh
-#define FIXCRLF(t,c) ((t & BINARY) ? \
-                      c : \
-                      ((c == '\n' || c == '\r' ) ? (c ^ 7) : c) \
-                     )
-#else
-#define FIXCRLF(t,c) c
-#endif
 
 /* Bit mask of enabled SWI implementations.  */
 unsigned int swi_mask = -1;
@@ -159,7 +117,6 @@ ARMul_OSInit (ARMul_State * state)
     }
 
   OSptr = (struct OSblock *) state->OSptr;
-  OSptr->ErrorP = 0;
   state->Reg[13] = ADDRSUPERSTACK;			/* Set up a stack for the current mode...  */
   ARMul_SetReg (state, SVC32MODE,   13, ADDRSUPERSTACK);/* ...and for supervisor mode...  */
   ARMul_SetReg (state, ABORT32MODE, 13, ADDRSUPERSTACK);/* ...and for abort 32 mode...  */
@@ -182,12 +139,6 @@ ARMul_OSInit (ARMul_State * state)
 
   for (i = 0; i < sizeof (softvectorcode); i += 4)
     ARMul_WriteWord (state, SOFTVECTORCODE + i, softvectorcode[i / 4]);
-
-  for (i = 0; i < FOPEN_MAX; i++)
-    OSptr->FileTable[i] = NULL;
-
-  for (i = 0; i < UNIQUETEMPS; i++)
-    OSptr->tempnames[i] = NULL;
 
   ARMul_ConsolePrint (state, ", Demon 1.01");
 
@@ -232,20 +183,6 @@ ARMul_OSInit (ARMul_State * state)
     swi_mask = SWI_MASK_ANGEL;
 
    return TRUE;
-}
-
-void
-ARMul_OSExit (ARMul_State * state)
-{
-  free ((char *) state->OSptr);
-}
-
-
-/* Return the last Operating System Error.  */
-
-ARMword ARMul_OSLastErrorP (ARMul_State * state)
-{
-  return ((struct OSblock *) state->OSptr)->ErrorP;
 }
 
 static int translate_open_mode[] =
@@ -925,22 +862,3 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 
   return TRUE;
 }
-
-#ifndef NOOS
-#ifndef ASIM
-
-/* The emulator calls this routine when an Exception occurs.  The second
-   parameter is the address of the relevant exception vector.  Returning
-   FALSE from this routine causes the trap to be taken, TRUE causes it to
-   be ignored (so set state->Emulate to FALSE!).  */
-
-unsigned
-ARMul_OSException (ARMul_State * state  ATTRIBUTE_UNUSED,
-		   ARMword       vector ATTRIBUTE_UNUSED,
-		   ARMword       pc     ATTRIBUTE_UNUSED)
-{
-  return FALSE;
-}
-
-#endif
-#endif /* NOOS */

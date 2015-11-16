@@ -1,3 +1,36 @@
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete bag.o.
+	* armdefs.h (struct ARMul_State): Delete ErrorCode.
+	(ResetPin, FIQPin, IRQPin, AbortPin, TransPin, BigEndPin, Prog32Pin,
+	Data32Pin, LateAbortPin, ARMul_OSExit, ARMul_OSLastErrorP,
+	ARMul_Debug, ARMul_OSException,rdi_log, SpinCursor, HOURGLASS,
+	HOURGLASS_RATE): Delete.
+	* armemu.c (ARMul_Emulate26): Delete ARMul_Debug call.
+	* arminit.c (ARMul_Reset): Do not set state->ErrorCode.
+	(ARMul_Abort): Delete ARMul_OSException call.
+	* armopts.h: Delete file.
+	* armos.c (isatty_, ARMul_OSExit, ARMul_OSException,
+	ARMul_OSLastErrorP, ARMul_Debug, BUFFERSIZE, UNIQUETEMPS, NOOP,
+	BINARY, READOP, WRITEOP, FIXCRLF): Delete.
+	(struct OSblock): Delete Time0, ErrorP, FileTable, FileFlags, and
+	tempnames.
+	(ARMul_OSInit): Do not set OSptr->ErrorP, OSptr->FileTable, or
+	OSptr->tempnames.
+	* armrdi.c: Delete file.
+	* armvirt.c: Delete armopts.h include.
+	(ARMul_LoadInstrS): Delete HOURGLASS logic.
+	* bag.c, bag.h, communicate.c, communicate.h, dbg_conf.h, dbg_cp.h,
+	dbg_hif.h: Delete files.
+	* dbg_rdi.h (RDP_*, RDI*): Delete defines.
+	(PointHandle, ThreadHandle, Dbg_ConfigBlock, Dbg_HostosInterface,
+	Dbg_MCState, getbufferproc): Delete.
+	(rdi_*): Delete Functions.
+	(RDI_ConfigAspect, RDI_ConfigMatchType, RDI_NameList): Delete
+	(struct RDIProcVec): Delete.
+	* gdbhost.c, gdbhost.h, kid.c, main.c, parent.c: Delete files.
+	* wrapper.c (ARMul_Debug): Delete.
+
 2015-12-15  Dominik Vogt  <vogt@linux.vnet.ibm.com>
 
 	* thumbemu.c (handle_T2_insn): Fix left shift of negative value.

@@ -72,7 +72,6 @@ struct ARMul_State
 {
   ARMword Emulate;		/* to start and stop emulation */
   unsigned EndCondition;	/* reason for stopping */
-  unsigned ErrorCode;		/* type of illegal instruction */
   ARMword Reg[16];		/* the current register file */
   ARMword RegBank[7][16];	/* all the registers */
   /* 40 bit accumulator.  We always keep this 64 bits wide,
@@ -161,16 +160,6 @@ struct ARMul_State
   ARM_VFP_reg  VFP_Reg[32];     /* Advanced SIMD registers.  */
   ARMword      FPSCR;		/* Floating Point Status Register.  */
 };
-
-#define ResetPin NresetSig
-#define FIQPin NfiqSig
-#define IRQPin NirqSig
-#define AbortPin abortSig
-#define TransPin NtransSig
-#define BigEndPin bigendSig
-#define Prog32Pin prog32Sig
-#define Data32Pin data32Sig
-#define LateAbortPin lateabtSig
 
 /***************************************************************************\
 *                        Properties of ARM we know about                    *
@@ -417,24 +406,11 @@ extern int XScale_debug_moe (ARMul_State * state, int moe);
 \***************************************************************************/
 
 extern unsigned ARMul_OSInit (ARMul_State * state);
-extern void ARMul_OSExit (ARMul_State * state);
 extern unsigned ARMul_OSHandleSWI (ARMul_State * state, ARMword number);
-extern ARMword ARMul_OSLastErrorP (ARMul_State * state);
-
-extern ARMword ARMul_Debug (ARMul_State * state, ARMword pc, ARMword instr);
-extern unsigned ARMul_OSException (ARMul_State * state, ARMword vector,
-				   ARMword pc);
-extern int rdi_log;
 
 /***************************************************************************\
 *                            Host-dependent stuff                           *
 \***************************************************************************/
-
-#ifdef macintosh
-pascal void SpinCursor (short increment);	/* copied from CursorCtl.h */
-# define HOURGLASS           SpinCursor( 1 )
-# define HOURGLASS_RATE      1023	/* 2^n - 1 */
-#endif
 
 extern void ARMul_UndefInstr      (ARMul_State *, ARMword);
 extern void ARMul_FixCPSR         (ARMul_State *, ARMword, ARMword);

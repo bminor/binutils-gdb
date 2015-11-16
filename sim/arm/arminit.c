@@ -198,7 +198,6 @@ ARMul_Reset (ARMul_State * state)
   FLUSHPIPE;
 
   state->EndCondition = 0;
-  state->ErrorCode = 0;
 
   state->Exception = FALSE;
   state->NresetSig = HIGH;
@@ -279,9 +278,6 @@ ARMul_Abort (ARMul_State * state, ARMword vector)
   int e2size = (TFLAG ? -4 : 0);
 
   state->Aborted = FALSE;
-
-  if (ARMul_OSException (state, vector, ARMul_GetPC (state)))
-    return;
 
   if (state->prog32Sig)
     if (ARMul_MODE26BIT)
