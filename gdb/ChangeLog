@@ -1,3 +1,8 @@
+2015-11-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_push_dummy_call): New array buf.  Store regval
+	to buf.  Pass buf instead of val to push_stack_item.
+
 2015-11-13  Yao Qi  <yao.qi@linaro.org>
 
 	PR tdep/19051

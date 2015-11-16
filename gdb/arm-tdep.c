@@ -3925,13 +3925,13 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       while (len > 0)
 	{
 	  int partial_len = len < INT_REGISTER_SIZE ? len : INT_REGISTER_SIZE;
+	  CORE_ADDR regval
+	    = extract_unsigned_integer (val, partial_len, byte_order);
 
 	  if (may_use_core_reg && argreg <= ARM_LAST_ARG_REGNUM)
 	    {
 	      /* The argument is being passed in a general purpose
 		 register.  */
-	      CORE_ADDR regval
-		= extract_unsigned_integer (val, partial_len, byte_order);
 	      if (byte_order == BFD_ENDIAN_BIG)
 		regval <<= (INT_REGISTER_SIZE - partial_len) * 8;
 	      if (arm_debug)
@@ -3945,11 +3945,16 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	  else
 	    {
+	      gdb_byte buf[INT_REGISTER_SIZE];
+
+	      memset (buf, 0, sizeof (buf));
+	      store_unsigned_integer (buf, partial_len, byte_order, regval);
+
 	      /* Push the arguments onto the stack.  */
 	      if (arm_debug)
 		fprintf_unfiltered (gdb_stdlog, "arg %d @ sp + %d\n",
 				    argnum, nstack);
-	      si = push_stack_item (si, val, INT_REGISTER_SIZE);
+	      si = push_stack_item (si, buf, INT_REGISTER_SIZE);
 	      nstack += INT_REGISTER_SIZE;
 	    }
 	      
