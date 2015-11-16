@@ -1,5 +1,12 @@
 2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/list.exp (test_list_forward): Add end of file error
+	test.
+	(test_repeat_list_command): Add end of file error test.
+	(test_list_backwards): Add beginning of file error test.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/list.exp (test_list_invalid_args): New function,
 	defined, and called.
 

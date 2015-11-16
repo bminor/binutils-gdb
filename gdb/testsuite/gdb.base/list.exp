@@ -244,6 +244,10 @@ proc test_list_forward {} {
     }
 
     pass "successive list commands to page forward ($testcnt tests)"
+
+    gdb_test "list" "Line number 44 out of range; \[^\r\n\]+ has 43 lines\." \
+	"end of file error after \"list\" command"
+
     gdb_stop_suppressing_tests
 }
 
@@ -287,6 +291,10 @@ proc test_repeat_list_command {} {
     }
 
     pass "repeat list commands to page forward using 'return' ($testcnt tests)"
+
+    gdb_test "list" "Line number 44 out of range; \[^\r\n\]+ has 43 lines\." \
+	"end of file error after using 'return' to repeat the list command"
+
     gdb_stop_suppressing_tests
 }
 
@@ -324,6 +332,10 @@ proc test_list_backwards {} {
     }
 
     pass "$testcnt successive \"list -\" commands to page backwards"
+
+    gdb_test "list -" "Already at the start of .*\." \
+	"beginning of file error after \"list -\" command"
+
     gdb_stop_suppressing_tests
 }
 

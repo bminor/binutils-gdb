@@ -940,10 +940,15 @@ list_command (char *arg, int from_tty)
       /* "l -" lists previous ten lines, the ones before the ten just
 	 listed.  */
       else if (arg[0] == '-')
-	print_source_lines (cursal.symtab,
-			    max (get_first_line_listed ()
-				 - get_lines_to_list (), 1),
-			    get_first_line_listed (), 0);
+	{
+	  if (get_first_line_listed () == 1)
+	    error (_("Already at the start of %s."),
+		   symtab_to_filename_for_display (cursal.symtab));
+	  print_source_lines (cursal.symtab,
+			      max (get_first_line_listed ()
+				   - get_lines_to_list (), 1),
+			      get_first_line_listed (), 0);
+	}
 
       return;
     }
