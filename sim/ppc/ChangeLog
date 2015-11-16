@@ -1,3 +1,17 @@
+2015-12-29  Kevin Buettner  <kevinb@redhat.com>
+
+	* emul_netbsd.c (fd_closed): New static array.
+	(fdbad): New function.
+	(do_read, do_write, do_close, do_dup, do_ioctl, do_dup2, do_fcntl)
+	(do_fstatfs, do_fstat, do_lseek): Call `fdbad'.
+	(emul_netbsd_init): Initialize `fd_closed'.
+	* emul_unix.c (fd_closed): New static array.
+	(fdbad): New function.
+	(do_unix_read, do_unix_write, do_unix_close, do_unix_dup)
+	(do_unix_dup2, do_unix_lseek, do_solaris_fstat, do_solaris_ioctl)
+	(do_linux_fstat, do_linux_ioctl): Call `fdbad'.
+	(emul_solaris_init, emul_linux_init): Initialize `fd_closed'.
+
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (TCONFIG_H): Delete.
