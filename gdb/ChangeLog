@@ -1,5 +1,10 @@
 2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cli/cli-cmds.c (list_command): Move all handling of +/-
+	arguments into a single if block.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cli/cli-cmds.c (list_command): Use NULL instead of 0 when
 	checking pointers.
 

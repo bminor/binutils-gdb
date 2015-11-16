@@ -930,27 +930,21 @@ list_command (char *arg, int from_tty)
 
 	  print_source_lines (cursal.symtab, first,
 			      first + get_lines_to_list (), 0);
-	  return;
 	}
-    }
 
-  /* "l" or "l +" lists next ten lines.  */
+      /* "l" or "l +" lists next ten lines.  */
+      else if (arg == NULL || strcmp (arg, "+") == 0)
+	print_source_lines (cursal.symtab, cursal.line,
+			    cursal.line + get_lines_to_list (), 0);
 
-  if (arg == NULL || strcmp (arg, "+") == 0)
-    {
-      print_source_lines (cursal.symtab, cursal.line,
-			  cursal.line + get_lines_to_list (), 0);
-      return;
-    }
+      /* "l -" lists previous ten lines, the ones before the ten just
+	 listed.  */
+      else if (strcmp (arg, "-") == 0)
+	print_source_lines (cursal.symtab,
+			    max (get_first_line_listed ()
+				 - get_lines_to_list (), 1),
+			    get_first_line_listed (), 0);
 
-  /* "l -" lists previous ten lines, the ones before the ten just
-     listed.  */
-  if (strcmp (arg, "-") == 0)
-    {
-      print_source_lines (cursal.symtab,
-			  max (get_first_line_listed () 
-			       - get_lines_to_list (), 1),
-			  get_first_line_listed (), 0);
       return;
     }
 
