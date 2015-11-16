@@ -74,7 +74,7 @@ static char const * condition_names[] =
 {
   /* condition codes */
   "eq", "ne", "c", "nc", "gtu", "leu", "pz", "n",
-  "ge", "lt", "gt", "le", "o", "no", "always", "never"
+  "ge", "lt", "gt", "le", "o", "no", "<invalid>", "<invalid>"
 };
 
 static const char * flag_names[] =

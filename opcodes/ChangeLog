@@ -1,3 +1,8 @@
+2015-11-16  Nick Clifton  <nickc@redhat.com>
+
+	* rx-dis.c (condition_names): Replace always and never with
+	invalid, since the always/never conditions can never be legal.
+
 2015-11-13  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
