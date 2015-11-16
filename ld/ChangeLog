@@ -1,3 +1,10 @@
+2015-11-16  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19106
+	* emultempl/armelf.em (_set_symbols): New function.  Enables
+	relaxation for non-relocatable links.
+	(LDEMUL_SET_SYMBOLS): Define.
+
 2015-11-13  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.

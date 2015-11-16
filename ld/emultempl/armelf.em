@@ -55,6 +55,19 @@ gld${EMULATION_NAME}_before_parse (void)
 }
 
 static void
+gld${EMULATION_NAME}_set_symbols (void)
+{
+  /* PR 19106: The section resizing code in gldarmelf_after_allocation
+     is effectively the same as relaxation, so prevent early memory
+     region checks which produce bogus error messages.
+     Note - this test has nothing to do with symbols.  It is just here
+     because this is the first emulation routine that is called after
+     the command line has been parsed.  */
+  if (!bfd_link_relocatable (&link_info))
+    TARGET_ENABLE_RELAXATION;
+}
+
+static void
 arm_elf_before_allocation (void)
 {
   bfd_elf32_arm_set_byteswap_code (&link_info, byteswap_code);
@@ -728,6 +741,7 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=arm_elf_create_output_section_statements
 
 # Replace the elf before_parse function with our own.
 LDEMUL_BEFORE_PARSE=gld"${EMULATION_NAME}"_before_parse
+LDEMUL_SET_SYMBOLS=gld"${EMULATION_NAME}"_set_symbols
 
 # Call the extra arm-elf function
 LDEMUL_FINISH=gld${EMULATION_NAME}_finish
