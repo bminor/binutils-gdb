@@ -1,5 +1,13 @@
 2015-11-16  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (pass_in_x_or_stack): Change argument type
+	from bfd_byte * to value *.  Caller updated.
+	(pass_in_x): Likewise.
+	(pass_in_v_or_stack): Likewise.
+	(pass_on_stack): Likewise.
+
+2015-11-16  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (aarch64_push_dummy_call): Call value_contents
 	instead of value_contents_writeable.
 	* bfin-tdep.c (bfin_push_dummy_call): Likewise.

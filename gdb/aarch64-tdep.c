@@ -989,12 +989,13 @@ struct aarch64_call_info
 static void
 pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 	   struct aarch64_call_info *info, struct type *type,
-	   const bfd_byte *buf)
+	   struct value *arg)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   enum type_code typecode = TYPE_CODE (type);
   int regnum = AARCH64_X0_REGNUM + info->ngrn;
+  const bfd_byte *buf = value_contents (arg);
 
   info->argnum++;
 
@@ -1059,8 +1060,9 @@ pass_in_v (struct gdbarch *gdbarch,
 
 static void
 pass_on_stack (struct aarch64_call_info *info, struct type *type,
-	       const bfd_byte *buf)
+	       struct value *arg)
 {
+  const bfd_byte *buf = value_contents (arg);
   int len = TYPE_LENGTH (type);
   int align;
   stack_item_t item;
@@ -1108,7 +1110,7 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
 static void
 pass_in_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
 		    struct aarch64_call_info *info, struct type *type,
-		    const bfd_byte *buf)
+		    struct value *arg)
 {
   int len = TYPE_LENGTH (type);
   int nregs = (len + X_REGISTER_SIZE - 1) / X_REGISTER_SIZE;
@@ -1116,13 +1118,13 @@ pass_in_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
   /* PCS C.13 - Pass in registers if we have enough spare */
   if (info->ngrn + nregs <= 8)
     {
-      pass_in_x (gdbarch, regcache, info, type, buf);
+      pass_in_x (gdbarch, regcache, info, type, arg);
       info->ngrn += nregs;
     }
   else
     {
       info->ngrn = 8;
-      pass_on_stack (info, type, buf);
+      pass_on_stack (info, type, arg);
     }
 }
 
@@ -1134,10 +1136,10 @@ pass_in_v_or_stack (struct gdbarch *gdbarch,
 		    struct regcache *regcache,
 		    struct aarch64_call_info *info,
 		    struct type *type,
-		    const bfd_byte *buf)
+		    struct value *arg)
 {
-  if (!pass_in_v (gdbarch, regcache, info, buf))
-    pass_on_stack (info, type, buf);
+  if (!pass_in_v (gdbarch, regcache, info, value_contents (arg)))
+    pass_on_stack (info, type, arg);
 }
 
 /* Implement the "push_dummy_call" gdbarch method.  */
@@ -1251,8 +1253,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		arg_type = builtin_type (gdbarch)->builtin_int32;
 	      arg = value_cast (arg_type, arg);
 	    }
-	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type,
-			      value_contents (arg));
+	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	  break;
 
 	case TYPE_CODE_COMPLEX:
@@ -1269,12 +1270,11 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  else
 	    {
 	      info.nsrn = 8;
-	      pass_on_stack (&info, arg_type, value_contents (arg));
+	      pass_on_stack (&info, arg_type, arg);
 	    }
 	  break;
 	case TYPE_CODE_FLT:
-	  pass_in_v_or_stack (gdbarch, regcache, &info, arg_type,
-			      value_contents (arg));
+	  pass_in_v_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	  break;
 
 	case TYPE_CODE_STRUCT:
@@ -1299,14 +1299,14 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct type *field_type =
 			check_typedef (value_type (field));
 
-		      pass_in_v_or_stack (gdbarch, regcache, &info, field_type,
-					  value_contents (field));
+		      pass_in_v_or_stack (gdbarch, regcache, &info,
+					  field_type, field);
 		    }
 		}
 	      else
 		{
 		  info.nsrn = 8;
-		  pass_on_stack (&info, arg_type, value_contents (arg));
+		  pass_on_stack (&info, arg_type, arg);
 		}
 	    }
 	  else if (len > 16)
@@ -1323,18 +1323,15 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* Construct the indirection.  */
 	      arg_type = lookup_pointer_type (arg_type);
 	      arg = value_from_pointer (arg_type, sp);
-	      pass_in_x_or_stack (gdbarch, regcache, &info, arg_type,
-				  value_contents (arg));
+	      pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	    }
 	  else
 	    /* PCS C.15 / C.18 multiple values pass.  */
-	    pass_in_x_or_stack (gdbarch, regcache, &info, arg_type,
-				value_contents (arg));
+	    pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	  break;
 
 	default:
-	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type,
-			      value_contents (arg));
+	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	  break;
 	}
     }
