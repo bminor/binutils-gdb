@@ -1,5 +1,9 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Delete sim-reason.o and sim-stop.o.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (sim_open): Delete sim_create_inferior call.
 
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>

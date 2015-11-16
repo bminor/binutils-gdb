@@ -22,9 +22,7 @@ MN10300_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	op_utils.o \
 	sim-hload.o \
-	sim-resume.o \
-	sim-reason.o \
-	sim-stop.o
+	sim-resume.o
 
 SIM_OBJS = $(MN10300_OBJS) interp.o
 

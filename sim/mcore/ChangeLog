@@ -1,5 +1,10 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Delete sim-reason.o, sim-reg.o, and
+	sim-stop.o.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (mcore_regset, LAST_VALID_CREG, NUM_MCORE_REGS: Move
 	to sim-main.h.
 	(cpu): Delete.

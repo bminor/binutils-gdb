@@ -29,10 +29,7 @@ SIM_OBJS = \
 	machs.o \
 	sim-hload.o \
 	sim-model.o \
-	sim-reason.o \
-	sim-reg.o \
-	sim-resume.o \
-	sim-stop.o
+	sim-resume.o
 
 INCLUDE = bfin-sim.h
 

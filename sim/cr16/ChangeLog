@@ -1,5 +1,10 @@
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Delete sim-reason.o, sim-reg.o, and
+	sim-stop.o.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* cr16_sim.h (cr16_callback): Delete.
 	* interp.c (cr16_callback): Delete.
 	(do_run): Delete cr16_callback.  Replace
