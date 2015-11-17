@@ -1124,7 +1124,7 @@ handle_exception (struct target_waitstatus *ourstatus)
     default:
       /* Treat unhandled first chance exceptions specially.  */
       if (current_event.u.Exception.dwFirstChance)
-	return -1;
+	return 0;
       printf_unfiltered ("gdb: unknown target exception 0x%08x at %s\n",
 	(unsigned) current_event.u.Exception.ExceptionRecord.ExceptionCode,
 	host_address_to_string (
@@ -1491,19 +1491,10 @@ get_windows_debug_event (struct target_ops *ops,
 		     "EXCEPTION_DEBUG_EVENT"));
       if (saw_create != 1)
 	break;
-      switch (handle_exception (ourstatus))
-	{
-	case 0:
-	  continue_status = DBG_EXCEPTION_NOT_HANDLED;
-	  break;
-	case 1:
-	  thread_id = current_event.dwThreadId;
-	  break;
-	case -1:
-	  last_sig = 1;
-	  continue_status = -1;
-	  break;
-	}
+      if (handle_exception (ourstatus))
+	thread_id = current_event.dwThreadId;
+      else
+	continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:	/* Message from the kernel.  */
@@ -1529,10 +1520,7 @@ get_windows_debug_event (struct target_ops *ops,
 
   if (!thread_id || saw_create != 1)
     {
-      if (continue_status == -1)
-	windows_resume (ops, minus_one_ptid, 0, 1);
-      else
-	CHECK (windows_continue (continue_status, -1, 0));
+      CHECK (windows_continue (continue_status, -1, 0));
     }
   else
     {

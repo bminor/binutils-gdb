@@ -1,5 +1,11 @@
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
+	* windows-nat.c (handle_exception): Return 0 for first chance
+	exceptions.
+	(get_windows_debug_event): Adjust.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
 	* windows-nat.c (xslate): Use GDB_SIGNAL_UNKNOWN instead of -1 as
 	signal number for terminator.
 
