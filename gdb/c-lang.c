@@ -701,7 +701,7 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 			obstack_object_size (&output));
 	      }
 	    else
-	      result = value_cstring (obstack_base (&output),
+	      result = value_cstring ((const char *) obstack_base (&output),
 				      obstack_object_size (&output),
 				      type);
 	  }

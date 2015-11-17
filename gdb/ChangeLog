@@ -1,4 +1,15 @@
 2015-11-18  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* break-catch-sig.c (signal_catchpoint_print_one): Add cast.
+	* c-exp.y (parse_string_or_char, yylex): Add casts.
+	* c-lang.c (evaluate_subexp_c): Add casts.
+	* d-exp.y (parse_string_or_char, yylex): Add casts.
+	* go-exp.y (parse_string_or_char, build_packaged_name): Add casts.
+	* p-valprint.c (pascal_object_print_value_fields): Add casts.
+	* valprint.c (generic_emit_char, generic_printstr): Add casts.
+
+2015-11-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* valops.c (value_cstring): Constify 'ptr' parameter.
 	* value.h (value_cstring): Constify 'ptr' parameter.

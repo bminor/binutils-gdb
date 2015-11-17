@@ -279,7 +279,7 @@ signal_catchpoint_print_one (struct breakpoint *b,
 	  obstack_grow (&text, name, strlen (name));
         }
       obstack_grow (&text, "", 1);
-      ui_out_field_string (uiout, "what", obstack_base (&text));
+      ui_out_field_string (uiout, "what", (const char *) obstack_base (&text));
       do_cleanups (cleanup);
     }
   else
