@@ -1,3 +1,8 @@
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* debug.h (TRACE, ITRACE, DTRACE, DITRACE, PTRACE): Call
+	sim_io_printf_filtered instead of printf_filtered.
+
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
