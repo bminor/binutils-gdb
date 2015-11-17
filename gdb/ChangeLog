@@ -1,3 +1,19 @@
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* ser-mingw.c (CancelIo_ftype): New typedef.
+	(CancelIo): Use CancelIo_ftype.
+	(ser_windows_close, ser_windows_wait_handle)
+	(ser_windows_read_prim, stop_select_thread)
+	(console_select_thread, pipe_select_thread, file_select_thread)
+	(ser_console_wait_handle, ser_console_done_wait_handle)
+	(ser_console_close, cleanup_pipe_state, pipe_windows_close)
+	(pipe_windows_write, pipe_wait_handle, pipe_done_wait_handle)
+	(net_windows_socket_check_pending, net_windows_select_thread)
+	(net_windows_wait_handle, net_windows_done_wait_handle)
+	(net_windows_close): Add casts.
+	(_initialize_ser_windows): Cast to CancelIo_ftype* instead of
+	void*.
+
 2015-11-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* c-exp.y (exp): Adjust, change enum c_string_type to
