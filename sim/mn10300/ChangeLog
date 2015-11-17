@@ -1,3 +1,7 @@
+2015-11-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (WITH_CORE): Delete.
+
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-reason.o and sim-stop.o.

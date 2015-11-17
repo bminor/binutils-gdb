@@ -3,7 +3,6 @@
 
 /* General config options */
 
-#define WITH_CORE
 #define WITH_WATCHPOINTS 1
 
 
