@@ -1289,7 +1289,7 @@ namespace eval Dwarf {
 	_op .ascii [_quote $name]
 	# Alignment.
 	set align 2
-	set total [expr {($namelen + (1 << $align) - 1) & (-1 << $align)}]
+	set total [expr {($namelen + (1 << $align) - 1) & -(1 << $align)}]
 	for {set i $namelen} {$i < $total} {incr i} {
 	    _op .byte 0
 	}

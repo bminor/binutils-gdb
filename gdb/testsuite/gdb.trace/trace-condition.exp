@@ -142,7 +142,7 @@ foreach trace_command { "trace" "ftrace" } {
     test_tracepoints $trace_command "21 * 2 == 42" 10
     test_tracepoints $trace_command "21 << 1 == 42" 10
     test_tracepoints $trace_command "42 >> 1 == 21" 10
-    test_tracepoints $trace_command "-21 << 1 == -42" 10
+    test_tracepoints $trace_command "-(21 << 1) == -42" 10
     test_tracepoints $trace_command "-42 >> 1 == -21" 10
     test_tracepoints $trace_command "(0xabababab & 0x0000ffff) == 0xabab" 10
     test_tracepoints $trace_command "(0xabababab | 0x0000ffff) == 0xababffff" 10
