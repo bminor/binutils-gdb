@@ -42,6 +42,7 @@
 #include "completer.h"
 #include "ui-out.h"
 #include "readline/readline.h"
+#include "common/enum-flags.h"
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -1327,7 +1328,7 @@ identify_source_line (struct symtab *s, int line, int mid_statement,
 
 static void
 print_source_lines_base (struct symtab *s, int line, int stopline,
-			 enum print_source_lines_flags flags)
+			 print_source_lines_flags flags)
 {
   int c;
   int desc;
@@ -1361,7 +1362,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
   else
     {
       desc = last_source_error;
-	  flags |= PRINT_SOURCE_LINES_NOERROR;
+      flags |= PRINT_SOURCE_LINES_NOERROR;
       noprint = 1;
     }
 
@@ -1487,7 +1488,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
 void
 print_source_lines (struct symtab *s, int line, int stopline,
-		    enum print_source_lines_flags flags)
+		    print_source_lines_flags flags)
 {
   print_source_lines_base (s, line, stopline, flags);
 }

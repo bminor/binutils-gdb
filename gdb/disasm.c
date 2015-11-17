@@ -340,7 +340,7 @@ do_mixed_source_and_assembly_deprecated
   int out_of_order = 0;
   int next_line = 0;
   int num_displayed = 0;
-  enum print_source_lines_flags psl_flags = 0;
+  print_source_lines_flags psl_flags = 0;
   struct cleanup *ui_out_chain;
   struct cleanup *ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
   struct cleanup *ui_out_list_chain = make_cleanup (null_cleanup, 0);
@@ -501,7 +501,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   int out_of_order = 0;
   int next_line = 0;
   int num_displayed = 0;
-  enum print_source_lines_flags psl_flags = 0;
+  print_source_lines_flags psl_flags = 0;
   struct cleanup *cleanups;
   struct cleanup *ui_out_chain;
   struct cleanup *ui_out_tuple_chain;

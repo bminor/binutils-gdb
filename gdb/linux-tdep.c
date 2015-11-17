@@ -37,6 +37,7 @@
 #include "infcall.h"
 #include "gdbcmd.h"
 #include "gdb_regex.h"
+#include "common/enum-flags.h"
 
 #include <ctype.h>
 
@@ -46,7 +47,7 @@
    Documentation/filesystems/proc.txt, inside the Linux kernel
    tree.  */
 
-enum filterflags
+enum filter_flag
   {
     COREFILTER_ANON_PRIVATE = 1 << 0,
     COREFILTER_ANON_SHARED = 1 << 1,
@@ -56,6 +57,7 @@ enum filterflags
     COREFILTER_HUGETLB_PRIVATE = 1 << 5,
     COREFILTER_HUGETLB_SHARED = 1 << 6,
   };
+DEF_ENUM_FLAGS_TYPE (enum filter_flag, filter_flags);
 
 /* This struct is used to map flags found in the "VmFlags:" field (in
    the /proc/<PID>/smaps file).  */
@@ -599,7 +601,7 @@ mapping_is_anonymous_p (const char *filename)
      This should work OK enough, however.  */
 
 static int
-dump_mapping_p (enum filterflags filterflags, const struct smaps_vmflags *v,
+dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 		int maybe_private_p, int mapping_anon_p, int mapping_file_p,
 		const char *filename)
 {
@@ -1120,10 +1122,10 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
   /* Default dump behavior of coredump_filter (0x33), according to
      Documentation/filesystems/proc.txt from the Linux kernel
      tree.  */
-  enum filterflags filterflags = (COREFILTER_ANON_PRIVATE
-				  | COREFILTER_ANON_SHARED
-				  | COREFILTER_ELF_HEADERS
-				  | COREFILTER_HUGETLB_PRIVATE);
+  filter_flags filterflags = (COREFILTER_ANON_PRIVATE
+			      | COREFILTER_ANON_SHARED
+			      | COREFILTER_ELF_HEADERS
+			      | COREFILTER_HUGETLB_PRIVATE);
 
   /* We need to know the real target PID to access /proc.  */
   if (current_inferior ()->fake_pid_p)
@@ -1139,7 +1141,10 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 							coredumpfilter_name);
       if (coredumpfilterdata != NULL)
 	{
-	  sscanf (coredumpfilterdata, "%x", &filterflags);
+	  unsigned int flags;
+
+	  sscanf (coredumpfilterdata, "%x", &flags);
+	  filterflags = (enum filter_flag) flags;
 	  xfree (coredumpfilterdata);
 	}
     }

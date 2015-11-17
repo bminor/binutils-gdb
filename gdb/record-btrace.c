@@ -639,7 +639,7 @@ static void
 btrace_print_lines (struct btrace_line_range lines, struct ui_out *uiout,
 		    struct cleanup **ui_item_chain, int flags)
 {
-  enum print_source_lines_flags psl_flags;
+  print_source_lines_flags psl_flags;
   int line;
 
   psl_flags = 0;
@@ -1044,11 +1044,12 @@ btrace_call_history (struct ui_out *uiout,
 		     const struct btrace_thread_info *btinfo,
 		     const struct btrace_call_iterator *begin,
 		     const struct btrace_call_iterator *end,
-		     enum record_print_flag flags)
+		     int int_flags)
 {
   struct btrace_call_iterator it;
+  record_print_flags flags = (enum record_print_flag) int_flags;
 
-  DEBUG ("ftrace (0x%x): [%u; %u)", flags, btrace_call_number (begin),
+  DEBUG ("ftrace (0x%x): [%u; %u)", int_flags, btrace_call_number (begin),
 	 btrace_call_number (end));
 
   for (it = *begin; btrace_call_cmp (&it, end) < 0; btrace_call_next (&it, 1))
@@ -1114,7 +1115,7 @@ btrace_call_history (struct ui_out *uiout,
 /* The to_call_history method of target record-btrace.  */
 
 static void
-record_btrace_call_history (struct target_ops *self, int size, int flags)
+record_btrace_call_history (struct target_ops *self, int size, int int_flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_call_history *history;
@@ -1122,6 +1123,7 @@ record_btrace_call_history (struct target_ops *self, int size, int flags)
   struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
   unsigned int context, covered;
+  record_print_flags flags = (enum record_print_flag) int_flags;
 
   uiout = current_uiout;
   uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
@@ -1136,7 +1138,7 @@ record_btrace_call_history (struct target_ops *self, int size, int flags)
     {
       struct btrace_insn_iterator *replay;
 
-      DEBUG ("call-history (0x%x): %d", flags, size);
+      DEBUG ("call-history (0x%x): %d", int_flags, size);
 
       /* If we're replaying, we start at the replay position.  Otherwise, we
 	 start at the tail of the trace.  */
@@ -1171,7 +1173,7 @@ record_btrace_call_history (struct target_ops *self, int size, int flags)
       begin = history->begin;
       end = history->end;
 
-      DEBUG ("call-history (0x%x): %d, prev: [%u; %u)", flags, size,
+      DEBUG ("call-history (0x%x): %d, prev: [%u; %u)", int_flags, size,
 	     btrace_call_number (&begin), btrace_call_number (&end));
 
       if (size < 0)
@@ -1204,7 +1206,8 @@ record_btrace_call_history (struct target_ops *self, int size, int flags)
 
 static void
 record_btrace_call_history_range (struct target_ops *self,
-				  ULONGEST from, ULONGEST to, int flags)
+				  ULONGEST from, ULONGEST to,
+				  int int_flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_call_history *history;
@@ -1213,6 +1216,7 @@ record_btrace_call_history_range (struct target_ops *self,
   struct ui_out *uiout;
   unsigned int low, high;
   int found;
+  record_print_flags flags = (enum record_print_flag) int_flags;
 
   uiout = current_uiout;
   uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
@@ -1220,7 +1224,7 @@ record_btrace_call_history_range (struct target_ops *self,
   low = from;
   high = to;
 
-  DEBUG ("call-history (0x%x): [%u; %u)", flags, low, high);
+  DEBUG ("call-history (0x%x): [%u; %u)", int_flags, low, high);
 
   /* Check for wrap-arounds.  */
   if (low != from || high != to)
@@ -1257,9 +1261,11 @@ record_btrace_call_history_range (struct target_ops *self,
 
 static void
 record_btrace_call_history_from (struct target_ops *self,
-				 ULONGEST from, int size, int flags)
+				 ULONGEST from, int size,
+				 int int_flags)
 {
   ULONGEST begin, end, context;
+  record_print_flags flags = (enum record_print_flag) int_flags;
 
   context = abs (size);
   if (context == 0)

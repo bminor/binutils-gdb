@@ -2257,7 +2257,7 @@ parse_string_or_char (const char *tokptr, const char **outptr,
 
 /* This is used to associate some attributes with a token.  */
 
-enum token_flags
+enum token_flag
 {
   /* If this bit is set, the token is C++-only.  */
 
@@ -2269,13 +2269,14 @@ enum token_flags
 
   FLAG_SHADOW = 2
 };
+DEF_ENUM_FLAGS_TYPE (enum token_flag, token_flags);
 
 struct token
 {
   char *oper;
   int token;
   enum exp_opcode opcode;
-  enum token_flags flags;
+  token_flags flags;
 };
 
 static const struct token tokentab3[] =

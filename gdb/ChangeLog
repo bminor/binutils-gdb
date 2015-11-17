@@ -1,5 +1,65 @@
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
+	* btrace.h: Include common/enum-flags.h.
+	(btrace_insn_flags): Define.
+	(struct btrace_insn) <flags>: Change type.
+	(btrace_function_flags): Define.
+	(struct btrace_function) <flags>: Change type.
+	(btrace_thread_flags): Define.
+	(struct btrace_thread_info) <flags>: Change type.
+	* c-exp.y (token_flags): Rename to ...
+	(token_flag): ... this.
+	(token_flags): Define.
+	(struct token) <flags>: Change type.
+	* common/enum-flags.h: New file.
+	* compile/compile-c-types.c (convert_qualified): Change type of
+	'quals' local.
+	* compile/compile-internal.h: Include "common/enum-flags.h".
+	(gcc_qualifiers_flags): Define.
+	* completer.c (enum reg_completer_targets): Rename to ...
+	(enum reg_completer_target): ... this.
+	(reg_completer_targets): Define.
+	(reg_or_group_completer_1): Change type of 'targets' parameter.
+	* disasm.c (do_mixed_source_and_assembly_deprecated): Change type
+	of 'psl_flags' local.
+	(do_mixed_source_and_assembly): Change type of 'psl_flags' local.
+	* infrun.c: Include "common/enum-flags.h".
+	(enum step_over_what): Rename to ...
+	(enum step_over_what_flag): ... this.
+	(step_over_what): Change type.
+	(start_step_over): Change type of 'step_what' local.
+	(thread_still_needs_step_over): Now returns a step_over_what.
+	Adjust.
+	(keep_going_pass_signal): Change type of 'step_what' local.
+	* linux-tdep.c: Include "common/enum-flags.h".
+	(enum filterflags): Rename to ...
+	(enum filter_flag): ... this.
+	(filter_flags): Define.
+	(dump_mapping_p): Change type of 'filterflags' parameter.
+	(linux_find_memory_regions_full): Change type of 'filterflags'
+	local.
+	(linux_find_memory_regions_full): Pass the address of an unsigned
+	int to sscanf instead of the address of an enum.
+	* record-btrace.c (btrace_print_lines): Change type of local
+	'psl_flags'.
+	(btrace_call_history): Replace 'flags' parameter
+	with 'int_flags' parameter.  Adjust.
+	(record_btrace_call_history, record_btrace_call_history_range)
+	(record_btrace_call_history_from): Rename 'flags' parameter to
+	'int_flags'.  Use record_print_flags.
+	* record.h: Include "common/enum-flags.h".
+	(record_print_flags): Define.
+	* source.c: Include "common/enum-flags.h".
+	(print_source_lines_base, print_source_lines): Change type of
+	flags parameter.
+	* symtab.h: Include "common/enum-flags.h".
+	(enum print_source_lines_flags): Rename to ...
+	(enum print_source_lines_flag): ... this.
+	(print_source_lines_flags): Define.
+	(print_source_lines): Change prototype.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
 	* guile/scm-disasm.c (gdbscm_disasm_read_memory): Return -1 on
 	error instead of TARGET_XFER_E_IO.
 	(gdbscm_disasm_memory_error): Always pass TARGET_XFER_E_IO to
