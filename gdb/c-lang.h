@@ -29,12 +29,13 @@ struct parser_state;
 #include "value.h"
 #include "macroexp.h"
 #include "parser-defs.h"
+#include "common/enum-flags.h"
 
 
 /* The various kinds of C string and character.  Note that these
    values are chosen so that they may be or'd together in certain
    ways.  */
-enum c_string_type
+enum c_string_type_values
   {
     /* An ordinary string: "value".  */
     C_STRING = 0,
@@ -55,6 +56,8 @@ enum c_string_type
     /* A 32-bit Unicode char: U'v'.  */
     C_CHAR_32 = 7
   };
+
+DEF_ENUM_FLAGS_TYPE (enum c_string_type_values, c_string_type);
 
 /* Defined in c-exp.y.  */
 

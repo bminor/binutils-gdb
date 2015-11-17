@@ -1,3 +1,19 @@
+2015-11-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-exp.y (exp): Adjust, change enum c_string_type to
+	c_string_type.
+	(parse_string_or_char): Likewise.
+	* c-lang.c (charset_for_string_type): Likewise.
+	(classify_type): Likewise.
+	(c_printchar): Likewise.
+	(c_printstr): Likewise.
+	(evaluate_subexp_c): Likewise.  And change cast to enum
+	c_string_type_values.
+	* c-lang.h: Include "common/enum_flags.h".
+	(enum c_string_type): Rename to...
+	(enum c_string_type_values): ...this.
+	(c_string_type): Define new enum flags type.
+
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
 	* btrace.h: Include common/enum-flags.h.

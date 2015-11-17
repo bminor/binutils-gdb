@@ -864,7 +864,7 @@ string_exp:
 exp	:	string_exp
 			{
 			  int i;
-			  enum c_string_type type = C_STRING;
+			  c_string_type type = C_STRING;
 
 			  for (i = 0; i < $1.len; ++i)
 			    {
@@ -878,7 +878,7 @@ exp	:	string_exp
 				  if (type != C_STRING
 				      && type != $1.tokens[i].type)
 				    error (_("Undefined string concatenation."));
-				  type = (enum c_string_type) $1.tokens[i].type;
+				  type = (enum c_string_type_values) $1.tokens[i].type;
 				  break;
 				default:
 				  /* internal error */
@@ -2164,7 +2164,7 @@ parse_string_or_char (const char *tokptr, const char **outptr,
 		      struct typed_stoken *value, int *host_chars)
 {
   int quote;
-  enum c_string_type type;
+  c_string_type type;
   int is_objc = 0;
 
   /* Build the gdb internal form of the input string in tempbuf.  Note
