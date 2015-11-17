@@ -1,5 +1,10 @@
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
+	* windows-nat.c (xslate): Use GDB_SIGNAL_UNKNOWN instead of -1 as
+	signal number for terminator.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
 	* ser-tcp.c (net_open) : Cast getsockopt argument to char *
 	instead of void *.  Update comment.
 	(net_read_prim): Cast recv argument to char * instead of void *.

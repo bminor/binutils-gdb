@@ -284,7 +284,7 @@ static const struct xlate_exception
   {DBG_CONTROL_C, GDB_SIGNAL_INT},
   {EXCEPTION_SINGLE_STEP, GDB_SIGNAL_TRAP},
   {STATUS_FLOAT_DIVIDE_BY_ZERO, GDB_SIGNAL_FPE},
-  {-1, -1}};
+  {-1, GDB_SIGNAL_UNKNOWN}};
 
 /* Set the MAPPINGS static global to OFFSETS.
    See the description of MAPPINGS for more details.  */
