@@ -1,3 +1,18 @@
+2015-11-17  Tristan Gingold  <gingold@adacore.com>
+
+	* arm64.h: New file.
+	* arm.h: New file.
+	* unwind.h: Add arm64 encodings.
+	* loader.h (bfd_mach_o_cpu_subtype): Add arm64 literals.
+	(BFD_MACH_O_LC_ENCRYPTION_INFO_64, BFD_MACH_O_LC_LINKER_OPTIONS)
+	(BFD_MACH_O_LC_LINKER_OPTIMIZATION_HINT)
+	(BFD_MACH_O_LC_VERSION_MIN_WATCHOS): Define.
+	* external.h (mach_o_encryption_info_64_command_external):
+	(mach_o_linker_option_command_external)
+	(mach_o_dyld_cache_header_external)
+	(mach_o_dyld_cache_mapping_info_external)
+	(mach_o_dyld_cache_image_info_external): New types.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
