@@ -1,5 +1,10 @@
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
+	* common/common-defs.h (ATTRIBUTE_PRINTF): Redefine in terms of
+	_GL_ATTRIBUTE_FORMAT_PRINTF after including ansidecl.h.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
 	* common/common-defs.h (__STDC_CONSTANT_MACROS)
 	(__STDC_LIMIT_MACROS): Define before including stdint.h.
 

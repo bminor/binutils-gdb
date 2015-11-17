@@ -51,7 +51,16 @@
 #include <string.h>
 #include <errno.h>
 #include <alloca.h>
+
 #include "ansidecl.h"
+/* This is defined by ansidecl.h, but we prefer gnulib's version.  On
+   MinGW, gnulib might enable __USE_MINGW_ANSI_STDIO, which may or not
+   require use of attribute gnu_printf instead of printf.  gnulib
+   checks that at configure time.  Since _GL_ATTRIBUTE_FORMAT_PRINTF
+   is compatible with ATTRIBUTE_PRINTF, simply use it.  */
+#undef ATTRIBUTE_PRINTF
+#define ATTRIBUTE_PRINTF _GL_ATTRIBUTE_FORMAT_PRINTF
+
 #include "libiberty.h"
 #include "pathmax.h"
 #include "gdb/signals.h"
