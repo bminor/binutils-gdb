@@ -1,5 +1,10 @@
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
+	* win32-low.c (win32_resume): Use gdb_signal_from_host,
+	GDB_SIGNAL_0 and gdb_signal_to_string.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
 	* win32-low.c (handle_output_debug_string): Remove parameter.
 	(win32_kill): Remove our_status local and adjust call to
 	handle_output_debug_string.

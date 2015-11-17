@@ -926,12 +926,12 @@ win32_resume (struct thread_resume *resume_info, size_t n)
 
   if (!ptid_equal (resume_info[0].thread, minus_one_ptid))
     {
-      sig = resume_info[0].sig;
+      sig = gdb_signal_from_host (resume_info[0].sig);
       step = resume_info[0].kind == resume_step;
     }
   else
     {
-      sig = 0;
+      sig = GDB_SIGNAL_0;
       step = 0;
     }
 
@@ -939,12 +939,14 @@ win32_resume (struct thread_resume *resume_info, size_t n)
     {
       if (current_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT)
 	{
-	  OUTMSG (("Cannot continue with signal %d here.\n", sig));
+	  OUTMSG (("Cannot continue with signal %s here.\n",
+		   gdb_signal_to_string (sig)));
 	}
       else if (sig == last_sig)
 	continue_status = DBG_EXCEPTION_NOT_HANDLED;
       else
-	OUTMSG (("Can only continue with recieved signal %d.\n", last_sig));
+	OUTMSG (("Can only continue with received signal %s.\n",
+		 gdb_signal_to_string (last_sig)));
     }
 
   last_sig = GDB_SIGNAL_0;
