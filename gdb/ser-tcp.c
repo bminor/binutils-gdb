@@ -280,10 +280,10 @@ net_open (struct serial *scb, const char *name)
 
     len = sizeof (err);
     /* On Windows, the fourth parameter to getsockopt is a "char *";
-       on UNIX systems it is generally "void *".  The cast to "void *"
-       is OK everywhere, since in C "void *" can be implicitly
-       converted to any pointer type.  */
-    res = getsockopt (scb->fd, SOL_SOCKET, SO_ERROR, (void *) &err, &len);
+       on UNIX systems it is generally "void *".  The cast to "char *"
+       is OK everywhere, since in C++ any data pointer type can be
+       implicitly converted to "void *".  */
+    res = getsockopt (scb->fd, SOL_SOCKET, SO_ERROR, (char *) &err, &len);
     if (res < 0 || err)
       {
 	/* Maybe the target still isn't ready to accept the connection.  */
@@ -342,13 +342,17 @@ net_read_prim (struct serial *scb, size_t count)
   /* Need to cast to silence -Wpointer-sign on MinGW, as Winsock's
      'recv' takes 'char *' as second argument, while 'scb->buf' is
      'unsigned char *'.  */
-  return recv (scb->fd, (void *) scb->buf, count, 0);
+  return recv (scb->fd, (char *) scb->buf, count, 0);
 }
 
 int
 net_write_prim (struct serial *scb, const void *buf, size_t count)
 {
-  return send (scb->fd, buf, count, 0);
+  /* On Windows, the second parameter to send is a "const char *"; on
+     UNIX systems it is generally "const void *".  The cast to "const
+     char *" is OK everywhere, since in C++ any data pointer type can
+     be implicitly converted to "const void *".  */
+  return send (scb->fd, (const char *) buf, count, 0);
 }
 
 int
