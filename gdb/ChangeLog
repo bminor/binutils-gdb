@@ -1,5 +1,12 @@
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
+	* exec.c (exec_file_attach, symfile_bfd_open) [__GO32__ || _WIN32
+	|| __CYGWIN__]: Add casts.
+	* utils.c (gdb_filename_fnmatch): Add cast.
+	* windows-nat.c (windows_create_inferior): Add cast.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
 	* ser-mingw.c (CancelIo_ftype): New typedef.
 	(CancelIo): Use CancelIo_ftype.
 	(ser_windows_close, ser_windows_wait_handle)

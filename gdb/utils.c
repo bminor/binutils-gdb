@@ -3356,14 +3356,14 @@ gdb_filename_fnmatch (const char *pattern, const char *string, int flags)
 
     /* Replace '\' by '/' in both strings.  */
 
-    pattern_slash = alloca (strlen (pattern) + 1);
+    pattern_slash = (char *) alloca (strlen (pattern) + 1);
     strcpy (pattern_slash, pattern);
     pattern = pattern_slash;
     for (; *pattern_slash != 0; pattern_slash++)
       if (IS_DIR_SEPARATOR (*pattern_slash))
 	*pattern_slash = '/';
 
-    string_slash = alloca (strlen (string) + 1);
+    string_slash = (char *) alloca (strlen (string) + 1);
     strcpy (string_slash, string);
     string = string_slash;
     for (; *string_slash != 0; string_slash++)

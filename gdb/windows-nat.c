@@ -2209,7 +2209,7 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
      To avoid ambiguities introduced by spaces in the module name,
      we quote it.  */
   args_len = strlen (toexec) + 2 /* quotes */ + strlen (allargs) + 2;
-  args = alloca (args_len);
+  args = (char *) alloca (args_len);
   xsnprintf (args, args_len, "\"%s\" %s", toexec, allargs);
 
   flags |= DEBUG_ONLY_THIS_PROCESS;
@@ -2249,7 +2249,7 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
   /* Windows programs expect the environment block to be sorted.  */
   qsort (env, i, sizeof (char *), envvar_cmp);
 
-  w32env = alloca (envlen + 1);
+  w32env = (char *) alloca (envlen + 1);
 
   /* Copy env strings into new buffer.  */
   for (temp = w32env, i = 0; env[i] && *env[i]; i++)
@@ -2421,7 +2421,7 @@ windows_xfer_shared_libraries (struct target_ops *ops,
 				 target_gdbarch (), &obstack);
   obstack_grow_str0 (&obstack, "</library-list>\n");
 
-  buf = obstack_finish (&obstack);
+  buf = (const char *) obstack_finish (&obstack);
   len_avail = strlen (buf);
   if (offset >= len_avail)
     len= 0;
@@ -2700,7 +2700,7 @@ _initialize_check_for_gdb_ini (void)
       if (access (oldini, 0) == 0)
 	{
 	  int len = strlen (oldini);
-	  char *newini = alloca (len + 1);
+	  char *newini = (char *) alloca (len + 1);
 
 	  xsnprintf (newini, len + 1, "%.*s.gdbinit",
 		     (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
