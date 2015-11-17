@@ -747,7 +747,7 @@ win32_attach (unsigned long pid)
 
 /* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  */
 static void
-handle_output_debug_string (struct target_waitstatus *ourstatus)
+handle_output_debug_string (void)
 {
 #define READ_BUFFER_LEN 1024
   CORE_ADDR addr;
@@ -819,10 +819,7 @@ win32_kill (int pid)
       if (current_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
 	break;
       else if (current_event.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
-	{
-	  struct target_waitstatus our_status = { 0 };
-	  handle_output_debug_string (&our_status);
-	}
+	handle_output_debug_string ();
     }
 
   win32_clear_inferiors ();
@@ -1572,7 +1569,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
-      handle_output_debug_string (ourstatus);
+      handle_output_debug_string ();
       break;
 
     default:

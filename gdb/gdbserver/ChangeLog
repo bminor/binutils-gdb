@@ -1,3 +1,11 @@
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* win32-low.c (handle_output_debug_string): Remove parameter.
+	(win32_kill): Remove our_status local and adjust call to
+	handle_output_debug_string.
+	(get_child_debug_event): Adjust call to
+	handle_output_debug_string.
+
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* linux-mips-low.c (mips_fill_gregset): Add cast.
