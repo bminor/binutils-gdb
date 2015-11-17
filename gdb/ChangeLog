@@ -1,5 +1,17 @@
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
+	* cp-namespace.c (cp_lookup_bare_symbol)
+	(cp_search_static_and_baseclasses, cp_lookup_symbol_via_imports)
+	(cp_lookup_symbol_via_all_imports, cp_lookup_nested_symbol_1)
+	(cp_lookup_nested_symbol): Use null_block_symbol.
+	* d-namespace.c (d_lookup_symbol, d_lookup_nested_symbol)
+	(d_lookup_symbol_imports, d_lookup_symbol_module): Use
+	null_block_symbol.
+	* symtab.c (null_block_symbol): New global.
+	* symtab.h (null_block_symbol): Declare.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
 	* common/common-exceptions.h (GDB_XCPT_SJMP, GDB_XCPT_TRY)
 	(GDB_XCPT_RAW_TRY, GDB_XCPT): Define.
 	Replace __cplusplus checks with GDB_XCPT checks throughout.

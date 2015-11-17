@@ -832,6 +832,10 @@ struct block_symbol
 
 extern const struct symbol_impl *symbol_impls;
 
+/* For convenience.  All fields are NULL.  This means "there is no
+   symbol".  */
+extern const struct block_symbol null_block_symbol;
+
 /* Note: There is no accessor macro for symbol.owner because it is
    "private".  */
 

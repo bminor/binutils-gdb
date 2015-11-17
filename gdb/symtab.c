@@ -85,6 +85,9 @@ static struct block_symbol
   lookup_symbol_in_objfile (struct objfile *objfile, int block_index,
 			    const char *name, const domain_enum domain);
 
+/* See symtab.h.  */
+const struct block_symbol null_block_symbol = { NULL, NULL };
+
 extern initialize_file_ftype _initialize_symtab;
 
 /* Program space key for finding name and language of "main".  */
