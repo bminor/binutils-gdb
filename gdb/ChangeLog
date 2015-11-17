@@ -1,5 +1,22 @@
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
+	* windows-nat.c (AdjustTokenPrivileges_ftype)
+	(DebugActiveProcessStop_ftype, DebugBreakProcess_ftype)
+	(DebugSetProcessKillOnExit_ftype, EnumProcessModules_ftype)
+	(GetCurrentConsoleFont_ftype, GetModuleInformation_ftype)
+	(LookupPrivilegeValueA_ftype, OpenProcessToken_ftype)
+	(GetConsoleFontSize_ftype): New typedefs.
+	(AdjustTokenPrivileges, DebugActiveProcessStop)
+	(DebugBreakProcess, DebugSetProcessKillOnExit, EnumProcessModules)
+	(GetConsoleFontSize, GetCurrentConsoleFont, GetModuleInformation)
+	(LookupPrivilegeValueA, OpenProcessToken, GetConsoleFontSize):
+	Adjust.
+	(GetModuleFileNameEx_ftype): New typedef.
+	(GetModuleFileNameEx): Use it.
+	(_initialize_loadable): Define GPA macro and use it.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
 	* gdb-dlfcn.c (gdb_dlsym, gdb_dlclose) [__MINGW32__]: Add casts to
 	HMODULE.
 
