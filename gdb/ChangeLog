@@ -1,5 +1,13 @@
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
+	* common/common-exceptions.h (GDB_XCPT_SJMP, GDB_XCPT_TRY)
+	(GDB_XCPT_RAW_TRY, GDB_XCPT): Define.
+	Replace __cplusplus checks with GDB_XCPT checks throughout.
+	* common/common-exceptions.c: Replace __cplusplus checks with
+	GDB_XCPT checks throughout.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
 	* common/common-defs.h (ATTRIBUTE_PRINTF): Redefine in terms of
 	_GL_ATTRIBUTE_FORMAT_PRINTF after including ansidecl.h.
 
