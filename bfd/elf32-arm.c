@@ -17010,10 +17010,10 @@ elf32_arm_write_section (bfd *output_bfd,
 
 		    (*_bfd_error_handler)
 		      (_("%B(%#x): error: Cannot create STM32L4XX veneer. "
-			 "Jump out of range by %d bytes. "
+			 "Jump out of range by %ld bytes. "
 			 "Cannot encode branch instruction. "),
 		       output_bfd,
-		       stm32l4xx_errnode->vma - 4,
+		       (long) (stm32l4xx_errnode->vma - 4),
 		       out_of_range);
 		    continue;
 		  }
