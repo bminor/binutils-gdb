@@ -1,3 +1,8 @@
+2015-11-17  Yao Qi  <yao.qi@linaro.org>
+
+	* infrun.c (resume): Check control.trap_expected only
+	when deciding the set of threads to resume.
+
 2015-11-17  Pedro Alves  <palves@redhat.com>
 
 	* cp-namespace.c (cp_lookup_bare_symbol)
