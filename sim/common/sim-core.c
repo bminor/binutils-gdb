@@ -157,10 +157,7 @@ new_sim_core_mapping (SIM_DESC sd,
   new_mapping->base = addr;
   new_mapping->nr_bytes = nr_bytes;
   new_mapping->bound = addr + (nr_bytes - 1);
-  if (modulo == 0)
-    new_mapping->mask = (unsigned) 0 - 1;
-  else
-    new_mapping->mask = modulo - 1;
+  new_mapping->mask = modulo - 1;
   new_mapping->buffer = buffer;
   new_mapping->free_buffer = free_buffer;
   new_mapping->device = device;
@@ -298,17 +295,6 @@ sim_core_attach (SIM_DESC sd,
   if (cpu != NULL)
     sim_io_error (sd, "sim_core_map_attach - processor specific memory map not yet supported");
 
-  /* verify modulo memory */
-  if (!WITH_MODULO_MEMORY && modulo != 0)
-    {
-#if (WITH_DEVICES)
-      device_error (client, "sim_core_attach - internal error - modulo memory disabled");
-#endif
-#if (WITH_HW)
-      sim_hw_abort (sd, client, "sim_core_attach - internal error - modulo memory disabled");
-#endif
-      sim_io_error (sd, "sim_core_attach - internal error - modulo memory disabled");
-    }
   if (client != NULL && modulo != 0)
     {
 #if (WITH_DEVICES)
@@ -497,12 +483,8 @@ STATIC_INLINE_SIM_CORE\
 sim_core_translate (sim_core_mapping *mapping,
 		    address_word addr)
 {
-  if (WITH_MODULO_MEMORY)
-    return (void *)((unsigned8 *) mapping->buffer
-		    + ((addr - mapping->base) & mapping->mask));
-  else
-    return (void *)((unsigned8 *) mapping->buffer
-		    + addr - mapping->base);
+  return (void *)((unsigned8 *) mapping->buffer
+		  + ((addr - mapping->base) & mapping->mask));
 }
 
 

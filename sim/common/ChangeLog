@@ -1,3 +1,11 @@
+2015-11-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (WITH_MODULO_MEMORY): Delete.
+	* sim-core.c (new_sim_core_mapping): Always assign mask to modulo-1.
+	(sim_core_attach): Delete WITH_MODULO_MEMORY == 0 logic.
+	(sim_core_translate): Likewise.
+	* sim-core.h: Delete mention of WITH_MODULO_MEMORY.
+
 2015-11-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-close.c (__cgen_cpu_close, _cgen_cpu_close): Delete.

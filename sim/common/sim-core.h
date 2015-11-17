@@ -119,10 +119,9 @@ extern SIM_RC sim_core_install (SIM_DESC sd);
    translated into ADDRESS_SPACE:OFFSET before being passed to the
    client device.
 
-   MODULO - when the simulator has been configured WITH_MODULO support
-   and is greater than zero, specifies that accesses to the region
-   [ADDR .. ADDR+NR_BYTES) should be mapped onto the sub region [ADDR
-   .. ADDR+MODULO).  The modulo value must be a power of two.
+   MODULO - Specifies that accesses to the region [ADDR .. ADDR+NR_BYTES)
+   should be mapped onto the sub region [ADDR .. ADDR+MODULO).  The modulo
+   value must be a power of two.
 
    DEVICE - When non NULL, indicates that this is a callback memory
    space and specified device's memory callback handler should be

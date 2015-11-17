@@ -4,7 +4,6 @@
 /* General config options */
 
 #define WITH_CORE
-#define WITH_MODULO_MEMORY 1
 #define WITH_WATCHPOINTS 1
 
 

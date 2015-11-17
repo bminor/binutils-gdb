@@ -1,3 +1,7 @@
+2015-11-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* tconfig.h (WITH_MODULO_MEMORY): Delete.
+
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-reason.o, sim-reg.o, and
