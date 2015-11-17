@@ -198,7 +198,7 @@ thread_rec (ptid_t ptid, int get_context)
   if (thread == NULL)
     return NULL;
 
-  th = inferior_target_data (thread);
+  th = (win32_thread_info *) inferior_target_data (thread);
   if (get_context)
     win32_require_context (th);
   return th;
@@ -229,11 +229,12 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 
 /* Delete a thread from the list of threads.  */
 static void
-delete_thread_info (struct inferior_list_entry *thread)
+delete_thread_info (struct inferior_list_entry *entry)
 {
-  win32_thread_info *th = inferior_target_data ((struct thread_info *) thread);
+  struct thread_info *thread = (struct thread_info *) entry;
+  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thread);
 
-  remove_thread ((struct thread_info *) thread);
+  remove_thread (thread);
   CloseHandle (th->h);
   free (th);
 }
@@ -432,7 +433,7 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
 {
   struct thread_info *thread = (struct thread_info *) this_thread;
   int thread_id = * (int *) id_ptr;
-  win32_thread_info *th = inferior_target_data (thread);
+  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thread);
 
   if (thread_id == -1 || thread_id == th->tid)
     {
@@ -523,7 +524,7 @@ strwinerror (DWORD error)
 			       NULL,
 			       error,
 			       0, /* Default language */
-			       (LPVOID)&msgbuf,
+			       (LPTSTR) &msgbuf,
 			       0,
 			       NULL);
   if (chars != 0)
@@ -654,7 +655,7 @@ win32_create_inferior (char *program, char **program_args)
   argslen = 1;
   for (argc = 1; program_args[argc]; argc++)
     argslen += strlen (program_args[argc]) + 1;
-  args = alloca (argslen);
+  args = (char *) alloca (argslen);
   args[0] = '\0';
   for (argc = 1; program_args[argc]; argc++)
     {
@@ -673,7 +674,7 @@ win32_create_inferior (char *program, char **program_args)
   err = GetLastError ();
   if (!ret && err == ERROR_FILE_NOT_FOUND)
     {
-      char *exename = alloca (strlen (program) + 5);
+      char *exename = (char *) alloca (strlen (program) + 5);
       strcat (strcpy (exename, program), ".exe");
       ret = create_process (exename, args, flags, &pi);
       err = GetLastError ();
@@ -1344,7 +1345,7 @@ static void
 suspend_one_thread (struct inferior_list_entry *entry)
 {
   struct thread_info *thread = (struct thread_info *) entry;
-  win32_thread_info *th = inferior_target_data (thread);
+  win32_thread_info *th = (win32_thread_info *) inferior_target_data (thread);
 
   if (!th->suspended)
     {
