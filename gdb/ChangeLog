@@ -1,3 +1,10 @@
+2015-11-17  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* hppa-tdep.c (hppa_sign_extend, hppa_low_hppa_sign_extend)
+	(prologue_inst_adjust_sp, hppa_frame_cache): Fix left shift of negative
+	value.
+	* dwarf2read.c (read_subrange_type): Likewise.
+
 2015-11-16  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_extract_return_value):  Change array
