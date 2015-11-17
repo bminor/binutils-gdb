@@ -1,3 +1,10 @@
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* guile/scm-disasm.c (gdbscm_disasm_read_memory): Return -1 on
+	error instead of TARGET_XFER_E_IO.
+	(gdbscm_disasm_memory_error): Always pass TARGET_XFER_E_IO to
+	memory_error.
+
 2015-11-17  Dominik Vogt  <vogt@linux.vnet.ibm.com>
 
 	* hppa-tdep.c (hppa_sign_extend, hppa_low_hppa_sign_extend)
