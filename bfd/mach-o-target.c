@@ -104,7 +104,7 @@ static const bfd_mach_o_backend_data TARGET_NAME_BACKEND =
 {
   TARGET_ARCHITECTURE,
   TARGET_PAGESIZE,
-  bfd_mach_o_swap_reloc_in,
+  bfd_mach_o_canonicalize_one_reloc,
   bfd_mach_o_swap_reloc_out,
   bfd_mach_o_print_thread,
   bfd_mach_o_tgt_seg_table,

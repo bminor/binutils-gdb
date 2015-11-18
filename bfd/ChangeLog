@@ -7,6 +7,32 @@
 
 2015-11-18  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h (bfd_mach_o_swap_in_non_scattered_reloc)
+	(bfd_mach_o_canonicalize_non_scattered_reloc)
+	(bfd_mach_o_pre_canonicalize_one_reloc): Declare.
+	(bfd_mach_o_backend_data): Rename field
+	_bfd_mach_o_swap_reloc_in to _bfd_mach_o_canonicalize_one_reloc.
+	* mach-o.c (bfd_mach_o_swap_in_non_scattered_reloc): Now public.
+	(bfd_mach_o_canonicalize_non_scattered_reloc): Renames from
+	bfd_mach_o_canonicalize_one_reloc.
+	(bfd_mach_o_pre_canonicalize_one_reloc): New function.
+	(bfd_mach_o_canonicalize_relocs): Adjust.
+	(bfd_mach_o_canonicalize_relocs): Rename define from
+	bfd_mach_o_swap_reloc_in.
+	* mach-o-target.c (TARGET_NAME_BACKEND): Use
+	bfd_mach_o_canonicalize_one_reloc instead of
+	bfd_mach_o_swap_reloc_in.
+	* mach-o-i386.c (bfd_mach_o_i386_canonicalize_one_reloc): Renames
+	from bfd_mach_o_i386_swap_reloc_in and adjust.
+	(bfd_mach_o_canonicalize_one_reloc): Renames from
+	bfd_mach_o_i386_canonicalize_one_reloc.
+	* mach-o-x86_64.c (bfd_mach_o_x86_64_canonicalize_one_reloc): Renames
+	from bfd_mach_o_x86_64_swap_reloc_in and adjust.
+	(bfd_mach_o_canonicalize_one_reloc): Renames from
+	bfd_mach_o_x86_64_canonicalize_one_reloc.
+
+2015-11-18  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h (struct mach_o_data_struct): Add hdr_offset field.
 	(bfd_mach_o_fat_archive_p): Renames prototype.
 	(bfd_mach_o_fat_openr_next_archived_file): Renames.

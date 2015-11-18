@@ -704,6 +704,11 @@ bfd_boolean bfd_mach_o_read_symtab_strtab (bfd *abfd);
 
 bfd_vma bfd_mach_o_get_base_address (bfd *);
 
+void bfd_mach_o_swap_in_non_scattered_reloc (bfd *, bfd_mach_o_reloc_info *,
+					     unsigned char *);
+bfd_boolean bfd_mach_o_canonicalize_non_scattered_reloc (bfd *, bfd_mach_o_reloc_info *, arelent *, asymbol **);
+bfd_boolean bfd_mach_o_pre_canonicalize_one_reloc (bfd *, struct mach_o_reloc_info_external *, bfd_mach_o_reloc_info *, arelent *, asymbol **);
+
 /* A placeholder in case we need to suppress emitting the dysymtab for some
    reason (e.g. compatibility with older system versions).  */
 #define bfd_mach_o_should_emit_dysymtab(x) TRUE
@@ -740,7 +745,8 @@ typedef struct bfd_mach_o_backend_data
 {
   enum bfd_architecture arch;
   bfd_vma page_size;
-  bfd_boolean (*_bfd_mach_o_swap_reloc_in)(arelent *, bfd_mach_o_reloc_info *);
+  bfd_boolean (*_bfd_mach_o_canonicalize_one_reloc)
+    (bfd *, struct mach_o_reloc_info_external *, arelent *, asymbol **);
   bfd_boolean (*_bfd_mach_o_swap_reloc_out)(arelent *, bfd_mach_o_reloc_info *);
   bfd_boolean (*_bfd_mach_o_print_thread)(bfd *, bfd_mach_o_thread_flavour *,
                                           void *, char *);

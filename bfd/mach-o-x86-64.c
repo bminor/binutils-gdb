@@ -120,18 +120,25 @@ static reloc_howto_type x86_64_howto_table[]=
 };
 
 static bfd_boolean
-bfd_mach_o_x86_64_swap_reloc_in (arelent *res, bfd_mach_o_reloc_info *reloc)
+bfd_mach_o_x86_64_canonicalize_one_reloc (bfd *abfd,
+				        struct mach_o_reloc_info_external *raw,
+					arelent *res, asymbol **syms)
 {
-  /* On x86-64, scattered relocs are not used.  */
-  if (reloc->r_scattered)
+  bfd_mach_o_reloc_info reloc;
+
+  if (!bfd_mach_o_pre_canonicalize_one_reloc (abfd, raw, &reloc, res, syms))
     return FALSE;
 
-  switch (reloc->r_type)
+  /* On x86-64, scattered relocs are not used.  */
+  if (reloc.r_scattered)
+    return FALSE;
+
+  switch (reloc.r_type)
     {
     case BFD_MACH_O_X86_64_RELOC_UNSIGNED:
-      if (reloc->r_pcrel)
+      if (reloc.r_pcrel)
         return FALSE;
-      switch (reloc->r_length)
+      switch (reloc.r_length)
         {
         case 2:
           res->howto = &x86_64_howto_table[1];
@@ -143,16 +150,16 @@ bfd_mach_o_x86_64_swap_reloc_in (arelent *res, bfd_mach_o_reloc_info *reloc)
           return FALSE;
         }
     case BFD_MACH_O_X86_64_RELOC_SIGNED:
-      if (reloc->r_length == 2 && reloc->r_pcrel)
+      if (reloc.r_length == 2 && reloc.r_pcrel)
         {
           res->howto = &x86_64_howto_table[2];
           return TRUE;
         }
       break;
     case BFD_MACH_O_X86_64_RELOC_BRANCH:
-      if (!reloc->r_pcrel)
+      if (!reloc.r_pcrel)
         return FALSE;
-      switch (reloc->r_length)
+      switch (reloc.r_length)
         {
         case 2:
           res->howto = &x86_64_howto_table[6];
@@ -162,23 +169,23 @@ bfd_mach_o_x86_64_swap_reloc_in (arelent *res, bfd_mach_o_reloc_info *reloc)
         }
       break;
     case BFD_MACH_O_X86_64_RELOC_GOT_LOAD:
-      if (reloc->r_length == 2 && reloc->r_pcrel && reloc->r_extern)
+      if (reloc.r_length == 2 && reloc.r_pcrel && reloc.r_extern)
         {
           res->howto = &x86_64_howto_table[7];
           return TRUE;
         }
       break;
     case BFD_MACH_O_X86_64_RELOC_GOT:
-      if (reloc->r_length == 2 && reloc->r_pcrel && reloc->r_extern)
+      if (reloc.r_length == 2 && reloc.r_pcrel && reloc.r_extern)
         {
           res->howto = &x86_64_howto_table[10];
           return TRUE;
         }
       break;
     case BFD_MACH_O_X86_64_RELOC_SUBTRACTOR:
-      if (reloc->r_pcrel)
+      if (reloc.r_pcrel)
         return FALSE;
-      switch (reloc->r_length)
+      switch (reloc.r_length)
         {
         case 2:
           res->howto = &x86_64_howto_table[8];
@@ -191,21 +198,21 @@ bfd_mach_o_x86_64_swap_reloc_in (arelent *res, bfd_mach_o_reloc_info *reloc)
         }
       break;
     case BFD_MACH_O_X86_64_RELOC_SIGNED_1:
-      if (reloc->r_length == 2 && reloc->r_pcrel)
+      if (reloc.r_length == 2 && reloc.r_pcrel)
         {
           res->howto = &x86_64_howto_table[3];
           return TRUE;
         }
       break;
     case BFD_MACH_O_X86_64_RELOC_SIGNED_2:
-      if (reloc->r_length == 2 && reloc->r_pcrel)
+      if (reloc.r_length == 2 && reloc.r_pcrel)
         {
           res->howto = &x86_64_howto_table[4];
           return TRUE;
         }
       break;
     case BFD_MACH_O_X86_64_RELOC_SIGNED_4:
-      if (reloc->r_length == 2 && reloc->r_pcrel)
+      if (reloc.r_length == 2 && reloc.r_pcrel)
         {
           res->howto = &x86_64_howto_table[5];
           return TRUE;
@@ -344,7 +351,7 @@ const mach_o_segment_name_xlat mach_o_x86_64_segsec_names_xlat[] =
     { NULL, NULL }
   };
 
-#define bfd_mach_o_swap_reloc_in bfd_mach_o_x86_64_swap_reloc_in
+#define bfd_mach_o_canonicalize_one_reloc bfd_mach_o_x86_64_canonicalize_one_reloc
 #define bfd_mach_o_swap_reloc_out bfd_mach_o_x86_64_swap_reloc_out
 
 #define bfd_mach_o_bfd_reloc_type_lookup bfd_mach_o_x86_64_bfd_reloc_type_lookup

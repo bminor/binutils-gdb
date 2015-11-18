@@ -1299,7 +1299,7 @@ bfd_mach_o_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
 /* In addition to the need to byte-swap the symbol number, the bit positions
    of the fields in the relocation information vary per target endian-ness.  */
 
-static void
+void
 bfd_mach_o_swap_in_non_scattered_reloc (bfd *abfd, bfd_mach_o_reloc_info *rel,
 				       unsigned char *fields)
 {
@@ -1325,16 +1325,86 @@ bfd_mach_o_swap_in_non_scattered_reloc (bfd *abfd, bfd_mach_o_reloc_info *rel,
     }
 }
 
-static int
-bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
-                                   struct mach_o_reloc_info_external *raw,
-                                   arelent *res, asymbol **syms)
+/* Set syms_ptr_ptr and addend of RES.  */
+
+bfd_boolean
+bfd_mach_o_canonicalize_non_scattered_reloc (bfd *abfd,
+					     bfd_mach_o_reloc_info *reloc,
+					     arelent *res, asymbol **syms)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
-  bfd_mach_o_backend_data *bed = bfd_mach_o_get_backend_data (abfd);
-  bfd_mach_o_reloc_info reloc;
-  bfd_vma addr;
+  unsigned int num;
   asymbol **sym;
+
+  /* Non-scattered relocation.  */
+  reloc->r_scattered = 0;
+  res->addend = 0;
+
+  num = reloc->r_value;
+
+  if (reloc->r_extern)
+    {
+      /* PR 17512: file: 8396-1185-0.004.  */
+      if (num >= (unsigned) bfd_mach_o_count_symbols (abfd))
+	sym = bfd_und_section_ptr->symbol_ptr_ptr;
+      else if (syms == NULL)
+	sym = bfd_und_section_ptr->symbol_ptr_ptr;
+      else
+	/* An external symbol number.  */
+	sym = syms + num;
+    }
+  else if (num == 0x00ffffff || num == 0)
+    {
+      /* The 'symnum' in a non-scattered PAIR is 0x00ffffff.  But as this
+	 is generic code, we don't know wether this is really a PAIR.
+	 This value is almost certainly not a valid section number, hence
+	 this specific case to avoid an assertion failure.
+	 Target specific swap_reloc_in routine should adjust that.  */
+      sym = bfd_abs_section_ptr->symbol_ptr_ptr;
+    }
+  else
+    {
+      /* PR 17512: file: 006-2964-0.004.  */
+      if (num > mdata->nsects)
+	return FALSE;
+
+      /* A section number.  */
+      sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
+      /* For a symbol defined in section S, the addend (stored in the
+	 binary) contains the address of the section.  To comply with
+	 bfd convention, subtract the section address.
+	 Use the address from the header, so that the user can modify
+             the vma of the section.  */
+      res->addend = -mdata->sections[num - 1]->addr;
+    }
+
+  /* Note: Pairs for PPC LO/HI/HA are not scattered, but contain the offset
+     in the lower 16bits of the address value.  So we have to find the
+     'symbol' from the preceding reloc.  We do this even though the
+     section symbol is probably not needed here, because NULL symbol
+     values cause an assert in generic BFD code.  This must be done in
+     the PPC swap_reloc_in routine.  */
+  res->sym_ptr_ptr = sym;
+
+  return TRUE;
+}
+
+/* Do most of the work for canonicalize_relocs on RAW: create internal
+   representation RELOC and set most fields of RES using symbol table SYMS.
+   Each target still has to set the howto of RES and possibly adjust other
+   fields.
+   Previously the Mach-O hook point was simply swap_in, but some targets
+   (like arm64) don't follow the generic rules (symnum is a value for the
+   non-scattered relocation ADDEND).  */
+
+bfd_boolean
+bfd_mach_o_pre_canonicalize_one_reloc (bfd *abfd,
+				       struct mach_o_reloc_info_external *raw,
+				       bfd_mach_o_reloc_info *reloc,
+				       arelent *res, asymbol **syms)
+{
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  bfd_vma addr;
 
   addr = bfd_get_32 (abfd, raw->r_address);
   res->sym_ptr_ptr = NULL;
@@ -1346,11 +1416,11 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
       bfd_vma symnum = bfd_get_32 (abfd, raw->r_symbolnum);
 
       /* Scattered relocation, can't be extern. */
-      reloc.r_scattered = 1;
-      reloc.r_extern = 0;
+      reloc->r_scattered = 1;
+      reloc->r_extern = 0;
 
       /*   Extract section and offset from r_value (symnum).  */
-      reloc.r_value = symnum;
+      reloc->r_value = symnum;
       /* FIXME: This breaks when a symbol in a reloc exactly follows the
 	 end of the data for the section (e.g. in a calculation of section
 	 data length).  At present, the symbol will end up associated with
@@ -1368,81 +1438,33 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
         }
 
       /* Extract the info and address fields from r_address.  */
-      reloc.r_type = BFD_MACH_O_GET_SR_TYPE (addr);
-      reloc.r_length = BFD_MACH_O_GET_SR_LENGTH (addr);
-      reloc.r_pcrel = addr & BFD_MACH_O_SR_PCREL;
-      reloc.r_address = BFD_MACH_O_GET_SR_TYPE (addr);
+      reloc->r_type = BFD_MACH_O_GET_SR_TYPE (addr);
+      reloc->r_length = BFD_MACH_O_GET_SR_LENGTH (addr);
+      reloc->r_pcrel = addr & BFD_MACH_O_SR_PCREL;
+      reloc->r_address = BFD_MACH_O_GET_SR_TYPE (addr);
       res->address = BFD_MACH_O_GET_SR_ADDRESS (addr);
     }
   else
     {
-      unsigned int num;
-
       /* Non-scattered relocation.  */
-      reloc.r_scattered = 0;
+      reloc->r_scattered = 0;
+      reloc->r_address = addr;
+      res->address = addr;
 
       /* The value and info fields have to be extracted dependent on target
          endian-ness.  */
-      bfd_mach_o_swap_in_non_scattered_reloc (abfd, &reloc, raw->r_symbolnum);
-      num = reloc.r_value;
+      bfd_mach_o_swap_in_non_scattered_reloc (abfd, reloc, raw->r_symbolnum);
 
-      if (reloc.r_extern)
-	{
-	  /* PR 17512: file: 8396-1185-0.004.  */
-	  if (num >= (unsigned) bfd_mach_o_count_symbols (abfd))
-	    sym = bfd_und_section_ptr->symbol_ptr_ptr;
-	  else if (syms == NULL)
-	    sym = bfd_und_section_ptr->symbol_ptr_ptr;
-	  else
-	    /* An external symbol number.  */
-	    sym = syms + num;
-	}
-      else if (num == 0x00ffffff || num == 0)
-	{
-	  /* The 'symnum' in a non-scattered PAIR is 0x00ffffff.  But as this
-	     is generic code, we don't know wether this is really a PAIR.
-	     This value is almost certainly not a valid section number, hence
-	     this specific case to avoid an assertion failure.
-	     Target specific swap_reloc_in routine should adjust that.  */
-	  sym = bfd_abs_section_ptr->symbol_ptr_ptr;
-	}
-      else
-        {
-	  /* PR 17512: file: 006-2964-0.004.  */
-	  if (num > mdata->nsects)
-	    return -1;
-
-	  /* A section number.  */
-          sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
-          /* For a symbol defined in section S, the addend (stored in the
-             binary) contains the address of the section.  To comply with
-             bfd convention, subtract the section address.
-             Use the address from the header, so that the user can modify
-             the vma of the section.  */
-          res->addend = -mdata->sections[num - 1]->addr;
-        }
-      /* Note: Pairs for PPC LO/HI/HA are not scattered, but contain the offset
-	 in the lower 16bits of the address value.  So we have to find the
-	 'symbol' from the preceding reloc.  We do this even though the
-	 section symbol is probably not needed here, because NULL symbol
-	 values cause an assert in generic BFD code.  This must be done in
-	 the PPC swap_reloc_in routine.  */
-      res->sym_ptr_ptr = sym;
-
-      /* The 'address' is just r_address.
-         ??? maybe this should be masked with  0xffffff for safety.  */
-      res->address = addr;
-      reloc.r_address = addr;
+      if (!bfd_mach_o_canonicalize_non_scattered_reloc (abfd, reloc,
+							res, syms))
+	return FALSE;
     }
 
   /* We have set up a reloc with all the information present, so the swapper
      can modify address, value and addend fields, if necessary, to convey
      information in the generic BFD reloc that is mach-o specific.  */
 
-  if (!(*bed->_bfd_mach_o_swap_reloc_in)(res, &reloc))
-    return -1;
-
-  return 0;
+  return TRUE;
 }
 
 static int
@@ -1450,6 +1472,7 @@ bfd_mach_o_canonicalize_relocs (bfd *abfd, unsigned long filepos,
                                 unsigned long count,
                                 arelent *res, asymbol **syms)
 {
+  bfd_mach_o_backend_data *bed = bfd_mach_o_get_backend_data (abfd);
   unsigned long i;
   struct mach_o_reloc_info_external *native_relocs;
   bfd_size_type native_size;
@@ -1472,8 +1495,8 @@ bfd_mach_o_canonicalize_relocs (bfd *abfd, unsigned long filepos,
 
   for (i = 0; i < count; i++)
     {
-      if (bfd_mach_o_canonicalize_one_reloc (abfd, &native_relocs[i],
-                                             &res[i], syms) < 0)
+      if (!(*bed->_bfd_mach_o_canonicalize_one_reloc)(abfd, &native_relocs[i],
+						      &res[i], syms))
         goto err;
     }
   free (native_relocs);
@@ -1495,7 +1518,7 @@ bfd_mach_o_canonicalize_reloc (bfd *abfd, asection *asect,
     return 0;
 
   /* No need to go further if we don't know how to read relocs.  */
-  if (bed->_bfd_mach_o_swap_reloc_in == NULL)
+  if (bed->_bfd_mach_o_canonicalize_one_reloc == NULL)
     return 0;
 
   if (asect->relocation == NULL)
@@ -1550,7 +1573,7 @@ bfd_mach_o_canonicalize_dynamic_reloc (bfd *abfd, arelent **rels,
     return 0;
 
   /* No need to go further if we don't know how to read relocs.  */
-  if (bed->_bfd_mach_o_swap_reloc_in == NULL)
+  if (bed->_bfd_mach_o_canonicalize_one_reloc == NULL)
     return 0;
 
   if (mdata->dyn_reloc_cache == NULL)
@@ -5807,7 +5830,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #define bfd_mach_o_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
 #define bfd_mach_o_bfd_reloc_name_lookup _bfd_norelocs_bfd_reloc_name_lookup
 
-#define bfd_mach_o_swap_reloc_in NULL
+#define bfd_mach_o_canonicalize_one_reloc NULL
 #define bfd_mach_o_swap_reloc_out NULL
 #define bfd_mach_o_print_thread NULL
 #define bfd_mach_o_tgt_seg_table NULL
