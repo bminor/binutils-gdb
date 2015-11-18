@@ -32,13 +32,13 @@
 static const bfd_target *
 bfd_mach_o_i386_object_p (bfd *abfd)
 {
-  return bfd_mach_o_header_p (abfd, 0, BFD_MACH_O_CPU_TYPE_I386);
+  return bfd_mach_o_header_p (abfd, 0, 0, BFD_MACH_O_CPU_TYPE_I386);
 }
 
 static const bfd_target *
 bfd_mach_o_i386_core_p (bfd *abfd)
 {
-  return bfd_mach_o_header_p (abfd,
+  return bfd_mach_o_header_p (abfd, 0,
                               BFD_MACH_O_MH_CORE, BFD_MACH_O_CPU_TYPE_I386);
 }
 

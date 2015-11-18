@@ -32,13 +32,13 @@
 static const bfd_target *
 bfd_mach_o_x86_64_object_p (bfd *abfd)
 {
-  return bfd_mach_o_header_p (abfd, 0, BFD_MACH_O_CPU_TYPE_X86_64);
+  return bfd_mach_o_header_p (abfd, 0, 0, BFD_MACH_O_CPU_TYPE_X86_64);
 }
 
 static const bfd_target *
 bfd_mach_o_x86_64_core_p (bfd *abfd)
 {
-  return bfd_mach_o_header_p (abfd,
+  return bfd_mach_o_header_p (abfd, 0,
                               BFD_MACH_O_MH_CORE, BFD_MACH_O_CPU_TYPE_X86_64);
 }
 

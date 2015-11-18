@@ -1,3 +1,40 @@
+2015-11-18  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (struct mach_o_data_struct): Add hdr_offset field.
+	(bfd_mach_o_fat_archive_p): Renames prototype.
+	(bfd_mach_o_fat_openr_next_archived_file): Renames.
+	(bfd_mach_o_header_p): Add argument.
+	* mach-o.c (bfd_mach_o_read_header): Add hdr_off argument and
+	use it.
+	(bfd_mach_o_read_section_32, bfd_mach_o_read_section_64)
+	(bfd_mach_o_read_section): Remove offset argument.
+	(bfd_mach_o_read_dylinker): Remove bfd_seek call.
+	(bfd_mach_o_read_dylib, bfd_mach_o_read_prebound_dylib)
+	(bfd_mach_o_read_prebind_cksum, bfd_mach_o_read_twolevel_hints)
+	(bfd_mach_o_read_fvmlib, bfd_mach_o_read_dysymtab)
+	(bfd_mach_o_read_symtab, bfd_mach_o_read_uuid)
+	(bfd_mach_o_read_linkedit, bfd_mach_o_read_str)
+	(bfd_mach_o_read_dyld_info, bfd_mach_o_read_version_min)
+	(bfd_mach_o_read_encryption_info): Likewise.
+	(bfd_mach_o_read_encryption_info_64): New function.
+	(bfd_mach_o_read_main, bfd_mach_o_read_source_version)
+	(bfd_mach_o_read_segment): Remove call to bfd_seek.
+	(bfd_mach_o_read_command): Use hdr_offset in bfd_seek.
+	Handle BFD_MACH_O_LC_LINKER_OPTIMIZATION_HINT,
+	BFD_MACH_O_LC_ENCRYPTION_INFO_64, BFD_MACH_O_LC_VERSION_MIN_WATCHOS.
+	(bfd_mach_o_header_p): Add hdr_off argument.
+	(bfd_mach_o_gen_object_p, bfd_mach_o_gen_core_p): Adjust calls.
+	(bfd_mach_o_fat_archive_p): Renames.
+	(bfd_mach_o_fat_openr_next_archived_file): Renames.
+	(bfd_mach_o_close_and_cleanup): Remove useless code.
+	(bfd_mach_o_close_and_cleanup): Define.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_object_p)
+	(bfd_mach_o_x86_64_core_p): Adjust calls.
+	* mach-o-target.c: Move defines for archive from mach-o.c.
+	Remove check on TARGET_ARCHIVE.
+	* mach-o-i386.c (bfd_mach_o_i386_object_p)
+	(bfd_mach_o_i386_core_p): Adjust calls.
+
 2015-11-17  Christophe Lyon  <christophe.lyon@linaro.org>
 
 	* elf32-arm.c (elf32_arm_write_section): Force offset output as

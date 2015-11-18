@@ -23,6 +23,7 @@
 
 #include "bfd.h"
 #include "mach-o/loader.h"
+#include "mach-o/external.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -591,6 +592,10 @@ typedef struct mach_o_data_struct
 {
   /* Mach-O header.  */
   bfd_mach_o_header header;
+
+  /* File offset of the header.  Usually this is 0.  */
+  file_ptr hdr_offset;
+
   /* Array of load commands (length is given by header.ncmds).  */
   bfd_mach_o_load_command *first_command;
   bfd_mach_o_load_command *last_command;
@@ -641,8 +646,8 @@ bfd_boolean bfd_mach_o_valid (bfd *);
 bfd_boolean bfd_mach_o_mkobject_init (bfd *);
 const bfd_target *bfd_mach_o_object_p (bfd *);
 const bfd_target *bfd_mach_o_core_p (bfd *);
-const bfd_target *bfd_mach_o_archive_p (bfd *);
-bfd *bfd_mach_o_openr_next_archived_file (bfd *, bfd *);
+const bfd_target *bfd_mach_o_fat_archive_p (bfd *);
+bfd *bfd_mach_o_fat_openr_next_archived_file (bfd *, bfd *);
 bfd_boolean bfd_mach_o_set_arch_mach (bfd *, enum bfd_architecture,
                                       unsigned long);
 int bfd_mach_o_lookup_command (bfd *, bfd_mach_o_load_command_type, bfd_mach_o_load_command **);
@@ -672,7 +677,7 @@ char *bfd_mach_o_core_file_failing_command (bfd *);
 int bfd_mach_o_core_file_failing_signal (bfd *);
 bfd_boolean bfd_mach_o_core_file_matches_executable_p (bfd *, bfd *);
 bfd *bfd_mach_o_fat_extract (bfd *, bfd_format , const bfd_arch_info_type *);
-const bfd_target *bfd_mach_o_header_p (bfd *, bfd_mach_o_filetype,
+const bfd_target *bfd_mach_o_header_p (bfd *, file_ptr, bfd_mach_o_filetype,
                                        bfd_mach_o_cpu_type);
 bfd_boolean bfd_mach_o_build_commands (bfd *);
 bfd_boolean bfd_mach_o_set_section_contents (bfd *, asection *, const void *,
