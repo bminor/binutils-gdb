@@ -1,4 +1,9 @@
 2015-11-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valops.c (value_string): Constify 'ptr' parameter.
+	* value.h (value_string): Constify 'ptr' parameter.
+
+2015-11-18  Simon Marchi  <simon.marchi@ericsson.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* break-catch-sig.c (signal_catchpoint_print_one): Add cast.
