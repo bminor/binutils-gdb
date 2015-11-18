@@ -1,3 +1,8 @@
+2015-11-18  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (pass_in_v): Add argument len.  Add local array
+	reg.  Callers updated.
+
 2015-11-17  Yao Qi  <yao.qi@linaro.org>
 
 	* infrun.c (resume): Check control.trap_expected only

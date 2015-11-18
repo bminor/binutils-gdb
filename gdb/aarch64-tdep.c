@@ -1034,17 +1034,23 @@ static int
 pass_in_v (struct gdbarch *gdbarch,
 	   struct regcache *regcache,
 	   struct aarch64_call_info *info,
-	   const bfd_byte *buf)
+	   int len, const bfd_byte *buf)
 {
   if (info->nsrn < 8)
     {
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int regnum = AARCH64_V0_REGNUM + info->nsrn;
+      gdb_byte reg[V_REGISTER_SIZE];
 
       info->argnum++;
       info->nsrn++;
 
-      regcache_cooked_write (regcache, regnum, buf);
+      memset (reg, 0, sizeof (reg));
+      /* PCS C.1, the argument is allocated to the least significant
+	 bits of V register.  */
+      memcpy (reg, buf, len);
+      regcache_cooked_write (regcache, regnum, reg);
+
       if (aarch64_debug)
 	{
 	  debug_printf ("arg %d in %s\n", info->argnum,
@@ -1138,7 +1144,8 @@ pass_in_v_or_stack (struct gdbarch *gdbarch,
 		    struct type *type,
 		    struct value *arg)
 {
-  if (!pass_in_v (gdbarch, regcache, info, value_contents (arg)))
+  if (!pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (type),
+		  value_contents (arg)))
     pass_on_stack (info, type, arg);
 }
 
@@ -1263,8 +1270,10 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      struct type *target_type =
 		check_typedef (TYPE_TARGET_TYPE (arg_type));
 
-	      pass_in_v (gdbarch, regcache, &info, buf);
 	      pass_in_v (gdbarch, regcache, &info,
+			 TYPE_LENGTH (target_type), buf);
+	      pass_in_v (gdbarch, regcache, &info,
+			 TYPE_LENGTH (target_type),
 			 buf + TYPE_LENGTH (target_type));
 	    }
 	  else
