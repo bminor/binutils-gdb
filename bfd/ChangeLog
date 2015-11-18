@@ -1,3 +1,10 @@
+2015-11-18  Alan Modra  <amodra@gmail.com>
+
+	PR 19256
+	* archive.c (bfd_generic_openr_next_archived_file): Don't allow
+	backward file movement via "negative" sizes.
+	* coff-alpha.c (alpha_ecoff_openr_next_archived_file): Likewise.
+
 2015-11-18  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.h (struct mach_o_data_struct): Add hdr_offset field.
