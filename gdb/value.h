@@ -696,7 +696,7 @@ extern struct value *value_mark (void);
 
 extern void value_free_to_mark (struct value *mark);
 
-extern struct value *value_cstring (char *ptr, ssize_t len,
+extern struct value *value_cstring (const char *ptr, ssize_t len,
 				    struct type *char_type);
 extern struct value *value_string (char *ptr, ssize_t len,
 				   struct type *char_type);

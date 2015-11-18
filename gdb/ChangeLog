@@ -1,3 +1,8 @@
+2015-11-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valops.c (value_cstring): Constify 'ptr' parameter.
+	* value.h (value_cstring): Constify 'ptr' parameter.
+
 2015-11-18  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (pass_in_v): Add argument len.  Add local array
