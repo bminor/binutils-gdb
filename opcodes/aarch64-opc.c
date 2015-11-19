@@ -1862,6 +1862,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	{
 	case AARCH64_OPND_PSTATEFIELD:
 	  assert (idx == 0 && opnds[1].type == AARCH64_OPND_UIMM4);
+	  /* MSR PAN, #uimm4
+	     The immediate must be #0 or #1.  */
+	  if (opnd->pstatefield == 0x04 /* PAN.  */
+	      && opnds[1].imm.value > 1)
+	    {
+	      set_imm_out_of_range_error (mismatch_detail, idx, 0, 1);
+	      return 0;
+	    }
 	  /* MSR SPSel, #uimm4
 	     Uses uimm4 as a control value to select the stack pointer: if
 	     bit 0 is set it selects the current exception level's stack

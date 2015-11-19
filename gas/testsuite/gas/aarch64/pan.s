@@ -31,4 +31,10 @@
 	msr pan, x0
 	mrs x1, pan
 
+	.ifdef ERROR
+	.irp N,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+	msr pan, #\N
+	.endr
+	.endif
+
 	.arch_extension nopan

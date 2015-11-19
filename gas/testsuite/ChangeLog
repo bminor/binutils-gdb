@@ -1,3 +1,9 @@
+2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/pan-illegal.d: New.
+	* gas/aarch64/pan-illegal.l: New.
+	* gas/aarch64/pan.s: Add tests for invalid immediates.
+
 2015-11-19  Alan Modra  <amodra@gmail.com>
 
 	* gas/ppc/altivec3.d: Allow for padding at end of section.
