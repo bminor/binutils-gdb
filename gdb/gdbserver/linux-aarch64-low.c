@@ -614,17 +614,20 @@ enum aarch64_condition_codes
   LE = 0xd,
 };
 
+enum aarch64_operand_type
+{
+  OPERAND_IMMEDIATE,
+  OPERAND_REGISTER,
+};
+
 /* Representation of an operand.  At this time, it only supports register
    and immediate types.  */
 
 struct aarch64_operand
 {
   /* Type of the operand.  */
-  enum
-    {
-      OPERAND_IMMEDIATE,
-      OPERAND_REGISTER,
-    } type;
+  enum aarch64_operand_type type;
+
   /* Value of the operand according to the type.  */
   union
     {
