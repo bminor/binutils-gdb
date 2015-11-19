@@ -1531,7 +1531,7 @@ elf_s390_gc_sweep_hook (bfd *abfd,
 
 	case R_390_GOTOFF16:
 	case R_390_GOTOFF32:
-	  if (s390_is_ifunc_symbol_p (h) && h->def_regular)
+	  if (h != NULL && s390_is_ifunc_symbol_p (h) && h->def_regular)
 	    {
 	      h->plt.refcount--;
 	      break;
