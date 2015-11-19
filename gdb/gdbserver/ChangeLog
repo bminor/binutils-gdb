@@ -1,5 +1,20 @@
 2015-11-19  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (linux_process_qsupported): Change prototype.
+	Adjust.
+	* linux-low.h (struct linux_target_ops) <process_qsupported>:
+	Change prototype.
+	* linux-x86-low.c (x86_linux_process_qsupported): Change prototype
+	and adjust to loop over all features.
+	* server.c (handle_query) <qSupported>: Adjust to call
+	target_process_qsupported once, passing it a vector of unprocessed
+	features.
+	* target.h (struct target_ops) <process_qsupported>: Change
+	prototype.
+	(target_process_qsupported): Adjust.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
 	* configure.ac (ERROR_ON_WARNING): Don't check whether in C++
 	mode.
 	* configure: Regenerate.
