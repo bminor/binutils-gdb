@@ -1,3 +1,9 @@
+2015-11-26  Markus Metzger  <markus.t.metzger@intel.com>
+
+	PR 19297
+	* lib/gdb.exp (skip_btrace_pt_tests): Check for a "GDB does not
+	support" error.
+
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
 	PR 17539

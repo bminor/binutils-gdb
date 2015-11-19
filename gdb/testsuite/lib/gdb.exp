@@ -2826,6 +2826,9 @@ gdb_caching_proc skip_btrace_pt_tests {
         -re "Could not enable branch tracing.*\r\n$gdb_prompt $" {
             set skip_btrace_tests 1
         }
+        -re "GDB does not support.*\r\n$gdb_prompt $" {
+            set skip_btrace_tests 1
+        }
         -re "^record btrace pt\r\n$gdb_prompt $" {
             set skip_btrace_tests 0
         }

@@ -1,3 +1,8 @@
+2015-11-26  Markus Metzger  <markus.t.metzger@intel.com>
+
+	PR 19297
+	* btrace.c (btrace_enable): Check whether HAVE_LIBIPT is defined.
+
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention that a few "info" commands now list the
