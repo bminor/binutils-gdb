@@ -236,6 +236,9 @@ struct linux_target_ops
 
   /* See target.h.  */
   int (*breakpoint_kind_from_current_state) (CORE_ADDR *pcptr);
+
+  /* See target.h.  */
+  int (*supports_hardware_single_step) (void);
 };
 
 extern struct linux_target_ops the_low_target;

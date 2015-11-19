@@ -269,13 +269,24 @@ static void complete_ongoing_step_over (void);
    being stepped.  */
 ptid_t step_over_bkpt;
 
-/* True if the low target can hardware single-step.  Such targets
-   don't need a BREAKPOINT_REINSERT_ADDR callback.  */
+/* True if the low target can hardware single-step.  */
 
 static int
 can_hardware_single_step (void)
 {
-  return (the_low_target.breakpoint_reinsert_addr == NULL);
+  if (the_low_target.supports_hardware_single_step != NULL)
+    return the_low_target.supports_hardware_single_step ();
+  else
+    return 0;
+}
+
+/* True if the low target can software single-step.  Such targets
+   implement the BREAKPOINT_REINSERT_ADDR callback.  */
+
+static int
+can_software_single_step (void)
+{
+  return (the_low_target.breakpoint_reinsert_addr != NULL);
 }
 
 /* True if the low target supports memory breakpoints.  If so, we'll
@@ -4509,11 +4520,16 @@ start_step_over (struct lwp_info *lwp)
     {
       step = 1;
     }
-  else
+  else if (can_software_single_step ())
     {
       CORE_ADDR raddr = (*the_low_target.breakpoint_reinsert_addr) ();
       set_reinsert_breakpoint (raddr);
       step = 0;
+    }
+  else
+    {
+      internal_error (__FILE__, __LINE__,
+		      "stepping is not implemented on this target");
     }
 
   current_thread = saved_thread;
@@ -5711,6 +5727,12 @@ static int
 linux_supports_hardware_single_step (void)
 {
   return can_hardware_single_step ();
+}
+
+static int
+linux_supports_software_single_step (void)
+{
+  return can_software_single_step ();
 }
 
 static int
@@ -7153,7 +7175,8 @@ static struct target_ops linux_target_ops = {
   linux_breakpoint_kind_from_pc,
   linux_sw_breakpoint_from_kind,
   linux_proc_tid_get_name,
-  linux_breakpoint_kind_from_current_state
+  linux_breakpoint_kind_from_current_state,
+  linux_supports_software_single_step
 };
 
 static void

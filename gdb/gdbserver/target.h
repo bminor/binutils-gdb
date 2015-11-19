@@ -463,6 +463,9 @@ struct target_ops
      PC.  The PCPTR is adjusted to the real memory location in case a flag
      (e.g., the Thumb bit on ARM) is present in the PC.  */
   int (*breakpoint_kind_from_current_state) (CORE_ADDR *pcptr);
+
+  /* Returns true if the target can software single step.  */
+  int (*supports_software_single_step) (void);
 };
 
 extern struct target_ops *the_target;
@@ -654,6 +657,10 @@ int kill_inferior (int);
   (the_target->breakpoint_kind_from_current_state \
    ? (*the_target->breakpoint_kind_from_current_state) (pcptr) \
    : target_breakpoint_kind_from_pc (pcptr))
+
+#define target_supports_software_single_step() \
+  (the_target->supports_software_single_step ? \
+   (*the_target->supports_software_single_step) () : 0)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 

@@ -388,6 +388,14 @@ cris_arch_setup (void)
   current_process ()->tdesc = tdesc_crisv32;
 }
 
+/* Support for hardware single step.  */
+
+static int
+cris_supports_hardware_single_step (void)
+{
+  return 1;
+}
+
 static struct regset_info cris_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, cris_num_regs * 4,
     GENERAL_REGS, cris_fill_gregset, cris_store_gregset },
@@ -439,6 +447,22 @@ struct linux_target_ops the_low_target = {
   cris_remove_point,
   cris_stopped_by_watchpoint,
   cris_stopped_data_address,
+  NULL, /* collect_ptrace_register */
+  NULL, /* supply_ptrace_register */
+  NULL, /* siginfo_fixup */
+  NULL, /* new_process */
+  NULL, /* new_thread */
+  NULL, /* new_fork */
+  NULL, /* prepare_to_resume */
+  NULL, /* process_qsupported */
+  NULL, /* supports_tracepoints */
+  NULL, /* get_thread_area */
+  NULL, /* install_fast_tracepoint_jump_pad */
+  NULL, /* emit_ops */
+  NULL, /* get_min_fast_tracepoint_insn_len */
+  NULL, /* supports_range_stepping */
+  NULL, /* breakpoint_kind_from_current_state */
+  cris_supports_hardware_single_step,
 };
 
 void

@@ -341,6 +341,14 @@ tic6x_arch_setup (void)
   current_process ()->tdesc = tic6x_read_description ();
 }
 
+/* Support for hardware single step.  */
+
+static int
+tic6x_supports_hardware_single_step (void)
+{
+  return 1;
+}
+
 static struct regsets_info tic6x_regsets_info =
   {
     tic6x_regsets, /* regsets */
@@ -380,6 +388,27 @@ struct linux_target_ops the_low_target = {
   NULL,
   0,
   tic6x_breakpoint_at,
+  NULL, /* supports_z_point_type */
+  NULL, /* insert_point */
+  NULL, /* remove_point */
+  NULL, /* stopped_by_watchpoint */
+  NULL, /* stopped_data_address */
+  NULL, /* collect_ptrace_register */
+  NULL, /* supply_ptrace_register */
+  NULL, /* siginfo_fixup */
+  NULL, /* new_process */
+  NULL, /* new_thread */
+  NULL, /* new_fork */
+  NULL, /* prepare_to_resume */
+  NULL, /* process_qsupported */
+  NULL, /* supports_tracepoints */
+  NULL, /* get_thread_area */
+  NULL, /* install_fast_tracepoint_jump_pad */
+  NULL, /* emit_ops */
+  NULL, /* get_min_fast_tracepoint_insn_len */
+  NULL, /* supports_range_stepping */
+  NULL, /* breakpoint_kind_from_current_state */
+  tic6x_supports_hardware_single_step,
 };
 
 void

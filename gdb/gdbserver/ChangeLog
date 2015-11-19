@@ -1,5 +1,49 @@
 2015-11-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* linux-aarch64-low.c (aarch64_supports_hardware_single_step):
+	New function.
+	(struct linux_target_ops) <supports_hardware_single_step>: Initialize.
+	* linux-arm-low.c (arm_supports_hardware_single_step): New function.
+	(struct linux_target_ops) <supports_hardware_single_step>: Initialize.
+	* linux-bfin-low.c (bfin_supports_hardware_single_step): New function.
+	(struct linux_target_ops) <bfin_supports_hardware_single_step>:
+	Initialize.
+	* linux-crisv32-low.c (cris_supports_hardware_single_step):
+	New function.
+	(struct linux_target_ops) <supports_hardware_single_step>: Initialize.
+	* linux-low.c (can_hardware_single_step): Use
+	supports_hardware_single_step.
+	(can_software_single_step): New function.
+	(start_step_over): Call can_software_single_step.
+	(linux_supports_hardware_single_step): New function.
+	(struct target_ops) <supports_software_single_step>: Initialize.
+	* linux-low.h (struct linux_target_ops)
+	<supports_hardware_single_step>: Initialize.
+	* linux-m32r-low.c (m32r_supports_hardware_single_step): New function.
+	(struct linux_target_ops) <supports_hardware_single_step>: Initialize.
+	* linux-ppc-low.c (ppc_supports_hardware_single_step): New function.
+	(struct linux_target_ops) <supports_hardware_single_step> Initialize.
+	* linux-s390-low.c (s390_supports_hardware_single_step): New function.
+	(struct linux_target_ops) <supports_hardware_single_step>: Initialize.
+	* linux-sh-low.c (sh_supports_hardware_single_step): New function.
+	(struct linux_target_ops) <supports_hardware_single_step>: Initialize.
+	* linux-tic6x-low.c (tic6x_supports_hardware_single_step): New function.
+	(struct linux_target_ops) <tic6x_supports_hardware_single_step>:
+	Initialize.
+	* linux-tile-low.c (tile_supports_hardware_single_step): New function.
+	(struct linux_target_ops) <tile_supports_hardware_single_step>:
+	Initialize.
+	* linux-x86-low.c (x86_supports_hardware_single_step) New function.
+	(struct linux_target_ops) <supports_hardware_single_step>: Initialize.
+	* linux-xtensa-low.c (xtensa_supports_hardware_single_step):
+	New function.
+	(struct linux_target_ops) <supports_hardware_single_step>: Initialize.
+	* target.h (struct target_ops): <supports_software_single_step>:
+	New field.
+	(target_supports_software_single_step): New macro.
+
+2015-11-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* linux-low.c (linux_wait_1): Fix pc advance condition.
 	* mem-break.c (reinsert_breakpoint_inserted_here): New function.
 	* mem-break.h (reinsert_breakpoint_inserted_here): New declaration.

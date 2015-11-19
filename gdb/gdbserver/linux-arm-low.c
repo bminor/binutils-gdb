@@ -902,6 +902,14 @@ arm_arch_setup (void)
     have_ptrace_getregset = 0;
 }
 
+/* Support for hardware single step.  */
+
+static int
+arm_supports_hardware_single_step (void)
+{
+  return 0;
+}
+
 /* Register sets without using PTRACE_GETREGSET.  */
 
 static struct regset_info arm_regsets[] = {
@@ -1058,7 +1066,8 @@ struct linux_target_ops the_low_target = {
   NULL, /* emit_ops */
   NULL, /* get_min_fast_tracepoint_insn_len */
   NULL, /* supports_range_stepping */
-  arm_breakpoint_kind_from_current_state
+  arm_breakpoint_kind_from_current_state,
+  arm_supports_hardware_single_step
 };
 
 void
