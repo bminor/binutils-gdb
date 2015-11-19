@@ -1020,6 +1020,11 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
   if (tp->btrace.target != NULL)
     return;
 
+#if !defined (HAVE_LIBIPT)
+  if (conf->format == BTRACE_FORMAT_PT)
+    error (_("GDB does not support Intel(R) Processor Trace."));
+#endif /* !defined (HAVE_LIBIPT) */
+
   if (!target_supports_btrace (conf->format))
     error (_("Target does not support branch tracing."));
 
