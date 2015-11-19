@@ -1,3 +1,10 @@
+2015-12-10  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2015-11-19  Alan Modra  <amodra@gmail.com>
+	* gas/ppc/altivec3.d: Allow for padding at end of section.
+	* gas/testsuite/gas/ppc/power9.d: Likewise.
+
 2015-12-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run ospke and x86-64-ospke.
