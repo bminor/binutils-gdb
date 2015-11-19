@@ -1,5 +1,11 @@
 2015-11-19  Pedro Alves  <palves@redhat.com>
 
+	* configure.ac (ERROR_ON_WARNING): Don't check whether in C++
+	mode.
+	* configure: Regenerate.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
 	* build-with-cxx.m4 (GDB_AC_BUILD_WITH_CXX): Remove -fpermissive.
 	* configure: Regenerate.
 
