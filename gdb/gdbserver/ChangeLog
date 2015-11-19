@@ -1,5 +1,10 @@
 2015-11-19  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (emit_data_processing_reg): Change opcode
+	type to uint32_t.
+
+2015-11-19  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (enum aarch64_operand_type): New.
 	(struct aarch64_operand): Move enum out.
 

@@ -1029,7 +1029,7 @@ emit_stlr (uint32_t *buf, struct aarch64_register rt,
 /* Helper function for data processing instructions with register sources.  */
 
 static int
-emit_data_processing_reg (uint32_t *buf, enum aarch64_opcodes opcode,
+emit_data_processing_reg (uint32_t *buf, uint32_t opcode,
 			  struct aarch64_register rd,
 			  struct aarch64_register rn,
 			  struct aarch64_register rm)
