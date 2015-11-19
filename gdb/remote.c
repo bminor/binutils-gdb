@@ -4607,7 +4607,7 @@ remote_query_supported (void)
 static void
 remote_unpush_target (void)
 {
-  pop_all_targets_above (process_stratum - 1);
+  pop_all_targets_at_and_above (process_stratum);
 }
 
 static void

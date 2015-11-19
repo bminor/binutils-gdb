@@ -746,21 +746,35 @@ unpush_target (struct target_ops *t)
   return 1;
 }
 
+/* Unpush TARGET and assert that it worked.  */
+
+static void
+unpush_target_and_assert (struct target_ops *target)
+{
+  if (!unpush_target (target))
+    {
+      fprintf_unfiltered (gdb_stderr,
+			  "pop_all_targets couldn't find target %s\n",
+			  target->to_shortname);
+      internal_error (__FILE__, __LINE__,
+		      _("failed internal consistency check"));
+    }
+}
+
 void
 pop_all_targets_above (enum strata above_stratum)
 {
   while ((int) (current_target.to_stratum) > (int) above_stratum)
-    {
-      if (!unpush_target (target_stack))
-	{
-	  fprintf_unfiltered (gdb_stderr,
-			      "pop_all_targets couldn't find target %s\n",
-			      target_stack->to_shortname);
-	  internal_error (__FILE__, __LINE__,
-			  _("failed internal consistency check"));
-	  break;
-	}
-    }
+    unpush_target_and_assert (target_stack);
+}
+
+/* See target.h.  */
+
+void
+pop_all_targets_at_and_above (enum strata stratum)
+{
+  while ((int) (current_target.to_stratum) >= (int) stratum)
+    unpush_target_and_assert (target_stack);
 }
 
 void

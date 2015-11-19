@@ -1,3 +1,13 @@
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_unpush_target): Use
+	pop_all_targets_at_and_above instead of pop_all_targets_above.
+	* target.c (unpush_target_and_assert): New function, factored out
+	from ...
+	(pop_all_targets_above): ... here.
+	(pop_all_targets_at_and_above): New function.
+	* target.h (pop_all_targets_at_and_above): Declare.
+
 2015-11-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* valops.c (value_string): Constify 'ptr' parameter.
