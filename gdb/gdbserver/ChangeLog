@@ -1,5 +1,20 @@
 2015-11-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* linux-arm-low.c (arm_reinsert_addr): Remove function.
+	(struct linux_target_ops <breakpoint_reinsert_addr>: Set to NULL.
+	* linux-cris-low.c (cris_reinsert_addr> Remove function.
+	(struct linux_target_ops) <breakpoint_reinsert_addr>: Set to NULL.
+	* linux-crisv32-low.c (cris_reinsert_addr): Remove function.
+	(struct linux_target_ops) <breakpoint_reinsert_addr>: Set to NULL.
+	* linux-mips-low.c (mips_reinsert_addr): Remove function.
+	(struct linux_target_ops) <breakpoint_reinsert_addr>: Set to NULL.
+	* linux-nios2-low.c (nios2_reinsert_addr): Remove function.
+	(struct linux_target_ops) <breakpoint_reinsert_addr>: Set to NULL.
+	* linux-sparc-low.c (sparc_reinsert_addr): Remove function.
+	(struct linux_target_ops) <breakpoint_reinsert_addr>: Set to NULL.
+
+2015-11-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* linux-low.c (linux_look_up_symbols): Don't call
 	linux_supports_traceclone.
 	* linux-low.h (thread_db_init): Remove use_events argument.

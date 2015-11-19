@@ -101,23 +101,6 @@ cris_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
-/* We only place breakpoints in empty marker functions, and thread locking
-   is outside of the function.  So rather than importing software single-step,
-   we can just run until exit.  */
-
-/* FIXME: This function should not be needed, since we have PTRACE_SINGLESTEP
-   for CRISv32.  Without it, td_ta_event_getmsg in thread_db_create_event
-   will fail when debugging multi-threaded applications.  */
-
-static CORE_ADDR
-cris_reinsert_addr (void)
-{
-  struct regcache *regcache = get_thread_regcache (current_thread, 1);
-  unsigned long pc;
-  collect_register_by_name (regcache, "srp", &pc);
-  return pc;
-}
-
 static void
 cris_write_data_breakpoint (struct regcache *regcache,
 			    int bp, unsigned long start, unsigned long end)
@@ -439,7 +422,7 @@ struct linux_target_ops the_low_target = {
   cris_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   cris_sw_breakpoint_from_kind,
-  cris_reinsert_addr,
+  NULL, /* breakpoint_reinsert_addr */
   0,
   cris_breakpoint_at,
   cris_supports_z_point_type,
