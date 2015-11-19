@@ -1,5 +1,9 @@
 2015-11-19  Pedro Alves  <palves@redhat.com>
 
+	* linux-thread-db.c (try_thread_db_load_1): Add cast.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_unpush_target): Use
 	pop_all_targets_at_and_above instead of pop_all_targets_above.
 	* target.c (unpush_target_and_assert): New function, factored out
