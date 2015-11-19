@@ -1,5 +1,9 @@
 2015-11-19  Alan Modra  <amodra@gmail.com>
 
+	* read.c (output_big_leb128): Describe "sign" parameter.
+
+2015-11-19  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.h (SUB_SEGMENT_ALIGN): Define only for ELF.
 
 2015-11-16  Mike Frysinger  <vapier@gentoo.org>
