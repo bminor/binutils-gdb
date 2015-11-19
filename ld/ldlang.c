@@ -5457,18 +5457,23 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 
       /* For sections in the relro segment..  */
       for (sec = link_info.output_bfd->section_last; sec; sec = sec->prev)
-	if (!IGNORE_SECTION (sec)
+	if ((sec->flags & SEC_ALLOC) != 0
 	    && sec->vma >= expld.dataseg.base
 	    && sec->vma < expld.dataseg.relro_end - expld.dataseg.relro_offset)
 	  {
 	    /* Where do we want to put this section so that it ends as
 	       desired?  */
-	    bfd_vma start = sec->vma;
-	    bfd_vma end = start + sec->size;
-	    bfd_vma bump = desired_end - end;
+	    bfd_vma start, end, bump;
+
+	    end = start = sec->vma;
+	    if ((sec->flags & SEC_HAS_CONTENTS) != 0
+		|| (sec->flags & SEC_THREAD_LOCAL) == 0)
+	      end += sec->size;
+	    bump = desired_end - end;
 	    /* We'd like to increase START by BUMP, but we must heed
 	       alignment so the increase might be less than optimum.  */
-	    start += bump & ~(((bfd_vma) 1 << sec->alignment_power) - 1);
+	    start += bump;
+	    start &= ~(((bfd_vma) 1 << sec->alignment_power) - 1);
 	    /* This is now the desired end for the previous section.  */
 	    desired_end = start;
 	  }

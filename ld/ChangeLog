@@ -1,3 +1,9 @@
+2015-11-19  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19264
+	* ldlang.c (lang_size_sections): Don't ignore .tbss when
+	adjusting start of relro region.
+
 2015-11-16  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/19106
