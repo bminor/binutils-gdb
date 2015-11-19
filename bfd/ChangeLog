@@ -1,3 +1,14 @@
+2015-12-11  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	Apply from master.
+	2015-11-19  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	PR ld/19263
+	* elf32-s390.c (elf_s390_gc_sweep_hook): Add null ptr check.
+	* elf64-s390.c (elf_s390_check_relocs): Port the GOTOFF handling
+	over from the 32 bit code.
+	(elf_s390_relocate_section): Likewise.
+
 2015-12-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
