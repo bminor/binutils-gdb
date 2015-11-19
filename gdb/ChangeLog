@@ -1,3 +1,11 @@
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (software_watchpoint_add_no_memory_location)
+	(is_no_memory_software_watchpoint): New functions.
+	(update_watchpoint): Use
+	software_watchpoint_add_memoryless_location.
+	(breakpoint_address_bits): Use is_no_memory_software_watchpoint.
+
 2015-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 	    Pedro Alves  <palves@redhat.com>
 

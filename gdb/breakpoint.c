@@ -1775,6 +1775,36 @@ extract_bitfield_from_watchpoint_value (struct watchpoint *w, struct value *val)
   return bit_val;
 }
 
+/* Allocate a dummy location and add it to B, which must be a software
+   watchpoint.  This is required because even if a software watchpoint
+   is not watching any memory, bpstat_stop_status requires a location
+   to be able to report stops.  */
+
+static void
+software_watchpoint_add_no_memory_location (struct breakpoint *b,
+					    struct program_space *pspace)
+{
+  gdb_assert (b->type == bp_watchpoint && b->loc == NULL);
+
+  b->loc = allocate_bp_location (b);
+  b->loc->pspace = pspace;
+  b->loc->address = -1;
+  b->loc->length = -1;
+}
+
+/* Returns true if B is a software watchpoint that is not watching any
+   memory (e.g., "watch $pc").  */
+
+static int
+is_no_memory_software_watchpoint (struct breakpoint *b)
+{
+  return (b->type == bp_watchpoint
+	  && b->loc != NULL
+	  && b->loc->next == NULL
+	  && b->loc->address == -1
+	  && b->loc->length == -1);
+}
+
 /* Assuming that B is a watchpoint:
    - Reparse watchpoint expression, if REPARSE is non-zero
    - Evaluate expression and store the result in B->val
@@ -2138,14 +2168,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	 bpstat_stop_status requires a location to be able to report
 	 stops, so make sure there's at least a dummy one.  */
       if (b->base.type == bp_watchpoint && b->base.loc == NULL)
-	{
-	  struct breakpoint *base = &b->base;
-	  base->loc = allocate_bp_location (base);
-	  base->loc->pspace = frame_pspace;
-	  base->loc->address = -1;
-	  base->loc->length = -1;
-	  base->loc->watchpoint_type = -1;
-	}
+	software_watchpoint_add_no_memory_location (&b->base, frame_pspace);
     }
   else if (!within_current_scope)
     {
@@ -6667,14 +6690,14 @@ breakpoint_address_bits (struct breakpoint *b)
   int print_address_bits = 0;
   struct bp_location *loc;
 
+  /* Software watchpoints that aren't watching memory don't have an
+     address to print.  */
+  if (is_no_memory_software_watchpoint (b))
+    return 0;
+
   for (loc = b->loc; loc; loc = loc->next)
     {
       int addr_bit;
-
-      /* Software watchpoints that aren't watching memory don't have
-	 an address to print.  */
-      if (b->type == bp_watchpoint && loc->watchpoint_type == -1)
-	continue;
 
       addr_bit = gdbarch_addr_bit (loc->gdbarch);
       if (addr_bit > print_address_bits)
