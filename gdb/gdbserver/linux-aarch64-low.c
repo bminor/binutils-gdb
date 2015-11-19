@@ -131,7 +131,7 @@ aarch64_store_gregset (struct regcache *regcache, const void *buf)
 static void
 aarch64_fill_fpregset (struct regcache *regcache, void *buf)
 {
-  struct user_fpsimd_state *regset = buf;
+  struct user_fpsimd_state *regset = (struct user_fpsimd_state *) buf;
   int i;
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)
@@ -143,7 +143,8 @@ aarch64_fill_fpregset (struct regcache *regcache, void *buf)
 static void
 aarch64_store_fpregset (struct regcache *regcache, const void *buf)
 {
-  const struct user_fpsimd_state *regset = buf;
+  const struct user_fpsimd_state *regset
+    = (const struct user_fpsimd_state *) buf;
   int i;
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)

@@ -1,5 +1,11 @@
 2015-11-19  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_fill_fpregset): Cast buf to
+	struct user_fpsimd_state *.
+	(aarch64_store_fpregset): Likewise.
+
+2015-11-19  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch64-low.c (aarch64_fill_gregset): Cast buf to
 	struct user_pt_regs *.
 	(aarch64_store_gregset): Likewise.
