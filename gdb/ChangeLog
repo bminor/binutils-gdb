@@ -1,5 +1,10 @@
 2015-11-19  Pedro Alves  <palves@redhat.com>
 
+	* build-with-cxx.m4 (GDB_AC_BUILD_WITH_CXX): Remove -fpermissive.
+	* configure: Regenerate.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (software_watchpoint_add_no_memory_location)
 	(is_no_memory_software_watchpoint): New functions.
 	(update_watchpoint): Use

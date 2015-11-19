@@ -32,8 +32,7 @@ AC_DEFUN([GDB_AC_BUILD_WITH_CXX],
     [enable_build_with_cxx=no])
 
   if test "$enable_build_with_cxx" = "yes"; then
-    # We're using -fpermissive as shortcut for now.
-    COMPILER='$(CXX) -fpermissive'
+    COMPILER='$(CXX)'
    else
     COMPILER='$(CC)'
   fi
