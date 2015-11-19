@@ -1,5 +1,10 @@
 2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* config/tc-arm.c (arm_archs): Add "armv8.2-a".
+	* doc/c-arm.texi (-march): Add "armv8.2-a".
+
+2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* config/tc-aarch64.c (aarch64_archs): Add "armv8.2-a".
 	* doc/c-aarch64.texi (-march): Likewise.
 

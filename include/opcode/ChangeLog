@@ -1,5 +1,10 @@
 2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* arm.h (ARM_EXT2_V8_2A): New.
+	(ARM_ARCH_V8_2A): New.
+
+2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64.h (AARCH64_FEATURE_V8_2): New.
 	(AARCH64_ARCH_V8_2): New.
 
