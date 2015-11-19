@@ -4467,9 +4467,6 @@ remote_query_supported (void)
       if (packet_set_cmd_state (PACKET_hwbreak_feature) != AUTO_BOOLEAN_FALSE)
 	q = remote_query_supported_append (q, "hwbreak+");
 
-      if (remote_support_xml)
-	q = remote_query_supported_append (q, remote_support_xml);
-
       q = remote_query_supported_append (q, "qRelocInsn+");
 
       if (rs->extended)
@@ -4487,6 +4484,11 @@ remote_query_supported (void)
 
       if (packet_set_cmd_state (PACKET_vContSupported) != AUTO_BOOLEAN_FALSE)
 	q = remote_query_supported_append (q, "vContSupported+");
+
+      /* Keep this one last to work around a gdbserver <= 7.10 bug in
+	 the qSupported:xmlRegisters=i386 handling.  */
+      if (remote_support_xml != NULL)
+	q = remote_query_supported_append (q, remote_support_xml);
 
       q = reconcat (q, "qSupported:", q, (char *) NULL);
       putpkt (q);
