@@ -2619,7 +2619,7 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
     case 197: /* fstat64 */
     case 221: /* fcntl64 */
       if (abi == ABI_LINUX_S390)
-        return syscall;
+        return (enum gdb_syscall) syscall;
       return gdb_sys_no_syscall;
     /* These syscalls don't exist on s390.  */
     case 17: /* break */
@@ -2717,22 +2717,29 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
       return gdb_sys_newfstatat;
     /* 313+ not yet supported */
     default:
-      /* Most "old" syscalls copied from i386.  */
-      if (syscall <= 221)
-        return syscall;
-      /* xattr syscalls.  */
-      if (syscall >= 224 && syscall <= 235)
-        return syscall + 2;
-      /* timer syscalls.  */
-      if (syscall >= 254 && syscall <= 262)
-        return syscall + 5;
-      /* mq_* and kexec_load */
-      if (syscall >= 271 && syscall <= 277)
-        return syscall + 6;
-      /* ioprio_set .. epoll_pwait */
-      if (syscall >= 282 && syscall <= 312)
-        return syscall + 7;
-      return gdb_sys_no_syscall;
+      {
+	int ret;
+
+	/* Most "old" syscalls copied from i386.  */
+	if (syscall <= 221)
+	  ret = syscall;
+	/* xattr syscalls.  */
+	else if (syscall >= 224 && syscall <= 235)
+	  ret = syscall + 2;
+	/* timer syscalls.  */
+	else if (syscall >= 254 && syscall <= 262)
+	  ret = syscall + 5;
+	/* mq_* and kexec_load */
+	else if (syscall >= 271 && syscall <= 277)
+	  ret = syscall + 6;
+	/* ioprio_set .. epoll_pwait */
+	else if (syscall >= 282 && syscall <= 312)
+	  ret = syscall + 7;
+	else
+	  ret = gdb_sys_no_syscall;
+
+	return (enum gdb_syscall) ret;
+      }
     }
 }
 

@@ -1,3 +1,9 @@
+2015-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* s390-linux-tdep.c (s390_canonicalize_syscall): Add casts and
+	intermediate 'int' variable.
+
 2015-11-19  Pedro Alves  <palves@redhat.com>
 
 	* linux-thread-db.c (try_thread_db_load_1): Add cast.
