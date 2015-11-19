@@ -561,8 +561,8 @@ aarch64_linux_set_debug_regs (const struct aarch64_debug_reg_state *state,
   ctrl = watchpoint ? state->dr_ctrl_wp : state->dr_ctrl_bp;
   if (count == 0)
     return;
-  iov.iov_len = (offsetof (struct user_hwdebug_state, dbg_regs[count - 1])
-		 + sizeof (regs.dbg_regs [count - 1]));
+  iov.iov_len = (offsetof (struct user_hwdebug_state, dbg_regs)
+		 + count * sizeof (regs.dbg_regs[0]));
 
   for (i = 0; i < count; i++)
     {

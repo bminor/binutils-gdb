@@ -1,3 +1,8 @@
+2015-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* nat/aarch64-linux-hw-point.c (aarch64_linux_set_debug_regs): Change
+	form of iov_len computation.
+
 2015-11-19  Pedro Alves  <palves@redhat.com>
 
 	* configure.ac (ERROR_ON_WARNING): Don't check whether in C++
