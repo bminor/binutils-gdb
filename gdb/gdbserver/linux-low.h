@@ -379,7 +379,7 @@ void initialize_regsets_info (struct regsets_info *regsets_info);
 void initialize_low_arch (void);
 
 /* From thread-db.c  */
-int thread_db_init (int use_events);
+int thread_db_init (void);
 void thread_db_detach (struct process_info *);
 void thread_db_mourn (struct process_info *);
 int thread_db_handle_monitor_command (char *);

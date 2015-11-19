@@ -24,8 +24,6 @@
 
 extern int debug_threads;
 
-static int thread_db_use_events;
-
 #include "gdb_proc_service.h"
 #include "nat/gdb_thread_db.h"
 #include "gdb_vecs.h"
@@ -56,16 +54,6 @@ struct thread_db
   void *handle;
 #endif
 
-  /* Thread creation event breakpoint.  The code at this location in
-     the child process will be called by the pthread library whenever
-     a new thread is created.  By setting a special breakpoint at this
-     location, GDB can detect when a new thread is created.  We obtain
-     this location via the td_ta_event_addr call.  Note that if the
-     running kernel supports tracing clones, then we don't need to use
-     (and in fact don't use) this magic thread event breakpoint to
-     learn about threads.  */
-  struct breakpoint *td_create_bp;
-
   /* Addresses of libthread_db functions.  */
   td_ta_new_ftype *td_ta_new_p;
   td_ta_event_getmsg_ftype * td_ta_event_getmsg_p;
@@ -73,7 +61,6 @@ struct thread_db
   td_ta_event_addr_ftype *td_ta_event_addr_p;
   td_ta_map_lwp2thr_ftype *td_ta_map_lwp2thr_p;
   td_thr_get_info_ftype *td_thr_get_info_p;
-  td_thr_event_enable_ftype *td_thr_event_enable_p;
   td_ta_thr_iter_ftype *td_ta_thr_iter_p;
   td_thr_tls_get_addr_ftype *td_thr_tls_get_addr_p;
   td_thr_tlsbase_ftype *td_thr_tlsbase_p;
@@ -172,84 +159,6 @@ thread_db_state_str (td_thr_state_e state)
 #endif
 
 static int
-thread_db_create_event (CORE_ADDR where)
-{
-  td_event_msg_t msg;
-  td_err_e err;
-  struct lwp_info *lwp;
-  struct thread_db *thread_db = current_process ()->priv->thread_db;
-
-  gdb_assert (thread_db->td_ta_event_getmsg_p != NULL);
-
-  if (debug_threads)
-    debug_printf ("Thread creation event.\n");
-
-  /* FIXME: This assumes we don't get another event.
-     In the LinuxThreads implementation, this is safe,
-     because all events come from the manager thread
-     (except for its own creation, of course).  */
-  err = thread_db->td_ta_event_getmsg_p (thread_db->thread_agent, &msg);
-  if (err != TD_OK)
-    fprintf (stderr, "thread getmsg err: %s\n",
-	     thread_db_err_str (err));
-
-  /* If we do not know about the main thread yet, this would be a good time to
-     find it.  We need to do this to pick up the main thread before any newly
-     created threads.  */
-  lwp = get_thread_lwp (current_thread);
-  if (lwp->thread_known == 0)
-    find_one_thread (current_thread->entry.id);
-
-  /* msg.event == TD_EVENT_CREATE */
-
-  find_new_threads_callback (msg.th_p, NULL);
-
-  return 0;
-}
-
-static int
-thread_db_enable_reporting (void)
-{
-  td_thr_events_t events;
-  td_notify_t notify;
-  td_err_e err;
-  struct thread_db *thread_db = current_process ()->priv->thread_db;
-
-  if (thread_db->td_ta_set_event_p == NULL
-      || thread_db->td_ta_event_addr_p == NULL
-      || thread_db->td_ta_event_getmsg_p == NULL)
-    /* This libthread_db is missing required support.  */
-    return 0;
-
-  /* Set the process wide mask saying which events we're interested in.  */
-  td_event_emptyset (&events);
-  td_event_addset (&events, TD_CREATE);
-
-  err = thread_db->td_ta_set_event_p (thread_db->thread_agent, &events);
-  if (err != TD_OK)
-    {
-      warning ("Unable to set global thread event mask: %s",
-	       thread_db_err_str (err));
-      return 0;
-    }
-
-  /* Get address for thread creation breakpoint.  */
-  err = thread_db->td_ta_event_addr_p (thread_db->thread_agent, TD_CREATE,
-				       &notify);
-  if (err != TD_OK)
-    {
-      warning ("Unable to get location for thread creation breakpoint: %s",
-	       thread_db_err_str (err));
-      return 0;
-    }
-  thread_db->td_create_bp
-    = set_breakpoint_at ((CORE_ADDR) (unsigned long) notify.u.bptaddr,
-			 thread_db_create_event);
-
-  return 1;
-}
-
-static int
 find_one_thread (ptid_t ptid)
 {
   td_thrhandle_t th;
@@ -285,14 +194,6 @@ find_one_thread (ptid_t ptid)
       warning ("PID mismatch!  Expected %ld, got %ld",
 	       (long) lwpid, (long) ti.ti_lid);
       return 0;
-    }
-
-  if (thread_db_use_events)
-    {
-      err = thread_db->td_thr_event_enable_p (&th, 1);
-      if (err != TD_OK)
-	error ("Cannot enable thread event reporting for %d: %s",
-	       ti.ti_lid, thread_db_err_str (err));
     }
 
   /* If the new thread ID is zero, a final thread ID will be available
@@ -333,17 +234,6 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
   gdb_assert (lwp != NULL);
   lwp->thread_known = 1;
   lwp->th = *th_p;
-
-  if (thread_db_use_events)
-    {
-      td_err_e err;
-      struct thread_db *thread_db = proc->priv->thread_db;
-
-      err = thread_db->td_thr_event_enable_p (th_p, 1);
-      if (err != TD_OK)
-	error ("Cannot enable thread event reporting for %d: %s",
-	       ti_p->ti_lid, thread_db_err_str (err));
-    }
 
   return 1;
 }
@@ -584,9 +474,6 @@ thread_db_load_search (void)
   tdb->td_ta_thr_iter_p = &td_ta_thr_iter;
   tdb->td_symbol_list_p = &td_symbol_list;
 
-  /* This is required only when thread_db_use_events is on.  */
-  tdb->td_thr_event_enable_p = &td_thr_event_enable;
-
   /* These are not essential.  */
   tdb->td_ta_event_addr_p = &td_ta_event_addr;
   tdb->td_ta_set_event_p = &td_ta_set_event;
@@ -653,9 +540,6 @@ try_thread_db_load_1 (void *handle)
   CHK (1, TDB_DLSYM (tdb, td_thr_get_info));
   CHK (1, TDB_DLSYM (tdb, td_ta_thr_iter));
   CHK (1, TDB_DLSYM (tdb, td_symbol_list));
-
-  /* This is required only when thread_db_use_events is on.  */
-  CHK (thread_db_use_events, TDB_DLSYM (tdb, td_thr_event_enable));
 
   /* These are not essential.  */
   CHK (0, TDB_DLSYM (tdb, td_ta_event_addr));
@@ -824,7 +708,7 @@ thread_db_load_search (void)
 #endif  /* USE_LIBTHREAD_DB_DIRECTLY */
 
 int
-thread_db_init (int use_events)
+thread_db_init (void)
 {
   struct process_info *proc = current_process ();
 
@@ -839,31 +723,21 @@ thread_db_init (int use_events)
      This isn't the only place in gdbserver that assumes that the first
      process in the list is the thread group leader.  */
 
-  thread_db_use_events = use_events;
-
   if (thread_db_load_search ())
     {
-      if (use_events && thread_db_enable_reporting () == 0)
-	{
-	  /* Keep trying; maybe event reporting will work later.  */
-	  thread_db_mourn (proc);
-	  return 0;
-	}
-
       /* It's best to avoid td_ta_thr_iter if possible.  That walks
 	 data structures in the inferior's address space that may be
 	 corrupted, or, if the target is running, the list may change
 	 while we walk it.  In the latter case, it's possible that a
 	 thread exits just at the exact time that causes GDBserver to
-	 get stuck in an infinite loop.  If the kernel supports clone
-	 events, and /proc/PID/task/ exits, then we already know about
+	 get stuck in an infinite loop.  As the kernel supports clone
+	 events and /proc/PID/task/ exists, then we already know about
 	 all threads in the process.  When we need info out of
 	 thread_db on a given thread (e.g., for TLS), we'll use
 	 find_one_thread then.  That uses thread_db entry points that
 	 do not walk libpthread's thread list, so should be safe, as
 	 well as more efficient.  */
-      if (use_events
-	  || !linux_proc_task_list_dir_exists (pid_of (proc)))
+      if (!linux_proc_task_list_dir_exists (pid_of (proc)))
 	thread_db_find_new_threads ();
       thread_db_look_up_symbols ();
       return 1;
@@ -929,24 +803,6 @@ disable_thread_event_reporting (struct process_info *proc)
     }
 }
 
-static void
-remove_thread_event_breakpoints (struct process_info *proc)
-{
-  struct thread_db *thread_db = proc->priv->thread_db;
-
-  if (thread_db->td_create_bp != NULL)
-    {
-      struct thread_info *saved_thread = current_thread;
-
-      switch_to_process (proc);
-
-      delete_breakpoint (thread_db->td_create_bp);
-      thread_db->td_create_bp = NULL;
-
-      current_thread = saved_thread;
-    }
-}
-
 void
 thread_db_detach (struct process_info *proc)
 {
@@ -955,7 +811,6 @@ thread_db_detach (struct process_info *proc)
   if (thread_db)
     {
       disable_thread_event_reporting (proc);
-      remove_thread_event_breakpoints (proc);
     }
 }
 

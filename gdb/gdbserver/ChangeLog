@@ -1,5 +1,24 @@
 2015-11-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* linux-low.c (linux_look_up_symbols): Don't call
+	linux_supports_traceclone.
+	* linux-low.h (thread_db_init): Remove use_events argument.
+	* thread-db.c (thread_db_use_event): Remove global variable.
+	(struct thread_db) <td_thr_event_enable_p>: Remove field.
+	(struct thread_db) <td_create_bp>: Remove field.
+	(thread_db_create_event): Remove function.
+	(thread_db_enable_reporting): Likewise.
+	(find_one_thread): Don't check for thread_db_use_events.
+	(attach_thread): Likewise.
+	(thread_db_load_search): Remove td_thr_event_enable_p initialization.
+	(try_thread_db_load_1): Don't check for thread_db_use_events.
+	(thread_db_init): Remove use_events argument and thread events
+	handling.
+	(remove_thread_event_breakpoints): Remove function.
+	(thread_db_detach): Remove call to remove_thred_event_breakpoints.
+
+2015-11-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* linux-aarch64-low.c (aarch64_supports_hardware_single_step):
 	New function.
 	(struct linux_target_ops) <supports_hardware_single_step>: Initialize.
