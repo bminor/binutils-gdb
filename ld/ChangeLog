@@ -1,3 +1,11 @@
+2015-12-10  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2015-11-19  Alan Modra  <amodra@gmail.com>
+	PR ld/19264
+	* ldlang.c (lang_size_sections): Don't ignore .tbss when
+	adjusting start of relro region.
+
 2015-11-13  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
