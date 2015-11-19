@@ -5326,8 +5326,7 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
     case elfcpp::R_PPC64_TOC16_HA:
     case elfcpp::R_PPC64_TOC16_DS:
     case elfcpp::R_PPC64_TOC16_LO_DS:
-      // Absolute in GOT.
-      ref = Symbol::ABSOLUTE_REF;
+      ref = Symbol::RELATIVE_REF;
       break;
 
     case elfcpp::R_POWERPC_GOT_TPREL16:

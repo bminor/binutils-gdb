@@ -1,6 +1,10 @@
 2015-12-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-11-19  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::Scan::get_reference_flags): Correct
+	GOT16 and TOC16 relocs to RELATIVE_REF.
+
 	2015-11-14  Cary Coutant  <ccoutant@gmail.com>
 	PR gold/19244
 	PR gold/18548
