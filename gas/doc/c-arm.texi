@@ -223,6 +223,7 @@ names are recognized:
 @code{armv7e-m},
 @code{armv8-a},
 @code{armv8.1-a},
+@code{armv8.2-a},
 @code{iwmmxt}
 @code{iwmmxt2}
 and
