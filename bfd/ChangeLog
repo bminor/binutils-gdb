@@ -1,5 +1,9 @@
 2015-11-20  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o-x86-64.c (x86_64_howto_table): Change name here too.
+
+2015-11-20  Tristan Gingold  <gingold@adacore.com>
+
 	* targets.c (aarch64_mach_o_vec, arm_mach_o_vec): Declare.
 	(_bfd_target_vector): Add new vectors.
 	* reloc.c (BFD_RELOC_MACH_O_SUBTRACTOR32)

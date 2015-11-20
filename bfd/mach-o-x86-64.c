@@ -101,11 +101,11 @@ static reloc_howto_type x86_64_howto_table[]=
 	NULL, "GOT_LOAD",
 	FALSE, 0xffffffff, 0xffffffff, TRUE),
   /* 8 */
-  HOWTO(BFD_RELOC_MACH_O_X86_64_SUBTRACTOR32, 0, 2, 32, FALSE, 0,
+  HOWTO(BFD_RELOC_MACH_O_SUBTRACTOR32, 0, 2, 32, FALSE, 0,
 	complain_overflow_bitfield,
 	NULL, "SUBTRACTOR32",
 	FALSE, 0xffffffff, 0xffffffff, FALSE),
-  HOWTO(BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64, 0, 4, 64, FALSE, 0,
+  HOWTO(BFD_RELOC_MACH_O_SUBTRACTOR64, 0, 4, 64, FALSE, 0,
 	complain_overflow_bitfield,
 	NULL, "SUBTRACTOR64",
 	FALSE, MINUS_ONE, MINUS_ONE, FALSE),
