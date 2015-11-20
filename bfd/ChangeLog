@@ -1,3 +1,9 @@
+2015-11-20  Stefan Teleman  <stefan.teleman@oracle.com>
+
+	PR ld/19260
+	* cache.c (bfd_cache_max_open): Avoid using getrlimit on 32-bit
+	Solaris as the result is unreliable.
+
 2015-11-20  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o-x86-64.c (x86_64_howto_table): Change name here too.
