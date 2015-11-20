@@ -1,3 +1,7 @@
+2015-11-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated simplified Chinese translation.
+
 2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-opc.c (operand_general_constraint_met_p): Check validity

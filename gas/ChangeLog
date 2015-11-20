@@ -1,3 +1,11 @@
+2015-11-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+	* po/uk.po: Updated Ukraninan translation.
+	* po/zh_CN.po: New simplified Chinese translation.
+	* configure.ac (ALL_LINGUAS): Add zh_CN.
+	* configure: Regenerate.
+
 2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-arm.c (arm_archs): Add "armv8.2-a".
