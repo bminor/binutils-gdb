@@ -1,3 +1,7 @@
+2015-11-20  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+    	* gdb.arch/sparc-sysstep.c: Include unistd.h for getpid.
+
 2015-11-19  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/nested-subp1.exp: Pass executable, not executable name,
