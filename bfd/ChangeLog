@@ -1,6 +1,11 @@
 2015-12-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-11-20  Stefan Teleman  <stefan.teleman@oracle.com>
+	PR ld/19260
+	* cache.c (bfd_cache_max_open): Avoid using getrlimit on 32-bit
+	Solaris as the result is unreliable.
+
 	2015-11-18  Alan Modra  <amodra@gmail.com>
 	PR 19256
 	* archive.c (bfd_generic_openr_next_archived_file): Don't allow
