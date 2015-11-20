@@ -34,6 +34,7 @@
 #include "elf-bfd.h"
 #include "elf/internal.h"
 #include "elf/arm.h"
+#include "mach-o.h"
 
 /* FIXME: Belongs in global header.  */
 #ifndef strneq
@@ -6373,6 +6374,13 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	  is_thumb = ((ARM_SYM_BRANCH_TYPE (&es->internal_elf_sym)
 		       == ST_BRANCH_TO_THUMB)
 		      || type == STT_ARM_16BIT);
+	}
+      else if (bfd_asymbol_flavour (*info->symbols)
+	       == bfd_target_mach_o_flavour)
+	{
+	  bfd_mach_o_asymbol *asym = (bfd_mach_o_asymbol *)*info->symbols;
+
+	  is_thumb = (asym->n_desc & BFD_MACH_O_N_ARM_THUMB_DEF);
 	}
     }
 

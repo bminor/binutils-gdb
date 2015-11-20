@@ -1,3 +1,7 @@
+2015-11-23  Tristan Gingold  <gingold@adacore.com>
+
+	* arm-dis.c (print_insn): Also set is_thumb for Mach-O.
+
 2015-11-20  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_regs): Add spsr_el12, elr_el12,
