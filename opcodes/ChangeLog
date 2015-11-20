@@ -1,3 +1,7 @@
+2015-11-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: Updated simplified Chinese translation.
+
 2015-11-13  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
