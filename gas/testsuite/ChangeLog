@@ -1,3 +1,7 @@
+2015-11-20  Matthew Wahab  <matthew.wahab@foss.arm.com>
+
+	* gas/arm/mapshort-elf.d: Fix typo in exclusion list.
+
 2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/aarch64/pan-illegal.d: New.
