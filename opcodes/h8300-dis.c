@@ -544,10 +544,6 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
 		    (data[i] << 16) | (data[i + 1] << 8) | (data[i + 2]);
 		  cstlen[opnr] = 24;
 		}
-	      else if (looking_for & IGNORE)
-		{
-		  ;
-		}
 	      else if (looking_for & DISPREG)
 		{
 		  dispregno[opnr] = thisnib & 7;

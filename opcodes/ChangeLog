@@ -1,5 +1,10 @@
 2015-11-20  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/19224
+	* h8300-dis.c (bfd_h8_disassemble): Remove redundant if clause.
+
+2015-11-20  Nick Clifton  <nickc@redhat.com>
+
 	* po/zh_CN.po: Updated simplified Chinese translation.
 
 2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
