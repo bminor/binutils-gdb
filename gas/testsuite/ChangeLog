@@ -1,3 +1,9 @@
+2015-11-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/virthostext-directive.d: New.
+	* gas/aarch64/virthostext.d: New.
+	* gas/aarch64/virthostext.s: New.
+
 2015-06-03  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/arm/armv8-a+rdma.d: New.
