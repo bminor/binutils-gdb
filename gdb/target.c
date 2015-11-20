@@ -1836,8 +1836,9 @@ read_memory_robust (struct target_ops *ops,
 	      /* Got an error reading full chunk.  See if maybe we can read
 		 some subrange.  */
 	      xfree (buffer);
-	      read_whatever_is_readable (ops, offset + xfered_total, unit_size,
-					 offset + xfered_total + to_read, &result);
+	      read_whatever_is_readable (ops, offset + xfered_total,
+					 offset + xfered_total + to_read,
+					 unit_size, &result);
 	      xfered_total += to_read;
 	    }
 	  else
