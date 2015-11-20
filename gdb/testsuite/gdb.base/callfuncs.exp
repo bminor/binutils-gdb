@@ -254,6 +254,16 @@ proc fetch_all_registers {test} {
 	    }
 	    exp_continue
 	}
+	-re  "^pstate\[ \t\]+\[^\r\n\]+\r\n" {
+	    if [istarget "sparc64-*-linux-gnu"] {
+		# Filter out the pstate register, since in sparc64
+		# targets the Linux kernel disables pstate.PEF when
+		# returning from traps, giving spurious differences.
+	    } else {
+		lappend all_registers_lines $expect_out(0,string)
+	    }
+	    exp_continue
+	}
 	-re "^last_break\[ \t\]+\[^\r\n\]+\r\n" {
 	    if [istarget "s390*-*-*"] {
 		# Filter out last_break which is read-only,

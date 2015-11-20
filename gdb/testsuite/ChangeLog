@@ -1,5 +1,11 @@
 2015-11-20  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+        * gdb.base/callfuncs.exp (fetch_all_registers): Filter out the
+	pstate register when comparing registers values in
+	sparc64-*-linux-gnu targets to avoid spurious differences.
+
+2015-11-20  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
     	* gdb.arch/sparc-sysstep.c: Include unistd.h for getpid.
 
 2015-11-19  Sandra Loosemore  <sandra@codesourcery.com>
