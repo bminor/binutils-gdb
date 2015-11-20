@@ -1,3 +1,8 @@
+2015-11-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* configure.tgt <mips*el-mti-elf*, mips*el-img-elf*>: Add
+	targets.
+
 2015-11-19  Alan Modra  <amodra@gmail.com>
 
 	PR ld/19264
