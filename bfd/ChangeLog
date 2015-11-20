@@ -1,3 +1,29 @@
+2015-11-20  Tristan Gingold  <gingold@adacore.com>
+
+	* targets.c (aarch64_mach_o_vec, arm_mach_o_vec): Declare.
+	(_bfd_target_vector): Add new vectors.
+	* reloc.c (BFD_RELOC_MACH_O_SUBTRACTOR32)
+	(BFD_RELOC_MACH_O_SUBTRACTOR64, BFD_RELOC_MACH_O_ARM64_ADDEND)
+	(BFD_RELOC_MACH_O_ARM64_GOT_LOAD_PAGE21)
+	(BFD_RELOC_MACH_O_ARM64_GOT_LOAD_PAGEOFF12)
+	(BFD_RELOC_MACH_O_ARM64_POINTER_TO_GOT): New relocations.
+	(BFD_RELOC_MACH_O_X86_64_SUBTRACTOR32)
+	(BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64): Remove.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_swap_reloc_out): Change
+	name of subtractor relocations.
+	* config.bfd: Handle aarch64-*-darwin*, arm-*-darwin*.
+	* Makefile.am (BFD32_BACKENDS): Add mach-o-arm.lo.
+	(BFD32_BACKENDS_CFILES): Add mach-o-arm.c.
+	(BFD64_BACKENDS): Add mach-o-aarch64.lo.
+	(BFD64_BACKENDS_CFILES): Add mach-o-aarch64.c.
+	* configure.ac: Handle aarch64_mach_o_vec and arm_mach_o_vec.
+	* mach-o-aarch64.c: New file.
+	* mach-o-arm.c: New file.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+
 2015-11-20  David Bridgham  <dab@froghouse.org>
 
 	* pdp11.c (TARGET_PAGE_SIZE): Set to 256 to match definition in

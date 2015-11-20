@@ -266,12 +266,12 @@ bfd_mach_o_x86_64_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_pcrel = 1;
       rinfo->r_length = 2;
       break;
-    case BFD_RELOC_MACH_O_X86_64_SUBTRACTOR32:
+    case BFD_RELOC_MACH_O_SUBTRACTOR32:
       rinfo->r_type = BFD_MACH_O_X86_64_RELOC_SUBTRACTOR;
       rinfo->r_pcrel = 0;
       rinfo->r_length = 2;
       break;
-    case BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64:
+    case BFD_RELOC_MACH_O_SUBTRACTOR64:
       rinfo->r_type = BFD_MACH_O_X86_64_RELOC_SUBTRACTOR;
       rinfo->r_pcrel = 0;
       rinfo->r_length = 3;
