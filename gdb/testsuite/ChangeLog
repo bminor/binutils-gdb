@@ -1,3 +1,10 @@
+2015-11-19  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/nested-subp1.exp: Pass executable, not executable name,
+	as type argument to gdb_compile.
+	* gdb.base/nested-subp2.exp: Likewise.
+	* gdb.base/nested-subp3.exp: Likewise.
+
 2015-11-17  Dominik Vogt  <vogt@linux.vnet.ibm.com>
 
 	* lib/dwarf.exp (_note): Fix left shift of negative value.
