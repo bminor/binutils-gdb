@@ -1,3 +1,11 @@
+2015-11-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gas/mips/nan-legacy-1.d: Remove MIPS ABI flags match patterns.
+	* gas/mips/nan-legacy-2.d: Likewise.
+	* gas/mips/nan-legacy-3.d: Likewise.
+	* gas/mips/nan-legacy-4.d: Likewise.
+	* gas/mips/nan-legacy-5.d: Likewise.
+
 2015-11-20  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/aarch64/virthostext-directive.d: New.
