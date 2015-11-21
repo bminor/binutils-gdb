@@ -24,7 +24,6 @@
 #include "bfd.h"
 
 
-host_callback *mn10300_callback;
 struct _state State;
 
 
@@ -97,7 +96,6 @@ sim_open (SIM_OPEN_KIND kind,
 {
   int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
-  mn10300_callback = cb;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
@@ -418,10 +416,7 @@ program_interrupt (SIM_DESC sd,
 
   /* avoid infinite recursion */
   if (in_interrupt)
-    {
-      (*mn10300_callback->printf_filtered) (mn10300_callback, 
-					    "ERROR: recursion in program_interrupt during software exception dispatch.");
-    }
+    sim_io_printf (sd, "ERROR: recursion in program_interrupt during software exception dispatch.");
   else
     {
       in_interrupt = 1;
