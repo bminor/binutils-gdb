@@ -1,5 +1,10 @@
 2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cli/cli-cmds.c (_initialize_cli_cmds): Extend help text for
+	'list' command.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cli/cli-cmds.c (list_command): Add an error when trying to use
 	'-' to scan read off the start of the source file.
 

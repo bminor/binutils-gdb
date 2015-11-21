@@ -1896,8 +1896,12 @@ Lines can be specified in these ways:\n\
   FUNCTION, to list around beginning of that function,\n\
   FILE:FUNCTION, to distinguish among like-named static functions.\n\
   *ADDRESS, to list around the line containing that address.\n\
-With two args if one is empty it stands for ten lines away from \
-the other arg."));
+With two args, if one is empty, it stands for ten lines away from\n\
+the other arg.\n\
+\n\
+By default, when a single location is given, display ten lines.\n\
+This can be changed using \"set listsize\", and the current value\n\
+can be shown using \"show listsize\"."));
 
   add_com_alias ("l", "list", class_files, 1);
 
