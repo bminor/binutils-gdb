@@ -1,5 +1,10 @@
 2015-11-21  Mike Frysinger  <vapier@gentoo.org>
 
+	PR sim/18762
+	* Makefile.in (CPPFLAGS, CXXFLAGS, LDFLAGS): Define.
+
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
 	PR sim/19273
 	* sim-utils.c (sim_do_commandf): Declare ret.  Call va_start,
 	vasprintf, and va_end together.  Check ret after va_end call.
