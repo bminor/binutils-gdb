@@ -1604,8 +1604,8 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
     }
 }
 
-int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+avr_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   if (rn < 32 && length == 1)
     {
@@ -1633,8 +1633,8 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
   return 0;
 }
 
-int
-sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+avr_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   if (rn < 32 && length == 1)
     {
@@ -1747,6 +1747,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = avr_reg_fetch;
+      CPU_REG_STORE (cpu) = avr_reg_store;
       CPU_PC_FETCH (cpu) = avr_pc_get;
       CPU_PC_STORE (cpu) = avr_pc_set;
     }

@@ -1,3 +1,11 @@
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_store_register): Rename to ...
+	(avr_reg_store): ... this.  Adjust signature.
+	(sim_fetch_register): Rename to ...
+	(avr_reg_fetch): ... this.  Adjust signature.
+	(sim_open): Call CPU_REG_FETCH and CPU_REG_STORE.
+
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-reason.o and sim-stop.o.
