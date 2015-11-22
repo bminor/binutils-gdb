@@ -1426,7 +1426,7 @@ static op tab[] =
   },
 
   { "", "", "sleep", "0000000000011011",
-    "nip += trap (0xc3, &R0, PC, memory, maskl, maskw, endianw);",
+    "nip += trap (sd, 0xc3, &R0, PC, memory, maskl, maskw, endianw);",
   },
 
   { "n", "", "stc <CREG_M>,<REG_N>", "0000nnnnmmmm0010",
@@ -1524,7 +1524,7 @@ static op tab[] =
     "long imm = 0xff & i;",
     "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "if (i < 20 || i == 33 || i == 34 || i == 0xc3)",
-    "  nip += trap (i, &R0, PC, memory, maskl, maskw, endianw);",
+    "  nip += trap (sd, i, &R0, PC, memory, maskl, maskw, endianw);",
 #if 0
     "else {",
     /* SH-[12] */

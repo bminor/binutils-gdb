@@ -1,3 +1,19 @@
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* gencode.c (tab): Pass sd into trap calls.
+	* interp.c (prog_argv, callback): Delete.
+	(parse_and_set_memory_size): Add SIM_DESC arg.
+	(trap): Declare callback and prog_argv.
+	(sim_resume): Declare callback.
+	(sim_info): Change callback->printf_filtered calls to sim_io_printf.
+	(sim_open): Delete callback assignment.  Pass sd to
+	parse_and_set_memory_size.
+	(parse_and_set_memory_size): Change callback->printf_filtered call
+	to sim_io_printf.
+	(sim_create_inferior): Delete prog_argv assignment.
+	(sim_do_command): Change callback->printf_filtered calls to
+	sim_io_printf.  Pass sd to parse_and_set_memory_size.
+
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-stop.o.
