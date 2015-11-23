@@ -568,12 +568,10 @@ print_subexp_standard (struct expression *exp, int *pos,
 	*pos += 2;
 
 	fputs_filtered ("RANGE(", stream);
-	if (range_type == HIGH_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT)
+	if ((range_type & SUBARRAY_LOW_BOUND) == SUBARRAY_LOW_BOUND)
 	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
 	fputs_filtered ("..", stream);
-	if (range_type == LOW_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT)
+	if ((range_type & SUBARRAY_HIGH_BOUND) == SUBARRAY_HIGH_BOUND)
 	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
 	fputs_filtered (")", stream);
 	return;
@@ -1055,16 +1053,16 @@ dump_subexp_body_standard (struct expression *exp,
 
 	switch (range_type)
 	  {
-	  case BOTH_BOUND_DEFAULT:
+	  case SUBARRAY_NONE_BOUND:
 	    fputs_filtered ("Range '..'", stream);
 	    break;
-	  case LOW_BOUND_DEFAULT:
+	  case SUBARRAY_HIGH_BOUND:
 	    fputs_filtered ("Range '..EXP'", stream);
 	    break;
-	  case HIGH_BOUND_DEFAULT:
+	  case SUBARRAY_LOW_BOUND:
 	    fputs_filtered ("Range 'EXP..'", stream);
 	    break;
-	  case NONE_BOUND_DEFAULT:
+	  case (SUBARRAY_LOW_BOUND | SUBARRAY_HIGH_BOUND):
 	    fputs_filtered ("Range 'EXP..EXP'", stream);
 	    break;
 	  default:
@@ -1072,11 +1070,9 @@ dump_subexp_body_standard (struct expression *exp,
 	    break;
 	  }
 
-	if (range_type == HIGH_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT)
+	if ((range_type & SUBARRAY_LOW_BOUND) == SUBARRAY_LOW_BOUND)
 	  elt = dump_subexp (exp, stream, elt);
-	if (range_type == LOW_BOUND_DEFAULT
-	    || range_type == NONE_BOUND_DEFAULT)
+	if ((range_type & SUBARRAY_HIGH_BOUND) == SUBARRAY_HIGH_BOUND)
 	  elt = dump_subexp (exp, stream, elt);
       }
       break;

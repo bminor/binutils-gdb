@@ -482,12 +482,12 @@ value_f90_subarray (struct value *array, struct expression *exp,
 	  /* If a lower bound was provided by the user, the bit has been
 	     set and we can assign the value from the elt stack.  Same for
 	     upper bound.  */
-	  if ((range->f90_range_type == HIGH_BOUND_DEFAULT)
-	      || range->f90_range_type == NONE_BOUND_DEFAULT)
+	  if ((range->f90_range_type & SUBARRAY_LOW_BOUND)
+	      == SUBARRAY_LOW_BOUND)
 	    range->low = value_as_long (evaluate_subexp (NULL_TYPE, exp,
 							 pos, noside));
-	  if ((range->f90_range_type == LOW_BOUND_DEFAULT)
-	      || range->f90_range_type == NONE_BOUND_DEFAULT)
+	  if ((range->f90_range_type & SUBARRAY_HIGH_BOUND)
+	      == SUBARRAY_HIGH_BOUND)
 	    range->high = value_as_long (evaluate_subexp (NULL_TYPE, exp,
 							  pos, noside));
 	}
@@ -528,12 +528,10 @@ value_f90_subarray (struct value *array, struct expression *exp,
 
 	    /* If no lower bound was provided by the user, we take the
 	       default boundary.  Same for the high bound.  */
-	    if ((range->f90_range_type == LOW_BOUND_DEFAULT)
-		|| (range->f90_range_type == BOTH_BOUND_DEFAULT))
+	    if ((range->f90_range_type & SUBARRAY_LOW_BOUND) == 0)
 	      range->low = TYPE_LOW_BOUND (index_type);
 
-	    if ((range->f90_range_type == HIGH_BOUND_DEFAULT)
-		|| (range->f90_range_type == BOTH_BOUND_DEFAULT))
+	    if ((range->f90_range_type & SUBARRAY_HIGH_BOUND) == 0)
 	      range->high = TYPE_HIGH_BOUND (index_type);
 
 	    /* Both user provided low and high bound have to be inside the

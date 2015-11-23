@@ -2429,23 +2429,17 @@ convert_ast_to_expression (struct parser_state *state,
 
     case OP_RANGE:
       {
-	enum range_type kind = BOTH_BOUND_DEFAULT;
+	enum range_type kind = SUBARRAY_NONE_BOUND;
 
 	if (operation->left.op != NULL)
 	  {
 	    convert_ast_to_expression (state, operation->left.op, top);
-	    kind = HIGH_BOUND_DEFAULT;
+	    kind = SUBARRAY_LOW_BOUND;
 	  }
 	if (operation->right.op != NULL)
 	  {
 	    convert_ast_to_expression (state, operation->right.op, top);
-	    if (kind == BOTH_BOUND_DEFAULT)
-	      kind = LOW_BOUND_DEFAULT;
-	    else
-	      {
-		gdb_assert (kind == HIGH_BOUND_DEFAULT);
-		kind = NONE_BOUND_DEFAULT;
-	      }
+	    kind = (range_type) (kind | SUBARRAY_HIGH_BOUND);
 	  }
 	write_exp_elt_opcode (state, OP_RANGE);
 	write_exp_elt_longcst (state, kind);

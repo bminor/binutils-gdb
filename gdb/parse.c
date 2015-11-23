@@ -1006,22 +1006,17 @@ operator_length_standard (const struct expression *expr, int endpos,
 
     case OP_RANGE:
       oplen = 3;
+      args = 0;
       range_type = (enum range_type)
 	longest_to_int (expr->elts[endpos - 2].longconst);
 
-      switch (range_type)
-	{
-	case LOW_BOUND_DEFAULT:
-	case HIGH_BOUND_DEFAULT:
-	  args = 1;
-	  break;
-	case BOTH_BOUND_DEFAULT:
-	  args = 0;
-	  break;
-	case NONE_BOUND_DEFAULT:
-	  args = 2;
-	  break;
-	}
+      /* Increment the argument counter for each argument
+	 provided by the user.  */
+      if ((range_type & SUBARRAY_LOW_BOUND) == SUBARRAY_LOW_BOUND)
+	args++;
+
+      if ((range_type & SUBARRAY_HIGH_BOUND) == SUBARRAY_HIGH_BOUND)
+	args++;
 
       break;
 
