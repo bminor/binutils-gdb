@@ -1,5 +1,17 @@
 2015-11-23  Tristan Gingold  <gingold@adacore.com>
 
+	* darwin-nat.c (darwin_read_dyld_info): Write address in
+	big-endian order.
+	* solib-darwin.c (darwin_validate_exec_header): New function,
+	extracted from...
+	(darwin_read_exec_load_addr_from_dyld): ...here.
+	(darwin_read_exec_load_addr_at_init): New function.
+	(darwin_solib_read_all_image_info_addr): Adjust after
+	darwin_read_dyld_info change.
+	(darwin_solib_create_inferior_hook): Support PIE.
+
+2015-11-23  Tristan Gingold  <gingold@adacore.com>
+
 	* darwin-nat.c (darwin_ptrace): Add a cast to fix warning.
 	(darwin_resume, cancel_breakpoint, _initialize_darwin_inferior):
 	Likewise.

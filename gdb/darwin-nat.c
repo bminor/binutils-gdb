@@ -1965,7 +1965,7 @@ darwin_read_write_inferior (task_t task, CORE_ADDR addr,
 }
 
 /* Read LENGTH bytes at offset ADDR of task_dyld_info for TASK, and copy them
-   to RDADDR.
+   to RDADDR (in big endian).
    Return 0 on failure; number of bytes read / written otherwise.  */
 
 #ifdef TASK_DYLD_INFO_COUNT
@@ -1979,17 +1979,17 @@ darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
   int sz = TASK_DYLD_INFO_COUNT * sizeof (natural_t);
   kern_return_t kret;
 
-  if (addr >= sz)
+  if (addr != 0 || length > sizeof (mach_vm_address_t))
     return TARGET_XFER_EOF;
 
-  kret = task_info (task, TASK_DYLD_INFO, (task_info_t) &task_dyld_info, &count);
+  kret = task_info (task, TASK_DYLD_INFO,
+		    (task_info_t) &task_dyld_info, &count);
   MACH_CHECK_ERROR (kret);
   if (kret != KERN_SUCCESS)
     return TARGET_XFER_E_IO;
-  /* Truncate.  */
-  if (addr + length > sz)
-    length = sz - addr;
-  memcpy (rdaddr, (char *)&task_dyld_info + addr, length);
+
+  store_unsigned_integer (rdaddr, length, BFD_ENDIAN_BIG,
+			  task_dyld_info.all_image_info_addr);
   *xfered_len = (ULONGEST) length;
   return TARGET_XFER_OK;
 }
