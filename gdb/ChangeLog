@@ -1,5 +1,10 @@
 2015-11-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* arm-tdep.c (arm_exidx_unwind_sniffer): Do not check for a frame
+	stuck on a system call if the given frame is the innermost frame.
+
+2015-11-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (read_structure_type): Set the type's length
 	to zero if it has a DW_AT_byte_size attribute which is not
 	a constant.
