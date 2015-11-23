@@ -4,13 +4,13 @@
 
 2015-11-20  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
-        * gdb.base/callfuncs.exp (fetch_all_registers): Filter out the
+	* gdb.base/callfuncs.exp (fetch_all_registers): Filter out the
 	pstate register when comparing registers values in
 	sparc64-*-linux-gnu targets to avoid spurious differences.
 
 2015-11-20  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
-    	* gdb.arch/sparc-sysstep.c: Include unistd.h for getpid.
+	* gdb.arch/sparc-sysstep.c: Include unistd.h for getpid.
 
 2015-11-19  Sandra Loosemore  <sandra@codesourcery.com>
 
@@ -671,7 +671,7 @@
 	* gdb.ada/attr_ref_and_charlit/foo.adb: New file.
 
 2015-08-19  Kevin Buettner  <kevinb@redhat.com>
-    
+
 	* gdb.dwarf2/dw2-bad-mips-linkage-name.c: New file.
 	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp: New file.
 
