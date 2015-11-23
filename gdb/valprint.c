@@ -2362,7 +2362,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
 			     sizeof (gdb_wchar_t), &output, translit_char);
   obstack_1grow (&output, '\0');
 
-  fputs_filtered (obstack_base (&output), stream);
+  fputs_filtered ((const char *) obstack_base (&output), stream);
 
   do_cleanups (cleanups);
 }
@@ -2717,7 +2717,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 			     sizeof (gdb_wchar_t), &output, translit_char);
   obstack_1grow (&output, '\0');
 
-  fputs_filtered (obstack_base (&output), stream);
+  fputs_filtered ((const char *) obstack_base (&output), stream);
 
   do_cleanups (cleanup);
 }

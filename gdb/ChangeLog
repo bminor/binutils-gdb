@@ -1,3 +1,330 @@
+2015-11-23  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_ptrace): Avoid a cast.
+	(darwin_resume_thread): Ditto.  And always set or reset
+	single step.
+
+2015-11-23  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_read_dyld_info): Write address in
+	big-endian order.
+	* solib-darwin.c (darwin_validate_exec_header): New function,
+	extracted from...
+	(darwin_read_exec_load_addr_from_dyld): ...here.
+	(darwin_read_exec_load_addr_at_init): New function.
+	(darwin_solib_read_all_image_info_addr): Adjust after
+	darwin_read_dyld_info change.
+	(darwin_solib_create_inferior_hook): Support PIE.
+
+2015-11-23  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_ptrace): Add a cast to fix warning.
+	(darwin_resume, cancel_breakpoint, _initialize_darwin_inferior):
+	Likewise.
+	(darwin_read_write_inferior): Rewrite using mach_vm_read_overwrite.
+
+2015-11-19  Don Breazeal  <donb@codesourcery.com>
+
+	* target.c (read_memory_robust): Call read_whatever_is_readable
+	with arguments in the correct order.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_query_supported): Send the "xmlRegisters="
+	feature last.
+
+2015-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* nat/aarch64-linux-hw-point.c (aarch64_linux_set_debug_regs): Change
+	form of iov_len computation.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac (ERROR_ON_WARNING): Don't check whether in C++
+	mode.
+	* configure: Regenerate.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* build-with-cxx.m4 (GDB_AC_BUILD_WITH_CXX): Remove -fpermissive.
+	* configure: Regenerate.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (software_watchpoint_add_no_memory_location)
+	(is_no_memory_software_watchpoint): New functions.
+	(update_watchpoint): Use
+	software_watchpoint_add_memoryless_location.
+	(breakpoint_address_bits): Use is_no_memory_software_watchpoint.
+
+2015-11-19  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* s390-linux-tdep.c (s390_canonicalize_syscall): Add casts and
+	intermediate 'int' variable.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-thread-db.c (try_thread_db_load_1): Add cast.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_unpush_target): Use
+	pop_all_targets_at_and_above instead of pop_all_targets_above.
+	* target.c (unpush_target_and_assert): New function, factored out
+	from ...
+	(pop_all_targets_above): ... here.
+	(pop_all_targets_at_and_above): New function.
+	* target.h (pop_all_targets_at_and_above): Declare.
+
+2015-11-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valops.c (value_string): Constify 'ptr' parameter.
+	* value.h (value_string): Constify 'ptr' parameter.
+
+2015-11-18  Simon Marchi  <simon.marchi@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* break-catch-sig.c (signal_catchpoint_print_one): Add cast.
+	* c-exp.y (parse_string_or_char, yylex): Add casts.
+	* c-lang.c (evaluate_subexp_c): Add casts.
+	* d-exp.y (parse_string_or_char, yylex): Add casts.
+	* go-exp.y (parse_string_or_char, build_packaged_name): Add casts.
+	* p-valprint.c (pascal_object_print_value_fields): Add casts.
+	* valprint.c (generic_emit_char, generic_printstr): Add casts.
+
+2015-11-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* valops.c (value_cstring): Constify 'ptr' parameter.
+	* value.h (value_cstring): Constify 'ptr' parameter.
+
+2015-11-18  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (pass_in_v): Add argument len.  Add local array
+	reg.  Callers updated.
+
+2015-11-17  Yao Qi  <yao.qi@linaro.org>
+
+	* infrun.c (resume): Check control.trap_expected only
+	when deciding the set of threads to resume.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* cp-namespace.c (cp_lookup_bare_symbol)
+	(cp_search_static_and_baseclasses, cp_lookup_symbol_via_imports)
+	(cp_lookup_symbol_via_all_imports, cp_lookup_nested_symbol_1)
+	(cp_lookup_nested_symbol): Use null_block_symbol.
+	* d-namespace.c (d_lookup_symbol, d_lookup_nested_symbol)
+	(d_lookup_symbol_imports, d_lookup_symbol_module): Use
+	null_block_symbol.
+	* symtab.c (null_block_symbol): New global.
+	* symtab.h (null_block_symbol): Declare.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.h (GDB_XCPT_SJMP, GDB_XCPT_TRY)
+	(GDB_XCPT_RAW_TRY, GDB_XCPT): Define.
+	Replace __cplusplus checks with GDB_XCPT checks throughout.
+	* common/common-exceptions.c: Replace __cplusplus checks with
+	GDB_XCPT checks throughout.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* common/common-defs.h (ATTRIBUTE_PRINTF): Redefine in terms of
+	_GL_ATTRIBUTE_FORMAT_PRINTF after including ansidecl.h.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* common/common-defs.h (__STDC_CONSTANT_MACROS)
+	(__STDC_LIMIT_MACROS): Define before including stdint.h.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (handle_exception): Return 0 for first chance
+	exceptions.
+	(get_windows_debug_event): Adjust.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (xslate): Use GDB_SIGNAL_UNKNOWN instead of -1 as
+	signal number for terminator.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* ser-tcp.c (net_open) : Cast getsockopt argument to char *
+	instead of void *.  Update comment.
+	(net_read_prim): Cast recv argument to char * instead of void *.
+	(net_write_prim): Cast send argument to char *.  Add comment.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* win32-i386-low.c (update_debug_registers_callback)
+	(win32_get_current_dr): Add cast.
+	* win32-low.c (thread_rec, delete_thread_info)
+	(continue_one_thread): Add casts.
+	(strwinerror): Cast FormatMessage argument to LPTSTR instead of
+	LPVOID.
+	(win32_create_inferior, suspend_one_thread): Add casts.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (AdjustTokenPrivileges_ftype)
+	(DebugActiveProcessStop_ftype, DebugBreakProcess_ftype)
+	(DebugSetProcessKillOnExit_ftype, EnumProcessModules_ftype)
+	(GetCurrentConsoleFont_ftype, GetModuleInformation_ftype)
+	(LookupPrivilegeValueA_ftype, OpenProcessToken_ftype)
+	(GetConsoleFontSize_ftype): New typedefs.
+	(AdjustTokenPrivileges, DebugActiveProcessStop)
+	(DebugBreakProcess, DebugSetProcessKillOnExit, EnumProcessModules)
+	(GetConsoleFontSize, GetCurrentConsoleFont, GetModuleInformation)
+	(LookupPrivilegeValueA, OpenProcessToken, GetConsoleFontSize):
+	Adjust.
+	(GetModuleFileNameEx_ftype): New typedef.
+	(GetModuleFileNameEx): Use it.
+	(_initialize_loadable): Define GPA macro and use it.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb-dlfcn.c (gdb_dlsym, gdb_dlclose) [__MINGW32__]: Add casts to
+	HMODULE.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* exec.c (exec_file_attach, symfile_bfd_open) [__GO32__ || _WIN32
+	|| __CYGWIN__]: Add casts.
+	* utils.c (gdb_filename_fnmatch): Add cast.
+	* windows-nat.c (windows_create_inferior): Add cast.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* ser-mingw.c (CancelIo_ftype): New typedef.
+	(CancelIo): Use CancelIo_ftype.
+	(ser_windows_close, ser_windows_wait_handle)
+	(ser_windows_read_prim, stop_select_thread)
+	(console_select_thread, pipe_select_thread, file_select_thread)
+	(ser_console_wait_handle, ser_console_done_wait_handle)
+	(ser_console_close, cleanup_pipe_state, pipe_windows_close)
+	(pipe_windows_write, pipe_wait_handle, pipe_done_wait_handle)
+	(net_windows_socket_check_pending, net_windows_select_thread)
+	(net_windows_wait_handle, net_windows_done_wait_handle)
+	(net_windows_close): Add casts.
+	(_initialize_ser_windows): Cast to CancelIo_ftype* instead of
+	void*.
+
+2015-11-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* c-exp.y (exp): Adjust, change enum c_string_type to
+	c_string_type.
+	(parse_string_or_char): Likewise.
+	* c-lang.c (charset_for_string_type): Likewise.
+	(classify_type): Likewise.
+	(c_printchar): Likewise.
+	(c_printstr): Likewise.
+	(evaluate_subexp_c): Likewise.  And change cast to enum
+	c_string_type_values.
+	* c-lang.h: Include "common/enum_flags.h".
+	(enum c_string_type): Rename to...
+	(enum c_string_type_values): ...this.
+	(c_string_type): Define new enum flags type.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* btrace.h: Include common/enum-flags.h.
+	(btrace_insn_flags): Define.
+	(struct btrace_insn) <flags>: Change type.
+	(btrace_function_flags): Define.
+	(struct btrace_function) <flags>: Change type.
+	(btrace_thread_flags): Define.
+	(struct btrace_thread_info) <flags>: Change type.
+	* c-exp.y (token_flags): Rename to ...
+	(token_flag): ... this.
+	(token_flags): Define.
+	(struct token) <flags>: Change type.
+	* common/enum-flags.h: New file.
+	* compile/compile-c-types.c (convert_qualified): Change type of
+	'quals' local.
+	* compile/compile-internal.h: Include "common/enum-flags.h".
+	(gcc_qualifiers_flags): Define.
+	* completer.c (enum reg_completer_targets): Rename to ...
+	(enum reg_completer_target): ... this.
+	(reg_completer_targets): Define.
+	(reg_or_group_completer_1): Change type of 'targets' parameter.
+	* disasm.c (do_mixed_source_and_assembly_deprecated): Change type
+	of 'psl_flags' local.
+	(do_mixed_source_and_assembly): Change type of 'psl_flags' local.
+	* infrun.c: Include "common/enum-flags.h".
+	(enum step_over_what): Rename to ...
+	(enum step_over_what_flag): ... this.
+	(step_over_what): Change type.
+	(start_step_over): Change type of 'step_what' local.
+	(thread_still_needs_step_over): Now returns a step_over_what.
+	Adjust.
+	(keep_going_pass_signal): Change type of 'step_what' local.
+	* linux-tdep.c: Include "common/enum-flags.h".
+	(enum filterflags): Rename to ...
+	(enum filter_flag): ... this.
+	(filter_flags): Define.
+	(dump_mapping_p): Change type of 'filterflags' parameter.
+	(linux_find_memory_regions_full): Change type of 'filterflags'
+	local.
+	(linux_find_memory_regions_full): Pass the address of an unsigned
+	int to sscanf instead of the address of an enum.
+	* record-btrace.c (btrace_print_lines): Change type of local
+	'psl_flags'.
+	(btrace_call_history): Replace 'flags' parameter
+	with 'int_flags' parameter.  Adjust.
+	(record_btrace_call_history, record_btrace_call_history_range)
+	(record_btrace_call_history_from): Rename 'flags' parameter to
+	'int_flags'.  Use record_print_flags.
+	* record.h: Include "common/enum-flags.h".
+	(record_print_flags): Define.
+	* source.c: Include "common/enum-flags.h".
+	(print_source_lines_base, print_source_lines): Change type of
+	flags parameter.
+	* symtab.h: Include "common/enum-flags.h".
+	(enum print_source_lines_flags): Rename to ...
+	(enum print_source_lines_flag): ... this.
+	(print_source_lines_flags): Define.
+	(print_source_lines): Change prototype.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* guile/scm-disasm.c (gdbscm_disasm_read_memory): Return -1 on
+	error instead of TARGET_XFER_E_IO.
+	(gdbscm_disasm_memory_error): Always pass TARGET_XFER_E_IO to
+	memory_error.
+
+2015-11-17  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* hppa-tdep.c (hppa_sign_extend, hppa_low_hppa_sign_extend)
+	(prologue_inst_adjust_sp, hppa_frame_cache): Fix left shift of negative
+	value.
+	* dwarf2read.c (read_subrange_type): Likewise.
+
+2015-11-16  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_extract_return_value):  Change array
+	buf's length to V_REGISTER_SIZE.
+
+2015-11-16  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (pass_in_x_or_stack): Change argument type
+	from bfd_byte * to value *.  Caller updated.
+	(pass_in_x): Likewise.
+	(pass_in_v_or_stack): Likewise.
+	(pass_on_stack): Likewise.
+
+2015-11-16  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_push_dummy_call): Call value_contents
+	instead of value_contents_writeable.
+	* bfin-tdep.c (bfin_push_dummy_call): Likewise.
+
+2015-11-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-tdep.c (arm_push_dummy_call): New array buf.  Store regval
+	to buf.  Pass buf instead of val to push_stack_item.
+
 2015-11-13  Yao Qi  <yao.qi@linaro.org>
 
 	PR tdep/19051

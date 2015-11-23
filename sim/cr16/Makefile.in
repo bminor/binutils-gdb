@@ -20,13 +20,13 @@
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-hload.o \
+	sim-resume.o \
 	interp.o \
 	table.o \
-	simops.o \
-	endian.o
+	simops.o
 SIM_EXTRA_CLEAN = clean-extra
 
-INCLUDE = cr16_sim.h $(srcroot)/include/gdb/callback.h targ-vals.h endian.c \
+INCLUDE = cr16_sim.h $(srcroot)/include/gdb/callback.h targ-vals.h \
 	$(srcroot)/include/gdb/sim-cr16.h
 
 # This selects the cr16 newlib/libgloss syscall definitions.

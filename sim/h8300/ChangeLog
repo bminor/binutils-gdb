@@ -1,3 +1,29 @@
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (sim_callback, sim_kind, myname): Delete.
+	(init_pointers, sim_store_register, sim_fetch_register, sim_info):
+	Change sim_callback->printf_filtered calls to sim_io_printf.
+	(sim_resume): Likewise.  Declare sim_callback.
+	(sim_open): Delete sim_callback, sim_kind, and myname assignment.
+	(sim_load); Use sd to look up myname, sim_callback, and sim_kind.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-reason.o and sim-stop.o.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Add sim-reason.o and sim-stop.o.
+	* compile.c (sim_stop, sim_stop_reason): Delete.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-load.o.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (sim_close): Delete.
+
 2015-11-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* compile.c (littleendian): Delete.

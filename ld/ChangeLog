@@ -1,3 +1,25 @@
+2015-11-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* configure.tgt <mips*el-mti-elf*, mips*el-img-elf*>: Add
+	targets.
+
+2015-11-19  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19264
+	* ldlang.c (lang_size_sections): Don't ignore .tbss when
+	adjusting start of relro region.
+
+2015-11-16  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19106
+	* emultempl/armelf.em (_set_symbols): New function.  Enables
+	relaxation for non-relocatable links.
+	(LDEMUL_SET_SYMBOLS): Define.
+
+2015-11-13  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2015-11-13  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.26.

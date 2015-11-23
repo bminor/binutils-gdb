@@ -1,3 +1,32 @@
+2015-11-20  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* gas/mips/nan-legacy-1.d: Remove MIPS ABI flags match patterns.
+	* gas/mips/nan-legacy-2.d: Likewise.
+	* gas/mips/nan-legacy-3.d: Likewise.
+	* gas/mips/nan-legacy-4.d: Likewise.
+	* gas/mips/nan-legacy-5.d: Likewise.
+
+2015-11-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/virthostext-directive.d: New.
+	* gas/aarch64/virthostext.d: New.
+	* gas/aarch64/virthostext.s: New.
+
+2015-11-20  Matthew Wahab  <matthew.wahab@foss.arm.com>
+
+	* gas/arm/mapshort-elf.d: Fix typo in exclusion list.
+
+2015-11-19  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/pan-illegal.d: New.
+	* gas/aarch64/pan-illegal.l: New.
+	* gas/aarch64/pan.s: Add tests for invalid immediates.
+
+2015-11-19  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/altivec3.d: Allow for padding at end of section.
+	* gas/testsuite/gas/ppc/power9.d: Likewise.
+
 2015-11-12  Matthew Wahab  <matthew.wahab@arm.com>
 
 	PR gas/19217

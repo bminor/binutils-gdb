@@ -239,11 +239,9 @@ sim_open (SIM_OPEN_KIND kind,
 }
 
 void
-sim_close (SIM_DESC sd,
-	   int quitting)
+msp430_sim_close (SIM_DESC sd, int quitting)
 {
   free (STATE_SYMBOL_TABLE (sd));
-  sim_state_free (sd);
 }
 
 SIM_RC

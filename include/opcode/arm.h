@@ -58,6 +58,7 @@
 #define ARM_EXT_VIRT	 0x80000000	/* Virtualization extensions.  */
 
 #define ARM_EXT2_PAN	 0x00000001     /* PAN extension.  */
+#define ARM_EXT2_V8_2A	 0x00000002     /* ARM V8.2A.  */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00000001	/* Allow MIA etc.          */
@@ -251,6 +252,8 @@
 #define ARM_ARCH_V7EM	ARM_FEATURE_CORE_LOW (ARM_AEXT_V7EM)
 #define ARM_ARCH_V8A	ARM_FEATURE_CORE_LOW (ARM_AEXT_V8A)
 #define ARM_ARCH_V8_1A	ARM_FEATURE_CORE (ARM_AEXT_V8A, ARM_EXT2_PAN)
+#define ARM_ARCH_V8_2A	ARM_FEATURE_CORE (ARM_AEXT_V8A, \
+					  ARM_EXT2_PAN | ARM_EXT2_V8_2A)
 
 /* Some useful combinations:  */
 #define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)

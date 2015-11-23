@@ -72,6 +72,9 @@ INSTALL_DATA = @INSTALL_DATA@
 CC = @CC@
 CC_FOR_BUILD = @CC_FOR_BUILD@
 CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+CXXFLAGS = @CXXFLAGS@
+LDFLAGS = @LDFLAGS@
 SIM_BSWAP = @sim_bswap@
 SIM_CFLAGS = @sim_cflags@
 SIM_DEBUG = @sim_debug@
@@ -173,6 +176,7 @@ SIM_COMMON_HW_OBJS = \
 SIM_NEW_COMMON_OBJS = \
 	sim-arange.o \
 	sim-bits.o \
+	sim-close.o \
 	sim-command.o \
 	sim-config.o \
 	sim-core.o \
@@ -189,7 +193,10 @@ SIM_NEW_COMMON_OBJS = \
 	sim-module.o \
 	sim-options.o \
 	sim-profile.o \
+	sim-reason.o \
+	sim-reg.o \
 	sim-signal.o \
+	sim-stop.o \
 	sim-syscall.o \
 	sim-trace.o \
 	sim-utils.o \

@@ -22,10 +22,6 @@
 #if !defined (SIM_FRV_H)
 #define SIM_FRV_H
 
-#ifdef __cplusplus
-extern "C" { // }
-#endif
-
 enum sim_frv_regs
 {
   SIM_FRV_GR0_REGNUM  = 0,
@@ -43,9 +39,5 @@ enum sim_frv_regs
   SIM_FRV_SPR0_REGNUM = 129,
   SIM_FRV_SPR4095_REGNUM = SIM_FRV_SPR0_REGNUM + 4095
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

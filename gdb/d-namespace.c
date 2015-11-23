@@ -132,7 +132,7 @@ d_lookup_symbol (const struct language_defn *langdef,
 	  if (lang_this.symbol == NULL)
 	    {
 	      do_cleanups (cleanup);
-	      return (struct block_symbol) {NULL, NULL};
+	      return null_block_symbol;
 	    }
 
 	  type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
@@ -159,7 +159,7 @@ d_lookup_symbol (const struct language_defn *langdef,
       if (class_sym.symbol == NULL)
 	{
 	  do_cleanups (cleanup);
-	  return (struct block_symbol) {NULL, NULL};
+	  return null_block_symbol;
 	}
 
       /* Look for a symbol named NESTED in this class.  */
@@ -370,7 +370,7 @@ d_lookup_nested_symbol (struct type *parent_type,
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
-      return (struct block_symbol) {NULL, NULL};
+      return null_block_symbol;
 
     default:
       gdb_assert_not_reached ("called with non-aggregate type.");
@@ -530,7 +530,7 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 	}
     }
 
-  return (struct block_symbol) {NULL, NULL};
+  return null_block_symbol;
 }
 
 /* Searches for NAME in the current module, and by applying relevant
@@ -562,7 +562,7 @@ d_lookup_symbol_module (const char *scope, const char *name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  return (struct block_symbol) {NULL, NULL};
+  return null_block_symbol;
 }
 
 /* The D-specific version of name lookup for static and global names

@@ -1,3 +1,71 @@
+2015-11-22  Doug Evans  <xdje42@gmail.com>
+
+	* target.h: #include <sys/types.h>.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_process_qsupported): Change prototype.
+	Adjust.
+	* linux-low.h (struct linux_target_ops) <process_qsupported>:
+	Change prototype.
+	* linux-x86-low.c (x86_linux_process_qsupported): Change prototype
+	and adjust to loop over all features.
+	* server.c (handle_query) <qSupported>: Adjust to call
+	target_process_qsupported once, passing it a vector of unprocessed
+	features.
+	* target.h (struct target_ops) <process_qsupported>: Change
+	prototype.
+	(target_process_qsupported): Adjust.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac (ERROR_ON_WARNING): Don't check whether in C++
+	mode.
+	* configure: Regenerate.
+
+2015-11-19  Pedro Alves  <palves@redhat.com>
+
+	* configure: Regenerate.
+
+2015-11-19  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (emit_data_processing_reg): Change opcode
+	type to uint32_t.
+
+2015-11-19  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (enum aarch64_operand_type): New.
+	(struct aarch64_operand): Move enum out.
+
+2015-11-19  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_fill_fpregset): Cast buf to
+	struct user_fpsimd_state *.
+	(aarch64_store_fpregset): Likewise.
+
+2015-11-19  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_fill_gregset): Cast buf to
+	struct user_pt_regs *.
+	(aarch64_store_gregset): Likewise.
+
+2015-11-18  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (all_object_files): Add $IPA_OBJS.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* win32-low.c (win32_resume): Use gdb_signal_from_host,
+	GDB_SIGNAL_0 and gdb_signal_to_string.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* win32-low.c (handle_output_debug_string): Remove parameter.
+	(win32_kill): Remove our_status local and adjust call to
+	handle_output_debug_string.
+	(get_child_debug_event): Adjust call to
+	handle_output_debug_string.
+
 2015-11-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* linux-mips-low.c (mips_fill_gregset): Add cast.

@@ -1149,11 +1149,12 @@ signal_completer (struct cmd_list_element *ignore,
 /* Bit-flags for selecting what the register and/or register-group
    completer should complete on.  */
 
-enum reg_completer_targets
+enum reg_completer_target
   {
     complete_register_names = 0x1,
     complete_reggroup_names = 0x2
   };
+DEF_ENUM_FLAGS_TYPE (enum reg_completer_target, reg_completer_targets);
 
 /* Complete register names and/or reggroup names based on the value passed
    in TARGETS.  At least one bit in TARGETS must be set.  */
@@ -1161,7 +1162,7 @@ enum reg_completer_targets
 static VEC (char_ptr) *
 reg_or_group_completer_1 (struct cmd_list_element *ignore,
 			  const char *text, const char *word,
-			  enum reg_completer_targets targets)
+			  reg_completer_targets targets)
 {
   VEC (char_ptr) *result = NULL;
   size_t len = strlen (word);

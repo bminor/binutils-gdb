@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* hobble some common features for moment */
 #define WITH_WATCHPOINTS 1
-#define WITH_MODULO_MEMORY 1
 
 
 #define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR) \
@@ -474,6 +473,8 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
+extern void mips_sim_close (SIM_DESC sd, int quitting);
+#define SIM_CLOSE_HOOK(...) mips_sim_close (__VA_ARGS__)
 
 /* MIPS specific simulator watch config */
 

@@ -21,6 +21,7 @@
 #ifndef TARGET_H
 #define TARGET_H
 
+#include <sys/types.h> /* for mode_t */
 #include "target/target.h"
 #include "target/resume.h"
 #include "target/wait.h"
@@ -306,8 +307,9 @@ struct target_ops
   int (*read_loadmap) (const char *annex, CORE_ADDR offset,
 		       unsigned char *myaddr, unsigned int len);
 
-  /* Target specific qSupported support.  */
-  void (*process_qsupported) (const char *);
+  /* Target specific qSupported support.  FEATURES is an array of
+     features with COUNT elements.  */
+  void (*process_qsupported) (char **features, int count);
 
   /* Return 1 if the target supports tracepoints, 0 (or leave the
      callback NULL) otherwise.  */
@@ -519,11 +521,11 @@ int kill_inferior (int);
   (the_target->supports_multi_process ? \
    (*the_target->supports_multi_process) () : 0)
 
-#define target_process_qsupported(query)		\
+#define target_process_qsupported(features, count)	\
   do							\
     {							\
       if (the_target->process_qsupported)		\
-	the_target->process_qsupported (query);		\
+	the_target->process_qsupported (features, count); \
     } while (0)
 
 #define target_supports_tracepoints()			\

@@ -535,7 +535,8 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 				  int dont_print_statmem)
 {
   int i, len, n_baseclasses;
-  char *last_dont_print = obstack_next_free (&dont_print_statmem_obstack);
+  char *last_dont_print
+    = (char *) obstack_next_free (&dont_print_statmem_obstack);
 
   type = check_typedef (type);
 

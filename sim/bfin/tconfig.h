@@ -9,7 +9,3 @@
 
 /* ??? Temporary hack until model support unified.  */
 #define SIM_HAVE_MODEL
-
-/* Allows us to do the memory aliasing that some bfroms have:
-   {0xef000000 - 0xef100000} => {0xef000000 - 0xef000800}  */
-#define WITH_MODULO_MEMORY 1

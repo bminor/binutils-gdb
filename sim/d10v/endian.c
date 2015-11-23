@@ -3,7 +3,7 @@
 
 #ifndef ENDIAN_INLINE
 #define NO_ENDIAN_INLINE
-#include "d10v_sim.h"
+#include "sim-main.h"
 #define ENDIAN_INLINE
 #endif
 

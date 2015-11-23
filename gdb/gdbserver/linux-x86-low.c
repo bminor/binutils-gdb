@@ -1356,29 +1356,35 @@ x86_linux_update_xmltarget (void)
    PTRACE_GETREGSET.  */
 
 static void
-x86_linux_process_qsupported (const char *query)
+x86_linux_process_qsupported (char **features, int count)
 {
+  int i;
+
   /* Return if gdb doesn't support XML.  If gdb sends "xmlRegisters="
      with "i386" in qSupported query, it supports x86 XML target
      descriptions.  */
   use_xml = 0;
-  if (query != NULL && startswith (query, "xmlRegisters="))
+  for (i = 0; i < count; i++)
     {
-      char *copy = xstrdup (query + 13);
-      char *p;
+      const char *feature = features[i];
 
-      for (p = strtok (copy, ","); p != NULL; p = strtok (NULL, ","))
+      if (startswith (feature, "xmlRegisters="))
 	{
-	  if (strcmp (p, "i386") == 0)
+	  char *copy = xstrdup (feature + 13);
+	  char *p;
+
+	  for (p = strtok (copy, ","); p != NULL; p = strtok (NULL, ","))
 	    {
-	      use_xml = 1;
-	      break;
+	      if (strcmp (p, "i386") == 0)
+		{
+		  use_xml = 1;
+		  break;
+		}
 	    }
-	} 
 
-      free (copy);
+	  free (copy);
+	}
     }
-
   x86_linux_update_xmltarget ();
 }
 

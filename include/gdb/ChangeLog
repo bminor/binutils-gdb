@@ -1,3 +1,15 @@
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-cr16.h (SIM_CR16_MEMORY_UNIFIED, SIM_CR16_MEMORY_INSN,
+	SIM_CR16_MEMORY_DATA, SIM_CR16_MEMORY_DMAP, SIM_CR16_MEMORY_IMAP):
+	Delete.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-arm.h: Delete __cplusplus checks and extern "C" linkage.
+	* sim-cr16.h, sim-d10v.h, sim-frv.h, sim-h8300.h, sim-lm32.h,
+	sim-sh.h: Likewise.
+
 2015-11-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-cr16.h (sim_cr16_translate_dmap_addr): Delete.

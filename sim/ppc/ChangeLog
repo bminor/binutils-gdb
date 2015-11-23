@@ -1,3 +1,15 @@
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/13834
+	* Makefile.in (gentmap): Change $< to $(srcdir)/../common/gentmap.c.
+	(callback.o): Change $< to $(srcdir)/../common/callback.c.
+	(options.o): Change $< to $(srcdir)/options.c.
+
+2015-11-17  Pedro Alves  <palves@redhat.com>
+
+	* debug.h (TRACE, ITRACE, DTRACE, DITRACE, PTRACE): Call
+	sim_io_printf_filtered instead of printf_filtered.
+
 2015-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

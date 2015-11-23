@@ -12914,7 +12914,7 @@ sim_link_links="${sim_link_links} targ-vals.def"
 
 
 
-wire_endian=""
+wire_endian="LITTLE_ENDIAN"
 default_endian=""
 # Check whether --enable-sim-endian was given.
 if test "${enable_sim_endian+set}" = set; then :
@@ -12958,8 +12958,8 @@ else
 fi
 fi
 
-wire_alignment="STRICT_ALIGNMENT"
-default_alignment="STRICT_ALIGNMENT"
+wire_alignment="NONSTRICT_ALIGNMENT"
+default_alignment=""
 
 # Check whether --enable-sim-alignment was given.
 if test "${enable_sim_alignment+set}" = set; then :

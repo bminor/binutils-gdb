@@ -120,7 +120,6 @@ struct loop_bounds { unsigned char *start, *end; };
 static int global_endianw, endianb;
 static int target_dsp;
 #define host_little_endian (CURRENT_HOST_BYTE_ORDER == LITTLE_ENDIAN)
-static char **prog_argv;
 
 static int maskw = 0;
 static int maskl = 0;
@@ -376,7 +375,7 @@ int valid[16];
 #define UNDEF(x)
 #endif
 
-static void parse_and_set_memory_size (const char *str);
+static void parse_and_set_memory_size (SIM_DESC sd, const char *str);
 static int IOMEM (int addr, int write, int value);
 static struct loop_bounds get_loop_bounds (int, int, unsigned char *,
 					   unsigned char *, int, int);
@@ -386,10 +385,6 @@ static void process_wbat_addr (int, int);
 static int process_rlat_addr (int);
 static int process_rwat_addr (int);
 static int process_rbat_addr (int);
-
-static host_callback *callback;
-
-
 
 /* Floating point registers */
 
@@ -886,9 +881,12 @@ strnswap (int str, int len)
    return offset by which to adjust pc.  */
 
 static int
-trap (int i, int *regs, unsigned char *insn_ptr, unsigned char *memory,
-      int maskl, int maskw, int endianw)
+trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
+      unsigned char *memory, int maskl, int maskw, int endianw)
 {
+  host_callback *callback = STATE_CALLBACK (sd);
+  char **prog_argv = STATE_PROG_ARGV (sd);
+
   switch (i)
     {
     case 1:
@@ -1865,6 +1863,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
       if (--pollcount < 0)
 	{
+	  host_callback *callback = STATE_CALLBACK (sd);
+
 	  pollcount = POLL_QUIT_INTERVAL;
 	  if ((*callback->poll_quit) != NULL
 	      && (*callback->poll_quit) (callback))
@@ -2345,31 +2345,28 @@ sim_info (SIM_DESC sd, int verbose)
     (double) saved_state.asregs.ticks / (double) now_persec ();
   double virttime = saved_state.asregs.cycles / 36.0e6;
 
-  callback->printf_filtered (callback, "\n\n# instructions executed  %10d\n", 
-			     saved_state.asregs.insts);
-  callback->printf_filtered (callback, "# cycles                 %10d\n",
-			     saved_state.asregs.cycles);
-  callback->printf_filtered (callback, "# pipeline stalls        %10d\n",
-			     saved_state.asregs.stalls);
-  callback->printf_filtered (callback, "# misaligned load/store  %10d\n",
-			     saved_state.asregs.memstalls);
-  callback->printf_filtered (callback, "# real time taken        %10.4f\n",
-			     timetaken);
-  callback->printf_filtered (callback, "# virtual time taken     %10.4f\n",
-			     virttime);
-  callback->printf_filtered (callback, "# profiling size         %10d\n",
-			     sim_profile_size);
-  callback->printf_filtered (callback, "# profiling frequency    %10d\n",
-			     saved_state.asregs.profile);
-  callback->printf_filtered (callback, "# profile maxpc          %10x\n",
-			     (1 << sim_profile_size) << PROFILE_SHIFT);
+  sim_io_printf (sd, "\n\n# instructions executed  %10d\n",
+		 saved_state.asregs.insts);
+  sim_io_printf (sd, "# cycles                 %10d\n",
+		 saved_state.asregs.cycles);
+  sim_io_printf (sd, "# pipeline stalls        %10d\n",
+		 saved_state.asregs.stalls);
+  sim_io_printf (sd, "# misaligned load/store  %10d\n",
+		 saved_state.asregs.memstalls);
+  sim_io_printf (sd, "# real time taken        %10.4f\n", timetaken);
+  sim_io_printf (sd, "# virtual time taken     %10.4f\n", virttime);
+  sim_io_printf (sd, "# profiling size         %10d\n", sim_profile_size);
+  sim_io_printf (sd, "# profiling frequency    %10d\n",
+		 saved_state.asregs.profile);
+  sim_io_printf (sd, "# profile maxpc          %10x\n",
+		 (1 << sim_profile_size) << PROFILE_SHIFT);
 
   if (timetaken != 0)
     {
-      callback->printf_filtered (callback, "# cycles/second          %10d\n", 
-				 (int) (saved_state.asregs.cycles / timetaken));
-      callback->printf_filtered (callback, "# simulation ratio       %10.4f\n", 
-				 virttime / timetaken);
+      sim_io_printf (sd, "# cycles/second          %10d\n",
+		     (int) (saved_state.asregs.cycles / timetaken));
+      sim_io_printf (sd, "# simulation ratio       %10.4f\n",
+		     virttime / timetaken);
     }
 }
 
@@ -2409,8 +2406,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-
-  callback = cb;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1, /*cgen_cpu_max_extra_bytes ()*/0) != SIM_RC_OK)
@@ -2472,7 +2467,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
   for (p = argv + 1; *p != NULL; ++p)
     {
       if (isdigit (**p))
-	parse_and_set_memory_size (*p);
+	parse_and_set_memory_size (sd, *p);
     }
 
   if (abfd)
@@ -2490,7 +2485,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 }
 
 static void
-parse_and_set_memory_size (const char *str)
+parse_and_set_memory_size (SIM_DESC sd, const char *str)
 {
   int n;
 
@@ -2498,13 +2493,7 @@ parse_and_set_memory_size (const char *str)
   if (n > 0 && n <= 24)
     sim_memory_size = n;
   else
-    callback->printf_filtered (callback, "Bad memory size %d; must be 1 to 24, inclusive\n", n);
-}
-
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  /* nothing to do */
+    sim_io_printf (sd, "Bad memory size %d; must be 1 to 24, inclusive\n", n);
 }
 
 SIM_RC
@@ -2525,9 +2514,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
   if (prog_bfd != NULL)
     init_dsp (prog_bfd);
 
-  /* Record the program's arguments. */
-  prog_argv = argv;
-
   return SIM_RC_OK;
 }
 
@@ -2546,17 +2532,16 @@ sim_do_command (SIM_DESC sd, const char *cmd)
   if (strncmp (cmd, sms_cmd, cmdsize) == 0 
       && strchr (" \t", cmd[cmdsize]) != NULL)
     {
-      parse_and_set_memory_size (cmd + cmdsize + 1);
+      parse_and_set_memory_size (sd, cmd + cmdsize + 1);
     }
   else if (strcmp (cmd, "help") == 0)
     {
-      (callback->printf_filtered) (callback, 
-				   "List of SH simulator commands:\n\n");
-      (callback->printf_filtered) (callback, "set-memory-size <n> -- Set the number of address bits to use\n");
-      (callback->printf_filtered) (callback, "\n");
+      sim_io_printf (sd, "List of SH simulator commands:\n\n");
+      sim_io_printf (sd, "set-memory-size <n> -- Set the number of address bits to use\n");
+      sim_io_printf (sd, "\n");
     }
   else
     {
-      (callback->printf_filtered) (callback, "Error: \"%s\" is not a valid SH simulator command.\n", cmd);
+      sim_io_printf (sd, "Error: \"%s\" is not a valid SH simulator command.\n", cmd);
     }
 }

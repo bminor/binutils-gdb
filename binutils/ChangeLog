@@ -1,3 +1,25 @@
+2015-11-20  Ronald Hoogenboom  <hoogenboom30@zonnet.nl>
+
+	* objcopy.c (parse_symflags): Use xstrndup in place of strndup.
+	(copy_main): Likewise.
+
+2015-11-20  Nick Clifton  <nickc@redhat.com>
+
+	* po/ca.po: New Catalan translation.
+	* configure.ac (ALL_LINGUAS): Add ca.
+	* configure: Regenerate.
+
+2015-11-18  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (bfd_mach_o_load_command_name): Add new
+	entries.
+	(dump_unwind_encoding_arm64): New function.
+	(dump_unwind_encoding): Handle arm64.
+
+2015-11-13  Tristan Gingold  <gingold@adacore.com>
+
+	* configure: Regenerate.
+
 2015-11-13  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.26.

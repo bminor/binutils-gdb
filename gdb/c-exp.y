@@ -864,7 +864,7 @@ string_exp:
 exp	:	string_exp
 			{
 			  int i;
-			  enum c_string_type type = C_STRING;
+			  c_string_type type = C_STRING;
 
 			  for (i = 0; i < $1.len; ++i)
 			    {
@@ -878,7 +878,7 @@ exp	:	string_exp
 				  if (type != C_STRING
 				      && type != $1.tokens[i].type)
 				    error (_("Undefined string concatenation."));
-				  type = (enum c_string_type) $1.tokens[i].type;
+				  type = (enum c_string_type_values) $1.tokens[i].type;
 				  break;
 				default:
 				  /* internal error */
@@ -2164,7 +2164,7 @@ parse_string_or_char (const char *tokptr, const char **outptr,
 		      struct typed_stoken *value, int *host_chars)
 {
   int quote;
-  enum c_string_type type;
+  c_string_type type;
   int is_objc = 0;
 
   /* Build the gdb internal form of the input string in tempbuf.  Note
@@ -2247,7 +2247,7 @@ parse_string_or_char (const char *tokptr, const char **outptr,
   ++tokptr;
 
   value->type = type;
-  value->ptr = obstack_base (&tempbuf);
+  value->ptr = (char *) obstack_base (&tempbuf);
   value->length = obstack_object_size (&tempbuf);
 
   *outptr = tokptr;
@@ -2257,7 +2257,7 @@ parse_string_or_char (const char *tokptr, const char **outptr,
 
 /* This is used to associate some attributes with a token.  */
 
-enum token_flags
+enum token_flag
 {
   /* If this bit is set, the token is C++-only.  */
 
@@ -2269,13 +2269,14 @@ enum token_flags
 
   FLAG_SHADOW = 2
 };
+DEF_ENUM_FLAGS_TYPE (enum token_flag, token_flags);
 
 struct token
 {
   char *oper;
   int token;
   enum exp_opcode opcode;
-  enum token_flags flags;
+  token_flags flags;
 };
 
 static const struct token tokentab3[] =
@@ -3172,7 +3173,7 @@ yylex (void)
 	  obstack_grow (&name_obstack, next->value.sval.ptr,
 			next->value.sval.length);
 
-	  yylval.sval.ptr = obstack_base (&name_obstack);
+	  yylval.sval.ptr = (const char *) obstack_base (&name_obstack);
 	  yylval.sval.length = obstack_object_size (&name_obstack);
 	  current.value = yylval;
 	  current.token = classification;

@@ -1,3 +1,132 @@
+2015-11-20  Stefan Teleman  <stefan.teleman@oracle.com>
+
+	PR ld/19260
+	* cache.c (bfd_cache_max_open): Avoid using getrlimit on 32-bit
+	Solaris as the result is unreliable.
+
+2015-11-20  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o-x86-64.c (x86_64_howto_table): Change name here too.
+
+2015-11-20  Tristan Gingold  <gingold@adacore.com>
+
+	* targets.c (aarch64_mach_o_vec, arm_mach_o_vec): Declare.
+	(_bfd_target_vector): Add new vectors.
+	* reloc.c (BFD_RELOC_MACH_O_SUBTRACTOR32)
+	(BFD_RELOC_MACH_O_SUBTRACTOR64, BFD_RELOC_MACH_O_ARM64_ADDEND)
+	(BFD_RELOC_MACH_O_ARM64_GOT_LOAD_PAGE21)
+	(BFD_RELOC_MACH_O_ARM64_GOT_LOAD_PAGEOFF12)
+	(BFD_RELOC_MACH_O_ARM64_POINTER_TO_GOT): New relocations.
+	(BFD_RELOC_MACH_O_X86_64_SUBTRACTOR32)
+	(BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64): Remove.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_swap_reloc_out): Change
+	name of subtractor relocations.
+	* config.bfd: Handle aarch64-*-darwin*, arm-*-darwin*.
+	* Makefile.am (BFD32_BACKENDS): Add mach-o-arm.lo.
+	(BFD32_BACKENDS_CFILES): Add mach-o-arm.c.
+	(BFD64_BACKENDS): Add mach-o-aarch64.lo.
+	(BFD64_BACKENDS_CFILES): Add mach-o-aarch64.c.
+	* configure.ac: Handle aarch64_mach_o_vec and arm_mach_o_vec.
+	* mach-o-aarch64.c: New file.
+	* mach-o-arm.c: New file.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+
+2015-11-20  David Bridgham  <dab@froghouse.org>
+
+	* pdp11.c (TARGET_PAGE_SIZE): Set to 256 to match definition in
+	ld/emulparams/pdp11.sh.
+
+2015-11-19  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
+
+	PR ld/19263
+	* elf32-s390.c (elf_s390_gc_sweep_hook): Add null ptr check.
+	* elf64-s390.c (elf_s390_check_relocs): Port the GOTOFF handling
+	over from the 32 bit code.
+	(elf_s390_relocate_section): Likewise.
+
+2015-11-18  Alan Modra  <amodra@gmail.com>
+
+	PR 19256
+	* archive.c (bfd_generic_openr_next_archived_file): Don't allow
+	backward file movement via "negative" sizes.
+	* coff-alpha.c (alpha_ecoff_openr_next_archived_file): Likewise.
+
+2015-11-18  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (bfd_mach_o_swap_in_non_scattered_reloc)
+	(bfd_mach_o_canonicalize_non_scattered_reloc)
+	(bfd_mach_o_pre_canonicalize_one_reloc): Declare.
+	(bfd_mach_o_backend_data): Rename field
+	_bfd_mach_o_swap_reloc_in to _bfd_mach_o_canonicalize_one_reloc.
+	* mach-o.c (bfd_mach_o_swap_in_non_scattered_reloc): Now public.
+	(bfd_mach_o_canonicalize_non_scattered_reloc): Renames from
+	bfd_mach_o_canonicalize_one_reloc.
+	(bfd_mach_o_pre_canonicalize_one_reloc): New function.
+	(bfd_mach_o_canonicalize_relocs): Adjust.
+	(bfd_mach_o_canonicalize_relocs): Rename define from
+	bfd_mach_o_swap_reloc_in.
+	* mach-o-target.c (TARGET_NAME_BACKEND): Use
+	bfd_mach_o_canonicalize_one_reloc instead of
+	bfd_mach_o_swap_reloc_in.
+	* mach-o-i386.c (bfd_mach_o_i386_canonicalize_one_reloc): Renames
+	from bfd_mach_o_i386_swap_reloc_in and adjust.
+	(bfd_mach_o_canonicalize_one_reloc): Renames from
+	bfd_mach_o_i386_canonicalize_one_reloc.
+	* mach-o-x86_64.c (bfd_mach_o_x86_64_canonicalize_one_reloc): Renames
+	from bfd_mach_o_x86_64_swap_reloc_in and adjust.
+	(bfd_mach_o_canonicalize_one_reloc): Renames from
+	bfd_mach_o_x86_64_canonicalize_one_reloc.
+
+2015-11-18  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (struct mach_o_data_struct): Add hdr_offset field.
+	(bfd_mach_o_fat_archive_p): Renames prototype.
+	(bfd_mach_o_fat_openr_next_archived_file): Renames.
+	(bfd_mach_o_header_p): Add argument.
+	* mach-o.c (bfd_mach_o_read_header): Add hdr_off argument and
+	use it.
+	(bfd_mach_o_read_section_32, bfd_mach_o_read_section_64)
+	(bfd_mach_o_read_section): Remove offset argument.
+	(bfd_mach_o_read_dylinker): Remove bfd_seek call.
+	(bfd_mach_o_read_dylib, bfd_mach_o_read_prebound_dylib)
+	(bfd_mach_o_read_prebind_cksum, bfd_mach_o_read_twolevel_hints)
+	(bfd_mach_o_read_fvmlib, bfd_mach_o_read_dysymtab)
+	(bfd_mach_o_read_symtab, bfd_mach_o_read_uuid)
+	(bfd_mach_o_read_linkedit, bfd_mach_o_read_str)
+	(bfd_mach_o_read_dyld_info, bfd_mach_o_read_version_min)
+	(bfd_mach_o_read_encryption_info): Likewise.
+	(bfd_mach_o_read_encryption_info_64): New function.
+	(bfd_mach_o_read_main, bfd_mach_o_read_source_version)
+	(bfd_mach_o_read_segment): Remove call to bfd_seek.
+	(bfd_mach_o_read_command): Use hdr_offset in bfd_seek.
+	Handle BFD_MACH_O_LC_LINKER_OPTIMIZATION_HINT,
+	BFD_MACH_O_LC_ENCRYPTION_INFO_64, BFD_MACH_O_LC_VERSION_MIN_WATCHOS.
+	(bfd_mach_o_header_p): Add hdr_off argument.
+	(bfd_mach_o_gen_object_p, bfd_mach_o_gen_core_p): Adjust calls.
+	(bfd_mach_o_fat_archive_p): Renames.
+	(bfd_mach_o_fat_openr_next_archived_file): Renames.
+	(bfd_mach_o_close_and_cleanup): Remove useless code.
+	(bfd_mach_o_close_and_cleanup): Define.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_object_p)
+	(bfd_mach_o_x86_64_core_p): Adjust calls.
+	* mach-o-target.c: Move defines for archive from mach-o.c.
+	Remove check on TARGET_ARCHIVE.
+	* mach-o-i386.c (bfd_mach_o_i386_object_p)
+	(bfd_mach_o_i386_core_p): Adjust calls.
+
+2015-11-17  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* elf32-arm.c (elf32_arm_write_section): Force offset output as
+	long (%ld).
+
+2015-11-13  Tristan Gingold  <gingold@adacore.com>
+
+	* version.m4: Bump version to 2.26.51
+	* configure: Regenerate.
+
 2015-11-11  Alan Modra  <amodra@gmail.com>
             Peter Bergner <bergner@vnet.ibm.com>
 

@@ -2294,6 +2294,10 @@ extern void target_preopen (int);
 /* Does whatever cleanup is required to get rid of all pushed targets.  */
 extern void pop_all_targets (void);
 
+/* Like pop_all_targets, but pops only targets whose stratum is at or
+   above STRATUM.  */
+extern void pop_all_targets_at_and_above (enum strata stratum);
+
 /* Like pop_all_targets, but pops only targets whose stratum is
    strictly above ABOVE_STRATUM.  */
 extern void pop_all_targets_above (enum strata above_stratum);

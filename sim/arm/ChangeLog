@@ -1,3 +1,7 @@
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (sim_close): Delete.
+
 2015-07-14  Nick Clifton  <nickc@redhat.com>
 
 	* armcopro.c: Remove extraneous whitespace.

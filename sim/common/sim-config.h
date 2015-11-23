@@ -398,10 +398,6 @@ extern char *simulator_sysroot;
 #define WITH_CALLBACK_MEMORY		1
 #endif
 
-#ifndef WITH_MODULO_MEMORY
-#define WITH_MODULO_MEMORY              0
-#endif
-
 
 
 /* Alignment:

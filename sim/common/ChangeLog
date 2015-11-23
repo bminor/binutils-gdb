@@ -1,3 +1,45 @@
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/18762
+	* Makefile.in (CPPFLAGS, CXXFLAGS, LDFLAGS): Define.
+
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/19273
+	* sim-utils.c (sim_do_commandf): Declare ret.  Call va_start,
+	vasprintf, and va_end together.  Check ret after va_end call.
+
+2015-11-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-types.h (SIM_PRI_TB): Define.
+	(PRI_TW, PRIiTW, PRIxTW): New PRI target word defines.
+	(PRI_TA, PRIiTA, PRIxTA): New PRI target address defines.
+	(PRI_TC, PRIiTC, PRIxTC): New PRI target cell defines.
+	(PRI_TF, PRIiTF, PRIxTF): New PRI target floating point defines.
+
+2015-11-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (WITH_MODULO_MEMORY): Delete.
+	* sim-core.c (new_sim_core_mapping): Always assign mask to modulo-1.
+	(sim_core_attach): Delete WITH_MODULO_MEMORY == 0 logic.
+	(sim_core_translate): Likewise.
+	* sim-core.h: Delete mention of WITH_MODULO_MEMORY.
+
+2015-11-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-close.c (__cgen_cpu_close, _cgen_cpu_close): Delete.
+	(cgen_cpu_close): Change to XCONCAT2.
+
+2015-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-reason.o, sim-reg.o,
+	and sim-stop.o.
+
+2015-11-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-close.o
+	* sim-close.c: New file.
+
 2015-09-25  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Ali Lown  <ali.lown@imgtec.com>
 

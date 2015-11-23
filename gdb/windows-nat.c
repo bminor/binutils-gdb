@@ -77,20 +77,41 @@
 #define GetConsoleFontSize		dyn_GetConsoleFontSize
 #define GetCurrentConsoleFont		dyn_GetCurrentConsoleFont
 
-static BOOL WINAPI (*AdjustTokenPrivileges)(HANDLE, BOOL, PTOKEN_PRIVILEGES,
-					    DWORD, PTOKEN_PRIVILEGES, PDWORD);
-static BOOL WINAPI (*DebugActiveProcessStop) (DWORD);
-static BOOL WINAPI (*DebugBreakProcess) (HANDLE);
-static BOOL WINAPI (*DebugSetProcessKillOnExit) (BOOL);
-static BOOL WINAPI (*EnumProcessModules) (HANDLE, HMODULE *, DWORD,
-					  LPDWORD);
-static BOOL WINAPI (*GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO,
-					    DWORD);
-static BOOL WINAPI (*LookupPrivilegeValueA)(LPCSTR, LPCSTR, PLUID);
-static BOOL WINAPI (*OpenProcessToken)(HANDLE, DWORD, PHANDLE);
-static BOOL WINAPI (*GetCurrentConsoleFont) (HANDLE, BOOL,
-					     CONSOLE_FONT_INFO *);
-static COORD WINAPI (*GetConsoleFontSize) (HANDLE, DWORD);
+typedef BOOL WINAPI (AdjustTokenPrivileges_ftype) (HANDLE, BOOL,
+						   PTOKEN_PRIVILEGES,
+						   DWORD, PTOKEN_PRIVILEGES,
+						   PDWORD);
+static AdjustTokenPrivileges_ftype *AdjustTokenPrivileges;
+
+typedef BOOL WINAPI (DebugActiveProcessStop_ftype) (DWORD);
+static DebugActiveProcessStop_ftype *DebugActiveProcessStop;
+
+typedef BOOL WINAPI (DebugBreakProcess_ftype) (HANDLE);
+static DebugBreakProcess_ftype *DebugBreakProcess;
+
+typedef BOOL WINAPI (DebugSetProcessKillOnExit_ftype) (BOOL);
+static DebugSetProcessKillOnExit_ftype *DebugSetProcessKillOnExit;
+
+typedef BOOL WINAPI (EnumProcessModules_ftype) (HANDLE, HMODULE *, DWORD,
+						LPDWORD);
+static EnumProcessModules_ftype *EnumProcessModules;
+
+typedef BOOL WINAPI (GetModuleInformation_ftype) (HANDLE, HMODULE,
+						  LPMODULEINFO, DWORD);
+static GetModuleInformation_ftype *GetModuleInformation;
+
+typedef BOOL WINAPI (LookupPrivilegeValueA_ftype) (LPCSTR, LPCSTR, PLUID);
+static LookupPrivilegeValueA_ftype *LookupPrivilegeValueA;
+
+typedef BOOL WINAPI (OpenProcessToken_ftype) (HANDLE, DWORD, PHANDLE);
+static OpenProcessToken_ftype *OpenProcessToken;
+
+typedef BOOL WINAPI (GetCurrentConsoleFont_ftype) (HANDLE, BOOL,
+						   CONSOLE_FONT_INFO *);
+static GetCurrentConsoleFont_ftype *GetCurrentConsoleFont;
+
+typedef COORD WINAPI (GetConsoleFontSize_ftype) (HANDLE, DWORD);
+static GetConsoleFontSize_ftype *GetConsoleFontSize;
 
 #undef STARTUPINFO
 #undef CreateProcess
@@ -98,7 +119,8 @@ static COORD WINAPI (*GetConsoleFontSize) (HANDLE, DWORD);
 
 #ifndef __CYGWIN__
 # define __PMAX	(MAX_PATH + 1)
-  static DWORD WINAPI (*GetModuleFileNameEx) (HANDLE, HMODULE, LPSTR, DWORD);
+  typedef DWORD WINAPI (GetModuleFileNameEx_ftype) (HANDLE, HMODULE, LPSTR, DWORD);
+  static GetModuleFileNameEx_ftype *GetModuleFileNameEx;
 # define STARTUPINFO STARTUPINFOA
 # define CreateProcess CreateProcessA
 # define GetModuleFileNameEx_name "GetModuleFileNameExA"
@@ -110,8 +132,9 @@ static COORD WINAPI (*GetConsoleFontSize) (HANDLE, DWORD);
   static CORE_ADDR cygwin_load_end;
 #   define __USEWIDE
     typedef wchar_t cygwin_buf_t;
-    static DWORD WINAPI (*GetModuleFileNameEx) (HANDLE, HMODULE,
-						LPWSTR, DWORD);
+    typedef DWORD WINAPI (GetModuleFileNameEx_ftype) (HANDLE, HMODULE,
+						      LPWSTR, DWORD);
+    static GetModuleFileNameEx_ftype *GetModuleFileNameEx;
 #   define STARTUPINFO STARTUPINFOW
 #   define CreateProcess CreateProcessW
 #   define GetModuleFileNameEx_name "GetModuleFileNameExW"
@@ -261,7 +284,7 @@ static const struct xlate_exception
   {DBG_CONTROL_C, GDB_SIGNAL_INT},
   {EXCEPTION_SINGLE_STEP, GDB_SIGNAL_TRAP},
   {STATUS_FLOAT_DIVIDE_BY_ZERO, GDB_SIGNAL_FPE},
-  {-1, -1}};
+  {-1, GDB_SIGNAL_UNKNOWN}};
 
 /* Set the MAPPINGS static global to OFFSETS.
    See the description of MAPPINGS for more details.  */
@@ -1101,7 +1124,7 @@ handle_exception (struct target_waitstatus *ourstatus)
     default:
       /* Treat unhandled first chance exceptions specially.  */
       if (current_event.u.Exception.dwFirstChance)
-	return -1;
+	return 0;
       printf_unfiltered ("gdb: unknown target exception 0x%08x at %s\n",
 	(unsigned) current_event.u.Exception.ExceptionRecord.ExceptionCode,
 	host_address_to_string (
@@ -1468,19 +1491,10 @@ get_windows_debug_event (struct target_ops *ops,
 		     "EXCEPTION_DEBUG_EVENT"));
       if (saw_create != 1)
 	break;
-      switch (handle_exception (ourstatus))
-	{
-	case 0:
-	  continue_status = DBG_EXCEPTION_NOT_HANDLED;
-	  break;
-	case 1:
-	  thread_id = current_event.dwThreadId;
-	  break;
-	case -1:
-	  last_sig = 1;
-	  continue_status = -1;
-	  break;
-	}
+      if (handle_exception (ourstatus))
+	thread_id = current_event.dwThreadId;
+      else
+	continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:	/* Message from the kernel.  */
@@ -1506,10 +1520,7 @@ get_windows_debug_event (struct target_ops *ops,
 
   if (!thread_id || saw_create != 1)
     {
-      if (continue_status == -1)
-	windows_resume (ops, minus_one_ptid, 0, 1);
-      else
-	CHECK (windows_continue (continue_status, -1, 0));
+      CHECK (windows_continue (continue_status, -1, 0));
     }
   else
     {
@@ -2209,7 +2220,7 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
      To avoid ambiguities introduced by spaces in the module name,
      we quote it.  */
   args_len = strlen (toexec) + 2 /* quotes */ + strlen (allargs) + 2;
-  args = alloca (args_len);
+  args = (char *) alloca (args_len);
   xsnprintf (args, args_len, "\"%s\" %s", toexec, allargs);
 
   flags |= DEBUG_ONLY_THIS_PROCESS;
@@ -2249,7 +2260,7 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
   /* Windows programs expect the environment block to be sorted.  */
   qsort (env, i, sizeof (char *), envvar_cmp);
 
-  w32env = alloca (envlen + 1);
+  w32env = (char *) alloca (envlen + 1);
 
   /* Copy env strings into new buffer.  */
   for (temp = w32env, i = 0; env[i] && *env[i]; i++)
@@ -2421,7 +2432,7 @@ windows_xfer_shared_libraries (struct target_ops *ops,
 				 target_gdbarch (), &obstack);
   obstack_grow_str0 (&obstack, "</library-list>\n");
 
-  buf = obstack_finish (&obstack);
+  buf = (const char *) obstack_finish (&obstack);
   len_avail = strlen (buf);
   if (offset >= len_avail)
     len= 0;
@@ -2700,7 +2711,7 @@ _initialize_check_for_gdb_ini (void)
       if (access (oldini, 0) == 0)
 	{
 	  int len = strlen (oldini);
-	  char *newini = alloca (len + 1);
+	  char *newini = (char *) alloca (len + 1);
 
 	  xsnprintf (newini, len + 1, "%.*s.gdbinit",
 		     (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
@@ -2784,19 +2795,18 @@ _initialize_loadable (void)
 {
   HMODULE hm = NULL;
 
+#define GPA(m, func)					\
+  func = (func ## _ftype *) GetProcAddress (m, #func)
+
   hm = LoadLibrary ("kernel32.dll");
   if (hm)
     {
-      DebugActiveProcessStop = (void *)
-	GetProcAddress (hm, "DebugActiveProcessStop");
-      DebugBreakProcess = (void *)
-	GetProcAddress (hm, "DebugBreakProcess");
-      DebugSetProcessKillOnExit = (void *)
-	GetProcAddress (hm, "DebugSetProcessKillOnExit");
-      GetConsoleFontSize = (void *) 
-	GetProcAddress (hm, "GetConsoleFontSize");
-      GetCurrentConsoleFont = (void *) 
-	GetProcAddress (hm, "GetCurrentConsoleFont");
+      GPA (hm, DebugActiveProcessStop);
+      GPA (hm, DebugBreakProcess);
+      GPA (hm, DebugSetProcessKillOnExit);
+      GPA (hm, GetConsoleFontSize);
+      GPA (hm, DebugActiveProcessStop);
+      GPA (hm, GetCurrentConsoleFont);
     }
 
   /* Set variables to dummy versions of these processes if the function
@@ -2818,12 +2828,9 @@ _initialize_loadable (void)
   hm = LoadLibrary ("psapi.dll");
   if (hm)
     {
-      EnumProcessModules = (void *)
-	GetProcAddress (hm, "EnumProcessModules");
-      GetModuleInformation = (void *)
-	GetProcAddress (hm, "GetModuleInformation");
-      GetModuleFileNameEx = (void *)
-	GetProcAddress (hm, GetModuleFileNameEx_name);
+      GPA (hm, EnumProcessModules);
+      GPA (hm, GetModuleInformation);
+      GPA (hm, GetModuleFileNameEx);
     }
 
   if (!EnumProcessModules || !GetModuleInformation || !GetModuleFileNameEx)
@@ -2843,15 +2850,15 @@ Use \"file\" or \"dll\" command to load executable/libraries directly."));
   hm = LoadLibrary ("advapi32.dll");
   if (hm)
     {
-      OpenProcessToken = (void *) GetProcAddress (hm, "OpenProcessToken");
-      LookupPrivilegeValueA = (void *)
-	GetProcAddress (hm, "LookupPrivilegeValueA");
-      AdjustTokenPrivileges = (void *)
-	GetProcAddress (hm, "AdjustTokenPrivileges");
+      GPA (hm, OpenProcessToken);
+      GPA (hm, LookupPrivilegeValueA);
+      GPA (hm, AdjustTokenPrivileges);
       /* Only need to set one of these since if OpenProcessToken fails nothing
 	 else is needed.  */
       if (!OpenProcessToken || !LookupPrivilegeValueA
 	  || !AdjustTokenPrivileges)
 	OpenProcessToken = bad_OpenProcessToken;
     }
+
+#undef GPA
 }

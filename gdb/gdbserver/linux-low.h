@@ -199,7 +199,7 @@ struct linux_target_ops
   void (*prepare_to_resume) (struct lwp_info *);
 
   /* Hook to support target specific qSupported.  */
-  void (*process_qsupported) (const char *);
+  void (*process_qsupported) (char **, int count);
 
   /* Returns true if the low target supports tracepoints.  */
   int (*supports_tracepoints) (void);

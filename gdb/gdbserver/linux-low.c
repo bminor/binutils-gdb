@@ -6128,10 +6128,10 @@ linux_read_loadmap (const char *annex, CORE_ADDR offset,
 #endif /* defined PT_GETDSBT || defined PTRACE_GETFDPIC */
 
 static void
-linux_process_qsupported (const char *query)
+linux_process_qsupported (char **features, int count)
 {
   if (the_low_target.process_qsupported != NULL)
-    the_low_target.process_qsupported (query);
+    the_low_target.process_qsupported (features, count);
 }
 
 static int

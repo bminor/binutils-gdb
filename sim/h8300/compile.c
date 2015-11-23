@@ -42,11 +42,6 @@
 
 int debug;
 
-host_callback *sim_callback;
-
-static SIM_OPEN_KIND sim_kind;
-static char *myname;
-
 /* FIXME: Needs to live in header file.
    This header should also include the things in remote-sim.h.
    One could move this to remote-sim.h but this function isn't needed
@@ -1769,8 +1764,8 @@ init_pointers (SIM_DESC sd)
       /* `msize' must be a power of two.  */
       if ((memory_size & (memory_size - 1)) != 0)
 	{
-	  (*sim_callback->printf_filtered) 
-	    (sim_callback,
+	  sim_io_printf
+	    (sd,
 	     "init_pointers: bad memory size %d, defaulting to %d.\n", 
 	     memory_size, memory_size = H8300S_MSIZE);
 	}
@@ -1830,8 +1825,7 @@ init_pointers (SIM_DESC sd)
 	    }
 
 	  if (wreg[i] == 0 || wreg[i + 8] == 0)
-	    (*sim_callback->printf_filtered) (sim_callback, 
-					      "init_pointers: internal error.\n");
+	    sim_io_printf (sd, "init_pointers: internal error.\n");
 
 	  h8_set_reg (sd, i, 0);
 	  lreg[i] = h8_get_reg_buf (sd) + i;
@@ -1845,14 +1839,6 @@ init_pointers (SIM_DESC sd)
       if (!sd->sim_cache)
 	set_simcache_size (sd, CSIZE);
     }
-}
-
-int
-sim_stop (SIM_DESC sd)
-{
-  /* FIXME: use a real signal value.  */
-  sim_engine_set_run_state (sd, sim_stopped, SIGINT);
-  return 1;
 }
 
 #define OBITOP(name, f, s, op) 			\
@@ -1892,6 +1878,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   int oldmask;
   enum sim_stop reason;
   int sigrc;
+  host_callback *sim_callback = STATE_CALLBACK (sd);
 
   init_pointers (sd);
 
@@ -4345,8 +4332,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	}
 
-      (*sim_callback->printf_filtered) (sim_callback,
-					"sim_resume: internal error.\n");
+      sim_io_printf (sd, "sim_resume: internal error.\n");
       sim_engine_set_run_state (sd, sim_stopped, SIGILL);
       goto end;
 
@@ -4639,9 +4625,7 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
         h8_set_pc (sd, intval);
       break;
     default:
-      (*sim_callback->printf_filtered) (sim_callback, 
-					"sim_store_register: bad regnum %d.\n",
-					rn);
+      sim_io_printf (sd, "sim_store_register: bad regnum %d.\n", rn);
     case R0_REGNUM:
     case R1_REGNUM:
     case R2_REGNUM:
@@ -4698,9 +4682,7 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
   switch (rn)
     {
     default:
-      (*sim_callback->printf_filtered) (sim_callback, 
-					"sim_fetch_register: bad regnum %d.\n",
-					rn);
+      sim_io_printf (sd, "sim_fetch_register: bad regnum %d.\n", rn);
       v = 0;
       break;
     case CCR_REGNUM:
@@ -4763,12 +4745,6 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
   return -1;
 }
 
-void
-sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
-{
-  sim_engine_get_run_state (sd, reason, sigrc);
-}
-
 static void
 set_simcache_size (SIM_DESC sd, int n)
 {
@@ -4788,28 +4764,14 @@ sim_info (SIM_DESC sd, int verbose)
   double timetaken = (double) h8_get_ticks (sd) / (double) now_persec ();
   double virttime = h8_get_cycles (sd) / 10.0e6;
 
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "\n\n#instructions executed  %10d\n",
-				    h8_get_insts (sd));
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "#cycles (v approximate) %10d\n",
-				    h8_get_cycles (sd));
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "#real time taken        %10.4f\n",
-				    timetaken);
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "#virtual time taken     %10.4f\n",
-				    virttime);
+  sim_io_printf (sd, "\n\n#instructions executed  %10d\n", h8_get_insts (sd));
+  sim_io_printf (sd, "#cycles (v approximate) %10d\n", h8_get_cycles (sd));
+  sim_io_printf (sd, "#real time taken        %10.4f\n", timetaken);
+  sim_io_printf (sd, "#virtual time taken     %10.4f\n", virttime);
   if (timetaken != 0.0)
-    (*sim_callback->printf_filtered) (sim_callback,
-				      "#simulation ratio       %10.4f\n",
-				      virttime / timetaken);
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "#compiles               %10d\n",
-				    h8_get_compiles (sd));
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "#cache size             %10d\n",
-				    sd->sim_cache_size);
+    sim_io_printf (sd, "#simulation ratio       %10.4f\n", virttime / timetaken);
+  sim_io_printf (sd, "#compiles               %10d\n", h8_get_compiles (sd));
+  sim_io_printf (sd, "#cache size             %10d\n", sd->sim_cache_size);
 
 #ifdef ADEBUG
   /* This to be conditional on `what' (aka `verbose'),
@@ -4820,8 +4782,7 @@ sim_info (SIM_DESC sd, int verbose)
       for (i = 0; i < O_LAST; i++)
 	{
 	  if (h8_get_stats (sd, i))
-	    (*sim_callback->printf_filtered) (sim_callback, "%d: %d\n", 
-					      i, h8_get_stats (sd, i));
+	    sim_io_printf (sd, "%d: %d\n", i, h8_get_stats (sd, i));
 	}
     }
 #endif
@@ -4960,16 +4921,7 @@ sim_open (SIM_OPEN_KIND kind,
 
   /* FIXME: Much of the code in sim_load can be moved here.  */
 
-  sim_kind = kind;
-  myname = argv[0];
-  sim_callback = callback;
   return sd;
-}
-
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  /* Nothing to do.  */
 }
 
 /* Called by gdb to load a program into memory.  */
@@ -5038,14 +4990,13 @@ sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
   /* `msize' must be a power of two.  */
   if ((memory_size & (memory_size - 1)) != 0)
     {
-      (*sim_callback->printf_filtered) (sim_callback, 
-					"sim_load: bad memory size.\n");
+      sim_io_printf (sd, "sim_load: bad memory size.\n");
       return SIM_RC_FAIL;
     }
   h8_set_mask (sd, memory_size - 1);
 
-  if (sim_load_file (sd, myname, sim_callback, prog, prog_bfd,
-		     sim_kind == SIM_OPEN_DEBUG,
+  if (sim_load_file (sd, STATE_MY_NAME (sd), STATE_CALLBACK (sd), prog,
+		     prog_bfd, STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG,
 		     0, sim_write)
       == NULL)
     {

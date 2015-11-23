@@ -820,12 +820,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   return sd;
 }
 
-void
-sim_close (SIM_DESC sd, int quitting)
-{
-  sim_module_uninstall (sd);
-}
-
 /* Some utils don't like having a NULL environ.  */
 static const char * const simple_env[] = { "HOME=/", "PATH=/bin", NULL };
 

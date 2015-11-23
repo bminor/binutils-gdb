@@ -105,7 +105,7 @@ aarch64_cannot_fetch_register (int regno)
 static void
 aarch64_fill_gregset (struct regcache *regcache, void *buf)
 {
-  struct user_pt_regs *regset = buf;
+  struct user_pt_regs *regset = (struct user_pt_regs *) buf;
   int i;
 
   for (i = 0; i < AARCH64_X_REGS_NUM; i++)
@@ -118,7 +118,7 @@ aarch64_fill_gregset (struct regcache *regcache, void *buf)
 static void
 aarch64_store_gregset (struct regcache *regcache, const void *buf)
 {
-  const struct user_pt_regs *regset = buf;
+  const struct user_pt_regs *regset = (const struct user_pt_regs *) buf;
   int i;
 
   for (i = 0; i < AARCH64_X_REGS_NUM; i++)
@@ -131,7 +131,7 @@ aarch64_store_gregset (struct regcache *regcache, const void *buf)
 static void
 aarch64_fill_fpregset (struct regcache *regcache, void *buf)
 {
-  struct user_fpsimd_state *regset = buf;
+  struct user_fpsimd_state *regset = (struct user_fpsimd_state *) buf;
   int i;
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)
@@ -143,7 +143,8 @@ aarch64_fill_fpregset (struct regcache *regcache, void *buf)
 static void
 aarch64_store_fpregset (struct regcache *regcache, const void *buf)
 {
-  const struct user_fpsimd_state *regset = buf;
+  const struct user_fpsimd_state *regset
+    = (const struct user_fpsimd_state *) buf;
   int i;
 
   for (i = 0; i < AARCH64_V_REGS_NUM; i++)
@@ -613,17 +614,20 @@ enum aarch64_condition_codes
   LE = 0xd,
 };
 
+enum aarch64_operand_type
+{
+  OPERAND_IMMEDIATE,
+  OPERAND_REGISTER,
+};
+
 /* Representation of an operand.  At this time, it only supports register
    and immediate types.  */
 
 struct aarch64_operand
 {
   /* Type of the operand.  */
-  enum
-    {
-      OPERAND_IMMEDIATE,
-      OPERAND_REGISTER,
-    } type;
+  enum aarch64_operand_type type;
+
   /* Value of the operand according to the type.  */
   union
     {
@@ -1025,7 +1029,7 @@ emit_stlr (uint32_t *buf, struct aarch64_register rt,
 /* Helper function for data processing instructions with register sources.  */
 
 static int
-emit_data_processing_reg (uint32_t *buf, enum aarch64_opcodes opcode,
+emit_data_processing_reg (uint32_t *buf, uint32_t opcode,
 			  struct aarch64_register rd,
 			  struct aarch64_register rn,
 			  struct aarch64_register rm)

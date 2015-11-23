@@ -19,10 +19,6 @@
 #if !defined (SIM_SH_H)
 #define SIM_SH_H
 
-#ifdef __cplusplus
-extern "C" { // }
-#endif
-
 /* The simulator makes use of the following register information. */
 
 enum
@@ -161,9 +157,5 @@ enum
   SIM_SH64_NR_TR_REGS = 8, /* number of target registers */
   SIM_SH64_NR_FP_REGS = 64 /* number of floating point registers */
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

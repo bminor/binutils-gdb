@@ -2054,9 +2054,6 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       char *p = &own_buf[10];
       int gdb_supports_qRelocInsn = 0;
 
-      /* Start processing qSupported packet.  */
-      target_process_qsupported (NULL);
-
       /* Process each feature being provided by GDB.  The first
 	 feature will follow a ':', and latter features will follow
 	 ';'.  */
@@ -2064,6 +2061,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	{
 	  char **qsupported = NULL;
 	  int count = 0;
+	  int unknown = 0;
 	  int i;
 
 	  /* Two passes, to avoid nested strtok calls in
@@ -2128,11 +2126,20 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	      else if (strcmp (p, "vContSupported+") == 0)
 		vCont_supported = 1;
 	      else
-		target_process_qsupported (p);
-
-	      free (p);
+		{
+		  /* Move the unknown features all together.  */
+		  qsupported[i] = NULL;
+		  qsupported[unknown] = p;
+		  unknown++;
+		}
 	    }
 
+	  /* Give the target backend a chance to process the unknown
+	     features.  */
+	  target_process_qsupported (qsupported, unknown);
+
+	  for (i = 0; i < count; i++)
+	    free (qsupported[i]);
 	  free (qsupported);
 	}
 

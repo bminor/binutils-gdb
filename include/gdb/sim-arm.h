@@ -22,10 +22,6 @@
 #if !defined (SIM_ARM_H)
 #define SIM_ARM_H
 
-#ifdef __cplusplus
-extern "C" { // }
-#endif
-
 enum sim_arm_regs
 {
   SIM_ARM_R0_REGNUM,
@@ -104,9 +100,5 @@ enum sim_arm_regs
   SIM_ARM_IWMMXT_COP1R14_REGNUM,
   SIM_ARM_IWMMXT_COP1R15_REGNUM
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -20,19 +20,6 @@
 #if !defined (SIM_CR16_H)
 #define SIM_CR16_H
 
-#ifdef __cplusplus
-extern "C" { // }
-#endif
-
-enum
-  {
-    SIM_CR16_MEMORY_UNIFIED = 0x00000000,
-    SIM_CR16_MEMORY_INSN    = 0x10000000,
-    SIM_CR16_MEMORY_DATA    = 0x10000000,
-    SIM_CR16_MEMORY_DMAP    = 0x10000000,
-    SIM_CR16_MEMORY_IMAP    = 0x10000000
-  };
-
 /* The simulator makes use of the following register information. */
 
 enum sim_cr16_regs
@@ -75,9 +62,5 @@ enum
   SIM_CR16_NR_DMAP_REGS = 4,
   SIM_CR16_NR_CR_REGS = 11
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -19,6 +19,10 @@
 
 #include "hashtab.h"
 #include "gcc-c-interface.h"
+#include "common/enum-flags.h"
+
+/* enum-flags wrapper.  */
+DEF_ENUM_FLAGS_TYPE (enum gcc_qualifiers, gcc_qualifiers_flags);
 
 /* Debugging flag for the "compile" family of commands.  */
 

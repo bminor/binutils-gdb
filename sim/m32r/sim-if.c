@@ -179,15 +179,6 @@ sim_open (kind, callback, abfd, argv)
 
   return sd;
 }
-
-void
-sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
-{
-  m32r_cgen_cpu_close (CPU_CPU_DESC (STATE_CPU (sd, 0)));
-  sim_module_uninstall (sd);
-}
 
 SIM_RC
 sim_create_inferior (sd, abfd, argv, envp)

@@ -21,10 +21,6 @@
 #ifndef SIM_LM32_H
 #define SIM_LM32_H
 
-#ifdef __cplusplus
-extern "C" { // }
-#endif
-
 enum sim_lm32_regs
 {
   SIM_LM32_R0_REGNUM,
@@ -68,9 +64,5 @@ enum sim_lm32_regs
   SIM_LM32_IP_REGNUM,  
   SIM_LM32_NUM_REGS      
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

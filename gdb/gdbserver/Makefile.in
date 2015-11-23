@@ -835,7 +835,7 @@ reg-tilegx32.c : $(srcdir)/../regformats/reg-tilegx32.dat $(regdat_sh)
 
 # A list of all the objects we might care about in this build, for
 # dependency tracking.
-all_object_files = $(OBS) $(GDBREPLAY_OBS)
+all_object_files = $(OBS) $(GDBREPLAY_OBS) $(IPA_OBJS)
 
 # Ensure that generated files are created early.  Use order-only
 # dependencies if available.  They require GNU make 3.80 or newer,

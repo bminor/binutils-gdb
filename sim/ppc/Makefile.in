@@ -635,8 +635,9 @@ mon.o: mon.c $(BASICS_H) $(CPU_H) $(MON_H)
 
 # GDB after 4.16 expects the default_callback structure to be setup.
 # As a kludge, build the common stuff here for now.
-gentmap: ../common/gentmap.c Makefile targ-vals.def
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -I. -I../common -I$(srcdir)/../common -o gentmap $< $(BUILD_LIBS)
+gentmap: $(srcdir)/../common/gentmap.c Makefile targ-vals.def
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -I. -I../common -I$(srcdir)/../common \
+		-o gentmap $(srcdir)/../common/gentmap.c $(BUILD_LIBS)
 
 targ-vals.def: $(srcdir)/../common/nltvals.def
 	rm -f targ-vals.def tmp-def
@@ -653,8 +654,8 @@ targ-map.c: Makefile gentmap $(srcdir)/../../move-if-change
 	./gentmap -c > tmp-map.c
 	$(SHELL) $(srcdir)/../../move-if-change tmp-map.c targ-map.c
 
-callback.o: ../common/callback.c $(TARG_VALS_H) $(CONFIG_H)
-	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $<
+callback.o: $(srcdir)/../common/callback.c $(TARG_VALS_H) $(CONFIG_H)
+	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/callback.c
 
 targ-map.o: targ-map.c $(ANSIDECL_H) $(GDB_CALLBACK_H) $(TARG_VALS_H)
 
@@ -667,7 +668,7 @@ tconfig.h:
 
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile
-	$(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' '-DDGEN_FLAGS="$(DGEN_FLAGS)"' $<
+	$(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' '-DDGEN_FLAGS="$(DGEN_FLAGS)"' $(srcdir)/options.c
 
 defines.h: tmp-defines; @true
 tmp-defines: config.h Makefile

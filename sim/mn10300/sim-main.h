@@ -22,7 +22,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define WITH_CORE
 #define WITH_WATCHPOINTS 1
 #define SIM_HANDLES_LMA 1
 

@@ -254,7 +254,7 @@ exec_file_attach (const char *filename, int from_tty)
 #if defined(__GO32__) || defined(_WIN32) || defined(__CYGWIN__)
 	  if (scratch_chan < 0)
 	    {
-	      char *exename = alloca (strlen (filename) + 5);
+	      char *exename = (char *) alloca (strlen (filename) + 5);
 
 	      strcat (strcpy (exename, filename), ".exe");
 	      scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST,

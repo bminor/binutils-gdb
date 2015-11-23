@@ -63,6 +63,7 @@
 #include "solist.h"
 #include "event-loop.h"
 #include "thread-fsm.h"
+#include "common/enum-flags.h"
 
 /* Prototypes for local functions */
 
@@ -1269,7 +1270,7 @@ struct thread_info *step_over_queue_head;
 
 /* Bit flags indicating what the thread needs to step over.  */
 
-enum step_over_what
+enum step_over_what_flag
   {
     /* Step over a breakpoint.  */
     STEP_OVER_BREAKPOINT = 1,
@@ -1279,6 +1280,7 @@ enum step_over_what
        expression.  */
     STEP_OVER_WATCHPOINT = 2
   };
+DEF_ENUM_FLAGS_TYPE (enum step_over_what_flag, step_over_what);
 
 /* Info about an instruction that is being stepped over.  */
 
@@ -2049,7 +2051,7 @@ reset_ecs (struct execution_control_state *ecs, struct thread_info *tp)
 static void keep_going_pass_signal (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static int keep_going_stepped_thread (struct thread_info *tp);
-static int thread_still_needs_step_over (struct thread_info *tp);
+static step_over_what thread_still_needs_step_over (struct thread_info *tp);
 static void stop_all_threads (void);
 
 /* Are there any pending step-over requests?  If so, run all we can
@@ -2069,7 +2071,7 @@ start_step_over (void)
     {
       struct execution_control_state ecss;
       struct execution_control_state *ecs = &ecss;
-      enum step_over_what step_what;
+      step_over_what step_what;
       int must_be_in_line;
 
       next = thread_step_over_chain_next (tp);
@@ -2654,14 +2656,17 @@ resume (enum gdb_signal sig)
   gdb_assert (!(thread_has_single_step_breakpoints_set (tp) && step));
 
   /* Decide the set of threads to ask the target to resume.  */
-  if ((step || thread_has_single_step_breakpoints_set (tp))
-      && tp->control.trap_expected)
+  if (tp->control.trap_expected)
     {
       /* We're allowing a thread to run past a breakpoint it has
-	 hit, by single-stepping the thread with the breakpoint
-	 removed.  In which case, we need to single-step only this
-	 thread, and keep others stopped, as they can miss this
-	 breakpoint if allowed to run.  */
+	 hit, either by single-stepping the thread with the breakpoint
+	 removed, or by displaced stepping, with the breakpoint inserted.
+	 In the former case, we need to single-step only this thread,
+	 and keep others stopped, as they can miss this breakpoint if
+	 allowed to run.  That's not really a problem for displaced
+	 stepping, but, we still keep other threads stopped, in case
+	 another thread is also stopped for a breakpoint waiting for
+	 its turn in the displaced stepping queue.  */
       resume_ptid = inferior_ptid;
     }
   else
@@ -2919,11 +2924,11 @@ thread_still_needs_step_over_bp (struct thread_info *tp)
    to make progress when resumed.  Returns an bitwise or of enum
    step_over_what bits, indicating what needs to be stepped over.  */
 
-static int
+static step_over_what
 thread_still_needs_step_over (struct thread_info *tp)
 {
   struct inferior *inf = find_inferior_ptid (tp->ptid);
-  int what = 0;
+  step_over_what what = 0;
 
   if (thread_still_needs_step_over_bp (tp))
     what |= STEP_OVER_BREAKPOINT;
@@ -7575,7 +7580,7 @@ keep_going_pass_signal (struct execution_control_state *ecs)
       struct regcache *regcache = get_current_regcache ();
       int remove_bp;
       int remove_wps;
-      enum step_over_what step_what;
+      step_over_what step_what;
 
       /* Either the trap was not expected, but we are continuing
 	 anyway (if we got a signal, the user asked it be passed to

@@ -328,15 +328,20 @@ sim_do_commandf (SIM_DESC sd,
 {
   va_list ap;
   char *buf;
+  int ret;
+
   va_start (ap, fmt);
-  if (vasprintf (&buf, fmt, ap) < 0)
+  ret = vasprintf (&buf, fmt, ap);
+  va_end (ap);
+
+  if (ret < 0)
     {
       sim_io_eprintf (sd, "%s: asprintf failed for `%s'\n",
 		      STATE_MY_NAME (sd), fmt);
       return;
     }
+
   sim_do_command (sd, buf);
-  va_end (ap);
   free (buf);
 }
 

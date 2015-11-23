@@ -21,25 +21,7 @@
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	interp.o	\
-	sim-bits.o	\
-	sim-config.o	\
-	sim-core.o	\
-	sim-endian.o	\
-	sim-events.o	\
-	sim-fpu.o	\
 	sim-hload.o	\
-	sim-io.o	\
-	sim-load.o	\
-	sim-memopt.o	\
-	sim-module.o	\
-	sim-options.o	\
-	sim-profile.o	\
-	sim-reason.o	\
-	sim-reg.o	\
-	sim-resume.o	\
-	sim-signal.o	\
-	sim-stop.o	\
-	sim-trace.o	\
-	sim-utils.o
+	sim-resume.o
 
 ## COMMON_POST_CONFIG_FRAG
