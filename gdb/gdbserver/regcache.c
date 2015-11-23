@@ -107,13 +107,23 @@ regcache_invalidate_one (struct inferior_list_entry *entry,
   return 0;
 }
 
+/* See regcache.h.  */
+
+void
+regcache_invalidate_pid (int pid)
+{
+  find_inferior (&all_threads, regcache_invalidate_one, &pid);
+}
+
+/* See regcache.h.  */
+
 void
 regcache_invalidate (void)
 {
   /* Only update the threads of the current process.  */
   int pid = ptid_get_pid (current_thread->entry.id);
 
-  find_inferior (&all_threads, regcache_invalidate_one, &pid);
+  regcache_invalidate_pid (pid);
 }
 
 #endif

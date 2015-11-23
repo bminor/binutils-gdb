@@ -1,5 +1,15 @@
 2015-11-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* regcache.h (regcache_invalidate_pid): Add declaration.
+	* regcache.c (regcache_invalidate_pid): New function, extracted
+	from regcache_invalidate.
+	(regcache_invalidate): Reimplement using regcache_invalidate_pid.
+	Add trivial documentation comment.
+	* lynx-low.c: Use regcache_invalidate_pid instead of
+	regcache_invalidate.
+
+2015-11-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: Do not call AC_CHECK_TYPES for Elf32_auxv_t
 	and Elf64_auxv_t if the target is Android.
 
