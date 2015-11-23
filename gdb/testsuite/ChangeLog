@@ -1,5 +1,11 @@
 2015-11-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/wrong_frame_bt_full-main.c: New file.
+	* gdb.base/wrong_frame_bt_full-opaque.c: New file.
+	* gdb.base/wrong_frame_bt_full.exp: New file.
+
+2015-11-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* testsuite/gdb.ada/var_rec_arr.exp: Add "ptype a1(1)" test.
 
 2015-11-20  Jose E. Marchesi  <jose.marchesi@oracle.com>

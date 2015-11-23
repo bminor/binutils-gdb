@@ -2082,6 +2082,7 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
   struct print_variable_and_value_data cb_data;
   const struct block *block;
   CORE_ADDR pc;
+  struct gdb_exception except = exception_none;
 
   if (!get_frame_pc_if_available (frame, &pc))
     {
@@ -2102,9 +2103,27 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
   cb_data.stream = stream;
   cb_data.values_printed = 0;
 
-  iterate_over_block_local_vars (block,
-				 do_print_variable_and_value,
-				 &cb_data);
+  /* Temporarily change the selected frame to the given FRAME.
+     This allows routines that rely on the selected frame instead
+     of being given a frame as parameter to use the correct frame.  */
+  select_frame (frame);
+
+  TRY
+    {
+      iterate_over_block_local_vars (block,
+				     do_print_variable_and_value,
+				     &cb_data);
+    }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      except = ex;
+    }
+  END_CATCH
+
+  /* Restore the selected frame, and then rethrow if there was a problem.  */
+  select_frame (frame_find_by_id (cb_data.frame_id));
+  if (except.reason < 0)
+    throw_exception (except);
 
   /* do_print_variable_and_value invalidates FRAME.  */
   frame = NULL;
