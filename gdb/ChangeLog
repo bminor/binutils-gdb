@@ -1,5 +1,10 @@
 2015-11-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* amd64-windows-tdep.c (amd64_windows_frame_decode_epilogue):
+	Increment PC in while loop skipping "pop reg" instructions.
+
+2015-11-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* arm-tdep.c (arm_exidx_unwind_sniffer): Do not check for a frame
 	stuck on a system call if the given frame is the innermost frame.
 

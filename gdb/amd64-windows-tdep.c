@@ -488,6 +488,7 @@ amd64_windows_frame_decode_epilogue (struct frame_info *this_frame,
 
 	  cache->prev_reg_addr[amd64_windows_w2gdb_regnum[reg]] = cur_sp;
 	  cur_sp += 8;
+	  pc += rex ? 2 : 1;
 	}
       else
 	break;
