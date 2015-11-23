@@ -1,3 +1,10 @@
+2015-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* save-trace.exp: Factor out code to these...
+	(gdb_save_tracepoints): New.
+	(gdb_load_tracepoints): New.
+	(do_save_load_test): New.
+
 2015-11-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/asmlabel.exp: New test.
