@@ -1,3 +1,8 @@
+2015-11-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Do not call AC_CHECK_TYPES for Elf32_auxv_t
+	and Elf64_auxv_t if the target is Android.
+
 2015-11-22  Doug Evans  <xdje42@gmail.com>
 
 	* target.h: #include <sys/types.h>.
