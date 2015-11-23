@@ -76,6 +76,10 @@ foreach x { 1 2 3 4 5 6 } {
 	    "end" "^$"
 }
 
+gdb_test "ftrace fast_tracepoint_loc" \
+	 "Fast tracepoint $decimal at $hex: file .*$srcfile, line $decimal.*" \
+	 "set a fast tracepoint"
+
 gdb_test_no_output "set default-collect gdb_char_test, gdb_long_test - 100" \
     "set default-collect"
 
@@ -116,7 +120,7 @@ proc gdb_verify_tracepoints { testname } {
 	    exp_continue
 	}
 	-re "$gdb_prompt $" {
-	    if { $ourstate >= 6 } {
+	    if { $ourstate >= 7 } {
 		set result "pass"
 	    } else {
 		set result "fail"

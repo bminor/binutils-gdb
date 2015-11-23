@@ -1,3 +1,8 @@
+2015-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* breakpoint.c (tracepoint_print_recreate): Fix logic error
+	if -> else if.
+
 2015-11-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* minsyms.c (lookup_minimal_symbol_by_pc_section_1): Scan backwards

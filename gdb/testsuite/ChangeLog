@@ -1,5 +1,13 @@
 2015-11-23  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.trace/actions.c: Include trace-common.h.
+	(main): Add a location for a fast tracepoint.
+	* gdb.trace/save-trace.exp: Set a fast tracepoint in addition to
+	the normal tracepoints.
+	(gdb_verify_tracepoints): Adjust number of expected tracepoints.
+
+2015-11-23  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* save-trace.exp: Factor out code to these...
 	(gdb_save_tracepoints): New.
 	(gdb_load_tracepoints): New.
