@@ -1543,11 +1543,21 @@ display_command (char *arg, int from_tty)
   newobj->exp = expr;
   newobj->block = innermost_block;
   newobj->pspace = current_program_space;
-  newobj->next = display_chain;
   newobj->number = ++display_number;
   newobj->format = fmt;
   newobj->enabled_p = 1;
-  display_chain = newobj;
+  newobj->next = NULL;
+
+  if (display_chain == NULL)
+    display_chain = newobj;
+  else
+    {
+      struct display *last;
+
+      for (last = display_chain; last->next != NULL; last = last->next)
+	;
+      last->next = newobj;
+    }
 
   if (from_tty)
     do_one_display (newobj);

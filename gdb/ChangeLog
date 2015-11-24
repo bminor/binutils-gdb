@@ -1,6 +1,12 @@
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
 	PR 17539
+	* printcmd.c (display_command): Append new display at the end of
+	the list.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	PR 17539
         * printcmd.c (display_command): Append new display at the end of
         the list.
 

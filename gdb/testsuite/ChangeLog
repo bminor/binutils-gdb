@@ -1,6 +1,13 @@
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
 	PR 17539
+	* gdb.base/display.exp: Expect displays to be sorted in ascending
+	order.  Use multi_line.
+	* gdb.base/solib-display.exp: Likewise.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	PR 17539
         * gdb.base/display.exp: Expect displays to be sorted in ascending
         order.  Use multi_line.
         * gdb.base/solib-display.exp: Likewise.
