@@ -1,3 +1,8 @@
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-inferior.exp: Use with_test_prefix.  Consistently
+	use lowercase.
+
 2015-11-23  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.trace/actions.c: Include trace-common.h.
