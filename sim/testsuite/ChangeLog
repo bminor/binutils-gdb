@@ -1,3 +1,8 @@
+2015-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* sim/aarch64: New directory.
+
 2015-11-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* lib/sim-defs.exp (slurp_options): Pull in global subdir/srcdir.

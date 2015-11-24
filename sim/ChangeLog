@@ -1,3 +1,26 @@
+2015-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Add aarch64 entry.
+	* configure: Regenerate.
+	* sim/aarch64/configure.ac: New configure template.
+	* sim/aarch64/aclocal.m4: Generate.
+	* sim/aarch64/config.in: Generate.
+	* sim/aarch64/configure: Generate.
+	* sim/aarch64/cpustate.c: New file - functions for accessing
+	AArch64 registers.
+	* sim/aarch64/cpustate.h: New header.
+	* sim/aarch64/decode.h: New header.
+	* sim/aarch64/interp.c: New file - interface between GDB and
+	simulator.
+	* sim/aarch64/Makefile.in: New makefile template.
+	* sim/aarch64/memory.c: New file - functions for simulating
+	aarch64 memory accesses.
+	* sim/aarch64/memory.h: New header.
+	* sim/aarch64/sim-main.h: New header.
+	* sim/aarch64/simulator.c: New file - aarch64 simulator
+	functions.
+	* sim/aarch64/simulator.h: New header.
+
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_ARG_ENABLE(sim)): Call AS_HELP_STRING.

@@ -1,3 +1,7 @@
+2015-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* sim-aarch64.h: New file.
+
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-cr16.h (SIM_CR16_MEMORY_UNIFIED, SIM_CR16_MEMORY_INSN,
