@@ -1,3 +1,12 @@
+2015-11-24  Christophe Monat <christophe.monat@st.com>
+
+	* gas/arm/thumb2_ldr_immediate_armv6t2.s: Added high register
+	tests.
+	* gas/arm/thumb2_ldr_immediate_armv6t2.d: Accounted for new test
+	cases.
+	* gas/arm/thumb2_ldr_immediate_highregs_armv6t2.s: New.
+	* gas/arm/thumb2_ldr_immediate_highregs_armv6t2.d: New.
+
 2015-11-24  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/arm/armv7e-m+fpv5-d16.d: Skip test for *-*-pe, *-wince-* and

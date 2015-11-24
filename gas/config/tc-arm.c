@@ -7839,7 +7839,8 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	{
 	  if (thumb_p)
 	    {
-	      if ((v & ~0xFF) == 0)
+	      /* This can be encoded only for a low register.  */
+	      if ((v & ~0xFF) == 0 && (inst.operands[i].reg < 8))
 		{
 		  /* This can be done with a mov(1) instruction.  */
 		  inst.instruction = T_OPCODE_MOV_I8 | (inst.operands[i].reg << 8);
