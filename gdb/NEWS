@@ -24,6 +24,10 @@
 
 * GDB now supports displaced stepping on AArch64 GNU/Linux.
 
+* "info threads", "info inferiors", "info display", "info checkpoints"
+  and "maint info program-spaces" now list the corresponding items in
+  ascending ID order, for consistency with all other "info" commands.
+
 * New commands
 
 maint set target-non-stop (on|off|auto)

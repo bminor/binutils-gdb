@@ -1,5 +1,10 @@
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention that a few "info" commands now list the
+	corresponding items in ascending ID order.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
 	PR 17539
 	* printcmd.c (display_command): Append new display at the end of
 	the list.
