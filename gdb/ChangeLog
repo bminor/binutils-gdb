@@ -1,5 +1,15 @@
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
+	PR 17539
+	* inferior.c (add_inferior_silent): Append the new inferior to the
+	end of the list.
+	* progspace.c (add_program_space): Append the new pspace to the
+	end of the list.
+	* thread.c (new_thread): Append the new thread to the end of the
+	list.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
 	* linux-tdep.c (find_stop_signal): Delete.
 	(struct linux_corefile_thread_data) <pid>: Remove field.
 	(linux_corefile_thread_callback): Rename to ...

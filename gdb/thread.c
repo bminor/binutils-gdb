@@ -236,8 +236,17 @@ new_thread (ptid_t ptid)
 
   tp->ptid = ptid;
   tp->num = ++highest_thread_num;
-  tp->next = thread_list;
-  thread_list = tp;
+
+  if (thread_list == NULL)
+    thread_list = tp;
+  else
+    {
+      struct thread_info *last;
+
+      for (last = thread_list; last->next != NULL; last = last->next)
+	;
+      last->next = tp;
+    }
 
   /* Nothing to follow yet.  */
   tp->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;

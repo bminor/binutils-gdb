@@ -95,4 +95,4 @@ if ![runto_main] then {
 # Check we do have two inferiors loaded.
 
 gdb_test "info inferiors" \
-    "Executable.*${exec2}.*${exec1}.*"
+    "Executable.*${exec1}.*${exec2}.*"

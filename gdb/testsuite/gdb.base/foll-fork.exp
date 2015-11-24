@@ -144,7 +144,7 @@ proc test_follow_fork { who detach cmd } {
 
 	    # Follow parent / keep child: two inferiors under debug, the
 	    # parent is the current inferior.
-	    gdb_test "info inferiors" " 2 .*process.*\\* 1 .*process.*" \
+	    gdb_test "info inferiors" "\\* 1 .*process.* 2 .*process.*" \
 		     "info inferiors"
 
 	    gdb_test "inferior 2" "Switching to inferior 2 .*"
@@ -155,14 +155,14 @@ proc test_follow_fork { who detach cmd } {
 	    # Follow child / detach parent: the child is under debug and is
 	    # the current inferior.  The parent is listed but is not under
 	    # debug.
-	    gdb_test "info inferiors" "\\* 2 .*process.* 1 .*<null>.*" \
+	    gdb_test "info inferiors" " 1 .*<null>.*\\* 2 .*process.*" \
 		     "info inferiors"
 
 	} elseif {$who == "child" && $detach == "off"} {
 
 	    # Follow child / keep parent: two inferiors under debug, the
 	    # child is the current inferior.
-	    gdb_test "info inferiors" "\\* 2 .*process.* 1 .*process.*" \
+	    gdb_test "info inferiors" " 1 .*process.*\\* 2 .*process.*" \
 		     "info inferiors"
 
 	    gdb_test "inferior 1" "Switching to inferior 1 .*"

@@ -94,7 +94,7 @@ mi_expect_interrupt "got interrupt"
 sleep 1
 mi_check_thread_states {"stopped" "stopped" "stopped"} "thread state, stop 4"
 
-mi_gdb_test "-exec-continue --all" ".*\\*running,thread-id=\"3\"\r\n\\*running,thread-id=\"2\"\r\n\\*running,thread-id=\"1\"" \
+mi_gdb_test "-exec-continue --all" ".*\\*running,thread-id=\"1\"\r\n\\*running,thread-id=\"2\"\r\n\\*running,thread-id=\"3\"" \
     "resume all"
 
 mi_expect_stop "breakpoint-hit" "break_at_me" "\[^\n\]*" "non-stop.c" "\[0-9\]*" {"" "disp=\"keep\""} "w0,i2 stop"

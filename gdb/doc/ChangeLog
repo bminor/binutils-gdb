@@ -1,3 +1,13 @@
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	PR 17539
+	* gdb.texinfo (Inferiors and Programs): Adjust "maint info
+	program-spaces" example to ascending order listing.
+	(Threads): Adjust "info threads" example to ascending order
+	listing.
+	(Forks): Adjust "info inferiors" example to ascending order
+	listing.
+
 2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (Process Record and Replay): Document "record

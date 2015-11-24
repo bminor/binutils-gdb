@@ -2791,9 +2791,9 @@ example, the list of inferiors bound to the program space.
 @smallexample
 (@value{GDBP}) maint info program-spaces
   Id   Executable
+* 1    hello
   2    goodbye
         Bound inferiors: ID 1 (process 21561)
-* 1    hello
 @end smallexample
 
 Here we can see that no inferior is running the program @code{hello},
@@ -2938,9 +2938,9 @@ For example,
 @smallexample
 (@value{GDBP}) info threads
   Id   Target Id         Frame
-  3    process 35 thread 27  0x34e5 in sigpause ()
-  2    process 35 thread 23  0x34e5 in sigpause ()
 * 1    process 35 thread 13  main (argc=1, argv=0x7ffffff8)
+  2    process 35 thread 23  0x34e5 in sigpause ()
+  3    process 35 thread 27  0x34e5 in sigpause ()
     at threadtest.c:68
 @end smallexample
 
@@ -3254,8 +3254,8 @@ process 12020 is executing new program: prog2
 Program exited normally.
 (@value{GDBP}) info inferiors
   Id   Description   Executable
-* 2    <null>        prog2
   1    <null>        prog1
+* 2    <null>        prog2
 @end smallexample
 
 @item same
