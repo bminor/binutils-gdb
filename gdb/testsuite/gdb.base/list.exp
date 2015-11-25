@@ -578,9 +578,13 @@ proc test_list {command listsize1 listsize2 linerange1 linerange2} {
 	# Test changing the listsize both before nexting, and after
 	# stopping, but before listing.  Only the second listsize
 	# change should affect which lines are listed.
-	gdb_test_no_output "set listsize $listsize1"
+	with_test_prefix "before next" {
+	    gdb_test_no_output "set listsize $listsize1"
+	}
 	gdb_test "next" "foo \\(.*"
-	gdb_test_no_output "set listsize $listsize2"
+	with_test_prefix "after next" {
+	    gdb_test_no_output "set listsize $listsize2"
+	}
 
 	set pattern1 [build_pattern $linerange1]
 	set pattern2 [build_pattern $linerange2]
