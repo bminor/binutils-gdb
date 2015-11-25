@@ -1,3 +1,11 @@
+2015-11-25  Tejas Belagod  <tejas.belagod@arm.com>
+
+	Backport from mainline:
+	2015-11-20  Ronald Hoogenboom  <hoogenboom30@zonnet.nl>
+
+	* objcopy.c (parse_symflags): Use xstrndup in place of strndup.
+	(copy_main): Likewise.
+
 2015-11-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/ca.po: New Catalan translation.
