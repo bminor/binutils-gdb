@@ -1,6 +1,11 @@
 2015-12-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-11-25  Cary Coutant  <ccoutant@gmail.com>
+	PR gold/19291
+	* object.cc (Sized_relobj_file::write_local_symbols): If relocatable,
+	subtract section address from symbol value.
+
 	2015-11-25  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (Output_data_got_powerpc::Output_data_got_powerpc): Align
 	to 256 byte boundary.
