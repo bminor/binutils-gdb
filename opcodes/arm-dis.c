@@ -1607,7 +1607,7 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),
     0x01e0fc90, 0x0ff0fff0, "stlh%c\t%0-3r, [%16-19R]"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),
-    0x01f00c9f, 0x0ff00fff, "ldaexh%c\t%12-15r, [%16-19R]"},
+    0x01f00c9f, 0x0ff00fff, "ldah%c\t%12-15r, [%16-19R]"},
   /* CRC32 instructions.  */
   {ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
     0xe1000040, 0xfff00ff0, "crc32b\t%12-15R, %16-19R, %0-3R"},

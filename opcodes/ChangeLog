@@ -1,3 +1,8 @@
+2015-12-02  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* arm-dis.c (arm_opcodes): <ldaexh>: Fix typo...
+	<ldah>: ... to this.
+
 2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_reg_supported_p): Add mistakenly
