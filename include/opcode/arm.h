@@ -34,7 +34,7 @@
 #define ARM_EXT_V6       0x00001000     /* ARM V6.                 */
 #define ARM_EXT_V6K      0x00002000     /* ARM V6K.                */
 /*			 0x00004000	   Was ARM V6Z.            */
-#define ARM_EXT_V8	 0x00004000     /* is now ARMv8.           */
+#define ARM_EXT_V8	 0x00004000     /* is now ARMv8 w/o atomics.  */
 #define ARM_EXT_V6T2	 0x00008000	/* Thumb-2.                */
 #define ARM_EXT_DIV	 0x00010000	/* Integer division.       */
 /* The 'M' in Arm V7M stands for Microcontroller.
@@ -58,6 +58,8 @@
 #define ARM_EXT_VIRT	 0x80000000	/* Virtualization extensions.  */
 
 #define ARM_EXT2_PAN	 0x00000001     /* PAN extension.  */
+#define ARM_EXT2_V8M	 0x00000004	/* ARM V8M.  */
+#define ARM_EXT2_ATOMICS 0x00000008	/* ARMv8 atomics.  */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00000001	/* Allow MIA etc.          */
@@ -140,6 +142,9 @@
 #define ARM_AEXT_V8A \
   (ARM_AEXT_V7A | ARM_EXT_MP | ARM_EXT_SEC | ARM_EXT_DIV | ARM_EXT_ADIV \
    | ARM_EXT_VIRT | ARM_EXT_V8)
+#define ARM_AEXT2_V8_1A	(ARM_EXT2_ATOMICS | ARM_EXT2_PAN)
+#define ARM_AEXT_V8M_MAIN ARM_AEXT_V7M
+#define ARM_AEXT2_V8M	(ARM_EXT2_V8M | ARM_EXT2_ATOMICS)
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	ARM_FEATURE_LOW (ARM_AEXT_V5TE, ARM_CEXT_XSCALE)
@@ -249,8 +254,9 @@
 #define ARM_ARCH_V7R	ARM_FEATURE_CORE_LOW (ARM_AEXT_V7R)
 #define ARM_ARCH_V7M	ARM_FEATURE_CORE_LOW (ARM_AEXT_V7M)
 #define ARM_ARCH_V7EM	ARM_FEATURE_CORE_LOW (ARM_AEXT_V7EM)
-#define ARM_ARCH_V8A	ARM_FEATURE_CORE_LOW (ARM_AEXT_V8A)
-#define ARM_ARCH_V8_1A	ARM_FEATURE_CORE (ARM_AEXT_V8A, ARM_EXT2_PAN)
+#define ARM_ARCH_V8A	ARM_FEATURE_CORE (ARM_AEXT_V8A, ARM_EXT2_ATOMICS)
+#define ARM_ARCH_V8_1A	ARM_FEATURE_CORE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A)
+#define ARM_ARCH_V8M_MAIN ARM_FEATURE_CORE (ARM_AEXT_V8M_MAIN, ARM_AEXT2_V8M)
 
 /* Some useful combinations:  */
 #define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)
@@ -272,23 +278,24 @@
 /* Features that are present in v6M and v6S-M but not other v6 cores.  */
 #define ARM_ARCH_V6M_ONLY ARM_FEATURE_CORE_LOW (ARM_AEXT_V6M_ONLY)
 /* v8-a+fp.  */
-#define ARM_ARCH_V8A_FP	ARM_FEATURE_LOW (ARM_AEXT_V8A, FPU_ARCH_VFP_ARMV8)
+#define ARM_ARCH_V8A_FP	\
+  ARM_FEATURE (ARM_AEXT_V8A, ARM_EXT2_ATOMICS, FPU_ARCH_VFP_ARMV8)
 /* v8-a+simd (implies fp).  */
-#define ARM_ARCH_V8A_SIMD	ARM_FEATURE_LOW (ARM_AEXT_V8A, \
-					     FPU_ARCH_NEON_VFP_ARMV8)
+#define ARM_ARCH_V8A_SIMD \
+  ARM_FEATURE (ARM_AEXT_V8A, ARM_EXT2_ATOMICS, FPU_ARCH_NEON_VFP_ARMV8)
 /* v8-a+crypto (implies simd+fp).  */
-#define ARM_ARCH_V8A_CRYPTOV1 	ARM_FEATURE_LOW (ARM_AEXT_V8A, \
-					     FPU_ARCH_CRYPTO_NEON_VFP_ARMV8)
+#define ARM_ARCH_V8A_CRYPTOV1 \
+  ARM_FEATURE (ARM_AEXT_V8A, ARM_EXT2_ATOMICS, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8)
 
 /* v8.1-a+fp.  */
-#define ARM_ARCH_V8_1A_FP	ARM_FEATURE (ARM_AEXT_V8A, ARM_EXT2_PAN, \
-				     FPU_ARCH_VFP_ARMV8)
+#define ARM_ARCH_V8_1A_FP \
+  ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A, FPU_ARCH_VFP_ARMV8)
 /* v8.1-a+simd (implies fp).  */
-#define ARM_ARCH_V8_1A_SIMD	ARM_FEATURE (ARM_AEXT_V8A, ARM_EXT2_PAN, \
-				     FPU_ARCH_NEON_VFP_ARMV8_1)
+#define ARM_ARCH_V8_1A_SIMD \
+  ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A, FPU_ARCH_NEON_VFP_ARMV8_1)
 /* v8.1-a+crypto (implies simd+fp).  */
-#define ARM_ARCH_V8_1A_CRYPTOV1   ARM_FEATURE (ARM_AEXT_V8A, ARM_EXT2_PAN, \
-					       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1)
+#define ARM_ARCH_V8_1A_CRYPTOV1 \
+  ARM_FEATURE (ARM_AEXT_V8A, ARM_AEXT2_V8_1A, FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1)
 
 
 /* There are too many feature bits to fit in a single word, so use a
