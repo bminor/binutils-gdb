@@ -1,3 +1,8 @@
+2015-12-02  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* arm-dis.c (arm_opcodes): <ldaexh>: Fix typo...
+	<ldah>: ... to this.
+
 2015-06-16  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* arm-dis.c (print_insn_coprocessor): Avoid negative shift.
