@@ -1,6 +1,10 @@
 2015-12-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-11-25  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Output_data_got_powerpc::Output_data_got_powerpc): Align
+	to 256 byte boundary.
+
 	2015-11-19  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (Target_powerpc::Scan::get_reference_flags): Correct
 	GOT16 and TOC16 relocs to RELATIVE_REF.
