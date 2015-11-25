@@ -2343,8 +2343,29 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
 	case DWARF_VALUE_MEMORY:
 	  {
+	    struct type *ptr_type;
 	    CORE_ADDR address = dwarf_expr_fetch_address (ctx, 0);
 	    int in_stack_memory = dwarf_expr_fetch_in_stack_memory (ctx, 0);
+
+	    /* DW_OP_deref_size (and possibly other operations too) may
+	       create a pointer instead of an address.  Ideally, the
+	       pointer to address conversion would be performed as part
+	       of those operations, but the type of the object to
+	       which the address refers is not known at the time of
+	       the operation.  Therefore, we do the conversion here
+	       since the type is readily available.  */
+
+	    switch (TYPE_CODE (type))
+	      {
+		case TYPE_CODE_FUNC:
+		case TYPE_CODE_METHOD:
+		  ptr_type = builtin_type (ctx->gdbarch)->builtin_func_ptr;
+		  break;
+		default:
+		  ptr_type = builtin_type (ctx->gdbarch)->builtin_data_ptr;
+		  break;
+	      }
+	    address = value_as_address (value_from_pointer (ptr_type, address));
 
 	    do_cleanups (value_chain);
 	    retval = value_at_lazy (type, address + byte_offset);

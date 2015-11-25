@@ -1,3 +1,8 @@
+2015-12-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Perform a pointer
+	to address conversion for DWARF_VALUE_MEMORY.
+
 2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb/mi/mi-cmd-var.c (mi_parse_format): Handle new "zero-hexadecimal"
