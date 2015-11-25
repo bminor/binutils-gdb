@@ -2674,6 +2674,7 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
       elfcpp::Sym<size, big_endian> isym(psyms);
 
       Symbol_value<size>& lv(this->local_values_[i]);
+      typename elfcpp::Elf_types<size>::Elf_Addr sym_value = lv.value(this, 0);
 
       bool is_ordinary;
       unsigned int st_shndx = this->adjust_sym_shndx(i, isym.get_st_shndx(),
@@ -2683,6 +2684,9 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
 	  gold_assert(st_shndx < out_sections.size());
 	  if (out_sections[st_shndx] == NULL)
 	    continue;
+	  // In relocatable object files symbol values are section relative.
+	  if (parameters->options().relocatable())
+	    sym_value -= out_sections[st_shndx]->address();
 	  st_shndx = out_sections[st_shndx]->out_shndx();
 	  if (st_shndx >= elfcpp::SHN_LORESERVE)
 	    {
@@ -2702,7 +2706,7 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
 	  gold_assert(isym.get_st_name() < strtab_size);
 	  const char* name = pnames + isym.get_st_name();
 	  osym.put_st_name(sympool->get_offset(name));
-	  osym.put_st_value(this->local_values_[i].value(this, 0));
+	  osym.put_st_value(sym_value);
 	  osym.put_st_size(isym.get_st_size());
 	  osym.put_st_info(isym.get_st_info());
 	  osym.put_st_other(isym.get_st_other());
@@ -2720,7 +2724,7 @@ Sized_relobj_file<size, big_endian>::write_local_symbols(
 	  gold_assert(isym.get_st_name() < strtab_size);
 	  const char* name = pnames + isym.get_st_name();
 	  osym.put_st_name(dynpool->get_offset(name));
-	  osym.put_st_value(this->local_values_[i].value(this, 0));
+	  osym.put_st_value(sym_value);
 	  osym.put_st_size(isym.get_st_size());
 	  osym.put_st_info(isym.get_st_info());
 	  osym.put_st_other(isym.get_st_other());
