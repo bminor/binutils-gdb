@@ -369,6 +369,9 @@ gdb,predefined_tsv
 
   The predefined trace state variables the board has.
 
+gdb,no_thread_names
+
+  The target doesn't support thread names.
 
 Testsuite Organization
 **********************

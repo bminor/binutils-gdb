@@ -1,3 +1,9 @@
+2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.threads/names.exp: New file.
+	* gdb.threads/names.c: New file.
+	* README: Mention gdb,no_thread_names.
+
 2015-11-26  Markus Metzger  <markus.t.metzger@intel.com>
 
 	PR 19297
