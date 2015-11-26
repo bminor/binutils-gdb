@@ -7043,7 +7043,8 @@ static struct target_ops linux_target_ops = {
   linux_mntns_unlink,
   linux_mntns_readlink,
   linux_breakpoint_kind_from_pc,
-  linux_sw_breakpoint_from_kind
+  linux_sw_breakpoint_from_kind,
+  linux_proc_tid_get_name,
 };
 
 static void

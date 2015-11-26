@@ -94,6 +94,11 @@ set remote exec-event-feature-packet
 show remote exec-event-feature-packet
   Set/show the use of the remote exec event feature.
 
+ * Thread names in remote protocol
+
+   The reply to qXfer:threads:read may now include a name attribute for each
+   thread.
+
 *** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*

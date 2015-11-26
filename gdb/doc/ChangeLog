@@ -1,3 +1,7 @@
+2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Thread List Format): Mention thread names.
+
 2015-11-24  Pedro Alves  <palves@redhat.com>
 
 	PR 17539

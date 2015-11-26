@@ -1456,20 +1456,22 @@ handle_qxfer_threads_worker (struct inferior_list_entry *inf, void *arg)
   char ptid_s[100];
   int core = target_core_of_thread (ptid);
   char core_s[21];
+  const char *name = target_thread_name (ptid);
 
   write_ptid (ptid_s, ptid);
+
+  buffer_xml_printf (buffer, "<thread id=\"%s\"", ptid_s);
 
   if (core != -1)
     {
       sprintf (core_s, "%d", core);
-      buffer_xml_printf (buffer, "<thread id=\"%s\" core=\"%s\"/>\n",
-			 ptid_s, core_s);
+      buffer_xml_printf (buffer, " core=\"%s\"", core_s);
     }
-  else
-    {
-      buffer_xml_printf (buffer, "<thread id=\"%s\"/>\n",
-			 ptid_s);
-    }
+
+  if (name != NULL)
+    buffer_xml_printf (buffer, " name=\"%s\"", name);
+
+  buffer_xml_printf (buffer, "/>\n");
 }
 
 /* Helper for handle_qxfer_threads.  */

@@ -1820,8 +1820,8 @@ extern char *normal_pid_to_str (ptid_t ptid);
 #define target_extra_thread_info(TP) \
      (current_target.to_extra_thread_info (&current_target, TP))
 
-/* Return the thread's name.  A NULL result means that the target
-   could not determine this thread's name.  */
+/* Return the thread's name, or NULL if the target is unable to determine it.
+   The returned value must not be freed by the caller.  */
 
 extern const char *target_thread_name (struct thread_info *);
 

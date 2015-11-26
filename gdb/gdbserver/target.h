@@ -453,6 +453,10 @@ struct target_ops
      specific meaning like the Z0 kind parameter.
      SIZE is set to the software breakpoint's length in memory.  */
   const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
+
+  /* Return the thread's name, or NULL if the target is unable to determine it.
+     The returned value must not be freed by the caller.  */
+  const char *(*thread_name) (ptid_t thread);
 };
 
 extern struct target_ops *the_target;
@@ -662,6 +666,10 @@ ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 #define target_core_of_thread(ptid)		\
   (the_target->core_of_thread ? (*the_target->core_of_thread) (ptid) \
    : -1)
+
+#define target_thread_name(ptid)                                \
+  (the_target->thread_name ? (*the_target->thread_name) (ptid)  \
+   : NULL)
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 

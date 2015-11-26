@@ -1,3 +1,23 @@
+2015-11-26  Daniel Colascione  <dancol@dancol.org>
+2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-nat.c (linux_nat_thread_name): Replace implementation by call
+	to linux_proc_tid_get_name.
+	* nat/linux-procfs.c (linux_proc_tid_get_name): New function,
+	implementation inspired by linux_nat_thread_name.
+	* nat/linux-procfs.h (linux_proc_tid_get_name): New declaration.
+	* remote.c (struct private_thread_info) <name>: New field.
+	(free_private_thread_info): Free name field.
+	(remote_thread_name): New function.
+	(thread_item_t) <name>: New field.
+	(clear_threads_listing_context): Free name field.
+	(start_thread): Get name xml attribute.
+	(thread_attributes): Add "name" attribute.
+	(remote_update_thread_list): Copy name field.
+	(init_remote_ops): Assign remote_thread_name callback.
+	* target.h (target_thread_name): Update comment.
+	* NEWS: Mention remote thread name support.
+
 2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* linux-nat.c (linux_nat_thread_name): Constify return value.
