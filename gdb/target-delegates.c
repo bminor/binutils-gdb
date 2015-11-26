@@ -1530,23 +1530,23 @@ debug_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
   return result;
 }
 
-static char *
+static const char *
 delegate_thread_name (struct target_ops *self, struct thread_info *arg1)
 {
   self = self->beneath;
   return self->to_thread_name (self, arg1);
 }
 
-static char *
+static const char *
 tdefault_thread_name (struct target_ops *self, struct thread_info *arg1)
 {
   return NULL;
 }
 
-static char *
+static const char *
 debug_thread_name (struct target_ops *self, struct thread_info *arg1)
 {
-  char * result;
+  const char * result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_thread_name (...)\n", debug_target.to_shortname);
   result = debug_target.to_thread_name (&debug_target, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_thread_name (", debug_target.to_shortname);
@@ -1554,7 +1554,7 @@ debug_thread_name (struct target_ops *self, struct thread_info *arg1)
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_thread_info_p (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_char_p (result);
+  target_debug_print_const_char_p (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

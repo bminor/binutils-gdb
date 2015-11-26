@@ -1122,7 +1122,7 @@ print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct cleanup *old_chain;
-  char *extra_info, *name, *target_id;
+  const char *extra_info, *name, *target_id;
   int current_thread = -1;
 
   update_thread_list ();
@@ -1781,7 +1781,7 @@ static void
 thread_find_command (char *arg, int from_tty)
 {
   struct thread_info *tp;
-  char *tmp;
+  const char *tmp;
   unsigned long match = 0;
 
   if (arg == NULL || *arg == '\0')

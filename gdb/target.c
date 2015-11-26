@@ -2265,7 +2265,7 @@ target_pid_to_str (ptid_t ptid)
   return (*current_target.to_pid_to_str) (&current_target, ptid);
 }
 
-char *
+const char *
 target_thread_name (struct thread_info *info)
 {
   return current_target.to_thread_name (&current_target, info);

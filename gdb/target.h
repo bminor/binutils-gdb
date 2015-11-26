@@ -639,7 +639,7 @@ struct target_ops
       TARGET_DEFAULT_FUNC (default_pid_to_str);
     char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
-    char *(*to_thread_name) (struct target_ops *, struct thread_info *)
+    const char *(*to_thread_name) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
@@ -1823,7 +1823,7 @@ extern char *normal_pid_to_str (ptid_t ptid);
 /* Return the thread's name.  A NULL result means that the target
    could not determine this thread's name.  */
 
-extern char *target_thread_name (struct thread_info *);
+extern const char *target_thread_name (struct thread_info *);
 
 /* Attempts to find the pathname of the executable file
    that was run to create a specified process.

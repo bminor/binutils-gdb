@@ -1,3 +1,14 @@
+2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-nat.c (linux_nat_thread_name): Constify return value.
+	* target.h (struct target_ops) <to_thread_name>: Likewise.
+	(target_thread_name): Likewise.
+	* target.c (target_thread_name): Likewise.
+	* target-delegates.c (debug_thread_name): Regenerate.
+	* python/py-infthread.c (thpy_get_name): Constify local variables.
+	* thread.c (print_thread_info): Likewise.
+	(thread_find_command): Likewise.
+
 2015-11-26  Markus Metzger  <markus.t.metzger@intel.com>
 
 	PR 19297
