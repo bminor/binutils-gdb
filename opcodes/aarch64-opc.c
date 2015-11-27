@@ -1659,7 +1659,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  break;
 
 	case AARCH64_OPND_WIDTH:
-	  assert (idx == 3 && opnds[idx-1].type == AARCH64_OPND_IMM
+	  assert (idx > 1 && opnds[idx-1].type == AARCH64_OPND_IMM
 		  && opnds[0].type == AARCH64_OPND_Rd);
 	  size = get_upper_bound (qualifier);
 	  if (opnd->imm.value + opnds[idx-1].imm.value > size)

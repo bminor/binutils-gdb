@@ -438,6 +438,7 @@ enum aarch64_op
   OP_SBFX,
   OP_SBFIZ,
   OP_BFI,
+  OP_BFC,		/* ARMv8.2.  */
   OP_UBFIZ,
   OP_UXTB,
   OP_UXTH,
