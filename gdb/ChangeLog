@@ -1,3 +1,12 @@
+2015-11-27  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_type_align): For vector type, return
+	its length, but with the maximum of 16 bytes.
+	(is_hfa): Return zero for vector type.
+	(aarch64_push_dummy_call): Handle short vectors.
+	(aarch64_extract_return_value): Likewise.
+	(aarch64_store_return_value): Likewise.
+
 2015-11-26  Daniel Colascione  <dancol@dancol.org>
 2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
 

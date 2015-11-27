@@ -894,6 +894,17 @@ aarch64_type_align (struct type *t)
       return TYPE_LENGTH (t);
 
     case TYPE_CODE_ARRAY:
+      if (TYPE_VECTOR (t))
+	{
+	  /* Use the natural alignment for vector types (the same for
+	     scalar type), but the maximum alignment is 128-bit.  */
+	  if (TYPE_LENGTH (t) > 16)
+	    return 16;
+	  else
+	    return TYPE_LENGTH (t);
+	}
+      else
+	return aarch64_type_align (TYPE_TARGET_TYPE (t));
     case TYPE_CODE_COMPLEX:
       return aarch64_type_align (TYPE_TARGET_TYPE (t));
 
@@ -921,6 +932,10 @@ is_hfa (struct type *ty)
     case TYPE_CODE_ARRAY:
       {
 	struct type *target_ty = TYPE_TARGET_TYPE (ty);
+
+	if (TYPE_VECTOR (ty))
+	  return 0;
+
 	if (TYPE_CODE (target_ty) == TYPE_CODE_FLT && TYPE_LENGTH (ty) <= 4)
 	  return 1;
 	break;
@@ -1318,6 +1333,12 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  pass_on_stack (&info, arg_type, arg);
 		}
 	    }
+	  else if (TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
+		   && TYPE_VECTOR (arg_type) && (len == 16 || len == 8))
+	    {
+	      /* Short vector types are passed in V registers.  */
+	      pass_in_v_or_stack (gdbarch, regcache, &info, arg_type, arg);
+	    }
 	  else if (len > 16)
 	    {
 	      /* PCS B.7 Aggregates larger than 16 bytes are passed by
@@ -1643,6 +1664,15 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	  valbuf += len;
 	}
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+	   && (TYPE_LENGTH (type) == 16 || TYPE_LENGTH (type) == 8))
+    {
+      /* Short vector is returned in V register.  */
+      gdb_byte buf[V_REGISTER_SIZE];
+
+      regcache_cooked_read (regs, AARCH64_V0_REGNUM, buf);
+      memcpy (valbuf, buf, TYPE_LENGTH (type));
+    }
   else
     {
       /* For a structure or union the behaviour is as if the value had
@@ -1771,6 +1801,15 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  regcache_cooked_write (regs, regno, tmpbuf);
 	  valbuf += len;
 	}
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+	   && (TYPE_LENGTH (type) == 8 || TYPE_LENGTH (type) == 16))
+    {
+      /* Short vector.  */
+      gdb_byte buf[V_REGISTER_SIZE];
+
+      memcpy (buf, valbuf, TYPE_LENGTH (type));
+      regcache_cooked_write (regs, AARCH64_V0_REGNUM, buf);
     }
   else
     {
