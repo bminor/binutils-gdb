@@ -1,3 +1,8 @@
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "fp16".
+	* doc/c-aarch64.texi (Architecture Extensions): Add "fp16".
+
 2015-12-09  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (aarch64_archs): Add "armv8.2-a".

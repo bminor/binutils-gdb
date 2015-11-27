@@ -142,6 +142,9 @@ automatically cause those extensions to be disabled.
  @tab Enable Limited Ordering Regions extensions.
 @item @code{rdma} @tab ARMv8-A @tab ARMv8-A or later
  @tab Enable ARMv8.1 Advanced SIMD extensions.  This implies @code{simd}.
+@item @code{fp16} @tab ARMv8.2-A @tab ARMv8.2-A or later
+ @tab Enable ARMv8.2 16-bit floating-point support.  This implies
+ @code{fp}.
 @end multitable
 
 @node AArch64 Syntax
