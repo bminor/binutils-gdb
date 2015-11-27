@@ -1,3 +1,7 @@
+2015-11-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (start_thread): Add cast.
+
 2015-11-27  Yao Qi  <yao.qi@linaro.org>
 
 	* nat/aarch64-linux-hw-point.c (aarch64_dr_state_remove_one_point):

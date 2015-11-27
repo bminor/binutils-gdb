@@ -2972,7 +2972,7 @@ start_thread (struct gdb_xml_parser *parser,
     item.core = -1;
 
   attr = xml_find_attribute (attributes, "name");
-  item.name = attr != NULL ? xstrdup (attr->value) : NULL;
+  item.name = attr != NULL ? xstrdup ((const char *) attr->value) : NULL;
 
   item.extra = 0;
 
