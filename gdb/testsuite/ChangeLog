@@ -1,5 +1,10 @@
 2015-11-27  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.arch/arm-neon.exp: New.
+	* gdb.arch/arm-neon.c: New.
+
+2015-11-27  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.cp/annota2.exp: Rewrite the pattern using multi_line.
 
 2015-11-27  Yao Qi  <yao.qi@linaro.org>
