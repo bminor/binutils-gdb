@@ -693,12 +693,14 @@ find_alias_opcode (const aarch64_opcode *opcode)
   /* Assume maximum of 8 disassemble preference candidates.  */
   const int max_num_aliases = 8;
   const aarch64_opcode *ent;
-  const aarch64_opcode *preferred[max_num_aliases];
+  const aarch64_opcode *preferred[max_num_aliases + 1];
   opcode_node head, **next;
 
   assert (opcode_has_alias (opcode));
 
   i = 0;
+  if (opcode->name != NULL)
+    preferred[i++] = opcode;
   ent = aarch64_opcode_table;
   while (ent->name != NULL)
     {
