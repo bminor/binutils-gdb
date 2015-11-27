@@ -1,5 +1,14 @@
 2015-11-27  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-tdep.c (is_hfa): Rename to ...
+	(is_hfa_or_hva): ... this.  Handle vector type.  All callers
+	updated.
+	(aarch64_extract_return_value): Update debugging message.
+	(aarch64_store_return_value): Likewise.
+	(aarch64_return_in_memory): Update comments.
+
+2015-11-27  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (aarch64_type_align): For vector type, return
 	its length, but with the maximum of 16 bytes.
 	(is_hfa): Return zero for vector type.
