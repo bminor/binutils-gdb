@@ -236,6 +236,13 @@
   QLF4(X,X,imm_0_63,imm_0_63),	\
 }
 
+/* e.g. BFC <Wd>, #<immr>, #<imms>.  */
+#define QL_BF1					\
+{						\
+  QLF3 (W, imm_0_31, imm_1_32),			\
+  QLF3 (X, imm_0_63, imm_1_64),			\
+}
+
 /* e.g. UBFIZ <Wd>, <Wn>, #<lsb>, #<width>.  */
 #define QL_BF2			\
 {				\
@@ -1226,6 +1233,8 @@ static const aarch64_feature_set aarch64_feature_lor =
   AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0);
 static const aarch64_feature_set aarch64_feature_rdma =
   AARCH64_FEATURE (AARCH64_FEATURE_RDMA, 0);
+static const aarch64_feature_set aarch64_feature_v8_2 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2, 0);
 
 #define CORE	&aarch64_feature_v8
 #define FP	&aarch64_feature_fp
@@ -1235,6 +1244,7 @@ static const aarch64_feature_set aarch64_feature_rdma =
 #define LSE	&aarch64_feature_lse
 #define LOR	&aarch64_feature_lor
 #define RDMA	&aarch64_feature_rdma
+#define ARMV8_2	&aarch64_feature_v8_2
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -1777,6 +1787,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"asr", 0x13000000, 0x7f800000, bitfield, OP_ASR_IMM, CORE, OP3 (Rd, Rn, IMM), QL_SHIFT, F_ALIAS | F_P2 | F_CONV},
   {"bfm", 0x33000000, 0x7f800000, bitfield, 0, CORE, OP4 (Rd, Rn, IMMR, IMMS), QL_BF, F_HAS_ALIAS | F_SF | F_N},
   {"bfi", 0x33000000, 0x7f800000, bitfield, OP_BFI, CORE, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV},
+  {"bfc", 0x330003e0, 0x7f8003e0, bitfield, OP_BFC, ARMV8_2,
+   OP3 (Rd, IMM, WIDTH), QL_BF1, F_ALIAS | F_P2 | F_CONV},
   {"bfxil", 0x33000000, 0x7f800000, bitfield, OP_BFXIL, CORE, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV},
   {"ubfm", 0x53000000, 0x7f800000, bitfield, 0, CORE, OP4 (Rd, Rn, IMMR, IMMS), QL_BF, F_HAS_ALIAS | F_SF | F_N},
   {"ubfiz", 0x53000000, 0x7f800000, bitfield, OP_UBFIZ, CORE, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV},

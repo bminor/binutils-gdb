@@ -1,3 +1,7 @@
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (aarch64_op): Add OP_BFC.
+
 2015-12-09  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64.h (AARCH64_FEATURE_V8_2): New.
