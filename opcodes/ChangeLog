@@ -1,5 +1,23 @@
 2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_FIX2FP_H, QL_FP2FIX_H): New.
+	(QL_INT2FP_H, QL_FP2INT_H): New.
+	(QL_FP2_H, QL_FP3_H, QL_FP4_H): New
+	(QL_DST_H): New.
+	(QL_FCCMP_H): New.
+	(aarch64_opcode_table): Add 16-bit variants of scvt, ucvtf,
+	fcvtzs, fcvtzu, fcvtns, fcvtnu, scvtf, ucvtf, fcvtas, fcvtau,
+	fmov, fcvtpos, fcvtpu, fcvtms, fcvtmu, fcvtzs, fcvtzu, fccmp,
+	fccmpe, fcmp, fcmpe, fabs, fneg, fsqrt, frintn, frintp, frintm,
+	frintz, frinta, frintx, frinti, fmul, fdiv, fadd, fsub, fmax,
+	fmin, fmaxnm, fminnm, fnmul, fmadd, fmsub, fnmadd, fnmsub and
+	fcsel.
+
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-opc.c (half_conv_t): New.
         (expand_fp_imm): Replace is_dp flag with the parameter size to
 	specify the number of bytes for the required expansion.  Treat
