@@ -1,3 +1,8 @@
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/sysreg-2.d: New.
+	* gas/aarch64/sysreg-2.s: New.
+
 2015-12-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
