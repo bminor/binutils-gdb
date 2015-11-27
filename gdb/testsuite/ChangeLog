@@ -1,5 +1,10 @@
 2015-11-27  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.cp/annota2.exp: Allow multiple occurrences of the
+	frames-invalid annotation.
+
+2015-11-27  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.cp/annota2.exp: Use ${frames_invalid}.
 
 2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
