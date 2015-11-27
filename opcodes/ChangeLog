@@ -1,6 +1,22 @@
 2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-asm-2.c: Regenerate.
+	* aarch64-asm.c (convert_bfc_to_bfm): New.
+	(convert_to_real): Add case for OP_BFC.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-dis.c: (convert_bfm_to_bfc): New.
+	(convert_to_alias): Add case for OP_BFC.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-opc.c (operand_general_constraint_met_p): Weaken assert
+	to allow width operand in three-operand instructions.
+	* aarch64-tbl.h (QL_BF1): New.
+	(aarch64_feature_v8_2): New.
+	(ARMV8_2): New.
+	(aarch64_opcode_table): Add "bfc".
+
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
 	* aarch64-dis.c: Weaken assert.
 	* aarch64-gen.c: Include the instruction in the list of its
