@@ -1235,6 +1235,8 @@ static const aarch64_feature_set aarch64_feature_rdma =
   AARCH64_FEATURE (AARCH64_FEATURE_RDMA, 0);
 static const aarch64_feature_set aarch64_feature_v8_2 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2, 0);
+static const aarch64_feature_set aarch64_feature_fp_f16 =
+  AARCH64_FEATURE (AARCH64_FEATURE_F16 | AARCH64_FEATURE_FP, 0);
 
 #define CORE	&aarch64_feature_v8
 #define FP	&aarch64_feature_fp
@@ -1244,6 +1246,7 @@ static const aarch64_feature_set aarch64_feature_v8_2 =
 #define LSE	&aarch64_feature_lse
 #define LOR	&aarch64_feature_lor
 #define RDMA	&aarch64_feature_rdma
+#define FP_F16	&aarch64_feature_fp_f16
 #define ARMV8_2	&aarch64_feature_v8_2
 
 struct aarch64_opcode aarch64_opcode_table[] =

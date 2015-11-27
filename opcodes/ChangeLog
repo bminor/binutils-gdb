@@ -1,5 +1,10 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-tbl.h (aarch64_feature_fp_f16): New.
+	(FP_F16): New.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
 	* aarch64-opc-2.c: Regenerate.
