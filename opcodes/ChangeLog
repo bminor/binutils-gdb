@@ -1,5 +1,13 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-dis.c: Weaken assert.
+	* aarch64-gen.c: Include the instruction in the list of its
+	possible aliases.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-opc.c (aarch64_sys_regs): Add "id_aa64mmfr2_el1".
 	(aarch64_sys_reg_supported_p): Add ARMv8.2 system register
 	feature test.
