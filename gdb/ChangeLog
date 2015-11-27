@@ -1,5 +1,12 @@
 2015-11-27  Yao Qi  <yao.qi@linaro.org>
 
+	* nat/aarch64-linux-hw-point.c (aarch64_dr_state_remove_one_point):
+	Don't assert on alignment.
+	(aarch64_handle_breakpoint): Only check alignment when IS_INSERT
+	is true.
+
+2015-11-27  Yao Qi  <yao.qi@linaro.org>
+
 	* aarch64-tdep.c (is_hfa): Rename to ...
 	(is_hfa_or_hva): ... this.  Handle vector type.  All callers
 	updated.
