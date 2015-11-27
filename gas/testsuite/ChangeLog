@@ -1,5 +1,10 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* gas/aarch64/alias-2.d: Add tests for REV.
+	* gas/aarch64/alias-2.s: Likewise.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* gas/aarch64/alias-2.d: New.
 	* gas/aarch64/alias-2.s: New.
 
