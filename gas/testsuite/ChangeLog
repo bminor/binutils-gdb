@@ -1,3 +1,8 @@
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/sysreg-2.d: New.
+	* gas/aarch64/sysreg-2.s: New.
+
 2015-11-24  Christophe Monat <christophe.monat@st.com>
 
 	* gas/arm/thumb2_ldr_immediate_armv6t2.s: Added high register

@@ -2801,6 +2801,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "id_aa64isar1_el1", CPENC(3,0,C0,C6,1),	0 }, /* RO */
   { "id_aa64mmfr0_el1", CPENC(3,0,C0,C7,0),	0 }, /* RO */
   { "id_aa64mmfr1_el1", CPENC(3,0,C0,C7,1),	0 }, /* RO */
+  { "id_aa64mmfr2_el1", CPENC (3, 0, C0, C7, 2), F_ARCHEXT }, /* RO */
   { "id_aa64afr0_el1",  CPENC(3,0,C0,C5,4),	0 }, /* RO */
   { "id_aa64afr1_el1",  CPENC(3,0,C0,C5,5),	0 }, /* RO */
   { "clidr_el1",        CPENC(3,1,C0,C0,1),	0 }, /* RO */
@@ -3135,6 +3136,10 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
        || reg->value == CPENC (3, 5, C14, C3, 1)
        || reg->value == CPENC (3, 5, C14, C3, 2))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_1))
+
+  /* ARMv8.2 features.  */
+  if (reg->value == CPENC (3, 0, C0, C7, 2)
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
     return FALSE;
 
   return TRUE;

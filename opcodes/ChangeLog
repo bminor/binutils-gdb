@@ -1,3 +1,9 @@
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs): Add "id_aa64mmfr2_el1".
+	(aarch64_sys_reg_supported_p): Add ARMv8.2 system register
+	feature test.
+
 2015-11-23  Tristan Gingold  <gingold@adacore.com>
 
 	* arm-dis.c (print_insn): Also set is_thumb for Mach-O.
