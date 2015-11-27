@@ -1,6 +1,14 @@
 2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (aarchr64_opcode_table): Update "rev", add
+	"rev64".
+
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
 	* aarch64-asm.c (convert_bfc_to_bfm): New.
 	(convert_to_real): Add case for OP_BFC.
 	* aarch64-dis-2.c: Regenerate.

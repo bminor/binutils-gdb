@@ -96,3 +96,15 @@ Disassembly of section \.text:
  [0-9a-f]+:	b3611fff 	bfc	xzr, #31, #8
  [0-9a-f]+:	b3403be0 	bfxil	x0, xzr, #0, #15
  [0-9a-f]+:	b3613bff 	bfc	xzr, #31, #15
+ [0-9a-f]+:	dac00fe0 	rev	x0, xzr
+ [0-9a-f]+:	dac00c20 	rev	x0, x1
+ [0-9a-f]+:	dac00c3f 	rev	xzr, x1
+ [0-9a-f]+:	dac00fff 	rev	xzr, xzr
+ [0-9a-f]+:	dac007e0 	rev16	x0, xzr
+ [0-9a-f]+:	dac00420 	rev16	x0, x1
+ [0-9a-f]+:	dac0043f 	rev16	xzr, x1
+ [0-9a-f]+:	dac007ff 	rev16	xzr, xzr
+ [0-9a-f]+:	dac00fe0 	rev	x0, xzr
+ [0-9a-f]+:	dac00c20 	rev	x0, x1
+ [0-9a-f]+:	dac00c3f 	rev	xzr, x1
+ [0-9a-f]+:	dac00fff 	rev	xzr, xzr
