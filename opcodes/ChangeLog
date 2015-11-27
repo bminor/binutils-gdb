@@ -1,5 +1,15 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-opc.c (half_conv_t): New.
+	(expand_fp_imm): Replace is_dp flag with the parameter size to
+	specify the number of bytes for the required expansion.  Treat
+	a 16-bit expansion like a 32-bit expansion.  Add check for an
+	unsupported size request.  Update comment.
+	(aarch64_print_operand): Update to support 16-bit floating point
+	values.  Update for changes to expand_fp_imm.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_fp_f16): New.
 	(FP_F16): New.
 
