@@ -1,3 +1,8 @@
+2014-11-28  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (conversion_op): Use
+	DEMANGLE_COMPONENT_CONVERSION instead of DEMANGLE_COMPONENT_CAST.
+
 2015-11-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote.c (start_thread): Add cast.
