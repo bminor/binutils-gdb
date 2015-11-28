@@ -528,7 +528,7 @@ oper	:	OPERATOR NEW
 		   since it's not clear that it's parseable.  */
 conversion_op
 		:	OPERATOR typespec_2
-			{ $$ = fill_comp (DEMANGLE_COMPONENT_CAST, $2, NULL); }
+			{ $$ = fill_comp (DEMANGLE_COMPONENT_CONVERSION, $2, NULL); }
 		;
 
 conversion_op_name
