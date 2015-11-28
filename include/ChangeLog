@@ -13,6 +13,11 @@
 	* bfdlink.h (bfd_link_info): Add call_nop_as_suffix and
 	call_nop_byte.
 
+2015-10-18  Roland McGrath  <roland@gnu.org>
+
+	PR other/63758
+	* environ.h: New file.
+
 2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* dis-asm.h (arc_get_disassembler): Correct declaration.
