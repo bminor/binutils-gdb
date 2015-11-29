@@ -1,3 +1,7 @@
+2015-11-28  Cary Coutant  <ccoutant@gmail.com>
+
+	* MAINTAINERS: Update my email address.
+
 2015-11-20  Ronald Hoogenboom  <hoogenboom30@zonnet.nl>
 
 	* objcopy.c (parse_symflags): Use xstrndup in place of strndup.
