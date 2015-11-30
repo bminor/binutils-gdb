@@ -1,5 +1,10 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* lib/range-stepping-support.exp (exec_cmd_expect_vCont_count):
+	Handle non-stop mode vCont replies.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/dprintf-non-stop.exp: Use build_executable instead of
 	prepare_for_testing.  Start gdb with "set non-stop on" appended to
 	GDBFLAGS.  Lax expected stop output.

@@ -25,12 +25,15 @@ proc exec_cmd_expect_vCont_count { cmd exp_vCont_r } {
     set r_counter 0
     set s_counter 0
     set ret 1
+    # We either get a stop reply in all-stop mode, or an OK in
+    # non-stop mode.
+    set vcont_reply "(T\[\[:xdigit:\]\]\[\[:xdigit:\]\]|OK)"
     gdb_test_multiple $cmd $test {
-	-re "vCont;s\[^\r\n\]*Packet received: T\[\[:xdigit:\]\]\[\[:xdigit:\]\]" {
+	-re "vCont;s\[^\r\n\]*Packet received: $vcont_reply" {
 	    incr s_counter
 	    exp_continue
 	}
-	-re "vCont;r\[^\r\n\]*Packet received: T\[\[:xdigit:\]\]\[\[:xdigit:\]\]" {
+	-re "vCont;r\[^\r\n\]*Packet received: $vcont_reply" {
 	    incr r_counter
 	    exp_continue
 	}
