@@ -116,7 +116,7 @@ remote_notif_process (struct remote_notif_state *state,
 static void
 remote_async_get_pending_events_handler (gdb_client_data data)
 {
-  gdb_assert (non_stop);
+  gdb_assert (target_is_non_stop_p ());
   remote_notif_process ((struct remote_notif_state *) data, NULL);
 }
 
@@ -166,7 +166,7 @@ handle_notification (struct remote_notif_state *state, char *buf)
       /* Notify the event loop there's a stop reply to acknowledge
 	 and that there may be more events to fetch.  */
       QUEUE_enque (notif_client_p, state->notif_queue, nc);
-      if (non_stop)
+      if (target_is_non_stop_p ())
 	{
 	  /* In non-stop, We mark REMOTE_ASYNC_GET_PENDING_EVENTS_TOKEN
 	     in order to go on what we were doing and postpone

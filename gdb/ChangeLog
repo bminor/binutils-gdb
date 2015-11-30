@@ -1,5 +1,51 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (switch_to_thread_no_regs): Declare.
+	* infcmd.c (setup_inferior): New function, factored out from ...
+	(attach_command_post_wait): ... this.  Rename to ...
+	(attach_post_wait): ... this.  Replace parameter async_exec with
+	attach_post_wait_mode parameter.  Adjust.
+	(enum attach_post_wait_mode): New enum.
+	(struct attach_command_continuation_args): Replace 'async_exec'
+	field with 'mode' field.
+	(attach_command_continuation): Adjust.
+	(attach_command): Add comment.  Mark the inferior as needing
+	setup.  Adjust to use enum attach_post_wait_mode.
+	(notice_new_inferior): Use switch_to_thread_no_regs.  Adjust to
+	use enum attach_post_wait_mode.
+	* inferior.h (setup_inferior): Declare.
+	(struct inferior) <needs_setup>: New field.
+	* infrun.c (set_last_target_status): Make extern.
+	(stop_all_threads): Make extern.  Setup inferior, if necessary.
+	* infrun.h (set_last_target_status, stop_all_threads): Declare.
+	* remote-notif.c (remote_async_get_pending_events_handler)
+	(handle_notification): Replace non_stop checks with
+	target_is_non_stop_p() checks.
+	* remote.c (remote_notice_new_inferior): Remove non_stop check.
+	(remote_update_thread_list): Replace non_stop check with
+	target_is_non_stop_p() check.
+	(print_one_stopped_thread): New function.
+	(process_initial_stop_replies): New 'from_tty' parameter.
+	"Notice" all new live inferiors after storing initial stops as
+	pending status in each corresponding thread.  If all-stop, stop
+	all threads, try picking a signalled thread as current, and print
+	the status of that one thread.  Record the last target status.
+	(remote_start_remote): Replace non_stop checks with
+	target_is_non_stop_p() checks.  Don't query for the remote current
+	thread of use qOffsets here.  Pass from_tty to
+	process_initial_stop_replies.
+	(extended_remote_attach): Replace non_stop checks with
+	target_is_non_stop_p() checks.
+	(extended_remote_post_attach): Send qOffsets here.
+	(remote_vcont_resume, remote_resume, remote_stop)
+	(remote_interrupt, remote_parse_stop_reply, remote_wait): Replace
+	non_stop checks with target_is_non_stop_p() checks.
+	(remote_async): If target is non-stop, mark/clear the pending
+	events token.
+	* thread.c (switch_to_thread_no_regs): New function.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* gdb.mi/mi-nonstop.exp: Append "set non-stop on" to GDBFLAGS
 	instead of issuing "-gdb-set non-stop 1" after starting gdb.
 	Use mi_is_target_remote instead of checking "is_remote target".

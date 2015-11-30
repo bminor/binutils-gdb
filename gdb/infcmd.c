@@ -2609,18 +2609,15 @@ proceed_after_attach (int pid)
   do_cleanups (old_chain);
 }
 
-/* attach_command --
-   takes a program started up outside of gdb and ``attaches'' to it.
-   This stops it cold in its tracks and allows us to start debugging it.
-   and wait for the trace-trap that results from attaching.  */
+/* See inferior.h.  */
 
-static void
-attach_command_post_wait (char *args, int from_tty, int async_exec)
+void
+setup_inferior (int from_tty)
 {
   struct inferior *inferior;
 
   inferior = current_inferior ();
-  inferior->control.stop_soon = NO_STOP_QUIETLY;
+  inferior->needs_setup = 0;
 
   /* If no exec file is yet known, try to determine it from the
      process itself.  */
@@ -2636,8 +2633,37 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
   target_post_attach (ptid_get_pid (inferior_ptid));
 
   post_create_inferior (&current_target, from_tty);
+}
 
-  if (async_exec)
+/* What to do after the first program stops after attaching.  */
+enum attach_post_wait_mode
+{
+  /* Do nothing.  Leaves threads as they are.  */
+  ATTACH_POST_WAIT_NOTHING,
+
+  /* Re-resume threads that are marked running.  */
+  ATTACH_POST_WAIT_RESUME,
+
+  /* Stop all threads.  */
+  ATTACH_POST_WAIT_STOP,
+};
+
+/* Called after we've attached to a process and we've seen it stop for
+   the first time.  If ASYNC_EXEC is true, re-resume threads that
+   should be running.  Else if ATTACH, */
+
+static void
+attach_post_wait (char *args, int from_tty, enum attach_post_wait_mode mode)
+{
+  struct inferior *inferior;
+
+  inferior = current_inferior ();
+  inferior->control.stop_soon = NO_STOP_QUIETLY;
+
+  if (inferior->needs_setup)
+    setup_inferior (from_tty);
+
+  if (mode == ATTACH_POST_WAIT_RESUME)
     {
       /* The user requested an `attach&', so be sure to leave threads
 	 that didn't get a signal running.  */
@@ -2657,7 +2683,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 	    }
 	}
     }
-  else
+  else if (mode == ATTACH_POST_WAIT_STOP)
     {
       /* The user requested a plain `attach', so be sure to leave
 	 the inferior stopped.  */
@@ -2685,7 +2711,7 @@ struct attach_command_continuation_args
 {
   char *args;
   int from_tty;
-  int async_exec;
+  enum attach_post_wait_mode mode;
 };
 
 static void
@@ -2697,7 +2723,7 @@ attach_command_continuation (void *args, int err)
   if (err)
     return;
 
-  attach_command_post_wait (a->args, a->from_tty, a->async_exec);
+  attach_post_wait (a->args, a->from_tty, a->mode);
 }
 
 static void
@@ -2710,12 +2736,18 @@ attach_command_continuation_free_args (void *args)
   xfree (a);
 }
 
+/* "attach" command entry point.  Takes a program started up outside
+   of gdb and ``attaches'' to it.  This stops it cold in its tracks
+   and allows us to start debugging it.  */
+
 void
 attach_command (char *args, int from_tty)
 {
   int async_exec;
   struct cleanup *args_chain;
   struct target_ops *attach_target;
+  struct inferior *inferior = current_inferior ();
+  enum attach_post_wait_mode mode;
 
   dont_repeat ();		/* Not for the faint of heart */
 
@@ -2775,6 +2807,8 @@ attach_command (char *args, int from_tty)
   init_wait_for_inferior ();
   clear_proceed_status (0);
 
+  inferior->needs_setup = 1;
+
   if (target_is_non_stop_p ())
     {
       /* If we find that the current thread isn't stopped, explicitly
@@ -2790,12 +2824,13 @@ attach_command (char *args, int from_tty)
 	target_stop (pid_to_ptid (ptid_get_pid (inferior_ptid)));
     }
 
+  mode = async_exec ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_STOP;
+
   /* Some system don't generate traps when attaching to inferior.
      E.g. Mach 3 or GNU hurd.  */
   if (!target_attach_no_wait)
     {
       struct attach_command_continuation_args *a;
-      struct inferior *inferior = current_inferior ();
 
       /* Careful here.  See comments in inferior.h.  Basically some
 	 OSes don't ignore SIGSTOPs on continue requests anymore.  We
@@ -2808,7 +2843,7 @@ attach_command (char *args, int from_tty)
       a = XNEW (struct attach_command_continuation_args);
       a->args = xstrdup (args);
       a->from_tty = from_tty;
-      a->async_exec = async_exec;
+      a->mode = mode;
       add_inferior_continuation (attach_command_continuation, a,
 				 attach_command_continuation_free_args);
       /* Done with ARGS.  */
@@ -2822,7 +2857,7 @@ attach_command (char *args, int from_tty)
   /* Done with ARGS.  */
   do_cleanups (args_chain);
 
-  attach_command_post_wait (args, from_tty, async_exec);
+  attach_post_wait (args, from_tty, mode);
 }
 
 /* We had just found out that the target was already attached to an
@@ -2837,7 +2872,7 @@ void
 notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
 {
   struct cleanup* old_chain;
-  int async_exec;
+  enum attach_post_wait_mode mode;
 
   old_chain = make_cleanup (null_cleanup, NULL);
 
@@ -2845,12 +2880,14 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
      they're stopped for some reason other than us telling it to, the
      target reports a signal != GDB_SIGNAL_0.  We don't try to
      resume threads with such a stop signal.  */
-  async_exec = non_stop;
+  mode = non_stop ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
 
   if (!ptid_equal (inferior_ptid, null_ptid))
     make_cleanup_restore_current_thread ();
 
-  switch_to_thread (ptid);
+  /* Avoid reading registers -- we haven't fetched the target
+     description yet.  */
+  switch_to_thread_no_regs (find_thread_ptid (ptid));
 
   /* When we "notice" a new inferior we need to do all the things we
      would normally do if we had just attached to it.  */
@@ -2871,7 +2908,7 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
       a = XNEW (struct attach_command_continuation_args);
       a->args = xstrdup ("");
       a->from_tty = from_tty;
-      a->async_exec = async_exec;
+      a->mode = mode;
       add_inferior_continuation (attach_command_continuation, a,
 				 attach_command_continuation_free_args);
 
@@ -2879,8 +2916,8 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
       return;
     }
 
-  async_exec = leave_running;
-  attach_command_post_wait ("" /* args */, from_tty, async_exec);
+  mode = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
+  attach_post_wait ("" /* args */, from_tty, mode);
 
   do_cleanups (old_chain);
 }

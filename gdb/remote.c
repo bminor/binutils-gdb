@@ -1887,7 +1887,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	{
 	  struct remote_state *rs = get_remote_state ();
 
-	  if (non_stop || !rs->starting_up)
+	  if (!rs->starting_up)
 	    notice_new_inferior (currthread, running, 0);
 	}
     }
@@ -3165,7 +3165,7 @@ remote_update_thread_list (struct target_ops *ops)
 		 running until proven otherwise with a stop reply.  In
 		 all-stop, we can only get here if all threads are
 		 stopped.  */
-	      int running = non_stop ? 1 : 0;
+	      int running = target_is_non_stop_p () ? 1 : 0;
 
 	      remote_notice_new_inferior (item->ptid, running);
 
@@ -3706,15 +3706,44 @@ add_current_inferior_and_thread (char *wait_status)
   add_thread_silent (inferior_ptid);
 }
 
+/* Print info about a thread that was found already stopped on
+   connection.  */
+
+static void
+print_one_stopped_thread (struct thread_info *thread)
+{
+  struct target_waitstatus *ws = &thread->suspend.waitstatus;
+
+  switch_to_thread (thread->ptid);
+  stop_pc = get_frame_pc (get_current_frame ());
+  set_current_sal_from_frame (get_current_frame ());
+
+  thread->suspend.waitstatus_pending_p = 0;
+
+  if (ws->kind == TARGET_WAITKIND_STOPPED)
+    {
+      enum gdb_signal sig = ws->value.sig;
+
+      if (signal_print_state (sig))
+	observer_notify_signal_received (sig);
+    }
+  observer_notify_normal_stop (NULL, 1);
+}
+
 /* Process all initial stop replies the remote side sent in response
    to the ? packet.  These indicate threads that were already stopped
    on initial connection.  We mark these threads as stopped and print
    their current frame before giving the user the prompt.  */
 
 static void
-process_initial_stop_replies (void)
+process_initial_stop_replies (int from_tty)
 {
   int pending_stop_replies = stop_reply_queue_length ();
+  struct inferior *inf;
+  struct thread_info *thread;
+  struct thread_info *selected = NULL;
+  struct thread_info *lowest_stopped = NULL;
+  struct thread_info *first = NULL;
 
   /* Consume the initial pending events.  */
   while (pending_stop_replies-- > 0)
@@ -3723,6 +3752,7 @@ process_initial_stop_replies (void)
       ptid_t event_ptid;
       struct target_waitstatus ws;
       int ignore_event = 0;
+      struct thread_info *thread;
 
       memset (&ws, 0, sizeof (ws));
       event_ptid = target_wait (waiton_ptid, &ws, TARGET_WNOHANG);
@@ -3751,12 +3781,7 @@ process_initial_stop_replies (void)
       if (ignore_event)
 	continue;
 
-      switch_to_thread (event_ptid);
-      set_executing (event_ptid, 0);
-      set_running (event_ptid, 0);
-
-      stop_pc = get_frame_pc (get_current_frame ());
-      set_current_sal_from_frame (get_current_frame ());
+      thread = find_thread_ptid (event_ptid);
 
       if (ws.kind == TARGET_WAITKIND_STOPPED)
 	{
@@ -3766,15 +3791,106 @@ process_initial_stop_replies (void)
 	     instead of signal 0.  Suppress it.  */
 	  if (sig == GDB_SIGNAL_TRAP)
 	    sig = GDB_SIGNAL_0;
-	  inferior_thread ()->suspend.stop_signal = sig;
+	  thread->suspend.stop_signal = sig;
+	  ws.value.sig = sig;
+	}
 
-	  if (signal_print_state (sig))
-	    observer_notify_signal_received (sig);
-        }
+      thread->suspend.waitstatus = ws;
 
-      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
-      observer_notify_normal_stop (NULL, 1);
+      if (ws.kind != TARGET_WAITKIND_STOPPED
+	  || ws.value.sig != GDB_SIGNAL_0)
+	thread->suspend.waitstatus_pending_p = 1;
+
+      set_executing (event_ptid, 0);
+      set_running (event_ptid, 0);
     }
+
+  /* "Notice" the new inferiors before anything related to
+     registers/memory.  */
+  ALL_INFERIORS (inf)
+    {
+      if (inf->pid == 0)
+	continue;
+
+      inf->needs_setup = 1;
+
+      if (non_stop)
+	{
+	  thread = any_live_thread_of_process (inf->pid);
+	  notice_new_inferior (thread->ptid,
+			       thread->state == THREAD_RUNNING,
+			       from_tty);
+	}
+    }
+
+  /* If all-stop on top of non-stop, pause all threads.  Note this
+     records the threads' stop pc, so must be done after "noticing"
+     the inferiors.  */
+  if (!non_stop)
+    {
+      stop_all_threads ();
+
+      /* If all threads of an inferior were already stopped, we
+	 haven't setup the inferior yet.  */
+      ALL_INFERIORS (inf)
+	{
+	  if (inf->pid == 0)
+	    continue;
+
+	  if (inf->needs_setup)
+	    {
+	      thread = any_live_thread_of_process (inf->pid);
+	      switch_to_thread_no_regs (thread);
+	      setup_inferior (0);
+	    }
+	}
+    }
+
+  /* Now go over all threads that are stopped, and print their current
+     frame.  If all-stop, then if there's a signalled thread, pick
+     that as current.  */
+  ALL_NON_EXITED_THREADS (thread)
+    {
+      struct target_waitstatus *ws;
+
+      if (first == NULL)
+	first = thread;
+
+      if (!non_stop)
+	set_running (thread->ptid, 0);
+      else if (thread->state != THREAD_STOPPED)
+	continue;
+
+      ws = &thread->suspend.waitstatus;
+
+      if (selected == NULL
+	  && thread->suspend.waitstatus_pending_p)
+	selected = thread;
+
+      if (lowest_stopped == NULL || thread->num < lowest_stopped->num)
+	lowest_stopped = thread;
+
+      if (non_stop)
+	print_one_stopped_thread (thread);
+    }
+
+  /* In all-stop, we only print the status of one thread, and leave
+     others with their status pending.  */
+  if (!non_stop)
+    {
+      thread = selected;
+      if (thread == NULL)
+	thread = lowest_stopped;
+      if (thread == NULL)
+	thread = first;
+
+      print_one_stopped_thread (thread);
+    }
+
+  /* For "info program".  */
+  thread = inferior_thread ();
+  if (thread->state == THREAD_STOPPED)
+    set_last_target_status (inferior_ptid, thread->suspend.waitstatus);
 }
 
 static void
@@ -3852,7 +3968,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   if (gdbarch_has_global_solist (target_gdbarch ()))
     solib_add (NULL, from_tty, target, auto_solib_add);
 
-  if (non_stop)
+  if (target_is_non_stop_p ())
     {
       if (packet_support (PACKET_QNonStop) != PACKET_ENABLE)
 	error (_("Non-stop mode requested, but remote "
@@ -3896,7 +4012,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   putpkt ("?");
   getpkt (&rs->buf, &rs->buf_size, 0);
 
-  if (!non_stop)
+  if (!target_is_non_stop_p ())
     {
       ptid_t ptid;
       int fake_pid_p = 0;
@@ -3989,8 +4105,6 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
     }
   else
     {
-      ptid_t current_ptid;
-
       /* Clear WFI global state.  Do this before finding about new
 	 threads and inferiors, and setting the current inferior.
 	 Otherwise we would clear the proceed status of the current
@@ -4025,19 +4139,6 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	  return;
 	}
 
-      /* Let the stub know that we want it to return the thread.  */
-
-      /* Force the stub to choose a thread.  */
-      set_general_thread (null_ptid);
-
-      /* Query it.  */
-      current_ptid = remote_current_thread (minus_one_ptid);
-      if (ptid_equal (inferior_ptid, minus_one_ptid))
-	error (_("remote didn't report the current thread in non-stop mode"));
-
-      inferior_ptid = current_ptid;
-      get_offsets ();		/* Get text, data & bss offsets.  */
-
       /* In non-stop mode, any cached wait status will be stored in
 	 the stop reply queue.  */
       gdb_assert (wait_status == NULL);
@@ -4047,9 +4148,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
       /* If there are already stopped threads, mark them stopped and
 	 report their stops before giving the prompt to the user.  */
-      process_initial_stop_replies ();
-
-      switch_to_thread (current_ptid);
+      process_initial_stop_replies (from_tty);
 
       if (target_can_async_p ())
 	target_async (1);
@@ -5001,7 +5100,7 @@ extended_remote_attach (struct target_ops *target, const char *args,
 		     &remote_protocol_packets[PACKET_vAttach]))
     {
     case PACKET_OK:
-      if (!non_stop)
+      if (!target_is_non_stop_p ())
 	{
 	  /* Save the reply for later.  */
 	  wait_status = (char *) alloca (strlen (rs->buf) + 1);
@@ -5023,7 +5122,7 @@ extended_remote_attach (struct target_ops *target, const char *args,
 
   inferior_ptid = pid_to_ptid (pid);
 
-  if (non_stop)
+  if (target_is_non_stop_p ())
     {
       struct thread_info *thread;
 
@@ -5052,7 +5151,7 @@ extended_remote_attach (struct target_ops *target, const char *args,
      this before anything involving memory or registers.  */
   target_find_description ();
 
-  if (!non_stop)
+  if (!target_is_non_stop_p ())
     {
       /* Use the previously fetched status.  */
       gdb_assert (wait_status != NULL);
@@ -5082,6 +5181,9 @@ extended_remote_attach (struct target_ops *target, const char *args,
 static void
 extended_remote_post_attach (struct target_ops *ops, int pid)
 {
+  /* Get text, data & bss offsets.  */
+  get_offsets ();
+
   /* In certain cases GDB might not have had the chance to start
      symbol lookup up until now.  This could happen if the debugged
      binary is not using shared libraries, the vsyscall page is not
@@ -5314,7 +5416,7 @@ remote_vcont_resume (ptid_t ptid, int step, enum gdb_signal siggnal)
   gdb_assert (strlen (rs->buf) < get_remote_packet_size ());
   putpkt (rs->buf);
 
-  if (non_stop)
+  if (target_is_non_stop_p ())
     {
       /* In non-stop, the stub replies to vCont with "OK".  The stop
 	 reply will be reported asynchronously by means of a `%Stop'
@@ -5342,7 +5444,7 @@ remote_resume (struct target_ops *ops,
      it is safe to start a 'vNotif' sequence.  It is good to do it
      before resuming inferior, because inferior was stopped and no RSP
      traffic at that moment.  */
-  if (!non_stop)
+  if (!target_is_non_stop_p ())
     remote_notif_process (rs->notif_state, &notif_client_stop);
 
   rs->last_sent_signal = siggnal;
@@ -5406,7 +5508,7 @@ remote_resume (struct target_ops *ops,
      only to the base all-stop protocol, however.  In non-stop (which
      only supports vCont), the stub replies with an "OK", and is
      immediate able to process further serial input.  */
-  if (!non_stop)
+  if (!target_is_non_stop_p ())
     rs->waiting_for_stop_reply = 1;
 }
 
@@ -5593,7 +5695,7 @@ remote_stop (struct target_ops *self, ptid_t ptid)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_stop called\n");
 
-  if (non_stop)
+  if (target_is_non_stop_p ())
     remote_stop_ns (ptid);
   else
     {
@@ -5611,7 +5713,7 @@ remote_interrupt (struct target_ops *self, ptid_t ptid)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
 
-  if (non_stop)
+  if (target_is_non_stop_p ())
     {
       /* We don't currently have a way to ^C the remote target in
 	 non-stop mode.  Stop it (with no signal) instead.  */
@@ -6405,7 +6507,7 @@ Packet: '%s'\n"),
       break;
     }
 
-  if (non_stop && ptid_equal (event->ptid, null_ptid))
+  if (target_is_non_stop_p () && ptid_equal (event->ptid, null_ptid))
     error (_("No process or thread specified in stop reply: %s"), buf);
 }
 
@@ -6755,7 +6857,7 @@ remote_wait (struct target_ops *ops,
 {
   ptid_t event_ptid;
 
-  if (non_stop)
+  if (target_is_non_stop_p ())
     event_ptid = remote_wait_ns (ptid, status, options);
   else
     event_ptid = remote_wait_as (ptid, status, options);
@@ -7984,7 +8086,9 @@ putpkt_binary (const char *buf, int cnt)
      case it's not possible to issue a command while the target is
      running.  This is not a problem in non-stop mode, because in that
      case, the stub is always ready to process serial input.  */
-  if (!non_stop && target_is_async_p () && rs->waiting_for_stop_reply)
+  if (!target_is_non_stop_p ()
+      && target_is_async_p ()
+      && rs->waiting_for_stop_reply)
     {
       error (_("Cannot execute this command while the target is running.\n"
 	       "Use the \"interrupt\" command to stop the target\n"
@@ -12959,11 +13063,23 @@ remote_async (struct target_ops *ops, int enable)
 	 event loop to process them.  */
       if (!QUEUE_is_empty (stop_reply_p, stop_reply_queue))
 	mark_async_event_handler (remote_async_inferior_event_token);
+      /* For simplicity, below we clear the pending events token
+	 without remembering whether it is marked, so here we always
+	 mark it.  If there's actually no pending notification to
+	 process, this ends up being a no-op (other than a spurious
+	 event-loop wakeup).  */
+      if (target_is_non_stop_p ())
+	mark_async_event_handler (rs->notif_state->get_pending_events_token);
     }
   else
     {
       serial_async (rs->remote_desc, NULL, NULL);
+      /* If the core is disabling async, it doesn't want to be
+	 disturbed with target events.  Clear all async event sources
+	 too.  */
       clear_async_event_handler (remote_async_inferior_event_token);
+      if (target_is_non_stop_p ())
+	clear_async_event_handler (rs->notif_state->get_pending_events_token);
     }
 }
 
