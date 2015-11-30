@@ -1,5 +1,10 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (linux_resume): Wake up the event loop before
+	returning.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* mem-break.c (check_gdb_bp_preconditions): Remove current_thread
 	check.
 	(set_gdb_breakpoint): If prepare_to_access_memory fails, set *ERR

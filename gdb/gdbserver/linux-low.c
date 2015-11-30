@@ -4770,6 +4770,11 @@ linux_resume (struct thread_resume *resume_info, size_t n)
       debug_printf ("linux_resume done\n");
       debug_exit ();
     }
+
+  /* We may have events that were pending that can/should be sent to
+     the client now.  Trigger a linux_wait call.  */
+  if (target_is_async_p ())
+    async_file_mark ();
 }
 
 /* This function is called once per thread.  We check the thread's
