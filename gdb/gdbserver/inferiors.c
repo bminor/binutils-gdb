@@ -162,6 +162,29 @@ find_thread_process (const struct process_info *const process)
     find_inferior (&all_threads, thread_pid_matches_callback, &pid);
 }
 
+/* Helper for find_any_thread_of_pid.  Returns true if a thread
+   matches a PID.  */
+
+static int
+thread_of_pid (struct inferior_list_entry *entry, void *pid_p)
+{
+  int pid = *(int *) pid_p;
+
+  return (ptid_get_pid (entry->id) == pid);
+}
+
+/* See gdbthread.h.  */
+
+struct thread_info *
+find_any_thread_of_pid (int pid)
+{
+  struct inferior_list_entry *entry;
+
+  entry = find_inferior (&all_threads, thread_of_pid, &pid);
+
+  return (struct thread_info *) entry;
+}
+
 ptid_t
 gdb_id_to_thread_id (ptid_t gdb_id)
 {

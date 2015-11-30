@@ -1,3 +1,11 @@
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (find_any_thread_of_pid): Declare.
+	* inferiors.c (thread_of_pid, find_any_thread_of_pid): New
+	functions.
+	* server.c (handle_query): If current_thread is NULL, look for
+	another thread of the selected process.
+
 2015-11-26  Daniel Colascione  <dancol@dancol.org>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 
