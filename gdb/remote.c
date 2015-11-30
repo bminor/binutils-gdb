@@ -401,13 +401,6 @@ struct remote_state
   int use_threadinfo_query;
   int use_threadextra_query;
 
-  /* This is set to the data address of the access causing the target
-     to stop for a watchpoint.  */
-  CORE_ADDR remote_watch_data_address;
-
-  /* Whether the target stopped for a breakpoint/watchpoint.  */
-  enum target_stop_reason stop_reason;
-
   threadref echo_nextthread;
   threadref nextthread;
   threadref resultthreadlist[MAXTHREADLISTRESULTS];
@@ -439,6 +432,13 @@ struct private_thread_info
   char *extra;
   char *name;
   int core;
+
+  /* Whether the target stopped for a breakpoint/watchpoint.  */
+  enum target_stop_reason stop_reason;
+
+  /* This is set to the data address of the access causing the target
+     to stop for a watchpoint.  */
+  CORE_ADDR watch_data_address;
 };
 
 static void
@@ -5327,6 +5327,18 @@ append_resumption (char *p, char *endp,
   return p;
 }
 
+/* Clear the thread's private info on resume.  */
+
+static void
+resume_clear_thread_private_info (struct thread_info *thread)
+{
+  if (thread->priv != NULL)
+    {
+      thread->priv->stop_reason = TARGET_STOPPED_BY_NO_REASON;
+      thread->priv->watch_data_address = 0;
+    }
+}
+
 /* Append a vCont continue-with-signal action for threads that have a
    non-zero stop signal.  */
 
@@ -5343,6 +5355,7 @@ append_pending_thread_resumptions (char *p, char *endp, ptid_t ptid)
 	p = append_resumption (p, endp, thread->ptid,
 			       0, thread->suspend.stop_signal);
 	thread->suspend.stop_signal = GDB_SIGNAL_0;
+	resume_clear_thread_private_info (thread);
       }
 
   return p;
@@ -5437,6 +5450,7 @@ remote_resume (struct target_ops *ops,
 {
   struct remote_state *rs = get_remote_state ();
   char *buf;
+  struct thread_info *thread;
 
   /* In all-stop, we can't mark REMOTE_ASYNC_GET_PENDING_EVENTS_TOKEN
      (explained in remote-notif.c:handle_notification) so
@@ -5462,6 +5476,9 @@ remote_resume (struct target_ops *ops,
     set_continue_thread (any_thread_ptid);
   else
     set_continue_thread (ptid);
+
+  ALL_NON_EXITED_THREADS (thread)
+    resume_clear_thread_private_info (thread);
 
   buf = rs->buf;
   if (execution_direction == EXEC_REVERSE)
@@ -6609,6 +6626,7 @@ process_stop_reply (struct stop_reply *stop_reply,
       && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
       struct remote_state *rs = get_remote_state ();
+      struct private_thread_info *remote_thr;
 
       /* Expedited registers.  */
       if (stop_reply->regcache)
@@ -6625,11 +6643,11 @@ process_stop_reply (struct stop_reply *stop_reply,
 	  VEC_free (cached_reg_t, stop_reply->regcache);
 	}
 
-      rs->stop_reason = stop_reply->stop_reason;
-      rs->remote_watch_data_address = stop_reply->watch_data_address;
-
       remote_notice_new_inferior (ptid, 0);
-      demand_private_info (ptid)->core = stop_reply->core;
+      remote_thr = demand_private_info (ptid);
+      remote_thr->core = stop_reply->core;
+      remote_thr->stop_reason = stop_reply->stop_reason;
+      remote_thr->watch_data_address = stop_reply->watch_data_address;
     }
 
   stop_reply_xfree (stop_reply);
@@ -6762,8 +6780,6 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
     }
 
   buf = rs->buf;
-
-  rs->stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
   /* Assume that the target has acknowledged Ctrl-C unless we receive
      an 'F' or 'O' packet.  */
@@ -9333,9 +9349,10 @@ remote_check_watch_resources (struct target_ops *self,
 static int
 remote_stopped_by_sw_breakpoint (struct target_ops *ops)
 {
-  struct remote_state *rs = get_remote_state ();
+  struct thread_info *thread = inferior_thread ();
 
-  return rs->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT;
+  return (thread->priv != NULL
+	  && thread->priv->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT);
 }
 
 /* The to_supports_stopped_by_sw_breakpoint method of target
@@ -9354,9 +9371,10 @@ remote_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
 static int
 remote_stopped_by_hw_breakpoint (struct target_ops *ops)
 {
-  struct remote_state *rs = get_remote_state ();
+  struct thread_info *thread = inferior_thread ();
 
-  return rs->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT;
+  return (thread->priv != NULL
+	  && thread->priv->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT);
 }
 
 /* The to_supports_stopped_by_hw_breakpoint method of target
@@ -9373,24 +9391,25 @@ remote_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
 static int
 remote_stopped_by_watchpoint (struct target_ops *ops)
 {
-  struct remote_state *rs = get_remote_state ();
+  struct thread_info *thread = inferior_thread ();
 
-  return rs->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
+  return (thread->priv != NULL
+	  && thread->priv->stop_reason == TARGET_STOPPED_BY_WATCHPOINT);
 }
 
 static int
 remote_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
-  struct remote_state *rs = get_remote_state ();
-  int rc = 0;
+  struct thread_info *thread = inferior_thread ();
 
-  if (remote_stopped_by_watchpoint (target))
+  if (thread->priv != NULL
+      && thread->priv->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
     {
-      *addr_p = rs->remote_watch_data_address;
-      rc = 1;
+      *addr_p = thread->priv->watch_data_address;
+      return 1;
     }
 
-  return rc;
+  return 0;
 }
 
 

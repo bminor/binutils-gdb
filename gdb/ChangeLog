@@ -1,5 +1,22 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (struct remote_state) <remote_watch_data_address,
+	stop_reason>: Delete fields.
+	(struct private_thread_info) <stop_reason, watch_data_address>:
+	New fields.
+	(resume_clear_thread_private_info): New function.
+	(append_pending_thread_resumptions): Call it.
+	(remote_resume): Clear all threads' private info.
+	(process_stop_reply): Adjust.
+	(remote_wait_as): Don't reference remote_state's stop_reason
+	field.
+	(remote_stopped_by_sw_breakpoint)
+	(remote_stopped_by_hw_breakpoint, remote_stopped_by_watchpoint)
+	(remote_stopped_data_address): Adjust to refer get data from the
+	current thread.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* infcmd.c (attach_post_wait): If the target is always in non-stop
 	mode, and the UI is in all-stop mode, stop all threads and pick
 	the one with lowest number as current.
