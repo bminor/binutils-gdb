@@ -1,5 +1,10 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (linux_attach): In non-stop mode, wait for one stop
+	before returning.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* server.c (handle_v_requests): Handle vCtrlC.
 
 2015-11-30  Pedro Alves  <palves@redhat.com>

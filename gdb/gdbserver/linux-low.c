@@ -1029,12 +1029,16 @@ attach_proc_task_lwp_callback (ptid_t ptid)
   return 0;
 }
 
+static void async_file_mark (void);
+
 /* Attach to PID.  If PID is the tgid, attach to it and all
    of its threads.  */
 
 static int
 linux_attach (unsigned long pid)
 {
+  struct process_info *proc;
+  struct thread_info *initial_thread;
   ptid_t ptid = ptid_build (pid, pid, 0);
   int err;
 
@@ -1045,17 +1049,12 @@ linux_attach (unsigned long pid)
     error ("Cannot attach to process %ld: %s",
 	   pid, linux_ptrace_attach_fail_reason_string (ptid, err));
 
-  linux_add_process (pid, 1);
+  proc = linux_add_process (pid, 1);
 
-  if (!non_stop)
-    {
-      struct thread_info *thread;
-
-     /* Don't ignore the initial SIGSTOP if we just attached to this
-	process.  It will be collected by wait shortly.  */
-      thread = find_thread_ptid (ptid_build (pid, pid, 0));
-      thread->last_resume_kind = resume_stop;
-    }
+  /* Don't ignore the initial SIGSTOP if we just attached to this
+     process.  It will be collected by wait shortly.  */
+  initial_thread = find_thread_ptid (ptid_build (pid, pid, 0));
+  initial_thread->last_resume_kind = resume_stop;
 
   /* We must attach to every LWP.  If /proc is mounted, use that to
      find them now.  On the one hand, the inferior may be using raw
@@ -1067,6 +1066,38 @@ linux_attach (unsigned long pid)
      that once thread_db is loaded, we'll still use it to list threads
      and associate pthread info with each LWP.  */
   linux_proc_attach_tgid_threads (pid, attach_proc_task_lwp_callback);
+
+  /* GDB will shortly read the xml target description for this
+     process, to figure out the process' architecture.  But the target
+     description is only filled in when the first process/thread in
+     the thread group reports its initial PTRACE_ATTACH SIGSTOP.  Do
+     that now, otherwise, if GDB is fast enough, it could read the
+     target description _before_ that initial stop.  */
+  if (non_stop)
+    {
+      struct lwp_info *lwp;
+      int wstat, lwpid;
+      ptid_t pid_ptid = pid_to_ptid (pid);
+
+      lwpid = linux_wait_for_event_filtered (pid_ptid, pid_ptid,
+					     &wstat, __WALL);
+      gdb_assert (lwpid > 0);
+
+      lwp = find_lwp_pid (pid_to_ptid (lwpid));
+
+      if (!WIFSTOPPED (wstat) || WSTOPSIG (wstat) != SIGSTOP)
+	{
+	  lwp->status_pending_p = 1;
+	  lwp->status_pending = wstat;
+	}
+
+      initial_thread->last_resume_kind = resume_continue;
+
+      async_file_mark ();
+
+      gdb_assert (proc->tdesc != NULL);
+    }
+
   return 0;
 }
 
@@ -2867,8 +2898,6 @@ linux_stabilize_threads (void)
 		      lwpid_of (thread_stuck));
     }
 }
-
-static void async_file_mark (void);
 
 /* Convenience function that is called when the kernel reports an
    event that is not passed out to GDB.  */
