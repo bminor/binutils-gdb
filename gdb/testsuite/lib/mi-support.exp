@@ -2499,3 +2499,12 @@ proc mi_skip_python_tests {} {
     global mi_gdb_prompt
     return [skip_python_tests_prompt "$mi_gdb_prompt$"]
 }
+
+# Check whether we're testing with the remote or extended-remote
+# targets.
+
+proc mi_is_target_remote {} {
+    global mi_gdb_prompt
+
+    return [gdb_is_target_remote_prompt "$mi_gdb_prompt"]
+}

@@ -1,3 +1,14 @@
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-nonstop.exp: Append "set non-stop on" to GDBFLAGS
+	instead of issuing "-gdb-set non-stop 1" after starting gdb.
+	Use mi_is_target_remote instead of checking "is_remote target".
+	* lib/gdb.exp (gdb_is_target_remote): Rename to ...
+	(gdb_is_target_remote_prompt): ... this, and add 'prompt_regexp'
+	parameter.
+	(gdb_is_target_remote): Reimplement.
+	* lib/mi-support.exp (mi_is_target_remote): New procedure.
+
 2014-11-28  Pedro Alves  <palves@redhat.com>
 
 	* cp-name-parser.y (conversion_op): Use

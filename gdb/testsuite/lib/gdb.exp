@@ -3023,23 +3023,31 @@ proc skip_compile_feature_tests {} {
     return $result
 }
 
+# Helper for gdb_is_target_remote.  PROMPT_REGEXP is the expected
+# prompt.
+
+proc gdb_is_target_remote_prompt { prompt_regexp } {
+
+    set test "probe for target remote"
+    gdb_test_multiple "maint print target-stack" $test {
+	-re ".*emote serial target in gdb-specific protocol.*$prompt_regexp" {
+	    pass $test
+	    return 1
+	}
+	-re "$prompt_regexp" {
+	    pass $test
+	}
+    }
+    return 0
+}
+
 # Check whether we're testing with the remote or extended-remote
 # targets.
 
 proc gdb_is_target_remote {} {
     global gdb_prompt
 
-    set test "probe for target remote"
-    gdb_test_multiple "maint print target-stack" $test {
-	-re ".*emote serial target in gdb-specific protocol.*$gdb_prompt $" {
-	    pass $test
-	    return 1
-	}
-	-re "$gdb_prompt $" {
-	    pass $test
-	}
-    }
-    return 0
+    return [gdb_is_target_remote_prompt "$gdb_prompt $"]
 }
 
 # Return 1 if the current remote target is an instance of our GDBserver, 0
