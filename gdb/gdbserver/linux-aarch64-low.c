@@ -2944,6 +2944,14 @@ aarch64_sw_breakpoint_from_kind (int kind, int *size)
   return aarch64_breakpoint;
 }
 
+/* Support for hardware single step.  */
+
+static int
+aarch64_supports_hardware_single_step (void)
+{
+  return 1;
+}
+
 struct linux_target_ops the_low_target =
 {
   aarch64_arch_setup,
@@ -2977,6 +2985,8 @@ struct linux_target_ops the_low_target =
   aarch64_emit_ops,
   aarch64_get_min_fast_tracepoint_insn_len,
   aarch64_supports_range_stepping,
+  NULL, /* breakpoint_kind_from_current_state */
+  aarch64_supports_hardware_single_step,
 };
 
 void

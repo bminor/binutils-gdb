@@ -609,6 +609,14 @@ s390_breakpoint_at (CORE_ADDR pc)
   return memcmp (c, s390_breakpoint, s390_breakpoint_len) == 0;
 }
 
+/* Support for hardware single step.  */
+
+static int
+s390_supports_hardware_single_step (void)
+{
+  return 1;
+}
+
 static struct usrregs_info s390_usrregs_info =
   {
     s390_num_regs,
@@ -686,6 +694,20 @@ struct linux_target_ops the_low_target = {
   NULL,
   s390_collect_ptrace_register,
   s390_supply_ptrace_register,
+  NULL, /* siginfo_fixup */
+  NULL, /* new_process */
+  NULL, /* new_thread */
+  NULL, /* new_fork */
+  NULL, /* prepare_to_resume */
+  NULL, /* process_qsupported */
+  NULL, /* supports_tracepoints */
+  NULL, /* get_thread_area */
+  NULL, /* install_fast_tracepoint_jump_pad */
+  NULL, /* emit_ops */
+  NULL, /* get_min_fast_tracepoint_insn_len */
+  NULL, /* supports_range_stepping */
+  NULL, /* breakpoint_kind_from_current_state */
+  s390_supports_hardware_single_step,
 };
 
 void

@@ -1,3 +1,45 @@
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/float-fp16.d: New.
+	* gas/aarch64/float-fp16.s: New.
+
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/alias-2.d: Add tests for REV.
+	* gas/aarch64/alias-2.s: Likewise.
+
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/alias-2.d: New.
+	* gas/aarch64/alias-2.s: New.
+
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/sysreg-2.d: New.
+	* gas/aarch64/sysreg-2.s: New.
+
+2015-11-24  Christophe Monat <christophe.monat@st.com>
+
+	* gas/arm/thumb2_ldr_immediate_armv6t2.s: Added high register
+	tests.
+	* gas/arm/thumb2_ldr_immediate_armv6t2.d: Accounted for new test
+	cases.
+	* gas/arm/thumb2_ldr_immediate_highregs_armv6t2.s: New.
+	* gas/arm/thumb2_ldr_immediate_highregs_armv6t2.d: New.
+
+2015-11-24  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/arm/armv7e-m+fpv5-d16.d: Skip test for *-*-pe, *-wince-* and
+	for *-*-coff targets.
+	* gas/arm/armv7e-m+fpv5-sp-d16.d: Likewise.
+	* gas/arm/blx-bl-convert.d: Likewise.
+	* gas/arm/ldst-offset0.d: Likewise.
+	* gas/arm/thumb2_ldr_immediate_armv6t2.d: Likewise.
+	* gas/arm/armv8-a+pan.s: Adjust test to make it
+	valid for non-ELF targets.
+	* gas/arm/wince.d: Add assembler option "-mccs".
+	* gas/arm/wince_inst.d: Update expected output.
+
 2015-11-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* gas/mips/nan-legacy-1.d: Remove MIPS ABI flags match patterns.

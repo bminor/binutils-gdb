@@ -80,6 +80,10 @@ struct thread_info *get_first_thread (void);
 
 struct thread_info *find_thread_ptid (ptid_t ptid);
 
+/* Find any thread of the PID process.  Returns NULL if none is
+   found.  */
+struct thread_info *find_any_thread_of_pid (int pid);
+
 /* Get current thread ID (Linux task ID).  */
 #define current_ptid (current_thread->entry.id)
 

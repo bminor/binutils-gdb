@@ -2052,7 +2052,6 @@ static void keep_going_pass_signal (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static int keep_going_stepped_thread (struct thread_info *tp);
 static step_over_what thread_still_needs_step_over (struct thread_info *tp);
-static void stop_all_threads (void);
 
 /* Are there any pending step-over requests?  If so, run all we can
    now and return true.  Otherwise, return false.  */
@@ -4015,7 +4014,7 @@ init_thread_stepping_state (struct thread_info *tss)
 
 /* Set the cached copy of the last ptid/waitstatus.  */
 
-static void
+void
 set_last_target_status (ptid_t ptid, struct target_waitstatus status)
 {
   target_last_wait_ptid = ptid;
@@ -4437,9 +4436,17 @@ save_waitstatus (struct thread_info *tp, struct target_waitstatus *ws)
     }
 }
 
-/* Stop all threads.  */
+/* A cleanup that disables thread create/exit events.  */
 
 static void
+disable_thread_events (void *arg)
+{
+  target_thread_events (0);
+}
+
+/* See infrun.h.  */
+
+void
 stop_all_threads (void)
 {
   /* We may need multiple passes to discover all threads.  */
@@ -4455,6 +4462,9 @@ stop_all_threads (void)
 
   entry_ptid = inferior_ptid;
   old_chain = make_cleanup (switch_to_thread_cleanup, &entry_ptid);
+
+  target_thread_events (1);
+  make_cleanup (disable_thread_events, NULL);
 
   /* Request threads to stop, and then wait for the stops.  Because
      threads we already know about can spawn more threads while we're
@@ -4533,7 +4543,8 @@ stop_all_threads (void)
 	    {
 	      /* All resumed threads exited.  */
 	    }
-	  else if (ws.kind == TARGET_WAITKIND_EXITED
+	  else if (ws.kind == TARGET_WAITKIND_THREAD_EXITED
+		   || ws.kind == TARGET_WAITKIND_EXITED
 		   || ws.kind == TARGET_WAITKIND_SIGNALLED)
 	    {
 	      if (debug_infrun)
@@ -4548,6 +4559,8 @@ stop_all_threads (void)
 	    }
 	  else
 	    {
+	      struct inferior *inf;
+
 	      t = find_thread_ptid (event_ptid);
 	      if (t == NULL)
 		t = add_thread (event_ptid);
@@ -4556,6 +4569,15 @@ stop_all_threads (void)
 	      t->executing = 0;
 	      t->resumed = 0;
 	      t->control.may_range_step = 0;
+
+	      /* This may be the first time we see the inferior report
+		 a stop.  */
+	      inf = find_inferior_ptid (event_ptid);
+	      if (inf->needs_setup)
+		{
+		  switch_to_thread_no_regs (t);
+		  setup_inferior (0);
+		}
 
 	      if (ws.kind == TARGET_WAITKIND_STOPPED
 		  && ws.value.sig == GDB_SIGNAL_0)
@@ -4638,6 +4660,102 @@ stop_all_threads (void)
     fprintf_unfiltered (gdb_stdlog, "infrun: stop_all_threads done\n");
 }
 
+/* Handle a TARGET_WAITKIND_NO_RESUMED event.  */
+
+static int
+handle_no_resumed (struct execution_control_state *ecs)
+{
+  struct inferior *inf;
+  struct thread_info *thread;
+
+  if (target_can_async_p () && !sync_execution)
+    {
+      /* There were no unwaited-for children left in the target, but,
+	 we're not synchronously waiting for events either.  Just
+	 ignore.  */
+
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: TARGET_WAITKIND_NO_RESUMED " "(ignoring: bg)\n");
+      prepare_to_wait (ecs);
+      return 1;
+    }
+
+  /* Otherwise, if we were running a synchronous execution command, we
+     may need to cancel it and give the user back the terminal.
+
+     In non-stop mode, the target can't tell whether we've already
+     consumed previous stop events, so it can end up sending us a
+     no-resumed event like so:
+
+       #0 - thread 1 is left stopped
+
+       #1 - thread 2 is resumed and hits breakpoint
+               -> TARGET_WAITKIND_STOPPED
+
+       #2 - thread 3 is resumed and exits
+            this is the last resumed thread, so
+	       -> TARGET_WAITKIND_NO_RESUMED
+
+       #3 - gdb processes stop for thread 2 and decides to re-resume
+            it.
+
+       #4 - gdb processes the TARGET_WAITKIND_NO_RESUMED event.
+            thread 2 is now resumed, so the event should be ignored.
+
+     IOW, if the stop for thread 2 doesn't end a foreground command,
+     then we need to ignore the following TARGET_WAITKIND_NO_RESUMED
+     event.  But it could be that the event meant that thread 2 itself
+     (or whatever other thread was the last resumed thread) exited.
+
+     To address this we refresh the thread list and check whether we
+     have resumed threads _now_.  In the example above, this removes
+     thread 3 from the thread list.  If thread 2 was re-resumed, we
+     ignore this event.  If we find no thread resumed, then we cancel
+     the synchronous command show "no unwaited-for " to the user.  */
+  update_thread_list ();
+
+  ALL_NON_EXITED_THREADS (thread)
+    {
+      if (thread->executing
+	  || thread->suspend.waitstatus_pending_p)
+	{
+	  /* There were no unwaited-for children left in the target at
+	     some point, but there are now.  Just ignore.  */
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: TARGET_WAITKIND_NO_RESUMED "
+				"(ignoring: found resumed)\n");
+	  prepare_to_wait (ecs);
+	  return 1;
+	}
+    }
+
+  /* Note however that we may find no resumed thread because the whole
+     process exited meanwhile (thus updating the thread list results
+     in an empty thread list).  In this case we know we'll be getting
+     a process exit event shortly.  */
+  ALL_INFERIORS (inf)
+    {
+      if (inf->pid == 0)
+	continue;
+
+      thread = any_live_thread_of_process (inf->pid);
+      if (thread == NULL)
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: TARGET_WAITKIND_NO_RESUMED "
+				"(expect process exit)\n");
+	  prepare_to_wait (ecs);
+	  return 1;
+	}
+    }
+
+  /* Go ahead and report the event.  */
+  return 0;
+}
+
 /* Given an execution control state that has been freshly filled in by
    an event from the inferior, figure out what it means and take
    appropriate action.
@@ -4673,20 +4791,17 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
       return;
     }
 
-  if (ecs->ws.kind == TARGET_WAITKIND_NO_RESUMED
-      && target_can_async_p () && !sync_execution)
+  if (ecs->ws.kind == TARGET_WAITKIND_THREAD_EXITED)
     {
-      /* There were no unwaited-for children left in the target, but,
-	 we're not synchronously waiting for events either.  Just
-	 ignore.  Otherwise, if we were running a synchronous
-	 execution command, we need to cancel it and give the user
-	 back the terminal.  */
       if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog,
-			    "infrun: TARGET_WAITKIND_NO_RESUMED (ignoring)\n");
+	fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_THREAD_EXITED\n");
       prepare_to_wait (ecs);
       return;
     }
+
+  if (ecs->ws.kind == TARGET_WAITKIND_NO_RESUMED
+      && handle_no_resumed (ecs))
+    return;
 
   /* Cache the last pid/waitstatus.  */
   set_last_target_status (ecs->ptid, ecs->ws);
@@ -4875,6 +4990,15 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
 	context_switch (ecs->ptid);
       resume (GDB_SIGNAL_0);
       prepare_to_wait (ecs);
+      return;
+
+    case TARGET_WAITKIND_THREAD_CREATED:
+      if (debug_infrun)
+        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_THREAD_CREATED\n");
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
+      if (!switch_back_to_stepped_thread (ecs))
+	keep_going (ecs);
       return;
 
     case TARGET_WAITKIND_EXITED:

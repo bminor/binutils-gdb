@@ -21,6 +21,8 @@
 
 #include <string.h>
 
+#include "trace-common.h"
+
 static char   gdb_char_test;
 static short  gdb_short_test;
 static long   gdb_long_test;
@@ -135,6 +137,8 @@ main (argc, argv, envp)
 {
   int i;
   unsigned long myparms[10];
+
+  FAST_TRACEPOINT_LABEL (fast_tracepoint_loc);
 
   begin ();
   for (i = 0; i < sizeof (myparms) / sizeof (myparms[0]); i++)

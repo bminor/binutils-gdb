@@ -639,7 +639,7 @@ struct target_ops
       TARGET_DEFAULT_FUNC (default_pid_to_str);
     char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
-    char *(*to_thread_name) (struct target_ops *, struct thread_info *)
+    const char *(*to_thread_name) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
@@ -672,6 +672,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     void (*to_async) (struct target_ops *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
+    void (*to_thread_events) (struct target_ops *, int)
+      TARGET_DEFAULT_IGNORE ();
     /* This method must be implemented in some situations.  See the
        comment on 'to_can_run'.  */
     int (*to_supports_non_stop) (struct target_ops *)
@@ -1793,6 +1795,9 @@ extern int target_async_permitted;
 /* Enables/disabled async target events.  */
 extern void target_async (int enable);
 
+/* Enables/disables thread create and exit events.  */
+extern void target_thread_events (int enable);
+
 /* Whether support for controlling the target backends always in
    non-stop mode is enabled.  */
 extern enum auto_boolean target_non_stop_enabled;
@@ -1820,10 +1825,10 @@ extern char *normal_pid_to_str (ptid_t ptid);
 #define target_extra_thread_info(TP) \
      (current_target.to_extra_thread_info (&current_target, TP))
 
-/* Return the thread's name.  A NULL result means that the target
-   could not determine this thread's name.  */
+/* Return the thread's name, or NULL if the target is unable to determine it.
+   The returned value must not be freed by the caller.  */
 
-extern char *target_thread_name (struct thread_info *);
+extern const char *target_thread_name (struct thread_info *);
 
 /* Attempts to find the pathname of the executable file
    that was run to create a specified process.

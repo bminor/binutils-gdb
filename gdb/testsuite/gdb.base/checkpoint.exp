@@ -87,7 +87,7 @@ gdb_test "continue 10" "breakpoint 1.*" "break1 ten"
 gdb_test "checkpoint" ".*" ""
 
 gdb_test "info checkpoints" \
-    " 10 .* 9 .* 8 .* 7 .* 6 .* 5 .* 4 .* 3 .* 2 .* 1 .*" \
+    " 1 .* 2 .* 3 .* 4 .* 5 .* 6 .* 7 .* 8 .* 9 .* 10 .*" \
     "info checkpoints one"
 
 delete_breakpoints
@@ -294,7 +294,7 @@ gdb_test "continue" \
 # There should be still at least five forks left
 # 
 
-gdb_test "info checkpoints" " 5 .* 4 .* 3 .* 2 .* 1 .*" \
+gdb_test "info checkpoints" " 1 .* 2 .* 3 .* 4 .* 5 .*" \
     "info checkpoints two"
 
 #

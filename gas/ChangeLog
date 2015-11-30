@@ -1,3 +1,13 @@
+2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "fp16".
+	* doc/c-aarch64.texi (Architecture Extensions): Add "fp16".
+
+2015-11-24  Christophe Monat <christophe.monat@st.com>
+
+	* config/tc-arm.c (move_or_literal_pool): Do not transform ldr
+	ri,=imm into movs when ri is a high register in T1.
+
 2015-11-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

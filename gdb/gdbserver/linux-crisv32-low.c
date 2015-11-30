@@ -101,23 +101,6 @@ cris_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
-/* We only place breakpoints in empty marker functions, and thread locking
-   is outside of the function.  So rather than importing software single-step,
-   we can just run until exit.  */
-
-/* FIXME: This function should not be needed, since we have PTRACE_SINGLESTEP
-   for CRISv32.  Without it, td_ta_event_getmsg in thread_db_create_event
-   will fail when debugging multi-threaded applications.  */
-
-static CORE_ADDR
-cris_reinsert_addr (void)
-{
-  struct regcache *regcache = get_thread_regcache (current_thread, 1);
-  unsigned long pc;
-  collect_register_by_name (regcache, "srp", &pc);
-  return pc;
-}
-
 static void
 cris_write_data_breakpoint (struct regcache *regcache,
 			    int bp, unsigned long start, unsigned long end)
@@ -388,6 +371,14 @@ cris_arch_setup (void)
   current_process ()->tdesc = tdesc_crisv32;
 }
 
+/* Support for hardware single step.  */
+
+static int
+cris_supports_hardware_single_step (void)
+{
+  return 1;
+}
+
 static struct regset_info cris_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, cris_num_regs * 4,
     GENERAL_REGS, cris_fill_gregset, cris_store_gregset },
@@ -431,7 +422,7 @@ struct linux_target_ops the_low_target = {
   cris_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   cris_sw_breakpoint_from_kind,
-  cris_reinsert_addr,
+  NULL, /* breakpoint_reinsert_addr */
   0,
   cris_breakpoint_at,
   cris_supports_z_point_type,
@@ -439,6 +430,22 @@ struct linux_target_ops the_low_target = {
   cris_remove_point,
   cris_stopped_by_watchpoint,
   cris_stopped_data_address,
+  NULL, /* collect_ptrace_register */
+  NULL, /* supply_ptrace_register */
+  NULL, /* siginfo_fixup */
+  NULL, /* new_process */
+  NULL, /* new_thread */
+  NULL, /* new_fork */
+  NULL, /* prepare_to_resume */
+  NULL, /* process_qsupported */
+  NULL, /* supports_tracepoints */
+  NULL, /* get_thread_area */
+  NULL, /* install_fast_tracepoint_jump_pad */
+  NULL, /* emit_ops */
+  NULL, /* get_min_fast_tracepoint_insn_len */
+  NULL, /* supports_range_stepping */
+  NULL, /* breakpoint_kind_from_current_state */
+  cris_supports_hardware_single_step,
 };
 
 void

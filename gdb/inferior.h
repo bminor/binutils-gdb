@@ -143,6 +143,12 @@ extern char *construct_inferior_arguments (int, char **);
 
 /* From infcmd.c */
 
+/* Initial inferior setup.  Determines the exec file is not yet known,
+   takes any necessary post-attaching actions, fetches the target
+   description and syncs the shared library list.  */
+
+extern void setup_inferior (int from_tty);
+
 extern void post_create_inferior (struct target_ops *, int);
 
 extern void attach_command (char *, int);
@@ -363,6 +369,12 @@ struct inferior
      this inferior stops.  For continuations associated with a
      specific thread, see `struct thread_info'.  */
   struct continuation *continuations;
+
+  /* True if setup_inferior wasn't called for this inferior yet.
+     Until that is done, we must not access inferior memory or
+     registers, as we haven't determined the target
+     architecture/description.  */
+  int needs_setup;
 
   /* Private data used by the target vector implementation.  */
   struct private_inferior *priv;

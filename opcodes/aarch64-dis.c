@@ -1601,6 +1601,45 @@ convert_bfm_to_bfi (aarch64_inst *inst)
 }
 
 /* The instruction written:
+     BFC <Xd>, #<lsb>, #<width>
+   is equivalent to:
+     BFM <Xd>, XZR, #((64-<lsb>)&0x3f), #(<width>-1).  */
+
+static int
+convert_bfm_to_bfc (aarch64_inst *inst)
+{
+  int64_t immr, imms, val;
+
+  /* Should have been assured by the base opcode value.  */
+  assert (inst->operands[1].reg.regno == 0x1f);
+
+  immr = inst->operands[2].imm.value;
+  imms = inst->operands[3].imm.value;
+  val = inst->operands[2].qualifier == AARCH64_OPND_QLF_imm_0_31 ? 32 : 64;
+  if (imms < immr)
+    {
+      /* Drop XZR from the second operand.  */
+      copy_operand_info (inst, 1, 2);
+      copy_operand_info (inst, 2, 3);
+      inst->operands[3].type = AARCH64_OPND_NIL;
+
+      /* Recalculate the immediates.  */
+      inst->operands[1].imm.value = (val - immr) & (val - 1);
+      inst->operands[2].imm.value = imms + 1;
+
+      /* The two opcodes have different qualifiers for the operands; reset to
+	 help the checking.  */
+      reset_operand_qualifier (inst, 1);
+      reset_operand_qualifier (inst, 2);
+      reset_operand_qualifier (inst, 3);
+
+      return 1;
+    }
+
+  return 0;
+}
+
+/* The instruction written:
      LSL <Xd>, <Xn>, #<shift>
    is equivalent to:
      UBFM <Xd>, <Xn>, #((64-<shift>)&0x3f), #(63-<shift>).  */
@@ -1759,6 +1798,8 @@ convert_to_alias (aarch64_inst *inst, const aarch64_opcode *alias)
     case OP_BFI:
     case OP_UBFIZ:
       return convert_bfm_to_bfi (inst);
+    case OP_BFC:
+      return convert_bfm_to_bfc (inst);
     case OP_MOV_V:
       return convert_orr_to_mov (inst);
     case OP_MOV_IMM_WIDE:
@@ -1866,7 +1907,7 @@ determine_disassembling_preference (struct aarch64_inst *inst)
   for (; alias; alias = aarch64_find_next_alias_opcode (alias))
     {
       DEBUG_TRACE ("try %s", alias->name);
-      assert (alias_opcode_p (alias));
+      assert (alias_opcode_p (alias) || opcode_has_alias (opcode));
 
       /* An alias can be a pseudo opcode which will never be used in the
 	 disassembly, e.g. BIC logical immediate is such a pseudo opcode

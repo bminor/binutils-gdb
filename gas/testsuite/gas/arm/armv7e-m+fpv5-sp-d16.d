@@ -1,4 +1,5 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
+#skip: *-*-pe *-wince-* *-*-coff
 
 .*: +file format .*arm.*
 

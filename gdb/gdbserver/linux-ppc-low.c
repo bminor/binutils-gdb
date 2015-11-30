@@ -547,6 +547,14 @@ ppc_store_evrregset (struct regcache *regcache, const void *buf)
   supply_register_by_name (regcache, "spefscr", &regset->spefscr);
 }
 
+/* Support for hardware single step.  */
+
+static int
+ppc_supports_hardware_single_step (void)
+{
+  return 1;
+}
+
 static struct regset_info ppc_regsets[] = {
   /* List the extra register sets before GENERAL_REGS.  That way we will
      fetch them every time, but still fall back to PTRACE_PEEKUSER for the
@@ -705,6 +713,20 @@ struct linux_target_ops the_low_target = {
   NULL,
   ppc_collect_ptrace_register,
   ppc_supply_ptrace_register,
+  NULL, /* siginfo_fixup */
+  NULL, /* new_process */
+  NULL, /* new_thread */
+  NULL, /* new_fork */
+  NULL, /* prepare_to_resume */
+  NULL, /* process_qsupported */
+  NULL, /* supports_tracepoints */
+  NULL, /* get_thread_area */
+  NULL, /* install_fast_tracepoint_jump_pad */
+  NULL, /* emit_ops */
+  NULL, /* get_min_fast_tracepoint_insn_len */
+  NULL, /* supports_range_stepping */
+  NULL, /* breakpoint_kind_from_current_state */
+  ppc_supports_hardware_single_step,
 };
 
 void

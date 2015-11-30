@@ -2814,26 +2814,37 @@ arm_exidx_unwind_sniffer (const struct frame_unwind *self,
 
       /* We also assume exception information is valid if we're currently
 	 blocked in a system call.  The system library is supposed to
-	 ensure this, so that e.g. pthread cancellation works.  */
-      if (arm_frame_is_thumb (this_frame))
-	{
-	  LONGEST insn;
+	 ensure this, so that e.g. pthread cancellation works.
 
-	  if (safe_read_memory_integer (get_frame_pc (this_frame) - 2, 2,
-					byte_order_for_code, &insn)
-	      && (insn & 0xff00) == 0xdf00 /* svc */)
-	    exc_valid = 1;
-	}
-      else
-	{
-	  LONGEST insn;
+	 But before verifying the instruction at the point of call, make
+	 sure this_frame is actually making a call (or, said differently,
+	 that it is not the innermost frame).  For that, we compare
+	 this_frame's PC vs this_frame's addr_in_block. If equal, it means
+	 there is no call (otherwise, the PC would be the return address,
+	 which is the instruction after the call).  */
 
-	  if (safe_read_memory_integer (get_frame_pc (this_frame) - 4, 4,
-					byte_order_for_code, &insn)
-	      && (insn & 0x0f000000) == 0x0f000000 /* svc */)
-	    exc_valid = 1;
+      if (get_frame_pc (this_frame) != addr_in_block)
+	{
+	  if (arm_frame_is_thumb (this_frame))
+	    {
+	      LONGEST insn;
+
+	      if (safe_read_memory_integer (get_frame_pc (this_frame) - 2, 2,
+					    byte_order_for_code, &insn)
+		  && (insn & 0xff00) == 0xdf00 /* svc */)
+		exc_valid = 1;
+	    }
+	  else
+	    {
+	      LONGEST insn;
+
+	      if (safe_read_memory_integer (get_frame_pc (this_frame) - 4, 4,
+					    byte_order_for_code, &insn)
+		  && (insn & 0x0f000000) == 0x0f000000 /* svc */)
+		exc_valid = 1;
+	    }
 	}
-	
+
       /* Bail out if we don't know that exception information is valid.  */
       if (!exc_valid)
 	return 0;

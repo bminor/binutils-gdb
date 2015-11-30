@@ -1659,7 +1659,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  break;
 
 	case AARCH64_OPND_WIDTH:
-	  assert (idx == 3 && opnds[idx-1].type == AARCH64_OPND_IMM
+	  assert (idx > 1 && opnds[idx-1].type == AARCH64_OPND_IMM
 		  && opnds[0].type == AARCH64_OPND_Rd);
 	  size = get_upper_bound (qualifier);
 	  if (opnd->imm.value + opnds[idx-1].imm.value > size)
@@ -2172,14 +2172,22 @@ typedef union
   float    f;
 } single_conv_t;
 
+typedef union
+{
+  uint32_t i;
+  float    f;
+} half_conv_t;
+
 /* IMM8 is an 8-bit floating-point constant with sign, 3-bit exponent and
    normalized 4 bits of precision, encoded in "a:b:c:d:e:f:g:h" or FLD_imm8
    (depending on the type of the instruction).  IMM8 will be expanded to a
-   single-precision floating-point value (IS_DP == 0) or a double-precision
-   floating-point value (IS_DP == 1).  The expanded value is returned.  */
+   single-precision floating-point value (SIZE == 4) or a double-precision
+   floating-point value (SIZE == 8).  A half-precision floating-point value
+   (SIZE == 2) is expanded to a single-precision floating-point value.  The
+   expanded value is returned.  */
 
 static uint64_t
-expand_fp_imm (int is_dp, uint32_t imm8)
+expand_fp_imm (int size, uint32_t imm8)
 {
   uint64_t imm;
   uint32_t imm8_7, imm8_6_0, imm8_6, imm8_6_repl4;
@@ -2189,7 +2197,7 @@ expand_fp_imm (int is_dp, uint32_t imm8)
   imm8_6 = imm8_6_0 >> 6;	/* imm8<6>   */
   imm8_6_repl4 = (imm8_6 << 3) | (imm8_6 << 2)
     | (imm8_6 << 1) | imm8_6;	/* Replicate(imm8<6>,4) */
-  if (is_dp)
+  if (size == 8)
     {
       imm = (imm8_7 << (63-32))		/* imm8<7>  */
 	| ((imm8_6 ^ 1) << (62-32))	/* NOT(imm8<6)	*/
@@ -2198,12 +2206,17 @@ expand_fp_imm (int is_dp, uint32_t imm8)
 	| (imm8_6_0 << (48-32));	/* imm8<6>:imm8<5:0>    */
       imm <<= 32;
     }
-  else
+  else if (size == 4 || size == 2)
     {
       imm = (imm8_7 << 31)	/* imm8<7>              */
 	| ((imm8_6 ^ 1) << 30)	/* NOT(imm8<6>)         */
 	| (imm8_6_repl4 << 26)	/* Replicate(imm8<6>,4) */
 	| (imm8_6_0 << 19);	/* imm8<6>:imm8<5:0>    */
+    }
+  else
+    {
+      /* An unsupported size.  */
+      assert (0);
     }
 
   return imm;
@@ -2533,17 +2546,24 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SIMD_FPIMM:
       switch (aarch64_get_qualifier_esize (opnds[0].qualifier))
 	{
+	case 2:	/* e.g. FMOV <Hd>, #<imm>.  */
+	    {
+	      half_conv_t c;
+	      c.i = expand_fp_imm (2, opnd->imm.value);
+	      snprintf (buf, size,  "#%.18e", c.f);
+	    }
+	  break;
 	case 4:	/* e.g. FMOV <Vd>.4S, #<imm>.  */
 	    {
 	      single_conv_t c;
-	      c.i = expand_fp_imm (0, opnd->imm.value);
+	      c.i = expand_fp_imm (4, opnd->imm.value);
 	      snprintf (buf, size,  "#%.18e", c.f);
 	    }
 	  break;
 	case 8:	/* e.g. FMOV <Sd>, #<imm>.  */
 	    {
 	      double_conv_t c;
-	      c.i = expand_fp_imm (1, opnd->imm.value);
+	      c.i = expand_fp_imm (8, opnd->imm.value);
 	      snprintf (buf, size,  "#%.18e", c.d);
 	    }
 	  break;
@@ -2801,6 +2821,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "id_aa64isar1_el1", CPENC(3,0,C0,C6,1),	0 }, /* RO */
   { "id_aa64mmfr0_el1", CPENC(3,0,C0,C7,0),	0 }, /* RO */
   { "id_aa64mmfr1_el1", CPENC(3,0,C0,C7,1),	0 }, /* RO */
+  { "id_aa64mmfr2_el1", CPENC (3, 0, C0, C7, 2), F_ARCHEXT }, /* RO */
   { "id_aa64afr0_el1",  CPENC(3,0,C0,C5,4),	0 }, /* RO */
   { "id_aa64afr1_el1",  CPENC(3,0,C0,C5,5),	0 }, /* RO */
   { "clidr_el1",        CPENC(3,1,C0,C0,1),	0 }, /* RO */
@@ -3135,6 +3156,10 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
        || reg->value == CPENC (3, 5, C14, C3, 1)
        || reg->value == CPENC (3, 5, C14, C3, 2))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_1))
+
+  /* ARMv8.2 features.  */
+  if (reg->value == CPENC (3, 0, C0, C7, 2)
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
     return FALSE;
 
   return TRUE;

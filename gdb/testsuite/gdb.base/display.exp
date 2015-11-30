@@ -83,8 +83,23 @@ gdb_test "disp/s &sum" ".*5: x/s &sum  $hex.*sum.:.*" "display/s &sum"
 
 # Hit the displays
 #
-gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f f = 3.1415\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0\r\n\[1-9\]*: i = 0.*" "first disp"
-gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f f = 4.1415\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0.*\[1-9\]*: i = 0.*" "second disp"
+gdb_test "cont" [multi_line \
+		     ".*\[Ww\]atchpoint 3: sum.*" \
+		     "\[1-9\]*: i = 0.*" \
+		     "\[1-9\]*: /x j = 0x0" \
+		     "\[1-9\]*: x/i &k.*" \
+		     "\[1-9\]*: /f f = 3.1415" \
+		     "\[1-9\]*: x/s &sum.*" \
+		    ] "first disp"
+
+gdb_test "cont" [multi_line \
+		     ".*\[Ww\]atchpoint 3: sum.*" \
+		     "\[1-9\]*: i = 0.*" \
+		     "\[1-9\]*: /x j = 0x0.*" \
+		     "\[1-9\]*: x/i &k.*" \
+		     "\[1-9\]*: /f f = 4.1415" \
+		     "\[1-9\]*: x/s &sum.*" \
+		    ] "second disp"
 
 gdb_test "enab  disp 6" ".*No display number 6..*" "catch err"
 gdb_test_no_output "disab disp 1" "disab disp 1"
@@ -92,9 +107,19 @@ gdb_test_no_output "disab disp 2" "disab disp 2"
 gdb_test_no_output "enab disp 1"  "re-enab"
 gdb_test_no_output "enab disp 1"  "re-enab of enab"
 gdb_test_no_output "undisp 5"     "undisp"
-gdb_test "info disp"    ".*Auto-display expressions now in effect.*y  /f f.*y  /1bi &k.*n  /x j.*y  i.*" "info disp"
+gdb_test "info disp" [multi_line \
+			  "Auto-display expressions now in effect.*" \
+			  ".*y  i" \
+			  ".*n  /x j" \
+			  ".*y  /1bi &k" \
+			  ".*y  /f f" \
+			 ] "info disp"
 
-gdb_test "cont" ".*\[Ww\]atch.*5.1415.*.*i = 0.*" "next hit"
+gdb_test "cont" [multi_line \
+		     ".*\[Ww\]atch.*" \
+		     ".*i = 0" \
+		     ".*5.1415" \
+		    ] "next hit"
 
 gdb_test "undisp" \
     "" \

@@ -92,7 +92,13 @@ enum target_waitkind
   TARGET_WAITKIND_NO_HISTORY,
  
   /* There are no resumed children left in the program.  */
-  TARGET_WAITKIND_NO_RESUMED
+  TARGET_WAITKIND_NO_RESUMED,
+
+  /* The thread was created.  */
+  TARGET_WAITKIND_THREAD_CREATED,
+
+  /* The thread has exited.  The exit status is in value.integer.  */
+  TARGET_WAITKIND_THREAD_EXITED,
 };
 
 struct target_waitstatus

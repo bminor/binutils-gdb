@@ -24,6 +24,10 @@
 
 * GDB now supports displaced stepping on AArch64 GNU/Linux.
 
+* "info threads", "info inferiors", "info display", "info checkpoints"
+  and "maint info program-spaces" now list the corresponding items in
+  ascending ID order, for consistency with all other "info" commands.
+
 * New commands
 
 maint set target-non-stop (on|off|auto)
@@ -43,6 +47,10 @@ show debug bfd-cache
 set remote multiprocess-extensions-packet
 show remote multiprocess-extensions-packet
   Set/show the use of the remote protocol multiprocess extensions.
+
+set remote thread-events
+show remote thread-events
+  Set/show the use of thread create/exit events.
 
 * The "disassemble" command accepts a new modifier: /s.
   It prints mixed source+disassembly like /m with two differences:
@@ -80,6 +88,30 @@ exec-events feature in qSupported
   response can contain the corresponding 'stubfeature'.  Set and
   show commands can be used to display whether these features are enabled.
 
+vCtrlC
+  Equivalent to interrupting with the ^C character, but works in
+  non-stop mode.
+
+thread created stop reason (T05 create:...)
+  Indicates that the thread was just created and is stopped at entry.
+
+thread exit stop reply (w exitcode;tid)
+  Indicates that the thread has terminated.
+
+QThreadEvents
+  Enables/disables thread create and exit event reporting.  For
+  example, this is used in non-stop mode when GDB stops a set of
+  threads and synchronously waits for the their corresponding stop
+  replies.  Without exit events, if one of the threads exits, GDB
+  would hang forever not knowing that it should no longer expect a
+  stop for that same thread.
+
+N stop reply
+
+  Indicates that there are no resumed threads left in the target (all
+  threads are stopped).  The remote stub reports support for this stop
+  reply to GDB's qSupported query.
+
 * Extended-remote exec events
 
   ** GDB now has support for exec events on extended-remote Linux targets.
@@ -89,6 +121,11 @@ exec-events feature in qSupported
 set remote exec-event-feature-packet
 show remote exec-event-feature-packet
   Set/show the use of the remote exec event feature.
+
+ * Thread names in remote protocol
+
+   The reply to qXfer:threads:read may now include a name attribute for each
+   thread.
 
 *** Changes in GDB 7.10
 

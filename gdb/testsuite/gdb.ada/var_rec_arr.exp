@@ -49,3 +49,9 @@ gdb_test "print a2(2)" \
 
 gdb_test "print a2(3)" \
          " = \\(i => 0, s => \"\"\\)"
+
+gdb_test "ptype a1(1)" \
+         [multi_line "type = record" \
+                     "    i: pck\\.small_type;" \
+                     "    s: access array \\((<>|1 \\.\\. i)\\) of character;" \
+                     "end record"]

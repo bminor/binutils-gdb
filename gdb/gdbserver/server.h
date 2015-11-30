@@ -87,6 +87,7 @@ extern int multi_process;
 extern int report_fork_events;
 extern int report_vfork_events;
 extern int report_exec_events;
+extern int report_thread_events;
 extern int non_stop;
 extern int extended_protocol;
 

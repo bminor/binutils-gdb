@@ -264,8 +264,10 @@ static const unsigned short thumb_breakpoint = 0xde01;
 static const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
 #define thumb2_breakpoint_len 4
 
+/* Returns 1 if the current instruction set is thumb, 0 otherwise.  */
+
 static int
-arm_breakpoint_at (CORE_ADDR where)
+arm_is_thumb_mode (void)
 {
   struct regcache *regcache = get_thread_regcache (current_thread, 1);
   unsigned long cpsr;
@@ -273,6 +275,17 @@ arm_breakpoint_at (CORE_ADDR where)
   collect_register_by_name (regcache, "cpsr", &cpsr);
 
   if (cpsr & 0x20)
+    return 1;
+  else
+    return 0;
+}
+
+/* Returns 1 if there is a software breakpoint at location.  */
+
+static int
+arm_breakpoint_at (CORE_ADDR where)
+{
+  if (arm_is_thumb_mode ())
     {
       /* Thumb mode.  */
       unsigned short insn;
@@ -302,18 +315,6 @@ arm_breakpoint_at (CORE_ADDR where)
     }
 
   return 0;
-}
-
-/* We only place breakpoints in empty marker functions, and thread locking
-   is outside of the function.  So rather than importing software single-step,
-   we can just run until exit.  */
-static CORE_ADDR
-arm_reinsert_addr (void)
-{
-  struct regcache *regcache = get_thread_regcache (current_thread, 1);
-  unsigned long pc;
-  collect_register_by_name (regcache, "lr", &pc);
-  return pc;
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */
@@ -889,6 +890,14 @@ arm_arch_setup (void)
     have_ptrace_getregset = 0;
 }
 
+/* Support for hardware single step.  */
+
+static int
+arm_supports_hardware_single_step (void)
+{
+  return 0;
+}
+
 /* Register sets without using PTRACE_GETREGSET.  */
 
 static struct regset_info arm_regsets[] = {
@@ -996,6 +1005,23 @@ arm_sw_breakpoint_from_kind (int kind , int *size)
   return NULL;
 }
 
+/* Implementation of the linux_target_ops method
+   "breakpoint_kind_from_current_state".  */
+
+static int
+arm_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+{
+  if (arm_is_thumb_mode ())
+    {
+      *pcptr = MAKE_THUMB_ADDR (*pcptr);
+      return arm_breakpoint_kind_from_pc (pcptr);
+    }
+  else
+    {
+      return arm_breakpoint_kind_from_pc (pcptr);
+    }
+}
+
 struct linux_target_ops the_low_target = {
   arm_arch_setup,
   arm_regs_info,
@@ -1006,7 +1032,7 @@ struct linux_target_ops the_low_target = {
   arm_set_pc,
   arm_breakpoint_kind_from_pc,
   arm_sw_breakpoint_from_kind,
-  arm_reinsert_addr,
+  NULL, /* breakpoint_reinsert_addr */
   0,
   arm_breakpoint_at,
   arm_supports_z_point_type,
@@ -1021,6 +1047,15 @@ struct linux_target_ops the_low_target = {
   arm_new_thread,
   arm_new_fork,
   arm_prepare_to_resume,
+  NULL, /* process_qsupported */
+  NULL, /* supports_tracepoints */
+  NULL, /* get_thread_area */
+  NULL, /* install_fast_tracepoint_jump_pad */
+  NULL, /* emit_ops */
+  NULL, /* get_min_fast_tracepoint_insn_len */
+  NULL, /* supports_range_stepping */
+  arm_breakpoint_kind_from_current_state,
+  arm_supports_hardware_single_step
 };
 
 void

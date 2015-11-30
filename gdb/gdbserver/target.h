@@ -453,6 +453,19 @@ struct target_ops
      specific meaning like the Z0 kind parameter.
      SIZE is set to the software breakpoint's length in memory.  */
   const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
+
+  /* Return the thread's name, or NULL if the target is unable to determine it.
+     The returned value must not be freed by the caller.  */
+  const char *(*thread_name) (ptid_t thread);
+
+  /* Return the breakpoint kind for this target based on the current
+     processor state (e.g. the current instruction mode on ARM) and the
+     PC.  The PCPTR is adjusted to the real memory location in case a flag
+     (e.g., the Thumb bit on ARM) is present in the PC.  */
+  int (*breakpoint_kind_from_current_state) (CORE_ADDR *pcptr);
+
+  /* Returns true if the target can software single step.  */
+  int (*supports_software_single_step) (void);
 };
 
 extern struct target_ops *the_target;
@@ -640,6 +653,15 @@ int kill_inferior (int);
    ? (*the_target->breakpoint_kind_from_pc) (pcptr) \
    : default_breakpoint_kind_from_pc (pcptr))
 
+#define target_breakpoint_kind_from_current_state(pcptr) \
+  (the_target->breakpoint_kind_from_current_state \
+   ? (*the_target->breakpoint_kind_from_current_state) (pcptr) \
+   : target_breakpoint_kind_from_pc (pcptr))
+
+#define target_supports_software_single_step() \
+  (the_target->supports_software_single_step ? \
+   (*the_target->supports_software_single_step) () : 0)
+
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 
 int start_non_stop (int nonstop);
@@ -647,21 +669,19 @@ int start_non_stop (int nonstop);
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	       int connected_wait);
 
-#define prepare_to_access_memory()		\
-  (the_target->prepare_to_access_memory		\
-   ? (*the_target->prepare_to_access_memory) () \
-   : 0)
+/* Prepare to read or write memory from the inferior process.  See the
+   corresponding target_ops methods for more details.  */
 
-#define done_accessing_memory()				\
-  do							\
-    {							\
-      if (the_target->done_accessing_memory)     	\
-	(*the_target->done_accessing_memory) ();  	\
-    } while (0)
+int prepare_to_access_memory (void);
+void done_accessing_memory (void);
 
 #define target_core_of_thread(ptid)		\
   (the_target->core_of_thread ? (*the_target->core_of_thread) (ptid) \
    : -1)
+
+#define target_thread_name(ptid)                                \
+  (the_target->thread_name ? (*the_target->thread_name) (ptid)  \
+   : NULL)
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 

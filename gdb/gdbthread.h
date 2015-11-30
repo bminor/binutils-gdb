@@ -411,8 +411,13 @@ extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 
 extern int thread_count (void);
 
-/* Switch from one thread to another.  */
+/* Switch from one thread to another.  Also sets the STOP_PC
+   global.  */
 extern void switch_to_thread (ptid_t ptid);
+
+/* Switch from one thread to another.  Does not read registers and
+   sets STOP_PC to -1.  */
+extern void switch_to_thread_no_regs (struct thread_info *thread);
 
 /* Marks or clears thread(s) PTID as resumed.  If PTID is
    MINUS_ONE_PTID, applies to all threads.  If ptid_is_pid(PTID) is

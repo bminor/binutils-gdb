@@ -2265,7 +2265,7 @@ target_pid_to_str (ptid_t ptid)
   return (*current_target.to_pid_to_str) (&current_target, ptid);
 }
 
-char *
+const char *
 target_thread_name (struct thread_info *info)
 {
   return current_target.to_thread_name (&current_target, info);
@@ -3848,6 +3848,14 @@ target_async (int enable)
 {
   infrun_async (enable);
   current_target.to_async (&current_target, enable);
+}
+
+/* See target.h.  */
+
+void
+target_thread_events (int enable)
+{
+  current_target.to_thread_events (&current_target, enable);
 }
 
 /* Controls if targets can report that they can/are async.  This is

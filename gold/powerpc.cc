@@ -2192,7 +2192,10 @@ public:
       symtab_(symtab), layout_(layout),
       header_ent_cnt_(size == 32 ? 3 : 1),
       header_index_(size == 32 ? 0x2000 : 0)
-  { }
+  {
+    if (size == 64)
+      this->set_addralign(256);
+  }
 
   // Override all the Output_data_got methods we use so as to first call
   // reserve_ent().

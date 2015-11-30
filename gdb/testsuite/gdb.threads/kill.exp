@@ -48,7 +48,7 @@ proc test {threaded} {
 	gdb_continue_to_breakpoint "break here" ".*break here.*"
 
 	if {$threaded} {
-	    gdb_test "info threads" "6.*5.*4.*3.*2.*1.*" "all threads started"
+	    gdb_test "info threads" "1.*2.*3.*4.*5.*6.*" "all threads started"
 	}
 
 	# This kills and ensures no output other than the prompt comes out,

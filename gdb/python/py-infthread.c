@@ -62,7 +62,7 @@ static PyObject *
 thpy_get_name (PyObject *self, void *ignore)
 {
   thread_object *thread_obj = (thread_object *) self;
-  char *name;
+  const char *name;
 
   THPY_REQUIRE_VALID (thread_obj);
 

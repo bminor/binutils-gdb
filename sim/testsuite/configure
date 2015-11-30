@@ -1827,6 +1827,9 @@ sim_common=yes
 sim_igen=no
 sim_arch=
 case "${target}" in
+   aarch64*-*-*)
+       sim_arch=aarch64
+       ;;
    arm*-*-*)
        sim_arch=arm
        ;;

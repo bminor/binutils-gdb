@@ -187,6 +187,48 @@ linux_proc_pid_is_zombie (pid_t pid)
 
 /* See linux-procfs.h.  */
 
+const char *
+linux_proc_tid_get_name (ptid_t ptid)
+{
+#define TASK_COMM_LEN 16  /* As defined in the kernel's sched.h.  */
+
+  static char comm_buf[TASK_COMM_LEN];
+  char comm_path[100];
+  FILE *comm_file;
+  const char *comm_val;
+  pid_t pid = ptid_get_pid (ptid);
+  pid_t tid = ptid_lwp_p (ptid) ? ptid_get_lwp (ptid) : ptid_get_pid (ptid);
+
+  xsnprintf (comm_path, sizeof (comm_path),
+	     "/proc/%ld/task/%ld/comm", (long) pid, (long) tid);
+
+  comm_file = gdb_fopen_cloexec (comm_path, "r");
+  if (comm_file == NULL)
+    return NULL;
+
+  comm_val = fgets (comm_buf, sizeof (comm_buf), comm_file);
+  fclose (comm_file);
+
+  if (comm_val != NULL)
+    {
+      int i;
+
+      /* Make sure there is no newline at the end.  */
+      for (i = 0; i < sizeof (comm_buf); i++)
+	{
+	  if (comm_buf[i] == '\n')
+	    {
+	      comm_buf[i] = '\0';
+	      break;
+	    }
+	}
+    }
+
+  return comm_val;
+}
+
+/* See linux-procfs.h.  */
+
 void
 linux_proc_attach_tgid_threads (pid_t pid,
 				linux_proc_attach_lwp_func attach_lwp)

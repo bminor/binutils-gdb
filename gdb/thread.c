@@ -236,8 +236,17 @@ new_thread (ptid_t ptid)
 
   tp->ptid = ptid;
   tp->num = ++highest_thread_num;
-  tp->next = thread_list;
-  thread_list = tp;
+
+  if (thread_list == NULL)
+    thread_list = tp;
+  else
+    {
+      struct thread_info *last;
+
+      for (last = thread_list; last->next != NULL; last = last->next)
+	;
+      last->next = tp;
+    }
 
   /* Nothing to follow yet.  */
   tp->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
@@ -1113,7 +1122,7 @@ print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct cleanup *old_chain;
-  char *extra_info, *name, *target_id;
+  const char *extra_info, *name, *target_id;
   int current_thread = -1;
 
   update_thread_list ();
@@ -1310,6 +1319,22 @@ static void
 info_threads_command (char *arg, int from_tty)
 {
   print_thread_info (current_uiout, arg, -1);
+}
+
+/* See gdbthread.h.  */
+
+void
+switch_to_thread_no_regs (struct thread_info *thread)
+{
+  struct inferior *inf;
+
+  inf = find_inferior_ptid (thread->ptid);
+  gdb_assert (inf != NULL);
+  set_current_program_space (inf->pspace);
+  set_current_inferior (inf);
+
+  inferior_ptid = thread->ptid;
+  stop_pc = ~(CORE_ADDR) 0;
 }
 
 /* Switch from one thread to another.  */
@@ -1772,7 +1797,7 @@ static void
 thread_find_command (char *arg, int from_tty)
 {
   struct thread_info *tp;
-  char *tmp;
+  const char *tmp;
   unsigned long match = 0;
 
   if (arg == NULL || *arg == '\0')

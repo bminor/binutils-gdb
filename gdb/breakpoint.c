@@ -13506,7 +13506,7 @@ tracepoint_print_recreate (struct breakpoint *self, struct ui_file *fp)
 
   if (self->type == bp_fast_tracepoint)
     fprintf_unfiltered (fp, "ftrace");
-  if (self->type == bp_static_tracepoint)
+  else if (self->type == bp_static_tracepoint)
     fprintf_unfiltered (fp, "strace");
   else if (self->type == bp_tracepoint)
     fprintf_unfiltered (fp, "trace");

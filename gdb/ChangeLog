@@ -1,3 +1,283 @@
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	PR 14618
+	* NEWS (New remote packets): Mention the N stop reply.
+	* remote.c (remote_protocol_features): Add "no-resumed" entry.
+	(remote_query_supported): Report no-resumed+ support.
+	(remote_parse_stop_reply): Handle 'N'.
+	(process_stop_reply): Handle TARGET_WAITKIND_NO_RESUMED.
+	(remote_wait_as): Handle 'N' / TARGET_WAITKIND_NO_RESUMED.
+	(_initialize_remote): Register "set/show remote
+	no-resumed-stop-reply" commands.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	PR 14618
+	* infrun.c (handle_no_resumed): New function.
+	(handle_inferior_event_1) <TARGET_WAITKIND_NO_RESUMED>: Defer to
+	handle_no_resumed.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (New commands): Mention "set/show remote thread-events"
+	commands.
+	(New remote packets): Mention thread created/exited stop reasons
+	and QThreadEvents packet.
+	* infrun.c (disable_thread_events): New function.
+	(stop_all_threads): Disable/enable thread create/exit events.
+	Handle TARGET_WAITKIND_THREAD_EXITED.
+	(handle_inferior_event_1): Handle TARGET_WAITKIND_THREAD_CREATED
+	and TARGET_WAITKIND_THREAD_EXITED.
+	* remote.c (remove_child_of_pending_fork): Also remove threads of
+	threads that have TARGET_WAITKIND_THREAD_EXITED events.
+	(remote_parse_stop_reply): Handle "create" magic register.  Handle
+	'w' stop reply.
+	(initialize_remote): Install remote_thread_events as
+	to_thread_events target hook.
+	(remote_thread_events): New function.
+	* target-delegates.c: Regenerate.
+	* target.c (target_thread_events): New function.
+	* target.h (struct target_ops) <to_thread_events>: New field.
+	(target_thread_events): Declare.
+	* target/waitstatus.c (target_waitstatus_to_string): Handle
+	TARGET_WAITKIND_THREAD_CREATED and TARGET_WAITKIND_THREAD_EXITED.
+	* target/waitstatus.h (enum target_waitkind)
+	<TARGET_WAITKIND_THREAD_CREATED, TARGET_WAITKIND_THREAD_EXITED):
+	New values.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (New remote packets): Mention vCtrlC.
+	* remote.c (PACKET_vCtrlC): New enum value.
+	(async_remote_interrupt): Call target_interrupt instead of
+	target_stop.
+	(remote_interrupt_as): Remove 'ptid' parameter.
+	(remote_interrupt_ns): New function.
+	(remote_stop): Adjust.
+	(remote_interrupt): If the target is in non-stop mode, try
+	interrupting with vCtrlC.
+	(initialize_remote): Install set remote ctrl-c packet.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (struct remote_state) <remote_watch_data_address,
+	stop_reason>: Delete fields.
+	(struct private_thread_info) <stop_reason, watch_data_address>:
+	New fields.
+	(resume_clear_thread_private_info): New function.
+	(append_pending_thread_resumptions): Call it.
+	(remote_resume): Clear all threads' private info.
+	(process_stop_reply): Adjust.
+	(remote_wait_as): Don't reference remote_state's stop_reason
+	field.
+	(remote_stopped_by_sw_breakpoint)
+	(remote_stopped_by_hw_breakpoint, remote_stopped_by_watchpoint)
+	(remote_stopped_data_address): Adjust to refer get data from the
+	current thread.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (attach_post_wait): If the target is always in non-stop
+	mode, and the UI is in all-stop mode, stop all threads and pick
+	the one with lowest number as current.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (switch_to_thread_no_regs): Declare.
+	* infcmd.c (setup_inferior): New function, factored out from ...
+	(attach_command_post_wait): ... this.  Rename to ...
+	(attach_post_wait): ... this.  Replace parameter async_exec with
+	attach_post_wait_mode parameter.  Adjust.
+	(enum attach_post_wait_mode): New enum.
+	(struct attach_command_continuation_args): Replace 'async_exec'
+	field with 'mode' field.
+	(attach_command_continuation): Adjust.
+	(attach_command): Add comment.  Mark the inferior as needing
+	setup.  Adjust to use enum attach_post_wait_mode.
+	(notice_new_inferior): Use switch_to_thread_no_regs.  Adjust to
+	use enum attach_post_wait_mode.
+	* inferior.h (setup_inferior): Declare.
+	(struct inferior) <needs_setup>: New field.
+	* infrun.c (set_last_target_status): Make extern.
+	(stop_all_threads): Make extern.  Setup inferior, if necessary.
+	* infrun.h (set_last_target_status, stop_all_threads): Declare.
+	* remote-notif.c (remote_async_get_pending_events_handler)
+	(handle_notification): Replace non_stop checks with
+	target_is_non_stop_p() checks.
+	* remote.c (remote_notice_new_inferior): Remove non_stop check.
+	(remote_update_thread_list): Replace non_stop check with
+	target_is_non_stop_p() check.
+	(print_one_stopped_thread): New function.
+	(process_initial_stop_replies): New 'from_tty' parameter.
+	"Notice" all new live inferiors after storing initial stops as
+	pending status in each corresponding thread.  If all-stop, stop
+	all threads, try picking a signalled thread as current, and print
+	the status of that one thread.  Record the last target status.
+	(remote_start_remote): Replace non_stop checks with
+	target_is_non_stop_p() checks.  Don't query for the remote current
+	thread of use qOffsets here.  Pass from_tty to
+	process_initial_stop_replies.
+	(extended_remote_attach): Replace non_stop checks with
+	target_is_non_stop_p() checks.
+	(extended_remote_post_attach): Send qOffsets here.
+	(remote_vcont_resume, remote_resume, remote_stop)
+	(remote_interrupt, remote_parse_stop_reply, remote_wait): Replace
+	non_stop checks with target_is_non_stop_p() checks.
+	(remote_async): If target is non-stop, mark/clear the pending
+	events token.
+	* thread.c (switch_to_thread_no_regs): New function.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-nonstop.exp: Append "set non-stop on" to GDBFLAGS
+	instead of issuing "-gdb-set non-stop 1" after starting gdb.
+	Use mi_is_target_remote instead of checking "is_remote target".
+	* lib/gdb.exp (gdb_is_target_remote): Rename to ...
+	(gdb_is_target_remote_prompt): ... this, and add 'prompt_regexp'
+	parameter.
+	(gdb_is_target_remote): Reimplement.
+	* lib/mi-support.exp (mi_is_target_remote): New procedure.
+
+2014-11-28  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (conversion_op): Use
+	DEMANGLE_COMPONENT_CONVERSION instead of DEMANGLE_COMPONENT_CAST.
+
+2015-11-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (start_thread): Add cast.
+
+2015-11-27  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/aarch64-linux-hw-point.c (aarch64_dr_state_remove_one_point):
+	Don't assert on alignment.
+	(aarch64_handle_breakpoint): Only check alignment when IS_INSERT
+	is true.
+
+2015-11-27  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (is_hfa): Rename to ...
+	(is_hfa_or_hva): ... this.  Handle vector type.  All callers
+	updated.
+	(aarch64_extract_return_value): Update debugging message.
+	(aarch64_store_return_value): Likewise.
+	(aarch64_return_in_memory): Update comments.
+
+2015-11-27  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_type_align): For vector type, return
+	its length, but with the maximum of 16 bytes.
+	(is_hfa): Return zero for vector type.
+	(aarch64_push_dummy_call): Handle short vectors.
+	(aarch64_extract_return_value): Likewise.
+	(aarch64_store_return_value): Likewise.
+
+2015-11-26  Daniel Colascione  <dancol@dancol.org>
+2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-nat.c (linux_nat_thread_name): Replace implementation by call
+	to linux_proc_tid_get_name.
+	* nat/linux-procfs.c (linux_proc_tid_get_name): New function,
+	implementation inspired by linux_nat_thread_name.
+	* nat/linux-procfs.h (linux_proc_tid_get_name): New declaration.
+	* remote.c (struct private_thread_info) <name>: New field.
+	(free_private_thread_info): Free name field.
+	(remote_thread_name): New function.
+	(thread_item_t) <name>: New field.
+	(clear_threads_listing_context): Free name field.
+	(start_thread): Get name xml attribute.
+	(thread_attributes): Add "name" attribute.
+	(remote_update_thread_list): Copy name field.
+	(init_remote_ops): Assign remote_thread_name callback.
+	* target.h (target_thread_name): Update comment.
+	* NEWS: Mention remote thread name support.
+
+2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-nat.c (linux_nat_thread_name): Constify return value.
+	* target.h (struct target_ops) <to_thread_name>: Likewise.
+	(target_thread_name): Likewise.
+	* target.c (target_thread_name): Likewise.
+	* target-delegates.c (debug_thread_name): Regenerate.
+	* python/py-infthread.c (thpy_get_name): Constify local variables.
+	* thread.c (print_thread_info): Likewise.
+	(thread_find_command): Likewise.
+
+2015-11-26  Markus Metzger  <markus.t.metzger@intel.com>
+
+	PR 19297
+	* btrace.c (btrace_enable): Check whether HAVE_LIBIPT is defined.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that a few "info" commands now list the
+	corresponding items in ascending ID order.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	PR 17539
+	* printcmd.c (display_command): Append new display at the end of
+	the list.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	PR 17539
+        * printcmd.c (display_command): Append new display at the end of
+        the list.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	PR 17539
+	* inferior.c (add_inferior_silent): Append the new inferior to the
+	end of the list.
+	* progspace.c (add_program_space): Append the new pspace to the
+	end of the list.
+	* thread.c (new_thread): Append the new thread to the end of the
+	list.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	* linux-tdep.c (find_stop_signal): Delete.
+	(struct linux_corefile_thread_data) <pid>: Remove field.
+	(linux_corefile_thread_callback): Rename to ...
+	(linux_corefile_thread): ... this.  Now takes a struct
+	linux_corefile_thread_data pointer rather than a void pointer.
+	Remove thread state and thread pid checks.
+	(linux_make_corefile_notes): Prefer dumping the signalled thread
+	first.  Use ALL_NON_EXITED_THREADS instead of
+	iterate_over_threads.
+
+2015-11-23  Par Olsson  <par.olsson@windriver.com>
+
+	* breakpoint.c (tracepoint_print_recreate): Fix logic error
+	if -> else if.
+
+2015-11-23  Kevin Buettner  <kevinb@redhat.com>
+
+	* minsyms.c (lookup_minimal_symbol_by_pc_section_1): Scan backwards
+	over all zero-sized symbols.
+
+2015-11-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* stack.c (print_frame_local_vars): Temporarily set the selected
+	frame to FRAME while printing the frame's local variables.
+
+2015-11-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* amd64-windows-tdep.c (amd64_windows_frame_decode_epilogue):
+	Increment PC in while loop skipping "pop reg" instructions.
+
+2015-11-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* arm-tdep.c (arm_exidx_unwind_sniffer): Do not check for a frame
+	stuck on a system call if the given frame is the innermost frame.
+
+2015-11-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (read_structure_type): Set the type's length
+	to zero if it has a DW_AT_byte_size attribute which is not
+	a constant.
+
 2015-11-23  Tristan Gingold  <gingold@adacore.com>
 
 	* darwin-nat.c (darwin_ptrace): Avoid a cast.

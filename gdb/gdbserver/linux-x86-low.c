@@ -3264,6 +3264,15 @@ x86_supports_range_stepping (void)
   return 1;
 }
 
+/* Implementation of linux_target_ops method "supports_hardware_single_step".
+ */
+
+static int
+x86_supports_hardware_single_step (void)
+{
+  return 1;
+}
+
 /* This is initialized assuming an amd64 target.
    x86_arch_setup will correct it for i386 or amd64 targets.  */
 
@@ -3304,6 +3313,8 @@ struct linux_target_ops the_low_target =
   x86_emit_ops,
   x86_get_min_fast_tracepoint_insn_len,
   x86_supports_range_stepping,
+  NULL, /* breakpoint_kind_from_current_state */
+  x86_supports_hardware_single_step,
 };
 
 void

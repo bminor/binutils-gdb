@@ -144,18 +144,6 @@ nios2_sw_breakpoint_from_kind (int kind, int *size)
   return (const gdb_byte *) &nios2_breakpoint;
 }
 
-/* Implement the breakpoint_reinsert_addr linux_target_ops method.  */
-
-static CORE_ADDR
-nios2_reinsert_addr (void)
-{
-  union nios2_register ra;
-  struct regcache *regcache = get_thread_regcache (current_thread, 1);
-
-  collect_register_by_name (regcache, "ra", ra.buf);
-  return ra.reg32;
-}
-
 /* Implement the breakpoint_at linux_target_ops method.  */
 
 static int
@@ -279,7 +267,7 @@ struct linux_target_ops the_low_target =
   nios2_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   nios2_sw_breakpoint_from_kind,
-  nios2_reinsert_addr,
+  NULL, /* breakpoint_reinsert_addr */
   0,
   nios2_breakpoint_at,
 };

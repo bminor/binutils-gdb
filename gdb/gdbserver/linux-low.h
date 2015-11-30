@@ -233,6 +233,12 @@ struct linux_target_ops
 
   /* Returns true if the low target supports range stepping.  */
   int (*supports_range_stepping) (void);
+
+  /* See target.h.  */
+  int (*breakpoint_kind_from_current_state) (CORE_ADDR *pcptr);
+
+  /* See target.h.  */
+  int (*supports_hardware_single_step) (void);
 };
 
 extern struct linux_target_ops the_low_target;
@@ -373,7 +379,7 @@ void initialize_regsets_info (struct regsets_info *regsets_info);
 void initialize_low_arch (void);
 
 /* From thread-db.c  */
-int thread_db_init (int use_events);
+int thread_db_init (void);
 void thread_db_detach (struct process_info *);
 void thread_db_mourn (struct process_info *);
 int thread_db_handle_monitor_command (char *);

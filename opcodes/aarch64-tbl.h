@@ -236,6 +236,13 @@
   QLF4(X,X,imm_0_63,imm_0_63),	\
 }
 
+/* e.g. BFC <Wd>, #<immr>, #<imms>.  */
+#define QL_BF1					\
+{						\
+  QLF3 (W, imm_0_31, imm_1_32),			\
+  QLF3 (X, imm_0_63, imm_1_64),			\
+}
+
 /* e.g. UBFIZ <Wd>, <Wn>, #<lsb>, #<width>.  */
 #define QL_BF2			\
 {				\
@@ -252,6 +259,13 @@
   QLF3(S_S,X,imm_1_64),		\
 }
 
+/* e.g. SCVTF <Hd>, <Xn>, #<fbits>.  */
+#define QL_FIX2FP_H			\
+{					\
+  QLF3 (S_H, W, imm_1_32),		\
+  QLF3 (S_H, X, imm_1_64),		\
+}
+
 /* e.g. FCVTZS <Wd>, <Dn>, #<fbits>.  */
 #define QL_FP2FIX		\
 {				\
@@ -259,6 +273,13 @@
   QLF3(W,S_S,imm_1_32),		\
   QLF3(X,S_D,imm_1_64),		\
   QLF3(X,S_S,imm_1_64),		\
+}
+
+/* e.g. FCVTZS <Wd>, <Hn>, #<fbits>.  */
+#define QL_FP2FIX_H			\
+{					\
+  QLF3 (W, S_H, imm_1_32),		\
+  QLF3 (X, S_H, imm_1_64),		\
 }
 
 /* e.g. SCVTF <Dd>, <Wn>.  */
@@ -270,6 +291,13 @@
   QLF2(S_S,X),			\
 }
 
+/* e.g. SCVTF <Hd>, <Wn>.  */
+#define QL_INT2FP_H			\
+{					\
+  QLF2 (S_H, W),			\
+  QLF2 (S_H, X),			\
+}
+
 /* e.g. FCVTNS <Xd>, <Dn>.  */
 #define QL_FP2INT		\
 {				\
@@ -277,6 +305,13 @@
   QLF2(W,S_S),			\
   QLF2(X,S_D),			\
   QLF2(X,S_S),			\
+}
+
+/* e.g. FCVTNS <Hd>, <Wn>.  */
+#define QL_FP2INT_H			\
+{					\
+  QLF2 (W, S_H),			\
+  QLF2 (X, S_H),			\
 }
 
 /* e.g. FMOV <Xd>, <Vn>.D[1].  */
@@ -497,6 +532,12 @@
   QLF2(S_D, S_D),		\
 }
 
+/* FMOV <Hd>, <Hn>.  */
+#define QL_FP2_H		\
+{				\
+  QLF2 (S_H, S_H),		\
+}
+
 /* e.g. SQADD <V><d>, <V><n>, <V><m>.  */
 #define QL_S_3SAME		\
 {				\
@@ -533,11 +574,23 @@
   QLF3(S_D, S_D, S_D),		\
 }
 
+/* FMUL <Hd>, <Hn>, <Hm>.  */
+#define QL_FP3_H		\
+{				\
+  QLF3 (S_H, S_H, S_H),		\
+}
+
 /* FMADD <Dd>, <Dn>, <Dm>, <Da>.  */
 #define QL_FP4			\
 {				\
   QLF4(S_S, S_S, S_S, S_S),	\
   QLF4(S_D, S_D, S_D, S_D),	\
+}
+
+/* FMADD <Hd>, <Hn>, <Hm>, <Ha>.  */
+#define QL_FP4_H		\
+{				\
+  QLF4 (S_H, S_H, S_H, S_H),	\
 }
 
 /* e.g. FCMP <Dn>, #0.0.  */
@@ -547,11 +600,23 @@
   QLF2(S_D, NIL),		\
 }
 
+/* e.g. FCMP <Hn>, #0.0.  */
+#define QL_DST_H		\
+{				\
+  QLF2 (S_H, NIL),		\
+}
+
 /* FCSEL <Sd>, <Sn>, <Sm>, <cond>.  */
 #define QL_FP_COND		\
 {				\
   QLF4(S_S, S_S, S_S, NIL),	\
   QLF4(S_D, S_D, S_D, NIL),	\
+}
+
+/* FCSEL <Hd>, <Hn>, <Hm>, <cond>.  */
+#define QL_FP_COND_H		\
+{				\
+  QLF4 (S_H, S_H, S_H, NIL),	\
 }
 
 /* e.g. CCMN <Xn>, <Xm>, #<nzcv>, <cond>.  */
@@ -573,6 +638,12 @@
 {				\
   QLF4(S_S, S_S, NIL, NIL),	\
   QLF4(S_D, S_D, NIL, NIL),	\
+}
+
+/* e.g. FCCMP <Sn>, <Sm>, #<nzcv>, <cond>.  */
+#define QL_FCCMP_H		\
+{				\
+  QLF4 (S_H, S_H, NIL, NIL),	\
 }
 
 /* e.g. DUP <Vd>.<T>, <Vn>.<Ts>[<index>].  */
@@ -1226,6 +1297,10 @@ static const aarch64_feature_set aarch64_feature_lor =
   AARCH64_FEATURE (AARCH64_FEATURE_LOR, 0);
 static const aarch64_feature_set aarch64_feature_rdma =
   AARCH64_FEATURE (AARCH64_FEATURE_RDMA, 0);
+static const aarch64_feature_set aarch64_feature_v8_2 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_2, 0);
+static const aarch64_feature_set aarch64_feature_fp_f16 =
+  AARCH64_FEATURE (AARCH64_FEATURE_F16 | AARCH64_FEATURE_FP, 0);
 
 #define CORE	&aarch64_feature_v8
 #define FP	&aarch64_feature_fp
@@ -1235,6 +1310,8 @@ static const aarch64_feature_set aarch64_feature_rdma =
 #define LSE	&aarch64_feature_lse
 #define LOR	&aarch64_feature_lor
 #define RDMA	&aarch64_feature_rdma
+#define FP_F16	&aarch64_feature_fp_f16
+#define ARMV8_2	&aarch64_feature_v8_2
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -1777,6 +1854,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"asr", 0x13000000, 0x7f800000, bitfield, OP_ASR_IMM, CORE, OP3 (Rd, Rn, IMM), QL_SHIFT, F_ALIAS | F_P2 | F_CONV},
   {"bfm", 0x33000000, 0x7f800000, bitfield, 0, CORE, OP4 (Rd, Rn, IMMR, IMMS), QL_BF, F_HAS_ALIAS | F_SF | F_N},
   {"bfi", 0x33000000, 0x7f800000, bitfield, OP_BFI, CORE, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV},
+  {"bfc", 0x330003e0, 0x7f8003e0, bitfield, OP_BFC, ARMV8_2,
+   OP3 (Rd, IMM, WIDTH), QL_BF1, F_ALIAS | F_P2 | F_CONV},
   {"bfxil", 0x33000000, 0x7f800000, bitfield, OP_BFXIL, CORE, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV},
   {"ubfm", 0x53000000, 0x7f800000, bitfield, 0, CORE, OP4 (Rd, Rn, IMMR, IMMS), QL_BF, F_HAS_ALIAS | F_SF | F_N},
   {"ubfiz", 0x53000000, 0x7f800000, bitfield, OP_UBFIZ, CORE, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV},
@@ -1836,7 +1915,10 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"rbit", 0x5ac00000, 0x7ffffc00, dp_1src, 0, CORE, OP2 (Rd, Rn), QL_I2SAME, F_SF},
   {"rev16", 0x5ac00400, 0x7ffffc00, dp_1src, 0, CORE, OP2 (Rd, Rn), QL_I2SAME, F_SF},
   {"rev", 0x5ac00800, 0xfffffc00, dp_1src, 0, CORE, OP2 (Rd, Rn), QL_I2SAMEW, 0},
-  {"rev", 0xdac00c00, 0x7ffffc00, dp_1src, 0, CORE, OP2 (Rd, Rn), QL_I2SAMEX, 0},
+  {"rev", 0xdac00c00, 0xfffffc00, dp_1src, 0, CORE,
+   OP2 (Rd, Rn), QL_I2SAMEX, F_SF | F_HAS_ALIAS | F_P1},
+  {"rev64", 0xdac00c00, 0xfffffc00, dp_1src, 0, ARMV8_2,
+   OP2 (Rd, Rn), QL_I2SAMEX, F_SF | F_ALIAS},
   {"clz", 0x5ac01000, 0x7ffffc00, dp_1src, 0, CORE, OP2 (Rd, Rn), QL_I2SAME, F_SF},
   {"cls", 0x5ac01400, 0x7ffffc00, dp_1src, 0, CORE, OP2 (Rd, Rn), QL_I2SAME, F_SF},
   {"rev32", 0xdac00800, 0xfffffc00, dp_1src, 0, CORE, OP2 (Rd, Rn), QL_I2SAMEX, 0},
@@ -1889,66 +1971,166 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"ror", 0x13800000, 0x7fa00000, extract, OP_ROR_IMM, CORE, OP3 (Rd, Rm, IMMS), QL_SHIFT, F_ALIAS | F_CONV},
   /* Floating-point<->fixed-point conversions.  */
   {"scvtf", 0x1e020000, 0x7f3f0000, float2fix, 0, FP, OP3 (Fd, Rn, FBITS), QL_FIX2FP, F_FPTYPE | F_SF},
+  {"scvtf", 0x1ec20000, 0x7f3f0000, float2fix, 0, FP_F16,
+   OP3 (Fd, Rn, FBITS), QL_FIX2FP_H, F_FPTYPE | F_SF},
   {"ucvtf", 0x1e030000, 0x7f3f0000, float2fix, 0, FP, OP3 (Fd, Rn, FBITS), QL_FIX2FP, F_FPTYPE | F_SF},
+  {"ucvtf", 0x1ec30000, 0x7f3f0000, float2fix, 0, FP_F16,
+   OP3 (Fd, Rn, FBITS), QL_FIX2FP_H, F_FPTYPE | F_SF},
   {"fcvtzs", 0x1e180000, 0x7f3f0000, float2fix, 0, FP, OP3 (Rd, Fn, FBITS), QL_FP2FIX, F_FPTYPE | F_SF},
+  {"fcvtzs", 0x1ed80000, 0x7f3f0000, float2fix, 0, FP_F16,
+   OP3 (Rd, Fn, FBITS), QL_FP2FIX_H, F_FPTYPE | F_SF},
   {"fcvtzu", 0x1e190000, 0x7f3f0000, float2fix, 0, FP, OP3 (Rd, Fn, FBITS), QL_FP2FIX, F_FPTYPE | F_SF},
+  {"fcvtzu", 0x1ed90000, 0x7f3f0000, float2fix, 0, FP_F16,
+   OP3 (Rd, Fn, FBITS), QL_FP2FIX_H, F_FPTYPE | F_SF},
   /* Floating-point<->integer conversions.  */
   {"fcvtns", 0x1e200000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtns", 0x1ee00000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fcvtnu", 0x1e210000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtnu", 0x1ee10000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"scvtf", 0x1e220000, 0x7f3ffc00, float2int, 0, FP, OP2 (Fd, Rn), QL_INT2FP, F_FPTYPE | F_SF},
+  {"scvtf", 0x1ee20000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Fd, Rn), QL_INT2FP_H, F_FPTYPE | F_SF},
   {"ucvtf", 0x1e230000, 0x7f3ffc00, float2int, 0, FP, OP2 (Fd, Rn), QL_INT2FP, F_FPTYPE | F_SF},
+  {"ucvtf", 0x1ee30000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Fd, Rn), QL_INT2FP_H, F_FPTYPE | F_SF},
   {"fcvtas", 0x1e240000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtas", 0x1ee40000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fcvtau", 0x1e250000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtau", 0x1ee50000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fmov", 0x1e260000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fmov", 0x1ee60000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fmov", 0x1e270000, 0x7f3ffc00, float2int, 0, FP, OP2 (Fd, Rn), QL_INT2FP, F_FPTYPE | F_SF},
+  {"fmov", 0x1ee70000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Fd, Rn), QL_INT2FP_H, F_FPTYPE | F_SF},
   {"fcvtps", 0x1e280000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtps", 0x1ee80000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fcvtpu", 0x1e290000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtpu", 0x1ee90000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fcvtms", 0x1e300000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtms", 0x1ef00000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fcvtmu", 0x1e310000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtmu", 0x1ef10000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fcvtzs", 0x1e380000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtzs", 0x1ef80000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fcvtzu", 0x1e390000, 0x7f3ffc00, float2int, 0, FP, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF},
+  {"fcvtzu", 0x1ef90000, 0x7f3ffc00, float2int, 0, FP_F16,
+   OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF},
   {"fmov", 0x9eae0000, 0xfffffc00, float2int, 0, FP, OP2 (Rd, VnD1), QL_XVD1, 0},
   {"fmov", 0x9eaf0000, 0xfffffc00, float2int, 0, FP, OP2 (VdD1, Rn), QL_VD1X, 0},
   /* Floating-point conditional compare.  */
   {"fccmp", 0x1e200400, 0xff200c10, floatccmp, 0, FP, OP4 (Fn, Fm, NZCV, COND), QL_FCCMP, F_FPTYPE},
+  {"fccmp", 0x1ee00400, 0xff200c10, floatccmp, 0, FP_F16,
+   OP4 (Fn, Fm, NZCV, COND), QL_FCCMP_H, F_FPTYPE},
   {"fccmpe", 0x1e200410, 0xff200c10, floatccmp, 0, FP, OP4 (Fn, Fm, NZCV, COND), QL_FCCMP, F_FPTYPE},
+  {"fccmpe", 0x1ee00410, 0xff200c10, floatccmp, 0, FP_F16,
+   OP4 (Fn, Fm, NZCV, COND), QL_FCCMP_H, F_FPTYPE},
   /* Floating-point compare.  */
   {"fcmp", 0x1e202000, 0xff20fc1f, floatcmp, 0, FP, OP2 (Fn, Fm), QL_FP2, F_FPTYPE},
+  {"fcmp", 0x1ee02000, 0xff20fc1f, floatcmp, 0, FP_F16,
+   OP2 (Fn, Fm), QL_FP2_H, F_FPTYPE},
   {"fcmpe", 0x1e202010, 0xff20fc1f, floatcmp, 0, FP, OP2 (Fn, Fm), QL_FP2, F_FPTYPE},
+  {"fcmpe", 0x1ee02010, 0xff20fc1f, floatcmp, 0, FP_F16,
+   OP2 (Fn, Fm), QL_FP2_H, F_FPTYPE},
   {"fcmp", 0x1e202008, 0xff20fc1f, floatcmp, 0, FP, OP2 (Fn, FPIMM0), QL_DST_SD, F_FPTYPE},
+  {"fcmp", 0x1ee02008, 0xff20fc1f, floatcmp, 0, FP_F16,
+   OP2 (Fn, FPIMM0), QL_FP2_H, F_FPTYPE},
   {"fcmpe", 0x1e202018, 0xff20fc1f, floatcmp, 0, FP, OP2 (Fn, FPIMM0), QL_DST_SD, F_FPTYPE},
+  {"fcmpe", 0x1ee02018, 0xff20fc1f, floatcmp, 0, FP_F16,
+   OP2 (Fn, FPIMM0), QL_FP2_H, F_FPTYPE},
   /* Floating-point data-processing (1 source).  */
   {"fmov", 0x1e204000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"fmov", 0x1ee04000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"fabs", 0x1e20c000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"fabs", 0x1ee0c000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"fneg", 0x1e214000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"fneg", 0x1ee14000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"fsqrt", 0x1e21c000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"fsqrt", 0x1ee1c000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"fcvt", 0x1e224000, 0xff3e7c00, floatdp1, OP_FCVT, FP, OP2 (Fd, Fn), QL_FCVT, F_FPTYPE | F_MISC},
   {"frintn", 0x1e244000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"frintn", 0x1ee44000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"frintp", 0x1e24c000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"frintp", 0x1ee4c000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"frintm", 0x1e254000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"frintm", 0x1ee54000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"frintz", 0x1e25c000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"frintz", 0x1ee5c000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"frinta", 0x1e264000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"frinta", 0x1ee64000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"frintx", 0x1e274000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"frintx", 0x1ee74000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   {"frinti", 0x1e27c000, 0xff3ffc00, floatdp1, 0, FP, OP2 (Fd, Fn), QL_FP2, F_FPTYPE},
+  {"frinti", 0x1ee7c000, 0xff3ffc00, floatdp1, 0, FP_F16,
+   OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE},
   /* Floating-point data-processing (2 source).  */
   {"fmul", 0x1e200800, 0xff20fc00, floatdp2, 0, FP, OP3 (Fd, Fn, Fm), QL_FP3, F_FPTYPE},
+  {"fmul", 0x1ee00800, 0xff20fc00, floatdp2, 0, FP_F16,
+   OP3 (Fd, Fn, Fm), QL_FP3_H, F_FPTYPE},
   {"fdiv", 0x1e201800, 0xff20fc00, floatdp2, 0, FP, OP3 (Fd, Fn, Fm), QL_FP3, F_FPTYPE},
+  {"fdiv", 0x1ee01800, 0xff20fc00, floatdp2, 0, FP_F16,
+   OP3 (Fd, Fn, Fm), QL_FP3_H, F_FPTYPE},
   {"fadd", 0x1e202800, 0xff20fc00, floatdp2, 0, FP, OP3 (Fd, Fn, Fm), QL_FP3, F_FPTYPE},
+  {"fadd", 0x1ee02800, 0xff20fc00, floatdp2, 0, FP_F16,
+   OP3 (Fd, Fn, Fm), QL_FP3_H, F_FPTYPE},
   {"fsub", 0x1e203800, 0xff20fc00, floatdp2, 0, FP, OP3 (Fd, Fn, Fm), QL_FP3, F_FPTYPE},
+  {"fsub", 0x1ee03800, 0xff20fc00, floatdp2, 0, FP_F16,
+   OP3 (Fd, Fn, Fm), QL_FP3_H, F_FPTYPE},
   {"fmax", 0x1e204800, 0xff20fc00, floatdp2, 0, FP, OP3 (Fd, Fn, Fm), QL_FP3, F_FPTYPE},
+  {"fmax", 0x1ee04800, 0xff20fc00, floatdp2, 0, FP_F16,
+   OP3 (Fd, Fn, Fm), QL_FP3_H, F_FPTYPE},
   {"fmin", 0x1e205800, 0xff20fc00, floatdp2, 0, FP, OP3 (Fd, Fn, Fm), QL_FP3, F_FPTYPE},
+  {"fmin", 0x1ee05800, 0xff20fc00, floatdp2, 0, FP_F16,
+   OP3 (Fd, Fn, Fm), QL_FP3_H, F_FPTYPE},
   {"fmaxnm", 0x1e206800, 0xff20fc00, floatdp2, 0, FP, OP3 (Fd, Fn, Fm), QL_FP3, F_FPTYPE},
+  {"fmaxnm", 0x1ee06800, 0xff20fc00, floatdp2, 0, FP_F16,
+   OP3 (Fd, Fn, Fm), QL_FP3_H, F_FPTYPE},
   {"fminnm", 0x1e207800, 0xff20fc00, floatdp2, 0, FP, OP3 (Fd, Fn, Fm), QL_FP3, F_FPTYPE},
+  {"fminnm", 0x1ee07800, 0xff20fc00, floatdp2, 0, FP_F16,
+   OP3 (Fd, Fn, Fm), QL_FP3_H, F_FPTYPE},
   {"fnmul", 0x1e208800, 0xff20fc00, floatdp2, 0, FP, OP3 (Fd, Fn, Fm), QL_FP3, F_FPTYPE},
+  {"fnmul", 0x1ee08800, 0xff20fc00, floatdp2, 0, FP_F16,
+   OP3 (Fd, Fn, Fm), QL_FP3_H, F_FPTYPE},
   /* Floating-point data-processing (3 source).  */
   {"fmadd", 0x1f000000, 0xff208000, floatdp3, 0, FP, OP4 (Fd, Fn, Fm, Fa), QL_FP4, F_FPTYPE},
+  {"fmadd", 0x1fc00000, 0xff208000, floatdp3, 0, FP_F16,
+   OP4 (Fd, Fn, Fm, Fa), QL_FP4_H, F_FPTYPE},
   {"fmsub", 0x1f008000, 0xff208000, floatdp3, 0, FP, OP4 (Fd, Fn, Fm, Fa), QL_FP4, F_FPTYPE},
+  {"fmsub", 0x1fc08000, 0xff208000, floatdp3, 0, FP_F16,
+   OP4 (Fd, Fn, Fm, Fa), QL_FP4_H, F_FPTYPE},
   {"fnmadd", 0x1f200000, 0xff208000, floatdp3, 0, FP, OP4 (Fd, Fn, Fm, Fa), QL_FP4, F_FPTYPE},
+  {"fnmadd", 0x1fe00000, 0xff208000, floatdp3, 0, FP_F16,
+   OP4 (Fd, Fn, Fm, Fa), QL_FP4_H, F_FPTYPE},
   {"fnmsub", 0x1f208000, 0xff208000, floatdp3, 0, FP, OP4 (Fd, Fn, Fm, Fa), QL_FP4, F_FPTYPE},
+  {"fnmsub", 0x1fe08000, 0xff208000, floatdp3, 0, FP_F16,
+   OP4 (Fd, Fn, Fm, Fa), QL_FP4_H, F_FPTYPE},
   /* Floating-point immediate.  */
   {"fmov", 0x1e201000, 0xff201fe0, floatimm, 0, FP, OP2 (Fd, FPIMM), QL_DST_SD, F_FPTYPE},
+  {"fmov", 0x1ee01000, 0xff201fe0, floatimm, 0, FP_F16,
+   OP2 (Fd, FPIMM), QL_DST_H, F_FPTYPE},
   /* Floating-point conditional select.  */
   {"fcsel", 0x1e200c00, 0xff200c00, floatsel, 0, FP, OP4 (Fd, Fn, Fm, COND), QL_FP_COND, F_FPTYPE},
+  {"fcsel", 0x1ee00c00, 0xff200c00, floatsel, 0, FP_F16,
+   OP4 (Fd, Fn, Fm, COND), QL_FP_COND_H, F_FPTYPE},
   /* Load/store register (immediate indexed).  */
   {"strb", 0x38000400, 0xffe00400, ldst_imm9, 0, CORE, OP2 (Rt, ADDR_SIMM9), QL_LDST_W8, 0},
   {"ldrb", 0x38400400, 0xffe00400, ldst_imm9, 0, CORE, OP2 (Rt, ADDR_SIMM9), QL_LDST_W8, 0},

@@ -2791,9 +2791,9 @@ example, the list of inferiors bound to the program space.
 @smallexample
 (@value{GDBP}) maint info program-spaces
   Id   Executable
+* 1    hello
   2    goodbye
         Bound inferiors: ID 1 (process 21561)
-* 1    hello
 @end smallexample
 
 Here we can see that no inferior is running the program @code{hello},
@@ -2938,9 +2938,9 @@ For example,
 @smallexample
 (@value{GDBP}) info threads
   Id   Target Id         Frame
-  3    process 35 thread 27  0x34e5 in sigpause ()
-  2    process 35 thread 23  0x34e5 in sigpause ()
 * 1    process 35 thread 13  main (argc=1, argv=0x7ffffff8)
+  2    process 35 thread 23  0x34e5 in sigpause ()
+  3    process 35 thread 27  0x34e5 in sigpause ()
     at threadtest.c:68
 @end smallexample
 
@@ -3254,8 +3254,8 @@ process 12020 is executing new program: prog2
 Program exited normally.
 (@value{GDBP}) info inferiors
   Id   Description   Executable
-* 2    <null>        prog2
   1    <null>        prog1
+* 2    <null>        prog2
 @end smallexample
 
 @item same
@@ -20235,6 +20235,14 @@ are:
 @tab @code{exec stop reason}
 @tab @code{exec}
 
+@item @code{thread-events}
+@tab @code{QThreadEvents}
+@tab Tracking thread lifetime.
+
+@item @code{no-resumed-stop-reply}
+@tab @code{no resumed thread left stop reply}
+@tab Tracking thread lifetime.
+
 @end multitable
 
 @node Remote Stub
@@ -35090,6 +35098,24 @@ command in the @samp{vCont} packet.
 The @samp{vCont} packet is not supported.
 @end table
 
+@anchor{vCtrlC packet}
+@item vCtrlC
+@cindex @samp{vCtrlC} packet
+Interrupt remote target as if a control-C was pressed on the remote
+terminal.  This is the equivalent to reacting to the @code{^C}
+(@samp{\003}, the control-C character) character in all-stop mode
+while the target is running, except this works in non-stop mode.
+@xref{interrupting remote targets}, for more info on the all-stop
+variant.
+
+Reply:
+@table @samp
+@item E @var{nn}
+for an error
+@item OK
+for success
+@end table
+
 @item vFile:@var{operation}:@var{parameter}@dots{}
 @cindex @samp{vFile} packet
 Perform a file operation on the target system.  For details,
@@ -35528,6 +35554,15 @@ appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
 remote stub must also supply the appropriate @samp{qSupported} feature
 indicating support.
 
+@cindex thread create event, remote reply
+@anchor{thread create event}
+@item create
+The packet indicates that the thread was just created.  The new thread
+is stopped until @value{GDBN} sets it running with a resumption packet
+(@pxref{vCont packet}).  This packet should not be sent by default;
+@value{GDBN} requests it with the @ref{QThreadEvents} packet.  See
+also the @samp{w} (@ref{thread exit event}) remote reply below.
+
 @end table
 
 @item W @var{AA}
@@ -35548,6 +35583,29 @@ The second form of the response, including the process ID of the
 terminated process, can be used only when @value{GDBN} has reported
 support for multiprocess protocol extensions; see @ref{multiprocess
 extensions}.  The @var{pid} is formatted as a big-endian hex string.
+
+@anchor{thread exit event}
+@cindex thread exit event, remote reply
+@item w @var{AA} ; @var{tid}
+
+The thread exited, and @var{AA} is the exit status.  This response
+should not be sent by default; @value{GDBN} requests it with the
+@ref{QThreadEvents} packet.  See also @ref{thread create event} above.
+
+@item N
+There are no resumed threads left in the target.  In other words, even
+though the process is alive, the last resumed thread has exited.  For
+example, say the target process has two threads: thread 1 and thread
+2.  The client leaves thread 1 stopped, and resumes thread 2, which
+subsequently exits.  At this point, even though the process is still
+alive, and thus no @samp{W} stop reply is sent, no thread is actually
+executing either.  The @samp{N} stop reply thus informs the client
+that it can stop waiting for stop replies.  This packet should not be
+sent by default; older @value{GDBN} versions did not support it.
+@value{GDBN} requests it, by supplying an appropriate
+@samp{qSupported} feature (@pxref{qSupported}).  The remote stub must
+also supply the appropriate @samp{qSupported} feature indicating
+support.
 
 @item O @var{XX}@dots{}
 @samp{@var{XX}@dots{}} is hex encoding of @sc{ascii} data, to be
@@ -35965,6 +36023,39 @@ Use of this packet is controlled by the @code{set remote program-signals}
 command (@pxref{Remote Configuration, set remote program-signals}).
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@anchor{QThreadEvents}
+@item QThreadEvents:1
+@itemx QThreadEvents:0
+@cindex thread create/exit events, remote request
+@cindex @samp{QThreadEvents} packet
+
+Enable (@samp{QThreadEvents:1}) or disable (@samp{QThreadEvents:0})
+reporting of thread create and exit events.  @xref{thread create
+event}, for the reply specifications.  For example, this is used in
+non-stop mode when @value{GDBN} stops a set of threads and
+synchronously waits for the their corresponding stop replies.  Without
+exit events, if one of the threads exits, @value{GDBN} would hang
+forever not knowing that it should no longer expect a stop for that
+same thread.  @value{GDBN} does not enable this feature unless the
+stub reports that it supports it by including @samp{QThreadEvents+} in
+its @samp{qSupported} reply.
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  The error number @var{nn} is given as hex digits.
+
+@item @w{}
+An empty reply indicates that @samp{QThreadEvents} is not supported by
+the stub.
+@end table
+
+Use of this packet is controlled by the @code{set remote thread-events}
+command (@pxref{Remote Configuration, set remote thread-events}).
 
 @item qRcmd,@var{command}
 @cindex execute remote command, remote request
@@ -36410,6 +36501,16 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{QThreadEvents}
+@tab No
+@tab @samp{-}
+@tab No
+
+@item @samp{no-resumed}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36621,6 +36722,12 @@ The remote stub reports the @samp{exec} stop reason for exec events.
 @item vContSupported
 The remote stub reports the supported actions in the reply to
 @samp{vCont?} packet.
+
+@item QThreadEvents
+The remote stub understands the @samp{QThreadEvents} packet.
+
+@item no-resumed
+The remote stub reports the @samp{N} stop reply.
 
 @end table
 
@@ -37857,11 +37964,12 @@ operation.
 @node Interrupts
 @section Interrupts
 @cindex interrupts (remote protocol)
+@anchor{interrupting remote targets}
 
-When a program on the remote target is running, @value{GDBN} may
-attempt to interrupt it by sending a @samp{Ctrl-C}, @code{BREAK} or
-a @code{BREAK} followed by @code{g},
-control of which is specified via @value{GDBN}'s @samp{interrupt-sequence}.
+In all-stop mode, when a program on the remote target is running,
+@value{GDBN} may attempt to interrupt it by sending a @samp{Ctrl-C},
+@code{BREAK} or a @code{BREAK} followed by @code{g}, control of which
+is specified via @value{GDBN}'s @samp{interrupt-sequence}.
 
 The precise meaning of @code{BREAK} is defined by the transport
 mechanism and may, in fact, be undefined.  @value{GDBN} does not
@@ -37881,6 +37989,13 @@ and does @emph{not} represent an interrupt.  E.g., an @samp{X} packet
 @code{BREAK} followed by @code{g} is also known as Magic SysRq g.
 When Linux kernel receives this sequence from serial port,
 it stops execution and connects to gdb.
+
+In non-stop mode, because packet resumptions are asynchronous
+(@pxref{vCont packet}), @value{GDBN} is always free to send a remote
+command to the remote stub, even when the target is running.  For that
+reason, @value{GDBN} instead sends a regular packet (@pxref{vCtrlC
+packet}) with the usual packet framing instead of the single byte
+@code{0x03}.
 
 Stubs are not required to recognize these interrupt mechanisms and the
 precise meaning associated with receipt of the interrupt is
@@ -39542,7 +39657,7 @@ the following structure:
 @smallexample
 <?xml version="1.0"?>
 <threads>
-    <thread id="id" core="0">
+    <thread id="id" core="0" name="name">
     ... description ...
     </thread>
 </threads>
@@ -39551,8 +39666,10 @@ the following structure:
 Each @samp{thread} element must have the @samp{id} attribute that
 identifies the thread (@pxref{thread-id syntax}).  The
 @samp{core} attribute, if present, specifies which processor core
-the thread was last executing on.  The content of the of @samp{thread}
-element is interpreted as human-readable auxilliary information.
+the thread was last executing on.  The @samp{name} attribute, if
+present, specifies the human-readable name of the thread.  The content
+of the of @samp{thread} element is interpreted as human-readable
+auxiliary information.
 
 @node Traceframe Info Format
 @section Traceframe Info Format

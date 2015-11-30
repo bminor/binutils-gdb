@@ -74,6 +74,10 @@ void free_register_cache (struct regcache *regcache);
 
 void regcache_invalidate_thread (struct thread_info *);
 
+/* Invalidate cached registers for all threads of the given process.  */
+
+void regcache_invalidate_pid (int pid);
+
 /* Invalidate cached registers for all threads of the current
    process.  */
 

@@ -1,3 +1,41 @@
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	PR 14618
+	* gdb.texinfo (Stop Reply Packets): Document the N stop reply.
+	(Remote Configuration): Add the "set/show remote
+	no-resumed-stop-reply" to the available settings table.
+	(General Query Packets): Document the "no-resumed" qSupported
+	feature.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Remote Configuration): List "set/show remote
+	thread-events" command in configuration table.
+	(Stop Reply Packets): Document "T05 create" stop
+	reason and 'w' stop reply.
+	(General Query Packets): Document QThreadEvents packet.  Document
+	QThreadEvents qSupported feature.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Bootstrapping): Add "interrupting remote targets"
+	anchor.
+	(Packets): Document vCtrlC.
+
+2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Thread List Format): Mention thread names.
+
+2015-11-24  Pedro Alves  <palves@redhat.com>
+
+	PR 17539
+	* gdb.texinfo (Inferiors and Programs): Adjust "maint info
+	program-spaces" example to ascending order listing.
+	(Threads): Adjust "info threads" example to ascending order
+	listing.
+	(Forks): Adjust "info inferiors" example to ascending order
+	listing.
+
 2015-11-04  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (Process Record and Replay): Document "record
