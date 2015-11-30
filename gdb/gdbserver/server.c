@@ -3691,11 +3691,21 @@ captured_main (int argc, char *argv[])
 	  start_event_loop ();
 
 	  /* If an exit was requested (using the "monitor exit"
-	     command), terminate now.  The only other way to get
-	     here is for getpkt to fail; close the connection
-	     and reopen it at the top of the loop.  */
+	     command), terminate now.  */
+	  if (exit_requested)
+	    throw_quit ("Quit");
 
-	  if (exit_requested || run_once)
+	  /* The only other way to get here is for getpkt to fail:
+
+	      - If --once was specified, we're done.
+
+	      - If not in extended-remote mode, and we're no longer
+	        debugging anything, simply exit: GDB has disconnected
+	        after processing the last process exit.
+
+	      - Otherwise, close the connection and reopen it at the
+	        top of the loop.  */
+	  if (run_once || (!extended_protocol && !target_running ()))
 	    throw_quit ("Quit");
 
 	  fprintf (stderr,
@@ -3859,13 +3869,6 @@ process_serial_event (void)
   unsigned char sig;
   int packet_len;
   int new_packet_len = -1;
-
-  /* Used to decide when gdbserver should exit in
-     multi-mode/remote.  */
-  static int have_ran = 0;
-
-  if (!have_ran)
-    have_ran = target_running ();
 
   disable_async_io ();
 
@@ -4304,21 +4307,6 @@ process_serial_event (void)
     putpkt (own_buf);
 
   response_needed = 0;
-
-  if (!extended_protocol && have_ran && !target_running ())
-    {
-      /* In non-stop, defer exiting until GDB had a chance to query
-	 the whole vStopped list (until it gets an OK).  */
-      if (QUEUE_is_empty (notif_event_p, notif_stop.queue))
-	{
-	  /* Be transparent when GDB is connected through stdio -- no
-	     need to spam GDB's console.  */
-	  if (!remote_connection_is_stdio ())
-	    fprintf (stderr, "GDBserver exiting\n");
-	  remote_close ();
-	  exit (0);
-	}
-    }
 
   if (exit_requested)
     return -1;

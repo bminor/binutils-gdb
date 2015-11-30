@@ -882,7 +882,10 @@ readchar (void)
       if (readchar_bufcnt <= 0)
 	{
 	  if (readchar_bufcnt == 0)
-	    fprintf (stderr, "readchar: Got EOF\n");
+	    {
+	      if (remote_debug)
+		fprintf (stderr, "readchar: Got EOF\n");
+	    }
 	  else
 	    perror ("readchar");
 
