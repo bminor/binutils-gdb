@@ -1119,6 +1119,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     case TARGET_WAITKIND_VFORKED:
     case TARGET_WAITKIND_VFORK_DONE:
     case TARGET_WAITKIND_EXECD:
+    case TARGET_WAITKIND_THREAD_CREATED:
       {
 	struct thread_info *saved_thread;
 	const char **regp;
@@ -1160,6 +1161,13 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    xfree (status->value.execd_pathname);
 	    status->value.execd_pathname = NULL;
 	    buf += strlen (buf);
+	  }
+	else if (status->kind == TARGET_WAITKIND_THREAD_CREATED
+		 && report_thread_events)
+	  {
+	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
+
+	    sprintf (buf, "T%02xcreate:;", signal);
 	  }
 	else
 	  sprintf (buf, "T%02x", status->value.sig);
@@ -1275,6 +1283,11 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 		 status->value.sig, ptid_get_pid (ptid));
       else
 	sprintf (buf, "X%02x", status->value.sig);
+      break;
+    case TARGET_WAITKIND_THREAD_EXITED:
+      sprintf (buf, "w%x;", status->value.integer);
+      buf += strlen (buf);
+      buf = write_ptid (buf, ptid);
       break;
     default:
       error ("unhandled waitkind");

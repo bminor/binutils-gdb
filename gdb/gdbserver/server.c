@@ -60,6 +60,7 @@ int multi_process;
 int report_fork_events;
 int report_vfork_events;
 int report_exec_events;
+int report_thread_events;
 int non_stop;
 int swbreak_feature;
 int hwbreak_feature;
@@ -722,6 +723,39 @@ handle_general_set (char *own_buf)
 
   if (handle_btrace_conf_general_set (own_buf))
     return;
+
+  if (startswith (own_buf, "QThreadEvents:"))
+    {
+      char *mode = own_buf + strlen ("QThreadEvents:");
+      enum tribool req = TRIBOOL_UNKNOWN;
+
+      if (strcmp (mode, "0") == 0)
+	req = TRIBOOL_FALSE;
+      else if (strcmp (mode, "1") == 0)
+	req = TRIBOOL_TRUE;
+      else
+	{
+	  char *mode_copy = xstrdup (mode);
+
+	  /* We don't know what this mode is, so complain to GDB.  */
+	  sprintf (own_buf, "E.Unknown thread-events mode requested: %s\n",
+		   mode_copy);
+	  xfree (mode_copy);
+	  return;
+	}
+
+      report_thread_events = (req == TRIBOOL_TRUE);
+
+      if (remote_debug)
+	{
+	  const char *req_str = report_thread_events ? "enabled" : "disabled";
+
+	  fprintf (stderr, "[thread events are now %s]\n", req_str);
+	}
+
+      write_ok (own_buf);
+      return;
+    }
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
@@ -2151,6 +2185,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		}
 	      else if (strcmp (p, "vContSupported+") == 0)
 		vCont_supported = 1;
+	      else if (strcmp (p, "QThreadEvents+") == 0)
+		;
 	      else
 		{
 		  /* Move the unknown features all together.  */
@@ -2270,6 +2306,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	strcat (own_buf, ";qXfer:exec-file:read+");
 
       strcat (own_buf, ";vContSupported+");
+
+      strcat (own_buf, ";QThreadEvents+");
 
       /* Reinitialize components as needed for the new connection.  */
       hostio_handle_new_gdb_connection ();
@@ -4321,6 +4359,8 @@ handle_target_event (int err, gdb_client_data client_data)
 	  mark_breakpoints_out (process);
 	  mourn_inferior (process);
 	}
+      else if (last_status.kind == TARGET_WAITKIND_THREAD_EXITED)
+	;
       else
 	{
 	  /* We're reporting this thread as stopped.  Update its
@@ -4338,7 +4378,11 @@ handle_target_event (int err, gdb_client_data client_data)
 	      exit (0);
 	    }
 
-	  if (last_status.kind == TARGET_WAITKIND_STOPPED)
+	  if (last_status.kind == TARGET_WAITKIND_EXITED
+	      || last_status.kind == TARGET_WAITKIND_SIGNALLED
+	      || last_status.kind == TARGET_WAITKIND_THREAD_EXITED)
+	    ;
+	  else
 	    {
 	      /* A thread stopped with a signal, but gdb isn't
 		 connected to handle it.  Pass it down to the
@@ -4353,13 +4397,12 @@ handle_target_event (int err, gdb_client_data client_data)
 
 	      resume_info.thread = last_ptid;
 	      resume_info.kind = resume_continue;
-	      resume_info.sig = gdb_signal_to_host (last_status.value.sig);
+	      if (last_status.kind == TARGET_WAITKIND_STOPPED)
+		resume_info.sig = gdb_signal_to_host (last_status.value.sig);
+	      else
+		resume_info.sig = 0;
 	      (*the_target->resume) (&resume_info, 1);
 	    }
-	  else if (debug_threads)
-	    debug_printf ("GDB not connected; ignoring event %d for [%s]\n",
-			  (int) last_status.kind,
-			  target_pid_to_str (last_ptid));
 	}
       else
 	{

@@ -3850,6 +3850,14 @@ target_async (int enable)
   current_target.to_async (&current_target, enable);
 }
 
+/* See target.h.  */
+
+void
+target_thread_events (int enable)
+{
+  current_target.to_thread_events (&current_target, enable);
+}
+
 /* Controls if targets can report that they can/are async.  This is
    just for maintainers to use when debugging gdb.  */
 int target_async_permitted = 1;

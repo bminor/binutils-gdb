@@ -1,5 +1,26 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (handle_extended_wait): Assert that the LWP's
+	waitstatus is TARGET_WAITKIND_IGNORE.  If GDB wants to hear about
+	thread create events, leave the new child's status pending.
+	(linux_low_filter_event): If GDB wants to hear about thread exit
+	events, leave the LWP marked dead and don't delete it.
+	(linux_wait_for_event_filtered): Don't check for thread exit.
+	(filter_exit_event): New function.
+	(linux_wait_1): Use it, when returning an exit event.
+	(linux_resume_one_lwp_throw): Assert that the LWP's
+	waitstatus is TARGET_WAITKIND_IGNORE.
+	* remote-utils.c (prepare_resume_reply): Handle
+	TARGET_WAITKIND_THREAD_CREATED and TARGET_WAITKIND_THREAD_EXITED.
+	* server.c (report_thread_events): New global.
+	(handle_general_set): Handle QThreadEvents.
+	(handle_query) <qSupported>: Handle and report QThreadEvents+;
+	(handle_target_event): Handle TARGET_WAITKIND_THREAD_CREATED and
+	TARGET_WAITKIND_THREAD_EXITED.
+	* server.h (report_thread_events): Declare.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (resume_stopped_resumed_lwps): Don't check whether
 	the thread's last_resume_kind was resume_stop.
 

@@ -447,6 +447,8 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
   struct thread_info *event_thr = get_lwp_thread (event_lwp);
   struct lwp_info *new_lwp;
 
+  gdb_assert (event_lwp->waitstatus.kind == TARGET_WAITKIND_IGNORE);
+
   if ((event == PTRACE_EVENT_FORK) || (event == PTRACE_EVENT_VFORK)
       || (event == PTRACE_EVENT_CLONE))
     {
@@ -574,6 +576,12 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
       if (WSTOPSIG (status) != SIGSTOP)
 	{
 	  new_lwp->stop_expected = 1;
+	  new_lwp->status_pending_p = 1;
+	  new_lwp->status_pending = status;
+	}
+      else if (report_thread_events)
+	{
+	  new_lwp->waitstatus.kind = TARGET_WAITKIND_THREAD_CREATED;
 	  new_lwp->status_pending_p = 1;
 	  new_lwp->status_pending = status;
 	}
@@ -2256,25 +2264,22 @@ linux_low_filter_event (int lwpid, int wstat)
     {
       if (debug_threads)
 	debug_printf ("LLFE: %d exited.\n", lwpid);
-      if (num_lwps (pid_of (thread)) > 1)
+      /* If there is at least one more LWP, then the exit signal was
+	 not the end of the debugged application and should be
+	 ignored, unless GDB wants to hear about thread exits.  */
+      if (report_thread_events
+	  || last_thread_of_process_p (pid_of (thread)))
 	{
-
-	  /* If there is at least one more LWP, then the exit signal was
-	     not the end of the debugged application and should be
-	     ignored.  */
-	  delete_lwp (child);
-	  return NULL;
+	  /* Since events are serialized to GDB core, and we can't
+	     report this one right now.  Leave the status pending for
+	     the next time we're able to report it.  */
+	  mark_lwp_dead (child, wstat);
+	  return child;
 	}
       else
 	{
-	  /* This was the last lwp in the process.  Since events are
-	     serialized to GDB core, and we can't report this one
-	     right now, but GDB core and the other target layers will
-	     want to be notified about the exit code/signal, leave the
-	     status pending for the next time we're able to report
-	     it.  */
-	  mark_lwp_dead (child, wstat);
-	  return child;
+	  delete_lwp (child);
+	  return NULL;
 	}
     }
 
@@ -2617,18 +2622,6 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 
   current_thread = event_thread;
 
-  /* Check for thread exit.  */
-  if (! WIFSTOPPED (*wstatp))
-    {
-      gdb_assert (last_thread_of_process_p (pid_of (event_thread)));
-
-      if (debug_threads)
-	debug_printf ("LWP %d is the last lwp of process.  "
-		      "Process %ld exiting.\n",
-		      pid_of (event_thread), lwpid_of (event_thread));
-      return lwpid_of (event_thread);
-    }
-
   return lwpid_of (event_thread);
 }
 
@@ -2913,6 +2906,30 @@ ignore_event (struct target_waitstatus *ourstatus)
   return null_ptid;
 }
 
+/* Convenience function that is called when the kernel reports an exit
+   event.  This decides whether to report the event to GDB as a
+   process exit event, a thread exit event, or to suppress the
+   event.  */
+
+static ptid_t
+filter_exit_event (struct lwp_info *event_child,
+		   struct target_waitstatus *ourstatus)
+{
+  struct thread_info *thread = get_lwp_thread (event_child);
+  ptid_t ptid = ptid_of (thread);
+
+  if (!last_thread_of_process_p (pid_of (thread)))
+    {
+      if (report_thread_events)
+	ourstatus->kind = TARGET_WAITKIND_THREAD_EXITED;
+      else
+	ourstatus->kind = TARGET_WAITKIND_IGNORE;
+
+      delete_lwp (event_child);
+    }
+  return ptid;
+}
+
 /* Wait for process, returns status.  */
 
 static ptid_t
@@ -3017,6 +3034,9 @@ linux_wait_1 (ptid_t ptid,
 	      debug_exit ();
 	    }
 	}
+
+      if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+	return filter_exit_event (event_child, ourstatus);
 
       return ptid_of (current_thread);
     }
@@ -3507,6 +3527,9 @@ linux_wait_1 (ptid_t ptid,
       debug_exit ();
     }
 
+  if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+    return filter_exit_event (event_child, ourstatus);
+
   return ptid_of (current_thread);
 }
 
@@ -3906,6 +3929,8 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
 
   if (lwp->stopped == 0)
     return;
+
+  gdb_assert (lwp->waitstatus.kind == TARGET_WAITKIND_IGNORE);
 
   fast_tp_collecting = lwp->collecting_fast_tracepoint;
 

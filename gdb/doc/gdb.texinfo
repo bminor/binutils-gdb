@@ -20235,6 +20235,10 @@ are:
 @tab @code{exec stop reason}
 @tab @code{exec}
 
+@item @code{thread-events}
+@tab @code{QThreadEvents}
+@tab Tracking thread lifetime.
+
 @end multitable
 
 @node Remote Stub
@@ -35546,6 +35550,15 @@ appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
 remote stub must also supply the appropriate @samp{qSupported} feature
 indicating support.
 
+@cindex thread create event, remote reply
+@anchor{thread create event}
+@item create
+The packet indicates that the thread was just created.  The new thread
+is stopped until @value{GDBN} sets it running with a resumption packet
+(@pxref{vCont packet}).  This packet should not be sent by default;
+@value{GDBN} requests it with the @ref{QThreadEvents} packet.  See
+also the @samp{w} (@ref{thread exit event}) remote reply below.
+
 @end table
 
 @item W @var{AA}
@@ -35566,6 +35579,14 @@ The second form of the response, including the process ID of the
 terminated process, can be used only when @value{GDBN} has reported
 support for multiprocess protocol extensions; see @ref{multiprocess
 extensions}.  The @var{pid} is formatted as a big-endian hex string.
+
+@anchor{thread exit event}
+@cindex thread exit event, remote reply
+@item w @var{AA} ; @var{tid}
+
+The thread exited, and @var{AA} is the exit status.  This response
+should not be sent by default; @value{GDBN} requests it with the
+@ref{QThreadEvents} packet.  See also @ref{thread create event} above.
 
 @item O @var{XX}@dots{}
 @samp{@var{XX}@dots{}} is hex encoding of @sc{ascii} data, to be
@@ -35983,6 +36004,39 @@ Use of this packet is controlled by the @code{set remote program-signals}
 command (@pxref{Remote Configuration, set remote program-signals}).
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@anchor{QThreadEvents}
+@item QThreadEvents:1
+@itemx QThreadEvents:0
+@cindex thread create/exit events, remote request
+@cindex @samp{QThreadEvents} packet
+
+Enable (@samp{QThreadEvents:1}) or disable (@samp{QThreadEvents:0})
+reporting of thread create and exit events.  @xref{thread create
+event}, for the reply specifications.  For example, this is used in
+non-stop mode when @value{GDBN} stops a set of threads and
+synchronously waits for the their corresponding stop replies.  Without
+exit events, if one of the threads exits, @value{GDBN} would hang
+forever not knowing that it should no longer expect a stop for that
+same thread.  @value{GDBN} does not enable this feature unless the
+stub reports that it supports it by including @samp{QThreadEvents+} in
+its @samp{qSupported} reply.
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  The error number @var{nn} is given as hex digits.
+
+@item @w{}
+An empty reply indicates that @samp{QThreadEvents} is not supported by
+the stub.
+@end table
+
+Use of this packet is controlled by the @code{set remote thread-events}
+command (@pxref{Remote Configuration, set remote thread-events}).
 
 @item qRcmd,@var{command}
 @cindex execute remote command, remote request
@@ -36428,6 +36482,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{QThreadEvents}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36639,6 +36698,9 @@ The remote stub reports the @samp{exec} stop reason for exec events.
 @item vContSupported
 The remote stub reports the supported actions in the reply to
 @samp{vCont?} packet.
+
+@item QThreadEvents
+The remote stub understands the @samp{QThreadEvents} packet.
 
 @end table
 

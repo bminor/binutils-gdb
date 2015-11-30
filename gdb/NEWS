@@ -48,6 +48,10 @@ set remote multiprocess-extensions-packet
 show remote multiprocess-extensions-packet
   Set/show the use of the remote protocol multiprocess extensions.
 
+set remote thread-events
+show remote thread-events
+  Set/show the use of thread create/exit events.
+
 * The "disassemble" command accepts a new modifier: /s.
   It prints mixed source+disassembly like /m with two differences:
   - disassembled instructions are now printed in program order, and
@@ -87,6 +91,20 @@ exec-events feature in qSupported
 vCtrlC
   Equivalent to interrupting with the ^C character, but works in
   non-stop mode.
+
+thread created stop reason (T05 create:...)
+  Indicates that the thread was just created and is stopped at entry.
+
+thread exit stop reply (w exitcode;tid)
+  Indicates that the thread has terminated.
+
+QThreadEvents
+  Enables/disables thread create and exit event reporting.  For
+  example, this is used in non-stop mode when GDB stops a set of
+  threads and synchronously waits for the their corresponding stop
+  replies.  Without exit events, if one of the threads exits, GDB
+  would hang forever not knowing that it should no longer expect a
+  stop for that same thread.
 
 * Extended-remote exec events
 

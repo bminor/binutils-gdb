@@ -672,6 +672,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     void (*to_async) (struct target_ops *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
+    void (*to_thread_events) (struct target_ops *, int)
+      TARGET_DEFAULT_IGNORE ();
     /* This method must be implemented in some situations.  See the
        comment on 'to_can_run'.  */
     int (*to_supports_non_stop) (struct target_ops *)
@@ -1792,6 +1794,9 @@ extern int target_async_permitted;
 
 /* Enables/disabled async target events.  */
 extern void target_async (int enable);
+
+/* Enables/disables thread create and exit events.  */
+extern void target_thread_events (int enable);
 
 /* Whether support for controlling the target backends always in
    non-stop mode is enabled.  */

@@ -1,5 +1,14 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* gdb.texinfo (Remote Configuration): List "set/show remote
+	thread-events" command in configuration table.
+	(Stop Reply Packets): Document "T05 create" stop
+	reason and 'w' stop reply.
+	(General Query Packets): Document QThreadEvents packet.  Document
+	QThreadEvents qSupported feature.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* gdb.texinfo (Bootstrapping): Add "interrupting remote targets"
 	anchor.
 	(Packets): Document vCtrlC.

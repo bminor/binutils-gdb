@@ -1,5 +1,33 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* NEWS (New commands): Mention "set/show remote thread-events"
+	commands.
+	(New remote packets): Mention thread created/exited stop reasons
+	and QThreadEvents packet.
+	* infrun.c (disable_thread_events): New function.
+	(stop_all_threads): Disable/enable thread create/exit events.
+	Handle TARGET_WAITKIND_THREAD_EXITED.
+	(handle_inferior_event_1): Handle TARGET_WAITKIND_THREAD_CREATED
+	and TARGET_WAITKIND_THREAD_EXITED.
+	* remote.c (remove_child_of_pending_fork): Also remove threads of
+	threads that have TARGET_WAITKIND_THREAD_EXITED events.
+	(remote_parse_stop_reply): Handle "create" magic register.  Handle
+	'w' stop reply.
+	(initialize_remote): Install remote_thread_events as
+	to_thread_events target hook.
+	(remote_thread_events): New function.
+	* target-delegates.c: Regenerate.
+	* target.c (target_thread_events): New function.
+	* target.h (struct target_ops) <to_thread_events>: New field.
+	(target_thread_events): Declare.
+	* target/waitstatus.c (target_waitstatus_to_string): Handle
+	TARGET_WAITKIND_THREAD_CREATED and TARGET_WAITKIND_THREAD_EXITED.
+	* target/waitstatus.h (enum target_waitkind)
+	<TARGET_WAITKIND_THREAD_CREATED, TARGET_WAITKIND_THREAD_EXITED):
+	New values.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* NEWS (New remote packets): Mention vCtrlC.
 	* remote.c (PACKET_vCtrlC): New enum value.
 	(async_remote_interrupt): Call target_interrupt instead of
