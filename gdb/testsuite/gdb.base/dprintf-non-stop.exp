@@ -20,13 +20,17 @@ if [is_remote target] then {
 }
 
 standard_testfile
+set executable ${testfile}
 
-if [prepare_for_testing "failed to prepare for dprintf with non-stop" \
+if [build_executable "failed to prepare for dprintf with non-stop" \
     ${testfile} ${srcfile} {debug}] {
     return -1
 }
 
-gdb_test_no_output "set non-stop on"
+save_vars { GDBFLAGS } {
+    append GDBFLAGS " -ex \"set non-stop on\""
+    clean_restart ${executable}
+}
 
 if ![runto main] {
     fail "Can't run to main"
@@ -60,7 +64,7 @@ gdb_test_multiple $test $test {
 
 set test "inferior stopped"
 gdb_test_multiple "" $test {
-    -re "\r\n\\\[.* \[0-9\]+\\\] #1 stopped\\\.\r\n" {
+    -re "\r\n\\\[.*\\\] #1 stopped\\\.\r\n" {
 	pass $test
     }
 }
