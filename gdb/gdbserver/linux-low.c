@@ -2409,7 +2409,6 @@ resume_stopped_resumed_lwps (struct inferior_list_entry *entry)
   if (lp->stopped
       && !lp->suspended
       && !lp->status_pending_p
-      && thread->last_resume_kind != resume_stop
       && thread->last_status.kind == TARGET_WAITKIND_IGNORE)
     {
       int step = thread->last_resume_kind == resume_step;

@@ -1,5 +1,10 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (resume_stopped_resumed_lwps): Don't check whether
+	the thread's last_resume_kind was resume_stop.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (linux_attach): In non-stop mode, wait for one stop
 	before returning.
 
