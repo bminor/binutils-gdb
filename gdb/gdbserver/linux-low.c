@@ -2963,6 +2963,7 @@ linux_wait_1 (ptid_t ptid,
   int report_to_gdb;
   int trace_event;
   int in_step_range;
+  int any_resumed;
 
   if (debug_threads)
     {
@@ -2980,6 +2981,18 @@ linux_wait_1 (ptid_t ptid,
   in_step_range = 0;
   ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
+  /* Find a resumed LWP, if any.  */
+  if (find_inferior (&all_threads,
+		     status_pending_p_callback,
+		     &minus_one_ptid) != NULL)
+    any_resumed = 1;
+  else if ((find_inferior (&all_threads,
+			   not_stopped_callback,
+			   &minus_one_ptid) != NULL))
+    any_resumed = 1;
+  else
+    any_resumed = 0;
+
   if (ptid_equal (step_over_bkpt, null_ptid))
     pid = linux_wait_for_event (ptid, &w, options);
   else
@@ -2990,7 +3003,7 @@ linux_wait_1 (ptid_t ptid,
       pid = linux_wait_for_event (step_over_bkpt, &w, options & ~WNOHANG);
     }
 
-  if (pid == 0)
+  if (pid == 0 || (pid == -1 && !any_resumed))
     {
       gdb_assert (target_options & TARGET_WNOHANG);
 

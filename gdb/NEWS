@@ -106,6 +106,12 @@ QThreadEvents
   would hang forever not knowing that it should no longer expect a
   stop for that same thread.
 
+N stop reply
+
+  Indicates that there are no resumed threads left in the target (all
+  threads are stopped).  The remote stub reports support for this stop
+  reply to GDB's qSupported query.
+
 * Extended-remote exec events
 
   ** GDB now has support for exec events on extended-remote Linux targets.

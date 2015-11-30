@@ -1289,6 +1289,9 @@ prepare_resume_reply (char *buf, ptid_t ptid,
       buf += strlen (buf);
       buf = write_ptid (buf, ptid);
       break;
+    case TARGET_WAITKIND_NO_RESUMED:
+      sprintf (buf, "N");
+      break;
     default:
       error ("unhandled waitkind");
       break;

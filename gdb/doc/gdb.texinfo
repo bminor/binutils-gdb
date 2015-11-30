@@ -20239,6 +20239,10 @@ are:
 @tab @code{QThreadEvents}
 @tab Tracking thread lifetime.
 
+@item @code{no-resumed-stop-reply}
+@tab @code{no resumed thread left stop reply}
+@tab Tracking thread lifetime.
+
 @end multitable
 
 @node Remote Stub
@@ -35588,6 +35592,21 @@ The thread exited, and @var{AA} is the exit status.  This response
 should not be sent by default; @value{GDBN} requests it with the
 @ref{QThreadEvents} packet.  See also @ref{thread create event} above.
 
+@item N
+There are no resumed threads left in the target.  In other words, even
+though the process is alive, the last resumed thread has exited.  For
+example, say the target process has two threads: thread 1 and thread
+2.  The client leaves thread 1 stopped, and resumes thread 2, which
+subsequently exits.  At this point, even though the process is still
+alive, and thus no @samp{W} stop reply is sent, no thread is actually
+executing either.  The @samp{N} stop reply thus informs the client
+that it can stop waiting for stop replies.  This packet should not be
+sent by default; older @value{GDBN} versions did not support it.
+@value{GDBN} requests it, by supplying an appropriate
+@samp{qSupported} feature (@pxref{qSupported}).  The remote stub must
+also supply the appropriate @samp{qSupported} feature indicating
+support.
+
 @item O @var{XX}@dots{}
 @samp{@var{XX}@dots{}} is hex encoding of @sc{ascii} data, to be
 written as the program's console output.  This can happen at any time
@@ -36487,6 +36506,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{no-resumed}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36701,6 +36725,9 @@ The remote stub reports the supported actions in the reply to
 
 @item QThreadEvents
 The remote stub understands the @samp{QThreadEvents} packet.
+
+@item no-resumed
+The remote stub reports the @samp{N} stop reply.
 
 @end table
 

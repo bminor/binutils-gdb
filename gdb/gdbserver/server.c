@@ -61,6 +61,10 @@ int report_fork_events;
 int report_vfork_events;
 int report_exec_events;
 int report_thread_events;
+
+/* Whether to report TARGET_WAITKING_NO_RESUMED events.  */
+static int report_no_resumed;
+
 int non_stop;
 int swbreak_feature;
 int hwbreak_feature;
@@ -2187,6 +2191,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		vCont_supported = 1;
 	      else if (strcmp (p, "QThreadEvents+") == 0)
 		;
+	      else if (strcmp (p, "no-resumed+") == 0)
+		{
+		  /* GDB supports and wants TARGET_WAITKIND_NO_RESUMED
+		     events.  */
+		  report_no_resumed = 1;
+		}
 	      else
 		{
 		  /* Move the unknown features all together.  */
@@ -2308,6 +2318,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       strcat (own_buf, ";vContSupported+");
 
       strcat (own_buf, ";QThreadEvents+");
+
+      strcat (own_buf, ";no-resumed+");
 
       /* Reinitialize components as needed for the new connection.  */
       hostio_handle_new_gdb_connection ();
@@ -2716,10 +2728,11 @@ resume (struct thread_resume *actions, size_t num_actions)
     {
       last_ptid = mywait (minus_one_ptid, &last_status, 0, 1);
 
-      if (last_status.kind == TARGET_WAITKIND_NO_RESUMED)
+      if (last_status.kind == TARGET_WAITKIND_NO_RESUMED
+	  && !report_no_resumed)
 	{
-	  /* No proper RSP support for this yet.  At least return
-	     error.  */
+	  /* The client does not support this stop reply.  At least
+	     return error.  */
 	  sprintf (own_buf, "E.No unwaited-for children left.");
 	  disable_async_io ();
 	  return;
@@ -4332,6 +4345,19 @@ handle_serial_event (int err, gdb_client_data client_data)
   return 0;
 }
 
+/* Push a stop notification on the notification queue.  */
+
+static void
+push_stop_notification (ptid_t ptid, struct target_waitstatus *status)
+{
+  struct vstop_notif *vstop_notif = XNEW (struct vstop_notif);
+
+  vstop_notif->status = *status;
+  vstop_notif->ptid = ptid;
+  /* Push Stop notification.  */
+  notif_push (&notif_stop, (struct notif_event *) vstop_notif);
+}
+
 /* Event-loop callback for target events.  */
 
 int
@@ -4345,7 +4371,8 @@ handle_target_event (int err, gdb_client_data client_data)
 
   if (last_status.kind == TARGET_WAITKIND_NO_RESUMED)
     {
-      /* No RSP support for this yet.  */
+      if (gdb_connected () && report_no_resumed)
+	push_stop_notification (null_ptid, &last_status);
     }
   else if (last_status.kind != TARGET_WAITKIND_IGNORE)
     {
@@ -4405,15 +4432,7 @@ handle_target_event (int err, gdb_client_data client_data)
 	    }
 	}
       else
-	{
-	  struct vstop_notif *vstop_notif = XNEW (struct vstop_notif);
-
-	  vstop_notif->status = last_status;
-	  vstop_notif->ptid = last_ptid;
-	  /* Push Stop notification.  */
-	  notif_push (&notif_stop,
-		      (struct notif_event *) vstop_notif);
-	}
+	push_stop_notification (last_ptid, &last_status);
     }
 
   /* Be sure to not change the selected thread behind GDB's back.

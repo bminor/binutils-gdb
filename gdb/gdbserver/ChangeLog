@@ -1,5 +1,21 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	PR 14618
+	* linux-low.c (linux_wait_1): If the last resumed thread is gone,
+	report TARGET_WAITKIND_NO_RESUMED.
+	* remote-utils.c (prepare_resume_reply): Handle
+	TARGET_WAITKIND_NO_RESUMED.
+	* server.c (report_no_resumed): New global.
+	(handle_query) <qSupported>: Handle "no-resumed+".  Report
+	"no-resumed+" support.
+	(resume): When the target reports TARGET_WAITKIND_NO_RESUMED, only
+	return error if the client doesn't support no-resumed events.
+	(push_stop_notification): New function.
+	(handle_target_event): Use it.  Report TARGET_WAITKIND_NO_RESUMED
+	events if the client supports them.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (thread_still_has_status_pending_p): Don't check
 	vCont;t here.
 	(lwp_resumed): New function.

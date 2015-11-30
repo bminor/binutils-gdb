@@ -1,6 +1,18 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
 	PR 14618
+	* NEWS (New remote packets): Mention the N stop reply.
+	* remote.c (remote_protocol_features): Add "no-resumed" entry.
+	(remote_query_supported): Report no-resumed+ support.
+	(remote_parse_stop_reply): Handle 'N'.
+	(process_stop_reply): Handle TARGET_WAITKIND_NO_RESUMED.
+	(remote_wait_as): Handle 'N' / TARGET_WAITKIND_NO_RESUMED.
+	(_initialize_remote): Register "set/show remote
+	no-resumed-stop-reply" commands.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	PR 14618
 	* infrun.c (handle_no_resumed): New function.
 	(handle_inferior_event_1) <TARGET_WAITKIND_NO_RESUMED>: Defer to
 	handle_no_resumed.

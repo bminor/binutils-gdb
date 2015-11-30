@@ -1,5 +1,14 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	PR 14618
+	* gdb.texinfo (Stop Reply Packets): Document the N stop reply.
+	(Remote Configuration): Add the "set/show remote
+	no-resumed-stop-reply" to the available settings table.
+	(General Query Packets): Document the "no-resumed" qSupported
+	feature.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* gdb.texinfo (Remote Configuration): List "set/show remote
 	thread-events" command in configuration table.
 	(Stop Reply Packets): Document "T05 create" stop

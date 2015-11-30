@@ -1488,6 +1488,9 @@ enum {
   /* Support remote CTRL-C.  */
   PACKET_vCtrlC,
 
+  /* Support TARGET_WAITKIND_NO_RESUMED.  */
+  PACKET_no_resumed,
+
   PACKET_MAX
 };
 
@@ -4527,6 +4530,7 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_Qbtrace_conf_pt_size },
   { "vContSupported", PACKET_DISABLE, remote_supported_packet, PACKET_vContSupported },
   { "QThreadEvents", PACKET_DISABLE, remote_supported_packet, PACKET_QThreadEvents },
+  { "no-resumed", PACKET_DISABLE, remote_supported_packet, PACKET_no_resumed },
 };
 
 static char *remote_support_xml;
@@ -4621,6 +4625,9 @@ remote_query_supported (void)
 
       if (packet_set_cmd_state (PACKET_QThreadEvents) != AUTO_BOOLEAN_FALSE)
 	q = remote_query_supported_append (q, "QThreadEvents+");
+
+      if (packet_set_cmd_state (PACKET_no_resumed) != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "no-resumed+");
 
       /* Keep this one last to work around a gdbserver <= 7.10 bug in
 	 the qSupported:xmlRegisters=i386 handling.  */
@@ -6596,6 +6603,10 @@ Packet: '%s'\n"),
 	event->ptid = pid_to_ptid (pid);
       }
       break;
+    case 'N':
+      event->ws.kind = TARGET_WAITKIND_NO_RESUMED;
+      event->ptid = minus_one_ptid;
+      break;
     }
 
   if (target_is_non_stop_p () && ptid_equal (event->ptid, null_ptid))
@@ -6697,7 +6708,8 @@ process_stop_reply (struct stop_reply *stop_reply,
     ptid = inferior_ptid;
 
   if (status->kind != TARGET_WAITKIND_EXITED
-      && status->kind != TARGET_WAITKIND_SIGNALLED)
+      && status->kind != TARGET_WAITKIND_SIGNALLED
+      && status->kind != TARGET_WAITKIND_NO_RESUMED)
     {
       struct remote_state *rs = get_remote_state ();
       struct private_thread_info *remote_thr;
@@ -6875,7 +6887,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
       remote_fileio_request (buf, rs->ctrlc_pending_p);
       rs->ctrlc_pending_p = 0;
       break;
-    case 'T': case 'S': case 'X': case 'W':
+    case 'N': case 'T': case 'S': case 'X': case 'W':
       {
 	struct stop_reply *stop_reply;
 
@@ -6914,7 +6926,9 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
       break;
     }
 
-  if (status->kind == TARGET_WAITKIND_IGNORE)
+  if (status->kind == TARGET_WAITKIND_NO_RESUMED)
+    return minus_one_ptid;
+  else if (status->kind == TARGET_WAITKIND_IGNORE)
     {
       /* Nothing interesting happened.  If we're doing a non-blocking
 	 poll, we're done.  Otherwise, go back to waiting.  */
@@ -13754,6 +13768,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QThreadEvents],
 			 "QThreadEvents", "thread-events", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_no_resumed],
+			 "N stop reply", "no-resumed-stop-reply", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */
