@@ -2697,8 +2697,31 @@ attach_post_wait (char *args, int from_tty, enum attach_post_wait_mode mode)
 	 selected thread is stopped, others may still be executing.
 	 Be sure to explicitly stop all threads of the process.  This
 	 should have no effect on already stopped threads.  */
-      if (target_is_non_stop_p ())
+      if (non_stop)
 	target_stop (pid_to_ptid (inferior->pid));
+      else if (target_is_non_stop_p ())
+	{
+	  struct thread_info *thread;
+	  struct thread_info *lowest = inferior_thread ();
+	  int pid = current_inferior ()->pid;
+
+	  stop_all_threads ();
+
+	  /* It's not defined which thread will report the attach
+	     stop.  For consistency, always select the thread with
+	     lowest GDB number, which should be the main thread, if it
+	     still exists.  */
+	  ALL_NON_EXITED_THREADS (thread)
+	    {
+	      if (ptid_get_pid (thread->ptid) == pid)
+		{
+		  if (thread->num < lowest->num)
+		    lowest = thread;
+		}
+	    }
+
+	  switch_to_thread (lowest->ptid);
+	}
 
       /* Tell the user/frontend where we're stopped.  */
       normal_stop ();

@@ -1,5 +1,11 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* infcmd.c (attach_post_wait): If the target is always in non-stop
+	mode, and the UI is in all-stop mode, stop all threads and pick
+	the one with lowest number as current.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (switch_to_thread_no_regs): Declare.
 	* infcmd.c (setup_inferior): New function, factored out from ...
 	(attach_command_post_wait): ... this.  Rename to ...
