@@ -1,5 +1,13 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (thread_still_has_status_pending_p): Don't check
+	vCont;t here.
+	(lwp_resumed): New function.
+	(status_pending_p_callback): Return early if the LWP is not
+	supposed to be resumed.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (handle_extended_wait): Assert that the LWP's
 	waitstatus is TARGET_WAITKIND_IGNORE.  If GDB wants to hear about
 	thread create events, leave the new child's status pending.

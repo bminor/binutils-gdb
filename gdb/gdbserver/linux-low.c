@@ -1525,12 +1525,6 @@ thread_still_has_status_pending_p (struct thread_info *thread)
   if (!lp->status_pending_p)
     return 0;
 
-  /* If we got a `vCont;t', but we haven't reported a stop yet, do
-     report any status pending the LWP may have.  */
-  if (thread->last_resume_kind == resume_stop
-      && thread->last_status.kind != TARGET_WAITKIND_IGNORE)
-    return 0;
-
   if (thread->last_resume_kind != resume_stop
       && (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
 	  || lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT))
@@ -1587,6 +1581,26 @@ thread_still_has_status_pending_p (struct thread_info *thread)
   return 1;
 }
 
+/* Returns true if LWP is resumed from the client's perspective.  */
+
+static int
+lwp_resumed (struct lwp_info *lwp)
+{
+  struct thread_info *thread = get_lwp_thread (lwp);
+
+  if (thread->last_resume_kind != resume_stop)
+    return 1;
+
+  /* Did gdb send us a `vCont;t', but we haven't reported the
+     corresponding stop to gdb yet?  If so, the thread is still
+     resumed/running from gdb's perspective.  */
+  if (thread->last_resume_kind == resume_stop
+      && thread->last_status.kind == TARGET_WAITKIND_IGNORE)
+    return 1;
+
+  return 0;
+}
+
 /* Return 1 if this lwp has an interesting status pending.  */
 static int
 status_pending_p_callback (struct inferior_list_entry *entry, void *arg)
@@ -1598,6 +1612,9 @@ status_pending_p_callback (struct inferior_list_entry *entry, void *arg)
   /* Check if we're only interested in events from a specific process
      or a specific LWP.  */
   if (!ptid_match (ptid_of (thread), ptid))
+    return 0;
+
+  if (!lwp_resumed (lp))
     return 0;
 
   if (lp->status_pending_p
