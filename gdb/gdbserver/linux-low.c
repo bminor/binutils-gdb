@@ -3071,14 +3071,21 @@ linux_wait_1 (ptid_t ptid,
       return ptid_of (current_thread);
     }
 
-  /* If step-over executes a breakpoint instruction, it means a
-     gdb/gdbserver breakpoint had been planted on top of a permanent
-     breakpoint.  The PC has been adjusted by
-     check_stopped_by_breakpoint to point at the breakpoint address.
-     Advance the PC manually past the breakpoint, otherwise the
-     program would keep trapping the permanent breakpoint forever.  */
+  /* If step-over executes a breakpoint instruction, in the case of a
+     hardware single step it means a gdb/gdbserver breakpoint had been
+     planted on top of a permanent breakpoint, in the case of a software
+     single step it may just mean that gdbserver hit the reinsert breakpoint.
+     The PC has been adjusted by check_stopped_by_breakpoint to point at
+     the breakpoint address.
+     So in the case of the hardware single step advance the PC manually
+     past the breakpoint and in the case of software single step advance only
+     if it's not the reinsert_breakpoint we are hitting.
+     This avoids that a program would keep trapping a permanent breakpoint
+     forever.  */
   if (!ptid_equal (step_over_bkpt, null_ptid)
-      && event_child->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT)
+      && event_child->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
+      && (event_child->stepping
+	  || !reinsert_breakpoint_inserted_here (event_child->stop_pc)))
     {
       int increment_pc = 0;
       int breakpoint_kind = 0;

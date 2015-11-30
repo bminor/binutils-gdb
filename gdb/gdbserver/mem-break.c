@@ -1662,6 +1662,23 @@ hardware_breakpoint_inserted_here (CORE_ADDR addr)
   return 0;
 }
 
+/* See mem-break.h.  */
+
+int
+reinsert_breakpoint_inserted_here (CORE_ADDR addr)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp;
+
+  for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
+    if (bp->type == reinsert_breakpoint
+	&& bp->raw->pc == addr
+	&& bp->raw->inserted)
+      return 1;
+
+  return 0;
+}
+
 static int
 validate_inserted_breakpoint (struct raw_breakpoint *bp)
 {

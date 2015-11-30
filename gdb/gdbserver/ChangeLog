@@ -1,5 +1,11 @@
 2015-11-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* linux-low.c (linux_wait_1): Fix pc advance condition.
+	* mem-break.c (reinsert_breakpoint_inserted_here): New function.
+	* mem-break.h (reinsert_breakpoint_inserted_here): New declaration.
+
+2015-11-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* linux-arm-low.c (arm_is_thumb_mode): New function.
 	(arm_breakpoint_at): Use arm_is_thumb_mode.
 	(arm_breakpoint_kind_from_current_state): New function.
