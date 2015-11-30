@@ -1,5 +1,5 @@
 2015-11-26  Daniel Colascione  <dancol@dancol.org>
-2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	* linux-low.c (linux_target_ops): Use linux_proc_tid_get_name.
 	* server.c (handle_qxfer_threads_worker): Refactor to include thread
