@@ -1,5 +1,9 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* server.c (handle_v_requests): Handle vCtrlC.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (find_any_thread_of_pid): Declare.
 	* inferiors.c (thread_of_pid, find_any_thread_of_pid): New
 	functions.

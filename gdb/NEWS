@@ -84,6 +84,10 @@ exec-events feature in qSupported
   response can contain the corresponding 'stubfeature'.  Set and
   show commands can be used to display whether these features are enabled.
 
+vCtrlC
+  Equivalent to interrupting with the ^C character, but works in
+  non-stop mode.
+
 * Extended-remote exec events
 
   ** GDB now has support for exec events on extended-remote Linux targets.

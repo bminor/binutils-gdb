@@ -1480,6 +1480,9 @@ enum {
   /* Support for query supported vCont actions.  */
   PACKET_vContSupported,
 
+  /* Support remote CTRL-C.  */
+  PACKET_vCtrlC,
+
   PACKET_MAX
 };
 
@@ -5581,7 +5584,7 @@ async_remote_interrupt (gdb_client_data arg)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "async_remote_interrupt called\n");
 
-  target_stop (inferior_ptid);
+  target_interrupt (inferior_ptid);
 }
 
 /* Perform interrupt, if the first attempt did not succeed.  Just give
@@ -5688,7 +5691,7 @@ remote_stop_ns (ptid_t ptid)
    process reports the interrupt.  */
 
 static void
-remote_interrupt_as (ptid_t ptid)
+remote_interrupt_as (void)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -5702,6 +5705,38 @@ remote_interrupt_as (ptid_t ptid)
 
   /* Send interrupt_sequence to remote target.  */
   send_interrupt_sequence ();
+}
+
+/* Non-stop version of target_interrupt.  Uses `vCtrlC' to interrupt
+   the remote target.  It is undefined which thread of which process
+   reports the interrupt.  Returns true if the packet is supported by
+   the server, false otherwise.  */
+
+static int
+remote_interrupt_ns (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p = rs->buf;
+  char *endp = rs->buf + get_remote_packet_size ();
+
+  xsnprintf (p, endp - p, "vCtrlC");
+
+  /* In non-stop, we get an immediate OK reply.  The stop reply will
+     come in asynchronously by notification.  */
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  switch (packet_ok (rs->buf, &remote_protocol_packets[PACKET_vCtrlC]))
+    {
+    case PACKET_OK:
+      break;
+    case PACKET_UNKNOWN:
+      return 0;
+    case PACKET_ERROR:
+      error (_("Interrupting target failed: %s"), rs->buf);
+    }
+
+  return 1;
 }
 
 /* Implement the to_stop function for the remote targets.  */
@@ -5718,7 +5753,7 @@ remote_stop (struct target_ops *self, ptid_t ptid)
     {
       /* We don't currently have a way to transparently pause the
 	 remote target in all-stop mode.  Interrupt it instead.  */
-      remote_interrupt_as (ptid);
+      remote_interrupt_as ();
     }
 }
 
@@ -5730,14 +5765,27 @@ remote_interrupt (struct target_ops *self, ptid_t ptid)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
 
-  if (target_is_non_stop_p ())
+  if (non_stop)
     {
-      /* We don't currently have a way to ^C the remote target in
-	 non-stop mode.  Stop it (with no signal) instead.  */
+      /* In non-stop mode, we always stop with no signal instead.  */
       remote_stop_ns (ptid);
     }
   else
-    remote_interrupt_as (ptid);
+    {
+      /* In all-stop, we emulate ^C-ing the remote target's
+	 terminal.  */
+      if (target_is_non_stop_p ())
+	{
+	  if (!remote_interrupt_ns ())
+	    {
+	      /* No support for ^C-ing the remote target.  Stop it
+		 (with no signal) instead.  */
+	      remote_stop_ns (ptid);
+	    }
+	}
+      else
+	remote_interrupt_as ();
+    }
 }
 
 /* Ask the user what to do when an interrupt is received.  */
@@ -13642,6 +13690,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_exec_event_feature],
 			 "exec-event-feature", "exec-event-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vCtrlC],
+			 "vCtrlC", "ctrl-c", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */

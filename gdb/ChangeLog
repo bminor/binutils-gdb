@@ -1,5 +1,18 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* NEWS (New remote packets): Mention vCtrlC.
+	* remote.c (PACKET_vCtrlC): New enum value.
+	(async_remote_interrupt): Call target_interrupt instead of
+	target_stop.
+	(remote_interrupt_as): Remove 'ptid' parameter.
+	(remote_interrupt_ns): New function.
+	(remote_stop): Adjust.
+	(remote_interrupt): If the target is in non-stop mode, try
+	interrupting with vCtrlC.
+	(initialize_remote): Install set remote ctrl-c packet.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (struct remote_state) <remote_watch_data_address,
 	stop_reason>: Delete fields.
 	(struct private_thread_info) <stop_reason, watch_data_address>:

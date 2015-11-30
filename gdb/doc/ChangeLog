@@ -1,3 +1,9 @@
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Bootstrapping): Add "interrupting remote targets"
+	anchor.
+	(Packets): Document vCtrlC.
+
 2015-11-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Thread List Format): Mention thread names.

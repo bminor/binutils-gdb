@@ -35090,6 +35090,24 @@ command in the @samp{vCont} packet.
 The @samp{vCont} packet is not supported.
 @end table
 
+@anchor{vCtrlC packet}
+@item vCtrlC
+@cindex @samp{vCtrlC} packet
+Interrupt remote target as if a control-C was pressed on the remote
+terminal.  This is the equivalent to reacting to the @code{^C}
+(@samp{\003}, the control-C character) character in all-stop mode
+while the target is running, except this works in non-stop mode.
+@xref{interrupting remote targets}, for more info on the all-stop
+variant.
+
+Reply:
+@table @samp
+@item E @var{nn}
+for an error
+@item OK
+for success
+@end table
+
 @item vFile:@var{operation}:@var{parameter}@dots{}
 @cindex @samp{vFile} packet
 Perform a file operation on the target system.  For details,
@@ -37857,11 +37875,12 @@ operation.
 @node Interrupts
 @section Interrupts
 @cindex interrupts (remote protocol)
+@anchor{interrupting remote targets}
 
-When a program on the remote target is running, @value{GDBN} may
-attempt to interrupt it by sending a @samp{Ctrl-C}, @code{BREAK} or
-a @code{BREAK} followed by @code{g},
-control of which is specified via @value{GDBN}'s @samp{interrupt-sequence}.
+In all-stop mode, when a program on the remote target is running,
+@value{GDBN} may attempt to interrupt it by sending a @samp{Ctrl-C},
+@code{BREAK} or a @code{BREAK} followed by @code{g}, control of which
+is specified via @value{GDBN}'s @samp{interrupt-sequence}.
 
 The precise meaning of @code{BREAK} is defined by the transport
 mechanism and may, in fact, be undefined.  @value{GDBN} does not
@@ -37881,6 +37900,13 @@ and does @emph{not} represent an interrupt.  E.g., an @samp{X} packet
 @code{BREAK} followed by @code{g} is also known as Magic SysRq g.
 When Linux kernel receives this sequence from serial port,
 it stops execution and connects to gdb.
+
+In non-stop mode, because packet resumptions are asynchronous
+(@pxref{vCont packet}), @value{GDBN} is always free to send a remote
+command to the remote stub, even when the target is running.  For that
+reason, @value{GDBN} instead sends a regular packet (@pxref{vCtrlC
+packet}) with the usual packet framing instead of the single byte
+@code{0x03}.
 
 Stubs are not required to recognize these interrupt mechanisms and the
 precise meaning associated with receipt of the interrupt is

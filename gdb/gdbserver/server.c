@@ -2861,6 +2861,13 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 {
   if (!disable_packet_vCont)
     {
+      if (strcmp (own_buf, "vCtrlC") == 0)
+	{
+	  (*the_target->request_interrupt) ();
+	  write_ok (own_buf);
+	  return;
+	}
+
       if (startswith (own_buf, "vCont;"))
 	{
 	  require_running (own_buf);
