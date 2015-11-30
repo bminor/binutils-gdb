@@ -233,6 +233,9 @@ struct linux_target_ops
 
   /* Returns true if the low target supports range stepping.  */
   int (*supports_range_stepping) (void);
+
+  /* See target.h.  */
+  int (*breakpoint_kind_from_current_state) (CORE_ADDR *pcptr);
 };
 
 extern struct linux_target_ops the_low_target;

@@ -3084,7 +3084,8 @@ linux_wait_1 (ptid_t ptid,
       int breakpoint_kind = 0;
       CORE_ADDR stop_pc = event_child->stop_pc;
 
-      breakpoint_kind = the_target->breakpoint_kind_from_pc (&stop_pc);
+      breakpoint_kind =
+	the_target->breakpoint_kind_from_current_state (&stop_pc);
       the_target->sw_breakpoint_from_kind (breakpoint_kind, &increment_pc);
 
       if (debug_threads)
@@ -7036,6 +7037,18 @@ linux_sw_breakpoint_from_kind (int kind, int *size)
   return (*the_low_target.sw_breakpoint_from_kind) (kind, size);
 }
 
+/* Implementation of the target_ops method
+   "breakpoint_kind_from_current_state".  */
+
+static int
+linux_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+{
+  if (the_low_target.breakpoint_kind_from_current_state != NULL)
+    return (*the_low_target.breakpoint_kind_from_current_state) (pcptr);
+  else
+    return linux_breakpoint_kind_from_pc (pcptr);
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_arch_setup,
@@ -7133,6 +7146,7 @@ static struct target_ops linux_target_ops = {
   linux_breakpoint_kind_from_pc,
   linux_sw_breakpoint_from_kind,
   linux_proc_tid_get_name,
+  linux_breakpoint_kind_from_current_state
 };
 
 static void

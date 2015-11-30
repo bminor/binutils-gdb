@@ -1,3 +1,18 @@
+2015-11-30  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-arm-low.c (arm_is_thumb_mode): New function.
+	(arm_breakpoint_at): Use arm_is_thumb_mode.
+	(arm_breakpoint_kind_from_current_state): New function.
+	(struct linux_target_ops) <breakpoint_kind_from_current_state>:
+	Initialize.
+	* linux-low.c (linux_wait_1): Call breakpoint_kind_from_current_state.
+	(linux_breakpoint_kind_from_current_state): New function.
+	(struct target_ops <breakpoint_kind_from_current_state>: Initialize.
+	* linux-low.h (struct linux_target_ops)
+	<breakpoint_kind_from_current_state>: New field.
+	* target.h (struct target_ops): Likewise.
+	(target_breakpoint_kind_from_current_state): New macro.
+
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (linux_resume): Wake up the event loop before

@@ -457,6 +457,12 @@ struct target_ops
   /* Return the thread's name, or NULL if the target is unable to determine it.
      The returned value must not be freed by the caller.  */
   const char *(*thread_name) (ptid_t thread);
+
+  /* Return the breakpoint kind for this target based on the current
+     processor state (e.g. the current instruction mode on ARM) and the
+     PC.  The PCPTR is adjusted to the real memory location in case a flag
+     (e.g., the Thumb bit on ARM) is present in the PC.  */
+  int (*breakpoint_kind_from_current_state) (CORE_ADDR *pcptr);
 };
 
 extern struct target_ops *the_target;
@@ -643,6 +649,11 @@ int kill_inferior (int);
   (the_target->breakpoint_kind_from_pc \
    ? (*the_target->breakpoint_kind_from_pc) (pcptr) \
    : default_breakpoint_kind_from_pc (pcptr))
+
+#define target_breakpoint_kind_from_current_state(pcptr) \
+  (the_target->breakpoint_kind_from_current_state \
+   ? (*the_target->breakpoint_kind_from_current_state) (pcptr) \
+   : target_breakpoint_kind_from_pc (pcptr))
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 
