@@ -1023,13 +1023,8 @@ check_gdb_bp_preconditions (char z_type, int *err)
       *err = 1;
       return 0;
     }
-  else if (current_thread == NULL)
-    {
-      *err = -1;
-      return 0;
-    }
-  else
-    return 1;
+
+  return 1;
 }
 
 /* See mem-break.h.  This is a wrapper for set_gdb_breakpoint_1 that
@@ -1047,9 +1042,11 @@ set_gdb_breakpoint (char z_type, CORE_ADDR addr, int kind, int *err)
      access memory.  */
   if (z_type == Z_PACKET_SW_BP)
     {
-      *err = prepare_to_access_memory ();
-      if (*err != 0)
-	return NULL;
+      if (prepare_to_access_memory () != 0)
+	{
+	  *err = -1;
+	  return NULL;
+	}
     }
 
   bp = set_gdb_breakpoint_1 (z_type, addr, kind, err);

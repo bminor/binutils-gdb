@@ -651,17 +651,11 @@ int start_non_stop (int nonstop);
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	       int connected_wait);
 
-#define prepare_to_access_memory()		\
-  (the_target->prepare_to_access_memory		\
-   ? (*the_target->prepare_to_access_memory) () \
-   : 0)
+/* Prepare to read or write memory from the inferior process.  See the
+   corresponding target_ops methods for more details.  */
 
-#define done_accessing_memory()				\
-  do							\
-    {							\
-      if (the_target->done_accessing_memory)     	\
-	(*the_target->done_accessing_memory) ();  	\
-    } while (0)
+int prepare_to_access_memory (void);
+void done_accessing_memory (void);
 
 #define target_core_of_thread(ptid)		\
   (the_target->core_of_thread ? (*the_target->core_of_thread) (ptid) \

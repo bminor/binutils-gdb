@@ -1,5 +1,18 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	* mem-break.c (check_gdb_bp_preconditions): Remove current_thread
+	check.
+	(set_gdb_breakpoint): If prepare_to_access_memory fails, set *ERR
+	to -1.
+	* target.c (struct thread_search): New structure.
+	(thread_search_callback): New function.
+	(prev_general_thread): New global.
+	(prepare_to_access_memory, done_accessing_memory): New functions.
+	* target.h (prepare_to_access_memory, done_accessing_memory):
+	Replace macros with function declarations.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	PR 14618
 	* linux-low.c (linux_wait_1): If the last resumed thread is gone,
 	report TARGET_WAITKIND_NO_RESUMED.
