@@ -1,5 +1,12 @@
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
+	PR 14618
+	* infrun.c (handle_no_resumed): New function.
+	(handle_inferior_event_1) <TARGET_WAITKIND_NO_RESUMED>: Defer to
+	handle_no_resumed.
+
+2015-11-30  Pedro Alves  <palves@redhat.com>
+
 	* NEWS (New commands): Mention "set/show remote thread-events"
 	commands.
 	(New remote packets): Mention thread created/exited stop reasons

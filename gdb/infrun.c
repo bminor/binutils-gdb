@@ -4660,6 +4660,102 @@ stop_all_threads (void)
     fprintf_unfiltered (gdb_stdlog, "infrun: stop_all_threads done\n");
 }
 
+/* Handle a TARGET_WAITKIND_NO_RESUMED event.  */
+
+static int
+handle_no_resumed (struct execution_control_state *ecs)
+{
+  struct inferior *inf;
+  struct thread_info *thread;
+
+  if (target_can_async_p () && !sync_execution)
+    {
+      /* There were no unwaited-for children left in the target, but,
+	 we're not synchronously waiting for events either.  Just
+	 ignore.  */
+
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: TARGET_WAITKIND_NO_RESUMED " "(ignoring: bg)\n");
+      prepare_to_wait (ecs);
+      return 1;
+    }
+
+  /* Otherwise, if we were running a synchronous execution command, we
+     may need to cancel it and give the user back the terminal.
+
+     In non-stop mode, the target can't tell whether we've already
+     consumed previous stop events, so it can end up sending us a
+     no-resumed event like so:
+
+       #0 - thread 1 is left stopped
+
+       #1 - thread 2 is resumed and hits breakpoint
+               -> TARGET_WAITKIND_STOPPED
+
+       #2 - thread 3 is resumed and exits
+            this is the last resumed thread, so
+	       -> TARGET_WAITKIND_NO_RESUMED
+
+       #3 - gdb processes stop for thread 2 and decides to re-resume
+            it.
+
+       #4 - gdb processes the TARGET_WAITKIND_NO_RESUMED event.
+            thread 2 is now resumed, so the event should be ignored.
+
+     IOW, if the stop for thread 2 doesn't end a foreground command,
+     then we need to ignore the following TARGET_WAITKIND_NO_RESUMED
+     event.  But it could be that the event meant that thread 2 itself
+     (or whatever other thread was the last resumed thread) exited.
+
+     To address this we refresh the thread list and check whether we
+     have resumed threads _now_.  In the example above, this removes
+     thread 3 from the thread list.  If thread 2 was re-resumed, we
+     ignore this event.  If we find no thread resumed, then we cancel
+     the synchronous command show "no unwaited-for " to the user.  */
+  update_thread_list ();
+
+  ALL_NON_EXITED_THREADS (thread)
+    {
+      if (thread->executing
+	  || thread->suspend.waitstatus_pending_p)
+	{
+	  /* There were no unwaited-for children left in the target at
+	     some point, but there are now.  Just ignore.  */
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: TARGET_WAITKIND_NO_RESUMED "
+				"(ignoring: found resumed)\n");
+	  prepare_to_wait (ecs);
+	  return 1;
+	}
+    }
+
+  /* Note however that we may find no resumed thread because the whole
+     process exited meanwhile (thus updating the thread list results
+     in an empty thread list).  In this case we know we'll be getting
+     a process exit event shortly.  */
+  ALL_INFERIORS (inf)
+    {
+      if (inf->pid == 0)
+	continue;
+
+      thread = any_live_thread_of_process (inf->pid);
+      if (thread == NULL)
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: TARGET_WAITKIND_NO_RESUMED "
+				"(expect process exit)\n");
+	  prepare_to_wait (ecs);
+	  return 1;
+	}
+    }
+
+  /* Go ahead and report the event.  */
+  return 0;
+}
+
 /* Given an execution control state that has been freshly filled in by
    an event from the inferior, figure out what it means and take
    appropriate action.
@@ -4704,19 +4800,8 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
     }
 
   if (ecs->ws.kind == TARGET_WAITKIND_NO_RESUMED
-      && target_can_async_p () && !sync_execution)
-    {
-      /* There were no unwaited-for children left in the target, but,
-	 we're not synchronously waiting for events either.  Just
-	 ignore.  Otherwise, if we were running a synchronous
-	 execution command, we need to cancel it and give the user
-	 back the terminal.  */
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog,
-			    "infrun: TARGET_WAITKIND_NO_RESUMED (ignoring)\n");
-      prepare_to_wait (ecs);
-      return;
-    }
+      && handle_no_resumed (ecs))
+    return;
 
   /* Cache the last pid/waitstatus.  */
   set_last_target_status (ecs->ptid, ecs->ws);
