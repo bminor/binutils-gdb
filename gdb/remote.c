@@ -6548,7 +6548,7 @@ Packet: '%s'\n"),
 	event->ws.value.integer = value;
 	if (*p != ';')
 	  error (_("stop reply packet badly formatted: %s"), buf);
-	event->ptid = read_ptid (++p, &p);
+	event->ptid = read_ptid (++p, NULL);
 	break;
       }
     case 'W':		/* Target exited.  */

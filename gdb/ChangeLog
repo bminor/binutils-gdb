@@ -1,5 +1,10 @@
 2015-12-01  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* remote.c (remote_parse_stop_reply): Avoid GCC 4.1 "operation
+	may be undefined" warning.
+
+2015-12-01  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* remote.c (remote_newthread_step): Initialize item.name.
 	(remote_get_threads_with_qthreadinfo): Likewise.
 
