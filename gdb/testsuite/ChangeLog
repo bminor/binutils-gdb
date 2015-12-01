@@ -1,3 +1,8 @@
+2015-12-01  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-syscall.exp: Define syscall instruction
+	for aarch64*-*-linux* target.
+
 2015-11-30  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/no-unwaited-for-left.exp: Remove setup_kfail calls.
