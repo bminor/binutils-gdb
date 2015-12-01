@@ -1,3 +1,7 @@
+2015-12-01  Cupertino Miranda  <cupertino.miranda@synopsys.com>
+
+	* elf32-arc.c (arc_elf_howto_init): Init dst_mask.
+
 2015-11-20  Stefan Teleman  <stefan.teleman@oracle.com>
 
 	PR ld/19260
