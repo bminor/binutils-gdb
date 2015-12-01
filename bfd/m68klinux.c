@@ -69,11 +69,11 @@ m68klinux_write_object_contents (bfd *abfd)
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);
 
-  N_SET_MACHTYPE (*execp, M_68020);
+  N_SET_MACHTYPE (execp, M_68020);
 
   obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
 
-  WRITE_HEADERS(abfd, execp);
+  WRITE_HEADERS (abfd, execp);
 
   return TRUE;
 }

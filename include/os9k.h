@@ -100,7 +100,7 @@ Boston, MA 02110-1301, USA.  */
 #define MODSIZE(mod) ((u_int32)((Mh_com)mod)->m_size)
 #endif /* 0 */
 #define MHCOM_BYTES_SIZE 80
-#define N_BADMAG(a) (((a).a_info) != MODSYNC)
+#define N_BADMAG(a) (((a)->a_info) != MODSYNC)
 
 typedef struct mh_com
 {

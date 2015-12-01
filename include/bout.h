@@ -87,16 +87,16 @@ struct external_exec
 
 /* These macros use the a_xxx field names, since they operate on the exec
    structure after it's been byte-swapped and realigned on the host machine.  */
-#define N_BADMAG(x)	(((x).a_info)!=BMAGIC)
+#define N_BADMAG(x)	(((x)->a_info)!=BMAGIC)
 #define N_TXTOFF(x)	EXEC_BYTES_SIZE
-#define N_DATOFF(x)	( N_TXTOFF(x) + (x).a_text )
-#define N_TROFF(x)	( N_DATOFF(x) + (x).a_data )
+#define N_DATOFF(x)	( N_TXTOFF(x) + (x)->a_text )
+#define N_TROFF(x)	( N_DATOFF(x) + (x)->a_data )
 #define N_TRELOFF	N_TROFF
-#define N_DROFF(x)	( N_TROFF(x) + (x).a_trsize )
+#define N_DROFF(x)	( N_TROFF(x) + (x)->a_trsize )
 #define N_DRELOFF	N_DROFF
-#define N_SYMOFF(x)	( N_DROFF(x) + (x).a_drsize )
-#define N_STROFF(x)	( N_SYMOFF(x) + (x).a_syms )
-#define N_DATADDR(x)	( (x).a_dload )    
+#define N_SYMOFF(x)	( N_DROFF(x) + (x)->a_drsize )
+#define N_STROFF(x)	( N_SYMOFF(x) + (x)->a_syms )
+#define N_DATADDR(x)	( (x)->a_dload )
 
 /* Address of text segment in memory after it is loaded.  */
 #if !defined (N_TXTADDR)

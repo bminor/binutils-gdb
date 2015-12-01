@@ -57,7 +57,7 @@ main (int argc, char** argv)
   fclose (file);
 
 #ifdef N_TXTOFF
-  page_size = N_TXTOFF(my_exec);
+  page_size = N_TXTOFF (&my_exec);
   if (page_size == 0)
     printf ("#define N_HEADER_IN_TEXT(x) 1\n");
   else

@@ -32,7 +32,7 @@
 /* This macro is only relevant when N_MAGIC(x) == ZMAGIC.  */
 #define N_HEADER_IN_TEXT(x)	1
 
-#define N_TXTSIZE(x)	((x).a_text)
+#define N_TXTSIZE(x)	((x)->a_text)
 
 #include "sysdep.h"
 #include "bfd.h"

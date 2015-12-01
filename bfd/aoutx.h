@@ -488,27 +488,27 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
   /* Setting of EXEC_P has been deferred to the bottom of this function.  */
   if (execp->a_syms)
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
-  if (N_DYNAMIC (*execp))
+  if (N_DYNAMIC (execp))
     abfd->flags |= DYNAMIC;
 
-  if (N_MAGIC (*execp) == ZMAGIC)
+  if (N_MAGIC (execp) == ZMAGIC)
     {
       abfd->flags |= D_PAGED | WP_TEXT;
       adata (abfd).magic = z_magic;
     }
-  else if (N_MAGIC (*execp) == QMAGIC)
+  else if (N_MAGIC (execp) == QMAGIC)
     {
       abfd->flags |= D_PAGED | WP_TEXT;
       adata (abfd).magic = z_magic;
       adata (abfd).subformat = q_magic_format;
     }
-  else if (N_MAGIC (*execp) == NMAGIC)
+  else if (N_MAGIC (execp) == NMAGIC)
     {
       abfd->flags |= WP_TEXT;
       adata (abfd).magic = n_magic;
     }
-  else if (N_MAGIC (*execp) == OMAGIC
-	   || N_MAGIC (*execp) == BMAGIC)
+  else if (N_MAGIC (execp) == OMAGIC
+	   || N_MAGIC (execp) == BMAGIC)
     adata (abfd).magic = o_magic;
   else
     /* Should have been checked with N_BADMAG before this routine
@@ -563,28 +563,28 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
 
   struct exec *execp = exec_hdr (abfd);
 
-  obj_textsec (abfd)->size = N_TXTSIZE (*execp);
+  obj_textsec (abfd)->size = N_TXTSIZE (execp);
   /* Data and bss are already filled in since they're so standard.  */
 
   /* The virtual memory addresses of the sections.  */
-  obj_textsec (abfd)->vma = N_TXTADDR (*execp);
-  obj_datasec (abfd)->vma = N_DATADDR (*execp);
-  obj_bsssec  (abfd)->vma = N_BSSADDR (*execp);
+  obj_textsec (abfd)->vma = N_TXTADDR (execp);
+  obj_datasec (abfd)->vma = N_DATADDR (execp);
+  obj_bsssec  (abfd)->vma = N_BSSADDR (execp);
 
   /* The file offsets of the sections.  */
-  obj_textsec (abfd)->filepos = N_TXTOFF (*execp);
-  obj_datasec (abfd)->filepos = N_DATOFF (*execp);
+  obj_textsec (abfd)->filepos = N_TXTOFF (execp);
+  obj_datasec (abfd)->filepos = N_DATOFF (execp);
 
   /* The file offsets of the relocation info.  */
-  obj_textsec (abfd)->rel_filepos = N_TRELOFF (*execp);
-  obj_datasec (abfd)->rel_filepos = N_DRELOFF (*execp);
+  obj_textsec (abfd)->rel_filepos = N_TRELOFF (execp);
+  obj_datasec (abfd)->rel_filepos = N_DRELOFF (execp);
 
   /* The file offsets of the string table and symbol table.  */
-  obj_str_filepos (abfd) = N_STROFF (*execp);
-  obj_sym_filepos (abfd) = N_SYMOFF (*execp);
+  obj_str_filepos (abfd) = N_STROFF (execp);
+  obj_sym_filepos (abfd) = N_SYMOFF (execp);
 
   /* Determine the architecture and machine type of the object file.  */
-  switch (N_MACHTYPE (*exec_hdr (abfd)))
+  switch (N_MACHTYPE (exec_hdr (abfd)))
     {
     default:
       abfd->obj_arch = bfd_arch_obscure;
@@ -949,7 +949,7 @@ adjust_o_magic (bfd *abfd, struct internal_exec *execp)
   execp->a_text = obj_textsec (abfd)->size;
   execp->a_data = obj_datasec (abfd)->size;
   execp->a_bss = obj_bsssec (abfd)->size;
-  N_SET_MAGIC (*execp, OMAGIC);
+  N_SET_MAGIC (execp, OMAGIC);
 }
 
 static void
@@ -1038,9 +1038,9 @@ adjust_z_magic (bfd *abfd, struct internal_exec *execp)
   if (ztih && (!abdp || (abdp && !abdp->exec_header_not_counted)))
     execp->a_text += adata (abfd).exec_bytes_size;
   if (obj_aout_subformat (abfd) == q_magic_format)
-    N_SET_MAGIC (*execp, QMAGIC);
+    N_SET_MAGIC (execp, QMAGIC);
   else
-    N_SET_MAGIC (*execp, ZMAGIC);
+    N_SET_MAGIC (execp, ZMAGIC);
 
   /* Spec says data section should be rounded up to page boundary.  */
   obj_datasec (abfd)->size
@@ -1107,7 +1107,7 @@ adjust_n_magic (bfd *abfd, struct internal_exec *execp)
   execp->a_text = obj_textsec (abfd)->size;
   execp->a_data = obj_datasec (abfd)->size;
   execp->a_bss = obj_bsssec (abfd)->size;
-  N_SET_MAGIC (*execp, NMAGIC);
+  N_SET_MAGIC (execp, NMAGIC);
 }
 
 bfd_boolean

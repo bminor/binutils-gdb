@@ -1,5 +1,35 @@
 2015-12-01  Alan Modra  <amodra@gmail.com>
 
+	* aout-adobe.c: Invoke aout N_* macros with pointer to
+	struct internal_exec.
+	* aout-arm.c: Likewise.
+	* aout-cris.c: Likewise.
+	* aout-target.h: Likewise.
+	* aout-tic30.c: Likewise.
+	* aoutf1.h: Likewise.
+	* aoutx.h: Likewise.
+	* bout.c: Likewise.
+	* freebsd.h: Likewise.
+	* gen-aout.c: Likewise.
+	* hp300hpux.c: Likewise.
+	* i386aout.c: Likewise.
+	* i386linux.c: Likewise.
+	* i386lynx.c: Likewise.
+	* i386mach3.c: Likewise.
+	* i386os9k.c: Likewise.
+	* libaout.h: Likewise.
+	* m68klinux.c: Likewise.
+	* m88kmach3.c: Likewise.
+	* mipsbsd.c: Likewise.
+	* netbsd.h: Likewise.
+	* pc532-mach.c: Likewise.
+	* pdp11.c: Likewise.
+	* riscix.c: Likewise.
+	* sparclinux.c: Likewise.
+	* sparclynx.c: Likewise.
+
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
 	* coff-rs6000.c (_bfd_xcoff_put_symbol_name): Replace abfd param
 	with info param.  Test info->traditional_format rather than
 	BFD_TRADITIONAL_FORMAT flag.

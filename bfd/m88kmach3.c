@@ -23,7 +23,7 @@
 #define TEXT_START_ADDR	0
 #define N_HEADER_IN_TEXT(x)	1 		/* (N_MAGIG(x) == ZMAGIC) */
 
-#define N_TXTSIZE(x)	((x).a_text)
+#define N_TXTSIZE(x)	((x)->a_text)
 
 #include "sysdep.h"
 #include "bfd.h"

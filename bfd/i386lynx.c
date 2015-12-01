@@ -58,19 +58,19 @@
   									      \
 	if (bfd_get_symcount (abfd) != 0) 				      \
 	    {								      \
-	      if (bfd_seek (abfd, (file_ptr) (N_SYMOFF(*execp)), SEEK_SET)    \
+	      if (bfd_seek (abfd, (file_ptr) (N_SYMOFF (execp)), SEEK_SET)    \
 		  != 0)							      \
 	        return FALSE;						      \
 									      \
 	      if (! NAME(aout,write_syms) (abfd)) return FALSE;		      \
 									      \
-	      if (bfd_seek (abfd, (file_ptr) (N_TRELOFF(*execp)), SEEK_SET)   \
+	      if (bfd_seek (abfd, (file_ptr) (N_TRELOFF (execp)), SEEK_SET)   \
 		  != 0)							      \
 	        return FALSE;						      \
 									      \
 	      if (!NAME(lynx,squirt_out_relocs) (abfd, obj_textsec (abfd)))   \
 		return FALSE;						      \
-	      if (bfd_seek (abfd, (file_ptr) (N_DRELOFF(*execp)), SEEK_SET)   \
+	      if (bfd_seek (abfd, (file_ptr) (N_DRELOFF (execp)), SEEK_SET)   \
 		  != 0)							      \
 	        return 0;						      \
 									      \

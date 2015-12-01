@@ -1,3 +1,14 @@
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
+	* adobe.h: Invoke aout N_* macros with pointer to
+	struct internal_exec.
+	* aout64.h: Likewise.
+	* dynix3.h: Likewise.
+	* encap.h: Likewise.
+	* hp.h: Likewise.
+	* hp300hpux.h: Likewise.
+	* sun4.h: Likewise.
+
 2015-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

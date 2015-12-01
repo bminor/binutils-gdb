@@ -103,8 +103,8 @@ os9k_callback (bfd *abfd)
   obj_datasec (abfd)->filepos = execp->a_dload;
 
   /* The file positions of the relocation info ***
-  obj_textsec (abfd)->rel_filepos = N_TROFF(*execp);
-  obj_datasec (abfd)->rel_filepos =  N_DROFF(*execp);  */
+  obj_textsec (abfd)->rel_filepos = N_TROFF (execp);
+  obj_datasec (abfd)->rel_filepos =  N_DROFF (execp);  */
 
   adata (abfd).page_size = 1;	/* Not applicable.  */
   adata (abfd).segment_size = 1;/* Not applicable.  */
@@ -128,7 +128,7 @@ os9k_object_p (bfd *abfd)
     }
 
   anexec.a_info = H_GET_16 (abfd, exec_bytes.m_sync);
-  if (N_BADMAG (anexec))
+  if (N_BADMAG (&anexec))
     {
       bfd_set_error (bfd_error_wrong_format);
       return 0;
