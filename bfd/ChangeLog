@@ -1,5 +1,9 @@
 2015-12-01  Alan Modra  <amodra@gmail.com>
 
+	* po/SRC-POTFILES.in: Regenerate.
+
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
 	* elf32-arc.c (ARC_ELF_HOWTO): Delete.
 	(arc_elf_howto): New function.
 	(bfd_elf32_bfd_reloc_type_lookup): Use it in place of existing

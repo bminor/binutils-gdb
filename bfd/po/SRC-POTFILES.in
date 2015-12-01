@@ -298,6 +298,8 @@ m68klinux.c
 m68knetbsd.c
 m88kmach3.c
 m88kopenbsd.c
+mach-o-aarch64.c
+mach-o-arm.c
 mach-o-i386.c
 mach-o-x86-64.c
 mach-o.c
