@@ -546,6 +546,22 @@ if { [isnative] && [which $CC] != 0 } {
 	    {{objdump {-dw} gotpcrel1.dd}} \
 	    "gotpcrel1" \
 	] \
+	[list \
+	    "Build pr19319.so" \
+	    "-shared" \
+	    "" \
+	    { pr19319a.S } \
+	    "" \
+	    "pr19319.so" \
+	] \
+	[list \
+	    "Build pr19319" \
+	    "-pie -nostdlib -nostartfiles tmpdir/pr19319.so" \
+	    "" \
+	    { pr19319b.S } \
+	    {{objdump {-dw} pr19319.dd}} \
+	    "pr19319" \
+	] \
     ]
 
     run_ld_link_exec_tests [] [list \
