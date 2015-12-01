@@ -246,8 +246,13 @@ const int howto_table_lookup[] =
 };
 #undef ARC_RELOC_HOWTO
 
-#define ARC_ELF_HOWTO(r_type) \
-  (&elf_arc_howto_table[r_type])
+static reloc_howto_type *
+arc_elf_howto (unsigned int r_type)
+{
+  if (elf_arc_howto_table[R_ARC_32].dst_mask == 0)
+    arc_elf_howto_init ();
+  return &elf_arc_howto_table[r_type];
+}
 
 /* Map BFD reloc types to ARC ELF reloc types.  */
 
@@ -275,18 +280,11 @@ bfd_elf32_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
 				 bfd_reloc_code_real_type code)
 {
   unsigned int i;
-  static int fully_initialized = FALSE;
-
-  if (fully_initialized == FALSE)
-    {
-      arc_elf_howto_init ();
-      fully_initialized = TRUE; /* TODO: CHECK THIS IF IT STOPS WORKING.  */
-    }
 
   for (i = ARRAY_SIZE (arc_reloc_map); i--;)
     {
       if (arc_reloc_map[i].bfd_reloc_val == code)
-	return elf_arc_howto_table + arc_reloc_map[i].elf_reloc_val;
+	return arc_elf_howto (arc_reloc_map[i].elf_reloc_val);
     }
 
   return NULL;
@@ -300,7 +298,7 @@ bfd_elf32_bfd_reloc_name_lookup (bfd * abfd ATTRIBUTE_UNUSED, const char *r_name
   for (i = 0; i < ARRAY_SIZE (elf_arc_howto_table); i++)
     if (elf_arc_howto_table[i].name != NULL
 	&& strcasecmp (elf_arc_howto_table[i].name, r_name) == 0)
-      return elf_arc_howto_table + i;
+      return arc_elf_howto (i);
 
   return NULL;
 }
@@ -316,7 +314,7 @@ arc_info_to_howto_rel (bfd * abfd ATTRIBUTE_UNUSED,
 
   r_type = ELF32_R_TYPE (dst->r_info);
   BFD_ASSERT (r_type < (unsigned int) R_ARC_max);
-  cache_ptr->howto = &elf_arc_howto_table[r_type];
+  cache_ptr->howto = arc_elf_howto (r_type);
 }
 
 /* Set the right machine number for an ARC ELF file.  */
@@ -743,7 +741,7 @@ elf_arc_relocate_section (bfd *                   output_bfd,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-      howto = &elf_arc_howto_table[r_type];
+      howto = arc_elf_howto (r_type);
 
       reloc_data.input_section = input_section;
       reloc_data.howto = howto;
@@ -960,7 +958,7 @@ elf_arc_check_relocs (bfd *                      abfd,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-      howto = &elf_arc_howto_table[r_type];
+      howto = arc_elf_howto (r_type);
 
       /* Load symbol information.  */
       r_symndx = ELF32_R_SYM (rel->r_info);

@@ -1,3 +1,13 @@
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arc.c (ARC_ELF_HOWTO): Delete.
+	(arc_elf_howto): New function.
+	(bfd_elf32_bfd_reloc_type_lookup): Use it in place of existing
+	init code.
+	(bfd_elf32_bfd_reloc_name_lookup): Use arc_elf_howto.
+	(arc_info_to_howto_rel, elf_arc_relocate_section): Likwise.
+	(elf_arc_check_relocs): Likewise.
+
 2015-12-01  Cupertino Miranda  <cupertino.miranda@synopsys.com>
 
 	* elf32-arc.c (arc_elf_howto_init): Init dst_mask.
