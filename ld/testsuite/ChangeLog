@@ -1,3 +1,15 @@
+2015-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19319
+	* ld-i386/i386.exp: Run pr19319 test.
+	* ld-x86-64/x86-64.exp: Likewise.
+	* ld-i386/pr19319.dd: New file.
+	* ld-i386/pr19319a.S: Likewise.
+	* ld-i386/pr19319b.S: Likewise.
+	* ld-x86-64/pr19319.dd: Likewise.
+	* ld-x86-64/pr19319a.S: Likewise.
+	* ld-x86-64/pr19319b.S: Likewise.
+
 2015-11-11  Alan Modra  <amodra@gmail.com>
 	    Peter Bergner <bergner@vnet.ibm.com>
 

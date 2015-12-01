@@ -1,3 +1,12 @@
+2015-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19319
+	* elf32-i386.c (elf_i386_convert_load): Check h->def_regular
+	instead of bfd_link_hash_new.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Likewise.  Skip
+	relocation overflow for bfd_link_hash_undefined and
+	bfd_link_hash_new if h->def_regular is set.
+
 2015-11-13  Tristan Gingold  <gingold@adacore.com>
 
 	* version.m4: Bump version to 2.25.90
