@@ -1,5 +1,21 @@
 2015-12-01  Alan Modra  <amodra@gmail.com>
 
+	* coff-rs6000.c (_bfd_xcoff_put_symbol_name): Replace abfd param
+	with info param.  Test info->traditional_format rather than
+	BFD_TRADITIONAL_FORMAT flag.
+	* coff64-rs6000.c (_bfd_xcoff64_put_symbol_name): Likewise.
+	* libxcoff.h (struct xcoff_backend_data_rec): Update
+	_xcoff_put_symbol_name prototype.
+	(bfd_xcoff_put_symbol_name): Add info param.
+	* xcofflink.c (xcoff_find_tc0): Update bfd_xcoff_put_symbol_name call.
+	(xcoff_write_global_symbol): Likewise.
+	(xcoff_link_input_bfd): Test info->traditional_format rather than
+	BFD_TRADITIONAL_FORMAT flag.
+	* cofflink.c (_bfd_coff_final_link): Likewise.
+	(_bfd_coff_link_input_bfd, _bfd_coff_write_global_sym): Likewise.
+
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
 	* po/SRC-POTFILES.in: Regenerate.
 
 2015-12-01  Alan Modra  <amodra@gmail.com>
