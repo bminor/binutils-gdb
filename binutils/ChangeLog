@@ -1,3 +1,7 @@
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2015-11-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf.c (is_max_address): New function.
