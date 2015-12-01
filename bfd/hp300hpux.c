@@ -280,15 +280,13 @@ MY (write_object_contents) (bfd * abfd)
 {
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);
-  bfd_size_type text_size;	/* dummy vars */
-  file_ptr text_end;
 
   memset (&exec_bytes, 0, sizeof (exec_bytes));
 
   obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
 
   if (adata (abfd).magic == undecided_magic)
-    NAME (aout,adjust_sizes_and_vmas) (abfd, &text_size, &text_end);
+    NAME (aout,adjust_sizes_and_vmas) (abfd);
   execp->a_syms = 0;
 
   execp->a_entry = bfd_get_start_address (abfd);

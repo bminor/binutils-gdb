@@ -292,11 +292,9 @@ static int
 pdp11_aout_write_headers (bfd *abfd, struct internal_exec *execp)
 {
   struct external_exec exec_bytes;
-  bfd_size_type text_size;
-  file_ptr text_end;
 
   if (adata(abfd).magic == undecided_magic)
-    NAME (aout, adjust_sizes_and_vmas) (abfd, &text_size, &text_end);
+    NAME (aout, adjust_sizes_and_vmas) (abfd);
 
   execp->a_syms = bfd_get_symcount (abfd) * EXTERNAL_NLIST_SIZE;
   execp->a_entry = bfd_get_start_address (abfd);
@@ -359,12 +357,7 @@ MY(write_object_contents) (bfd *abfd)
      will normally have been done by set_section_contents, but only if
      there actually are some section contents.  */
   if (! abfd->output_has_begun)
-    {
-      bfd_size_type text_size;
-      file_ptr text_end;
-
-      NAME (aout, adjust_sizes_and_vmas) (abfd, &text_size, &text_end);
-    }
+    NAME (aout, adjust_sizes_and_vmas) (abfd);
 
   obj_reloc_entry_size (abfd) = RELOC_SIZE;
 
@@ -1015,9 +1008,7 @@ adjust_n_magic (bfd *abfd, struct internal_exec *execp)
 }
 
 bfd_boolean
-NAME (aout, adjust_sizes_and_vmas) (bfd *abfd,
-				    bfd_size_type *text_size,
-				    file_ptr * text_end ATTRIBUTE_UNUSED)
+NAME (aout, adjust_sizes_and_vmas) (bfd *abfd)
 {
   struct internal_exec *execp = exec_hdr (abfd);
 
@@ -1031,7 +1022,6 @@ NAME (aout, adjust_sizes_and_vmas) (bfd *abfd,
     align_power(obj_textsec(abfd)->size,
 		obj_textsec(abfd)->alignment_power);
 
-  *text_size = obj_textsec (abfd)->size;
   /* Rule (heuristic) for when to pad to a new page.  Note that there
      are (at least) two ways demand-paged (ZMAGIC) files have been
      handled.  Most Berkeley-based systems start the text segment at
@@ -1142,12 +1132,9 @@ NAME (aout, set_section_contents) (bfd *abfd,
 				   file_ptr offset,
 				   bfd_size_type count)
 {
-  file_ptr text_end;
-  bfd_size_type text_size;
-
   if (! abfd->output_has_begun)
     {
-      if (! NAME (aout, adjust_sizes_and_vmas) (abfd, & text_size, & text_end))
+      if (! NAME (aout, adjust_sizes_and_vmas) (abfd))
 	return FALSE;
     }
 
@@ -3676,8 +3663,6 @@ NAME (aout, final_link) (bfd *abfd,
   bfd_size_type max_contents_size;
   bfd_size_type max_relocs_size;
   bfd_size_type max_sym_count;
-  bfd_size_type text_size;
-  file_ptr text_end;
   struct bfd_link_order *p;
   asection *o;
   bfd_boolean have_link_order_relocs;
@@ -3773,7 +3758,7 @@ NAME (aout, final_link) (bfd *abfd,
   /* Adjust the section sizes and vmas according to the magic number.
      This sets a_text, a_data and a_bss in the exec_hdr and sets the
      filepos for each section.  */
-  if (! NAME (aout, adjust_sizes_and_vmas) (abfd, &text_size, &text_end))
+  if (! NAME (aout, adjust_sizes_and_vmas) (abfd))
     goto error_return;
 
   /* The relocation and symbol file positions differ among a.out

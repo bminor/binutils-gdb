@@ -36,10 +36,8 @@
 #ifndef WRITE_HEADERS
 #define WRITE_HEADERS(abfd, execp)					      \
       {									      \
-	bfd_size_type text_size; /* dummy vars */			      \
-	file_ptr text_end;						      \
 	if (adata(abfd).magic == undecided_magic)			      \
-	  NAME(aout,adjust_sizes_and_vmas) (abfd, &text_size, &text_end);     \
+	  NAME(aout,adjust_sizes_and_vmas) (abfd);			      \
     									      \
 	execp->a_syms = bfd_get_symcount (abfd) * EXTERNAL_NLIST_SIZE;	      \
 	execp->a_entry = bfd_get_start_address (abfd);			      \

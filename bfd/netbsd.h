@@ -84,12 +84,7 @@ MY (write_object_contents) (bfd *abfd)
      will normally have been done by set_section_contents, but only if
      there actually are some section contents.  */
   if (! abfd->output_has_begun)
-    {
-      bfd_size_type text_size;
-      file_ptr text_end;
-
-      NAME (aout, adjust_sizes_and_vmas) (abfd, & text_size, & text_end);
-    }
+    NAME (aout, adjust_sizes_and_vmas) (abfd);
 
   obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
 

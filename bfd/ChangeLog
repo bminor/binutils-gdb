@@ -1,5 +1,17 @@
 2015-12-01  Alan Modra  <amodra@gmail.com>
 
+	* aoutx.h (adjust_sizes_and_vmas): Remove unused text_size and
+	text_end parameters.  Update callers.
+	* aout-tic30.c: Update adjust_sizes_and_vmas callers.
+	* hp300hpux.c: Likewise.
+	* i386lynx.c: Likewise.
+	* libaout.h: Likewise.
+	* netbsd.h: Likewise.
+	* pdp11.c: Likewise.
+	* riscix.c: Likewise.
+
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
 	* aout-adobe.c: Invoke aout N_* macros with pointer to
 	struct internal_exec.
 	* aout-arm.c: Likewise.

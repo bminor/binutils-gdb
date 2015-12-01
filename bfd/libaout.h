@@ -564,7 +564,7 @@ extern int NAME (aout, sizeof_headers)
   (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean NAME (aout, adjust_sizes_and_vmas)
-  (bfd *, bfd_size_type *, file_ptr *);
+  (bfd *);
 
 extern void NAME (aout, swap_exec_header_in)
   (bfd *, struct external_exec *, struct internal_exec *);
@@ -624,11 +624,8 @@ extern bfd_boolean NAME (aout, bfd_free_cached_info)
 #ifndef WRITE_HEADERS
 #define WRITE_HEADERS(abfd, execp)					      \
       {									      \
-	bfd_size_type text_size; /* Dummy vars.  */			      \
-	file_ptr text_end;						      \
-       									      \
 	if (adata(abfd).magic == undecided_magic)			      \
-	  NAME (aout, adjust_sizes_and_vmas) (abfd, & text_size, & text_end); \
+	  NAME (aout, adjust_sizes_and_vmas) (abfd);			      \
     									      \
 	execp->a_syms = bfd_get_symcount (abfd) * EXTERNAL_NLIST_SIZE;	      \
 	execp->a_entry = bfd_get_start_address (abfd);			      \
