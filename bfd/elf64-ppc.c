@@ -8391,7 +8391,8 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		      if (h != NULL
 			  && h->root.type == bfd_link_hash_undefweak)
 			ok_tprel = TRUE;
-		      else
+		      else if (sym_sec != NULL
+			       && sym_sec->output_section != NULL)
 			{
 			  value += sym_sec->output_offset;
 			  value += sym_sec->output_section->vma;
@@ -8952,6 +8953,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		goto error_ret;
 
 	      if (sym_sec == NULL
+		  || sym_sec->output_section == NULL
 		  || discarded_section (sym_sec))
 		continue;
 
@@ -12275,7 +12277,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		  if (hash == NULL)
 		    {
 		      sym_value = sym->st_value;
-		      ok_dest = TRUE;
+		      if (sym_sec != NULL
+			  && sym_sec->output_section != NULL)
+			ok_dest = TRUE;
 		    }
 		  else if (hash->elf.root.type == bfd_link_hash_defined
 			   || hash->elf.root.type == bfd_link_hash_defweak)
