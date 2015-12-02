@@ -1,3 +1,7 @@
+2015-12-02  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/thumb-singlestep.exp: Do one more single step.
+
 2015-08-21  Gary Benson <gbenson@redhat.com>
 
 	* gdb.trace/pending.exp: Cope with remote transfer warnings.
