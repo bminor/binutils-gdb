@@ -1,3 +1,8 @@
+2015-12-02  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* arm-dis.c (arm_opcodes): <ldaexh>: Fix typo...
+	<ldah>: ... to this.
+
 2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-asm-2.c: Regenerate.

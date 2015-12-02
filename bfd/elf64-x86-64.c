@@ -3127,18 +3127,21 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	  /* STT_GNU_IFUNC must keep GOTPCREL relocations.  We also
 	     avoid optimizing GOTPCREL relocations againt _DYNAMIC
 	     since ld.so may use its link-time address.  */
-	  if ((h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak
-	       || h->root.type == bfd_link_hash_new)
+	  if ((h->def_regular
+	       || h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak)
 	      && h->type != STT_GNU_IFUNC
 	      && h != htab->elf.hdynamic
 	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
 	    {
-	      /* bfd_link_hash_new is set by an assignment in a linker
-		 script in bfd_elf_record_link_assignment.  FIXME: If
-		 we ever get a linker error due relocation overflow, we
-		 will skip this optimization.  */
-	      if (h->root.type == bfd_link_hash_new)
+	      /* bfd_link_hash_new or bfd_link_hash_undefined is
+	         set by an assignment in a linker script in
+	         bfd_elf_record_link_assignment.  FIXME: If we
+		 ever get a linker error due relocation overflow,
+		 we will skip this optimization.  */
+	      if (h->def_regular
+		  && (h->root.type == bfd_link_hash_new
+		      || h->root.type == bfd_link_hash_undefined))
 		goto convert;
 	      tsec = h->root.u.def.section;
 	      toff = h->root.u.def.value;

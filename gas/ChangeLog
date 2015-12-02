@@ -1,3 +1,8 @@
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
+	* config/aout_gnu.h: Invoke aout N_* macros with pointer to
+	struct internal_exec.
+
 2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (aarch64_features): Add "fp16".

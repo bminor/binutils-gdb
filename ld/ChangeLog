@@ -1,3 +1,9 @@
+2015-12-02  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac (--enable-initfini-array): Remove run test.  Default
+	to "yes".  Change help string to --disable-initfini-array.
+	* configure: Regenerate.
+
 2015-11-20  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* configure.tgt <mips*el-mti-elf*, mips*el-img-elf*>: Add

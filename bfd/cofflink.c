@@ -906,7 +906,7 @@ _bfd_coff_final_link (bfd *abfd,
 
 	      if (string_size)
 		{
-		  bfd_boolean hash = ! (abfd->flags & BFD_TRADITIONAL_FORMAT);
+		  bfd_boolean hash = !flaginfo.info->traditional_format;
 		  bfd_size_type indx;
 
 		  indx = _bfd_stringtab_add (flaginfo.strtab,
@@ -1413,7 +1413,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
   if (! flaginfo->info->keep_memory)
     copy = TRUE;
   hash = TRUE;
-  if ((output_bfd->flags & BFD_TRADITIONAL_FORMAT) != 0)
+  if (flaginfo->info->traditional_format)
     hash = FALSE;
 
   if (! _bfd_coff_get_external_symbols (input_bfd))
@@ -1591,7 +1591,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
       /* If this is an enum, struct, or union tag, see if we have
          already output an identical type.  */
       if (! skip
-	  && (flaginfo->output_bfd->flags & BFD_TRADITIONAL_FORMAT) == 0
+	  && !flaginfo->info->traditional_format
 	  && (isym.n_sclass == C_ENTAG
 	      || isym.n_sclass == C_STRTAG
 	      || isym.n_sclass == C_UNTAG)
@@ -2602,7 +2602,7 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
       bfd_size_type indx;
 
       hash = TRUE;
-      if ((output_bfd->flags & BFD_TRADITIONAL_FORMAT) != 0)
+      if (flaginfo->info->traditional_format)
 	hash = FALSE;
       indx = _bfd_stringtab_add (flaginfo->strtab, h->root.root.string, hash,
 				 FALSE);

@@ -1,3 +1,103 @@
+2015-12-02  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/19315
+	* dwarf2.c (_bfd_elf_find_function): Return symbol matched.
+	(_bfd_dwarf2_find_nearest_line): Check symbol returned above
+	against dwarf range.
+	* elf-bfd.h (_bfd_elf_find_function): Update prototype.
+
+2015-12-02  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_tls_optimize): Don't segfault on NULL
+	symbol section or output section.
+	(ppc64_elf_edit_toc): Similarly for ld -R objects.
+	(ppc64_elf_size_stubs): Likewise.
+
+2015-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19319
+	* elf32-i386.c (elf_i386_convert_load): Check h->def_regular
+	instead of bfd_link_hash_new.
+	* elf64-x86-64.c (elf_x86_64_convert_load): Likewise.  Skip
+	relocation overflow for bfd_link_hash_undefined and
+	bfd_link_hash_new if h->def_regular is set.
+
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
+	* aoutx.h (adjust_sizes_and_vmas): Remove unused text_size and
+	text_end parameters.  Update callers.
+	* aout-tic30.c: Update adjust_sizes_and_vmas callers.
+	* hp300hpux.c: Likewise.
+	* i386lynx.c: Likewise.
+	* libaout.h: Likewise.
+	* netbsd.h: Likewise.
+	* pdp11.c: Likewise.
+	* riscix.c: Likewise.
+
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
+	* aout-adobe.c: Invoke aout N_* macros with pointer to
+	struct internal_exec.
+	* aout-arm.c: Likewise.
+	* aout-cris.c: Likewise.
+	* aout-target.h: Likewise.
+	* aout-tic30.c: Likewise.
+	* aoutf1.h: Likewise.
+	* aoutx.h: Likewise.
+	* bout.c: Likewise.
+	* freebsd.h: Likewise.
+	* gen-aout.c: Likewise.
+	* hp300hpux.c: Likewise.
+	* i386aout.c: Likewise.
+	* i386linux.c: Likewise.
+	* i386lynx.c: Likewise.
+	* i386mach3.c: Likewise.
+	* i386os9k.c: Likewise.
+	* libaout.h: Likewise.
+	* m68klinux.c: Likewise.
+	* m88kmach3.c: Likewise.
+	* mipsbsd.c: Likewise.
+	* netbsd.h: Likewise.
+	* pc532-mach.c: Likewise.
+	* pdp11.c: Likewise.
+	* riscix.c: Likewise.
+	* sparclinux.c: Likewise.
+	* sparclynx.c: Likewise.
+
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
+	* coff-rs6000.c (_bfd_xcoff_put_symbol_name): Replace abfd param
+	with info param.  Test info->traditional_format rather than
+	BFD_TRADITIONAL_FORMAT flag.
+	* coff64-rs6000.c (_bfd_xcoff64_put_symbol_name): Likewise.
+	* libxcoff.h (struct xcoff_backend_data_rec): Update
+	_xcoff_put_symbol_name prototype.
+	(bfd_xcoff_put_symbol_name): Add info param.
+	* xcofflink.c (xcoff_find_tc0): Update bfd_xcoff_put_symbol_name call.
+	(xcoff_write_global_symbol): Likewise.
+	(xcoff_link_input_bfd): Test info->traditional_format rather than
+	BFD_TRADITIONAL_FORMAT flag.
+	* cofflink.c (_bfd_coff_final_link): Likewise.
+	(_bfd_coff_link_input_bfd, _bfd_coff_write_global_sym): Likewise.
+
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
+	* po/SRC-POTFILES.in: Regenerate.
+
+2015-12-01  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arc.c (ARC_ELF_HOWTO): Delete.
+	(arc_elf_howto): New function.
+	(bfd_elf32_bfd_reloc_type_lookup): Use it in place of existing
+	init code.
+	(bfd_elf32_bfd_reloc_name_lookup): Use arc_elf_howto.
+	(arc_info_to_howto_rel, elf_arc_relocate_section): Likwise.
+	(elf_arc_check_relocs): Likewise.
+
+2015-12-01  Cupertino Miranda  <cupertino.miranda@synopsys.com>
+
+	* elf32-arc.c (arc_elf_howto_init): Init dst_mask.
+
 2015-11-20  Stefan Teleman  <stefan.teleman@oracle.com>
 
 	PR ld/19260

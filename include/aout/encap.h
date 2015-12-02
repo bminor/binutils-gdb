@@ -131,5 +131,5 @@ short __header_offset_temp;
 
 #define N_DATADDR(x) \
 	((N_FLAGS(x) & N_FLAGS_COFF_ENCAPSULATE) ? \
-	 (SEGMENT_SIZE + ((N_TXTADDR(x)+(x).a_text-1) & ~(SEGMENT_SIZE-1))) : \
-	 (N_TXTADDR(x)+(x).a_text))
+	 (SEGMENT_SIZE + ((N_TXTADDR(x)+(x)->a_text-1) & ~(SEGMENT_SIZE-1))) : \
+	 (N_TXTADDR(x)+(x)->a_text))

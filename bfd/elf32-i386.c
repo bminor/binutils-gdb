@@ -2976,11 +2976,11 @@ convert_branch:
 	  if (h == htab->elf.hdynamic)
 	    continue;
 
-	  /* bfd_link_hash_new is set by an assignment in a linker
-	     script in bfd_elf_record_link_assignment.  */
-	  if ((h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak
-	       || h->root.type == bfd_link_hash_new)
+	  /* def_regular is set by an assignment in a linker script in
+	     bfd_elf_record_link_assignment.  */
+	  if ((h->def_regular
+	       || h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak)
 	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
 	    {
 convert_load:

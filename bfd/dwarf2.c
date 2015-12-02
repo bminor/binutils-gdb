@@ -4129,16 +4129,25 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
  done:
   if (function)
     {
-      if (!function->is_linkage
-	  && _bfd_elf_find_function (abfd, symbols, section, offset,
-				     *filename_ptr ? NULL : filename_ptr,
-				     functionname_ptr))
+      if (!function->is_linkage)
 	{
-	  function->name = *functionname_ptr;
+	  asymbol *fun;
+	  bfd_vma sec_vma;
+
+	  fun = _bfd_elf_find_function (abfd, symbols, section, offset,
+					*filename_ptr ? NULL : filename_ptr,
+					functionname_ptr);
+	  sec_vma = section->vma;
+	  if (section->output_section != NULL)
+	    sec_vma = section->output_section->vma + section->output_offset;
+	  if (fun != NULL
+	      && fun->value + sec_vma == function->arange.low)
+	    function->name = *functionname_ptr;
+	  /* Even if we didn't find a linkage name, say that we have
+	     to stop a repeated search of symbols.  */
 	  function->is_linkage = TRUE;
 	}
-      else
-	*functionname_ptr = function->name;
+      *functionname_ptr = function->name;
     }
   if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
     unset_sections (stash);
@@ -4261,7 +4270,7 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
 /* Find the function to a particular section and offset,
    for error reporting.  */
 
-bfd_boolean
+asymbol *
 _bfd_elf_find_function (bfd *abfd,
 			asymbol **symbols,
 			asection *section,
@@ -4278,10 +4287,10 @@ _bfd_elf_find_function (bfd *abfd,
   } *cache;
 
   if (symbols == NULL)
-    return FALSE;
+    return NULL;
 
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
-    return FALSE;
+    return NULL;
 
   cache = elf_tdata (abfd)->elf_find_function_cache;
   if (cache == NULL)
@@ -4289,7 +4298,7 @@ _bfd_elf_find_function (bfd *abfd,
       cache = bfd_zalloc (abfd, sizeof (*cache));
       elf_tdata (abfd)->elf_find_function_cache = cache;
       if (cache == NULL)
-	return FALSE;
+	return NULL;
     }
   if (cache->last_section != section
       || cache->func == NULL
@@ -4354,12 +4363,12 @@ _bfd_elf_find_function (bfd *abfd,
     }
 
   if (cache->func == NULL)
-    return FALSE;
+    return NULL;
 
   if (filename_ptr)
     *filename_ptr = cache->filename;
   if (functionname_ptr)
     *functionname_ptr = bfd_asymbol_name (cache->func);
 
-  return TRUE;
+  return cache->func;
 }

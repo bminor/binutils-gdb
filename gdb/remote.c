@@ -2914,6 +2914,7 @@ remote_newthread_step (threadref *ref, void *data)
 
   item.ptid = ptid_build (pid, threadref_to_int (ref), 0);
   item.core = -1;
+  item.name = NULL;
   item.extra = NULL;
 
   VEC_safe_push (thread_item_t, context->items, &item);
@@ -3079,6 +3080,7 @@ remote_get_threads_with_qthreadinfo (struct target_ops *ops,
 
 		  item.ptid = read_ptid (bufp, &bufp);
 		  item.core = -1;
+		  item.name = NULL;
 		  item.extra = NULL;
 
 		  VEC_safe_push (thread_item_t, context->items, &item);
@@ -6546,7 +6548,7 @@ Packet: '%s'\n"),
 	event->ws.value.integer = value;
 	if (*p != ';')
 	  error (_("stop reply packet badly formatted: %s"), buf);
-	event->ptid = read_ptid (++p, &p);
+	event->ptid = read_ptid (++p, NULL);
 	break;
       }
     case 'W':		/* Target exited.  */
