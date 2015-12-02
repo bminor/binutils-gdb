@@ -1,3 +1,10 @@
+2015-12-02  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_tls_optimize): Don't segfault on NULL
+	symbol section or output section.
+	(ppc64_elf_edit_toc): Similarly for ld -R objects.
+	(ppc64_elf_size_stubs): Likewise.
+
 2015-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19319
