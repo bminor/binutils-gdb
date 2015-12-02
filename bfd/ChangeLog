@@ -2,6 +2,13 @@
 
 	Apply from master.
 	2015-12-02  Alan Modra  <amodra@gmail.com>
+	PR binutils/19315
+	* dwarf2.c (_bfd_elf_find_function): Return symbol matched.
+	(_bfd_dwarf2_find_nearest_line): Check symbol returned above
+	against dwarf range.
+	* elf-bfd.h (_bfd_elf_find_function): Update prototype.
+
+	2015-12-02  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_tls_optimize): Don't segfault on NULL
 	symbol section or output section.
 	(ppc64_elf_edit_toc): Similarly for ld -R objects.
