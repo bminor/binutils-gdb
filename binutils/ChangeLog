@@ -1,3 +1,8 @@
+2015-12-03  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (bfd_mach_o_header_flags_name): Add name
+	for flags until BFD_MACH_O_MH_APP_EXTENSION_SAFE.
+
 2015-12-01  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
