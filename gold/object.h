@@ -315,6 +315,57 @@ class Got_offset_list
   Got_offset_list* got_next_;
 };
 
+// The Local_got_entry_key used to index the GOT offsets for local
+// non-TLS symbols, and tp-relative offsets for TLS symbols.
+
+class Local_got_entry_key
+{
+ public:
+  Local_got_entry_key(unsigned int symndx, uint64_t addend)
+    : symndx_(symndx), addend_(addend)
+  {}
+
+  // Whether this equals to another Local_got_entry_key.
+  bool
+  eq(const Local_got_entry_key& key) const
+  {
+    return (this->symndx_ == key.symndx_ && this->addend_ == key.addend_);
+  }
+
+  // Compute a hash value for this using 64-bit FNV-1a hash.
+  size_t
+  hash_value() const
+  {
+    uint64_t h = 14695981039346656037ULL; // FNV offset basis.
+    uint64_t prime = 1099511628211ULL;
+    h = (h ^ static_cast<uint64_t>(this->symndx_)) * prime;
+    h = (h ^ static_cast<uint64_t>(this->addend_)) * prime;
+    return h;
+  }
+
+  // Functors for associative containers.
+  struct equal_to
+  {
+    bool
+    operator()(const Local_got_entry_key& key1,
+               const Local_got_entry_key& key2) const
+    { return key1.eq(key2); }
+  };
+
+  struct hash
+  {
+    size_t
+    operator()(const Local_got_entry_key& key) const
+    { return key.hash_value(); }
+  };
+
+ private:
+  // The local symbol index.
+  unsigned int symndx_;
+  // The addend.
+  uint64_t addend_;
+};
+
 // Type for mapping section index to uncompressed size and contents.
 
 struct Compressed_section_info
@@ -1111,21 +1162,43 @@ class Relobj : public Object
   // GOT_TYPE.
   bool
   local_has_got_offset(unsigned int symndx, unsigned int got_type) const
-  { return this->do_local_has_got_offset(symndx, got_type); }
+  { return this->do_local_has_got_offset(symndx, got_type, 0); }
+
+  // Return whether the local symbol SYMNDX plus ADDEND has a GOT offset
+  // of type GOT_TYPE.
+  bool
+  local_has_got_offset(unsigned int symndx, unsigned int got_type,
+		       uint64_t addend) const
+  { return this->do_local_has_got_offset(symndx, got_type, addend); }
 
   // Return the GOT offset of type GOT_TYPE of the local symbol
   // SYMNDX.  It is an error to call this if the symbol does not have
   // a GOT offset of the specified type.
   unsigned int
   local_got_offset(unsigned int symndx, unsigned int got_type) const
-  { return this->do_local_got_offset(symndx, got_type); }
+  { return this->do_local_got_offset(symndx, got_type, 0); }
+
+  // Return the GOT offset of type GOT_TYPE of the local symbol
+  // SYMNDX plus ADDEND.  It is an error to call this if the symbol
+  // does not have a GOT offset of the specified type.
+  unsigned int
+  local_got_offset(unsigned int symndx, unsigned int got_type,
+		       uint64_t addend) const
+  { return this->do_local_got_offset(symndx, got_type, addend); }
 
   // Set the GOT offset with type GOT_TYPE of the local symbol SYMNDX
   // to GOT_OFFSET.
   void
   set_local_got_offset(unsigned int symndx, unsigned int got_type,
 		       unsigned int got_offset)
-  { this->do_set_local_got_offset(symndx, got_type, got_offset); }
+  { this->do_set_local_got_offset(symndx, got_type, got_offset, 0); }
+
+  // Set the GOT offset with type GOT_TYPE of the local symbol SYMNDX
+  // plus ADDEND to GOT_OFFSET.
+  void
+  set_local_got_offset(unsigned int symndx, unsigned int got_type,
+		       unsigned int got_offset, uint64_t addend)
+  { this->do_set_local_got_offset(symndx, got_type, got_offset, addend); }
 
   // Return whether the local symbol SYMNDX is a TLS symbol.
   bool
@@ -1318,19 +1391,21 @@ class Relobj : public Object
   virtual unsigned int
   do_local_plt_offset(unsigned int symndx) const = 0;
 
-  // Return whether a local symbol has a GOT offset of a given type.
+  // Return whether a local symbol plus addend has a GOT offset
+  // of a given type.
   virtual bool
   do_local_has_got_offset(unsigned int symndx,
-			  unsigned int got_type) const = 0;
+			  unsigned int got_type, uint64_t addend) const = 0;
 
-  // Return the GOT offset of a given type of a local symbol.
+  // Return the GOT offset of a given type of a local symbol plus addend.
   virtual unsigned int
-  do_local_got_offset(unsigned int symndx, unsigned int got_type) const = 0;
+  do_local_got_offset(unsigned int symndx, unsigned int got_type,
+		      uint64_t addend) const = 0;
 
-  // Set the GOT offset with a given type for a local symbol.
+  // Set the GOT offset with a given type for a local symbol plus addend.
   virtual void
   do_set_local_got_offset(unsigned int symndx, unsigned int got_type,
-			  unsigned int got_offset) = 0;
+			  unsigned int got_offset, uint64_t addend) = 0;
 
   // Return whether local symbol SYMNDX is a TLS symbol.
   virtual bool
@@ -1993,24 +2068,28 @@ class Sized_relobj : public Relobj
        : convert_types<Address, uint64_t>(off));
   }
 
-  // Return whether the local symbol SYMNDX has a GOT offset of type
-  // GOT_TYPE.
+  // Return whether the local symbol SYMNDX plus ADDEND has a GOT offset
+  // of type GOT_TYPE.
   bool
-  do_local_has_got_offset(unsigned int symndx, unsigned int got_type) const
+  do_local_has_got_offset(unsigned int symndx, unsigned int got_type,
+			  uint64_t addend) const
   {
+    Local_got_entry_key key(symndx, addend);
     Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
+        this->local_got_offsets_.find(key);
     return (p != this->local_got_offsets_.end()
             && p->second->get_offset(got_type) != -1U);
   }
 
   // Return the GOT offset of type GOT_TYPE of the local symbol
-  // SYMNDX.
+  // SYMNDX plus ADDEND.
   unsigned int
-  do_local_got_offset(unsigned int symndx, unsigned int got_type) const
+  do_local_got_offset(unsigned int symndx, unsigned int got_type,
+			  uint64_t addend) const
   {
+    Local_got_entry_key key(symndx, addend);
     Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
+        this->local_got_offsets_.find(key);
     gold_assert(p != this->local_got_offsets_.end());
     unsigned int off = p->second->get_offset(got_type);
     gold_assert(off != -1U);
@@ -2018,20 +2097,21 @@ class Sized_relobj : public Relobj
   }
 
   // Set the GOT offset with type GOT_TYPE of the local symbol SYMNDX
-  // to GOT_OFFSET.
+  // plus ADDEND to GOT_OFFSET.
   void
   do_set_local_got_offset(unsigned int symndx, unsigned int got_type,
-			  unsigned int got_offset)
+			  unsigned int got_offset, uint64_t addend)
   {
+    Local_got_entry_key key(symndx, addend);
     Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
+        this->local_got_offsets_.find(key);
     if (p != this->local_got_offsets_.end())
       p->second->set_offset(got_type, got_offset);
     else
       {
         Got_offset_list* g = new Got_offset_list(got_type, got_offset);
         std::pair<Local_got_offsets::iterator, bool> ins =
-            this->local_got_offsets_.insert(std::make_pair(symndx, g));
+            this->local_got_offsets_.insert(std::make_pair(key, g));
         gold_assert(ins.second);
       }
   }
@@ -2049,10 +2129,12 @@ class Sized_relobj : public Relobj
  private:
   // The GOT offsets of local symbols. This map also stores GOT offsets
   // for tp-relative offsets for TLS symbols.
-  typedef Unordered_map<unsigned int, Got_offset_list*> Local_got_offsets;
+  typedef Unordered_map<Local_got_entry_key, Got_offset_list*,
+                        Local_got_entry_key::hash,
+                        Local_got_entry_key::equal_to> Local_got_offsets;
 
   // GOT offsets for local non-TLS symbols, and tp-relative offsets
-  // for TLS symbols, indexed by symbol number.
+  // for TLS symbols, indexed by local got entry key class.
   Local_got_offsets local_got_offsets_;
   // For each input section, the offset of the input section in its
   // output section.  This is INVALID_ADDRESS if the input section requires a
