@@ -1,3 +1,7 @@
+2015-12-04  Tristan Gingold  <gingold@adacore.com>
+
+	* elf.c (rewrite_elf_program_header): Remove useless loop.
+
 2015-12-02  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/19315
