@@ -15,11 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if [target_info exists gdb,noinferiorio] {
-    verbose "Skipping sizeof.exp because of no fileio capabilities."
-    continue
-}
-
 #
 # test running programs
 #
@@ -48,7 +43,7 @@ if ![runto_main] then {
 # Query GDB for the size of various types
 #
 
-gdb_test "next 2"
+gdb_test "next"
 
 set sizeof_char [get_sizeof "char" 1]
 set sizeof_short [get_sizeof "short" 2]
@@ -68,12 +63,8 @@ set sizeof_long_double [get_sizeof "long double" 8]
 #
 
 proc check_sizeof { type size } {
-    global gdb_prompt
-
-    set pat [string_to_regexp "sizeof (${type}) == ${size}\r\n"]
-    gdb_test_stdio "next" "${pat}" \
-	"\[0-9\].*" \
-	"check sizeof \"$type\""
+    gdb_test "next" "" ""
+    gdb_test "p size" " = ${size}" "check sizeof \"$type\""
 }
 
 check_sizeof "char" ${sizeof_char}
@@ -90,12 +81,8 @@ check_sizeof "double" ${sizeof_double}
 check_sizeof "long double" ${sizeof_long_double}
 
 proc check_valueof { exp val } {
-    global gdb_prompt
-
-    set pat [string_to_regexp "valueof (${exp}) == ${val}\r\n"]
-    gdb_test_stdio "next" "${pat}" \
-	"\[0-9\].*" \
-	"check valueof \"$exp\""
+    gdb_test "next" "" ""
+    gdb_test "p value" " = ${val}" "check valueof \"$exp\""
 }
 
 # Check that GDB and the target agree over the sign of a character.
