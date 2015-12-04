@@ -1,3 +1,9 @@
+2015-12-04  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19276
+	* gas/arm/align64.d: Skip for COFF/PE targets.
+	* gas/arm/bundle-lock.d: Adjust for COFF/PE targets.
+
 2015-12-04  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* gas/arc/bic.d: Update test.

@@ -1,3 +1,9 @@
+2015-12-04  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19276
+	* config/tc-arm.h (SUB_SEGMENT_ALIGN): Do not define for COFF/PE
+	targets.
+
 2015-12-04  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* config/tc-arc.c (arc_option): Sets all internal gas options when
