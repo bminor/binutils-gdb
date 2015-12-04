@@ -1,3 +1,14 @@
+2015-12-03  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/sizeof.c: Don't include stdio.h and
+	../lib/unbuffer_output.c.
+	(main): New variable 'size' and 'value'.  Remove printf and
+	gdb_unbuffer_output.  Assign return value to size and value.
+	* gdb.base/sizeof.exp: Remove the checking to gdb,noinferiorio
+	at the beginning.
+	(check_sizeof): Check the result by printing variable 'size'.
+	(check_valueof): Check the result by printing variable 'value'.
+
 2015-12-01  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/disp-step-syscall.exp: Define syscall instruction

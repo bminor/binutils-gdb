@@ -6380,13 +6380,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       first_matching_lma = TRUE;
       first_suggested_lma = TRUE;
 
-      for (section = ibfd->sections;
+      for (section = first_section, j = 0;
 	   section != NULL;
 	   section = section->next)
-	if (section == first_section)
-	  break;
-
-      for (j = 0; section != NULL; section = section->next)
 	{
 	  if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
 	    {

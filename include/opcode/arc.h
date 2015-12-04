@@ -343,7 +343,7 @@ struct arc_reloc_equiv_tab
 {
   const char * name;	   /* String to lookup.  */
   const char * mnemonic;   /* Extra matching condition.  */
-  unsigned     flagcode;   /* Extra matching condition.  */
+  unsigned     flags[32];  /* Extra matching condition.  */
   signed int   oldreloc;   /* Old relocation.  */
   signed int   newreloc;   /* New relocation.  */
 };

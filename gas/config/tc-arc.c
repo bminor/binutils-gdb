@@ -155,9 +155,9 @@ struct option md_longopts[] =
   { "EL",		no_argument,	   NULL, OPTION_EL },
   { "mcpu",		required_argument, NULL, OPTION_MCPU },
   { "mA6",		no_argument,	   NULL, OPTION_ARC600 },
-  { "mARC600",	no_argument,	   NULL, OPTION_ARC600 },
-  { "mARC601",	no_argument,	   NULL, OPTION_ARC601 },
-  { "mARC700",	no_argument,	   NULL, OPTION_ARC700 },
+  { "mARC600",		no_argument,	   NULL, OPTION_ARC600 },
+  { "mARC601",		no_argument,	   NULL, OPTION_ARC601 },
+  { "mARC700",		no_argument,	   NULL, OPTION_ARC700 },
   { "mA7",		no_argument,	   NULL, OPTION_ARC700 },
   { "mEM",		no_argument,	   NULL, OPTION_ARCEM },
   { "mHS",		no_argument,	   NULL, OPTION_ARCHS },
@@ -512,28 +512,47 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 
   c = get_symbol_name (&cpu);
   mach = arc_get_mach (cpu);
-  restore_line_pointer (c);
 
   if (mach == -1)
     goto bad_cpu;
 
   if (!mach_type_specified_p)
     {
-      arc_mach_type = mach;
+      if ((!strcmp ("ARC600", cpu))
+	  || (!strcmp ("ARC601", cpu))
+	  || (!strcmp ("A6", cpu)))
+	{
+	  md_parse_option (OPTION_MCPU, "arc600");
+	}
+      else if ((!strcmp ("ARC700", cpu))
+	       || (!strcmp ("A7", cpu)))
+	{
+	  md_parse_option (OPTION_MCPU, "arc700");
+	}
+      else if (!strcmp ("EM", cpu))
+	{
+	  md_parse_option (OPTION_MCPU, "arcem");
+	}
+      else if (!strcmp ("HS", cpu))
+	{
+	  md_parse_option (OPTION_MCPU, "archs");
+	}
+      else
+	as_fatal ("could not find the architecture");
+
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
 	as_fatal ("could not set architecture and machine");
-
-      mach_type_specified_p = 1;
     }
   else
     if (arc_mach_type != mach)
       as_warn ("Command-line value overrides \".cpu\" directive");
 
+  restore_line_pointer (c);
   demand_empty_rest_of_line ();
-
   return;
 
  bad_cpu:
+  restore_line_pointer (c);
   as_bad ("invalid identifier for \".cpu\"");
   ignore_rest_of_line ();
 }
@@ -964,7 +983,7 @@ static void
 declare_register_set (void)
 {
   int i;
-  for (i = 0; i < 32; ++i)
+  for (i = 0; i < 64; ++i)
     {
       char name[7];
 
@@ -1067,7 +1086,7 @@ md_section_align (segT segment,
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
 
-  return ((size + (1 << align) - 1) & -(1 << align));
+  return ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
 }
 
 /* The location from which a PC relative jump should be calculated,
@@ -1105,11 +1124,10 @@ md_pcrel_from_section (fixS *fixP,
 	case BFD_RELOC_ARC_PC32:
 	  /* The hardware calculates relative to the start of the
 	     insn, but this relocation is relative to location of the
-	     LIMM, compensate.  TIP: the base always needs to be
+	     LIMM, compensate.  The base always needs to be
 	     substracted by 4 as we do not support this type of PCrel
 	     relocation for short instructions.  */
-	  base -= fixP->fx_where - fixP->fx_dot_value;
-	  gas_assert ((fixP->fx_where - fixP->fx_dot_value) == 4);
+	  base -= 4;
 	  /* Fall through.  */
 	case BFD_RELOC_ARC_PLT32:
 	case BFD_RELOC_ARC_S25H_PCREL_PLT:
@@ -1930,7 +1948,7 @@ pseudo_operand_match (const expressionS *tok,
 	ret = 1;
       else if (!(operand_real->flags & ARC_OPERAND_IR))
 	{
-	  val = tok->X_add_number;
+	  val = tok->X_add_number + op->count;
 	  if (operand_real->flags & ARC_OPERAND_SIGNED)
 	    {
 	      max = (1 << (operand_real->bits - 1)) - 1;
@@ -2539,7 +2557,7 @@ find_reloc (const char *name,
 {
   unsigned int i;
   int j;
-  bfd_boolean found_flag;
+  bfd_boolean found_flag, tmp;
   extended_bfd_reloc_code_real_type ret = BFD_RELOC_UNUSED;
 
   for (i = 0; i < arc_num_equiv_tab; i++)
@@ -2551,17 +2569,34 @@ find_reloc (const char *name,
 	continue;
       if (r->mnemonic && (strcmp (r->mnemonic, opcodename)))
 	continue;
-      if (r->flagcode)
+      if (r->flags[0])
 	{
 	  if (!nflg)
 	    continue;
 	  found_flag = FALSE;
-	  for (j = 0; j < nflg; j++)
-	    if (pflags[i].code == r->flagcode)
-	      {
-		found_flag = TRUE;
-		break;
-	      }
+	  unsigned * psflg = (unsigned *)r->flags;
+	  do
+	    {
+	      tmp = FALSE;
+	      for (j = 0; j < nflg; j++)
+		if (!strcmp (pflags[j].name,
+			     arc_flag_operands[*psflg].name))
+		  {
+		    tmp = TRUE;
+		    break;
+		  }
+	      if (!tmp)
+		{
+		  found_flag = FALSE;
+		  break;
+		}
+	      else
+		{
+		  found_flag = TRUE;
+		}
+	      ++ psflg;
+	    } while (*psflg);
+
 	  if (!found_flag)
 	    continue;
 	}

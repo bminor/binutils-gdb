@@ -1,3 +1,7 @@
+2015-12-04  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc.h (arc_reloc_equiv_tab): Replace flagcode with flags[32].
+
 2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64.h (aarch64_op): Add OP_BFC.

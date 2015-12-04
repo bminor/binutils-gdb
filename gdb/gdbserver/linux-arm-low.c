@@ -30,8 +30,6 @@
 #include "nat/gdb_ptrace.h"
 #include <signal.h>
 
-#include "arch/arm.h"
-
 /* Defined in auto-generated files.  */
 void init_registers_arm (void);
 extern const struct target_desc *tdesc_arm;

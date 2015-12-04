@@ -155,6 +155,10 @@ static const bfd_mach_o_xlat_name bfd_mach_o_header_flags_name[] =
   { "setuid_safe", BFD_MACH_O_MH_SETUID_SAFE },
   { "no_reexported_dylibs", BFD_MACH_O_MH_NO_REEXPORTED_DYLIBS },
   { "pie", BFD_MACH_O_MH_PIE },
+  { "dead_strippable_dylib", BFD_MACH_O_MH_DEAD_STRIPPABLE_DYLIB },
+  { "has_tlv", BFD_MACH_O_MH_HAS_TLV_DESCRIPTORS },
+  { "no_heap_execution", BFD_MACH_O_MH_NO_HEAP_EXECUTION },
+  { "app_extension_safe", BFD_MACH_O_MH_APP_EXTENSION_SAFE },
   { NULL, 0}
 };
 

@@ -1,3 +1,28 @@
+2015-12-03  Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
+
+	* object.cc (Sized_relobj::do_for_all_local_got_entries): Use
+	Local_got_entry_key for searching in local_got_offsets_.
+	* object.h (class Local_got_entry_key): New class.
+	(Relobj::local_has_got_offset): New overloaded method.
+	(Relobj::local_got_offset): Likewise.
+	(Relobj::set_local_got_offset): Likewise.
+	(Relobj::do_local_has_got_offset): Add addend argument.
+	(Relobj::do_local_got_offset): Likewise.
+	(Relobj::do_set_local_got_offset): Likewise.
+	(Sized_relobj::do_local_has_got_offset): Add addend argument, and use
+	Local_got_entry_key for searching through local_got_offsets_.
+	(Sized_relobj::do_local_got_offset): Likewise.
+	(Sized_relobj::do_set_local_got_offset): Likewise.
+	(Sized_relobj::Local_got_offsets): Change type of the key from
+	unsigned int to Local_got_entry_key, and add hash and equal_to.
+	* output.cc (Got_entry::write): Take addend into account for
+	calculating value of the local symbol for GOT.
+	(Output_data_got::add_local): New definition of overloaded method.
+	(Output_data_got::add_local_with_rel): Likewise.
+	(Output_data_got::add_local_pair_with_rel): Likewise.
+	* output.h (Output_data_got::add_local): New declaration of overloaded
+	method.
+
 2015-11-25  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/19291
