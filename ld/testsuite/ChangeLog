@@ -1,3 +1,16 @@
+2015-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Run mov2a and mov2b.
+	* ld-i386/mov2.s: New file.
+	* ld-i386/mov2a.d: Likewise.
+	* ld-i386/mov2b.d: Likewise.
+	* ld-x86-64/mov2.s: Likewise.
+	* ld-x86-64/mov2a.d: Likewise.
+	* ld-x86-64/mov2b.d: Likewise.
+	* ld-x86-64/mov2c.d: Likewise.
+	* ld-x86-64/mov2d.d: Likewise.
+	* ld-x86-64/x86-64.exp: Run mov2a, mov2b, mov2c and mov2d.
+
 2015-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19319

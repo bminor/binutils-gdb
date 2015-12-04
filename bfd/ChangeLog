@@ -1,3 +1,9 @@
+2015-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_convert_load): Skip if addend isn't 0.
+	(elf_i386_relocate_section): Skip R_386_GOT32X optimization if
+	addend isn't 0.
+
 2015-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19319

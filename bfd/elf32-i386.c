@@ -2820,6 +2820,11 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
       if (roff < 2)
 	continue;
 
+      /* Addend for R_386_GOT32 and R_386_GOT32X relocations must be 0.  */
+      addend = bfd_get_32 (abfd, contents + roff);
+      if (addend != 0)
+	continue;
+
       modrm = bfd_get_8 (abfd, contents + roff - 1);
       baseless = (modrm & 0xc7) == 0x5;
 
@@ -2913,11 +2918,6 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
 	    {
 	      /* The function is locally defined.   */
 convert_branch:
-	      addend = bfd_get_32 (abfd, contents + roff);
-	      /* Addend for R_386_GOT32X relocation must be 0.  */
-	      if (addend != 0)
-		continue;
-
 	      /* Convert R_386_GOT32X to R_386_PC32.  */
 	      if (modrm == 0x15 || (modrm & 0xf8) == 0x90)
 		{
@@ -3007,11 +3007,6 @@ convert_load:
 		}
 	      else
 		{
-		  /* Addend for R_386_GOT32X relocation must be 0.  */
-		  addend = bfd_get_32 (abfd, contents + roff);
-		  if (addend != 0)
-		    continue;
-
 		  if (opcode == 0x85)
 		    {
 		      /* Convert "test %reg1, foo@GOT(%reg2)" to
@@ -3998,8 +3993,11 @@ elf_i386_relocate_section (bfd *output_bfd,
 		 branch to direct branch.  It is OK to convert adc,
 		 add, and, cmp, or, sbb, sub, test, xor only when PIC
 		 is false.   */
-	      unsigned int opcode;
-	      opcode = bfd_get_8 (abfd, contents + rel->r_offset - 2);
+	      unsigned int opcode, addend;
+	      addend = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      if (addend != 0)
+		goto r_386_got32;
+	      opcode = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
 	      if (opcode != 0x8b && opcode != 0xff)
 		goto r_386_got32;
 	    }
@@ -4031,7 +4029,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      /* If not PIC, add the .got.plt section address for
 		 baseless addressing.  */
 	      unsigned int modrm;
-	      modrm = bfd_get_8 (abfd, contents + rel->r_offset - 1);
+	      modrm = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
 	      if ((modrm & 0xc7) == 0x5)
 		relocation += offplt;
 	    }
