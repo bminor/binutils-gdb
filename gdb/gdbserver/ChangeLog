@@ -1,3 +1,21 @@
+2015-12-04  Josh Stone  <jistone@redhat.com>
+
+	* target.h (struct target_ops) <arch_setup>: Rename to ...
+	(struct target_ops) <post_create_inferior>: ... this.
+	(target_arch_setup): Rename to ...
+	(target_post_create_inferior): ... this, calling post_create_inferior.
+	* server.c (start_inferior): Update target_arch_setup calls to
+	target_post_create_inferior.
+	* linux-low.c (linux_low_ptrace_options): Forward declare.
+	(linux_arch_setup): Update its comment for general use.
+	(linux_post_create_inferior): New, run arch_setup and setup ptrace.
+	(struct linux_target_ops): Use linux_post_create_inferior.
+	* lynx-low.c (struct lynx_target_ops): Update arch_setup stub comment
+	to post_create_inferior.
+	* nto-low.c (struct nto_target_ops): Likewise.
+	* spu-low.c (struct spu_target_ops): Likewise.
+	* win32-low.c (struct win32_target_ops): Likewise.
+
 2015-12-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* linux-arm-low.c: Remove duplicate arch/arm.h include.

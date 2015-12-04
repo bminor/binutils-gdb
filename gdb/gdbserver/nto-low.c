@@ -933,7 +933,7 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 
 static struct target_ops nto_target_ops = {
   nto_create_inferior,
-  NULL,  /* arch_setup */
+  NULL,  /* post_create_inferior */
   nto_attach,
   nto_kill,
   nto_detach,

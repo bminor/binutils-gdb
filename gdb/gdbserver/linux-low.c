@@ -264,6 +264,7 @@ static int finish_step_over (struct lwp_info *lwp);
 static int kill_lwp (unsigned long lwpid, int signo);
 static void enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t *info);
 static void complete_ongoing_step_over (void);
+static int linux_low_ptrace_options (int attached);
 
 /* When the event-loop is doing a step-over, this points at the thread
    being stepped.  */
@@ -421,7 +422,7 @@ linux_add_process (int pid, int attached)
 
 static CORE_ADDR get_pc (struct lwp_info *lwp);
 
-/* Implement the arch_setup target_ops method.  */
+/* Call the target arch_setup function on the current thread.  */
 
 static void
 linux_arch_setup (void)
@@ -917,6 +918,25 @@ linux_create_inferior (char *program, char **allargs)
   new_lwp->must_set_ptrace_flags = 1;
 
   return pid;
+}
+
+/* Implement the post_create_inferior target_ops method.  */
+
+static void
+linux_post_create_inferior (void)
+{
+  struct lwp_info *lwp = get_thread_lwp (current_thread);
+
+  linux_arch_setup ();
+
+  if (lwp->must_set_ptrace_flags)
+    {
+      struct process_info *proc = current_process ();
+      int options = linux_low_ptrace_options (proc->attached);
+
+      linux_enable_event_reporting (lwpid_of (current_thread), options);
+      lwp->must_set_ptrace_flags = 0;
+    }
 }
 
 /* Attach to an inferior process.  Returns 0 on success, ERRNO on
@@ -7077,7 +7097,7 @@ linux_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
-  linux_arch_setup,
+  linux_post_create_inferior,
   linux_attach,
   linux_kill,
   linux_detach,

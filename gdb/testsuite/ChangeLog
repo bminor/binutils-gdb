@@ -1,3 +1,7 @@
+2015-12-04  Josh Stone  <jistone@redhat.com>
+
+	* gdb.base/catch-fork-static.exp: New.
+
 2015-12-03  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/sizeof.c: Don't include stdio.h and

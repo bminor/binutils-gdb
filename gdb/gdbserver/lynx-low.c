@@ -722,7 +722,7 @@ lynx_request_interrupt (void)
 
 static struct target_ops lynx_target_ops = {
   lynx_create_inferior,
-  NULL,  /* arch_setup */
+  NULL,  /* post_create_inferior */
   lynx_attach,
   lynx_kill,
   lynx_detach,
