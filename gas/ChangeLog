@@ -1,3 +1,15 @@
+2015-12-04  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (arc_option): Sets all internal gas options when
+	parsing .cpu directive.
+	(declare_register_set): Declare all 64 registers.
+	(md_section_align): Refactor.
+	(md_pcrel_from_section): Remove assert.
+	(pseudo_operand_match): Fix pseudo operand match.
+	(find_reloc): Use flags filed, extend matching.
+	* config/tc-arc.h (TC_VALIDATE_FIX): Don't fixup any PLT
+	relocation.
+
 2015-12-01  Alan Modra  <amodra@gmail.com>
 
 	* config/aout_gnu.h: Invoke aout N_* macros with pointer to

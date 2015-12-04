@@ -1,3 +1,25 @@
+2015-12-04  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* gas/arc/bic.d: Update test.
+	* gas/arc/add_s-err.s: New file.
+	* gas/arc/cpu-warn1.s: Likewise.
+	* gas/arc/pcl-relocs.d: Likewise.
+	* gas/arc/pcl-relocs.s: Likewise.
+	* gas/arc/pcrel-relocs.d: Likewise.
+	* gas/arc/pcrel-relocs.s: Likewise.
+	* gas/arc/pic-relocs.d: Likewise.
+	* gas/arc/pic-relocs.s: Likewise.
+	* gas/arc/plt-relocs.d: Likewise.
+	* gas/arc/plt-relocs.s: Likewise.
+	* gas/arc/pseudos.d: Likewise.
+	* gas/arc/pseudos.s: Likewise.
+	* gas/arc/sda-relocs.d: Likewise.
+	* gas/arc/sda-relocs.s: Likewise.
+	* gas/arc/sda-relocs2.d: Likewise.
+	* gas/arc/sda-relocs2.s: Likewise.
+	* gas/arc/tls-relocs.d: Likewise.
+	* gas/arc/tls-relocs.s: Likewise.
+
 2015-12-02  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* gas/arm/armv8-a.d: <ldaexh>: Rename mismatched mnemonics ...

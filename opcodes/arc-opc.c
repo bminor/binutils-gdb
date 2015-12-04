@@ -1240,38 +1240,52 @@ const struct arc_flag_special arc_flag_special_cases[] =
 const unsigned arc_num_flag_special = ARRAY_SIZE (arc_flag_special_cases);
 
 /* Relocations.  */
-#undef DEF
-#define DEF(NAME, EXC1, EXC2, RELOC1, RELOC2)	\
-  { #NAME, EXC1, EXC2, RELOC1, RELOC2}
-
 const struct arc_reloc_equiv_tab arc_reloc_equiv[] =
 {
-  DEF (sda, "ld", F_AS9, BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST2),
-  DEF (sda, "st", F_AS9, BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST2),
-  DEF (sda, "ldw", F_AS9, BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST1),
-  DEF (sda, "ldh", F_AS9, BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST1),
-  DEF (sda, "stw", F_AS9, BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST1),
-  DEF (sda, "sth", F_AS9, BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST1),
+  { "sda", "ld", { F_ASFAKE, F_H1, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST1 },
+  { "sda", "st", { F_ASFAKE, F_H1, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST1 },
+  { "sda", "ld", { F_ASFAKE, F_SIZEW7, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST1 },
+  { "sda", "st", { F_ASFAKE, F_SIZEW7, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST1 },
+
+  /* Next two entries will cover the undefined behavior ldb/stb with
+     address scaling.  */
+  { "sda", "ld", { F_ASFAKE, F_SIZEB7, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST },
+  { "sda", "st", { F_ASFAKE, F_SIZEB7, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST},
+
+  { "sda", "ld", { F_ASFAKE, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST2 },
+  { "sda", "st", { F_ASFAKE, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST2},
+  { "sda", "ldd", { F_ASFAKE, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST2 },
+  { "sda", "std", { F_ASFAKE, F_NULL },
+    BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST2},
 
   /* Short instructions.  */
-  DEF (sda, 0, F_NULL, BFD_RELOC_ARC_SDA16_LD, BFD_RELOC_ARC_SDA16_LD),
-  DEF (sda, 0, F_NULL, -SIMM10_A16_7_Sbis, BFD_RELOC_ARC_SDA16_LD1),
-  DEF (sda, 0, F_NULL, BFD_RELOC_ARC_SDA16_LD2, BFD_RELOC_ARC_SDA16_LD2),
-  DEF (sda, 0, F_NULL, BFD_RELOC_ARC_SDA16_ST2, BFD_RELOC_ARC_SDA16_ST2),
+  { "sda", 0, { F_NULL }, BFD_RELOC_ARC_SDA16_LD, BFD_RELOC_ARC_SDA16_LD },
+  { "sda", 0, { F_NULL }, -SIMM10_A16_7_Sbis, BFD_RELOC_ARC_SDA16_LD1 },
+  { "sda", 0, { F_NULL }, BFD_RELOC_ARC_SDA16_LD2, BFD_RELOC_ARC_SDA16_LD2 },
+  { "sda", 0, { F_NULL }, BFD_RELOC_ARC_SDA16_ST2, BFD_RELOC_ARC_SDA16_ST2 },
 
-  DEF (sda, 0, F_NULL, BFD_RELOC_ARC_32_ME, BFD_RELOC_ARC_SDA32_ME),
-  DEF (sda, 0, F_NULL, BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST),
+  { "sda", 0, { F_NULL }, BFD_RELOC_ARC_32_ME, BFD_RELOC_ARC_SDA32_ME },
+  { "sda", 0, { F_NULL }, BFD_RELOC_ARC_SDA_LDST, BFD_RELOC_ARC_SDA_LDST },
 
-  DEF (plt, 0, F_NULL, BFD_RELOC_ARC_S25H_PCREL,
-       BFD_RELOC_ARC_S25H_PCREL_PLT),
-  DEF (plt, 0, F_NULL, BFD_RELOC_ARC_S21H_PCREL,
-       BFD_RELOC_ARC_S21H_PCREL_PLT),
-  DEF (plt, 0, F_NULL, BFD_RELOC_ARC_S25W_PCREL,
-       BFD_RELOC_ARC_S25W_PCREL_PLT),
-  DEF (plt, 0, F_NULL, BFD_RELOC_ARC_S21W_PCREL,
-       BFD_RELOC_ARC_S21W_PCREL_PLT),
+  { "plt", 0, { F_NULL }, BFD_RELOC_ARC_S25H_PCREL,
+    BFD_RELOC_ARC_S25H_PCREL_PLT },
+  { "plt", 0, { F_NULL }, BFD_RELOC_ARC_S21H_PCREL,
+    BFD_RELOC_ARC_S21H_PCREL_PLT },
+  { "plt", 0, { F_NULL }, BFD_RELOC_ARC_S25W_PCREL,
+    BFD_RELOC_ARC_S25W_PCREL_PLT },
+  { "plt", 0, { F_NULL }, BFD_RELOC_ARC_S21W_PCREL,
+    BFD_RELOC_ARC_S21W_PCREL_PLT },
 
-  DEF (plt, 0, F_NULL, BFD_RELOC_ARC_32_ME, BFD_RELOC_ARC_PLT32),
+  { "plt", 0, { F_NULL }, BFD_RELOC_ARC_32_ME, BFD_RELOC_ARC_PLT32 }
 };
 
 const unsigned arc_num_equiv_tab = ARRAY_SIZE (arc_reloc_equiv);

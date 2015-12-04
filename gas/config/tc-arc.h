@@ -125,14 +125,20 @@ extern long md_pcrel_from_section (struct fix *, segT);
   arc_cons_fix_new ((FRAG), (OFF), (LEN), (EXP), (RELOC))
 
 /* We don't want gas to fixup the following program memory related
-   relocations.  */
-#define TC_VALIDATE_FIX(FIXP,SEG,SKIP)			     \
-  if ((FIXP->fx_r_type == BFD_RELOC_ARC_GOTPC32)	     \
-      && FIXP->fx_addsy != NULL				     \
-      && FIXP->fx_subsy == NULL)			     \
-    {							     \
-      symbol_mark_used_in_reloc (FIXP->fx_addsy);	     \
-      goto SKIP;					     \
+   relocations.  Check also that fx_addsy is not NULL, in order to
+   make sure that the fixup refers to some sort of label.  */
+#define TC_VALIDATE_FIX(FIXP,SEG,SKIP)				     \
+  if ((FIXP->fx_r_type == BFD_RELOC_ARC_GOTPC32			     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_PLT32		     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_S25W_PCREL_PLT	     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_S25H_PCREL_PLT	     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_S21W_PCREL_PLT	     \
+       || FIXP->fx_r_type == BFD_RELOC_ARC_S21H_PCREL_PLT)	     \
+      && FIXP->fx_addsy != NULL					     \
+      && FIXP->fx_subsy == NULL)				     \
+    {								     \
+      symbol_mark_used_in_reloc (FIXP->fx_addsy);		     \
+      goto SKIP;						     \
     }
 
 /* BFD_RELOC_ARC_TLS_GD_LD may use fx_subsy to store a label that is
