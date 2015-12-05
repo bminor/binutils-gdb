@@ -1,3 +1,7 @@
+2015-12-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Set GDB version number to 7.10.1.
+
 2014-11-28  Pedro Alves  <palves@redhat.com>
 
 	* cp-name-parser.y (conversion_op): Use
