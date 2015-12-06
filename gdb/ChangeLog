@@ -1,3 +1,10 @@
+2015-12-06  Mike Stump <mikestump@comcast.net>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (TAGS): Replace i386-nat.h by x86-nat.h.
+	* x86-nat.c: Replace remaining references to i386-nat
+	by reference to x86-nat instead.
+
 2015-12-05  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.10.1 released.
