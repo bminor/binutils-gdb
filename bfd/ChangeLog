@@ -2,6 +2,11 @@
 
 	Apply from master.
 	2015-12-07  Alan Modra  <amodra@gmail.com>
+	PR 19323
+	* elfcode.h (elf_object_p): Check for ridiculous e_shnum and
+	e_phnum values.
+
+	2015-12-07  Alan Modra  <amodra@gmail.com>
 	* reloc.c (BFD_RELOC_PPC64_ENTRY): New.
 	* elf64-ppc.c (reloc_howto_type ppc64_elf_howto_raw): Add
 	entry for R_PPC64_ENTRY.
