@@ -44,10 +44,29 @@ gdb_continue_to_breakpoint "testing location"
 
 CompileExpression::new "var"
 CompileExpression::add_imp "a.public_" 1
-CompileExpression::add_imp "a.protected_" 2
+CompileExpression::add_imp "a.protected_" 21
 CompileExpression::add_imp "a.private_" 3
 CompileExpression::add_imp "A::s_public_" 10
 CompileExpression::add_imp "A::s_protected_" 20
-CompileExpression::add_imp "A::s_private_" 30
+CompileExpression::add_imp "A::s_private_" 12
+CompileExpression::add_exp "A::ATYPE i = 10; var = i;" 10
+CompileExpression::add_imp "get_values (a)" 85
+CompileExpression::add_exp "myenum me = E_B; var = me;" 11
+CompileExpression::add_exp "A::s_protected_ = N::AB; var = A::s_protected_;" 21
+CompileExpression::add_exp "A::s_private_ = E_B; var = A::s_private_;" 11
+CompileExpression::add_exp "N::ANON_E ae = N::AD; var = ae;" 23
 CompileExpression::run_tests "code"
 #CompileExpression::run_tests "print"
+
+# Test some compilation failures
+set failed {\r\nCompilation failed\.}
+gdb_test "compile code a.s_public_ = E_B" \
+    ".*assignment of read-only variable 'A::s_public_'$failed"
+gdb_test "compile code get_values ()" \
+    ".*too few arguments to function.*$failed"
+gdb_test "compile code ATYPE i;" \
+    ".*.ATYPE. was not declared in this scope$failed"
+
+# !!keiths; The "to ..." part depends on how we name anonymous types.
+gdb_test "compile code N::ANON_E nse = E_A" \
+    ".*cannot convert .myenum. to .anonymous enum.*$failed"

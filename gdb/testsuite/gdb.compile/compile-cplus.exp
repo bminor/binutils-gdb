@@ -81,13 +81,13 @@ gdb_test_no_output "compile -- f = 10" \
 gdb_test "compile f = 10;" ".*= 10;: No such file.*" \
     "Test abbreviations and code collision"
 
-gdb_test_no_output "compile -r -- extern \"C\" void _gdb_expr(){int i = 5;}" \
+gdb_test_no_output "compile -r -- void _gdb_expr(){int i = 5;}" \
     "Test delimiter with -r"
 
-gdb_test_no_output "compile -raw -- extern \"C\" void _gdb_expr(){int i = 5;}" \
+gdb_test_no_output "compile -raw -- void _gdb_expr(){int i = 5;}" \
     "Test delimiter with -raw"
 
-gdb_test "compile -- -r  extern \"C\" void _gdb_expr(){int i = 5;}" \
+gdb_test "compile -- -r  void _gdb_expr(){int i = 5;}" \
     ".* error: 'r' was not declared in this scope.*" \
     "Test delimiter with -r after it"
 
@@ -140,9 +140,11 @@ gdb_test "p globalvar" " = -1" "check MINUS_1"
 gdb_test_no_output "compile code globalvar = static_local"
 gdb_test "p globalvar" " = 77000" "check static_local"
 
-gdb_test_no_output "compile code static int staticvar = 5; intptr = &staticvar" \
-    "keep jit in memory"
-gdb_test "p *intptr" " = 5" "expect 5"
+gdb_test_no_output \
+    "compile code static int staticvar = 5; intptr = &staticvar" \
+    "do not keep jit in memory"
+gdb_test "p *intptr" "Cannot access memory at address 0x\[0-9a-f\]+" \
+    "expect 5"
 
 gdb_test "compile code func_doesnotexist ();" "error: \'func_doesnotexist\' was not declared in this scope.*"
 
@@ -298,14 +300,14 @@ gdb_test "print staticshadow" " = 202"
 # For #pragma we need multiline input.
 gdb_test_multiple "compile code -r" "compile code -r multiline 1" { -re "\r\n>$" {} }
 gdb_test_multiple "#pragma GCC user_expression" "compile code -r multiline 2" { -re "\r\n>$" {} }
-gdb_test_multiple "extern \"C\" void _gdb_expr(void) { globalshadow = 77000; }" "compile code -r multiline 3" { -re "\r\n>$" {} }
+gdb_test_multiple "void _gdb_expr(void) { globalshadow = 77000; }" "compile code -r multiline 3" { -re "\r\n>$" {} }
 gdb_test_no_output "end" "compile code -r multiline 4"
 gdb_test "print 'compile-cplus.c'::globalshadow" " = 77000" \
     "check globalshadow with -r"
 
 # Test GOT vs. resolving jit function pointers.
 
-gdb_test_no_output "compile -raw -- int func(){return 21;} extern \"C\" void _gdb_expr(){int (*funcp)()=func; if (funcp()!=21) abort();}" \
+gdb_test_no_output "compile -raw -- extern \"C\" void abort(); int func(){return 21;} void _gdb_expr(){int (*funcp)()=func; if (funcp()!=21) abort();}" \
     "pointer to jit function"
 
 #
@@ -350,7 +352,7 @@ gdb_test "compile code -z" "Unknown argument.*"
 
 gdb_test "set lang java" \
     "Warning: the current language does not match this frame."
-gdb_test "compile code globalvar" "No compiler support for this language\."
+gdb_test "compile code globalvar" "No compiler support for language java\."
 gdb_test_no_output "set lang auto"
 
 gdb_test_no_output "compile code union union_type newdecl_u"

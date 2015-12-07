@@ -43,10 +43,33 @@ gdb_breakpoint [gdb_get_line_number "break here" $srcfile]
 gdb_continue_to_breakpoint "testing location"
 
 CompileExpression::new "var"
-CompileExpression::add_imp "a.doit ()" 1
 CompileExpression::add_imp "b.doit ()" 2
 CompileExpression::add_imp "c.doit ()" 3
 CompileExpression::add_imp "d.doit ()" 4
 CompileExpression::add_imp "ap->doit ()" 4
+CompileExpression::add_imp "b.doit2 ()" 22
+CompileExpression::add_imp "c.doit2 ()" 33
+CompileExpression::add_imp "d.doit2 ()" 44
+CompileExpression::add_imp "ap->doit2 ()" 44
+CompileExpression::add_imp "b.doit3 ()" -3
+CompileExpression::add_imp "c.doit3 ()" -3
+CompileExpression::add_imp "d.doit3 ()" -3
+CompileExpression::add_imp "foo.doit ()" 1111
+CompileExpression::add_imp "bar.doit2 ()" 2222
+
+# These two tests are "disabled".  They represent new/future features.
+# CompileExpression::add_exp \
+    [concat "struct ABC {int doit2(void) { return 3333; }} abc;" \
+	 "var = abc.doit2()"] \
+    3333
+# CompileExpression::add_exp \
+    [concat "struct ABC : A {int doit2(void) { return 4444; }} abc;" \
+	 "var = abc.doit2()"] \
+    4444
+
 CompileExpression::run_tests "code"
 #CompileExpression::run_tests "print"
+
+# Test some error conditions
+gdb_test "compile code A a;" \
+    ".*cannot declare variable .a. to be of abstract type.*Compilation failed."

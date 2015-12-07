@@ -6894,7 +6894,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     {
     case DW_TAG_subprogram:
       addr = gdbarch_adjust_dwarf2_addr (gdbarch, pdi->lowpc + baseaddr);
-      if (pdi->is_external || cu->language == language_ada)
+      if (pdi->is_external || cu->language == language_ada || cu->language == language_cplus)
 	{
           /* brobecker/2007-12-26: Normally, only "external" DIEs are part
              of the global scope.  But in Ada, we want to be able to access
@@ -7146,7 +7146,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
   if (! pdi->has_children)
     return;
 
-  if (cu->language == language_ada)
+  if (cu->language == language_ada || cu->language == language_cplus)
     {
       pdi = pdi->die_child;
       while (pdi != NULL)
@@ -12134,7 +12134,7 @@ dwarf2_get_subprogram_pc_bounds (struct die_info *die,
 
   /* If the language does not allow nested subprograms (either inside
      subprograms or lexical blocks), we're done.  */
-  if (cu->language != language_ada)
+  if (cu->language != language_ada && cu->language != language_cplus)
     return;
 
   /* Check all the children of the given DIE.  If it contains nested
@@ -18430,7 +18430,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
 	  attr2 = dwarf2_attr (die, DW_AT_external, cu);
 	  if ((attr2 && (DW_UNSND (attr2) != 0))
-              || cu->language == language_ada)
+              || cu->language == language_ada || cu->language == language_cplus)
 	    {
               /* Subprograms marked external are stored as a global symbol.
                  Ada subprograms, whether marked external or not, are always

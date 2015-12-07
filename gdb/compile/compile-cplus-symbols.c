@@ -30,10 +30,11 @@
 #include "exceptions.h"
 #include "gdbtypes.h"
 #include "dwarf2loc.h"
-
+#include "cp-support.h"
 
 
 #define DEBUG 0
+#define DEBUG_ORACLE 0
 
 /* Object of this type are stored in the compiler's symbol_err_map.  */
 
@@ -173,7 +174,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	 maybe uninitialized".  Add temporary pacifier.  */
       enum gcc_cp_symbol_kind kind = -1;
       CORE_ADDR addr = 0;
-      char *symbol_name = NULL;
+      char *symbol_name = NULL, *name = NULL;
 
       switch (SYMBOL_CLASS (sym.symbol))
 	{
@@ -202,11 +203,11 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	      /* Already handled by convert_enum.  */
 	      return;
 	    }
-	  CP_CTX (context)->cp_ops->build_constant
-	    (CP_CTX (context), sym_type,
-	     SYMBOL_NATURAL_NAME (sym.symbol),
-	     SYMBOL_VALUE (sym.symbol),
-	     filename, line);
+	  CPOPS ("build_constant %s\n", SYMBOL_NATURAL_NAME (sym.symbol));
+	  CPCALL (build_constant, context,
+		  sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
+		  SYMBOL_VALUE (sym.symbol),
+		  filename, line);
 	  return;
 
 	case LOC_CONST_BYTES:
@@ -291,31 +292,58 @@ convert_one_symbol (struct compile_cplus_instance *context,
       if (context->base.scope != COMPILE_I_RAW_SCOPE
 	  || symbol_name == NULL)
 	{
-	  if (is_global)
+	  int need_new_context = 0;
+	  struct compile_cplus_context *pctx = NULL;
+
+	  /* For non-local symbols, create/push a new processing context
+	     so that the symbol is properly scoped to the plug-in.  */
+	  if (!is_local)
 	    {
-	      CP_CTX (context)->cp_ops->push_namespace (CP_CTX (context), "");
-	      // FIXME: push (and, after the call, pop) any other
-	      // namespaces, if any, and drop the above when defining
-	      // a class member.
+	      gcc_type dummy;
+
+	      pctx = new_processing_context (context,
+					     SYMBOL_NATURAL_NAME (sym.symbol),
+					     SYMBOL_TYPE (sym.symbol),
+					     &dummy);
+	      if (dummy != GCC_TYPE_NONE)
+		{
+		  /* We found a symbol for this type that was defined inside
+		     some other symbol, e.g., a class tyepdef defined.
+		     Don't return anything in that case because that really
+		     confuses users.  */
+		  xfree (symbol_name);
+		  xfree (name);
+		  delete_processing_context (pctx);
+		  return;
+		}
+
+	      need_new_context = ccp_need_new_context (pctx);
+	      if (need_new_context)
+		ccp_push_processing_context (context, pctx);
 	    }
-	  // FIXME: drop any namespace and class names from before
-	  // the symbol name, and any function signatures from
-	  // after it.  -lxo
-	  decl = CP_CTX (context)->cp_ops->new_decl
-	    (CP_CTX (context),
-	     SYMBOL_NATURAL_NAME (sym.symbol),
-	     kind,
-	     sym_type,
-	     symbol_name, addr,
-	     filename, line);
-	  if (is_global)
+
+	  /* Get the `raw' name of the symbol.  */
+	  if (SYMBOL_NATURAL_NAME (sym.symbol) != NULL)
 	    {
-	      // FIXME: pop other namespaces, if any.
-	      CP_CTX (context)->cp_ops->pop_namespace (CP_CTX (context));
+	      name
+		= cp_func_name (SYMBOL_NATURAL_NAME (sym.symbol));
 	    }
+
+	  /* Define the decl.  */
+	  CPOPS ("new_decl %s %d %s\n", name, kind, symbol_name);
+	  decl = CPCALL (new_decl, context,
+			 name, kind, sym_type, symbol_name, addr,
+			 filename, line);
+
+	  /* Pop any processing context.  */
+	  if (need_new_context)
+	    ccp_pop_processing_context (context, pctx);
+
+	  delete_processing_context (pctx);
 	}
 
       xfree (symbol_name);
+      xfree (name);
     }
 }
 
@@ -324,8 +352,9 @@ convert_one_symbol (struct compile_cplus_instance *context,
    itself, and DOMAIN is the domain which was searched.  */
 
 static void
-convert_symbol_sym (struct compile_cplus_instance *context, const char *identifier,
-		    struct block_symbol sym, domain_enum domain)
+convert_symbol_sym (struct compile_cplus_instance *context,
+		    const char *identifier, struct block_symbol sym,
+		    domain_enum domain)
 {
   const struct block *static_block;
   int is_local_symbol;
@@ -425,16 +454,76 @@ convert_symbol_bmsym (struct compile_cplus_instance *context,
     }
 
   sym_type = convert_cplus_type (context, type);
-  CP_CTX (context)->cp_ops->push_namespace (CP_CTX (context), "");
+  CPOPS ("push_namespace \"\"\n");
+  CPCALL (push_namespace, context, "");
   // FIXME: push (and, after the call, pop) any other namespaces, if
   // any, and drop the above when defining a class member.  drop any
   // namespace and class names from before the symbol name, and any
   // function signatures from after it.  -lxo
-  decl = CP_CTX (context)->cp_ops->new_decl (CP_CTX (context),
-					     MSYMBOL_NATURAL_NAME (msym),
-					     kind, sym_type, NULL, addr,
-					     NULL, 0);
-  CP_CTX (context)->cp_ops->pop_namespace (CP_CTX (context));
+  /* !!keiths: I don't see how we could do this.  We have NO debug
+     information for the symbol.  While we have access to the demangled
+     name, we still don't know what A::B::C::D::E::F means without debug
+     info, no?  */
+  CPOPS ("new_decl minsym %s %d\n", MSYMBOL_NATURAL_NAME (msym), kind);
+  decl = CPCALL (new_decl, context,
+		 MSYMBOL_NATURAL_NAME (msym), kind, sym_type,
+		 NULL, addr, NULL, 0);
+  CPOPS ("pop_namespace \"\"\n");
+  CPCALL (pop_namespace, context);
+}
+
+/* Do a regular expression search of the symbol table for any symbol
+   named NAME in the given DOMAIN.  Warning: This is INCREDIBLY slow.  */
+
+static int
+regexp_search_symbols (struct compile_cplus_instance *context,
+		      const char *name, domain_enum domain)
+{
+  char *regexp;
+  enum search_domain search_domain;
+  struct symbol_search *symbols, *p;
+  struct cleanup *cleanup;
+  int found = 0;
+
+  switch (domain)
+    {
+    case STRUCT_DOMAIN:
+      search_domain = TYPES_DOMAIN;
+      break;
+    case VAR_DOMAIN:
+      /* !!keiths: Don't run this for VAR_DOMAIN symbols?  */
+      return 0;
+      search_domain = VARIABLES_DOMAIN;
+      break;
+    default:
+      /* This will cause search_symbols to assert.  */
+      search_domain = ALL_DOMAIN;
+      break;
+    }
+
+  symbols = NULL;
+  cleanup = make_cleanup_free_search_symbols (&symbols);
+
+  regexp = xstrprintf ("\\(\\(.*::\\)\\|^\\)%s$", name);
+  make_cleanup (xfree, regexp);
+  search_symbols (regexp, search_domain, 0, NULL, &symbols);
+
+  for (p = symbols; p != NULL; p = p->next)
+    {
+      if (p->symbol != NULL)
+	{
+	  struct block_symbol sym;
+
+	  sym.symbol = p->symbol;
+	  sym.block = SYMBOL_BLOCK_VALUE (p->symbol);
+	  convert_symbol_sym (context, name, sym, domain);
+	  found = 1;
+	}
+      /* !!keiths: Ignore minsyms?  */
+    }
+
+  do_cleanups (cleanup);
+  return found;
 }
 
 /* See compile-internal.h.  */
@@ -448,6 +537,9 @@ gcc_cplus_convert_symbol (void *datum,
   struct compile_cplus_instance *context = datum;
   domain_enum domain;
   int found = 0;
+  struct search_multiple_result search_result;
+  struct cleanup *cleanups;
+  enum search_domain search_domain;
 
   switch (request)
     {
@@ -466,40 +558,90 @@ gcc_cplus_convert_symbol (void *datum,
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
-#if DEBUG
+#if DEBUG_ORACLE
   printf ("got oracle request for %s in domain %s\n", identifier,
 	  domain_name (domain));
 #endif
 
+  memset (&search_result, 0, sizeof (search_result));
+  cleanups = make_cleanup (search_multiple_result_cleanup, &search_result);
   TRY
     {
-      struct block_symbol sym;
+      int ix;
 
-      // FIXME: In response to oracle requests, we have to look up the
-      // identifier in every namespace, and introduce definitions for
-      // all symbols we find.  -lxo
-      sym = lookup_symbol (identifier, context->base.block, domain, NULL);
-      if (sym.symbol != NULL)
-	{
-	  convert_symbol_sym (context, identifier, sym, domain);
-	  found = 1;
-	}
-      else if (domain == VAR_DOMAIN)
-	{
-	  struct bound_minimal_symbol bmsym;
+      /* !!keiths: Symbol lookup is out of control.  Here's the current
+	 process, screaming for a custom symbol table search:
 
-	  bmsym = lookup_minimal_symbol (identifier, NULL, NULL);
-	  if (bmsym.minsym != NULL)
+	 1. If looking up a symbol in VAR_DOMAIN (basically anything but
+	 a type), use linespec.c's (new) multi-symbol search.  This will
+	 allow overloads of functions (not methods) to be converted.
+
+	 2. If a symbol is not found, do a "standard" lookup.  This will
+	 find variables in the current scope.
+
+	 3. If a symbol is still not found, try a regexp search.  This
+	 allows namespace-y stuff to work (cp-simple-ns.exp). This is currently
+	 only used for STRUCT_DOMAIN lookups.
+
+	 4. Finally, if all else fails, fall back to minsyms.  */
+
+      if (domain == VAR_DOMAIN)
+	{
+	  search_result = search_symbols_multiple (identifier,
+						   current_language,
+						   domain, NULL, NULL);
+	  if (!VEC_empty (block_symbol_d, search_result.symbols))
 	    {
-	      convert_symbol_bmsym (context, bmsym);
+	      struct block_symbol *elt;
+
+	      for (ix = 0;
+		   VEC_iterate (block_symbol_d, search_result.symbols, ix, elt);
+		   ++ix)
+		{
+		  convert_symbol_sym (context, identifier, *elt, domain);
+		}
+	      found = 1;
+	    }
+	}
+
+      if (!found)
+	{
+	  struct block_symbol sym;
+
+	  sym = lookup_symbol (identifier, context->base.block, domain, NULL);
+	  if (sym.symbol != NULL)
+	    {
+	      convert_symbol_sym (context, identifier, sym, domain);
+	      found = 1;
+	    }
+	}
+
+      if (!found)
+	{
+	  /* Try a regexp search of the program's symbols.  */
+	  found = regexp_search_symbols (context, identifier, domain);
+
+	  /* One last attempt: fall back to minsyms.  */
+	  if (!found && !VEC_empty (bound_minimal_symbol_d,
+				    search_result.minimal_symbols))
+	    {
+	      struct bound_minimal_symbol *elt;
+
+	      for (ix = 0;
+		   VEC_iterate (bound_minimal_symbol_d,
+				search_result.minimal_symbols, ix, elt);
+		   ++ix)
+		{
+		  convert_symbol_bmsym (context, *elt);
+		}
 	      found = 1;
 	    }
 	}
     }
-
   CATCH (e, RETURN_MASK_ALL)
     {
-      CP_CTX (context)->cp_ops->error (CP_CTX (context), e.message);
+      CPOPS ("error: %s\n", e.message);
+      CPCALL (error, context, e.message);
     }
   END_CATCH
 
@@ -508,13 +650,14 @@ gcc_cplus_convert_symbol (void *datum,
 			"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
 			identifier);
 
-#if DEBUG
+#if DEBUG_ORACLE
   if (found)
     printf ("found type for %s!\n", identifier);
   else
     printf ("did not find type for %s\n", identifier);
 #endif
 
+  do_cleanups (cleanups);
   return;
 }
 
@@ -527,6 +670,10 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
   struct compile_cplus_instance *context = datum;
   gcc_address result = 0;
   int found = 0;
+
+#if DEBUG_ORACLE
+  printf ("got oracle request for address of %s\n", identifier);
+#endif
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
@@ -569,7 +716,8 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      CP_CTX (context)->cp_ops->error (CP_CTX (context), e.message);
+      CPOPS ("error: %s\n", e.message);
+      CPCALL (error, context, e.message);
     }
   END_CATCH
 
@@ -577,6 +725,14 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
     fprintf_unfiltered (gdb_stdout,
 			"gcc_symbol_address \"%s\": failed\n",
 			identifier);
+
+#if DEBUG_ORACLE
+  if (found)
+    printf ("found address for %s!\n", identifier);
+  else
+    printf ("did not find address for %s\n", identifier);
+#endif
+
   return result;
 }
 

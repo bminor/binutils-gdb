@@ -48,6 +48,8 @@ CompileExpression::add_imp "a->get_var (static_cast<unsigned long> (1));" 100
 CompileExpression::add_imp "a->get_var (static_cast<int> (1));" 101
 CompileExpression::add_imp "a->get_var (static_cast<float> (1));" 102
 CompileExpression::add_imp "a->get_var (static_cast<void *> (a));" 103
+CompileExpression::add_imp "a->get_var (*a);" 104
+CompileExpression::add_imp "a->get_var (*ac);" 105
 CompileExpression::add_imp "a->get_var1 (1);" 42
 CompileExpression::add_imp "a->get_var2 (1, 2);" 88
 CompileExpression::add_imp "A::get_1 (1);" 2
@@ -55,5 +57,8 @@ CompileExpression::add_imp "A::get_2 (1, 2);" 5
 CompileExpression::add_imp "A::get_1 (a->get_var ());" 22
 CompileExpression::add_imp "a->get_var1 (a->get_var () - 16);" 672
 CompileExpression::add_imp "a->get_var2 (a->get_var (), A::get_1 (2));" 336
+CompileExpression::add_imp "get_value ()" 200
+CompileExpression::add_imp "get_value (a)" 21
+CompileExpression::add_imp "get_value (get_value ())" 200
 CompileExpression::run_tests "code"
 #CompileExpression::run_tests "print"

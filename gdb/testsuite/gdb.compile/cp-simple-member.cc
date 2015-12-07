@@ -16,32 +16,58 @@
 class A;
 static int get_values (const A& a);
 
+enum myenum {E_A = 10, E_B, E_C, E_D, E_E};
+
+#if WE_DONT_LIKE_THIS
+// Yet? GCC outputs DW_AT_linkage_name="<anon>"
+// This *really* messes things up.
+namespace {
+  typedef enum {AA = 20, AB, AC, AD} ANON_E;
+}
+#endif
+
+namespace N {
+  typedef enum {AA = 20, AB, AC, AD} ANON_E;
+}
+
 class A
 {
 public:
-  A(void) : public_ (1), protected_ (2), private_ (3) {}
-  int public_;
-  static int s_public_;
-  friend int get_values (const A&);
+  typedef int ATYPE;
+
+  A(void) : public_ (1), protected_ (N::AB), private_ (3) {}
+  ATYPE public_;
+  static const myenum s_public_;
+  friend ATYPE get_values (const A&);
 
 protected:
-  int protected_;
-  static int s_protected_;
+  N::ANON_E protected_;
+  static N::ANON_E s_protected_;
 
 private:
-  int private_;
-  static int s_private_;
+  ATYPE private_;
+  static myenum s_private_;
 };
 
-int A::s_public_ = 10;
-int A::s_protected_ = 20;
-int A::s_private_ = 30;
+const myenum A::s_public_ = E_A;
+N::ANON_E A::s_protected_ = N::AA;
+myenum A::s_private_ = E_C;
 
-static int
+static A::ATYPE
 get_values (const A& a)
 {
-  return (a.public_ + a.protected_ + a.private_
-	  + a.s_public_ + a.s_protected_ + a.s_private_);
+  A::ATYPE val;
+
+  val = a.public_ + a.private_;	// 1 + 3
+  if (a.protected_ == N::AB)	// + 21
+    val += 21;
+  if (a.s_public_ == E_A)	// +10
+    val += 10;
+  if (a.s_protected_ == N::AA)	// +20
+    val += 20;
+  if (a.s_private_ == E_C)	// +30
+    val += 30;
+  return val;			// = 85
 }
 
 int

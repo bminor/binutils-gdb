@@ -25,6 +25,12 @@
 
 extern int compile_debug;
 
+/* Flag to enable internal debugging for C++ type-conversion.  */
+
+extern int debug_compile_cplus_types;
+
+#define CPOPS(...) if (debug_compile_cplus_types) printf (__VA_ARGS__)
+
 struct block;
 
 /* An object of this type holds state associated with a given
@@ -107,6 +113,9 @@ struct compile_cplus_instance
 #define COMPILE_I_PRINT_OUT_ARG "__gdb_out_param"
 #define COMPILE_I_EXPR_VAL "__gdb_expr_val"
 #define COMPILE_I_EXPR_PTR_TYPE "__gdb_expr_ptr_type"
+
+/* A "type" to indicate a NULL type.  */
+#define GCC_TYPE_NONE ((gcc_type) -1)
 
 /* Call gdbarch_register_name (GDBARCH, REGNUM) and convert its result
    to a form suitable for the compiler source.  The register names
@@ -198,5 +207,22 @@ extern const char *cplus_get_mode_for_size (int size);
 struct dynamic_prop;
 extern char *c_get_range_decl_name (const struct dynamic_prop *prop);
 extern char *cplus_get_range_decl_name (const struct dynamic_prop *prop);
+
+/* A macro to help with calling the plug-in.  */
+#define CPCALL(OP,CONTEXT,...)						\
+  (CP_CTX ((CONTEXT))->cp_ops->OP (CP_CTX ((CONTEXT)), ##__VA_ARGS__))
+
+struct compile_cplus_context;
+extern void ccp_push_processing_context (struct compile_cplus_instance *,
+					 struct compile_cplus_context *);
+extern int ccp_need_new_context (const struct compile_cplus_context *);
+
+extern void ccp_pop_processing_context (struct compile_cplus_instance *,
+					struct compile_cplus_context *);
+extern struct compile_cplus_context *
+  new_processing_context (struct compile_cplus_instance *,
+			  const char *, const struct type *, gcc_type *);
+
+extern void delete_processing_context (struct compile_cplus_context *);
 
 #endif /* GDB_COMPILE_INTERNAL_H */
