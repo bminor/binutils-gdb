@@ -58,10 +58,6 @@ struct address_entry
   CORE_ADDR addr;
 };
 
-typedef struct bound_minimal_symbol bound_minimal_symbol_d;
-
-DEF_VEC_O (bound_minimal_symbol_d);
-
 /* A linespec.  Elements of this structure are filled in by a parser
    (either parse_linespec or some other function).  The structure is
    then converted into SALs by convert_linespec_to_sals.  */
@@ -159,11 +155,7 @@ struct collect_info
   VEC (symtab_ptr) *file_symtabs;
 
   /* The result being accumulated.  */
-  struct
-  {
-    VEC (block_symbol_d) *symbols;
-    VEC (bound_minimal_symbol_d) *minimal_symbols;
-  } result;
+  struct search_multiple_result result;
 };
 
 /* Token types  */

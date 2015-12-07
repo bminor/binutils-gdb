@@ -1638,4 +1638,10 @@ void initialize_objfile_symbol (struct symbol *);
 
 struct template_symbol *allocate_template_symbol (struct objfile *);
 
+struct search_multiple_result
+{
+  VEC (block_symbol_d) *symbols;
+  VEC (bound_minimal_symbol_d) *minimal_symbols;
+};
+
 #endif /* !defined(SYMTAB_H) */
