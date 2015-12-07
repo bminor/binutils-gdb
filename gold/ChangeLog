@@ -1,6 +1,11 @@
 2015-12-10  Alan Modra  <amodra@gmail.com>
 
 	Apply from master.
+	2015-12-07  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (add_2_2_12, ld_2_12, lis_2): Define.
+	(Target_powerpc::Scan::local, global): Handle R_PPC64_ENTRY.
+	(Target_powerpc::Relocate::relocate): Edit code at R_PPC64_ENTRY.
+
 	2015-11-25  Cary Coutant  <ccoutant@gmail.com>
 	PR gold/19291
 	* object.cc (Sized_relobj_file::write_local_symbols): If relocatable,

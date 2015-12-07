@@ -3224,6 +3224,7 @@ Output_data_plt_powerpc<size, big_endian>::add_local_ifunc_entry(
 
 static const uint32_t add_0_11_11	= 0x7c0b5a14;
 static const uint32_t add_2_2_11	= 0x7c425a14;
+static const uint32_t add_2_2_12	= 0x7c426214;
 static const uint32_t add_3_3_2		= 0x7c631214;
 static const uint32_t add_3_3_13	= 0x7c636a14;
 static const uint32_t add_11_0_11	= 0x7d605a14;
@@ -3258,6 +3259,7 @@ static const uint32_t ld_0_12		= 0xe80c0000;
 static const uint32_t ld_2_1		= 0xe8410000;
 static const uint32_t ld_2_2		= 0xe8420000;
 static const uint32_t ld_2_11		= 0xe84b0000;
+static const uint32_t ld_2_12		= 0xe84c0000;
 static const uint32_t ld_11_2		= 0xe9620000;
 static const uint32_t ld_11_11		= 0xe96b0000;
 static const uint32_t ld_12_2		= 0xe9820000;
@@ -3267,6 +3269,7 @@ static const uint32_t lfd_0_1		= 0xc8010000;
 static const uint32_t li_0_0		= 0x38000000;
 static const uint32_t li_12_0		= 0x39800000;
 static const uint32_t lis_0		= 0x3c000000;
+static const uint32_t lis_2		= 0x3c400000;
 static const uint32_t lis_11		= 0x3d600000;
 static const uint32_t lis_12		= 0x3d800000;
 static const uint32_t lvx_0_12_0	= 0x7c0c00ce;
@@ -5607,6 +5610,7 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_GNU_VTENTRY:
     case elfcpp::R_PPC64_TOCSAVE:
     case elfcpp::R_POWERPC_TLS:
+    case elfcpp::R_PPC64_ENTRY:
       break;
 
     case elfcpp::R_PPC64_TOC:
@@ -5982,6 +5986,7 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_GNU_VTENTRY:
     case elfcpp::R_PPC_LOCAL24PC:
     case elfcpp::R_POWERPC_TLS:
+    case elfcpp::R_PPC64_ENTRY:
       break;
 
     case elfcpp::R_PPC64_TOC:
@@ -7652,6 +7657,48 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		      insn |= 2 << 16;
 		    }
 		  elfcpp::Swap<32, big_endian>::writeval(iview, insn);
+		}
+	    }
+	  break;
+
+	case elfcpp::R_PPC64_ENTRY:
+	  value = (target->got_section()->output_section()->address()
+		   + object->toc_base_offset());
+	  if (value + 0x80008000 <= 0xffffffff
+	      && !parameters->options().output_is_position_independent())
+	    {
+	      Insn* iview = reinterpret_cast<Insn*>(view);
+	      Insn insn1 = elfcpp::Swap<32, big_endian>::readval(iview);
+	      Insn insn2 = elfcpp::Swap<32, big_endian>::readval(iview + 1);
+
+	      if ((insn1 & ~0xfffc) == ld_2_12
+		  && insn2 == add_2_2_12)
+		{
+		  insn1 = lis_2 + ha(value);
+		  elfcpp::Swap<32, big_endian>::writeval(iview, insn1);
+		  insn2 = addi_2_2 + l(value);
+		  elfcpp::Swap<32, big_endian>::writeval(iview + 1, insn2);
+		  return true;
+		}
+	    }
+	  else
+	    {
+	      value -= address;
+	      if (value + 0x80008000 <= 0xffffffff)
+		{
+		  Insn* iview = reinterpret_cast<Insn*>(view);
+		  Insn insn1 = elfcpp::Swap<32, big_endian>::readval(iview);
+		  Insn insn2 = elfcpp::Swap<32, big_endian>::readval(iview + 1);
+
+		  if ((insn1 & ~0xfffc) == ld_2_12
+		      && insn2 == add_2_2_12)
+		    {
+		      insn1 = addis_2_12 + ha(value);
+		      elfcpp::Swap<32, big_endian>::writeval(iview, insn1);
+		      insn2 = addi_2_2 + l(value);
+		      elfcpp::Swap<32, big_endian>::writeval(iview + 1, insn2);
+		      return true;
+		    }
 		}
 	    }
 	  break;
