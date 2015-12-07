@@ -5784,7 +5784,7 @@ ada_iterate_over_symbols (const struct block *block,
   ndefs = ada_lookup_symbol_list_worker (name, block, domain, &results, 0);
   for (i = 0; i < ndefs; ++i)
     {
-      if (! (*callback) (results[i].symbol, data))
+      if (! (*callback) (results[i], data))
 	break;
     }
 }

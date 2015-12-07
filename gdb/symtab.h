@@ -829,6 +829,9 @@ struct block_symbol
   const struct block *block;
 };
 
+typedef struct block_symbol block_symbol_d;
+DEF_VEC_O (block_symbol_d);
+
 extern const struct symbol_impl *symbol_impls;
 
 /* Note: There is no accessor macro for symbol.owner because it is
@@ -1619,7 +1622,7 @@ VEC (CORE_ADDR) *find_pcs_for_symtab_line (struct symtab *symtab, int line,
    should continue iterating, or zero to indicate that the iteration
    should end.  */
 
-typedef int (symbol_found_callback_ftype) (struct symbol *sym, void *data);
+typedef int (symbol_found_callback_ftype) (struct block_symbol sym, void *data);
 
 void iterate_over_symbols (const struct block *block, const char *name,
 			   const domain_enum domain,

@@ -2940,7 +2940,9 @@ iterate_over_symbols (const struct block *block, const char *name,
       if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				 SYMBOL_DOMAIN (sym), domain))
 	{
-	  if (!callback (sym, data))
+	  struct block_symbol block_sym = {sym, block};
+
+	  if (!callback (block_sym, data))
 	    return;
 	}
     }

@@ -45,9 +45,6 @@
 #include "stack.h"
 #include "location.h"
 
-typedef struct symbol *symbolp;
-DEF_VEC_P (symbolp);
-
 typedef struct type *typep;
 DEF_VEC_P (typep);
 
@@ -82,7 +79,7 @@ struct linespec
 
   /* A list of matching function symbols and minimal symbols.  Both lists
      may be NULL if no matching symbols were found.  */
-  VEC (symbolp) *function_symbols;
+  VEC (block_symbol_d) *function_symbols;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
 
   /* A structure of matching label symbols and the corresponding
@@ -90,8 +87,8 @@ struct linespec
      or both must be non-NULL.  */
   struct
   {
-    VEC (symbolp) *label_symbols;
-    VEC (symbolp) *function_symbols;
+    VEC (block_symbol_d) *label_symbols;
+    VEC (block_symbol_d) *function_symbols;
   } labels;
 };
 typedef struct linespec *linespec_p;
@@ -164,7 +161,7 @@ struct collect_info
   /* The result being accumulated.  */
   struct
   {
-    VEC (symbolp) *symbols;
+    VEC (block_symbol_d) *symbols;
     VEC (bound_minimal_symbol_d) *minimal_symbols;
   } result;
 };
@@ -276,15 +273,16 @@ static struct symtabs_and_lines decode_objc (struct linespec_state *self,
 
 static VEC (symtab_ptr) *symtabs_from_filename (const char *);
 
-static VEC (symbolp) *find_label_symbols (struct linespec_state *self,
-					  VEC (symbolp) *function_symbols,
-					  VEC (symbolp) **label_funcs_ret,
-					  const char *name);
+static VEC (block_symbol_d) *find_label_symbols
+     (struct linespec_state *self,
+      VEC (block_symbol_d) *function_symbols,
+      VEC (block_symbol_d) **label_funcs_ret,
+      const char *name);
 
 static void find_linespec_symbols (struct linespec_state *self,
 				   VEC (symtab_ptr) *file_symtabs,
 				   const char *name,
-				   VEC (symbolp) **symbols,
+				   VEC (block_symbol_d) **symbols,
 				   VEC (bound_minimal_symbol_d) **minsyms);
 
 static struct line_offset
@@ -925,9 +923,9 @@ struct symbol_and_data_callback
    symbols only.  */
 
 static int
-iterate_inline_only (struct symbol *sym, void *d)
+iterate_inline_only (struct block_symbol sym, void *d)
 {
-  if (SYMBOL_INLINED (sym))
+  if (SYMBOL_INLINED (sym.symbol))
     {
       struct symbol_and_data_callback *cad
 	= (struct symbol_and_data_callback *) d;
@@ -1583,7 +1581,7 @@ linespec_parse_basic (linespec_parser *parser)
 {
   char *name;
   linespec_token token;
-  VEC (symbolp) *symbols, *labels;
+  VEC (block_symbol_d) *symbols, *labels;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
   struct cleanup *cleanup;
 
@@ -1787,14 +1785,16 @@ canonicalize_linespec (struct linespec_state *state, const linespec_p ls)
 
       if (explicit_loc->function_name == NULL)
 	{
-	  struct symbol *s;
+	  struct block_symbol *s;
 
 	  /* No function was specified, so add the symbol name.  */
 	  gdb_assert (ls->labels.function_symbols != NULL
-		      && (VEC_length (symbolp, ls->labels.function_symbols)
+		      && (VEC_length (block_symbol_d,
+				      ls->labels.function_symbols)
 			  == 1));
-	  s = VEC_index (symbolp, ls->labels.function_symbols, 0);
-	  explicit_loc->function_name = xstrdup (SYMBOL_NATURAL_NAME (s));
+	  s = VEC_index (block_symbol_d, ls->labels.function_symbols, 0);
+	  explicit_loc->function_name
+	    = xstrdup (SYMBOL_NATURAL_NAME (s->symbol));
 	}
     }
 
@@ -1990,10 +1990,12 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
       /* We have just a bunch of functions/methods or labels.  */
       int i;
       struct symtab_and_line sal;
-      struct symbol *sym;
+      struct block_symbol *elt;
 
-      for (i = 0; VEC_iterate (symbolp, ls->labels.label_symbols, i, sym); ++i)
+      for (i = 0;
+	   VEC_iterate (block_symbol_d, ls->labels.label_symbols, i, elt); ++i)
 	{
+	  struct symbol *sym = elt->symbol;
 	  struct program_space *pspace = SYMTAB_PSPACE (symbol_symtab (sym));
 
 	  if (symbol_to_sal (&sal, state->funfirstline, sym)
@@ -2007,20 +2009,23 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
       /* We have just a bunch of functions and/or methods.  */
       int i;
       struct symtab_and_line sal;
-      struct symbol *sym;
-      bound_minimal_symbol_d *elem;
       struct program_space *pspace;
 
       if (ls->function_symbols != NULL)
 	{
+	  struct block_symbol *elem;
+
 	  /* Sort symbols so that symbols with the same program space are next
 	     to each other.  */
-	  qsort (VEC_address (symbolp, ls->function_symbols),
-		 VEC_length (symbolp, ls->function_symbols),
-		 sizeof (symbolp), compare_symbols);
+	  qsort (VEC_address (block_symbol_d, ls->function_symbols),
+		 VEC_length (block_symbol_d, ls->function_symbols),
+		 sizeof (block_symbol_d), compare_symbols);
 
-	  for (i = 0; VEC_iterate (symbolp, ls->function_symbols, i, sym); ++i)
+	  for (i = 0;
+	       VEC_iterate (block_symbol_d, ls->function_symbols, i, elem); ++i)
 	    {
+	      struct symbol *sym = elem->symbol;
+
 	      pspace = SYMTAB_PSPACE (symbol_symtab (sym));
 	      set_current_program_space (pspace);
 	      if (symbol_to_sal (&sal, state->funfirstline, sym)
@@ -2032,6 +2037,8 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 
       if (ls->minimal_symbols != NULL)
 	{
+	  bound_minimal_symbol_d *elem;
+
 	  /* Sort minimal symbols by program space, too.  */
 	  qsort (VEC_address (bound_minimal_symbol_d, ls->minimal_symbols),
 		 VEC_length (bound_minimal_symbol_d, ls->minimal_symbols),
@@ -2086,7 +2093,8 @@ convert_explicit_location_to_sals (struct linespec_state *self,
 				   linespec_p result,
 				   const struct explicit_location *explicit_loc)
 {
-  VEC (symbolp) *symbols, *labels;
+  VEC (block_symbol_d) *labels;
+  VEC (block_symbol_d) *symbols;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
 
   if (explicit_loc->source_filename != NULL)
@@ -2424,16 +2432,16 @@ linespec_parser_delete (void *arg)
     VEC_free (symtab_ptr, PARSER_RESULT (parser)->file_symtabs);
 
   if (PARSER_RESULT (parser)->function_symbols != NULL)
-    VEC_free (symbolp, PARSER_RESULT (parser)->function_symbols);
+    VEC_free (block_symbol_d, PARSER_RESULT (parser)->function_symbols);
 
   if (PARSER_RESULT (parser)->minimal_symbols != NULL)
     VEC_free (bound_minimal_symbol_d, PARSER_RESULT (parser)->minimal_symbols);
 
   if (PARSER_RESULT (parser)->labels.label_symbols != NULL)
-    VEC_free (symbolp, PARSER_RESULT (parser)->labels.label_symbols);
+    VEC_free (block_symbol_d, PARSER_RESULT (parser)->labels.label_symbols);
 
   if (PARSER_RESULT (parser)->labels.function_symbols != NULL)
-    VEC_free (symbolp, PARSER_RESULT (parser)->labels.function_symbols);
+    VEC_free (block_symbol_d, PARSER_RESULT (parser)->labels.function_symbols);
 
   linespec_state_destructor (PARSER_STATE (parser));
 }
@@ -2754,7 +2762,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 
   add_all_symbol_names_from_pspace (&info, NULL, symbol_names);
 
-  if (!VEC_empty (symbolp, info.result.symbols)
+  if (!VEC_empty (block_symbol_d, info.result.symbols)
       || !VEC_empty (bound_minimal_symbol_d, info.result.minimal_symbols))
     {
       char *saved_arg;
@@ -2798,7 +2806,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, const char *arg)
 struct decode_compound_collector
 {
   /* The result vector.  */
-  VEC (symbolp) *symbols;
+  VEC (block_symbol_d) *symbols;
 
   /* A hash table of all symbols we found.  We use this to avoid
      adding any symbol more than once.  */
@@ -2809,12 +2817,13 @@ struct decode_compound_collector
    lookup_prefix_sym to collect type symbols.  */
 
 static int
-collect_one_symbol (struct symbol *sym, void *d)
+collect_one_symbol (struct block_symbol block_sym, void *d)
 {
   struct decode_compound_collector *collector
     = (struct decode_compound_collector *) d;
   void **slot;
   struct type *t;
+  struct symbol *sym = block_sym.symbol;
 
   if (SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     return 1; /* Continue iterating.  */
@@ -2830,7 +2839,7 @@ collect_one_symbol (struct symbol *sym, void *d)
   if (!*slot)
     {
       *slot = sym;
-      VEC_safe_push (symbolp, collector->symbols, sym);
+      VEC_safe_push (block_symbol_d, collector->symbols, &block_sym);
     }
 
   return 1; /* Continue iterating.  */
@@ -2838,7 +2847,7 @@ collect_one_symbol (struct symbol *sym, void *d)
 
 /* Return any symbols corresponding to CLASS_NAME in FILE_SYMTABS.  */
 
-static VEC (symbolp) *
+static VEC (block_symbol_d) *
 lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
 		   const char *class_name)
 {
@@ -2849,7 +2858,7 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
   struct cleanup *cleanup;
 
   collector.symbols = NULL;
-  outer = make_cleanup (VEC_cleanup (symbolp), &collector.symbols);
+  outer = make_cleanup (VEC_cleanup (block_symbol_d), &collector.symbols);
 
   collector.unique_syms = htab_create_alloc (1, htab_hash_pointer,
 					     htab_eq_pointer, NULL,
@@ -2892,20 +2901,22 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
 static int
 compare_symbols (const void *a, const void *b)
 {
-  struct symbol * const *sa = (struct symbol * const*) a;
-  struct symbol * const *sb = (struct symbol * const*) b;
+  const struct block_symbol *ba = (const struct block_symbol *) a;
+  const struct block_symbol *bb = (const struct block_symbol *) b;
+  const struct symbol *sa = ba->symbol;
+  const struct symbol *sb = bb->symbol;
   uintptr_t uia, uib;
 
-  uia = (uintptr_t) SYMTAB_PSPACE (symbol_symtab (*sa));
-  uib = (uintptr_t) SYMTAB_PSPACE (symbol_symtab (*sb));
+  uia = (uintptr_t) SYMTAB_PSPACE (symbol_symtab (sa));
+  uib = (uintptr_t) SYMTAB_PSPACE (symbol_symtab (sb));
 
   if (uia < uib)
     return -1;
   if (uia > uib)
     return 1;
 
-  uia = (uintptr_t) *sa;
-  uib = (uintptr_t) *sb;
+  uia = (uintptr_t) sa;
+  uib = (uintptr_t) sb;
 
   if (uia < uib)
     return -1;
@@ -2999,10 +3010,10 @@ find_superclass_methods (VEC (typep) *superclasses,
 static void
 find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	     const char *class_name, const char *method_name,
-	     VEC (symbolp) *sym_classes, VEC (symbolp) **symbols,
+	     VEC (block_symbol_d) *sym_classes, VEC (block_symbol_d) **symbols,
 	     VEC (bound_minimal_symbol_d) **minsyms)
 {
-  struct symbol *sym;
+  struct block_symbol *elt;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   int ix;
   int last_result_len;
@@ -3012,9 +3023,9 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 
   /* Sort symbols so that symbols with the same program space are next
      to each other.  */
-  qsort (VEC_address (symbolp, sym_classes),
-	 VEC_length (symbolp, sym_classes),
-	 sizeof (symbolp),
+  qsort (VEC_address (block_symbol_d, sym_classes),
+	 VEC_length (block_symbol_d, sym_classes),
+	 sizeof (block_symbol_d),
 	 compare_symbols);
 
   info.state = self;
@@ -3036,10 +3047,11 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
   result_names = NULL;
   make_cleanup (VEC_cleanup (const_char_ptr), &result_names);
   last_result_len = 0;
-  for (ix = 0; VEC_iterate (symbolp, sym_classes, ix, sym); ++ix)
+  for (ix = 0; VEC_iterate (block_symbol_d, sym_classes, ix, elt); ++ix)
     {
       struct type *t;
       struct program_space *pspace;
+      struct symbol *sym = elt->symbol;
 
       /* Program spaces that are executing startup should have
 	 been filtered out earlier.  */
@@ -3051,10 +3063,11 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 
       /* Handle all items from a single program space at once; and be
 	 sure not to miss the last batch.  */
-      if (ix == VEC_length (symbolp, sym_classes) - 1
+      if (ix == VEC_length (block_symbol_d, sym_classes) - 1
 	  || (pspace
-	      != SYMTAB_PSPACE (symbol_symtab (VEC_index (symbolp, sym_classes,
-							  ix + 1)))))
+	      != SYMTAB_PSPACE (symbol_symtab (VEC_index (block_symbol_d,
+							  sym_classes,
+							  ix + 1)->symbol))))
 	{
 	  /* If we did not find a direct implementation anywhere in
 	     this program space, consider superclasses.  */
@@ -3072,7 +3085,7 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	}
     }
 
-  if (!VEC_empty (symbolp, info.result.symbols)
+  if (!VEC_empty (block_symbol_d, info.result.symbols)
       || !VEC_empty (bound_minimal_symbol_d, info.result.minimal_symbols))
     {
       *symbols = info.result.symbols;
@@ -3173,7 +3186,7 @@ symtabs_from_filename (const char *filename)
 static void
 find_function_symbols (struct linespec_state *state,
 		       VEC (symtab_ptr) *file_symtabs, const char *name,
-		       VEC (symbolp) **symbols,
+		       VEC (block_symbol_d) **symbols,
 		       VEC (bound_minimal_symbol_d) **minsyms)
 {
   struct collect_info info;
@@ -3195,9 +3208,9 @@ find_function_symbols (struct linespec_state *state,
 
   do_cleanups (cleanup);
 
-  if (VEC_empty (symbolp, info.result.symbols))
+  if (VEC_empty (block_symbol_d, info.result.symbols))
     {
-      VEC_free (symbolp, info.result.symbols);
+      VEC_free (block_symbol_d, info.result.symbols);
       *symbols = NULL;
     }
   else
@@ -3219,7 +3232,7 @@ static void
 find_linespec_symbols (struct linespec_state *state,
 		       VEC (symtab_ptr) *file_symtabs,
 		       const char *name,
-		       VEC (symbolp) **symbols,
+		       VEC (block_symbol_d) **symbols,
 		       VEC (bound_minimal_symbol_d) **minsyms)
 {
   struct cleanup *cleanup;
@@ -3258,12 +3271,12 @@ find_linespec_symbols (struct linespec_state *state,
   /* If we were unable to locate a symbol of the same name, try dividing
      the name into class and method names and searching the class and its
      baseclasses.  */
-  if (VEC_empty (symbolp, *symbols)
+  if (VEC_empty (block_symbol_d, *symbols)
       && VEC_empty (bound_minimal_symbol_d, *minsyms))
     {
       char *klass, *method;
       const char *last, *p, *scope_op;
-      VEC (symbolp) *classes;
+      VEC (block_symbol_d) *classes;
 
       /* See if we can find a scope operator and break this symbol
 	 name into namespaces${SCOPE_OPERATOR}class_name and method_name.  */
@@ -3307,9 +3320,9 @@ find_linespec_symbols (struct linespec_state *state,
 
       /* Find a list of classes named KLASS.  */
       classes = lookup_prefix_sym (state, file_symtabs, klass);
-      make_cleanup (VEC_cleanup (symbolp), &classes);
+      make_cleanup (VEC_cleanup (block_symbol_d), &classes);
 
-      if (!VEC_empty (symbolp, classes))
+      if (!VEC_empty (block_symbol_d, classes))
 	{
 	  /* Now locate a list of suitable methods named METHOD.  */
 	  TRY
@@ -3335,19 +3348,21 @@ find_linespec_symbols (struct linespec_state *state,
 /* Return all labels named NAME in FUNCTION_SYMBOLS.  Return the
    actual function symbol in which the label was found in LABEL_FUNC_RET.  */
 
-static VEC (symbolp) *
+static VEC (block_symbol_d) *
 find_label_symbols (struct linespec_state *self,
-		    VEC (symbolp) *function_symbols,
-		    VEC (symbolp) **label_funcs_ret, const char *name)
+		    VEC (block_symbol_d) *function_symbols,
+		    VEC (block_symbol_d) **label_funcs_ret, const char *name)
 {
   int ix;
   const struct block *block;
-  struct symbol *sym;
-  struct symbol *fn_sym;
-  VEC (symbolp) *result = NULL;
+
+  VEC (block_symbol_d) *result = NULL;
 
   if (function_symbols == NULL)
     {
+      struct block_symbol block_sym;
+      struct block_symbol fn_block_sym;
+
       set_current_program_space (self->program_space);
       block = get_current_search_block ();
 
@@ -3357,29 +3372,35 @@ find_label_symbols (struct linespec_state *self,
 	;
       if (!block)
 	return NULL;
-      fn_sym = BLOCK_FUNCTION (block);
+      fn_block_sym.symbol = BLOCK_FUNCTION (block);
+      fn_block_sym.block = block;
 
-      sym = lookup_symbol (name, block, LABEL_DOMAIN, 0).symbol;
+      block_sym = lookup_symbol (name, block, LABEL_DOMAIN, 0);
 
-      if (sym != NULL)
+      if (block_sym.symbol != NULL)
 	{
-	  VEC_safe_push (symbolp, result, sym);
-	  VEC_safe_push (symbolp, *label_funcs_ret, fn_sym);
+	  VEC_safe_push (block_symbol_d, result, &block_sym);
+	  VEC_safe_push (block_symbol_d, *label_funcs_ret, &fn_block_sym);
 	}
     }
   else
     {
+      struct block_symbol *elt;
+
       for (ix = 0;
-	   VEC_iterate (symbolp, function_symbols, ix, fn_sym); ++ix)
+	   VEC_iterate (block_symbol_d, function_symbols, ix, elt); ++ix)
 	{
+	  struct symbol *fn_sym = elt->symbol;
+	  struct block_symbol block_sym;
+
 	  set_current_program_space (SYMTAB_PSPACE (symbol_symtab (fn_sym)));
 	  block = SYMBOL_BLOCK_VALUE (fn_sym);
-	  sym = lookup_symbol (name, block, LABEL_DOMAIN, 0).symbol;
+	  block_sym = lookup_symbol (name, block, LABEL_DOMAIN, 0);
 
-	  if (sym != NULL)
+	  if (block_sym.symbol != NULL)
 	    {
-	      VEC_safe_push (symbolp, result, sym);
-	      VEC_safe_push (symbolp, *label_funcs_ret, fn_sym);
+	      VEC_safe_push (block_symbol_d, result, &block_sym);
+	      VEC_safe_push (block_symbol_d, *label_funcs_ret, elt);
 	    }
 	}
     }
@@ -3525,14 +3546,14 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
 /* A callback used to possibly add a symbol to the results.  */
 
 static int
-collect_symbols (struct symbol *sym, void *data)
+collect_symbols (struct block_symbol sym, void *data)
 {
   struct collect_info *info = (struct collect_info *) data;
 
   /* In list mode, add all matching symbols, regardless of class.
      This allows the user to type "list a_global_variable".  */
-  if (SYMBOL_CLASS (sym) == LOC_BLOCK || info->state->list_mode)
-    VEC_safe_push (symbolp, info->result.symbols, sym);
+  if (SYMBOL_CLASS (sym.symbol) == LOC_BLOCK || info->state->list_mode)
+    VEC_safe_push (block_symbol_d, info->result.symbols, &sym);
   return 1; /* Continue iterating.  */
 }
 
@@ -3809,7 +3830,7 @@ add_matching_symbols_to_info (const char *name,
 	}
       else if (pspace == NULL || pspace == SYMTAB_PSPACE (elt))
 	{
-	  int prev_len = VEC_length (symbolp, info->result.symbols);
+	  int prev_len = VEC_length (block_symbol_d, info->result.symbols);
 
 	  /* Program spaces that are executing startup should have
 	     been filtered out earlier.  */
@@ -3822,7 +3843,7 @@ add_matching_symbols_to_info (const char *name,
 	     is in assembler, we might actually be looking for a label for
 	     which we don't have debug info.  Check for a minimal symbol in
 	     this case.  */
-	  if (prev_len == VEC_length (symbolp, info->result.symbols)
+	  if (prev_len == VEC_length (block_symbol_d, info->result.symbols)
 	      && elt->language == language_asm)
 	    search_minsyms_for_name (info, name, pspace, elt);
 	}
