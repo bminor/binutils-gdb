@@ -1531,7 +1531,8 @@ next_smaller_reloc (int r)
 
 static bfd_boolean
 elf32_rx_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count,
-			     Elf_Internal_Rela *alignment_rel, int force_snip)
+			     Elf_Internal_Rela *alignment_rel, int force_snip,
+			     Elf_Internal_Rela *irelstart)
 {
   Elf_Internal_Shdr * symtab_hdr;
   unsigned int        sec_shndx;
@@ -1558,20 +1559,7 @@ elf32_rx_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count,
   if (alignment_rel)
     toaddr = alignment_rel->r_offset;
 
-  irel = elf_section_data (sec)->relocs;
-  irelend = irel + sec->reloc_count;
-
-  if (irel == NULL && sec->reloc_count > 0)
-    {
-      /* If the relocs have not been kept in the section data
-	 structure (because -no-keep-memory was used) then
-	 reread them now.  */
-      irel = (_bfd_elf_link_read_relocs
-	      (abfd, sec, NULL, (Elf_Internal_Rela *) NULL, FALSE));
-      if (irel == NULL)
-	/* FIXME: Return FALSE instead ?  */
-	irelend = irel;
-    }
+  BFD_ASSERT (toaddr > addr);  
 
   /* Actually delete the bytes.  */
   memmove (contents + addr, contents + addr + count,
@@ -1584,6 +1572,10 @@ elf32_rx_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count,
     sec->size -= count;
   else
     memset (contents + toaddr - count, 0x03, count);
+
+  irel = irelstart;
+  BFD_ASSERT (irel != NULL || sec->reloc_count == 0);
+  irelend = irel + sec->reloc_count;
 
   /* Adjust all the relocs.  */
   for (; irel < irelend; irel++)
@@ -1977,7 +1969,6 @@ elf32_rx_relax_section (bfd *                  abfd,
   Elf_Internal_Shdr * symtab_hdr;
   Elf_Internal_Shdr * shndx_hdr;
   Elf_Internal_Rela * internal_relocs;
-  Elf_Internal_Rela * free_relocs = NULL;
   Elf_Internal_Rela * irel;
   Elf_Internal_Rela * srel;
   Elf_Internal_Rela * irelend;
@@ -2054,13 +2045,15 @@ elf32_rx_relax_section (bfd *                  abfd,
     }
 
   /* Get a copy of the native relocations.  */
-  internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, sec, NULL, (Elf_Internal_Rela *) NULL,
-		      link_info->keep_memory));
+  /* Note - we ignore the setting of link_info->keep_memory when reading
+     in these relocs.  We have to maintain a permanent copy of the relocs
+     because we are going to walk over them multiple times, adjusting them
+     as bytes are deleted from the section, and with this relaxation
+     function itself being called multiple times on the same section...  */
+  internal_relocs = _bfd_elf_link_read_relocs
+    (abfd, sec, NULL, (Elf_Internal_Rela *) NULL, TRUE);
   if (internal_relocs == NULL)
     goto error_return;
-  if (! link_info->keep_memory)
-    free_relocs = internal_relocs;
 
   /* The RL_ relocs must be just before the operand relocs they go
      with, so we must sort them to guarantee this.  We use bubblesort
@@ -2150,7 +2143,7 @@ elf32_rx_relax_section (bfd *                  abfd,
 	  nbytes *= alignment;
 
 	  elf32_rx_relax_delete_bytes (abfd, sec, erel->r_offset-nbytes, nbytes, next_alignment,
-				       erel->r_offset == sec->size);
+				       erel->r_offset == sec->size, internal_relocs);
 	  *again = TRUE;
 
 	  continue;
@@ -2189,7 +2182,7 @@ elf32_rx_relax_section (bfd *                  abfd,
       nrelocs --;
 
 #define SNIPNR(offset, nbytes) \
-	elf32_rx_relax_delete_bytes (abfd, sec, (insn - contents) + offset, nbytes, next_alignment, 0);
+      elf32_rx_relax_delete_bytes (abfd, sec, (insn - contents) + offset, nbytes, next_alignment, 0, internal_relocs);
 #define SNIP(offset, nbytes, newtype) \
         SNIPNR (offset, nbytes);						\
 	srel->r_info = ELF32_R_INFO (ELF32_R_SYM (srel->r_info), newtype)
@@ -3009,9 +3002,6 @@ elf32_rx_relax_section (bfd *                  abfd,
   return TRUE;
 
  error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
-
   if (free_contents != NULL)
     free (free_contents);
 
