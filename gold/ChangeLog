@@ -1,3 +1,9 @@
+2015-12-07  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (add_2_2_12, ld_2_12, lis_2): Define.
+	(Target_powerpc::Scan::local, global): Handle R_PPC64_ENTRY.
+	(Target_powerpc::Relocate::relocate): Edit code at R_PPC64_ENTRY.
+
 2015-12-03  Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
 
 	* object.cc (Sized_relobj::do_for_all_local_got_entries): Use

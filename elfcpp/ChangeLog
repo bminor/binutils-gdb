@@ -1,3 +1,7 @@
+2015-12-07  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.h (R_PPC64_ENTRY): Define.
+
 2015-11-11  Alan Modra  <amodra@gmail.com>
             Peter Bergner <bergner@vnet.ibm.com>
 
