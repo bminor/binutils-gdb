@@ -173,8 +173,12 @@ static bfd_vma opd_entry_value
 #define LD_R2_0R2	0xe8420000	/* ld	 %r2,xxx+0(%r2)  */
 
 #define LD_R2_0R1	0xe8410000	/* ld    %r2,0(%r1)      */
+#define LD_R2_0R12	0xe84c0000	/* ld    %r2,0(%r12)     */
+#define ADD_R2_R2_R12	0x7c426214	/* add   %r2,%r2,%r12    */
 
-#define ADDIS_R12_R2	0x3d820000	/* addis %r12,%r2,xxx@ha     */
+#define LIS_R2		0x3c400000	/* lis %r2,xxx@ha         */
+#define ADDIS_R2_R12	0x3c4c0000	/* addis %r2,%r12,xxx@ha  */
+#define ADDIS_R12_R2	0x3d820000	/* addis %r12,%r2,xxx@ha  */
 #define ADDIS_R12_R12	0x3d8c0000	/* addis %r12,%r12,xxx@ha */
 #define LD_R12_0R12	0xe98c0000	/* ld    %r12,xxx@l(%r12) */
 
@@ -2127,6 +2131,21 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  /* Marker reloc on ELFv2 large-model function entry.  */
+  HOWTO (R_PPC64_ENTRY,
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC64_ENTRY",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   /* Like ADDR64, but use local entry point of function.  */
   HOWTO (R_PPC64_ADDR64_LOCAL,	/* type */
 	 0,			/* rightshift */
@@ -2428,6 +2447,8 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_HI16_S_PCREL:		r = R_PPC64_REL16_HA;
       break;
     case BFD_RELOC_PPC_REL16DX_HA:		r = R_PPC64_REL16DX_HA;
+      break;
+    case BFD_RELOC_PPC64_ENTRY:			r = R_PPC64_ENTRY;
       break;
     case BFD_RELOC_PPC64_ADDR64_LOCAL:		r = R_PPC64_ADDR64_LOCAL;
       break;
@@ -5573,6 +5594,10 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_TOC16_HA:
 	case R_PPC64_TOC16_LO_DS:
 	  sec->has_toc_reloc = 1;
+	  break;
+
+	  /* Marker reloc.  */
+	case R_PPC64_ENTRY:
 	  break;
 
 	  /* This relocation describes the C++ object vtable hierarchy.
@@ -13852,6 +13877,52 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    }
 	  break;
 
+	case R_PPC64_ENTRY:
+	  relocation = TOCstart + htab->sec_info[input_section->id].toc_off;
+	  if (!bfd_link_pic (info)
+	      && !info->traditional_format
+	      && relocation + 0x80008000 <= 0xffffffff)
+	    {
+	      unsigned int insn1, insn2;
+
+	      insn1 = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      insn2 = bfd_get_32 (input_bfd, contents + rel->r_offset + 4);
+	      if ((insn1 & ~0xfffc) == LD_R2_0R12
+		  && insn2 == ADD_R2_R2_R12)
+		{
+		  bfd_put_32 (output_bfd,
+			      LIS_R2 + PPC_HA (relocation),
+			      contents + rel->r_offset);
+		  bfd_put_32 (output_bfd,
+			      ADDI_R2_R2 + PPC_LO (relocation),
+			      contents + rel->r_offset + 4);
+		}
+	    }
+	  else
+	    {
+	      relocation -= (rel->r_offset
+			     + input_section->output_offset
+			     + input_section->output_section->vma);
+	      if (relocation + 0x80008000 <= 0xffffffff)
+		{
+		  unsigned int insn1, insn2;
+
+		  insn1 = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		  insn2 = bfd_get_32 (input_bfd, contents + rel->r_offset + 4);
+		  if ((insn1 & ~0xfffc) == LD_R2_0R12
+		      && insn2 == ADD_R2_R2_R12)
+		    {
+		      bfd_put_32 (output_bfd,
+				  ADDIS_R2_R12 + PPC_HA (relocation),
+				  contents + rel->r_offset);
+		      bfd_put_32 (output_bfd,
+				  ADDI_R2_R2 + PPC_LO (relocation),
+				  contents + rel->r_offset + 4);
+		    }
+		}
+	    }
+	  break;
+
 	case R_PPC64_REL16_HA:
 	  /* If we are generating a non-PIC executable, edit
 	     .	0:	addis 2,12,.TOC.-0b@ha
@@ -13862,6 +13933,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     if .TOC. is in range.  */
 	  if (!bfd_link_pic (info)
 	      && !info->traditional_format
+	      && !htab->opd_abi
 	      && h != NULL && &h->elf == htab->elf.hgot
 	      && rel + 1 < relend
 	      && rel[1].r_info == ELF64_R_INFO (r_symndx, R_PPC64_REL16_LO)
@@ -13873,15 +13945,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_vma offset = rel->r_offset - d_offset;
 	      insn1 = bfd_get_32 (output_bfd, contents + offset);
 	      insn2 = bfd_get_32 (output_bfd, contents + offset + 4);
-	      if ((insn1 & 0xffff0000) == 0x3c4c0000 /* addis 2,12 */
-		  && (insn2 & 0xffff0000) == 0x38420000 /* addi 2,2 */)
+	      if ((insn1 & 0xffff0000) == ADDIS_R2_R12
+		  && (insn2 & 0xffff0000) == ADDI_R2_R2)
 		{
 		  r_type = R_PPC64_ADDR16_HA;
 		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 		  rel->r_addend -= d_offset;
 		  rel[1].r_info = ELF64_R_INFO (r_symndx, R_PPC64_ADDR16_LO);
 		  rel[1].r_addend -= d_offset + 4;
-		  bfd_put_32 (output_bfd, 0x3c400000, contents + offset);
+		  bfd_put_32 (output_bfd, LIS_R2, contents + offset);
 		}
 	    }
 	  break;
@@ -14178,6 +14250,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TOCSAVE:
 	case R_PPC64_GNU_VTINHERIT:
 	case R_PPC64_GNU_VTENTRY:
+	case R_PPC64_ENTRY:
 	  goto copy_reloc;
 
 	  /* GOT16 relocations.  Like an ADDR16 using the symbol's

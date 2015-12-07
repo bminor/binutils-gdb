@@ -1,3 +1,15 @@
+2015-12-07  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c (BFD_RELOC_PPC64_ENTRY): New.
+	* elf64-ppc.c (reloc_howto_type ppc64_elf_howto_raw): Add
+	entry for R_PPC64_ENTRY.
+	(LD_R2_0R12, ADD_R2_R2_R12, LIS_R2, ADDIS_R2_R12): Define.
+	(ppc64_elf_reloc_type_lookup): Handle R_PPC64_ENTRY.
+	(ppc64_elf_relocate_section): Edit code at R_PPC64_ENTTY.  Use
+	new insn defines.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2015-12-07  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config.bfd: Mark sh5*-*-* and sh64*-*-* as obsolete.
