@@ -1,5 +1,17 @@
 2015-12-07  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_check_relocs): Don't error on local ifunc
+	plt call.  Wrap long lines.
+	(ppc_elf_relocate_section): Wrap long lines.
+	* elf64-ppc.c (ppc64_elf_check_relocs): Don't error on local ifunc
+	plt calls.  Move __tls_get_addr checks later.  Don't create plt
+	for addr14/addr24 relocs.
+	(ppc64_elf_gc_sweep_hook): Adjust to suit check_relocs changes.
+	(ppc64_elf_relocate_section): Correct local ifunc handling for
+	PLT64, PLT32 and PLT16 relocs.
+
+2015-12-07  Alan Modra  <amodra@gmail.com>
+
 	PR19323
 	* elfcode.h (elf_object_p): Check for ridiculous e_shnum and
 	e_phnum values.
