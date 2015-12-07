@@ -80,14 +80,6 @@ typedef enum
   arm_hwbp_access = 3
 } arm_hwbp_type;
 
-/* Enum describing the different kinds of breakpoints.  */
-enum arm_breakpoint_kinds
-{
-   ARM_BP_KIND_THUMB = 2,
-   ARM_BP_KIND_THUMB2 = 3,
-   ARM_BP_KIND_ARM = 4,
-};
-
 /* Type describing an ARM Hardware Breakpoint Control register value.  */
 typedef unsigned int arm_hwbp_control_t;
 
@@ -239,80 +231,6 @@ arm_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   unsigned long newpc = pc;
   supply_register_by_name (regcache, "pc", &newpc);
-}
-
-/* Correct in either endianness.  */
-#define arm_abi_breakpoint 0xef9f0001UL
-
-/* For new EABI binaries.  We recognize it regardless of which ABI
-   is used for gdbserver, so single threaded debugging should work
-   OK, but for multi-threaded debugging we only insert the current
-   ABI's breakpoint instruction.  For now at least.  */
-#define arm_eabi_breakpoint 0xe7f001f0UL
-
-#ifndef __ARM_EABI__
-static const unsigned long arm_breakpoint = arm_abi_breakpoint;
-#else
-static const unsigned long arm_breakpoint = arm_eabi_breakpoint;
-#endif
-
-#define arm_breakpoint_len 4
-static const unsigned short thumb_breakpoint = 0xde01;
-#define thumb_breakpoint_len 2
-static const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
-#define thumb2_breakpoint_len 4
-
-/* Returns 1 if the current instruction set is thumb, 0 otherwise.  */
-
-static int
-arm_is_thumb_mode (void)
-{
-  struct regcache *regcache = get_thread_regcache (current_thread, 1);
-  unsigned long cpsr;
-
-  collect_register_by_name (regcache, "cpsr", &cpsr);
-
-  if (cpsr & 0x20)
-    return 1;
-  else
-    return 0;
-}
-
-/* Returns 1 if there is a software breakpoint at location.  */
-
-static int
-arm_breakpoint_at (CORE_ADDR where)
-{
-  if (arm_is_thumb_mode ())
-    {
-      /* Thumb mode.  */
-      unsigned short insn;
-
-      (*the_target->read_memory) (where, (unsigned char *) &insn, 2);
-      if (insn == thumb_breakpoint)
-	return 1;
-
-      if (insn == thumb2_breakpoint[0])
-	{
-	  (*the_target->read_memory) (where + 2, (unsigned char *) &insn, 2);
-	  if (insn == thumb2_breakpoint[1])
-	    return 1;
-	}
-    }
-  else
-    {
-      /* ARM mode.  */
-      unsigned long insn;
-
-      (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
-      if (insn == arm_abi_breakpoint)
-	return 1;
-
-      if (insn == arm_eabi_breakpoint)
-	return 1;
-    }
-
-  return 0;
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */
@@ -941,83 +859,6 @@ arm_regs_info (void)
     return &regs_info_aarch32;
   else
     return &regs_info_arm;
-}
-
-/* Implementation of linux_target_ops method "breakpoint_kind_from_pc".
-
-   Determine the type and size of breakpoint to insert at PCPTR.  Uses the
-   program counter value to determine whether a 16-bit or 32-bit breakpoint
-   should be used.  It returns the breakpoint's kind, and adjusts the program
-   counter (if necessary) to point to the actual memory location where the
-   breakpoint should be inserted.  */
-
-static int
-arm_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
-{
-  if (IS_THUMB_ADDR (*pcptr))
-    {
-      gdb_byte buf[2];
-
-      *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
-
-      /* Check whether we are replacing a thumb2 32-bit instruction.  */
-      if ((*the_target->read_memory) (*pcptr, buf, 2) == 0)
-	{
-	  unsigned short inst1 = 0;
-
-	  (*the_target->read_memory) (*pcptr, (gdb_byte *) &inst1, 2);
-	  if (thumb_insn_size (inst1) == 4)
-	    return ARM_BP_KIND_THUMB2;
-	}
-      return ARM_BP_KIND_THUMB;
-    }
-  else
-    return ARM_BP_KIND_ARM;
-}
-
-/*  Implementation of the linux_target_ops method "sw_breakpoint_from_kind".  */
-
-static const gdb_byte *
-arm_sw_breakpoint_from_kind (int kind , int *size)
-{
-  *size = arm_breakpoint_len;
-  /* Define an ARM-mode breakpoint; we only set breakpoints in the C
-     library, which is most likely to be ARM.  If the kernel supports
-     clone events, we will never insert a breakpoint, so even a Thumb
-     C library will work; so will mixing EABI/non-EABI gdbserver and
-     application.  */
-  switch (kind)
-    {
-      case ARM_BP_KIND_THUMB:
-	*size = thumb_breakpoint_len;
-	return (gdb_byte *) &thumb_breakpoint;
-      case ARM_BP_KIND_THUMB2:
-	*size = thumb2_breakpoint_len;
-	return (gdb_byte *) &thumb2_breakpoint;
-      case ARM_BP_KIND_ARM:
-	*size = arm_breakpoint_len;
-	return (const gdb_byte *) &arm_breakpoint;
-      default:
-       return NULL;
-    }
-  return NULL;
-}
-
-/* Implementation of the linux_target_ops method
-   "breakpoint_kind_from_current_state".  */
-
-static int
-arm_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
-{
-  if (arm_is_thumb_mode ())
-    {
-      *pcptr = MAKE_THUMB_ADDR (*pcptr);
-      return arm_breakpoint_kind_from_pc (pcptr);
-    }
-  else
-    {
-      return arm_breakpoint_kind_from_pc (pcptr);
-    }
 }
 
 struct linux_target_ops the_low_target = {
