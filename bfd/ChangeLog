@@ -1,3 +1,10 @@
+2015-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rx.c (elf32_rx_relax_delete_bytes): Add extra parameter -
+	the start of the relocs for the section.  Delete code to load in
+	the relocs.
+	(elf32_rx_relax_section): Do not free the loaded relocs.
+
 2015-12-07  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Don't error on local ifunc
