@@ -3175,6 +3175,67 @@ symtabs_from_filename (const char *filename)
   return result;
 }
 
+/* See description in symtab.h.  */
+
+struct search_multiple_result
+search_symbols_multiple (const char *name,
+			 const struct language_defn *language,
+			 domain_enum domain,
+			 VEC (symtab_ptr) *search_symtabs,
+			 struct program_space *search_pspace)
+{
+  struct collect_info info;
+  struct linespec_state state;
+  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+
+  memset (&state, 0, sizeof (state));
+  state.language = language;
+  info.state = &state;
+  info.result.symbols = NULL;
+  info.result.minimal_symbols = NULL;
+  info.file_symtabs = search_symtabs;
+  if (info.file_symtabs == NULL)
+    {
+      VEC_safe_push (symtab_ptr, info.file_symtabs, NULL);
+      make_cleanup (VEC_cleanup (symtab_ptr), &info.file_symtabs);
+    }
+
+  add_matching_symbols_to_info (name, domain, &info, search_pspace);
+
+  if (VEC_empty (block_symbol_d, info.result.symbols))
+    {
+      VEC_free (block_symbol_d, info.result.symbols);
+      info.result.symbols = NULL;
+    }
+  if (VEC_empty (bound_minimal_symbol_d, info.result.minimal_symbols))
+    {
+      VEC_free (bound_minimal_symbol_d, info.result.minimal_symbols);
+      info.result.minimal_symbols = NULL;
+    }
+
+  do_cleanups (back_to);
+  return info.result;
+}
+
+/* See description in symtab.h.  */
+
+void
+free_search_multiple_result (struct search_multiple_result *result)
+{
+  VEC_free (block_symbol_d, result->symbols);
+  VEC_free (bound_minimal_symbol_d, result->minimal_symbols);
+}
+
+/* See the description in symtab.h.  */
+
+void
+search_multiple_result_cleanup (void *resultp)
+{
+  struct search_multiple_result *r = (struct search_multiple_result *) resultp;
+
+  free_search_multiple_result (r);
+}
+
 /* Look up a function symbol named NAME in symtabs FILE_SYMTABS.  Matching
    debug symbols are returned in SYMBOLS.  Matching minimal symbols are
    returned in MINSYMS.  */
