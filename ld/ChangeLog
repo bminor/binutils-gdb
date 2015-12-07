@@ -1,3 +1,11 @@
+2016-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2015-12-07  Jan Beulich  <jbeulich@suse.com>
+
+	* ld-elf/gabiend.rt: Accept any alignment.
+	* ld-elf/gabinormal.rt: Likewise.
+
 2016-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
