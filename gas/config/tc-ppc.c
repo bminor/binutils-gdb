@@ -6468,7 +6468,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
   valueT value = * valP;
   offsetT fieldval;
-  unsigned long insn = 0;
   const struct powerpc_operand *operand;
 
 #ifdef OBJ_ELF
@@ -6636,8 +6635,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
   if (operand != NULL)
     {
       /* Handle relocs in an insn.  */
-      char *where;
-
       switch (fixP->fx_r_type)
 	{
 #ifdef OBJ_ELF
@@ -6798,22 +6795,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 #endif
       if ((fieldval != 0 && APPLY_RELOC) || operand->insert != NULL)
 	{
+	  unsigned long insn;
+	  unsigned char *where;
+
 	  /* Fetch the instruction, insert the fully resolved operand
 	     value, and stuff the instruction back again.  */
-	  where = fixP->fx_frag->fr_literal + fixP->fx_where;
+	  where = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
 	  if (target_big_endian)
 	    {
 	      if (fixP->fx_size == 4)
-		insn = bfd_getb32 ((unsigned char *) where);
+		insn = bfd_getb32 (where);
 	      else
-		insn = bfd_getb16 ((unsigned char *) where);
+		insn = bfd_getb16 (where);
 	    }
 	  else
 	    {
 	      if (fixP->fx_size == 4)
-		insn = bfd_getl32 ((unsigned char *) where);
+		insn = bfd_getl32 (where);
 	      else
-		insn = bfd_getl16 ((unsigned char *) where);
+		insn = bfd_getl16 (where);
 	    }
 	  insn = ppc_insert_operand (insn, operand, fieldval,
 				     fixP->tc_fix_data.ppc_cpu,
@@ -6821,16 +6821,16 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  if (target_big_endian)
 	    {
 	      if (fixP->fx_size == 4)
-		bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+		bfd_putb32 (insn, where);
 	      else
-		bfd_putb16 ((bfd_vma) insn, (unsigned char *) where);
+		bfd_putb16 (insn, where);
 	    }
 	  else
 	    {
 	      if (fixP->fx_size == 4)
-		bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+		bfd_putl32 (insn, where);
 	      else
-		bfd_putl16 ((bfd_vma) insn, (unsigned char *) where);
+		bfd_putl16 (insn, where);
 	    }
 	}
 
