@@ -1,3 +1,8 @@
+2015-12-07  DJ Delorie  <dj@redhat.com>
+
+	* rl78-decode.opc: Enable MULU for all ISAs.
+	* rl78-decode.c: Regenerate.
+
 2015-12-07  Alan Modra  <amodra@gmail.com>
 
 	* opcodes/ppc-opc.c (powerpc_opcodes): Sort power9 insns by
