@@ -140,7 +140,6 @@ class Target_sparc : public Sized_target<size, big_endian>
 		  Output_section* output_section,
 		  typename elfcpp::Elf_types<size>::Elf_Off
                     offset_in_output_section,
-		  const Relocatable_relocs*,
 		  unsigned char* view,
 		  typename elfcpp::Elf_types<size>::Elf_Addr view_address,
 		  section_size_type view_size,
@@ -316,13 +315,10 @@ class Target_sparc : public Sized_target<size, big_endian>
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<size, big_endian>*, Target_sparc*,
-	     Output_section*, size_t relnum,
-	     const elfcpp::Rela<size, big_endian>&,
-	     unsigned int r_type, const Sized_symbol<size>*,
-	     const Symbol_value<size>*,
-	     unsigned char*,
-	     typename elfcpp::Elf_types<size>::Elf_Addr,
+    relocate(const Relocate_info<size, big_endian>*, unsigned int,
+	     Target_sparc*, Output_section*, size_t, const unsigned char*,
+	     const Sized_symbol<size>*, const Symbol_value<size>*,
+	     unsigned char*, typename elfcpp::Elf_types<size>::Elf_Addr,
 	     section_size_type);
 
    private:
@@ -3169,17 +3165,19 @@ template<int size, bool big_endian>
 inline bool
 Target_sparc<size, big_endian>::Relocate::relocate(
 			const Relocate_info<size, big_endian>* relinfo,
+			unsigned int,
 			Target_sparc* target,
 			Output_section*,
 			size_t relnum,
-			const elfcpp::Rela<size, big_endian>& rela,
-			unsigned int r_type,
+			const unsigned char* preloc,
 			const Sized_symbol<size>* gsym,
 			const Symbol_value<size>* psymval,
 			unsigned char* view,
 			typename elfcpp::Elf_types<size>::Elf_Addr address,
 			section_size_type view_size)
 {
+  const elfcpp::Rela<size, big_endian> rela(preloc);
+  unsigned int r_type = elfcpp::elf_r_type<size>(rela.get_r_info());
   bool orig_is_ifunc = psymval->is_ifunc_symbol();
   r_type &= 0xff;
 
@@ -4224,7 +4222,6 @@ Target_sparc<size, big_endian>::relocate_relocs(
     size_t reloc_count,
     Output_section* output_section,
     typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
-    const Relocatable_relocs* rr,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,
     section_size_type view_size,
@@ -4239,7 +4236,6 @@ Target_sparc<size, big_endian>::relocate_relocs(
     reloc_count,
     output_section,
     offset_in_output_section,
-    rr,
     view,
     view_address,
     view_size,

@@ -361,7 +361,6 @@ class Target_s390 : public Sized_target<size, true>
       size_t reloc_count,
       Output_section* output_section,
       typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
-      const Relocatable_relocs*,
       unsigned char* view,
       typename elfcpp::Elf_types<size>::Elf_Addr view_address,
       section_size_type view_size,
@@ -553,11 +552,9 @@ class Target_s390 : public Sized_target<size, true>
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<size, true>*, Target_s390*,
-	     Output_section*,
-	     size_t relnum, const elfcpp::Rela<size, true>&,
-	     unsigned int r_type, const Sized_symbol<size>*,
-	     const Symbol_value<size>*,
+    relocate(const Relocate_info<size, true>*, unsigned int,
+	     Target_s390*, Output_section*, size_t, const unsigned char*,
+	     const Sized_symbol<size>*, const Symbol_value<size>*,
 	     unsigned char*, typename elfcpp::Elf_types<size>::Elf_Addr,
 	     section_size_type);
 
@@ -3115,11 +3112,11 @@ template<int size>
 inline bool
 Target_s390<size>::Relocate::relocate(
     const Relocate_info<size, true>* relinfo,
+    unsigned int,
     Target_s390<size>* target,
     Output_section*,
     size_t relnum,
-    const elfcpp::Rela<size, true>& rela,
-    unsigned int r_type,
+    const unsigned char* preloc,
     const Sized_symbol<size>* gsym,
     const Symbol_value<size>* psymval,
     unsigned char* view,
@@ -3129,6 +3126,8 @@ Target_s390<size>::Relocate::relocate(
   if (view == NULL)
     return true;
 
+  const elfcpp::Rela<size, true> rela(preloc);
+  unsigned int r_type = elfcpp::elf_r_type<size>(rela.get_r_info());
   const Sized_relobj_file<size, true>* object = relinfo->object;
 
   // Pick the value to use for symbols defined in the PLT.
@@ -4171,7 +4170,6 @@ Target_s390<size>::relocate_relocs(
     size_t reloc_count,
     Output_section* output_section,
     typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
-    const Relocatable_relocs* rr,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,
     section_size_type view_size,
@@ -4186,7 +4184,6 @@ Target_s390<size>::relocate_relocs(
     reloc_count,
     output_section,
     offset_in_output_section,
-    rr,
     view,
     view_address,
     view_size,

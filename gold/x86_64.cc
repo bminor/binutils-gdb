@@ -505,7 +505,6 @@ class Target_x86_64 : public Sized_target<size, false>
       size_t reloc_count,
       Output_section* output_section,
       typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
-      const Relocatable_relocs*,
       unsigned char* view,
       typename elfcpp::Elf_types<size>::Elf_Addr view_address,
       section_size_type view_size,
@@ -782,11 +781,9 @@ class Target_x86_64 : public Sized_target<size, false>
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<size, false>*, Target_x86_64*,
-	     Output_section*,
-	     size_t relnum, const elfcpp::Rela<size, false>&,
-	     unsigned int r_type, const Sized_symbol<size>*,
-	     const Symbol_value<size>*,
+    relocate(const Relocate_info<size, false>*, unsigned int,
+	     Target_x86_64*, Output_section*, size_t, const unsigned char*,
+	     const Sized_symbol<size>*, const Symbol_value<size>*,
 	     unsigned char*, typename elfcpp::Elf_types<size>::Elf_Addr,
 	     section_size_type);
 
@@ -3348,17 +3345,20 @@ template<int size>
 inline bool
 Target_x86_64<size>::Relocate::relocate(
     const Relocate_info<size, false>* relinfo,
+    unsigned int,
     Target_x86_64<size>* target,
     Output_section*,
     size_t relnum,
-    const elfcpp::Rela<size, false>& rela,
-    unsigned int r_type,
+    const unsigned char* preloc,
     const Sized_symbol<size>* gsym,
     const Symbol_value<size>* psymval,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr address,
     section_size_type view_size)
 {
+  const elfcpp::Rela<size, false> rela(preloc);
+  unsigned int r_type = elfcpp::elf_r_type<size>(rela.get_r_info());
+
   if (this->skip_call_tls_get_addr_)
     {
       if ((r_type != elfcpp::R_X86_64_PLT32
@@ -4436,7 +4436,6 @@ Target_x86_64<size>::relocate_relocs(
     size_t reloc_count,
     Output_section* output_section,
     typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
-    const Relocatable_relocs* rr,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,
     section_size_type view_size,
@@ -4451,7 +4450,6 @@ Target_x86_64<size>::relocate_relocs(
     reloc_count,
     output_section,
     offset_in_output_section,
-    rr,
     view,
     view_address,
     view_size,

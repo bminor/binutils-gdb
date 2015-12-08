@@ -1010,33 +1010,33 @@ Sized_relobj_file<size, big_endian>::do_relocate_sections(
 				     &reloc_map);
 	}
 
+      Relocatable_relocs* rr = NULL;
+      if (parameters->options().emit_relocs()
+	  || parameters->options().relocatable())
+	rr = this->relocatable_relocs(i);
+      relinfo.rr = rr;
+
       if (!parameters->options().relocatable())
 	{
 	  target->relocate_section(&relinfo, sh_type, prelocs, reloc_count, os,
 				   output_offset == invalid_address,
 				   view, address, view_size, reloc_map);
 	  if (parameters->options().emit_relocs())
-	    {
-	      Relocatable_relocs* rr = this->relocatable_relocs(i);
-	      target->relocate_relocs(&relinfo, sh_type, prelocs, reloc_count,
-				      os, output_offset, rr,
-				      view, address, view_size,
-				      (*pviews)[i].view,
-				      (*pviews)[i].view_size);
-	    }
+	    target->relocate_relocs(&relinfo, sh_type, prelocs, reloc_count,
+				    os, output_offset,
+				    view, address, view_size,
+				    (*pviews)[i].view,
+				    (*pviews)[i].view_size);
 	  if (parameters->incremental())
 	    this->incremental_relocs_write(&relinfo, sh_type, prelocs,
 					   reloc_count, os, output_offset, of);
 	}
       else
-	{
-	  Relocatable_relocs* rr = this->relocatable_relocs(i);
-	  target->relocate_relocs(&relinfo, sh_type, prelocs, reloc_count,
-				  os, output_offset, rr,
-				  view, address, view_size,
-				  (*pviews)[i].view,
-				  (*pviews)[i].view_size);
-	}
+	target->relocate_relocs(&relinfo, sh_type, prelocs, reloc_count,
+				os, output_offset,
+				view, address, view_size,
+				(*pviews)[i].view,
+				(*pviews)[i].view_size);
     }
 }
 

@@ -2307,7 +2307,6 @@ class Target_arm : public Sized_target<32, big_endian>
 		  Output_section* output_section,
 		  typename elfcpp::Elf_types<32>::Elf_Off
                     offset_in_output_section,
-		  const Relocatable_relocs*,
 		  unsigned char* view,
 		  Arm_address view_address,
 		  section_size_type view_size,
@@ -2669,13 +2668,10 @@ class Target_arm : public Sized_target<32, big_endian>
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<32, big_endian>*, Target_arm*,
-	     Output_section*,  size_t relnum,
-	     const elfcpp::Rel<32, big_endian>&,
-	     unsigned int r_type, const Sized_symbol<32>*,
-	     const Symbol_value<32>*,
-	     unsigned char*, Arm_address,
-	     section_size_type);
+    relocate(const Relocate_info<32, big_endian>*, unsigned int,
+	     Target_arm*, Output_section*, size_t, const unsigned char*,
+	     const Sized_symbol<32>*, const Symbol_value<32>*,
+	     unsigned char*, Arm_address, section_size_type);
 
     // Return whether we want to pass flag NON_PIC_REF for this
     // reloc.  This means the relocation type accesses a symbol not via
@@ -9323,11 +9319,11 @@ template<bool big_endian>
 inline bool
 Target_arm<big_endian>::Relocate::relocate(
     const Relocate_info<32, big_endian>* relinfo,
+    unsigned int,
     Target_arm* target,
     Output_section* output_section,
     size_t relnum,
-    const elfcpp::Rel<32, big_endian>& rel,
-    unsigned int r_type,
+    const unsigned char* preloc,
     const Sized_symbol<32>* gsym,
     const Symbol_value<32>* psymval,
     unsigned char* view,
@@ -9339,6 +9335,8 @@ Target_arm<big_endian>::Relocate::relocate(
 
   typedef Arm_relocate_functions<big_endian> Arm_relocate_functions;
 
+  const elfcpp::Rel<32, big_endian> rel(preloc);
+  unsigned int r_type = elfcpp::elf_r_type<32>(rel.get_r_info());
   r_type = get_real_reloc_type(r_type);
   const Arm_reloc_property* reloc_property =
     arm_reloc_property_table->get_implemented_static_reloc_property(r_type);
@@ -10113,7 +10111,6 @@ Target_arm<big_endian>::relocate_relocs(
     size_t reloc_count,
     Output_section* output_section,
     typename elfcpp::Elf_types<32>::Elf_Off offset_in_output_section,
-    const Relocatable_relocs* rr,
     unsigned char* view,
     Arm_address view_address,
     section_size_type view_size,
@@ -10128,7 +10125,6 @@ Target_arm<big_endian>::relocate_relocs(
     reloc_count,
     output_section,
     offset_in_output_section,
-    rr,
     view,
     view_address,
     view_size,
@@ -12282,10 +12278,9 @@ Target_arm<big_endian>::relocate_stub(
       elfcpp::Rel_write<32, big_endian> reloc_write(reloc_buffer);
       reloc_write.put_r_offset(reloc_offset);
       reloc_write.put_r_info(elfcpp::elf_r_info<32>(0, r_type));
-      elfcpp::Rel<32, big_endian> rel(reloc_buffer);
 
-      relocate.relocate(relinfo, this, output_section,
-			this->fake_relnum_for_stubs, rel, r_type,
+      relocate.relocate(relinfo, elfcpp::SHT_REL, this, output_section,
+			this->fake_relnum_for_stubs, reloc_buffer,
 			NULL, &symval, view + reloc_offset,
 			address + reloc_offset, reloc_size);
     }

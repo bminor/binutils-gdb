@@ -437,7 +437,6 @@ class Target_i386 : public Sized_target<32, false>
 		  size_t reloc_count,
 		  Output_section* output_section,
 		  elfcpp::Elf_types<32>::Elf_Off offset_in_output_section,
-		  const Relocatable_relocs*,
 		  unsigned char* view,
 		  elfcpp::Elf_types<32>::Elf_Addr view_address,
 		  section_size_type view_size,
@@ -634,10 +633,9 @@ class Target_i386 : public Sized_target<32, false>
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<32, false>*, Target_i386*, Output_section*,
-	     size_t relnum, const elfcpp::Rel<32, false>&,
-	     unsigned int r_type, const Sized_symbol<32>*,
-	     const Symbol_value<32>*,
+    relocate(const Relocate_info<32, false>*, unsigned int,
+	     Target_i386*, Output_section*, size_t, const unsigned char*,
+	     const Sized_symbol<32>*, const Symbol_value<32>*,
 	     unsigned char*, elfcpp::Elf_types<32>::Elf_Addr,
 	     section_size_type);
 
@@ -2732,17 +2730,20 @@ Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
 
 inline bool
 Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
-				       Target_i386* target,
-				       Output_section* output_section,
-				       size_t relnum,
-				       const elfcpp::Rel<32, false>& rel,
-				       unsigned int r_type,
-				       const Sized_symbol<32>* gsym,
-				       const Symbol_value<32>* psymval,
-				       unsigned char* view,
-				       elfcpp::Elf_types<32>::Elf_Addr address,
-				       section_size_type view_size)
+				unsigned int,
+				Target_i386* target,
+				Output_section* output_section,
+				size_t relnum,
+				const unsigned char* preloc,
+				const Sized_symbol<32>* gsym,
+				const Symbol_value<32>* psymval,
+				unsigned char* view,
+				elfcpp::Elf_types<32>::Elf_Addr address,
+				section_size_type view_size)
 {
+  const elfcpp::Rel<32, false> rel(preloc);
+  unsigned int r_type = elfcpp::elf_r_type<32>(rel.get_r_info());
+
   if (this->skip_call_tls_get_addr_)
     {
       if ((r_type != elfcpp::R_386_PLT32
@@ -3740,7 +3741,6 @@ Target_i386::relocate_relocs(
     size_t reloc_count,
     Output_section* output_section,
     elfcpp::Elf_types<32>::Elf_Off offset_in_output_section,
-    const Relocatable_relocs* rr,
     unsigned char* view,
     elfcpp::Elf_types<32>::Elf_Addr view_address,
     section_size_type view_size,
@@ -3755,7 +3755,6 @@ Target_i386::relocate_relocs(
     reloc_count,
     output_section,
     offset_in_output_section,
-    rr,
     view,
     view_address,
     view_size,

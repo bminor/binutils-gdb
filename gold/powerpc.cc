@@ -671,7 +671,6 @@ class Target_powerpc : public Sized_target<size, big_endian>
 		  Output_section* output_section,
 		  typename elfcpp::Elf_types<size>::Elf_Off
                     offset_in_output_section,
-		  const Relocatable_relocs*,
 		  unsigned char*,
 		  Address view_address,
 		  section_size_type,
@@ -1072,13 +1071,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<size, big_endian>*, Target_powerpc*,
-	     Output_section*, size_t relnum,
-	     const elfcpp::Rela<size, big_endian>&,
-	     unsigned int r_type, const Sized_symbol<size>*,
-	     const Symbol_value<size>*,
-	     unsigned char*,
-	     typename elfcpp::Elf_types<size>::Elf_Addr,
+    relocate(const Relocate_info<size, big_endian>*, unsigned int,
+	     Target_powerpc*, Output_section*, size_t, const unsigned char*,
+	     const Sized_symbol<size>*, const Symbol_value<size>*,
+	     unsigned char*, typename elfcpp::Elf_types<size>::Elf_Addr,
 	     section_size_type);
   };
 
@@ -6998,11 +6994,11 @@ template<int size, bool big_endian>
 inline bool
 Target_powerpc<size, big_endian>::Relocate::relocate(
     const Relocate_info<size, big_endian>* relinfo,
+    unsigned int,
     Target_powerpc* target,
     Output_section* os,
     size_t relnum,
-    const elfcpp::Rela<size, big_endian>& rela,
-    unsigned int r_type,
+    const unsigned char* preloc,
     const Sized_symbol<size>* gsym,
     const Symbol_value<size>* psymval,
     unsigned char* view,
@@ -7012,6 +7008,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   if (view == NULL)
     return true;
 
+  const elfcpp::Rela<size, big_endian> rela(preloc);
+  unsigned int r_type = elfcpp::elf_r_type<size>(rela.get_r_info());
   switch (this->maybe_skip_tls_get_addr_call(r_type, gsym))
     {
     case Track_tls::NOT_EXPECTED:
@@ -8220,7 +8218,6 @@ Target_powerpc<size, big_endian>::relocate_relocs(
     size_t reloc_count,
     Output_section* output_section,
     typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
-    const Relocatable_relocs* rr,
     unsigned char*,
     Address view_address,
     section_size_type,
@@ -8251,7 +8248,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
   bool zap_next = false;
   for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
     {
-      Relocatable_relocs::Reloc_strategy strategy = rr->strategy(i);
+      Relocatable_relocs::Reloc_strategy strategy = relinfo->rr->strategy(i);
       if (strategy == Relocatable_relocs::RELOC_DISCARD)
 	continue;
 

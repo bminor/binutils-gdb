@@ -1,3 +1,27 @@
+2015-12-09  Alan Modra  <amodra@gmail.com>
+
+	* object.h (struct Relocate_info): Add "rr".
+	* reloc.h (Relocatable_relocs::set_strategy): New accessor.
+	* reloc.cc (Sized_relobj_file::do_relocate_sections): Init
+	relinfo.rr for relocate_section and relocate_relocs.
+	* powerpc.cc (relocate): Add rel_type and preloc parameters.
+	Delete rela and r_type params, instead recalculate these from
+	preloc.
+	(relocate_relocs): Delete Relocatable_relocs* param, instead
+	use relinfo->rr.
+	* aarch64.cc: Likewise.
+	* arm.cc: Likewise.
+	* i386.cc: Likewise.
+	* mips.cc: Likewise.
+	* s390.cc: Likewise.
+	* sparc.cc: Likewise.
+	* target.h: Likewise.
+	* tilegx.cc: Likewise.
+	* x86_64.cc: Likewise.
+	* testsuite/testfile.cc: Likewise.
+	* target-reloc.h (relocate_section): Adjust to suit.
+	(apply_relocation, relocate_relocs): Likewise.
+
 2015-12-07  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (add_2_2_12, ld_2_12, lis_2): Define.
