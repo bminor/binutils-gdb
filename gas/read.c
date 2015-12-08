@@ -5310,6 +5310,15 @@ stringer (int bits_appendzero)
   md_cons_align (1);
 #endif
 
+  /* If we have been switched into the abs_section then we
+     will not have an obstack onto which we can hang strings.  */
+  if (now_seg == absolute_section)
+    {
+      as_bad (_("strings must be placed into a section"));
+      ignore_rest_of_line ();
+      return;
+    }
+
   /* The following awkward logic is to parse ZERO or more strings,
      comma separated. Recall a string expression includes spaces
      before the opening '\"' and spaces after the closing '\"'.
@@ -5323,14 +5332,6 @@ stringer (int bits_appendzero)
   else
     {
       c = ',';			/* Do loop.  */
-    }
-  /* If we have been switched into the abs_section then we
-     will not have an obstack onto which we can hang strings.  */
-  if (now_seg == absolute_section)
-    {
-      as_bad (_("strings must be placed into a section"));
-      c = 0;
-      ignore_rest_of_line ();
     }
 
   while (c == ',' || c == '<' || c == '"')
