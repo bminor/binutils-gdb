@@ -1,5 +1,18 @@
 2015-12-08  Jan Beulich  <jbeulich@suse.com>
 
+	* read.c (in_bss): New.
+	(do_align): Use it to also warn for non-zero fill in .bss.
+	(do_org): Likewise.
+	(s_space): Likewise.
+	(s_fill): Error on bad use in .bss/.struct.
+	(float_cons): Likewise.
+	(emit_leb128_expr): Likewise.
+	(emit_expr_with_reloc): Defer handling use inside .struct. Also
+	error on non-zero item added to .bss.
+	(stringer_append_char): Error on non-zero character.
+
+2015-12-08  Jan Beulich  <jbeulich@suse.com>
+
 	* read.c (stringer): Move absolute section check up. Return
 	right away.
 
