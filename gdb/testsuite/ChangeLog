@@ -1,3 +1,8 @@
+2015-12-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/async.exp (proc test_background): Add case for
+	asynchronous execution not supported.
+
 2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.mi/mi-var-display.exp: Add new checks for the zero-hexadecimal
