@@ -1,3 +1,7 @@
+2015-12-08  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rx.c (rx_elf_object_p): Ignore empty and nobits sections.
+
 2015-12-07  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-rx.c (elf32_rx_relax_delete_bytes): Add extra parameter -

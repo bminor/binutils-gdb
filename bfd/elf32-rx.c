@@ -3229,6 +3229,8 @@ rx_elf_object_p (bfd * abfd)
 
 	  if (phdr[i].p_filesz
 	      && phdr[i].p_offset <= (bfd_vma) sec->sh_offset
+	      && sec->sh_size > 0
+	      && sec->sh_type != SHT_NOBITS
 	      && (bfd_vma)sec->sh_offset <= phdr[i].p_offset + (phdr[i].p_filesz - 1))
 	    {
 	      /* Found one!  The difference between the two addresses,
