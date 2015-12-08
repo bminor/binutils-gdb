@@ -7027,6 +7027,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 
   typedef Powerpc_relocate_functions<size, big_endian> Reloc;
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insn;
+  typedef typename Reloc_types<elfcpp::SHT_RELA,
+			       size, big_endian>::Reloc Reltype;
   Powerpc_relobj<size, big_endian>* const object
     = static_cast<Powerpc_relobj<size, big_endian>*>(relinfo->object);
   Address value = 0;
@@ -7700,6 +7702,55 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		}
 	    }
 	  break;
+
+	case elfcpp::R_POWERPC_REL16_LO:
+	  // If we are generating a non-PIC executable, edit
+	  // 	0:	addis 2,12,.TOC.-0b@ha
+	  //		addi 2,2,.TOC.-0b@l
+	  // used by ELFv2 global entry points to set up r2, to
+	  //		lis 2,.TOC.@ha
+	  //		addi 2,2,.TOC.@l
+	  // if .TOC. is in range.  */
+	  if (value + address - 4 + 0x80008000 <= 0xffffffff
+	      && relnum != 0
+	      && preloc != NULL
+	      && target->abiversion() >= 2
+	      && !parameters->options().output_is_position_independent()
+	      && gsym != NULL
+	      && strcmp(gsym->name(), ".TOC.") == 0)
+	    {
+	      const int reloc_size
+		= Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+	      Reltype prev_rela(preloc - reloc_size);
+	      if ((prev_rela.get_r_info()
+		   == elfcpp::elf_r_info<size>(r_sym,
+					       elfcpp::R_POWERPC_REL16_HA))
+		  && prev_rela.get_r_offset() + 4 == rela.get_r_offset()
+		  && prev_rela.get_r_addend() + 4 == rela.get_r_addend())
+		{
+		  Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+		  Insn insn1 = elfcpp::Swap<32, big_endian>::readval(iview - 1);
+		  Insn insn2 = elfcpp::Swap<32, big_endian>::readval(iview);
+
+		  if ((insn1 & 0xffff0000) == addis_2_12
+		      && (insn2 & 0xffff0000) == addi_2_2)
+		    {
+		      insn1 = lis_2 + ha(value + address - 4);
+		      elfcpp::Swap<32, big_endian>::writeval(iview - 1, insn1);
+		      insn2 = addi_2_2 + l(value + address - 4);
+		      elfcpp::Swap<32, big_endian>::writeval(iview, insn2);
+		      if (relinfo->rr)
+			{
+			  relinfo->rr->set_strategy(relnum - 1,
+						    Relocatable_relocs::RELOC_SPECIAL);
+			  relinfo->rr->set_strategy(relnum,
+						    Relocatable_relocs::RELOC_SPECIAL);
+			}
+		      return true;
+		    }
+		}
+	    }
+	  break;
 	}
     }
 
@@ -8357,8 +8408,21 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 	}
       else if (strategy == Relocatable_relocs::RELOC_SPECIAL)
 	{
-	  if (addend >= 32768)
-	    addend += got2_addend;
+	  if (size == 32)
+	    {
+	      if (addend >= 32768)
+		addend += got2_addend;
+	    }
+	  else if (r_type == elfcpp::R_POWERPC_REL16_HA)
+	    {
+	      r_type = elfcpp::R_POWERPC_ADDR16_HA;
+	      addend -= 2 * big_endian;
+	    }
+	  else if (r_type == elfcpp::R_POWERPC_REL16_LO)
+	    {
+	      r_type = elfcpp::R_POWERPC_ADDR16_LO;
+	      addend -= 2 * big_endian + 4;
+	    }
 	}
       else
 	gold_unreachable();

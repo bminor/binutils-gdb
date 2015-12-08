@@ -1,5 +1,11 @@
 2015-12-09  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Edit ELFv2
+	entry code.
+	(Target_powerpc::relocate_relocs): Edit relocs to suit.
+
+2015-12-09  Alan Modra  <amodra@gmail.com>
+
 	* object.h (struct Relocate_info): Add "rr".
 	* reloc.h (Relocatable_relocs::set_strategy): New accessor.
 	* reloc.cc (Sized_relobj_file::do_relocate_sections): Init
