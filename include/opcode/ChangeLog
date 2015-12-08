@@ -1,3 +1,8 @@
+2015-12-08  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_V8_1): New.
+	(AARCH64_ARCH_v8_1): Add AARCH64_FEATURE_V8_1.
+
 2015-11-11  Alan Modra  <amodra@gmail.com>
 	    Peter Bergner <bergner@vnet.ibm.com>
 
