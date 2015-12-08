@@ -407,6 +407,8 @@
 @V@/gdb/testsuite/gdb.base/bitfields2.c @V@/gdb/testsuite/gdb.base/bitfiel2.c
 @V@/gdb/testsuite/gdb.base/bitfields2.exp @V@/gdb/testsuite/gdb.base/bitfiel2.exp
 @V@/gdb/testsuite/gdb.base/break-entry.exp @V@/gdb/testsuite/gdb.base/brkentry.exp
+@V@/gdb/testsuite/gdb.base/break-fun-addr1.c @V@/gdb/testsuite/gdb.base/b-f-a1.c
+@V@/gdb/testsuite/gdb.base/break-fun-addr2.c @V@/gdb/testsuite/gdb.base/b-f-a2.c
 @V@/gdb/testsuite/gdb.base/coremaker2.c @V@/gdb/testsuite/gdb.base/core2maker.c
 @V@/gdb/testsuite/gdb.base/hashline1.exp @V@/gdb/testsuite/gdb.base/hash1line.exp
 @V@/gdb/testsuite/gdb.base/hashline2.exp @V@/gdb/testsuite/gdb.base/hash2line.exp

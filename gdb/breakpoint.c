@@ -7798,7 +7798,7 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 
   b->enable_state = bp_enabled;
   /* location has to be used or breakpoint_re_set will delete me.  */
-  b->location = new_address_location (b->loc->address);
+  b->location = new_address_location (b->loc->address, NULL, 0);
 
   update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
@@ -9369,7 +9369,18 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
   if (location != NULL)
     b->location = location;
   else
-    b->location = new_address_location (b->loc->address);
+    {
+      const char *addr_string = NULL;
+      int addr_string_len = 0;
+
+      if (location != NULL)
+	addr_string = event_location_to_string (location);
+      if (addr_string != NULL)
+	addr_string_len = strlen (addr_string);
+
+      b->location = new_address_location (b->loc->address,
+					  addr_string, addr_string_len);
+    }
   b->filter = filter;
 }
 

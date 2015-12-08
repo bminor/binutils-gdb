@@ -126,17 +126,26 @@ extern struct event_location *
 extern const char *
   get_linespec_location (const struct event_location *location);
 
-/* Create a new address location.  The return result is malloc'd
-   and should be freed with delete_event_location.  */
+/* Create a new address location.
+   ADDR is the address corresponding to this event_location.
+   ADDR_STRING, a string of ADDR_STRING_LEN characters, is
+   the expression that was parsed to determine the address ADDR.  */
 
 extern struct event_location *
-  new_address_location (CORE_ADDR addr);
+  new_address_location (CORE_ADDR addr, const char *addr_string,
+			int addr_string_len);
 
 /* Return the address location (a CORE_ADDR) of the given event_location
    (which must be of type ADDRESS_LOCATION).  */
 
 extern CORE_ADDR
   get_address_location (const struct event_location *location);
+
+/* Return the expression (a string) that was used to compute the address
+   of the given event_location (which must be of type ADDRESS_LOCATION).  */
+
+extern const char *
+  get_address_string_location (const struct event_location *location);
 
 /* Create a new probe location.  The return result is malloc'd
    and should be freed with delete_event_location.  */

@@ -297,7 +297,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
       struct cleanup *back_to;
 
       /* Set a breakpoint on the return address.  */
-      location = new_address_location (get_frame_pc (prev_frame));
+      location = new_address_location (get_frame_pc (prev_frame), NULL, 0);
       back_to = make_cleanup_delete_event_location (location);
       create_breakpoint (python_gdbarch,
                          location, NULL, thread, NULL,

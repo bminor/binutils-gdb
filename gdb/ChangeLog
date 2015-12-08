@@ -1,3 +1,28 @@
+2016-01-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* location.h (new_address_location): Add new parameters
+	"addr_string" and "addr_string_len".
+	(get_address_string_location): Add declaration.
+	* location.c (new_address_location): Add new parameters
+	"addr_string" and "addr_string_len".  If not NULL, store
+	a copy of the addr_string in the new location as well.
+	(get_address_string_location): New function.
+	(string_to_event_location): Update call to new_address_location.
+	* linespec.c (event_location_to_sals) <ADDRESS_LOCATION>:
+	Save the event location in the parser's state before
+	passing it to convert_address_location_to_sals.
+	* breakpoint.c (create_thread_event_breakpoint): Update call
+	to new_address_location.
+	(init_breakpoint_sal): Get the event location's string, if any,
+	and use it to update call to new_address_location.
+	* python/py-finishbreakpoint.c (bpfinishpy_init):
+	Update call to new_address_location.
+	* spu-tdep.c (spu_catch_start): Likewise.
+
+	* config/djgpp/fnchange.lst: Add entries for
+	gdb/testsuite/gdb.base/break-fun-addr1.c and
+	gdb/testsuite/gdb.base/break-fun-addr2.c.
+
 2016-01-21  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-linux-tdep.c (arm_linux_sigreturn_next_pc): Add parameter

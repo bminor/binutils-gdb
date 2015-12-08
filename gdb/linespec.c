@@ -2512,9 +2512,27 @@ event_location_to_sals (linespec_parser *parser,
       break;
 
     case ADDRESS_LOCATION:
-      result
-	= convert_address_location_to_sals (PARSER_STATE (parser),
-					    get_address_location (location));
+      {
+	const char *addr_string = get_address_string_location (location);
+	CORE_ADDR addr = get_address_location (location);
+
+	if (addr_string != NULL)
+	  {
+	    char *expr = xstrdup (addr_string);
+	    const char *const_expr = expr;
+	    struct cleanup *cleanup = make_cleanup (xfree, expr);
+
+	    addr = linespec_expression_to_pc (&const_expr);
+	    if (PARSER_STATE (parser)->canonical != NULL)
+	      PARSER_STATE (parser)->canonical->location
+		= copy_event_location (location);
+
+	    do_cleanups (cleanup);
+	  }
+
+	result = convert_address_location_to_sals (PARSER_STATE (parser),
+						   addr);
+      }
       break;
 
     case EXPLICIT_LOCATION:
