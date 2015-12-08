@@ -99,3 +99,5 @@ extern void rl78_elf_final_processing (void);
    || TC_FORCE_RELOCATION (FIX))
 
 #define DWARF2_USE_FIXED_ADVANCE_PC 1
+
+#define TC_FORCE_RELOCATION(FIX) (linkrelax)

@@ -1,3 +1,23 @@
+2015-12-08  DJ Delorie  <dj@redhat.com>
+
+	* config/rl78-parse.y: Make all branches relaxable via
+	rl78_linkrelax_branch().
+	* config/tc-rl78.c (rl78_linkrelax_branch): Mark all relaxable
+	branches with relocs.
+	(options): Add OPTION_NORELAX.
+	(md_longopts): Add -mnorelax.
+	(md_parse_option): Support OPTION_NORELAX.
+	(op_type_T): Add bh, sk, call, and br.
+	(rl78_opcode_type): Likewise.
+	(rl78_relax_frag): Fix not-relaxing logic.  Add sk.
+	(md_convert_frag): Fix relocation handling.
+	(tc_gen_reloc): Strip relax relocs when not linker relaxing.
+	(md_apply_fix): Defer overflow handling for anything that needs a
+	PLT, to the linker.
+	* config/tc-rl78.h (TC_FORCE_RELOCATION): Force all relocations to
+	the linker when linker relaxing.
+	* doc/c-rl78.texi (norelax): Add.
+
 2015-12-07  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_apply_fix): Localize variables.  Reduce casts.
