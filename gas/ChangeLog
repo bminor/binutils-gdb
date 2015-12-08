@@ -1,3 +1,8 @@
+2015-12-08  Jan Beulich  <jbeulich@suse.com>
+
+	* config/obj-elf.c (elf_file_symbol): Tighten condition for
+	moving BSF_FILE symbols.
+
 2015-12-08  DJ Delorie  <dj@redhat.com>
 
 	* config/rl78-parse.y: Make all branches relaxable via

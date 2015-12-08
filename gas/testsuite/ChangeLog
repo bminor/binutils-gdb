@@ -1,3 +1,10 @@
+2015-12-08  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/elf/file-2.s, gas/elf/file-2.d: New.
+	* gas/elf/elf.exp: Run new test.
+	* gas/elf/file.d: Adjust expectations.
+	* gas/i386/ilp32/elf/file.d: Likewise.
+
 2015-12-04  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19276

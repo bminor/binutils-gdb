@@ -282,14 +282,17 @@ elf_file_symbol (const char *s, int appfile)
 
       symbol_get_bfdsym (sym)->flags |= BSF_FILE;
 
-      if (symbol_rootP != sym)
+      if (symbol_rootP != sym
+	  && (symbol_rootP->bsym == NULL
+	      || !(symbol_rootP->bsym->flags & BSF_FILE)))
 	{
 	  symbol_remove (sym, &symbol_rootP, &symbol_lastP);
 	  symbol_insert (sym, symbol_rootP, &symbol_rootP, &symbol_lastP);
-#ifdef DEBUG
-	  verify_symbol_chain (symbol_rootP, symbol_lastP);
-#endif
 	}
+
+#ifdef DEBUG
+      verify_symbol_chain (symbol_rootP, symbol_lastP);
+#endif
     }
 
 #ifdef NEED_ECOFF_DEBUG

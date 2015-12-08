@@ -111,6 +111,7 @@ if { [is_elf_format] } then {
 	    run_dump_test "file"
 	}
     }
+    run_dump_test "file-2"
     setup_xfail "nds32*-*-*"
     run_dump_test "group0a"
     run_dump_test "group0b"
