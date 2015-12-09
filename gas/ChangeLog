@@ -1,3 +1,8 @@
+2015-12-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_ip): Support %dN and %qN notation for
+	double and quad-precision floating-point registers.
+
 2015-12-09  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-rx.c (rx_relax_frag): Fix compile time warning.
