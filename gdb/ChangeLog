@@ -1,3 +1,15 @@
+2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb/mi/mi-cmd-var.c (mi_parse_format): Handle new "zero-hexadecimal"
+	format.
+	* gdb/varobj.c (varobj_format_string): Add "zero-hexadecimal" entry.
+	(format_code): Add 'z' entry.
+	(varobj_set_display_format): Handle FORMAT_ZHEXADECIMAL.
+	* gdb/varobj.h (varobj_display_formats) <FORMAT_ZHEXADECIMAL>: New enum
+	field.
+	* NEWS: Add new note to MI changes citing the new zero-hexadecimal
+	format for -var-set-format.
+
 2015-12-09  Ruslan Kabatsayev  <b7.10110111@gmail.com>  (tiny patch)
 
 	PR gdb/18702

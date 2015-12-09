@@ -28,7 +28,8 @@ enum varobj_display_formats
     FORMAT_BINARY,		/* Binary display                    */
     FORMAT_DECIMAL,		/* Decimal display                   */
     FORMAT_HEXADECIMAL,		/* Hex display                       */
-    FORMAT_OCTAL		/* Octal display                     */
+    FORMAT_OCTAL,		/* Octal display                     */
+    FORMAT_ZHEXADECIMAL		/* Zero padded hexadecimal	     */
   };
 
 enum varobj_type

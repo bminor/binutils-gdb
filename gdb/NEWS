@@ -135,6 +135,12 @@ show remote exec-event-feature-packet
    The reply to qXfer:threads:read may now include a name attribute for each
    thread.
 
+* MI changes
+
+  ** The -var-set-format command now accepts the zero-hexadecimal
+     format.  It outputs data in hexadecimal format with zero-padding on the
+     left.
+
 *** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*

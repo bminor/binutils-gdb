@@ -233,10 +233,12 @@ mi_parse_format (const char *arg)
 	return FORMAT_HEXADECIMAL;
       else if (strncmp (arg, "octal", len) == 0)
 	return FORMAT_OCTAL;
+      else if (strncmp (arg, "zero-hexadecimal", len) == 0)
+	return FORMAT_ZHEXADECIMAL;
     }
 
   error (_("Must specify the format as: \"natural\", "
-	   "\"binary\", \"decimal\", \"hexadecimal\", or \"octal\""));
+	   "\"binary\", \"decimal\", \"hexadecimal\", \"octal\" or \"zero-hexadecimal\""));
 }
 
 void

@@ -1,3 +1,8 @@
+2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Update text to mention
+	-var-set-format's new zero-hexadecimal format.
+
 2015-12-08  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.texinfo (Ada Mode Into): Move overloading support

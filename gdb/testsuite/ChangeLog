@@ -1,3 +1,8 @@
+2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.mi/mi-var-display.exp: Add new checks for the zero-hexadecimal
+	  format and change test names to make them unique.
+
 2015-12-09  Ruslan Kabatsayev  <b7.10110111@gmail.com>
 	    Pedro Alves  <pedro@redhat.com>
 

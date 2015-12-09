@@ -28980,12 +28980,17 @@ The syntax for the @var{format-spec} is as follows:
 
 @smallexample
  @var{format-spec} @expansion{}
- @{binary | decimal | hexadecimal | octal | natural@}
+ @{binary | decimal | hexadecimal | octal | natural | zero-hexadecimal@}
 @end smallexample
 
 The natural format is the default format choosen automatically
 based on the variable type (like decimal for an @code{int}, hex
 for pointers, etc.).
+
+The zero-hexadecimal format has a representation similar to hexadecimal
+but with padding zeroes to the left of the value.  For example, a 32-bit
+hexadecimal value of 0x1234 would be represented as 0x00001234 in the
+zero-hexadecimal format.
 
 For a variable with children, the format is set only on the 
 variable itself, and the children are not affected.  
