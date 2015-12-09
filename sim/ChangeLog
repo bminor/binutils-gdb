@@ -1,3 +1,7 @@
+2015-12-09  Tristan Gingold  <gingold@adacore.com>
+
+	* aarch64/simulator.c: Remove syscall.h include.
+
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* README-HACKING: Delete mention of tconfig.h.

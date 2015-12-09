@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include <syscall.h>
 #include <math.h>
 #include <time.h>
 #include <limits.h>
