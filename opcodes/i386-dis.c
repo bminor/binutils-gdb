@@ -758,6 +758,7 @@ enum
   MOD_0F01_REG_1,
   MOD_0F01_REG_2,
   MOD_0F01_REG_3,
+  MOD_0F01_REG_5,
   MOD_0F01_REG_7,
   MOD_0F12_PREFIX_0,
   MOD_0F13,
@@ -929,6 +930,7 @@ enum
   RM_0F01_REG_1,
   RM_0F01_REG_2,
   RM_0F01_REG_3,
+  RM_0F01_REG_5,
   RM_0F01_REG_7,
   RM_0FAE_REG_5,
   RM_0FAE_REG_6,
@@ -3554,7 +3556,7 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F01_REG_2) },
     { MOD_TABLE (MOD_0F01_REG_3) },
     { "smswD",	{ Sv }, 0 },
-    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F01_REG_5) },
     { "lmsw",	{ Ew }, 0 },
     { MOD_TABLE (MOD_0F01_REG_7) },
   },
@@ -11685,6 +11687,11 @@ static const struct dis386 mod_table[][2] = {
     { RM_TABLE (RM_0F01_REG_3) },
   },
   {
+    /* MOD_0F01_REG_5 */
+    { Bad_Opcode },
+    { RM_TABLE (RM_0F01_REG_5) },
+  },
+  {
     /* MOD_0F01_REG_7 */
     { "invlpg",		{ Mb }, 0 },
     { RM_TABLE (RM_0F01_REG_7) },
@@ -12427,6 +12434,17 @@ static const struct dis386 rm_table[][8] = {
     { "clgi",		{ Skip_MODRM }, 0 },
     { "skinit",		{ Skip_MODRM }, 0 },
     { "invlpga",	{ Skip_MODRM }, 0 },
+  },
+  {
+    /* RM_0F01_REG_5 */
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "rdpkru",		{ Skip_MODRM }, 0 },
+    { "wrpkru",		{ Skip_MODRM }, 0 },
   },
   {
     /* RM_0F01_REG_7 */
