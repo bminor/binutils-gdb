@@ -1,3 +1,8 @@
+2015-12-09  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_V8_2): New.
+	(AARCH64_ARCH_V8_2): New.
+
 2015-12-08  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64.h (AARCH64_FEATURE_V8_1): New.

@@ -38,6 +38,7 @@ typedef uint32_t aarch64_insn;
 
 /* The following bitmasks control CPU features.  */
 #define AARCH64_FEATURE_V8	0x00000001	/* All processors.  */
+#define AARCH64_FEATURE_V8_2	0x00000020      /* ARMv8.2 processors.  */
 #define AARCH64_FEATURE_CRYPTO	0x00010000	/* Crypto instructions.  */
 #define AARCH64_FEATURE_FP	0x00020000	/* FP instructions.  */
 #define AARCH64_FEATURE_SIMD	0x00040000	/* SIMD instructions.  */
@@ -60,7 +61,14 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_PAN	\
 						 | AARCH64_FEATURE_LOR	\
 						 | AARCH64_FEATURE_RDMA)
-
+#define AARCH64_ARCH_V8_2	AARCH64_FEATURE (AARCH64_FEATURE_V8,	\
+						 AARCH64_FEATURE_V8_2	\
+						 | AARCH64_FEATURE_FP	\
+						 | AARCH64_FEATURE_SIMD \
+						 | AARCH64_FEATURE_LSE	\
+						 | AARCH64_FEATURE_PAN	\
+						 | AARCH64_FEATURE_LOR	\
+						 | AARCH64_FEATURE_RDMA)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */
