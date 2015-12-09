@@ -4,6 +4,7 @@
 .*: .*
 
 SYMBOL TABLE:
+#...
 0+ l[ ]*df \*ABS\*[ 	]+0+ file-2\.s
 #...
 0+ l[ ]*\.text[ 	]+0+ local1

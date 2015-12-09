@@ -4,6 +4,7 @@
 .*: .*
 
 SYMBOL TABLE:
+#...
 0+ l[ ]*df \*ABS\*[ 	]+0+ ~tilde
 #...
 0+ l[ ]*df \*ABS\*[ 	]+0+ hash\#
