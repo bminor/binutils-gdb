@@ -1,3 +1,13 @@
+2015-12-09  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+	    Pedro Alves  <pedro@redhat.com>
+
+	PR gdb/18702
+	Add checking of floatformats setup on x86_64 hosts.
+	* gdb.arch/i386-float.S (main): Load bigval and smallval.
+	(smallval, bigval): New labels/constants.
+	* gdb.arch/i386-float.exp: Use with_test_prefix and test "info
+	float" after loading bigval and smallval.
+
 2015-12-07  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* gdb.ada/fun_overload_menu.exp: New testcase.

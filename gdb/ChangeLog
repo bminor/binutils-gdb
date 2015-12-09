@@ -1,3 +1,9 @@
+2015-12-09  Ruslan Kabatsayev  <b7.10110111@gmail.com>  (tiny patch)
+
+	PR gdb/18702
+	* configure.host: Fix detection of x86_64 host when setting
+	floatformats.
+
 2015-12-08  Pierre-Marie de Rodat  <derodat@adacore.com>
 
 	* NEWS: Announce this enhancement and the corresponding new
