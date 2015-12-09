@@ -1552,7 +1552,7 @@ rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
       if (fragP->fr_subtype >= next_size)
 	fragP->fr_subtype = 0;
       tprintf ("\033[34m -> mypc %lu next_size %u new %d old %d delta %d (fetchalign)\033[0m\n",
-	       mypc & 7,
+	       (unsigned long) (mypc & 7),
 	       next_size, fragP->fr_subtype, oldsize, fragP->fr_subtype-oldsize);
 
       newsize = fragP->fr_subtype;

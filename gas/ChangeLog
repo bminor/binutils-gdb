@@ -1,3 +1,7 @@
+2015-12-09  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (rx_relax_frag): Fix compile time warning.
+
 2015-12-08  Jan Beulich  <jbeulich@suse.com>
 
 	* read.c (in_bss): New.
