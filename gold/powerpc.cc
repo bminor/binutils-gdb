@@ -7029,6 +7029,9 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insn;
   typedef typename Reloc_types<elfcpp::SHT_RELA,
 			       size, big_endian>::Reloc Reltype;
+  // Offset from start of insn to d-field reloc.
+  const int d_offset = big_endian ? 2 : 0;
+
   Powerpc_relobj<size, big_endian>* const object
     = static_cast<Powerpc_relobj<size, big_endian>*>(relinfo->object);
   Address value = 0;
@@ -7212,7 +7215,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  if (r_type == elfcpp::R_POWERPC_GOT_TLSGD16
 	      || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_LO)
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 	      insn &= (1 << 26) - (1 << 16); // extract rt,ra from addi
 	      if (size == 32)
@@ -7229,7 +7232,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  if (r_type == elfcpp::R_POWERPC_GOT_TLSGD16
 	      || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_LO)
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 	      insn &= (1 << 26) - (1 << 21); // extract rt
 	      if (size == 32)
@@ -7242,7 +7245,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    }
 	  else
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = nop;
 	      elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	      r_type = elfcpp::R_POWERPC_NONE;
@@ -7267,7 +7270,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  if (r_type == elfcpp::R_POWERPC_GOT_TLSLD16
 	      || r_type == elfcpp::R_POWERPC_GOT_TLSLD16_LO)
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 	      insn &= (1 << 26) - (1 << 21); // extract rt
 	      if (size == 32)
@@ -7280,7 +7283,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    }
 	  else
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = nop;
 	      elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	      r_type = elfcpp::R_POWERPC_NONE;
@@ -7336,7 +7339,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  if (r_type == elfcpp::R_POWERPC_GOT_TPREL16
 	      || r_type == elfcpp::R_POWERPC_GOT_TPREL16_LO)
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 	      insn &= (1 << 26) - (1 << 21); // extract rt from ld
 	      if (size == 32)
@@ -7349,7 +7352,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    }
 	  else
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = nop;
 	      elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	      r_type = elfcpp::R_POWERPC_NONE;
@@ -7381,7 +7384,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      Insn insn = addi_3_3;
 	      elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	      r_type = elfcpp::R_POWERPC_TPREL16_LO;
-	      view += 2 * big_endian;
+	      view += d_offset;
 	      value = psymval->value(object, rela.get_r_addend());
 	    }
 	  this->skip_next_tls_get_addr_call();
@@ -7401,7 +7404,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	  this->skip_next_tls_get_addr_call();
 	  r_type = elfcpp::R_POWERPC_TPREL16_LO;
-	  view += 2 * big_endian;
+	  view += d_offset;
 	  value = dtp_offset;
 	}
     }
@@ -7419,7 +7422,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  gold_assert(insn != 0);
 	  elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	  r_type = elfcpp::R_POWERPC_TPREL16_LO;
-	  view += 2 * big_endian;
+	  view += d_offset;
 	  value = psymval->value(object, rela.get_r_addend());
 	}
     }
@@ -7612,7 +7615,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	case elfcpp::R_PPC64_TOC16_HA:
 	  if (parameters->options().toc_optimize())
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 	      if ((insn & ((0x3f << 26) | 0x1f << 16))
 		  != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */)
@@ -7637,7 +7640,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	case elfcpp::R_PPC64_TOC16_LO_DS:
 	  if (parameters->options().toc_optimize())
 	    {
-	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+	      Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
 	      if (!ok_lo_toc_insn(insn))
 		gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
@@ -7728,7 +7731,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		  && prev_rela.get_r_offset() + 4 == rela.get_r_offset()
 		  && prev_rela.get_r_addend() + 4 == rela.get_r_addend())
 		{
-		  Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+		  Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
 		  Insn insn1 = elfcpp::Swap<32, big_endian>::readval(iview - 1);
 		  Insn insn2 = elfcpp::Swap<32, big_endian>::readval(iview);
 
@@ -7846,7 +7849,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       break;
     }
 
-  Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
+  Insn* iview = reinterpret_cast<Insn*>(view - d_offset);
   Insn insn = 0;
 
   if (overflow == Reloc::CHECK_LOW_INSN
@@ -8283,6 +8286,8 @@ Target_powerpc<size, big_endian>::relocate_relocs(
     Reltype_write;
   const int reloc_size
     = Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+  // Offset from start of insn to d-field reloc.
+  const int d_offset = big_endian ? 2 : 0;
 
   Powerpc_relobj<size, big_endian>* const object
     = static_cast<Powerpc_relobj<size, big_endian>*>(relinfo->object);
@@ -8416,12 +8421,12 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 	  else if (r_type == elfcpp::R_POWERPC_REL16_HA)
 	    {
 	      r_type = elfcpp::R_POWERPC_ADDR16_HA;
-	      addend -= 2 * big_endian;
+	      addend -= d_offset;
 	    }
 	  else if (r_type == elfcpp::R_POWERPC_REL16_LO)
 	    {
 	      r_type = elfcpp::R_POWERPC_ADDR16_LO;
-	      addend -= 2 * big_endian + 4;
+	      addend -= d_offset + 4;
 	    }
 	}
       else
@@ -8450,7 +8455,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 		  else
 		    {
 		      r_type = elfcpp::R_POWERPC_NONE;
-		      offset -= 2 * big_endian;
+		      offset -= d_offset;
 		    }
 		  break;
 		default:
@@ -8480,7 +8485,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 		  else
 		    {
 		      r_type = elfcpp::R_POWERPC_NONE;
-		      offset -= 2 * big_endian;
+		      offset -= d_offset;
 		    }
 		}
 	    }
@@ -8499,7 +8504,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 		  else
 		    {
 		      r_type = elfcpp::R_POWERPC_NONE;
-		      offset -= 2 * big_endian;
+		      offset -= d_offset;
 		    }
 		}
 	    }
@@ -8517,7 +8522,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 		  break;
 		case tls::TLSOPT_TO_LE:
 		  r_type = elfcpp::R_POWERPC_TPREL16_LO;
-		  offset += 2 * big_endian;
+		  offset += d_offset;
 		  zap_next = true;
 		  break;
 		default:
@@ -8538,7 +8543,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 		  r_sym = os->symtab_index();
 		  addend = dtp_offset;
 		  r_type = elfcpp::R_POWERPC_TPREL16_LO;
-		  offset += 2 * big_endian;
+		  offset += d_offset;
 		  zap_next = true;
 		}
 	    }
@@ -8549,7 +8554,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 	      if (this->optimize_tls_ie(final) == tls::TLSOPT_TO_LE)
 		{
 		  r_type = elfcpp::R_POWERPC_TPREL16_LO;
-		  offset += 2 * big_endian;
+		  offset += d_offset;
 		}
 	    }
 	}

@@ -1,5 +1,11 @@
 2015-12-09  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::Relocate::relocate): New constant
+	d_offset.  Use throughout.
+	(Target_powerpc::relocate_relocs): Likewise.
+
+2015-12-09  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Edit ELFv2
 	entry code.
 	(Target_powerpc::relocate_relocs): Edit relocs to suit.
