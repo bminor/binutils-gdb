@@ -255,6 +255,8 @@ static initializer cpu_flag_init[] =
     "CpuCLZERO" },
   { "CPU_MWAITX_FLAGS",
     "CpuMWAITX" },
+  { "CPU_OSPKE_FLAGS",
+    "CpuOSPKE" },
 };
 
 static initializer operand_type_init[] =
@@ -461,6 +463,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuAVX512VBMI),
   BITFIELD (CpuMWAITX),
   BITFIELD (CpuCLZERO),
+  BITFIELD (CpuOSPKE),
   BITFIELD (CpuAMD64),
   BITFIELD (CpuIntel64),
 #ifdef CpuUnused

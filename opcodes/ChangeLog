@@ -1,3 +1,18 @@
+2015-12-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (MOD_0F01_REG_5): New.
+	(RM_0F01_REG_5): Likewise.
+	(reg_table): Use MOD_0F01_REG_5.
+	(mod_table): Add MOD_0F01_REG_5.
+	(rm_table): Add RM_0F01_REG_5.
+	* i386-gen.c (cpu_flag_init): Add CPU_OSPKE_FLAGS.
+	(cpu_flags): Add CpuOSPKE.
+	* i386-opc.h (CpuOSPKE): New.
+	(i386_cpu_flags): Add cpuospke.
+	* i386-opc.tbl: Add rdpkru and wrpkru instructions.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2015-12-08  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_regs): Add spsr_el12, elr_el12,
