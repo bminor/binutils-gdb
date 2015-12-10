@@ -1,5 +1,10 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* config/tc-aarch64.c (parse_sys_ins_reg): Add check of
+	architectural support for system register.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* doc/c-aarch64.texi (AArch64 Extensions): Update entry for crc.
 
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
