@@ -7847,10 +7847,10 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		  return TRUE;
 		}
 
-	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2))
+	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
 		{
-		  /* Check if on thumb2 it can be done with a mov.w or mvn.w
-		     instruction.  */
+		  /* Check if on thumb2 it can be done with a mov.w, mvn or
+		     movw instruction.  */
 		  unsigned int newimm;
 		  bfd_boolean isNegated;
 
@@ -7864,19 +7864,22 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 			isNegated = TRUE;
 		    }
 
+		  /* The number can be loaded with a mov.w or mvn
+		     instruction.  */
 		  if (newimm != (unsigned int) FAIL)
 		    {
-		      inst.instruction = (0xf04f0000
+		      inst.instruction = (0xf04f0000  /*  MOV.W.  */
 					  | (inst.operands[i].reg << 8));
+		      /* Change to MOVN.  */
 		      inst.instruction |= (isNegated ? 0x200000 : 0);
 		      inst.instruction |= (newimm & 0x800) << 15;
 		      inst.instruction |= (newimm & 0x700) << 4;
 		      inst.instruction |= (newimm & 0x0ff);
 		      return TRUE;
 		    }
+		  /* The number can be loaded with a movw instruction.  */
 		  else if ((v & ~0xFFFF) == 0)
 		    {
-		      /* The number can be loaded with a mov.w instruction.  */
 		      int imm = v & 0xFFFF;
 
 		      inst.instruction = 0xf2400000;  /* MOVW.  */
@@ -17535,7 +17538,7 @@ handle_it_state (void)
 	  else
 	    {
 	      if ((implicit_it_mode & IMPLICIT_IT_MODE_THUMB)
-		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2))
+		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
 		{
 		  /* Automatically generate the IT instruction.  */
 		  new_automatic_it_block (inst.cond);
@@ -17767,6 +17770,22 @@ in_it_block (void)
   return now_it.state != OUTSIDE_IT_BLOCK;
 }
 
+/* Given an OPCODE that is valid in at least one architecture that is not a
+   superset of ARMv6t2, returns whether it only has wide encoding(s).  */
+
+static bfd_boolean
+non_v6t2_wide_only_insn (const struct asm_opcode *opcode)
+{
+  /* Thumb-1 wide instruction.  */
+  if (opcode->tencode == do_t_blx
+      || opcode->tencode == do_t_branch23
+      || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_msr)
+      || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier))
+    return TRUE;
+
+  return FALSE;
+}
+
 void
 md_assemble (char *str)
 {
@@ -17826,24 +17845,24 @@ md_assemble (char *str)
 	  return;
 	}
 
-      if (!ARM_CPU_HAS_FEATURE (variant, arm_ext_v6t2))
+      /* Two things are addressed here:
+	 1) Implicit require narrow instructions on Thumb-1.
+	    This avoids relaxation accidentally introducing Thumb-2
+	    instructions.
+	 2) Reject wide instructions in non Thumb-2 cores.
+
+	 Only instructions with narrow and wide variants need to be handled
+	 but selecting all non wide-only instructions is easier.  */
+      if (!ARM_CPU_HAS_FEATURE (variant, arm_ext_v6t2)
+	  && !non_v6t2_wide_only_insn (opcode))
 	{
-	  if (opcode->tencode != do_t_blx && opcode->tencode != do_t_branch23
-	      && !(ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr)
-		   || ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_barrier)))
+	  if (inst.size_req == 0)
+	    inst.size_req = 2;
+	  else if (inst.size_req == 4)
 	    {
-	      /* Two things are addressed here.
-		 1) Implicit require narrow instructions on Thumb-1.
-		    This avoids relaxation accidentally introducing Thumb-2
-		     instructions.
-		 2) Reject wide instructions in non Thumb-2 cores.  */
-	      if (inst.size_req == 0)
-		inst.size_req = 2;
-	      else if (inst.size_req == 4)
-		{
-		  as_bad (_("selected processor does not support `%s' in Thumb-2 mode"), str);
-		  return;
-		}
+	      as_bad (_("selected processor does not support `%s' in Thumb-2 "
+			"mode"), str);
+	      return;
 	    }
 	}
 
@@ -17878,13 +17897,10 @@ md_assemble (char *str)
       ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 			      *opcode->tvariant);
       /* Many Thumb-2 instructions also have Thumb-1 variants, so explicitly
-	 set those bits when Thumb-2 32-bit instructions are seen.  ie.
-	 anything other than bl/blx and v6-M instructions.
-	 The impact of relaxable instructions will be considered later after we
-	 finish all relaxation.  */
-      if ((inst.size == 4 && (inst.instruction & 0xf800e800) != 0xf000e800)
-	  && !(ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_msr)
-	       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier)))
+	 set those bits when Thumb-2 32-bit instructions are seen.  The impact
+	 of relaxable instructions will be considered later after we finish all
+	 relaxation.  */
+      if (inst.size == 4 && !non_v6t2_wide_only_insn (opcode))
 	ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 				arm_ext_v6t2);
 
@@ -22852,7 +22868,7 @@ md_apply_fix (fixS *	fixP,
 
       if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
 	{
-	  if (!(ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2)))
+	  if (!(ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)))
 	    as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 	  else if ((value & ~0x1ffffff)
 		   && ((value & ~0x1ffffff) != ~0x1ffffff))
