@@ -1,5 +1,10 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64.h (AARCH64_FEATURE_RAS): New.
+	(AARCH64_ARCH_V8_2): Add AARCH64_FEATURE_RAS.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64.h (AARCH64_FEATURE_F16): Fix clash with
 	AARCH64_FEATURE_V8_1.
 	(AARCH64_ARCH_V8_1): Add AARCH64_FEATURE_CRC.

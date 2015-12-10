@@ -2,6 +2,14 @@
 
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
+	* aarch64-tbl.h (aarch64_feature_ras): New.
+	(RAS): New.
+	(aarch64_opcode_table): Add "esb".
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
 	* aarch64-opc-2.c: Regenerate.
 	* aarch64-tbl.h (QL_FIX2FP_H, QL_FP2FIX_H): New.
 	(QL_INT2FP_H, QL_FP2INT_H): New.

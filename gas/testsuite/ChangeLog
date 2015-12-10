@@ -1,5 +1,11 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* gas/aarch64/system-2.d: New.
+	* gas/aarch64/system-2.s: New.
+	* gas/aarch64/system.d: Adjust expected output for HINT 16.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* gas/aarch64/float-fp16.d: New.
 	* gas/aarch64/float-fp16.s: New.
 
