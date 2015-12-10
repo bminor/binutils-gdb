@@ -1,5 +1,9 @@
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64.h (aarch64_sys_ins_reg_supported_p): Declare.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64.h (aarch64_sys_ins_reg): Replace has_xt with flags.
 	(aarch64_sys_ins_reg_has_xt): Declare.
 

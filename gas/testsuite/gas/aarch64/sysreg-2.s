@@ -30,3 +30,9 @@
 	rw_sys_reg sys_reg=vsesr_el2 xreg=x5 r=1 w=0
 	rw_sys_reg sys_reg=disr_el1 xreg=x5 r=1 w=1
 	rw_sys_reg sys_reg=vdisr_el2 xreg=x5 r=1 w=0
+
+	/* DC CVAP.  */
+
+	dc cvac, x0
+	dc cvau, x1
+	dc cvap, x2

@@ -3687,6 +3687,10 @@ parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
   if (!o)
     return NULL;
 
+  if (!aarch64_sys_ins_reg_supported_p (cpu_variant, o))
+    as_bad (_("selected processor does not support system register "
+	      "name '%s'"), buf);
+
   *str = q;
   return o;
 }

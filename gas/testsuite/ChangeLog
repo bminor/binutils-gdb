@@ -1,5 +1,10 @@
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* gas/aarch64/sysreg-2.d: Add tests for dc instruction.
+	* gas/aarch64/sysreg-2.s: Add uses of dc instruction.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* gas/aarch64/uao-directive.d: New.
 	* gas/aarch64/uao.d: New.
 	* gas/aarch64/uao.s: New.

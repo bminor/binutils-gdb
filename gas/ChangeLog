@@ -1,3 +1,8 @@
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (parse_sys_ins_reg): Add check of
+	architectural support for system register.
+
 2015-12-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* doc/c-sparc.texi (Sparc-Regs): Document the %dN and %qN notation
