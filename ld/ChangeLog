@@ -1,3 +1,10 @@
+2015-12-10  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	PR ld/18199
+	* plugin.c (plugin_get_ir_dummy_bfd): Use srctemplate as the
+	template when calling bfd_create if it does not use the BFD
+	plugin target vector.
+
 2015-12-02  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac (--enable-initfini-array): Remove run test.  Default
