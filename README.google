@@ -60,3 +60,11 @@ they are an ongoing maintenance burden.
 +	that var-cmd.dwo isn't clobbered.
 +
 +	* testsuite/boards/fission.exp: Add blaze support.
+--- README.google	2015-09-05 15:16:13.000000000 -0700
++++ README.google	2015-09-05 15:19:05.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	* dwarf2read.c (use_index_sections): New static global.
++	(read_index_from_section): Check it.
++	(_initialize_dwarf2_read): New option "use-index-sections".

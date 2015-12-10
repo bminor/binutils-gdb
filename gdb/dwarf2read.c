@@ -93,6 +93,11 @@ static int check_physname = 0;
 /* When non-zero, do not reject deprecated .gdb_index sections.  */
 static int use_deprecated_index_sections = 0;
 
+/* GOOGLE LOCAL
+   When non-zero, use the .gdb_index section if present.
+   This is an escape-hatch in case problems are found with the index.  */
+static int use_index_sections = 1;
+
 static const struct objfile_data *dwarf2_objfile_data_key;
 
 /* The "aclass" indices for various kinds of computed DWARF symbols.  */
@@ -3053,6 +3058,9 @@ read_index_from_section (struct objfile *objfile,
   offset_type version;
   offset_type *metadata;
   int i;
+
+  if (!use_index_sections) /* GOOGLE LOCAL */
+    return 0;
 
   if (dwarf2_section_empty_p (section))
     return 0;
@@ -23483,6 +23491,19 @@ Warning: This option must be enabled before gdb reads the file."),
 			   NULL,
 			   NULL,
 			   &setlist, &showlist);
+
+  /* GOOGLE LOCAL: escape hatch in case an index is bad.  */
+  add_setshow_boolean_cmd ("use-index-sections",
+			   no_class, &use_index_sections, _("\
+Set whether to use gdb_index sections."), _("\
+Show whether to use gdb_index sections."), _("\
+When disabled .gdb_index sections are not used.\n\
+This option exists as an escape hatch in case of a bad index.\n\
+Warning: This option must be disabled before gdb reads the file."),
+			   NULL,
+			   NULL,
+			   &setlist, &showlist);
+  /* END GOOGLE LOCAL */
 
   c = add_cmd ("gdb-index", class_files, save_gdb_index_command,
 	       _("\
