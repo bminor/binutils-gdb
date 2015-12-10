@@ -46,6 +46,8 @@ array_func ()
       un_initialized_array[i] = extern_array[i] + 8;
       local_array[i] = extern_array[i] + 12;
     }
+  /* Reference static_array so that clang doesn't discard it.  */
+  (void) static_array[0];
   terminal_func ();
 }
 

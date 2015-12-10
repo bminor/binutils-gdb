@@ -497,3 +497,10 @@ they are an ongoing maintenance burden.
 +	(canonicalize_source_path): New function.
 +	(_initialize_source): New parameter "canonicalize-source-paths".
 +	* source.h (canonicalize_source_path): Declare.
+--- README.google	2015-09-15 16:46:29.000000000 -0700
++++ README.google	2015-09-16 14:07:50.000000000 -0700
++
++2015-09-15  Doug Evans  <dje@google.com>
++
++	testsuite/
++	* gdb.base/gcore.c (array_func): Add reference to static_array.
