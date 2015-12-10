@@ -1,0 +1,16 @@
+Remember standard operating procedure: Patches go into the FSF tree
+*first*, when possible.  At the very least non-Google specific patches
+should be submitted to the FSF first.  If you need to timeout on waiting
+for FSF approval that's fine.  When the patch goes in upstream, then
+delete its entry here and copy over the entry from the appropriate
+ChangeLog(s).  The goal here is to minimize unnecessary local patches,
+they are an ongoing maintenance burden.
+
+2015-09-05  Doug Evans  <dje@google.com>
+
+	N.B. No further README.google entries are required for google.[ch].
+	You can still add them if they make sense of course.
+	This one exists because of the change to Makefile.in.
+	* Makefile.in: Add google.c.
+	* google.c: New file.
+	* google.h: New file.

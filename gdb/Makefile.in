@@ -847,6 +847,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	findcmd.c findvar.c frame.c frame-base.c frame-unwind.c \
 	gdbarch.c arch-utils.c gdb_bfd.c gdb_obstack.c \
 	gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
+	google.c \
 	go-exp.y go-lang.c go-typeprint.c go-valprint.c \
 	inf-loop.c \
 	infcall.c \
@@ -912,6 +913,7 @@ i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
 ia64-tdep.h ada-lang.h varobj.h varobj-iter.h frv-tdep.h \
 nto-tdep.h serial.h \
 c-lang.h d-lang.h go-lang.h frame.h event-loop.h block.h cli/cli-setshow.h \
+google.h \
 cli/cli-decode.h cli/cli-cmds.h cli/cli-utils.h \
 cli/cli-script.h macrotab.h symtab.h common/version.h \
 compile/compile.h gnulib/import/string.in.h gnulib/import/str-two-way.h \
@@ -1055,6 +1057,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	ada-tasks.o ada-varobj.o c-varobj.o \
 	ui-out.o cli-out.o \
 	varobj.o vec.o \
+	google.o \
 	go-lang.o go-valprint.o go-typeprint.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o jv-varobj.o \
 	m2-lang.o opencl-lang.o p-lang.o p-typeprint.o p-valprint.o \
