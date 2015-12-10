@@ -11894,7 +11894,6 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
   int found_base;
   unsigned int dummy;
   const gdb_byte *buffer;
-  CORE_ADDR marker;
   int low_set;
   CORE_ADDR low = 0;
   CORE_ADDR high = 0;
@@ -11912,18 +11911,6 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
       return 0;
     }
   buffer = dwarf2_per_objfile->ranges.buffer + offset;
-
-  /* Read in the largest possible address.  */
-  marker = read_address (obfd, buffer, cu, &dummy);
-  if ((marker & mask) == mask)
-    {
-      /* If we found the largest possible address, then
-	 read the base address.  */
-      base = read_address (obfd, buffer + addr_size, cu, &dummy);
-      buffer += 2 * addr_size;
-      offset += 2 * addr_size;
-      found_base = 1;
-    }
 
   low_set = 0;
 
@@ -11949,9 +11936,9 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 	 the base address.  Check for a base address here.  */
       if ((range_beginning & mask) == mask)
 	{
-	  /* If we found the largest possible address, then
-	     read the base address.  */
-	  base = read_address (obfd, buffer + addr_size, cu, &dummy);
+	  /* If we found the largest possible address, then we already
+	     have the base address in range_end.  */
+	  base = range_end;
 	  found_base = 1;
 	  continue;
 	}

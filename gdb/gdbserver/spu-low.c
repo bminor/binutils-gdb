@@ -653,7 +653,7 @@ spu_sw_breakpoint_from_kind (int kind, int *size)
 
 static struct target_ops spu_target_ops = {
   spu_create_inferior,
-  NULL,  /* arch_setup */
+  NULL,  /* post_create_inferior */
   spu_attach,
   spu_kill,
   spu_detach,

@@ -181,8 +181,8 @@ sim_open (SIM_OPEN_KIND kind,
      Note - these values match the memory regions in the libgloss/msp430/msp430[xl]-sim.ld scripts.  */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x2, 1) == 0)
     sim_do_commandf (sd, "memory-region 0,0x20"); /* Needed by the GDB testsuite.  */
-  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x200, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0x200,0xfd00");  /* RAM and/or ROM */
+  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x500, 1) == 0)
+    sim_do_commandf (sd, "memory-region 0x500,0xfa00");  /* RAM and/or ROM */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0xfffe, 1) == 0)
     sim_do_commandf (sd, "memory-region 0xffc0,0x40"); /* VECTORS.  */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x10000, 1) == 0)
@@ -404,10 +404,12 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
       if (addr == 0x5dd)
 	rv = 2;
 #endif
-      if (addr >= 0x130 && addr <= 0x15B)
+      if ((addr >= 0x130 && addr <= 0x15B)
+	  || (addr >= 0x4C0 && addr <= 0x4EB))
 	{
 	  switch (addr)
 	    {
+	    case 0x4CA:
 	    case 0x13A:
 	      switch (HWMULT (sd, hwmult_type))
 		{
@@ -422,6 +424,7 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 		}
 	      break;
 
+	    case 0x4CC:
 	    case 0x13C:
 	      switch (HWMULT (sd, hwmult_type))
 		{
@@ -437,6 +440,7 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 		}
 	      break;
 
+	    case 0x4CE:
 	    case 0x13E:
 	      switch (HWMULT (sd, hwmult_type))
 		{
@@ -455,18 +459,22 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 		}
 	      break;
 
+	    case 0x4E4:
 	    case 0x154:
 	      rv = zero_ext (HWMULT (sd, hw32mult_result), 16);
 	      break;
 
+	    case 0x4E6:
 	    case 0x156:
 	      rv = zero_ext (HWMULT (sd, hw32mult_result) >> 16, 16);
 	      break;
 
+	    case 0x4E8:
 	    case 0x158:
 	      rv = zero_ext (HWMULT (sd, hw32mult_result) >> 32, 16);
 	      break;
 
+	    case 0x4EA:
 	    case 0x15A:
 	      switch (HWMULT (sd, hw32mult_type))
 		{
@@ -581,7 +589,8 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
       if (addr == 0x5ce)
 	putchar (val);
 #endif
-      if (addr >= 0x130 && addr <= 0x15B)
+      if ((addr >= 0x130 && addr <= 0x15B)
+	  || (addr >= 0x4C0 && addr <= 0x4EB))
 	{
 	  signed int a,b;
 
@@ -590,12 +599,33 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 
 	  switch (addr)
 	    {
-	    case 0x130: HWMULT (sd, hwmult_op1) = val; HWMULT (sd, hwmult_type) = UNSIGN_32; break;
-	    case 0x132: HWMULT (sd, hwmult_op1) = val; HWMULT (sd, hwmult_type) = SIGN_32; break;
-	    case 0x134: HWMULT (sd, hwmult_op1) = val; HWMULT (sd, hwmult_type) = UNSIGN_MAC_32; break;
-	    case 0x136: HWMULT (sd, hwmult_op1) = val; HWMULT (sd, hwmult_type) = SIGN_MAC_32; break;
+	    case 0x4C0:
+	    case 0x130:
+	      HWMULT (sd, hwmult_op1) = val;
+	      HWMULT (sd, hwmult_type) = UNSIGN_32;
+	      break;
 
-	    case 0x138: HWMULT (sd, hwmult_op2) = val;
+	    case 0x4C2:
+	    case 0x132:
+	      HWMULT (sd, hwmult_op1) = val;
+	      HWMULT (sd, hwmult_type) = SIGN_32;
+	      break;
+
+	    case 0x4C4:
+	    case 0x134:
+	      HWMULT (sd, hwmult_op1) = val;
+	      HWMULT (sd, hwmult_type) = UNSIGN_MAC_32;
+	      break;
+
+	    case 0x4C6:
+	    case 0x136:
+	      HWMULT (sd, hwmult_op1) = val;
+	      HWMULT (sd, hwmult_type) = SIGN_MAC_32;
+	      break;
+
+	    case 0x4C8:
+	    case 0x138:
+	      HWMULT (sd, hwmult_op2) = val;
 	      switch (HWMULT (sd, hwmult_type))
 		{
 		case UNSIGN_32:
@@ -630,7 +660,8 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 		}
 	      break;
 
-	    case 0x13a:
+	    case 0x4CA:
+	    case 0x13A:
 	      /* Copy into LOW result...  */
 	      switch (HWMULT (sd, hwmult_type))
 		{
@@ -647,24 +678,34 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 		}
 	      break;
 		
+	    case 0x4D0:
 	    case 0x140:
 	      HWMULT (sd, hw32mult_op1) = val;
 	      HWMULT (sd, hw32mult_type) = UNSIGN_64;
 	      break;
+
+	    case 0x4D2:
 	    case 0x142:
 	      HWMULT (sd, hw32mult_op1) = (HWMULT (sd, hw32mult_op1) & 0xFFFF) | (val << 16);
 	      break;
+
+	    case 0x4D4:
 	    case 0x144:
 	      HWMULT (sd, hw32mult_op1) = val;
 	      HWMULT (sd, hw32mult_type) = SIGN_64;
 	      break;
+
+	    case 0x4D6:
 	    case 0x146:
 	      HWMULT (sd, hw32mult_op1) = (HWMULT (sd, hw32mult_op1) & 0xFFFF) | (val << 16);
 	      break;
+
+	    case 0x4E0:
 	    case 0x150:
 	      HWMULT (sd, hw32mult_op2) = val;
 	      break;
 
+	    case 0x4E2:
 	    case 0x152:
 	      HWMULT (sd, hw32mult_op2) = (HWMULT (sd, hw32mult_op2) & 0xFFFF) | (val << 16);
 	      switch (HWMULT (sd, hw32mult_type))
@@ -1115,6 +1156,7 @@ msp430_step_once (SIM_DESC sd)
       init_disassemble_info (&info, stderr, (fprintf_ftype) fprintf);
       info.private_data = sd;
       info.read_memory_func = msp430_dis_read;
+
       fprintf (stderr, "%#8x  ", opcode_pc);
       for (i = 0; i < opsize; i += 2)
 	fprintf (stderr, " %02x%02x", b[i+1], b[i]);

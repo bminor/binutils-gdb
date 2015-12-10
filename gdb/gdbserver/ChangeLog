@@ -1,3 +1,66 @@
+2015-12-07  Yao Qi  <yao.qi@linaro.org>
+
+	* configure.srv: Append arm.o to srv_tgtobj for
+	aarch64*-*-linux* target.
+	* linux-aarch32-low.c (arm_abi_breakpoint): New macro.  Moved
+	from linux-arm-low.c.
+	(arm_eabi_breakpoint, arm_breakpoint): Likewise.
+	(arm_breakpoint_len, thumb_breakpoint): Likewise.
+	(thumb_breakpoint_len, thumb2_breakpoint): Likewise.
+	(thumb2_breakpoint_len): Likewise.
+	(arm_is_thumb_mode, arm_breakpoint_at): Likewise.
+	(arm_breakpoint_kinds): Likewise.
+	(arm_breakpoint_kind_from_pc): Likewise.
+	(arm_sw_breakpoint_from_kind): Likewise.
+	(arm_breakpoint_kind_from_current_state): Likewise.
+	* linux-aarch32-low.h (arm_breakpoint_kind_from_pc): Declare.
+	(arm_sw_breakpoint_from_kind): Declare.
+	(arm_breakpoint_kind_from_current_state): Declare.
+	(arm_breakpoint_at): Declare.
+	* linux-aarch64-low.c (aarch64_sw_breakpoint_from_kind): Call
+	arm_sw_breakpoint_from_kind if process is 32-bit.
+	(aarch64_breakpoint_kind_from_pc): New function.
+	(aarch64_breakpoint_kind_from_current_state): New function.
+	(the_low_target): Initialize fields breakpoint_kind_from_pc
+	and breakpoint_kind_from_current_state.
+	* linux-arm-low.c (arm_breakpoint_kinds): Move to
+	linux-aarch32-low.c.
+	(arm_abi_breakpoint, arm_eabi_breakpoint): Likewise.
+	(arm_breakpoint, arm_breakpoint_len): Likewise.
+	(thumb_breakpoint, thumb_breakpoint_len): Likewise.
+	(thumb2_breakpoint, thumb2_breakpoint_len): Likewise.
+	(arm_is_thumb_mode): Likewise.
+	(arm_breakpoint_at): Likewise.
+	(arm_breakpoint_kind_from_pc): Likewise.
+	(arm_sw_breakpoint_from_kind): Likewise.
+	(arm_breakpoint_kind_from_current_state): Likewise.
+
+	Revert:
+	2015-08-04  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_supports_z_point_type): Return
+	0 for Z_PACKET_SW_BP if it may be used in multi-arch debugging.
+	* server.c (extended_protocol): Remove "static".
+	* server.h (extended_protocol): Declare it.
+
+2015-12-04  Josh Stone  <jistone@redhat.com>
+
+	* target.h (struct target_ops) <arch_setup>: Rename to ...
+	(struct target_ops) <post_create_inferior>: ... this.
+	(target_arch_setup): Rename to ...
+	(target_post_create_inferior): ... this, calling post_create_inferior.
+	* server.c (start_inferior): Update target_arch_setup calls to
+	target_post_create_inferior.
+	* linux-low.c (linux_low_ptrace_options): Forward declare.
+	(linux_arch_setup): Update its comment for general use.
+	(linux_post_create_inferior): New, run arch_setup and setup ptrace.
+	(struct linux_target_ops): Use linux_post_create_inferior.
+	* lynx-low.c (struct lynx_target_ops): Update arch_setup stub comment
+	to post_create_inferior.
+	* nto-low.c (struct nto_target_ops): Likewise.
+	* spu-low.c (struct spu_target_ops): Likewise.
+	* win32-low.c (struct win32_target_ops): Likewise.
+
 2015-12-03  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* linux-arm-low.c: Remove duplicate arch/arm.h include.

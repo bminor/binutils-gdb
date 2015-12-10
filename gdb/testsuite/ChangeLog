@@ -1,3 +1,52 @@
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/base.exp: Don't use nowarnings.
+	* gdb.multi/bkpt-multi-exec.exp: Don't use nowarnings.
+	* gdb.multi/hangout.c: Include stdio.h.
+	* gdb.multi/hello.c: Include stdlib.h.
+	* gdb.multi/multi-arch-exec.c: Include stdlib.h.
+	* gdb.multi/multi-arch-exec.exp: Don't use nowarnings.
+	* gdb.multi/multi-arch.exp: Don't use nowarnings.
+
+2015-12-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-ranges-base.c: New file.
+	* gdb.dwarf2/dw2-ranges-base.exp: New file.
+	* lib/dwarf.exp (namespace eval Dwarf): Add new variables to
+	support additional line table, and debug ranges generation.
+	(Dwarf::ranges): New function, generate .debug_ranges.
+	(Dwarf::lines): Support generating simple line table programs.
+	(Dwarf::assemble): Initialise new namespace variables.
+
+2015-12-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/async.exp (proc test_background): Add case for
+	asynchronous execution not supported.
+
+2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.mi/mi-var-display.exp: Add new checks for the zero-hexadecimal
+	  format and change test names to make them unique.
+
+2015-12-09  Ruslan Kabatsayev  <b7.10110111@gmail.com>
+	    Pedro Alves  <pedro@redhat.com>
+
+	PR gdb/18702
+	Add checking of floatformats setup on x86_64 hosts.
+	* gdb.arch/i386-float.S (main): Load bigval and smallval.
+	(smallval, bigval): New labels/constants.
+	* gdb.arch/i386-float.exp: Use with_test_prefix and test "info
+	float" after loading bigval and smallval.
+
+2015-12-07  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* gdb.ada/fun_overload_menu.exp: New testcase.
+	* gdb.ada/fun_overload_menu/foo.adb: New testcase.
+
+2015-12-04  Josh Stone  <jistone@redhat.com>
+
+	* gdb.base/catch-fork-static.exp: New.
+
 2015-12-03  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/sizeof.c: Don't include stdio.h and

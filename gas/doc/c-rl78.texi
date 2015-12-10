@@ -28,6 +28,9 @@
 @item relax
 Enable support for link-time relaxation.
 
+@item norelax
+Disable support for link-time relaxation (default).
+
 @item mg10
 Mark the generated binary as targeting the G10 variant of the RL78
 architecture.

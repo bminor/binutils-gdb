@@ -52,6 +52,7 @@ case "${target}" in
 			srv_regobj="${srv_regobj} arm-with-neon.o"
 			srv_tgtobj="linux-aarch64-low.o aarch64-linux-hw-point.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
+			srv_tgtobj="${srv_tgtobj} arm.o"
 			srv_tgtobj="$srv_tgtobj aarch64-linux.o"
 			srv_tgtobj="$srv_tgtobj aarch64-insn.o"
 			srv_tgtobj="${srv_tgtobj} $srv_linux_obj"

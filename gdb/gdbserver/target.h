@@ -75,8 +75,9 @@ struct target_ops
 
   int (*create_inferior) (char *program, char **args);
 
-  /* Architecture-specific setup.  */
-  void (*arch_setup) (void);
+  /* Do additional setup after a new process is created, including
+     exec-wrapper completion.  */
+  void (*post_create_inferior) (void);
 
   /* Attach to a running process.
 
@@ -475,11 +476,11 @@ void set_target_ops (struct target_ops *);
 #define create_inferior(program, args) \
   (*the_target->create_inferior) (program, args)
 
-#define target_arch_setup()			 \
-  do						 \
-    {						 \
-      if (the_target->arch_setup != NULL)	 \
-	(*the_target->arch_setup) ();		 \
+#define target_post_create_inferior()			 \
+  do							 \
+    {							 \
+      if (the_target->post_create_inferior != NULL)	 \
+	(*the_target->post_create_inferior) ();		 \
     } while (0)
 
 #define myattach(pid) \

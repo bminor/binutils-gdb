@@ -260,22 +260,6 @@ aarch64_supports_z_point_type (char z_type)
   switch (z_type)
     {
     case Z_PACKET_SW_BP:
-      {
-	if (!extended_protocol && is_64bit_tdesc ())
-	  {
-	    /* Only enable Z0 packet in non-multi-arch debugging.  If
-	       extended protocol is used, don't enable Z0 packet because
-	       GDBserver may attach to 32-bit process.  */
-	    return 1;
-	  }
-	else
-	  {
-	    /* Disable Z0 packet so that GDBserver doesn't have to handle
-	       different breakpoint instructions (aarch64, arm, thumb etc)
-	       in multi-arch debugging.  */
-	    return 0;
-	  }
-      }
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
@@ -2940,8 +2924,36 @@ aarch64_supports_range_stepping (void)
 static const gdb_byte *
 aarch64_sw_breakpoint_from_kind (int kind, int *size)
 {
-  *size = aarch64_breakpoint_len;
-  return aarch64_breakpoint;
+  if (is_64bit_tdesc ())
+    {
+      *size = aarch64_breakpoint_len;
+      return aarch64_breakpoint;
+    }
+  else
+    return arm_sw_breakpoint_from_kind (kind, size);
+}
+
+/* Implementation of linux_target_ops method "breakpoint_kind_from_pc".  */
+
+static int
+aarch64_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+{
+  if (is_64bit_tdesc ())
+    return aarch64_breakpoint_len;
+  else
+    return arm_breakpoint_kind_from_pc (pcptr);
+}
+
+/* Implementation of the linux_target_ops method
+   "breakpoint_kind_from_current_state".  */
+
+static int
+aarch64_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+{
+  if (is_64bit_tdesc ())
+    return aarch64_breakpoint_len;
+  else
+    return arm_breakpoint_kind_from_current_state (pcptr);
 }
 
 /* Support for hardware single step.  */
@@ -2961,7 +2973,7 @@ struct linux_target_ops the_low_target =
   NULL, /* fetch_register */
   aarch64_get_pc,
   aarch64_set_pc,
-  NULL, /* breakpoint_kind_from_pc */
+  aarch64_breakpoint_kind_from_pc,
   aarch64_sw_breakpoint_from_kind,
   NULL, /* breakpoint_reinsert_addr */
   0,    /* decr_pc_after_break */
@@ -2985,7 +2997,7 @@ struct linux_target_ops the_low_target =
   aarch64_emit_ops,
   aarch64_get_min_fast_tracepoint_insn_len,
   aarch64_supports_range_stepping,
-  NULL, /* breakpoint_kind_from_current_state */
+  aarch64_breakpoint_kind_from_current_state,
   aarch64_supports_hardware_single_step,
 };
 

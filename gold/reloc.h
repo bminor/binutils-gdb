@@ -296,6 +296,14 @@ class Relocatable_relocs
     return static_cast<Reloc_strategy>(this->reloc_strategies_[i]);
   }
 
+  // Set the strategy for reloc I.
+  void
+  set_strategy(unsigned int i, Reloc_strategy strategy)
+  {
+    gold_assert(i < this->reloc_strategies_.size());
+    this->reloc_strategies_[i] = strategy;
+  }
+
   // Return the number of relocations to create in the output file.
   size_t
   output_reloc_count() const

@@ -1,3 +1,47 @@
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/uao-directive.d: New.
+	* gas/aarch64/uao.d: New.
+	* gas/aarch64/uao.s: New.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/sysreg-2.d: Add tests for new registers.
+	* gas/aarch64/sysreg-2.s: Likewise.  Also replace some spaces with
+	tabs.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/system-2.d: New.
+	* gas/aarch64/system-2.s: New.
+	* gas/aarch64/system.d: Adjust expected output for HINT 16.
+
+2015-12-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run ospke and x86-64-ospke.
+	* gas/i386/ospke.d: New file.
+	* gas/i386/ospke.s: Likewise.
+	* gas/i386/x86-64-ospke.d: Likewise.
+
+2015-12-09  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/elf/file.d: Allow arbitrary entries at the beginning of
+	the symbol table.
+	* gas/elf/file-2.d: Likewise.
+
+2015-12-08  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/elf/bad-bss.d, gas/elf/bad-bss.err: New.
+	* gas/elf/bss.d, gas/elf/bss.s: New.
+	* gas/elf/elf.exp: Run new tests.
+
+2015-12-08  Jan Beulich  <jbeulich@suse.com>
+
+	* gas/elf/file-2.s, gas/elf/file-2.d: New.
+	* gas/elf/elf.exp: Run new test.
+	* gas/elf/file.d: Adjust expectations.
+	* gas/i386/ilp32/elf/file.d: Likewise.
+
 2015-12-04  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19276

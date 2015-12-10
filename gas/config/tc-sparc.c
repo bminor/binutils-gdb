@@ -2370,7 +2370,9 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		char format;
 
 		if (*s++ == '%'
-		    && ((format = *s) == 'f')
+		    && ((format = *s) == 'f'
+                        || format == 'd'
+                        || format == 'q')
 		    && ISDIGIT (*++s))
 		  {
 		    for (mask = 0; ISDIGIT (*s); ++s)
@@ -2381,19 +2383,23 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		    if ((*args == 'v'
 			 || *args == 'B'
 			 || *args == '5'
-			 || *args == 'H')
+			 || *args == 'H'
+			 || format == 'd')
 			&& (mask & 1))
 		      {
+                        /* register must be even numbered */
 			break;
-		      }		/* register must be even numbered */
+		      }
 
 		    if ((*args == 'V'
 			 || *args == 'R'
-			 || *args == 'J')
+			 || *args == 'J'
+			 || format == 'q')
 			&& (mask & 3))
 		      {
+                        /* register must be multiple of 4 */
 			break;
-		      }		/* register must be multiple of 4 */
+		      }
 
 		    if (mask >= 64)
 		      {

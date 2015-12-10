@@ -33,7 +33,7 @@ set exec2 "crashme"
 set srcfile2 ${exec2}.c
 set binfile2 [standard_output_file ${exec2}]
 
-set compile_options {debug nowarnings}
+set compile_options {debug}
 set dirname [relative_filename [pwd] [file dirname $binfile1]]
 lappend compile_options "additional_flags=-DBASEDIR=\"$dirname\""
 

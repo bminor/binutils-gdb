@@ -2944,6 +2944,8 @@ struct Relocate_info
   unsigned int reloc_shndx;
   // Section header of relocation section.
   const unsigned char* reloc_shdr;
+  // Info about how relocs should be handled
+  Relocatable_relocs* rr;
   // Section index of section being relocated.
   unsigned int data_shndx;
   // Section header of data section.

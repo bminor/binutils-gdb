@@ -54,13 +54,13 @@ if [istarget "s390*-*-*"] {
 
 set dirname [relative_filename [pwd] [file dirname $binfile2]]
 if { [prepare_for_testing ${testfile}.exp ${exec1} "${srcfile1}" \
-	  [list debug nowarnings \
+	  [list debug \
 	       additional_flags=${march1} \
 	       additional_flags=-DBASEDIR=\"$dirname\"]] } {
     return -1
 }
 
-set options [list debug nowarnings]
+set options [list debug]
 
 if { [istarget "aarch64*-*-*"] } {
     if {[info exists ARM_CC_FOR_TARGET]} {

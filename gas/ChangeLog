@@ -1,3 +1,73 @@
+2015-12-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* doc/c-sparc.texi (Sparc-Regs): Document the %dN and %qN notation
+	for floating-point registers.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* doc/c-aarch64.texi (AArch64 Extensions): Update entry for crc.
+
+2015-12-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-arc.c (md_parse_option): Return 1 in order to accept
+	dummy arguments.
+
+2015-12-09  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-sparc.c (sparc_ip): Support %dN and %qN notation for
+	double and quad-precision floating-point registers.
+
+2015-12-09  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (rx_relax_frag): Fix compile time warning.
+
+2015-12-08  Jan Beulich  <jbeulich@suse.com>
+
+	* read.c (in_bss): New.
+	(do_align): Use it to also warn for non-zero fill in .bss.
+	(do_org): Likewise.
+	(s_space): Likewise.
+	(s_fill): Error on bad use in .bss/.struct.
+	(float_cons): Likewise.
+	(emit_leb128_expr): Likewise.
+	(emit_expr_with_reloc): Defer handling use inside .struct. Also
+	error on non-zero item added to .bss.
+	(stringer_append_char): Error on non-zero character.
+
+2015-12-08  Jan Beulich  <jbeulich@suse.com>
+
+	* read.c (stringer): Move absolute section check up. Return
+	right away.
+
+2015-12-08  Jan Beulich  <jbeulich@suse.com>
+
+	* config/obj-elf.c (elf_file_symbol): Tighten condition for
+	moving BSF_FILE symbols.
+
+2015-12-08  DJ Delorie  <dj@redhat.com>
+
+	* config/rl78-parse.y: Make all branches relaxable via
+	rl78_linkrelax_branch().
+	* config/tc-rl78.c (rl78_linkrelax_branch): Mark all relaxable
+	branches with relocs.
+	(options): Add OPTION_NORELAX.
+	(md_longopts): Add -mnorelax.
+	(md_parse_option): Support OPTION_NORELAX.
+	(op_type_T): Add bh, sk, call, and br.
+	(rl78_opcode_type): Likewise.
+	(rl78_relax_frag): Fix not-relaxing logic.  Add sk.
+	(md_convert_frag): Fix relocation handling.
+	(tc_gen_reloc): Strip relax relocs when not linker relaxing.
+	(md_apply_fix): Defer overflow handling for anything that needs a
+	PLT, to the linker.
+	* config/tc-rl78.h (TC_FORCE_RELOCATION): Force all relocations to
+	the linker when linker relaxing.
+	* doc/c-rl78.texi (norelax): Add.
+
+2015-12-07  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_apply_fix): Localize variables.  Reduce casts.
+
 2015-12-04  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19276

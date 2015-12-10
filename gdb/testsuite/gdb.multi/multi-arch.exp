@@ -53,11 +53,11 @@ if [istarget "s390*-*-*"] {
 }
 
 if { [prepare_for_testing ${testfile}.exp ${exec1} "${srcfile1}" \
-	  [list debug nowarnings additional_flags=${march1}]] } {
+	  [list debug additional_flags=${march1}]] } {
     return -1
 }
 
-set options [list debug nowarnings]
+set options [list debug]
 
 if [istarget "aarch64*-*-*"] {
     if {[info exists ARM_CC_FOR_TARGET]} {

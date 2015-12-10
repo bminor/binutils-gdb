@@ -50,7 +50,7 @@ show_varobjdebug (struct ui_file *file, int from_tty,
 
 /* String representations of gdb's format codes.  */
 char *varobj_format_string[] =
-  { "natural", "binary", "decimal", "hexadecimal", "octal" };
+  { "natural", "binary", "decimal", "hexadecimal", "octal", "zero-hexadecimal" };
 
 /* True if we want to allow Python-based pretty-printing.  */
 static int pretty_printing = 0;
@@ -214,7 +214,7 @@ static struct varobj *varobj_add_child (struct varobj *var,
 /* Private data */
 
 /* Mappings of varobj_display_formats enums to gdb's format codes.  */
-static int format_code[] = { 0, 't', 'd', 'x', 'o' };
+static int format_code[] = { 0, 't', 'd', 'x', 'o', 'z' };
 
 /* Header of the list of root variable objects.  */
 static struct varobj_root *rootlist;
@@ -583,6 +583,7 @@ varobj_set_display_format (struct varobj *var,
     case FORMAT_DECIMAL:
     case FORMAT_HEXADECIMAL:
     case FORMAT_OCTAL:
+    case FORMAT_ZHEXADECIMAL:
       var->format = format;
       break;
 

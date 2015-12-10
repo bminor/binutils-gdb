@@ -1,3 +1,45 @@
+2015-12-09  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): New constant
+	d_offset.  Use throughout.
+	(Target_powerpc::relocate_relocs): Likewise.
+
+2015-12-09  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Edit ELFv2
+	entry code.
+	(Target_powerpc::relocate_relocs): Edit relocs to suit.
+
+2015-12-09  Alan Modra  <amodra@gmail.com>
+
+	* object.h (struct Relocate_info): Add "rr".
+	* reloc.h (Relocatable_relocs::set_strategy): New accessor.
+	* reloc.cc (Sized_relobj_file::do_relocate_sections): Init
+	relinfo.rr for relocate_section and relocate_relocs.
+	* powerpc.cc (relocate): Add rel_type and preloc parameters.
+	Delete rela and r_type params, instead recalculate these from
+	preloc.
+	(relocate_relocs): Delete Relocatable_relocs* param, instead
+	use relinfo->rr.
+	* aarch64.cc: Likewise.
+	* arm.cc: Likewise.
+	* i386.cc: Likewise.
+	* mips.cc: Likewise.
+	* s390.cc: Likewise.
+	* sparc.cc: Likewise.
+	* target.h: Likewise.
+	* tilegx.cc: Likewise.
+	* x86_64.cc: Likewise.
+	* testsuite/testfile.cc: Likewise.
+	* target-reloc.h (relocate_section): Adjust to suit.
+	(apply_relocation, relocate_relocs): Likewise.
+
+2015-12-07  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (add_2_2_12, ld_2_12, lis_2): Define.
+	(Target_powerpc::Scan::local, global): Handle R_PPC64_ENTRY.
+	(Target_powerpc::Relocate::relocate): Edit code at R_PPC64_ENTRY.
+
 2015-12-03  Vladimir Radosavljevic <Vladimir.Radosavljevic@imgtec.com>
 
 	* object.cc (Sized_relobj::do_for_all_local_got_entries): Use

@@ -1,3 +1,97 @@
+2015-12-10  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* breakpoint.c (remove_thread_event_breakpoints): Remove.
+	* breakpoint.h (remove_thread_event_breakpoints): Remove
+	declaration.
+	* linux-nat.c (in_pid_list_p): Remove.
+	(lin_lwp_attach_lwp): Remove.
+	* linux-nat.h (lin_lwp_attach_lwp): Remove declaration.
+	* linux-thread-db.c (thread_db_use_events): Remove.
+	(struct thread_db_info) <td_create_bp_addr>: Remove.
+	<td_death_bp_addr>: Likewise.
+	<td_ta_event_addr_p>: Likewise.
+	<td_ta_set_event_p>: Likewise.
+	<td_ta_clear_event_p>: Likewise.
+	<td_ta_event_getmsg_p>: Likewise.
+	<td_thr_event_enable_p>: Likewise.
+	(attach_thread): Likewise.
+	(detach_thread): Likewise.
+	(have_threads_callback): Likewise.
+	(have_threads): Likewise.
+	(enable_thread_event): Likewise.
+	(enable_thread_event_reporting): Likewise.
+	(try_thread_db_load_1): Remove td_ta_event_addr, td_ta_set_event,
+	td_ta_clear_event, td_ta_event_getmsg, td_thr_event_enable
+	initializations.
+	(try_thread_db_load_1): Remove enable_thread_event_reporting call.
+	(disable_thread_event_reporting): Remove.
+	(record_thread): Adapt to thread_db_use_event removal.
+	(detach_thread): Remove.
+	(thread_db_detach): Adapt to thread_db_use_event removal.
+	(check_event): Remove.
+	(thread_db_wait): Adapt to thread events support removal.
+	(thread_db_mourn_inferior): Likewise.
+	(find_new_threads_callback): Likewise.
+	(find_new_threads_once): Likewise.
+	(thread_db_update_thread_list): Likewise.
+
+2015-12-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2read.c (dwarf2_ranges_read): Unify and fix base address
+	reading code.
+
+2015-12-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Perform a pointer
+	to address conversion for DWARF_VALUE_MEMORY.
+
+2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb/mi/mi-cmd-var.c (mi_parse_format): Handle new "zero-hexadecimal"
+	format.
+	* gdb/varobj.c (varobj_format_string): Add "zero-hexadecimal" entry.
+	(format_code): Add 'z' entry.
+	(varobj_set_display_format): Handle FORMAT_ZHEXADECIMAL.
+	* gdb/varobj.h (varobj_display_formats) <FORMAT_ZHEXADECIMAL>: New enum
+	field.
+	* NEWS: Add new note to MI changes citing the new zero-hexadecimal
+	format for -var-set-format.
+
+2015-12-09  Ruslan Kabatsayev  <b7.10110111@gmail.com>  (tiny patch)
+
+	PR gdb/18702
+	* configure.host: Fix detection of x86_64 host when setting
+	floatformats.
+
+2015-12-08  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* NEWS: Announce this enhancement and the corresponding new
+	option.
+
+2015-12-07  Pierre-Marie de Rodat  <derodat@adacore.com>
+
+	* ada-lang.c (print_signatures): New.
+	(ada_print_symbol_signature): New.
+	(user_select_syms): Add signatures to the output of candidate
+	symbols using ada_print_symbol_signature.
+	(_initialize_ada_language): Add a "set/show ada
+	print-signatures" boolean option.
+
+2015-12-07  Andreas Arnez <arnez@linux.vnet.ibm.com>
+
+	* MAINTAINERS (Write After Approval): Add Andreas Arnez.
+
+2015-12-06  Mike Stump <mikestump@comcast.net>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (TAGS): Replace i386-nat.h by x86-nat.h.
+	* x86-nat.c: Replace remaining references to i386-nat
+	by reference to x86-nat instead.
+
+2015-12-05  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.10.1 released.
+
 2015-12-01  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* remote.c (remote_parse_stop_reply): Avoid GCC 4.1 "operation

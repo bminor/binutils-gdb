@@ -1,3 +1,58 @@
+2015-12-09  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* elf32-nios2.c (nios2_elf32_finish_dynamic_sections): Correct
+	%hiadj/%lo computations for _GLOBAL_OFFSET_TABLE_ in initial
+	PLT entries.  Assert alignment requirements.
+
+2015-12-08  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (rl78_offset_for_reloc): Add more relocs.
+	(rl78_elf_relax_section): Add bc/bz/bnc/bnz/bh/bnh.  Fix reloc
+	choices.
+
+	* elf32-rx.c (rx_elf_object_p): Ignore empty and nobits sections.
+
+2015-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rx.c (elf32_rx_relax_delete_bytes): Add extra parameter -
+	the start of the relocs for the section.  Delete code to load in
+	the relocs.
+	(elf32_rx_relax_section): Do not free the loaded relocs.
+
+2015-12-07  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Don't error on local ifunc
+	plt call.  Wrap long lines.
+	(ppc_elf_relocate_section): Wrap long lines.
+	* elf64-ppc.c (ppc64_elf_check_relocs): Don't error on local ifunc
+	plt calls.  Move __tls_get_addr checks later.  Don't create plt
+	for addr14/addr24 relocs.
+	(ppc64_elf_gc_sweep_hook): Adjust to suit check_relocs changes.
+	(ppc64_elf_relocate_section): Correct local ifunc handling for
+	PLT64, PLT32 and PLT16 relocs.
+
+2015-12-07  Alan Modra  <amodra@gmail.com>
+
+	PR19323
+	* elfcode.h (elf_object_p): Check for ridiculous e_shnum and
+	e_phnum values.
+
+2015-12-07  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c (BFD_RELOC_PPC64_ENTRY): New.
+	* elf64-ppc.c (reloc_howto_type ppc64_elf_howto_raw): Add
+	entry for R_PPC64_ENTRY.
+	(LD_R2_0R12, ADD_R2_R2_R12, LIS_R2, ADDIS_R2_R12): Define.
+	(ppc64_elf_reloc_type_lookup): Handle R_PPC64_ENTRY.
+	(ppc64_elf_relocate_section): Edit code at R_PPC64_ENTTY.  Use
+	new insn defines.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2015-12-07  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config.bfd: Mark sh5*-*-* and sh64*-*-* as obsolete.
+
 2015-12-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_convert_load): Skip if addend isn't 0.

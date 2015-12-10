@@ -6459,7 +6459,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_def_cfa_expression:
 	      ul = LEB ();
-	      if (start >= block_end || start + ul > block_end || start + ul < start)
+	      if (start >= block_end || ul > (unsigned long) (block_end - start))
 		{
 		  printf (_("  DW_CFA_def_cfa_expression: <corrupt len %lu>\n"), ul);
 		  break;

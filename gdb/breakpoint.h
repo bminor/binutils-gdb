@@ -1498,8 +1498,6 @@ extern void remove_solib_event_breakpoints (void);
    delete at next stop disposition.  */
 extern void remove_solib_event_breakpoints_at_next_stop (void);
 
-extern void remove_thread_event_breakpoints (void);
-
 extern void disable_breakpoints_in_shlibs (void);
 
 /* This function returns TRUE if ep is a catchpoint.  */

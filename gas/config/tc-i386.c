@@ -950,6 +950,8 @@ static const arch_entry cpu_arch[] =
     CPU_CLZERO_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".mwaitx"), PROCESSOR_UNKNOWN,
     CPU_MWAITX_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".ospke"), PROCESSOR_UNKNOWN,
+    CPU_OSPKE_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF

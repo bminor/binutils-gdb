@@ -934,7 +934,6 @@ class Sized_target : public Target
 		  Output_section* output_section,
 		  typename elfcpp::Elf_types<size>::Elf_Off
                     offset_in_output_section,
-		  const Relocatable_relocs*,
 		  unsigned char* view,
 		  typename elfcpp::Elf_types<size>::Elf_Addr view_address,
 		  section_size_type view_size,

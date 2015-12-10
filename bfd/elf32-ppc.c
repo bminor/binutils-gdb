@@ -3948,6 +3948,7 @@ ppc_elf_check_relocs (bfd *abfd,
       enum elf_ppc_reloc_type r_type;
       struct elf_link_hash_entry *h;
       int tls_type;
+      struct plt_entry **ifunc;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
@@ -3980,6 +3981,7 @@ ppc_elf_check_relocs (bfd *abfd,
 
       tls_type = 0;
       r_type = ELF32_R_TYPE (rel->r_info);
+      ifunc = NULL;
       if (h == NULL && !htab->is_vxworks)
 	{
 	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->sym_cache,
@@ -3989,8 +3991,6 @@ ppc_elf_check_relocs (bfd *abfd,
 
 	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
 	    {
-	      struct plt_entry **ifunc;
-
 	      /* Set PLT_IFUNC flag for this sym, no GOT entry yet.  */
 	      ifunc = update_local_sym_info (abfd, symtab_hdr, r_symndx,
 					     PLT_IFUNC);
@@ -4224,21 +4224,20 @@ ppc_elf_check_relocs (bfd *abfd,
 #ifdef DEBUG
 	  fprintf (stderr, "Reloc requires a PLT entry\n");
 #endif
-	  /* This symbol requires a procedure linkage table entry.  We
-	     actually build the entry in finish_dynamic_symbol,
-	     because this might be a case of linking PIC code without
-	     linking in any dynamic objects, in which case we don't
-	     need to generate a procedure linkage table after all.  */
-
+	  /* This symbol requires a procedure linkage table entry.  */
 	  if (h == NULL)
 	    {
-	      /* It does not make sense to have a procedure linkage
-		 table entry for a local symbol.  */
-	      info->callbacks->einfo (_("%P: %H: %s reloc against local symbol\n"),
-				      abfd, sec, rel->r_offset,
-				      ppc_elf_howto_table[r_type]->name);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+	      if (ifunc == NULL)
+		{
+		  /* It does not make sense to have a procedure linkage
+		     table entry for a non-ifunc local symbol.  */
+		  info->callbacks->einfo
+		    (_("%P: %H: %s reloc against local symbol\n"),
+		     abfd, sec, rel->r_offset,
+		     ppc_elf_howto_table[r_type]->name);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
 	    }
 	  else
 	    {
@@ -4316,9 +4315,10 @@ ppc_elf_check_relocs (bfd *abfd,
 	    {
 	      if (bfd_link_pic (info))
 		{
-		  info->callbacks->einfo (_("%P: %H: @local call to ifunc %s\n"),
-					  abfd, sec, rel->r_offset,
-					  h->root.root.string);
+		  info->callbacks->einfo
+		    (_("%P: %H: @local call to ifunc %s\n"),
+		     abfd, sec, rel->r_offset,
+		     h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -8968,8 +8968,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_PLTREL24:
 	  if (h != NULL && ifunc == NULL)
 	    {
-	      struct plt_entry *ent = find_plt_ent (&h->plt.plist, got2,
-						    bfd_link_pic (info) ? addend : 0);
+	      struct plt_entry *ent;
+
+	      ent = find_plt_ent (&h->plt.plist, got2,
+				  bfd_link_pic (info) ? addend : 0);
 	      if (ent == NULL
 		  || htab->plt == NULL)
 		{

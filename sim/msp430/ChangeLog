@@ -1,3 +1,10 @@
+2015-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-sim.c (sim_open): Check for needed memory at address
+	0x500 not 0x200.
+	(get_op): Add support for F5 hardware multiply addresses.
+	(put_op): Likewise.
+
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-reason.o, sim-reg.o, and

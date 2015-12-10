@@ -6904,9 +6904,9 @@ currently executing frame and describes it briefly, similar to the
 @menu
 * Frames::                      Stack frames
 * Backtrace::                   Backtraces
-* Frame Filter Management::     Managing frame filters
 * Selection::                   Selecting a frame
 * Frame Info::                  Information on a frame
+* Frame Filter Management::     Managing frame filters
 
 @end menu
 
@@ -15606,6 +15606,8 @@ to be difficult.
                                    in @value{GDBN}.
 * Omissions from Ada::          Restrictions on the Ada expression syntax.
 * Additions to Ada::            Extensions of the Ada expression syntax.
+* Overloading support for Ada:: Support for expressions involving overloaded
+                                   subprograms.
 * Stopping Before Main Program:: Debugging the program during elaboration.
 * Ada Exceptions::              Ada Exceptions
 * Ada Tasks::                   Listing and setting breakpoints in tasks.
@@ -15652,13 +15654,6 @@ While in Ada mode, you may use `@t{--}' for comments.  This is useful
 mostly for documenting command files.  The standard @value{GDBN} comment 
 (@samp{#}) still works at the beginning of a line in Ada mode, but not in the 
 middle (to allow based literals).
-
-The debugger supports limited overloading.  Given a subprogram call in which
-the function symbol has multiple definitions, it will use the number of 
-actual parameters and some information about their types to attempt to narrow
-the set of definitions.  It also makes very limited use of context, preferring
-procedures to functions in the context of the @code{call} command, and
-functions to procedures elsewhere. 
 
 @node Omissions from Ada
 @subsubsection Omissions from Ada
@@ -15919,6 +15914,53 @@ selection on such a value will operate on the specific type of the
 object.
 
 @end itemize
+
+@node Overloading support for Ada
+@subsubsection Overloading support for Ada
+@cindex overloading, Ada
+
+The debugger supports limited overloading.  Given a subprogram call in which
+the function symbol has multiple definitions, it will use the number of
+actual parameters and some information about their types to attempt to narrow
+the set of definitions.  It also makes very limited use of context, preferring
+procedures to functions in the context of the @code{call} command, and
+functions to procedures elsewhere.
+
+If, after narrowing, the set of matching definitions still contains more than
+one definition, @value{GDBN} will display a menu to query which one it should
+use, for instance:
+
+@smallexample
+(@value{GDBP}) print f(1)
+Multiple matches for f
+[0] cancel
+[1] foo.f (integer) return boolean at foo.adb:23
+[2] foo.f (foo.new_integer) return boolean at foo.adb:28
+> 
+@end smallexample
+
+In this case, just select one menu entry either to cancel expression evaluation
+(type @kbd{0} and press @key{RET}) or to continue evaluation with a specific
+instance (type the corresponding number and press @key{RET}).
+
+Here are a couple of commands to customize @value{GDBN}'s behavior in this
+case:
+
+@table @code
+
+@kindex set ada print-signatures
+@item set ada print-signatures
+Control whether parameter types and return types are displayed in overloads
+selection menus.  It is @code{on} by default.
+@xref{Overloading support for Ada}.
+
+@kindex show ada print-signatures
+@item show ada print-signatures
+Show the current setting for displaying parameter types and return types in
+overloads selection menu.
+@xref{Overloading support for Ada}.
+
+@end table
 
 @node Stopping Before Main Program
 @subsubsection Stopping at the Very Beginning
@@ -28938,12 +28980,17 @@ The syntax for the @var{format-spec} is as follows:
 
 @smallexample
  @var{format-spec} @expansion{}
- @{binary | decimal | hexadecimal | octal | natural@}
+ @{binary | decimal | hexadecimal | octal | natural | zero-hexadecimal@}
 @end smallexample
 
 The natural format is the default format choosen automatically
 based on the variable type (like decimal for an @code{int}, hex
 for pointers, etc.).
+
+The zero-hexadecimal format has a representation similar to hexadecimal
+but with padding zeroes to the left of the value.  For example, a 32-bit
+hexadecimal value of 0x1234 would be represented as 0x00001234 in the
+zero-hexadecimal format.
 
 For a variable with children, the format is set only on the 
 variable itself, and the children are not affected.  

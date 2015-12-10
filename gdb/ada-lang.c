@@ -3822,6 +3822,49 @@ sort_choices (struct block_symbol syms[], int nsyms)
     }
 }
 
+/* Whether GDB should display formals and return types for functions in the
+   overloads selection menu.  */
+static int print_signatures = 1;
+
+/* Print the signature for SYM on STREAM according to the FLAGS options.  For
+   all but functions, the signature is just the name of the symbol.  For
+   functions, this is the name of the function, the list of types for formals
+   and the return type (if any).  */
+
+static void
+ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
+			    const struct type_print_options *flags)
+{
+  struct type *type = SYMBOL_TYPE (sym);
+
+  fprintf_filtered (stream, "%s", SYMBOL_PRINT_NAME (sym));
+  if (!print_signatures
+      || type == NULL
+      || TYPE_CODE (type) != TYPE_CODE_FUNC)
+    return;
+
+  if (TYPE_NFIELDS (type) > 0)
+    {
+      int i;
+
+      fprintf_filtered (stream, " (");
+      for (i = 0; i < TYPE_NFIELDS (type); ++i)
+	{
+	  if (i > 0)
+	    fprintf_filtered (stream, "; ");
+	  ada_print_type (TYPE_FIELD_TYPE (type, i), NULL, stream, -1, 0,
+			  flags);
+	}
+      fprintf_filtered (stream, ")");
+    }
+  if (TYPE_TARGET_TYPE (type) != NULL
+      && TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+    {
+      fprintf_filtered (stream, " return ");
+      ada_print_type (TYPE_TARGET_TYPE (type), NULL, stream, -1, 0, flags);
+    }
+}
+
 /* Given a list of NSYMS symbols in SYMS, select up to MAX_RESULTS>0 
    by asking the user (if necessary), returning the number selected, 
    and setting the first elements of SYMS items.  Error if no symbols
@@ -3871,14 +3914,14 @@ See set/show multiple-symbol."));
           struct symtab_and_line sal =
             find_function_start_sal (syms[i].symbol, 1);
 
+	  printf_unfiltered ("[%d] ", i + first_choice);
+	  ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
+				      &type_print_raw_options);
 	  if (sal.symtab == NULL)
-	    printf_unfiltered (_("[%d] %s at <no source file available>:%d\n"),
-			       i + first_choice,
-			       SYMBOL_PRINT_NAME (syms[i].symbol),
+	    printf_unfiltered (_(" at <no source file available>:%d\n"),
 			       sal.line);
 	  else
-	    printf_unfiltered (_("[%d] %s at %s:%d\n"), i + first_choice,
-			       SYMBOL_PRINT_NAME (syms[i].symbol),
+	    printf_unfiltered (_(" at %s:%d\n"),
 			       symtab_to_filename_for_display (sal.symtab),
 			       sal.line);
           continue;
@@ -3895,11 +3938,14 @@ See set/show multiple-symbol."));
 	    symtab = symbol_symtab (syms[i].symbol);
 
           if (SYMBOL_LINE (syms[i].symbol) != 0 && symtab != NULL)
-            printf_unfiltered (_("[%d] %s at %s:%d\n"),
-                               i + first_choice,
-                               SYMBOL_PRINT_NAME (syms[i].symbol),
-			       symtab_to_filename_for_display (symtab),
-			       SYMBOL_LINE (syms[i].symbol));
+	    {
+	      printf_unfiltered ("[%d] ", i + first_choice);
+	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
+					  &type_print_raw_options);
+	      printf_unfiltered (_(" at %s:%d\n"),
+				 symtab_to_filename_for_display (symtab),
+				 SYMBOL_LINE (syms[i].symbol));
+	    }
           else if (is_enumeral
                    && TYPE_NAME (SYMBOL_TYPE (syms[i].symbol)) != NULL)
             {
@@ -3909,19 +3955,22 @@ See set/show multiple-symbol."));
               printf_unfiltered (_("'(%s) (enumeral)\n"),
                                  SYMBOL_PRINT_NAME (syms[i].symbol));
             }
-          else if (symtab != NULL)
-            printf_unfiltered (is_enumeral
-                               ? _("[%d] %s in %s (enumeral)\n")
-                               : _("[%d] %s at %s:?\n"),
-                               i + first_choice,
-                               SYMBOL_PRINT_NAME (syms[i].symbol),
-                               symtab_to_filename_for_display (symtab));
-          else
-            printf_unfiltered (is_enumeral
-                               ? _("[%d] %s (enumeral)\n")
-                               : _("[%d] %s at ?\n"),
-                               i + first_choice,
-                               SYMBOL_PRINT_NAME (syms[i].symbol));
+	  else
+	    {
+	      printf_unfiltered ("[%d] ", i + first_choice);
+	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
+					  &type_print_raw_options);
+
+	      if (symtab != NULL)
+		printf_unfiltered (is_enumeral
+				   ? _(" in %s (enumeral)\n")
+				   : _(" at %s:?\n"),
+				   symtab_to_filename_for_display (symtab));
+	      else
+		printf_unfiltered (is_enumeral
+				   ? _(" (enumeral)\n")
+				   : _(" at ?\n"));
+	    }
         }
     }
 
@@ -14135,6 +14184,14 @@ work around this bug.  It is always safe to turn this option \"off\", but\n\
 this incurs a slight performance penalty, so it is recommended to NOT change\n\
 this option to \"off\" unless necessary."),
                             NULL, NULL, &set_ada_list, &show_ada_list);
+
+  add_setshow_boolean_cmd ("print-signatures", class_vars,
+			   &print_signatures, _("\
+Enable or disable the output of formal and return types for functions in the \
+overloads selection menu"), _("\
+Show whether the output of formal and return types for functions in the \
+overloads selection menu is activated"),
+			   NULL, NULL, NULL, &set_ada_list, &show_ada_list);
 
   add_catch_command ("exception", _("\
 Catch Ada exceptions, when raised.\n\

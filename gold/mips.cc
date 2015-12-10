@@ -2964,7 +2964,6 @@ class Target_mips : public Sized_target<size, big_endian>
                   Output_section* output_section,
                   typename elfcpp::Elf_types<size>::Elf_Off
                     offset_in_output_section,
-                  const Relocatable_relocs*,
                   unsigned char* view,
                   Mips_address view_address,
                   section_size_type view_size,
@@ -3392,36 +3391,10 @@ class Target_mips : public Sized_target<size, big_endian>
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<size, big_endian>*, Target_mips*,
-             Output_section*, size_t relnum,
-             const elfcpp::Rela<size, big_endian>*,
-             const elfcpp::Rel<size, big_endian>*,
-             unsigned int,
-             unsigned int,  const Sized_symbol<size>*,
-             const Symbol_value<size>*,
-             unsigned char*,
-             Mips_address,
-             section_size_type);
-
-    inline bool
-    relocate(const Relocate_info<size, big_endian>*, Target_mips*,
-             Output_section*, size_t relnum,
-             const elfcpp::Rel<size, big_endian>&,
-             unsigned int, const Sized_symbol<size>*,
-             const Symbol_value<size>*,
-             unsigned char*,
-             Mips_address,
-             section_size_type);
-
-    inline bool
-    relocate(const Relocate_info<size, big_endian>*, Target_mips*,
-             Output_section*, size_t relnum,
-             const elfcpp::Rela<size, big_endian>&,
-             unsigned int, const Sized_symbol<size>*,
-             const Symbol_value<size>*,
-             unsigned char*,
-             Mips_address,
-             section_size_type);
+    relocate(const Relocate_info<size, big_endian>*, unsigned int,
+	     Target_mips*, Output_section*, size_t, const unsigned char*,
+	     const Sized_symbol<size>*, const Symbol_value<size>*,
+	     unsigned char*, Mips_address, section_size_type);
   };
 
   // A class which returns the size required for a relocation type,
@@ -8278,7 +8251,7 @@ Target_mips<size, big_endian>::relocate_section(
       view,
       address,
       view_size,
-     reloc_symbol_changes);
+      reloc_symbol_changes);
 }
 
 // Return the size of a relocation while scanning during a relocatable
@@ -8403,7 +8376,6 @@ Target_mips<size, big_endian>::relocate_relocs(
                         Output_section* output_section,
                         typename elfcpp::Elf_types<size>::Elf_Off
                           offset_in_output_section,
-                        const Relocatable_relocs* rr,
                         unsigned char* view,
                         Mips_address view_address,
                         section_size_type view_size,
@@ -8418,7 +8390,6 @@ Target_mips<size, big_endian>::relocate_relocs(
     reloc_count,
     output_section,
     offset_in_output_section,
-    rr,
     view,
     view_address,
     view_size,
@@ -9563,13 +9534,11 @@ template<int size, bool big_endian>
 inline bool
 Target_mips<size, big_endian>::Relocate::relocate(
                         const Relocate_info<size, big_endian>* relinfo,
+                        unsigned int rel_type,
                         Target_mips* target,
                         Output_section* output_section,
                         size_t relnum,
-                        const elfcpp::Rela<size, big_endian>* rela,
-                        const elfcpp::Rel<size, big_endian>* rel,
-                        unsigned int rel_type,
-                        unsigned int r_type,
+                        const unsigned char* preloc,
                         const Sized_symbol<size>* gsym,
                         const Symbol_value<size>* psymval,
                         unsigned char* view,
@@ -9582,16 +9551,19 @@ Target_mips<size, big_endian>::Relocate::relocate(
 
   if (rel_type == elfcpp::SHT_RELA)
     {
-      r_offset = rela->get_r_offset();
-      r_info = rela->get_r_info();
-      r_addend = rela->get_r_addend();
+      const elfcpp::Rela<size, big_endian> rela(preloc);
+      r_offset = rela.get_r_offset();
+      r_info = rela.get_r_info();
+      r_addend = rela.get_r_addend();
     }
   else
     {
-      r_offset = rel->get_r_offset();
-      r_info = rel->get_r_info();
+      const elfcpp::Rel<size, big_endian> rel(preloc);
+      r_offset = rel.get_r_offset();
+      r_info = rel.get_r_info();
       r_addend = 0;
     }
+  unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
 
   typedef Mips_relocate_functions<size, big_endian> Reloc_funcs;
   typename Reloc_funcs::Status reloc_status = Reloc_funcs::STATUS_OKAY;
@@ -10186,68 +10158,6 @@ Target_mips<size, big_endian>::Relocate::relocate(
     }
 
   return true;
-}
-
-template<int size, bool big_endian>
-inline bool
-Target_mips<size, big_endian>::Relocate::relocate(
-                        const Relocate_info<size, big_endian>* relinfo,
-                        Target_mips* target,
-                        Output_section* output_section,
-                        size_t relnum,
-                        const elfcpp::Rela<size, big_endian>& reloc,
-                        unsigned int r_type,
-                        const Sized_symbol<size>* gsym,
-                        const Symbol_value<size>* psymval,
-                        unsigned char* view,
-                        Mips_address address,
-                        section_size_type view_size)
-{
-  return relocate(
-    relinfo,
-    target,
-    output_section,
-    relnum,
-    &reloc,
-    (const elfcpp::Rel<size, big_endian>*) NULL,
-    elfcpp::SHT_RELA,
-    r_type,
-    gsym,
-    psymval,
-    view,
-    address,
-    view_size);
-}
-
-template<int size, bool big_endian>
-inline bool
-Target_mips<size, big_endian>::Relocate::relocate(
-                        const Relocate_info<size, big_endian>* relinfo,
-                        Target_mips* target,
-                        Output_section* output_section,
-                        size_t relnum,
-                        const elfcpp::Rel<size, big_endian>& reloc,
-                        unsigned int r_type,
-                        const Sized_symbol<size>* gsym,
-                        const Symbol_value<size>* psymval,
-                        unsigned char* view,
-                        Mips_address address,
-                        section_size_type view_size)
-{
-  return relocate(
-    relinfo,
-    target,
-    output_section,
-    relnum,
-    (const elfcpp::Rela<size, big_endian>*) NULL,
-    &reloc,
-    elfcpp::SHT_REL,
-    r_type,
-    gsym,
-    psymval,
-    view,
-    address,
-    view_size);
 }
 
 // Get the Reference_flags for a particular relocation.

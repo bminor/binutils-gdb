@@ -7765,17 +7765,6 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
   return b;
 }
 
-void
-remove_thread_event_breakpoints (void)
-{
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
-    if (b->type == bp_thread_event
-	&& b->loc->pspace == current_program_space)
-      delete_breakpoint (b);
-}
-
 struct lang_and_radix
   {
     enum language lang;

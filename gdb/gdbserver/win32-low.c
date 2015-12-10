@@ -1794,7 +1794,7 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 
 static struct target_ops win32_target_ops = {
   win32_create_inferior,
-  NULL,  /* arch_setup */
+  NULL,  /* post_create_inferior */
   win32_attach,
   win32_kill,
   win32_detach,
