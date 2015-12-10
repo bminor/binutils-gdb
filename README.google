@@ -14,3 +14,23 @@ they are an ongoing maintenance burden.
 	* Makefile.in: Add google.c.
 	* google.c: New file.
 	* google.h: New file.
+
+2015-09-05  Doug Evans  <dje@google.com>
+
+	Implement 1155829.
+	* exec.c (elf_64_p): New function.
+	(exec_file_attach): If the file format is not recognized, check if
+	it's 64-bit elf and if so recommend using 64-bit gdb. Improve error
+	message if binary is accidently a core file.
+	* main.c (captured_main): Call warn_troublesome_environment if !quiet.
+	* google.c (warn_troublesome_environment): New function.
+	* symfile.c (print_no_debugging_symbols_found): New function.
+	(symbol_file_add_with_addrs_or_offsets): Call it if no debugging
+	symbols found.
+	(reread_symbols): Ditto.
+	* testsuite/lib/gdb.exp (gdb_file_cmd): Update to match
+	output of print_no_debugging_symbols_found.
+	Properly update gdb_file_cmd_debug_info for nodebug when
+	loading new symbol table.
+	* testsuite/gdb.base/sepdebug.exp: Update expected output to match
+	"no debugging symbols found" warning change for 1155829.

@@ -38,7 +38,7 @@
 #include "objfiles.h"
 #include "auto-load.h"
 #include "maint.h"
-
+#include "google.h"
 #include "filenames.h"
 #include "filestuff.h"
 #include <signal.h>
@@ -991,6 +991,11 @@ captured_main (void *data)
       gdb_flush (gdb_stdout);	/* Force to screen during slow
 				   operations.  */
     }
+
+  /* GOOGLE LOCAL ref# 1155829.
+     Warn about troublesome environment variables.  */
+  if (!quiet)
+    warn_troublesome_environment ();
 
   /* Set off error and warning messages with a blank line.  */
   xfree (warning_pre_print);

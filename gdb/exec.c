@@ -135,6 +135,23 @@ exec_file_clear (int from_tty)
     printf_unfiltered (_("No executable file now.\n"));
 }
 
+/* Bug 1155829.
+   Subroutine of exec_file_attach to simplify it.
+   Return non-zero if HEADER is a 64-bit ELF file.  */
+
+#include "elf/external.h"
+#include "elf/common.h"
+
+static int
+elf_64_p (Elf64_External_Ehdr *header)
+{
+  return (header->e_ident[EI_MAG0] == ELFMAG0
+          && header->e_ident[EI_MAG1] == ELFMAG1
+          && header->e_ident[EI_MAG2] == ELFMAG2
+          && header->e_ident[EI_MAG3] == ELFMAG3
+          && header->e_ident[EI_CLASS] == ELFCLASS64);
+}
+
 /* See gdbcore.h.  */
 
 void
@@ -297,12 +314,54 @@ exec_file_attach (const char *filename, int from_tty)
 
       if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
 	{
+	  /* Bug 1155829.  If we're trying to debug a 64 bit binary with
+	     32-bit gdb print a more useful error message.  */
+	  bfd_error_type error_kind = bfd_get_error ();
+	  struct gdbarch *cur_arch = target_gdbarch ();
+	  const struct bfd_arch_info *arch = gdbarch_bfd_arch_info (cur_arch);
+	  int is_core = 0, is_elf_64_on_32 = 0;
+
+	  if (error_kind == bfd_error_file_not_recognized
+	      && arch->arch == bfd_arch_i386)
+	    {
+	      Elf64_External_Ehdr header;
+
+	      /* A common user error is "gdb core".  */
+	      if (bfd_check_format_matches (current_program_space->ebfd, bfd_core, NULL))
+		is_core = 1;
+	      else if (bfd_seek (exec_bfd, 0, SEEK_SET) == 0
+		       && bfd_bread (&header, sizeof (header), exec_bfd) == sizeof (header)
+		       && elf_64_p (&header))
+		is_elf_64_on_32 = 1;
+	    }
+
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  exec_close ();
-	  error (_("\"%s\": not in executable format: %s"),
-		 scratch_pathname,
-		 gdb_bfd_errmsg (bfd_get_error (), matching));
+
+	  if (is_core)
+	    {
+	      error (_("\n"
+		       "\"%s\": Is a core file.\n"
+		       "Do \"gdb binary core\" instead.\n"),
+		     scratch_pathname);
+	    }
+	  if (is_elf_64_on_32)
+	    {
+	      /* We enhance the text of the argument to error() instead of
+		 printing the enhanced text here, we don't want to assume what
+		 error() will do with the text.  */
+	      error (_("\n"
+		       "\"%s\": Unable to debug 64-bit ELF file.\n"
+		       "To debug 64-bit binaries you need to use 64-bit gdb.\n"),
+		     scratch_pathname);
+	    }
+	  else
+	    {
+	      error (_("\"%s\": not in executable format: %s"),
+		     scratch_pathname,
+		 gdb_bfd_errmsg (error_kind, matching));
+	    }
 	}
 
       if (build_section_table (exec_bfd, &sections, &sections_end))

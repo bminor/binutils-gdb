@@ -20,4 +20,6 @@
 #ifndef GOOGLE_H
 #define GOOGLE_H
 
+extern void warn_troublesome_environment (void);
+
 #endif /* GOOGLE_H */

@@ -1121,6 +1121,29 @@ finish_new_objfile (struct objfile *objfile, int add_flags)
   clear_complaints (&symfile_complaints, 0, add_flags & SYMFILE_VERBOSE);
 }
 
+/* Bug 1155829.  Print "no debugging symbols found" in a more
+   noticeable fashion.
+   If VERBOSE is non-zero print a more verbose version of the warning.  */
+
+static void
+print_no_debugging_symbols_found (int verbose, const char* file_name)
+{
+  if (verbose)
+    printf_filtered ("\n");
+
+  printf_filtered (_("WARNING: no debugging symbols found in %s.\n"),
+		   file_name);
+
+  if (verbose)
+    {
+      printf_filtered (_("Either the binary was compiled without debugging information\n"
+			 "or the debugging information was removed (e.g., with strip or strip -g).\n"
+			 "Debugger capabilities will be very limited.\n"));
+      printf_filtered (_("For further information: http://wiki/Main/GdbFaq#No_debugging_symbols_found\n"));
+      printf_filtered ("\n");
+    }
+}
+
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
 
@@ -1208,19 +1231,20 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
 	objfile->sf->qf->expand_all_symtabs (objfile);
     }
 
-  if (should_print && !objfile_has_symbols (objfile))
-    {
-      wrap_here ("");
-      printf_unfiltered (_("(no debugging symbols found)..."));
-      wrap_here ("");
-    }
-
   if (should_print)
     {
       if (deprecated_post_add_symbol_hook)
 	deprecated_post_add_symbol_hook ();
       else
-	printf_unfiltered (_("done.\n"));
+	{
+	  printf_unfiltered (_("done.\n"));
+
+	  /* GOOGLE LOCAL: Printing of "no debugging symbols found" warning
+	     has been moved to after "done." because the multi-line warning
+	     looks better there.  */
+	  if (!objfile_has_symbols (objfile))
+	    print_no_debugging_symbols_found (mainline, name);
+	}
     }
 
   /* We print some messages regardless of whether 'from_tty ||
@@ -2669,7 +2693,8 @@ reread_symbols (void)
 	  if (!objfile_has_symbols (objfile))
 	    {
 	      wrap_here ("");
-	      printf_unfiltered (_("(no debugging symbols found)\n"));
+	      print_no_debugging_symbols_found (objfile == symfile_objfile,
+						objfile_name (objfile));
 	      wrap_here ("");
 	    }
 
