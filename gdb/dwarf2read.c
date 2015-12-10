@@ -2718,7 +2718,13 @@ dw2_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
   if (!per_cu->v.quick->compunit_symtab)
     {
       struct cleanup *back_to = make_cleanup (free_cached_comp_units, NULL);
+
       increment_reading_symtab ();
+      /* We call out to routines that can call QUIT (which we shouldn't).
+	 E.g., dwarf2_compute_name calls c_print_type.
+	 Defer QUIT processing to ensure the symtab isn't left in
+	 a half-completed state.  */
+      begin_uninterruptible_section ();
       dw2_do_instantiate_symtab (per_cu);
       process_cu_includes ();
       do_cleanups (back_to);

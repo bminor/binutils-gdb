@@ -290,6 +290,10 @@ gdbpy_set_quit_flag (const struct extension_language_defn *extlang)
 static int
 gdbpy_check_quit_flag (const struct extension_language_defn *extlang)
 {
+  /* Are we in an uninterruptible section?  */
+  if (defer_quit)
+    return 0;
+
   return PyOS_InterruptOccurred ();
 }
 

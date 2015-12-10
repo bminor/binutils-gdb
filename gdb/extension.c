@@ -833,6 +833,12 @@ check_quit_flag (void)
   int i, result = 0;
   const struct extension_language_defn *extlang;
 
+  /* GOOGLE LOCAL */
+  /* Are we in an uninterruptible section?  */
+  if (defer_quit)
+    return 0;
+  /* END GOOGLE LOCAL */
+
   ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
     {
       if (extlang->ops->check_quit_flag != NULL)

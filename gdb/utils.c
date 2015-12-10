@@ -55,7 +55,6 @@
 #include "top.h"
 #include "main.h"
 #include "solist.h"
-
 #include "inferior.h"		/* for signed_pointer_to_address */
 
 #include "gdb_curses.h"
@@ -121,6 +120,33 @@ int job_control;
    expect to block), call QUIT after setting immediate_quit.  */
 
 int immediate_quit;
+
+/* Nonzero means GDB is in a critical section that cannot be interrupted.
+   This is the case, for example, when expanding symtabs.
+   TODO(dje): Symtab expansion should be interruptible.  */
+
+int defer_quit;
+
+/* Cleanup to decrement defer_quit.  */
+
+static void
+end_uninterruptible_cleanup (void *ignore)
+{
+  --defer_quit;
+  gdb_assert (defer_quit >= 0);
+}
+
+/* Indicate GDB cannot be interrupted.
+   The result is a cleanup to be called when SIGINTs can be handled
+   again.  */
+
+struct cleanup *
+begin_uninterruptible_section (void)
+{
+  ++defer_quit;
+  gdb_assert (defer_quit > 0);
+  return make_cleanup (end_uninterruptible_cleanup, NULL);
+}
 
 /* Nonzero means that strings with character values >0x7F should be printed
    as octal escapes.  Zero means just print the value (e.g. it's an

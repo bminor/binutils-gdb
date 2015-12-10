@@ -787,6 +787,11 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
     {
       struct cleanup *back_to = increment_reading_symtab ();
 
+      /* Some debug info readers like dwarf2read.c call out to routines that
+	 call QUIT.  Defer QUIT processing to ensure the symtab isn't left in
+	 a half-completed state.  */
+      begin_uninterruptible_section ();
+
       (*pst->read_symtab) (pst, objfile);
       do_cleanups (back_to);
     }

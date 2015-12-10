@@ -106,3 +106,18 @@ they are an ongoing maintenance burden.
 +	(symbol_info_typedef_print): Declare.
 +	* symtab.c: #include "typeprint.h".
 +	(print_symbol_info): Call them.
+--- README.google	2015-09-05 16:18:05.000000000 -0700
++++ README.google	2015-09-05 16:20:56.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	* defs.h (begin_uninterruptible_section): Declare.
++	(defer_quit): Declare.
++	* utils.c (defer_quit): New global.
++	(end_uninterruptible_cleanup): New function.
++	(begin_uninterruptible_cleanup): New function.
++	* extension.c (check_quit_flag): Check it. [revised from original]
++	* dwarf2read.c (dw2_instantiate_symtab): Mark symtab expansion as
++	uninterruptible.
++	* psymtab.c (psymtab_to_symtab): Ditto.
++	* python/python.c (check_quit_flag): Ditto.

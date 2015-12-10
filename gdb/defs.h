@@ -141,11 +141,14 @@ extern void clear_quit_flag (void);
 extern int check_quit_flag (void);
 /* * Set the quit flag.  */
 extern void set_quit_flag (void);
+/* Indicate entering an uninterruptible region of code.  */
+struct cleanup *begin_uninterruptible_section (void);
 
 /* Flag that function quit should call quit_force.  */
 extern volatile int sync_quit_force_run;
 
 extern int immediate_quit;
+extern int defer_quit;
 
 extern void quit (void);
 
