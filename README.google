@@ -222,3 +222,11 @@ they are an ongoing maintenance burden.
 +
 +	testsuite/
 +	* gdb.python/py-objfile.exp: Add tests for objfile.have_debug_info.
+--- README.google	2015-09-05 18:13:45.000000000 -0700
++++ README.google	2015-09-05 18:20:10.000000000 -0700
++
++2015-09-05  Doug Evans  <google.com>
++
++	Ref: 15188412
++	* breakpoint.c (create_solib_event_breakpoint): Apply
++	gdbarch_skip_entrypoint if it's defined.

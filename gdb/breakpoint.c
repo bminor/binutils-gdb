@@ -7711,6 +7711,10 @@ create_solib_event_breakpoint_1 (struct gdbarch *gdbarch, CORE_ADDR address,
 {
   struct breakpoint *b;
 
+  /* GOOGLE LOCAL: Ref# 15188412.  */
+  if (gdbarch_skip_entrypoint_p (gdbarch))
+    address = gdbarch_skip_entrypoint (gdbarch, address);
+
   b = create_internal_breakpoint (gdbarch, address, bp_shlib_event,
 				  &internal_breakpoint_ops);
   update_global_location_list_nothrow (insert_mode);
