@@ -417,6 +417,11 @@ VAX running Ultrix 			vax-*-ultrix*
   and "assf"), have been removed.  Use the "sharedlibrary" command, or
   its alias "share", instead.
 
+*** Changes since GDB 7.8
+
+* The "interrupt" command now waits for the inferior to stop by default.
+  To avoid waiting for the inferior to stop pass "&".
+
 *** Changes in GDB 7.8
 
 * New command line options

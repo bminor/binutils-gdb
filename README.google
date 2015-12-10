@@ -129,3 +129,32 @@ they are an ongoing maintenance burden.
 +	Ref# 2180247
 +	* infcmd.c (attach_command_post_wait): Pass zero to
 +	post_create_inferior, same as run_command_1.
+--- README.google	2015-09-05 16:24:43.000000000 -0700
++++ README.google	2015-09-05 16:33:32.000000000 -0700
++
++2015-09-05  Doug Evans  <google.com>
++
++	Ref# 13734692, submitted upstream
++	PR gdb/14236
++	* NEWS: Mention change in default behaviour of "interrupt" command.
++	* infcmd.c (struct interrupt_command_continuation_args): New struct.
++	(interrupt_command_continuation_free_args): New function.
++	(wait_thread_stopped): New function.
++	(interrupt_command_post_wait): New function.
++	(interrupt_command_continuation): New function.
++	(add_interrupt_continuation): New function.
++	(interrupt_command): Rewrite.
++
++	doc/
++	* gdb.texinfo (Background Execution): Document new option "&" for
++	"interrupt" command.
++
++	testsuite/
++	* gdb.base/async-shell.exp: Add "&" to "interrupt" command.
++	* gdb.base/dprintf-non-stop.exp: Ditto.
++	* gdb.base/interrupt-noterm.exp: Ditto.
++	* gdb.threads/interrupt-command.c: New file.
++	* gdb.threads/interrupt-command.exp: New file.
++
++	* gdbthread.h (any_running): Declare.
++	* thread.c (any_running): New function.

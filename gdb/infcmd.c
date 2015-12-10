@@ -2848,29 +2848,180 @@ interrupt_target_1 (int all_threads)
     set_stop_requested (ptid, 1);
 }
 
-/* interrupt [-a]
-   Stop the execution of the target while running in async mode, in
-   the backgound.  In all-stop, stop the whole process.  In non-stop
-   mode, stop the current thread only by default, or stop all threads
-   if the `-a' switch is used.  */
+/* Data associated with an "interrupt" command continuation.  */
+
+struct interrupt_command_continuation_args
+{
+  /* This is the thread to wait for or minus_one_ptid to wait for all
+     threads.  */
+  ptid_t wait_for_ptid;
+};
+
+/* continuation_free_arg_ftype function for the interrupt command.  */
+
+static void
+interrupt_command_continuation_free_args (void *args)
+{
+  struct interrupt_command_continuation_args *a = args;
+
+  xfree (a);
+}
+
+/* Wait for thread PTID to stop, or all threads if it is minus_one_ptid.
+   This is used in non-stop mode to implement "interrupt -a" without
+   complicating the infrun state machine more than it already is.  */
+
+static void
+wait_thread_stopped (ptid_t ptid)
+{
+  struct cleanup* cleanups = make_cleanup_restore_current_thread ();
+  int all_threads = ptid_equal (ptid, minus_one_ptid);
+
+  gdb_assert (non_stop);
+
+  while (all_threads
+	 ? any_running ()
+	 : is_running (ptid))
+    {
+      struct target_waitstatus last;
+      ptid_t last_ptid;
+
+      QUIT;
+      wait_for_inferior ();
+      get_last_target_status (&last_ptid, &last);
+      finish_thread_state (last_ptid);
+      /* Leave printing of the stop event of PTID to normal_stop.  */
+      if (!all_threads && !ptid_equal (last_ptid, ptid))
+	print_stop_event (&last);
+    }
+
+  do_cleanups (cleanups);
+
+  if (!all_threads && !target_can_async_p ())
+    normal_stop ();
+}
+
+/* Finish up waiting for thread WAIT_FOR_PTID to stop, or continue waiting
+   for all threads to stop if it is minus_one_ptid.
+   Note: This function is named the way it is as it's derived from
+   attach_command_post_wait.  */
+
+static void
+interrupt_command_post_wait (ptid_t wait_for_ptid)
+{
+  struct inferior *inferior;
+
+  inferior = current_inferior ();
+  inferior->control.stop_soon = NO_STOP_QUIETLY;
+
+  /* If this is all-stop we don't have to do anything special to wait for all
+     threads to stop.  */
+  if (non_stop)
+    wait_thread_stopped (wait_for_ptid);
+}
+
+/* continuation_ftype function for the interrupt command.  */
+
+static void
+interrupt_command_continuation (void *args, int err)
+{
+  struct interrupt_command_continuation_args *a = args;
+
+  if (err)
+    return;
+
+  interrupt_command_post_wait (a->wait_for_ptid);
+}
+
+/* Queue a continuation to complete the interrupt command.
+   WAIT_FOR_PTID is minus_one_ptid if waiting for all threads to stop.  */
+
+static void
+add_interrupt_continuation (ptid_t wait_for_ptid)
+{
+  struct interrupt_command_continuation_args *a;
+
+  a = xmalloc (sizeof (*a));
+  a->wait_for_ptid = wait_for_ptid;
+
+  /* We add the continuation to the inferior, even if we're only waiting for
+     a single thread, because we don't know which thread the event loop will
+     see first.  */
+  add_inferior_continuation (interrupt_command_continuation, a,
+			     interrupt_command_continuation_free_args);
+}
+
+/* interrupt [-a] [&]
+   Stop the execution of the target.
+   In all-stop, stop the whole process.  In non-stop mode, stop only
+   the current thread by default, or stop all threads if the "-a"
+   switch is used.  "-a" is ignored in all-stop mode.  */
 
 static void
 interrupt_command (char *args, int from_tty)
 {
-  if (target_can_async_p ())
+  int async_exec;
+  int all_threads = 0;
+
+  /* Otherwise subsequent invocations will just throw an error.  */
+  dont_repeat ();
+
+  ERROR_NO_INFERIOR;
+  ensure_not_tfind_mode ();
+
+  args = strip_bg_char (args, &async_exec);
+
+  if (args != NULL
+      && startswith (args, "-a"))
+    all_threads = 1;
+
+  /* Done with ARGS.  */
+  xfree (args);
+
+  if (all_threads)
     {
-      int all_threads = 0;
+      if (!any_running ())
+	error (_("All threads are already stopped."));
+    }
+  else
+    {
+      if (!is_running (inferior_ptid))
+	error (_("Current thread is already stopped."));
+    }
 
-      dont_repeat ();		/* Not for the faint of heart.  */
+  /* If we're in synchronous all-stop mode, the above error checking for
+     whether threads are already stopped should have fired.  */
+  gdb_assert (non_stop || target_can_async_p ());
 
-      if (args != NULL
-	  && startswith (args, "-a"))
-	all_threads = 1;
+  /* This will flag an error if & is given in non-async mode.
+     This isn't an execution command per se, but this performs what we
+     need.  */
+  prepare_execution_command (&current_target, async_exec);
 
-      if (!non_stop && all_threads)
-	error (_("-a is meaningless in all-stop mode."));
+  interrupt_target_1 (all_threads);
 
-      interrupt_target_1 (all_threads);
+  if (async_exec)
+    return;
+
+  /* Set the terminal to the inferior while we're waiting for it to stop.
+     One reason to do this is because if we don't in target-async mode,
+     after we return rl_linefunc will get set to NULL.  If we leave the
+     terminal as ours then if the user types a command while gdb is
+     waiting for the inferior, readline will get called to process the
+     command and will abort because rl_linefunc is NULL.  This is
+     fragile, but apparently exists as a workaround for a readline
+     issue.  Grep for "trick readline" in display_gdb_prompt.
+     This must be done after calling async_disable_stdin (which is called
+     by prepare_execution_command), or it will "early exit" without doing
+     anything.  */
+  target_terminal_inferior ();
+
+  if (target_can_async_p ())
+    add_interrupt_continuation (all_threads ? minus_one_ptid : inferior_ptid);
+  else
+    {
+      gdb_assert (non_stop);
+      wait_thread_stopped (all_threads ? minus_one_ptid : inferior_ptid);
     }
 }
 

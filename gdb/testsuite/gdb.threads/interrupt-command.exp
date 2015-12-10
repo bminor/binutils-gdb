@@ -1,0 +1,465 @@
+# Copyright (C) 2014 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set NR_THREADS 4
+
+standard_testfile
+
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "additional_flags=-DNR_THREADS=$NR_THREADS"]] != "" } {
+    return -1
+}
+
+proc prepare_interrupt_test { target_async non_stop } {
+    global binfile
+    clean_restart ${binfile}
+
+    gdb_test_no_output "set target-async ${target_async}" "set async mode"
+    gdb_test_no_output "set non-stop ${non_stop}" "set non-stop mode"
+
+    if ![runto_main] {
+	untested "could not run to main"
+	return -1
+    }
+
+    gdb_breakpoint "all_threads_running"
+    gdb_continue_to_breakpoint "all_threads_running"
+}
+
+proc interrupt_all_stop { command } {
+    global gdb_prompt
+
+    set test_name $command
+    gdb_test_multiple $command "" {
+	-re "Program received signal SIGINT.*$gdb_prompt $" {
+	    pass $test_name
+	}
+	timeout {
+	    fail "$test_name (timeout)"
+	}
+    }
+}
+
+# Apparently the state of a thread isn't necessarily "running" immediately
+# after doing "c &".  This feels like a bug, but for robustness sake it's a
+# good thing to verify anyway.
+# THREAD_NR is either a thread number or "all".
+
+proc wait_thread_running { thread_nr } {
+    global gdb_prompt
+    set nr_attempts 4
+
+    set test_name "wait thread $thread_nr running"
+    for { set i 0 } { $i < $nr_attempts } { incr i } {
+	if { "$thread_nr" == "all" } {
+	    set running -1
+	} else {
+	    set running -1
+	    send_gdb "info thread $thread_nr\n"
+	    gdb_expect {
+		-re "\n\[ \]*$thread_nr +Thread \[^\r\]+\\(running\\)\[\r\n\]+$gdb_prompt $" {
+		    set running 1
+		}
+		-re "\n\[ \]*$thread_nr +Thread \[^\r\]+\[\r\n\]+$gdb_prompt $" {
+		    set running 0
+		}
+		-re "$gdb_prompt $" {
+		    verbose -log "unexpected output processing info thread output"
+		}
+		timeout {
+		    verbose -log "unexpected timeout processing info thread output"
+		}
+	    }
+	    if { $running < 0 } {
+		fail "$test_name (error processing info threads output)"
+		return
+	    }
+	    if { $running } {
+		pass $test_name
+		return
+	    }
+	}
+    }
+
+    fail "$test_name (thread still not running after $nr_attempts attempts)"
+}
+
+proc verify_current_thread { thread_nr } {
+    global gdb_prompt
+
+    set test_name "verify thread $thread_nr current"
+    set correct_current_thread 0
+    gdb_test_multiple "info threads" $test_name {
+	-re "\n\[*\]\[ \]+$thread_nr +Thread \[^\r\]+\r" {
+	    set correct_current_thread 1
+	    exp_continue
+	}
+	-re "\n\[*\]?\[ \]+\[\[:digit:\]\]+ +Thread \[^\r\]+\r" {
+	    exp_continue
+	}
+	-re "$gdb_prompt $" {
+	    if { $correct_current_thread } {
+		pass $test_name
+	    } else {
+		fail $test_name
+	    }
+	}
+	timeout {
+	    fail "$test_name (timeout)"
+	}
+    }
+}
+
+proc interrupt_all_threads_all_stop_background { command } {
+    global gdb_prompt
+
+    set command "$command &"
+    set test_name $command
+    # This has to watch for gdb_prompt separately from SIGINT because
+    # other cases added will catch gdb_prompt before we recognize SIGINT.
+    gdb_test_multiple $command $test_name {
+	-re "$gdb_prompt " {
+	    exp_continue
+	}
+	-re "\[\r\n\]+Program received signal SIGINT" {
+	    pass $test_name
+	}
+	timeout {
+	    fail "$test_name (timeout)"
+	}
+    }
+}
+
+proc interrupt_and_verify_one_thread_non_stop { ampersand } {
+    global gdb_prompt NR_THREADS
+
+    for { set i 0 } { $i < $NR_THREADS } { incr i } {
+	set thread_nr [expr 2 + $i]
+
+	gdb_test "thread $thread_nr" \
+	    "Switching to thread $thread_nr.*running.*"
+
+	set test_name [string trim "interrupt $ampersand"]
+	set test_name "$test_name, thread $thread_nr"
+	gdb_test_multiple "interrupt $ampersand" $test_name {
+	    -re "$gdb_prompt " {
+		if { "$ampersand" == "&" } {
+		    exp_continue
+		}
+		pass $test_name
+	    }
+	    -re "\n\[^\r\]+Thread \[^\r\]+ stopped\[^\r\]+\r" {
+		if { "$ampersand" != "&" } {
+		    exp_continue
+		}
+		pass $test_name
+	    }
+	    timeout {
+		fail "$test_name (timeout)"
+	    }
+	}
+
+	set test_name "thread $thread_nr stopped"
+	gdb_test_multiple "info thread $thread_nr" $test_name {
+	    -re "running.*$gdb_prompt $" {
+		fail $test_name
+	    }
+	    -re "$gdb_prompt $" {
+		pass $test_name
+	    }
+	    timeout {
+		fail "$test_name (timeout)"
+		set i $NR_THREADS
+	    }
+	}
+    }
+}
+
+proc interrupt_all_threads_non_stop { command ampersand nr_threads_running } {
+    global gdb_prompt NR_THREADS
+
+    set thread_stopped_count 0
+    set test_name [string trim "$command $ampersand"]
+
+    gdb_test_multiple "$command $ampersand" $test_name {
+	-re "\n\[^\r\]+Thread \[^\r\]+ stopped\[^\r\]+\r" {
+	    verbose -log "got stopped thread"
+	    incr thread_stopped_count
+	    if { "$ampersand" == "&" } {
+		if { $thread_stopped_count == $nr_threads_running } {
+		    pass $test_name
+		} else {
+		    exp_continue
+		}
+	    } else {
+		exp_continue
+	    }
+	}
+	-re "\nNo unwaited-for children left.\[\r\n\]+$gdb_prompt $" {
+	    # This appeared during development.  Ensure it doesn't come back.
+	    fail "$test_name (No unwaited-for children left)"
+	}
+	-re "$gdb_prompt " {
+	    if { "$ampersand" == "&" } {
+		exp_continue
+	    }
+	    if { $thread_stopped_count != $nr_threads_running } {
+		fail "$test_name (missing thread)"
+	    } else {
+		pass $test_name
+	    }
+	}
+	timeout {
+	    fail "$test_name (timeout)"
+	}
+    }
+}
+
+proc verify_all_threads_stopped { } {
+    global gdb_prompt NR_THREADS
+
+    set test_name "info threads"
+    set running_count 0
+    set thread_count 0
+
+    gdb_test_multiple "info threads" $test_name {
+	-re "\n\[ \]*\[\[:digit:\]\]+ +Thread \[^\r\]+\\(running\\)\r" {
+	    verbose -log "got running thread"
+	    incr running_count
+	    incr thread_count
+	    exp_continue
+	}
+	-re "\n\[*\]?\[ \]*\[\[:digit:\]\]+ +Thread \[^\r\]+\r" {
+	    verbose -log "got stopped thread"
+	    incr thread_count
+	    exp_continue
+	}
+	-re "$gdb_prompt $" {
+	    if { $thread_count != [expr $NR_THREADS + 1] } {
+		fail "$test_name (missing thread)"
+	    } elseif { $running_count != 0 } {
+		fail "$test_name (running thread)"
+	    } else {
+		pass $test_name
+	    }
+	}
+	timeout {
+	    fail "$test_name (timeout)"
+	}
+    }
+}
+
+proc interrupt_and_verify_all_threads_non_stop { ampersand } {
+    global gdb_prompt NR_THREADS
+
+    # These tests are repeated just for stress testing purposes.
+
+    for { set i 0 } { $i < $NR_THREADS } { incr i } {
+	set thread_nr [expr 2 + $i]
+	with_test_prefix "thread ${thread_nr}" {
+	    gdb_test "c -a &" "Continuing."
+	    gdb_test "thread $thread_nr" \
+		"Switching to thread $thread_nr.*running.*"
+	    interrupt_all_threads_non_stop "interrupt -a" $ampersand [expr $NR_THREADS + 1]
+	    verify_all_threads_stopped
+	}
+    }
+}
+
+proc test_sync_all_stop { } {
+    with_test_prefix "sync, all-stop" {
+	prepare_interrupt_test off off
+
+	gdb_test "interrupt" "Current thread is already stopped."
+	gdb_test "interrupt -a" "All threads are already stopped."
+    }
+}
+
+proc test_async_all_stop { } {
+    global NR_THREADS
+
+    with_test_prefix "async, all-stop" {
+	prepare_interrupt_test on off
+
+	# Do these tests several times because there was a bug during
+	# development when doing two in a row.
+
+	for { set i 0 } { $i < $NR_THREADS } { incr i } {
+	    set thread_nr [expr 2 + $i]
+	    with_test_prefix "interrupt, thread ${thread_nr}" {
+		gdb_test "c &" "Continuing."
+		wait_thread_running $thread_nr
+		gdb_test "thread ${thread_nr}" \
+		    "Switching to thread ${thread_nr}.*running.*"
+		interrupt_all_stop "interrupt"
+		verify_all_threads_stopped
+	    }
+	}
+
+	for { set i 0 } { $i < $NR_THREADS } { incr i } {
+	    set thread_nr [expr 2 + $i]
+	    with_test_prefix "interrupt -a, thread ${thread_nr}" {
+		gdb_test "c &" "Continuing."
+		wait_thread_running $thread_nr
+		gdb_test "thread ${thread_nr}" \
+		    "Switching to thread ${thread_nr}.*running.*"
+		interrupt_all_stop "interrupt -a"
+		verify_all_threads_stopped
+	    }
+	}
+    }
+
+    with_test_prefix "async, all-stop, &" {
+	prepare_interrupt_test on off
+
+	# These tests are repeated just for stress testing purposes.
+
+	for { set i 0 } { $i < $NR_THREADS } { incr i } {
+	    set thread_nr [expr 2 + $i]
+	    with_test_prefix "interrupt, thread ${thread_nr}" {
+		gdb_test "c &" "Continuing."
+		wait_thread_running $thread_nr
+		gdb_test "thread ${thread_nr}" \
+		    "Switching to thread ${thread_nr}.*running.*"
+		interrupt_all_threads_all_stop_background "interrupt"
+		verify_all_threads_stopped
+	    }
+	}
+
+	for { set i 0 } { $i < $NR_THREADS } { incr i } {
+	    set thread_nr [expr 2 + $i]
+	    with_test_prefix "interrupt -a, thread ${thread_nr}" {
+		gdb_test "c &" "Continuing."
+		wait_thread_running $thread_nr
+		gdb_test "thread ${thread_nr}" \
+		    "Switching to thread ${thread_nr}.*running.*"
+		interrupt_all_threads_all_stop_background "interrupt -a"
+		verify_all_threads_stopped
+	    }
+	}
+    }
+}
+
+proc test_sync_non_stop { } {
+    global NR_THREADS
+
+    with_test_prefix "sync, non-stop, one thread at a time" {
+	prepare_interrupt_test off on
+
+	interrupt_and_verify_one_thread_non_stop ""
+    }
+
+    with_test_prefix "sync, non-stop, all threads" {
+	prepare_interrupt_test off on
+
+	# IWBN to use interrupt_and_verify_all_threads_non_stop here,
+	# but it uses & to continually resume the threads, which we can't do.
+	# So we just test once, until we know the extra coverage is needed
+	# here.  One suggestions is to put a breakpoint on do_something.
+	interrupt_all_threads_non_stop "interrupt -a" "" $NR_THREADS
+	verify_all_threads_stopped
+    }
+}
+
+proc test_async_non_stop { } {
+    global NR_THREADS
+
+    with_test_prefix "async, non-stop, one thread at a time" {
+	prepare_interrupt_test on on
+
+	interrupt_and_verify_one_thread_non_stop ""
+    }
+
+    with_test_prefix "async, non-stop, one thread at a time, &" {
+	prepare_interrupt_test on on
+
+	interrupt_and_verify_one_thread_non_stop "&"
+    }
+
+    with_test_prefix "async, non-stop, all threads" {
+	prepare_interrupt_test on on
+
+	interrupt_and_verify_all_threads_non_stop ""
+    }
+
+    with_test_prefix "async, non-stop, all threads, &" {
+	prepare_interrupt_test on on
+
+	interrupt_and_verify_all_threads_non_stop "&"
+    }
+}
+
+test_sync_all_stop
+test_async_all_stop
+test_sync_non_stop
+test_async_non_stop
+
+# That's it for standard testing.
+# The rest of the file is specialized testing.
+
+# Verify "interrupt" waits for the right thread in non-stop.
+# This test is inheritantly racy, even if it succeeds we're not testing
+# the right things to verify success wasn't a fluke.  But it has been
+# quite useful in practice.
+
+proc test_right_thread_stopped { } {
+    global gdb_prompt
+
+    with_test_prefix "test_right_thread_stopped" {
+	prepare_interrupt_test on on
+	# At this point thread 1 is stopped, threads 2-5 are running.
+	gdb_test_multiple "define interrupt2" "define user command: interrupt2" {
+	    -re "Type commands for definition of \"interrupt2\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+		gdb_test "thread 2\ninterrupt &\nthread 3\ninterrupt\nend" "" \
+		    "define user command: interrupt2"
+	    }
+	}
+	set test_name "interrupt2"
+	set prompt_seen 0
+	set thread2_stopped 0
+	set thread3_stopped 0
+	# Turn on command tracing, makes it easier to match output to the
+	# commands in the interrupt2 macro.
+	gdb_test_no_output "set trace-commands on"
+	gdb_test_multiple "interrupt2" $test_name {
+	    -re "\[\r\n\]+\[^\r\]+Thread \[^\r\]+ #3 stopped\[^\r\]+\[\r\n\]+" {
+		# Note: There may also be a notification that thread 2 stopped
+		# before we see the gdb prompt.  However, it can also occur
+		# after the prompt: be careful not to add a regexp for thread 2
+		# here lest it swallow the prompt!
+		verbose -log "saw thread 3"
+		set thread3_stopped 1
+		exp_continue
+	    }
+	    -re "$gdb_prompt " {
+		# Don't put a trailing $ on the regexp here.
+		# If expect buffers the thread 2 stopped output, we lose.
+		if { $thread3_stopped } {
+		    pass $test_name
+		} else {
+		    fail "$test_name (thread 3 not stopped before prompt)"
+		}
+	    }
+	    timeout {
+		fail "$test_name (timeout)"
+	    }
+	}
+	# We can't use gdb_test_no_output here because the command is traced.
+	gdb_test "set trace-commands off" ".*"
+	# One last thing, verify thread 3 is still the current thread.
+	verify_current_thread 3
+    }
+}
+
+test_right_thread_stopped

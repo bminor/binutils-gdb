@@ -6040,13 +6040,14 @@ using the @code{interrupt} command.
 
 @table @code
 @kindex interrupt
-@item interrupt
-@itemx interrupt -a
-
+@item interrupt @r{[}-a@r{]} @r{[}&@r{]}
 Suspend execution of the running program.  In all-stop mode,
 @code{interrupt} stops the whole process, but in non-stop mode, it stops
 only the current thread.  To stop the whole program in non-stop mode,
-use @code{interrupt -a}.
+use @code{interrupt -a}.  The @code{-a} option is ignored in all-stop mode.
+By default, the @code{interrupt} command waits for the thread to stop,
+or if the @code{-a} option is specified all threads.
+To not wait for the thread to stop pass @code{&}.
 @end table
 
 @node Thread-Specific Breakpoints

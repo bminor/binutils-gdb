@@ -837,6 +837,18 @@ is_running (ptid_t ptid)
 }
 
 int
+any_running (void)
+{
+  struct thread_info *tp;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    if (tp->state == THREAD_RUNNING)
+      return 1;
+
+  return 0;
+}
+
+int
 is_executing (ptid_t ptid)
 {
   struct thread_info *tp;

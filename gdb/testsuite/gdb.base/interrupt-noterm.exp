@@ -58,9 +58,9 @@ if { $async_supported < 0 } {
 # With native debugging, and no terminal (emulated by interactive-mode
 # off, above), GDB had a bug where "interrupt" would send SIGINT to
 # its own process group, instead of the inferior's.
-set test "interrupt"
+set test "interrupt &"
 gdb_test_multiple $test $test {
-    -re "interrupt\r\n$gdb_prompt " {
+    -re "interrupt &\r\n$gdb_prompt " {
 	pass $test
     }
 }

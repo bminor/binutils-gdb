@@ -51,9 +51,9 @@ gdb_expect {
 # Now test that we're still able to issue commands.  GDB used to
 # implement re-resuming from dprintfs with a synchronous "continue" in
 # the dprintf's command list, which stole the prompt from the user.
-set test "interrupt"
+set test "interrupt &"
 gdb_test_multiple $test $test {
-    -re "interrupt\r\n$gdb_prompt " {
+    -re "interrupt &\r\n$gdb_prompt " {
 	pass $test
     }
 }
