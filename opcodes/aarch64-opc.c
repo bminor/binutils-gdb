@@ -3245,6 +3245,12 @@ aarch64_pstatefield_supported_p (const aarch64_feature_set features,
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
     return FALSE;
 
+  /* AT S1E1RP, AT S1E1WP.  Values are from aarch64_sys_regs_at.  */
+  if ((reg->value == CPENS (0, C7, C9, 0)
+       || reg->value == CPENS (0, C7, C9, 1))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return FALSE;
+
   return TRUE;
 }
 
@@ -3284,6 +3290,8 @@ const aarch64_sys_ins_reg aarch64_sys_regs_at[] =
     { "s1e2w",      CPENS (4, C7, C8, 1), F_HASXT },
     { "s1e3r",      CPENS (6, C7, C8, 0), F_HASXT },
     { "s1e3w",      CPENS (6, C7, C8, 1), F_HASXT },
+    { "s1e1rp",     CPENS (0, C7, C9, 0), F_HASXT | F_ARCHEXT },
+    { "s1e1wp",     CPENS (0, C7, C9, 1), F_HASXT | F_ARCHEXT },
     { 0,       CPENS(0,0,0,0), 0 }
 };
 

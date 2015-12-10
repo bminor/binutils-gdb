@@ -1,5 +1,11 @@
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* gas/aarch64/sysreg-2.d: Update for new tests for AT S1E1RP and
+	AT S1E1WP.
+	* gas/aarch64/sysreg-2.s: Add tests for AT S1E1RP and AT S1E1WP.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* gas/aarch64/sysreg-2.d: Add tests for dc instruction.
 	* gas/aarch64/sysreg-2.s: Add uses of dc instruction.
 

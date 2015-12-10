@@ -30,3 +30,5 @@ Disassembly of section .text:
   [0-9a-f]+:	d50b7a20 	dc	cvac, x0
   [0-9a-f]+:	d50b7b21 	dc	cvau, x1
   [0-9a-f]+:	d50b7c22 	dc	cvap, x2
+  [0-9a-f]+:	d5087900 	at	s1e1rp, x0
+  [0-9a-f]+:	d5087921 	at	s1e1wp, x1
