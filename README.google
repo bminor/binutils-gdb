@@ -437,3 +437,11 @@ they are an ongoing maintenance burden.
 +	testsuite/
 +	* gdb.arch/amd64-entry-value-paramref.S: Re-fixup DIE offsets, they're
 +	relative to the start of the CU.
+--- README.google	2015-09-06 01:25:12.000000000 -0700
++++ README.google	2015-09-08 13:41:18.000000000 -0700
++
++2015-09-08  Doug Evans  <dje@google.com>
++
++	Submitted upstream, but not committed there yet.
++	PR go/18926
++	* gdb.go/methods.exp: Mark gdb_breakpoint calls as known failures.

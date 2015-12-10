@@ -36,14 +36,14 @@ if { [go_runto_main] < 0 } {
     return -1
 }
 
-if { [gdb_breakpoint ${bp_location1}] } {
-    pass "setting breakpoint 1"
-}
+setup_kfail "go/18926" "*-*-*"
+gdb_breakpoint ${bp_location1} message
+
 setup_xfail "*-*-*" ;# mangling issues IIRC
 gdb_test "cont" "Breakpoint .*:${bp_location1}.*" "Going to first breakpoint"
 
-if { [gdb_breakpoint ${bp_location2}] } {
-    pass "setting breakpoint 2"
-}
+setup_kfail "go/18926" "*-*-*"
+gdb_breakpoint ${bp_location2} message
+
 setup_xfail "*-*-*" ;# mangling issues IIRC
 gdb_test "cont" "Breakpoint .*:${bp_location2_regexp}.*" "Going to second breakpoint"
