@@ -138,23 +138,66 @@ set_gdb_data_directory (const char *new_datadir)
     }
 }
 
-/* Relocate a file or directory.  PROGNAME is the name by which gdb
-   was invoked (i.e., argv[0]).  INITIAL is the default value for the
-   file or directory.  FLAG is true if the value is relocatable, false
-   otherwise.  Returns a newly allocated string; this may return NULL
-   under the same conditions as make_relative_prefix.  */
+/* Relocate a file.
+   INITIAL is the default value of the file.
+   FLAG is true if the value is relocatable, false otherwise.
+   Returns a newly allocated string; this may return NULL
+   under the same conditions as gdb_make_relative_prefix.  */
 
 static char *
-relocate_path (const char *progname, const char *initial, int flag)
+relocate_gdb_file (const char *initial, int flag)
 {
-  if (flag)
-    return make_relative_prefix (progname, BINDIR, initial);
+  char *path;
+
+  /* Early exit if there's nothing we can do.  */
+  if (!flag)
+    return xstrdup (initial);
+
+  /* We have to try both make_relative_prefix and
+     make_relative_prefix_ignore_links. The first handles a symlink to
+     gdb where it is installed.  The second handles the case where the
+     installation tree is itself a collection of symlinks to random places.
+     Alas we can't distinguish a NULL return from make_relative_prefix*
+     due to lack of memory or due to failure to find a common prefix.
+     make_relative_prefix is tried first for backward compatibility.  Ugh.  */
+
+  path = make_relative_prefix (gdb_program_name, BINDIR, initial);
+  if (path != NULL && gdb_path_isfile (path))
+    return path;
+  xfree (path);
+  path = make_relative_prefix_ignore_links (gdb_program_name, BINDIR, initial);
+  if (path != NULL && gdb_path_isfile (path))
+    return path;
+  xfree (path);
   return xstrdup (initial);
 }
 
-/* Like relocate_path, but specifically checks for a directory.
-   INITIAL is relocated according to the rules of relocate_path.  If
-   the result is a directory, it is used; otherwise, INITIAL is used.
+/* Return the lrealpath form of PATH.
+   Space for PATH must have been malloc'd.
+   PATH is freed if the lrealpath'd form is different.  */
+
+static char *
+maybe_lrealpath (char *path)
+{
+  char *canon;
+
+  if (*path == '\0')
+    return path;
+
+  canon = lrealpath (path);
+  if (canon != NULL)
+    {
+      xfree (path);
+      path = canon;
+    }
+
+  return path;
+}
+
+/* Relocate a directory.
+   INITIAL is the default value of the directory.
+   FLAG is true if the value is relocatable, false otherwise.
+   If the result is a directory, it is used; otherwise, INITIAL is used.
    The chosen directory is then canonicalized using lrealpath.  This
    function always returns a newly-allocated string.  */
 
@@ -163,33 +206,29 @@ relocate_gdb_directory (const char *initial, int flag)
 {
   char *dir;
 
-  dir = relocate_path (gdb_program_name, initial, flag);
-  if (dir)
-    {
-      struct stat s;
+  /* Early exit if there's nothing we can do.  */
+  if (initial[0] == '\0')
+    return xstrdup ("");
+  if (!flag)
+    return maybe_lrealpath (xstrdup (initial));
 
-      if (*dir == '\0' || stat (dir, &s) != 0 || !S_ISDIR (s.st_mode))
-	{
-	  xfree (dir);
-	  dir = NULL;
-	}
-    }
-  if (!dir)
-    dir = xstrdup (initial);
+  /* We have to try both make_relative_prefix and
+     make_relative_prefix_ignore_links. The first handles a symlink to
+     gdb where it is installed.  The second handles the case where the
+     installation tree is itself a collection of symlinks to random places.
+     Alas we can't distinguish a NULL return from make_relative_prefix*
+     due to lack of memory or due to failure to find a common prefix.  Ugh.
+     make_relative_prefix is tried first for backward compatibility.  */
 
-  /* Canonicalize the directory.  */
-  if (*dir)
-    {
-      char *canon_sysroot = lrealpath (dir);
-
-      if (canon_sysroot)
-	{
-	  xfree (dir);
-	  dir = canon_sysroot;
-	}
-    }
-
-  return dir;
+  dir = make_relative_prefix (gdb_program_name, BINDIR, initial);
+  if (dir != NULL && gdb_path_isdir (dir))
+    return maybe_lrealpath (dir);
+  xfree (dir);
+  dir = make_relative_prefix_ignore_links (gdb_program_name, BINDIR, initial);
+  if (gdb_path_isdir (dir))
+    return maybe_lrealpath (dir);
+  xfree (dir);
+  return maybe_lrealpath (xstrdup (initial));
 }
 
 /* Compute the locations of init files that GDB should source and
@@ -238,9 +277,9 @@ get_init_files (const char **system_gdbinit,
 	    }
 	  else
 	    {
-	      relocated_sysgdbinit = relocate_path (gdb_program_name,
-						    SYSTEM_GDBINIT,
-						    SYSTEM_GDBINIT_RELOCATABLE);
+	      relocated_sysgdbinit
+		= relocate_gdb_file (SYSTEM_GDBINIT,
+				     SYSTEM_GDBINIT_RELOCATABLE);
 	    }
 	  if (relocated_sysgdbinit && stat (relocated_sysgdbinit, &s) == 0)
 	    sysgdbinit = relocated_sysgdbinit;

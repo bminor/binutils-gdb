@@ -3057,6 +3057,28 @@ ldirname (const char *filename)
   return dirname;
 }
 
+/* See utils.h.
+   Based on readline/complete.c:path_isdir.  */
+
+int
+gdb_path_isdir (const char *path)
+{
+  struct stat s;
+
+  return stat (path, &s) == 0 && S_ISDIR (s.st_mode);
+}
+
+/* See utils.h.
+   Based on readline/complete.c:path_isdir.  */
+
+int
+gdb_path_isfile (const char *path)
+{
+  struct stat s;
+
+  return stat (path, &s) == 0 && S_ISREG (s.st_mode);
+}
+
 /* Call libiberty's buildargv, and return the result.
    If buildargv fails due to out-of-memory, call nomem.
    Therefore, the returned value is guaranteed to be non-NULL,

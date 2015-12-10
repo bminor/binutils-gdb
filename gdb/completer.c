@@ -1285,17 +1285,6 @@ gdb_display_match_list_pager (int lines,
     return 0;
 }
 
-/* Return non-zero if FILENAME is a directory.
-   Based on readline/complete.c:path_isdir.  */
-
-static int
-gdb_path_isdir (const char *filename)
-{
-  struct stat finfo;
-
-  return (stat (filename, &finfo) == 0 && S_ISDIR (finfo.st_mode));
-}
-
 /* Return the portion of PATHNAME that should be output when listing
    possible completions.  If we are hacking filename completion, we
    are only interested in the basename, the portion following the

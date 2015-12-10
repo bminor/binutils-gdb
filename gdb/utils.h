@@ -135,6 +135,14 @@ extern void substitute_path_component (char **stringp, const char *from,
 				       const char *to);
 
 char *ldirname (const char *filename);
+
+/* Return non-zero if PATH is a directory.  */
+
+extern int gdb_path_isdir (const char *path);
+
+/* Return non-zero if PATH is a plain file.  */
+
+extern int gdb_path_isfile (const char *path);
 
 /* GDB output, ui_file utilities.  */
 

@@ -1284,6 +1284,9 @@ This GDB was configured as follows:\n\
    configure --host=%s --target=%s\n\
 "), host_name, target_name);
   fprintf_filtered (stream, _("\
+             --bindir=%s\n\
+"), BINDIR);
+  fprintf_filtered (stream, _("\
              --with-auto-load-dir=%s\n\
              --with-auto-load-safe-path=%s\n\
 "), AUTO_LOAD_DIR, AUTO_LOAD_SAFE_PATH);

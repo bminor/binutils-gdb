@@ -21,6 +21,10 @@
 	gdb.base/dso2dso-dso1.c, gdb.base/dso2dso-dso1.h, gdb.base/dso2dso.c,
 	gdb.base/dso2dso.exp: New files.
 
+2015-08-12  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* lib/gdb.exp (save_vars): New proc.
+
 2015-08-10  Doug Evans  <dje@google.com>
 	    Keith Seitz  <keiths@redhat.com>
 

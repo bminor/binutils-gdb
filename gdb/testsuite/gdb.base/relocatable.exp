@@ -1,0 +1,161 @@
+# Copyright 2015 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test gdb's handling of relocatability.
+# This only works if gdb was configured to be relocatable.
+# We can't rebuild gdb just for this test, but we can check whether
+# the built gdb is relocatable and if so then run the tests.
+
+# It's not clear what systems this test will work on.
+# For now pick the ones we know will work.
+if {![istarget *-*-linux*]
+    || [is_remote host]} {
+    return 0
+}
+
+gdb_exit
+gdb_start
+set config [capture_command_output "show config" ""]
+
+regsub "^.*(--bindir=\[\^\r\n\]+).*$" $config "\\1" bindir_text
+regsub "^.*(--with-gdb-datadir=\[\^\r\n\]+).*$" $config "\\1" datadir_text
+
+verbose -log "bindir_text: $bindir_text"
+verbose -log "datadir_text: $datadir_text"
+
+if { [string first " (relocatable)" $datadir_text] < 0 } {
+    unsupported "gdb not relocatable"
+    return 0
+}
+
+regsub "^--bindir=" $bindir_text "" bindir
+regsub "^--with-gdb-datadir=" $datadir_text "" datadir
+regsub " \\(relocatable\\)" $datadir "" datadir
+
+verbose -log "bindir: $bindir"
+verbose -log "datadir: $datadir"
+
+set env_program "env" ;# TODO: gdb_find_env
+set make_program "make" ;# TODO: gdb_find_make
+
+# Run "make install" to install gdb in INSTALL_DIR.
+# The result is zero for success, non-zero for failure.
+
+proc make_install { install_dir } {
+    global env_program
+    global make_program
+
+    file delete -force -- $install_dir
+
+    # If invoked from make check-parallel, several env vars are set up which
+    # will confuse this make, so unset them.
+    set env_options "-u MAKELEVEL -u MAKEFLAGS -u MFLAGS -u MAKEOVERRIDES"
+
+    # We don't need to install the docs or gdbserver, just gdb.
+    # And we don't want to cause a rebuild of gdb, so use install-only.
+    set make_options "-C .. install-only SUBDIRS=data-directory DESTDIR=$install_dir"
+
+    set cmd "$env_program $env_options $make_program $make_options"
+    verbose -log "Executing: $cmd"
+    set result [catch "exec $cmd" output]
+
+    verbose -log "result is $result"
+    verbose -log "output is $output"
+
+    set test "make install"
+    if { $result != 0 } {
+	fail $test
+    } else {
+	pass $test
+    }
+    return $result
+}
+
+proc start_and_check_data_dir { gdb_path expected_data_dir } {
+    global GDB INTERNAL_GDBFLAGS
+    save_vars { GDB INTERNAL_GDBFLAGS } {
+	set GDB $gdb_path
+	# We want this gdb to find its installed data-directory, so don't
+	# pass it one.
+	regsub -- "-data-directory \[^ \]+" $INTERNAL_GDBFLAGS "" INTERNAL_GDBFLAGS
+	gdb_exit
+	gdb_start
+	set datadir_in_gdb [capture_command_output "show data-dir" ""]
+	regsub "^GDB's data directory is \"" $datadir_in_gdb "" datadir_in_gdb
+	regsub "\".\[\r\n\]+$" $datadir_in_gdb "" datadir_in_gdb
+	set test "data-dir updated correctly"
+	if { $datadir_in_gdb == $expected_data_dir } {
+	    pass $test
+	} else {
+	    fail $test
+	}
+    }
+}
+
+# Move all files (and directories) from from_dir to to_dir and leave behind
+# symlinks pointing to the new location.
+
+proc move_and_leave_symlinks { from_dir to_dir } {
+    file delete -force -- $to_dir
+    file mkdir $to_dir
+    set files [glob -tails -directory $from_dir *]
+    foreach f $files {
+	file copy -- "${from_dir}/$f" "${to_dir}"
+	file delete -force -- "${from_dir}/$f"
+	file link -symbolic "${from_dir}/$f" "${to_dir}/$f"
+    }
+}
+
+# First test the case where gdb is a symlink to its installed copy.
+# This exercises make_relative_prefix (where we need to call lrealname
+# on gdb's argv[0] in order to establish our location).
+
+with_test_prefix "realpath_symlinks" {
+    set install_dir [standard_output_file make_relative_prefix]
+
+    if { [make_install $install_dir] == 0 } {
+	set linked_gdb [standard_output_file ${install_dir}/gdb]
+	file delete -force -- "${linked_gdb}"
+	file link -symbolic "${linked_gdb}" ".${bindir}/gdb"
+
+	start_and_check_data_dir $linked_gdb "${install_dir}${datadir}"
+    }
+}
+
+# Second test is having the install tree being a set of symlinks pointing
+# to (essentially) random places
+# This exercises make_relative_prefix_ignore_links (where calling lrealname on
+# gdb's argv[0] is the wrong thing to do).
+
+with_test_prefix "ignore_symlinks" {
+    set install_dir [standard_output_file make_relative_prefix_ignore_links]
+
+    if { [make_install $install_dir] == 0 } {
+	# Now that we've created an install tree, move bindir and datadir to
+	# "random" places and create symlinks in their place.
+
+	set install_bindir "${install_dir}${bindir}"
+	set install_datadir "${install_dir}${datadir}"
+
+	set random_bindir "${install_dir}/random1/bindir"
+	set random_datadir "${install_dir}/random2/datadir"
+
+	move_and_leave_symlinks $install_bindir $random_bindir
+	move_and_leave_symlinks $install_datadir $random_datadir
+
+	start_and_check_data_dir ${install_bindir}/gdb \
+	    "${install_dir}${datadir}"
+    }
+}
