@@ -158,3 +158,42 @@ they are an ongoing maintenance burden.
 +
 +	* gdbthread.h (any_running): Declare.
 +	* thread.c (any_running): New function.
+--- README.google	2015-09-05 16:33:32.000000000 -0700
++++ README.google	2015-09-05 17:01:28.000000000 -0700
++
++2015-09-05  Doug Evans  <google.com>
++
++	Ref# 12994080
++	Add support for DW_AT_str_offsets_base.
++	This patch is GOOGLE LOCAL for now.
++	Not sure when to submit it upstream.
++
++	* dwarf2read.c (struct dwarf2_per_objfile): New member str_offsets.
++	(dwarf2_elf_names): Add .debug_str_offsets.
++	(struct dwarf2_cu): New members str_offsets_base,
++	have_str_offsets_base.
++	(struct attribute): Reduce member form to 14 bits.  New member
++	string_is_str_index.
++	(DW_STRING_IS_STR_INDEX): New macro.
++	(dwarf2_locate_sections): Handle .debug_str_offsets.
++	(read_cutu_die_from_dwo): Initialize DW_STRING_IS_STR_INDEX for
++	comp_dir attribute.  Call get_comp_dir_attr.
++	(lookup_dwo_unit): Replace arg this_cu with reader.  All callers
++	updated.
++	(init_cutu_and_read_dies): Fetch value of DW_AT_str_offsets_base.
++	(init_cutu_and_read_dies_no_follow): Ditto.
++	(process_psymtab_comp_unit_reader): Call get_comp_dir_attr.
++	(find_file_and_directory): Ditto.
++	(read_attribute_value): Initialize DW_STRING_IS_STR_INDEX for all
++	string forms.
++	(read_attribute_value) <DW_FORM_GNU_str_index>: Handle appearance in
++	Fission stubs.
++	(read_str_index): Replace arg reader with cu, str_section,
++	str_offsets_section, str_offsets_base.  All callers updated.
++	(read_dwo_str_index, read_stub_str_index): New functions.
++	(get_stub_string_attr, get_comp_dir_attr): New functions.
++	* symfile.h (struct dwarf2_debug_sections): New member str_offsets.
++	* xcoffread.c (dwarf2_xcoff_names): Add entry for str_offsets.
++
++	include/
++	* dwarf2.def (DW_AT_str_offsets_base): New attribute.

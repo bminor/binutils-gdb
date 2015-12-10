@@ -162,6 +162,7 @@ static const struct dwarf2_debug_sections dwarf2_xcoff_names = {
   { NULL, NULL }, /* debug_macinfo */
   { NULL, NULL }, /* debug_macro */
   { ".dwstr", NULL },
+  { NULL, NULL }, /* debug_str_offsets */ /* GOOGLE LOCAL */
   { ".dwrnges", NULL },
   { NULL, NULL }, /* debug_types */
   { NULL, NULL }, /* debug_addr */

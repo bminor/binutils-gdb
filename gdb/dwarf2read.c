@@ -228,6 +228,7 @@ struct dwarf2_per_objfile
   struct dwarf2_section_info macinfo;
   struct dwarf2_section_info macro;
   struct dwarf2_section_info str;
+  struct dwarf2_section_info str_offsets; /* GOOGLE LOCAL */
   struct dwarf2_section_info ranges;
   struct dwarf2_section_info addr;
   struct dwarf2_section_info frame;
@@ -339,6 +340,7 @@ static const struct dwarf2_debug_sections dwarf2_elf_names =
   { ".debug_macinfo", ".zdebug_macinfo" },
   { ".debug_macro", ".zdebug_macro" },
   { ".debug_str", ".zdebug_str" },
+  { ".debug_str_offsets", ".zdebug_str_offsets" }, /* GOOGLE LOCAL */
   { ".debug_ranges", ".zdebug_ranges" },
   { ".debug_types", ".zdebug_types" },
   { ".debug_addr", ".zdebug_addr" },
@@ -535,6 +537,21 @@ struct dwarf2_cu
      DW_AT_ranges_base *would* have to be applied, and we'd have to care
      whether the DW_AT_ranges attribute came from the skeleton or DWO.  */
   ULONGEST ranges_base;
+
+  /* GOOGLE LOCAL */
+  /* The DW_AT_str_offsets_base attribute if present, zero otherwise
+     (zero is a valid value though).
+     Note this value comes from a Fission stub CU/TU's DIE.
+     Also note that the value is zero in the DWO case so this value can
+     be used without needing to know whether DWO files are in use or not.
+     Note that this "base" value is for attributes in the stub only, we don't
+     need this to process DW_FORM_GNU_str_index in DWO files.  */
+  ULONGEST str_offsets_base;
+
+  /* Non-zero if str_offsets_base contains the value of
+     DW_AT_str_offsets_base.  */
+  unsigned int have_str_offsets_base : 1;
+  /* END GOOGLE LOCAL */
 
   /* Mark used when releasing cached dies.  */
   unsigned int mark : 1;
@@ -1214,12 +1231,28 @@ struct abbrev_table
 struct attribute
   {
     ENUM_BITFIELD(dwarf_attribute) name : 16;
-    ENUM_BITFIELD(dwarf_form) form : 15;
+    ENUM_BITFIELD(dwarf_form) form : 14;
 
-    /* Has DW_STRING already been updated by dwarf2_canonicalize_name?  This
-       field should be in u.str (existing only for DW_STRING) but it is kept
-       here for better struct attribute alignment.  */
+    /* These bitfields are specific to particular fields in the union, but
+       are recorded here for better struct attribute packing.  */
+
+    /* Has DW_STRING already been updated by dwarf2_canonicalize_name?  */
     unsigned int string_is_canonical : 1;
+
+    /* GOOGLE LOCAL */
+    /* For strings in non-DWO files, was a string recorded with
+       DW_AT_GNU_str_index before we knew the value of DW_AT_str_offsets_base?
+       If non-zero, then the "value" of the string is in u.unsnd, and
+       read_dwo_str_index must be called to obtain the actual string.
+       This is necessary for DW_AT_comp_dir and DW_AT_GNU_dwo_name in Fission
+       stubs: To save a relocation DW_AT_GNU_str_index is used, but because
+       all .o file .debug_str_offsets sections are concatenated together in
+       the executable each .o has its own offset into this section.  So we
+       can't read the string until we read DW_AT_str_offsets_base.  Plus,
+       there's no guarantee it isn't recorded later in the DIE, after the
+       attribute that needs it.  Ugh.  */
+    unsigned int string_is_str_index : 1;
+    /* END GOOGLE LOCAL */
 
     union
       {
@@ -1273,6 +1306,7 @@ struct die_info
 
 #define DW_STRING(attr)    ((attr)->u.str)
 #define DW_STRING_IS_CANONICAL(attr) ((attr)->string_is_canonical)
+#define DW_STRING_IS_STR_INDEX(attr) ((attr)->string_is_str_index) /* GOOGLE LOCAL */
 #define DW_UNSND(attr)     ((attr)->u.unsnd)
 #define DW_BLOCK(attr)     ((attr)->u.blk)
 #define DW_SND(attr)       ((attr)->u.snd)
@@ -1516,8 +1550,19 @@ static CORE_ADDR read_addr_index_from_leb128 (struct dwarf2_cu *,
 					      const gdb_byte *,
 					      unsigned int *);
 
-static const char *read_str_index (const struct die_reader_specs *reader,
-				   ULONGEST str_index);
+/* GOOGLE LOCAL */
+static const char *read_dwo_str_index (const struct die_reader_specs *reader,
+				       ULONGEST str_index);
+
+static const char *read_stub_str_index (struct dwarf2_cu *cu,
+					ULONGEST str_index);
+
+static const char *get_comp_dir_attr (struct die_info *die,
+				      struct dwarf2_cu *cu);
+
+static const char *get_stub_string_attr (struct dwarf2_cu *cu,
+					 const struct attribute *attr);
+/* END GOOGLE LOCAL */
 
 static void set_cu_language (unsigned int, struct dwarf2_cu *);
 
@@ -2209,6 +2254,13 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
       dwarf2_per_objfile->str.s.asection = sectp;
       dwarf2_per_objfile->str.size = bfd_get_section_size (sectp);
     }
+  /* GOOGLE LOCAL */
+  else if (section_is_p (sectp->name, &names->str_offsets))
+    {
+      dwarf2_per_objfile->str_offsets.s.asection = sectp;
+      dwarf2_per_objfile->str_offsets.size = bfd_get_section_size (sectp);
+    }
+  /* END GOOGLE LOCAL */
   else if (section_is_p (sectp->name, &names->addr))
     {
       dwarf2_per_objfile->addr.s.asection = sectp;
@@ -5135,6 +5187,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
       comp_dir->name = DW_AT_comp_dir;
       comp_dir->form = DW_FORM_string;
       DW_STRING_IS_CANONICAL (comp_dir) = 0;
+      DW_STRING_IS_STR_INDEX (comp_dir) = 0; /* GOOGLE LOCAL */
       DW_STRING (comp_dir) = stub_comp_dir;
     }
 
@@ -5248,8 +5301,8 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
      TUs by skipping the stub and going directly to the entry in the DWO file.
      However, skipping the stub means we won't get DW_AT_comp_dir, so we have
      to get it via circuitous means.  Blech.  */
-  if (comp_dir != NULL)
-    result_reader->comp_dir = DW_STRING (comp_dir);
+  /* GOOGLE LOCAL */
+  result_reader->comp_dir = get_comp_dir_attr (comp_unit_die, cu);
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + dwo_unit->length
@@ -5260,15 +5313,18 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
   return 1;
 }
 
+/* GOOGLE LOCAL */
+
 /* Subroutine of init_cutu_and_read_dies to simplify it.
    Look up the DWO unit specified by COMP_UNIT_DIE of THIS_CU.
    Returns NULL if the specified DWO unit cannot be found.  */
 
 static struct dwo_unit *
-lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
+lookup_dwo_unit (const struct die_reader_specs *reader,
 		 struct die_info *comp_unit_die)
 {
-  struct dwarf2_cu *cu = this_cu->cu;
+  struct dwarf2_cu *cu = reader->cu;
+  struct dwarf2_per_cu_data *per_cu = cu->per_cu;
   struct attribute *attr;
   ULONGEST signature;
   struct dwo_unit *dwo_unit;
@@ -5279,19 +5335,17 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
   /* Yeah, we look dwo_name up again, but it simplifies the code.  */
   attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
   gdb_assert (attr != NULL);
-  dwo_name = DW_STRING (attr);
-  comp_dir = NULL;
-  attr = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
-  if (attr)
-    comp_dir = DW_STRING (attr);
+  dwo_name = get_stub_string_attr (cu, attr);
 
-  if (this_cu->is_debug_types)
+  comp_dir = get_comp_dir_attr (comp_unit_die, cu);
+
+  if (per_cu->is_debug_types)
     {
       struct signatured_type *sig_type;
 
-      /* Since this_cu is the first member of struct signatured_type,
+      /* Since per_cu is the first member of struct signatured_type,
 	 we can go from a pointer to one to a pointer to the other.  */
-      sig_type = (struct signatured_type *) this_cu;
+      sig_type = (struct signatured_type *) per_cu;
       signature = sig_type->signature;
       dwo_unit = lookup_dwo_type_unit (sig_type, dwo_name, comp_dir);
     }
@@ -5303,14 +5357,16 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
       if (! attr)
 	error (_("Dwarf Error: missing dwo_id for dwo_name %s"
 		 " [in module %s]"),
-	       dwo_name, objfile_name (this_cu->objfile));
+	       dwo_name, objfile_name (per_cu->objfile));
       signature = DW_UNSND (attr);
-      dwo_unit = lookup_dwo_comp_unit (this_cu, dwo_name, comp_dir,
+      dwo_unit = lookup_dwo_comp_unit (per_cu, dwo_name, comp_dir,
 				       signature);
     }
 
   return dwo_unit;
 }
+
+/* END GOOGLE LOCAL */
 
 /* Subroutine of init_cutu_and_read_dies to simplify it.
    See it for a description of the parameters.
@@ -5577,6 +5633,17 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   init_cu_die_reader (&reader, cu, section, NULL);
   info_ptr = read_full_die (&reader, &comp_unit_die, info_ptr, &has_children);
 
+  /* GOOGLE LOCAL */
+  /* DWO_AT_GNU_dwo_name and DW_AT_comp_dir in the stub may be using
+     DW_FORM_GNU_str_index which needs DW_AT_str_offsets_base.  */
+  attr = dwarf2_attr (comp_unit_die, DW_AT_str_offsets_base, cu);
+  if (attr)
+    {
+      cu->str_offsets_base = DW_UNSND (attr);
+      cu->have_str_offsets_base = 1;
+    }
+  /* END GOOGLE LOCAL */
+
   /* If we are in a DWO stub, process it and then read in the "real" CU/TU
      from the DWO file.
      Note that if USE_EXISTING_OK != 0, and THIS_CU->cu already contains a
@@ -5594,7 +5661,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 		       " has children (offset 0x%x) [in module %s]"),
 		     this_cu->offset.sect_off, bfd_get_filename (abfd));
 	}
-      dwo_unit = lookup_dwo_unit (this_cu, comp_unit_die);
+      dwo_unit = lookup_dwo_unit (&reader, comp_unit_die); /* GOOGLE LOCAL */
       if (dwo_unit != NULL)
 	{
 	  if (read_cutu_die_from_dwo (this_cu, dwo_unit,
@@ -5677,6 +5744,7 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
   struct die_reader_specs reader;
   struct cleanup *cleanups;
   struct die_info *comp_unit_die;
+  struct attribute *attr; /* GOOGLE LOCAL */
   int has_children;
 
   if (dwarf_die_debug)
@@ -5717,6 +5785,29 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
 
   init_cu_die_reader (&reader, &cu, section, dwo_file);
   info_ptr = read_full_die (&reader, &comp_unit_die, info_ptr, &has_children);
+
+  /* GOOGLE LOCAL */
+  /* DWO_AT_GNU_dwo_name and DW_AT_comp_dir in the stub may be using
+     DW_FORM_GNU_str_index, so we need to fetch DW_AT_str_offsets_base
+     ASAP.  */
+  attr = dwarf2_attr (comp_unit_die, DW_AT_str_offsets_base, &cu);
+  if (attr)
+    {
+      /* DW_AT_str_offsets_base shouldn't appear in DWOs.  */
+      if (dwo_file != NULL)
+	{
+	  complaint (&symfile_complaints,
+		     _("DW_AT_str_offsets_base present in DWO file %s,"
+		       " ignored"),
+		     dwo_file->dwo_name);
+	}
+      else
+	{
+	  cu.str_offsets_base = DW_UNSND (attr);
+	  cu.have_str_offsets_base = 1;
+	}
+    }
+  /* END GOOGLE LOCAL */
 
   die_reader_func (&reader, info_ptr, comp_unit_die, has_children, data);
 
@@ -5972,9 +6063,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   pst = create_partial_symtab (per_cu, filename);
 
   /* This must be done before calling dwarf2_build_include_psymtabs.  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
-  if (attr != NULL)
-    pst->dirname = DW_STRING (attr);
+  pst->dirname = get_comp_dir_attr (comp_unit_die, cu); /* GOOGLE LOCAL */
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -9060,7 +9149,7 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
 
   attr = dwarf2_attr (die, DW_AT_comp_dir, cu);
   if (attr)
-    *comp_dir = DW_STRING (attr);
+    *comp_dir = get_comp_dir_attr (die, cu); /* GOOGLE LOCAL */
   else if (producer_is_gcc_lt_4_3 (cu) && *name != NULL
 	   && IS_ABSOLUTE_PATH (*name))
     {
@@ -16269,6 +16358,7 @@ read_attribute_value (const struct die_reader_specs *reader,
     case DW_FORM_string:
       DW_STRING (attr) = read_direct_string (abfd, info_ptr, &bytes_read);
       DW_STRING_IS_CANONICAL (attr) = 0;
+      DW_STRING_IS_STR_INDEX (attr) = 0; /* GOOGLE LOCAL */
       info_ptr += bytes_read;
       break;
     case DW_FORM_strp:
@@ -16277,6 +16367,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 	  DW_STRING (attr) = read_indirect_string (abfd, info_ptr, cu_header,
 						   &bytes_read);
 	  DW_STRING_IS_CANONICAL (attr) = 0;
+	  DW_STRING_IS_STR_INDEX (attr) = 0; /* GOOGLE LOCAL */
 	  info_ptr += bytes_read;
 	  break;
 	}
@@ -16289,6 +16380,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 
 	DW_STRING (attr) = read_indirect_string_from_dwz (dwz, str_offset);
 	DW_STRING_IS_CANONICAL (attr) = 0;
+	DW_STRING_IS_STR_INDEX (attr) = 0; /* GOOGLE LOCAL */
 	info_ptr += bytes_read;
       }
       break;
@@ -16375,22 +16467,47 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += bytes_read;
       break;
     case DW_FORM_GNU_str_index:
-      if (reader->dwo_file == NULL)
-	{
-	  /* For now flag a hard error.
-	     Later we can turn this into a complaint if warranted.  */
-	  error (_("Dwarf Error: %s found in non-DWO CU [in module %s]"),
-		 dwarf_form_name (form),
-		 bfd_get_filename (abfd));
-	}
+      /* GOOGLE LOCAL */
       {
 	ULONGEST str_index =
 	  read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
 
-	DW_STRING (attr) = read_str_index (reader, str_index);
-	DW_STRING_IS_CANONICAL (attr) = 0;
+	/* If the DIE is from a Fission stub and we don't have
+	   DW_AT_str_offsets yet then we cannot fetch the string.
+	   All we can do is record the index and leave it to the caller
+	   to deal with.  */
+	if (reader->dwo_file != NULL)
+	  {
+	    DW_STRING (attr) = read_dwo_str_index (reader, str_index);
+	    DW_STRING_IS_CANONICAL (attr) = 0;
+	    DW_STRING_IS_STR_INDEX (attr) = 0;
+	  }
+	else if (cu->have_str_offsets_base)
+	  {
+	    DW_STRING (attr) = read_stub_str_index (cu, str_index);
+	    DW_STRING_IS_CANONICAL (attr) = 0;
+	    DW_STRING_IS_STR_INDEX (attr) = 0;
+	  }
+	else
+	  {
+	    /* Until it's clear handling the general case is worth it,
+	       flag any other uses of this situation as errors to avoid
+	       latent bugs.  What should happen is we should make DW_STRING
+	       check DW_STRING_IS_STR_INDEX, but ugh.  */
+	    if (attr->name != DW_AT_comp_dir
+		&& attr->name != DW_AT_GNU_dwo_name)
+	      {
+		error (_("Dwarf Error: %s/%s found in non-DWO CU"
+			 " [in module %s]"),
+		       dwarf_form_name (form), dwarf_attr_name (attr->name),
+		       bfd_get_filename (abfd));
+	      }
+	    DW_UNSND (attr) = str_index;
+	    DW_STRING_IS_STR_INDEX (attr) = 1;
+	  }
 	info_ptr += bytes_read;
       }
+      /* END GOOGLE LOCAL */
       break;
     default:
       error (_("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]"),
@@ -16919,49 +17036,131 @@ dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
   return read_addr_index_1 (addr_index, addr_base, addr_size);
 }
 
-/* Given a DW_FORM_GNU_str_index, fetch the string.
-   This is only used by the Fission support.  */
+/* GOOGLE LOCAL */
+
+/* Given a DW_FORM_GNU_str_index value STR_INDEX, fetch the string.
+   STR_SECTION, STR_OFFSETS_SECTION are either from a Fission stub or a
+   DWO file.  If the former, then STR_OFFSETS_BASE is the value of the
+   DW_AT_str_offsets_base attribute, otherwise it must be zero.  */
 
 static const char *
-read_str_index (const struct die_reader_specs *reader, ULONGEST str_index)
+read_str_index (struct dwarf2_cu *cu,
+		struct dwarf2_section_info *str_section,
+		struct dwarf2_section_info *str_offsets_section,
+		ULONGEST str_offsets_base, ULONGEST str_index)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   const char *objf_name = objfile_name (objfile);
   bfd *abfd = objfile->obfd;
-  struct dwarf2_cu *cu = reader->cu;
-  struct dwarf2_section_info *str_section = &reader->dwo_file->sections.str;
-  struct dwarf2_section_info *str_offsets_section =
-    &reader->dwo_file->sections.str_offsets;
   const gdb_byte *info_ptr;
   ULONGEST str_offset;
   static const char form_name[] = "DW_FORM_GNU_str_index";
+  static const char str_offsets_attr_name[] = "DW_AT_str_offsets";
 
   dwarf2_read_section (objfile, str_section);
   dwarf2_read_section (objfile, str_offsets_section);
+
   if (str_section->buffer == NULL)
-    error (_("%s used without .debug_str.dwo section"
+    error (_("%s used without %s section"
 	     " in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, objf_name);
+	   form_name, get_section_name (str_section),
+	   (long) cu->header.offset.sect_off, objf_name);
   if (str_offsets_section->buffer == NULL)
-    error (_("%s used without .debug_str_offsets.dwo section"
+    error (_("%s used without %s section"
 	     " in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, objf_name);
+	   form_name, get_section_name (str_offsets_section),
+	   (long) cu->header.offset.sect_off, objf_name);
   if (str_index * cu->header.offset_size >= str_offsets_section->size)
-    error (_("%s pointing outside of .debug_str_offsets.dwo"
-	     " section in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, objf_name);
+    error (_("%s pointing outside of %s section"
+	     " in CU at offset 0x%lx [in module %s]"),
+	   form_name, get_section_name (str_offsets_section),
+	   (long) cu->header.offset.sect_off, objf_name);
   info_ptr = (str_offsets_section->buffer
+	      + str_offsets_base
 	      + str_index * cu->header.offset_size);
   if (cu->header.offset_size == 4)
     str_offset = bfd_get_32 (abfd, info_ptr);
   else
     str_offset = bfd_get_64 (abfd, info_ptr);
   if (str_offset >= str_section->size)
-    error (_("Offset from %s pointing outside of"
-	     " .debug_str.dwo section in CU at offset 0x%lx [in module %s]"),
-	   form_name, (long) cu->header.offset.sect_off, objf_name);
+    error (_("Offset from %s pointing outside of %s section"
+	     " in CU at offset 0x%lx [in module %s]"),
+	   form_name, get_section_name (str_section),
+	   (long) cu->header.offset.sect_off, objf_name);
+
+  if (str_section->buffer[str_offset] == '\0')
+    return NULL;
   return (const char *) (str_section->buffer + str_offset);
 }
+
+/* Given a DW_FORM_GNU_str_index from a DWO file, fetch the string.  */
+
+static const char *
+read_dwo_str_index (const struct die_reader_specs *reader, ULONGEST str_index)
+{
+  return read_str_index (reader->cu,
+			 &reader->dwo_file->sections.str,
+			 &reader->dwo_file->sections.str_offsets,
+			 0, str_index);
+}
+
+/* Given a DW_FORM_GNU_str_index from a Fission stub, fetch the string.  */
+
+static const char *
+read_stub_str_index (struct dwarf2_cu *cu, ULONGEST str_index)
+{
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  const char *objf_name = objfile_name (objfile);
+  static const char form_name[] = "DW_FORM_GNU_str_index";
+  static const char str_offsets_attr_name[] = "DW_AT_str_offsets";
+
+  if (!cu->have_str_offsets_base)
+    {
+      error (_("%s used in Fission stub without %s"
+	       " in CU at offset 0x%lx [in module %s]"),
+	     form_name, str_offsets_attr_name,
+	     (long) cu->header.offset.sect_off, objf_name);
+    }
+
+  return read_str_index (cu,
+			 &dwarf2_per_objfile->str,
+			 &dwarf2_per_objfile->str_offsets,
+			 cu->str_offsets_base, str_index);
+}
+
+/* Wrapper around read_stub_str_index for attributes that *may* be using
+   DW_AT_GNU_str_index from a non-DWO file.  This is currently only
+   appropriate for Fission stubs, but nothing precludes it from being
+   used in general (not that that's necessarily a good thing).  */
+
+static const char *
+get_stub_string_attr (struct dwarf2_cu *cu, const struct attribute *attr)
+{
+  if (DW_STRING_IS_STR_INDEX (attr))
+    return read_stub_str_index (cu, DW_UNSND (attr));
+  return DW_STRING (attr);
+}
+
+/* Fetch the value of the DW_AT_comp_dir attribute.
+   The result is NULL if the attribute isn't present or if the value of
+   the attribute is "".  If the caller needs to do something different
+   depending on whether the attribute is present, the caller must check.
+   This function should always be used to fetch this attribute as it
+   handles DW_AT_GNU_str_index from Fission stubs.  This is important as
+   the low level DIE reader combines the contents of the stub with the DWO
+   top level DIE so that the rest of the code only ever sees one DIE.  */
+
+static const char *
+get_comp_dir_attr (struct die_info *die, struct dwarf2_cu *cu)
+{
+  const struct attribute *attr = dwarf2_attr (die, DW_AT_comp_dir, cu);
+
+  if (attr == NULL)
+    return NULL;
+  return get_stub_string_attr (cu, attr);
+}
+
+/* END GOOGLE LOCAL */
 
 /* Return the length of an LEB128 number in BUF.  */
 
