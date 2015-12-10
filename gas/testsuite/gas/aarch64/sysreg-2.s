@@ -36,3 +36,8 @@
 	dc cvac, x0
 	dc cvau, x1
 	dc cvap, x2
+
+	/* AT.  */
+
+	at s1e1rp, x0
+	at s1e1wp, x1
