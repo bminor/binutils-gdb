@@ -24,6 +24,7 @@
 #include "frame.h"
 #include "target.h"
 #include "value.h"
+#include "typeprint.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbcmd.h"
@@ -4754,19 +4755,21 @@ print_symbol_info (enum search_domain kind,
   if (kind != TYPES_DOMAIN && block == STATIC_BLOCK)
     printf_filtered ("static ");
 
+  // GOOGLE_LOCAL: call symbol_info_type{,def}_print
+
   /* Typedef that is not a C++ class.  */
   if (kind == TYPES_DOMAIN
       && SYMBOL_DOMAIN (sym) != STRUCT_DOMAIN)
-    typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
+    symbol_info_typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
   /* variable, func, or typedef-that-is-c++-class.  */
   else if (kind < TYPES_DOMAIN
 	   || (kind == TYPES_DOMAIN
 	       && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN))
     {
-      type_print (SYMBOL_TYPE (sym),
-		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-		   ? "" : SYMBOL_PRINT_NAME (sym)),
-		  gdb_stdout, 0);
+      symbol_info_type_print (SYMBOL_TYPE (sym),
+			      (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+			       ? "" : SYMBOL_PRINT_NAME (sym)),
+			      gdb_stdout, 0);
 
       printf_filtered (";\n");
     }

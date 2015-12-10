@@ -74,4 +74,11 @@ void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
 void c_type_print_args (struct type *, struct ui_file *, int, enum language,
 			const struct type_print_options *);
 
+// GOOGLE LOCAL
+void symbol_info_type_print (struct type *type, const char *varstring,
+			     struct ui_file *stream, int show);
+void symbol_info_typedef_print (struct type *type, struct symbol *news,
+				struct ui_file *stream);
+// END GOOGLE LOCAL
+
 #endif

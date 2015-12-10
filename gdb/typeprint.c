@@ -363,6 +363,60 @@ type_print (struct type *type, const char *varstring, struct ui_file *stream,
   LA_PRINT_TYPE (type, varstring, stream, show, 0, &default_ptype_flags);
 }
 
+// GOOGLE LOCAL: http://sourceware.org/bugzilla/show_bug.cgi?id=15412
+
+/* Cleanup helper for symbol_info_type_print to restore the raw flag.  */
+
+static void
+restore_default_ptype_raw (void *arg)
+{
+  int *previous = arg;
+
+  default_ptype_flags.raw = *previous;
+}
+
+/* Hacky copy of type_print to set the "raw" flag for print_symbol_info.
+   This is defined here and not symtab.c because we want to change just
+   one flag in default_ptype_flags (which is local to this file).  */
+
+void
+symbol_info_type_print (struct type *type, const char *varstring,
+			struct ui_file *stream, int show)
+{
+  int previous_raw = default_ptype_flags.raw;
+  struct cleanup *cleanup = make_cleanup (restore_default_ptype_raw,
+					  &previous_raw);
+
+  default_ptype_flags.raw = 1;
+  LA_PRINT_TYPE (type, varstring, stream, show, 0, &default_ptype_flags);
+  do_cleanups (cleanup);
+}
+
+/* Hacky copy of typedef_print to set the "raw" flag for print_symbol_info.
+   This is defined here and not symtab.c because we want to change just
+   one flag in default_ptype_flags (which is local to this file).  */
+
+void
+symbol_info_typedef_print (struct type *type, struct symbol *new,
+			   struct ui_file *stream)
+{
+  /* NOTE: The type printing API needs to change: LA_PRINT_TYPEDEF
+   doesn't take a type_print_options parameter, yet it calls type_print
+   which hardwires its own flags, and print_symbol_info calls
+   typedef_print.  That is why we can't just make a copy of
+   default_ptype_flags and set the raw flag.  To get all the performance
+   back in a simple and safe way we have to modify default_ptype_flags.  */
+  int previous_raw = default_ptype_flags.raw;
+  struct cleanup *cleanup = make_cleanup (restore_default_ptype_raw,
+					  &previous_raw);
+
+  default_ptype_flags.raw = 1;
+  LA_PRINT_TYPEDEF (type, new, stream);
+  do_cleanups (cleanup);
+}
+
+// END GOOGLE LOCAL
+
 /* Print TYPE to a string, returning it.  The caller is responsible for
    freeing the string.  */
 
