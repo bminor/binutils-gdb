@@ -76,6 +76,8 @@
 
 * Python Scripting
 
+  ** gdb.Objfile objects have a new attribute "have_debug_info", which is
+     a boolean indicating if debug information for the objfile is present.
   ** gdb.Objfile objects have a new attribute "username",
      which is the name of the objfile as specified by the user,
      without, for example, resolving symlinks.

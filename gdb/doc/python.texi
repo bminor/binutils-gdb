@@ -3720,6 +3720,15 @@ command-line option in @ref{Options, , Command Line Options, ld.info,
 The GNU Linker}.
 @end defvar
 
+@defvar Objfile.have_debug_info
+A boolean indicating if debug information for the objfile is present.
+Note that a program compiled without @samp{-g} may still have some debug
+information, e.g., from the @code{C} runtime.  Thus a value of @code{True}
+for this attribute does not mean that debug information is present for
+every source file in the program.  It only means that debug information
+is present for at least one source file.
+@end defvar
+
 @defvar Objfile.progspace
 The containing program space of the objfile as a @code{gdb.Progspace}
 object.  @xref{Progspaces In Python}.

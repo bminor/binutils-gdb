@@ -208,3 +208,17 @@ they are an ongoing maintenance burden.
 +
 +	Upstream PR libc/13097, local ref# 17474967
 +	* solib-svr4.c (svr4_read_so_list): Ignore linux-vdso64.so.1, for ppc.
+--- README.google	2015-09-05 18:02:29.000000000 -0700
++++ README.google	2015-09-05 18:13:45.000000000 -0700
++
++2015-09-05  Doug Evans  <google.com>
++
++	* NEWS: Mention gdb.Objfile.have_debug_info.
++	* python/py-objfile.c (objfpy_get_have_debug_info): New function.
++	(objfile_getset): Add "have_debug_info".
++
++	doc/
++	* python.texi (Objfiles In Python): Document Objfile.have_debug_info.
++
++	testsuite/
++	* gdb.python/py-objfile.exp: Add tests for objfile.have_debug_info.

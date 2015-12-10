@@ -161,6 +161,32 @@ objfpy_get_build_id (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+/* An Objfile method which returns whether there debug information
+   has been stripped.  */
+
+static PyObject *
+objfpy_get_have_debug_info (PyObject *self, void *closure)
+{
+  objfile_object *obj = (objfile_object *) self;
+  struct objfile *objfile = obj->objfile;
+
+  if (objfile != NULL)
+    {
+      /* This uses the same test that the file readers use, e.g.,
+	 elf_symfile_read, because its main purpose is to decide whether
+	 separate debug info files should be fetched.
+	 See elf_symfile_read.  */
+      if (!objfile_has_partial_symbols (objfile)
+	  && !objfile_has_full_symbols (objfile)
+	  && objfile->separate_debug_objfile == NULL
+	  && objfile->separate_debug_objfile_backlink == NULL)
+	Py_RETURN_FALSE;
+      Py_RETURN_TRUE;
+    }
+
+  Py_RETURN_FALSE;
+}
+
 /* An Objfile method which returns the objfile's progspace, or None.  */
 
 static PyObject *
@@ -695,6 +721,8 @@ static PyGetSetDef objfile_getset[] =
     NULL },
   { "build_id", objfpy_get_build_id, NULL,
     "The objfile's build id, or None.", NULL },
+  { "have_debug_info", objfpy_get_have_debug_info, NULL,
+    "True if there is debug information for the objfile.", NULL },
   { "progspace", objfpy_get_progspace, NULL,
     "The objfile's progspace, or None.", NULL },
   { "pretty_printers", objfpy_get_printers, objfpy_set_printers,

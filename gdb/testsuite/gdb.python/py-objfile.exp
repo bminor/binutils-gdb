@@ -61,6 +61,9 @@ if [string compare $binfile_build_id ""] {
     unsupported "build-id is not supported by the compiler"
 }
 
+gdb_test "python print (objfile.have_debug_info)" "True" \
+    "Get objfile have_debug_info"
+
 # Other lookup_objfile_by_build_id tests we can do, even if compiler doesn't
 # support them.
 gdb_test "python print (gdb.lookup_objfile (\"foo\", by_build_id=True))" \
@@ -106,6 +109,9 @@ if ![runto_main] {
 
 gdb_py_test_silent_cmd "python objfile = gdb.objfiles()\[0\]" \
     "Get no-debug objfile file" 1
+
+gdb_test "python print (objfile.have_debug_info)" "False" \
+    "Get no-debug objfile have_debug_info"
 
 gdb_test "python print (objfile.owner)" "None" \
     "Test owner of real objfile."
