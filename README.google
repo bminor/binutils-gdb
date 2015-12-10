@@ -121,3 +121,11 @@ they are an ongoing maintenance burden.
 +	uninterruptible.
 +	* psymtab.c (psymtab_to_symtab): Ditto.
 +	* python/python.c (check_quit_flag): Ditto.
+--- README.google	2015-09-05 16:20:56.000000000 -0700
++++ README.google	2015-09-05 16:22:58.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	Ref# 2180247
++	* infcmd.c (attach_command_post_wait): Pass zero to
++	post_create_inferior, same as run_command_1.

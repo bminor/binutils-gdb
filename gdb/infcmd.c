@@ -2505,7 +2505,9 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
   /* Take any necessary post-attaching actions for this platform.  */
   target_post_attach (ptid_get_pid (inferior_ptid));
 
-  post_create_inferior (&current_target, from_tty);
+  /* GOOGLE LOCAL: run_command_1 passes zero for from_tty here.
+     Do the same for attach.  Ref# 2180247  */
+  post_create_inferior (&current_target, 0);
 
   if (async_exec)
     {
