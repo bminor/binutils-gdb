@@ -1,5 +1,11 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* gas/aarch64/uao-directive.d: New.
+	* gas/aarch64/uao.d: New.
+	* gas/aarch64/uao.s: New.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* gas/aarch64/sysreg-2.d: Add tests for new registers.
 	* gas/aarch64/sysreg-2.s: Likewise.  Also replace some spaces with
 	tabs.

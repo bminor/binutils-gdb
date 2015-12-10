@@ -2763,6 +2763,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "daif",             CPEN_(3,C2,1),	0 },
   { "currentel",        CPEN_(0,C2,2),	0 }, /* RO */
   { "pan",		CPEN_(0,C2,3),	F_ARCHEXT },
+  { "uao",		CPEN_ (0, C2, 4), F_ARCHEXT },
   { "nzcv",             CPEN_(3,C2,0),	0 },
   { "fpcr",             CPEN_(3,C4,0),	0 },
   { "fpsr",             CPEN_(3,C4,1),	0 },
@@ -3161,7 +3162,14 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_1))
 
   /* ARMv8.2 features.  */
+
+  /* ID_AA64MMFR2_EL1.  */
   if (reg->value == CPENC (3, 0, C0, C7, 2)
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return FALSE;
+
+  /* PSTATE.UAO.  */
+  if (reg->value == CPEN_ (0, C2, 4)
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
     return FALSE;
 
@@ -3200,6 +3208,7 @@ const aarch64_sys_reg aarch64_pstatefields [] =
   { "daifset",          0x1e,	0 },
   { "daifclr",          0x1f,	0 },
   { "pan",		0x04,	F_ARCHEXT },
+  { "uao",		0x03,	F_ARCHEXT },
   { 0,          CPENC(0,0,0,0,0), 0 },
 };
 
@@ -3213,6 +3222,11 @@ aarch64_pstatefield_supported_p (const aarch64_feature_set features,
   /* PAN.  Values are from aarch64_pstatefields.  */
   if (reg->value == 0x04
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_PAN))
+    return FALSE;
+
+  /* UAO.  Values are from aarch64_pstatefields.  */
+  if (reg->value == 0x03
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
     return FALSE;
 
   return TRUE;
