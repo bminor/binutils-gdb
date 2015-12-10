@@ -197,7 +197,10 @@ inf_ptrace_attach (struct target_ops *ops, const char *args, int from_tty)
   errno = 0;
   ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3)0, 0);
   if (errno != 0)
-    perror_with_name (("ptrace"));
+    {
+      /* GOOGLE LOCAL: We want the linux caller to see errno.  */
+      throw_perror_with_name (SYSCALL_FAILED_ERROR, _("ptrace"));
+    }
 #else
   error (_("This system does not support attaching to a process"));
 #endif

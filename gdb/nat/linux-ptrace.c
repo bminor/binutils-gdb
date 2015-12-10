@@ -32,19 +32,19 @@ static int supported_ptrace_options = -1;
    these as strings to the already initialized BUFFER.  '\0'
    termination of BUFFER must be done by the caller.  */
 
-void
+static void
 linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer)
 {
   pid_t tracerpid;
 
   tracerpid = linux_proc_get_tracerpid_nowarn (pid);
   if (tracerpid > 0)
-    buffer_xml_printf (buffer, _("process %d is already traced "
+    buffer_xml_printf (buffer, _(", process %d is already traced "
 				 "by process %d"),
 		       (int) pid, (int) tracerpid);
 
   if (linux_proc_pid_is_zombie_nowarn (pid))
-    buffer_xml_printf (buffer, _("process %d is a zombie "
+    buffer_xml_printf (buffer, _(", process %d is a zombie "
 				 "- the process has already terminated"),
 		       (int) pid);
 }
@@ -56,22 +56,25 @@ linux_ptrace_attach_fail_reason_string (ptid_t ptid, int err)
 {
   static char *reason_string;
   struct buffer buffer;
-  char *warnings;
   long lwpid = ptid_get_lwp (ptid);
 
   xfree (reason_string);
 
   buffer_init (&buffer);
+  buffer_xml_printf (&buffer, "%s (%d)", strerror (err), err);
   linux_ptrace_attach_fail_reason (lwpid, &buffer);
+  /* GOOGLE LOCAL, ref: 20215162 */
+  if (err == EPERM)
+    {
+      buffer_xml_printf (&buffer, _("\n\
+If your uid matches the uid of the target process, check the setting of\n\
+/proc/sys/kernel/yama/ptrace_scope.  See /etc/sysctl.d/10-ptrace.conf.\n\
+If ptrace scope is enabled, you can lift the restriction with:\n\
+sudo sysctl -w kernel.yama.ptrace_scope=0"));
+    }
+  /* END GOOGLE LOCAL */
   buffer_grow_str0 (&buffer, "");
-  warnings = buffer_finish (&buffer);
-  if (warnings[0] != '\0')
-    reason_string = xstrprintf ("%s (%d), %s",
-				safe_strerror (err), err, warnings);
-  else
-    reason_string = xstrprintf ("%s (%d)",
-				safe_strerror (err), err);
-  xfree (warnings);
+  reason_string = buffer_finish (&buffer);
   return reason_string;
 }
 

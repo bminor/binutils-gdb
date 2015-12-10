@@ -105,6 +105,10 @@ enum errors {
      "_ERROR" is appended to the name.  */
   MAX_COMPLETIONS_REACHED_ERROR,
 
+  /* A system call failed.
+     The "errno" value is in gdb_exception.suberror.  */
+  SYSCALL_FAILED_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };
@@ -113,6 +117,7 @@ struct gdb_exception
 {
   enum return_reason reason;
   enum errors error;
+  int suberror;
   const char *message;
 };
 
@@ -262,6 +267,9 @@ extern void throw_vquit (const char *fmt, va_list ap)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 0);
 extern void throw_error (enum errors error, const char *fmt, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
+extern void throw_error_with_suberror (enum errors error, int suberror,
+				       const char *fmt, ...)
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 4);
 extern void throw_quit (const char *fmt, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 

@@ -959,17 +959,17 @@ add_internal_problem_command (struct internal_problem *problem)
 }
 
 /* Return a newly allocated string, containing the PREFIX followed
-   by the system error message for errno (separated by a colon).
+   by the system error message for ERRNO_VALUE (separated by a colon).
 
    The result must be deallocated after use.  */
 
 static char *
-perror_string (const char *prefix)
+perror_string (const char *prefix, int errno_value)
 {
   char *err;
   char *combined;
 
-  err = safe_strerror (errno);
+  err = safe_strerror (errno_value);
   combined = (char *) xmalloc (strlen (err) + strlen (prefix) + 3);
   strcpy (combined, prefix);
   strcat (combined, ": ");
@@ -978,16 +978,18 @@ perror_string (const char *prefix)
   return combined;
 }
 
-/* Print the system error message for errno, and also mention STRING
-   as the file name for which the error was encountered.  Use ERRCODE
-   for the thrown exception.  Then return to command level.  */
+/* Throw an error with the system error message for errno, and also mention
+   STRING as the file name or system call for which the error was encountered.
+   Use ERRCODE for the thrown exception.  */
 
 void
 throw_perror_with_name (enum errors errcode, const char *string)
 {
   char *combined;
+  /* Fetch ERRNO early, you never know which function might modify it.  */
+  int saved_errno = errno;
 
-  combined = perror_string (string);
+  combined = perror_string (string, saved_errno);
   make_cleanup (xfree, combined);
 
   /* I understand setting these is a matter of taste.  Still, some people
@@ -996,7 +998,9 @@ throw_perror_with_name (enum errors errcode, const char *string)
   bfd_set_error (bfd_error_no_error);
   errno = 0;
 
-  throw_error (errcode, _("%s."), combined);
+  throw_error_with_suberror (errcode,
+			     errcode == SYSCALL_FAILED_ERROR ? saved_errno : 0,
+			     _("%s."), combined);
 }
 
 /* See throw_perror_with_name, ERRCODE defaults here to GENERIC_ERROR.  */
@@ -1015,7 +1019,7 @@ perror_warning_with_name (const char *string)
 {
   char *combined;
 
-  combined = perror_string (string);
+  combined = perror_string (string, errno);
   warning (_("%s"), combined);
   xfree (combined);
 }

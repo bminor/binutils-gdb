@@ -147,8 +147,6 @@ struct buffer;
 # define TRAP_HWBKPT 4
 #endif
 
-extern void linux_ptrace_attach_fail_reason (pid_t pid, struct buffer *buffer);
-
 /* Find all possible reasons we could have failed to attach to PTID
    and return them as a string.  ERR is the error PTRACE_ATTACH failed
    with (an errno).  The result is stored in a static buffer.  This

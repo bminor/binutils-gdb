@@ -340,3 +340,27 @@ they are an ongoing maintenance burden.
 +	DW_LNS_set_address_from_logical, DW_LNS_set_subprogram,
 +	DW_LNS_inlined_call, DW_LNS_pop_context.
 +	(dwarf_line_number_content_type): New enum.
+--- README.google	2015-09-05 20:17:18.000000000 -0700
++++ README.google	2015-09-05 23:58:27.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	Ref# 20215162
++	* common/common-exceptions.c (exceptions_state_mc_init): Initialize
++	suberror.
++	(throw_it): New arg suberror.  All callers updated.
++	(throw_error_with_suberror): New function.
++	* common/common-exceptions.h (enum errors): New enum value
++	SYSCALL_FAILED_ERROR.
++	(struct gdb_exception): New member suberror.
++	(throw_error_with_suberror): Declare.
++	* inf-ptrace.c (inf_ptrace_attach): Call throw_perror_with_name
++	passing SYSCALL_FAILED_ERROR.
++	* linux-nat.c (linux_nat_attach): Rewrite attach fail error processing.
++	* nat/linux-ptrace.c (linux_ptrace_attach_fail_reason): Make static.
++	Prepend ", " to messages.
++	(linux_ptrace_attach_fail_reason_string): Rewrite message construction.
++	Add kernel.yama.ptrace_scope suggestion.
++	* nat/linux-ptrace.h (linux_ptrace_attach_fail_reason): Delete.
++	* utils.c (perror_string): New arg errno_value.  All callers updated.
++	(throw_perror_with_name): Call throw_error_with_suberror.

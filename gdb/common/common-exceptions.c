@@ -20,7 +20,7 @@
 #include "common-defs.h"
 #include "common-exceptions.h"
 
-const struct gdb_exception exception_none = { 0, GDB_NO_ERROR, NULL };
+const struct gdb_exception exception_none = { 0, GDB_NO_ERROR, 0, NULL };
 
 #ifndef __cplusplus
 
@@ -314,9 +314,9 @@ static char **exception_messages;
 /* The number of currently allocated entries in exception_messages.  */
 static int exception_messages_size;
 
-static void ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 0)
-throw_it (enum return_reason reason, enum errors error, const char *fmt,
-	  va_list ap)
+static void ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (4, 0)
+throw_it (enum return_reason reason, enum errors error, int suberror,
+	  const char *fmt, va_list ap)
 {
   struct gdb_exception e;
   char *new_message;
@@ -349,6 +349,7 @@ throw_it (enum return_reason reason, enum errors error, const char *fmt,
   /* Create the exception.  */
   e.reason = reason;
   e.error = error;
+  e.suberror = suberror;
   e.message = new_message;
 
   /* Throw the exception.  */
@@ -358,13 +359,13 @@ throw_it (enum return_reason reason, enum errors error, const char *fmt,
 void
 throw_verror (enum errors error, const char *fmt, va_list ap)
 {
-  throw_it (RETURN_ERROR, error, fmt, ap);
+  throw_it (RETURN_ERROR, error, 0, fmt, ap);
 }
 
 void
 throw_vquit (const char *fmt, va_list ap)
 {
-  throw_it (RETURN_QUIT, GDB_NO_ERROR, fmt, ap);
+  throw_it (RETURN_QUIT, GDB_NO_ERROR, 0, fmt, ap);
 }
 
 void
@@ -374,6 +375,17 @@ throw_error (enum errors error, const char *fmt, ...)
 
   va_start (args, fmt);
   throw_verror (error, fmt, args);
+  va_end (args);
+}
+
+void
+throw_error_with_suberror (enum errors error, int suberror,
+			   const char *fmt, ...)
+{
+  va_list args;
+
+  va_start (args, fmt);
+  throw_it (RETURN_ERROR, error, suberror, fmt, args);
   va_end (args);
 }
 

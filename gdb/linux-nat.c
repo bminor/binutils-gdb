@@ -1280,23 +1280,18 @@ linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
   CATCH (ex, RETURN_MASK_ERROR)
     {
       pid_t pid = parse_pid_to_attach (args);
-      struct buffer buffer;
-      char *message, *buffer_s;
+      char *reason;
 
-      message = xstrdup (ex.message);
-      make_cleanup (xfree, message);
-
-      buffer_init (&buffer);
-      linux_ptrace_attach_fail_reason (pid, &buffer);
-
-      buffer_grow_str0 (&buffer, "");
-      buffer_s = buffer_finish (&buffer);
-      make_cleanup (xfree, buffer_s);
-
-      if (*buffer_s != '\0')
-	throw_error (ex.error, "warning: %s\n%s", buffer_s, message);
+      if (ex.error == SYSCALL_FAILED_ERROR)
+	{
+	  ptid = ptid_build (pid, pid, 0);
+	  reason = linux_ptrace_attach_fail_reason_string (ptid, ex.suberror);
+	  throw_error_with_suberror (ex.error, ex.suberror,
+				     "Cannot attach to process %ld: %s",
+				     (unsigned long) pid, reason);
+	}
       else
-	throw_error (ex.error, "%s", message);
+	throw_error (ex.error, "%s", ex.message);
     }
   END_CATCH
 
