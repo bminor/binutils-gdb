@@ -1,5 +1,10 @@
 2015-12-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.texinfo (Threads): Replace warning with explanation
+	about single-threaded programs.
+
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.texinfo (Threads): Remove mention of SGI.
 	(Forks): Remove mention of HP-UX.
 	(Breakpoints): Remove mention of HP-UX.

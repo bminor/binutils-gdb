@@ -2844,24 +2844,6 @@ the user specify which @code{libthread_db} to use if the default choice
 isn't compatible with the program.
 @end itemize
 
-@quotation
-@emph{Warning:} These facilities are not yet available on every
-@value{GDBN} configuration where the operating system supports threads.
-If your @value{GDBN} does not support threads, these commands have no
-effect.  For example, a system without thread support shows no output
-from @samp{info threads}, and always rejects the @code{thread} command,
-like this:
-
-@smallexample
-(@value{GDBP}) info threads
-(@value{GDBP}) thread 1
-Thread ID 1 not known.  Use the "info threads" command to
-see the IDs of currently known threads.
-@end smallexample
-@c FIXME to implementors: how hard would it be to say "sorry, this GDB
-@c                        doesn't support threads"?
-@end quotation
-
 @cindex focus of debugging
 @cindex current thread
 The @value{GDBN} thread debugging facility allows you to observe all
@@ -2902,6 +2884,10 @@ further qualifier.
 @cindex thread identifier (GDB)
 For debugging purposes, @value{GDBN} associates its own thread
 number---always a single integer---with each thread in your program.
+
+From @value{GDBN}'s perspective, a process always has at least one
+thread.  In other words, @value{GDBN} assigns a thread number to the
+program's ``main thread'' even if the program is not multi-threaded.
 
 @table @code
 @kindex info threads
