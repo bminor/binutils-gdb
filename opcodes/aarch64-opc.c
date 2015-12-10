@@ -1279,12 +1279,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	{
 	  assert (idx == 1 && (aarch64_get_operand_class (opnds[0].type)
 			       == AARCH64_OPND_CLASS_SYSTEM));
-	  if (opnds[1].present && !opnds[0].sysins_op->has_xt)
+	  if (opnds[1].present
+	      && !aarch64_sys_ins_reg_has_xt (opnds[0].sysins_op))
 	    {
 	      set_other_error (mismatch_detail, idx, _("extraneous register"));
 	      return 0;
 	    }
-	  if (!opnds[1].present && opnds[0].sysins_op->has_xt)
+	  if (!opnds[1].present
+	      && aarch64_sys_ins_reg_has_xt (opnds[0].sysins_op))
 	    {
 	      set_other_error (mismatch_detail, idx, _("missing register"));
 	      return 0;
@@ -2748,6 +2750,12 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 #endif
 #define F_ARCHEXT	0x2	/* Architecture dependent system register.  */
 
+#ifdef F_HASXT
+#undef F_HASXT
+#endif
+#define F_HASXT		0x4	/* System instruction register <Xt>
+				   operand.  */
+
 
 /* TODO there are two more issues need to be resolved
    1. handle read-only and write-only system registers
@@ -3236,76 +3244,82 @@ const aarch64_sys_ins_reg aarch64_sys_regs_ic[] =
 {
     { "ialluis", CPENS(0,C7,C1,0), 0 },
     { "iallu",   CPENS(0,C7,C5,0), 0 },
-    { "ivau",    CPENS(3,C7,C5,1), 1 },
+    { "ivau",    CPENS (3, C7, C5, 1), F_HASXT },
     { 0, CPENS(0,0,0,0), 0 }
 };
 
 const aarch64_sys_ins_reg aarch64_sys_regs_dc[] =
 {
-    { "zva",        CPENS(3,C7,C4,1),  1 },
-    { "ivac",       CPENS(0,C7,C6,1),  1 },
-    { "isw",        CPENS(0,C7,C6,2),  1 },
-    { "cvac",       CPENS(3,C7,C10,1), 1 },
-    { "csw",        CPENS(0,C7,C10,2), 1 },
-    { "cvau",       CPENS(3,C7,C11,1), 1 },
-    { "civac",      CPENS(3,C7,C14,1), 1 },
-    { "cisw",       CPENS(0,C7,C14,2), 1 },
+    { "zva",	    CPENS (3, C7, C4, 1),  F_HASXT },
+    { "ivac",       CPENS (0, C7, C6, 1),  F_HASXT },
+    { "isw",	    CPENS (0, C7, C6, 2),  F_HASXT },
+    { "cvac",       CPENS (3, C7, C10, 1), F_HASXT },
+    { "csw",	    CPENS (0, C7, C10, 2), F_HASXT },
+    { "cvau",       CPENS (3, C7, C11, 1), F_HASXT },
+    { "civac",      CPENS (3, C7, C14, 1), F_HASXT },
+    { "cisw",       CPENS (0, C7, C14, 2), F_HASXT },
     { 0,       CPENS(0,0,0,0), 0 }
 };
 
 const aarch64_sys_ins_reg aarch64_sys_regs_at[] =
 {
-    { "s1e1r",      CPENS(0,C7,C8,0), 1 },
-    { "s1e1w",      CPENS(0,C7,C8,1), 1 },
-    { "s1e0r",      CPENS(0,C7,C8,2), 1 },
-    { "s1e0w",      CPENS(0,C7,C8,3), 1 },
-    { "s12e1r",     CPENS(4,C7,C8,4), 1 },
-    { "s12e1w",     CPENS(4,C7,C8,5), 1 },
-    { "s12e0r",     CPENS(4,C7,C8,6), 1 },
-    { "s12e0w",     CPENS(4,C7,C8,7), 1 },
-    { "s1e2r",      CPENS(4,C7,C8,0), 1 },
-    { "s1e2w",      CPENS(4,C7,C8,1), 1 },
-    { "s1e3r",      CPENS(6,C7,C8,0), 1 },
-    { "s1e3w",      CPENS(6,C7,C8,1), 1 },
+    { "s1e1r",      CPENS (0, C7, C8, 0), F_HASXT },
+    { "s1e1w",      CPENS (0, C7, C8, 1), F_HASXT },
+    { "s1e0r",      CPENS (0, C7, C8, 2), F_HASXT },
+    { "s1e0w",      CPENS (0, C7, C8, 3), F_HASXT },
+    { "s12e1r",     CPENS (4, C7, C8, 4), F_HASXT },
+    { "s12e1w",     CPENS (4, C7, C8, 5), F_HASXT },
+    { "s12e0r",     CPENS (4, C7, C8, 6), F_HASXT },
+    { "s12e0w",     CPENS (4, C7, C8, 7), F_HASXT },
+    { "s1e2r",      CPENS (4, C7, C8, 0), F_HASXT },
+    { "s1e2w",      CPENS (4, C7, C8, 1), F_HASXT },
+    { "s1e3r",      CPENS (6, C7, C8, 0), F_HASXT },
+    { "s1e3w",      CPENS (6, C7, C8, 1), F_HASXT },
     { 0,       CPENS(0,0,0,0), 0 }
 };
 
 const aarch64_sys_ins_reg aarch64_sys_regs_tlbi[] =
 {
     { "vmalle1",   CPENS(0,C8,C7,0), 0 },
-    { "vae1",      CPENS(0,C8,C7,1), 1 },
-    { "aside1",    CPENS(0,C8,C7,2), 1 },
-    { "vaae1",     CPENS(0,C8,C7,3), 1 },
+    { "vae1",      CPENS (0, C8, C7, 1), F_HASXT },
+    { "aside1",    CPENS (0, C8, C7, 2), F_HASXT },
+    { "vaae1",     CPENS (0, C8, C7, 3), F_HASXT },
     { "vmalle1is", CPENS(0,C8,C3,0), 0 },
-    { "vae1is",    CPENS(0,C8,C3,1), 1 },
-    { "aside1is",  CPENS(0,C8,C3,2), 1 },
-    { "vaae1is",   CPENS(0,C8,C3,3), 1 },
-    { "ipas2e1is", CPENS(4,C8,C0,1), 1 },
-    { "ipas2le1is",CPENS(4,C8,C0,5), 1 },
-    { "ipas2e1",   CPENS(4,C8,C4,1), 1 },
-    { "ipas2le1",  CPENS(4,C8,C4,5), 1 },
-    { "vae2",      CPENS(4,C8,C7,1), 1 },
-    { "vae2is",    CPENS(4,C8,C3,1), 1 },
+    { "vae1is",    CPENS (0, C8, C3, 1), F_HASXT },
+    { "aside1is",  CPENS (0, C8, C3, 2), F_HASXT },
+    { "vaae1is",   CPENS (0, C8, C3, 3), F_HASXT },
+    { "ipas2e1is", CPENS (4, C8, C0, 1), F_HASXT },
+    { "ipas2le1is",CPENS (4, C8, C0, 5), F_HASXT },
+    { "ipas2e1",   CPENS (4, C8, C4, 1), F_HASXT },
+    { "ipas2le1",  CPENS (4, C8, C4, 5), F_HASXT },
+    { "vae2",      CPENS (4, C8, C7, 1), F_HASXT },
+    { "vae2is",    CPENS (4, C8, C3, 1), F_HASXT },
     { "vmalls12e1",CPENS(4,C8,C7,6), 0 },
     { "vmalls12e1is",CPENS(4,C8,C3,6), 0 },
-    { "vae3",      CPENS(6,C8,C7,1), 1 },
-    { "vae3is",    CPENS(6,C8,C3,1), 1 },
+    { "vae3",      CPENS (6, C8, C7, 1), F_HASXT },
+    { "vae3is",    CPENS (6, C8, C3, 1), F_HASXT },
     { "alle2",     CPENS(4,C8,C7,0), 0 },
     { "alle2is",   CPENS(4,C8,C3,0), 0 },
     { "alle1",     CPENS(4,C8,C7,4), 0 },
     { "alle1is",   CPENS(4,C8,C3,4), 0 },
     { "alle3",     CPENS(6,C8,C7,0), 0 },
     { "alle3is",   CPENS(6,C8,C3,0), 0 },
-    { "vale1is",   CPENS(0,C8,C3,5), 1 },
-    { "vale2is",   CPENS(4,C8,C3,5), 1 },
-    { "vale3is",   CPENS(6,C8,C3,5), 1 },
-    { "vaale1is",  CPENS(0,C8,C3,7), 1 },
-    { "vale1",     CPENS(0,C8,C7,5), 1 },
-    { "vale2",     CPENS(4,C8,C7,5), 1 },
-    { "vale3",     CPENS(6,C8,C7,5), 1 },
-    { "vaale1",    CPENS(0,C8,C7,7), 1 },
+    { "vale1is",   CPENS (0, C8, C3, 5), F_HASXT },
+    { "vale2is",   CPENS (4, C8, C3, 5), F_HASXT },
+    { "vale3is",   CPENS (6, C8, C3, 5), F_HASXT },
+    { "vaale1is",  CPENS (0, C8, C3, 7), F_HASXT },
+    { "vale1",     CPENS (0, C8, C7, 5), F_HASXT },
+    { "vale2",     CPENS (4, C8, C7, 5), F_HASXT },
+    { "vale3",     CPENS (6, C8, C7, 5), F_HASXT },
+    { "vaale1",    CPENS (0, C8, C7, 7), F_HASXT },
     { 0,       CPENS(0,0,0,0), 0 }
 };
+
+bfd_boolean
+aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *sys_ins_reg)
+{
+  return (sys_ins_reg->flags & F_HASXT) != 0;
+}
 
 #undef C0
 #undef C1
