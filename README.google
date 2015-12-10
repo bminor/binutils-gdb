@@ -271,3 +271,13 @@ they are an ongoing maintenance burden.
 +
 +	testsuite/
 +	* gdb.base/dprintf-detach.exp: Cope with local patch. Ref# 2180247
+--- README.google	2015-09-05 18:55:44.000000000 -0700
++++ README.google	2015-09-05 18:59:16.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	* python/python.c (gdbpy_top_interpreter_is_mi): New function.
++	(GdbMethods): New member top_interpreter_is_mi.
++
++	testsuite/
++	* gdb.python/py-mi.exp: Add tests for gdb.top_interpreter_is_mi.

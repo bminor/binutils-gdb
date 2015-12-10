@@ -1541,6 +1541,16 @@ gdbpy_free_type_printers (const struct extension_language_defn *extlang,
   do_cleanups (cleanups);
 }
 
+/* Return True if the top interpreter is MI-like.  */
+
+static PyObject *
+gdbpy_top_interpreter_is_mi (PyObject *unused1, PyObject *unused2)
+{
+  if (ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ())))
+    Py_RETURN_TRUE;
+  Py_RETURN_FALSE;
+}
+
 #else /* HAVE_PYTHON */
 
 /* Dummy implementation of the gdb "python-interactive" and "python"

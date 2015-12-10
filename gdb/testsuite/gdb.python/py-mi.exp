@@ -356,3 +356,17 @@ mi_list_varobj_children fake.private {
 
 mi_gdb_test "-var-set-visualizer fake.private gdb.default_visualizer" \
     "\\^done" "Install visualizer on a cplus_fake_child"
+
+# Test top_interpreter_is_mi.
+
+gdb_exit
+gdb_start
+gdb_test "python print gdb.top_interpreter_is_mi()" "False" \
+  "top_interpreter_is_mi when false"
+
+gdb_exit
+if ![mi_gdb_start] {
+    mi_gdb_test "python print gdb.top_interpreter_is_mi()" \
+	".*~\"True\\\\n\"\r\n\\^done" \
+	"top_interpreter_is_mi when true"
+}
