@@ -98,4 +98,12 @@ extern void clear_current_source_symtab_and_line (void);
 
 /* Add a source path substitution rule.  */
 extern void add_substitute_path_rule (char *, char *);
+
+/* GOOGLE LOCAL ref# 23817600 */
+/* Return the possibly canonicalized version of SOURCE_PATH.
+   Whether to do so is controlled by the "canonicalize-source-paths"
+   parameter.  The result is always an absolute path.
+   Space for the result is always malloc'd, caller must free.  */
+extern char *canonicalize_source_path (const char *source_path);
+
 #endif

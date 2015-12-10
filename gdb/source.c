@@ -62,6 +62,11 @@ static void line_info (char *, int);
 
 static void source_info (char *, int);
 
+/* GOOGLE LOCAL ref# 23817600 */
+/* Non-zero if source file paths should be canonicalized (realpath'd).  */
+
+static int canonicalize_source_paths = 1;
+
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
 
@@ -916,7 +921,9 @@ source_full_path_of (const char *filename, char **full_pathname)
   int fd;
 
   fd = openp (source_path,
-	      OPF_TRY_CWD_FIRST | OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH,
+	      (OPF_TRY_CWD_FIRST | OPF_SEARCH_IN_PATH
+	       /* GOOGLE LOCAL ref# 23817600 */
+	       | (canonicalize_source_paths ? OPF_RETURN_REALPATH : 0)),
 	      filename, O_RDONLY, full_pathname);
   if (fd < 0)
     {
@@ -1028,7 +1035,8 @@ find_and_open_source (const char *filename,
       result = gdb_open_cloexec (*fullname, OPEN_MODE, 0);
       if (result >= 0)
 	{
-	  char *lpath = gdb_realpath (*fullname);
+	  /* GOOGLE LOCAL ref# 23817600 */
+	  char *lpath = canonicalize_source_path (*fullname);
 
 	  xfree (*fullname);
 	  *fullname = lpath;
@@ -1089,15 +1097,22 @@ find_and_open_source (const char *filename,
         }
     }
 
-  result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH, filename,
-		  OPEN_MODE, fullname);
+  /* GOOGLE LOCAL ref# 23817600 */
+  result = openp (path,
+		  (OPF_SEARCH_IN_PATH
+		   | (canonicalize_source_paths ? OPF_RETURN_REALPATH : 0)),
+		  filename, OPEN_MODE, fullname);
   if (result < 0)
     {
       /* Didn't work.  Try using just the basename.  */
       p = lbasename (filename);
       if (p != filename)
-	result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH, p,
-			OPEN_MODE, fullname);
+	result = openp (path,
+			/* GOOGLE LOCAL ref# 23817600 */
+			(OPF_SEARCH_IN_PATH
+			 | (canonicalize_source_paths
+			    ? OPF_RETURN_REALPATH : 0)),
+			p, OPEN_MODE, fullname);
     }
 
   do_cleanups (cleanup);
@@ -2002,6 +2017,16 @@ set_substitute_path_command (char *args, int from_tty)
   do_cleanups (cleanup);
 }
 
+/* GOOGLE LOCAL ref# 23817600 */
+/* See source.h.  */
+
+char *
+canonicalize_source_path (const char *source_path)
+{
+  if (canonicalize_source_paths)
+    return gdb_realpath (source_path);
+  return gdb_abspath (source_path);
+}
 
 void
 _initialize_source (void)
@@ -2120,4 +2145,12 @@ By default, relative filenames are displayed."),
 			show_filename_display_string,
 			&setlist, &showlist);
 
+  /* GOOGLE LOCAL ref# 23817600 */
+  add_setshow_boolean_cmd ("canonicalize-source-paths", class_obscure,
+			   &canonicalize_source_paths, _("\
+Set whether source file paths are canonicalized."), _("\
+Show whether source file paths are canonicalized."), _("\
+If set, GDB will canonicalize all source paths (e.g., expand symlinks)."),
+			   NULL, NULL,
+			   &setlist, &showlist);
 }

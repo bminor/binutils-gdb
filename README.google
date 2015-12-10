@@ -481,3 +481,19 @@ they are an ongoing maintenance burden.
 +	testsuite/
 +	* gdb.python/python.exp: Add test for symlink from .py file to .notpy
 +	file.
+--- README.google	2015-09-15 16:23:33.000000000 -0700
++++ README.google	2015-09-15 16:26:22.000000000 -0700
++
++2015-09-15  Doug Evans  <dje@google.com>
++
++	Ref# 23817600
++	* dwarf2read.c (dw2_get_real_path): Call canonicalize_source_path
++	instead of gdb_realpath.
++	* symtab.c (iterate_over_symtabs): Ditto.
++	* source.c (canonicalize_source_paths): New static global.
++	(source_full_path_of): Only pass OPF_RETURN_REALPATH to openp if
++	canonicalize_source_paths.
++	(find_and_open_source): Ditto.  Call canonicalize_source_path.
++	(canonicalize_source_path): New function.
++	(_initialize_source): New parameter "canonicalize-source-paths".
++	* source.h (canonicalize_source_path): Declare.

@@ -437,7 +437,8 @@ iterate_over_symtabs (const char *name,
      absolutizing a relative path.  */
   if (IS_ABSOLUTE_PATH (name))
     {
-      real_path = gdb_realpath (name);
+      /* GOOGLE LOCAL ref# 23817600 */
+      real_path = canonicalize_source_path (name);
       make_cleanup (xfree, real_path);
       gdb_assert (IS_ABSOLUTE_PATH (real_path));
     }

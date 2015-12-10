@@ -3464,7 +3464,8 @@ dw2_get_real_path (struct objfile *objfile,
 				      qfn->num_file_names, const char *);
 
   if (qfn->real_names[index] == NULL)
-    qfn->real_names[index] = gdb_realpath (qfn->file_names[index]);
+    /* GOOGLE LOCAL: ref# 23817600 */
+    qfn->real_names[index] = canonicalize_source_path (qfn->file_names[index]);
 
   return qfn->real_names[index];
 }
