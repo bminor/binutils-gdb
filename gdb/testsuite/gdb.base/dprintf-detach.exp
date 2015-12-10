@@ -82,7 +82,11 @@ proc dprintf_detach_test { breakpoint_always_inserted dprintf_style disconnected
 		sleep 1
 	}
 
-	gdb_test "attach $inferior_pid" "Attaching to program: $escapedbinfile, process $inferior_pid.*Reading symbols from.*" "$test"
+	# GOOGLE LOCAL: Ref# 2180247
+	# We don't see "Reading symbols from ..." here.
+	gdb_test "attach $inferior_pid" "Attaching to program: $escapedbinfile, process $inferior_pid.*" "$test"
+	global hex
+	gdb_test "p/x \$pc" "= $hex"
     }
 }
 
