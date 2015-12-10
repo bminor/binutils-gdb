@@ -1,5 +1,9 @@
 2015-12-10  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* linux-thread-db.c (find_new_threads_callback): Use record_thread.
+
+2015-12-10  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* breakpoint.c (remove_thread_event_breakpoints): Remove.
 	* breakpoint.h (remove_thread_event_breakpoints): Remove
 	declaration.
