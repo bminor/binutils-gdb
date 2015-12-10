@@ -281,3 +281,62 @@ they are an ongoing maintenance burden.
 +
 +	testsuite/
 +	* gdb.python/py-mi.exp: Add tests for gdb.top_interpreter_is_mi.
+--- README.google	2015-09-05 18:59:16.000000000 -0700
++++ README.google	2015-09-05 20:17:18.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	Two Level Line Tables support.
++	Submitted upstream, but not committed there yet.
++
++	* NEWS: Mention DWARF 5 line tables.
++	* dwarf2read.c (DW_VERSION_EXPERIMENTAL_TLL): New macro.
++	(dwarf2_per_objfile): New member line_str.
++	(dwarf2_elf_names): Update.
++	(struct file_entry): Add comment.  New member offset_size.
++	Rename member header_length to prologue_length, all uses updated.
++	New members address_size, segment_size.
++	(line_header) <actuals_program_start, actuals_program_end>: New
++	members.
++	(dwarf2_statement_list_fits_in_line_number_section_complaint): Delete.
++	(dwarf2_invalid_form_complaint): New function.
++	(dwarf2_locate_sections): Handle .debug_line_str.
++	(read_indirect_line_string): New function.
++	(read_unsigned_integer): New function.
++	(read_dwarf2_line_header_paths): New function.
++	(dwarf5_line_header_format): New struct.
++	(dwarf5_line_header_entry): New struct.
++	(read_dwarf5_line_header_entry): New function.
++	(read_dwarf5_line_header_subtable): New function.
++	(read_dwarf5_line_header_paths): New function.
++	(read_dwarf6_subprograms): New function.
++	(read_experimental_tll_header_and_tables): New function.
++	(dwarf_decode_line_header): Update to handle DWARF5 line tables.
++	Handle DW_VERSION_EXPERIMENTAL_TLL.
++	(logical_line): New typedef.
++	(DEF_VEC_O logical_line): Define vector.
++	(record_line_ftype): New typedef.
++	(lnp_state_machine) <context, subprogram>: New members.
++	(lnp_reader_state) <two_level_p, build_logicals_p>: New members.
++	(lnp_reader_state) <logical_line_table>: New member.
++	(dwarf_append_logical_line): New function.
++	(dwarf_record_line): Handle Two Level Line Tables.
++	(init_lnp_state_machine): Initialize context, subprogram.
++	(dwarf_decode_lines_1): New result type to int.  All callers updated.
++	Add Two Level Line Tables support.
++	(dwarf_decode_lines): Add Two Level Line Tables support.
++	(dwarf_line_number_content_type_name): New function.
++	(skip_form_bytes): Mention DW_FORM_data16.  Call
++	dwarf2_invalid_form_complaint.
++	* symfile.h (struct dwarf2_debug_sections): New member line_str.
++	* xcoffread.c (dwarf2_xcoff_names): Add entry for .debug_line_str.
++
++	testsuite/
++	* boards/fission-tll.exp: New file.
++
++	include/
++	* dwarf2.def (DW_FORM_line_strp): New form.
++	* dwarf2.h (dwarf_line_number_ops): New enum values
++	DW_LNS_set_address_from_logical, DW_LNS_set_subprogram,
++	DW_LNS_inlined_call, DW_LNS_pop_context.
++	(dwarf_line_number_content_type): New enum.

@@ -76,6 +76,11 @@
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
 
+/* DWARF version with Two Level Line Tables (TLLs).
+   http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables
+   http://www.dwarfstd.org/ShowIssue.php?issue=140906.1  */
+#define DW_VERSION_EXPERIMENTAL_TLL 0xf006
+
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */
@@ -229,6 +234,7 @@ struct dwarf2_per_objfile
   struct dwarf2_section_info macro;
   struct dwarf2_section_info str;
   struct dwarf2_section_info str_offsets; /* GOOGLE LOCAL */
+  struct dwarf2_section_info line_str;
   struct dwarf2_section_info ranges;
   struct dwarf2_section_info addr;
   struct dwarf2_section_info frame;
@@ -341,6 +347,7 @@ static const struct dwarf2_debug_sections dwarf2_elf_names =
   { ".debug_macro", ".zdebug_macro" },
   { ".debug_str", ".zdebug_str" },
   { ".debug_str_offsets", ".zdebug_str_offsets" }, /* GOOGLE LOCAL */
+  { ".debug_line_str", ".zdebug_line_str" },
   { ".debug_ranges", ".zdebug_ranges" },
   { ".debug_types", ".zdebug_types" },
   { ".debug_addr", ".zdebug_addr" },
@@ -1052,6 +1059,10 @@ typedef void (die_reader_func_ftype) (const struct die_reader_specs *reader,
 struct file_entry
 {
   const char *name;
+  /* Note: In DWARF5, the current directory is defined to exist in the
+     directory table as the first entry and has number zero.  To preserve
+     the meaning of "dir_index == 0 -> no directory", one is added to the
+     DWARF5 directory number.  */
   unsigned int dir_index;
   unsigned int mod_time;
   unsigned int length;
@@ -1073,14 +1084,18 @@ struct line_header
   unsigned offset_in_dwz : 1;
 
   unsigned int total_length;
+  unsigned int offset_size;
   unsigned short version;
-  unsigned int header_length;
+  unsigned int prologue_length;
   unsigned char minimum_instruction_length;
   unsigned char maximum_ops_per_instruction;
   unsigned char default_is_stmt;
   int line_base;
   unsigned char line_range;
   unsigned char opcode_base;
+
+  /* The address and segment sizes.  These were added in DWARF5.  */
+  unsigned char address_size, segment_size;
 
   /* standard_opcode_lengths[i] is the number of operands for the
      standard opcode whose value is i.  This means that
@@ -1104,6 +1119,13 @@ struct line_header
   /* The start and end of the statement program following this
      header.  These point into dwarf2_per_objfile->line_buffer.  */
   const gdb_byte *statement_program_start, *statement_program_end;
+
+  /* The start and end of the actuals statement program following this
+     header.  These point into dwarf2_per_objfile->line_buffer.
+     Only used by Two Level Line Tables.
+     They are NULL if the actuals program is not present.
+     http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables */
+  const gdb_byte *actuals_program_start, *actuals_program_end;
 };
 
 /* When we construct a partial symbol table entry we only
@@ -1745,6 +1767,8 @@ static char *dwarf_bool_name (unsigned int);
 
 static const char *dwarf_type_encoding_name (unsigned int);
 
+static const char *dwarf_line_number_content_type_name (unsigned int);
+
 static struct die_info *sibling_die (struct die_info *);
 
 static void dump_die_shallow (struct ui_file *, int indent, struct die_info *);
@@ -1814,6 +1838,12 @@ static void dwarf2_symbol_mark_computed (const struct attribute *attr,
 static const gdb_byte *skip_one_die (const struct die_reader_specs *reader,
 				     const gdb_byte *info_ptr,
 				     struct abbrev_info *abbrev);
+
+static const gdb_byte *skip_form_bytes (bfd *abfd, const gdb_byte *bytes,
+					const gdb_byte *buffer_end,
+					enum dwarf_form form,
+					unsigned int offset_size,
+					struct dwarf2_section_info *section);
 
 static void free_stack_comp_unit (void *);
 
@@ -1925,13 +1955,6 @@ static void free_line_header_voidp (void *arg);
 /* Various complaints about symbol reading that don't abort the process.  */
 
 static void
-dwarf2_statement_list_fits_in_line_number_section_complaint (void)
-{
-  complaint (&symfile_complaints,
-	     _("statement list doesn't fit in .debug_line section"));
-}
-
-static void
 dwarf2_debug_line_missing_file_complaint (void)
 {
   complaint (&symfile_complaints,
@@ -1986,6 +2009,20 @@ dwarf2_invalid_attrib_class_complaint (const char *arg1, const char *arg2)
   complaint (&symfile_complaints,
 	     _("invalid attribute class or form for '%s' in '%s'"),
 	     arg1, arg2);
+}
+
+/* Issue a complaint saying FORM is invalid in context CONTEXT
+   in section SECTION.  */
+
+static void
+dwarf2_invalid_form_complaint (unsigned int form, const char *context,
+			       unsigned int offset,
+			       struct dwarf2_section_info *section)
+{
+  complaint (&symfile_complaints,
+	     _("invalid form %s(0x%x) in %s at offset 0x%x of section %s [in module %s]"),
+	     dwarf_form_name (form), form, context, offset,
+	     get_section_name (section), get_section_file_name (section));
 }
 
 /* Hash function for line_header_hash.  */
@@ -2233,6 +2270,11 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     {
       dwarf2_per_objfile->line.s.asection = sectp;
       dwarf2_per_objfile->line.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &names->line_str))
+    {
+      dwarf2_per_objfile->line_str.s.asection = sectp;
+      dwarf2_per_objfile->line_str.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->loc))
     {
@@ -16817,6 +16859,36 @@ read_indirect_string_at_offset (bfd *abfd, LONGEST str_offset)
   return (const char *) (dwarf2_per_objfile->str.buffer + str_offset);
 }
 
+/* Return the string in .debug_line_str at STR_OFFSET.
+   Returns NULL if there is no such section or if STR_OFFSET is invalid,
+   a complaint will have already been issued.
+   The caller is responsible for converting "" to NULL if desired.  */
+
+static const char *
+read_indirect_line_string (bfd *abfd, LONGEST str_offset)
+{
+  dwarf2_read_section (dwarf2_per_objfile->objfile,
+		       &dwarf2_per_objfile->line_str);
+  if (dwarf2_per_objfile->line_str.buffer == NULL)
+    {
+      complaint (&symfile_complaints,
+		 _("DW_FORM_line_strp used without .debug_line_str section"
+		   " [in module %s]"),
+		 bfd_get_filename (abfd));
+      return NULL;
+    }
+  if (str_offset >= dwarf2_per_objfile->line_str.size)
+    {
+      complaint (&symfile_complaints,
+		 _("DW_FORM_line_strp pointing outside of"
+		   " .debug_line_str section [in module %s]"),
+		 bfd_get_filename (abfd));
+      return NULL;
+    }
+  gdb_assert (HOST_CHAR_BIT == 8);
+  return (const char *) (dwarf2_per_objfile->line_str.buffer + str_offset);
+}
+
 /* Read a string at offset STR_OFFSET in the .debug_str section from
    the .dwz file DWZ.  Throw an error if the offset is too large.  If
    the string consists of a single NUL byte, return NULL; otherwise
@@ -16908,6 +16980,53 @@ read_signed_leb128 (bfd *abfd, const gdb_byte *buf,
     result |= -(((LONGEST) 1) << shift);
   *bytes_read_ptr = num_read;
   return result;
+}
+
+/* Read an unsigned integer of form FORM from SECTION at INFO_PTR.
+   INFO_PTR must point into SECTION's buffer.
+   The value is stored in *RESULT_PTR.
+   CONTEXT describes the context in which the value is being read and is
+   only used in complaints.
+   The result is the number of bytes read, unless there was an error
+   (e.g., bad form), in which case a complaint is issued and NULL
+   is returned.  */
+
+static const gdb_byte *
+read_unsigned_integer (struct dwarf2_section_info *section,
+		       const gdb_byte *buf, unsigned int form,
+		       const char *context, ULONGEST *result_ptr)
+{
+  bfd *abfd = get_section_bfd_owner (section);
+
+  gdb_assert (buf >= section->buffer
+	      && buf < section->buffer + section->size);
+
+  switch (form)
+    {
+    case DW_FORM_data1:
+      *result_ptr = read_1_byte (abfd, buf);
+      return buf + 1;
+    case DW_FORM_data2:
+      *result_ptr = read_2_bytes (abfd, buf);
+      return buf + 2;
+    case DW_FORM_data4:
+      *result_ptr = read_4_bytes (abfd, buf);
+      return buf + 4;
+    case DW_FORM_data8:
+      *result_ptr = read_8_bytes (abfd, buf);
+      return buf + 8;
+    case DW_FORM_udata:
+      {
+	unsigned int bytes_read;
+
+	*result_ptr = read_unsigned_leb128 (abfd, buf, &bytes_read);
+	return buf + bytes_read;
+      }
+    default:
+      dwarf2_invalid_form_complaint (form, context, buf - section->buffer,
+				     section);
+      return NULL;
+    }
 }
 
 /* Given index ADDR_INDEX in .debug_addr, fetch the value.
@@ -17450,22 +17569,425 @@ get_debug_line_section (struct dwarf2_cu *cu)
   return section;
 }
 
+/* Subroutine of dwarf_decode_line_header to simplify it.
+   Read old style (pre-dwarf5) line header paths (directory and
+   file name entries).
+   The result is a pointer to the end of the read data, or NULL
+   if there was an error (a complaint has already been issued).  */
+
+static const gdb_byte *
+read_dwarf2_line_header_paths (struct line_header *lh,
+			       struct dwarf2_section_info *section,
+			       const gdb_byte *line_ptr)
+{
+  bfd *abfd = get_section_bfd_owner (section);
+  const gdb_byte *end_ptr = section->buffer + section->size;
+  unsigned int bytes_read;
+  const char *cur_dir, *cur_file;
+
+  /* Read directory table.  */
+  while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+    {
+      line_ptr += bytes_read;
+      add_include_dir (lh, cur_dir);
+    }
+  line_ptr += bytes_read;
+
+  /* Read file name table.  */
+  while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+    {
+      unsigned int dir_index, mod_time, length;
+
+      line_ptr += bytes_read;
+      dir_index = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+      line_ptr += bytes_read;
+      mod_time = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+      line_ptr += bytes_read;
+      length = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+      line_ptr += bytes_read;
+
+      add_file_name (lh, cur_file, dir_index, mod_time, length);
+    }
+  line_ptr += bytes_read;
+
+  if (line_ptr > end_ptr)
+    {
+      dwarf2_section_buffer_overflow_complaint (section);
+      return NULL;
+    }
+
+  return line_ptr;
+}
+
+struct dwarf5_line_header_format
+{
+  /* One of DW_LNCT_*.  */
+  unsigned int type;
+  /* One of DW_FORM_*.  */
+  unsigned int form;
+};
+
+struct dwarf5_line_header_entry
+{
+  /* DW_LNCT_path or DW_LNCT_subprogram_name.  */
+  const char *path_or_name;
+  /* DW_LNCT_directory_index.  */
+  unsigned int dir_index;
+  /* DW_LNCT_timestamp.  */
+  unsigned int timestamp;
+  /* DW_LNCT_size.  */
+  unsigned int size;
+  /* DW_LNCT_decl_file.  */
+  unsigned int decl_file;
+  /* DW_LNCT_decl_line.  */
+  unsigned int decl_line;
+};
+
+/* Subroutine of read_dwarf5_line_header_paths to simplify it.
+   Process TYPE,FORM for ENTRY.
+   The result is a pointer to the end of the read data, or NULL
+   if an error was found (complaint has already been issued).  */
+
+static const gdb_byte *
+read_dwarf5_line_header_entry (struct line_header *lh,
+			       struct dwarf2_section_info *section,
+			       const gdb_byte *line_ptr,
+			       unsigned int type, unsigned int form,
+			       struct dwarf5_line_header_entry *entry)
+{
+  bfd *abfd = get_section_bfd_owner (section);
+  const gdb_byte *end_ptr = section->buffer + section->size;
+  unsigned int offset_size = lh->offset_size;
+  unsigned int bytes_read;
+  const char *context = dwarf_line_number_content_type_name (type);
+  const char *string = NULL;
+  ULONGEST value = 0;
+
+  switch (type)
+    {
+    case DW_LNCT_path:
+    case DW_LNCT_subprogram_name:
+      switch (form)
+	{
+	case DW_FORM_string:
+	  string = read_direct_string (abfd, line_ptr, &bytes_read);
+	  break;
+	case DW_FORM_line_strp:
+	  value = read_offset_1 (abfd, line_ptr, offset_size);
+	  line_ptr += offset_size;
+	  string = read_indirect_line_string (abfd, value);
+	  if (string == NULL)
+	    string = "<invalid-file>";
+	  break;
+	/*case DW_FORM_strx: - TODO(dje) */
+	default:
+	  goto complaint_bad_form;
+	}
+      break;
+    case DW_LNCT_directory_index:
+    case DW_LNCT_timestamp:
+    case DW_LNCT_size:
+    case DW_LNCT_decl_file:
+    case DW_LNCT_decl_line:
+      line_ptr = read_unsigned_integer (section, line_ptr, form, context,
+					&value);
+      if (line_ptr == NULL)
+	return NULL;
+      break;
+#if 0 /* Disabled until DW_FORM_data16 appears in dwarf2.def.  */
+    case DW_LNCT_MD5:
+      if (form != DW_FORM_data16)
+	goto complaint_bad_form;
+      /* Ignore for now.  */
+      line_ptr += 16;
+      break;
+#endif
+    default:
+      /* Ignore.  */
+      line_ptr = skip_form_bytes (abfd, line_ptr, end_ptr, form,
+				  offset_size, section);
+      if (line_ptr == NULL)
+	return NULL;
+      if (line_ptr > end_ptr)
+	{
+	  dwarf2_section_buffer_overflow_complaint (section);
+	  return NULL;
+	}
+      return line_ptr;
+    }
+
+  switch (type)
+    {
+    case DW_LNCT_path:
+      entry->path_or_name = string;
+      break;
+    case DW_LNCT_subprogram_name:
+      entry->path_or_name = string;
+      break;
+    case DW_LNCT_directory_index:
+      entry->dir_index = value;
+      break;
+    case DW_LNCT_timestamp:
+      entry->timestamp = value;
+      break;
+    case DW_LNCT_size:
+      entry->size = value;
+      break;
+    case DW_LNCT_decl_file:
+      entry->decl_file = value;
+      break;
+    case DW_LNCT_decl_line:
+      entry->decl_line = value;
+      break;
+    default:
+      gdb_assert_not_reached ("bad type handling");
+    }
+
+  if (line_ptr > end_ptr)
+    {
+      dwarf2_section_buffer_overflow_complaint (section);
+      return NULL;
+    }
+
+  return line_ptr;
+
+ complaint_bad_form:
+  dwarf2_invalid_form_complaint (form, context, line_ptr - section->buffer,
+				 section);
+  return NULL;
+}
+
+/* Utility to read the directory / file-names / subprogram-names entries.
+   They all have the same format, which is self-describing.
+   The processed table is stored in *ENTRIES_PTR, with its size stored in
+   *NR_ENTRIES_PTR.
+   The result is a pointer to the end of the read data, or NULL
+   if an error was found (complaint has already been issued).  */
+
+static const gdb_byte *
+read_dwarf5_line_header_subtable (struct line_header *lh,
+				  struct dwarf2_section_info *section,
+				  const gdb_byte *line_ptr,
+				  struct dwarf5_line_header_entry **entries_ptr,
+				  unsigned int *nr_entries_ptr)
+{
+  bfd *abfd = get_section_bfd_owner (section);
+  const gdb_byte *end_ptr = section->buffer + section->size;
+  unsigned char entry_format_count;
+  struct dwarf5_line_header_format *format;
+  unsigned int entry_count;
+  struct dwarf5_line_header_entry *entries;
+  unsigned int bytes_read;
+  unsigned int i, j;
+  struct cleanup *cleanups;
+
+  entry_format_count = read_1_byte (abfd, line_ptr);
+  ++line_ptr;
+
+  format = (struct dwarf5_line_header_format *)
+    alloca (entry_format_count
+	     * sizeof (struct dwarf5_line_header_format *));
+  for (i = 0; i < entry_format_count; ++i)
+    {
+      format[i].type = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+      line_ptr += bytes_read;
+      format[i].form = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+      line_ptr += bytes_read;
+    }
+
+  entry_count = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+  line_ptr += bytes_read;
+  entries = XCNEWVEC (struct dwarf5_line_header_entry, entry_count);
+  cleanups = make_cleanup (xfree, entries);
+
+  for (i = 0; i < entry_count; ++i)
+    {
+      for (j = 0; j < entry_format_count; ++j)
+	{
+	  line_ptr = read_dwarf5_line_header_entry (lh, section, line_ptr,
+						    format[j].type,
+						    format[j].form,
+						    &entries[i]);
+	  if (line_ptr == NULL)
+	    {
+	      do_cleanups (cleanups);
+	      return NULL;
+	    }
+	}
+    }
+
+  gdb_assert (line_ptr != NULL);
+  discard_cleanups (cleanups);
+  *entries_ptr = entries;
+  *nr_entries_ptr = entry_count;
+  return line_ptr;
+}
+
+/* Subroutine of dwarf_decode_line_header to simplify it.
+   Read new style (dwarf5) line header paths (directory and
+   file name entries).
+   The result is a pointer to the end of the read data, or NULL
+   if an error was found (complaint has already been issued).  */
+
+static const gdb_byte *
+read_dwarf5_line_header_paths (struct line_header *lh,
+			       struct dwarf2_section_info *section,
+			       const gdb_byte *line_ptr)
+{
+  bfd *abfd = get_section_bfd_owner (section);
+  unsigned int i, dir_count, file_count;
+  struct dwarf5_line_header_entry *directories, *files;
+  struct cleanup *cleanups;
+
+  cleanups = make_cleanup (null_cleanup, NULL);
+
+  line_ptr = read_dwarf5_line_header_subtable (lh, section, line_ptr,
+					       &directories, &dir_count);
+  if (line_ptr == NULL)
+    {
+      do_cleanups (cleanups);
+      return NULL;
+    }
+
+  make_cleanup (xfree, directories);
+
+  line_ptr = read_dwarf5_line_header_subtable (lh, section, line_ptr,
+					       &files, &file_count);
+  if (line_ptr == NULL)
+    {
+      do_cleanups (cleanups);
+      return NULL;
+    }
+
+  make_cleanup (xfree, files);
+
+  for (i = 0; i < dir_count; ++i)
+    {
+      add_include_dir (lh, directories[i].path_or_name);
+    }
+
+  for (i = 0; i < file_count; ++i)
+    {
+      add_file_name (lh, files[i].path_or_name, files[i].dir_index,
+		     files[i].timestamp, files[i].size);
+    }
+
+  gdb_assert (line_ptr != NULL);
+  do_cleanups (cleanups);
+  return line_ptr;
+}
+
+/* Subroutine of dwarf_decode_line_header to simplify it.
+   Read dwarf6 two level line table entries in the header.
+   The result is a pointer to the end of the read data, or NULL
+   if an error was found (complaint has already been issued).  */
+
+static const gdb_byte *
+read_dwarf6_subprograms (struct line_header *lh,
+			 struct dwarf2_section_info *section,
+			 const gdb_byte *line_ptr)
+{
+  bfd *abfd = get_section_bfd_owner (section);
+  unsigned int subprog_count;
+  struct dwarf5_line_header_entry *subprograms;
+  struct cleanup *cleanups;
+
+  cleanups = make_cleanup (null_cleanup, NULL);
+
+  line_ptr = read_dwarf5_line_header_subtable (lh, section, line_ptr,
+					       &subprograms, &subprog_count);
+  if (line_ptr == NULL)
+    {
+      do_cleanups (cleanups);
+      return NULL;
+    }
+
+  /* TODO(dje): We don't do anything with subprograms.  */
+  xfree (subprograms);
+
+  gdb_assert (line_ptr != NULL);
+  do_cleanups (cleanups);
+  return line_ptr;
+}
+
+/* Read the header and directory/file/subprogram tables part of experimental
+   TLL support.
+   The result is a pointer to the logicals line number program, which
+   is actually embedded in the faked line number program of the outer
+   version 2 shell.  */
+
+static const gdb_byte *
+read_experimental_tll_header_and_tables (struct line_header *lh,
+					 struct dwarf2_section_info *section,
+					 const gdb_byte *line_ptr,
+					 const gdb_byte *end_of_header_length,
+					 const gdb_byte *program_end)
+{
+  bfd *abfd = get_section_bfd_owner (section);
+  unsigned int logicals_offset, actuals_offset;
+
+  /* Skip the fake directory and filename table.  */
+  if (*line_ptr != 0)
+    complaint (&symfile_complaints, _("fake directory table not empty"));
+  ++line_ptr;
+  if (*line_ptr != 0)
+    complaint (&symfile_complaints, _("fake file table not empty"));
+  ++line_ptr;
+
+  /* Skip the fake extended opcode that wraps the rest of the section.  */
+  line_ptr += 5;
+
+  logicals_offset = read_offset_1 (abfd, line_ptr, lh->offset_size);
+  line_ptr += lh->offset_size;
+  actuals_offset = read_offset_1 (abfd, line_ptr, lh->offset_size);
+  line_ptr += lh->offset_size;
+
+  lh->statement_program_start = end_of_header_length + logicals_offset;
+  if (actuals_offset != 0)
+    {
+      lh->statement_program_end = end_of_header_length + actuals_offset;
+      lh->actuals_program_start = lh->statement_program_end;
+      lh->actuals_program_end = program_end;
+    }
+  else
+    lh->statement_program_end = program_end;
+
+  if (line_ptr >= program_end)
+    {
+      dwarf2_section_buffer_overflow_complaint (section);
+      return NULL;
+    }
+
+  line_ptr = read_dwarf5_line_header_paths (lh, section, line_ptr);
+  if (line_ptr == NULL)
+    return NULL;
+
+  line_ptr = read_dwarf6_subprograms (lh, section, line_ptr);
+  if (line_ptr == NULL)
+    return NULL;
+
+  return line_ptr;
+}
+
 /* Read the statement program header starting at OFFSET in
    .debug_line, or .debug_line.dwo.  Return a pointer
    to a struct line_header, allocated using xmalloc.
-   Returns NULL if there is a problem reading the header, e.g., if it
-   has a version we don't understand.
+   Returns NULL if there is a problem reading the header, e.g., if it has a
+   version we don't understand, a complaint will have already been issued.
 
    NOTE: the strings in the include directory and file name tables of
    the returned object point into the dwarf line section buffer,
-   and must not be freed.  */
+   and must not be freed.
+
+   DWARF5 support follows the proposal here:
+   http://dwarfstd.org/ShowIssue.php?issue=140724.1 */
 
 static struct line_header *
 dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
 {
   struct cleanup *back_to;
   struct line_header *lh;
-  const gdb_byte *line_ptr;
+  const gdb_byte *line_ptr, *end_ptr, *program_end, *end_of_header_length;
   unsigned int bytes_read, offset_size;
   int i;
   const char *cur_dir, *cur_file;
@@ -17480,7 +18002,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
 	complaint (&symfile_complaints, _("missing .debug_line.dwo section"));
       else
 	complaint (&symfile_complaints, _("missing .debug_line section"));
-      return 0;
+      return NULL;
     }
 
   /* We can't do this until we know the section is non-empty.
@@ -17491,8 +18013,8 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
      That could be 12 bytes long, but we're just going to fudge that.  */
   if (offset + 4 >= section->size)
     {
-      dwarf2_statement_list_fits_in_line_number_section_complaint ();
-      return 0;
+      dwarf2_section_buffer_overflow_complaint (section);
+      return NULL;
     }
 
   lh = xmalloc (sizeof (*lh));
@@ -17504,22 +18026,25 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   lh->offset_in_dwz = cu->per_cu->is_dwz;
 
   line_ptr = section->buffer + offset;
+  end_ptr = section->buffer + section->size;
 
   /* Read in the header.  */
+
   lh->total_length =
     read_checked_initial_length_and_offset (abfd, line_ptr, &cu->header,
 					    &bytes_read, &offset_size);
   line_ptr += bytes_read;
-  if (line_ptr + lh->total_length > (section->buffer + section->size))
+  lh->offset_size = offset_size;
+  if (line_ptr + lh->total_length > end_ptr)
     {
-      dwarf2_statement_list_fits_in_line_number_section_complaint ();
+      dwarf2_section_buffer_overflow_complaint (section);
       do_cleanups (back_to);
-      return 0;
+      return NULL;
     }
-  lh->statement_program_end = line_ptr + lh->total_length;
+  program_end = line_ptr + lh->total_length;
   lh->version = read_2_bytes (abfd, line_ptr);
   line_ptr += 2;
-  if (lh->version > 4)
+  if (lh->version > 5 && lh->version != DW_VERSION_EXPERIMENTAL_TLL)
     {
       /* This is a version we don't understand.  The format could have
 	 changed in ways we don't handle properly so just punt.  */
@@ -17527,8 +18052,16 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
 		 _("unsupported version in .debug_line section"));
       return NULL;
     }
-  lh->header_length = read_offset_1 (abfd, line_ptr, offset_size);
+  if (lh->version >= 5 && lh->version != DW_VERSION_EXPERIMENTAL_TLL)
+    {
+      lh->address_size = read_1_byte (abfd, line_ptr);
+      line_ptr += 1;
+      lh->segment_size = read_1_byte (abfd, line_ptr);
+      line_ptr += 1;
+    }
+  lh->prologue_length = read_offset_1 (abfd, line_ptr, offset_size);
   line_ptr += offset_size;
+  end_of_header_length = line_ptr;
   lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
   if (lh->version >= 4)
@@ -17565,36 +18098,61 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
       line_ptr += 1;
     }
 
-  /* Read directory table.  */
-  while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+  if (line_ptr >= program_end)
     {
-      line_ptr += bytes_read;
-      add_include_dir (lh, cur_dir);
+      dwarf2_section_buffer_overflow_complaint (section);
+      do_cleanups (back_to);
+      return NULL;
     }
-  line_ptr += bytes_read;
 
-  /* Read file name table.  */
-  while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
+  /* Read in the directory and file tables.  */
+
+  if (lh->version <= 4)
+    line_ptr = read_dwarf2_line_header_paths (lh, section, line_ptr);
+  else if (lh->version == 5)
     {
-      unsigned int dir_index, mod_time, length;
-
-      line_ptr += bytes_read;
-      dir_index = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-      line_ptr += bytes_read;
-      mod_time = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-      line_ptr += bytes_read;
-      length = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-      line_ptr += bytes_read;
-
-      add_file_name (lh, cur_file, dir_index, mod_time, length);
+      line_ptr = read_dwarf5_line_header_paths (lh, section, line_ptr);
+      if (line_ptr == NULL)
+	{
+	  do_cleanups (back_to);
+	  return NULL;
+	}
     }
-  line_ptr += bytes_read;
-  lh->statement_program_start = line_ptr;
+  if (line_ptr == NULL)
+    {
+      do_cleanups (back_to);
+      return NULL;
+    }
 
-  if (line_ptr > (section->buffer + section->size))
-    complaint (&symfile_complaints,
-	       _("line number info header doesn't "
-		 "fit in `.debug_line' section"));
+  /* In order to not hang existing gdb's the experimental version of TLL
+     support uses a gross hack.  The extension is embedded in a line header
+     that looks like a version 4 header, and in the line number program that
+     is a single entry that masks out both the real programs (logicals and
+     actuals), plus the version field is different.  */
+  if (lh->version == DW_VERSION_EXPERIMENTAL_TLL)
+    {
+      line_ptr
+	= read_experimental_tll_header_and_tables (lh, section, line_ptr,
+						   end_of_header_length,
+						   program_end);
+      if (line_ptr == NULL)
+	{
+	  do_cleanups (back_to);
+	  return NULL;
+	}
+    }
+  else
+    {
+      lh->statement_program_start = line_ptr;
+      lh->statement_program_end = program_end;
+    }
+
+  if (line_ptr > program_end)
+    {
+      dwarf2_section_buffer_overflow_complaint (section);
+      do_cleanups (back_to);
+      return NULL;
+    }
 
   discard_cleanups (back_to);
   return lh;
@@ -17686,6 +18244,28 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
   return include_name;
 }
 
+/* An entry in the "logicals" linetable of the Two Level Line Tables
+   extension to dwarf5.  */
+
+typedef struct
+{
+  unsigned int op_index;
+  unsigned int file;
+  unsigned int line;
+  CORE_ADDR address;
+  unsigned int discriminator;
+  int is_stmt;
+  unsigned int context;
+  unsigned int subprogram;
+} logical_line;
+
+DEF_VEC_O (logical_line);
+
+/* Function to record a line number.  */
+
+typedef void (record_line_ftype) (struct subfile *subfile, int line,
+				  CORE_ADDR pc);
+
 /* State machine to track the state of the line number program.  */
 
 typedef struct
@@ -17698,6 +18278,12 @@ typedef struct
   CORE_ADDR address;
   int is_stmt;
   unsigned int discriminator;
+
+  /* Two Level Line Tables.
+     http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables
+     http://www.dwarfstd.org/ShowIssue.php?issue=140906.1  */
+  unsigned int context;
+  unsigned int subprogram;
 
   /* Additional bits of state we need to track.  */
 
@@ -17732,7 +18318,64 @@ typedef struct
      Otherwise we're building partial symtabs and are just interested in
      finding include files mentioned by the line number program.  */
   int record_lines_p;
+
+  /* Non-zero if we're reading Two Level Line Tables (TLLs).  */
+  int two_level_p;
+
+  /* Non-zero if we're building the logical line table.
+     Otherwise we're building the actual line table.
+     The distinction comes from the TLL feature.
+     An "actual" line is what gets recorded in GDB's own tables.
+     A logical line is used to help compute actual line entries.  */
+  int build_logicals_p;
+
+  /* The logical line table.  */
+  VEC (logical_line) *logical_line_table;
 } lnp_reader_state;
+
+/* Append a line to the logical line table.
+   Note: There are no heuristics involved in building this table.
+   The finite state machine must be followed to the letter because entries
+   in the actuals table will refer to entries in the logicals table assuming
+   the state machine has been precisely followed.
+   Assuming no bugs of course :-).  */
+
+static void
+dwarf_append_logical_line (lnp_reader_state *reader,
+			   const lnp_state_machine *state)
+{
+  logical_line entry;
+
+  if (dwarf_line_debug)
+    {
+      unsigned int logical_line_nr
+	= VEC_length (logical_line, reader->logical_line_table) + 1;
+      const char *file_name = "???";
+
+      if (state->file != 0
+	  && state->file - 1 < reader->line_header->num_file_names)
+	file_name = reader->line_header->file_names[state->file - 1].name;
+
+      fprintf_unfiltered (gdb_stdlog,
+			  "Adding logical line %u: file %u(%s), line %u,"
+			  " address %s, is_stmt %u, discrim %u\n",
+			  logical_line_nr, state->file, lbasename (file_name),
+			  state->line,
+			  paddress (reader->gdbarch, state->address),
+			  state->is_stmt, state->discriminator);
+    }
+
+  entry.op_index = state->op_index;
+  entry.file = state->file;
+  entry.line = state->line;
+  entry.address = state->address;
+  entry.is_stmt = state->is_stmt;
+  entry.discriminator = state->discriminator;
+  entry.context = state->context;
+  entry.subprogram = state->subprogram;
+
+  VEC_safe_push (logical_line, reader->logical_line_table, &entry);
+}
 
 /* Ignore this record_line request.  */
 
@@ -17833,66 +18476,128 @@ dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
   dwarf_record_line_1 (gdbarch, subfile, 0, address, p_record_line);
 }
 
-/* Record the line in STATE.
+/* Record either a logical line or an actual line.
    END_SEQUENCE is non-zero if we're processing the end of a sequence.  */
 
 static void
 dwarf_record_line (lnp_reader_state *reader, lnp_state_machine *state,
 		   int end_sequence)
 {
-  const struct line_header *lh = reader->line_header;
-  unsigned int file, line, discriminator;
-  int is_stmt;
-
-  file = state->file;
-  line = state->line;
-  is_stmt = state->is_stmt;
-  discriminator = state->discriminator;
-
-  if (dwarf_line_debug)
+  if (reader->build_logicals_p)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Processing actual line %u: file %u,"
-			  " address %s, is_stmt %u, discrim %u\n",
-			  line, file,
-			  paddress (reader->gdbarch, state->address),
-			  is_stmt, discriminator);
+      /* If there's a problem with a value here we leave it
+	 to processing the actuals table to flag it.  */
+      dwarf_append_logical_line (reader, state);
     }
-
-  if (file == 0 || file - 1 >= lh->num_file_names)
-    dwarf2_debug_line_missing_file_complaint ();
-  /* For now we ignore lines not starting on an instruction boundary.
-     But not when processing end_sequence for compatibility with the
-     previous version of the code.  */
-  else if (state->op_index == 0 || end_sequence)
+  else
     {
-      lh->file_names[file - 1].included_p = 1;
-      if (reader->record_lines_p && is_stmt)
+      const struct line_header *lh = reader->line_header;
+      unsigned int file, line, discriminator;
+      int is_stmt;
+
+      /* If we're reading the actuals table, a lot of the info
+	 comes from the logicals table, so fetch it.  */
+      if (reader->two_level_p)
 	{
-	  if (state->last_subfile != current_subfile || end_sequence)
+	  const logical_line *table
+	    = VEC_address (logical_line, reader->logical_line_table);
+
+	  if (state->line == 0
+	      || (state->line - 1
+		  >= VEC_length (logical_line, reader->logical_line_table)))
 	    {
-	      dwarf_finish_line (reader->gdbarch, state->last_subfile,
-				 state->address, state->record_line);
+	      complaint (&symfile_complaints,
+			 _("logical line number is zero"
+			   " or too large"));
+	      return;
 	    }
 
-	  if (!end_sequence)
+	  /* The "line number" when processing the actual line table is
+	     an origin-1 index into the logical line table.  */
+	  file = table[state->line - 1].file;
+	  line = table[state->line - 1].line;
+	  is_stmt = table[state->line - 1].is_stmt;
+	  discriminator = table[state->line - 1].discriminator;
+	}
+      else
+	{
+	  file = state->file;
+	  line = state->line;
+	  is_stmt = state->is_stmt;
+	  discriminator = state->discriminator;
+	}
+
+      if (dwarf_line_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "Processing actual line %u: file %u,"
+			      " address %s, is_stmt %u, discrim %u\n",
+			      line, file,
+			      paddress (reader->gdbarch, state->address),
+			      is_stmt, discriminator);
+	}
+
+      if (file == 0 || file - 1 >= lh->num_file_names)
+	dwarf2_debug_line_missing_file_complaint ();
+      /* For now we ignore lines not starting on an instruction boundary.
+	 But not when processing end_sequence for compatibility with the
+	 previous version of the code.  */
+      else if (state->op_index == 0 || end_sequence)
+	{
+	  lh->file_names[file - 1].included_p = 1;
+	  if (reader->record_lines_p && is_stmt)
 	    {
-	      if (dwarf_record_line_p (line, state->last_line,
-				       state->line_has_non_zero_discriminator,
-				       state->last_subfile))
+	      /* If we're reading the actuals line number program, then we
+		 have to create subfiles here as DW_LNS_set_file isn't
+		 used.  */
+	      if (reader->two_level_p
+		  /* Only do this if we need to, start_subfile does a
+		     linear search for existing files.  */
+		  && file != state->last_file)
 		{
-		  dwarf_record_line_1 (reader->gdbarch, current_subfile,
-				       line, state->address,
-				       state->record_line);
+		  struct file_entry *fe;
+		  const char *dir = NULL;
+
+		  fe = &lh->file_names[file - 1];
+		  if (fe->dir_index)
+		    dir = lh->include_dirs[fe->dir_index - 1];
+		  /* dwarf2_start_subfile sets current_subfile, so save this
+		     now.  */
+		  state->last_subfile = current_subfile;
+		  state->line_has_non_zero_discriminator = discriminator != 0;
+		  dwarf2_start_subfile (fe->name, dir);
+		  /* This records what's in current_subfile in a way we can
+		     compare with the file in the state machine.  */
+		  state->last_file = file;
 		}
-	      state->last_subfile = current_subfile;
-	      state->last_line = line;
+
+	      if (state->last_subfile != current_subfile)
+		{
+		  dwarf_finish_line (reader->gdbarch, state->last_subfile,
+				     state->address, state->record_line);
+		}
+
+	      if (!end_sequence)
+		{
+		  if (dwarf_record_line_p (line, state->last_line,
+					   state->line_has_non_zero_discriminator,
+					   state->last_subfile))
+		    {
+		      dwarf_record_line_1 (reader->gdbarch, current_subfile,
+					   line, state->address,
+					   state->record_line);
+		    }
+		  state->last_subfile = current_subfile;
+		  state->last_line = line;
+		}
 	    }
 	}
     }
 }
 
-/* Initialize STATE for the start of a line number program.  */
+/* Initialize STATE for the start of a line number program.
+   TODO(dje): Seems like this should be reset at the start of each sequence
+   but that's not what the previous code did.  */
 
 static void
 init_lnp_state_machine (lnp_state_machine *state,
@@ -17920,6 +18625,8 @@ init_lnp_state_machine (lnp_state_machine *state,
   state->address = gdbarch_adjust_dwarf2_line (reader->gdbarch, 0, 0);
   state->is_stmt = reader->line_header->default_is_stmt;
   state->discriminator = 0;
+  state->context = 0;
+  state->subprogram = 0;
 }
 
 /* Check address and if invalid nop-out the rest of the lines in this
@@ -17955,11 +18662,23 @@ check_line_address (struct dwarf2_cu *cu, lnp_state_machine *state,
 /* Subroutine of dwarf_decode_lines to simplify it.
    Process the line number information in LH.
    If DECODE_FOR_PST_P is non-zero, all we do is process the line number
-   program in order to set included_p for every referenced header.  */
+   program in order to set included_p for every referenced header.
 
-static void
+   Two Level Line Tables extension: If LOGICALS_PTR is non-NULL then we are
+   processing TLLs.  If PASS is 1 then we are reading the logicals table,
+   and on return the result is stored in *LOGICALS_PTR.
+   If PASS is 2 then we are reading the actuals table, and *LOGICALS_PTR is
+   the used as input.
+   If LOGICALS_PTR is NULL (dwarf5 and earlier), then PASS must be 1.
+   If DECODE_FOR_PST_P is non-zero, then LOGICALS_PTR must be NULL and
+   PASS must be 1.
+
+   The result is zero for success, -1 for failure.  */
+
+static int
 dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
-		      const int decode_for_pst_p, CORE_ADDR lowpc)
+		      const int decode_for_pst_p, CORE_ADDR lowpc,
+		      VEC (logical_line) **logicals_ptr, int pass)
 {
   const gdb_byte *line_ptr, *extended_end;
   const gdb_byte *line_end;
@@ -17969,20 +18688,78 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  int two_level_p = logicals_ptr != NULL;
+  /* Non-zero if we're building the logical line table.  */
+  int build_logicals_p = two_level_p && pass == 1;
+  /* Non-zero if we're reading the actuals table, otherwise we're reading
+     the logicals table.  */
+  int reading_actuals_p = pass == 2;
   /* Non-zero if we're recording line info (as opposed to building partial
-     symtabs).  */
-  int record_lines_p = !decode_for_pst_p;
+     symtabs or building the logical line table).  */
+  int record_lines_p = (!decode_for_pst_p
+			&& (!two_level_p || (two_level_p && pass == 2)));
+  struct cleanup *cleanups, *logicals_cleanup;
   /* A collection of things we need to pass to dwarf_record_line.  */
   lnp_reader_state reader_state;
 
+  cleanups = make_cleanup (null_cleanup, NULL);
+
+  /* Reading the line number program state machine involves a lot of bit-fiddly
+     code and we'd rather have only one copy of it.  OTOH it is used for
+     multiple purposes.  These asserts exist, besides to validate the
+     arguments, to add clarity to how this function can be used.  */
+
+  /* If we're not using TLLs there's only one pass.  */
+  if (!two_level_p)
+    gdb_assert (pass == 1);
+  /* Both could be zero (building partial symtabs), but at most one can be
+     non-zero.  */
+  gdb_assert (!(build_logicals_p && record_lines_p));
+  /* If we're building partial symtabs, we only need the file information.  */
+  if (decode_for_pst_p)
+    gdb_assert (logicals_ptr == NULL && pass == 1);
+  /* If we're reading the actuals table then we should be recording lines.  */
+  if (reading_actuals_p)
+    gdb_assert (record_lines_p);
+
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  line_ptr = lh->statement_program_start;
-  line_end = lh->statement_program_end;
+  if (reading_actuals_p)
+    {
+      line_ptr = lh->actuals_program_start;
+      line_end = lh->actuals_program_end;
+    }
+  else
+    {
+      line_ptr = lh->statement_program_start;
+      line_end = lh->statement_program_end;
+    }
 
   reader_state.gdbarch = gdbarch;
   reader_state.line_header = lh;
   reader_state.record_lines_p = record_lines_p;
+  reader_state.two_level_p = two_level_p;
+  reader_state.build_logicals_p = build_logicals_p;
+  reader_state.logical_line_table = NULL;
+
+  logicals_cleanup = NULL;
+  if (two_level_p)
+    {
+      if (pass == 1)
+	{
+	  *logicals_ptr = NULL;
+	  logicals_cleanup = make_cleanup (VEC_cleanup (logical_line),
+					   &reader_state.logical_line_table);
+	}
+      else
+	reader_state.logical_line_table = *logicals_ptr;
+    }
+
+  /* Note: If we're building the logical line table then we need to protect it
+     with a cleanup, but we also need to discard that cleanup at the end.
+     Therefore be careful with adding new cleanups after this point: they
+     can't just be simply added and forgotten because they will be discarded
+     along with logicals_cleanup.  */
 
   /* Read the statement sequences until there's nothing left.  */
   while (line_ptr < line_end)
@@ -17993,6 +18770,23 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 
       /* Reset the state machine at the start of each sequence.  */
       init_lnp_state_machine (&state_machine, &reader_state);
+
+      /* Notes on Two Level Line Tables.
+	 http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables
+
+	 When only a single line number table is used, the context/subprogram
+	 registers are not used, and the logicals table "degrades gracefully
+	 to the single table of dwarf4".
+
+	 When both a logical line table and an actual line table are
+	 used, the basic_block, end_sequence, and isa registers are
+	 not used in the logical line table.  The file, column,
+	 is_stmt, prologue_end, epilogue_begin, discriminator,
+	 context, and subprogram registers are not used in the actual
+	 line table.  In the actual line table, the line register
+	 represents a row in the logicals table rather than an actual
+	 line number.  Rows in the logical line table are numbered
+	 starting at 1.  */
 
       if (record_lines_p && lh->num_file_names >= state_machine.file)
 	{
@@ -18105,7 +18899,8 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		default:
 		  complaint (&symfile_complaints,
 			     _("mangled .debug_line section"));
-		  return;
+		  do_cleanups (cleanups);
+		  return -1;
 		}
 	      /* Make sure that we parsed the extended op correctly.  If e.g.
 		 we expected a different address size than the producer used,
@@ -18114,7 +18909,8 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		{
 		  complaint (&symfile_complaints,
 			     _("mangled .debug_line section"));
-		  return;
+		  do_cleanups (cleanups);
+		  return -1;
 		}
 	      break;
 	    case DW_LNS_copy:
@@ -18217,6 +19013,107 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		line_ptr += 2;
 	      }
 	      break;
+	    case DW_LNS_set_subprogram: /* Logicals table only.  */
+	      /* case DW_LNS_set_address_from_logical: - Actuals table only,
+		 same value as DW_LNS_set_subprogram.  */
+	      if (reading_actuals_p)
+		{
+		  /* DW_LNS_set_address_from_logical */
+		  int line_adj = read_signed_leb128 (abfd, line_ptr,
+						     &bytes_read);
+
+		  line_ptr += bytes_read;
+		  state_machine.line = (int) state_machine.line + line_adj;
+		  if (state_machine.line == 0
+		      || (state_machine.line - 1
+			  >= VEC_length (logical_line,
+					 reader_state.logical_line_table)))
+		    {
+		      complaint (&symfile_complaints,
+				 _("logical line number is zero"
+				   " or too large"));
+		    }
+		  else
+		    {
+		      const logical_line *table
+			= VEC_address (logical_line,
+				       reader_state.logical_line_table);
+		      CORE_ADDR address
+			= table[state_machine.line - 1].address;
+
+		      check_line_address (cu, &state_machine, line_ptr,
+					  lowpc, address);
+		      state_machine.address = address;
+		      state_machine.op_index
+			= table[state_machine.line - 1].op_index;
+		    }
+		}
+	      else /* DW_LNS_set_subprogram */
+		{
+		  state_machine.subprogram
+		    = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+		  line_ptr += bytes_read;
+		  state_machine.context = 0;
+		}
+	      break;
+	    case DW_LNS_inlined_call: /* Logicals table only.  */
+	      {
+		int context_adj = read_signed_leb128 (abfd, line_ptr,
+						      &bytes_read);
+
+		line_ptr += bytes_read;
+		if (build_logicals_p)
+		  {
+		    state_machine.context
+		      = ((int) VEC_length (logical_line,
+					   reader_state.logical_line_table)
+			 + context_adj);
+		    state_machine.subprogram
+		      = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+		    line_ptr += bytes_read;
+		  }
+		else
+		  {
+		    complaint (&symfile_complaints,
+			       _("DW_LNS_inlined_call seen outside of"
+				 " logicals table"));
+		  }
+	      }
+	      break;
+	    case DW_LNS_pop_context: /* Logicals table only.  */
+	      if (build_logicals_p)
+		{
+		  unsigned int logical = state_machine.context;
+		  const logical_line *table
+		    = VEC_address (logical_line,
+				   reader_state.logical_line_table);
+
+		  if (logical > 0
+		      && (logical - 1
+			  < VEC_length (logical_line,
+					reader_state.logical_line_table)))
+		    {
+		      state_machine.file = table[logical - 1].file;
+		      state_machine.line = table[logical - 1].line;
+		      state_machine.discriminator
+			= table[logical - 1].discriminator;
+		      state_machine.is_stmt = table[logical - 1].is_stmt;
+		      state_machine.context = table[logical - 1].context;
+		      state_machine.subprogram = table[logical - 1].subprogram;
+		    }
+		  else
+		    {
+		      complaint (&symfile_complaints,
+				 _("invalid context to pop from"));
+		    }
+		}
+	      else
+		{
+		  complaint (&symfile_complaints,
+			     _("DW_LNS_pop_context seen outside of"
+			       " logicals table"));
+		}
+	      break;
 	    default:
 	      {
 		/* Unknown standard opcode, ignore it.  */
@@ -18231,13 +19128,28 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	    }
 	}
 
-      if (!end_sequence)
-	dwarf2_debug_line_missing_end_sequence_complaint ();
+      if (!build_logicals_p)
+	{
+	  if (!end_sequence)
+	    dwarf2_debug_line_missing_end_sequence_complaint ();
 
-      /* We got a DW_LNE_end_sequence (or we ran off the end of the buffer,
-	 in which case we still finish recording the last line).  */
-      dwarf_record_line (&reader_state, &state_machine, 1);
+	  /* We got a DW_LNE_end_sequence (or we ran off the end of the buffer,
+	     in which case we still finish recording the last line).  */
+	  dwarf_record_line (&reader_state, &state_machine, 1);
+	}
     }
+
+  /* Pass back the logicals table to the caller if we just built it.  */
+  if (two_level_p && pass == 1)
+    {
+      *logicals_ptr = reader_state.logical_line_table;
+      discard_cleanups (logicals_cleanup);
+    }
+  else
+    gdb_assert (logicals_cleanup == NULL);
+
+  do_cleanups (cleanups);
+  return 0;
 }
 
 /* Decode the Line Number Program (LNP) for the given line_header
@@ -18277,7 +19189,35 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
   const int decode_for_pst_p = (pst != NULL);
 
   if (decode_mapping)
-    dwarf_decode_lines_1 (lh, cu, decode_for_pst_p, lowpc);
+    {
+      /* If an "actuals" line number program is present, we need to process the
+	 line number information in two passes: the first pass builds the
+	 "logicals" line table, and then the second pass builds the "actuals"
+	 table (the one we use).  If we're building partial symtabs, then we
+	 just want file information and therefore just need to read the
+	 logicals table.  */
+      if (!decode_for_pst_p && lh->actuals_program_start != NULL)
+	{
+	  VEC (logical_line) *logical_line_table = NULL;
+	  struct cleanup *cleanups = NULL;
+
+	  if (dwarf_decode_lines_1 (lh, cu, decode_for_pst_p, lowpc,
+				    &logical_line_table, 1) == 0)
+	    {
+	      cleanups = make_cleanup (VEC_cleanup (logical_line),
+				       &logical_line_table);
+	      dwarf_decode_lines_1 (lh, cu, decode_for_pst_p, lowpc,
+				    &logical_line_table, 2);
+	    }
+	  if (cleanups != NULL)
+	    do_cleanups (cleanups);
+	}
+      else
+	dwarf_decode_lines_1 (lh, cu, decode_for_pst_p, lowpc, NULL, 1);
+    }
+
+  /* We ignore a failure when building the real or "actuals" line table,
+     as we can still build the symtabs.  */
 
   if (decode_for_pst_p)
     {
@@ -19878,6 +20818,28 @@ dwarf_type_encoding_name (unsigned enc)
   return name;
 }
 
+/* Return name of a line number table content type.  */
+
+static const char *
+dwarf_line_number_content_type_name (unsigned int type)
+{
+  switch (type)
+    {
+    case DW_LNCT_path:
+      return "DW_LNCT_path";
+    case DW_LNCT_directory_index:
+      return "DW_LNCT_directory_index";
+    case DW_LNCT_timestamp:
+      return "DW_LNCT_timestamp";
+    case DW_LNCT_size:
+      return "DW_LNCT_size";
+    case DW_LNCT_MD5:
+      return "DW_LNCT_MD5";
+    default:
+      return "DW_LNCT_<unknown>";
+    }
+}
+
 static void
 dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 {
@@ -21265,6 +22227,12 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
       bytes += 8;
       break;
 
+#if 0 /* Disabled until DW_FORM_data16 appears in dwarf2.def.  */
+    case DW_FORM_data16:
+      bytes += 16;
+      break;
+#endif
+
     case DW_FORM_string:
       read_direct_string (abfd, bytes, &bytes_read);
       bytes += bytes_read;
@@ -21304,13 +22272,9 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
       break;
 
     default:
-      {
-      complain:
-	complaint (&symfile_complaints,
-		   _("invalid form 0x%x in `%s'"),
-		   form, get_section_name (section));
-	return NULL;
-      }
+      dwarf2_invalid_form_complaint (form, _("skipping"),
+				     bytes - section->buffer, section);
+      return NULL;
     }
 
   return bytes;

@@ -615,6 +615,7 @@ struct dwarf2_debug_sections {
   struct dwarf2_section_names macro;
   struct dwarf2_section_names str;
   struct dwarf2_section_names str_offsets; /* GOOGLE LOCAL */
+  struct dwarf2_section_names line_str;
   struct dwarf2_section_names ranges;
   struct dwarf2_section_names types;
   struct dwarf2_section_names addr;

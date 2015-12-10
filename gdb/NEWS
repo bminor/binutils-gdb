@@ -88,6 +88,13 @@
      "const_value" which return a reference to the value and a
      "const" version of the value respectively.
 
+* DWARF
+
+GDB now supports DWARF 5 line tables and the new .debug_line_str section.
+
+GDB now supports the Two Level Line Tables extension proposed here:
+http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables
+
 * New commands
 
 maint print symbol-cache

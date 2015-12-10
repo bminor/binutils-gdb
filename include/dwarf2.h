@@ -222,7 +222,13 @@ enum dwarf_line_number_ops
     /* DWARF 3.  */
     DW_LNS_set_prologue_end = 10,
     DW_LNS_set_epilogue_begin = 11,
-    DW_LNS_set_isa = 12
+    DW_LNS_set_isa = 12,
+    /* Experimental DWARF 5 extensions.
+       See http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables.  */
+    DW_LNS_set_address_from_logical = 13, /* Actuals table only.  */
+    DW_LNS_set_subprogram = 13,           /* Logicals table only.  */
+    DW_LNS_inlined_call = 14,             /* Logicals table only.  */
+    DW_LNS_pop_context = 15               /* Logicals table only.  */
   };
 
 /* Line number extended opcodes.  */
@@ -266,6 +272,24 @@ enum dwarf_location_list_entry_type
     DW_LLE_GNU_base_address_selection_entry = 1,
     DW_LLE_GNU_start_end_entry = 2,
     DW_LLE_GNU_start_length_entry = 3
+  };
+
+/* Type codes for line number program content descriptors (DWARF 5).  */
+
+enum dwarf_line_number_content_type
+  {
+    DW_LNCT_path = 1,
+    DW_LNCT_directory_index = 2,
+    DW_LNCT_timestamp = 3,
+    DW_LNCT_size = 4,
+    DW_LNCT_MD5 = 5,
+    /* Experimental DWARF 5 extensions.
+       See http://wiki.dwarfstd.org/index.php?title=TwoLevelLineTables.  */
+    DW_LNCT_subprogram_name = 6,
+    DW_LNCT_decl_file = 7,
+    DW_LNCT_decl_line = 8,
+    DW_LNCT_lo_user = 0x2000,
+    DW_LNCT_hi_user = 0x3fff
   };
 
 #define DW_CIE_ID	  0xffffffff
