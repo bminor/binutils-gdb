@@ -2819,7 +2819,7 @@ space as a result of inferior 1 having executed a @code{vfork} call.
 @cindex threads of execution
 @cindex multiple threads
 @cindex switching threads
-In some operating systems, such as HP-UX and Solaris, a single program
+In some operating systems, such as GNU/Linux and Solaris, a single program
 may have more than one @dfn{thread} of execution.  The precise semantics
 of threads differ from one operating system to another, but in general
 the threads of a single program are akin to multiple processes---except
@@ -2886,7 +2886,7 @@ whose form varies depending on the particular system.  For example, on
 @end smallexample
 
 @noindent
-when @value{GDBN} notices a new thread.  In contrast, on an SGI system,
+when @value{GDBN} notices a new thread.  In contrast, on other systems,
 the @var{systag} is simply something like @samp{process 368}, with no
 further qualifier.
 
@@ -3130,10 +3130,10 @@ get its process ID.  Then tell @value{GDBN} (a new invocation of
 the child process (@pxref{Attach}).  From that point on you can debug
 the child process just like any other process which you attached to.
 
-On some systems, @value{GDBN} provides support for debugging programs that
-create additional processes using the @code{fork} or @code{vfork} functions.
-Currently, the only platforms with this feature are HP-UX (11.x and later
-only?) and @sc{gnu}/Linux (kernel version 2.5.60 and later).
+On some systems, @value{GDBN} provides support for debugging programs
+that create additional processes using the @code{fork} or @code{vfork}
+functions.  On @sc{gnu}/Linux platforms, this feature is supported
+with kernel version 2.5.60 and later.
 
 The fork debugging commands are supported in both native mode and when
 connected to @code{gdbserver} using @kbd{target extended-remote}.
@@ -3444,11 +3444,7 @@ should stop by line number, function name or exact address in the
 program.
 
 On some systems, you can set breakpoints in shared libraries before
-the executable is run.  There is a minor limitation on HP-UX systems:
-you must wait until the executable is run in order to set breakpoints
-in shared library routines that are not called directly by the program
-(for example, routines that are arguments in a @code{pthread_create}
-call).
+the executable is run.
 
 @cindex watchpoints
 @cindex data breakpoints
@@ -3985,9 +3981,9 @@ times slower than normal execution.  (But this may still be worth it, to
 catch errors where you have no clue what part of your program is the
 culprit.)
 
-On some systems, such as HP-UX, PowerPC, @sc{gnu}/Linux and most other
-x86-based targets, @value{GDBN} includes support for hardware
-watchpoints, which do not slow down the running of your program.
+On some systems, such as most PowerPC or x86-based targets,
+@value{GDBN} includes support for hardware watchpoints, which do not
+slow down the running of your program.
 
 @table @code
 @kindex watch
@@ -4281,8 +4277,7 @@ A failed Ada assertion.
 @item exec
 @kindex catch exec
 @cindex break on fork/exec
-A call to @code{exec}.  This is currently only available for HP-UX
-and @sc{gnu}/Linux.
+A call to @code{exec}.
 
 @item syscall
 @itemx syscall @r{[}@var{name} @r{|} @var{number}@r{]} @dots{} 
@@ -4418,13 +4413,11 @@ Again, in this case @value{GDBN} would not be able to display syscall's names.
 
 @item fork
 @kindex catch fork
-A call to @code{fork}.  This is currently only available for HP-UX
-and @sc{gnu}/Linux.
+A call to @code{fork}.
 
 @item vfork
 @kindex catch vfork
-A call to @code{vfork}.  This is currently only available for HP-UX
-and @sc{gnu}/Linux.
+A call to @code{vfork}.
 
 @item load @r{[}regexp@r{]}
 @itemx unload @r{[}regexp@r{]}
@@ -10400,10 +10393,6 @@ gdbserver that supports the @code{qGetTIBAddr} request.
 This variable contains the address of the thread information block.
 
 @end table
-
-On HP-UX systems, if you refer to a function or variable name that
-begins with a dollar sign, @value{GDBN} searches for a user or system
-name first, before it searches for a convenience variable.
 
 @node Convenience Funs
 @section Convenience Functions
@@ -17122,7 +17111,6 @@ executing.  However, even bizarre results are predictable if you are
 well acquainted with the machine-language code of your program.
 @end table
 
-@c Doesn't work on HP-UX; have to set $pcoqh and $pcoqt.
 On many systems, you can get much the same effect as the @code{jump}
 command by storing a new value into the register @code{$pc}.  The
 difference is that this does not start your program running; it only
@@ -18069,8 +18057,9 @@ name and remembers it that way.
 
 @cindex shared libraries
 @anchor{Shared Libraries}
-@value{GDBN} supports @sc{gnu}/Linux, MS-Windows, HP-UX, SunOS, SVr4, Irix,
-and IBM RS/6000 AIX shared libraries.
+@value{GDBN} supports @sc{gnu}/Linux, MS-Windows, SunOS,
+Darwin/Mach-O, SVr4, IBM RS/6000 AIX, QNX Neutrino, FDPIC (FR-V), and
+DSBT (TIC6X) shared libraries.
 
 On MS-Windows @value{GDBN} must be linked with the Expat library to support
 shared libraries.  @xref{Expat}.
@@ -18080,9 +18069,6 @@ when you use the @code{run} command, or when you examine a core file.
 (Before you issue the @code{run} command, @value{GDBN} does not understand
 references to a function in a shared library, however---unless you are
 debugging a core file).
-
-On HP-UX, if the program loads a library explicitly, @value{GDBN}
-automatically loads the symbols at the time of the @code{shl_load} call.
 
 @c FIXME: some @value{GDBN} release may permit some refs to undef
 @c FIXME...symbols---eg in a break cmd---assuming they are from a shared
@@ -20630,7 +20616,6 @@ This section describes details specific to particular native
 configurations.
 
 @menu
-* HP-UX::                       HP-UX
 * BSD libkvm Interface::	Debugging BSD kernel memory images
 * SVR4 Process Information::    SVR4 process information
 * DJGPP Native::                Features specific to the DJGPP port
@@ -20638,14 +20623,6 @@ configurations.
 * Hurd Native::                 Features specific to @sc{gnu} Hurd
 * Darwin::			Features specific to Darwin
 @end menu
-
-@node HP-UX
-@subsection HP-UX
-
-On HP-UX systems, if you refer to a function or variable name that
-begins with a dollar sign, @value{GDBN} searches for a user or system
-name first, before it searches for a convenience variable.
-
 
 @node BSD libkvm Interface
 @subsection BSD libkvm Interface
@@ -20701,7 +20678,7 @@ If @value{GDBN} is configured for an operating system with this
 facility, the command @code{info proc} is available to report
 information about the process running your program, or about any
 process running on your system.  This includes, as of this writing,
-@sc{gnu}/Linux and Solaris, but not HP-UX, for example.
+@sc{gnu}/Linux and Solaris, for example.
 
 This command may also work on core files that were created on a system
 that has the @samp{/proc} facility.

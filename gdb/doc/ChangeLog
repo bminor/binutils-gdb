@@ -1,5 +1,21 @@
 2015-12-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.texinfo (Threads): Remove mention of SGI.
+	(Forks): Remove mention of HP-UX.
+	(Breakpoints): Remove mention of HP-UX.
+	(Set Watchpoints) <hardware watchpoints>: Don't mention HP-UX.
+	Reword in terms of architectures.
+	(Set Catchpoints) <catch exec, catch fork, catch vfork>: Don't
+	mention supported systems.
+	(Convenience Vars): Don't mention HP-UX.
+	(Jumping): Remove mention of HP-UX in comment.
+	(Files) <shared libraries>: Update supported shared library types
+	list.  Remove mention of HP-UX.
+	(Native): Remove HP-UX subsection.
+	(SVR4 Process Information): Remove mention of HP-UX.
+
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.texinfo (Stack): Reorder menu.
 
 2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
