@@ -128,7 +128,7 @@ automatically cause those extensions to be disabled.
 @multitable @columnfractions .12 .17 .17 .54
 @headitem Extension @tab Minimum Architecture @tab Enabled by default
  @tab Description
-@item @code{crc} @tab ARMv8-A @tab No
+@item @code{crc} @tab ARMv8-A @tab ARMv8.1-A or later
  @tab Enable CRC instructions.
 @item @code{crypto} @tab ARMv8-A @tab No
  @tab Enable cryptographic extensions.  This implies @code{fp} and @code{simd}.
