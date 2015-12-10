@@ -1,3 +1,9 @@
+2015-12-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19317
+	* symtab.cc (Symbol_table::add_from_relobj): Don't complain
+	plugin needed to handle slim lto object for relocatable link.
+
 2015-12-09  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): New constant
