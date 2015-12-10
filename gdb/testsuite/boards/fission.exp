@@ -35,3 +35,10 @@ set_board_info debug_flags "-gdwarf-4 -gsplit-dwarf -ggnu-pubnames -fdebug-types
 # Double blech: set_board_info only sets the value if not already set.
 unset_board_info isremote
 set_board_info isremote 0
+
+# Enable fission in blaze builds.
+if [info exists CROSSTOOL_ARGS] {
+    lappend CROSSTOOL_ARGS " --fission=dbg"
+} else {
+    set CROSSTOOL_ARGS "--fission=dbg"
+}

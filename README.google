@@ -45,3 +45,18 @@ they are an ongoing maintenance burden.
 +
 +	* remote.c (readchar): Don't lengthen timeout value of 0,
 +	return immediately means return immediately.
+--- README.google	2015-09-05 15:13:05.000000000 -0700
++++ README.google	2015-09-05 15:16:13.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	Temporary hack to make these tests pass with Fission.
++	To be replaced with something that can be checked in upstream
++	when support for .dwp files is completed.
++	* gdb.python/py-prettyprint.exp: Do all C testing before any C++
++	testing.
++
++	* testsuite/gdb.mi/mi-var-invalidate.exp: Reorder compilations so
++	that var-cmd.dwo isn't clobbered.
++
++	* testsuite/boards/fission.exp: Add blaze support.

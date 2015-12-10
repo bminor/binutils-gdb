@@ -115,7 +115,6 @@ proc run_lang_tests {exefile lang} {
 }
 
 run_lang_tests "${binfile}" "c"
-run_lang_tests "${binfile}-cxx" "c++"
 
 # Run various other tests.
 
@@ -157,3 +156,11 @@ gdb_test_no_output "python enable_lookup_function ()"
 
 gdb_test "print ss" " = a=< a=<1> b=<$hex>> b=< a=<2> b=<$hex>>" \
     "print ss enabled #2"
+
+# Now that we're done with C testing, test C++.
+# Note: This build must be done after all C testing because the .o file
+# used by the C and C++ versions are the same, and thus if we're testing
+# Fission then the .dwo files will be the same, and building the c++ file
+# will clobber the C .dwo file.
+
+run_lang_tests "${binfile}-cxx" "c++"
