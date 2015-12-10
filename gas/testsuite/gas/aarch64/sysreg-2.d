@@ -27,3 +27,6 @@ Disassembly of section .text:
   [0-9a-f]+:	d518c125 	msr	disr_el1, x5
   [0-9a-f]+:	d538c125 	mrs	x5, disr_el1
   [0-9a-f]+:	d53cc125 	mrs	x5, vdisr_el2
+  [0-9a-f]+:	d50b7a20 	dc	cvac, x0
+  [0-9a-f]+:	d50b7b21 	dc	cvau, x1
+  [0-9a-f]+:	d50b7c22 	dc	cvap, x2

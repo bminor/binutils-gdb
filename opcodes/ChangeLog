@@ -1,5 +1,10 @@
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs_dc): Add "cvap".
+	(aarch64_sys_ins_reg_supported_p): New.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-dis.c (aarch64_ext_regrt_sysins): Replace use of has_xt
 	with aarch64_sys_ins_reg_has_xt.
 	(aarch64_ext_sysins_op): Likewise.
