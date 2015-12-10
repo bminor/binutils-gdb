@@ -2146,6 +2146,12 @@ Return the selected inferior object." },
   { "inferiors", gdbpy_inferiors, METH_NOARGS,
     "inferiors () -> (gdb.Inferior, ...).\n\
 Return a tuple containing all inferiors." },
+
+  { "top_interpreter_is_mi", gdbpy_top_interpreter_is_mi, METH_NOARGS,
+    "top_interpreter_is_mi () -> boolean.\n\
+Return True if the top level interpreter is MI-like."
+  },
+
   {NULL, NULL, 0, NULL}
 };
 
