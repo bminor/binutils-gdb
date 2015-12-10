@@ -1,3 +1,9 @@
+2015-12-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19317
+	* linker.c (_bfd_generic_link_add_one_symbol): Don't complain
+	plugin needed to handle slim lto object for relocatable link.
+
 2015-12-09  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* elf32-nios2.c (nios2_elf32_finish_dynamic_sections): Correct

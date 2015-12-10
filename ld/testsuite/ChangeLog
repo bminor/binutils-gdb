@@ -1,3 +1,11 @@
+2015-12-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19317
+	* ld-plugin/lto.exp (lto_no_fat): New.
+	(lto_link_tests): Add a test for PR ld/19317.
+	(lto_run_tests): Likewise.
+	(run_ld_link_tests): Likewise.
+
 2015-12-07  Jan Beulich  <jbeulich@suse.com>
 
 	* ld-elf/gabiend.rt: Accept any alignment.

@@ -1475,7 +1475,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
   else if (bfd_is_com_section (section))
     {
       row = COMMON_ROW;
-      if (strcmp (name, "__gnu_lto_slim") == 0)
+      if (!bfd_link_relocatable (info)
+	  && strcmp (name, "__gnu_lto_slim") == 0)
 	(*_bfd_error_handler)
 	  (_("%s: plugin needed to handle lto object"),
 	   bfd_get_filename (abfd));
