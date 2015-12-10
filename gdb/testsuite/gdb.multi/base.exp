@@ -30,15 +30,15 @@ set exec3 "goodbye"
 set srcfile3 ${exec3}.c
 set binfile3 [standard_output_file ${exec3}]
 
-if { [build_executable ${testfile}.exp ${exec1} "${srcfile1}" {debug nowarnings}] == -1 } {
+if { [build_executable ${testfile}.exp ${exec1} "${srcfile1}" {debug}] == -1 } {
     return -1
 }
 
-if { [build_executable ${testfile}.exp ${exec2} "${srcfile2}" {debug nowarnings}] == -1} {
+if { [build_executable ${testfile}.exp ${exec2} "${srcfile2}" {debug}] == -1} {
     return -1
 }
 
-if { [build_executable ${testfile}.exp ${exec3} "${srcfile3}" {debug nowarnings}] == -1 } {
+if { [build_executable ${testfile}.exp ${exec3} "${srcfile3}" {debug}] == -1 } {
     return -1
 }
 

@@ -1,3 +1,13 @@
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/base.exp: Don't use nowarnings.
+	* gdb.multi/bkpt-multi-exec.exp: Don't use nowarnings.
+	* gdb.multi/hangout.c: Include stdio.h.
+	* gdb.multi/hello.c: Include stdlib.h.
+	* gdb.multi/multi-arch-exec.c: Include stdlib.h.
+	* gdb.multi/multi-arch-exec.exp: Don't use nowarnings.
+	* gdb.multi/multi-arch.exp: Don't use nowarnings.
+
 2015-12-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.dwarf2/dw2-ranges-base.c: New file.
