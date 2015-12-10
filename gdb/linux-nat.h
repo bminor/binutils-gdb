@@ -141,8 +141,6 @@ extern void lin_thread_get_thread_signals (sigset_t *mask);
 void linux_proc_pending_signals (int pid, sigset_t *pending,
 				 sigset_t *blocked, sigset_t *ignored);
 
-extern int lin_lwp_attach_lwp (ptid_t ptid);
-
 /* For linux_stop_lwp see nat/linux-nat.h.  */
 
 /* Stop all LWPs, synchronously.  (Any events that trigger while LWPs
