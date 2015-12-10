@@ -672,8 +672,10 @@ typedef struct
 {
   const char *name;
   uint32_t value;
-  int has_xt;
+  uint32_t flags ;
 } aarch64_sys_ins_reg;
+
+extern bfd_boolean aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *);
 
 extern const aarch64_sys_ins_reg aarch64_sys_regs_ic [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_dc [];

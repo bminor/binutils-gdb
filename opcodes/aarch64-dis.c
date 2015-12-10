@@ -248,7 +248,7 @@ aarch64_ext_regrt_sysins (const aarch64_operand *self, aarch64_opnd_info *info,
   /* This will make the constraint checking happy and more importantly will
      help the disassembler determine whether this operand is optional or
      not.  */
-  info->present = inst->operands[0].sysins_op->has_xt;
+  info->present = aarch64_sys_ins_reg_has_xt (inst->operands[0].sysins_op);
 
   return 1;
 }
@@ -1034,7 +1034,7 @@ aarch64_ext_sysins_op (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	DEBUG_TRACE ("%s found value: %x, has_xt: %d, i: %d.",
 		     info->sysins_op->name,
 		     (unsigned)info->sysins_op->value,
-		     info->sysins_op->has_xt, i);
+		     aarch64_sys_ins_reg_has_xt (info->sysins_op), i);
 	return 1;
       }
 
