@@ -138,6 +138,7 @@ const struct extension_language_ops guile_extension_ops =
 {
   gdbscm_finish_initialization,
   gdbscm_initialized,
+  NULL, /* gdbscm_post_initialization */
 
   gdbscm_eval_from_control_command,
 

@@ -136,6 +136,10 @@ struct extension_language_ops
      This method is required.  */
   int (*initialized) (const struct extension_language_defn *);
 
+  /* Called after -iex, -ix, -cd and -d options are processed to perform
+     any final user-specified initialization prior to loading the binary.  */
+  void (*post_initialization) (const struct extension_language_defn *);
+
   /* Process a sequence of commands embedded in GDB's own scripting language.
      E.g.,
      python

@@ -384,3 +384,28 @@ they are an ongoing maintenance burden.
 +	(basic_lookup_transparent_type): Ditto.
 +	* windows-tdep.c (windows_iterate_over_objfiles_in_search_order):
 +	Ditto.
+--- README.google	2015-09-06 00:39:08.000000000 -0700
++++ README.google	2015-09-06 00:43:48.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	* NEWS: Document new post-initializer support for Python.
++	* extension-priv.h (extension_language_ops) <post_initialization>:
++	New member.
++	* extension.c (post_ext_lang_initialization): New function.
++	* extension.h (post_ext_lang_initialization): Declare.
++	* main.c: #include "extension.h".
++	(captured_main): Call post_ext_lang_initialization.
++	* python/lib/gdb/__init__.py (post_initializers): Define.
++	* python/python.c (python_extension_ops): Update.
++	(gdbpy_post_initialization): New function.
++	* guile/guile.c (guile_extension_ops): Update.
++
++	doc/
++	* python.texi (Python API): Add entry for Startup Post-Initialization.
++	(Startup Post-Initialization): New node.
++
++	testsuite/
++	* gdb.python/py-post-init.c: New file.
++	* gdb.python/py-post-init.exp: New file.
++	* gdb.python/py-post-init.py: New file.

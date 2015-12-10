@@ -337,6 +337,22 @@ finish_ext_lang_initialization (void)
     }
 }
 
+/* Wrapper to call the extension_language_ops.post_initialization "method"
+   for each compiled-in extension language.  */
+
+void
+post_ext_lang_initialization (void)
+{
+  int i;
+  const struct extension_language_defn *extlang;
+
+  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+    {
+      if (extlang->ops->post_initialization != NULL)
+	extlang->ops->post_initialization (extlang);
+    }
+}
+
 /* Invoke the appropriate extension_language_ops.eval_from_control_command
    method to perform CMD, which is a list of commands in an extension language.
 

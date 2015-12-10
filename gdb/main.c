@@ -44,6 +44,7 @@
 #include <signal.h>
 #include "event-top.h"
 #include "infrun.h"
+#include "extension.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -1039,6 +1040,12 @@ captured_main (void *data)
   for (i = 0; i < ndir; i++)
     catch_command_errors (directory_switch, dirarg[i], 0);
   xfree (dirarg);
+
+  /* We're about to load the program (if specified).
+     Given extension languages a chance to do any final preprocessing,
+     after -ix, -iex, -cd, and -d parameters are processed, and prior to
+     the program being loaded.  */
+  post_ext_lang_initialization ();
 
   /* Skip auto-loading section-specified scripts until we've sourced
      local_gdbinit (which is often used to augment the source search

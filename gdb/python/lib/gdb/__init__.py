@@ -62,6 +62,9 @@ prompt_hook = None
 # We do not use PySys_SetArgvEx because it did not appear until 2.6.6.
 sys.argv = ['']
 
+# Initial post-initializers.
+post_initializers = []
+
 # Initial pretty printers.
 pretty_printers = []
 

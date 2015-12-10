@@ -135,6 +135,7 @@ optional arguments while skipping others.  Example:
 @menu
 * Basic Python::                Basic Python Functions.
 * Exception Handling::          How Python exceptions are translated.
+* Startup Post-Initialization:: Running python at the end of GDB startup.
 * Values From Inferior::        Python representation of values.
 * Types In Python::             Python representation of types.
 * Pretty Printing API::         Pretty-printing values.
@@ -510,6 +511,48 @@ to handle this case.  Example:
 >end
 (gdb) hello-world 42
 hello-world takes no arguments
+@end smallexample
+
+@node Startup Post-Initialization
+@subsubsection Startup Post-Initialization
+@cindex running python at the end of GDB startup
+
+@value{GDBN} provides a way to run Python code at the end of startup,
+after @code{-iex}, @code{-ix}, and @code{-cd} option processing,
+and before it loads any specified program.
+Such initialization may depend on various startup options, so
+@value{GDBN} invokes them after all such options are processed.
+
+The Python list @code{gdb.post_initializers} contains an array of
+functions or callable objects that have been registered.
+Registration is done via appending to the list.
+
+As an example, suppose the @file{system.gdbinit} file provides a set of
+features that are loaded, if present, from the current directory.
+The features must be loaded before the program is loaded,
+and must take into account the @code{-cd} option.
+Thus loading must be delayed until after processing the @code{-cd}
+option but before the inferior program is loaded.
+This is achieved with a ``post-initializer'' function.
+The function is registered by @file{system.gdbinit} and is called
+at the correct time by @value{GDBN}.
+
+Here is a small example:
+
+@smallexample
+$ cd $HOME
+$ cat post-init.py
+def post_init():
+  print "Hi, this is post_init."
+  gdb.execute("pwd")
+import gdb
+gdb.post_initializers.append(post_init)
+$ gdb -quiet -cd /tmp -iex pwd -ix post-init.py $HOME/myprogram
+Working directory /home/user.
+Hi, this is post_init.
+Working directory /tmp.
+Reading symbols from /home/user/myprogram...done.
+(gdb)
 @end smallexample
 
 @node Values From Inferior

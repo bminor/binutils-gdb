@@ -135,6 +135,8 @@ static objfile_script_executor_func gdbpy_execute_objfile_script;
 static void gdbpy_finish_initialization
   (const struct extension_language_defn *);
 static int gdbpy_initialized (const struct extension_language_defn *);
+static void gdbpy_post_initialization
+  (const struct extension_language_defn *);
 static void gdbpy_eval_from_control_command
   (const struct extension_language_defn *, struct command_line *cmd);
 static void gdbpy_start_type_printers (const struct extension_language_defn *,
@@ -166,6 +168,7 @@ const struct extension_language_ops python_extension_ops =
 {
   gdbpy_finish_initialization,
   gdbpy_initialized,
+  gdbpy_post_initialization,
 
   gdbpy_eval_from_control_command,
 
@@ -1979,6 +1982,54 @@ static int
 gdbpy_initialized (const struct extension_language_defn *extlang)
 {
   return gdb_python_initialized;
+}
+
+/* Called after -iex, -ix, -cd and -d options are processed to perform
+   any final user-specified initialization prior to loading the binary.  */
+
+static void
+gdbpy_post_initialization (const struct extension_language_defn *extlang)
+{
+  PyObject *pi_list, *function, *result;
+  Py_ssize_t pi_list_size, list_index;
+  struct cleanup *cleanup;
+
+  cleanup = ensure_python_env (get_current_arch (), current_language);
+
+  /* Fetch the global post-initializer list.  */
+  if (gdb_python_module == NULL
+      || ! PyObject_HasAttrString (gdb_python_module, "post_initializers"))
+    {
+      do_cleanups (cleanup);
+      return;
+    }
+  pi_list = PyObject_GetAttrString (gdb_python_module, "post_initializers");
+  if (pi_list == NULL || ! PyList_Check (pi_list))
+    {
+      Py_XDECREF (pi_list);
+      do_cleanups (cleanup);
+      return;
+    }
+
+  pi_list_size = PyList_Size (pi_list);
+  for (list_index = 0; list_index < pi_list_size; list_index++)
+    {
+      function = PyList_GetItem (pi_list, list_index);
+      result = NULL;
+      if (function != NULL)
+	result = PyObject_CallFunctionObjArgs (function, NULL);
+      if (result == NULL)
+	{
+	  /* Print the trace here, but keep going -- we want to
+	     call all of the callbacks even if one is broken.  */
+	  gdbpy_print_stack ();
+	}
+      Py_XDECREF (function);
+      Py_XDECREF (result);
+    }
+
+  Py_DECREF (pi_list);
+  do_cleanups (cleanup);
 }
 
 #endif /* HAVE_PYTHON */
