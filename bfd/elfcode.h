@@ -1174,7 +1174,17 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 
       amt = symcount;
       amt *= sizeof (elf_symbol_type);
-      symbase = (elf_symbol_type *) bfd_zalloc (abfd, amt);
+      /* GOOGLE LOCAL 14108 */
+      if (abfd->use_14108)
+	{
+	  symbase = (elf_symbol_type *) bfd_zmalloc (amt);
+	  abfd->memory_14108 = symbase;
+	}
+      else
+	{
+	  symbase = (elf_symbol_type *) bfd_zalloc (abfd, amt);
+	}
+      /* END GOOGLE LOCAL */
       if (symbase == (elf_symbol_type *) NULL)
 	goto error_return;
 

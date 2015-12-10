@@ -586,6 +586,11 @@ extern void bfd_section_already_linked_table_free (void);
 extern bfd_boolean _bfd_handle_already_linked
   (struct bfd_section *, struct bfd_section_already_linked *,
    struct bfd_link_info *);
+
+/* GOOGLE LOCAL 14108 */
+extern void bfd_init_14108 (bfd *);
+extern void *bfd_release_14108 (bfd *);
+/* END GOOGLE LOCAL */
 
 /* Externally visible ECOFF routines.  */
 
@@ -6631,6 +6636,15 @@ struct bfd
      struct objalloc *, but we use void * to avoid requiring the inclusion
      of objalloc.h.  */
   void *memory;
+
+  /* GOOGLE LOCAL 14108
+     For large apps, gdb can waste >= 450MB of space.
+     http://sourceware.org/bugzilla/show_bug.cgi?id=14108
+     Record the space used here, so it can be individually freed.
+     This is just a quick hack until The Right Thing is implemented.  */
+  int use_14108;
+  void *memory_14108;
+  /* END GOOGLE LOCAL */
 
   /* For input BFDs, the build ID, if the object has one. */
   const struct bfd_build_id *build_id;

@@ -1057,7 +1057,11 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 	 bfd_canonicalize_symtab so it must not get freed before ABFD gets.  */
 
       symbol_table = bfd_alloc (abfd, storage_needed);
+      /* GOOGLE LOCAL 14108 */
+      bfd_init_14108 (objfile->obfd);
       symcount = bfd_canonicalize_symtab (objfile->obfd, symbol_table);
+      make_cleanup (xfree, bfd_release_14108 (objfile->obfd));
+      /* END GOOGLE LOCAL */
 
       if (symcount < 0)
 	error (_("Can't read symbols from %s: %s"),

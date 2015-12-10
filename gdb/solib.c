@@ -1542,8 +1542,13 @@ gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 
       asymbol **symbol_table = (asymbol **) xmalloc (storage_needed);
       struct cleanup *back_to = make_cleanup (xfree, symbol_table);
-      unsigned int number_of_symbols =
-	bfd_canonicalize_symtab (abfd, symbol_table);
+      /* GOOGLE LOCAL 14108 */
+      unsigned int number_of_symbols;
+
+      bfd_init_14108 (abfd);
+      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
+      make_cleanup (xfree, bfd_release_14108 (abfd));
+      /* END GOOGLE LOCAL */
 
       for (i = 0; i < number_of_symbols; i++)
 	{

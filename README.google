@@ -76,3 +76,21 @@ they are an ongoing maintenance burden.
 +	Temp fix for http://sourceware.org/bugzilla/show_bug.cgi?id=14704
 +	* bfd/elf.c (bfd_section_from_shdr, case SHT_REL,SHT_RELA): Don't mark
 +	the target section as having relocs if the reloc section is empty.
+--- README.google	2015-09-05 15:24:02.000000000 -0700
++++ README.google	2015-09-05 16:13:49.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	Quick hack to workaround bfd memory wastage, bug 8033013.
++	Upstream: http://sourceware.org/bugzilla/show_bug.cgi?id=14108
++	* bfd/bfd-in.h (bfd_init_14108, bfd_release_14108): Declare.
++	* bfd/bfd-in2.h: Regenerate.
++	* bfd/bfd.c (struct bfd): New members use_14108, memory_14108.
++	* bfd/elfcode.h (elf_slurp_symbol_table): If user requested, allocate
++	space for symbols in memory_14108.
++	* bfd/opncls.c (_bfd_delete_bfd): Free memory_14108.
++	(_bfd_free_cached_info): Ditto.
++	(bfd_init_14108, bfd_release_14108): New functions.
++	(bfd_alloc_aux, bfd_release_all_aux): New functions.
++	* gdb/elfread.c (elf_symfile_read): Free memory for normal symtab.
++	* gdb/solib.c (gdb_bfd_lookup_symbol_from_symtab): Ditto.

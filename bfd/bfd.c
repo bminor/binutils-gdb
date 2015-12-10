@@ -342,6 +342,15 @@ CODE_FRAGMENT
 .     of objalloc.h.  *}
 .  void *memory;
 .
+.  {* GOOGLE LOCAL 14108
+.     For large apps, gdb can waste >= 450MB of space.
+.     http://sourceware.org/bugzilla/show_bug.cgi?id=14108
+.     Record the space used here, so it can be individually freed.
+.     This is just a quick hack until The Right Thing is implemented.  *}
+.  int use_14108;
+.  void *memory_14108;
+.  {* END GOOGLE LOCAL *}
+.
 .  {* For input BFDs, the build ID, if the object has one. *}
 .  const struct bfd_build_id *build_id;
 .};

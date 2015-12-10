@@ -124,6 +124,9 @@ _bfd_delete_bfd (bfd *abfd)
       bfd_hash_table_free (&abfd->section_htab);
       objalloc_free ((struct objalloc *) abfd->memory);
     }
+  /* GOOGLE LOCAL 14108 */
+  free (abfd->memory_14108);
+  /* END GOOGLE LOCAL */
 
   if (abfd->filename)
     free ((char *) abfd->filename);
@@ -140,6 +143,11 @@ _bfd_free_cached_info (bfd *abfd)
     {
       bfd_hash_table_free (&abfd->section_htab);
       objalloc_free ((struct objalloc *) abfd->memory);
+      /* GOOGLE LOCAL 14108 */
+      free (abfd->memory_14108);
+      abfd->memory_14108 = NULL;
+      abfd->use_14108 = FALSE;
+      /* END GOOGLE LOCAL */
 
       abfd->sections = NULL;
       abfd->section_last = NULL;
@@ -960,6 +968,26 @@ bfd_alloc (bfd *abfd, bfd_size_type size)
     bfd_set_error (bfd_error_no_memory);
   return ret;
 }
+
+/* GOOGLE LOCAL 14108 */
+
+void
+bfd_init_14108 (bfd *abfd)
+{
+  abfd->use_14108 = TRUE;
+}
+
+void *
+bfd_release_14108 (bfd *abfd)
+{
+  void *result = abfd->memory_14108;
+
+  abfd->use_14108 = FALSE;
+  abfd->memory_14108 = NULL;
+  return result;
+}
+
+/* END GOOGLE LOCAL */
 
 /*
 INTERNAL_FUNCTION

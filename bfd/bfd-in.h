@@ -579,6 +579,11 @@ extern void bfd_section_already_linked_table_free (void);
 extern bfd_boolean _bfd_handle_already_linked
   (struct bfd_section *, struct bfd_section_already_linked *,
    struct bfd_link_info *);
+
+/* GOOGLE LOCAL 14108 */
+extern void bfd_init_14108 (bfd *);
+extern void *bfd_release_14108 (bfd *);
+/* END GOOGLE LOCAL */
 
 /* Externally visible ECOFF routines.  */
 
