@@ -18186,6 +18186,39 @@ Set whether a source file may have multiple base names.
 Show whether a source file may have multiple base names.
 @end table
 
+@cindex problems with ELF PIE programs
+When the kernel runs PIE (Position Independent Executable) programs,
+they are loaded at essentially arbitrary addresses.
+When debugging these programs @value{GDBN} needs to obtain this
+load address in order to properly show program information
+like backtraces.  @value{GDBN} obtains this address from the
+@code{AT_ENTRY} entry in the target's @dfn{auxiliary vector}.
+@xref{OS Information, auxiliary vector}.
+If @value{GDBN} gets the wrong address, say because
+one is using a core file that doesn't match the program, then
+@value{GDBN}'s output will be wrong and confusing.
+Thus the load address is verified before it is used.
+This is done by comparing the ELF program headers of the program
+(say core file) with the ELF headers in the PIE executable.
+However, these tests are not bullet proof.  Plus, tool bugs
+may cause innocuous problems that cause the tests to fail, preventing the
+user from being able to use @value{GDBN}.
+@value{GDBN} provides an escape hatch to disable these tests for when they're
+getting in the way.
+
+@table @code
+@item set pie-displacement-verification
+@kindex set pie-displacement-verification
+Set whether to verify PIE program headers.
+When set to @code{on} @value{GDBN} performs a set of tests to verify
+the displacement obtained from the program is correct.
+This is on by default.
+
+@item show pie-displacement-verification
+@kindex show pie-displacement-verification
+Show whether to verify PIE program headers.
+@end table
+
 @node Separate Debug Files
 @section Debugging Information in Separate Files
 @cindex separate debugging information files

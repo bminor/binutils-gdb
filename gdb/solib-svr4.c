@@ -34,17 +34,20 @@
 #include "regcache.h"
 #include "gdbthread.h"
 #include "observer.h"
-
+#include "complaints.h"
 #include "solist.h"
 #include "solib.h"
 #include "solib-svr4.h"
-
+#include "gdbcmd.h"
 #include "bfd-target.h"
 #include "elf-bfd.h"
 #include "exec.h"
 #include "auxv.h"
 #include "gdb_bfd.h"
 #include "probe.h"
+
+/* If non-zero, verify the displacement computed for PIE executables.  */
+static int pie_displacement_verification = 1;
 
 static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
@@ -2527,6 +2530,201 @@ read_program_headers_from_bfd (bfd *abfd, int *phdrs_size)
   return buf;
 }
 
+/* Private copy of bfd_build_id in newer source trees.  */
+
+struct build_id
+{
+  unsigned int size;
+  unsigned char data[1];
+};
+
+/* Given a PT_NOTE segment in BUF,SIZE, return the recorded build id
+   if present, otherwise NULL.  */
+
+static struct build_id *
+find_build_id_in_note_buffer (const gdb_byte *buf, ULONGEST size,
+			      enum bfd_endian byte_order)
+{
+  /* Note: This is cribbed from bfd/elf.c:elf_parse_notes.  */
+  const Elf_External_Note *note_p;
+  const char *p, *end;
+
+  p = (const char *) buf;
+  end = p + size;
+  while (p < end)
+    {
+      const Elf_External_Note *xnp = (const Elf_External_Note *) p;
+      unsigned int type, namesz, descsz;
+      const char *namedata, *descdata;
+      struct build_id *result;
+
+      type = extract_unsigned_integer ((const gdb_byte *) xnp->type, 4,
+				       byte_order);
+      namesz = extract_unsigned_integer ((const gdb_byte *) xnp->namesz, 4,
+					 byte_order);
+      namedata = xnp->name;
+      if (namedata + namesz > end)
+	return NULL;
+      descsz = extract_unsigned_integer ((const gdb_byte *) xnp->descsz, 4,
+					 byte_order);
+      descdata = namedata + align_up (namesz, 4);
+      if (descsz != 0
+	  && (descdata >= end
+	      || descdata + descsz > end))
+	return NULL;
+      if (namesz == sizeof "GNU"
+	  && namedata[sizeof "GNU" - 1] == '\0'
+	  && strcmp (namedata, "GNU") == 0
+	  && type == NT_GNU_BUILD_ID)
+	{
+	  if (descsz == 0)
+	    return NULL;
+	  result = xmalloc (sizeof (struct build_id) - 1 + descsz);
+	  result->size = descsz;
+	  memcpy (result->data, descdata, descsz);
+	  return result;
+	}
+
+      p = descdata + align_up (descsz, 4);
+    }
+
+  return NULL;
+}
+
+/* Given a set of program headers, try to find the build id.
+   The result is a malloc'd struct build_id, caller must free;
+   or NULL if the build id could not be found.
+   ARCH_SIZE must be one of 32 or 64.
+   If ABFD is non-NULL then fetch data from the bfd, otherwise
+   fetch data from target memory.  */
+
+static struct build_id *
+get_build_id (bfd *abfd, const gdb_byte *phdrs, int num_hdrs,
+	      CORE_ADDR displacement, int arch_size,
+	      enum bfd_endian byte_order)
+{
+  int i;
+  int phdr_size;
+  struct build_id *result;
+
+  switch (arch_size)
+    {
+    case 32:
+      phdr_size = sizeof (Elf32_External_Phdr);
+      break;
+    case 64:
+      phdr_size = sizeof (Elf64_External_Phdr);
+      break;
+    default:
+      gdb_assert_not_reached ("bad arch_size");
+    }
+
+  for (i = 0; i < num_hdrs; ++i)
+    {
+      const gdb_byte *phdr = phdrs + (i * phdr_size);
+      gdb_byte *note_buf;
+      const gdb_byte *type_p;
+      const gdb_byte *vaddr_or_offset_p;
+      const gdb_byte *filesz_p;
+      unsigned int type;
+      CORE_ADDR vaddr_or_offset;
+      ULONGEST filesz;
+      struct cleanup *cleanups;
+
+      if (arch_size == 32)
+	{
+	  const Elf32_External_Phdr *phdrp = (Elf32_External_Phdr *) phdr;
+
+	  type_p = (const gdb_byte *) &phdrp->p_type;
+	  if (abfd != NULL)
+	    vaddr_or_offset_p = (const gdb_byte *) &phdrp->p_offset;
+	  else
+	    vaddr_or_offset_p = (const gdb_byte *) &phdrp->p_vaddr;
+	  filesz_p = (const gdb_byte *) &phdrp->p_filesz;
+	}
+      else /* arch_size == 64 */
+	{
+	  const Elf64_External_Phdr *phdrp = (Elf64_External_Phdr *) phdr;
+
+	  type_p = (const gdb_byte *) &phdrp->p_type;
+	  if (abfd != NULL)
+	    vaddr_or_offset_p = (const gdb_byte *) &phdrp->p_offset;
+	  else
+	    vaddr_or_offset_p = (const gdb_byte *) &phdrp->p_vaddr;
+	  filesz_p = (const gdb_byte *) &phdrp->p_filesz;
+	}
+
+      type = extract_unsigned_integer (type_p, 4, byte_order);
+      if (type != PT_NOTE)
+	continue;
+      vaddr_or_offset = extract_unsigned_integer (vaddr_or_offset_p,
+						  arch_size == 32 ? 4 : 8,
+						  byte_order);
+      filesz = extract_unsigned_integer (filesz_p, arch_size == 32 ? 4 : 8,
+					 byte_order);
+      note_buf = xmalloc (filesz);
+      cleanups = make_cleanup (xfree, note_buf);
+      if (abfd != NULL)
+	{
+	  if (bfd_seek (abfd, vaddr_or_offset, SEEK_SET) != 0
+	      || bfd_bread (note_buf, filesz, abfd) != filesz)
+	    {
+	      do_cleanups (cleanups);
+	      return NULL;
+	    }
+	}
+      else
+	{
+	  vaddr_or_offset += displacement;
+	  if (target_read_memory (vaddr_or_offset, note_buf, filesz) != 0)
+	    {
+	      do_cleanups (cleanups);
+	      return NULL;
+	    }
+	}
+      result = find_build_id_in_note_buffer (note_buf, filesz, byte_order);
+      do_cleanups (cleanups);
+      if (result != NULL)
+	return result;
+    }
+
+  return NULL;
+}
+
+/* Return non-zero if the program headers in DISPLACEMENT1+BUF1 and OWNER2+BUF2
+   contain build ids and the build ids match.
+   DISPLACEMENT1 is the offset to use, for PIE binaries.
+   OWNER2 is the bfd that BUF2 comes from target memory.
+   BUF1 and BUF2 are copies of the program headers.
+   ARCH_SIZE must be one of 32 or 64.  */
+
+static int
+build_ids_match_p (CORE_ADDR displacement1, const gdb_byte *buf1,
+		   bfd *owner2, const gdb_byte *buf2,
+		   int num_hdrs, int arch_size, enum bfd_endian byte_order)
+{
+  struct build_id *build_id1, *build_id2;
+  int match;
+  struct cleanup *cleanups;
+
+  build_id1 = get_build_id (NULL, buf1, num_hdrs, displacement1,
+			    arch_size, byte_order);
+  cleanups = make_cleanup (xfree, build_id1);
+  build_id2 = get_build_id (owner2, buf2, num_hdrs, 0,
+			    arch_size, byte_order);
+  make_cleanup (xfree, build_id2);
+
+  match = 0;
+  if (build_id1 != NULL
+      && build_id2 != NULL
+      && build_id1->size == build_id2->size
+      && memcmp (build_id1->data, build_id2->data, build_id1->size) == 0)
+    match = 1;
+
+  do_cleanups (cleanups);
+  return match;
+}
+
 /* Return 1 and fill *DISPLACEMENTP with detected PIE offset of inferior
    exec_bfd.  Otherwise return 0.
 
@@ -2614,13 +2812,17 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
      looking at a different file than the one used by the kernel - for
      instance, "gdb program" connected to "gdbserver :PORT ld.so program".  */
 
-  if (bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
+  if (bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour
+      && pie_displacement_verification)
     {
       /* Be optimistic and clear OK only if GDB was able to verify the headers
 	 really do not match.  */
       int phdrs_size, phdrs2_size, ok = 1;
+      /* Record which phdr is bad so we can tell the user.  */
+      int bad_phdr_num = -1;
       gdb_byte *buf, *buf2;
       int arch_size;
+      int build_ids_match = 0;
 
       buf = read_program_header (-1, &phdrs_size, &arch_size);
       buf2 = read_program_headers_from_bfd (exec_bfd, &phdrs2_size);
@@ -2652,6 +2854,11 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	      Elf_Internal_Phdr *phdr2 = elf_tdata (exec_bfd)->phdr;
 	      CORE_ADDR displacement = 0;
 	      int i;
+
+	      build_ids_match = build_ids_match_p (exec_displacement, buf,
+						   exec_bfd, buf2,
+						   ehdr2->e_phnum,
+						   arch_size, byte_order);
 
 	      /* DISPLACEMENT could be found more easily by the difference of
 		 ehdr2->e_entry.  But we haven't read the ehdr yet, and we
@@ -2772,6 +2979,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		    }
 
 		  ok = 0;
+		  bad_phdr_num = i;
 		  break;
 		}
 	    }
@@ -2783,6 +2991,11 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	      Elf_Internal_Phdr *phdr2 = elf_tdata (exec_bfd)->phdr;
 	      CORE_ADDR displacement = 0;
 	      int i;
+
+	      build_ids_match = build_ids_match_p (exec_displacement, buf,
+						   exec_bfd, buf2,
+						   ehdr2->e_phnum,
+						   arch_size, byte_order);
 
 	      /* DISPLACEMENT could be found more easily by the difference of
 		 ehdr2->e_entry.  But we haven't read the ehdr yet, and we
@@ -2903,6 +3116,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		    }
 
 		  ok = 0;
+		  bad_phdr_num = i;
 		  break;
 		}
 	    }
@@ -2913,8 +3127,25 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
       xfree (buf);
       xfree (buf2);
 
-      if (!ok)
-	return 0;
+      if (bad_phdr_num >= 0)
+	{
+	  complaint (&symfile_complaints,
+		     _("mismatch in ELF phdr #%d between executable and"
+		       " in-memory copy"),
+		     bad_phdr_num);
+	}
+
+      /* If either the phdrs match or the build ids match we're good.  */
+      if (!ok && !build_ids_match)
+	{
+	  /* Print *something*.  It's not nice for a debugging session to
+	     go awry because of a gdb decision, and not pass on to the user
+	     what that decision was.  */
+	  warning (_("Unable to calculate PIE (Position Independent"
+		     " Executable) displacement: ELF phdr mismatch and"
+		     " build-id mismatch."));
+	  return 0;
+	}
     }
 
   if (info_verbose)
@@ -3273,4 +3504,18 @@ _initialize_svr4_solib (void)
   svr4_so_ops.keep_data_in_core = svr4_keep_data_in_core;
   svr4_so_ops.update_breakpoints = svr4_update_solib_event_breakpoints;
   svr4_so_ops.handle_event = svr4_handle_solib_event;
+
+  add_setshow_boolean_cmd ("pie-displacement-verification", class_obscure,
+			   &pie_displacement_verification, _("\
+Set whether to verify PIE program headers."), _("\
+Show whether to verify PIE program headers."), _("\
+When debugging PIE (Position Independent Executable) programs,\n\
+it is important, for example, to verify that the core file being used\n\
+matches the program.  If it does not then the information GDB prints\n\
+may be wrong.  However, these tests are not bullet proof.  Plus, tool bugs\n\
+may cause innocuous problems that cause the tests to fail, preventing the\n\
+user from being able to use GDB.  Set this parameter to \"off\" as an escape\n\
+hatch to disable these tests."),
+			   NULL, NULL,
+			   &setlist, &showlist);
 }

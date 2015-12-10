@@ -1,6 +1,14 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes since GDB 7.10
+
+* New options
+ 
+set pie-displacement-verification
+show pie-displacement-verification
+Control whether to verify ELF PIE program headers.
+
 *** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*

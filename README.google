@@ -445,3 +445,26 @@ they are an ongoing maintenance burden.
 +	Submitted upstream, but not committed there yet.
 +	PR go/18926
 +	* gdb.go/methods.exp: Mark gdb_breakpoint calls as known failures.
+--- README.google	2015-09-08 13:41:18.000000000 -0700
++++ README.google	2015-09-11 16:22:06.000000000 -0700
++
++2015-09-11  Doug Evans  <dje@google.com>
++
++	* NEWS: Mention pie-displacement-verification.
++	* solib-svr4.c: #include complaints.h, gdbcmd.h.
++	(pie_displacement_verification): New static global.
++	(build_id): New struct.
++	(find_build_id_in_note_buffer, get_build_id): New functions.
++	(build_ids_match_p): New function.
++	(svr4_exec_displacement): Don't verify phdrs if
++	!pie_exec_displacement.  If build-ids match, return success.
++	Print complaint if there's a phdr mismatch.  Print warning on
++	failure.
++	(_initialize_svr4_solib): New parameter pie-displacement-verification.
++
++	doc/
++	* gdb.texinfo (Files): Document pie-displacement-verification.
++
++	testsuite/
++	* gdb.base/gcore-build-id-pie.c: New file.
++	* gdb.base/gcore-build-id-pie.exp: New file.
