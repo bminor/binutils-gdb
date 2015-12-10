@@ -242,3 +242,20 @@ they are an ongoing maintenance burden.
 +	separate debug files.
 +	(clear_symtab_users): Don't call observer_notify_new_objfile (NULL)
 +	here if SYMFILE_MAINLINE.
+--- README.google	2015-09-05 18:26:36.000000000 -0700
++++ README.google	2015-09-05 18:44:15.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	PR python/17936
++	* symfile.c (symbol_file_add_with_addrs): Don't query whether to load
++	a new symbol table for separate debug files.  Don't call
++	observer_notify_new_objfile (NULL) for separate debug files.  Turn off
++	SYMFILE_MAINLINE when calling finish_new_objfile for separate debug
++	files.
++	(symbol_file_add_separate): Don't turn off SYMFILE_MAINLINE.  Add a
++	comment explaining why.
++
++	testsuite/
++	* gdb.base/sepdebug.exp: Add test to verify two "Reading symbols ..."
++	messages are printed.

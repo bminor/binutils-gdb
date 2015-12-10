@@ -628,6 +628,26 @@ proc test_next_with_recursion {} {
 
 test_next_with_recursion
 
+# Verify we see two "Reading symbols from ..." messages.
+# Normally gdb_file_cmd is used, but it is a monster which we don't want to
+# replicate.  We could put the detection of two "Reading ..." messages there,
+# but that would further complicate it just for this one test.  Instead we do
+# a stripped down version of gdb_file_cmd here: we don't need to be be as
+# general purpose.
+# We take advantage of the fact that the previous clean_restart will have
+# already downloaded the binary
+
+proc test_two_reading_messages { } {
+    global srcdir subdir testfile EXEEXT
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_test "file [standard_output_file ${testfile}${EXEEXT}]" \
+	"Reading symbols from.*Reading symbols from.*done." \
+	"Verify two \"Reading symbols\" messages are seen"
+}
+
+test_two_reading_messages
 
 #********
 

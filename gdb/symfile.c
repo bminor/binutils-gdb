@@ -1187,17 +1187,19 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
 
   if ((have_full_symbols () || have_partial_symbols ())
       && mainline
+      && parent == NULL
       && from_tty
       && !query (_("Load new symbol table from \"%s\"? "), name))
     error (_("Not confirmed."));
 
-  /* If mainline, send the new_objfile (NULL) notification now.
-     This is done here so that clients will see one event instead of one for
-     the main objfile and a second one for a possible separate debug file, and
-     will see the event before any objfiles are loaded including possible
-     separate debug files. Note that if there is a separate debug file, we
-     will end up back here from calling syms_from_objfile below.  PR 17936.  */
-  if (mainline)
+  /* If mainline and not a separate debug file, send the new_objfile (NULL)
+     notification now.  This is done here so that clients will see one event
+     instead of one for the main objfile and a second one for a possible
+     separate debug file, and will see the event before any objfiles are
+     loaded including possible separate debug files.  Note that if there is a
+     separate debug file, we will end up back here from calling
+     syms_from_objfile below.  PR 17936.  */
+  if (mainline && parent == NULL)
     observer_notify_new_objfile (NULL);
 
   objfile = allocate_objfile (abfd, name,
@@ -1267,7 +1269,10 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
       return objfile;	/* No symbols.  */
     }
 
-  finish_new_objfile (objfile, add_flags);
+  finish_new_objfile (objfile,
+		      parent != NULL
+		      ? (add_flags & ~SYMFILE_MAINLINE)
+		      : add_flags);
 
   observer_notify_new_objfile (objfile);
 
@@ -1292,8 +1297,11 @@ symbol_file_add_separate (bfd *bfd, const char *name, int symfile_flags,
   sap = build_section_addr_info_from_objfile (objfile);
   my_cleanup = make_cleanup_free_section_addr_info (sap);
 
+  /* Note: We pass on SYMFILE_MAINLINE for the separate debug file on purpose:
+     We want to have the same "Reading symbols ..." handling for the separate
+     debug file.  */
   new_objfile = symbol_file_add_with_addrs
-    (bfd, name, symfile_flags & ~SYMFILE_MAINLINE, sap,
+    (bfd, name, symfile_flags, sap,
      objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
 		       | OBJF_USERLOADED),
      objfile);
