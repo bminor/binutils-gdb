@@ -1,3 +1,11 @@
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-tbl.h (aarch64_feature_ras): New.
+	(RAS): New.
+	(aarch64_opcode_table): Add "esb".
+
 2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-opc.c (half_conv_t): New.

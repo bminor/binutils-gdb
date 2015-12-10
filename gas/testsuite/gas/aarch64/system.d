@@ -28,7 +28,7 @@ Disassembly of section \.text:
   50:	d50321bf 	hint	#0xd
   54:	d50321df 	hint	#0xe
   58:	d50321ff 	hint	#0xf
-  5c:	d503221f 	hint	#0x10
+  5c:	d503221f 	(hint	#0x10|esb)
   60:	d503223f 	hint	#0x11
   64:	d503225f 	hint	#0x12
   68:	d503227f 	hint	#0x13
