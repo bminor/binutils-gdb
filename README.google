@@ -468,3 +468,16 @@ they are an ongoing maintenance burden.
 +	testsuite/
 +	* gdb.base/gcore-build-id-pie.c: New file.
 +	* gdb.base/gcore-build-id-pie.exp: New file.
+--- README.google	2015-09-11 16:22:06.000000000 -0700
++++ README.google	2015-09-15 16:23:33.000000000 -0700
++
++2015-09-15  Doug Evans  <dje@google.com>
++
++	Submitted upstream, not committed there yet.
++	PR python/18938
++	* cli/cli-cmds (source_script_fron_sctream): New arg file_to_open.
++	All callers updated.
++
++	testsuite/
++	* gdb.python/python.exp: Add test for symlink from .py file to .notpy
++	file.
