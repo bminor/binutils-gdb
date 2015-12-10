@@ -1,5 +1,9 @@
 2015-12-10  Pedro Alves  <palves@redhat.com>
 
+	* gdb.multi/base.exp: Remove stale "spaces" references.
+
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
 	* gdb.multi/base.exp: Don't use nowarnings.
 	* gdb.multi/bkpt-multi-exec.exp: Don't use nowarnings.
 	* gdb.multi/hangout.c: Include stdio.h.
