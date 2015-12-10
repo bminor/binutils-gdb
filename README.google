@@ -197,3 +197,14 @@ they are an ongoing maintenance burden.
 +
 +	include/
 +	* dwarf2.def (DW_AT_str_offsets_base): New attribute.
+--- README.google	2015-09-05 17:04:41.000000000 -0700
++++ README.google	2015-09-05 18:02:29.000000000 -0700
++
++2015-09-05  Doug Evans  <google.com>
++
++	Upstream PR libc/13097, local ref# 17474967
++	* solib-svr4.c (svr4_read_so_list): Ignore linux-vdso.so.1
++	and linux-gate.so.1.
++
++	Upstream PR libc/13097, local ref# 17474967
++	* solib-svr4.c (svr4_read_so_list): Ignore linux-vdso64.so.1, for ppc.
