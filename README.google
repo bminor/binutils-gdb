@@ -259,3 +259,8 @@ they are an ongoing maintenance burden.
 +	testsuite/
 +	* gdb.base/sepdebug.exp: Add test to verify two "Reading symbols ..."
 +	messages are printed.
+--- README.google	2015-09-05 18:44:15.000000000 -0700
++++ README.google	2015-09-05 18:49:14.000000000 -0700
+-	* solib-svr4.c (svr4_read_so_list): Ignore linux-vdso64.so.1, for ppc.
++	* solib-svr4.c (svr4_read_so_list): Ignore linux-vdso64.so.1, for ppc,
++	and update for -Wc++-compat changes.

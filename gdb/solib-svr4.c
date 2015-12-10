@@ -1398,9 +1398,9 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
 #define LINUX_VDSO_NAME "linux-vdso.so.1"
 #define LINUX_GATE_NAME "linux-gate.so.1"
 #define LINUX_VDSO64_NAME "linux-vdso64.so.1" /* for ppc */
-      if (strcmp (new->so_name, LINUX_VDSO_NAME) == 0
-	  || strcmp (new->so_name, LINUX_GATE_NAME) == 0
-	  || strcmp (new->so_name, LINUX_VDSO64_NAME) == 0)
+      if (strcmp (newobj->so_name, LINUX_VDSO_NAME) == 0
+	  || strcmp (newobj->so_name, LINUX_GATE_NAME) == 0
+	  || strcmp (newobj->so_name, LINUX_VDSO64_NAME) == 0)
 	{
 	  do_cleanups (old_chain);
 	  continue;
