@@ -373,3 +373,14 @@ they are an ongoing maintenance burden.
 +	* dwarf2read.c (dw2_map_symtabs_matching_filename): Add QUIT calls.
 +	* psymtab.c (psym_map_symtabs_matching_filename): Add QUIT call.
 +	* symtab.c (iterate_over_symtabs): Add QUIT calls.
+--- README.google	2015-09-06 00:28:23.000000000 -0700
++++ README.google	2015-09-06 00:32:11.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	* objfiles.c (default_iterate_over_objfiles_in_search_order): Add
++	QUIT call.
++	* symtab.c (lookup_static_symbol): Ditto.
++	(basic_lookup_transparent_type): Ditto.
++	* windows-tdep.c (windows_iterate_over_objfiles_in_search_order):
++	Ditto.

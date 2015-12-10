@@ -448,6 +448,8 @@ windows_iterate_over_objfiles_in_search_order
 
   ALL_OBJFILES (objfile)
     {
+      QUIT;
+
       if (objfile != current_objfile)
 	{
 	  stop = cb (objfile, cb_data);

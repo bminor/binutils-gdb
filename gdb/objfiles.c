@@ -1487,9 +1487,11 @@ default_iterate_over_objfiles_in_search_order
 
   ALL_OBJFILES (objfile)
     {
-       stop = cb (objfile, cb_data);
-       if (stop)
-	 return;
+      QUIT;
+
+      stop = cb (objfile, cb_data);
+      if (stop)
+	return;
     }
 }
 

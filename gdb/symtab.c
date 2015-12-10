@@ -2657,6 +2657,8 @@ lookup_static_symbol (const char *name, const domain_enum domain)
 
   ALL_OBJFILES (objfile)
     {
+      QUIT;
+
       result = lookup_symbol_in_objfile (objfile, STATIC_BLOCK, name, domain);
       if (result != NULL)
 	{
@@ -2869,6 +2871,8 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
+    QUIT;
+
     t = basic_lookup_transparent_type_1 (objfile, GLOBAL_BLOCK, name);
     if (t)
       return t;
@@ -2876,6 +2880,8 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
+    QUIT;
+
     t = basic_lookup_transparent_type_quick (objfile, GLOBAL_BLOCK, name);
     if (t)
       return t;
@@ -2890,6 +2896,8 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
+    QUIT;
+
     t = basic_lookup_transparent_type_1 (objfile, STATIC_BLOCK, name);
     if (t)
       return t;
@@ -2897,6 +2905,8 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
+    QUIT;
+
     t = basic_lookup_transparent_type_quick (objfile, STATIC_BLOCK, name);
     if (t)
       return t;
