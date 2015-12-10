@@ -1,3 +1,9 @@
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/system-2.d: New.
+	* gas/aarch64/system-2.s: New.
+	* gas/aarch64/system.d: Adjust expected output for HINT 16.
+
 2015-12-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run ospke and x86-64-ospke.

@@ -1,3 +1,11 @@
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-tbl.h (aarch64_feature_ras): New.
+	(RAS): New.
+	(aarch64_opcode_table): Add "esb".
+
 2015-12-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (MOD_0F01_REG_5): New.

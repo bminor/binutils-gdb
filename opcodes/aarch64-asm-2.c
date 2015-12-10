@@ -422,6 +422,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1004:	/* movz */
       value = 1004;	/* --> movz.  */
       break;
+    case 1017:	/* esb */
     case 1016:	/* sevl */
     case 1015:	/* sev */
     case 1014:	/* wfi */
@@ -431,12 +432,12 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1010:	/* hint */
       value = 1010;	/* --> hint.  */
       break;
-    case 1025:	/* tlbi */
-    case 1024:	/* ic */
-    case 1023:	/* dc */
-    case 1022:	/* at */
-    case 1021:	/* sys */
-      value = 1021;	/* --> sys.  */
+    case 1026:	/* tlbi */
+    case 1025:	/* ic */
+    case 1024:	/* dc */
+    case 1023:	/* at */
+    case 1022:	/* sys */
+      value = 1022;	/* --> sys.  */
       break;
     default: return NULL;
     }
