@@ -6904,9 +6904,9 @@ currently executing frame and describes it briefly, similar to the
 @menu
 * Frames::                      Stack frames
 * Backtrace::                   Backtraces
-* Frame Filter Management::     Managing frame filters
 * Selection::                   Selecting a frame
 * Frame Info::                  Information on a frame
+* Frame Filter Management::     Managing frame filters
 
 @end menu
 

@@ -1,3 +1,7 @@
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Stack): Reorder menu.
+
 2015-12-09  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Update text to mention
