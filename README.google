@@ -429,3 +429,11 @@ they are an ongoing maintenance burden.
 +
 +	testsuite/
 +	* gdb.base/relocatable.exp: New file.
+--- README.google	2015-09-06 00:49:09.000000000 -0700
++++ README.google	2015-09-06 00:53:20.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	testsuite/
++	* gdb.arch/amd64-entry-value-paramref.S: Re-fixup DIE offsets, they're
++	relative to the start of the CU.
