@@ -1,5 +1,11 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs_at): Add "s1e1rp" and "s1e1wp".
+	(aarch64_sys_ins_reg_supported_p): Add ARMv8.2 system register
+	feature test for "s1e1rp" and "s1e1wp".
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-opc.c (aarch64_sys_regs_dc): Add "cvap".
 	(aarch64_sys_ins_reg_supported_p): New.
 
