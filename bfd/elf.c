@@ -2010,14 +2010,16 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	*hdr2 = *hdr;
 	*p_hdr = hdr2;
 	elf_elfsections (abfd)[shindex] = hdr2;
-	target_sect->reloc_count += NUM_SHDR_ENTRIES (hdr);
-	target_sect->flags |= SEC_RELOC;
-	target_sect->relocation = NULL;
-	target_sect->rel_filepos = hdr->sh_offset;
-	/* In the section to which the relocations apply, mark whether
-	   its relocations are of the REL or RELA variety.  */
+	/* Don't mark the target section as having relocs if this
+	   section is empty.  */
 	if (hdr->sh_size != 0)
 	  {
+	    target_sect->reloc_count += NUM_SHDR_ENTRIES (hdr);
+	    target_sect->flags |= SEC_RELOC;
+	    target_sect->relocation = NULL;
+	    target_sect->rel_filepos = hdr->sh_offset;
+	    /* In the section to which the relocations apply, mark whether
+	       its relocations are of the REL or RELA variety.  */
 	    if (hdr->sh_type == SHT_RELA)
 	      target_sect->use_rela_p = 1;
 	  }

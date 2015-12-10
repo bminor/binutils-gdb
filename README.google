@@ -68,3 +68,11 @@ they are an ongoing maintenance burden.
 +	* dwarf2read.c (use_index_sections): New static global.
 +	(read_index_from_section): Check it.
 +	(_initialize_dwarf2_read): New option "use-index-sections".
+--- README.google	2015-09-05 15:21:34.000000000 -0700
++++ README.google	2015-09-05 15:24:02.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	Temp fix for http://sourceware.org/bugzilla/show_bug.cgi?id=14704
++	* bfd/elf.c (bfd_section_from_shdr, case SHT_REL,SHT_RELA): Don't mark
++	the target section as having relocs if the reloc section is empty.
