@@ -1191,6 +1191,15 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
       && !query (_("Load new symbol table from \"%s\"? "), name))
     error (_("Not confirmed."));
 
+  /* If mainline, send the new_objfile (NULL) notification now.
+     This is done here so that clients will see one event instead of one for
+     the main objfile and a second one for a possible separate debug file, and
+     will see the event before any objfiles are loaded including possible
+     separate debug files. Note that if there is a separate debug file, we
+     will end up back here from calling syms_from_objfile below.  PR 17936.  */
+  if (mainline)
+    observer_notify_new_objfile (NULL);
+
   objfile = allocate_objfile (abfd, name,
 			      flags | (mainline ? OBJF_MAINLINE : 0));
 
@@ -1284,7 +1293,7 @@ symbol_file_add_separate (bfd *bfd, const char *name, int symfile_flags,
   my_cleanup = make_cleanup_free_section_addr_info (sap);
 
   new_objfile = symbol_file_add_with_addrs
-    (bfd, name, symfile_flags, sap,
+    (bfd, name, symfile_flags & ~SYMFILE_MAINLINE, sap,
      objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
 		       | OBJF_USERLOADED),
      objfile);
@@ -3030,7 +3039,11 @@ clear_symtab_users (int add_flags)
   clear_displays ();
   clear_last_displayed_sal ();
   clear_pc_function_cache ();
-  observer_notify_new_objfile (NULL);
+
+  /* If this is the main objfile, the notification is sent out sooner,
+     by symbol_file_add_with_addrs.  PR 17936.  */
+  if ((add_flags & SYMFILE_MAINLINE) == 0)
+    observer_notify_new_objfile (NULL);
 
   /* Clear globals which might have pointed into a removed objfile.
      FIXME: It's not clear which of these are supposed to persist

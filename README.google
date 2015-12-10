@@ -230,3 +230,15 @@ they are an ongoing maintenance burden.
 +	Ref: 15188412
 +	* breakpoint.c (create_solib_event_breakpoint): Apply
 +	gdbarch_skip_entrypoint if it's defined.
+--- README.google	2015-09-05 18:23:16.000000000 -0700
++++ README.google	2015-09-05 18:26:36.000000000 -0700
++
++2015-09-05  Doug Evans  <google.com>
++
++	PR python/17936
++	* symfile.c (symbol_file_add_with_addrs): Call
++	observer_notify_new_objfile (NULL) early, before loading symbols.
++	(symbol_file_add_separate): Turn off SYMFILE_MAINLINE when loading
++	separate debug files.
++	(clear_symtab_users): Don't call observer_notify_new_objfile (NULL)
++	here if SYMFILE_MAINLINE.
