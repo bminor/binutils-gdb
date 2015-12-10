@@ -34,3 +34,14 @@ they are an ongoing maintenance burden.
 	loading new symbol table.
 	* testsuite/gdb.base/sepdebug.exp: Update expected output to match
 	"no debugging symbols found" warning change for 1155829.
+--- README.google	2015-09-05 14:53:18.000000000 -0700
++++ README.google	2015-09-05 15:01:01.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	Fix for http://b/2630476
++	* remote.c (readchar): Use minimum timeout of 10 minutes in noack mode.
++	(putpkt_binary): Don't resend QStartNoAckMode command packets.
++
++	* remote.c (readchar): Don't lengthen timeout value of 0,
++	return immediately means return immediately.

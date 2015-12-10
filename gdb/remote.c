@@ -7551,6 +7551,14 @@ readchar (int timeout)
   int ch;
   struct remote_state *rs = get_remote_state ();
 
+  /* GOOGLE LOCAL
+     Timeouts in noack mode are problematic.  The protocol, as currently
+     implemented, basically can't handle them.  As a temp hack until a
+     better fix is found, use a large minimum.  */
+#define MIN_NOACK_TIMEOUT (10 * 60) /* seconds */
+  if (rs->noack_mode && timeout > 0 && timeout < MIN_NOACK_TIMEOUT)
+    timeout = MIN_NOACK_TIMEOUT;
+
   ch = serial_readchar (rs->remote_desc, timeout);
 
   if (ch >= 0)
@@ -7654,7 +7662,8 @@ putpkt_binary (const char *buf, int cnt)
   int i;
   unsigned char csum = 0;
   char *buf2 = alloca (cnt + 6);
-
+  int is_noack_switch = strncmp (buf, "QStartNoAckMode",
+				 sizeof ("QStartNoAckMode")) == 0;
   int ch;
   int tcount = 0;
   char *p;
@@ -7699,6 +7708,20 @@ putpkt_binary (const char *buf, int cnt)
     {
       int started_error_output = 0;
 
+      /* GOOGLE LOCAL
+	 If we're making the transition to noack mode, don't keep
+	 resending, just wait for the ack.
+	 The problem is the remote protocol can't handle two commands
+	 timing out in a row, which can happen when the system is under load.
+	 Ref# 2630476.
+	 Special case the transition to noack mode because once there we
+	 use a much better timeout, regardless of what the default is or
+	 what the user sets.
+	 This is implemented this way in order to minimize differences
+	 with the FSF tree until a better fix is checked in.  */
+      if (is_noack_switch && tcount > 0)
+	goto GetAck;
+
       if (remote_debug)
 	{
 	  struct cleanup *old_chain;
@@ -7717,6 +7740,8 @@ putpkt_binary (const char *buf, int cnt)
 	 packet and move on.  */
       if (rs->noack_mode)
         break;
+
+     GetAck: /* Ref# 2630476 */
 
       /* Read until either a timeout occurs (-2) or '+' is read.
 	 Handle any notification that arrives in the mean time.  */
