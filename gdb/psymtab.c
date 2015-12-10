@@ -169,6 +169,8 @@ psym_map_symtabs_matching_filename (struct objfile *objfile,
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, pst)
   {
+    QUIT;
+
     /* We can skip shared psymtabs here, because any file name will be
        attached to the unshared psymtab.  */
     if (pst->user != NULL)

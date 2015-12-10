@@ -444,6 +444,8 @@ iterate_over_symtabs (const char *name,
 
   ALL_OBJFILES (objfile)
   {
+    QUIT;
+
     if (iterate_over_some_symtabs (name, real_path, callback, data,
 				   objfile->compunit_symtabs, NULL))
       {
@@ -457,6 +459,8 @@ iterate_over_symtabs (const char *name,
 
   ALL_OBJFILES (objfile)
   {
+    QUIT;
+
     if (objfile->sf
 	&& objfile->sf->qf->map_symtabs_matching_filename (objfile,
 							   name,

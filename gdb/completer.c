@@ -196,7 +196,6 @@ location_completer (struct cmd_list_element *ignore,
   int quoted = *text == '\'' || *text == '"';
   int quote_char = '\0';
   const char *colon = NULL;
-  char *file_to_match = NULL;
   const char *symbol_start = text;
   const char *orig_text = text;
   size_t text_len;
@@ -242,12 +241,17 @@ location_completer (struct cmd_list_element *ignore,
     text++;
   text_len = strlen (text);
 
-  /* Where is the file name?  */
-  if (colon)
+  /* Where is the file name?
+     If the text includes a colon, they want completion only on a
+     symbol name after the colon.  Otherwise, we need to complete on
+     symbols as well as on files.  */
+  if (colon != NULL)
     {
-      char *s;
+      char *s, *file_to_match;
+      struct cleanup *cleanup;
 
-      file_to_match = (char *) xmalloc (colon - text + 1);
+      file_to_match = xmalloc (colon - text + 1);
+      cleanup = make_cleanup (xfree, file_to_match);
       strncpy (file_to_match, text, colon - text + 1);
       /* Remove trailing colons and quotes from the file name.  */
       for (s = file_to_match + (colon - text);
@@ -255,15 +259,9 @@ location_completer (struct cmd_list_element *ignore,
 	   s--)
 	if (*s == ':' || *s == quote_char)
 	  *s = '\0';
-    }
-  /* If the text includes a colon, they want completion only on a
-     symbol name after the colon.  Otherwise, we need to complete on
-     symbols as well as on files.  */
-  if (colon)
-    {
       list = make_file_symbol_completion_list (symbol_start, word,
 					       file_to_match);
-      xfree (file_to_match);
+      do_cleanups (cleanup);
     }
   else
     {

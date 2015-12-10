@@ -364,3 +364,12 @@ they are an ongoing maintenance burden.
 +	* nat/linux-ptrace.h (linux_ptrace_attach_fail_reason): Delete.
 +	* utils.c (perror_string): New arg errno_value.  All callers updated.
 +	(throw_perror_with_name): Call throw_error_with_suberror.
+--- README.google	2015-09-06 00:17:17.000000000 -0700
++++ README.google	2015-09-06 00:28:23.000000000 -0700
++
++2015-09-05  Doug Evans  <dje@google.com>
++
++	* completer.c (location_completer): Protect file_to_match with cleanup.
++	* dwarf2read.c (dw2_map_symtabs_matching_filename): Add QUIT calls.
++	* psymtab.c (psym_map_symtabs_matching_filename): Add QUIT call.
++	* symtab.c (iterate_over_symtabs): Add QUIT calls.

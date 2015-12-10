@@ -3559,6 +3559,8 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
       struct quick_file_names *file_data;
 
+      QUIT;
+
       /* We only need to look at symtabs not already expanded.  */
       if (per_cu->v.quick->compunit_symtab)
 	continue;
@@ -3571,6 +3573,8 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 	{
 	  const char *this_name = file_data->file_names[j];
 	  const char *this_real_name;
+
+	  QUIT;
 
 	  if (compare_filenames_for_search (this_name, name))
 	    {
