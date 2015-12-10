@@ -5383,12 +5383,17 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 				 + sgotplt->output_offset);
 	  if (bfd_link_pic (info))
 	    {
-	      bfd_vma corrected = got_address - (splt->output_section->vma
-						 + splt->output_offset + 4);
+	      bfd_vma got_pcrel = got_address - (splt->output_section->vma
+						 + splt->output_offset);
+	      /* Both GOT and PLT must be aligned to a 16-byte boundary
+		 for the two loads to share the %hiadj part.  The 4-byte
+		 offset for nextpc is accounted for in the %lo offsets
+		 on the loads.  */
+	      BFD_ASSERT ((got_pcrel & 0xf) == 0);
 	      nios2_elf32_install_data (splt, nios2_so_plt0_entry, 0, 6);
-	      nios2_elf32_install_imm16 (splt, 4, hiadj (corrected));
-	      nios2_elf32_install_imm16 (splt, 12, (corrected & 0xffff) + 4);
-	      nios2_elf32_install_imm16 (splt, 16, (corrected & 0xffff) + 8);
+	      nios2_elf32_install_imm16 (splt, 4, hiadj (got_pcrel));
+	      nios2_elf32_install_imm16 (splt, 12, got_pcrel & 0xffff);
+	      nios2_elf32_install_imm16 (splt, 16, (got_pcrel + 4) & 0xffff);
 	    }
 	  else
 	    {
@@ -5404,6 +5409,10 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 			    6 | ((res_size - (res_offset + 4)) << 6),
 			    splt->contents + res_offset);
 
+	      /* The GOT must be aligned to a 16-byte boundary for the
+		 two loads to share the same %hiadj part.  */
+	      BFD_ASSERT ((got_address & 0xf) == 0);
+
 	      nios2_elf32_install_data (splt, nios2_plt0_entry, res_size, 7);
 	      nios2_elf32_install_imm16 (splt, res_size, hiadj (res_start));
 	      nios2_elf32_install_imm16 (splt, res_size + 4,
@@ -5411,9 +5420,9 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 	      nios2_elf32_install_imm16 (splt, res_size + 12,
 					 hiadj (got_address));
 	      nios2_elf32_install_imm16 (splt, res_size + 16,
-					 (got_address & 0xffff) + 4);
+					 (got_address + 4) & 0xffff);
 	      nios2_elf32_install_imm16 (splt, res_size + 20,
-					 (got_address & 0xffff) + 8);
+					 (got_address + 8) & 0xffff);
 	    }
 	}
     }

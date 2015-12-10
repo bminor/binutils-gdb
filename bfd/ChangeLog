@@ -1,3 +1,9 @@
+2015-12-09  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* elf32-nios2.c (nios2_elf32_finish_dynamic_sections): Correct
+	%hiadj/%lo computations for _GLOBAL_OFFSET_TABLE_ in initial
+	PLT entries.  Assert alignment requirements.
+
 2015-12-08  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rl78.c (rl78_offset_for_reloc): Add more relocs.
