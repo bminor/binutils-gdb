@@ -2862,7 +2862,16 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "esr_el2",          CPENC(3,4,C5,C2,0),	0 },
   { "esr_el3",          CPENC(3,6,C5,C2,0),	0 },
   { "esr_el12",		CPENC (3, 5, C5, C2, 0), F_ARCHEXT },
+  { "vsesr_el2",	CPENC (3, 4, C5, C2, 3), F_ARCHEXT }, /* RO */
   { "fpexc32_el2",      CPENC(3,4,C5,C3,0),	0 },
+  { "erridr_el1",	CPENC (3, 0, C5, C3, 0), F_ARCHEXT }, /* RO */
+  { "errselr_el1",	CPENC (3, 0, C5, C3, 1), F_ARCHEXT },
+  { "erxfr_el1",	CPENC (3, 0, C5, C4, 0), F_ARCHEXT }, /* RO */
+  { "erxctlr_el1",	CPENC (3, 0, C5, C4, 1), F_ARCHEXT },
+  { "erxstatus_el1",	CPENC (3, 0, C5, C4, 2), F_ARCHEXT },
+  { "erxaddr_el1",	CPENC (3, 0, C5, C4, 3), F_ARCHEXT },
+  { "erxmisc0_el1",	CPENC (3, 0, C5, C5, 0), F_ARCHEXT },
+  { "erxmisc1_el1",	CPENC (3, 0, C5, C5, 1), F_ARCHEXT },
   { "far_el1",          CPENC(3,0,C6,C0,0),	0 },
   { "far_el2",          CPENC(3,4,C6,C0,0),	0 },
   { "far_el3",          CPENC(3,6,C6,C0,0),	0 },
@@ -2888,6 +2897,8 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "rmr_el2",          CPENC(3,4,C12,C0,2),	0 },
   { "rmr_el3",          CPENC(3,6,C12,C0,2),	0 },
   { "isr_el1",          CPENC(3,0,C12,C1,0),	0 }, /* RO */
+  { "disr_el1",		CPENC (3, 0, C12, C1, 1), F_ARCHEXT },
+  { "vdisr_el2",	CPENC (3, 4, C12, C1, 1), F_ARCHEXT },
   { "contextidr_el1",   CPENC(3,0,C13,C0,1),	0 },
   { "contextidr_el2",	CPENC (3, 4, C13, C0, 1), F_ARCHEXT },
   { "contextidr_el12",	CPENC (3, 5, C13, C0, 1), F_ARCHEXT },
@@ -3152,6 +3163,32 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
   /* ARMv8.2 features.  */
   if (reg->value == CPENC (3, 0, C0, C7, 2)
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return FALSE;
+
+  /* RAS extension.  */
+
+  /* ERRIDR_EL1 and ERRSELR_EL1.  */
+  if ((reg->value == CPENC (3, 0, C5, C3, 0)
+       || reg->value == CPENC (3, 0, C5, C3, 1))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_RAS))
+    return FALSE;
+
+  /* ERXFR_EL1, ERXCTLR_EL1, ERXSTATUS_EL, ERXADDR_EL1, ERXMISC0_EL1 AND
+     ERXMISC1_EL1.  */
+  if ((reg->value == CPENC (3, 0, C5, C3, 0)
+       || reg->value == CPENC (3, 0, C5, C3 ,1)
+       || reg->value == CPENC (3, 0, C5, C3, 2)
+       || reg->value == CPENC (3, 0, C5, C3, 3)
+       || reg->value == CPENC (3, 0, C5, C5, 0)
+       || reg->value == CPENC (3, 0, C5, C5, 1))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_RAS))
+    return FALSE;
+
+  /* VSESR_EL2, DISR_EL1 and VDISR_EL2.  */
+  if ((reg->value == CPENC (3, 4, C5, C2, 3)
+       || reg->value == CPENC (3, 0, C12, C1, 1)
+       || reg->value == CPENC (3, 4, C12, C1, 1))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_RAS))
     return FALSE;
 
   return TRUE;

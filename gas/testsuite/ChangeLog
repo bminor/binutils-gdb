@@ -1,5 +1,11 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* gas/aarch64/sysreg-2.d: Add tests for new registers.
+	* gas/aarch64/sysreg-2.s: Likewise.  Also replace some spaces with
+	tabs.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* gas/aarch64/system-2.d: New.
 	* gas/aarch64/system-2.s: New.
 	* gas/aarch64/system.d: Adjust expected output for HINT 16.

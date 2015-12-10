@@ -1,5 +1,13 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs): Add "vsesr_el2", "erridr_el1",
+	"errselr_el1", "erxfr_el1", "erxctlr", "erxaddr_el1",
+	"erxmisc0_el1", "erxmisc1_el1", "disr_el1" and "vdisr_el2".
+	(aarch64_sys_reg_supported_p): Add architecture feature tests for
+	new registers.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
 	* aarch64-tbl.h (aarch64_feature_ras): New.
