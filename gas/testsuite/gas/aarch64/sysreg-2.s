@@ -41,3 +41,21 @@
 
 	at s1e1rp, x0
 	at s1e1wp, x1
+
+	/* Statistical profiling.  */
+
+	.irp reg, pmblimitr_el1, pmbptr_el1, pmbsr_el1 pmbidr_el1
+	rw_sys_reg sys_reg=\reg xreg=x7 r=1 w=1
+	.endr
+
+	.irp reg, pmscr_el1, pmsicr_el1, pmsirr_el1, pmsfcr_el1
+	rw_sys_reg sys_reg=\reg xreg=x7 r=1 w=1
+	.endr
+
+	.irp reg, pmsevfr_el1, pmslatfr_el1, pmscr_el2, pmscr_el12
+	rw_sys_reg sys_reg=\reg xreg=x7 r=1 w=1
+	.endr
+
+	.irp reg, pmbidr_el1, pmsidr_el1
+	rw_sys_reg sys_reg=\reg xreg=x7 r=1 w=0
+	.endr

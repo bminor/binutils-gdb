@@ -1,3 +1,10 @@
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/sysreg-2.s: Add tests for the statistical profiling
+	system registers.
+	* gas/aarch64/sysreg-2.d: Enable the statistical profiling
+	extension and update the expected output.
+
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/aarch64/sysreg-2.d: Update for new tests for AT S1E1RP and
