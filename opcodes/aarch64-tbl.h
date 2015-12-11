@@ -1303,6 +1303,8 @@ static const aarch64_feature_set aarch64_feature_v8_2 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2, 0);
 static const aarch64_feature_set aarch64_feature_fp_f16 =
   AARCH64_FEATURE (AARCH64_FEATURE_F16 | AARCH64_FEATURE_FP, 0);
+static const aarch64_feature_set aarch64_feature_stat_profile =
+  AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0);
 
 #define CORE	&aarch64_feature_v8
 #define FP	&aarch64_feature_fp
@@ -1314,6 +1316,7 @@ static const aarch64_feature_set aarch64_feature_fp_f16 =
 #define RDMA	&aarch64_feature_rdma
 #define FP_F16	&aarch64_feature_fp_f16
 #define RAS	&aarch64_feature_ras
+#define STAT_PROFILE	&aarch64_feature_stat_profile
 #define ARMV8_2	&aarch64_feature_v8_2
 
 struct aarch64_opcode aarch64_opcode_table[] =
@@ -2460,6 +2463,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"sev", 0xd503209f, 0xffffffff, ic_system, 0, CORE, OP0 (), {}, F_ALIAS},
   {"sevl", 0xd50320bf, 0xffffffff, ic_system, 0, CORE, OP0 (), {}, F_ALIAS},
   {"esb", 0xd503221f, 0xffffffff, ic_system, 0, RAS, OP0 (), {}, F_ALIAS},
+  {"psb", 0xd503223f, 0xffffffff, ic_system, 0, STAT_PROFILE,
+   OP1 (BARRIER_PSB), {}, F_ALIAS },
   {"clrex", 0xd503305f, 0xfffff0ff, ic_system, 0, CORE, OP1 (UIMM4), {}, F_OPD0_OPT | F_DEFAULT (0xF)},
   {"dsb", 0xd503309f, 0xfffff0ff, ic_system, 0, CORE, OP1 (BARRIER), {}, 0},
   {"dmb", 0xd50330bf, 0xfffff0ff, ic_system, 0, CORE, OP1 (BARRIER), {}, 0},
@@ -2662,4 +2667,6 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(SYSTEM, barrier, "BARRIER_ISB", 0, F(),				\
       "the ISB option name SY or an optional 4-bit unsigned immediate")	\
     Y(SYSTEM, prfop, "PRFOP", 0, F(),					\
-      "a prefetch operation specifier")
+      "a prefetch operation specifier")					\
+    Y (SYSTEM, hint, "BARRIER_PSB", 0, F (),				\
+      "the PSB option name CSYNC")

@@ -422,6 +422,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1004:	/* movz */
       value = 1004;	/* --> movz.  */
       break;
+    case 1018:	/* psb */
     case 1017:	/* esb */
     case 1016:	/* sevl */
     case 1015:	/* sev */
@@ -432,12 +433,12 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1010:	/* hint */
       value = 1010;	/* --> hint.  */
       break;
-    case 1026:	/* tlbi */
-    case 1025:	/* ic */
-    case 1024:	/* dc */
-    case 1023:	/* at */
-    case 1022:	/* sys */
-      value = 1022;	/* --> sys.  */
+    case 1027:	/* tlbi */
+    case 1026:	/* ic */
+    case 1025:	/* dc */
+    case 1024:	/* at */
+    case 1023:	/* sys */
+      value = 1023;	/* --> sys.  */
       break;
     default: return NULL;
     }
@@ -562,6 +563,8 @@ aarch64_insert_operand (const aarch64_operand *self,
       return aarch64_ins_barrier (self, info, code, inst);
     case 87:
       return aarch64_ins_prfop (self, info, code, inst);
+    case 88:
+      return aarch64_ins_hint (self, info, code, inst);
     default: assert (0); abort ();
     }
 }
