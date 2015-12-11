@@ -1,3 +1,8 @@
+2015-12-11  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.c [__aarch64__]: Use arm_abi_breakpoint
+	arm breakpoint.
+
 2015-12-07  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.srv: Append arm.o to srv_tgtobj for
