@@ -1,5 +1,11 @@
 2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.mi/mi-vla-fortran.exp: Add XFAIL for accessing unassociated
+	pointer.  Don't perform further tests on the unassociated pointer
+	if the first test fails.
+
+2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/max-value-size.c: New file.
 	* gdb.base/max-value-size.exp: New file.
 	* gdb.base/huge.exp: Disable max-value-size for this test.
