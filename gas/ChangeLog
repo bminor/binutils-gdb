@@ -1,3 +1,8 @@
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "profile".
+	* doc/c-aarch64.texi (AArch64 Extensions): Add "profile".
+
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (parse_sys_ins_reg): Add check of
