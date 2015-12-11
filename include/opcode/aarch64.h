@@ -237,6 +237,7 @@ enum aarch64_opnd
   AARCH64_OPND_BARRIER,		/* Barrier operand.  */
   AARCH64_OPND_BARRIER_ISB,	/* Barrier operand for ISB.  */
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
+  AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an

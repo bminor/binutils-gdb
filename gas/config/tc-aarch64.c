@@ -406,6 +406,7 @@ static struct hash_control *aarch64_reg_hsh;
 static struct hash_control *aarch64_barrier_opt_hsh;
 static struct hash_control *aarch64_nzcv_hsh;
 static struct hash_control *aarch64_pldop_hsh;
+static struct hash_control *aarch64_hint_opt_hsh;
 
 /* Stuff needed to resolve the label ambiguity
    As:
@@ -3604,6 +3605,41 @@ parse_barrier (char **str)
   return o->value;
 }
 
+/* Parse an operand for a PSB barrier.  Set *HINT_OPT to the hint-option record
+   return 0 if successful.  Otherwise return PARSE_FAIL.  */
+
+static int
+parse_barrier_psb (char **str,
+		   const struct aarch64_name_value_pair ** hint_opt)
+{
+  char *p, *q;
+  const struct aarch64_name_value_pair *o;
+
+  p = q = *str;
+  while (ISALPHA (*q))
+    q++;
+
+  o = hash_find_n (aarch64_hint_opt_hsh, p, q - p);
+  if (!o)
+    {
+      set_fatal_syntax_error
+	( _("unknown or missing option to PSB"));
+      return PARSE_FAIL;
+    }
+
+  if (o->value != 0x11)
+    {
+      /* PSB only accepts option name 'CSYNC'.  */
+      set_syntax_error
+	(_("the specified option is not accepted for PSB"));
+      return PARSE_FAIL;
+    }
+
+  *str = q;
+  *hint_opt = o;
+  return 0;
+}
+
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
    Returns the encoding for the option, or PARSE_FAIL.
 
@@ -5643,6 +5679,12 @@ sys_reg_ins:
 	  inst.base.operands[i].prfop = aarch64_prfops + val;
 	  break;
 
+	case AARCH64_OPND_BARRIER_PSB:
+	  val = parse_barrier_psb (&str, &(info->hint_option));
+	  if (val == PARSE_FAIL)
+	    goto failure;
+	  break;
+
 	default:
 	  as_fatal (_("unhandled operand code %d"), operands[i]);
 	}
@@ -7506,7 +7548,8 @@ md_begin (void)
       || (aarch64_reg_hsh = hash_new ()) == NULL
       || (aarch64_barrier_opt_hsh = hash_new ()) == NULL
       || (aarch64_nzcv_hsh = hash_new ()) == NULL
-      || (aarch64_pldop_hsh = hash_new ()) == NULL)
+      || (aarch64_pldop_hsh = hash_new ()) == NULL
+      || (aarch64_hint_opt_hsh = hash_new ()) == NULL)
     as_fatal (_("virtual memory exhausted"));
 
   fill_instruction_hash_table ();
@@ -7600,6 +7643,17 @@ md_begin (void)
       /* Also hash the name in the upper case.  */
       checked_hash_insert (aarch64_pldop_hsh, get_upper_str (name),
 			   (void *) (aarch64_prfops + i));
+    }
+
+  for (i = 0; aarch64_hint_options[i].name != NULL; i++)
+    {
+      const char* name = aarch64_hint_options[i].name;
+
+      checked_hash_insert (aarch64_hint_opt_hsh, name,
+			   (void *) (aarch64_hint_options + i));
+      /* Also hash the name in the upper case.  */
+      checked_hash_insert (aarch64_pldop_hsh, get_upper_str (name),
+			   (void *) (aarch64_hint_options + i));
     }
 
   /* Set the cpu variant based on the command-line options.  */

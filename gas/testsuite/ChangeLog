@@ -1,5 +1,12 @@
 2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* gas/aarch64/system-2.d: Enable the statistical profiling
+	extension.  Update the expected output.
+	* gas/aarch64/system-2.s: Add tests for PSB CSYNC.
+	* gas/aarch64/system.d: Update the expected output.
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* gas/aarch64/sysreg-2.s: Add tests for the statistical profiling
 	system registers.
 	* gas/aarch64/sysreg-2.d: Enable the statistical profiling

@@ -344,6 +344,7 @@ const struct aarch64_name_value_pair aarch64_barrier_options[16] =
 
 const struct aarch64_name_value_pair aarch64_hint_options[] =
 {
+  { "csync", 0x11 },    /* PSB CSYNC.  */
   { NULL, 0x0 },
 };
 
@@ -2729,6 +2730,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	snprintf (buf, size, "%s", opnd->prfop->name);
       else
 	snprintf (buf, size, "#0x%02x", opnd->prfop->value);
+      break;
+
+    case AARCH64_OPND_BARRIER_PSB:
+      snprintf (buf, size, "%s", opnd->hint_option->name);
       break;
 
     default:
