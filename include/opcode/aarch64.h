@@ -50,6 +50,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_V8_1	0x01000000	/* v8.1 features.  */
 #define AARCH64_FEATURE_F16	0x02000000	/* v8.2 FP16 instructions.  */
 #define AARCH64_FEATURE_RAS	0x04000000	/* RAS Extensions.  */
+#define AARCH64_FEATURE_PROFILE	0x08000000	/* Statistical Profiling.  */
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \

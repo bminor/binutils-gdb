@@ -7744,6 +7744,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 					 | AARCH64_FEATURE_RDMA, 0)},
   {"fp16",		AARCH64_FEATURE (AARCH64_FEATURE_F16
 					 | AARCH64_FEATURE_FP, 0)},
+  {"profile",		AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0)},
   {NULL,		AARCH64_ARCH_NONE}
 };
 

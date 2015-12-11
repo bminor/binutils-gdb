@@ -1,3 +1,7 @@
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (AARCH64_FEATURE_PROFILE): New.
+
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64.h (aarch64_sys_ins_reg_supported_p): Declare.
