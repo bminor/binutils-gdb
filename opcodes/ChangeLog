@@ -1,5 +1,9 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-gen.c (find_alias_opcode): Set max_num_aliases to 16.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-opc.c (aarch64_sys_reg): Add pbmlimitr_el1, pmbptr_el1,
 	pmbsr_el1, pmbidr_el1, pmscr_el1, pmsicr_el1, pmsirr_el1,
 	pmsfcr_el1, pmsevfr_el1, pmslatfr_el1, pmsidr_el1, pmscr_el2 and
