@@ -1,5 +1,14 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_reg): Add pbmlimitr_el1, pmbptr_el1,
+	pmbsr_el1, pmbidr_el1, pmscr_el1, pmsicr_el1, pmsirr_el1,
+	pmsfcr_el1, pmsevfr_el1, pmslatfr_el1, pmsidr_el1, pmscr_el2 and
+	pmscr_el2.
+	(aarch64_sys_reg_supported_p): Add architecture feature tests for
+	the new registers.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-opc.c (aarch64_sys_regs_at): Add "s1e1rp" and "s1e1wp".
 	(aarch64_sys_ins_reg_supported_p): Add ARMv8.2 system register
 	feature test for "s1e1rp" and "s1e1wp".
