@@ -1067,6 +1067,33 @@ aarch64_ext_prfop (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return 1;
 }
 
+/* Decode the hint number for an alias taking an operand.  Set info->hint_option
+   to the matching name/value pair in aarch64_hint_options.  */
+
+int
+aarch64_ext_hint (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		  aarch64_opnd_info *info,
+		  aarch64_insn code,
+		  const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  /* CRm:op2.  */
+  unsigned hint_number;
+  int i;
+
+  hint_number = extract_fields (code, 0, 2, FLD_CRm, FLD_op2);
+
+  for (i = 0; aarch64_hint_options[i].name != NULL; i++)
+    {
+      if (hint_number == aarch64_hint_options[i].value)
+	{
+	  info->hint_option = &(aarch64_hint_options[i]);
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
 /* Decode the extended register operand for e.g.
      STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}].  */
 int

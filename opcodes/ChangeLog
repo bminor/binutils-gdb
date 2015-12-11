@@ -1,5 +1,15 @@
 2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_hint): New.
+	* aarch64-asm.h (aarch64_ins_hint): Declare.
+	* aarch64-dis.c (aarch64_ext_hint): New.
+	* aarch64-dis.h (aarch64_ext_hint): Declare.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-opc.c (aarch64_hint_options): New.
+	* aarch64-tbl.h (AARCH64_OPERANDS): Fix typos.
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-gen.c (find_alias_opcode): Set max_num_aliases to 16.
 
 2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
