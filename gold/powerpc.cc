@@ -663,6 +663,21 @@ class Target_powerpc : public Sized_target<size, big_endian>
 			  const unsigned char* plocal_symbols,
 			  Relocatable_relocs*);
 
+  // Scan the relocs for --emit-relocs.
+  void
+  emit_relocs_scan(Symbol_table* symtab,
+		   Layout* layout,
+		   Sized_relobj_file<size, big_endian>* object,
+		   unsigned int data_shndx,
+		   unsigned int sh_type,
+		   const unsigned char* prelocs,
+		   size_t reloc_count,
+		   Output_section* output_section,
+		   bool needs_special_offset_handling,
+		   size_t local_symbol_count,
+		   const unsigned char* plocal_syms,
+		   Relocatable_relocs* rr);
+
   // Emit relocations for a section.
   void
   relocate_relocs(const Relocate_info<size, big_endian>*,
@@ -1102,19 +1117,6 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	    ret = CB_IGNORE;
 	}
       return ret;
-    }
-  };
-
-  // A class which returns the size required for a relocation type,
-  // used while scanning relocs during a relocatable link.
-  class Relocatable_size_for_reloc
-  {
-   public:
-    unsigned int
-    get_size_for_reloc(unsigned int, Relobj*)
-    {
-      gold_unreachable();
-      return 0;
     }
   };
 
@@ -6430,7 +6432,9 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
     const unsigned char* plocal_symbols)
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
-  typedef typename Target_powerpc<size, big_endian>::Scan Scan;
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, big_endian>
+      Classify_reloc;
+
   Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<Powerpc_relobj<size, big_endian>*>(object);
   if (size == 64)
@@ -6460,8 +6464,7 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
       return;
     }
 
-  gold::gc_process_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, Scan,
-			  typename Target_powerpc::Relocatable_size_for_reloc>(
+  gold::gc_process_relocs<size, big_endian, Powerpc, Scan, Classify_reloc>(
     symtab,
     layout,
     this,
@@ -6707,7 +6710,8 @@ Target_powerpc<size, big_endian>::scan_relocs(
     const unsigned char* plocal_symbols)
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
-  typedef typename Target_powerpc<size, big_endian>::Scan Scan;
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, big_endian>
+      Classify_reloc;
 
   if (sh_type == elfcpp::SHT_REL)
     {
@@ -6716,7 +6720,7 @@ Target_powerpc<size, big_endian>::scan_relocs(
       return;
     }
 
-  gold::scan_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, Scan>(
+  gold::scan_relocs<size, big_endian, Powerpc, Scan, Classify_reloc>(
     symtab,
     layout,
     this,
@@ -8177,11 +8181,13 @@ Target_powerpc<size, big_endian>::relocate_section(
   typedef typename Target_powerpc<size, big_endian>::Relocate Powerpc_relocate;
   typedef typename Target_powerpc<size, big_endian>::Relocate_comdat_behavior
     Powerpc_comdat_behavior;
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, big_endian>
+      Classify_reloc;
 
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  gold::relocate_section<size, big_endian, Powerpc, elfcpp::SHT_RELA,
-			 Powerpc_relocate, Powerpc_comdat_behavior>(
+  gold::relocate_section<size, big_endian, Powerpc, Powerpc_relocate,
+			 Powerpc_comdat_behavior, Classify_reloc>(
     relinfo,
     this,
     prelocs,
@@ -8194,9 +8200,26 @@ Target_powerpc<size, big_endian>::relocate_section(
     reloc_symbol_changes);
 }
 
+template<int size, bool big_endian>
 class Powerpc_scan_relocatable_reloc
 {
 public:
+  typedef typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
+      Reltype;
+  static const int reloc_size =
+      Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+  static const int sh_type = elfcpp::SHT_RELA;
+
+  // Return the symbol referred to by the relocation.
+  static inline unsigned int
+  get_r_sym(const Reltype* reloc)
+  { return elfcpp::elf_r_sym<size>(reloc->get_r_info()); }
+
+  // Return the type of the relocation.
+  static inline unsigned int
+  get_r_type(const Reltype* reloc)
+  { return elfcpp::elf_r_type<size>(reloc->get_r_info()); }
+
   // Return the strategy to use for a local symbol which is not a
   // section symbol, given the relocation type.
   inline Relocatable_relocs::Reloc_strategy
@@ -8244,10 +8267,11 @@ Target_powerpc<size, big_endian>::scan_relocatable_relocs(
     const unsigned char* plocal_symbols,
     Relocatable_relocs* rr)
 {
+  typedef Powerpc_scan_relocatable_reloc<size, big_endian> Scan_strategy;
+
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  gold::scan_relocatable_relocs<size, big_endian, elfcpp::SHT_RELA,
-				Powerpc_scan_relocatable_reloc>(
+  gold::scan_relocatable_relocs<size, big_endian, Scan_strategy>(
     symtab,
     layout,
     object,
@@ -8258,6 +8282,45 @@ Target_powerpc<size, big_endian>::scan_relocatable_relocs(
     needs_special_offset_handling,
     local_symbol_count,
     plocal_symbols,
+    rr);
+}
+
+// Scan the relocs for --emit-relocs.
+
+template<int size, bool big_endian>
+void
+Target_powerpc<size, big_endian>::emit_relocs_scan(
+    Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int data_shndx,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    size_t local_symbol_count,
+    const unsigned char* plocal_syms,
+    Relocatable_relocs* rr)
+{
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, big_endian>
+      Classify_reloc;
+  typedef gold::Default_emit_relocs_strategy<Classify_reloc>
+      Emit_relocs_strategy;
+
+  gold_assert(sh_type == elfcpp::SHT_RELA);
+
+  gold::scan_relocatable_relocs<size, big_endian, Emit_relocs_strategy>(
+    symtab,
+    layout,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_syms,
     rr);
 }
 

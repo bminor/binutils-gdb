@@ -1,3 +1,9 @@
+2016-01-11  Cary Coutant  <ccoutant@gmail.com>
+
+	* elfcpp.h (Mips64_rel, Mips64_rel_write): New classes.
+	(Mips64_rela, Mips64_rela_write): New classes.
+	* elfcpp_internal.h (Mips64_rel_data, Mips64_rela_data): New structs.
+
 2016-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

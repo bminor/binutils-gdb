@@ -348,6 +348,21 @@ class Target_s390 : public Sized_target<size, true>
 			  const unsigned char* plocal_symbols,
 			  Relocatable_relocs*);
 
+  // Scan the relocs for --emit-relocs.
+  void
+  emit_relocs_scan(Symbol_table* symtab,
+		   Layout* layout,
+		   Sized_relobj_file<size, true>* object,
+		   unsigned int data_shndx,
+		   unsigned int sh_type,
+		   const unsigned char* prelocs,
+		   size_t reloc_count,
+		   Output_section* output_section,
+		   bool needs_special_offset_handling,
+		   size_t local_symbol_count,
+		   const unsigned char* plocal_syms,
+		   Relocatable_relocs* rr);
+
   // Return a string used to fill a code section with nops.
   std::string
   do_code_fill(section_size_type length) const;
@@ -594,15 +609,6 @@ class Target_s390 : public Sized_target<size, true>
 		 const elfcpp::Rela<size, true>&,
 		 unsigned char* view,
 		 section_size_type view_size);
-  };
-
-  // A class which returns the size required for a relocation type,
-  // used while scanning relocs during a relocatable link.
-  class Relocatable_size_for_reloc
-  {
-   public:
-    unsigned int
-    get_size_for_reloc(unsigned int, Relobj*);
   };
 
   // Adjust TLS relocation type based on the options and whether this
@@ -3086,13 +3092,13 @@ Target_s390<size>::gc_process_relocs(Symbol_table* symtab,
 				       size_t local_symbol_count,
 				       const unsigned char* plocal_symbols)
 {
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, true>
+      Classify_reloc;
 
   if (sh_type == elfcpp::SHT_REL)
     return;
 
-  gold::gc_process_relocs<size, true, Target_s390<size>, elfcpp::SHT_RELA,
-			  typename Target_s390<size>::Scan,
-			  typename Target_s390<size>::Relocatable_size_for_reloc>(
+  gold::gc_process_relocs<size, true, Target_s390<size>, Scan, Classify_reloc>(
     symtab,
     layout,
     this,
@@ -3924,6 +3930,9 @@ Target_s390<size>::scan_relocs(Symbol_table* symtab,
 				 size_t local_symbol_count,
 				 const unsigned char* plocal_symbols)
 {
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, true>
+      Classify_reloc;
+
   if (sh_type == elfcpp::SHT_REL)
     {
       gold_error(_("%s: unsupported REL reloc section"),
@@ -3931,8 +3940,7 @@ Target_s390<size>::scan_relocs(Symbol_table* symtab,
       return;
     }
 
-  gold::scan_relocs<size, true, Target_s390<size>, elfcpp::SHT_RELA,
-      typename Target_s390<size>::Scan>(
+  gold::scan_relocs<size, true, Target_s390<size>, Scan, Classify_reloc>(
     symtab,
     layout,
     this,
@@ -4019,108 +4027,6 @@ Target_s390<size>::do_finalize_sections(
     }
 }
 
-// Return the size of a relocation while scanning during a relocatable
-// link.
-
-template<int size>
-unsigned int
-Target_s390<size>::Relocatable_size_for_reloc::get_size_for_reloc(
-    unsigned int r_type,
-    Relobj* object)
-{
-  switch (r_type)
-    {
-    case elfcpp::R_390_NONE:
-    case elfcpp::R_390_GNU_VTINHERIT:
-    case elfcpp::R_390_GNU_VTENTRY:
-    case elfcpp::R_390_TLS_GD32:          // Global-dynamic
-    case elfcpp::R_390_TLS_GD64:
-    case elfcpp::R_390_TLS_GDCALL:
-    case elfcpp::R_390_TLS_LDM32:         // Local-dynamic
-    case elfcpp::R_390_TLS_LDM64:
-    case elfcpp::R_390_TLS_LDO32:
-    case elfcpp::R_390_TLS_LDO64:
-    case elfcpp::R_390_TLS_LDCALL:
-    case elfcpp::R_390_TLS_IE32:          // Initial-exec
-    case elfcpp::R_390_TLS_IE64:
-    case elfcpp::R_390_TLS_IEENT:
-    case elfcpp::R_390_TLS_GOTIE12:
-    case elfcpp::R_390_TLS_GOTIE20:
-    case elfcpp::R_390_TLS_GOTIE32:
-    case elfcpp::R_390_TLS_GOTIE64:
-    case elfcpp::R_390_TLS_LOAD:
-    case elfcpp::R_390_TLS_LE32:          // Local-exec
-    case elfcpp::R_390_TLS_LE64:
-      return 0;
-
-    case elfcpp::R_390_64:
-    case elfcpp::R_390_PC64:
-    case elfcpp::R_390_GOT64:
-    case elfcpp::R_390_PLT64:
-    case elfcpp::R_390_GOTOFF64:
-    case elfcpp::R_390_GOTPLT64:
-    case elfcpp::R_390_PLTOFF64:
-      return 8;
-
-    case elfcpp::R_390_32:
-    case elfcpp::R_390_PC32:
-    case elfcpp::R_390_GOT32:
-    case elfcpp::R_390_PLT32:
-    case elfcpp::R_390_GOTOFF32:
-    case elfcpp::R_390_GOTPC:
-    case elfcpp::R_390_PC32DBL:
-    case elfcpp::R_390_PLT32DBL:
-    case elfcpp::R_390_GOTPCDBL:
-    case elfcpp::R_390_GOTENT:
-    case elfcpp::R_390_GOTPLT32:
-    case elfcpp::R_390_GOTPLTENT:
-    case elfcpp::R_390_PLTOFF32:
-    case elfcpp::R_390_20:
-    case elfcpp::R_390_GOT20:
-    case elfcpp::R_390_GOTPLT20:
-      return 4;
-
-    case elfcpp::R_390_PC24DBL:
-    case elfcpp::R_390_PLT24DBL:
-      return 3;
-
-    case elfcpp::R_390_12:
-    case elfcpp::R_390_GOT12:
-    case elfcpp::R_390_GOTPLT12:
-    case elfcpp::R_390_PC12DBL:
-    case elfcpp::R_390_PLT12DBL:
-    case elfcpp::R_390_16:
-    case elfcpp::R_390_GOT16:
-    case elfcpp::R_390_PC16:
-    case elfcpp::R_390_PC16DBL:
-    case elfcpp::R_390_PLT16DBL:
-    case elfcpp::R_390_GOTOFF16:
-    case elfcpp::R_390_GOTPLT16:
-    case elfcpp::R_390_PLTOFF16:
-      return 2;
-
-    case elfcpp::R_390_8:
-      return 1;
-
-      // These are relocations which should only be seen by the
-      // dynamic linker, and should never be seen here.
-    case elfcpp::R_390_COPY:
-    case elfcpp::R_390_GLOB_DAT:
-    case elfcpp::R_390_JMP_SLOT:
-    case elfcpp::R_390_RELATIVE:
-    case elfcpp::R_390_IRELATIVE:
-    case elfcpp::R_390_TLS_DTPMOD:
-    case elfcpp::R_390_TLS_DTPOFF:
-    case elfcpp::R_390_TLS_TPOFF:
-      object->error(_("unexpected reloc %u in object file"), r_type);
-      return 0;
-
-    default:
-      object->error(_("unsupported reloc %u in object file"), r_type);
-      return 0;
-    }
-}
-
 // Scan the relocs during a relocatable link.
 
 template<int size>
@@ -4139,13 +4045,14 @@ Target_s390<size>::scan_relocatable_relocs(
     const unsigned char* plocal_symbols,
     Relocatable_relocs* rr)
 {
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, true>
+      Classify_reloc;
+  typedef gold::Default_scan_relocatable_relocs<Classify_reloc>
+      Scan_relocatable_relocs;
+
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  typedef gold::Default_scan_relocatable_relocs<elfcpp::SHT_RELA,
-    Relocatable_size_for_reloc> Scan_relocatable_relocs;
-
-  gold::scan_relocatable_relocs<size, true, elfcpp::SHT_RELA,
-      Scan_relocatable_relocs>(
+  gold::scan_relocatable_relocs<size, true, Scan_relocatable_relocs>(
     symtab,
     layout,
     object,
@@ -4156,6 +4063,45 @@ Target_s390<size>::scan_relocatable_relocs(
     needs_special_offset_handling,
     local_symbol_count,
     plocal_symbols,
+    rr);
+}
+
+// Scan the relocs for --emit-relocs.
+
+template<int size>
+void
+Target_s390<size>::emit_relocs_scan(
+    Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj_file<size, true>* object,
+    unsigned int data_shndx,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    size_t local_symbol_count,
+    const unsigned char* plocal_syms,
+    Relocatable_relocs* rr)
+{
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, true>
+      Classify_reloc;
+  typedef gold::Default_emit_relocs_strategy<Classify_reloc>
+      Emit_relocs_strategy;
+
+  gold_assert(sh_type == elfcpp::SHT_RELA);
+
+  gold::scan_relocatable_relocs<size, true, Emit_relocs_strategy>(
+    symtab,
+    layout,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_syms,
     rr);
 }
 
@@ -4176,9 +4122,12 @@ Target_s390<size>::relocate_relocs(
     unsigned char* reloc_view,
     section_size_type reloc_view_size)
 {
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, true>
+      Classify_reloc;
+
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  gold::relocate_relocs<size, true, elfcpp::SHT_RELA>(
+  gold::relocate_relocs<size, true, Classify_reloc>(
     relinfo,
     prelocs,
     reloc_count,
@@ -4259,11 +4208,13 @@ Target_s390<size>::relocate_section(
     section_size_type view_size,
     const Reloc_symbol_changes* reloc_symbol_changes)
 {
+  typedef gold::Default_classify_reloc<elfcpp::SHT_RELA, size, true>
+      Classify_reloc;
+
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  gold::relocate_section<size, true, Target_s390<size>, elfcpp::SHT_RELA,
-			 typename Target_s390<size>::Relocate,
-			 gold::Default_comdat_behavior>(
+  gold::relocate_section<size, true, Target_s390<size>, Relocate,
+			 gold::Default_comdat_behavior, Classify_reloc>(
     relinfo,
     this,
     prelocs,

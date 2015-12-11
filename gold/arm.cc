@@ -2040,9 +2040,9 @@ class Arm_output_data_got : public Output_data_got<32, big_endian>
 // bits.  The default handling of relocatable relocation cannot process these
 // relocations.  So we have to extend the default code.
 
-template<bool big_endian, int sh_type, typename Classify_reloc>
+template<bool big_endian, typename Classify_reloc>
 class Arm_scan_relocatable_relocs :
-  public Default_scan_relocatable_relocs<sh_type, Classify_reloc>
+  public Default_scan_relocatable_relocs<Classify_reloc>
 {
  public:
   // Return the strategy to use for a local symbol which is a section
@@ -2050,7 +2050,7 @@ class Arm_scan_relocatable_relocs :
   inline Relocatable_relocs::Reloc_strategy
   local_section_strategy(unsigned int r_type, Relobj*)
   {
-    if (sh_type == elfcpp::SHT_RELA)
+    if (Classify_reloc::sh_type == elfcpp::SHT_RELA)
       return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA;
     else
       {
@@ -2300,6 +2300,21 @@ class Target_arm : public Sized_target<32, big_endian>
 			  size_t local_symbol_count,
 			  const unsigned char* plocal_symbols,
 			  Relocatable_relocs*);
+
+  // Scan the relocs for --emit-relocs.
+  void
+  emit_relocs_scan(Symbol_table* symtab,
+		   Layout* layout,
+		   Sized_relobj_file<32, big_endian>* object,
+		   unsigned int data_shndx,
+		   unsigned int sh_type,
+		   const unsigned char* prelocs,
+		   size_t reloc_count,
+		   Output_section* output_section,
+		   bool needs_special_offset_handling,
+		   size_t local_symbol_count,
+		   const unsigned char* plocal_syms,
+		   Relocatable_relocs* rr);
 
   // Emit relocations for a section.
   void
@@ -2727,12 +2742,15 @@ class Target_arm : public Sized_target<32, big_endian>
 
   };
 
-  // A class which returns the size required for a relocation type,
-  // used while scanning relocs during a relocatable link.
-  class Relocatable_size_for_reloc
+  // A class for inquiring about properties of a relocation,
+  // used while scanning relocs during a relocatable link and
+  // garbage collection.
+  class Classify_reloc :
+      public gold::Default_classify_reloc<elfcpp::SHT_REL, 32, big_endian>
   {
    public:
-    unsigned int
+    // Return the size of the addend of the relocation (only used for SHT_REL).
+    static unsigned int
     get_size_for_reloc(unsigned int, Relobj*);
   };
 
@@ -9170,8 +9188,7 @@ Target_arm<big_endian>::gc_process_relocs(
   typedef Target_arm<big_endian> Arm;
   typedef typename Target_arm<big_endian>::Scan Scan;
 
-  gold::gc_process_relocs<32, big_endian, Arm, elfcpp::SHT_REL, Scan,
-			  typename Target_arm::Relocatable_size_for_reloc>(
+  gold::gc_process_relocs<32, big_endian, Arm, Scan, Classify_reloc>(
     symtab,
     layout,
     this,
@@ -9201,7 +9218,6 @@ Target_arm<big_endian>::scan_relocs(Symbol_table* symtab,
 				    size_t local_symbol_count,
 				    const unsigned char* plocal_symbols)
 {
-  typedef typename Target_arm<big_endian>::Scan Scan;
   if (sh_type == elfcpp::SHT_RELA)
     {
       gold_error(_("%s: unsupported RELA reloc section"),
@@ -9209,7 +9225,7 @@ Target_arm<big_endian>::scan_relocs(Symbol_table* symtab,
       return;
     }
 
-  gold::scan_relocs<32, big_endian, Target_arm, elfcpp::SHT_REL, Scan>(
+  gold::scan_relocs<32, big_endian, Target_arm, Scan, Classify_reloc>(
     symtab,
     layout,
     this,
@@ -10109,8 +10125,8 @@ Target_arm<big_endian>::relocate_section(
 	}
     }
 
-  gold::relocate_section<32, big_endian, Target_arm, elfcpp::SHT_REL,
-			 Arm_relocate, gold::Default_comdat_behavior>(
+  gold::relocate_section<32, big_endian, Target_arm, Arm_relocate,
+			 gold::Default_comdat_behavior, Classify_reloc>(
     relinfo,
     this,
     prelocs,
@@ -10128,7 +10144,7 @@ Target_arm<big_endian>::relocate_section(
 
 template<bool big_endian>
 unsigned int
-Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
+Target_arm<big_endian>::Classify_reloc::get_size_for_reloc(
     unsigned int r_type,
     Relobj* object)
 {
@@ -10165,13 +10181,12 @@ Target_arm<big_endian>::scan_relocatable_relocs(
     const unsigned char* plocal_symbols,
     Relocatable_relocs* rr)
 {
+  typedef Arm_scan_relocatable_relocs<big_endian, Classify_reloc>
+      Scan_relocatable_relocs;
+
   gold_assert(sh_type == elfcpp::SHT_REL);
 
-  typedef Arm_scan_relocatable_relocs<big_endian, elfcpp::SHT_REL,
-    Relocatable_size_for_reloc> Scan_relocatable_relocs;
-
-  gold::scan_relocatable_relocs<32, big_endian, elfcpp::SHT_REL,
-      Scan_relocatable_relocs>(
+  gold::scan_relocatable_relocs<32, big_endian, Scan_relocatable_relocs>(
     symtab,
     layout,
     object,
@@ -10182,6 +10197,44 @@ Target_arm<big_endian>::scan_relocatable_relocs(
     needs_special_offset_handling,
     local_symbol_count,
     plocal_symbols,
+    rr);
+}
+
+// Scan the relocs for --emit-relocs.
+
+template<bool big_endian>
+void
+Target_arm<big_endian>::emit_relocs_scan(Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj_file<32, big_endian>* object,
+    unsigned int data_shndx,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    size_t local_symbol_count,
+    const unsigned char* plocal_syms,
+    Relocatable_relocs* rr)
+{
+  typedef gold::Default_classify_reloc<elfcpp::SHT_REL, 32, big_endian>
+      Classify_reloc;
+  typedef gold::Default_emit_relocs_strategy<Classify_reloc>
+      Emit_relocs_strategy;
+
+  gold_assert(sh_type == elfcpp::SHT_REL);
+
+  gold::scan_relocatable_relocs<32, big_endian, Emit_relocs_strategy>(
+    symtab,
+    layout,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_syms,
     rr);
 }
 
@@ -10204,7 +10257,7 @@ Target_arm<big_endian>::relocate_relocs(
 {
   gold_assert(sh_type == elfcpp::SHT_REL);
 
-  gold::relocate_relocs<32, big_endian, elfcpp::SHT_REL>(
+  gold::relocate_relocs<32, big_endian, Classify_reloc>(
     relinfo,
     prelocs,
     reloc_count,
