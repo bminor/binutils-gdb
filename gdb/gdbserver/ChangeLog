@@ -1,5 +1,10 @@
 2015-12-11  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_breakpoint_at): Call
+	arm_breakpoint_at if the process is 32-bit.
+
+2015-12-11  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-aarch32-low.c [__aarch64__]: Use arm_abi_breakpoint
 	arm breakpoint.
 
