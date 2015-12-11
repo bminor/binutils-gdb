@@ -665,6 +665,24 @@ Sized_relobj_file<size, big_endian>::do_relocate(const Symbol_table* symtab,
   // input offsets to output addresses.
   this->initialize_input_to_output_maps();
 
+  // Make the views available through get_output_view() for the duration
+  // of this routine.  This RAII class will reset output_views_ to NULL
+  // when the views go out of scope.
+  struct Set_output_views
+  {
+    Set_output_views(const Views** ppviews, const Views* pviews)
+    {
+      ppviews_ = ppviews;
+      *ppviews = pviews;
+    }
+
+    ~Set_output_views()
+    { *ppviews_ = NULL; }
+
+    const Views** ppviews_;
+  };
+  Set_output_views set_output_views(&this->output_views_, &views);
+
   // Apply relocations.
 
   this->relocate_sections(symtab, layout, pshdrs, of, &views);
@@ -1038,6 +1056,21 @@ Sized_relobj_file<size, big_endian>::do_relocate_sections(
 				(*pviews)[i].view,
 				(*pviews)[i].view_size);
     }
+}
+
+// Return the output view for section SHNDX.
+
+template<int size, bool big_endian>
+const unsigned char*
+Sized_relobj_file<size, big_endian>::do_get_output_view(
+    unsigned int shndx,
+    section_size_type* plen) const
+{
+  gold_assert(this->output_views_ != NULL);
+  gold_assert(shndx < this->output_views_->size());
+  const View_size& v = (*this->output_views_)[shndx];
+  *plen = v.view_size;
+  return v.view;
 }
 
 // Write the incremental relocs.
@@ -1739,6 +1772,12 @@ Sized_relobj_file<32, false>::do_relocate_sections(
     const unsigned char* pshdrs,
     Output_file* of,
     Views* pviews);
+
+template
+const unsigned char*
+Sized_relobj_file<32, false>::do_get_output_view(
+    unsigned int shndx,
+    section_size_type* plen) const;
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -1750,6 +1789,12 @@ Sized_relobj_file<32, true>::do_relocate_sections(
     const unsigned char* pshdrs,
     Output_file* of,
     Views* pviews);
+
+template
+const unsigned char*
+Sized_relobj_file<32, true>::do_get_output_view(
+    unsigned int shndx,
+    section_size_type* plen) const;
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -1761,6 +1806,12 @@ Sized_relobj_file<64, false>::do_relocate_sections(
     const unsigned char* pshdrs,
     Output_file* of,
     Views* pviews);
+
+template
+const unsigned char*
+Sized_relobj_file<64, false>::do_get_output_view(
+    unsigned int shndx,
+    section_size_type* plen) const;
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -1772,6 +1823,12 @@ Sized_relobj_file<64, true>::do_relocate_sections(
     const unsigned char* pshdrs,
     Output_file* of,
     Views* pviews);
+
+template
+const unsigned char*
+Sized_relobj_file<64, true>::do_get_output_view(
+    unsigned int shndx,
+    section_size_type* plen) const;
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

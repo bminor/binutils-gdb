@@ -479,7 +479,8 @@ Sized_relobj_file<size, big_endian>::Sized_relobj_file(
     discarded_eh_frame_shndx_(-1U),
     is_deferred_layout_(false),
     deferred_layout_(),
-    deferred_layout_relocs_()
+    deferred_layout_relocs_(),
+    output_views_(NULL)
 {
   this->e_type_ = ehdr.get_e_type();
 }

@@ -1,3 +1,15 @@
+2015-12-11  Cary Coutant  <ccoutant@gmail.com>
+
+	* object.cc (Sized_relobj_file::Sized_relobj_file): Initialize
+	output_views_.
+	* object.h (Object::get_output_view): New function.
+	(Object::do_get_output_view): New function.
+	(Sized_relobj_file::do_get_output_view): New function.
+	(Sized_relobj_file::output_views_): New data member.	
+	* reloc.cc: (Sized_relobj_file::do_relocate): Store pointer to
+	output views in class object.
+	(Sized_relobj_file::do_get_output_view): New function.
+
 2015-12-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19317
