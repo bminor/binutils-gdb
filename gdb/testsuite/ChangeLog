@@ -1,3 +1,7 @@
+2015-12-11  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/coremaker2.c: Remove.
+
 2015-12-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.multi/base.exp: Remove stale "spaces" references.
