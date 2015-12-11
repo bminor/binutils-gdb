@@ -1,3 +1,15 @@
+2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* value.c (max_value_size): New variable.
+	(MIN_VALUE_FOR_MAX_VALUE_SIZE): New define.
+	(set_max_value_size): New function.
+	(show_max_value_size): New function.
+	(check_type_length_before_alloc): New function.
+	(allocate_value_contents): Call check_type_length_before_alloc.
+	(set_value_enclosing_type): Likewise.
+	(_initialize_values): Add set/show handler for max-value-size.
+	* NEWS: Mention new set/show command.
+
 2016-01-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* varobj.h (struct varobj): Fix typos in comments.

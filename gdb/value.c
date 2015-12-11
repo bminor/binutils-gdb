@@ -955,13 +955,86 @@ allocate_value_lazy (struct type *type)
   return val;
 }
 
+/* The maximum size, in bytes, that GDB will try to allocate for a value.
+   The initial value of 64k was not selected for any specific reason, it is
+   just a reasonable starting point.  */
+
+static int max_value_size = 65536; /* 64k bytes */
+
+/* It is critical that the MAX_VALUE_SIZE is at least as big as the size of
+   LONGEST, otherwise GDB will not be able to parse integer values from the
+   CLI; for example if the MAX_VALUE_SIZE could be set to 1 then GDB would
+   be unable to parse "set max-value-size 2".
+
+   As we want a consistent GDB experience across hosts with different sizes
+   of LONGEST, this arbitrary minimum value was selected, so long as this
+   is bigger than LONGEST on all GDB supported hosts we're fine.  */
+
+#define MIN_VALUE_FOR_MAX_VALUE_SIZE 16
+gdb_static_assert (sizeof (LONGEST) <= MIN_VALUE_FOR_MAX_VALUE_SIZE);
+
+/* Implement the "set max-value-size" command.  */
+
+static void
+set_max_value_size (char *args, int from_tty,
+		    struct cmd_list_element *c)
+{
+  gdb_assert (max_value_size == -1 || max_value_size >= 0);
+
+  if (max_value_size > -1 && max_value_size < MIN_VALUE_FOR_MAX_VALUE_SIZE)
+    {
+      max_value_size = MIN_VALUE_FOR_MAX_VALUE_SIZE;
+      error (_("max-value-size set too low, increasing to %d bytes"),
+	     max_value_size);
+    }
+}
+
+/* Implement the "show max-value-size" command.  */
+
+static void
+show_max_value_size (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  if (max_value_size == -1)
+    fprintf_filtered (file, _("Maximum value size is unlimited.\n"));
+  else
+    fprintf_filtered (file, _("Maximum value size is %d bytes.\n"),
+		      max_value_size);
+}
+
+/* Called before we attempt to allocate or reallocate a buffer for the
+   contents of a value.  TYPE is the type of the value for which we are
+   allocating the buffer.  If the buffer is too large (based on the user
+   controllable setting) then throw an error.  If this function returns
+   then we should attempt to allocate the buffer.  */
+
+static void
+check_type_length_before_alloc (const struct type *type)
+{
+  unsigned int length = TYPE_LENGTH (type);
+
+  if (max_value_size > -1 && length > max_value_size)
+    {
+      if (TYPE_NAME (type) != NULL)
+	error (_("value of type `%s' requires %u bytes, which is more "
+		 "than max-value-size"), TYPE_NAME (type), length);
+      else
+	error (_("value requires %u bytes, which is more than "
+		 "max-value-size"), length);
+    }
+}
+
 /* Allocate the contents of VAL if it has not been allocated yet.  */
 
 static void
 allocate_value_contents (struct value *val)
 {
   if (!val->contents)
-    val->contents = (gdb_byte *) xzalloc (TYPE_LENGTH (val->enclosing_type));
+    {
+      check_type_length_before_alloc (val->enclosing_type);
+      val->contents
+	= (gdb_byte *) xzalloc (TYPE_LENGTH (val->enclosing_type));
+    }
 }
 
 /* Allocate a  value  and its contents for type TYPE.  */
@@ -2986,9 +3059,12 @@ value_static_field (struct type *type, int fieldno)
 void
 set_value_enclosing_type (struct value *val, struct type *new_encl_type)
 {
-  if (TYPE_LENGTH (new_encl_type) > TYPE_LENGTH (value_enclosing_type (val))) 
-    val->contents =
-      (gdb_byte *) xrealloc (val->contents, TYPE_LENGTH (new_encl_type));
+  if (TYPE_LENGTH (new_encl_type) > TYPE_LENGTH (value_enclosing_type (val)))
+    {
+      check_type_length_before_alloc (new_encl_type);
+      val->contents
+	= (gdb_byte *) xrealloc (val->contents, TYPE_LENGTH (new_encl_type));
+    }
 
   val->enclosing_type = new_encl_type;
 }
@@ -4013,4 +4089,17 @@ Check whether an expression is void.\n\
 Usage: $_isvoid (expression)\n\
 Return 1 if the expression is void, zero otherwise."),
 			 isvoid_internal_fn, NULL);
+
+  add_setshow_zuinteger_unlimited_cmd ("max-value-size",
+				       class_support, &max_value_size, _("\
+Set maximum sized value gdb will load from the inferior."), _("\
+Show maximum sized value gdb will load from the inferior."), _("\
+Use this to control the maximum size, in bytes, of a value that gdb\n\
+will load from the inferior.  Setting this value to 'unlimited'\n\
+disables checking.\n\
+Setting this does not invalidate already allocated values, it only\n\
+prevents future values, larger than this size, from being allocated."),
+			    set_max_value_size,
+			    show_max_value_size,
+			    &setlist, &showlist);
 }

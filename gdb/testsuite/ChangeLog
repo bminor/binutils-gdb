@@ -1,3 +1,9 @@
+2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/max-value-size.c: New file.
+	* gdb.base/max-value-size.exp: New file.
+	* gdb.base/huge.exp: Disable max-value-size for this test.
+
 2016-01-28  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* gdb.dlang/demangle.exp: Sync tests from libiberty testsuite.

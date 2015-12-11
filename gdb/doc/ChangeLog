@@ -1,3 +1,8 @@
+2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Value Sizes): New section.
+	(Data): Add the 'Value Sizes' node to the menu.
+
 2016-01-26  John Baldwin  <jhb@FreeBSD.org>
 
 	* gdb.texinfo (Debugging Output): Fix subject verb disagreements.
