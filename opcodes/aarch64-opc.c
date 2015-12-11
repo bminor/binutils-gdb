@@ -335,6 +335,18 @@ const struct aarch64_name_value_pair aarch64_barrier_options[16] =
     { "sy",    0xf },
 };
 
+/* Table describing the operands supported by the aliases of the HINT
+   instruction.
+
+   The name column is the operand that is accepted for the alias.  The value
+   column is the hint number of the alias.  The list of operands is terminated
+   by NULL in the name column.  */
+
+const struct aarch64_name_value_pair aarch64_hint_options[] =
+{
+  { NULL, 0x0 },
+};
+
 /* op -> op:       load = 0 instruction = 1 store = 2
    l  -> level:    1-3
    t  -> temporal: temporal (retained) = 0 non-temporal (streaming) = 1   */

@@ -667,6 +667,19 @@ aarch64_ins_prfop (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+/* Encode the hint number for instructions that alias HINT but take an
+   operand.  */
+
+const char *
+aarch64_ins_hint (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		  const aarch64_opnd_info *info, aarch64_insn *code,
+		  const aarch64_inst *inst ATTRIBUTE_UNUSED)
+{
+  /* CRm:op2.  */
+  insert_fields (code, info->hint_option->value, 0, 2, FLD_op2, FLD_CRm);
+  return NULL;
+}
+
 /* Encode the extended register operand for e.g.
      STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}].  */
 const char *

@@ -2654,7 +2654,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(SYSTEM, sysins_op, "SYSREG_DC", 0, F(),				\
       "a data cache maintenance operation specifier")			\
     Y(SYSTEM, sysins_op, "SYSREG_IC", 0, F(),				\
-      "an instructin cache maintenance operation specifier")		\
+      "an instruction cache maintenance operation specifier")		\
     Y(SYSTEM, sysins_op, "SYSREG_TLBI", 0, F(),				\
       "a TBL invalidation operation specifier")				\
     Y(SYSTEM, barrier, "BARRIER", 0, F(),				\
@@ -2662,4 +2662,4 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(SYSTEM, barrier, "BARRIER_ISB", 0, F(),				\
       "the ISB option name SY or an optional 4-bit unsigned immediate")	\
     Y(SYSTEM, prfop, "PRFOP", 0, F(),					\
-      "an prefetch operation specifier")
+      "a prefetch operation specifier")
