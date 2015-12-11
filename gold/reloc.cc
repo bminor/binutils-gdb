@@ -1364,6 +1364,7 @@ Sized_relobj_file<size, big_endian>::split_stack_adjust_reltype(
       std::string from;
       std::string to;
       parameters->target().calls_non_split(this, shndx, p->first, p->second,
+					   prelocs, reloc_count,
 					   view, view_size, &from, &to);
       if (!from.empty())
 	{

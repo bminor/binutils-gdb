@@ -561,6 +561,7 @@ class Target_x86_64 : public Sized_target<size, false>
   void
   do_calls_non_split(Relobj* object, unsigned int shndx,
 		     section_offset_type fnoffset, section_size_type fnsize,
+		     const unsigned char* prelocs, size_t reloc_count,
 		     unsigned char* view, section_size_type view_size,
 		     std::string* from, std::string* to) const;
 
@@ -4597,6 +4598,8 @@ void
 Target_x86_64<size>::do_calls_non_split(Relobj* object, unsigned int shndx,
 					section_offset_type fnoffset,
 					section_size_type fnsize,
+					const unsigned char*,
+					size_t,
 					unsigned char* view,
 					section_size_type view_size,
 					std::string* from,

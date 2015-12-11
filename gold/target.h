@@ -338,10 +338,12 @@ class Target
   void
   calls_non_split(Relobj* object, unsigned int shndx,
 		  section_offset_type fnoffset, section_size_type fnsize,
+		  const unsigned char* prelocs, size_t reloc_count,
 		  unsigned char* view, section_size_type view_size,
 		  std::string* from, std::string* to) const
   {
-    this->do_calls_non_split(object, shndx, fnoffset, fnsize, view, view_size,
+    this->do_calls_non_split(object, shndx, fnoffset, fnsize,
+			     prelocs, reloc_count, view, view_size,
 			     from, to);
   }
 
@@ -664,7 +666,8 @@ class Target
   // Virtual function which may be overridden by the child class.
   virtual void
   do_calls_non_split(Relobj* object, unsigned int, section_offset_type,
-		     section_size_type, unsigned char*, section_size_type,
+		     section_size_type, const unsigned char*, size_t,
+		     unsigned char*, section_size_type,
 		     std::string*, std::string*) const;
 
   // make_elf_object hooks.  There are four versions of these for

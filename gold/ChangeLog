@@ -1,5 +1,18 @@
 2015-12-11  Cary Coutant  <ccoutant@gmail.com>
 
+	* target.h (Target::calls_non_split): Add prelocs, reloc_count
+	parameters.
+	(Target::do_calls_non_split): Likewise.
+	* target.cc (Target::do_calls_non_split): Likewise.
+	* reloc.cc (Sized_relobj_file::split_stack_adjust_reltype): Adjust
+	call to Target::calls_non_split.
+	* i386.cc (Target_i386::do_calls_non_split): Add prelocs, reloc_count
+	parameters.
+	* powerpc.cc (Target_powerpc::do_calls_non_split): Likewise.
+	* x86_64.cc (Target_x86_64::do_calls_non_split): Likewise.
+
+2015-12-11  Cary Coutant  <ccoutant@gmail.com>
+
 	* object.cc (Sized_relobj_file::Sized_relobj_file): Initialize
 	output_views_.
 	* object.h (Object::get_output_view): New function.

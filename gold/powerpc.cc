@@ -631,6 +631,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
   void
   do_calls_non_split(Relobj* object, unsigned int shndx,
 		     section_offset_type fnoffset, section_size_type fnsize,
+		     const unsigned char* prelocs, size_t reloc_count,
 		     unsigned char* view, section_size_type view_size,
 		     std::string* from, std::string* to) const;
 
@@ -6590,6 +6591,8 @@ Target_powerpc<size, big_endian>::do_calls_non_split(
     unsigned int shndx,
     section_offset_type fnoffset,
     section_size_type fnsize,
+    const unsigned char* prelocs,
+    size_t reloc_count,
     unsigned char* view,
     section_size_type view_size,
     std::string* from,
@@ -6600,7 +6603,8 @@ Target_powerpc<size, big_endian>::do_calls_non_split(
     {
       // warn
       Target::do_calls_non_split(object, shndx, fnoffset, fnsize,
-				 view, view_size, from, to);
+				 prelocs, reloc_count, view, view_size,
+				 from, to);
       return;
     }
 
