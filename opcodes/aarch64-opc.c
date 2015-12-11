@@ -3039,7 +3039,19 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "dbgclaimset_el1",   CPENC(2,0,C7, C8, 6),	0 },
   { "dbgclaimclr_el1",   CPENC(2,0,C7, C9, 6),	0 },
   { "dbgauthstatus_el1", CPENC(2,0,C7, C14,6),	0 },  /* r */
-
+  { "pmblimitr_el1",	 CPENC (3, 0, C9, C10, 0), F_ARCHEXT },  /* rw */
+  { "pmbptr_el1",	 CPENC (3, 0, C9, C10, 1), F_ARCHEXT },  /* rw */
+  { "pmbsr_el1",	 CPENC (3, 0, C9, C10, 3), F_ARCHEXT },  /* rw */
+  { "pmbidr_el1",	 CPENC (3, 0, C9, C10, 7), F_ARCHEXT },  /* ro */
+  { "pmscr_el1",	 CPENC (3, 0, C9, C9, 0),  F_ARCHEXT },  /* rw */
+  { "pmsicr_el1",	 CPENC (3, 0, C9, C9, 2),  F_ARCHEXT },  /* rw */
+  { "pmsirr_el1",	 CPENC (3, 0, C9, C9, 3),  F_ARCHEXT },  /* rw */
+  { "pmsfcr_el1",	 CPENC (3, 0, C9, C9, 4),  F_ARCHEXT },  /* rw */
+  { "pmsevfr_el1",	 CPENC (3, 0, C9, C9, 5),  F_ARCHEXT },  /* rw */
+  { "pmslatfr_el1",	 CPENC (3, 0, C9, C9, 6),  F_ARCHEXT },  /* rw */
+  { "pmsidr_el1",	 CPENC (3, 0, C9, C9, 7),  F_ARCHEXT },  /* ro */
+  { "pmscr_el2",	 CPENC (3, 4, C9, C9, 0),  F_ARCHEXT },  /* rw */
+  { "pmscr_el12",	 CPENC (3, 5, C9, C9, 0),  F_ARCHEXT },  /* rw */
   { "pmcr_el0",          CPENC(3,3,C9,C12, 0),	0 },
   { "pmcntenset_el0",    CPENC(3,3,C9,C12, 1),	0 },
   { "pmcntenclr_el0",    CPENC(3,3,C9,C12, 2),	0 },
@@ -3213,6 +3225,23 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
        || reg->value == CPENC (3, 0, C12, C1, 1)
        || reg->value == CPENC (3, 4, C12, C1, 1))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_RAS))
+    return FALSE;
+
+  /* Statistical Profiling extension.  */
+  if ((reg->value == CPENC (3, 0, C9, C10, 0)
+       || reg->value == CPENC (3, 0, C9, C10, 1)
+       || reg->value == CPENC (3, 0, C9, C10, 3)
+       || reg->value == CPENC (3, 0, C9, C10, 7)
+       || reg->value == CPENC (3, 0, C9, C9, 0)
+       || reg->value == CPENC (3, 0, C9, C9, 2)
+       || reg->value == CPENC (3, 0, C9, C9, 3)
+       || reg->value == CPENC (3, 0, C9, C9, 4)
+       || reg->value == CPENC (3, 0, C9, C9, 5)
+       || reg->value == CPENC (3, 0, C9, C9, 6)
+       || reg->value == CPENC (3, 0, C9, C9, 7)
+       || reg->value == CPENC (3, 4, C9, C9, 0)
+       || reg->value == CPENC (3, 5, C9, C9, 0))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_PROFILE))
     return FALSE;
 
   return TRUE;
