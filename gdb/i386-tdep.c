@@ -8807,7 +8807,7 @@ i386_mpx_info_bounds (char *args, int from_tty)
 
   for (i = 0; i < 4; i++)
     bt_entry[i] = read_memory_typed_address (bt_entry_addr
-					     + i * data_ptr_type->length,
+					     + i * TYPE_LENGTH (data_ptr_type),
 					     data_ptr_type);
 
   i386_mpx_print_bounds (bt_entry);
@@ -8853,14 +8853,15 @@ i386_mpx_set_bounds (char *args, int from_tty)
   bt_entry_addr = i386_mpx_get_bt_entry (addr, bd_base);
   for (i = 0; i < 2; i++)
     bt_entry[i] = read_memory_typed_address (bt_entry_addr
-					     + i * data_ptr_type->length,
+					     + i * TYPE_LENGTH (data_ptr_type),
 					     data_ptr_type);
   bt_entry[0] = (uint64_t) lower;
   bt_entry[1] = ~(uint64_t) upper;
 
   for (i = 0; i < 2; i++)
-    write_memory_unsigned_integer (bt_entry_addr + i * data_ptr_type->length,
-				   data_ptr_type->length, byte_order,
+    write_memory_unsigned_integer (bt_entry_addr
+				   + i * TYPE_LENGTH (data_ptr_type),
+				   TYPE_LENGTH (data_ptr_type), byte_order,
 				   bt_entry[i]);
 }
 

@@ -132,7 +132,7 @@ darwin_load_image_infos (struct darwin_info *info)
 
   /* The structure has 4 fields: version (4 bytes), count (4 bytes),
      info (pointer) and notifier (pointer).  */
-  len = 4 + 4 + 2 * ptr_type->length;
+  len = 4 + 4 + 2 * TYPE_LENGTH (ptr_type);
   gdb_assert (len <= sizeof (buf));
   memset (&info->all_image, 0, sizeof (info->all_image));
 
@@ -148,7 +148,7 @@ darwin_load_image_infos (struct darwin_info *info)
   info->all_image.count = extract_unsigned_integer (buf + 4, 4, byte_order);
   info->all_image.info = extract_typed_address (buf + 8, ptr_type);
   info->all_image.notifier = extract_typed_address
-    (buf + 8 + ptr_type->length, ptr_type);
+    (buf + 8 + TYPE_LENGTH (ptr_type), ptr_type);
 }
 
 /* Link map info to include in an allocated so_list entry.  */
@@ -528,11 +528,11 @@ darwin_solib_read_all_image_info_addr (struct darwin_info *info)
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
   /* Sanity check.  */
-  if (ptr_type->length > sizeof (buf))
+  if (TYPE_LENGTH (ptr_type) > sizeof (buf))
     return;
 
   len = target_read (&current_target, TARGET_OBJECT_DARWIN_DYLD_INFO, NULL,
-		     buf, 0, ptr_type->length);
+		     buf, 0, TYPE_LENGTH (ptr_type));
   if (len <= 0)
     return;
 

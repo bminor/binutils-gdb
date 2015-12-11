@@ -1,3 +1,10 @@
+2015-12-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* i386-tdep.c (i386_mpx_info_bounds): Use TYPE_LENGTH.
+	(i386_mpx_set_bounds): Likewise.
+	* solib-darwin.c (darwin_load_image_infos): Likewise.
+	(darwin_solib_read_all_image_info_addr): Likewise.
+
 2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cli/cli-cmds.c (_initialize_cli_cmds): Extend help text for
