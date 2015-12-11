@@ -3319,7 +3319,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                              10987654321098765432109876543210
                              xxxxxxxxxxxxxxxxxxxxx1xx1x10x01x
                              sysl.  */
-                          return 1028;
+                          return 1029;
                         }
                     }
                 }
@@ -3342,7 +3342,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxx0110x1xx
                          tbz.  */
-                      return 1030;
+                      return 1031;
                     }
                 }
               else
@@ -3361,7 +3361,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxx1110x1xx
                          tbnz.  */
-                      return 1031;
+                      return 1032;
                     }
                 }
             }
@@ -8857,15 +8857,15 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
     case 794: value = 798; break;	/* ldnp --> ldp.  */
     case 798: return NULL;		/* ldp --> NULL.  */
     case 1009: value = 1010; break;	/* msr --> hint.  */
-    case 1010: value = 1018; break;	/* hint --> clrex.  */
-    case 1018: value = 1019; break;	/* clrex --> dsb.  */
-    case 1019: value = 1020; break;	/* dsb --> dmb.  */
-    case 1020: value = 1021; break;	/* dmb --> isb.  */
-    case 1021: value = 1022; break;	/* isb --> sys.  */
-    case 1022: value = 1027; break;	/* sys --> msr.  */
-    case 1027: return NULL;		/* msr --> NULL.  */
-    case 1028: value = 1029; break;	/* sysl --> mrs.  */
-    case 1029: return NULL;		/* mrs --> NULL.  */
+    case 1010: value = 1019; break;	/* hint --> clrex.  */
+    case 1019: value = 1020; break;	/* clrex --> dsb.  */
+    case 1020: value = 1021; break;	/* dsb --> dmb.  */
+    case 1021: value = 1022; break;	/* dmb --> isb.  */
+    case 1022: value = 1023; break;	/* isb --> sys.  */
+    case 1023: value = 1028; break;	/* sys --> msr.  */
+    case 1028: return NULL;		/* msr --> NULL.  */
+    case 1029: value = 1030; break;	/* sysl --> mrs.  */
+    case 1030: return NULL;		/* mrs --> NULL.  */
     case 361: value = 362; break;	/* st4 --> st1.  */
     case 362: value = 363; break;	/* st1 --> st2.  */
     case 363: value = 364; break;	/* st2 --> st3.  */
@@ -9145,8 +9145,8 @@ aarch64_find_alias_opcode (const aarch64_opcode *opcode)
     case 952: value = 1001; break;	/* lduminl --> stuminl.  */
     case 1002: value = 1003; break;	/* movn --> mov.  */
     case 1004: value = 1005; break;	/* movz --> mov.  */
-    case 1010: value = 1017; break;	/* hint --> esb.  */
-    case 1022: value = 1026; break;	/* sys --> tlbi.  */
+    case 1010: value = 1018; break;	/* hint --> psb.  */
+    case 1023: value = 1027; break;	/* sys --> tlbi.  */
     default: return NULL;
     }
 
@@ -9271,6 +9271,7 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 1001: value = 952; break;	/* stuminl --> lduminl.  */
     case 1003: value = 1002; break;	/* mov --> movn.  */
     case 1005: value = 1004; break;	/* mov --> movz.  */
+    case 1018: value = 1017; break;	/* psb --> esb.  */
     case 1017: value = 1016; break;	/* esb --> sevl.  */
     case 1016: value = 1015; break;	/* sevl --> sev.  */
     case 1015: value = 1014; break;	/* sev --> wfi.  */
@@ -9278,10 +9279,10 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 1013: value = 1012; break;	/* wfe --> yield.  */
     case 1012: value = 1011; break;	/* yield --> nop.  */
     case 1011: value = 1010; break;	/* nop --> hint.  */
-    case 1026: value = 1025; break;	/* tlbi --> ic.  */
-    case 1025: value = 1024; break;	/* ic --> dc.  */
-    case 1024: value = 1023; break;	/* dc --> at.  */
-    case 1023: value = 1022; break;	/* at --> sys.  */
+    case 1027: value = 1026; break;	/* tlbi --> ic.  */
+    case 1026: value = 1025; break;	/* ic --> dc.  */
+    case 1025: value = 1024; break;	/* dc --> at.  */
+    case 1024: value = 1023; break;	/* at --> sys.  */
     default: return NULL;
     }
 
@@ -9411,6 +9412,8 @@ aarch64_extract_operand (const aarch64_operand *self,
       return aarch64_ext_barrier (self, info, code, inst);
     case 87:
       return aarch64_ext_prfop (self, info, code, inst);
+    case 88:
+      return aarch64_ext_hint (self, info, code, inst);
     default: assert (0); abort ();
     }
 }

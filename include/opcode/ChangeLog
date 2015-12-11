@@ -1,5 +1,18 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64.h (aarch64_opnd): Add AARCH64_OPND_BARRIER_PSB.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-opc.c (aarch64_hint_options): Add "csync".
+	(aarch64_print_operands): Handle AARCH64_OPND_BARRIER_PSB.
+	* aarch64-tbl.h (aarch64_feature_stat_profile): New.
+	(STAT_PROFILE): New.
+	(aarch64_opcode_table): Add "psb".
+	(AARCH64_OPERANDS): Add "BARRIER_PSB".
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64.h (aarch64_hint_options): Declare.
 	(aarch64_opnd_info): Add field hint_option.
 

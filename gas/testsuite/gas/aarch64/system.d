@@ -29,7 +29,7 @@ Disassembly of section \.text:
   54:	d50321df 	hint	#0xe
   58:	d50321ff 	hint	#0xf
   5c:	d503221f 	(hint	#0x10|esb)
-  60:	d503223f 	hint	#0x11
+  60:	d503223f 	(hint	#0x11|psb	csync)
   64:	d503225f 	hint	#0x12
   68:	d503227f 	hint	#0x13
   6c:	d503229f 	hint	#0x14

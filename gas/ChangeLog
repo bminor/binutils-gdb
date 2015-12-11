@@ -1,5 +1,12 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* config/tc-aarch64.c (aarch64_hint_opt_hsh): New.
+	(parse_barrier_psb): New.
+	(parse_operands): Add case for AARCH64_OPND_BARRIER_PSB.
+	(md_begin): Set up aarch64_hint_opt_hsh.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* config/tc-aarch64.c (aarch64_features): Add "profile".
 	* doc/c-aarch64.texi (AArch64 Extensions): Add "profile".
 
