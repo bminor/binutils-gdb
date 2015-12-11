@@ -1,5 +1,10 @@
 2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64.h (aarch64_hint_options): Declare.
+	(aarch64_opnd_info): Add field hint_option.
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64.h (AARCH64_FEATURE_PROFILE): New.
 
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>

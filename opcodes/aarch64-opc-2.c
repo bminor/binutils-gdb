@@ -107,11 +107,11 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_SYSTEM, "PSTATEFIELD", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "a PSTATE field name"},
   {AARCH64_OPND_CLASS_SYSTEM, "SYSREG_AT", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "an address translation operation specifier"},
   {AARCH64_OPND_CLASS_SYSTEM, "SYSREG_DC", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "a data cache maintenance operation specifier"},
-  {AARCH64_OPND_CLASS_SYSTEM, "SYSREG_IC", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "an instructin cache maintenance operation specifier"},
+  {AARCH64_OPND_CLASS_SYSTEM, "SYSREG_IC", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "an instruction cache maintenance operation specifier"},
   {AARCH64_OPND_CLASS_SYSTEM, "SYSREG_TLBI", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "a TBL invalidation operation specifier"},
   {AARCH64_OPND_CLASS_SYSTEM, "BARRIER", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "a barrier option name"},
   {AARCH64_OPND_CLASS_SYSTEM, "BARRIER_ISB", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "the ISB option name SY or an optional 4-bit unsigned immediate"},
-  {AARCH64_OPND_CLASS_SYSTEM, "PRFOP", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "an prefetch operation specifier"},
+  {AARCH64_OPND_CLASS_SYSTEM, "PRFOP", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "a prefetch operation specifier"},
   {AARCH64_OPND_CLASS_NIL, "", 0, {0}, "DUMMY"},
 };
 
