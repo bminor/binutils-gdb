@@ -1,3 +1,9 @@
+2015-12-12  Alan Modra  <amodra@gmail.com>
+
+	PR 19359
+	* ppc-opc.c (insert_fxm): Remove "ignored" from error message.
+	(powerpc_opcodes): Remove single-operand mfcr.
+
 2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-asm.c (aarch64_ins_hint): New.
