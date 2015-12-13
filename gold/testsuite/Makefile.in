@@ -837,10 +837,32 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_6m \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t
-@DEFAULT_TARGET_X86_64_TRUE@am__append_88 = *.dwo *.dwp
-@DEFAULT_TARGET_X86_64_TRUE@am__append_89 = dwp_test_1.sh \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_88 = split_s390.sh
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_89 = split_s390_z1.stdout split_s390_z2.stdout split_s390_z3.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_z4.stdout split_s390_n1.stdout split_s390_n2.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_a1.stdout split_s390_a2.stdout split_s390_z1_ns.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_z2_ns.stdout split_s390_z3_ns.stdout split_s390_z4_ns.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_n1_ns.stdout split_s390_n2_ns.stdout split_s390_r.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z1.stdout split_s390x_z2.stdout split_s390x_z3.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z4.stdout split_s390x_n1.stdout split_s390x_n2.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_a1.stdout split_s390x_a2.stdout split_s390x_z1_ns.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z2_ns.stdout split_s390x_z3_ns.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z4_ns.stdout split_s390x_n1_ns.stdout \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_n2_ns.stdout split_s390x_r.stdout
+
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_90 = split_s390_z1 split_s390_z2 split_s390_z3 \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_z4 split_s390_n1 split_s390_n2 split_s390_a1 \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_a2 split_s390_z1_ns split_s390_z2_ns split_s390_z3_ns \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390_z4_ns split_s390_n1_ns split_s390_n2_ns split_s390_r \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z1 split_s390x_z2 split_s390x_z3 split_s390x_z4 \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_n1 split_s390x_n2 split_s390x_a1 split_s390x_a2 \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z1_ns split_s390x_z2_ns split_s390x_z3_ns \
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z4_ns split_s390x_n1_ns split_s390x_n2_ns split_s390x_r
+
+@DEFAULT_TARGET_X86_64_TRUE@am__append_91 = *.dwo *.dwp
+@DEFAULT_TARGET_X86_64_TRUE@am__append_92 = dwp_test_1.sh \
 @DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.sh
-@DEFAULT_TARGET_X86_64_TRUE@am__append_90 = dwp_test_1.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@am__append_93 = dwp_test_1.stdout \
 @DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.stdout
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
@@ -2492,7 +2514,7 @@ MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_4) \
 	$(am__append_45) $(am__append_51) $(am__append_67) \
 	$(am__append_70) $(am__append_72) $(am__append_75) \
 	$(am__append_78) $(am__append_81) $(am__append_84) \
-	$(am__append_87) $(am__append_88)
+	$(am__append_87) $(am__append_90) $(am__append_91)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
@@ -2502,13 +2524,13 @@ check_SCRIPTS = $(am__append_2) $(am__append_20) $(am__append_26) \
 	$(am__append_42) $(am__append_46) $(am__append_49) \
 	$(am__append_65) $(am__append_68) $(am__append_73) \
 	$(am__append_76) $(am__append_79) $(am__append_82) \
-	$(am__append_85) $(am__append_89)
+	$(am__append_85) $(am__append_88) $(am__append_92)
 check_DATA = $(am__append_3) $(am__append_21) $(am__append_27) \
 	$(am__append_30) $(am__append_36) $(am__append_39) \
 	$(am__append_43) $(am__append_47) $(am__append_50) \
 	$(am__append_66) $(am__append_69) $(am__append_74) \
 	$(am__append_77) $(am__append_80) $(am__append_83) \
-	$(am__append_86) $(am__append_90)
+	$(am__append_86) $(am__append_89) $(am__append_93)
 BUILT_SOURCES = $(am__append_33)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -3011,6 +3033,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_LDFLAGS = $(exception_test_LDFLAGS)
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_test_LDADD = exception_x86_64_bnd_1.o exception_x86_64_bnd_2.o
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 @DEFAULT_TARGET_X32_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 all: $(BUILT_SOURCES)
@@ -4580,6 +4603,8 @@ arm_farcall_thumb_thumb.sh.log: arm_farcall_thumb_thumb.sh
 	@p='arm_farcall_thumb_thumb.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 arm_farcall_thumb_arm.sh.log: arm_farcall_thumb_arm.sh
 	@p='arm_farcall_thumb_arm.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+split_s390.sh.log: split_s390.sh
+	@p='split_s390.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 dwp_test_1.sh.log: dwp_test_1.sh
 	@p='dwp_test_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 dwp_test_2.sh.log: dwp_test_2.sh
@@ -6896,6 +6921,154 @@ uninstall-am:
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_farcall_thumb_arm_5t.o: arm_farcall_thumb_arm.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -march=armv5t -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_z1.o: split_s390_1_z1.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_z2.o: split_s390_1_z2.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_z3.o: split_s390_1_z3.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_z4.o: split_s390_1_z4.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_n1.o: split_s390_1_n1.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_n2.o: split_s390_1_n2.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_a1.o: split_s390_1_a1.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_1_a2.o: split_s390_1_a2.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_2_s.o: split_s390_2_s.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_2_ns.o: split_s390_2_ns.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m31 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z1: split_s390_1_z1.o split_s390_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z1.o split_s390_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z1.stdout: split_s390_z1
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z2: split_s390_1_z2.o split_s390_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z2.o split_s390_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z2.stdout: split_s390_z2
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z3: split_s390_1_z3.o split_s390_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z3.o split_s390_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z3.stdout: split_s390_z3
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z4: split_s390_1_z4.o split_s390_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z4.o split_s390_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z4.stdout: split_s390_z4
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_n1: split_s390_1_n1.o split_s390_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_n1.o split_s390_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_n1.stdout: split_s390_n1
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_n2: split_s390_1_n2.o split_s390_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_n2.o split_s390_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_n2.stdout: split_s390_n2
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z1_ns: split_s390_1_z1.o split_s390_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z1.o split_s390_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z1_ns.stdout: split_s390_z1_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z2_ns: split_s390_1_z2.o split_s390_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z2.o split_s390_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z2_ns.stdout: split_s390_z2_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z3_ns: split_s390_1_z3.o split_s390_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z3.o split_s390_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z3_ns.stdout: split_s390_z3_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z4_ns: split_s390_1_z4.o split_s390_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z4.o split_s390_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_z4_ns.stdout: split_s390_z4_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_n1_ns: split_s390_1_n1.o split_s390_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_n1.o split_s390_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_n1_ns.stdout: split_s390_n1_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_n2_ns.stdout: split_s390_1_n2.o split_s390_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o split_s390_n2 split_s390_1_n2.o split_s390_2_ns.o > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_a1.stdout: split_s390_1_a1.o split_s390_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o split_s390_a1 split_s390_1_a1.o split_s390_2_ns.o > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_a2: split_s390_1_a2.o split_s390_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_a2.o split_s390_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_a2.stdout: split_s390_a2
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390_r.stdout: split_s390_1_z1.o split_s390_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -r split_s390_1_z1.o split_s390_2_ns.o -o split_s390_r > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_1_z1.o: split_s390x_1_z1.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_1_z2.o: split_s390x_1_z2.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_1_z3.o: split_s390x_1_z3.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_1_z4.o: split_s390x_1_z4.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_1_n1.o: split_s390x_1_n1.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_1_n2.o: split_s390x_1_n2.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_1_a1.o: split_s390x_1_a1.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_1_a2.o: split_s390x_1_a2.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_2_s.o: split_s390x_2_s.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_2_ns.o: split_s390x_2_ns.s
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -m64 -o $@ $<
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z1: split_s390x_1_z1.o split_s390x_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z1.o split_s390x_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z1.stdout: split_s390x_z1
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z2: split_s390x_1_z2.o split_s390x_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z2.o split_s390x_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z2.stdout: split_s390x_z2
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z3: split_s390x_1_z3.o split_s390x_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z3.o split_s390x_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z3.stdout: split_s390x_z3
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z4: split_s390x_1_z4.o split_s390x_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z4.o split_s390x_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z4.stdout: split_s390x_z4
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_n1: split_s390x_1_n1.o split_s390x_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_n1.o split_s390x_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_n1.stdout: split_s390x_n1
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_n2: split_s390x_1_n2.o split_s390x_2_s.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_n2.o split_s390x_2_s.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_n2.stdout: split_s390x_n2
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z1_ns: split_s390x_1_z1.o split_s390x_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z1.o split_s390x_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z1_ns.stdout: split_s390x_z1_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z2_ns: split_s390x_1_z2.o split_s390x_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z2.o split_s390x_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z2_ns.stdout: split_s390x_z2_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z3_ns: split_s390x_1_z3.o split_s390x_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z3.o split_s390x_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z3_ns.stdout: split_s390x_z3_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z4_ns: split_s390x_1_z4.o split_s390x_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z4.o split_s390x_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_z4_ns.stdout: split_s390x_z4_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_n1_ns: split_s390x_1_n1.o split_s390x_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_n1.o split_s390x_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_n1_ns.stdout: split_s390x_n1_ns
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_n2_ns.stdout: split_s390x_1_n2.o split_s390x_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o split_s390x_n2 split_s390x_1_n2.o split_s390x_2_ns.o > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_a1.stdout: split_s390x_1_a1.o split_s390x_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o split_s390x_a1 split_s390x_1_a1.o split_s390x_2_ns.o > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_a2: split_s390x_1_a2.o split_s390x_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_a2.o split_s390x_2_ns.o
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_a2.stdout: split_s390x_a2
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_s390x_r.stdout: split_s390x_1_z1.o split_s390x_2_ns.o ../ld-new
+@DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -r split_s390x_1_z1.o split_s390x_2_ns.o -o split_s390x_r > $@ 2>&1 || exit 0
 
 # Tests for the dwp tool.
 # We don't want to rely yet on GCC support for -gsplit-dwarf,
