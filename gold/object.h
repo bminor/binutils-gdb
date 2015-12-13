@@ -845,7 +845,7 @@ class Object
   { return this->do_get_incremental_reloc_count(symndx); }
 
   // Return the output view for section SHNDX.
-  const unsigned char*
+  unsigned char*
   get_output_view(unsigned int shndx, section_size_type* plen) const
   { return this->do_get_output_view(shndx, plen); }
 
@@ -1035,7 +1035,7 @@ class Object
   { gold_unreachable(); }
 
   // Return the output view for a section.
-  virtual const unsigned char*
+  virtual unsigned char*
   do_get_output_view(unsigned int, section_size_type*) const
   { gold_unreachable(); }
 
@@ -2574,7 +2574,7 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   { this->output_local_symbol_count_ = value; }
 
   // Return the output view for a section.
-  const unsigned char*
+  unsigned char*
   do_get_output_view(unsigned int, section_size_type*) const;
 
  private:

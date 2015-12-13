@@ -1061,7 +1061,7 @@ Sized_relobj_file<size, big_endian>::do_relocate_sections(
 // Return the output view for section SHNDX.
 
 template<int size, bool big_endian>
-const unsigned char*
+unsigned char*
 Sized_relobj_file<size, big_endian>::do_get_output_view(
     unsigned int shndx,
     section_size_type* plen) const
@@ -1775,7 +1775,7 @@ Sized_relobj_file<32, false>::do_relocate_sections(
     Views* pviews);
 
 template
-const unsigned char*
+unsigned char*
 Sized_relobj_file<32, false>::do_get_output_view(
     unsigned int shndx,
     section_size_type* plen) const;
@@ -1792,7 +1792,7 @@ Sized_relobj_file<32, true>::do_relocate_sections(
     Views* pviews);
 
 template
-const unsigned char*
+unsigned char*
 Sized_relobj_file<32, true>::do_get_output_view(
     unsigned int shndx,
     section_size_type* plen) const;
@@ -1809,7 +1809,7 @@ Sized_relobj_file<64, false>::do_relocate_sections(
     Views* pviews);
 
 template
-const unsigned char*
+unsigned char*
 Sized_relobj_file<64, false>::do_get_output_view(
     unsigned int shndx,
     section_size_type* plen) const;
@@ -1826,7 +1826,7 @@ Sized_relobj_file<64, true>::do_relocate_sections(
     Views* pviews);
 
 template
-const unsigned char*
+unsigned char*
 Sized_relobj_file<64, true>::do_get_output_view(
     unsigned int shndx,
     section_size_type* plen) const;
