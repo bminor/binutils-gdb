@@ -1,5 +1,11 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* config/tc-aarch64.c (parse_neon_type_for_operand): Adjust to
+	take into account new vector type 2H.
+	(vectype_to_qualifier): Likewise.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* config/tc-aarch64.c (vectype_to_qualifier): Calculate operand
 	qualifier from per-type base and offet.
 

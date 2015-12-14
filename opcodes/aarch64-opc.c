@@ -578,6 +578,7 @@ struct operand_qualifier_data aarch64_opnd_qualifiers[] =
 
   {1, 8, 0x0, "8b", OQK_OPD_VARIANT},
   {1, 16, 0x1, "16b", OQK_OPD_VARIANT},
+  {2, 2, 0x0, "2h", OQK_OPD_VARIANT},
   {2, 4, 0x2, "4h", OQK_OPD_VARIANT},
   {2, 8, 0x3, "8h", OQK_OPD_VARIANT},
   {4, 2, 0x4, "2s", OQK_OPD_VARIANT},

@@ -744,7 +744,7 @@ aarch64_reg_parse_32_64 (char **ccp, int reject_sp, int reject_rz,
    otherwise return FALSE.
 
    Accept only one occurrence of:
-   8b 16b 4h 8h 2s 4s 1d 2d
+   8b 16b 2h 4h 8h 2s 4s 1d 2d
    b h s d q  */
 static bfd_boolean
 parse_neon_type_for_operand (struct neon_type_el *parsed_type, char **str)
@@ -803,7 +803,8 @@ elt_size:
 	first_error (_("missing element size"));
       return FALSE;
     }
-  if (width != 0 && width * element_size != 64 && width * element_size != 128)
+  if (width != 0 && width * element_size != 64 && width * element_size != 128
+      && !(width == 2 && element_size == 16))
     {
       first_error_fmt (_
 		       ("invalid element size %d and vector size combination %c"),
@@ -4674,7 +4675,7 @@ vectype_to_qualifier (const struct neon_type_el *vectype)
   const unsigned int ele_base [5] =
     {
       AARCH64_OPND_QLF_V_8B,
-      AARCH64_OPND_QLF_V_4H,
+      AARCH64_OPND_QLF_V_2H,
       AARCH64_OPND_QLF_V_2S,
       AARCH64_OPND_QLF_V_1D,
       AARCH64_OPND_QLF_V_1Q
@@ -4694,7 +4695,7 @@ vectype_to_qualifier (const struct neon_type_el *vectype)
       int reg_size = ele_size[vectype->type] * vectype->width;
       unsigned offset;
       unsigned shift;
-      if (reg_size != 16 && reg_size != 8)
+      if (reg_size != 16 && reg_size != 8 && reg_size != 4)
 	goto vectype_conversion_fail;
 
       /* The conversion is by calculating the offset from the base operand
@@ -4704,9 +4705,7 @@ vectype_to_qualifier (const struct neon_type_el *vectype)
       shift = 0;
       if (vectype->type == NT_b)
 	shift = 4;
-      else if (vectype->type == NT_h)
-	shift = 3;
-      else if (vectype->type == NT_s)
+      else if (vectype->type == NT_h || vectype->type == NT_s)
 	shift = 2;
       else if (vectype->type >= NT_d)
 	shift = 1;

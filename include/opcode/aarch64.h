@@ -282,6 +282,7 @@ enum aarch64_opnd_qualifier
      constraint qualifiers for immediate operands wherever possible.  */
   AARCH64_OPND_QLF_V_8B,
   AARCH64_OPND_QLF_V_16B,
+  AARCH64_OPND_QLF_V_2H,
   AARCH64_OPND_QLF_V_4H,
   AARCH64_OPND_QLF_V_8H,
   AARCH64_OPND_QLF_V_2S,
