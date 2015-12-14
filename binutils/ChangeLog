@@ -1,3 +1,14 @@
+2015-12-14  Jan Beulich  <jbeulich@suse.com>
+
+	* nm.c: Include coff/external.h, coff/internal.h, and
+	libcoff.h.
+	(struct extended_symbol_info): New field "coffinfo".
+	(get_symbol_type): Rename to get_elf_symbol_type.
+	(get_coff_symbol_type): New.
+	(print_symbol): Also init info.coffinfo.
+	(print_symbol_info_sysv): Print type and section name also for
+	COFF symbols.
+
 2015-12-08  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/19310
