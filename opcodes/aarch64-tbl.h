@@ -1259,6 +1259,13 @@
   QLF3(V_2D, V_2D, S_D),	\
 }
 
+/* e.g. FMLA <V><d>, <V><n>, <Vm>.<Ts>[<index>].  */
+#define QL_ELEMENT_FP_H		\
+{				\
+  QLF3 (V_4H, V_4H, S_H),	\
+  QLF3 (V_8H, V_8H, S_H),	\
+}
+
 /* e.g. MOVI <Vd>.4S, #<imm8> {, LSL #<amount>}.  */
 #define QL_SIMD_IMM_S0W		\
 {				\
@@ -1465,8 +1472,14 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"sqdmulh", 0xf00c000, 0xbf00f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT, F_SIZEQ},
   {"sqrdmulh", 0xf00d000, 0xbf00f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT, F_SIZEQ},
   {"fmla", 0xf801000, 0xbf80f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT_FP, F_SIZEQ},
+  {"fmla", 0xf001000, 0xbfe0fc00, asimdelem, 0, SIMD_F16,
+   OP3 (Vd, Vn, Em), QL_ELEMENT_FP_H, F_SIZEQ},
   {"fmls", 0xf805000, 0xbf80f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT_FP, F_SIZEQ},
+  {"fmls", 0xf005000, 0xbfe0fc00, asimdelem, 0, SIMD_F16,
+   OP3 (Vd, Vn, Em), QL_ELEMENT_FP_H, F_SIZEQ},
   {"fmul", 0xf809000, 0xbf80f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT_FP, F_SIZEQ},
+  {"fmul", 0xf009000, 0xbfe0fc00, asimdelem, 0, SIMD_F16,
+   OP3 (Vd, Vn, Em), QL_ELEMENT_FP_H, F_SIZEQ},
   {"mla", 0x2f000000, 0xbf00f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT, F_SIZEQ},
   {"umlal", 0x2f002000, 0xff00f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT_L, F_SIZEQ},
   {"umlal2", 0x6f002000, 0xff00f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT_L2, F_SIZEQ},
@@ -1476,6 +1489,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"umull", 0x2f00a000, 0xff00f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT_L, F_SIZEQ},
   {"umull2", 0x6f00a000, 0xff00f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT_L2, F_SIZEQ},
   {"fmulx", 0x2f809000, 0xbf80f400, asimdelem, 0, SIMD, OP3 (Vd, Vn, Em), QL_ELEMENT_FP, F_SIZEQ},
+  {"fmulx", 0x2f009000, 0xbfe0fc00, asimdelem, 0, SIMD_F16,
+   OP3 (Vd, Vn, Em), QL_ELEMENT_FP_H, F_SIZEQ},
   {"sqrdmlah", 0x2f00d000, 0xbf00f400, asimdelem, 0, RDMA, OP3 (Vd, Vn, Em), QL_ELEMENT, F_SIZEQ},
   {"sqrdmlsh", 0x2f00f000, 0xbf00f400, asimdelem, 0, RDMA, OP3 (Vd, Vn, Em), QL_ELEMENT, F_SIZEQ},
   /* AdvSIMD EXT.  */
