@@ -484,6 +484,12 @@
   QLF2(S_D, V_2D),		\
 }
 
+/* e.g. FMAXNMP <V><d>, <Vn>.<T>.  */
+#define QL_SISD_PAIR_H		\
+{				\
+  QLF2 (S_H, V_2H),		\
+}
+
 /* e.g. ADDP <V><d>, <Vn>.<T>.  */
 #define QL_SISD_PAIR_D		\
 {				\
@@ -2008,10 +2014,20 @@ struct aarch64_opcode aarch64_opcode_table[] =
   /* AdvSIMD scalar pairwise.  */
   {"addp", 0x5e31b800, 0xff3ffc00, asisdpair, 0, SIMD, OP2 (Sd, Vn), QL_SISD_PAIR_D, F_SIZEQ},
   {"fmaxnmp", 0x7e30c800, 0xffbffc00, asisdpair, 0, SIMD, OP2 (Sd, Vn), QL_SISD_PAIR, F_SIZEQ},
+  {"fmaxnmp", 0x5e30c800, 0xfffffc00, asisdpair, 0, SIMD_F16,
+   OP2 (Sd, Vn), QL_SISD_PAIR_H, F_SIZEQ},
   {"faddp", 0x7e30d800, 0xffbffc00, asisdpair, 0, SIMD, OP2 (Sd, Vn), QL_SISD_PAIR, F_SIZEQ},
+  {"faddp", 0x5e30d800, 0xfffffc00, asisdpair, 0, SIMD_F16,
+   OP2 (Sd, Vn), QL_SISD_PAIR_H, F_SIZEQ},
   {"fmaxp", 0x7e30f800, 0xffbffc00, asisdpair, 0, SIMD, OP2 (Sd, Vn), QL_SISD_PAIR, F_SIZEQ},
+  {"fmaxp", 0x5e30f800, 0xfffffc00, asisdpair, 0, SIMD_F16,
+   OP2 (Sd, Vn), QL_SISD_PAIR_H, F_SIZEQ},
   {"fminnmp", 0x7eb0c800, 0xffbffc00, asisdpair, 0, SIMD, OP2 (Sd, Vn), QL_SISD_PAIR, F_SIZEQ},
+  {"fminnmp", 0x5eb0c800, 0xfffffc00, asisdpair, 0, SIMD_F16,
+   OP2 (Sd, Vn), QL_SISD_PAIR_H, F_SIZEQ},
   {"fminp", 0x7eb0f800, 0xffbffc00, asisdpair, 0, SIMD, OP2 (Sd, Vn), QL_SISD_PAIR, F_SIZEQ},
+  {"fminp", 0x5eb0f800, 0xfffffc00, asisdpair, 0, SIMD_F16,
+   OP2 (Sd, Vn), QL_SISD_PAIR_H, F_SIZEQ},
   /* AdvSIMD scalar three same.  */
   {"sqadd", 0x5e200c00, 0xff20fc00, asisdsame, 0, SIMD, OP3 (Sd, Sn, Sm), QL_S_3SAME, F_SSIZE},
   {"sqsub", 0x5e202c00, 0xff20fc00, asisdsame, 0, SIMD, OP3 (Sd, Sn, Sm), QL_S_3SAME, F_SSIZE},

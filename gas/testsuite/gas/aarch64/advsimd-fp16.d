@@ -499,3 +499,23 @@ Disassembly of section \.text:
  [0-9a-f]+:	4f00fc01 	fmov	v1.8h, #2.000000000000000000e\+00
  [0-9a-f]+:	0f03fe00 	fmov	v0.4h, #1.000000000000000000e\+00
  [0-9a-f]+:	4f03fe00 	fmov	v0.8h, #1.000000000000000000e\+00
+ [0-9a-f]+:	7e70c841 	fmaxnmp	d1, v2.2d
+ [0-9a-f]+:	7e30c841 	fmaxnmp	s1, v2.2s
+ [0-9a-f]+:	5e30c841 	fmaxnmp	h1, v2.2h
+ [0-9a-f]+:	5e30c800 	fmaxnmp	h0, v0.2h
+ [0-9a-f]+:	7e70d841 	faddp	d1, v2.2d
+ [0-9a-f]+:	7e30d841 	faddp	s1, v2.2s
+ [0-9a-f]+:	5e30d841 	faddp	h1, v2.2h
+ [0-9a-f]+:	5e30d800 	faddp	h0, v0.2h
+ [0-9a-f]+:	7e70f841 	fmaxp	d1, v2.2d
+ [0-9a-f]+:	7e30f841 	fmaxp	s1, v2.2s
+ [0-9a-f]+:	5e30f841 	fmaxp	h1, v2.2h
+ [0-9a-f]+:	5e30f800 	fmaxp	h0, v0.2h
+ [0-9a-f]+:	7ef0c841 	fminnmp	d1, v2.2d
+ [0-9a-f]+:	7eb0c841 	fminnmp	s1, v2.2s
+ [0-9a-f]+:	5eb0c841 	fminnmp	h1, v2.2h
+ [0-9a-f]+:	5eb0c800 	fminnmp	h0, v0.2h
+ [0-9a-f]+:	7ef0f841 	fminp	d1, v2.2d
+ [0-9a-f]+:	7eb0f841 	fminp	s1, v2.2s
+ [0-9a-f]+:	5eb0f841 	fminp	h1, v2.2h
+ [0-9a-f]+:	5eb0f800 	fminp	h0, v0.2h
