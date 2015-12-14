@@ -187,3 +187,19 @@
 
 	sindexed_elem fmul
 	sindexed_elem fmulx
+
+	/* Adv.SIMD across lanes.  */
+
+	.macro across_lanes, op
+	\op	s1, v2.4s
+	\op	h1, v2.4h
+	\op	h1, v2.8h
+	\op	h0, v0.4h
+	\op	h0, v0.8h
+	.endm
+
+	across_lanes fmaxnmv
+	across_lanes fmaxv
+	across_lanes fminnmv
+	across_lanes fminv
+

@@ -32,8 +32,8 @@
 	saddlv	q7, v31.2d
 	smaxv	s7, v31.2s
 	sminv	d7, v31.2d
-	fmaxv	h7, v31.8h
-	fmaxv	h7, v31.4h
+	fmaxv	h7, v31.2h
+	fmaxv	s7, v31.4h
 	fminv	d7, v31.2d
 
 	abs b0, b31
