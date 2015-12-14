@@ -406,6 +406,13 @@
   QLF3(V_2D , V_2D , V_2D )	\
 }
 
+/* e.g. SCVTF <Vd>.<T>, <Vn>.<T>, #<fbits>.  */
+#define QL_VSHIFT_H		\
+{				\
+  QLF3 (V_4H, V_4H, V_4H),	\
+  QLF3 (V_8H, V_8H, V_8H)	\
+}
+
 /* e.g. SHRN<Q> <Vd>.<Tb>, <Vn>.<Ta>, #<shift>.  */
 #define QL_VSHIFTN		\
 {				\
@@ -1838,7 +1845,11 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"sshll2", 0x4f00a400, 0xff80fc00, asimdshf, 0, SIMD, OP3 (Vd, Vn, IMM_VLSL), QL_VSHIFTL2, F_HAS_ALIAS},
   {"sxtl2", 0x4f00a400, 0xff87fc00, asimdshf, OP_SXTL2, SIMD, OP2 (Vd, Vn), QL_V2LONGBHS2, F_ALIAS | F_CONV},
   {"scvtf", 0xf00e400, 0xbf80fc00, asimdshf, 0, SIMD, OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT_SD, 0},
+  {"scvtf", 0xf10e400, 0xbf80fc00, asimdshf, 0, SIMD_F16,
+   OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT_H, 0},
   {"fcvtzs", 0xf00fc00, 0xbf80fc00, asimdshf, 0, SIMD, OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT_SD, 0},
+  {"fcvtzs", 0xf10fc00, 0xbf80fc00, asimdshf, 0, SIMD_F16,
+   OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT_H, 0},
   {"ushr", 0x2f000400, 0xbf80fc00, asimdshf, 0, SIMD, OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT, 0},
   {"usra", 0x2f001400, 0xbf80fc00, asimdshf, 0, SIMD, OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT, 0},
   {"urshr", 0x2f002400, 0xbf80fc00, asimdshf, 0, SIMD, OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT, 0},
@@ -1860,7 +1871,11 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"ushll2", 0x6f00a400, 0xff80fc00, asimdshf, 0, SIMD, OP3 (Vd, Vn, IMM_VLSL), QL_VSHIFTL2, F_HAS_ALIAS},
   {"uxtl2", 0x6f00a400, 0xff87fc00, asimdshf, OP_UXTL2, SIMD, OP2 (Vd, Vn), QL_V2LONGBHS2, F_ALIAS | F_CONV},
   {"ucvtf", 0x2f00e400, 0xbf80fc00, asimdshf, 0, SIMD, OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT_SD, 0},
+  {"ucvtf", 0x2f10e400, 0xbf80fc00, asimdshf, 0, SIMD_F16,
+   OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT_H, 0},
   {"fcvtzu", 0x2f00fc00, 0xbf80fc00, asimdshf, 0, SIMD, OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT_SD, 0},
+  {"fcvtzu", 0x2f10fc00, 0xbf80fc00, asimdshf, 0, SIMD_F16,
+   OP3 (Vd, Vn, IMM_VLSR), QL_VSHIFT_H, 0},
   /* AdvSIMD TBL/TBX.  */
   {"tbl", 0xe000000, 0xbfe09c00, asimdtbl, 0, SIMD, OP3 (Vd, LVn, Vm), QL_TABLE, F_SIZEQ},
   {"tbx", 0xe001000, 0xbfe09c00, asimdtbl, 0, SIMD, OP3 (Vd, LVn, Vm), QL_TABLE, F_SIZEQ},
