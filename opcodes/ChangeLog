@@ -1,5 +1,13 @@
 2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_reg_supported_p): Add mistakenly
+	removed statement.
+	(aarch64_pstatefield_supported_p): Move feature checks for AT
+	registers ..
+	(aarch64_sys_ins_reg_supported_p): .. to here.
+
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
 	* aarch64-opc-2.c: Regenerate.

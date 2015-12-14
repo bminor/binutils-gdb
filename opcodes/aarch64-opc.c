@@ -3198,6 +3198,7 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
        || reg->value == CPENC (3, 5, C14, C3, 1)
        || reg->value == CPENC (3, 5, C14, C3, 2))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_1))
+    return FALSE;
 
   /* ARMv8.2 features.  */
 
@@ -3281,12 +3282,6 @@ aarch64_pstatefield_supported_p (const aarch64_feature_set features,
 
   /* UAO.  Values are from aarch64_pstatefields.  */
   if (reg->value == 0x03
-      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
-    return FALSE;
-
-  /* AT S1E1RP, AT S1E1WP.  Values are from aarch64_sys_regs_at.  */
-  if ((reg->value == CPENS (0, C7, C9, 0)
-       || reg->value == CPENS (0, C7, C9, 1))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
     return FALSE;
 
@@ -3386,6 +3381,12 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
 
   /* DC CVAP.  Values are from aarch64_sys_regs_dc.  */
   if (reg->value == CPENS (3, C7, C12, 1)
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return FALSE;
+
+  /* AT S1E1RP, AT S1E1WP.  Values are from aarch64_sys_regs_at.  */
+  if ((reg->value == CPENS (0, C7, C9, 0)
+       || reg->value == CPENS (0, C7, C9, 1))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
     return FALSE;
 
