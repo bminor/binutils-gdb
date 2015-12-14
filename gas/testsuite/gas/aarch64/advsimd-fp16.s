@@ -172,3 +172,18 @@
 
 	indexed_elem fmul
 	indexed_elem fmulx
+
+	/* Scalar indexed element.  */
+
+	.macro sindexed_elem, op
+	\op	d1, d2, v3.d[1]
+	\op	s1, s2, v3.s[1]
+	\op	h1, h2, v3.h[1]
+	\op	h0, h0, v0.h[0]
+	.endm
+
+	sindexed_elem fmla
+	sindexed_elem fmls
+
+	sindexed_elem fmul
+	sindexed_elem fmulx
