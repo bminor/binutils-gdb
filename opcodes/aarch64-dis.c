@@ -173,11 +173,18 @@ get_greg_qualifier_from_value (aarch64_insn value)
   return qualifier;
 }
 
-/* Given VALUE, return qualifier for a vector register.  */
+/* Given VALUE, return qualifier for a vector register.  This does not support
+   decoding instructions that accept the 2H vector type.  */
+
 static inline enum aarch64_opnd_qualifier
 get_vreg_qualifier_from_value (aarch64_insn value)
 {
   enum aarch64_opnd_qualifier qualifier = AARCH64_OPND_QLF_V_8B + value;
+
+  /* Instructions using vector type 2H should not call this function.  Skip over
+     the 2H qualifier.  */
+  if (qualifier >= AARCH64_OPND_QLF_V_2H)
+    qualifier += 1;
 
   assert (value <= 0x8
 	  && aarch64_get_qualifier_standard_value (qualifier) == value);

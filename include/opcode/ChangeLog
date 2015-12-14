@@ -1,3 +1,8 @@
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64.h (enum aarch64_opnd_qualifier): Add
+	AARCH64_OPND_QLF_V_2H.
+
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64.h (aarch64_opnd): Add AARCH64_OPND_BARRIER_PSB.

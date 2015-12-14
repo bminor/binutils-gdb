@@ -1,3 +1,9 @@
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.coM>
+
+	* aarch64-dis.c (get_vreg_qualifier_from_value): Update comment
+	and adjust calculation to ignore qualifier for type 2H.
+	* aarch64-opc.c (aarch64_opnd_qualifier): Add "2H".
+
 2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-asm-2.c: Regenerate.
