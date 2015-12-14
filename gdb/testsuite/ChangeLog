@@ -1,3 +1,23 @@
+2015-12-14  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/completion.exp: Skip tests that interrupt GDB with
+	ctrl-C if nointerrupts target property is set.
+	* gdb.base/double-prompt-target-event-error.exp: Likewise.
+	* gdb.base/paginate-after-ctrl-c-running.exp: Likewise.
+	* gdb.base/paginate-bg-execution.exp: Likewise.
+	* gdb.base/paginate-execution-startup.exp: Likewise.
+	* gdb.base/random-signal.exp: Likewise.
+	* gdb.base/range-stepping.exp: Likewise.
+	* gdb.cp/annota2.exp: Likewise.
+	* gdb.cp/annota3.exp: Likewise.
+	* gdb.gdb/selftest.exp: Likewise.
+	* gdb.threads/continue-pending-status.exp: Likewise.
+	* gdb.threads/leader-exit.exp: Likewise.
+	* gdb.threads/manythreads.exp: Likewise.
+	* gdb.threads/pthreads.exp: Likewise.
+	* gdb.threads/schedlock.exp: Likewise.
+	* gdb.threads/sigthread.exp: Likewise.
+
 2015-12-11  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.base/execl-update-breakpoints.exp (main): Enable for target

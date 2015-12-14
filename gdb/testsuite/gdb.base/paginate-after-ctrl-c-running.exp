@@ -13,6 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+if [target_info exists gdb,nointerrupts] {
+    verbose "Skipping paginate-after-ctrl-c-running.exp because of nointerrupts."
+    return
+}
+
 standard_testfile
 
 if {[build_executable "failed to prepare" $testfile $srcfile debug] == -1} {

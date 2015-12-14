@@ -433,17 +433,19 @@ proc test_with_self { executable } {
     }
 
     # kill the xgdb process
-    set description "send ^C to child process"
-    send_gdb "\003"
-    gdb_expect {
-	-re "Program received signal SIGINT.*$gdb_prompt $" {
-	    pass "$description"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "$description"
-	}
-	timeout {
-	    fail "$description (timeout)"
+    if ![target_info exists gdb,nointerrupts] {
+	set description "send ^C to child process"
+	send_gdb "\003"
+	gdb_expect {
+	    -re "Program received signal SIGINT.*$gdb_prompt $" {
+		pass "$description"
+	    }
+	    -re ".*$gdb_prompt $" {
+		fail "$description"
+	    }
+	    timeout {
+		fail "$description (timeout)"
+	    }
 	}
     }
     
