@@ -1,5 +1,10 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-tbl.h (aarch64_feature_simd_f16): New.
+	(SIMD_F16): New.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-opc.c (aarch64_sys_reg_supported_p): Add mistakenly
 	removed statement.
 	(aarch64_pstatefield_supported_p): Move feature checks for AT
