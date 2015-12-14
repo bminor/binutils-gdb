@@ -348,3 +348,83 @@ Disassembly of section \.text:
  [0-9a-f]+:	6ea1f820 	fsqrt	v0.4s, v1.4s
  [0-9a-f]+:	2ef9f820 	fsqrt	v0.4h, v1.4h
  [0-9a-f]+:	6ef9f820 	fsqrt	v0.8h, v1.8h
+ [0-9a-f]+:	5ee0c820 	fcmgt	d0, d1, #0.0
+ [0-9a-f]+:	5ea0c820 	fcmgt	s0, s1, #0.0
+ [0-9a-f]+:	5ef8c820 	fcmgt	h0, h1, #0.0
+ [0-9a-f]+:	5ef8c800 	fcmgt	h0, h0, #0.0
+ [0-9a-f]+:	7ee0c820 	fcmge	d0, d1, #0.0
+ [0-9a-f]+:	7ea0c820 	fcmge	s0, s1, #0.0
+ [0-9a-f]+:	7ef8c820 	fcmge	h0, h1, #0.0
+ [0-9a-f]+:	7ef8c800 	fcmge	h0, h0, #0.0
+ [0-9a-f]+:	5ee0d820 	fcmeq	d0, d1, #0.0
+ [0-9a-f]+:	5ea0d820 	fcmeq	s0, s1, #0.0
+ [0-9a-f]+:	5ef8d820 	fcmeq	h0, h1, #0.0
+ [0-9a-f]+:	5ef8d800 	fcmeq	h0, h0, #0.0
+ [0-9a-f]+:	7ee0d820 	fcmle	d0, d1, #0.0
+ [0-9a-f]+:	7ea0d820 	fcmle	s0, s1, #0.0
+ [0-9a-f]+:	7ef8d820 	fcmle	h0, h1, #0.0
+ [0-9a-f]+:	7ef8d800 	fcmle	h0, h0, #0.0
+ [0-9a-f]+:	5ee0e820 	fcmlt	d0, d1, #0.0
+ [0-9a-f]+:	5ea0e820 	fcmlt	s0, s1, #0.0
+ [0-9a-f]+:	5ef8e820 	fcmlt	h0, h1, #0.0
+ [0-9a-f]+:	5ef8e800 	fcmlt	h0, h0, #0.0
+ [0-9a-f]+:	5e61a820 	fcvtns	d0, d1
+ [0-9a-f]+:	5e21a820 	fcvtns	s0, s1
+ [0-9a-f]+:	5e79a820 	fcvtns	h0, h1
+ [0-9a-f]+:	5e79a800 	fcvtns	h0, h0
+ [0-9a-f]+:	7e61a820 	fcvtnu	d0, d1
+ [0-9a-f]+:	7e21a820 	fcvtnu	s0, s1
+ [0-9a-f]+:	7e79a820 	fcvtnu	h0, h1
+ [0-9a-f]+:	7e79a800 	fcvtnu	h0, h0
+ [0-9a-f]+:	5ee1a820 	fcvtps	d0, d1
+ [0-9a-f]+:	5ea1a820 	fcvtps	s0, s1
+ [0-9a-f]+:	5ef9a820 	fcvtps	h0, h1
+ [0-9a-f]+:	5ef9a800 	fcvtps	h0, h0
+ [0-9a-f]+:	7ee1a820 	fcvtpu	d0, d1
+ [0-9a-f]+:	7ea1a820 	fcvtpu	s0, s1
+ [0-9a-f]+:	7ef9a820 	fcvtpu	h0, h1
+ [0-9a-f]+:	7ef9a800 	fcvtpu	h0, h0
+ [0-9a-f]+:	5e61b820 	fcvtms	d0, d1
+ [0-9a-f]+:	5e21b820 	fcvtms	s0, s1
+ [0-9a-f]+:	5e79b820 	fcvtms	h0, h1
+ [0-9a-f]+:	5e79b800 	fcvtms	h0, h0
+ [0-9a-f]+:	7e61b820 	fcvtmu	d0, d1
+ [0-9a-f]+:	7e21b820 	fcvtmu	s0, s1
+ [0-9a-f]+:	7e79b820 	fcvtmu	h0, h1
+ [0-9a-f]+:	7e79b800 	fcvtmu	h0, h0
+ [0-9a-f]+:	5ee1b820 	fcvtzs	d0, d1
+ [0-9a-f]+:	5ea1b820 	fcvtzs	s0, s1
+ [0-9a-f]+:	5ef9b820 	fcvtzs	h0, h1
+ [0-9a-f]+:	5ef9b800 	fcvtzs	h0, h0
+ [0-9a-f]+:	7ee1b820 	fcvtzu	d0, d1
+ [0-9a-f]+:	7ea1b820 	fcvtzu	s0, s1
+ [0-9a-f]+:	7ef9b820 	fcvtzu	h0, h1
+ [0-9a-f]+:	7ef9b800 	fcvtzu	h0, h0
+ [0-9a-f]+:	5e61c820 	fcvtas	d0, d1
+ [0-9a-f]+:	5e21c820 	fcvtas	s0, s1
+ [0-9a-f]+:	5e79c820 	fcvtas	h0, h1
+ [0-9a-f]+:	5e79c800 	fcvtas	h0, h0
+ [0-9a-f]+:	7e61c820 	fcvtau	d0, d1
+ [0-9a-f]+:	7e21c820 	fcvtau	s0, s1
+ [0-9a-f]+:	7e79c820 	fcvtau	h0, h1
+ [0-9a-f]+:	7e79c800 	fcvtau	h0, h0
+ [0-9a-f]+:	5e61d820 	scvtf	d0, d1
+ [0-9a-f]+:	5e21d820 	scvtf	s0, s1
+ [0-9a-f]+:	5e79d820 	scvtf	h0, h1
+ [0-9a-f]+:	5e79d800 	scvtf	h0, h0
+ [0-9a-f]+:	7e61d820 	ucvtf	d0, d1
+ [0-9a-f]+:	7e21d820 	ucvtf	s0, s1
+ [0-9a-f]+:	7e79d820 	ucvtf	h0, h1
+ [0-9a-f]+:	7e79d800 	ucvtf	h0, h0
+ [0-9a-f]+:	5ee1d820 	frecpe	d0, d1
+ [0-9a-f]+:	5ea1d820 	frecpe	s0, s1
+ [0-9a-f]+:	5ef9d820 	frecpe	h0, h1
+ [0-9a-f]+:	5ef9d800 	frecpe	h0, h0
+ [0-9a-f]+:	7ee1d820 	frsqrte	d0, d1
+ [0-9a-f]+:	7ea1d820 	frsqrte	s0, s1
+ [0-9a-f]+:	7ef9d820 	frsqrte	h0, h1
+ [0-9a-f]+:	7ef9d800 	frsqrte	h0, h0
+ [0-9a-f]+:	5ee1f820 	frecpx	d0, d1
+ [0-9a-f]+:	5ea1f820 	frecpx	s0, s1
+ [0-9a-f]+:	5ef9f820 	frecpx	h0, h1
+ [0-9a-f]+:	5ef9f800 	frecpx	h0, h0

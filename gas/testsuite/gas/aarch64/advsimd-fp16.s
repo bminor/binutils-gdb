@@ -112,3 +112,45 @@
 	tworeg_misc frecpe
 	tworeg_misc frsqrte
 	tworeg_misc fsqrt
+
+	/* Scalar two-register misc.  */
+
+	.macro stworeg_zero, op
+	\op	d0, d1, #0.0
+	\op	s0, s1, #0.0
+	\op	h0, h1, #0.0
+	\op	h0, h0, #0.0
+	.endm
+
+	stworeg_zero fcmgt
+	stworeg_zero fcmge
+	stworeg_zero fcmeq
+	stworeg_zero fcmle
+	stworeg_zero fcmlt
+
+	.macro stworeg_misc, op
+	\op	d0, d1
+	\op	s0, s1
+	\op	h0, h1
+	\op	h0, h0
+	.endm
+
+	stworeg_misc fcvtns
+	stworeg_misc fcvtnu
+	stworeg_misc fcvtps
+	stworeg_misc fcvtpu
+
+	stworeg_misc fcvtms
+	stworeg_misc fcvtmu
+	stworeg_misc fcvtzs
+	stworeg_misc fcvtzu
+
+	stworeg_misc fcvtas
+	stworeg_misc fcvtau
+
+	stworeg_misc scvtf
+	stworeg_misc ucvtf
+
+	stworeg_misc frecpe
+	stworeg_misc frsqrte
+	stworeg_misc frecpx

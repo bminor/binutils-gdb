@@ -1,6 +1,12 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for scalar two register misc.
+	instructions.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
 	* gas/aarch64/advsimd-fp16.s: Add tests for vector two register
 	misc. instructions.
 
