@@ -1303,6 +1303,8 @@ static const aarch64_feature_set aarch64_feature_v8_2 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2, 0);
 static const aarch64_feature_set aarch64_feature_fp_f16 =
   AARCH64_FEATURE (AARCH64_FEATURE_F16 | AARCH64_FEATURE_FP, 0);
+static const aarch64_feature_set aarch64_feature_simd_f16 =
+  AARCH64_FEATURE (AARCH64_FEATURE_F16 | AARCH64_FEATURE_SIMD, 0);
 static const aarch64_feature_set aarch64_feature_stat_profile =
   AARCH64_FEATURE (AARCH64_FEATURE_PROFILE, 0);
 
@@ -1315,6 +1317,7 @@ static const aarch64_feature_set aarch64_feature_stat_profile =
 #define LOR	&aarch64_feature_lor
 #define RDMA	&aarch64_feature_rdma
 #define FP_F16	&aarch64_feature_fp_f16
+#define SIMD_F16	&aarch64_feature_simd_f16
 #define RAS	&aarch64_feature_ras
 #define STAT_PROFILE	&aarch64_feature_stat_profile
 #define ARMV8_2	&aarch64_feature_v8_2

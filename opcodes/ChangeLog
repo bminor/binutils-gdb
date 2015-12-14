@@ -1,3 +1,8 @@
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_simd_f16): New.
+	(SIMD_F16): New.
+
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-asm.c (aarch64_ins_hint): New.
