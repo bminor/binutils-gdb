@@ -3,6 +3,15 @@
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
 	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_SSHIFT_H): New.
+	(aarch64_opcode_table): Add fp16 versions of scvtf, fcvtzs, ucvtf
+	and fcvtzu to the Adv.SIMD scalar shift by immediate group.
+
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
 	* aarch64-tbl.h (QL_VSHIFT_H): New.
 	(aarch64_opcode_table): Add fp16 versions of scvtf, fcvtzs, ucvtf
 	and fcvtzu to the Adv.SIMD shift by immediate group.

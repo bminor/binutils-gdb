@@ -375,6 +375,12 @@
   QLF3(S_D , S_D , S_D )	\
 }
 
+/* e.g. UCVTF <Vd>.<T>, <Vn>.<T>, #<fbits>.  */
+#define QL_SSHIFT_H		\
+{				\
+  QLF3 (S_H, S_H, S_H)		\
+}
+
 /* e.g. SQSHRUN <Vb><d>, <Va><n>, #<shift>.  */
 #define QL_SSHIFTN		\
 {				\
@@ -2106,7 +2112,11 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"sqshrn", 0x5f009400, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFTN, 0},
   {"sqrshrn", 0x5f009c00, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFTN, 0},
   {"scvtf", 0x5f00e400, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_SD, 0},
+  {"scvtf", 0x5f10e400, 0xff80fc00, asisdshf, 0, SIMD_F16,
+   OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_H, 0},
   {"fcvtzs", 0x5f00fc00, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_SD, 0},
+  {"fcvtzs", 0x5f10fc00, 0xff80fc00, asisdshf, 0, SIMD_F16,
+   OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_H, 0},
   {"ushr", 0x7f000400, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_D, 0},
   {"usra", 0x7f001400, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_D, 0},
   {"urshr", 0x7f002400, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_D, 0},
@@ -2120,7 +2130,11 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"uqshrn", 0x7f009400, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFTN, 0},
   {"uqrshrn", 0x7f009c00, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFTN, 0},
   {"ucvtf", 0x7f00e400, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_SD, 0},
+  {"ucvtf", 0x7f10e400, 0xff80fc00, asisdshf, 0, SIMD_F16,
+   OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_H, 0},
   {"fcvtzu", 0x7f00fc00, 0xff80fc00, asisdshf, 0, SIMD, OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_SD, 0},
+  {"fcvtzu", 0x7f10fc00, 0xff80fc00, asisdshf, 0, SIMD_F16,
+   OP3 (Sd, Sn, IMM_VLSR), QL_SSHIFT_H, 0},
   /* Bitfield.  */
   {"sbfm", 0x13000000, 0x7f800000, bitfield, 0, CORE, OP4 (Rd, Rn, IMMR, IMMS), QL_BF, F_HAS_ALIAS | F_SF | F_N},
   {"sbfiz", 0x13000000, 0x7f800000, bitfield, OP_SBFIZ, CORE, OP4 (Rd, Rn, IMM, WIDTH), QL_BF2, F_ALIAS | F_P1 | F_CONV},
