@@ -490,6 +490,9 @@ extern struct inferior *iterate_over_inferiors (int (*) (struct inferior *,
 /* Returns true if the inferior list is not empty.  */
 extern int have_inferiors (void);
 
+/* Returns the number of live inferiors (real live processes).  */
+extern int number_of_live_inferiors (void);
+
 /* Returns true if there are any live inferiors in the inferior list
    (not cores, not executables, real live processes).  */
 extern int have_live_inferiors (void);

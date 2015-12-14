@@ -119,11 +119,11 @@ struct remote_state;
 
 static int remote_vkill (int pid, struct remote_state *rs);
 
+static void remote_kill_k (void);
+
 static void remote_mourn (struct target_ops *ops);
 
 static void extended_remote_restart (void);
-
-static void extended_remote_mourn (struct target_ops *);
 
 static void remote_send (char **buf, long *sizeof_buf_p);
 
@@ -1918,7 +1918,8 @@ demand_private_info (ptid_t ptid)
       info->priv = XNEW (struct private_thread_info);
       info->private_dtor = free_private_thread_info;
       info->priv->core = -1;
-      info->priv->extra = 0;
+      info->priv->extra = NULL;
+      info->priv->name = NULL;
     }
 
   return info->priv;
@@ -2097,7 +2098,7 @@ set_general_process (void)
   struct remote_state *rs = get_remote_state ();
 
   /* If the remote can't handle multiple processes, don't bother.  */
-  if (!rs->extended || !remote_multi_process_p (rs))
+  if (!remote_multi_process_p (rs))
     return;
 
   /* We only need to change the remote current thread if it's pointing
@@ -4609,18 +4610,15 @@ remote_query_supported (void)
 
       q = remote_query_supported_append (q, "qRelocInsn+");
 
-      if (rs->extended)
-	{
-	  if (packet_set_cmd_state (PACKET_fork_event_feature)
-	      != AUTO_BOOLEAN_FALSE)
-	    q = remote_query_supported_append (q, "fork-events+");
-	  if (packet_set_cmd_state (PACKET_vfork_event_feature)
-	      != AUTO_BOOLEAN_FALSE)
-	    q = remote_query_supported_append (q, "vfork-events+");
-	  if (packet_set_cmd_state (PACKET_exec_event_feature)
-	      != AUTO_BOOLEAN_FALSE)
-	    q = remote_query_supported_append (q, "exec-events+");
-	}
+      if (packet_set_cmd_state (PACKET_fork_event_feature)
+	  != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "fork-events+");
+      if (packet_set_cmd_state (PACKET_vfork_event_feature)
+	  != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "vfork-events+");
+      if (packet_set_cmd_state (PACKET_exec_event_feature)
+	  != AUTO_BOOLEAN_FALSE)
+	q = remote_query_supported_append (q, "exec-events+");
 
       if (packet_set_cmd_state (PACKET_vContSupported) != AUTO_BOOLEAN_FALSE)
 	q = remote_query_supported_append (q, "vContSupported+");
@@ -4975,7 +4973,8 @@ remote_detach_1 (const char *args, int from_tty)
   /* Tell the remote target to detach.  */
   remote_detach_pid (pid);
 
-  if (from_tty && !rs->extended)
+  /* Exit only if this is the only active inferior.  */
+  if (from_tty && !rs->extended && number_of_live_inferiors () == 1)
     puts_filtered (_("Ending remote debugging.\n"));
 
   /* Check to see if we are detaching a fork parent.  Note that if we
@@ -5071,10 +5070,11 @@ remote_disconnect (struct target_ops *target, const char *args, int from_tty)
   if (args)
     error (_("Argument given to \"disconnect\" when remotely debugging."));
 
-  /* Make sure we unpush even the extended remote targets; mourn
-     won't do it.  So call remote_mourn directly instead of
-     target_mourn_inferior.  */
-  remote_mourn (target);
+  /* Make sure we unpush even the extended remote targets.  Calling
+     target_mourn_inferior won't unpush, and remote_mourn won't
+     unpush if there is more than one inferior left.  */
+  unpush_target (target);
+  generic_mourn_inferior ();
 
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
@@ -8800,41 +8800,52 @@ kill_new_fork_children (int pid, struct remote_state *rs)
 }
 
 
+/* Target hook to kill the current inferior.  */
+
 static void
 remote_kill (struct target_ops *ops)
 {
+  int res = -1;
+  int pid = ptid_get_pid (inferior_ptid);
+  struct remote_state *rs = get_remote_state ();
 
-  /* Catch errors so the user can quit from gdb even when we
-     aren't on speaking terms with the remote system.  */
-  TRY
+  if (packet_support (PACKET_vKill) != PACKET_DISABLE)
     {
-      putpkt ("k");
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      if (ex.error == TARGET_CLOSE_ERROR)
+      /* If we're stopped while forking and we haven't followed yet,
+	 kill the child task.  We need to do this before killing the
+	 parent task because if this is a vfork then the parent will
+	 be sleeping.  */
+      kill_new_fork_children (pid, rs);
+
+      res = remote_vkill (pid, rs);
+      if (res == 0)
 	{
-	  /* If we got an (EOF) error that caused the target
-	     to go away, then we're done, that's what we wanted.
-	     "k" is susceptible to cause a premature EOF, given
-	     that the remote server isn't actually required to
-	     reply to "k", and it can happen that it doesn't
-	     even get to reply ACK to the "k".  */
+	  target_mourn_inferior ();
 	  return;
 	}
-
-	/* Otherwise, something went wrong.  We didn't actually kill
-	   the target.  Just propagate the exception, and let the
-	   user or higher layers decide what to do.  */
-	throw_exception (ex);
     }
-  END_CATCH
 
-  /* We've killed the remote end, we get to mourn it.  Since this is
-     target remote, single-process, mourning the inferior also
-     unpushes remote_ops.  */
-  target_mourn_inferior ();
+  /* If we are in 'target remote' mode and we are killing the only
+     inferior, then we will tell gdbserver to exit and unpush the
+     target.  */
+  if (res == -1 && !remote_multi_process_p (rs)
+      && number_of_live_inferiors () == 1)
+    {
+      remote_kill_k ();
+
+      /* We've killed the remote end, we get to mourn it.  If we are
+	 not in extended mode, mourning the inferior also unpushes
+	 remote_ops from the target stack, which closes the remote
+	 connection.  */
+      target_mourn_inferior ();
+
+      return;
+    }
+
+  error (_("Can't kill process"));
 }
+
+/* Send a kill request to the target using the 'vKill' packet.  */
 
 static int
 remote_vkill (int pid, struct remote_state *rs)
@@ -8861,55 +8872,52 @@ remote_vkill (int pid, struct remote_state *rs)
     }
 }
 
+/* Send a kill request to the target using the 'k' packet.  */
+
 static void
-extended_remote_kill (struct target_ops *ops)
+remote_kill_k (void)
 {
-  int res;
-  int pid = ptid_get_pid (inferior_ptid);
-  struct remote_state *rs = get_remote_state ();
-
-  /* If we're stopped while forking and we haven't followed yet, kill the
-     child task.  We need to do this before killing the parent task
-     because if this is a vfork then the parent will be sleeping.  */
-  kill_new_fork_children (pid, rs);
-
-  res = remote_vkill (pid, rs);
-  if (res == -1 && !(rs->extended && remote_multi_process_p (rs)))
+  /* Catch errors so the user can quit from gdb even when we
+     aren't on speaking terms with the remote system.  */
+  TRY
     {
-      /* Don't try 'k' on a multi-process aware stub -- it has no way
-	 to specify the pid.  */
-
       putpkt ("k");
-#if 0
-      getpkt (&rs->buf, &rs->buf_size, 0);
-      if (rs->buf[0] != 'O' || rs->buf[0] != 'K')
-	res = 1;
-#else
-      /* Don't wait for it to die.  I'm not really sure it matters whether
-	 we do or not.  For the existing stubs, kill is a noop.  */
-      res = 0;
-#endif
     }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error == TARGET_CLOSE_ERROR)
+	{
+	  /* If we got an (EOF) error that caused the target
+	     to go away, then we're done, that's what we wanted.
+	     "k" is susceptible to cause a premature EOF, given
+	     that the remote server isn't actually required to
+	     reply to "k", and it can happen that it doesn't
+	     even get to reply ACK to the "k".  */
+	  return;
+	}
 
-  if (res != 0)
-    error (_("Can't kill process"));
-
-  target_mourn_inferior ();
+      /* Otherwise, something went wrong.  We didn't actually kill
+	 the target.  Just propagate the exception, and let the
+	 user or higher layers decide what to do.  */
+      throw_exception (ex);
+    }
+  END_CATCH
 }
 
 static void
 remote_mourn (struct target_ops *target)
 {
-  unpush_target (target);
-
-  /* remote_close takes care of doing most of the clean up.  */
-  generic_mourn_inferior ();
-}
-
-static void
-extended_remote_mourn (struct target_ops *target)
-{
   struct remote_state *rs = get_remote_state ();
+
+  /* In 'target remote' mode with one inferior, we close the connection.  */
+  if (!rs->extended && number_of_live_inferiors () <= 1)
+    {
+      unpush_target (target);
+
+      /* remote_close takes care of doing most of the clean up.  */
+      generic_mourn_inferior ();
+      return;
+    }
 
   /* In case we got here due to an error, but we're going to stay
      connected.  */
@@ -8940,10 +8948,7 @@ extended_remote_mourn (struct target_ops *target)
      current thread.  */
   record_currthread (rs, minus_one_ptid);
 
-  /* Unlike "target remote", we do not want to unpush the target; then
-     the next time the user says "run", we won't be connected.  */
-
-  /* Call common code to mark the inferior as not running.	*/
+  /* Call common code to mark the inferior as not running.  */
   generic_mourn_inferior ();
 
   if (!have_inferiors ())
@@ -10465,7 +10470,7 @@ remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
     {
       if (ptid_equal (magic_null_ptid, ptid))
 	xsnprintf (buf, sizeof buf, "Thread <main>");
-      else if (rs->extended && remote_multi_process_p (rs))
+      else if (remote_multi_process_p (rs))
 	if (ptid_get_lwp (ptid) == 0)
 	  return normal_pid_to_str (ptid);
 	else
@@ -11635,11 +11640,7 @@ remote_supports_multi_process (struct target_ops *self)
 {
   struct remote_state *rs = get_remote_state ();
 
-  /* Only extended-remote handles being attached to multiple
-     processes, even though plain remote can use the multi-process
-     thread id extensions, so that GDB knows the target process's
-     PID.  */
-  return rs->extended && remote_multi_process_p (rs);
+  return remote_multi_process_p (rs);
 }
 
 static int
@@ -13071,6 +13072,14 @@ Specify the serial device it is connected to\n\
   remote_ops.to_btrace_conf = remote_btrace_conf;
   remote_ops.to_augmented_libraries_svr4_read =
     remote_augmented_libraries_svr4_read;
+  remote_ops.to_follow_fork = remote_follow_fork;
+  remote_ops.to_follow_exec = remote_follow_exec;
+  remote_ops.to_insert_fork_catchpoint = remote_insert_fork_catchpoint;
+  remote_ops.to_remove_fork_catchpoint = remote_remove_fork_catchpoint;
+  remote_ops.to_insert_vfork_catchpoint = remote_insert_vfork_catchpoint;
+  remote_ops.to_remove_vfork_catchpoint = remote_remove_vfork_catchpoint;
+  remote_ops.to_insert_exec_catchpoint = remote_insert_exec_catchpoint;
+  remote_ops.to_remove_exec_catchpoint = remote_remove_exec_catchpoint;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -13089,27 +13098,11 @@ init_extended_remote_ops (void)
 Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_open = extended_remote_open;
   extended_remote_ops.to_create_inferior = extended_remote_create_inferior;
-  extended_remote_ops.to_mourn_inferior = extended_remote_mourn;
   extended_remote_ops.to_detach = extended_remote_detach;
   extended_remote_ops.to_attach = extended_remote_attach;
   extended_remote_ops.to_post_attach = extended_remote_post_attach;
-  extended_remote_ops.to_kill = extended_remote_kill;
   extended_remote_ops.to_supports_disable_randomization
     = extended_remote_supports_disable_randomization;
-  extended_remote_ops.to_follow_fork = remote_follow_fork;
-  extended_remote_ops.to_follow_exec = remote_follow_exec;
-  extended_remote_ops.to_insert_fork_catchpoint
-    = remote_insert_fork_catchpoint;
-  extended_remote_ops.to_remove_fork_catchpoint
-    = remote_remove_fork_catchpoint;
-  extended_remote_ops.to_insert_vfork_catchpoint
-    = remote_insert_vfork_catchpoint;
-  extended_remote_ops.to_remove_vfork_catchpoint
-    = remote_remove_vfork_catchpoint;
-  extended_remote_ops.to_insert_exec_catchpoint
-    = remote_insert_exec_catchpoint;
-  extended_remote_ops.to_remove_exec_catchpoint
-    = remote_remove_exec_catchpoint;
 }
 
 static int

@@ -1,3 +1,8 @@
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
+	* server.c (process_serial_event): Don't exit from gdbserver
+	in remote mode if there are still active inferiors.
+
 2015-12-11  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_breakpoint_at): Call

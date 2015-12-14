@@ -3959,9 +3959,11 @@ process_serial_event (void)
 	  discard_queued_stop_replies (pid_to_ptid (pid));
 	  write_ok (own_buf);
 
-	  if (extended_protocol)
+	  if (extended_protocol || target_running ())
 	    {
-	      /* Treat this like a normal program exit.  */
+	      /* There is still at least one inferior remaining or
+		 we are in extended mode, so don't terminate gdbserver,
+		 and instead treat this like a normal program exit.  */
 	      last_status.kind = TARGET_WAITKIND_EXITED;
 	      last_status.value.integer = 0;
 	      last_ptid = pid_to_ptid (pid);

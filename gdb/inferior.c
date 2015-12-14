@@ -459,22 +459,41 @@ have_inferiors (void)
   return 0;
 }
 
+/* Return the number of live inferiors.  We account for the case
+   where an inferior might have a non-zero pid but no threads, as
+   in the middle of a 'mourn' operation.  */
+
 int
-have_live_inferiors (void)
+number_of_live_inferiors (void)
 {
   struct inferior *inf;
+  int num_inf = 0;
 
   for (inf = inferior_list; inf; inf = inf->next)
     if (inf->pid != 0)
       {
 	struct thread_info *tp;
-	
-	tp = any_thread_of_process (inf->pid);
-	if (tp && target_has_execution_1 (tp->ptid))
-	  break;
+
+	ALL_NON_EXITED_THREADS (tp)
+	 if (tp && ptid_get_pid (tp->ptid) == inf->pid)
+	   if (target_has_execution_1 (tp->ptid))
+	     {
+	       /* Found a live thread in this inferior, go to the next
+		  inferior.  */
+	       ++num_inf;
+	       break;
+	     }
       }
 
-  return inf != NULL;
+  return num_inf;
+}
+
+/* Return true if there is at least one live inferior.  */
+
+int
+have_live_inferiors (void)
+{
+  return number_of_live_inferiors () > 0;
 }
 
 /* Prune away any unused inferiors, and then prune away no longer used

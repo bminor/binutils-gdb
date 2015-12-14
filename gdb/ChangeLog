@@ -1,3 +1,28 @@
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
+	* inferior.c (number_of_live_inferiors): New function.
+	(have_live_inferiors): Use number_of_live_inferiors in place
+	of duplicate code.
+	* inferior.h (number_of_live_inferiors): Declare new function.
+	* remote.c (set_general_process): Remove restriction on target
+	remote mode.
+	(remote_query_supported): Likewise.
+	(remote_detach_1): Exit in target remote mode only when there
+	is just one live inferior left.
+	(remote_disconnect): Unpush the target directly instead of 
+	calling remote_mourn.
+	(remote_kill): Rewrite function to handle both target remote
+	and extended-remote.  Call remote_kill_k.
+	(remote_kill_k): New function.
+	(extended_remote_kill): Delete function.
+	(remote_mourn, extended_remote_mourn): Combine functions into
+	one, remote_mourn, and enable extended functionality for target
+	remote.
+	(remote_pid_to_str): Enable "process" style ptid string for
+	target remote.
+	(remote_supports_multi_process): Remove restriction on target
+	remote mode.
+
 2015-12-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* i386-tdep.c (i386_mpx_info_bounds): Use TYPE_LENGTH.
