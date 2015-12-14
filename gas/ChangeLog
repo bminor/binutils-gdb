@@ -1,3 +1,7 @@
+2015-12-14  Jan Beulich  <jbeulich@suse.com>
+
+	* dw2gencfi.c (dot_cfi_label): Free "name".
+
 2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (aarch64_hint_opt_hsh): New.

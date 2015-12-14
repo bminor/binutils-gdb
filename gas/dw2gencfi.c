@@ -1186,6 +1186,7 @@ dot_cfi_label (int ignored ATTRIBUTE_UNUSED)
     cfi_add_advance_loc (symbol_temp_new_now ());
 
   cfi_add_label (name);
+  free (name);
 
   demand_empty_rest_of_line ();
 }
