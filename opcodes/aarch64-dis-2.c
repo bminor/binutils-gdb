@@ -40,7 +40,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxx0000xxx0
                          adr.  */
-                      return 1040;
+                      return 1069;
                     }
                   else
                     {
@@ -48,7 +48,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxx0000xxx1
                          adrp.  */
-                      return 1041;
+                      return 1070;
                     }
                 }
               else
@@ -115,7 +115,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx000x0010000
                                                  stxrb.  */
-                                              return 798;
+                                              return 827;
                                             }
                                           else
                                             {
@@ -123,7 +123,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx000x0010010
                                                  stxrh.  */
-                                              return 804;
+                                              return 833;
                                             }
                                         }
                                       else
@@ -132,7 +132,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx000x00100x1
                                              stxr.  */
-                                          return 810;
+                                          return 839;
                                         }
                                     }
                                   else
@@ -143,7 +143,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx100x00100x0
                                              casp.  */
-                                          return 875;
+                                          return 904;
                                         }
                                       else
                                         {
@@ -151,7 +151,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx100x00100x1
                                              stxp.  */
-                                          return 812;
+                                          return 841;
                                         }
                                     }
                                 }
@@ -167,7 +167,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx000x0010000
                                                  stlxrb.  */
-                                              return 799;
+                                              return 828;
                                             }
                                           else
                                             {
@@ -175,7 +175,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx000x0010010
                                                  stlxrh.  */
-                                              return 805;
+                                              return 834;
                                             }
                                         }
                                       else
@@ -184,7 +184,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx000x00100x1
                                              stlxr.  */
-                                          return 811;
+                                          return 840;
                                         }
                                     }
                                   else
@@ -195,7 +195,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx100x00100x0
                                              caspl.  */
-                                          return 877;
+                                          return 906;
                                         }
                                       else
                                         {
@@ -203,7 +203,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx100x00100x1
                                              stlxp.  */
-                                          return 813;
+                                          return 842;
                                         }
                                     }
                                 }
@@ -214,7 +214,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxx00x00101xx
                                  stnp.  */
-                              return 826;
+                              return 855;
                             }
                         }
                       else
@@ -231,7 +231,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx001x00100x0
                                              stllrb.  */
-                                          return 824;
+                                          return 853;
                                         }
                                       else
                                         {
@@ -239,7 +239,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx001x00100x1
                                              stllr.  */
-                                          return 823;
+                                          return 852;
                                         }
                                     }
                                   else
@@ -252,7 +252,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx101x0010000
                                                  casb.  */
-                                              return 863;
+                                              return 892;
                                             }
                                           else
                                             {
@@ -260,7 +260,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx101x0010010
                                                  cash.  */
-                                              return 864;
+                                              return 893;
                                             }
                                         }
                                       else
@@ -269,7 +269,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx101x00100x1
                                              cas.  */
-                                          return 865;
+                                          return 894;
                                         }
                                     }
                                 }
@@ -285,7 +285,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx001x0010000
                                                  stlrb.  */
-                                              return 802;
+                                              return 831;
                                             }
                                           else
                                             {
@@ -293,7 +293,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx001x0010010
                                                  stlrh.  */
-                                              return 808;
+                                              return 837;
                                             }
                                         }
                                       else
@@ -302,7 +302,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx001x00100x1
                                              stlr.  */
-                                          return 818;
+                                          return 847;
                                         }
                                     }
                                   else
@@ -315,7 +315,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx101x0010000
                                                  caslb.  */
-                                              return 867;
+                                              return 896;
                                             }
                                           else
                                             {
@@ -323,7 +323,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx101x0010010
                                                  caslh.  */
-                                              return 870;
+                                              return 899;
                                             }
                                         }
                                       else
@@ -332,7 +332,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx101x00100x1
                                              casl.  */
-                                          return 873;
+                                          return 902;
                                         }
                                     }
                                 }
@@ -343,7 +343,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxx01x00101xx
                                  stp.  */
-                              return 835;
+                              return 864;
                             }
                         }
                     }
@@ -365,7 +365,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx010x0010000
                                                  ldxrb.  */
-                                              return 800;
+                                              return 829;
                                             }
                                           else
                                             {
@@ -373,7 +373,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx010x0010010
                                                  ldxrh.  */
-                                              return 806;
+                                              return 835;
                                             }
                                         }
                                       else
@@ -382,7 +382,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx010x00100x1
                                              ldxr.  */
-                                          return 814;
+                                          return 843;
                                         }
                                     }
                                   else
@@ -393,7 +393,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx110x00100x0
                                              caspa.  */
-                                          return 876;
+                                          return 905;
                                         }
                                       else
                                         {
@@ -401,7 +401,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx110x00100x1
                                              ldxp.  */
-                                          return 816;
+                                          return 845;
                                         }
                                     }
                                 }
@@ -417,7 +417,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx010x0010000
                                                  ldaxrb.  */
-                                              return 801;
+                                              return 830;
                                             }
                                           else
                                             {
@@ -425,7 +425,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx010x0010010
                                                  ldaxrh.  */
-                                              return 807;
+                                              return 836;
                                             }
                                         }
                                       else
@@ -434,7 +434,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx010x00100x1
                                              ldaxr.  */
-                                          return 815;
+                                          return 844;
                                         }
                                     }
                                   else
@@ -445,7 +445,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx110x00100x0
                                              caspal.  */
-                                          return 878;
+                                          return 907;
                                         }
                                       else
                                         {
@@ -453,7 +453,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx110x00100x1
                                              ldaxp.  */
-                                          return 817;
+                                          return 846;
                                         }
                                     }
                                 }
@@ -466,7 +466,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx10x001010x
                                      ldnp.  */
-                                  return 827;
+                                  return 856;
                                 }
                               else
                                 {
@@ -474,7 +474,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx10x001011x
                                      ldpsw.  */
-                                  return 834;
+                                  return 863;
                                 }
                             }
                         }
@@ -494,7 +494,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx011x0010000
                                                  ldlarb.  */
-                                              return 821;
+                                              return 850;
                                             }
                                           else
                                             {
@@ -502,7 +502,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx011x0010010
                                                  ldlarh.  */
-                                              return 822;
+                                              return 851;
                                             }
                                         }
                                       else
@@ -511,7 +511,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx011x00100x1
                                              ldlar.  */
-                                          return 820;
+                                          return 849;
                                         }
                                     }
                                   else
@@ -524,7 +524,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx111x0010000
                                                  casab.  */
-                                              return 866;
+                                              return 895;
                                             }
                                           else
                                             {
@@ -532,7 +532,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx0xxxxx111x0010010
                                                  casah.  */
-                                              return 869;
+                                              return 898;
                                             }
                                         }
                                       else
@@ -541,7 +541,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx0xxxxx111x00100x1
                                              casa.  */
-                                          return 872;
+                                          return 901;
                                         }
                                     }
                                 }
@@ -557,7 +557,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx011x0010000
                                                  ldarb.  */
-                                              return 803;
+                                              return 832;
                                             }
                                           else
                                             {
@@ -565,7 +565,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx011x0010010
                                                  ldarh.  */
-                                              return 809;
+                                              return 838;
                                             }
                                         }
                                       else
@@ -574,7 +574,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx011x00100x1
                                              ldar.  */
-                                          return 819;
+                                          return 848;
                                         }
                                     }
                                   else
@@ -587,7 +587,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx111x0010000
                                                  casalb.  */
-                                              return 868;
+                                              return 897;
                                             }
                                           else
                                             {
@@ -595,7 +595,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxxxxxx1xxxxx111x0010010
                                                  casalh.  */
-                                              return 871;
+                                              return 900;
                                             }
                                         }
                                       else
@@ -604,7 +604,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxx1xxxxx111x00100x1
                                              casal.  */
-                                          return 874;
+                                          return 903;
                                         }
                                     }
                                 }
@@ -617,7 +617,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx11x001010x
                                      ldp.  */
-                                  return 836;
+                                  return 865;
                                 }
                               else
                                 {
@@ -625,7 +625,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx11x001011x
                                      ldpsw.  */
-                                  return 839;
+                                  return 868;
                                 }
                             }
                         }
@@ -643,7 +643,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxxx000110x0
                                  ldr.  */
-                              return 840;
+                              return 869;
                             }
                           else
                             {
@@ -653,7 +653,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxxxx00011001
                                      ldrsw.  */
-                                  return 842;
+                                  return 871;
                                 }
                               else
                                 {
@@ -661,7 +661,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxxxx00011011
                                      prfm.  */
-                                  return 843;
+                                  return 872;
                                 }
                             }
                         }
@@ -685,7 +685,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx00xxxxxxxxx00000011100
                                                          sturb.  */
-                                                      return 786;
+                                                      return 815;
                                                     }
                                                   else
                                                     {
@@ -693,7 +693,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx00xxxxxxxxx00000011110
                                                          sturh.  */
-                                                      return 791;
+                                                      return 820;
                                                     }
                                                 }
                                               else
@@ -702,7 +702,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx00xxxxxxxxx000000111x1
                                                      stur.  */
-                                                  return 794;
+                                                  return 823;
                                                 }
                                             }
                                           else
@@ -715,7 +715,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx00xxxxxxxxx01000011100
                                                          ldurb.  */
-                                                      return 787;
+                                                      return 816;
                                                     }
                                                   else
                                                     {
@@ -723,7 +723,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx00xxxxxxxxx01000011110
                                                          ldurh.  */
-                                                      return 792;
+                                                      return 821;
                                                     }
                                                 }
                                               else
@@ -732,7 +732,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx00xxxxxxxxx010000111x1
                                                      ldur.  */
-                                                  return 795;
+                                                  return 824;
                                                 }
                                             }
                                         }
@@ -746,7 +746,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx00xxxxxxxxx0x100011100
                                                      ldursb.  */
-                                                  return 788;
+                                                  return 817;
                                                 }
                                               else
                                                 {
@@ -754,7 +754,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx00xxxxxxxxx0x100011101
                                                      ldursw.  */
-                                                  return 796;
+                                                  return 825;
                                                 }
                                             }
                                           else
@@ -765,7 +765,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx00xxxxxxxxx0x100011110
                                                      ldursh.  */
-                                                  return 793;
+                                                  return 822;
                                                 }
                                               else
                                                 {
@@ -773,7 +773,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx00xxxxxxxxx0x100011111
                                                      prfum.  */
-                                                  return 797;
+                                                  return 826;
                                                 }
                                             }
                                         }
@@ -800,7 +800,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000xxxxx10000011100
                                                                          ldaddb.  */
-                                                                      return 891;
+                                                                      return 920;
                                                                     }
                                                                   else
                                                                     {
@@ -808,7 +808,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000xxxxx10000011110
                                                                          ldaddh.  */
-                                                                      return 892;
+                                                                      return 921;
                                                                     }
                                                                 }
                                                               else
@@ -817,7 +817,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx000000xxxxx100000111x1
                                                                      ldadd.  */
-                                                                  return 893;
+                                                                  return 922;
                                                                 }
                                                             }
                                                           else
@@ -830,7 +830,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000xxxxx10100011100
                                                                          ldaddab.  */
-                                                                      return 894;
+                                                                      return 923;
                                                                     }
                                                                   else
                                                                     {
@@ -838,7 +838,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000xxxxx10100011110
                                                                          ldaddah.  */
-                                                                      return 897;
+                                                                      return 926;
                                                                     }
                                                                 }
                                                               else
@@ -847,7 +847,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx000000xxxxx101000111x1
                                                                      ldadda.  */
-                                                                  return 900;
+                                                                  return 929;
                                                                 }
                                                             }
                                                         }
@@ -863,7 +863,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000xxxxx11000011100
                                                                          ldaddlb.  */
-                                                                      return 895;
+                                                                      return 924;
                                                                     }
                                                                   else
                                                                     {
@@ -871,7 +871,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000xxxxx11000011110
                                                                          ldaddlh.  */
-                                                                      return 898;
+                                                                      return 927;
                                                                     }
                                                                 }
                                                               else
@@ -880,7 +880,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx000000xxxxx110000111x1
                                                                      ldaddl.  */
-                                                                  return 901;
+                                                                  return 930;
                                                                 }
                                                             }
                                                           else
@@ -893,7 +893,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000xxxxx11100011100
                                                                          ldaddalb.  */
-                                                                      return 896;
+                                                                      return 925;
                                                                     }
                                                                   else
                                                                     {
@@ -901,7 +901,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000xxxxx11100011110
                                                                          ldaddalh.  */
-                                                                      return 899;
+                                                                      return 928;
                                                                     }
                                                                 }
                                                               else
@@ -910,7 +910,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx000000xxxxx111000111x1
                                                                      ldaddal.  */
-                                                                  return 902;
+                                                                  return 931;
                                                                 }
                                                             }
                                                         }
@@ -929,7 +929,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000001xxxxx10000011100
                                                                          swpb.  */
-                                                                      return 879;
+                                                                      return 908;
                                                                     }
                                                                   else
                                                                     {
@@ -937,7 +937,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000001xxxxx10000011110
                                                                          swph.  */
-                                                                      return 880;
+                                                                      return 909;
                                                                     }
                                                                 }
                                                               else
@@ -946,7 +946,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx000001xxxxx100000111x1
                                                                      swp.  */
-                                                                  return 881;
+                                                                  return 910;
                                                                 }
                                                             }
                                                           else
@@ -959,7 +959,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000001xxxxx10100011100
                                                                          swpab.  */
-                                                                      return 882;
+                                                                      return 911;
                                                                     }
                                                                   else
                                                                     {
@@ -967,7 +967,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000001xxxxx10100011110
                                                                          swpah.  */
-                                                                      return 885;
+                                                                      return 914;
                                                                     }
                                                                 }
                                                               else
@@ -976,7 +976,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx000001xxxxx101000111x1
                                                                      swpa.  */
-                                                                  return 888;
+                                                                  return 917;
                                                                 }
                                                             }
                                                         }
@@ -992,7 +992,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000001xxxxx11000011100
                                                                          swplb.  */
-                                                                      return 883;
+                                                                      return 912;
                                                                     }
                                                                   else
                                                                     {
@@ -1000,7 +1000,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000001xxxxx11000011110
                                                                          swplh.  */
-                                                                      return 886;
+                                                                      return 915;
                                                                     }
                                                                 }
                                                               else
@@ -1009,7 +1009,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx000001xxxxx110000111x1
                                                                      swpl.  */
-                                                                  return 889;
+                                                                  return 918;
                                                                 }
                                                             }
                                                           else
@@ -1022,7 +1022,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000001xxxxx11100011100
                                                                          swpalb.  */
-                                                                      return 884;
+                                                                      return 913;
                                                                     }
                                                                   else
                                                                     {
@@ -1030,7 +1030,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000001xxxxx11100011110
                                                                          swpalh.  */
-                                                                      return 887;
+                                                                      return 916;
                                                                     }
                                                                 }
                                                               else
@@ -1039,7 +1039,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx000001xxxxx111000111x1
                                                                      swpal.  */
-                                                                  return 890;
+                                                                  return 919;
                                                                 }
                                                             }
                                                         }
@@ -1059,7 +1059,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00001xxxxxx10000011100
                                                                      ldsmaxb.  */
-                                                                  return 939;
+                                                                  return 968;
                                                                 }
                                                               else
                                                                 {
@@ -1067,7 +1067,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00001xxxxxx10000011110
                                                                      ldsmaxh.  */
-                                                                  return 940;
+                                                                  return 969;
                                                                 }
                                                             }
                                                           else
@@ -1076,7 +1076,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00001xxxxxx100000111x1
                                                                  ldsmax.  */
-                                                              return 941;
+                                                              return 970;
                                                             }
                                                         }
                                                       else
@@ -1089,7 +1089,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00001xxxxxx10100011100
                                                                      ldsmaxab.  */
-                                                                  return 942;
+                                                                  return 971;
                                                                 }
                                                               else
                                                                 {
@@ -1097,7 +1097,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00001xxxxxx10100011110
                                                                      ldsmaxah.  */
-                                                                  return 945;
+                                                                  return 974;
                                                                 }
                                                             }
                                                           else
@@ -1106,7 +1106,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00001xxxxxx101000111x1
                                                                  ldsmaxa.  */
-                                                              return 948;
+                                                              return 977;
                                                             }
                                                         }
                                                     }
@@ -1122,7 +1122,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00001xxxxxx11000011100
                                                                      ldsmaxlb.  */
-                                                                  return 943;
+                                                                  return 972;
                                                                 }
                                                               else
                                                                 {
@@ -1130,7 +1130,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00001xxxxxx11000011110
                                                                      ldsmaxlh.  */
-                                                                  return 946;
+                                                                  return 975;
                                                                 }
                                                             }
                                                           else
@@ -1139,7 +1139,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00001xxxxxx110000111x1
                                                                  ldsmaxl.  */
-                                                              return 949;
+                                                              return 978;
                                                             }
                                                         }
                                                       else
@@ -1152,7 +1152,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00001xxxxxx11100011100
                                                                      ldsmaxalb.  */
-                                                                  return 944;
+                                                                  return 973;
                                                                 }
                                                               else
                                                                 {
@@ -1160,7 +1160,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00001xxxxxx11100011110
                                                                      ldsmaxalh.  */
-                                                                  return 947;
+                                                                  return 976;
                                                                 }
                                                             }
                                                           else
@@ -1169,7 +1169,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00001xxxxxx111000111x1
                                                                  ldsmaxal.  */
-                                                              return 950;
+                                                              return 979;
                                                             }
                                                         }
                                                     }
@@ -1191,7 +1191,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00010xxxxxx10000011100
                                                                      ldeorb.  */
-                                                                  return 915;
+                                                                  return 944;
                                                                 }
                                                               else
                                                                 {
@@ -1199,7 +1199,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00010xxxxxx10000011110
                                                                      ldeorh.  */
-                                                                  return 916;
+                                                                  return 945;
                                                                 }
                                                             }
                                                           else
@@ -1208,7 +1208,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00010xxxxxx100000111x1
                                                                  ldeor.  */
-                                                              return 917;
+                                                              return 946;
                                                             }
                                                         }
                                                       else
@@ -1221,7 +1221,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00010xxxxxx10100011100
                                                                      ldeorab.  */
-                                                                  return 918;
+                                                                  return 947;
                                                                 }
                                                               else
                                                                 {
@@ -1229,7 +1229,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00010xxxxxx10100011110
                                                                      ldeorah.  */
-                                                                  return 921;
+                                                                  return 950;
                                                                 }
                                                             }
                                                           else
@@ -1238,7 +1238,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00010xxxxxx101000111x1
                                                                  ldeora.  */
-                                                              return 924;
+                                                              return 953;
                                                             }
                                                         }
                                                     }
@@ -1254,7 +1254,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00010xxxxxx11000011100
                                                                      ldeorlb.  */
-                                                                  return 919;
+                                                                  return 948;
                                                                 }
                                                               else
                                                                 {
@@ -1262,7 +1262,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00010xxxxxx11000011110
                                                                      ldeorlh.  */
-                                                                  return 922;
+                                                                  return 951;
                                                                 }
                                                             }
                                                           else
@@ -1271,7 +1271,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00010xxxxxx110000111x1
                                                                  ldeorl.  */
-                                                              return 925;
+                                                              return 954;
                                                             }
                                                         }
                                                       else
@@ -1284,7 +1284,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00010xxxxxx11100011100
                                                                      ldeoralb.  */
-                                                                  return 920;
+                                                                  return 949;
                                                                 }
                                                               else
                                                                 {
@@ -1292,7 +1292,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00010xxxxxx11100011110
                                                                      ldeoralh.  */
-                                                                  return 923;
+                                                                  return 952;
                                                                 }
                                                             }
                                                           else
@@ -1301,7 +1301,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00010xxxxxx111000111x1
                                                                  ldeoral.  */
-                                                              return 926;
+                                                              return 955;
                                                             }
                                                         }
                                                     }
@@ -1320,7 +1320,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00011xxxxxx10000011100
                                                                      ldumaxb.  */
-                                                                  return 963;
+                                                                  return 992;
                                                                 }
                                                               else
                                                                 {
@@ -1328,7 +1328,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00011xxxxxx10000011110
                                                                      ldumaxh.  */
-                                                                  return 964;
+                                                                  return 993;
                                                                 }
                                                             }
                                                           else
@@ -1337,7 +1337,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00011xxxxxx100000111x1
                                                                  ldumax.  */
-                                                              return 965;
+                                                              return 994;
                                                             }
                                                         }
                                                       else
@@ -1350,7 +1350,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00011xxxxxx10100011100
                                                                      ldumaxab.  */
-                                                                  return 966;
+                                                                  return 995;
                                                                 }
                                                               else
                                                                 {
@@ -1358,7 +1358,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00011xxxxxx10100011110
                                                                      ldumaxah.  */
-                                                                  return 969;
+                                                                  return 998;
                                                                 }
                                                             }
                                                           else
@@ -1367,7 +1367,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00011xxxxxx101000111x1
                                                                  ldumaxa.  */
-                                                              return 972;
+                                                              return 1001;
                                                             }
                                                         }
                                                     }
@@ -1383,7 +1383,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00011xxxxxx11000011100
                                                                      ldumaxlb.  */
-                                                                  return 967;
+                                                                  return 996;
                                                                 }
                                                               else
                                                                 {
@@ -1391,7 +1391,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00011xxxxxx11000011110
                                                                      ldumaxlh.  */
-                                                                  return 970;
+                                                                  return 999;
                                                                 }
                                                             }
                                                           else
@@ -1400,7 +1400,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00011xxxxxx110000111x1
                                                                  ldumaxl.  */
-                                                              return 973;
+                                                              return 1002;
                                                             }
                                                         }
                                                       else
@@ -1413,7 +1413,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00011xxxxxx11100011100
                                                                      ldumaxalb.  */
-                                                                  return 968;
+                                                                  return 997;
                                                                 }
                                                               else
                                                                 {
@@ -1421,7 +1421,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00011xxxxxx11100011110
                                                                      ldumaxalh.  */
-                                                                  return 971;
+                                                                  return 1000;
                                                                 }
                                                             }
                                                           else
@@ -1430,7 +1430,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00011xxxxxx111000111x1
                                                                  ldumaxal.  */
-                                                              return 974;
+                                                              return 1003;
                                                             }
                                                         }
                                                     }
@@ -1455,7 +1455,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00100xxxxxx10000011100
                                                                      ldclrb.  */
-                                                                  return 903;
+                                                                  return 932;
                                                                 }
                                                               else
                                                                 {
@@ -1463,7 +1463,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00100xxxxxx10000011110
                                                                      ldclrh.  */
-                                                                  return 904;
+                                                                  return 933;
                                                                 }
                                                             }
                                                           else
@@ -1472,7 +1472,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00100xxxxxx100000111x1
                                                                  ldclr.  */
-                                                              return 905;
+                                                              return 934;
                                                             }
                                                         }
                                                       else
@@ -1485,7 +1485,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00100xxxxxx10100011100
                                                                      ldclrab.  */
-                                                                  return 906;
+                                                                  return 935;
                                                                 }
                                                               else
                                                                 {
@@ -1493,7 +1493,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00100xxxxxx10100011110
                                                                      ldclrah.  */
-                                                                  return 909;
+                                                                  return 938;
                                                                 }
                                                             }
                                                           else
@@ -1502,7 +1502,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00100xxxxxx101000111x1
                                                                  ldclra.  */
-                                                              return 912;
+                                                              return 941;
                                                             }
                                                         }
                                                     }
@@ -1518,7 +1518,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00100xxxxxx11000011100
                                                                      ldclrlb.  */
-                                                                  return 907;
+                                                                  return 936;
                                                                 }
                                                               else
                                                                 {
@@ -1526,7 +1526,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00100xxxxxx11000011110
                                                                      ldclrlh.  */
-                                                                  return 910;
+                                                                  return 939;
                                                                 }
                                                             }
                                                           else
@@ -1535,7 +1535,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00100xxxxxx110000111x1
                                                                  ldclrl.  */
-                                                              return 913;
+                                                              return 942;
                                                             }
                                                         }
                                                       else
@@ -1548,7 +1548,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00100xxxxxx11100011100
                                                                      ldclralb.  */
-                                                                  return 908;
+                                                                  return 937;
                                                                 }
                                                               else
                                                                 {
@@ -1556,7 +1556,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00100xxxxxx11100011110
                                                                      ldclralh.  */
-                                                                  return 911;
+                                                                  return 940;
                                                                 }
                                                             }
                                                           else
@@ -1565,7 +1565,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00100xxxxxx111000111x1
                                                                  ldclral.  */
-                                                              return 914;
+                                                              return 943;
                                                             }
                                                         }
                                                     }
@@ -1584,7 +1584,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00101xxxxxx10000011100
                                                                      ldsminb.  */
-                                                                  return 951;
+                                                                  return 980;
                                                                 }
                                                               else
                                                                 {
@@ -1592,7 +1592,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00101xxxxxx10000011110
                                                                      ldsminh.  */
-                                                                  return 952;
+                                                                  return 981;
                                                                 }
                                                             }
                                                           else
@@ -1601,7 +1601,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00101xxxxxx100000111x1
                                                                  ldsmin.  */
-                                                              return 953;
+                                                              return 982;
                                                             }
                                                         }
                                                       else
@@ -1614,7 +1614,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00101xxxxxx10100011100
                                                                      ldsminab.  */
-                                                                  return 954;
+                                                                  return 983;
                                                                 }
                                                               else
                                                                 {
@@ -1622,7 +1622,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00101xxxxxx10100011110
                                                                      ldsminah.  */
-                                                                  return 957;
+                                                                  return 986;
                                                                 }
                                                             }
                                                           else
@@ -1631,7 +1631,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00101xxxxxx101000111x1
                                                                  ldsmina.  */
-                                                              return 960;
+                                                              return 989;
                                                             }
                                                         }
                                                     }
@@ -1647,7 +1647,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00101xxxxxx11000011100
                                                                      ldsminlb.  */
-                                                                  return 955;
+                                                                  return 984;
                                                                 }
                                                               else
                                                                 {
@@ -1655,7 +1655,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00101xxxxxx11000011110
                                                                      ldsminlh.  */
-                                                                  return 958;
+                                                                  return 987;
                                                                 }
                                                             }
                                                           else
@@ -1664,7 +1664,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00101xxxxxx110000111x1
                                                                  ldsminl.  */
-                                                              return 961;
+                                                              return 990;
                                                             }
                                                         }
                                                       else
@@ -1677,7 +1677,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00101xxxxxx11100011100
                                                                      ldsminalb.  */
-                                                                  return 956;
+                                                                  return 985;
                                                                 }
                                                               else
                                                                 {
@@ -1685,7 +1685,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00101xxxxxx11100011110
                                                                      ldsminalh.  */
-                                                                  return 959;
+                                                                  return 988;
                                                                 }
                                                             }
                                                           else
@@ -1694,7 +1694,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00101xxxxxx111000111x1
                                                                  ldsminal.  */
-                                                              return 962;
+                                                              return 991;
                                                             }
                                                         }
                                                     }
@@ -1716,7 +1716,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00110xxxxxx10000011100
                                                                      ldsetb.  */
-                                                                  return 927;
+                                                                  return 956;
                                                                 }
                                                               else
                                                                 {
@@ -1724,7 +1724,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00110xxxxxx10000011110
                                                                      ldseth.  */
-                                                                  return 928;
+                                                                  return 957;
                                                                 }
                                                             }
                                                           else
@@ -1733,7 +1733,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00110xxxxxx100000111x1
                                                                  ldset.  */
-                                                              return 929;
+                                                              return 958;
                                                             }
                                                         }
                                                       else
@@ -1746,7 +1746,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00110xxxxxx10100011100
                                                                      ldsetab.  */
-                                                                  return 930;
+                                                                  return 959;
                                                                 }
                                                               else
                                                                 {
@@ -1754,7 +1754,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00110xxxxxx10100011110
                                                                      ldsetah.  */
-                                                                  return 933;
+                                                                  return 962;
                                                                 }
                                                             }
                                                           else
@@ -1763,7 +1763,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00110xxxxxx101000111x1
                                                                  ldseta.  */
-                                                              return 936;
+                                                              return 965;
                                                             }
                                                         }
                                                     }
@@ -1779,7 +1779,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00110xxxxxx11000011100
                                                                      ldsetlb.  */
-                                                                  return 931;
+                                                                  return 960;
                                                                 }
                                                               else
                                                                 {
@@ -1787,7 +1787,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00110xxxxxx11000011110
                                                                      ldsetlh.  */
-                                                                  return 934;
+                                                                  return 963;
                                                                 }
                                                             }
                                                           else
@@ -1796,7 +1796,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00110xxxxxx110000111x1
                                                                  ldsetl.  */
-                                                              return 937;
+                                                              return 966;
                                                             }
                                                         }
                                                       else
@@ -1809,7 +1809,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00110xxxxxx11100011100
                                                                      ldsetalb.  */
-                                                                  return 932;
+                                                                  return 961;
                                                                 }
                                                               else
                                                                 {
@@ -1817,7 +1817,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00110xxxxxx11100011110
                                                                      ldsetalh.  */
-                                                                  return 935;
+                                                                  return 964;
                                                                 }
                                                             }
                                                           else
@@ -1826,7 +1826,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00110xxxxxx111000111x1
                                                                  ldsetal.  */
-                                                              return 938;
+                                                              return 967;
                                                             }
                                                         }
                                                     }
@@ -1845,7 +1845,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00111xxxxxx10000011100
                                                                      lduminb.  */
-                                                                  return 975;
+                                                                  return 1004;
                                                                 }
                                                               else
                                                                 {
@@ -1853,7 +1853,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00111xxxxxx10000011110
                                                                      lduminh.  */
-                                                                  return 976;
+                                                                  return 1005;
                                                                 }
                                                             }
                                                           else
@@ -1862,7 +1862,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00111xxxxxx100000111x1
                                                                  ldumin.  */
-                                                              return 977;
+                                                              return 1006;
                                                             }
                                                         }
                                                       else
@@ -1875,7 +1875,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00111xxxxxx10100011100
                                                                      lduminab.  */
-                                                                  return 978;
+                                                                  return 1007;
                                                                 }
                                                               else
                                                                 {
@@ -1883,7 +1883,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00111xxxxxx10100011110
                                                                      lduminah.  */
-                                                                  return 981;
+                                                                  return 1010;
                                                                 }
                                                             }
                                                           else
@@ -1892,7 +1892,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00111xxxxxx101000111x1
                                                                  ldumina.  */
-                                                              return 984;
+                                                              return 1013;
                                                             }
                                                         }
                                                     }
@@ -1908,7 +1908,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00111xxxxxx11000011100
                                                                      lduminlb.  */
-                                                                  return 979;
+                                                                  return 1008;
                                                                 }
                                                               else
                                                                 {
@@ -1916,7 +1916,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00111xxxxxx11000011110
                                                                      lduminlh.  */
-                                                                  return 982;
+                                                                  return 1011;
                                                                 }
                                                             }
                                                           else
@@ -1925,7 +1925,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00111xxxxxx110000111x1
                                                                  lduminl.  */
-                                                              return 985;
+                                                              return 1014;
                                                             }
                                                         }
                                                       else
@@ -1938,7 +1938,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00111xxxxxx11100011100
                                                                      lduminalb.  */
-                                                                  return 980;
+                                                                  return 1009;
                                                                 }
                                                               else
                                                                 {
@@ -1946,7 +1946,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx00111xxxxxx11100011110
                                                                      lduminalh.  */
-                                                                  return 983;
+                                                                  return 1012;
                                                                 }
                                                             }
                                                           else
@@ -1955,7 +1955,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx00111xxxxxx111000111x1
                                                                  lduminal.  */
-                                                              return 986;
+                                                              return 1015;
                                                             }
                                                         }
                                                     }
@@ -1980,7 +1980,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx01xxxxxxxxx00000011100
                                                          sttrb.  */
-                                                      return 777;
+                                                      return 806;
                                                     }
                                                   else
                                                     {
@@ -1988,7 +1988,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx01xxxxxxxxx00000011110
                                                          sttrh.  */
-                                                      return 780;
+                                                      return 809;
                                                     }
                                                 }
                                               else
@@ -1997,7 +1997,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx000000111x1
                                                      sttr.  */
-                                                  return 783;
+                                                  return 812;
                                                 }
                                             }
                                           else
@@ -2010,7 +2010,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx01xxxxxxxxx01000011100
                                                          ldtrb.  */
-                                                      return 778;
+                                                      return 807;
                                                     }
                                                   else
                                                     {
@@ -2018,7 +2018,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx01xxxxxxxxx01000011110
                                                          ldtrh.  */
-                                                      return 781;
+                                                      return 810;
                                                     }
                                                 }
                                               else
@@ -2027,7 +2027,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx010000111x1
                                                      ldtr.  */
-                                                  return 784;
+                                                  return 813;
                                                 }
                                             }
                                         }
@@ -2041,7 +2041,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx0x100011100
                                                      ldtrsb.  */
-                                                  return 779;
+                                                  return 808;
                                                 }
                                               else
                                                 {
@@ -2049,7 +2049,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx0x100011101
                                                      ldtrsw.  */
-                                                  return 785;
+                                                  return 814;
                                                 }
                                             }
                                           else
@@ -2058,7 +2058,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx01xxxxxxxxx0x10001111x
                                                  ldtrsh.  */
-                                              return 782;
+                                              return 811;
                                             }
                                         }
                                     }
@@ -2076,7 +2076,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx01xxxxxxxxx10000011100
                                                          strb.  */
-                                                      return 765;
+                                                      return 794;
                                                     }
                                                   else
                                                     {
@@ -2084,7 +2084,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx01xxxxxxxxx10000011110
                                                          strh.  */
-                                                      return 770;
+                                                      return 799;
                                                     }
                                                 }
                                               else
@@ -2093,7 +2093,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx100000111x1
                                                      str.  */
-                                                  return 773;
+                                                  return 802;
                                                 }
                                             }
                                           else
@@ -2106,7 +2106,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx01xxxxxxxxx11000011100
                                                          ldrb.  */
-                                                      return 766;
+                                                      return 795;
                                                     }
                                                   else
                                                     {
@@ -2114,7 +2114,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx01xxxxxxxxx11000011110
                                                          ldrh.  */
-                                                      return 771;
+                                                      return 800;
                                                     }
                                                 }
                                               else
@@ -2123,7 +2123,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx110000111x1
                                                      ldr.  */
-                                                  return 774;
+                                                  return 803;
                                                 }
                                             }
                                         }
@@ -2137,7 +2137,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx1x100011100
                                                      ldrsb.  */
-                                                  return 767;
+                                                  return 796;
                                                 }
                                               else
                                                 {
@@ -2145,7 +2145,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx1x100011101
                                                      ldrsw.  */
-                                                  return 775;
+                                                  return 804;
                                                 }
                                             }
                                           else
@@ -2156,7 +2156,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx1x100011110
                                                      ldrsh.  */
-                                                  return 772;
+                                                  return 801;
                                                 }
                                               else
                                                 {
@@ -2164,7 +2164,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01xxxxxxxxx1x100011111
                                                      prfm.  */
-                                                  return 776;
+                                                  return 805;
                                                 }
                                             }
                                         }
@@ -2185,7 +2185,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1xxxxxxxxxxx0000011100
                                                  strb.  */
-                                              return 742;
+                                              return 771;
                                             }
                                           else
                                             {
@@ -2193,7 +2193,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1xxxxxxxxxxx0000011110
                                                  strh.  */
-                                              return 747;
+                                              return 776;
                                             }
                                         }
                                       else
@@ -2202,7 +2202,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx1xxxxxxxxxxx00000111x1
                                              str.  */
-                                          return 750;
+                                          return 779;
                                         }
                                     }
                                   else
@@ -2215,7 +2215,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1xxxxxxxxxxx1000011100
                                                  ldrb.  */
-                                              return 743;
+                                              return 772;
                                             }
                                           else
                                             {
@@ -2223,7 +2223,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1xxxxxxxxxxx1000011110
                                                  ldrh.  */
-                                              return 748;
+                                              return 777;
                                             }
                                         }
                                       else
@@ -2232,7 +2232,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx1xxxxxxxxxxx10000111x1
                                              ldr.  */
-                                          return 751;
+                                          return 780;
                                         }
                                     }
                                 }
@@ -2246,7 +2246,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx1xxxxxxxxxxxx100011100
                                              ldrsb.  */
-                                          return 744;
+                                          return 773;
                                         }
                                       else
                                         {
@@ -2254,7 +2254,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx1xxxxxxxxxxxx100011101
                                              ldrsw.  */
-                                          return 752;
+                                          return 781;
                                         }
                                     }
                                   else
@@ -2263,7 +2263,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxx1xxxxxxxxxxxx10001111x
                                          ldrsh.  */
-                                      return 749;
+                                      return 778;
                                     }
                                 }
                             }
@@ -2283,7 +2283,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxxxxxxxxx0010011x00
                                          strb.  */
-                                      return 753;
+                                      return 782;
                                     }
                                   else
                                     {
@@ -2291,7 +2291,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxxxxxxxxx0010011x10
                                          strh.  */
-                                      return 758;
+                                      return 787;
                                     }
                                 }
                               else
@@ -2300,7 +2300,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx0010011xx1
                                      str.  */
-                                  return 761;
+                                  return 790;
                                 }
                             }
                           else
@@ -2313,7 +2313,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxxxxxxxxx1010011x00
                                          ldrb.  */
-                                      return 754;
+                                      return 783;
                                     }
                                   else
                                     {
@@ -2321,7 +2321,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxxxxxxxxx1010011x10
                                          ldrh.  */
-                                      return 759;
+                                      return 788;
                                     }
                                 }
                               else
@@ -2330,7 +2330,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx1010011xx1
                                      ldr.  */
-                                  return 762;
+                                  return 791;
                                 }
                             }
                         }
@@ -2344,7 +2344,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxxx110011x00
                                      ldrsb.  */
-                                  return 755;
+                                  return 784;
                                 }
                               else
                                 {
@@ -2352,7 +2352,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxxx110011x01
                                      ldrsw.  */
-                                  return 763;
+                                  return 792;
                                 }
                             }
                           else
@@ -2363,7 +2363,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxxx110011x10
                                      ldrsh.  */
-                                  return 760;
+                                  return 789;
                                 }
                               else
                                 {
@@ -2371,7 +2371,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxxx110011x11
                                      prfm.  */
-                                  return 764;
+                                  return 793;
                                 }
                             }
                         }
@@ -2395,7 +2395,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxx00100x00x
                                  and.  */
-                              return 844;
+                              return 873;
                             }
                           else
                             {
@@ -2403,7 +2403,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxx00100x01x
                                  eor.  */
-                              return 848;
+                              return 877;
                             }
                         }
                       else
@@ -2414,7 +2414,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxx00100x10x
                                  orr.  */
-                              return 846;
+                              return 875;
                             }
                           else
                             {
@@ -2422,7 +2422,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxx00100x11x
                                  ands.  */
-                              return 849;
+                              return 878;
                             }
                         }
                     }
@@ -2436,7 +2436,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxx10100x00x
                                  movn.  */
-                              return 1035;
+                              return 1064;
                             }
                           else
                             {
@@ -2444,7 +2444,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxx10100x01x
                                  movz.  */
-                              return 1037;
+                              return 1066;
                             }
                         }
                       else
@@ -2453,7 +2453,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                              10987654321098765432109876543210
                              xxxxxxxxxxxxxxxxxxxxxxx10100x1xx
                              movk.  */
-                          return 1039;
+                          return 1068;
                         }
                     }
                 }
@@ -2471,7 +2471,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxx0xx0101000x
                                      and.  */
-                                  return 851;
+                                  return 880;
                                 }
                               else
                                 {
@@ -2479,7 +2479,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxx0xx0101001x
                                      eor.  */
-                                  return 858;
+                                  return 887;
                                 }
                             }
                           else
@@ -2490,7 +2490,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxx0xx0101010x
                                      orr.  */
-                                  return 853;
+                                  return 882;
                                 }
                               else
                                 {
@@ -2498,7 +2498,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxx0xx0101011x
                                      ands.  */
-                                  return 860;
+                                  return 889;
                                 }
                             }
                         }
@@ -2559,7 +2559,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx00xxxxxxxxx00101011x0x
                                                  csel.  */
-                                              return 566;
+                                              return 595;
                                             }
                                           else
                                             {
@@ -2567,7 +2567,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx00xxxxxxxxx00101011x1x
                                                  csinv.  */
-                                              return 570;
+                                              return 599;
                                             }
                                         }
                                     }
@@ -2581,7 +2581,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx00xxxxxxxxx01001011x0x
                                                  ccmn.  */
-                                              return 564;
+                                              return 593;
                                             }
                                           else
                                             {
@@ -2589,7 +2589,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx00xxxxxxxxx01001011x1x
                                                  ccmp.  */
-                                              return 565;
+                                              return 594;
                                             }
                                         }
                                       else
@@ -2604,7 +2604,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx00000xxxxxx01101011xxx
                                                          rbit.  */
-                                                      return 589;
+                                                      return 618;
                                                     }
                                                   else
                                                     {
@@ -2612,7 +2612,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx00001xxxxxx01101011xxx
                                                          crc32b.  */
-                                                      return 607;
+                                                      return 636;
                                                     }
                                                 }
                                               else
@@ -2621,7 +2621,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx0001xxxxxxx01101011xxx
                                                      lslv.  */
-                                                  return 599;
+                                                  return 628;
                                                 }
                                             }
                                           else
@@ -2632,7 +2632,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx001x0xxxxxx01101011xxx
                                                      clz.  */
-                                                  return 594;
+                                                  return 623;
                                                 }
                                               else
                                                 {
@@ -2640,7 +2640,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx001x1xxxxxx01101011xxx
                                                      crc32cb.  */
-                                                  return 611;
+                                                  return 640;
                                                 }
                                             }
                                         }
@@ -2656,7 +2656,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx01xxxxxxxxx0x001011x0x
                                              ccmn.  */
-                                          return 562;
+                                          return 591;
                                         }
                                       else
                                         {
@@ -2664,7 +2664,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx01xxxxxxxxx0x001011x1x
                                              ccmp.  */
-                                          return 563;
+                                          return 592;
                                         }
                                     }
                                   else
@@ -2681,7 +2681,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx01000xxxxxx0x101011x0x
                                                          udiv.  */
-                                                      return 597;
+                                                      return 626;
                                                     }
                                                   else
                                                     {
@@ -2691,7 +2691,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx01000xxxxxx0x101011x10
                                                              rev.  */
-                                                          return 591;
+                                                          return 620;
                                                         }
                                                       else
                                                         {
@@ -2699,7 +2699,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx01000xxxxxx0x101011x11
                                                              rev32.  */
-                                                          return 596;
+                                                          return 625;
                                                         }
                                                     }
                                                 }
@@ -2709,7 +2709,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01001xxxxxx0x101011xxx
                                                      crc32w.  */
-                                                  return 609;
+                                                  return 638;
                                                 }
                                             }
                                           else
@@ -2718,7 +2718,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx0101xxxxxxx0x101011xxx
                                                  asrv.  */
-                                              return 603;
+                                              return 632;
                                             }
                                         }
                                       else
@@ -2727,7 +2727,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx011xxxxxxxx0x101011xxx
                                              crc32cw.  */
-                                          return 613;
+                                          return 642;
                                         }
                                     }
                                 }
@@ -2744,7 +2744,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx10xxxxxxxxx00x01011x0x
                                              csinc.  */
-                                          return 567;
+                                          return 596;
                                         }
                                       else
                                         {
@@ -2752,7 +2752,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx10xxxxxxxxx00x01011x1x
                                              csneg.  */
-                                          return 573;
+                                          return 602;
                                         }
                                     }
                                   else
@@ -2767,7 +2767,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx10000xxxxxx01x01011xxx
                                                      rev16.  */
-                                                  return 590;
+                                                  return 619;
                                                 }
                                               else
                                                 {
@@ -2775,7 +2775,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx10001xxxxxx01x01011xxx
                                                      crc32h.  */
-                                                  return 608;
+                                                  return 637;
                                                 }
                                             }
                                           else
@@ -2784,7 +2784,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1001xxxxxxx01x01011xxx
                                                  lsrv.  */
-                                              return 601;
+                                              return 630;
                                             }
                                         }
                                       else
@@ -2795,7 +2795,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx101x0xxxxxx01x01011xxx
                                                  cls.  */
-                                              return 595;
+                                              return 624;
                                             }
                                           else
                                             {
@@ -2803,7 +2803,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx101x1xxxxxx01x01011xxx
                                                  crc32ch.  */
-                                              return 612;
+                                              return 641;
                                             }
                                         }
                                     }
@@ -2822,7 +2822,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx11000xxxxxx0xx01011x0x
                                                      sdiv.  */
-                                                  return 598;
+                                                  return 627;
                                                 }
                                               else
                                                 {
@@ -2830,7 +2830,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx11000xxxxxx0xx01011x1x
                                                      rev.  */
-                                                  return 592;
+                                                  return 621;
                                                 }
                                             }
                                           else
@@ -2839,7 +2839,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx11001xxxxxx0xx01011xxx
                                                  crc32x.  */
-                                              return 610;
+                                              return 639;
                                             }
                                         }
                                       else
@@ -2848,7 +2848,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx1101xxxxxxx0xx01011xxx
                                              rorv.  */
-                                          return 605;
+                                          return 634;
                                         }
                                     }
                                   else
@@ -2857,7 +2857,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxx111xxxxxxxx0xx01011xxx
                                          crc32cx.  */
-                                      return 614;
+                                      return 643;
                                     }
                                 }
                             }
@@ -2873,7 +2873,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxx1xx0101x00x
                                  bic.  */
-                              return 852;
+                              return 881;
                             }
                           else
                             {
@@ -2881,7 +2881,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxx1xx0101x01x
                                  eon.  */
-                              return 859;
+                              return 888;
                             }
                         }
                       else
@@ -2892,7 +2892,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxx1xx0101x10x
                                  orn.  */
-                              return 856;
+                              return 885;
                             }
                           else
                             {
@@ -2900,7 +2900,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxx1xx0101x11x
                                  bics.  */
-                              return 862;
+                              return 891;
                             }
                         }
                     }
@@ -2920,7 +2920,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxx01100x00x
                                  sbfm.  */
-                              return 534;
+                              return 563;
                             }
                           else
                             {
@@ -2928,7 +2928,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxx01100x01x
                                  ubfm.  */
-                              return 545;
+                              return 574;
                             }
                         }
                       else
@@ -2937,7 +2937,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                              10987654321098765432109876543210
                              xxxxxxxxxxxxxxxxxxxxxxx01100x1xx
                              bfm.  */
-                          return 541;
+                          return 570;
                         }
                     }
                   else
@@ -2946,7 +2946,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxx11100xxxx
                          extr.  */
-                      return 637;
+                      return 666;
                     }
                 }
               else
@@ -3004,7 +3004,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxx0xxxxx00x11011xxx
                                      madd.  */
-                                  return 615;
+                                  return 644;
                                 }
                               else
                                 {
@@ -3014,7 +3014,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxx0xxxxx01011011xxx
                                          smulh.  */
-                                      return 623;
+                                      return 652;
                                     }
                                   else
                                     {
@@ -3022,7 +3022,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxx0xxxxx01111011xxx
                                          umulh.  */
-                                      return 628;
+                                      return 657;
                                     }
                                 }
                             }
@@ -3032,7 +3032,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxx1xxxxx0xx11011xxx
                                  msub.  */
-                              return 617;
+                              return 646;
                             }
                         }
                     }
@@ -3089,7 +3089,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxx0xxxxx1x011011xxx
                                      smaddl.  */
-                                  return 619;
+                                  return 648;
                                 }
                               else
                                 {
@@ -3097,7 +3097,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxx1xxxxx1x011011xxx
                                      smsubl.  */
-                                  return 621;
+                                  return 650;
                                 }
                             }
                         }
@@ -3109,7 +3109,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxx0xxxxx1x11101xxxx
                                  umaddl.  */
-                              return 624;
+                              return 653;
                             }
                           else
                             {
@@ -3117,7 +3117,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxx1xxxxx1x11101xxxx
                                  umsubl.  */
-                              return 626;
+                              return 655;
                             }
                         }
                     }
@@ -3139,7 +3139,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxxxx10x000
                          b.  */
-                      return 552;
+                      return 581;
                     }
                   else
                     {
@@ -3147,7 +3147,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxxxx10x001
                          bl.  */
-                      return 553;
+                      return 582;
                     }
                 }
               else
@@ -3162,7 +3162,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxxxx0010x010
                                  b.c.  */
-                              return 561;
+                              return 590;
                             }
                           else
                             {
@@ -3176,7 +3176,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              00xxxxxxxxxxxxxxxxxxx0xx0010x011
                                              hlt.  */
-                                          return 633;
+                                          return 662;
                                         }
                                       else
                                         {
@@ -3184,7 +3184,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              00xxxxxxxxxxxxxxxxxxx1xx0010x011
                                              brk.  */
-                                          return 632;
+                                          return 661;
                                         }
                                     }
                                   else
@@ -3195,7 +3195,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              01xxxxxxxxxxxxxxxxxxx0xx0010x011
                                              hvc.  */
-                                          return 630;
+                                          return 659;
                                         }
                                       else
                                         {
@@ -3203,7 +3203,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              01xxxxxxxxxxxxxxxxxxx1xx0010x011
                                              dcps2.  */
-                                          return 635;
+                                          return 664;
                                         }
                                     }
                                 }
@@ -3217,7 +3217,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              10xxxxxxxxxxxxxxxxxxx0xx0010x011
                                              svc.  */
-                                          return 629;
+                                          return 658;
                                         }
                                       else
                                         {
@@ -3225,7 +3225,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              10xxxxxxxxxxxxxxxxxxx1xx0010x011
                                              dcps1.  */
-                                          return 634;
+                                          return 663;
                                         }
                                     }
                                   else
@@ -3236,7 +3236,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              11xxxxxxxxxxxxxxxxxxx0xx0010x011
                                              smc.  */
-                                          return 631;
+                                          return 660;
                                         }
                                       else
                                         {
@@ -3244,7 +3244,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              11xxxxxxxxxxxxxxxxxxx1xx0010x011
                                              dcps3.  */
-                                          return 636;
+                                          return 665;
                                         }
                                     }
                                 }
@@ -3262,7 +3262,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxxxxxxxx0000110x01x
                                          br.  */
-                                      return 554;
+                                      return 583;
                                     }
                                   else
                                     {
@@ -3270,7 +3270,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxxxxxxxx0010110x01x
                                          eret.  */
-                                      return 557;
+                                      return 586;
                                     }
                                 }
                               else
@@ -3279,7 +3279,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxx01x0110x01x
                                      ret.  */
-                                  return 556;
+                                  return 585;
                                 }
                             }
                           else
@@ -3290,7 +3290,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxx1x00110x01x
                                      blr.  */
-                                  return 555;
+                                  return 584;
                                 }
                               else
                                 {
@@ -3298,7 +3298,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxx1x10110x01x
                                      drps.  */
-                                  return 558;
+                                  return 587;
                                 }
                             }
                         }
@@ -3311,7 +3311,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                              10987654321098765432109876543210
                              xxxxxxxxxxxxxxxxxxxxx0xx1x10x01x
                              msr.  */
-                          return 1042;
+                          return 1071;
                         }
                       else
                         {
@@ -3319,7 +3319,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                              10987654321098765432109876543210
                              xxxxxxxxxxxxxxxxxxxxx1xx1x10x01x
                              sysl.  */
-                          return 1062;
+                          return 1091;
                         }
                     }
                 }
@@ -3334,7 +3334,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxx0010x1xx
                          cbz.  */
-                      return 559;
+                      return 588;
                     }
                   else
                     {
@@ -3342,7 +3342,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxx0110x1xx
                          tbz.  */
-                      return 1064;
+                      return 1093;
                     }
                 }
               else
@@ -3353,7 +3353,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxx1010x1xx
                          cbnz.  */
-                      return 560;
+                      return 589;
                     }
                   else
                     {
@@ -3361,7 +3361,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                          10987654321098765432109876543210
                          xxxxxxxxxxxxxxxxxxxxxxxx1110x1xx
                          tbnz.  */
-                      return 1065;
+                      return 1094;
                     }
                 }
             }
@@ -3384,7 +3384,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx00001100xx
                                      st4.  */
-                                  return 385;
+                                  return 414;
                                 }
                               else
                                 {
@@ -3392,7 +3392,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx00001101xx
                                      stnp.  */
-                                  return 828;
+                                  return 857;
                                 }
                             }
                           else
@@ -3407,7 +3407,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx0xxxxxxx000101100xx
                                              st1.  */
-                                          return 401;
+                                          return 430;
                                         }
                                       else
                                         {
@@ -3415,7 +3415,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx0xxxxxxx100101100xx
                                              st2.  */
-                                          return 403;
+                                          return 432;
                                         }
                                     }
                                   else
@@ -3426,7 +3426,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx1xxxxxxx000101100xx
                                              st3.  */
-                                          return 402;
+                                          return 431;
                                         }
                                       else
                                         {
@@ -3434,7 +3434,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx1xxxxxxx100101100xx
                                              st4.  */
-                                          return 404;
+                                          return 433;
                                         }
                                     }
                                 }
@@ -3444,7 +3444,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx00101101xx
                                      stp.  */
-                                  return 832;
+                                  return 861;
                                 }
                             }
                         }
@@ -3460,7 +3460,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxxxxxxxx001001100xx
                                          st4.  */
-                                      return 393;
+                                      return 422;
                                     }
                                   else
                                     {
@@ -3470,7 +3470,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx0xxxxxxx001101100xx
                                              st1.  */
-                                          return 413;
+                                          return 442;
                                         }
                                       else
                                         {
@@ -3478,7 +3478,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx1xxxxxxx001101100xx
                                              st3.  */
-                                          return 414;
+                                          return 443;
                                         }
                                     }
                                 }
@@ -3490,7 +3490,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxx0xxxxxxx101x01100xx
                                          st2.  */
-                                      return 415;
+                                      return 444;
                                     }
                                   else
                                     {
@@ -3498,7 +3498,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxx1xxxxxxx101x01100xx
                                          st4.  */
-                                      return 416;
+                                      return 445;
                                     }
                                 }
                             }
@@ -3508,7 +3508,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxx01x01101xx
                                  stp.  */
-                              return 837;
+                              return 866;
                             }
                         }
                     }
@@ -3524,7 +3524,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx10001100xx
                                      ld4.  */
-                                  return 389;
+                                  return 418;
                                 }
                               else
                                 {
@@ -3532,7 +3532,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx10001101xx
                                      ldnp.  */
-                                  return 829;
+                                  return 858;
                                 }
                             }
                           else
@@ -3547,7 +3547,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx0xxxxxxx010101100xx
                                              ld1.  */
-                                          return 405;
+                                          return 434;
                                         }
                                       else
                                         {
@@ -3555,7 +3555,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx0xxxxxxx110101100xx
                                              ld2.  */
-                                          return 409;
+                                          return 438;
                                         }
                                     }
                                   else
@@ -3566,7 +3566,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx1xxxxxxx010101100xx
                                              ld3.  */
-                                          return 406;
+                                          return 435;
                                         }
                                       else
                                         {
@@ -3574,7 +3574,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx1xxxxxxx110101100xx
                                              ld4.  */
-                                          return 410;
+                                          return 439;
                                         }
                                     }
                                 }
@@ -3584,7 +3584,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxxxxxxxxxxxxxx10101101xx
                                      ldp.  */
-                                  return 833;
+                                  return 862;
                                 }
                             }
                         }
@@ -3600,7 +3600,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxxxxxxxx011001100xx
                                          ld4.  */
-                                      return 397;
+                                      return 426;
                                     }
                                   else
                                     {
@@ -3610,7 +3610,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx0xxxxxxx011101100xx
                                              ld1.  */
-                                          return 417;
+                                          return 446;
                                         }
                                       else
                                         {
@@ -3618,7 +3618,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxx1xxxxxxx011101100xx
                                              ld3.  */
-                                          return 418;
+                                          return 447;
                                         }
                                     }
                                 }
@@ -3630,7 +3630,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxx0xxxxxxx111x01100xx
                                          ld2.  */
-                                      return 421;
+                                      return 450;
                                     }
                                   else
                                     {
@@ -3638,7 +3638,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxx1xxxxxxx111x01100xx
                                          ld4.  */
-                                      return 422;
+                                      return 451;
                                     }
                                 }
                             }
@@ -3648,7 +3648,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                  10987654321098765432109876543210
                                  xxxxxxxxxxxxxxxxxxxxxx11x01101xx
                                  ldp.  */
-                              return 838;
+                              return 867;
                             }
                         }
                     }
@@ -3663,7 +3663,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                              10987654321098765432109876543210
                              xxxxxxxxxxxxxxxxxxxxxxxx001110xx
                              ldr.  */
-                          return 841;
+                          return 870;
                         }
                       else
                         {
@@ -3677,7 +3677,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxx00xxxxxxxxxx0x001111xx
                                          stur.  */
-                                      return 789;
+                                      return 818;
                                     }
                                   else
                                     {
@@ -3685,7 +3685,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxx00xxxxxxxxxx1x001111xx
                                          ldur.  */
-                                      return 790;
+                                      return 819;
                                     }
                                 }
                               else
@@ -3696,7 +3696,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxx01xxxxxxxxxx0x001111xx
                                          str.  */
-                                      return 768;
+                                      return 797;
                                     }
                                   else
                                     {
@@ -3704,7 +3704,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxx01xxxxxxxxxx1x001111xx
                                          ldr.  */
-                                      return 769;
+                                      return 798;
                                     }
                                 }
                             }
@@ -3716,7 +3716,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxx1xxxxxxxxxxx0x001111xx
                                      str.  */
-                                  return 745;
+                                  return 774;
                                 }
                               else
                                 {
@@ -3724,7 +3724,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                      10987654321098765432109876543210
                                      xxxxxxxxxx1xxxxxxxxxxx1x001111xx
                                      ldr.  */
-                                  return 746;
+                                  return 775;
                                 }
                             }
                         }
@@ -3737,7 +3737,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                              10987654321098765432109876543210
                              xxxxxxxxxxxxxxxxxxxxxx0x10111xxx
                              str.  */
-                          return 756;
+                          return 785;
                         }
                       else
                         {
@@ -3745,7 +3745,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                              10987654321098765432109876543210
                              xxxxxxxxxxxxxxxxxxxxxx1x10111xxx
                              ldr.  */
-                          return 757;
+                          return 786;
                         }
                     }
                 }
@@ -3770,7 +3770,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx000xxxxxxxx0xx011100xx
                                              tbl.  */
-                                          return 369;
+                                          return 398;
                                         }
                                       else
                                         {
@@ -3778,7 +3778,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx001xxxxxxxx0xx011100xx
                                              tbx.  */
-                                          return 370;
+                                          return 399;
                                         }
                                     }
                                   else
@@ -3791,7 +3791,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx010x0xxxxxx0xx011100xx
                                                  trn1.  */
-                                              return 218;
+                                              return 247;
                                             }
                                           else
                                             {
@@ -3799,7 +3799,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx010x1xxxxxx0xx011100xx
                                                  trn2.  */
-                                              return 221;
+                                              return 250;
                                             }
                                         }
                                       else
@@ -3812,7 +3812,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01100xxxxxx0xx011100xx
                                                      uzp1.  */
-                                                  return 217;
+                                                  return 246;
                                                 }
                                               else
                                                 {
@@ -3820,7 +3820,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01101xxxxxx0xx011100xx
                                                      uzp2.  */
-                                                  return 220;
+                                                  return 249;
                                                 }
                                             }
                                           else
@@ -3831,7 +3831,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01110xxxxxx0xx011100xx
                                                      zip1.  */
-                                                  return 219;
+                                                  return 248;
                                                 }
                                               else
                                                 {
@@ -3839,7 +3839,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx01111xxxxxx0xx011100xx
                                                      zip2.  */
-                                                  return 222;
+                                                  return 251;
                                                 }
                                             }
                                         }
@@ -3937,7 +3937,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1000x0xxxxx010011100xx
                                                              fmaxnm.  */
-                                                          return 247;
+                                                          return 276;
                                                         }
                                                       else
                                                         {
@@ -3945,7 +3945,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1000x0xxxxx010011101xx
                                                              fmaxnmp.  */
-                                                          return 298;
+                                                          return 327;
                                                         }
                                                     }
                                                   else
@@ -3956,7 +3956,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1000x0xxxxx011011100xx
                                                              fminnm.  */
-                                                          return 263;
+                                                          return 292;
                                                         }
                                                       else
                                                         {
@@ -3964,7 +3964,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1000x0xxxxx011011101xx
                                                              fminnmp.  */
-                                                          return 314;
+                                                          return 343;
                                                         }
                                                     }
                                                 }
@@ -3978,7 +3978,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1001x0xxxxx010011100xx
                                                              fcmeq.  */
-                                                          return 255;
+                                                          return 284;
                                                         }
                                                       else
                                                         {
@@ -3986,7 +3986,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1001x0xxxxx010011101xx
                                                              fcmge.  */
-                                                          return 304;
+                                                          return 333;
                                                         }
                                                     }
                                                   else
@@ -3995,7 +3995,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1001x0xxxxx01101110xxx
                                                          fcmgt.  */
-                                                      return 318;
+                                                      return 347;
                                                     }
                                                 }
                                             }
@@ -4011,7 +4011,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1010x0xxxxx010011100xx
                                                              fadd.  */
-                                                          return 251;
+                                                          return 280;
                                                         }
                                                       else
                                                         {
@@ -4019,7 +4019,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1010x0xxxxx010011101xx
                                                              faddp.  */
-                                                          return 300;
+                                                          return 329;
                                                         }
                                                     }
                                                   else
@@ -4030,7 +4030,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1010x0xxxxx011011100xx
                                                              fsub.  */
-                                                          return 267;
+                                                          return 296;
                                                         }
                                                       else
                                                         {
@@ -4038,7 +4038,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1010x0xxxxx011011101xx
                                                              fabd.  */
-                                                          return 316;
+                                                          return 345;
                                                         }
                                                     }
                                                 }
@@ -4052,7 +4052,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1011x0xxxxx010011100xx
                                                              fmax.  */
-                                                          return 257;
+                                                          return 286;
                                                         }
                                                       else
                                                         {
@@ -4060,7 +4060,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1011x0xxxxx010011101xx
                                                              fmaxp.  */
-                                                          return 308;
+                                                          return 337;
                                                         }
                                                     }
                                                   else
@@ -4071,7 +4071,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1011x0xxxxx011011100xx
                                                              fmin.  */
-                                                          return 269;
+                                                          return 298;
                                                         }
                                                       else
                                                         {
@@ -4079,7 +4079,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1011x0xxxxx011011101xx
                                                              fminp.  */
-                                                          return 322;
+                                                          return 351;
                                                         }
                                                     }
                                                 }
@@ -4097,7 +4097,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1100x0xxxxx01001110xxx
                                                          fmla.  */
-                                                      return 249;
+                                                      return 278;
                                                     }
                                                   else
                                                     {
@@ -4105,7 +4105,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1100x0xxxxx01101110xxx
                                                          fmls.  */
-                                                      return 265;
+                                                      return 294;
                                                     }
                                                 }
                                               else
@@ -4116,7 +4116,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1101x0xxxxx01001110xxx
                                                          facge.  */
-                                                      return 306;
+                                                      return 335;
                                                     }
                                                   else
                                                     {
@@ -4124,7 +4124,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1101x0xxxxx01101110xxx
                                                          facgt.  */
-                                                      return 320;
+                                                      return 349;
                                                     }
                                                 }
                                             }
@@ -4138,7 +4138,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1110x0xxxxx01x011100xx
                                                          fmulx.  */
-                                                      return 253;
+                                                      return 282;
                                                     }
                                                   else
                                                     {
@@ -4146,7 +4146,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1110x0xxxxx01x011101xx
                                                          fmul.  */
-                                                      return 302;
+                                                      return 331;
                                                     }
                                                 }
                                               else
@@ -4159,7 +4159,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1111x0xxxxx010011100xx
                                                              frecps.  */
-                                                          return 259;
+                                                          return 288;
                                                         }
                                                       else
                                                         {
@@ -4167,7 +4167,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx1111x0xxxxx010011101xx
                                                              fdiv.  */
-                                                          return 310;
+                                                          return 339;
                                                         }
                                                     }
                                                   else
@@ -4176,7 +4176,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1111x0xxxxx01101110xxx
                                                          frsqrts.  */
-                                                      return 271;
+                                                      return 300;
                                                     }
                                                 }
                                             }
@@ -4191,7 +4191,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxx10xxx1xxxxx0xx01110xxx
                                          sqrdmlah.  */
-                                      return 325;
+                                      return 354;
                                     }
                                   else
                                     {
@@ -4199,7 +4199,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxx11xxx1xxxxx0xx01110xxx
                                          sqrdmlsh.  */
-                                      return 326;
+                                      return 355;
                                     }
                                 }
                             }
@@ -4218,7 +4218,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxxx00xxx0xx0111100x
                                              fcvtzs.  */
-                                          return 643;
+                                          return 672;
                                         }
                                       else
                                         {
@@ -4226,7 +4226,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxxx01xxx0xx0111100x
                                              scvtf.  */
-                                          return 639;
+                                          return 668;
                                         }
                                     }
                                   else
@@ -4237,7 +4237,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxxx10xxx0xx0111100x
                                              fcvtzu.  */
-                                          return 645;
+                                          return 674;
                                         }
                                       else
                                         {
@@ -4245,7 +4245,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxxxxxx11xxx0xx0111100x
                                              ucvtf.  */
-                                          return 641;
+                                          return 670;
                                         }
                                     }
                                 }
@@ -4263,7 +4263,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx0x000xxxxxx0xx0111101x
                                                      sha1c.  */
-                                                  return 582;
+                                                  return 611;
                                                 }
                                               else
                                                 {
@@ -4271,7 +4271,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx0x001xxxxxx0xx0111101x
                                                      sha256h.  */
-                                                  return 586;
+                                                  return 615;
                                                 }
                                             }
                                           else
@@ -4282,7 +4282,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx0x010xxxxxx0xx0111101x
                                                      sha1m.  */
-                                                  return 584;
+                                                  return 613;
                                                 }
                                               else
                                                 {
@@ -4290,7 +4290,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx0x011xxxxxx0xx0111101x
                                                      sha256su1.  */
-                                                  return 588;
+                                                  return 617;
                                                 }
                                             }
                                         }
@@ -4304,7 +4304,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx0x100xxxxxx0xx0111101x
                                                      sha1p.  */
-                                                  return 583;
+                                                  return 612;
                                                 }
                                               else
                                                 {
@@ -4312,7 +4312,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx0x101xxxxxx0xx0111101x
                                                      sha256h2.  */
-                                                  return 587;
+                                                  return 616;
                                                 }
                                             }
                                           else
@@ -4321,7 +4321,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx0x11xxxxxxx0xx0111101x
                                                  sha1su0.  */
-                                              return 585;
+                                              return 614;
                                             }
                                         }
                                     }
@@ -4335,7 +4335,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx10x0xxxxxxx0xx0111101x
                                                  dup.  */
-                                              return 460;
+                                              return 489;
                                             }
                                           else
                                             {
@@ -4343,7 +4343,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx10x1xxxxxxx0xx0111101x
                                                  fcmeq.  */
-                                              return 476;
+                                              return 505;
                                             }
                                         }
                                       else
@@ -4354,7 +4354,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx11x0xxxxxxx0xx0111101x
                                                  fmulx.  */
-                                              return 474;
+                                              return 503;
                                             }
                                           else
                                             {
@@ -4364,7 +4364,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx11x1xxxxxxx0x00111101x
                                                      frecps.  */
-                                                  return 478;
+                                                  return 507;
                                                 }
                                               else
                                                 {
@@ -4372,7 +4372,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx11x1xxxxxxx0x10111101x
                                                      frsqrts.  */
-                                                  return 480;
+                                                  return 509;
                                                 }
                                             }
                                         }
@@ -4391,7 +4391,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxx000xxxxxxx0xx011111xx
                                              sqrdmlah.  */
-                                          return 508;
+                                          return 537;
                                         }
                                       else
                                         {
@@ -4401,7 +4401,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxx001xxxxxxx0x0011111xx
                                                  fcmge.  */
-                                              return 493;
+                                              return 522;
                                             }
                                           else
                                             {
@@ -4409,7 +4409,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxxx001xxxxxxx0x1011111xx
                                                  fcmgt.  */
-                                              return 499;
+                                              return 528;
                                             }
                                         }
                                     }
@@ -4419,7 +4419,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxx01xxxxxxxx0xx011111xx
                                          fabd.  */
-                                      return 497;
+                                      return 526;
                                     }
                                 }
                               else
@@ -4430,7 +4430,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxx1x0xxxxxxx0xx011111xx
                                          sqrdmlsh.  */
-                                      return 509;
+                                      return 538;
                                     }
                                   else
                                     {
@@ -4440,7 +4440,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxx1x1xxxxxxx0x0011111xx
                                              facge.  */
-                                          return 495;
+                                          return 524;
                                         }
                                       else
                                         {
@@ -4448,7 +4448,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxx1x1xxxxxxx0x1011111xx
                                              facgt.  */
-                                          return 501;
+                                          return 530;
                                         }
                                     }
                                 }
@@ -4526,7 +4526,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000000001xx01111xxx
                                                                          fcvtns.  */
-                                                                      return 647;
+                                                                      return 676;
                                                                     }
                                                                   else
                                                                     {
@@ -4534,7 +4534,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000000011xx01111xxx
                                                                          fcvtms.  */
-                                                                      return 667;
+                                                                      return 696;
                                                                     }
                                                                 }
                                                               else
@@ -4545,7 +4545,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000000101xx01111xxx
                                                                          fcvtps.  */
-                                                                      return 663;
+                                                                      return 692;
                                                                     }
                                                                   else
                                                                     {
@@ -4553,7 +4553,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000000111xx01111xxx
                                                                          fcvtzs.  */
-                                                                      return 671;
+                                                                      return 700;
                                                                     }
                                                                 }
                                                             }
@@ -4563,7 +4563,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000000001xx1xx01111xxx
                                                                  fcvtas.  */
-                                                              return 655;
+                                                              return 684;
                                                             }
                                                         }
                                                       else
@@ -4574,7 +4574,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000000010xx1xx01111xxx
                                                                  scvtf.  */
-                                                              return 651;
+                                                              return 680;
                                                             }
                                                           else
                                                             {
@@ -4584,7 +4584,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx0000000110x1xx01111xxx
                                                                      fmov.  */
-                                                                  return 659;
+                                                                  return 688;
                                                                 }
                                                               else
                                                                 {
@@ -4592,7 +4592,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx0000000111x1xx01111xxx
                                                                      fmov.  */
-                                                                  return 675;
+                                                                  return 704;
                                                                 }
                                                             }
                                                         }
@@ -4611,7 +4611,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000100001xx01111xxx
                                                                          fcvtnu.  */
-                                                                      return 649;
+                                                                      return 678;
                                                                     }
                                                                   else
                                                                     {
@@ -4619,7 +4619,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000100011xx01111xxx
                                                                          fcvtmu.  */
-                                                                      return 669;
+                                                                      return 698;
                                                                     }
                                                                 }
                                                               else
@@ -4630,7 +4630,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000100101xx01111xxx
                                                                          fcvtpu.  */
-                                                                      return 665;
+                                                                      return 694;
                                                                     }
                                                                   else
                                                                     {
@@ -4638,7 +4638,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                          10987654321098765432109876543210
                                                                          xxxxxxxxxx000000100111xx01111xxx
                                                                          fcvtzu.  */
-                                                                      return 673;
+                                                                      return 702;
                                                                     }
                                                                 }
                                                             }
@@ -4648,7 +4648,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000000101xx1xx01111xxx
                                                                  fcvtau.  */
-                                                              return 657;
+                                                              return 686;
                                                             }
                                                         }
                                                       else
@@ -4659,7 +4659,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000000110xx1xx01111xxx
                                                                  ucvtf.  */
-                                                              return 653;
+                                                              return 682;
                                                             }
                                                           else
                                                             {
@@ -4669,7 +4669,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx0000001110x1xx01111xxx
                                                                      fmov.  */
-                                                                  return 661;
+                                                                  return 690;
                                                                 }
                                                               else
                                                                 {
@@ -4677,7 +4677,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                      10987654321098765432109876543210
                                                                      xxxxxxxxxx0000001111x1xx01111xxx
                                                                      fmov.  */
-                                                                  return 676;
+                                                                  return 705;
                                                                 }
                                                             }
                                                         }
@@ -4827,7 +4827,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000010000xx1xx01111xxx
                                                                  fmov.  */
-                                                              return 689;
+                                                              return 718;
                                                             }
                                                           else
                                                             {
@@ -4835,7 +4835,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000010001xx1xx01111xxx
                                                                  frintn.  */
-                                                              return 698;
+                                                              return 727;
                                                             }
                                                         }
                                                       else
@@ -4846,7 +4846,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000010100xx1xx01111xxx
                                                                  fneg.  */
-                                                              return 693;
+                                                              return 722;
                                                             }
                                                           else
                                                             {
@@ -4854,7 +4854,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000010101xx1xx01111xxx
                                                                  frintm.  */
-                                                              return 702;
+                                                              return 731;
                                                             }
                                                         }
                                                     }
@@ -4868,7 +4868,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000011000xx1xx01111xxx
                                                                  fabs.  */
-                                                              return 691;
+                                                              return 720;
                                                             }
                                                           else
                                                             {
@@ -4876,7 +4876,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000011001xx1xx01111xxx
                                                                  frintp.  */
-                                                              return 700;
+                                                              return 729;
                                                             }
                                                         }
                                                       else
@@ -4887,7 +4887,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000011100xx1xx01111xxx
                                                                  fsqrt.  */
-                                                              return 695;
+                                                              return 724;
                                                             }
                                                           else
                                                             {
@@ -4895,7 +4895,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000011101xx1xx01111xxx
                                                                  frintz.  */
-                                                              return 704;
+                                                              return 733;
                                                             }
                                                         }
                                                     }
@@ -4908,7 +4908,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx00001xx10xx1xx01111xxx
                                                          fcvt.  */
-                                                      return 697;
+                                                      return 726;
                                                     }
                                                   else
                                                     {
@@ -4920,7 +4920,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000010011xx1xx01111xxx
                                                                  frinta.  */
-                                                              return 706;
+                                                              return 735;
                                                             }
                                                           else
                                                             {
@@ -4928,7 +4928,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx000010111xx1xx01111xxx
                                                                  frintx.  */
-                                                              return 708;
+                                                              return 737;
                                                             }
                                                         }
                                                       else
@@ -4937,7 +4937,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx000011x11xx1xx01111xxx
                                                              frinti.  */
-                                                          return 710;
+                                                          return 739;
                                                         }
                                                     }
                                                 }
@@ -5001,7 +5001,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxx00xxxxx000100xxxxx1xx01111xxx
                                                              fcmp.  */
-                                                          return 681;
+                                                          return 710;
                                                         }
                                                       else
                                                         {
@@ -5009,7 +5009,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxx01xxxxx000100xxxxx1xx01111xxx
                                                              fcmpe.  */
-                                                          return 683;
+                                                          return 712;
                                                         }
                                                     }
                                                   else
@@ -5020,7 +5020,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxx10xxxxx000100xxxxx1xx01111xxx
                                                              fcmp.  */
-                                                          return 685;
+                                                          return 714;
                                                         }
                                                       else
                                                         {
@@ -5028,7 +5028,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxx11xxxxx000100xxxxx1xx01111xxx
                                                              fcmpe.  */
-                                                          return 687;
+                                                          return 716;
                                                         }
                                                     }
                                                 }
@@ -5411,7 +5411,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx001xxxxxxxx1xx01111x0x
                                              fmov.  */
-                                          return 738;
+                                          return 767;
                                         }
                                       else
                                         {
@@ -5423,7 +5423,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx00100xxxxxx1xx01111x1x
                                                      sqdmlal.  */
-                                                  return 371;
+                                                  return 400;
                                                 }
                                               else
                                                 {
@@ -5431,7 +5431,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx00101xxxxxx1xx01111x1x
                                                      sqdmull.  */
-                                                  return 373;
+                                                  return 402;
                                                 }
                                             }
                                           else
@@ -5440,7 +5440,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx0011xxxxxxx1xx01111x1x
                                                  sqdmlsl.  */
-                                              return 372;
+                                              return 401;
                                             }
                                         }
                                     }
@@ -5472,7 +5472,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx010000xxxxx1xx011101xx
                                                          rev32.  */
-                                                      return 182;
+                                                      return 197;
                                                     }
                                                 }
                                               else
@@ -5483,7 +5483,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx010000xxxxx1xx01111x0x
                                                          fmul.  */
-                                                      return 712;
+                                                      return 741;
                                                     }
                                                   else
                                                     {
@@ -5491,7 +5491,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx010000xxxxx1xx01111x1x
                                                          sha1h.  */
-                                                      return 579;
+                                                      return 608;
                                                     }
                                                 }
                                             }
@@ -5515,37 +5515,70 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0100010xxxx1xx011101xx
                                                              cmge.  */
-                                                          return 188;
+                                                          return 203;
                                                         }
                                                     }
                                                   else
                                                     {
-                                                      if (((word >> 23) & 0x1) == 0)
+                                                      if (((word >> 19) & 0x1) == 0)
                                                         {
-                                                          if (((word >> 29) & 0x1) == 0)
+                                                          if (((word >> 23) & 0x1) == 0)
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100011xxxx1x0011100xx
-                                                                 frintn.  */
-                                                              return 166;
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100011xx0x1x0011100xx
+                                                                     frintn.  */
+                                                                  return 166;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100011xx0x1x0011101xx
+                                                                     frinta.  */
+                                                                  return 214;
+                                                                }
                                                             }
                                                           else
                                                             {
                                                               /* 33222222222211111111110000000000
                                                                  10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100011xxxx1x0011101xx
-                                                                 frinta.  */
-                                                              return 199;
+                                                                 xxxxxxxxxx0100011xx0x1x101110xxx
+                                                                 frintp.  */
+                                                              return 186;
                                                             }
                                                         }
                                                       else
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             xxxxxxxxxx0100011xxxx1x101110xxx
-                                                             frintp.  */
-                                                          return 176;
+                                                          if (((word >> 23) & 0x1) == 0)
+                                                            {
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100011xx1x1x0011100xx
+                                                                     frintn.  */
+                                                                  return 167;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100011xx1x1x0011101xx
+                                                                     frinta.  */
+                                                                  return 215;
+                                                                }
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0100011xx1x1x101110xxx
+                                                                 frintp.  */
+                                                              return 187;
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -5559,7 +5592,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx010001xxxxx1xx0111100x
                                                              fnmul.  */
-                                                          return 728;
+                                                          return 757;
                                                         }
                                                       else
                                                         {
@@ -5567,7 +5600,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx010001xxxxx1xx0111101x
                                                              cmgt.  */
-                                                          return 427;
+                                                          return 456;
                                                         }
                                                     }
                                                   else
@@ -5576,7 +5609,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx010001xxxxx1xx011111xx
                                                          cmge.  */
-                                                      return 445;
+                                                      return 474;
                                                     }
                                                 }
                                             }
@@ -5605,7 +5638,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0100100xx0x1xx011101xx
                                                                  clz.  */
-                                                              return 185;
+                                                              return 200;
                                                             }
                                                         }
                                                       else
@@ -5614,7 +5647,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0100100xx1x1xx01110xxx
                                                              aese.  */
-                                                          return 575;
+                                                          return 604;
                                                         }
                                                     }
                                                   else
@@ -5646,7 +5679,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0100101xxxx1xx0111010x
                                                                  uqxtn.  */
-                                                              return 195;
+                                                              return 210;
                                                             }
                                                           else
                                                             {
@@ -5654,7 +5687,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0100101xxxx1xx0111011x
                                                                  uqxtn2.  */
-                                                              return 196;
+                                                              return 211;
                                                             }
                                                         }
                                                     }
@@ -5669,7 +5702,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx010010xxxxx1xx0111100x
                                                              fmax.  */
-                                                          return 720;
+                                                          return 749;
                                                         }
                                                       else
                                                         {
@@ -5677,7 +5710,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx010010xxxxx1xx0111101x
                                                              sqxtn.  */
-                                                          return 431;
+                                                          return 460;
                                                         }
                                                     }
                                                   else
@@ -5686,7 +5719,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx010010xxxxx1xx011111xx
                                                          uqxtn.  */
-                                                      return 449;
+                                                      return 478;
                                                     }
                                                 }
                                             }
@@ -5694,129 +5727,88 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                             {
                                               if (((word >> 16) & 0x1) == 0)
                                                 {
-                                                  if (((word >> 20) & 0x1) == 0)
+                                                  if (((word >> 19) & 0x1) == 0)
                                                     {
-                                                      if (((word >> 28) & 0x1) == 0)
-                                                        {
-                                                          if (((word >> 29) & 0x1) == 0)
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100110xxx01xx011100xx
-                                                                 fcmgt.  */
-                                                              return 172;
-                                                            }
-                                                          else
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100110xxx01xx011101xx
-                                                                 fcmge.  */
-                                                              return 208;
-                                                            }
-                                                        }
-                                                      else
-                                                        {
-                                                          if (((word >> 29) & 0x1) == 0)
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100110xxx01xx011110xx
-                                                                 fcmgt.  */
-                                                              return 436;
-                                                            }
-                                                          else
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100110xxx01xx011111xx
-                                                                 fcmge.  */
-                                                              return 455;
-                                                            }
-                                                        }
-                                                    }
-                                                  else
-                                                    {
-                                                      if (((word >> 23) & 0x1) == 0)
+                                                      if (((word >> 20) & 0x1) == 0)
                                                         {
                                                           if (((word >> 28) & 0x1) == 0)
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100110xxx11x001110xxx
-                                                                 fmaxnmv.  */
-                                                              return 34;
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100110xx001xx011100xx
+                                                                     fcmgt.  */
+                                                                  return 178;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100110xx001xx011101xx
+                                                                     fcmge.  */
+                                                                  return 229;
+                                                                }
                                                             }
                                                           else
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100110xxx11x001111xxx
-                                                                 fmaxnmp.  */
-                                                              return 463;
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100110xx001xx011110xx
+                                                                     fcmgt.  */
+                                                                  return 465;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100110xx001xx011111xx
+                                                                     fcmge.  */
+                                                                  return 484;
+                                                                }
                                                             }
                                                         }
                                                       else
                                                         {
-                                                          if (((word >> 28) & 0x1) == 0)
+                                                          if (((word >> 23) & 0x1) == 0)
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100110xxx11x101110xxx
-                                                                 fminnmv.  */
-                                                              return 36;
+                                                              if (((word >> 28) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100110xx011x001110xxx
+                                                                     fmaxnmv.  */
+                                                                  return 34;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100110xx011x001111xxx
+                                                                     fmaxnmp.  */
+                                                                  return 492;
+                                                                }
                                                             }
                                                           else
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100110xxx11x101111xxx
-                                                                 fminnmp.  */
-                                                              return 466;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                              else
-                                                {
-                                                  if (((word >> 23) & 0x1) == 0)
-                                                    {
-                                                      if (((word >> 28) & 0x1) == 0)
-                                                        {
-                                                          if (((word >> 29) & 0x1) == 0)
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100111xxxx1x0011100xx
-                                                                 fcvtas.  */
-                                                              return 170;
-                                                            }
-                                                          else
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100111xxxx1x0011101xx
-                                                                 fcvtau.  */
-                                                              return 203;
-                                                            }
-                                                        }
-                                                      else
-                                                        {
-                                                          if (((word >> 29) & 0x1) == 0)
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100111xxxx1x0011110xx
-                                                                 fcvtas.  */
-                                                              return 434;
-                                                            }
-                                                          else
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0100111xxxx1x0011111xx
-                                                                 fcvtau.  */
-                                                              return 453;
+                                                              if (((word >> 28) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100110xx011x101110xxx
+                                                                     fminnmv.  */
+                                                                  return 36;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100110xx011x101111xxx
+                                                                     fminnmp.  */
+                                                                  return 495;
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -5826,17 +5818,102 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                         {
                                                           /* 33222222222211111111110000000000
                                                              10987654321098765432109876543210
-                                                             xxxxxxxxxx0100111xxxx1x10111x0xx
-                                                             urecpe.  */
-                                                          return 180;
+                                                             xxxxxxxxxx0100110xx1x1xx0111x0xx
+                                                             fcmgt.  */
+                                                          return 179;
                                                         }
                                                       else
                                                         {
                                                           /* 33222222222211111111110000000000
                                                              10987654321098765432109876543210
-                                                             xxxxxxxxxx0100111xxxx1x10111x1xx
-                                                             ursqrte.  */
-                                                          return 214;
+                                                             xxxxxxxxxx0100110xx1x1xx0111x1xx
+                                                             fcmge.  */
+                                                          return 230;
+                                                        }
+                                                    }
+                                                }
+                                              else
+                                                {
+                                                  if (((word >> 19) & 0x1) == 0)
+                                                    {
+                                                      if (((word >> 23) & 0x1) == 0)
+                                                        {
+                                                          if (((word >> 28) & 0x1) == 0)
+                                                            {
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100111xx0x1x0011100xx
+                                                                     fcvtas.  */
+                                                                  return 174;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100111xx0x1x0011101xx
+                                                                     fcvtau.  */
+                                                                  return 222;
+                                                                }
+                                                            }
+                                                          else
+                                                            {
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100111xx0x1x0011110xx
+                                                                     fcvtas.  */
+                                                                  return 463;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0100111xx0x1x0011111xx
+                                                                     fcvtau.  */
+                                                                  return 482;
+                                                                }
+                                                            }
+                                                        }
+                                                      else
+                                                        {
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0100111xx0x1x10111x0xx
+                                                                 urecpe.  */
+                                                              return 194;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0100111xx0x1x10111x1xx
+                                                                 ursqrte.  */
+                                                              return 241;
+                                                            }
+                                                        }
+                                                    }
+                                                  else
+                                                    {
+                                                      if (((word >> 29) & 0x1) == 0)
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             xxxxxxxxxx0100111xx1x1xx0111x0xx
+                                                             fcvtas.  */
+                                                          return 175;
+                                                        }
+                                                      else
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             xxxxxxxxxx0100111xx1x1xx0111x1xx
+                                                             fcvtau.  */
+                                                          return 223;
                                                         }
                                                     }
                                                 }
@@ -5867,7 +5944,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0101000xxxx1xx011101xx
                                                              uaddlp.  */
-                                                          return 183;
+                                                          return 198;
                                                         }
                                                     }
                                                   else
@@ -5899,7 +5976,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0101001xxxx1xx0111010x
                                                                  sqxtun.  */
-                                                              return 191;
+                                                              return 206;
                                                             }
                                                           else
                                                             {
@@ -5907,7 +5984,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0101001xxxx1xx0111011x
                                                                  sqxtun2.  */
-                                                              return 192;
+                                                              return 207;
                                                             }
                                                         }
                                                     }
@@ -5922,7 +5999,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx010100xxxxx1xx0111100x
                                                              fadd.  */
-                                                          return 716;
+                                                          return 745;
                                                         }
                                                       else
                                                         {
@@ -5930,7 +6007,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx010100xxxxx1xx0111101x
                                                              sha256su0.  */
-                                                          return 581;
+                                                          return 610;
                                                         }
                                                     }
                                                   else
@@ -5939,7 +6016,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx010100xxxxx1xx011111xx
                                                          sqxtun.  */
-                                                      return 448;
+                                                      return 477;
                                                     }
                                                 }
                                             }
@@ -5963,7 +6040,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0101010xxx01xx01111xxx
                                                              cmlt.  */
-                                                          return 429;
+                                                          return 458;
                                                         }
                                                     }
                                                   else
@@ -5988,108 +6065,152 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                 }
                                               else
                                                 {
-                                                  if (((word >> 20) & 0x1) == 0)
+                                                  if (((word >> 19) & 0x1) == 0)
                                                     {
-                                                      if (((word >> 23) & 0x1) == 0)
+                                                      if (((word >> 20) & 0x1) == 0)
                                                         {
-                                                          if (((word >> 28) & 0x1) == 0)
+                                                          if (((word >> 23) & 0x1) == 0)
                                                             {
-                                                              if (((word >> 29) & 0x1) == 0)
+                                                              if (((word >> 28) & 0x1) == 0)
                                                                 {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0101011xxx01x0011100xx
-                                                                     fcvtns.  */
-                                                                  return 168;
+                                                                  if (((word >> 29) & 0x1) == 0)
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0101011xx001x0011100xx
+                                                                         fcvtns.  */
+                                                                      return 170;
+                                                                    }
+                                                                  else
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0101011xx001x0011101xx
+                                                                         fcvtnu.  */
+                                                                      return 218;
+                                                                    }
                                                                 }
                                                               else
                                                                 {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0101011xxx01x0011101xx
-                                                                     fcvtnu.  */
-                                                                  return 201;
+                                                                  if (((word >> 29) & 0x1) == 0)
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0101011xx001x0011110xx
+                                                                         fcvtns.  */
+                                                                      return 461;
+                                                                    }
+                                                                  else
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0101011xx001x0011111xx
+                                                                         fcvtnu.  */
+                                                                      return 480;
+                                                                    }
                                                                 }
                                                             }
                                                           else
                                                             {
-                                                              if (((word >> 29) & 0x1) == 0)
+                                                              if (((word >> 28) & 0x1) == 0)
                                                                 {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0101011xxx01x0011110xx
-                                                                     fcvtns.  */
-                                                                  return 432;
+                                                                  if (((word >> 29) & 0x1) == 0)
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0101011xx001x1011100xx
+                                                                         fcvtps.  */
+                                                                      return 190;
+                                                                    }
+                                                                  else
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0101011xx001x1011101xx
+                                                                         fcvtpu.  */
+                                                                      return 237;
+                                                                    }
                                                                 }
                                                               else
                                                                 {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0101011xxx01x0011111xx
-                                                                     fcvtnu.  */
-                                                                  return 451;
+                                                                  if (((word >> 29) & 0x1) == 0)
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0101011xx001x1011110xx
+                                                                         fcvtps.  */
+                                                                      return 468;
+                                                                    }
+                                                                  else
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0101011xx001x1011111xx
+                                                                         fcvtpu.  */
+                                                                      return 486;
+                                                                    }
                                                                 }
                                                             }
                                                         }
                                                       else
                                                         {
-                                                          if (((word >> 28) & 0x1) == 0)
+                                                          if (((word >> 29) & 0x1) == 0)
                                                             {
-                                                              if (((word >> 29) & 0x1) == 0)
-                                                                {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0101011xxx01x1011100xx
-                                                                     fcvtps.  */
-                                                                  return 178;
-                                                                }
-                                                              else
-                                                                {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0101011xxx01x1011101xx
-                                                                     fcvtpu.  */
-                                                                  return 212;
-                                                                }
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0101011xx011xx0111x0xx
+                                                                 sminv.  */
+                                                              return 29;
                                                             }
                                                           else
                                                             {
-                                                              if (((word >> 29) & 0x1) == 0)
-                                                                {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0101011xxx01x1011110xx
-                                                                     fcvtps.  */
-                                                                  return 439;
-                                                                }
-                                                              else
-                                                                {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0101011xxx01x1011111xx
-                                                                     fcvtpu.  */
-                                                                  return 457;
-                                                                }
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0101011xx011xx0111x1xx
+                                                                 uminv.  */
+                                                              return 33;
                                                             }
                                                         }
                                                     }
                                                   else
                                                     {
-                                                      if (((word >> 29) & 0x1) == 0)
+                                                      if (((word >> 23) & 0x1) == 0)
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             xxxxxxxxxx0101011xxx11xx0111x0xx
-                                                             sminv.  */
-                                                          return 29;
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0101011xx1x1x00111x0xx
+                                                                 fcvtns.  */
+                                                              return 171;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0101011xx1x1x00111x1xx
+                                                                 fcvtnu.  */
+                                                              return 219;
+                                                            }
                                                         }
                                                       else
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             xxxxxxxxxx0101011xxx11xx0111x1xx
-                                                             uminv.  */
-                                                          return 33;
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0101011xx1x1x10111x0xx
+                                                                 fcvtps.  */
+                                                              return 191;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0101011xx1x1x10111x1xx
+                                                                 fcvtpu.  */
+                                                              return 238;
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -6119,7 +6240,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0101100xx0x1xx011101xx
                                                                  uadalp.  */
-                                                              return 186;
+                                                              return 201;
                                                             }
                                                         }
                                                       else
@@ -6128,7 +6249,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0101100xx1x1xx01110xxx
                                                              aesmc.  */
-                                                          return 577;
+                                                          return 606;
                                                         }
                                                     }
                                                   else
@@ -6160,7 +6281,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0101101xxxx1xx0111010x
                                                                  fcvtxn.  */
-                                                              return 197;
+                                                              return 212;
                                                             }
                                                           else
                                                             {
@@ -6168,7 +6289,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0101101xxxx1xx0111011x
                                                                  fcvtxn2.  */
-                                                              return 198;
+                                                              return 213;
                                                             }
                                                         }
                                                     }
@@ -6181,7 +6302,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx010110xxxxx1xx011110xx
                                                          fmaxnm.  */
-                                                      return 724;
+                                                      return 753;
                                                     }
                                                   else
                                                     {
@@ -6189,27 +6310,38 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx010110xxxxx1xx011111xx
                                                          fcvtxn.  */
-                                                      return 450;
+                                                      return 479;
                                                     }
                                                 }
                                             }
                                           else
                                             {
-                                              if (((word >> 28) & 0x1) == 0)
+                                              if (((word >> 19) & 0x1) == 0)
                                                 {
-                                                  /* 33222222222211111111110000000000
-                                                     10987654321098765432109876543210
-                                                     xxxxxxxxxx010111xxxxx1xx01110xxx
-                                                     fcmlt.  */
-                                                  return 174;
+                                                  if (((word >> 28) & 0x1) == 0)
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xxxxxxxxxx010111xxx0x1xx01110xxx
+                                                         fcmlt.  */
+                                                      return 182;
+                                                    }
+                                                  else
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xxxxxxxxxx010111xxx0x1xx01111xxx
+                                                         fcmlt.  */
+                                                      return 467;
+                                                    }
                                                 }
                                               else
                                                 {
                                                   /* 33222222222211111111110000000000
                                                      10987654321098765432109876543210
-                                                     xxxxxxxxxx010111xxxxx1xx01111xxx
+                                                     xxxxxxxxxx010111xxx1x1xx0111xxxx
                                                      fcmlt.  */
-                                                  return 438;
+                                                  return 183;
                                                 }
                                             }
                                         }
@@ -6239,7 +6371,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx011000xxxxx1xx01111x0x
                                                          fdiv.  */
-                                                      return 714;
+                                                      return 743;
                                                     }
                                                   else
                                                     {
@@ -6247,7 +6379,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx011000xxxxx1xx01111x1x
                                                          sha1su1.  */
-                                                      return 580;
+                                                      return 609;
                                                     }
                                                 }
                                             }
@@ -6271,7 +6403,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0110010xxxx1xx011101xx
                                                              cmle.  */
-                                                          return 189;
+                                                          return 204;
                                                         }
                                                     }
                                                   else
@@ -6282,7 +6414,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0110010xxxx1xx011110xx
                                                              cmeq.  */
-                                                          return 428;
+                                                          return 457;
                                                         }
                                                       else
                                                         {
@@ -6290,48 +6422,92 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0110010xxxx1xx011111xx
                                                              cmle.  */
-                                                          return 446;
+                                                          return 475;
                                                         }
                                                     }
                                                 }
                                               else
                                                 {
-                                                  if (((word >> 23) & 0x1) == 0)
+                                                  if (((word >> 19) & 0x1) == 0)
                                                     {
-                                                      if (((word >> 29) & 0x1) == 0)
+                                                      if (((word >> 23) & 0x1) == 0)
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             xxxxxxxxxx0110011xxxx1x00111x0xx
-                                                             frintm.  */
-                                                          return 167;
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0110011xx0x1x00111x0xx
+                                                                 frintm.  */
+                                                              return 168;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0110011xx0x1x00111x1xx
+                                                                 frintx.  */
+                                                              return 216;
+                                                            }
                                                         }
                                                       else
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             xxxxxxxxxx0110011xxxx1x00111x1xx
-                                                             frintx.  */
-                                                          return 200;
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0110011xx0x1x10111x0xx
+                                                                 frintz.  */
+                                                              return 188;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0110011xx0x1x10111x1xx
+                                                                 frinti.  */
+                                                              return 235;
+                                                            }
                                                         }
                                                     }
                                                   else
                                                     {
-                                                      if (((word >> 29) & 0x1) == 0)
+                                                      if (((word >> 23) & 0x1) == 0)
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             xxxxxxxxxx0110011xxxx1x10111x0xx
-                                                             frintz.  */
-                                                          return 177;
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0110011xx1x1x00111x0xx
+                                                                 frintm.  */
+                                                              return 169;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0110011xx1x1x00111x1xx
+                                                                 frintx.  */
+                                                              return 217;
+                                                            }
                                                         }
                                                       else
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             xxxxxxxxxx0110011xxxx1x10111x1xx
-                                                             frinti.  */
-                                                          return 211;
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0110011xx1x1x10111x0xx
+                                                                 frintz.  */
+                                                              return 189;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0110011xx1x1x10111x1xx
+                                                                 frinti.  */
+                                                              return 236;
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -6361,7 +6537,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx011010xxx0x10x011101xx
                                                                  not.  */
-                                                              return 205;
+                                                              return 226;
                                                             }
                                                           else
                                                             {
@@ -6369,7 +6545,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx011010xxx0x11x011101xx
                                                                  rbit.  */
-                                                              return 207;
+                                                              return 228;
                                                             }
                                                         }
                                                     }
@@ -6379,7 +6555,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx011010xxx1x1xx01110xxx
                                                          aesd.  */
-                                                      return 576;
+                                                      return 605;
                                                     }
                                                 }
                                               else
@@ -6388,125 +6564,191 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx011010xxxxx1xx01111xxx
                                                      fmin.  */
-                                                  return 722;
+                                                  return 751;
                                                 }
                                             }
                                           else
                                             {
                                               if (((word >> 16) & 0x1) == 0)
                                                 {
-                                                  if (((word >> 20) & 0x1) == 0)
+                                                  if (((word >> 19) & 0x1) == 0)
                                                     {
-                                                      if (((word >> 28) & 0x1) == 0)
+                                                      if (((word >> 20) & 0x1) == 0)
                                                         {
-                                                          if (((word >> 29) & 0x1) == 0)
+                                                          if (((word >> 28) & 0x1) == 0)
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110110xxx01xx011100xx
-                                                                 fcmeq.  */
-                                                              return 173;
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110110xx001xx011100xx
+                                                                     fcmeq.  */
+                                                                  return 180;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110110xx001xx011101xx
+                                                                     fcmle.  */
+                                                                  return 231;
+                                                                }
                                                             }
                                                           else
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110110xxx01xx011101xx
-                                                                 fcmle.  */
-                                                              return 209;
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110110xx001xx011110xx
+                                                                     fcmeq.  */
+                                                                  return 466;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110110xx001xx011111xx
+                                                                     fcmle.  */
+                                                                  return 485;
+                                                                }
                                                             }
                                                         }
                                                       else
                                                         {
-                                                          if (((word >> 29) & 0x1) == 0)
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110110xxx01xx011110xx
-                                                                 fcmeq.  */
-                                                              return 437;
-                                                            }
-                                                          else
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110110xxx01xx011111xx
-                                                                 fcmle.  */
-                                                              return 456;
-                                                            }
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             xxxxxxxxxx0110110xx011xx0111xxxx
+                                                             faddp.  */
+                                                          return 493;
                                                         }
                                                     }
                                                   else
                                                     {
-                                                      /* 33222222222211111111110000000000
-                                                         10987654321098765432109876543210
-                                                         xxxxxxxxxx0110110xxx11xx0111xxxx
-                                                         faddp.  */
-                                                      return 464;
+                                                      if (((word >> 29) & 0x1) == 0)
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             xxxxxxxxxx0110110xx1x1xx0111x0xx
+                                                             fcmeq.  */
+                                                          return 181;
+                                                        }
+                                                      else
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             xxxxxxxxxx0110110xx1x1xx0111x1xx
+                                                             fcmle.  */
+                                                          return 232;
+                                                        }
                                                     }
                                                 }
                                               else
                                                 {
-                                                  if (((word >> 23) & 0x1) == 0)
+                                                  if (((word >> 19) & 0x1) == 0)
                                                     {
-                                                      if (((word >> 28) & 0x1) == 0)
+                                                      if (((word >> 23) & 0x1) == 0)
                                                         {
-                                                          if (((word >> 29) & 0x1) == 0)
+                                                          if (((word >> 28) & 0x1) == 0)
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110111xxxx1x0011100xx
-                                                                 scvtf.  */
-                                                              return 171;
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110111xx0x1x0011100xx
+                                                                     scvtf.  */
+                                                                  return 176;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110111xx0x1x0011101xx
+                                                                     ucvtf.  */
+                                                                  return 224;
+                                                                }
                                                             }
                                                           else
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110111xxxx1x0011101xx
-                                                                 ucvtf.  */
-                                                              return 204;
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110111xx0x1x0011110xx
+                                                                     scvtf.  */
+                                                                  return 464;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110111xx0x1x0011111xx
+                                                                     ucvtf.  */
+                                                                  return 483;
+                                                                }
                                                             }
                                                         }
                                                       else
                                                         {
-                                                          if (((word >> 29) & 0x1) == 0)
+                                                          if (((word >> 28) & 0x1) == 0)
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110111xxxx1x0011110xx
-                                                                 scvtf.  */
-                                                              return 435;
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110111xx0x1x1011100xx
+                                                                     frecpe.  */
+                                                                  return 195;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110111xx0x1x1011101xx
+                                                                     frsqrte.  */
+                                                                  return 242;
+                                                                }
                                                             }
                                                           else
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110111xxxx1x0011111xx
-                                                                 ucvtf.  */
-                                                              return 454;
+                                                              if (((word >> 29) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110111xx0x1x1011110xx
+                                                                     frecpe.  */
+                                                                  return 470;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0110111xx0x1x1011111xx
+                                                                     frsqrte.  */
+                                                                  return 488;
+                                                                }
                                                             }
                                                         }
                                                     }
                                                   else
                                                     {
-                                                      if (((word >> 28) & 0x1) == 0)
+                                                      if (((word >> 23) & 0x1) == 0)
                                                         {
                                                           if (((word >> 29) & 0x1) == 0)
                                                             {
                                                               /* 33222222222211111111110000000000
                                                                  10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110111xxxx1x1011100xx
-                                                                 frecpe.  */
-                                                              return 181;
+                                                                 xxxxxxxxxx0110111xx1x1x00111x0xx
+                                                                 scvtf.  */
+                                                              return 177;
                                                             }
                                                           else
                                                             {
                                                               /* 33222222222211111111110000000000
                                                                  10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110111xxxx1x1011101xx
-                                                                 frsqrte.  */
-                                                              return 215;
+                                                                 xxxxxxxxxx0110111xx1x1x00111x1xx
+                                                                 ucvtf.  */
+                                                              return 225;
                                                             }
                                                         }
                                                       else
@@ -6515,17 +6757,17 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                             {
                                                               /* 33222222222211111111110000000000
                                                                  10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110111xxxx1x1011110xx
+                                                                 xxxxxxxxxx0110111xx1x1x10111x0xx
                                                                  frecpe.  */
-                                                              return 441;
+                                                              return 196;
                                                             }
                                                           else
                                                             {
                                                               /* 33222222222211111111110000000000
                                                                  10987654321098765432109876543210
-                                                                 xxxxxxxxxx0110111xxxx1x1011111xx
+                                                                 xxxxxxxxxx0110111xx1x1x10111x1xx
                                                                  frsqrte.  */
-                                                              return 459;
+                                                              return 243;
                                                             }
                                                         }
                                                     }
@@ -6559,7 +6801,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0111000xxx01xx011101xx
                                                                  usqadd.  */
-                                                              return 184;
+                                                              return 199;
                                                             }
                                                         }
                                                       else
@@ -6590,7 +6832,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0111001xxxx1xx01110x0x
                                                              shll.  */
-                                                          return 193;
+                                                          return 208;
                                                         }
                                                       else
                                                         {
@@ -6598,7 +6840,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0111001xxxx1xx01110x1x
                                                              shll2.  */
-                                                          return 194;
+                                                          return 209;
                                                         }
                                                     }
                                                 }
@@ -6612,7 +6854,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx011100xxxxx1xx0111100x
                                                              fsub.  */
-                                                          return 718;
+                                                          return 747;
                                                         }
                                                       else
                                                         {
@@ -6620,7 +6862,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx011100xxxxx1xx0111101x
                                                              suqadd.  */
-                                                          return 425;
+                                                          return 454;
                                                         }
                                                     }
                                                   else
@@ -6629,7 +6871,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx011100xxxxx1xx011111xx
                                                          usqadd.  */
-                                                      return 443;
+                                                      return 472;
                                                     }
                                                 }
                                             }
@@ -6653,7 +6895,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0111010xxxx1xx011101xx
                                                              neg.  */
-                                                          return 190;
+                                                          return 205;
                                                         }
                                                     }
                                                   else
@@ -6664,7 +6906,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0111010xxxx1xx011110xx
                                                              abs.  */
-                                                          return 430;
+                                                          return 459;
                                                         }
                                                       else
                                                         {
@@ -6672,52 +6914,96 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0111010xxxx1xx011111xx
                                                              neg.  */
-                                                          return 447;
+                                                          return 476;
                                                         }
                                                     }
                                                 }
                                               else
                                                 {
-                                                  if (((word >> 20) & 0x1) == 0)
+                                                  if (((word >> 19) & 0x1) == 0)
                                                     {
-                                                      if (((word >> 23) & 0x1) == 0)
+                                                      if (((word >> 20) & 0x1) == 0)
                                                         {
-                                                          if (((word >> 28) & 0x1) == 0)
+                                                          if (((word >> 23) & 0x1) == 0)
                                                             {
-                                                              if (((word >> 29) & 0x1) == 0)
+                                                              if (((word >> 28) & 0x1) == 0)
                                                                 {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0111011xxx01x0011100xx
-                                                                     fcvtms.  */
-                                                                  return 169;
+                                                                  if (((word >> 29) & 0x1) == 0)
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0111011xx001x0011100xx
+                                                                         fcvtms.  */
+                                                                      return 172;
+                                                                    }
+                                                                  else
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0111011xx001x0011101xx
+                                                                         fcvtmu.  */
+                                                                      return 220;
+                                                                    }
                                                                 }
                                                               else
                                                                 {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0111011xxx01x0011101xx
-                                                                     fcvtmu.  */
-                                                                  return 202;
+                                                                  if (((word >> 29) & 0x1) == 0)
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0111011xx001x0011110xx
+                                                                         fcvtms.  */
+                                                                      return 462;
+                                                                    }
+                                                                  else
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0111011xx001x0011111xx
+                                                                         fcvtmu.  */
+                                                                      return 481;
+                                                                    }
                                                                 }
                                                             }
                                                           else
                                                             {
-                                                              if (((word >> 29) & 0x1) == 0)
+                                                              if (((word >> 28) & 0x1) == 0)
                                                                 {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0111011xxx01x0011110xx
-                                                                     fcvtms.  */
-                                                                  return 433;
+                                                                  if (((word >> 29) & 0x1) == 0)
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0111011xx001x1011100xx
+                                                                         fcvtzs.  */
+                                                                      return 192;
+                                                                    }
+                                                                  else
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0111011xx001x1011101xx
+                                                                         fcvtzu.  */
+                                                                      return 239;
+                                                                    }
                                                                 }
                                                               else
                                                                 {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0111011xxx01x0011111xx
-                                                                     fcvtmu.  */
-                                                                  return 452;
+                                                                  if (((word >> 29) & 0x1) == 0)
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0111011xx001x1011110xx
+                                                                         fcvtzs.  */
+                                                                      return 469;
+                                                                    }
+                                                                  else
+                                                                    {
+                                                                      /* 33222222222211111111110000000000
+                                                                         10987654321098765432109876543210
+                                                                         xxxxxxxxxx0111011xx001x1011111xx
+                                                                         fcvtzu.  */
+                                                                      return 487;
+                                                                    }
                                                                 }
                                                             }
                                                         }
@@ -6725,61 +7011,61 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                         {
                                                           if (((word >> 28) & 0x1) == 0)
                                                             {
-                                                              if (((word >> 29) & 0x1) == 0)
-                                                                {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0111011xxx01x1011100xx
-                                                                     fcvtzs.  */
-                                                                  return 179;
-                                                                }
-                                                              else
-                                                                {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0111011xxx01x1011101xx
-                                                                     fcvtzu.  */
-                                                                  return 213;
-                                                                }
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0111011xx011xx01110xxx
+                                                                 addv.  */
+                                                              return 30;
                                                             }
                                                           else
                                                             {
-                                                              if (((word >> 29) & 0x1) == 0)
-                                                                {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0111011xxx01x1011110xx
-                                                                     fcvtzs.  */
-                                                                  return 440;
-                                                                }
-                                                              else
-                                                                {
-                                                                  /* 33222222222211111111110000000000
-                                                                     10987654321098765432109876543210
-                                                                     xxxxxxxxxx0111011xxx01x1011111xx
-                                                                     fcvtzu.  */
-                                                                  return 458;
-                                                                }
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0111011xx011xx01111xxx
+                                                                 addp.  */
+                                                              return 491;
                                                             }
                                                         }
                                                     }
                                                   else
                                                     {
-                                                      if (((word >> 28) & 0x1) == 0)
+                                                      if (((word >> 23) & 0x1) == 0)
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             xxxxxxxxxx0111011xxx11xx01110xxx
-                                                             addv.  */
-                                                          return 30;
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0111011xx1x1x00111x0xx
+                                                                 fcvtms.  */
+                                                              return 173;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0111011xx1x1x00111x1xx
+                                                                 fcvtmu.  */
+                                                              return 221;
+                                                            }
                                                         }
                                                       else
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             xxxxxxxxxx0111011xxx11xx01111xxx
-                                                             addp.  */
-                                                          return 462;
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0111011xx1x1x10111x0xx
+                                                                 fcvtzs.  */
+                                                              return 193;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0111011xx1x1x10111x1xx
+                                                                 fcvtzu.  */
+                                                              return 240;
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -6809,7 +7095,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx0111100xx0x1xx011101xx
                                                                  sqneg.  */
-                                                              return 187;
+                                                              return 202;
                                                             }
                                                         }
                                                       else
@@ -6818,7 +7104,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx0111100xx1x1xx01110xxx
                                                              aesimc.  */
-                                                          return 578;
+                                                          return 607;
                                                         }
                                                     }
                                                   else
@@ -6851,7 +7137,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx011110xxxxx1xx0111100x
                                                              fminnm.  */
-                                                          return 726;
+                                                          return 755;
                                                         }
                                                       else
                                                         {
@@ -6859,7 +7145,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx011110xxxxx1xx0111101x
                                                              sqabs.  */
-                                                          return 426;
+                                                          return 455;
                                                         }
                                                     }
                                                   else
@@ -6868,7 +7154,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx011110xxxxx1xx011111xx
                                                          sqneg.  */
-                                                      return 444;
+                                                      return 473;
                                                     }
                                                 }
                                             }
@@ -6876,84 +7162,117 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                             {
                                               if (((word >> 16) & 0x1) == 0)
                                                 {
-                                                  if (((word >> 20) & 0x1) == 0)
+                                                  if (((word >> 19) & 0x1) == 0)
+                                                    {
+                                                      if (((word >> 20) & 0x1) == 0)
+                                                        {
+                                                          if (((word >> 29) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0111110xx001xx0111x0xx
+                                                                 fabs.  */
+                                                              return 184;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 xxxxxxxxxx0111110xx001xx0111x1xx
+                                                                 fneg.  */
+                                                              return 233;
+                                                            }
+                                                        }
+                                                      else
+                                                        {
+                                                          if (((word >> 23) & 0x1) == 0)
+                                                            {
+                                                              if (((word >> 28) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0111110xx011x001110xxx
+                                                                     fmaxv.  */
+                                                                  return 35;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0111110xx011x001111xxx
+                                                                     fmaxp.  */
+                                                                  return 494;
+                                                                }
+                                                            }
+                                                          else
+                                                            {
+                                                              if (((word >> 28) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0111110xx011x101110xxx
+                                                                     fminv.  */
+                                                                  return 37;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     xxxxxxxxxx0111110xx011x101111xxx
+                                                                     fminp.  */
+                                                                  return 496;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                  else
                                                     {
                                                       if (((word >> 29) & 0x1) == 0)
                                                         {
                                                           /* 33222222222211111111110000000000
                                                              10987654321098765432109876543210
-                                                             xxxxxxxxxx0111110xxx01xx0111x0xx
+                                                             xxxxxxxxxx0111110xx1x1xx0111x0xx
                                                              fabs.  */
-                                                          return 175;
+                                                          return 185;
                                                         }
                                                       else
                                                         {
                                                           /* 33222222222211111111110000000000
                                                              10987654321098765432109876543210
-                                                             xxxxxxxxxx0111110xxx01xx0111x1xx
+                                                             xxxxxxxxxx0111110xx1x1xx0111x1xx
                                                              fneg.  */
-                                                          return 210;
-                                                        }
-                                                    }
-                                                  else
-                                                    {
-                                                      if (((word >> 23) & 0x1) == 0)
-                                                        {
-                                                          if (((word >> 28) & 0x1) == 0)
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0111110xxx11x001110xxx
-                                                                 fmaxv.  */
-                                                              return 35;
-                                                            }
-                                                          else
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0111110xxx11x001111xxx
-                                                                 fmaxp.  */
-                                                              return 465;
-                                                            }
-                                                        }
-                                                      else
-                                                        {
-                                                          if (((word >> 28) & 0x1) == 0)
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0111110xxx11x101110xxx
-                                                                 fminv.  */
-                                                              return 37;
-                                                            }
-                                                          else
-                                                            {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 xxxxxxxxxx0111110xxx11x101111xxx
-                                                                 fminp.  */
-                                                              return 467;
-                                                            }
+                                                          return 234;
                                                         }
                                                     }
                                                 }
                                               else
                                                 {
-                                                  if (((word >> 28) & 0x1) == 0)
+                                                  if (((word >> 19) & 0x1) == 0)
                                                     {
-                                                      /* 33222222222211111111110000000000
-                                                         10987654321098765432109876543210
-                                                         xxxxxxxxxx0111111xxxx1xx01110xxx
-                                                         fsqrt.  */
-                                                      return 216;
+                                                      if (((word >> 28) & 0x1) == 0)
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             xxxxxxxxxx0111111xx0x1xx01110xxx
+                                                             fsqrt.  */
+                                                          return 244;
+                                                        }
+                                                      else
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             xxxxxxxxxx0111111xx0x1xx01111xxx
+                                                             frecpx.  */
+                                                          return 471;
+                                                        }
                                                     }
                                                   else
                                                     {
                                                       /* 33222222222211111111110000000000
                                                          10987654321098765432109876543210
-                                                         xxxxxxxxxx0111111xxxx1xx01111xxx
-                                                         frecpx.  */
-                                                      return 442;
+                                                         xxxxxxxxxx0111111xx1x1xx0111xxxx
+                                                         fsqrt.  */
+                                                      return 245;
                                                     }
                                                 }
                                             }
@@ -6982,7 +7301,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100000xxxxx1xx011100xx
                                                          shadd.  */
-                                                      return 223;
+                                                      return 252;
                                                     }
                                                   else
                                                     {
@@ -6990,7 +7309,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100000xxxxx1xx011101xx
                                                          uhadd.  */
-                                                      return 275;
+                                                      return 304;
                                                     }
                                                 }
                                               else
@@ -7001,7 +7320,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100001xxxxx1xx011100xx
                                                          add.  */
-                                                      return 238;
+                                                      return 267;
                                                     }
                                                   else
                                                     {
@@ -7009,7 +7328,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100001xxxxx1xx011101xx
                                                          sub.  */
-                                                      return 290;
+                                                      return 319;
                                                     }
                                                 }
                                             }
@@ -7023,7 +7342,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100010xxxxx1xx011100xx
                                                          sshl.  */
-                                                      return 230;
+                                                      return 259;
                                                     }
                                                   else
                                                     {
@@ -7031,7 +7350,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100010xxxxx1xx011101xx
                                                          ushl.  */
-                                                      return 282;
+                                                      return 311;
                                                     }
                                                 }
                                               else
@@ -7044,7 +7363,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx100011xxxxx1x0011100xx
                                                              fmaxnm.  */
-                                                          return 246;
+                                                          return 275;
                                                         }
                                                       else
                                                         {
@@ -7052,7 +7371,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx100011xxxxx1x0011101xx
                                                              fmaxnmp.  */
-                                                          return 297;
+                                                          return 326;
                                                         }
                                                     }
                                                   else
@@ -7063,7 +7382,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx100011xxxxx1x1011100xx
                                                              fminnm.  */
-                                                          return 262;
+                                                          return 291;
                                                         }
                                                       else
                                                         {
@@ -7071,7 +7390,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx100011xxxxx1x1011101xx
                                                              fminnmp.  */
-                                                          return 313;
+                                                          return 342;
                                                         }
                                                     }
                                                 }
@@ -7089,7 +7408,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100100xxxxx1xx011100xx
                                                          shsub.  */
-                                                      return 226;
+                                                      return 255;
                                                     }
                                                   else
                                                     {
@@ -7097,7 +7416,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100100xxxxx1xx011101xx
                                                          uhsub.  */
-                                                      return 278;
+                                                      return 307;
                                                     }
                                                 }
                                               else
@@ -7108,7 +7427,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100101xxxxx1xx011100xx
                                                          smaxp.  */
-                                                      return 242;
+                                                      return 271;
                                                     }
                                                   else
                                                     {
@@ -7116,7 +7435,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100101xxxxx1xx011101xx
                                                          umaxp.  */
-                                                      return 294;
+                                                      return 323;
                                                     }
                                                 }
                                             }
@@ -7130,7 +7449,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100110xxxxx1xx011100xx
                                                          smax.  */
-                                                      return 234;
+                                                      return 263;
                                                     }
                                                   else
                                                     {
@@ -7138,7 +7457,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100110xxxxx1xx011101xx
                                                          umax.  */
-                                                      return 286;
+                                                      return 315;
                                                     }
                                                 }
                                               else
@@ -7151,7 +7470,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx100111xxxxx1x0011100xx
                                                              fcmeq.  */
-                                                          return 254;
+                                                          return 283;
                                                         }
                                                       else
                                                         {
@@ -7159,7 +7478,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx100111xxxxx1x0011101xx
                                                              fcmge.  */
-                                                          return 303;
+                                                          return 332;
                                                         }
                                                     }
                                                   else
@@ -7168,7 +7487,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx100111xxxxx1x101110xxx
                                                          fcmgt.  */
-                                                      return 317;
+                                                      return 346;
                                                     }
                                                 }
                                             }
@@ -7188,7 +7507,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101000xxxxx1xx011100xx
                                                          srhadd.  */
-                                                      return 225;
+                                                      return 254;
                                                     }
                                                   else
                                                     {
@@ -7196,7 +7515,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101000xxxxx1xx011101xx
                                                          urhadd.  */
-                                                      return 277;
+                                                      return 306;
                                                     }
                                                 }
                                               else
@@ -7207,7 +7526,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101001xxxxx1xx011100xx
                                                          mla.  */
-                                                      return 240;
+                                                      return 269;
                                                     }
                                                   else
                                                     {
@@ -7215,7 +7534,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101001xxxxx1xx011101xx
                                                          mls.  */
-                                                      return 292;
+                                                      return 321;
                                                     }
                                                 }
                                             }
@@ -7229,7 +7548,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101010xxxxx1xx011100xx
                                                          srshl.  */
-                                                      return 232;
+                                                      return 261;
                                                     }
                                                   else
                                                     {
@@ -7237,7 +7556,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101010xxxxx1xx011101xx
                                                          urshl.  */
-                                                      return 284;
+                                                      return 313;
                                                     }
                                                 }
                                               else
@@ -7250,7 +7569,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx101011xxxxx1x0011100xx
                                                              fadd.  */
-                                                          return 250;
+                                                          return 279;
                                                         }
                                                       else
                                                         {
@@ -7258,7 +7577,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx101011xxxxx1x0011101xx
                                                              faddp.  */
-                                                          return 299;
+                                                          return 328;
                                                         }
                                                     }
                                                   else
@@ -7269,7 +7588,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx101011xxxxx1x1011100xx
                                                              fsub.  */
-                                                          return 266;
+                                                          return 295;
                                                         }
                                                       else
                                                         {
@@ -7277,7 +7596,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx101011xxxxx1x1011101xx
                                                              fabd.  */
-                                                          return 315;
+                                                          return 344;
                                                         }
                                                     }
                                                 }
@@ -7295,7 +7614,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101100xxxxx1xx011100xx
                                                          cmgt.  */
-                                                      return 228;
+                                                      return 257;
                                                     }
                                                   else
                                                     {
@@ -7303,7 +7622,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101100xxxxx1xx011101xx
                                                          cmhi.  */
-                                                      return 280;
+                                                      return 309;
                                                     }
                                                 }
                                               else
@@ -7314,7 +7633,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101101xxxxx1xx011100xx
                                                          sqdmulh.  */
-                                                      return 244;
+                                                      return 273;
                                                     }
                                                   else
                                                     {
@@ -7322,7 +7641,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101101xxxxx1xx011101xx
                                                          sqrdmulh.  */
-                                                      return 296;
+                                                      return 325;
                                                     }
                                                 }
                                             }
@@ -7336,7 +7655,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101110xxxxx1xx011100xx
                                                          sabd.  */
-                                                      return 236;
+                                                      return 265;
                                                     }
                                                   else
                                                     {
@@ -7344,7 +7663,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx101110xxxxx1xx011101xx
                                                          uabd.  */
-                                                      return 288;
+                                                      return 317;
                                                     }
                                                 }
                                               else
@@ -7357,7 +7676,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx101111xxxxx1x0011100xx
                                                              fmax.  */
-                                                          return 256;
+                                                          return 285;
                                                         }
                                                       else
                                                         {
@@ -7365,7 +7684,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx101111xxxxx1x0011101xx
                                                              fmaxp.  */
-                                                          return 307;
+                                                          return 336;
                                                         }
                                                     }
                                                   else
@@ -7376,7 +7695,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx101111xxxxx1x1011100xx
                                                              fmin.  */
-                                                          return 268;
+                                                          return 297;
                                                         }
                                                       else
                                                         {
@@ -7384,7 +7703,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx101111xxxxx1x1011101xx
                                                              fminp.  */
-                                                          return 321;
+                                                          return 350;
                                                         }
                                                     }
                                                 }
@@ -7404,7 +7723,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxx0xxxxx10xxxxxxxxx1xx0111100x
                                                  fccmp.  */
-                                              return 677;
+                                              return 706;
                                             }
                                           else
                                             {
@@ -7412,7 +7731,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxx1xxxxx10xxxxxxxxx1xx0111100x
                                                  fccmpe.  */
-                                              return 679;
+                                              return 708;
                                             }
                                         }
                                       else
@@ -7427,7 +7746,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx10000xxxxxx1xx0111101x
                                                          add.  */
-                                                      return 485;
+                                                      return 514;
                                                     }
                                                   else
                                                     {
@@ -7435,7 +7754,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx10001xxxxxx1xx0111101x
                                                          sshl.  */
-                                                      return 483;
+                                                      return 512;
                                                     }
                                                 }
                                               else
@@ -7444,7 +7763,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1001xxxxxxx1xx0111101x
                                                      fcmeq.  */
-                                                  return 475;
+                                                  return 504;
                                                 }
                                             }
                                           else
@@ -7455,7 +7774,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1010xxxxxxx1xx0111101x
                                                      srshl.  */
-                                                  return 484;
+                                                  return 513;
                                                 }
                                               else
                                                 {
@@ -7465,7 +7784,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1011x0xxxxx1xx0111101x
                                                          cmgt.  */
-                                                      return 481;
+                                                      return 510;
                                                     }
                                                   else
                                                     {
@@ -7473,7 +7792,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1011x1xxxxx1xx0111101x
                                                          sqdmulh.  */
-                                                      return 472;
+                                                      return 501;
                                                     }
                                                 }
                                             }
@@ -7491,7 +7810,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx10000xxxxxx1xx011111xx
                                                      sub.  */
-                                                  return 506;
+                                                  return 535;
                                                 }
                                               else
                                                 {
@@ -7499,7 +7818,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx10001xxxxxx1xx011111xx
                                                      ushl.  */
-                                                  return 504;
+                                                  return 533;
                                                 }
                                             }
                                           else
@@ -7510,7 +7829,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1001xxxxxxx1x0011111xx
                                                      fcmge.  */
-                                                  return 492;
+                                                  return 521;
                                                 }
                                               else
                                                 {
@@ -7518,7 +7837,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1001xxxxxxx1x1011111xx
                                                      fcmgt.  */
-                                                  return 498;
+                                                  return 527;
                                                 }
                                             }
                                         }
@@ -7532,7 +7851,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1010x0xxxxx1xx011111xx
                                                      urshl.  */
-                                                  return 505;
+                                                  return 534;
                                                 }
                                               else
                                                 {
@@ -7540,7 +7859,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1010x1xxxxx1xx011111xx
                                                      fabd.  */
-                                                  return 496;
+                                                  return 525;
                                                 }
                                             }
                                           else
@@ -7551,7 +7870,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1011x0xxxxx1xx011111xx
                                                      cmhi.  */
-                                                  return 502;
+                                                  return 531;
                                                 }
                                               else
                                                 {
@@ -7559,7 +7878,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1011x1xxxxx1xx011111xx
                                                      sqrdmulh.  */
-                                                  return 491;
+                                                  return 520;
                                                 }
                                             }
                                         }
@@ -7584,7 +7903,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110000xxxxx1xx011100xx
                                                          sqadd.  */
-                                                      return 224;
+                                                      return 253;
                                                     }
                                                   else
                                                     {
@@ -7592,7 +7911,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110000xxxxx1xx011101xx
                                                          uqadd.  */
-                                                      return 276;
+                                                      return 305;
                                                     }
                                                 }
                                               else
@@ -7603,7 +7922,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110001xxxxx1xx011100xx
                                                          cmtst.  */
-                                                      return 239;
+                                                      return 268;
                                                     }
                                                   else
                                                     {
@@ -7611,7 +7930,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110001xxxxx1xx011101xx
                                                          cmeq.  */
-                                                      return 291;
+                                                      return 320;
                                                     }
                                                 }
                                             }
@@ -7625,7 +7944,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110010xxxxx1xx011100xx
                                                          sqshl.  */
-                                                      return 231;
+                                                      return 260;
                                                     }
                                                   else
                                                     {
@@ -7633,7 +7952,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110010xxxxx1xx011101xx
                                                          uqshl.  */
-                                                      return 283;
+                                                      return 312;
                                                     }
                                                 }
                                               else
@@ -7644,7 +7963,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110011xxxxx1x001110xxx
                                                          fmla.  */
-                                                      return 248;
+                                                      return 277;
                                                     }
                                                   else
                                                     {
@@ -7652,7 +7971,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110011xxxxx1x101110xxx
                                                          fmls.  */
-                                                      return 264;
+                                                      return 293;
                                                     }
                                                 }
                                             }
@@ -7669,7 +7988,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110100xxxxx1xx011100xx
                                                          sqsub.  */
-                                                      return 227;
+                                                      return 256;
                                                     }
                                                   else
                                                     {
@@ -7677,7 +7996,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110100xxxxx1xx011101xx
                                                          uqsub.  */
-                                                      return 279;
+                                                      return 308;
                                                     }
                                                 }
                                               else
@@ -7688,7 +8007,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110101xxxxx1xx011100xx
                                                          sminp.  */
-                                                      return 243;
+                                                      return 272;
                                                     }
                                                   else
                                                     {
@@ -7696,7 +8015,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110101xxxxx1xx011101xx
                                                          uminp.  */
-                                                      return 295;
+                                                      return 324;
                                                     }
                                                 }
                                             }
@@ -7710,7 +8029,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110110xxxxx1xx011100xx
                                                          smin.  */
-                                                      return 235;
+                                                      return 264;
                                                     }
                                                   else
                                                     {
@@ -7718,7 +8037,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110110xxxxx1xx011101xx
                                                          umin.  */
-                                                      return 287;
+                                                      return 316;
                                                     }
                                                 }
                                               else
@@ -7729,7 +8048,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110111xxxxx1x001110xxx
                                                          facge.  */
-                                                      return 305;
+                                                      return 334;
                                                     }
                                                   else
                                                     {
@@ -7737,7 +8056,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110111xxxxx1x101110xxx
                                                          facgt.  */
-                                                      return 319;
+                                                      return 348;
                                                     }
                                                 }
                                             }
@@ -7761,7 +8080,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx111000xxxxx100011100xx
                                                                  and.  */
-                                                              return 260;
+                                                              return 289;
                                                             }
                                                           else
                                                             {
@@ -7769,7 +8088,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx111000xxxxx100011101xx
                                                                  eor.  */
-                                                              return 311;
+                                                              return 340;
                                                             }
                                                         }
                                                       else
@@ -7780,7 +8099,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx111000xxxxx101011100xx
                                                                  orr.  */
-                                                              return 272;
+                                                              return 301;
                                                             }
                                                           else
                                                             {
@@ -7788,7 +8107,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx111000xxxxx101011101xx
                                                                  bit.  */
-                                                              return 323;
+                                                              return 352;
                                                             }
                                                         }
                                                     }
@@ -7802,7 +8121,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx111000xxxxx110011100xx
                                                                  bic.  */
-                                                              return 261;
+                                                              return 290;
                                                             }
                                                           else
                                                             {
@@ -7810,7 +8129,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx111000xxxxx110011101xx
                                                                  bsl.  */
-                                                              return 312;
+                                                              return 341;
                                                             }
                                                         }
                                                       else
@@ -7821,7 +8140,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx111000xxxxx111011100xx
                                                                  orn.  */
-                                                              return 274;
+                                                              return 303;
                                                             }
                                                           else
                                                             {
@@ -7829,7 +8148,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                                  10987654321098765432109876543210
                                                                  xxxxxxxxxx111000xxxxx111011101xx
                                                                  bif.  */
-                                                              return 324;
+                                                              return 353;
                                                             }
                                                         }
                                                     }
@@ -7842,7 +8161,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111001xxxxx1xx011100xx
                                                          mul.  */
-                                                      return 241;
+                                                      return 270;
                                                     }
                                                   else
                                                     {
@@ -7850,7 +8169,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111001xxxxx1xx011101xx
                                                          pmul.  */
-                                                      return 293;
+                                                      return 322;
                                                     }
                                                 }
                                             }
@@ -7864,7 +8183,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111010xxxxx1xx011100xx
                                                          sqrshl.  */
-                                                      return 233;
+                                                      return 262;
                                                     }
                                                   else
                                                     {
@@ -7872,7 +8191,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111010xxxxx1xx011101xx
                                                          uqrshl.  */
-                                                      return 285;
+                                                      return 314;
                                                     }
                                                 }
                                               else
@@ -7883,7 +8202,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111011xxxxx1xx011100xx
                                                          fmulx.  */
-                                                      return 252;
+                                                      return 281;
                                                     }
                                                   else
                                                     {
@@ -7891,7 +8210,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111011xxxxx1xx011101xx
                                                          fmul.  */
-                                                      return 301;
+                                                      return 330;
                                                     }
                                                 }
                                             }
@@ -7908,7 +8227,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111100xxxxx1xx011100xx
                                                          cmge.  */
-                                                      return 229;
+                                                      return 258;
                                                     }
                                                   else
                                                     {
@@ -7916,7 +8235,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111100xxxxx1xx011101xx
                                                          cmhs.  */
-                                                      return 281;
+                                                      return 310;
                                                     }
                                                 }
                                               else
@@ -7925,7 +8244,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx111101xxxxx1xx01110xxx
                                                      addp.  */
-                                                  return 245;
+                                                  return 274;
                                                 }
                                             }
                                           else
@@ -7938,7 +8257,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111110xxxxx1xx011100xx
                                                          saba.  */
-                                                      return 237;
+                                                      return 266;
                                                     }
                                                   else
                                                     {
@@ -7946,7 +8265,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111110xxxxx1xx011101xx
                                                          uaba.  */
-                                                      return 289;
+                                                      return 318;
                                                     }
                                                 }
                                               else
@@ -7959,7 +8278,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx111111xxxxx1x0011100xx
                                                              frecps.  */
-                                                          return 258;
+                                                          return 287;
                                                         }
                                                       else
                                                         {
@@ -7967,7 +8286,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx111111xxxxx1x0011101xx
                                                              fdiv.  */
-                                                          return 309;
+                                                          return 338;
                                                         }
                                                     }
                                                   else
@@ -7976,7 +8295,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx111111xxxxx1x101110xxx
                                                          frsqrts.  */
-                                                      return 270;
+                                                      return 299;
                                                     }
                                                 }
                                             }
@@ -7993,7 +8312,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx11xxxxxxxxx1xx0111100x
                                              fcsel.  */
-                                          return 740;
+                                          return 769;
                                         }
                                       else
                                         {
@@ -8009,7 +8328,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx110000xxxxx1xx0111101x
                                                              sqadd.  */
-                                                          return 468;
+                                                          return 497;
                                                         }
                                                       else
                                                         {
@@ -8017,7 +8336,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx110001xxxxx1xx0111101x
                                                              cmtst.  */
-                                                          return 486;
+                                                          return 515;
                                                         }
                                                     }
                                                   else
@@ -8026,7 +8345,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx11001xxxxxx1xx0111101x
                                                          sqshl.  */
-                                                      return 470;
+                                                      return 499;
                                                     }
                                                 }
                                               else
@@ -8035,7 +8354,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1101xxxxxxx1xx0111101x
                                                      sqsub.  */
-                                                  return 469;
+                                                  return 498;
                                                 }
                                             }
                                           else
@@ -8048,7 +8367,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1110x0xxxxx1xx0111101x
                                                          sqrshl.  */
-                                                      return 471;
+                                                      return 500;
                                                     }
                                                   else
                                                     {
@@ -8056,7 +8375,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx1110x1xxxxx1xx0111101x
                                                          fmulx.  */
-                                                      return 473;
+                                                      return 502;
                                                     }
                                                 }
                                               else
@@ -8067,7 +8386,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx11110xxxxxx1xx0111101x
                                                          cmge.  */
-                                                      return 482;
+                                                      return 511;
                                                     }
                                                   else
                                                     {
@@ -8077,7 +8396,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx11111xxxxxx1x00111101x
                                                              frecps.  */
-                                                          return 477;
+                                                          return 506;
                                                         }
                                                       else
                                                         {
@@ -8085,7 +8404,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              xxxxxxxxxx11111xxxxxx1x10111101x
                                                              frsqrts.  */
-                                                          return 479;
+                                                          return 508;
                                                         }
                                                     }
                                                 }
@@ -8106,7 +8425,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110000xxxxx1xx011111xx
                                                          uqadd.  */
-                                                      return 487;
+                                                      return 516;
                                                     }
                                                   else
                                                     {
@@ -8114,7 +8433,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx110001xxxxx1xx011111xx
                                                          cmeq.  */
-                                                      return 507;
+                                                      return 536;
                                                     }
                                                 }
                                               else
@@ -8123,7 +8442,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx11001xxxxxx1xx011111xx
                                                      uqshl.  */
-                                                  return 489;
+                                                  return 518;
                                                 }
                                             }
                                           else
@@ -8134,7 +8453,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx11010xxxxxx1xx011111xx
                                                      uqsub.  */
-                                                  return 488;
+                                                  return 517;
                                                 }
                                               else
                                                 {
@@ -8144,7 +8463,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx11011xxxxxx1x0011111xx
                                                          facge.  */
-                                                      return 494;
+                                                      return 523;
                                                     }
                                                   else
                                                     {
@@ -8152,7 +8471,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                          10987654321098765432109876543210
                                                          xxxxxxxxxx11011xxxxxx1x1011111xx
                                                          facgt.  */
-                                                      return 500;
+                                                      return 529;
                                                     }
                                                 }
                                             }
@@ -8165,7 +8484,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1110xxxxxxx1xx011111xx
                                                  uqrshl.  */
-                                              return 490;
+                                              return 519;
                                             }
                                           else
                                             {
@@ -8173,7 +8492,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1111xxxxxxx1xx011111xx
                                                  cmhs.  */
-                                              return 503;
+                                              return 532;
                                             }
                                         }
                                     }
@@ -8415,7 +8734,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxx0xxxxx0xx1111100x
                                          fmadd.  */
-                                      return 730;
+                                      return 759;
                                     }
                                   else
                                     {
@@ -8423,7 +8742,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxx0xxxxx1xx1111100x
                                          fnmadd.  */
-                                      return 734;
+                                      return 763;
                                     }
                                 }
                               else
@@ -8438,7 +8757,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx0xx000xxxxxxxx1111101x
                                                  fmla.  */
-                                              return 379;
+                                              return 408;
                                             }
                                           else
                                             {
@@ -8446,7 +8765,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx0xx010xxxxxxxx1111101x
                                                  fmls.  */
-                                              return 380;
+                                              return 409;
                                             }
                                         }
                                       else
@@ -8457,7 +8776,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx0xx100xxxxxxxx1111101x
                                                  sqdmlal.  */
-                                              return 374;
+                                              return 403;
                                             }
                                           else
                                             {
@@ -8465,7 +8784,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx0xx110xxxxxxxx1111101x
                                                  sqdmlsl.  */
-                                              return 375;
+                                              return 404;
                                             }
                                         }
                                     }
@@ -8479,7 +8798,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1x00x0xxxxxxxx1111101x
                                                  sshr.  */
-                                              return 510;
+                                              return 539;
                                             }
                                           else
                                             {
@@ -8487,7 +8806,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1x01x0xxxxxxxx1111101x
                                                  srshr.  */
-                                              return 512;
+                                              return 541;
                                             }
                                         }
                                       else
@@ -8500,7 +8819,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1x1000xxxxxxxx1111101x
                                                      ssra.  */
-                                                  return 511;
+                                                  return 540;
                                                 }
                                               else
                                                 {
@@ -8508,7 +8827,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1x1010xxxxxxxx1111101x
                                                      shl.  */
-                                                  return 514;
+                                                  return 543;
                                                 }
                                             }
                                           else
@@ -8519,7 +8838,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1x1100xxxxxxxx1111101x
                                                      srsra.  */
-                                                  return 513;
+                                                  return 542;
                                                 }
                                               else
                                                 {
@@ -8527,7 +8846,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1x1110xxxxxxxx1111101x
                                                      sqshl.  */
-                                                  return 515;
+                                                  return 544;
                                                 }
                                             }
                                         }
@@ -8546,7 +8865,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxx0000xxxxxxxx111111xx
                                              ushr.  */
-                                          return 520;
+                                          return 549;
                                         }
                                       else
                                         {
@@ -8554,7 +8873,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxx0010xxxxxxxx111111xx
                                              sri.  */
-                                          return 524;
+                                          return 553;
                                         }
                                     }
                                   else
@@ -8565,7 +8884,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxx0100xxxxxxxx111111xx
                                              urshr.  */
-                                          return 522;
+                                          return 551;
                                         }
                                       else
                                         {
@@ -8573,7 +8892,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxx0110xxxxxxxx111111xx
                                              sqshlu.  */
-                                          return 526;
+                                          return 555;
                                         }
                                     }
                                 }
@@ -8587,7 +8906,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxx1000xxxxxxxx111111xx
                                              usra.  */
-                                          return 521;
+                                          return 550;
                                         }
                                       else
                                         {
@@ -8595,7 +8914,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxx1010xxxxxxxx111111xx
                                              sli.  */
-                                          return 525;
+                                          return 554;
                                         }
                                     }
                                   else
@@ -8606,7 +8925,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxx1100xxxxxxxx111111xx
                                              ursra.  */
-                                          return 523;
+                                          return 552;
                                         }
                                       else
                                         {
@@ -8614,7 +8933,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxxxx1110xxxxxxxx111111xx
                                              uqshl.  */
-                                          return 527;
+                                          return 556;
                                         }
                                     }
                                 }
@@ -8886,7 +9205,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx110xx1xxxxxxxx1111000x
                                                  rshrn.  */
-                                              return 335;
+                                              return 364;
                                             }
                                           else
                                             {
@@ -8894,7 +9213,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx110xx1xxxxxxxx1111001x
                                                  rshrn2.  */
-                                              return 336;
+                                              return 365;
                                             }
                                         }
                                       else
@@ -8905,7 +9224,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx110xx1xxxxxxxx1111010x
                                                  sqrshrun.  */
-                                              return 357;
+                                              return 386;
                                             }
                                           else
                                             {
@@ -8913,7 +9232,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx110xx1xxxxxxxx1111011x
                                                  sqrshrun2.  */
-                                              return 358;
+                                              return 387;
                                             }
                                         }
                                     }
@@ -8929,7 +9248,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1110x1xxxxxxxx1111000x
                                                      sqrshrn.  */
-                                                  return 339;
+                                                  return 368;
                                                 }
                                               else
                                                 {
@@ -8937,7 +9256,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1110x1xxxxxxxx1111001x
                                                      sqrshrn2.  */
-                                                  return 340;
+                                                  return 369;
                                                 }
                                             }
                                           else
@@ -8948,7 +9267,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1110x1xxxxxxxx1111010x
                                                      uqrshrn.  */
-                                                  return 361;
+                                                  return 390;
                                                 }
                                               else
                                                 {
@@ -8956,7 +9275,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx1110x1xxxxxxxx1111011x
                                                      uqrshrn2.  */
-                                                  return 362;
+                                                  return 391;
                                                 }
                                             }
                                         }
@@ -8968,7 +9287,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1111x1xxxxxxxx111100xx
                                                  fcvtzs.  */
-                                              return 346;
+                                              return 375;
                                             }
                                           else
                                             {
@@ -8976,7 +9295,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1111x1xxxxxxxx111101xx
                                                  fcvtzu.  */
-                                              return 368;
+                                              return 397;
                                             }
                                         }
                                     }
@@ -8995,7 +9314,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxx1xxxxx0xx1111100x
                                          fmsub.  */
-                                      return 732;
+                                      return 761;
                                     }
                                   else
                                     {
@@ -9003,7 +9322,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxxxxxxx1xxxxx1xx1111100x
                                          fnmsub.  */
-                                      return 736;
+                                      return 765;
                                     }
                                 }
                               else
@@ -9016,7 +9335,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx0x0xx1xxxxxxxx1111101x
                                              sqdmulh.  */
-                                          return 377;
+                                          return 406;
                                         }
                                       else
                                         {
@@ -9028,7 +9347,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx0x1001xxxxxxxx1111101x
                                                      fmul.  */
-                                                  return 381;
+                                                  return 410;
                                                 }
                                               else
                                                 {
@@ -9036,7 +9355,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                      10987654321098765432109876543210
                                                      xxxxxxxxxx0x1011xxxxxxxx1111101x
                                                      sqrdmulh.  */
-                                                  return 378;
+                                                  return 407;
                                                 }
                                             }
                                           else
@@ -9045,7 +9364,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx0x11x1xxxxxxxx1111101x
                                                  sqdmull.  */
-                                              return 376;
+                                              return 405;
                                             }
                                         }
                                     }
@@ -9059,7 +9378,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx100xx1xxxxxxxx1111101x
                                                  scvtf.  */
-                                              return 518;
+                                              return 547;
                                             }
                                           else
                                             {
@@ -9067,7 +9386,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx101xx1xxxxxxxx1111101x
                                                  sqshrn.  */
-                                              return 516;
+                                              return 545;
                                             }
                                         }
                                       else
@@ -9078,7 +9397,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx11x0x1xxxxxxxx1111101x
                                                  sqrshrn.  */
-                                              return 517;
+                                              return 546;
                                             }
                                           else
                                             {
@@ -9086,7 +9405,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx11x1x1xxxxxxxx1111101x
                                                  fcvtzs.  */
-                                              return 519;
+                                              return 548;
                                             }
                                         }
                                     }
@@ -9104,7 +9423,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx0xx001xxxxxxxx111111xx
                                              fmulx.  */
-                                          return 382;
+                                          return 411;
                                         }
                                       else
                                         {
@@ -9112,7 +9431,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx0xx011xxxxxxxx111111xx
                                              sqrdmlah.  */
-                                          return 383;
+                                          return 412;
                                         }
                                     }
                                   else
@@ -9121,7 +9440,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                          10987654321098765432109876543210
                                          xxxxxxxxxx0xx1x1xxxxxxxx111111xx
                                          sqrdmlsh.  */
-                                      return 384;
+                                      return 413;
                                     }
                                 }
                               else
@@ -9136,7 +9455,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1000x1xxxxxxxx111111xx
                                                  sqshrun.  */
-                                              return 528;
+                                              return 557;
                                             }
                                           else
                                             {
@@ -9144,7 +9463,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1001x1xxxxxxxx111111xx
                                                  ucvtf.  */
-                                              return 532;
+                                              return 561;
                                             }
                                         }
                                       else
@@ -9153,7 +9472,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx101xx1xxxxxxxx111111xx
                                              uqshrn.  */
-                                          return 530;
+                                          return 559;
                                         }
                                     }
                                   else
@@ -9164,7 +9483,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                              10987654321098765432109876543210
                                              xxxxxxxxxx110xx1xxxxxxxx111111xx
                                              sqrshrun.  */
-                                          return 529;
+                                          return 558;
                                         }
                                       else
                                         {
@@ -9174,7 +9493,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1110x1xxxxxxxx111111xx
                                                  uqrshrn.  */
-                                              return 531;
+                                              return 560;
                                             }
                                           else
                                             {
@@ -9182,7 +9501,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                  10987654321098765432109876543210
                                                  xxxxxxxxxx1111x1xxxxxxxx111111xx
                                                  fcvtzu.  */
-                                              return 533;
+                                              return 562;
                                             }
                                         }
                                     }
@@ -9213,193 +9532,193 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
   int value;
   switch (key)
     {
-    case 826: value = 830; break;	/* stnp --> stp.  */
-    case 830: return NULL;		/* stp --> NULL.  */
-    case 824: value = 825; break;	/* stllrb --> stllrh.  */
-    case 825: return NULL;		/* stllrh --> NULL.  */
-    case 827: value = 831; break;	/* ldnp --> ldp.  */
-    case 831: return NULL;		/* ldp --> NULL.  */
-    case 1042: value = 1043; break;	/* msr --> hint.  */
-    case 1043: value = 1052; break;	/* hint --> clrex.  */
-    case 1052: value = 1053; break;	/* clrex --> dsb.  */
-    case 1053: value = 1054; break;	/* dsb --> dmb.  */
-    case 1054: value = 1055; break;	/* dmb --> isb.  */
-    case 1055: value = 1056; break;	/* isb --> sys.  */
-    case 1056: value = 1061; break;	/* sys --> msr.  */
-    case 1061: return NULL;		/* msr --> NULL.  */
-    case 1062: value = 1063; break;	/* sysl --> mrs.  */
-    case 1063: return NULL;		/* mrs --> NULL.  */
-    case 385: value = 386; break;	/* st4 --> st1.  */
-    case 386: value = 387; break;	/* st1 --> st2.  */
-    case 387: value = 388; break;	/* st2 --> st3.  */
-    case 388: return NULL;		/* st3 --> NULL.  */
-    case 393: value = 394; break;	/* st4 --> st1.  */
-    case 394: value = 395; break;	/* st1 --> st2.  */
-    case 395: value = 396; break;	/* st2 --> st3.  */
-    case 396: return NULL;		/* st3 --> NULL.  */
-    case 389: value = 390; break;	/* ld4 --> ld1.  */
-    case 390: value = 391; break;	/* ld1 --> ld2.  */
-    case 391: value = 392; break;	/* ld2 --> ld3.  */
-    case 392: return NULL;		/* ld3 --> NULL.  */
-    case 405: value = 407; break;	/* ld1 --> ld1r.  */
-    case 407: return NULL;		/* ld1r --> NULL.  */
-    case 409: value = 411; break;	/* ld2 --> ld2r.  */
-    case 411: return NULL;		/* ld2r --> NULL.  */
-    case 406: value = 408; break;	/* ld3 --> ld3r.  */
-    case 408: return NULL;		/* ld3r --> NULL.  */
-    case 410: value = 412; break;	/* ld4 --> ld4r.  */
-    case 412: return NULL;		/* ld4r --> NULL.  */
-    case 397: value = 398; break;	/* ld4 --> ld1.  */
-    case 398: value = 399; break;	/* ld1 --> ld2.  */
-    case 399: value = 400; break;	/* ld2 --> ld3.  */
-    case 400: return NULL;		/* ld3 --> NULL.  */
-    case 417: value = 419; break;	/* ld1 --> ld1r.  */
-    case 419: return NULL;		/* ld1r --> NULL.  */
-    case 418: value = 420; break;	/* ld3 --> ld3r.  */
-    case 420: return NULL;		/* ld3r --> NULL.  */
-    case 421: value = 423; break;	/* ld2 --> ld2r.  */
-    case 423: return NULL;		/* ld2r --> NULL.  */
-    case 422: value = 424; break;	/* ld4 --> ld4r.  */
-    case 424: return NULL;		/* ld4r --> NULL.  */
-    case 643: value = 644; break;	/* fcvtzs --> fcvtzs.  */
-    case 644: return NULL;		/* fcvtzs --> NULL.  */
-    case 639: value = 640; break;	/* scvtf --> scvtf.  */
-    case 640: return NULL;		/* scvtf --> NULL.  */
-    case 645: value = 646; break;	/* fcvtzu --> fcvtzu.  */
-    case 646: return NULL;		/* fcvtzu --> NULL.  */
-    case 641: value = 642; break;	/* ucvtf --> ucvtf.  */
-    case 642: return NULL;		/* ucvtf --> NULL.  */
-    case 647: value = 648; break;	/* fcvtns --> fcvtns.  */
-    case 648: return NULL;		/* fcvtns --> NULL.  */
-    case 667: value = 668; break;	/* fcvtms --> fcvtms.  */
-    case 668: return NULL;		/* fcvtms --> NULL.  */
-    case 663: value = 664; break;	/* fcvtps --> fcvtps.  */
-    case 664: return NULL;		/* fcvtps --> NULL.  */
-    case 671: value = 672; break;	/* fcvtzs --> fcvtzs.  */
-    case 672: return NULL;		/* fcvtzs --> NULL.  */
-    case 655: value = 656; break;	/* fcvtas --> fcvtas.  */
-    case 656: return NULL;		/* fcvtas --> NULL.  */
-    case 651: value = 652; break;	/* scvtf --> scvtf.  */
-    case 652: return NULL;		/* scvtf --> NULL.  */
-    case 659: value = 660; break;	/* fmov --> fmov.  */
-    case 660: return NULL;		/* fmov --> NULL.  */
-    case 649: value = 650; break;	/* fcvtnu --> fcvtnu.  */
-    case 650: return NULL;		/* fcvtnu --> NULL.  */
-    case 669: value = 670; break;	/* fcvtmu --> fcvtmu.  */
-    case 670: return NULL;		/* fcvtmu --> NULL.  */
-    case 665: value = 666; break;	/* fcvtpu --> fcvtpu.  */
-    case 666: return NULL;		/* fcvtpu --> NULL.  */
-    case 673: value = 674; break;	/* fcvtzu --> fcvtzu.  */
-    case 674: return NULL;		/* fcvtzu --> NULL.  */
-    case 657: value = 658; break;	/* fcvtau --> fcvtau.  */
-    case 658: return NULL;		/* fcvtau --> NULL.  */
-    case 653: value = 654; break;	/* ucvtf --> ucvtf.  */
-    case 654: return NULL;		/* ucvtf --> NULL.  */
-    case 661: value = 662; break;	/* fmov --> fmov.  */
-    case 662: return NULL;		/* fmov --> NULL.  */
-    case 689: value = 690; break;	/* fmov --> fmov.  */
-    case 690: return NULL;		/* fmov --> NULL.  */
-    case 698: value = 699; break;	/* frintn --> frintn.  */
-    case 699: return NULL;		/* frintn --> NULL.  */
-    case 693: value = 694; break;	/* fneg --> fneg.  */
-    case 694: return NULL;		/* fneg --> NULL.  */
-    case 702: value = 703; break;	/* frintm --> frintm.  */
-    case 703: return NULL;		/* frintm --> NULL.  */
-    case 691: value = 692; break;	/* fabs --> fabs.  */
-    case 692: return NULL;		/* fabs --> NULL.  */
-    case 700: value = 701; break;	/* frintp --> frintp.  */
-    case 701: return NULL;		/* frintp --> NULL.  */
-    case 695: value = 696; break;	/* fsqrt --> fsqrt.  */
-    case 696: return NULL;		/* fsqrt --> NULL.  */
-    case 704: value = 705; break;	/* frintz --> frintz.  */
-    case 705: return NULL;		/* frintz --> NULL.  */
-    case 706: value = 707; break;	/* frinta --> frinta.  */
-    case 707: return NULL;		/* frinta --> NULL.  */
-    case 708: value = 709; break;	/* frintx --> frintx.  */
-    case 709: return NULL;		/* frintx --> NULL.  */
-    case 710: value = 711; break;	/* frinti --> frinti.  */
-    case 711: return NULL;		/* frinti --> NULL.  */
-    case 681: value = 682; break;	/* fcmp --> fcmp.  */
-    case 682: return NULL;		/* fcmp --> NULL.  */
-    case 683: value = 684; break;	/* fcmpe --> fcmpe.  */
-    case 684: return NULL;		/* fcmpe --> NULL.  */
-    case 685: value = 686; break;	/* fcmp --> fcmp.  */
-    case 686: return NULL;		/* fcmp --> NULL.  */
-    case 687: value = 688; break;	/* fcmpe --> fcmpe.  */
-    case 688: return NULL;		/* fcmpe --> NULL.  */
-    case 738: value = 739; break;	/* fmov --> fmov.  */
-    case 739: return NULL;		/* fmov --> NULL.  */
-    case 712: value = 713; break;	/* fmul --> fmul.  */
-    case 713: return NULL;		/* fmul --> NULL.  */
-    case 728: value = 729; break;	/* fnmul --> fnmul.  */
-    case 729: return NULL;		/* fnmul --> NULL.  */
-    case 720: value = 721; break;	/* fmax --> fmax.  */
-    case 721: return NULL;		/* fmax --> NULL.  */
-    case 716: value = 717; break;	/* fadd --> fadd.  */
-    case 717: return NULL;		/* fadd --> NULL.  */
-    case 724: value = 725; break;	/* fmaxnm --> fmaxnm.  */
-    case 725: return NULL;		/* fmaxnm --> NULL.  */
-    case 714: value = 715; break;	/* fdiv --> fdiv.  */
-    case 715: return NULL;		/* fdiv --> NULL.  */
-    case 722: value = 723; break;	/* fmin --> fmin.  */
-    case 723: return NULL;		/* fmin --> NULL.  */
-    case 718: value = 719; break;	/* fsub --> fsub.  */
-    case 719: return NULL;		/* fsub --> NULL.  */
-    case 726: value = 727; break;	/* fminnm --> fminnm.  */
-    case 727: return NULL;		/* fminnm --> NULL.  */
-    case 677: value = 678; break;	/* fccmp --> fccmp.  */
-    case 678: return NULL;		/* fccmp --> NULL.  */
-    case 679: value = 680; break;	/* fccmpe --> fccmpe.  */
-    case 680: return NULL;		/* fccmpe --> NULL.  */
-    case 740: value = 741; break;	/* fcsel --> fcsel.  */
-    case 741: return NULL;		/* fcsel --> NULL.  */
-    case 122: value = 327; break;	/* movi --> sshr.  */
-    case 327: value = 329; break;	/* sshr --> srshr.  */
-    case 329: return NULL;		/* srshr --> NULL.  */
-    case 129: value = 347; break;	/* mvni --> ushr.  */
-    case 347: value = 349; break;	/* ushr --> urshr.  */
-    case 349: value = 351; break;	/* urshr --> sri.  */
-    case 351: value = 353; break;	/* sri --> sqshlu.  */
-    case 353: return NULL;		/* sqshlu --> NULL.  */
-    case 123: value = 328; break;	/* orr --> ssra.  */
-    case 328: value = 330; break;	/* ssra --> srsra.  */
-    case 330: value = 331; break;	/* srsra --> shl.  */
-    case 331: value = 332; break;	/* shl --> sqshl.  */
-    case 332: return NULL;		/* sqshl --> NULL.  */
-    case 130: value = 348; break;	/* bic --> usra.  */
-    case 348: value = 350; break;	/* usra --> ursra.  */
-    case 350: value = 352; break;	/* ursra --> sli.  */
-    case 352: value = 354; break;	/* sli --> uqshl.  */
-    case 354: return NULL;		/* uqshl --> NULL.  */
-    case 730: value = 731; break;	/* fmadd --> fmadd.  */
-    case 731: return NULL;		/* fmadd --> NULL.  */
-    case 734: value = 735; break;	/* fnmadd --> fnmadd.  */
-    case 735: return NULL;		/* fnmadd --> NULL.  */
-    case 124: value = 333; break;	/* movi --> shrn.  */
-    case 333: value = 334; break;	/* shrn --> shrn2.  */
-    case 334: value = 341; break;	/* shrn2 --> sshll.  */
-    case 341: value = 343; break;	/* sshll --> sshll2.  */
-    case 343: return NULL;		/* sshll2 --> NULL.  */
-    case 131: value = 355; break;	/* mvni --> sqshrun.  */
-    case 355: value = 356; break;	/* sqshrun --> sqshrun2.  */
-    case 356: value = 363; break;	/* sqshrun2 --> ushll.  */
-    case 363: value = 365; break;	/* ushll --> ushll2.  */
-    case 365: return NULL;		/* ushll2 --> NULL.  */
-    case 125: value = 337; break;	/* orr --> sqshrn.  */
-    case 337: value = 338; break;	/* sqshrn --> sqshrn2.  */
-    case 338: return NULL;		/* sqshrn2 --> NULL.  */
-    case 132: value = 359; break;	/* bic --> uqshrn.  */
-    case 359: value = 360; break;	/* uqshrn --> uqshrn2.  */
-    case 360: return NULL;		/* uqshrn2 --> NULL.  */
-    case 127: value = 345; break;	/* movi --> scvtf.  */
-    case 345: return NULL;		/* scvtf --> NULL.  */
+    case 855: value = 859; break;	/* stnp --> stp.  */
+    case 859: return NULL;		/* stp --> NULL.  */
+    case 853: value = 854; break;	/* stllrb --> stllrh.  */
+    case 854: return NULL;		/* stllrh --> NULL.  */
+    case 856: value = 860; break;	/* ldnp --> ldp.  */
+    case 860: return NULL;		/* ldp --> NULL.  */
+    case 1071: value = 1072; break;	/* msr --> hint.  */
+    case 1072: value = 1081; break;	/* hint --> clrex.  */
+    case 1081: value = 1082; break;	/* clrex --> dsb.  */
+    case 1082: value = 1083; break;	/* dsb --> dmb.  */
+    case 1083: value = 1084; break;	/* dmb --> isb.  */
+    case 1084: value = 1085; break;	/* isb --> sys.  */
+    case 1085: value = 1090; break;	/* sys --> msr.  */
+    case 1090: return NULL;		/* msr --> NULL.  */
+    case 1091: value = 1092; break;	/* sysl --> mrs.  */
+    case 1092: return NULL;		/* mrs --> NULL.  */
+    case 414: value = 415; break;	/* st4 --> st1.  */
+    case 415: value = 416; break;	/* st1 --> st2.  */
+    case 416: value = 417; break;	/* st2 --> st3.  */
+    case 417: return NULL;		/* st3 --> NULL.  */
+    case 422: value = 423; break;	/* st4 --> st1.  */
+    case 423: value = 424; break;	/* st1 --> st2.  */
+    case 424: value = 425; break;	/* st2 --> st3.  */
+    case 425: return NULL;		/* st3 --> NULL.  */
+    case 418: value = 419; break;	/* ld4 --> ld1.  */
+    case 419: value = 420; break;	/* ld1 --> ld2.  */
+    case 420: value = 421; break;	/* ld2 --> ld3.  */
+    case 421: return NULL;		/* ld3 --> NULL.  */
+    case 434: value = 436; break;	/* ld1 --> ld1r.  */
+    case 436: return NULL;		/* ld1r --> NULL.  */
+    case 438: value = 440; break;	/* ld2 --> ld2r.  */
+    case 440: return NULL;		/* ld2r --> NULL.  */
+    case 435: value = 437; break;	/* ld3 --> ld3r.  */
+    case 437: return NULL;		/* ld3r --> NULL.  */
+    case 439: value = 441; break;	/* ld4 --> ld4r.  */
+    case 441: return NULL;		/* ld4r --> NULL.  */
+    case 426: value = 427; break;	/* ld4 --> ld1.  */
+    case 427: value = 428; break;	/* ld1 --> ld2.  */
+    case 428: value = 429; break;	/* ld2 --> ld3.  */
+    case 429: return NULL;		/* ld3 --> NULL.  */
+    case 446: value = 448; break;	/* ld1 --> ld1r.  */
+    case 448: return NULL;		/* ld1r --> NULL.  */
+    case 447: value = 449; break;	/* ld3 --> ld3r.  */
+    case 449: return NULL;		/* ld3r --> NULL.  */
+    case 450: value = 452; break;	/* ld2 --> ld2r.  */
+    case 452: return NULL;		/* ld2r --> NULL.  */
+    case 451: value = 453; break;	/* ld4 --> ld4r.  */
+    case 453: return NULL;		/* ld4r --> NULL.  */
+    case 672: value = 673; break;	/* fcvtzs --> fcvtzs.  */
+    case 673: return NULL;		/* fcvtzs --> NULL.  */
+    case 668: value = 669; break;	/* scvtf --> scvtf.  */
+    case 669: return NULL;		/* scvtf --> NULL.  */
+    case 674: value = 675; break;	/* fcvtzu --> fcvtzu.  */
+    case 675: return NULL;		/* fcvtzu --> NULL.  */
+    case 670: value = 671; break;	/* ucvtf --> ucvtf.  */
+    case 671: return NULL;		/* ucvtf --> NULL.  */
+    case 676: value = 677; break;	/* fcvtns --> fcvtns.  */
+    case 677: return NULL;		/* fcvtns --> NULL.  */
+    case 696: value = 697; break;	/* fcvtms --> fcvtms.  */
+    case 697: return NULL;		/* fcvtms --> NULL.  */
+    case 692: value = 693; break;	/* fcvtps --> fcvtps.  */
+    case 693: return NULL;		/* fcvtps --> NULL.  */
+    case 700: value = 701; break;	/* fcvtzs --> fcvtzs.  */
+    case 701: return NULL;		/* fcvtzs --> NULL.  */
+    case 684: value = 685; break;	/* fcvtas --> fcvtas.  */
+    case 685: return NULL;		/* fcvtas --> NULL.  */
+    case 680: value = 681; break;	/* scvtf --> scvtf.  */
+    case 681: return NULL;		/* scvtf --> NULL.  */
+    case 688: value = 689; break;	/* fmov --> fmov.  */
+    case 689: return NULL;		/* fmov --> NULL.  */
+    case 678: value = 679; break;	/* fcvtnu --> fcvtnu.  */
+    case 679: return NULL;		/* fcvtnu --> NULL.  */
+    case 698: value = 699; break;	/* fcvtmu --> fcvtmu.  */
+    case 699: return NULL;		/* fcvtmu --> NULL.  */
+    case 694: value = 695; break;	/* fcvtpu --> fcvtpu.  */
+    case 695: return NULL;		/* fcvtpu --> NULL.  */
+    case 702: value = 703; break;	/* fcvtzu --> fcvtzu.  */
+    case 703: return NULL;		/* fcvtzu --> NULL.  */
+    case 686: value = 687; break;	/* fcvtau --> fcvtau.  */
+    case 687: return NULL;		/* fcvtau --> NULL.  */
+    case 682: value = 683; break;	/* ucvtf --> ucvtf.  */
+    case 683: return NULL;		/* ucvtf --> NULL.  */
+    case 690: value = 691; break;	/* fmov --> fmov.  */
+    case 691: return NULL;		/* fmov --> NULL.  */
+    case 718: value = 719; break;	/* fmov --> fmov.  */
+    case 719: return NULL;		/* fmov --> NULL.  */
+    case 727: value = 728; break;	/* frintn --> frintn.  */
+    case 728: return NULL;		/* frintn --> NULL.  */
+    case 722: value = 723; break;	/* fneg --> fneg.  */
+    case 723: return NULL;		/* fneg --> NULL.  */
+    case 731: value = 732; break;	/* frintm --> frintm.  */
+    case 732: return NULL;		/* frintm --> NULL.  */
+    case 720: value = 721; break;	/* fabs --> fabs.  */
+    case 721: return NULL;		/* fabs --> NULL.  */
+    case 729: value = 730; break;	/* frintp --> frintp.  */
+    case 730: return NULL;		/* frintp --> NULL.  */
+    case 724: value = 725; break;	/* fsqrt --> fsqrt.  */
+    case 725: return NULL;		/* fsqrt --> NULL.  */
+    case 733: value = 734; break;	/* frintz --> frintz.  */
+    case 734: return NULL;		/* frintz --> NULL.  */
+    case 735: value = 736; break;	/* frinta --> frinta.  */
+    case 736: return NULL;		/* frinta --> NULL.  */
+    case 737: value = 738; break;	/* frintx --> frintx.  */
+    case 738: return NULL;		/* frintx --> NULL.  */
+    case 739: value = 740; break;	/* frinti --> frinti.  */
+    case 740: return NULL;		/* frinti --> NULL.  */
+    case 710: value = 711; break;	/* fcmp --> fcmp.  */
+    case 711: return NULL;		/* fcmp --> NULL.  */
+    case 712: value = 713; break;	/* fcmpe --> fcmpe.  */
+    case 713: return NULL;		/* fcmpe --> NULL.  */
+    case 714: value = 715; break;	/* fcmp --> fcmp.  */
+    case 715: return NULL;		/* fcmp --> NULL.  */
+    case 716: value = 717; break;	/* fcmpe --> fcmpe.  */
+    case 717: return NULL;		/* fcmpe --> NULL.  */
+    case 767: value = 768; break;	/* fmov --> fmov.  */
+    case 768: return NULL;		/* fmov --> NULL.  */
+    case 741: value = 742; break;	/* fmul --> fmul.  */
+    case 742: return NULL;		/* fmul --> NULL.  */
+    case 757: value = 758; break;	/* fnmul --> fnmul.  */
+    case 758: return NULL;		/* fnmul --> NULL.  */
+    case 749: value = 750; break;	/* fmax --> fmax.  */
+    case 750: return NULL;		/* fmax --> NULL.  */
+    case 745: value = 746; break;	/* fadd --> fadd.  */
+    case 746: return NULL;		/* fadd --> NULL.  */
+    case 753: value = 754; break;	/* fmaxnm --> fmaxnm.  */
+    case 754: return NULL;		/* fmaxnm --> NULL.  */
+    case 743: value = 744; break;	/* fdiv --> fdiv.  */
+    case 744: return NULL;		/* fdiv --> NULL.  */
+    case 751: value = 752; break;	/* fmin --> fmin.  */
+    case 752: return NULL;		/* fmin --> NULL.  */
+    case 747: value = 748; break;	/* fsub --> fsub.  */
+    case 748: return NULL;		/* fsub --> NULL.  */
+    case 755: value = 756; break;	/* fminnm --> fminnm.  */
+    case 756: return NULL;		/* fminnm --> NULL.  */
+    case 706: value = 707; break;	/* fccmp --> fccmp.  */
+    case 707: return NULL;		/* fccmp --> NULL.  */
+    case 708: value = 709; break;	/* fccmpe --> fccmpe.  */
+    case 709: return NULL;		/* fccmpe --> NULL.  */
+    case 769: value = 770; break;	/* fcsel --> fcsel.  */
+    case 770: return NULL;		/* fcsel --> NULL.  */
+    case 122: value = 356; break;	/* movi --> sshr.  */
+    case 356: value = 358; break;	/* sshr --> srshr.  */
+    case 358: return NULL;		/* srshr --> NULL.  */
+    case 129: value = 376; break;	/* mvni --> ushr.  */
+    case 376: value = 378; break;	/* ushr --> urshr.  */
+    case 378: value = 380; break;	/* urshr --> sri.  */
+    case 380: value = 382; break;	/* sri --> sqshlu.  */
+    case 382: return NULL;		/* sqshlu --> NULL.  */
+    case 123: value = 357; break;	/* orr --> ssra.  */
+    case 357: value = 359; break;	/* ssra --> srsra.  */
+    case 359: value = 360; break;	/* srsra --> shl.  */
+    case 360: value = 361; break;	/* shl --> sqshl.  */
+    case 361: return NULL;		/* sqshl --> NULL.  */
+    case 130: value = 377; break;	/* bic --> usra.  */
+    case 377: value = 379; break;	/* usra --> ursra.  */
+    case 379: value = 381; break;	/* ursra --> sli.  */
+    case 381: value = 383; break;	/* sli --> uqshl.  */
+    case 383: return NULL;		/* uqshl --> NULL.  */
+    case 759: value = 760; break;	/* fmadd --> fmadd.  */
+    case 760: return NULL;		/* fmadd --> NULL.  */
+    case 763: value = 764; break;	/* fnmadd --> fnmadd.  */
+    case 764: return NULL;		/* fnmadd --> NULL.  */
+    case 124: value = 362; break;	/* movi --> shrn.  */
+    case 362: value = 363; break;	/* shrn --> shrn2.  */
+    case 363: value = 370; break;	/* shrn2 --> sshll.  */
+    case 370: value = 372; break;	/* sshll --> sshll2.  */
+    case 372: return NULL;		/* sshll2 --> NULL.  */
+    case 131: value = 384; break;	/* mvni --> sqshrun.  */
+    case 384: value = 385; break;	/* sqshrun --> sqshrun2.  */
+    case 385: value = 392; break;	/* sqshrun2 --> ushll.  */
+    case 392: value = 394; break;	/* ushll --> ushll2.  */
+    case 394: return NULL;		/* ushll2 --> NULL.  */
+    case 125: value = 366; break;	/* orr --> sqshrn.  */
+    case 366: value = 367; break;	/* sqshrn --> sqshrn2.  */
+    case 367: return NULL;		/* sqshrn2 --> NULL.  */
+    case 132: value = 388; break;	/* bic --> uqshrn.  */
+    case 388: value = 389; break;	/* uqshrn --> uqshrn2.  */
+    case 389: return NULL;		/* uqshrn2 --> NULL.  */
+    case 127: value = 374; break;	/* movi --> scvtf.  */
+    case 374: return NULL;		/* scvtf --> NULL.  */
     case 134: value = 135; break;	/* movi --> movi.  */
-    case 135: value = 367; break;	/* movi --> ucvtf.  */
-    case 367: return NULL;		/* ucvtf --> NULL.  */
-    case 732: value = 733; break;	/* fmsub --> fmsub.  */
-    case 733: return NULL;		/* fmsub --> NULL.  */
-    case 736: value = 737; break;	/* fnmsub --> fnmsub.  */
-    case 737: return NULL;		/* fnmsub --> NULL.  */
+    case 135: value = 396; break;	/* movi --> ucvtf.  */
+    case 396: return NULL;		/* ucvtf --> NULL.  */
+    case 761: value = 762; break;	/* fmsub --> fmsub.  */
+    case 762: return NULL;		/* fmsub --> NULL.  */
+    case 765: value = 766; break;	/* fnmsub --> fnmsub.  */
+    case 766: return NULL;		/* fnmsub --> NULL.  */
     default: return NULL;
     }
 
@@ -9427,89 +9746,89 @@ aarch64_find_alias_opcode (const aarch64_opcode *opcode)
     case 140: value = 141; break;	/* umov --> mov.  */
     case 142: value = 143; break;	/* ins --> mov.  */
     case 144: value = 145; break;	/* ins --> mov.  */
-    case 205: value = 206; break;	/* not --> mvn.  */
-    case 272: value = 273; break;	/* orr --> mov.  */
-    case 341: value = 342; break;	/* sshll --> sxtl.  */
-    case 343: value = 344; break;	/* sshll2 --> sxtl2.  */
-    case 363: value = 364; break;	/* ushll --> uxtl.  */
-    case 365: value = 366; break;	/* ushll2 --> uxtl2.  */
-    case 460: value = 461; break;	/* dup --> mov.  */
-    case 534: value = 539; break;	/* sbfm --> sxtw.  */
-    case 541: value = 543; break;	/* bfm --> bfc.  */
-    case 545: value = 549; break;	/* ubfm --> uxth.  */
-    case 567: value = 569; break;	/* csinc --> cset.  */
-    case 570: value = 572; break;	/* csinv --> csetm.  */
-    case 573: value = 574; break;	/* csneg --> cneg.  */
-    case 592: value = 592; break;	/* rev --> rev.  */
-    case 599: value = 600; break;	/* lslv --> lsl.  */
-    case 601: value = 602; break;	/* lsrv --> lsr.  */
-    case 603: value = 604; break;	/* asrv --> asr.  */
-    case 605: value = 606; break;	/* rorv --> ror.  */
-    case 615: value = 616; break;	/* madd --> mul.  */
-    case 617: value = 618; break;	/* msub --> mneg.  */
-    case 619: value = 620; break;	/* smaddl --> smull.  */
-    case 621: value = 622; break;	/* smsubl --> smnegl.  */
-    case 624: value = 625; break;	/* umaddl --> umull.  */
-    case 626: value = 627; break;	/* umsubl --> umnegl.  */
-    case 637: value = 638; break;	/* extr --> ror.  */
-    case 844: value = 845; break;	/* and --> bic.  */
-    case 846: value = 847; break;	/* orr --> mov.  */
-    case 849: value = 850; break;	/* ands --> tst.  */
-    case 853: value = 855; break;	/* orr --> uxtw.  */
-    case 856: value = 857; break;	/* orn --> mvn.  */
-    case 860: value = 861; break;	/* ands --> tst.  */
-    case 891: value = 987; break;	/* ldaddb --> staddb.  */
-    case 892: value = 988; break;	/* ldaddh --> staddh.  */
-    case 893: value = 989; break;	/* ldadd --> stadd.  */
-    case 895: value = 990; break;	/* ldaddlb --> staddlb.  */
-    case 898: value = 991; break;	/* ldaddlh --> staddlh.  */
-    case 901: value = 992; break;	/* ldaddl --> staddl.  */
-    case 903: value = 993; break;	/* ldclrb --> stclrb.  */
-    case 904: value = 994; break;	/* ldclrh --> stclrh.  */
-    case 905: value = 995; break;	/* ldclr --> stclr.  */
-    case 907: value = 996; break;	/* ldclrlb --> stclrlb.  */
-    case 910: value = 997; break;	/* ldclrlh --> stclrlh.  */
-    case 913: value = 998; break;	/* ldclrl --> stclrl.  */
-    case 915: value = 999; break;	/* ldeorb --> steorb.  */
-    case 916: value = 1000; break;	/* ldeorh --> steorh.  */
-    case 917: value = 1001; break;	/* ldeor --> steor.  */
-    case 919: value = 1002; break;	/* ldeorlb --> steorlb.  */
-    case 922: value = 1003; break;	/* ldeorlh --> steorlh.  */
-    case 925: value = 1004; break;	/* ldeorl --> steorl.  */
-    case 927: value = 1005; break;	/* ldsetb --> stsetb.  */
-    case 928: value = 1006; break;	/* ldseth --> stseth.  */
-    case 929: value = 1007; break;	/* ldset --> stset.  */
-    case 931: value = 1008; break;	/* ldsetlb --> stsetlb.  */
-    case 934: value = 1009; break;	/* ldsetlh --> stsetlh.  */
-    case 937: value = 1010; break;	/* ldsetl --> stsetl.  */
-    case 939: value = 1011; break;	/* ldsmaxb --> stsmaxb.  */
-    case 940: value = 1012; break;	/* ldsmaxh --> stsmaxh.  */
-    case 941: value = 1013; break;	/* ldsmax --> stsmax.  */
-    case 943: value = 1014; break;	/* ldsmaxlb --> stsmaxlb.  */
-    case 946: value = 1015; break;	/* ldsmaxlh --> stsmaxlh.  */
-    case 949: value = 1016; break;	/* ldsmaxl --> stsmaxl.  */
-    case 951: value = 1017; break;	/* ldsminb --> stsminb.  */
-    case 952: value = 1018; break;	/* ldsminh --> stsminh.  */
-    case 953: value = 1019; break;	/* ldsmin --> stsmin.  */
-    case 955: value = 1020; break;	/* ldsminlb --> stsminlb.  */
-    case 958: value = 1021; break;	/* ldsminlh --> stsminlh.  */
-    case 961: value = 1022; break;	/* ldsminl --> stsminl.  */
-    case 963: value = 1023; break;	/* ldumaxb --> stumaxb.  */
-    case 964: value = 1024; break;	/* ldumaxh --> stumaxh.  */
-    case 965: value = 1025; break;	/* ldumax --> stumax.  */
-    case 967: value = 1026; break;	/* ldumaxlb --> stumaxlb.  */
-    case 970: value = 1027; break;	/* ldumaxlh --> stumaxlh.  */
-    case 973: value = 1028; break;	/* ldumaxl --> stumaxl.  */
-    case 975: value = 1029; break;	/* lduminb --> stuminb.  */
-    case 976: value = 1030; break;	/* lduminh --> stuminh.  */
-    case 977: value = 1031; break;	/* ldumin --> stumin.  */
-    case 979: value = 1032; break;	/* lduminlb --> stuminlb.  */
-    case 982: value = 1033; break;	/* lduminlh --> stuminlh.  */
-    case 985: value = 1034; break;	/* lduminl --> stuminl.  */
-    case 1035: value = 1036; break;	/* movn --> mov.  */
-    case 1037: value = 1038; break;	/* movz --> mov.  */
-    case 1043: value = 1051; break;	/* hint --> psb.  */
-    case 1056: value = 1060; break;	/* sys --> tlbi.  */
+    case 226: value = 227; break;	/* not --> mvn.  */
+    case 301: value = 302; break;	/* orr --> mov.  */
+    case 370: value = 371; break;	/* sshll --> sxtl.  */
+    case 372: value = 373; break;	/* sshll2 --> sxtl2.  */
+    case 392: value = 393; break;	/* ushll --> uxtl.  */
+    case 394: value = 395; break;	/* ushll2 --> uxtl2.  */
+    case 489: value = 490; break;	/* dup --> mov.  */
+    case 563: value = 568; break;	/* sbfm --> sxtw.  */
+    case 570: value = 572; break;	/* bfm --> bfc.  */
+    case 574: value = 578; break;	/* ubfm --> uxth.  */
+    case 596: value = 598; break;	/* csinc --> cset.  */
+    case 599: value = 601; break;	/* csinv --> csetm.  */
+    case 602: value = 603; break;	/* csneg --> cneg.  */
+    case 621: value = 621; break;	/* rev --> rev.  */
+    case 628: value = 629; break;	/* lslv --> lsl.  */
+    case 630: value = 631; break;	/* lsrv --> lsr.  */
+    case 632: value = 633; break;	/* asrv --> asr.  */
+    case 634: value = 635; break;	/* rorv --> ror.  */
+    case 644: value = 645; break;	/* madd --> mul.  */
+    case 646: value = 647; break;	/* msub --> mneg.  */
+    case 648: value = 649; break;	/* smaddl --> smull.  */
+    case 650: value = 651; break;	/* smsubl --> smnegl.  */
+    case 653: value = 654; break;	/* umaddl --> umull.  */
+    case 655: value = 656; break;	/* umsubl --> umnegl.  */
+    case 666: value = 667; break;	/* extr --> ror.  */
+    case 873: value = 874; break;	/* and --> bic.  */
+    case 875: value = 876; break;	/* orr --> mov.  */
+    case 878: value = 879; break;	/* ands --> tst.  */
+    case 882: value = 884; break;	/* orr --> uxtw.  */
+    case 885: value = 886; break;	/* orn --> mvn.  */
+    case 889: value = 890; break;	/* ands --> tst.  */
+    case 920: value = 1016; break;	/* ldaddb --> staddb.  */
+    case 921: value = 1017; break;	/* ldaddh --> staddh.  */
+    case 922: value = 1018; break;	/* ldadd --> stadd.  */
+    case 924: value = 1019; break;	/* ldaddlb --> staddlb.  */
+    case 927: value = 1020; break;	/* ldaddlh --> staddlh.  */
+    case 930: value = 1021; break;	/* ldaddl --> staddl.  */
+    case 932: value = 1022; break;	/* ldclrb --> stclrb.  */
+    case 933: value = 1023; break;	/* ldclrh --> stclrh.  */
+    case 934: value = 1024; break;	/* ldclr --> stclr.  */
+    case 936: value = 1025; break;	/* ldclrlb --> stclrlb.  */
+    case 939: value = 1026; break;	/* ldclrlh --> stclrlh.  */
+    case 942: value = 1027; break;	/* ldclrl --> stclrl.  */
+    case 944: value = 1028; break;	/* ldeorb --> steorb.  */
+    case 945: value = 1029; break;	/* ldeorh --> steorh.  */
+    case 946: value = 1030; break;	/* ldeor --> steor.  */
+    case 948: value = 1031; break;	/* ldeorlb --> steorlb.  */
+    case 951: value = 1032; break;	/* ldeorlh --> steorlh.  */
+    case 954: value = 1033; break;	/* ldeorl --> steorl.  */
+    case 956: value = 1034; break;	/* ldsetb --> stsetb.  */
+    case 957: value = 1035; break;	/* ldseth --> stseth.  */
+    case 958: value = 1036; break;	/* ldset --> stset.  */
+    case 960: value = 1037; break;	/* ldsetlb --> stsetlb.  */
+    case 963: value = 1038; break;	/* ldsetlh --> stsetlh.  */
+    case 966: value = 1039; break;	/* ldsetl --> stsetl.  */
+    case 968: value = 1040; break;	/* ldsmaxb --> stsmaxb.  */
+    case 969: value = 1041; break;	/* ldsmaxh --> stsmaxh.  */
+    case 970: value = 1042; break;	/* ldsmax --> stsmax.  */
+    case 972: value = 1043; break;	/* ldsmaxlb --> stsmaxlb.  */
+    case 975: value = 1044; break;	/* ldsmaxlh --> stsmaxlh.  */
+    case 978: value = 1045; break;	/* ldsmaxl --> stsmaxl.  */
+    case 980: value = 1046; break;	/* ldsminb --> stsminb.  */
+    case 981: value = 1047; break;	/* ldsminh --> stsminh.  */
+    case 982: value = 1048; break;	/* ldsmin --> stsmin.  */
+    case 984: value = 1049; break;	/* ldsminlb --> stsminlb.  */
+    case 987: value = 1050; break;	/* ldsminlh --> stsminlh.  */
+    case 990: value = 1051; break;	/* ldsminl --> stsminl.  */
+    case 992: value = 1052; break;	/* ldumaxb --> stumaxb.  */
+    case 993: value = 1053; break;	/* ldumaxh --> stumaxh.  */
+    case 994: value = 1054; break;	/* ldumax --> stumax.  */
+    case 996: value = 1055; break;	/* ldumaxlb --> stumaxlb.  */
+    case 999: value = 1056; break;	/* ldumaxlh --> stumaxlh.  */
+    case 1002: value = 1057; break;	/* ldumaxl --> stumaxl.  */
+    case 1004: value = 1058; break;	/* lduminb --> stuminb.  */
+    case 1005: value = 1059; break;	/* lduminh --> stuminh.  */
+    case 1006: value = 1060; break;	/* ldumin --> stumin.  */
+    case 1008: value = 1061; break;	/* lduminlb --> stuminlb.  */
+    case 1011: value = 1062; break;	/* lduminlh --> stuminlh.  */
+    case 1014: value = 1063; break;	/* lduminl --> stuminl.  */
+    case 1064: value = 1065; break;	/* movn --> mov.  */
+    case 1066: value = 1067; break;	/* movz --> mov.  */
+    case 1072: value = 1080; break;	/* hint --> psb.  */
+    case 1085: value = 1089; break;	/* sys --> tlbi.  */
     default: return NULL;
     }
 
@@ -9538,114 +9857,114 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 141: value = 140; break;	/* mov --> umov.  */
     case 143: value = 142; break;	/* mov --> ins.  */
     case 145: value = 144; break;	/* mov --> ins.  */
-    case 206: value = 205; break;	/* mvn --> not.  */
-    case 273: value = 272; break;	/* mov --> orr.  */
-    case 342: value = 341; break;	/* sxtl --> sshll.  */
-    case 344: value = 343; break;	/* sxtl2 --> sshll2.  */
-    case 364: value = 363; break;	/* uxtl --> ushll.  */
-    case 366: value = 365; break;	/* uxtl2 --> ushll2.  */
-    case 461: value = 460; break;	/* mov --> dup.  */
-    case 539: value = 538; break;	/* sxtw --> sxth.  */
-    case 538: value = 537; break;	/* sxth --> sxtb.  */
-    case 537: value = 540; break;	/* sxtb --> asr.  */
-    case 540: value = 536; break;	/* asr --> sbfx.  */
-    case 536: value = 535; break;	/* sbfx --> sbfiz.  */
-    case 535: value = 534; break;	/* sbfiz --> sbfm.  */
-    case 543: value = 544; break;	/* bfc --> bfxil.  */
-    case 544: value = 542; break;	/* bfxil --> bfi.  */
-    case 542: value = 541; break;	/* bfi --> bfm.  */
-    case 549: value = 548; break;	/* uxth --> uxtb.  */
-    case 548: value = 551; break;	/* uxtb --> lsr.  */
-    case 551: value = 550; break;	/* lsr --> lsl.  */
-    case 550: value = 547; break;	/* lsl --> ubfx.  */
-    case 547: value = 546; break;	/* ubfx --> ubfiz.  */
-    case 546: value = 545; break;	/* ubfiz --> ubfm.  */
-    case 569: value = 568; break;	/* cset --> cinc.  */
-    case 568: value = 567; break;	/* cinc --> csinc.  */
-    case 572: value = 571; break;	/* csetm --> cinv.  */
-    case 571: value = 570; break;	/* cinv --> csinv.  */
-    case 574: value = 573; break;	/* cneg --> csneg.  */
-    case 592: value = 593; break;	/* rev --> rev64.  */
-    case 600: value = 599; break;	/* lsl --> lslv.  */
-    case 602: value = 601; break;	/* lsr --> lsrv.  */
-    case 604: value = 603; break;	/* asr --> asrv.  */
-    case 606: value = 605; break;	/* ror --> rorv.  */
-    case 616: value = 615; break;	/* mul --> madd.  */
-    case 618: value = 617; break;	/* mneg --> msub.  */
-    case 620: value = 619; break;	/* smull --> smaddl.  */
-    case 622: value = 621; break;	/* smnegl --> smsubl.  */
-    case 625: value = 624; break;	/* umull --> umaddl.  */
-    case 627: value = 626; break;	/* umnegl --> umsubl.  */
-    case 638: value = 637; break;	/* ror --> extr.  */
-    case 845: value = 844; break;	/* bic --> and.  */
-    case 847: value = 846; break;	/* mov --> orr.  */
-    case 850: value = 849; break;	/* tst --> ands.  */
-    case 855: value = 854; break;	/* uxtw --> mov.  */
-    case 854: value = 853; break;	/* mov --> orr.  */
-    case 857: value = 856; break;	/* mvn --> orn.  */
-    case 861: value = 860; break;	/* tst --> ands.  */
-    case 987: value = 891; break;	/* staddb --> ldaddb.  */
-    case 988: value = 892; break;	/* staddh --> ldaddh.  */
-    case 989: value = 893; break;	/* stadd --> ldadd.  */
-    case 990: value = 895; break;	/* staddlb --> ldaddlb.  */
-    case 991: value = 898; break;	/* staddlh --> ldaddlh.  */
-    case 992: value = 901; break;	/* staddl --> ldaddl.  */
-    case 993: value = 903; break;	/* stclrb --> ldclrb.  */
-    case 994: value = 904; break;	/* stclrh --> ldclrh.  */
-    case 995: value = 905; break;	/* stclr --> ldclr.  */
-    case 996: value = 907; break;	/* stclrlb --> ldclrlb.  */
-    case 997: value = 910; break;	/* stclrlh --> ldclrlh.  */
-    case 998: value = 913; break;	/* stclrl --> ldclrl.  */
-    case 999: value = 915; break;	/* steorb --> ldeorb.  */
-    case 1000: value = 916; break;	/* steorh --> ldeorh.  */
-    case 1001: value = 917; break;	/* steor --> ldeor.  */
-    case 1002: value = 919; break;	/* steorlb --> ldeorlb.  */
-    case 1003: value = 922; break;	/* steorlh --> ldeorlh.  */
-    case 1004: value = 925; break;	/* steorl --> ldeorl.  */
-    case 1005: value = 927; break;	/* stsetb --> ldsetb.  */
-    case 1006: value = 928; break;	/* stseth --> ldseth.  */
-    case 1007: value = 929; break;	/* stset --> ldset.  */
-    case 1008: value = 931; break;	/* stsetlb --> ldsetlb.  */
-    case 1009: value = 934; break;	/* stsetlh --> ldsetlh.  */
-    case 1010: value = 937; break;	/* stsetl --> ldsetl.  */
-    case 1011: value = 939; break;	/* stsmaxb --> ldsmaxb.  */
-    case 1012: value = 940; break;	/* stsmaxh --> ldsmaxh.  */
-    case 1013: value = 941; break;	/* stsmax --> ldsmax.  */
-    case 1014: value = 943; break;	/* stsmaxlb --> ldsmaxlb.  */
-    case 1015: value = 946; break;	/* stsmaxlh --> ldsmaxlh.  */
-    case 1016: value = 949; break;	/* stsmaxl --> ldsmaxl.  */
-    case 1017: value = 951; break;	/* stsminb --> ldsminb.  */
-    case 1018: value = 952; break;	/* stsminh --> ldsminh.  */
-    case 1019: value = 953; break;	/* stsmin --> ldsmin.  */
-    case 1020: value = 955; break;	/* stsminlb --> ldsminlb.  */
-    case 1021: value = 958; break;	/* stsminlh --> ldsminlh.  */
-    case 1022: value = 961; break;	/* stsminl --> ldsminl.  */
-    case 1023: value = 963; break;	/* stumaxb --> ldumaxb.  */
-    case 1024: value = 964; break;	/* stumaxh --> ldumaxh.  */
-    case 1025: value = 965; break;	/* stumax --> ldumax.  */
-    case 1026: value = 967; break;	/* stumaxlb --> ldumaxlb.  */
-    case 1027: value = 970; break;	/* stumaxlh --> ldumaxlh.  */
-    case 1028: value = 973; break;	/* stumaxl --> ldumaxl.  */
-    case 1029: value = 975; break;	/* stuminb --> lduminb.  */
-    case 1030: value = 976; break;	/* stuminh --> lduminh.  */
-    case 1031: value = 977; break;	/* stumin --> ldumin.  */
-    case 1032: value = 979; break;	/* stuminlb --> lduminlb.  */
-    case 1033: value = 982; break;	/* stuminlh --> lduminlh.  */
-    case 1034: value = 985; break;	/* stuminl --> lduminl.  */
-    case 1036: value = 1035; break;	/* mov --> movn.  */
-    case 1038: value = 1037; break;	/* mov --> movz.  */
-    case 1051: value = 1050; break;	/* psb --> esb.  */
-    case 1050: value = 1049; break;	/* esb --> sevl.  */
-    case 1049: value = 1048; break;	/* sevl --> sev.  */
-    case 1048: value = 1047; break;	/* sev --> wfi.  */
-    case 1047: value = 1046; break;	/* wfi --> wfe.  */
-    case 1046: value = 1045; break;	/* wfe --> yield.  */
-    case 1045: value = 1044; break;	/* yield --> nop.  */
-    case 1044: value = 1043; break;	/* nop --> hint.  */
-    case 1060: value = 1059; break;	/* tlbi --> ic.  */
-    case 1059: value = 1058; break;	/* ic --> dc.  */
-    case 1058: value = 1057; break;	/* dc --> at.  */
-    case 1057: value = 1056; break;	/* at --> sys.  */
+    case 227: value = 226; break;	/* mvn --> not.  */
+    case 302: value = 301; break;	/* mov --> orr.  */
+    case 371: value = 370; break;	/* sxtl --> sshll.  */
+    case 373: value = 372; break;	/* sxtl2 --> sshll2.  */
+    case 393: value = 392; break;	/* uxtl --> ushll.  */
+    case 395: value = 394; break;	/* uxtl2 --> ushll2.  */
+    case 490: value = 489; break;	/* mov --> dup.  */
+    case 568: value = 567; break;	/* sxtw --> sxth.  */
+    case 567: value = 566; break;	/* sxth --> sxtb.  */
+    case 566: value = 569; break;	/* sxtb --> asr.  */
+    case 569: value = 565; break;	/* asr --> sbfx.  */
+    case 565: value = 564; break;	/* sbfx --> sbfiz.  */
+    case 564: value = 563; break;	/* sbfiz --> sbfm.  */
+    case 572: value = 573; break;	/* bfc --> bfxil.  */
+    case 573: value = 571; break;	/* bfxil --> bfi.  */
+    case 571: value = 570; break;	/* bfi --> bfm.  */
+    case 578: value = 577; break;	/* uxth --> uxtb.  */
+    case 577: value = 580; break;	/* uxtb --> lsr.  */
+    case 580: value = 579; break;	/* lsr --> lsl.  */
+    case 579: value = 576; break;	/* lsl --> ubfx.  */
+    case 576: value = 575; break;	/* ubfx --> ubfiz.  */
+    case 575: value = 574; break;	/* ubfiz --> ubfm.  */
+    case 598: value = 597; break;	/* cset --> cinc.  */
+    case 597: value = 596; break;	/* cinc --> csinc.  */
+    case 601: value = 600; break;	/* csetm --> cinv.  */
+    case 600: value = 599; break;	/* cinv --> csinv.  */
+    case 603: value = 602; break;	/* cneg --> csneg.  */
+    case 621: value = 622; break;	/* rev --> rev64.  */
+    case 629: value = 628; break;	/* lsl --> lslv.  */
+    case 631: value = 630; break;	/* lsr --> lsrv.  */
+    case 633: value = 632; break;	/* asr --> asrv.  */
+    case 635: value = 634; break;	/* ror --> rorv.  */
+    case 645: value = 644; break;	/* mul --> madd.  */
+    case 647: value = 646; break;	/* mneg --> msub.  */
+    case 649: value = 648; break;	/* smull --> smaddl.  */
+    case 651: value = 650; break;	/* smnegl --> smsubl.  */
+    case 654: value = 653; break;	/* umull --> umaddl.  */
+    case 656: value = 655; break;	/* umnegl --> umsubl.  */
+    case 667: value = 666; break;	/* ror --> extr.  */
+    case 874: value = 873; break;	/* bic --> and.  */
+    case 876: value = 875; break;	/* mov --> orr.  */
+    case 879: value = 878; break;	/* tst --> ands.  */
+    case 884: value = 883; break;	/* uxtw --> mov.  */
+    case 883: value = 882; break;	/* mov --> orr.  */
+    case 886: value = 885; break;	/* mvn --> orn.  */
+    case 890: value = 889; break;	/* tst --> ands.  */
+    case 1016: value = 920; break;	/* staddb --> ldaddb.  */
+    case 1017: value = 921; break;	/* staddh --> ldaddh.  */
+    case 1018: value = 922; break;	/* stadd --> ldadd.  */
+    case 1019: value = 924; break;	/* staddlb --> ldaddlb.  */
+    case 1020: value = 927; break;	/* staddlh --> ldaddlh.  */
+    case 1021: value = 930; break;	/* staddl --> ldaddl.  */
+    case 1022: value = 932; break;	/* stclrb --> ldclrb.  */
+    case 1023: value = 933; break;	/* stclrh --> ldclrh.  */
+    case 1024: value = 934; break;	/* stclr --> ldclr.  */
+    case 1025: value = 936; break;	/* stclrlb --> ldclrlb.  */
+    case 1026: value = 939; break;	/* stclrlh --> ldclrlh.  */
+    case 1027: value = 942; break;	/* stclrl --> ldclrl.  */
+    case 1028: value = 944; break;	/* steorb --> ldeorb.  */
+    case 1029: value = 945; break;	/* steorh --> ldeorh.  */
+    case 1030: value = 946; break;	/* steor --> ldeor.  */
+    case 1031: value = 948; break;	/* steorlb --> ldeorlb.  */
+    case 1032: value = 951; break;	/* steorlh --> ldeorlh.  */
+    case 1033: value = 954; break;	/* steorl --> ldeorl.  */
+    case 1034: value = 956; break;	/* stsetb --> ldsetb.  */
+    case 1035: value = 957; break;	/* stseth --> ldseth.  */
+    case 1036: value = 958; break;	/* stset --> ldset.  */
+    case 1037: value = 960; break;	/* stsetlb --> ldsetlb.  */
+    case 1038: value = 963; break;	/* stsetlh --> ldsetlh.  */
+    case 1039: value = 966; break;	/* stsetl --> ldsetl.  */
+    case 1040: value = 968; break;	/* stsmaxb --> ldsmaxb.  */
+    case 1041: value = 969; break;	/* stsmaxh --> ldsmaxh.  */
+    case 1042: value = 970; break;	/* stsmax --> ldsmax.  */
+    case 1043: value = 972; break;	/* stsmaxlb --> ldsmaxlb.  */
+    case 1044: value = 975; break;	/* stsmaxlh --> ldsmaxlh.  */
+    case 1045: value = 978; break;	/* stsmaxl --> ldsmaxl.  */
+    case 1046: value = 980; break;	/* stsminb --> ldsminb.  */
+    case 1047: value = 981; break;	/* stsminh --> ldsminh.  */
+    case 1048: value = 982; break;	/* stsmin --> ldsmin.  */
+    case 1049: value = 984; break;	/* stsminlb --> ldsminlb.  */
+    case 1050: value = 987; break;	/* stsminlh --> ldsminlh.  */
+    case 1051: value = 990; break;	/* stsminl --> ldsminl.  */
+    case 1052: value = 992; break;	/* stumaxb --> ldumaxb.  */
+    case 1053: value = 993; break;	/* stumaxh --> ldumaxh.  */
+    case 1054: value = 994; break;	/* stumax --> ldumax.  */
+    case 1055: value = 996; break;	/* stumaxlb --> ldumaxlb.  */
+    case 1056: value = 999; break;	/* stumaxlh --> ldumaxlh.  */
+    case 1057: value = 1002; break;	/* stumaxl --> ldumaxl.  */
+    case 1058: value = 1004; break;	/* stuminb --> lduminb.  */
+    case 1059: value = 1005; break;	/* stuminh --> lduminh.  */
+    case 1060: value = 1006; break;	/* stumin --> ldumin.  */
+    case 1061: value = 1008; break;	/* stuminlb --> lduminlb.  */
+    case 1062: value = 1011; break;	/* stuminlh --> lduminlh.  */
+    case 1063: value = 1014; break;	/* stuminl --> lduminl.  */
+    case 1065: value = 1064; break;	/* mov --> movn.  */
+    case 1067: value = 1066; break;	/* mov --> movz.  */
+    case 1080: value = 1079; break;	/* psb --> esb.  */
+    case 1079: value = 1078; break;	/* esb --> sevl.  */
+    case 1078: value = 1077; break;	/* sevl --> sev.  */
+    case 1077: value = 1076; break;	/* sev --> wfi.  */
+    case 1076: value = 1075; break;	/* wfi --> wfe.  */
+    case 1075: value = 1074; break;	/* wfe --> yield.  */
+    case 1074: value = 1073; break;	/* yield --> nop.  */
+    case 1073: value = 1072; break;	/* nop --> hint.  */
+    case 1089: value = 1088; break;	/* tlbi --> ic.  */
+    case 1088: value = 1087; break;	/* ic --> dc.  */
+    case 1087: value = 1086; break;	/* dc --> at.  */
+    case 1086: value = 1085; break;	/* at --> sys.  */
     default: return NULL;
     }
 
