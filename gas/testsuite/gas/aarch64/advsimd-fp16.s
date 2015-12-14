@@ -57,3 +57,58 @@
 	sthree_same facgt
 	sthree_same frecps
 	sthree_same frsqrts
+
+	/* Vector two-register misc.  */
+
+	.macro tworeg_zero, op
+	\op	v0.2d, v1.2d, #0.0
+	\op	v0.2s, v1.2s, #0.0
+	\op	v0.4s, v1.4s, #0.0
+	\op	v0.4h, v1.4h, #0.0
+	\op	v0.8h, v1.8h, #0.0
+	.endm
+
+	tworeg_zero fcmgt
+	tworeg_zero fcmge
+	tworeg_zero fcmeq
+	tworeg_zero fcmle
+	tworeg_zero fcmlt
+
+	.macro tworeg_misc, op
+	\op	v0.2d, v1.2d
+	\op	v0.2s, v1.2s
+	\op	v0.4s, v1.4s
+	\op	v0.4h, v1.4h
+	\op	v0.8h, v1.8h
+	.endm
+
+	tworeg_misc fabs
+	tworeg_misc fneg
+
+	tworeg_misc frintn
+	tworeg_misc frinta
+	tworeg_misc frintp
+
+	tworeg_misc frintm
+	tworeg_misc frintx
+	tworeg_misc frintz
+	tworeg_misc frinti
+
+	tworeg_misc fcvtns
+	tworeg_misc fcvtnu
+	tworeg_misc fcvtps
+	tworeg_misc fcvtpu
+
+	tworeg_misc fcvtms
+	tworeg_misc fcvtmu
+	tworeg_misc fcvtzs
+	tworeg_misc fcvtzu
+
+	tworeg_misc fcvtas
+	tworeg_misc fcvtau
+
+	tworeg_misc scvtf
+	tworeg_misc ucvtf
+	tworeg_misc frecpe
+	tworeg_misc frsqrte
+	tworeg_misc fsqrt
