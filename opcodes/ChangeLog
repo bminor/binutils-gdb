@@ -3,6 +3,18 @@
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
 	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_SISD_FCMP_H_0): new.
+	(QL_S_2SAMEH): New.
+	(aarch64_opcode_table): Add fp16 versions of fcvtns, fcvtms,
+	fcvtas, scvtf, fcmgt, fcmeq, fcmlt, fcvtps, fcvtzs, frecpe,
+	frecpx, fcvtnu, fcvtmu, fcvtau, ucvtf, fcmge, fcmle, fcvtpu,
+	fcvtzu and frsqrte to the scalar two register misc. group.
+
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
 	* aarch64-tbl.h (QL_V2SAMEH): New.
 	(aarch64_opcode_table): Add fp16 versions of frintn, frintm,
 	fcvtns, fcvtms, fcvtas, scvtf, fcmgt, fcmeq, fcmlt, fabs, frintp,

@@ -471,6 +471,12 @@
   QLF3(S_D, S_D, NIL),		\
 }
 
+/* e.g. FCMEQ <V><d>, <V><n>, #0.  */
+#define QL_SISD_FCMP_H_0	\
+{				\
+  QLF3 (S_H, S_H, NIL),		\
+}
+
 /* e.g. FMAXNMP <V><d>, <Vn>.<T>.  */
 #define QL_SISD_PAIR		\
 {				\
@@ -498,6 +504,12 @@
 {				\
   QLF2(S_S, S_S),		\
   QLF2(S_D, S_D),		\
+}
+
+/* e.g. FCVTNS <V><d>, <V><n>.  */
+#define QL_S_2SAMEH		\
+{				\
+  QLF2 (S_H, S_H),		\
 }
 
 /* e.g. SQXTN <Vb><d>, <Va><n>.  */
@@ -1876,16 +1888,38 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"abs", 0x5e20b800, 0xff3ffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_2SAMED, F_SSIZE},
   {"sqxtn", 0x5e214800, 0xff3ffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_SISD_NARROW, F_SSIZE},
   {"fcvtns", 0x5e21a800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtns", 0x5e79a800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"fcvtms", 0x5e21b800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtms", 0x5e79b800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"fcvtas", 0x5e21c800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtas", 0x5e79c800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"scvtf", 0x5e21d800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"scvtf", 0x5e79d800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"fcmgt", 0x5ea0c800, 0xffbffc00, asisdmisc, 0, SIMD, OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_0, F_SSIZE},
+  {"fcmgt", 0x5ef8c800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_H_0, F_SSIZE},
   {"fcmeq", 0x5ea0d800, 0xffbffc00, asisdmisc, 0, SIMD, OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_0, F_SSIZE},
+  {"fcmeq", 0x5ef8d800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_H_0, F_SSIZE},
   {"fcmlt", 0x5ea0e800, 0xffbffc00, asisdmisc, 0, SIMD, OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_0, F_SSIZE},
+  {"fcmlt", 0x5ef8e800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_H_0, F_SSIZE},
   {"fcvtps", 0x5ea1a800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtps", 0x5ef9a800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"fcvtzs", 0x5ea1b800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtzs", 0x5ef9b800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"frecpe", 0x5ea1d800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"frecpe", 0x5ef9d800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"frecpx", 0x5ea1f800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"frecpx", 0x5ef9f800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"usqadd", 0x7e203800, 0xff3ffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAME, F_SSIZE},
   {"sqneg", 0x7e207800, 0xff3ffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAME, F_SSIZE},
   {"cmge", 0x7e208800, 0xff3ffc00, asisdmisc, 0, SIMD, OP3 (Sd, Sn, IMM0), QL_SISD_CMP_0, F_SSIZE},
@@ -1895,14 +1929,32 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"uqxtn", 0x7e214800, 0xff3ffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_SISD_NARROW, F_SSIZE},
   {"fcvtxn", 0x7e216800, 0xffbffc00, asisdmisc, OP_FCVTXN_S, SIMD, OP2 (Sd, Sn), QL_SISD_NARROW_S, F_MISC},
   {"fcvtnu", 0x7e21a800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtnu", 0x7e79a800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"fcvtmu", 0x7e21b800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtmu", 0x7e79b800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"fcvtau", 0x7e21c800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtau", 0x7e79c800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"ucvtf", 0x7e21d800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"ucvtf", 0x7e79d800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"fcmge", 0x7ea0c800, 0xffbffc00, asisdmisc, 0, SIMD, OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_0, F_SSIZE},
+  {"fcmge", 0x7ef8c800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_H_0, F_SSIZE},
   {"fcmle", 0x7ea0d800, 0xffbffc00, asisdmisc, 0, SIMD, OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_0, F_SSIZE},
+  {"fcmle", 0x7ef8d800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP3 (Sd, Sn, FPIMM0), QL_SISD_FCMP_H_0, F_SSIZE},
   {"fcvtpu", 0x7ea1a800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtpu", 0x7ef9a800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_SISD_FCMP_H_0, F_SSIZE},
   {"fcvtzu", 0x7ea1b800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"fcvtzu", 0x7ef9b800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   {"frsqrte", 0x7ea1d800, 0xffbffc00, asisdmisc, 0, SIMD, OP2 (Sd, Sn), QL_S_2SAMESD, F_SSIZE},
+  {"frsqrte", 0x7ef9d800, 0xfffffc00, asisdmisc, 0, SIMD_F16,
+   OP2 (Sd, Sn), QL_S_2SAMEH, F_SSIZE},
   /* AdvSIMD scalar copy.  */
   {"dup", 0x5e000400, 0xffe0fc00, asisdone, 0, SIMD, OP2 (Sd, En), QL_S_2SAME, F_HAS_ALIAS},
   {"mov", 0x5e000400, 0xffe0fc00, asisdone, 0, SIMD, OP2 (Sd, En), QL_S_2SAME, F_ALIAS},
