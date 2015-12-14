@@ -1,3 +1,8 @@
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (vectype_to_qualifier): Calculate operand
+	qualifier from per-type base and offet.
+
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-aarch64.c (aarch64_hint_opt_hsh): New.

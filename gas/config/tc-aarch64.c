@@ -4671,6 +4671,14 @@ vectype_to_qualifier (const struct neon_type_el *vectype)
   /* Element size in bytes indexed by neon_el_type.  */
   const unsigned char ele_size[5]
     = {1, 2, 4, 8, 16};
+  const unsigned int ele_base [5] =
+    {
+      AARCH64_OPND_QLF_V_8B,
+      AARCH64_OPND_QLF_V_4H,
+      AARCH64_OPND_QLF_V_2S,
+      AARCH64_OPND_QLF_V_1D,
+      AARCH64_OPND_QLF_V_1Q
+  };
 
   if (!vectype->defined || vectype->type == NT_invtype)
     goto vectype_conversion_fail;
@@ -4685,14 +4693,30 @@ vectype_to_qualifier (const struct neon_type_el *vectype)
       /* Vector register.  */
       int reg_size = ele_size[vectype->type] * vectype->width;
       unsigned offset;
+      unsigned shift;
       if (reg_size != 16 && reg_size != 8)
 	goto vectype_conversion_fail;
-      /* The conversion is calculated based on the relation of the order of
-	 qualifiers to the vector element size and vector register size.  */
-      offset = (vectype->type == NT_q)
-	? 8 : (vectype->type << 1) + (reg_size >> 4);
-      gas_assert (offset <= 8);
-      return AARCH64_OPND_QLF_V_8B + offset;
+
+      /* The conversion is by calculating the offset from the base operand
+	 qualifier for the vector type.  The operand qualifiers are regular
+	 enough that the offset can established by shifting the vector width by
+	 a vector-type dependent amount.  */
+      shift = 0;
+      if (vectype->type == NT_b)
+	shift = 4;
+      else if (vectype->type == NT_h)
+	shift = 3;
+      else if (vectype->type == NT_s)
+	shift = 2;
+      else if (vectype->type >= NT_d)
+	shift = 1;
+      else
+	gas_assert (0);
+
+      offset = ele_base [vectype->type] + (vectype->width >> shift);
+      gas_assert (AARCH64_OPND_QLF_V_8B <= offset
+		  && offset <= AARCH64_OPND_QLF_V_1Q);
+      return offset;
     }
 
 vectype_conversion_fail:
