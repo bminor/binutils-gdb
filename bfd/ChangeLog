@@ -1,3 +1,7 @@
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_note): Recognize NT_FREEBSD_THRMISC notes.
+
 2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
 	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
 
