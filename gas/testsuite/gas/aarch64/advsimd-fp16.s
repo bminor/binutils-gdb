@@ -212,3 +212,19 @@
 	fmov	v1.8h, #2.0
 	fmov	v0.4h, #1.0
 	fmov	v0.8h, #1.0
+
+	/* Adv.SIMD modified immediate.  */
+
+	.macro scalar_pairwise, op
+	\op	d1, v2.2d
+	\op	s1, v2.2s
+	\op	h1, v2.2h
+	\op	h0, v0.2h
+	.endm
+
+	scalar_pairwise fmaxnmp
+	scalar_pairwise faddp
+	scalar_pairwise fmaxp
+	scalar_pairwise fminnmp
+	scalar_pairwise fminp
+
