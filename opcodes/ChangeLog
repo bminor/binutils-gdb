@@ -3,6 +3,15 @@
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
 	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_SIMD_IMM_H): New.
+	(aarch64_opcode_table): Add fp16 version of fmov to the Adv.SIMD
+	modified immediate group.
+
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
 	* aarch64-tbl.h (QL_XLANES_FP_H): New.
 	(aarch64_opcode_table): Add fp16 versions of fmaxnmv, fmaxv,
 	fminnmv, fminv to the Adv.SIMD across lanes group.

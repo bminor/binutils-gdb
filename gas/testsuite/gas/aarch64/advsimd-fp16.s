@@ -203,3 +203,12 @@
 	across_lanes fminnmv
 	across_lanes fminv
 
+	/* Adv.SIMD modified immediate.  */
+
+	fmov	v1.2d, #2.0
+	fmov	v1.2s, #2.0
+	fmov	v1.4s, #2.0
+	fmov	v1.4h, #2.0
+	fmov	v1.8h, #2.0
+	fmov	v0.4h, #1.0
+	fmov	v0.8h, #1.0
