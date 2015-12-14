@@ -519,3 +519,31 @@ Disassembly of section \.text:
  [0-9a-f]+:	7eb0f841 	fminp	s1, v2.2s
  [0-9a-f]+:	5eb0f841 	fminp	h1, v2.2h
  [0-9a-f]+:	5eb0f800 	fminp	h0, v0.2h
+ [0-9a-f]+:	4f7de441 	scvtf	v1.2d, v2.2d, #3
+ [0-9a-f]+:	0f3de441 	scvtf	v1.2s, v2.2s, #3
+ [0-9a-f]+:	4f3de441 	scvtf	v1.4s, v2.4s, #3
+ [0-9a-f]+:	0f1de441 	scvtf	v1.4h, v2.4h, #3
+ [0-9a-f]+:	4f1de441 	scvtf	v1.8h, v2.8h, #3
+ [0-9a-f]+:	0f1fe400 	scvtf	v0.4h, v0.4h, #1
+ [0-9a-f]+:	4f1fe400 	scvtf	v0.8h, v0.8h, #1
+ [0-9a-f]+:	4f7dfc41 	fcvtzs	v1.2d, v2.2d, #3
+ [0-9a-f]+:	0f3dfc41 	fcvtzs	v1.2s, v2.2s, #3
+ [0-9a-f]+:	4f3dfc41 	fcvtzs	v1.4s, v2.4s, #3
+ [0-9a-f]+:	0f1dfc41 	fcvtzs	v1.4h, v2.4h, #3
+ [0-9a-f]+:	4f1dfc41 	fcvtzs	v1.8h, v2.8h, #3
+ [0-9a-f]+:	0f1ffc00 	fcvtzs	v0.4h, v0.4h, #1
+ [0-9a-f]+:	4f1ffc00 	fcvtzs	v0.8h, v0.8h, #1
+ [0-9a-f]+:	6f7de441 	ucvtf	v1.2d, v2.2d, #3
+ [0-9a-f]+:	2f3de441 	ucvtf	v1.2s, v2.2s, #3
+ [0-9a-f]+:	6f3de441 	ucvtf	v1.4s, v2.4s, #3
+ [0-9a-f]+:	2f1de441 	ucvtf	v1.4h, v2.4h, #3
+ [0-9a-f]+:	6f1de441 	ucvtf	v1.8h, v2.8h, #3
+ [0-9a-f]+:	2f1fe400 	ucvtf	v0.4h, v0.4h, #1
+ [0-9a-f]+:	6f1fe400 	ucvtf	v0.8h, v0.8h, #1
+ [0-9a-f]+:	6f7dfc41 	fcvtzu	v1.2d, v2.2d, #3
+ [0-9a-f]+:	2f3dfc41 	fcvtzu	v1.2s, v2.2s, #3
+ [0-9a-f]+:	6f3dfc41 	fcvtzu	v1.4s, v2.4s, #3
+ [0-9a-f]+:	2f1dfc41 	fcvtzu	v1.4h, v2.4h, #3
+ [0-9a-f]+:	6f1dfc41 	fcvtzu	v1.8h, v2.8h, #3
+ [0-9a-f]+:	2f1ffc00 	fcvtzu	v0.4h, v0.4h, #1
+ [0-9a-f]+:	6f1ffc00 	fcvtzu	v0.8h, v0.8h, #1

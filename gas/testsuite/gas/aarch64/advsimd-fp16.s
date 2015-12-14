@@ -213,7 +213,7 @@
 	fmov	v0.4h, #1.0
 	fmov	v0.8h, #1.0
 
-	/* Adv.SIMD modified immediate.  */
+	/* Adv.SIMD scalar pairwise.  */
 
 	.macro scalar_pairwise, op
 	\op	d1, v2.2d
@@ -228,3 +228,19 @@
 	scalar_pairwise fminnmp
 	scalar_pairwise fminp
 
+	/* Adv.SIMD shift by immediate.  */
+
+	.macro shift_imm, op
+	\op v1.2d, v2.2d, #3
+	\op v1.2s, v2.2s, #3
+	\op v1.4s, v2.4s, #3
+	\op v1.4h, v2.4h, #3
+	\op v1.8h, v2.8h, #3
+	\op v0.4h, v0.4h, #1
+	\op v0.8h, v0.8h, #1
+	.endm
+
+	shift_imm scvtf
+	shift_imm fcvtzs
+	shift_imm ucvtf
+	shift_imm fcvtzu

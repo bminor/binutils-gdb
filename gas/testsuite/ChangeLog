@@ -1,6 +1,15 @@
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for Adv.SIMD across lanes
+	instructions.
+	* gas/aarch64/illegal.d: Update expected output.
+	* gas/aarch64/illegal.s: Replace tests for illegal use of 'h'
+	specifier.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
 	* gas/aarch64/advsimd-fp16.s: Add tests for Adv.SIMD Scalar
 	Pairwise instructions.
 

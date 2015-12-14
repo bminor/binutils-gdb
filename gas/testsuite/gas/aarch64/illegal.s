@@ -161,7 +161,7 @@
 	sshr	v0.4h, v1.4h, #20
 
 	shl	v0.4s, v1.4s, #32
-	fcvtzs	v0.4h, v1.4h, #2
+	fcvtzs	v0.2h, v1.2h, #2
 	uqshrn	v0.2s, v1.2d, 33
 	uqrshrn	v0.2s, v1.2s, 32
 	sshll	v8.8h, v2.8b, #8
