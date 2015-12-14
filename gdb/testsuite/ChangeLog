@@ -1,5 +1,9 @@
 2015-12-14  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gdb.base/gdbinit-history.exp: Skip for remote-host testing.
+
+2015-12-14  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* gdb.base/gdbhistsize-history.exp: Skip for remote-host testing.
 
 2015-12-14  Sandra Loosemore  <sandra@codesourcery.com>

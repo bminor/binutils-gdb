@@ -17,6 +17,14 @@
 
 # Test the setting of "history size" via $HOME/.gdbinit
 
+# This test depends on being able to set $HOME and $GDBHISTSIZE.
+# We cannot expect remote hosts to see environment variables set on the
+# local machine.
+
+if { [is_remote host] } {
+    unsupported "can't set environment variables on remote host"
+    return -1
+}
 
 # Check that the history size is properly set to SIZE when reading the .gdbinit
 # file located in HOME with the environment variable GDBHISTSIZE optionally
