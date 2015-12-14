@@ -15411,6 +15411,37 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
 }
 
 static const char *
+get_freebsd_elfcore_note_type (unsigned e_type)
+{
+  static char buff[64];
+
+  switch (e_type)
+    {
+    case NT_FREEBSD_THRMISC:
+      return _("NT_THRMISC (thrmisc structure)");
+    case NT_FREEBSD_PROCSTAT_PROC:
+      return _("NT_PROCSTAT_PROC (proc data)");
+    case NT_FREEBSD_PROCSTAT_FILES:
+      return _("NT_PROCSTAT_FILES (files data)");
+    case NT_FREEBSD_PROCSTAT_VMMAP:
+      return _("NT_PROCSTAT_VMMAP (vmmap data)");
+    case NT_FREEBSD_PROCSTAT_GROUPS:
+      return _("NT_PROCSTAT_GROUPS (groups data)");
+    case NT_FREEBSD_PROCSTAT_UMASK:
+      return _("NT_PROCSTAT_UMASK (umask data)");
+    case NT_FREEBSD_PROCSTAT_RLIMIT:
+      return _("NT_PROCSTAT_RLIMIT (rlimit data)");
+    case NT_FREEBSD_PROCSTAT_OSREL:
+      return _("NT_PROCSTAT_OSREL (osreldate data)");
+    case NT_FREEBSD_PROCSTAT_PSSTRINGS:
+      return _("NT_PROCSTAT_PSSTRINGS (ps_strings data)");
+    case NT_FREEBSD_PROCSTAT_AUXV:
+      return _("NT_PROCSTAT_AUXV (auxv data)");
+    }
+  return get_note_type (e_type);
+}
+
+static const char *
 get_netbsd_elfcore_note_type (unsigned e_type)
 {
   static char buff[64];
@@ -15658,6 +15689,10 @@ process_note (Elf_Internal_Note * pnote)
   else if (const_strneq (pnote->namedata, "GNU"))
     /* GNU-specific object file notes.  */
     nt = get_gnu_elf_note_type (pnote->type);
+
+  else if (const_strneq (pnote->namedata, "FreeBSD"))
+    /* FreeBSD-specific core file notes.  */
+    nt = get_freebsd_elfcore_note_type (pnote->type);
 
   else if (const_strneq (pnote->namedata, "NetBSD-CORE"))
     /* NetBSD-specific core file notes.  */

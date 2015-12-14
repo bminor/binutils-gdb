@@ -1,3 +1,8 @@
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* readelf.c (get_freebsd_elfcore_note_type): New
+	(process_note): Add support for FreeBSD core notes.
+
 2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
 	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
 
