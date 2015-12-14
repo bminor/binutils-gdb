@@ -1,5 +1,12 @@
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd_tdep.c (fbsd_core_pid_to_str): New function.
+	(fbsd_core_thread_name): New function.
+	(fbsd_init_abi): Add "core_pid_to_str" gdbarch method.
+	Add "core_thread_name" gdbarch method.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
 	* corelow.c (core_thread_name): New function.
 	(init_core_ops): Use "core_thread_name" for the "to_thread_name"
 	target op.
