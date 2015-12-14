@@ -1,5 +1,9 @@
 2015-12-11  Don Breazeal  <donb@codesourcery.com>
 
+	* NEWS: Announce fork and exec event support for target remote.
+
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
 	* inferior.c (number_of_live_inferiors): New function.
 	(have_live_inferiors): Use number_of_live_inferiors in place
 	of duplicate code.
