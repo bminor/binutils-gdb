@@ -1,3 +1,29 @@
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/execl-update-breakpoints.exp (main): Enable for target
+	remote.
+	* gdb.base/foll-exec-mode.exp (main): Disable for target remote.
+	* gdb.base/foll-exec.exp (main): Enable for target remote.
+	* gdb.base/foll-fork.exp (main): Likewise.
+	* gdb.base/foll-vfork.exp (main): Likewise.
+	* gdb.base/multi-forks.exp (main): Likewise, and use clean_restart.
+	(proc continue_to_exit_bp_loc): Use clean_restart.
+	* gdb.base/pie-execl.exp (main): Disable for target remote.
+	* gdb.base/watch-vfork.exp (main): Enable for target remote.
+	* gdb.mi/mi-nsthrexec.exp (main): Likewise.
+	* gdb.threads/execl.exp (main): Likewise.
+	* gdb.threads/fork-child-threads.exp (main): Likewise.
+	* gdb.threads/fork-plus-threads.exp (main): Disable for target
+	remote.
+	* gdb.threads/fork-thread-pending.exp (main): Enable for target
+	remote.
+	* gdb.threads/linux-dp.exp (check_philosopher_stack): Allow
+	pid.tid style ptids, instead of just tid.
+	* gdb.threads/thread-execl.exp (main): Enable for target remote.
+	* gdb.threads/watchpoint-fork.exp (main): Likewise.
+	* gdb.trace/report.exp (use_collected_data): Allow pid.tid style
+	ptids, instead of just tid.
+
 2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/list.exp (test_list_forward): Add end of file error

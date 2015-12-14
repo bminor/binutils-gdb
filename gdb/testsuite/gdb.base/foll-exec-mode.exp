@@ -26,8 +26,11 @@
 # be a breakpoint in order to stop after the exec, even if we use
 # a single-step command to execute past the exec.
 
-if { [is_remote target] || ![isnative] } then {
-     continue
+# Remote mode doesn't support the 'run' command, which is
+# required for follow-exec-mode testing.
+if { [target_info exists gdb_protocol]
+     && [target_info gdb_protocol] == "remote" } {
+    continue
 }
 
 # Until "catch exec" is implemented on other targets...

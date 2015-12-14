@@ -16,10 +16,6 @@
 # This is a test of gdb's ability to follow a process through a
 # Unix exec() system call.
 
-if { [is_remote target] || ![isnative] } then {
-    continue
-}
-
 # Until "catch exec" is implemented on other targets...
 #
 if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {

@@ -17,11 +17,6 @@
 
 set testfile watchpoint-fork
 
-if [is_remote target] {
-    kfail "remote/13584" "gdbserver does not support debugging across fork"
-    return
-}
-
 proc test {type symbol} {
     with_test_prefix "$type" {
 	global testfile subdir srcdir gdb_prompt

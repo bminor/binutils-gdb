@@ -18,11 +18,6 @@
 # the main thread doesn't just silently stop at the first internal
 # breakpoint (usually the _dl_debug_state breakpoint).
 
-# No exec event support in the remote protocol.
-if { [is_remote target] } then {
-    continue
-}
-
 if { ![support_displaced_stepping] } { 
     unsupported "displaced stepping"
     return -1

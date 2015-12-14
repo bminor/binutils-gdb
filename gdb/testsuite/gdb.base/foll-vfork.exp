@@ -18,10 +18,6 @@
 # either execs or exits --- since those events take somewhat different
 # code paths in GDB, both variants are exercised.
 
-if { [is_remote target] || ![isnative] } then {
-    continue
-}
-
 # Until "set follow-fork-mode" and "catch vfork" are implemented on
 # other targets...
 #
