@@ -154,3 +154,21 @@
 	stworeg_misc frecpe
 	stworeg_misc frsqrte
 	stworeg_misc frecpx
+
+	/* Vector indexed element.  */
+
+	.macro indexed_elem, op
+	\op	v1.2d, v2.2d, v3.d[1]
+	\op	v1.2s, v2.2s, v3.s[2]
+	\op	v1.4s, v2.4s, v3.s[1]
+	\op	v0.4h, v0.4h, v0.h[0]
+	\op	v1.4h, v2.4h, v3.h[0]
+	\op	v0.8h, v0.8h, v0.h[0]
+	\op	v1.8h, v2.8h, v3.h[0]
+	.endm
+
+	indexed_elem fmla
+	indexed_elem fmls
+
+	indexed_elem fmul
+	indexed_elem fmulx
