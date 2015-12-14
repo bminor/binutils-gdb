@@ -1,3 +1,8 @@
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (vectype_to_qualifier): Calculate operand
+	qualifier from per-type base and offet.
+
 2015-12-14  Jan Beulich  <jbeulich@suse.com>
 
 	* dw2gencfi.c (dot_cfi_label): Free "name".
