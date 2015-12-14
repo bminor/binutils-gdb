@@ -1218,6 +1218,13 @@
   QLF2(S_S, V_4S),		\
 }
 
+/* e.g. FMINV <V><d>, <Vn>.<T>.  */
+#define QL_XLANES_FP_H		\
+{				\
+  QLF2 (S_H, V_4H),		\
+  QLF2 (S_H, V_8H),		\
+}
+
 /* e.g. SADDLV <V><d>, <Vn>.<T>.  */
 #define QL_XLANES_L		\
 {				\
@@ -1397,9 +1404,17 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"umaxv", 0x2e30a800, 0xbf3ffc00, asimdall, 0, SIMD, OP2 (Fd, Vn), QL_XLANES, F_SIZEQ},
   {"uminv", 0x2e31a800, 0xbf3ffc00, asimdall, 0, SIMD, OP2 (Fd, Vn), QL_XLANES, F_SIZEQ},
   {"fmaxnmv", 0x2e30c800, 0xbfbffc00, asimdall, 0, SIMD, OP2 (Fd, Vn), QL_XLANES_FP, F_SIZEQ},
+  {"fmaxnmv", 0xe30c800, 0xbffffc00, asimdall, 0, SIMD_F16,
+   OP2 (Fd, Vn), QL_XLANES_FP_H, F_SIZEQ},
   {"fmaxv", 0x2e30f800, 0xbfbffc00, asimdall, 0, SIMD, OP2 (Fd, Vn), QL_XLANES_FP, F_SIZEQ},
+  {"fmaxv", 0xe30f800, 0xbffffc00, asimdall, 0, SIMD_F16,
+   OP2 (Fd, Vn), QL_XLANES_FP_H, F_SIZEQ},
   {"fminnmv", 0x2eb0c800, 0xbfbffc00, asimdall, 0, SIMD, OP2 (Fd, Vn), QL_XLANES_FP, F_SIZEQ},
+  {"fminnmv", 0xeb0c800, 0xbffffc00, asimdall, 0, SIMD_F16,
+   OP2 (Fd, Vn), QL_XLANES_FP_H, F_SIZEQ},
   {"fminv", 0x2eb0f800, 0xbfbffc00, asimdall, 0, SIMD, OP2 (Fd, Vn), QL_XLANES_FP, F_SIZEQ},
+  {"fminv", 0xeb0f800, 0xbffffc00, asimdall, 0, SIMD_F16,
+   OP2 (Fd, Vn), QL_XLANES_FP_H, F_SIZEQ},
   /* AdvSIMD three different.  */
   {"saddl", 0x0e200000, 0xff20fc00, asimddiff, 0, SIMD, OP3 (Vd, Vn, Vm), QL_V3LONGBHS, F_SIZEQ},
   {"saddl2", 0x4e200000, 0xff20fc00, asimddiff, 0, SIMD, OP3 (Vd, Vn, Vm), QL_V3LONGBHS2, F_SIZEQ},
