@@ -167,3 +167,39 @@ Disassembly of section \.text:
  [0-9a-f]+:	0ec33c41 	frsqrts	v1.4h, v2.4h, v3.4h
  [0-9a-f]+:	4ec03c00 	frsqrts	v0.8h, v0.8h, v0.8h
  [0-9a-f]+:	4ec33c41 	frsqrts	v1.8h, v2.8h, v3.8h
+ [0-9a-f]+:	7ee2d420 	fabd	d0, d1, d2
+ [0-9a-f]+:	7ea2d420 	fabd	s0, s1, s2
+ [0-9a-f]+:	7ec21420 	fabd	h0, h1, h2
+ [0-9a-f]+:	7ec01400 	fabd	h0, h0, h0
+ [0-9a-f]+:	5e62dc20 	fmulx	d0, d1, d2
+ [0-9a-f]+:	5e22dc20 	fmulx	s0, s1, s2
+ [0-9a-f]+:	5e421c20 	fmulx	h0, h1, h2
+ [0-9a-f]+:	5e401c00 	fmulx	h0, h0, h0
+ [0-9a-f]+:	5e62e420 	fcmeq	d0, d1, d2
+ [0-9a-f]+:	5e22e420 	fcmeq	s0, s1, s2
+ [0-9a-f]+:	5e422420 	fcmeq	h0, h1, h2
+ [0-9a-f]+:	5e402400 	fcmeq	h0, h0, h0
+ [0-9a-f]+:	7ee2e420 	fcmgt	d0, d1, d2
+ [0-9a-f]+:	7ea2e420 	fcmgt	s0, s1, s2
+ [0-9a-f]+:	7ec22420 	fcmgt	h0, h1, h2
+ [0-9a-f]+:	7ec02400 	fcmgt	h0, h0, h0
+ [0-9a-f]+:	7e62e420 	fcmge	d0, d1, d2
+ [0-9a-f]+:	7e22e420 	fcmge	s0, s1, s2
+ [0-9a-f]+:	7e422420 	fcmge	h0, h1, h2
+ [0-9a-f]+:	7e402400 	fcmge	h0, h0, h0
+ [0-9a-f]+:	7e62ec20 	facge	d0, d1, d2
+ [0-9a-f]+:	7e22ec20 	facge	s0, s1, s2
+ [0-9a-f]+:	7e422c20 	facge	h0, h1, h2
+ [0-9a-f]+:	7e402c00 	facge	h0, h0, h0
+ [0-9a-f]+:	7ee2ec20 	facgt	d0, d1, d2
+ [0-9a-f]+:	7ea2ec20 	facgt	s0, s1, s2
+ [0-9a-f]+:	7ec22c20 	facgt	h0, h1, h2
+ [0-9a-f]+:	7ec02c00 	facgt	h0, h0, h0
+ [0-9a-f]+:	5e62fc20 	frecps	d0, d1, d2
+ [0-9a-f]+:	5e22fc20 	frecps	s0, s1, s2
+ [0-9a-f]+:	5e423c20 	frecps	h0, h1, h2
+ [0-9a-f]+:	5e403c00 	frecps	h0, h0, h0
+ [0-9a-f]+:	5ee2fc20 	frsqrts	d0, d1, d2
+ [0-9a-f]+:	5ea2fc20 	frsqrts	s0, s1, s2
+ [0-9a-f]+:	5ec23c20 	frsqrts	h0, h1, h2
+ [0-9a-f]+:	5ec03c00 	frsqrts	h0, h0, h0

@@ -3,6 +3,15 @@
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
 	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (aarch64_opcode_table): Add fp16 versions of
+	fmulx, fcmeq, frecps, frsqrts, fcmge, facge, fabd, fcmgt and facgt
+	to the scalar three same group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
 	* aarch64-tbl.h (QL_V3SAMEH): New.
 	(aarch64_opcode_table): Add fp16 versions of fmaxnm, fmla, fadd,
 	fmulx, fcmeq, fmax, frecps, fminnm, fmls, fsub, fmin, frsqrts,
