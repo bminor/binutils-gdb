@@ -244,3 +244,17 @@
 	shift_imm fcvtzs
 	shift_imm ucvtf
 	shift_imm fcvtzu
+
+	/* Adv.SIMD scalar shift by immediate.  */
+
+	.macro sshift_imm, op
+	\op d1, d2, #3
+	\op s1, s2, #3
+	\op h1, h2, #3
+	\op h0, h0, #1
+	.endm
+
+	sshift_imm scvtf
+	sshift_imm fcvtzs
+	sshift_imm ucvtf
+	sshift_imm fcvtzu

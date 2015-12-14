@@ -547,3 +547,19 @@ Disassembly of section \.text:
  [0-9a-f]+:	6f1dfc41 	fcvtzu	v1.8h, v2.8h, #3
  [0-9a-f]+:	2f1ffc00 	fcvtzu	v0.4h, v0.4h, #1
  [0-9a-f]+:	6f1ffc00 	fcvtzu	v0.8h, v0.8h, #1
+ [0-9a-f]+:	5f7de441 	scvtf	d1, d2, #3
+ [0-9a-f]+:	5f3de441 	scvtf	s1, s2, #3
+ [0-9a-f]+:	5f1de441 	scvtf	h1, h2, #3
+ [0-9a-f]+:	5f1fe400 	scvtf	h0, h0, #1
+ [0-9a-f]+:	5f7dfc41 	fcvtzs	d1, d2, #3
+ [0-9a-f]+:	5f3dfc41 	fcvtzs	s1, s2, #3
+ [0-9a-f]+:	5f1dfc41 	fcvtzs	h1, h2, #3
+ [0-9a-f]+:	5f1ffc00 	fcvtzs	h0, h0, #1
+ [0-9a-f]+:	7f7de441 	ucvtf	d1, d2, #3
+ [0-9a-f]+:	7f3de441 	ucvtf	s1, s2, #3
+ [0-9a-f]+:	7f1de441 	ucvtf	h1, h2, #3
+ [0-9a-f]+:	7f1fe400 	ucvtf	h0, h0, #1
+ [0-9a-f]+:	7f7dfc41 	fcvtzu	d1, d2, #3
+ [0-9a-f]+:	7f3dfc41 	fcvtzu	s1, s2, #3
+ [0-9a-f]+:	7f1dfc41 	fcvtzu	h1, h2, #3
+ [0-9a-f]+:	7f1ffc00 	fcvtzu	h0, h0, #1
