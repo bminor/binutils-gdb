@@ -38,3 +38,22 @@
 	three_same frecps
 	three_same fdiv
 	three_same frsqrts
+
+	/* Scalar three-same.  */
+
+	.macro sthree_same, op
+	\op	d0, d1, d2
+	\op	s0, s1, s2
+	\op	h0, h1, h2
+	\op	h0, h0, h0
+	.endm
+
+	sthree_same fabd
+	sthree_same fmulx
+	sthree_same fcmeq
+	sthree_same fcmgt
+	sthree_same fcmge
+	sthree_same facge
+	sthree_same facgt
+	sthree_same frecps
+	sthree_same frsqrts
