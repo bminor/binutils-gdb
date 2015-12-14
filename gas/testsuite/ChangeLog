@@ -1,3 +1,8 @@
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: New.
+	* gas/aarch64/advsimd-fp16.s: New.
+
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/aarch64/system-2.d: Enable the statistical profiling

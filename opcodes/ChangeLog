@@ -1,5 +1,16 @@
 2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
 
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_V3SAMEH): New.
+	(aarch64_opcode_table): Add fp16 versions of fmaxnm, fmla, fadd,
+	fmulx, fcmeq, fmax, frecps, fminnm, fmls, fsub, fmin, frsqrts,
+	fmaxnmp, faddp, fmul, fcmge, facge, fmaxp, fdiv, fminnmp, fabd,
+	fcmgt, facgt and fminp to the vector three same group.
+
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_simd_f16): New.
 	(SIMD_F16): New.
 
