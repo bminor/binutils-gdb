@@ -1,3 +1,11 @@
+2015-12-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 19339
+	* elf-vxworks.h: Update copyright notice.
+	* elf-vxworks.c: Update copyright notice.
+	* elf-nacl.h: Update copyright notice.
+	* elf-nacl.c: Update copyright notice.
+
 2015-12-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19317
