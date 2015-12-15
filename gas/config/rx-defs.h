@@ -38,7 +38,8 @@ enum rx_cpu_types
   RX600,
   RX610,
   RX200,
-  RX100
+  RX100,
+  RXV2
 };
 
 extern int rx_pid_register;

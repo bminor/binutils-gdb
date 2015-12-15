@@ -106,6 +106,21 @@ struct option md_longopts[] =
 };
 size_t md_longopts_size = sizeof (md_longopts);
 
+struct cpu_type
+{
+  char *cpu_name;
+  int type;
+};
+
+struct cpu_type  cpu_type_list[] =
+{
+  {"rx100",RX100},
+  {"rx200",RX200},
+  {"rx600",RX600},
+  {"rx610",RX610},
+  {"rxv2",RXV2}
+};
+
 int
 md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
 {
@@ -161,25 +176,27 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
       return 1;
 
     case OPTION_CPU:
-      if (strcasecmp (arg, "rx100") == 0)
-        rx_cpu = RX100;
-      else if (strcasecmp (arg, "rx200") == 0)
-	rx_cpu = RX200;
-      else if (strcasecmp (arg, "rx600") == 0)
-	rx_cpu = RX600;
-      else if (strcasecmp (arg, "rx610") == 0)
-	rx_cpu = RX610;
-      else
-	{
-	  as_warn (_("unrecognised RX CPU type %s"), arg);
-	  break;
-	}
-      return 1;
+      {
+	unsigned int i;
+	for (i = 0; i < ARRAY_SIZE (cpu_type_list); i++)
+	  {
+	    if (strcasecmp (arg, cpu_type_list[i].cpu_name) == 0)
+	      {
+		rx_cpu = cpu_type_list[i].type;
+		if (rx_cpu == RXV2)
+		  elf_flags |= E_FLAG_RX_V2;
+		return 1;
+	      }
+	  }
+	as_warn (_("unrecognised RX CPU type %s"), arg);
+	break;
+      }
 
     case OPTION_DISALLOW_STRING_INSNS:
       elf_flags |= E_FLAG_RX_SINSNS_SET | E_FLAG_RX_SINSNS_NO;
       return 1;
     }
+
   return 0;
 }
 
@@ -197,7 +214,7 @@ md_show_usage (FILE * stream)
   fprintf (stream, _("  --mrelax\n"));
   fprintf (stream, _("  --mpid\n"));
   fprintf (stream, _("  --mint-register=<value>\n"));
-  fprintf (stream, _("  --mcpu=<rx100|rx200|rx600|rx610>\n"));
+  fprintf (stream, _("  --mcpu=<rx100|rx200|rx600|rx610|rxv2>\n"));
   fprintf (stream, _("  --mno-allow-string-insns"));
 }
 

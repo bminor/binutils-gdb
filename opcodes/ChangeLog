@@ -1,3 +1,9 @@
+2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* rx-deocde.opc: Add new instructions pattern.
+	* rx-deocde.c: Regenerate.
+	* rx-dis.c (register_name): Add new register.
+
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-asm-2.c: Regenerate.

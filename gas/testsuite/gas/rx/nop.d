@@ -3,9 +3,9 @@
 dump\.o:     file format .*
 
 
-Disassembly of section \..*:
+Disassembly of section .*:
 
-00000000 <\..*>:
+00000000 <.*>:
    0:	03                            	nop
    1:	ef 00                         	nop	; mov.l	r0, r0
    3:	63 10                         	nop	; mul	#1, r0

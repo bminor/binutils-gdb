@@ -1,3 +1,7 @@
+2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* readelf.c (get_machine_flags): Add support for RX v2 flag.
+
 2015-12-14  Jan Beulich  <jbeulich@suse.com>
 
 	* nm.c: Include coff/external.h, coff/internal.h, and

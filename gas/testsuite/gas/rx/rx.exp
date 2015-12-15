@@ -21,6 +21,9 @@ if { ! [istarget rx-*-*] } {
     return
 }
 
+global ASFLAGS
+set ASFLAGS "--mcpu=rxv2"
+
 foreach test [lsort [glob $srcdir/$subdir/*.sm]] {
     regexp ".*/(.*)\.sm" $test rxjunk rxbase
     exec "$srcdir/$subdir/explode" "-I" "$srcdir/$subdir" "$test" "$srcdir/$subdir/$rxbase.s"

@@ -68,6 +68,71 @@
 	* gas/aarch64/advsimd-fp16.d: New.
 	* gas/aarch64/advsimd-fp16.s: New.
 
+2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* gas/rx/emaca.d: New.
+	* gas/rx/emaca.sm: New.
+	* gas/rx/emsba.d: New.
+	* gas/rx/emsba.sm: New.
+	* gas/rx/emula.d: New.
+	* gas/rx/emula.sm: New.
+	* gas/rx/fadd.d: Add new pattern.
+	* gas/rx/fadd.sm: Add new pattern.
+	* gas/rx/fmul.d: Add new pattern.
+	* gas/rx/fmul.sm: Add new pattern.
+	* gas/rx/fsqrt.d: New.
+	* gas/rx/fsqrt.sm: New.
+	* gas/rx/fsub.d: Add new pattern.
+ 	* gas/rx/fsub.sm: Add new pattern.
+	* gas/rx/ftou.d: New.
+	* gas/rx/ftou.sm: New.
+	* gas/rx/maclh.d: New.
+	* gas/rx/maclh.sm: New.
+	* gas/rx/maclo.d: Add new pattern.
+	* gas/rx/maclo.sm: Add new pattern.
+	* gas/rx/macros.inc: Add new register.
+	* gas/rx/movco.d: New.
+	* gas/rx/movco.sm: New.
+	* gas/rx/movli.d: New.
+	* gas/rx/movli.sm: New.
+	* gas/rx/msbhi.d: New.
+	* gas/rx/msbhi.sm: New.
+	* gas/rx/msblh.d: New.
+	* gas/rx/msblh.sm: New.
+	* gas/rx/msblo.d: New.
+	* gas/rx/msblo.sm: New.
+	* gas/rx/mullh.d: New.
+	* gas/rx/mullh.sm: New.
+	* gas/rx/mvfacgu.d: New.
+	* gas/rx/mvfacgu.sm: New.
+	* gas/rx/mvfachi.d: Add new pattern.
+	* gas/rx/mvfachi.sm: Add new pattern.
+	* gas/rx/mvfaclo.d: Add new pattern.
+	* gas/rx/mvfaclo.sm: Add new pattern.
+	* gas/rx/mvfacmi.d: Add new pattern.
+	* gas/rx/mvfacmi.sm: Add new pattern.
+	* gas/rx/mvfc.d: Add new pattern.
+	* gas/rx/mvtacgu.d: New.
+	* gas/rx/mvtacgu.sm: New.
+	* gas/rx/mvtc.d: Add new pattern.
+	* gas/rx/popc.d: Add new pattern.
+	* gas/rx/pushc.d: Add new pattern.
+	* gas/rx/racl.d: New.
+	* gas/rx/racl.sm: New.
+	* gas/rx/racw.d: Add new pattern.
+	* gas/rx/racw.sm: Add new pattern.
+	* gas/rx/rdacl.d: New.
+	* gas/rx/rdacl.sm: New.
+	* gas/rx/rdacw.d: New.
+	* gas/rx/rdacw.sm: New.
+	* gas/rx/rx.exp: Add option.
+	* gas/rx/stnz.d: Add new pattern.
+	* gas/rx/stnz.sm: Add new pattern.
+	* gas/rx/stz.d: Add new pattern.
+	* gas/rx/stz.sm: Add new pattern.
+	* gas/rx/utof.d: New.
+	* gas/rx/utof.sm: New.
+
 2015-12-12  Alan Modra  <amodra@gmail.com>
 
 	* gas/sh/tlsd.s: Use .tdata not .tbss.

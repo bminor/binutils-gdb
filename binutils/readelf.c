@@ -3376,6 +3376,8 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if (e_flags & E_FLAG_RX_SINSNS_SET)
 	    strcat (buf, e_flags & E_FLAG_RX_SINSNS_YES
 		    ? ", uses String instructions" : ", bans String instructions");
+	  if (e_flags & E_FLAG_RX_V2)
+	    strcat (buf, ", V2");
 	  break;
 
 	case EM_S390:
