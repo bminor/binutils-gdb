@@ -1,3 +1,9 @@
+2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm.h (ARM_ARCH_V8_1A): Add the CRC_EXT_ARMV8 co-processor
+	feature macro.
+	(ARM_ARCH_V8_2A): Likewise.
+
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64.h (enum aarch64_opnd_qualifier): Add
