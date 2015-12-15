@@ -54,7 +54,7 @@
 :function:::address_word:process_isa_mode:address_word target
 {
   SD->isa_mode = target & 0x1;
-  return (target & (-1 << 1));
+  return (target & (-(1 << 1)));
 }
 
 :function:::address_word:do_micromips_jalr:int rt, int rs, address_word nia, int delayslot_instruction_size

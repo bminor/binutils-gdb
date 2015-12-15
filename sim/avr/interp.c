@@ -222,7 +222,7 @@ static byte sram[MAX_AVR_SRAM];
 static int sign_ext (word val, int nb_bits)
 {
   if (val & (1 << (nb_bits - 1)))
-    return val | (-1 << nb_bits);
+    return val | -(1 << nb_bits);
   return val;
 }
 
