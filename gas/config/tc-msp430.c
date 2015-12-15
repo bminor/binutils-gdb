@@ -694,8 +694,6 @@ static unsigned int silicon_errata_warn = 0;
 #define SILICON_ERRATA_CPU12 		(1 << 3)
 #define SILICON_ERRATA_CPU13 		(1 << 4)
 #define SILICON_ERRATA_CPU19 		(1 << 5)
-#define SILICON_ERRATA_CPU42 		(1 << 6)
-#define SILICON_ERRATA_CPU42_PLUS	(1 << 7)
 
 static void
 msp430_set_arch (int option)
@@ -1338,8 +1336,6 @@ md_parse_option (int c, char * arg)
 	  { STRING_COMMA_LEN ("cpu12"), SILICON_ERRATA_CPU12 },
 	  { STRING_COMMA_LEN ("cpu13"), SILICON_ERRATA_CPU13 },
 	  { STRING_COMMA_LEN ("cpu19"), SILICON_ERRATA_CPU19 },
-	  { STRING_COMMA_LEN ("cpu42"), SILICON_ERRATA_CPU42 },
-	  { STRING_COMMA_LEN ("cpu42+"), SILICON_ERRATA_CPU42_PLUS },
 	};
 
 	do
@@ -1579,7 +1575,7 @@ md_show_usage (FILE * stream)
   fprintf (stream,
 	   _("  -msilicon-errata=<name>[,<name>...] - enable fixups for silicon errata\n"
 	     "  -msilicon-errata-warn=<name>[,<name>...] - warn when a fixup might be needed\n"
-	     "   supported errata names: cpu4, cpu8, cpu11, cpu12, cpu13, cpu19, cpu42, cpu42+\n"));
+	     "   supported errata names: cpu4, cpu8, cpu11, cpu12, cpu13, cpu19\n"));
   fprintf (stream,
 	   _("  -mQ - enable relaxation at assembly time. DANGEROUS!\n"
 	     "  -mP - enable polymorph instructions\n"));
@@ -2605,9 +2601,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      switch (check_for_nop & - check_for_nop)
 		{
 		case NOP_CHECK_INTERRUPT:
-		  if (warn_interrupt_nops
-		      || silicon_errata_warn & SILICON_ERRATA_CPU42
-		      || silicon_errata_warn & SILICON_ERRATA_CPU42_PLUS)
+		  if (warn_interrupt_nops)
 		    {
 		      if (gen_interrupt_nops)
 			as_warn (_("NOP inserted between two instructions that change interrupt state"));
@@ -2615,8 +2609,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 			as_warn (_("a NOP might be needed here because of successive changes in interrupt state"));
 		    }
 
-		  if (gen_interrupt_nops
-		      || silicon_errata_fix & SILICON_ERRATA_CPU42_PLUS)
+		  if (gen_interrupt_nops)
 		    /* Emit a NOP between interrupt enable/disable.
 		       See 1.3.4.1 of the MSP430x5xx User Guide.  */
 		    doit = TRUE;
