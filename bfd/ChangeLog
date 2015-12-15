@@ -1,3 +1,17 @@
+2015-12-15  Jan Beulich  <jbeulich@suse.com>
+
+	* coffgen.c (coff_write_alien_symbol): New parameter "iaux".
+	(coff_write_symbols): Pass NULL for new argument.
+	* cofflink.c (_bfd_coff_final_link): New local variables
+	"iaux".
+	Extend scope of local variables "indx" and "hash". Pass address
+	of "iaux" to coff_write_alien_symbol(). Handle ".file" and the
+	file name ending up in the string table separately. Avoid
+	setting "rewrite" on more than one path.
+	* libcoff-in.h (coff_write_alien_symbol): New parameter of type
+	"union internal_auxent *".
+	* libcoff.h: Re-generate.
+
 2015-12-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 19339
