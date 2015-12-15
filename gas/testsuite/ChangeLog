@@ -1,3 +1,168 @@
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16: Add tests for Adv.SIMD scalar shift
+	by immediate instructions.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for Adv.SIMD across lanes
+	instructions.
+	* gas/aarch64/illegal.d: Update expected output.
+	* gas/aarch64/illegal.s: Replace tests for illegal use of 'h'
+	specifier.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for Adv.SIMD Scalar
+	Pairwise instructions.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for Adv.SIMD modified
+	immediate instructions.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for Adv.SIMD across lanes
+	instructions.
+	* gas/aarch64/illegal.d: Update expected output.
+	* gas/aarch64/illegal.s: Replace test for illegal use of 'h' specifier.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for scalar indexed element
+	instructions.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for vector indexed element
+	instructions.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for scalar two register misc.
+	instructions.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for vector two register
+	misc. instructions.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: Update expected output.
+	* gas/aarch64/advsimd-fp16.s: Add tests for scalar three register
+	same instructions.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/advsimd-fp16.d: New.
+	* gas/aarch64/advsimd-fp16.s: New.
+
+2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* gas/rx/emaca.d: New.
+	* gas/rx/emaca.sm: New.
+	* gas/rx/emsba.d: New.
+	* gas/rx/emsba.sm: New.
+	* gas/rx/emula.d: New.
+	* gas/rx/emula.sm: New.
+	* gas/rx/fadd.d: Add new pattern.
+	* gas/rx/fadd.sm: Add new pattern.
+	* gas/rx/fmul.d: Add new pattern.
+	* gas/rx/fmul.sm: Add new pattern.
+	* gas/rx/fsqrt.d: New.
+	* gas/rx/fsqrt.sm: New.
+	* gas/rx/fsub.d: Add new pattern.
+ 	* gas/rx/fsub.sm: Add new pattern.
+	* gas/rx/ftou.d: New.
+	* gas/rx/ftou.sm: New.
+	* gas/rx/maclh.d: New.
+	* gas/rx/maclh.sm: New.
+	* gas/rx/maclo.d: Add new pattern.
+	* gas/rx/maclo.sm: Add new pattern.
+	* gas/rx/macros.inc: Add new register.
+	* gas/rx/movco.d: New.
+	* gas/rx/movco.sm: New.
+	* gas/rx/movli.d: New.
+	* gas/rx/movli.sm: New.
+	* gas/rx/msbhi.d: New.
+	* gas/rx/msbhi.sm: New.
+	* gas/rx/msblh.d: New.
+	* gas/rx/msblh.sm: New.
+	* gas/rx/msblo.d: New.
+	* gas/rx/msblo.sm: New.
+	* gas/rx/mullh.d: New.
+	* gas/rx/mullh.sm: New.
+	* gas/rx/mvfacgu.d: New.
+	* gas/rx/mvfacgu.sm: New.
+	* gas/rx/mvfachi.d: Add new pattern.
+	* gas/rx/mvfachi.sm: Add new pattern.
+	* gas/rx/mvfaclo.d: Add new pattern.
+	* gas/rx/mvfaclo.sm: Add new pattern.
+	* gas/rx/mvfacmi.d: Add new pattern.
+	* gas/rx/mvfacmi.sm: Add new pattern.
+	* gas/rx/mvfc.d: Add new pattern.
+	* gas/rx/mvtacgu.d: New.
+	* gas/rx/mvtacgu.sm: New.
+	* gas/rx/mvtc.d: Add new pattern.
+	* gas/rx/popc.d: Add new pattern.
+	* gas/rx/pushc.d: Add new pattern.
+	* gas/rx/racl.d: New.
+	* gas/rx/racl.sm: New.
+	* gas/rx/racw.d: Add new pattern.
+	* gas/rx/racw.sm: Add new pattern.
+	* gas/rx/rdacl.d: New.
+	* gas/rx/rdacl.sm: New.
+	* gas/rx/rdacw.d: New.
+	* gas/rx/rdacw.sm: New.
+	* gas/rx/rx.exp: Add option.
+	* gas/rx/stnz.d: Add new pattern.
+	* gas/rx/stnz.sm: Add new pattern.
+	* gas/rx/stz.d: Add new pattern.
+	* gas/rx/stz.sm: Add new pattern.
+	* gas/rx/utof.d: New.
+	* gas/rx/utof.sm: New.
+
+2015-12-12  Alan Modra  <amodra@gmail.com>
+
+	* gas/sh/tlsd.s: Use .tdata not .tbss.
+	* gas/sh/tlsnopic.s: Likewise.
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/system-2.d: Enable the statistical profiling
+	extension.  Update the expected output.
+	* gas/aarch64/system-2.s: Add tests for PSB CSYNC.
+	* gas/aarch64/system.d: Update the expected output.
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/sysreg-2.s: Add tests for the statistical profiling
+	system registers.
+	* gas/aarch64/sysreg-2.d: Enable the statistical profiling
+	extension and update the expected output.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/sysreg-2.d: Update for new tests for AT S1E1RP and
+	AT S1E1WP.
+	* gas/aarch64/sysreg-2.s: Add tests for AT S1E1RP and AT S1E1WP.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* gas/aarch64/sysreg-2.d: Add tests for dc instruction.
+	* gas/aarch64/sysreg-2.s: Add uses of dc instruction.
+
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/aarch64/uao-directive.d: New.

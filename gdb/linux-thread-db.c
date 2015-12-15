@@ -1226,7 +1226,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   ptid = ptid_build (info->pid, ti.ti_lid, 0);
   tp = find_thread_ptid (ptid);
   if (tp == NULL || tp->priv == NULL)
-    thread_from_lwp (ptid);
+    record_thread (info, tp, ptid, th_p, &ti);
 
   return 0;
 }

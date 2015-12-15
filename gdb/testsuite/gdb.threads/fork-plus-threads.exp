@@ -20,6 +20,13 @@
 #
 # See https://sourceware.org/bugzilla/show_bug.cgi?id=18600
 
+# In remote mode, we cannot continue debugging after all
+# inferiors have terminated, and this test requires that.
+if { [target_info exists gdb_protocol]
+     && [target_info gdb_protocol] == "remote" } {
+    continue
+}
+
 standard_testfile
 
 proc do_test { detach_on_fork } {

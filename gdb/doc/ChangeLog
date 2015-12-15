@@ -1,3 +1,37 @@
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.texinfo (Forks): Correct Linux kernel version where
+	fork and exec events are supported, add notes about support
+	of these events in target remote mode.
+	(Connecting): Reorganize and clarify distinctions between
+	target remote, extended-remote, and multiprocess.
+	Reorganize related text from separate sections into new
+	sections.
+	(Server): Note effects of target extended-remote mode.
+	Delete section on Multi-Process Mode for gdbserver.
+	Move some text to "Connecting" node.
+
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads): Replace warning with explanation
+	about single-threaded programs.
+
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads): Remove mention of SGI.
+	(Forks): Remove mention of HP-UX.
+	(Breakpoints): Remove mention of HP-UX.
+	(Set Watchpoints) <hardware watchpoints>: Don't mention HP-UX.
+	Reword in terms of architectures.
+	(Set Catchpoints) <catch exec, catch fork, catch vfork>: Don't
+	mention supported systems.
+	(Convenience Vars): Don't mention HP-UX.
+	(Jumping): Remove mention of HP-UX in comment.
+	(Files) <shared libraries>: Update supported shared library types
+	list.  Remove mention of HP-UX.
+	(Native): Remove HP-UX subsection.
+	(SVR4 Process Information): Remove mention of HP-UX.
+
 2015-12-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Stack): Reorder menu.

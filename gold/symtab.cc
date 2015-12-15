@@ -1171,7 +1171,8 @@ Symbol_table::add_from_relobj(
 
       const char* name = sym_names + st_name;
 
-      if (strcmp (name, "__gnu_lto_slim") == 0)
+      if (!parameters->options().relocatable()
+	  && strcmp (name, "__gnu_lto_slim") == 0)
         gold_info(_("%s: plugin needed to handle lto object"),
 		  relobj->name().c_str());
 

@@ -17,6 +17,11 @@
 # thread, then switching to a thread that has a status pending and
 # continuing.
 
+if [target_info exists gdb,nointerrupts] {
+    verbose "Skipping continue-pending-status.exp because of nointerrupts."
+    return
+}
+
 standard_testfile
 
 if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}] {

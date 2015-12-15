@@ -37,6 +37,12 @@ gdb_test_multiple "continue" "continue" {
     }
 }
 
+# This test requires sending ^C to interrupt the running target.
+if [target_info exists gdb,nointerrupts] {
+    verbose "Skipping sigthread.exp because of nointerrupts."
+    return
+}
+
 # For this to work we must be sure to consume the "Continuing."
 # message first, or GDB's signal handler may not be in place.
 after 500 {send_gdb "\003"}

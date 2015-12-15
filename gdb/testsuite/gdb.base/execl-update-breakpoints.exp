@@ -16,12 +16,6 @@
 # Test that when following an exec, we don't try to insert breakpoints
 # in the new image at the addresses the symbols had before the exec.
 
-# Remote protocol does not support follow-exec notifications.
-
-if [is_remote target] {
-    continue
-}
-
 standard_testfile
 
 # Build two copies of the program, each linked at a different address.

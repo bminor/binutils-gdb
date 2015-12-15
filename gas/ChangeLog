@@ -1,3 +1,45 @@
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (parse_neon_type_for_operand): Adjust to
+	take into account new vector type 2H.
+	(vectype_to_qualifier): Likewise.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (vectype_to_qualifier): Calculate operand
+	qualifier from per-type base and offet.
+
+2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* config/rx-defs.h(rx_cpu_type): Add RXV2 type.
+	* config/tc-rx.c(cpu_type_list): New type lookup table.
+	(md_parse_option): Use lookup table for choose cpu.
+	(md_show_usage): Add rxv2 for mcpu option.
+	* doc/c-rx.texi: Likewise.
+	* config/rx-parse.y: Add v2 instructions and ACC register.
+	(rx_check_v2): check v2 type.
+
+2015-12-14  Jan Beulich  <jbeulich@suse.com>
+
+	* dw2gencfi.c (dot_cfi_label): Free "name".
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_hint_opt_hsh): New.
+	(parse_barrier_psb): New.
+	(parse_operands): Add case for AARCH64_OPND_BARRIER_PSB.
+	(md_begin): Set up aarch64_hint_opt_hsh.
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (aarch64_features): Add "profile".
+	* doc/c-aarch64.texi (AArch64 Extensions): Add "profile".
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-aarch64.c (parse_sys_ins_reg): Add check of
+	architectural support for system register.
+
 2015-12-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* doc/c-sparc.texi (Sparc-Regs): Document the %dN and %qN notation

@@ -13,10 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if { [is_remote target] || ![isnative] } then {
-    continue
-}
-
 # Until "set follow-fork-mode" and "catch fork" are implemented on
 # other targets...
 #
@@ -111,6 +107,7 @@ proc continue_to_exit_bp_loc {} {
 # First set gdb to follow the child.
 # The result should be that each of the 4 forks returns zero.
 
+clean_restart ${binfile}
 runto_main
 gdb_test_no_output "set follow-fork child"
 continue_to_exit_bp_loc
@@ -120,6 +117,7 @@ gdb_test "print pids" "\\$.* = \\{0, 0, 0, 0\\}.*" "follow child, print pids"
 # Now set gdb to follow the parent.
 # Result should be that none of the 4 forks returns zero.
 
+clean_restart ${binfile}
 runto_main
 gdb_test_no_output "set follow-fork parent" ""
 continue_to_exit_bp_loc

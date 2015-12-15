@@ -944,7 +944,7 @@ gdb_test_multiple "" "$test" {
 
 gdb_test_no_output "set max-completions unlimited"
 
-if {![skip_tui_tests]} {
+if {![skip_tui_tests] && ![target_info exists gdb,nointerrupts]} {
     set test "test completion of layout names"
     send_gdb "layout\t\t\t"
     gdb_test_multiple "" "$test" {
@@ -960,7 +960,7 @@ if {![skip_tui_tests]} {
 	}
     }
 }
-if {![skip_tui_tests]} {
+if {![skip_tui_tests] && ![target_info exists gdb,nointerrupts]} {
     with_test_prefix "focus command" {
 	set test "test completion"
 	send_gdb "focus \t\t"

@@ -1,3 +1,85 @@
+2015-12-14  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/history-duplicates.exp: Skip if no readline support.
+
+2015-12-14  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/gdbinit-history.exp: Skip for remote-host testing.
+
+2015-12-14  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/gdbhistsize-history.exp: Skip for remote-host testing.
+
+2015-12-14  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/completion.exp: Skip tests that interrupt GDB with
+	ctrl-C if nointerrupts target property is set.
+	* gdb.base/double-prompt-target-event-error.exp: Likewise.
+	* gdb.base/paginate-after-ctrl-c-running.exp: Likewise.
+	* gdb.base/paginate-bg-execution.exp: Likewise.
+	* gdb.base/paginate-execution-startup.exp: Likewise.
+	* gdb.base/random-signal.exp: Likewise.
+	* gdb.base/range-stepping.exp: Likewise.
+	* gdb.cp/annota2.exp: Likewise.
+	* gdb.cp/annota3.exp: Likewise.
+	* gdb.gdb/selftest.exp: Likewise.
+	* gdb.threads/continue-pending-status.exp: Likewise.
+	* gdb.threads/leader-exit.exp: Likewise.
+	* gdb.threads/manythreads.exp: Likewise.
+	* gdb.threads/pthreads.exp: Likewise.
+	* gdb.threads/schedlock.exp: Likewise.
+	* gdb.threads/sigthread.exp: Likewise.
+
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/execl-update-breakpoints.exp (main): Enable for target
+	remote.
+	* gdb.base/foll-exec-mode.exp (main): Disable for target remote.
+	* gdb.base/foll-exec.exp (main): Enable for target remote.
+	* gdb.base/foll-fork.exp (main): Likewise.
+	* gdb.base/foll-vfork.exp (main): Likewise.
+	* gdb.base/multi-forks.exp (main): Likewise, and use clean_restart.
+	(proc continue_to_exit_bp_loc): Use clean_restart.
+	* gdb.base/pie-execl.exp (main): Disable for target remote.
+	* gdb.base/watch-vfork.exp (main): Enable for target remote.
+	* gdb.mi/mi-nsthrexec.exp (main): Likewise.
+	* gdb.threads/execl.exp (main): Likewise.
+	* gdb.threads/fork-child-threads.exp (main): Likewise.
+	* gdb.threads/fork-plus-threads.exp (main): Disable for target
+	remote.
+	* gdb.threads/fork-thread-pending.exp (main): Enable for target
+	remote.
+	* gdb.threads/linux-dp.exp (check_philosopher_stack): Allow
+	pid.tid style ptids, instead of just tid.
+	* gdb.threads/thread-execl.exp (main): Enable for target remote.
+	* gdb.threads/watchpoint-fork.exp (main): Likewise.
+	* gdb.trace/report.exp (use_collected_data): Allow pid.tid style
+	ptids, instead of just tid.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/list.exp (test_list_forward): Add end of file error
+	test.
+	(test_repeat_list_command): Add end of file error test.
+	(test_list_backwards): Add beginning of file error test.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/list.exp (test_list_invalid_args): New function,
+	defined, and called.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/list.exp (test_list): Make test names unique.
+
+2015-12-11  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/coremaker2.c: Remove.
+
+2015-12-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/base.exp: Remove stale "spaces" references.
+
 2015-12-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.multi/base.exp: Don't use nowarnings.

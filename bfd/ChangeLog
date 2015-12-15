@@ -1,3 +1,31 @@
+2015-12-15  Jan Beulich  <jbeulich@suse.com>
+
+	* coffgen.c (coff_write_alien_symbol): New parameter "iaux".
+	(coff_write_symbols): Pass NULL for new argument.
+	* cofflink.c (_bfd_coff_final_link): New local variables
+	"iaux".
+	Extend scope of local variables "indx" and "hash". Pass address
+	of "iaux" to coff_write_alien_symbol(). Handle ".file" and the
+	file name ending up in the string table separately. Avoid
+	setting "rewrite" on more than one path.
+	* libcoff-in.h (coff_write_alien_symbol): New parameter of type
+	"union internal_auxent *".
+	* libcoff.h: Re-generate.
+
+2015-12-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 19339
+	* elf-vxworks.h: Update copyright notice.
+	* elf-vxworks.c: Update copyright notice.
+	* elf-nacl.h: Update copyright notice.
+	* elf-nacl.c: Update copyright notice.
+
+2015-12-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19317
+	* linker.c (_bfd_generic_link_add_one_symbol): Don't complain
+	plugin needed to handle slim lto object for relocatable link.
+
 2015-12-09  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* elf32-nios2.c (nios2_elf32_finish_dynamic_sections): Correct

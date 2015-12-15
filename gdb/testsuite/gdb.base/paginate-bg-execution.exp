@@ -114,5 +114,7 @@ proc test_bg_execution_pagination_cancel { how } {
 }
 
 test_bg_execution_pagination_return
-test_bg_execution_pagination_cancel "ctrl-c"
+if ![target_info exists gdb,nointerrupts] {
+    test_bg_execution_pagination_cancel "ctrl-c"
+}
 test_bg_execution_pagination_cancel "quit"

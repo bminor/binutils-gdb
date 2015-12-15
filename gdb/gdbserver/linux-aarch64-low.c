@@ -211,14 +211,19 @@ static const gdb_byte aarch64_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
 static int
 aarch64_breakpoint_at (CORE_ADDR where)
 {
-  gdb_byte insn[aarch64_breakpoint_len];
+  if (is_64bit_tdesc ())
+    {
+      gdb_byte insn[aarch64_breakpoint_len];
 
-  (*the_target->read_memory) (where, (unsigned char *) &insn,
-			      aarch64_breakpoint_len);
-  if (memcmp (insn, aarch64_breakpoint, aarch64_breakpoint_len) == 0)
-    return 1;
+      (*the_target->read_memory) (where, (unsigned char *) &insn,
+				  aarch64_breakpoint_len);
+      if (memcmp (insn, aarch64_breakpoint, aarch64_breakpoint_len) == 0)
+	return 1;
 
-  return 0;
+      return 0;
+    }
+  else
+    return arm_breakpoint_at (where);
 }
 
 static void

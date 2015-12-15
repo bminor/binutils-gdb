@@ -1,3 +1,7 @@
+2015-12-15  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* msp430-sim.c (get_op, put_op): Fix left shift of negative value.
+
 2015-12-07  Nick Clifton  <nickc@redhat.com>
 
 	* msp430-sim.c (sim_open): Check for needed memory at address

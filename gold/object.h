@@ -844,6 +844,11 @@ class Object
   get_incremental_reloc_count(unsigned int symndx) const
   { return this->do_get_incremental_reloc_count(symndx); }
 
+  // Return the output view for section SHNDX.
+  unsigned char*
+  get_output_view(unsigned int shndx, section_size_type* plen) const
+  { return this->do_get_output_view(shndx, plen); }
+
  protected:
   // Returns NULL for Objects that are not dynamic objects.  This method
   // is overridden in the Dynobj class.
@@ -1027,6 +1032,11 @@ class Object
   // implemented by child class.
   virtual unsigned int
   do_get_incremental_reloc_count(unsigned int) const
+  { gold_unreachable(); }
+
+  // Return the output view for a section.
+  virtual unsigned char*
+  do_get_output_view(unsigned int, section_size_type*) const
   { gold_unreachable(); }
 
   void
@@ -2563,6 +2573,10 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   set_output_local_symbol_count(unsigned int value)
   { this->output_local_symbol_count_ = value; }
 
+  // Return the output view for a section.
+  unsigned char*
+  do_get_output_view(unsigned int, section_size_type*) const;
+
  private:
   // For convenience.
   typedef Sized_relobj_file<size, big_endian> This;
@@ -2829,6 +2843,8 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   std::vector<Deferred_layout> deferred_layout_;
   // The list of relocation sections whose layout was deferred.
   std::vector<Deferred_layout> deferred_layout_relocs_;
+  // Pointer to the list of output views; valid only during do_relocate().
+  const Views* output_views_;
 };
 
 // A class to manage the list of all objects.

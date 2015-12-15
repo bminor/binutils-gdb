@@ -15,10 +15,6 @@
 
 # Test handling of threads across an execl.
 
-if { [is_remote target] } then {
-    continue
-}
-
 # Original image, loads a thread library.
 standard_testfile
 

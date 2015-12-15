@@ -1,3 +1,18 @@
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
+	* server.c (process_serial_event): Don't exit from gdbserver
+	in remote mode if there are still active inferiors.
+
+2015-12-11  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch64-low.c (aarch64_breakpoint_at): Call
+	arm_breakpoint_at if the process is 32-bit.
+
+2015-12-11  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.c [__aarch64__]: Use arm_abi_breakpoint
+	arm breakpoint.
+
 2015-12-07  Yao Qi  <yao.qi@linaro.org>
 
 	* configure.srv: Append arm.o to srv_tgtobj for

@@ -1,3 +1,72 @@
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
+	* NEWS: Announce fork and exec event support for target remote.
+
+2015-12-11  Don Breazeal  <donb@codesourcery.com>
+
+	* inferior.c (number_of_live_inferiors): New function.
+	(have_live_inferiors): Use number_of_live_inferiors in place
+	of duplicate code.
+	* inferior.h (number_of_live_inferiors): Declare new function.
+	* remote.c (set_general_process): Remove restriction on target
+	remote mode.
+	(remote_query_supported): Likewise.
+	(remote_detach_1): Exit in target remote mode only when there
+	is just one live inferior left.
+	(remote_disconnect): Unpush the target directly instead of 
+	calling remote_mourn.
+	(remote_kill): Rewrite function to handle both target remote
+	and extended-remote.  Call remote_kill_k.
+	(remote_kill_k): New function.
+	(extended_remote_kill): Delete function.
+	(remote_mourn, extended_remote_mourn): Combine functions into
+	one, remote_mourn, and enable extended functionality for target
+	remote.
+	(remote_pid_to_str): Enable "process" style ptid string for
+	target remote.
+	(remote_supports_multi_process): Remove restriction on target
+	remote mode.
+
+2015-12-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* i386-tdep.c (i386_mpx_info_bounds): Use TYPE_LENGTH.
+	(i386_mpx_set_bounds): Likewise.
+	* solib-darwin.c (darwin_load_image_infos): Likewise.
+	(darwin_solib_read_all_image_info_addr): Likewise.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-cmds.c (_initialize_cli_cmds): Extend help text for
+	'list' command.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-cmds.c (list_command): Add an error when trying to use
+	'-' to scan read off the start of the source file.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-cmds.c (list_command): Check that the argument string is
+	a single character, either '+' or '-'.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-cmds.c (list_command): Move all handling of +/-
+	arguments into a single if block.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-cmds.c (list_command): Use NULL instead of 0 when
+	checking pointers.
+
+2015-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* source.c (lines_to_list): Make static.
+
+2015-12-10  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-thread-db.c (find_new_threads_callback): Use record_thread.
+
 2015-12-10  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* breakpoint.c (remove_thread_event_breakpoints): Remove.

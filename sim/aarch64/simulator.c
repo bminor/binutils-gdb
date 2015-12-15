@@ -12783,6 +12783,44 @@ dexExcpnGen (sim_cpu *cpu)
     HALT_UNALLOC;
 }
 
+/* Stub for accessing system registers.
+   We implement support for the DCZID register since this is used
+   by the C library's memset function.  */
+
+static uint64_t
+system_get (sim_cpu *cpu, unsigned op0, unsigned op1, unsigned crn,
+	    unsigned crm, unsigned op2)
+{
+  if (crn == 0 && op1 == 3 && crm == 0 && op2 == 7)
+    /* DCZID_EL0 - the Data Cache Zero ID register.
+       We do not support DC ZVA at the moment, so
+       we return a value with the disable bit set.  */
+    return ((uint64_t) 1) << 4;
+
+  HALT_NYI;
+}
+
+static void
+do_mrs (sim_cpu *cpu)
+{
+  /* instr[31:20] = 1101 01010 0011
+     instr[19]    = op0
+     instr[18,16] = op1
+     instr[15,12] = CRn
+     instr[11,8]  = CRm
+     instr[7,5]   = op2
+     instr[4,0]   = Rt  */
+  unsigned sys_op0 = uimm (aarch64_get_instr (cpu), 19, 19) + 2;
+  unsigned sys_op1 = uimm (aarch64_get_instr (cpu), 18, 16);
+  unsigned sys_crn = uimm (aarch64_get_instr (cpu), 15, 12);
+  unsigned sys_crm = uimm (aarch64_get_instr (cpu), 11, 8);
+  unsigned sys_op2 = uimm (aarch64_get_instr (cpu), 7, 5);
+  unsigned rt = uimm (aarch64_get_instr (cpu), 4, 0);
+
+  aarch64_set_reg_u64 (cpu, rt, NO_SP,
+		       system_get (cpu, sys_op0, sys_op1, sys_crn, sys_crm, sys_op2));
+}
+
 static void
 dexSystem (sim_cpu *cpu)
 {
@@ -12842,9 +12880,7 @@ dexSystem (sim_cpu *cpu)
 
 	switch (op2)
 	  {
-	  case 2:
-	    HALT_NYI;
-
+	  case 2: HALT_NYI;
 	  case 4: dsb (cpu); return;
 	  case 5: dmb (cpu); return;
 	  case 6: isb (cpu); return;
@@ -12855,25 +12891,25 @@ dexSystem (sim_cpu *cpu)
 
     case 0x3B0:
       /* MRS Wt, sys-reg.  */
-      /* FIXME: Ignore for now.  */
+      do_mrs (cpu);
       return;
 
     case 0x3B4:
     case 0x3BD:
       /* MRS Xt, sys-reg.  */
-      /* FIXME: Ignore for now.  */
+      do_mrs (cpu);
       return;
 
     case 0x0B7:
       /* DC <type>, x<n>.  */
-      /* FIXME: Ignore for now.  */
+      HALT_NYI;
       return;
 
     default:
-      if (uimm (aarch64_get_instr (cpu), 21, 20) == 0x1)
-	/* MSR <sys-reg>, <Xreg>.  */
-	return;
+      /* if (uimm (aarch64_get_instr (cpu), 21, 20) == 0x1)
+         MRS Xt, sys-reg.  */
       HALT_NYI;
+      return;
     }
 }
 

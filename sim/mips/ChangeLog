@@ -1,3 +1,8 @@
+2015-12-15  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* micromips.igen (process_isa_mode): Fix left shift of negative
+	value.
+
 2015-11-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (WITH_MODULO_MEMORY): Delete.

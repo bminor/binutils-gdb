@@ -44,19 +44,19 @@ if { [build_executable ${testfile}.exp ${exec3} "${srcfile3}" {debug}] == -1 } {
 
 clean_restart ${exec1}
 
-# Add an empty inferior space, switch to it, and load a main
-# executable into it.
+# Add an empty inferior, switch to it, and load a main executable into
+# it.
 gdb_test "add-inferior" "Added inferior 2.*" "add empty inferior 2"
 gdb_test "inferior 2" "Switching to inferior 2.*" "switch to inferior 2"
 gdb_test "file ${binfile2}" ".*" "load ${exec2} file in inferior 2"
 
-# Add a new inferior space and load a main executable into it in one
+# Add a new inferior and load a main executable into it in one
 # command.
 gdb_test "add-inferior -exec ${binfile3}" \
     "Added inferior 3.*" \
     "add inferior 3 with -exec ${exec3}"
 
-# Check that we have multiple spaces.
+# Check that we have multiple inferiors.
 
 gdb_test "info inferiors" \
     "Executable.*${exec1}.*${exec2}.*${exec3}.*"

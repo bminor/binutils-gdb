@@ -1,3 +1,187 @@
+2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* rx-deocde.opc: Add new instructions pattern.
+	* rx-deocde.c: Regenerate.
+	* rx-dis.c (register_name): Add new register.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_SSHIFT_H): New.
+	(aarch64_opcode_table): Add fp16 versions of scvtf, fcvtzs, ucvtf
+	and fcvtzu to the Adv.SIMD scalar shift by immediate group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_VSHIFT_H): New.
+	(aarch64_opcode_table): Add fp16 versions of scvtf, fcvtzs, ucvtf
+	and fcvtzu to the Adv.SIMD shift by immediate group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_SISD_PAIR_H): New.
+	(aarch64_opcode_table): Add fp16 versions of fmaxnmp, faddp,
+	fmaxp, fminnmp, fminp to the Adv.SIMD scalar pairwise group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.coM>
+
+	* aarch64-dis.c (get_vreg_qualifier_from_value): Update comment
+	and adjust calculation to ignore qualifier for type 2H.
+	* aarch64-opc.c (aarch64_opnd_qualifier): Add "2H".
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_SIMD_IMM_H): New.
+	(aarch64_opcode_table): Add fp16 version of fmov to the Adv.SIMD
+	modified immediate group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_XLANES_FP_H): New.
+	(aarch64_opcode_table): Add fp16 versions of fmaxnmv, fmaxv,
+	fminnmv, fminv to the Adv.SIMD across lanes group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (aarch64_opcode_table): Add fp16 versions of fmla,
+	fmls, fmul and fmulx to the scalar indexed element group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_ELEMENT_FP_H): New.
+	(aarch64_opcode_table): Add fp16 versions of fmla, fmls, fmul and
+	fmulx to the vector indexed element group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_SISD_FCMP_H_0): new.
+	(QL_S_2SAMEH): New.
+	(aarch64_opcode_table): Add fp16 versions of fcvtns, fcvtms,
+	fcvtas, scvtf, fcmgt, fcmeq, fcmlt, fcvtps, fcvtzs, frecpe,
+	frecpx, fcvtnu, fcvtmu, fcvtau, ucvtf, fcmge, fcmle, fcvtpu,
+	fcvtzu and frsqrte to the scalar two register misc. group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_V2SAMEH): New.
+	(aarch64_opcode_table): Add fp16 versions of frintn, frintm,
+	fcvtns, fcvtms, fcvtas, scvtf, fcmgt, fcmeq, fcmlt, fabs, frintp,
+	frintz, fcvtps, fcvtzs, frecpe, frinta, frintx, fcvtnu, fcvtmu,
+	fcvtau, ucvtf, fcmge, fcmle, fneg, frinti, fcvtpu, fcvtzu, frsqrte
+	and fsqrt to the vector register misc. group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (aarch64_opcode_table): Add fp16 versions of
+	fmulx, fcmeq, frecps, frsqrts, fcmge, facge, fabd, fcmgt and facgt
+	to the scalar three same group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-tbl.h (QL_V3SAMEH): New.
+	(aarch64_opcode_table): Add fp16 versions of fmaxnm, fmla, fadd,
+	fmulx, fcmeq, fmax, frecps, fminnm, fmls, fsub, fmin, frsqrts,
+	fmaxnmp, faddp, fmul, fcmge, facge, fmaxp, fdiv, fminnmp, fabd,
+	fcmgt, facgt and fminp to the vector three same group.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_simd_f16): New.
+	(SIMD_F16): New.
+
+2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_reg_supported_p): Add mistakenly
+	removed statement.
+	(aarch64_pstatefield_supported_p): Move feature checks for AT
+	registers ..
+	(aarch64_sys_ins_reg_supported_p): .. to here.
+
+2015-12-12  Alan Modra  <amodra@gmail.com>
+
+	PR 19359
+	* ppc-opc.c (insert_fxm): Remove "ignored" from error message.
+	(powerpc_opcodes): Remove single-operand mfcr.
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-asm.c (aarch64_ins_hint): New.
+	* aarch64-asm.h (aarch64_ins_hint): Declare.
+	* aarch64-dis.c (aarch64_ext_hint): New.
+	* aarch64-dis.h (aarch64_ext_hint): Declare.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-opc.c (aarch64_hint_options): New.
+	* aarch64-tbl.h (AARCH64_OPERANDS): Fix typos.
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-gen.c (find_alias_opcode): Set max_num_aliases to 16.
+
+2015-12-11  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_reg): Add pbmlimitr_el1, pmbptr_el1,
+	pmbsr_el1, pmbidr_el1, pmscr_el1, pmsicr_el1, pmsirr_el1,
+	pmsfcr_el1, pmsevfr_el1, pmslatfr_el1, pmsidr_el1, pmscr_el2 and
+	pmscr_el2.
+	(aarch64_sys_reg_supported_p): Add architecture feature tests for
+	the new registers.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs_at): Add "s1e1rp" and "s1e1wp".
+	(aarch64_sys_ins_reg_supported_p): Add ARMv8.2 system register
+	feature test for "s1e1rp" and "s1e1wp".
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_regs_dc): Add "cvap".
+	(aarch64_sys_ins_reg_supported_p): New.
+
+2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-dis.c (aarch64_ext_regrt_sysins): Replace use of has_xt
+	with aarch64_sys_ins_reg_has_xt.
+	(aarch64_ext_sysins_op): Likewise.
+	* aarch64-opc.c (operand_general_constraint_met_p): Likewise.
+	(F_HASXT): New.
+	(aarch64_sys_regs_ic): Update for changes to aarch64_sys_ins_reg.
+	(aarch64_sys_regs_dc): Likewise.
+	(aarch64_sys_regs_at): Likewise.
+	(aarch64_sys_regs_tlbi): Likewise.
+	(aarch64_sys_ins_reg_has_xt): New.
+
 2015-12-10  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_regs): Add "uao".

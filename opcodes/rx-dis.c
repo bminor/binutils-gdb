@@ -65,9 +65,9 @@ static char const * register_names[] =
   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
   /* control register */
   "psw", "pc", "usp", "fpsw", NULL, NULL, NULL, NULL,
-  "bpsw", "bpc", "isp", "fintv", "intb", NULL, NULL, NULL,
+  "bpsw", "bpc", "isp", "fintv", "intb", "extb", NULL, NULL,
+  "a0", "a1", NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
 static char const * condition_names[] =

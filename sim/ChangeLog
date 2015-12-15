@@ -1,3 +1,11 @@
+2015-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* aarch64/simulator.c (system_get): New function.  Provides read
+	access to the dczid system register.
+	(do_mrs): New function - implements the MRS instruction.
+	(dexSystem): Call do_mrs for the MRS instruction.  Halt on
+	unimplemented system instructions.
+
 2015-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* configure.tgt: Add aarch64 entry.

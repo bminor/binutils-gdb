@@ -2819,7 +2819,7 @@ space as a result of inferior 1 having executed a @code{vfork} call.
 @cindex threads of execution
 @cindex multiple threads
 @cindex switching threads
-In some operating systems, such as HP-UX and Solaris, a single program
+In some operating systems, such as GNU/Linux and Solaris, a single program
 may have more than one @dfn{thread} of execution.  The precise semantics
 of threads differ from one operating system to another, but in general
 the threads of a single program are akin to multiple processes---except
@@ -2843,24 +2843,6 @@ messages on thread start and exit.
 the user specify which @code{libthread_db} to use if the default choice
 isn't compatible with the program.
 @end itemize
-
-@quotation
-@emph{Warning:} These facilities are not yet available on every
-@value{GDBN} configuration where the operating system supports threads.
-If your @value{GDBN} does not support threads, these commands have no
-effect.  For example, a system without thread support shows no output
-from @samp{info threads}, and always rejects the @code{thread} command,
-like this:
-
-@smallexample
-(@value{GDBP}) info threads
-(@value{GDBP}) thread 1
-Thread ID 1 not known.  Use the "info threads" command to
-see the IDs of currently known threads.
-@end smallexample
-@c FIXME to implementors: how hard would it be to say "sorry, this GDB
-@c                        doesn't support threads"?
-@end quotation
 
 @cindex focus of debugging
 @cindex current thread
@@ -2886,7 +2868,7 @@ whose form varies depending on the particular system.  For example, on
 @end smallexample
 
 @noindent
-when @value{GDBN} notices a new thread.  In contrast, on an SGI system,
+when @value{GDBN} notices a new thread.  In contrast, on other systems,
 the @var{systag} is simply something like @samp{process 368}, with no
 further qualifier.
 
@@ -2902,6 +2884,10 @@ further qualifier.
 @cindex thread identifier (GDB)
 For debugging purposes, @value{GDBN} associates its own thread
 number---always a single integer---with each thread in your program.
+
+From @value{GDBN}'s perspective, a process always has at least one
+thread.  In other words, @value{GDBN} assigns a thread number to the
+program's ``main thread'' even if the program is not multi-threaded.
 
 @table @code
 @kindex info threads
@@ -3130,13 +3116,14 @@ get its process ID.  Then tell @value{GDBN} (a new invocation of
 the child process (@pxref{Attach}).  From that point on you can debug
 the child process just like any other process which you attached to.
 
-On some systems, @value{GDBN} provides support for debugging programs that
-create additional processes using the @code{fork} or @code{vfork} functions.
-Currently, the only platforms with this feature are HP-UX (11.x and later
-only?) and @sc{gnu}/Linux (kernel version 2.5.60 and later).
+On some systems, @value{GDBN} provides support for debugging programs
+that create additional processes using the @code{fork} or @code{vfork}
+functions.  On @sc{gnu}/Linux platforms, this feature is supported
+with kernel version 2.5.46 and later.
 
-The fork debugging commands are supported in both native mode and when
-connected to @code{gdbserver} using @kbd{target extended-remote}.
+The fork debugging commands are supported in native mode and when
+connected to @code{gdbserver} in either @code{target remote} mode or
+@code{target extended-remote} mode.
 
 By default, when a program forks, @value{GDBN} will continue to debug
 the parent process and the child process will run unimpeded.
@@ -3281,6 +3268,9 @@ Program exited normally.
 
 @end table
 @end table
+
+@code{follow-exec-mode} is supported in native mode and
+@code{target extended-remote} mode.
 
 You can use the @code{catch} command to make @value{GDBN} stop whenever
 a @code{fork}, @code{vfork}, or @code{exec} call is made.  @xref{Set
@@ -3444,11 +3434,7 @@ should stop by line number, function name or exact address in the
 program.
 
 On some systems, you can set breakpoints in shared libraries before
-the executable is run.  There is a minor limitation on HP-UX systems:
-you must wait until the executable is run in order to set breakpoints
-in shared library routines that are not called directly by the program
-(for example, routines that are arguments in a @code{pthread_create}
-call).
+the executable is run.
 
 @cindex watchpoints
 @cindex data breakpoints
@@ -3985,9 +3971,9 @@ times slower than normal execution.  (But this may still be worth it, to
 catch errors where you have no clue what part of your program is the
 culprit.)
 
-On some systems, such as HP-UX, PowerPC, @sc{gnu}/Linux and most other
-x86-based targets, @value{GDBN} includes support for hardware
-watchpoints, which do not slow down the running of your program.
+On some systems, such as most PowerPC or x86-based targets,
+@value{GDBN} includes support for hardware watchpoints, which do not
+slow down the running of your program.
 
 @table @code
 @kindex watch
@@ -4281,8 +4267,7 @@ A failed Ada assertion.
 @item exec
 @kindex catch exec
 @cindex break on fork/exec
-A call to @code{exec}.  This is currently only available for HP-UX
-and @sc{gnu}/Linux.
+A call to @code{exec}.
 
 @item syscall
 @itemx syscall @r{[}@var{name} @r{|} @var{number}@r{]} @dots{} 
@@ -4418,13 +4403,11 @@ Again, in this case @value{GDBN} would not be able to display syscall's names.
 
 @item fork
 @kindex catch fork
-A call to @code{fork}.  This is currently only available for HP-UX
-and @sc{gnu}/Linux.
+A call to @code{fork}.
 
 @item vfork
 @kindex catch vfork
-A call to @code{vfork}.  This is currently only available for HP-UX
-and @sc{gnu}/Linux.
+A call to @code{vfork}.
 
 @item load @r{[}regexp@r{]}
 @itemx unload @r{[}regexp@r{]}
@@ -10400,10 +10383,6 @@ gdbserver that supports the @code{qGetTIBAddr} request.
 This variable contains the address of the thread information block.
 
 @end table
-
-On HP-UX systems, if you refer to a function or variable name that
-begins with a dollar sign, @value{GDBN} searches for a user or system
-name first, before it searches for a convenience variable.
 
 @node Convenience Funs
 @section Convenience Functions
@@ -17122,7 +17101,6 @@ executing.  However, even bizarre results are predictable if you are
 well acquainted with the machine-language code of your program.
 @end table
 
-@c Doesn't work on HP-UX; have to set $pcoqh and $pcoqt.
 On many systems, you can get much the same effect as the @code{jump}
 command by storing a new value into the register @code{$pc}.  The
 difference is that this does not start your program running; it only
@@ -18069,8 +18047,9 @@ name and remembers it that way.
 
 @cindex shared libraries
 @anchor{Shared Libraries}
-@value{GDBN} supports @sc{gnu}/Linux, MS-Windows, HP-UX, SunOS, SVr4, Irix,
-and IBM RS/6000 AIX shared libraries.
+@value{GDBN} supports @sc{gnu}/Linux, MS-Windows, SunOS,
+Darwin/Mach-O, SVr4, IBM RS/6000 AIX, QNX Neutrino, FDPIC (FR-V), and
+DSBT (TIC6X) shared libraries.
 
 On MS-Windows @value{GDBN} must be linked with the Expat library to support
 shared libraries.  @xref{Expat}.
@@ -18080,9 +18059,6 @@ when you use the @code{run} command, or when you examine a core file.
 (Before you issue the @code{run} command, @value{GDBN} does not understand
 references to a function in a shared library, however---unless you are
 debugging a core file).
-
-On HP-UX, if the program loads a library explicitly, @value{GDBN}
-automatically loads the symbols at the time of the @code{shl_load} call.
 
 @c FIXME: some @value{GDBN} release may permit some refs to undef
 @c FIXME...symbols---eg in a break cmd---assuming they are from a shared
@@ -19276,28 +19252,148 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 
 @node Connecting
 @section Connecting to a Remote Target
+@cindex remote debugging, connecting
+@cindex @code{gdbserver}, connecting
+@cindex remote debugging, types of connections
+@cindex @code{gdbserver}, types of connections
+@cindex @code{gdbserver}, @code{target remote} mode
+@cindex @code{gdbserver}, @code{target extended-remote} mode
 
-@value{GDBN} needs an unstripped copy of your program to access symbol
-and debugging information.  Some remote targets (@pxref{qXfer
-executable filename read}, and @pxref{Host I/O Packets}) allow
-@value{GDBN} to access program files over the same connection used to
-communicate with @value{GDBN}.  With such a target, if the remote
-program is unstripped, the only command you need is @code{target
-remote}.  Otherwise, start up @value{GDBN} using the name of the local
+This section describes how to connect to a remote target, including the
+types of connections and their differences, how to set up executable and
+symbol files on the host and target, and the commands used for
+connecting to and disconnecting from the remote target.
+
+@subsection Types of Remote Connections
+
+@value{GDBN} supports two types of remote connections, @code{target remote}
+mode and @code{target extended-remote} mode.  Note that many remote targets
+support only @code{target remote} mode.  There are several major
+differences between the two types of connections, enumerated here:
+
+@table @asis
+
+@cindex remote debugging, detach and program exit
+@item Result of detach or program exit
+@strong{With target remote mode:} When the debugged program exits or you
+detach from it, @value{GDBN} disconnects from the target.  When using
+@code{gdbserver}, @code{gdbserver} will exit.
+
+@strong{With target extended-remote mode:} When the debugged program exits or
+you detach from it, @value{GDBN} remains connected to the target, even
+though no program is running.  You can rerun the program, attach to a
+running program, or use @code{monitor} commands specific to the target.
+
+When using @code{gdbserver} in this case, it does not exit unless it was
+invoked using the @option{--once} option.  If the @option{--once} option
+was not used, you can ask @code{gdbserver} to exit using the
+@code{monitor exit} command (@pxref{Monitor Commands for gdbserver}).
+
+@item Specifying the program to debug
+For both connection types you use the @code{file} command to specify the
+program on the host system.  If you are using @code{gdbserver} there are
+some differences in how to specify the location of the program on the
+target.
+
+@strong{With target remote mode:} You must either specify the program to debug
+on the @code{gdbserver} command line or use the @option{--attach} option
+(@pxref{Attaching to a program,,Attaching to a Running Program}).
+
+@cindex @option{--multi}, @code{gdbserver} option
+@strong{With target extended-remote mode:} You may specify the program to debug
+on the @code{gdbserver} command line, or you can load the program or attach
+to it using @value{GDBN} commands after connecting to @code{gdbserver}.
+
+@anchor{--multi Option in Types of Remote Connnections}
+You can start @code{gdbserver} without supplying an initial command to run
+or process ID to attach.  To do this, use the @option{--multi} command line
+option.  Then you can connect using @code{target extended-remote} and start
+the program you want to debug (see below for details on using the
+@code{run} command in this scenario).  Note that the conditions under which
+@code{gdbserver} terminates depend on how @value{GDBN} connects to it
+(@code{target remote} or @code{target extended-remote}).  The
+@option{--multi} option to @code{gdbserver} has no influence on that.
+
+@item The @code{run} command
+@strong{With target remote mode:} The @code{run} command is not
+supported.  Once a connection has been established, you can use all
+the usual @value{GDBN} commands to examine and change data.  The
+remote program is already running, so you can use commands like
+@kbd{step} and @kbd{continue}.
+
+@strong{With target extended-remote mode:} The @code{run} command is
+supported.  The @code{run} command uses the value set by
+@code{set remote exec-file} (@pxref{set remote exec-file}) to select
+the program to run.  Command line arguments are supported, except for
+wildcard expansion and I/O redirection (@pxref{Arguments}).
+
+If you specify the program to debug on the command line, then the
+@code{run} command is not required to start execution, and you can
+resume using commands like @kbd{step} and @kbd{continue} as with
+@code{target remote} mode.
+
+@anchor{Attaching in Types of Remote Connections}
+@item Attaching
+@strong{With target remote mode:} The @value{GDBN} command @code{attach} is
+not supported.  To attach to a running program using @code{gdbserver}, you
+must use the @option{--attach} option (@pxref{Running gdbserver}).
+
+@strong{With target extended-remote mode:} To attach to a running program,
+you may use the @code{attach} command after the connection has been
+established.  If you are using @code{gdbserver}, you may also invoke
+@code{gdbserver} using the @option{--attach} option
+(@pxref{Running gdbserver}).
+
+@end table
+
+@anchor{Host and target files}
+@subsection Host and Target Files
+@cindex remote debugging, symbol files
+@cindex symbol files, remote debugging
+
+@value{GDBN}, running on the host, needs access to symbol and debugging
+information for your program running on the target.  This requires 
+access to an unstripped copy of your program, and possibly any associated
+symbol files.  Note that this section applies equally to both @code{target
+remote} mode and @code{target extended-remote} mode.
+
+Some remote targets (@pxref{qXfer executable filename read}, and
+@pxref{Host I/O Packets}) allow @value{GDBN} to access program files over
+the same connection used to communicate with @value{GDBN}.  With such a
+target, if the remote program is unstripped, the only command you need is
+@code{target remote} (or @code{target extended-remote}).
+
+If the remote program is stripped, or the target does not support remote
+program file access, start up @value{GDBN} using the name of the local
 unstripped copy of your program as the first argument, or use the
-@code{file} command.
+@code{file} command.  Use @code{set sysroot} to specify the location (on
+the host) of target libraries (unless your @value{GDBN} was compiled with
+the correct sysroot using @code{--with-sysroot}).  Alternatively, you
+may use @code{set solib-search-path} to specify how @value{GDBN} locates
+target libraries.
 
-@cindex @code{target remote}
+The symbol file and target libraries must exactly match the executable
+and libraries on the target, with one exception: the files on the host
+system should not be stripped, even if the files on the target system
+are.  Mismatched or missing files will lead to confusing results
+during debugging.  On @sc{gnu}/Linux targets, mismatched or missing
+files may also prevent @code{gdbserver} from debugging multi-threaded
+programs.
+
+@subsection Remote Connection Commands
+@cindex remote connection commands
 @value{GDBN} can communicate with the target over a serial line, or
 over an @acronym{IP} network using @acronym{TCP} or @acronym{UDP}.  In
 each case, @value{GDBN} uses the same protocol for debugging your
 program; only the medium carrying the debugging packets varies.  The
-@code{target remote} command establishes a connection to the target.
-Its arguments indicate which medium to use:
+@code{target remote} and @code{target extended-remote} commands
+establish a connection to the target.  Both commands accept the same
+arguments, which indicate the medium to use:
 
 @table @code
 
 @item target remote @var{serial-device}
+@itemx target extended-remote @var{serial-device}
 @cindex serial line, @code{target remote}
 Use @var{serial-device} to communicate with the target.  For example,
 to use a serial line connected to the device named @file{/dev/ttyb}:
@@ -19313,6 +19409,8 @@ If you're using a serial line, you may want to give @value{GDBN} the
 
 @item target remote @code{@var{host}:@var{port}}
 @itemx target remote @code{tcp:@var{host}:@var{port}}
+@itemx target extended-remote @code{@var{host}:@var{port}}
+@itemx target extended-remote @code{tcp:@var{host}:@var{port}}
 @cindex @acronym{TCP} port, @code{target remote}
 Debug using a @acronym{TCP} connection to @var{port} on @var{host}.
 The @var{host} may be either a host name or a numeric @acronym{IP}
@@ -19341,6 +19439,7 @@ target remote :1234
 Note that the colon is still required here.
 
 @item target remote @code{udp:@var{host}:@var{port}}
+@itemx target extended-remote @code{udp:@var{host}:@var{port}}
 @cindex @acronym{UDP} port, @code{target remote}
 Debug using @acronym{UDP} packets to @var{port} on @var{host}.  For example, to
 connect to @acronym{UDP} port 2828 on a terminal server named @code{manyfarms}:
@@ -19355,6 +19454,7 @@ can silently drop packets on busy or unreliable networks, which will
 cause havoc with your debugging session.
 
 @item target remote | @var{command}
+@itemx target extended-remote | @var{command}
 @cindex pipe, @code{target remote} to
 Run @var{command} in the background and communicate with it using a
 pipe.  The @var{command} is a shell command, to be parsed and expanded
@@ -19370,11 +19470,6 @@ program has already exited, this will have no effect.)
 
 @end table
 
-Once the connection has been established, you can use all the usual
-commands to examine and change data.  The remote program is already
-running; you can use @kbd{step} and @kbd{continue}, and you do not
-need to use @kbd{run}.
-
 @cindex interrupting remote programs
 @cindex remote programs, interrupting
 Whenever @value{GDBN} is waiting for the remote program, if you type the
@@ -19388,10 +19483,13 @@ Interrupted while waiting for the program.
 Give up (and stop debugging it)?  (y or n)
 @end smallexample
 
-If you type @kbd{y}, @value{GDBN} abandons the remote debugging session.
-(If you decide you want to try again later, you can use @samp{target
-remote} again to connect once more.)  If you type @kbd{n}, @value{GDBN}
-goes back to waiting.
+In @code{target remote} mode, if you type @kbd{y}, @value{GDBN} abandons
+the remote debugging session.  (If you decide you want to try again later,
+you can use @kbd{target remote} again to connect once more.)  If you type
+@kbd{n}, @value{GDBN} goes back to waiting.
+
+In @code{target extended-remote} mode, typing @kbd{n} will leave
+@value{GDBN} connected to the target.
 
 @table @code
 @kindex detach (remote)
@@ -19400,11 +19498,13 @@ When you have finished debugging the remote program, you can use the
 @code{detach} command to release it from @value{GDBN} control.
 Detaching from the target normally resumes its execution, but the results
 will depend on your particular remote stub.  After the @code{detach}
-command, @value{GDBN} is free to connect to another target.
+command in @code{target remote} mode, @value{GDBN} is free to connect to
+another target.  In @code{target extended-remote} mode, @value{GDBN} is
+still connected to the target.
 
 @kindex disconnect
 @item disconnect
-The @code{disconnect} command behaves like @code{detach}, except that
+The @code{disconnect} command closes the connection to the target, and
 the target is generally not resumed.  It will wait for @value{GDBN}
 (this instance or another one) to connect and continue debugging.  After
 the @code{disconnect} command, @value{GDBN} is again free to connect to
@@ -19461,7 +19561,8 @@ Delete @var{targetfile} from the target system.
 @cindex remote connection without stubs
 @code{gdbserver} is a control program for Unix-like systems, which
 allows you to connect your program with a remote @value{GDBN} via
-@code{target remote}---but without linking in the usual debugging stub.
+@code{target remote} or @code{target extended-remote}---but without
+linking in the usual debugging stub.
 
 @code{gdbserver} is not a complete replacement for the debugging stubs,
 because it requires essentially the same operating-system facilities
@@ -19489,6 +19590,7 @@ target system with the same privileges as the user running
 @code{gdbserver}.
 @end quotation
 
+@anchor{Running gdbserver}
 @subsection Running @code{gdbserver}
 @cindex arguments, to @code{gdbserver}
 @cindex @code{gdbserver}, command-line arguments
@@ -19556,6 +19658,7 @@ Programs started with stdio-connected gdbserver have @file{/dev/null} for
 display through a pipe connected to gdbserver.
 Both @code{stdout} and @code{stderr} use the same pipe.
 
+@anchor{Attaching to a program}
 @subsubsection Attaching to a Running Program
 @cindex attach to a program, @code{gdbserver}
 @cindex @option{--attach}, @code{gdbserver} option
@@ -19567,8 +19670,12 @@ This is accomplished via the @code{--attach} argument.  The syntax is:
 target> gdbserver --attach @var{comm} @var{pid}
 @end smallexample
 
-@var{pid} is the process ID of a currently running process.  It isn't necessary
-to point @code{gdbserver} at a binary for the running process.
+@var{pid} is the process ID of a currently running process.  It isn't
+necessary to point @code{gdbserver} at a binary for the running process.
+
+In @code{target extended-remote} mode, you can also attach using the
+@value{GDBN} attach command
+(@pxref{Attaching in Types of Remote Connections}).
 
 @pindex pidof
 You can debug processes by name instead of process ID if your target has the
@@ -19582,41 +19689,10 @@ In case more than one copy of @var{program} is running, or @var{program}
 has multiple threads, most versions of @code{pidof} support the
 @code{-s} option to only return the first process ID.
 
-@subsubsection Multi-Process Mode for @code{gdbserver}
-@cindex @code{gdbserver}, multiple processes
-@cindex multiple processes with @code{gdbserver}
-
-When you connect to @code{gdbserver} using @code{target remote},
-@code{gdbserver} debugs the specified program only once.  When the
-program exits, or you detach from it, @value{GDBN} closes the connection
-and @code{gdbserver} exits.
-
-If you connect using @kbd{target extended-remote}, @code{gdbserver}
-enters multi-process mode.  When the debugged program exits, or you
-detach from it, @value{GDBN} stays connected to @code{gdbserver} even
-though no program is running.  The @code{run} and @code{attach}
-commands instruct @code{gdbserver} to run or attach to a new program.
-The @code{run} command uses @code{set remote exec-file} (@pxref{set
-remote exec-file}) to select the program to run.  Command line
-arguments are supported, except for wildcard expansion and I/O
-redirection (@pxref{Arguments}).
-
-@cindex @option{--multi}, @code{gdbserver} option
-To start @code{gdbserver} without supplying an initial command to run
-or process ID to attach, use the @option{--multi} command line option.
-Then you can connect using @kbd{target extended-remote} and start
-the program you want to debug.
-
-In multi-process mode @code{gdbserver} does not automatically exit unless you
-use the option @option{--once}.  You can terminate it by using
-@code{monitor exit} (@pxref{Monitor Commands for gdbserver}).  Note that the
-conditions under which @code{gdbserver} terminates depend on how @value{GDBN}
-connects to it (@kbd{target remote} or @kbd{target extended-remote}).  The
-@option{--multi} option to @code{gdbserver} has no influence on that.
-
 @subsubsection TCP port allocation lifecycle of @code{gdbserver}
 
-This section applies only when @code{gdbserver} is run to listen on a TCP port.
+This section applies only when @code{gdbserver} is run to listen on a TCP
+port.
 
 @code{gdbserver} normally terminates after all of its debugged processes have
 terminated in @kbd{target remote} mode.  On the other hand, for @kbd{target
@@ -19646,6 +19722,12 @@ instance closes its port after the first connection.
 
 @anchor{Other Command-Line Arguments for gdbserver}
 @subsubsection Other Command-Line Arguments for @code{gdbserver}
+
+You can use the @option{--multi} option to start @code{gdbserver} without
+specifying a program to debug or a process to attach to.  Then you can
+attach in @code{target extended-remote} mode and run or attach to a
+program.  For more information,
+@pxref{--multi Option in Types of Remote Connnections}.
 
 @cindex @option{--debug}, @code{gdbserver} option
 The @option{--debug} option tells @code{gdbserver} to display extra
@@ -19698,32 +19780,34 @@ $ gdbserver --wrapper env LD_PRELOAD=libtest.so -- :2222 ./testprog
 
 @subsection Connecting to @code{gdbserver}
 
+The basic procedure for connecting to the remote target is:
+@itemize
+
+@item
 Run @value{GDBN} on the host system.
 
-First make sure you have the necessary symbol files.  Load symbols for
-your application using the @code{file} command before you connect.  Use
-@code{set sysroot} to locate target libraries (unless your @value{GDBN}
-was compiled with the correct sysroot using @code{--with-sysroot}).
+@item
+Make sure you have the necessary symbol files
+(@pxref{Host and target files}).
+Load symbols for your application using the @code{file} command before you
+connect.  Use @code{set sysroot} to locate target libraries (unless your
+@value{GDBN} was compiled with the correct sysroot using
+@code{--with-sysroot}).
 
-The symbol file and target libraries must exactly match the executable
-and libraries on the target, with one exception: the files on the host
-system should not be stripped, even if the files on the target system
-are.  Mismatched or missing files will lead to confusing results
-during debugging.  On @sc{gnu}/Linux targets, mismatched or missing
-files may also prevent @code{gdbserver} from debugging multi-threaded
-programs.
-
+@item
 Connect to your target (@pxref{Connecting,,Connecting to a Remote Target}).
 For TCP connections, you must start up @code{gdbserver} prior to using
-the @code{target remote} command.  Otherwise you may get an error whose
+the @code{target} command.  Otherwise you may get an error whose
 text depends on the host system, but which usually looks something like
 @samp{Connection refused}.  Don't use the @code{load}
-command in @value{GDBN} when using @code{gdbserver}, since the program is
-already on the target.
+command in @value{GDBN} when using @code{target remote} mode, since the
+program is already on the target.
 
+@end itemize
+
+@anchor{Monitor Commands for gdbserver}
 @subsection Monitor Commands for @code{gdbserver}
 @cindex monitor commands, for @code{gdbserver}
-@anchor{Monitor Commands for gdbserver}
 
 During a @value{GDBN} session using @code{gdbserver}, you can use the
 @code{monitor} command to send special requests to @code{gdbserver}.
@@ -20630,7 +20714,6 @@ This section describes details specific to particular native
 configurations.
 
 @menu
-* HP-UX::                       HP-UX
 * BSD libkvm Interface::	Debugging BSD kernel memory images
 * SVR4 Process Information::    SVR4 process information
 * DJGPP Native::                Features specific to the DJGPP port
@@ -20638,14 +20721,6 @@ configurations.
 * Hurd Native::                 Features specific to @sc{gnu} Hurd
 * Darwin::			Features specific to Darwin
 @end menu
-
-@node HP-UX
-@subsection HP-UX
-
-On HP-UX systems, if you refer to a function or variable name that
-begins with a dollar sign, @value{GDBN} searches for a user or system
-name first, before it searches for a convenience variable.
-
 
 @node BSD libkvm Interface
 @subsection BSD libkvm Interface
@@ -20701,7 +20776,7 @@ If @value{GDBN} is configured for an operating system with this
 facility, the command @code{info proc} is available to report
 information about the process running your program, or about any
 process running on your system.  This includes, as of this writing,
-@sc{gnu}/Linux and Solaris, but not HP-UX, for example.
+@sc{gnu}/Linux and Solaris, for example.
 
 This command may also work on core files that were created on a system
 that has the @samp{/proc} facility.

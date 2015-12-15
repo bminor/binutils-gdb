@@ -1,3 +1,7 @@
+2015-12-15  Dominik Vogt  <vogt@linux.vnet.ibm.com>
+
+	* interp.c (sign_ext): Fix left shift of negative value.
+
 2015-11-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (pc, cycles, avr_pc22): Delete.

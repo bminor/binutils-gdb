@@ -364,7 +364,7 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 
 	  /* Index values are signed.  */
 	  if (addr & (1 << (sign - 1)))
-	    addr |= -1 << sign;
+	    addr |= -(1 << sign);
 
 	  addr += reg;
 
@@ -565,7 +565,7 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 
 	  /* Index values are signed.  */
 	  if (addr & (1 << (sign - 1)))
-	    addr |= -1 << sign;
+	    addr |= -(1 << sign);
 
 	  addr += reg;
 

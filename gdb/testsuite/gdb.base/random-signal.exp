@@ -18,6 +18,12 @@ if [target_info exists gdb,nosignals] {
     continue
 }
 
+# This test requires sending ^C to interrupt the running target.
+if [target_info exists gdb,nointerrupts] {
+    verbose "Skipping random-signal.exp because of nointerrupts."
+    return
+}
+
 standard_testfile
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {

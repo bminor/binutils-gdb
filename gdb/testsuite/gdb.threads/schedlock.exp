@@ -18,6 +18,12 @@
 #
 # This test covers the various forms of "set scheduler-locking".
 
+# This test requires sending ^C to interrupt the running target.
+
+if [target_info exists gdb,nointerrupts] {
+    verbose "Skipping schedlock.exp because of nointerrupts."
+    return
+}
 
 standard_testfile
 

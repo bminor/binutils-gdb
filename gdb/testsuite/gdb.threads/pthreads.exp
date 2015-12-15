@@ -15,6 +15,11 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
+# This test requires sending ^C to interrupt the running target.
+if [target_info exists gdb,nointerrupts] {
+    verbose "Skipping pthreads.exp because of nointerrupts."
+    return
+}
 
 standard_testfile
 

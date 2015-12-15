@@ -145,6 +145,8 @@ automatically cause those extensions to be disabled.
 @item @code{fp16} @tab ARMv8.2-A @tab ARMv8.2-A or later
  @tab Enable ARMv8.2 16-bit floating-point support.  This implies
  @code{fp}.
+@item @code{profile} @tab ARMv8.2-A @tab No
+ @tab Enable statistical profiling extensions.
 @end multitable
 
 @node AArch64 Syntax

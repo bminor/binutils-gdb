@@ -5,7 +5,7 @@ dump\.o:     file format .*
 
 Disassembly of section .*:
 
-00000000 <\..*>:
+00000000 <.*>:
    [0-9a-f]+:	c3 00[ 	]+mov\.b	r0, \[r0\]
    [0-9a-f]+:	c3 70[ 	]+mov\.b	r0, \[r7\]
    [0-9a-f]+:	c3 07[ 	]+mov\.b	r7, \[r0\]

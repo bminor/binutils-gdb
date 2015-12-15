@@ -262,12 +262,14 @@ gdb_test_multiple "next" "watch triggered on a.x" {
 # test:
 # annotate-quit
 #
-send_gdb "\003"
-gdb_expect {
-    -re "\r\n\032\032error-begin\r\nQuit\r\n\r\n\032\032quit\r\n$gdb_prompt$" \
+if ![target_info exists gdb,nointerrupts] {
+    send_gdb "\003"
+    gdb_expect {
+	-re "\r\n\032\032error-begin\r\nQuit\r\n\r\n\032\032quit\r\n$gdb_prompt$" \
 	    { pass "annotate-quit" }
-    -re ".*$gdb_prompt$" { fail "annotate-quit" }
-    timeout { fail "annotate-quit (timeout)" }
+	-re ".*$gdb_prompt$" { fail "annotate-quit" }
+	timeout { fail "annotate-quit (timeout)" }
+    }
 }
 
 #

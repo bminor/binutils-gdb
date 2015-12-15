@@ -67,10 +67,9 @@
 [^:]*:22: Info:    	rev32 v4.8h,v5.8h
 [^:]*:24: Error: operand mismatch -- `frintn v6.8b,v7.8b'
 [^:]*:24: Info:    did you mean this\?
-[^:]*:24: Info:    	frintn v6.2s,v7.2s
+[^:]*:24: Info:    	frintn v6.4h,v7.4h
 [^:]*:24: Info:    other valid variant\(s\):
-[^:]*:24: Info:    	frintn v6.4s,v7.4s
-[^:]*:24: Info:    	frintn v6.2d,v7.2d
+[^:]*:24: Info:    	frintn v6.8h,v7.8h
 [^:]*:26: Error: operand mismatch -- `rev64 v8.2d,v9.2d'
 [^:]*:26: Info:    did you mean this\?
 [^:]*:26: Info:    	rev64 v8.8b,v9.8b

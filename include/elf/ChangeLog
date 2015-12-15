@@ -1,3 +1,7 @@
+2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* rx.h (E_FLAG_RX_V2): New RXv2 type.
+
 2015-12-07  Alan Modra  <amodra@gmail.com>
 
 	* ppc64.h (R_PPC64_ENTRY): Define.

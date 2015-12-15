@@ -1,3 +1,41 @@
+2015-12-13  Cary Coutant  <ccoutant@gmail.com>
+
+	* object.h (Object::get_output_view): remove const from return type.
+	(Object::do_get_output_view): Likewise.
+	(Sized_relobj_file::do_get_output_view): Likewise.
+	* reloc.cc (Sized_relobj_file::do_get_output_view): Likewise.
+
+2015-12-11  Cary Coutant  <ccoutant@gmail.com>
+
+	* target.h (Target::calls_non_split): Add prelocs, reloc_count
+	parameters.
+	(Target::do_calls_non_split): Likewise.
+	* target.cc (Target::do_calls_non_split): Likewise.
+	* reloc.cc (Sized_relobj_file::split_stack_adjust_reltype): Adjust
+	call to Target::calls_non_split.
+	* i386.cc (Target_i386::do_calls_non_split): Add prelocs, reloc_count
+	parameters.
+	* powerpc.cc (Target_powerpc::do_calls_non_split): Likewise.
+	* x86_64.cc (Target_x86_64::do_calls_non_split): Likewise.
+
+2015-12-11  Cary Coutant  <ccoutant@gmail.com>
+
+	* object.cc (Sized_relobj_file::Sized_relobj_file): Initialize
+	output_views_.
+	* object.h (Object::get_output_view): New function.
+	(Object::do_get_output_view): New function.
+	(Sized_relobj_file::do_get_output_view): New function.
+	(Sized_relobj_file::output_views_): New data member.	
+	* reloc.cc: (Sized_relobj_file::do_relocate): Store pointer to
+	output views in class object.
+	(Sized_relobj_file::do_get_output_view): New function.
+
+2015-12-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19317
+	* symtab.cc (Symbol_table::add_from_relobj): Don't complain
+	plugin needed to handle slim lto object for relocatable link.
+
 2015-12-09  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): New constant
