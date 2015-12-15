@@ -243,6 +243,8 @@ if [is_amd64_regs_target] {
     set arg0exp "\$rdi"
 } elseif [is_x86_like_target] {
     set arg0exp "*(int *) (\$ebp + 8)"
+} elseif { [istarget "aarch64*-*-*"] } {
+    set arg0exp "\$x0"
 } else {
     set arg0exp ""
 }
