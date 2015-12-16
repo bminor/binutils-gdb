@@ -1,3 +1,12 @@
+2015-12-22  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+opcodes/
+        * rx-decode.opc (movco): Use uniqe id.
+        (movli): Likewise.
+        (stnz): Condition fix.
+        (mvtacgu): Destination fix.
+        * rx-decode.c: Regenerate.
+
 2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
 
 	* rx-deocde.opc: Add new instructions pattern.

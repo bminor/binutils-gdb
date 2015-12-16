@@ -1,3 +1,10 @@
+2015-12-22  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* archures.c: Add bfd_mach_rx_v2.
+	* bfd-in2.h: Regenerate.
+	* cpu-rx.c (arch_info_struct): Add v2 information.
+	* elf32-rx.c (elf32_rx_machine): Add v2 support.
+
 2015-12-22 Mickael Guene <mickael.guene@st.com>
 
 	* bfd-in2.h: Regenerate.
