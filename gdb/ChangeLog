@@ -1,5 +1,11 @@
 2015-12-16  Pedro Alves  <palves@redhat.com>
 
+	* configure.ac (compiler warning flags): When testing a
+	-Wno-foo option, check whether -Wfoo works instead.
+	* configure: Regenerate.
+
+2015-12-16  Pedro Alves  <palves@redhat.com>
+
 	* common/vec.h (vec_offset): New macro.
 	(DEF_VEC_ALLOC_FUNC_I, DEF_VEC_ALLOC_FUNC_O): Use it instead of
 	offsetof.

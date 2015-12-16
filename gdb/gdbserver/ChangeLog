@@ -1,3 +1,9 @@
+2015-12-16  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac (compiler warning flags): When testing a
+	-Wno-foo option, check whether -Wfoo works instead.
+	* configure: Regenerate.
+
 2015-12-11  Don Breazeal  <donb@codesourcery.com>
 
 	* server.c (process_serial_event): Don't exit from gdbserver
