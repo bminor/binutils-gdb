@@ -223,6 +223,12 @@ set armelftests_common {
      "" {pcrel-shared.s}
      {{readelf -dr pcrel-shared.rd}}
      "pcrel-shared.so"}
+    {"MOVS thumb1 relocations" "-static -T arm.ld" "" "" {thumb1-movs.s}
+     {{objdump -dw thumb1-movs.d}}
+     "thumb1-movs"}
+    {"ADDS thumb1 relocations" "-static -T arm.ld" "" "" {thumb1-adds.s}
+     {{objdump -dw thumb1-adds.d}}
+     "thumb1-adds"}
 }
 
 set armelftests_nonacl {

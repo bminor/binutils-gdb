@@ -1689,6 +1689,60 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 0x00000000,		/* src_mask */
 	 0x00000000,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+  EMPTY_HOWTO (130),
+  EMPTY_HOWTO (131),
+  HOWTO (R_ARM_THM_ALU_ABS_G0_NC,/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 16,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_bitfield,/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_ALU_ABS_G0_NC",/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x00000000,		/* src_mask.  */
+	 0x00000000,		/* dst_mask.  */
+	 FALSE),		/* pcrel_offset.  */
+  HOWTO (R_ARM_THM_ALU_ABS_G1_NC,/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 16,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_bitfield,/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_ALU_ABS_G1_NC",/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x00000000,		/* src_mask.  */
+	 0x00000000,		/* dst_mask.  */
+	 FALSE),		/* pcrel_offset.  */
+  HOWTO (R_ARM_THM_ALU_ABS_G2_NC,/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 16,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_bitfield,/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_ALU_ABS_G2_NC",/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x00000000,		/* src_mask.  */
+	 0x00000000,		/* dst_mask.  */
+	 FALSE),		/* pcrel_offset.  */
+  HOWTO (R_ARM_THM_ALU_ABS_G3_NC,/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 16,			/* bitsize.  */
+	 FALSE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_bitfield,/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_ALU_ABS_G3_NC",/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x00000000,		/* src_mask.  */
+	 0x00000000,		/* dst_mask.  */
+	 FALSE),		/* pcrel_offset.  */
 };
 
 /* 160 onwards: */
@@ -1889,7 +1943,11 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
     {BFD_RELOC_ARM_LDC_SB_G0, R_ARM_LDC_SB_G0},
     {BFD_RELOC_ARM_LDC_SB_G1, R_ARM_LDC_SB_G1},
     {BFD_RELOC_ARM_LDC_SB_G2, R_ARM_LDC_SB_G2},
-    {BFD_RELOC_ARM_V4BX,	     R_ARM_V4BX}
+    {BFD_RELOC_ARM_V4BX,	     R_ARM_V4BX},
+    {BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC, R_ARM_THM_ALU_ABS_G3_NC},
+    {BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC, R_ARM_THM_ALU_ABS_G2_NC},
+    {BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC, R_ARM_THM_ALU_ABS_G1_NC},
+    {BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC, R_ARM_THM_ALU_ABS_G0_NC}
   };
 
 static reloc_howto_type *
@@ -11022,6 +11080,33 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_put_32 (input_bfd, insn, hit_data);
       }
       return bfd_reloc_ok;
+
+    case R_ARM_THM_ALU_ABS_G0_NC:
+    case R_ARM_THM_ALU_ABS_G1_NC:
+    case R_ARM_THM_ALU_ABS_G2_NC:
+    case R_ARM_THM_ALU_ABS_G3_NC:
+	{
+	    const int shift_array[4] = {0, 8, 16, 24};
+	    bfd_vma insn = bfd_get_16 (input_bfd, hit_data);
+	    bfd_vma addr = value;
+	    int shift = shift_array[r_type - R_ARM_THM_ALU_ABS_G0_NC];
+
+	    /* Compute address.  */
+	    if (globals->use_rel)
+		signed_addend = insn & 0xff;
+	    addr += signed_addend;
+	    if (branch_type == ST_BRANCH_TO_THUMB)
+		addr |= 1;
+	    /* Clean imm8 insn.  */
+	    insn &= 0xff00;
+	    /* And update with correct part of address.  */
+	    insn |= (addr >> shift) & 0xff;
+	    /* Update insn.  */
+	    bfd_put_16 (input_bfd, insn, hit_data);
+	}
+
+	*unresolved_reloc_p = FALSE;
+	return bfd_reloc_ok;
 
     default:
       return bfd_reloc_notsupported;

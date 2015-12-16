@@ -5273,7 +5273,28 @@ static struct group_reloc_table_entry group_reloc_table[] =
       BFD_RELOC_ARM_ALU_SB_G2,		/* ALU */
       BFD_RELOC_ARM_LDR_SB_G2,		/* LDR */
       BFD_RELOC_ARM_LDRS_SB_G2,		/* LDRS */
-      BFD_RELOC_ARM_LDC_SB_G2 }	};	/* LDC */
+      BFD_RELOC_ARM_LDC_SB_G2 },	/* LDC */
+    /* Absolute thumb alu relocations.  */
+    { "lower0_7",
+      BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC,/* ALU.  */
+      0,				/* LDR.  */
+      0,				/* LDRS.  */
+      0 },				/* LDC.  */
+    { "lower8_15",
+      BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC,/* ALU.  */
+      0,				/* LDR.  */
+      0,				/* LDRS.  */
+      0 },				/* LDC.  */
+    { "upper0_7",
+      BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC,/* ALU.  */
+      0,				/* LDR.  */
+      0,				/* LDRS.  */
+      0 },				/* LDC.  */
+    { "upper8_15",
+      BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC,/* ALU.  */
+      0,				/* LDR.  */
+      0,				/* LDRS.  */
+      0 } };				/* LDC.  */
 
 /* Given the address of a pointer pointing to the textual name of a group
    relocation as may appear in assembler source, attempt to find its details
@@ -10394,7 +10415,9 @@ do_t_add_sub (void)
 		{
 		  inst.instruction = THUMB_OP16(opcode);
 		  inst.instruction |= (Rd << 4) | Rs;
-		  inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
+		  if (inst.reloc.type < BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
+		      || inst.reloc.type > BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC)
+		    inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
 		  if (inst.size_req != 2)
 		    inst.relax = opcode;
 		}
@@ -11745,9 +11768,13 @@ do_t_mov_cmp (void)
 	      inst.instruction = THUMB_OP16 (opcode);
 	      inst.instruction |= Rn << 8;
 	      if (inst.size_req == 2)
-		inst.reloc.type = BFD_RELOC_ARM_THUMB_IMM;
+		{
+		  if (inst.reloc.type < BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
+		      || inst.reloc.type > BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC)
+		    inst.reloc.type = BFD_RELOC_ARM_THUMB_IMM;
+		}
 	      else
-		inst.relax = opcode;
+		  inst.relax = opcode;
 	    }
 	  else
 	    {
@@ -18608,7 +18635,7 @@ static const struct asm_opcode insns[] =
   CL("cmnp",	170f000,     	   2, (RR, SH),      cmp),
 
  tCE("mov",	1a00000, _mov,	   2, (RR, SH),      mov,  t_mov_cmp),
- tC3("movs",	1b00000, _movs,	   2, (RR, SH),      mov,  t_mov_cmp),
+ tC3("movs",	1b00000, _movs,	   2, (RR, SHG),     mov,  t_mov_cmp),
  tCE("mvn",	1e00000, _mvn,	   2, (RR, SH),      mov,  t_mvn_tst),
  tC3("mvns",	1f00000, _mvns,	   2, (RR, SH),      mov,  t_mvn_tst),
 
@@ -23242,6 +23269,68 @@ md_apply_fix (fixS *	fixP,
 	}
       return;
 
+   case BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC:
+   case BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC:
+   case BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC:
+   case BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC:
+      gas_assert (!fixP->fx_done);
+      {
+	bfd_vma insn;
+	bfd_boolean is_mov;
+	bfd_vma encoded_addend = value;
+
+	/* Check that addend can be encoded in instruction.  */
+	if (!seg->use_rela_p && (value < 0 || value > 255))
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("the offset 0x%08lX is not representable"),
+			(unsigned long) encoded_addend);
+
+	/* Extract the instruction.  */
+	insn = md_chars_to_number (buf, THUMB_SIZE);
+	is_mov = (insn & 0xf800) == 0x2000;
+
+	/* Encode insn.  */
+	if (is_mov)
+	  {
+	    if (!seg->use_rela_p)
+	      insn |= encoded_addend;
+	  }
+	else
+	  {
+	    int rd, rs;
+
+	    /* Extract the instruction.  */
+	     /* Encoding is the following
+		0x8000  SUB
+		0x00F0  Rd
+		0x000F  Rs
+	     */
+	     /* The following conditions must be true :
+		- ADD
+		- Rd == Rs
+		- Rd <= 7
+	     */
+	    rd = (insn >> 4) & 0xf;
+	    rs = insn & 0xf;
+	    if ((insn & 0x8000) || (rd != rs) || rd > 7)
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("Unable to process relocation for thumb opcode: %lx"),
+			(unsigned long) insn);
+
+	    /* Encode as ADD immediate8 thumb 1 code.  */
+	    insn = 0x3000 | (rd << 8);
+
+	    /* Place the encoded addend into the first 8 bits of the
+	       instruction.  */
+	    if (!seg->use_rela_p)
+	      insn |= encoded_addend;
+	  }
+
+	/* Update the instruction.  */
+	md_number_to_chars (buf, insn, THUMB_SIZE);
+      }
+      break;
+
    case BFD_RELOC_ARM_ALU_PC_G0_NC:
    case BFD_RELOC_ARM_ALU_PC_G0:
    case BFD_RELOC_ARM_ALU_PC_G1_NC:
@@ -23579,6 +23668,10 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_ARM_LDC_SB_G1:
     case BFD_RELOC_ARM_LDC_SB_G2:
     case BFD_RELOC_ARM_V4BX:
+    case BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC:
+    case BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC:
+    case BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC:
+    case BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC:
       code = fixp->fx_r_type;
       break;
 
@@ -23879,6 +23972,12 @@ arm_fix_adjustable (fixS * fixP)
       || fixP->fx_r_type == BFD_RELOC_ARM_THUMB_MOVT
       || fixP->fx_r_type == BFD_RELOC_ARM_THUMB_MOVW_PCREL
       || fixP->fx_r_type == BFD_RELOC_ARM_THUMB_MOVT_PCREL)
+    return FALSE;
+
+  /* BFD_RELOC_ARM_THUMB_ALU_ABS_Gx_NC relocations have VERY limited
+     offsets, so keep these symbols.  */
+  if (fixP->fx_r_type >= BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
+      && fixP->fx_r_type <= BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC)
     return FALSE;
 
   return TRUE;

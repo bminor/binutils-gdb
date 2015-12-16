@@ -3516,6 +3516,12 @@ pc-relative or some form of GOT-indirect relocation.  */
 /* ARM support for STT_GNU_IFUNC.  */
   BFD_RELOC_ARM_IRELATIVE,
 
+/* Thumb1 relocations to support execute-only code.  */
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC,
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC,
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC,
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC,
+
 /* These relocs are only used within the ARM assembler.  They are not
 (at present) written to any object files.  */
   BFD_RELOC_ARM_IMMEDIATE,
