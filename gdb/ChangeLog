@@ -1,3 +1,9 @@
+2015-12-16  Pedro Alves  <palves@redhat.com>
+
+	* common/vec.h (vec_offset): New macro.
+	(DEF_VEC_ALLOC_FUNC_I, DEF_VEC_ALLOC_FUNC_O): Use it instead of
+	offsetof.
+
 2015-12-11  Don Breazeal  <donb@codesourcery.com>
 
 	* NEWS: Announce fork and exec event support for target remote.
