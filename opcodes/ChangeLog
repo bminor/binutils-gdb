@@ -1,3 +1,8 @@
+2015-12-31  Claudiu Zissulescu <Claudiu.Zissulescu@synopsys.com>
+	    Andrew Burgess <andrew.burgess@embecosm.com>
+
+	* arc-tbl.h (dmb): Add a no operand version of dmb.
+
 2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-dis.c (arm_opcodes): Guard movw, movt cbz, cbnz, clrex, ldrex,
