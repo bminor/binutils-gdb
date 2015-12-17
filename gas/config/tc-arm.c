@@ -25649,7 +25649,8 @@ aeabi_set_public_attributes (void)
   aeabi_set_attribute_int (Tag_CPU_arch, arch);
 
   /* Tag_CPU_arch_profile.  */
-  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a))
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
+      || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8))
     profile = 'A';
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
     profile = 'R';
