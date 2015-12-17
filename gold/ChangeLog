@@ -1,3 +1,8 @@
+2015-12-16  Roland McGrath  <mcgrathr@google.com>
+
+	PR ld/17473
+	* binary.cc: Move #include "safe-ctype.h" to be last #include.
+
 2015-07-26  Doug Kwan  <dougkwan@google.com>
 
 	Apply from master

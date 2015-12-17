@@ -24,13 +24,19 @@
 
 #include <cerrno>
 #include <cstring>
-#include "safe-ctype.h"
 
 #include "elfcpp.h"
 #include "stringpool.h"
 #include "fileread.h"
 #include "output.h"
 #include "binary.h"
+
+// safe-ctype.h interferes with macros defined by the system <ctype.h>.
+// Some C++ system headers might include <ctype.h> and rely on its macro
+// definitions being intact.  So make sure that safe-ctype.h is included
+// only after any C++ system headers, whether directly here (above) or via
+// other local header files (e.g. #include <string> in "binary.h").
+#include "safe-ctype.h"
 
 // Support for reading binary files as input.  These become blobs in
 // the final output.  These files are treated as though they have a
