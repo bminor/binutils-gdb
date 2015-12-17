@@ -1,3 +1,8 @@
+2015-12-17  Pedro Alves  <palves@redhat.com>
+
+	PR threads/19354
+	* gdb.multi/info-threads.exp: New file.
+
 2015-12-15  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.trace/ftrace.exp: Set arg0exp to "$x0" if target

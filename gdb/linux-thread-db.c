@@ -1324,17 +1324,11 @@ thread_db_find_new_threads_1 (ptid_t ptid)
   thread_db_find_new_threads_2 (ptid, 0);
 }
 
-static int
-update_thread_core (struct lwp_info *info, void *closure)
-{
-  info->core = linux_common_core_of_thread (info->ptid);
-  return 0;
-}
-
-/* Update the thread list using td_ta_thr_iter.  */
+/* Implement the to_update_thread_list target method for this
+   target.  */
 
 static void
-thread_db_update_thread_list_td_ta_thr_iter (struct target_ops *ops)
+thread_db_update_thread_list (struct target_ops *ops)
 {
   struct thread_db_info *info;
   struct inferior *inf;
@@ -1356,34 +1350,25 @@ thread_db_update_thread_list_td_ta_thr_iter (struct target_ops *ops)
       if (thread == NULL || thread->executing)
 	continue;
 
+      /* It's best to avoid td_ta_thr_iter if possible.  That walks
+	 data structures in the inferior's address space that may be
+	 corrupted, or, if the target is running, the list may change
+	 while we walk it.  In the latter case, it's possible that a
+	 thread exits just at the exact time that causes GDB to get
+	 stuck in an infinite loop.  To avoid pausing all threads
+	 whenever the core wants to refresh the thread list, we
+	 instead use thread_from_lwp immediately when we see an LWP
+	 stop.  That uses thread_db entry points that do not walk
+	 libpthread's thread list, so should be safe, as well as more
+	 efficient.  */
+      if (target_has_execution_1 (thread->ptid))
+	continue;
+
       thread_db_find_new_threads_1 (thread->ptid);
     }
-}
 
-/* Implement the to_update_thread_list target method for this
-   target.  */
-
-static void
-thread_db_update_thread_list (struct target_ops *ops)
-{
-  /* It's best to avoid td_ta_thr_iter if possible.  That walks data
-     structures in the inferior's address space that may be corrupted,
-     or, if the target is running, the list may change while we walk
-     it.  In the latter case, it's possible that a thread exits just
-     at the exact time that causes GDB to get stuck in an infinite
-     loop.  To avoid pausing all threads whenever the core wants to
-     refresh the thread list, use thread_from_lwp immediately when we
-     see an LWP stop.  That uses  thread_db entry points that do not
-     walk libpthread's thread list, so should be safe, as well as
-     more efficient.  */
-  if (target_has_execution)
-    ops->beneath->to_update_thread_list (ops->beneath);
-  else
-    thread_db_update_thread_list_td_ta_thr_iter (ops);
-
-  if (target_has_execution)
-    iterate_over_lwps (minus_one_ptid /* iterate over all */,
-		       update_thread_core, NULL);
+  /* Give the beneath target a chance to do extra processing.  */
+  ops->beneath->to_update_thread_list (ops->beneath);
 }
 
 static char *

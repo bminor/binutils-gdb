@@ -3719,10 +3719,17 @@ linux_nat_thread_alive (struct target_ops *ops, ptid_t ptid)
 static void
 linux_nat_update_thread_list (struct target_ops *ops)
 {
+  struct lwp_info *lwp;
+
   /* We add/delete threads from the list as clone/exit events are
      processed, so just try deleting exited threads still in the
      thread list.  */
   delete_exited_threads ();
+
+  /* Update the processor core that each lwp/thread was last seen
+     running on.  */
+  ALL_LWPS (lwp)
+    lwp->core = linux_common_core_of_thread (lwp->ptid);
 }
 
 static char *

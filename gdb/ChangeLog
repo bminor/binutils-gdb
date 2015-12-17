@@ -1,5 +1,16 @@
 2015-12-17  Pedro Alves  <palves@redhat.com>
 
+	PR threads/19354
+	* linux-nat.c (linux_nat_update_thread_list): Update process cores
+	each lwp was last seen running on here.
+	* linux-thread-db.c (update_thread_core): Delete.
+	(thread_db_update_thread_list_td_ta_thr_iter): Rename to ...
+	(thread_db_update_thread_list): ... this.  Skip inferiors with
+	execution.  Also call the target beneath.
+	(thread_db_update_thread_list): Delete.
+
+2015-12-17  Pedro Alves  <palves@redhat.com>
+
 	* configure.ac: Remove tkill checks.
 	* configure, config.in: Regenerate.
 	* linux-nat.c: Remove HAVE_TKILL_SYSCALL check.  Update top level
