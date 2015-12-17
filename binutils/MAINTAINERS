@@ -105,6 +105,7 @@ responsibility among the other maintainers.
   METAG            Markos Chandras <markos.chandras@imgtec.com>
   MICROBLAZE	   Michael Eager <eager@eagercon.com>
   MIPS		   Eric Christopher <echristo@apple.com>
+  MIPS		   Maciej W. Rozycki <macro@imgtec.com>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
   MN10300	   Eric Christopher <echristo@apple.com>
   MN10300	   Alexandre Oliva <aoliva@redhat.com>
