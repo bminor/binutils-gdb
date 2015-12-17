@@ -1,3 +1,13 @@
+2015-12-17  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_kill_one_lwp): Remove references to
+	LinuxThreads.
+	(kill_lwp): Remove HAVE_TKILL_SYSCALL check.  No longer fall back
+	to 'kill'.
+	(linux_init_signals): Delete.
+	(initialize_low): Adjust.
+	* thread-db.c (thread_db_init): Remove LinuxThreads reference.
+
 2015-12-16  Pedro Alves  <palves@redhat.com>
 
 	* configure.ac (compiler warning flags): When testing a

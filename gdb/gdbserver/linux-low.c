@@ -878,10 +878,6 @@ linux_create_inferior (char *program, char **allargs)
       close_most_fds ();
       ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) 0, (PTRACE_TYPE_ARG4) 0);
 
-#ifndef __ANDROID__ /* Bionic doesn't use SIGRTMIN the way glibc does.  */
-      signal (__SIGRTMIN + 1, SIG_DFL);
-#endif
-
       setpgid (0, 0);
 
       /* If gdbserver is connected to gdb via stdio, redirect the inferior's
@@ -1183,13 +1179,12 @@ linux_kill_one_lwp (struct lwp_info *lwp)
      ptrace(CONT, pid, 0,0) and just resumes the tracee.  A better
      alternative is to kill with SIGKILL.  We only need one SIGKILL
      per process, not one for each thread.  But since we still support
-     linuxthreads, and we also support debugging programs using raw
-     clone without CLONE_THREAD, we send one for each thread.  For
-     years, we used PTRACE_KILL only, so we're being a bit paranoid
-     about some old kernels where PTRACE_KILL might work better
-     (dubious if there are any such, but that's why it's paranoia), so
-     we try SIGKILL first, PTRACE_KILL second, and so we're fine
-     everywhere.  */
+     support debugging programs using raw clone without CLONE_THREAD,
+     we send one for each thread.  For years, we used PTRACE_KILL
+     only, so we're being a bit paranoid about some old kernels where
+     PTRACE_KILL might work better (dubious if there are any such, but
+     that's why it's paranoia), so we try SIGKILL first, PTRACE_KILL
+     second, and so we're fine everywhere.  */
 
   errno = 0;
   kill_lwp (pid, SIGKILL);
@@ -3320,8 +3315,6 @@ linux_wait_1 (ptid_t ptid,
      stepping - they may require special handling to skip the signal
      handler. Also never ignore signals that could be caused by a
      breakpoint.  */
-  /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
-     thread library?  */
   if (WIFSTOPPED (w)
       && current_thread->last_resume_kind != resume_step
       && (
@@ -3663,27 +3656,17 @@ linux_wait (ptid_t ptid,
 static int
 kill_lwp (unsigned long lwpid, int signo)
 {
-  /* Use tkill, if possible, in case we are using nptl threads.  If tkill
-     fails, then we are not using nptl threads and we should be using kill.  */
+  int ret;
 
-#ifdef __NR_tkill
-  {
-    static int tkill_failed;
-
-    if (!tkill_failed)
-      {
-	int ret;
-
-	errno = 0;
-	ret = syscall (__NR_tkill, lwpid, signo);
-	if (errno != ENOSYS)
-	  return ret;
-	tkill_failed = 1;
-      }
-  }
-#endif
-
-  return kill (lwpid, signo);
+  errno = 0;
+  ret = syscall (__NR_tkill, lwpid, signo);
+  if (errno == ENOSYS)
+    {
+      /* If tkill fails, then we are not using nptl threads, a
+	 configuration we no longer support.  */
+      perror_with_name (("tkill"));
+    }
+  return ret;
 }
 
 void
@@ -7196,16 +7179,6 @@ static struct target_ops linux_target_ops = {
   linux_supports_software_single_step
 };
 
-static void
-linux_init_signals ()
-{
-  /* FIXME drow/2002-06-09: As above, we should check with LinuxThreads
-     to find what the cancel signal actually is.  */
-#ifndef __ANDROID__ /* Bionic doesn't use SIGRTMIN the way glibc does.  */
-  signal (__SIGRTMIN+1, SIG_IGN);
-#endif
-}
-
 #ifdef HAVE_LINUX_REGSETS
 void
 initialize_regsets_info (struct regsets_info *info)
@@ -7225,7 +7198,6 @@ initialize_low (void)
   memset (&sigchld_action, 0, sizeof (sigchld_action));
   set_target_ops (&linux_target_ops);
 
-  linux_init_signals ();
   linux_ptrace_init_warnings ();
 
   sigchld_action.sa_handler = sigchld_handler;

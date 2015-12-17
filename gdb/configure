@@ -14057,46 +14057,6 @@ $as_echo "#define THREAD_DB_HAS_TD_NOTLS 1" >>confdefs.h
 
 fi
 
-if test "x$ac_cv_header_sys_syscall_h" = "xyes"; then
-   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <sys/syscall.h> has __NR_tkill" >&5
-$as_echo_n "checking whether <sys/syscall.h> has __NR_tkill... " >&6; }
-if test "${gdb_cv_sys_syscall_h_has_tkill+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/syscall.h>
-int
-main ()
-{
-int i = __NR_tkill;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gdb_cv_sys_syscall_h_has_tkill=yes
-else
-  gdb_cv_sys_syscall_h_has_tkill=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_sys_syscall_h_has_tkill" >&5
-$as_echo "$gdb_cv_sys_syscall_h_has_tkill" >&6; }
-fi
-if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes"; then
-  ac_fn_c_check_func "$LINENO" "syscall" "ac_cv_func_syscall"
-if test "x$ac_cv_func_syscall" = x""yes; then :
-
-$as_echo "#define HAVE_TKILL_SYSCALL 1" >>confdefs.h
-
-
-fi
-
-fi
-
 ac_fn_c_check_decl "$LINENO" "ADDR_NO_RANDOMIZE" "ac_cv_have_decl_ADDR_NO_RANDOMIZE" "#include <sys/personality.h>
 "
 if test "x$ac_cv_have_decl_ADDR_NO_RANDOMIZE" = x""yes; then :

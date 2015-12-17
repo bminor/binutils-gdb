@@ -20,8 +20,7 @@
 #ifndef LINUX_WAITPID_H
 #define LINUX_WAITPID_H
 
-/* Wrapper function for waitpid which handles EINTR, and emulates
-   __WALL for systems where that is not available.  */
+/* Wrapper function for waitpid which handles EINTR.  */
 extern int my_waitpid (int pid, int *status, int flags);
 
 /* Convert wait status STATUS to a string.  Used for printing debug

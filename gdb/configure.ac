@@ -1850,25 +1850,6 @@ if test "x$gdb_cv_thread_db_h_has_td_notls" = "xyes"; then
             [Define if <thread_db.h> has the TD_NOTLS error code.])
 fi
 
-dnl See if we have a sys/syscall header file that has __NR_tkill.
-if test "x$ac_cv_header_sys_syscall_h" = "xyes"; then
-   AC_CACHE_CHECK([whether <sys/syscall.h> has __NR_tkill],
-                  gdb_cv_sys_syscall_h_has_tkill,
-     AC_TRY_COMPILE(
-       [#include <sys/syscall.h>],
-       [int i = __NR_tkill;],
-       gdb_cv_sys_syscall_h_has_tkill=yes,
-       gdb_cv_sys_syscall_h_has_tkill=no
-     )
-   )
-fi
-dnl See if we can issue tkill syscall.
-if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes"; then
-  AC_CHECK_FUNC(syscall,
-    AC_DEFINE(HAVE_TKILL_SYSCALL, 1, [Define if you support the tkill syscall.])
-  )
-fi
-
 dnl Check if we can disable the virtual address space randomization.
 dnl The functionality of setarch -R.
 AC_CHECK_DECLS([ADDR_NO_RANDOMIZE],,, [#include <sys/personality.h>])

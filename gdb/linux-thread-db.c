@@ -54,11 +54,12 @@
    created, thread IDs (usually, the result of pthread_self), and
    thread-local variables.
 
-   The libthread_db interface originates on Solaris, where it is
-   both more powerful and more complicated.  This implementation
-   only works for LinuxThreads and NPTL, the two glibc threading
-   libraries.  It assumes that each thread is permanently assigned
-   to a single light-weight process (LWP).
+   The libthread_db interface originates on Solaris, where it is both
+   more powerful and more complicated.  This implementation only works
+   for NPTL, the glibc threading library.  It assumes that each thread
+   is permanently assigned to a single light-weight process (LWP).  At
+   some point it also supported the older LinuxThreads library, but it
+   no longer does.
 
    libthread_db-specific information is stored in the "private" field
    of struct thread_info.  When the field is NULL we do not yet have
@@ -1717,10 +1718,9 @@ _initialize_thread_db (void)
 
   /* Defer loading of libthread_db.so until inferior is running.
      This allows gdb to load correct libthread_db for a given
-     executable -- there could be mutiple versions of glibc,
-     compiled with LinuxThreads or NPTL, and until there is
-     a running inferior, we can't tell which libthread_db is
-     the correct one to load.  */
+     executable -- there could be multiple versions of glibc,
+     and until there is a running inferior, we can't tell which
+     libthread_db is the correct one to load.  */
 
   libthread_db_search_path = xstrdup (LIBTHREAD_DB_SEARCH_PATH);
 

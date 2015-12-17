@@ -1,3 +1,41 @@
+2015-12-17  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac: Remove tkill checks.
+	* configure, config.in: Regenerate.
+	* linux-nat.c: Remove HAVE_TKILL_SYSCALL check.  Update top level
+	comments.
+	(linux_nat_post_attach_wait): Remove 'cloned' parameter.  Use
+	__WALL.
+	(attach_proc_task_lwp_callback): Don't set the cloned flag.
+	(linux_nat_attach): Adjust.
+	(kill_lwp): Remove HAVE_TKILL_SYSCALL check.  No longer fall back
+	to 'kill'.
+	(linux_handle_extended_wait): Use __WALL.  Don't set the cloned
+	flag.
+	(wait_lwp): Use __WALL.  Update comments.
+	(running_callback, stop_and_resume_callback): Delete.
+	(linux_nat_filter_event): Don't stop and resume all lwps. Don't
+	check if the event LWP has previously exited.
+	(check_zombie_leaders): Update comments.
+	(linux_nat_wait_1): Use __WALL.
+	(kill_wait_callback): Don't handle clone processes separately.
+	Use __WALL instead.
+	(linux_thread_alive): Delete.
+	(linux_nat_thread_alive): Return true as long as the LWP is in the
+	LWP list.
+	(linux_nat_update_thread_list): Assume the kernel supports
+	PTRACE_EVENT_CLONE.
+	(get_signo): Delete.
+	(lin_thread_get_thread_signals): Remove LinuxThreads references.
+	No longer check __pthread_sig_restart / __pthread_sig_cancel in
+	the inferior.
+	* linux-nat.h (struct lwp_info) <cloned>: Delete field.
+	* linux-thread-db.c: Update comments.
+	(_initialize_thread_db): Remove LinuxThreads references.
+	* nat/linux-waitpid.c (my_waitpid): No longer emulate __WALL.
+	Pass down flags unmodified.
+	* linux-waitpid.h (my_waitpid): Update documentation.
+
 2015-12-17  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (struct stack_item_t): Update comments.

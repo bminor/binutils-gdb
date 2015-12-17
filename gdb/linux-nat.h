@@ -37,11 +37,6 @@ struct lwp_info
      next time we see this LWP stop.  */
   int must_set_ptrace_flags;
 
-  /* Non-zero if this LWP is cloned.  In this context "cloned" means
-     that the LWP is reporting to its parent using a signal other than
-     SIGCHLD.  */
-  int cloned;
-
   /* Non-zero if we sent this LWP a SIGSTOP (but the LWP didn't report
      it back yet).  */
   int signalled;
