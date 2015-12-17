@@ -1,3 +1,8 @@
+2015-12-16  Roland McGrath  <mcgrathr@google.com>
+
+	PR ld/17473
+	* binary.cc: Move #include "safe-ctype.h" to be last #include.
+
 2015-12-13  Cary Coutant  <ccoutant@gmail.com>
 
 	* object.h (Object::get_output_view): remove const from return type.
@@ -25,7 +30,7 @@
 	* object.h (Object::get_output_view): New function.
 	(Object::do_get_output_view): New function.
 	(Sized_relobj_file::do_get_output_view): New function.
-	(Sized_relobj_file::output_views_): New data member.	
+	(Sized_relobj_file::output_views_): New data member.
 	* reloc.cc: (Sized_relobj_file::do_relocate): Store pointer to
 	output views in class object.
 	(Sized_relobj_file::do_get_output_view): New function.
