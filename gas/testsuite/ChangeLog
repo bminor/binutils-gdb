@@ -1,3 +1,10 @@
+2015-12-16  Mickael Guene <mickael.guene@st.com>
+
+	* gas/arm/adds-thumb1-reloc-local.d: New
+	* gas/arm/adds-thumb1-reloc-local.s: New
+	* gas/arm/movs-thumb1-reloc-local.d: New
+	* gas/arm/movs-thumb1-reloc-local.s: New
+
 2015-12-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* gas/aarch64/advsimd-fp16.d: Update expected output.

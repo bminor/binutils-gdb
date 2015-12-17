@@ -1,3 +1,18 @@
+2015-12-16 Mickael Guene <mickael.guene@st.com>
+
+	* doc/c-arm.texi: Add documentation about new directives
+	* config/tc-arm.c (group_reloc_table): Add mapping between gas
+	syntax and new relocations.
+	(do_t_add_sub): Keep new relocations for add operand.
+	(do_t_mov_cmp): Keep new relocations for mov operand.
+	(insns): Use 'shifter operand with possible group relocation'
+	operand parse code for movs operand.
+	(md_apply_fix): Implement mov and add encoding when new
+	relocations on them.
+	(tc_gen_reloc): Add new relocations.
+	(arm_fix_adjustable): Since offset has a limited range ([0:255])
+	we disable adjust_reloc_syms() for new relocations.
+
 2015-12-15  Nick Clifton  <nickc@redhat.com>
 
 	* doc/c-msp430.texi (MSP430 Options): Remove references to a

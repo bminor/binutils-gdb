@@ -1,3 +1,12 @@
+2015-12-16  Mickael Guene <mickael.guene@st.com>
+
+	* ld-arm/arm-elf.exp (armelftests_common): Add new relocations
+	tests.
+	* ld-arm/thumb1-adds.d: New
+	* ld-arm/thumb1-adds.s: New
+	* ld-arm/thumb1-movs.d: New
+	* ld-arm/thumb1-movs.s: New
+
 2015-12-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19317

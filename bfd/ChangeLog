@@ -1,3 +1,15 @@
+2015-12-16  Mickael Guene <mickael.guene@st.com>
+
+	* bfd-in2.h: Regenerate.
+	* reloc.c: Add new relocations.
+	* libbfd.h (bfd_reloc_code_real_names): Add new relocations
+	display names.
+	* elf32-arm.c (elf32_arm_howto_table_1): Add HOWTO for new
+	relocations.
+	(elf32_arm_reloc_map): Add bfd/arm mapping for new relocations.
+	(elf32_arm_final_link_relocate): Implement new relocations
+	resolution.
+
 2015-12-15  Jan Beulich  <jbeulich@suse.com>
 
 	* coffgen.c (coff_write_alien_symbol): New parameter "iaux".
