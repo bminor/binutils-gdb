@@ -1,3 +1,12 @@
+2015-12-17  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* gas/config/tc-arm.c (aeabi_set_public_attributes): Adjust
+	TAG_ARCH_profile for armv8-a.
+	* gas/testsuite/gas/arm/armv8a-automatic-hlt.d: New test.
+	* gas/testsuite/gas/arm/armv8a-automatic-hlt.s: New test.
+	* gas/testsuite/gas/arm/armv8a-automatic-lda.d: New test.
+	* gas/testsuite/gas/arm/armv8a-automatic-lda.s: New test.
+
 2015-12-15  Nick Clifton  <nickc@redhat.com>
 
 	* doc/c-msp430.texi (MSP430 Options): Remove references to a
