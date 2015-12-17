@@ -1,3 +1,10 @@
+2015-12-17  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (struct stack_item_t): Update comments.
+	(pass_on_stack): Set item.data to NULL.
+	(aarch64_push_dummy_call): Call write_memory if si->data
+	isn't NULL.
+
 2015-12-16  Pedro Alves  <palves@redhat.com>
 
 	* configure.ac (compiler warning flags): When testing a
