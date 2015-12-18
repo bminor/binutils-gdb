@@ -26,9 +26,6 @@ struct address_space;
 
 #include "arch/arm.h"
 
-/* Size of integer registers.  */
-#define INT_REGISTER_SIZE		4
-
 /* Say how long FP registers are.  Used for documentation purposes and
    code readability in this header.  IEEE extended doubles are 80
    bits.  DWORD aligned they use 96 bits.  */
@@ -50,32 +47,6 @@ struct address_space;
 #define NUM_GREGS	16	/* Number of general purpose registers.  */
 
 
-/* Instruction condition field values.  */
-#define INST_EQ		0x0
-#define INST_NE		0x1
-#define INST_CS		0x2
-#define INST_CC		0x3
-#define INST_MI		0x4
-#define INST_PL		0x5
-#define INST_VS		0x6
-#define INST_VC		0x7
-#define INST_HI		0x8
-#define INST_LS		0x9
-#define INST_GE		0xa
-#define INST_LT		0xb
-#define INST_GT		0xc
-#define INST_LE		0xd
-#define INST_AL		0xe
-#define INST_NV		0xf
-
-#define FLAG_N		0x80000000
-#define FLAG_Z		0x40000000
-#define FLAG_C		0x20000000
-#define FLAG_V		0x10000000
-
-#define CPSR_T		0x20
-
-#define XPSR_T		0x01000000
 
 /* Type of floating-point code in use by inferior.  There are really 3 models
    that are traditionally supported (plus the endianness issue), but gcc can

@@ -4301,50 +4301,6 @@ convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr,
 			       &d, dbl);
 }
 
-static int
-condition_true (unsigned long cond, unsigned long status_reg)
-{
-  if (cond == INST_AL || cond == INST_NV)
-    return 1;
-
-  switch (cond)
-    {
-    case INST_EQ:
-      return ((status_reg & FLAG_Z) != 0);
-    case INST_NE:
-      return ((status_reg & FLAG_Z) == 0);
-    case INST_CS:
-      return ((status_reg & FLAG_C) != 0);
-    case INST_CC:
-      return ((status_reg & FLAG_C) == 0);
-    case INST_MI:
-      return ((status_reg & FLAG_N) != 0);
-    case INST_PL:
-      return ((status_reg & FLAG_N) == 0);
-    case INST_VS:
-      return ((status_reg & FLAG_V) != 0);
-    case INST_VC:
-      return ((status_reg & FLAG_V) == 0);
-    case INST_HI:
-      return ((status_reg & (FLAG_C | FLAG_Z)) == FLAG_C);
-    case INST_LS:
-      return ((status_reg & (FLAG_C | FLAG_Z)) != FLAG_C);
-    case INST_GE:
-      return (((status_reg & FLAG_N) == 0) == ((status_reg & FLAG_V) == 0));
-    case INST_LT:
-      return (((status_reg & FLAG_N) == 0) != ((status_reg & FLAG_V) == 0));
-    case INST_GT:
-      return (((status_reg & FLAG_Z) == 0)
-	      && (((status_reg & FLAG_N) == 0)
-		  == ((status_reg & FLAG_V) == 0)));
-    case INST_LE:
-      return (((status_reg & FLAG_Z) != 0)
-	      || (((status_reg & FLAG_N) == 0)
-		  != ((status_reg & FLAG_V) == 0)));
-    }
-  return 1;
-}
-
 static unsigned long
 shifted_reg_val (struct frame_info *frame, unsigned long inst, int carry,
 		 unsigned long pc_val, unsigned long status_reg)
@@ -4393,17 +4349,6 @@ shifted_reg_val (struct frame_info *frame, unsigned long inst, int carry,
     }
 
   return res & 0xffffffff;
-}
-
-/* Return number of 1-bits in VAL.  */
-
-static int
-bitcount (unsigned long val)
-{
-  int nbits;
-  for (nbits = 0; val != 0; nbits++)
-    val &= val - 1;		/* Delete rightmost 1-bit in val.  */
-  return nbits;
 }
 
 static int

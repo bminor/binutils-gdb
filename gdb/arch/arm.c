@@ -20,8 +20,7 @@
 #include "common-defs.h"
 #include "arm.h"
 
-/* Return the size in bytes of the complete Thumb instruction whose
-   first halfword is INST1.  */
+/* See arm.h.  */
 
 int
 thumb_insn_size (unsigned short inst1)
@@ -30,4 +29,61 @@ thumb_insn_size (unsigned short inst1)
     return 4;
   else
     return 2;
+}
+
+/* See arm.h.  */
+
+int
+bitcount (unsigned long val)
+{
+  int nbits;
+  for (nbits = 0; val != 0; nbits++)
+    val &= val - 1;		/* Delete rightmost 1-bit in val.  */
+  return nbits;
+}
+
+/* See arm.h.  */
+
+int
+condition_true (unsigned long cond, unsigned long status_reg)
+{
+  if (cond == INST_AL || cond == INST_NV)
+    return 1;
+
+  switch (cond)
+    {
+    case INST_EQ:
+      return ((status_reg & FLAG_Z) != 0);
+    case INST_NE:
+      return ((status_reg & FLAG_Z) == 0);
+    case INST_CS:
+      return ((status_reg & FLAG_C) != 0);
+    case INST_CC:
+      return ((status_reg & FLAG_C) == 0);
+    case INST_MI:
+      return ((status_reg & FLAG_N) != 0);
+    case INST_PL:
+      return ((status_reg & FLAG_N) == 0);
+    case INST_VS:
+      return ((status_reg & FLAG_V) != 0);
+    case INST_VC:
+      return ((status_reg & FLAG_V) == 0);
+    case INST_HI:
+      return ((status_reg & (FLAG_C | FLAG_Z)) == FLAG_C);
+    case INST_LS:
+      return ((status_reg & (FLAG_C | FLAG_Z)) != FLAG_C);
+    case INST_GE:
+      return (((status_reg & FLAG_N) == 0) == ((status_reg & FLAG_V) == 0));
+    case INST_LT:
+      return (((status_reg & FLAG_N) == 0) != ((status_reg & FLAG_V) == 0));
+    case INST_GT:
+      return (((status_reg & FLAG_Z) == 0)
+	      && (((status_reg & FLAG_N) == 0)
+		  == ((status_reg & FLAG_V) == 0)));
+    case INST_LE:
+      return (((status_reg & FLAG_Z) != 0)
+	      || (((status_reg & FLAG_N) == 0)
+		  != ((status_reg & FLAG_V) == 0)));
+    }
+  return 1;
 }

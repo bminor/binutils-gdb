@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "osabi.h"
 
+#include "arch/arm.h"
 #include "arm-tdep.h"
 #include "solib-svr4.h"
 

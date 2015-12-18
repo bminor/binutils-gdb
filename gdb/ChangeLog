@@ -1,3 +1,16 @@
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* arch/arm.c (bitcount): Move from arm-tdep.c.
+	(condition_true): Likewise.
+	* arch/arm.h (Instruction Definitions): Move form arm-tdep.h.
+	(condition_true): Move defenition from arm-tdep.h.
+	(bitcount): Likewise.
+	* arm-tdep.c (condition_true): Move to arch/arm.c.
+	(bitcount): Likewise.
+	* arm-tdep.h (Instruction Definitions): Move to arch/arm.h.
+	* arm-wince-tdep.c: Include arch/arm.h.
+	* armnbsd-tdep.c: Likewise.
+
 2015-12-17  Pedro Alves  <palves@redhat.com>
 
 	PR threads/19354
