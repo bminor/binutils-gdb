@@ -3980,6 +3980,33 @@ install_software_single_step_breakpoints (struct lwp_info *lwp)
   do_cleanups (old_chain);
 }
 
+/* Single step via hardware or software single step.
+   Return 1 if hardware single stepping, 0 if software single stepping
+   or can't single step.  */
+
+static int
+single_step (struct lwp_info* lwp)
+{
+  int step = 0;
+
+  if (can_hardware_single_step ())
+    {
+      step = 1;
+    }
+  else if (can_software_single_step ())
+    {
+      install_software_single_step_breakpoints (lwp);
+      step = 0;
+    }
+  else
+    {
+      if (debug_threads)
+	debug_printf ("stepping is not implemented on this target");
+    }
+
+  return step;
+}
+
 /* Resume execution of LWP.  If STEP is nonzero, single-step it.  If
    SIGNAL is nonzero, give it that signal.  */
 
@@ -4127,13 +4154,13 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
      address, continue, and carry on catching this while-stepping
      action only when that breakpoint is hit.  A future
      enhancement.  */
-  if (thread->while_stepping != NULL
-      && can_hardware_single_step ())
+  if (thread->while_stepping != NULL)
     {
       if (debug_threads)
 	debug_printf ("lwp %ld has a while-stepping action -> forcing step.\n",
 		      lwpid_of (thread));
-      step = 1;
+
+      step = single_step (lwp);
     }
 
   if (proc->tdesc != NULL && the_low_target.get_pc != NULL)
@@ -4539,20 +4566,7 @@ start_step_over (struct lwp_info *lwp)
   uninsert_breakpoints_at (pc);
   uninsert_fast_tracepoint_jumps_at (pc);
 
-  if (can_hardware_single_step ())
-    {
-      step = 1;
-    }
-  else if (can_software_single_step ())
-    {
-      install_software_single_step_breakpoints (lwp);
-      step = 0;
-    }
-  else
-    {
-      internal_error (__FILE__, __LINE__,
-		      "stepping is not implemented on this target");
-    }
+  step = single_step (lwp);
 
   current_thread = saved_thread;
 

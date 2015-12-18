@@ -1,5 +1,11 @@
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* linux-low.c (single_step): New function.
+	(linux_resume_one_lwp_throw): Call single_step.
+	(start_step_over): Likewise.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* Makefile.in (SFILES): Append arch/arm-linux.c,
 	arch/arm-get-next-pcs.c.
 	(arm-linux.o): New rule.
