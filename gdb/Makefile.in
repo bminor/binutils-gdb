@@ -894,7 +894,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
 	common/errors.c common/common-debug.c common/common-exceptions.c \
-	common/btrace-common.c common/fileio.c \
+	common/btrace-common.c common/fileio.c common/common-regcache.c \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -1085,6 +1085,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
 	common-exceptions.o btrace-common.o fileio.o \
+	common-regcache.o \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -2266,6 +2267,11 @@ btrace-common.o: ${srcdir}/common/btrace-common.c
 fileio.o: ${srcdir}/common/fileio.c
 	$(COMPILE) $(srcdir)/common/fileio.c
 	$(POSTCOMPILE)
+
+common-regcache.o: ${srcdir}/common/common-regcache.c
+	$(COMPILE) $(srcdir)/common/common-regcache.c
+	$(POSTCOMPILE)
+
 #
 # gdb/target/ dependencies
 #

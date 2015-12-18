@@ -1,5 +1,17 @@
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* Makefile.in (SFILES): Append common/common-regcache.c.
+	(COMMON_OBS): Append common/common-regcache.o.
+	(common-regcache.o): New rule.
+	* common/common-regcache.h (register_status) New enum.
+	(regcache_raw_read_unsigned): New declaration.
+	* common/common-regcache.c: New file.
+	* regcache.h (enum register_status): Move to common-regcache.h.
+	(regcache_raw_read_unsigned): Likewise.
+	(regcache_raw_get_unsigned): Likewise.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* arm-linux-tdep.c (arm_linux_sigreturn_next_pc_offset): New function.
 	(arm_linux_sigreturn_next_pc): Likewise.
 	(arm_linux_syscall_next_pc): Use regcache instead of frame.

@@ -145,8 +145,9 @@ init_register_cache (struct regcache *regcache,
 	= (unsigned char *) xcalloc (1, tdesc->registers_size);
       regcache->registers_owned = 1;
       regcache->register_status
-	= (unsigned char *) xcalloc (1, tdesc->num_registers);
-      gdb_assert (REG_UNAVAILABLE == 0);
+	= (unsigned char *) xmalloc (tdesc->num_registers);
+      memset ((void *) regcache->register_status, REG_UNAVAILABLE,
+	      tdesc->num_registers);
 #else
       gdb_assert_not_reached ("can't allocate memory from the heap");
 #endif
@@ -433,6 +434,27 @@ collect_register (struct regcache *regcache, int n, void *buf)
 {
   memcpy (buf, register_data (regcache, n, 1),
 	  register_size (regcache->tdesc, n));
+}
+
+enum register_status
+regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
+			    ULONGEST *val)
+{
+  int size;
+
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->tdesc->num_registers);
+
+  size = register_size (regcache->tdesc, regnum);
+
+  if (size > (int) sizeof (ULONGEST))
+    error (_("That operation is not available on integers of more than"
+            "%d bytes."),
+          (int) sizeof (ULONGEST));
+
+  collect_register (regcache, regnum, val);
+
+  return REG_VALID;
 }
 
 #ifndef IN_PROCESS_AGENT

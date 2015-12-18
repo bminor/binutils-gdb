@@ -24,13 +24,6 @@
 struct thread_info;
 struct target_desc;
 
-/* The register exists, it has a value, but we don't know what it is.
-   Used when inspecting traceframes.  */
-#define REG_UNAVAILABLE 0
-
-/* We know the register's value (and we have it cached).  */
-#define REG_VALID 1
-
 /* The data for the register cache.  Note that we have one per
    inferior; this is primarily for simplicity, as the performance
    benefit is minimal.  */

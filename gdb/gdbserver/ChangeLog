@@ -1,5 +1,16 @@
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* Makefile.in (SFILES): Append common/common-regcache.c.
+	(OBS): Append common-regcache.o.
+	(common-regcache.o): New rule.
+	* regcache.c (init_register_cache): Initialize cache to
+	REG_UNAVAILABLE.
+	(regcache_raw_read_unsigned): New function.
+	* regcache.h (REG_UNAVAILABLE, REG_VALID): Replaced by shared
+	register_status enum.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* linux-aarch64-low.c (the_low_targets): Rename
 	breakpoint_reinsert_addr to get_next_pcs.
 	* linux-arm-low.c (the_low_targets): Likewise.
