@@ -715,6 +715,21 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
   return status;
 }
 
+/* Return the register's value or throw if it's not available.  */
+
+ULONGEST
+regcache_raw_get_unsigned (struct regcache *regcache, int regnum)
+{
+  ULONGEST value;
+  enum register_status status;
+
+  status = regcache_raw_read_unsigned (regcache, regnum, &value);
+  if (status == REG_UNAVAILABLE)
+    throw_error (NOT_AVAILABLE_ERROR,
+		 _("Register %d is not available"), regnum);
+  return value;
+}
+
 void
 regcache_raw_write_signed (struct regcache *regcache, int regnum, LONGEST val)
 {

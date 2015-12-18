@@ -281,6 +281,19 @@ arm_psr_thumb_bit (struct gdbarch *gdbarch)
     return CPSR_T;
 }
 
+/* Determine if the processor is currently executing in Thumb mode.  */
+
+int
+arm_is_thumb (struct regcache *regcache)
+{
+  ULONGEST cpsr;
+  ULONGEST t_bit = arm_psr_thumb_bit (get_regcache_arch (regcache));
+
+  cpsr = regcache_raw_get_unsigned (regcache, ARM_PS_REGNUM);
+
+  return (cpsr & t_bit) != 0;
+}
+
 /* Determine if FRAME is executing in Thumb mode.  */
 
 int
@@ -4302,7 +4315,7 @@ convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr,
 }
 
 static unsigned long
-shifted_reg_val (struct frame_info *frame, unsigned long inst, int carry,
+shifted_reg_val (struct regcache *regcache, unsigned long inst, int carry,
 		 unsigned long pc_val, unsigned long status_reg)
 {
   unsigned long res, shift;
@@ -4313,14 +4326,14 @@ shifted_reg_val (struct frame_info *frame, unsigned long inst, int carry,
     {
       int rs = bits (inst, 8, 11);
       shift = (rs == 15 ? pc_val + 8
-			: get_frame_register_unsigned (frame, rs)) & 0xFF;
+	       : regcache_raw_get_unsigned (regcache, rs)) & 0xFF;
     }
   else
     shift = bits (inst, 7, 11);
 
   res = (rm == ARM_PC_REGNUM
 	 ? (pc_val + (bit (inst, 4) ? 12 : 8))
-	 : get_frame_register_unsigned (frame, rm));
+	 : regcache_raw_get_unsigned (regcache, rm));
 
   switch (shifttype)
     {
@@ -4372,10 +4385,10 @@ thumb_advance_itstate (unsigned int itstate)
    another breakpoint by our caller.  */
 
 static CORE_ADDR
-thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
+thumb_get_next_pc_raw (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct address_space *aspace = get_regcache_aspace (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
@@ -4397,7 +4410,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
      base condition.  One of the low four bits will be set if an IT
      block is active.  These bits read as zero on earlier
      processors.  */
-  status = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
+  status = regcache_raw_get_unsigned (regcache, ARM_PS_REGNUM);
   itstate = ((status >> 8) & 0xfc) | ((status >> 25) & 0x3);
 
   /* If-Then handling.  On GNU/Linux, where this routine is used, we
@@ -4512,7 +4525,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
       /* Fetch the saved PC from the stack.  It's stored above
          all of the other registers.  */
       offset = bitcount (bits (inst1, 0, 7)) * INT_REGISTER_SIZE;
-      sp = get_frame_register_unsigned (frame, ARM_SP_REGNUM);
+      sp = regcache_raw_get_unsigned (regcache, ARM_SP_REGNUM);
       nextpc = read_memory_unsigned_integer (sp + offset, 4, byte_order);
     }
   else if ((inst1 & 0xf000) == 0xd000)	/* conditional branch */
@@ -4524,7 +4537,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	  tdep = gdbarch_tdep (gdbarch);
 
 	  if (tdep->syscall_next_pc != NULL)
-	    nextpc = tdep->syscall_next_pc (frame);
+	    nextpc = tdep->syscall_next_pc (regcache);
 
 	}
       else if (cond != 0x0f && condition_true (cond, status))
@@ -4568,7 +4581,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	  else if (inst1 == 0xf3de && (inst2 & 0xff00) == 0x3f00)
 	    {
 	      /* SUBS PC, LR, #imm8.  */
-	      nextpc = get_frame_register_unsigned (frame, ARM_LR_REGNUM);
+	      nextpc = regcache_raw_get_unsigned (regcache, ARM_LR_REGNUM);
 	      nextpc -= inst2 & 0x00ff;
 	    }
 	  else if ((inst2 & 0xd000) == 0x8000 && (inst1 & 0x0380) != 0x0380)
@@ -4626,14 +4639,15 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 
 	  if (load_pc)
 	    {
-	      CORE_ADDR addr = get_frame_register_unsigned (frame, rn);
-	      nextpc = get_frame_memory_unsigned (frame, addr + offset, 4);
+	      CORE_ADDR addr = regcache_raw_get_unsigned (regcache, rn);
+	      nextpc = read_memory_unsigned_integer (addr + offset, 4,
+						     byte_order);
 	    }
 	}
       else if ((inst1 & 0xffef) == 0xea4f && (inst2 & 0xfff0) == 0x0f00)
 	{
 	  /* MOV PC or MOVS PC.  */
-	  nextpc = get_frame_register_unsigned (frame, bits (inst2, 0, 3));
+	  nextpc = regcache_raw_get_unsigned (regcache, bits (inst2, 0, 3));
 	  nextpc = MAKE_THUMB_ADDR (nextpc);
 	}
       else if ((inst1 & 0xff70) == 0xf850 && (inst2 & 0xf000) == 0xf000)
@@ -4643,7 +4657,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	  int rn, load_pc = 1;
 
 	  rn = bits (inst1, 0, 3);
-	  base = get_frame_register_unsigned (frame, rn);
+	  base = regcache_raw_get_unsigned (regcache, rn);
 	  if (rn == ARM_PC_REGNUM)
 	    {
 	      base = (base + 4) & ~(CORE_ADDR) 0x3;
@@ -4667,14 +4681,14 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	  else if ((inst2 & 0x0fc0) == 0x0000)
 	    {
 	      int shift = bits (inst2, 4, 5), rm = bits (inst2, 0, 3);
-	      base += get_frame_register_unsigned (frame, rm) << shift;
+	      base += regcache_raw_get_unsigned (regcache, rm) << shift;
 	    }
 	  else
 	    /* Reserved.  */
 	    load_pc = 0;
 
 	  if (load_pc)
-	    nextpc = get_frame_memory_unsigned (frame, base, 4);
+	    nextpc = read_memory_unsigned_integer (base, 4, byte_order);
 	}
       else if ((inst1 & 0xfff0) == 0xe8d0 && (inst2 & 0xfff0) == 0xf000)
 	{
@@ -4685,10 +4699,11 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	  if (tbl_reg == 0x0f)
 	    table = pc + 4;  /* Regcache copy of PC isn't right yet.  */
 	  else
-	    table = get_frame_register_unsigned (frame, tbl_reg);
+	    table = regcache_raw_get_unsigned (regcache, tbl_reg);
 
-	  offset = get_frame_register_unsigned (frame, bits (inst2, 0, 3));
-	  length = 2 * get_frame_memory_unsigned (frame, table + offset, 1);
+	  offset = regcache_raw_get_unsigned (regcache, bits (inst2, 0, 3));
+	  length = 2 * read_memory_unsigned_integer (table + offset, 1,
+						     byte_order);
 	  nextpc = pc_val + length;
 	}
       else if ((inst1 & 0xfff0) == 0xe8d0 && (inst2 & 0xfff0) == 0xf010)
@@ -4700,10 +4715,11 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	  if (tbl_reg == 0x0f)
 	    table = pc + 4;  /* Regcache copy of PC isn't right yet.  */
 	  else
-	    table = get_frame_register_unsigned (frame, tbl_reg);
+	    table = regcache_raw_get_unsigned (regcache, tbl_reg);
 
-	  offset = 2 * get_frame_register_unsigned (frame, bits (inst2, 0, 3));
-	  length = 2 * get_frame_memory_unsigned (frame, table + offset, 2);
+	  offset = 2 * regcache_raw_get_unsigned (regcache, bits (inst2, 0, 3));
+	  length = 2 * read_memory_unsigned_integer (table + offset, 2,
+						     byte_order);
 	  nextpc = pc_val + length;
 	}
     }
@@ -4712,14 +4728,14 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
       if (bits (inst1, 3, 6) == 0x0f)
 	nextpc = UNMAKE_THUMB_ADDR (pc_val);
       else
-	nextpc = get_frame_register_unsigned (frame, bits (inst1, 3, 6));
+	nextpc = regcache_raw_get_unsigned (regcache, bits (inst1, 3, 6));
     }
   else if ((inst1 & 0xff87) == 0x4687)	/* mov pc, REG */
     {
       if (bits (inst1, 3, 6) == 0x0f)
 	nextpc = pc_val;
       else
-	nextpc = get_frame_register_unsigned (frame, bits (inst1, 3, 6));
+	nextpc = regcache_raw_get_unsigned (regcache, bits (inst1, 3, 6));
 
       nextpc = MAKE_THUMB_ADDR (nextpc);
     }
@@ -4727,7 +4743,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
     {
       /* CBNZ or CBZ.  */
       int imm = (bit (inst1, 9) << 6) + (bits (inst1, 3, 7) << 1);
-      ULONGEST reg = get_frame_register_unsigned (frame, bits (inst1, 0, 2));
+      ULONGEST reg = regcache_raw_get_unsigned (regcache, bits (inst1, 0, 2));
 
       if (bit (inst1, 11) && reg != 0)
 	nextpc = pc_val + imm;
@@ -4746,9 +4762,9 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
    address.  */
 
 static CORE_ADDR
-arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
+arm_get_next_pc_raw (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned long pc_val;
@@ -4759,7 +4775,7 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
   pc_val = (unsigned long) pc;
   this_instr = read_memory_unsigned_integer (pc, 4, byte_order_for_code);
 
-  status = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
+  status = regcache_raw_get_unsigned (regcache, ARM_PS_REGNUM);
   nextpc = (CORE_ADDR) (pc_val + 4);	/* Default case */
 
   if (bits (this_instr, 28, 31) == INST_NV)
@@ -4809,7 +4825,7 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 		rn = bits (this_instr, 0, 3);
 		nextpc = ((rn == ARM_PC_REGNUM)
 			  ? (pc_val + 8)
-			  : get_frame_register_unsigned (frame, rn));
+			  : regcache_raw_get_unsigned (regcache, rn));
 
 		return nextpc;
 	      }
@@ -4819,7 +4835,7 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	    rn = bits (this_instr, 16, 19);
 	    operand1 = ((rn == ARM_PC_REGNUM)
 			? (pc_val + 8)
-			: get_frame_register_unsigned (frame, rn));
+			: regcache_raw_get_unsigned (regcache, rn));
 
 	    if (bit (this_instr, 25))
 	      {
@@ -4829,7 +4845,7 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 		  & 0xffffffff;
 	      }
 	    else		/* operand 2 is a shifted register.  */
-	      operand2 = shifted_reg_val (frame, this_instr, c,
+	      operand2 = shifted_reg_val (regcache, this_instr, c,
 					  pc_val, status);
 
 	    switch (bits (this_instr, 21, 24))
@@ -4928,7 +4944,7 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 		  rn = bits (this_instr, 16, 19);
 		  base = ((rn == ARM_PC_REGNUM)
 			  ? (pc_val + 8)
-			  : get_frame_register_unsigned (frame, rn));
+			  : regcache_raw_get_unsigned (regcache, rn));
 
 		  if (bit (this_instr, 24))
 		    {
@@ -4936,7 +4952,8 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 		      int c = (status & FLAG_C) ? 1 : 0;
 		      unsigned long offset =
 		      (bit (this_instr, 25)
-		       ? shifted_reg_val (frame, this_instr, c, pc_val, status)
+		       ? shifted_reg_val (regcache, this_instr, c, pc_val,
+					  status)
 		       : bits (this_instr, 0, 11));
 
 		      if (bit (this_instr, 23))
@@ -4961,8 +4978,8 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 		  /* loading pc */
 		  int offset = 0;
 		  unsigned long rn_val
-		    = get_frame_register_unsigned (frame,
-						   bits (this_instr, 16, 19));
+		    = regcache_raw_get_unsigned (regcache,
+						 bits (this_instr, 16, 19));
 
 		  if (bit (this_instr, 23))
 		    {
@@ -5000,7 +5017,7 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 	    tdep = gdbarch_tdep (gdbarch);
 
 	    if (tdep->syscall_next_pc != NULL)
-	      nextpc = tdep->syscall_next_pc (frame);
+	      nextpc = tdep->syscall_next_pc (regcache);
 
 	  }
 	  break;
@@ -5019,14 +5036,14 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
    loop is detected.  */
 
 CORE_ADDR
-arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
+arm_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   CORE_ADDR nextpc;
 
-  if (arm_frame_is_thumb (frame))
-    nextpc = thumb_get_next_pc_raw (frame, pc);
+  if (arm_is_thumb (regcache))
+    nextpc = thumb_get_next_pc_raw (regcache, pc);
   else
-    nextpc = arm_get_next_pc_raw (frame, pc);
+    nextpc = arm_get_next_pc_raw (regcache, pc);
 
   return nextpc;
 }
@@ -5057,12 +5074,12 @@ arm_insert_single_step_breakpoint (struct gdbarch *gdbarch,
    the sequence.  */
 
 static int
-thumb_deal_with_atomic_sequence_raw (struct frame_info *frame)
+thumb_deal_with_atomic_sequence_raw (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct address_space *aspace = get_regcache_aspace (regcache);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  CORE_ADDR pc = get_frame_pc (frame);
+  CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
   unsigned short insn1, insn2;
@@ -5073,7 +5090,7 @@ thumb_deal_with_atomic_sequence_raw (struct frame_info *frame)
   ULONGEST status, itstate;
 
   /* We currently do not support atomic sequences within an IT block.  */
-  status = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
+  status = regcache_raw_get_unsigned (regcache, ARM_PS_REGNUM);
   itstate = ((status >> 8) & 0xfc) | ((status >> 25) & 0x3);
   if (itstate & 0x0f)
     return 0;
@@ -5188,12 +5205,12 @@ thumb_deal_with_atomic_sequence_raw (struct frame_info *frame)
 }
 
 static int
-arm_deal_with_atomic_sequence_raw (struct frame_info *frame)
+arm_deal_with_atomic_sequence_raw (struct regcache *regcache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct address_space *aspace = get_regcache_aspace (regcache);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  CORE_ADDR pc = get_frame_pc (frame);
+  CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
   unsigned int insn;
@@ -5263,12 +5280,12 @@ arm_deal_with_atomic_sequence_raw (struct frame_info *frame)
 }
 
 int
-arm_deal_with_atomic_sequence (struct frame_info *frame)
+arm_deal_with_atomic_sequence (struct regcache *regcache)
 {
-  if (arm_frame_is_thumb (frame))
-    return thumb_deal_with_atomic_sequence_raw (frame);
+  if (arm_is_thumb (regcache))
+    return thumb_deal_with_atomic_sequence_raw (regcache);
   else
-    return arm_deal_with_atomic_sequence_raw (frame);
+    return arm_deal_with_atomic_sequence_raw (regcache);
 }
 
 /* single_step() is called just before we want to resume the inferior,
@@ -5279,14 +5296,15 @@ arm_deal_with_atomic_sequence (struct frame_info *frame)
 int
 arm_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct address_space *aspace = get_regcache_aspace (regcache);
   CORE_ADDR next_pc;
 
-  if (arm_deal_with_atomic_sequence (frame))
+  if (arm_deal_with_atomic_sequence (regcache))
     return 1;
 
-  next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
+  next_pc = arm_get_next_pc (regcache, regcache_read_pc (regcache));
   arm_insert_single_step_breakpoint (gdbarch, aspace, next_pc);
 
   return 1;

@@ -257,6 +257,11 @@ static const gdb_byte arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa
 #define ARM_LDR_PC_SP_12		0xe49df00c
 #define ARM_LDR_PC_SP_4			0xe49df004
 
+/* Syscall number for sigreturn.  */
+#define ARM_SIGRETURN 119
+/* Syscall number for rt_sigreturn.  */
+#define ARM_RT_SIGRETURN 173
+
 static void
 arm_linux_sigtramp_cache (struct frame_info *this_frame,
 			  struct trad_frame_cache *this_cache,
@@ -805,6 +810,70 @@ arm_linux_sigreturn_return_addr (struct frame_info *frame,
   return 0;
 }
 
+/* Calculate the offset from stack pointer of the pc register on the stack
+   in the case of a sigreturn or sigreturn_rt syscall.  */
+static int
+arm_linux_sigreturn_next_pc_offset (unsigned long sp,
+				    unsigned long sp_data,
+				    unsigned long svc_number,
+				    int is_sigreturn)
+{
+  /* Offset of R0 register.  */
+  int r0_offset = 0;
+  /* Offset of PC register.  */
+  int pc_offset = 0;
+
+  if (is_sigreturn)
+    {
+      if (sp_data == ARM_NEW_SIGFRAME_MAGIC)
+	r0_offset = ARM_UCONTEXT_SIGCONTEXT + ARM_SIGCONTEXT_R0;
+      else
+	r0_offset = ARM_SIGCONTEXT_R0;
+    }
+  else
+    {
+      if (sp_data == sp + ARM_OLD_RT_SIGFRAME_SIGINFO)
+	r0_offset = ARM_OLD_RT_SIGFRAME_UCONTEXT;
+      else
+	r0_offset = ARM_NEW_RT_SIGFRAME_UCONTEXT;
+
+      r0_offset += ARM_UCONTEXT_SIGCONTEXT + ARM_SIGCONTEXT_R0;
+    }
+
+  pc_offset = r0_offset + INT_REGISTER_SIZE * ARM_PC_REGNUM;
+
+  return pc_offset;
+}
+
+/* Find the value of the next PC after a sigreturn or rt_sigreturn syscall
+   based on current processor state.  */
+static CORE_ADDR
+arm_linux_sigreturn_next_pc (struct regcache *regcache,
+			     unsigned long svc_number)
+{
+  ULONGEST sp;
+  unsigned long sp_data;
+  CORE_ADDR next_pc = 0;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int pc_offset = 0;
+  int is_sigreturn = 0;
+
+  gdb_assert (svc_number == ARM_SIGRETURN
+	      || svc_number == ARM_RT_SIGRETURN);
+
+  is_sigreturn = (svc_number == ARM_SIGRETURN);
+  regcache_cooked_read_unsigned (regcache, ARM_SP_REGNUM, &sp);
+  sp_data = read_memory_unsigned_integer (sp, 4, byte_order);
+
+  pc_offset = arm_linux_sigreturn_next_pc_offset (sp, sp_data, svc_number,
+						  is_sigreturn);
+
+  next_pc = read_memory_unsigned_integer (sp + pc_offset, 4, byte_order);
+
+  return next_pc;
+}
+
 /* At a ptrace syscall-stop, return the syscall number.  This either
    comes from the SWI instruction (OABI) or from r7 (EABI).
 
@@ -858,25 +927,26 @@ arm_linux_get_syscall_number (struct gdbarch *gdbarch,
   return svc_number;
 }
 
-/* When FRAME is at a syscall instruction, return the PC of the next
-   instruction to be executed.  */
+/* When the processor is at a syscall instruction, return the PC of the
+   next instruction to be executed.  */
 
 static CORE_ADDR
-arm_linux_syscall_next_pc (struct frame_info *frame)
+arm_linux_syscall_next_pc (struct regcache *regcache)
 {
-  CORE_ADDR pc = get_frame_pc (frame);
-  CORE_ADDR return_addr = 0;
-  int is_thumb = arm_frame_is_thumb (frame);
+  CORE_ADDR pc = regcache_read_pc (regcache);
+  CORE_ADDR next_pc = 0;
+  int is_thumb = arm_is_thumb (regcache);
   ULONGEST svc_number = 0;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   if (is_thumb)
     {
-      svc_number = get_frame_register_unsigned (frame, 7);
-      return_addr = pc + 2;
+      svc_number = regcache_raw_get_unsigned (regcache, 7);
+      next_pc = pc + 2;
     }
   else
     {
-      struct gdbarch *gdbarch = get_frame_arch (frame);
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
       enum bfd_endian byte_order_for_code = 
 	gdbarch_byte_order_for_code (gdbarch);
       unsigned long this_instr = 
@@ -889,19 +959,20 @@ arm_linux_syscall_next_pc (struct frame_info *frame)
 	}
       else /* EABI.  */
 	{
-	  svc_number = get_frame_register_unsigned (frame, 7);
+	  svc_number = regcache_raw_get_unsigned (regcache, 7);
 	}
 
-      return_addr = pc + 4;
+      next_pc = pc + 4;
     }
 
-  arm_linux_sigreturn_return_addr (frame, svc_number, &return_addr, &is_thumb);
+  if (svc_number == ARM_SIGRETURN || svc_number == ARM_RT_SIGRETURN)
+    next_pc = arm_linux_sigreturn_next_pc (regcache, svc_number);
 
   /* Addresses for calling Thumb functions have the bit 0 set.  */
   if (is_thumb)
-    return_addr |= 1;
+    next_pc = MAKE_THUMB_ADDR (next_pc);
 
-  return return_addr;
+  return next_pc;
 }
 
 
@@ -910,11 +981,13 @@ arm_linux_syscall_next_pc (struct frame_info *frame)
 static int
 arm_linux_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct address_space *aspace = get_frame_address_space (frame);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct address_space *aspace = get_regcache_aspace (regcache);
+
   CORE_ADDR next_pc;
 
-  if (arm_deal_with_atomic_sequence (frame))
+  if (arm_deal_with_atomic_sequence (regcache))
     return 1;
 
   /* If the target does have hardware single step, GDB doesn't have
@@ -922,7 +995,7 @@ arm_linux_software_single_step (struct frame_info *frame)
   if (target_can_do_single_step () == 1)
     return 0;
 
-  next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
+  next_pc = arm_get_next_pc (regcache, regcache_read_pc (regcache));
 
   /* The Linux kernel offers some user-mode helpers in a high page.  We can
      not read this page (as of 2.6.23), and even if we could then we couldn't

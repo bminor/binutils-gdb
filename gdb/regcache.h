@@ -81,6 +81,10 @@ extern enum register_status
 extern enum register_status
   regcache_raw_read_unsigned (struct regcache *regcache,
 			      int regnum, ULONGEST *val);
+
+ULONGEST regcache_raw_get_unsigned (struct regcache *regcache,
+				    int regnum);
+
 extern void regcache_raw_write_signed (struct regcache *regcache,
 				       int regnum, LONGEST val);
 extern void regcache_raw_write_unsigned (struct regcache *regcache,

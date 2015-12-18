@@ -135,9 +135,9 @@ struct gdbarch_tdep
   struct type *neon_double_type;
   struct type *neon_quad_type;
 
-  /* Return the expected next PC if FRAME is stopped at a syscall
+  /* Return the expected next PC if the program is stopped at a syscall
      instruction.  */
-  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
+  CORE_ADDR (*syscall_next_pc) (struct regcache *regcache);
 
    /* syscall record.  */
   int (*arm_syscall_record) (struct regcache *regcache, unsigned long svc_number);
@@ -250,11 +250,12 @@ extern void
 		       ULONGEST val, enum pc_write_style write_pc);
 
 CORE_ADDR arm_skip_stub (struct frame_info *, CORE_ADDR);
-CORE_ADDR arm_get_next_pc (struct frame_info *, CORE_ADDR);
+CORE_ADDR arm_get_next_pc (struct regcache *regcache, CORE_ADDR pc);
 void arm_insert_single_step_breakpoint (struct gdbarch *,
 					struct address_space *, CORE_ADDR);
-int arm_deal_with_atomic_sequence (struct frame_info *);
+int arm_deal_with_atomic_sequence (struct regcache *);
 int arm_software_single_step (struct frame_info *);
+int arm_is_thumb (struct regcache *regcache);
 int arm_frame_is_thumb (struct frame_info *frame);
 
 extern struct displaced_step_closure *

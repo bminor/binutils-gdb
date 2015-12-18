@@ -1,5 +1,27 @@
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* arm-linux-tdep.c (arm_linux_sigreturn_next_pc_offset): New function.
+	(arm_linux_sigreturn_next_pc): Likewise.
+	(arm_linux_syscall_next_pc): Use regcache instead of frame.
+	(arm_linux_software_single_step): Likewise.
+	* arm-tdep.c (arm_is_thumb): New function.
+	(shifted_reg_va): Use regcache instead of frame.
+	(thumb_get_next_pc_raw): Likewise.
+	(arm_get_next_pc_raw): Likewise.
+	(arm_get_next_pc): Likewise.
+	(thumb_deal_with_atomic_sequence_raw): Likewise.
+	(arm_deal_with_atomic_sequence_raw): Likewise.
+	(arm_deal_with_atomic_sequence): Likewise.
+	(arm_software_single_step): Likewise.
+	* arm-tdep.h (struct gdbarch_tdep): Use regcache for syscall_next_pc.
+	(arm_get_next_pc): Use regcache.
+	(arm_deal_with_atomic_sequence): Likewise.
+	(arm_is_thumb): New declaration.
+	* regcache.c (regcache_raw_get_unsigned): New function.
+	* regcache.h (regcache_raw_get_unsigned): New function declaration.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* arch/arm.c (bitcount): Move from arm-tdep.c.
 	(condition_true): Likewise.
 	* arch/arm.h (Instruction Definitions): Move form arm-tdep.h.
