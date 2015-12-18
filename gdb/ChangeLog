@@ -1,5 +1,85 @@
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* Makefile.in (ALL_TARGET_OBS): Append arm-get-next-pcs.o,
+	arm-linux.o.
+	(ALLDEPFILES): Append arm-get-next-pcs.c, arm-linux.c
+	(arm-linux.o): New rule.
+	(arm-get-next-pcs.o): New rule.
+	* arch/arm-get-next-pcs.c: New file.
+	* arch/arm-get-next-pcs.h: New file.
+	* arch/arm-linux.h: New file.
+	* arch/arm-linux.c: New file.
+	* arm.c: Include common-regcache.c.
+	(thumb_advance_itstate): Moved from arm-tdep.c.
+	(arm_instruction_changes_pc): Likewise.
+	(thumb_instruction_changes_pc): Likewise.
+	(thumb2_instruction_changes_pc): Likewise.
+	(shifted_reg_val): Likewise.
+	* arm.h (submask): Move macro from arm-tdep.h
+	(bit): Likewise.
+	(bits): Likewise.
+	(sbits): Likewise.
+	(BranchDest): Likewise.
+	(thumb_advance_itstate): Moved declaration from arm-tdep.h
+	(arm_instruction_changes_pc): Likewise.
+	(thumb_instruction_changes_pc): Likewise.
+	(thumb2_instruction_changes_pc): Likewise.
+	(shifted_reg_val): Likewise.
+	* arm-linux-tdep.c: Include arch/arm.h, arch/arm-get-next-pcs.h
+	arch/arm-linux.h.
+	(arm_linux_get_next_pcs_ops): New struct.
+	(ARM_SIGCONTEXT_R0, ARM_UCONTEXT_SIGCONTEXT,
+	ARM_OLD_RT_SIGFRAME_SIGINFO, ARM_OLD_RT_SIGFRAME_UCONTEXT,
+	ARM_NEW_RT_SIGFRAME_UCONTEXT, ARM_NEW_SIGFRAME_MAGIC): Move stack
+	layout defines to arch/arm-linux.h.
+	(arm_linux_sigreturn_next_pc_offset): Move to arch/arm-linux.c.
+	(arm_linux_software_single_step): Adjust for arm_get_next_pcs
+	implementation.
+	* arm-tdep.c: Include arch/arm-get-next-pcs.h.
+	(arm_get_next_pcs_ops): New struct.
+	(submask): Move macro to arm.h.
+	(bit): Likewise.
+	(bits): Likewise.
+	(sbits): Likewise.
+	(BranchDest): Likewise.
+	(thumb_instruction_changes_pc): Move to arm.c
+	(thumb2_instruction_changes_pc): Likewise.
+	(arm_instruction_changes_pc): Likewise.
+	(shifted_reg_val): Likewise.
+	(thumb_advance_itstate): Likewise.
+	(thumb_get_next_pc_raw): Move to arm-get-next-pcs.c.
+	(arm_get_next_pc_raw): Likewise.
+	(arm_get_next_pc): Likewise.
+	(thumb_deal_with_atomic_sequence_raw): Likewise.
+	(arm_deal_with_atomic_sequence_raw): Likewise.
+	(arm_deal_with_atomic_sequence): Likewise.
+	(arm_get_next_pcs_read_memory_unsigned_integer): New function.
+	(arm_get_next_pcs_addr_bits_remove): Likewise.
+	(arm_get_next_pcs_syscall_next_pc): Likewise.
+	(arm_get_next_pcs_is_thumb): Likewise.
+	(arm_software_single_step): Adjust for arm_get_next_pcs
+	implementation.
+	* arm-tdep.h: (arm_get_next_pc): Remove declaration.
+	(arm_get_next_pcs_read_memory_unsigned_integer):
+	New declaration.
+	(arm_get_next_pcs_addr_bits_remove): Likewise.
+	(arm_get_next_pcs_syscall_next_pc): Likewise.
+	(arm_get_next_pcs_is_thumb): Likewise.
+	(arm_deal_with_atomic_sequence: Remove declaration.
+	* common/gdb_vecs.h: Add CORE_ADDR vector definition.
+	* configure.tgt (aarch64*-*-linux): Add arm-get-next-pcs.o,
+	arm-linux.o.
+	(arm*-wince-pe): Add arm-get-next-pcs.o.
+	(arm*-*-linux*): Add arm-get-next-pcs.o, arm-linux.o,
+	arm-get-next-pcs.o
+	(arm*-*-netbsd*,arm*-*-knetbsd*-gnu): Add arm-get-next-pcs.o.
+	(arm*-*-openbsd*): Likewise.
+	(arm*-*-symbianelf*): Likewise.
+	(arm*-*-*): Likewise.
+	* symtab.h: Move CORE_ADDR vector definition to gdb_vecs.h.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* Makefile.in (SFILES): Append common/common-regcache.c.
 	(COMMON_OBS): Append common/common-regcache.o.
 	(common-regcache.o): New rule.

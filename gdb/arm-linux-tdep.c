@@ -35,6 +35,9 @@
 #include "auxv.h"
 #include "xml-syscall.h"
 
+#include "arch/arm.h"
+#include "arch/arm-get-next-pcs.h"
+#include "arch/arm-linux.h"
 #include "arm-tdep.h"
 #include "arm-linux-tdep.h"
 #include "linux-tdep.h"
@@ -262,6 +265,14 @@ static const gdb_byte arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa
 /* Syscall number for rt_sigreturn.  */
 #define ARM_RT_SIGRETURN 173
 
+/* Operation function pointers for get_next_pcs.  */
+static struct arm_get_next_pcs_ops arm_linux_get_next_pcs_ops = {
+  arm_get_next_pcs_read_memory_unsigned_integer,
+  arm_get_next_pcs_syscall_next_pc,
+  arm_get_next_pcs_addr_bits_remove,
+  arm_get_next_pcs_is_thumb
+};
+
 static void
 arm_linux_sigtramp_cache (struct frame_info *this_frame,
 			  struct trad_frame_cache *this_cache,
@@ -283,51 +294,7 @@ arm_linux_sigtramp_cache (struct frame_info *this_frame,
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
-/* There are a couple of different possible stack layouts that
-   we need to support.
-
-   Before version 2.6.18, the kernel used completely independent
-   layouts for non-RT and RT signals.  For non-RT signals the stack
-   began directly with a struct sigcontext.  For RT signals the stack
-   began with two redundant pointers (to the siginfo and ucontext),
-   and then the siginfo and ucontext.
-
-   As of version 2.6.18, the non-RT signal frame layout starts with
-   a ucontext and the RT signal frame starts with a siginfo and then
-   a ucontext.  Also, the ucontext now has a designated save area
-   for coprocessor registers.
-
-   For RT signals, it's easy to tell the difference: we look for
-   pinfo, the pointer to the siginfo.  If it has the expected
-   value, we have an old layout.  If it doesn't, we have the new
-   layout.
-
-   For non-RT signals, it's a bit harder.  We need something in one
-   layout or the other with a recognizable offset and value.  We can't
-   use the return trampoline, because ARM usually uses SA_RESTORER,
-   in which case the stack return trampoline is not filled in.
-   We can't use the saved stack pointer, because sigaltstack might
-   be in use.  So for now we guess the new layout...  */
-
-/* There are three words (trap_no, error_code, oldmask) in
-   struct sigcontext before r0.  */
-#define ARM_SIGCONTEXT_R0 0xc
-
-/* There are five words (uc_flags, uc_link, and three for uc_stack)
-   in the ucontext_t before the sigcontext.  */
-#define ARM_UCONTEXT_SIGCONTEXT 0x14
-
-/* There are three elements in an rt_sigframe before the ucontext:
-   pinfo, puc, and info.  The first two are pointers and the third
-   is a struct siginfo, with size 128 bytes.  We could follow puc
-   to the ucontext, but it's simpler to skip the whole thing.  */
-#define ARM_OLD_RT_SIGFRAME_SIGINFO 0x8
-#define ARM_OLD_RT_SIGFRAME_UCONTEXT 0x88
-
-#define ARM_NEW_RT_SIGFRAME_UCONTEXT 0x80
-
-#define ARM_NEW_SIGFRAME_MAGIC 0x5ac3c35a
-
+/* See arm-linux.h for stack layout details.  */
 static void
 arm_linux_sigreturn_init (const struct tramp_frame *self,
 			  struct frame_info *this_frame,
@@ -810,41 +777,6 @@ arm_linux_sigreturn_return_addr (struct frame_info *frame,
   return 0;
 }
 
-/* Calculate the offset from stack pointer of the pc register on the stack
-   in the case of a sigreturn or sigreturn_rt syscall.  */
-static int
-arm_linux_sigreturn_next_pc_offset (unsigned long sp,
-				    unsigned long sp_data,
-				    unsigned long svc_number,
-				    int is_sigreturn)
-{
-  /* Offset of R0 register.  */
-  int r0_offset = 0;
-  /* Offset of PC register.  */
-  int pc_offset = 0;
-
-  if (is_sigreturn)
-    {
-      if (sp_data == ARM_NEW_SIGFRAME_MAGIC)
-	r0_offset = ARM_UCONTEXT_SIGCONTEXT + ARM_SIGCONTEXT_R0;
-      else
-	r0_offset = ARM_SIGCONTEXT_R0;
-    }
-  else
-    {
-      if (sp_data == sp + ARM_OLD_RT_SIGFRAME_SIGINFO)
-	r0_offset = ARM_OLD_RT_SIGFRAME_UCONTEXT;
-      else
-	r0_offset = ARM_NEW_RT_SIGFRAME_UCONTEXT;
-
-      r0_offset += ARM_UCONTEXT_SIGCONTEXT + ARM_SIGCONTEXT_R0;
-    }
-
-  pc_offset = r0_offset + INT_REGISTER_SIZE * ARM_PC_REGNUM;
-
-  return pc_offset;
-}
-
 /* Find the value of the next PC after a sigreturn or rt_sigreturn syscall
    based on current processor state.  */
 static CORE_ADDR
@@ -984,28 +916,41 @@ arm_linux_software_single_step (struct frame_info *frame)
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct address_space *aspace = get_regcache_aspace (regcache);
-
-  CORE_ADDR next_pc;
-
-  if (arm_deal_with_atomic_sequence (regcache))
-    return 1;
+  struct arm_get_next_pcs next_pcs_ctx;
+  CORE_ADDR pc;
+  int i;
+  VEC (CORE_ADDR) *next_pcs = NULL;
+  struct cleanup *old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
 
   /* If the target does have hardware single step, GDB doesn't have
      to bother software single step.  */
   if (target_can_do_single_step () == 1)
     return 0;
 
-  next_pc = arm_get_next_pc (regcache, regcache_read_pc (regcache));
+  arm_get_next_pcs_ctor (&next_pcs_ctx,
+			 &arm_linux_get_next_pcs_ops,
+			 gdbarch_byte_order (gdbarch),
+			 gdbarch_byte_order_for_code (gdbarch),
+			 gdbarch_tdep (gdbarch)->thumb2_breakpoint,
+			 regcache);
 
-  /* The Linux kernel offers some user-mode helpers in a high page.  We can
-     not read this page (as of 2.6.23), and even if we could then we couldn't
-     set breakpoints in it, and even if we could then the atomic operations
-     would fail when interrupted.  They are all called as functions and return
-     to the address in LR, so step to there instead.  */
-  if (next_pc > 0xffff0000)
-    next_pc = get_frame_register_unsigned (frame, ARM_LR_REGNUM);
+  next_pcs = arm_get_next_pcs (&next_pcs_ctx, regcache_read_pc (regcache));
 
-  arm_insert_single_step_breakpoint (gdbarch, aspace, next_pc);
+  for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
+    {
+      /* The Linux kernel offers some user-mode helpers in a high page.  We can
+	 not read this page (as of 2.6.23), and even if we could then we
+	 couldn't set breakpoints in it, and even if we could then the atomic
+	 operations would fail when interrupted.  They are all called as
+	 functions and return to the address in LR, so step to there
+	 instead.  */
+      if (pc > 0xffff0000)
+	pc = get_frame_register_unsigned (frame, ARM_LR_REGNUM);
+
+      arm_insert_single_step_breakpoint (gdbarch, aspace, pc);
+    }
+
+  do_cleanups (old_chain);
 
   return 1;
 }

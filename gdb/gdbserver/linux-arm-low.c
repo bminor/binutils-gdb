@@ -19,6 +19,8 @@
 #include "server.h"
 #include "linux-low.h"
 #include "arch/arm.h"
+#include "arch/arm-linux.h"
+#include "arch/arm-get-next-pcs.h"
 #include "linux-aarch32-low.h"
 
 #include <sys/uio.h>
@@ -29,6 +31,7 @@
 #endif
 #include "nat/gdb_ptrace.h"
 #include <signal.h>
+#include <sys/syscall.h>
 
 /* Defined in auto-generated files.  */
 void init_registers_arm (void);
@@ -136,6 +139,27 @@ static int arm_regmap[] = {
   64
 };
 
+/* Forward declarations needed for get_next_pcs ops.  */
+static ULONGEST get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
+							   int len,
+							   int byte_order);
+
+static CORE_ADDR get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
+						CORE_ADDR val);
+
+static CORE_ADDR get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
+					       CORE_ADDR pc);
+
+static int get_next_pcs_is_thumb (struct arm_get_next_pcs *self);
+
+/* get_next_pcs operations.  */
+static struct arm_get_next_pcs_ops get_next_pcs_ops = {
+  get_next_pcs_read_memory_unsigned_integer,
+  get_next_pcs_syscall_next_pc,
+  get_next_pcs_addr_bits_remove,
+  get_next_pcs_is_thumb
+};
+
 static int
 arm_cannot_store_register (int regno)
 {
@@ -198,6 +222,13 @@ arm_fill_vfpregset (struct regcache *regcache, void *buf)
   arm_fill_vfpregset_num (regcache, buf, num);
 }
 
+/* Wrapper of UNMAKE_THUMB_ADDR for get_next_pcs.  */
+static CORE_ADDR
+get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self, CORE_ADDR val)
+{
+  return UNMAKE_THUMB_ADDR (val);
+}
+
 static void
 arm_store_vfpregset (struct regcache *regcache, const void *buf)
 {
@@ -231,6 +262,27 @@ arm_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   unsigned long newpc = pc;
   supply_register_by_name (regcache, "pc", &newpc);
+}
+
+/* Wrapper of arm_is_thumb_mode for get_next_pcs.  */
+static int
+get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
+{
+  return arm_is_thumb_mode ();
+}
+
+/* Read memory from the inferiror.
+   BYTE_ORDER is ignored and there to keep compatiblity with GDB's
+   read_memory_unsigned_integer. */
+static ULONGEST
+get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
+					   int len,
+					   int byte_order)
+{
+  ULONGEST res;
+
+  (*the_target->read_memory) (memaddr, (unsigned char *) &res, len);
+  return res;
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */
@@ -717,6 +769,77 @@ arm_prepare_to_resume (struct lwp_info *lwp)
       }
 }
 
+/* Find the next pc for a sigreturn or rt_sigreturn syscall.
+   See arm-linux.h for stack layout details.  */
+static CORE_ADDR
+arm_sigreturn_next_pc (struct regcache *regcache, int svc_number)
+{
+  unsigned long sp;
+  unsigned long sp_data;
+  /* Offset of PC register.  */
+  int pc_offset = 0;
+  CORE_ADDR next_pc = 0;
+
+  gdb_assert (svc_number == __NR_sigreturn || svc_number == __NR_rt_sigreturn);
+
+  collect_register_by_name (regcache, "sp", &sp);
+  (*the_target->read_memory) (sp, (unsigned char *) &sp_data, 4);
+
+  pc_offset = arm_linux_sigreturn_next_pc_offset
+    (sp, sp_data, svc_number, __NR_sigreturn == svc_number ? 1 : 0);
+
+  (*the_target->read_memory) (sp + pc_offset, (unsigned char *) &next_pc, 4);
+
+  return next_pc;
+}
+
+/* When PC is at a syscall instruction, return the PC of the next
+   instruction to be executed.  */
+static CORE_ADDR
+get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self, CORE_ADDR pc)
+{
+  CORE_ADDR next_pc = 0;
+  int is_thumb = arm_is_thumb_mode ();
+  ULONGEST svc_number = 0;
+  struct regcache *regcache = self->regcache;
+
+  if (is_thumb)
+    {
+      collect_register (regcache, 7, &svc_number);
+      next_pc = pc + 2;
+    }
+  else
+    {
+      unsigned long this_instr;
+      unsigned long svc_operand;
+
+      (*the_target->read_memory) (pc, (unsigned char *) &this_instr, 4);
+      svc_operand = (0x00ffffff & this_instr);
+
+      if (svc_operand)  /* OABI.  */
+	{
+	  svc_number = svc_operand - 0x900000;
+	}
+      else /* EABI.  */
+	{
+	  collect_register (regcache, 7, &svc_number);
+	}
+
+      next_pc = pc + 4;
+    }
+
+  /* This is a sigreturn or sigreturn_rt syscall.  */
+  if (svc_number == __NR_sigreturn || svc_number == __NR_rt_sigreturn)
+    {
+      next_pc = arm_sigreturn_next_pc (regcache, svc_number);
+    }
+
+  /* Addresses for calling Thumb functions have the bit 0 set.  */
+  if (is_thumb)
+    next_pc = MAKE_THUMB_ADDR (next_pc);
+
+  return next_pc;
+}
 
 static int
 arm_get_hwcap (unsigned long *valp)
@@ -806,6 +929,27 @@ arm_arch_setup (void)
     have_ptrace_getregset = 0;
 }
 
+/* Fetch the next possible PCs after the current instruction executes.  */
+
+static VEC (CORE_ADDR) *
+arm_gdbserver_get_next_pcs (CORE_ADDR pc, struct regcache *regcache)
+{
+  struct arm_get_next_pcs next_pcs_ctx;
+  VEC (CORE_ADDR) *next_pcs = NULL;
+
+  arm_get_next_pcs_ctor (&next_pcs_ctx,
+			 &get_next_pcs_ops,
+			 /* Byte order is ignored assumed as host.  */
+			 0,
+			 0,
+			 (const gdb_byte *) &thumb2_breakpoint,
+			 regcache);
+
+  next_pcs = arm_get_next_pcs (&next_pcs_ctx, pc);
+
+  return next_pcs;
+}
+
 /* Support for hardware single step.  */
 
 static int
@@ -871,7 +1015,7 @@ struct linux_target_ops the_low_target = {
   arm_set_pc,
   arm_breakpoint_kind_from_pc,
   arm_sw_breakpoint_from_kind,
-  NULL, /* get_next_pcs */
+  arm_gdbserver_get_next_pcs,
   0,
   arm_breakpoint_at,
   arm_supports_z_point_type,

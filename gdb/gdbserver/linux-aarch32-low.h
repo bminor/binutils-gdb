@@ -15,6 +15,27 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* Correct in either endianness.  */
+#define arm_abi_breakpoint 0xef9f0001UL
+
+/* For new EABI binaries.  We recognize it regardless of which ABI
+   is used for gdbserver, so single threaded debugging should work
+   OK, but for multi-threaded debugging we only insert the current
+   ABI's breakpoint instruction.  For now at least.  */
+#define arm_eabi_breakpoint 0xe7f001f0UL
+
+#ifndef __ARM_EABI__
+static const unsigned long arm_breakpoint = arm_abi_breakpoint;
+#else
+static const unsigned long arm_breakpoint = arm_eabi_breakpoint;
+#endif
+
+#define arm_breakpoint_len 4
+static const unsigned short thumb_breakpoint = 0xde01;
+#define thumb_breakpoint_len 2
+static const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
+#define thumb2_breakpoint_len 4
+
 extern struct regs_info regs_info_aarch32;
 
 void arm_fill_gregset (struct regcache *regcache, void *buf);
@@ -31,4 +52,6 @@ int arm_breakpoint_at (CORE_ADDR where);
 void initialize_low_arch_aarch32 (void);
 
 void init_registers_arm_with_neon (void);
+int arm_is_thumb_mode (void);
+
 extern const struct target_desc *tdesc_arm_with_neon;

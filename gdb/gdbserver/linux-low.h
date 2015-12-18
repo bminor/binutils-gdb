@@ -124,8 +124,6 @@ struct process_info_private
 
 struct lwp_info;
 
-DEF_VEC_I (CORE_ADDR);
-
 struct linux_target_ops
 {
   /* Architecture-specific setup.  */

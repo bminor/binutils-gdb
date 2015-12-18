@@ -1,5 +1,41 @@
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* Makefile.in (SFILES): Append arch/arm-linux.c,
+	arch/arm-get-next-pcs.c.
+	(arm-linux.o): New rule.
+	(arm-get-next-pcs.o): New rule.
+	* configure.srv (arm*-*-linux*): Add arm-get-next-pcs.o,
+	arm-linux.o.
+	* linux-aarch32-low.c (arm_abi_breakpoint): Remove macro.  Moved
+	to linux-aarch32-low.c.
+	(arm_eabi_breakpoint, arm_breakpoint): Likewise.
+	(arm_breakpoint_len, thumb_breakpoint): Likewise.
+	(thumb_breakpoint_len, thumb2_breakpoint): Likewise.
+	(thumb2_breakpoint_len): Likewise.
+	(arm_is_thumb_mode): Make non-static.
+	* linux-aarch32-low.h (arm_abi_breakpoint): New macro.  Moved
+	from linux-aarch32-low.c.
+	(arm_eabi_breakpoint, arm_breakpoint): Likewise.
+	(arm_breakpoint_len, thumb_breakpoint): Likewise.
+	(thumb_breakpoint_len, thumb2_breakpoint): Likewise.
+	(thumb2_breakpoint_len): Likewise.
+	(arm_is_thumb_mode): New declaration.
+	* linux-arm-low.c: Include arch/arm-linux.h
+	aarch/arm-get-next-pcs.h, sys/syscall.h.
+	(get_next_pcs_ops): New struct.
+	(get_next_pcs_addr_bits_remove): New function.
+	(get_next_pcs_is_thumb): New function.
+	(get_next_pcs_read_memory_unsigned_integer): Likewise.
+	(arm_sigreturn_next_pc): Likewise.
+	(get_next_pcs_syscall_next_pc): Likewise.
+	(arm_gdbserver_get_next_pcs): Likewise.
+	(struct linux_target_ops) <arm_gdbserver_get_next_pcs>:
+	Initialize.
+	* linux-low.h: Move CORE_ADDR vector definition to gdb_vecs.h.
+	* server.h: Include gdb_vecs.h.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* Makefile.in (SFILES): Append common/common-regcache.c.
 	(OBS): Append common-regcache.o.
 	(common-regcache.o): New rule.

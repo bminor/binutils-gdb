@@ -1613,8 +1613,6 @@ void iterate_over_symtabs (const char *name,
 					    void *data),
 			   void *data);
 
-DEF_VEC_I (CORE_ADDR);
-
 VEC (CORE_ADDR) *find_pcs_for_symtab_line (struct symtab *symtab, int line,
 					   struct linetable_entry **best_entry);
 

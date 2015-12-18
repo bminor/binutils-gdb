@@ -94,6 +94,18 @@ enum gdb_regnum {
 #define MAKE_THUMB_ADDR(addr)  ((addr) | 1)
 #define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
 
+/* Support routines for instruction parsing.  */
+#define submask(x) ((1L << ((x) + 1)) - 1)
+#define bits(obj,st,fn) (((obj) >> (st)) & submask ((fn) - (st)))
+#define bit(obj,st) (((obj) >> (st)) & 1)
+#define sbits(obj,st,fn) \
+  ((long) (bits(obj,st,fn) | ((long) bit(obj,fn) * ~ submask (fn - st))))
+#define BranchDest(addr,instr) \
+  ((CORE_ADDR) (((unsigned long) (addr)) + 8 + (sbits (instr, 0, 23) << 2)))
+
+/* Forward declaration.  */
+struct regcache;
+
 /* Return the size in bytes of the complete Thumb instruction whose
    first halfword is INST1.  */
 int thumb_insn_size (unsigned short inst1);
@@ -103,5 +115,27 @@ int condition_true (unsigned long cond, unsigned long status_reg);
 
 /* Return number of 1-bits in VAL.  */
 int bitcount (unsigned long val);
+
+/* Return 1 if THIS_INSTR might change control flow, 0 otherwise.  */
+int arm_instruction_changes_pc (uint32_t this_instr);
+
+/* Return 1 if the 16-bit Thumb instruction INST might change
+   control flow, 0 otherwise.  */
+int thumb_instruction_changes_pc (unsigned short inst);
+
+/* Return 1 if the 32-bit Thumb instruction in INST1 and INST2
+   might change control flow, 0 otherwise.  */
+int thumb2_instruction_changes_pc (unsigned short inst1, unsigned short inst2);
+
+/* Advance the state of the IT block and return that state.  */
+int thumb_advance_itstate (unsigned int itstate);
+
+/* Decode shifted register value.  */
+
+unsigned long shifted_reg_val (struct regcache *regcache,
+			       unsigned long inst,
+			       int carry,
+			       unsigned long pc_val,
+			       unsigned long status_reg);
 
 #endif

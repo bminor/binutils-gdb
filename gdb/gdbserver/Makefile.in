@@ -181,7 +181,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/common-exceptions.c $(srcdir)/symbol.c \
 	$(srcdir)/common/btrace-common.c \
 	$(srcdir)/common/fileio.c $(srcdir)/nat/linux-namespaces.c \
-	$(srcdir)/arch/arm.c $(srcdir)/common/common-regcache.c
+	$(srcdir)/arch/arm.c $(srcdir)/common/common-regcache.c \
+	$(srcdir)/arch/arm-linux.c $(srcdir)/arch/arm-get-next-pcs.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -590,6 +591,12 @@ common-regcache.o: ../common/common-regcache.c
 # Arch object files rules form ../arch
 
 arm.o: ../arch/arm.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+arm-linux.o: ../arch/arm-linux.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+arm-get-next-pcs.o: ../arch/arm-get-next-pcs.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
