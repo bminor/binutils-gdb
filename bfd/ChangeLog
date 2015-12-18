@@ -1,3 +1,7 @@
+2015-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* coff-i386.c (coff_i386_reloc): Fix formatting.
+
 2015-12-16  Mickael Guene <mickael.guene@st.com>
 
 	* bfd-in2.h: Regenerate.
