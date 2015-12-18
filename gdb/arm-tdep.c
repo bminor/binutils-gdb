@@ -6127,7 +6127,8 @@ ULONGEST
 arm_get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr, int len,
 					       int byte_order)
 {
-  return read_memory_unsigned_integer (memaddr, len, byte_order);
+  return read_memory_unsigned_integer (memaddr, len,
+				       (enum bfd_endian) byte_order);
 }
 
 /* Wrapper over gdbarch_addr_bits_remove for use in arm_get_next_pcs.  */

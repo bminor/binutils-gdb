@@ -1,5 +1,10 @@
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* arm-tdep.c (arm_get_next_pcs_read_memory_unsigned_integer): Cast
+	to enum bfd_endian)
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* Makefile.in (ALL_TARGET_OBS): Append arm-get-next-pcs.o,
 	arm-linux.o.
 	(ALLDEPFILES): Append arm-get-next-pcs.c, arm-linux.c
