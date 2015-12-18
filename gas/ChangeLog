@@ -1,3 +1,10 @@
+2015-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (optimize_imm): Store 32-bit immediate in
+	64-bit only for 64-bit BFD.
+	(optimize_disp): Optimize 64-bit displacement to 32-bit only
+	for 64-bit BFD.
+
 2015-12-17  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* gas/config/tc-arm.c (aeabi_set_public_attributes): Adjust

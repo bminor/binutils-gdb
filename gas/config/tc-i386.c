@@ -4218,6 +4218,8 @@ optimize_imm (void)
 		i.op[op].imms->X_add_number =
 		  (((i.op[op].imms->X_add_number & 0xffff) ^ 0x8000) - 0x8000);
 	      }
+#ifdef BFD64
+	    /* Store 32-bit immediate in 64-bit for 64-bit BFD.  */
 	    if ((i.types[op].bitfield.imm32)
 		&& ((i.op[op].imms->X_add_number & ~(((offsetT) 2 << 31) - 1))
 		    == 0))
@@ -4226,6 +4228,7 @@ optimize_imm (void)
 						^ ((offsetT) 1 << 31))
 					       - ((offsetT) 1 << 31));
 	      }
+#endif
 	    i.types[op]
 	      = operand_type_or (i.types[op],
 				 smallest_imm_type (i.op[op].imms->X_add_number));
@@ -4306,6 +4309,8 @@ optimize_disp (void)
 		op_disp = (((op_disp & 0xffff) ^ 0x8000) - 0x8000);
 		i.types[op].bitfield.disp64 = 0;
 	      }
+#ifdef BFD64
+	    /* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
 	    if (i.types[op].bitfield.disp32
 		&& (op_disp & ~(((offsetT) 2 << 31) - 1)) == 0)
 	      {
@@ -4316,6 +4321,7 @@ optimize_disp (void)
 		op_disp = (op_disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
 		i.types[op].bitfield.disp64 = 0;
 	      }
+#endif
 	    if (!op_disp && i.types[op].bitfield.baseindex)
 	      {
 		i.types[op].bitfield.disp8 = 0;
