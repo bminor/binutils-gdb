@@ -1,3 +1,7 @@
+2015-12-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (gdb_compile): Add function doc.
+
 2015-12-17  Pedro Alves  <palves@redhat.com>
 
 	PR threads/19354

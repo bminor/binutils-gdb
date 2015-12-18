@@ -3297,6 +3297,40 @@ proc gdb_wrapper_init { args } {
 global gdb_saved_set_unbuffered_mode_obj
 set gdb_saved_set_unbuffered_mode_obj ""
 
+# Compile source files specified by SOURCE into a binary of type TYPE at path
+# DEST.  gdb_compile is implemented using DejaGnu's target_compile, so the type
+# parameter and most options are passed directly to it.
+#
+# The type can be one of the following:
+#
+#   - object: Compile into an object file.
+#   - executable: Compile and link into an executable.
+#   - preprocess: Preprocess the source files.
+#   - assembly: Generate assembly listing.
+#
+# The following options are understood and processed by gdb_compile:
+#
+#   - shlib=so_path: Add SO_PATH to the sources, and enable some target-specific
+#     quirks to be able to use shared libraries.
+#   - shlib_load: Link with appropriate libraries to allow the test to
+#     dynamically load libraries at runtime.  For example, on Linux, this adds
+#     -ldl so that the test can use dlopen.
+#   - nowarnings:  Inhibit all compiler warnings.
+#
+# And here are some of the not too obscure options understood by DejaGnu that
+# influence the compilation:
+#
+#   - additional_flags=flag: Add FLAG to the compiler flags.
+#   - libs=library: Add LIBRARY to the libraries passed to the linker.  The
+#     argument can be a file, in which case it's added to the sources, or a
+#     linker flag.
+#   - ldflags=flag: Add FLAG to the linker flags.
+#   - incdir=path: Add PATH to the searched include directories.
+#   - libdir=path: Add PATH to the linker searched directories.
+#   - ada, c++, f77: Compile the file as Ada, C++ or Fortran.
+#   - debug: Build with debug information.
+#   - optimize: Build with optimization.
+
 proc gdb_compile {source dest type options} {
     global GDB_TESTCASE_OPTIONS
     global gdb_wrapper_file
