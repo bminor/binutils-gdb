@@ -1,3 +1,20 @@
+2015-12-17  Peter Collingbourne  <pcc@google.com>
+
+	PR gold/18780
+	* arm.cc (Target_arm::do_make_data_plt): Choose PLT generator based
+	on value of --long-plt flag.
+	(Output_data_plt_arm_standard::do_get_plt_entry_size): Moved to
+	Output_data_plt_arm_short.
+	(Output_data_plt_arm_standard::do_fill_plt_entry): Likewise.
+	(Output_data_plt_arm_standard::plt_entry): Likewise.
+	(Output_data_plt_arm_standard::do_fill_first_plt_entry): Fix
+	variable reference.
+	(Output_data_plt_arm_short): New class.
+	(Output_data_plt_arm_short::do_fill_plt_entry): Error out on too large
+	PLT offsets instead of asserting.
+	(Output_data_plt_arm_long): New class.
+	* options.h (General_options): Define --long-plt flag.
+
 2015-12-16  Roland McGrath  <mcgrathr@google.com>
 
 	PR ld/17473

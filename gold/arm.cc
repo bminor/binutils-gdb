@@ -62,7 +62,10 @@ template<bool big_endian>
 class Output_data_plt_arm;
 
 template<bool big_endian>
-class Output_data_plt_arm_standard;
+class Output_data_plt_arm_short;
+
+template<bool big_endian>
+class Output_data_plt_arm_long;
 
 template<bool big_endian>
 class Stub_table;
@@ -2554,7 +2557,11 @@ class Target_arm : public Sized_target<32, big_endian>
 		   Output_data_space* got_irelative)
   {
     gold_assert(got_plt != NULL && got_irelative != NULL);
-    return new Output_data_plt_arm_standard<big_endian>(
+    if (parameters->options().long_plt())
+      return new Output_data_plt_arm_long<big_endian>(
+	layout, got, got_plt, got_irelative);
+    else
+      return new Output_data_plt_arm_short<big_endian>(
 	layout, got, got_plt, got_irelative);
   }
 
@@ -7715,29 +7722,14 @@ class Output_data_plt_arm_standard : public Output_data_plt_arm<big_endian>
   do_first_plt_entry_offset() const
   { return sizeof(first_plt_entry); }
 
-  // Return the size of a PLT entry.
-  virtual unsigned int
-  do_get_plt_entry_size() const
-  { return sizeof(plt_entry); }
-
   virtual void
   do_fill_first_plt_entry(unsigned char* pov,
 			  Arm_address got_address,
 			  Arm_address plt_address);
 
-  virtual void
-  do_fill_plt_entry(unsigned char* pov,
-		    Arm_address got_address,
-		    Arm_address plt_address,
-		    unsigned int got_offset,
-		    unsigned int plt_offset);
-
  private:
   // Template for the first PLT entry.
   static const uint32_t first_plt_entry[5];
-
-  // Template for subsequent PLT entries.
-  static const uint32_t plt_entry[3];
 };
 
 // ARM PLTs.
@@ -7765,7 +7757,7 @@ Output_data_plt_arm_standard<big_endian>::do_fill_first_plt_entry(
 {
   // Write first PLT entry.  All but the last word are constants.
   const size_t num_first_plt_words = (sizeof(first_plt_entry)
-				      / sizeof(plt_entry[0]));
+				      / sizeof(first_plt_entry[0]));
   for (size_t i = 0; i < num_first_plt_words - 1; i++)
     elfcpp::Swap<32, big_endian>::writeval(pov + i * 4, first_plt_entry[i]);
   // Last word in first PLT entry is &GOT[0] - .
@@ -7774,9 +7766,39 @@ Output_data_plt_arm_standard<big_endian>::do_fill_first_plt_entry(
 }
 
 // Subsequent entries in the PLT.
+// This class generates short (12-byte) entries, for displacements up to 2^28.
 
 template<bool big_endian>
-const uint32_t Output_data_plt_arm_standard<big_endian>::plt_entry[3] =
+class Output_data_plt_arm_short : public Output_data_plt_arm_standard<big_endian>
+{
+ public:
+  Output_data_plt_arm_short(Layout* layout,
+			    Arm_output_data_got<big_endian>* got,
+			    Output_data_space* got_plt,
+			    Output_data_space* got_irelative)
+    : Output_data_plt_arm_standard<big_endian>(layout, got, got_plt, got_irelative)
+  { }
+
+ protected:
+  // Return the size of a PLT entry.
+  virtual unsigned int
+  do_get_plt_entry_size() const
+  { return sizeof(plt_entry); }
+
+  virtual void
+  do_fill_plt_entry(unsigned char* pov,
+		    Arm_address got_address,
+		    Arm_address plt_address,
+		    unsigned int got_offset,
+		    unsigned int plt_offset);
+
+ private:
+  // Template for subsequent PLT entries.
+  static const uint32_t plt_entry[3];
+};
+
+template<bool big_endian>
+const uint32_t Output_data_plt_arm_short<big_endian>::plt_entry[3] =
 {
   0xe28fc600,	// add   ip, pc, #0xNN00000
   0xe28cca00,	// add   ip, ip, #0xNN000
@@ -7785,7 +7807,69 @@ const uint32_t Output_data_plt_arm_standard<big_endian>::plt_entry[3] =
 
 template<bool big_endian>
 void
-Output_data_plt_arm_standard<big_endian>::do_fill_plt_entry(
+Output_data_plt_arm_short<big_endian>::do_fill_plt_entry(
+    unsigned char* pov,
+    Arm_address got_address,
+    Arm_address plt_address,
+    unsigned int got_offset,
+    unsigned int plt_offset)
+{
+  int32_t offset = ((got_address + got_offset)
+		    - (plt_address + plt_offset + 8));
+  if (offset < 0 || offset > 0x0fffffff)
+    gold_error(_("PLT offset too large, try linking with --long-plt"));
+
+  uint32_t plt_insn0 = plt_entry[0] | ((offset >> 20) & 0xff);
+  elfcpp::Swap<32, big_endian>::writeval(pov, plt_insn0);
+  uint32_t plt_insn1 = plt_entry[1] | ((offset >> 12) & 0xff);
+  elfcpp::Swap<32, big_endian>::writeval(pov + 4, plt_insn1);
+  uint32_t plt_insn2 = plt_entry[2] | (offset & 0xfff);
+  elfcpp::Swap<32, big_endian>::writeval(pov + 8, plt_insn2);
+}
+
+// This class generates long (16-byte) entries, for arbitrary displacements.
+
+template<bool big_endian>
+class Output_data_plt_arm_long : public Output_data_plt_arm_standard<big_endian>
+{
+ public:
+  Output_data_plt_arm_long(Layout* layout,
+			   Arm_output_data_got<big_endian>* got,
+			   Output_data_space* got_plt,
+			   Output_data_space* got_irelative)
+    : Output_data_plt_arm_standard<big_endian>(layout, got, got_plt, got_irelative)
+  { }
+
+ protected:
+  // Return the size of a PLT entry.
+  virtual unsigned int
+  do_get_plt_entry_size() const
+  { return sizeof(plt_entry); }
+
+  virtual void
+  do_fill_plt_entry(unsigned char* pov,
+		    Arm_address got_address,
+		    Arm_address plt_address,
+		    unsigned int got_offset,
+		    unsigned int plt_offset);
+
+ private:
+  // Template for subsequent PLT entries.
+  static const uint32_t plt_entry[4];
+};
+
+template<bool big_endian>
+const uint32_t Output_data_plt_arm_long<big_endian>::plt_entry[4] =
+{
+  0xe28fc200,	// add   ip, pc, #0xN0000000
+  0xe28cc600,	// add   ip, ip, #0xNN00000
+  0xe28cca00,	// add   ip, ip, #0xNN000
+  0xe5bcf000,	// ldr   pc, [ip, #0xNNN]!
+};
+
+template<bool big_endian>
+void
+Output_data_plt_arm_long<big_endian>::do_fill_plt_entry(
     unsigned char* pov,
     Arm_address got_address,
     Arm_address plt_address,
@@ -7795,13 +7879,14 @@ Output_data_plt_arm_standard<big_endian>::do_fill_plt_entry(
   int32_t offset = ((got_address + got_offset)
 		    - (plt_address + plt_offset + 8));
 
-  gold_assert(offset >= 0 && offset < 0x0fffffff);
-  uint32_t plt_insn0 = plt_entry[0] | ((offset >> 20) & 0xff);
+  uint32_t plt_insn0 = plt_entry[0] | (offset >> 28);
   elfcpp::Swap<32, big_endian>::writeval(pov, plt_insn0);
-  uint32_t plt_insn1 = plt_entry[1] | ((offset >> 12) & 0xff);
+  uint32_t plt_insn1 = plt_entry[1] | ((offset >> 20) & 0xff);
   elfcpp::Swap<32, big_endian>::writeval(pov + 4, plt_insn1);
-  uint32_t plt_insn2 = plt_entry[2] | (offset & 0xfff);
+  uint32_t plt_insn2 = plt_entry[2] | ((offset >> 12) & 0xff);
   elfcpp::Swap<32, big_endian>::writeval(pov + 8, plt_insn2);
+  uint32_t plt_insn3 = plt_entry[3] | (offset & 0xfff);
+  elfcpp::Swap<32, big_endian>::writeval(pov + 12, plt_insn3);
 }
 
 // Write out the PLT.  This uses the hand-coded instructions above,
