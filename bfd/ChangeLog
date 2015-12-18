@@ -1,3 +1,7 @@
+2015-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* coff-x86_64.c (coff_amd64_reloc): Fix formatting.
+
 2015-12-18  Nick Clifton  <nickc@redhat.com>
 
 	* coff-i386.c (coff_i386_reloc): Fix formatting.
