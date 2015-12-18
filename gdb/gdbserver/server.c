@@ -2290,13 +2290,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";tracenz+");
 	}
 
-      if (target_supports_hardware_single_step ())
+      if (target_supports_hardware_single_step ()
+	  || target_supports_software_single_step () )
 	{
-	  /* Support target-side breakpoint conditions and commands.
-	     GDBserver needs to step over the breakpoint if the condition
-	     is false.  GDBserver software single step is too simple, so
-	     disable conditional breakpoints if the target doesn't have
-	     hardware single step.  */
 	  strcat (own_buf, ";ConditionalBreakpoints+");
 	}
       strcat (own_buf, ";BreakpointCommands+");

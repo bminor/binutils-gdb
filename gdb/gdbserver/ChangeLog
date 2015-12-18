@@ -1,5 +1,9 @@
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
+	* server.c (handle_query): Call target_supports_software_single_step.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
 	* linux-low.c (single_step): New function.
 	(linux_resume_one_lwp_throw): Call single_step.
 	(start_step_over): Likewise.
