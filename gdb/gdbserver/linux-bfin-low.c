@@ -141,7 +141,7 @@ struct linux_target_ops the_low_target = {
   bfin_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   bfin_sw_breakpoint_from_kind,
-  NULL, /* breakpoint_reinsert_addr */
+  NULL, /* get_next_pcs */
   2,
   bfin_breakpoint_at,
   NULL, /* supports_z_point_type */

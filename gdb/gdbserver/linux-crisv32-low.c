@@ -422,7 +422,7 @@ struct linux_target_ops the_low_target = {
   cris_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   cris_sw_breakpoint_from_kind,
-  NULL, /* breakpoint_reinsert_addr */
+  NULL, /* get_next_pcs */
   0,
   cris_breakpoint_at,
   cris_supports_z_point_type,

@@ -871,7 +871,7 @@ struct linux_target_ops the_low_target = {
   arm_set_pc,
   arm_breakpoint_kind_from_pc,
   arm_sw_breakpoint_from_kind,
-  NULL, /* breakpoint_reinsert_addr */
+  NULL, /* get_next_pcs */
   0,
   arm_breakpoint_at,
   arm_supports_z_point_type,

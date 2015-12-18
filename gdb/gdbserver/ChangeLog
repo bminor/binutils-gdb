@@ -1,3 +1,21 @@
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-aarch64-low.c (the_low_targets): Rename
+	breakpoint_reinsert_addr to get_next_pcs.
+	* linux-arm-low.c (the_low_targets): Likewise.
+	* linux-bfin-low.c (the_low_targets): Likewise.
+	* linux-cris-low.c (the_low_targets): Likewise.
+	* linux-crisv32-low.c (the_low_targets): Likewise.
+	* linux-low.c (can_software_single_step): Likewise.
+	(install_software_single_step_breakpoints): New function.
+	(start_step_over): Use install_software_single_step_breakpoints.
+	* linux-low.h: New CORE_ADDR vector.
+	(struct linux_target_ops) Rename breakpoint_reinsert_addr to
+	get_next_pcs.
+	* linux-mips-low.c (the_low_targets): Likewise.
+	* linux-nios2-low.c (the_low_targets): Likewise.
+	* linux-sparc-low.c (the_low_targets): Likewise.
+
 2015-12-17  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (linux_kill_one_lwp): Remove references to

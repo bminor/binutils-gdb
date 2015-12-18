@@ -267,7 +267,7 @@ struct linux_target_ops the_low_target =
   nios2_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   nios2_sw_breakpoint_from_kind,
-  NULL, /* breakpoint_reinsert_addr */
+  NULL, /* get_next_pcs */
   0,
   nios2_breakpoint_at,
 };

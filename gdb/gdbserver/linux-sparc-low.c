@@ -320,7 +320,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   NULL, /* breakpoint_kind_from_pc */
   sparc_sw_breakpoint_from_kind,
-  NULL, /* breakpoint_reinsert_addr */
+  NULL, /* get_next_pcs */
   0,
   sparc_breakpoint_at,
   NULL,  /* supports_z_point_type */

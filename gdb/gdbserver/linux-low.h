@@ -124,6 +124,8 @@ struct process_info_private
 
 struct lwp_info;
 
+DEF_VEC_I (CORE_ADDR);
+
 struct linux_target_ops
 {
   /* Architecture-specific setup.  */
@@ -153,7 +155,8 @@ struct linux_target_ops
   /* See target.h for details.  */
   const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
 
-  CORE_ADDR (*breakpoint_reinsert_addr) (void);
+  /* Find the next possible PCs after the current instruction executes.  */
+  VEC (CORE_ADDR) *(*get_next_pcs) (CORE_ADDR pc, struct regcache *regcache);
 
   int decr_pc_after_break;
   int (*breakpoint_at) (CORE_ADDR pc);
