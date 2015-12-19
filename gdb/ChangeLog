@@ -1,3 +1,8 @@
+2015-12-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* arch/arm-get-next-pcs.c (arm_get_next_pcs_raw): Remove trailing
+	newline at end of error message.
+
 2015-12-18  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* event-top.c (command_handler): Don't require stdin to be a tty

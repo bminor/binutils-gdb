@@ -916,7 +916,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self,
 	  break;
 
 	default:
-	  error (_("Bad bit-field extraction\n"));
+	  error (_("Bad bit-field extraction"));
 	  return next_pcs;
 	}
     }
