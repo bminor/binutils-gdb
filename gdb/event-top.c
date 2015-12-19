@@ -469,11 +469,10 @@ async_disable_stdin (void)
 static void
 command_handler (char *command)
 {
-  int stdin_is_tty = ISATTY (stdin);
   struct cleanup *stat_chain;
 
   clear_quit_flag ();
-  if (instream == stdin && stdin_is_tty)
+  if (instream == stdin)
     reinitialize_more_filter ();
 
   /* If readline returned a NULL command, it means that the connection

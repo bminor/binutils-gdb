@@ -542,7 +542,6 @@ command_loop (void)
 {
   struct cleanup *old_chain;
   char *command;
-  int stdin_is_tty = ISATTY (stdin);
 
   while (instream && !feof (instream))
     {
@@ -550,7 +549,7 @@ command_loop (void)
 	(*window_hook) (instream, get_prompt ());
 
       clear_quit_flag ();
-      if (instream == stdin && stdin_is_tty)
+      if (instream == stdin)
 	reinitialize_more_filter ();
       old_chain = make_cleanup (null_cleanup, 0);
 

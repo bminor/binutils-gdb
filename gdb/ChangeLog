@@ -1,5 +1,11 @@
 2015-12-18  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* event-top.c (command_handler): Don't require stdin to be a tty
+	for call to reinitialize_more_filter.
+	* top.c (command_loop): Likewise.
+
+2015-12-18  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* utils.c (prompt_for_continue): Call throw_quit directly on 'q'.
 
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
