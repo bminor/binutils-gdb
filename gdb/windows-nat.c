@@ -2830,7 +2830,8 @@ _initialize_loadable (void)
     {
       GPA (hm, EnumProcessModules);
       GPA (hm, GetModuleInformation);
-      GPA (hm, GetModuleFileNameEx);
+      GetModuleFileNameEx = (GetModuleFileNameEx_ftype *)
+        GetProcAddress (hm, GetModuleFileNameEx_name);
     }
 
   if (!EnumProcessModules || !GetModuleInformation || !GetModuleFileNameEx)
