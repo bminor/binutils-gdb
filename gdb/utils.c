@@ -1868,7 +1868,8 @@ prompt_for_continue (void)
       while (*p == ' ' || *p == '\t')
 	++p;
       if (p[0] == 'q')
-	quit ();
+	/* Do not call quit here; there is no possibility of SIGINT.  */
+	throw_quit ("Quit");
       xfree (ignore);
     }
   immediate_quit--;

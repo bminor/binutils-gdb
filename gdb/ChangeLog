@@ -1,3 +1,7 @@
+2015-12-18  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* utils.c (prompt_for_continue): Call throw_quit directly on 'q'.
+
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* arm-tdep.c (arm_get_next_pcs_read_memory_unsigned_integer): Cast
