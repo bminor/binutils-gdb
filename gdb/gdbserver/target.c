@@ -68,7 +68,9 @@ thread_search_callback (struct inferior_list_entry *entry, void *args)
   if (ptid_get_pid (entry->id) == ptid_get_pid (s->current_gen_ptid)
       && mythread_alive (ptid_of (thread)))
     {
-      if (s->stopped == NULL && thread_stopped (thread))
+      if (s->stopped == NULL
+	  && the_target->thread_stopped != NULL
+	  && thread_stopped (thread))
 	s->stopped = thread;
 
       if (s->first == NULL)
