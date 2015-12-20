@@ -77,8 +77,6 @@ else
       fi ;;
     darwin* | rhapsody*)
       RPATH_ENVVAR=DYLD_LIBRARY_PATH ;;
-    hpux*)
-      RPATH_ENVVAR=SHLIB_PATH ;;
   esac
 fi
 AC_SUBST(RPATH_ENVVAR)

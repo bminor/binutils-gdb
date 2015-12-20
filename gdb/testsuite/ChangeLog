@@ -1,3 +1,8 @@
+2015-12-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac: Remove HP-UX case.
+	* configure: Regenerate.
+
 2015-12-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* lib/gdb.exp (gdb_compile): Add function doc.
