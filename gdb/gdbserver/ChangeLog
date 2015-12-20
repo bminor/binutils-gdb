@@ -1,5 +1,11 @@
 2015-12-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* lynx-low.c (lynx_delete_thread_callback): New function.
+	(lynx_mourn): Properly delete our process and all of its
+	threads.  Remove call to clear_inferiors.
+
+2015-12-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* target.c (thread_search_callback): Add check that
 	the thread_stopped target callback is not NULL before
 	calling it.
