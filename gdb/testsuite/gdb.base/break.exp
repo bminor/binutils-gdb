@@ -473,37 +473,14 @@ gdb_test "catch" \
     "Catch requires an event name." \
     "catch requires an event name"
 
+gdb_test "catch fork" "Catchpoint \[0-9\]+ \\(fork\\)" \
+    "set catch fork, never expected to trigger"
 
-set name "set catch fork, never expected to trigger"
-gdb_test_multiple "catch fork" "$name" {
-    -re "Catchpoint \[0-9\]* .fork..*$gdb_prompt $" {
-	pass $name
-    }
-    -re "Catch of fork not yet implemented.*$gdb_prompt $" {
-	pass $name
-    }
-}
+gdb_test "catch vfork" "Catchpoint \[0-9\]+ \\(vfork\\)" \
+    "set catch vfork, never expected to trigger"
 
-
-set name "set catch vfork, never expected to trigger"
-gdb_test_multiple "catch vfork" "$name" {
-    -re "Catchpoint \[0-9\]* .vfork..*$gdb_prompt $" {
-	pass $name
-    }
-    -re "Catch of vfork not yet implemented.*$gdb_prompt $" {
-	pass $name
-    }
-}
-
-set name "set catch exec, never expected to trigger"
-gdb_test_multiple "catch exec" "$name" {
-    -re "Catchpoint \[0-9\]* .exec..*$gdb_prompt $" {
-	pass $name
-    }
-    -re "Catch of exec not yet implemented.*$gdb_prompt $" {
-	pass $name
-    }
-}
+gdb_test "catch exec" "Catchpoint \[0-9\]+ \\(exec\\)" \
+    "set catch exec, never expected to trigger"
 
 # Verify that GDB responds gracefully when asked to set a breakpoint
 # on a nonexistent source line.
