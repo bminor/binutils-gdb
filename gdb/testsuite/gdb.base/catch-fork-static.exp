@@ -27,8 +27,7 @@ if { [is_remote target] || ![isnative] } then {
 
 # Until "catch fork" is implemented on other targets...
 #
-if { ![istarget "hppa*-hp-hpux*"] && ![istarget "*-*-linux*"]
-     && ![istarget "*-*-openbsd*"] } then {
+if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
     continue
 }
 

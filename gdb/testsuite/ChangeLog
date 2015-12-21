@@ -1,5 +1,43 @@
 2015-12-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb.asm/asm-source.exp: Remove HP-UX references.
+	* gdb.base/annota1.exp: Likewise.
+	* gdb.base/annota3.exp: Likewise.
+	* gdb.base/attach.exp: Likewise.
+	* gdb.base/bigcore.exp: Likewise.
+	* gdb.base/break.exp: Likewise.
+	* gdb.base/call-ar-st.exp: Likewise.
+	* gdb.base/callfuncs.exp: Likewise.
+	* gdb.base/catch-fork-static.exp: Likewise.
+	* gdb.base/display.exp: Likewise.
+	* gdb.base/foll-exec-mode.exp: Likewise.
+	* gdb.base/foll-exec.exp: Likewise.
+	* gdb.base/foll-fork.exp: Likewise.
+	* gdb.base/foll-vfork.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/hbreak2.exp: Likewise.
+	* gdb.base/inferior-died.exp: Likewise.
+	* gdb.base/interrupt.exp: Likewise.
+	* gdb.base/multi-forks.exp: Likewise.
+	* gdb.base/nodebug.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/solib1.c: Likewise.
+	* gdb.base/step-test.exp: Likewise.
+	* gdb.mi/non-stop.c: Likewise.
+	* gdb.mi/pthreads.c: Likewise.
+	* gdb.multi/bkpt-multi-exec.ex: Likewise.
+	* gdb.threads/pthreads.c: Likewise.
+	* gdb.threads/staticthreads.exp: Likewise.
+	* lib/future.exp: Likewise.
+	* lib/gdb.exp: Likewise.
+	* gdb.base/so-indr-cl.c: Remove.
+	* gdb.base/so-indr-cl.exp: Likewise.
+	* gdb.base/solib.c: Likewise.
+	* gdb.base/solib.exp: Likewise.
+	* gdb.base/solib2.c: Likewise.
+
+2015-12-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdb.base/break.exp: Remove references to HP CC/aCC compilers.
 	* gdb.base/call-ar-st.exp: Likewise.
 	* gdb.base/callfuncs.exp: Likewise.

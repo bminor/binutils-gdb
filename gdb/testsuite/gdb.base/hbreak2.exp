@@ -396,27 +396,15 @@ gdb_test "print marker2(99)" \
 
 # As long as we're stopped (breakpointed) in a called function,
 # verify that we can successfully backtrace & such from here.
-#
-# In this and the following test, the _sr4export check apparently is needed
-# for hppa*-*-hpux.
-#
-gdb_test_multiple "bt" "backtrace while in called function" {
-    -re "#0\[ \t\]*($hex in )?marker2.*:$bp_location8\r\n#1.*_sr4export.*$gdb_prompt $" {
-	pass "backtrace while in called function"
-    }
-    -re "#0\[ \t\]*($hex in )?marker2.*:$bp_location8\r\n#1.*function called from gdb.*$gdb_prompt $" {
-	pass "backtrace while in called function"
-    }
-}
+gdb_test "bt" \
+    "#0\[ \t\]*($hex in )?marker2.*:$bp_location8\r\n#1\[ \t\]*<function called from gdb>.*" \
+    "backtrace while in called function"
 
 # Return from the called function.  For remote targets, it's important to do
 # this before runto_main, which otherwise may silently stop on the dummy
 # breakpoint inserted by GDB at the program's entry point.
 #
 gdb_test_multiple "finish" "finish from called function" {
-    -re "Run till exit from .*marker2.* at .*$bp_location8\r\n.* in _sr4export.*$gdb_prompt $" {
-	pass "finish from called function"
-    }
     -re "Run till exit from .*marker2.* at .*$bp_location8\r\n.*function called from gdb.*$gdb_prompt $" {
 	pass "finish from called function"
     }

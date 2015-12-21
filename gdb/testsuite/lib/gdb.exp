@@ -2840,15 +2840,6 @@ gdb_caching_proc skip_btrace_pt_tests {
     return $skip_btrace_tests
 }
 
-# Skip all the tests in the file if you are not on an hppa running
-# hpux target.
-
-proc skip_hp_tests {} {
-    eval set skip_hp [ expr ![isnative] || ![istarget "hppa*-*-hpux*"] ]
-    verbose "Skip hp tests is $skip_hp"
-    return $skip_hp
-}
-
 # Return whether we should skip tests for showing inlined functions in
 # backtraces.  Requires get_compiler_info and get_debug_format.
 
@@ -3374,8 +3365,7 @@ proc gdb_compile {source dest type options} {
     if { $shlib_load || ($shlib_found && [is_remote target]) } {
 	if { ([istarget "*-*-mingw*"]
 	      || [istarget *-*-cygwin*]
-	      || [istarget *-*-pe*]
-	      || [istarget hppa*-*-hpux*])} {
+	      || [istarget *-*-pe*]) } {
 	    # Do not need anything.
 	} elseif { [istarget *-*-freebsd*] || [istarget *-*-openbsd*] } {
 	    lappend new_options "ldflags=-Wl,-rpath,${outdir}"
@@ -3554,14 +3544,7 @@ proc gdb_compile_shlib {sources dest options} {
             }
         }
         default {
-            switch -glob [istarget] {
-                "hppa*-hp-hpux*" {
-                    lappend obj_options "additional_flags=+z"
-                }
-                default {
-                    # don't know what the compiler is...
-                }
-            }
+	    # don't know what the compiler is...
         }
     }
 
@@ -3575,49 +3558,46 @@ proc gdb_compile_shlib {sources dest options} {
        lappend objects ${outdir}/${sourcebase}.o
     }
 
-    if [istarget "hppa*-*-hpux*"] {
-       remote_exec build "ld -b ${objects} -o ${dest}"
+    set link_options $options
+    if [test_compiler_info "xlc-*"] {
+	lappend link_options "additional_flags=-qmkshrobj"
     } else {
-       set link_options $options
-       if [test_compiler_info "xlc-*"] {
-          lappend link_options "additional_flags=-qmkshrobj"
-       } else {
-          lappend link_options "additional_flags=-shared"
+	lappend link_options "additional_flags=-shared"
 
-	   if { ([istarget "*-*-mingw*"]
-		 || [istarget *-*-cygwin*]
-		 || [istarget *-*-pe*]) } {
-	       if { [is_remote host] } {
-		   set name [file tail ${dest}]
-	       } else {
-		   set name ${dest}
-	       }
-	       lappend link_options "additional_flags=-Wl,--out-implib,${name}.a"
-	   } elseif [is_remote target] {
-	     # By default, we do not set the soname.  This causes the linker
-	     # on ELF systems to create a DT_NEEDED entry in the executable
-	     # refering to the full path name of the library.  This is a
-	     # problem in remote testing if the library is in a different
-	     # directory there.  To fix this, we set a soname of just the
-	     # base filename for the library, and add an appropriate -rpath
-	     # to the main executable (in gdb_compile).
-             set destbase [file tail $dest]
-             lappend link_options "additional_flags=-Wl,-soname,$destbase"
-           }
-       }
-       if {[gdb_compile "${objects}" "${dest}" executable $link_options] != ""} {
-           return -1
-       }
-	if { [is_remote host]
-	     && ([istarget "*-*-mingw*"]
-		 || [istarget *-*-cygwin*]
-		 || [istarget *-*-pe*]) } {
-	    set dest_tail_name [file tail ${dest}]
-	    remote_upload host $dest_tail_name.a ${dest}.a
-	    remote_file host delete $dest_tail_name.a
+	if { ([istarget "*-*-mingw*"]
+	      || [istarget *-*-cygwin*]
+	      || [istarget *-*-pe*]) } {
+	    if { [is_remote host] } {
+		set name [file tail ${dest}]
+	    } else {
+		set name ${dest}
+	    }
+	    lappend link_options "additional_flags=-Wl,--out-implib,${name}.a"
+	} elseif [is_remote target] {
+	    # By default, we do not set the soname.  This causes the linker
+	    # on ELF systems to create a DT_NEEDED entry in the executable
+	    # refering to the full path name of the library.  This is a
+	    # problem in remote testing if the library is in a different
+	    # directory there.  To fix this, we set a soname of just the
+	    # base filename for the library, and add an appropriate -rpath
+	    # to the main executable (in gdb_compile).
+	    set destbase [file tail $dest]
+	    lappend link_options "additional_flags=-Wl,-soname,$destbase"
 	}
     }
-  return ""
+    if {[gdb_compile "${objects}" "${dest}" executable $link_options] != ""} {
+	return -1
+    }
+    if { [is_remote host]
+	 && ([istarget "*-*-mingw*"]
+	     || [istarget *-*-cygwin*]
+	     || [istarget *-*-pe*]) } {
+	set dest_tail_name [file tail ${dest}]
+	remote_upload host $dest_tail_name.a ${dest}.a
+	remote_file host delete $dest_tail_name.a
+    }
+
+    return ""
 }
 
 # This is just like gdb_compile_shlib, above, except that it tries compiling
@@ -4954,7 +4934,6 @@ gdb_caching_proc gdb_has_argv0 {
 	  || [istarget *-wince-pe] || [istarget *-*-mingw32ce*]
 	  || [istarget *-*-symbianelf*]
 	  || [istarget *-*-osf*]
-	  || [istarget *-*-hpux*]
 	  || [istarget *-*-dicos*]
 	  || [istarget *-*-nto*]
 	  || [istarget *-*-*vms*]

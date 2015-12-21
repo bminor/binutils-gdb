@@ -13,18 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-# On HP-UX 11.0, this test is causing a process running the program
-# "attach" to be left around spinning.  Until we figure out why, I am
-# commenting out the test to avoid polluting tiamat (our 11.0 nightly
-# test machine) with these processes. RT
-#
-# Setting the magic bit in the target app should work.  I added a
-# "kill", and also a test for the R3 register warning.  JB
-if { [istarget "hppa*-*-hpux*"] } {
-    return 0
-}
-
 if {![can_spawn_for_attach]} {
     return 0
 }

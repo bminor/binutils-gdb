@@ -58,7 +58,7 @@ gdb_test_multiple "continue" "$test" {
 
 set sig "SIG32"
 
-# SIGRTMIN is 37 on hppa-linux and hpux
+# SIGRTMIN is 37 on hppa-linux
 if [istarget hppa*-*-*] {
   set sig "SIG37"
 }

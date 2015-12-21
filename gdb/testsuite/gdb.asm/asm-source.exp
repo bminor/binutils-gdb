@@ -159,10 +159,6 @@ switch -glob -- [istarget] {
         set asm-arch pa
 	set debug-flags "-gdwarf-2"
     }
-    "hppa64-*-hpux*" {
-        set asm-arch pa64
-	set debug-flags "-gdwarf-2"
-    }
     "h83*-*" {
 	set asm-arch h8300
         set debug-flags "-gdwarf-2"

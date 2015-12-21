@@ -35,7 +35,7 @@ if { [target_info exists gdb_protocol]
 
 # Until "catch exec" is implemented on other targets...
 #
-if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
+if {![istarget "*-linux*"]} then {
      continue
 }
 

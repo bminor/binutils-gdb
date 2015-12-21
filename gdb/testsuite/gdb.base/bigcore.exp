@@ -31,7 +31,6 @@ if ![isnative] then {
 # I/O bandwith.
 
 if { [istarget "*-*-*bsd*"]
-     || [istarget "*-*-hpux*"]
      || [istarget "*-*-solaris*"] 
      || [istarget "*-*-darwin*"] 
      || [istarget "*-*-cygwin*"] } {

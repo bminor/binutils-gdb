@@ -19,7 +19,7 @@ if { [is_remote target] || ![isnative] } then {
 
 # Until "catch exec" is implemented on other targets...
 #
-if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
+if {![istarget "*-linux*"]} then {
     continue
 }
 

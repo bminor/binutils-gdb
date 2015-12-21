@@ -21,25 +21,9 @@
 # Until "set follow-fork-mode" and "catch vfork" are implemented on
 # other targets...
 #
-if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
+if {![istarget "*-linux*"]} then {
     continue
 }
-
-# Test to see if we are on an HP-UX 10.20 and if so,
-# do not run these tests as catching vfork is disabled for
-# 10.20.
-
-if [istarget "hppa*-hp-hpux10.20"] then {
-    return 0
-}
-
-# NOTE drow/2002-12-06: I don't know what the referenced kernel problem
-# is, but it appears to be fixed in recent HP/UX versions.
-
-##if [istarget "hppa2.0w-hp-hpux*"] {
-##  warning "Don't run gdb.base/foll-vfork.exp until JAGaa43495 kernel problem is fixed."
-##  return 0
-##}
 
 standard_testfile
 
@@ -207,46 +191,18 @@ proc vfork_and_exec_child_follow_through_step {} {
    global gdb_prompt
    global srcfile2
 
-   if { [istarget "hppa*-*-hpux*"] && ![istarget "hppa*-*-hpux11.*"] } {
-      # This test cannot be performed prior to HP-UX 10.30, because
-      # ptrace-based debugging of a vforking program basically doesn't
-      # allow the child to do things like hit a breakpoint between a
-      # vfork and exec.  This means that saying "set follow-fork
-      # child; next" at a vfork() call won't work, because the
-      # implementation of "next" sets a "step resume" breakpoint at
-      # the return from the vfork(), which the child will hit on its
-      # way to exec'ing.
-      #
-      verbose "vfork child-following next test ignored for pre-HP/UX-10.30 targets."
-      return 0
-   }
-
    setup_gdb
 
    gdb_test_no_output "set follow-fork child"
 
    set test "step over vfork"
-   if { [istarget "hppa*-*-hpux*"]} {
-       # Since the child cannot be debugged until after it has exec'd,
-       # and since there's a bp on "main" in the parent, and since the
-       # bp's for the parent are recomputed in the exec'd child, the
-       # step through a vfork should land us in the "main" for the
-       # exec'd child, too.
-       #
-       set linenum [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
-       gdb_test_multiple "next" $test {
-	   -re "Attaching after vfork to.*Executing new program.*Breakpoint.*vforked-prog.c:${linenum}.*$gdb_prompt " {
-	       pass "$test"
-	   }
-       }
-   } else {
-       # The ideal support is to be able to debug the child even
-       # before it execs.  Thus, "next" lands on the next line after
-       # the vfork.
-       gdb_test_multiple "next" $test {
-	   -re "Attaching after .* vfork to child.*if \\(pid == 0\\).*$gdb_prompt " {
-	       pass "$test"
-	   }
+
+   # The ideal support is to be able to debug the child even
+   # before it execs.  Thus, "next" lands on the next line after
+   # the vfork.
+   gdb_test_multiple "next" $test {
+       -re "Attaching after .* vfork to child.*if \\(pid == 0\\).*$gdb_prompt " {
+	   pass "$test"
        }
    }
    # The parent has been detached; allow time for any output it might

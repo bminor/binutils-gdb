@@ -16,7 +16,7 @@
 # Until "set follow-fork-mode" and "catch fork" are implemented on
 # other targets...
 #
-if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-*-linux*"]} then {
+if { ![istarget "*-*-linux*"] } then {
     continue
 }
 
@@ -128,12 +128,6 @@ gdb_test "print pids\[0\]==0 || pids\[1\]==0 || pids\[2\]==0 || pids\[3\]==0" \
 #
 # Now test with detach-on-fork off.
 #
-
-# detach-on-fork isn't implemented on hpux.
-#
-if {![istarget "*-*-linux*"]} then {
-    continue
-}
 
 # Start with a fresh gdb
 

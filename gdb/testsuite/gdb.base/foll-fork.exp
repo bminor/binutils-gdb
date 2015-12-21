@@ -16,8 +16,7 @@
 # Until "set follow-fork-mode" and "catch fork" are implemented on
 # other targets...
 #
-if { ![istarget "hppa*-hp-hpux*"] && ![istarget "*-*-linux*"]
-     && ![istarget "*-*-openbsd*"] } then {
+if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
     continue
 }
 
