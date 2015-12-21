@@ -1,3 +1,8 @@
+2015-12-21  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.h [__aarch64__]: Use arm_abi_breakpoint
+	arm breakpoint.
+
 2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* server.c (handle_query): Call target_supports_software_single_step.

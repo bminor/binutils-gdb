@@ -24,10 +24,10 @@
    ABI's breakpoint instruction.  For now at least.  */
 #define arm_eabi_breakpoint 0xe7f001f0UL
 
-#ifndef __ARM_EABI__
-static const unsigned long arm_breakpoint = arm_abi_breakpoint;
-#else
+#if (defined __ARM_EABI__ || defined __aarch64__)
 static const unsigned long arm_breakpoint = arm_eabi_breakpoint;
+#else
+static const unsigned long arm_breakpoint = arm_abi_breakpoint;
 #endif
 
 #define arm_breakpoint_len 4
