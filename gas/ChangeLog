@@ -1,3 +1,10 @@
+2015-12-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19386
+	* doc/as.texinfo (Strings): Prepend a space to index entries that
+	start with a backslash.  This works around a problem in the pdf
+	generator.
+
 2015-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (optimize_imm): Store 32-bit immediate in
