@@ -69,8 +69,6 @@ proc set_listsize { arg } {
 
 proc test_listsize {} {
     global gdb_prompt
-    global hp_cc_compiler
-    global hp_aCC_compiler
     global last_line_re
 
     # Show default size

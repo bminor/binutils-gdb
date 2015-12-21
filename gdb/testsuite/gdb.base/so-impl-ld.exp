@@ -30,14 +30,6 @@ if [get_compiler_info] {
     return -1
 }
 
-if [get_compiler_info] {
-    return -1
-}
-
-if [test_compiler_info "hpcc-*"] {
-    lappend exec_opts "additional_flags=-Ae"
-}
-
 if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
      || [gdb_compile $srcdir/$subdir/$srcfile $binfile \
 	     executable $exec_opts] != ""} {

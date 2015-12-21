@@ -301,22 +301,11 @@ proc fetch_all_registers {test} {
 }
 
 proc rerun_and_prepare {} {
-    global hp_aCC_compiler
-
     if { ![runto_main] } {
 	gdb_suppress_tests
     }
-    if { $hp_aCC_compiler } {
-	# Do not set language explicitly to 'C'.  This will cause aCC
-	# tests to fail because promotion rules are different.  Just let
-	# the language be set to the default.
-	# However, turn off overload-resolution for aCC.  Having it on causes
-	# a lot of failures.
 
-	gdb_test_no_output "set overload-resolution 0"
-    } else {
-	gdb_test_no_output "set language c"
-    }
+    gdb_test_no_output "set language c"
 
     get_debug_format
 

@@ -539,12 +539,6 @@ gdb_test continue "Continuing\\..*main \\(\\) at .*$srcfile:$stop_line\[\r\n\t \
 
 #call print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)
 
-# FIXME:
-# HP aCC demangler currently does not handle hp aCC functions with >10 args
-# DTS CLLbs16994  coulter 990114
-
-if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*" CLLbs16994}
-
 if {![gdb_skip_float_test "print print_long_arg_list"] && \
     ![gdb_skip_stdio_test "print print_long_arg_list"] } {
 

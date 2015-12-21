@@ -63,11 +63,6 @@ proc local_compiler_xfail_check { } {
 	    setup_xfail "*-*-*" 
 	}
     }
-
-    global hp_cc_compiler
-    if { $hp_cc_compiler } {
-	setup_xfail "hppa*-*-hpux*"
-    }
 }
 
 # A few tests still xfail with gcc 3 -gstabs+ and gcc 4 -gstabs+.

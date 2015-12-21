@@ -56,7 +56,6 @@ if ![runto_main] then {
 get_debug_format
 
 # Many tests xfail with gcc 2 -gstabs+.
-# TODO: check out the hp side of this.
 
 proc local_compiler_xfail_check { } {
     if { [test_compiler_info gcc-2-*] } then {
@@ -64,11 +63,6 @@ proc local_compiler_xfail_check { } {
 		&& ![test_debug_format "DWARF 2"] } then {
 	    setup_xfail "*-*-*" 
 	}
-    }
-
-    global hp_cc_compiler
-    if { $hp_cc_compiler } {
-	setup_xfail "hppa*-*-hpux*"
     }
 }
 

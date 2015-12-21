@@ -3084,8 +3084,6 @@ if [info exists compiler_info] {
 }
 
 set gcc_compiled		0
-set hp_cc_compiler		0
-set hp_aCC_compiler		0
 
 # Figure out what compiler I am using.
 # The result is cached so only the first invocation runs the compiler.
@@ -3152,8 +3150,6 @@ proc get_compiler_info {{arg ""}} {
 
     # Legacy global data symbols.
     global gcc_compiled
-    global hp_cc_compiler
-    global hp_aCC_compiler
 
     if [info exists compiler_info] {
 	# Already computed.
@@ -3214,15 +3210,11 @@ proc get_compiler_info {{arg ""}} {
 
     # Set the legacy symbols.
     set gcc_compiled     0
-    set hp_cc_compiler   0
-    set hp_aCC_compiler  0
     if { [regexp "^gcc-1-" "$compiler_info" ] } { set gcc_compiled 1 }
     if { [regexp "^gcc-2-" "$compiler_info" ] } { set gcc_compiled 2 }
     if { [regexp "^gcc-3-" "$compiler_info" ] } { set gcc_compiled 3 }
     if { [regexp "^gcc-4-" "$compiler_info" ] } { set gcc_compiled 4 }
     if { [regexp "^gcc-5-" "$compiler_info" ] } { set gcc_compiled 5 }
-    if { [regexp "^hpcc-"  "$compiler_info" ] } { set hp_cc_compiler 1 }
-    if { [regexp "^hpacc-" "$compiler_info" ] } { set hp_aCC_compiler 1 }
 
     # Log what happened.
     verbose -log "get_compiler_info: $compiler_info"
@@ -3231,13 +3223,6 @@ proc get_compiler_info {{arg ""}} {
     # operations to 0 or 1.
     uplevel \#0 { set true 1 }
     uplevel \#0 { set false 0 }
-
-    # Use of aCC results in boolean results being displayed as
-    # "true" or "false"
-    if { $hp_aCC_compiler } {
-      uplevel \#0 { set true true }
-      uplevel \#0 { set false false }
-    }
 
     return 0
 }

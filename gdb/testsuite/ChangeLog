@@ -1,3 +1,34 @@
+2015-12-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/break.exp: Remove references to HP CC/aCC compilers.
+	* gdb.base/call-ar-st.exp: Likewise.
+	* gdb.base/callfuncs.exp: Likewise.
+	* gdb.base/condbreak.exp: Likewise.
+	* gdb.base/constvars.exp: Likewise.
+	* gdb.base/hbreak2.exp: Likewise.
+	* gdb.base/langs.exp: Likewise.
+	* gdb.base/list.exp: Likewise.
+	* gdb.base/long_long.exp: Likewise.
+	* gdb.base/ptype.exp: Likewise.
+	* gdb.base/scope.exp: Likewise.
+	* gdb.base/signals.exp: Likewise.
+	* gdb.base/so-impl-ld.exp: Likewise.
+	* gdb.base/varargs.exp: Likewise.
+	* gdb.base/volatile.exp: Likewise.
+	* gdb.base/whatis.exp: Likewise.
+	* gdb.cp/cplusfuncs.exp: Likewise.
+	* gdb.cp/inherit.exp: Likewise.
+	* gdb.cp/local.exp: Likewise.
+	* gdb.cp/member-ptr.exp: Likewise.
+	* gdb.cp/method.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/templates.exp: Likewise.
+	* gdb.stabs/weird.exp: Likewise.
+	* lib/compiler.c: Likewise.
+	* lib/compiler.cc: Likewise.
+	* lib/cp-support.exp: Likewise.
+	* lib/gdb.exp: Likewise.
+
 2015-12-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* configure.ac: Remove HP-UX case.

@@ -118,12 +118,6 @@ set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
 
 set main_line $bp_location6
 
-if {$hp_aCC_compiler} {
-    set proto "\\(int\\)"
-} else {
-    set proto ""
-}
-
 set bp_location7 [gdb_get_line_number "set breakpoint 7 here"]
 set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
 
@@ -131,7 +125,7 @@ gdb_test "info break" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$main_line.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in marker2 at .*$srcfile1:$bp_location8.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in factorial$proto at .*$srcfile:$bp_location7.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in factorial at .*$srcfile:$bp_location7.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location1.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location1.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location2.*
@@ -459,7 +453,7 @@ gdb_test  "tbreak $srcfile:$bp_location11" "Temporary breakpoint.*at.* file .*$s
 #
 gdb_test "info break" "Num     Type.*Disp Enb Address.*What.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$main_line.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial$proto at .*$srcfile:$bp_location7.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial at .*$srcfile:$bp_location7.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location1.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location6.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location2.*\[\r\n\]
@@ -647,7 +641,7 @@ gdb_test "break marker2" \
     "set breakpoint on to-be-called function"
 
 gdb_test "print marker2(99)" \
-    "The program being debugged stopped while in a function called from GDB.\r\nEvaluation of the expression containing the function\r\n.marker2$proto. will be abandoned.\r\nWhen the function is done executing, GDB will silently stop.*" \
+    "The program being debugged stopped while in a function called from GDB.\r\nEvaluation of the expression containing the function\r\n.marker2. will be abandoned.\r\nWhen the function is done executing, GDB will silently stop.*" \
     "hit breakpoint on called function"
 
 # As long as we're stopped (breakpointed) in a called function,

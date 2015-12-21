@@ -176,8 +176,6 @@ proc cp_check_errata { expected_string actual_string errata_table } {
 #
 # "A*" versus "A *" and "A&" versus "A &" in user methods.
 #
-# Test with hp ACC.
-#
 # -- chastain 2004-08-07
 
 proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table { in_tail "" } { in_errata_table { } } { in_ptype_arg /r } } {

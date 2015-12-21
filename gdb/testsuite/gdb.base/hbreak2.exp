@@ -133,12 +133,6 @@ set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
 
 set main_line $bp_location6
 
-if {$hp_aCC_compiler} {
-    set proto "\\(int\\)"
-} else {
-    set proto ""
-}
-
 set bp_location7 [gdb_get_line_number "set breakpoint 7 here"]
 set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
 
@@ -397,7 +391,7 @@ gdb_test "hbreak marker2" \
     "set hardware breakpoint on to-be-called function"
 
 gdb_test "print marker2(99)" \
-    "The program being debugged stopped while in a function called from GDB.\r\nEvaluation of the expression containing the function\r\n.marker2$proto. will be abandoned.\r\nWhen the function is done executing, GDB will silently stop.*" \
+    "The program being debugged stopped while in a function called from GDB.\r\nEvaluation of the expression containing the function\r\n.marker2. will be abandoned.\r\nWhen the function is done executing, GDB will silently stop.*" \
     "hit hardware breakpoint on called function"
 
 # As long as we're stopped (breakpointed) in a called function,

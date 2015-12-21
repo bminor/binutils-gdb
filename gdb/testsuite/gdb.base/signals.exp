@@ -32,12 +32,6 @@ if [get_compiler_info] {
     return -1
 }
 
-if {$hp_cc_compiler} {
-    set void 0
-} else {
-    set void void
-}
-
 gdb_exit
 gdb_start
 
@@ -103,7 +97,7 @@ if [runto_main] then {
 
     # ...call the function
 
-    gdb_test "p func1 ()" "^p func1 \\(\\)\r\n.\[0-9\]* = $void" \
+    gdb_test "p func1 ()" "^p func1 \\(\\)\r\n.\[0-9\]* = void" \
 	"p func1 () #1"
 
     # ...veryfiy that the cout was updated

@@ -30,13 +30,7 @@ if [get_compiler_info] {
     return -1
 }
 
-if {$hp_cc_compiler} {
-    set flag "+e"
-} else {
-    set flag ""
-}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat debug additional_flags=$flag nowarnings]] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat debug nowarnings]] != "" } {
      untested long_long.exp
      return -1
 }
