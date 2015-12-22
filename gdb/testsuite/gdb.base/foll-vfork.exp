@@ -222,18 +222,8 @@ proc tcatch_vfork_then_parent_follow {} {
    gdb_test_no_output "set follow-fork parent"
 
    gdb_test "tcatch vfork" "Catchpoint .*(vfork).*"
-
-   # HP-UX 10.20 seems to stop you in "vfork", while more recent
-   # HP-UXs stop you in "_vfork".
-   set test "continue to vfork"
-   gdb_test_multiple "continue" $test {
-      -re "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*$gdb_prompt " {
-	  pass $test
-      }
-      -re "vfork \\(\\) at.*$gdb_prompt " {
-	  pass $test
-      }
-   }
+   gdb_test "continue" "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*" \
+	"continue to vfork"
 
    set linenum [gdb_get_line_number "pid = vfork ();"]
    set test "finish"
@@ -264,18 +254,8 @@ proc tcatch_vfork_then_child_follow_exec {} {
    gdb_test_no_output "set follow-fork child"
 
    gdb_test "tcatch vfork" "Catchpoint .*(vfork).*"
-
-   # HP-UX 10.20 seems to stop you in "vfork", while more recent HP-UXs
-   # stop you in "_vfork".
-   set test "continue to vfork"
-   gdb_test_multiple "continue" $test {
-      -re "vfork \\(\\) at .*$gdb_prompt $" {
-	  pass $test
-      }
-      -re "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*$gdb_prompt " {
-	  pass $test
-      }
-   }
+   gdb_test "continue" "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*" \
+	"continue to vfork"
 
    set linenum1 [gdb_get_line_number "pid = vfork ();"]
    set linenum2 [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
@@ -310,18 +290,8 @@ proc tcatch_vfork_then_child_follow_exit {} {
    gdb_test_no_output "set follow-fork child"
 
    gdb_test "tcatch vfork" "Catchpoint .*(vfork).*"
-
-   # HP-UX 10.20 seems to stop you in "vfork", while more recent HP-UXs
-   # stop you in "_vfork".
-   set test "continue to vfork"
-   gdb_test_multiple "continue" $test {
-      -re "vfork \\(\\) at .*$gdb_prompt $" {
-	  pass $test
-      }
-      -re "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*$gdb_prompt " {
-	  pass $test
-      }
-   }
+   gdb_test "continue" "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*" \
+	"continue to vfork"
 
    set test "finish"
    gdb_test_multiple "finish" $test {

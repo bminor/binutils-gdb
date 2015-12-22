@@ -1,3 +1,7 @@
+2015-12-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/foll-vork.exp: Remove HP-UX special case.
+
 2015-12-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* lib/mi-support.exp (mi_run_cmd_full): Add an expect for the CLI jump
