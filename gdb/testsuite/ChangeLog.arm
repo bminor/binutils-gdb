@@ -1,0 +1,7 @@
+2016-04-05  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	Backport from master
+	2015-12-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* lib/mi-support.exp (mi_run_cmd_full): Add an expect for the CLI jump
+	case.
