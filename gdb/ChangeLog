@@ -1,5 +1,18 @@
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-tdep.c (find_stop_signal): Remove.
+	(struct fbsd_collect_regset_section_cb) <lwp>: New field.
+	<stop_signal>: New field.
+	<abort_iteration>: New field.
+	(fbsd_collect_regset_section_cb): Use new fields.
+	(fbsd_collect_thread_registers): New function.
+	(struct fbsd_corefile_thread_data): New structure.
+	(fbsd_corefile_thread): New function.
+	(fbsd_make_corefile_notes): Use new function to dump notes for each
+	non-exited thread in a process.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
 	* configure.ac: Check for support for LWP names on FreeBSD.
 	* fbsd-nat.c [PT_LWPINFO] New variable debug_fbsd_lwp.
 	[TDP_RFPPWAIT || HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME]
