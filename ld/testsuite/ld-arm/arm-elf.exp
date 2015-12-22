@@ -299,6 +299,18 @@ set armelftests_nonacl {
     {"TLS shared library gdesc local" "--no-fix-arm1176 -shared -T arm-dyn.ld" "" "" {tls-lib-loc.s}
      {{objdump -fdw tls-lib-loc.d} {objdump -Rw tls-lib-loc.r}}
      "tls-lib-loc.so"}
+    {"PF_R not present when one noread section" "-static -T arm.ld" "" "" {thumb1-noread-present-one-section.s}
+     {{readelf -l thumb1-noread-present-one-section.d}}
+     "thumb1-noread-present-one-section"}
+    {"PF_R not present when two noread sections" "-static -T arm.ld" "" "" {thumb1-noread-present-two-section.s}
+     {{readelf -l thumb1-noread-present-two-section.d}}
+     "thumb1-noread-present-two-section"}
+    {"PF_R present when mixing noread section with read section" "-static -T arm.ld" "" "" {thumb1-noread-not-present-mixing-two-section.s}
+     {{readelf -l thumb1-noread-not-present-mixing-two-section.d}}
+     "thumb1-noread-not-present-mixing-two-section"}
+    {"Match SHF_ARM_NOREAD with INPUT_SECTION_FLAGS directive" "-static -T arm_noread.ld" "" "" {thumb1-input-section-flag-match.s}
+     {{readelf -l thumb1-input-section-flag-match.d}}
+     "thumb1-noread-not-present-mixing-two-section"}
 }
 
 run_ld_link_tests $armelftests_common

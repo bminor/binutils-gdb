@@ -1,3 +1,15 @@
+2015-12-22 Mickael Guene <mickael.guene@st.com>
+
+	* ld-arm/arm-elf.exp: New tests.
+	* ld-arm/thumb1-input-section-flag-match.d: New
+	* ld-arm/thumb1-input-section-flag-match.s: New
+	* ld-arm/thumb1-noread-not-present-mixing-two-section.d: New
+	* ld-arm/thumb1-noread-not-present-mixing-two-section.s: New
+	* ld-arm/thumb1-noread-present-one-section.d: New
+	* ld-arm/thumb1-noread-present-one-section.s: New
+	* ld-arm/thumb1-noread-present-two-section.d: New
+	* ld-arm/thumb1-noread-present-two-section.s: New
+
 2015-12-16  Mickael Guene <mickael.guene@st.com>
 
 	* ld-arm/arm-elf.exp (armelftests_common): Add new relocations

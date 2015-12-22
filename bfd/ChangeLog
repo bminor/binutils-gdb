@@ -1,3 +1,18 @@
+2015-12-22 Mickael Guene <mickael.guene@st.com>
+
+	* bfd-in2.h: Regenerate.
+	* section.c: Add SEC_ELF_NOREAD.
+	* elf32-arm.c (elf32_arm_post_process_headers): Only set
+	PF_X attribute if a segment only contains section with
+	SHF_ARM_NOREAD flag.
+	(elf32_arm_fake_sections): Add SEC_ELF_NOREAD conversion.
+	(elf32_arm_section_flags): New function to convert SHF_ARM_NOREAD
+	to bfd flag.
+	(elf32_arm_lookup_section_flags): New function to allow
+	INPUT_SECTION_FLAGS directive with SHF_ARM_NOREAD flag.
+	(elf32_arm_special_sections): Add special sections array
+	to catch section prefix by '.text.noread' pattern.
+
 2015-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coff-x86_64.c (coff_amd64_reloc): Fix formatting.

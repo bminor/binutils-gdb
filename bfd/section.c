@@ -361,6 +361,9 @@ CODE_FRAGMENT
 .     when memory read flag isn't set. *}
 .#define SEC_COFF_NOREAD 0x40000000
 .
+.  {* Indicate that section has the no read flag set.  *}
+.#define SEC_ELF_NOREAD 0x80000000
+.
 .  {*  End of section flags.  *}
 .
 .  {* Some internal packed boolean fields.  *}

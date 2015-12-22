@@ -1,3 +1,8 @@
+2015-12-22  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_elf_section_flags): Add support for ARM specific
+	section flags.
+
 2015-12-17  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* MAINTAINERS: Add myself as MIPS maintainer.

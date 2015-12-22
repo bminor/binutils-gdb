@@ -1,3 +1,11 @@
+2015-12-22 Mickael Guene <mickael.guene@st.com>
+
+	* arm.h: Add arm SHF_ARM_NOREAD section flag.
+
+2015-12-16  Mickael Guene <mickael.guene@st.com>
+
+	* arm.h: Add new arm relocations.
+
 2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
 
 	* rx.h (E_FLAG_RX_V2): New RXv2 type.

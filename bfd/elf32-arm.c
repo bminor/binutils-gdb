@@ -15417,6 +15417,7 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
   struct elf32_arm_link_hash_table *globals;
+  struct elf_segment_map *m;
 
   i_ehdrp = elf_elfheader (abfd);
 
@@ -15441,6 +15442,26 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
 	i_ehdrp->e_flags |= EF_ARM_ABI_FLOAT_HARD;
       else
 	i_ehdrp->e_flags |= EF_ARM_ABI_FLOAT_SOFT;
+    }
+
+  /* Scan segment to set p_flags attribute if it contains only sections with
+     SHF_ARM_NOREAD flag.  */
+  for (m = elf_seg_map (abfd); m != NULL; m = m->next)
+    {
+      unsigned int j;
+
+      if (m->count == 0)
+	continue;
+      for (j = 0; j < m->count; j++)
+	{
+	  if (!(elf_section_flags (m->sections[j]) & SHF_ARM_NOREAD))
+	    break;
+	}
+      if (j == m->count)
+	{
+	  m->p_flags = PF_X;
+	  m->p_flags_valid = 1;
+	}
     }
 }
 
@@ -15493,6 +15514,10 @@ elf32_arm_fake_sections (bfd * abfd, Elf_Internal_Shdr * hdr, asection * sec)
       hdr->sh_type = SHT_ARM_EXIDX;
       hdr->sh_flags |= SHF_LINK_ORDER;
     }
+
+  if (sec->flags & SEC_ELF_NOREAD)
+    hdr->sh_flags |= SHF_ARM_NOREAD;
+
   return TRUE;
 }
 
@@ -17690,6 +17715,33 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
   return n;
 }
 
+static const struct bfd_elf_special_section
+elf32_arm_special_sections[] =
+{
+/* Catch sections with .text.noread prefix and apply allocate, execute and
+   noread section attributes.  */
+  { STRING_COMMA_LEN (".text.noread"),  -2, SHT_PROGBITS,
+    SHF_ALLOC + SHF_EXECINSTR + SHF_ARM_NOREAD },
+  { NULL,			      0, 0, 0,			0 }
+};
+
+static bfd_boolean
+elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr * hdr)
+{
+  if (hdr->sh_flags & SHF_ARM_NOREAD)
+    *flags |= SEC_ELF_NOREAD;
+  return TRUE;
+}
+
+static flagword
+elf32_arm_lookup_section_flags (char *flag_name)
+{
+  if (!strcmp (flag_name, "SHF_ARM_NOREAD"))
+    return SHF_ARM_NOREAD;
+
+  return SEC_NO_FLAGS;
+}
+
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_TARGET_ID			ARM_ELF_DATA
 #define ELF_MACHINE_CODE		EM_ARM
@@ -17767,6 +17819,13 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 #define elf_backend_obj_attrs_section_type	SHT_ARM_ATTRIBUTES
 #define elf_backend_obj_attrs_order		elf32_arm_obj_attrs_order
 #define elf_backend_obj_attrs_handle_unknown 	elf32_arm_obj_attrs_handle_unknown
+
+#undef  elf_backend_special_sections
+#define elf_backend_special_sections 		elf32_arm_special_sections
+#undef elf_backend_section_flags
+#define elf_backend_section_flags		elf32_arm_section_flags
+#undef elf_backend_lookup_section_flags_hook
+#define elf_backend_lookup_section_flags_hook   elf32_arm_lookup_section_flags
 
 #include "elf32-target.h"
 
