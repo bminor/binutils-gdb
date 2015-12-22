@@ -941,3 +941,9 @@ run_dump_test "gc-hidden-1"
 run_dump_test "protected-data"
 run_dump_test "stm32l4xx-cannot-fix-it-block"
 run_dump_test "stm32l4xx-cannot-fix-far-ldm"
+set arm_unwind_tests {
+    {"unwind-rel" "-r -Tarm.ld" "" "" {unwind-rel1.s unwind-rel2.s unwind-rel3.s}
+     {{readelf -ur unwind-rel.d}}
+     "unwind-rel"}
+}
+run_ld_link_tests $arm_unwind_tests

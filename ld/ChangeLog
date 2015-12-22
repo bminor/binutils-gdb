@@ -1,3 +1,8 @@
+2015-12-22 Yury Usishchev <y.usishchev@samsung.com>
+
+	* emultempl/armelf.em (gld${EMULATION_NAME}_after_allocation): Call
+	elf32_arm_fix_exidx_coverage for relocatable builds.
+
 2015-12-10  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	PR ld/18199

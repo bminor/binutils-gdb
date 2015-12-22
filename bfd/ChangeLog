@@ -1,3 +1,18 @@
+2015-12-22 Yury Usishchev <y.usishchev@samsung.com>
+
+	* elf-bfd.h: Add callback to count additional relocations.
+	* elf32-arm.c (_arm_elf_section_data): Add new counter.
+	(insert_cantunwind_after): Increment relocations counter.
+	(elf32_arm_fix_exidx_coverage): Remove exidx entries and add
+	terminating CANTUNWIND entry only in final builds.
+	(elf32_arm_add_relocation): New function.
+	(elf32_arm_write_section): Add relocations in relocatable builds.
+	(elf32_arm_count_additional_relocs): New function.
+	(elf_backend_count_additional_relocs): New define.
+	* elflink.c (bfd_elf_final_link): Use callback and adjust size of
+	.rel section.
+	* elfxx-target.h (elf_backend_count_additional_relocs): New define.
+
 2015-12-22  Yoshinori Sato <ysato@users.sourceforge.jp>
 
 	* archures.c: Add bfd_mach_rx_v2.

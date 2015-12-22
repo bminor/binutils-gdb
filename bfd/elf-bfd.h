@@ -1170,6 +1170,11 @@ struct elf_backend_data
   unsigned int (*elf_backend_count_relocs)
     (struct bfd_link_info *, asection *);
 
+  /* Count additionals relocations.  Called for relocatable links if
+     additional relocations needs to be created.  */
+  unsigned int (*elf_backend_count_additional_relocs)
+    (asection *);
+
   /* Say whether to sort relocs output by ld -r and ld --emit-relocs,
      by r_offset.  If NULL, default to true.  */
   bfd_boolean (*sort_relocs_p)

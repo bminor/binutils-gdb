@@ -293,55 +293,52 @@ gld${EMULATION_NAME}_after_allocation (void)
 {
   int ret;
 
-  if (!bfd_link_relocatable (&link_info))
+  /* Build a sorted list of input text sections, then use that to process
+     the unwind table index.  */
+  unsigned int list_size = 10;
+  asection **sec_list = (asection **)
+      xmalloc (list_size * sizeof (asection *));
+  unsigned int sec_count = 0;
+
+  LANG_FOR_EACH_INPUT_STATEMENT (is)
     {
-      /* Build a sorted list of input text sections, then use that to process
-	 the unwind table index.  */
-      unsigned int list_size = 10;
-      asection **sec_list = (asection **)
-          xmalloc (list_size * sizeof (asection *));
-      unsigned int sec_count = 0;
+      bfd *abfd = is->the_bfd;
+      asection *sec;
 
-      LANG_FOR_EACH_INPUT_STATEMENT (is)
+      if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+	continue;
+
+      for (sec = abfd->sections; sec != NULL; sec = sec->next)
 	{
-	  bfd *abfd = is->the_bfd;
-	  asection *sec;
+	  asection *out_sec = sec->output_section;
 
-	  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
-	    continue;
-
-	  for (sec = abfd->sections; sec != NULL; sec = sec->next)
+	  if (out_sec
+	      && elf_section_data (sec)
+	      && elf_section_type (sec) == SHT_PROGBITS
+	      && (elf_section_flags (sec) & SHF_EXECINSTR) != 0
+	      && (sec->flags & SEC_EXCLUDE) == 0
+	      && sec->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
+	      && out_sec != bfd_abs_section_ptr)
 	    {
-	      asection *out_sec = sec->output_section;
-
-	      if (out_sec
-		  && elf_section_data (sec)
-		  && elf_section_type (sec) == SHT_PROGBITS
-		  && (elf_section_flags (sec) & SHF_EXECINSTR) != 0
-		  && (sec->flags & SEC_EXCLUDE) == 0
-		  && sec->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
-		  && out_sec != bfd_abs_section_ptr)
+	      if (sec_count == list_size)
 		{
-		  if (sec_count == list_size)
-		    {
-		      list_size *= 2;
-		      sec_list = (asection **)
-                          xrealloc (sec_list, list_size * sizeof (asection *));
-		    }
-
-		  sec_list[sec_count++] = sec;
+		  list_size *= 2;
+		  sec_list = (asection **)
+		      xrealloc (sec_list, list_size * sizeof (asection *));
 		}
+
+	      sec_list[sec_count++] = sec;
 	    }
 	}
-
-      qsort (sec_list, sec_count, sizeof (asection *), &compare_output_sec_vma);
-
-      if (elf32_arm_fix_exidx_coverage (sec_list, sec_count, &link_info,
-					   merge_exidx_entries))
-	need_laying_out = 1;
-
-      free (sec_list);
     }
+
+  qsort (sec_list, sec_count, sizeof (asection *), &compare_output_sec_vma);
+
+  if (elf32_arm_fix_exidx_coverage (sec_list, sec_count, &link_info,
+				    merge_exidx_entries))
+    need_laying_out = 1;
+
+  free (sec_list);
 
   /* bfd_elf32_discard_info just plays with debugging sections,
      ie. doesn't affect any code, so we can delay resizing the
