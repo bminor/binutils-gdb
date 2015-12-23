@@ -842,21 +842,22 @@ btrace_pt_readmem_callback (gdb_byte *buffer, size_t size,
 			    const struct pt_asid *asid, uint64_t pc,
 			    void *context)
 {
-  int errcode;
+  int result, errcode;
 
+  result = (int) size;
   TRY
     {
       errcode = target_read_code ((CORE_ADDR) pc, buffer, size);
       if (errcode != 0)
-	return -pte_nomap;
+	result = -pte_nomap;
     }
   CATCH (error, RETURN_MASK_ERROR)
     {
-      return -pte_nomap;
+      result = -pte_nomap;
     }
   END_CATCH
 
-  return size;
+  return result;
 }
 
 /* Translate the vendor from one enum to another.  */

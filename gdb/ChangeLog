@@ -1,3 +1,7 @@
+2016-01-04  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (btrace_pt_readmem_callback): Do not return in TRY/CATCH.
+
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.tgt (powerpc*-*-*): Delete test call and

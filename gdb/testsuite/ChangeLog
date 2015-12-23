@@ -1,3 +1,9 @@
+2016-01-04  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/dlopen.exp: New.
+	* gdb.btrace/dlopen.c: New.
+	* gdb.btrace/dlopen-dso.c: New.
+
 2015-12-25  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* lib/gdb.exp (gdb_test): Update comments to clarify that the
