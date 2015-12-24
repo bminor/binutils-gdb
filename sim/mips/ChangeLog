@@ -1,5 +1,9 @@
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-main.h (WITH_WATCHPOINTS): Delete.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c [SIM_HAVE_FLATMEM] (sim_open): Delete flatmem code.
 
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>

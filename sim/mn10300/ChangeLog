@@ -1,3 +1,7 @@
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (WITH_WATCHPOINTS): Delete.
+
 2015-11-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (mn10300_callback): Delete.

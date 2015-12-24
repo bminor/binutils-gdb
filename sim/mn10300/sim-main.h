@@ -22,7 +22,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define WITH_WATCHPOINTS 1
 #define SIM_HANDLES_LMA 1
 
 #define SIM_ENGINE_HALT_HOOK(SD,LAST_CPU,CIA) 0 /* disable this hook */
@@ -40,8 +39,6 @@
 /* These are generated files.  */
 #include "itable.h"
 #include "idecode.h"
-
-#define WITH_WATCHPOINTS 1
 
 #define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR)  \
 mn10300_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ERROR))

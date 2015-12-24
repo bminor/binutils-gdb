@@ -1,5 +1,10 @@
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-module.c [WITH_WATCHPOINTS] (modules): Always call
+	sim_watchpoint_install.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-base.h [SIM_HAVE_FLATMEM] (sim_state_base): Delete flatmem code.
 	* sim-module.c [SIM_HAVE_FLATMEM] (modules): Always call
 	sim_memopt_install.

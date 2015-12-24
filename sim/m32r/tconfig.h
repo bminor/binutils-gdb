@@ -9,11 +9,6 @@
 /* For MSPR support.  FIXME: revisit.  */
 #define WITH_DEVICES 1
 
-#if 0
-/* Enable watchpoints.  */
-#define WITH_WATCHPOINTS 1
-#endif
-
 /* Define this to enable the intrinsic breakpoint mechanism. */
 /* FIXME: may be able to remove SIM_HAVE_BREAKPOINT since it essentially
    duplicates ifdef SIM_BREAKPOINT (right?) */

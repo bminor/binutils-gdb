@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef _SIM_MAIN_H
 #define _SIM_MAIN_H
 
-#define WITH_WATCHPOINTS 1
 #define SIM_HANDLES_LMA 1
 
 #include "sim-basics.h"

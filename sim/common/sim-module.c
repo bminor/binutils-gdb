@@ -54,9 +54,7 @@ static MODULE_INSTALL_FN * const modules[] = {
 #endif
   sim_core_install,
   sim_memopt_install,
-#if WITH_WATCHPOINTS
   sim_watchpoint_install,
-#endif
 #if WITH_SCACHE
   scache_install,
 #endif
