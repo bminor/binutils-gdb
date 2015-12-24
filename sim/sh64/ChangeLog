@@ -1,5 +1,10 @@
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* tconfig.h (SIM_HAVE_BREAKPOINTS, SIM_BREAKPOINT,
+	SIM_BREAKPOINT_SIZE): Delete.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* tconfig.h (WITH_WATCHPOINTS): Delete.
 
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>

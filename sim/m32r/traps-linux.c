@@ -197,18 +197,6 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
   SIM_DESC sd = CPU_STATE (current_cpu);
   host_callback *cb = STATE_CALLBACK (sd);
 
-#ifdef SIM_HAVE_BREAKPOINTS
-  /* Check for breakpoints "owned" by the simulator first, regardless
-     of --environment.  */
-  if (num == TRAP_BREAKPOINT)
-    {
-      /* First try sim-break.c.  If it's a breakpoint the simulator "owns"
-	 it doesn't return.  Otherwise it returns and let's us try.  */
-      sim_handle_breakpoint (sd, current_cpu, pc);
-      /* Fall through.  */
-    }
-#endif
-
   switch (num)
     {
     case TRAP_ELF_SYSCALL :
