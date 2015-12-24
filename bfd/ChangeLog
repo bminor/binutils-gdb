@@ -1,5 +1,15 @@
 2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* elf32-arm.c (using_thumb_only): Check that profile is 'M' and update
+	logic around Tag_CPU_arch values to return TRUE for ARMv8-M
+	architectures.
+	(tag_cpu_arch_combine): Define v8m_baseline and v8m_mainline and update
+	v4t_plus_v6_m and comb to deal with ARMv8-M Tag_CPU_arch merging logic.
+	(elf32_arm_merge_eabi_attributes): Add Tag_CPU_name values for
+	ARMv8-M.
+
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	(tag_cpu_arch_combine): Adjust comment in v4t_plus_v6_m with regards
 	to merging with ARMv8-M Baseline.
 

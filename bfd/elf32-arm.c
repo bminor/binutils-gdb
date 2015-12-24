@@ -3504,20 +3504,23 @@ create_ifunc_sections (struct bfd_link_info *info)
 static bfd_boolean
 using_thumb_only (struct elf32_arm_link_hash_table *globals)
 {
-  int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-				       Tag_CPU_arch);
-  int profile;
+  int arch;
+  int profile = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+					  Tag_CPU_arch_profile);
 
-  if (arch == TAG_CPU_ARCH_V6_M || arch == TAG_CPU_ARCH_V6S_M)
+  if (profile)
+    return profile == 'M';
+
+  arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
+
+  if (arch == TAG_CPU_ARCH_V6_M
+      || arch == TAG_CPU_ARCH_V6S_M
+      || arch == TAG_CPU_ARCH_V7E_M
+      || arch == TAG_CPU_ARCH_V8M_BASE
+      || arch == TAG_CPU_ARCH_V8M_MAIN)
     return TRUE;
 
-  if (arch != TAG_CPU_ARCH_V7 && arch != TAG_CPU_ARCH_V7E_M)
-    return FALSE;
-
-  profile = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-				      Tag_CPU_arch_profile);
-
-  return profile == 'M';
+  return FALSE;
 }
 
 /* Determine if we're dealing with a Thumb-2 object.  */
@@ -12275,6 +12278,47 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8),		/* V7E_M.  */
       T(V8)		/* V8.  */
     };
+  const int v8m_baseline[] =
+    {
+      -1,		/* PRE_V4.  */
+      -1,		/* V4.  */
+      -1,		/* V4T.  */
+      -1,		/* V5T.  */
+      -1,		/* V5TE.  */
+      -1,		/* V5TEJ.  */
+      -1,		/* V6.  */
+      -1,		/* V6KZ.  */
+      -1,		/* V6T2.  */
+      -1,		/* V6K.  */
+      -1,		/* V7.  */
+      T(V8M_BASE),	/* V6_M.  */
+      T(V8M_BASE),	/* V6S_M.  */
+      -1,		/* V7E_M.  */
+      -1,		/* V8.  */
+      -1,
+      T(V8M_BASE)	/* V8-M BASELINE.  */
+    };
+  const int v8m_mainline[] =
+    {
+      -1,		/* PRE_V4.  */
+      -1,		/* V4.  */
+      -1,		/* V4T.  */
+      -1,		/* V5T.  */
+      -1,		/* V5TE.  */
+      -1,		/* V5TEJ.  */
+      -1,		/* V6.  */
+      -1,		/* V6KZ.  */
+      -1,		/* V6T2.  */
+      -1,		/* V6K.  */
+      T(V8M_MAIN),	/* V7.  */
+      T(V8M_MAIN),	/* V6_M.  */
+      T(V8M_MAIN),	/* V6S_M.  */
+      T(V8M_MAIN),	/* V7E_M.  */
+      -1,		/* V8.  */
+      -1,
+      T(V8M_MAIN),	/* V8-M BASELINE.  */
+      T(V8M_MAIN)	/* V8-M MAINLINE.  */
+    };
   const int v4t_plus_v6_m[] =
     {
       -1,		/* PRE_V4.  */
@@ -12293,8 +12337,8 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V7E_M),		/* V7E_M.  */
       T(V8),		/* V8.  */
       -1,		/* Unused.  */
-      -1,		/* V8-M BASELINE.  */
-      -1,		/* V8-M MAINLINE.  */
+      T(V8M_BASE),	/* V8-M BASELINE.  */
+      T(V8M_MAIN),	/* V8-M MAINLINE.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };
   const int *comb[] =
@@ -12307,8 +12351,8 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       v7e_m,
       v8,
       NULL,
-      NULL,
-      NULL,
+      v8m_baseline,
+      v8m_mainline,
       /* Pseudo-architecture.  */
       v4t_plus_v6_m
     };
@@ -12524,7 +12568,10 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		"ARM v7",
 		"ARM v6-M",
 		"ARM v6S-M",
-		"ARM v8"
+		"ARM v8",
+		"",
+		"ARM v8-M.baseline",
+		"ARM v8-M.mainline",
 	    };
 
 	    /* Merge Tag_CPU_arch and Tag_also_compatible_with.  */
