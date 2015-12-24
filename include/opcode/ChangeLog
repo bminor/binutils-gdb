@@ -1,5 +1,28 @@
 2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm.h (ARM_EXT2_ATOMICS): New extension bit.
+	(ARM_EXT2_V8M): Likewise.
+	(ARM_EXT_V8): Adjust comment with regards to atomics and remove
+	mention of legacy use for that bit.
+	(ARM_AEXT2_V8_1A): New architecture extension bitfield.
+	(ARM_AEXT2_V8_2A): Likewise.
+	(ARM_AEXT_V8M_MAIN): Likewise.
+	(ARM_AEXT2_V8M): Likewise.
+	(ARM_ARCH_V8A): Use ARM_EXT2_ATOMICS for features in second bitfield.
+	(ARM_ARCH_V8_1A): Likewise with ARM_AEXT2_V8_1A.
+	(ARM_ARCH_V8_2A): Likewise with ARM_AEXT2_V8_2A.
+	(ARM_ARCH_V8M_MAIN): New architecture feature bitfield.
+	(ARM_ARCH_V8A_FP): Use ARM_EXT2_ATOMICS for features in second bitfield
+	and reindent.
+	(ARM_ARCH_V8A_SIMD): Likewise.
+	(ARM_ARCH_V8A_CRYPTOV1): Likewise.
+	(ARM_ARCH_V8_1A_FP): Use ARM_AEXT2_V8_1A to set second bitfield of
+	feature bits.
+	(ARM_ARCH_V8_1A_SIMD): Likewise.
+	(ARM_ARCH_V8_1A_CRYPTOV1): Likewise.
+
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* arm.h (ARM_ARCH_THUMB2): Add comment explaining its meaning and
 	remove extension bit not including any Thumb-2 instruction.
 

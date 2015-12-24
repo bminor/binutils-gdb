@@ -12292,6 +12292,9 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V6S_M),		/* V6S_M.  */
       T(V7E_M),		/* V7E_M.  */
       T(V8),		/* V8.  */
+      -1,		/* Unused.  */
+      -1,		/* Unused.  */
+      -1,		/* V8-M MAINLINE.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };
   const int *comb[] =
@@ -12303,6 +12306,9 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       v6s_m,
       v7e_m,
       v8,
+      NULL,
+      NULL,
+      NULL,
       /* Pseudo-architecture.  */
       v4t_plus_v6_m
     };
@@ -12335,7 +12341,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
   if (tagh <= TAG_CPU_ARCH_V6KZ)
     return result;
 
-  result = comb[tagh - T(V6T2)][tagl];
+  result = comb[tagh - T(V6T2)] ? comb[tagh - T(V6T2)][tagl] : -1;
 
   /* Use Tag_CPU_arch == V4T and Tag_also_compatible_with (Tag_CPU_arch V6_M)
      as the canonical version.  */

@@ -12731,10 +12731,10 @@ typedef struct
 
 static const char * arm_attr_tag_CPU_arch[] =
   {"Pre-v4", "v4", "v4T", "v5T", "v5TE", "v5TEJ", "v6", "v6KZ", "v6T2",
-   "v6K", "v7", "v6-M", "v6S-M", "v7E-M", "v8"};
+   "v6K", "v7", "v6-M", "v6S-M", "v7E-M", "v8", "", "", "v8-M.mainline"};
 static const char * arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
 static const char * arm_attr_tag_THUMB_ISA_use[] =
-  {"No", "Thumb-1", "Thumb-2"};
+  {"No", "Thumb-1", "Thumb-2", "Yes"};
 static const char * arm_attr_tag_FP_arch[] =
   {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16", "VFPv4", "VFPv4-D16",
    "FP for ARMv8", "FPv5/FP-D16 for ARMv8"};

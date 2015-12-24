@@ -1,3 +1,10 @@
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (arm_opcodes): Guard lda, ldab, ldaex, ldaexb, ldaexh, stl,
+	stlb, stlh, stlex, stlexb and stlexh by ARM_EXT2_ATOMICS instead of
+	ARM_EXT_V8.
+	(thumb32_opcodes): Add entries for wide ARMv8-M instructions.
+
 2015-12-22  Yoshinori Sato <ysato@users.sourceforge.jp>
 
 opcodes/

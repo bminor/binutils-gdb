@@ -201,13 +201,17 @@ static const arm_feature_set arm_ext_v7r = ARM_FEATURE_CORE_LOW (ARM_EXT_V7R);
 static const arm_feature_set arm_ext_v7m = ARM_FEATURE_CORE_LOW (ARM_EXT_V7M);
 static const arm_feature_set arm_ext_v8 = ARM_FEATURE_CORE_LOW (ARM_EXT_V8);
 static const arm_feature_set arm_ext_m =
-  ARM_FEATURE_CORE_LOW (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M);
+  ARM_FEATURE_CORE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M, ARM_EXT2_V8M);
 static const arm_feature_set arm_ext_mp = ARM_FEATURE_CORE_LOW (ARM_EXT_MP);
 static const arm_feature_set arm_ext_sec = ARM_FEATURE_CORE_LOW (ARM_EXT_SEC);
 static const arm_feature_set arm_ext_os = ARM_FEATURE_CORE_LOW (ARM_EXT_OS);
 static const arm_feature_set arm_ext_adiv = ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV);
 static const arm_feature_set arm_ext_virt = ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT);
 static const arm_feature_set arm_ext_pan = ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN);
+static const arm_feature_set arm_ext_v8m = ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M);
+/* Instructions shared between ARMv8-A and ARMv8-M.  */
+static const arm_feature_set arm_ext_atomics =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_ATOMICS);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1, -1);
@@ -8146,6 +8150,13 @@ do_rn_rd (void)
 {
   inst.instruction |= inst.operands[0].reg << 16;
   inst.instruction |= inst.operands[1].reg << 12;
+}
+
+static void
+do_tt (void)
+{
+  inst.instruction |= inst.operands[0].reg << 8;
+  inst.instruction |= inst.operands[1].reg << 16;
 }
 
 static bfd_boolean
@@ -19178,31 +19189,35 @@ static const struct asm_opcode insns[] =
  /* AArchv8 instructions.  */
 #undef  ARM_VARIANT
 #define ARM_VARIANT   & arm_ext_v8
-#undef  THUMB_VARIANT
-#define THUMB_VARIANT & arm_ext_v8
 
- tCE("sevl",	320f005, _sevl,    0, (),		noargs,	t_hint),
- TUE("hlt",	1000070, ba80,     1, (oIffffb),	bkpt,	t_hlt),
- TCE("ldaex",	1900e9f, e8d00fef, 2, (RRnpc, RRnpcb),	rd_rn,	rd_rn),
- TCE("ldaexd",	1b00e9f, e8d000ff, 3, (RRnpc, oRRnpc, RRnpcb),
-							ldrexd, t_ldrexd),
- TCE("ldaexb",	1d00e9f, e8d00fcf, 2, (RRnpc,RRnpcb),	rd_rn,  rd_rn),
- TCE("ldaexh",	1f00e9f, e8d00fdf, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
- TCE("stlex",	1800e90, e8c00fe0, 3, (RRnpc, RRnpc, RRnpcb),
-							stlex,  t_stlex),
- TCE("stlexd",	1a00e90, e8c000f0, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb),
-							strexd, t_strexd),
- TCE("stlexb",	1c00e90, e8c00fc0, 3, (RRnpc, RRnpc, RRnpcb),
-							stlex, t_stlex),
- TCE("stlexh",	1e00e90, e8c00fd0, 3, (RRnpc, RRnpc, RRnpcb),
-							stlex, t_stlex),
+/* Instructions shared between armv8-a and armv8-m.  */
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_atomics
+
  TCE("lda",	1900c9f, e8d00faf, 2, (RRnpc, RRnpcb),	rd_rn,	rd_rn),
  TCE("ldab",	1d00c9f, e8d00f8f, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
  TCE("ldah",	1f00c9f, e8d00f9f, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
  TCE("stl",	180fc90, e8c00faf, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
  TCE("stlb",	1c0fc90, e8c00f8f, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
  TCE("stlh",	1e0fc90, e8c00f9f, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
+ TCE("ldaex",	1900e9f, e8d00fef, 2, (RRnpc, RRnpcb),	rd_rn,	rd_rn),
+ TCE("ldaexb",	1d00e9f, e8d00fcf, 2, (RRnpc,RRnpcb),	rd_rn,  rd_rn),
+ TCE("ldaexh",	1f00e9f, e8d00fdf, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
+ TCE("stlex",	1800e90, e8c00fe0, 3, (RRnpc, RRnpc, RRnpcb),
+							stlex,  t_stlex),
+ TCE("stlexb",	1c00e90, e8c00fc0, 3, (RRnpc, RRnpc, RRnpcb),
+							stlex, t_stlex),
+ TCE("stlexh",	1e00e90, e8c00fd0, 3, (RRnpc, RRnpc, RRnpcb),
+							stlex, t_stlex),
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8
 
+ tCE("sevl",	320f005, _sevl,    0, (),		noargs,	t_hint),
+ TUE("hlt",	1000070, ba80,     1, (oIffffb),	bkpt,	t_hlt),
+ TCE("ldaexd",	1b00e9f, e8d000ff, 3, (RRnpc, oRRnpc, RRnpcb),
+							ldrexd, t_ldrexd),
+ TCE("stlexd",	1a00e90, e8c000f0, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb),
+							strexd, t_strexd),
  /* ARMv8 T32 only.  */
 #undef  ARM_VARIANT
 #define ARM_VARIANT  NULL
@@ -20500,6 +20515,13 @@ static const struct asm_opcode insns[] =
  cCE("cfmsub32",e100600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
  cCE("cfmadda32", e200600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
  cCE("cfmsuba32", e300600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
+
+#undef  ARM_VARIANT
+#define ARM_VARIANT NULL
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8m
+ TUE("tt", 0, e840f000, 2, (RRnpc, RRnpc), 0, tt),
+ TUE("ttt", 0, e840f040, 2, (RRnpc, RRnpc), 0, tt),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
@@ -24940,6 +24962,7 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv7-r",	ARM_ARCH_V7R,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7-m",	ARM_ARCH_V7M,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7e-m",	ARM_ARCH_V7EM,	 FPU_ARCH_VFP),
+  ARM_ARCH_OPT ("armv8-m.main",	ARM_ARCH_V8M_MAIN, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8-a",	ARM_ARCH_V8A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8.1-a",	ARM_ARCH_V8_1A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8.2-a",	ARM_ARCH_V8_2A,	 FPU_ARCH_VFP),
@@ -25538,8 +25561,9 @@ typedef struct
   arm_feature_set flags;
 } cpu_arch_ver_table;
 
-/* Mapping from CPU features to EABI CPU arch values.  Table must be sorted
-   least features first.  */
+/* Mapping from CPU features to EABI CPU arch values.  As a general rule, table
+   must be sorted least features first but some reordering is needed, eg. for
+   Thumb-2 instructions to be detected as coming from ARMv6T2.  */
 static const cpu_arch_ver_table cpu_arch_ver[] =
 {
     {1, ARM_ARCH_V4},
@@ -25558,6 +25582,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {10, ARM_ARCH_V7R},
     {10, ARM_ARCH_V7M},
     {14, ARM_ARCH_V8A},
+    {17, ARM_ARCH_V8M_MAIN},
     {0, ARM_ARCH_NONE}
 };
 
@@ -25638,11 +25663,18 @@ aeabi_set_public_attributes (void)
      actually used.  Perhaps we should separate out the specified
      and implicit cases.  Avoid taking this path for -march=all by
      checking for contradictory v7-A / v7-M features.  */
-  if (arch == 10
+  if (arch == TAG_CPU_ARCH_V7
       && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v6_dsp))
-    arch = 13;
+    arch = TAG_CPU_ARCH_V7E_M;
+
+  /* In cpu_arch_ver ARMv8-A is before ARMv8-M for atomics to be detected as
+     coming from ARMv8-A.  However, since ARMv8-A has more instructions than
+     ARMv8-M, -march=all must be detected as ARMv8-A.  */
+  if (arch == TAG_CPU_ARCH_V8M_MAIN
+      && ARM_FEATURE_CORE_EQUAL (selected_cpu, arm_arch_any))
+    arch = TAG_CPU_ARCH_V8;
 
   /* Tag_CPU_name.  */
   if (selected_cpu_name[0])
@@ -25666,7 +25698,9 @@ aeabi_set_public_attributes (void)
 
   /* Tag_CPU_arch_profile.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
-      || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8))
+      || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
+      || (ARM_CPU_HAS_FEATURE (flags, arm_ext_atomics)
+	  && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m)))
     profile = 'A';
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
     profile = 'R';
@@ -25686,8 +25720,18 @@ aeabi_set_public_attributes (void)
   /* Tag_THUMB_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v4t)
       || arch == 0)
-    aeabi_set_attribute_int (Tag_THUMB_ISA_use,
-	ARM_CPU_HAS_FEATURE (flags, arm_arch_t2) ? 2 : 1);
+    {
+      int thumb_isa_use;
+
+      if (!ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
+	  && ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m))
+	thumb_isa_use = 3;
+      else if (ARM_CPU_HAS_FEATURE (flags, arm_arch_t2))
+	thumb_isa_use = 2;
+      else
+	thumb_isa_use = 1;
+      aeabi_set_attribute_int (Tag_THUMB_ISA_use, thumb_isa_use);
+    }
 
   /* Tag_VFP_arch.  */
   if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_armv8xd))
@@ -25751,12 +25795,13 @@ aeabi_set_public_attributes (void)
      in ARM state, or when Thumb integer divide instructions have been used,
      but we have no architecture profile set, nor have we any ARM instructions.
 
-     For ARMv8 we set the tag to 0 as integer divide is implied by the base
-     architecture.
+     For ARMv8-A and ARMv8-M we set the tag to 0 as integer divide is implied
+     by the base architecture.
 
      For new architectures we will have to check these tests.  */
-  gas_assert (arch <= TAG_CPU_ARCH_V8);
-  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v8))
+  gas_assert (arch <= TAG_CPU_ARCH_V8 || arch == TAG_CPU_ARCH_V8M_MAIN);
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
+      || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m))
     aeabi_set_attribute_int (Tag_DIV_use, 0);
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_adiv)
 	   || (profile == '\0'

@@ -1,3 +1,9 @@
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	(tag_cpu_arch_combine): Adjust v4t_plus_v6_m and comb array to account
+	for new TAG_CPU_ARCH_V4T_PLUS_V6_M value.  Deal with NULL values in
+	comb array.
+
 2015-12-22 Yury Usishchev <y.usishchev@samsung.com>
 
 	* elf-bfd.h: Add callback to count additional relocations.

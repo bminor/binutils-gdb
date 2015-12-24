@@ -1,3 +1,10 @@
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Add ARMv8-M Mainline Tag_CPU_arch
+	value.
+	(arm_attr_tag_THUMB_ISA_use): Add ARMv8-M Mainline Tag_THUMB_ISA_use
+	value.
+
 2015-12-22  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_elf_section_flags): Add support for ARM specific

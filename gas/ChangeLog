@@ -1,5 +1,23 @@
 2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (arm_ext_m): Include ARMv8-M.
+	(arm_ext_v8m): New feature for ARMv8-M.
+	(arm_ext_atomics): New feature for ARMv8 atomics.
+	(do_tt): New encoding function for TT* instructions.
+	(insns): Add new entries for ARMv8-M specific instructions and
+	reorganize the ones shared by ARMv8-M Mainline and ARMv8-A.
+	(arm_archs): Define armv8-m.main architecture.
+	(cpu_arch_ver): Define ARM_ARCH_V8M_MAIN architecture version and
+	clarify the ordering rule.
+	(aeabi_set_public_attributes): Use TAG_CPU_ARCH_* macro to refer to
+	Tag_CPU_arch values for ARMv7e-M detection.  Add logic to keep setting
+	Tag_CPU_arch to ARMv8-A for -march=all.  Also set Tag_CPU_arch_profile
+	to 'A' if extension bit for atomic instructions is set, unless it is
+	ARMv8-M.  Set Tag_THUMB_ISA_use to 3 for ARMv8-M.  Set Tag_DIV_use to 0
+	for ARMv8-M Mainline.
+
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (move_or_literal_pool): Check mov.w, mvm and movw
 	availability against arm_ext_v6t2 instead of checking arm_arch_t2,
 	fixing comments along the way.

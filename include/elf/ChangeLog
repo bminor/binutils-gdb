@@ -1,3 +1,9 @@
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h (TAG_CPU_ARCH_V8M_MAIN): Declare.
+	(MAX_TAG_CPU_ARCH): Define to TAG_CPU_ARCH_V8M_MAIN.
+	(TAG_CPU_ARCH_V4T_PLUS_V6_M): Define to unused value 15.
+
 2015-12-22 Mickael Guene <mickael.guene@st.com>
 
 	* arm.h: Add arm SHF_ARM_NOREAD section flag.
