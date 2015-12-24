@@ -30,10 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* For MSPR support.  FIXME: revisit.  */
 #define WITH_DEVICES 1
 
-#include "sim-module.h"
-extern MODULE_INSTALL_FN cris_option_install;
-#define MODULE_LIST cris_option_install,
-
 #define SIM_HAVE_MODEL
 
 /* This is a global setting.  Different cpu families can't mix-n-match -scache

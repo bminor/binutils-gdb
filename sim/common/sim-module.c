@@ -65,10 +65,6 @@ static MODULE_INSTALL_FN * const modules[] = {
   /* TODO: Shouldn't have device models here.  */
   dv_sockser_install,
 #endif
-  /* Configured in [simulator specific] additional modules.  */
-#ifdef MODULE_LIST
-  MODULE_LIST
-#endif
   0
 };
 

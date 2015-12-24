@@ -127,17 +127,6 @@ static const OPTION cris_options[] =
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
 
-/* Add the CRIS-specific option list to the simulator.  */
-
-SIM_RC
-cris_option_install (SIM_DESC sd)
-{
-  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  if (sim_add_option_table (sd, NULL, cris_options) != SIM_RC_OK)
-    return SIM_RC_FAIL;
-  return SIM_RC_OK;
-}
-
 /* Handle CRIS-specific options.  */
 
 static SIM_RC
@@ -756,6 +745,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     }
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  /* Add the CRIS-specific option list to the simulator.  */
+  if (sim_add_option_table (sd, NULL, cris_options) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

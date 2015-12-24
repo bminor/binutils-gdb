@@ -1,5 +1,9 @@
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-module.c (MODULE_LIST): Delete.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-options.c (OPTION_H8300H, OPTION_H8300S, OPTION_H8300SX):
 	Move to h8300/compile.c.
 	[SIM_H8300] (standard_options): Likewise.
