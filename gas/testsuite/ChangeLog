@@ -1,3 +1,28 @@
+2015-12-24  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* gas/arm/automatic-bw.d: New.
+	* gas/arm/automatic-bw.s: New.
+	* gas/arm/automatic-cbz.d: New.
+	* gas/arm/automatic-cbz.s: New.
+	* gas/arm/automatic-clrex.d: New.
+	* gas/arm/automatic-clrex.s: New.
+	* gas/arm/automatic-lda.d: New.
+	* gas/arm/automatic-lda.s: New.
+	* gas/arm/automatic-ldaex.d: New.
+	* gas/arm/automatic-ldaex.s: New.
+	* gas/arm/automatic-ldaexb.d: New.
+	* gas/arm/automatic-ldaexb.s: New.
+	* gas/arm/automatic-ldrex.d: New.
+	* gas/arm/automatic-ldrex.s: New.
+	* gas/arm/automatic-ldrexd.d: New.
+	* gas/arm/automatic-ldrexd.s: New.
+	* gas/arm/automatic-movw.d: New.
+	* gas/arm/automatic-movw.s: New.
+	* gas/arm/automatic-sdiv.d: New.
+	* gas/arm/automatic-sdiv.s: New.
+	* gas/arm/automatic-strexb.d: New.
+	* gas/arm/automatic-strexb.s: New.
+
 2015-12-16  Mickael Guene <mickael.guene@st.com>
 
 	* gas/arm/adds-thumb1-reloc-local.d: New
