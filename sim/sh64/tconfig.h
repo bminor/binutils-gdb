@@ -1,12 +1,5 @@
 /* SH64 target configuration file.  -*- C -*- */
 
-/* Define this if the simulator can vary the size of memory.
-   See the xxx simulator for an example.
-   This enables the `-m size' option.
-   The memory size is stored in STATE_MEM_SIZE.  */
-/* Not used for SH64 since we use the memory module. TODO -- check this  */
-/* #define SIM_HAVE_MEM_SIZE */
-
 /* See sim-hload.c.  We properly handle LMA. -- TODO: check this */
 #define SIM_HANDLES_LMA 1
 

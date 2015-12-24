@@ -3,13 +3,6 @@
 #ifndef M32R_TCONFIG_H
 #define M32R_TCONFIG_H
 
-/* Define this if the simulator can vary the size of memory.
-   See the xxx simulator for an example.
-   This enables the `-m size' option.
-   The memory size is stored in STATE_MEM_SIZE.  */
-/* Not used for M32R since we use the memory module.  */
-/* #define SIM_HAVE_MEM_SIZE */
-
 /* See sim-hload.c.  We properly handle LMA.  */
 #define SIM_HANDLES_LMA 1
 
