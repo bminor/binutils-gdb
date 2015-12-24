@@ -263,10 +263,10 @@
 #define ARM_ANY		ARM_FEATURE (-1, -1, 0)	/* Any basic core.  */
 #define ARM_FEATURE_ALL	ARM_FEATURE (-1, -1, -1)/* All CPU and FPU features.  */
 #define FPU_ANY_HARD	ARM_FEATURE_COPROC (FPU_FPA | FPU_VFP_HARD | FPU_MAVERICK)
+/* Extensions containing some Thumb-2 instructions.  If any is present, Thumb
+   ISA is Thumb-2.  */
 #define ARM_ARCH_THUMB2 ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2 | ARM_EXT_V7	\
-					      | ARM_EXT_V7A | ARM_EXT_V7R \
-					      | ARM_EXT_V7M | ARM_EXT_DIV \
-					      | ARM_EXT_V8)
+					      | ARM_EXT_DIV | ARM_EXT_V8)
 /* v7-a+sec.  */
 #define ARM_ARCH_V7A_SEC ARM_FEATURE_CORE_LOW (ARM_AEXT_V7A | ARM_EXT_SEC)
 /* v7-a+mp+sec.  */

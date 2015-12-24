@@ -1,3 +1,17 @@
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (move_or_literal_pool): Check mov.w, mvm and movw
+	availability against arm_ext_v6t2 instead of checking arm_arch_t2,
+	fixing comments along the way.
+	(handle_it_state): Check arm_ext_v6t2 instead of arm_arch_t2 to
+	generate IT instruction.
+	(t1_isa_t32_only_insn): New function.
+	(md_assemble): Use above new function to check for invalid wide
+	instruction for CPU Thumb ISA and to determine what Thumb extension
+	bit is necessary for that instruction.
+	(md_apply_fix): Use arm_ext_v6t2 instead of arm_arch_t2 to decide if
+	branch is out of range.
+
 2015-12-21  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19386

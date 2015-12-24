@@ -1,3 +1,8 @@
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm.h (ARM_ARCH_THUMB2): Add comment explaining its meaning and
+	remove extension bit not including any Thumb-2 instruction.
+
 2015-12-15  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* arm.h (ARM_ARCH_V8_1A): Add the CRC_EXT_ARMV8 co-processor
