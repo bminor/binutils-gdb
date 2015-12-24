@@ -53,10 +53,7 @@ static MODULE_INSTALL_FN * const modules[] = {
   profile_install,
 #endif
   sim_core_install,
-#ifndef SIM_HAVE_FLATMEM
-  /* FIXME: should handle flatmem as well FLATMEM */
   sim_memopt_install,
-#endif
 #if WITH_WATCHPOINTS
   sim_watchpoint_install,
 #endif

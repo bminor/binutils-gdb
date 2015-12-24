@@ -202,16 +202,6 @@ typedef struct {
   unsigned int scache_size;
 #define STATE_SCACHE_SIZE(sd) ((sd)->base.scache_size)
 
-  /* FIXME: Move to top level sim_state struct (as some struct)?  */
-#ifdef SIM_HAVE_FLATMEM
-  unsigned int mem_size;
-#define STATE_MEM_SIZE(sd) ((sd)->base.mem_size)
-  unsigned int mem_base;
-#define STATE_MEM_BASE(sd) ((sd)->base.mem_base)
-  unsigned char *memory;
-#define STATE_MEMORY(sd) ((sd)->base.memory)
-#endif
-
   /* core memory bus */
 #define STATE_CORE(sd) (&(sd)->base.core)
   sim_core core;

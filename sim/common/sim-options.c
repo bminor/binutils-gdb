@@ -102,9 +102,6 @@ typedef enum {
   OPTION_VERBOSE,
   OPTION_ENDIAN,
   OPTION_DEBUG,
-#ifdef SIM_HAVE_FLATMEM
-  OPTION_MEM_SIZE,
-#endif
   OPTION_HELP,
   OPTION_VERSION,
 #ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
@@ -160,12 +157,6 @@ static const OPTION standard_options[] =
   { {"h8300sx", no_argument, NULL, OPTION_H8300SX},
       'x', NULL, "Indicate the CPU is H8SX",
       standard_option_handler },
-#endif
-
-#ifdef SIM_HAVE_FLATMEM
-  { {"mem-size", required_argument, NULL, OPTION_MEM_SIZE},
-     'm', "<size>[in bytes, Kb (k suffix), Mb (m suffix) or Gb (g suffix)]",
-     "Specify memory size", standard_option_handler },
 #endif
 
   { {"do-command", required_argument, NULL, OPTION_DO_COMMAND},
@@ -373,35 +364,6 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       break;
     case OPTION_H8300SX:
       set_h8300h (bfd_mach_h8300sx);
-      break;
-#endif
-
-#ifdef SIM_HAVE_FLATMEM
-    case OPTION_MEM_SIZE:
-      {
-	char * endp;
-	unsigned long ul = strtol (arg, &endp, 0);
-
-	switch (* endp)
-	  {
-	  case 'k': case 'K': size <<= 10; break;
-	  case 'm': case 'M': size <<= 20; break;
-	  case 'g': case 'G': size <<= 30; break;
-	  case ' ': case '\0': case '\t':  break;
-	  default:
-	    if (ul > 0)
-	      sim_io_eprintf (sd, "Ignoring strange character at end of memory size: %c\n", * endp);
-	    break;
-	  }
-
-	/* 16384: some minimal amount */
-	if (! isdigit (arg[0]) || ul < 16384)
-	  {
-	    sim_io_eprintf (sd, "Invalid memory size `%s'", arg);
-	    return SIM_RC_FAIL;
-	  }
-	STATE_MEM_SIZE (sd) = ul;
-      }
       break;
 #endif
 

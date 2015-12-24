@@ -399,9 +399,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 
       /* Look for largest memory region defined on command-line at
 	 phys address 0. */
-#ifdef SIM_HAVE_FLATMEM
-      mem_size = STATE_MEM_SIZE (sd);
-#endif
       for (entry = STATE_MEMOPT (sd); entry != NULL; entry = entry->next)
 	{
 	  /* If we find an entry at address 0, then we will end up
