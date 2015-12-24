@@ -1,5 +1,10 @@
 2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	(tag_cpu_arch_combine): Adjust comment in v4t_plus_v6_m with regards
+	to merging with ARMv8-M Baseline.
+
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	(tag_cpu_arch_combine): Adjust v4t_plus_v6_m and comb array to account
 	for new TAG_CPU_ARCH_V4T_PLUS_V6_M value.  Deal with NULL values in
 	comb array.

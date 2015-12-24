@@ -1,5 +1,9 @@
 2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm.h (TAG_CPU_ARCH_V8M_BASE): Declare.
+
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* arm.h (TAG_CPU_ARCH_V8M_MAIN): Declare.
 	(MAX_TAG_CPU_ARCH): Define to TAG_CPU_ARCH_V8M_MAIN.
 	(TAG_CPU_ARCH_V4T_PLUS_V6_M): Define to unused value 15.

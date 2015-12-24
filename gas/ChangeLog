@@ -1,5 +1,29 @@
 2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (arm_ext_v6t2_v8m): New feature for instructions
+	shared between ARMv6T2 and ARMv8-M.
+	(move_or_literal_pool): Check mov.w/mvn and movw availability against
+	arm_ext_v6t2 and arm_ext_v6t2_v8m respectively instead of checking
+	arm_arch_t2.
+	(do_t_branch): Error out for wide conditional branch instructions if
+	targetting ARMv8-M Baseline.
+	(non_v6t2_wide_only_insn): Add the logic for new wide-only instructions
+	in ARMv8-M Baseline.
+	(wide_insn_ok): New function.
+	(md_assemble): Use wide_insn_ok instead of non_v6t2_wide_only_insn and
+	adapt error message for unsupported wide instruction to ARMv8-M
+	Baseline.
+	(insns): Reorganize instructions shared by ARMv8-M Baseline and
+	ARMv6t2 architecture.
+	(arm_cpus): Set feature bit ARM_EXT2_V6T2_V8M for marvell-pj4 and
+	marvell-whitney cores.
+	(arm_archs): Define armv8-m.base architecture.
+	(cpu_arch_ver): Define ARM_ARCH_V8M_BASE architecture version.
+	(aeabi_set_public_attributes): Add logic to set Tag_CPU_arch to 17 for
+	ARMv8-M Mainline.  Set Tag_DIV_use for ARMv8-M Baseline as well.
+
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (arm_ext_m): Include ARMv8-M.
 	(arm_ext_v8m): New feature for ARMv8-M.
 	(arm_ext_atomics): New feature for ARMv8 atomics.

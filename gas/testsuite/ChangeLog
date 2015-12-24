@@ -1,5 +1,12 @@
 2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* gas/arm/archv8m-base.d: New file.
+	* gas/arm/attr-march-armv8m.base.d: Likewise.
+	* gas/arm/armv8m.base-idiv.d: Likewise.
+	* gas/arm/any-armv8m.d: Adapt to deal with ARMv8-M Baseline.
+
+2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* gas/arm/archv8m.s: New file.
 	* gas/arm/archv8m-main.d: Likewise.
 	* gas/arm/attr-march-armv8m.main.d: Likewise.

@@ -12293,7 +12293,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V7E_M),		/* V7E_M.  */
       T(V8),		/* V8.  */
       -1,		/* Unused.  */
-      -1,		/* Unused.  */
+      -1,		/* V8-M BASELINE.  */
       -1,		/* V8-M MAINLINE.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };

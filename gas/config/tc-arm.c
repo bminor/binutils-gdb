@@ -209,6 +209,8 @@ static const arm_feature_set arm_ext_adiv = ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV);
 static const arm_feature_set arm_ext_virt = ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT);
 static const arm_feature_set arm_ext_pan = ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN);
 static const arm_feature_set arm_ext_v8m = ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M);
+static const arm_feature_set arm_ext_v6t2_v8m =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V6T2_V8M);
 /* Instructions shared between ARMv8-A and ARMv8-M.  */
 static const arm_feature_set arm_ext_atomics =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_ATOMICS);
@@ -7873,7 +7875,8 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		  return TRUE;
 		}
 
-	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
+	      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)
+		  || ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2_v8m))
 		{
 		  /* Check if on thumb2 it can be done with a mov.w, mvn or
 		     movw instruction.  */
@@ -7892,7 +7895,8 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 
 		  /* The number can be loaded with a mov.w or mvn
 		     instruction.  */
-		  if (newimm != (unsigned int) FAIL)
+		  if (newimm != (unsigned int) FAIL
+		      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2))
 		    {
 		      inst.instruction = (0xf04f0000  /*  MOV.W.  */
 					  | (inst.operands[i].reg << 8));
@@ -7904,7 +7908,8 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		      return TRUE;
 		    }
 		  /* The number can be loaded with a movw instruction.  */
-		  else if ((v & ~0xFFFF) == 0)
+		  else if ((v & ~0xFFFF) == 0
+			   && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2_v8m))
 		    {
 		      int imm = v & 0xFFFF;
 
@@ -10939,6 +10944,10 @@ do_t_branch (void)
 	reloc = BFD_RELOC_THUMB_PCREL_BRANCH25;
       else
 	{
+	  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2),
+		      _("selected architecture does not support "
+			"wide conditional branch instruction"));
+
 	  gas_assert (cond != 0xF);
 	  inst.instruction |= cond << 22;
 	  reloc = BFD_RELOC_THUMB_PCREL_BRANCH20;
@@ -17809,11 +17818,12 @@ in_it_block (void)
   return now_it.state != OUTSIDE_IT_BLOCK;
 }
 
-/* Whether OPCODE only has T32 encoding and makes build attribute
-   Tag_THUMB_ISA_use be set to 1 if assembled without any cpu or arch info.  */
+/* Whether OPCODE only has T32 encoding.  Since this function is only used by
+   t32_insn_ok, OPCODE enabled by v6t2 extension bit do not need to be listed
+   here, hence the "known" in the function name.  */
 
 static bfd_boolean
-t1_isa_t32_only_insn (const struct asm_opcode *opcode)
+known_t32_only_insn (const struct asm_opcode *opcode)
 {
   /* Original Thumb-1 wide instruction.  */
   if (opcode->tencode == do_t_blx
@@ -17822,6 +17832,39 @@ t1_isa_t32_only_insn (const struct asm_opcode *opcode)
       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier))
     return TRUE;
 
+  /* Wide-only instruction added to ARMv8-M.  */
+  if (ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_v8m)
+      || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_atomics)
+      || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_v6t2_v8m)
+      || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_div))
+    return TRUE;
+
+  return FALSE;
+}
+
+/* Whether wide instruction variant can be used if available for a valid OPCODE
+   in ARCH.  */
+
+static bfd_boolean
+t32_insn_ok (arm_feature_set arch, const struct asm_opcode *opcode)
+{
+  if (known_t32_only_insn (opcode))
+    return TRUE;
+
+  /* Instruction with narrow and wide encoding added to ARMv8-M.  Availability
+     of variant T3 of B.W is checked in do_t_branch.  */
+  if (ARM_CPU_HAS_FEATURE (arch, arm_ext_v8m)
+      && opcode->tencode == do_t_branch)
+    return TRUE;
+
+  /* Wide instruction variants of all instructions with narrow *and* wide
+     variants become available with ARMv6t2.  Other opcodes are either
+     narrow-only or wide-only and are thus available if OPCODE is valid.  */
+  if (ARM_CPU_HAS_FEATURE (arch, arm_ext_v6t2))
+    return TRUE;
+
+  /* OPCODE with narrow only instruction variant or wide variant not
+     available.  */
   return FALSE;
 }
 
@@ -17893,14 +17936,18 @@ md_assemble (char *str)
 	 Only instructions with narrow and wide variants need to be handled
 	 but selecting all non wide-only instructions is easier.  */
       if (!ARM_CPU_HAS_FEATURE (variant, arm_ext_v6t2)
-	  && !t1_isa_t32_only_insn (opcode))
+	  && !t32_insn_ok (variant, opcode))
 	{
 	  if (inst.size_req == 0)
 	    inst.size_req = 2;
 	  else if (inst.size_req == 4)
 	    {
-	      as_bad (_("selected processor does not support `%s' in Thumb-2 "
-			"mode"), str);
+	      if (ARM_CPU_HAS_FEATURE (variant, arm_ext_v8m))
+		as_bad (_("selected processor does not support 32bit wide "
+			  "variant of instruction `%s'"), str);
+	      else
+		as_bad (_("selected processor does not support `%s' in "
+			  "Thumb-2 mode"), str);
 	      return;
 	    }
 	}
@@ -17939,7 +17986,11 @@ md_assemble (char *str)
 	 set those bits when Thumb-2 32-bit instructions are seen.  The impact
 	 of relaxable instructions will be considered later after we finish all
 	 relaxation.  */
-      if (inst.size == 4 && !t1_isa_t32_only_insn (opcode))
+      if (ARM_FEATURE_CORE_EQUAL (cpu_variant, arm_arch_any))
+	variant = arm_arch_none;
+      else
+	variant = cpu_variant;
+      if (inst.size == 4 && !t32_insn_ok (variant, opcode))
 	ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 				arm_ext_v6t2);
 
@@ -18906,11 +18957,14 @@ static const struct asm_opcode insns[] =
  TUF("setend",    1010000, b650,     1, (ENDI),                     setend, t_setend),
 
 #undef  THUMB_VARIANT
-#define THUMB_VARIANT  & arm_ext_v6t2
+#define THUMB_VARIANT  & arm_ext_v6t2_v8m
 
  TCE("ldrex",	1900f9f, e8500f00, 2, (RRnpc_npcsp, ADDR),	  ldrex, t_ldrex),
  TCE("strex",	1800f90, e8400000, 3, (RRnpc_npcsp, RRnpc_npcsp, ADDR),
 				      strex,  t_strex),
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v6t2
+
  TUF("mcrr2",	c400000, fc400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
  TUF("mrrc2",	c500000, fc500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
 
@@ -19056,7 +19110,7 @@ static const struct asm_opcode insns[] =
 				       RRnpcb), strexd, t_strexd),
 
 #undef  THUMB_VARIANT
-#define THUMB_VARIANT  & arm_ext_v6t2
+#define THUMB_VARIANT  & arm_ext_v6t2_v8m
  TCE("ldrexb",	1d00f9f, e8d00f4f, 2, (RRnpc_npcsp,RRnpcb),
      rd_rn,  rd_rn),
  TCE("ldrexh",	1f00f9f, e8d00f5f, 2, (RRnpc_npcsp, RRnpcb),
@@ -19100,14 +19154,17 @@ static const struct asm_opcode insns[] =
  TCE("ubfx",	7e00050, f3c00000, 4, (RR, RR, I31, I32),	   bfx, t_bfx),
 
  TCE("mls",	0600090, fb000010, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas, t_mla),
- TCE("movw",	3000000, f2400000, 2, (RRnpc, HALF),		    mov16, t_mov16),
- TCE("movt",	3400000, f2c00000, 2, (RRnpc, HALF),		    mov16, t_mov16),
  TCE("rbit",	6ff0f30, fa90f0a0, 2, (RR, RR),			    rd_rm, t_rbit),
 
  TC3("ldrht",	03000b0, f8300e00, 2, (RRnpc_npcsp, ADDR), ldsttv4, t_ldstt),
  TC3("ldrsht",	03000f0, f9300e00, 2, (RRnpc_npcsp, ADDR), ldsttv4, t_ldstt),
  TC3("ldrsbt",	03000d0, f9100e00, 2, (RRnpc_npcsp, ADDR), ldsttv4, t_ldstt),
  TC3("strht",	02000b0, f8200e00, 2, (RRnpc_npcsp, ADDR), ldsttv4, t_ldstt),
+
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v6t2_v8m
+ TCE("movw",	3000000, f2400000, 2, (RRnpc, HALF),		    mov16, t_mov16),
+ TCE("movt",	3400000, f2c00000, 2, (RRnpc, HALF),		    mov16, t_mov16),
 
  /* Thumb-only instructions.  */
 #undef  ARM_VARIANT
@@ -19120,6 +19177,8 @@ static const struct asm_opcode insns[] =
     -mimplicit-it=[never | arm] modes.  */
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v1
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v6t2
 
  TUE("it",        bf08,        bf08,     1, (COND),   it,    t_it),
  TUE("itt",       bf0c,        bf0c,     1, (COND),   it,    t_it),
@@ -24888,11 +24947,13 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("ep9312",	ARM_FEATURE_LOW (ARM_AEXT_V4T, ARM_CEXT_MAVERICK),
 						 FPU_ARCH_MAVERICK, "ARM920T"),
   /* Marvell processors.  */
-  ARM_CPU_OPT ("marvell-pj4",   ARM_FEATURE_CORE_LOW (ARM_AEXT_V7A | ARM_EXT_MP
-						      | ARM_EXT_SEC),
+  ARM_CPU_OPT ("marvell-pj4",   ARM_FEATURE_CORE (ARM_AEXT_V7A | ARM_EXT_MP
+						  | ARM_EXT_SEC,
+						  ARM_EXT2_V6T2_V8M),
 						FPU_ARCH_VFP_V3D16, NULL),
-  ARM_CPU_OPT ("marvell-whitney", ARM_FEATURE_CORE_LOW (ARM_AEXT_V7A | ARM_EXT_MP
-							| ARM_EXT_SEC),
+  ARM_CPU_OPT ("marvell-whitney", ARM_FEATURE_CORE (ARM_AEXT_V7A | ARM_EXT_MP
+						    | ARM_EXT_SEC,
+						    ARM_EXT2_V6T2_V8M),
 					       FPU_ARCH_NEON_VFP_V4, NULL),
   /* APM X-Gene family.  */
   ARM_CPU_OPT ("xgene1",        ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
@@ -24962,6 +25023,7 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv7-r",	ARM_ARCH_V7R,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7-m",	ARM_ARCH_V7M,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7e-m",	ARM_ARCH_V7EM,	 FPU_ARCH_VFP),
+  ARM_ARCH_OPT ("armv8-m.base",	ARM_ARCH_V8M_BASE, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8-m.main",	ARM_ARCH_V8M_MAIN, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8-a",	ARM_ARCH_V8A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8.1-a",	ARM_ARCH_V8_1A,	 FPU_ARCH_VFP),
@@ -25582,6 +25644,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {10, ARM_ARCH_V7R},
     {10, ARM_ARCH_V7M},
     {14, ARM_ARCH_V8A},
+    {16, ARM_ARCH_V8M_BASE},
     {17, ARM_ARCH_V8M_MAIN},
     {0, ARM_ARCH_NONE}
 };
@@ -25615,6 +25678,7 @@ aeabi_set_public_attributes (void)
   int fp16_optional = 0;
   arm_feature_set flags;
   arm_feature_set tmp;
+  arm_feature_set arm_arch_v8m_base = ARM_ARCH_V8M_BASE;
   const cpu_arch_ver_table *p;
 
   /* Choose the architecture based on the capabilities of the requested cpu
@@ -25668,6 +25732,10 @@ aeabi_set_public_attributes (void)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m)
       && ARM_CPU_HAS_FEATURE (flags, arm_ext_v6_dsp))
     arch = TAG_CPU_ARCH_V7E_M;
+
+  ARM_CLEAR_FEATURE (tmp, flags, arm_arch_v8m_base);
+  if (arch == TAG_CPU_ARCH_V8M_BASE && ARM_CPU_HAS_FEATURE (tmp, arm_arch_any))
+    arch = TAG_CPU_ARCH_V8M_MAIN;
 
   /* In cpu_arch_ver ARMv8-A is before ARMv8-M for atomics to be detected as
      coming from ARMv8-A.  However, since ARMv8-A has more instructions than
@@ -25799,7 +25867,9 @@ aeabi_set_public_attributes (void)
      by the base architecture.
 
      For new architectures we will have to check these tests.  */
-  gas_assert (arch <= TAG_CPU_ARCH_V8 || arch == TAG_CPU_ARCH_V8M_MAIN);
+  gas_assert (arch <= TAG_CPU_ARCH_V8
+	      || (arch >= TAG_CPU_ARCH_V8M_BASE
+		  && arch <= TAG_CPU_ARCH_V8M_MAIN));
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
       || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m))
     aeabi_set_attribute_int (Tag_DIV_use, 0);
