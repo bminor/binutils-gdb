@@ -1,5 +1,13 @@
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* compile.c (H8300_OPTIONS): New enum from common/sim-options.c.
+	(h8300_option_handler): New func from common/sim-options.c.
+	(h8300_options): New options from common/sim-options.c.
+	(sim_open): Call sim_add_option_table.
+	* tconfig.h: Delete file.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* tconfig.h (SIM_HAVE_SIMCACHE): Delete.
 
 2015-11-21  Mike Frysinger  <vapier@gentoo.org>

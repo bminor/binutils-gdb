@@ -4813,6 +4813,54 @@ set_h8300h (unsigned long machine)
     h8300_normal_mode = 1;
 }
 
+/* H8300-specific options.
+   TODO: These really should be merged into the common model modules.  */
+typedef enum {
+  OPTION_H8300H,
+  OPTION_H8300S,
+  OPTION_H8300SX
+} H8300_OPTIONS;
+
+static SIM_RC
+h8300_option_handler (SIM_DESC sd, sim_cpu *cpu ATTRIBUTE_UNUSED, int opt,
+		      char *arg, int is_command ATTRIBUTE_UNUSED)
+{
+  switch ((H8300_OPTIONS) opt)
+    {
+    case OPTION_H8300H:
+      set_h8300h (bfd_mach_h8300h);
+      break;
+    case OPTION_H8300S:
+      set_h8300h (bfd_mach_h8300s);
+      break;
+    case OPTION_H8300SX:
+      set_h8300h (bfd_mach_h8300sx);
+      break;
+
+      default:
+	/* We'll actually never get here; the caller handles the error
+	   case.  */
+	sim_io_eprintf (sd, "Unknown option `%s'\n", arg);
+	return SIM_RC_FAIL;
+    }
+
+  return SIM_RC_OK;
+}
+
+static const OPTION h8300_options[] =
+{
+  { {"h8300h", no_argument, NULL, OPTION_H8300H},
+      'h', NULL, "Indicate the CPU is H8/300H",
+      h8300_option_handler },
+  { {"h8300s", no_argument, NULL, OPTION_H8300S},
+      'S', NULL, "Indicate the CPU is H8S",
+      h8300_option_handler },
+  { {"h8300sx", no_argument, NULL, OPTION_H8300SX},
+      'x', NULL, "Indicate the CPU is H8SX",
+      h8300_option_handler },
+  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
+};
+
 static sim_cia
 h8300_pc_get (sim_cpu *cpu)
 {
@@ -4867,6 +4915,12 @@ sim_open (SIM_OPEN_KIND kind,
   current_target_byte_order = BIG_ENDIAN;
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
+    {
+      free_state (sd);
+      return 0;
+    }
+
+  if (sim_add_option_table (sd, NULL, h8300_options) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

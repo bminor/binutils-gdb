@@ -104,11 +104,6 @@ typedef enum {
   OPTION_DEBUG,
   OPTION_HELP,
   OPTION_VERSION,
-#ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
-  OPTION_H8300H,
-  OPTION_H8300S,
-  OPTION_H8300SX,
-#endif
   OPTION_LOAD_LMA,
   OPTION_LOAD_VMA,
   OPTION_SYSROOT
@@ -146,18 +141,6 @@ static const OPTION standard_options[] =
   { {"debug-file", required_argument, NULL, OPTION_DEBUG_FILE},
       '\0', "FILE NAME", "Specify debugging output file",
       standard_option_handler },
-
-#ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
-  { {"h8300h", no_argument, NULL, OPTION_H8300H},
-      'h', NULL, "Indicate the CPU is H8/300H",
-      standard_option_handler },
-  { {"h8300s", no_argument, NULL, OPTION_H8300S},
-      'S', NULL, "Indicate the CPU is H8S",
-      standard_option_handler },
-  { {"h8300sx", no_argument, NULL, OPTION_H8300SX},
-      'x', NULL, "Indicate the CPU is H8SX",
-      standard_option_handler },
-#endif
 
   { {"do-command", required_argument, NULL, OPTION_DO_COMMAND},
       '\0', "COMMAND", ""/*undocumented*/,
@@ -354,18 +337,6 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	    CPU_DEBUG_FILE (STATE_CPU (sd, n)) = f;
 	}
       break;
-
-#ifdef SIM_H8300 /* FIXME: Can be moved to h8300 dir.  */
-    case OPTION_H8300H:
-      set_h8300h (bfd_mach_h8300h);
-      break;
-    case OPTION_H8300S:
-      set_h8300h (bfd_mach_h8300s);
-      break;
-    case OPTION_H8300SX:
-      set_h8300h (bfd_mach_h8300sx);
-      break;
-#endif
 
     case OPTION_DO_COMMAND:
       sim_do_command (sd, arg);
