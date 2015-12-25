@@ -29,7 +29,7 @@ SIM_OBJS = \
 	sim-if.o arch.o \
 	$(CRISV10F_OBJS) \
 	$(CRISV32F_OBJS) \
-	traps.o devices.o \
+	traps.o \
 	cris-desc.o
 
 # Extra headers included by sim-main.h.

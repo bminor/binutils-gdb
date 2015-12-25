@@ -977,18 +977,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   /* Allocate simulator I/O managed memory if none specified by user.  */
   if (cris_have_900000xxif)
-    {
-      if (sim_core_read_buffer (sd, NULL, read_map, &c, 0x90000000, 1) == 0)
-	sim_core_attach (sd, NULL, 0, access_write, 0, 0x90000000, 0x100,
-			 0, &cris_devices, NULL);
-      else
-	{
-	  (*callback->
-	   printf_filtered) (callback,
-			     "Seeing --cris-900000xx with memory defined there\n");
-	  goto abandon_chip;
-	}
-    }
+    sim_hw_parse (sd, "/core/%s/reg %#x %i", "cris_900000xx", 0x90000000, 0x100);
 
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)

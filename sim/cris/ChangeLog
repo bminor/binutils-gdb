@@ -1,5 +1,17 @@
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Change default to yes and
+	add cris_900000xx.
+	* configure: Regenerated.
+	* devices.c: Delete file.
+	* dv-cris_900000xx.c: New device model.
+	* Makefile.in (SIM_OBJS): Delete devices.o.
+	* sim-if.c (sim_open): Replace cris_have_900000xxif logic with a
+	call to sim_hw_parse.
+	* tconfig.h: Delete file.
+
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* rvdummy.c (_GNU_SOURCE): Delete.
 	(setupsocket): Mark static.
 
