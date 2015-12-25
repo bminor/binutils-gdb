@@ -28,7 +28,6 @@
 
 #if (WITH_HW)
 #include "sim-hw.h"
-#define device_error(client, ...) device_error ((device *)(client), __VA_ARGS__)
 #define device_io_read_buffer(client, ...) device_io_read_buffer ((device *)(client), __VA_ARGS__)
 #define device_io_write_buffer(client, ...) device_io_write_buffer ((device *)(client), __VA_ARGS__)
 #endif
@@ -194,9 +193,6 @@ sim_core_map_attach (SIM_DESC sd,
   /* actually do occasionally get a zero size map */
   if (nr_bytes == 0)
     {
-#if (WITH_DEVICES)
-      device_error (client, "called on sim_core_map_attach with size zero");
-#endif
 #if (WITH_HW)
       sim_hw_abort (sd, client, "called on sim_core_map_attach with size zero");
 #endif
@@ -223,17 +219,6 @@ sim_core_map_attach (SIM_DESC sd,
   if (next_mapping != NULL && next_mapping->level == level
       && next_mapping->base < (addr + (nr_bytes - 1)))
     {
-#if (WITH_DEVICES)
-      device_error (client, "memory map %d:0x%lx..0x%lx (%ld bytes) overlaps %d:0x%lx..0x%lx (%ld bytes)",
-		    space,
-		    (long) addr,
-		    (long) (addr + nr_bytes - 1),
-		    (long) nr_bytes,
-		    next_mapping->space,
-		    (long) next_mapping->base,
-		    (long) next_mapping->bound,
-		    (long) next_mapping->nr_bytes);
-#endif
 #if WITH_HW
       sim_hw_abort (sd, client, "memory map %d:0x%lx..0x%lx (%ld bytes) overlaps %d:0x%lx..0x%lx (%ld bytes)",
 		    space,
@@ -297,9 +282,6 @@ sim_core_attach (SIM_DESC sd,
 
   if (client != NULL && modulo != 0)
     {
-#if (WITH_DEVICES)
-      device_error (client, "sim_core_attach - internal error - modulo and callback memory conflict");
-#endif
 #if (WITH_HW)
       sim_hw_abort (sd, client, "sim_core_attach - internal error - modulo and callback memory conflict");
 #endif
@@ -318,9 +300,6 @@ sim_core_attach (SIM_DESC sd,
 	}
       if (mask != sizeof (unsigned64) - 1)
 	{
-#if (WITH_DEVICES)
-	  device_error (client, "sim_core_attach - internal error - modulo %lx not power of two", (long) modulo);
-#endif
 #if (WITH_HW)
 	  sim_hw_abort (sd, client, "sim_core_attach - internal error - modulo %lx not power of two", (long) modulo);
 #endif
@@ -331,9 +310,6 @@ sim_core_attach (SIM_DESC sd,
   /* verify consistency between device and buffer */
   if (client != NULL && optional_buffer != NULL)
     {
-#if (WITH_DEVICES)
-      device_error (client, "sim_core_attach - internal error - conflicting buffer and attach arguments");
-#endif
 #if (WITH_HW)
       sim_hw_abort (sd, client, "sim_core_attach - internal error - conflicting buffer and attach arguments");
 #endif

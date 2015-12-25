@@ -54,5 +54,3 @@ device_io_write_buffer (device *me, const void *source, int space,
 
   return nr_bytes;
 }
-
-void device_error (device *me, const char *message, ...) {}

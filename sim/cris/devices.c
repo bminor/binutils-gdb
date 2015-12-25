@@ -31,14 +31,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Placeholder definition.  */
 struct _device { char dummy; } cris_devices;
 
-void
-device_error (device *me ATTRIBUTE_UNUSED,
-	      const char *message ATTRIBUTE_UNUSED,
-	      ...)
-{
-  abort ();
-}
-
 int
 device_io_read_buffer (device *me ATTRIBUTE_UNUSED,
 		       void *source ATTRIBUTE_UNUSED,

@@ -1,3 +1,7 @@
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* devices.c (device_error): Delete.
+
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* tconfig.h (SIM_HANDLES_LMA): Delete.

@@ -149,14 +149,6 @@ device_io_write_buffer (device *me, const void *source, int space,
     return 0;
 }
 
-void device_error (device *me, const char *message, ...)
-{
-  /* Don't bother doing anything here -- any place in common code that
-     calls device_error() follows it with sim_hw_abort().  Since the
-     device isn't bound to the system yet, we can't call any common
-     hardware error funcs on it or we'll hit a NULL pointer.  */
-}
-
 unsigned int dv_get_bus_num (struct hw *me)
 {
   const hw_unit *unit = hw_unit_address (me);
