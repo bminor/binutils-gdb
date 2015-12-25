@@ -24,9 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    file.  I just copied it from m32r, pruned some stuff and added
    HAVE_MODEL because it seemed useful.  */
 
-/* See sim-hload.c.  We properly handle LMA.  */
-#define SIM_HANDLES_LMA 1
-
 /* For MSPR support.  FIXME: revisit.  */
 #define WITH_DEVICES 1
 

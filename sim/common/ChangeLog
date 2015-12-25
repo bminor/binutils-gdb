@@ -1,5 +1,11 @@
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-options.c (standard_options): Always enable load-lma and
+	load-vma options.
+	(standard_install): Always set STATE_LOAD_AT_LMA_P(sd) to 1.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-module.c (MODULE_LIST): Delete.
 
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>

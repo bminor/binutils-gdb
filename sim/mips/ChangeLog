@@ -1,5 +1,9 @@
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* tconfig.h (SIM_HANDLES_LMA): Delete.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-main.h (WITH_WATCHPOINTS): Delete.
 
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>

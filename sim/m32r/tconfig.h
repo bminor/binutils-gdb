@@ -3,9 +3,6 @@
 #ifndef M32R_TCONFIG_H
 #define M32R_TCONFIG_H
 
-/* See sim-hload.c.  We properly handle LMA.  */
-#define SIM_HANDLES_LMA 1
-
 /* For MSPR support.  FIXME: revisit.  */
 #define WITH_DEVICES 1
 

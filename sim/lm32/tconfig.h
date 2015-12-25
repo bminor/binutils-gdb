@@ -19,9 +19,6 @@
 #ifndef LM32_TCONFIG_H
 #define LM32_TCONFIG_H
 
-/* See sim-hload.c.  We properly handle LMA.  */
-#define SIM_HANDLES_LMA 1
-
 #define WITH_SCACHE_PBB 1
 
 #endif /* LM32_TCONFIG_H */

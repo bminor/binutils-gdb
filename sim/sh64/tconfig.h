@@ -1,8 +1,5 @@
 /* SH64 target configuration file.  -*- C -*- */
 
-/* See sim-hload.c.  We properly handle LMA. -- TODO: check this */
-#define SIM_HANDLES_LMA 1
-
 /* For MSPR support.  FIXME: revisit.  */
 #define WITH_DEVICES 0
 

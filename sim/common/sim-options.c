@@ -167,18 +167,12 @@ static const OPTION standard_options[] =
       '\0', "BFDNAME", "Specify the object-code format for the object files",
       standard_option_handler },
 
-#ifdef SIM_HANDLES_LMA
   { {"load-lma", no_argument, NULL, OPTION_LOAD_LMA},
       '\0', NULL,
-#if SIM_HANDLES_LMA
     "Use VMA or LMA addresses when loading image (default LMA)",
-#else
-    "Use VMA or LMA addresses when loading image (default VMA)",
-#endif
       standard_option_handler, "load-{lma,vma}" },
   { {"load-vma", no_argument, NULL, OPTION_LOAD_VMA},
       '\0', NULL, "", standard_option_handler,  "" },
-#endif
 
   { {"sysroot", required_argument, NULL, OPTION_SYSROOT},
       '\0', "SYSROOT",
@@ -423,9 +417,7 @@ standard_install (SIM_DESC sd)
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   if (sim_add_option_table (sd, NULL, standard_options) != SIM_RC_OK)
     return SIM_RC_FAIL;
-#ifdef SIM_HANDLES_LMA
-  STATE_LOAD_AT_LMA_P (sd) = SIM_HANDLES_LMA;
-#endif
+  STATE_LOAD_AT_LMA_P (sd) = 1;
   return SIM_RC_OK;
 }
 
