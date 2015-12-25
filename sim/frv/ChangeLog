@@ -1,5 +1,14 @@
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* devices.c: Delete file.
+	* frv-sim.h (MCCR_ADDR, MCCR_CP, MCCR_CM0, MCCR_CM1, frv_devices,
+	struct _device): Delete.
+	* Makefile.in (SIM_OBJS): Delete devices.o.
+	* sim-if.c (sim_open): Delete #if 0 code.
+	* tconfig.h: Delete file.
+
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Delete sim-model.o.
 	* tconfig.h (SIM_HAVE_MODEL): Delete.
 

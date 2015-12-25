@@ -96,22 +96,6 @@ sim_open (kind, callback, abfd, argv)
       return 0;
     }
 
-#if 0
-  /* Allocate a handler for the control registers and other devices
-     if no memory for that range has been allocated by the user.
-     All are allocated in one chunk to keep things from being
-     unnecessarily complicated.  */
-  if (sim_core_read_buffer (sd, NULL, read_map, &c, FRV_DEVICE_ADDR, 1) == 0)
-    sim_core_attach (sd, NULL,
-		     0 /*level*/,
-		     access_read_write,
-		     0 /*space ???*/,
-		     FRV_DEVICE_ADDR, FRV_DEVICE_LEN /*nr_bytes*/,
-		     0 /*modulo*/,
-		     &frv_devices,
-		     NULL /*buffer*/);
-#endif
-
   /* Allocate core managed memory if none specified by user.
      Use address 4 here in case the user wanted address 0 unmapped.  */
   if (sim_core_read_buffer (sd, NULL, read_map, &c, 4, 1) == 0)
