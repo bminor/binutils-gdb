@@ -36,7 +36,6 @@ main (int argc, char *argv[])
 #include "getopt.h"
 #include "libiberty.h"
 
-#define _GNU_SOURCE
 #include <stdio.h>
 
 #ifdef HAVE_UNISTD_H
@@ -104,7 +103,7 @@ static void handle_input_file (int, char *);
    connection.  Return a file descriptor for the connection or -1 on
    error.  */
 
-int setupsocket (void)
+static int setupsocket (void)
 {
   int s;
   socklen_t len;

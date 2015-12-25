@@ -1,5 +1,10 @@
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* rvdummy.c (_GNU_SOURCE): Delete.
+	(setupsocket): Mark static.
+
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Delete sim-model.o.
 	* tconfig.h (SIM_HAVE_MODEL): Delete.
 
