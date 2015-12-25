@@ -23,6 +23,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define WITH_SCACHE_PBB 1
+
 #include "symcat.h"
 #include "sim-basics.h"
 #include "cgen-types.h"

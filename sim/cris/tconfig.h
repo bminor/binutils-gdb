@@ -29,9 +29,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define SIM_HAVE_MODEL
 
-/* This is a global setting.  Different cpu families can't mix-n-match -scache
-   and -pbb.  However some cpu families may use -simple while others use
-   one of -scache/-pbb.  */
-#define WITH_SCACHE_PBB 1
-
 #endif /* CRIS_TCONFIG_H */
