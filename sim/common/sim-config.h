@@ -454,19 +454,6 @@ extern int current_floating_point;
 #endif
 
 
-
-/* Engine module.
-
-   Use the common start/stop/restart framework (sim-engine).
-   Simulators using the other modules but not the engine should define
-   WITH_ENGINE=0. */
-
-#ifndef WITH_ENGINE
-#define WITH_ENGINE			1
-#endif
-
-
-
 /* Debugging:
 
    Control the inclusion of debugging code.

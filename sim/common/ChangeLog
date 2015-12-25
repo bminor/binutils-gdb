@@ -1,5 +1,10 @@
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-config.h (WITH_ENGINE): Delete.
+	* sim-module.c (modules): Always include sim_engine_install.
+
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-model.o.
 	* cgen-types.h (SIM_HAVE_MODEL): Delete.
 	* sim-base.h: Always include sim-model.h.
