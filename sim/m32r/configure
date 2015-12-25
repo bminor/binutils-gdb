@@ -13400,12 +13400,12 @@ fi
 
 
 
-if test """"; then
-  hardware=""""
+if test ""; then
+  hardware=""
 else
   hardware="cfi core pal glue"
 fi
-hardware="$hardware """
+hardware="$hardware m32r_cache m32r_uart"
 
 sim_hw_cflags="-DWITH_HW=1"
 sim_hw="$hardware"

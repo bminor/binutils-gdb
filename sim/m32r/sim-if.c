@@ -33,6 +33,8 @@
 #include <stdlib.h>
 #endif
 
+#include "dv-m32r_uart.h"
+
 static void free_state (SIM_DESC);
 static void print_m32r_misc_cpu (SIM_CPU *cpu, int verbose);
 
@@ -106,16 +108,10 @@ sim_open (kind, callback, abfd, argv)
   /* Allocate a handler for the control registers and other devices
      if no memory for that range has been allocated by the user.
      All are allocated in one chunk to keep things from being
-     unnecessarily complicated.  */
-  if (sim_core_read_buffer (sd, NULL, read_map, &c, M32R_DEVICE_ADDR, 1) == 0)
-    sim_core_attach (sd, NULL,
-		     0 /*level*/,
-		     access_read_write,
-		     0 /*space ???*/,
-		     M32R_DEVICE_ADDR, M32R_DEVICE_LEN /*nr_bytes*/,
-		     0 /*modulo*/,
-		     &m32r_devices,
-		     NULL /*buffer*/);
+     unnecessarily complicated.
+     TODO: Move these to the sim-model framework.  */
+  sim_hw_parse (sd, "/core/%s/reg %#x %i", "m32r_uart", UART_BASE_ADDR, 0x100);
+  sim_hw_parse (sd, "/core/%s/reg %#x %i", "m32r_cache", 0xfffffff0, 0x10);
 
   /* Allocate core managed memory if none specified by user.
      Use address 4 here in case the user wanted address 0 unmapped.  */

@@ -27,6 +27,6 @@ SIM_AC_OPTION_CGEN_MAINT
 AC_SUBST(traps_obj)
 AC_SUBST(sim_extra_cflags)
 
-SIM_AC_OPTION_HARDWARE(yes,"","")
+SIM_AC_OPTION_HARDWARE(yes,,m32r_cache m32r_uart)
 
 SIM_AC_OUTPUT

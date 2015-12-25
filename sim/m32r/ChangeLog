@@ -1,5 +1,21 @@
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Add m32r_cache & m32r_uart.
+	* configure: Regenerate.
+	* devices.c: Delete file.
+	* dv-m32r_cache.c, dv-m32r_cache.h: New cache model with logic from
+	devices.c.
+	* dv-m32r_uart.c, dv-m32r_uart.h: New uart model with logic from
+	devices.c.
+	* m32r-sim.h: Move cache defines to dv-m32r_cache.h and uart defines
+	to dv-m32r_uart.h.
+	* Makefile.in (SIM_OBJS): Delete devices.o.
+	* sim-if.c: Include dv-m32r_uart.h.
+	(sim_open): Replace sim_core_attach call with sim_hw_parse calls.
+	* tconfig.h: Delete file.
+
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Delete sim-model.o.
 
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
