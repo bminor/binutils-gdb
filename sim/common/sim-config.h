@@ -524,10 +524,6 @@ extern int current_floating_point;
 		       ? WITH_MODEL	\
 		       : current_model)
 
-#ifndef WITH_DEFAULT_MODEL
-#define WITH_DEFAULT_MODEL		DEFAULT_MODEL
-#endif
-
 #define MODEL_ISSUE_IGNORE		(-1)
 #define MODEL_ISSUE_PROCESS		1
 

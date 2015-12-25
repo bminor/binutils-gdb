@@ -102,12 +102,6 @@ SIM_RC sim_profile_set_option (SIM_DESC sd_, const char *name_, int idx_,
 #define WITH_PROFILE_MEMORY_P 0
 #endif
 
-/* Only build MODEL code when the target simulator has support for it */
-#ifndef SIM_HAVE_MODEL
-#undef WITH_PROFILE_MODEL_P
-#define WITH_PROFILE_MODEL_P 0
-#endif
-
 /* Profiling install handler.  */
 MODULE_INSTALL_FN profile_install;
 

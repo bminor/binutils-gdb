@@ -190,6 +190,7 @@ SIM_NEW_COMMON_OBJS = \
 	sim-info.o \
 	sim-load.o \
 	sim-memopt.o \
+	sim-model.o \
 	sim-module.o \
 	sim-options.o \
 	sim-profile.o \

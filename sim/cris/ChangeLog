@@ -1,5 +1,10 @@
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Delete sim-model.o.
+	* tconfig.h (SIM_HAVE_MODEL): Delete.
+
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* arch.c: Rename MACH to SIM_MACH.
 	* cpuall.h: Likewise.
 	* modelv10.c: Rename MACH to SIM_MACH, MACH_IMP_PROPERTIES to

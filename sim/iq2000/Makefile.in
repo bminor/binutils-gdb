@@ -22,7 +22,6 @@ IQ2000_OBJS = iq2000.o cpu.o decode.o sem.o model.o mloop.o
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-hload.o \
-	sim-model.o \
 	cgen-utils.o cgen-trace.o cgen-scache.o \
 	cgen-run.o \
 	sim-if.o arch.o \

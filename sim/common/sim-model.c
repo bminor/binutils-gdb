@@ -190,6 +190,9 @@ sim_model_init (SIM_DESC sd)
 {
   SIM_CPU *cpu;
 
+  if (!WITH_MODEL_P)
+    return SIM_RC_OK;
+
   /* If both cpu model and state architecture are set, ensure they're
      compatible.  If only one is set, set the other.  If neither are set,
      use the default model.  STATE_ARCHITECTURE is the bfd_arch_info data
@@ -241,3 +244,12 @@ sim_model_init (SIM_DESC sd)
 
   return SIM_RC_OK;
 }
+
+#if !WITH_MODEL_P
+/* Set up basic model support.  This is a stub for ports that do not define
+   models.  See sim-model.h for more details.  */
+const SIM_MACH *sim_machs[] =
+{
+  NULL
+};
+#endif

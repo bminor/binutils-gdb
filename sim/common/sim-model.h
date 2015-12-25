@@ -21,6 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    architecture = one of sparc, mips, sh, etc.
    in the sparc architecture, mach = one of v6, v7, v8, sparclite, etc.
    in the v8 mach, model = one of supersparc, etc.
+
+   To use the model framework, your arch needs to do a few things:
+   (1) Call SIM_AC_OPTION_DEFAULT_MODEL() in configure.ac.
+   (2) Define enum mach_attr in sim-main.h.
+   (3) Define sim_machs array (and all the callbacks it uses).
 */
 
 /* This file is intended to be included by sim-basics.h.  */
@@ -40,6 +45,15 @@ typedef struct {
 
 #ifndef MAX_UNITS
 #define MAX_UNITS 1
+#endif
+
+#ifndef WITH_DEFAULT_MODEL
+/* Just a stub for ports that do not define models.  */
+enum mach_attr { _MACH_NONE };
+# define WITH_DEFAULT_MODEL NULL
+# define WITH_MODEL_P 0
+#else
+# define WITH_MODEL_P 1
 #endif
 
 typedef int (MODEL_FN) (sim_cpu *, void *);

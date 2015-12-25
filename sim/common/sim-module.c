@@ -40,9 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 static MODULE_INSTALL_FN * const modules[] = {
   standard_install,
   sim_events_install,
-#ifdef SIM_HAVE_MODEL
   sim_model_install,
-#endif
 #if WITH_ENGINE
   sim_engine_install,
 #endif

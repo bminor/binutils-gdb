@@ -28,7 +28,6 @@ SIM_OBJS = \
 	interp.o \
 	machs.o \
 	sim-hload.o \
-	sim-model.o \
 	sim-resume.o
 
 INCLUDE = bfin-sim.h

@@ -27,6 +27,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* For MSPR support.  FIXME: revisit.  */
 #define WITH_DEVICES 1
 
-#define SIM_HAVE_MODEL
-
 #endif /* CRIS_TCONFIG_H */

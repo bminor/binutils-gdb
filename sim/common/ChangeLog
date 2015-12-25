@@ -1,5 +1,20 @@
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-model.o.
+	* cgen-types.h (SIM_HAVE_MODEL): Delete.
+	* sim-base.h: Always include sim-model.h.
+	* sim-config.h (WITH_DEFAULT_MODEL): Delete.
+	* sim-cpu.h (sim_cpu_base): Always declare mach/model members.
+	* sim-model.c (sim_model_init): Return when !WITH_MODEL_P.
+	[!WITH_MODEL_P] (sim_machs): Define.
+	* sim-model.h: Add some developer docs.
+	[!WITH_DEFAULT_MODEL] (mach_attr, WITH_DEFAULT_MODEL): Define.
+	(WITH_MODEL_P): Define.
+	* sim-module.c (modules): Always include sim_model_install.
+	* sim-profile.h (WITH_PROFILE_MODEL_P): Delete.
+
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-cpu.h: Rename MACH to SIM_MACH and MODEL to SIM_MODEL.
 	* sim-model.c: Likewise.
 	* sim-model.h: Likewise.  Rename MACH_IMP_PROPERTIES to

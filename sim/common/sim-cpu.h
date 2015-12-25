@@ -100,7 +100,6 @@ typedef struct {
   PROFILE_DATA profile_data;
 #define CPU_PROFILE_DATA(cpu) (& (cpu)->base.profile_data)
 
-#ifdef SIM_HAVE_MODEL
   /* Machine tables for this cpu.  See sim-model.h.  */
   const SIM_MACH *mach;
 #define CPU_MACH(cpu) ((cpu)->base.mach)
@@ -110,7 +109,6 @@ typedef struct {
   /* Model data (profiling state, etc.).  */
   void *model_data;
 #define CPU_MODEL_DATA(cpu) ((cpu)->base.model_data)
-#endif
 
   /* Routines to fetch/store registers.  */
   CPUREG_FETCH_FN *reg_fetch;
