@@ -1,3 +1,8 @@
+2015-12-25  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* lib/gdb.exp (gdb_test): Update comments to clarify that the
+	PATTERN argument is optional.
+
 2015-12-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* lib/ada.exp (target_compile_ada_from_dir): New function.

@@ -959,7 +959,9 @@ proc gdb_test_multiple { command message user_code } {
 # COMMAND is the command to execute, send to GDB with send_gdb.  If
 #   this is the null string no command is sent.
 # PATTERN is the pattern to match for a PASS, and must NOT include
-#   the \r\n sequence immediately before the gdb prompt.
+#   the \r\n sequence immediately before the gdb prompt.  This argument
+#   may be omitted to just match the prompt, ignoring whatever output 
+#   precedes it.
 # MESSAGE is an optional message to be printed.  If this is
 #   omitted, then the pass/fail messages use the command string as the
 #   message.  (If this is the empty string, then sometimes we don't
