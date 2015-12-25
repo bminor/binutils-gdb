@@ -1,5 +1,12 @@
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-cpu.h: Rename MACH to SIM_MACH and MODEL to SIM_MODEL.
+	* sim-model.c: Likewise.
+	* sim-model.h: Likewise.  Rename MACH_IMP_PROPERTIES to
+	SIM_MACH_IMP_PROPERTIES
+
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-core.c (device_error): Delete.
 	(sim_core_map_attach): Delete calls to device_error.
 	(sim_core_attach): Likewise.

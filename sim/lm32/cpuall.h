@@ -32,7 +32,7 @@ This file is part of the GNU simulators.
 #include "decode.h"
 #endif
 
-extern const MACH lm32_mach;
+extern const SIM_MACH lm32_mach;
 
 #ifndef WANT_CPU
 /* The ARGBUF struct.  */

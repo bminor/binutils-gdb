@@ -44,9 +44,9 @@ This file is part of the GNU simulators.
 #include "decode2.h"
 #endif
 
-extern const MACH m32r_mach;
-extern const MACH m32rx_mach;
-extern const MACH m32r2_mach;
+extern const SIM_MACH m32r_mach;
+extern const SIM_MACH m32rx_mach;
+extern const SIM_MACH m32r2_mach;
 
 #ifndef WANT_CPU
 /* The ARGBUF struct.  */

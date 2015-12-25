@@ -68,7 +68,7 @@ typedef struct {
      This is zero if the SCACHE isn't in use for this variant.  */
   int scache_elm_size;
 #define IMP_PROPS_SCACHE_ELM_SIZE(cpu_props) ((cpu_props)->scache_elm_size)
-} MACH_IMP_PROPERTIES;
+} SIM_MACH_IMP_PROPERTIES;
 
 /* A machine variant.  */
 
@@ -92,7 +92,7 @@ typedef struct {
 #define MACH_MODELS(m) ((m)->models)
 
   /* Pointer to the implementation properties of this mach.  */
-  const MACH_IMP_PROPERTIES *imp_props;
+  const SIM_MACH_IMP_PROPERTIES *imp_props;
 #define MACH_IMP_PROPS(m) ((m)->imp_props)
 
   /* Called by sim_model_set when the model of a cpu is set.  */
@@ -103,14 +103,14 @@ typedef struct {
      Used by cgen simulators to initialize the insn descriptor table.  */
   void (* prepare_run) (sim_cpu *);
 #define MACH_PREPARE_RUN(m) ((m)->prepare_run)
-} MACH;
+} SIM_MACH;
 
 /* A model (implementation) of a machine.  */
 
 typedef struct model {
   const char *name;
 #define MODEL_NAME(m) ((m)->name)
-  const MACH *mach;
+  const SIM_MACH *mach;
 #define MODEL_MACH(m) ((m)->mach)
   /* An enum that distinguished the model.  */
   int num;
@@ -120,21 +120,21 @@ typedef struct model {
 #define MODEL_TIMING(m) ((m)->timing)
   void (* init) (sim_cpu *);
 #define MODEL_INIT(m) ((m)->init)
-} MODEL;
+} SIM_MODEL;
 
 /* Tables of supported machines.  */
 /* ??? In a simulator of multiple architectures, will need multiple copies of
    this.  Have an `archs' array that contains a pointer to the machs array
    for each (which in turn has a pointer to the models array for each).  */
-extern const MACH *sim_machs[];
+extern const SIM_MACH *sim_machs[];
 
 /* Model module handlers.  */
 extern MODULE_INSTALL_FN sim_model_install;
 
 /* Support routines.  */
-extern void sim_model_set (SIM_DESC sd_, sim_cpu *cpu_, const MODEL *model_);
-extern const MODEL * sim_model_lookup (const char *name_);
-extern const MACH * sim_mach_lookup (const char *name_);
-extern const MACH * sim_mach_lookup_bfd_name (const char *bfd_name_);
+extern void sim_model_set (SIM_DESC sd_, sim_cpu *cpu_, const SIM_MODEL *model_);
+extern const SIM_MODEL *sim_model_lookup (const char *name_);
+extern const SIM_MACH *sim_mach_lookup (const char *name_);
+extern const SIM_MACH *sim_mach_lookup_bfd_name (const char *bfd_name_);
 
 #endif /* SIM_MODEL_H */

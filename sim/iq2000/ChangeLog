@@ -1,5 +1,12 @@
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* arch.c: Rename MACH to SIM_MACH.
+	* cpuall.h: Likewise.
+	* model.c: Rename MACH to SIM_MACH, MACH_IMP_PROPERTIES to
+	SIM_MACH_IMP_PROPERTIES, and MODEL to SIM_MODEL.
+
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-main.h (WITH_SCACHE_PBB): Move from ...
 	* tconfig.h (WITH_SCACHE_PBB): ... here.
 

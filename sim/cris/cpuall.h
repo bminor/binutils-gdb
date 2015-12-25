@@ -56,8 +56,8 @@ This file is part of the GNU simulators.
 #include "decodev32.h"
 #endif
 
-extern const MACH crisv10_mach;
-extern const MACH crisv32_mach;
+extern const SIM_MACH crisv10_mach;
+extern const SIM_MACH crisv32_mach;
 
 #ifndef WANT_CPU
 /* The ARGBUF struct.  */

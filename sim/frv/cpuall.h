@@ -32,13 +32,13 @@ This file is part of the GNU simulators.
 #include "decode.h"
 #endif
 
-extern const MACH frv_mach;
-extern const MACH fr550_mach;
-extern const MACH fr500_mach;
-extern const MACH tomcat_mach;
-extern const MACH fr400_mach;
-extern const MACH fr450_mach;
-extern const MACH simple_mach;
+extern const SIM_MACH frv_mach;
+extern const SIM_MACH fr550_mach;
+extern const SIM_MACH fr500_mach;
+extern const SIM_MACH tomcat_mach;
+extern const SIM_MACH fr400_mach;
+extern const SIM_MACH fr450_mach;
+extern const SIM_MACH simple_mach;
 
 #ifndef WANT_CPU
 /* The ARGBUF struct.  */

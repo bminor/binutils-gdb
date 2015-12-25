@@ -102,10 +102,10 @@ typedef struct {
 
 #ifdef SIM_HAVE_MODEL
   /* Machine tables for this cpu.  See sim-model.h.  */
-  const MACH *mach;
+  const SIM_MACH *mach;
 #define CPU_MACH(cpu) ((cpu)->base.mach)
   /* The selected model.  */
-  const MODEL *model;
+  const SIM_MODEL *model;
 #define CPU_MODEL(cpu) ((cpu)->base.model)
   /* Model data (profiling state, etc.).  */
   void *model_data;

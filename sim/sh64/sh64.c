@@ -1030,7 +1030,7 @@ sh64_model_init()
   /* Do nothing.  */
 }
 
-static const MODEL sh_models [] =
+static const SIM_MODEL sh_models [] =
 {
   { "sh2",        & sh2_mach,         MODEL_SH5, NULL, sh64_model_init },
   { "sh2e",       & sh2e_mach,        MODEL_SH5, NULL, sh64_model_init },
@@ -1047,7 +1047,7 @@ static const MODEL sh_models [] =
   { 0 }
 };
 
-static const MACH_IMP_PROPERTIES sh5_imp_properties =
+static const SIM_MACH_IMP_PROPERTIES sh5_imp_properties =
 {
   sizeof (SIM_CPU),
 #if WITH_SCACHE
@@ -1057,7 +1057,7 @@ static const MACH_IMP_PROPERTIES sh5_imp_properties =
 #endif
 };
 
-const MACH sh2_mach =
+const SIM_MACH sh2_mach =
 {
   "sh2", "sh2", MACH_SH5,
   16, 16, &sh_models[0], &sh5_imp_properties,
@@ -1065,7 +1065,7 @@ const MACH sh2_mach =
   sh64_prepare_run
 };
 
-const MACH sh2e_mach =
+const SIM_MACH sh2e_mach =
 {
   "sh2e", "sh2e", MACH_SH5,
   16, 16, &sh_models[1], &sh5_imp_properties,
@@ -1073,7 +1073,7 @@ const MACH sh2e_mach =
   sh64_prepare_run
 };
 
-const MACH sh2a_fpu_mach =
+const SIM_MACH sh2a_fpu_mach =
 {
   "sh2a", "sh2a", MACH_SH5,
   16, 16, &sh_models[2], &sh5_imp_properties,
@@ -1081,7 +1081,7 @@ const MACH sh2a_fpu_mach =
   sh64_prepare_run
 };
 
-const MACH sh2a_nofpu_mach =
+const SIM_MACH sh2a_nofpu_mach =
 {
   "sh2a_nofpu", "sh2a_nofpu", MACH_SH5,
   16, 16, &sh_models[3], &sh5_imp_properties,
@@ -1089,7 +1089,7 @@ const MACH sh2a_nofpu_mach =
   sh64_prepare_run
 };
 
-const MACH sh3_mach =
+const SIM_MACH sh3_mach =
 {
   "sh3", "sh3", MACH_SH5,
   16, 16, &sh_models[4], &sh5_imp_properties,
@@ -1097,7 +1097,7 @@ const MACH sh3_mach =
   sh64_prepare_run
 };
 
-const MACH sh3e_mach =
+const SIM_MACH sh3e_mach =
 {
   "sh3e", "sh3e", MACH_SH5,
   16, 16, &sh_models[5], &sh5_imp_properties,
@@ -1105,7 +1105,7 @@ const MACH sh3e_mach =
   sh64_prepare_run
 };
 
-const MACH sh4_mach =
+const SIM_MACH sh4_mach =
 {
   "sh4", "sh4", MACH_SH5,
   16, 16, &sh_models[6], &sh5_imp_properties,
@@ -1113,7 +1113,7 @@ const MACH sh4_mach =
   sh64_prepare_run
 };
 
-const MACH sh4_nofpu_mach =
+const SIM_MACH sh4_nofpu_mach =
 {
   "sh4_nofpu", "sh4_nofpu", MACH_SH5,
   16, 16, &sh_models[7], &sh5_imp_properties,
@@ -1121,7 +1121,7 @@ const MACH sh4_nofpu_mach =
   sh64_prepare_run
 };
 
-const MACH sh4a_mach =
+const SIM_MACH sh4a_mach =
 {
   "sh4a", "sh4a", MACH_SH5,
   16, 16, &sh_models[8], &sh5_imp_properties,
@@ -1129,7 +1129,7 @@ const MACH sh4a_mach =
   sh64_prepare_run
 };
 
-const MACH sh4a_nofpu_mach =
+const SIM_MACH sh4a_nofpu_mach =
 {
   "sh4a_nofpu", "sh4a_nofpu", MACH_SH5,
   16, 16, &sh_models[9], &sh5_imp_properties,
@@ -1137,7 +1137,7 @@ const MACH sh4a_nofpu_mach =
   sh64_prepare_run
 };
 
-const MACH sh4al_mach =
+const SIM_MACH sh4al_mach =
 {
   "sh4al", "sh4al", MACH_SH5,
   16, 16, &sh_models[10], &sh5_imp_properties,
@@ -1145,7 +1145,7 @@ const MACH sh4al_mach =
   sh64_prepare_run
 };
 
-const MACH sh5_mach =
+const SIM_MACH sh5_mach =
 {
   "sh5", "sh5", MACH_SH5,
   32, 32, &sh_models[11], &sh5_imp_properties,
