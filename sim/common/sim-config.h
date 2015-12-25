@@ -394,11 +394,6 @@ extern char *simulator_sysroot;
    x86) in eliminating a function call for the most common
    (raw_memory) case. */
 
-#ifndef WITH_CALLBACK_MEMORY
-#define WITH_CALLBACK_MEMORY		1
-#endif
-
-
 
 /* Alignment:
 

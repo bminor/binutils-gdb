@@ -165,7 +165,7 @@ sim_core_read_aligned_N(sim_cpu *cpu,
   do
     {
 #if (WITH_DEVICES)
-      if (WITH_CALLBACK_MEMORY && mapping->device != NULL)
+      if (mapping->device != NULL)
 	{
 	  unsigned_M data;
 	  if (device_io_read_buffer (mapping->device, &data, mapping->space, addr, N, CPU_STATE (cpu), cpu, cia) != N)
@@ -176,7 +176,7 @@ sim_core_read_aligned_N(sim_cpu *cpu,
 	}
 #endif
 #if (WITH_HW)
-      if (WITH_CALLBACK_MEMORY && mapping->device != NULL)
+      if (mapping->device != NULL)
 	{
 	  unsigned_M data;
 	  sim_cpu_hw_io_read_buffer (cpu, cia, mapping->device, &data, mapping->space, addr, N);
@@ -296,7 +296,7 @@ sim_core_write_aligned_N(sim_cpu *cpu,
   do
     {
 #if (WITH_DEVICES)
-      if (WITH_CALLBACK_MEMORY && mapping->device != NULL)
+      if (mapping->device != NULL)
 	{
 	  unsigned_M data = H2T_M (val);
 	  if (device_io_write_buffer (mapping->device, &data, mapping->space, addr, N, CPU_STATE (cpu), cpu, cia) != N)
@@ -306,7 +306,7 @@ sim_core_write_aligned_N(sim_cpu *cpu,
 	}
 #endif
 #if (WITH_HW)
-      if (WITH_CALLBACK_MEMORY && mapping->device != NULL)
+      if (mapping->device != NULL)
 	{
 	  unsigned_M data = H2T_M (val);
 	  sim_cpu_hw_io_write_buffer (cpu, cia, mapping->device, &data, mapping->space, addr, N);

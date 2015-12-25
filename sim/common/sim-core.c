@@ -576,8 +576,7 @@ sim_core_write_buffer (SIM_DESC sd,
       if (mapping == NULL)
 	break;
 #if (WITH_DEVICES)
-      if (WITH_CALLBACK_MEMORY
-	  && mapping->device != NULL)
+      if (mapping->device != NULL)
 	{
 	  int nr_bytes = len - count;
 	  sim_cia cia = cpu ? CPU_PC_GET (cpu) : NULL_CIA;
@@ -597,8 +596,7 @@ sim_core_write_buffer (SIM_DESC sd,
 	}
 #endif
 #if (WITH_HW)
-      if (WITH_CALLBACK_MEMORY
-	  && mapping->device != NULL)
+      if (mapping->device != NULL)
 	{
 	  int nr_bytes = len - count;
 	  if (raddr + nr_bytes - 1 > mapping->bound)
