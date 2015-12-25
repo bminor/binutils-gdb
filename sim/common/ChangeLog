@@ -1,3 +1,8 @@
+2015-12-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-pal.c: Include config.h and sim-main.h.
+	(hw_pal_io_read_buffer): Always call CPU_INDEX.
+
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-options.c (standard_options): Always enable load-lma and
