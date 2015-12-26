@@ -511,11 +511,23 @@ sim_core_read_buffer (SIM_DESC sd,
 	int nr_bytes = len - count;
 	if (raddr + nr_bytes - 1> mapping->bound)
 	  nr_bytes = mapping->bound - raddr + 1;
-	if (sim_hw_io_read_buffer (sd, mapping->device,
-				   (unsigned_1*)buffer + count,
-				   mapping->space,
-				   raddr,
-				   nr_bytes) != nr_bytes)
+	/* If the access was initiated by a cpu, pass it down so errors can
+	   be propagated properly.  For other sources (e.g. GDB or DMA), we
+	   can only signal errors via the return value.  */
+	if (cpu)
+	  {
+	    sim_cia cia = cpu ? CPU_PC_GET (cpu) : NULL_CIA;
+	    sim_cpu_hw_io_read_buffer (cpu, cia, mapping->device,
+				       (unsigned_1*)buffer + count,
+				       mapping->space,
+				       raddr,
+				       nr_bytes);
+	  }
+	else if (sim_hw_io_read_buffer (sd, mapping->device,
+					(unsigned_1*)buffer + count,
+					mapping->space,
+					raddr,
+					nr_bytes) != nr_bytes)
 	  break;
 	count += nr_bytes;
 	continue;
@@ -577,11 +589,23 @@ sim_core_write_buffer (SIM_DESC sd,
 	  int nr_bytes = len - count;
 	  if (raddr + nr_bytes - 1 > mapping->bound)
 	    nr_bytes = mapping->bound - raddr + 1;
-	  if (sim_hw_io_write_buffer (sd, mapping->device,
-				      (unsigned_1*)buffer + count,
-				      mapping->space,
-				      raddr,
-				      nr_bytes) != nr_bytes)
+	  /* If the access was initiated by a cpu, pass it down so errors can
+	     be propagated properly.  For other sources (e.g. GDB or DMA), we
+	     can only signal errors via the return value.  */
+	  if (cpu)
+	    {
+	      sim_cia cia = cpu ? CPU_PC_GET (cpu) : NULL_CIA;
+	      sim_cpu_hw_io_write_buffer (cpu, cia, mapping->device,
+					  (unsigned_1*)buffer + count,
+					  mapping->space,
+					  raddr,
+					  nr_bytes);
+	    }
+	  else if (sim_hw_io_write_buffer (sd, mapping->device,
+					  (unsigned_1*)buffer + count,
+					  mapping->space,
+					  raddr,
+					  nr_bytes) != nr_bytes)
 	    break;
 	  count += nr_bytes;
 	  continue;
