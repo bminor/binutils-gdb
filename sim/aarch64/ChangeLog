@@ -1,0 +1,25 @@
+2015-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (system_get): New function.  Provides read
+	access to the dczid system register.
+	(do_mrs): New function - implements the MRS instruction.
+	(dexSystem): Call do_mrs for the MRS instruction.  Halt on
+	unimplemented system instructions.
+
+2015-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac: New configure template.
+	* aclocal.m4: Generate.
+	* config.in: Generate.
+	* configure: Generate.
+	* cpustate.c: New file - functions for accessing AArch64 registers.
+	* cpustate.h: New header.
+	* decode.h: New header.
+	* interp.c: New file - interface between GDB and simulator.
+	* Makefile.in: New makefile template.
+	* memory.c: New file - functions for simulating aarch64 memory
+	accesses.
+	* memory.h: New header.
+	* sim-main.h: New header.
+	* simulator.c: New file - aarch64 simulator functions.
+	* simulator.h: New header.
