@@ -3292,7 +3292,7 @@ decode_LDST_0 (SIM_CPU *cpu, bu16 iw0)
   int aop = ((iw0 >> LDST_aop_bits) & LDST_aop_mask);
   int reg = ((iw0 >> LDST_reg_bits) & LDST_reg_mask);
   int ptr = ((iw0 >> LDST_ptr_bits) & LDST_ptr_mask);
-  const char * const posts[] = { "++", "--", "" };
+  const char * const posts[] = { "++", "--", "", "<INV>" };
   const char *post = posts[aop];
   const char *ptr_name = get_preg_name (ptr);
 

@@ -1,5 +1,9 @@
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-sim.c (decode_LDST_0): Add 4th element to posts array.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (sim_create_inferior): Update comment and argv check.
 
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
