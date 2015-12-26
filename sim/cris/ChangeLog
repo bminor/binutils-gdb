@@ -1,5 +1,10 @@
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-if.c (sim_open): Delete cpu variable.  Pass NULL/NULL_CIA to
+	sim_core_write_buffer.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-if.c (sim_create_inferior): Delete old comment and set up
 	STATE_PROG_ARGV.
 

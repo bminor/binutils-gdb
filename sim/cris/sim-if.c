@@ -845,8 +845,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
       int i;
       char **prog_argv = STATE_PROG_ARGV (sd);
       int my_argc = 0;
-      /* All CPU:s have the same memory map, apparently.  */
-      SIM_CPU *cpu = STATE_CPU (sd, 0);
       USI csp;
       bfd_byte buf[4];
 
@@ -910,7 +908,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
      USI data_ = data;							\
      USI addr_ = addr;							\
      bfd_putl32 (data_, buf);						\
-     if (sim_core_write_buffer (sd, cpu, 0, buf, addr_, 4) != 4)	\
+     if (sim_core_write_buffer (sd, NULL, NULL_CIA, buf, addr_, 4) != 4)\
 	goto abandon_chip;						\
    }									\
  while (0)
@@ -922,7 +920,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 	{
 	  size_t strln = strlen (prog_argv[i]) + 1;
 
-	  if (sim_core_write_buffer (sd, cpu, 0, prog_argv[i], epp, strln)
+	  if (sim_core_write_buffer (sd, NULL, NULL_CIA, prog_argv[i], epp,
+				     strln)
 	      != strln)
 	  goto abandon_chip;
 
@@ -937,7 +936,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 	{
 	  unsigned int strln = strlen (my_environ[i]) + 1;
 
-	  if (sim_core_write_buffer (sd, cpu, 0, my_environ[i], epp, strln)
+	  if (sim_core_write_buffer (sd, NULL, NULL_CIA, my_environ[i], epp,
+				     strln)
 	      != strln)
 	    goto abandon_chip;
 
