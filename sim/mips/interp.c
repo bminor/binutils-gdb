@@ -841,59 +841,6 @@ mips_sim_close (SIM_DESC sd, int quitting)
 }
 
 int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
-{
-  int index;
-  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
-
-  /* Return the number of bytes written, or zero if error. */
-#ifdef DEBUG
-  sim_io_printf(sd,"sim_write(0x%s,buffer,%d);\n",pr_addr(addr),size);
-#endif
-
-  /* We use raw read and write routines, since we do not want to count
-     the GDB memory accesses in our statistics gathering. */
-
-  for (index = 0; index < size; index++)
-    {
-      address_word vaddr = (address_word)addr + index;
-      address_word paddr;
-      int cca;
-      if (!address_translation (SD, CPU, NULL_CIA, vaddr, isDATA, isSTORE, &paddr, &cca, isRAW))
-	break;
-      if (sim_core_write_buffer (SD, CPU, read_map, buffer + index, paddr, 1) != 1)
-	break;
-    }
-
-  return(index);
-}
-
-int
-sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
-{
-  int index;
-  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
-
-  /* Return the number of bytes read, or zero if error. */
-#ifdef DEBUG
-  sim_io_printf(sd,"sim_read(0x%s,buffer,%d);\n",pr_addr(addr),size);
-#endif /* DEBUG */
-
-  for (index = 0; (index < size); index++)
-    {
-      address_word vaddr = (address_word)addr + index;
-      address_word paddr;
-      int cca;
-      if (!address_translation (SD, CPU, NULL_CIA, vaddr, isDATA, isLOAD, &paddr, &cca, isRAW))
-	break;
-      if (sim_core_read_buffer (SD, CPU, read_map, buffer + index, paddr, 1) != 1)
-	break;
-    }
-
-  return(index);
-}
-
-int
 sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
@@ -1491,26 +1438,21 @@ store_word (SIM_DESC sd,
 	    uword64 vaddr,
 	    signed_word val)
 {
-  address_word paddr;
-  int uncached;
+  address_word paddr = vaddr;
 
   if ((vaddr & 3) != 0)
     SignalExceptionAddressStore ();
   else
     {
-      if (AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached,
-			      isTARGET, isREAL))
-	{
-	  const uword64 mask = 7;
-	  uword64 memval;
-	  unsigned int byte;
+      const uword64 mask = 7;
+      uword64 memval;
+      unsigned int byte;
 
-	  paddr = (paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2));
-	  byte = (vaddr & mask) ^ (BigEndianCPU << 2);
-	  memval = ((uword64) val) << (8 * byte);
-	  StoreMemory (uncached, AccessLength_WORD, memval, 0, paddr, vaddr,
-		       isREAL);
-	}
+      paddr = (paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2));
+      byte = (vaddr & mask) ^ (BigEndianCPU << 2);
+      memval = ((uword64) val) << (8 * byte);
+      StoreMemory (AccessLength_WORD, memval, 0, paddr, vaddr,
+		   isREAL);
     }
 }
 
@@ -1528,24 +1470,18 @@ load_word (SIM_DESC sd,
     }
   else
     {
-      address_word paddr;
-      int uncached;
+      address_word paddr = vaddr;
+      const uword64 mask = 0x7;
+      const unsigned int reverse = ReverseEndian ? 1 : 0;
+      const unsigned int bigend = BigEndianCPU ? 1 : 0;
+      uword64 memval;
+      unsigned int byte;
 
-      if (AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached,
-			      isTARGET, isREAL))
-	{
-	  const uword64 mask = 0x7;
-	  const unsigned int reverse = ReverseEndian ? 1 : 0;
-	  const unsigned int bigend = BigEndianCPU ? 1 : 0;
-	  uword64 memval;
-	  unsigned int byte;
-
-	  paddr = (paddr & ~mask) | ((paddr & mask) ^ (reverse << 2));
-	  LoadMemory (&memval,NULL,uncached, AccessLength_WORD, paddr, vaddr,
-			       isDATA, isREAL);
-	  byte = (vaddr & mask) ^ (bigend << 2);
-	  return EXTEND32 (memval >> (8 * byte));
-	}
+      paddr = (paddr & ~mask) | ((paddr & mask) ^ (reverse << 2));
+      LoadMemory (&memval, NULL, AccessLength_WORD, paddr, vaddr, isDATA,
+		  isREAL);
+      byte = (vaddr & mask) ^ (bigend << 2);
+      return EXTEND32 (memval >> (8 * byte));
     }
 
   return 0;

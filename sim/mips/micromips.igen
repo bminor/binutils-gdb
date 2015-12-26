@@ -845,11 +845,8 @@
   address_word base = GPR[BASE];
   address_word offset = EXTEND12 (IMMEDIATE);
   address_word vaddr = loadstore_ea (SD_, base, offset);
-  address_word paddr;
-  int uncached;
-  if (AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached,
-			  isTARGET, isREAL))
-    CacheOp (OP, vaddr, paddr, instruction_0);
+  address_word paddr = vaddr;
+  CacheOp (OP, vaddr, paddr, instruction_0);
 }
 
 

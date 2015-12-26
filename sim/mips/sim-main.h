@@ -908,12 +908,6 @@ unsigned64 mdmx_shuffle (SIM_STATE, int, unsigned64, unsigned64);
 /* The following are generic to all versions of the MIPS architecture
    to date: */
 
-/* Memory Access Types (for CCA): */
-#define Uncached                (0)
-#define CachedNoncoherent       (1)
-#define CachedCoherent          (2)
-#define Cached                  (3)
-
 #define isINSTRUCTION   (1 == 0) /* FALSE */
 #define isDATA          (1 == 1) /* TRUE */
 #define isLOAD          (1 == 0) /* FALSE */
@@ -942,17 +936,13 @@ unsigned64 mdmx_shuffle (SIM_STATE, int, unsigned64, unsigned64);
 #define PSIZE (WITH_TARGET_ADDRESS_BITSIZE)
 
 
-INLINE_SIM_MAIN (int) address_translation (SIM_DESC sd, sim_cpu *, address_word cia, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw);
-#define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
-address_translation (SD, CPU, cia, vAddr, IorD, LorS, pAddr, CCA, raw)
-
 INLINE_SIM_MAIN (void) load_memory (SIM_DESC sd, sim_cpu *cpu, address_word cia, uword64* memvalp, uword64* memval1p, int CCA, unsigned int AccessLength, address_word pAddr, address_word vAddr, int IorD);
-#define LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw) \
-load_memory (SD, CPU, cia, memvalp, memval1p, CCA, AccessLength, pAddr, vAddr, IorD)
+#define LoadMemory(memvalp,memval1p,AccessLength,pAddr,vAddr,IorD,raw) \
+load_memory (SD, CPU, cia, memvalp, memval1p, 0, AccessLength, pAddr, vAddr, IorD)
 
 INLINE_SIM_MAIN (void) store_memory (SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, unsigned int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr);
-#define StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw) \
-store_memory (SD, CPU, cia, CCA, AccessLength, MemElem, MemElem1, pAddr, vAddr)
+#define StoreMemory(AccessLength,MemElem,MemElem1,pAddr,vAddr,raw) \
+store_memory (SD, CPU, cia, 0, AccessLength, MemElem, MemElem1, pAddr, vAddr)
 
 INLINE_SIM_MAIN (void) cache_op (SIM_DESC sd, sim_cpu *cpu, address_word cia, int op, address_word pAddr, address_word vAddr, unsigned int instruction);
 #define CacheOp(op,pAddr,vAddr,instruction) \
@@ -961,10 +951,6 @@ cache_op (SD, CPU, cia, op, pAddr, vAddr, instruction)
 INLINE_SIM_MAIN (void) sync_operation (SIM_DESC sd, sim_cpu *cpu, address_word cia, int stype);
 #define SyncOperation(stype) \
 sync_operation (SD, CPU, cia, (stype))
-
-INLINE_SIM_MAIN (void) prefetch (SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, address_word pAddr, address_word vAddr, int DATA, int hint);
-#define Prefetch(CCA,pAddr,vAddr,DATA,hint) \
-prefetch (SD, CPU, cia, CCA, pAddr, vAddr, DATA, hint)
 
 void unpredictable_action (sim_cpu *cpu, address_word cia);
 #define NotWordValue(val)	not_word_value (SD_, (val))
