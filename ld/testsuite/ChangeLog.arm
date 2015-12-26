@@ -1,5 +1,16 @@
 2016-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	Backport from mainline
+	2015-12-26  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* ld-arm/arm-elf.exp: Run new test "Thumb-Thumb farcall v6-M (no
+	profile)".
+	* ld-arm/farcall-thumb-thumb-m-no-profile-a.s: New file.
+	* ld-arm/farcall-thumb-thumb-m-no-profile-b.s: Likewise.
+	* ld-arm/farcall-thumb-thumb-m-no-profile.d: Likewise.
+
+2016-06-20  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* ld-arm/arm-elf.exp (Secure gateway veneers (ARMv8-M Baseline)): Also
 	pass --gc-sections to ld.
 	(Secure gateway veneers (ARMv8-M Mainline)): Likewise.
