@@ -192,10 +192,11 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
   aarch64_set_next_PC (cpu, addr);
   aarch64_update_PC (cpu);
 
-  /* Standalone mode (ie aarch64-elf-run) will take care of the argv
-     for us in sim_open() -> sim_parse_args().  But in debug mode (i.e.
-     'target sim' with `aarch64-...-gdb`), we need to handle it.  */
-  if (STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG)
+  /* Standalone mode (i.e. `run`) will take care of the argv for us in
+     sim_open() -> sim_parse_args().  But in debug mode (i.e. 'target sim'
+     with `gdb`), we need to handle it because the user can change the
+     argv on the fly via gdb's 'run'.  */
+  if (STATE_PROG_ARGV (sd) != argv)
     {
       freeargv (STATE_PROG_ARGV (sd));
       STATE_PROG_ARGV (sd) = dupargv (argv);

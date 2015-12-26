@@ -1,3 +1,7 @@
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_create_inferior): Replace old #if 0 code with dupargv.
+
 2015-12-25  Mike Frysinger  <vapier@gentoo.org>
 
 	* devices.c: Delete file.

@@ -877,7 +877,11 @@ sim_create_inferior (SIM_DESC sd,
   else
     addr = 0;
 
-  if (STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG)
+  /* Standalone mode (i.e. `run`) will take care of the argv for us in
+     sim_open() -> sim_parse_args().  But in debug mode (i.e. 'target sim'
+     with `gdb`), we need to handle it because the user can change the
+     argv on the fly via gdb's 'run'.  */
+  if (STATE_PROG_ARGV (sd) != argv)
     {
       freeargv (STATE_PROG_ARGV (sd));
       STATE_PROG_ARGV (sd) = dupargv (argv);
