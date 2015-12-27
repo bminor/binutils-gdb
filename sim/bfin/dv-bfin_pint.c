@@ -63,6 +63,11 @@ bfin_pint_io_write_buffer (struct hw *me, const void *source, int space,
   bu32 value;
   bu32 *valuep;
 
+  /* Invalid access mode is higher priority than missing register.  */
+  /* XXX: The hardware allows 16 or 32 bit accesses ...  */
+  if (!dv_bfin_mmr_require_32 (me, addr, nr_bytes, true))
+    return 0;
+
   if (nr_bytes == 4)
     value = dv_load_4 (source);
   else
@@ -71,9 +76,6 @@ bfin_pint_io_write_buffer (struct hw *me, const void *source, int space,
   valuep = (void *)((unsigned long)pint + mmr_base() + mmr_off);
 
   HW_TRACE_WRITE ();
-
-  /* XXX: The hardware allows 16 or 32 bit accesses ...  */
-  dv_bfin_mmr_require_32 (me, addr, nr_bytes, true);
 
   switch (mmr_off)
     {
@@ -103,7 +105,7 @@ bfin_pint_io_write_buffer (struct hw *me, const void *source, int space,
       break;
     default:
       dv_bfin_mmr_invalid (me, addr, nr_bytes, true);
-      break;
+      return 0;
     }
 
 #if 0
@@ -134,13 +136,15 @@ bfin_pint_io_read_buffer (struct hw *me, void *dest, int space,
   bu32 mmr_off;
   bu32 *valuep;
 
+  /* Invalid access mode is higher priority than missing register.  */
+  /* XXX: The hardware allows 16 or 32 bit accesses ...  */
+  if (!dv_bfin_mmr_require_32 (me, addr, nr_bytes, false))
+    return 0;
+
   mmr_off = addr - pint->base;
   valuep = (void *)((unsigned long)pint + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
-
-  /* XXX: The hardware allows 16 or 32 bit accesses ...  */
-  dv_bfin_mmr_require_32 (me, addr, nr_bytes, false);
 
   switch (mmr_off)
     {
@@ -164,7 +168,7 @@ bfin_pint_io_read_buffer (struct hw *me, void *dest, int space,
       break;
     default:
       dv_bfin_mmr_invalid (me, addr, nr_bytes, false);
-      break;
+      return 0;
     }
 
   return nr_bytes;

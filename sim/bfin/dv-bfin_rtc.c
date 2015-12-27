@@ -61,6 +61,10 @@ bfin_rtc_io_write_buffer (struct hw *me, const void *source,
   bu32 *value32p;
   void *valuep;
 
+  /* Invalid access mode is higher priority than missing register.  */
+  if (!dv_bfin_mmr_require_16_32 (me, addr, nr_bytes, true))
+    return 0;
+
   if (nr_bytes == 4)
     value = dv_load_4 (source);
   else
@@ -103,6 +107,10 @@ bfin_rtc_io_read_buffer (struct hw *me, void *dest,
   bu16 *value16p;
   bu32 *value32p;
   void *valuep;
+
+  /* Invalid access mode is higher priority than missing register.  */
+  if (!dv_bfin_mmr_require_16_32 (me, addr, nr_bytes, false))
+    return 0;
 
   mmr_off = addr - rtc->base;
   valuep = (void *)((unsigned long)rtc + mmr_base() + mmr_off);
