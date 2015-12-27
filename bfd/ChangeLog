@@ -1,3 +1,10 @@
+2015-12-27  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* elf32-nios2.c (nios2_elf_assign_gp): Correct computation of _gp
+	address.
+	(nios2_elf32_relocate_section): Tidy code for R_NIOS2_GPREL error
+	messages.
+
 2015-12-24  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* elf32-arm.c (using_thumb_only): Check that profile is 'M' and update
