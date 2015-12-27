@@ -882,7 +882,7 @@ msp430_dis_read (bfd_vma memaddr,
 		 unsigned int length,
 		 struct disassemble_info *dinfo)
 {
-  SIM_DESC sd = dinfo->private_data;
+  SIM_DESC sd = dinfo->application_data;
   sim_core_read_buffer (sd, MSP430_CPU (sd), 0, myaddr, memaddr, length);
   return 0;
 }
@@ -1154,7 +1154,7 @@ msp430_step_once (SIM_DESC sd)
       sim_core_read_buffer (sd, MSP430_CPU (sd), 0, b, opcode_pc, opsize);
 
       init_disassemble_info (&info, stderr, (fprintf_ftype) fprintf);
-      info.private_data = sd;
+      info.application_data = sd;
       info.read_memory_func = msp430_dis_read;
 
       fprintf (stderr, "%#8x  ", opcode_pc);

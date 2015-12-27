@@ -85,7 +85,7 @@ sim_dis_read (bfd_vma                     memaddr,
 	      unsigned int                length,
 	      struct disassemble_info *   info)
 {
-  aarch64_get_mem_blk (info->private_data, memaddr, (char *) ptr, length);
+  aarch64_get_mem_blk (info->application_data, memaddr, (char *) ptr, length);
 
   return 0;
 }
@@ -207,7 +207,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
   info.read_memory_func = sim_dis_read;
   info.arch = bfd_get_arch (abfd);
   info.mach = bfd_get_mach (abfd);
-  info.private_data = cpu;
+  info.application_data = cpu;
   if (info.mach == 0)
     info.arch = bfd_arch_aarch64;
   disassemble_init_for_target (& info);

@@ -1,5 +1,10 @@
 2015-12-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (sim_dis_read): Change private_data to application_data.
+	(sim_create_inferior): Likewise.
+
+2015-12-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Delete sim-hload.o.
 
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
