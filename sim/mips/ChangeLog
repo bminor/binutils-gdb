@@ -1,5 +1,9 @@
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
+	* config.in, configure: Regenerate.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (sim_write, sim_read): Delete.
 	(store_word): Delete call to AddressTranslation and set paddr=vaddr.
 	(load_word): Likewise.

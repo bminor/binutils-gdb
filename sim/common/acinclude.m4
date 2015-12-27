@@ -53,9 +53,6 @@ AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
 
-dnl Pull in the target configuration file directly.
-AH_BOTTOM([#include "tconfig.h"])
-
 # Some of the common include files depend on bfd.h, and bfd.h checks
 # that config.h is included first by testing that the PACKAGE macro
 # is defined.

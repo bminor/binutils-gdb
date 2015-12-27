@@ -446,9 +446,6 @@ SUPPORT_H = \
 TARG_VALS_H = \
         targ-vals.h
 
-TCONFIG_H = \
-        tconfig.h
-
 INLINE = \
 	inline.h \
 	inline.c
@@ -659,12 +656,8 @@ callback.o: $(srcdir)/../common/callback.c $(TARG_VALS_H) $(CONFIG_H)
 
 targ-map.o: targ-map.c $(ANSIDECL_H) $(GDB_CALLBACK_H) $(TARG_VALS_H)
 
-sim-fpu.o: $(srcdir)/../common/sim-fpu.c $(CONFIG_H) $(TCONFIG_H)
+sim-fpu.o: $(srcdir)/../common/sim-fpu.c $(CONFIG_H)
 	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-fpu.c 
-
-tconfig.h:
-	rm -f tconfig.h
-	echo > tconfig.h
 
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile

@@ -28,8 +28,6 @@
 
 #if (WITH_HW)
 #include "sim-hw.h"
-#define device_io_read_buffer(client, ...) device_io_read_buffer ((device *)(client), __VA_ARGS__)
-#define device_io_write_buffer(client, ...) device_io_write_buffer ((device *)(client), __VA_ARGS__)
 #endif
 
 /* "core" module install handler.
@@ -141,11 +139,7 @@ new_sim_core_mapping (SIM_DESC sd,
 		      address_word addr,
 		      address_word nr_bytes,
 		      unsigned modulo,
-#if WITH_HW
 		      struct hw *device,
-#else
-		      device *device,
-#endif
 		      void *buffer,
 		      void *free_buffer)
 {
@@ -174,11 +168,7 @@ sim_core_map_attach (SIM_DESC sd,
 		     address_word addr,
 		     address_word nr_bytes,
 		     unsigned modulo,
-#if WITH_HW
 		     struct hw *client, /*callback/default*/
-#else
-		     device *client, /*callback/default*/
-#endif
 		     void *buffer, /*raw_memory*/
 		     void *free_buffer) /*raw_memory*/
 {
@@ -264,11 +254,7 @@ sim_core_attach (SIM_DESC sd,
 		 address_word addr,
 		 address_word nr_bytes,
 		 unsigned modulo,
-#if WITH_HW
 		 struct hw *client,
-#else
-		 device *client,
-#endif
 		 void *optional_buffer)
 {
   sim_core *memory = STATE_CORE (sd);
@@ -485,26 +471,6 @@ sim_core_read_buffer (SIM_DESC sd,
 			    0 /*dont-abort*/, NULL, NULL_CIA);
     if (mapping == NULL)
       break;
-#if (WITH_DEVICES)
-    if (mapping->device != NULL)
-      {
-	int nr_bytes = len - count;
-	sim_cia cia = cpu ? CPU_PC_GET (cpu) : NULL_CIA;
-	if (raddr + nr_bytes - 1> mapping->bound)
-	  nr_bytes = mapping->bound - raddr + 1;
-	if (device_io_read_buffer (mapping->device,
-				   (unsigned_1*)buffer + count,
-				   mapping->space,
-				   raddr,
-				   nr_bytes,
-				   sd,
-				   cpu,
-				   cia) != nr_bytes)
-	  break;
-	count += nr_bytes;
-	continue;
-      }
-#endif
 #if (WITH_HW)
     if (mapping->device != NULL)
       {
@@ -563,26 +529,6 @@ sim_core_write_buffer (SIM_DESC sd,
 			       0 /*dont-abort*/, NULL, NULL_CIA);
       if (mapping == NULL)
 	break;
-#if (WITH_DEVICES)
-      if (mapping->device != NULL)
-	{
-	  int nr_bytes = len - count;
-	  sim_cia cia = cpu ? CPU_PC_GET (cpu) : NULL_CIA;
-	  if (raddr + nr_bytes - 1 > mapping->bound)
-	    nr_bytes = mapping->bound - raddr + 1;
-	  if (device_io_write_buffer (mapping->device,
-				      (unsigned_1*)buffer + count,
-				      mapping->space,
-				      raddr,
-				      nr_bytes,
-				      sd,
-				      cpu,
-				      cia) != nr_bytes)
-	    break;
-	  count += nr_bytes;
-	  continue;
-	}
-#endif
 #if (WITH_HW)
       if (mapping->device != NULL)
 	{

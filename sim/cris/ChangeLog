@@ -1,5 +1,10 @@
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
+	* config.in, configure: Regenerate.
+	* Makefile.in (rvdummy.o): Delete tconfig.h.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-if.c (sim_open): Delete cpu variable.  Pass NULL/NULL_CIA to
 	sim_core_write_buffer.
 

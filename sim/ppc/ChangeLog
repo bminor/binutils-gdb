@@ -1,3 +1,9 @@
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (TCONFIG_H): Delete.
+	(sim-fpu.o): Delete $(TCONFIG_H).
+	(tconfig.h): Delete rule.
+
 2015-11-21  Mike Frysinger  <vapier@gentoo.org>
 
 	PR sim/13834

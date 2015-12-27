@@ -1,3 +1,7 @@
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
 2015-12-15  Dominik Vogt  <vogt@linux.vnet.ibm.com>
 
 	* interp.c (sign_ext): Fix left shift of negative value.

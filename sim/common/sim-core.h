@@ -57,11 +57,7 @@ struct _sim_core_mapping {
   void *free_buffer;
   void *buffer;
   /* callback map */
-#if (WITH_HW)
   struct hw *device;
-#else
-  device *device;
-#endif
   /* tracing */
   int trace;
   /* growth */
@@ -144,11 +140,7 @@ extern void sim_core_attach
  address_word addr,
  address_word nr_bytes,
  unsigned modulo,
-#if (WITH_HW)
  struct hw *client,
-#else
- device *client,
-#endif
  void *optional_buffer);
 
 
@@ -346,14 +338,5 @@ DECLARE_SIM_CORE_READ_N(misaligned,7,8)
 #define sim_core_read_word XCONCAT2(sim_core_read_,WITH_TARGET_WORD_BITSIZE)
 
 #undef DECLARE_SIM_CORE_READ_N
-
-
-#if (WITH_DEVICES)
-/* TODO: create sim/common/device.h */
-/* These are defined with each particular cpu.  */
-int device_io_read_buffer(device *me, void *dest, int space, address_word addr, unsigned nr_bytes, SIM_DESC sd, sim_cpu *processor, sim_cia cia);
-int device_io_write_buffer(device *me, const void *source, int space, address_word addr, unsigned nr_bytes, SIM_DESC sd, sim_cpu *processor, sim_cia cia);
-#endif
-
 
 #endif

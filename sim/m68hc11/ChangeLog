@@ -1,3 +1,7 @@
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
 2015-12-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_HANDLES_LMA): Delete.

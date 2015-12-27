@@ -164,18 +164,6 @@ sim_core_read_aligned_N(sim_cpu *cpu,
   mapping = sim_core_find_mapping (core, map, addr, N, read_transfer, 1 /*abort*/, cpu, cia);
   do
     {
-#if (WITH_DEVICES)
-      if (mapping->device != NULL)
-	{
-	  unsigned_M data;
-	  if (device_io_read_buffer (mapping->device, &data, mapping->space, addr, N, CPU_STATE (cpu), cpu, cia) != N)
-	    sim_engine_abort (CPU_STATE (cpu), cpu, cia,
-			      "internal error - %s - io_read_buffer should not fail",
-			      XSTRING (sim_core_read_aligned_N));
-	  val = T2H_M (data);
-	  break;
-	}
-#endif
 #if (WITH_HW)
       if (mapping->device != NULL)
 	{
@@ -296,17 +284,6 @@ sim_core_write_aligned_N(sim_cpu *cpu,
   mapping = sim_core_find_mapping (core, map, addr, N, write_transfer, 1 /*abort*/, cpu, cia);
   do
     {
-#if (WITH_DEVICES)
-      if (mapping->device != NULL)
-	{
-	  unsigned_M data = H2T_M (val);
-	  if (device_io_write_buffer (mapping->device, &data, mapping->space, addr, N, CPU_STATE (cpu), cpu, cia) != N)
-	    sim_engine_abort (CPU_STATE (cpu), cpu, cia,
-			      "internal error - %s - io_write_buffer should not fail",
-			      XSTRING (sim_core_read_aligned_N));
-	  break;
-	}
-#endif
 #if (WITH_HW)
       if (mapping->device != NULL)
 	{

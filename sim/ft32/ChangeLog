@@ -1,5 +1,9 @@
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
+	* config.in, configure: Regenerate.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (sim_create_inferior): Update comment and argv check.
 
 2015-11-15  Mike Frysinger  <vapier@gentoo.org>

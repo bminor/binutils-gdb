@@ -1,5 +1,24 @@
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (AH_BOTTOM): Delete tconfig.h appending.
+	* config.in, configure: Regenerate.
+	* Make-common.in (sim-basics_h): Delete tconfig.h.
+	(distclean): Likewise.
+	* sim-core.c (device_io_read_buffer, device_io_write_buffer): Delete.
+	(new_sim_core_mapping): Delete WITH_HW and device *device.
+	(sim_core_map_attach, sim_core_attach): Likewise.
+	(sim_core_read_buffer): Delete WITH_DEVICES logic.
+	(sim_core_write_buffer): Likewise.
+	* sim-core.h (struct _sim_core_mapping): Delete WITH_HW and device
+	*device.
+	(sim_core_attach): Likewise.
+	(device_io_read_buffer, device_io_write_buffer): Delete.
+	* sim-n-core.h (sim_core_read_aligned_N): Delete WITH_DEVICES logic.
+	(sim_core_write_aligned_N): Likewise.
+	* tconfig.h: Delete file.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-core.c (sim_core_read_buffer): Move cia decl to top of func.
 	Call sim_cpu_hw_io_read_buffer if cpu is valid.
 	(sim_core_write_buffer): Move cia decl to top of func.  Call

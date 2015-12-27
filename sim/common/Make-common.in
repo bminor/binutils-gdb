@@ -361,7 +361,6 @@ sim-base_h = $(srccom)/sim-base.h \
 		$(sim-cpu_h)
 sim-basics_h = $(srccom)/sim-basics.h \
 		../common/cconfig.h \
-		tconfig.h \
 		$(sim-config_h) \
 		$(callback_h) \
 		$(sim-inline_h) \
@@ -536,7 +535,7 @@ clean: $(SIM_EXTRA_CLEAN)
 distclean mostlyclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
 	rm -f TAGS
 	rm -f Makefile config.cache config.log config.status .gdbinit
-	rm -f tconfig.h config.h stamp-h
+	rm -f config.h stamp-h
 	rm -f targ-vals.def
 
 .c.o:

@@ -1,5 +1,9 @@
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
+	* config.in, configure: Regenerate.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
 	* devices.c (bfin_mmr_invalid): Delete cpu arg and add missing arg.
 	Add cpu, rw, and reason local vars.  Rewrite error messages.  Add
 	more todo comments.

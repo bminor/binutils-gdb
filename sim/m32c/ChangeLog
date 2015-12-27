@@ -1,3 +1,7 @@
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
 2015-11-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (sample.x, sample.mot, sample2.x, sample2.o, gloss.o):

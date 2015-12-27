@@ -1,3 +1,7 @@
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Delete mention of tconfig.h.
+
 2015-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* configure.tgt: Add aarch64 entry.

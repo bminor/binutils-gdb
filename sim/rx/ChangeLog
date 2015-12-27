@@ -1,3 +1,7 @@
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
 2015-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* rx.c (id_names): Add nop4, nop5, nop6 and nop7.
