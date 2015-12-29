@@ -13,12 +13,11 @@
 
 2015-12-22  Yoshinori Sato <ysato@users.sourceforge.jp>
 
-opcodes/
-        * rx-decode.opc (movco): Use uniqe id.
-        (movli): Likewise.
-        (stnz): Condition fix.
-        (mvtacgu): Destination fix.
-        * rx-decode.c: Regenerate.
+	* rx-decode.opc (movco): Use uniqe id.
+	(movli): Likewise.
+	(stnz): Condition fix.
+	(mvtacgu): Destination fix.
+	* rx-decode.c: Regenerate.
 
 2015-12-14  Yoshinori Sato <ysato@users.sourceforge.jp>
 
@@ -249,7 +248,7 @@ opcodes/
 
 2015-12-07  Alan Modra  <amodra@gmail.com>
 
-	* opcodes/ppc-opc.c (powerpc_opcodes): Sort power9 insns by
+	* ppc-opc.c (powerpc_opcodes): Sort power9 insns by
 	major opcode/xop.
 
 2015-12-04  Claudiu Zissulescu  <claziss@synopsys.com>
@@ -286,7 +285,7 @@ opcodes/
 2015-11-27  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-opc.c (half_conv_t): New.
-        (expand_fp_imm): Replace is_dp flag with the parameter size to
+	(expand_fp_imm): Replace is_dp flag with the parameter size to
 	specify the number of bytes for the required expansion.  Treat
 	a 16-bit expansion like a 32-bit expansion.  Add check for an
 	unsupported size request.  Update comment.
@@ -861,7 +860,7 @@ opcodes/
 
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* opcodes/i386-opc.tbl (call): Remove Disp16|Disp32 from 64-bit
+	* i386-opc.tbl (call): Remove Disp16|Disp32 from 64-bit
 	direct branch.
 	(jmp): Likewise.
 	* i386-tbl.h: Regenerated.

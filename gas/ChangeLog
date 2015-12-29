@@ -70,12 +70,8 @@
 
 2015-12-17  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
-	* gas/config/tc-arm.c (aeabi_set_public_attributes): Adjust
+	* config/tc-arm.c (aeabi_set_public_attributes): Adjust
 	TAG_ARCH_profile for armv8-a.
-	* gas/testsuite/gas/arm/armv8a-automatic-hlt.d: New test.
-	* gas/testsuite/gas/arm/armv8a-automatic-hlt.s: New test.
-	* gas/testsuite/gas/arm/armv8a-automatic-lda.d: New test.
-	* gas/testsuite/gas/arm/armv8a-automatic-lda.s: New test.
 
 2015-12-16 Mickael Guene <mickael.guene@st.com>
 
@@ -511,10 +507,10 @@
 
 2015-10-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
-        * config/tc-arc.c: Revamped file for ARC support.
-        * config/tc-arc.h: Likewise.
-        * doc/as.texinfo: Add new ARC options.
-        * doc/c-arc.texi: Likewise.
+	* config/tc-arc.c: Revamped file for ARC support.
+	* config/tc-arc.h: Likewise.
+	* doc/as.texinfo: Add new ARC options.
+	* doc/c-arc.texi: Likewise.
 
 2015-10-02  Renlin Li <renlin.li@arm.com>
 
@@ -763,9 +759,9 @@
 
 2015-08-17  Alan Modra  <amodra@gmail.com>
 
-	* gas/config/tc-arm.c (s_align): Delete.
+	* config/tc-arm.c (s_align): Delete.
 	(md_pseudo_table): Use s_align_ptwo for "align".
-	* gas/config/tc-arm.h (TC_ALIGN_ZERO_IS_DEFAULT): Define.
+	* config/tc-arm.h (TC_ALIGN_ZERO_IS_DEFAULT): Define.
 	* read.c (s_align): Modify for TC_ALIGN_ZERO_IS_DEFAULT.
 
 2015-08-13  Alan Modra  <amodra@gmail.com>
@@ -1143,7 +1139,7 @@
 2015-06-11  John David Anglin  <danglin@gcc.gnu.org>
 
 	PR gas/18427
-	* gas/config/tc-hppa.c (last_label_symbol): Declare.
+	* config/tc-hppa.c (last_label_symbol): Declare.
 	(pa_get_label): Return last label in current space/segment or NULL.
 	(pa_define_label): Record last label and add to root.
 	(pa_undefine_label): Remove last label from root.
@@ -1219,7 +1215,6 @@
 	    Bernd Schmidt <bernds@codesourcery.com>
 	    Paul Brook <paul@codesourcery.com>
 
-	gas/
 	* config/tc-alpha.c (all_cfi_sections): Declare.
 	(s_alpha_ent): Initialize all_cfi_sections.
 	(alpha_elf_md_end): Invoke cfi_set_sections.
@@ -1987,7 +1982,7 @@
 
 2015-01-12  Jan Beulich  <jbeulich@suse.com>
 
-	* gas/dw2gencfi.c (cfi_add_label, dot_cfi_label): New.
+	* dw2gencfi.c (cfi_add_label, dot_cfi_label): New.
 	(cfi_pseudo_table): Add "cfi_label".
 	(output_cfi_insn): Handle CFI_label.
 	(select_cie_for_fde): Als terminate CIE when encountering
@@ -2000,7 +1995,7 @@
 
 2015-01-12  Jan Beulich  <jbeulich@suse.com>
 
-	* gas/config/tc-arm.c (do_neon_shl_imm): Check immediate range.
+	* config/tc-arm.c (do_neon_shl_imm): Check immediate range.
 	(do_neon_qshl_imm): Likewise.
 
 2015-01-12  Alan Modra  <amodra@gmail.com>

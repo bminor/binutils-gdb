@@ -38,6 +38,13 @@
 	* gas/arm/automatic-strexb.d: New.
 	* gas/arm/automatic-strexb.s: New.
 
+2015-12-17  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* gas/arm/armv8a-automatic-hlt.d: New test.
+	* gas/arm/armv8a-automatic-hlt.s: New test.
+	* gas/arm/armv8a-automatic-lda.d: New test.
+	* gas/arm/armv8a-automatic-lda.s: New test.
+
 2015-12-16  Mickael Guene <mickael.guene@st.com>
 
 	* gas/arm/adds-thumb1-reloc-local.d: New
@@ -130,7 +137,7 @@
 	* gas/rx/fsqrt.d: New.
 	* gas/rx/fsqrt.sm: New.
 	* gas/rx/fsub.d: Add new pattern.
- 	* gas/rx/fsub.sm: Add new pattern.
+	* gas/rx/fsub.sm: Add new pattern.
 	* gas/rx/ftou.d: New.
 	* gas/rx/ftou.sm: New.
 	* gas/rx/maclh.d: New.
@@ -356,7 +363,7 @@
 2015-11-19  Alan Modra  <amodra@gmail.com>
 
 	* gas/ppc/altivec3.d: Allow for padding at end of section.
-	* gas/testsuite/gas/ppc/power9.d: Likewise.
+	* gas/ppc/power9.d: Likewise.
 
 2015-11-12  Matthew Wahab  <matthew.wahab@arm.com>
 
@@ -397,8 +404,8 @@
 
 2015-10-28  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
-        * gas/arm/pinsn.s: New.
-        * gas/arm/pinsn.d: Likewise.
+	* gas/arm/pinsn.s: New.
+	* gas/arm/pinsn.d: Likewise.
 
 2015-10-27  Nick Clifton  <nickc@redhat.com>
 
@@ -575,8 +582,8 @@
 
 2015-10-02  Renlin Li <renlin.li@arm.com>
 
-    * gas/aarch64/reloc-tlsgd_g0_nc.d: New.
-    * gas/aarch64/reloc-tlsgd_g0_nc.s: New.
+	* gas/aarch64/reloc-tlsgd_g0_nc.d: New.
+	* gas/aarch64/reloc-tlsgd_g0_nc.s: New.
 
 2015-10-02  Renlin Li <renlin.li@arm.com>
 
@@ -1148,9 +1155,7 @@
 2015-05-28  Catherine Moore  <clm@codesourcery.com>
 	    Bernd Schmidt <bernds@codesourcery.com>
 
-	gas/testsuite/
 	* gas/mips/mips.exp: Run new tests.
-
 	* gas/mips/compact-eh-1.s: New file.
 	* gas/mips/compact-eh-2.s: New file.
 	* gas/mips/compact-eh-3.s: New file.
