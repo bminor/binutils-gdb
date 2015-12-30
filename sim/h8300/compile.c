@@ -58,32 +58,6 @@ static void set_simcache_size (SIM_DESC, int);
 
 /* CPU data object: */
 
-static int
-sim_state_initialize (SIM_DESC sd, sim_cpu *cpu)
-{
-  /* FIXME: not really necessary, since sim_cpu_alloc calls zalloc.  */
-
-  memset (&cpu->regs, 0, sizeof(cpu->regs));
-  cpu->regs[SBR_REGNUM] = 0xFFFFFF00;
-  cpu->pc = 0;
-  cpu->delayed_branch = 0;
-  cpu->memory = NULL;
-  cpu->eightbit = NULL;
-  cpu->mask = 0;
-
-  /* Initialize local simulator state.  */
-  sd->sim_cache = NULL;
-  sd->sim_cache_size = 0;
-  sd->cache_idx = NULL;
-  sd->cache_top = 0;
-  sd->memory_size = 0;
-  sd->compiles = 0;
-#ifdef ADEBUG
-  memset (&cpu->stats, 0, sizeof (cpu->stats));
-#endif
-  return 0;
-}
-
 static unsigned int
 h8_get_pc (SIM_DESC sd)
 {
@@ -4869,7 +4843,7 @@ sim_open (SIM_OPEN_KIND kind,
 
   cpu = STATE_CPU (sd, 0);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  sim_state_initialize (sd, cpu);
+  cpu->regs[SBR_REGNUM] = 0xFFFFFF00;
   /* sim_cpu object is new, so some initialization is needed.  */
   init_pointers_needed = 1;
 

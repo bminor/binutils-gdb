@@ -1,5 +1,11 @@
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* compile.c (sim_state_initialize): Delete.
+	(sim_open): Replace sim_state_initialize call with SBR_REGNUM
+	assignment.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* compile.c (h8300_reg_store): Delete sd.  Change init_pointers to
 	use CPU_STATE (cpu).  Change h8_set_pc to cpu->pc.  Return -1 and
 	drop the printf if the default case.  Change all the set func calls
