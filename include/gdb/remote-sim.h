@@ -213,6 +213,15 @@ int sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length);
 void sim_info (SIM_DESC sd, int verbose);
 
 
+/* Return a memory map in XML format.
+
+   The caller must free the returned string.
+
+   For details on the format, see GDB's Memory Map Format documentation.  */
+
+char *sim_memory_map (SIM_DESC sd);
+
+
 /* Run (or resume) the simulated program.
 
    STEP, when non-zero indicates that only a single simulator cycle

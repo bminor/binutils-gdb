@@ -1,3 +1,9 @@
+2021-01-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* remote-sim.c: Include memory-map.h.
+	(gdbsim_target): Define memory_map override.
+	(gdbsim_target::memory_map): Define.
+
 2021-01-07  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (do_full_match): Conditionally skip "_ada_" prefix.

@@ -1,3 +1,7 @@
+2021-01-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-core.c (sim_memory_map): Define.
+
 2021-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4 (ACX_BUGURL): Change http:// to https://.

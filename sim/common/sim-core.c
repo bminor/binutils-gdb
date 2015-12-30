@@ -453,6 +453,63 @@ sim_core_translate (sim_core_mapping *mapping,
 
 
 #if EXTERN_SIM_CORE_P
+/* See include/gdb/remote-sim.h.  */
+char *
+sim_memory_map (SIM_DESC sd)
+{
+  sim_core *core = STATE_CORE (sd);
+  unsigned map;
+  char *s1, *s2, *entry;
+
+  s1 = xstrdup (
+    "<?xml version='1.0'?>\n"
+    "<!DOCTYPE memory-map PUBLIC '+//IDN gnu.org//DTD GDB Memory Map V1.0//EN'"
+    " 'http://sourceware.org/gdb/gdb-memory-map.dtd'>\n"
+    "<memory-map>\n");
+
+  for (map = 0; map < nr_maps; ++map)
+    {
+      sim_core_mapping *mapping;
+
+      for (mapping = core->common.map[map].first;
+	   mapping != NULL;
+	   mapping = mapping->next)
+	{
+	  /* GDB can only handle a single address space.  */
+	  if (mapping->level != 0)
+	    continue;
+
+	  entry = xasprintf ("<memory type='ram' start='%#x' length='%#x'/>\n",
+			     mapping->base, mapping->nr_bytes);
+	  /* The sim memory map is organized by access, not by addresses.
+	     So a RWX memory map will have three independent mappings.
+	     GDB's format cannot support overlapping regions, so we have
+	     to filter those out.
+
+	     Further, GDB can only handle RX ("rom") or RWX ("ram") mappings.
+	     We just emit "ram" everywhere to keep it simple.  If GDB ever
+	     gains support for more stuff, we can expand this.
+
+	     Using strstr is kind of hacky, but as long as the map is not huge
+	     (we're talking <10K), should be fine.  */
+	  if (strstr (s1, entry) == NULL)
+	    {
+	      s2 = concat (s1, entry, NULL);
+	      free (s1);
+	      s1 = s2;
+	    }
+	  free (entry);
+	}
+    }
+
+  s2 = concat (s1, "</memory-map>", NULL);
+  free (s1);
+  return s2;
+}
+#endif
+
+
+#if EXTERN_SIM_CORE_P
 unsigned
 sim_core_read_buffer (SIM_DESC sd,
 		      sim_cpu *cpu,

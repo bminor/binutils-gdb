@@ -1,3 +1,7 @@
+2021-01-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* remote-sim.h (sim_memory_map): Define.
+
 2016-07-15  John Baldwin  <jhb@FreeBSD.org>
 
 	* signals.def: Add GDB_SIGNAL_LIBRT.

@@ -42,6 +42,7 @@
 #include "readline/readline.h"
 #include "gdbthread.h"
 #include "gdbsupport/byte-vector.h"
+#include "memory-map.h"
 
 /* Prototypes */
 
@@ -164,6 +165,7 @@ struct gdbsim_target final
 
   bool has_all_memory ()  override;
   bool has_memory ()  override;
+  std::vector<mem_region> memory_map () override;
 
 private:
   sim_inferior_data *get_inferior_data_by_ptid (ptid_t ptid,
@@ -1268,6 +1270,22 @@ gdbsim_target::has_memory ()
     return false;
 
   return true;
+}
+
+/* Get memory map from the simulator.  */
+
+std::vector<mem_region>
+gdbsim_target::memory_map ()
+{
+  struct sim_inferior_data *sim_data
+    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
+  std::vector<mem_region> result;
+  gdb::unique_xmalloc_ptr<char> text (sim_memory_map (sim_data->gdbsim_desc));
+
+  if (text != nullptr)
+    result = parse_memory_map (text.get ());
+
+  return result;
 }
 
 void _initialize_remote_sim ();
