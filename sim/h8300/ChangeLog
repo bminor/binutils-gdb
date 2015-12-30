@@ -1,5 +1,13 @@
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* wrapper.c (sim_store_register): Rename to ...
+	(h8300_reg_store): ... this.  Declare sd.
+	(sim_fetch_register): Rename to ...
+	(h8300_reg_fetch): ... this.  Declare sd.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* compile.c (lreg): Delete.
 	(init_pointers): Delete lreg assignments.
 

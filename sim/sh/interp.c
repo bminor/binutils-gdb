@@ -1977,8 +1977,8 @@ enum {
   REGBANK_MACL = 19
 };
 
-int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+sh_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   unsigned val;
 
@@ -2150,8 +2150,8 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
   return length;
 }
 
-int
-sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+sh_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   int val;
 
@@ -2460,6 +2460,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = sh_reg_fetch;
+      CPU_REG_STORE (cpu) = sh_reg_store;
       CPU_PC_FETCH (cpu) = sh_pc_get;
       CPU_PC_STORE (cpu) = sh_pc_set;
     }

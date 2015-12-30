@@ -342,6 +342,9 @@ mips_pc_set (sim_cpu *cpu, sim_cia pc)
   PC = pc;
 }
 
+static int mips_reg_fetch (SIM_CPU *, int, unsigned char *, int);
+static int mips_reg_store (SIM_CPU *, int, unsigned char *, int);
+
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
@@ -803,6 +806,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = mips_reg_fetch;
+      CPU_REG_STORE (cpu) = mips_reg_store;
       CPU_PC_FETCH (cpu) = mips_pc_get;
       CPU_PC_STORE (cpu) = mips_pc_set;
     }
@@ -840,15 +845,11 @@ mips_sim_close (SIM_DESC sd, int quitting)
 #endif
 }
 
-int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+mips_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
   /* NOTE: gdb (the client) stores registers in target byte order
      while the simulator uses host byte order */
-#ifdef DEBUG
-  sim_io_printf(sd,"sim_store_register(%d,*memory=0x%s);\n",rn,pr_addr(*((SIM_ADDR *)memory)));
-#endif /* DEBUG */
 
   /* Unfortunately this suffers from the same problem as the register
      numbering one. We need to know what the width of each logical
@@ -856,11 +857,9 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 
   if (cpu->register_widths[rn] == 0)
     {
-      sim_io_eprintf(sd,"Invalid register width for %d (register store ignored)\n",rn);
+      sim_io_eprintf (CPU_STATE (cpu), "Invalid register width for %d (register store ignored)\n", rn);
       return 0;
     }
-
-
 
   if (rn >= FGR_BASE && rn < FGR_BASE + NR_FGR)
     {
@@ -925,25 +924,17 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
   return 0;
 }
 
-int
-sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+mips_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
   /* NOTE: gdb (the client) stores registers in target byte order
      while the simulator uses host byte order */
-#ifdef DEBUG
-#if 0  /* FIXME: doesn't compile */
-  sim_io_printf(sd,"sim_fetch_register(%d=0x%s,mem) : place simulator registers into memory\n",rn,pr_addr(registers[rn]));
-#endif
-#endif /* DEBUG */
 
   if (cpu->register_widths[rn] == 0)
     {
-      sim_io_eprintf (sd, "Invalid register width for %d (register fetch ignored)\n",rn);
+      sim_io_eprintf (CPU_STATE (cpu), "Invalid register width for %d (register fetch ignored)\n", rn);
       return 0;
     }
-
-
 
   /* Any floating point register */
   if (rn >= FGR_BASE && rn < FGR_BASE + NR_FGR)

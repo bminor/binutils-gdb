@@ -742,6 +742,9 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
+static int d10v_reg_fetch (SIM_CPU *, int, unsigned char *, int);
+static int d10v_reg_store (SIM_CPU *, int, unsigned char *, int);
+
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 {
@@ -806,6 +809,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = d10v_reg_fetch;
+      CPU_REG_STORE (cpu) = d10v_reg_store;
       CPU_PC_FETCH (cpu) = d10v_pc_get;
       CPU_PC_STORE (cpu) = d10v_pc_set;
     }
@@ -1196,10 +1201,10 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
   return SIM_RC_OK;
 }
 
-int
-sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+d10v_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
+  SIM_DESC sd = CPU_STATE (cpu);
   int size;
   switch ((enum sim_d10v_regs) rn)
     {
@@ -1280,10 +1285,10 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
   return size;
 }
  
-int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+d10v_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
+  SIM_DESC sd = CPU_STATE (cpu);
   int size;
   switch ((enum sim_d10v_regs) rn)
     {

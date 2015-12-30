@@ -1,3 +1,12 @@
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (d10v_reg_store, d10v_reg_fetch): Define.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+	(sim_store_register): Rename to ...
+	(d10v_reg_store): ... this.  Rename cpu to sd.
+	(sim_fetch_register): Rename to ...
+	(d10v_reg_fetch): ... this.  Rename cpu to sd.
+
 2015-12-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-hload.o.

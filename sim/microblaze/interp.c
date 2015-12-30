@@ -304,11 +304,9 @@ sim_engine_run (SIM_DESC sd,
   CPU.cycles += memops; 	/* and memop cycle delays */
 }
 
-int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+microblaze_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
-
   if (rn < NUM_REGS + NUM_SPECIAL && rn >= 0)
     {
       if (length == 4)
@@ -328,10 +326,9 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     return 0;
 }
 
-int
-sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+microblaze_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
   long ival;
 
   if (rn < NUM_REGS + NUM_SPECIAL && rn >= 0)
@@ -447,6 +444,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = microblaze_reg_fetch;
+      CPU_REG_STORE (cpu) = microblaze_reg_store;
       CPU_PC_FETCH (cpu) = microblaze_pc_get;
       CPU_PC_STORE (cpu) = microblaze_pc_set;
 

@@ -4600,10 +4600,10 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
   return size;
 }
 
-
-int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
+static int
+h8300_reg_store (SIM_CPU *cpu, int rn, unsigned char *value, int length)
 {
+  SIM_DESC sd = CPU_STATE (cpu);
   int longval;
   int shortval;
   int intval;
@@ -4665,9 +4665,10 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
   return length;
 }
 
-int
-sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
+static int
+h8300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int length)
 {
+  SIM_DESC sd = CPU_STATE (cpu);
   int v;
   int longreg = 0;
 
@@ -4963,6 +4964,8 @@ sim_open (SIM_OPEN_KIND kind,
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = h8300_reg_fetch;
+      CPU_REG_STORE (cpu) = h8300_reg_store;
       CPU_PC_FETCH (cpu) = h8300_pc_get;
       CPU_PC_STORE (cpu) = h8300_pc_set;
     }

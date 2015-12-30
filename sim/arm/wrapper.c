@@ -431,11 +431,8 @@ tomem (struct ARMul_State *state,
     }
 }
 
-int
-sim_store_register (SIM_DESC sd ATTRIBUTE_UNUSED,
-		    int rn,
-		    unsigned char *memory,
-		    int length)
+static int
+arm_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   init ();
 
@@ -539,11 +536,8 @@ sim_store_register (SIM_DESC sd ATTRIBUTE_UNUSED,
   return length;
 }
 
-int
-sim_fetch_register (SIM_DESC sd ATTRIBUTE_UNUSED,
-		    int rn,
-		    unsigned char *memory,
-		    int length)
+static int
+arm_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   ARMword regval;
   int len = length;
@@ -870,6 +864,8 @@ sim_open (SIM_OPEN_KIND kind,
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = arm_reg_fetch;
+      CPU_REG_STORE (cpu) = arm_reg_store;
       CPU_PC_FETCH (cpu) = arm_pc_get;
       CPU_PC_STORE (cpu) = arm_pc_set;
     }

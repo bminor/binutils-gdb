@@ -1,3 +1,12 @@
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (m68hc11_reg_store, m68hc11_reg_fetch): Define.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+	(sim_store_register): Rename to ...
+	(m68hc11_reg_store): ... this.  Delete local cpu var.
+	(sim_fetch_register): Rename to ...
+	(m68hc11_reg_fetch): ... this.  Delete local cpu var.
+
 2015-12-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-hload.o.

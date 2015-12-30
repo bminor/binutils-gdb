@@ -1,3 +1,11 @@
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (sim_store_register): Rename to ...
+	(arm_reg_store): ... this.
+	(sim_fetch_register): Rename to ...
+	(arm_reg_fetch): ... this.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+
 2015-12-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-hload.o.

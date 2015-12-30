@@ -1,3 +1,14 @@
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (mips_reg_store, mips_reg_fetch): Define.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+	(sim_store_register): Rename to ...
+	(mips_reg_store): ... this.  Delete local cpu var.
+	Update sim_io_eprintf calls.
+	(sim_fetch_register): Rename to ...
+	(mips_reg_fetch): ... this.  Delete local cpu var.
+	Update sim_io_eprintf calls.
+
 2015-12-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_OBJS): Delete sim-hload.o.
