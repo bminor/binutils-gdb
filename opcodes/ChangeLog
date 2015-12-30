@@ -823,7 +823,7 @@
 
 2015-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* opcodes/i386-opc.tbl (call): Remove Disp16|Disp32 from 64-bit
+	* i386-opc.tbl (call): Remove Disp16|Disp32 from 64-bit
 	direct branch.
 	(jmp): Likewise.
 	* i386-tbl.h: Regenerated.

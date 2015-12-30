@@ -249,12 +249,12 @@
 
 2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
-	 PR binutils/18656
-	 * objcopy.c (setup_section): Call bfd_convert_section_size
-	 to get the output section size.
-	 (copy_section): Get the section size from the output section
-	 and call bfd_get_full_section_contents to convert section
-	 contents for output.
+	PR binutils/18656
+	* objcopy.c (setup_section): Call bfd_convert_section_size
+	to get the output section size.
+	(copy_section): Get the section size from the output section
+	and call bfd_get_full_section_contents to convert section
+	contents for output.
 
 2015-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
