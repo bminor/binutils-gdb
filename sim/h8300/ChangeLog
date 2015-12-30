@@ -1,5 +1,17 @@
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* compile.c (h8300_reg_store): Delete sd.  Change init_pointers to
+	use CPU_STATE (cpu).  Change h8_set_pc to cpu->pc.  Return -1 and
+	drop the printf if the default case.  Change all the set func calls
+	to use cpu->regs[rn] instead.
+	(h8300_reg_store): Delete sd.  Change init_pointers to
+	use CPU_STATE (cpu).  Change h8_get_pc to cpu->pc.  Return -1 and
+	drop the printf if the default case.  Change all the get func calls
+	to use cpu->regs[rn] instead.  Add ZERO_REGNUM case.  Return 2 and
+	4 instead of -1 at the end.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* compile.c (lvalue): Change sim_engine_set_run_state calls to
 	sim_engine_halt.  Declare local cpu.
 	(fetch_1): Likewise.

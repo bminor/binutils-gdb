@@ -4605,7 +4605,6 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 static int
 h8300_reg_store (SIM_CPU *cpu, int rn, unsigned char *value, int length)
 {
-  SIM_DESC sd = CPU_STATE (cpu);
   int longval;
   int shortval;
   int intval;
@@ -4613,17 +4612,17 @@ h8300_reg_store (SIM_CPU *cpu, int rn, unsigned char *value, int length)
   shortval = (value[0] << 8) | (value[1]);
   intval = h8300hmode ? longval : shortval;
 
-  init_pointers (sd);
+  init_pointers (CPU_STATE (cpu));
   switch (rn)
     {
     case PC_REGNUM:
       if(h8300_normal_mode)
-        h8_set_pc (sd, shortval); /* PC for Normal mode is 2 bytes */
+        cpu->pc = shortval; /* PC for Normal mode is 2 bytes */
       else
-        h8_set_pc (sd, intval);
+        cpu->pc = intval;
       break;
     default:
-      sim_io_printf (sd, "sim_store_register: bad regnum %d.\n", rn);
+      return -1;
     case R0_REGNUM:
     case R1_REGNUM:
     case R2_REGNUM:
@@ -4632,36 +4631,18 @@ h8300_reg_store (SIM_CPU *cpu, int rn, unsigned char *value, int length)
     case R5_REGNUM:
     case R6_REGNUM:
     case R7_REGNUM:
-      h8_set_reg (sd, rn, intval);
-      break;
     case CCR_REGNUM:
-      h8_set_ccr (sd, intval);
-      break;
     case EXR_REGNUM:
-      h8_set_exr (sd, intval);
-      break;
     case SBR_REGNUM:
-      h8_set_sbr (sd, intval);
-      break;
     case VBR_REGNUM:
-      h8_set_vbr (sd, intval);
-      break;
     case MACH_REGNUM:
-      h8_set_mach (sd, intval);
-      break;
     case MACL_REGNUM:
-      h8_set_macl (sd, intval);
+      cpu->regs[rn] = intval;
       break;
     case CYCLE_REGNUM:
-      h8_set_cycles (sd, longval);
-      break;
-
     case INST_REGNUM:
-      h8_set_insts (sd, longval);
-      break;
-
     case TICK_REGNUM:
-      h8_set_ticks (sd, longval);
+      cpu->regs[rn] = longval;
       break;
     }
   return length;
@@ -4670,41 +4651,26 @@ h8300_reg_store (SIM_CPU *cpu, int rn, unsigned char *value, int length)
 static int
 h8300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int length)
 {
-  SIM_DESC sd = CPU_STATE (cpu);
   int v;
   int longreg = 0;
 
-  init_pointers (sd);
+  init_pointers (CPU_STATE (cpu));
 
   if (!h8300smode && rn >= EXR_REGNUM)
     rn++;
   switch (rn)
     {
     default:
-      sim_io_printf (sd, "sim_fetch_register: bad regnum %d.\n", rn);
-      v = 0;
+      return -1;
+    case PC_REGNUM:
+      v = cpu->pc;
       break;
     case CCR_REGNUM:
-      v = h8_get_ccr (sd);
-      break;
     case EXR_REGNUM:
-      v = h8_get_exr (sd);
-      break;
-    case PC_REGNUM:
-      v = h8_get_pc (sd);
-      break;
     case SBR_REGNUM:
-      v = h8_get_sbr (sd);
-      break;
     case VBR_REGNUM:
-      v = h8_get_vbr (sd);
-      break;
     case MACH_REGNUM:
-      v = h8_get_mach (sd);
-      break;
     case MACL_REGNUM:
-      v = h8_get_macl (sd);
-      break;
     case R0_REGNUM:
     case R1_REGNUM:
     case R2_REGNUM:
@@ -4713,19 +4679,16 @@ h8300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int length)
     case R5_REGNUM:
     case R6_REGNUM:
     case R7_REGNUM:
-      v = h8_get_reg (sd, rn);
+      v = cpu->regs[rn];
       break;
     case CYCLE_REGNUM:
-      v = h8_get_cycles (sd);
-      longreg = 1;
-      break;
     case TICK_REGNUM:
-      v = h8_get_ticks (sd);
+    case INST_REGNUM:
+      v = cpu->regs[rn];
       longreg = 1;
       break;
-    case INST_REGNUM:
-      v = h8_get_insts (sd);
-      longreg = 1;
+    case ZERO_REGNUM:
+      v = 0;
       break;
     }
   /* In Normal mode PC is 2 byte, but other registers are 4 byte */
@@ -4735,13 +4698,14 @@ h8300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int length)
       buf[1] = v >> 16;
       buf[2] = v >> 8;
       buf[3] = v >> 0;
+      return 4;
     }
   else
     {
       buf[0] = v >> 8;
       buf[1] = v;
+      return 2;
     }
-  return -1;
 }
 
 static void
