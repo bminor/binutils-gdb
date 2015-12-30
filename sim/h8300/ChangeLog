@@ -1,3 +1,8 @@
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* inst.h: Delete file.
+	* Makefile.in (compile.o): Delete rule.
+
 2015-12-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
