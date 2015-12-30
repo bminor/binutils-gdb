@@ -1,5 +1,10 @@
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* compile.c (lreg): Delete.
+	(init_pointers): Delete lreg assignments.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* inst.h: Delete file.
 	* Makefile.in (compile.o): Delete rule.
 

@@ -1251,7 +1251,6 @@ compile (SIM_DESC sd, int pc)
 
 static unsigned char  *breg[32];
 static unsigned short *wreg[16];
-static unsigned int   *lreg[18];
 
 #define GET_B_REG(X)     *(breg[X])
 #define SET_B_REG(X, Y) (*(breg[X])) = (Y)
@@ -1828,11 +1827,8 @@ init_pointers (SIM_DESC sd)
 	    sim_io_printf (sd, "init_pointers: internal error.\n");
 
 	  h8_set_reg (sd, i, 0);
-	  lreg[i] = h8_get_reg_buf (sd) + i;
 	}
 
-      /* Note: sim uses pseudo-register ZERO as a zero register.  */
-      lreg[ZERO_REGNUM] = h8_get_reg_buf (sd) + ZERO_REGNUM;
       init_pointers_needed = 0;
 
       /* Initialize the seg registers.  */
