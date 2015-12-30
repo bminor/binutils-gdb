@@ -549,6 +549,8 @@ bitfrom (int x)
 static unsigned int
 lvalue (SIM_DESC sd, int x, int rn, unsigned int *val)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
+
   if (val == NULL)	/* Paranoia.  */
     return -1;
 
@@ -564,7 +566,7 @@ lvalue (SIM_DESC sd, int x, int rn, unsigned int *val)
       *val = X (OP_MEM, SP);
       break;
     default:
-      sim_engine_set_run_state (sd, sim_stopped, SIGSEGV);
+      sim_engine_halt (sd, cpu, NULL, NULL_CIA, sim_stopped, SIM_SIGSEGV);
       return -1;
     }
   return 0;
@@ -1306,6 +1308,7 @@ static unsigned short *wreg[16];
 static int
 fetch_1 (SIM_DESC sd, ea_type *arg, int *val, int twice)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   int rn = arg->reg;
   int abs = arg->literal;
   int r;
@@ -1511,7 +1514,7 @@ fetch_1 (SIM_DESC sd, ea_type *arg, int *val, int twice)
 
     case X (OP_MEM, SB):	/* Why isn't this implemented?  */
     default:
-      sim_engine_set_run_state (sd, sim_stopped, SIGSEGV);
+      sim_engine_halt (sd, cpu, NULL, NULL_CIA, sim_stopped, SIM_SIGSEGV);
       return -1;
     }
   return 0;	/* Success.  */
@@ -1542,6 +1545,7 @@ fetch2 (SIM_DESC sd, ea_type *arg, int *val)
 static int
 store_1 (SIM_DESC sd, ea_type *arg, int n, int twice)
 {
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
   int rn = arg->reg;
   int abs = arg->literal;
   int t;
@@ -1720,7 +1724,7 @@ store_1 (SIM_DESC sd, ea_type *arg, int n, int twice)
     case X (OP_MEM, SW):	/* Why isn't this implemented?  */
     case X (OP_MEM, SL):	/* Why isn't this implemented?  */
     default:
-      sim_engine_set_run_state (sd, sim_stopped, SIGSEGV);
+      sim_engine_halt (sd, cpu, NULL, NULL_CIA, sim_stopped, SIM_SIGSEGV);
       return -1;
     }
   return 0;
@@ -1855,14 +1859,12 @@ case O (name, SB):				\
   goto next;					\
 }
 
-void
-sim_resume (SIM_DESC sd, int step, int siggnal)
+static void
+step_once (SIM_DESC sd, SIM_CPU *cpu)
 {
-  static int init1;
   int cycles = 0;
   int insts = 0;
   int tick_start = get_now ();
-  int poll_count = 0;
   int res;
   int tmp;
   int rd;
@@ -1872,27 +1874,16 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   int c, nz, v, n, u, h, ui, intMaskBit;
   int trace, intMask;
   int oldmask;
-  enum sim_stop reason;
-  int sigrc;
   host_callback *sim_callback = STATE_CALLBACK (sd);
 
   init_pointers (sd);
-
-  if (step)
-    {
-      sim_engine_set_run_state (sd, sim_stopped, SIGTRAP);
-    }
-  else
-    {
-      sim_engine_set_run_state (sd, sim_running, 0);
-    }
 
   pc = h8_get_pc (sd);
 
   /* The PC should never be odd.  */
   if (pc & 0x1)
     {
-      sim_engine_set_run_state (sd, sim_stopped, SIGBUS);
+      sim_engine_halt (sd, cpu, NULL, NULL_CIA, sim_stopped, SIM_SIGBUS);
       return;
     }
 
@@ -3582,7 +3573,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  goto end;
 
 	case O (O_ILL, SB):		/* illegal */
-	  sim_engine_set_run_state (sd, sim_stopped, SIGILL);
+	  sim_engine_halt (sd, cpu, NULL, pc, sim_stopped, SIM_SIGILL);
 	  goto end;
 
 	case O (O_SLEEP, SN):		/* sleep */
@@ -3592,8 +3583,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      SIM_WIFEXITED (h8_get_reg (sd, 0)))
 	    {
 	      /* This trap comes from _exit, not from gdb.  */
-	      sim_engine_set_run_state (sd, sim_exited, 
-					SIM_WEXITSTATUS (h8_get_reg (sd, 0)));
+	      sim_engine_halt (sd, cpu, NULL, pc, sim_exited,
+			       SIM_WEXITSTATUS (h8_get_reg (sd, 0)));
 	    }
 #if 0
 	  /* Unfortunately this won't really work, because
@@ -3602,14 +3593,14 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  else if (SIM_WIFSTOPPED (h8_get_reg (sd, 0)))
 	    {
 	      /* Pass the stop signal up to gdb.  */
-	      sim_engine_set_run_state (sd, sim_stopped, 
-					SIM_WSTOPSIG (h8_get_reg (sd, 0)));
+	      sim_engine_halt (sd, cpu, NULL, pc, sim_stopped,
+			       SIM_WSTOPSIG (h8_get_reg (sd, 0)));
 	    }
 #endif
 	  else
 	    {
 	      /* Treat it as a sigtrap.  */
-	      sim_engine_set_run_state (sd, sim_stopped, SIGTRAP);
+	      sim_engine_halt (sd, cpu, NULL, pc, sim_stopped, SIM_SIGTRAP);
 	    }
 	  goto end;
 
@@ -3650,7 +3641,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  goto end;
 
 	case O (O_BPT, SN):
-	  sim_engine_set_run_state (sd, sim_stopped, SIGTRAP);
+	  sim_engine_halt (sd, cpu, NULL, pc, sim_stopped, SIM_SIGTRAP);
 	  goto end;
 
 	case O (O_BSETEQ, SB):
@@ -4323,13 +4314,13 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 
 	default:
 	illegal:
-	  sim_engine_set_run_state (sd, sim_stopped, SIGILL);
+	  sim_engine_halt (sd, cpu, NULL, pc, sim_stopped, SIM_SIGILL);
 	  goto end;
 
 	}
 
       sim_io_printf (sd, "sim_resume: internal error.\n");
-      sim_engine_set_run_state (sd, sim_stopped, SIGILL);
+      sim_engine_halt (sd, cpu, NULL, pc, sim_stopped, SIM_SIGILL);
       goto end;
 
     setc:
@@ -4540,18 +4531,9 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
       else
 	pc = code->next_pc;
 
-    end:
-      
-      if (--poll_count < 0)
-	{
-	  poll_count = POLL_QUIT_INTERVAL;
-	  if ((*sim_callback->poll_quit) != NULL
-	      && (*sim_callback->poll_quit) (sim_callback))
-	    sim_engine_set_run_state (sd, sim_stopped, SIGINT);
-	}
-      sim_engine_get_run_state (sd, &reason, &sigrc);
-    } while (reason == sim_running);
+    } while (0);
 
+ end:
   h8_set_ticks (sd, h8_get_ticks (sd) + get_now () - tick_start);
   h8_set_cycles (sd, h8_get_cycles (sd) + cycles);
   h8_set_insts (sd, h8_get_insts (sd) + insts);
@@ -4562,6 +4544,26 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
     h8_set_exr (sd, (trace<<7) | intMask);
 
   h8_set_mask (sd, oldmask);
+}
+
+void
+sim_engine_run (SIM_DESC sd,
+		int next_cpu_nr,  /* ignore  */
+		int nr_cpus,      /* ignore  */
+		int siggnal)
+{
+  sim_cpu *cpu;
+
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  cpu = STATE_CPU (sd, 0);
+
+  while (1)
+    {
+      step_once (sd, cpu);
+      if (sim_events_tick (sd))
+	sim_events_process (sd);
+    }
 }
 
 int

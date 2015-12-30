@@ -1,5 +1,19 @@
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* compile.c (lvalue): Change sim_engine_set_run_state calls to
+	sim_engine_halt.  Declare local cpu.
+	(fetch_1): Likewise.
+	(store_1): Likewise.
+	(sim_resume): Rename to ...
+	(step_once): ... this.  Declare init1, poll_count, reason, and
+	sigrc variables.  Delete step checking.  Change
+	sim_engine_set_run_state calls to sim_engine_halt.  Delete poll
+	logic.  Change while(1) loop to while(0).
+	(sim_engine_run): New function.
+	* Makefile.in (SIM_OBJS): Add sim-resume.o.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* compile.c (sim_open): Delete current_alignment and
 	current_target_byte_order assignments.
 	* configure.ac: Call SIM_AC_OPTION_ENDIAN and
