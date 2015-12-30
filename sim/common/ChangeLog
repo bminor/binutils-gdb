@@ -1,3 +1,8 @@
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-module.c (sim_pre_argv_init): Change STATE_MY_NAME assignment
+	to use lbasename.
+
 2015-12-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (SIM_NEW_COMMON_OBJS): Add sim-hload.o.

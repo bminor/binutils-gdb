@@ -74,9 +74,7 @@ sim_pre_argv_init (SIM_DESC sd, const char *myname)
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   SIM_ASSERT (STATE_MODULES (sd) == NULL);
 
-  STATE_MY_NAME (sd) = myname + strlen (myname);
-  while (STATE_MY_NAME (sd) > myname && STATE_MY_NAME (sd)[-1] != '/')
-    --STATE_MY_NAME (sd);
+  STATE_MY_NAME (sd) = lbasename (myname);
 
   /* Set the cpu names to default values.  */
   {
