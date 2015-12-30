@@ -4907,10 +4907,6 @@ sim_open (SIM_OPEN_KIND kind,
   /* sim_cpu object is new, so some initialization is needed.  */
   init_pointers_needed = 1;
 
-  /* For compatibility (FIXME: is this right?).  */
-  current_alignment = NONSTRICT_ALIGNMENT;
-  current_target_byte_order = BIG_ENDIAN;
-
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {
       free_state (sd);
