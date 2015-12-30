@@ -42,12 +42,6 @@
 
 int debug;
 
-/* FIXME: Needs to live in header file.
-   This header should also include the things in remote-sim.h.
-   One could move this to remote-sim.h but this function isn't needed
-   by gdb.  */
-static void set_simcache_size (SIM_DESC, int);
-
 #define X(op, size)  (op * 4 + size)
 
 #define SP (h8300hmode && !h8300_normal_mode ? SL : SW)
@@ -116,18 +110,6 @@ static void
 h8_set_vbr (SIM_DESC sd, int val)
 {
   (STATE_CPU (sd, 0)) -> regs[VBR_REGNUM] = val;
-}
-
-static int
-h8_get_cache_top (SIM_DESC sd)
-{
-  return sd -> cache_top;
-}
-
-static void
-h8_set_cache_top (SIM_DESC sd, int val)
-{
-  sd -> cache_top = val;
 }
 
 static int
@@ -226,18 +208,6 @@ h8_set_macl (SIM_DESC sd, unsigned int val)
   (STATE_CPU (sd, 0)) -> regs[MACL_REGNUM] = val;
 }
 
-static int
-h8_get_compiles (SIM_DESC sd)
-{
-  return sd -> compiles;
-}
-
-static void
-h8_increment_compiles (SIM_DESC sd)
-{
-  sd -> compiles ++;
-}
-
 static unsigned int *
 h8_get_reg_buf (SIM_DESC sd)
 {
@@ -269,32 +239,6 @@ h8_increment_stats (SIM_DESC sd, int idx)
   sd -> stats[idx] ++;
 }
 #endif /* ADEBUG */
-
-static unsigned short *
-h8_get_cache_idx_buf (SIM_DESC sd)
-{
-  return sd -> cache_idx;
-}
-
-static void
-h8_set_cache_idx_buf (SIM_DESC sd, unsigned short *ptr)
-{
-  sd -> cache_idx = ptr;
-}
-
-static unsigned short
-h8_get_cache_idx (SIM_DESC sd, unsigned int idx)
-{
-  if (idx > sd->memory_size)
-    return (unsigned short) -1;
-  return sd -> cache_idx[idx];
-}
-
-static void
-h8_set_cache_idx (SIM_DESC sd, int idx, unsigned int val)
-{
-  sd -> cache_idx[idx] = (unsigned short) val;
-}
 
 static unsigned char *
 h8_get_memory_buf (SIM_DESC sd)
@@ -1197,34 +1141,6 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
   dst->opcode = O (O_ILL, SB);
 }
 
-static void
-compile (SIM_DESC sd, int pc)
-{
-  int idx;
-
-  /* Find the next cache entry to use.  */
-  idx = h8_get_cache_top (sd) + 1;
-  h8_increment_compiles (sd);
-  if (idx >= sd->sim_cache_size)
-    {
-      idx = 1;
-    }
-  h8_set_cache_top (sd, idx);
-
-  /* Throw away its old meaning.  */
-  h8_set_cache_idx (sd, sd->sim_cache[idx].oldpc, 0);
-
-  /* Set to new address.  */
-  sd->sim_cache[idx].oldpc = pc;
-
-  /* Fill in instruction info.  */
-  decode (sd, pc, h8_get_memory_buf (sd) + pc, sd->sim_cache + idx);
-
-  /* Point to new cache entry.  */
-  h8_set_cache_idx (sd, pc, idx);
-}
-
-
 static unsigned char  *breg[32];
 static unsigned short *wreg[16];
 
@@ -1749,15 +1665,11 @@ init_pointers (SIM_DESC sd)
 
       if (h8_get_memory_buf (sd))
 	free (h8_get_memory_buf (sd));
-      if (h8_get_cache_idx_buf (sd))
-	free (h8_get_cache_idx_buf (sd));
       if (h8_get_eightbit_buf (sd))
 	free (h8_get_eightbit_buf (sd));
 
       h8_set_memory_buf (sd, (unsigned char *) 
 			 calloc (sizeof (char), memory_size));
-      h8_set_cache_idx_buf (sd, (unsigned short *) 
-			    calloc (sizeof (short), memory_size));
       sd->memory_size = memory_size;
       h8_set_eightbit_buf (sd, (unsigned char *) calloc (sizeof (char), 256));
 
@@ -1808,10 +1720,6 @@ init_pointers (SIM_DESC sd)
 	}
 
       init_pointers_needed = 0;
-
-      /* Initialize the seg registers.  */
-      if (!sd->sim_cache)
-	set_simcache_size (sd, CSIZE);
     }
 }
 
@@ -1875,16 +1783,10 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
     h8_set_mask (sd, 0xffff);
   do
     {
-      unsigned short cidx;
-      decoded_inst *code;
-
-    top:
-      cidx = h8_get_cache_idx (sd, pc);
-      if (cidx == (unsigned short) -1 ||
-	  cidx >= sd->sim_cache_size)
-	goto illegal;
-	  
-      code = sd->sim_cache + cidx;
+      decoded_inst _code, *code = &_code;
+      memset (code, 0, sizeof (*code));
+      decode (sd, pc, h8_get_memory_buf (sd) + pc, code);
+      code->oldpc = pc;
 
 #if ADEBUG
       if (debug)
@@ -1903,15 +1805,6 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 
       switch (code->opcode)
 	{
-	case 0:
-	  /*
-	   * This opcode is a fake for when we get to an
-	   * instruction which hasnt been compiled
-	   */
-	  compile (sd, pc);
-	  goto top;
-	  break;
-
 	case O (O_MOVAB, SL):
 	case O (O_MOVAW, SL):
 	case O (O_MOVAL, SL):
@@ -4553,7 +4446,6 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
       if (addr < memory_size)
 	{
 	  h8_set_memory    (sd, addr + i, buffer[i]);
-	  h8_set_cache_idx (sd, addr + i,  0);
 	}
       else
 	{
@@ -4682,19 +4574,6 @@ h8300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int length)
     }
 }
 
-static void
-set_simcache_size (SIM_DESC sd, int n)
-{
-  if (sd->sim_cache)
-    free (sd->sim_cache);
-  if (n < 2)
-    n = 2;
-  sd->sim_cache = (decoded_inst *) malloc (sizeof (decoded_inst) * n);
-  memset (sd->sim_cache, 0, sizeof (decoded_inst) * n);
-  sd->sim_cache_size = n;
-}
-
-
 void
 sim_info (SIM_DESC sd, int verbose)
 {
@@ -4707,8 +4586,6 @@ sim_info (SIM_DESC sd, int verbose)
   sim_io_printf (sd, "#virtual time taken     %10.4f\n", virttime);
   if (timetaken != 0.0)
     sim_io_printf (sd, "#simulation ratio       %10.4f\n", virttime / timetaken);
-  sim_io_printf (sd, "#compiles               %10d\n", h8_get_compiles (sd));
-  sim_io_printf (sd, "#cache size             %10d\n", sd->sim_cache_size);
 
 #ifdef ADEBUG
   /* This to be conditional on `what' (aka `verbose'),
@@ -4962,15 +4839,11 @@ sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 
   if (h8_get_memory_buf (sd))
     free (h8_get_memory_buf (sd));
-  if (h8_get_cache_idx_buf (sd))
-    free (h8_get_cache_idx_buf (sd));
   if (h8_get_eightbit_buf (sd))
     free (h8_get_eightbit_buf (sd));
 
   h8_set_memory_buf (sd, (unsigned char *) 
 		     calloc (sizeof (char), memory_size));
-  h8_set_cache_idx_buf (sd, (unsigned short *) 
-			calloc (sizeof (short), memory_size));
   sd->memory_size = memory_size;
   h8_set_eightbit_buf (sd, (unsigned char *) calloc (sizeof (char), 256));
 

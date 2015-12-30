@@ -1,3 +1,19 @@
+2021-01-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (set_simcache_size, h8_get_cache_top, h8_set_cache_top,
+	h8_get_compiles, h8_increment_compiles, h8_get_cache_idx_buf,
+	h8_set_cache_idx_buf, h8_get_cache_idx, h8_set_cache_idx, compile,
+	set_simcache_size): Delete.
+	(init_pointers): Delete calls to h8_get_cache_idx_buf,
+	h8_set_cache_idx_buf, and set_simcache_size.
+	(step_once): Replace call to h8_get_cache_idx with decode.  Delete
+	case 0 handling and call to compile.
+	(sim_write): Delete call to h8_set_cache_idx.
+	(sim_info): Delete call to h8_get_compiles & sim_cache_size.
+	(sim_load): Delete calls to h8_get_cache_idx_buf & h8_set_cache_idx_buf.
+	* sim-main.h (sim_state): Delete sim_cache_size, sim_cache, cache_idx,
+	cache_top, and compiles.
+
 2021-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
