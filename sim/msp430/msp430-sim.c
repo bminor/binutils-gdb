@@ -30,9 +30,7 @@
 #include "opcode/msp430-decode.h"
 #include "sim-main.h"
 #include "sim-syscall.h"
-#include "dis-asm.h"
 #include "targ-vals.h"
-#include "trace.h"
 
 static int
 loader_write_mem (SIM_DESC sd,
@@ -224,8 +222,6 @@ sim_open (SIM_OPEN_KIND kind,
   /* CPU specific initialization.  */
   assert (MAX_NR_PROCESSORS == 1);
   msp430_initialize_cpu (sd, MSP430_CPU (sd));
-
-  msp430_trace_init (STATE_PROG_BFD (sd));
 
   if (prog_bfd != NULL)
     {
@@ -876,17 +872,6 @@ msp430_cio (SIM_DESC sd)
 #define DSRC    get_op (sd, opcode, 0)
 #define DEST(V) put_op (sd, opcode, 0, (V))
 
-static int
-msp430_dis_read (bfd_vma memaddr,
-		 bfd_byte *myaddr,
-		 unsigned int length,
-		 struct disassemble_info *dinfo)
-{
-  SIM_DESC sd = dinfo->application_data;
-  sim_core_read_buffer (sd, MSP430_CPU (sd), 0, myaddr, memaddr, length);
-  return 0;
-}
-
 #define DO_ALU(OP,SOP,MORE)						\
   {									\
     int s1 = DSRC;							\
@@ -1144,33 +1129,11 @@ msp430_step_once (SIM_DESC sd)
       break;
     }
 
-  if (TRACE_INSN_P (MSP430_CPU (sd)))
-    {
-      disassemble_info info;
-      unsigned char b[10];
-
-      msp430_trace_one (opcode_pc);
-
-      sim_core_read_buffer (sd, MSP430_CPU (sd), 0, b, opcode_pc, opsize);
-
-      init_disassemble_info (&info, stderr, (fprintf_ftype) fprintf);
-      info.application_data = sd;
-      info.read_memory_func = msp430_dis_read;
-
-      fprintf (stderr, "%#8x  ", opcode_pc);
-      for (i = 0; i < opsize; i += 2)
-	fprintf (stderr, " %02x%02x", b[i+1], b[i]);
-      for (; i < 6; i += 2)
-	fprintf (stderr, "     ");
-      fprintf (stderr, "  ");
-      print_insn_msp430 (opcode_pc, &info);
-      fprintf (stderr, "\n");
-      fflush (stdout);
-    }
-
   if (TRACE_ANY_P (MSP430_CPU (sd)))
     trace_prefix (sd, MSP430_CPU (sd), NULL_CIA, opcode_pc,
 		  TRACE_LINENUM_P (MSP430_CPU (sd)), NULL, 0, "");
+
+  TRACE_DISASM (MSP430_CPU (sd), opcode_pc);
 
   carry_to_use = 0;
   switch (opcode->id)

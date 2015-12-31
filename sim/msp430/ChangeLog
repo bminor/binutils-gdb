@@ -1,3 +1,13 @@
+2016-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete trace.o.
+	* msp430-sim.c: Delete dis-asm.h and trace.h includes.
+	(sim_open): Delete msp430_trace_init call.
+	(msp430_dis_read): Delete function.
+	(msp430_step_once): Replace disassembly logic with a call
+	to TRACE_DISASM.
+	* trace.c, trace.h: Delete files.
+
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
