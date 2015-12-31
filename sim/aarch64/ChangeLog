@@ -1,3 +1,20 @@
+2016-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Delete dis-asm.h include.
+	(info, opbuf, op_printf, aarch64_print_insn, sim_dis_read): Delete.
+	(sim_create_inferior): Delete disassemble init logic.
+	(OPTION_DISAS, aarch64_option_handler, aarch64_options): Delete.
+	(sim_open): Delete sim_add_option_table call.
+	* memory.c (mem_error): Delete disas check.
+	* simulator.c: Delete dis-asm.h include.
+	(disas): Delete.
+	(HALT_UNALLOC): Replace disassembly logic with TRACE_DISASM.
+	(HALT_NYI): Likewise.
+	(handle_halt): Delete disas call.
+	(aarch64_step): Replace disas logic with TRACE_DISASM.
+	* simulator.h: Delete dis-asm.h include.
+	(aarch64_print_insn): Delete.
+
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* simulator.c (MAX, MIN): Delete.

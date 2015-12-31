@@ -28,16 +28,12 @@
 #include <time.h>
 #include <limits.h>
 
-#include "dis-asm.h"
-
 #include "simulator.h"
 #include "cpustate.h"
 #include "memory.h"
 
 #define NO_SP 0
 #define SP_OK 1
-
-bfd_boolean disas = FALSE;
 
 #define TST(_flag)   (aarch64_test_CPSR_bit (cpu, _flag))
 #define IS_SET(_X)   ( TST (( _X )))
@@ -46,14 +42,11 @@ bfd_boolean disas = FALSE;
 #define HALT_UNALLOC							\
   do									\
     {									\
-      if (TRACE_INSN_P (cpu))						\
-	{								\
-	  aarch64_print_insn (CPU_STATE (cpu), aarch64_get_PC (cpu));	\
-	  TRACE_INSN (cpu,						\
-		      "Unallocated instruction detected at sim line %d,"\
-		      " exe addr %" PRIx64,				\
-		      __LINE__, aarch64_get_PC (cpu));			\
-	}								\
+      TRACE_DISASM (cpu, aarch64_get_PC (cpu));				\
+      TRACE_INSN (cpu,							\
+		  "Unallocated instruction detected at sim line %d,"	\
+		  " exe addr %" PRIx64,					\
+		  __LINE__, aarch64_get_PC (cpu));			\
       sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu),\
 		       sim_stopped, SIM_SIGILL);			\
     }									\
@@ -62,14 +55,11 @@ bfd_boolean disas = FALSE;
 #define HALT_NYI							\
   do									\
     {									\
-      if (TRACE_INSN_P (cpu))						\
-	{								\
-	  aarch64_print_insn (CPU_STATE (cpu), aarch64_get_PC (cpu));	\
-	  TRACE_INSN (cpu,						\
-		      "Unimplemented instruction detected at sim line %d,"\
-		      " exe addr %" PRIx64,				\
-		      __LINE__, aarch64_get_PC (cpu));			\
-	}								\
+      TRACE_DISASM (cpu, aarch64_get_PC (cpu));				\
+      TRACE_INSN (cpu,							\
+		  "Unimplemented instruction detected at sim line %d,"	\
+		  " exe addr %" PRIx64,					\
+		  __LINE__, aarch64_get_PC (cpu));			\
       sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu),\
 		       sim_stopped, SIM_SIGABRT);			\
     }									\
@@ -12678,9 +12668,6 @@ handle_halt (sim_cpu *cpu, uint32_t val)
 	else if (fd == 1)
 	  {
 	    printf ("%.*s", (int) len, aarch64_get_mem_ptr (cpu, buf));
-	    if (disas)
-	      /* So that the output stays in sync with trace output.  */
-	      fflush (stdout);
 	  }
 	else if (fd == 2)
 	  {
@@ -13032,19 +13019,9 @@ aarch64_step (sim_cpu *cpu)
   aarch64_set_next_PC (cpu, pc + 4);
   aarch64_get_instr (cpu) = aarch64_get_mem_u32 (cpu, pc);
 
-  if (TRACE_INSN_P (cpu))
-    {
-      if (disas)
-	TRACE_INSN (cpu, " pc = %" PRIx64 " ", pc);
-      else
-	TRACE_INSN (cpu, " pc = %" PRIx64 " instr = %x", pc,
-		    aarch64_get_instr (cpu));
-    }
-  else if (disas)
-    sim_io_eprintf (CPU_STATE (cpu), " %" PRIx64 " ", pc);
-
-  if (disas)
-    aarch64_print_insn (CPU_STATE (cpu), pc);
+  TRACE_INSN (cpu, " pc = %" PRIx64 " instr = %x", pc,
+	      aarch64_get_instr (cpu));
+  TRACE_DISASM (cpu, pc);
 
   aarch64_decode_and_execute (cpu, pc);
 
