@@ -1,3 +1,7 @@
+2016-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (step_once): Call TRACE_DISASM.
+
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c (decode_dsp32shift_0): Change MIN to min.

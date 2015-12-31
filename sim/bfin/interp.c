@@ -606,6 +606,8 @@ step_once (SIM_CPU *cpu)
     trace_prefix (sd, cpu, NULL_CIA, oldpc, TRACE_LINENUM_P (cpu),
 		  NULL, 0, " "); /* Use a space for gcc warnings.  */
 
+  TRACE_DISASM (cpu, oldpc);
+
   /* Handle hardware single stepping when lower than EVT3, and when SYSCFG
      has already had the SSSTEP bit enabled.  */
   ssstep = false;
