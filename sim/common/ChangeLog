@@ -1,3 +1,23 @@
+2016-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-trace.c: Include dis-asm.h.
+	(OPTION_TRACE_DISASM): New enum.
+	(trace_options): Add trace-disasm flag.
+	(trace_option_handler): Handle OPTION_TRACE_DISASM.
+	(trace_idx_to_str): Handle TRACE_DISASM_IDX.
+	(dis_read, dis_printf, trace_disasm): New functions.
+	* sim-trace.h: Include dis-asm.h.
+	(TRACE_INSN_IDX): Clarify comment.
+	(TRACE_DISASM_IDX): New enum.
+	(TRACE_disasm): New define.
+	(WITH_TRACE_DISASM_P): New define.
+	(struct _trace_data): Add dis_bfd, disassembler, and dis_info.
+	(STRACE_DISASM_P): New define.
+	(TRACE_DISASM_P): Likewise.
+	(TRACE_DISASM_P): Likewise.
+	(TRACE_DISASM): Likewise.
+	(trace_disasm): New function.
+
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-utils.c (sim_state_free): Change to STATE_MAGIC.
