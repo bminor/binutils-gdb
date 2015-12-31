@@ -1,3 +1,9 @@
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete current_target_byte_order assignment.
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN.
+	* configure: Regenerate.
+
 2015-12-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-if.c (cris_program_offset_write, sim_load): Delete.

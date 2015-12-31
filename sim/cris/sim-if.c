@@ -720,12 +720,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
       return 0;
     }
 
-  /* If we have a binary program, endianness-setting would not be taken
-     from elsewhere unfortunately, so set it here.  At the time of this
-     writing, it isn't used until sim_config, but that might change so
-     set it here before memory is defined or touched.  */
-  current_target_byte_order = LITTLE_ENDIAN;
-
   /* check for/establish the reference program image */
   if (sim_analyze_program (sd,
 			   (STATE_PROG_ARGV (sd) != NULL

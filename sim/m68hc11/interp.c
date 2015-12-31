@@ -437,10 +437,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 
   cpu = STATE_CPU (sd, 0);
 
-  /* for compatibility */
-  current_alignment = NONSTRICT_ALIGNMENT;
-  current_target_byte_order = BIG_ENDIAN;
-
   cpu_initialize (sd, cpu);
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
