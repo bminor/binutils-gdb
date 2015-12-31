@@ -12955,7 +12955,7 @@ fi
 fi
 
 
-wire_endian="LITTLE_ENDIAN"
+wire_endian="BIG_ENDIAN"
 default_endian=""
 # Check whether --enable-sim-endian was given.
 if test "${enable_sim_endian+set}" = set; then :

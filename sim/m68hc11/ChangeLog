@@ -1,5 +1,10 @@
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Change LITTLE_ENDIAN to BIG_ENDIAN.
+	* configure: Regenerate.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* imterp.c (sim_open): Delete current_alignment and
 	current_target_byte_order assignments.
 	* configure.ac: Call SIM_AC_OPTION_ENDIAN.
