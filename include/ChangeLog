@@ -1,3 +1,7 @@
+2016-01-01  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
 For older changes see ChangeLog-0415, aout/ChangeLog-9115,
 cgen/ChangeLog-0915, coff/ChangeLog-0415, elf/ChangeLog-0415,
 mach-o/ChangeLog-1115, nlm/ChangeLog-9315, opcode/ChangeLog-0415,
