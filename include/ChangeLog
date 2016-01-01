@@ -1,0 +1,17 @@
+For older changes see ChangeLog-0415, aout/ChangeLog-9115,
+cgen/ChangeLog-0915, coff/ChangeLog-0415, elf/ChangeLog-0415,
+mach-o/ChangeLog-1115, nlm/ChangeLog-9315, opcode/ChangeLog-0415,
+som/ChangeLog-1015, and vms/ChangeLog-1015
+
+Copyright (C) 2016 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+End:
