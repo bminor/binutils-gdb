@@ -1,5 +1,10 @@
 2016-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* top.c (print_gdb_version): Change copyright year in version
+	message.
+
+2016-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* config/djgpp/fnchange.lst: Add entry for gdb/ChangeLog-2015.
 
 For older changes see ChangeLog-2015.
