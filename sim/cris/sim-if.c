@@ -229,32 +229,6 @@ cris_option_handler (SIM_DESC sd, sim_cpu *cpu ATTRIBUTE_UNUSED, int opt,
   return sim_profile_set_option (sd, "-model", PROFILE_MODEL_IDX, "on");
 }
 
-/* FIXME: Remove these, globalize those in sim-load.c, move elsewhere.  */
-
-static void
-xprintf  (host_callback *callback, const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-
-  (*callback->vprintf_filtered) (callback, fmt, ap);
-
-  va_end (ap);
-}
-
-static void
-eprintf (host_callback *callback, const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-
-  (*callback->evprintf_filtered) (callback, fmt, ap);
-
-  va_end (ap);
-}
-
 /* An ELF-specific simplified ../common/sim-load.c:sim_load_file,
    using the program headers, not sections, in order to make sure that
    the program headers themeselves are also loaded.  The caller is
@@ -267,7 +241,6 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
   int n_hdrs;
   int i;
   bfd_boolean verbose = STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG;
-  host_callback *callback = STATE_CALLBACK (sd);
 
   phdr = elf_tdata (abfd)->phdr;
   n_hdrs = elf_elfheader (abfd)->e_phnum;
@@ -286,24 +259,24 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
       buf = xmalloc (phdr[i].p_filesz);
 
       if (verbose)
-	xprintf (callback, "Loading segment at 0x%lx, size 0x%lx\n",
-		 lma, phdr[i].p_filesz);
+	sim_io_printf (sd, "Loading segment at 0x%lx, size 0x%lx\n",
+		       lma, phdr[i].p_filesz);
 
       if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
 	  || (bfd_bread (buf, phdr[i].p_filesz, abfd) != phdr[i].p_filesz))
 	{
-	  eprintf (callback,
-		   "%s: could not read segment at 0x%lx, size 0x%lx\n",
-		   STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
+	  sim_io_eprintf (sd,
+			  "%s: could not read segment at 0x%lx, size 0x%lx\n",
+			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
 	}
 
       if (do_write (sd, lma, buf, phdr[i].p_filesz) != phdr[i].p_filesz)
 	{
-	  eprintf (callback,
-		   "%s: could not load segment at 0x%lx, size 0x%lx\n",
-		   STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
+	  sim_io_eprintf (sd,
+			  "%s: could not load segment at 0x%lx, size 0x%lx\n",
+			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
 	}
