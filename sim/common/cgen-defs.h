@@ -140,12 +140,6 @@ typedef enum {
 
 /* Simulator state.  */
 
-/* Records simulator descriptor so utilities like @cpu@_dump_regs can be
-   called from gdb.  */
-extern SIM_DESC current_state;
-
-/* Simulator state.  */
-
 /* CGEN_STATE contains additional state information not present in
    sim_state_base.  */
 

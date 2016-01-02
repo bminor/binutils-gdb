@@ -37,10 +37,6 @@
 
 static void free_state (SIM_DESC);
 static void print_m32r_misc_cpu (SIM_CPU *cpu, int verbose);
-
-/* Records simulator descriptor so utilities like m32r_dump_regs can be
-   called from gdb.  */
-SIM_DESC current_state;
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
@@ -168,10 +164,6 @@ sim_open (kind, callback, abfd, argv)
       PROFILE_INFO_CPU_CALLBACK (CPU_PROFILE_DATA (STATE_CPU (sd, i)))
 	= print_m32r_misc_cpu;
     }
-
-  /* Store in a global so things like sparc32_dump_regs can be invoked
-     from the gdb command line.  */
-  current_state = sd;
 
   return sd;
 }

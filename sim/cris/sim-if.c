@@ -81,10 +81,6 @@ static int cris_program_offset = 0;
 enum cris_unknown_syscall_action_type cris_unknown_syscall_action
   = CRIS_USYSC_MSG_STOP;
 
-/* Records simulator descriptor so utilities like cris_dump_regs can be
-   called from gdb.  */
-SIM_DESC current_state;
-
 /* CRIS-specific options.  */
 typedef enum {
   OPTION_CRIS_STATS = OPTION_START,
@@ -984,10 +980,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   /* Initialize various cgen things not done by common framework.
      Must be done after cris_cgen_cpu_open.  */
   cgen_init (sd);
-
-  /* Store in a global so things like cris_dump_regs can be invoked
-     from the gdb command line.  */
-  current_state = sd;
 
   cris_set_callbacks (callback);
 

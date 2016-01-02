@@ -1,3 +1,9 @@
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-defs.h (current_state): Delete.
+	* sim-base.h (CURRENT_STATE_REG, CURRENT_STATE): Delete.
+	* sim-utils.c (current_state): Delete.
+
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-module.c (sim_pre_argv_init): Change STATE_MY_NAME assignment

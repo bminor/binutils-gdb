@@ -143,9 +143,6 @@ deliver_tx3904cpu_interrupt (struct hw *me,
   sim_cpu *cpu = STATE_CPU (sd, 0); /* NB: fix CPU 0. */
   address_word cia = CPU_PC_GET (cpu);
 
-#define CPU cpu
-#define SD current_state
-
   if (controller->pending_reset)
     {
       controller->pending_reset = 0;
@@ -190,8 +187,6 @@ deliver_tx3904cpu_interrupt (struct hw *me,
 	    }
 	} /* interrupt set */
     }
-#undef CPU cpu
-#undef SD current_state
 }
 
 

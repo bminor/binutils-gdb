@@ -48,10 +48,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "bfd.h"
 #include "sim-utils.h"
 
-/* Global pointer to all state data.
-   Set by sim_resume.  */
-struct sim_state *current_state;
-
 /* Allocate zero filled memory with xcalloc - xcalloc aborts if the
    allocation fails.  */
 

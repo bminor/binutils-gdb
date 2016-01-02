@@ -26,10 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "bfd.h"
 
 static void free_state (SIM_DESC);
-
-/* Records simulator descriptor so utilities like iq2000_dump_regs can be
-   called from gdb.  */
-SIM_DESC current_state;
 
 /* Cover function for sim_cgen_disassemble_insn.  */
 
@@ -148,10 +144,6 @@ sim_open (kind, callback, abfd, argv)
   /* Initialize various cgen things not done by common framework.
      Must be done after iq2000_cgen_cpu_open.  */
   cgen_init (sd);
-
-  /* Store in a global so things like sparc32_dump_regs can be invoked
-     from the gdb command line.  */
-  current_state = sd;
 
   return sd;
 }

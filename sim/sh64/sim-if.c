@@ -32,10 +32,6 @@ static void free_state (SIM_DESC);
 /* Since we don't build the cgen-opcode table, we use a wrapper around
    the existing disassembler from libopcodes. */
 static CGEN_DISASSEMBLER sh64_disassemble_insn;
-
-/* Records simulator descriptor so utilities like sh5_dump_regs can be
-   called from gdb.  */
-SIM_DESC current_state;
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
@@ -154,10 +150,6 @@ sim_open (kind, callback, abfd, argv)
   /* Initialize various cgen things not done by common framework.
      Must be done after sh_cgen_cpu_open.  */
   cgen_init (sd);
-
-  /* Store in a global so things like sparc32_dump_regs can be invoked
-     from the gdb command line.  */
-  current_state = sd;
 
   return sd;
 }

@@ -30,10 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 static void free_state (SIM_DESC);
 static void print_frv_misc_cpu (SIM_CPU *cpu, int verbose);
-
-/* Records simulator descriptor so utilities like frv_dump_regs can be
-   called from gdb.  */
-SIM_DESC current_state;
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
@@ -174,10 +170,6 @@ sim_open (kind, callback, abfd, argv)
       SIM_CPU* cpu = STATE_CPU (sd, i);
       frv_initialize (cpu, sd);
     }
-
-  /* Store in a global so things like sparc32_dump_regs can be invoked
-     from the gdb command line.  */
-  current_state = sd;
 
   return sd;
 }

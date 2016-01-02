@@ -105,7 +105,7 @@ frv_term (SIM_DESC sd)
      then turn it off again.  This is the only place we can currently gain
      control to do this.  */
   if (frv_interrupt_state.timer.enabled && ! frv_save_profile_model_p)
-    sim_profile_set_option (current_state, "-model", PROFILE_MODEL_IDX, "0");
+    sim_profile_set_option (sd, "-model", PROFILE_MODEL_IDX, "0");
 }
 
 /* Perform a power on reset.  */

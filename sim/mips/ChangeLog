@@ -1,3 +1,7 @@
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-tx3904cpu.c (CPU, SD): Delete.
+
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* wrapper.c (mips_reg_store, mips_reg_fetch): Define.

@@ -43,10 +43,6 @@ static const OPTION lm32_options[] = {
    lm32_option_handler},
   {{NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL}
 };
-
-/* Records simulator descriptor so utilities like lm32_dump_regs can be
-   called from gdb.  */
-SIM_DESC current_state;
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
@@ -239,10 +235,6 @@ sim_open (kind, callback, abfd, argv)
   /* Initialize various cgen things not done by common framework.
      Must be done after lm32_cgen_cpu_open.  */
   cgen_init (sd);
-
-  /* Store in a global so things like lm32_dump_regs can be invoked
-     from the gdb command line.  */
-  current_state = sd;
 
   return sd;
 }

@@ -89,28 +89,6 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-memopt.h"
 #include "sim-cpu.h"
 
-/* Global pointer to current state while sim_resume is running.
-   On a machine with lots of registers, it might be possible to reserve
-   one of them for current_state.  However on a machine with few registers
-   current_state can't permanently live in one and indirecting through it
-   will be slower [in which case one can have sim_resume set globals from
-   current_state for faster access].
-   If CURRENT_STATE_REG is defined, it means current_state is living in
-   a global register.  */
-
-
-#ifdef CURRENT_STATE_REG
-/* FIXME: wip */
-#else
-extern struct sim_state *current_state;
-#endif
-
-
-/* The simulator may provide different (and faster) definition.  */
-#ifndef CURRENT_STATE
-#define CURRENT_STATE current_state
-#endif
-
 
 /* We require all sims to dynamically allocate cpus.  See comment up top about
    struct sim_state.  */
