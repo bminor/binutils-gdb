@@ -26,23 +26,6 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-
-static void free_state (SIM_DESC);
-static void print_lm32_misc_cpu (SIM_CPU * cpu, int verbose);
-static DECLARE_OPTION_HANDLER (lm32_option_handler);
-
-enum
-{
-  OPTION_ENDIAN = OPTION_START,
-};
-
-/* GDB passes -E, even though it's fixed, so we have to handle it here. common code only handles it if SIM_HAVE_BIENDIAN is defined, which it isn't for lm32.  */
-static const OPTION lm32_options[] = {
-  {{"endian", required_argument, NULL, OPTION_ENDIAN},
-   'E', "big", "Set endianness",
-   lm32_option_handler},
-  {{NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL}
-};
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
@@ -111,19 +94,6 @@ find_limit (bfd *prog_bfd)
   return 0;
 }
 
-/* Handle lm32 specific options.  */
-
-static SIM_RC
-lm32_option_handler (sd, cpu, opt, arg, is_command)
-     SIM_DESC sd;
-     sim_cpu *cpu;
-     int opt;
-     char *arg;
-     int is_command;
-{
-  return SIM_RC_OK;
-}
-
 /* Create an instance of the simulator.  */
 
 SIM_DESC
@@ -150,7 +120,6 @@ sim_open (kind, callback, abfd, argv)
       free_state (sd);
       return 0;
     }
-  sim_add_option_table (sd, NULL, lm32_options);
 
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call

@@ -84,14 +84,6 @@ sim_open (kind, callback, abfd, argv)
       return 0;
     }
 
-#if 0 /* FIXME: 'twould be nice if we could do this */
-  /* These options override any module options.
-     Obviously ambiguity should be avoided, however the caller may wish to
-     augment the meaning of an option.  */
-  if (extra_options != NULL)
-    sim_add_option_table (sd, extra_options);
-#endif
-
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
      print_filtered.  */

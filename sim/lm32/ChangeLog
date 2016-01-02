@@ -1,5 +1,11 @@
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-if.c (free_state, print_lm32_misc_cpu): Delete prototypes.
+	(lm32_option_handler, OPTION_ENDIAN, lm32_options): Delete.
+	(sim_open): Delete sim_add_option_table call.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-if.c (current_state): Delete.
 	(sim_open): Delete current_state assignment.
 
