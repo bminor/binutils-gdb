@@ -13034,9 +13034,9 @@ fi
 # Check whether --enable-sim-hostendian was given.
 if test "${enable_sim_hostendian+set}" = set; then :
   enableval=$enable_sim_hostendian; case "${enableval}" in
-  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=0";;
-  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
-  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
+  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_UNKNOWN";;
+  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_BIG";;
+  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
   *)	 as_fn_error "\"Unknown value $enableval for --enable-sim-hostendian\"" "$LINENO" 5; sim_hostendian="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_hostendian" != x""; then
@@ -13270,12 +13270,12 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
  esac
 
   if test $ac_cv_c_bigendian = yes; then
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN"
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_BIG"
   else
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN"
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_LITTLE"
   fi
 else
-  sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
+  sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
 fi
 fi
 

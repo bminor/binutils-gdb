@@ -37,14 +37,14 @@ AC_SUBST(SIM_SUBTARGET)
 mips_endian=
 default_endian=
 case "${target}" in
-  mips64el*-*-*)	mips_endian=LITTLE_ENDIAN ;;
-  mips64vr*el-*-*)      default_endian=LITTLE_ENDIAN ;;
-  mips64*-*-*)          default_endian=BIG_ENDIAN ;;
-  mips16*-*-*)          default_endian=BIG_ENDIAN ;;
-  mipsisa32*-*-*)       default_endian=BIG_ENDIAN ;;
-  mipsisa64*-*-*)       default_endian=BIG_ENDIAN ;;
-  mips*-*-*)            default_endian=BIG_ENDIAN ;;
-  *)                    default_endian=BIG_ENDIAN ;;
+  mips64el*-*-*)        mips_endian=LITTLE ;;
+  mips64vr*el-*-*)      default_endian=LITTLE ;;
+  mips64*-*-*)          default_endian=BIG ;;
+  mips16*-*-*)          default_endian=BIG ;;
+  mipsisa32*-*-*)       default_endian=BIG ;;
+  mipsisa64*-*-*)       default_endian=BIG ;;
+  mips*-*-*)            default_endian=BIG ;;
+  *)                    default_endian=BIG ;;
 esac
 SIM_AC_OPTION_ENDIAN($mips_endian,$default_endian)
 

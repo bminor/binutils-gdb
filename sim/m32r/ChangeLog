@@ -1,5 +1,14 @@
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* arch.h (TARGET_BIG_ENDIAN): Delete.
+	* configure.ac (SIM_AC_OPTION_ENDIAN): Change BIG_ENDIAN to BIG.
+	* configure: Regenerate.
+	* traps-linux.c (conv_endian): Change LITTLE_ENDIAN to
+	BFD_ENDIAN_LITTLE.
+	(conv_endian16): Likewise.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-if.c (sim_open): Delete #if 0 sim_add_option_table call.
 
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>

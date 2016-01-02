@@ -592,7 +592,7 @@ struct sim_state {
 /* Hardware configuration. Affects endianness of LoadMemory and
    StoreMemory and the endianness of Kernel and Supervisor mode
    execution. The value is 0 for little-endian; 1 for big-endian. */
-#define BigEndianMem    (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+#define BigEndianMem    (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 /*(state & simBE) ? 1 : 0)*/
 
 /* ReverseEndian */

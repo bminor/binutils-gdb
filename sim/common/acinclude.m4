@@ -449,26 +449,26 @@ AC_ARG_ENABLE(sim-endian,
 [AS_HELP_STRING([--enable-sim-endian=endian],
 		[Specify target byte endian orientation])],
 [case "${enableval}" in
-  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
-  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
+  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
   yes)	 if test x"$wire_endian" != x; then
-	   sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+	   sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
 	 else
-           if test x"$default_endian" != x; then
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=${default_endian}"
+	  if test x"$default_endian" != x; then
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
 	   else
 	     echo "No hard-wired endian for target $target" 1>&6
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
 	   fi
 	 fi;;
   no)	 if test x"$default_endian" != x; then
-	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
 	 else
 	   if test x"$wire_endian" != x; then
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${wire_endian}"
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
 	   else
 	     echo "No default endian for target $target" 1>&6
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
 	   fi
 	 fi;;
   *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-endian"); sim_endian="";;
@@ -477,10 +477,10 @@ if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
   echo "Setting endian flags = $sim_endian" 6>&1
 fi],
 [if test x"$default_endian" != x; then
-  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
 else
   if test x"$wire_endian" != x; then
-    sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+    sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
   else
     sim_endian=
   fi
@@ -498,9 +498,9 @@ AC_ARG_ENABLE(sim-hostendian,
 [AS_HELP_STRING([--enable-sim-hostendian=end],
 		[Specify host byte endian orientation])],
 [case "${enableval}" in
-  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=0";;
-  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
-  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
+  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_UNKNOWN";;
+  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_BIG";;
+  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
   *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-hostendian"); sim_hostendian="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_hostendian" != x""; then
@@ -509,12 +509,12 @@ fi],[
 if test "x$cross_compiling" = "xno"; then
   AC_C_BIGENDIAN
   if test $ac_cv_c_bigendian = yes; then
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN"
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_BIG"
   else
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN"
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_LITTLE"
   fi
 else
-  sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
+  sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
 fi])dnl
 ])
 AC_SUBST(sim_hostendian)

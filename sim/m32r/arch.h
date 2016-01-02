@@ -24,8 +24,6 @@ This file is part of the GNU simulators.
 #ifndef M32R_ARCH_H
 #define M32R_ARCH_H
 
-#define TARGET_BIG_ENDIAN 1
-
 /* Enum declaration for model types.  */
 typedef enum model_type {
   MODEL_M32R_D, MODEL_TEST, MODEL_M32RX, MODEL_M32R2

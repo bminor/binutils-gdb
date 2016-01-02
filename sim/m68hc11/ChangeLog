@@ -1,3 +1,8 @@
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_ENDIAN): Change BIG_ENDIAN to BIG.
+	* configure: Regenerate.
+
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Change LITTLE_ENDIAN to BIG_ENDIAN.

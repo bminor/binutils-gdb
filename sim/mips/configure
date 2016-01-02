@@ -13037,9 +13037,9 @@ fi
 # Check whether --enable-sim-hostendian was given.
 if test "${enable_sim_hostendian+set}" = set; then :
   enableval=$enable_sim_hostendian; case "${enableval}" in
-  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=0";;
-  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
-  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
+  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_UNKNOWN";;
+  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_BIG";;
+  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
   *)	 as_fn_error "\"Unknown value $enableval for --enable-sim-hostendian\"" "$LINENO" 5; sim_hostendian="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_hostendian" != x""; then
@@ -13273,12 +13273,12 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
  esac
 
   if test $ac_cv_c_bigendian = yes; then
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN"
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_BIG"
   else
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN"
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_LITTLE"
   fi
 else
-  sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
+  sim_hostendian="-DWITH_HOST_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
 fi
 fi
 
@@ -13426,14 +13426,14 @@ esac
 mips_endian=
 default_endian=
 case "${target}" in
-  mips64el*-*-*)	mips_endian=LITTLE_ENDIAN ;;
-  mips64vr*el-*-*)      default_endian=LITTLE_ENDIAN ;;
-  mips64*-*-*)          default_endian=BIG_ENDIAN ;;
-  mips16*-*-*)          default_endian=BIG_ENDIAN ;;
-  mipsisa32*-*-*)       default_endian=BIG_ENDIAN ;;
-  mipsisa64*-*-*)       default_endian=BIG_ENDIAN ;;
-  mips*-*-*)            default_endian=BIG_ENDIAN ;;
-  *)                    default_endian=BIG_ENDIAN ;;
+  mips64el*-*-*)        mips_endian=LITTLE ;;
+  mips64vr*el-*-*)      default_endian=LITTLE ;;
+  mips64*-*-*)          default_endian=BIG ;;
+  mips16*-*-*)          default_endian=BIG ;;
+  mipsisa32*-*-*)       default_endian=BIG ;;
+  mipsisa64*-*-*)       default_endian=BIG ;;
+  mips*-*-*)            default_endian=BIG ;;
+  *)                    default_endian=BIG ;;
 esac
 
 wire_endian="$mips_endian"
@@ -13441,26 +13441,26 @@ default_endian="$default_endian"
 # Check whether --enable-sim-endian was given.
 if test "${enable_sim_endian+set}" = set; then :
   enableval=$enable_sim_endian; case "${enableval}" in
-  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
-  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
+  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
   yes)	 if test x"$wire_endian" != x; then
-	   sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+	   sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
 	 else
-           if test x"$default_endian" != x; then
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=${default_endian}"
+	  if test x"$default_endian" != x; then
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
 	   else
 	     echo "No hard-wired endian for target $target" 1>&6
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
 	   fi
 	 fi;;
   no)	 if test x"$default_endian" != x; then
-	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
 	 else
 	   if test x"$wire_endian" != x; then
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${wire_endian}"
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
 	   else
 	     echo "No default endian for target $target" 1>&6
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
 	   fi
 	 fi;;
   *)	 as_fn_error "\"Unknown value $enableval for --enable-sim-endian\"" "$LINENO" 5; sim_endian="";;
@@ -13470,10 +13470,10 @@ if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
 fi
 else
   if test x"$default_endian" != x; then
-  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
 else
   if test x"$wire_endian" != x; then
-    sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+    sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
   else
     sim_endian=
   fi
@@ -13769,7 +13769,7 @@ if test ${sim_gen} = MULTI; then
 
   cat << __EOF__ > multi-run.c
 /* Main entry point for MULTI simulators.
-   Copyright (C) 2003-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

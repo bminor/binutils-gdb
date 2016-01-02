@@ -24,8 +24,6 @@ This file is part of the GNU simulators.
 #ifndef CRIS_ARCH_H
 #define CRIS_ARCH_H
 
-#define TARGET_BIG_ENDIAN 1
-
 /* Enum declaration for model types.  */
 typedef enum model_type {
   MODEL_CRISV10, MODEL_CRISV32, MODEL_MAX

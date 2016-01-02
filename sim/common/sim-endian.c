@@ -31,7 +31,7 @@
 #define _SWAP_1(SET,RAW) SET (RAW)
 #endif
 
-#if !defined(_SWAP_2) && (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN) && defined(htons)
+#if !defined(_SWAP_2) && (WITH_HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE) && defined(htons)
 #define _SWAP_2(SET,RAW) SET htons (RAW)
 #endif
 
@@ -39,7 +39,7 @@
 #define _SWAP_2(SET,RAW) SET (((RAW) >> 8) | ((RAW) << 8))
 #endif
 
-#if !defined(_SWAP_4) && (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN) && defined(htonl)
+#if !defined(_SWAP_4) && (WITH_HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE) && defined(htonl)
 #define _SWAP_4(SET,RAW) SET htonl (RAW)
 #endif
 
@@ -93,7 +93,7 @@ INLINE_SIM_ENDIAN\
 (unsigned_8)
 sim_endian_split_16 (unsigned_16 word, int w)
 {
-  if (CURRENT_HOST_BYTE_ORDER == LITTLE_ENDIAN)
+  if (CURRENT_HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     {
       return word.a[1 - w];
     }
@@ -110,7 +110,7 @@ sim_endian_join_16 (unsigned_8 h, unsigned_8 l)
 
 {
   unsigned_16 word;
-  if (CURRENT_HOST_BYTE_ORDER == LITTLE_ENDIAN)
+  if (CURRENT_HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     {
       word.a[0] = l;
       word.a[1] = h;

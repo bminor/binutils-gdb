@@ -1,5 +1,46 @@
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (SIM_AC_OPTION_ENDIAN): Change BIG_ENDIAN to
+	BFD_ENDIAN_BIG, LITTLE_ENDIAN to BFD_ENDIAN_LITTLE, and 0 to
+	BFD_ENDIAN_UNKNOWN.
+	(SIM_AC_OPTION_HOSTENDIAN): Likewise.
+	* cgen-ops.h (SUBWORDXFSI): Change BIG_ENDIAN to BFD_ENDIAN_BIG.
+	(SUBWORDTFSI, JOINSIDF, JOINSIXF, JOINSITF): Likewise.
+	* nrun.c (main): Likewise.
+	* sim-config.c (current_host_byte_order): Change type to enum
+	bfd_endian.  Initialize to BFD_ENDIAN_UNKNOWN.
+	(current_target_byte_order): Likewise.
+	(config_byte_order_to_a): Likewise.  Change BIG_ENDIAN to
+	BFD_ENDIAN_BIG, LITTLE_ENDIAN to BFD_ENDIAN_LITTLE, and 0 to
+	BFD_ENDIAN_UNKNOWN.
+	(sim_config): Change prefered_target_byte_order type to enum
+	bfd_endian.  Change BIG_ENDIAN to BFD_ENDIAN_BIG, LITTLE_ENDIAN
+	to BFD_ENDIAN_LITTLE, and 0 to BFD_ENDIAN_UNKNOWN.
+	* sim-config.h: Change BIG_ENDIAN to BFD_ENDIAN_BIG, LITTLE_ENDIAN
+	to BFD_ENDIAN_LITTLE, and 0 to BFD_ENDIAN_UNKNOWN.
+	Delete all the various arch/OS endian includes & defines.
+	(current_host_byte_order): Change type to enum bfd_endian.
+	(current_target_byte_order): Likewise.
+	(CURRENT_HOST_BYTE_ORDER): Compare to BFD_ENDIAN_UNKNOWN, not 0.
+	(CURRENT_TARGET_BYTE_ORDER): Likewise.
+	* sim-endian.c: Change LITTLE_ENDIAN to BFD_ENDIAN_LITTLE.
+	* sim-events.c (sim_events_watch_sim): Change BIG_ENDIAN to
+	BFD_ENDIAN_BIG, LITTLE_ENDIAN to BFD_ENDIAN_LITTLE, and 0 to
+	BFD_ENDIAN_UNKNOWN.
+	(sim_events_watch_core): Likewise.
+	* sim-events.h: Likewise.
+	* sim-n-core.h (sim_core_read_misaligned_N): Change BIG_ENDIAN to
+	BFD_ENDIAN_BIG.
+	(sim_core_write_misaligned_N): Likewise.
+	* sim-n-endian.h (endian_h2be_N): Likewise.
+	(endian_be2h_N): Likewise.
+	(endian_h2le_N): Change LITTLE_ENDIAN to BFD_ENDIAN_LITTLE.
+	(offset_N): Likewise.
+	* sim-options.c (standard_option_handler): Change LITTLE_ENDIAN to
+	BFD_ENDIAN_LITTLE and BIG_ENDIAN to BFD_ENDIAN_BIG.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-defs.h (current_state): Delete.
 	* sim-base.h (CURRENT_STATE_REG, CURRENT_STATE): Delete.
 	* sim-utils.c (current_state): Delete.

@@ -1,3 +1,7 @@
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2015-12-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_dis_read): Change private_data to application_data.

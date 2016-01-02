@@ -140,7 +140,7 @@ init (void)
     {
       ARMul_EmulateInit ();
       state = ARMul_NewState ();
-      state->bigendSig = (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN ? HIGH : LOW);
+      state->bigendSig = (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? HIGH : LOW);
       ARMul_MemoryInit (state, mem_size);
       ARMul_OSInit (state);
       state->verbose = 0;

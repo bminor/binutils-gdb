@@ -1,5 +1,14 @@
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* arch.h (TARGET_BIG_ENDIAN): Delete.
+	* configure.ac (SIM_AC_OPTION_ENDIAN): Change BIG_ENDIAN to BIG.
+	* configure: Regenerate.
+	* frv.c (frvbf_h_fr_double_get_handler): Change LITTLE_ENDIAN to
+	BFD_ENDIAN_LITTLE.
+	(frvbf_h_fr_double_set_handler): Likewise.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* reset.c (frv_term): Change current_state to sd.
 	* sim-if.c (current_state): Delete.
 	(sim_open): Delete current_state assignment.

@@ -25,8 +25,8 @@
 #include "bfd.h"
 
 
-int current_host_byte_order;
-int current_target_byte_order;
+enum bfd_endian current_host_byte_order = BFD_ENDIAN_UNKNOWN;
+enum bfd_endian current_target_byte_order = BFD_ENDIAN_UNKNOWN;
 int current_stdio;
 
 enum sim_alignments current_alignment;
@@ -40,16 +40,16 @@ int current_floating_point;
 /* map a byte order onto a textual string */
 
 static const char *
-config_byte_order_to_a (int byte_order)
+config_byte_order_to_a (enum bfd_endian byte_order)
 {
   switch (byte_order)
     {
-    case LITTLE_ENDIAN:
+    case BFD_ENDIAN_LITTLE:
       return "LITTLE_ENDIAN";
-    case BIG_ENDIAN:
+    case BFD_ENDIAN_BIG:
       return "BIG_ENDIAN";
-    case 0:
-      return "0";
+    case BFD_ENDIAN_UNKNOWN:
+      return "UNKNOWN_ENDIAN";
     }
   return "UNKNOWN";
 }
@@ -140,7 +140,7 @@ sim_config_default (SIM_DESC sd)
 SIM_RC
 sim_config (SIM_DESC sd)
 {
-  int prefered_target_byte_order;
+  enum bfd_endian prefered_target_byte_order;
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* extract all relevant information */
@@ -149,18 +149,18 @@ sim_config (SIM_DESC sd)
 	 "--architecture"), it'll have no endianness.  */
       || (!bfd_little_endian (STATE_PROG_BFD (sd))
 	  && !bfd_big_endian (STATE_PROG_BFD (sd))))
-    prefered_target_byte_order = 0;
+    prefered_target_byte_order = BFD_ENDIAN_UNKNOWN;
   else
     prefered_target_byte_order = (bfd_little_endian (STATE_PROG_BFD (sd))
-				  ? LITTLE_ENDIAN
-				  : BIG_ENDIAN);
+				  ? BFD_ENDIAN_LITTLE
+				  : BFD_ENDIAN_BIG);
 
   /* set the host byte order */
   current_host_byte_order = 1;
   if (*(char*)(&current_host_byte_order))
-    current_host_byte_order = LITTLE_ENDIAN;
+    current_host_byte_order = BFD_ENDIAN_LITTLE;
   else
-    current_host_byte_order = BIG_ENDIAN;
+    current_host_byte_order = BFD_ENDIAN_BIG;
 
   /* verify the host byte order */
   if (CURRENT_HOST_BYTE_ORDER != current_host_byte_order)
@@ -174,22 +174,22 @@ sim_config (SIM_DESC sd)
 
   /* set the target byte order */
 #if (WITH_TREE_PROPERTIES)
-  if (current_target_byte_order == 0)
+  if (current_target_byte_order == BFD_ENDIAN_UNKNOWN)
     current_target_byte_order
       = (tree_find_boolean_property (root, "/options/little-endian?")
-	 ? LITTLE_ENDIAN
-	 : BIG_ENDIAN);
+	 ? BFD_ENDIAN_LITTLE
+	 : BFD_ENDIAN_BIG);
 #endif
-  if (current_target_byte_order == 0
-      && prefered_target_byte_order != 0)
+  if (current_target_byte_order == BFD_ENDIAN_UNKNOWN
+      && prefered_target_byte_order != BFD_ENDIAN_UNKNOWN)
     current_target_byte_order = prefered_target_byte_order;
-  if (current_target_byte_order == 0)
+  if (current_target_byte_order == BFD_ENDIAN_UNKNOWN)
     current_target_byte_order = WITH_TARGET_BYTE_ORDER;
-  if (current_target_byte_order == 0)
+  if (current_target_byte_order == BFD_ENDIAN_UNKNOWN)
     current_target_byte_order = WITH_DEFAULT_TARGET_BYTE_ORDER;
 
   /* verify the target byte order */
-  if (CURRENT_TARGET_BYTE_ORDER == 0)
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_UNKNOWN)
     {
       sim_io_eprintf (sd, "Target byte order unspecified\n");
       return SIM_RC_FAIL;
@@ -198,7 +198,7 @@ sim_config (SIM_DESC sd)
     sim_io_eprintf (sd, "Target (%s) and configured (%s) byte order in conflict\n",
 		  config_byte_order_to_a (current_target_byte_order),
 		  config_byte_order_to_a (CURRENT_TARGET_BYTE_ORDER));
-  if (prefered_target_byte_order != 0
+  if (prefered_target_byte_order != BFD_ENDIAN_UNKNOWN
       && CURRENT_TARGET_BYTE_ORDER != prefered_target_byte_order)
     sim_io_eprintf (sd, "Target (%s) and specified (%s) byte order in conflict\n",
 		  config_byte_order_to_a (CURRENT_TARGET_BYTE_ORDER),

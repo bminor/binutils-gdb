@@ -197,23 +197,23 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
     case OPTION_ENDIAN:
       if (strcmp (arg, "big") == 0)
 	{
-	  if (WITH_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
+	  if (WITH_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 	    {
 	      sim_io_eprintf (sd, "Simulator compiled for little endian only.\n");
 	      return SIM_RC_FAIL;
 	    }
 	  /* FIXME:wip: Need to set something in STATE_CONFIG.  */
-	  current_target_byte_order = BIG_ENDIAN;
+	  current_target_byte_order = BFD_ENDIAN_BIG;
 	}
       else if (strcmp (arg, "little") == 0)
 	{
-	  if (WITH_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	  if (WITH_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    {
 	      sim_io_eprintf (sd, "Simulator compiled for big endian only.\n");
 	      return SIM_RC_FAIL;
 	    }
 	  /* FIXME:wip: Need to set something in STATE_CONFIG.  */
-	  current_target_byte_order = LITTLE_ENDIAN;
+	  current_target_byte_order = BFD_ENDIAN_LITTLE;
 	}
       else
 	{

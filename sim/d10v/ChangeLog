@@ -1,3 +1,7 @@
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* wrapper.c (d10v_reg_store, d10v_reg_fetch): Define.

@@ -1,5 +1,12 @@
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* arch.h (TARGET_BIG_ENDIAN): Delete.
+	* configure.ac (SIM_AC_OPTION_ENDIAN): Change LITTLE_ENDIAN to
+	LITTLE.
+	* configure: Regenerate.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-if.c (xprintf, eprintf): Delete.
 	(cris_load_elf_file): Delete callback.  Change xprintf to
 	sim_io_printf and eprintf to sim_io_eprintf.

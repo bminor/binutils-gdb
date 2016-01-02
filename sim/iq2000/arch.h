@@ -24,8 +24,6 @@ This file is part of the GNU simulators.
 #ifndef IQ2000_ARCH_H
 #define IQ2000_ARCH_H
 
-#define TARGET_BIG_ENDIAN 1
-
 /* Enum declaration for model types.  */
 typedef enum model_type {
   MODEL_IQ2000, MODEL_MAX

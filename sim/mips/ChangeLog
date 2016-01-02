@@ -1,5 +1,12 @@
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac (mips_endian): Change LITTLE_ENDIAN to LITTLE.
+	(default_endian): Likewise.  Change BIG_ENDIAN to BIG.
+	* configure: Regenerate.
+	* sim-main.h (BigEndianMem): Change BIG_ENDIAN to BFD_ENDIAN_BIG.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-tx3904cpu.c (CPU, SD): Delete.
 
 2015-12-30  Mike Frysinger  <vapier@gentoo.org>

@@ -1,3 +1,9 @@
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_ENDIAN): Change LITTLE_ENDIAN to
+	LITTLE.
+	* configure: Regenerate.
+
 2015-12-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* msp430-sim.c (sim_dis_read): Change private_data to application_data.

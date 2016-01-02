@@ -24,8 +24,6 @@ This file is part of the GNU simulators.
 #ifndef SH_ARCH_H
 #define SH_ARCH_H
 
-#define TARGET_BIG_ENDIAN 1
-
 /* Enum declaration for model types.  */
 typedef enum model_type {
   MODEL_SH2A_NOFPU, MODEL_SH2A_FPU, MODEL_SH4_NOFPU, MODEL_SH4

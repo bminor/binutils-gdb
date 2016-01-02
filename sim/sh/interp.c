@@ -116,10 +116,10 @@ struct loop_bounds { unsigned char *start, *end; };
 /* These variables are at file scope so that functions other than
    sim_resume can use the fetch/store macros */
 
-#define target_little_endian (CURRENT_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
+#define target_little_endian (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 static int global_endianw, endianb;
 static int target_dsp;
-#define host_little_endian (CURRENT_HOST_BYTE_ORDER == LITTLE_ENDIAN)
+#define host_little_endian (CURRENT_HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 
 static int maskw = 0;
 static int maskl = 0;

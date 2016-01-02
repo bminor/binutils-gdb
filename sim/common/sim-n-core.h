@@ -250,7 +250,7 @@ sim_core_read_misaligned_N(sim_cpu *cpu,
 		     read_transfer, sim_core_unaligned_signal);
   if (CURRENT_HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
     val = SWAP_M (val);
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     val >>= (M - N) * 8;
   PROFILE_COUNT_CORE (cpu, addr, N, map);
   if (TRACE_P (cpu, TRACE_CORE_IDX))
@@ -366,7 +366,7 @@ sim_core_write_misaligned_N(sim_cpu *cpu,
 			   unsigned_M val)
 {
   unsigned_M data = val;
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     data <<= (M - N) * 8;
   if (CURRENT_HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
     data = SWAP_M (data);
