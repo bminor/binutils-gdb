@@ -250,7 +250,8 @@ LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB)
 EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
 	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL)
 
-LIB_OBJS = callback.o syscall.o targ-map.o version.o $(SIM_OBJS)
+LIB_OBJS = callback.o modules.o syscall.o targ-map.o version.o \
+	$(SIM_OBJS)
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
@@ -420,6 +421,7 @@ all_object_files = $(LIB_OBJS) $(SIM_RUN_OBJS)
 generated_files = \
 	$(SIM_EXTRA_DEPS) \
 	hw-config.h \
+	modules.c \
 	targ-map.c \
 	targ-vals.h \
 	version.c
@@ -458,6 +460,26 @@ stamp-hw: Makefile.in $(srccom)/Make-common.in config.status Makefile
 test-hw-events: $(srccom)/hw-events.c libsim.a
 	$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
 		$(srccom)/hw-events.c libsim.a $(EXTRA_LIBS)
+
+# See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
+modules.c: Makefile $(SIM_OBJS:.o=.c)
+	@echo Generating $@
+	@LANG=C ; export LANG ; \
+	LC_ALL=C ; export LC_ALL ; \
+	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' $^ | sort >$@.l-tmp
+	@set -e; (\
+	echo '/* Do not modify this file.  */'; \
+	echo '/* It is created automatically by the Makefile.  */'; \
+	echo '#include "libiberty.h"'; \
+	echo '#include "sim-module.h"'; \
+	sed -e 's:\(.*\):extern __attribute__((__weak__)) MODULE_INIT_FN \1;:' $@.l-tmp; \
+	echo 'MODULE_INSTALL_FN * const sim_modules_detected[] = {'; \
+	sed -e 's:\(.*\):  \1,:' $@.l-tmp; \
+	echo '};'; \
+	echo 'const int sim_modules_detected_len = ARRAY_SIZE (sim_modules_detected);'; \
+	) >$@.tmp
+	$(SHELL) $(srcroot)/move-if-change $@.tmp $@
+	@rm -f $@.l-tmp $@.tmp
 
 # CGEN support.
 

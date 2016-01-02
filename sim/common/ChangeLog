@@ -1,5 +1,19 @@
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (LIB_OBJS): Add modules.o.
+	(generated_files): Add modules.c.
+	(modules.c): New target.
+	* sim-module.c (modules): Rename to ...
+	(early_modules): ... this.  Delete 0 sentinel.
+	(early_modules_len): Define.
+	(sim_modules_detected, sim_modules_detected_len): Declare.
+	(sim_pre_argv_init): Call sim_module_install_list.
+	(sim_module_install): New function.
+	(sim_module_install_list): New function.
+	* sim-module.h (sim_module_install_list): Declare.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* nrun.c (strsignal): New prototype.
 
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>

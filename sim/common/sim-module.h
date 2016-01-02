@@ -73,6 +73,7 @@ typedef struct module_info_list {
 /* Functions to register module with various handler lists */
 
 SIM_RC sim_module_install (SIM_DESC);
+SIM_RC sim_module_install_list (SIM_DESC, MODULE_INSTALL_FN * const[], size_t);
 void sim_module_uninstall (SIM_DESC);
 void sim_module_add_init_fn (SIM_DESC sd, MODULE_INIT_FN fn);
 void sim_module_add_resume_fn (SIM_DESC sd, MODULE_RESUME_FN fn);

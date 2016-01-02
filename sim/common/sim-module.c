@@ -38,8 +38,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdlib.h>
 
-/* List of all modules.  */
-static MODULE_INSTALL_FN * const modules[] = {
+/* List of all early/core modules.
+   TODO: Should trim this list by converting to sim_install_* framework.  */
+static MODULE_INSTALL_FN * const early_modules[] = {
   standard_install,
   sim_events_install,
   sim_model_install,
@@ -63,8 +64,12 @@ static MODULE_INSTALL_FN * const modules[] = {
   /* TODO: Shouldn't have device models here.  */
   dv_sockser_install,
 #endif
-  0
 };
+static int early_modules_len = ARRAY_SIZE (early_modules);
+
+/* List of dynamically detected modules.  Declared in generated modules.c.  */
+extern MODULE_INSTALL_FN * const sim_modules_detected[];
+extern const int sim_modules_detected_len;
 
 /* Functions called from sim_open.  */
 
@@ -92,11 +97,13 @@ sim_pre_argv_init (SIM_DESC sd, const char *myname)
 
   sim_config_default (sd);
 
-  /* Install all configured in modules.  */
+  /* Install all early configured-in modules.  */
   if (sim_module_install (sd) != SIM_RC_OK)
     return SIM_RC_FAIL;
 
-  return SIM_RC_OK;
+  /* Install all remaining dynamically detected modules.  */
+  return sim_module_install_list (sd, sim_modules_detected,
+				  sim_modules_detected_len);
 }
 
 /* Initialize common parts after argument processing.  */
@@ -121,6 +128,29 @@ sim_post_argv_init (SIM_DESC sd)
   return SIM_RC_OK;
 }
 
+/* Install a list of modules.
+   If this fails, no modules are left installed.  */
+SIM_RC
+sim_module_install_list (SIM_DESC sd, MODULE_INSTALL_FN * const *modules,
+			 size_t modules_len)
+{
+  size_t i;
+
+  for (i = 0; i < modules_len; ++i)
+    {
+      MODULE_INSTALL_FN *modp = modules[i];
+
+      if (modp != NULL && modp (sd) != SIM_RC_OK)
+	{
+	  sim_module_uninstall (sd);
+	  SIM_ASSERT (STATE_MODULES (sd) == NULL);
+	  return SIM_RC_FAIL;
+	}
+    }
+
+  return SIM_RC_OK;
+}
+
 /* Install all modules.
    If this fails, no modules are left installed.  */
 
@@ -133,16 +163,7 @@ sim_module_install (SIM_DESC sd)
   SIM_ASSERT (STATE_MODULES (sd) == NULL);
 
   STATE_MODULES (sd) = ZALLOC (struct module_list);
-  for (modp = modules; *modp != NULL; ++modp)
-    {
-      if ((*modp) (sd) != SIM_RC_OK)
-	{
-	  sim_module_uninstall (sd);
-	  SIM_ASSERT (STATE_MODULES (sd) == NULL);
-	  return SIM_RC_FAIL;
-	}
-    }
-  return SIM_RC_OK;
+  return sim_module_install_list (sd, early_modules, early_modules_len);
 }
 
 /* Called after all modules have been installed and after argv
