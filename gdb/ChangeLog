@@ -1,3 +1,7 @@
+2016-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt (score-*-*): Delete gdb_sim assignment.
+
 2016-01-05  Pedro Alves  <palves@redhat.com>
 
 	PR sim/13418
