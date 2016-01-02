@@ -1,5 +1,13 @@
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-sockser.c (dv_sockser_install): Rename to ...
+	(sim_install_dv_sockser): ... this.
+	* dv-sockser.h (dv_sockser_install): Delete.
+	* sim-module.c: Delete dv-sockser.h include.
+	(early_modules): Delete dv_sockser_install.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (LIB_OBJS): Add modules.o.
 	(generated_files): Add modules.c.
 	(modules.c): New target.

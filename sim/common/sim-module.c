@@ -29,11 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-hw.h"
 #endif
 
-#ifdef HAVE_DV_SOCKSER
-/* TODO: Shouldn't have device models here.  */
-#include "dv-sockser.h"
-#endif
-
 #include "libiberty.h"
 
 #include <stdlib.h>
@@ -59,10 +54,6 @@ static MODULE_INSTALL_FN * const early_modules[] = {
 #endif
 #if WITH_HW
   sim_hw_install,
-#endif
-#ifdef HAVE_DV_SOCKSER
-  /* TODO: Shouldn't have device models here.  */
-  dv_sockser_install,
 #endif
 };
 static int early_modules_len = ARRAY_SIZE (early_modules);
