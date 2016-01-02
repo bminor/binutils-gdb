@@ -1,3 +1,18 @@
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* main.c (main): Pass SIM_OPEN_STANDALONE to psim_options and
+	psim_usage.
+	* psim.c (psim_usage): Add new kind arg.  Only show bug URL and
+	exit when kind is SIM_OPEN_STANDALONE.
+	(psim_options): Add new kind arg.  Pass kind down to all psim_usage
+	calls.  Replace error/break calls after psim_usage with return NULL.
+	Only exit with version case when kind is SIM_OPEN_STANDALONE.
+	* psim.h: Include gdb/remote-sim.h.
+	(psim_options): Add new kind arg.
+	(psim_usage): Likewise.
+	* sim_calls.c (sim_open): Pass kind to psim_options.  Return NULL
+	when it returns NULL.
+
 2015-12-29  Kevin Buettner  <kevinb@redhat.com>
 
 	* emul_netbsd.c (fd_closed): New static array.
