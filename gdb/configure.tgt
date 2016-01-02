@@ -452,9 +452,7 @@ powerpc*-*-*)
 	# Target: PowerPC running eabi
 	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o solib-svr4.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
-	if test -f ../sim/ppc/Makefile; then
-	  gdb_sim=../sim/ppc/libsim.a
-	fi
+	gdb_sim=../sim/ppc/libsim.a
 	;;
 
 s390*-*-linux*)

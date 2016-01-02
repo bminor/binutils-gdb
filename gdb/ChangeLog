@@ -1,3 +1,8 @@
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt (powerpc*-*-*): Delete test call and
+	always assign gdb_sim.
+
 2016-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Update year range in copyright notice of all files.
