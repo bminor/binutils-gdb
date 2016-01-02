@@ -1,5 +1,13 @@
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-bfin_mmu.c (bfin_mmu_options): Mark static.
+	(sim_install_bfin_mmu): New function & prototype.
+	* interp.c (e_sim_add_option_table): Delete.
+	* machs.c (bfin_mach_options): Mark static.
+	(sim_install_bfin_mach): New function & prototype.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-04-26  Mike Frysinger  <vapier@gentoo.org>

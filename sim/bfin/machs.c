@@ -1976,7 +1976,7 @@ enum {
   OPTION_MACH_HW_BOARD_FILE,
 };
 
-const OPTION bfin_mach_options[] =
+static const OPTION bfin_mach_options[] =
 {
   { {"sirev", required_argument, NULL, OPTION_MACH_SIREV },
       '\0', "NUMBER", "Set CPU silicon revision",
@@ -2018,4 +2018,14 @@ bfin_mach_option_handler (SIM_DESC sd, sim_cpu *current_cpu, int opt,
       sim_io_eprintf (sd, "Unknown Blackfin option %d\n", opt);
       return SIM_RC_FAIL;
     }
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern MODULE_INIT_FN sim_install_bfin_mach;
+
+SIM_RC
+sim_install_bfin_mach (SIM_DESC sd)
+{
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+  return sim_add_option_table (sd, NULL, bfin_mach_options);
 }

@@ -735,17 +735,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   if (STATE_ENVIRONMENT (sd) == ALL_ENVIRONMENT)
     STATE_ENVIRONMENT (sd) = VIRTUAL_ENVIRONMENT;
 
-  /* These options override any module options.
-     Obviously ambiguity should be avoided, however the caller may wish to
-     augment the meaning of an option.  */
-#define e_sim_add_option_table(sd, options) \
-  do { \
-    extern const OPTION options[]; \
-    sim_add_option_table (sd, NULL, options); \
-  } while (0)
-  e_sim_add_option_table (sd, bfin_mmu_options);
-  e_sim_add_option_table (sd, bfin_mach_options);
-
   /* The parser will print an error message for us, so we silently return.  */
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
