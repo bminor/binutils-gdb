@@ -474,8 +474,7 @@ sim_parse_args (SIM_DESC sd, char **argv)
   SIM_RC result = SIM_RC_OK;
 
   /* Count the number of arguments.  */
-  for (argc = 0; argv[argc] != NULL; ++argc)
-    continue;
+  argc = countargv (argv);
 
   /* Count the number of options.  */
   num_opts = 0;

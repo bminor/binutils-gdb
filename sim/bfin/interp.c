@@ -112,20 +112,6 @@ static const char cb_libgloss_stat_map_32[] =
 "space,4:st_blksize,4:st_blocks,4:space,8";
 static const char *stat_map_32, *stat_map_64;
 
-/* Count the number of arguments in an argv.  */
-static int
-count_argc (const char * const *argv)
-{
-  int i;
-
-  if (! argv)
-    return -1;
-
-  for (i = 0; argv[i] != NULL; ++i)
-    continue;
-  return i;
-}
-
 /* Simulate a monitor trap, put the result into r0 and errno into r1
    return offset by which to adjust pc.  */
 
@@ -180,12 +166,12 @@ bfin_syscall (SIM_CPU *cpu)
 #ifdef CB_SYS_argc
     case CB_SYS_argc:
       tbuf += sprintf (tbuf, "argc()");
-      sc.result = count_argc (argv);
+      sc.result = countargv ((char **)argv);
       break;
     case CB_SYS_argnlen:
       {
       tbuf += sprintf (tbuf, "argnlen(%u)", args[0]);
-	if (sc.arg1 < count_argc (argv))
+	if (sc.arg1 < countargv ((char **)argv))
 	  sc.result = strlen (argv[sc.arg1]);
 	else
 	  sc.result = -1;
@@ -194,7 +180,7 @@ bfin_syscall (SIM_CPU *cpu)
     case CB_SYS_argn:
       {
 	tbuf += sprintf (tbuf, "argn(%u)", args[0]);
-	if (sc.arg1 < count_argc (argv))
+	if (sc.arg1 < countargv ((char **)argv))
 	  {
 	    const char *argn = argv[sc.arg1];
 	    int len = strlen (argn);
@@ -1073,7 +1059,7 @@ bfin_user_init (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd,
   sim_pc_set (cpu, elf_addrs[0]);
 
   /* Figure out how much storage the argv/env strings need.  */
-  argc = count_argc (argv);
+  argc = countargv ((char **)argv);
   if (argc == -1)
     argc = 0;
   argv_flat = argc; /* NUL bytes  */
@@ -1082,7 +1068,7 @@ bfin_user_init (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd,
 
   if (!env)
     env = simple_env;
-  envc = count_argc (env);
+  envc = countargv ((char **)env);
   env_flat = envc; /* NUL bytes  */
   for (i = 0; i < envc; ++i)
     env_flat += strlen (env[i]);

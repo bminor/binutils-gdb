@@ -1,5 +1,10 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (count_argc): Delete.
+	(trap): Change count_argc to countargv.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
 	* configure: Regenerate.
 	* interp.c (host_little_endian): Change CURRENT_HOST_BYTE_ORDER

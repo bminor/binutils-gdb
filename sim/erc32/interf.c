@@ -171,8 +171,7 @@ sim_open (kind, callback, abfd, argv)
 
     sim_callback = callback;
 
-    while (argv[argc])
-      argc++;
+    argc = countargv (argv);
     while (stat < argc) {
 	if (argv[stat][0] == '-') {
 	    if (strcmp(argv[stat], "-v") == 0) {

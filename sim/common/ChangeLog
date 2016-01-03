@@ -1,5 +1,10 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-options.c (sim_parse_args): Replace for loop with a call
+	to countargv.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* nrun.c (myname): Mark const.
 	(main): Mark name const.  Replace myname parsing loop with a
 	call to lbasename.

@@ -1,5 +1,10 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* sh64.c (count_argc): Delete.
+	(trap_handler): Change count_argc to countargv.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
 	* configure: Regenerate.
 

@@ -772,12 +772,7 @@ sim_target_parse_command_line (int argc, char ** argv)
 static void
 sim_target_parse_arg_array (char ** argv)
 {
-  int i;
-
-  for (i = 0; argv[i]; i++)
-    ;
-
-  sim_target_parse_command_line (i, argv);
+  sim_target_parse_command_line (countargv (argv), argv);
 }
 
 static sim_cia

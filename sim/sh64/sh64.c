@@ -529,22 +529,6 @@ sh64_pref (SIM_CPU *cpu, SI addr)
   /* TODO: Unimplemented.  */
 }
 
-/* Count the number of arguments.  */
-static int
-count_argc (cpu)
-     SIM_CPU *cpu;
-{
-  int i = 0;
-
-  if (! STATE_PROG_ARGV (CPU_STATE (cpu)))
-    return -1;
-  
-  while (STATE_PROG_ARGV (CPU_STATE (cpu)) [i] != NULL)
-    ++i;
-
-  return i;
-}
-
 /* Read a null terminated string from memory, return in a buffer */
 static char *
 fetch_str (current_cpu, pc, addr)
@@ -634,11 +618,11 @@ trap_handler (SIM_CPU *current_cpu, int shmedia_abi_p, UQI trapnum, PCADDR pc)
 	    break;
 
 	  case SYS_argc:
-	    SET_H_GR (ret_reg, count_argc (current_cpu));
+	    SET_H_GR (ret_reg, countargv (STATE_PROG_ARGV (CPU_STATE (current_cpu))));
 	    break;
 
 	  case SYS_argnlen:
-	    if (PARM1 < count_argc (current_cpu))
+	    if (PARM1 < countargv (STATE_PROG_ARGV (CPU_STATE (current_cpu))))
 	      SET_H_GR (ret_reg,
 			strlen (STATE_PROG_ARGV (CPU_STATE (current_cpu)) [PARM1]));
 	    else
@@ -646,7 +630,7 @@ trap_handler (SIM_CPU *current_cpu, int shmedia_abi_p, UQI trapnum, PCADDR pc)
 	    break;
 
 	  case SYS_argn:
-	    if (PARM1 < count_argc (current_cpu))
+	    if (PARM1 < countargv (STATE_PROG_ARGV (CPU_STATE (current_cpu))))
 	      {
 		/* Include the NULL byte.  */
 		i = strlen (STATE_PROG_ARGV (CPU_STATE (current_cpu)) [PARM1]) + 1;

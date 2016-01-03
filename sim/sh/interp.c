@@ -240,20 +240,6 @@ do { \
 #define FPSCR_SZ  ((GET_FPSCR () & FPSCR_MASK_SZ) != 0)
 #define FPSCR_PR  ((GET_FPSCR () & FPSCR_MASK_PR) != 0)
 
-/* Count the number of arguments in an argv.  */
-static int
-count_argc (char **argv)
-{
-  int i;
-
-  if (! argv)
-    return -1;
-
-  for (i = 0; argv[i] != NULL; ++i)
-    continue;
-  return i;
-}
-
 static void
 set_fpscr1 (int x)
 {
@@ -1056,16 +1042,16 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	      break;
 	    }
 	  case SYS_argc:
-	    regs[0] = count_argc (prog_argv);
+	    regs[0] = countargv (prog_argv);
 	    break;
 	  case SYS_argnlen:
-	    if (regs[5] < count_argc (prog_argv))
+	    if (regs[5] < countargv (prog_argv))
 	      regs[0] = strlen (prog_argv[regs[5]]);
 	    else
 	      regs[0] = -1;
 	    break;
 	  case SYS_argn:
-	    if (regs[5] < count_argc (prog_argv))
+	    if (regs[5] < countargv (prog_argv))
 	      {
 		/* Include the termination byte.  */
 		int i = strlen (prog_argv[regs[5]]) + 1;

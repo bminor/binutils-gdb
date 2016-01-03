@@ -1,5 +1,9 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* interf.c (sim_open): Replace while loop with a call to countargv.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
 	* configure: Regenerate.
 	* exec.c (fpexec): Rename CURRENT_HOST_BYTE_ORDER to
