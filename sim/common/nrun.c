@@ -47,7 +47,7 @@ static void usage (void);
 
 extern host_callback default_callback;
 
-static char *myname;
+static const char *myname;
 
 static SIM_DESC sd;
 
@@ -64,7 +64,7 @@ cntrl_c (int sig)
 int
 main (int argc, char **argv)
 {
-  char *name;
+  const char *name;
   char **prog_argv = NULL;
   struct bfd *prog_bfd;
   enum sim_stop reason;
@@ -72,9 +72,7 @@ main (int argc, char **argv)
   int single_step = 0;
   RETSIGTYPE (*prev_sigint) ();
 
-  myname = argv[0] + strlen (argv[0]);
-  while (myname > argv[0] && myname[-1] != '/')
-    --myname;
+  myname = lbasename (argv[0]);
 
   /* INTERNAL: When MYNAME is `step', single step the simulator
      instead of allowing it to run free.  The sole purpose of this

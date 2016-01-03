@@ -1,5 +1,11 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* nrun.c (myname): Mark const.
+	(main): Mark name const.  Replace myname parsing loop with a
+	call to lbasename.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	(CONFIG_CFLAGS): Delte $(SIM_HOSTENDIAN).
 	* acinclude.m4 (SIM_AC_COMMON): Call AC_C_BIGENDIAN.
 	(SIM_AC_OPTION_HOSTENDIAN): Delete.
