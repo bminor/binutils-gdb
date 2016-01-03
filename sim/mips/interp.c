@@ -346,7 +346,8 @@ static int mips_reg_fetch (SIM_CPU *, int, unsigned char *, int);
 static int mips_reg_store (SIM_CPU *, int, unsigned char *, int);
 
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
+sim_open (SIM_OPEN_KIND kind, host_callback *cb,
+	  struct bfd *abfd, char * const *argv)
 {
   int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
@@ -999,7 +1000,8 @@ mips_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
+		     char * const *argv, char * const *env)
 {
 
 #ifdef DEBUG

@@ -1341,7 +1341,8 @@ free_state (SIM_DESC sd)
 }
 
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
+sim_open (SIM_OPEN_KIND kind, host_callback *cb,
+	  struct bfd *abfd, char * const *argv)
 {
   int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
@@ -1413,7 +1414,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd,
+		     char * const *argv, char * const *env)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   char ** avp;

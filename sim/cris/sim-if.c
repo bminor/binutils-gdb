@@ -617,7 +617,7 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
-	  char **argv)
+	  char * const *argv)
 {
   char c;
   int i;
@@ -959,8 +959,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
-		     char **argv ATTRIBUTE_UNUSED,
-		     char **envp ATTRIBUTE_UNUSED)
+		     char * const *argv ATTRIBUTE_UNUSED,
+		     char * const *envp ATTRIBUTE_UNUSED)
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
   SIM_ADDR addr;

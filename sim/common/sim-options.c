@@ -458,7 +458,7 @@ dup_arg_p (const char *arg)
 /* Called by sim_open to parse the arguments.  */
 
 SIM_RC
-sim_parse_args (SIM_DESC sd, char **argv)
+sim_parse_args (SIM_DESC sd, char * const *argv)
 {
   int c, i, argc, num_opts, save_opterr;
   char *p, *short_options;

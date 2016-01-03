@@ -137,7 +137,7 @@ SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
 	  struct host_callback_struct *callback,
 	  struct bfd *abfd,
-	  char **argv)
+	  char * const *argv)
 {
   SIM_DESC sd = sim_state_alloc (kind, callback);
   char c;
@@ -224,8 +224,8 @@ msp430_sim_close (SIM_DESC sd, int quitting)
 SIM_RC
 sim_create_inferior (SIM_DESC sd,
 		     struct bfd *abfd,
-		     char **argv,
-		     char **env)
+		     char * const *argv,
+		     char * const *env)
 {
   unsigned char resetv[2];
   int c;

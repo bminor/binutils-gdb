@@ -119,7 +119,7 @@ void
 bfin_syscall (SIM_CPU *cpu)
 {
   SIM_DESC sd = CPU_STATE (cpu);
-  const char * const *argv = (void *)STATE_PROG_ARGV (sd);
+  char * const *argv = (void *)STATE_PROG_ARGV (sd);
   host_callback *cb = STATE_CALLBACK (sd);
   bu32 args[6];
   CB_SYSCALL sc;
@@ -716,7 +716,7 @@ bfin_initialize_cpu (SIM_DESC sd, SIM_CPU *cpu)
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback,
-	  struct bfd *abfd, char **argv)
+	  struct bfd *abfd, char * const *argv)
 {
   char c;
   int i;
@@ -807,7 +807,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 }
 
 /* Some utils don't like having a NULL environ.  */
-static const char * const simple_env[] = { "HOME=/", "PATH=/bin", NULL };
+static char * const simple_env[] = { "HOME=/", "PATH=/bin", NULL };
 
 static bu32 fdpic_load_offset;
 
@@ -965,7 +965,7 @@ bfin_fdpic_load (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd, bu32 *sp,
 
 static void
 bfin_user_init (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd,
-		const char * const *argv, const char * const *env)
+		char * const *argv, char * const *env)
 {
   /* XXX: Missing host -> target endian ...  */
   /* Linux starts the user app with the stack:
@@ -1147,7 +1147,7 @@ bfin_user_init (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd,
 }
 
 static void
-bfin_os_init (SIM_DESC sd, SIM_CPU *cpu, const char * const *argv)
+bfin_os_init (SIM_DESC sd, SIM_CPU *cpu, char * const *argv)
 {
   /* Pass the command line via a string in R0 like Linux expects.  */
   int i;
@@ -1184,7 +1184,7 @@ bfin_virtual_init (SIM_DESC sd, SIM_CPU *cpu)
 
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
-		     char **argv, char **env)
+		     char * const *argv, char * const *env)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   SIM_ADDR addr;
@@ -1209,10 +1209,10 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   switch (STATE_ENVIRONMENT (sd))
     {
     case USER_ENVIRONMENT:
-      bfin_user_init (sd, cpu, abfd, (void *)argv, (void *)env);
+      bfin_user_init (sd, cpu, abfd, argv, env);
       break;
     case OPERATING_ENVIRONMENT:
-      bfin_os_init (sd, cpu, (void *)argv);
+      bfin_os_init (sd, cpu, argv);
       break;
     default:
       bfin_virtual_init (sd, cpu);

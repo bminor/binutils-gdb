@@ -131,7 +131,8 @@ aarch64_get_sym_value (const char *name)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
+		     char * const *argv, char * const *env)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0);
   long storage;
@@ -329,7 +330,7 @@ SIM_DESC
 sim_open (SIM_OPEN_KIND                  kind,
 	  struct host_callback_struct *  callback,
 	  struct bfd *                   abfd,
-	  char **                        argv)
+	  char * const *                 argv)
 {
   int i;
   sim_cpu *cpu;

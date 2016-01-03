@@ -1,3 +1,8 @@
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Mark argv const.
+	(sim_create_inferior): Mark argv and env const.
+
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* endian.c (get_word): Delete all arch/big endian logic.

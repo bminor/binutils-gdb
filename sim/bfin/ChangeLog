@@ -1,3 +1,13 @@
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (bfin_syscall): Remove first const from argv.
+	(sim_open): Mark argv const.
+	(simple_env): Remove first const.
+	(bfin_user_init): Remove first const from argv and and env
+	(bfin_os_init): Remove first const from argv.
+	(sim_create_inferior): Mark argv and env const.
+	Drop casts from bfin_user_init and bfin_os_init calls.
+
 2016-01-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (step_once): Call TRACE_DISASM.

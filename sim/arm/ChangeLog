@@ -1,3 +1,8 @@
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (sim_create_inferior): Mark argv and env const.
+	(sim_open): Mark argv const.
+
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

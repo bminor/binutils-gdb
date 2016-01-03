@@ -1,3 +1,8 @@
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-options.c (sim_parse_args): Mark argv array const.
+	* sim-options.h (sim_parse_args): Likewise.
+
 2016-01-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-trace.c: Include dis-asm.h.
