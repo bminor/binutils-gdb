@@ -20,7 +20,7 @@
 #include <sim-config.h>
 #include <stdint.h>
 
-#if WITH_HOST_BYTE_ORDER == BIG_ENDIAN
+#if HOST_BYTE_ORDER == BIG_ENDIAN
 #define HOST_BIG_ENDIAN
 #define EBT 0
 #else

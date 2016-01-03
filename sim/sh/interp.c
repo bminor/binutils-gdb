@@ -119,7 +119,7 @@ struct loop_bounds { unsigned char *start, *end; };
 #define target_little_endian (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 static int global_endianw, endianb;
 static int target_dsp;
-#define host_little_endian (CURRENT_HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+#define host_little_endian (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 
 static int maskw = 0;
 static int maskl = 0;

@@ -1,3 +1,11 @@
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
+	* configure: Regenerate.
+	* traps-linux.c (conv_endian): Change CURRENT_HOST_BYTE_ORDER
+	to HOST_BYTE_ORDER.
+	(conv_endian16): Likewise.
+
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* arch.h (TARGET_BIG_ENDIAN): Delete.

@@ -45,5 +45,4 @@ else
 	       AC_ERROR([the required "readline" library is missing]), $TERMCAP)
 fi
 AC_SUBST(READLINE)
-SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OUTPUT

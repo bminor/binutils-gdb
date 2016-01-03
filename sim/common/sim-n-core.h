@@ -248,7 +248,7 @@ sim_core_read_misaligned_N(sim_cpu *cpu,
   if (sim_core_xor_read_buffer (CPU_STATE (cpu), cpu, map, &val, addr, N) != N)
     SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map, N, addr,
 		     read_transfer, sim_core_unaligned_signal);
-  if (CURRENT_HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
+  if (HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
     val = SWAP_M (val);
   if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     val >>= (M - N) * 8;
@@ -368,7 +368,7 @@ sim_core_write_misaligned_N(sim_cpu *cpu,
   unsigned_M data = val;
   if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     data <<= (M - N) * 8;
-  if (CURRENT_HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
+  if (HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
     data = SWAP_M (data);
   if (sim_core_xor_write_buffer (CPU_STATE (cpu), cpu, map, &data, addr, N) != N)
     SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map, N, addr,

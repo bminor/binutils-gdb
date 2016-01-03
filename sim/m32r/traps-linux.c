@@ -136,7 +136,7 @@ conv_endian (unsigned int tvalue)
   unsigned int hvalue;
   unsigned int t1, t2, t3, t4;
 
-  if (CURRENT_HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+  if (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     {
       t1 = tvalue & 0xff000000;
       t2 = tvalue & 0x00ff0000;
@@ -160,7 +160,7 @@ conv_endian16 (unsigned short tvalue)
   unsigned short hvalue;
   unsigned short t1, t2;
 
-  if (CURRENT_HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+  if (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     {
       t1 = tvalue & 0xff00;
       t2 = tvalue & 0x00ff;

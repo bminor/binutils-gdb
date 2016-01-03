@@ -1,3 +1,31 @@
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	(CONFIG_CFLAGS): Delte $(SIM_HOSTENDIAN).
+	* acinclude.m4 (SIM_AC_COMMON): Call AC_C_BIGENDIAN.
+	(SIM_AC_OPTION_HOSTENDIAN): Delete.
+	* config.in, configure: Regenerate.
+	* Make-common.in (SIM_HOSTENDIAN): Delete.
+	* sim-config.c (current_host_byte_order): Delete.
+	(sim_config): Delete current_host_byte_order assignments and
+	CURRENT_HOST_BYTE_ORDER checks.
+	(print_sim_config): Change WITH_HOST_BYTE_ORDER to HOST_BYTE_ORDER.
+	* sim-config.h (WITH_HOST_BYTE_ORDER): Change to ...
+	(HOST_BYTE_ORDER): ... this.  Define based on WORDS_BIGENDIAN.
+	(current_host_byte_order): Delete.
+	(CURRENT_HOST_BYTE_ORDER): Likewise.
+	* sim-endian.c (WITH_HOST_BYTE_ORDER): Rename to ...
+	(HOST_BYTE_ORDER): ... this.
+	(sim_endian_split_16): Change WITH_HOST_BYTE_ORDER to
+	HOST_BYTE_ORDER.
+	(sim_endian_join_16): Likewise.
+	* sim-n-core.h (sim_core_read_misaligned_N): Change
+	CURRENT_HOST_BYTE_ORDER to HOST_BYTE_ORDER.
+	(sim_core_write_misaligned_N): Likewise.
+	* sim-n-endian.h (endian_t2h_N): Likewise.
+	(endian_h2t_N, endian_h2be_N, endian_be2h_N, endian_h2le_N,
+	endian_le2h_N): Likewise.
+	(offset_N): Change WITH_HOST_BYTE_ORDER to HOST_BYTE_ORDER.
+
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4 (SIM_AC_OPTION_ENDIAN): Change BIG_ENDIAN to

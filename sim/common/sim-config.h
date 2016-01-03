@@ -29,13 +29,16 @@
    The CPP below defines information about the compilation host.  In
    particular it defines the macro's:
 
-   	WITH_HOST_BYTE_ORDER	The byte order of the host. Could
-				be any of BFD_ENDIAN_LITTLE, BFD_ENDIAN_BIG,
-				or BFD_ENDIAN_UNKNOWN.  Those macro's also
-				need to be defined.
+   HOST_BYTE_ORDER	The byte order of the host. Could be BFD_ENDIAN_LITTLE
+			or BFD_ENDIAN_BIG.
 
  */
 
+#ifdef WORDS_BIGENDIAN
+# define HOST_BYTE_ORDER BFD_ENDIAN_BIG
+#else
+# define HOST_BYTE_ORDER BFD_ENDIAN_LITTLE
+#endif
 
 #if (defined (__i486__) || defined (__i586__) || defined (__i686__)) && defined(__GNUC__) && WITH_BSWAP
 #undef  htonl
@@ -49,17 +52,9 @@
 #define WITH_TREE_PROPERTIES 0
 
 
-/* endianness of the host/target:
+/* Endianness of the target.
 
-   If the build process is aware (at compile time) of the endianness
-   of the host/target it is able to eliminate slower generic endian
-   handling code.
-
-   Possible values are BFD_ENDIAN_UNKNOWN, BFD_ENDIAN_LITTLE, BFD_ENDIAN_BIG.  */
-
-#ifndef WITH_HOST_BYTE_ORDER
-#define WITH_HOST_BYTE_ORDER		BFD_ENDIAN_UNKNOWN
-#endif
+   Possible values are BFD_ENDIAN_UNKNOWN, BFD_ENDIAN_LITTLE, or BFD_ENDIAN_BIG.  */
 
 #ifndef WITH_TARGET_BYTE_ORDER
 #define WITH_TARGET_BYTE_ORDER		BFD_ENDIAN_UNKNOWN
@@ -69,10 +64,6 @@
 #define WITH_DEFAULT_TARGET_BYTE_ORDER	BFD_ENDIAN_UNKNOWN
 #endif
 
-extern enum bfd_endian current_host_byte_order;
-#define CURRENT_HOST_BYTE_ORDER \
-  (WITH_HOST_BYTE_ORDER != BFD_ENDIAN_UNKNOWN \
-   ? WITH_HOST_BYTE_ORDER : current_host_byte_order)
 extern enum bfd_endian current_target_byte_order;
 #define CURRENT_TARGET_BYTE_ORDER \
   (WITH_TARGET_BYTE_ORDER != BFD_ENDIAN_UNKNOWN \

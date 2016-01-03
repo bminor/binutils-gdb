@@ -25,7 +25,6 @@
 #include "bfd.h"
 
 
-enum bfd_endian current_host_byte_order = BFD_ENDIAN_UNKNOWN;
 enum bfd_endian current_target_byte_order = BFD_ENDIAN_UNKNOWN;
 int current_stdio;
 
@@ -154,23 +153,6 @@ sim_config (SIM_DESC sd)
     prefered_target_byte_order = (bfd_little_endian (STATE_PROG_BFD (sd))
 				  ? BFD_ENDIAN_LITTLE
 				  : BFD_ENDIAN_BIG);
-
-  /* set the host byte order */
-  current_host_byte_order = 1;
-  if (*(char*)(&current_host_byte_order))
-    current_host_byte_order = BFD_ENDIAN_LITTLE;
-  else
-    current_host_byte_order = BFD_ENDIAN_BIG;
-
-  /* verify the host byte order */
-  if (CURRENT_HOST_BYTE_ORDER != current_host_byte_order)
-    {
-      sim_io_eprintf (sd, "host (%s) and configured (%s) byte order in conflict",
-		      config_byte_order_to_a (current_host_byte_order),
-		      config_byte_order_to_a (CURRENT_HOST_BYTE_ORDER));
-      return SIM_RC_FAIL;
-    }
-
 
   /* set the target byte order */
 #if (WITH_TREE_PROPERTIES)
@@ -326,8 +308,8 @@ print_sim_config (SIM_DESC sd)
   sim_io_printf (sd, "WITH_DEFAULT_TARGET_BYTE_ORDER   = %s\n",
 		 config_byte_order_to_a (WITH_DEFAULT_TARGET_BYTE_ORDER));
 
-  sim_io_printf (sd, "WITH_HOST_BYTE_ORDER     = %s\n",
-		 config_byte_order_to_a (WITH_HOST_BYTE_ORDER));
+  sim_io_printf (sd, "HOST_BYTE_ORDER          = %s\n",
+		 config_byte_order_to_a (HOST_BYTE_ORDER));
 
   sim_io_printf (sd, "WITH_STDIO               = %s\n",
 		 config_stdio_to_a (WITH_STDIO));
