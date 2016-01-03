@@ -20,19 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SH64_SIM_H
 #define SH64_SIM_H
 
-#define GETTWI GETTSI
-#define SETTWI SETTSI
-
-
 enum {
   ISM_COMPACT, ISM_MEDIA
 };
-
-/* Hardware/device support.  */
-extern device sh5_devices;
-
-/* FIXME: Temporary, until device support ready.  */
-struct _device { int foo; };
 
 extern IDESC * sh64_idesc_media;
 extern IDESC * sh64_idesc_compact;

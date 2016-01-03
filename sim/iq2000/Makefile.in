@@ -29,7 +29,7 @@ SIM_OBJS = \
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \
 	$(CGEN_INCLUDE_DEPS) \
-	arch.h cpuall.h iq2000-sim.h $(srcdir)/../../opcodes/iq2000-desc.h
+	arch.h cpuall.h $(srcdir)/../../opcodes/iq2000-desc.h
 
 SIM_EXTRA_CFLAGS =
 

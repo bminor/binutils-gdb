@@ -1,5 +1,11 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* iq2000-sim.h: Delete file.
+	* Makefile.in (SIM_EXTRA_DEPS): Delete iq2000-sim.h.
+	* sim-main.h: Delete iq2000-sim.h include.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
 	* configure: Regenerate.
 

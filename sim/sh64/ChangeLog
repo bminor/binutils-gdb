@@ -1,5 +1,11 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* sh64-sim.h (GETTWI, SETTWI): Delete unused defines.
+	(sh5_devices): Delete.
+	(struct _device): Delete.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* sh64.c (count_argc): Delete.
 	(trap_handler): Change count_argc to countargv.
 

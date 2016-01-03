@@ -567,7 +567,6 @@ extern void m68hc11cpu_set_port (struct hw *me, sim_cpu *cpu,
 
 struct sim_state {
   sim_cpu        *cpu[MAX_NR_PROCESSORS];
-  device         *devices;
   sim_state_base base;
 };
 

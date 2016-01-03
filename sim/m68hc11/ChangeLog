@@ -1,5 +1,9 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-main.h (sim_state): Delete devices member.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
 	* configure: Regenerate.
 

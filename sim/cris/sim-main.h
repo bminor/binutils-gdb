@@ -226,6 +226,4 @@ cris_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), \
 /* Default memory size.  */
 #define CRIS_DEFAULT_MEM_SIZE 0x800000 /* 8M */
 
-extern device cris_devices;
-
 #endif /* SIM_MAIN_H */

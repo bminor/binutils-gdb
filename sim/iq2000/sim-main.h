@@ -25,7 +25,6 @@
 
 #include "sim-base.h"
 #include "cgen-sim.h"
-#include "iq2000-sim.h"
 
 /* The _sim_cpu struct.  */
 

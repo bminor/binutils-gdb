@@ -23,9 +23,6 @@
 #ifndef HW_DEVICE_H
 #define HW_DEVICE_H
 
-/* declared in sim-basics.h, this object is used everywhere */
-/* typedef struct _device device; */
-
 
 /* Introduction:
 

@@ -60,7 +60,6 @@ extern int asprintf (char **result, const char *format, ...);
 
 /* Global types that code manipulates */
 
-typedef struct _device device;
 struct hw;
 struct _sim_fpu;
 

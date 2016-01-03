@@ -1,5 +1,10 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* hw-device.h (device): Delete commented typedef.
+	* sim-basics.h (device): Delete typedef.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-options.c (sim_parse_args): Replace for loop with a call
 	to countargv.
 
