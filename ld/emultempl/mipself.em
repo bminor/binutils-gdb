@@ -250,8 +250,11 @@ EOF
 # parse_args and list_options functions.
 #
 PARSE_AND_LIST_PROLOGUE='
-#define OPTION_INSN32			301
-#define OPTION_NO_INSN32		(OPTION_INSN32 + 1)
+enum
+  {
+    OPTION_INSN32 = 301,
+    OPTION_NO_INSN32
+  };
 '
 
 PARSE_AND_LIST_LONGOPTS='

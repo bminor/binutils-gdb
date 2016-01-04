@@ -1,5 +1,10 @@
 2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* emultempl/mipself.em (PARSE_AND_LIST_PROLOGUE): Convert
+	OPTION_INSN32 and OPTION_NO_INSN32 macros to an enum.
+
+2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* testsuite/ld-mips-elf/attr-gnu-4-14.d: Update the order of
 	messages expected according to MIPS BFD private data merge
 	changes.
