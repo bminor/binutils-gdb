@@ -1,3 +1,8 @@
+2016-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-config.c (print_sim_config): Drop extra whitespace before =
+	in output for byte order, stdio, and msb settings.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4 (SIM_AC_COMMON): Call AC_MSG_CHECKING,

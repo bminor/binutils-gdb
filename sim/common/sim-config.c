@@ -296,19 +296,19 @@ sim_config (SIM_DESC sd)
 void
 print_sim_config (SIM_DESC sd)
 {
-  sim_io_printf (sd, "WITH_TARGET_BYTE_ORDER   = %s\n",
+  sim_io_printf (sd, "WITH_TARGET_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (WITH_TARGET_BYTE_ORDER));
 
-  sim_io_printf (sd, "WITH_DEFAULT_TARGET_BYTE_ORDER   = %s\n",
+  sim_io_printf (sd, "WITH_DEFAULT_TARGET_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (WITH_DEFAULT_TARGET_BYTE_ORDER));
 
-  sim_io_printf (sd, "HOST_BYTE_ORDER          = %s\n",
+  sim_io_printf (sd, "HOST_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (HOST_BYTE_ORDER));
 
-  sim_io_printf (sd, "WITH_STDIO               = %s\n",
+  sim_io_printf (sd, "WITH_STDIO = %s\n",
 		 config_stdio_to_a (WITH_STDIO));
 
-  sim_io_printf (sd, "WITH_TARGET_WORD_MSB     = %d\n",
+  sim_io_printf (sd, "WITH_TARGET_WORD_MSB = %d\n",
 		 WITH_TARGET_WORD_MSB);
 
   sim_io_printf (sd, "WITH_TARGET_WORD_BITSIZE = %d\n",
