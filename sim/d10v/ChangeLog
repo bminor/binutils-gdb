@@ -1,3 +1,8 @@
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* endian.c (get_word): Delete all arch/big endian logic.
+	(get_longword, write_word, write_longword): Likewise.
+
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_open): Update sim_parse_args comment.
