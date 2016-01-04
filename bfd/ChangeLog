@@ -1,3 +1,10 @@
+2016-01-06  Maciej W. Rozycki  <macro@imgtec.com>
+
+	Apply from master.
+	2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
+	* elfxx-mips.c (mips_elf_merge_obj_attributes): Propagate the
+	return status from `_bfd_elf_merge_object_attributes'.
+
 2015-12-11  Andreas Krebbel  <krebbel@linux.vnet.ibm.com>
 
 	Apply from master.
