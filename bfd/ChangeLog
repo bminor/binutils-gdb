@@ -1,5 +1,10 @@
 2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Suppress
+	attribute checks for null input.
+
+2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Use local
 	pointers to target data.
 
