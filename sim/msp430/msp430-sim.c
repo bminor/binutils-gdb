@@ -32,16 +32,6 @@
 #include "sim-syscall.h"
 #include "targ-vals.h"
 
-static int
-loader_write_mem (SIM_DESC sd,
-		  SIM_ADDR taddr,
-		  const unsigned char *buf,
-		  int bytes)
-{
-  SIM_CPU *cpu = MSP430_CPU (sd);
-  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
-}
-
 static sim_cia
 msp430_pc_fetch (SIM_CPU *cpu)
 {
@@ -61,6 +51,9 @@ lookup_symbol (SIM_DESC sd, const char *name)
   asymbol **symbol_table = STATE_SYMBOL_TABLE (sd);
   long number_of_symbols = STATE_NUM_SYMBOLS (sd);
   long i;
+
+  if (abfd == NULL)
+    return -1;
 
   if (symbol_table == NULL)
     {
@@ -148,7 +141,6 @@ sim_open (SIM_OPEN_KIND kind,
 {
   SIM_DESC sd = sim_state_alloc (kind, callback);
   char c;
-  struct bfd *prog_bfd;
 
   /* Initialise the simulator.  */
 
@@ -198,14 +190,6 @@ sim_open (SIM_OPEN_KIND kind,
       return 0;
     }
 
-  prog_bfd = sim_load_file (sd, argv[0], callback,
-			    "the program",
-			    STATE_PROG_BFD (sd),
-			    0 /* verbose */,
-			    1 /* use LMA instead of VMA */,
-			    loader_write_mem);
-  /* Allow prog_bfd to be NULL - this is needed by the GDB testsuite.  */
-
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)
     {
@@ -223,13 +207,10 @@ sim_open (SIM_OPEN_KIND kind,
   assert (MAX_NR_PROCESSORS == 1);
   msp430_initialize_cpu (sd, MSP430_CPU (sd));
 
-  if (prog_bfd != NULL)
-    {
-      MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
-      MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
-      if (MSP430_CPU (sd)->state.cio_buffer == -1)
-	MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
-    }
+  MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
+  MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
+  if (MSP430_CPU (sd)->state.cio_buffer == -1)
+    MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
 
   return sd;
 }

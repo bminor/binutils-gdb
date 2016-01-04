@@ -1,5 +1,12 @@
 2016-01-05  Mike Frysinger  <vapier@gentoo.org>
 
+	* msp430-sim.c (loader_write_mem): Delete.
+	(lookup_symbol): Return -1 when abfd is NULL.
+	(sim_open): Delete prog_bfd variable.  Delete call to sim_load_file.
+	Delete prog_bfd check.
+
+2016-01-05  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Delete trace.o.
 	* msp430-sim.c: Delete dis-asm.h and trace.h includes.
 	(sim_open): Delete msp430_trace_init call.
