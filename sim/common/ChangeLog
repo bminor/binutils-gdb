@@ -1,5 +1,10 @@
 2016-01-06  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-config.c (print_sim_config): Delete sim_io_printf of version,
+	date, and time information.
+
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-options.c (sim_parse_args): Mark argv array const.
 	* sim-options.h (sim_parse_args): Likewise.
 

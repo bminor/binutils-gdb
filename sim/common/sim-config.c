@@ -295,13 +295,6 @@ sim_config (SIM_DESC sd)
 void
 print_sim_config (SIM_DESC sd)
 {
-#if defined (__GNUC__) && defined (__VERSION__)
-  sim_io_printf (sd, "Compiled by GCC %s on %s %s\n",
-			  __VERSION__, __DATE__, __TIME__);
-#else
-  sim_io_printf (sd, "Compiled on %s %s\n", __DATE__, __TIME__);
-#endif
-
   sim_io_printf (sd, "WITH_TARGET_BYTE_ORDER   = %s\n",
 		 config_byte_order_to_a (WITH_TARGET_BYTE_ORDER));
 
