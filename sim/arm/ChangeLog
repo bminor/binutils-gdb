@@ -1,5 +1,9 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* wrapper.c (sim_open): Update sim_parse_args comment.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* wrapper.c (sim_target_parse_arg_array): Replace for loop with
 	a call to countargv.
 

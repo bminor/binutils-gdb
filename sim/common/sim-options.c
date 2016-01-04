@@ -460,7 +460,7 @@ dup_arg_p (const char *arg)
 SIM_RC
 sim_parse_args (SIM_DESC sd, char **argv)
 {
-  int c, i, argc, num_opts;
+  int c, i, argc, num_opts, save_opterr;
   char *p, *short_options;
   /* The `val' option struct entry is dynamically assigned for options that
      only come in the long form.  ORIG_VAL is used to get the original value
@@ -583,6 +583,11 @@ sim_parse_args (SIM_DESC sd, char **argv)
   /* Ensure getopt is initialized.  */
   optind = 0;
 
+  /* Do not lot getopt throw errors for us.  But don't mess with the state for
+     any callers higher up by saving/restoring it.  */
+  save_opterr = opterr;
+  opterr = 0;
+
   while (1)
     {
       int longind, optc;
@@ -596,6 +601,25 @@ sim_parse_args (SIM_DESC sd, char **argv)
 	}
       if (optc == '?')
 	{
+	  /* If getopt rejects a short option, optopt is set to the bad char.
+	     If it rejects a long option, we have to look at optind.  In the
+	     short option case, argv could be multiple short options.  */
+	  const char *badopt;
+	  char optbuf[3];
+
+	  if (optopt)
+	    {
+	      sprintf (optbuf, "-%c", optopt);
+	      badopt = optbuf;
+	    }
+	  else
+	    badopt = argv[optind - 1];
+
+	  sim_io_eprintf (sd,
+			  "%s: unrecognized option: %s\n"
+			  "Use --help for a complete list of options.\n",
+			  STATE_MY_NAME (sd), badopt);
+
 	  result = SIM_RC_FAIL;
 	  break;
 	}
@@ -606,6 +630,8 @@ sim_parse_args (SIM_DESC sd, char **argv)
 	  break;
 	}
     }
+
+  opterr = save_opterr;
 
   free (long_options);
   free (short_options);

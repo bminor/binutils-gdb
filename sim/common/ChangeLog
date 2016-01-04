@@ -1,5 +1,11 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-options.c (sim_parse_args): Declare local save_opterr.  Save
+	opterr state to it before calling getopt_long and restore afterwards.
+	Set opterr to 0.  When optc is '?', call sim_io_eprintf.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* hw-device.h (device): Delete commented typedef.
 	* sim-basics.h (device): Delete typedef.
 

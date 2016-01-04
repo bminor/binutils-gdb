@@ -83,9 +83,7 @@ sim_open (kind, callback, abfd, argv)
      augment the meaning of an option.  */
   sim_add_option_table (sd, NULL, frv_options);
 
-  /* getopt will print the error message so we just have to exit if this fails.
-     FIXME: Hmmm...  in the case of gdb we need getopt to call
-     print_filtered.  */
+  /* The parser will print an error message for us, so we silently return.  */
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
       free_state (sd);

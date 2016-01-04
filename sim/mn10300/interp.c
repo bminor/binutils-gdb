@@ -125,9 +125,7 @@ sim_open (SIM_OPEN_KIND kind,
   sim_do_command (sd, "memory region 0,0x100000");
   sim_do_command (sd, "memory region 0x40000000,0x200000");
 
-  /* getopt will print the error message so we just have to exit if this fails.
-     FIXME: Hmmm...  in the case of gdb we need getopt to call
-     print_filtered.  */
+  /* The parser will print an error message for us, so we silently return.  */
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
       /* Uninstall the modules to avoid memory leaks,
