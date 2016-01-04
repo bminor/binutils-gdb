@@ -1,5 +1,11 @@
 2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (mips_elf_merge_obj_e_flags): New function,
+	factored out from...
+	(_bfd_mips_elf_merge_private_bfd_data): ... here.
+
+2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Fold the
 	handling of input MIPS ABI flags together.
 

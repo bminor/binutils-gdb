@@ -14867,324 +14867,16 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Merge object attributes from IBFD into OBFD.  Raise an error if
-   there are conflicting attributes.  */
+/* Merge object file header flags from IBFD into OBFD.  Raise an error
+   if there are conflicting settings.  */
+
 static bfd_boolean
-mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
+mips_elf_merge_obj_e_flags (bfd *ibfd, bfd *obfd)
 {
-  obj_attribute *in_attr;
-  obj_attribute *out_attr;
-  bfd *abi_fp_bfd;
-  bfd *abi_msa_bfd;
-
-  abi_fp_bfd = mips_elf_tdata (obfd)->abi_fp_bfd;
-  in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
-  if (!abi_fp_bfd && in_attr[Tag_GNU_MIPS_ABI_FP].i != Val_GNU_MIPS_ABI_FP_ANY)
-    mips_elf_tdata (obfd)->abi_fp_bfd = ibfd;
-
-  abi_msa_bfd = mips_elf_tdata (obfd)->abi_msa_bfd;
-  if (!abi_msa_bfd
-      && in_attr[Tag_GNU_MIPS_ABI_MSA].i != Val_GNU_MIPS_ABI_MSA_ANY)
-    mips_elf_tdata (obfd)->abi_msa_bfd = ibfd;
-
-  if (!elf_known_obj_attributes_proc (obfd)[0].i)
-    {
-      /* This is the first object.  Copy the attributes.  */
-      _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
-      /* Use the Tag_null value to indicate the attributes have been
-	 initialized.  */
-      elf_known_obj_attributes_proc (obfd)[0].i = 1;
-
-      return TRUE;
-    }
-
-  /* Check for conflicting Tag_GNU_MIPS_ABI_FP attributes and merge
-     non-conflicting ones.  */
-  out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
-  if (in_attr[Tag_GNU_MIPS_ABI_FP].i != out_attr[Tag_GNU_MIPS_ABI_FP].i)
-    {
-      int out_fp, in_fp;
-
-      out_fp = out_attr[Tag_GNU_MIPS_ABI_FP].i;
-      in_fp = in_attr[Tag_GNU_MIPS_ABI_FP].i;
-      out_attr[Tag_GNU_MIPS_ABI_FP].type = 1;
-      if (out_fp == Val_GNU_MIPS_ABI_FP_ANY)
-	out_attr[Tag_GNU_MIPS_ABI_FP].i = in_fp;
-      else if (out_fp == Val_GNU_MIPS_ABI_FP_XX
-	       && (in_fp == Val_GNU_MIPS_ABI_FP_DOUBLE
-		   || in_fp == Val_GNU_MIPS_ABI_FP_64
-		   || in_fp == Val_GNU_MIPS_ABI_FP_64A))
-	{
-	  mips_elf_tdata (obfd)->abi_fp_bfd = ibfd;
-	  out_attr[Tag_GNU_MIPS_ABI_FP].i = in_attr[Tag_GNU_MIPS_ABI_FP].i;
-	}
-      else if (in_fp == Val_GNU_MIPS_ABI_FP_XX
-	       && (out_fp == Val_GNU_MIPS_ABI_FP_DOUBLE
-		   || out_fp == Val_GNU_MIPS_ABI_FP_64
-		   || out_fp == Val_GNU_MIPS_ABI_FP_64A))
-	/* Keep the current setting.  */;
-      else if (out_fp == Val_GNU_MIPS_ABI_FP_64A
-	       && in_fp == Val_GNU_MIPS_ABI_FP_64)
-	{
-	  mips_elf_tdata (obfd)->abi_fp_bfd = ibfd;
-	  out_attr[Tag_GNU_MIPS_ABI_FP].i = in_attr[Tag_GNU_MIPS_ABI_FP].i;
-	}
-      else if (in_fp == Val_GNU_MIPS_ABI_FP_64A
-	       && out_fp == Val_GNU_MIPS_ABI_FP_64)
-	/* Keep the current setting.  */;
-      else if (in_fp != Val_GNU_MIPS_ABI_FP_ANY)
-	{
-	  const char *out_string, *in_string;
-
-	  out_string = _bfd_mips_fp_abi_string (out_fp);
-	  in_string = _bfd_mips_fp_abi_string (in_fp);
-	  /* First warn about cases involving unrecognised ABIs.  */
-	  if (!out_string && !in_string)
-	    _bfd_error_handler
-	      (_("Warning: %B uses unknown floating point ABI %d "
-		 "(set by %B), %B uses unknown floating point ABI %d"),
-	       obfd, abi_fp_bfd, ibfd, out_fp, in_fp);
-	  else if (!out_string)
-	    _bfd_error_handler
-	      (_("Warning: %B uses unknown floating point ABI %d "
-		 "(set by %B), %B uses %s"),
-	       obfd, abi_fp_bfd, ibfd, out_fp, in_string);
-	  else if (!in_string)
-	    _bfd_error_handler
-	      (_("Warning: %B uses %s (set by %B), "
-		 "%B uses unknown floating point ABI %d"),
-	       obfd, abi_fp_bfd, ibfd, out_string, in_fp);
-	  else
-	    {
-	      /* If one of the bfds is soft-float, the other must be
-		 hard-float.  The exact choice of hard-float ABI isn't
-		 really relevant to the error message.  */
-	      if (in_fp == Val_GNU_MIPS_ABI_FP_SOFT)
-		out_string = "-mhard-float";
-	      else if (out_fp == Val_GNU_MIPS_ABI_FP_SOFT)
-		in_string = "-mhard-float";
-	      _bfd_error_handler
-		(_("Warning: %B uses %s (set by %B), %B uses %s"),
-		 obfd, abi_fp_bfd, ibfd, out_string, in_string);
-	    }
-	}
-    }
-
-  /* Check for conflicting Tag_GNU_MIPS_ABI_MSA attributes and merge
-     non-conflicting ones.  */
-  if (in_attr[Tag_GNU_MIPS_ABI_MSA].i != out_attr[Tag_GNU_MIPS_ABI_MSA].i)
-    {
-      out_attr[Tag_GNU_MIPS_ABI_MSA].type = 1;
-      if (out_attr[Tag_GNU_MIPS_ABI_MSA].i == Val_GNU_MIPS_ABI_MSA_ANY)
-	out_attr[Tag_GNU_MIPS_ABI_MSA].i = in_attr[Tag_GNU_MIPS_ABI_MSA].i;
-      else if (in_attr[Tag_GNU_MIPS_ABI_MSA].i != Val_GNU_MIPS_ABI_MSA_ANY)
-	switch (out_attr[Tag_GNU_MIPS_ABI_MSA].i)
-	  {
-	  case Val_GNU_MIPS_ABI_MSA_128:
-	    _bfd_error_handler
-	      (_("Warning: %B uses %s (set by %B), "
-		 "%B uses unknown MSA ABI %d"),
-	       obfd, abi_msa_bfd, ibfd,
-	       "-mmsa", in_attr[Tag_GNU_MIPS_ABI_MSA].i);
-	    break;
-
-	  default:
-	    switch (in_attr[Tag_GNU_MIPS_ABI_MSA].i)
-	      {
-	      case Val_GNU_MIPS_ABI_MSA_128:
-		_bfd_error_handler
-		  (_("Warning: %B uses unknown MSA ABI %d "
-		     "(set by %B), %B uses %s"),
-		     obfd, abi_msa_bfd, ibfd,
-		     out_attr[Tag_GNU_MIPS_ABI_MSA].i, "-mmsa");
-		  break;
-
-	      default:
-		_bfd_error_handler
-		  (_("Warning: %B uses unknown MSA ABI %d "
-		     "(set by %B), %B uses unknown MSA ABI %d"),
-		   obfd, abi_msa_bfd, ibfd,
-		   out_attr[Tag_GNU_MIPS_ABI_MSA].i,
-		   in_attr[Tag_GNU_MIPS_ABI_MSA].i);
-		break;
-	      }
-	  }
-    }
-
-  /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
-
-  return TRUE;
-}
-
-/* Merge backend specific data from an object file to the output
-   object file when linking.  */
-
-bfd_boolean
-_bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  struct mips_elf_obj_tdata *out_tdata;
-  struct mips_elf_obj_tdata *in_tdata;
+  struct mips_elf_obj_tdata *out_tdata = mips_elf_tdata (obfd);
   flagword old_flags;
   flagword new_flags;
   bfd_boolean ok;
-  bfd_boolean null_input_bfd = TRUE;
-  asection *sec;
-  obj_attribute *out_attr;
-
-  /* Check if we have the same endianness.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
-    {
-      (*_bfd_error_handler)
-	(_("%B: endianness incompatible with that of the selected emulation"),
-	 ibfd);
-      return FALSE;
-    }
-
-  if (!is_mips_elf (ibfd) || !is_mips_elf (obfd))
-    return TRUE;
-
-  in_tdata = mips_elf_tdata (ibfd);
-  out_tdata = mips_elf_tdata (obfd);
-
-  if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
-    {
-      (*_bfd_error_handler)
-	(_("%B: ABI is incompatible with that of the selected emulation"),
-	 ibfd);
-      return FALSE;
-    }
-
-  /* Check to see if the input BFD actually contains any sections.  If not,
-     then it has no attributes, and its flags may not have been initialized
-     either, but it cannot actually cause any incompatibility.  */
-  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-    {
-      /* Ignore synthetic sections and empty .text, .data and .bss sections
-	 which are automatically generated by gas.  Also ignore fake
-	 (s)common sections, since merely defining a common symbol does
-	 not affect compatibility.  */
-      if ((sec->flags & SEC_IS_COMMON) == 0
-	  && strcmp (sec->name, ".reginfo")
-	  && strcmp (sec->name, ".mdebug")
-	  && (sec->size != 0
-	      || (strcmp (sec->name, ".text")
-		  && strcmp (sec->name, ".data")
-		  && strcmp (sec->name, ".bss"))))
-	{
-	  null_input_bfd = FALSE;
-	  break;
-	}
-    }
-  if (null_input_bfd)
-    return TRUE;
-
-  /* Populate abiflags using existing information.  */
-  if (in_tdata->abiflags_valid)
-    {
-      obj_attribute *in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
-      Elf_Internal_ABIFlags_v0 in_abiflags;
-      Elf_Internal_ABIFlags_v0 abiflags;
-
-      /* Set up the FP ABI attribute from the abiflags if it is not already
-         set.  */
-      if (in_attr[Tag_GNU_MIPS_ABI_FP].i == Val_GNU_MIPS_ABI_FP_ANY)
-        in_attr[Tag_GNU_MIPS_ABI_FP].i = in_tdata->abiflags.fp_abi;
-
-      infer_mips_abiflags (ibfd, &abiflags);
-      in_abiflags = in_tdata->abiflags;
-
-      /* It is not possible to infer the correct ISA revision
-         for R3 or R5 so drop down to R2 for the checks.  */
-      if (in_abiflags.isa_rev == 3 || in_abiflags.isa_rev == 5)
-	in_abiflags.isa_rev = 2;
-
-      if (LEVEL_REV (in_abiflags.isa_level, in_abiflags.isa_rev)
-	  < LEVEL_REV (abiflags.isa_level, abiflags.isa_rev))
-	(*_bfd_error_handler)
-	  (_("%B: warning: Inconsistent ISA between e_flags and "
-	     ".MIPS.abiflags"), ibfd);
-      if (abiflags.fp_abi != Val_GNU_MIPS_ABI_FP_ANY
-	  && in_abiflags.fp_abi != abiflags.fp_abi)
-	(*_bfd_error_handler)
-	  (_("%B: warning: Inconsistent FP ABI between .gnu.attributes and "
-	     ".MIPS.abiflags"), ibfd);
-      if ((in_abiflags.ases & abiflags.ases) != abiflags.ases)
-	(*_bfd_error_handler)
-	  (_("%B: warning: Inconsistent ASEs between e_flags and "
-	     ".MIPS.abiflags"), ibfd);
-      /* The isa_ext is allowed to be an extension of what can be inferred
-	 from e_flags.  */
-      if (!mips_mach_extends_p (bfd_mips_isa_ext_mach (abiflags.isa_ext),
-				bfd_mips_isa_ext_mach (in_abiflags.isa_ext)))
-	(*_bfd_error_handler)
-	  (_("%B: warning: Inconsistent ISA extensions between e_flags and "
-	     ".MIPS.abiflags"), ibfd);
-      if (in_abiflags.flags2 != 0)
-	(*_bfd_error_handler)
-	  (_("%B: warning: Unexpected flag in the flags2 field of "
-	     ".MIPS.abiflags (0x%lx)"), ibfd,
-	   (unsigned long) in_abiflags.flags2);
-    }
-  else
-    {
-      infer_mips_abiflags (ibfd, &in_tdata->abiflags);
-      in_tdata->abiflags_valid = TRUE;
-    }
-
-  if (!mips_elf_merge_obj_attributes (ibfd, obfd))
-    return FALSE;
-
-  if (!out_tdata->abiflags_valid)
-    {
-      /* Copy input abiflags if output abiflags are not already valid.  */
-      out_tdata->abiflags = in_tdata->abiflags;
-      out_tdata->abiflags_valid = TRUE;
-    }
-
-  if (! elf_flags_init (obfd))
-    {
-      elf_flags_init (obfd) = TRUE;
-      elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-      elf_elfheader (obfd)->e_ident[EI_CLASS]
-	= elf_elfheader (ibfd)->e_ident[EI_CLASS];
-
-      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
-	  && (bfd_get_arch_info (obfd)->the_default
-	      || mips_mach_extends_p (bfd_get_mach (obfd),
-				      bfd_get_mach (ibfd))))
-	{
-	  if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
-				   bfd_get_mach (ibfd)))
-	    return FALSE;
-
-	  /* Update the ABI flags isa_level, isa_rev and isa_ext fields.  */
-	  update_mips_abiflags_isa (obfd, &out_tdata->abiflags);
-	}
-
-      return TRUE;
-    }
-
-  /* Update the output abiflags fp_abi using the computed fp_abi.  */
-  out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
-  out_tdata->abiflags.fp_abi = out_attr[Tag_GNU_MIPS_ABI_FP].i;
-
-#define max(a,b) ((a) > (b) ? (a) : (b))
-  /* Merge abiflags.  */
-  out_tdata->abiflags.isa_level = max (out_tdata->abiflags.isa_level,
-				       in_tdata->abiflags.isa_level);
-  out_tdata->abiflags.isa_rev = max (out_tdata->abiflags.isa_rev,
-				     in_tdata->abiflags.isa_rev);
-  out_tdata->abiflags.gpr_size = max (out_tdata->abiflags.gpr_size,
-				      in_tdata->abiflags.gpr_size);
-  out_tdata->abiflags.cpr1_size = max (out_tdata->abiflags.cpr1_size,
-				       in_tdata->abiflags.cpr1_size);
-  out_tdata->abiflags.cpr2_size = max (out_tdata->abiflags.cpr2_size,
-				       in_tdata->abiflags.cpr2_size);
-#undef max
-  out_tdata->abiflags.ases |= in_tdata->abiflags.ases;
-  out_tdata->abiflags.flags1 |= in_tdata->abiflags.flags1;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_NOREORDER;
@@ -15358,13 +15050,333 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (new_flags != old_flags)
     {
       (*_bfd_error_handler)
-	(_("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
+	(_("%B: uses different e_flags (0x%lx) fields than previous modules "
+	   "(0x%lx)"),
 	 ibfd, (unsigned long) new_flags,
 	 (unsigned long) old_flags);
       ok = FALSE;
     }
 
-  if (! ok)
+  return ok;
+}
+
+/* Merge object attributes from IBFD into OBFD.  Raise an error if
+   there are conflicting attributes.  */
+static bfd_boolean
+mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
+{
+  obj_attribute *in_attr;
+  obj_attribute *out_attr;
+  bfd *abi_fp_bfd;
+  bfd *abi_msa_bfd;
+
+  abi_fp_bfd = mips_elf_tdata (obfd)->abi_fp_bfd;
+  in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
+  if (!abi_fp_bfd && in_attr[Tag_GNU_MIPS_ABI_FP].i != Val_GNU_MIPS_ABI_FP_ANY)
+    mips_elf_tdata (obfd)->abi_fp_bfd = ibfd;
+
+  abi_msa_bfd = mips_elf_tdata (obfd)->abi_msa_bfd;
+  if (!abi_msa_bfd
+      && in_attr[Tag_GNU_MIPS_ABI_MSA].i != Val_GNU_MIPS_ABI_MSA_ANY)
+    mips_elf_tdata (obfd)->abi_msa_bfd = ibfd;
+
+  if (!elf_known_obj_attributes_proc (obfd)[0].i)
+    {
+      /* This is the first object.  Copy the attributes.  */
+      _bfd_elf_copy_obj_attributes (ibfd, obfd);
+
+      /* Use the Tag_null value to indicate the attributes have been
+	 initialized.  */
+      elf_known_obj_attributes_proc (obfd)[0].i = 1;
+
+      return TRUE;
+    }
+
+  /* Check for conflicting Tag_GNU_MIPS_ABI_FP attributes and merge
+     non-conflicting ones.  */
+  out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+  if (in_attr[Tag_GNU_MIPS_ABI_FP].i != out_attr[Tag_GNU_MIPS_ABI_FP].i)
+    {
+      int out_fp, in_fp;
+
+      out_fp = out_attr[Tag_GNU_MIPS_ABI_FP].i;
+      in_fp = in_attr[Tag_GNU_MIPS_ABI_FP].i;
+      out_attr[Tag_GNU_MIPS_ABI_FP].type = 1;
+      if (out_fp == Val_GNU_MIPS_ABI_FP_ANY)
+	out_attr[Tag_GNU_MIPS_ABI_FP].i = in_fp;
+      else if (out_fp == Val_GNU_MIPS_ABI_FP_XX
+	       && (in_fp == Val_GNU_MIPS_ABI_FP_DOUBLE
+		   || in_fp == Val_GNU_MIPS_ABI_FP_64
+		   || in_fp == Val_GNU_MIPS_ABI_FP_64A))
+	{
+	  mips_elf_tdata (obfd)->abi_fp_bfd = ibfd;
+	  out_attr[Tag_GNU_MIPS_ABI_FP].i = in_attr[Tag_GNU_MIPS_ABI_FP].i;
+	}
+      else if (in_fp == Val_GNU_MIPS_ABI_FP_XX
+	       && (out_fp == Val_GNU_MIPS_ABI_FP_DOUBLE
+		   || out_fp == Val_GNU_MIPS_ABI_FP_64
+		   || out_fp == Val_GNU_MIPS_ABI_FP_64A))
+	/* Keep the current setting.  */;
+      else if (out_fp == Val_GNU_MIPS_ABI_FP_64A
+	       && in_fp == Val_GNU_MIPS_ABI_FP_64)
+	{
+	  mips_elf_tdata (obfd)->abi_fp_bfd = ibfd;
+	  out_attr[Tag_GNU_MIPS_ABI_FP].i = in_attr[Tag_GNU_MIPS_ABI_FP].i;
+	}
+      else if (in_fp == Val_GNU_MIPS_ABI_FP_64A
+	       && out_fp == Val_GNU_MIPS_ABI_FP_64)
+	/* Keep the current setting.  */;
+      else if (in_fp != Val_GNU_MIPS_ABI_FP_ANY)
+	{
+	  const char *out_string, *in_string;
+
+	  out_string = _bfd_mips_fp_abi_string (out_fp);
+	  in_string = _bfd_mips_fp_abi_string (in_fp);
+	  /* First warn about cases involving unrecognised ABIs.  */
+	  if (!out_string && !in_string)
+	    _bfd_error_handler
+	      (_("Warning: %B uses unknown floating point ABI %d "
+		 "(set by %B), %B uses unknown floating point ABI %d"),
+	       obfd, abi_fp_bfd, ibfd, out_fp, in_fp);
+	  else if (!out_string)
+	    _bfd_error_handler
+	      (_("Warning: %B uses unknown floating point ABI %d "
+		 "(set by %B), %B uses %s"),
+	       obfd, abi_fp_bfd, ibfd, out_fp, in_string);
+	  else if (!in_string)
+	    _bfd_error_handler
+	      (_("Warning: %B uses %s (set by %B), "
+		 "%B uses unknown floating point ABI %d"),
+	       obfd, abi_fp_bfd, ibfd, out_string, in_fp);
+	  else
+	    {
+	      /* If one of the bfds is soft-float, the other must be
+		 hard-float.  The exact choice of hard-float ABI isn't
+		 really relevant to the error message.  */
+	      if (in_fp == Val_GNU_MIPS_ABI_FP_SOFT)
+		out_string = "-mhard-float";
+	      else if (out_fp == Val_GNU_MIPS_ABI_FP_SOFT)
+		in_string = "-mhard-float";
+	      _bfd_error_handler
+		(_("Warning: %B uses %s (set by %B), %B uses %s"),
+		 obfd, abi_fp_bfd, ibfd, out_string, in_string);
+	    }
+	}
+    }
+
+  /* Check for conflicting Tag_GNU_MIPS_ABI_MSA attributes and merge
+     non-conflicting ones.  */
+  if (in_attr[Tag_GNU_MIPS_ABI_MSA].i != out_attr[Tag_GNU_MIPS_ABI_MSA].i)
+    {
+      out_attr[Tag_GNU_MIPS_ABI_MSA].type = 1;
+      if (out_attr[Tag_GNU_MIPS_ABI_MSA].i == Val_GNU_MIPS_ABI_MSA_ANY)
+	out_attr[Tag_GNU_MIPS_ABI_MSA].i = in_attr[Tag_GNU_MIPS_ABI_MSA].i;
+      else if (in_attr[Tag_GNU_MIPS_ABI_MSA].i != Val_GNU_MIPS_ABI_MSA_ANY)
+	switch (out_attr[Tag_GNU_MIPS_ABI_MSA].i)
+	  {
+	  case Val_GNU_MIPS_ABI_MSA_128:
+	    _bfd_error_handler
+	      (_("Warning: %B uses %s (set by %B), "
+		 "%B uses unknown MSA ABI %d"),
+	       obfd, abi_msa_bfd, ibfd,
+	       "-mmsa", in_attr[Tag_GNU_MIPS_ABI_MSA].i);
+	    break;
+
+	  default:
+	    switch (in_attr[Tag_GNU_MIPS_ABI_MSA].i)
+	      {
+	      case Val_GNU_MIPS_ABI_MSA_128:
+		_bfd_error_handler
+		  (_("Warning: %B uses unknown MSA ABI %d "
+		     "(set by %B), %B uses %s"),
+		     obfd, abi_msa_bfd, ibfd,
+		     out_attr[Tag_GNU_MIPS_ABI_MSA].i, "-mmsa");
+		  break;
+
+	      default:
+		_bfd_error_handler
+		  (_("Warning: %B uses unknown MSA ABI %d "
+		     "(set by %B), %B uses unknown MSA ABI %d"),
+		   obfd, abi_msa_bfd, ibfd,
+		   out_attr[Tag_GNU_MIPS_ABI_MSA].i,
+		   in_attr[Tag_GNU_MIPS_ABI_MSA].i);
+		break;
+	      }
+	  }
+    }
+
+  /* Merge Tag_compatibility attributes and any common GNU ones.  */
+  _bfd_elf_merge_object_attributes (ibfd, obfd);
+
+  return TRUE;
+}
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+bfd_boolean
+_bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  struct mips_elf_obj_tdata *out_tdata;
+  struct mips_elf_obj_tdata *in_tdata;
+  bfd_boolean null_input_bfd = TRUE;
+  asection *sec;
+  obj_attribute *out_attr;
+
+  /* Check if we have the same endianness.  */
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+    {
+      (*_bfd_error_handler)
+	(_("%B: endianness incompatible with that of the selected emulation"),
+	 ibfd);
+      return FALSE;
+    }
+
+  if (!is_mips_elf (ibfd) || !is_mips_elf (obfd))
+    return TRUE;
+
+  in_tdata = mips_elf_tdata (ibfd);
+  out_tdata = mips_elf_tdata (obfd);
+
+  if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
+    {
+      (*_bfd_error_handler)
+	(_("%B: ABI is incompatible with that of the selected emulation"),
+	 ibfd);
+      return FALSE;
+    }
+
+  /* Check to see if the input BFD actually contains any sections.  If not,
+     then it has no attributes, and its flags may not have been initialized
+     either, but it cannot actually cause any incompatibility.  */
+  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+    {
+      /* Ignore synthetic sections and empty .text, .data and .bss sections
+	 which are automatically generated by gas.  Also ignore fake
+	 (s)common sections, since merely defining a common symbol does
+	 not affect compatibility.  */
+      if ((sec->flags & SEC_IS_COMMON) == 0
+	  && strcmp (sec->name, ".reginfo")
+	  && strcmp (sec->name, ".mdebug")
+	  && (sec->size != 0
+	      || (strcmp (sec->name, ".text")
+		  && strcmp (sec->name, ".data")
+		  && strcmp (sec->name, ".bss"))))
+	{
+	  null_input_bfd = FALSE;
+	  break;
+	}
+    }
+  if (null_input_bfd)
+    return TRUE;
+
+  /* Populate abiflags using existing information.  */
+  if (in_tdata->abiflags_valid)
+    {
+      obj_attribute *in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
+      Elf_Internal_ABIFlags_v0 in_abiflags;
+      Elf_Internal_ABIFlags_v0 abiflags;
+
+      /* Set up the FP ABI attribute from the abiflags if it is not already
+         set.  */
+      if (in_attr[Tag_GNU_MIPS_ABI_FP].i == Val_GNU_MIPS_ABI_FP_ANY)
+        in_attr[Tag_GNU_MIPS_ABI_FP].i = in_tdata->abiflags.fp_abi;
+
+      infer_mips_abiflags (ibfd, &abiflags);
+      in_abiflags = in_tdata->abiflags;
+
+      /* It is not possible to infer the correct ISA revision
+         for R3 or R5 so drop down to R2 for the checks.  */
+      if (in_abiflags.isa_rev == 3 || in_abiflags.isa_rev == 5)
+	in_abiflags.isa_rev = 2;
+
+      if (LEVEL_REV (in_abiflags.isa_level, in_abiflags.isa_rev)
+	  < LEVEL_REV (abiflags.isa_level, abiflags.isa_rev))
+	(*_bfd_error_handler)
+	  (_("%B: warning: Inconsistent ISA between e_flags and "
+	     ".MIPS.abiflags"), ibfd);
+      if (abiflags.fp_abi != Val_GNU_MIPS_ABI_FP_ANY
+	  && in_abiflags.fp_abi != abiflags.fp_abi)
+	(*_bfd_error_handler)
+	  (_("%B: warning: Inconsistent FP ABI between .gnu.attributes and "
+	     ".MIPS.abiflags"), ibfd);
+      if ((in_abiflags.ases & abiflags.ases) != abiflags.ases)
+	(*_bfd_error_handler)
+	  (_("%B: warning: Inconsistent ASEs between e_flags and "
+	     ".MIPS.abiflags"), ibfd);
+      /* The isa_ext is allowed to be an extension of what can be inferred
+	 from e_flags.  */
+      if (!mips_mach_extends_p (bfd_mips_isa_ext_mach (abiflags.isa_ext),
+				bfd_mips_isa_ext_mach (in_abiflags.isa_ext)))
+	(*_bfd_error_handler)
+	  (_("%B: warning: Inconsistent ISA extensions between e_flags and "
+	     ".MIPS.abiflags"), ibfd);
+      if (in_abiflags.flags2 != 0)
+	(*_bfd_error_handler)
+	  (_("%B: warning: Unexpected flag in the flags2 field of "
+	     ".MIPS.abiflags (0x%lx)"), ibfd,
+	   (unsigned long) in_abiflags.flags2);
+    }
+  else
+    {
+      infer_mips_abiflags (ibfd, &in_tdata->abiflags);
+      in_tdata->abiflags_valid = TRUE;
+    }
+
+  if (!mips_elf_merge_obj_attributes (ibfd, obfd))
+    return FALSE;
+
+  if (!out_tdata->abiflags_valid)
+    {
+      /* Copy input abiflags if output abiflags are not already valid.  */
+      out_tdata->abiflags = in_tdata->abiflags;
+      out_tdata->abiflags_valid = TRUE;
+    }
+
+  if (! elf_flags_init (obfd))
+    {
+      elf_flags_init (obfd) = TRUE;
+      elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+      elf_elfheader (obfd)->e_ident[EI_CLASS]
+	= elf_elfheader (ibfd)->e_ident[EI_CLASS];
+
+      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
+	  && (bfd_get_arch_info (obfd)->the_default
+	      || mips_mach_extends_p (bfd_get_mach (obfd),
+				      bfd_get_mach (ibfd))))
+	{
+	  if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
+				   bfd_get_mach (ibfd)))
+	    return FALSE;
+
+	  /* Update the ABI flags isa_level, isa_rev and isa_ext fields.  */
+	  update_mips_abiflags_isa (obfd, &out_tdata->abiflags);
+	}
+
+      return TRUE;
+    }
+
+  /* Update the output abiflags fp_abi using the computed fp_abi.  */
+  out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+  out_tdata->abiflags.fp_abi = out_attr[Tag_GNU_MIPS_ABI_FP].i;
+
+#define max(a,b) ((a) > (b) ? (a) : (b))
+  /* Merge abiflags.  */
+  out_tdata->abiflags.isa_level = max (out_tdata->abiflags.isa_level,
+				       in_tdata->abiflags.isa_level);
+  out_tdata->abiflags.isa_rev = max (out_tdata->abiflags.isa_rev,
+				     in_tdata->abiflags.isa_rev);
+  out_tdata->abiflags.gpr_size = max (out_tdata->abiflags.gpr_size,
+				      in_tdata->abiflags.gpr_size);
+  out_tdata->abiflags.cpr1_size = max (out_tdata->abiflags.cpr1_size,
+				       in_tdata->abiflags.cpr1_size);
+  out_tdata->abiflags.cpr2_size = max (out_tdata->abiflags.cpr2_size,
+				       in_tdata->abiflags.cpr2_size);
+#undef max
+  out_tdata->abiflags.ases |= in_tdata->abiflags.ases;
+  out_tdata->abiflags.flags1 |= in_tdata->abiflags.flags1;
+
+  if (!mips_elf_merge_obj_e_flags (ibfd, obfd))
     {
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
