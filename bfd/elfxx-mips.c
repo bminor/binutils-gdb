@@ -15024,6 +15024,8 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 bfd_boolean
 _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
+  struct mips_elf_obj_tdata *out_tdata;
+  struct mips_elf_obj_tdata *in_tdata;
   flagword old_flags;
   flagword new_flags;
   bfd_boolean ok;
@@ -15043,6 +15045,9 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (!is_mips_elf (ibfd) || !is_mips_elf (obfd))
     return TRUE;
 
+  in_tdata = mips_elf_tdata (ibfd);
+  out_tdata = mips_elf_tdata (obfd);
+
   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
     {
       (*_bfd_error_handler)
@@ -15053,12 +15058,11 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   /* Set up the FP ABI attribute from the abiflags if it is not already
      set.  */
-  if (mips_elf_tdata (ibfd)->abiflags_valid)
+  if (in_tdata->abiflags_valid)
     {
       obj_attribute *in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
       if (in_attr[Tag_GNU_MIPS_ABI_FP].i == Val_GNU_MIPS_ABI_FP_ANY)
-        in_attr[Tag_GNU_MIPS_ABI_FP].i =
-	  mips_elf_tdata (ibfd)->abiflags.fp_abi;
+        in_attr[Tag_GNU_MIPS_ABI_FP].i = in_tdata->abiflags.fp_abi;
     }
 
   if (!mips_elf_merge_obj_attributes (ibfd, obfd))
@@ -15089,17 +15093,17 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     return TRUE;
 
   /* Populate abiflags using existing information.  */
-  if (!mips_elf_tdata (ibfd)->abiflags_valid)
+  if (!in_tdata->abiflags_valid)
     {
-      infer_mips_abiflags (ibfd, &mips_elf_tdata (ibfd)->abiflags);
-      mips_elf_tdata (ibfd)->abiflags_valid = TRUE;
+      infer_mips_abiflags (ibfd, &in_tdata->abiflags);
+      in_tdata->abiflags_valid = TRUE;
     }
   else
     {
       Elf_Internal_ABIFlags_v0 abiflags;
       Elf_Internal_ABIFlags_v0 in_abiflags;
       infer_mips_abiflags (ibfd, &abiflags);
-      in_abiflags = mips_elf_tdata (ibfd)->abiflags;
+      in_abiflags = in_tdata->abiflags;
 
       /* It is not possible to infer the correct ISA revision
          for R3 or R5 so drop down to R2 for the checks.  */
@@ -15134,11 +15138,11 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	   (unsigned long) in_abiflags.flags2);
     }
 
-  if (!mips_elf_tdata (obfd)->abiflags_valid)
+  if (!out_tdata->abiflags_valid)
     {
       /* Copy input abiflags if output abiflags are not already valid.  */
-      mips_elf_tdata (obfd)->abiflags = mips_elf_tdata (ibfd)->abiflags;
-      mips_elf_tdata (obfd)->abiflags_valid = TRUE;
+      out_tdata->abiflags = in_tdata->abiflags;
+      out_tdata->abiflags_valid = TRUE;
     }
 
   if (! elf_flags_init (obfd))
@@ -15158,7 +15162,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	    return FALSE;
 
 	  /* Update the ABI flags isa_level, isa_rev and isa_ext fields.  */
-	  update_mips_abiflags_isa (obfd, &mips_elf_tdata (obfd)->abiflags);
+	  update_mips_abiflags_isa (obfd, &out_tdata->abiflags);
 	}
 
       return TRUE;
@@ -15166,30 +15170,23 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   /* Update the output abiflags fp_abi using the computed fp_abi.  */
   out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
-  mips_elf_tdata (obfd)->abiflags.fp_abi = out_attr[Tag_GNU_MIPS_ABI_FP].i;
+  out_tdata->abiflags.fp_abi = out_attr[Tag_GNU_MIPS_ABI_FP].i;
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
   /* Merge abiflags.  */
-  mips_elf_tdata (obfd)->abiflags.isa_level
-    = max (mips_elf_tdata (obfd)->abiflags.isa_level,
-	   mips_elf_tdata (ibfd)->abiflags.isa_level);
-  mips_elf_tdata (obfd)->abiflags.isa_rev
-    = max (mips_elf_tdata (obfd)->abiflags.isa_rev,
-	   mips_elf_tdata (ibfd)->abiflags.isa_rev);
-  mips_elf_tdata (obfd)->abiflags.gpr_size
-    = max (mips_elf_tdata (obfd)->abiflags.gpr_size,
-	   mips_elf_tdata (ibfd)->abiflags.gpr_size);
-  mips_elf_tdata (obfd)->abiflags.cpr1_size
-    = max (mips_elf_tdata (obfd)->abiflags.cpr1_size,
-	   mips_elf_tdata (ibfd)->abiflags.cpr1_size);
-  mips_elf_tdata (obfd)->abiflags.cpr2_size
-    = max (mips_elf_tdata (obfd)->abiflags.cpr2_size,
-	   mips_elf_tdata (ibfd)->abiflags.cpr2_size);
+  out_tdata->abiflags.isa_level = max (out_tdata->abiflags.isa_level,
+				       in_tdata->abiflags.isa_level);
+  out_tdata->abiflags.isa_rev = max (out_tdata->abiflags.isa_rev,
+				     in_tdata->abiflags.isa_rev);
+  out_tdata->abiflags.gpr_size = max (out_tdata->abiflags.gpr_size,
+				      in_tdata->abiflags.gpr_size);
+  out_tdata->abiflags.cpr1_size = max (out_tdata->abiflags.cpr1_size,
+				       in_tdata->abiflags.cpr1_size);
+  out_tdata->abiflags.cpr2_size = max (out_tdata->abiflags.cpr2_size,
+				       in_tdata->abiflags.cpr2_size);
 #undef max
-  mips_elf_tdata (obfd)->abiflags.ases
-    |= mips_elf_tdata (ibfd)->abiflags.ases;
-  mips_elf_tdata (obfd)->abiflags.flags1
-    |= mips_elf_tdata (ibfd)->abiflags.flags1;
+  out_tdata->abiflags.ases |= in_tdata->abiflags.ases;
+  out_tdata->abiflags.flags1 |= in_tdata->abiflags.flags1;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_NOREORDER;
@@ -15258,7 +15255,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	    |= new_flags & (EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
 
 	  /* Update the ABI flags isa_level, isa_rev, isa_ext fields.  */
-	  update_mips_abiflags_isa (obfd, &mips_elf_tdata (obfd)->abiflags);
+	  update_mips_abiflags_isa (obfd, &out_tdata->abiflags);
 
 	  /* Copy across the ABI flags if OBFD doesn't use them
 	     and if that was what caused us to treat IBFD as 32-bit.  */
