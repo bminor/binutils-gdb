@@ -117,21 +117,6 @@ dnl --enable-maintainer-mode.
 AM_MAINTAINER_MODE
 
 
-dnl This is a generic option to enable special byte swapping
-dnl insns on *any* cpu.
-AC_ARG_ENABLE(sim-bswap,
-[AS_HELP_STRING([--enable-sim-bswap], [Use Host specific BSWAP instruction])],
-[case "${enableval}" in
-  yes)	sim_bswap="-DWITH_BSWAP=1 -DUSE_BSWAP=1";;
-  no)	sim_bswap="-DWITH_BSWAP=0";;
-  *)	AC_MSG_ERROR("--enable-sim-bswap does not take a value"); sim_bswap="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_bswap" != x""; then
-  echo "Setting bswap flags = $sim_bswap" 6>&1
-fi],[sim_bswap=""])dnl
-AC_SUBST(sim_bswap)
-
-
 AC_ARG_ENABLE(sim-cflags,
 [AS_HELP_STRING([--enable-sim-cflags=opts],
 		[Extra CFLAGS for use in building simulator])],

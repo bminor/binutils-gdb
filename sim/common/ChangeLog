@@ -1,3 +1,12 @@
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (sim-bswap): Delete.
+	* configure: Regenerate.
+	* Make-common.in (SIM_BSWAP): Delete.
+	(CONFIG_CFLAGS): Delete $(SIM_BSWAP).
+	* sim-config.h (htonl, ntohl): Delete.
+	(WITH_BSWAP): Delete.
+
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-options.c (sim_parse_args): Declare local save_opterr.  Save

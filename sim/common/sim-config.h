@@ -40,13 +40,7 @@
 # define HOST_BYTE_ORDER BFD_ENDIAN_LITTLE
 #endif
 
-#if (defined (__i486__) || defined (__i586__) || defined (__i686__)) && defined(__GNUC__) && WITH_BSWAP
-#undef  htonl
-#undef  ntohl
-#define htonl(IN) __extension__ ({ int _out; __asm__ ("bswap %0" : "=r" (_out) : "0" (IN)); _out; })
-#define ntohl(IN) __extension__ ({ int _out; __asm__ ("bswap %0" : "=r" (_out) : "0" (IN)); _out; })
-#endif
-
+
 /* Until devices and tree properties are sorted out, tell sim-config.c
    not to call the tree_find_foo fns.  */
 #define WITH_TREE_PROPERTIES 0
@@ -82,16 +76,6 @@ extern enum bfd_endian current_target_byte_order;
 
 #ifndef WITH_XOR_ENDIAN
 #define WITH_XOR_ENDIAN		0
-#endif
-
-
-
-/* Intel host BSWAP support:
-
-   Whether to use bswap on the 486 and pentiums rather than the 386
-   sequence that uses xchgb/rorl/xchgb */
-#ifndef WITH_BSWAP
-#define	WITH_BSWAP 0
 #endif
 
 

@@ -59,15 +59,6 @@ extern int current_target_byte_order;
 #endif
 
 
-/* Intel host BSWAP support:
-
-   Whether to use bswap on the 486 and pentiums rather than the 386
-   sequence that uses xchgb/rorl/xchgb */
-#ifndef WITH_BSWAP
-#define	WITH_BSWAP 0
-#endif
-
-
 /* SMP support:
 
    Sets a limit on the number of processors that can be simulated.  If

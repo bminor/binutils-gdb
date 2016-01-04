@@ -56,18 +56,6 @@ if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
 fi],[sim_bitsize=""])dnl
 
 
-AC_ARG_ENABLE(sim-bswap,
-[  --enable-sim-bswap			Use the BSWAP instruction on Intel 486s and Pentiums.],
-[case "${enableval}" in
-  yes)	sim_bswap="-DWITH_BSWAP=1";;
-  no)	sim_bswap="-DWITH_BSWAP=0";;
-  *)	AC_MSG_ERROR("--enable-sim-bswap does not take a value"); sim_bswap="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_bswap" != x""; then
-  echo "Setting bswap flags = $sim_bswap" 6>&1
-fi],[sim_bswap=""])dnl
-
-
 AC_ARG_ENABLE(sim-cflags,
 [  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator],
 [case "${enableval}" in
@@ -902,7 +890,6 @@ AC_SUBST(sim_hw_obj)
 AC_SUBST(sim_pk_src)
 AC_SUBST(sim_pk_obj)
 AC_SUBST(sim_inline)
-AC_SUBST(sim_bswap)
 AC_SUBST(sim_endian)
 AC_SUBST(sim_regparm)
 AC_SUBST(sim_stdcall)

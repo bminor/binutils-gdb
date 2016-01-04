@@ -1,3 +1,14 @@
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (sim-bswap): Delete.
+	* configure: Regenerate.
+	* INSTALL: Delete --enable-sim-bswap docs.
+	* Makefile.in (BSWAP_CFLAGS): Delete.
+	(CONFIG_CFLAGS): Delete $(BSWAP_CFLAGS).
+	* options.c (print_options): Delete WITH_BSWAP.
+	* sim-endian.h (htonl, ntohl): Delete.
+	* std-config.h (WITH_BSWAP): Delete.
+
 2016-01-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* main.c (main): Pass SIM_OPEN_STANDALONE to psim_options and

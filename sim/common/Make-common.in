@@ -75,7 +75,6 @@ CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 CXXFLAGS = @CXXFLAGS@
 LDFLAGS = @LDFLAGS@
-SIM_BSWAP = @sim_bswap@
 SIM_CFLAGS = @sim_cflags@
 SIM_DEBUG = @sim_debug@
 SIM_TRACE = @sim_trace@
@@ -234,7 +233,6 @@ CONFIG_CFLAGS = \
 	$(SIM_DEFAULT_MODEL) \
 	$(SIM_TRACE) \
 	$(SIM_PROFILE) \
-	$(SIM_BSWAP) \
 	$(SIM_ASSERT) \
 	$(SIM_ALIGNMENT) \
 	$(SIM_BITSIZE) \

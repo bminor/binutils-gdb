@@ -605,7 +605,7 @@ sim_timebase
 sim_env
 sim_hostbitsize
 sim_igen_smp
-sim_bswap
+sim_hostendian
 sim_pk_obj
 sim_pk_src
 sim_hw_obj
@@ -684,7 +684,6 @@ sim_hw_cflags
 sim_default_model
 sim_scache
 sim_float
-sim_hostendian
 sim_endian
 sim_bitsize
 sim_assert
@@ -734,7 +733,6 @@ enable_option_checking
 enable_sim_alignment
 enable_sim_assert
 enable_sim_bitsize
-enable_sim_bswap
 enable_sim_cflags
 enable_sim_config
 enable_sim_decode_mechanism
@@ -1401,7 +1399,6 @@ Optional Features:
   --enable-sim-alignment=align		Specify strict or nonstrict alignment.
   --enable-sim-assert			Specify whether to perform random assertions.
   --enable-sim-bitsize=n		Specify target bitsize (32 or 64).
-  --enable-sim-bswap			Use the BSWAP instruction on Intel 486s and Pentiums.
   --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator
   --enable-sim-config=file		Override default config file
   --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.
@@ -4068,10 +4065,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
-
-
 sim_inline="-DDEFAULT_INLINE=0"
 
 
@@ -5235,21 +5228,6 @@ if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
 fi
 else
   sim_bitsize=""
-fi
-
-
-# Check whether --enable-sim-bswap was given.
-if test "${enable_sim_bswap+set}" = set; then :
-  enableval=$enable_sim_bswap; case "${enableval}" in
-  yes)	sim_bswap="-DWITH_BSWAP=1";;
-  no)	sim_bswap="-DWITH_BSWAP=0";;
-  *)	as_fn_error "\"--enable-sim-bswap does not take a value\"" "$LINENO" 5; sim_bswap="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_bswap" != x""; then
-  echo "Setting bswap flags = $sim_bswap" 6>&1
-fi
-else
-  sim_bswap=""
 fi
 
 
@@ -7898,7 +7876,6 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
-
 
 
 
