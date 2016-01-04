@@ -15220,6 +15220,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   bfd_boolean null_input_bfd = TRUE;
   asection *sec;
   obj_attribute *out_attr;
+  bfd_boolean ok;
 
   /* Check if we have the same endianness.  */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
@@ -15321,9 +15322,6 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       in_tdata->abiflags_valid = TRUE;
     }
 
-  if (!mips_elf_merge_obj_attributes (ibfd, obfd))
-    return FALSE;
-
   if (!out_tdata->abiflags_valid)
     {
       /* Copy input abiflags if output abiflags are not already valid.  */
@@ -15351,8 +15349,12 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  update_mips_abiflags_isa (obfd, &out_tdata->abiflags);
 	}
 
-      return TRUE;
+      ok = TRUE;
     }
+  else
+    ok = mips_elf_merge_obj_e_flags (ibfd, obfd);
+
+  ok = mips_elf_merge_obj_attributes (ibfd, obfd) && ok;
 
   /* Update the output abiflags fp_abi using the computed fp_abi.  */
   out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
@@ -15374,7 +15376,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   out_tdata->abiflags.ases |= in_tdata->abiflags.ases;
   out_tdata->abiflags.flags1 |= in_tdata->abiflags.flags1;
 
-  if (!mips_elf_merge_obj_e_flags (ibfd, obfd))
+  if (!ok)
     {
       bfd_set_error (bfd_error_bad_value);
       return FALSE;

@@ -1,3 +1,22 @@
+2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* testsuite/ld-mips-elf/attr-gnu-4-14.d: Update the order of
+	messages expected according to MIPS BFD private data merge
+	changes.
+	* testsuite/ld-mips-elf/attr-gnu-4-24.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-34.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-41.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-42.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-43.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-45.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-46.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-47.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-48.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-49.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-54.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-64.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-74.d: Likewise.
+
 2016-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
