@@ -1,5 +1,11 @@
 2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (mips_elf_merge_obj_abiflags): New function,
+	factored out from...
+	(_bfd_mips_elf_merge_private_bfd_data): ... here.
+
+2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Move
 	attribute check after ELF file header flag check.
 

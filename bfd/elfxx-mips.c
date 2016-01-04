@@ -15209,6 +15209,38 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
   return _bfd_elf_merge_object_attributes (ibfd, obfd);
 }
 
+/* Merge object ABI flags from IBFD into OBFD.  Raise an error if
+   there are conflicting settings.  */
+
+static bfd_boolean
+mips_elf_merge_obj_abiflags (bfd *ibfd, bfd *obfd)
+{
+  obj_attribute *out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+  struct mips_elf_obj_tdata *out_tdata = mips_elf_tdata (obfd);
+  struct mips_elf_obj_tdata *in_tdata = mips_elf_tdata (ibfd);
+
+  /* Update the output abiflags fp_abi using the computed fp_abi.  */
+  out_tdata->abiflags.fp_abi = out_attr[Tag_GNU_MIPS_ABI_FP].i;
+
+#define max(a, b) ((a) > (b) ? (a) : (b))
+  /* Merge abiflags.  */
+  out_tdata->abiflags.isa_level = max (out_tdata->abiflags.isa_level,
+				       in_tdata->abiflags.isa_level);
+  out_tdata->abiflags.isa_rev = max (out_tdata->abiflags.isa_rev,
+				     in_tdata->abiflags.isa_rev);
+  out_tdata->abiflags.gpr_size = max (out_tdata->abiflags.gpr_size,
+				      in_tdata->abiflags.gpr_size);
+  out_tdata->abiflags.cpr1_size = max (out_tdata->abiflags.cpr1_size,
+				       in_tdata->abiflags.cpr1_size);
+  out_tdata->abiflags.cpr2_size = max (out_tdata->abiflags.cpr2_size,
+				       in_tdata->abiflags.cpr2_size);
+#undef max
+  out_tdata->abiflags.ases |= in_tdata->abiflags.ases;
+  out_tdata->abiflags.flags1 |= in_tdata->abiflags.flags1;
+
+  return TRUE;
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -15219,7 +15251,6 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   struct mips_elf_obj_tdata *in_tdata;
   bfd_boolean null_input_bfd = TRUE;
   asection *sec;
-  obj_attribute *out_attr;
   bfd_boolean ok;
 
   /* Check if we have the same endianness.  */
@@ -15356,25 +15387,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   ok = mips_elf_merge_obj_attributes (ibfd, obfd) && ok;
 
-  /* Update the output abiflags fp_abi using the computed fp_abi.  */
-  out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
-  out_tdata->abiflags.fp_abi = out_attr[Tag_GNU_MIPS_ABI_FP].i;
-
-#define max(a,b) ((a) > (b) ? (a) : (b))
-  /* Merge abiflags.  */
-  out_tdata->abiflags.isa_level = max (out_tdata->abiflags.isa_level,
-				       in_tdata->abiflags.isa_level);
-  out_tdata->abiflags.isa_rev = max (out_tdata->abiflags.isa_rev,
-				     in_tdata->abiflags.isa_rev);
-  out_tdata->abiflags.gpr_size = max (out_tdata->abiflags.gpr_size,
-				      in_tdata->abiflags.gpr_size);
-  out_tdata->abiflags.cpr1_size = max (out_tdata->abiflags.cpr1_size,
-				       in_tdata->abiflags.cpr1_size);
-  out_tdata->abiflags.cpr2_size = max (out_tdata->abiflags.cpr2_size,
-				       in_tdata->abiflags.cpr2_size);
-#undef max
-  out_tdata->abiflags.ases |= in_tdata->abiflags.ases;
-  out_tdata->abiflags.flags1 |= in_tdata->abiflags.flags1;
+  ok = mips_elf_merge_obj_abiflags (ibfd, obfd) && ok;
 
   if (!ok)
     {
