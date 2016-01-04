@@ -1,5 +1,9 @@
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-options.c (sim_parse_args): Tweak getopt error message.
+
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4 (sim-bswap): Delete.
 	* configure: Regenerate.
 	* Make-common.in (SIM_BSWAP): Delete.

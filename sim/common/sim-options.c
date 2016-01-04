@@ -616,7 +616,7 @@ sim_parse_args (SIM_DESC sd, char **argv)
 	    badopt = argv[optind - 1];
 
 	  sim_io_eprintf (sd,
-			  "%s: unrecognized option: %s\n"
+			  "%s: unrecognized option '%s'\n"
 			  "Use --help for a complete list of options.\n",
 			  STATE_MY_NAME (sd), badopt);
 
