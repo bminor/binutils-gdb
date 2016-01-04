@@ -1,5 +1,9 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* TODO: Delete file.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
 	* configure: Regenerate.
 	* frv.c (frvbf_h_fr_double_get_handler): Change

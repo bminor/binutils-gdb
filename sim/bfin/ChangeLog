@@ -1,5 +1,9 @@
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* TODO: Delete file.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (count_argc): Delete.
 	(bfin_syscall): Change count_argc to countargv.
 	(bfin_user_init): Likewise.
