@@ -15080,28 +15080,18 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (null_input_bfd)
     return TRUE;
 
-  /* Set up the FP ABI attribute from the abiflags if it is not already
-     set.  */
+  /* Populate abiflags using existing information.  */
   if (in_tdata->abiflags_valid)
     {
       obj_attribute *in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
+      Elf_Internal_ABIFlags_v0 in_abiflags;
+      Elf_Internal_ABIFlags_v0 abiflags;
+
+      /* Set up the FP ABI attribute from the abiflags if it is not already
+         set.  */
       if (in_attr[Tag_GNU_MIPS_ABI_FP].i == Val_GNU_MIPS_ABI_FP_ANY)
         in_attr[Tag_GNU_MIPS_ABI_FP].i = in_tdata->abiflags.fp_abi;
-    }
 
-  if (!mips_elf_merge_obj_attributes (ibfd, obfd))
-    return FALSE;
-
-  /* Populate abiflags using existing information.  */
-  if (!in_tdata->abiflags_valid)
-    {
-      infer_mips_abiflags (ibfd, &in_tdata->abiflags);
-      in_tdata->abiflags_valid = TRUE;
-    }
-  else
-    {
-      Elf_Internal_ABIFlags_v0 abiflags;
-      Elf_Internal_ABIFlags_v0 in_abiflags;
       infer_mips_abiflags (ibfd, &abiflags);
       in_abiflags = in_tdata->abiflags;
 
@@ -15137,6 +15127,14 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	     ".MIPS.abiflags (0x%lx)"), ibfd,
 	   (unsigned long) in_abiflags.flags2);
     }
+  else
+    {
+      infer_mips_abiflags (ibfd, &in_tdata->abiflags);
+      in_tdata->abiflags_valid = TRUE;
+    }
+
+  if (!mips_elf_merge_obj_attributes (ibfd, obfd))
+    return FALSE;
 
   if (!out_tdata->abiflags_valid)
     {

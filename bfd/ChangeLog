@@ -1,5 +1,10 @@
 2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Fold the
+	handling of input MIPS ABI flags together.
+
+2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Suppress
 	attribute checks for null input.
 
