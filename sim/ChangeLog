@@ -1,3 +1,7 @@
+2016-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add myself as AArch64 sim maintainer.
+
 2015-12-09  Tristan Gingold  <gingold@adacore.com>
 
 	* aarch64/simulator.c: Remove syscall.h include.
