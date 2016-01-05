@@ -3,6 +3,8 @@
 	PR sim/13418
 	* configure.ac: Define WITH_PPC_SIM when linking in the sim and
 	the target is powerpc*.
+	* rs6000-tdep.c (init_sim_regno_table): Check WITH_PPC_SIM instead
+	of WITH_SIM.
 	* configure: Regenerate.
 	* config.in: Regenerate.
 
