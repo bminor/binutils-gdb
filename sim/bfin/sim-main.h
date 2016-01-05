@@ -56,13 +56,9 @@ struct sim_state {
 #include "sim-options.h"
 #include "dv-bfin_trace.h"
 
-#undef MAX
-#undef MIN
 #undef CLAMP
 #undef ALIGN
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define CLAMP(a, b, c) MIN (MAX (a, b), c)
+#define CLAMP(a, b, c) min (max (a, b), c)
 #define ALIGN(addr, size) (((addr) + ((size)-1)) & ~((size)-1))
 
 /* TODO: Move all this trace logic to the common code.  */

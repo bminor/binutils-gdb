@@ -532,7 +532,7 @@ _mmu_check_addr (SIM_CPU *cpu, bu32 addr, bool write, bool inst, int size)
     }
   else
     /* Normalize hit count so hits==2 is always multiple hit exception.  */
-    hits = MIN (2, hits);
+    hits = min (2, hits);
 
   _mmu_log_fault (cpu, mmu, addr, write, inst, hits == 0, supv, dag1, faults);
 

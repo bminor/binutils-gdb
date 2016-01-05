@@ -131,7 +131,7 @@ bfin_trace_io_read_buffer (struct hw *me, void *dest,
       /* Hardware is limited to 16 entries, so to stay compatible with
          software, limit the value to 16.  For software algorithms that
          keep reading while (TBUFSTAT != 0), they'll get all of it.  */
-      value = MIN (TBUF_LEN (trace), 16);
+      value = min (TBUF_LEN (trace), 16);
       break;
     case mmr_offset(tbuf):
       {

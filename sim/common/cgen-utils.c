@@ -28,9 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SEMOPS_DEFINE_INLINE
 #include "cgen-ops.h"
 
-#undef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-
 const char *mode_names[] = {
   "VOID",
   "BI",

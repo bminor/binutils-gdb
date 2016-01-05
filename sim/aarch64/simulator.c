@@ -4108,9 +4108,6 @@ do_vec_XTN (sim_cpu *cpu)
     }
 }
 
-#define MAX(A,B) ((A) > (B) ? (A) : (B))
-#define MIN(A,B) ((A) < (B) ? (A) : (B))
-
 static void
 do_vec_maxv (sim_cpu *cpu)
 {
@@ -4147,17 +4144,17 @@ do_vec_maxv (sim_cpu *cpu)
 	  case 0:
 	    smax = aarch64_get_vec_s8 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 16 : 8); i++)
-	      smax = MAX (smax, aarch64_get_vec_s8 (cpu, vs, i));
+	      smax = max (smax, aarch64_get_vec_s8 (cpu, vs, i));
 	    break;
 	  case 1:
 	    smax = aarch64_get_vec_s16 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 8 : 4); i++)
-	      smax = MAX (smax, aarch64_get_vec_s16 (cpu, vs, i));
+	      smax = max (smax, aarch64_get_vec_s16 (cpu, vs, i));
 	    break;
 	  case 2:
 	    smax = aarch64_get_vec_s32 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 4 : 2); i++)
-	      smax = MAX (smax, aarch64_get_vec_s32 (cpu, vs, i));
+	      smax = max (smax, aarch64_get_vec_s32 (cpu, vs, i));
 	    break;
 	  default:
 	  case 3:
@@ -4175,17 +4172,17 @@ do_vec_maxv (sim_cpu *cpu)
 	  case 0:
 	    smin = aarch64_get_vec_s8 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 16 : 8); i++)
-	      smin = MIN (smin, aarch64_get_vec_s8 (cpu, vs, i));
+	      smin = min (smin, aarch64_get_vec_s8 (cpu, vs, i));
 	    break;
 	  case 1:
 	    smin = aarch64_get_vec_s16 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 8 : 4); i++)
-	      smin = MIN (smin, aarch64_get_vec_s16 (cpu, vs, i));
+	      smin = min (smin, aarch64_get_vec_s16 (cpu, vs, i));
 	    break;
 	  case 2:
 	    smin = aarch64_get_vec_s32 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 4 : 2); i++)
-	      smin = MIN (smin, aarch64_get_vec_s32 (cpu, vs, i));
+	      smin = min (smin, aarch64_get_vec_s32 (cpu, vs, i));
 	    break;
 	  default:
 	  case 3:
@@ -4203,17 +4200,17 @@ do_vec_maxv (sim_cpu *cpu)
 	  case 0:
 	    umax = aarch64_get_vec_u8 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 16 : 8); i++)
-	      umax = MAX (umax, aarch64_get_vec_u8 (cpu, vs, i));
+	      umax = max (umax, aarch64_get_vec_u8 (cpu, vs, i));
 	    break;
 	  case 1:
 	    umax = aarch64_get_vec_u16 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 8 : 4); i++)
-	      umax = MAX (umax, aarch64_get_vec_u16 (cpu, vs, i));
+	      umax = max (umax, aarch64_get_vec_u16 (cpu, vs, i));
 	    break;
 	  case 2:
 	    umax = aarch64_get_vec_u32 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 4 : 2); i++)
-	      umax = MAX (umax, aarch64_get_vec_u32 (cpu, vs, i));
+	      umax = max (umax, aarch64_get_vec_u32 (cpu, vs, i));
 	    break;
 	  default:
 	  case 3:
@@ -4231,17 +4228,17 @@ do_vec_maxv (sim_cpu *cpu)
 	  case 0:
 	    umin = aarch64_get_vec_u8 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 16 : 8); i++)
-	      umin = MIN (umin, aarch64_get_vec_u8 (cpu, vs, i));
+	      umin = min (umin, aarch64_get_vec_u8 (cpu, vs, i));
 	    break;
 	  case 1:
 	    umin = aarch64_get_vec_u16 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 8 : 4); i++)
-	      umin = MIN (umin, aarch64_get_vec_u16 (cpu, vs, i));
+	      umin = min (umin, aarch64_get_vec_u16 (cpu, vs, i));
 	    break;
 	  case 2:
 	    umin = aarch64_get_vec_u32 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 4 : 2); i++)
-	      umin = MIN (umin, aarch64_get_vec_u32 (cpu, vs, i));
+	      umin = min (umin, aarch64_get_vec_u32 (cpu, vs, i));
 	    break;
 	  default:
 	  case 3:
@@ -4287,7 +4284,7 @@ do_vec_fminmaxV (sim_cpu *cpu)
 
 	case 3: /* FMINV.  */
 	  for (i = 1; i < 4; i++)
-	    res = MIN (res, aarch64_get_vec_float (cpu, vs, i));
+	    res = min (res, aarch64_get_vec_float (cpu, vs, i));
 	  break;
 
 	default:
@@ -4305,7 +4302,7 @@ do_vec_fminmaxV (sim_cpu *cpu)
 
 	case 3: /* FMAXV.  */
 	  for (i = 1; i < 4; i++)
-	    res = MAX (res, aarch64_get_vec_float (cpu, vs, i));
+	    res = max (res, aarch64_get_vec_float (cpu, vs, i));
 	  break;
 
 	default:

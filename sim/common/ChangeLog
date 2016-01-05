@@ -1,5 +1,14 @@
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-scache.c (MAX): Delete.
+	(scache_init): Change MAX to max.
+	* cgen-trace.c (min): Delete.
+	* cgen-utils.c (min): Delete.
+	* sim-basics.h [!min] (min): Define.
+	[!max] (max): Define.
+
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-options.c (sim_parse_args): Tweak getopt error message.
 
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>

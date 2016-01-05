@@ -1,5 +1,18 @@
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-sim.c (decode_dsp32shift_0): Change MIN to min.
+	* dv-bfin_dma.c (bfin_dma_hw_event_callback): Likewise.
+	* dv-bfin_ebiu_amc.c (bfin_ebiu_amc_write_amgctl): Likewise.
+	* dv-bfin_emac.c (bfin_emac_dma_read_buffer): Change MAX to max.
+	* dv-bfin_mmu.c (_mmu_check_addr): Change MIN to min.
+	* dv-bfin_trace.c (bfin_trace_io_read_buffer): Likewise.
+	* interp.c (bfin_fdpic_load): Change MAX to max.
+	(bfin_fdpic_load): Likewise.
+	* sim-main.h (MIN, MAX): Delete.
+	(CLAMP): Change MIN to min and MAX to max.
+
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2016-01-03  Mike Frysinger  <vapier@gentoo.org>

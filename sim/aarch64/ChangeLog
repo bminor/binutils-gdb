@@ -1,3 +1,9 @@
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* simulator.c (MAX, MIN): Delete.
+	(do_vec_maxv): Change MAX to max and MIN to min.
+	(do_vec_fminmaxV): Likewise.
+
 2016-01-04  Tristan Gingold  <gingold@adacore.com>
 
 	* simulator.c: Remove syscall.h include.

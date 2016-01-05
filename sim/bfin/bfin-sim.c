@@ -5716,7 +5716,7 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       bu32 fg = DREG (src0);
       bu32 bg = DREG (src1);
       bu32 len = fg & 0x1f;
-      bu32 mask = (1 << MIN (16, len)) - 1;
+      bu32 mask = (1 << min (16, len)) - 1;
       bu32 fgnd = (fg >> 16) & mask;
       int shft = ((fg >> 8) & 0x1f);
 

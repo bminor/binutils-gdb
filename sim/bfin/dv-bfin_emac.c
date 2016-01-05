@@ -413,7 +413,7 @@ bfin_emac_dma_read_buffer (struct hw *me, void *dest, int space,
       if (ret < 0)
 	return 0;
       ret += 4; /* include crc */
-      pad_ret = MAX (ret + 4, 64);
+      pad_ret = max (ret + 4, 64);
       len = pad_ret;
       memcpy (dest, &len, 2);
 

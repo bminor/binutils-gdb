@@ -48,6 +48,13 @@ extern int asprintf (char **result, const char *format, ...);
 #endif
 
 
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#endif
+
 
 /* Some versions of GCC include an attribute operator, define it */
 

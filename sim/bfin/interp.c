@@ -915,7 +915,7 @@ bfin_fdpic_load (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd, bu32 *sp,
 
 	free (data);
 
-	max_load_addr = MAX (paddr + memsz, max_load_addr);
+	max_load_addr = max (paddr + memsz, max_load_addr);
 
 	*sp -= 12;
 	sim_write (sd, *sp+0, (void *)&paddr, 4); /* loadseg.addr  */
@@ -946,7 +946,7 @@ bfin_fdpic_load (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd, bu32 *sp,
       }
 
   /* Update the load offset with a few extra pages.  */
-  fdpic_load_offset = ALIGN (MAX (max_load_addr, fdpic_load_offset), 0x10000);
+  fdpic_load_offset = ALIGN (max (max_load_addr, fdpic_load_offset), 0x10000);
   fdpic_load_offset += 0x10000;
 
   /* Push the summary loadmap info onto the stack last.  */

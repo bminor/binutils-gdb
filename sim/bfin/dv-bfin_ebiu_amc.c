@@ -81,8 +81,8 @@ bfin_ebiu_amc_write_amgctl (struct hw *me, struct bfin_ebiu_amc *amc,
 {
   bu32 amben_old, amben, addr, i;
 
-  amben_old = MIN ((amc->amgctl >> 1) & 0x7, 4);
-  amben = MIN ((amgctl >> 1) & 0x7, 4);
+  amben_old = min ((amc->amgctl >> 1) & 0x7, 4);
+  amben = min ((amgctl >> 1) & 0x7, 4);
 
   HW_TRACE ((me, "reattaching banks: AMGCTL 0x%04x[%u] -> 0x%04x[%u]",
 	     amc->amgctl, amben_old, amgctl, amben));

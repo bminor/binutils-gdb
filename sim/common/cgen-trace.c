@@ -24,9 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-main.h"
 #include "sim-fpu.h"
 
-#undef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 16
 #endif
