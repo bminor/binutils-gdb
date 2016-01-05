@@ -147,6 +147,9 @@ SECTIONS
     ${RELOCATING+ _edata = . ; }
   } ${RELOCATING+ > data ${RELOCATING+AT> text}}
   
+  __romdatastart = LOADADDR(.data);
+  __romdatacopysize = SIZEOF(.data);
+  
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
     ${RELOCATING+. = ALIGN(2);}

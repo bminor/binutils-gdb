@@ -1,3 +1,11 @@
+2016-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* emulparams/msp430elf.sh (RAM_START): Move to 0x500 - above the
+	MSP430 hardware multiply address range.
+	* scripttempl/elf32msp430.sc (__romdatastart): Define.
+	(__romdatacopysize): Define.
+	* scripttempl/elf32msp430_3.sc: Likewise.
+
 2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* emultempl/mipself.em (PARSE_AND_LIST_PROLOGUE): Convert
