@@ -1,5 +1,9 @@
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-utils.c (sim_state_free): Change to STATE_MAGIC.
+
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-scache.c (MAX): Delete.
 	(scache_init): Change MAX to max.
 	* cgen-trace.c (min): Delete.

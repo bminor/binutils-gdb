@@ -101,7 +101,7 @@ sim_state_alloc (SIM_OPEN_KIND kind,
 void
 sim_state_free (SIM_DESC sd)
 {
-  ASSERT (sd->base.magic == SIM_MAGIC_NUMBER);
+  ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
 #ifdef SIM_STATE_FREE
   SIM_STATE_FREE (sd);
