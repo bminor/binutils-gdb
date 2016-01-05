@@ -9,7 +9,7 @@ Disassembly of section .text:
    0:	1100 0000           	ld	r0,\[r1\]
    4:	1601 0005           	ld	r5,\[r6,1\]
    8:	1600 7013 0000 0000 	ld	r19,\[0\]
-			c: ARC_32_ME	foo
+			c: R_ARC_32_ME	foo
   10:	120a 0204           	ld.aw	r4,\[r2,10\]
   14:	1600 7001 0000 0384 	ld	r1,\[0x384\]
   1c:	130f 0082           	ldb	r2,\[r3,15\]
