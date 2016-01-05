@@ -758,6 +758,9 @@
    when building for Cygwin. */
 #undef USE_WIN32API
 
+/* Define if the PPC simulator is being linked in. */
+#undef WITH_PPC_SIM
+
 /* Define if --with-python provides a path, either directly or via
    python-config.py --exec-prefix. */
 #undef WITH_PYTHON_PATH

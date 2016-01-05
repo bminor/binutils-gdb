@@ -328,7 +328,7 @@ init_sim_regno_table (struct gdbarch *arch)
     set_sim_regno (sim_regno, tdep->ppc_acc_regnum, sim_ppc_acc_regnum);
   /* spefscr is a special-purpose register, so the code below handles it.  */
 
-#ifdef WITH_SIM
+#ifdef WITH_PPC_SIM
   /* Now handle all special-purpose registers.  Verify that they
      haven't mistakenly been assigned numbers by any of the above
      code.  */

@@ -1,3 +1,11 @@
+2016-01-05  Pedro Alves  <palves@redhat.com>
+
+	PR sim/13418
+	* configure.ac: Define WITH_PPC_SIM when linking in the sim and
+	the target is powerpc*.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2016-01-04  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.c (btrace_pt_readmem_callback): Do not return in TRY/CATCH.

@@ -15846,6 +15846,16 @@ if test "${ignore_sim}" = "false"; then
 
 $as_echo "#define WITH_SIM 1" >>confdefs.h
 
+
+    # Some tdep code should only be compiled in when the ppc sim is
+    # built.  PR sim/13418.
+    case $target in
+      powerpc*-*-*)
+
+$as_echo "#define WITH_PPC_SIM 1" >>confdefs.h
+
+	;;
+    esac
   fi
 fi
 
