@@ -258,34 +258,10 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self,
   return next_pcs;
 }
 
-/* See arm-get-next-pcs.h.  */
+/* Find the next possible PCs for thumb mode.  */
 
-VEC (CORE_ADDR) *
-arm_get_next_pcs (struct arm_get_next_pcs *self, CORE_ADDR pc)
-{
-  VEC (CORE_ADDR) *next_pcs = NULL;
-
-  if (self->ops->is_thumb (self))
-    {
-      next_pcs = thumb_deal_with_atomic_sequence_raw (self, pc);
-      if (next_pcs == NULL)
-	next_pcs = thumb_get_next_pcs_raw (self, pc);
-    }
-  else
-    {
-      next_pcs = arm_deal_with_atomic_sequence_raw (self, pc);
-      if (next_pcs == NULL)
-	next_pcs = arm_get_next_pcs_raw (self, pc);
-    }
-
-  return next_pcs;
-}
-
-/* See arm-get-next-pcs.h.  */
-
-VEC (CORE_ADDR) *
-thumb_get_next_pcs_raw (struct arm_get_next_pcs *self,
-			CORE_ADDR pc)
+static VEC (CORE_ADDR) *
+thumb_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
 {
   int byte_order = self->byte_order;
   int byte_order_for_code = self->byte_order_for_code;
@@ -664,9 +640,8 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self,
    in Thumb-State, and gdbarch_addr_bits_remove () to get the plain memory
    address in GDB and arm_addr_bits_remove in GDBServer.  */
 
-VEC (CORE_ADDR) *
-arm_get_next_pcs_raw (struct arm_get_next_pcs *self,
-		      CORE_ADDR pc)
+static VEC (CORE_ADDR) *
+arm_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
 {
   int byte_order = self->byte_order;
   unsigned long pc_val;
@@ -922,5 +897,28 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self,
     }
 
   VEC_safe_push (CORE_ADDR, next_pcs, nextpc);
+  return next_pcs;
+}
+
+/* See arm-get-next-pcs.h.  */
+
+VEC (CORE_ADDR) *
+arm_get_next_pcs (struct arm_get_next_pcs *self, CORE_ADDR pc)
+{
+  VEC (CORE_ADDR) *next_pcs = NULL;
+
+  if (self->ops->is_thumb (self))
+    {
+      next_pcs = thumb_deal_with_atomic_sequence_raw (self, pc);
+      if (next_pcs == NULL)
+	next_pcs = thumb_get_next_pcs_raw (self, pc);
+    }
+  else
+    {
+      next_pcs = arm_deal_with_atomic_sequence_raw (self, pc);
+      if (next_pcs == NULL)
+	next_pcs = arm_get_next_pcs_raw (self, pc);
+    }
+
   return next_pcs;
 }
