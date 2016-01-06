@@ -27,6 +27,27 @@
 #include <elf.h>
 #endif
 
+/* Correct in either endianness.  */
+#define arm_abi_breakpoint 0xef9f0001UL
+
+/* For new EABI binaries.  We recognize it regardless of which ABI
+   is used for gdbserver, so single threaded debugging should work
+   OK, but for multi-threaded debugging we only insert the current
+   ABI's breakpoint instruction.  For now at least.  */
+#define arm_eabi_breakpoint 0xe7f001f0UL
+
+#if (defined __ARM_EABI__ || defined __aarch64__)
+static const unsigned long arm_breakpoint = arm_eabi_breakpoint;
+#else
+static const unsigned long arm_breakpoint = arm_abi_breakpoint;
+#endif
+
+#define arm_breakpoint_len 4
+static const unsigned short thumb_breakpoint = 0xde01;
+#define thumb_breakpoint_len 2
+const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
+#define thumb2_breakpoint_len 4
+
 /* Some older versions of GNU/Linux and Android do not define
    the following macros.  */
 #ifndef NT_ARM_VFP

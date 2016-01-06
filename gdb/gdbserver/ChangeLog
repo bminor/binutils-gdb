@@ -1,3 +1,17 @@
+2016-01-06  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.h (arm_abi_breakpoint): Move to
+	linux-aarch32-low.c.
+	(arm_eabi_breakpoint, arm_breakpoint): Likewise.
+	(arm_breakpoint_len, thumb_breakpoint_len): Likewise.
+	(thumb2_breakpoint, thumb2_breakpoint_len): Likewise.
+	(thumb2_breakpoint): Declare.
+	* linux-aarch32-low.c (arm_abi_breakpoint): Moved from
+	linux-aarch32-low.h.
+	(arm_eabi_breakpoint, arm_breakpoint): Likewise.
+	(arm_breakpoint_len, thumb_breakpoint_len): Likewise.
+	(thumb2_breakpoint, thumb2_breakpoint_len): Likewise.
+
 2016-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbreplay.c (gdbreplay_version): Change copyright year in
