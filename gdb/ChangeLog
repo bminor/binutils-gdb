@@ -1,5 +1,9 @@
 2016-01-05  Mike Frysinger  <vapier@gentoo.org>
 
+	* version.in: Change cvs to git.
+
+2016-01-05  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.tgt (score-*-*): Delete gdb_sim assignment.
 
 2016-01-05  Pedro Alves  <palves@redhat.com>
