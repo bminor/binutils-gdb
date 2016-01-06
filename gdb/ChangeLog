@@ -1,3 +1,10 @@
+2016-01-17  Jonas Hahnfeld <Hahnfeld@itc.rwth-aachen.de>  (tiny change)
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
+	PR gdb/19208
+	* dwarf2read.c (read_partial_die): Do not call set_objfile_main_name
+	if the function has no name.
+
 2016-01-15  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* charset.c [PHONY_ICONV] (GDB_DEFAULT_HOST_CHARSET):
