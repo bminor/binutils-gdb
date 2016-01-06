@@ -8,7 +8,6 @@ SIM_AC_COMMON
 dnl Options available in this module
 SIM_AC_OPTION_INLINE()
 SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
-SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OPTION_WARNINGS
 SIM_AC_OPTION_RESERVED_BITS(1)
 
@@ -37,14 +36,14 @@ AC_SUBST(SIM_SUBTARGET)
 mips_endian=
 default_endian=
 case "${target}" in
-  mips64el*-*-*)	mips_endian=LITTLE_ENDIAN ;;
-  mips64vr*el-*-*)      default_endian=LITTLE_ENDIAN ;;
-  mips64*-*-*)          default_endian=BIG_ENDIAN ;;
-  mips16*-*-*)          default_endian=BIG_ENDIAN ;;
-  mipsisa32*-*-*)       default_endian=BIG_ENDIAN ;;
-  mipsisa64*-*-*)       default_endian=BIG_ENDIAN ;;
-  mips*-*-*)            default_endian=BIG_ENDIAN ;;
-  *)                    default_endian=BIG_ENDIAN ;;
+  mips64el*-*-*)        mips_endian=LITTLE ;;
+  mips64vr*el-*-*)      default_endian=LITTLE ;;
+  mips64*-*-*)          default_endian=BIG ;;
+  mips16*-*-*)          default_endian=BIG ;;
+  mipsisa32*-*-*)       default_endian=BIG ;;
+  mipsisa64*-*-*)       default_endian=BIG ;;
+  mips*-*-*)            default_endian=BIG ;;
+  *)                    default_endian=BIG ;;
 esac
 SIM_AC_OPTION_ENDIAN($mips_endian,$default_endian)
 
@@ -234,7 +233,7 @@ if test ${sim_gen} = MULTI; then
 
   cat << __EOF__ > multi-run.c
 /* Main entry point for MULTI simulators.
-   Copyright (C) 2003-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -444,7 +443,6 @@ case "${target}" in
   mips*tx39*)
 	hw_enabled=yes
 	hw_extra_devices="tx3904cpu tx3904irc tx3904tmr tx3904sio" 
-	SIM_SUBTARGET="$SIM_SUBTARGET -DTARGET_TX3904=1"
 	;;
   *)
 	;;

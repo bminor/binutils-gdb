@@ -1,3 +1,129 @@
+2016-01-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-infthread.exp: Fix typo.  Expect t0.num to be 1.
+
+2016-01-04  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/dlopen.exp: New.
+	* gdb.btrace/dlopen.c: New.
+	* gdb.btrace/dlopen-dso.c: New.
+
+2015-12-25  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* lib/gdb.exp (gdb_test): Update comments to clarify that the
+	PATTERN argument is optional.
+
+2015-12-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* lib/ada.exp (target_compile_ada_from_dir): New function.
+	(gdb_compile_ada): Reimplement avoiding the use of project files.
+	* gdb.ada/gnat_ada.gpr: Delete.
+	* gdb.ada/cond_lang.exp: Adjust test to make path before
+	filename optional.
+	* gdb.ada/small_reg_param.exp: Likewise.
+
+2015-12-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/foll-vork.exp: Remove HP-UX special case.
+
+2015-12-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* lib/mi-support.exp (mi_run_cmd_full): Add an expect for the CLI jump
+	case.
+
+2015-12-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/break.exp: Remove dead code.
+	* gdb.base/sepdebug.exp: Likewise.
+
+2015-12-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.asm/asm-source.exp: Remove HP-UX references.
+	* gdb.base/annota1.exp: Likewise.
+	* gdb.base/annota3.exp: Likewise.
+	* gdb.base/attach.exp: Likewise.
+	* gdb.base/bigcore.exp: Likewise.
+	* gdb.base/break.exp: Likewise.
+	* gdb.base/call-ar-st.exp: Likewise.
+	* gdb.base/callfuncs.exp: Likewise.
+	* gdb.base/catch-fork-static.exp: Likewise.
+	* gdb.base/display.exp: Likewise.
+	* gdb.base/foll-exec-mode.exp: Likewise.
+	* gdb.base/foll-exec.exp: Likewise.
+	* gdb.base/foll-fork.exp: Likewise.
+	* gdb.base/foll-vfork.exp: Likewise.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/hbreak2.exp: Likewise.
+	* gdb.base/inferior-died.exp: Likewise.
+	* gdb.base/interrupt.exp: Likewise.
+	* gdb.base/multi-forks.exp: Likewise.
+	* gdb.base/nodebug.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/solib1.c: Likewise.
+	* gdb.base/step-test.exp: Likewise.
+	* gdb.mi/non-stop.c: Likewise.
+	* gdb.mi/pthreads.c: Likewise.
+	* gdb.multi/bkpt-multi-exec.ex: Likewise.
+	* gdb.threads/pthreads.c: Likewise.
+	* gdb.threads/staticthreads.exp: Likewise.
+	* lib/future.exp: Likewise.
+	* lib/gdb.exp: Likewise.
+	* gdb.base/so-indr-cl.c: Remove.
+	* gdb.base/so-indr-cl.exp: Likewise.
+	* gdb.base/solib.c: Likewise.
+	* gdb.base/solib.exp: Likewise.
+	* gdb.base/solib2.c: Likewise.
+
+2015-12-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/break.exp: Remove references to HP CC/aCC compilers.
+	* gdb.base/call-ar-st.exp: Likewise.
+	* gdb.base/callfuncs.exp: Likewise.
+	* gdb.base/condbreak.exp: Likewise.
+	* gdb.base/constvars.exp: Likewise.
+	* gdb.base/hbreak2.exp: Likewise.
+	* gdb.base/langs.exp: Likewise.
+	* gdb.base/list.exp: Likewise.
+	* gdb.base/long_long.exp: Likewise.
+	* gdb.base/ptype.exp: Likewise.
+	* gdb.base/scope.exp: Likewise.
+	* gdb.base/signals.exp: Likewise.
+	* gdb.base/so-impl-ld.exp: Likewise.
+	* gdb.base/varargs.exp: Likewise.
+	* gdb.base/volatile.exp: Likewise.
+	* gdb.base/whatis.exp: Likewise.
+	* gdb.cp/cplusfuncs.exp: Likewise.
+	* gdb.cp/inherit.exp: Likewise.
+	* gdb.cp/local.exp: Likewise.
+	* gdb.cp/member-ptr.exp: Likewise.
+	* gdb.cp/method.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/templates.exp: Likewise.
+	* gdb.stabs/weird.exp: Likewise.
+	* lib/compiler.c: Likewise.
+	* lib/compiler.cc: Likewise.
+	* lib/cp-support.exp: Likewise.
+	* lib/gdb.exp: Likewise.
+
+2015-12-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac: Remove HP-UX case.
+	* configure: Regenerate.
+
+2015-12-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (gdb_compile): Add function doc.
+
+2015-12-17  Pedro Alves  <palves@redhat.com>
+
+	PR threads/19354
+	* gdb.multi/info-threads.exp: New file.
+
+2015-12-15  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.trace/ftrace.exp: Set arg0exp to "$x0" if target
+	is aarch64*-*-*.
+
 2015-12-14  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/history-duplicates.exp: Skip if no readline support.
@@ -6945,6 +7071,6 @@ For older changes see ChangeLog-1993-2013.
 ;; version-control: never
 ;; End:
 
-    Copyright 2014-2015 Free Software Foundation, Inc.
+    Copyright 2014-2016 Free Software Foundation, Inc.
   Copying and distribution of this file, with or without modification,
   are permitted provided the copyright notice and this notice are preserved.

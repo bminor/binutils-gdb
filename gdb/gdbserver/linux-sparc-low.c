@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for the remote server for GDB.
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -320,7 +320,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   NULL, /* breakpoint_kind_from_pc */
   sparc_sw_breakpoint_from_kind,
-  NULL, /* breakpoint_reinsert_addr */
+  NULL, /* get_next_pcs */
   0,
   sparc_breakpoint_at,
   NULL,  /* supports_z_point_type */

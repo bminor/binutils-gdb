@@ -6,7 +6,7 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
 
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -1545,6 +1545,10 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARM_LDC_SB_G2",
   "BFD_RELOC_ARM_V4BX",
   "BFD_RELOC_ARM_IRELATIVE",
+  "BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC",
+  "BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC",
+  "BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC",
+  "BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC",
   "BFD_RELOC_ARM_IMMEDIATE",
   "BFD_RELOC_ARM_ADRL_IMMEDIATE",
   "BFD_RELOC_ARM_T32_IMMEDIATE",

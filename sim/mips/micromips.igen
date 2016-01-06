@@ -1,5 +1,5 @@
 // Simulator definition for the micromips ASE.
-// Copyright (C) 2005-2015 Free Software Foundation, Inc.
+// Copyright (C) 2005-2016 Free Software Foundation, Inc.
 // Contributed by Imagination Technologies, Ltd.
 // Written by Andrew Bennett <andrew.bennett@imgtec.com>
 //
@@ -845,11 +845,8 @@
   address_word base = GPR[BASE];
   address_word offset = EXTEND12 (IMMEDIATE);
   address_word vaddr = loadstore_ea (SD_, base, offset);
-  address_word paddr;
-  int uncached;
-  if (AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached,
-			  isTARGET, isREAL))
-    CacheOp (OP, vaddr, paddr, instruction_0);
+  address_word paddr = vaddr;
+  CacheOp (OP, vaddr, paddr, instruction_0);
 }
 
 

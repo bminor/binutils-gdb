@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2015 Free Software Foundation, Inc.
+# Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -657,7 +657,8 @@ ALL_64_TARGET_OBS = \
 
 # All other target-dependent objects files (used with --enable-targets=all).
 ALL_TARGET_OBS = \
-	armbsd-tdep.o arm.o arm-linux-tdep.o arm-symbian-tdep.o \
+	armbsd-tdep.o arm.o arm-linux.o arm-linux-tdep.o \
+	arm-get-next-pcs.o arm-symbian-tdep.o \
 	armnbsd-tdep.o armobsd-tdep.o \
 	arm-tdep.o arm-wince-tdep.o \
 	avr-tdep.o \
@@ -894,7 +895,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
 	target/waitstatus.c common/print-utils.c common/rsp-low.c \
 	common/errors.c common/common-debug.c common/common-exceptions.c \
-	common/btrace-common.c common/fileio.c \
+	common/btrace-common.c common/fileio.c common/common-regcache.c \
 	$(SUBDIR_GCC_COMPILE_SRCS)
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -1085,6 +1086,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	format.o registry.o btrace.o record-btrace.o waitstatus.o \
 	print-utils.o rsp-low.o errors.o common-debug.o debug.o \
 	common-exceptions.o btrace-common.o fileio.o \
+	common-regcache.o \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
 TSOBS = inflow.o
@@ -1660,8 +1662,9 @@ ALLDEPFILES = \
 	amd64-dicos-tdep.c \
 	amd64-linux-nat.c amd64-linux-tdep.c \
 	amd64-sol2-tdep.c \
-	arm.c \
-	arm-linux-nat.c arm-linux-tdep.c arm-symbian-tdep.c arm-tdep.c \
+	arm.c arm-get-next-pcs.c \
+	arm-linux.c arm-linux-nat.c arm-linux-tdep.c \
+	arm-symbian-tdep.c arm-tdep.c \
 	armnbsd-nat.c armbsd-tdep.c armnbsd-tdep.c armobsd-tdep.c \
 	avr-tdep.c \
 	bfin-linux-tdep.c bfin-tdep.c \
@@ -2266,6 +2269,11 @@ btrace-common.o: ${srcdir}/common/btrace-common.c
 fileio.o: ${srcdir}/common/fileio.c
 	$(COMPILE) $(srcdir)/common/fileio.c
 	$(POSTCOMPILE)
+
+common-regcache.o: ${srcdir}/common/common-regcache.c
+	$(COMPILE) $(srcdir)/common/common-regcache.c
+	$(POSTCOMPILE)
+
 #
 # gdb/target/ dependencies
 #
@@ -2284,6 +2292,14 @@ waitstatus.o: ${srcdir}/target/waitstatus.c
 
 arm.o: ${srcdir}/arch/arm.c
 	$(COMPILE) $(srcdir)/arch/arm.c
+	$(POSTCOMPILE)
+
+arm-linux.o: ${srcdir}/arch/arm-linux.c
+	$(COMPILE) $(srcdir)/arch/arm-linux.c
+	$(POSTCOMPILE)
+
+arm-get-next-pcs.o: ${srcdir}/arch/arm-get-next-pcs.c
+	$(COMPILE) $(srcdir)/arch/arm-get-next-pcs.c
 	$(POSTCOMPILE)
 
 # gdb/nat/ dependencies

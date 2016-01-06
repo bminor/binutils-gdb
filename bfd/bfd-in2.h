@@ -7,7 +7,7 @@
 
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -1431,6 +1431,9 @@ typedef struct bfd_section
   /* Indicate that section has the no read flag set. This happens
      when memory read flag isn't set. */
 #define SEC_COFF_NOREAD 0x40000000
+
+  /* Indicate that section has the no read flag set.  */
+#define SEC_ELF_NOREAD 0x80000000
 
   /*  End of section flags.  */
 
@@ -3515,6 +3518,12 @@ pc-relative or some form of GOT-indirect relocation.  */
 
 /* ARM support for STT_GNU_IFUNC.  */
   BFD_RELOC_ARM_IRELATIVE,
+
+/* Thumb1 relocations to support execute-only code.  */
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC,
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC,
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC,
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC,
 
 /* These relocs are only used within the ARM assembler.  They are not
 (at present) written to any object files.  */

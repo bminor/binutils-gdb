@@ -1,6 +1,6 @@
 /* Simulator for TI MSP430 and MSP430X
 
-   Copyright (C) 2013-2015 Free Software Foundation, Inc.
+   Copyright (C) 2013-2016 Free Software Foundation, Inc.
    Contributed by Red Hat.
    Based on sim/bfin/bfin-sim.c which was contributed by Analog Devices, Inc.
 
@@ -30,19 +30,7 @@
 #include "opcode/msp430-decode.h"
 #include "sim-main.h"
 #include "sim-syscall.h"
-#include "dis-asm.h"
 #include "targ-vals.h"
-#include "trace.h"
-
-static int
-loader_write_mem (SIM_DESC sd,
-		  SIM_ADDR taddr,
-		  const unsigned char *buf,
-		  int bytes)
-{
-  SIM_CPU *cpu = MSP430_CPU (sd);
-  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
-}
 
 static sim_cia
 msp430_pc_fetch (SIM_CPU *cpu)
@@ -63,6 +51,9 @@ lookup_symbol (SIM_DESC sd, const char *name)
   asymbol **symbol_table = STATE_SYMBOL_TABLE (sd);
   long number_of_symbols = STATE_NUM_SYMBOLS (sd);
   long i;
+
+  if (abfd == NULL)
+    return -1;
 
   if (symbol_table == NULL)
     {
@@ -150,7 +141,6 @@ sim_open (SIM_OPEN_KIND kind,
 {
   SIM_DESC sd = sim_state_alloc (kind, callback);
   char c;
-  struct bfd *prog_bfd;
 
   /* Initialise the simulator.  */
 
@@ -200,14 +190,6 @@ sim_open (SIM_OPEN_KIND kind,
       return 0;
     }
 
-  prog_bfd = sim_load_file (sd, argv[0], callback,
-			    "the program",
-			    STATE_PROG_BFD (sd),
-			    0 /* verbose */,
-			    1 /* use LMA instead of VMA */,
-			    loader_write_mem);
-  /* Allow prog_bfd to be NULL - this is needed by the GDB testsuite.  */
-
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)
     {
@@ -225,15 +207,10 @@ sim_open (SIM_OPEN_KIND kind,
   assert (MAX_NR_PROCESSORS == 1);
   msp430_initialize_cpu (sd, MSP430_CPU (sd));
 
-  msp430_trace_init (STATE_PROG_BFD (sd));
-
-  if (prog_bfd != NULL)
-    {
-      MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
-      MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
-      if (MSP430_CPU (sd)->state.cio_buffer == -1)
-	MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
-    }
+  MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
+  MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
+  if (MSP430_CPU (sd)->state.cio_buffer == -1)
+    MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
 
   return sd;
 }
@@ -876,17 +853,6 @@ msp430_cio (SIM_DESC sd)
 #define DSRC    get_op (sd, opcode, 0)
 #define DEST(V) put_op (sd, opcode, 0, (V))
 
-static int
-msp430_dis_read (bfd_vma memaddr,
-		 bfd_byte *myaddr,
-		 unsigned int length,
-		 struct disassemble_info *dinfo)
-{
-  SIM_DESC sd = dinfo->private_data;
-  sim_core_read_buffer (sd, MSP430_CPU (sd), 0, myaddr, memaddr, length);
-  return 0;
-}
-
 #define DO_ALU(OP,SOP,MORE)						\
   {									\
     int s1 = DSRC;							\
@@ -1144,33 +1110,11 @@ msp430_step_once (SIM_DESC sd)
       break;
     }
 
-  if (TRACE_INSN_P (MSP430_CPU (sd)))
-    {
-      disassemble_info info;
-      unsigned char b[10];
-
-      msp430_trace_one (opcode_pc);
-
-      sim_core_read_buffer (sd, MSP430_CPU (sd), 0, b, opcode_pc, opsize);
-
-      init_disassemble_info (&info, stderr, (fprintf_ftype) fprintf);
-      info.private_data = sd;
-      info.read_memory_func = msp430_dis_read;
-
-      fprintf (stderr, "%#8x  ", opcode_pc);
-      for (i = 0; i < opsize; i += 2)
-	fprintf (stderr, " %02x%02x", b[i+1], b[i]);
-      for (; i < 6; i += 2)
-	fprintf (stderr, "     ");
-      fprintf (stderr, "  ");
-      print_insn_msp430 (opcode_pc, &info);
-      fprintf (stderr, "\n");
-      fflush (stdout);
-    }
-
   if (TRACE_ANY_P (MSP430_CPU (sd)))
     trace_prefix (sd, MSP430_CPU (sd), NULL_CIA, opcode_pc,
 		  TRACE_LINENUM_P (MSP430_CPU (sd)), NULL, 0, "");
+
+  TRACE_DISASM (MSP430_CPU (sd), opcode_pc);
 
   carry_to_use = 0;
   switch (opcode->id)

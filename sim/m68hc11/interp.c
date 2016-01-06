@@ -1,5 +1,5 @@
 /* interp.c -- Simulator for Motorola 68HC11/68HC12
-   Copyright (C) 1999-2015 Free Software Foundation, Inc.
+   Copyright (C) 1999-2016 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, the GNU debugger.
@@ -413,6 +413,9 @@ m68hc11_pc_set (sim_cpu *cpu, sim_cia pc)
   cpu_set_pc (cpu, pc);
 }
 
+static int m68hc11_reg_fetch (SIM_CPU *, int, unsigned char *, int);
+static int m68hc11_reg_store (SIM_CPU *, int, unsigned char *, int);
+
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback,
           bfd *abfd, char **argv)
@@ -434,10 +437,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 
   cpu = STATE_CPU (sd, 0);
 
-  /* for compatibility */
-  current_alignment = NONSTRICT_ALIGNMENT;
-  current_target_byte_order = BIG_ENDIAN;
-
   cpu_initialize (sd, cpu);
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
@@ -446,9 +445,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
       return 0;
     }
 
-  /* getopt will print the error message so we just have to exit if this fails.
-     FIXME: Hmmm...  in the case of gdb we need getopt to call
-     print_filtered.  */
+  /* The parser will print an error message for us, so we silently return.  */
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
       /* Uninstall the modules to avoid memory leaks,
@@ -492,6 +489,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = m68hc11_reg_fetch;
+      CPU_REG_STORE (cpu) = m68hc11_reg_store;
       CPU_PC_FETCH (cpu) = m68hc11_pc_get;
       CPU_PC_STORE (cpu) = m68hc11_pc_set;
     }
@@ -553,14 +552,12 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   return sim_prepare_for_program (sd, abfd);
 }
 
-int
-sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+m68hc11_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  sim_cpu *cpu;
   uint16 val;
   int size = 2;
 
-  cpu = STATE_CPU (sd, 0);
   switch (rn)
     {
     case A_REGNUM:
@@ -619,13 +616,10 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
   return size;
 }
 
-int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+m68hc11_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   uint16 val;
-  sim_cpu *cpu;
-
-  cpu = STATE_CPU (sd, 0);
 
   val = *memory++;
   if (length == 2)

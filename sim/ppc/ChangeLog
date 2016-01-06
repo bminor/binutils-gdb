@@ -1,3 +1,49 @@
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (sim-bswap): Delete.
+	* configure: Regenerate.
+	* INSTALL: Delete --enable-sim-bswap docs.
+	* Makefile.in (BSWAP_CFLAGS): Delete.
+	(CONFIG_CFLAGS): Delete $(BSWAP_CFLAGS).
+	* options.c (print_options): Delete WITH_BSWAP.
+	* sim-endian.h (htonl, ntohl): Delete.
+	* std-config.h (WITH_BSWAP): Delete.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* main.c (main): Pass SIM_OPEN_STANDALONE to psim_options and
+	psim_usage.
+	* psim.c (psim_usage): Add new kind arg.  Only show bug URL and
+	exit when kind is SIM_OPEN_STANDALONE.
+	(psim_options): Add new kind arg.  Pass kind down to all psim_usage
+	calls.  Replace error/break calls after psim_usage with return NULL.
+	Only exit with version case when kind is SIM_OPEN_STANDALONE.
+	* psim.h: Include gdb/remote-sim.h.
+	(psim_options): Add new kind arg.
+	(psim_usage): Likewise.
+	* sim_calls.c (sim_open): Pass kind to psim_options.  Return NULL
+	when it returns NULL.
+
+2015-12-29  Kevin Buettner  <kevinb@redhat.com>
+
+	* emul_netbsd.c (fd_closed): New static array.
+	(fdbad): New function.
+	(do_read, do_write, do_close, do_dup, do_ioctl, do_dup2, do_fcntl)
+	(do_fstatfs, do_fstat, do_lseek): Call `fdbad'.
+	(emul_netbsd_init): Initialize `fd_closed'.
+	* emul_unix.c (fd_closed): New static array.
+	(fdbad): New function.
+	(do_unix_read, do_unix_write, do_unix_close, do_unix_dup)
+	(do_unix_dup2, do_unix_lseek, do_solaris_fstat, do_solaris_ioctl)
+	(do_linux_fstat, do_linux_ioctl): Call `fdbad'.
+	(emul_solaris_init, emul_linux_init): Initialize `fd_closed'.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (TCONFIG_H): Delete.
+	(sim-fpu.o): Delete $(TCONFIG_H).
+	(tconfig.h): Delete rule.
+
 2015-11-21  Mike Frysinger  <vapier@gentoo.org>
 
 	PR sim/13834

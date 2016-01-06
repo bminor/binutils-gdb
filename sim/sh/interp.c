@@ -116,10 +116,10 @@ struct loop_bounds { unsigned char *start, *end; };
 /* These variables are at file scope so that functions other than
    sim_resume can use the fetch/store macros */
 
-#define target_little_endian (CURRENT_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
+#define target_little_endian (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 static int global_endianw, endianb;
 static int target_dsp;
-#define host_little_endian (CURRENT_HOST_BYTE_ORDER == LITTLE_ENDIAN)
+#define host_little_endian (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 
 static int maskw = 0;
 static int maskl = 0;
@@ -239,20 +239,6 @@ do { \
 #define FPSCR_FR  ((GET_FPSCR () & FPSCR_MASK_FR) != 0)
 #define FPSCR_SZ  ((GET_FPSCR () & FPSCR_MASK_SZ) != 0)
 #define FPSCR_PR  ((GET_FPSCR () & FPSCR_MASK_PR) != 0)
-
-/* Count the number of arguments in an argv.  */
-static int
-count_argc (char **argv)
-{
-  int i;
-
-  if (! argv)
-    return -1;
-
-  for (i = 0; argv[i] != NULL; ++i)
-    continue;
-  return i;
-}
 
 static void
 set_fpscr1 (int x)
@@ -1056,16 +1042,16 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	      break;
 	    }
 	  case SYS_argc:
-	    regs[0] = count_argc (prog_argv);
+	    regs[0] = countargv (prog_argv);
 	    break;
 	  case SYS_argnlen:
-	    if (regs[5] < count_argc (prog_argv))
+	    if (regs[5] < countargv (prog_argv))
 	      regs[0] = strlen (prog_argv[regs[5]]);
 	    else
 	      regs[0] = -1;
 	    break;
 	  case SYS_argn:
-	    if (regs[5] < count_argc (prog_argv))
+	    if (regs[5] < countargv (prog_argv))
 	      {
 		/* Include the termination byte.  */
 		int i = strlen (prog_argv[regs[5]]) + 1;
@@ -1977,8 +1963,8 @@ enum {
   REGBANK_MACL = 19
 };
 
-int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+sh_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   unsigned val;
 
@@ -2150,8 +2136,8 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
   return length;
 }
 
-int
-sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
+static int
+sh_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   int val;
 
@@ -2420,9 +2406,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
       return 0;
     }
 
-  /* getopt will print the error message so we just have to exit if this fails.
-     FIXME: Hmmm...  in the case of gdb we need getopt to call
-     print_filtered.  */
+  /* The parser will print an error message for us, so we silently return.  */
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
       free_state (sd);
@@ -2460,6 +2444,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = sh_reg_fetch;
+      CPU_REG_STORE (cpu) = sh_reg_store;
       CPU_PC_FETCH (cpu) = sh_pc_get;
       CPU_PC_STORE (cpu) = sh_pc_set;
     }

@@ -1,5 +1,5 @@
 /* ARC instruction defintions.
-   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
 
    Contributed by Claudiu Zissulescu (claziss@synopsys.com)
 
@@ -4422,6 +4422,9 @@
 
 /* dmb u3 00100011011011110001RRRuuu111111.  */
 { "dmb", 0x236F103F, 0xFFFFF03F, ARC_OPCODE_ARCv2HS, CONTROL, NONE, { UIMM3_23 }, { 0 }},
+
+/* dmb    00100011011011110001RRR000111111.  */
+{ "dmb", 0x236F103F, 0xFFFFFFFF, ARC_OPCODE_ARCv2HS, CONTROL, NONE, { 0 }, { 0 }},
 
 /* dmpyh<.f> a,b,c 00101bbb00010000FBBBCCCCCCAAAAAA.  */
 { "dmpyh", 0x28100000, 0xF8FF0000, ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, ARITH, MPY7E, { RA, RB, RC }, { C_F }},

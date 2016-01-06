@@ -1,5 +1,5 @@
 /* Internal interfaces for the GNU/Linux specific target code for gdbserver.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -153,7 +153,8 @@ struct linux_target_ops
   /* See target.h for details.  */
   const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
 
-  CORE_ADDR (*breakpoint_reinsert_addr) (void);
+  /* Find the next possible PCs after the current instruction executes.  */
+  VEC (CORE_ADDR) *(*get_next_pcs) (CORE_ADDR pc, struct regcache *regcache);
 
   int decr_pc_after_break;
   int (*breakpoint_at) (CORE_ADDR pc);

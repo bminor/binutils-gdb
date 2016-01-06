@@ -188,6 +188,9 @@ v850_pc_set (sim_cpu *cpu, sim_cia pc)
   PC = pc;
 }
 
+static int v850_reg_fetch (SIM_CPU *, int, unsigned char *, int);
+static int v850_reg_store (SIM_CPU *, int, unsigned char *, int);
+
 SIM_DESC
 sim_open (SIM_OPEN_KIND    kind,
 	  host_callback *  cb,
@@ -231,9 +234,7 @@ sim_open (SIM_OPEN_KIND    kind,
   /* similarly if in the internal RAM region */
   sim_do_command (sd, "memory region 0xffe000,0x1000,1024");
 
-  /* getopt will print the error message so we just have to exit if this fails.
-     FIXME: Hmmm...  in the case of gdb we need getopt to call
-     print_filtered.  */
+  /* The parser will print an error message for us, so we silently return.  */
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
       /* Uninstall the modules to avoid memory leaks,
@@ -296,6 +297,8 @@ sim_open (SIM_OPEN_KIND    kind,
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = v850_reg_fetch;
+      CPU_REG_STORE (cpu) = v850_reg_store;
       CPU_PC_FETCH (cpu) = v850_pc_get;
       CPU_PC_STORE (cpu) = v850_pc_set;
     }
@@ -315,21 +318,15 @@ sim_create_inferior (SIM_DESC      sd,
   return SIM_RC_OK;
 }
 
-int
-sim_fetch_register (SIM_DESC         sd,
-		    int              rn,
-		    unsigned char *  memory,
-		    int              length)
+static int
+v850_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   *(unsigned32*)memory = H2T_4 (State.regs[rn]);
   return -1;
 }
- 
-int
-sim_store_register (SIM_DESC        sd,
-		    int             rn,
-		    unsigned char * memory,
-		    int             length)
+
+static int
+v850_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   State.regs[rn] = T2H_4 (*(unsigned32 *) memory);
   return length;

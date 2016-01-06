@@ -1,5 +1,5 @@
 /* Thread management interface, for the remote server for GDB.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -716,9 +716,6 @@ thread_db_init (void)
      GNU/Linux calls tgid, "thread group ID".  When we support
      attaching to threads, the original thread may not be the correct
      thread.  We would have to get the process ID from /proc for NPTL.
-     For LinuxThreads we could do something similar: follow the chain
-     of parent processes until we find the highest one we're attached
-     to, and use its tgid.
 
      This isn't the only place in gdbserver that assumes that the first
      process in the list is the thread group leader.  */

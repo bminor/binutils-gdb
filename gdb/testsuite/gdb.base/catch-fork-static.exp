@@ -1,4 +1,4 @@
-# Copyright (C) 2015 Free Software Foundation, Inc.
+# Copyright (C) 2015-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,8 +27,7 @@ if { [is_remote target] || ![isnative] } then {
 
 # Until "catch fork" is implemented on other targets...
 #
-if { ![istarget "hppa*-hp-hpux*"] && ![istarget "*-*-linux*"]
-     && ![istarget "*-*-openbsd*"] } then {
+if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
     continue
 }
 

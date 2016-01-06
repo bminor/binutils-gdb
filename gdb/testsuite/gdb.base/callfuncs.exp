@@ -1,4 +1,4 @@
-# Copyright 1992-2015 Free Software Foundation, Inc.
+# Copyright 1992-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -165,15 +165,12 @@ proc do_function_calls {} {
     # and attempting a jump through that (a totally random address).
     setup_kfail gdb/1457 "rs6000*-*-aix*"
     setup_kfail gdb/1457 "powerpc*-*-aix*"
-    setup_kfail gdb/1457 hppa*-*-hpux*
     gdb_test "p t_func_values(add,func_val2)" " = 1"
     setup_kfail gdb/1457 "rs6000*-*-aix*"
     setup_kfail gdb/1457 "powerpc*-*-aix*"
-    setup_kfail gdb/1457 hppa*-*-hpux*
     gdb_test "p t_func_values(func_val1,doubleit)" " = 1"
     setup_kfail gdb/1457 "rs6000*-*-aix*"
     setup_kfail gdb/1457 "powerpc*-*-aix*"
-    setup_kfail gdb/1457 hppa*-*-hpux*
     gdb_test "p t_call_add(add,3,4)" " = 7"
     gdb_test "p t_call_add(func_val1,3,4)" " = 7"
 
@@ -301,22 +298,11 @@ proc fetch_all_registers {test} {
 }
 
 proc rerun_and_prepare {} {
-    global hp_aCC_compiler
-
     if { ![runto_main] } {
 	gdb_suppress_tests
     }
-    if { $hp_aCC_compiler } {
-	# Do not set language explicitly to 'C'.  This will cause aCC
-	# tests to fail because promotion rules are different.  Just let
-	# the language be set to the default.
-	# However, turn off overload-resolution for aCC.  Having it on causes
-	# a lot of failures.
 
-	gdb_test_no_output "set overload-resolution 0"
-    } else {
-	gdb_test_no_output "set language c"
-    }
+    gdb_test_no_output "set language c"
 
     get_debug_format
 

@@ -69,7 +69,6 @@ SIM_OBJS = \
 	mdmx.o \
 	dsp.o \
 	sim-main.o \
-	sim-hload.o \
 	sim-resume.o \
 
 

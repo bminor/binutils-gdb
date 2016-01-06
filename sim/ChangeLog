@@ -1,33 +1,19 @@
-2015-12-14  Nick Clifton  <nickc@redhat.com>
+2016-01-05  Nick Clifton  <nickc@redhat.com>
 
-	* aarch64/simulator.c (system_get): New function.  Provides read
-	access to the dczid system register.
-	(do_mrs): New function - implements the MRS instruction.
-	(dexSystem): Call do_mrs for the MRS instruction.  Halt on
-	unimplemented system instructions.
+	* MAINTAINERS: Add myself as AArch64 sim maintainer.
+
+2015-12-09  Tristan Gingold  <gingold@adacore.com>
+
+	* aarch64/simulator.c: Remove syscall.h include.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Delete mention of tconfig.h.
 
 2015-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* configure.tgt: Add aarch64 entry.
 	* configure: Regenerate.
-	* sim/aarch64/configure.ac: New configure template.
-	* sim/aarch64/aclocal.m4: Generate.
-	* sim/aarch64/config.in: Generate.
-	* sim/aarch64/configure: Generate.
-	* sim/aarch64/cpustate.c: New file - functions for accessing
-	AArch64 registers.
-	* sim/aarch64/cpustate.h: New header.
-	* sim/aarch64/decode.h: New header.
-	* sim/aarch64/interp.c: New file - interface between GDB and
-	simulator.
-	* sim/aarch64/Makefile.in: New makefile template.
-	* sim/aarch64/memory.c: New file - functions for simulating
-	aarch64 memory accesses.
-	* sim/aarch64/memory.h: New header.
-	* sim/aarch64/sim-main.h: New header.
-	* sim/aarch64/simulator.c: New file - aarch64 simulator
-	functions.
-	* sim/aarch64/simulator.h: New header.
 
 2015-06-23  Mike Frysinger  <vapier@gentoo.org>
 

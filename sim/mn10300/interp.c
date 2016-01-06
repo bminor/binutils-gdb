@@ -86,6 +86,9 @@ mn10300_pc_set (sim_cpu *cpu, sim_cia pc)
   PC = pc;
 }
 
+static int mn10300_reg_fetch (SIM_CPU *, int, unsigned char *, int);
+static int mn10300_reg_store (SIM_CPU *, int, unsigned char *, int);
+
 /* These default values correspond to expected usage for the chip.  */
 
 SIM_DESC
@@ -122,9 +125,7 @@ sim_open (SIM_OPEN_KIND kind,
   sim_do_command (sd, "memory region 0,0x100000");
   sim_do_command (sd, "memory region 0x40000000,0x200000");
 
-  /* getopt will print the error message so we just have to exit if this fails.
-     FIXME: Hmmm...  in the case of gdb we need getopt to call
-     print_filtered.  */
+  /* The parser will print an error message for us, so we silently return.  */
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
       /* Uninstall the modules to avoid memory leaks,
@@ -308,6 +309,8 @@ sim_open (SIM_OPEN_KIND kind,
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
 
+      CPU_REG_FETCH (cpu) = mn10300_reg_fetch;
+      CPU_REG_STORE (cpu) = mn10300_reg_store;
       CPU_PC_FETCH (cpu) = mn10300_pc_get;
       CPU_PC_STORE (cpu) = mn10300_pc_set;
     }
@@ -338,11 +341,8 @@ sim_create_inferior (SIM_DESC sd,
 /* FIXME These would more efficient to use than load_mem/store_mem,
    but need to be changed to use the memory map.  */
 
-int
-sim_fetch_register (SIM_DESC sd,
-		    int rn,
-		    unsigned char *memory,
-		    int length)
+static int
+mn10300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   reg_t reg = State.regs[rn];
   uint8 *a = memory;
@@ -353,11 +353,8 @@ sim_fetch_register (SIM_DESC sd,
   return length;
 }
  
-int
-sim_store_register (SIM_DESC sd,
-		    int rn,
-		    unsigned char *memory,
-		    int length)
+static int
+mn10300_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   uint8 *a = memory;
   State.regs[rn] = (a[3] << 24) + (a[2] << 16) + (a[1] << 8) + a[0];

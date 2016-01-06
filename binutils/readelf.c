@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright (C) 1998-2015 Free Software Foundation, Inc.
+   Copyright (C) 1998-2016 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -5273,7 +5273,11 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* 18 */ { STRING_COMMA_LEN ("EXCLUDE") },
       /* SPARC specific.  */
       /* 19 */ { STRING_COMMA_LEN ("ORDERED") },
-      /* 20 */ { STRING_COMMA_LEN ("COMPRESSED") }
+      /* 20 */ { STRING_COMMA_LEN ("COMPRESSED") },
+      /* ARM specific.  */
+      /* 21 */ { STRING_COMMA_LEN ("ENTRYSECT") },
+      /* 22 */ { STRING_COMMA_LEN ("ARM_NOREAD") },
+      /* 23 */ { STRING_COMMA_LEN ("COMDEF") }
     };
 
   if (do_section_details)
@@ -5343,6 +5347,17 @@ get_elf_section_flags (bfd_vma sh_flags)
 		  if (flag == SHF_ORDERED)
 		    sindex = 19;
 		  break;
+
+		case EM_ARM:
+		  switch (flag)
+		    {
+		    case SHF_ENTRYSECT: sindex = 21; break;
+		    case SHF_ARM_NOREAD: sindex = 22; break;
+		    case SHF_COMDEF: sindex = 23; break;
+		    default: break;
+		    }
+		  break;
+
 		default:
 		  break;
 		}
@@ -12716,10 +12731,11 @@ typedef struct
 
 static const char * arm_attr_tag_CPU_arch[] =
   {"Pre-v4", "v4", "v4T", "v5T", "v5TE", "v5TEJ", "v6", "v6KZ", "v6T2",
-   "v6K", "v7", "v6-M", "v6S-M", "v7E-M", "v8"};
+   "v6K", "v7", "v6-M", "v6S-M", "v7E-M", "v8", "", "v8-M.baseline",
+   "v8-M.mainline"};
 static const char * arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
 static const char * arm_attr_tag_THUMB_ISA_use[] =
-  {"No", "Thumb-1", "Thumb-2"};
+  {"No", "Thumb-1", "Thumb-2", "Yes"};
 static const char * arm_attr_tag_FP_arch[] =
   {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16", "VFPv4", "VFPv4-D16",
    "FP for ARMv8", "FPv5/FP-D16 for ARMv8"};

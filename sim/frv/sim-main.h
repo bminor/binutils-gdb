@@ -1,5 +1,5 @@
 /* frv simulator support code
-   Copyright (C) 1998-2015 Free Software Foundation, Inc.
+   Copyright (C) 1998-2016 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -22,6 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* sim-basics.h includes config.h but cgen-types.h must be included before
    sim-basics.h and cgen-types.h needs config.h.  */
 #include "config.h"
+
+/* This is a global setting.  Different cpu families can't mix-n-match -scache
+   and -pbb.  However some cpu families may use -simple while others use
+   one of -scache/-pbb. ???? */
+#define WITH_SCACHE_PBB 0
 
 #include "symcat.h"
 #include "sim-basics.h"

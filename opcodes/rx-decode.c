@@ -1,6 +1,6 @@
 #line 1 "rx-decode.opc"
 /* -*- c -*- */
-/* Copyright (C) 2012-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2012-2016 Free Software Foundation, Inc.
    Contributed by Red Hat.
    Written by DJ Delorie.
 
@@ -8039,7 +8039,7 @@ rx_decode_opcode (unsigned long pc AU,
                         }
                       SYNTAX("stnz	%1, %0");
 #line 1055 "rx-decode.opc"
-                      ID(stcc); SR(rsrc); DR(rdst); S2cc(RXC_z);
+                      ID(stcc); SR(rsrc); DR(rdst); S2cc(RXC_nz);
 
                     }
                   break;
@@ -10270,7 +10270,7 @@ rx_decode_opcode (unsigned long pc AU,
                         }
                       SYNTAX("mvtacgu	%0, %1");
 #line 1085 "rx-decode.opc"
-                      ID(mvtacgu); SR(a+32); DR(rdst); F_____;
+                      ID(mvtacgu); DR(a+32); SR(rdst); F_____;
 
                     }
                   break;
@@ -10615,7 +10615,7 @@ rx_decode_opcode (unsigned long pc AU,
                         }
                       SYNTAX("movco	%1, [%0]");
 #line 1046 "rx-decode.opc"
-                       ID(mov); SR(rsrc); DR(rdst); F_____;
+                       ID(movco); SR(rsrc); DR(rdst); F_____;
 
                     }
                   break;
@@ -10722,7 +10722,7 @@ rx_decode_opcode (unsigned long pc AU,
                         }
                       SYNTAX("movli	[%1], %0");
 #line 1049 "rx-decode.opc"
-                       ID(mov); SR(rsrc); DR(rdst); F_____;
+                       ID(movli); SR(rsrc); DR(rdst); F_____;
 
                     }
                   break;

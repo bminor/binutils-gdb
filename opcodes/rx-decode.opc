@@ -1,5 +1,5 @@
 /* -*- c -*- */
-/* Copyright (C) 2012-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2012-2016 Free Software Foundation, Inc.
    Contributed by Red Hat.
    Written by DJ Delorie.
 
@@ -1043,16 +1043,16 @@ rx_decode_opcode (unsigned long pc AU,
 /* RXv2 enhanced								*/
 
 /** 1111 1101 0010 0111 rdst rsrc	movco	%1, [%0] */
-   ID(mov); SR(rsrc); DR(rdst); F_____;
+   ID(movco); SR(rsrc); DR(rdst); F_____;
 
 /** 1111 1101 0010 1111 rsrc rdst	movli	[%1], %0 */
-   ID(mov); SR(rsrc); DR(rdst); F_____;
+   ID(movli); SR(rsrc); DR(rdst); F_____;
 
 /** 1111 1100 0100 1011 rsrc rdst	stz	%1, %0 */
   ID(stcc); SR(rsrc); DR(rdst); S2cc(RXC_z);
 
 /** 1111 1100 0100 1111 rsrc rdst	stnz	%1, %0 */
-  ID(stcc); SR(rsrc); DR(rdst); S2cc(RXC_z);
+  ID(stcc); SR(rsrc); DR(rdst); S2cc(RXC_nz);
 
 /** 1111 1101 0000 a111 srca srcb 	emaca	%1, %2, %0 */
   ID(emaca); DR(a+32); SR(srca); S2R(srcb); F_____;
@@ -1082,7 +1082,7 @@ rx_decode_opcode (unsigned long pc AU,
   ID(mvfacgu); S2C(((i^1)<<1)|m); SR(a+32); DR(rdst); F_____;
 
 /** 1111 1101 0001 0111 a011 rdst	mvtacgu	%0, %1 */
-  ID(mvtacgu); SR(a+32); DR(rdst); F_____;
+  ID(mvtacgu); DR(a+32); SR(rdst); F_____;
 
 /** 1111 1101 0001 1001 a00i 0000	racl	#%1, %0 */
   ID(racl); SC(i+1); DR(a+32); F_____;

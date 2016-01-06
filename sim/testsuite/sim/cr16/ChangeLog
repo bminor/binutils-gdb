@@ -1,3 +1,8 @@
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsn.exp: Append --load-vma to global_sim_options.
+	* misc.exp: Likewise.
+
 2015-03-29  Mike Frysinger  <vapier@gentoo.org>
 
 	PR sim/12385

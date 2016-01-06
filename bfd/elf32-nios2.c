@@ -1,5 +1,5 @@
 /* 32-bit ELF support for Nios II.
-   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+   Copyright (C) 2012-2016 Free Software Foundation, Inc.
    Contributed by Nigel Gray (ngray@altera.com).
    Contributed by Mentor Graphics, Inc.
 
@@ -3086,7 +3086,15 @@ lookup:
 	case bfd_link_hash_defined:
 	case bfd_link_hash_defweak:
 	  gp_found = TRUE;
-	  *pgp = lh->u.def.value;
+	  {
+	    asection *sym_sec = lh->u.def.section;
+	    bfd_vma sym_value = lh->u.def.value;
+
+	    if (sym_sec->output_section)
+	      sym_value = (sym_value + sym_sec->output_offset
+			   + sym_sec->output_section->vma);
+	    *pgp = sym_value;
+	  }
 	  break;
 	case bfd_link_hash_indirect:
 	case bfd_link_hash_warning:
@@ -3719,7 +3727,6 @@ nios2_elf32_relocate_section (bfd *output_bfd,
       struct elf32_nios2_link_hash_entry *eh;
       bfd_vma relocation;
       bfd_vma gp;
-      bfd_vma reloc_address;
       bfd_reloc_status_type r = bfd_reloc_ok;
       const char *name = NULL;
       int r_type;
@@ -3761,12 +3768,6 @@ nios2_elf32_relocate_section (bfd *output_bfd,
       /* Nothing more to do unless this is a final link.  */
       if (bfd_link_relocatable (info))
 	continue;
-
-      if (sec && sec->output_section)
-	reloc_address = (sec->output_section->vma + sec->output_offset
-			 + rel->r_offset);
-      else
-	reloc_address = 0;
 
       if (howto)
 	{
@@ -3816,6 +3817,15 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	      /* Turns an absolute address into a gp-relative address.  */
 	      if (!nios2_elf_assign_gp (output_bfd, &gp, info))
 		{
+		  bfd_vma reloc_address;
+
+		  if (sec && sec->output_section)
+		    reloc_address = (sec->output_section->vma
+				     + sec->output_offset
+				     + rel->r_offset);
+		  else
+		    reloc_address = 0;
+
 		  format = _("global pointer relative relocation at address "
 			     "0x%08x when _gp not defined\n");
 		  sprintf (msgbuf, format, reloc_address);
@@ -3825,7 +3835,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  bfd_vma symbol_address = rel->r_addend + relocation;
-		  relocation = relocation + rel->r_addend - gp;
+		  relocation = symbol_address - gp;
 		  rel->r_addend = 0;
 		  if (((signed) relocation < -32768
 		       || (signed) relocation > 32767)
@@ -3833,6 +3843,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 			  || h->root.type == bfd_link_hash_defined
 			  || h->root.type == bfd_link_hash_defweak))
 		    {
+		      if (h)
+			name = h->root.root.string;
 		      format = _("Unable to reach %s (at 0x%08x) from the "
 				 "global pointer (at 0x%08x) because the "
 				 "offset (%d) is out of the allowed range, "
@@ -3848,7 +3860,6 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 						  rel->r_offset, relocation,
 						  rel->r_addend);
 		}
-
 	      break;
 	    case R_NIOS2_UJMP:
 	      r = nios2_elf32_do_ujmp_relocate (input_bfd, howto,

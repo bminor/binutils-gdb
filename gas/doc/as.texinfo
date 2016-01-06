@@ -1,5 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (C) 1991-2015 Free Software Foundation, Inc.
+@c  Copyright (C) 1991-2016 Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
 @c         md_parse_option definitions in config/tc-*.c
@@ -100,7 +100,7 @@
 This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991-2015 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2016 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -149,7 +149,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991-2015 Free Software Foundation, Inc.
+Copyright @copyright{} 1991-2016 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -2870,11 +2870,19 @@ escape character).  The complete list of escapes follows.
 
 @cindex escape codes, character
 @cindex character escape codes
+@c NOTE: Cindex entries must not start with a backlash character.
+@c NOTE: This confuses the pdf2texi script when it is creating the
+@c NOTE: index based upon the first character and so it generates:
+@c NOTE:   \initial {\\}
+@c NOTE: which then results in the error message:
+@c NOTE:   Argument of \\ has an extra }.
+@c NOTE: So in the index entries below a space character has been
+@c NOTE: prepended to avoid this problem.
 @table @kbd
 @c      @item \a
 @c      Mnemonic for ACKnowledge; for ASCII this is octal code 007.
 @c
-@cindex @code{\b} (backspace character)
+@cindex @code{ \b} (backspace character)
 @cindex backspace (@code{\b})
 @item \b
 Mnemonic for backspace; for ASCII this is octal code 010.
@@ -2882,12 +2890,12 @@ Mnemonic for backspace; for ASCII this is octal code 010.
 @c      @item \e
 @c      Mnemonic for EOText; for ASCII this is octal code 004.
 @c
-@cindex @code{\f} (formfeed character)
+@cindex @code{ \f} (formfeed character)
 @cindex formfeed (@code{\f})
-@item \f
+@item backslash-f
 Mnemonic for FormFeed; for ASCII this is octal code 014.
 
-@cindex @code{\n} (newline character)
+@cindex @code{ \n} (newline character)
 @cindex newline (@code{\n})
 @item \n
 Mnemonic for newline; for ASCII this is octal code 012.
@@ -2895,8 +2903,8 @@ Mnemonic for newline; for ASCII this is octal code 012.
 @c      @item \p
 @c      Mnemonic for prefix; for ASCII this is octal code 033, usually known as @code{escape}.
 @c
-@cindex @code{\r} (carriage return character)
-@cindex carriage return (@code{\r})
+@cindex @code{ \r} (carriage return character)
+@cindex carriage return (@code{backslash-r})
 @item \r
 Mnemonic for carriage-Return; for ASCII this is octal code 015.
 
@@ -2904,7 +2912,7 @@ Mnemonic for carriage-Return; for ASCII this is octal code 015.
 @c      Mnemonic for space; for ASCII this is octal code 040.  Included for compliance with
 @c      other assemblers.
 @c
-@cindex @code{\t} (tab)
+@cindex @code{ \t} (tab)
 @cindex tab (@code{\t})
 @item \t
 Mnemonic for horizontal Tab; for ASCII this is octal code 011.
@@ -2914,20 +2922,20 @@ Mnemonic for horizontal Tab; for ASCII this is octal code 011.
 @c      @item \x @var{digit} @var{digit} @var{digit}
 @c      A hexadecimal character code.  The numeric code is 3 hexadecimal digits.
 @c
-@cindex @code{\@var{ddd}} (octal character code)
+@cindex @code{ \@var{ddd}} (octal character code)
 @cindex octal character code (@code{\@var{ddd}})
 @item \ @var{digit} @var{digit} @var{digit}
 An octal character code.  The numeric code is 3 octal digits.
 For compatibility with other Unix systems, 8 and 9 are accepted as digits:
 for example, @code{\008} has the value 010, and @code{\009} the value 011.
 
-@cindex @code{\@var{xd...}} (hex character code)
+@cindex @code{ \@var{xd...}} (hex character code)
 @cindex hex character code (@code{\@var{xd...}})
 @item \@code{x} @var{hex-digits...}
 A hex character code.  All trailing hex digits are combined.  Either upper or
 lower case @code{x} works.
 
-@cindex @code{\\} (@samp{\} character)
+@cindex @code{ \\} (@samp{\} character)
 @cindex backslash (@code{\\})
 @item \\
 Represents one @samp{\} character.
@@ -2938,7 +2946,7 @@ Represents one @samp{\} character.
 @c      (@xref{Characters,,Character Constants}.) to represent
 @c      a @samp{'}.
 @c
-@cindex @code{\"} (doublequote character)
+@cindex @code{ \"} (doublequote character)
 @cindex doublequote (@code{\"})
 @item \"
 Represents one @samp{"} character.  Needed in strings to represent

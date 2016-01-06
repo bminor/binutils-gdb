@@ -1,6 +1,6 @@
 /* memory.c -- Memory accessor functions for the AArch64 simulator
 
-   Copyright (C) 2015 Free Software Foundation, Inc.
+   Copyright (C) 2015-2016 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -39,8 +39,6 @@
 static inline void
 mem_error (sim_cpu *cpu, const char *message, uint64_t addr)
 {
-  if (disas)
-    sim_io_eprintf (CPU_STATE (cpu), "\n");
   TRACE_MEMORY (cpu, "ERROR: %s: %" PRIx64, message, addr);
 }
 

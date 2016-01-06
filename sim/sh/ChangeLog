@@ -1,3 +1,46 @@
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Update sim_parse_args comment.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (count_argc): Delete.
+	(trap): Change count_argc to countargv.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
+	* configure: Regenerate.
+	* interp.c (host_little_endian): Change CURRENT_HOST_BYTE_ORDER
+	to HOST_BYTE_ORDER.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* interp.c (target_little_endian): Change LITTLE_ENDIAN to
+	BFD_ENDIAN_LITTLE.
+	(host_little_endian): Likewise.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (sim_store_register): Rename to ...
+	(sh_reg_store): ... this.
+	(sim_fetch_register): Rename to ...
+	(sh_reg_fetch): ... this.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+
+2015-12-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-hload.o.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
 2015-11-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* gencode.c (tab): Pass sd into trap calls.

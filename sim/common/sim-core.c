@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002-2015 Free Software Foundation, Inc.
+   Copyright 2002-2016 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -28,9 +28,6 @@
 
 #if (WITH_HW)
 #include "sim-hw.h"
-#define device_error(client, ...) device_error ((device *)(client), __VA_ARGS__)
-#define device_io_read_buffer(client, ...) device_io_read_buffer ((device *)(client), __VA_ARGS__)
-#define device_io_write_buffer(client, ...) device_io_write_buffer ((device *)(client), __VA_ARGS__)
 #endif
 
 /* "core" module install handler.
@@ -142,11 +139,7 @@ new_sim_core_mapping (SIM_DESC sd,
 		      address_word addr,
 		      address_word nr_bytes,
 		      unsigned modulo,
-#if WITH_HW
 		      struct hw *device,
-#else
-		      device *device,
-#endif
 		      void *buffer,
 		      void *free_buffer)
 {
@@ -175,11 +168,7 @@ sim_core_map_attach (SIM_DESC sd,
 		     address_word addr,
 		     address_word nr_bytes,
 		     unsigned modulo,
-#if WITH_HW
 		     struct hw *client, /*callback/default*/
-#else
-		     device *client, /*callback/default*/
-#endif
 		     void *buffer, /*raw_memory*/
 		     void *free_buffer) /*raw_memory*/
 {
@@ -194,9 +183,6 @@ sim_core_map_attach (SIM_DESC sd,
   /* actually do occasionally get a zero size map */
   if (nr_bytes == 0)
     {
-#if (WITH_DEVICES)
-      device_error (client, "called on sim_core_map_attach with size zero");
-#endif
 #if (WITH_HW)
       sim_hw_abort (sd, client, "called on sim_core_map_attach with size zero");
 #endif
@@ -223,17 +209,6 @@ sim_core_map_attach (SIM_DESC sd,
   if (next_mapping != NULL && next_mapping->level == level
       && next_mapping->base < (addr + (nr_bytes - 1)))
     {
-#if (WITH_DEVICES)
-      device_error (client, "memory map %d:0x%lx..0x%lx (%ld bytes) overlaps %d:0x%lx..0x%lx (%ld bytes)",
-		    space,
-		    (long) addr,
-		    (long) (addr + nr_bytes - 1),
-		    (long) nr_bytes,
-		    next_mapping->space,
-		    (long) next_mapping->base,
-		    (long) next_mapping->bound,
-		    (long) next_mapping->nr_bytes);
-#endif
 #if WITH_HW
       sim_hw_abort (sd, client, "memory map %d:0x%lx..0x%lx (%ld bytes) overlaps %d:0x%lx..0x%lx (%ld bytes)",
 		    space,
@@ -279,11 +254,7 @@ sim_core_attach (SIM_DESC sd,
 		 address_word addr,
 		 address_word nr_bytes,
 		 unsigned modulo,
-#if WITH_HW
 		 struct hw *client,
-#else
-		 device *client,
-#endif
 		 void *optional_buffer)
 {
   sim_core *memory = STATE_CORE (sd);
@@ -297,9 +268,6 @@ sim_core_attach (SIM_DESC sd,
 
   if (client != NULL && modulo != 0)
     {
-#if (WITH_DEVICES)
-      device_error (client, "sim_core_attach - internal error - modulo and callback memory conflict");
-#endif
 #if (WITH_HW)
       sim_hw_abort (sd, client, "sim_core_attach - internal error - modulo and callback memory conflict");
 #endif
@@ -318,9 +286,6 @@ sim_core_attach (SIM_DESC sd,
 	}
       if (mask != sizeof (unsigned64) - 1)
 	{
-#if (WITH_DEVICES)
-	  device_error (client, "sim_core_attach - internal error - modulo %lx not power of two", (long) modulo);
-#endif
 #if (WITH_HW)
 	  sim_hw_abort (sd, client, "sim_core_attach - internal error - modulo %lx not power of two", (long) modulo);
 #endif
@@ -331,9 +296,6 @@ sim_core_attach (SIM_DESC sd,
   /* verify consistency between device and buffer */
   if (client != NULL && optional_buffer != NULL)
     {
-#if (WITH_DEVICES)
-      device_error (client, "sim_core_attach - internal error - conflicting buffer and attach arguments");
-#endif
 #if (WITH_HW)
       sim_hw_abort (sd, client, "sim_core_attach - internal error - conflicting buffer and attach arguments");
 #endif
@@ -509,37 +471,29 @@ sim_core_read_buffer (SIM_DESC sd,
 			    0 /*dont-abort*/, NULL, NULL_CIA);
     if (mapping == NULL)
       break;
-#if (WITH_DEVICES)
-    if (mapping->device != NULL)
-      {
-	int nr_bytes = len - count;
-	sim_cia cia = cpu ? CPU_PC_GET (cpu) : NULL_CIA;
-	if (raddr + nr_bytes - 1> mapping->bound)
-	  nr_bytes = mapping->bound - raddr + 1;
-	if (device_io_read_buffer (mapping->device,
-				   (unsigned_1*)buffer + count,
-				   mapping->space,
-				   raddr,
-				   nr_bytes,
-				   sd,
-				   cpu,
-				   cia) != nr_bytes)
-	  break;
-	count += nr_bytes;
-	continue;
-      }
-#endif
 #if (WITH_HW)
     if (mapping->device != NULL)
       {
 	int nr_bytes = len - count;
 	if (raddr + nr_bytes - 1> mapping->bound)
 	  nr_bytes = mapping->bound - raddr + 1;
-	if (sim_hw_io_read_buffer (sd, mapping->device,
-				   (unsigned_1*)buffer + count,
-				   mapping->space,
-				   raddr,
-				   nr_bytes) != nr_bytes)
+	/* If the access was initiated by a cpu, pass it down so errors can
+	   be propagated properly.  For other sources (e.g. GDB or DMA), we
+	   can only signal errors via the return value.  */
+	if (cpu)
+	  {
+	    sim_cia cia = cpu ? CPU_PC_GET (cpu) : NULL_CIA;
+	    sim_cpu_hw_io_read_buffer (cpu, cia, mapping->device,
+				       (unsigned_1*)buffer + count,
+				       mapping->space,
+				       raddr,
+				       nr_bytes);
+	  }
+	else if (sim_hw_io_read_buffer (sd, mapping->device,
+					(unsigned_1*)buffer + count,
+					mapping->space,
+					raddr,
+					nr_bytes) != nr_bytes)
 	  break;
 	count += nr_bytes;
 	continue;
@@ -575,39 +529,29 @@ sim_core_write_buffer (SIM_DESC sd,
 			       0 /*dont-abort*/, NULL, NULL_CIA);
       if (mapping == NULL)
 	break;
-#if (WITH_DEVICES)
-      if (WITH_CALLBACK_MEMORY
-	  && mapping->device != NULL)
-	{
-	  int nr_bytes = len - count;
-	  sim_cia cia = cpu ? CPU_PC_GET (cpu) : NULL_CIA;
-	  if (raddr + nr_bytes - 1 > mapping->bound)
-	    nr_bytes = mapping->bound - raddr + 1;
-	  if (device_io_write_buffer (mapping->device,
-				      (unsigned_1*)buffer + count,
-				      mapping->space,
-				      raddr,
-				      nr_bytes,
-				      sd,
-				      cpu,
-				      cia) != nr_bytes)
-	    break;
-	  count += nr_bytes;
-	  continue;
-	}
-#endif
 #if (WITH_HW)
-      if (WITH_CALLBACK_MEMORY
-	  && mapping->device != NULL)
+      if (mapping->device != NULL)
 	{
 	  int nr_bytes = len - count;
 	  if (raddr + nr_bytes - 1 > mapping->bound)
 	    nr_bytes = mapping->bound - raddr + 1;
-	  if (sim_hw_io_write_buffer (sd, mapping->device,
-				      (unsigned_1*)buffer + count,
-				      mapping->space,
-				      raddr,
-				      nr_bytes) != nr_bytes)
+	  /* If the access was initiated by a cpu, pass it down so errors can
+	     be propagated properly.  For other sources (e.g. GDB or DMA), we
+	     can only signal errors via the return value.  */
+	  if (cpu)
+	    {
+	      sim_cia cia = cpu ? CPU_PC_GET (cpu) : NULL_CIA;
+	      sim_cpu_hw_io_write_buffer (cpu, cia, mapping->device,
+					  (unsigned_1*)buffer + count,
+					  mapping->space,
+					  raddr,
+					  nr_bytes);
+	    }
+	  else if (sim_hw_io_write_buffer (sd, mapping->device,
+					  (unsigned_1*)buffer + count,
+					  mapping->space,
+					  raddr,
+					  nr_bytes) != nr_bytes)
 	    break;
 	  count += nr_bytes;
 	  continue;

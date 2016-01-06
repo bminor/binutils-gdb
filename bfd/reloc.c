@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3270,6 +3270,17 @@ ENUM
   BFD_RELOC_ARM_IRELATIVE
 ENUMDOC
   ARM support for STT_GNU_IFUNC.
+
+ENUM
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC
+ENUMX
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC
+ENUMX
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC
+ENUMX
+  BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC
+ENUMDOC
+  Thumb1 relocations to support execute-only code.
 
 ENUM
   BFD_RELOC_ARM_IMMEDIATE

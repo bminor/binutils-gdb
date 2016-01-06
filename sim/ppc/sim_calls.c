@@ -77,7 +77,8 @@ sim_open (SIM_OPEN_KIND kind,
   root_device = psim_tree();
   simulator = NULL;
 
-  psim_options(root_device, argv + 1);
+  if (psim_options (root_device, argv + 1, kind) == NULL)
+    return NULL;
 
   if (ppc_trace[trace_opts])
     print_options ();

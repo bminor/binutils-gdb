@@ -1,6 +1,6 @@
 /* simulator.c -- Interface for the AArch64 simulator.
 
-   Copyright (C) 2015 Free Software Foundation, Inc.
+   Copyright (C) 2015-2016 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 
@@ -24,12 +24,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include <syscall.h>
 #include <math.h>
 #include <time.h>
 #include <limits.h>
-
-#include "dis-asm.h"
 
 #include "simulator.h"
 #include "cpustate.h"
@@ -38,8 +35,6 @@
 #define NO_SP 0
 #define SP_OK 1
 
-bfd_boolean disas = FALSE;
-
 #define TST(_flag)   (aarch64_test_CPSR_bit (cpu, _flag))
 #define IS_SET(_X)   ( TST (( _X )))
 #define IS_CLEAR(_X) (!TST (( _X )))
@@ -47,14 +42,11 @@ bfd_boolean disas = FALSE;
 #define HALT_UNALLOC							\
   do									\
     {									\
-      if (TRACE_INSN_P (cpu))						\
-	{								\
-	  aarch64_print_insn (CPU_STATE (cpu), aarch64_get_PC (cpu));	\
-	  TRACE_INSN (cpu,						\
-		      "Unallocated instruction detected at sim line %d,"\
-		      " exe addr %" PRIx64,				\
-		      __LINE__, aarch64_get_PC (cpu));			\
-	}								\
+      TRACE_DISASM (cpu, aarch64_get_PC (cpu));				\
+      TRACE_INSN (cpu,							\
+		  "Unallocated instruction detected at sim line %d,"	\
+		  " exe addr %" PRIx64,					\
+		  __LINE__, aarch64_get_PC (cpu));			\
       sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu),\
 		       sim_stopped, SIM_SIGILL);			\
     }									\
@@ -63,14 +55,11 @@ bfd_boolean disas = FALSE;
 #define HALT_NYI							\
   do									\
     {									\
-      if (TRACE_INSN_P (cpu))						\
-	{								\
-	  aarch64_print_insn (CPU_STATE (cpu), aarch64_get_PC (cpu));	\
-	  TRACE_INSN (cpu,						\
-		      "Unimplemented instruction detected at sim line %d,"\
-		      " exe addr %" PRIx64,				\
-		      __LINE__, aarch64_get_PC (cpu));			\
-	}								\
+      TRACE_DISASM (cpu, aarch64_get_PC (cpu));				\
+      TRACE_INSN (cpu,							\
+		  "Unimplemented instruction detected at sim line %d,"	\
+		  " exe addr %" PRIx64,					\
+		  __LINE__, aarch64_get_PC (cpu));			\
       sim_engine_halt (CPU_STATE (cpu), cpu, NULL, aarch64_get_PC (cpu),\
 		       sim_stopped, SIM_SIGABRT);			\
     }									\
@@ -4109,9 +4098,6 @@ do_vec_XTN (sim_cpu *cpu)
     }
 }
 
-#define MAX(A,B) ((A) > (B) ? (A) : (B))
-#define MIN(A,B) ((A) < (B) ? (A) : (B))
-
 static void
 do_vec_maxv (sim_cpu *cpu)
 {
@@ -4148,17 +4134,17 @@ do_vec_maxv (sim_cpu *cpu)
 	  case 0:
 	    smax = aarch64_get_vec_s8 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 16 : 8); i++)
-	      smax = MAX (smax, aarch64_get_vec_s8 (cpu, vs, i));
+	      smax = max (smax, aarch64_get_vec_s8 (cpu, vs, i));
 	    break;
 	  case 1:
 	    smax = aarch64_get_vec_s16 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 8 : 4); i++)
-	      smax = MAX (smax, aarch64_get_vec_s16 (cpu, vs, i));
+	      smax = max (smax, aarch64_get_vec_s16 (cpu, vs, i));
 	    break;
 	  case 2:
 	    smax = aarch64_get_vec_s32 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 4 : 2); i++)
-	      smax = MAX (smax, aarch64_get_vec_s32 (cpu, vs, i));
+	      smax = max (smax, aarch64_get_vec_s32 (cpu, vs, i));
 	    break;
 	  default:
 	  case 3:
@@ -4176,17 +4162,17 @@ do_vec_maxv (sim_cpu *cpu)
 	  case 0:
 	    smin = aarch64_get_vec_s8 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 16 : 8); i++)
-	      smin = MIN (smin, aarch64_get_vec_s8 (cpu, vs, i));
+	      smin = min (smin, aarch64_get_vec_s8 (cpu, vs, i));
 	    break;
 	  case 1:
 	    smin = aarch64_get_vec_s16 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 8 : 4); i++)
-	      smin = MIN (smin, aarch64_get_vec_s16 (cpu, vs, i));
+	      smin = min (smin, aarch64_get_vec_s16 (cpu, vs, i));
 	    break;
 	  case 2:
 	    smin = aarch64_get_vec_s32 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 4 : 2); i++)
-	      smin = MIN (smin, aarch64_get_vec_s32 (cpu, vs, i));
+	      smin = min (smin, aarch64_get_vec_s32 (cpu, vs, i));
 	    break;
 	  default:
 	  case 3:
@@ -4204,17 +4190,17 @@ do_vec_maxv (sim_cpu *cpu)
 	  case 0:
 	    umax = aarch64_get_vec_u8 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 16 : 8); i++)
-	      umax = MAX (umax, aarch64_get_vec_u8 (cpu, vs, i));
+	      umax = max (umax, aarch64_get_vec_u8 (cpu, vs, i));
 	    break;
 	  case 1:
 	    umax = aarch64_get_vec_u16 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 8 : 4); i++)
-	      umax = MAX (umax, aarch64_get_vec_u16 (cpu, vs, i));
+	      umax = max (umax, aarch64_get_vec_u16 (cpu, vs, i));
 	    break;
 	  case 2:
 	    umax = aarch64_get_vec_u32 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 4 : 2); i++)
-	      umax = MAX (umax, aarch64_get_vec_u32 (cpu, vs, i));
+	      umax = max (umax, aarch64_get_vec_u32 (cpu, vs, i));
 	    break;
 	  default:
 	  case 3:
@@ -4232,17 +4218,17 @@ do_vec_maxv (sim_cpu *cpu)
 	  case 0:
 	    umin = aarch64_get_vec_u8 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 16 : 8); i++)
-	      umin = MIN (umin, aarch64_get_vec_u8 (cpu, vs, i));
+	      umin = min (umin, aarch64_get_vec_u8 (cpu, vs, i));
 	    break;
 	  case 1:
 	    umin = aarch64_get_vec_u16 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 8 : 4); i++)
-	      umin = MIN (umin, aarch64_get_vec_u16 (cpu, vs, i));
+	      umin = min (umin, aarch64_get_vec_u16 (cpu, vs, i));
 	    break;
 	  case 2:
 	    umin = aarch64_get_vec_u32 (cpu, vs, 0);
 	    for (i = 1; i < (full ? 4 : 2); i++)
-	      umin = MIN (umin, aarch64_get_vec_u32 (cpu, vs, i));
+	      umin = min (umin, aarch64_get_vec_u32 (cpu, vs, i));
 	    break;
 	  default:
 	  case 3:
@@ -4288,7 +4274,7 @@ do_vec_fminmaxV (sim_cpu *cpu)
 
 	case 3: /* FMINV.  */
 	  for (i = 1; i < 4; i++)
-	    res = MIN (res, aarch64_get_vec_float (cpu, vs, i));
+	    res = min (res, aarch64_get_vec_float (cpu, vs, i));
 	  break;
 
 	default:
@@ -4306,7 +4292,7 @@ do_vec_fminmaxV (sim_cpu *cpu)
 
 	case 3: /* FMAXV.  */
 	  for (i = 1; i < 4; i++)
-	    res = MAX (res, aarch64_get_vec_float (cpu, vs, i));
+	    res = max (res, aarch64_get_vec_float (cpu, vs, i));
 	  break;
 
 	default:
@@ -12682,9 +12668,6 @@ handle_halt (sim_cpu *cpu, uint32_t val)
 	else if (fd == 1)
 	  {
 	    printf ("%.*s", (int) len, aarch64_get_mem_ptr (cpu, buf));
-	    if (disas)
-	      /* So that the output stays in sync with trace output.  */
-	      fflush (stdout);
 	  }
 	else if (fd == 2)
 	  {
@@ -13036,19 +13019,9 @@ aarch64_step (sim_cpu *cpu)
   aarch64_set_next_PC (cpu, pc + 4);
   aarch64_get_instr (cpu) = aarch64_get_mem_u32 (cpu, pc);
 
-  if (TRACE_INSN_P (cpu))
-    {
-      if (disas)
-	TRACE_INSN (cpu, " pc = %" PRIx64 " ", pc);
-      else
-	TRACE_INSN (cpu, " pc = %" PRIx64 " instr = %x", pc,
-		    aarch64_get_instr (cpu));
-    }
-  else if (disas)
-    sim_io_eprintf (CPU_STATE (cpu), " %" PRIx64 " ", pc);
-
-  if (disas)
-    aarch64_print_insn (CPU_STATE (cpu), pc);
+  TRACE_INSN (cpu, " pc = %" PRIx64 " instr = %x", pc,
+	      aarch64_get_instr (cpu));
+  TRACE_DISASM (cpu, pc);
 
   aarch64_decode_and_execute (cpu, pc);
 

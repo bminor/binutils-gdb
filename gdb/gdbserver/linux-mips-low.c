@@ -1,5 +1,5 @@
 /* GNU/Linux/MIPS specific low level interface, for the remote server for GDB.
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -880,7 +880,7 @@ struct linux_target_ops the_low_target = {
   mips_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   mips_sw_breakpoint_from_kind,
-  NULL, /* breakpoint_reinsert_addr */
+  NULL, /* get_next_pcs */
   0,
   mips_breakpoint_at,
   mips_supports_z_point_type,

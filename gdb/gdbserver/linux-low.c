@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for the remote server for GDB.
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -282,12 +282,12 @@ can_hardware_single_step (void)
 }
 
 /* True if the low target can software single-step.  Such targets
-   implement the BREAKPOINT_REINSERT_ADDR callback.  */
+   implement the GET_NEXT_PCS callback.  */
 
 static int
 can_software_single_step (void)
 {
-  return (the_low_target.breakpoint_reinsert_addr != NULL);
+  return (the_low_target.get_next_pcs != NULL);
 }
 
 /* True if the low target supports memory breakpoints.  If so, we'll
@@ -878,10 +878,6 @@ linux_create_inferior (char *program, char **allargs)
       close_most_fds ();
       ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) 0, (PTRACE_TYPE_ARG4) 0);
 
-#ifndef __ANDROID__ /* Bionic doesn't use SIGRTMIN the way glibc does.  */
-      signal (__SIGRTMIN + 1, SIG_DFL);
-#endif
-
       setpgid (0, 0);
 
       /* If gdbserver is connected to gdb via stdio, redirect the inferior's
@@ -1183,13 +1179,12 @@ linux_kill_one_lwp (struct lwp_info *lwp)
      ptrace(CONT, pid, 0,0) and just resumes the tracee.  A better
      alternative is to kill with SIGKILL.  We only need one SIGKILL
      per process, not one for each thread.  But since we still support
-     linuxthreads, and we also support debugging programs using raw
-     clone without CLONE_THREAD, we send one for each thread.  For
-     years, we used PTRACE_KILL only, so we're being a bit paranoid
-     about some old kernels where PTRACE_KILL might work better
-     (dubious if there are any such, but that's why it's paranoia), so
-     we try SIGKILL first, PTRACE_KILL second, and so we're fine
-     everywhere.  */
+     support debugging programs using raw clone without CLONE_THREAD,
+     we send one for each thread.  For years, we used PTRACE_KILL
+     only, so we're being a bit paranoid about some old kernels where
+     PTRACE_KILL might work better (dubious if there are any such, but
+     that's why it's paranoia), so we try SIGKILL first, PTRACE_KILL
+     second, and so we're fine everywhere.  */
 
   errno = 0;
   kill_lwp (pid, SIGKILL);
@@ -3320,8 +3315,6 @@ linux_wait_1 (ptid_t ptid,
      stepping - they may require special handling to skip the signal
      handler. Also never ignore signals that could be caused by a
      breakpoint.  */
-  /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
-     thread library?  */
   if (WIFSTOPPED (w)
       && current_thread->last_resume_kind != resume_step
       && (
@@ -3663,27 +3656,17 @@ linux_wait (ptid_t ptid,
 static int
 kill_lwp (unsigned long lwpid, int signo)
 {
-  /* Use tkill, if possible, in case we are using nptl threads.  If tkill
-     fails, then we are not using nptl threads and we should be using kill.  */
+  int ret;
 
-#ifdef __NR_tkill
-  {
-    static int tkill_failed;
-
-    if (!tkill_failed)
-      {
-	int ret;
-
-	errno = 0;
-	ret = syscall (__NR_tkill, lwpid, signo);
-	if (errno != ENOSYS)
-	  return ret;
-	tkill_failed = 1;
-      }
-  }
-#endif
-
-  return kill (lwpid, signo);
+  errno = 0;
+  ret = syscall (__NR_tkill, lwpid, signo);
+  if (errno == ENOSYS)
+    {
+      /* If tkill fails, then we are not using nptl threads, a
+	 configuration we no longer support.  */
+      perror_with_name (("tkill"));
+    }
+  return ret;
 }
 
 void
@@ -3977,6 +3960,53 @@ enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t *info)
   lwp->pending_signals = p_sig;
 }
 
+/* Install breakpoints for software single stepping.  */
+
+static void
+install_software_single_step_breakpoints (struct lwp_info *lwp)
+{
+  int i;
+  CORE_ADDR pc;
+  struct regcache *regcache = get_thread_regcache (current_thread, 1);
+  VEC (CORE_ADDR) *next_pcs = NULL;
+  struct cleanup *old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
+
+  pc = get_pc (lwp);
+  next_pcs = (*the_low_target.get_next_pcs) (pc, regcache);
+
+  for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); ++i)
+    set_reinsert_breakpoint (pc);
+
+  do_cleanups (old_chain);
+}
+
+/* Single step via hardware or software single step.
+   Return 1 if hardware single stepping, 0 if software single stepping
+   or can't single step.  */
+
+static int
+single_step (struct lwp_info* lwp)
+{
+  int step = 0;
+
+  if (can_hardware_single_step ())
+    {
+      step = 1;
+    }
+  else if (can_software_single_step ())
+    {
+      install_software_single_step_breakpoints (lwp);
+      step = 0;
+    }
+  else
+    {
+      if (debug_threads)
+	debug_printf ("stepping is not implemented on this target");
+    }
+
+  return step;
+}
+
 /* Resume execution of LWP.  If STEP is nonzero, single-step it.  If
    SIGNAL is nonzero, give it that signal.  */
 
@@ -4124,13 +4154,13 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
      address, continue, and carry on catching this while-stepping
      action only when that breakpoint is hit.  A future
      enhancement.  */
-  if (thread->while_stepping != NULL
-      && can_hardware_single_step ())
+  if (thread->while_stepping != NULL)
     {
       if (debug_threads)
 	debug_printf ("lwp %ld has a while-stepping action -> forcing step.\n",
 		      lwpid_of (thread));
-      step = 1;
+
+      step = single_step (lwp);
     }
 
   if (proc->tdesc != NULL && the_low_target.get_pc != NULL)
@@ -4536,21 +4566,7 @@ start_step_over (struct lwp_info *lwp)
   uninsert_breakpoints_at (pc);
   uninsert_fast_tracepoint_jumps_at (pc);
 
-  if (can_hardware_single_step ())
-    {
-      step = 1;
-    }
-  else if (can_software_single_step ())
-    {
-      CORE_ADDR raddr = (*the_low_target.breakpoint_reinsert_addr) ();
-      set_reinsert_breakpoint (raddr);
-      step = 0;
-    }
-  else
-    {
-      internal_error (__FILE__, __LINE__,
-		      "stepping is not implemented on this target");
-    }
+  step = single_step (lwp);
 
   current_thread = saved_thread;
 
@@ -7196,16 +7212,6 @@ static struct target_ops linux_target_ops = {
   linux_supports_software_single_step
 };
 
-static void
-linux_init_signals ()
-{
-  /* FIXME drow/2002-06-09: As above, we should check with LinuxThreads
-     to find what the cancel signal actually is.  */
-#ifndef __ANDROID__ /* Bionic doesn't use SIGRTMIN the way glibc does.  */
-  signal (__SIGRTMIN+1, SIG_IGN);
-#endif
-}
-
 #ifdef HAVE_LINUX_REGSETS
 void
 initialize_regsets_info (struct regsets_info *info)
@@ -7225,7 +7231,6 @@ initialize_low (void)
   memset (&sigchld_action, 0, sizeof (sigchld_action));
   set_target_ops (&linux_target_ops);
 
-  linux_init_signals ();
   linux_ptrace_init_warnings ();
 
   sigchld_action.sa_handler = sigchld_handler;

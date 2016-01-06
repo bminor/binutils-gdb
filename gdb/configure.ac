@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright (C) 1995-2015 Free Software Foundation, Inc.
+dnl Copyright (C) 1995-2016 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl
@@ -1850,25 +1850,6 @@ if test "x$gdb_cv_thread_db_h_has_td_notls" = "xyes"; then
             [Define if <thread_db.h> has the TD_NOTLS error code.])
 fi
 
-dnl See if we have a sys/syscall header file that has __NR_tkill.
-if test "x$ac_cv_header_sys_syscall_h" = "xyes"; then
-   AC_CACHE_CHECK([whether <sys/syscall.h> has __NR_tkill],
-                  gdb_cv_sys_syscall_h_has_tkill,
-     AC_TRY_COMPILE(
-       [#include <sys/syscall.h>],
-       [int i = __NR_tkill;],
-       gdb_cv_sys_syscall_h_has_tkill=yes,
-       gdb_cv_sys_syscall_h_has_tkill=no
-     )
-   )
-fi
-dnl See if we can issue tkill syscall.
-if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes"; then
-  AC_CHECK_FUNC(syscall,
-    AC_DEFINE(HAVE_TKILL_SYSCALL, 1, [Define if you support the tkill syscall.])
-  )
-fi
-
 dnl Check if we can disable the virtual address space randomization.
 dnl The functionality of setarch -R.
 AC_CHECK_DECLS([ADDR_NO_RANDOMIZE],,, [#include <sys/personality.h>])
@@ -2007,14 +1988,23 @@ then
     # Separate out the -Werror flag as some files just cannot be
     # compiled with it enabled.
     for w in ${build_warnings}; do
+	# GCC does not complain about -Wno-unknown-warning.  Invert
+	# and test -Wunknown-warning instead.
+	case $w in
+	-Wno-*)
+		wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
+	*)
+		wtest=$w ;;
+	esac
+
 	case $w in
 	-Werr*) WERROR_CFLAGS=-Werror ;;
 	*)
 	    # Check whether GCC accepts it.
 	    saved_CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS $w"
+	    CFLAGS="$CFLAGS $wtest"
 	    saved_CXXFLAGS="$CXXFLAGS"
-	    CXXFLAGS="$CXXFLAGS $w"
+	    CXXFLAGS="$CXXFLAGS $wtest"
 	    AC_TRY_COMPILE([],[],WARN_CFLAGS="${WARN_CFLAGS} $w",)
 	    CFLAGS="$saved_CFLAGS"
 	    CXXFLAGS="$saved_CXXFLAGS"
@@ -2270,6 +2260,14 @@ if test "${ignore_sim}" = "false"; then
     SIM="${gdb_sim}"
     SIM_OBS="remote-sim.o"
     AC_DEFINE(WITH_SIM, 1, [Define if the simulator is being linked in.])
+
+    # Some tdep code should only be compiled in when the ppc sim is
+    # built.  PR sim/13418.
+    case $target in
+      powerpc*-*-*)
+	AC_DEFINE(WITH_PPC_SIM, 1, [Define if the PPC simulator is being linked in.])
+	;;
+    esac
   fi
 fi
 AC_SUBST(SIM)

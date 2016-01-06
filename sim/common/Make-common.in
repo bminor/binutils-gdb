@@ -1,5 +1,5 @@
 # Makefile fragment for common parts of all simulators.
-# Copyright 1997-2015 Free Software Foundation, Inc.
+# Copyright 1997-2016 Free Software Foundation, Inc.
 # Contributed by Cygnus Support.
 
 # This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,6 @@ CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 CXXFLAGS = @CXXFLAGS@
 LDFLAGS = @LDFLAGS@
-SIM_BSWAP = @sim_bswap@
 SIM_CFLAGS = @sim_cflags@
 SIM_DEBUG = @sim_debug@
 SIM_TRACE = @sim_trace@
@@ -91,7 +90,6 @@ SIM_FLOAT = @sim_float@
 SIM_HW_CFLAGS = @sim_hw_cflags@
 SIM_HW_OBJS = @sim_hw_objs@
 SIM_HW = @sim_hw@
-SIM_HOSTENDIAN = @sim_hostendian@
 SIM_INLINE = @sim_inline@
 SIM_PACKAGES = @sim_packages@
 SIM_REGPARM = @sim_regparm@
@@ -185,11 +183,13 @@ SIM_NEW_COMMON_OBJS = \
 	sim-engine.o \
 	sim-events.o \
 	sim-fpu.o \
+	sim-hload.o \
 	sim-hrw.o \
 	sim-io.o \
 	sim-info.o \
 	sim-load.o \
 	sim-memopt.o \
+	sim-model.o \
 	sim-module.o \
 	sim-options.o \
 	sim-profile.o \
@@ -233,7 +233,6 @@ CONFIG_CFLAGS = \
 	$(SIM_DEFAULT_MODEL) \
 	$(SIM_TRACE) \
 	$(SIM_PROFILE) \
-	$(SIM_BSWAP) \
 	$(SIM_ASSERT) \
 	$(SIM_ALIGNMENT) \
 	$(SIM_BITSIZE) \
@@ -241,7 +240,6 @@ CONFIG_CFLAGS = \
 	$(SIM_ENVIRONMENT) \
 	$(SIM_FLOAT) \
 	$(SIM_HW_CFLAGS) \
-	$(SIM_HOSTENDIAN) \
 	$(SIM_INLINE) \
 	$(SIM_PACKAGES) \
 	$(SIM_REGPARM) \
@@ -360,7 +358,6 @@ sim-base_h = $(srccom)/sim-base.h \
 		$(sim-cpu_h)
 sim-basics_h = $(srccom)/sim-basics.h \
 		../common/cconfig.h \
-		tconfig.h \
 		$(sim-config_h) \
 		$(callback_h) \
 		$(sim-inline_h) \
@@ -535,7 +532,7 @@ clean: $(SIM_EXTRA_CLEAN)
 distclean mostlyclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
 	rm -f TAGS
 	rm -f Makefile config.cache config.log config.status .gdbinit
-	rm -f tconfig.h config.h stamp-h
+	rm -f config.h stamp-h
 	rm -f targ-vals.def
 
 .c.o:

@@ -1,5 +1,5 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990-2015 Free Software Foundation, Inc.
+   Copyright (C) 1990-2016 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -360,6 +360,9 @@ CODE_FRAGMENT
 .  {* Indicate that section has the no read flag set. This happens
 .     when memory read flag isn't set. *}
 .#define SEC_COFF_NOREAD 0x40000000
+.
+.  {* Indicate that section has the no read flag set.  *}
+.#define SEC_ELF_NOREAD 0x80000000
 .
 .  {*  End of section flags.  *}
 .

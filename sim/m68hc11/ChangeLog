@@ -1,3 +1,62 @@
+2016-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Update sim_parse_args comment.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (sim_state): Delete devices member.
+
+2016-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HOSTENDIAN): Delete.
+	* configure: Regenerate.
+
+2016-01-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_ENDIAN): Change BIG_ENDIAN to BIG.
+	* configure: Regenerate.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change LITTLE_ENDIAN to BIG_ENDIAN.
+	* configure: Regenerate.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* imterp.c (sim_open): Delete current_alignment and
+	current_target_byte_order assignments.
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN.
+	* configure: Regenerate.
+
+2015-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* wrapper.c (m68hc11_reg_store, m68hc11_reg_fetch): Define.
+	(sim_open): Call CPU_REG_FETCH/CPU_REG_STORE.
+	(sim_store_register): Rename to ...
+	(m68hc11_reg_store): ... this.  Delete local cpu var.
+	(sim_fetch_register): Rename to ...
+	(m68hc11_reg_fetch): ... this.  Delete local cpu var.
+
+2015-12-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Delete sim-hload.o.
+
+2015-12-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_HANDLES_LMA): Delete.
+
+2015-12-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (WITH_WATCHPOINTS): Delete.
+
 2015-11-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (WITH_MODULO_MEMORY): Delete.

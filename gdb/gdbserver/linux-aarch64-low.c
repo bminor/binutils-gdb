@@ -1,7 +1,7 @@
 /* GNU/Linux/AArch64 specific low level interface, for the remote server for
    GDB.
 
-   Copyright (C) 2009-2015 Free Software Foundation, Inc.
+   Copyright (C) 2009-2016 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GDB.
@@ -2980,7 +2980,7 @@ struct linux_target_ops the_low_target =
   aarch64_set_pc,
   aarch64_breakpoint_kind_from_pc,
   aarch64_sw_breakpoint_from_kind,
-  NULL, /* breakpoint_reinsert_addr */
+  NULL, /* get_next_pcs */
   0,    /* decr_pc_after_break */
   aarch64_breakpoint_at,
   aarch64_supports_z_point_type,

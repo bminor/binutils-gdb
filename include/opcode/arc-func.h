@@ -1,6 +1,5 @@
 /* Replace functions for the ARC relocs.
-   Copyright 2015
-   Free Software Foundation, Inc.
+   Copyright (C) 2015-2016 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler, GDB, the GNU debugger, and
    the GNU Binutils.

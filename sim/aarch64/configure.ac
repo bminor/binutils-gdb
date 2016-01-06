@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2015 Free Software Foundation, Inc.
+dnl Copyright (C) 2015-2016 Free Software Foundation, Inc.
 dnl
 dnl Contributed by Red Hat.
 dnl
@@ -31,7 +31,6 @@ SIM_AC_OPTION_ENDIAN
 ## common core does not support this, so we opt for non-strict
 ## alignment instead.
 SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT,NONSTRICT_ALIGNMENT)
-SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OPTION_ENVIRONMENT
 SIM_AC_OPTION_INLINE
 SIM_AC_OPTION_WARNINGS

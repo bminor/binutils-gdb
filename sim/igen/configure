@@ -638,7 +638,6 @@ sim_hw_cflags
 sim_default_model
 sim_scache
 sim_float
-sim_hostendian
 sim_endian
 sim_bitsize
 sim_assert
@@ -3679,10 +3678,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # ZW_CREATE_DEPDIR
 # ----------------
 # As AM_SET_DEPDIR, but also create the directory at config.status time.
-
-
-
-
 
 
 

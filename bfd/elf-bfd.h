@@ -1,5 +1,5 @@
 /* BFD back-end data structures for ELF files.
-   Copyright (C) 1992-2015 Free Software Foundation, Inc.
+   Copyright (C) 1992-2016 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1169,6 +1169,11 @@ struct elf_backend_data
      or if all relocs are being preserved in the output.  */
   unsigned int (*elf_backend_count_relocs)
     (struct bfd_link_info *, asection *);
+
+  /* Count additionals relocations.  Called for relocatable links if
+     additional relocations needs to be created.  */
+  unsigned int (*elf_backend_count_additional_relocs)
+    (asection *);
 
   /* Say whether to sort relocs output by ld -r and ld --emit-relocs,
      by r_offset.  If NULL, default to true.  */

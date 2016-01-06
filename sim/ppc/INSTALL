@@ -480,22 +480,6 @@ with:
 
 
 
---enable-sim-bswap
-
-
-(x86 specific) Use the i486/P5/P6 byte swap instruction.
-
-PSIM contains generic byte swapping code.  For the x86 (P[4-6]) PSIM
-can be built so that it uses the bswap instruction instead of relying
-on the compiler to generate byte swap code.
-
-Ex: default
-
-By default, when compiling with GCC-2 on an i486/P5/P6 the bswap
-instruction is used.
-
-
-
 --enable-sim-endian=endian
 
 

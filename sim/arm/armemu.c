@@ -1293,7 +1293,6 @@ ARMul_Emulate26 (ARMul_State * state)
 
       if (state->CallDebug > 0)
 	{
-	  instr = ARMul_Debug (state, pc, instr);
 	  if (state->Emulate < ONCE)
 	    {
 	      state->NextInstr = RESUME;

@@ -1,4 +1,4 @@
-#   Copyright 1997-2015 Free Software Foundation, Inc.
+#   Copyright 1997-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 # Until "catch exec" is implemented on other targets...
 #
-if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
+if { ![istarget "*-linux*"] } then {
     continue
 }
 
@@ -193,10 +193,6 @@ proc do_exec_tests {} {
        }
    }
 
-   # DTS CLLbs16760
-   # PA64 doesn't know about $START$ in dld.sl at this point.  It should.
-   # - Michael Coulter
-   setup_xfail hppa2.0w-hp-hpux* CLLbs16760
    send_gdb "continue\n"
    gdb_expect {
      -re ".*xecuting new program:.*${testfile2}.*Catchpoint .*(exec\'d .*${testfile2}).*in .*$gdb_prompt $"\

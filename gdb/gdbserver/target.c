@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -68,7 +68,9 @@ thread_search_callback (struct inferior_list_entry *entry, void *args)
   if (ptid_get_pid (entry->id) == ptid_get_pid (s->current_gen_ptid)
       && mythread_alive (ptid_of (thread)))
     {
-      if (s->stopped == NULL && thread_stopped (thread))
+      if (s->stopped == NULL
+	  && the_target->thread_stopped != NULL
+	  && thread_stopped (thread))
 	s->stopped = thread;
 
       if (s->first == NULL)

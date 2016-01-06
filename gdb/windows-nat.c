@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling windows child processes, for GDB.
 
-   Copyright (C) 1995-2015 Free Software Foundation, Inc.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
 
@@ -2830,7 +2830,8 @@ _initialize_loadable (void)
     {
       GPA (hm, EnumProcessModules);
       GPA (hm, GetModuleInformation);
-      GPA (hm, GetModuleFileNameEx);
+      GetModuleFileNameEx = (GetModuleFileNameEx_ftype *)
+        GetProcAddress (hm, GetModuleFileNameEx_name);
     }
 
   if (!EnumProcessModules || !GetModuleInformation || !GetModuleFileNameEx)

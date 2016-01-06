@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on ARM systems.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,11 +23,11 @@
 struct gdbarch;
 struct regset;
 struct address_space;
+struct get_next_pcs;
+struct arm_get_next_pcs;
+struct gdb_get_next_pcs;
 
 #include "arch/arm.h"
-
-/* Size of integer registers.  */
-#define INT_REGISTER_SIZE		4
 
 /* Say how long FP registers are.  Used for documentation purposes and
    code readability in this header.  IEEE extended doubles are 80
@@ -50,32 +50,6 @@ struct address_space;
 #define NUM_GREGS	16	/* Number of general purpose registers.  */
 
 
-/* Instruction condition field values.  */
-#define INST_EQ		0x0
-#define INST_NE		0x1
-#define INST_CS		0x2
-#define INST_CC		0x3
-#define INST_MI		0x4
-#define INST_PL		0x5
-#define INST_VS		0x6
-#define INST_VC		0x7
-#define INST_HI		0x8
-#define INST_LS		0x9
-#define INST_GE		0xa
-#define INST_LT		0xb
-#define INST_GT		0xc
-#define INST_LE		0xd
-#define INST_AL		0xe
-#define INST_NV		0xf
-
-#define FLAG_N		0x80000000
-#define FLAG_Z		0x40000000
-#define FLAG_C		0x20000000
-#define FLAG_V		0x10000000
-
-#define CPSR_T		0x20
-
-#define XPSR_T		0x01000000
 
 /* Type of floating-point code in use by inferior.  There are really 3 models
    that are traditionally supported (plus the endianness issue), but gcc can
@@ -164,9 +138,9 @@ struct gdbarch_tdep
   struct type *neon_double_type;
   struct type *neon_quad_type;
 
-  /* Return the expected next PC if FRAME is stopped at a syscall
+  /* Return the expected next PC if the program is stopped at a syscall
      instruction.  */
-  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
+  CORE_ADDR (*syscall_next_pc) (struct regcache *regcache);
 
    /* syscall record.  */
   int (*arm_syscall_record) (struct regcache *regcache, unsigned long svc_number);
@@ -279,11 +253,23 @@ extern void
 		       ULONGEST val, enum pc_write_style write_pc);
 
 CORE_ADDR arm_skip_stub (struct frame_info *, CORE_ADDR);
-CORE_ADDR arm_get_next_pc (struct frame_info *, CORE_ADDR);
+
+ULONGEST arm_get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
+							int len,
+							int byte_order);
+
+CORE_ADDR arm_get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
+					     CORE_ADDR val);
+
+CORE_ADDR arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
+					    CORE_ADDR pc);
+
+int arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self);
+
 void arm_insert_single_step_breakpoint (struct gdbarch *,
 					struct address_space *, CORE_ADDR);
-int arm_deal_with_atomic_sequence (struct frame_info *);
 int arm_software_single_step (struct frame_info *);
+int arm_is_thumb (struct regcache *regcache);
 int arm_frame_is_thumb (struct frame_info *frame);
 
 extern struct displaced_step_closure *

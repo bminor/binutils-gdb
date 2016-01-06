@@ -36,6 +36,7 @@ AC_REQUIRE([AC_PROG_CC])
 AC_CONFIG_HEADER(ifelse([$1],,config.h,[$1]):config.in)
 AC_CANONICAL_SYSTEM
 AC_USE_SYSTEM_EXTENSIONS
+AC_C_BIGENDIAN
 AC_ARG_PROGRAM
 AC_PROG_INSTALL
 
@@ -52,9 +53,6 @@ AC_SUBST(HDEFINES)
 AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
-
-dnl Pull in the target configuration file directly.
-AH_BOTTOM([#include "tconfig.h"])
 
 # Some of the common include files depend on bfd.h, and bfd.h checks
 # that config.h is included first by testing that the PACKAGE macro
@@ -117,21 +115,6 @@ dnl all shall eventually behave the same way.
 dnl We don't use automake, but we still want to support
 dnl --enable-maintainer-mode.
 AM_MAINTAINER_MODE
-
-
-dnl This is a generic option to enable special byte swapping
-dnl insns on *any* cpu.
-AC_ARG_ENABLE(sim-bswap,
-[AS_HELP_STRING([--enable-sim-bswap], [Use Host specific BSWAP instruction])],
-[case "${enableval}" in
-  yes)	sim_bswap="-DWITH_BSWAP=1 -DUSE_BSWAP=1";;
-  no)	sim_bswap="-DWITH_BSWAP=0";;
-  *)	AC_MSG_ERROR("--enable-sim-bswap does not take a value"); sim_bswap="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_bswap" != x""; then
-  echo "Setting bswap flags = $sim_bswap" 6>&1
-fi],[sim_bswap=""])dnl
-AC_SUBST(sim_bswap)
 
 
 AC_ARG_ENABLE(sim-cflags,
@@ -452,26 +435,26 @@ AC_ARG_ENABLE(sim-endian,
 [AS_HELP_STRING([--enable-sim-endian=endian],
 		[Specify target byte endian orientation])],
 [case "${enableval}" in
-  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
-  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
+  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
   yes)	 if test x"$wire_endian" != x; then
-	   sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+	   sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
 	 else
-           if test x"$default_endian" != x; then
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=${default_endian}"
+	  if test x"$default_endian" != x; then
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
 	   else
 	     echo "No hard-wired endian for target $target" 1>&6
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
 	   fi
 	 fi;;
   no)	 if test x"$default_endian" != x; then
-	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
 	 else
 	   if test x"$wire_endian" != x; then
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${wire_endian}"
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
 	   else
 	     echo "No default endian for target $target" 1>&6
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
 	   fi
 	 fi;;
   *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-endian"); sim_endian="";;
@@ -480,47 +463,16 @@ if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
   echo "Setting endian flags = $sim_endian" 6>&1
 fi],
 [if test x"$default_endian" != x; then
-  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
 else
   if test x"$wire_endian" != x; then
-    sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+    sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
   else
     sim_endian=
   fi
 fi])dnl
 ])
 AC_SUBST(sim_endian)
-
-
-dnl --enable-sim-hostendian is for users of the simulator when
-dnl they find that AC_C_BIGENDIAN does not function correctly
-dnl (for instance in a canadian cross)
-AC_DEFUN([SIM_AC_OPTION_HOSTENDIAN],
-[
-AC_ARG_ENABLE(sim-hostendian,
-[AS_HELP_STRING([--enable-sim-hostendian=end],
-		[Specify host byte endian orientation])],
-[case "${enableval}" in
-  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=0";;
-  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
-  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
-  *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-hostendian"); sim_hostendian="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_hostendian" != x""; then
-  echo "Setting hostendian flags = $sim_hostendian" 6>&1
-fi],[
-if test "x$cross_compiling" = "xno"; then
-  AC_C_BIGENDIAN
-  if test $ac_cv_c_bigendian = yes; then
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN"
-  else
-    sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN"
-  fi
-else
-  sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
-fi])dnl
-])
-AC_SUBST(sim_hostendian)
 
 
 dnl --enable-sim-float is for developers of the simulator

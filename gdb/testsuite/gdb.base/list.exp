@@ -1,4 +1,4 @@
-# Copyright 1992-2015 Free Software Foundation, Inc.
+# Copyright 1992-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,8 +69,6 @@ proc set_listsize { arg } {
 
 proc test_listsize {} {
     global gdb_prompt
-    global hp_cc_compiler
-    global hp_aCC_compiler
     global last_line_re
 
     # Show default size

@@ -1,5 +1,5 @@
 # Expect script for various ARM ELF tests.
-#   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+#   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -223,6 +223,12 @@ set armelftests_common {
      "" {pcrel-shared.s}
      {{readelf -dr pcrel-shared.rd}}
      "pcrel-shared.so"}
+    {"MOVS thumb1 relocations" "-static -T arm.ld" "" "" {thumb1-movs.s}
+     {{objdump -dw thumb1-movs.d}}
+     "thumb1-movs"}
+    {"ADDS thumb1 relocations" "-static -T arm.ld" "" "" {thumb1-adds.s}
+     {{objdump -dw thumb1-adds.d}}
+     "thumb1-adds"}
 }
 
 set armelftests_nonacl {
@@ -293,6 +299,18 @@ set armelftests_nonacl {
     {"TLS shared library gdesc local" "--no-fix-arm1176 -shared -T arm-dyn.ld" "" "" {tls-lib-loc.s}
      {{objdump -fdw tls-lib-loc.d} {objdump -Rw tls-lib-loc.r}}
      "tls-lib-loc.so"}
+    {"PF_R not present when one noread section" "-static -T arm.ld" "" "" {thumb1-noread-present-one-section.s}
+     {{readelf -l thumb1-noread-present-one-section.d}}
+     "thumb1-noread-present-one-section"}
+    {"PF_R not present when two noread sections" "-static -T arm.ld" "" "" {thumb1-noread-present-two-section.s}
+     {{readelf -l thumb1-noread-present-two-section.d}}
+     "thumb1-noread-present-two-section"}
+    {"PF_R present when mixing noread section with read section" "-static -T arm.ld" "" "" {thumb1-noread-not-present-mixing-two-section.s}
+     {{readelf -l thumb1-noread-not-present-mixing-two-section.d}}
+     "thumb1-noread-not-present-mixing-two-section"}
+    {"Match SHF_ARM_NOREAD with INPUT_SECTION_FLAGS directive" "-static -T arm_noread.ld" "" "" {thumb1-input-section-flag-match.s}
+     {{readelf -l thumb1-input-section-flag-match.d}}
+     "thumb1-noread-not-present-mixing-two-section"}
 }
 
 run_ld_link_tests $armelftests_common
@@ -370,6 +388,15 @@ set armeabitests_common {
      {"EABI attribute merging 7" "-r" "" "" {attr-merge-7a.s attr-merge-7b.s}
       {{readelf -A attr-merge-7.attr}}
       "attr-merge-7"}
+     {"EABI attribute merging 8" "-r" "" "" {attr-merge-8a.s attr-merge-8b.s}
+      {{readelf -A attr-merge-8.attr}}
+      "attr-merge-8"}
+     {"EABI attribute merging 9" "-r" "" "" {attr-merge-9a.s attr-merge-9b.s}
+      {{ld attr-merge-9.out}}
+      "attr-merge-9"}
+     {"EABI attribute merging 10" "-r" "" "" {attr-merge-10a.s attr-merge-10b.s}
+      {{readelf -A attr-merge-10.attr}}
+      "attr-merge-10"}
      {"EABI attribute arch merging 1" "-r" "" "" {arch-v6k.s arch-v6t2.s}
       {{readelf -A attr-merge-arch-1.attr}}
       "attr-merge-arch-1"}
@@ -433,6 +460,12 @@ set armeabitests_nonacl {
     {"Thumb-Thumb farcall M profile" "-Ttext 0x1000 --section-start .foo=0x2001014" "" "-march=armv7-m" {farcall-thumb-thumb.s}
      {{objdump -d farcall-thumb-thumb-m.d}}
      "farcall-thumb-thumb-m"}
+    {"Thumb-Thumb farcall v8-M Baseline" "-Ttext 0x1000 --section-start .foo=0x2001014" "" "-march=armv8-m.base" {farcall-thumb-thumb.s}
+     {{objdump -d farcall-thumb-thumb-m.d}}
+     "farcall-thumb-thumb-v8-m-base"}
+    {"Thumb-Thumb farcall v8-M Mainline" "-Ttext 0x1000 --section-start .foo=0x2001014" "" "-march=armv8-m.main" {farcall-thumb-thumb.s}
+     {{objdump -d farcall-thumb-thumb-m.d}}
+     "farcall-thumb-thumb-v8-m-main"}
     {"Thumb-Thumb farcall v6-M" "-Ttext 0x1000 --section-start .foo=0x2001014" "" "-march=armv6-m" {farcall-thumb-thumb.s}
      {{objdump -d farcall-thumb-thumb-m.d}}
      "farcall-thumb-thumb-v6-m"}
@@ -448,6 +481,10 @@ set armeabitests_nonacl {
     {"Thumb-Thumb farcall (PIC veneer)" "-Ttext 0x1000 --section-start .foo=0x2001014 --pic-veneer" "" "-march=armv4t" {farcall-thumb-thumb.s}
      {{objdump -d farcall-thumb-thumb-pic-veneer.d}}
      "farcall-thumb-thumb-pic-veneer"}
+    {"Thumb-Thumb farcall v6-M (no profile)" "-Ttext 0x1000" "" ""
+     {farcall-thumb-thumb-m-no-profile-a.s farcall-thumb-thumb-m-no-profile-b.s}
+     {{objdump -d farcall-thumb-thumb-m-no-profile.d}}
+     "farcall-thumb-thumb-m-no-profile"}
 
     {"Thumb-ARM farcall" "-Ttext 0x1c01010 --section-start .foo=0x2001014" "" "-W" {farcall-thumb-arm.s}
      {{objdump -d farcall-thumb-arm.d}}
@@ -923,3 +960,9 @@ run_dump_test "gc-hidden-1"
 run_dump_test "protected-data"
 run_dump_test "stm32l4xx-cannot-fix-it-block"
 run_dump_test "stm32l4xx-cannot-fix-far-ldm"
+set arm_unwind_tests {
+    {"unwind-rel" "-r -Tarm.ld" "" "" {unwind-rel1.s unwind-rel2.s unwind-rel3.s}
+     {{readelf -ur unwind-rel.d}}
+     "unwind-rel"}
+}
+run_ld_link_tests $arm_unwind_tests

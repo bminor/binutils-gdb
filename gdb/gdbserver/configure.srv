@@ -72,6 +72,8 @@ case "${target}" in
 			srv_tgtobj="$srv_linux_obj linux-arm-low.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
 			srv_tgtobj="${srv_tgtobj} arm.o"
+			srv_tgtobj="${srv_tgtobj} arm-linux.o"
+			srv_tgtobj="${srv_tgtobj} arm-get-next-pcs.o"
 			srv_xmlfiles="arm-with-iwmmxt.xml"
 			srv_xmlfiles="${srv_xmlfiles} arm-with-vfpv2.xml"
 			srv_xmlfiles="${srv_xmlfiles} arm-with-vfpv3.xml"

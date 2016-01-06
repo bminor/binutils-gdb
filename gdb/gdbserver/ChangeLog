@@ -1,3 +1,122 @@
+2016-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbreplay.c (gdbreplay_version): Change copyright year in
+	version message.
+	* server.c (gdbserver_version): Likewise.
+
+2015-12-28  Patrick Palka  <patrick@parcs.ath.cx>
+
+	* server.c (crc32_table): Delete.
+	(crc32): Use libiberty's xcrc32 function.
+
+2015-12-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* lynx-low.c (lynx_delete_thread_callback): New function.
+	(lynx_mourn): Properly delete our process and all of its
+	threads.  Remove call to clear_inferiors.
+
+2015-12-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* target.c (thread_search_callback): Add check that
+	the thread_stopped target callback is not NULL before
+	calling it.
+
+2015-12-21  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.h [__aarch64__]: Use arm_abi_breakpoint
+	arm breakpoint.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* server.c (handle_query): Call target_supports_software_single_step.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-low.c (single_step): New function.
+	(linux_resume_one_lwp_throw): Call single_step.
+	(start_step_over): Likewise.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* Makefile.in (SFILES): Append arch/arm-linux.c,
+	arch/arm-get-next-pcs.c.
+	(arm-linux.o): New rule.
+	(arm-get-next-pcs.o): New rule.
+	* configure.srv (arm*-*-linux*): Add arm-get-next-pcs.o,
+	arm-linux.o.
+	* linux-aarch32-low.c (arm_abi_breakpoint): Remove macro.  Moved
+	to linux-aarch32-low.c.
+	(arm_eabi_breakpoint, arm_breakpoint): Likewise.
+	(arm_breakpoint_len, thumb_breakpoint): Likewise.
+	(thumb_breakpoint_len, thumb2_breakpoint): Likewise.
+	(thumb2_breakpoint_len): Likewise.
+	(arm_is_thumb_mode): Make non-static.
+	* linux-aarch32-low.h (arm_abi_breakpoint): New macro.  Moved
+	from linux-aarch32-low.c.
+	(arm_eabi_breakpoint, arm_breakpoint): Likewise.
+	(arm_breakpoint_len, thumb_breakpoint): Likewise.
+	(thumb_breakpoint_len, thumb2_breakpoint): Likewise.
+	(thumb2_breakpoint_len): Likewise.
+	(arm_is_thumb_mode): New declaration.
+	* linux-arm-low.c: Include arch/arm-linux.h
+	aarch/arm-get-next-pcs.h, sys/syscall.h.
+	(get_next_pcs_ops): New struct.
+	(get_next_pcs_addr_bits_remove): New function.
+	(get_next_pcs_is_thumb): New function.
+	(get_next_pcs_read_memory_unsigned_integer): Likewise.
+	(arm_sigreturn_next_pc): Likewise.
+	(get_next_pcs_syscall_next_pc): Likewise.
+	(arm_gdbserver_get_next_pcs): Likewise.
+	(struct linux_target_ops) <arm_gdbserver_get_next_pcs>:
+	Initialize.
+	* linux-low.h: Move CORE_ADDR vector definition to gdb_vecs.h.
+	* server.h: Include gdb_vecs.h.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* Makefile.in (SFILES): Append common/common-regcache.c.
+	(OBS): Append common-regcache.o.
+	(common-regcache.o): New rule.
+	* regcache.c (init_register_cache): Initialize cache to
+	REG_UNAVAILABLE.
+	(regcache_raw_read_unsigned): New function.
+	* regcache.h (REG_UNAVAILABLE, REG_VALID): Replaced by shared
+	register_status enum.
+
+2015-12-18  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* linux-aarch64-low.c (the_low_targets): Rename
+	breakpoint_reinsert_addr to get_next_pcs.
+	* linux-arm-low.c (the_low_targets): Likewise.
+	* linux-bfin-low.c (the_low_targets): Likewise.
+	* linux-cris-low.c (the_low_targets): Likewise.
+	* linux-crisv32-low.c (the_low_targets): Likewise.
+	* linux-low.c (can_software_single_step): Likewise.
+	(install_software_single_step_breakpoints): New function.
+	(start_step_over): Use install_software_single_step_breakpoints.
+	* linux-low.h: New CORE_ADDR vector.
+	(struct linux_target_ops) Rename breakpoint_reinsert_addr to
+	get_next_pcs.
+	* linux-mips-low.c (the_low_targets): Likewise.
+	* linux-nios2-low.c (the_low_targets): Likewise.
+	* linux-sparc-low.c (the_low_targets): Likewise.
+
+2015-12-17  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_kill_one_lwp): Remove references to
+	LinuxThreads.
+	(kill_lwp): Remove HAVE_TKILL_SYSCALL check.  No longer fall back
+	to 'kill'.
+	(linux_init_signals): Delete.
+	(initialize_low): Adjust.
+	* thread-db.c (thread_db_init): Remove LinuxThreads reference.
+
+2015-12-16  Pedro Alves  <palves@redhat.com>
+
+	* configure.ac (compiler warning flags): When testing a
+	-Wno-foo option, check whether -Wfoo works instead.
+	* configure: Regenerate.
+
 2015-12-11  Don Breazeal  <donb@codesourcery.com>
 
 	* server.c (process_serial_event): Don't exit from gdbserver

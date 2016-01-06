@@ -1,4 +1,4 @@
-# Copyright 1992-2015 Free Software Foundation, Inc.
+# Copyright 1992-2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1013,13 +1013,6 @@ proc localvars_in_indirect_call { } {
     #
 
     gdb_test_multiple "finish" "finish from indirectly called function" {
-	-re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*First.*$gdb_prompt $" {
-	    #On hppa2.0w-hp-hpux11.00, gdb finishes at one line earlier than 
-	    #hppa1.1-hp-hpux11.00. Therefore, an extra "step" is necessary 
-	    #to continue the test.
-	    send_gdb "step\n"
-	    exp_continue
-	}
 	-re ".*\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*Second.*$gdb_prompt $" {
 	    pass "finish from indirectly called function"
 	}
