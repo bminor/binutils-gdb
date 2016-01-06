@@ -2084,11 +2084,6 @@
 
 2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Silence older
-	GCC warning.
-
-2015-06-24  H.J. Lu  <hongjiu.lu@intel.com>
-
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Always allocate
 	space for the first .plt entry.
 	(elf_i386_size_dynamic_sections): Always add DT_PLTGOT for .plt
