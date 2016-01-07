@@ -1,5 +1,11 @@
 2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* rs6000-tdep.c: Add "ax.h" and "ax-gdb.h" includes.
+	(rs6000_gen_return_address): New function.
+	(rs6000_gdbarch_init): Wire in the above.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* rs6000-tdep.c (rs6000_ax_pseudo_register_collect): New function.
 	(rs6000_gdbarch_init): Wire in the above.
 

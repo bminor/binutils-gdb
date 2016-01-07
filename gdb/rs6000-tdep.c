@@ -63,6 +63,9 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 
+#include "ax.h"
+#include "ax-gdb.h"
+
 #include "features/rs6000/powerpc-32.c"
 #include "features/rs6000/powerpc-altivec32.c"
 #include "features/rs6000/powerpc-vsx32.c"
@@ -2960,6 +2963,18 @@ rs6000_ax_pseudo_register_collect (struct gdbarch *gdbarch,
 		    "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
   return 0;
+}
+
+
+static void
+rs6000_gen_return_address (struct gdbarch *gdbarch,
+			   struct agent_expr *ax, struct axs_value *value,
+			   CORE_ADDR scope)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  value->type = register_type (gdbarch, tdep->ppc_lr_regnum);
+  value->kind = axs_lvalue_register;
+  value->u.reg = tdep->ppc_lr_regnum;
 }
 
 
@@ -5971,6 +5986,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ax_pseudo_register_collect (gdbarch,
 	      rs6000_ax_pseudo_register_collect);
     }
+
+  set_gdbarch_gen_return_address (gdbarch, rs6000_gen_return_address);
 
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
