@@ -7170,12 +7170,13 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
 	  static gdb_byte micromips16_little_breakpoint[] = { 0x85, 0x46 };
 	  static gdb_byte micromips32_little_breakpoint[] = { 0x5, 0, 0x7, 0 };
 	  ULONGEST insn;
-	  int status;
+	  int err;
 	  int size;
 
-	  insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &status);
-	  size = status ? 2
-			: mips_insn_size (ISA_MICROMIPS, insn) == 2 ? 2 : 4;
+	  insn = mips_fetch_instruction (gdbarch, ISA_MICROMIPS, pc, &err);
+	  size = (err != 0
+		  ? 2 : (mips_insn_size (ISA_MICROMIPS, insn) == 2
+			 ? 2 : 4));
 	  *pcptr = unmake_compact_addr (pc);
 	  *lenptr = size;
 	  return (size == 2) ? micromips16_little_breakpoint
