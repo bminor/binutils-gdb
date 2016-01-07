@@ -1,3 +1,10 @@
+2016-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Include new warning.m4 file.
+	* configure: Regenerated.
+	* configure.ac: Move all warning logic ...
+	* warning.m4: ... here.
+
 2016-01-08  Yao Qi  <yao.qi@linaro.org>
 
 	* extension.c: Include target.h.
