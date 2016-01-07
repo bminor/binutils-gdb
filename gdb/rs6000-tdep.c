@@ -2919,6 +2919,50 @@ rs6000_pseudo_register_write (struct gdbarch *gdbarch,
 		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
 
+static int
+rs6000_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+				   struct agent_expr *ax, int reg_nr)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  if (IS_SPE_PSEUDOREG (tdep, reg_nr))
+    {
+      int reg_index = reg_nr - tdep->ppc_ev0_regnum;
+      ax_reg_mask (ax, tdep->ppc_gp0_regnum + reg_index);
+      ax_reg_mask (ax, tdep->ppc_ev0_upper_regnum + reg_index);
+    }
+  else if (IS_DFP_PSEUDOREG (tdep, reg_nr))
+    {
+      int reg_index = reg_nr - tdep->ppc_dl0_regnum;
+      ax_reg_mask (ax, tdep->ppc_fp0_regnum + 2 * reg_index);
+      ax_reg_mask (ax, tdep->ppc_fp0_regnum + 2 * reg_index + 1);
+    }
+  else if (IS_VSX_PSEUDOREG (tdep, reg_nr))
+    {
+      int reg_index = reg_nr - tdep->ppc_vsr0_regnum;
+      if (reg_index > 31)
+        {
+          ax_reg_mask (ax, tdep->ppc_vr0_regnum + reg_index - 32);
+	}
+      else
+        {
+          ax_reg_mask (ax, tdep->ppc_fp0_regnum + reg_index);
+          ax_reg_mask (ax, tdep->ppc_vsr0_upper_regnum + reg_index);
+        }
+    }
+  else if (IS_EFP_PSEUDOREG (tdep, reg_nr))
+    {
+      int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+      ax_reg_mask (ax, tdep->ppc_vr0_regnum + reg_index);
+    }
+  else
+    internal_error (__FILE__, __LINE__,
+		    _("rs6000_pseudo_register_collect: "
+		    "called on unexpected register '%s' (%d)"),
+		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
+  return 0;
+}
+
+
 /* Convert a DBX STABS register number to a GDB register number.  */
 static int
 rs6000_stab_reg_to_regnum (struct gdbarch *gdbarch, int num)
@@ -5924,6 +5968,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pseudo_register_read (gdbarch, rs6000_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch,
 					 rs6000_pseudo_register_write);
+      set_gdbarch_ax_pseudo_register_collect (gdbarch,
+	      rs6000_ax_pseudo_register_collect);
     }
 
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
