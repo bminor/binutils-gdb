@@ -1,5 +1,13 @@
 2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* gdb.trace/ftrace.exp: Set arg0exp for ppc.
+	* gdb.trace/mi-trace-unavailable.exp: Set pcnum for ppc.
+	* gdb.trace/pending.exp: Accept leading dot before function name.
+	* gdb.trace/trace-common.h: Add fast tracepoint dummy insn for ppc.
+	* lib/trace-support.exp: Set registers for ppc.
+
+2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* gdb.trace/entry-values.exp: Link ${binfile}1.o to ${binfile}1 and
 	use it for disassembly; accept .main in addition to main in backtrace.
 
