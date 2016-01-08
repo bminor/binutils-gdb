@@ -1,3 +1,9 @@
+2016-01-08  Andreas Schwab  <schwab@linux-m68k.org>
+
+	PR gas/13050
+	* m68k-opc.c (moveb, movew): For ISA_B/C only allow #,d(An) in
+	addition to ISA_A.
+
 2016-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

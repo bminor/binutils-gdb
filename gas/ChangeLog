@@ -1,3 +1,11 @@
+2016-01-08  Andreas Schwab  <schwab@linux-m68k.org>
+
+	PR gas/13050
+	* testsuite/gas/m68k/all.exp: Add tests p13050-1 and p13050-2.
+	* testsuite/gas/m68k/p13050-1.s: New file.
+	* testsuite/gas/m68k/p13050-2.d: New file.
+	* testsuite/gas/m68k/p13050-2.s: New file.
+
 2016-01-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/gas/arc/adc.d: Add 'R_' prefix to relocation names.
