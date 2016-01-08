@@ -1,3 +1,10 @@
+2016-01-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.perf/lib/perftest/perftest.py: Change relative imports to
+	absolute.
+	(SingleStatisticTestResult.report): Use dict.keys instead of
+	dict.iterkeys.
+
 2016-01-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.python/py-infthread.exp: Fix typo.  Expect t0.num to be 1.
