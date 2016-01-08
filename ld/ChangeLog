@@ -1,3 +1,13 @@
+2016-01-08  Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/19368
+	* testsuite/ld-arm/ifunc-3.rd: Update expected result.
+	* testsuite/ld-arm/ifunc-4.rd: Likewise.
+	* testsuite/ld-arm/ifunc-9.rd: Likewise.
+	* testsuite/ld-arm/ifunc-10.rd: Likewise.
+	* testsuite/ld-arm/ifunc-12.rd: Likewise.
+	* testsuite/ld-arm/ifunc-13.rd: Likewise.
+
 2016-01-05  Nick Clifton  <nickc@redhat.com>
 
 	* emulparams/msp430elf.sh (RAM_START): Move to 0x500 - above the

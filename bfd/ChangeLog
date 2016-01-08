@@ -1,3 +1,10 @@
+2016-01-08  Richard Sandiford  <richard.sandiford@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/19368
+	* elf32-arm.c (elf32_arm_reloc_type_class): Map R_ARM_IRELATIVE to
+	reloc_class_ifunc.
+
 2016-01-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* elf32-arc.c (reloc_type_to_name): Change ARC_RELOC_HOWTO to
