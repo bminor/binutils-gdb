@@ -1503,6 +1503,10 @@ extern int target_remove_breakpoint (struct gdbarch *gdbarch,
 
 extern int target_terminal_is_inferior (void);
 
+/* Returns true if our terminal settings are in effect.  */
+
+extern int target_terminal_is_ours (void);
+
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
 
