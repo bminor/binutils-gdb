@@ -1,3 +1,10 @@
+2016-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.multi/goodbye.c: Fix compilation warnings by adding return types
+	and reordering the functions.
+	* gdb.multi/hangout.c: Likewise.
+	* gdb.multi/hello.c: Likewise.
+
 2016-01-08  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.perf/lib/perftest/perftest.py: Change relative imports to
