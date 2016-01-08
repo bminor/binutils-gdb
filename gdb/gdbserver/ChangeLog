@@ -1,3 +1,8 @@
+2016-01-08  Yao Qi  <yao.qi@linaro.org>
+
+	* remote-utils.c (getpkt): If c is '\003', call target hook
+	request_interrupt.
+
 2016-01-06  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch32-low.h (arm_abi_breakpoint): Move to
