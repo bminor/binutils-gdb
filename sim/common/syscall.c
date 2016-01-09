@@ -24,7 +24,7 @@
    supported.  */
 
 #ifdef HAVE_CONFIG_H
-#include "cconfig.h"
+#include "config.h"
 #endif
 #include "ansidecl.h"
 #include "libiberty.h"

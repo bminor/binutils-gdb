@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Need to be before general includes, to pick up e.g. _GNU_SOURCE.  */
 #ifdef HAVE_CONFIG_H
-#include "cconfig.h"
+#include "config.h"
 #endif
 
 #include <signal.h>

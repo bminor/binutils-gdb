@@ -22,7 +22,7 @@
 
 /* TODO: support vendor query tables.  */
 
-#include "cconfig.h"
+#include "config.h"
 
 #include <math.h>
 #include <errno.h>

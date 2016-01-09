@@ -357,7 +357,6 @@ sim-base_h = $(srccom)/sim-base.h \
 		$(sim-memopt_h) \
 		$(sim-cpu_h)
 sim-basics_h = $(srccom)/sim-basics.h \
-		../common/cconfig.h \
 		$(sim-config_h) \
 		$(callback_h) \
 		$(sim-inline_h) \

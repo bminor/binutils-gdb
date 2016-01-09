@@ -1,3 +1,17 @@
+2016-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change SIM_AC_COMMON to AC_PROG_CC.  Drop 2nd arg
+	to AC_OUTPUT.  Move AC_CHECK_HEADERS, AC_CHECK_FUNCS,
+	AC_CHECK_MEMBERS, and -AC_CHECK_TYPES ...
+	* acinclude.m4 (SIM_AC_COMMON): ... here.
+	* aclocal.m4, configure: Regenerate.
+	* config.in: Delete file.
+	* callback.c: Change cconfig.h include to config.h.
+	* dv-cfi.c, nrun.c, sim-basics.h, sim-load.c, sim-memopt.c,
+	syscall.c: Likewise.
+	* Make-common.in (sim-basics_h): Delete ../common/cconfig.h.
+	* Makefile.in (distclean): Delete rm -f cconfig.h config.h stamp-h.
+
 2016-01-06  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-config.c (print_sim_config): Delete sim_io_printf of version,

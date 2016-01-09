@@ -84,10 +84,26 @@ ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
 # FIXME: Seems to me this can cause problems for i386-windows hosts.
 # At one point there were hardcoded AC_DEFINE's if ${host} = i386-*-windows*.
 AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h time.h)
-AC_CHECK_HEADERS(sys/time.h sys/resource.h)
+AC_CHECK_HEADERS(sys/time.h sys/times.h sys/resource.h sys/mman.h)
 AC_CHECK_HEADERS(fcntl.h fpu_control.h)
 AC_CHECK_HEADERS(dlfcn.h errno.h sys/stat.h)
 AC_CHECK_FUNCS(getrusage time sigaction __setfpucw)
+AC_CHECK_FUNCS(mmap munmap lstat truncate ftruncate posix_fallocate)
+AC_CHECK_MEMBERS([[struct stat.st_dev], [struct stat.st_ino],
+[struct stat.st_mode], [struct stat.st_nlink], [struct stat.st_uid],
+[struct stat.st_gid], [struct stat.st_rdev], [struct stat.st_size],
+[struct stat.st_blksize], [struct stat.st_blocks], [struct stat.st_atime],
+[struct stat.st_mtime], [struct stat.st_ctime]], [], [],
+[[#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif]])
+AC_CHECK_TYPES(socklen_t, [], [],
+[#include <sys/types.h>
+#include <sys/socket.h>
+])
 
 # Check for socket libraries
 AC_CHECK_LIB(socket, bind)
