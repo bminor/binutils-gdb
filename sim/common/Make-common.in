@@ -75,16 +75,11 @@ CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 CXXFLAGS = @CXXFLAGS@
 LDFLAGS = @LDFLAGS@
-SIM_DEBUG = @sim_debug@
-SIM_TRACE = @sim_trace@
-SIM_PROFILE = @sim_profile@
 
-SIM_ASSERT = @sim_assert@
 SIM_ALIGNMENT = @sim_alignment@
 SIM_BITSIZE = @sim_bitsize@
 SIM_DEFAULT_MODEL = @sim_default_model@
 SIM_ENDIAN = @sim_endian@
-SIM_ENVIRONMENT = @sim_environment@
 SIM_FLOAT = @sim_float@
 SIM_HW_CFLAGS = @sim_hw_cflags@
 SIM_HW_OBJS = @sim_hw_objs@
@@ -92,8 +87,6 @@ SIM_HW = @sim_hw@
 SIM_INLINE = @sim_inline@
 SIM_RESERVED_BITS = @sim_reserved_bits@
 SIM_SCACHE = @sim_scache@
-SIM_SMP = @sim_smp@
-SIM_XOR_ENDIAN = @sim_xor_endian@
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
 SIM_WARN_CFLAGS = $(WARN_CFLAGS)
@@ -224,24 +217,17 @@ CGEN_INCLUDE_DEPS = \
 
 CONFIG_CFLAGS = \
 	@DEFS@ \
-	$(SIM_DEBUG) \
 	$(SIM_DEFAULT_MODEL) \
-	$(SIM_TRACE) \
-	$(SIM_PROFILE) \
-	$(SIM_ASSERT) \
 	$(SIM_ALIGNMENT) \
 	$(SIM_BITSIZE) \
 	$(SIM_ENDIAN) \
-	$(SIM_ENVIRONMENT) \
 	$(SIM_FLOAT) \
 	$(SIM_HW_CFLAGS) \
 	$(SIM_INLINE) \
 	$(SIM_RESERVED_BITS) \
 	$(SIM_SCACHE) \
-	$(SIM_SMP) \
 	$(SIM_WARN_CFLAGS) \
 	$(SIM_WERROR_CFLAGS) \
-	$(SIM_XOR_ENDIAN) \
 	$(SIM_HARDWARE) \
 	$(SIM_EXTRA_CFLAGS) \
 	$(HDEFINES) $(TDEFINES)

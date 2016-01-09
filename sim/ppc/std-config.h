@@ -111,10 +111,6 @@ extern int current_target_byte_order;
 #define VIRTUAL_ENVIRONMENT		2
 #define OPERATING_ENVIRONMENT		3
 
-#ifndef WITH_ENVIRONMENT
-#define WITH_ENVIRONMENT		0
-#endif
-
 extern int current_environment;
 #define CURRENT_ENVIRONMENT (WITH_ENVIRONMENT \
 			     ? WITH_ENVIRONMENT \
@@ -223,20 +219,6 @@ extern int current_floating_point;
 
    Control the inclusion of debugging code. */
 
-/* Include the tracing code.  Disabling this eliminates all tracing
-   code */
-
-#ifndef WITH_TRACE
-#define WITH_TRACE                      1
-#endif
-
-/* include code that checks assertions scattered through out the
-   program */
-
-#ifndef WITH_ASSERT
-#define WITH_ASSERT			1
-#endif
-
 /* Whether to check instructions for reserved bits being set */
 
 #ifndef WITH_RESERVED_BITS
@@ -282,10 +264,6 @@ extern int current_model_issue;
 
 #define DONT_USE_STDIO			2
 #define DO_USE_STDIO			1
-
-#ifndef WITH_STDIO
-#define WITH_STDIO			0
-#endif
 
 extern int current_stdio;
 #define CURRENT_STDIO (WITH_STDIO	\

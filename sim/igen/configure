@@ -625,8 +625,6 @@ INSTALL_SCRIPT
 INSTALL_PROGRAM
 WERROR_CFLAGS
 WARN_CFLAGS
-sim_xor_endian
-sim_smp
 sim_reserved_bits
 sim_inline
 sim_hw
@@ -637,9 +635,7 @@ sim_scache
 sim_float
 sim_endian
 sim_bitsize
-sim_assert
 sim_alignment
-sim_environment
 target_alias
 host_alias
 build_alias
@@ -3675,10 +3671,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # ZW_CREATE_DEPDIR
 # ----------------
 # As AM_SET_DEPDIR, but also create the directory at config.status time.
-
-
-
-
 
 
 

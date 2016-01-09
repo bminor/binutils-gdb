@@ -77,16 +77,12 @@ SMP_CFLAGS = @sim_smp@
 XOR_ENDIAN_CFLAGS = @sim_xor_endian@
 BITSIZE_CFLAGS = @sim_bitsize@
 HOSTBITSIZE_CFLAGS = @sim_hostbitsize@
-ENV_CFLAGS = @sim_env@
 TIMEBASE_CFLAGS = @sim_timebase@
 ALIGNMENT_CFLAGS = @sim_alignment@
 FLOAT_CFLAGS = @sim_float@
-TRACE_CFLAGS = @sim_trace@
-ASSERT_CFLAGS = @sim_assert@
 RESERVED_CFLAGS = @sim_reserved@
 MONITOR_CFLAGS = @sim_monitor@
 MODEL_CFLAGS = @sim_model@ @sim_default_model@ @sim_model_issue@
-STDIO_CFLAGS = @sim_stdio@
 TERMIO_CFLAGS = @sim_termio@
 WARNING_CFLAGS = @sim_warnings@
 DEVZERO_CFLAGS = @sim_devzero@
@@ -97,16 +93,12 @@ CONFIG_CFLAGS = \
   $(XOR_ENDIAN_CFLAGS) \
   $(BITSIZE_CFLAGS) \
   $(HOSTBITSIZE_CFLAGS) \
-  $(ENV_CFLAGS) \
   $(TIMEBASE_CFLAGS) \
   $(ALIGNMENT_CFLAGS) \
   $(FLOAT_CFLAGS) \
-  $(TRACE_CFLAGS) \
-  $(ASSERT_CFLAGS) \
   $(RESERVED_CFLAGS) \
   $(MONITOR_CFLAGS) \
   $(MODEL_CFLAGS) \
-  $(STDIO_CFLAGS) \
   $(TERMIO_CFLAGS) \
   $(DEVZERO_CFLAGS)
 SIM_FPU_CFLAGS = @sim_fpu_cflags@

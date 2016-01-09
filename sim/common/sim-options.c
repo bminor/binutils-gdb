@@ -119,14 +119,12 @@ static const OPTION standard_options[] =
       'E', "big|little", "Set endianness",
       standard_option_handler, NULL },
 
-#ifdef SIM_HAVE_ENVIRONMENT
   /* This option isn't supported unless all choices are supported in keeping
      with the goal of not printing in --help output things the simulator can't
      do [as opposed to things that just haven't been configured in].  */
   { {"environment", required_argument, NULL, OPTION_ENVIRONMENT},
       '\0', "user|virtual|operating", "Set running environment",
       standard_option_handler },
-#endif
 
   { {"alignment", required_argument, NULL, OPTION_ALIGNMENT},
       '\0', "strict|nonstrict|forced", "Set memory access alignment",

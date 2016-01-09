@@ -237,7 +237,8 @@ sim_config (SIM_DESC sd)
     }
 #endif
   if (STATE_ENVIRONMENT (sd) == ALL_ENVIRONMENT)
-    STATE_ENVIRONMENT (sd) = DEFAULT_ENVIRONMENT;
+    STATE_ENVIRONMENT (sd) = (WITH_ENVIRONMENT != ALL_ENVIRONMENT ?
+			      WITH_ENVIRONMENT : USER_ENVIRONMENT);
 
 
   /* set the alignment */

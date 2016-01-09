@@ -1,5 +1,27 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (SIM_AC_COMMON): Call AC_MSG_CHECKING,
+	AC_DEFINE_UNQUOTED, and AC_MSG_RESULT for sim-debug.  Likewise for
+	sim-stdio, sim-trace, and sim-profile.
+	(SIM_AC_OPTION_ENVIRONMENT): Likewise.
+	(SIM_AC_OPTION_ASSERT): Likewise.
+	(SIM_AC_OPTION_SMP): Likewise.
+	(SIM_AC_OPTION_XOR_ENDIAN): Likewise.
+	* configure: Regenerate.
+	* Make-common.in (SIM_DEBUG, SIM_TRACE, SIM_PROFILE, SIM_ASSERT,
+	SIM_ENVIRONMENT, SIM_SMP, SIM_XOR_ENDIAN): Delete.
+	(CONFIG_CFLAGS): Delete $(SIM_DEBUG), $(SIM_TRACE), $(SIM_PROFILE),
+	$(SIM_ASSERT), $(SIM_ENVIRONMENT), $(SIM_SMP), and $(SIM_XOR_ENDIAN).
+	* sim-config.c (sim_config): Change DEFAULT_ENVIRONMENT to
+	WITH_ENVIRONMENT & USER_ENVIRONMENT.
+	* sim-config.h (SIM_HAVE_ENVIRONMENT, WITH_ENVIRONMENT,
+	DEFAULT_ENVIRONMENT, WITH_DEBUG, WITH_TRACE, WITH_PROFILE,
+	WITH_ASSERT, WITH_STDIO): Delete.
+	* sim-options.c (standard_options): Delete SIM_HAVE_ENVIRONMENT
+	check.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4 (SIM_AC_OPTION_PACKAGES): Delete.
 	* configure: Regenerate.
 	* Make-common.in (SIM_PACKAGES): Delete.

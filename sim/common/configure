@@ -602,8 +602,6 @@ PATH_SEPARATOR
 SHELL
 WERROR_CFLAGS
 WARN_CFLAGS
-sim_xor_endian
-sim_smp
 sim_reserved_bits
 sim_inline
 sim_hw
@@ -614,9 +612,7 @@ sim_scache
 sim_float
 sim_endian
 sim_bitsize
-sim_assert
-sim_alignment
-sim_environment'
+sim_alignment'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking

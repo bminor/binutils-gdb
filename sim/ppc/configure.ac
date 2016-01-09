@@ -33,16 +33,17 @@ if test x"$silent" != x"yes" && test x"$sim_alignment" != x""; then
 fi],[sim_alignment=""])dnl
 
 
+AC_MSG_CHECKING([whether to enable sim asserts])
+sim_assert="1"
 AC_ARG_ENABLE(sim-assert,
 [  --enable-sim-assert			Specify whether to perform random assertions.],
 [case "${enableval}" in
-  yes)	sim_assert="-DWITH_ASSERT=1";;
-  no)	sim_assert="-DWITH_ASSERT=0";;
-  *)	AC_MSG_ERROR("--enable-sim-assert does not take a value"); sim_assert="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_assert" != x""; then
-  echo "Setting assert flags = $sim_assert" 6>&1
-fi],[sim_assert=""])dnl
+  yes)	sim_assert="1";;
+  no)	sim_assert="0";;
+  *)	AC_MSG_ERROR([--enable-sim-assert does not take a value]);;
+esac])dnl
+AC_DEFINE_UNQUOTED([WITH_ASSERT], [$sim_assert], [Sim assert settings])
+AC_MSG_RESULT($sim_assert)
 
 
 AC_ARG_ENABLE(sim-bitsize,
@@ -137,18 +138,19 @@ if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
 fi],[sim_endian=""])dnl
 
 
+AC_MSG_CHECKING([default sim environment setting])
+sim_env="0"
 AC_ARG_ENABLE(sim-env,
 [  --enable-sim-env=env			Specify target environment (operating, virtual, user).],
 [case "${enableval}" in
-  operating | os | oea)	sim_env="-DWITH_ENVIRONMENT=OPERATING_ENVIRONMENT";;
-  virtual | vea)	sim_env="-DWITH_ENVIRONMENT=VIRTUAL_ENVIRONMENT";;
-  user | uea)		sim_env="-DWITH_ENVIRONMENT=USER_ENVIRONMENT";;
-  no)			sim_env="-DWITH_ENVIRONMENT=0";;
-  *)			AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-env"); sim_env="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_env" != x""; then
-  echo "Setting env flags = $sim_env" 6>&1
-fi],[sim_env=""])dnl
+  operating | os | oea)	sim_env="OPERATING_ENVIRONMENT";;
+  virtual | vea)	sim_env="VIRTUAL_ENVIRONMENT";;
+  user | uea)		sim_env="USER_ENVIRONMENT";;
+  no)			sim_env="0";;
+  *)			AC_MSG_ERROR([Unknown value $enableval passed to --enable-sim-env]);;
+esac])dnl
+AC_DEFINE_UNQUOTED([WITH_ENVIRONMENT], [$sim_env], [Sim default environment])
+AC_MSG_RESULT($sim_env)
 
 
 AC_ARG_ENABLE(sim-filter,
@@ -533,16 +535,17 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 
 
+AC_MSG_CHECKING([for sim stdio debug behavior])
+sim_stdio=0
 AC_ARG_ENABLE(sim-stdio,
 [  --enable-sim-stdio			Specify whether to use stdio for console input/output.],
 [case "${enableval}" in
-  yes)	sim_stdio="-DWITH_STDIO=DO_USE_STDIO";;
-  no)	sim_stdio="-DWITH_STDIO=DONT_USE_STDIO";;
-  *)	AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-stdio"); sim_stdio="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_stdio" != x""; then
-  echo "Setting stdio flags = $sim_stdio" 6>&1
-fi],[sim_stdio=""])dnl
+  yes)	sim_stdio="DO_USE_STDIO";;
+  no)	sim_stdio="DONT_USE_STDIO";;
+  *)	AC_MSG_ERROR([Unknown value $enableval passed to --enable-sim-stdio]);;
+esac])dnl
+AC_DEFINE_UNQUOTED([WITH_STDIO], [$sim_stdio], [How to route I/O])
+AC_MSG_RESULT($sim_stdio)
 
 
 AC_ARG_ENABLE(sim-switch,
@@ -572,16 +575,17 @@ if test x"$silent" != x"yes" && test x"$sim_timebase" != x""; then
 fi],[sim_timebase=""])dnl
 
 
+AC_MSG_CHECKING([for sim trace settings])
+sim_trace="1"
 AC_ARG_ENABLE(sim-trace,
 [  --enable-sim-trace			Specify whether tracing is supported.],
 [case "${enableval}" in
-  yes)	sim_trace="-DWITH_TRACE=1";;
-  no)	sim_trace="-DWITH_TRACE=0";;
-  *)	AC_MSG_ERROR("--enable-sim-trace does not take a value"); sim_trace="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_trace" != x""; then
-  echo "Setting trace flags = $sim_trace" 6>&1
-fi],[sim_trace=""])dnl
+  yes)	sim_trace="1";;
+  no)	sim_trace="0";;
+  *)	AC_MSG_ERROR([--enable-sim-trace does not take a value]);;
+esac])dnl
+AC_DEFINE_UNQUOTED([WITH_TRACE], [$sim_trace], [Sim trace settings])
+AC_MSG_RESULT($sim_trace)
 
 
 AC_ARG_ENABLE(sim-warnings,
@@ -858,18 +862,14 @@ AC_SUBST(sim_smp)
 AC_SUBST(sim_igen_smp)
 AC_SUBST(sim_bitsize)
 AC_SUBST(sim_hostbitsize)
-AC_SUBST(sim_env)
 AC_SUBST(sim_timebase)
 AC_SUBST(sim_alignment)
 AC_SUBST(sim_float)
-AC_SUBST(sim_trace)
-AC_SUBST(sim_assert)
 AC_SUBST(sim_reserved)
 AC_SUBST(sim_monitor)
 AC_SUBST(sim_model)
 AC_SUBST(sim_default_model)
 AC_SUBST(sim_model_issue)
-AC_SUBST(sim_stdio)
 AC_SUBST(sim_termio)
 AC_SUBST(sim_devzero)
 AC_SUBST(sim_callback)

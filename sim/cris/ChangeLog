@@ -1,5 +1,9 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* config.in, configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>

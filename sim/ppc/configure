@@ -595,17 +595,16 @@ sim_targ_vals
 sim_callback
 sim_devzero
 sim_termio
-sim_stdio
 sim_model_issue
 sim_model
 sim_monitor
 sim_reserved
-sim_trace
 sim_timebase
-sim_env
 sim_hostbitsize
 sim_igen_smp
+sim_smp
 sim_hostendian
+sim_xor_endian
 sim_pk_obj
 sim_pk_src
 sim_hw_obj
@@ -670,8 +669,6 @@ INSTALL_SCRIPT
 INSTALL_PROGRAM
 WERROR_CFLAGS
 WARN_CFLAGS
-sim_xor_endian
-sim_smp
 sim_reserved_bits
 sim_inline
 sim_hw
@@ -682,9 +679,7 @@ sim_scache
 sim_float
 sim_endian
 sim_bitsize
-sim_assert
 sim_alignment
-sim_environment
 target_alias
 host_alias
 build_alias
@@ -4075,10 +4070,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
-
-
 # intl sister-directory configuration rules.
 #
 
@@ -5179,19 +5170,24 @@ else
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable sim asserts" >&5
+$as_echo_n "checking whether to enable sim asserts... " >&6; }
+sim_assert="1"
 # Check whether --enable-sim-assert was given.
 if test "${enable_sim_assert+set}" = set; then :
   enableval=$enable_sim_assert; case "${enableval}" in
-  yes)	sim_assert="-DWITH_ASSERT=1";;
-  no)	sim_assert="-DWITH_ASSERT=0";;
-  *)	as_fn_error "\"--enable-sim-assert does not take a value\"" "$LINENO" 5; sim_assert="";;
+  yes)	sim_assert="1";;
+  no)	sim_assert="0";;
+  *)	as_fn_error "--enable-sim-assert does not take a value" "$LINENO" 5;;
 esac
-if test x"$silent" != x"yes" && test x"$sim_assert" != x""; then
-  echo "Setting assert flags = $sim_assert" 6>&1
 fi
-else
-  sim_assert=""
-fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_ASSERT $sim_assert
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_assert" >&5
+$as_echo "$sim_assert" >&6; }
 
 
 # Check whether --enable-sim-bitsize was given.
@@ -5304,21 +5300,26 @@ else
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking default sim environment setting" >&5
+$as_echo_n "checking default sim environment setting... " >&6; }
+sim_env="0"
 # Check whether --enable-sim-env was given.
 if test "${enable_sim_env+set}" = set; then :
   enableval=$enable_sim_env; case "${enableval}" in
-  operating | os | oea)	sim_env="-DWITH_ENVIRONMENT=OPERATING_ENVIRONMENT";;
-  virtual | vea)	sim_env="-DWITH_ENVIRONMENT=VIRTUAL_ENVIRONMENT";;
-  user | uea)		sim_env="-DWITH_ENVIRONMENT=USER_ENVIRONMENT";;
-  no)			sim_env="-DWITH_ENVIRONMENT=0";;
-  *)			as_fn_error "\"Unknown value $enableval passed to --enable-sim-env\"" "$LINENO" 5; sim_env="";;
+  operating | os | oea)	sim_env="OPERATING_ENVIRONMENT";;
+  virtual | vea)	sim_env="VIRTUAL_ENVIRONMENT";;
+  user | uea)		sim_env="USER_ENVIRONMENT";;
+  no)			sim_env="0";;
+  *)			as_fn_error "Unknown value $enableval passed to --enable-sim-env" "$LINENO" 5;;
 esac
-if test x"$silent" != x"yes" && test x"$sim_env" != x""; then
-  echo "Setting env flags = $sim_env" 6>&1
 fi
-else
-  sim_env=""
-fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_ENVIRONMENT $sim_env
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_env" >&5
+$as_echo "$sim_env" >&6; }
 
 
 # Check whether --enable-sim-filter was given.
@@ -6452,19 +6453,24 @@ fi
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim stdio debug behavior" >&5
+$as_echo_n "checking for sim stdio debug behavior... " >&6; }
+sim_stdio=0
 # Check whether --enable-sim-stdio was given.
 if test "${enable_sim_stdio+set}" = set; then :
   enableval=$enable_sim_stdio; case "${enableval}" in
-  yes)	sim_stdio="-DWITH_STDIO=DO_USE_STDIO";;
-  no)	sim_stdio="-DWITH_STDIO=DONT_USE_STDIO";;
-  *)	as_fn_error "\"Unknown value $enableval passed to --enable-sim-stdio\"" "$LINENO" 5; sim_stdio="";;
+  yes)	sim_stdio="DO_USE_STDIO";;
+  no)	sim_stdio="DONT_USE_STDIO";;
+  *)	as_fn_error "Unknown value $enableval passed to --enable-sim-stdio" "$LINENO" 5;;
 esac
-if test x"$silent" != x"yes" && test x"$sim_stdio" != x""; then
-  echo "Setting stdio flags = $sim_stdio" 6>&1
 fi
-else
-  sim_stdio=""
-fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_STDIO $sim_stdio
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_stdio" >&5
+$as_echo "$sim_stdio" >&6; }
 
 
 # Check whether --enable-sim-switch was given.
@@ -6500,19 +6506,24 @@ else
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim trace settings" >&5
+$as_echo_n "checking for sim trace settings... " >&6; }
+sim_trace="1"
 # Check whether --enable-sim-trace was given.
 if test "${enable_sim_trace+set}" = set; then :
   enableval=$enable_sim_trace; case "${enableval}" in
-  yes)	sim_trace="-DWITH_TRACE=1";;
-  no)	sim_trace="-DWITH_TRACE=0";;
-  *)	as_fn_error "\"--enable-sim-trace does not take a value\"" "$LINENO" 5; sim_trace="";;
+  yes)	sim_trace="1";;
+  no)	sim_trace="0";;
+  *)	as_fn_error "--enable-sim-trace does not take a value" "$LINENO" 5;;
 esac
-if test x"$silent" != x"yes" && test x"$sim_trace" != x""; then
-  echo "Setting trace flags = $sim_trace" 6>&1
 fi
-else
-  sim_trace=""
-fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_TRACE $sim_trace
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_trace" >&5
+$as_echo "$sim_trace" >&6; }
 
 
 # Check whether --enable-sim-warnings was given.
@@ -7806,10 +7817,6 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
-
-
-
-
 
 
 
