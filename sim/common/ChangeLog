@@ -1,5 +1,16 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4: Delete --enable-sim-regparm and sim_regparm,
+	and --enable-sim-stdcall and sim_stdcall.
+	* configure: Regenerate.
+	* Make-common.in (SIM_REGPARM, SIM_STDCALL): Delete.
+	(CONFIG_CFLAGS): Delete $(SIM_REGPARM) and $(SIM_STDCALL).
+	* sim-config.h (WITH_REGPARM, WITH_STDCALL): Delete.
+	* sim-inline.h (REGPARM_MODULE, REGPARM): Delete.
+	(REGPARM_*): Delete all regparm defines and their use.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4: Delete --enable-sim-cflags and sim_cflags.
 	* Make-common.in (SIM_CFLAGS): Delete.
 	(CONFIG_CFLAGS): Delete $(SIM_CFLAGS).

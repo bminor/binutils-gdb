@@ -694,24 +694,6 @@ fi])dnl
 AC_SUBST(sim_packages)
 
 
-AC_DEFUN([SIM_AC_OPTION_REGPARM],
-[
-AC_ARG_ENABLE(sim-regparm,
-[AS_HELP_STRING([--enable-sim-regparm=nr-parm],
-		[Pass parameters in registers instead of on the stack - x86/GCC specific])],
-[case "${enableval}" in
-  0*|1*|2*|3*|4*|5*|6*|7*|8*|9*) sim_regparm="-DWITH_REGPARM=${enableval}";;
-  no)                            sim_regparm="" ;;
-  yes)                           sim_regparm="-DWITH_REGPARM=3";;
-  *)   AC_MSG_ERROR("Unknown value $enableval for --enable-sim-regparm"); sim_regparm="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_regparm" != x""; then
-  echo "Setting regparm flags = $sim_regparm" 6>&1
-fi],[sim_regparm=""])dnl
-])
-AC_SUBST(sim_regparm)
-
-
 AC_DEFUN([SIM_AC_OPTION_RESERVED_BITS],
 [
 default_sim_reserved_bits="ifelse([$1],,1,[$1])"
@@ -749,24 +731,6 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 ])
 AC_SUBST(sim_smp)
-
-
-AC_DEFUN([SIM_AC_OPTION_STDCALL],
-[
-AC_ARG_ENABLE(sim-stdcall,
-[AS_HELP_STRING([--enable-sim-stdcall=type],
-		[Use an alternative function call/return mechanism - x86/GCC specific])],
-[case "${enableval}" in
-  no)		sim_stdcall="" ;;
-  std*)		sim_stdcall="-DWITH_STDCALL=1";;
-  yes)		sim_stdcall="-DWITH_STDCALL=1";;
-  *)   AC_MSG_ERROR("Unknown value $enableval for --enable-sim-stdcall"); sim_stdcall="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_stdcall" != x""; then
-  echo "Setting function call flags = $sim_stdcall" 6>&1
-fi],[sim_stdcall=""])dnl
-])
-AC_SUBST(sim_stdcall)
 
 
 AC_DEFUN([SIM_AC_OPTION_XOR_ENDIAN],

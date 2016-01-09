@@ -603,10 +603,8 @@ SHELL
 WERROR_CFLAGS
 WARN_CFLAGS
 sim_xor_endian
-sim_stdcall
 sim_smp
 sim_reserved_bits
-sim_regparm
 sim_packages
 sim_inline
 sim_hw

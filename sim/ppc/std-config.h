@@ -453,40 +453,6 @@ extern int current_stdio;
 #endif
 
 
-/* Your compilers pass parameters in registers reserved word */
-
-#ifndef WITH_REGPARM
-#define WITH_REGPARM                   0
-#endif
-
-/* Your compilers use an alternative calling sequence reserved word */
-
-#ifndef WITH_STDCALL
-#define WITH_STDCALL                   0
-#endif
-
-#if !defined REGPARM
-#if defined(__GNUC__) && (defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__))
-#if (WITH_REGPARM && WITH_STDCALL)
-#define REGPARM __attribute__((__regparm__(WITH_REGPARM),__stdcall__))
-#else
-#if (WITH_REGPARM && !WITH_STDCALL)
-#define REGPARM __attribute__((__regparm__(WITH_REGPARM)))
-#else
-#if (!WITH_REGPARM && WITH_STDCALL)
-#define REGPARM __attribute__((__stdcall__))
-#endif
-#endif
-#endif
-#endif
-#endif
-
-#if !defined REGPARM
-#define REGPARM
-#endif
-
-
-
 /* Default prefix for static functions */
 
 #ifndef STATIC_INLINE

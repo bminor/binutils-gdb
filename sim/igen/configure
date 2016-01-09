@@ -626,10 +626,8 @@ INSTALL_PROGRAM
 WERROR_CFLAGS
 WARN_CFLAGS
 sim_xor_endian
-sim_stdcall
 sim_smp
 sim_reserved_bits
-sim_regparm
 sim_packages
 sim_inline
 sim_hw
@@ -3725,14 +3723,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 sim_inline="-DDEFAULT_INLINE=0"
-
-
-
-
-
-
-
-
 
 
 

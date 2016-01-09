@@ -91,11 +91,9 @@ SIM_HW_OBJS = @sim_hw_objs@
 SIM_HW = @sim_hw@
 SIM_INLINE = @sim_inline@
 SIM_PACKAGES = @sim_packages@
-SIM_REGPARM = @sim_regparm@
 SIM_RESERVED_BITS = @sim_reserved_bits@
 SIM_SCACHE = @sim_scache@
 SIM_SMP = @sim_smp@
-SIM_STDCALL = @sim_stdcall@
 SIM_XOR_ENDIAN = @sim_xor_endian@
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
@@ -240,11 +238,9 @@ CONFIG_CFLAGS = \
 	$(SIM_HW_CFLAGS) \
 	$(SIM_INLINE) \
 	$(SIM_PACKAGES) \
-	$(SIM_REGPARM) \
 	$(SIM_RESERVED_BITS) \
 	$(SIM_SCACHE) \
 	$(SIM_SMP) \
-	$(SIM_STDCALL) \
 	$(SIM_WARN_CFLAGS) \
 	$(SIM_WERROR_CFLAGS) \
 	$(SIM_XOR_ENDIAN) \

@@ -1,6 +1,10 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
 	* Makefile.in (SIM_CFLAGS): Rename to ...
 	(SIM_EXTRA_CFLAGS): ... this.
 

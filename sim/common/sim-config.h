@@ -355,20 +355,6 @@ extern int current_stdio;
 
 
 
-/* Specify that configured calls pass parameters in registers when the
-   convention is that they are placed on the stack */
-
-#ifndef WITH_REGPARM
-#define WITH_REGPARM                   0
-#endif
-
-/* Specify that configured calls use an alternative calling mechanism */
-
-#ifndef WITH_STDCALL
-#define WITH_STDCALL                   0
-#endif
-
-
 /* Set the default state configuration, before parsing argv.  */
 
 extern void sim_config_default (SIM_DESC sd);

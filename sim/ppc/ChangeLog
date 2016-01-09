@@ -1,5 +1,17 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Delete --enable-sim-regparm and sim_regparm,
+	and --enable-sim-stdcall and sim_stdcall.
+	* configure: Regenerate.
+	* Makefile.in (REGPARM_CFLAGS, STDCALL_CFLAGS): Delete.
+	(CONFIG_CFLAGS): Delete $(REGPARM_CFLAGS) and $(STDCALL_CFLAGS).
+	* inline.h: Delete REGPARM everywhere.
+	* options.c (print_options): Delete WITH_REGPARM and
+	WITH_STDCALL.
+	* std-config.h (WITH_REGPARM, WITH_STDCALL, REGPARM): Delete.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Delete --enable-sim-cflags and sim_cflags.
 	* configure: Regenerate.
 	* INSTALL: Delete all mention of --enable-sim-cflags.

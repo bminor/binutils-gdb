@@ -683,10 +683,8 @@ CC
 WERROR_CFLAGS
 WARN_CFLAGS
 sim_xor_endian
-sim_stdcall
 sim_smp
 sim_reserved_bits
-sim_regparm
 sim_packages
 sim_inline
 sim_hw
@@ -3992,14 +3990,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 sim_inline="-DDEFAULT_INLINE=0"
-
-
-
-
-
-
-
-
 
 
 
@@ -12835,7 +12825,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12838 "configure"
+#line 12828 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12941,7 +12931,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12944 "configure"
+#line 12934 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

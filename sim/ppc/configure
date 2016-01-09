@@ -671,10 +671,8 @@ INSTALL_PROGRAM
 WERROR_CFLAGS
 WARN_CFLAGS
 sim_xor_endian
-sim_stdcall
 sim_smp
 sim_reserved_bits
-sim_regparm
 sim_packages
 sim_inline
 sim_hw
@@ -752,10 +750,8 @@ enable_sim_model_issue
 enable_sim_monitor
 enable_sim_opcode
 enable_sim_packages
-enable_sim_regparm
 enable_sim_reserved_bits
 enable_sim_smp
-enable_sim_stdcall
 enable_sim_stdio
 enable_sim_switch
 enable_sim_timebase
@@ -1417,10 +1413,8 @@ Optional Features:
   --enable-sim-monitor=mon		Specify whether to enable monitoring events.
   --enable-sim-opcode=which		Override default opcode lookup.
   --enable-sim-packages=list		Specify the packages to be included in the build.
-  --enable-sim-regparm=nr-parm		Pass parameters in registers instead of on the stack - x86/GCC specific.
   --enable-sim-reserved-bits		Specify whether to check reserved bits in instruction.
   --enable-sim-smp=n			Specify number of processors to configure for.
-  --enable-sim-stdcall=type		Use an alternative function call/return mechanism - x86/GCC specific.
   --enable-sim-stdio			Specify whether to use stdio for console input/output.
   --enable-sim-switch			Use a switch instead of a table for instruction call.
   --enable-sim-timebase			Specify whether the PPC timebase is supported.
@@ -4091,14 +4085,6 @@ sim_inline="-DDEFAULT_INLINE=0"
 
 
 
-
-
-
-
-
-
-
-
 # intl sister-directory configuration rules.
 #
 
@@ -6439,22 +6425,6 @@ fi
 fi
 
 
-# Check whether --enable-sim-regparm was given.
-if test "${enable_sim_regparm+set}" = set; then :
-  enableval=$enable_sim_regparm; case "${enableval}" in
-  0*|1*|2*|3*|4*|5*|6*|7*|8*|9*) sim_regparm="-DWITH_REGPARM=${enableval}";;
-  no)                            sim_regparm="" ;;
-  yes)                           sim_regparm="-DWITH_REGPARM=3";;
-  *)   as_fn_error "\"Unknown value $enableval for --enable-sim-regparm\"" "$LINENO" 5; sim_regparm="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_regparm" != x""; then
-  echo "Setting regparm flags = $sim_regparm" 6>&1
-fi
-else
-  sim_regparm=""
-fi
-
-
 # Check whether --enable-sim-reserved-bits was given.
 if test "${enable_sim_reserved_bits+set}" = set; then :
   enableval=$enable_sim_reserved_bits; case "${enableval}" in
@@ -6485,22 +6455,6 @@ else
 if test x"$silent" != x"yes"; then
   echo "Setting smp flags = $sim_smp" 6>&1
 fi
-fi
-
-
-# Check whether --enable-sim-stdcall was given.
-if test "${enable_sim_stdcall+set}" = set; then :
-  enableval=$enable_sim_stdcall; case "${enableval}" in
-  no)		sim_stdcall="" ;;
-  std*)		sim_stdcall="-DWITH_STDCALL=1";;
-  yes)		sim_stdcall="-DWITH_STDCALL=1";;
-  *)   as_fn_error "\"Unknown value $enableval for --enable-sim-stdcall\"" "$LINENO" 5; sim_stdcall="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_stdcall" != x""; then
-  echo "Setting function call flags = $sim_stdcall" 6>&1
-fi
-else
-  sim_stdcall=""
 fi
 
 
@@ -7858,8 +7812,6 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
-
-
 
 
 
