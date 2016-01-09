@@ -1,5 +1,12 @@
 2016-01-09  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Delete sim_common check and the
+	AC_CONFIG_SUBDIRS(common) call.
+	* configure: Regenerate.
+	* configure.tgt (sim_common): Delete the variable.
+
+2016-01-09  Mike Frysinger  <vapier@gentoo.org>
+
 	* .gitignore: Delete /common/cconfig.h entry.
 
 2016-01-05  Nick Clifton  <nickc@redhat.com>
