@@ -223,6 +223,8 @@ if test x"$silent" != x"yes" && test x"$sim_profile" != x""; then
 fi],[sim_profile="-DPROFILE=1 -DWITH_PROFILE=-1"])dnl
 AC_SUBST(sim_profile)
 
+SIM_AC_OPTION_INLINE
+
 ACX_PKGVERSION([SIM])
 ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
 AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
@@ -619,11 +621,10 @@ AC_SUBST(sim_hw)
 
 dnl --enable-sim-inline is for users that wish to ramp up the simulator's
 dnl performance by inlining functions.
-dnl Guarantee that unconfigured simulators do not do any inlining
-sim_inline="-DDEFAULT_INLINE=0"
+dnl Default sims to no inlining.
 AC_DEFUN([SIM_AC_OPTION_INLINE],
 [
-default_sim_inline="ifelse([$1],,,-DDEFAULT_INLINE=[$1])"
+sim_inline="-DDEFAULT_INLINE=m4_ifblank([$1],[0],[$1])"
 AC_ARG_ENABLE(sim-inline,
 [AS_HELP_STRING([--enable-sim-inline=inlines],
 		[Specify which functions should be inlined])],
@@ -650,18 +651,6 @@ case "$enableval" in
 esac
 if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
   echo "Setting inline flags = $sim_inline" 6>&1
-fi],[
-if test "x$cross_compiling" = "xno"; then
-  if test x"$GCC" != "x" -a x"${default_sim_inline}" != "x" ; then
-    sim_inline="${default_sim_inline}"
-    if test x"$silent" != x"yes"; then
-      echo "Setting inline flags = $sim_inline" 6>&1
-    fi
-  else
-    sim_inline=""
-  fi
-else
-  sim_inline="-DDEFAULT_INLINE=0"
 fi])dnl
 ])
 AC_SUBST(sim_inline)

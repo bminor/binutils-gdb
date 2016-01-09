@@ -752,6 +752,7 @@ enable_sim_debug
 enable_sim_stdio
 enable_sim_trace
 enable_sim_profile
+enable_sim_inline
 with_pkgversion
 with_bugurl
 enable_sim_endian
@@ -1399,6 +1400,8 @@ Optional Features:
   --enable-sim-trace=opts Enable tracing of simulated programs
   --enable-sim-profile=opts
                           Enable profiling flags
+  --enable-sim-inline=inlines
+                          Specify which functions should be inlined
   --enable-sim-endian=endian
                           Specify target byte endian orientation
   --enable-sim-alignment=align
@@ -3996,7 +3999,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-sim_inline="-DDEFAULT_INLINE=0"
 
 
 
@@ -12832,7 +12834,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12835 "configure"
+#line 12837 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12938,7 +12940,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12941 "configure"
+#line 12943 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13288,6 +13290,37 @@ if test x"$silent" != x"yes" && test x"$sim_profile" != x""; then
 fi
 else
   sim_profile="-DPROFILE=1 -DWITH_PROFILE=-1"
+fi
+
+
+
+sim_inline="-DDEFAULT_INLINE=0"
+# Check whether --enable-sim-inline was given.
+if test "${enable_sim_inline+set}" = set; then :
+  enableval=$enable_sim_inline; sim_inline=""
+case "$enableval" in
+  no)		sim_inline="-DDEFAULT_INLINE=0";;
+  0)		sim_inline="-DDEFAULT_INLINE=0";;
+  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_C_INLINE";;
+  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
+  *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+       new_flag=""
+       case "$x" in
+	 *_INLINE=*)	new_flag="-D$x";;
+	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
+	 *_INLINE)	new_flag="-D$x=ALL_C_INLINE";;
+	 *)		new_flag="-D$x""_INLINE=ALL_C_INLINE";;
+       esac
+       if test x"$sim_inline" = x""; then
+	 sim_inline="$new_flag"
+       else
+	 sim_inline="$sim_inline $new_flag"
+       fi
+     done;;
+esac
+if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
+  echo "Setting inline flags = $sim_inline" 6>&1
+fi
 fi
 
 

@@ -17,7 +17,6 @@ SIM_AC_OPTION_HARDWARE(yes,,rv cris cris_900000xx)
 # The default model shouldn't matter as long as there's a BFD.
 SIM_AC_OPTION_DEFAULT_MODEL(crisv32)
 SIM_AC_OPTION_ENVIRONMENT
-SIM_AC_OPTION_INLINE()
 SIM_AC_OPTION_CGEN_MAINT
 
 SIM_AC_OUTPUT

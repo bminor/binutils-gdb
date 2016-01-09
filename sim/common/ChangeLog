@@ -1,5 +1,11 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (SIM_AC_COMMON): Call SIM_AC_OPTION_INLINE.
+	(SIM_AC_OPTION_INLINE): Rename default_sim_inline to sim_inline
+	and always set -DDEFAULT_INLINE.  Delete AC_ARG_ENABLE 4th arg.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4: Delete --enable-sim-regparm and sim_regparm,
 	and --enable-sim-stdcall and sim_stdcall.
 	* configure: Regenerate.
