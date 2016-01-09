@@ -133,21 +133,6 @@ dnl --enable-maintainer-mode.
 AM_MAINTAINER_MODE
 
 
-AC_ARG_ENABLE(sim-cflags,
-[AS_HELP_STRING([--enable-sim-cflags=opts],
-		[Extra CFLAGS for use in building simulator])],
-[case "${enableval}" in
-  yes)	 sim_cflags="-O2 -fomit-frame-pointer";;
-  trace) AC_MSG_ERROR("Please use --enable-sim-debug instead."); sim_cflags="";;
-  no)	 sim_cflags="";;
-  *)	 sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_cflags" != x""; then
-  echo "Setting sim cflags = $sim_cflags" 6>&1
-fi],[sim_cflags=""])dnl
-AC_SUBST(sim_cflags)
-
-
 dnl --enable-sim-debug is for developers of the simulator
 dnl the allowable values are work-in-progress
 AC_ARG_ENABLE(sim-debug,

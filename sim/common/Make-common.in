@@ -75,7 +75,6 @@ CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 CXXFLAGS = @CXXFLAGS@
 LDFLAGS = @LDFLAGS@
-SIM_CFLAGS = @sim_cflags@
 SIM_DEBUG = @sim_debug@
 SIM_TRACE = @sim_trace@
 SIM_PROFILE = @sim_profile@
@@ -228,7 +227,6 @@ CGEN_INCLUDE_DEPS = \
 
 CONFIG_CFLAGS = \
 	@DEFS@ \
-	$(SIM_CFLAGS) \
 	$(SIM_DEBUG) \
 	$(SIM_DEFAULT_MODEL) \
 	$(SIM_TRACE) \

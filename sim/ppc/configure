@@ -620,7 +620,6 @@ sim_opcode
 sim_config
 sim_line_nr
 sim_warnings
-sim_cflags
 RANLIB
 AR
 HDEFINES
@@ -733,7 +732,6 @@ enable_option_checking
 enable_sim_alignment
 enable_sim_assert
 enable_sim_bitsize
-enable_sim_cflags
 enable_sim_config
 enable_sim_decode_mechanism
 enable_sim_default_model
@@ -1399,7 +1397,6 @@ Optional Features:
   --enable-sim-alignment=align		Specify strict or nonstrict alignment.
   --enable-sim-assert			Specify whether to perform random assertions.
   --enable-sim-bitsize=n		Specify target bitsize (32 or 64).
-  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator
   --enable-sim-config=file		Override default config file
   --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.
   --enable-sim-default-model=which	Specify default PowerPC to model.
@@ -5231,21 +5228,6 @@ else
 fi
 
 
-# Check whether --enable-sim-cflags was given.
-if test "${enable_sim_cflags+set}" = set; then :
-  enableval=$enable_sim_cflags; case "${enableval}" in
-  yes)	sim_cflags="-O2 -fomit-frame-pointer";;
-  no)	sim_cflags="";;
-  *)	sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_cflags" != x""; then
-  echo "Setting sim cflags = $sim_cflags" 6>&1
-fi
-else
-  sim_cflags=""
-fi
-
-
 # Check whether --enable-sim-config was given.
 if test "${enable_sim_config+set}" = set; then :
   enableval=$enable_sim_config; case "${enableval}" in
@@ -7876,7 +7858,6 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
-
 
 
 

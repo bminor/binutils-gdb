@@ -56,18 +56,6 @@ if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
 fi],[sim_bitsize=""])dnl
 
 
-AC_ARG_ENABLE(sim-cflags,
-[  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator],
-[case "${enableval}" in
-  yes)	sim_cflags="-O2 -fomit-frame-pointer";;
-  no)	sim_cflags="";;
-  *)	sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_cflags" != x""; then
-  echo "Setting sim cflags = $sim_cflags" 6>&1
-fi],[sim_cflags=""])dnl
-
-
 AC_ARG_ENABLE(sim-config,
 [  --enable-sim-config=file		Override default config file],
 [case "${enableval}" in
@@ -874,7 +862,6 @@ AC_SUBST(HDEFINES)
 AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
-AC_SUBST(sim_cflags)
 AC_SUBST(sim_warnings)
 AC_SUBST(sim_line_nr)
 AC_SUBST(sim_config)

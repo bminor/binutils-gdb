@@ -1,3 +1,10 @@
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Delete --enable-sim-cflags and sim_cflags.
+	* Make-common.in (SIM_CFLAGS): Delete.
+	(CONFIG_CFLAGS): Delete $(SIM_CFLAGS).
+	* Makefile.in: Likewise.
+
 2016-01-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Change SIM_AC_COMMON to AC_PROG_CC.  Drop 2nd arg

@@ -1,3 +1,12 @@
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete --enable-sim-cflags and sim_cflags.
+	* configure: Regenerate.
+	* INSTALL: Delete all mention of --enable-sim-cflags.
+	* Makefile.in (SIM_CFLAGS): Delete.
+	(STD_CFLAGS, NOWARN_CFLAGS): Delete $(SIM_CFLAGS).
+	(psim): Likewise.
+
 2016-01-06  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim_calls.c (sim_open): Mark argv const.

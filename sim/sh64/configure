@@ -611,7 +611,6 @@ sim_profile
 sim_trace
 sim_stdio
 sim_debug
-sim_cflags
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
@@ -754,7 +753,6 @@ enable_fast_install
 with_gnu_ld
 enable_libtool_lock
 enable_maintainer_mode
-enable_sim_cflags
 enable_sim_debug
 enable_sim_stdio
 enable_sim_trace
@@ -1405,8 +1403,6 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
-  --enable-sim-cflags=opts
-                          Extra CFLAGS for use in building simulator
   --enable-sim-debug=opts Enable debugging flags (for developers of the sim
                           itself)
   --enable-sim-stdio      Specify whether to use stdio for console
@@ -12867,7 +12863,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12870 "configure"
+#line 12866 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12973,7 +12969,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12976 "configure"
+#line 12972 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13238,23 +13234,6 @@ fi
 
   MAINT=$MAINTAINER_MODE_TRUE
 
-
-
-
-# Check whether --enable-sim-cflags was given.
-if test "${enable_sim_cflags+set}" = set; then :
-  enableval=$enable_sim_cflags; case "${enableval}" in
-  yes)	 sim_cflags="-O2 -fomit-frame-pointer";;
-  trace) as_fn_error "\"Please use --enable-sim-debug instead.\"" "$LINENO" 5; sim_cflags="";;
-  no)	 sim_cflags="";;
-  *)	 sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_cflags" != x""; then
-  echo "Setting sim cflags = $sim_cflags" 6>&1
-fi
-else
-  sim_cflags=""
-fi
 
 
 

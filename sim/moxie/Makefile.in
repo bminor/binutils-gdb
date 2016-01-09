@@ -26,7 +26,7 @@ SIM_OBJS = \
 
 SIM_EXTRA_LIBS = -lm -lz
 SIM_EXTRA_INSTALL = install-dtb
-SIM_CFLAGS = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
+SIM_EXTRA_CFLAGS = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
 
 ## COMMON_POST_CONFIG_FRAG
 
