@@ -1,5 +1,9 @@
 2016-01-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* sim-fpu.c: Minor comment fixes throughout.
+
+2016-01-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* sim-fpu.c (print_bits): Minor reformatting (no code change).
 	(sim_fpu_map): Likewise.
 
