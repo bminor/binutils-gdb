@@ -75,7 +75,7 @@ all:
 # This file is shipped with distributions so we build in the source dir.
 # Use `make headers' to rebuild.
 # Note: If gdb releases begin to contain target header files (not a good idea,
-# but if they did ...), targ-vals.def coud be generated at build time.
+# but if they did ...), nltvals.def coud be generated at build time.
 # An alternative is to slurp in the tables at runtime.
 .PHONY: headers
 headers:

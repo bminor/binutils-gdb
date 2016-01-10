@@ -236,17 +236,6 @@ AC_TYPE_SIGNAL
 dnl Detect exe extension
 AC_EXEEXT
 
-dnl These are available to append to as desired.
-sim_link_files=
-sim_link_links=
-
-# targ-vals.def points to the libc macro description file.
-case "${target}" in
-*-*-*) TARG_VALS_DEF=../common/nltvals.def ;;
-esac
-sim_link_files="${sim_link_files} ${TARG_VALS_DEF}"
-sim_link_links="${sim_link_links} targ-vals.def"
-
 ]) dnl End of SIM_AC_COMMON
 
 
@@ -838,7 +827,6 @@ dnl the target's fragment at the appropriate points.
 
 AC_DEFUN([SIM_AC_OUTPUT],
 [
-AC_LINK_FILES($sim_link_files, $sim_link_links)
 dnl Make @cgen_breaks@ non-null only if the sim uses CGEN.
 cgen_breaks=""
 if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then

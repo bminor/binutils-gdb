@@ -1,5 +1,9 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_SMP): Delete call.
 	* configure: Regenerate.
 

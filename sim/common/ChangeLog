@@ -1,5 +1,16 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (SIM_AC_COMMON): Delete sim_link_files and
+	sim_link_links.
+	(SIM_AC_OUTPUT): Delete AC_LINK_FILES call.
+	* gentmap.c: Change targ-vals.def include to nltvals.def.
+	* Make-common.in (gentmap): Change targ-vals.def to
+	$(srccom)/nltvals.def.
+	(distclean): Delete rm -f targ-vals.def.
+	* Makefile.in: Update comment.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4 (SIM_AC_COMMON): Call SIM_AC_OPTION_INLINE.
 	(SIM_AC_OPTION_INLINE): Rename default_sim_inline to sim_inline
 	and always set -DDEFAULT_INLINE.  Delete AC_ARG_ENABLE 4th arg.

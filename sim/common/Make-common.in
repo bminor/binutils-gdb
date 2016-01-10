@@ -293,7 +293,7 @@ run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
 # devo/libremote because this directory would contain more than just
 # a library).
 
-gentmap: Makefile $(srccom)/gentmap.c targ-vals.def
+gentmap: Makefile $(srccom)/gentmap.c $(srccom)/nltvals.def
 	$(CC_FOR_BUILD) $(srccom)/gentmap.c -o gentmap $(BUILD_CFLAGS) $(NL_TARGET)
 
 targ-vals.h targ-map.c: stamp-tvals
@@ -526,7 +526,6 @@ distclean mostlyclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
 	rm -f TAGS
 	rm -f Makefile config.cache config.log config.status .gdbinit
 	rm -f config.h stamp-h
-	rm -f targ-vals.def
 
 .c.o:
 	$(COMPILE) $<
