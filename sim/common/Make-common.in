@@ -90,7 +90,6 @@ SIM_HW_CFLAGS = @sim_hw_cflags@
 SIM_HW_OBJS = @sim_hw_objs@
 SIM_HW = @sim_hw@
 SIM_INLINE = @sim_inline@
-SIM_PACKAGES = @sim_packages@
 SIM_RESERVED_BITS = @sim_reserved_bits@
 SIM_SCACHE = @sim_scache@
 SIM_SMP = @sim_smp@
@@ -237,7 +236,6 @@ CONFIG_CFLAGS = \
 	$(SIM_FLOAT) \
 	$(SIM_HW_CFLAGS) \
 	$(SIM_INLINE) \
-	$(SIM_PACKAGES) \
 	$(SIM_RESERVED_BITS) \
 	$(SIM_SCACHE) \
 	$(SIM_SMP) \

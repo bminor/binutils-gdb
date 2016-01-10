@@ -698,7 +698,6 @@ WARN_CFLAGS
 sim_xor_endian
 sim_smp
 sim_reserved_bits
-sim_packages
 sim_inline
 sim_hw
 sim_hw_objs
@@ -4000,10 +3999,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # ZW_CREATE_DEPDIR
 # ----------------
 # As AM_SET_DEPDIR, but also create the directory at config.status time.
-
-
-
-
 
 
 
@@ -12881,7 +12876,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12884 "configure"
+#line 12879 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12987,7 +12982,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12990 "configure"
+#line 12985 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

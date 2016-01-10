@@ -605,7 +605,6 @@ WARN_CFLAGS
 sim_xor_endian
 sim_smp
 sim_reserved_bits
-sim_packages
 sim_inline
 sim_hw
 sim_hw_objs

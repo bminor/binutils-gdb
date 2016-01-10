@@ -1,5 +1,12 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (SIM_AC_OPTION_PACKAGES): Delete.
+	* configure: Regenerate.
+	* Make-common.in (SIM_PACKAGES): Delete.
+	(CONFIG_CFLAGS): Delete $(SIM_PACKAGES).
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4 (SIM_AC_COMMON): Call SIM_AC_OPTION_ENVIRONMENT.
 
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>

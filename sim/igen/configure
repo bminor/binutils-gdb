@@ -628,7 +628,6 @@ WARN_CFLAGS
 sim_xor_endian
 sim_smp
 sim_reserved_bits
-sim_packages
 sim_inline
 sim_hw
 sim_hw_objs
@@ -3676,10 +3675,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # ZW_CREATE_DEPDIR
 # ----------------
 # As AM_SET_DEPDIR, but also create the directory at config.status time.
-
-
-
-
 
 
 

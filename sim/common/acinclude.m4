@@ -647,33 +647,6 @@ fi])dnl
 AC_SUBST(sim_inline)
 
 
-AC_DEFUN([SIM_AC_OPTION_PACKAGES],
-[
-AC_ARG_ENABLE(sim-packages,
-[AS_HELP_STRING([--enable-sim-packages=list],
-		[Specify the packages to be included in the build])],
-[packages=disklabel
-case "${enableval}" in
-  yes)	;;
-  no)	AC_MSG_ERROR("List of packages must be specified for --enable-sim-packages"); packages="";;
-  ,*)   packages="${packages}${enableval}";;
-  *,)   packages="${enableval}${packages}";;
-  *)	packages="${enableval}"'';;
-esac
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes" && test x"$packages" != x""; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi],[packages=disklabel
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes"; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi])dnl
-])
-AC_SUBST(sim_packages)
-
-
 AC_DEFUN([SIM_AC_OPTION_RESERVED_BITS],
 [
 default_sim_reserved_bits="ifelse([$1],,1,[$1])"
