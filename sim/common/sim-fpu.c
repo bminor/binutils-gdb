@@ -65,7 +65,8 @@ print_bits (unsigned64 x,
 	print (arg, "0");
       bit >>= 1;
 
-      if (digits > 0) digits--;
+      if (digits > 0)
+	digits--;
       i = (i + 1) % 4;
     }
 }
@@ -74,7 +75,8 @@ print_bits (unsigned64 x,
 
 /* Quick and dirty conversion between a host double and host 64bit int */
 
-typedef union {
+typedef union
+{
   double d;
   unsigned64 i;
 } sim_fpu_map;
