@@ -754,12 +754,12 @@ enable_sim_stdio
 enable_sim_trace
 enable_sim_profile
 enable_sim_assert
+enable_sim_environment
 enable_sim_inline
 with_pkgversion
 with_bugurl
 enable_sim_endian
 enable_sim_alignment
-enable_sim_environment
 enable_werror
 enable_build_warnings
 enable_sim_build_warnings
@@ -1407,6 +1407,9 @@ Optional Features:
   --enable-sim-profile=opts
                           Enable profiling flags
   --enable-sim-assert     Specify whether to perform random assertions
+  --enable-sim-environment=environment
+                          Specify mixed, user, virtual or operating
+                          environment
   --enable-sim-inline=inlines
                           Specify which functions should be inlined
   --enable-sim-endian=endian
@@ -1414,9 +1417,6 @@ Optional Features:
   --enable-sim-alignment=align
                           Specify strict, nonstrict or forced alignment of
                           memory accesses
-  --enable-sim-environment=environment
-                          Specify mixed, user, virtual or operating
-                          environment
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-sim-build-warnings
@@ -13324,6 +13324,24 @@ else
 fi
 
 
+# Check whether --enable-sim-environment was given.
+if test "${enable_sim_environment+set}" = set; then :
+  enableval=$enable_sim_environment; case "${enableval}" in
+  all | ALL)             sim_environment="-DWITH_ENVIRONMENT=ALL_ENVIRONMENT";;
+  user | USER)           sim_environment="-DWITH_ENVIRONMENT=USER_ENVIRONMENT";;
+  virtual | VIRTUAL)     sim_environment="-DWITH_ENVIRONMENT=VIRTUAL_ENVIRONMENT";;
+  operating | OPERATING) sim_environment="-DWITH_ENVIRONMENT=OPERATING_ENVIRONMENT";;
+  *)   as_fn_error "\"Unknown value $enableval passed to --enable-sim-environment\"" "$LINENO" 5;
+       sim_environment="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_environment" != x""; then
+  echo "Setting sim environment = $sim_environment" 6>&1
+fi
+else
+  sim_environment="-DWITH_ENVIRONMENT=ALL_ENVIRONMENT"
+fi
+
+
 sim_inline="-DDEFAULT_INLINE=0"
 # Check whether --enable-sim-inline was given.
 if test "${enable_sim_inline+set}" = set; then :
@@ -13630,24 +13648,6 @@ else
     sim_alignment=
   fi
 fi
-fi
-
-
-# Check whether --enable-sim-environment was given.
-if test "${enable_sim_environment+set}" = set; then :
-  enableval=$enable_sim_environment; case "${enableval}" in
-  all | ALL)             sim_environment="-DWITH_ENVIRONMENT=ALL_ENVIRONMENT";;
-  user | USER)           sim_environment="-DWITH_ENVIRONMENT=USER_ENVIRONMENT";;
-  virtual | VIRTUAL)     sim_environment="-DWITH_ENVIRONMENT=VIRTUAL_ENVIRONMENT";;
-  operating | OPERATING) sim_environment="-DWITH_ENVIRONMENT=OPERATING_ENVIRONMENT";;
-  *)   as_fn_error "\"Unknown value $enableval passed to --enable-sim-environment\"" "$LINENO" 5;
-       sim_environment="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_environment" != x""; then
-  echo "Setting sim environment = $sim_environment" 6>&1
-fi
-else
-  sim_environment="-DWITH_ENVIRONMENT=ALL_ENVIRONMENT"
 fi
 
 
