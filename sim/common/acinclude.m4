@@ -223,6 +223,7 @@ if test x"$silent" != x"yes" && test x"$sim_profile" != x""; then
 fi],[sim_profile="-DPROFILE=1 -DWITH_PROFILE=-1"])dnl
 AC_SUBST(sim_profile)
 
+SIM_AC_OPTION_ASSERT
 SIM_AC_OPTION_INLINE
 
 ACX_PKGVERSION([SIM])

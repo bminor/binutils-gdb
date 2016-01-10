@@ -1,5 +1,9 @@
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (SIM_AC_COMMON): Call SIM_AC_OPTION_ASSERT.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4 (SIM_AC_COMMON): Delete sim_link_files and
 	sim_link_links.
 	(SIM_AC_OUTPUT): Delete AC_LINK_FILES call.
