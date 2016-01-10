@@ -776,7 +776,6 @@ enable_sim_reserved_bits
 enable_sim_endian
 enable_sim_bitsize
 enable_sim_float
-enable_sim_smp
 enable_sim_hardware
 with_x
 '
@@ -1445,8 +1444,6 @@ Optional Features:
   --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
   --enable-sim-float      Specify that the target processor has floating point
                           hardware
-  --enable-sim-smp=n      Specify number of processors to configure for
-                          (default ${default_sim_smp})
   --enable-sim-hardware=LIST
                           Specify the hardware to be included in the build.
 
@@ -12878,7 +12875,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12881 "configure"
+#line 12878 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12984,7 +12981,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12987 "configure"
+#line 12984 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13836,34 +13833,6 @@ if test x"${default_sim_float_bitsize}" != x""; then
   sim_float="$sim_float -DWITH_TARGET_FLOATING_POINT_BITSIZE=${default_sim_float_bitsize}"
 fi
 
-fi
-
-
-
-
-#
-# Select the level of SMP support
-#
-case "${target}" in
-  *)                    mips_smp=0 ;;
-esac
-
-default_sim_smp="$mips_smp"
-# Check whether --enable-sim-smp was given.
-if test "${enable_sim_smp+set}" = set; then :
-  enableval=$enable_sim_smp; case "${enableval}" in
-  yes)	sim_smp="-DWITH_SMP=5" ; sim_igen_smp="-N 5";;
-  no)	sim_smp="-DWITH_SMP=0" ; sim_igen_smp="-N 0";;
-  *)	sim_smp="-DWITH_SMP=$enableval" ; sim_igen_smp="-N $enableval";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_smp" != x""; then
-  echo "Setting smp flags = $sim_smp" 6>&1
-fi
-else
-  sim_smp="-DWITH_SMP=${default_sim_smp}" ; sim_igen_smp="-N ${default_sim_smp}"
-if test x"$silent" != x"yes"; then
-  echo "Setting smp flags = $sim_smp" 6>&1
-fi
 fi
 
 

@@ -87,16 +87,6 @@ SIM_AC_OPTION_FLOAT($mips_fpu,$mips_fpu_bitsize)
 
 
 #
-# Select the level of SMP support
-#
-case "${target}" in
-  *)                    mips_smp=0 ;;
-esac
-SIM_AC_OPTION_SMP($mips_smp)
-
-
-
-#
 # Select the IGEN architecture
 #
 sim_gen=IGEN
