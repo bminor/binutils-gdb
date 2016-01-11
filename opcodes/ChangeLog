@@ -1,3 +1,11 @@
+2016-01-11  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-opc.c <xscmpnedp>: Delete.
+	<xvcmpnedp>: Likewise.
+	<xvcmpnedp.>: Likewise.
+	<xvcmpnesp>: Likewise.
+	<xvcmpnesp.>: Likewise.
+
 2016-01-08  Andreas Schwab  <schwab@linux-m68k.org>
 
 	PR gas/13050

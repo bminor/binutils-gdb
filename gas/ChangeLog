@@ -1,3 +1,11 @@
+2016-01-11  Peter Bergner <bergner@vnet.ibm.com>
+
+	* testsuite/gas/ppc/power9.d <xscmpnedp, xvcmpnedp, xvcmpnedp.,
+	xvcmpnesp, xvcmpnesp.>: Delete tests.
+	* testsuite/gas/ppc/power9.s: Likewise.
+	* testsuite/gas/ppc/vsx3.d: Likewise.
+	* testsuite/gas/ppc/vsx3.s: Likewise.
+
 2016-01-08  Andreas Schwab  <schwab@linux-m68k.org>
 
 	PR gas/13050
