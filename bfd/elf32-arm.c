@@ -15372,6 +15372,8 @@ elf32_arm_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
       return reloc_class_plt;
     case R_ARM_COPY:
       return reloc_class_copy;
+    case R_ARM_IRELATIVE:
+      return reloc_class_ifunc;
     default:
       return reloc_class_normal;
     }

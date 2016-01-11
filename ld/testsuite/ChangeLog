@@ -1,3 +1,17 @@
+2016-01-11  Jiong Wang  <jiong.wang@arm.com>
+
+	Apply from master
+
+	2016-01-08  Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/19368
+	* testsuite/ld-arm/ifunc-3.rd: Update expected result.
+	* testsuite/ld-arm/ifunc-4.rd: Likewise.
+	* testsuite/ld-arm/ifunc-9.rd: Likewise.
+	* testsuite/ld-arm/ifunc-10.rd: Likewise.
+	* testsuite/ld-arm/ifunc-12.rd: Likewise.
+	* testsuite/ld-arm/ifunc-13.rd: Likewise.
+
 2015-12-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/i386.exp: Run mov2a and mov2b.
