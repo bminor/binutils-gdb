@@ -135,17 +135,8 @@ add_inferior_silent (int pid)
   inf->control.stop_soon = NO_STOP_QUIETLY;
 
   inf->num = ++highest_inferior_num;
-
-  if (inferior_list == NULL)
-    inferior_list = inf;
-  else
-    {
-      struct inferior *last;
-
-      for (last = inferior_list; last->next != NULL; last = last->next)
-	;
-      last->next = inf;
-    }
+  inf->next = inferior_list;
+  inferior_list = inf;
 
   inf->environment = make_environ ();
   init_environ (inf->environment);

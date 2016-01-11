@@ -226,6 +226,8 @@ proc test_value_in_inferior {} {
   global has_argv0
   set test "verify dereferenced value"
   if { $has_argv0 } {
+    gdb_test_no_output "set print elements unlimited" ""
+    gdb_test_no_output "set print repeats unlimited" ""
     gdb_test "python print (arg0)" "0x.*$testfile\"" $test
   } else {
     unsupported $test

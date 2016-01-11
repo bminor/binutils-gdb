@@ -230,10 +230,10 @@ with_test_prefix "is_valid" {
 	"check inferior validity 3"
 
     gdb_test_no_output "remove-inferiors 2" "remove-inferiors 3"
-    gdb_test "python print (inf_list\[0\].is_valid())" "True" \
+    gdb_test "python print (inf_list\[0\].is_valid())" "False" \
 	"check inferior validity 4"
 
-    gdb_test "python print (inf_list\[1\].is_valid())" "False" \
+    gdb_test "python print (inf_list\[1\].is_valid())" "True" \
 	"check inferior validity 5"
 }
 

@@ -1,3 +1,11 @@
+2016-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Set print elements
+	and repeats to unlimited.
+	* gdb.python/py-value.exp: Likewise.
+	* lib/gdb.exp (gdb_has_argv0): Save and temporarily set print elements
+	and repeats to unlimited.
+
 2016-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.multi/goodbye.c: Fix compilation warnings by adding return types

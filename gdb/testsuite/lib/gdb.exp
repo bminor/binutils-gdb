@@ -4896,24 +4896,44 @@ gdb_caching_proc gdb_has_argv0 {
 	    }
 	}
 
+	set old_elements "200"
+	set test "show print elements"
+	gdb_test_multiple $test $test {
+	    -re "Limit on string chars or array elements to print is (\[^\r\n\]+)\\.\r\n$gdb_prompt $" {
+		set old_elements $expect_out(1,string)
+	    }
+	}
+	set old_repeats "200"
+	set test "show print repeats"
+	gdb_test_multiple $test $test {
+	    -re "Threshold for repeated print elements is (\[^\r\n\]+)\\.\r\n$gdb_prompt $" {
+		set old_repeats $expect_out(1,string)
+	    }
+	}
+	gdb_test_no_output "set print elements unlimited" ""
+	gdb_test_no_output "set print repeats unlimited" ""
+
+	set retval 0
 	# Check whether argc is 1.
 	gdb_test_multiple "p argc" "p argc" {
 	    -re " = 1\r\n${gdb_prompt} $" {
 
 		gdb_test_multiple "p argv\[0\]" "p argv\[0\]" {
 		    -re " = $hex \".*[file tail $exe]\"\r\n${gdb_prompt} $" {
-			return 1
+			set retval 1
 		    }
 		    -re "${gdb_prompt} $" {
-			return 0
 		    }
 		}
 	    }
 	    -re "${gdb_prompt} $" {
-		return 0
 	    }
 	}
-	return 0
+	
+	gdb_test_no_output "set print elements $old_elements" ""
+	gdb_test_no_output "set print repeats $old_repeats" ""
+
+	return $retval
     }
 
     set result [gdb_has_argv0_1 $exe]

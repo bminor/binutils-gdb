@@ -1968,8 +1968,19 @@ proc mi_load_shlibs { args } {
     mi_gdb_test "set solib-search-path [file dirname [lindex $args 0]]" "\^done" ""
 }
 
-proc mi_check_thread_states { states test } {
+proc mi_reverse_list { list } {
+    if { [llength $list] <= 1 } {
+	return $list
+    }
+    set tail [lrange $list 1 [llength $list]]
+    set rtail [mi_reverse_list $tail]
+    lappend rtail [lindex $list 0]
+    return $rtail
+}
+
+proc mi_check_thread_states { xstates test } {
     global expect_out
+    set states [mi_reverse_list $xstates]
     set pattern ".*\\^done,threads=\\\["
     foreach s $states {
 	set pattern "${pattern}(.*)state=\"$s\""

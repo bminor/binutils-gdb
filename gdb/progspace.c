@@ -133,16 +133,8 @@ add_program_space (struct address_space *aspace)
 
   program_space_alloc_data (pspace);
 
-  if (program_spaces == NULL)
-    program_spaces = pspace;
-  else
-    {
-      struct program_space *last;
-
-      for (last = program_spaces; last->next != NULL; last = last->next)
-	;
-      last->next = pspace;
-    }
+  pspace->next = program_spaces;
+  program_spaces = pspace;
 
   return pspace;
 }
