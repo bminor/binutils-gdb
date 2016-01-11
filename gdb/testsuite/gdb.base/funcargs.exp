@@ -1013,6 +1013,13 @@ proc localvars_in_indirect_call { } {
     #
 
     gdb_test_multiple "finish" "finish from indirectly called function" {
+	-re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*First.*$gdb_prompt $" {
+	    # If the branch instruction is not the last instruction in the
+	    # function call line, we'll stop at that line, and need an extra
+	    # "step" to continue the test.
+	    send_gdb "step\n"
+	    exp_continue
+	}
 	-re ".*\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*Second.*$gdb_prompt $" {
 	    pass "finish from indirectly called function"
 	}

@@ -1,6 +1,12 @@
 2016-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/funcargs.exp (finish from indirectly called function):
+	Reintroduce the case for 'First'.
+
+2016-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/foll-vfork.exp (tcatch_vfork_then_parent_follow)
 	(tcatch_vfork_then_child_follow_exec)
 	(tcatch_vfork_then_child_follow_exit): Revert back DWARF vfork
