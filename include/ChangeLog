@@ -1,3 +1,13 @@
+2016-01-11  Nick Clifton  <nickc@redhat.com>
+
+	Import this change from GCC mainline:
+
+	2016-01-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* longlong.h: Change !__SHMEDIA__ to
+	(!defined (__SHMEDIA__) || !__SHMEDIA__).
+	Change __SHMEDIA__ to defined (__SHMEDIA__) && __SHMEDIA__.
+
 2016-01-06  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* opcode/mips.h: Add a summary of MIPS16 operand codes.
