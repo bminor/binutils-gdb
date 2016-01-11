@@ -5227,7 +5227,7 @@ linux_register_in_regsets (const struct regs_info *regs_info, int regno)
 
 #ifdef HAVE_LINUX_USRREGS
 
-int
+static int
 register_addr (const struct usrregs_info *usrregs, int regnum)
 {
   int addr;
@@ -5389,7 +5389,7 @@ usr_store_inferior_registers (const struct regs_info *regs_info,
 #endif
 
 
-void
+static void
 linux_fetch_registers (struct regcache *regcache, int regno)
 {
   int use_regsets;
@@ -5422,7 +5422,7 @@ linux_fetch_registers (struct regcache *regcache, int regno)
     }
 }
 
-void
+static void
 linux_store_registers (struct regcache *regcache, int regno)
 {
   int use_regsets;

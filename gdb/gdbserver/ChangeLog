@@ -1,3 +1,16 @@
+2016-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* ax.c (is_goto_target): Mark static.
+	* linux-low.c (register_addr): Likewise.
+	(linux_fetch_registers, linux_store_registers): Likewise.
+	* mem-break.c (any_persistent_commands): Fix old prototype.
+	(add_commands_to_breakpoint): Mark static.
+	* regcache.c (find_register_by_name): Delete unused func.
+	* remote-utils.c (hex_or_minus_one): Mark static.
+	* server.c (monitor_show_help): Mark static.
+	(handle_query, handle_v_cont, handle_v_attach, handle_v_kill,
+	handle_v_requests): Likewise.
+
 2016-01-12  Pedro Alves  <palves@redhat.com>
 
 	Remove use of the registered trademark symbol throughout.

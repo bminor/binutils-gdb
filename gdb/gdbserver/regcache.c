@@ -253,18 +253,6 @@ registers_from_string (struct regcache *regcache, char *buf)
   hex2bin (buf, registers, len / 2);
 }
 
-struct reg *
-find_register_by_name (const struct target_desc *tdesc, const char *name)
-{
-  int i;
-
-  for (i = 0; i < tdesc->num_registers; i++)
-    if (strcmp (name, tdesc->reg_defs[i].name) == 0)
-      return &tdesc->reg_defs[i];
-  internal_error (__FILE__, __LINE__, "Unknown register %s requested",
-		  name);
-}
-
 int
 find_regno (const struct target_desc *tdesc, const char *name)
 {

@@ -375,7 +375,7 @@ emit_le_goto (int *offset_p, int *size_p)
 /* Scan an agent expression for any evidence that the given PC is the
    target of a jump bytecode in the expression.  */
 
-int
+static int
 is_goto_target (struct agent_expr *aexpr, int pc)
 {
   int i;

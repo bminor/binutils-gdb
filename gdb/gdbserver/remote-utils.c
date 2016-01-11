@@ -526,7 +526,7 @@ write_ptid (char *buf, ptid_t ptid)
   return buf;
 }
 
-ULONGEST
+static ULONGEST
 hex_or_minus_one (char *buf, char **obuf)
 {
   ULONGEST ret;
