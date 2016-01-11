@@ -698,6 +698,8 @@ with_ust
 with_ust_include
 with_ust_lib
 enable_werror
+enable_build_warnings
+enable_gdb_build_warnings
 with_pkgversion
 with_bugurl
 with_libthread_db
@@ -1339,6 +1341,10 @@ Optional Features:
   --enable-build-with-cxx build with C++ compiler instead of C compiler
   --enable-libmcheck      Try linking with -lmcheck if available
   --enable-werror         treat compile warnings as errors
+  --enable-build-warnings enable build-time compiler warnings if gcc is used
+  --enable-gdb-build-warnings
+                          enable GDB specific build-time compiler warnings if
+                          gcc is used
   --enable-inprocess-agent
                           inprocess agent
 
@@ -6096,6 +6102,7 @@ fi
 
 
 
+
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror; case "${enableval}" in
@@ -6107,9 +6114,7 @@ fi
 
 
 # Enable -Werror by default when using gcc.  Turn it off for releases.
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" \
-   && test x"$enable_build_with_cxx" != x"yes" \
-   && $development; then
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" && $development; then
     ERROR_ON_WARNING=yes
 fi
 
@@ -6118,15 +6123,58 @@ if test "${ERROR_ON_WARNING}" = yes ; then
     WERROR_CFLAGS="-Werror"
 fi
 
+# These options work in either C or C++ modes.
 build_warnings="-Wall -Wpointer-arith \
--Wformat-nonliteral -Wno-char-subscripts -Wempty-body"
+-Wno-unused -Wunused-value -Wunused-function \
+-Wno-switch -Wno-char-subscripts \
+-Wempty-body"
 
 # Now add in C and C++ specific options, depending on mode.
 if test "$enable_build_with_cxx" = "yes"; then
    build_warnings="$build_warnings -Wno-sign-compare -Wno-write-strings \
 -Wno-narrowing"
 else
-   build_warnings="$build_warnings -Wdeclaration-after-statement"
+   build_warnings="$build_warnings -Wpointer-sign -Wmissing-prototypes \
+-Wdeclaration-after-statement -Wmissing-parameter-type \
+-Wold-style-declaration -Wold-style-definition"
+fi
+
+# Enable -Wno-format by default when using gcc on mingw since many
+# GCC versions complain about %I64.
+case "${host}" in
+  *-*-mingw32*) build_warnings="$build_warnings -Wno-format" ;;
+  *) build_warnings="$build_warnings -Wformat-nonliteral" ;;
+esac
+
+# Check whether --enable-build-warnings was given.
+if test "${enable_build_warnings+set}" = set; then :
+  enableval=$enable_build_warnings; case "${enableval}" in
+  yes)	;;
+  no)	build_warnings="-w";;
+  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${build_warnings} ${t}";;
+  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${t} ${build_warnings}";;
+  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+esac
+if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
+  echo "Setting compiler warning flags = $build_warnings" 6>&1
+fi
+fi
+# Check whether --enable-gdb-build-warnings was given.
+if test "${enable_gdb_build_warnings+set}" = set; then :
+  enableval=$enable_gdb_build_warnings; case "${enableval}" in
+  yes)	;;
+  no)	build_warnings="-w";;
+  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${build_warnings} ${t}";;
+  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${t} ${build_warnings}";;
+  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+esac
+if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
+  echo "Setting GDB specific compiler warning flags = $build_warnings" 6>&1
+fi
 fi
 
 # The set of warnings supported by a C++ compiler is not the same as
@@ -6141,7 +6189,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 fi
 
 WARN_CFLAGS=""
-if test "x$GCC" = xyes
+if test "x${build_warnings}" != x -a "x$GCC" = xyes
 then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler warning flags" >&5
 $as_echo_n "checking compiler warning flags... " >&6; }
@@ -6198,6 +6246,12 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 fi
+
+case " $WARN_CFLAGS " in
+*" -Wmissing-prototypes "*)
+  WARN_CFLAGS="$WARN_CFLAGS -Wno-missing-prototypes"
+  ;;
+esac
 
 old_LIBS="$LIBS"
 LIBS="$LIBS -ldl"

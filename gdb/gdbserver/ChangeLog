@@ -1,5 +1,11 @@
 2016-01-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4: Include new ../warning.m4 file.
+	* configure: Regenerated.
+	* configure.ac: Replace all warning logic with AM_GDB_WARNINGS.
+
+2016-01-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* ax.c (is_goto_target): Mark static.
 	* linux-low.c (register_addr): Likewise.
 	(linux_fetch_registers, linux_store_registers): Likewise.
