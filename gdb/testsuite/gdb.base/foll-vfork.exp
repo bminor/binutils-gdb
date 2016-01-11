@@ -212,6 +212,21 @@ proc vfork_and_exec_child_follow_through_step {} {
    exec sleep 1
 }}
 
+proc continue_to_vfork {} {
+   global gdb_prompt
+
+   # A vfork catchpoint may stop in either "vfork" or "_vfork".
+   set test "continue to vfork"
+   gdb_test_multiple "continue" $test {
+      -re "vfork \\(\\) at .*$gdb_prompt $" {
+	  pass $test
+      }
+      -re "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*$gdb_prompt " {
+	  pass $test
+      }
+   }
+}
+
 proc tcatch_vfork_then_parent_follow {} {
   with_test_prefix "vfork parent follow, finish after tcatch vfork" {
    global gdb_prompt
@@ -222,8 +237,8 @@ proc tcatch_vfork_then_parent_follow {} {
    gdb_test_no_output "set follow-fork parent"
 
    gdb_test "tcatch vfork" "Catchpoint .*(vfork).*"
-   gdb_test "continue" "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*" \
-	"continue to vfork"
+
+   continue_to_vfork
 
    set linenum [gdb_get_line_number "pid = vfork ();"]
    set test "finish"
@@ -254,8 +269,8 @@ proc tcatch_vfork_then_child_follow_exec {} {
    gdb_test_no_output "set follow-fork child"
 
    gdb_test "tcatch vfork" "Catchpoint .*(vfork).*"
-   gdb_test "continue" "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*" \
-	"continue to vfork"
+
+   continue_to_vfork
 
    set linenum1 [gdb_get_line_number "pid = vfork ();"]
    set linenum2 [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
@@ -290,8 +305,8 @@ proc tcatch_vfork_then_child_follow_exit {} {
    gdb_test_no_output "set follow-fork child"
 
    gdb_test "tcatch vfork" "Catchpoint .*(vfork).*"
-   gdb_test "continue" "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*" \
-	"continue to vfork"
+
+   continue_to_vfork
 
    set test "finish"
    gdb_test_multiple "finish" $test {

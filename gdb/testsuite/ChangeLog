@@ -1,4 +1,12 @@
 2016-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/foll-vfork.exp (tcatch_vfork_then_parent_follow)
+	(tcatch_vfork_then_child_follow_exec)
+	(tcatch_vfork_then_child_follow_exit): Revert back DWARF vfork
+	identification.
+
+2016-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.guile/scm-value.exp (test_value_in_inferior): Set print elements
 	and repeats to unlimited.
