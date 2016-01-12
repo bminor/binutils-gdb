@@ -1,5 +1,9 @@
 2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (ftrace_update_function): Update tail call heuristic.
+
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (btrace_compute_ftrace_bts, ftrace_add_pt): Allow
 	leading gaps.
 	* record-btrace.c (record_btrace_single_step_forward)

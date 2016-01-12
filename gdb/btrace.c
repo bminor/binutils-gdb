@@ -529,10 +529,17 @@ ftrace_update_function (struct btrace_function *bfun, CORE_ADDR pc)
 
 	    start = get_pc_function_start (pc);
 
-	    /* If we can't determine the function for PC, we treat a jump at
-	       the end of the block as tail call.  */
-	    if (start == 0 || start == pc)
+	    /* A jump to the start of a function is (typically) a tail call.  */
+	    if (start == pc)
 	      return ftrace_new_tailcall (bfun, mfun, fun);
+
+	    /* If we can't determine the function for PC, we treat a jump at
+	       the end of the block as tail call if we're switching functions
+	       and as an intra-function branch if we don't.  */
+	    if (start == 0 && ftrace_function_switched (bfun, mfun, fun))
+	      return ftrace_new_tailcall (bfun, mfun, fun);
+
+	    break;
 	  }
 	}
     }
