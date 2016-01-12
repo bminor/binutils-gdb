@@ -1,3 +1,9 @@
+2016-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include elf-bfd.h.
+	(sim_create_inferior): Truncate pc to 32-bits when EI_CLASS is
+	ELFCLASS32.
+
 2016-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

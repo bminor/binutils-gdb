@@ -55,6 +55,7 @@ code on the hardware.
 #include "getopt.h"
 #include "libiberty.h"
 #include "bfd.h"
+#include "elf-bfd.h"
 #include "gdb/callback.h"   /* GDB simulator callback interface */
 #include "gdb/remote-sim.h" /* GDB simulator interface */
 
@@ -1020,7 +1021,17 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       for (cpu_nr = 0; cpu_nr < sim_engine_nr_cpus (sd); cpu_nr++)
 	{
 	  sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
-	  CPU_PC_SET (cpu, (unsigned64) bfd_get_start_address (abfd));
+	  sim_cia pc = bfd_get_start_address (abfd);
+
+	  /* We need to undo brain-dead bfd behavior where it sign-extends
+	     addresses that are supposed to be unsigned.  See the mips bfd
+	     sign_extend_vma setting.  We have to check the ELF data itself
+	     in order to handle o32 & n32 ABIs.  */
+	  if (abfd->tdata.elf_obj_data->elf_header->e_ident[EI_CLASS] ==
+	      ELFCLASS32)
+	    pc = (unsigned32) pc;
+
+	  CPU_PC_SET (cpu, pc);
 	}
     }
 
