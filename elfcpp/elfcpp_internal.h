@@ -184,7 +184,7 @@ struct Rela_data
 
 struct Mips64_rel_data
 {
-  typename Elf_types<64>::Elf_Addr r_offset;
+  Elf_types<64>::Elf_Addr r_offset;
   Elf_Word r_sym;
   unsigned char r_ssym;
   unsigned char r_type3;
@@ -194,7 +194,7 @@ struct Mips64_rel_data
 
 struct Mips64_rela_data
 {
-  typename Elf_types<64>::Elf_Addr r_offset;
+  Elf_types<64>::Elf_Addr r_offset;
   Elf_Word r_sym;
   unsigned char r_ssym;
   unsigned char r_type3;
