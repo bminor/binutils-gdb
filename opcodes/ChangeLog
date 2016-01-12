@@ -1,3 +1,8 @@
+2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add "esb".
+	(thumb_opcodes): Likewise.
+
 2016-01-11  Peter Bergner <bergner@vnet.ibm.com>
 
 	* ppc-opc.c <xscmpnedp>: Delete.

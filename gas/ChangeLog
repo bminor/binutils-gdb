@@ -1,3 +1,10 @@
+2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* config/tc-arm.c (arm_ext_v8_2): New.
+	(insns): Add "esb".
+	* testsuite/gas/arm/armv8_2-a.d: New.
+	* testsuite/gas/arm/armv8_2-a.s: New.
+
 2016-01-12  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/ppc/vsx3.d: Accept nop padding.
