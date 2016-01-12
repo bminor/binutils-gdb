@@ -1,4 +1,12 @@
-2016-01-12  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+2016-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-11-26  David Edelsohn  <dje.gcc@gmail.com>
+
+	* m4/libtool.m4 (export_symbols_cmds) [AIX]: Add global TLS "L"
+	symbols.
+
+	2016-01-12  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	PR bootstrap/69134
 	* Makefile.def (mpfr): Disable assembler.
