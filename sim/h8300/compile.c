@@ -4826,7 +4826,7 @@ SIM_DESC
 sim_open (SIM_OPEN_KIND kind, 
 	  struct host_callback_struct *callback, 
 	  struct bfd *abfd, 
-	  char **argv)
+	  char * const *argv)
 {
   int i;
   SIM_DESC sd;
@@ -5000,7 +5000,8 @@ sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
+		     char * const *argv, char * const *env)
 {
   int i = 0;
   int len_arg = 0;

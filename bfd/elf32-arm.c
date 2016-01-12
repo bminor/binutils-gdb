@@ -11740,6 +11740,18 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
 	/* An error?  */
 	continue;
 
+      if (last_unwind_type > 0)
+	{
+	  unsigned int first_word = bfd_get_32 (ibfd, contents);
+	  /* Add cantunwind if first unwind item does not match section
+	     start.  */
+	  if (first_word != sec->vma)
+	    {
+	      insert_cantunwind_after (last_text_sec, last_exidx_sec);
+	      last_unwind_type = 0;
+	    }
+	}
+
       for (j = 0; j < hdr->sh_size; j += 8)
 	{
 	  unsigned int second_word = bfd_get_32 (ibfd, contents + j + 4);
@@ -15535,6 +15547,8 @@ elf32_arm_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
       return reloc_class_plt;
     case R_ARM_COPY:
       return reloc_class_copy;
+    case R_ARM_IRELATIVE:
+      return reloc_class_ifunc;
     default:
       return reloc_class_normal;
     }

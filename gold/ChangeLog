@@ -1,3 +1,165 @@
+2016-01-11  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19353
+	* aarch64.cc (Target_aarch64::relocate_tls): Don't insist that
+	we have a TLS segment for GD-to-IE optimization.
+	* i386.cc (Target_i386::tls_gd_to_ie): Remove tls_segment parameter.
+	Adjust all calls.
+	(Target_i386::tls_desc_gd_to_ie): Likewise.
+	(Target_i386::relocate_tls): Don't insist that we have a TLS segment
+	for TLSDESC GD-to-IE optimizations.
+	* x86_64.cc (Target_x86_64::tls_gd_to_ie): Remove tls_segment parameter.
+	Adjust all calls.
+	(Target_x86_64::tls_desc_gd_to_ie): Likewise.
+	(Target_x86_64::relocate_tls): Don't insist that we have a TLS segment
+	for TLSDESC GD-to-IE optimizations.
+
+2016-01-11  Cary Coutant  <ccoutant@gmail.com>
+
+	Refactor gold to enable support for MIPS-64 relocation format.
+
+	* gc.h (get_embedded_addend_size): Remove sh_type parameter.
+	(gc_process_relocs): Remove sh_type template parameter.
+	Use Classify_reloc to access r_sym, r_type, and r_addend fields.
+	* object.h (Sized_relobj_file::split_stack_adjust): Add target
+	parameter.
+	(Sized_relobj_file::split_stack_adjust_reltype): Likewise.
+	* reloc-types.h (Reloc_types::copy_reloc_addend): (SHT_REL and SHT_RELA
+	specializations) Remove.
+	* reloc.cc (Emit_relocs_strategy): Rename and move to target-reloc.h.
+	(Sized_relobj_file::emit_relocs_scan): Call Target::emit_relocs_scan().
+	(Sized_relobj_file::emit_relocs_scan_reltype): Remove.
+	(Sized_relobj_file::split_stack_adjust): Add target parameter.
+	Adjust all callers.
+	(Sized_relobj_file::split_stack_adjust_reltype): Likewise. Call
+	Target::get_r_sym() to get r_sym field from relocations.
+	(Track_relocs::next_symndx): Call Target::get_r_sym().
+	* target-reloc.h (scan_relocs): Remove sh_type template parameter;
+	add Classify_reloc template parameter.  Use for accessing r_sym and
+	r_type.
+	(relocate_section): Likewise.
+	(Default_classify_reloc): New class (renamed and moved from reloc.cc).
+	(Default_scan_relocatable_relocs): Remove sh_type template parameter.
+	(Default_scan_relocatable_relocs::Reltype): New typedef.
+	(Default_scan_relocatable_relocs::reloc_size): New const.
+	(Default_scan_relocatable_relocs::sh_type): New const.
+	(Default_scan_relocatable_relocs::get_r_sym): New method.
+	(Default_scan_relocatable_relocs::get_r_type): New method.
+	(Default_emit_relocs_strategy): New class.
+	(scan_relocatable_relocs): Replace sh_type template parameter with
+	Scan_relocatable_relocs class.  Use it to access r_sym and r_type
+	fields.
+	(relocate_relocs): Replace sh_type template parameter with
+	Classify_reloc class.  Use it to access r_sym and r_type fields.
+	* target.h (Target::is_call_to_non_split): Replace r_type parameter
+	with pointer to relocation. Adjust all callers.
+	(Target::do_is_call_to_non_split): Likewise.
+	(Target::emit_relocs_scan): New virtual method.
+	(Sized_target::get_r_sym): New virtual method.
+	* target.cc (Target::do_is_call_to_non_split): Replace r_type parameter
+	with pointer to relocation.
+
+	* aarch64.cc (Target_aarch64::emit_relocs_scan): New method.
+	(Target_aarch64::Relocatable_size_for_reloc): Remove.
+	(Target_aarch64::gc_process_relocs): Use Default_classify_reloc.
+	(Target_aarch64::scan_relocs): Likewise.
+	(Target_aarch64::relocate_section): Likewise.
+	(Target_aarch64::Relocatable_size_for_reloc::get_size_for_reloc):
+	Remove.
+	(Target_aarch64::scan_relocatable_relocs): Use Default_classify_reloc.
+	(Target_aarch64::relocate_relocs): Use Default_classify_reloc.
+	* arm.cc (Target_arm::Arm_scan_relocatable_relocs): Remove sh_type
+	template parameter.
+	(Target_arm::emit_relocs_scan): New method.
+	(Target_arm::Relocatable_size_for_reloc): Replace with...
+	(Target_arm::Classify_reloc): ...this.
+	(Target_arm::gc_process_relocs): Use Classify_reloc.
+	(Target_arm::scan_relocs): Likewise.
+	(Target_arm::relocate_section): Likewise.
+	(Target_arm::scan_relocatable_relocs): Likewise.
+	(Target_arm::relocate_relocs): Likewise.
+	* i386.cc (Target_i386::emit_relocs_scan): New method.
+	(Target_i386::Relocatable_size_for_reloc): Replace with...
+	(Target_i386::Classify_reloc): ...this.
+	(Target_i386::gc_process_relocs): Use Classify_reloc.
+	(Target_i386::scan_relocs): Likewise.
+	(Target_i386::relocate_section): Likewise.
+	(Target_i386::scan_relocatable_relocs): Likewise.
+	(Target_i386::relocate_relocs): Likewise.
+	* mips.cc (Mips_scan_relocatable_relocs): Remove sh_type template
+	parameter.
+	(Mips_reloc_types): New class template.
+	(Mips_classify_reloc): New class template.
+	(Target_mips::Reltype): New typedef.
+	(Target_mips::Relatype): New typedef.
+	(Target_mips::emit_relocs_scan): New method.
+	(Target_mips::get_r_sym): New method.
+	(Target_mips::Relocatable_size_for_reloc): Replace with
+	Mips_classify_reloc.
+	(Target_mips::copy_reloc): Use Mips_classify_reloc.
+	(Target_mips::gc_process_relocs): Likewise.
+	(Target_mips::scan_relocs): Likewise.
+	(Target_mips::relocate_section): Likewise.
+	(Target_mips::scan_relocatable_relocs): Likewise.
+	(Target_mips::relocate_relocs): Likewise.
+	(mips_get_size_for_reloc): New function, factored out from
+	Relocatable_size_for_reloc::get_size_for_reloc.
+	(Target_mips::Scan::local): Use Mips_classify_reloc.
+	(Target_mips::Scan::global): Likewise.
+	(Target_mips::Relocate::relocate): Likewise.
+	* powerpc.cc (Target_powerpc::emit_relocs_scan): New method.
+	(Target_powerpc::Relocatable_size_for_reloc): Remove.
+	(Target_powerpc::gc_process_relocs): Use Default_classify_reloc.
+	(Target_powerpc::scan_relocs): Likewise.
+	(Target_powerpc::relocate_section): Likewise.
+	(Powerpc_scan_relocatable_reloc): Convert to class template.
+	(Powerpc_scan_relocatable_reloc::Reltype): New typedef.
+	(Powerpc_scan_relocatable_reloc::reloc_size): New const.
+	(Powerpc_scan_relocatable_reloc::sh_type): New const.
+	(Powerpc_scan_relocatable_reloc::get_r_sym): New method.
+	(Powerpc_scan_relocatable_reloc::get_r_type): New method.
+	(Target_powerpc::scan_relocatable_relocs): Use
+	Powerpc_scan_relocatable_reloc.
+	(Target_powerpc::relocate_relocs): Use Default_classify_reloc.
+	* s390.cc (Target_s390::emit_relocs_scan): New method.
+	(Target_s390::Relocatable_size_for_reloc): Remove.
+	(Target_s390::gc_process_relocs): Use Default_classify_reloc.
+	(Target_s390::scan_relocs): Likewise.
+	(Target_s390::relocate_section): Likewise.
+	(Target_s390::Relocatable_size_for_reloc::get_size_for_reloc):
+	Remove.
+	(Target_s390::scan_relocatable_relocs): Use Default_classify_reloc.
+	(Target_s390::relocate_relocs): Use Default_classify_reloc.
+	* sparc.cc (Target_sparc::emit_relocs_scan): New method.
+	(Target_sparc::Relocatable_size_for_reloc): Remove.
+	(Target_sparc::gc_process_relocs): Use Default_classify_reloc.
+	(Target_sparc::scan_relocs): Likewise.
+	(Target_sparc::relocate_section): Likewise.
+	(Target_sparc::Relocatable_size_for_reloc::get_size_for_reloc):
+	Remove.
+	(Target_sparc::scan_relocatable_relocs): Use Default_classify_reloc.
+	(Target_sparc::relocate_relocs): Use Default_classify_reloc.
+	* tilegx.cc (Target_tilegx::emit_relocs_scan): New method.
+	(Target_tilegx::Relocatable_size_for_reloc): Remove.
+	(Target_tilegx::gc_process_relocs): Use Default_classify_reloc.
+	(Target_tilegx::scan_relocs): Likewise.
+	(Target_tilegx::relocate_section): Likewise.
+	(Target_tilegx::Relocatable_size_for_reloc::get_size_for_reloc):
+	Remove.
+	(Target_tilegx::scan_relocatable_relocs): Use Default_classify_reloc.
+	(Target_tilegx::relocate_relocs): Use Default_classify_reloc.
+	* x86_64.cc (Target_x86_64::emit_relocs_scan): New method.
+	(Target_x86_64::Relocatable_size_for_reloc): Remove.
+	(Target_x86_64::gc_process_relocs): Use Default_classify_reloc.
+	(Target_x86_64::scan_relocs): Likewise.
+	(Target_x86_64::relocate_section): Likewise.
+	(Target_x86_64::Relocatable_size_for_reloc::get_size_for_reloc):
+	Remove.
+	(Target_x86_64::scan_relocatable_relocs): Use Default_classify_reloc.
+	(Target_x86_64::relocate_relocs): Use Default_classify_reloc.
+
+	* testsuite/testfile.cc (Target_test::emit_relocs_scan): New method.
+
 2016-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

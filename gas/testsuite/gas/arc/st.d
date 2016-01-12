@@ -15,12 +15,12 @@ Disassembly of section .text:
   1c:	1a00 0003           	stb	0,\[r2\]
   20:	1af8 8e01           	st	56,\[r2,-8\]
   24:	1e00 7080 0000 0000 	st	r2,\[0\]
-			28: ARC_32_ME	foo
+			28: R_ARC_32_ME	foo
   2c:	1a02 0060           	st.di	r1,\[r2,2\]
   30:	1a03 0068           	st.di.aw	r1,\[r2,3\]
   34:	1a04 006c           	st[hw]+.di.aw	r1,\[r2,4\]
   38:	1c04 1f80 0000 0000 	st	0,\[r12,4\]
-			3c: ARC_32_ME	.L1
+			3c: R_ARC_32_ME	.L1
 
 [0-9a-f]+ <.L1>:
   40:	212b 0080           	sr	r1,\[r2\]

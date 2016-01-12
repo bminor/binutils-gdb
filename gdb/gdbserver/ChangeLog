@@ -1,3 +1,45 @@
+2016-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Include new ../warning.m4 file.
+	* configure: Regenerated.
+	* configure.ac: Replace all warning logic with AM_GDB_WARNINGS.
+
+2016-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* ax.c (is_goto_target): Mark static.
+	* linux-low.c (register_addr): Likewise.
+	(linux_fetch_registers, linux_store_registers): Likewise.
+	* mem-break.c (any_persistent_commands): Fix old prototype.
+	(add_commands_to_breakpoint): Mark static.
+	* regcache.c (find_register_by_name): Delete unused func.
+	* remote-utils.c (hex_or_minus_one): Mark static.
+	* server.c (monitor_show_help): Mark static.
+	(handle_query, handle_v_cont, handle_v_attach, handle_v_kill,
+	handle_v_requests): Likewise.
+
+2016-01-12  Pedro Alves  <palves@redhat.com>
+
+	Remove use of the registered trademark symbol throughout.
+
+2016-01-08  Yao Qi  <yao.qi@linaro.org>
+
+	* remote-utils.c (getpkt): If c is '\003', call target hook
+	request_interrupt.
+
+2016-01-06  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.h (arm_abi_breakpoint): Move to
+	linux-aarch32-low.c.
+	(arm_eabi_breakpoint, arm_breakpoint): Likewise.
+	(arm_breakpoint_len, thumb_breakpoint_len): Likewise.
+	(thumb2_breakpoint, thumb2_breakpoint_len): Likewise.
+	(thumb2_breakpoint): Declare.
+	* linux-aarch32-low.c (arm_abi_breakpoint): Moved from
+	linux-aarch32-low.h.
+	(arm_eabi_breakpoint, arm_breakpoint): Likewise.
+	(arm_breakpoint_len, thumb_breakpoint_len): Likewise.
+	(thumb2_breakpoint, thumb2_breakpoint_len): Likewise.
+
 2016-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbreplay.c (gdbreplay_version): Change copyright year in

@@ -383,7 +383,8 @@ static int cr16_reg_fetch (SIM_CPU *, int, unsigned char *, int);
 static int cr16_reg_store (SIM_CPU *, int, unsigned char *, int);
 
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb, struct bfd *abfd, char **argv)
+sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb,
+	  struct bfd *abfd, char * const *argv)
 {
   struct simops *s;
   struct hash_entry *h;
@@ -645,7 +646,8 @@ sim_engine_run (SIM_DESC sd,
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
+		     char * const *argv, char * const *env)
 {
   bfd_vma start_address;
 

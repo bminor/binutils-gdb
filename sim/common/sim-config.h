@@ -167,21 +167,6 @@ enum sim_environment {
   OPERATING_ENVIRONMENT
 };
 
-/* If the simulator specified SIM_AC_OPTION_ENVIRONMENT, indicate so.  */
-#ifdef WITH_ENVIRONMENT
-#define SIM_HAVE_ENVIRONMENT
-#endif
-
-/* If the simulator doesn't specify SIM_AC_OPTION_ENVIRONMENT in its
-   configure.ac, the only supported environment is the user environment.  */
-#ifndef WITH_ENVIRONMENT
-#define WITH_ENVIRONMENT USER_ENVIRONMENT
-#endif
-
-#define DEFAULT_ENVIRONMENT (WITH_ENVIRONMENT != ALL_ENVIRONMENT \
-			     ? WITH_ENVIRONMENT \
-			     : USER_ENVIRONMENT)
-
 /* To be prepended to simulator calls with absolute file paths and
    chdir:ed at startup.  */
 extern char *simulator_sysroot;
@@ -267,39 +252,6 @@ extern int current_floating_point;
 #endif
 
 
-/* Debugging:
-
-   Control the inclusion of debugging code.
-   Debugging is only turned on in rare circumstances [say during development]
-   and is not intended to be turned on otherwise.  */
-
-#ifndef WITH_DEBUG
-#define WITH_DEBUG			0
-#endif
-
-/* Include the tracing code.  Disabling this eliminates all tracing
-   code.  Default to all tracing but internal debug.  */
-
-#ifndef WITH_TRACE
-#define WITH_TRACE			(~TRACE_debug)
-#endif
-
-/* Include the profiling code.  Disabling this eliminates all profiling
-   code.  */
-
-#ifndef WITH_PROFILE
-#define WITH_PROFILE			(-1)
-#endif
-
-
-/* include code that checks assertions scattered through out the
-   program */
-
-#ifndef WITH_ASSERT
-#define WITH_ASSERT			1
-#endif
-
-
 /* Whether to check instructions for reserved bits being set */
 
 /* #define WITH_RESERVED_BITS		1 */
@@ -344,29 +296,11 @@ extern int current_model_issue;
 #define DONT_USE_STDIO			2
 #define DO_USE_STDIO			1
 
-#ifndef WITH_STDIO
-#define WITH_STDIO			0
-#endif
-
 extern int current_stdio;
 #define CURRENT_STDIO (WITH_STDIO	\
 		       ? WITH_STDIO     \
 		       : current_stdio)
 
-
-
-/* Specify that configured calls pass parameters in registers when the
-   convention is that they are placed on the stack */
-
-#ifndef WITH_REGPARM
-#define WITH_REGPARM                   0
-#endif
-
-/* Specify that configured calls use an alternative calling mechanism */
-
-#ifndef WITH_STDCALL
-#define WITH_STDCALL                   0
-#endif
 
 
 /* Set the default state configuration, before parsing argv.  */

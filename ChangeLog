@@ -1,3 +1,64 @@
+2016-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Sync with GCC
+	2015-11-26  David Edelsohn  <dje.gcc@gmail.com>
+
+	* m4/libtool.m4 (export_symbols_cmds) [AIX]: Add global TLS "L"
+	symbols.
+
+	2016-01-12  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	PR bootstrap/69134
+	* Makefile.def (mpfr): Disable assembler.
+	* Makefile.in: Regenerate.
+
+2016-01-11  Nick Clifton  <nickc@redhat.com>
+
+	Import the following changes from the GCC mainline:
+
+	2015-11-13  Tsvetkova Alexandra  <aleksandra.tsvetkova@intel.com>
+
+	* configure.ac: Enable libmpx by default.
+	* configure: Regenerated.
+
+	2015-11-19  Martin Liska  <mliska@suse.cz>
+
+	* .gitignore: Add .clang-format to ignored files.
+	* Makefile.tpl: Add clang-format.
+	* Makefile.in: Regenerate.
+
+	2015-12-01  Andreas Tobler  <andreast@gcc.gnu.org>
+
+	PR libffi/65726
+	* Makefile.def (lang_env_dependencies): Make libffi depend
+	on cxx.
+	* Makefile.in: Regenerate.
+
+	2015-12-02  Ian Lance Taylor  <iant@google.com>
+
+	PR go/66147
+	* Makefile.tpl (HOST_EXPORTS): Add XGCC_FLAGS_FOR_TARGET.
+	* Makefile.in: Regenerate.
+
+	2015-12-17  Nathan Sidwell  <nathan@acm.org>
+
+	* config/isl.m4 (ISL_CHECK_VERSION): Add gmp libs.
+	* configure: Regenerate.
+
+	2015-12-17  Sebastian Pop  <s.pop@samsung.com>
+
+	* Makefile.in: Replace ISL with isl.
+	* Makefile.tpl: Same.
+	* config/isl.m4: Same.
+	* configure.ac: Same.
+	* contrib/download_prerequisites: Same.
+	* configure: Regenerate.
+
+	2016-01-01  Ben Elliston  <bje@gnu.org>
+
+	* config.guess: Import version 2016-01-01.
+	* config.sub: Likewise.
+
 2015-11-20  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.ac: Add aarch64-*-darwin* and arm-*-darwin*.

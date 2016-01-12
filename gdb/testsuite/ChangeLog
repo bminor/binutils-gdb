@@ -1,3 +1,44 @@
+2016-01-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/random-signal.exp (do_test): New procedure, with body
+	of testcase moved in.
+
+2016-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/funcargs.exp (finish from indirectly called function):
+	Reintroduce the case for 'First'.
+
+2016-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/foll-vfork.exp (tcatch_vfork_then_parent_follow)
+	(tcatch_vfork_then_child_follow_exec)
+	(tcatch_vfork_then_child_follow_exit): Revert back DWARF vfork
+	identification.
+
+2016-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Set print elements
+	and repeats to unlimited.
+	* gdb.python/py-value.exp: Likewise.
+	* lib/gdb.exp (gdb_has_argv0): Save and temporarily set print elements
+	and repeats to unlimited.
+
+2016-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.multi/goodbye.c: Fix compilation warnings by adding return types
+	and reordering the functions.
+	* gdb.multi/hangout.c: Likewise.
+	* gdb.multi/hello.c: Likewise.
+
+2016-01-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.perf/lib/perftest/perftest.py: Change relative imports to
+	absolute.
+	(SingleStatisticTestResult.report): Use dict.keys instead of
+	dict.iterkeys.
+
 2016-01-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.python/py-infthread.exp: Fix typo.  Expect t0.num to be 1.

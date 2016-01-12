@@ -526,7 +526,7 @@ write_ptid (char *buf, ptid_t ptid)
   return buf;
 }
 
-ULONGEST
+static ULONGEST
 hex_or_minus_one (char *buf, char **obuf)
 {
   ULONGEST ret;
@@ -959,6 +959,15 @@ getpkt (char *buf)
       while (1)
 	{
 	  c = readchar ();
+
+	  /* The '\003' may appear before or after each packet, so
+	     check for an input interrupt.  */
+	  if (c == '\003')
+	    {
+	      (*the_target->request_interrupt) ();
+	      continue;
+	    }
+
 	  if (c == '$')
 	    break;
 	  if (remote_debug)

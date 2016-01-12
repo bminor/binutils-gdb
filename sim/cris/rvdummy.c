@@ -30,7 +30,7 @@ main (int argc, char *argv[])
 #else
 
 #ifdef HAVE_CONFIG_H
-#include "cconfig.h"
+#include "config.h"
 #endif
 
 #include "getopt.h"

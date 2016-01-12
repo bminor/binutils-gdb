@@ -59,12 +59,4 @@ void arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
 VEC (CORE_ADDR) *arm_get_next_pcs (struct arm_get_next_pcs *self,
 				   CORE_ADDR pc);
 
-/* Find the next possible PCs for thumb mode.  */
-VEC (CORE_ADDR) *thumb_get_next_pcs_raw (struct arm_get_next_pcs *self,
-					 CORE_ADDR pc);
-
-/* Find the next possible PCs for arm mode.  */
-VEC (CORE_ADDR) *arm_get_next_pcs_raw (struct arm_get_next_pcs *self,
-				       CORE_ADDR pc);
-
 #endif /* ARM_GET_NEXT_PCS_H */

@@ -20,7 +20,7 @@ Disassembly of section .text:
 0x[0-9a-f]+ 2e00 7080 ffff feff 	asl	r0,0xfffffeff,r2
 0x[0-9a-f]+ 2e00 7f80 0000 0100 	asl	r0,0x100,0x100
 0x[0-9a-f]+ 2900 0f80 0000 0000 	asl	r0,r1,0
-			68: ARC_32_ME	foo
+			68: R_ARC_32_ME	foo
 0x[0-9a-f]+ 28c0 0080           	asl	r0,r0,r2
 0x[0-9a-f]+ 2bc0 0140           	asl	r3,r3,r5
 0x[0-9a-f]+ 2ec0 0201           	asl.eq	r6,r6,r8

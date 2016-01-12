@@ -8787,7 +8787,7 @@ i386_mpx_info_bounds (char *args, int from_tty)
 
   if (!i386_mpx_enabled ())
     {
-      printf_unfiltered (_("Intel(R) Memory Protection Extensions not "
+      printf_unfiltered (_("Intel Memory Protection Extensions not "
 			   "supported on this target.\n"));
       return;
     }
@@ -8829,7 +8829,7 @@ i386_mpx_set_bounds (char *args, int from_tty)
   struct type *data_ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
   if (!i386_mpx_enabled ())
-    error (_("Intel(R) Memory Protection Extensions not supported\
+    error (_("Intel Memory Protection Extensions not supported\
  on this target."));
 
   if (args == NULL)
@@ -8916,14 +8916,14 @@ is \"default\"."),
   /* Add "mpx" prefix for the set commands.  */
 
   add_prefix_cmd ("mpx", class_support, set_mpx_cmd, _("\
-Set Intel(R) Memory Protection Extensions specific variables."),
+Set Intel Memory Protection Extensions specific variables."),
 		  &mpx_set_cmdlist, "set mpx ",
 		  0 /* allow-unknown */, &setlist);
 
   /* Add "mpx" prefix for the show commands.  */
 
   add_prefix_cmd ("mpx", class_support, show_mpx_cmd, _("\
-Show Intel(R) Memory Protection Extensions specific variables."),
+Show Intel Memory Protection Extensions specific variables."),
 		  &mpx_show_cmdlist, "show mpx ",
 		  0 /* allow-unknown */, &showlist);
 

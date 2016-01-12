@@ -429,6 +429,21 @@ class Target_i386 : public Sized_target<32, false>
 			  const unsigned char* plocal_symbols,
 			  Relocatable_relocs*);
 
+  // Scan the relocs for --emit-relocs.
+  void
+  emit_relocs_scan(Symbol_table* symtab,
+		   Layout* layout,
+		   Sized_relobj_file<32, false>* object,
+		   unsigned int data_shndx,
+		   unsigned int sh_type,
+		   const unsigned char* prelocs,
+		   size_t reloc_count,
+		   Output_section* output_section,
+		   bool needs_special_offset_handling,
+		   size_t local_symbol_count,
+		   const unsigned char* plocal_syms,
+		   Relocatable_relocs* rr);
+
   // Emit relocations for a section.
   void
   relocate_relocs(const Relocate_info<32, false>*,
@@ -485,7 +500,7 @@ class Target_i386 : public Sized_target<32, false>
 
   // Return whether SYM is call to a non-split function.
   bool
-  do_is_call_to_non_split(const Symbol* sym, unsigned int) const;
+  do_is_call_to_non_split(const Symbol* sym, const unsigned char*) const;
 
   // Adjust -fsplit-stack code which calls non-split-stack code.
   void
@@ -653,7 +668,6 @@ class Target_i386 : public Sized_target<32, false>
     // Do a TLS General-Dynamic to Initial-Exec transition.
     inline void
     tls_gd_to_ie(const Relocate_info<32, false>*, size_t relnum,
-		 Output_segment* tls_segment,
 		 const elfcpp::Rel<32, false>&, unsigned int r_type,
 		 elfcpp::Elf_types<32>::Elf_Addr value,
 		 unsigned char* view,
@@ -672,7 +686,6 @@ class Target_i386 : public Sized_target<32, false>
     // transition.
     inline void
     tls_desc_gd_to_ie(const Relocate_info<32, false>*, size_t relnum,
-		      Output_segment* tls_segment,
 		      const elfcpp::Rel<32, false>&, unsigned int r_type,
 		      elfcpp::Elf_types<32>::Elf_Addr value,
 		      unsigned char* view,
@@ -723,12 +736,15 @@ class Target_i386 : public Sized_target<32, false>
     Local_dynamic_type local_dynamic_type_;
   };
 
-  // A class which returns the size required for a relocation type,
-  // used while scanning relocs during a relocatable link.
-  class Relocatable_size_for_reloc
+  // A class for inquiring about properties of a relocation,
+  // used while scanning relocs during a relocatable link and
+  // garbage collection.
+  class Classify_reloc :
+      public gold::Default_classify_reloc<elfcpp::SHT_REL, 32, false>
   {
    public:
-    unsigned int
+    // Return the size of the addend of the relocation (only used for SHT_REL).
+    static unsigned int
     get_size_for_reloc(unsigned int, Relobj*);
   };
 
@@ -2564,9 +2580,7 @@ Target_i386::gc_process_relocs(Symbol_table* symtab,
 				      size_t local_symbol_count,
 				      const unsigned char* plocal_symbols)
 {
-  gold::gc_process_relocs<32, false, Target_i386, elfcpp::SHT_REL,
-			  Target_i386::Scan,
-			  Target_i386::Relocatable_size_for_reloc>(
+  gold::gc_process_relocs<32, false, Target_i386, Scan, Classify_reloc>(
     symtab,
     layout,
     this,
@@ -2602,8 +2616,7 @@ Target_i386::scan_relocs(Symbol_table* symtab,
       return;
     }
 
-  gold::scan_relocs<32, false, Target_i386, elfcpp::SHT_REL,
-		    Target_i386::Scan>(
+  gold::scan_relocs<32, false, Target_i386, Scan, Classify_reloc>(
     symtab,
     layout,
     this,
@@ -3039,7 +3052,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	    }
 	  if (optimized_type == tls::TLSOPT_TO_IE)
 	    {
-	      this->tls_gd_to_ie(relinfo, relnum, tls_segment, rel, r_type,
+	      this->tls_gd_to_ie(relinfo, relnum, rel, r_type,
 				 got_offset, view, view_size);
 	      break;
 	    }
@@ -3101,13 +3114,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	    }
 	  if (optimized_type == tls::TLSOPT_TO_IE)
 	    {
-	      if (tls_segment == NULL)
-		{
-		  gold_assert(parameters->errors()->error_count() > 0
-			      || issue_undefined_symbol_error(gsym));
-		  return;
-		}
-	      this->tls_desc_gd_to_ie(relinfo, relnum, tls_segment, rel, r_type,
+	      this->tls_desc_gd_to_ie(relinfo, relnum, rel, r_type,
 				      got_offset, view, view_size);
 	      break;
 	    }
@@ -3339,7 +3346,6 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
 inline void
 Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
 				    size_t relnum,
-				    Output_segment*,
 				    const elfcpp::Rel<32, false>& rel,
 				    unsigned int,
 				    elfcpp::Elf_types<32>::Elf_Addr value,
@@ -3434,7 +3440,6 @@ inline void
 Target_i386::Relocate::tls_desc_gd_to_ie(
     const Relocate_info<32, false>* relinfo,
     size_t relnum,
-    Output_segment*,
     const elfcpp::Rel<32, false>& rel,
     unsigned int r_type,
     elfcpp::Elf_types<32>::Elf_Addr value,
@@ -3609,8 +3614,8 @@ Target_i386::relocate_section(const Relocate_info<32, false>* relinfo,
 {
   gold_assert(sh_type == elfcpp::SHT_REL);
 
-  gold::relocate_section<32, false, Target_i386, elfcpp::SHT_REL,
-			 Target_i386::Relocate, gold::Default_comdat_behavior>(
+  gold::relocate_section<32, false, Target_i386, Relocate,
+			 gold::Default_comdat_behavior, Classify_reloc>(
     relinfo,
     this,
     prelocs,
@@ -3627,7 +3632,7 @@ Target_i386::relocate_section(const Relocate_info<32, false>* relinfo,
 // link.
 
 unsigned int
-Target_i386::Relocatable_size_for_reloc::get_size_for_reloc(
+Target_i386::Classify_reloc::get_size_for_reloc(
     unsigned int r_type,
     Relobj* object)
 {
@@ -3712,13 +3717,12 @@ Target_i386::scan_relocatable_relocs(Symbol_table* symtab,
 				     const unsigned char* plocal_symbols,
 				     Relocatable_relocs* rr)
 {
+  typedef gold::Default_scan_relocatable_relocs<Classify_reloc>
+      Scan_relocatable_relocs;
+
   gold_assert(sh_type == elfcpp::SHT_REL);
 
-  typedef gold::Default_scan_relocatable_relocs<elfcpp::SHT_REL,
-    Relocatable_size_for_reloc> Scan_relocatable_relocs;
-
-  gold::scan_relocatable_relocs<32, false, elfcpp::SHT_REL,
-      Scan_relocatable_relocs>(
+  gold::scan_relocatable_relocs<32, false, Scan_relocatable_relocs>(
     symtab,
     layout,
     object,
@@ -3729,6 +3733,43 @@ Target_i386::scan_relocatable_relocs(Symbol_table* symtab,
     needs_special_offset_handling,
     local_symbol_count,
     plocal_symbols,
+    rr);
+}
+
+// Scan the relocs for --emit-relocs.
+
+void
+Target_i386::emit_relocs_scan(Symbol_table* symtab,
+			      Layout* layout,
+			      Sized_relobj_file<32, false>* object,
+			      unsigned int data_shndx,
+			      unsigned int sh_type,
+			      const unsigned char* prelocs,
+			      size_t reloc_count,
+			      Output_section* output_section,
+			      bool needs_special_offset_handling,
+			      size_t local_symbol_count,
+			      const unsigned char* plocal_syms,
+			      Relocatable_relocs* rr)
+{
+  typedef gold::Default_classify_reloc<elfcpp::SHT_REL, 32, false>
+      Classify_reloc;
+  typedef gold::Default_emit_relocs_strategy<Classify_reloc>
+      Emit_relocs_strategy;
+
+  gold_assert(sh_type == elfcpp::SHT_REL);
+
+  gold::scan_relocatable_relocs<32, false, Emit_relocs_strategy>(
+    symtab,
+    layout,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_syms,
     rr);
 }
 
@@ -3750,7 +3791,7 @@ Target_i386::relocate_relocs(
 {
   gold_assert(sh_type == elfcpp::SHT_REL);
 
-  gold::relocate_relocs<32, false, elfcpp::SHT_REL>(
+  gold::relocate_relocs<32, false, Classify_reloc>(
     relinfo,
     prelocs,
     reloc_count,
@@ -3867,7 +3908,8 @@ Target_i386::do_ehframe_datarel_base() const
 // get_pc_thunk function.
 
 bool
-Target_i386::do_is_call_to_non_split(const Symbol* sym, unsigned int) const
+Target_i386::do_is_call_to_non_split(const Symbol* sym,
+				     const unsigned char*) const
 {
   return (sym->type() == elfcpp::STT_FUNC
 	  && !is_prefix_of("__i686.get_pc_thunk.", sym->name()));

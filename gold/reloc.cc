@@ -424,8 +424,8 @@ Sized_relobj_file<size, big_endian>::do_gc_process_relocs(Symbol_table* symtab,
 template<int size, bool big_endian>
 void
 Sized_relobj_file<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
-					       Layout* layout,
-					       Read_relocs_data* rd)
+						    Layout* layout,
+						    Read_relocs_data* rd)
 {
   Sized_target<size, big_endian>* target =
     parameters->sized_target<size, big_endian>();
@@ -501,41 +501,6 @@ Sized_relobj_file<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
     }
 }
 
-// This is a strategy class we use when scanning for --emit-relocs.
-
-template<int sh_type>
-class Emit_relocs_strategy
-{
- public:
-  // A local non-section symbol.
-  inline Relocatable_relocs::Reloc_strategy
-  local_non_section_strategy(unsigned int, Relobj*, unsigned int)
-  { return Relocatable_relocs::RELOC_COPY; }
-
-  // A local section symbol.
-  inline Relocatable_relocs::Reloc_strategy
-  local_section_strategy(unsigned int, Relobj*)
-  {
-    if (sh_type == elfcpp::SHT_RELA)
-      return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA;
-    else
-      {
-	// The addend is stored in the section contents.  Since this
-	// is not a relocatable link, we are going to apply the
-	// relocation contents to the section as usual.  This means
-	// that we have no way to record the original addend.  If the
-	// original addend is not zero, there is basically no way for
-	// the user to handle this correctly.  Caveat emptor.
-	return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_0;
-      }
-  }
-
-  // A global symbol.
-  inline Relocatable_relocs::Reloc_strategy
-  global_strategy(unsigned int, Relobj*, unsigned int)
-  { return Relocatable_relocs::RELOC_COPY; }
-};
-
 // Scan the input relocations for --emit-relocs.
 
 template<int size, bool big_endian>
@@ -546,40 +511,18 @@ Sized_relobj_file<size, big_endian>::emit_relocs_scan(
     const unsigned char* plocal_syms,
     const Read_relocs_data::Relocs_list::iterator& p)
 {
+  Sized_target<size, big_endian>* target =
+      parameters->sized_target<size, big_endian>();
+
   Relocatable_relocs* rr = this->relocatable_relocs(p->reloc_shndx);
   gold_assert(rr != NULL);
   rr->set_reloc_count(p->reloc_count);
-
-  if (p->sh_type == elfcpp::SHT_REL)
-    this->emit_relocs_scan_reltype<elfcpp::SHT_REL>(symtab, layout,
-						    plocal_syms, p, rr);
-  else
-    {
-      gold_assert(p->sh_type == elfcpp::SHT_RELA);
-      this->emit_relocs_scan_reltype<elfcpp::SHT_RELA>(symtab, layout,
-						       plocal_syms, p, rr);
-    }
-}
-
-// Scan the input relocation for --emit-relocs, templatized on the
-// type of the relocation section.
-
-template<int size, bool big_endian>
-template<int sh_type>
-void
-Sized_relobj_file<size, big_endian>::emit_relocs_scan_reltype(
-    Symbol_table* symtab,
-    Layout* layout,
-    const unsigned char* plocal_syms,
-    const Read_relocs_data::Relocs_list::iterator& p,
-    Relocatable_relocs* rr)
-{
-  scan_relocatable_relocs<size, big_endian, sh_type,
-			  Emit_relocs_strategy<sh_type> >(
+  target->emit_relocs_scan(
     symtab,
     layout,
     this,
     p->data_shndx,
+    p->sh_type,
     p->contents->data(),
     p->reloc_count,
     p->output_section,
@@ -628,8 +571,8 @@ Sized_relobj_file<size, big_endian>::incremental_relocs_scan_reltype(
 						         reloc.get_r_offset()))
 	continue;
 
-      typename elfcpp::Elf_types<size>::Elf_WXword r_info =
-	  reloc.get_r_info();
+      // FIXME: Some targets have a non-standard r_info field.
+      typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
       const unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
 
       if (r_sym >= this->local_symbol_count_)
@@ -1025,7 +968,7 @@ Sized_relobj_file<size, big_endian>::do_relocate_sections(
 	  if ((data_shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) != 0)
 	    this->split_stack_adjust(symtab, pshdrs, sh_type, index,
 				     prelocs, reloc_count, view, view_size,
-				     &reloc_map);
+				     &reloc_map, target);
 	}
 
       Relocatable_relocs* rr = NULL;
@@ -1142,6 +1085,7 @@ Sized_relobj_file<size, big_endian>::incremental_relocs_write_reltype(
     {
       Reloc reloc(prelocs);
 
+      // FIXME: Some targets have a non-standard r_info field.
       typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
       const unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
       const unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
@@ -1240,20 +1184,21 @@ Sized_relobj_file<size, big_endian>::split_stack_adjust(
     size_t reloc_count,
     unsigned char* view,
     section_size_type view_size,
-    Reloc_symbol_changes** reloc_map)
+    Reloc_symbol_changes** reloc_map,
+    const Sized_target<size, big_endian>* target)
 {
   if (sh_type == elfcpp::SHT_REL)
     this->split_stack_adjust_reltype<elfcpp::SHT_REL>(symtab, pshdrs, shndx,
 						      prelocs, reloc_count,
 						      view, view_size,
-						      reloc_map);
+						      reloc_map, target);
   else
     {
       gold_assert(sh_type == elfcpp::SHT_RELA);
       this->split_stack_adjust_reltype<elfcpp::SHT_RELA>(symtab, pshdrs, shndx,
 							 prelocs, reloc_count,
 							 view, view_size,
-							 reloc_map);
+							 reloc_map, target);
     }
 }
 
@@ -1271,7 +1216,8 @@ Sized_relobj_file<size, big_endian>::split_stack_adjust_reltype(
     size_t reloc_count,
     unsigned char* view,
     section_size_type view_size,
-    Reloc_symbol_changes** reloc_map)
+    Reloc_symbol_changes** reloc_map,
+    const Sized_target<size, big_endian>* target)
 {
   typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
@@ -1283,10 +1229,10 @@ Sized_relobj_file<size, big_endian>::split_stack_adjust_reltype(
   const unsigned char* pr = prelocs;
   for (size_t i = 0; i < reloc_count; ++i, pr += reloc_size)
     {
-      Reltype reloc(pr);
-
-      typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
-      unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+      // Some supported targets have a non-standard r_info field.
+      // If this call is too slow, we can move this routine to
+      // target-reloc.h and templatize it on Classify_reloc.
+      unsigned int r_sym = target->get_r_sym(pr);
       if (r_sym < local_count)
 	continue;
 
@@ -1305,9 +1251,9 @@ Sized_relobj_file<size, big_endian>::split_stack_adjust_reltype(
 	  && gsym->source() == Symbol::FROM_OBJECT
 	  && !gsym->object()->uses_split_stack())
 	{
-	  unsigned int r_type = elfcpp::elf_r_type<size>(reloc.get_r_info());
-	  if (parameters->target().is_call_to_non_split(gsym, r_type))
+	  if (parameters->target().is_call_to_non_split(gsym, pr))
 	    {
+	      Reltype reloc(pr);
 	      section_offset_type offset =
 		convert_to_section_size_type(reloc.get_r_offset());
 	      non_split_refs.push_back(offset);
@@ -1378,9 +1324,7 @@ Sized_relobj_file<size, big_endian>::split_stack_adjust_reltype(
 	    {
 	      Reltype reloc(pr);
 
-	      typename elfcpp::Elf_types<size>::Elf_WXword r_info =
-		reloc.get_r_info();
-	      unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+	      unsigned int r_sym = target->get_r_sym(pr);
 	      if (r_sym < local_count)
 		continue;
 
@@ -1600,11 +1544,9 @@ Track_relocs<size, big_endian>::next_symndx() const
 {
   if (this->pos_ >= this->len_)
     return -1U;
-
-  // Rel and Rela start out the same, so we can use Rel to find the
-  // symbol index.
-  elfcpp::Rel<size, big_endian> rel(this->prelocs_ + this->pos_);
-  return elfcpp::elf_r_sym<size>(rel.get_r_info());
+  Sized_target<size, big_endian>* target
+      = parameters->sized_target<size, big_endian>();
+  return target->get_r_sym(this->prelocs_ + this->pos_);
 }
 
 // Return the addend of the next reloc, or 0 if there isn't one.

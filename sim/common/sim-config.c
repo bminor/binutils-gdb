@@ -237,7 +237,8 @@ sim_config (SIM_DESC sd)
     }
 #endif
   if (STATE_ENVIRONMENT (sd) == ALL_ENVIRONMENT)
-    STATE_ENVIRONMENT (sd) = DEFAULT_ENVIRONMENT;
+    STATE_ENVIRONMENT (sd) = (WITH_ENVIRONMENT != ALL_ENVIRONMENT ?
+			      WITH_ENVIRONMENT : USER_ENVIRONMENT);
 
 
   /* set the alignment */
@@ -295,26 +296,19 @@ sim_config (SIM_DESC sd)
 void
 print_sim_config (SIM_DESC sd)
 {
-#if defined (__GNUC__) && defined (__VERSION__)
-  sim_io_printf (sd, "Compiled by GCC %s on %s %s\n",
-			  __VERSION__, __DATE__, __TIME__);
-#else
-  sim_io_printf (sd, "Compiled on %s %s\n", __DATE__, __TIME__);
-#endif
-
-  sim_io_printf (sd, "WITH_TARGET_BYTE_ORDER   = %s\n",
+  sim_io_printf (sd, "WITH_TARGET_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (WITH_TARGET_BYTE_ORDER));
 
-  sim_io_printf (sd, "WITH_DEFAULT_TARGET_BYTE_ORDER   = %s\n",
+  sim_io_printf (sd, "WITH_DEFAULT_TARGET_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (WITH_DEFAULT_TARGET_BYTE_ORDER));
 
-  sim_io_printf (sd, "HOST_BYTE_ORDER          = %s\n",
+  sim_io_printf (sd, "HOST_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (HOST_BYTE_ORDER));
 
-  sim_io_printf (sd, "WITH_STDIO               = %s\n",
+  sim_io_printf (sd, "WITH_STDIO = %s\n",
 		 config_stdio_to_a (WITH_STDIO));
 
-  sim_io_printf (sd, "WITH_TARGET_WORD_MSB     = %d\n",
+  sim_io_printf (sd, "WITH_TARGET_WORD_MSB = %d\n",
 		 WITH_TARGET_WORD_MSB);
 
   sim_io_printf (sd, "WITH_TARGET_WORD_BITSIZE = %d\n",

@@ -55,6 +55,7 @@ code on the hardware.
 #include "getopt.h"
 #include "libiberty.h"
 #include "bfd.h"
+#include "elf-bfd.h"
 #include "gdb/callback.h"   /* GDB simulator callback interface */
 #include "gdb/remote-sim.h" /* GDB simulator interface */
 
@@ -346,7 +347,8 @@ static int mips_reg_fetch (SIM_CPU *, int, unsigned char *, int);
 static int mips_reg_store (SIM_CPU *, int, unsigned char *, int);
 
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
+sim_open (SIM_OPEN_KIND kind, host_callback *cb,
+	  struct bfd *abfd, char * const *argv)
 {
   int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
@@ -999,7 +1001,8 @@ mips_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
+		     char * const *argv, char * const *env)
 {
 
 #ifdef DEBUG
@@ -1018,7 +1021,17 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
       for (cpu_nr = 0; cpu_nr < sim_engine_nr_cpus (sd); cpu_nr++)
 	{
 	  sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
-	  CPU_PC_SET (cpu, (unsigned64) bfd_get_start_address (abfd));
+	  sim_cia pc = bfd_get_start_address (abfd);
+
+	  /* We need to undo brain-dead bfd behavior where it sign-extends
+	     addresses that are supposed to be unsigned.  See the mips bfd
+	     sign_extend_vma setting.  We have to check the ELF data itself
+	     in order to handle o32 & n32 ABIs.  */
+	  if (abfd->tdata.elf_obj_data->elf_header->e_ident[EI_CLASS] ==
+	      ELFCLASS32)
+	    pc = (unsigned32) pc;
+
+	  CPU_PC_SET (cpu, pc);
 	}
     }
 

@@ -2378,7 +2378,8 @@ free_state (SIM_DESC sd)
 }
 
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, host_callback *cb, struct bfd *abfd, char **argv)
+sim_open (SIM_OPEN_KIND kind, host_callback *cb,
+	  struct bfd *abfd, char * const *argv)
 {
   char **p;
   int i;
@@ -2483,7 +2484,8 @@ parse_and_set_memory_size (SIM_DESC sd, const char *str)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd,
+		     char * const *argv, char * const *env)
 {
   /* Clear the registers. */
   memset (&saved_state, 0,

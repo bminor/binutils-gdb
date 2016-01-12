@@ -60,7 +60,7 @@ static int open;
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
 	  struct host_callback_struct *callback,
-	  struct bfd *abfd, char **argv)
+	  struct bfd *abfd, char * const *argv)
 {
   setbuf (stdout, 0);
   if (open)
@@ -144,7 +144,8 @@ sim_load (SIM_DESC sd, const char *prog, struct bfd * abfd, int from_tty)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd * abfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd * abfd,
+		     char * const *argv, char * const *env)
 {
   check_desc (sd);
 

@@ -1,3 +1,56 @@
+2016-01-12  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/linux-ptrace.c (linux_child_function): Cast child_stack
+	to gdb_byte * and pass to linux_fork_to_function.
+
+2016-01-12  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/linux-ptrace.c (linux_fork_to_function): Change type
+	of argument 'function'.
+	(linux_grandchild_function): Change return type to 'int'.
+	Change child_stack's type to 'void *'.
+	(linux_child_function): Likewise.
+
+2016-01-12  Pedro Alves  <palves@redhat.com>
+
+	Remove use of the registered trademark symbol throughout.
+
+2016-01-12  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* reply_mig_hack.awk: Rewrite one regular expression.
+
+2016-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Include new warning.m4 file.
+	* configure: Regenerated.
+	* configure.ac: Move all warning logic ...
+	* warning.m4: ... here.
+
+2016-01-08  Yao Qi  <yao.qi@linaro.org>
+
+	* extension.c: Include target.h.
+	(set_active_ext_lang): Only call install_gdb_sigint_handler,
+	check_quit_flag, and set_quit_flag if target_terminal_is_ours
+	returns false.
+	(restore_active_ext_lang): Likewise.
+	* target.c (target_terminal_is_ours): New function.
+	* target.h (target_terminal_is_ours): Declare.
+
+2016-01-07  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_breakpoint_from_pc): Rename local `status'
+	to `err' in the little-endian leg.
+
+2016-01-06  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm-get-next-pcs.c (arm_get_next_pcs): Move it to some
+	lines below.
+	(thumb_get_next_pcs_raw): Make it static.
+	(arm_get_next_pcs_raw): Likewise.
+	* arch/arm-get-next-pcs.h (thumb_get_next_pcs_raw): Remove the
+	declaration.
+	(arm_get_next_pcs_raw): Likewise.
+
 2016-01-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* version.in: Change cvs to git.

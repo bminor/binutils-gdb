@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    to suggest that they shouldn't :-)].  */
 
 #ifdef HAVE_CONFIG_H
-#include "cconfig.h"
+#include "config.h"
 #endif
 #include "ansidecl.h"
 #include <stdio.h> /* for NULL */

@@ -21,20 +21,23 @@ short hglob = 1;
 
 short glob = 92;
 
-int commonfun() { bar(); } /* from hello */
-
+void
 bar()
 {
   if (glob == 0)
     exit(1);
 }
 
+int commonfun() { bar(); } /* from hello */
+
+int
 hello(int x)
 {
   x *= 2;
   return x + 45;
 }
 
+int
 main()
 {
   int tmpx;

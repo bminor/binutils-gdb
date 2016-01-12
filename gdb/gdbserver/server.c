@@ -420,7 +420,7 @@ handle_btrace_enable_bts (struct thread_info *thread)
   return NULL;
 }
 
-/* Handle btrace enabling in Intel(R) Processor Trace format.  */
+/* Handle btrace enabling in Intel Processor Trace format.  */
 
 static const char *
 handle_btrace_enable_pt (struct thread_info *thread)
@@ -805,7 +805,7 @@ get_features_xml (const char *annex)
   return NULL;
 }
 
-void
+static void
 monitor_show_help (void)
 {
   monitor_output ("The following monitor commands are supported:\n");
@@ -1966,7 +1966,7 @@ supported_btrace_packets (char *buf)
 
 /* Handle all of the extended 'q' packets.  */
 
-void
+static void
 handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 {
   static struct inferior_list_entry *thread_ptr;
@@ -2568,7 +2568,7 @@ handle_pending_status (const struct thread_resume *resumption,
 }
 
 /* Parse vCont packets.  */
-void
+static void
 handle_v_cont (char *own_buf)
 {
   char *p, *q;
@@ -2735,7 +2735,7 @@ resume (struct thread_resume *actions, size_t num_actions)
 }
 
 /* Attach to a new program.  Return 1 if successful, 0 if failure.  */
-int
+static int
 handle_v_attach (char *own_buf)
 {
   int pid;
@@ -2858,7 +2858,7 @@ handle_v_run (char *own_buf)
 }
 
 /* Kill process.  Return 1 if successful, 0 if failure.  */
-int
+static int
 handle_v_kill (char *own_buf)
 {
   int pid;
@@ -2884,7 +2884,7 @@ handle_v_kill (char *own_buf)
 }
 
 /* Handle all of the extended 'v' packets.  */
-void
+static void
 handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 {
   if (!disable_packet_vCont)

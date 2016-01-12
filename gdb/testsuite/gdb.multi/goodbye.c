@@ -39,6 +39,23 @@ int verylongfun()
   glob *= 9;
 }
 
+void
+mailand()
+{
+  glob = 46;
+}
+
+int
+foo(int x) {
+  return x + 92;
+}
+
+void
+goodbye() {
+  ++glob;
+}
+
+int
 main() {
   mailand();
   foo(glob);
@@ -46,17 +63,4 @@ main() {
   goodbye();
 }
 
-foo(int x) {
-  return x + 92;
-}
-
-mailand()
-{
-  glob = 46;
-}
-
 void commonfun() { mailand(); } /* from goodbye */
-
-goodbye() {
-  ++glob;
-}

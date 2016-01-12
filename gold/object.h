@@ -2710,7 +2710,8 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 		     unsigned int sh_type, unsigned int shndx,
 		     const unsigned char* prelocs, size_t reloc_count,
 		     unsigned char* view, section_size_type view_size,
-		     Reloc_symbol_changes** reloc_map);
+		     Reloc_symbol_changes** reloc_map,
+		     const Sized_target<size, big_endian>* target);
 
   template<int sh_type>
   void
@@ -2718,7 +2719,8 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 			     unsigned int shndx, const unsigned char* prelocs,
 			     size_t reloc_count, unsigned char* view,
 			     section_size_type view_size,
-			     Reloc_symbol_changes** reloc_map);
+			     Reloc_symbol_changes** reloc_map,
+			     const Sized_target<size, big_endian>* target);
 
   // Find all functions in a section.
   void

@@ -8,7 +8,7 @@
 * Support for tracepoints on aarch64-linux was added in GDBserver.
 
 * The 'record instruction-history' command now indicates speculative execution
-  when using the Intel(R) Processor Trace recording format.
+  when using the Intel Processor Trace recording format.
 
 * GDB now allows users to specify explicit locations, bypassing
   the linespec parser.  This feature is also available to GDB/MI
@@ -257,11 +257,11 @@ tui disable
 
 show mpx bound
 set mpx bound on i386 and amd64
-   Support for bound table investigation on Intel(R) MPX enabled applications.
+   Support for bound table investigation on Intel MPX enabled applications.
 
 record btrace pt
 record pt
-  Start branch trace recording using Intel(R) Processor Trace format.
+  Start branch trace recording using Intel Processor Trace format.
 
 maint info btrace
   Print information about branch tracing internals.
@@ -329,7 +329,7 @@ show debug linux-namespaces
 
 set|show record btrace pt buffer-size
   Set and show the size of the ring buffer used for branch tracing in
-  Intel(R) Processor Trace format.
+  Intel Processor Trace format.
   The obtained size may differ from the requested size.  Use "info
   record" to see the obtained buffer size.
 
@@ -354,12 +354,12 @@ Qbtrace-conf:bts:size
   Set the requested ring buffer size for branch tracing in BTS format.
 
 Qbtrace:pt
-  Enable Intel(R) Procesor Trace-based branch tracing for the current
+  Enable Intel Procesor Trace-based branch tracing for the current
   process.  The remote stub reports support for this packet to GDB's
   qSupported query.
 
 Qbtrace-conf:pt:size
-  Set the requested ring buffer size for branch tracing in Intel(R) Processor
+  Set the requested ring buffer size for branch tracing in Intel Processor
   Trace format.
 
 swbreak stop reason
@@ -433,7 +433,7 @@ Itanium running HP-UX         ia64-*-hpux*
 
 --with-intel-pt
   This configure option allows the user to build GDB with support for
-  Intel(R) Processor Trace (default: auto).  This requires libipt.
+  Intel Processor Trace (default: auto).  This requires libipt.
 
 --with-libipt-prefix=PATH
   Specify the path to the version of libipt that GDB should use.
@@ -705,10 +705,10 @@ show mi-async
   can be used to launch native programs even when "set
   auto-connect-native-target" is set to off.
 
-* GDB now supports access to Intel(R) MPX registers on GNU/Linux.
+* GDB now supports access to Intel MPX registers on GNU/Linux.
 
-* Support for Intel(R) AVX-512 registers on GNU/Linux.
-  Support displaying and modifying Intel(R) AVX-512 registers
+* Support for Intel AVX-512 registers on GNU/Linux.
+  Support displaying and modifying Intel AVX-512 registers
   $zmm0 - $zmm31 and $k0 - $k7 on GNU/Linux.
 
 * New remote packets

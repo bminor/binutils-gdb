@@ -6,7 +6,6 @@ sinclude(../common/acinclude.m4)
 SIM_AC_COMMON
 
 dnl Options available in this module
-SIM_AC_OPTION_INLINE()
 SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
 SIM_AC_OPTION_WARNINGS
 SIM_AC_OPTION_RESERVED_BITS(1)
@@ -84,16 +83,6 @@ case "${target}" in
   *)                    mips_fpu=HARD_FLOATING_POINT ;;
 esac
 SIM_AC_OPTION_FLOAT($mips_fpu,$mips_fpu_bitsize)
-
-
-
-#
-# Select the level of SMP support
-#
-case "${target}" in
-  *)                    mips_smp=0 ;;
-esac
-SIM_AC_OPTION_SMP($mips_smp)
 
 
 

@@ -267,7 +267,7 @@ Z_packet_to_raw_bkpt_type (char z_type)
 }
 
 int
-any_persistent_commands ()
+any_persistent_commands (void)
 {
   struct process_info *proc = current_process ();
   struct breakpoint *bp;
@@ -1269,7 +1269,7 @@ gdb_condition_true_at_breakpoint (CORE_ADDR where)
 
 /* Add commands COMMANDS to GDBserver's breakpoint BP.  */
 
-void
+static void
 add_commands_to_breakpoint (struct breakpoint *bp,
 			    struct agent_expr *commands, int persist)
 {

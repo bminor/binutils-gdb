@@ -72,6 +72,14 @@ class Target_test : public Sized_target<size, big_endian>
   { ERROR("call to Target_test::scan_relocatable_relocs"); }
 
   void
+  emit_relocs_scan(Symbol_table*, Layout*,
+		   Sized_relobj_file<size, big_endian>*, unsigned int,
+		   unsigned int, const unsigned char*,
+		   size_t, Output_section*, bool, size_t,
+		   const unsigned char*, Relocatable_relocs*)
+  { ERROR("call to Target_test::emit_relocs_scan"); }
+
+  void
   relocate_relocs(const Relocate_info<size, big_endian>*,
 		  unsigned int, const unsigned char*, size_t,
 		  Output_section*, typename elfcpp::Elf_types<size>::Elf_Off,

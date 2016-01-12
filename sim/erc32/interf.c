@@ -162,7 +162,7 @@ sim_open (kind, callback, abfd, argv)
      SIM_OPEN_KIND kind;
      struct host_callback_struct *callback;
      struct bfd *abfd;
-     char **argv;
+     char * const *argv;
 {
 
     int             argc = 0;
@@ -288,8 +288,8 @@ SIM_RC
 sim_create_inferior(sd, abfd, argv, env)
      SIM_DESC sd;
      struct bfd *abfd;
-     char **argv;
-     char **env;
+     char * const *argv;
+     char * const *env;
 {
     bfd_vma start_address = 0;
     if (abfd != NULL)

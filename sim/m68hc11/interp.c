@@ -418,7 +418,7 @@ static int m68hc11_reg_store (SIM_CPU *, int, unsigned char *, int);
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback,
-          bfd *abfd, char **argv)
+	  bfd *abfd, char * const *argv)
 {
   int i;
   SIM_DESC sd;
@@ -547,7 +547,7 @@ sim_info (SIM_DESC sd, int verbose)
 
 SIM_RC
 sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
-                     char **argv, char **env)
+                     char * const *argv, char * const *env)
 {
   return sim_prepare_for_program (sd, abfd);
 }

@@ -625,12 +625,7 @@ INSTALL_SCRIPT
 INSTALL_PROGRAM
 WERROR_CFLAGS
 WARN_CFLAGS
-sim_xor_endian
-sim_stdcall
-sim_smp
 sim_reserved_bits
-sim_regparm
-sim_packages
 sim_inline
 sim_hw
 sim_hw_objs
@@ -640,9 +635,7 @@ sim_scache
 sim_float
 sim_endian
 sim_bitsize
-sim_assert
 sim_alignment
-sim_environment
 target_alias
 host_alias
 build_alias
@@ -3708,23 +3701,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-sim_inline="-DDEFAULT_INLINE=0"
 
 
 

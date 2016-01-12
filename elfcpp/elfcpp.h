@@ -1661,6 +1661,172 @@ class Rela_write
   internal::Rela_data<size>* p_;
 };
 
+// MIPS-64 has a non-standard relocation layout.
+
+template<bool big_endian>
+class Mips64_rel
+{
+ public:
+  Mips64_rel(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Mips64_rel_data*>(p))
+  { }
+
+  template<typename File>
+  Mips64_rel(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Mips64_rel_data*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  typename Elf_types<64>::Elf_Addr
+  get_r_offset() const
+  { return Convert<64, big_endian>::convert_host(this->p_->r_offset); }
+
+  Elf_Word
+  get_r_sym() const
+  { return Convert<32, big_endian>::convert_host(this->p_->r_sym); }
+
+  unsigned char
+  get_r_ssym() const
+  { return this->p_->r_ssym; }
+
+  unsigned char
+  get_r_type() const
+  { return this->p_->r_type; }
+
+  unsigned char
+  get_r_type2() const
+  { return this->p_->r_type2; }
+
+  unsigned char
+  get_r_type3() const
+  { return this->p_->r_type3; }
+
+ private:
+  const internal::Mips64_rel_data* p_;
+};
+
+template<bool big_endian>
+class Mips64_rel_write
+{
+ public:
+  Mips64_rel_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Mips64_rel_data*>(p))
+  { }
+
+  void
+  put_r_offset(typename Elf_types<64>::Elf_Addr v)
+  { this->p_->r_offset = Convert<64, big_endian>::convert_host(v); }
+
+  void
+  put_r_sym(Elf_Word v)
+  { this->p_->r_sym = Convert<32, big_endian>::convert_host(v); }
+
+  void
+  put_r_ssym(unsigned char v)
+  { this->p_->r_ssym = v; }
+
+  void
+  put_r_type(unsigned char v)
+  { this->p_->r_type = v; }
+
+  void
+  put_r_type2(unsigned char v)
+  { this->p_->r_type2 = v; }
+
+  void
+  put_r_type3(unsigned char v)
+  { this->p_->r_type3 = v; }
+
+ private:
+  internal::Mips64_rel_data* p_;
+};
+
+template<bool big_endian>
+class Mips64_rela
+{
+ public:
+  Mips64_rela(const unsigned char* p)
+    : p_(reinterpret_cast<const internal::Mips64_rela_data*>(p))
+  { }
+
+  template<typename File>
+  Mips64_rela(File* file, typename File::Location loc)
+    : p_(reinterpret_cast<const internal::Mips64_rela_data*>(
+	   file->view(loc.file_offset, loc.data_size).data()))
+  { }
+
+  typename Elf_types<64>::Elf_Addr
+  get_r_offset() const
+  { return Convert<64, big_endian>::convert_host(this->p_->r_offset); }
+
+  Elf_Word
+  get_r_sym() const
+  { return Convert<32, big_endian>::convert_host(this->p_->r_sym); }
+
+  unsigned char
+  get_r_ssym() const
+  { return this->p_->r_ssym; }
+
+  unsigned char
+  get_r_type() const
+  { return this->p_->r_type; }
+
+  unsigned char
+  get_r_type2() const
+  { return this->p_->r_type2; }
+
+  unsigned char
+  get_r_type3() const
+  { return this->p_->r_type3; }
+
+  typename Elf_types<64>::Elf_Swxword
+  get_r_addend() const
+  { return Convert<64, big_endian>::convert_host(this->p_->r_addend); }
+
+ private:
+  const internal::Mips64_rela_data* p_;
+};
+
+template<bool big_endian>
+class Mips64_rela_write
+{
+ public:
+  Mips64_rela_write(unsigned char* p)
+    : p_(reinterpret_cast<internal::Mips64_rela_data*>(p))
+  { }
+
+  void
+  put_r_offset(typename Elf_types<64>::Elf_Addr v)
+  { this->p_->r_offset = Convert<64, big_endian>::convert_host(v); }
+
+  void
+  put_r_sym(Elf_Word v)
+  { this->p_->r_sym = Convert<32, big_endian>::convert_host(v); }
+
+  void
+  put_r_ssym(unsigned char v)
+  { this->p_->r_ssym = v; }
+
+  void
+  put_r_type(unsigned char v)
+  { this->p_->r_type = v; }
+
+  void
+  put_r_type2(unsigned char v)
+  { this->p_->r_type2 = v; }
+
+  void
+  put_r_type3(unsigned char v)
+  { this->p_->r_type3 = v; }
+
+  void
+  put_r_addend(typename Elf_types<64>::Elf_Swxword v)
+  { this->p_->r_addend = Convert<64, big_endian>::convert_host(v); }
+
+ private:
+  internal::Mips64_rela_data* p_;
+};
+
 // Accessor classes for entries in the ELF SHT_DYNAMIC section aka
 // PT_DYNAMIC segment.
 

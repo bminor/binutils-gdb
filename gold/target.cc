@@ -152,7 +152,7 @@ Target::do_make_output_section(const char* name, elfcpp::Elf_Word type,
 // whether the symbol is a function.
 
 bool
-Target::do_is_call_to_non_split(const Symbol* sym, unsigned int) const
+Target::do_is_call_to_non_split(const Symbol* sym, const unsigned char*) const
 {
   return sym->type() == elfcpp::STT_FUNC;
 }

@@ -63,7 +63,8 @@ struct btrace_tinfo_bts
   struct perf_event_buffer bts;
 };
 
-/* Branch trace target information for Intel(R) Processor Trace.  */
+/* Branch trace target information for Intel Processor Trace
+   tracing.  */
 struct btrace_tinfo_pt
 {
   /* The Linux perf_event configuration for collecting the branch trace.  */

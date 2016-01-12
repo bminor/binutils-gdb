@@ -180,6 +180,29 @@ struct Rela_data
   typename Elf_types<size>::Elf_Swxword r_addend;
 };
 
+// MIPS-64 has a non-standard layout for relocations.
+
+struct Mips64_rel_data
+{
+  typename Elf_types<64>::Elf_Addr r_offset;
+  Elf_Word r_sym;
+  unsigned char r_ssym;
+  unsigned char r_type3;
+  unsigned char r_type2;
+  unsigned char r_type;
+};
+
+struct Mips64_rela_data
+{
+  typename Elf_types<64>::Elf_Addr r_offset;
+  Elf_Word r_sym;
+  unsigned char r_ssym;
+  unsigned char r_type3;
+  unsigned char r_type2;
+  unsigned char r_type;
+  typename Elf_types<64>::Elf_Swxword r_addend;
+};
+
 // An entry in the ELF SHT_DYNAMIC section aka PT_DYNAMIC segment.
 
 template<int size>

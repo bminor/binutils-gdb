@@ -1,3 +1,12 @@
+2016-01-12  Pedro Alves  <palves@redhat.com>
+
+	Remove use of the registered trademark symbol throughout.
+
+2016-01-12  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.texinfo (Interrupts): Update the document on handling
+	interrupt when program is stopped.
+
 2015-12-11  Don Breazeal  <donb@codesourcery.com>
 
 	* gdb.texinfo (Forks): Correct Linux kernel version where

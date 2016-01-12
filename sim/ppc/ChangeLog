@@ -1,3 +1,50 @@
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (sim-assert): Call AC_MSG_CHECKING,
+	AC_DEFINE_UNQUOTED, and AC_MSG_RESULT
+	(sim-env, sim-stdio, sim-trace): Delete.
+	* config.in, configure: Regenerate.
+	* Make-common.in (ENV_CFLAGS, TRACE_CFLAGS, ASSERT_CFLAGS,
+	STDIO_CFLAGS): Delete.
+	(CONFIG_CFLAGS): Delete $(ENV_CFLAGS), $(TRACE_CFLAGS),
+	$(ASSERT_CFLAGS), and $(STDIO_CFLAGS).
+	* std-config.h (WITH_ENVIRONMENT, WITH_TRACE, WITH_ASSERT,
+	WITH_STDIO): Delete.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete --enable-sim-regparm and sim_regparm,
+	and --enable-sim-stdcall and sim_stdcall.
+	* configure: Regenerate.
+	* Makefile.in (REGPARM_CFLAGS, STDCALL_CFLAGS): Delete.
+	(CONFIG_CFLAGS): Delete $(REGPARM_CFLAGS) and $(STDCALL_CFLAGS).
+	* inline.h: Delete REGPARM everywhere.
+	* options.c (print_options): Delete WITH_REGPARM and
+	WITH_STDCALL.
+	* std-config.h (WITH_REGPARM, WITH_STDCALL, REGPARM): Delete.
+
+2016-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete --enable-sim-cflags and sim_cflags.
+	* configure: Regenerate.
+	* INSTALL: Delete all mention of --enable-sim-cflags.
+	* Makefile.in (SIM_CFLAGS): Delete.
+	(STD_CFLAGS, NOWARN_CFLAGS): Delete $(SIM_CFLAGS).
+	(psim): Likewise.
+
+2016-01-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim_calls.c (sim_open): Mark argv const.
+	(sim_create_inferior): Mark argv and env const.
+
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (sim-bswap): Delete.

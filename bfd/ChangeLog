@@ -1,3 +1,23 @@
+2016-01-12  Yury Usishchev  <y.usishchev@samsung.com>
+
+	* elf32-arm.c (elf32_arm_fix_exidx_coverage): Insert cantunwind
+	when address in first unwind entry does not match start of
+	section.
+
+2016-01-08  Richard Sandiford  <richard.sandiford@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	PR ld/19368
+	* elf32-arm.c (elf32_arm_reloc_type_class): Map R_ARM_IRELATIVE to
+	reloc_class_ifunc.
+
+2016-01-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf32-arc.c (reloc_type_to_name): Change ARC_RELOC_HOWTO to
+	place 'R_' before the reloc name returned.
+	(elf_arc_howto_table): Change ARC_RELOC_HOWTO to place 'R_' before
+	the relocation string.
+
 2016-01-04  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_merge_obj_abiflags): New function,

@@ -1,3 +1,22 @@
+2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add "esb".
+	(thumb_opcodes): Likewise.
+
+2016-01-11  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-opc.c <xscmpnedp>: Delete.
+	<xvcmpnedp>: Likewise.
+	<xvcmpnedp.>: Likewise.
+	<xvcmpnesp>: Likewise.
+	<xvcmpnesp.>: Likewise.
+
+2016-01-08  Andreas Schwab  <schwab@linux-m68k.org>
+
+	PR gas/13050
+	* m68k-opc.c (moveb, movew): For ISA_B/C only allow #,d(An) in
+	addition to ISA_A.
+
 2016-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
