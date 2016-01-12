@@ -2749,6 +2749,14 @@ class Target_arm : public Sized_target<32, big_endian>
       public gold::Default_classify_reloc<elfcpp::SHT_REL, 32, big_endian>
   {
    public:
+    typedef typename Reloc_types<elfcpp::SHT_REL, 32, big_endian>::Reloc
+	Reltype;
+
+    // Return the explicit addend of the relocation (return 0 for SHT_REL).
+    static typename elfcpp::Elf_types<32>::Elf_Swxword
+    get_r_addend(const Reltype*)
+    { return 0; }
+
     // Return the size of the addend of the relocation (only used for SHT_REL).
     static unsigned int
     get_size_for_reloc(unsigned int, Relobj*);
