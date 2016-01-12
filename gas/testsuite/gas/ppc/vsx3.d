@@ -130,3 +130,4 @@ Disassembly of section \.text:
 .*:	(fe 76 66 88|88 66 76 fe) 	xscvdpqp v19,v12
 .*:	(fd b9 26 88|88 26 b9 fd) 	xscvqpsdz v13,v4
 .*:	(fc f8 3e c8|c8 3e f8 fc) 	xsiexpqp v7,v24,v7
+#pass
