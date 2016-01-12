@@ -1,3 +1,8 @@
+2016-01-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/random-signal.exp (do_test): New procedure, with body
+	of testcase moved in.
+
 2016-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
