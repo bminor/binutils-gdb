@@ -1,3 +1,11 @@
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* btrace.c (ftrace_add_pt): Fix gap indication.  Add warning for non-
+	contiguous trace and overflow.  Rephrase trace decode warning and print
+	instruction number.  Remove dead gaps warning.
+	(btrace_compute_ftrace_bts): Rephrase warnings and print instruction
+	number.
+
 2016-10-25  Sandra Loosemore  <sandra@codesourcery.com>
 	    Luis Machado  <lgustavo@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>

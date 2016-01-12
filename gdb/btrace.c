@@ -630,11 +630,12 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 		 beginning.  */
 	      if (begin != NULL)
 		{
-		  warning (_("Recorded trace may be corrupted around %s."),
-			   core_addr_to_string_nz (pc));
-
 		  end = ftrace_new_gap (end, BDE_BTS_OVERFLOW);
 		  ngaps += 1;
+
+		  warning (_("Recorded trace may be corrupted at instruction "
+			     "%u (pc = %s)."), end->insn_offset - 1,
+			   core_addr_to_string_nz (pc));
 		}
 	      break;
 	    }
@@ -672,13 +673,14 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  /* We can't continue if we fail to compute the size.  */
 	  if (size <= 0)
 	    {
-	      warning (_("Recorded trace may be incomplete around %s."),
-		       core_addr_to_string_nz (pc));
-
 	      /* Indicate the gap in the trace.  We just added INSN so we're
 		 not at the beginning.  */
 	      end = ftrace_new_gap (end, BDE_BTS_INSN_SIZE);
 	      ngaps += 1;
+
+	      warning (_("Recorded trace may be incomplete at instruction %u "
+			 "(pc = %s)."), end->insn_offset - 1,
+		       core_addr_to_string_nz (pc));
 
 	      break;
 	    }
@@ -750,11 +752,10 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 {
   struct btrace_function *begin, *end, *upd;
   uint64_t offset;
-  int errcode, nerrors;
+  int errcode;
 
   begin = *pbegin;
   end = *pend;
-  nerrors = 0;
   for (;;)
     {
       struct btrace_insn btinsn;
@@ -785,11 +786,29 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 		 flag.  The ENABLED instruction flag means that we continued
 		 from some other instruction.  Indicate this as a trace gap.  */
 	      if (insn.enabled)
-		*pend = end = ftrace_new_gap (end, BDE_PT_DISABLED);
+		{
+		  *pend = end = ftrace_new_gap (end, BDE_PT_DISABLED);
+		  *ngaps += 1;
+
+		  pt_insn_get_offset (decoder, &offset);
+
+		  warning (_("Non-contiguous trace at instruction %u (offset "
+			     "= 0x%" PRIx64 ", pc = 0x%" PRIx64 ")."),
+			   end->insn_offset - 1, offset, insn.ip);
+		}
 
 	      /* Indicate trace overflows.  */
 	      if (insn.resynced)
-		*pend = end = ftrace_new_gap (end, BDE_PT_OVERFLOW);
+		{
+		  *pend = end = ftrace_new_gap (end, BDE_PT_OVERFLOW);
+		  *ngaps += 1;
+
+		  pt_insn_get_offset (decoder, &offset);
+
+		  warning (_("Overflow at instruction %u (offset = 0x%" PRIx64
+			     ", pc = 0x%" PRIx64 ")."), end->insn_offset - 1,
+			   offset, insn.ip);
+		}
 	    }
 
 	  upd = ftrace_update_function (end, insn.ip);
@@ -820,19 +839,16 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
       if (begin == NULL)
 	continue;
 
-      pt_insn_get_offset (decoder, &offset);
-
-      warning (_("Failed to decode Intel Processor Trace near trace "
-		 "offset 0x%" PRIx64 " near recorded PC 0x%" PRIx64 ": %s."),
-	       offset, insn.ip, pt_errstr (pt_errcode (errcode)));
-
       /* Indicate the gap in the trace.  */
       *pend = end = ftrace_new_gap (end, errcode);
       *ngaps += 1;
-    }
 
-  if (nerrors > 0)
-    warning (_("The recorded execution trace may have gaps."));
+      pt_insn_get_offset (decoder, &offset);
+
+      warning (_("Decode error (%d) at instruction %u (offset = 0x%" PRIx64
+		 ", pc = 0x%" PRIx64 "): %s."), errcode, end->insn_offset - 1,
+	       offset, insn.ip, pt_errstr (pt_errcode (errcode)));
+    }
 }
 
 /* A callback function to allow the trace decoder to read the inferior's
