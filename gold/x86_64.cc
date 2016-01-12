@@ -816,7 +816,6 @@ class Target_x86_64 : public Sized_target<size, false>
     // Do a TLS General-Dynamic to Initial-Exec transition.
     inline void
     tls_gd_to_ie(const Relocate_info<size, false>*, size_t relnum,
-		 Output_segment* tls_segment,
 		 const elfcpp::Rela<size, false>&, unsigned int r_type,
 		 typename elfcpp::Elf_types<size>::Elf_Addr value,
 		 unsigned char* view,
@@ -835,7 +834,6 @@ class Target_x86_64 : public Sized_target<size, false>
     // Do a TLSDESC-style General-Dynamic to Initial-Exec transition.
     inline void
     tls_desc_gd_to_ie(const Relocate_info<size, false>*, size_t relnum,
-		      Output_segment* tls_segment,
 		      const elfcpp::Rela<size, false>&, unsigned int r_type,
 		      typename elfcpp::Elf_types<size>::Elf_Addr value,
 		      unsigned char* view,
@@ -3733,7 +3731,7 @@ Target_x86_64<size>::Relocate::relocate_tls(
 	  if (optimized_type == tls::TLSOPT_TO_IE)
 	    {
 	      value = target->got_plt_section()->address() + got_offset;
-	      this->tls_gd_to_ie(relinfo, relnum, tls_segment, rela, r_type,
+	      this->tls_gd_to_ie(relinfo, relnum, rela, r_type,
 				 value, view, address, view_size);
 	      break;
 	    }
@@ -3800,14 +3798,8 @@ Target_x86_64<size>::Relocate::relocate_tls(
 	    }
 	  if (optimized_type == tls::TLSOPT_TO_IE)
 	    {
-	      if (tls_segment == NULL)
-		{
-		  gold_assert(parameters->errors()->error_count() > 0
-			      || issue_undefined_symbol_error(gsym));
-		  return;
-		}
 	      value = target->got_plt_section()->address() + got_offset;
-	      this->tls_desc_gd_to_ie(relinfo, relnum, tls_segment,
+	      this->tls_desc_gd_to_ie(relinfo, relnum,
 				      rela, r_type, value, view, address,
 				      view_size);
 	      break;
@@ -3973,7 +3965,6 @@ inline void
 Target_x86_64<size>::Relocate::tls_gd_to_ie(
     const Relocate_info<size, false>* relinfo,
     size_t relnum,
-    Output_segment*,
     const elfcpp::Rela<size, false>& rela,
     unsigned int,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
@@ -4085,7 +4076,6 @@ inline void
 Target_x86_64<size>::Relocate::tls_desc_gd_to_ie(
     const Relocate_info<size, false>* relinfo,
     size_t relnum,
-    Output_segment*,
     const elfcpp::Rela<size, false>& rela,
     unsigned int r_type,
     typename elfcpp::Elf_types<size>::Elf_Addr value,

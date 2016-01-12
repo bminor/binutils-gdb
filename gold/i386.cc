@@ -668,7 +668,6 @@ class Target_i386 : public Sized_target<32, false>
     // Do a TLS General-Dynamic to Initial-Exec transition.
     inline void
     tls_gd_to_ie(const Relocate_info<32, false>*, size_t relnum,
-		 Output_segment* tls_segment,
 		 const elfcpp::Rel<32, false>&, unsigned int r_type,
 		 elfcpp::Elf_types<32>::Elf_Addr value,
 		 unsigned char* view,
@@ -687,7 +686,6 @@ class Target_i386 : public Sized_target<32, false>
     // transition.
     inline void
     tls_desc_gd_to_ie(const Relocate_info<32, false>*, size_t relnum,
-		      Output_segment* tls_segment,
 		      const elfcpp::Rel<32, false>&, unsigned int r_type,
 		      elfcpp::Elf_types<32>::Elf_Addr value,
 		      unsigned char* view,
@@ -3054,7 +3052,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	    }
 	  if (optimized_type == tls::TLSOPT_TO_IE)
 	    {
-	      this->tls_gd_to_ie(relinfo, relnum, tls_segment, rel, r_type,
+	      this->tls_gd_to_ie(relinfo, relnum, rel, r_type,
 				 got_offset, view, view_size);
 	      break;
 	    }
@@ -3116,13 +3114,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	    }
 	  if (optimized_type == tls::TLSOPT_TO_IE)
 	    {
-	      if (tls_segment == NULL)
-		{
-		  gold_assert(parameters->errors()->error_count() > 0
-			      || issue_undefined_symbol_error(gsym));
-		  return;
-		}
-	      this->tls_desc_gd_to_ie(relinfo, relnum, tls_segment, rel, r_type,
+	      this->tls_desc_gd_to_ie(relinfo, relnum, rel, r_type,
 				      got_offset, view, view_size);
 	      break;
 	    }
@@ -3354,7 +3346,6 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
 inline void
 Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
 				    size_t relnum,
-				    Output_segment*,
 				    const elfcpp::Rel<32, false>& rel,
 				    unsigned int,
 				    elfcpp::Elf_types<32>::Elf_Addr value,
@@ -3449,7 +3440,6 @@ inline void
 Target_i386::Relocate::tls_desc_gd_to_ie(
     const Relocate_info<32, false>* relinfo,
     size_t relnum,
-    Output_segment*,
     const elfcpp::Rel<32, false>& rel,
     unsigned int r_type,
     elfcpp::Elf_types<32>::Elf_Addr value,

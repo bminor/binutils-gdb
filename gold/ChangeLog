@@ -1,5 +1,21 @@
 2016-01-11  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/19353
+	* aarch64.cc (Target_aarch64::relocate_tls): Don't insist that
+	we have a TLS segment for GD-to-IE optimization.
+	* i386.cc (Target_i386::tls_gd_to_ie): Remove tls_segment parameter.
+	Adjust all calls.
+	(Target_i386::tls_desc_gd_to_ie): Likewise.
+	(Target_i386::relocate_tls): Don't insist that we have a TLS segment
+	for TLSDESC GD-to-IE optimizations.
+	* x86_64.cc (Target_x86_64::tls_gd_to_ie): Remove tls_segment parameter.
+	Adjust all calls.
+	(Target_x86_64::tls_desc_gd_to_ie): Likewise.
+	(Target_x86_64::relocate_tls): Don't insist that we have a TLS segment
+	for TLSDESC GD-to-IE optimizations.
+
+2016-01-11  Cary Coutant  <ccoutant@gmail.com>
+
 	Refactor gold to enable support for MIPS-64 relocation format.
 
 	* gc.h (get_embedded_addend_size): Remove sh_type parameter.

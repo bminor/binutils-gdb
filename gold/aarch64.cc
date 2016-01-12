@@ -7422,12 +7422,6 @@ Target_aarch64<size, big_endian>::Relocate::relocate_tls(
 	      }
 	    if (tlsopt == tls::TLSOPT_TO_IE)
 	      {
-		if (tls_segment == NULL)
-		  {
-		    gold_assert(parameters->errors()->error_count() > 0
-				|| issue_undefined_symbol_error(gsym));
-		    return aarch64_reloc_funcs::STATUS_BAD_RELOC;
-		  }
 		return tls_desc_gd_to_ie(relinfo, target, rela, r_type,
 					 view, psymval, got_entry_address,
 					 address);
