@@ -1,3 +1,33 @@
+2016-01-12  Josh Stone  <jistone@redhat.com>
+	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* inferiors.h: Include "gdb_vecs.h".
+	(struct process_info): Add syscalls_to_catch.
+	* inferiors.c (remove_process): Free syscalls_to_catch.
+	* remote-utils.c (prepare_resume_reply): Report syscall_entry and
+	syscall_return stops.
+	* server.h (UNKNOWN_SYSCALL, ANY_SYSCALL): Define.
+	* server.c (handle_general_set): Handle QCatchSyscalls.
+	(handle_query): Report support for QCatchSyscalls.
+	* target.h (struct target_ops): Add supports_catch_syscall.
+	(target_supports_catch_syscall): New macro.
+	* linux-low.h (struct linux_target_ops): Add get_syscall_trapinfo.
+	(struct lwp_info): Add syscall_state.
+	* linux-low.c (handle_extended_wait): Mark syscall_state as an entry.
+	Maintain syscall_state and syscalls_to_catch across exec.
+	(get_syscall_trapinfo): New function, proxy to the_low_target.
+	(linux_low_ptrace_options): Enable PTRACE_O_TRACESYSGOOD.
+	(linux_low_filter_event): Toggle syscall_state entry/return for
+	syscall traps, and set it ignored for all others.
+	(gdb_catching_syscalls_p): New function.
+	(gdb_catch_this_syscall_p): New function.
+	(linux_wait_1): Handle SYSCALL_SIGTRAP.
+	(linux_resume_one_lwp_throw): Add PTRACE_SYSCALL possibility.
+	(linux_supports_catch_syscall): New function.
+	(linux_target_ops): Install it.
+	* linux-x86-low.c (x86_get_syscall_trapinfo): New function.
+	(the_low_target): Install it.
+
 2016-01-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4: Include new ../warning.m4 file.

@@ -1,3 +1,17 @@
+2016-01-12  Josh Stone  <jistone@redhat.com>
+	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* NEWS (Changes since GDB 7.10): Mention QCatchSyscalls and the
+	syscall_entry and syscall_return stop reasons.  Mention GDB
+	support for remote catch syscall.
+	* remote.c (PACKET_QCatchSyscalls): New enum.
+	(remote_set_syscall_catchpoint): New function.
+	(remote_protocol_features): New element for QCatchSyscalls.
+	(remote_parse_stop_reply): Parse syscall_entry/return stops.
+	(init_remote_ops): Install remote_set_syscall_catchpoint.
+	(_initialize_remote): Config QCatchSyscalls.
+	* linux-nat.h (struct lwp_info) <syscall_state>: Comment typo.
+
 2016-01-12  Yao Qi  <yao.qi@linaro.org>
 
 	* nat/linux-ptrace.c (linux_child_function): Cast child_stack

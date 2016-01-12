@@ -1,3 +1,12 @@
+2016-01-12  Josh Stone  <jistone@redhat.com>
+	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/catch-syscall.c (do_execve): New variable.
+	(main): Conditionally trigger an execve.
+	* gdb.base/catch-syscall.exp: Enable testing for remote targets.
+	(test_catch_syscall_execve): New, check entry/return across execve.
+	(do_syscall_tests): Call test_catch_syscall_execve.
+
 2016-01-12  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/random-signal.exp (do_test): New procedure, with body

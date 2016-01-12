@@ -467,6 +467,10 @@ struct target_ops
 
   /* Returns true if the target can software single step.  */
   int (*supports_software_single_step) (void);
+
+  /* Return 1 if the target supports catch syscall, 0 (or leave the
+     callback NULL) otherwise.  */
+  int (*supports_catch_syscall) (void);
 };
 
 extern struct target_ops *the_target;
@@ -541,6 +545,10 @@ int kill_inferior (int);
       if (the_target->process_qsupported)		\
 	the_target->process_qsupported (features, count); \
     } while (0)
+
+#define target_supports_catch_syscall()              	\
+  (the_target->supports_catch_syscall ?			\
+   (*the_target->supports_catch_syscall) () : 0)
 
 #define target_supports_tracepoints()			\
   (the_target->supports_tracepoints			\

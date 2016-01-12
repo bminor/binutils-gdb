@@ -20261,6 +20261,10 @@ are:
 @tab @code{qSupported}
 @tab Remote communications parameters
 
+@item @code{catch-syscalls}
+@tab @code{QCatchSyscalls}
+@tab @code{catch syscall}
+
 @item @code{pass-signals}
 @tab @code{QPassSignals}
 @tab @code{handle @var{signal}}
@@ -35580,6 +35584,11 @@ The currently defined stop reasons are:
 The packet indicates a watchpoint hit, and @var{r} is the data address, in
 hex.
 
+@item syscall_entry
+@itemx syscall_return
+The packet indicates a syscall entry or return, and @var{r} is the
+syscall number, in hex.
+
 @cindex shared library events, remote reply
 @item library
 The packet indicates that the loaded libraries have changed.
@@ -36072,6 +36081,49 @@ by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 Use of this packet is controlled by the @code{set non-stop} command; 
 @pxref{Non-Stop Mode}.
 
+@item QCatchSyscalls:1 @r{[};@var{sysno}@r{]}@dots{}
+@itemx QCatchSyscalls:0
+@cindex catch syscalls from inferior, remote request
+@cindex @samp{QCatchSyscalls} packet
+@anchor{QCatchSyscalls}
+Enable (@samp{QCatchSyscalls:1}) or disable (@samp{QCatchSyscalls:0})
+catching syscalls from the inferior process.
+
+For @samp{QCatchSyscalls:1}, each listed syscall @var{sysno} (encoded
+in hex) should be reported to @value{GDBN}.  If no syscall @var{sysno}
+is listed, every system call should be reported.
+
+Note that if a syscall not in the list is reported, @value{GDBN} will
+still filter the event according to its own list from all corresponding
+@code{catch syscall} commands.  However, it is more efficient to only
+report the requested syscalls.
+
+Multiple @samp{QCatchSyscalls:1} packets do not combine; any earlier
+@samp{QCatchSyscalls:1} list is completely replaced by the new list.
+
+If the inferior process execs, the state of @samp{QCatchSyscalls} is
+kept for the new process too.  On targets where exec may affect syscall
+numbers, for example with exec between 32 and 64-bit processes, the
+client should send a new packet with the new syscall list.
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  @var{nn} are hex digits.
+
+@item @w{}
+An empty reply indicates that @samp{QCatchSyscalls} is not supported by
+the stub.
+@end table
+
+Use of this packet is controlled by the @code{set remote catch-syscalls}
+command (@pxref{Remote Configuration, set remote catch-syscalls}).
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
 @item QPassSignals: @var{signal} @r{[};@var{signal}@r{]}@dots{}
 @cindex pass signals to inferior, remote request
 @cindex @samp{QPassSignals} packet
@@ -36523,6 +36575,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{QCatchSyscalls}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{QPassSignals}
 @tab No
 @tab @samp{-}
@@ -36725,6 +36782,10 @@ packet (@pxref{qXfer fdpic loadmap read}).
 @item QNonStop
 The remote stub understands the @samp{QNonStop} packet
 (@pxref{QNonStop}).
+
+@item QCatchSyscalls
+The remote stub understands the @samp{QCatchSyscalls} packet
+(@pxref{QCatchSyscalls}).
 
 @item QPassSignals
 The remote stub understands the @samp{QPassSignals} packet

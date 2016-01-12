@@ -1132,6 +1132,8 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     case TARGET_WAITKIND_VFORK_DONE:
     case TARGET_WAITKIND_EXECD:
     case TARGET_WAITKIND_THREAD_CREATED:
+    case TARGET_WAITKIND_SYSCALL_ENTRY:
+    case TARGET_WAITKIND_SYSCALL_RETURN:
       {
 	struct thread_info *saved_thread;
 	const char **regp;
@@ -1180,6 +1182,16 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
 
 	    sprintf (buf, "T%02xcreate:;", signal);
+	  }
+	else if (status->kind == TARGET_WAITKIND_SYSCALL_ENTRY
+		 || status->kind == TARGET_WAITKIND_SYSCALL_RETURN)
+	  {
+	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
+	    const char *event = (status->kind == TARGET_WAITKIND_SYSCALL_ENTRY
+				 ? "syscall_entry" : "syscall_return");
+
+	    sprintf (buf, "T%02x%s:%x;", signal, event,
+		     status->value.syscall_number);
 	  }
 	else
 	  sprintf (buf, "T%02x", status->value.sig);

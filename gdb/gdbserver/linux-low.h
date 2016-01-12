@@ -240,6 +240,12 @@ struct linux_target_ops
 
   /* See target.h.  */
   int (*supports_hardware_single_step) (void);
+
+  /* Fill *SYSNO with the syscall nr trapped.  Fill *SYSRET with the
+     return code.  Only to be called when inferior is stopped
+     due to SYSCALL_SIGTRAP.  */
+  void (*get_syscall_trapinfo) (struct regcache *regcache,
+				int *sysno, int *sysret);
 };
 
 extern struct linux_target_ops the_low_target;
@@ -277,6 +283,13 @@ struct lwp_info
   /* If this flag is set, the lwp is known to be stopped right now (stop
      event already received in a wait()).  */
   int stopped;
+
+  /* Signal whether we are in a SYSCALL_ENTRY or
+     in a SYSCALL_RETURN event.
+     Values:
+     - TARGET_WAITKIND_SYSCALL_ENTRY
+     - TARGET_WAITKIND_SYSCALL_RETURN */
+  enum target_waitkind syscall_state;
 
   /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;

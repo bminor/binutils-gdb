@@ -120,6 +120,21 @@ N stop reply
   threads are stopped).  The remote stub reports support for this stop
   reply to GDB's qSupported query.
 
+QCatchSyscalls:1 [;SYSNO]...
+QCatchSyscalls:0
+  Enable ("QCatchSyscalls:1") or disable ("QCatchSyscalls:0")
+  catching syscalls from the inferior process.
+
+syscall_entry stop reason
+  Indicates that a syscall was just called.
+
+syscall_return stop reason
+  Indicates that a syscall just returned.
+
+QCatchSyscalls:1 in qSupported
+  The qSupported packet may now include QCatchSyscalls:1 in the reply
+  to indicate support for catching syscalls.
+
 * Extended-remote exec events
 
   ** GDB now has support for exec events on extended-remote Linux targets.
@@ -141,6 +156,15 @@ show remote exec-event-feature-packet
      Linux targets.  For such targets with Linux kernels 2.5.46 and later,
      this enables follow-fork-mode, detach-on-fork, follow-exec-mode, and
      fork and exec catchpoints.
+
+* Remote syscall events
+
+  ** GDB now has support for catch syscall on remote Linux targets,
+     currently enabled on x86/x86_64 architectures.
+
+set remote catch-syscall-packet
+show remote catch-syscall-packet
+  Set/show the use of the remote catch syscall feature.
 
 * MI changes
 

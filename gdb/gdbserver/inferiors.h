@@ -19,6 +19,8 @@
 #ifndef INFERIORS_H
 #define INFERIORS_H
 
+#include "gdb_vecs.h"
+
 /* Generic information for tracking a list of ``inferiors'' - threads,
    processes, etc.  */
 struct inferior_list
@@ -66,6 +68,10 @@ struct process_info
 
   /* The list of installed fast tracepoints.  */
   struct fast_tracepoint_jump *fast_tracepoint_jumps;
+
+  /* The list of syscalls to report, or just a single element, ANY_SYSCALL,
+     for unfiltered syscall reporting.  */
+  VEC (int) *syscalls_to_catch;
 
   const struct target_desc *tdesc;
 
