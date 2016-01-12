@@ -345,7 +345,7 @@ proc vfork_relations_in_info_inferiors { variant } {
    }
 
    gdb_test "info inferiors" \
-       ".*is vfork child of inferior 1.*is vfork parent of inferior 2" \
+       ".*is vfork parent of inferior 2.*is vfork child of inferior 1" \
        "info inferiors shows vfork parent/child relation"
 
    if { $variant == "exec" } {

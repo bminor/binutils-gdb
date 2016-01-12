@@ -150,13 +150,13 @@ gdb_test_no_output "set detach off" "set detach off"
 
 for {set i 1} {$i <= 15} {incr i} {
   gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit $i"
-  gdb_test "info inferior" " 5 .* 4 .* 3 .* 2 .*" "info inferior $i"
+  gdb_test "info inferior" " 2 .* 3 .* 4 .* 5 .*" "info inferior $i"
   gdb_test "inferior $i + 1" "(_dl_sysinfo_int80|fork|__kernel_(v|)syscall).*" \
       "inferior $i"
 }
 
 gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 16"
-gdb_test "info inferiors" " 5 .* 4 .* 3 .* 2 .*" "info inferior 16"
+gdb_test "info inferior" " 2 .* 3 .* 4 .* 5 .*" "info inferior 16"
 gdb_test "inferior 2" " main .*" "restart final"
 
 #
@@ -177,27 +177,9 @@ gdb_test "detach inferior 5" "Detaching .*" "Detach 5"
 # Test kill inferior
 #
 
-gdb_test_no_output "kill inferior 6" "Kill 6"
-gdb_test "info inferior 6" "<null>.*" "Did kill 6"
-gdb_test_no_output "kill inferior 7" "Kill 7"
-gdb_test "info inferior 7" "<null>.*" "Did kill 7"
-gdb_test_no_output "kill inferior 8" "Kill 8"
-gdb_test "info inferior 8" "<null>.*" "Did kill 8"
-gdb_test_no_output "kill inferior 9" "Kill 9"
-gdb_test "info inferior 9" "<null>.*" "Did kill 9"
-gdb_test_no_output "kill inferior 10" "Kill 10"
-gdb_test "info inferior 10" "<null>.*" "Did kill 10"
-gdb_test_no_output "kill inferior 11" "Kill 11"
-gdb_test "info inferior 11" "<null>.*" "Did kill 11"
-gdb_test_no_output "kill inferior 12" "Kill 12"
-gdb_test "info inferior 12" "<null>.*" "Did kill 12"
-gdb_test_no_output "kill inferior 13" "Kill 13"
-gdb_test "info inferior 13" "<null>.*" "Did kill 13"
-gdb_test_no_output "kill inferior 14" "Kill 14"
-gdb_test "info inferior 14" "<null>.*" "Did kill 14"
-gdb_test_no_output "kill inferior 15" "Kill 15"
-gdb_test "info inferior 15" "<null>.*" "Did kill 15"
-gdb_test_no_output "kill inferior 16" "Kill 16"
-gdb_test "info inferior 16" "<null>.*" "Did kill 16"
+for {set i 6} { $i <= 16} {incr i} {
+    gdb_test_no_output "kill inferior $i" "Kill $i"
+    gdb_test "info inferior $i" "<null>.*" "Did kill $i"
+}
 
 return 0

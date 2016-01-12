@@ -46,7 +46,7 @@ proc setup {} {
 
 	gdb_breakpoint [gdb_get_line_number "set wait-threads breakpoint here"]
 	gdb_continue_to_breakpoint "run to breakpoint"
-	gdb_test "info threads" "3 .* 2 .*\\\* 1.*" "info threads shows all threads"
+	gdb_test "info threads" "\\\* 1 .* 2 .* 3 .*" "info threads shows all threads"
 
 	gdb_test_no_output "set scheduler-locking on"
 

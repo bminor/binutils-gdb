@@ -168,7 +168,7 @@ set nthreads 6
 gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: info threads 2"]
 gdb_continue_to_breakpoint "main thread's sleep"
 set info_threads_ptn ".*"
-for {set i $nthreads} {$i > 0} {incr i -1} {
+for {set i 1} {$i <  $nthreads} {incr i} {
     append info_threads_ptn "$i *Thread .*"
 }
 append info_threads_ptn "\[\r\n\]+$gdb_prompt $"

@@ -150,7 +150,7 @@ proc do_follow_exec_mode_tests { mode cmd infswitch } {
 	if {$mode == "same"} {
 	    set expected_re "\\* 1.*process.*"
 	} else {
-	    set expected_re "\\* 2.*process.*$testfile2 \r\n  1.*null.*$testfile.*"
+	    set expected_re "  1.*null.*$testfile.*\r\n\\* 2.*process.*$testfile2 .*"
 	}
 
 	# Check that the inferior list is correct:

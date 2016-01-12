@@ -48,7 +48,7 @@ delete_breakpoints
 
 gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
 gdb_continue_to_breakpoint "run to nop breakpoint"
-gdb_test "info threads" "\\\* 2 .* 1.*" "info threads shows all threads"
+gdb_test "info threads" "  1 .*\\\* 2 .*" "info threads shows all threads"
 
 gdb_test "next" "while.*" "next over nop"
 
