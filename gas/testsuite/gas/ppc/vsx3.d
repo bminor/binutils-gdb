@@ -51,16 +51,11 @@ Disassembly of section \.text:
 .*:	(f0 5a 10 5a|5a 10 5a f0) 	xscmpgtdp vs2,vs26,vs34
 .*:	(f0 ba a0 98|98 a0 ba f0) 	xscmpgedp vs5,vs26,vs20
 .*:	(f1 8a 58 d3|d3 58 8a f1) 	xxperm  vs44,vs10,vs43
-.*:	(f0 b5 10 da|da 10 b5 f0) 	xscmpnedp vs5,vs21,vs34
 .*:	(f1 34 29 d1|d1 29 34 f1) 	xxpermr vs41,vs20,vs5
 .*:	(f2 12 b9 da|da b9 12 f2) 	xscmpexpdp cr4,vs18,vs55
 .*:	(f2 e3 2a 96|96 2a e3 f2) 	xxextractuw vs23,vs37,3
 .*:	(f2 c7 5a d1|d1 5a c7 f2) 	xxspltib vs54,235
 .*:	(f1 e4 f2 d4|d4 f2 e4 f1) 	xxinsertw vs15,vs30,4
-.*:	(f0 e8 7a dd|dd 7a e8 f0) 	xvcmpnesp vs39,vs40,vs15
-.*:	(f0 17 96 de|de 96 17 f0) 	xvcmpnesp\. vs0,vs55,vs50
-.*:	(f3 8c 73 db|db 73 8c f3) 	xvcmpnedp vs60,vs12,vs46
-.*:	(f0 95 cf d9|d9 cf 95 f0) 	xvcmpnedp\. vs36,vs21,vs25
 .*:	(f1 8b 3c 00|00 3c 8b f1) 	xsmaxcdp vs12,vs11,vs7
 .*:	(f0 19 c4 41|41 c4 19 f0) 	xsmincdp vs32,vs25,vs24
 .*:	(f3 35 64 84|84 64 35 f3) 	xsmaxjdp vs25,vs53,vs12

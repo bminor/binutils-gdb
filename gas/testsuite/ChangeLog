@@ -1,3 +1,13 @@
+2016-01-11  Peter Bergner <bergner@vnet.ibm.com>
+
+	Apply from master.
+	2016-01-11  Peter Bergner <bergner@vnet.ibm.com>
+	* gas/ppc/power9.d <xscmpnedp, xvcmpnedp, xvcmpnedp.,
+	xvcmpnesp, xvcmpnesp.>: Delete tests.
+	* gas/ppc/power9.s: Likewise.
+	* gas/ppc/vsx3.d: Likewise.
+	* gas/ppc/vsx3.s: Likewise.
+
 2015-12-22  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	Apply from master

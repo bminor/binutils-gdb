@@ -377,13 +377,8 @@ Disassembly of section \.text:
 .*:	(f3 c8 90 1e|1e 90 c8 f3) 	xscmpeqdp vs30,vs40,vs50
 .*:	(f3 e9 98 5e|5e 98 e9 f3) 	xscmpgtdp vs31,vs41,vs51
 .*:	(f0 0a a0 9f|9f a0 0a f0) 	xscmpgedp vs32,vs42,vs52
-.*:	(f0 2b a8 df|df a8 2b f0) 	xscmpnedp vs33,vs43,vs53
 .*:	(f0 4c b4 47|47 b4 4c f0) 	xsmincdp vs34,vs44,vs54
 .*:	(f0 6d bc 07|07 bc 6d f0) 	xsmaxcdp vs35,vs45,vs55
 .*:	(f0 8e c4 c7|c7 c4 8e f0) 	xsminjdp vs36,vs46,vs56
 .*:	(f0 af cc 87|87 cc af f0) 	xsmaxjdp vs37,vs47,vs57
-.*:	(f0 d0 d3 df|df d3 d0 f0) 	xvcmpnedp vs38,vs48,vs58
-.*:	(f0 f1 df df|df df f1 f0) 	xvcmpnedp\. vs39,vs49,vs59
-.*:	(f1 12 e2 df|df e2 12 f1) 	xvcmpnesp vs40,vs50,vs60
-.*:	(f1 33 ee df|df ee 33 f1) 	xvcmpnesp\. vs41,vs51,vs61
 #pass
