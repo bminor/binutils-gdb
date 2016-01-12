@@ -200,7 +200,7 @@ struct Mips64_rela_data
   unsigned char r_type3;
   unsigned char r_type2;
   unsigned char r_type;
-  typename Elf_types<64>::Elf_Swxword r_addend;
+  Elf_types<64>::Elf_Swxword r_addend;
 };
 
 // An entry in the ELF SHT_DYNAMIC section aka PT_DYNAMIC segment.
