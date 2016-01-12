@@ -2964,7 +2964,11 @@ class Mips_classify_reloc<sh_type_, 32, big_endian> :
   // Return the explicit addend of the relocation (return 0 for SHT_REL).
   static inline unsigned int
   get_r_addend(const Reltype* reloc)
-  { return Mips_reloc_types<sh_type_, 32, big_endian>::get_r_addend(reloc); }
+  {
+    if (sh_type_ == elfcpp::SHT_REL)
+      return 0;
+    return Mips_reloc_types<sh_type_, 32, big_endian>::get_r_addend(reloc);
+  }
 
   // Write the r_info field to a new reloc, using the r_info field from
   // the original reloc, replacing the r_sym field with R_SYM.
@@ -3010,7 +3014,11 @@ class Mips_classify_reloc<sh_type_, 64, big_endian> :
   // Return the explicit addend of the relocation (return 0 for SHT_REL).
   static inline typename elfcpp::Elf_types<64>::Elf_Swxword
   get_r_addend(const Reltype* reloc)
-  { return Mips_reloc_types<sh_type_, 64, big_endian>::get_r_addend(reloc); }
+  {
+    if (sh_type_ == elfcpp::SHT_REL)
+      return 0;
+    return Mips_reloc_types<sh_type_, 64, big_endian>::get_r_addend(reloc);
+  }
 
   // Write the r_info field to a new reloc, using the r_info field from
   // the original reloc, replacing the r_sym field with R_SYM.
