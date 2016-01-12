@@ -1,5 +1,10 @@
 2016-01-12  Yao Qi  <yao.qi@linaro.org>
 
+	* nat/linux-ptrace.c (linux_child_function): Cast child_stack
+	to gdb_byte * and pass to linux_fork_to_function.
+
+2016-01-12  Yao Qi  <yao.qi@linaro.org>
+
 	* nat/linux-ptrace.c (linux_fork_to_function): Change type
 	of argument 'function'.
 	(linux_grandchild_function): Change return type to 'int'.

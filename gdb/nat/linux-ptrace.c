@@ -320,7 +320,7 @@ linux_child_function (void *child_stack)
   kill (getpid (), SIGSTOP);
 
   /* Fork a grandchild.  */
-  linux_fork_to_function (child_stack, linux_grandchild_function);
+  linux_fork_to_function ((gdb_byte *) child_stack, linux_grandchild_function);
 
   /* This code is only reacheable by the child (grandchild's parent)
      process.  */
