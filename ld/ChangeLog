@@ -1,3 +1,10 @@
+2016-01-12  Yury Usishchev  <y.usishchev@samsung.com>
+
+	* testsuite/ld-arm/arm-elf.exp: New test.
+	* testsuite/ld-arm/unwind-mix.d: New file.
+	* testsuite/ld-arm/unwind-mix1.s: New file.
+	* testsuite/ld-arm/unwind-mix2.s: New file.
+
 2016-01-08  Jiong Wang  <jiong.wang@arm.com>
 
 	PR ld/19368

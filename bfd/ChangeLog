@@ -1,3 +1,9 @@
+2016-01-12  Yury Usishchev  <y.usishchev@samsung.com>
+
+	* elf32-arm.c (elf32_arm_fix_exidx_coverage): Insert cantunwind
+	when address in first unwind entry does not match start of
+	section.
+
 2016-01-08  Richard Sandiford  <richard.sandiford@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 

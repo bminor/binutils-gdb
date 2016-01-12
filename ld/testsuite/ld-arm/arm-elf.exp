@@ -964,5 +964,8 @@ set arm_unwind_tests {
     {"unwind-rel" "-r -Tarm.ld" "" "" {unwind-rel1.s unwind-rel2.s unwind-rel3.s}
      {{readelf -ur unwind-rel.d}}
      "unwind-rel"}
+    {"unwind-mix" "-Tarm.ld" "" "" {unwind-mix1.s unwind-mix2.s}
+     {{readelf -u unwind-mix.d}}
+     "unwind-mix"}
 }
 run_ld_link_tests $arm_unwind_tests
