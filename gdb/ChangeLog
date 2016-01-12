@@ -1,3 +1,7 @@
+2016-01-12  Pedro Alves  <palves@redhat.com>
+
+	Remove use of the registered trademark symbol throughout.
+
 2016-01-12  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* reply_mig_hack.awk: Rewrite one regular expression.

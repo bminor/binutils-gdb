@@ -1,3 +1,7 @@
+2016-01-12  Pedro Alves  <palves@redhat.com>
+
+	Remove use of the registered trademark symbol throughout.
+
 2016-01-08  Yao Qi  <yao.qi@linaro.org>
 
 	* remote-utils.c (getpkt): If c is '\003', call target hook

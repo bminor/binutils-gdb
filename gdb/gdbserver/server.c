@@ -420,7 +420,7 @@ handle_btrace_enable_bts (struct thread_info *thread)
   return NULL;
 }
 
-/* Handle btrace enabling in Intel(R) Processor Trace format.  */
+/* Handle btrace enabling in Intel Processor Trace format.  */
 
 static const char *
 handle_btrace_enable_pt (struct thread_info *thread)

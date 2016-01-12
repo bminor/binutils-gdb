@@ -332,7 +332,7 @@ record_btrace_print_bts_conf (const struct btrace_config_bts *conf)
     }
 }
 
-/* Print an Intel(R) Processor Trace configuration.  */
+/* Print an Intel Processor Trace configuration.  */
 
 static void
 record_btrace_print_pt_conf (const struct btrace_config_pt *conf)
@@ -2886,7 +2886,7 @@ cmd_record_btrace_bts_start (char *args, int from_tty)
   END_CATCH
 }
 
-/* Start recording Intel(R) Processor Trace.  */
+/* Start recording in Intel Processor Trace format.  */
 
 static void
 cmd_record_btrace_pt_start (char *args, int from_tty)
@@ -3048,7 +3048,7 @@ This format may not be available on all processors."),
 
   add_cmd ("pt", class_obscure, cmd_record_btrace_pt_start,
 	   _("\
-Start branch trace recording in Intel(R) Processor Trace format.\n\n\
+Start branch trace recording in Intel Processor Trace format.\n\n\
 This format may not be available on all processors."),
 	   &record_btrace_cmdlist);
   add_alias_cmd ("pt", "btrace pt", class_obscure, 1, &record_cmdlist);

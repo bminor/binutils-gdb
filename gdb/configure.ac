@@ -1243,13 +1243,13 @@ if test "$ENABLE_LIBMCHECK" = "yes" \
 fi
 
 AC_ARG_WITH(intel_pt,
-  AS_HELP_STRING([--with-intel-pt], [include Intel(R) Processor Trace support (auto/yes/no)]),
+  AS_HELP_STRING([--with-intel-pt], [include Intel Processor Trace support (auto/yes/no)]),
   [], [with_intel_pt=auto])
 AC_MSG_CHECKING([whether to use intel pt])
 AC_MSG_RESULT([$with_intel_pt])
 
 if test "${with_intel_pt}" = no; then
-  AC_MSG_WARN([Intel(R) Processor Trace support disabled; some features may be unavailable.])
+  AC_MSG_WARN([Intel Processor Trace support disabled; some features may be unavailable.])
   HAVE_LIBIPT=no
 else
   AC_PREPROC_IFELSE(AC_LANG_SOURCE([[

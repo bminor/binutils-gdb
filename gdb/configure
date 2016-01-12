@@ -1560,8 +1560,7 @@ Optional Packages:
                           (auto/yes/no/<python-program>)
   --with-guile[=GUILE]    include guile support
                           (auto/yes/no/<guile-version>/<pkg-config-program>)
-  --with-intel-pt         include Intel(R) Processor Trace support
-                          (auto/yes/no)
+  --with-intel-pt         include Intel Processor Trace support (auto/yes/no)
   --with-libipt-prefix[=DIR]  search for libipt in DIR/include and DIR/lib
   --without-libipt-prefix     don't search for libipt in includedir and libdir
   --without-included-regex
@@ -10111,8 +10110,8 @@ $as_echo_n "checking whether to use intel pt... " >&6; }
 $as_echo "$with_intel_pt" >&6; }
 
 if test "${with_intel_pt}" = no; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Intel(R) Processor Trace support disabled; some features may be unavailable." >&5
-$as_echo "$as_me: WARNING: Intel(R) Processor Trace support disabled; some features may be unavailable." >&2;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Intel Processor Trace support disabled; some features may be unavailable." >&5
+$as_echo "$as_me: WARNING: Intel Processor Trace support disabled; some features may be unavailable." >&2;}
   HAVE_LIBIPT=no
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext

@@ -6913,7 +6913,7 @@ linux_low_disable_btrace (struct btrace_target_info *tinfo)
   return (err == BTRACE_ERR_NONE ? 0 : -1);
 }
 
-/* Encode an Intel(R) Processor Trace configuration.  */
+/* Encode an Intel Processor Trace configuration.  */
 
 static void
 linux_low_encode_pt_config (struct buffer *buffer,

@@ -763,7 +763,7 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
       if (errcode < 0)
 	{
 	  if (errcode != -pte_eos)
-	    warning (_("Failed to synchronize onto the Intel(R) Processor "
+	    warning (_("Failed to synchronize onto the Intel Processor "
 		       "Trace stream: %s."), pt_errstr (pt_errcode (errcode)));
 	  break;
 	}
@@ -821,7 +821,7 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 
       pt_insn_get_offset (decoder, &offset);
 
-      warning (_("Failed to decode Intel(R) Processor Trace near trace "
+      warning (_("Failed to decode Intel Processor Trace near trace "
 		 "offset 0x%" PRIx64 " near recorded PC 0x%" PRIx64 ": %s."),
 	       offset, insn.ip, pt_errstr (pt_errcode (errcode)));
 
@@ -894,7 +894,8 @@ static void btrace_finalize_ftrace_pt (struct pt_insn_decoder *decoder,
   btrace_add_pc (tp);
 }
 
-/* Compute the function branch trace from Intel(R) Processor Trace.  */
+/* Compute the function branch trace from Intel Processor Trace
+   format.  */
 
 static void
 btrace_compute_ftrace_pt (struct thread_info *tp,
@@ -922,12 +923,12 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 
   errcode = pt_cpu_errata (&config.errata, &config.cpu);
   if (errcode < 0)
-    error (_("Failed to configure the Intel(R) Processor Trace decoder: %s."),
+    error (_("Failed to configure the Intel Processor Trace decoder: %s."),
 	   pt_errstr (pt_errcode (errcode)));
 
   decoder = pt_insn_alloc_decoder (&config);
   if (decoder == NULL)
-    error (_("Failed to allocate the Intel(R) Processor Trace decoder."));
+    error (_("Failed to allocate the Intel Processor Trace decoder."));
 
   TRY
     {
@@ -935,11 +936,11 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 
       image = pt_insn_get_image(decoder);
       if (image == NULL)
-	error (_("Failed to configure the Intel(R) Processor Trace decoder."));
+	error (_("Failed to configure the Intel Processor Trace decoder."));
 
       errcode = pt_image_set_callback(image, btrace_pt_readmem_callback, NULL);
       if (errcode < 0)
-	error (_("Failed to configure the Intel(R) Processor Trace decoder: "
+	error (_("Failed to configure the Intel Processor Trace decoder: "
 		 "%s."), pt_errstr (pt_errcode (errcode)));
 
       ftrace_add_pt (decoder, &btinfo->begin, &btinfo->end, &level,
@@ -1038,7 +1039,7 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
 
 #if !defined (HAVE_LIBIPT)
   if (conf->format == BTRACE_FORMAT_PT)
-    error (_("GDB does not support Intel(R) Processor Trace."));
+    error (_("GDB does not support Intel Processor Trace."));
 #endif /* !defined (HAVE_LIBIPT) */
 
   if (!target_supports_btrace (conf->format))
@@ -2443,7 +2444,7 @@ btrace_maint_decode_pt (struct btrace_maint_info *maint,
     }
 
   if (errcode != -pte_eos)
-    warning (_("Failed to synchronize onto the Intel(R) Processor Trace "
+    warning (_("Failed to synchronize onto the Intel Processor Trace "
 	       "stream: %s."), pt_errstr (pt_errcode (errcode)));
 }
 
@@ -2477,12 +2478,12 @@ btrace_maint_update_pt_packets (struct btrace_thread_info *btinfo)
 
   errcode = pt_cpu_errata (&config.errata, &config.cpu);
   if (errcode < 0)
-    error (_("Failed to configure the Intel(R) Processor Trace decoder: %s."),
+    error (_("Failed to configure the Intel Processor Trace decoder: %s."),
 	   pt_errstr (pt_errcode (errcode)));
 
   decoder = pt_pkt_alloc_decoder (&config);
   if (decoder == NULL)
-    error (_("Failed to allocate the Intel(R) Processor Trace decoder."));
+    error (_("Failed to allocate the Intel Processor Trace decoder."));
 
   TRY
     {
@@ -2933,7 +2934,7 @@ Set branch tracing specific variables."),
                   0, &maintenance_set_cmdlist);
 
   add_prefix_cmd ("pt", class_maintenance, maint_btrace_pt_set_cmd, _("\
-Set Intel(R) Processor Trace specific variables."),
+Set Intel Processor Trace specific variables."),
                   &maint_btrace_pt_set_cmdlist, "maintenance set btrace pt ",
                   0, &maint_btrace_set_cmdlist);
 
@@ -2943,7 +2944,7 @@ Show branch tracing specific variables."),
                   0, &maintenance_show_cmdlist);
 
   add_prefix_cmd ("pt", class_maintenance, maint_btrace_pt_show_cmd, _("\
-Show Intel(R) Processor Trace specific variables."),
+Show Intel Processor Trace specific variables."),
                   &maint_btrace_pt_show_cmdlist, "maintenance show btrace pt ",
                   0, &maint_btrace_show_cmdlist);
 

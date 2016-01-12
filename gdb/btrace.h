@@ -114,7 +114,7 @@ enum btrace_bts_error
   BDE_BTS_INSN_SIZE
 };
 
-/* Decode errors for the Intel(R) Processor Trace recording format.  */
+/* Decode errors for the Intel Processor Trace recording format.  */
 enum btrace_pt_error
 {
   /* The user cancelled trace processing.  */

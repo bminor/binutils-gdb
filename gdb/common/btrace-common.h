@@ -60,7 +60,7 @@ enum btrace_format
      Actually, the format is a sequence of blocks derived from BTS.  */
   BTRACE_FORMAT_BTS,
 
-  /* Branch trace is in Intel(R) Processor Trace format.  */
+  /* Branch trace is in Intel Processor Trace format.  */
   BTRACE_FORMAT_PT
 };
 
@@ -103,7 +103,7 @@ struct btrace_config_bts
   unsigned int size;
 };
 
-/* An Intel(R) Processor Trace configuration.  */
+/* An Intel Processor Trace configuration.  */
 
 struct btrace_config_pt
 {
@@ -129,7 +129,7 @@ struct btrace_config
   /* The BTS format configuration.  */
   struct btrace_config_bts bts;
 
-  /* The Intel(R) Processor Trace format configuration.  */
+  /* The Intel Processor Trace format configuration.  */
   struct btrace_config_pt pt;
 };
 
@@ -148,7 +148,7 @@ struct btrace_data_pt_config
   struct btrace_cpu cpu;
 };
 
-/* Branch trace in Intel(R) Processor Trace format.  */
+/* Branch trace in Intel Processor Trace format.  */
 struct btrace_data_pt
 {
   /* Some configuration information to go with the data.  */

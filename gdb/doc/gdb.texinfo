@@ -6444,8 +6444,8 @@ this format, the processor stores a from/to record for each executed
 branch in the btrace ring buffer.
 
 @item pt
-@cindex Intel(R) Processor Trace
-Use the @dfn{Intel(R) Processor Trace} recording format.  In this
+@cindex Intel Processor Trace
+Use the @dfn{Intel Processor Trace} recording format.  In this
 format, the processor stores the execution trace in a compressed form
 that is afterwards decoded by @value{GDBN}.
 
@@ -6635,12 +6635,12 @@ tracing in @acronym{BTS} format.
 @kindex set record btrace pt
 @item set record btrace pt buffer-size @var{size}
 @itemx set record btrace pt buffer-size unlimited
-Set the requested ring buffer size for branch tracing in Intel(R)
+Set the requested ring buffer size for branch tracing in Intel
 Processor Trace format.  Default is 16KB.
 
 If @var{size} is a positive number, then @value{GDBN} will try to
 allocate a buffer of at least @var{size} bytes for each new thread
-that uses the btrace recording method and the Intel(R) Processor Trace
+that uses the btrace recording method and the Intel Processor Trace
 format.  The actually obtained buffer size may differ from the
 requested @var{size}.  Use the @code{info record} command to see the
 actual buffer size for each thread.
@@ -6653,7 +6653,7 @@ also need longer to process the branch trace data before it can be used.
 
 @item show record btrace pt buffer-size @var{size}
 Show the current setting of the requested ring buffer size for branch
-tracing in Intel(R) Processor Trace format.
+tracing in Intel Processor Trace format.
 
 @kindex info record
 @item info record
@@ -22129,8 +22129,8 @@ from functions.
 @end table
 
 
-@subsubsection Intel(R) @dfn{Memory Protection Extensions} (MPX).
-@cindex Intel(R) Memory Protection Extensions (MPX).
+@subsubsection Intel @dfn{Memory Protection Extensions} (MPX).
+@cindex Intel Memory Protection Extensions (MPX).
 
 Memory Protection Extension (MPX) adds the bound registers @samp{BND0}
 @footnote{The register named with capital letters represent the architecture
@@ -33978,8 +33978,8 @@ Newer blocks have higher numbers.  The oldest block has number zero.
 @end table
 
 @item pt
-For the Intel(R) Processor Trace recording format, print a list of
-Intel(R) Processor Trace packets.  For each packet, the following
+For the Intel Processor Trace recording format, print a list of
+Intel Processor Trace packets.  For each packet, the following
 information is printed:
 
 @table @asis
@@ -37291,7 +37291,7 @@ A badly formed request or an error was encountered.
 @end table
 
 @item Qbtrace:pt
-Enable branch tracing for the current thread using Intel(R) Processor Trace.
+Enable branch tracing for the current thread using Intel Processor Trace.
 
 Reply:
 @table @samp
@@ -39937,11 +39937,11 @@ This thread uses the @dfn{Branch Trace Store} (@acronym{BTS}) format.
 The size of the @acronym{BTS} ring buffer in bytes.
 @end table
 @item pt
-This thread uses the @dfn{Intel(R) Processor Trace} (@acronym{Intel(R)
+This thread uses the @dfn{Intel Processor Trace} (@acronym{Intel
 PT}) format.
 @table @code
 @item size
-The size of the @acronym{Intel(R) PT} ring buffer in bytes.
+The size of the @acronym{Intel PT} ring buffer in bytes.
 @end table
 @end table
 
@@ -40525,7 +40525,7 @@ describe the upper 128 bits of @sc{ymm} registers:
 @samp{ymm0h} through @samp{ymm15h} for amd64
 @end itemize
 
-The @samp{org.gnu.gdb.i386.mpx} is an optional feature representing Intel(R)
+The @samp{org.gnu.gdb.i386.mpx} is an optional feature representing Intel
 Memory Protection Extension (MPX).  It should describe the following registers:
 
 @itemize @minus
