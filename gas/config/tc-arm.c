@@ -208,6 +208,8 @@ static const arm_feature_set arm_ext_os = ARM_FEATURE_CORE_LOW (ARM_EXT_OS);
 static const arm_feature_set arm_ext_adiv = ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV);
 static const arm_feature_set arm_ext_virt = ARM_FEATURE_CORE_LOW (ARM_EXT_VIRT);
 static const arm_feature_set arm_ext_pan = ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN);
+static const arm_feature_set arm_ext_v8_2 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1, -1);
@@ -19053,6 +19055,13 @@ static const struct asm_opcode insns[] =
   TUEc("crc32cb",1000240, fad0f080, 3, (RR, oRR, RR), crc32cb),
   TUEc("crc32ch",1200240, fad0f090, 3, (RR, oRR, RR), crc32ch),
   TUEc("crc32cw",1400240, fad0f0a0, 3, (RR, oRR, RR), crc32cw),
+
+ /* ARMv8.2 RAS extension.  */
+#undef  ARM_VARIANT
+#define ARM_VARIANT   & arm_ext_v8_2
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8_2
+ TUE ("esb", 320f010, f3af8010, 0, (), noargs,  noargs),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */

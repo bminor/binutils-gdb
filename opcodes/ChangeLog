@@ -1,3 +1,8 @@
+2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add "esb".
+	(thumb_opcodes): Likewise.
+
 2015-12-02  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* arm-dis.c (arm_opcodes): <ldaexh>: Fix typo...

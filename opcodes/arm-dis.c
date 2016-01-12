@@ -1574,6 +1574,10 @@ static const struct opcode32 arm_opcodes[] =
     0x00a00090, 0x0fa000f0,
     "%22?sumlal%20's%c\t%12-15Ru, %16-19Ru, %0-3R, %8-11R"},
 
+  /* V8.2 RAS extension instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A),
+    0xe320f010, 0xffffffff, "esb"},
+
   /* V8 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),
     0x0320f005, 0x0fffffff, "sevl"},
@@ -2515,6 +2519,10 @@ static const struct opcode16 thumb_opcodes[] =
    makes heavy use of special-case bit patterns.  */
 static const struct opcode32 thumb32_opcodes[] =
 {
+  /* ARM V8.2 RAS extension instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A),
+    0xf3af8010, 0xffffffff, "esb"},
+
   /* V8 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),
     0xf3af8005, 0xffffffff, "sevl%c.w"},
