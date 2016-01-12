@@ -38130,7 +38130,8 @@ reply packets (@pxref{Stop Reply Packets}) to @value{GDBN} as a result
 of successfully stopping the program in all-stop mode, and a stop reply
 for each stopped thread in non-stop mode.
 Interrupts received while the
-program is stopped are discarded.
+program is stopped are queued and the program will be interrupted when
+it is resumed next time.
 
 @node Notification Packets
 @section Notification Packets
