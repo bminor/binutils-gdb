@@ -1,3 +1,7 @@
+2016-01-12  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* reply_mig_hack.awk: Rewrite one regular expression.
+
 2016-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4: Include new warning.m4 file.
