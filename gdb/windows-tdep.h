@@ -18,6 +18,8 @@
 #ifndef WINDOWS_TDEP_H
 #define WINDOWS_TDEP_H
 
+#include "frame-unwind.h"
+
 struct gdbarch;
 
 extern struct cmd_list_element *info_w32_cmdlist;
@@ -54,5 +56,23 @@ extern void cygwin_init_abi (struct gdbarch_info info,
    (cygwin1.dll).  */
 
 extern bool is_linked_with_cygwin_dll (bfd *abfd);
+
+/* Cygwin sigwapper unwinder.  Unwinds signal frames over
+   sigbe/sigdelayed.  */
+
+struct cygwin_sigwrapper_frame_unwind : public frame_unwind
+{
+  explicit cygwin_sigwrapper_frame_unwind
+    (gdb::array_view<const gdb::array_view<const gdb_byte>> patterns_list);
+
+  /* Architecture-specific list of instruction patterns to match.
+     It's a list of patterns instead of single pattern because some
+     architectures want to match more than one function
+     (sigbe/sigdelayed & friends).  Each potential instruction
+     sequence is assumed to be followed by 4 bytes for tls::stackptr.
+     If any pattern in the list matches, then the frame is assumed to
+     be a sigwrapper frame.  */
+  gdb::array_view<const gdb::array_view<const gdb_byte>> patterns_list;
+};
 
 #endif

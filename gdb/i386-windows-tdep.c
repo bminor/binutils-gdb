@@ -27,6 +27,7 @@
 #include "xml-support.h"
 #include "gdbcore.h"
 #include "inferior.h"
+#include "frame-unwind.h"
 
 /* Core file support.  */
 
@@ -169,11 +170,30 @@ i386_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_push_dummy_call (gdbarch, i386_windows_push_dummy_call);
 }
 
+/* Sigwrapper unwinder instruction patterns for i386.  */
+
+static const gdb_byte i386_sigbe_bytes[] = {
+  0xb8, 0xfc, 0xff, 0xff, 0xff,			/* movl $-4,%eax */
+  0x0f, 0xc1, 0x83,				/* xadd %eax,$tls::stackptr(%ebx) */
+  /* 4 bytes for tls::stackptr operand.  */
+};
+
+static const gdb::array_view<const gdb_byte> i386_sig_patterns[] {
+  { i386_sigbe_bytes },
+};
+
+/* The sigwrapper unwinder on i386.  */
+
+static const cygwin_sigwrapper_frame_unwind
+  i386_cygwin_sigwrapper_frame_unwind (i386_sig_patterns);
+
 /* gdbarch initialization for Cygwin on i386.  */
 
 static void
 i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  frame_unwind_append_unwinder (gdbarch, &i386_cygwin_sigwrapper_frame_unwind);
+
   i386_windows_init_abi_common (info, gdbarch);
   cygwin_init_abi (info, gdbarch);
 }
