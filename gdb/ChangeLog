@@ -1,3 +1,11 @@
+2016-01-12  Yao Qi  <yao.qi@linaro.org>
+
+	* nat/linux-ptrace.c (linux_fork_to_function): Change type
+	of argument 'function'.
+	(linux_grandchild_function): Change return type to 'int'.
+	Change child_stack's type to 'void *'.
+	(linux_child_function): Likewise.
+
 2016-01-12  Pedro Alves  <palves@redhat.com>
 
 	Remove use of the registered trademark symbol throughout.
