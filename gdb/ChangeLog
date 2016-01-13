@@ -1,3 +1,7 @@
+2016-01-13  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* MAINTAINERS: Add Andreas Arnez as s390 target maintainer.
+
 2016-01-13  Yao Qi  <yao.qi@linaro.org>
 
 	* arch/arm-get-next-pcs.c (arm_get_next_pcs_raw): Use

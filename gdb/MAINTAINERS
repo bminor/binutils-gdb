@@ -308,6 +308,7 @@ the native maintainer when resolving ABI issues.
 	rx		--target=rx-elf ,-Werror
 
 	s390		--target=s390-linux-gnu ,-Werror
+			Andreas Arnez		arnez@linux.vnet.ibm.com
 
 	score	--target=score-elf
 			Qinwei		qinwei@sunnorth.com.cn
