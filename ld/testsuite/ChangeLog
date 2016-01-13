@@ -1,5 +1,8 @@
 2016-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* ld-elf/elf.exp (-Bymsolic-functions): Expect to fail
+	for MIPS targets.
+
 	* ld-scripts/script.exp (extract_symbol_test): Expect to
 	fail for MIPS targets.
 
