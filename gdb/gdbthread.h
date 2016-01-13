@@ -216,8 +216,8 @@ struct thread_info
      Above, both inferiors 1 and 2 have threads numbered 1-3, but each
      thread has its own unique global ID.  */
 
-  /* The thread's global GDB thread number.  This is exposed to MI and
-     Python/Scheme.  */
+  /* The thread's global GDB thread number.  This is exposed to MI,
+     Python/Scheme and visible with "info threads -gid".  */
   int global_num;
 
   /* The per-inferior thread number.  This is unique in the inferior

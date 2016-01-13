@@ -34,6 +34,9 @@
      [Switching to thread 2.1 (Thread 0x7ffff7fc2740 (LWP 8157))] (running)
      (gdb)
 
+* You can use "info threads -gid" to display the global thread ID of
+  all threads.
+
 * The new convenience variable $_inferior holds the number of the
   current inferior.
 

@@ -1403,7 +1403,16 @@ print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
 static void
 info_threads_command (char *arg, int from_tty)
 {
-  print_thread_info_1 (current_uiout, arg, 0, -1, 0);
+  int show_global_ids = 0;
+
+  if (arg != NULL
+      && check_for_argument (&arg, "-gid", sizeof ("-gid") - 1))
+    {
+      arg = skip_spaces (arg);
+      show_global_ids = 1;
+    }
+
+  print_thread_info_1 (current_uiout, arg, 0, -1, show_global_ids);
 }
 
 /* See gdbthread.h.  */
@@ -2107,7 +2116,8 @@ _initialize_thread (void)
 
   add_info ("threads", info_threads_command, 
 	    _("Display currently known threads.\n\
-Usage: info threads [ID]...\n\
+Usage: info threads [-gid] [ID]...\n\
+-gid: Show global thread IDs.\n\
 If ID is given, it is a space-separated list of IDs of threads to display.\n\
 Otherwise, all threads are displayed."));
 

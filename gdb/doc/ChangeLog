@@ -1,5 +1,9 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.texinfo (Threads): Document "info threads -gid".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	* python.texi (Breakpoints In Python) <Breakpoint.thread>: Add
 	anchor.
 	(Threads In Python): Document new InferiorThread.global_num

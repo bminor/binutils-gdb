@@ -150,6 +150,14 @@ with_test_prefix "two inferiors" {
     info_threads "" "1.1 1.2 2.1 2.2" \
 	"info threads again"
 
+    # Same, but show the global ID.
+    gdb_test "info threads -gid" \
+	[multi_line \
+	     "  1\.1 +1 +.*" \
+	     "\\* 1\.2 +4 +.* thread_function1 .* at .*$srcfile:.*" \
+	     "  2\.1 +2 +.*" \
+	     "  2\.2 +3 +.* thread_function1 .* at .*$srcfile:.*"]
+
     # Confirm the convenience variable show the expected number.
     gdb_test "p \$_thread == 2" " = 1"
 

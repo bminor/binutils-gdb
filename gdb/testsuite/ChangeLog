@@ -1,5 +1,9 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.multi/tids.exp: Test "info threads -gid".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.multi/tids.exp: Test InferiorThread.global_num and
 	Breakpoint.thread.
 	* gdb.python/py-infthread.exp: Test InferiorThread.global_num.
