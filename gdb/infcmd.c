@@ -960,7 +960,7 @@ step_command_fsm_prepare (struct step_command_fsm *sm,
   sm->skip_subroutines = skip_subroutines;
   sm->single_inst = single_inst;
   sm->count = count;
-  sm->thread = thread->num;
+  sm->thread = thread->global_num;
 
   /* Leave the si command alone.  */
   if (!sm->single_inst || sm->skip_subroutines)
@@ -1032,7 +1032,7 @@ static int
 step_command_fsm_should_stop (struct thread_fsm *self)
 {
   struct step_command_fsm *sm = (struct step_command_fsm *) self;
-  struct thread_info *tp = find_thread_id (sm->thread);
+  struct thread_info *tp = find_thread_global_id (sm->thread);
 
   if (tp->control.stop_step)
     {
@@ -1478,7 +1478,7 @@ until_next_command (int from_tty)
   struct symbol *func;
   struct symtab_and_line sal;
   struct thread_info *tp = inferior_thread ();
-  int thread = tp->num;
+  int thread = tp->global_num;
   struct cleanup *old_chain;
   struct until_next_fsm *sm;
 
@@ -1520,12 +1520,11 @@ until_next_command (int from_tty)
   set_longjmp_breakpoint (tp, get_frame_id (frame));
   old_chain = make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
 
-  sm = new_until_next_fsm (tp->num);
+  sm = new_until_next_fsm (tp->global_num);
   tp->thread_fsm = &sm->thread_fsm;
   discard_cleanups (old_chain);
 
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
-
 }
 
 static void
@@ -1774,7 +1773,7 @@ finish_command_fsm_should_stop (struct thread_fsm *self)
 {
   struct finish_command_fsm *f = (struct finish_command_fsm *) self;
   struct return_value_info *rv = &f->return_value;
-  struct thread_info *tp = find_thread_id (f->thread);
+  struct thread_info *tp = find_thread_global_id (f->thread);
 
   if (f->function != NULL
       && bpstat_find_breakpoint (tp->control.stop_bpstat,
@@ -1967,7 +1966,7 @@ finish_command (char *arg, int from_tty)
 
   tp = inferior_thread ();
 
-  sm = new_finish_command_fsm (tp->num);
+  sm = new_finish_command_fsm (tp->global_num);
 
   tp->thread_fsm = &sm->thread_fsm;
 
@@ -2715,7 +2714,8 @@ attach_post_wait (char *args, int from_tty, enum attach_post_wait_mode mode)
 	    {
 	      if (ptid_get_pid (thread->ptid) == pid)
 		{
-		  if (thread->num < lowest->num)
+		  if (thread->inf->num < lowest->inf->num
+		      || thread->per_inf_num < lowest->per_inf_num)
 		    lowest = thread;
 		}
 	    }

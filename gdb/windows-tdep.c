@@ -361,31 +361,12 @@ display_one_tib (ptid_t ptid)
   return 1;  
 }
 
-/* Display thread information block of a thread specified by ARGS.
-   If ARGS is empty, display thread information block of current_thread
-   if current_thread is non NULL.
-   Otherwise ARGS is parsed and converted to a integer that should
-   be the windows ThreadID (not the internal GDB thread ID).  */
+/* Display thread information block of the current thread.  */
 
 static void
 display_tib (char * args, int from_tty)
 {
-  if (args)
-    {
-      struct thread_info *tp;
-      int gdb_id = value_as_long (parse_and_eval (args));
-
-      tp = find_thread_id (gdb_id);
-
-      if (!tp)
-	error (_("Thread ID %d not known."), gdb_id);
-
-      if (!target_thread_alive (tp->ptid))
-	error (_("Thread ID %d has terminated."), gdb_id);
-
-      display_one_tib (tp->ptid);
-    }
-  else if (!ptid_equal (inferior_ptid, null_ptid))
+  if (!ptid_equal (inferior_ptid, null_ptid))
     display_one_tib (inferior_ptid);
 }
 

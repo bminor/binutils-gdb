@@ -1,3 +1,15 @@
+2016-01-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/break.exp: Adjust to output changes.
+	* gdb.base/hbreak2.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/watch_thread_num.exp: Likewise.
+	* gdb.linespec/keywords.exp: Likewise.
+	* gdb.multi/info-threads.exp: Likewise.
+	* gdb.threads/thread-find.exp: Likewise.
+	* gdb.multi/tids.c: New file.
+	* gdb.multi/tids.exp: New file.
+
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
 	* gdb.python/py-infthread.exp: Test InferiorThread.inferior.

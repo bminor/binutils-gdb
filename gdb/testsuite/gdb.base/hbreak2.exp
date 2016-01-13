@@ -341,7 +341,7 @@ gdb_test "hbreak $bp_location12 thread 999" "Unknown thread 999.*" \
     "thread-specific hardware breakpoint on non-existent thread disallowed"
 
 gdb_test "hbreak $bp_location12 thread foo" \
-    "Junk after thread keyword.*" \
+    "Invalid thread ID: foo" \
     "thread-specific hardware breakpoint on bogus thread ID disallowed"
 
 # Verify that GDB responds gracefully to a breakpoint command with

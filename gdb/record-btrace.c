@@ -218,7 +218,7 @@ record_btrace_open (const char *args, int from_tty)
 
   disable_chain = make_cleanup (null_cleanup, NULL);
   ALL_NON_EXITED_THREADS (tp)
-    if (args == NULL || *args == 0 || number_is_in_list (args, tp->num))
+    if (args == NULL || *args == 0 || number_is_in_list (args, tp->global_num))
       {
 	btrace_enable (tp, &record_btrace_conf);
 

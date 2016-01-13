@@ -1,3 +1,22 @@
+2016-01-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads): Document per-inferior thread IDs,
+	qualified thread IDs, global thread IDs and thread ID lists.
+	(Set Watchpoints, Thread-Specific Breakpoints): Adjust to refer to
+	thread IDs.
+	(Convenience Vars): Document the $_thread convenience variable.
+	(Ada Tasks): Adjust to refer to thread IDs.
+	(GDB/MI Async Records, GDB/MI Thread Commands, GDB/MI Ada Tasking
+	Commands, GDB/MI Variable Objects): Update to mention global
+	thread IDs.
+	* guile.texi (Breakpoints In Guile)
+	<breakpoint-thread/set-breakpoint-thread breakpoint>: Mention
+	global thread IDs instead of thread IDs.
+	* python.texi (Threads In Python): Adjust documentation of
+	InferiorThread.num.
+	(Breakpoint.thread): Mention global thread IDs instead of thread
+	IDs.
+
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
 	* python.texi (Threads In Python): Document

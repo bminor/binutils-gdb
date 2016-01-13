@@ -221,7 +221,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   if (PyErr_Occurred ())
     return -1;
 
-  thread = pid_to_thread_id (inferior_ptid);
+  thread = ptid_to_global_thread_id (inferior_ptid);
   if (thread == 0)
     {
       PyErr_SetString (PyExc_ValueError,

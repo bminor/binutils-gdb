@@ -662,7 +662,7 @@ mi_cmd_var_update_iter (struct varobj *var, void *data_pointer)
     thread_stopped = 1;
   else
     {
-      struct thread_info *tp = find_thread_id (thread_id);
+      struct thread_info *tp = find_thread_global_id (thread_id);
 
       if (tp)
 	thread_stopped = is_stopped (tp->ptid);

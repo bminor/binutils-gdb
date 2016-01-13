@@ -876,7 +876,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	stabsread.c stack.c probe.c stap-probe.c std-regs.c \
 	symfile.c symfile-debug.c symfile-mem.c symmisc.c symtab.c \
 	target.c target-dcache.c target-descriptions.c target-memory.c \
-	thread.c top.c tracepoint.c \
+	tid-parse.c thread.c top.c tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
 	typeprint.c \
@@ -987,7 +987,8 @@ common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
 common/common-regcache.h fbsd-tdep.h nat/linux-personality.h \
 common/fileio.h nat/x86-linux.h nat/x86-linux-dregs.h \
-nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h arch/aarch64-insn.h
+nat/linux-namespaces.h arch/arm.h common/gdb_sys_time.h arch/aarch64-insn.h \
+tid-parse.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1029,7 +1030,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	linespec.o dictionary.o namespace.o \
 	location.o infcall.o \
 	infcmd.o infrun.o \
-	expprint.o environ.o stack.o thread.o thread-fsm.o \
+	expprint.o environ.o stack.o tid-parse.o thread.o thread-fsm.o \
 	exceptions.o \
 	extension.o \
 	filesystem.o \

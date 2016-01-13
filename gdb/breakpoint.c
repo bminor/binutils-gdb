@@ -69,6 +69,7 @@
 #include "format.h"
 #include "location.h"
 #include "thread-fsm.h"
+#include "tid-parse.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -3144,7 +3145,7 @@ insert_breakpoint_locations (void)
 	 the thread no longer exists.  ALL_BP_LOCATIONS bp_location
 	 has BL->OWNER always non-NULL.  */
       if (bl->owner->thread != -1
-	  && !valid_thread_id (bl->owner->thread))
+	  && !valid_global_thread_id (bl->owner->thread))
 	continue;
 
       switch_to_program_space_and_thread (bl->pspace);
@@ -3244,7 +3245,7 @@ remove_threaded_breakpoints (struct thread_info *tp, int silent)
 
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
     {
-      if (b->thread == tp->num && user_breakpoint_p (b))
+      if (b->thread == tp->global_num && user_breakpoint_p (b))
 	{
 	  b->disposition = disp_del_at_next_stop;
 
@@ -5447,7 +5448,7 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
   /* If this is a thread/task-specific breakpoint, don't waste cpu
      evaluating the condition if this isn't the specified
      thread/task.  */
-  if ((b->thread != -1 && b->thread != pid_to_thread_id (ptid))
+  if ((b->thread != -1 && b->thread != ptid_to_global_thread_id (ptid))
       || (b->task != 0 && b->task != ada_get_task_number (ptid)))
 
     {
@@ -6514,11 +6515,16 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   if (!part_of_multiple && b->thread != -1)
     {
-      struct thread_info *thr = find_thread_id (b->thread);
-
       /* FIXME should make an annotation for this.  */
       ui_out_text (uiout, "\tstop only in thread ");
-      ui_out_field_string (uiout, "thread", print_thread_id (thr));
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_int (uiout, "thread", b->thread);
+      else
+	{
+	  struct thread_info *thr = find_thread_global_id (b->thread);
+
+	  ui_out_field_string (uiout, "thread", print_thread_id (thr));
+	}
       ui_out_text (uiout, "\n");
     }
   
@@ -7574,7 +7580,7 @@ void
 set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 {
   struct breakpoint *b, *b_tmp;
-  int thread = tp->num;
+  int thread = tp->global_num;
 
   /* To avoid having to rescan all objfile symbols at every step,
      we maintain a list of continually-inserted but always disabled
@@ -7643,7 +7649,7 @@ set_longjmp_breakpoint_for_call_dummy (void)
 	new_b = momentary_breakpoint_from_master (b, bp_longjmp_call_dummy,
 						  &momentary_breakpoint_ops,
 						  1);
-	new_b->thread = pid_to_thread_id (inferior_ptid);
+	new_b->thread = ptid_to_global_thread_id (inferior_ptid);
 
 	/* Link NEW_B into the chain of RETVAL breakpoints.  */
 
@@ -7673,7 +7679,7 @@ check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp)
   struct breakpoint *b, *b_tmp;
 
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
-    if (b->type == bp_longjmp_call_dummy && b->thread == tp->num)
+    if (b->type == bp_longjmp_call_dummy && b->thread == tp->global_num)
       {
 	struct breakpoint *dummy_b = b->related_breakpoint;
 
@@ -8893,7 +8899,7 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
      momentary breakpoints to be active in only a single thread of
      control.  */
   if (in_thread_list (inferior_ptid))
-    b->thread = pid_to_thread_id (inferior_ptid);
+    b->thread = ptid_to_global_thread_id (inferior_ptid);
 
   update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
@@ -9567,14 +9573,6 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
     }
 }
 
-/* Issue an invalid thread ID error.  */
-
-static void ATTRIBUTE_NORETURN
-invalid_thread_id_error (int id)
-{
-  error (_("Unknown thread %d."), id);
-}
-
 /* Given TOK, a string specification of condition and thread, as
    accepted by the 'break' command, extract the condition
    string and thread number and set *COND_STRING and *THREAD.
@@ -9623,14 +9621,14 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
 	}
       else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
 	{
-	  char *tmptok;
+	  const char *tmptok;
+	  struct thread_info *thr;
 
 	  tok = end_tok + 1;
-	  *thread = strtol (tok, &tmptok, 0);
+	  thr = parse_thread_id (tok, &tmptok);
 	  if (tok == tmptok)
 	    error (_("Junk after thread keyword."));
-	  if (!valid_thread_id (*thread))
-	    invalid_thread_id_error (*thread);
+	  *thread = thr->global_num;
 	  tok = tmptok;
 	}
       else if (toklen >= 1 && strncmp (tok, "task", toklen) == 0)
@@ -11135,25 +11133,23 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 
 	  if (toklen == 6 && startswith (tok, "thread"))
 	    {
+	      struct thread_info *thr;
 	      /* At this point we've found a "thread" token, which means
 		 the user is trying to set a watchpoint that triggers
 		 only in a specific thread.  */
-	      char *endp;
+	      const char *endp;
 
 	      if (thread != -1)
 		error(_("You can specify only one thread."));
 
 	      /* Extract the thread ID from the next token.  */
-	      thread = strtol (value_start, &endp, 0);
+	      thr = parse_thread_id (value_start, &endp);
 
-	      /* Check if the user provided a valid numeric value for the
-		 thread ID.  */
+	      /* Check if the user provided a valid thread ID.  */
 	      if (*endp != ' ' && *endp != '\t' && *endp != '\0')
-		error (_("Invalid thread ID specification %s."), value_start);
+		invalid_thread_id_error (value_start);
 
-	      /* Check if the thread actually exists.  */
-	      if (!valid_thread_id (thread))
-		invalid_thread_id_error (thread);
+	      thread = thr->global_num;
 	    }
 	  else if (toklen == 4 && startswith (tok, "mask"))
 	    {
@@ -11694,7 +11690,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
   resolve_sal_pc (&sal);
 
   tp = inferior_thread ();
-  thread = tp->num;
+  thread = tp->global_num;
 
   old_chain = make_cleanup (null_cleanup, NULL);
 
@@ -11744,7 +11740,8 @@ until_break_command (char *arg, int from_tty, int anywhere)
 						    stack_frame_id, bp_until);
   make_cleanup_delete_breakpoint (location_breakpoint);
 
-  sm = new_until_break_fsm (tp->num, location_breakpoint, caller_breakpoint);
+  sm = new_until_break_fsm (tp->global_num,
+			    location_breakpoint, caller_breakpoint);
   tp->thread_fsm = &sm->thread_fsm;
 
   discard_cleanups (old_chain);
@@ -13366,7 +13363,7 @@ momentary_bkpt_print_mention (struct breakpoint *b)
 static void
 longjmp_bkpt_dtor (struct breakpoint *self)
 {
-  struct thread_info *tp = find_thread_id (self->thread);
+  struct thread_info *tp = find_thread_global_id (self->thread);
 
   if (tp)
     tp->initiating_frame = null_frame_id;
@@ -14547,7 +14544,7 @@ breakpoint_re_set_thread (struct breakpoint *b)
   if (b->thread != -1)
     {
       if (in_thread_list (inferior_ptid))
-	b->thread = pid_to_thread_id (inferior_ptid);
+	b->thread = ptid_to_global_thread_id (inferior_ptid);
 
       /* We're being called after following a fork.  The new fork is
 	 selected as current, and unless this was a vfork will have a
@@ -15058,7 +15055,7 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
   if (tp->control.single_step_breakpoints == NULL)
     {
       tp->control.single_step_breakpoints
-	= new_single_step_breakpoint (tp->num, gdbarch);
+	= new_single_step_breakpoint (tp->global_num, gdbarch);
     }
 
   sal = find_pc_line (pc, 0);

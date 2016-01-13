@@ -3,6 +3,37 @@
 
 *** Changes since GDB 7.10
 
+* Per-inferior thread numbers
+
+  Thread numbers are now per inferior instead of global.  If you're
+  debugging multiple inferiors, GDB displays thread IDs using a
+  qualified INF_NUM.THR_NUM form.  For example:
+
+     (gdb) info threads
+       Id   Target Id         Frame
+       1.1  Thread 0x7ffff7fc2740 (LWP 8155) (running)
+       1.2  Thread 0x7ffff7fc1700 (LWP 8168) (running)
+     * 2.1  Thread 0x7ffff7fc2740 (LWP 8157) (running)
+       2.2  Thread 0x7ffff7fc1700 (LWP 8190) (running)
+
+  As consequence, thread numbers as visible in the $_thread
+  convenience variable and in Python's InferiorThread.num attribute
+  are no longer unique between inferiors.
+
+  GDB now maintains a second thread ID per thread, referred to as the
+  global thread ID, which is the new equivalent of thread numbers in
+  previous releases.
+
+  For backwards compatibility, MI's thread IDs always refer to global
+  IDs.
+
+* Commands that accept thread IDs now accept the qualified
+  INF_NUM.THR_NUM form as well.  For example:
+
+     (gdb) thread 2.1
+     [Switching to thread 2.1 (Thread 0x7ffff7fc2740 (LWP 8157))] (running)
+     (gdb)
+
 * The new convenience variable $_inferior holds the number of the
   current inferior.
 
@@ -177,6 +208,9 @@ show remote catch-syscall-packet
 
 * Python Scripting
 
+  ** The "num" attribute of gdb.InferiorThread objects now refers to
+     the thread's per-inferior number.  See "Per-inferior thread
+     numbers" above.
   ** gdb.InferiorThread objects have a new attribute "inferior", which
      is the Inferior object the thread belongs to.
 

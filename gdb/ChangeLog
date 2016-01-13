@@ -1,5 +1,104 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention that thread IDs are now per inferior and global
+	thread IDs.
+	* Makefile.in (SFILES): Add tid-parse.c.
+	(COMMON_OBS): Add tid-parse.o.
+	(HFILES_NO_SRCDIR): Add tid-parse.h.
+	* ada-tasks.c: Adjust to use ptid_to_global_thread_id.
+	* breakpoint.c (insert_breakpoint_locations)
+	(remove_threaded_breakpoints, bpstat_check_breakpoint_conditions)
+	(print_one_breakpoint_location, set_longjmp_breakpoint)
+	(check_longjmp_breakpoint_for_call_dummy)
+	(set_momentary_breakpoint): Adjust to use global IDs.
+	(find_condition_and_thread, watch_command_1): Use parse_thread_id.
+	(until_break_command, longjmp_bkpt_dtor)
+	(breakpoint_re_set_thread, insert_single_step_breakpoint): Adjust
+	to use global IDs.
+	* dummy-frame.c (pop_dummy_frame_bpt): Adjust to use
+	ptid_to_global_thread_id.
+	* elfread.c (elf_gnu_ifunc_resolver_stop): Likewise.
+	* gdbthread.h (struct thread_info): Rename field 'num' to
+	'global_num.  Add new fields 'per_inf_num' and 'inf'.
+	(thread_id_to_pid): Rename thread_id_to_pid to
+	global_thread_id_to_ptid.
+	(pid_to_thread_id): Rename to ...
+	(ptid_to_global_thread_id): ... this.
+	(valid_thread_id): Rename to ...
+	(valid_global_thread_id): ... this.
+	(find_thread_id): Rename to ...
+	(find_thread_global_id): ... this.
+	(ALL_THREADS, ALL_THREADS_BY_INFERIOR): Declare.
+	(print_thread_info): Add comment.
+	* tid-parse.h: New file.
+	* tid-parse.c: New file.
+	* infcmd.c (step_command_fsm_prepare)
+	(step_command_fsm_should_stop): Adjust to use the global thread
+	ID.
+	(until_next_command, until_next_command)
+	(finish_command_fsm_should_stop): Adjust to use the global thread
+	ID.
+	(attach_post_wait): Adjust to check the inferior number too.
+	* inferior.h (struct inferior) <highest_thread_num>: New field.
+	* infrun.c (handle_signal_stop)
+	(insert_exception_resume_breakpoint)
+	(insert_exception_resume_from_probe): Adjust to use the global
+	thread ID.
+	* record-btrace.c (record_btrace_open): Use global thread IDs.
+	* remote.c (process_initial_stop_replies): Also consider the
+	inferior number.
+	* target.c (target_pre_inferior): Clear the inferior's highest
+	thread num.
+	* thread.c (clear_thread_inferior_resources): Adjust to use the
+	global thread ID.
+	(new_thread): New inferior parameter.  Adjust to use it.  Set both
+	the thread's global ID and the thread's per-inferior ID.
+	(add_thread_silent): Adjust.
+	(find_thread_global_id): New.
+	(find_thread_id): Make static.  Adjust to rename.
+	(valid_thread_id): Rename to ...
+	(valid_global_thread_id): ... this.
+	(pid_to_thread_id): Rename to ...
+	(ptid_to_global_thread_id): ... this.
+	(thread_id_to_pid): Rename to ...
+	(global_thread_id_to_ptid): ... this.  Adjust.
+	(first_thread_of_process): Adjust.
+	(do_captured_list_thread_ids): Adjust to use global thread IDs.
+	(should_print_thread): New function.
+	(print_thread_info): Rename to ...
+	(print_thread_info_1): ... this, and add new show_global_ids
+	parameter.  Handle it.  Iterate over inferiors.
+	(print_thread_info): Reimplement as wrapper around
+	print_thread_info_1.
+	(show_inferior_qualified_tids): New function.
+	(print_thread_id): Use it.
+	(tp_array_compar): Compare inferior numbers too.
+	(thread_apply_command): Use tid_range_parser.
+	(do_captured_thread_select): Use parse_thread_id.
+	(thread_id_make_value): Adjust.
+	(_initialize_thread): Adjust "info threads" help string.
+	* varobj.c (struct varobj_root): Update comment.
+	(varobj_create): Adjust to use global thread IDs.
+	(value_of_root_1): Adjust to use global_thread_id_to_ptid.
+	* windows-tdep.c (display_tib): No longer accept an argument.
+	* cli/cli-utils.c (get_number_trailer): Make extern.
+	* cli/cli-utils.h (get_number_trailer): Declare.
+	(get_number_const): Adjust documentation.
+	* mi/mi-cmd-var.c (mi_cmd_var_update_iter): Adjust to use global
+	thread IDs.
+	* mi/mi-interp.c (mi_new_thread, mi_thread_exit)
+	(mi_on_normal_stop, mi_output_running_pid, mi_on_resume):
+	* mi/mi-main.c (mi_execute_command, mi_cmd_execute): Likewise.
+	* guile/scm-breakpoint.c (gdbscm_set_breakpoint_thread_x):
+	Likewise.
+	* python/py-breakpoint.c (bppy_set_thread): Likewise.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Likewise.
+	* python/py-infthread.c (thpy_get_num): Add comment and return the
+	per-inferior thread ID.
+	(thread_object_getset): Update comment of "num".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (remove_threaded_breakpoints)
 	(print_one_breakpoint_location): Use print_thread_id.
 	* btrace.c (btrace_enable, btrace_disable, btrace_teardown)

@@ -20,11 +20,18 @@
 #ifndef CLI_UTILS_H
 #define CLI_UTILS_H
 
-/* *PP is a string denoting a number.  Get the number of the.  Advance
-   *PP after the string and any trailing whitespace.
+/* *PP is a string denoting a number.  Get the number.  Advance *PP
+   after the string and any trailing whitespace.
 
-   Currently the string can either be a number,  or "$" followed by the
-   name of a convenience variable, or ("$" or "$$") followed by digits.  */
+   The string can either be a number, or "$" followed by the name of a
+   convenience variable, or ("$" or "$$") followed by digits.
+
+   TRAILER is a character which can be found after the number; most
+   commonly this is `-'.  If you don't want a trailer, use \0.  */
+
+extern int get_number_trailer (const char **pp, int trailer);
+
+/* Convenience.  Like get_number_trailer, but with no TRAILER.  */
 
 extern int get_number_const (const char **);
 

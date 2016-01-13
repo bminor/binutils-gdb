@@ -2838,9 +2838,9 @@ programs:
 
 @itemize @bullet
 @item automatic notification of new threads
-@item @samp{thread @var{threadno}}, a command to switch among threads
+@item @samp{thread @var{thread-id}}, a command to switch among threads
 @item @samp{info threads}, a command to inquire about existing threads
-@item @samp{thread apply [@var{threadno}] [@var{all}] @var{args}},
+@item @samp{thread apply [@var{thread-id-list}] [@var{all}] @var{args}},
 a command to apply a command to a list of threads
 @item thread-specific breakpoints
 @item @samp{set print thread-events}, which controls printing of 
@@ -2886,26 +2886,77 @@ further qualifier.
 @c         multithread systems permit starting a program with multiple
 @c         threads ab initio?
 
-@cindex thread number
+@anchor{thread numbers}
+@cindex thread number, per inferior
 @cindex thread identifier (GDB)
-For debugging purposes, @value{GDBN} associates its own thread
-number---always a single integer---with each thread in your program.
+For debugging purposes, @value{GDBN} associates its own thread number
+---always a single integer---with each thread of an inferior.  This
+number is unique between all threads of an inferior, but not unique
+between threads of different inferiors.
+
+@cindex qualified thread ID
+You can refer to a given thread in an inferior using the qualified
+@var{inferior-num}.@var{thread-num} syntax, also known as
+@dfn{qualified thread ID}, with @var{inferior-num} being the inferior
+number and @var{thread-num} being the thread number of the given
+inferior.  For example, thread @code{2.3} refers to thread number 3 of
+inferior 2.  If you omit @var{inferior-num} (e.g., @code{thread 3}),
+then @value{GDBN} infers you're referring to a thread of the current
+inferior.
+
+Until you create a second inferior, @value{GDBN} does not show the
+@var{inferior-num} part of thread IDs, even though you can always use
+the full @var{inferior-num}.@var{thread-num} form to refer to threads
+of inferior 1, the initial inferior.
+
+@anchor{thread ID lists}
+@cindex thread ID lists
+Some commands accept a space-separated @dfn{thread ID list} as
+argument.  A list element can be a thread ID as shown in the first
+field of the @samp{info threads} display, with or without an inferior
+qualifier (e.g., @samp{2.1} or @samp{1}); or can be a range of thread
+numbers, again with or without an inferior qualifier, as in
+@var{inf1}.@var{thr1}-@var{thr2} or @var{thr1}-@var{thr2} (e.g.,
+@samp{1.2-4} or @samp{2-4}).  For example, if the current inferior is
+1, the thread list @samp{1 2-3 4.5 6.7-9} includes threads 1 to 3 of
+inferior 1, thread 5 of inferior 4 and threads 7 to 9 of inferior 6.
+That is, in expanded qualified form, the same as @samp{1.1 1.2 1.3 4.5
+6.7 6.8 6.9}.
+
+@anchor{global thread numbers}
+@cindex global thread number
+@cindex global thread identifier (GDB)
+In addition to a @emph{per-inferior} number, each thread is also
+assigned a unique @emph{global} number, also known as @dfn{global
+thread ID}, a single integer.  Unlike the thread number component of
+the thread ID, no two threads have the same global ID, even when
+you're debugging multiple inferiors.
 
 From @value{GDBN}'s perspective, a process always has at least one
 thread.  In other words, @value{GDBN} assigns a thread number to the
 program's ``main thread'' even if the program is not multi-threaded.
 
+@vindex $_thread@r{, convenience variable}
+The debugger convenience variable @samp{$_thread} contains the
+per-inferior thread number of the current thread.  You may find this
+useful in writing breakpoint conditional expressions, command scripts,
+and so forth.  @xref{Convenience Vars,, Convenience Variables}, for
+general information on convenience variables.
+
 @table @code
 @kindex info threads
-@item info threads @r{[}@var{id}@dots{}@r{]}
-Display a summary of all threads currently in your program.  Optional 
-argument @var{id}@dots{} is one or more thread ids separated by spaces, and
-means to print information only about the specified thread or threads.
+@item info threads @r{[}@var{thread-id-list}@r{]}
+
+Display information about one or more threads.  With no arguments
+displays information about all threads.  You can specify the list of
+threads that you want to display using the thread ID list syntax
+(@pxref{thread ID lists}).
+
 @value{GDBN} displays for each thread (in this order):
 
 @enumerate
 @item
-the thread number assigned by @value{GDBN}
+the per-inferior thread number assigned by @value{GDBN}
 
 @item
 the target system's thread identifier (@var{systag})
@@ -2936,6 +2987,19 @@ For example,
     at threadtest.c:68
 @end smallexample
 
+If you're debugging multiple inferiors, @value{GDBN} displays thread
+IDs using the qualified @var{inferior-num}.@var{thread-num} format.
+Otherwise, only @var{thread-num} is shown:
+
+@smallexample
+(@value{GDBP}) info threads
+  Id   Target Id             Frame
+  1.1  process 35 thread 13  main (argc=1, argv=0x7ffffff8)
+  1.2  process 35 thread 23  0x34e5 in sigpause ()
+  1.3  process 35 thread 27  0x34e5 in sigpause ()
+* 2.1  process 65 thread 1   main (argc=1, argv=0x7ffffff8)
+@end smallexample
+
 On Solaris, you can display more information about user threads with a
 Solaris-specific command:
 
@@ -2947,13 +3011,15 @@ Display info on Solaris user threads.
 @end table
 
 @table @code
-@kindex thread @var{threadno}
-@item thread @var{threadno}
-Make thread number @var{threadno} the current thread.  The command
-argument @var{threadno} is the internal @value{GDBN} thread number, as
-shown in the first field of the @samp{info threads} display.
-@value{GDBN} responds by displaying the system identifier of the thread
-you selected, and its current stack frame summary:
+@kindex thread @var{thread-id}
+@item thread @var{thread-id}
+Make thread ID @var{thread-id} the current thread.  The command
+argument @var{thread-id} is the @value{GDBN} thread ID, as shown in
+the first field of the @samp{info threads} display, with or without an
+inferior qualifier (e.g., @samp{2.1} or @samp{1}).
+
+@value{GDBN} responds by displaying the system identifier of the
+thread you selected, and its current stack frame summary:
 
 @smallexample
 (@value{GDBP}) thread 2
@@ -2967,23 +3033,14 @@ As with the @samp{[New @dots{}]} message, the form of the text after
 @samp{Switching to} depends on your system's conventions for identifying
 threads.
 
-@vindex $_thread@r{, convenience variable}
-The debugger convenience variable @samp{$_thread} contains the number
-of the current thread.  You may find this useful in writing breakpoint
-conditional expressions, command scripts, and so forth.  See
-@xref{Convenience Vars,, Convenience Variables}, for general
-information on convenience variables.
-
 @kindex thread apply
 @cindex apply command to several threads
-@item thread apply [@var{threadno} | all [-ascending]] @var{command}
+@item thread apply [@var{thread-id-list} | all [-ascending]] @var{command}
 The @code{thread apply} command allows you to apply the named
-@var{command} to one or more threads.  Specify the numbers of the
-threads that you want affected with the command argument
-@var{threadno}.  It can be a single thread number, one of the numbers
-shown in the first field of the @samp{info threads} display; or it
-could be a range of thread numbers, as in @code{2-4}.  To apply
-a command to all threads in descending order, type @kbd{thread apply all
+@var{command} to one or more threads.  Specify the threads that you
+want affected using the thread ID list syntax (@pxref{thread ID
+lists}), or specify @code{all} to apply to all threads.  To apply a
+command to all threads in descending order, type @kbd{thread apply all
 @var{command}}.  To apply a command to all threads in ascending order,
 type @kbd{thread apply all -ascending @var{command}}.
 
@@ -3983,7 +4040,7 @@ slow down the running of your program.
 
 @table @code
 @kindex watch
-@item watch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{threadnum}@r{]} @r{[}mask @var{maskvalue}@r{]}
+@item watch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{thread-id}@r{]} @r{[}mask @var{maskvalue}@r{]}
 Set a watchpoint for an expression.  @value{GDBN} will break when the
 expression @var{expr} is written into by the program and its value
 changes.  The simplest (and the most popular) use of this command is
@@ -3993,9 +4050,9 @@ to watch the value of a single variable:
 (@value{GDBP}) watch foo
 @end smallexample
 
-If the command includes a @code{@r{[}thread @var{threadnum}@r{]}}
+If the command includes a @code{@r{[}thread @var{thread-id}@r{]}}
 argument, @value{GDBN} breaks only when the thread identified by
-@var{threadnum} changes the value of @var{expr}.  If any other threads
+@var{thread-id} changes the value of @var{expr}.  If any other threads
 change the value of @var{expr}, @value{GDBN} will not break.  Note
 that watchpoints restricted to a single thread in this way only work
 with Hardware Watchpoints.
@@ -4027,12 +4084,12 @@ Examples:
 @end smallexample
 
 @kindex rwatch
-@item rwatch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{threadnum}@r{]} @r{[}mask @var{maskvalue}@r{]}
+@item rwatch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{thread-id}@r{]} @r{[}mask @var{maskvalue}@r{]}
 Set a watchpoint that will break when the value of @var{expr} is read
 by the program.
 
 @kindex awatch
-@item awatch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{threadnum}@r{]} @r{[}mask @var{maskvalue}@r{]}
+@item awatch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{thread-id}@r{]} @r{[}mask @var{maskvalue}@r{]}
 Set a watchpoint that will break when @var{expr} is either read from
 or written into by the program.
 
@@ -6051,25 +6108,25 @@ breakpoints on all threads, or on a particular thread.
 @table @code
 @cindex breakpoints and threads
 @cindex thread breakpoints
-@kindex break @dots{} thread @var{threadno}
-@item break @var{location} thread @var{threadno}
-@itemx break @var{location} thread @var{threadno} if @dots{}
+@kindex break @dots{} thread @var{thread-id}
+@item break @var{location} thread @var{thread-id}
+@itemx break @var{location} thread @var{thread-id} if @dots{}
 @var{location} specifies source lines; there are several ways of
 writing them (@pxref{Specify Location}), but the effect is always to
 specify some source line.
 
-Use the qualifier @samp{thread @var{threadno}} with a breakpoint command
+Use the qualifier @samp{thread @var{thread-id}} with a breakpoint command
 to specify that you only want @value{GDBN} to stop the program when a
-particular thread reaches this breakpoint.  The @var{threadno} specifier
-is one of the numeric thread identifiers assigned by @value{GDBN}, shown
+particular thread reaches this breakpoint.  The @var{thread-id} specifier
+is one of the thread identifiers assigned by @value{GDBN}, shown
 in the first column of the @samp{info threads} display.
 
-If you do not specify @samp{thread @var{threadno}} when you set a
+If you do not specify @samp{thread @var{thread-id}} when you set a
 breakpoint, the breakpoint applies to @emph{all} threads of your
 program.
 
 You can use the @code{thread} qualifier on conditional breakpoints as
-well; in this case, place @samp{thread @var{threadno}} before or
+well; in this case, place @samp{thread @var{thread-id}} before or
 after the breakpoint condition, like this:
 
 @smallexample
@@ -10391,6 +10448,9 @@ This variable contains the address of the thread information block.
 @item $_inferior
 The number of the current inferior.  @xref{Inferiors and
 Programs, ,Debugging Multiple Inferiors and Programs}.
+
+@item $_thread
+The thread number of the current thread.  @xref{thread numbers}.
 
 @end table
 
@@ -16134,7 +16194,7 @@ This command prints the ID of the current task.
 
 @item task @var{taskno}
 @cindex Ada task switching
-This command is like the @code{thread @var{threadno}}
+This command is like the @code{thread @var{thread-id}}
 command (@pxref{Threads}).  It switches the context of debugging
 from the current task to the given task.
 
@@ -25483,8 +25543,8 @@ increases the risk that by relying on implicitly selected thread, the
 frontend may be operating on a wrong one.  Therefore, each MI command
 should explicitly specify which thread and frame to operate on.  To
 make it possible, each MI command accepts the @samp{--thread} and
-@samp{--frame} options, the value to each is @value{GDBN} identifier
-for thread and frame to operate on.
+@samp{--frame} options, the value to each is @value{GDBN} global
+identifier for thread and frame to operate on.
 
 Usually, each top-level window in a frontend allows the user to select
 a thread and a frame, and remembers the user selection for further
@@ -26037,15 +26097,16 @@ The following is the list of possible async records:
 @table @code
 
 @item *running,thread-id="@var{thread}"
-The target is now running.  The @var{thread} field tells which
-specific thread is now running, and can be @samp{all} if all threads
-are running.  The frontend should assume that no interaction with a 
-running thread is possible after this notification is produced.
-The frontend should not assume that this notification is output
-only once for any command.  @value{GDBN} may emit this notification 
-several times, either for different threads, because it cannot resume
-all threads together, or even for a single thread, if the thread must
-be stepped though some code before letting it run freely.
+The target is now running.  The @var{thread} field can be the global
+thread ID of the the thread that is now running, and it can be
+@samp{all} if all threads are running.  The frontend should assume
+that no interaction with a running thread is possible after this
+notification is produced.  The frontend should not assume that this
+notification is output only once for any command.  @value{GDBN} may
+emit this notification several times, either for different threads,
+because it cannot resume all threads together, or even for a single
+thread, if the thread must be stepped though some code before letting
+it run freely.
 
 @item *stopped,reason="@var{reason}",thread-id="@var{id}",stopped-threads="@var{stopped}",core="@var{core}"
 The target has stopped.  The @var{reason} field can have one of the
@@ -26099,8 +26160,9 @@ The inferior called @code{exec}.  This is reported when @code{catch exec}
 (@pxref{Set Catchpoints}) has been used.
 @end table
 
-The @var{id} field identifies the thread that directly caused the stop
--- for example by hitting a breakpoint.  Depending on whether all-stop
+The @var{id} field identifies the global thread ID of the thread
+that directly caused the stop -- for example by hitting a breakpoint.
+Depending on whether all-stop
 mode is in effect (@pxref{All-Stop Mode}), @value{GDBN} may either
 stop all threads, or only the thread that directly triggered the stop.
 If all threads are stopped, the @var{stopped} field will have the
@@ -26136,7 +26198,7 @@ only when the inferior exited with some code.
 @item =thread-created,id="@var{id}",group-id="@var{gid}"
 @itemx =thread-exited,id="@var{id}",group-id="@var{gid}"
 A thread either was created, or has exited.  The @var{id} field
-contains the @value{GDBN} identifier of the thread.  The @var{gid}
+contains the global @value{GDBN} identifier of the thread.  The @var{gid}
 field identifies the thread group this thread belongs to.
 
 @item =thread-selected,id="@var{id}"
@@ -26397,7 +26459,7 @@ uses a tuple with the following fields:
 
 @table @code
 @item id
-The numeric id assigned to the thread by @value{GDBN}.  This field is
+The global numeric id assigned to the thread by @value{GDBN}.  This field is
 always present.
 
 @item target-id
@@ -26870,7 +26932,8 @@ Make the breakpoint conditional on @var{condition}.
 @item -i @var{ignore-count}
 Initialize the @var{ignore-count}.
 @item -p @var{thread-id}
-Restrict the breakpoint to the specified @var{thread-id}.
+Restrict the breakpoint to the thread with the specified global
+@var{thread-id}.
 @end table
 
 @subsubheading Result
@@ -26960,7 +27023,8 @@ Make the breakpoint conditional on @var{condition}.
 Set the ignore count of the breakpoint (@pxref{Conditions, ignore count})
 to @var{ignore-count}.
 @item -p @var{thread-id}
-Restrict the breakpoint to the specified @var{thread-id}.
+Restrict the breakpoint to the thread with the specified global
+@var{thread-id}.
 @end table
 
 @subsubheading Result
@@ -27610,10 +27674,11 @@ The corresponding @value{GDBN} command is @samp{pwd}.
  -thread-info [ @var{thread-id} ]
 @end smallexample
 
-Reports information about either a specific thread, if 
-the @var{thread-id} parameter is present, or about all
-threads.  When printing information about all threads,
-also reports the current thread.
+Reports information about either a specific thread, if the
+@var{thread-id} parameter is present, or about all threads.
+@var{thread-id} is the thread's global thread ID.  When printing
+information about all threads, also reports the global ID of the
+current thread.
 
 @subsubheading @value{GDBN} Command
 
@@ -27630,7 +27695,7 @@ defined for a given thread:
 This field exists only for the current thread.  It has the value @samp{*}.
 
 @item id
-The identifier that @value{GDBN} uses to refer to the thread.
+The global identifier that @value{GDBN} uses to refer to the thread.
 
 @item target-id
 The identifier that the target uses to refer to the thread.
@@ -27696,8 +27761,9 @@ current-thread-id="1"
  -thread-list-ids
 @end smallexample
 
-Produces a list of the currently known @value{GDBN} thread ids.  At the
-end of the list it also prints the total number of such threads.
+Produces a list of the currently known global @value{GDBN} thread ids.
+At the end of the list it also prints the total number of such
+threads.
 
 This command is retained for historical reasons, the
 @code{-thread-info} command should be used instead.
@@ -27723,11 +27789,12 @@ current-thread-id="1",number-of-threads="3"
 @subsubheading Synopsis
 
 @smallexample
- -thread-select @var{threadnum}
+ -thread-select @var{thread-id}
 @end smallexample
 
-Make @var{threadnum} the current thread.  It prints the number of the new
-current thread, and the topmost frame for that thread.
+Make thread with global thread number @var{thread-id} the current
+thread.  It prints the number of the new current thread, and the
+topmost frame for that thread.
 
 This command is deprecated in favor of explicitly using the
 @samp{--thread} option to each command.
@@ -27796,7 +27863,8 @@ The identifier that @value{GDBN} uses to refer to the Ada task.
 The identifier that the target uses to refer to the Ada task.
 
 @item thread-id
-The identifier of the thread corresponding to the Ada task.
+The global thread identifier of the thread corresponding to the Ada
+task.
 
 This field should always exist, as Ada tasks are always implemented
 on top of a thread.  But if @value{GDBN} cannot find this corresponding
@@ -29012,7 +29080,7 @@ would be printed by the @value{GDBN} CLI.  If @samp{print object}
 
 @item thread-id
 If a variable object is bound to a specific thread, then this is the
-thread's identifier.
+thread's global identifier.
 
 @item has_more
 For a dynamic varobj, this indicates whether there appear to be any
@@ -29193,8 +29261,8 @@ The type of the child.  If @samp{print object}
 If values were requested, this is the value.
 
 @item thread-id
-If this variable object is associated with a thread, this is the thread id.  
-Otherwise this result is not present.
+If this variable object is associated with a thread, this is the
+thread's global thread id.  Otherwise this result is not present.
 
 @item frozen
 If the variable object is frozen, this variable will be present with a value of 1.
