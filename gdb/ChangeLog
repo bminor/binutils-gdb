@@ -1,3 +1,13 @@
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/19388
+	* frame.c (get_current_frame): Use validate_registers_access.
+	* gdbthread.h (validate_registers_access): Declare.
+	* infrun.c (validate_siginfo_access): Delete.
+	(siginfo_value_read, siginfo_value_write): Use
+	validate_registers_access.
+	* thread.c (validate_registers_access): New function.
+
 2016-01-12  Josh Stone  <jistone@redhat.com>
 	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 

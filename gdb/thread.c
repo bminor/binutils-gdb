@@ -1098,6 +1098,28 @@ finish_thread_state_cleanup (void *arg)
   finish_thread_state (*ptid_p);
 }
 
+/* See gdbthread.h.  */
+
+void
+validate_registers_access (void)
+{
+  /* No selected thread, no registers.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    error (_("No thread selected."));
+
+  /* Don't try to read from a dead thread.  */
+  if (is_exited (inferior_ptid))
+    error (_("The current thread has terminated"));
+
+  /* ... or from a spinning thread.  FIXME: This isn't actually fully
+     correct.  It'll allow an user-requested access (e.g., "print $pc"
+     at the prompt) when a thread is not executing for some internal
+     reason, but is marked running from the user's perspective.  E.g.,
+     the thread is waiting for its turn in the step-over queue.  */
+  if (is_executing (inferior_ptid))
+    error (_("Selected thread is running."));
+}
+
 int
 pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread)
 {

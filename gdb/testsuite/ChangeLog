@@ -1,3 +1,9 @@
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/19388
+	* gdb.base/catch-signal-siginfo-cond.c: New file.
+	* gdb.base/catch-signal-siginfo-cond.exp: New file.
+
 2016-01-12  Josh Stone  <jistone@redhat.com>
 	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 

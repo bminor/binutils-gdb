@@ -555,6 +555,11 @@ extern int thread_is_in_step_over_chain (struct thread_info *tp);
 
 extern void thread_cancel_execution_command (struct thread_info *thr);
 
+/* Check whether it makes sense to access a register of the current
+   thread at this point.  If not, throw an error (e.g., the thread is
+   executing).  */
+extern void validate_registers_access (void);
+
 extern struct thread_info *thread_list;
 
 #endif /* GDBTHREAD_H */
