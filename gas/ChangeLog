@@ -1,3 +1,7 @@
+2016-01-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-nios2.c (output_movia): Preset `code' to 0.
+
 2016-01-13  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* config/tc-h8300.c (get_operand): Remove spurious condition in
