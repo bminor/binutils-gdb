@@ -127,6 +127,18 @@ thpy_get_num (PyObject *self, void *closure)
   return PyLong_FromLong (thread_obj->thread->per_inf_num);
 }
 
+/* Getter for InferiorThread.global_num.  */
+
+static PyObject *
+thpy_get_global_num (PyObject *self, void *closure)
+{
+  thread_object *thread_obj = (thread_object *) self;
+
+  THPY_REQUIRE_VALID (thread_obj);
+
+  return PyLong_FromLong (thread_obj->thread->global_num);
+}
+
 /* Getter for InferiorThread.ptid  -> (pid, lwp, tid).
    Returns a tuple with the thread's ptid components.  */
 
@@ -298,6 +310,8 @@ static PyGetSetDef thread_object_getset[] =
     "The name of the thread, as set by the user or the OS.", NULL },
   { "num", thpy_get_num, NULL,
     "Per-inferior number of the thread, as assigned by GDB.", NULL },
+  { "global_num", thpy_get_global_num, NULL,
+    "Global number of the thread, as assigned by GDB.", NULL },
   { "ptid", thpy_get_ptid, NULL, "ID of the thread, as assigned by the OS.",
     NULL },
   { "inferior", thpy_get_inferior, NULL,

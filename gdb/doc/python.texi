@@ -2998,6 +2998,12 @@ user-specified thread name.
 The per-inferior number of the thread, as assigned by GDB.
 @end defvar
 
+@defvar InferiorThread.global_num
+The global ID of the thread, as assigned by GDB.  You can use this to
+make Python breakpoints thread-specific, for example
+(@pxref{python_breakpoint_thread,,The Breakpoint.thread attribute}).
+@end defvar
+
 @defvar InferiorThread.ptid
 ID of the thread, as assigned by the operating system.  This attribute is a
 tuple containing three integers.  The first is the Process ID (PID); the second
@@ -4642,6 +4648,7 @@ first command is @code{silent}.  This is not reported by the
 @code{silent} attribute.
 @end defvar
 
+@anchor{python_breakpoint_thread}
 @defvar Breakpoint.thread
 If the breakpoint is thread-specific, this attribute holds the
 thread's global id.  If the breakpoint is not thread-specific, this

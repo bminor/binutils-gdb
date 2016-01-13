@@ -208,9 +208,10 @@ show remote catch-syscall-packet
 
 * Python Scripting
 
-  ** The "num" attribute of gdb.InferiorThread objects now refers to
-     the thread's per-inferior number.  See "Per-inferior thread
-     numbers" above.
+  ** gdb.InferiorThread objects have a new attribute "global_num",
+     which refers to the thread's global thread ID.  The existing
+     "num" attribute now refers to the thread's per-inferior number.
+     See "Per-inferior thread numbers" above.
   ** gdb.InferiorThread objects have a new attribute "inferior", which
      is the Inferior object the thread belongs to.
 

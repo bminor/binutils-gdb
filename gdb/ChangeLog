@@ -1,5 +1,11 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention InferiorThread.global_num.
+	* python/py-infthread.c (thpy_get_global_num): New function.
+	(thread_object_getset): Register "global_num".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention that thread IDs are now per inferior and global
 	thread IDs.
 	* Makefile.in (SFILES): Add tid-parse.c.

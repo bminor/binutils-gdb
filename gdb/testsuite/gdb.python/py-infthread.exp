@@ -42,6 +42,7 @@ if ![runto_main] then {
 gdb_py_test_silent_cmd "python t0 = gdb.selected_thread ()" "test gdb.selected_thread" 1
 gdb_test "python print (t0)" "\\<gdb.InferiorThread object at 0x\[\[:xdigit:\]\]+>" "verify InferiorThread object"
 gdb_test "python print ('result = %s' % t0.num)" " = 1" "test InferiorThread.num"
+gdb_test "python print ('result = %s' % t0.global_num)" " = 1" "test InferiorThread.global_num"
 gdb_test "python print ('result = %s' % str (t0.ptid))" " = \\(\[0-9\]+, \[0-9\]+, \[0-9\]+\\)" "test InferiorThread.ptid"
 
 gdb_py_test_silent_cmd "python i0 = t0.inferior" "test InferiorThread.inferior" 1
