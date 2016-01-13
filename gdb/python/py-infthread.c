@@ -140,6 +140,18 @@ thpy_get_ptid (PyObject *self, void *closure)
   return gdbpy_create_ptid_object (thread_obj->thread->ptid);
 }
 
+/* Getter for InferiorThread.inferior -> Inferior.  */
+
+static PyObject *
+thpy_get_inferior (PyObject *self, void *ignore)
+{
+  thread_object *thread_obj = (thread_object *) self;
+
+  THPY_REQUIRE_VALID (thread_obj);
+
+  return thread_obj->inf_obj;
+}
+
 /* Implementation of InferiorThread.switch ().
    Makes this the GDB selected thread.  */
 
@@ -285,6 +297,8 @@ static PyGetSetDef thread_object_getset[] =
   { "num", thpy_get_num, NULL, "ID of the thread, as assigned by GDB.", NULL },
   { "ptid", thpy_get_ptid, NULL, "ID of the thread, as assigned by the OS.",
     NULL },
+  { "inferior", thpy_get_inferior, NULL,
+    "The Inferior object this thread belongs to.", NULL },
 
   { NULL }
 };

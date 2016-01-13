@@ -175,6 +175,11 @@ show remote catch-syscall-packet
      format.  It outputs data in hexadecimal format with zero-padding on the
      left.
 
+* Python Scripting
+
+  ** gdb.InferiorThread objects have a new attribute "inferior", which
+     is the Inferior object the thread belongs to.
+
 *** Changes in GDB 7.10
 
 * Support for process record-replay and reverse debugging on aarch64*-linux*

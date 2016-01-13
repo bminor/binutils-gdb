@@ -1,5 +1,11 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention InferiorThread.inferior.
+	* python/py-infthread.c (thpy_get_inferior): New.
+	(thread_object_getset): Register "inferior".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention $_inferior.
 	* inferior.c (inferior_id_make_value): New.
 	(inferior_funcs): New.
