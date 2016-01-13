@@ -1,3 +1,8 @@
+2016-01-20  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (windows_make_so): Warn rather than stopping with
+	an error if realpath() fails.
+
 2020-04-14  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-nat.c (nbsd_pid_to_kinfo_proc2): New.
