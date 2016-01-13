@@ -644,6 +644,7 @@ static VEC (CORE_ADDR) *
 arm_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
 {
   int byte_order = self->byte_order;
+  int byte_order_for_code = self->byte_order_for_code;
   unsigned long pc_val;
   unsigned long this_instr = 0;
   unsigned long status;
@@ -652,7 +653,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
   VEC (CORE_ADDR) *next_pcs = NULL;
 
   pc_val = (unsigned long) pc;
-  this_instr = self->ops->read_mem_uint (pc, 4, byte_order);
+  this_instr = self->ops->read_mem_uint (pc, 4, byte_order_for_code);
 
   status = regcache_raw_get_unsigned (regcache, ARM_PS_REGNUM);
   nextpc = (CORE_ADDR) (pc_val + 4);	/* Default case */
