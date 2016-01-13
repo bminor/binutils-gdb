@@ -1,5 +1,8 @@
 2016-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* ld-scripts/script.exp (extract_symbol_test): Expect to
+	fail for MIPS targets.
+
 	* ld-scripts/rgn-at11.d: Expect this test to fail for
 	MIPS targets.
 
