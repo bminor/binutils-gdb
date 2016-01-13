@@ -1,3 +1,8 @@
+2016-01-13  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* config/tc-h8300.c (get_operand): Remove spurious condition in
+	test for closing parenthesis.
+
 2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-arm.c (arm_ext_v8_2): New.
