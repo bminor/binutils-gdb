@@ -1,5 +1,34 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (remove_threaded_breakpoints)
+	(print_one_breakpoint_location): Use print_thread_id.
+	* btrace.c (btrace_enable, btrace_disable, btrace_teardown)
+	(btrace_fetch, btrace_clear): Use print_thread_id.
+	* common/print-utils.c (CELLSIZE): Delete.
+	(get_cell): Rename to ...
+	(get_print_cell): ... this and made extern.  Adjust call callers.
+	Adjust to use PRINT_CELL_SIZE.
+	* common/print-utils.h (get_print_cell): Declare.
+	(PRINT_CELL_SIZE): New.
+	* gdbthread.h (print_thread_id): Declare.
+	* infcmd.c (signal_command): Use print_thread_id.
+	* inferior.c (print_inferior): Use print_thread_id.
+	* infrun.c (handle_signal_stop)
+	(insert_exception_resume_breakpoint)
+	(insert_exception_resume_from_probe)
+	(print_signal_received_reason): Use print_thread_id.
+	* record-btrace.c (record_btrace_info)
+	(record_btrace_resume_thread, record_btrace_cancel_resume)
+	(record_btrace_step_thread, record_btrace_wait): Use
+	print_thread_id.
+	* thread.c (thread_apply_all_command): Use print_thread_id.
+	(print_thread_id): New function.
+	(thread_apply_command): Use print_thread_id.
+	(thread_command, thread_find_command, do_captured_thread_select):
+	Use print_thread_id.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention InferiorThread.inferior.
 	* python/py-infthread.c (thpy_get_inferior): New.
 	(thread_object_getset): Register "inferior".

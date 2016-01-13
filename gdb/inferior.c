@@ -748,8 +748,8 @@ inferior_command (char *args, int from_tty)
 	  switch_to_thread (tp->ptid);
 	}
 
-      printf_filtered (_("[Switching to thread %d (%s)] "),
-		       pid_to_thread_id (inferior_ptid),
+      printf_filtered (_("[Switching to thread %s (%s)] "),
+		       print_thread_id (inferior_thread ()),
 		       target_pid_to_str (inferior_ptid));
     }
   else

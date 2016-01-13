@@ -7905,7 +7905,7 @@ print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
       ui_out_text (uiout, "\n[");
       ui_out_field_string (uiout, "thread-name",
 			   target_pid_to_str (t->ptid));
-      ui_out_field_fmt (uiout, "thread-id", "] #%d", t->num);
+      ui_out_field_fmt (uiout, "thread-id", "] #%s", print_thread_id (t));
       ui_out_text (uiout, " stopped");
     }
   else

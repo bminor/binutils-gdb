@@ -361,6 +361,10 @@ extern ptid_t thread_id_to_pid (int);
    into the integer thread id (GDB's homegrown id, not the system's).  */
 extern int pid_to_thread_id (ptid_t ptid);
 
+/* Return a string version of THR's thread ID.  The result is stored
+   in a circular static buffer, NUMCELLS deep.  */
+const char *print_thread_id (struct thread_info *thr);
+
 /* Boolean test for an already-known pid (which may be overloaded with
    extra thread information).  */
 extern int in_thread_list (ptid_t ptid);

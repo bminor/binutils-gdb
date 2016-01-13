@@ -1610,6 +1610,17 @@ make_cleanup_restore_current_thread (void)
 			    restore_current_thread_cleanup_dtor);
 }
 
+/* See gdbthread.h.  */
+
+const char *
+print_thread_id (struct thread_info *thr)
+{
+  char *s = get_print_cell ();
+
+  xsnprintf (s, PRINT_CELL_SIZE, "%d", thr->num);
+  return s;
+}
+
 /* If non-zero tp_array_compar should sort in ascending order, otherwise in
    descending order.  */
 
@@ -1700,8 +1711,8 @@ thread_apply_all_command (char *cmd, int from_tty)
         if (thread_alive (tp_array[k]))
           {
             switch_to_thread (tp_array[k]->ptid);
-            printf_filtered (_("\nThread %d (%s):\n"), 
-			     tp_array[k]->num,
+            printf_filtered (_("\nThread %s (%s):\n"),
+			     print_thread_id (tp_array[k]),
 			     target_pid_to_str (inferior_ptid));
             execute_command (cmd, from_tty);
 
@@ -1712,6 +1723,8 @@ thread_apply_all_command (char *cmd, int from_tty)
 
   do_cleanups (old_chain);
 }
+
+/* Implementation of the "thread apply" command.  */
 
 static void
 thread_apply_command (char *tidlist, int from_tty)
@@ -1779,13 +1792,15 @@ thread_command (char *tidstr, int from_tty)
 
       if (target_has_stack)
 	{
+	  struct thread_info *tp = inferior_thread ();
+
 	  if (is_exited (inferior_ptid))
-	    printf_filtered (_("[Current thread is %d (%s) (exited)]\n"),
-			     pid_to_thread_id (inferior_ptid),
+	    printf_filtered (_("[Current thread is %s (%s) (exited)]\n"),
+			     print_thread_id (tp),
 			     target_pid_to_str (inferior_ptid));
 	  else
-	    printf_filtered (_("[Current thread is %d (%s)]\n"),
-			     pid_to_thread_id (inferior_ptid),
+	    printf_filtered (_("[Current thread is %s (%s)]\n"),
+			     print_thread_id (tp),
 			     target_pid_to_str (inferior_ptid));
 	}
       else
@@ -1834,32 +1849,32 @@ thread_find_command (char *arg, int from_tty)
     {
       if (tp->name != NULL && re_exec (tp->name))
 	{
-	  printf_filtered (_("Thread %d has name '%s'\n"),
-			   tp->num, tp->name);
+	  printf_filtered (_("Thread %s has name '%s'\n"),
+			   print_thread_id (tp), tp->name);
 	  match++;
 	}
 
       tmp = target_thread_name (tp);
       if (tmp != NULL && re_exec (tmp))
 	{
-	  printf_filtered (_("Thread %d has target name '%s'\n"),
-			   tp->num, tmp);
+	  printf_filtered (_("Thread %s has target name '%s'\n"),
+			   print_thread_id (tp), tmp);
 	  match++;
 	}
 
       tmp = target_pid_to_str (tp->ptid);
       if (tmp != NULL && re_exec (tmp))
 	{
-	  printf_filtered (_("Thread %d has target id '%s'\n"),
-			   tp->num, tmp);
+	  printf_filtered (_("Thread %s has target id '%s'\n"),
+			   print_thread_id (tp), tmp);
 	  match++;
 	}
 
       tmp = target_extra_thread_info (tp);
       if (tmp != NULL && re_exec (tmp))
 	{
-	  printf_filtered (_("Thread %d has extra info '%s'\n"),
-			   tp->num, tmp);
+	  printf_filtered (_("Thread %s has extra info '%s'\n"),
+			   print_thread_id (tp), tmp);
 	  match++;
 	}
     }
@@ -1899,7 +1914,7 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
   annotate_thread_changed ();
 
   ui_out_text (uiout, "[Switching to thread ");
-  ui_out_field_int (uiout, "new-thread-id", pid_to_thread_id (inferior_ptid));
+  ui_out_field_string (uiout, "new-thread-id", print_thread_id (tp));
   ui_out_text (uiout, " (");
   ui_out_text (uiout, target_pid_to_str (inferior_ptid));
   ui_out_text (uiout, ")]");

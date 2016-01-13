@@ -1316,8 +1316,8 @@ signal_command (char *signum_exp, int from_tty)
 	    {
 	      if (!must_confirm)
 		printf_unfiltered (_("Note:\n"));
-	      printf_unfiltered (_("  Thread %d previously stopped with signal %s, %s.\n"),
-				 tp->num,
+	      printf_unfiltered (_("  Thread %s previously stopped with signal %s, %s.\n"),
+				 print_thread_id (tp),
 				 gdb_signal_to_name (tp->suspend.stop_signal),
 				 gdb_signal_to_string (tp->suspend.stop_signal));
 	      must_confirm = 1;
@@ -1325,10 +1325,10 @@ signal_command (char *signum_exp, int from_tty)
 	}
 
       if (must_confirm
-	  && !query (_("Continuing thread %d (the current thread) with specified signal will\n"
+	  && !query (_("Continuing thread %s (the current thread) with specified signal will\n"
 		       "still deliver the signals noted above to their respective threads.\n"
 		       "Continue anyway? "),
-		     inferior_thread ()->num))
+		     print_thread_id (inferior_thread ())))
 	error (_("Not confirmed."));
     }
 

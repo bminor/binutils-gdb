@@ -3249,8 +3249,8 @@ remove_threaded_breakpoints (struct thread_info *tp, int silent)
 	  b->disposition = disp_del_at_next_stop;
 
 	  printf_filtered (_("\
-Thread-specific breakpoint %d deleted - thread %d no longer in the thread list.\n"),
-			  b->number, tp->num);
+Thread-specific breakpoint %d deleted - thread %s no longer in the thread list.\n"),
+			   b->number, print_thread_id (tp));
 
 	  /* Hide it from the user.  */
 	  b->number = 0;
@@ -6514,9 +6514,11 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   if (!part_of_multiple && b->thread != -1)
     {
+      struct thread_info *thr = find_thread_id (b->thread);
+
       /* FIXME should make an annotation for this.  */
       ui_out_text (uiout, "\tstop only in thread ");
-      ui_out_field_int (uiout, "thread", b->thread);
+      ui_out_field_string (uiout, "thread", print_thread_id (thr));
       ui_out_text (uiout, "\n");
     }
   

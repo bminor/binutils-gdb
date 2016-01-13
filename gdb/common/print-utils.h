@@ -20,6 +20,10 @@
 #ifndef COMMON_CELLS_H
 #define COMMON_CELLS_H
 
+/* How many characters (including the terminating null byte) fit in a
+   cell.  */
+#define PRINT_CELL_SIZE 50
+
 /* %d for LONGEST.  The result is stored in a circular static buffer,
    NUMCELLS deep.  */
 
@@ -70,5 +74,9 @@ extern const char *host_address_to_string_1 (const void *addr);
 /* Wrapper that avoids adding a pointless cast to all callers.  */
 #define host_address_to_string(ADDR) \
   host_address_to_string_1 ((const void *) (ADDR))
+
+/* Return the next entry in the circular print buffer.  */
+
+extern char *get_print_cell (void);
 
 #endif /* COMMON_CELLS_H */
