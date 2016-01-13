@@ -1,5 +1,11 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.texinfo (Threads): Document the $_gthread convenience
+	variable.
+	(Convenience Vars): Likewise.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.texinfo (Threads): Document "info threads -gid".
 
 2016-01-13  Pedro Alves  <palves@redhat.com>

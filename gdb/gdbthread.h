@@ -217,7 +217,8 @@ struct thread_info
      thread has its own unique global ID.  */
 
   /* The thread's global GDB thread number.  This is exposed to MI,
-     Python/Scheme and visible with "info threads -gid".  */
+     Python/Scheme, visible with "info threads -gid", and is also what
+     the $_gthread convenience variable is bound to.  */
   int global_num;
 
   /* The per-inferior thread number.  This is unique in the inferior

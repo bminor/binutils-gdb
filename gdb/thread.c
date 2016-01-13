@@ -2083,18 +2083,45 @@ update_thread_list (void)
   update_threads_executing ();
 }
 
+/* Return a new value for the selected thread's id.  Return a value of
+   0 if no thread is selected.  If GLOBAL is true, return the thread's
+   global number.  Otherwise return the per-inferior number.  */
+
+static struct value *
+thread_num_make_value_helper (struct gdbarch *gdbarch, int global)
+{
+  struct thread_info *tp = find_thread_ptid (inferior_ptid);
+  int int_val;
+
+  if (tp == NULL)
+    int_val = 0;
+  else if (global)
+    int_val = tp->global_num;
+  else
+    int_val = tp->per_inf_num;
+
+  return value_from_longest (builtin_type (gdbarch)->builtin_int, int_val);
+}
+
 /* Return a new value for the selected thread's per-inferior thread
    number.  Return a value of 0 if no thread is selected, or no
    threads exist.  */
 
 static struct value *
-thread_id_make_value (struct gdbarch *gdbarch, struct internalvar *var,
-		      void *ignore)
+thread_id_per_inf_num_make_value (struct gdbarch *gdbarch, struct internalvar *var,
+				  void *ignore)
 {
-  struct thread_info *tp = find_thread_ptid (inferior_ptid);
+  return thread_num_make_value_helper (gdbarch, 0);
+}
 
-  return value_from_longest (builtin_type (gdbarch)->builtin_int,
-			     (tp ? tp->per_inf_num : 0));
+/* Return a new value for the selected thread's global id.  Return a
+   value of 0 if no thread is selected, or no threads exist.  */
+
+static struct value *
+global_thread_id_make_value (struct gdbarch *gdbarch, struct internalvar *var,
+			     void *ignore)
+{
+  return thread_num_make_value_helper (gdbarch, 1);
 }
 
 /* Commands with a prefix of `thread'.  */
@@ -2104,7 +2131,16 @@ struct cmd_list_element *thread_cmd_list = NULL;
 
 static const struct internalvar_funcs thread_funcs =
 {
-  thread_id_make_value,
+  thread_id_per_inf_num_make_value,
+  NULL,
+  NULL
+};
+
+/* Implementation of `gthread' variable.  */
+
+static const struct internalvar_funcs gthread_funcs =
+{
+  global_thread_id_make_value,
   NULL,
   NULL
 };
@@ -2162,6 +2198,7 @@ Show printing of thread events (such as thread start and exit)."), NULL,
          &setprintlist, &showprintlist);
 
   create_internalvar_type_lazy ("_thread", &thread_funcs, NULL);
+  create_internalvar_type_lazy ("_gthread", &gthread_funcs, NULL);
 
   observer_attach_thread_ptid_changed (restore_current_thread_ptid_changed);
 }

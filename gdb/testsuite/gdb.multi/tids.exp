@@ -158,8 +158,9 @@ with_test_prefix "two inferiors" {
 	     "  2\.1 +2 +.*" \
 	     "  2\.2 +3 +.* thread_function1 .* at .*$srcfile:.*"]
 
-    # Confirm the convenience variable show the expected number.
+    # Confirm the convenience variables show the expected numbers.
     gdb_test "p \$_thread == 2" " = 1"
+    gdb_test "p \$_gthread == 4" " = 1"
 
     # Without an explicit inferior component, GDB defaults to the
     # current inferior.  Make sure we don't refer to a thread by

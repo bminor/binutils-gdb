@@ -1,5 +1,18 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention $_gthread.
+	* gdbthread.h (struct thread_info) <global_num>: Mention
+	$_gthread.
+	* thread.c (thread_num_make_value_helper): New function.
+	(thread_id_make_value): Delete.
+	(thread_id_per_inf_num_make_value, global_thread_id_make_value):
+	New.
+	(thread_funcs): Adjust.
+	(gthread_funcs): New.
+	(_initialize_thread): Register $_gthread variable.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention "info threads -gid".
 	* gdbthread.h (struct thread_info) <global_num>: Mention "info
 	threads -gid".

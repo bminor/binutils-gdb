@@ -1,5 +1,11 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/default.exp: Expect $_gthread as well.
+	* gdb.multi/tids.exp: Test $_gthread.
+	* gdb.threads/thread-specific.exp: Test $_gthread.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	* gdb.multi/tids.exp: Test "info threads -gid".
 
 2016-01-13  Pedro Alves  <palves@redhat.com>

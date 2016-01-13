@@ -2937,8 +2937,10 @@ thread.  In other words, @value{GDBN} assigns a thread number to the
 program's ``main thread'' even if the program is not multi-threaded.
 
 @vindex $_thread@r{, convenience variable}
-The debugger convenience variable @samp{$_thread} contains the
-per-inferior thread number of the current thread.  You may find this
+@vindex $_gthread@r{, convenience variable}
+The debugger convenience variables @samp{$_thread} and
+@samp{$_gthread} contain, respectively, the per-inferior thread number
+and the global thread number of the current thread.  You may find this
 useful in writing breakpoint conditional expressions, command scripts,
 and so forth.  @xref{Convenience Vars,, Convenience Variables}, for
 general information on convenience variables.
@@ -10458,6 +10460,9 @@ Programs, ,Debugging Multiple Inferiors and Programs}.
 
 @item $_thread
 The thread number of the current thread.  @xref{thread numbers}.
+
+@item $_gthread
+The global number of the current thread.  @xref{global thread numbers}.
 
 @end table
 

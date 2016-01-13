@@ -22,7 +22,7 @@
 
   GDB now maintains a second thread ID per thread, referred to as the
   global thread ID, which is the new equivalent of thread numbers in
-  previous releases.
+  previous releases.  See also $_gthread below.
 
   For backwards compatibility, MI's thread IDs always refer to global
   IDs.
@@ -36,6 +36,9 @@
 
 * You can use "info threads -gid" to display the global thread ID of
   all threads.
+
+* The new convenience variable $_gthread holds the global number of
+  the current thread.
 
 * The new convenience variable $_inferior holds the number of the
   current inferior.
