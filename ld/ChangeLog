@@ -1,3 +1,8 @@
+2016-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-scripts/rgn-at11.d: Expect this test to fail for
+	MIPS targets.
+
 2016-01-12  Yury Usishchev  <y.usishchev@samsung.com>
 
 	* testsuite/ld-arm/arm-elf.exp: New test.
