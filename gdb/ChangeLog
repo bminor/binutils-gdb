@@ -1,5 +1,12 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention $_inferior.
+	* inferior.c (inferior_id_make_value): New.
+	(inferior_funcs): New.
+	(_initialize_inferior): Create $_inferior variable.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	PR breakpoints/19388
 	* frame.c (get_current_frame): Use validate_registers_access.
 	* gdbthread.h (validate_registers_access): Declare.

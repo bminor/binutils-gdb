@@ -2658,6 +2658,12 @@ Make inferior number @var{infno} the current inferior.  The argument
 in the first field of the @samp{info inferiors} display.
 @end table
 
+@vindex $_inferior@r{, convenience variable}
+The debugger convenience variable @samp{$_inferior} contains the
+number of the current inferior.  You may find this useful in writing
+breakpoint conditional expressions, command scripts, and so forth.
+@xref{Convenience Vars,, Convenience Variables}, for general
+information on convenience variables.
 
 You can get multiple executables into a debugging session via the
 @code{add-inferior} and @w{@code{clone-inferior}} commands.  On some
@@ -10381,6 +10387,10 @@ applications running on MS-Windows in native mode or connected to
 gdbserver that supports the @code{qGetTIBAddr} request. 
 @xref{General Query Packets}.
 This variable contains the address of the thread information block.
+
+@item $_inferior
+The number of the current inferior.  @xref{Inferiors and
+Programs, ,Debugging Multiple Inferiors and Programs}.
 
 @end table
 

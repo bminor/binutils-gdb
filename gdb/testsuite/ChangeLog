@@ -1,5 +1,10 @@
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/default.exp: Expect $_inferior as well.
+	* gdb.multi/base.exp: Test $_inferior.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
 	PR breakpoints/19388
 	* gdb.base/catch-signal-siginfo-cond.c: New file.
 	* gdb.base/catch-signal-siginfo-cond.exp: New file.

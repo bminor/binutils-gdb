@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.10
 
+* The new convenience variable $_inferior holds the number of the
+  current inferior.
+
 * Record btrace now supports non-stop mode.
 
 * Support for tracepoints on aarch64-linux was added in GDBserver.

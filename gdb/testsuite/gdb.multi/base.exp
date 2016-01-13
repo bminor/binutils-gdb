@@ -44,11 +44,15 @@ if { [build_executable ${testfile}.exp ${exec3} "${srcfile3}" {debug}] == -1 } {
 
 clean_restart ${exec1}
 
+gdb_test {print $_inferior} " = 1"
+
 # Add an empty inferior, switch to it, and load a main executable into
 # it.
 gdb_test "add-inferior" "Added inferior 2.*" "add empty inferior 2"
 gdb_test "inferior 2" "Switching to inferior 2.*" "switch to inferior 2"
 gdb_test "file ${binfile2}" ".*" "load ${exec2} file in inferior 2"
+
+gdb_test {print $_inferior} " = 2" "print \$_inferior after switching"
 
 # Add a new inferior and load a main executable into it in one
 # command.
