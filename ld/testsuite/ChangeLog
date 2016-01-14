@@ -1,3 +1,24 @@
+2016-01-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19421
+	PR ld/4317
+	* ld-aarch64/gc-tls-relocs.d: Revert 2015-02-19 changes.
+	* ld-cris/locref2.d: Likewise.
+	* ld-elf/ehdr_start-weak.d: Likewise.
+	* ld-elf/group1.d: Likewise.
+	* ld-i386/compressed1.d: Likewise.
+	* ld-ia64/error1.d: Likewise.
+	* ld-ia64/error2.d: Likewise.
+	* ld-ia64/error3.d: Likewise.
+	* ld-mips-elf/pic-and-nonpic-1.nd: Likewise.
+	* ld-mmix/undef-3.d: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+	* ld-x86-64/compressed1.d: Likewise.
+	* ld-x86-64/pie1.d: Likewise.
+
 2016-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/elf.exp (-Bymsolic-functions): Expect to fail

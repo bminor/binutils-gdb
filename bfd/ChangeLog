@@ -1,3 +1,10 @@
+2016-01-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/19421
+	PR ld/4317
+	* elflink.c (elf_link_input_bfd): Revert 2015-02-19 changes.
+	(elf_link_output_extsym): Likewise.
+
 2016-01-11  Jiong Wang  <jiong.wang@arm.com>
 
 	Apply from master
