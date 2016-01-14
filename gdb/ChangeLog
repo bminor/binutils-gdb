@@ -1,3 +1,18 @@
+2016-01-14  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm-get-next-pcs.c (arm_get_next_pcs_ctor): Change
+	argument arm_thumb2_breakpoint to has_thumb2_breakpoint.
+	(thumb_get_next_pcs_raw): Check has_thumb2_breakpoint
+	instead.
+	* arch/arm-get-next-pcs.h (struct arm_get_next_pcs)
+	<arm_thumb2_breakpoint>: Remove.
+	<has_thumb2_breakpoint>: New field.
+	(arm_get_next_pcs_ctor): Update declaration.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Pass
+	1 to arm_get_next_pcs_ctor.
+	* arm-tdep.c (arm_software_single_step): Pass 0 to
+	arm_get_next_pcs_ctor.
+
 2016-01-13  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* MAINTAINERS: Add Andreas Arnez as s390 target maintainer.

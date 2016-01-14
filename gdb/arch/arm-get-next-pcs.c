@@ -30,13 +30,13 @@ arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
 		       struct arm_get_next_pcs_ops *ops,
 		       int byte_order,
 		       int byte_order_for_code,
-		       const gdb_byte *arm_thumb2_breakpoint,
+		       int has_thumb2_breakpoint,
 		       struct regcache *regcache)
 {
   self->ops = ops;
   self->byte_order = byte_order;
   self->byte_order_for_code = byte_order_for_code;
-  self->arm_thumb2_breakpoint = arm_thumb2_breakpoint;
+  self->has_thumb2_breakpoint = has_thumb2_breakpoint;
   self->regcache = regcache;
 }
 
@@ -297,7 +297,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
      flags, affecting the execution of further instructions, we may
      need to set two breakpoints.  */
 
-  if (self->arm_thumb2_breakpoint != NULL)
+  if (self->has_thumb2_breakpoint)
     {
       if ((inst1 & 0xff00) == 0xbf00 && (inst1 & 0x000f) != 0)
 	{

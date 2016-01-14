@@ -6183,7 +6183,7 @@ arm_software_single_step (struct frame_info *frame)
 			 &arm_get_next_pcs_ops,
 			 gdbarch_byte_order (gdbarch),
 			 gdbarch_byte_order_for_code (gdbarch),
-			 gdbarch_tdep (gdbarch)->thumb2_breakpoint,
+			 0,
 			 regcache);
 
   next_pcs = arm_get_next_pcs (&next_pcs_ctx, regcache_read_pc (regcache));

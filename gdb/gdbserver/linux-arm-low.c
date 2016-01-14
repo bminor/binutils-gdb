@@ -942,7 +942,7 @@ arm_gdbserver_get_next_pcs (CORE_ADDR pc, struct regcache *regcache)
 			 /* Byte order is ignored assumed as host.  */
 			 0,
 			 0,
-			 (const gdb_byte *) &thumb2_breakpoint,
+			 1,
 			 regcache);
 
   next_pcs = arm_get_next_pcs (&next_pcs_ctx, pc);

@@ -45,7 +45,7 @@ static const unsigned long arm_breakpoint = arm_abi_breakpoint;
 #define arm_breakpoint_len 4
 static const unsigned short thumb_breakpoint = 0xde01;
 #define thumb_breakpoint_len 2
-const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
+static const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
 #define thumb2_breakpoint_len 4
 
 /* Some older versions of GNU/Linux and Android do not define
