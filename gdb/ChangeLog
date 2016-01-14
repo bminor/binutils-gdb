@@ -1,5 +1,10 @@
 2016-01-14  Yao Qi  <yao.qi@linaro.org>
 
+	* remote.c (remote_set_syscall_catchpoint): Cast to char *.
+	* thread.c (do_captured_thread_select): Cast to const char *.
+
+2016-01-14  Yao Qi  <yao.qi@linaro.org>
+
 	* arch/arm-get-next-pcs.c (arm_get_next_pcs_ctor): Change
 	argument arm_thumb2_breakpoint to has_thumb2_breakpoint.
 	(thumb_get_next_pcs_raw): Check has_thumb2_breakpoint

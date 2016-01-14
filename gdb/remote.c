@@ -2033,7 +2033,7 @@ remote_set_syscall_catchpoint (struct target_ops *self,
 	 big, fallback on the non-selective packet.  */
       const int maxpktsz = strlen ("QCatchSyscalls:1") + n_sysno * 9 + 1;
 
-      catch_packet = xmalloc (maxpktsz);
+      catch_packet = (char *) xmalloc (maxpktsz);
       strcpy (catch_packet, "QCatchSyscalls:1");
       if (!any_count)
 	{

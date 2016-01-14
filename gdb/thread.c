@@ -1996,7 +1996,7 @@ show_print_thread_events (struct ui_file *file, int from_tty,
 static int
 do_captured_thread_select (struct ui_out *uiout, void *tidstr_v)
 {
-  const char *tidstr = tidstr_v;
+  const char *tidstr = (const char *) tidstr_v;
   struct thread_info *tp;
 
   if (ui_out_is_mi_like_p (uiout))
