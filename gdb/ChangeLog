@@ -1,5 +1,20 @@
 2016-01-14  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-linux-tdep.c (arm_linux_get_next_pcs_syscall_next_pc):
+	Declare.
+	(arm_linux_get_next_pcs_ops): Install
+	arm_linux_get_next_pcs_syscall_next_pc.
+	(arm_linux_syscall_next_pc): Change to ...
+	(arm_linux_get_next_pcs_syscall_next_pc): ... it.
+	(arm_linux_init_abi): Don't set tdep->syscall_next_pc.
+	* arm-tdep.c (arm_get_next_pcs_syscall_next_pc): Declare.
+	(arm_get_next_pcs_syscall_next_pc): Make it static.  Don't
+	call tdep->syscall_next_pc.
+	* arm-tdep.h (struct gdbarch_tdep) <syscall_next_pc>: Remove.
+	(arm_get_next_pcs_syscall_next_pc): Remove.
+
+2016-01-14  Yao Qi  <yao.qi@linaro.org>
+
 	* remote.c (remote_set_syscall_catchpoint): Cast to char *.
 	* thread.c (do_captured_thread_select): Cast to const char *.
 

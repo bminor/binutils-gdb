@@ -237,6 +237,11 @@ static void arm_neon_quad_write (struct gdbarch *gdbarch,
 				 struct regcache *regcache,
 				 int regnum, const gdb_byte *buf);
 
+static CORE_ADDR
+  arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
+				    CORE_ADDR pc);
+
+
 /* get_next_pcs operations.  */
 static struct arm_get_next_pcs_ops arm_get_next_pcs_ops = {
   arm_get_next_pcs_read_memory_unsigned_integer,
@@ -6142,15 +6147,10 @@ arm_get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
 
 /* Wrapper over syscall_next_pc for use in get_next_pcs.  */
 
-CORE_ADDR
-arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self, CORE_ADDR pc)
+static CORE_ADDR
+arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
+				  CORE_ADDR pc)
 {
-  struct gdbarch_tdep *tdep;
-
-  tdep = gdbarch_tdep (get_regcache_arch (self->regcache));
-  if (tdep->syscall_next_pc != NULL)
-    return tdep->syscall_next_pc (self->regcache);
-
   return 0;
 }
 
