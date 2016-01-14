@@ -22,4 +22,5 @@ if [expr [istarget "rl78-*-*"]]  then {
     run_dump_test "pr19157"
     run_dump_test "pr19158"
     run_dump_test "pr19159"
+    run_dump_test "sp-relative-movw"
 }

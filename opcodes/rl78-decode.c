@@ -5347,7 +5347,7 @@ rl78_decode_opcode (unsigned long pc AU,
                      op[0]);
               printf ("  ra = 0x%x\n", ra);
             }
-          SYNTAX("movw	%0, %e!1");
+          SYNTAX("movw	%0, %es!1");
 #line 886 "rl78-decode.opc"
           ID(mov); W(); DRW(ra); SM(None, IMMU(2));
 

@@ -1,3 +1,9 @@
+2016-01-14  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/rl78/sp-relative-movw.s: New test.
+	* testsuite/gas/rl78/sp-relative-movw.d: Expected disassembly.
+	* testsuite/gas/rl78/rl78.exp: Run the new test.
+
 2016-01-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* testsuite/gas/aarch64/illegal-sysreg-2.l: New.

@@ -1,3 +1,11 @@
+2016-01-14  Nick Clifton  <nickc@redhat.com>
+
+	* rl78-decode.opc (rl78_decode_opcode): Add 's' operand to movw
+	instructions that can support stack pointer operations.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c: Fix display of stack pointer in MOVW based
+	instructions.
+
 2016-01-14  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_reg_supported_p): Merge conditionals
