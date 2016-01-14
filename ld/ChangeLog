@@ -1,3 +1,12 @@
+2016-01-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (Thumb-Thumb farcall v6-M (no profile)):
+	Set address of .foo section when linking.
+	* testsuite/ld-arm/farcall-thumb-thumb-m-no-profile-b.s: Place myfunc
+	in .foo section.
+	* testsuite/ld-arm/farcall-thumb-thumb-m-no-profile.d: Adapt expected
+	output to the above changes.
+
 2016-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-elf/elf.exp (-Bymsolic-functions): Expect to fail

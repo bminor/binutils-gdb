@@ -14,11 +14,9 @@ Disassembly of section .text:
     100e:	bc01      	pop	{r0}
     1010:	4760      	bx	ip
     1012:	bf00      	nop
-    1014:	061a9019 	.word	0x061a9019
-	\.\.\.
+    1014:	02001015 	.word	0x02001015
 
-00080000 <_stack>:
-	\.\.\.
+Disassembly of section .foo:
 
-061a9018 <myfunc>:
- 61a9018:	4770      	bx	lr
+02001014 <myfunc>:
+ 2001014:	4770      	bx	lr
