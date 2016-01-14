@@ -1,3 +1,9 @@
+2016-01-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* aarch64-opc.c (aarch64_sys_reg_supported_p): Merge conditionals
+	testing for RAS support.  Add checks for erxfr_el1, erxctlr_el1,
+	erxtatus_el1 and erxaddr_el1.
+
 2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* arm-dis.c (arm_opcodes): Add "esb".

@@ -3222,18 +3222,16 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
 
   /* RAS extension.  */
 
-  /* ERRIDR_EL1 and ERRSELR_EL1.  */
+  /* ERRIDR_EL1, ERRSELR_EL1, ERXFR_EL1, ERXCTLR_EL1, ERXSTATUS_EL, ERXADDR_EL1,
+     ERXMISC0_EL1 AND ERXMISC1_EL1.  */
   if ((reg->value == CPENC (3, 0, C5, C3, 0)
-       || reg->value == CPENC (3, 0, C5, C3, 1))
-      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_RAS))
-    return FALSE;
-
-  /* ERXFR_EL1, ERXCTLR_EL1, ERXSTATUS_EL, ERXADDR_EL1, ERXMISC0_EL1 AND
-     ERXMISC1_EL1.  */
-  if ((reg->value == CPENC (3, 0, C5, C3, 0)
-       || reg->value == CPENC (3, 0, C5, C3 ,1)
+       || reg->value == CPENC (3, 0, C5, C3, 1)
        || reg->value == CPENC (3, 0, C5, C3, 2)
        || reg->value == CPENC (3, 0, C5, C3, 3)
+       || reg->value == CPENC (3, 0, C5, C4, 0)
+       || reg->value == CPENC (3, 0, C5, C4, 1)
+       || reg->value == CPENC (3, 0, C5, C4, 2)
+       || reg->value == CPENC (3, 0, C5, C4, 3)
        || reg->value == CPENC (3, 0, C5, C5, 0)
        || reg->value == CPENC (3, 0, C5, C5, 1))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_RAS))
