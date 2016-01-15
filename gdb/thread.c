@@ -1818,7 +1818,7 @@ thread_apply_all_command (char *cmd, int from_tty)
 static void
 thread_apply_command (char *tidlist, int from_tty)
 {
-  char *cmd;
+  char *cmd = NULL;
   struct cleanup *old_chain;
   char *saved_cmd;
   struct tid_range_parser parser;
@@ -1826,10 +1826,24 @@ thread_apply_command (char *tidlist, int from_tty)
   if (tidlist == NULL || *tidlist == '\000')
     error (_("Please specify a thread ID list"));
 
-  for (cmd = tidlist; *cmd != '\000' && !isalpha (*cmd); cmd++);
+  tid_range_parser_init (&parser, tidlist, current_inferior ()->num);
+  while (!tid_range_parser_finished (&parser))
+    {
+      int inf_num, thr_start, thr_end;
 
-  if (*cmd == '\000')
+      if (!tid_range_parser_get_tid_range (&parser,
+					   &inf_num, &thr_start, &thr_end))
+	{
+	  cmd = (char *) tid_range_parser_string (&parser);
+	  break;
+	}
+    }
+
+  if (cmd == NULL)
     error (_("Please specify a command following the thread ID list"));
+
+  if (tidlist == cmd || !isalpha (cmd[0]))
+    invalid_thread_id_error (cmd);
 
   /* Save a copy of the command in case it is clobbered by
      execute_command.  */

@@ -90,15 +90,19 @@ proc thr_apply_info_thr_error {tid_list exp_error}  {
     gdb_test "info threads $tid_list" \
 	$exp_error
 
-    gdb_test "thread apply $tid_list p 1234" \
+    gdb_test "thread apply $tid_list" \
 	$exp_error \
 	"thread apply $tid_list"
 }
 
 # Issue both "info threads TID_LIST" and "thread apply TID_LIST" and
 # expect the command to error out with "Invalid thread ID: $EXPECTED".
-# EXPECTED is a literal string, not a regexp.
-proc thr_apply_info_thr_invalid {tid_list expected} {
+# EXPECTED is a literal string, not a regexp.  If EXPECTED is omitted,
+# TID_LIST is expected instead.
+proc thr_apply_info_thr_invalid {tid_list {expected ""}} {
+    if {$expected == ""} {
+	set expected $tid_list
+    }
     set expected [string_to_regexp $expected]
     gdb_test "info threads $tid_list" \
 	"Invalid thread ID: $expected"
@@ -183,6 +187,12 @@ with_test_prefix "two inferiors" {
 	gdb_continue_to_breakpoint "twice"
     }
 
+    thr_apply_info_thr "1" \
+	"1.1"
+
+    thr_apply_info_thr "1.1" \
+	"1.1"
+
     thr_apply_info_thr "1 2 3" \
 	"1.1 1.2 1.3"
 
@@ -214,6 +224,59 @@ with_test_prefix "two inferiors" {
     thr_apply_info_thr "1.1-2 2.2-3" \
 	"1.1 1.2 2.2 2.3"
 
+    # Now test using GDB convenience variables.
+
+    gdb_test "p \$inf = 1" " = 1"
+    gdb_test "p \$thr_start = 2" " = 2"
+    gdb_test "p \$thr_end = 3" " = 3"
+
+    # Convenience variable for the inferior number, only.
+    thr_apply_info_thr "\$inf.2" \
+	"1.2"
+    thr_apply_info_thr "\$inf.2-3" \
+	"1.2 1.3"
+
+    # Convenience variables for thread numbers as well.
+    foreach prefix {"" "1." "\$inf."} {
+	thr_apply_info_thr "${prefix}\$thr_start" \
+	    "1.2"
+	thr_apply_info_thr "${prefix}\$thr_start-\$thr_end" \
+	    "1.2 1.3"
+	thr_apply_info_thr "${prefix}2-\$thr_end" \
+	    "1.2 1.3"
+	thr_apply_info_thr "${prefix}\$thr_start-3" \
+	    "1.2 1.3"
+
+	# Undefined convenience variable.
+	set prefix_re [string_to_regexp $prefix]
+	thr_apply_info_thr_error "${prefix}\$conv123" \
+	    [multi_line \
+		 "Convenience variable must have integer value\." \
+		 "Invalid thread ID: ${prefix_re}\\\$conv123"]
+    }
+
+    # Convenience variables pointing at an inexisting thread and/or
+    # inferior.
+    gdb_test "p \$inf = 30" " = 30"
+    gdb_test "p \$thr = 20" " = 20"
+    # Try both the convenience variable and the literal number.
+    foreach thr {"\$thr" "20" "1.20" "\$inf.1" "30.1" } {
+	set expected [string_to_regexp $thr]
+	gdb_test "info threads $thr" "No threads match '${expected}'."
+	# "info threads" works like a filter.  If there's any other
+	# valid thread in the list, there's no error.
+	info_threads "$thr 1.1" "1.1"
+	info_threads "1.1 $thr" "1.1"
+    }
+
+    gdb_test "thread apply \$thr p 1234" \
+	"warning: Unknown thread 1.20" \
+	"thread apply \$thr"
+
+    gdb_test "thread apply \$inf.1 p 1234" \
+	"warning: Unknown thread 30.1" \
+	"thread apply \$inf.1"
+
     # Now test a set of invalid thread IDs/ranges.
 
     thr_apply_info_thr_invalid "1." \
@@ -234,17 +297,40 @@ with_test_prefix "two inferiors" {
     thr_apply_info_thr_invalid "1-2.1" \
 	"1-2.1"
 
-    thr_apply_info_thr_error "1-0" "inverted range"
-    thr_apply_info_thr_error "1.1-0" "inverted range"
+    gdb_test "p \$zero = 0" " = 0"
+    gdb_test "p \$one = 1" " = 1"
+    gdb_test "p \$minus_one = -11" " = -11"
+    foreach prefix {"" "1." "$one."} {
+	set prefix_re [string_to_regexp $prefix]
 
-    thr_apply_info_thr_error "1-" "inverted range"
-    thr_apply_info_thr_error "1.1-" "inverted range"
+	thr_apply_info_thr_invalid "${prefix}foo"
+	thr_apply_info_thr_invalid "${prefix}1foo"
+	thr_apply_info_thr_invalid "${prefix}foo1"
 
-    thr_apply_info_thr_error "2-1" "inverted range"
-    thr_apply_info_thr_error "1.2-1" "inverted range"
+	thr_apply_info_thr_error "${prefix}1-0" "inverted range"
+	thr_apply_info_thr_error "${prefix}1-\$zero" "inverted range"
+	thr_apply_info_thr_error "${prefix}\$one-0" "inverted range"
+	thr_apply_info_thr_error "${prefix}\$one-\$zero" "inverted range"
+	thr_apply_info_thr_error "${prefix}1-" "inverted range"
+	thr_apply_info_thr_error "${prefix}2-1" "inverted range"
+	thr_apply_info_thr_error "${prefix}2-\$one" "inverted range"
+	thr_apply_info_thr_error "${prefix}-1" "negative value"
+	thr_apply_info_thr_error "${prefix}-\$one" "negative value"
+	thr_apply_info_thr_error "${prefix}\$minus_one" \
+	    "negative value: ${prefix_re}\\\$minus_one"
+    }
 
-    thr_apply_info_thr_error "-1" "negative value"
-    thr_apply_info_thr_error "1.-1" "negative value"
+    # Check that a valid thread ID list with a missing command errors
+    # out.
+    with_test_prefix "missing command" {
+	set output "Please specify a command following the thread ID list"
+	gdb_test "thread apply 1" $output
+	gdb_test "thread apply 1.1" $output
+	gdb_test "thread apply 1.1 1.2" $output
+	gdb_test "thread apply 1-2" $output
+	gdb_test "thread apply 1.1-2" $output
+	gdb_test "thread apply $thr" $output
+    }
 
     # Check that we do parse the inferior number and don't confuse it.
     gdb_test "info threads 3.1" \

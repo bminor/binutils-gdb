@@ -1,3 +1,14 @@
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (thread_apply_command): Use the tid range parser to
+	advance past the thread ID list.
+	* tid-parse.c (get_positive_number_trailer): New function.
+	(parse_thread_id): Use it.
+	(get_tid_or_range): Use it.  Return 0 instead of throwing invalid
+	thread ID error.
+	(get_tid_or_range): Detect negative values.  Return 0 instead of
+	throwing invalid thread ID error.
+
 2016-01-14  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-linux-tdep.c (arm_linux_get_next_pcs_syscall_next_pc):

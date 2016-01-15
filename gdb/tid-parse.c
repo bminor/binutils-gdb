@@ -31,6 +31,23 @@ invalid_thread_id_error (const char *string)
   error (_("Invalid thread ID: %s"), string);
 }
 
+/* Wrapper for get_number_trailer that throws an error if we get back
+   a negative number.  We'll see a negative value if the number is
+   stored in a negative convenience variable (e.g., $minus_one = -1).
+   STRING is the parser string to be used in the error message if we
+   do get back a negative number.  */
+
+static int
+get_positive_number_trailer (const char **pp, int trailer, const char *string)
+{
+  int num;
+
+  num = get_number_trailer (pp, trailer);
+  if (num < 0)
+    error (_("negative value: %s"), string);
+  return num;
+}
+
 /* See tid-parse.h.  */
 
 struct thread_info *
@@ -51,7 +68,7 @@ parse_thread_id (const char *tidstr, const char **end)
       int inf_num;
 
       p1 = number;
-      inf_num = get_number_trailer (&p1, '.');
+      inf_num = get_positive_number_trailer (&p1, '.', number);
       if (inf_num == 0)
 	invalid_thread_id_error (number);
 
@@ -69,7 +86,7 @@ parse_thread_id (const char *tidstr, const char **end)
       p1 = number;
     }
 
-  thr_num = get_number_const (&p1);
+  thr_num = get_positive_number_trailer (&p1, 0, number);
   if (thr_num == 0)
     invalid_thread_id_error (number);
 
@@ -183,15 +200,16 @@ get_tid_or_range (struct tid_range_parser *parser, int *inf_num,
 
 	  /* Parse number to the left of the dot.  */
 	  p = parser->string;
-	  parser->inf_num = get_number_trailer (&p, '.');
+	  parser->inf_num
+	    = get_positive_number_trailer (&p, '.', parser->string);
 	  if (parser->inf_num == 0)
-	    invalid_thread_id_error (parser->string);
+	    return 0;
 
 	  parser->qualified = 1;
 	  p = dot + 1;
 
 	  if (isspace (*p))
-	    invalid_thread_id_error (parser->string);
+	    return 0;
 	}
       else
 	{
@@ -206,8 +224,13 @@ get_tid_or_range (struct tid_range_parser *parser, int *inf_num,
 
   *inf_num = parser->inf_num;
   *thr_start = get_number_or_range (&parser->range_parser);
+  if (*thr_start < 0)
+    error (_("negative value: %s"), parser->string);
   if (*thr_start == 0)
-    invalid_thread_id_error (parser->string);
+    {
+      parser->state = TID_RANGE_STATE_INFERIOR;
+      return 0;
+    }
 
   /* If we successfully parsed a thread number or finished parsing a
      thread range, switch back to assuming the next TID is

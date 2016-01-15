@@ -1,3 +1,12 @@
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/tids.exp (thr_apply_info_thr_error): Remove "p 1234"
+	command from "thread apply" invocation.
+	(thr_apply_info_thr_invalid): Default the expected output to the
+	input tid list.
+	(top level): Add tests that use convenience variables.  Add tests
+	for "thread apply" with a valid TID list, but missing the command.
+
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/default.exp: Expect $_gthread as well.
