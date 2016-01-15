@@ -1,3 +1,7 @@
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Threads) <thread ID lists>: Document star ranges.
+
 2016-01-13  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Threads): Document the $_gthread convenience

@@ -2912,16 +2912,35 @@ of inferior 1, the initial inferior.
 @anchor{thread ID lists}
 @cindex thread ID lists
 Some commands accept a space-separated @dfn{thread ID list} as
-argument.  A list element can be a thread ID as shown in the first
-field of the @samp{info threads} display, with or without an inferior
-qualifier (e.g., @samp{2.1} or @samp{1}); or can be a range of thread
-numbers, again with or without an inferior qualifier, as in
-@var{inf1}.@var{thr1}-@var{thr2} or @var{thr1}-@var{thr2} (e.g.,
-@samp{1.2-4} or @samp{2-4}).  For example, if the current inferior is
-1, the thread list @samp{1 2-3 4.5 6.7-9} includes threads 1 to 3 of
-inferior 1, thread 5 of inferior 4 and threads 7 to 9 of inferior 6.
-That is, in expanded qualified form, the same as @samp{1.1 1.2 1.3 4.5
-6.7 6.8 6.9}.
+argument.  A list element can be:
+
+@enumerate
+@item
+A thread ID as shown in the first field of the @samp{info threads}
+display, with or without an inferior qualifier.  E.g., @samp{2.1} or
+@samp{1}.
+
+@item
+A range of thread numbers, again with or without an inferior
+qualifier, as in @var{inf}.@var{thr1}-@var{thr2} or
+@var{thr1}-@var{thr2}.  E.g., @samp{1.2-4} or @samp{2-4}.
+
+@item
+All threads of an inferior, specified with a star wildcard, with or
+without an inferior qualifier, as in @var{inf}.@code{*} (e.g.,
+@samp{1.*}) or @code{*}.  The former refers to all threads of the
+given inferior, and the latter form without an inferior qualifier
+refers to all threads of the current inferior.
+
+@end enumerate
+
+For example, if the current inferior is 1, and inferior 7 has one
+thread with ID 7.1, the thread list @samp{1 2-3 4.5 6.7-9 7.*}
+includes threads 1 to 3 of inferior 1, thread 5 of inferior 4, threads
+7 to 9 of inferior 6 and all threads of inferior 7.  That is, in
+expanded qualified form, the same as @samp{1.1 1.2 1.3 4.5 6.7 6.8 6.9
+7.1}.
+
 
 @anchor{global thread numbers}
 @cindex global thread number

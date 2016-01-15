@@ -134,6 +134,7 @@ tid_range_parser_finished (struct tid_range_parser *parser)
     case TID_RANGE_STATE_INFERIOR:
       return *parser->string == '\0';
     case TID_RANGE_STATE_THREAD_RANGE:
+    case TID_RANGE_STATE_STAR_RANGE:
       return parser->range_parser.finished;
     }
 
@@ -150,6 +151,7 @@ tid_range_parser_string (struct tid_range_parser *parser)
     case TID_RANGE_STATE_INFERIOR:
       return parser->string;
     case TID_RANGE_STATE_THREAD_RANGE:
+    case TID_RANGE_STATE_STAR_RANGE:
       return parser->range_parser.string;
     }
 
@@ -161,7 +163,8 @@ tid_range_parser_string (struct tid_range_parser *parser)
 void
 tid_range_parser_skip (struct tid_range_parser *parser)
 {
-  gdb_assert ((parser->state == TID_RANGE_STATE_THREAD_RANGE)
+  gdb_assert ((parser->state == TID_RANGE_STATE_THREAD_RANGE
+	       || parser->state == TID_RANGE_STATE_STAR_RANGE)
 	      && parser->range_parser.in_range);
 
   tid_range_parser_init (parser, parser->range_parser.end_ptr,
@@ -219,7 +222,16 @@ get_tid_or_range (struct tid_range_parser *parser, int *inf_num,
 	}
 
       init_number_or_range (&parser->range_parser, p);
-      parser->state = TID_RANGE_STATE_THREAD_RANGE;
+      if (p[0] == '*' && (p[1] == '\0' || isspace (p[1])))
+	{
+	  /* Setup the number range parser to return numbers in the
+	     whole [1,INT_MAX] range.  */
+	  number_range_setup_range (&parser->range_parser, 1, INT_MAX,
+				    skip_spaces_const (p + 1));
+	  parser->state = TID_RANGE_STATE_STAR_RANGE;
+	}
+      else
+	parser->state = TID_RANGE_STATE_THREAD_RANGE;
     }
 
   *inf_num = parser->inf_num;
@@ -247,7 +259,9 @@ get_tid_or_range (struct tid_range_parser *parser, int *inf_num,
 
   /* If we're midway through a range, and the caller wants the end
      value, return it and skip to the end of the range.  */
-  if (thr_end != NULL && parser->state == TID_RANGE_STATE_THREAD_RANGE)
+  if (thr_end != NULL
+      && (parser->state == TID_RANGE_STATE_THREAD_RANGE
+	  || parser->state == TID_RANGE_STATE_STAR_RANGE))
     {
       *thr_end = parser->range_parser.end_value;
       tid_range_parser_skip (parser);
@@ -279,6 +293,14 @@ tid_range_parser_get_tid (struct tid_range_parser *parser,
 }
 
 /* See tid-parse.h.  */
+
+int
+tid_range_parser_star_range (struct tid_range_parser *parser)
+{
+  return parser->state == TID_RANGE_STATE_STAR_RANGE;
+}
+
+/* See gdbthread.h.  */
 
 int
 tid_is_in_list (const char *list, int default_inferior,

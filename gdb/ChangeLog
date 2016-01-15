@@ -1,5 +1,21 @@
 2016-01-15  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention star wildcard ranges.
+	* cli/cli-utils.c (get_number_or_range): Check state->in_range first.
+	(number_range_setup_range): New function.
+	* cli/cli-utils.h (number_range_setup_range): New declaration.
+	* thread.c (thread_apply_command): Support star TID ranges.
+	* tid-parse.c (tid_range_parser_finished)
+	(tid_range_parser_string, tid_range_parser_skip)
+	(get_tid_or_range, get_tid_or_range): Handle
+	TID_RANGE_STATE_STAR_RANGE.
+	(tid_range_parser_star_range): New function.
+	* tid-parse.h (enum tid_range_state) <TID_RANGE_STATE_STAR_RANGE>:
+	New value.
+	(tid_range_parser_star_range): New declaration.
+
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
 	* thread.c (thread_apply_command): Use the tid range parser to
 	advance past the thread ID list.
 	* tid-parse.c (get_positive_number_trailer): New function.

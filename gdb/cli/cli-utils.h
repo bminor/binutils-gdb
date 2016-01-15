@@ -90,6 +90,14 @@ extern void init_number_or_range (struct get_number_or_range_state *state,
 
 extern int get_number_or_range (struct get_number_or_range_state *state);
 
+/* Setups STATE such that get_number_or_range returns numbers in range
+   START_VALUE to END_VALUE.  When get_number_or_range returns
+   END_VALUE, the STATE string is advanced to END_PTR.  */
+
+extern void number_range_setup_range (struct get_number_or_range_state *state,
+				      int start_value, int end_value,
+				      const char *end_ptr);
+
 /* Accept a number and a string-form list of numbers such as is 
    accepted by get_number_or_range.  Return TRUE if the number is
    in the list.

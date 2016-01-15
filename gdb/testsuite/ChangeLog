@@ -1,5 +1,9 @@
 2016-01-15  Pedro Alves  <palves@redhat.com>
 
+	* gdb.multi/tids.exp: Test star wildcard ranges.
+
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
 	* gdb.multi/tids.exp (thr_apply_info_thr_error): Remove "p 1234"
 	command from "thread apply" invocation.
 	(thr_apply_info_thr_invalid): Default the expected output to the

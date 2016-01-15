@@ -1864,6 +1864,26 @@ thread_apply_command (char *tidlist, int from_tty)
       inf = find_inferior_id (inf_num);
       if (inf != NULL)
 	tp = find_thread_id (inf, thr_num);
+
+      if (tid_range_parser_star_range (&parser))
+	{
+	  if (inf == NULL)
+	    {
+	      warning (_("Unknown inferior %d"), inf_num);
+	      tid_range_parser_skip (&parser);
+	      continue;
+	    }
+
+	  /* No use looking for threads past the highest thread number
+	     the inferior ever had.  */
+	  if (thr_num >= inf->highest_thread_num)
+	    tid_range_parser_skip (&parser);
+
+	  /* Be quiet about unknown threads numbers.  */
+	  if (tp == NULL)
+	    continue;
+	}
+
       if (tp == NULL)
 	{
 	  if (show_inferior_qualified_tids ()

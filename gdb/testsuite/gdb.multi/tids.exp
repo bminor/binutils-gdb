@@ -277,6 +277,36 @@ with_test_prefix "two inferiors" {
 	"warning: Unknown thread 30.1" \
 	"thread apply \$inf.1"
 
+    # Star ranges.
+
+    thr_apply_info_thr "1.*" \
+	"1.1 1.2 1.3"
+
+    thr_apply_info_thr "*" \
+	"1.1 1.2 1.3"
+
+    thr_apply_info_thr "1.* 2.1" \
+	"1.1 1.2 1.3 2.1"
+
+    thr_apply_info_thr "2.1 1.*" \
+	"1.1 1.2 1.3 2.1" \
+	"2.1 1.1 1.2 1.3"
+
+    thr_apply_info_thr "1.* 2.*" \
+	"1.1 1.2 1.3 2.1 2.2 2.3"
+
+    thr_apply_info_thr "2.* 1.*" \
+	"1.1 1.2 1.3 2.1 2.2 2.3" \
+	"2.1 2.2 2.3 1.1 1.2 1.3"
+
+    # There's no inferior 3, but "info threads" treats the thread list
+    # as a filter, so it's OK.  "thread apply" complains about the
+    # unknown inferior through.
+    info_threads "1.1 3.*" \
+	"1.1"
+    gdb_test "thread apply 1.1 3.* p 1" \
+	"Thread 1.1.*warning: Unknown inferior 3"
+
     # Now test a set of invalid thread IDs/ranges.
 
     thr_apply_info_thr_invalid "1." \
@@ -318,6 +348,11 @@ with_test_prefix "two inferiors" {
 	thr_apply_info_thr_error "${prefix}-\$one" "negative value"
 	thr_apply_info_thr_error "${prefix}\$minus_one" \
 	    "negative value: ${prefix_re}\\\$minus_one"
+
+	thr_apply_info_thr_error "${prefix}1-*" "inverted range"
+	thr_apply_info_thr_invalid "${prefix}*1"
+	thr_apply_info_thr_invalid "${prefix}*foo"
+	thr_apply_info_thr_invalid "${prefix}foo*"
     }
 
     # Check that a valid thread ID list with a missing command errors
@@ -330,6 +365,7 @@ with_test_prefix "two inferiors" {
 	gdb_test "thread apply 1-2" $output
 	gdb_test "thread apply 1.1-2" $output
 	gdb_test "thread apply $thr" $output
+	gdb_test "thread apply 1.*" $output
     }
 
     # Check that we do parse the inferior number and don't confuse it.

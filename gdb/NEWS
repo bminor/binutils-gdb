@@ -34,6 +34,12 @@
      [Switching to thread 2.1 (Thread 0x7ffff7fc2740 (LWP 8157))] (running)
      (gdb)
 
+* In commands that accept a list of thread IDs, you can now refer to
+  all threads of an inferior using a star wildcard.  GDB accepts
+  "INF_NUM.*", to refer to all threads of inferior INF_NUM, and "*" to
+  refer to all threads of the current inferior.  For example, "info
+  threads 2.*".
+
 * You can use "info threads -gid" to display the global thread ID of
   all threads.
 

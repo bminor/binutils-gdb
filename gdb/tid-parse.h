@@ -44,6 +44,9 @@ enum tid_range_state
 
   /* Parsing the thread number or thread number range.  */
   TID_RANGE_STATE_THREAD_RANGE,
+
+  /* Parsing a star wildcard thread range.  E.g., "1.*".  */
+  TID_RANGE_STATE_STAR_RANGE,
 };
 
 /* An object of this type is passed to tid_range_parser_get_tid.  It
@@ -141,6 +144,10 @@ extern int tid_range_parser_get_tid (struct tid_range_parser *parser,
 extern int tid_range_parser_get_tid_range (struct tid_range_parser *parser,
 					   int *inf_num,
 					   int *thr_start, int *thr_end);
+
+/* Returns non-zero if processing a star wildcard (e.g., "1.*")
+   range.  */
+extern int tid_range_parser_star_range (struct tid_range_parser *parser);
 
 /* Returns non-zero if parsing has completed.  */
 extern int tid_range_parser_finished (struct tid_range_parser *parser);
