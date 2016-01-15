@@ -1,3 +1,15 @@
+2016-01-15  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* charset.c [PHONY_ICONV] (GDB_DEFAULT_HOST_CHARSET):
+	Conditionalize for Windows host.
+	(GDB_DEFAULT_TARGET_CHARSET): Match GDB_DEFAULT_HOST_CHARSET.
+	(GDB_DEFAULT_TARGET_WIDE_CHARSET): Use UTF-32.
+	(phony_iconv_open): Handle both UTF-32 endiannesses.
+	(phony_iconv): Likewise.  Check for output overflow and clean up
+	out-of-input cases.  Correct adjustment to input buffer pointer.
+	(set_be_le_names) [PHONY_ICONV]: Use hard-wired names to match
+	phony_iconv_open.
+
 2016-01-15  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention star wildcard ranges.
