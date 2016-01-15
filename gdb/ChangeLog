@@ -1,5 +1,21 @@
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
+	* amd64bsd-nat.c (amd64bsd_fetch_inferior_registers): Use
+	get_ptrace_pid.
+	(amd64bsd_store_inferior_registers): Use get_ptrace_pid.
+	(amd64bsd_dr_get): Use get_ptrace_pid.
+	(amd64bsd_dr_set): Use get_ptrace_pid.
+	* i386bsd-nat.c (i386bsd_fetch_inferior_registers): Use get_ptrace_pid.
+	(i386bsd_store_inferior_registers): Use get_ptrace_pid.
+	(i386bsd_dr_get): Use get_ptrace_pid.
+	(i386bsd_dr_set): Use get_ptrace_pid.
+	* inf-ptrace.c (get_ptrace_pid): Export.
+	* inf-ptrace.h (get_ptrace_pid): Declare.
+	* ppcfbsd-nat.c (ppcfbsd_fetch_inferior_registers): Use lwp id.
+	(ppcfbsd_store_inferior_registers): Use lwp id.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd_tdep.c (fbsd_core_pid_to_str): New function.
 	(fbsd_core_thread_name): New function.
 	(fbsd_init_abi): Add "core_pid_to_str" gdbarch method.
