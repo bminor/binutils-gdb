@@ -1,3 +1,7 @@
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/cfi/cfi.exp: Exclude m68hc11/12 from m68k test.
+
 2016-01-14  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/rl78/sp-relative-movw.s: New test.

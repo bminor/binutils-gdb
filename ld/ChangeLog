@@ -1,3 +1,11 @@
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Exclude xgate.
+	* testsuite/ld-elf/endsym.d: xfail m68hc11/12 and xgate.
+	* testsuite/ld-elf/pr14156a.d: Likewise.
+	* testsuite/ld-elf/pr14926.d: Don't run for m68hc11/12 and xgate.
+	* testsuite/ld-elf/sec64k.exp: Likewise.
+
 2016-01-14  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/ld-arm/arm-elf.exp (Thumb-Thumb farcall v6-M (no profile)):
