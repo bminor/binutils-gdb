@@ -1,5 +1,9 @@
 2016-01-17  Alan Modra  <amodra@gmail.com>
 
+	* configure: Regenerate.
+
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Exclude xgate.
 	* testsuite/ld-elf/endsym.d: xfail m68hc11/12 and xgate.
 	* testsuite/ld-elf/pr14156a.d: Likewise.
