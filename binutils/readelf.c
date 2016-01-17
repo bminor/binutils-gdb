@@ -11404,6 +11404,9 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 3; /* R_M32C_32.  */
     case EM_M32R:
       return reloc_type == 34; /* R_M32R_32_RELA.  */
+    case EM_68HC11:
+    case EM_68HC12:
+      return reloc_type == 6; /* R_M68HC11_32.  */
     case EM_MCORE:
       return reloc_type == 1; /* R_MCORE_ADDR32.  */
     case EM_CYGNUS_MEP:

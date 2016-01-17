@@ -1,3 +1,7 @@
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (is_32bit_abs_reloc): Add R_M68HC11_32.
+
 2016-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
