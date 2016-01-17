@@ -27,6 +27,9 @@
 #include "nat/gdb_ptrace.h"
 #include <sys/uio.h>
 #include <elf.h>
+#include <inttypes.h>
+
+#include "linux-s390-tdesc.h"
 
 #ifndef HWCAP_S390_HIGH_GPRS
 #define HWCAP_S390_HIGH_GPRS 512
@@ -39,66 +42,6 @@
 #ifndef HWCAP_S390_VX
 #define HWCAP_S390_VX 2048
 #endif
-
-/* Defined in auto-generated file s390-linux32.c.  */
-void init_registers_s390_linux32 (void);
-extern const struct target_desc *tdesc_s390_linux32;
-
-/* Defined in auto-generated file s390-linux32v1.c.  */
-void init_registers_s390_linux32v1 (void);
-extern const struct target_desc *tdesc_s390_linux32v1;
-
-/* Defined in auto-generated file s390-linux32v2.c.  */
-void init_registers_s390_linux32v2 (void);
-extern const struct target_desc *tdesc_s390_linux32v2;
-
-/* Defined in auto-generated file s390-linux64.c.  */
-void init_registers_s390_linux64 (void);
-extern const struct target_desc *tdesc_s390_linux64;
-
-/* Defined in auto-generated file s390-linux64v1.c.  */
-void init_registers_s390_linux64v1 (void);
-extern const struct target_desc *tdesc_s390_linux64v1;
-
-/* Defined in auto-generated file s390-linux64v2.c.  */
-void init_registers_s390_linux64v2 (void);
-extern const struct target_desc *tdesc_s390_linux64v2;
-
-/* Defined in auto-generated file s390-te-linux64.c.  */
-void init_registers_s390_te_linux64 (void);
-extern const struct target_desc *tdesc_s390_te_linux64;
-
-/* Defined in auto-generated file s390-vx-linux64.c.  */
-void init_registers_s390_vx_linux64 (void);
-extern const struct target_desc *tdesc_s390_vx_linux64;
-
-/* Defined in auto-generated file s390-tevx-linux64.c.  */
-void init_registers_s390_tevx_linux64 (void);
-extern const struct target_desc *tdesc_s390_tevx_linux64;
-
-/* Defined in auto-generated file s390x-linux64.c.  */
-void init_registers_s390x_linux64 (void);
-extern const struct target_desc *tdesc_s390x_linux64;
-
-/* Defined in auto-generated file s390x-linux64v1.c.  */
-void init_registers_s390x_linux64v1 (void);
-extern const struct target_desc *tdesc_s390x_linux64v1;
-
-/* Defined in auto-generated file s390x-linux64v2.c.  */
-void init_registers_s390x_linux64v2 (void);
-extern const struct target_desc *tdesc_s390x_linux64v2;
-
-/* Defined in auto-generated file s390x-te-linux64.c.  */
-void init_registers_s390x_te_linux64 (void);
-extern const struct target_desc *tdesc_s390x_te_linux64;
-
-/* Defined in auto-generated file s390x-vx-linux64.c.  */
-void init_registers_s390x_vx_linux64 (void);
-extern const struct target_desc *tdesc_s390x_vx_linux64;
-
-/* Defined in auto-generated file s390x-tevx-linux64.c.  */
-void init_registers_s390x_tevx_linux64 (void);
-extern const struct target_desc *tdesc_s390x_tevx_linux64;
 
 #define s390_num_regs 52
 
@@ -539,6 +482,7 @@ s390_check_regset (int pid, int regset, int regsize)
 /* For a 31-bit inferior, whether the kernel supports using the full
    64-bit GPRs.  */
 static int have_hwcap_s390_high_gprs = 0;
+static int have_hwcap_s390_vx = 0;
 
 static void
 s390_arch_setup (void)
@@ -621,6 +565,8 @@ s390_arch_setup (void)
 	else
 	  tdesc = tdesc_s390_linux64;
       }
+
+    have_hwcap_s390_vx = have_regset_vxrs;
   }
 
   /* Update target_regsets according to available register sets.  */
@@ -753,6 +699,708 @@ s390_supports_tracepoints (void)
   return 1;
 }
 
+/* Implementation of linux_target_ops method "get_thread_area".  */
+
+static int
+s390_get_thread_area (int lwpid, CORE_ADDR *addrp)
+{
+  CORE_ADDR res = ptrace (PTRACE_PEEKUSER, lwpid, (long) PT_ACR0, (long) 0);
+#ifdef __s390x__
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+
+  if (register_size (regcache->tdesc, 0) == 4)
+    res &= 0xffffffffull;
+#endif
+  *addrp = res;
+  return 0;
+}
+
+
+/* Fast tracepoint support.
+
+   The register save area on stack is identical for all targets:
+
+   0x000+i*0x10: VR0-VR31
+   0x200+i*8: GR0-GR15
+   0x280+i*4: AR0-AR15
+   0x2c0: PSWM [64-bit]
+   0x2c8: PSWA [64-bit]
+   0x2d0: FPC
+
+   If we're on 31-bit linux, we just don't store the high parts of the GPRs.
+   Likewise, if there's no VX support, we just store the FRs into the slots
+   of low VR halves.  The agent code is responsible for rearranging that
+   into regcache.  */
+
+/* Code sequence saving GPRs for 31-bit target with no high GPRs.  There's
+   one trick used at the very beginning: since there's no way to allocate
+   stack space without destroying CC (lay instruction can do it, but it's
+   only supported on later CPUs), we take 4 different execution paths for
+   every possible value of CC, allocate stack space, save %r0, stuff the
+   CC value in %r0 (shifted to match its position in PSWM high word),
+   then branch to common path.  */
+
+static const unsigned char s390_ft_entry_gpr_esa[] = {
+  0xa7, 0x14, 0x00, 0x1e,		/* jo .Lcc3 */
+  0xa7, 0x24, 0x00, 0x14,		/* jh .Lcc2 */
+  0xa7, 0x44, 0x00, 0x0a,		/* jl .Lcc1 */
+  /* CC = 0 */
+  0xa7, 0xfa, 0xfd, 0x00,		/* ahi %r15, -0x300 */
+  0x50, 0x00, 0xf2, 0x04,		/* st %r0, 0x204(%r15) */
+  0xa7, 0x08, 0x00, 0x00,		/* lhi %r0, 0 */
+  0xa7, 0xf4, 0x00, 0x18,		/* j .Lccdone */
+  /* .Lcc1: */
+  0xa7, 0xfa, 0xfd, 0x00,		/* ahi %r15, -0x300 */
+  0x50, 0x00, 0xf2, 0x04,		/* st %r0, 0x204(%r15) */
+  0xa7, 0x08, 0x10, 0x00,		/* lhi %r0, 0x1000 */
+  0xa7, 0xf4, 0x00, 0x10,		/* j .Lccdone */
+  /* .Lcc2: */
+  0xa7, 0xfa, 0xfd, 0x00,		/* ahi %r15, -0x300 */
+  0x50, 0x00, 0xf2, 0x04,		/* st %r0, 0x204(%r15) */
+  0xa7, 0x08, 0x20, 0x00,		/* lhi %r0, 0x2000 */
+  0xa7, 0xf4, 0x00, 0x08,		/* j .Lccdone */
+  /* .Lcc3: */
+  0xa7, 0xfa, 0xfd, 0x00,		/* ahi %r15, -0x300 */
+  0x50, 0x00, 0xf2, 0x04,		/* st %r0, 0x204(%r15) */
+  0xa7, 0x08, 0x30, 0x00,		/* lhi %r0, 0x3000 */
+  /* .Lccdone: */
+  0x50, 0x10, 0xf2, 0x0c,		/* st %r1, 0x20c(%r15) */
+  0x50, 0x20, 0xf2, 0x14,		/* st %r2, 0x214(%r15) */
+  0x50, 0x30, 0xf2, 0x1c,		/* st %r3, 0x21c(%r15) */
+  0x50, 0x40, 0xf2, 0x24,		/* st %r4, 0x224(%r15) */
+  0x50, 0x50, 0xf2, 0x2c,		/* st %r5, 0x22c(%r15) */
+  0x50, 0x60, 0xf2, 0x34,		/* st %r6, 0x234(%r15) */
+  0x50, 0x70, 0xf2, 0x3c,		/* st %r7, 0x23c(%r15) */
+  0x50, 0x80, 0xf2, 0x44,		/* st %r8, 0x244(%r15) */
+  0x50, 0x90, 0xf2, 0x4c,		/* st %r9, 0x24c(%r15) */
+  0x50, 0xa0, 0xf2, 0x54,		/* st %r10, 0x254(%r15) */
+  0x50, 0xb0, 0xf2, 0x5c,		/* st %r11, 0x25c(%r15) */
+  0x50, 0xc0, 0xf2, 0x64,		/* st %r12, 0x264(%r15) */
+  0x50, 0xd0, 0xf2, 0x6c,		/* st %r13, 0x26c(%r15) */
+  0x50, 0xe0, 0xf2, 0x74,		/* st %r14, 0x274(%r15) */
+  /* Compute original value of %r15 and store it.  We use ahi instead
+     of la to preserve the whole value, and not just the low 31 bits.
+     This is not particularly important here, but essential in the
+     zarch case where someone might be using the high word of %r15
+     as an extra register.  */
+  0x18, 0x1f,				/* lr %r1, %r15 */
+  0xa7, 0x1a, 0x03, 0x00,		/* ahi %r1, 0x300 */
+  0x50, 0x10, 0xf2, 0x7c,		/* st %r1, 0x27c(%r15) */
+};
+
+/* Code sequence saving GPRs for 31-bit target with high GPRs and for 64-bit
+   target.  Same as above, except this time we can use load/store multiple,
+   since the 64-bit regs are tightly packed.  */
+
+static const unsigned char s390_ft_entry_gpr_zarch[] = {
+  0xa7, 0x14, 0x00, 0x21,		/* jo .Lcc3 */
+  0xa7, 0x24, 0x00, 0x16,		/* jh .Lcc2 */
+  0xa7, 0x44, 0x00, 0x0b,		/* jl .Lcc1 */
+  /* CC = 0 */
+  0xa7, 0xfb, 0xfd, 0x00,		/* aghi %r15, -0x300 */
+  0xeb, 0x0e, 0xf2, 0x00, 0x00, 0x24,	/* stmg %r0, %r14, 0x200(%r15) */
+  0xa7, 0x08, 0x00, 0x00,		/* lhi %r0, 0 */
+  0xa7, 0xf4, 0x00, 0x1b,		/* j .Lccdone */
+  /* .Lcc1: */
+  0xa7, 0xfb, 0xfd, 0x00,		/* aghi %r15, -0x300 */
+  0xeb, 0x0e, 0xf2, 0x00, 0x00, 0x24,	/* stmg %r0, %r14, 0x200(%r15) */
+  0xa7, 0x08, 0x10, 0x00,		/* lhi %r0, 0x1000 */
+  0xa7, 0xf4, 0x00, 0x12,		/* j .Lccdone */
+  /* .Lcc2: */
+  0xa7, 0xfb, 0xfd, 0x00,		/* aghi %r15, -0x300 */
+  0xeb, 0x0e, 0xf2, 0x00, 0x00, 0x24,	/* stmg %r0, %r14, 0x200(%r15) */
+  0xa7, 0x08, 0x20, 0x00,		/* lhi %r0, 0x2000 */
+  0xa7, 0xf4, 0x00, 0x09,		/* j .Lccdone */
+  /* .Lcc3: */
+  0xa7, 0xfb, 0xfd, 0x00,		/* aghi %r15, -0x300 */
+  0xeb, 0x0e, 0xf2, 0x00, 0x00, 0x24,	/* stmg %r0, %r14, 0x200(%r15) */
+  0xa7, 0x08, 0x30, 0x00,		/* lhi %r0, 0x3000 */
+  /* .Lccdone: */
+  0xb9, 0x04, 0x00, 0x1f,		/* lgr %r1, %r15 */
+  0xa7, 0x1b, 0x03, 0x00,		/* aghi %r1, 0x300 */
+  0xe3, 0x10, 0xf2, 0x78, 0x00, 0x24,	/* stg %r1, 0x278(%r15) */
+};
+
+/* Code sequence saving ARs, PSWM and FPC.  PSWM has to be assembled from
+   current PSWM (read by epsw) and CC from entry (in %r0).  */
+
+static const unsigned char s390_ft_entry_misc[] = {
+  0x9b, 0x0f, 0xf2, 0x80,		/* stam %a0, %a15, 0x20(%%r15) */
+  0xb9, 0x8d, 0x00, 0x23,		/* epsw %r2, %r3 */
+  0xa7, 0x18, 0xcf, 0xff,		/* lhi %r1, ~0x3000 */
+  0x14, 0x21,				/* nr %r2, %r1 */
+  0x16, 0x20,				/* or %r2, %r0 */
+  0x50, 0x20, 0xf2, 0xc0,		/* st %r2, 0x2c0(%r15) */
+  0x50, 0x30, 0xf2, 0xc4,		/* st %r3, 0x2c4(%r15) */
+  0xb2, 0x9c, 0xf2, 0xd0,		/* stfpc 0x2d0(%r15) */
+};
+
+/* Code sequence saving FRs, used if VX not supported.  */
+
+static const unsigned char s390_ft_entry_fr[] = {
+  0x60, 0x00, 0xf0, 0x00,		/* std %f0, 0x000(%r15) */
+  0x60, 0x10, 0xf0, 0x10,		/* std %f1, 0x010(%r15) */
+  0x60, 0x20, 0xf0, 0x20,		/* std %f2, 0x020(%r15) */
+  0x60, 0x30, 0xf0, 0x30,		/* std %f3, 0x030(%r15) */
+  0x60, 0x40, 0xf0, 0x40,		/* std %f4, 0x040(%r15) */
+  0x60, 0x50, 0xf0, 0x50,		/* std %f5, 0x050(%r15) */
+  0x60, 0x60, 0xf0, 0x60,		/* std %f6, 0x060(%r15) */
+  0x60, 0x70, 0xf0, 0x70,		/* std %f7, 0x070(%r15) */
+  0x60, 0x80, 0xf0, 0x80,		/* std %f8, 0x080(%r15) */
+  0x60, 0x90, 0xf0, 0x90,		/* std %f9, 0x090(%r15) */
+  0x60, 0xa0, 0xf0, 0xa0,		/* std %f10, 0x0a0(%r15) */
+  0x60, 0xb0, 0xf0, 0xb0,		/* std %f11, 0x0b0(%r15) */
+  0x60, 0xc0, 0xf0, 0xc0,		/* std %f12, 0x0c0(%r15) */
+  0x60, 0xd0, 0xf0, 0xd0,		/* std %f13, 0x0d0(%r15) */
+  0x60, 0xe0, 0xf0, 0xe0,		/* std %f14, 0x0e0(%r15) */
+  0x60, 0xf0, 0xf0, 0xf0,		/* std %f15, 0x0f0(%r15) */
+};
+
+/* Code sequence saving VRs, used if VX not supported.  */
+
+static const unsigned char s390_ft_entry_vr[] = {
+  0xe7, 0x0f, 0xf0, 0x00, 0x00, 0x3e,	/* vstm %v0, %v15, 0x000(%r15) */
+  0xe7, 0x0f, 0xf1, 0x00, 0x0c, 0x3e,	/* vstm %v16, %v31, 0x100(%r15) */
+};
+
+/* Code sequence doing the collection call for 31-bit target.  %r1 contains
+   the address of the literal pool.  */
+
+static const unsigned char s390_ft_main_31[] = {
+  /* Load the literals into registers.  */
+  0x58, 0x50, 0x10, 0x00,		/* l %r5, 0x0(%r1) */
+  0x58, 0x20, 0x10, 0x04,		/* l %r2, 0x4(%r1) */
+  0x58, 0x40, 0x10, 0x08,		/* l %r4, 0x8(%r1) */
+  0x58, 0x60, 0x10, 0x0c,		/* l %r6, 0xc(%r1) */
+  /* Save original PSWA (tracepoint address | 0x80000000).  */
+  0x50, 0x50, 0xf2, 0xcc,		/* st %r5, 0x2cc(%r15) */
+  /* Construct a collecting_t object at %r15+0x2e0.  */
+  0x50, 0x20, 0xf2, 0xe0,		/* st %r2, 0x2e0(%r15) */
+  0x9b, 0x00, 0xf2, 0xe4,		/* stam %a0, %a0, 0x2e4(%r15) */
+  /* Move its address to %r0.  */
+  0x41, 0x00, 0xf2, 0xe0,		/* la %r0, 0x2e0(%r15) */
+  /* Take the lock.  */
+  /* .Lloop:  */
+  0xa7, 0x18, 0x00, 0x00,		/* lhi %r1, 0 */
+  0xba, 0x10, 0x60, 0x00,		/* cs %r1, %r0, 0(%r6) */
+  0xa7, 0x74, 0xff, 0xfc,		/* jne .Lloop */
+  /* Address of the register save block to %r3.  */
+  0x18, 0x3f,				/* lr %r3, %r15 */
+  /* Make a stack frame, so that we can call the collector.  */
+  0xa7, 0xfa, 0xff, 0xa0,		/* ahi %r15, -0x60 */
+  /* Call it.  */
+  0x0d, 0xe4,				/* basr %r14, %r4 */
+  /* And get rid of the stack frame again.  */
+  0x41, 0xf0, 0xf0, 0x60,		/* la %r15, 0x60(%r15) */
+  /* Leave the lock.  */
+  0x07, 0xf0, 				/* br %r0 */
+  0xa7, 0x18, 0x00, 0x00,		/* lhi %r1, 0 */
+  0x50, 0x10, 0x60, 0x00,		/* st %t1, 0(%r6) */
+};
+
+/* Code sequence doing the collection call for 64-bit target.  %r1 contains
+   the address of the literal pool.  */
+
+static const unsigned char s390_ft_main_64[] = {
+  /* Load the literals into registers.  */
+  0xe3, 0x50, 0x10, 0x00, 0x00, 0x04,	/* lg %r5, 0x00(%r1) */
+  0xe3, 0x20, 0x10, 0x08, 0x00, 0x04,	/* lg %r2, 0x08(%r1) */
+  0xe3, 0x40, 0x10, 0x10, 0x00, 0x04,	/* lg %r4, 0x10(%r1) */
+  0xe3, 0x60, 0x10, 0x18, 0x00, 0x04,	/* lg %r6, 0x18(%r1) */
+  /* Save original PSWA (tracepoint address).  */
+  0xe3, 0x50, 0xf2, 0xc8, 0x00, 0x24,	/* stg %r5, 0x2c8(%r15) */
+  /* Construct a collecting_t object at %r15+0x2e0.  */
+  0xe3, 0x20, 0xf2, 0xe0, 0x00, 0x24,	/* stg %r2, 0x2e0(%r15) */
+  0x9b, 0x01, 0xf2, 0xe8,		/* stam %a0, %a1, 0x2e8(%r15) */
+  /* Move its address to %r0.  */
+  0x41, 0x00, 0xf2, 0xe0,		/* la %r0, 0x2e0(%r15) */
+  /* Take the lock.  */
+  /* .Lloop:  */
+  0xa7, 0x19, 0x00, 0x00,		/* lghi %r1, 0 */
+  0xeb, 0x10, 0x60, 0x00, 0x00, 0x30,	/* csg %r1, %r0, 0(%r6) */
+  0xa7, 0x74, 0xff, 0xfb,		/* jne .Lloop */
+  /* Address of the register save block to %r3.  */
+  0xb9, 0x04, 0x00, 0x3f,		/* lgr %r3, %r15 */
+  /* Make a stack frame, so that we can call the collector.  */
+  0xa7, 0xfb, 0xff, 0x60,		/* aghi %r15, -0xa0 */
+  /* Call it.  */
+  0x0d, 0xe4,				/* basr %r14, %r4 */
+  /* And get rid of the stack frame again.  */
+  0x41, 0xf0, 0xf0, 0xa0,		/* la %r15, 0xa0(%r15) */
+  /* Leave the lock.  */
+  0x07, 0xf0,				/* br %r0 */
+  0xa7, 0x19, 0x00, 0x00,		/* lghi %r1, 0 */
+  0xe3, 0x10, 0x60, 0x00, 0x00, 0x24,	/* stg %t1, 0(%r6) */
+};
+
+/* Code sequence restoring FRs, for targets with no VX support.  */
+
+static const unsigned char s390_ft_exit_fr[] = {
+  0x68, 0x00, 0xf0, 0x00,		/* ld %f0, 0x000(%r15) */
+  0x68, 0x10, 0xf0, 0x10,		/* ld %f1, 0x010(%r15) */
+  0x68, 0x20, 0xf0, 0x20,		/* ld %f2, 0x020(%r15) */
+  0x68, 0x30, 0xf0, 0x30,		/* ld %f3, 0x030(%r15) */
+  0x68, 0x40, 0xf0, 0x40,		/* ld %f4, 0x040(%r15) */
+  0x68, 0x50, 0xf0, 0x50,		/* ld %f5, 0x050(%r15) */
+  0x68, 0x60, 0xf0, 0x60,		/* ld %f6, 0x060(%r15) */
+  0x68, 0x70, 0xf0, 0x70,		/* ld %f7, 0x070(%r15) */
+  0x68, 0x80, 0xf0, 0x80,		/* ld %f8, 0x080(%r15) */
+  0x68, 0x90, 0xf0, 0x90,		/* ld %f9, 0x090(%r15) */
+  0x68, 0xa0, 0xf0, 0xa0,		/* ld %f10, 0x0a0(%r15) */
+  0x68, 0xb0, 0xf0, 0xb0,		/* ld %f11, 0x0b0(%r15) */
+  0x68, 0xc0, 0xf0, 0xc0,		/* ld %f12, 0x0c0(%r15) */
+  0x68, 0xd0, 0xf0, 0xd0,		/* ld %f13, 0x0d0(%r15) */
+  0x68, 0xe0, 0xf0, 0xe0,		/* ld %f14, 0x0e0(%r15) */
+  0x68, 0xf0, 0xf0, 0xf0,		/* ld %f15, 0x0f0(%r15) */
+};
+
+/* Code sequence restoring VRs.  */
+
+static const unsigned char s390_ft_exit_vr[] = {
+  0xe7, 0x0f, 0xf0, 0x00, 0x00, 0x36,	/* vlm %v0, %v15, 0x000(%r15) */
+  0xe7, 0x0f, 0xf1, 0x00, 0x0c, 0x36,	/* vlm %v16, %v31, 0x100(%r15) */
+};
+
+/* Code sequence restoring misc registers.  As for PSWM, only CC should be
+   modified by C code, so we use the alr instruction to restore it by
+   manufacturing an operand that'll result in the original flags.  */
+
+static const unsigned char s390_ft_exit_misc[] = {
+  0xb2, 0x9d, 0xf2, 0xd0,		/* lfpc 0x2d0(%r15) */
+  0x58, 0x00, 0xf2, 0xc0,		/* l %r0, 0x2c0(%r15) */
+  /* Extract CC to high 2 bits of %r0.  */
+  0x88, 0x00, 0x00, 0x0c,		/* srl %r0, 12 */
+  0x89, 0x00, 0x00, 0x1e,		/* sll %r0, 30 */
+  /* Add %r0 to itself.  Result will be nonzero iff CC bit 0 is set, and
+     will have carry iff CC bit 1 is set - resulting in the same flags
+     as the original.  */
+  0x1e, 0x00,				/* alr %r0, %r0 */
+  0x9a, 0x0f, 0xf2, 0x80,		/* lam %a0, %a15, 0x280(%r15) */
+};
+
+/* Code sequence restoring GPRs, for 31-bit targets with no high GPRs.  */
+
+static const unsigned char s390_ft_exit_gpr_esa[] = {
+  0x58, 0x00, 0xf2, 0x04,		/* l %r0, 0x204(%r15) */
+  0x58, 0x10, 0xf2, 0x0c,		/* l %r1, 0x20c(%r15) */
+  0x58, 0x20, 0xf2, 0x14,		/* l %r2, 0x214(%r15) */
+  0x58, 0x30, 0xf2, 0x1c,		/* l %r3, 0x21c(%r15) */
+  0x58, 0x40, 0xf2, 0x24,		/* l %r4, 0x224(%r15) */
+  0x58, 0x50, 0xf2, 0x2c,		/* l %r5, 0x22c(%r15) */
+  0x58, 0x60, 0xf2, 0x34,		/* l %r6, 0x234(%r15) */
+  0x58, 0x70, 0xf2, 0x3c,		/* l %r7, 0x23c(%r15) */
+  0x58, 0x80, 0xf2, 0x44,		/* l %r8, 0x244(%r15) */
+  0x58, 0x90, 0xf2, 0x4c,		/* l %r9, 0x24c(%r15) */
+  0x58, 0xa0, 0xf2, 0x54,		/* l %r10, 0x254(%r15) */
+  0x58, 0xb0, 0xf2, 0x5c,		/* l %r11, 0x25c(%r15) */
+  0x58, 0xc0, 0xf2, 0x64,		/* l %r12, 0x264(%r15) */
+  0x58, 0xd0, 0xf2, 0x6c,		/* l %r13, 0x26c(%r15) */
+  0x58, 0xe0, 0xf2, 0x74,		/* l %r14, 0x274(%r15) */
+  0x58, 0xf0, 0xf2, 0x7c,		/* l %r15, 0x27c(%r15) */
+};
+
+/* Code sequence restoring GPRs, for 64-bit targets and 31-bit targets
+   with high GPRs.  */
+
+static const unsigned char s390_ft_exit_gpr_zarch[] = {
+  0xeb, 0x0f, 0xf2, 0x00, 0x00, 0x04,	/* lmg %r0, %r15, 0x200(%r15) */
+};
+
+/* Writes instructions to target, updating the to pointer.  */
+
+static void
+append_insns (CORE_ADDR *to, size_t len, const unsigned char *buf)
+{
+  write_inferior_memory (*to, buf, len);
+  *to += len;
+}
+
+/* Relocates an instruction from oldloc to *to, updating to.  */
+
+static int
+s390_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc, int is_64)
+{
+  gdb_byte buf[6];
+  int ilen;
+  int op2;
+  /* 0: no fixup, 1: PC16DBL fixup, 2: PC32DBL fixup.  */
+  int mode = 0;
+  int is_bras = 0;
+  read_inferior_memory (oldloc, buf, sizeof buf);
+  if (buf[0] < 0x40)
+    ilen = 2;
+  else if (buf[0] < 0xc0)
+    ilen = 4;
+  else
+    ilen = 6;
+  switch (buf[0])
+    {
+    case 0x05: /* BALR */
+    case 0x0c: /* BASSM */
+    case 0x0d: /* BASR */
+    case 0x45: /* BAL */
+    case 0x4d: /* BAS */
+      /* These save a return address and mess around with registers.
+	 We can't relocate them.  */
+      return 1;
+    case 0x84: /* BRXH */
+    case 0x85: /* BRXLE */
+      mode = 1;
+      break;
+    case 0xa7:
+      op2 = buf[1] & 0xf;
+      /* BRC, BRAS, BRCT, BRCTG */
+      if (op2 >= 4 && op2 <= 7)
+	mode = 1;
+      /* BRAS */
+      if (op2 == 5)
+	is_bras = 1;
+      break;
+    case 0xc0:
+      op2 = buf[1] & 0xf;
+      /* LARL, BRCL, BRASL */
+      if (op2 == 0 || op2 == 4 || op2 == 5)
+	mode = 2;
+      /* BRASL */
+      if (op2 == 5)
+	is_bras = 1;
+      break;
+    case 0xc4:
+    case 0xc6:
+      /* PC-relative addressing instructions.  */
+      mode = 2;
+      break;
+    case 0xc5: /* BPRP */
+    case 0xc7: /* BPP */
+      /* Branch prediction - just skip it.  */
+      return 0;
+    case 0xcc:
+      op2 = buf[1] & 0xf;
+      /* BRCTH */
+      if (op2 == 6)
+	mode = 2;
+      break;
+    case 0xec:
+      op2 = buf[5];
+      switch (op2)
+	{
+	case 0x44: /* BRXHG */
+	case 0x45: /* BRXLG */
+	case 0x64: /* CGRJ */
+	case 0x65: /* CLGRJ */
+	case 0x76: /* CRJ */
+	case 0x77: /* CLRJ */
+	  mode = 1;
+	  break;
+	}
+      break;
+    }
+
+  if (mode != 0)
+    {
+      /* We'll have to relocate an instruction with a PC-relative field.
+	 First, compute the target.  */
+      int64_t loffset = 0;
+      CORE_ADDR target;
+      if (mode == 1)
+	{
+	  int16_t soffset = 0;
+	  memcpy (&soffset, buf + 2, 2);
+	  loffset = soffset;
+	}
+      else if (mode == 2)
+	{
+	  int32_t soffset = 0;
+	  memcpy (&soffset, buf + 2, 4);
+	  loffset = soffset;
+	}
+      target = oldloc + loffset * 2;
+      if (!is_64)
+	target &= 0x7fffffff;
+
+      if (is_bras)
+	{
+	  /* BRAS or BRASL was used.  We cannot just relocate those, since
+	     they save the return address in a register.  We can, however,
+	     replace them with a LARL+JG sequence.  */
+
+	  /* Make the LARL.  */
+	  int32_t soffset;
+	  buf[0] = 0xc0;
+	  buf[1] &= 0xf0;
+	  loffset = oldloc + ilen - *to;
+	  loffset >>= 1;
+	  soffset = loffset;
+	  if (soffset != loffset && is_64)
+	    return 1;
+	  memcpy (buf + 2, &soffset, 4);
+	  append_insns (to, 6, buf);
+
+	  /* Note: this is not fully correct.  In 31-bit mode, LARL will write
+	     an address with the top bit 0, while BRAS/BRASL will write it
+	     with top bit 1.  It should not matter much, since linux compilers
+	     use BR and not BSM to return from functions, but it could confuse
+	     some poor stack unwinder.  */
+
+	  /* We'll now be writing a JG.  */
+	  mode = 2;
+	  buf[0] = 0xc0;
+	  buf[1] = 0xf4;
+	  ilen = 6;
+	}
+
+      /* Compute the new offset and write it to the buffer.  */
+      loffset = target - *to;
+      loffset >>= 1;
+
+      if (mode == 1)
+	{
+	  int16_t soffset = loffset;
+	  if (soffset != loffset)
+	    return 1;
+	  memcpy (buf + 2, &soffset, 2);
+	}
+      else if (mode == 2)
+	{
+	  int32_t soffset = loffset;
+	  if (soffset != loffset && is_64)
+	    return 1;
+	  memcpy (buf + 2, &soffset, 4);
+	}
+    }
+  append_insns (to, ilen, buf);
+  return 0;
+}
+
+/* Implementation of linux_target_ops method
+   "install_fast_tracepoint_jump_pad".  */
+
+static int
+s390_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
+				       CORE_ADDR tpaddr,
+				       CORE_ADDR collector,
+				       CORE_ADDR lockaddr,
+				       ULONGEST orig_size,
+				       CORE_ADDR *jump_entry,
+				       CORE_ADDR *trampoline,
+				       ULONGEST *trampoline_size,
+				       unsigned char *jjump_pad_insn,
+				       ULONGEST *jjump_pad_insn_size,
+				       CORE_ADDR *adjusted_insn_addr,
+				       CORE_ADDR *adjusted_insn_addr_end,
+				       char *err)
+{
+  int i;
+  int64_t loffset;
+  int32_t offset;
+  unsigned char jbuf[6] = { 0xc0, 0xf4, 0, 0, 0, 0 };	/* jg ... */
+  CORE_ADDR buildaddr = *jump_entry;
+#ifdef __s390x__
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+  int is_64 = register_size (regcache->tdesc, 0) == 8;
+  int is_zarch = is_64 || have_hwcap_s390_high_gprs;
+  int has_vx = have_hwcap_s390_vx;
+#else
+  int is_64 = 0, is_zarch = 0, has_vx = 0;
+#endif
+  CORE_ADDR literals[4] = {
+    tpaddr,
+    tpoint,
+    collector,
+    lockaddr,
+  };
+
+  /* First, store the GPRs.  */
+  if (is_zarch)
+    append_insns (&buildaddr, sizeof s390_ft_entry_gpr_zarch,
+			      s390_ft_entry_gpr_zarch);
+  else
+    append_insns (&buildaddr, sizeof s390_ft_entry_gpr_esa,
+			      s390_ft_entry_gpr_esa);
+
+  /* Second, misc registers (ARs, PSWM, FPC).  PSWA will be stored below.  */
+  append_insns (&buildaddr, sizeof s390_ft_entry_misc, s390_ft_entry_misc);
+
+  /* Third, FRs or VRs.  */
+  if (has_vx)
+    append_insns (&buildaddr, sizeof s390_ft_entry_vr, s390_ft_entry_vr);
+  else
+    append_insns (&buildaddr, sizeof s390_ft_entry_fr, s390_ft_entry_fr);
+
+  /* Now, the main part of code - store PSWA, take lock, call collector,
+     leave lock.  First, we'll need to fetch 4 literals.  */
+  if (is_64) {
+    unsigned char buf[] = {
+      0x07, 0x07,		/* nopr %r7 */
+      0x07, 0x07,		/* nopr %r7 */
+      0x07, 0x07,		/* nopr %r7 */
+      0xa7, 0x15, 0x00, 0x12,	/* bras %r1, .Lend */
+      0, 0, 0, 0, 0, 0, 0, 0,	/* tpaddr */
+      0, 0, 0, 0, 0, 0, 0, 0,	/* tpoint */
+      0, 0, 0, 0, 0, 0, 0, 0,	/* collector */
+      0, 0, 0, 0, 0, 0, 0, 0,	/* lockaddr */
+      /* .Lend: */
+    };
+    /* Find the proper start place in buf, so that literals will be
+       aligned. */
+    int bufpos = (buildaddr + 2) & 7;
+    /* Stuff the literals into the buffer. */
+    for (i = 0; i < 4; i++) {
+      uint64_t lit = literals[i];
+      memcpy (&buf[sizeof buf - 32 + i * 8], &lit, 8);
+    }
+    append_insns (&buildaddr, sizeof buf - bufpos, buf + bufpos);
+    append_insns (&buildaddr, sizeof s390_ft_main_64, s390_ft_main_64);
+  } else {
+    unsigned char buf[] = {
+      0x07, 0x07,		/* nopr %r7 */
+      0xa7, 0x15, 0x00, 0x0a,	/* bras %r1, .Lend */
+      0, 0, 0, 0,		/* tpaddr */
+      0, 0, 0, 0,		/* tpoint */
+      0, 0, 0, 0,		/* collector */
+      0, 0, 0, 0,		/* lockaddr */
+      /* .Lend: */
+    };
+    /* Find the proper start place in buf, so that literals will be
+       aligned. */
+    int bufpos = (buildaddr + 2) & 3;
+    /* First literal will be saved as the PSWA, make sure it has the high bit
+       set.  */
+    literals[0] |= 0x80000000;
+    /* Stuff the literals into the buffer. */
+    for (i = 0; i < 4; i++) {
+      uint32_t lit = literals[i];
+      memcpy (&buf[sizeof buf - 16 + i * 4], &lit, 4);
+    }
+    append_insns (&buildaddr, sizeof buf - bufpos, buf + bufpos);
+    append_insns (&buildaddr, sizeof s390_ft_main_31, s390_ft_main_31);
+  }
+
+  /* Restore FRs or VRs.  */
+  if (has_vx)
+    append_insns (&buildaddr, sizeof s390_ft_exit_vr, s390_ft_exit_vr);
+  else
+    append_insns (&buildaddr, sizeof s390_ft_exit_fr, s390_ft_exit_fr);
+
+  /* Restore misc registers.  */
+  append_insns (&buildaddr, sizeof s390_ft_exit_misc, s390_ft_exit_misc);
+
+  /* Restore the GPRs.  */
+  if (is_zarch)
+    append_insns (&buildaddr, sizeof s390_ft_exit_gpr_zarch,
+			      s390_ft_exit_gpr_zarch);
+  else
+    append_insns (&buildaddr, sizeof s390_ft_exit_gpr_esa,
+			      s390_ft_exit_gpr_esa);
+
+  /* Now, adjust the original instruction to execute in the jump
+     pad.  */
+  *adjusted_insn_addr = buildaddr;
+  if (s390_relocate_instruction (&buildaddr, tpaddr, is_64))
+    {
+      sprintf (err, "E.Could not relocate instruction for tracepoint.");
+      return 1;
+    }
+  *adjusted_insn_addr_end = buildaddr;
+
+  /* Finally, write a jump back to the program.  */
+
+  loffset = (tpaddr + orig_size) - buildaddr;
+  loffset >>= 1;
+  offset = loffset;
+  if (is_64 && offset != loffset)
+    {
+      sprintf (err,
+	       "E.Jump back from jump pad too far from tracepoint "
+	       "(offset 0x%" PRIx64 " > int33).", loffset);
+      return 1;
+    }
+  memcpy (jbuf + 2, &offset, 4);
+  append_insns (&buildaddr, sizeof jbuf, jbuf);
+
+  /* The jump pad is now built.  Wire in a jump to our jump pad.  This
+     is always done last (by our caller actually), so that we can
+     install fast tracepoints with threads running.  This relies on
+     the agent's atomic write support.  */
+  loffset = *jump_entry - tpaddr;
+  loffset >>= 1;
+  offset = loffset;
+  if (is_64 && offset != loffset)
+    {
+      sprintf (err,
+	       "E.Jump back from jump pad too far from tracepoint "
+	       "(offset 0x%" PRIx64 " > int33).", loffset);
+      return 1;
+    }
+  memcpy (jbuf + 2, &offset, 4);
+  memcpy (jjump_pad_insn, jbuf, sizeof jbuf);
+  *jjump_pad_insn_size = sizeof jbuf;
+
+  /* Return the end address of our pad.  */
+  *jump_entry = buildaddr;
+
+  return 0;
+}
+
+/* Implementation of linux_target_ops method
+   "get_min_fast_tracepoint_insn_len".  */
+
+static int
+s390_get_min_fast_tracepoint_insn_len (void)
+{
+  /* We only support using 6-byte jumps to reach the tracepoint code.
+     If the tracepoint buffer were allocated sufficiently close (64kiB)
+     to the executable code, and the traced instruction itself was close
+     enough to the beginning, we could use 4-byte jumps, but this doesn't
+     seem to be worth the effort.  */
+  return 6;
+}
+
+/* Implementation of linux_target_ops method "get_ipa_tdesc_idx".  */
+
+static int
+s390_get_ipa_tdesc_idx (void)
+{
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+  const struct target_desc *tdesc = regcache->tdesc;
+
+#ifdef __s390x__
+  if (tdesc == tdesc_s390x_linux64)
+    return S390_TDESC_64;
+  if (tdesc == tdesc_s390x_linux64v1)
+    return S390_TDESC_64V1;
+  if (tdesc == tdesc_s390x_linux64v2)
+    return S390_TDESC_64V2;
+  if (tdesc == tdesc_s390x_te_linux64)
+    return S390_TDESC_TE;
+  if (tdesc == tdesc_s390x_vx_linux64)
+    return S390_TDESC_VX;
+  if (tdesc == tdesc_s390x_tevx_linux64)
+    return S390_TDESC_TEVX;
+#endif
+
+  if (tdesc == tdesc_s390_linux32)
+    return S390_TDESC_32;
+  if (tdesc == tdesc_s390_linux32v1)
+    return S390_TDESC_32V1;
+  if (tdesc == tdesc_s390_linux32v2)
+    return S390_TDESC_32V2;
+  if (tdesc == tdesc_s390_linux64)
+    return S390_TDESC_64;
+  if (tdesc == tdesc_s390_linux64v1)
+    return S390_TDESC_64V1;
+  if (tdesc == tdesc_s390_linux64v2)
+    return S390_TDESC_64V2;
+  if (tdesc == tdesc_s390_te_linux64)
+    return S390_TDESC_TE;
+  if (tdesc == tdesc_s390_vx_linux64)
+    return S390_TDESC_VX;
+  if (tdesc == tdesc_s390_tevx_linux64)
+    return S390_TDESC_TEVX;
+
+  return 0;
+}
+
 struct linux_target_ops the_low_target = {
   s390_arch_setup,
   s390_regs_info,
@@ -780,13 +1428,15 @@ struct linux_target_ops the_low_target = {
   NULL, /* prepare_to_resume */
   NULL, /* process_qsupported */
   s390_supports_tracepoints,
-  NULL, /* get_thread_area */
-  NULL, /* install_fast_tracepoint_jump_pad */
+  s390_get_thread_area,
+  s390_install_fast_tracepoint_jump_pad,
   NULL, /* emit_ops */
-  NULL, /* get_min_fast_tracepoint_insn_len */
+  s390_get_min_fast_tracepoint_insn_len,
   NULL, /* supports_range_stepping */
   NULL, /* breakpoint_kind_from_current_state */
   s390_supports_hardware_single_step,
+  NULL, /* get_syscall_trapinfo */
+  s390_get_ipa_tdesc_idx,
 };
 
 void
@@ -803,12 +1453,14 @@ initialize_low_arch (void)
   init_registers_s390_te_linux64 ();
   init_registers_s390_vx_linux64 ();
   init_registers_s390_tevx_linux64 ();
+#ifdef __s390x__
   init_registers_s390x_linux64 ();
   init_registers_s390x_linux64v1 ();
   init_registers_s390x_linux64v2 ();
   init_registers_s390x_te_linux64 ();
   init_registers_s390x_vx_linux64 ();
   init_registers_s390x_tevx_linux64 ();
+#endif
 
   initialize_regsets_info (&s390_regsets_info);
   initialize_regsets_info (&s390_regsets_info_3264);

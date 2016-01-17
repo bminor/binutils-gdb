@@ -1,5 +1,66 @@
 2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	PR 18377
+	* Makefile.in: Add s390 IPA files.
+	* configure.srv: Build IPA for s390.
+	* linux-s390-ipa.c: New file.
+	* linux-s390-low.c: New includes - inttypes.h and linux-s390-tdesc.h.
+	(init_registers_s390_linux32): Move declaration to linux-s390-tdesc.h.
+	(tdesc_s390_linux32): Likewise.
+	(init_registers_s390_linux32v1): Likewise.
+	(tdesc_s390_linux32v1): Likewise.
+	(init_registers_s390_linux32v2): Likewise.
+	(tdesc_s390_linux32v2): Likewise.
+	(init_registers_s390_linux64): Likewise.
+	(tdesc_s390_linux64): Likewise.
+	(init_registers_s390_linux64v1): Likewise.
+	(tdesc_s390_linux64v1): Likewise.
+	(init_registers_s390_linux64v2): Likewise.
+	(tdesc_s390_linux64v2): Likewise.
+	(init_registers_s390_te_linux64): Likewise.
+	(tdesc_s390_te_linux64): Likewise.
+	(init_registers_s390_vx_linux64): Likewise.
+	(tdesc_s390_vx_linux64): Likewise.
+	(init_registers_s390_tevx_linux64): Likewise.
+	(tdesc_s390_tevx_linux64): Likewise.
+	(init_registers_s390x_linux64): Likewise.
+	(tdesc_s390x_linux64): Likewise.
+	(init_registers_s390x_linux64v1): Likewise.
+	(tdesc_s390x_linux64v1): Likewise.
+	(init_registers_s390x_linux64v2): Likewise.
+	(tdesc_s390x_linux64v2): Likewise.
+	(init_registers_s390x_te_linux64): Likewise.
+	(tdesc_s390x_te_linux64): Likewise.
+	(init_registers_s390x_vx_linux64): Likewise.
+	(tdesc_s390x_vx_linux64): Likewise.
+	(init_registers_s390x_tevx_linux64): Likewise.
+	(tdesc_s390x_tevx_linux64): Likewise.
+	(have_hwcap_s390_vx): New static variable.
+	(s390_arch_setup): Fill have_hwcap_s390_vx.
+	(s390_get_thread_area): New function.
+	(s390_ft_entry_gpr_esa): New const.
+	(s390_ft_entry_gpr_zarch): New const.
+	(s390_ft_entry_misc): New const.
+	(s390_ft_entry_fr): New const.
+	(s390_ft_entry_vr): New const.
+	(s390_ft_main_31): New const.
+	(s390_ft_main_64): New const.
+	(s390_ft_exit_fr): New const.
+	(s390_ft_exit_vr): New const.
+	(s390_ft_exit_misc): New const.
+	(s390_ft_exit_gpr_esa): New const.
+	(s390_ft_exit_gpr_zarch): New const.
+	(append_insns): New function.
+	(s390_relocate_instruction): New function.
+	(s390_install_fast_tracepoint_jump_pad): New function.
+	(s390_get_min_fast_tracepoint_insn_len): New function.
+	(s390_get_ipa_tdesc_idx): New function.
+	(struct linux_target_ops): Wire in the above functions.
+	(initialize_low_arch) [!__s390x__]: Don't initialize s390x tdescs.
+	* linux-s390-tdesc.h: New file.
+
+2016-03-29  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* linux-s390-low.c (s390_supports_tracepoints): New function.
 	(struct linux_target_ops): Fill supports_tracepoints hook.
 

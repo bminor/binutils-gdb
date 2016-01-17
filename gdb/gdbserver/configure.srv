@@ -307,6 +307,22 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
+			ipa_obj="linux-s390-ipa.o"
+			ipa_obj="${ipa_obj} s390-linux32-ipa.o"
+			ipa_obj="${ipa_obj} s390-linux32v1-ipa.o"
+			ipa_obj="${ipa_obj} s390-linux32v2-ipa.o"
+			ipa_obj="${ipa_obj} s390-linux64-ipa.o"
+			ipa_obj="${ipa_obj} s390-linux64v1-ipa.o"
+			ipa_obj="${ipa_obj} s390-linux64v2-ipa.o"
+			ipa_obj="${ipa_obj} s390-vx-linux64-ipa.o"
+			ipa_obj="${ipa_obj} s390-te-linux64-ipa.o"
+			ipa_obj="${ipa_obj} s390-tevx-linux64-ipa.o"
+			ipa_obj="${ipa_obj} s390x-linux64-ipa.o"
+			ipa_obj="${ipa_obj} s390x-linux64v1-ipa.o"
+			ipa_obj="${ipa_obj} s390x-linux64v2-ipa.o"
+			ipa_obj="${ipa_obj} s390x-vx-linux64-ipa.o"
+			ipa_obj="${ipa_obj} s390x-te-linux64-ipa.o"
+			ipa_obj="${ipa_obj} s390x-tevx-linux64-ipa.o"
 			;;
   sh*-*-linux*)		srv_regobj=reg-sh.o
 			srv_tgtobj="$srv_linux_obj linux-sh-low.o"
