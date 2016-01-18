@@ -1,3 +1,9 @@
+2016-01-18  Gary Benson  <gbenson@redhat.com>
+
+	* configure.ac (AC_FUNC_FORK): New check.
+	* config.in: Regenerate.
+	* configure: Likewise.
+
 2016-01-14  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch32-low.c (thumb2_breakpoint): Make it static.
