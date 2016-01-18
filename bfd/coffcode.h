@@ -5759,6 +5759,7 @@ coff_bigobj_swap_sym_in (bfd * abfd, void * ext1, void * in1)
     }
 
   in->n_value = H_GET_32 (abfd, ext->e_value);
+  BFD_ASSERT (sizeof (in->n_scnum) >= 4);
   in->n_scnum = H_GET_32 (abfd, ext->e_scnum);
   in->n_type = H_GET_16 (abfd, ext->e_type);
   in->n_sclass = H_GET_8 (abfd, ext->e_sclass);

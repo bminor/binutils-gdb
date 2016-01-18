@@ -483,7 +483,7 @@ struct internal_syment
     char *_n_nptr[2];		/* allows for overlaying	*/
   }     _n;
   bfd_vma n_value;		/* value of symbol		*/
-  short n_scnum;		/* section number		*/
+  int n_scnum;			/* section number		*/
   unsigned short n_flags;	/* copy of flags from filhdr	*/
   unsigned short n_type;	/* type and derived type	*/
   unsigned char n_sclass;	/* storage class		*/
@@ -497,11 +497,11 @@ struct internal_syment
 /* Relocatable symbols have number of the section in which they are defined,
    or one of the following:  */
 
-#define N_UNDEF	((short)0)	/* undefined symbol */
-#define N_ABS	((short)-1)	/* value of symbol is absolute */
-#define N_DEBUG	((short)-2)	/* debugging symbol -- value is meaningless */
-#define N_TV	((short)-3)	/* indicates symbol needs preload transfer vector */
-#define P_TV	((short)-4)	/* indicates symbol needs postload transfer vector*/
+#define N_UNDEF	((int)0)	/* undefined symbol */
+#define N_ABS	((int)-1)	/* value of symbol is absolute */
+#define N_DEBUG	((int)-2)	/* debugging symbol -- value is meaningless */
+#define N_TV	((int)-3)	/* indicates symbol needs preload transfer vector */
+#define P_TV	((int)-4)	/* indicates symbol needs postload transfer vector*/
 
 /* Type of a symbol, in low N bits of the word.  */
 

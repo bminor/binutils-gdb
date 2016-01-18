@@ -119,7 +119,7 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
     memcpy (in->_n._n_name, ext->e.e_name, SYMNMLEN);
 
   in->n_value = H_GET_32 (abfd, ext->e_value);
-  in->n_scnum = H_GET_16 (abfd, ext->e_scnum);
+  in->n_scnum = (short) H_GET_16 (abfd, ext->e_scnum);
 
   if (sizeof (ext->e_type) == 2)
     in->n_type = H_GET_16 (abfd, ext->e_type);
@@ -257,7 +257,7 @@ _bfd_XXi_swap_sym_out (bfd * abfd, void * inp, void * extp)
 	 as the worst that can happen is that some absolute symbols are
 	 needlessly converted into section relative symbols.  */
       && in->n_value > ((1ULL << (sizeof (in->n_value) > 4 ? 32 : 31)) - 1)
-      && in->n_scnum == -1)
+      && in->n_scnum == N_ABS)
     {
       asection * sec;
 

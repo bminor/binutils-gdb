@@ -1,3 +1,14 @@
+2016-01-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19440
+	* coff-rs6000.c (_bfd_xcoff_swap_sym_in): Sign extend external
+	section number into internal section number.
+	* coff64-rs6000.c (_bfd_xcoff64_swap_sym_in): Likewise.
+	* coffswap.h (coff_swap_sym_in): Likewise.
+	* peXXigen.c (_bfd_XXi_swap_sym_in): Likewise.
+	* coffcode.h (_coff_bigobj_swap_sym_in): Make sure that internal
+	section number field is big enough to hold the external value.
+
 2016-01-17  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

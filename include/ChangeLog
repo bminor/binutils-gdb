@@ -1,3 +1,14 @@
+2016-01-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19440
+	* coff/internal.h (internal_syment): Use int to hold section
+	number.
+	(N_UNDEF): Cast to int not short.
+	(N_ABS): Likewise.
+	(N_DEBUG): Likewise.
+	(N_TV): Likewise.
+	(P_TV): Likewise.
+
 2016-01-11  Nick Clifton  <nickc@redhat.com>
 
 	Import this change from GCC mainline:
