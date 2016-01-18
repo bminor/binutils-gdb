@@ -1,3 +1,9 @@
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure.ac: Include <sys/types.h when checking for "r_fs" in
+	"struct reg".
+	* configure: Regenerate.
+
 2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* mips-tdep.c (mips_insn_size): Remove 48-bit microMIPS
