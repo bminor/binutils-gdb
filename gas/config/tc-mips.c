@@ -2089,10 +2089,8 @@ mips_lookup_ase (const char *name)
 }
 
 /* Return the length of a microMIPS instruction in bytes.  If bits of
-   the mask beyond the low 16 are 0, then it is a 16-bit instruction.
-   Otherwise assume a 32-bit instruction; 48-bit instructions (0x1f
-   major opcode) will require further modifications to the opcode
-   table.  */
+   the mask beyond the low 16 are 0, then it is a 16-bit instruction,
+   otherwise it is a 32-bit instruction.  */
 
 static inline unsigned int
 micromips_insn_length (const struct mips_opcode *mo)

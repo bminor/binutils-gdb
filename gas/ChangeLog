@@ -1,3 +1,8 @@
+2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (micromips_insn_length): Remove the mention
+	of 48-bit microMIPS instructions.
+
 2016-01-18  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

@@ -1,5 +1,15 @@
 2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* mips-tdep.c (mips_insn_size): Remove 48-bit microMIPS
+	instruction support.
+	(micromips_next_pc): Likewise.
+	(micromips_scan_prologue): Likewise.
+	(micromips_deal_with_atomic_sequence): Likewise.
+	(micromips_stack_frame_destroyed_p): Likewise.
+	(mips_breakpoint_from_pc): Likewise.
+
+2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* mips-tdep.c (micromips_insn_at_pc_has_delay_slot): Pass
 	unshifted 16-bit microMIPS instruction word to `mips_insn_size'.
 
