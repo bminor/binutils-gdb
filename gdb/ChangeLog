@@ -1,3 +1,8 @@
+2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (micromips_insn_at_pc_has_delay_slot): Pass
+	unshifted 16-bit microMIPS instruction word to `mips_insn_size'.
+
 2016-01-18  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention that GDB now displays the ID and name of the
