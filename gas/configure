@@ -12862,8 +12862,9 @@ fi
 done
 test -n "$LEX" || LEX=":"
 
-if test "x$LEX" != "x:"; then
-  cat >conftest.l <<_ACEOF
+case "$LEX" in
+  :|*"missing "*) ;;
+  *) cat >conftest.l <<_ACEOF
 %%
 a { ECHO; }
 b { REJECT; }
@@ -12974,8 +12975,8 @@ $as_echo "#define YYTEXT_POINTER 1" >>confdefs.h
 
 fi
 rm -f conftest.l $LEX_OUTPUT_ROOT.c
-
-fi
+ ;;
+esac
 if test "$LEX" = :; then
   LEX=${am_missing_run}flex
 fi

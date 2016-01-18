@@ -1,3 +1,7 @@
+2016-01-18  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2015-12-17  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* gas/config/tc-arm.c (aeabi_set_public_attributes): Adjust

@@ -1,3 +1,7 @@
+2016-01-18  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2016-01-11  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	PR ld/18199
