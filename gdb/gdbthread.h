@@ -630,6 +630,11 @@ extern void thread_cancel_execution_command (struct thread_info *thr);
    executing).  */
 extern void validate_registers_access (void);
 
+/* Returns whether to show which thread hit the breakpoint, received a
+   signal, etc. and ended up causing a user-visible stop.  This is
+   true iff we ever detected multiple threads.  */
+extern int show_thread_that_caused_stop (void);
+
 extern struct thread_info *thread_list;
 
 #endif /* GDBTHREAD_H */

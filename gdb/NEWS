@@ -49,6 +49,13 @@
 * The new convenience variable $_inferior holds the number of the
   current inferior.
 
+* GDB now displays the ID and name of the thread that hit a breakpoint
+  or received a signal, if your program is multi-threaded.  For
+  example:
+
+   Thread 3 "bar" hit Breakpoint 1 at 0x40087a: file program.c, line 20.
+   Thread 1 "main" received signal SIGINT, Interrupt.
+
 * Record btrace now supports non-stop mode.
 
 * Support for tracepoints on aarch64-linux was added in GDBserver.

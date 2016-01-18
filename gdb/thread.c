@@ -1685,6 +1685,14 @@ make_cleanup_restore_current_thread (void)
 /* See gdbthread.h.  */
 
 int
+show_thread_that_caused_stop (void)
+{
+  return highest_thread_num > 1;
+}
+
+/* See gdbthread.h.  */
+
+int
 show_inferior_qualified_tids (void)
 {
   return (inferior_list->next != NULL || inferior_list->num != 1);

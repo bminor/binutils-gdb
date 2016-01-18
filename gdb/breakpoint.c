@@ -4790,6 +4790,37 @@ watchpoint_value_print (struct value *val, struct ui_file *stream)
     }
 }
 
+/* Print the "Thread ID hit" part of "Thread ID hit Breakpoint N" if
+   debugging multiple threads.  */
+
+void
+maybe_print_thread_hit_breakpoint (struct ui_out *uiout)
+{
+  if (ui_out_is_mi_like_p (uiout))
+    return;
+
+  ui_out_text (uiout, "\n");
+
+  if (show_thread_that_caused_stop ())
+    {
+      const char *name;
+      struct thread_info *thr = inferior_thread ();
+
+      ui_out_text (uiout, "Thread ");
+      ui_out_field_fmt (uiout, "thread-id", "%s", print_thread_id (thr));
+
+      name = thr->name != NULL ? thr->name : target_thread_name (thr);
+      if (name != NULL)
+	{
+	  ui_out_text (uiout, " \"");
+	  ui_out_field_fmt (uiout, "name", "%s", name);
+	  ui_out_text (uiout, "\"");
+	}
+
+      ui_out_text (uiout, " hit ");
+    }
+}
+
 /* Generic routine for printing messages indicating why we
    stopped.  The behavior of this function depends on the value
    'print_it' in the bpstat structure.  Under some circumstances we
@@ -8093,10 +8124,11 @@ print_it_catch_fork (bpstat bs)
   struct fork_catchpoint *c = (struct fork_catchpoint *) bs->breakpoint_at;
 
   annotate_catchpoint (b->number);
+  maybe_print_thread_hit_breakpoint (uiout);
   if (b->disposition == disp_del)
-    ui_out_text (uiout, "\nTemporary catchpoint ");
+    ui_out_text (uiout, "Temporary catchpoint ");
   else
-    ui_out_text (uiout, "\nCatchpoint ");
+    ui_out_text (uiout, "Catchpoint ");
   if (ui_out_is_mi_like_p (uiout))
     {
       ui_out_field_string (uiout, "reason",
@@ -8210,10 +8242,11 @@ print_it_catch_vfork (bpstat bs)
   struct fork_catchpoint *c = (struct fork_catchpoint *) b;
 
   annotate_catchpoint (b->number);
+  maybe_print_thread_hit_breakpoint (uiout);
   if (b->disposition == disp_del)
-    ui_out_text (uiout, "\nTemporary catchpoint ");
+    ui_out_text (uiout, "Temporary catchpoint ");
   else
-    ui_out_text (uiout, "\nCatchpoint ");
+    ui_out_text (uiout, "Catchpoint ");
   if (ui_out_is_mi_like_p (uiout))
     {
       ui_out_field_string (uiout, "reason",
@@ -8406,10 +8439,11 @@ print_it_catch_solib (bpstat bs)
   struct ui_out *uiout = current_uiout;
 
   annotate_catchpoint (b->number);
+  maybe_print_thread_hit_breakpoint (uiout);
   if (b->disposition == disp_del)
-    ui_out_text (uiout, "\nTemporary catchpoint ");
+    ui_out_text (uiout, "Temporary catchpoint ");
   else
-    ui_out_text (uiout, "\nCatchpoint ");
+    ui_out_text (uiout, "Catchpoint ");
   ui_out_field_int (uiout, "bkptno", b->number);
   ui_out_text (uiout, "\n");
   if (ui_out_is_mi_like_p (uiout))
@@ -8675,10 +8709,11 @@ print_it_catch_exec (bpstat bs)
   struct exec_catchpoint *c = (struct exec_catchpoint *) b;
 
   annotate_catchpoint (b->number);
+  maybe_print_thread_hit_breakpoint (uiout);
   if (b->disposition == disp_del)
-    ui_out_text (uiout, "\nTemporary catchpoint ");
+    ui_out_text (uiout, "Temporary catchpoint ");
   else
-    ui_out_text (uiout, "\nCatchpoint ");
+    ui_out_text (uiout, "Catchpoint ");
   if (ui_out_is_mi_like_p (uiout))
     {
       ui_out_field_string (uiout, "reason",
@@ -10207,10 +10242,13 @@ print_it_ranged_breakpoint (bpstat bs)
   gdb_assert (bl && bl->next == NULL);
 
   annotate_breakpoint (b->number);
+
+  maybe_print_thread_hit_breakpoint (uiout);
+
   if (b->disposition == disp_del)
-    ui_out_text (uiout, "\nTemporary ranged breakpoint ");
+    ui_out_text (uiout, "Temporary ranged breakpoint ");
   else
-    ui_out_text (uiout, "\nRanged breakpoint ");
+    ui_out_text (uiout, "Ranged breakpoint ");
   if (ui_out_is_mi_like_p (uiout))
     {
       ui_out_field_string (uiout, "reason",
@@ -10719,11 +10757,13 @@ print_it_watchpoint (bpstat bs)
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
+  annotate_watchpoint (b->number);
+  maybe_print_thread_hit_breakpoint (uiout);
+
   switch (b->type)
     {
     case bp_watchpoint:
     case bp_hardware_watchpoint:
-      annotate_watchpoint (b->number);
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string
 	  (uiout, "reason",
@@ -10758,7 +10798,6 @@ print_it_watchpoint (bpstat bs)
     case bp_access_watchpoint:
       if (bs->old_val != NULL)
 	{
-	  annotate_watchpoint (b->number);
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string
 	      (uiout, "reason",
@@ -10935,10 +10974,12 @@ print_it_masked_watchpoint (bpstat bs)
   /* Masked watchpoints have only one location.  */
   gdb_assert (b->loc && b->loc->next == NULL);
 
+  annotate_watchpoint (b->number);
+  maybe_print_thread_hit_breakpoint (uiout);
+
   switch (b->type)
     {
     case bp_hardware_watchpoint:
-      annotate_watchpoint (b->number);
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string
 	  (uiout, "reason",
@@ -13120,10 +13161,12 @@ bkpt_print_it (bpstat bs)
 				   bl->address,
 				   b->number, 1);
   annotate_breakpoint (b->number);
+  maybe_print_thread_hit_breakpoint (uiout);
+
   if (bp_temp)
-    ui_out_text (uiout, "\nTemporary breakpoint ");
+    ui_out_text (uiout, "Temporary breakpoint ");
   else
-    ui_out_text (uiout, "\nBreakpoint ");
+    ui_out_text (uiout, "Breakpoint ");
   if (ui_out_is_mi_like_p (uiout))
     {
       ui_out_field_string (uiout, "reason",

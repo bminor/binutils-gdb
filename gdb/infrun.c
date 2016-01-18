@@ -7896,21 +7896,35 @@ print_exited_reason (struct ui_out *uiout, int exitstatus)
 void
 print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
 {
+  struct thread_info *thr = inferior_thread ();
+
   annotate_signal ();
 
-  if (siggnal == GDB_SIGNAL_0 && !ui_out_is_mi_like_p (uiout))
+  if (ui_out_is_mi_like_p (uiout))
+    ;
+  else if (show_thread_that_caused_stop ())
     {
-      struct thread_info *t = inferior_thread ();
+      const char *name;
 
-      ui_out_text (uiout, "\n[");
-      ui_out_field_string (uiout, "thread-name",
-			   target_pid_to_str (t->ptid));
-      ui_out_field_fmt (uiout, "thread-id", "] #%s", print_thread_id (t));
-      ui_out_text (uiout, " stopped");
+      ui_out_text (uiout, "\nThread ");
+      ui_out_field_fmt (uiout, "thread-id", "%s", print_thread_id (thr));
+
+      name = thr->name != NULL ? thr->name : target_thread_name (thr);
+      if (name != NULL)
+	{
+	  ui_out_text (uiout, " \"");
+	  ui_out_field_fmt (uiout, "name", "%s", name);
+	  ui_out_text (uiout, "\"");
+	}
     }
   else
+    ui_out_text (uiout, "\nProgram");
+
+  if (siggnal == GDB_SIGNAL_0 && !ui_out_is_mi_like_p (uiout))
+    ui_out_text (uiout, " stopped");
+  else
     {
-      ui_out_text (uiout, "\nProgram received signal ");
+      ui_out_text (uiout, " received signal ");
       annotate_signal_name ();
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string

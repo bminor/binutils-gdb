@@ -1622,4 +1622,8 @@ extern void breakpoint_free_objfile (struct objfile *objfile);
 
 extern char *ep_parse_optional_if_clause (char **arg);
 
+/* Print the "Thread ID hit" part of "Thread ID hit Breakpoint N" to
+   UIOUT iff debugging multiple threads.  */
+extern void maybe_print_thread_hit_breakpoint (struct ui_out *uiout);
+
 #endif /* !defined (BREAKPOINT_H) */

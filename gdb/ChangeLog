@@ -1,3 +1,22 @@
+2016-01-18  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that GDB now displays the ID and name of the
+	thread that hit a breakpoint or received a signal.
+	* break-catch-sig.c (signal_catchpoint_print_it): Use
+	maybe_print_thread_hit_breakpoint.
+	* break-catch-syscall.c (print_it_catch_syscall): Likewise.
+	* break-catch-throw.c (print_it_exception_catchpoint): Likewise.
+	* breakpoint.c (maybe_print_thread_hit_breakpoint): New function.
+	(print_it_catch_fork, print_it_catch_vfork, print_it_catch_solib)
+	(print_it_catch_exec, print_it_ranged_breakpoint)
+	(print_it_watchpoint, print_it_masked_watchpoint, bkpt_print_it):
+	Use maybe_print_thread_hit_breakpoint.
+	* breakpoint.h (maybe_print_thread_hit_breakpoint): Declare.
+	* gdbthread.h (show_thread_that_caused_stop): Declare.
+	* infrun.c (print_signal_received_reason): Print which thread
+	received signal.
+	* thread.c (show_thread_that_caused_stop): New function.
+
 2016-01-18  Gary Benson  <gbenson@redhat.com>
 
 	* nat/linux-namespaces.c (do_fork): New function.

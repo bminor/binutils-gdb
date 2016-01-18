@@ -116,7 +116,7 @@ for {set i 0} {$i < $attempts} {incr i} {
 
 	set msg "caught interrupt"
 	gdb_test_multiple "" $msg {
-	    -re "Program received signal SIGINT.*$gdb_prompt $" {
+	    -re "Thread .* received signal SIGINT.*$gdb_prompt $" {
 		pass $msg
 	    }
 	}

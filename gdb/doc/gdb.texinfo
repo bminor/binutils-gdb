@@ -2964,6 +2964,20 @@ useful in writing breakpoint conditional expressions, command scripts,
 and so forth.  @xref{Convenience Vars,, Convenience Variables}, for
 general information on convenience variables.
 
+If @value{GDBN} detects the program is multi-threaded, it augments the
+usual message about stopping at a breakpoint with the ID and name of
+the thread that hit the breakpoint.
+
+@smallexample
+Thread 2 "client" hit Breakpoint 1, send_message () at client.c:68
+@end smallexample
+
+Likewise when the program receives a signal:
+
+@smallexample
+Thread 1 "main" received signal SIGINT, Interrupt.
+@end smallexample
+
 @table @code
 @kindex info threads
 @item info threads @r{[}@var{thread-id-list}@r{]}

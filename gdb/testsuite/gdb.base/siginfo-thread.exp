@@ -41,7 +41,7 @@ if { ![runto_main] } then {
 }
 
 # Run to the signal.
-gdb_test "continue" ".*Program received signal SIGSEGV.*" "continue to signal"
+gdb_test "continue" "Thread .* received signal SIGSEGV.*" "continue to signal"
 
 # Try to generate a core file, for a later test.
 set gcorefile [standard_output_file $testfile.gcore]

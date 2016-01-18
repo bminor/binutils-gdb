@@ -75,7 +75,7 @@ proc test {type symbol} {
 		"reakpoint \[0-9\]+, marker.*" "breakpoint after the second fork"
 	    gdb_test "continue" \
 		"atchpoint \[0-9\]+: var.*Old value = 2.*New value = 3.*mark_exit \\(\\);" "watchpoint after the second fork"
-	    gdb_test "continue" "Continuing\\..*\r\nBreakpoint \[0-9\]+, mark_exit .*" "finish"
+	    gdb_test "continue" "Continuing\\..*\r\n(Thread .* hit )?Breakpoint \[0-9\]+, mark_exit .*" "finish"
 	}
 
 	# threads
@@ -129,7 +129,7 @@ proc test {type symbol} {
 		"atchpoint \[0-9\]+: var.*Old value = 5.*New value = 6.*after-fork2-A.*" "watchpoint A after the second fork"
 	    gdb_test "continue" \
 		"atchpoint \[0-9\]+: var.*Old value = 6.*New value = 7.*after-fork2-B.*" "watchpoint B after the second fork"
-	    gdb_test "continue" "Continuing\\..*\r\nBreakpoint \[0-9\]+, mark_exit .*" "finish"
+	    gdb_test "continue" "Continuing\\..*\r\nThread .* hit Breakpoint \[0-9\]+, mark_exit .*" "finish"
 	}
     }
 }

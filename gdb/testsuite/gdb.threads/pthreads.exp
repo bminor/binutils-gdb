@@ -202,7 +202,7 @@ proc check_control_c {} {
     send_gdb "\003"
     set description "Stopped with a ^C"
     gdb_expect {
-	-re "Program received signal SIGINT.*$gdb_prompt $" {
+	-re "Thread .* received signal SIGINT.*$gdb_prompt $" {
 	    pass $description
 	}
 	-re "Quit.*$gdb_prompt $" {

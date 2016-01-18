@@ -264,6 +264,7 @@ print_it_exception_catchpoint (bpstat bs)
   enum exception_event_kind kind = classify_exception_breakpoint (b);
 
   annotate_catchpoint (b->number);
+  maybe_print_thread_hit_breakpoint (uiout);
 
   bp_temp = b->disposition == disp_del;
   ui_out_text (uiout, 

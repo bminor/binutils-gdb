@@ -31,7 +31,7 @@ gdb_test "rwatch watchee"
 
 gdb_breakpoint [gdb_get_line_number "dummy = 2"]
 
-gdb_test "continue" "Continuing.\r\nHardware read watchpoint \[0-9\]+: watchee\r\n\r\nValue = 0\r\n.*"
+gdb_test "continue" "Continuing.\r\n\r\nHardware read watchpoint \[0-9\]+: watchee\r\n\r\nValue = 0\r\n.*"
 
 # Here should be no repeated notification of the read watchpoint.
 gdb_test "continue" \

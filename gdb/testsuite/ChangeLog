@@ -1,3 +1,24 @@
+2016-01-18  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async-shell.exp: Adjust expected output.
+	* gdb.base/dprintf-non-stop.exp: Adjust expected output.
+	* gdb.base/siginfo-thread.exp: Adjust expected output.
+	* gdb.base/watchpoint-hw-hit-once.exp: Adjust expected output.
+	* gdb.java/jnpe.exp: Adjust expected output.
+	* gdb.threads/clone-new-thread-event.exp: Adjust expected output.
+	* gdb.threads/continue-pending-status.exp: Adjust expected output.
+	* gdb.threads/leader-exit.exp: Adjust expected output.
+	* gdb.threads/manythreads.exp: Adjust expected output.
+	* gdb.threads/pthreads.exp: Adjust expected output.
+	* gdb.threads/schedlock.exp: Adjust expected output.
+	* gdb.threads/siginfo-threads.exp: Adjust expected output.
+	* gdb.threads/signal-command-multiple-signals-pending.exp: Adjust
+	expected output.
+	* gdb.threads/signal-delivered-right-thread.exp: Adjust expected
+	output.
+	* gdb.threads/sigthread.exp: Adjust expected output.
+	* gdb.threads/watchpoint-fork.exp: Adjust expected output.
+
 2016-01-18  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.guile/scm-section-script.c: Replace @progbits with
