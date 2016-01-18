@@ -392,6 +392,9 @@ void initialize_regsets_info (struct regsets_info *regsets_info);
 
 void initialize_low_arch (void);
 
+void linux_set_pc_32bit (struct regcache *regcache, CORE_ADDR pc);
+CORE_ADDR linux_get_pc_32bit (struct regcache *regcache);
+
 /* From thread-db.c  */
 int thread_db_init (void);
 void thread_db_detach (struct process_info *);

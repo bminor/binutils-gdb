@@ -58,21 +58,6 @@ sh_cannot_fetch_register (int regno)
   return 0;
 }
 
-static CORE_ADDR
-sh_get_pc (struct regcache *regcache)
-{
-  unsigned long pc;
-  collect_register_by_name (regcache, "pc", &pc);
-  return pc;
-}
-
-static void
-sh_set_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  unsigned long newpc = pc;
-  supply_register_by_name (regcache, "pc", &newpc);
-}
-
 /* Correct in either endianness, obviously.  */
 static const unsigned short sh_breakpoint = 0xc3c3;
 #define sh_breakpoint_len 2
@@ -163,8 +148,8 @@ struct linux_target_ops the_low_target = {
   sh_cannot_fetch_register,
   sh_cannot_store_register,
   NULL, /* fetch_register */
-  sh_get_pc,
-  sh_set_pc,
+  linux_get_pc_32bit,
+  linux_set_pc_32bit,
   NULL, /* breakpoint_kind_from_pc */
   sh_sw_breakpoint_from_kind,
   NULL,

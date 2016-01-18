@@ -46,6 +46,7 @@
 #include "filestuff.h"
 #include "tracepoint.h"
 #include "hostio.h"
+#include <inttypes.h>
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
    then ELFMAG0 will have been defined.  If it didn't get included by
@@ -7255,6 +7256,31 @@ linux_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return (*the_low_target.breakpoint_kind_from_current_state) (pcptr);
   else
     return linux_breakpoint_kind_from_pc (pcptr);
+}
+
+/* Default implementation of linux_target_ops method "set_pc" for
+   32-bit pc register which is literally named "pc".  */
+
+void
+linux_set_pc_32bit (struct regcache *regcache, CORE_ADDR pc)
+{
+  uint32_t newpc = pc;
+
+  supply_register_by_name (regcache, "pc", &newpc);
+}
+
+/* Default implementation of linux_target_ops method "get_pc" for
+   32-bit pc register which is literally named "pc".  */
+
+CORE_ADDR
+linux_get_pc_32bit (struct regcache *regcache)
+{
+  uint32_t pc;
+
+  collect_register_by_name (regcache, "pc", &pc);
+  if (debug_threads)
+    debug_printf ("stop pc is 0x%" PRIx32 "\n", pc);
+  return pc;
 }
 
 static struct target_ops linux_target_ops = {

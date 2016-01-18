@@ -245,25 +245,6 @@ arm_store_vfpregset (struct regcache *regcache, const void *buf)
   arm_store_vfpregset_num (regcache, buf, num);
 }
 
-extern int debug_threads;
-
-static CORE_ADDR
-arm_get_pc (struct regcache *regcache)
-{
-  unsigned long pc;
-  collect_register_by_name (regcache, "pc", &pc);
-  if (debug_threads)
-    debug_printf ("stop pc is %08lx\n", pc);
-  return pc;
-}
-
-static void
-arm_set_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  unsigned long newpc = pc;
-  supply_register_by_name (regcache, "pc", &newpc);
-}
-
 /* Wrapper of arm_is_thumb_mode for get_next_pcs.  */
 static int
 get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
@@ -1011,8 +992,8 @@ struct linux_target_ops the_low_target = {
   arm_cannot_fetch_register,
   arm_cannot_store_register,
   NULL, /* fetch_register */
-  arm_get_pc,
-  arm_set_pc,
+  linux_get_pc_32bit,
+  linux_set_pc_32bit,
   arm_breakpoint_kind_from_pc,
   arm_sw_breakpoint_from_kind,
   arm_gdbserver_get_next_pcs,

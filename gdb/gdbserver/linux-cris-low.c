@@ -59,25 +59,6 @@ cris_cannot_fetch_register (int regno)
   return (regno >= cris_num_regs);
 }
 
-extern int debug_threads;
-
-static CORE_ADDR
-cris_get_pc (struct regcache *regcache)
-{
-  unsigned long pc;
-  collect_register_by_name (regcache, "pc", &pc);
-  if (debug_threads)
-    debug_printf ("stop pc is %08lx\n", pc);
-  return pc;
-}
-
-static void
-cris_set_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  unsigned long newpc = pc;
-  supply_register_by_name (regcache, "pc", &newpc);
-}
-
 static const unsigned short cris_breakpoint = 0xe938;
 #define cris_breakpoint_len 2
 
@@ -135,8 +116,8 @@ struct linux_target_ops the_low_target = {
   cris_cannot_fetch_register,
   cris_cannot_store_register,
   NULL, /* fetch_register */
-  cris_get_pc,
-  cris_set_pc,
+  linux_get_pc_32bit,
+  linux_set_pc_32bit,
   NULL, /* breakpoint_kind_from_pc */
   cris_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */
