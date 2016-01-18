@@ -1,5 +1,14 @@
 2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (btrace_compute_ftrace_bts, ftrace_add_pt): Allow
+	leading gaps.
+	* record-btrace.c (record_btrace_single_step_forward)
+	(record_btrace_single_step_backward): Jump back to last
+	instruction if step ends at a gap.
+	(record_btrace_goto_begin): Skip gaps.
+
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (ftrace_add_pt): Fix gap indication.  Add warning for non-
 	contiguous trace and overflow.  Rephrase trace decode warning and print
 	instruction number.  Remove dead gaps warning.

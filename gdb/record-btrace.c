@@ -2300,7 +2300,7 @@ record_btrace_replay_at_breakpoint (struct thread_info *tp)
 static struct target_waitstatus
 record_btrace_single_step_forward (struct thread_info *tp)
 {
-  struct btrace_insn_iterator *replay, end;
+  struct btrace_insn_iterator *replay, end, start;
   struct btrace_thread_info *btinfo;
 
   btinfo = &tp->btrace;
@@ -2314,7 +2314,9 @@ record_btrace_single_step_forward (struct thread_info *tp)
   if (record_btrace_replay_at_breakpoint (tp))
     return btrace_step_stopped ();
 
-  /* Skip gaps during replay.  */
+  /* Skip gaps during replay.  If we end up at a gap (at the end of the trace),
+     jump back to the instruction at which we started.  */
+  start = *replay;
   do
     {
       unsigned int steps;
@@ -2323,7 +2325,10 @@ record_btrace_single_step_forward (struct thread_info *tp)
 	 of the execution history.  */
       steps = btrace_insn_next (replay, 1);
       if (steps == 0)
-	return btrace_step_no_history ();
+	{
+	  *replay = start;
+	  return btrace_step_no_history ();
+	}
     }
   while (btrace_insn_get (replay) == NULL);
 
@@ -2344,7 +2349,7 @@ record_btrace_single_step_forward (struct thread_info *tp)
 static struct target_waitstatus
 record_btrace_single_step_backward (struct thread_info *tp)
 {
-  struct btrace_insn_iterator *replay;
+  struct btrace_insn_iterator *replay, start;
   struct btrace_thread_info *btinfo;
 
   btinfo = &tp->btrace;
@@ -2355,14 +2360,19 @@ record_btrace_single_step_backward (struct thread_info *tp)
     replay = record_btrace_start_replaying (tp);
 
   /* If we can't step any further, we reached the end of the history.
-     Skip gaps during replay.  */
+     Skip gaps during replay.  If we end up at a gap (at the beginning of
+     the trace), jump back to the instruction at which we started.  */
+  start = *replay;
   do
     {
       unsigned int steps;
 
       steps = btrace_insn_prev (replay, 1);
       if (steps == 0)
-	return btrace_step_no_history ();
+	{
+	  *replay = start;
+	  return btrace_step_no_history ();
+	}
     }
   while (btrace_insn_get (replay) == NULL);
 
@@ -2772,6 +2782,17 @@ record_btrace_goto_begin (struct target_ops *self)
   tp = require_btrace_thread ();
 
   btrace_insn_begin (&begin, &tp->btrace);
+
+  /* Skip gaps at the beginning of the trace.  */
+  while (btrace_insn_get (&begin) == NULL)
+    {
+      unsigned int steps;
+
+      steps = btrace_insn_next (&begin, 1);
+      if (steps == 0)
+	error (_("No trace."));
+    }
+
   record_btrace_set_replay (tp, &begin);
 }
 

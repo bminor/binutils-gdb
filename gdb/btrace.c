@@ -626,17 +626,17 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	  /* We should hit the end of the block.  Warn if we went too far.  */
 	  if (block->end < pc)
 	    {
-	      /* Indicate the gap in the trace - unless we're at the
-		 beginning.  */
-	      if (begin != NULL)
-		{
-		  end = ftrace_new_gap (end, BDE_BTS_OVERFLOW);
-		  ngaps += 1;
+	      /* Indicate the gap in the trace.  */
+	      end = ftrace_new_gap (end, BDE_BTS_OVERFLOW);
+	      if (begin == NULL)
+		begin = end;
 
-		  warning (_("Recorded trace may be corrupted at instruction "
-			     "%u (pc = %s)."), end->insn_offset - 1,
-			   core_addr_to_string_nz (pc));
-		}
+	      ngaps += 1;
+
+	      warning (_("Recorded trace may be corrupted at instruction "
+			 "%u (pc = %s)."), end->insn_offset - 1,
+		       core_addr_to_string_nz (pc));
+
 	      break;
 	    }
 
@@ -796,19 +796,22 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
 			     "= 0x%" PRIx64 ", pc = 0x%" PRIx64 ")."),
 			   end->insn_offset - 1, offset, insn.ip);
 		}
+	    }
 
-	      /* Indicate trace overflows.  */
-	      if (insn.resynced)
-		{
-		  *pend = end = ftrace_new_gap (end, BDE_PT_OVERFLOW);
-		  *ngaps += 1;
+	  /* Indicate trace overflows.  */
+	  if (insn.resynced)
+	    {
+	      *pend = end = ftrace_new_gap (end, BDE_PT_OVERFLOW);
+	      if (begin == NULL)
+		*pbegin = begin = end;
 
-		  pt_insn_get_offset (decoder, &offset);
+	      *ngaps += 1;
 
-		  warning (_("Overflow at instruction %u (offset = 0x%" PRIx64
-			     ", pc = 0x%" PRIx64 ")."), end->insn_offset - 1,
-			   offset, insn.ip);
-		}
+	      pt_insn_get_offset (decoder, &offset);
+
+	      warning (_("Overflow at instruction %u (offset = 0x%" PRIx64
+			 ", pc = 0x%" PRIx64 ")."), end->insn_offset - 1,
+		       offset, insn.ip);
 	    }
 
 	  upd = ftrace_update_function (end, insn.ip);
@@ -834,13 +837,10 @@ ftrace_add_pt (struct pt_insn_decoder *decoder,
       if (errcode == -pte_eos)
 	break;
 
-      /* If the gap is at the very beginning, we ignore it - we will have
-	 less trace, but we won't have any holes in the trace.  */
-      if (begin == NULL)
-	continue;
-
       /* Indicate the gap in the trace.  */
       *pend = end = ftrace_new_gap (end, errcode);
+      if (begin == NULL)
+	*pbegin = begin = end;
       *ngaps += 1;
 
       pt_insn_get_offset (decoder, &offset);
