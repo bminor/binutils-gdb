@@ -1,3 +1,9 @@
+2016-01-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.guile/scm-section-script.c: Replace @progbits with
+	%progbits.
+	* gdb.python/py-section-script.c: Likewise.
+
 2016-01-15  Pedro Alves  <palves@redhat.com>
 
 	* gdb.multi/tids.exp: Test star wildcard ranges.
