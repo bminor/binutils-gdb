@@ -39,6 +39,9 @@
 :compute:::int:IMM_SHIFT_2BIT:IMMEDIATE:(IMMEDIATE << 2)
 
 :function:::address_word:delayslot_micromips:address_word target, address_word nia, int delayslot_instruction_size
+*micromips32:
+*micromips64:
+*micromipsdsp:
 {
   instruction_word delay_insn;
   sim_events_slip (SD, 1);
@@ -52,12 +55,16 @@
 }
 
 :function:::address_word:process_isa_mode:address_word target
+*micromips32:
+*micromips64:
 {
   SD->isa_mode = target & 0x1;
   return (target & (-(1 << 1)));
 }
 
 :function:::address_word:do_micromips_jalr:int rt, int rs, address_word nia, int delayslot_instruction_size
+*micromips32:
+*micromips64:
 {
   GPR[rt] = (nia + delayslot_instruction_size) | ISA_MODE_MICROMIPS;
   return (process_isa_mode (SD_,
@@ -65,6 +72,8 @@
 }
 
 :function:::address_word:do_micromips_jal:address_word target, address_word nia, int delayslot_instruction_size
+*micromips32:
+*micromips64:
 {
   RA = (nia + delayslot_instruction_size) | ISA_MODE_MICROMIPS;
   return delayslot_micromips (SD_, target, nia, delayslot_instruction_size);
@@ -72,6 +81,8 @@
 
 
 :function:::unsigned32:compute_movep_src_reg:int reg
+*micromips32:
+*micromips64:
 {
   switch(reg)
     {
@@ -88,6 +99,8 @@
 }
 
 :function:::unsigned32:compute_andi16_imm:int encoded_imm
+*micromips32:
+*micromips64:
 {
   switch (encoded_imm)
     {
@@ -112,6 +125,8 @@
 }
 
 :function:::FP_formats:convert_fmt_micromips:int fmt
+*micromips32:
+*micromips64:
 {
   switch (fmt)
     {
@@ -123,6 +138,8 @@
 }
 
 :function:::FP_formats:convert_fmt_micromips_cvt_d:int fmt
+*micromips32:
+*micromips64:
 {
   switch (fmt)
     {
@@ -135,6 +152,8 @@
 
 
 :function:::FP_formats:convert_fmt_micromips_cvt_s:int fmt
+*micromips32:
+*micromips64:
 {
   switch (fmt)
     {
@@ -2252,6 +2271,8 @@
 
 
 :%s::::FMT_MICROMIPS:int fmt
+*micromips32:
+*micromips64:
 {
   switch (fmt)
     {
@@ -2264,6 +2285,8 @@
 
 
 :%s::::FMT_MICROMIPS_CVT_D:int fmt
+*micromips32:
+*micromips64:
 {
   switch (fmt)
     {
@@ -2276,6 +2299,8 @@
 
 
 :%s::::FMT_MICROMIPS_CVT_S:int fmt
+*micromips32:
+*micromips64:
 {
   switch (fmt)
     {
