@@ -269,6 +269,7 @@ struct gdbarch
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix;
   gdbarch_core_pid_to_str_ftype *core_pid_to_str;
+  gdbarch_core_thread_name_ftype *core_thread_name;
   const char * gcore_bfd_target;
   int vtable_function_descriptors;
   int vbit_in_delta;
@@ -612,6 +613,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of core_xfer_shared_libraries, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries_aix, has predicate.  */
   /* Skip verify of core_pid_to_str, has predicate.  */
+  /* Skip verify of core_thread_name, has predicate.  */
   /* Skip verify of gcore_bfd_target, has predicate.  */
   /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
   /* Skip verify of vbit_in_delta, invalid_p == 0 */
@@ -823,6 +825,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: core_read_description = <%s>\n",
                       host_address_to_string (gdbarch->core_read_description));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_core_thread_name_p() = %d\n",
+                      gdbarch_core_thread_name_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: core_thread_name = <%s>\n",
+                      host_address_to_string (gdbarch->core_thread_name));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_core_xfer_shared_libraries_p() = %d\n",
                       gdbarch_core_xfer_shared_libraries_p (gdbarch));
@@ -3551,6 +3559,30 @@ set_gdbarch_core_pid_to_str (struct gdbarch *gdbarch,
                              gdbarch_core_pid_to_str_ftype core_pid_to_str)
 {
   gdbarch->core_pid_to_str = core_pid_to_str;
+}
+
+int
+gdbarch_core_thread_name_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->core_thread_name != NULL;
+}
+
+const char *
+gdbarch_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->core_thread_name != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_core_thread_name called\n");
+  return gdbarch->core_thread_name (gdbarch, thr);
+}
+
+void
+set_gdbarch_core_thread_name (struct gdbarch *gdbarch,
+                              gdbarch_core_thread_name_ftype core_thread_name)
+{
+  gdbarch->core_thread_name = core_thread_name;
 }
 
 int

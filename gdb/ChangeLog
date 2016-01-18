@@ -1,3 +1,12 @@
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* corelow.c (core_thread_name): New function.
+	(init_core_ops): Use "core_thread_name" for the "to_thread_name"
+	target op.
+	* gdbarch.sh (core_thread_name): New gdbarch callback.
+	* gdbarch.h: Re-generate.
+	* gdbarch.c: Re-generate.
+
 2016-01-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* python/lib/gdb/printing.py (_EnumInstance.to_string): Explicitly
