@@ -193,7 +193,7 @@ DO_RUNTEST = \
 @GMAKE_TRUE@	$(MAKE) check TESTS="gdb.$*/*.exp"
 
 check-single:
-	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none)
+	$(DO_RUNTEST) --status $(RUNTESTFLAGS) $(expanded_tests_or_none)
 
 check-parallel:
 	-rm -rf cache outputs temp
@@ -229,7 +229,7 @@ do-check-parallel: $(TEST_TARGETS)
 
 @GMAKE_TRUE@check/%.exp:
 @GMAKE_TRUE@	-mkdir -p outputs/$*
-@GMAKE_TRUE@	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp $(RUNTESTFLAGS)
+@GMAKE_TRUE@	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp --status $(RUNTESTFLAGS)
 
 check/no-matching-tests-found:
 	@echo ""
