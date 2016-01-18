@@ -7,6 +7,11 @@
 	* testsuite/ld-plugin/plugin.exp: Skip plugin tests if the linker
 	is not configured to support plugins.
 
+	* testsuite/ld-scripts/rgn-at11.s: New file - based on rgn-at10.s
+	but with 16 byte section alignment.
+	* testsuite/ld-scripts/rgn-at11.d: Use new source file.  Reenable
+	test for MIPS targets.
+
 2016-01-17  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
