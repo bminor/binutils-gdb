@@ -68,23 +68,6 @@ tile_cannot_store_register (int regno)
     return 1;
 }
 
-static CORE_ADDR
-tile_get_pc (struct regcache *regcache)
-{
-  unsigned long pc;
-
-  collect_register_by_name (regcache, "pc", &pc);
-  return pc;
-}
-
-static void
-tile_set_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  unsigned long newpc = pc;
-
-  supply_register_by_name (regcache, "pc", &newpc);
-}
-
 static uint64_t tile_breakpoint = 0x400b3cae70166000ULL;
 #define tile_breakpoint_len 8
 
@@ -197,8 +180,8 @@ struct linux_target_ops the_low_target =
   tile_cannot_fetch_register,
   tile_cannot_store_register,
   NULL,
-  tile_get_pc,
-  tile_set_pc,
+  linux_get_pc_64bit,
+  linux_set_pc_64bit,
   NULL, /* breakpoint_kind_from_pc */
   tile_sw_breakpoint_from_kind,
   NULL,

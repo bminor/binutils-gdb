@@ -7283,6 +7283,32 @@ linux_get_pc_32bit (struct regcache *regcache)
   return pc;
 }
 
+/* Default implementation of linux_target_ops method "set_pc" for
+   64-bit pc register which is literally named "pc".  */
+
+void
+linux_set_pc_64bit (struct regcache *regcache, CORE_ADDR pc)
+{
+  uint64_t newpc = pc;
+
+  supply_register_by_name (regcache, "pc", &newpc);
+}
+
+/* Default implementation of linux_target_ops method "get_pc" for
+   64-bit pc register which is literally named "pc".  */
+
+CORE_ADDR
+linux_get_pc_64bit (struct regcache *regcache)
+{
+  uint64_t pc;
+
+  collect_register_by_name (regcache, "pc", &pc);
+  if (debug_threads)
+    debug_printf ("stop pc is 0x%" PRIx64 "\n", pc);
+  return pc;
+}
+
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_post_create_inferior,
