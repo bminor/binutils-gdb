@@ -1,3 +1,8 @@
+2016-01-18  Nick Clifton  <nickc@redhat.com>
+
+	* ld-plugin/plugin.exp: Skip plugin tests if the linker is not
+	configured to support plugins.
+
 2016-01-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/19421
