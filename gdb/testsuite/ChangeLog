@@ -1,3 +1,7 @@
+2016-01-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (gdb_test): Remove unused global references.
+
 2016-01-18  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/async-shell.exp: Adjust expected output.

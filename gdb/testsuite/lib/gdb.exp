@@ -976,9 +976,7 @@ proc gdb_test_multiple { command message user_code } {
 #   -1 if there was an internal error.
 #  
 proc gdb_test { args } {
-    global verbose
     global gdb_prompt
-    global GDB
     upvar timeout timeout
 
     if [llength $args]>2 then {
