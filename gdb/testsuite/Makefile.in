@@ -198,11 +198,13 @@ check-single:
 check-parallel:
 	-rm -rf cache outputs temp
 	$(MAKE) -k do-check-parallel; \
+	result=$$?; \
 	$(SHELL) $(srcdir)/dg-extract-results.sh \
 	  `find outputs -name gdb.sum -print` > gdb.sum; \
 	$(SHELL) $(srcdir)/dg-extract-results.sh -L \
-	  `find outputs -name gdb.log -print` > gdb.log
-	@sed -n '/=== gdb Summary ===/,$$ p' gdb.sum
+	  `find outputs -name gdb.log -print` > gdb.log; \
+	sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
+	exit $$result
 
 # Turn a list of .exp files into "check/" targets.  Only examine .exp
 # files appearing in a gdb.* directory -- we don't want to pick up
