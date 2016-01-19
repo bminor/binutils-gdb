@@ -1,5 +1,9 @@
 2016-01-19  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* Makefile.in (DO_RUNTEST): Add --status and update usages.
+
+2016-01-19  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* Makefile.in (check-single): Pass --status to runtest.
 	(check/%.exp): Likewise.
 

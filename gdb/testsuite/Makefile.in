@@ -169,7 +169,7 @@ DO_RUNTEST = \
 	if [ -f $${rootme}/../../expect/expect ] ; then  \
 	  TCL_LIBRARY=$${srcdir}/../../tcl/library ; \
 	  export TCL_LIBRARY ; fi ; \
-	$(RUNTEST)
+	$(RUNTEST) --status
 
 # TESTS exists for the user to pass on the command line to easily
 # say "Only run these tests."  With check-single it's not necessary, but
@@ -193,7 +193,7 @@ DO_RUNTEST = \
 @GMAKE_TRUE@	$(MAKE) check TESTS="gdb.$*/*.exp"
 
 check-single:
-	$(DO_RUNTEST) --status $(RUNTESTFLAGS) $(expanded_tests_or_none)
+	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none)
 
 check-parallel:
 	-rm -rf cache outputs temp
@@ -229,7 +229,7 @@ do-check-parallel: $(TEST_TARGETS)
 
 @GMAKE_TRUE@check/%.exp:
 @GMAKE_TRUE@	-mkdir -p outputs/$*
-@GMAKE_TRUE@	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp --status $(RUNTESTFLAGS)
+@GMAKE_TRUE@	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp $(RUNTESTFLAGS)
 
 check/no-matching-tests-found:
 	@echo ""
@@ -239,7 +239,7 @@ check/no-matching-tests-found:
 # Utility rule invoked by step 2 of the build-perf rule.
 @GMAKE_TRUE@workers/%.worker:
 @GMAKE_TRUE@	mkdir -p gdb.perf/outputs/$*
-@GMAKE_TRUE@	$(DO_RUNTEST) --status --outdir=gdb.perf/outputs/$* lib/build-piece.exp WORKER=$* GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=build-pieces
+@GMAKE_TRUE@	$(DO_RUNTEST) --outdir=gdb.perf/outputs/$* lib/build-piece.exp WORKER=$* GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=build-pieces
 
 # Utility rule to build tests that support it in parallel.
 # The build is broken into 3 steps distinguished by GDB_PERFTEST_SUBMODE:
@@ -259,11 +259,11 @@ check/no-matching-tests-found:
 @GMAKE_TRUE@	rm -rf gdb.perf/workers
 @GMAKE_TRUE@	mkdir -p gdb.perf/workers
 @GMAKE_TRUE@	@: Step 1: Generate the build .worker files.
-@GMAKE_TRUE@	$(DO_RUNTEST) --status --directory=gdb.perf --outdir gdb.perf/workers GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=gen-workers
+@GMAKE_TRUE@	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf/workers GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=gen-workers
 @GMAKE_TRUE@	@: Step 2: Compile the pieces.  Here is the build parallelism.
 @GMAKE_TRUE@	$(MAKE) $$(cd gdb.perf && echo workers/*/*.worker)
 @GMAKE_TRUE@	@: Step 3: Do the final link.
-@GMAKE_TRUE@	$(DO_RUNTEST) --status --directory=gdb.perf --outdir gdb.perf GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=final
+@GMAKE_TRUE@	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=final
 
 # The default is to both compile and run the tests.
 GDB_PERFTEST_MODE = both
