@@ -1006,7 +1006,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   sals_end.nelts = 0;
 
   b->type = bp_breakpoint;
-  update_breakpoint_locations (b, sals, sals_end);
+  update_breakpoint_locations (b, current_program_space, sals, sals_end);
 }
 
 /* A helper function for elf_symfile_read that reads the minimal

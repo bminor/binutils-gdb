@@ -1,3 +1,66 @@
+2016-01-19  Pedro Alves  <palves@redhat.com>
+
+	* ax-gdb.c (agent_command_1): Adjust call to decode_line_full.
+	* break-catch-throw.c (re_set_exception_catchpoint): Pass the
+	current program space down to linespec decoding and breakpoint
+	location updating.
+	* breakpoint.c (parse_breakpoint_sals): Adjust calls to
+	decode_line_full.
+	(until_break_command): Adjust calls to decode_line_1.
+	(base_breakpoint_decode_location, bkpt_decode_location): Add
+	'search_pspace' parameter.  Pass it along.
+	(bkpt_probe_create_sals_from_location): Adjust calls to
+	parse_probes.
+	(tracepoint_decode_location, tracepoint_probe_decode_location)
+	(strace_marker_decode_location): Add 'search_pspace' parameter.
+	Pass it along.
+	(all_locations_are_pending): Rewrite to take a breakpoint and
+	program space as arguments instead.
+	(hoist_existing_locations): New function.
+	(update_breakpoint_locations): Add 'filter_pspace' parameter.  Use
+	hoist_existing_locations instead of always removing all locations,
+	and adjust to all_locations_are_pending change.
+	(location_to_sals): Add 'search_pspace' parameter.  Pass it along.
+	Don't disable the breakpoint if there are other locations in
+	another program space.
+	(breakpoint_re_set_default): Adjust to pass down the current
+	program space as filter program space.
+	(decode_location_default): Add 'search_pspace' parameter and pass
+	it along.
+	(prepare_re_set_context): Don't switch program space here.
+	(breakpoint_re_set): Use save_current_space_and_thread instead of
+	save_current_program_space.
+	* breakpoint.h (struct breakpoint_ops) <decode_location>: Add
+	'search_pspace' parameter.
+	(update_breakpoint_locations): Add 'filter_pspace' parameter.
+	* cli/cli-cmds.c (edit_command, list_command): Adjust calls to
+	decode_line_1.
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Pass the current
+	program space as filter program space.
+	* linespec.c (struct linespec_state) <search_pspace>: New field.
+	(create_sals_line_offset, convert_explicit_location_to_sals)
+	(parse_linespec): Pass the search program space down.
+	(linespec_state_constructor): Add 'search_pspace' parameter.
+	Store it.
+	(linespec_parser_new): Add 'search_pspace' parameter and pass it
+	along.
+	(linespec_lex_to_end): Adjust.
+	(decode_line_full, decode_line_1): Add 'search_pspace' parameter
+	and pass it along.
+	(decode_line_with_last_displayed): Adjust.
+	(collect_symtabs_from_filename, symtabs_from_filename): New
+	'search_pspace' parameter.  Use it.
+	(find_function_symbols): Pass the search program space down.
+	* linespec.h (decode_line_1, decode_line_full): Add
+	'search_pspace' parameter.
+	* probe.c (parse_probes_in_pspace): New function, factored out
+	from ...
+	(parse_probes): ... this.  Add 'search_pspace' parameter and use
+	it.
+	* probe.h (parse_probes): Add pspace' parameter.
+	* python/python.c (gdbpy_decode_line): Adjust.
+	* tracepoint.c (scope_info): Adjust.
+
 2016-01-19  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/ftrace.exp: Fix expected message on continue.

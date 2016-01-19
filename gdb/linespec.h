@@ -97,6 +97,7 @@ extern struct cleanup *
 
 extern struct symtabs_and_lines
 	decode_line_1 (const struct event_location *location, int flags,
+		       struct program_space *search_pspace,
 		       struct symtab *default_symtab, int default_line);
 
 /* Parse LOCATION and return results.  This is the "full"
@@ -105,6 +106,9 @@ extern struct symtabs_and_lines
 
    For FLAGS, see decode_line_flags.  DECODE_LINE_LIST_MODE is not
    valid for this function.
+
+   If SEARCH_PSPACE is not NULL, symbol search is restricted to just
+   that program space.
 
    DEFAULT_SYMTAB and DEFAULT_LINE describe the default location.
    DEFAULT_SYMTAB can be NULL, in which case the current symtab and
@@ -136,6 +140,7 @@ extern struct symtabs_and_lines
    filtered out.  */
 
 extern void decode_line_full (const struct event_location *location, int flags,
+			      struct program_space *search_pspace,
 			      struct symtab *default_symtab, int default_line,
 			      struct linespec_result *canonical,
 			      const char *select_mode,

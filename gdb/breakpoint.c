@@ -126,6 +126,7 @@ static void create_breakpoints_sal_default (struct gdbarch *,
 
 static void decode_location_default (struct breakpoint *b,
 				     const struct event_location *location,
+				     struct program_space *search_pspace,
 				     struct symtabs_and_lines *sals);
 
 static void clear_command (char *, int);
@@ -9545,7 +9546,7 @@ parse_breakpoint_sals (const struct event_location *location,
 	      && strchr ("+-", address[0]) != NULL
 	      && address[1] != '['))
 	{
-	  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE,
+	  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, NULL,
 			    get_last_displayed_symtab (),
 			    get_last_displayed_line (),
 			    canonical, NULL, NULL);
@@ -9553,7 +9554,7 @@ parse_breakpoint_sals (const struct event_location *location,
 	}
     }
 
-  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE,
+  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, NULL,
 		    cursal.symtab, cursal.line, canonical, NULL, NULL);
 }
 
@@ -10447,7 +10448,7 @@ break_range_command (char *arg, int from_tty)
      where +14 means 14 lines from the start location.  */
   end_location = string_to_event_location (&arg, current_language);
   make_cleanup_delete_event_location (end_location);
-  decode_line_full (end_location, DECODE_LINE_FUNFIRSTLINE,
+  decode_line_full (end_location, DECODE_LINE_FUNFIRSTLINE, NULL,
 		    sal_start.symtab, sal_start.line,
 		    &canonical_end, NULL, NULL);
 
@@ -11712,12 +11713,12 @@ until_break_command (char *arg, int from_tty, int anywhere)
   cleanup = make_cleanup_delete_event_location (location);
 
   if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE,
+    sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE, NULL,
 			  get_last_displayed_symtab (),
 			  get_last_displayed_line ());
   else
     sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE,
-			  (struct symtab *) NULL, 0);
+			  NULL, (struct symtab *) NULL, 0);
 
   if (sals.nelts != 1)
     error (_("Couldn't get information on specified line."));
@@ -13018,6 +13019,7 @@ base_breakpoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 base_breakpoint_decode_location (struct breakpoint *b,
 				 const struct event_location *location,
+				 struct program_space *search_pspace,
 				 struct symtabs_and_lines *sals)
 {
   internal_error_pure_virtual_called ();
@@ -13267,9 +13269,10 @@ bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 bkpt_decode_location (struct breakpoint *b,
 		      const struct event_location *location,
+		      struct program_space *search_pspace,
 		      struct symtabs_and_lines *sals)
 {
-  decode_location_default (b, location, sals);
+  decode_location_default (b, location, search_pspace, sals);
 }
 
 /* Virtual table for internal breakpoints.  */
@@ -13453,7 +13456,7 @@ bkpt_probe_create_sals_from_location (const struct event_location *location,
 {
   struct linespec_sals lsal;
 
-  lsal.sals = parse_probes (location, canonical);
+  lsal.sals = parse_probes (location, NULL, canonical);
   lsal.canonical = xstrdup (event_location_to_string (canonical->location));
   VEC_safe_push (linespec_sals, canonical->sals, &lsal);
 }
@@ -13461,9 +13464,10 @@ bkpt_probe_create_sals_from_location (const struct event_location *location,
 static void
 bkpt_probe_decode_location (struct breakpoint *b,
 			    const struct event_location *location,
+			    struct program_space *search_pspace,
 			    struct symtabs_and_lines *sals)
 {
-  *sals = parse_probes (location, NULL);
+  *sals = parse_probes (location, search_pspace, NULL);
   if (!sals->sals)
     error (_("probe not found"));
 }
@@ -13585,9 +13589,10 @@ tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 tracepoint_decode_location (struct breakpoint *b,
 			    const struct event_location *location,
+			    struct program_space *search_pspace,
 			    struct symtabs_and_lines *sals)
 {
-  decode_location_default (b, location, sals);
+  decode_location_default (b, location, search_pspace, sals);
 }
 
 struct breakpoint_ops tracepoint_breakpoint_ops;
@@ -13608,10 +13613,11 @@ tracepoint_probe_create_sals_from_location
 static void
 tracepoint_probe_decode_location (struct breakpoint *b,
 				  const struct event_location *location,
+				  struct program_space *search_pspace,
 				  struct symtabs_and_lines *sals)
 {
   /* We use the same method for breakpoint on probes.  */
-  bkpt_probe_decode_location (b, location, sals);
+  bkpt_probe_decode_location (b, location, search_pspace, sals);
 }
 
 static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
@@ -13776,6 +13782,7 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 strace_marker_decode_location (struct breakpoint *b,
 			       const struct event_location *location,
+			       struct program_space *search_pspace,
 			       struct symtabs_and_lines *sals)
 {
   struct tracepoint *tp = (struct tracepoint *) b;
@@ -13993,11 +14000,19 @@ delete_command (char *arg, int from_tty)
     map_breakpoint_numbers (arg, do_map_delete_breakpoint, NULL);
 }
 
+/* Return true if all locations of B bound to PSPACE are pending.  If
+   PSPACE is NULL, all locations of all program spaces are
+   considered.  */
+
 static int
-all_locations_are_pending (struct bp_location *loc)
+all_locations_are_pending (struct breakpoint *b, struct program_space *pspace)
 {
-  for (; loc; loc = loc->next)
-    if (!loc->shlib_disabled
+  struct bp_location *loc;
+
+  for (loc = b->loc; loc != NULL; loc = loc->next)
+    if ((pspace == NULL
+	 || loc->pspace == pspace)
+	&& !loc->shlib_disabled
 	&& !loc->pspace->executing_startup)
       return 0;
   return 1;
@@ -14202,17 +14217,58 @@ locations_are_equal (struct bp_location *a, struct bp_location *b)
   return 1;
 }
 
-/* Create new breakpoint locations for B (a hardware or software breakpoint)
-   based on SALS and SALS_END.  If SALS_END.NELTS is not zero, then B is
-   a ranged breakpoint.  */
+/* Split all locations of B that are bound to PSPACE out of B's
+   location list to a separate list and return that list's head.  If
+   PSPACE is NULL, hoist out all locations of B.  */
+
+static struct bp_location *
+hoist_existing_locations (struct breakpoint *b, struct program_space *pspace)
+{
+  struct bp_location head;
+  struct bp_location *i = b->loc;
+  struct bp_location **i_link = &b->loc;
+  struct bp_location *hoisted = &head;
+
+  if (pspace == NULL)
+    {
+      i = b->loc;
+      b->loc = NULL;
+      return i;
+    }
+
+  head.next = NULL;
+
+  while (i != NULL)
+    {
+      if (i->pspace == pspace)
+	{
+	  *i_link = i->next;
+	  i->next = NULL;
+	  hoisted->next = i;
+	  hoisted = i;
+	}
+      else
+	i_link = &i->next;
+      i = *i_link;
+    }
+
+  return head.next;
+}
+
+/* Create new breakpoint locations for B (a hardware or software
+   breakpoint) based on SALS and SALS_END.  If SALS_END.NELTS is not
+   zero, then B is a ranged breakpoint.  Only recreates locations for
+   FILTER_PSPACE.  Locations of other program spaces are left
+   untouched.  */
 
 void
 update_breakpoint_locations (struct breakpoint *b,
+			     struct program_space *filter_pspace,
 			     struct symtabs_and_lines sals,
 			     struct symtabs_and_lines sals_end)
 {
   int i;
-  struct bp_location *existing_locations = b->loc;
+  struct bp_location *existing_locations;
 
   if (sals_end.nelts != 0 && (sals.nelts != 1 || sals_end.nelts != 1))
     {
@@ -14232,10 +14288,10 @@ update_breakpoint_locations (struct breakpoint *b,
      We'd like to retain the location, so that when the library is
      loaded again, we don't loose the enabled/disabled status of the
      individual locations.  */
-  if (all_locations_are_pending (existing_locations) && sals.nelts == 0)
+  if (all_locations_are_pending (b, filter_pspace) && sals.nelts == 0)
     return;
 
-  b->loc = NULL;
+  existing_locations = hoist_existing_locations (b, filter_pspace);
 
   for (i = 0; i < sals.nelts; ++i)
     {
@@ -14326,7 +14382,7 @@ update_breakpoint_locations (struct breakpoint *b,
 
 static struct symtabs_and_lines
 location_to_sals (struct breakpoint *b, struct event_location *location,
-		  int *found)
+		  struct program_space *search_pspace, int *found)
 {
   struct symtabs_and_lines sals = {0};
   struct gdb_exception exception = exception_none;
@@ -14335,7 +14391,7 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 
   TRY
     {
-      b->ops->decode_location (b, location, &sals);
+      b->ops->decode_location (b, location, search_pspace, &sals);
     }
   CATCH (e, RETURN_MASK_ERROR)
     {
@@ -14351,7 +14407,10 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 	 breakpoint being disabled, and don't want to see more
 	 errors.  */
       if (e.error == NOT_FOUND_ERROR
-	  && (b->condition_not_parsed 
+	  && (b->condition_not_parsed
+	      || (b->loc != NULL
+		  && search_pspace != NULL
+		  && b->loc->pspace != search_pspace)
 	      || (b->loc && b->loc->shlib_disabled)
 	      || (b->loc && b->loc->pspace->executing_startup)
 	      || b->enable_state == bp_disabled))
@@ -14420,8 +14479,9 @@ breakpoint_re_set_default (struct breakpoint *b)
   struct symtabs_and_lines sals, sals_end;
   struct symtabs_and_lines expanded = {0};
   struct symtabs_and_lines expanded_end = {0};
+  struct program_space *filter_pspace = current_program_space;
 
-  sals = location_to_sals (b, b->location, &found);
+  sals = location_to_sals (b, b->location, filter_pspace, &found);
   if (found)
     {
       make_cleanup (xfree, sals.sals);
@@ -14430,7 +14490,8 @@ breakpoint_re_set_default (struct breakpoint *b)
 
   if (b->location_range_end != NULL)
     {
-      sals_end = location_to_sals (b, b->location_range_end, &found);
+      sals_end = location_to_sals (b, b->location_range_end,
+				   filter_pspace, &found);
       if (found)
 	{
 	  make_cleanup (xfree, sals_end.sals);
@@ -14438,7 +14499,7 @@ breakpoint_re_set_default (struct breakpoint *b)
 	}
     }
 
-  update_breakpoint_locations (b, expanded, expanded_end);
+  update_breakpoint_locations (b, filter_pspace, expanded, expanded_end);
 }
 
 /* Default method for creating SALs from an address string.  It basically
@@ -14482,12 +14543,13 @@ create_breakpoints_sal_default (struct gdbarch *gdbarch,
 static void
 decode_location_default (struct breakpoint *b,
 			 const struct event_location *location,
+			 struct program_space *search_pspace,
 			 struct symtabs_and_lines *sals)
 {
   struct linespec_result canonical;
 
   init_linespec_result (&canonical);
-  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE,
+  decode_line_full (location, DECODE_LINE_FUNFIRSTLINE, search_pspace,
 		    (struct symtab *) NULL, 0,
 		    &canonical, multiple_symbols_all,
 		    b->filter);
@@ -14514,15 +14576,10 @@ decode_location_default (struct breakpoint *b,
 static struct cleanup *
 prepare_re_set_context (struct breakpoint *b)
 {
-  struct cleanup *cleanups;
-
   input_radix = b->input_radix;
-  cleanups = save_current_space_and_thread ();
-  if (b->pspace != NULL)
-    switch_to_program_space_and_thread (b->pspace);
   set_language (b->language);
 
-  return cleanups;
+  return make_cleanup (null_cleanup, NULL);
 }
 
 /* Reset a breakpoint given it's struct breakpoint * BINT.
@@ -14542,7 +14599,9 @@ breakpoint_re_set_one (void *bint)
   return 0;
 }
 
-/* Re-set all breakpoints after symbols have been re-loaded.  */
+/* Re-set breakpoint locations for the current program space.
+   Locations bound to other program spaces are left untouched.  */
+
 void
 breakpoint_re_set (void)
 {
@@ -14553,7 +14612,7 @@ breakpoint_re_set (void)
 
   save_language = current_language->la_language;
   save_input_radix = input_radix;
-  old_chain = save_current_program_space ();
+  old_chain = save_current_space_and_thread ();
 
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
   {
