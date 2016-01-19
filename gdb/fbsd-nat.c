@@ -43,18 +43,20 @@
 static char *
 fbsd_pid_to_exec_file (struct target_ops *self, int pid)
 {
-  ssize_t len = PATH_MAX;
+  ssize_t len;
   static char buf[PATH_MAX];
   char name[PATH_MAX];
 
 #ifdef KERN_PROC_PATHNAME
+  size_t buflen;
   int mib[4];
 
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC;
   mib[2] = KERN_PROC_PATHNAME;
   mib[3] = pid;
-  if (sysctl (mib, 4, buf, &len, NULL, 0) == 0)
+  buflen = sizeof buf;
+  if (sysctl (mib, 4, buf, &buflen, NULL, 0) == 0)
     return buf;
 #endif
 

@@ -1,5 +1,10 @@
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Use new "buflen" instead of
+	"len" with sysctl.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c (find_stop_signal): Remove.
 	(struct fbsd_collect_regset_section_cb) <lwp>: New field.
 	<stop_signal>: New field.
