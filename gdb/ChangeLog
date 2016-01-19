@@ -1,5 +1,17 @@
 2016-04-19  John Baldwin  <jhb@FreeBSD.org>
 
+	* amd64bsd-nat.c (amd64bsd_fetch_inferior_registers): Change xstateregs
+	to void *.
+	(amd64bsd_store_inferior_registers): Likewise.
+	* fbsd-nat.c (resume_one_thread_cb): Explicitly cast data to ptid_t *.
+	(resume_all_threads_cb): Likewise.
+	* i386bsd-nat.c (i386bsd_supply_gregset): Cast gregs to char *.
+	(i386bsd_collect_gregset): Likewise.
+	(i386bsd_fetch_inferior_registers): Change xstateregs to void *.
+	(i386bsd_store_inferior_registers): Likewise.
+
+2016-04-19  John Baldwin  <jhb@FreeBSD.org>
+
 	* main.c (setup_alternate_signal_stack): Cast to char *.
 
 2016-04-19  Doug Evans  <xdje42@gmail.com>
