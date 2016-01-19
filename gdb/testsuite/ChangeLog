@@ -1,3 +1,9 @@
+2016-01-19  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/ftrace.exp: Fix expected message on continue.
+	* gdb.trace/pending.exp: Fix expected message on continue.
+	* gdb.trace/trace-break.exp: Fix expected message on continue.
+
 2016-01-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* lib/gdb.exp (gdb_test): Remove unused global references.
