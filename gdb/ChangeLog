@@ -1,3 +1,8 @@
+2016-01-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/lib/gdb/printing.py (_EnumInstance.to_string): Explicitly
+	convert gdb.Value to integer type using int().
+
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure.ac: Include <sys/types.h when checking for "r_fs" in
