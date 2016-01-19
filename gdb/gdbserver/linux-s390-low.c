@@ -609,6 +609,22 @@ s390_breakpoint_at (CORE_ADDR pc)
   return memcmp (c, s390_breakpoint, s390_breakpoint_len) == 0;
 }
 
+/* Breakpoint/Watchpoint support.  */
+
+/* The "supports_z_point_type" linux_target_ops method.  */
+
+static int
+s390_supports_z_point_type (char z_type)
+{
+  switch (z_type)
+    {
+    case Z_PACKET_SW_BP:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
 /* Support for hardware single step.  */
 
 static int
@@ -687,7 +703,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   s390_breakpoint_len,
   s390_breakpoint_at,
-  NULL,  /* supports_z_point_type */
+  s390_supports_z_point_type,
   NULL,
   NULL,
   NULL,
