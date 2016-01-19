@@ -2776,16 +2776,36 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case EF_ARC_CPU_ARCV2HS:
 	      strcat (buf, ", ARC HS");
 	      break;
+	    case EF_ARC_CPU_GENERIC:
+	      strcat (buf, ", ARC generic");
+	      break;
+	    case E_ARC_MACH_ARC600:
+	      strcat (buf, ", ARC600");
+	      break;
+	    case E_ARC_MACH_ARC601:
+	      strcat (buf, ", ARC601");
+	      break;
+	    case E_ARC_MACH_ARC700:
+	      strcat (buf, ", ARC700");
+	      break;
 	    default:
-	      strcat (buf, ", unrecognized flag for ARCv2");
+	      strcat (buf, ", unrecognized cpu flag for ARCv2");
 	      break;
 	    }
 	  switch (e_flags & EF_ARC_OSABI_MSK)
 	    {
-	      /* Only upstream 3.9+ kernels will support ARCv2
-		 ISA.  */
+	    case E_ARC_OSABI_ORIG:
+	      strcat (buf, ", (ABI:legacy)");
+	      break;
+	    case E_ARC_OSABI_V2:
+	      strcat (buf, ", (ABI:v2)");
+	      break;
+	      /* Only upstream 3.9+ kernels will support ARCv2 ISA.  */
 	    case E_ARC_OSABI_V3:
 	      strcat (buf, ", v3 no-legacy-syscalls ABI");
+	      break;
+	    default:
+	      strcat (buf, ", unrecognised ARC OSABI flag");
 	      break;
 	    }
 	  break;

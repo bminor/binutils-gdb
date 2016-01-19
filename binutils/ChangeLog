@@ -1,3 +1,9 @@
+2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
+	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
+
+	* readelf.c (get_machine_flags): Add support for newer ARC ELF
+	header flags.
+
 2016-01-18  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

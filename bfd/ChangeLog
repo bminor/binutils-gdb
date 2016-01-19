@@ -1,3 +1,42 @@
+2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
+	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
+
+	* arc-plt.def: New file.
+	* arc-plt.h: Likewise.
+	* elf32-arc.c (elf_arc_abs_plt0_entry, elf_arc_abs_pltn_entry,
+		       elf_arcV2_abs_plt0_entry, elf_arcV2_abs_pltn_entry,
+		       elf_arc_pic_plt0_entry, elf_arc_pic_pltn_entry,
+		       elf_arcV2_pic_plt0_entry, elf_arcV2_pic_pltn_entry): Remove.
+	(name_for_global_symbol): Added.
+	(ADD_RELA): Helper to create dynamic relocs.
+	(new_got_entry_to_list): Create a new got entry in linked list.
+	(symbol_has_entry_of_type): Search for specific type of entry in
+	list.
+	(is_reloc_for_GOT): return FALSE for any TLS related relocs.
+	(is_reloc_for_TLS, arc_elf_set_private_flags)
+	(arc_elf_print_private_bfd_data, arc_elf_copy_private_bfd_data)
+	(arc_elf_merge_private_bfd_data): New functions.
+	(debug_arc_reloc): Cleaned debug info printing.
+	(PDATA reloc): Changed not to perform address alignment.
+	(reverse_me): Added. Fix for ARC_32 relocs.
+	(arc_do_relocation): Return bfd_reloc_of when no relocation should
+	occur.
+	(arc_get_local_got_ents): Renamed from arc_get_local_got_offsets.
+	Changed function to access an array of list of GOT entries instead
+	of just an array of offsets.
+	(elf_arc_relocate_section): Added support for PIC and TLS related relocations.
+	(elf_arc_check_relocs): Likewise.
+	(elf_arc_adjust_dynamic_symbol, elf_arc_finish_dynamic_symbol,
+	(elf_arc_finish_dynamic_sections): Likewise
+	(arc_create_dynamic_sections): Modified conditions to create
+	dynamic sections.
+	(ADD_SYMBOL_REF_SEC_AND_RELOC): New macro.
+	(plt_do_relocs_for_symbol, relocate_plt_for_symbol)
+	(relocate_plt_for_entry): Changed to support new way to define PLT
+	related code.
+	(add_symbol_to_plt): Likewise.
+	(arc_elf_link_hash_table_create): New function.
+
 2016-01-18  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/19440

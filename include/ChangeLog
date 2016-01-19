@@ -1,3 +1,14 @@
+2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
+	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
+
+	* elf/arc-reloc.def (ARC_32, ARC_GOTPC, ARC_TLS_GD_GOT)
+	(ARC_TLS_IE_GOT, ARC_TLS_DTPOFF, ARC_TLS_DTPOFF_S9, ARC_TLS_LE_S9)
+	(ARC_TLS_LE_32): Fixed formula.
+	(ARC_TLS_GD_LD): Use new special function.
+	* opcode/arc-func.h: Changed all the replacement
+	functions to clear the patching bits before doing an or it with the value
+	argument.
+
 2016-01-18  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/19440
