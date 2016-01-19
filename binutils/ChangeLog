@@ -1,5 +1,9 @@
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
+	* readelf.c (get_freebsd_elfcore_note_type): Remove unused variable.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
 	* readelf.c (get_freebsd_elfcore_note_type): New
 	(process_note): Add support for FreeBSD core notes.
 

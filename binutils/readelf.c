@@ -15413,8 +15413,6 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
 static const char *
 get_freebsd_elfcore_note_type (unsigned e_type)
 {
-  static char buff[64];
-
   switch (e_type)
     {
     case NT_FREEBSD_THRMISC:
