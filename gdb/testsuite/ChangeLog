@@ -1,3 +1,13 @@
+2016-01-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (check-single): Pass --status to runtest.
+	(check/%.exp): Likewise.
+
+2016-01-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (check-parallel): Propagate return code from make
+	do-check-parallel.
+
 2016-01-19  Pedro Alves  <palves@redhat.com>
 
 	* ax-gdb.c (agent_command_1): Adjust call to decode_line_full.
