@@ -387,16 +387,12 @@ ftrace_new_return (struct btrace_function *prev,
 	  /* There is no call in PREV's back trace.  We assume that the
 	     branch trace did not include it.  */
 
-	  /* Let's find the topmost call function - this skips tail calls.  */
+	  /* Let's find the topmost function and add a new caller for it.
+	     This should handle a series of initial tail calls.  */
 	  while (prev->up != NULL)
 	    prev = prev->up;
 
-	  /* We maintain levels for a series of returns for which we have
-	     not seen the calls.
-	     We start at the preceding function's level in case this has
-	     already been a return for which we have not seen the call.
-	     We start at level 0 otherwise, to handle tail calls correctly.  */
-	  bfun->level = std::min (0, prev->level) - 1;
+	  bfun->level = prev->level - 1;
 
 	  /* Fix up the call stack for PREV.  */
 	  ftrace_fixup_caller (prev, bfun, BFUN_UP_LINKS_TO_RET);
@@ -406,8 +402,16 @@ ftrace_new_return (struct btrace_function *prev,
       else
 	{
 	  /* There is a call in PREV's back trace to which we should have
-	     returned.  Let's remain at this level.  */
-	  bfun->level = prev->level;
+	     returned but didn't.  Let's start a new, separate back trace
+	     from PREV's level.  */
+	  bfun->level = prev->level - 1;
+
+	  /* We fix up the back trace for PREV but leave other function segments
+	     on the same level as they are.
+	     This should handle things like schedule () correctly where we're
+	     switching contexts.  */
+	  prev->up = bfun;
+	  prev->flags = BFUN_UP_LINKS_TO_RET;
 
 	  ftrace_debug (bfun, "new return - unknown caller");
 	}

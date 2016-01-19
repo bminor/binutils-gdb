@@ -1,5 +1,10 @@
 2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (ftrace_new_return): Start from the previous function's
+	level if we can't find a matching call for a return.
+
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (ftrace_update_function): Update tail call heuristic.
 
 2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
