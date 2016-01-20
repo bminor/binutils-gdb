@@ -1,6 +1,6 @@
 2016-01-20  Joel Brobecker  <brobecker@adacore.com>
 
-	* printcmd.c (print_scalar_formatted): move binary operator from
+	* printcmd.c (print_scalar_formatted): Move binary operator from
 	end of line to beginning of next line.  Adjust formatting
 	accordingly.
 
