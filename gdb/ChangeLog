@@ -1,3 +1,9 @@
+2016-01-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* printcmd.c (print_scalar_formatted): move binary operator from
+	end of line to beginning of next line.  Adjust formatting
+	accordingly.
+
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_pid_to_exec_file): Use new "buflen" instead of
