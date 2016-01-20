@@ -1,5 +1,9 @@
 2016-01-20  Nick Clifton  <nickc@redhat.com>
 
+	PR 19499
+	* doc/as.texinfo (Errors): Correct documentation describing the
+	interaction of .file and .line with warning and error messages.
+
 	PR 19458
 	* testsuite/gas/arm/armv8_2-a.d: Skip for COFF based targets.
 	* testsuite/gas/arm/archv8m-main.d: Likewise.
