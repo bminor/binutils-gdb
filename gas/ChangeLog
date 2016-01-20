@@ -1,5 +1,15 @@
 2016-01-20  Nick Clifton  <nickc@redhat.com>
 
+	PR 19456
+	* testsuite/gas/arm/weakdef-1.d: Skip for VxWorks.
+	* testsuite/gas/arm/blx-bl-convert.d
+	* testsuite/gas/arm/plt-1.d: Likewise.
+	* testsuite/gas/arm/reloc-bad.d: Likewise.
+	* testsuite/gas/arm/thumb-w-good.d: Likewise.
+	* testsuite/gas/arm/thumb2_pool.d: Likewise.
+	* testsuite/gas/arm/ldconst.d: Adjust so that it works with VxWorks
+	* testsuite/gas/arm/tls_vxworks.d: Update expected output.
+
 	PR 19499
 	* doc/as.texinfo (Errors): Correct documentation describing the
 	interaction of .file and .line with warning and error messages.
