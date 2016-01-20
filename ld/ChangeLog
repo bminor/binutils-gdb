@@ -1,3 +1,11 @@
+2016-01-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 19457
+	* testsuite/ld-scripts/script.exp (extract_symbol_test): Stop test
+	early for PE based targets.
+	* testsuite/ld-scripts/align.t: Use 0x1000 as VMA alignment.
+	* testsuite/ld-pe/tlssec32.d: Allow for relocatable output.
+
 2016-01-20  Mickael Guene  <mickael.guene@st.com>
 
 	* testsuite/ld-arm/thumb1-noread-not-present-mixing-two-section.s:

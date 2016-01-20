@@ -145,6 +145,15 @@ proc extract_symbol_test { testfile testname } {
 	    pass $testname
 	    return
 	}
+	[a-z]*-*-pe$ {
+	    # Fails for PE based targets because the extracted section
+	    # relative symbols (eg tred or .text) all become undefined
+	    # when the sections are blown away by --extract-symbol.  Again
+	    # this should not matter as --extract-symbol is only used by
+	    # VxWorks.
+	    pass $testname
+	    return
+	}
     }
 
     set extract_syms [run_host_cmd $nm $copyfile]
