@@ -1,3 +1,9 @@
+2016-01-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu_vector.exp: Re-establish handling for should_kfail
+	when GDB can not set the vector return value.  Add more comments
+	for clarification.
+
 2016-01-20  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* gdb.trace/tspeed.exp:  Use shlib instead of libs in gdb_compile
