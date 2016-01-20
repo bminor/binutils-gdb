@@ -1,5 +1,6 @@
 #name: ARMv8.2-A
 #objdump: -dr
+#skip: *-*-pe *-wince-* *-*-coff
 
 .*: +file format .*arm.*
 

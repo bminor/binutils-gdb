@@ -1,3 +1,10 @@
+2016-01-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 19458
+	* testsuite/gas/arm/armv8_2-a.d: Skip for COFF based targets.
+	* testsuite/gas/arm/archv8m-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-base.d: Likewise.
+
 2016-01-20  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* testsuite/gas/aarch64/armv8_2-a-illegal.d: New.
