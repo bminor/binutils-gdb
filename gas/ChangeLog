@@ -1,3 +1,9 @@
+2016-01-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* testsuite/gas/aarch64/armv8_2-a-illegal.d: New.
+	* testsuite/gas/aarch64/armv8_2-a-illegal.l: New.
+	* testsuite/gas/aarch64/armv8_2-a-illegal.s: New.
+
 2016-01-20  Mickael Guene  <mickael.guene@st.com>
 	    Terry Guo  <terry.guo@arm.com>
 

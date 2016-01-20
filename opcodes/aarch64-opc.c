@@ -1878,9 +1878,11 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	{
 	case AARCH64_OPND_PSTATEFIELD:
 	  assert (idx == 0 && opnds[1].type == AARCH64_OPND_UIMM4);
-	  /* MSR PAN, #uimm4
+	  /* MSR UAO, #uimm4
+	     MSR PAN, #uimm4
 	     The immediate must be #0 or #1.  */
-	  if (opnd->pstatefield == 0x04 /* PAN.  */
+	  if ((opnd->pstatefield == 0x03	/* UAO.  */
+	       || opnd->pstatefield == 0x04)	/* PAN.  */
 	      && opnds[1].imm.value > 1)
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0, 1);
