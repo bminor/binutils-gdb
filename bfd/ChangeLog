@@ -1,3 +1,11 @@
+2016-01-21  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_type_of_stub): Allow insert long branch
+	veneer for sym_sec != input_sec.
+	(elfNN_aarch64_size_stub): Support STT_SECTION symbol.
+	(elfNN_aarch64_final_link_relocate): Take rela addend into account when
+	calculation destination.
+
 2016-01-21  Alan Modra  <amodra@gmail.com>
 
 	* elf-linux-core.h (swap_linux_prpsinfo32_out): New function.

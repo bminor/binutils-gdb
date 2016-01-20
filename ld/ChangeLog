@@ -1,3 +1,13 @@
+2016-01-20  Jiong Wang  <jiong.wang@arm.com>
+
+	* testsuite/ld-aarch64/farcall-section.d: Delete.
+	* testsuite/ld-aarch64/farcall-section.s: Delete.
+	* testsuite/ld-aarch64/farcall-b-section.d: New expectation file.
+	* testsuite/ld-aarch64/farcall-bl-section.d: Likewise.
+	* testsuite/ld-aarch64/farcall-b-section.s: New testcase.
+	* testsuite/ld-aarch64/farcall-bl-section.s: Likewise.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Likewise.
+
 2016-01-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 19457
