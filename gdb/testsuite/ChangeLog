@@ -1,3 +1,9 @@
+2016-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/py-pp-maint.exp: Change/add enum flag tests.
+	* gdb.python/py-pp-maint.c (enum flag_enum): Use more complex
+	enum flag values.
+
 2016-01-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.base/gnu_vector.exp: Re-establish handling for should_kfail

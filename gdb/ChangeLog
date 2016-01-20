@@ -1,3 +1,8 @@
+2016-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/lib/gdb/printing.py (FlagEnumerationPrinter.__call__):
+	Fix enumerators sort key function.
+
 2016-01-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* printcmd.c (print_scalar_formatted): Move binary operator from
