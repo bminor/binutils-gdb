@@ -1,3 +1,18 @@
+2016-01-20  Mickael Guene  <mickael.guene@st.com>
+	    Terry Guo  <terry.guo@arm.com>
+
+	* config/obj-elf.c (obj_elf_change_section) : Allow arm section with
+	SHF_ARM_NOREAD section flag.
+	* config/tc-arm.h (md_elf_section_letter) : Implement this hook to
+	handle letter 'y'.
+	(arm_elf_section_letter) : Declare it.
+	* config/tc-arm.c (arm_elf_section_letter): Handle letter 'y' to set
+	SHF_ARM_NOREAD section flag.
+	* doc/c-arm.texi (ARM section attribute): Document the 'y' attribute.
+
+	* testsuite/gas/arm/section-execute-only.s: New test case.
+	* testsuite/gas/arm/section-execute-only.d: Expected output.
+
 2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* config/tc-mips.c (micromips_insn_length): Remove the mention

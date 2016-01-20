@@ -1,3 +1,11 @@
+2016-01-20  Mickael Guene  <mickael.guene@st.com>
+
+	* testsuite/ld-arm/thumb1-noread-not-present-mixing-two-section.s:
+	Add 'y' attribute usage.
+	* testsuite/ld-arm/thumb1-noread-present-one-section.s: Likewise.
+	* testsuite/ld-arm/thumb1-noread-present-two-section.s: Likewise.
+	* testsuite/ld-arm/thumb1-input-section-flag-match.s: Likewise.
+
 2016-01-19  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-elf/pr18735.d: Allow for extra symbols between

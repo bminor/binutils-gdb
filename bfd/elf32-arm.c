@@ -17839,16 +17839,6 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
   return n;
 }
 
-static const struct bfd_elf_special_section
-elf32_arm_special_sections[] =
-{
-/* Catch sections with .text.noread prefix and apply allocate, execute and
-   noread section attributes.  */
-  { STRING_COMMA_LEN (".text.noread"),  -2, SHT_PROGBITS,
-    SHF_ALLOC + SHF_EXECINSTR + SHF_ARM_NOREAD },
-  { NULL,			      0, 0, 0,			0 }
-};
-
 static bfd_boolean
 elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr * hdr)
 {
@@ -17953,8 +17943,6 @@ elf32_arm_count_additional_relocs (asection *sec)
 #define elf_backend_obj_attrs_order		elf32_arm_obj_attrs_order
 #define elf_backend_obj_attrs_handle_unknown 	elf32_arm_obj_attrs_handle_unknown
 
-#undef  elf_backend_special_sections
-#define elf_backend_special_sections 		elf32_arm_special_sections
 #undef elf_backend_section_flags
 #define elf_backend_section_flags		elf32_arm_section_flags
 #undef elf_backend_lookup_section_flags_hook

@@ -1,3 +1,8 @@
+2016-01-20  Mickael Guene  <mickael.guene@st.com>
+
+	* elf32-arm.c (elf32_arm_special_sections): Remove catch of noread
+	section using '.text.noread' pattern.
+
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf.c (elfcore_grok_note): Recognize NT_FREEBSD_THRMISC notes.

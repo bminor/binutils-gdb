@@ -1,3 +1,14 @@
+2016-01-20  Mickael Guene  <mickael.guene@st.com>
+
+	* readelf.c (get_elf_section_flags): Display y letter for section
+	with SHF_ARM_NOREAD section flag in readelf section output.
+	(process_section_headers): Add y letter in readelf section output
+	key mapping for ARM architecture.
+	* objdump.c (dump_section_header): Display NOREAD attributes as
+	well.
+	* doc/binutils.texi (objdump): Note that it is correct for
+	sections to have both the READONLY and NOREAD attributes.
+
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* readelf.c (get_freebsd_elfcore_note_type): Remove unused variable.
