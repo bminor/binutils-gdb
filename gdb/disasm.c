@@ -86,11 +86,10 @@ allocate_dis_line_table (void)
 			    xfree, xcalloc, xfree);
 }
 
-/* Add DLE to TABLE.
-   Returns 1 if added, 0 if already present.  */
+/* Add a new dis_line_entry containing SYMTAB and LINE to TABLE.  */
 
 static void
-maybe_add_dis_line_entry (htab_t table, struct symtab *symtab, int line)
+add_dis_line_entry (htab_t table, struct symtab *symtab, int line)
 {
   void **slot;
   struct dis_line_entry dle, *dlep;
@@ -552,7 +551,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
       pc += length;
 
       if (sal.symtab != NULL)
-	maybe_add_dis_line_entry (dis_line_table, sal.symtab, sal.line);
+	add_dis_line_entry (dis_line_table, sal.symtab, sal.line);
     }
 
   /* Second pass: print the disassembly.

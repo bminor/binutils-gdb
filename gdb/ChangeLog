@@ -1,3 +1,9 @@
+2016-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* disasm.c (maybe_add_dis_line_entry): Rename to...
+	(add_dis_line_entry): ...this, and update header comment.
+	(do_mixed_source_and_assembly): Now use add_dis_line_entry.
+
 2016-01-21  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (COMPILER_CFLAGS): New.
