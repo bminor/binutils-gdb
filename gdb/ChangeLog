@@ -1,3 +1,10 @@
+2016-01-21  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_sigreturn_next_pc): Add parameter
+	is_thumb and set it according to CPSR saved on the stack.
+	(arm_linux_get_next_pcs_syscall_next_pc): Pass is_thumb to
+	arm_linux_sigreturn_next_pc.
+
 2016-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* python/lib/gdb/printing.py (FlagEnumerationPrinter.__call__):

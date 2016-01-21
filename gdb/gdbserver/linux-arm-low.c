@@ -750,16 +750,20 @@ arm_prepare_to_resume (struct lwp_info *lwp)
       }
 }
 
-/* Find the next pc for a sigreturn or rt_sigreturn syscall.
+/* Find the next pc for a sigreturn or rt_sigreturn syscall.  In
+   addition, set IS_THUMB depending on whether we will return to ARM
+   or Thumb code.
    See arm-linux.h for stack layout details.  */
 static CORE_ADDR
-arm_sigreturn_next_pc (struct regcache *regcache, int svc_number)
+arm_sigreturn_next_pc (struct regcache *regcache, int svc_number,
+		       int *is_thumb)
 {
   unsigned long sp;
   unsigned long sp_data;
   /* Offset of PC register.  */
   int pc_offset = 0;
   CORE_ADDR next_pc = 0;
+  CORE_ADDR cpsr;
 
   gdb_assert (svc_number == __NR_sigreturn || svc_number == __NR_rt_sigreturn);
 
@@ -770,6 +774,10 @@ arm_sigreturn_next_pc (struct regcache *regcache, int svc_number)
     (sp, sp_data, svc_number, __NR_sigreturn == svc_number ? 1 : 0);
 
   (*the_target->read_memory) (sp + pc_offset, (unsigned char *) &next_pc, 4);
+
+  /* Set IS_THUMB according the CPSR saved on the stack.  */
+  (*the_target->read_memory) (sp + pc_offset + 4, (unsigned char *) &cpsr, 4);
+  *is_thumb = ((cpsr & CPSR_T) != 0);
 
   return next_pc;
 }
@@ -812,7 +820,9 @@ get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self, CORE_ADDR pc)
   /* This is a sigreturn or sigreturn_rt syscall.  */
   if (svc_number == __NR_sigreturn || svc_number == __NR_rt_sigreturn)
     {
-      next_pc = arm_sigreturn_next_pc (regcache, svc_number);
+      /* SIGRETURN or RT_SIGRETURN may affect the arm thumb mode, so
+	 update IS_THUMB.   */
+      next_pc = arm_sigreturn_next_pc (regcache, svc_number, &is_thumb);
     }
 
   /* Addresses for calling Thumb functions have the bit 0 set.  */

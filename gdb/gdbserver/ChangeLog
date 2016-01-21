@@ -1,3 +1,10 @@
+2016-01-21  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (arm_sigreturn_next_pc): Add parameter
+	is_thumb and set it according to CPSR saved on the stack.
+	(get_next_pcs_syscall_next_pc): Pass is_thumb to
+	arm_sigreturn_next_pc.
+
 2016-01-18  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-low.c (linux_set_pc_64bit): New function.

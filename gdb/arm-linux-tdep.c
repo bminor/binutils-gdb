@@ -782,10 +782,12 @@ arm_linux_sigreturn_return_addr (struct frame_info *frame,
 }
 
 /* Find the value of the next PC after a sigreturn or rt_sigreturn syscall
-   based on current processor state.  */
+   based on current processor state.  In addition, set IS_THUMB depending
+   on whether we will return to ARM or Thumb code.  */
+
 static CORE_ADDR
 arm_linux_sigreturn_next_pc (struct regcache *regcache,
-			     unsigned long svc_number)
+			     unsigned long svc_number, int *is_thumb)
 {
   ULONGEST sp;
   unsigned long sp_data;
@@ -794,6 +796,7 @@ arm_linux_sigreturn_next_pc (struct regcache *regcache,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int pc_offset = 0;
   int is_sigreturn = 0;
+  CORE_ADDR cpsr;
 
   gdb_assert (svc_number == ARM_SIGRETURN
 	      || svc_number == ARM_RT_SIGRETURN);
@@ -806,6 +809,10 @@ arm_linux_sigreturn_next_pc (struct regcache *regcache,
 						  is_sigreturn);
 
   next_pc = read_memory_unsigned_integer (sp + pc_offset, 4, byte_order);
+
+  /* Set IS_THUMB according the CPSR saved on the stack.  */
+  cpsr = read_memory_unsigned_integer (sp + pc_offset + 4, 4, byte_order);
+  *is_thumb = ((cpsr & arm_psr_thumb_bit (gdbarch)) != 0);
 
   return next_pc;
 }
@@ -899,7 +906,12 @@ arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
     }
 
   if (svc_number == ARM_SIGRETURN || svc_number == ARM_RT_SIGRETURN)
-    next_pc = arm_linux_sigreturn_next_pc (self->regcache, svc_number);
+    {
+      /* SIGRETURN or RT_SIGRETURN may affect the arm thumb mode, so
+	 update IS_THUMB.   */
+      next_pc = arm_linux_sigreturn_next_pc (self->regcache, svc_number,
+					     &is_thumb);
+    }
 
   /* Addresses for calling Thumb functions have the bit 0 set.  */
   if (is_thumb)
