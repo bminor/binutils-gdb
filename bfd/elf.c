@@ -9791,9 +9791,7 @@ elfcore_write_linux_prpsinfo32
 {
   struct elf_external_linux_prpsinfo32 data;
 
-  memset (&data, 0, sizeof (data));
-  LINUX_PRPSINFO32_SWAP_FIELDS (abfd, prpsinfo, data);
-
+  swap_linux_prpsinfo32_out (abfd, prpsinfo, &data);
   return elfcore_write_note (abfd, buf, bufsiz, "CORE", NT_PRPSINFO,
 			     &data, sizeof (data));
 }
@@ -9805,9 +9803,7 @@ elfcore_write_linux_prpsinfo64
 {
   struct elf_external_linux_prpsinfo64 data;
 
-  memset (&data, 0, sizeof (data));
-  LINUX_PRPSINFO64_SWAP_FIELDS (abfd, prpsinfo, data);
-
+  swap_linux_prpsinfo64_out (abfd, prpsinfo, &data);
   return elfcore_write_note (abfd, buf, bufsiz,
 			     "CORE", NT_PRPSINFO, &data, sizeof (data));
 }

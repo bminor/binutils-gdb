@@ -1818,30 +1818,28 @@ struct elf_external_ppc_linux_prpsinfo32
     char pr_psargs[80];			/* Initial part of arg list.  */
   };
 
-/* Helper macro to swap (properly handling endianess) things from the
-   `elf_internal_prpsinfo' structure to the `elf_external_ppc_prpsinfo32'
-   structure.
+/* Helper function to copy an elf_internal_linux_prpsinfo in host
+   endian to an elf_external_ppc_linux_prpsinfo32 in target endian.  */
 
-   Note that FROM should be a pointer, and TO should be the explicit type.  */
-
-#define PPC_LINUX_PRPSINFO32_SWAP_FIELDS(abfd, from, to)	      \
-  do								      \
-    {								      \
-      H_PUT_8 (abfd, from->pr_state, &to.pr_state);		      \
-      H_PUT_8 (abfd, from->pr_sname, &to.pr_sname);		      \
-      H_PUT_8 (abfd, from->pr_zomb, &to.pr_zomb);		      \
-      H_PUT_8 (abfd, from->pr_nice, &to.pr_nice);		      \
-      H_PUT_32 (abfd, from->pr_flag, to.pr_flag);		      \
-      H_PUT_32 (abfd, from->pr_uid, to.pr_uid);			      \
-      H_PUT_32 (abfd, from->pr_gid, to.pr_gid);			      \
-      H_PUT_32 (abfd, from->pr_pid, to.pr_pid);			      \
-      H_PUT_32 (abfd, from->pr_ppid, to.pr_ppid);		      \
-      H_PUT_32 (abfd, from->pr_pgrp, to.pr_pgrp);		      \
-      H_PUT_32 (abfd, from->pr_sid, to.pr_sid);			      \
-      strncpy (to.pr_fname, from->pr_fname, sizeof (to.pr_fname));    \
-      strncpy (to.pr_psargs, from->pr_psargs, sizeof (to.pr_psargs)); \
-    } while (0)
-
+static inline void
+swap_ppc_linux_prpsinfo32_out (bfd *obfd,
+			       const struct elf_internal_linux_prpsinfo *from,
+			       struct elf_external_ppc_linux_prpsinfo32 *to)
+{
+  bfd_put_8 (obfd, from->pr_state, &to->pr_state);
+  bfd_put_8 (obfd, from->pr_sname, &to->pr_sname);
+  bfd_put_8 (obfd, from->pr_zomb, &to->pr_zomb);
+  bfd_put_8 (obfd, from->pr_nice, &to->pr_nice);
+  bfd_put_32 (obfd, from->pr_flag, to->pr_flag);
+  bfd_put_32 (obfd, from->pr_uid, to->pr_uid);
+  bfd_put_32 (obfd, from->pr_gid, to->pr_gid);
+  bfd_put_32 (obfd, from->pr_pid, to->pr_pid);
+  bfd_put_32 (obfd, from->pr_ppid, to->pr_ppid);
+  bfd_put_32 (obfd, from->pr_pgrp, to->pr_pgrp);
+  bfd_put_32 (obfd, from->pr_sid, to->pr_sid);
+  strncpy (to->pr_fname, from->pr_fname, sizeof (to->pr_fname));
+  strncpy (to->pr_psargs, from->pr_psargs, sizeof (to->pr_psargs));
+}
 
 /* Initialize the ppc_elf_howto_table, so that linear accesses can be done.  */
 
@@ -2296,14 +2294,15 @@ ppc_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 }
 
 char *
-elfcore_write_ppc_linux_prpsinfo32 (bfd *abfd, char *buf, int *bufsiz,
-				      const struct elf_internal_linux_prpsinfo *prpsinfo)
+elfcore_write_ppc_linux_prpsinfo32
+  (bfd *abfd,
+   char *buf,
+   int *bufsiz,
+   const struct elf_internal_linux_prpsinfo *prpsinfo)
 {
   struct elf_external_ppc_linux_prpsinfo32 data;
 
-  memset (&data, 0, sizeof (data));
-  PPC_LINUX_PRPSINFO32_SWAP_FIELDS (abfd, prpsinfo, data);
-
+  swap_ppc_linux_prpsinfo32_out (abfd, prpsinfo, &data);
   return elfcore_write_note (abfd, buf, bufsiz,
 			     "CORE", NT_PRPSINFO, &data, sizeof (data));
 }

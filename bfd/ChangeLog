@@ -1,5 +1,17 @@
 2016-01-21  Alan Modra  <amodra@gmail.com>
 
+	* elf-linux-core.h (swap_linux_prpsinfo32_out): New function.
+	(swap_linux_prpsinfo64_out): New function.
+	(LINUX_PRPSINFO32_SWAP_FIELDS): Delete.
+	(LINUX_PRPSINFO64_SWAP_FIELDS): Delete.
+	* elf.c (elfcore_write_linux_prpsinfo32): Adjust.  Don't memset.
+	(elfcore_write_linux_prpsinfo64): Likewise.
+	* elf32-ppc.c (swap_ppc_linux_prpsinfo32_out): New function.
+	(PPC_LINUX_PRPSINFO32_SWAP_FIELDS): Delete.
+	(elfcore_write_ppc_linux_prpsinfo32): Adjust.  Don't memset.
+
+2016-01-21  Alan Modra  <amodra@gmail.com>
+
 	* elf-linux-core.h: Rename from elf-linux-psinfo.h.
 	* elf.c: Adjust #include.
 	* elf32-ppc.c: Don't #include elf-linux-psinfo.h
