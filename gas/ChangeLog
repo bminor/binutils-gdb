@@ -1,3 +1,10 @@
+2016-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19454
+	* testsuite/gas/arm/mapshort-elf.d: Fix expected output to cope
+	with arm-netbsdelf target.
+	* testsuite/gas/arm/blx-bl-convert.d: Skip for netbsdelf.
+
 2016-01-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 19456
