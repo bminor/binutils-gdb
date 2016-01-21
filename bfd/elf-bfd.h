@@ -2435,6 +2435,35 @@ extern char *elfcore_write_linux_prpsinfo64
 extern char *elfcore_write_ppc_linux_prpsinfo32
   (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
 
+struct elf_internal_linux_prstatus
+{
+  struct elf_internal_siginfo
+  {
+    int si_signo;
+    int si_code;
+    int si_errno;
+  } pr_info;
+  int pr_cursig;
+  bfd_uint64_t pr_sigpend, pr_sighold;
+  int pr_pid, pr_ppid, pr_pgrp, pr_sid;
+  struct elf_internal_timeval
+  {
+    long tv_sec;
+    long tv_usec;
+  } pr_utime, pr_stime, pr_cutime, pr_cstime;
+  void *pr_reg;
+  int pr_reg_size;
+  int pr_fpvalid;
+};
+
+/* Linux/most 32-bit archs.  */
+extern char *elfcore_write_linux_prstatus32
+  (bfd *, char *, int *, const struct elf_internal_linux_prstatus *);
+
+/* Linux/most 64-bit archs.  */
+extern char *elfcore_write_linux_prstatus64
+  (bfd *, char *, int *, const struct elf_internal_linux_prstatus *);
+
 extern bfd *_bfd_elf32_bfd_from_remote_memory
   (bfd *templ, bfd_vma ehdr_vma, bfd_size_type size, bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type));

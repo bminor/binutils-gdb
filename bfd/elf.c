@@ -9809,6 +9809,40 @@ elfcore_write_linux_prpsinfo64
 }
 
 char *
+elfcore_write_linux_prstatus32
+  (bfd *obfd,
+   char *buf,
+   int *bufsize,
+   const struct elf_internal_linux_prstatus *prstatus)
+{
+  size_t datasize = (prstatus->pr_reg_size
+		     + sizeof (struct elf_external_linux_prstatus32));
+  char data[1144];
+
+  BFD_ASSERT (sizeof (data) >= datasize);
+  swap_linux_prstatus32_out (obfd, prstatus, data);
+  return elfcore_write_note (obfd, buf, bufsize,
+			     "CORE", NT_PRSTATUS, data, datasize);
+}
+
+char *
+elfcore_write_linux_prstatus64
+  (bfd *obfd,
+   char *buf,
+   int *bufsize,
+   const struct elf_internal_linux_prstatus *prstatus)
+{
+  size_t datasize = (prstatus->pr_reg_size
+		     + sizeof (struct elf_external_linux_prstatus64));
+  char data[1144]; /* Size of ia64 prstatus.  */
+
+  BFD_ASSERT (sizeof (data) >= datasize);
+  swap_linux_prstatus64_out (obfd, prstatus, data);
+  return elfcore_write_note (obfd, buf, bufsize,
+			     "CORE", NT_PRSTATUS, data, datasize);
+}
+
+char *
 elfcore_write_prstatus (bfd *abfd,
 			char *buf,
 			int *bufsiz,
