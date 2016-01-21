@@ -1,5 +1,11 @@
 2016-01-21  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-arc.c (ADD_RELA): Fix compile time warning errors by
+	changing the type of _loc to be bfd_byte *.
+	(elf_arc_finish_dynamic_symbol): Likewise.
+
+2016-01-21  Nick Clifton  <nickc@redhat.com>
+
 	PR ld/19455
 	* elf32-arm.c (elf32_arm_create_dynamic_sections): Set the ELF
 	class of the linker stub bfd.

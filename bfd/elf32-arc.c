@@ -55,9 +55,9 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
   {									\
     struct elf_link_hash_table *_htab = elf_hash_table (info);		\
     Elf_Internal_Rela _rel;						\
-    bfd_vma _loc;							\
+    bfd_byte * _loc;							\
 									\
-    _loc = (bfd_vma) _htab->srel##SECTION->contents			\
+    _loc = _htab->srel##SECTION->contents				\
       + ((_htab->srel##SECTION->reloc_count)				\
 	 * sizeof (Elf32_External_Rela));				\
     _htab->srel##SECTION->reloc_count++;				\
@@ -65,7 +65,7 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
     _rel.r_offset = (_htab->s##SECTION)->output_section->vma		\
       + (_htab->s##SECTION)->output_offset + OFFSET;			\
     _rel.r_info = ELF32_R_INFO (SYM_IDX, TYPE);				\
-    bfd_elf32_swap_reloca_out (BFD, &_rel, (bfd_byte *) _loc);		\
+    bfd_elf32_swap_reloca_out (BFD, &_rel, _loc);			\
   }
 
 struct arc_local_data
@@ -2245,8 +2245,8 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
 	bfd_get_section_by_name (h->root.u.def.section->owner,
 				 ".rela.bss");
 
-      bfd_vma loc = (bfd_vma) srelbss->contents
-		    + (srelbss->reloc_count * sizeof (Elf32_External_Rela));
+      bfd_byte * loc = srelbss->contents
+	+ (srelbss->reloc_count * sizeof (Elf32_External_Rela));
       srelbss->reloc_count++;
 
       Elf_Internal_Rela rel;
@@ -2254,7 +2254,7 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
       rel.r_offset = rel_offset;
       rel.r_info = ELF32_R_INFO (h->dynindx, R_ARC_COPY);
 
-      bfd_elf32_swap_reloca_out (output_bfd, &rel, (bfd_byte *) loc);
+      bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
