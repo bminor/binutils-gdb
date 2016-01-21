@@ -1,3 +1,7 @@
+2016-01-21  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* ax-gdb.c (gen_traced_pop): Use gen_fetch for string collection.
+
 2016-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* disasm.c (maybe_add_dis_line_entry): Rename to...

@@ -394,25 +394,24 @@ gen_traced_pop (struct gdbarch *gdbarch,
 
       case axs_lvalue_memory:
 	{
-	  if (string_trace)
-	    ax_simple (ax, aop_dup);
-
 	  /* Initialize the TYPE_LENGTH if it is a typedef.  */
 	  check_typedef (value->type);
 
-	  /* There's no point in trying to use a trace_quick bytecode
-	     here, since "trace_quick SIZE pop" is three bytes, whereas
-	     "const8 SIZE trace" is also three bytes, does the same
-	     thing, and the simplest code which generates that will also
-	     work correctly for objects with large sizes.  */
-	  ax_const_l (ax, TYPE_LENGTH (value->type));
-	  ax_simple (ax, aop_trace);
-
 	  if (string_trace)
 	    {
-	      ax_simple (ax, aop_ref32);
+	      gen_fetch (ax, value->type);
 	      ax_const_l (ax, ax->trace_string);
 	      ax_simple (ax, aop_tracenz);
+	    }
+	  else
+	    {
+	      /* There's no point in trying to use a trace_quick bytecode
+	         here, since "trace_quick SIZE pop" is three bytes, whereas
+	         "const8 SIZE trace" is also three bytes, does the same
+	         thing, and the simplest code which generates that will also
+	         work correctly for objects with large sizes.  */
+	      ax_const_l (ax, TYPE_LENGTH (value->type));
+	      ax_simple (ax, aop_trace);
 	    }
 	}
 	break;
