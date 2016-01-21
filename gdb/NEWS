@@ -31,6 +31,9 @@ skip -rfunction regular-expression
   glob-style file names and regular expressions for function names.
   Additionally, a file spec and a function spec may now be combined.
 
+maint info line-table REGEXP
+  Display the contents of GDB's internal line table data struture.
+
 *** Changes in GDB 7.11
 
 * GDB now supports debugging kernel-based threads on FreeBSD.

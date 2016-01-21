@@ -17175,6 +17175,15 @@ line 1574.
 (@value{GDBP})
 @end smallexample
 
+@kindex maint info line-table
+@cindex listing @value{GDBN}'s internal line tables
+@cindex line tables, listing @value{GDBN}'s internal
+@item maint info line-table @r{[} @var{regexp} @r{]}
+
+List the @code{struct linetable} from all @code{struct symtab}
+instances whose name matches @var{regexp}.  If @var{regexp} is not
+given, list the @code{struct linetable} from all @code{struct symtab}.
+
 @kindex maint set symbol-cache-size
 @cindex symbol cache size
 @item maint set symbol-cache-size @var{size}

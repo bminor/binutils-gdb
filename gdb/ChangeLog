@@ -1,3 +1,10 @@
+2016-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* symmisc.c (maintenance_info_line_tables): New function.
+	(maintenance_print_one_line_table): New function.
+	(_initialize_symmisc): Register 'maint info line-table' command.
+	* NEWS: Mention new command.
+
 2016-03-11  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* s390-linux-tdep.c (s390_ax_pseudo_register_collect): New function.
