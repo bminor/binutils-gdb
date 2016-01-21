@@ -1,3 +1,13 @@
+2016-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19455
+	* testsuite/ld-arm/vxworks1-lib.dd: Update for current
+	disassmebler output.
+	* testsuite/ld-arm/vxworks1-lib.rd: Likewise.
+	* testsuite/ld-arm/vxworks1.dd: Likewise.
+	* testsuite/ld-arm/vxworks1.rd: Likewise.
+	* testsuite/ld-arm/vxworks1.ld: Set the output format.
+
 2016-01-20  Jiong Wang  <jiong.wang@arm.com>
 
 	* testsuite/ld-aarch64/farcall-section.d: Delete.

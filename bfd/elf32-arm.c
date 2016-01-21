@@ -3575,6 +3575,9 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 	  htab->plt_entry_size
 	    = 4 * ARRAY_SIZE (elf32_arm_vxworks_exec_plt_entry);
 	}
+
+      if (elf_elfheader (dynobj))
+	elf_elfheader (dynobj)->e_ident[EI_CLASS] = ELFCLASS32;
     }
   else
     {
@@ -13613,6 +13616,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		may_need_local_target_p = TRUE;
 		break;
 	      }
+	    else goto jump_over;
+	      
 	    /* Fall through.  */
 
 	  case R_ARM_MOVW_ABS_NC:
@@ -13632,6 +13637,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    /* Fall through.  */
 	  case R_ARM_ABS32:
 	  case R_ARM_ABS32_NOI:
+	jump_over:
 	    if (h != NULL && bfd_link_executable (info))
 	      {
 		h->pointer_equality_needed = 1;

@@ -1,3 +1,13 @@
+2016-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19455
+	* elf32-arm.c (elf32_arm_create_dynamic_sections): Set the ELF
+	class of the linker stub bfd.
+	(elf32_arm_check_relocs): Skip check for pic format after
+	processing a vxWorks R_ARM_ABS12 reloc.
+	* elflink.c (bfd_elf_final_link): Check for ELFCLASSNONE when
+	reporting a class mismatch.
+
 2016-01-21  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64.c (aarch64_type_of_stub): Allow insert long branch
