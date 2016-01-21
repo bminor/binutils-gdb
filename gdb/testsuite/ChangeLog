@@ -1,3 +1,10 @@
+2016-01-22  Yao Qi  <yao.qi@linaro.org>
+
+	PR testsuite/19491
+	* gdb.base/multi-forks.c: Include
+	../lib/unbuffer_output.c
+	(main): Call gdb_unbuffer_output.
+
 2016-01-21  Doug Evans  <dje@google.com>
 
 	* lib/ada.exp (gdb_compile_ada): Fix typo.
