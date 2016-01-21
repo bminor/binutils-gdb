@@ -1,3 +1,7 @@
+2016-01-22  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_pid_to_str): Adjust string format.
+
 2016-01-22  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-linux-nat.c (fetch_fpregs): Call perror_with_name

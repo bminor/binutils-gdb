@@ -303,7 +303,7 @@ fbsd_pid_to_str (struct target_ops *ops, ptid_t ptid)
       static char buf[64];
       int pid = ptid_get_pid (ptid);
 
-      xsnprintf (buf, sizeof buf, "process %d, LWP %d", pid, lwp);
+      xsnprintf (buf, sizeof buf, "LWP %d of process %d", lwp, pid);
       return buf;
     }
 
