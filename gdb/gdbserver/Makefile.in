@@ -51,6 +51,8 @@ RANLIB = @RANLIB@
 
 # The name of the compiler to use.
 COMPILER = @COMPILER@
+# Set to CFLAGS or CXXFLAGS, depending on compiler/language.
+COMPILER_CFLAGS = @COMPILER_CFLAGS@
 
 CC = @CC@
 CXX = @CXX@
@@ -129,13 +131,14 @@ WERROR_CFLAGS = @WERROR_CFLAGS@
 WARN_CFLAGS_NO_FORMAT = `echo " $(WARN_CFLAGS) " \
 		   | sed "s/ -Wformat-nonliteral / -Wno-format-nonliteral /g"`
 
-# CFLAGS is specifically reserved for setting from the command line
+# These are specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
+CXXFLAGS = @CXXFLAGS@
 CPPFLAGS = @CPPFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS_BASE =  ${CFLAGS} ${GLOBAL_CFLAGS} \
+INTERNAL_CFLAGS_BASE =  ${COMPILER_CFLAGS} ${GLOBAL_CFLAGS} \
 	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${CPPFLAGS}
 INTERNAL_WARN_CFLAGS =  ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
 INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) -DGDBSERVER

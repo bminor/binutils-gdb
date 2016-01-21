@@ -615,6 +615,7 @@ DEPDIR
 am__leading_dot
 host_noncanonical
 target_noncanonical
+COMPILER_CFLAGS
 COMPILER
 RANLIB
 AR
@@ -4834,9 +4835,12 @@ fi
 
   if test "$enable_build_with_cxx" = "yes"; then
     COMPILER='$(CXX)'
+    COMPILER_CFLAGS='$(CXXFLAGS)'
    else
     COMPILER='$(CC)'
+    COMPILER_CFLAGS='$(CFLAGS)'
   fi
+
 
 
 

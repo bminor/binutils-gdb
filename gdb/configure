@@ -731,6 +731,7 @@ MAKE
 CCDEPMODE
 DEPDIR
 am__leading_dot
+COMPILER_CFLAGS
 COMPILER
 INSTALL_STRIP_PROGRAM
 STRIP
@@ -5015,9 +5016,12 @@ fi
 
   if test "$enable_build_with_cxx" = "yes"; then
     COMPILER='$(CXX)'
+    COMPILER_CFLAGS='$(CXXFLAGS)'
    else
     COMPILER='$(CC)'
+    COMPILER_CFLAGS='$(CFLAGS)'
   fi
+
 
 
 

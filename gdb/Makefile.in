@@ -81,6 +81,8 @@ CATALOGS = @CATALOGS@
 
 # The name of the compiler to use.
 COMPILER = @COMPILER@
+# Set to CFLAGS or CXXFLAGS, depending on compiler/language.
+COMPILER_CFLAGS = @COMPILER_CFLAGS@
 
 # If you are compiling with GCC, make sure that either 1) You have the
 # fixed include files where GCC can reach them, or 2) You use the
@@ -551,9 +553,10 @@ GLOBAL_CFLAGS = $(MH_CFLAGS)
 
 PROFILE_CFLAGS = @PROFILE_CFLAGS@
 
-# CFLAGS is specifically reserved for setting from the command line
-# when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
+# These are specifically reserved for setting from the command line
+# when running make.  I.E.: "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
+CXXFLAGS = @CXXFLAGS@
 
 # Set by configure, for e.g. expat.  Python installations are such that
 # C headers are included using their basename (for example, we #include
@@ -563,14 +566,9 @@ CFLAGS = @CFLAGS@
 # a bit the consequences by putting the Python includes last in the list.
 INTERNAL_CPPFLAGS = @CPPFLAGS@ @GUILE_CPPFLAGS@ @PYTHON_CPPFLAGS@
 
-# Need to pass this to testsuite for "make check".  Probably should be
-# consistent with top-level Makefile.in and gdb/testsuite/Makefile.in
-# so "make check" has the same result no matter where it is run.
-CXXFLAGS = -g -O
-
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS_BASE = \
-	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
+	$(COMPILER_CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) $(ZLIBINC) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
 	$(INTL_CFLAGS) $(INCGNU) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS)
@@ -585,7 +583,9 @@ LDFLAGS = @LDFLAGS@
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
 # PROFILE_CFLAGS is _not_ included, however, because we use monstartup.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS)
+INTERNAL_LDFLAGS = \
+	$(COMPILER_CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) \
+	$(LDFLAGS) $(CONFIG_LDFLAGS)
 
 # If your system is missing alloca(), or, more likely, it's there but
 # it doesn't work, then refer to libiberty.

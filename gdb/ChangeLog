@@ -1,3 +1,13 @@
+2016-01-21  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMPILER_CFLAGS): New.
+	(CXXFLAGS): Get it from configure.
+	(INTERNAL_CFLAGS_BASE, INTERNAL_LDFLAGS): Use COMPILER_CFLAGS
+	instead of CFLAGS.
+	* build-with-cxx.m4 (GDB_AC_BUILD_WITH_CXX): Set and AC_SUBST
+	COMPILER_CFLAGS.
+	* configure: Regenerate.
+
 2016-01-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* location.h (new_address_location): Add new parameters
