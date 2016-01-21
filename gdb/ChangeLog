@@ -1,5 +1,18 @@
 2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (bfun_s): New typedef.
+	(ftrace_update_caller): Print caller in debug dump.
+	(ftrace_get_caller, ftrace_match_backtrace, ftrace_fixup_level)
+	(ftrace_compute_global_level_offset, ftrace_connect_bfun)
+	(ftrace_connect_backtrace, ftrace_bridge_gap, btrace_bridge_gaps): New.
+	(btrace_compute_ftrace_bts): Pass vector of gaps.  Collect gaps.
+	(btrace_compute_ftrace_pt): Likewise.
+	(btrace_compute_ftrace): Split into this, ...
+	(btrace_compute_ftrace_1): ... this, and ...
+	(btrace_finalize_ftrace): ... this.  Call btrace_bridge_gaps.
+
+2016-10-28  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (ftrace_new_return): Start from the previous function's
 	level if we can't find a matching call for a return.
 
