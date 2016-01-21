@@ -1683,6 +1683,11 @@ mips_linux_init_abi (struct gdbarch_info info,
 				      &micromips_linux_n32_rt_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n32_rt_sigframe);
 	set_xml_syscall_file_name (gdbarch, "syscalls/mips-n32-linux.xml");
+
+	/* N32 uses a different prstatus compared to most other Linux
+	   archs.  */
+	set_gdbarch_elfcore_write_linux_prstatus
+	  (gdbarch, gdb_deprecated_elfcore_write_linux_prstatus);
 	break;
       case MIPS_ABI_N64:
 	set_gdbarch_get_longjmp_target (gdbarch,

@@ -697,12 +697,13 @@ M:void:iterate_over_regset_sections:iterate_over_regset_sections_cb *cb, void *c
 # Create core file notes
 M:char *:make_corefile_notes:bfd *obfd, int *note_size:obfd, note_size
 
-# The elfcore writer hook to use to write Linux prpsinfo notes to core
-# files.  Most Linux architectures use the same prpsinfo32 or
-# prpsinfo64 layouts, and so won't need to provide this hook, as we
-# call the Linux generic routines in bfd to write prpsinfo notes by
+# The elfcore writer hooks to use to write Linux notes to core files.
+# Most Linux architectures use the same prpsinfo{32,64} and
+# prstatus{32,64} layouts, and so won't need to provide these hooks,
+# as we call the Linux generic routines in bfd to write notes by
 # default.
 F:char *:elfcore_write_linux_prpsinfo:bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info:obfd, note_data, note_size, info
+F:char *:elfcore_write_linux_prstatus:bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prstatus *info:obfd, note_data, note_size, info
 
 # Find core file memory regions
 M:int:find_memory_regions:find_memory_region_ftype func, void *data:func, data
@@ -1248,6 +1249,7 @@ struct stap_parse_info;
 struct parser_state;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
+struct elf_internal_linux_prstatus;
 struct mem_range;
 struct syscalls_info;
 struct thread_info;

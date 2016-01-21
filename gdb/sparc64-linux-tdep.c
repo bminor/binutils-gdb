@@ -307,6 +307,11 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->fpregset = &sparc64_linux_fpregset;
   tdep->sizeof_fpregset = 280;
 
+  /* Sparc64 uses a different prstatus compared to most other Linux
+     archs.  */
+  set_gdbarch_elfcore_write_linux_prstatus
+    (gdbarch, gdb_deprecated_elfcore_write_linux_prstatus);
+
   tramp_frame_prepend_unwinder (gdbarch, &sparc64_linux_rt_sigframe);
 
   /* Hook in the DWARF CFI frame unwinder.  */

@@ -1526,6 +1526,21 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
   return note_data;
 }
 
+/* See linux-tdep.h.
+
+   FIXME: This should be reimplemented on the BFD side along the lines
+   of elfcore_write_linux_prstatus{32,64}, instead of relying on
+   elfcore_write_prstatus.  */
+
+char *
+gdb_deprecated_elfcore_write_linux_prstatus
+  (bfd *obfd, char *note_data, int *note_size,
+   const struct elf_internal_linux_prstatus *info)
+{
+  return elfcore_write_prstatus (obfd, note_data, note_size, info->pr_pid,
+				 info->pr_cursig, info->pr_reg);
+}
+
 /* Structure for passing information from
    linux_collect_thread_registers via an iterator to
    linux_collect_regset_section_cb. */
@@ -1564,9 +1579,31 @@ linux_collect_regset_section_cb (const char *sect_name, int size,
 
   /* PRSTATUS still needs to be treated specially.  */
   if (strcmp (sect_name, ".reg") == 0)
-    data->note_data = (char *) elfcore_write_prstatus
-      (data->obfd, data->note_data, data->note_size, data->lwp,
-       gdb_signal_to_host (data->stop_signal), buf);
+    {
+      struct elf_internal_linux_prstatus prstatus;
+
+      memset (&prstatus, 0, sizeof (prstatus));
+      prstatus.pr_reg = buf;
+      prstatus.pr_reg_size = size;
+      prstatus.pr_pid = data->lwp;
+      prstatus.pr_cursig = gdb_signal_to_host (data->stop_signal);
+      if (gdbarch_elfcore_write_linux_prstatus_p (data->gdbarch))
+	data->note_data = gdbarch_elfcore_write_linux_prstatus (data->gdbarch,
+								data->obfd,
+								data->note_data,
+								data->note_size,
+								&prstatus);
+      else if (gdbarch_ptr_bit (data->gdbarch) == 64)
+	data->note_data = elfcore_write_linux_prstatus64 (data->obfd,
+							  data->note_data,
+							  data->note_size,
+							  &prstatus);
+      else
+	data->note_data = elfcore_write_linux_prstatus32 (data->obfd,
+							  data->note_data,
+							  data->note_size,
+							  &prstatus);
+    }
   else
     data->note_data = (char *) elfcore_write_register_note
       (data->obfd, data->note_data, data->note_size,

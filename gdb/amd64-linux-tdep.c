@@ -2073,6 +2073,10 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64_linux_gregset_reg_offset);
   tdep->sizeof_gregset = 27 * 8;
 
+  /* x32's layout is not compatible with the 32-bit layout.  */
+  set_gdbarch_elfcore_write_linux_prstatus
+    (gdbarch, gdb_deprecated_elfcore_write_linux_prstatus);
+
   amd64_x32_init_abi (info, gdbarch);
 
   /* Reserve a number for orig_rax.  */

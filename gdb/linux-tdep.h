@@ -44,4 +44,12 @@ extern void linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 
 extern int linux_is_uclinux (void);
 
+/* Stop-gap gdbarch_elfcore_write_linux_prstatus implementation for
+   architectures whose prstatus{32,64} layout differs from the
+   standard one, and for which BFD doesn't provide a custom writer
+   yet.  */
+extern char *gdb_deprecated_elfcore_write_linux_prstatus
+  (bfd *obfd, char *note_data, int *note_size,
+   const struct elf_internal_linux_prstatus *info);
+
 #endif /* linux-tdep.h */

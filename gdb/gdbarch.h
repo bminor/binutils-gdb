@@ -61,6 +61,7 @@ struct stap_parse_info;
 struct parser_state;
 struct ravenscar_arch_ops;
 struct elf_internal_linux_prpsinfo;
+struct elf_internal_linux_prstatus;
 struct mem_range;
 struct syscalls_info;
 struct thread_info;
@@ -818,10 +819,10 @@ typedef char * (gdbarch_make_corefile_notes_ftype) (struct gdbarch *gdbarch, bfd
 extern char * gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
 extern void set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch, gdbarch_make_corefile_notes_ftype *make_corefile_notes);
 
-/* The elfcore writer hook to use to write Linux prpsinfo notes to core
-   files.  Most Linux architectures use the same prpsinfo32 or
-   prpsinfo64 layouts, and so won't need to provide this hook, as we
-   call the Linux generic routines in bfd to write prpsinfo notes by
+/* The elfcore writer hooks to use to write Linux notes to core files.
+   Most Linux architectures use the same prpsinfo{32,64} and
+   prstatus{32,64} layouts, and so won't need to provide these hooks,
+   as we call the Linux generic routines in bfd to write notes by
    default. */
 
 extern int gdbarch_elfcore_write_linux_prpsinfo_p (struct gdbarch *gdbarch);
@@ -829,6 +830,12 @@ extern int gdbarch_elfcore_write_linux_prpsinfo_p (struct gdbarch *gdbarch);
 typedef char * (gdbarch_elfcore_write_linux_prpsinfo_ftype) (bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
 extern char * gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
 extern void set_gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo);
+
+extern int gdbarch_elfcore_write_linux_prstatus_p (struct gdbarch *gdbarch);
+
+typedef char * (gdbarch_elfcore_write_linux_prstatus_ftype) (bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prstatus *info);
+extern char * gdbarch_elfcore_write_linux_prstatus (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prstatus *info);
+extern void set_gdbarch_elfcore_write_linux_prstatus (struct gdbarch *gdbarch, gdbarch_elfcore_write_linux_prstatus_ftype *elfcore_write_linux_prstatus);
 
 /* Find core file memory regions */
 

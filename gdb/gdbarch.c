@@ -265,6 +265,7 @@ struct gdbarch
   gdbarch_iterate_over_regset_sections_ftype *iterate_over_regset_sections;
   gdbarch_make_corefile_notes_ftype *make_corefile_notes;
   gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo;
+  gdbarch_elfcore_write_linux_prstatus_ftype *elfcore_write_linux_prstatus;
   gdbarch_find_memory_regions_ftype *find_memory_regions;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix;
@@ -609,6 +610,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of iterate_over_regset_sections, has predicate.  */
   /* Skip verify of make_corefile_notes, has predicate.  */
   /* Skip verify of elfcore_write_linux_prpsinfo, has predicate.  */
+  /* Skip verify of elfcore_write_linux_prstatus, has predicate.  */
   /* Skip verify of find_memory_regions, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries_aix, has predicate.  */
@@ -930,6 +932,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: elfcore_write_linux_prpsinfo = <%s>\n",
                       host_address_to_string (gdbarch->elfcore_write_linux_prpsinfo));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_elfcore_write_linux_prstatus_p() = %d\n",
+                      gdbarch_elfcore_write_linux_prstatus_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: elfcore_write_linux_prstatus = <%s>\n",
+                      host_address_to_string (gdbarch->elfcore_write_linux_prstatus));
   fprintf_unfiltered (file,
                       "gdbarch_dump: fast_tracepoint_valid_at = <%s>\n",
                       host_address_to_string (gdbarch->fast_tracepoint_valid_at));
@@ -3463,6 +3471,30 @@ set_gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch,
                                           gdbarch_elfcore_write_linux_prpsinfo_ftype elfcore_write_linux_prpsinfo)
 {
   gdbarch->elfcore_write_linux_prpsinfo = elfcore_write_linux_prpsinfo;
+}
+
+int
+gdbarch_elfcore_write_linux_prstatus_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->elfcore_write_linux_prstatus != NULL;
+}
+
+char *
+gdbarch_elfcore_write_linux_prstatus (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prstatus *info)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->elfcore_write_linux_prstatus != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_elfcore_write_linux_prstatus called\n");
+  return gdbarch->elfcore_write_linux_prstatus (obfd, note_data, note_size, info);
+}
+
+void
+set_gdbarch_elfcore_write_linux_prstatus (struct gdbarch *gdbarch,
+                                          gdbarch_elfcore_write_linux_prstatus_ftype elfcore_write_linux_prstatus)
+{
+  gdbarch->elfcore_write_linux_prstatus = elfcore_write_linux_prstatus;
 }
 
 int
