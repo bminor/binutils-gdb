@@ -3481,7 +3481,7 @@ gdbarch_elfcore_write_linux_prstatus_p (struct gdbarch *gdbarch)
 }
 
 char *
-gdbarch_elfcore_write_linux_prstatus (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prstatus *info)
+gdbarch_elfcore_write_linux_prstatus (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, struct elf_internal_linux_prstatus *info)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->elfcore_write_linux_prstatus != NULL);

@@ -833,8 +833,8 @@ extern void set_gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, g
 
 extern int gdbarch_elfcore_write_linux_prstatus_p (struct gdbarch *gdbarch);
 
-typedef char * (gdbarch_elfcore_write_linux_prstatus_ftype) (bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prstatus *info);
-extern char * gdbarch_elfcore_write_linux_prstatus (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prstatus *info);
+typedef char * (gdbarch_elfcore_write_linux_prstatus_ftype) (bfd *obfd, char *note_data, int *note_size, struct elf_internal_linux_prstatus *info);
+extern char * gdbarch_elfcore_write_linux_prstatus (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, struct elf_internal_linux_prstatus *info);
 extern void set_gdbarch_elfcore_write_linux_prstatus (struct gdbarch *gdbarch, gdbarch_elfcore_write_linux_prstatus_ftype *elfcore_write_linux_prstatus);
 
 /* Find core file memory regions */

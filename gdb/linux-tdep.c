@@ -1574,7 +1574,8 @@ linux_collect_regset_section_cb (const char *sect_name, int size,
 
   gdb_assert (regset && regset->collect_regset);
 
-  buf = (char *) xmalloc (size);
+  /* Extra 4 bytes for use by amd64_x32_write_linux_prstatus.  */
+  buf = (char *) xmalloc (size + 4);
   regset->collect_regset (regset, data->regcache, -1, buf, size);
 
   /* PRSTATUS still needs to be treated specially.  */

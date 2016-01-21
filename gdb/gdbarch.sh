@@ -703,7 +703,7 @@ M:char *:make_corefile_notes:bfd *obfd, int *note_size:obfd, note_size
 # as we call the Linux generic routines in bfd to write notes by
 # default.
 F:char *:elfcore_write_linux_prpsinfo:bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info:obfd, note_data, note_size, info
-F:char *:elfcore_write_linux_prstatus:bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prstatus *info:obfd, note_data, note_size, info
+F:char *:elfcore_write_linux_prstatus:bfd *obfd, char *note_data, int *note_size, struct elf_internal_linux_prstatus *info:obfd, note_data, note_size, info
 
 # Find core file memory regions
 M:int:find_memory_regions:find_memory_region_ftype func, void *data:func, data

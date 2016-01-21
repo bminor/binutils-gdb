@@ -28,6 +28,7 @@
 #include "gdbtypes.h"
 #include "reggroups.h"
 #include "regset.h"
+#include "elf-bfd.h"            /* for elfcore_write_* */
 #include "parser-defs.h"
 #include "user-regs.h"
 #include "amd64-linux-tdep.h"
@@ -1646,6 +1647,25 @@ amd64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       &amd64_linux_xstateregset, "XSAVE extended state", cb_data);
 }
 
+/* The standard elfcore_write_linux_prstatus32 isn't quite correct
+   for x32, which needs an extra 4 bytes of padding at the end of
+   the note.  */
+
+static char *
+amd64_x32_write_linux_prstatus (bfd *obfd,
+				char *buf,
+				int *bufsize,
+				struct elf_internal_linux_prstatus *prstatus)
+{
+  /* Tack pr_fpvalid to end of pr_regs.  */
+  bfd_put_32 (obfd, prstatus->pr_fpvalid,
+	      (char *) prstatus->pr_reg + prstatus->pr_reg_size);
+  prstatus->pr_reg_size += 4;
+  /* pr_fpvalid becomes padding.  */
+  prstatus->pr_fpvalid = 0;
+  return elfcore_write_linux_prstatus32 (obfd, buf, bufsize, prstatus);
+}
+
 /* The instruction sequences used in x86_64 machines for a
    disabled is-enabled probe.  */
 
@@ -2075,7 +2095,7 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* x32's layout is not compatible with the 32-bit layout.  */
   set_gdbarch_elfcore_write_linux_prstatus
-    (gdbarch, gdb_deprecated_elfcore_write_linux_prstatus);
+    (gdbarch, amd64_x32_write_linux_prstatus);
 
   amd64_x32_init_abi (info, gdbarch);
 
