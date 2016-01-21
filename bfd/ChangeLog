@@ -1,5 +1,14 @@
 2016-01-21  Alan Modra  <amodra@gmail.com>
 
+	* elf-linux-core.h: Rename from elf-linux-psinfo.h.
+	* elf.c: Adjust #include.
+	* elf32-ppc.c: Don't #include elf-linux-psinfo.h
+	* Makefile.am (SOURCE_HFILES): Update.
+	* Makefile.in: Regenerate.
+	* po/SRC-PORFILES.in: Regenerate.
+
+2016-01-21  Alan Modra  <amodra@gmail.com>
+
 	* configure.ac: Move corefile selection later in file.  Move
 	tdefaults code immediately after other target vector code.
 	* configure: Regenerate.

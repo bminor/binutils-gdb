@@ -35,7 +35,6 @@
 #include "elf32-ppc.h"
 #include "elf-vxworks.h"
 #include "dwarf2.h"
-#include "elf-linux-psinfo.h"
 
 typedef enum split16_format_type
 {

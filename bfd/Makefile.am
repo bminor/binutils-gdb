@@ -790,7 +790,7 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 ## This is a list of all .h files which are in the source tree.
 SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
-	elf-bfd.h elf-hppa.h elf-linux-psinfo.h elf32-hppa.h \
+	elf-bfd.h elf-hppa.h elf-linux-core.h elf32-hppa.h \
 	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \

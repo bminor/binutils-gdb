@@ -42,7 +42,7 @@ SECTION
 #include "elf-bfd.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
-#include "elf-linux-psinfo.h"
+#include "elf-linux-core.h"
 
 #ifdef CORE_HEADER
 #include CORE_HEADER
