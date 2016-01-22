@@ -139,13 +139,13 @@ h8_set_exception (SIM_DESC sd, int val)
 static enum h8300_sim_state
 h8_get_state (SIM_DESC sd)
 {
-  return sd -> state;
+  return H8300_SIM_STATE (sd)->state;
 }
 
 static void
 h8_set_state (SIM_DESC sd, enum h8300_sim_state val)
 {
-  sd -> state = val;
+  H8300_SIM_STATE (sd)->state = val;
 }
 #endif
 static unsigned int
@@ -230,13 +230,13 @@ h8_set_reg (SIM_DESC sd, int regnum, int val)
 static int
 h8_get_stats (SIM_DESC sd, int idx)
 {
-  return sd -> stats[idx];
+  return H8300_SIM_STATE (sd)->stats[idx];
 }
 
 static void
 h8_increment_stats (SIM_DESC sd, int idx)
 {
-  sd -> stats[idx] ++;
+  H8300_SIM_STATE (sd)->stats[idx] ++;
 }
 #endif /* ADEBUG */
 
@@ -1612,6 +1612,8 @@ static int init_pointers_needed = 1;
 static void
 init_pointers (SIM_DESC sd)
 {
+  struct h8300_sim_state *state = H8300_SIM_STATE (sd);
+
   if (init_pointers_needed)
     {
       int i;
@@ -1637,7 +1639,7 @@ init_pointers (SIM_DESC sd)
 
       h8_set_memory_buf (sd, (unsigned char *) 
 			 calloc (sizeof (char), memory_size));
-      sd->memory_size = memory_size;
+      state->memory_size = memory_size;
 
       h8_set_mask (sd, memory_size - 1);
 
@@ -1723,6 +1725,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
   int trace = 0;
   int intMask = 0;
   int oldmask;
+  const struct h8300_sim_state *state = H8300_SIM_STATE (sd);
   host_callback *sim_callback = STATE_CALLBACK (sd);
 
   init_pointers (sd);
@@ -4529,6 +4532,7 @@ h8300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int length)
 void
 sim_info (SIM_DESC sd, int verbose)
 {
+  const struct h8300_sim_state *state = H8300_SIM_STATE (sd);
   double timetaken = (double) h8_get_ticks (sd) / (double) now_persec ();
   double virttime = h8_get_cycles (sd) / 10.0e6;
 
@@ -4661,7 +4665,7 @@ sim_open (SIM_OPEN_KIND kind,
   SIM_DESC sd;
   sim_cpu *cpu;
 
-  sd = sim_state_alloc (kind, callback);
+  sd = sim_state_alloc_extra (kind, callback, sizeof (struct h8300_sim_state));
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
@@ -4745,6 +4749,7 @@ sim_open (SIM_OPEN_KIND kind,
 SIM_RC
 sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 {
+  struct h8300_sim_state *state = H8300_SIM_STATE (sd);
   bfd *prog_bfd;
 
   /* FIXME: The code below that sets a specific variant of the H8/300
@@ -4794,7 +4799,7 @@ sim_load (SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 
   h8_set_memory_buf (sd, (unsigned char *) 
 		     calloc (sizeof (char), memory_size));
-  sd->memory_size = memory_size;
+  state->memory_size = memory_size;
 
   /* `msize' must be a power of two.  */
   if ((memory_size & (memory_size - 1)) != 0)

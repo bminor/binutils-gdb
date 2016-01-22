@@ -1,3 +1,19 @@
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (h8_get_state): Change sd to H8300_SIM_STATE.
+	(h8_set_state): Likewise.
+	(h8_get_stats): Likewise.
+	(h8_increment_stats): Likewise.
+	(init_pointers): Likewise.
+	(step_once): Likewise.
+	(sim_info): Likewise.
+	(sim_open): Likewise.
+	(sim_load): Likewise.
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Define.
+	(struct sim_state): Delete.
+	(struct h8300_sim_state): New struct.
+	(H8300_SIM_STATE): Define.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* compile.c: Replace config.h include with defs.h.

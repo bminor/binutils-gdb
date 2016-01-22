@@ -5,6 +5,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_STATE
+
 #define DEBUG
 
 /* These define the size of main memory for the simulator.
@@ -130,15 +132,13 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
-/* The sim_state struct.  */
-struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
+struct h8300_sim_state {
   unsigned long memory_size;
 #ifdef ADEBUG
   int stats[O_LAST];
 #endif
-  sim_state_base base;
 };
+#define H8300_SIM_STATE(sd) ((struct h8300_sim_state *) STATE_ARCH_DATA (sd))
 
 /* The current state of the processor; registers, memory, etc.  */
 
