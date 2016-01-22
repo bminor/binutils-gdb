@@ -9233,7 +9233,8 @@ update_dprintf_commands (char *args, int from_tty,
 
 /* Create a breakpoint with SAL as location.  Use LOCATION
    as a description of the location, and COND_STRING
-   as condition expression.  */
+   as condition expression.  If LOCATION is NULL then create an
+   "address location" from the address in the SAL.  */
 
 static void
 init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,

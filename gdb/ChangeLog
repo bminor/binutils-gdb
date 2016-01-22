@@ -1,3 +1,7 @@
+2016-01-21  Doug Evans  <dje@google.com>
+
+	* breakpoint.c (init_breakpoint_sal): Add comment.
+
 2016-01-21  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* ax-gdb.c (gen_traced_pop): Use gen_fetch for string collection.
