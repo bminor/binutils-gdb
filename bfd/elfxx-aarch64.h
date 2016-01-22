@@ -58,10 +58,6 @@ _bfd_aarch64_elf_grok_prstatus (bfd *, Elf_Internal_Note *);
 extern bfd_boolean
 _bfd_aarch64_elf_grok_psinfo (bfd *, Elf_Internal_Note *);
 
-extern char *
-_bfd_aarch64_elf_write_core_note (bfd *, char *, int *, int, ...);
-
 #define elf_backend_add_symbol_hook	_bfd_aarch64_elf_add_symbol_hook
 #define elf_backend_grok_prstatus	_bfd_aarch64_elf_grok_prstatus
 #define elf_backend_grok_psinfo         _bfd_aarch64_elf_grok_psinfo
-#define elf_backend_write_core_note     _bfd_aarch64_elf_write_core_note

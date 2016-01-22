@@ -1190,10 +1190,6 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_grok_psinfo)
     (bfd *, Elf_Internal_Note *);
 
-  /* This function, if defined, is called to write a note to a corefile.  */
-  char *(*elf_backend_write_core_note)
-    (bfd *abfd, char *buf, int *bufsiz, int note_type, ...);
-
   /* This function, if defined, is called to convert target-specific
      section flag names into hex values.  */
   flagword (*elf_backend_lookup_section_flags_hook)

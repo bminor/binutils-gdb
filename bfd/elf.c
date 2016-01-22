@@ -9726,25 +9726,16 @@ elfcore_write_note (bfd *abfd,
 }
 
 char *
-elfcore_write_prpsinfo (bfd  *abfd,
+elfcore_write_prpsinfo (bfd *abfd ATTRIBUTE_UNUSED,
 			char *buf,
-			int  *bufsiz,
-			const char *fname,
-			const char *psargs)
+			int *bufsiz ATTRIBUTE_UNUSED,
+			const char *fname ATTRIBUTE_UNUSED,
+			const char *psargs ATTRIBUTE_UNUSED)
 {
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-  if (bed->elf_backend_write_core_note != NULL)
-    {
-      char *ret;
-      ret = (*bed->elf_backend_write_core_note) (abfd, buf, bufsiz,
-						 NT_PRPSINFO, fname, psargs);
-      if (ret != NULL)
-	return ret;
-    }
-
 #if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
 #if defined (HAVE_PRPSINFO32_T) || defined (HAVE_PSINFO32_T)
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
   if (bed->s->elfclass == ELFCLASS32)
     {
 #if defined (HAVE_PSINFO32_T)
@@ -9843,27 +9834,17 @@ elfcore_write_linux_prstatus64
 }
 
 char *
-elfcore_write_prstatus (bfd *abfd,
+elfcore_write_prstatus (bfd *abfd ATTRIBUTE_UNUSED,
 			char *buf,
-			int *bufsiz,
-			long pid,
-			int cursig,
-			const void *gregs)
+			int *bufsiz ATTRIBUTE_UNUSED,
+			long pid ATTRIBUTE_UNUSED,
+			int cursig ATTRIBUTE_UNUSED,
+			const void *gregs ATTRIBUTE_UNUSED)
 {
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-  if (bed->elf_backend_write_core_note != NULL)
-    {
-      char *ret;
-      ret = (*bed->elf_backend_write_core_note) (abfd, buf, bufsiz,
-						 NT_PRSTATUS,
-						 pid, cursig, gregs);
-      if (ret != NULL)
-	return ret;
-    }
-
 #if defined (HAVE_PRSTATUS_T)
 #if defined (HAVE_PRSTATUS32_T)
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
   if (bed->s->elfclass == ELFCLASS32)
     {
       prstatus32_t prstat;

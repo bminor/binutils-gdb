@@ -550,9 +550,6 @@
 #ifndef elf_backend_grok_psinfo
 #define elf_backend_grok_psinfo			NULL
 #endif
-#ifndef elf_backend_write_core_note
-#define elf_backend_write_core_note		NULL
-#endif
 #ifndef elf_backend_lookup_section_flags_hook
 #define elf_backend_lookup_section_flags_hook	NULL
 #endif
@@ -762,7 +759,6 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_sort_relocs_p,
   elf_backend_grok_prstatus,
   elf_backend_grok_psinfo,
-  elf_backend_write_core_note,
   elf_backend_lookup_section_flags_hook,
   elf_backend_reloc_type_class,
   elf_backend_discard_info,

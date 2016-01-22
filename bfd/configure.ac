@@ -841,7 +841,6 @@ AC_SUBST(havevecs)
 # If we are configured native, pick a core file support file.
 COREFILE=
 COREFLAG=
-CORE_HEADER=
 TRAD_HEADER=
 if test "${target}" = "${host}"; then
   case "${host}" in
@@ -941,10 +940,6 @@ changequote(,)dnl
 changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386linux.h"'
-	case "$enable_targets"-"$want64" in
-	*x86_64-*linux*|*-true)
-	  CORE_HEADER='"hosts/x86-64linux.h"'
-	esac
 	;;
 changequote(,)dnl
   i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;
@@ -1081,9 +1076,6 @@ changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/vaxbsd.h"'
 	;;
-  x86_64-*-linux*)
-	CORE_HEADER='"hosts/x86-64linux.h"'
-	;;
   x86_64-*-netbsd* | x86_64-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
@@ -1132,10 +1124,6 @@ changequote([,])dnl
 fi
 AC_SUBST(COREFILE)
 AC_SUBST(COREFLAG)
-if test -n "$CORE_HEADER"; then
-  AC_DEFINE_UNQUOTED(CORE_HEADER, $CORE_HEADER,
-    [Name of host specific core header file to include in elf.c.])
-fi
 if test -n "$TRAD_HEADER"; then
   AC_DEFINE_UNQUOTED(TRAD_HEADER, $TRAD_HEADER,
     [Name of host specific header file to include in trad-core.c.])

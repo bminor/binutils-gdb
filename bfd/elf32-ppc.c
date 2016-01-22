@@ -2307,52 +2307,6 @@ elfcore_write_ppc_linux_prpsinfo32
 			     "CORE", NT_PRPSINFO, &data, sizeof (data));
 }
 
-static char *
-ppc_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type, ...)
-{
-  switch (note_type)
-    {
-    default:
-      return NULL;
-
-    case NT_PRPSINFO:
-      {
-	char data[128];
-	va_list ap;
-
-	va_start (ap, note_type);
-	memset (data, 0, sizeof (data));
-	strncpy (data + 32, va_arg (ap, const char *), 16);
-	strncpy (data + 48, va_arg (ap, const char *), 80);
-	va_end (ap);
-	return elfcore_write_note (abfd, buf, bufsiz,
-				   "CORE", note_type, data, sizeof (data));
-      }
-
-    case NT_PRSTATUS:
-      {
-	char data[268];
-	va_list ap;
-	long pid;
-	int cursig;
-	const void *greg;
-
-	va_start (ap, note_type);
-	memset (data, 0, 72);
-	pid = va_arg (ap, long);
-	bfd_put_32 (abfd, pid, data + 24);
-	cursig = va_arg (ap, int);
-	bfd_put_16 (abfd, cursig, data + 12);
-	greg = va_arg (ap, const void *);
-	memcpy (data + 72, greg, 192);
-	memset (data + 264, 0, 4);
-	va_end (ap);
-	return elfcore_write_note (abfd, buf, bufsiz,
-				   "CORE", note_type, data, sizeof (data));
-      }
-    }
-}
-
 static flagword
 ppc_elf_lookup_section_flags (char *flag_name)
 {
@@ -10746,7 +10700,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_modify_segment_map     	ppc_elf_modify_segment_map
 #define elf_backend_grok_prstatus		ppc_elf_grok_prstatus
 #define elf_backend_grok_psinfo			ppc_elf_grok_psinfo
-#define elf_backend_write_core_note		ppc_elf_write_core_note
 #define elf_backend_reloc_type_class		ppc_elf_reloc_type_class
 #define elf_backend_begin_write_processing	ppc_elf_begin_write_processing
 #define elf_backend_final_write_processing	ppc_elf_final_write_processing
