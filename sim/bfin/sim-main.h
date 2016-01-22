@@ -21,6 +21,8 @@
 #ifndef _BFIN_MAIN_SIM_H_
 #define _BFIN_MAIN_SIM_H_
 
+#define SIM_HAVE_COMMON_SIM_STATE
+
 #include "sim-basics.h"
 #include "sim-signal.h"
 #include "arch.h"
@@ -37,14 +39,7 @@ struct _sim_cpu {
 };
 #define BFIN_CPU_STATE ((cpu)->state)
 
-struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  /* ... simulator specific members ... */
-  struct bfin_board_data board;
-#define STATE_BOARD_DATA(sd) (&(sd)->board)
-  sim_state_base base;
-};
+#define STATE_BOARD_DATA(sd) ((struct bfin_board_data *) STATE_ARCH_DATA (sd))
 
 #include "sim-config.h"
 #include "sim-types.h"

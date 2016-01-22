@@ -1,3 +1,10 @@
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Call sim_state_alloc_extra.
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Define.
+	(struct sim_state): Delete.
+	(STATE_BOARD_DATA): Define.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c, devices.c, dv-bfin_cec.c, dv-bfin_ctimer.c,

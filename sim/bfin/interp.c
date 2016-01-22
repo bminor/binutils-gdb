@@ -717,7 +717,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 {
   char c;
   int i;
-  SIM_DESC sd = sim_state_alloc (kind, callback);
+  SIM_DESC sd = sim_state_alloc_extra (kind, callback,
+				       sizeof (struct bfin_board_data));
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
