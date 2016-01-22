@@ -343,7 +343,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	  struct bfd *abfd, char * const *argv)
 {
   int i;
-  SIM_DESC sd = sim_state_alloc (kind, cb);
+  SIM_DESC sd = sim_state_alloc_extra (kind, cb,
+				       sizeof (struct mips_sim_state));
   sim_cpu *cpu;
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);

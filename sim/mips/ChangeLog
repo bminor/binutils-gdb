@@ -1,3 +1,15 @@
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_open): Switch to sim_state_alloc_extra.
+	* micromips.igen: Change SD to mips_sim_state.
+	* micromipsrun.c (sim_engine_run): Likewise.
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Define.
+	(watch_options_install): Delete.
+	(struct swatch): Delete.
+	(struct sim_state): Delete.
+	(struct mips_sim_state): New struct.
+	(MIPS_SIM_STATE): Define.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c: Replace config.h include with defs.h.
