@@ -39,13 +39,4 @@ struct _sim_cpu
 #endif
 };
 
-
-
-struct sim_state
-{
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-  CGEN_STATE cgen_state;
-  sim_state_base base;
-};
-
 #endif /* ! SIM_MAIN_H */

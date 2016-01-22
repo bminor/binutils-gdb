@@ -1,3 +1,7 @@
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (struct sim_state): Delete.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* cache.c, frv.c, interrupts.c, memory.c, options.c, pipeline.c,

@@ -88,6 +88,10 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-cpu.h"
 #include "sim-assert.h"
 
+#ifdef CGEN_ARCH
+# include "cgen-sim.h"
+# define SIM_HAVE_COMMON_SIM_STATE
+#endif
 
 /* We require all sims to dynamically allocate cpus.  See comment up top about
    struct sim_state.  */
@@ -232,6 +236,12 @@ struct sim_state {
      target should define a struct and use it here.  */
   void *arch_data;
 #define STATE_ARCH_DATA(sd) ((sd)->arch_data)
+
+#ifdef CGEN_ARCH
+  /* Various cgen runtime state.  */
+  CGEN_STATE cgen_state;
+#endif
+#define STATE_CGEN_STATE(sd) ((sd)->cgen_state)
 };
 #endif
 

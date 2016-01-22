@@ -1,5 +1,13 @@
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-defs.h (STATE_RUN_FAST_P): Call STATE_CGEN_STATE.
+	* sim-base.h [CGEN_ARCH]: Include cgen-sim.h and define
+	SIM_HAVE_COMMON_SIM_STATE.
+	(struct sim_state): Add cgen_state.
+	(STATE_CGEN_STATE): Define.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-base.h (struct sim_state): Update comment.
 	(struct sim_state): Define.
 	(STATE_ARCH_DATA): Likewise.

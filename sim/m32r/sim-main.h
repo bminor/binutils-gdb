@@ -48,16 +48,6 @@ struct _sim_cpu {
 #endif
 };
 
-/* The sim_state struct.  */
-
-struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  CGEN_STATE cgen_state;
-
-  sim_state_base base;
-};
-
 /* Misc.  */
 
 /* Catch address exceptions.  */

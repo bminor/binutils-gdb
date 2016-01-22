@@ -1,3 +1,7 @@
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (struct sim_state): Delete.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-lm32cpu.c, dv-lm32timer.c, dv-lm32uart.c, lm32.c, sim-if.c,

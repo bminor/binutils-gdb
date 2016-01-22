@@ -146,7 +146,7 @@ typedef enum {
 typedef struct cgen_state {
   /* Non-zero if no tracing or profiling is selected.  */
   int run_fast_p;
-#define STATE_RUN_FAST_P(sd) ((sd) -> cgen_state.run_fast_p)
+#define STATE_RUN_FAST_P(sd) (STATE_CGEN_STATE (sd).run_fast_p)
 } CGEN_STATE;
 
 /* Various utilities.  */

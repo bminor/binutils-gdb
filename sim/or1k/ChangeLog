@@ -1,3 +1,8 @@
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h: Move or1k-opc.h include.
+	(struct sim_state): Delete.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h: Delete config.h include.
