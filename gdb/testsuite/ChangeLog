@@ -1,3 +1,9 @@
+2016-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix testsuite compatibility with Guile.
+	* gdb.gdb/selftest.exp (send ^C to child process): Accept also Thread.
+	(thread 1): New test for backtrace through signal handler.
+
 2016-01-22  Yao Qi  <yao.qi@linaro.org>
 
 	PR testsuite/19491
