@@ -144,14 +144,6 @@ typedef enum {
    sim_state_base.  */
 
 typedef struct cgen_state {
-  /* FIXME: Moved to sim_state_base.  */
-  /* argv, env */
-  char **argv;
-#define STATE_ARGV(s) ((s) -> cgen_state.argv)
-  /* FIXME: Move to sim_state_base.  */
-  char **envp;
-#define STATE_ENVP(s) ((s) -> cgen_state.envp)
-
   /* Non-zero if no tracing or profiling is selected.  */
   int run_fast_p;
 #define STATE_RUN_FAST_P(sd) ((sd) -> cgen_state.run_fast_p)

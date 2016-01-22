@@ -1,3 +1,8 @@
+2016-08-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-defs.h (struct cgen_state): Delete argv and envp.
+	(STATE_ARGV, STATE_ENVP): Delete.
+
 2016-02-04  Nick Clifton  <nickc@redhat.com>
 
 	* cgen-scache.c (scache_option_handler): Prevent possible
