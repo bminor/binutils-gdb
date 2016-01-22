@@ -1,4 +1,11 @@
 2016-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	Fix testsuite compatibility with Guile.
+	* gdb.gdb/selftest.exp (send ^C to child process): Drop expected Thread
+	number.
+
+2016-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix testsuite compatibility with Guile.
 	* gdb.gdb/selftest.exp (send ^C to child process): Accept also Thread.

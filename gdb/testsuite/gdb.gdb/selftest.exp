@@ -438,7 +438,7 @@ proc test_with_self { executable } {
 	send_gdb "\003"
 	# "Thread 1" is displayed iff Guile support is linked in.
 	gdb_expect {
-	    -re "(Thread 1 .*|Program) received signal SIGINT.*$gdb_prompt $" {
+	    -re "(Thread .*|Program) received signal SIGINT.*$gdb_prompt $" {
 		pass "$description"
 	    }
 	    -re ".*$gdb_prompt $" {
