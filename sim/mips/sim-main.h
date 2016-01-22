@@ -20,8 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define SIM_HAVE_COMMON_SIM_STATE
-
 /* MIPS uses an unusual format for floating point quiet NaNs.  */
 #define SIM_QUIET_NAN_NEGATED
 

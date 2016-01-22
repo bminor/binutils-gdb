@@ -1,5 +1,42 @@
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-base.h (SIM_HAVE_COMMON_SIM_STATE): Delete.
+	(struct sim_state_base): Merge into ...
+	(struct sim_state): ... this.
+	(STATE_MY_NAME): Delete base.
+	(STATE_OPEN_KIND): Likewise.
+	(STATE_CALLBACK): Likewise.
+	(STATE_ENVIRONMENT): Likewise.
+	(STATE_CONFIG): Likewise.
+	(STATE_MODULES): Likewise.
+	(STATE_OPTIONS): Likewise.
+	(STATE_VERBOSE_P): Likewise.
+	(STATE_TRACE_DATA): Likewise.
+	(STATE_ARCHITECTURE): Likewise.
+	(STATE_TARGET): Likewise.
+	(STATE_PROG_ARGV): Likewise.
+	(STATE_PROG_BFD): Likewise.
+	(STATE_PROG_SYMS): Likewise.
+	(STATE_PROG_SYMS_COUNT): Likewise.
+	(STATE_TEXT_SECTION): Likewise.
+	(STATE_TEXT_START): Likewise.
+	(STATE_TEXT_END): Likewise.
+	(STATE_START_ADDR): Likewise.
+	(STATE_SCACHE_SIZE): Likewise.
+	(STATE_CORE): Likewise.
+	(STATE_MEMOPT): Likewise.
+	(STATE_EVENTS): Likewise.
+	(STATE_ENGINE): Likewise.
+	(STATE_WATCHPOINTS): Likewise.
+	(STATE_HW): Likewise.
+	(STATE_LOAD_AT_LMA_P): Likewise.
+	(SIM_MAGIC_NUMBER): Likewise.
+	(STATE_MAGIC): Likewise.
+	* sim-utils.c (sim_state_alloc_extra): Delete check for
+	SIM_HAVE_COMMON_SIM_STATE.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-defs.h (STATE_RUN_FAST_P): Call STATE_CGEN_STATE.
 	* sim-base.h [CGEN_ARCH]: Include cgen-sim.h and define
 	SIM_HAVE_COMMON_SIM_STATE.

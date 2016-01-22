@@ -21,8 +21,6 @@
 #ifndef _BFIN_MAIN_SIM_H_
 #define _BFIN_MAIN_SIM_H_
 
-#define SIM_HAVE_COMMON_SIM_STATE
-
 #include "sim-basics.h"
 #include "sim-signal.h"
 #include "arch.h"

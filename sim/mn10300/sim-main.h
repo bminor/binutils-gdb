@@ -22,8 +22,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define SIM_HAVE_COMMON_SIM_STATE
-
 #define SIM_ENGINE_HALT_HOOK(SD,LAST_CPU,CIA) 0 /* disable this hook */
 
 #include "sim-basics.h"

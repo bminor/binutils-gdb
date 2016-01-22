@@ -19,8 +19,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define SIM_HAVE_COMMON_SIM_STATE
-
 #include "sim-basics.h"
 
 typedef long int           word;

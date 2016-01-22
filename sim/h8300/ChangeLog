@@ -1,5 +1,9 @@
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* compile.c (h8_get_state): Change sd to H8300_SIM_STATE.
 	(h8_set_state): Likewise.
 	(h8_get_stats): Likewise.

@@ -5,8 +5,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define SIM_HAVE_COMMON_SIM_STATE
-
 #define DEBUG
 
 /* These define the size of main memory for the simulator.

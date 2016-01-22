@@ -1,5 +1,9 @@
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.
+
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (do_call): Change sd to avr_sim_state.
 	(step_once): Likewise.
 	(sim_open): Likewise.

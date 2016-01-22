@@ -57,10 +57,8 @@ sim_state_alloc_extra (SIM_OPEN_KIND kind, host_callback *callback,
   STATE_CALLBACK (sd) = callback;
   STATE_OPEN_KIND (sd) = kind;
 
-#ifdef SIM_HAVE_COMMON_SIM_STATE
   if (extra_bytes)
     STATE_ARCH_DATA (sd) = zalloc (extra_bytes);
-#endif
 
 #if 0
   {
