@@ -23622,7 +23622,7 @@ Displays the current state of displaying @value{GDBN} frame debugging
 info.
 @item set debug gnu-nat
 @cindex @sc{gnu}/Hurd debug messages
-Turns on or off debugging messages from the @sc{gnu}/Hurd debug support.
+Turn on or off debugging messages from the @sc{gnu}/Hurd debug support.
 @item show debug gnu-nat
 Show the current state of @sc{gnu}/Hurd debugging messages.
 @item set debug infrun
@@ -23634,18 +23634,18 @@ for implementing operations such as single-stepping the inferior.
 Displays the current state of @value{GDBN} inferior debugging.
 @item set debug jit
 @cindex just-in-time compilation, debugging messages
-Turns on or off debugging messages from JIT debug support.
+Turn on or off debugging messages from JIT debug support.
 @item show debug jit
 Displays the current state of @value{GDBN} JIT debugging.
 @item set debug lin-lwp
 @cindex @sc{gnu}/Linux LWP debug messages
 @cindex Linux lightweight processes
-Turns on or off debugging messages from the Linux LWP debug support.
+Turn on or off debugging messages from the Linux LWP debug support.
 @item show debug lin-lwp
 Show the current state of Linux LWP debugging messages.
 @item set debug linux-namespaces
 @cindex @sc{gnu}/Linux namespaces debug messages
-Turns on or off debugging messages from the Linux namespaces debug support.
+Turn on or off debugging messages from the Linux namespaces debug support.
 @item show debug linux-namespaces
 Show the current state of Linux namespaces debugging messages.
 @item set debug mach-o
@@ -23657,7 +23657,7 @@ Displays the current state of displaying debugging messages related to
 reading of COFF/PE exported symbols.
 @item set debug notification
 @cindex remote async notification debugging info
-Turns on or off debugging messages about remote async notification.
+Turn on or off debugging messages about remote async notification.
 The default is off.
 @item show debug notification
 Displays the current state of remote async notification debugging messages.
@@ -23703,7 +23703,7 @@ Displays the current state of displaying @value{GDBN} serial debugging
 info.
 @item set debug solib-frv
 @cindex FR-V shared-library debugging
-Turns on or off debugging messages for FR-V shared-library code.
+Turn on or off debugging messages for FR-V shared-library code.
 @item show debug solib-frv
 Display the current state of FR-V shared-library code debugging
 messages.
@@ -23755,7 +23755,7 @@ Displays the current state of displaying @value{GDBN} variable object
 debugging info.
 @item set debug xml
 @cindex XML parser debugging
-Turns on or off debugging messages for built-in XML parsers.
+Turn on or off debugging messages for built-in XML parsers.
 @item show debug xml
 Displays the current state of XML debugging messages.
 @end table

@@ -1,3 +1,7 @@
+2016-01-26  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Debugging Output): Fix subject verb disagreements.
+
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* gdb.texinfo (Debugging Output): Document "set/show debug fbsd-lwp".
