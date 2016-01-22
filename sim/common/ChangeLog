@@ -1,3 +1,13 @@
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-base.h (struct sim_state): Update comment.
+	(struct sim_state): Define.
+	(STATE_ARCH_DATA): Likewise.
+	(sim_state_alloc): New define.
+	(sim_state_alloc_extra): Renamed & add 3rd arg.
+	* sim-utils.c (sim_state_alloc): Likewise.
+	(sim_state_alloc_extra): Set arch data.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* callback.c: Replace config.h include with defs.h.

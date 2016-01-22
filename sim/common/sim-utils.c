@@ -48,14 +48,19 @@ zalloc (unsigned long size)
 /* Allocate a sim_state struct.  */
 
 SIM_DESC
-sim_state_alloc (SIM_OPEN_KIND kind,
-		 host_callback *callback)
+sim_state_alloc_extra (SIM_OPEN_KIND kind, host_callback *callback,
+		       size_t extra_bytes)
 {
   SIM_DESC sd = ZALLOC (struct sim_state);
 
   STATE_MAGIC (sd) = SIM_MAGIC_NUMBER;
   STATE_CALLBACK (sd) = callback;
   STATE_OPEN_KIND (sd) = kind;
+
+#ifdef SIM_HAVE_COMMON_SIM_STATE
+  if (extra_bytes)
+    STATE_ARCH_DATA (sd) = zalloc (extra_bytes);
+#endif
 
 #if 0
   {

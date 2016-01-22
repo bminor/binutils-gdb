@@ -1,6 +1,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_STATE
+
 /* The v850 has 32bit words, numbered 31 (MSB) to 0 (LSB) */
 
 #define WITH_TARGET_WORD_MSB 31
@@ -46,18 +48,6 @@ struct _sim_cpu
   sim_event *pending_nmi;
   /* ... base type ... */
   sim_cpu_base base;
-};
-
-struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-#if 0
-  SIM_ADDR rom_size;
-  SIM_ADDR low_end;
-  SIM_ADDR high_start;
-  SIM_ADDR high_base;
-  void *mem;
-#endif
-  sim_state_base base;
 };
 
 /* For compatibility, until all functions converted to passing

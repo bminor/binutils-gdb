@@ -18,6 +18,8 @@
 #ifndef MICROBLAZE_SIM_MAIN
 #define MICROBLAZE_SIM_MAIN
 
+#define SIM_HAVE_COMMON_SIM_STATE
+
 #include "microblaze.h"
 #include "sim-basics.h"
 #include "sim-base.h"
@@ -46,13 +48,6 @@
 struct _sim_cpu {
   struct microblaze_regset microblaze_cpu;
   sim_cpu_base base;
-};
-
-struct sim_state {
-
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  sim_state_base base;
 };
 
 #endif /* MICROBLAZE_SIM_MAIN */

@@ -42,14 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
         sim_cpu_base base;
      };
 
-     struct sim_state {
-       sim_cpu *cpu[MAX_NR_PROCESSORS];
-       ... simulator specific members ...
-       sim_state_base base;
-     };
-
-   Note that `base' appears last.  This makes `base.magic' appear last
-   in the entire struct and helps catch miscompilation errors. */
+   If your sim needs to allocate sim-wide state, use STATE_ARCH_DATA.  */
 
 
 #ifndef SIM_BASE_H
@@ -226,8 +219,27 @@ typedef struct {
 #define STATE_MAGIC(sd) ((sd)->base.magic)
 } sim_state_base;
 
+#ifdef SIM_HAVE_COMMON_SIM_STATE
+/* TODO: Merge sim_state & sim_state_base.  */
+struct sim_state {
+  /* All the cpus for this instance.  */
+  sim_cpu *cpu[MAX_NR_PROCESSORS];
+
+  /* All the common state.  */
+  sim_state_base base;
+
+  /* Pointer for sim target to store arbitrary state data.  Normally the
+     target should define a struct and use it here.  */
+  void *arch_data;
+#define STATE_ARCH_DATA(sd) ((sd)->arch_data)
+};
+#endif
+
 /* Functions for allocating/freeing a sim_state.  */
-SIM_DESC sim_state_alloc (SIM_OPEN_KIND kind, host_callback *callback);
+SIM_DESC sim_state_alloc_extra (SIM_OPEN_KIND kind, host_callback *callback,
+				size_t extra_bytes);
+#define sim_state_alloc(kind, callback) sim_state_alloc_extra(kind, callback, 0)
+
 void sim_state_free (SIM_DESC);
 
 #ifdef __cplusplus

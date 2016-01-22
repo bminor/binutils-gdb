@@ -22,6 +22,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_STATE
+
 #define SIM_ENGINE_HALT_HOOK(SD,LAST_CPU,CIA) 0 /* disable this hook */
 
 #include "sim-basics.h"
@@ -63,17 +65,6 @@ struct _sim_cpu {
   sim_event *pending_nmi;
   sim_cia cia;
   sim_cpu_base base;
-};
-
-
-struct sim_state {
-
-  /* the processors proper */
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  /* The base class.  */
-  sim_state_base base;
-
 };
 
 /* For compatibility, until all functions converted to passing

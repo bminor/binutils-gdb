@@ -19,6 +19,8 @@
 #ifndef PRU_SIM_MAIN
 #define PRU_SIM_MAIN
 
+#define SIM_HAVE_COMMON_SIM_STATE
+
 #include <stdint.h>
 #include <stddef.h>
 #include "pru.h"
@@ -83,9 +85,4 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
-struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  sim_state_base base;
-};
 #endif /* PRU_SIM_MAIN */

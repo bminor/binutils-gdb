@@ -21,6 +21,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_STATE
+
 #include "sim-basics.h"
 #include "sim-base.h"
 #include "bfd.h"
@@ -34,13 +36,6 @@ struct _sim_cpu {
   struct ft32_cpu_state state;
 
   sim_cpu_base base;
-};
-
-struct sim_state {
-
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  sim_state_base base;
 };
 
 #endif

@@ -19,6 +19,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_STATE
+
 #include "sim-basics.h"
 
 typedef long int           word;
@@ -32,13 +34,6 @@ typedef unsigned long int  uword;
 struct _sim_cpu {
 
   sim_cpu_base base;
-};
-
-struct sim_state {
-
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
-
-  sim_state_base base;
 };
 
 #endif

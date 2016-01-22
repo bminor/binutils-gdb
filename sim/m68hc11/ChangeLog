@@ -1,3 +1,8 @@
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Define.
+	(struct sim_state): Delete.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-m68hc11.c, dv-m68hc11eepr.c, dv-m68hc11sio.c, dv-m68hc11spi.c,
