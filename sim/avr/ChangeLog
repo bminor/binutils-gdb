@@ -1,3 +1,14 @@
+2021-05-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (do_call): Change sd to avr_sim_state.
+	(step_once): Likewise.
+	(sim_open): Likewise.
+	(sim_create_inferior): Likewise.
+	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Define.
+	(struct sim_state): Delete.
+	(struct avr_sim_state): New struct.
+	(AVR_SIM_STATE): Define.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c: Replace config.h include with defs.h.
