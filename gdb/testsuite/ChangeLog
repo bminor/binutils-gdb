@@ -1,3 +1,7 @@
+2016-01-21  Doug Evans  <dje@google.com>
+
+	* lib/ada.exp (gdb_compile_ada): Fix typo.
+
 2016-01-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/break-fun-addr.exp: New file.
