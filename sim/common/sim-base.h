@@ -160,6 +160,10 @@ typedef struct {
   struct bfd_symbol **prog_syms;
 #define STATE_PROG_SYMS(sd) ((sd)->base.prog_syms)
 
+  /* Number of prog_syms symbols.  */
+  long prog_syms_count;
+#define STATE_PROG_SYMS_COUNT(sd) ((sd)->base.prog_syms_count)
+
   /* The program's text section.  */
   struct bfd_section *text_section;
   /* Starting and ending text section addresses from the bfd.  */

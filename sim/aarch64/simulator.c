@@ -13163,7 +13163,8 @@ bl (sim_cpu *cpu, int32_t offset)
 		    " %*scall %" PRIx64 " [%s]"
 		    " [args: %" PRIx64 " %" PRIx64 " %" PRIx64 "]",
 		    stack_depth, " ", aarch64_get_next_PC (cpu),
-		    aarch64_get_func (aarch64_get_next_PC (cpu)),
+		    aarch64_get_func (CPU_STATE (cpu),
+				      aarch64_get_next_PC (cpu)),
 		    aarch64_get_reg_u64 (cpu, 0, NO_SP),
 		    aarch64_get_reg_u64 (cpu, 1, NO_SP),
 		    aarch64_get_reg_u64 (cpu, 2, NO_SP)
@@ -13202,7 +13203,8 @@ blr (sim_cpu *cpu)
 		    " %*scall %" PRIx64 " [%s]"
 		    " [args: %" PRIx64 " %" PRIx64 " %" PRIx64 "]",
 		    stack_depth, " ", aarch64_get_next_PC (cpu),
-		    aarch64_get_func (aarch64_get_next_PC (cpu)),
+		    aarch64_get_func (CPU_STATE (cpu),
+				      aarch64_get_next_PC (cpu)),
 		    aarch64_get_reg_u64 (cpu, 0, NO_SP),
 		    aarch64_get_reg_u64 (cpu, 1, NO_SP),
 		    aarch64_get_reg_u64 (cpu, 2, NO_SP)

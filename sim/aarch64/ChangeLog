@@ -1,3 +1,22 @@
+2016-08-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include bfd.h.
+	(symcount, symtab, aarch64_get_sym_value): Delete.
+	(remove_useless_symbols): Change count type to long.
+	(aarch64_get_func): Add SIM_DESC to arg list.  Add symcount
+	and symtab local variables.
+	(sim_create_inferior): Delete storage.  Replace symbol code
+	with a call to trace_load_symbols.
+	* memory.c: Delete bfd.h, elf/internal.h, and elf/common.h
+	includes.
+	(aarch64_get_heap_start): Change aarch64_get_sym_value to
+	trace_sym_value.
+	* memory.h: Delete bfd.h include.
+	(mem_add_blk): Delete unused prototype.
+	* simulator.c (bl, blr): Pass SIM_DESC to aarch64_get_func.
+	* simulator.c (aarch64_get_func): Add SIM_DESC to arg list.
+	(aarch64_get_sym_value): Delete.
+
 2016-08-12  Nick Clifton  <nickc@redhat.com>
 
 	* simulator.c (aarch64_step): Revert pervious delta.

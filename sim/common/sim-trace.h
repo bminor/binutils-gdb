@@ -671,6 +671,10 @@ extern void trace_vprintf (SIM_DESC, sim_cpu *, const char *, va_list);
 /* Non-zero if "--debug-insn" specified.  */
 #define DEBUG_INSN_P(cpu) DEBUG_P (cpu, DEBUG_INSN_IDX)
 
+/* Symbol related helpers.  */
+int trace_load_symbols (SIM_DESC);
+bfd_vma trace_sym_value (SIM_DESC, const char *name);
+
 extern void sim_debug_printf (sim_cpu *, const char *, ...)
      __attribute__((format (printf, 2, 3)));
 

@@ -1,3 +1,9 @@
+2016-08-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_get_bank_parameters): Delete abfd arg.
+	Replace all symbol lookup code with calls to trace_sym_value.
+	(sim_prepare_for_program): Update sim_get_bank_parameters call.
+
 2016-08-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-m68hc11.c (m68hc11cpu_port_event): Adjust cpu prototype style.
