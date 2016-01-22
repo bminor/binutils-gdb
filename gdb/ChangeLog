@@ -1,3 +1,11 @@
+2016-01-22  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (fetch_fpregs): Call perror_with_name
+	instead of warning.
+	(store_fpregs, fetch_regs, store_regs): Likewise.
+	(fetch_wmmx_regs, store_wmmx_regs): Likewise.
+	(fetch_vfp_regs, store_vfp_regs): Likewise.
+
 2016-01-21  Doug Evans  <dje@google.com>
 
 	* breakpoint.c (init_breakpoint_sal): Add comment.
