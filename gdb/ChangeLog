@@ -1,3 +1,8 @@
+2016-02-18  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* s390-linux-tdep.c (s390_guess_tracepoint_registers): New function.
+	(s390_gdbarch_init): Fill guess_tracepoint_registers hook.
+
 2016-02-18  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* NEWS: Add entry for bound violation.
