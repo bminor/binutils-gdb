@@ -221,7 +221,7 @@ proc pending_tracepoint_resolved_during_trace { trace_type } \
 		fail $test
 	    }
 	}
-	-re "Continuing.\r\n(Reading .* from remote target...\r\n)?\r\nBreakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
+	-re "Continuing.\r\n(Reading .* from remote target...\r\n)?\r\n(Thread .* hit )?Breakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
 	    pass $test
 	}
     }

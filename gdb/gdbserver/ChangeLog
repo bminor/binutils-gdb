@@ -1,3 +1,7 @@
+2016-01-23  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/pending.exp: Fix expected message on continue.
+
 2016-01-22  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* tracepoint.c (write_inferior_data_ptr): Cast to uintptr_t, so that
