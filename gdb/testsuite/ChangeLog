@@ -1,3 +1,8 @@
+2016-01-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/backtrace.exp: Bump stack collection fudge factor.
+	* gdb.trace/entry-values.exp: Bump stack collection fudge factor.
+
 2016-01-23  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/unavailable-dwarf-piece.exp: Fix bitfield handling on big
