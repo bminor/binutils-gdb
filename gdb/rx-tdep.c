@@ -813,7 +813,8 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 						struct_addr);
 	    }
 	  else if (TYPE_CODE (arg_type) != TYPE_CODE_STRUCT
-		   && TYPE_CODE (arg_type) != TYPE_CODE_UNION)
+		   && TYPE_CODE (arg_type) != TYPE_CODE_UNION
+		   && arg_size <= 8)
 	    {
 	      /* Argument is a scalar.  */
 	      if (arg_size == 8)
