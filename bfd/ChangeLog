@@ -1,5 +1,9 @@
 2016-01-24  Maciej W. Rozycki  <macro@imgtec.com>
 
+	* elfxx-mips.c (BZ16_REG_FIELD): Simplify calculation.
+
+2016-01-24  Maciej W. Rozycki  <macro@imgtec.com>
+
 	* elfxx-mips.c (BZ16_REG): Correct calculation.
 
 2016-01-21  Nick Clifton  <nickc@redhat.com>
