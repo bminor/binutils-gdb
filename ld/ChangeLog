@@ -1,3 +1,8 @@
+2016-01-22  Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+
+	* scripttempl/avr.sc (.noinit): Force .noinit VMA to end of .bss VMA.
+	* scripttempl/avrtiny.sc (.noinit): Likewise.
+
 2016-01-21  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/19453
