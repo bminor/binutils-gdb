@@ -1,3 +1,8 @@
+2016-01-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-arc.c (elf_arc_finish_dynamic_symbol): Rename `index' to
+	`dynindx'.
+
 2016-01-25  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19435

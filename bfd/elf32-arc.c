@@ -2192,10 +2192,10 @@ elf_arc_finish_dynamic_symbol (bfd * output_bfd,
 	      BFD_ASSERT (list->type != GOT_TLS_GD
 			  || list->existing_entries == MOD_AND_OFF);
 
-	      bfd_vma index = h->dynindx == -1 ? 0 : h->dynindx;
+	      bfd_vma dynindx = h->dynindx == -1 ? 0 : h->dynindx;
 	      if (e == MOD_AND_OFF || e == MOD)
 		{
-		  ADD_RELA (output_bfd, got, got_offset, index,
+		  ADD_RELA (output_bfd, got, got_offset, dynindx,
 			    R_ARC_TLS_DTPMOD, 0);
 		  ARC_DEBUG ("arc_info: TLS_DYNRELOC: type = %d, \
 GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
@@ -2203,7 +2203,7 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
 			     got_offset,
 			     htab->sgot->output_section->vma
 			     + htab->sgot->output_offset + got_offset,
-			     index, 0);
+			     dynindx, 0);
 		}
 	      if (e == MOD_AND_OFF || e == OFF)
 		{
@@ -2214,7 +2214,7 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
 
 		  ADD_RELA (output_bfd, got,
 			    got_offset + (e == MOD_AND_OFF ? 4 : 0),
-			    index,
+			    dynindx,
 			    (list->type == GOT_TLS_IE ?
 			     R_ARC_TLS_TPOFF : R_ARC_TLS_DTPOFF),
 			    addend);
@@ -2225,7 +2225,7 @@ GOT_OFFSET = 0x%x, GOT_VMA = 0x%x, INDEX = %d, ADDEND = 0x%x\n",
 			     got_offset,
 			     htab->sgot->output_section->vma
 			     + htab->sgot->output_offset + got_offset,
-			     index, addend);
+			     dynindx, addend);
 		}
 	    }
 
