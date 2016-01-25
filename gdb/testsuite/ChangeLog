@@ -1,3 +1,13 @@
+2016-01-25  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/step-sw-breakpoint-adjust-pc.exp (foreach_with_prefix):
+	Delete, moved to lib/gdb.exp.
+	* gdb.threads/forking-threads-plus-breakpoint.exp
+	(foreach_with_prefix): Likewise.
+	* gdb.threads/process-dies-while-handling-bp.exp
+	(foreach_with_prefix): Likewise.
+	* lib/gdb.exp (foreach_with_prefix): New procedure.
+
 2016-01-25  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/backtrace.exp: Bump stack collection fudge factor.

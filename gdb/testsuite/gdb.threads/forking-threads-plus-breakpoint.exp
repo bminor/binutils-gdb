@@ -92,18 +92,6 @@ proc do_test { cond_bp_target detach_on_fork } {
 	"only inferior 1 left"
 }
 
-# Wrapper for foreach that calls with_test_prefix on each iteration,
-# including the iterator's current value in the prefix.
-
-proc foreach_with_prefix {var list body} {
-    upvar 1 $var myvar
-    foreach myvar $list {
-	with_test_prefix "$var=$myvar" {
-	    uplevel 1 $body
-	}
-    }
-}
-
 foreach_with_prefix cond_bp_target {1 0} {
     foreach_with_prefix detach_on_fork {"on" "off"} {
 	do_test $cond_bp_target $detach_on_fork

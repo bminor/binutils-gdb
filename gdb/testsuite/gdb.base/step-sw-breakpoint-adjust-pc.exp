@@ -73,18 +73,6 @@ proc test {non_stop displaced always_inserted} {
     }
 }
 
-# Wrapper for foreach that calls with_test_prefix on each iteration,
-# including the iterator's current value in the prefix.
-
-proc foreach_with_prefix {var list body} {
-    upvar 1 $var myvar
-    foreach myvar $list {
-	with_test_prefix "$var=$myvar" {
-	    uplevel 1 $body
-	}
-    }
-}
-
 foreach_with_prefix non_stop { "off" "on" } {
     foreach_with_prefix displaced_step { "off" "on" } {
 	foreach_with_prefix always_inserted { "off" "on" } {

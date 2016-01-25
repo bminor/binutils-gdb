@@ -1906,6 +1906,18 @@ proc with_test_prefix { prefix body } {
   }
 }
 
+# Wrapper for foreach that calls with_test_prefix on each iteration,
+# including the iterator's name and current value in the prefix.
+
+proc foreach_with_prefix {var list body} {
+    upvar 1 $var myvar
+    foreach myvar $list {
+	with_test_prefix "$var=$myvar" {
+	    uplevel 1 $body
+	}
+    }
+}
+
 # Run BODY in the context of the caller.  After BODY is run, the variables
 # listed in VARS will be reset to the values they had before BODY was run.
 #
