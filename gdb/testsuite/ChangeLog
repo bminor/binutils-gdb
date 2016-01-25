@@ -1,5 +1,11 @@
 2016-01-25  Pedro Alves  <palves@redhat.com>
 
+	PR threads/19461
+	* gdb.base/fork-running-state.c: New file.
+	* gdb.base/fork-running-state.exp: New file.
+
+2016-01-25  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/19494
 	* gdb.base/catch-fork-kill.c: New file.
 	* gdb.base/catch-fork-kill.exp: New file.

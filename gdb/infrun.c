@@ -5198,6 +5198,17 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  parent = ecs->ptid;
 	  child = ecs->ws.value.related_pid;
 
+	  /* At this point, the parent is marked running, and the
+	     child is marked stopped.  */
+
+	  /* If not resuming the parent, mark it stopped.  */
+	  if (follow_child && !detach_fork && !non_stop && !sched_multi)
+	    set_running (parent, 0);
+
+	  /* If resuming the child, mark it running.  */
+	  if (follow_child || (!detach_fork && (non_stop || sched_multi)))
+	    set_running (child, 1);
+
 	  /* In non-stop mode, also resume the other branch.  */
 	  if (!detach_fork && (non_stop
 			       || (sched_multi && target_is_non_stop_p ())))
