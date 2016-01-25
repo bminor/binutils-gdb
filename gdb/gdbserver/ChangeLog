@@ -1,3 +1,10 @@
+2016-01-25  Yao Qi  <yao.qi@linaro.org>
+
+	* remote-utils.c (new_thread_notify): Remove.
+	(dead_thread_notify): Likewise.
+	* remote-utils.h (new_thread_notify): Remove declaration.
+	(dead_thread_notify): Likewise.
+
 2016-01-23  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/pending.exp: Fix expected message on continue.

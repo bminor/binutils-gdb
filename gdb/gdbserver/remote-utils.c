@@ -1084,39 +1084,6 @@ outreg (struct regcache *regcache, int regno, char *buf)
 }
 
 void
-new_thread_notify (int id)
-{
-  char own_buf[256];
-
-  /* The `n' response is not yet part of the remote protocol.  Do nothing.  */
-  if (1)
-    return;
-
-  if (server_waiting == 0)
-    return;
-
-  sprintf (own_buf, "n%x", id);
-  disable_async_io ();
-  putpkt (own_buf);
-  enable_async_io ();
-}
-
-void
-dead_thread_notify (int id)
-{
-  char own_buf[256];
-
-  /* The `x' response is not yet part of the remote protocol.  Do nothing.  */
-  if (1)
-    return;
-
-  sprintf (own_buf, "x%x", id);
-  disable_async_io ();
-  putpkt (own_buf);
-  enable_async_io ();
-}
-
-void
 prepare_resume_reply (char *buf, ptid_t ptid,
 		      struct target_waitstatus *status)
 {
