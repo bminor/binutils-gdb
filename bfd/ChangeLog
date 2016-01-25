@@ -1,5 +1,10 @@
 2016-01-25  Tristan Gingold  <gingold@adacore.com>
 
+	* version.m4: Bump version to 2.26.0
+	* configure: Regenerate.
+
+2016-01-25  Tristan Gingold  <gingold@adacore.com>
+
 	* version.m4: Bump version to 2.26
 	* configure: Regenerate.
 
