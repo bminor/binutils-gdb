@@ -741,6 +741,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "rol64-hw"	[mips_arch_list_matching gpr64 ror]
 
     run_dump_test "sb"
+    run_dump_test_arches "sdata-gp"	[mips_arch_list_matching mips1]
     run_dump_test "trunc"
     run_dump_test "ulh"
     run_dump_test_arches "ulh2-eb"	[mips_arch_list_matching mips1 !mips32r6]

@@ -3464,6 +3464,12 @@ md_begin (void)
 	as_bad (_("-G may not be used in position-independent code"));
       g_switch_value = 0;
     }
+  else if (mips_abicalls)
+    {
+      if (g_switch_seen && g_switch_value != 0)
+	as_bad (_("-G may not be used with abicalls"));
+      g_switch_value = 0;
+    }
 
   if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, file_mips_opts.arch))
     as_warn (_("could not set architecture and machine"));
