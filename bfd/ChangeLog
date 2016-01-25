@@ -1,3 +1,9 @@
+2016-01-25  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19435
+	* mach-o.c (bfd_mach_o_close_and_cleanup): Suppress code to free
+	dsym filename buffer.
+
 2016-01-24  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elfxx-mips.c (BZ16_REG_FIELD): Simplify calculation.
