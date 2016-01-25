@@ -5806,7 +5806,7 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
 	     can be traced and fixed on such a system, this code will remain
 	     commented out.  This does mean that there will be a memory leak,
 	     but it is small, and happens when we are closing down, so it
-	     should not matter too much.
+	     should not matter too much.  */
           char *dsym_filename = (char *)(fat_bfd
                                          ? fat_bfd->filename
                                          : mdata->dsym_bfd->filename);
