@@ -1,3 +1,14 @@
+2016-01-25  Mark Wielaard  <mjw@redhat.com>
+
+	* ada-lang.c (ada_evaluate_subexp): Add proper else block.
+	* c-typeprint.c (c_type_print_base): Fix misleading indentation of
+	if statement.
+	* inflow.c (child_terminal_ours_1): Fix misleading indentation of
+	statement block by introducing an else.
+	* linux-record.c (record_linux_sockaddr): Fix misleading indentation
+	of return statements.
+	(record_linux_msghdr): Likewise.
+
 2016-01-25  Pedro Alves  <palves@redhat.com>
 
 	PR threads/19461

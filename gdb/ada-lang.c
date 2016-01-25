@@ -11419,9 +11419,11 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           return value_zero (ada_aligned_type (type), lval_memory);
         }
       else
-        arg1 = ada_value_struct_elt (arg1, &exp->elts[pc + 2].string, 0);
-        arg1 = unwrap_value (arg1);
-        return ada_to_fixed_value (arg1);
+	{
+	  arg1 = ada_value_struct_elt (arg1, &exp->elts[pc + 2].string, 0);
+	  arg1 = unwrap_value (arg1);
+	  return ada_to_fixed_value (arg1);
+	}
 
     case OP_TYPE:
       /* The value is not supposed to be used.  This is here to make it
