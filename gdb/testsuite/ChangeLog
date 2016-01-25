@@ -1,5 +1,11 @@
 2016-01-25  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/19494
+	* gdb.base/catch-fork-kill.c: New file.
+	* gdb.base/catch-fork-kill.exp: New file.
+
+2016-01-25  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/step-sw-breakpoint-adjust-pc.exp (foreach_with_prefix):
 	Delete, moved to lib/gdb.exp.
 	* gdb.threads/forking-threads-plus-breakpoint.exp

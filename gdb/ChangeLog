@@ -1,3 +1,13 @@
+2016-01-25  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19494
+	* linux-nat.c (kill_one_lwp): New, factored out from ...
+	(kill_callback): ... this.
+	(kill_wait_callback): New, factored out from ...
+	(kill_wait_one_lwp): ... this.
+	(kill_unfollowed_fork_children): New function.
+	(linux_nat_kill): Use it.
+
 2016-01-22  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_pid_to_str): Adjust string format.
