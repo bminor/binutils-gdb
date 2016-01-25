@@ -1,3 +1,8 @@
+2016-01-25  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/gas/arm/thumb2_it_search.d: New.
+	* testsuite/gas/arm/thumb2_it_search.s: New.
+
 2016-01-21  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19454

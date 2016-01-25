@@ -5947,6 +5947,10 @@ parse_disassembler_options (char *options)
     }
 }
 
+static bfd_boolean
+mapping_symbol_for_insn (bfd_vma pc, struct disassemble_info *info,
+			 enum map_type *map_symbol);
+
 /* Search back through the insn stream to determine if this instruction is
    conditionally executed.  */
 
@@ -6009,9 +6013,15 @@ find_ifthen_state (bfd_vma pc,
 	}
       if ((insn & 0xff00) == 0xbf00 && (insn & 0xf) != 0)
 	{
-	  /* This could be an IT instruction.  */
-	  seen_it = insn;
-	  it_count = count >> 1;
+	  enum map_type type = MAP_ARM;
+	  bfd_boolean found = mapping_symbol_for_insn (addr, info, &type);
+
+	  if (!found || (found && type == MAP_THUMB))
+	    {
+	      /* This could be an IT instruction.  */
+	      seen_it = insn;
+	      it_count = count >> 1;
+	    }
 	}
       if ((insn & 0xf800) >= 0xe800)
 	count++;
@@ -6093,6 +6103,71 @@ get_sym_code_type (struct disassemble_info *info,
     }
 
   return FALSE;
+}
+
+/* Search the mapping symbol state for instruction at pc.  This is only
+   applicable for elf target.
+
+   There is an assumption Here, info->private_data contains the correct AND
+   up-to-date information about current scan process.  The information will be
+   used to speed this search process.
+
+   Return TRUE if the mapping state can be determined, and map_symbol
+   will be updated accordingly.  Otherwise, return FALSE.  */
+
+static bfd_boolean
+mapping_symbol_for_insn (bfd_vma pc, struct disassemble_info *info,
+			 enum map_type *map_symbol)
+{
+  bfd_vma addr;
+  int n, start = 0;
+  bfd_boolean found = FALSE;
+  enum map_type type = MAP_ARM;
+  struct arm_private_data *private_data;
+
+  if (info->private_data == NULL || info->symtab_size == 0
+      || bfd_asymbol_flavour (*info->symtab) != bfd_target_elf_flavour)
+    return FALSE;
+
+  private_data = info->private_data;
+  if (pc == 0)
+    start = 0;
+  else
+    start = private_data->last_mapping_sym;
+
+  start = (start == -1)? 0 : start;
+  addr = bfd_asymbol_value (info->symtab[start]);
+
+  if (pc >= addr)
+    {
+      if (get_map_sym_type (info, start, &type))
+      found = TRUE;
+    }
+  else
+    {
+      for (n = start - 1; n >= 0; n--)
+	{
+	  if (get_map_sym_type (info, n, &type))
+	    {
+	      found = TRUE;
+	      break;
+	    }
+	}
+    }
+
+  /* No mapping symbols were found.  A leading $d may be
+     omitted for sections which start with data; but for
+     compatibility with legacy and stripped binaries, only
+     assume the leading $d if there is at least one mapping
+     symbol in the file.  */
+  if (!found && private_data->has_mapping_symbols == 1)
+    {
+      type = MAP_DATA;
+      found = TRUE;
+    }
+
+  *map_symbol = type;
+  return found;
 }
 
 /* Given a bfd_mach_arm_XXX value, this function fills in the fields
