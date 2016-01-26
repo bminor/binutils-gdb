@@ -1,3 +1,8 @@
+2016-01-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/common-utils.c (skip_spaces): Fix comment.
+	(skip_to_space_const): Likewise.
+
 2016-01-25  Yao Qi  <yao.qi@linaro.org>
 
 	* arch/arm-get-next-pcs.c (thumb_deal_with_atomic_sequence_raw):
