@@ -1,3 +1,8 @@
+2016-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* remote-utils.c (getpkt): If the buffer isn't empty, and the
+	first character is '\003', call *the_target->request_interrupt.
+
 2016-01-25  Yao Qi  <yao.qi@linaro.org>
 
 	* remote-utils.c (new_thread_notify): Remove.
