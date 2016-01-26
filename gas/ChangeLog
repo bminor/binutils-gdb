@@ -1,3 +1,10 @@
+2016-01-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (OPTION_OMIT_LOCK_PREFIX): Renamed to ...
+	(OPTION_MOMIT_LOCK_PREFIX): This.
+	(md_longopts): Updated.
+	(md_parse_option): Likewise.
+
 2016-01-25  Catherine Moore  <clm@codesourcery.com>
 
 	* config/mips/tc-mips.c (md_begin): Avoid gp-relative addressing

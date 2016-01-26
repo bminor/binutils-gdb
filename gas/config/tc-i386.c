@@ -9617,7 +9617,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MEVEXLIG (OPTION_MD_BASE + 16)
 #define OPTION_MEVEXWIG (OPTION_MD_BASE + 17)
 #define OPTION_MBIG_OBJ (OPTION_MD_BASE + 18)
-#define OPTION_OMIT_LOCK_PREFIX (OPTION_MD_BASE + 19)
+#define OPTION_MOMIT_LOCK_PREFIX (OPTION_MD_BASE + 19)
 #define OPTION_MEVEXRCIG (OPTION_MD_BASE + 20)
 #define OPTION_MSHARED (OPTION_MD_BASE + 21)
 #define OPTION_MAMD64 (OPTION_MD_BASE + 22)
@@ -9652,7 +9652,7 @@ struct option md_longopts[] =
 # if defined (TE_PE) || defined (TE_PEP)
   {"mbig-obj", no_argument, NULL, OPTION_MBIG_OBJ},
 #endif
-  {"momit-lock-prefix", required_argument, NULL, OPTION_OMIT_LOCK_PREFIX},
+  {"momit-lock-prefix", required_argument, NULL, OPTION_MOMIT_LOCK_PREFIX},
   {"mevexrcig", required_argument, NULL, OPTION_MEVEXRCIG},
   {"mamd64", no_argument, NULL, OPTION_MAMD64},
   {"mintel64", no_argument, NULL, OPTION_MINTEL64},
@@ -9963,7 +9963,7 @@ md_parse_option (int c, char *arg)
       break;
 #endif
 
-    case OPTION_OMIT_LOCK_PREFIX:
+    case OPTION_MOMIT_LOCK_PREFIX:
       if (strcasecmp (arg, "yes") == 0)
         omit_lock_prefix = 1;
       else if (strcasecmp (arg, "no") == 0)
