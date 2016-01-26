@@ -46,11 +46,11 @@ arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
    added to the next_pcs list.  */
 
 static VEC (CORE_ADDR) *
-thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self,
-				     CORE_ADDR pc)
+thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 {
   int byte_order_for_code = self->byte_order_for_code;
   CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   CORE_ADDR loc = pc;
   unsigned short insn1, insn2;
   int insn_count;
@@ -183,11 +183,11 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self,
    added to the next_pcs list.  */
 
 static VEC (CORE_ADDR) *
-arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self,
-				   CORE_ADDR pc)
+arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 {
   int byte_order_for_code = self->byte_order_for_code;
   CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   CORE_ADDR loc = pc;
   unsigned int insn;
   int insn_count;
@@ -261,10 +261,11 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self,
 /* Find the next possible PCs for thumb mode.  */
 
 static VEC (CORE_ADDR) *
-thumb_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
+thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 {
   int byte_order = self->byte_order;
   int byte_order_for_code = self->byte_order_for_code;
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
   unsigned short inst1;
   CORE_ADDR nextpc = pc + 2;		/* Default is next instruction.  */
@@ -641,7 +642,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
    address in GDB and arm_addr_bits_remove in GDBServer.  */
 
 static VEC (CORE_ADDR) *
-arm_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
+arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 {
   int byte_order = self->byte_order;
   int byte_order_for_code = self->byte_order_for_code;
@@ -650,6 +651,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
   unsigned long status;
   CORE_ADDR nextpc;
   struct regcache *regcache = self->regcache;
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   VEC (CORE_ADDR) *next_pcs = NULL;
 
   pc_val = (unsigned long) pc;
@@ -904,21 +906,21 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
 /* See arm-get-next-pcs.h.  */
 
 VEC (CORE_ADDR) *
-arm_get_next_pcs (struct arm_get_next_pcs *self, CORE_ADDR pc)
+arm_get_next_pcs (struct arm_get_next_pcs *self)
 {
   VEC (CORE_ADDR) *next_pcs = NULL;
 
   if (self->ops->is_thumb (self))
     {
-      next_pcs = thumb_deal_with_atomic_sequence_raw (self, pc);
+      next_pcs = thumb_deal_with_atomic_sequence_raw (self);
       if (next_pcs == NULL)
-	next_pcs = thumb_get_next_pcs_raw (self, pc);
+	next_pcs = thumb_get_next_pcs_raw (self);
     }
   else
     {
-      next_pcs = arm_deal_with_atomic_sequence_raw (self, pc);
+      next_pcs = arm_deal_with_atomic_sequence_raw (self);
       if (next_pcs == NULL)
-	next_pcs = arm_get_next_pcs_raw (self, pc);
+	next_pcs = arm_get_next_pcs_raw (self);
     }
 
   return next_pcs;

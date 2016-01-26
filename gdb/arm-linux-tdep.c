@@ -947,7 +947,7 @@ arm_linux_software_single_step (struct frame_info *frame)
 			 1,
 			 regcache);
 
-  next_pcs = arm_get_next_pcs (&next_pcs_ctx, regcache_read_pc (regcache));
+  next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
     {

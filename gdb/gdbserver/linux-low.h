@@ -154,7 +154,7 @@ struct linux_target_ops
   const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
 
   /* Find the next possible PCs after the current instruction executes.  */
-  VEC (CORE_ADDR) *(*get_next_pcs) (CORE_ADDR pc, struct regcache *regcache);
+  VEC (CORE_ADDR) *(*get_next_pcs) (struct regcache *regcache);
 
   int decr_pc_after_break;
   int (*breakpoint_at) (CORE_ADDR pc);

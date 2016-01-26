@@ -1,5 +1,13 @@
 2016-01-26  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-arm-low.c (arm_gdbserver_get_next_pcs): Remove argument pc.
+	* linux-low.c (install_software_single_step_breakpoints): Don't
+	call regcache_read_pc.
+	* linux-low.h (struct linux_target_ops) <get_next_pcs>: Remove
+	argument pc.
+
+2016-01-26  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-low.c (install_software_single_step_breakpoints): Call
 	regcache_read_pc instead of get_pc.
 

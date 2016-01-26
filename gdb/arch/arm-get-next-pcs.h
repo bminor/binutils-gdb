@@ -57,7 +57,6 @@ void arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
 			    struct regcache *regcache);
 
 /* Find the next possible PCs after the current instruction executes.  */
-VEC (CORE_ADDR) *arm_get_next_pcs (struct arm_get_next_pcs *self,
-				   CORE_ADDR pc);
+VEC (CORE_ADDR) *arm_get_next_pcs (struct arm_get_next_pcs *self);
 
 #endif /* ARM_GET_NEXT_PCS_H */

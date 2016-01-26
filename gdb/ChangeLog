@@ -1,3 +1,13 @@
+2016-01-25  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm-get-next-pcs.c (thumb_deal_with_atomic_sequence_raw):
+	Remove argument pc.  Get pc by regcache_read_pc.  Callers updated.
+	(arm_deal_with_atomic_sequence_raw): Likewise.
+	(thumb_get_next_pcs_raw): Likewise.
+	(arm_get_next_pcs_raw): Likewise.
+	(arm_get_next_pcs): Remove argument pc.  Callers updated.
+	* arch/arm-get-next-pcs.h (arm_get_next_pcs): Update declaration.
+
 2016-01-25  Mark Wielaard  <mjw@redhat.com>
 
 	* ada-lang.c (ada_evaluate_subexp): Add proper else block.

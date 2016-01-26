@@ -4103,9 +4103,7 @@ install_software_single_step_breakpoints (struct lwp_info *lwp)
   VEC (CORE_ADDR) *next_pcs = NULL;
   struct cleanup *old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
 
-  pc = regcache_read_pc (regcache);
-
-  next_pcs = (*the_low_target.get_next_pcs) (pc, regcache);
+  next_pcs = (*the_low_target.get_next_pcs) (regcache);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); ++i)
     set_reinsert_breakpoint (pc);

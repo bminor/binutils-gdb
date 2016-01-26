@@ -923,7 +923,7 @@ arm_arch_setup (void)
 /* Fetch the next possible PCs after the current instruction executes.  */
 
 static VEC (CORE_ADDR) *
-arm_gdbserver_get_next_pcs (CORE_ADDR pc, struct regcache *regcache)
+arm_gdbserver_get_next_pcs (struct regcache *regcache)
 {
   struct arm_get_next_pcs next_pcs_ctx;
   VEC (CORE_ADDR) *next_pcs = NULL;
@@ -936,7 +936,7 @@ arm_gdbserver_get_next_pcs (CORE_ADDR pc, struct regcache *regcache)
 			 1,
 			 regcache);
 
-  next_pcs = arm_get_next_pcs (&next_pcs_ctx, pc);
+  next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
   return next_pcs;
 }
