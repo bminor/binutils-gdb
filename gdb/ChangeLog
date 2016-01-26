@@ -1,5 +1,18 @@
 2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* frame.h (skip_tailcall_frames): Update comment.
+	* frame.c (skip_artificial_frames, skip_tailcall_frames): Return NULL
+	if only artificial frames are found.  Update comment.
+	(frame_unwind_caller_id): Handle NULL return.
+	(frame_unwind_caller_pc, frame_unwind_caller_arch): Assert that
+	skip_artificial_frames does not return NULL.
+	(frame_pop): Add an error if only tailcall frames are found.
+	* infcmd.c (finish_command): Move skip_tailcall_frames call into
+	forward-execution case.  Add an error if only tailcall frames are
+	found.
+
+2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* stack.c (frame_info): Check frame_unwind_caller_id.
 
 2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>

@@ -1,3 +1,10 @@
+2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/tailcall-only.exp: New.
+	* gdb.btrace/tailcall-only.c: New.
+	* gdb.btrace/x86_64-tailcall-only.S: New.
+	* gdb.btrace/i686-tailcall-only.S: New.
+
 2016-02-11  Pedro Alves  <palves@redhat.com>
 
 	* README (Parallel testing): Add missing double quotes.

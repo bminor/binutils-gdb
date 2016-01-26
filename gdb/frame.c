@@ -420,7 +420,8 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
 
 /* Given FRAME, return the enclosing frame as found in real frames read-in from
    inferior memory.  Skip any previous frames which were made up by GDB.
-   Return the original frame if no immediate previous frames exist.  */
+   Return FRAME if FRAME is a non-artificial frame.
+   Return NULL if FRAME is the start of an artificial-only chain.  */
 
 static struct frame_info *
 skip_artificial_frames (struct frame_info *frame)
@@ -428,12 +429,17 @@ skip_artificial_frames (struct frame_info *frame)
   /* Note we use get_prev_frame_always, and not get_prev_frame.  The
      latter will truncate the frame chain, leading to this function
      unintentionally returning a null_frame_id (e.g., when the user
-     sets a backtrace limit).  This is safe, because as these frames
-     are made up by GDB, there must be a real frame in the chain
-     below.  */
+     sets a backtrace limit).
+
+     Note that for record targets we may get a frame chain that consists
+     of artificial frames only.  */
   while (get_frame_type (frame) == INLINE_FRAME
 	 || get_frame_type (frame) == TAILCALL_FRAME)
-    frame = get_prev_frame_always (frame);
+    {
+      frame = get_prev_frame_always (frame);
+      if (frame == NULL)
+	break;
+    }
 
   return frame;
 }
@@ -444,7 +450,13 @@ struct frame_info *
 skip_tailcall_frames (struct frame_info *frame)
 {
   while (get_frame_type (frame) == TAILCALL_FRAME)
-    frame = get_prev_frame (frame);
+    {
+      /* Note that for record targets we may get a frame chain that consists of
+	 tailcall frames only.  */
+      frame = get_prev_frame (frame);
+      if (frame == NULL)
+	break;
+    }
 
   return frame;
 }
@@ -507,6 +519,9 @@ frame_unwind_caller_id (struct frame_info *next_frame)
      requests the frame ID of "main()"s caller.  */
 
   next_frame = skip_artificial_frames (next_frame);
+  if (next_frame == NULL)
+    return null_frame_id;
+
   this_frame = get_prev_frame_always (next_frame);
   if (this_frame)
     return get_frame_id (skip_artificial_frames (this_frame));
@@ -880,7 +895,14 @@ frame_unwind_pc (struct frame_info *this_frame)
 CORE_ADDR
 frame_unwind_caller_pc (struct frame_info *this_frame)
 {
-  return frame_unwind_pc (skip_artificial_frames (this_frame));
+  this_frame = skip_artificial_frames (this_frame);
+
+  /* We must have a non-artificial frame.  The caller is supposed to check
+     the result of frame_unwind_caller_id (), which returns NULL_FRAME_ID
+     in this case.  */
+  gdb_assert (this_frame != NULL);
+
+  return frame_unwind_pc (this_frame);
 }
 
 int
@@ -984,6 +1006,9 @@ frame_pop (struct frame_info *this_frame)
   /* Ignore TAILCALL_FRAME type frames, they were executed already before
      entering THISFRAME.  */
   prev_frame = skip_tailcall_frames (prev_frame);
+
+  if (prev_frame == NULL)
+    error (_("Cannot find the caller frame."));
 
   /* Make a copy of all the register values unwound from this frame.
      Save them in a scratch buffer so that there isn't a race between
@@ -2571,7 +2596,14 @@ frame_unwind_arch (struct frame_info *next_frame)
 struct gdbarch *
 frame_unwind_caller_arch (struct frame_info *next_frame)
 {
-  return frame_unwind_arch (skip_artificial_frames (next_frame));
+  next_frame = skip_artificial_frames (next_frame);
+
+  /* We must have a non-artificial frame.  The caller is supposed to check
+     the result of frame_unwind_caller_id (), which returns NULL_FRAME_ID
+     in this case.  */
+  gdb_assert (next_frame != NULL);
+
+  return frame_unwind_arch (next_frame);
 }
 
 /* Gets the language of FRAME.  */
