@@ -1,5 +1,10 @@
 2016-01-26  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-low.c (install_software_single_step_breakpoints): Call
+	regcache_read_pc instead of get_pc.
+
+2016-01-26  Yao Qi  <yao.qi@linaro.org>
+
 	* remote-utils.c (remote_close) [!USE_WIN32API]: Ignore SIGIO.
 	(unblock_async_io): Rename to ...
 	(block_unblock_async_io): ... it.  New function.
