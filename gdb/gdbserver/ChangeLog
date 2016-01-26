@@ -1,5 +1,16 @@
 2016-01-26  Yao Qi  <yao.qi@linaro.org>
 
+	* remote-utils.c (remote_close) [!USE_WIN32API]: Ignore SIGIO.
+	(unblock_async_io): Rename to ...
+	(block_unblock_async_io): ... it.  New function.
+	(enable_async_io): Don't install SIGIO handler.  Unblock it
+	instead.
+	(disable_async_io): Don't ignore SIGIO.  Block it instead.
+	(initialize_async_io): Install SIGIO handler.  Don't call
+	unblock_async_io.
+
+2016-01-26  Yao Qi  <yao.qi@linaro.org>
+
 	* remote-utils.c (getpkt): If the buffer isn't empty, and the
 	first character is '\003', call *the_target->request_interrupt.
 
