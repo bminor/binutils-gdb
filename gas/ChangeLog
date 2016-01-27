@@ -1,3 +1,7 @@
+2016-02-03  Kevin Buettner  <kevinb@redhat.com>
+
+    	* config/tc-msp430.h (DWARF2_ADDR_SIZE): Set to 4.
+
 2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention new command line option -mfence-as-lock-add=yes
