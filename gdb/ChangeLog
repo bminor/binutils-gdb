@@ -1,3 +1,8 @@
+2016-01-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (Responsible Maintainers): Add Keith Seitz as
+	Linespec Maintainers.
+
 2016-01-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/common-utils.c (skip_spaces): Fix comment.
