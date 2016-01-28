@@ -1,5 +1,12 @@
 2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Regenerate.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add rawmemchr.
+
+2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* remote.c (skip_to_semicolon): Remove.
 	(remote_parse_stop_reply): Use strchrnul instead of
 	skip_to_semicolon.
