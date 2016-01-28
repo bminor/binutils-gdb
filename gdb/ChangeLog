@@ -1,3 +1,9 @@
+2016-01-28  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.c (build_target_command_list): Don't call continue
+	if aexpr is NULL.
+	(build_target_condition_list): Likewise.
+
 2016-01-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* rx-tdep.c (rx_push_dummy_call): Treat scalars larger than 8

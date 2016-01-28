@@ -2347,12 +2347,6 @@ build_target_condition_list (struct bp_location *bl)
 		 need to parse the condition to bytecodes again.  */
 	      aexpr = parse_cond_to_aexpr (bl->address, loc->cond);
 	      loc->cond_bytecode = aexpr;
-
-	      /* Check if we managed to parse the conditional expression
-		 correctly.  If not, we will not send this condition
-		 to the target.  */
-	      if (aexpr)
-		continue;
 	    }
 
 	  /* If we have a NULL bytecode expression, it means something
@@ -2553,9 +2547,6 @@ build_target_command_list (struct bp_location *bl)
 	      aexpr = parse_cmd_to_aexpr (bl->address,
 					  loc->owner->extra_string);
 	      loc->cmd_bytecode = aexpr;
-
-	      if (!aexpr)
-		continue;
 	    }
 
 	  /* If we have a NULL bytecode expression, it means something
