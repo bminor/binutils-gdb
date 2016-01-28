@@ -1,3 +1,7 @@
+2016-01-28  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.fortran/vla-value.exp: Wrap test with with_timeout_factor.
+
 2016-01-25  Pedro Alves  <palves@redhat.com>
 
 	PR threads/19461
