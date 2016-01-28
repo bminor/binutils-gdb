@@ -1,3 +1,7 @@
+2016-01-28  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/demangle.exp: Sync tests from libiberty testsuite.
+
 2016-01-28  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.fortran/vla-value.exp: Wrap test with with_timeout_factor.
