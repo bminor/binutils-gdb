@@ -1,3 +1,24 @@
+2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (skip_to_semicolon): Remove.
+	(remote_parse_stop_reply): Use strchrnul instead of
+	skip_to_semicolon.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	strchrnul.
+	* gnulib/aclocal.m4: Regenerate.
+	* gnulib/config.in: Regenerate.
+	* gnulib/configure: Regenerate.
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Regenerate.
+	* gnulib/import/m4/gnulib-comp.m4: Regenerate.
+	* gnulib/import/m4/rawmemchr.m4: New file.
+	* gnulib/import/m4/strchrnul.m4: New file.
+	* gnulib/import/rawmemchr.c: New file.
+	* gnulib/import/rawmemchr.valgrind: New file.
+	* gnulib/import/strchrnul.c: New file.
+	* gnulib/import/strchrnul.valgrind: New file.
+
 2016-01-28  Yao Qi  <yao.qi@linaro.org>
 
 	* breakpoint.c (build_target_command_list): Don't call continue

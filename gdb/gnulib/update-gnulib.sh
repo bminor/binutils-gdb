@@ -45,6 +45,7 @@ IMPORTED_GNULIB_MODULES="\
     readlink \
     rename \
     signal-h \
+    strchrnul \
     strstr \
     strtok_r \
     sys_stat \

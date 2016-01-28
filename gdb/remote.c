@@ -6387,16 +6387,6 @@ peek_stop_reply (ptid_t ptid)
 			 stop_reply_match_ptid_and_ws, &ptid);
 }
 
-/* Skip PACKET until the next semi-colon (or end of string).  */
-
-static char *
-skip_to_semicolon (char *p)
-{
-  while (*p != '\0' && *p != ';')
-    p++;
-  return p;
-}
-
 /* Helper for remote_parse_stop_reply.  Return nonzero if the substring
    starting with P and ending with PEND matches PREFIX.  */
 
@@ -6499,7 +6489,7 @@ Packet: '%s'\n"),
 	      /* The value part is documented as "must be empty",
 		 though we ignore it, in case we ever decide to make
 		 use of it in a backward compatible way.  */
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "hwbreak"))
 	    {
@@ -6511,19 +6501,19 @@ Packet: '%s'\n"),
 		error (_("Unexpected hwbreak stop reason"));
 
 	      /* See above.  */
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "library"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_LOADED;
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "replaylog"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
 	      /* p1 will indicate "begin" or "end", but it makes
 		 no difference for now, so ignore it.  */
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "core"))
 	    {
@@ -6545,7 +6535,7 @@ Packet: '%s'\n"),
 	  else if (strprefix (p, p1, "vforkdone"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_VFORK_DONE;
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "exec"))
 	    {
@@ -6574,7 +6564,7 @@ Packet: '%s'\n"),
 	  else if (strprefix (p, p1, "create"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_THREAD_CREATED;
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else
 	    {
@@ -6583,7 +6573,7 @@ Packet: '%s'\n"),
 
 	      if (skipregs)
 		{
-		  p = skip_to_semicolon (p1 + 1);
+		  p = strchrnul (p1 + 1, ';');
 		  p++;
 		  continue;
 		}
@@ -6620,7 +6610,7 @@ Packet: '%s'\n"),
 		{
 		  /* Not a number.  Silently skip unknown optional
 		     info.  */
-		  p = skip_to_semicolon (p1 + 1);
+		  p = strchrnul (p1 + 1, ';');
 		}
 	    }
 

@@ -1,3 +1,9 @@
+2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* server.c (skip_to_semicolon):  Remove.
+	(process_point_options): Use strchrnul instead of
+	skip_to_semicolon.
+
 2016-01-26  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-arm-low.c (arm_gdbserver_get_next_pcs): Remove argument pc.

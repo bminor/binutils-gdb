@@ -113,6 +113,9 @@
 /* Define to 1 when the gnulib module memmem should be tested. */
 #undef GNULIB_TEST_MEMMEM
 
+/* Define to 1 when the gnulib module rawmemchr should be tested. */
+#undef GNULIB_TEST_RAWMEMCHR
+
 /* Define to 1 when the gnulib module readlink should be tested. */
 #undef GNULIB_TEST_READLINK
 
@@ -127,6 +130,9 @@
 
 /* Define to 1 when the gnulib module stat should be tested. */
 #undef GNULIB_TEST_STAT
+
+/* Define to 1 when the gnulib module strchrnul should be tested. */
+#undef GNULIB_TEST_STRCHRNUL
 
 /* Define to 1 when the gnulib module strstr should be tested. */
 #undef GNULIB_TEST_STRSTR
@@ -275,6 +281,9 @@
 
 /* Define to 1 if you have the `mprotect' function. */
 #undef HAVE_MPROTECT
+
+/* Define to 1 if you have the `rawmemchr' function. */
+#undef HAVE_RAWMEMCHR
 
 /* Define to 1 if acosf is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_ACOSF
@@ -1116,6 +1125,9 @@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strchrnul' function. */
+#undef HAVE_STRCHRNUL
 
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H

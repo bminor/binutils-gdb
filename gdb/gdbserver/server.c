@@ -3820,15 +3820,6 @@ main (int argc, char *argv[])
   gdb_assert_not_reached ("captured_main should never return");
 }
 
-/* Skip PACKET until the next semi-colon (or end of string).  */
-
-static void
-skip_to_semicolon (char **packet)
-{
-  while (**packet != '\0' && **packet != ';')
-    (*packet)++;
-}
-
 /* Process options coming from Z packets for a breakpoint.  PACKET is
    the packet buffer.  *PACKET is updated to point to the first char
    after the last processed option.  */
@@ -3856,7 +3847,7 @@ process_point_options (struct breakpoint *bp, char **packet)
 	  if (debug_threads)
 	    debug_printf ("Found breakpoint condition.\n");
 	  if (!add_breakpoint_condition (bp, &dataptr))
-	    skip_to_semicolon (&dataptr);
+	    dataptr = strchrnul (dataptr, ';');
 	}
       else if (startswith (dataptr, "cmds:"))
 	{
@@ -3866,14 +3857,14 @@ process_point_options (struct breakpoint *bp, char **packet)
 	  persist = (*dataptr == '1');
 	  dataptr += 2;
 	  if (add_breakpoint_commands (bp, &dataptr, persist))
-	    skip_to_semicolon (&dataptr);
+	    dataptr = strchrnul (dataptr, ';');
 	}
       else
 	{
 	  fprintf (stderr, "Unknown token %c, ignoring.\n",
 		   *dataptr);
 	  /* Skip tokens until we find one that we recognize.  */
-	  skip_to_semicolon (&dataptr);
+	  dataptr = strchrnul (dataptr, ';');
 	}
     }
   *packet = dataptr;
