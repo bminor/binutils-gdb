@@ -1,3 +1,15 @@
+2016-02-12  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracepoint.c (x_tracepoint_action_download): Change
+	write_inferior_data_ptr to write_inferior_data_pointer.
+	(cmd_qtstart): Likewise.
+	(write_inferior_data_ptr): Remove.
+	(download_agent_expr): Change write_inferior_data_ptr to
+	write_inferior_data_pointer.
+	(download_tracepoint_1): Likewise.
+	(download_tracepoint): Likewise.
+	(download_trace_state_variables): Likewise.
+
 2016-02-11  Wei-cheng Wang  <cole945@gmail.com>
 	    Marcin Kościelnicki  <koriakin@0x04.net>
 

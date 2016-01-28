@@ -452,7 +452,6 @@ write_inferior_uinteger (CORE_ADDR symaddr, unsigned int val)
 }
 
 static CORE_ADDR target_malloc (ULONGEST size);
-static int write_inferior_data_ptr (CORE_ADDR where, CORE_ADDR ptr);
 
 #define COPY_FIELD_TO_BUF(BUF, OBJ, FIELD)	\
   do {							\
@@ -553,9 +552,9 @@ x_tracepoint_action_download (const struct tracepoint_action *action)
   write_inferior_memory (ipa_action, (unsigned char *) action,
 			 sizeof (struct eval_expr_action));
   expr = download_agent_expr (((struct eval_expr_action *) action)->expr);
-  write_inferior_data_ptr (ipa_action
-			   + offsetof (struct eval_expr_action, expr),
-			   expr);
+  write_inferior_data_pointer (ipa_action
+			       + offsetof (struct eval_expr_action, expr),
+			       expr);
 
   return ipa_action;
 }
@@ -3214,7 +3213,7 @@ cmd_qtstart (char *packet)
 
   /* Start out empty.  */
   if (agent_loaded_p ())
-    write_inferior_data_ptr (ipa_sym_addrs.addr_tracepoints, 0);
+    write_inferior_data_pointer (ipa_sym_addrs.addr_tracepoints, 0);
 
   /* Download and install tracepoints.  */
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
@@ -3310,11 +3309,11 @@ cmd_qtstart (char *packet)
 	  if (tpoint == tracepoints)
 	    /* First object in list, set the head pointer in the
 	       inferior.  */
-	    write_inferior_data_ptr (ipa_sym_addrs.addr_tracepoints, tpptr);
+	    write_inferior_data_pointer (ipa_sym_addrs.addr_tracepoints, tpptr);
 	  else
-	    write_inferior_data_ptr (prev_tpptr + offsetof (struct tracepoint,
-							    next),
-				     tpptr);
+	    write_inferior_data_pointer (prev_tpptr
+					 + offsetof (struct tracepoint, next),
+					 tpptr);
 	}
 
       /* Any failure in the inner loop is sufficient cause to give
@@ -5912,17 +5911,6 @@ compile_tracepoint_condition (struct tracepoint *tpoint,
   *jump_entry += 16;
 }
 
-/* We'll need to adjust these when we consider bi-arch setups.  */
-
-static int
-write_inferior_data_ptr (CORE_ADDR where, CORE_ADDR ptr)
-{
-  uintptr_t pptr = ptr;
-
-  return write_inferior_memory (where,
-				(unsigned char *) &pptr, sizeof pptr);
-}
-
 /* The base pointer of the IPA's heap.  This is the only memory the
    IPA is allowed to use.  The IPA should _not_ call the inferior's
    `malloc' during operation.  That'd be slow, and, most importantly,
@@ -5968,8 +5956,8 @@ download_agent_expr (struct agent_expr *expr)
   write_inferior_memory (expr_addr, (unsigned char *) expr, sizeof (*expr));
 
   expr_bytes = target_malloc (expr->length);
-  write_inferior_data_ptr (expr_addr + offsetof (struct agent_expr, bytes),
-			   expr_bytes);
+  write_inferior_data_pointer (expr_addr + offsetof (struct agent_expr, bytes),
+			       expr_bytes);
   write_inferior_memory (expr_bytes, expr->bytes, expr->length);
 
   return expr_addr;
@@ -6027,9 +6015,9 @@ download_tracepoint_1 (struct tracepoint *tpoint)
 			 sizeof (target_tracepoint));
 
   if (tpoint->cond)
-    write_inferior_data_ptr (tpptr + offsetof (struct tracepoint,
-					       cond),
-			     download_agent_expr (tpoint->cond));
+    write_inferior_data_pointer (tpptr
+				 + offsetof (struct tracepoint, cond),
+				 download_agent_expr (tpoint->cond));
 
   if (tpoint->numactions)
     {
@@ -6039,9 +6027,9 @@ download_tracepoint_1 (struct tracepoint *tpoint)
       /* The pointers array.  */
       actions_array
 	= target_malloc (sizeof (*tpoint->actions) * tpoint->numactions);
-      write_inferior_data_ptr (tpptr + offsetof (struct tracepoint,
-						 actions),
-			       actions_array);
+      write_inferior_data_pointer (tpptr + offsetof (struct tracepoint,
+						     actions),
+				   actions_array);
 
       /* Now for each pointer, download the action.  */
       for (i = 0; i < tpoint->numactions; i++)
@@ -6050,9 +6038,9 @@ download_tracepoint_1 (struct tracepoint *tpoint)
 	  CORE_ADDR ipa_action = tracepoint_action_download (action);
 
 	  if (ipa_action != 0)
-	    write_inferior_data_ptr
-	      (actions_array + i * sizeof (*tpoint->actions),
-	       ipa_action);
+	    write_inferior_data_pointer (actions_array
+					 + i * sizeof (*tpoint->actions),
+					 ipa_action);
 	}
     }
 }
@@ -6176,19 +6164,19 @@ download_tracepoint (struct tracepoint *tpoint)
 	}
 
       /* tpoint->next = tp_prev->next */
-      write_inferior_data_ptr (tpoint->obj_addr_on_target
-			       + offsetof (struct tracepoint, next),
-			       tp_prev_target_next_addr);
+      write_inferior_data_pointer (tpoint->obj_addr_on_target
+				   + offsetof (struct tracepoint, next),
+				   tp_prev_target_next_addr);
       /* tp_prev->next = tpoint */
-      write_inferior_data_ptr (tp_prev->obj_addr_on_target
-			       + offsetof (struct tracepoint, next),
-			       tpoint->obj_addr_on_target);
+      write_inferior_data_pointer (tp_prev->obj_addr_on_target
+				   + offsetof (struct tracepoint, next),
+				   tpoint->obj_addr_on_target);
     }
   else
     /* First object in list, set the head pointer in the
        inferior.  */
-    write_inferior_data_ptr (ipa_sym_addrs.addr_tracepoints,
-			     tpoint->obj_addr_on_target);
+    write_inferior_data_pointer (ipa_sym_addrs.addr_tracepoints,
+				 tpoint->obj_addr_on_target);
 
 }
 
@@ -6199,7 +6187,7 @@ download_trace_state_variables (void)
   struct trace_state_variable *tsv;
 
   /* Start out empty.  */
-  write_inferior_data_ptr (ipa_sym_addrs.addr_trace_state_variables, 0);
+  write_inferior_data_pointer (ipa_sym_addrs.addr_trace_state_variables, 0);
 
   for (tsv = trace_state_variables; tsv != NULL; tsv = tsv->next)
     {
@@ -6220,15 +6208,15 @@ download_trace_state_variables (void)
 	  /* First object in list, set the head pointer in the
 	     inferior.  */
 
-	  write_inferior_data_ptr (ipa_sym_addrs.addr_trace_state_variables,
-				   ptr);
+	  write_inferior_data_pointer (ipa_sym_addrs.addr_trace_state_variables,
+				       ptr);
 	}
       else
 	{
-	  write_inferior_data_ptr (prev_ptr
-				   + offsetof (struct trace_state_variable,
-					       next),
-				   ptr);
+	  write_inferior_data_pointer (prev_ptr
+				       + offsetof (struct trace_state_variable,
+						   next),
+				       ptr);
 	}
 
       /* Write the whole object.  We'll fix up its pointers in a bit.
@@ -6244,10 +6232,10 @@ download_trace_state_variables (void)
 	  CORE_ADDR name_addr = target_malloc (size);
 	  write_inferior_memory (name_addr,
 				 (unsigned char *) tsv->name, size);
-	  write_inferior_data_ptr (ptr
-				   + offsetof (struct trace_state_variable,
-					       name),
-				   name_addr);
+	  write_inferior_data_pointer (ptr
+				       + offsetof (struct trace_state_variable,
+						   name),
+				       name_addr);
 	}
 
       gdb_assert (tsv->getter == NULL);
@@ -6256,9 +6244,9 @@ download_trace_state_variables (void)
   if (prev_ptr != 0)
     {
       /* Fixup the next pointer in the last item in the list.  */
-      write_inferior_data_ptr (prev_ptr
-			       + offsetof (struct trace_state_variable,
-					   next), 0);
+      write_inferior_data_pointer (prev_ptr
+				   + offsetof (struct trace_state_variable,
+					       next), 0);
     }
 }
 
