@@ -1,3 +1,12 @@
+2016-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19523
+	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Set BFD_DECOMPRESS to
+	decompress debug sections.
+
 2016-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19579
