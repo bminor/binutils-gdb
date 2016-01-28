@@ -1,3 +1,9 @@
+2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19523
+	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Set BFD_DECOMPRESS to
+	decompress debug sections.
+
 2016-01-25  Maciej W. Rozycki  <macro@imgtec.com>
 
 	* elf32-arc.c (elf_arc_finish_dynamic_symbol): Rename `index' to

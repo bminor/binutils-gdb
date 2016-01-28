@@ -1,3 +1,13 @@
+2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19523
+	* Makefile.am (check-DEJAGNU): Pass CC and CC_FOR_BUILD to
+	runtest.
+	* Makefile.in: Regenerated.
+	* testsuite/binutils-all/compress.exp (test_gnu_debuglink): New
+	proc.
+	Run test_gnu_debuglink for native ELF build.
+
 2016-01-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 19495
