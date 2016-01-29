@@ -2381,13 +2381,12 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    if (first_fun_line_offset == 0 && symbol.n_numaux > 1)
 		      first_fun_line_offset =
 			main_aux[0].x_sym.x_fcnary.x_fcn.x_lnnoptr;
-		      {
-			record_minimal_symbol
-			  (namestring, symbol.n_value,
-			   sclass == C_HIDEXT ? mst_file_text : mst_text,
-			   symbol.n_scnum, objfile);
-			misc_func_recorded = 1;
-		      }
+
+		    record_minimal_symbol
+		      (namestring, symbol.n_value,
+		       sclass == C_HIDEXT ? mst_file_text : mst_text,
+		       symbol.n_scnum, objfile);
+		    misc_func_recorded = 1;
 		    break;
 
 		  case XMC_GL:

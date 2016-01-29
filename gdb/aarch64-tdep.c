@@ -3192,15 +3192,17 @@ aarch64_record_asimd_load_store (insn_decode_record *aarch64_insn_r)
       else
         {
           for (sindex = 0; sindex < selem; sindex++)
-            if (bit (aarch64_insn_r->aarch64_insn, 22))
-              record_buf[reg_index++] = reg_rt + AARCH64_V0_REGNUM;
-            else
-              {
-                record_buf_mem[mem_index++] = esize / 8;
-                record_buf_mem[mem_index++] = address + addr_offset;
-              }
-            addr_offset = addr_offset + (esize / 8);
-            reg_rt = (reg_rt + 1) % 32;
+	    {
+	      if (bit (aarch64_insn_r->aarch64_insn, 22))
+		record_buf[reg_index++] = reg_rt + AARCH64_V0_REGNUM;
+	      else
+		{
+		  record_buf_mem[mem_index++] = esize / 8;
+		  record_buf_mem[mem_index++] = address + addr_offset;
+		}
+	      addr_offset = addr_offset + (esize / 8);
+	      reg_rt = (reg_rt + 1) % 32;
+	    }
         }
     }
   /* Load/store multiple structure.  */

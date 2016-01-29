@@ -1,3 +1,9 @@
+2016-01-29  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aarch64-tdep.c (aarch64_record_asimd_load_store): Add braces
+	to for include additional lines.
+	* xcoffread.c (scan_xcoff_symtab): Remove unnecessary braces.
+
 2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gnulib/import/Makefile.am: Regenerate.
