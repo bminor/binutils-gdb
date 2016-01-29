@@ -552,6 +552,10 @@ static int allow_index_reg = 0;
    specified explicitly.  */
 static int omit_lock_prefix = 0;
 
+/* 1 if the assembler should encode lfence, mfence, and sfence as
+   "lock addl $0, (%{re}sp)".  */
+static int avoid_fence = 0;
+
 static enum check_kind
   {
     check_none = 0,
@@ -6956,6 +6960,22 @@ output_insn (void)
       unsigned int j;
       unsigned int prefix;
 
+      if (avoid_fence
+         && i.tm.base_opcode == 0xfae
+         && i.operands == 1
+         && i.imm_operands == 1
+         && (i.op[0].imms->X_add_number == 0xe8
+             || i.op[0].imms->X_add_number == 0xf0
+             || i.op[0].imms->X_add_number == 0xf8))
+        {
+          /* Encode lfence, mfence, and sfence as
+             f0 83 04 24 00   lock addl $0x0, (%{re}sp).  */
+          offsetT val = 0x240483f0ULL;
+          p = frag_more (5);
+          md_number_to_chars (p, val, 5);
+          return;
+        }
+
       /* Some processors fail on LOCK prefix. This options makes
 	 assembler ignore LOCK prefix and serves as a workaround.  */
       if (omit_lock_prefix)
@@ -9622,6 +9642,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MSHARED (OPTION_MD_BASE + 21)
 #define OPTION_MAMD64 (OPTION_MD_BASE + 22)
 #define OPTION_MINTEL64 (OPTION_MD_BASE + 23)
+#define OPTION_MFENCE_AS_LOCK_ADD (OPTION_MD_BASE + 24)
 
 struct option md_longopts[] =
 {
@@ -9653,6 +9674,7 @@ struct option md_longopts[] =
   {"mbig-obj", no_argument, NULL, OPTION_MBIG_OBJ},
 #endif
   {"momit-lock-prefix", required_argument, NULL, OPTION_MOMIT_LOCK_PREFIX},
+  {"mfence-as-lock-add", required_argument, NULL, OPTION_MFENCE_AS_LOCK_ADD},
   {"mevexrcig", required_argument, NULL, OPTION_MEVEXRCIG},
   {"mamd64", no_argument, NULL, OPTION_MAMD64},
   {"mintel64", no_argument, NULL, OPTION_MINTEL64},
@@ -9972,6 +9994,15 @@ md_parse_option (int c, char *arg)
         as_fatal (_("invalid -momit-lock-prefix= option: `%s'"), arg);
       break;
 
+    case OPTION_MFENCE_AS_LOCK_ADD:
+      if (strcasecmp (arg, "yes") == 0)
+        avoid_fence = 1;
+      else if (strcasecmp (arg, "no") == 0)
+        avoid_fence = 0;
+      else
+        as_fatal (_("invalid -mfence-as-lock-add= option: `%s'"), arg);
+      break;
+
     case OPTION_MAMD64:
       cpu_arch_flags.bitfield.cpuamd64 = 1;
       cpu_arch_flags.bitfield.cpuintel64 = 0;
@@ -10151,6 +10182,10 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -momit-lock-prefix=[no|yes]\n\
                           strip all lock prefixes\n"));
+  fprintf (stream, _("\
+  -mfence-as-lock-add=[no|yes]\n\
+                          encode lfence, mfence and sfence as\n\
+                           lock addl $0x0, (%%{re}sp)\n"));
   fprintf (stream, _("\
   -mamd64                 accept only AMD64 ISA\n"));
   fprintf (stream, _("\

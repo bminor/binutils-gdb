@@ -1,3 +1,21 @@
+2016-01-29  Andrew Senkevich  <andrew.senkevich@intel.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (avoid_fence): New.
+	(output_insn): Encode as lock addl $0x0, (%{r,e}sp) if avoid_fence
+	is true.
+	(OPTION_FENCE_AS_LOCK_ADD): New.
+	(md_longopts): Add -mfence-as-lock-add.
+	(md_parse_option): Handle -mfence-as-lock-add.
+	(md_show_usage): Add -mfence-as-lock-add=[no|yes].
+	* doc/c-i386.texi (-mfence-as-lock-add): Document.
+	* gas/i386/i386.exp: Run new tests.
+	* gas/i386/fence-as-lock-add.s: New.
+	* gas/i386/fence-as-lock-add-yes.d: Likewise.
+	* gas/i386/fence-as-lock-add-no.d: Likewise.
+	* gas/i386/x86-64-fence-as-lock-add-yes.d: Likewise.
+	* gas/i386/x86-64-fence-as-lock-add-no.d: Likewise.
+
 2016-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac (compressed_debug_sections): Remove trailing `]'.
