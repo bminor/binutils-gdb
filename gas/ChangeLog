@@ -1,3 +1,12 @@
+2016-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19532
+	* configure.ac (compressed_debug_sections): Replace == with =.
+	* configure: Regenerated.
+
 2016-01-25  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
