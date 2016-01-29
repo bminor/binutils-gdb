@@ -2125,6 +2125,11 @@ although @command{ld} relocates the sections correctly, using @samp{objdump
 Instead, it shows the usual addresses, which are implicit for the
 target.
 
+Note, in some cases it is possible for a section to have both the
+READONLY and the NOREAD attributes set.  In such cases the NOREAD
+attribute takes precedence, but @command{objdump} will report both
+since the exact setting of the flag bits might be important.
+
 @item -H
 @itemx --help
 Print a summary of the options to @command{objdump} and exit.

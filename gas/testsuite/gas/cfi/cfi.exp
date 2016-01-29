@@ -73,7 +73,7 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
 	run_dump_test "cfi-s390x-1"
     }
 
-} elseif { [istarget "m68*-*"] } then {
+} elseif { [istarget "m68*-*"] && ![istarget "m68hc1*-*"] } then {
     run_dump_test "cfi-m68k"
 
 } elseif { [istarget sparc*-*-*] } then {

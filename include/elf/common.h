@@ -595,6 +595,20 @@
 /* Note segment for SystemTap probes.  */
 #define NT_STAPSDT	3
 
+/* Note segments for core files on FreeBSD systems.  Note name is
+   "FreeBSD".  */
+
+#define	NT_FREEBSD_THRMISC	7	/* Thread miscellaneous info. */
+#define	NT_FREEBSD_PROCSTAT_PROC	8	/* Procstat proc data. */
+#define	NT_FREEBSD_PROCSTAT_FILES	9	/* Procstat files data. */
+#define	NT_FREEBSD_PROCSTAT_VMMAP	10	/* Procstat vmmap data. */
+#define	NT_FREEBSD_PROCSTAT_GROUPS	11	/* Procstat groups data. */
+#define	NT_FREEBSD_PROCSTAT_UMASK	12	/* Procstat umask data. */
+#define	NT_FREEBSD_PROCSTAT_RLIMIT	13	/* Procstat rlimit data. */
+#define	NT_FREEBSD_PROCSTAT_OSREL	14	/* Procstat osreldate data. */
+#define	NT_FREEBSD_PROCSTAT_PSSTRINGS	15	/* Procstat ps_strings data. */
+#define	NT_FREEBSD_PROCSTAT_AUXV	16	/* Procstat auxv data. */
+
 /* Note segments for core files on NetBSD systems.  Note name
    must start with "NetBSD-CORE".  */
 

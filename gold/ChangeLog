@@ -1,3 +1,10 @@
+2016-01-15 Han Shen  <shenhan@google.com>
+
+	PR gold/19472 - need pc-relative stubs.
+
+	* aarch64.cc (Reloc_stub::stub_type_for_reloc): Return PC-relative
+	stub type for DSOs and pie executables.
+
 2016-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386.cc (Target_i386::Classify_reloc::get_r_addend): Remove

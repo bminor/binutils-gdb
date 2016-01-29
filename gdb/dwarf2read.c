@@ -15936,7 +15936,8 @@ read_partial_die (const struct die_reader_specs *reader,
 	     compilers pick up the new representation, we'll support this
 	     practice.  */
 	  if (DW_UNSND (&attr) == DW_CC_program
-	      && cu->language == language_fortran)
+	      && cu->language == language_fortran
+	      && part_die->name != NULL)
 	    set_objfile_main_name (objfile, part_die->name, language_fortran);
 	  break;
 	case DW_AT_inline:

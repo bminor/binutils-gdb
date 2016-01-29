@@ -2720,7 +2720,7 @@ scope_info (char *args, int from_tty)
 
   location = string_to_event_location (&args, current_language);
   back_to = make_cleanup_delete_event_location (location);
-  sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE, NULL, 0);
+  sals = decode_line_1 (location, DECODE_LINE_FUNFIRSTLINE, NULL, NULL, 0);
   if (sals.nelts == 0)
     {
       /* Presumably decode_line_1 has already warned.  */

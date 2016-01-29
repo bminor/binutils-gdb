@@ -237,6 +237,11 @@ static void arm_neon_quad_write (struct gdbarch *gdbarch,
 				 struct regcache *regcache,
 				 int regnum, const gdb_byte *buf);
 
+static CORE_ADDR
+  arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
+				    CORE_ADDR pc);
+
+
 /* get_next_pcs operations.  */
 static struct arm_get_next_pcs_ops arm_get_next_pcs_ops = {
   arm_get_next_pcs_read_memory_unsigned_integer,
@@ -6142,15 +6147,10 @@ arm_get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
 
 /* Wrapper over syscall_next_pc for use in get_next_pcs.  */
 
-CORE_ADDR
-arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self, CORE_ADDR pc)
+static CORE_ADDR
+arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
+				  CORE_ADDR pc)
 {
-  struct gdbarch_tdep *tdep;
-
-  tdep = gdbarch_tdep (get_regcache_arch (self->regcache));
-  if (tdep->syscall_next_pc != NULL)
-    return tdep->syscall_next_pc (self->regcache);
-
   return 0;
 }
 
@@ -6183,10 +6183,10 @@ arm_software_single_step (struct frame_info *frame)
 			 &arm_get_next_pcs_ops,
 			 gdbarch_byte_order (gdbarch),
 			 gdbarch_byte_order_for_code (gdbarch),
-			 gdbarch_tdep (gdbarch)->thumb2_breakpoint,
+			 0,
 			 regcache);
 
-  next_pcs = arm_get_next_pcs (&next_pcs_ctx, regcache_read_pc (regcache));
+  next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
     arm_insert_single_step_breakpoint (gdbarch, aspace, pc);

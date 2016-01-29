@@ -55,7 +55,7 @@ send_gdb "\003"
 
 set test "caught interrupt"
 gdb_test_multiple "" $test {
-    -re "Program received signal SIGINT.*$gdb_prompt $" {
+    -re "Thread .* received signal SIGINT.*$gdb_prompt $" {
 	pass $test
     }
 }

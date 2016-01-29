@@ -322,7 +322,7 @@ _bfd_xcoff64_swap_sym_in (bfd *abfd, void *ext1, void *in1)
   in->_n._n_n._n_zeroes = 0;
   in->_n._n_n._n_offset = H_GET_32 (abfd, ext->e_offset);
   in->n_value = H_GET_64 (abfd, ext->e_value);
-  in->n_scnum = H_GET_16 (abfd, ext->e_scnum);
+  in->n_scnum = (short) H_GET_16 (abfd, ext->e_scnum);
   in->n_type = H_GET_16 (abfd, ext->e_type);
   in->n_sclass = H_GET_8 (abfd, ext->e_sclass);
   in->n_numaux = H_GET_8 (abfd, ext->e_numaux);

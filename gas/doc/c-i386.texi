@@ -327,6 +327,18 @@ single-thread computers
 @option{-momit-lock-prefix=@var{no}} will encode lock prefix as usual,
 which is the default.
 
+@cindex @samp{-mfence-as-lock-add=} option, i386
+@cindex @samp{-mfence-as-lock-add=} option, x86-64
+@item -mfence-as-lock-add=@var{no}
+@itemx -mfence-as-lock-add=@var{yes}
+These options control how the assembler should encode lfence, mfence and
+sfence.
+@option{-mfence-as-lock-add=@var{yes}} will encode lfence, mfence and
+sfence as @samp{lock addl $0x0, (%rsp)} in 64-bit mode and
+@samp{lock addl $0x0, (%esp)} in 32-bit mode.
+@option{-mfence-as-lock-add=@var{no}} will encode lfence, mfence and
+sfence as usual, which is the default.
+
 @cindex @samp{-mevexrcig=} option, i386
 @cindex @samp{-mevexrcig=} option, x86-64
 @item -mevexrcig=@var{rne}

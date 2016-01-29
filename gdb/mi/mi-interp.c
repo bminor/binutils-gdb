@@ -362,7 +362,7 @@ mi_new_thread (struct thread_info *t)
 
   fprintf_unfiltered (mi->event_channel, 
 		      "thread-created,id=\"%d\",group-id=\"i%d\"",
-		      t->num, inf->num);
+		      t->global_num, inf->num);
   gdb_flush (mi->event_channel);
 }
 
@@ -383,7 +383,7 @@ mi_thread_exit (struct thread_info *t, int silent)
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel, 
 		      "thread-exited,id=\"%d\",group-id=\"i%d\"",
-		      t->num, inf->num);
+		      t->global_num, inf->num);
   gdb_flush (mi->event_channel);
 
   do_cleanups (old_chain);
@@ -617,15 +617,14 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	  print_stop_event (mi->cli_uiout);
 	}
 
-      ui_out_field_int (mi_uiout, "thread-id",
-			pid_to_thread_id (inferior_ptid));
+      tp = inferior_thread ();
+      ui_out_field_int (mi_uiout, "thread-id", tp->global_num);
       if (non_stop)
 	{
 	  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end 
 	    (mi_uiout, "stopped-threads");
 
-	  ui_out_field_int (mi_uiout, NULL,
-			    pid_to_thread_id (inferior_ptid));
+	  ui_out_field_int (mi_uiout, NULL, tp->global_num);
 	  do_cleanups (back_to);
 	}
       else
@@ -859,7 +858,7 @@ mi_output_running_pid (struct thread_info *info, void *arg)
   if (ptid_get_pid (*ptid) == ptid_get_pid (info->ptid))
     fprintf_unfiltered (raw_stdout,
 			"*running,thread-id=\"%d\"\n",
-			info->num);
+			info->global_num);
 
   return 0;
 }
@@ -925,7 +924,8 @@ mi_on_resume (ptid_t ptid)
       struct thread_info *ti = find_thread_ptid (ptid);
 
       gdb_assert (ti);
-      fprintf_unfiltered (raw_stdout, "*running,thread-id=\"%d\"\n", ti->num);
+      fprintf_unfiltered (raw_stdout, "*running,thread-id=\"%d\"\n",
+			  ti->global_num);
     }
 
   if (!running_result_record_printed && mi_proceeded)

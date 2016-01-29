@@ -218,7 +218,7 @@ record_btrace_open (const char *args, int from_tty)
 
   disable_chain = make_cleanup (null_cleanup, NULL);
   ALL_NON_EXITED_THREADS (tp)
-    if (args == NULL || *args == 0 || number_is_in_list (args, tp->num))
+    if (args == NULL || *args == 0 || number_is_in_list (args, tp->global_num))
       {
 	btrace_enable (tp, &record_btrace_conf);
 
@@ -438,8 +438,8 @@ record_btrace_info (struct target_ops *self)
     }
 
   printf_unfiltered (_("Recorded %u instructions in %u functions (%u gaps) "
-		       "for thread %d (%s).\n"), insns, calls, gaps,
-		     tp->num, target_pid_to_str (tp->ptid));
+		       "for thread %s (%s).\n"), insns, calls, gaps,
+		     print_thread_id (tp), target_pid_to_str (tp->ptid));
 
   if (btrace_is_replaying (tp))
     printf_unfiltered (_("Replay in progress.  At instruction %u.\n"),
@@ -1864,7 +1864,7 @@ record_btrace_resume_thread (struct thread_info *tp,
 {
   struct btrace_thread_info *btinfo;
 
-  DEBUG ("resuming thread %d (%s): %x (%s)", tp->num,
+  DEBUG ("resuming thread %s (%s): %x (%s)", print_thread_id (tp),
 	 target_pid_to_str (tp->ptid), flag, btrace_thread_flag_to_str (flag));
 
   btinfo = &tp->btrace;
@@ -2131,7 +2131,8 @@ record_btrace_cancel_resume (struct thread_info *tp)
   if (flags == 0)
     return;
 
-  DEBUG ("cancel resume thread %d (%s): %x (%s)", tp->num,
+  DEBUG ("cancel resume thread %s (%s): %x (%s)",
+	 print_thread_id (tp),
 	 target_pid_to_str (tp->ptid), flags,
 	 btrace_thread_flag_to_str (flags));
 
@@ -2354,7 +2355,7 @@ record_btrace_step_thread (struct thread_info *tp)
   flags = btinfo->flags & (BTHR_MOVE | BTHR_STOP);
   btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
 
-  DEBUG ("stepping thread %d (%s): %x (%s)", tp->num,
+  DEBUG ("stepping thread %s (%s): %x (%s)", print_thread_id (tp),
 	 target_pid_to_str (tp->ptid), flags,
 	 btrace_thread_flag_to_str (flags));
 
@@ -2563,7 +2564,8 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   /* We moved the replay position but did not update registers.  */
   registers_changed_ptid (eventing->ptid);
 
-  DEBUG ("wait ended by thread %d (%s): %s", eventing->num,
+  DEBUG ("wait ended by thread %s (%s): %s",
+	 print_thread_id (eventing),
 	 target_pid_to_str (eventing->ptid),
 	 target_waitstatus_to_string (status));
 

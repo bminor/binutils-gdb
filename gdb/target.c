@@ -2165,6 +2165,8 @@ target_pre_inferior (int from_tty)
      the inferior was attached to.  */
   current_inferior ()->attach_flag = 0;
 
+  current_inferior ()->highest_thread_num = 0;
+
   agent_capability_invalidate ();
 }
 

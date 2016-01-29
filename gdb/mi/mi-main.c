@@ -2165,7 +2165,7 @@ mi_execute_command (const char *cmd, int from_tty)
 	    {
 	      struct thread_info *ti = inferior_thread ();
 
-	      report_change = (ti->num != command->thread);
+	      report_change = (ti->global_num != command->thread);
 	    }
 
 	  if (report_change)
@@ -2175,7 +2175,7 @@ mi_execute_command (const char *cmd, int from_tty)
 	      target_terminal_ours ();
 	      fprintf_unfiltered (mi->event_channel,
 				  "thread-selected,id=\"%d\"",
-				  ti->num);
+				  ti->global_num);
 	      gdb_flush (mi->event_channel);
 	    }
 	}
@@ -2226,7 +2226,7 @@ mi_cmd_execute (struct mi_parse *parse)
 
   if (parse->thread != -1)
     {
-      struct thread_info *tp = find_thread_id (parse->thread);
+      struct thread_info *tp = find_thread_global_id (parse->thread);
 
       if (!tp)
 	error (_("Invalid thread id: %d"), parse->thread);

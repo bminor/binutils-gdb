@@ -245,25 +245,6 @@ arm_store_vfpregset (struct regcache *regcache, const void *buf)
   arm_store_vfpregset_num (regcache, buf, num);
 }
 
-extern int debug_threads;
-
-static CORE_ADDR
-arm_get_pc (struct regcache *regcache)
-{
-  unsigned long pc;
-  collect_register_by_name (regcache, "pc", &pc);
-  if (debug_threads)
-    debug_printf ("stop pc is %08lx\n", pc);
-  return pc;
-}
-
-static void
-arm_set_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  unsigned long newpc = pc;
-  supply_register_by_name (regcache, "pc", &newpc);
-}
-
 /* Wrapper of arm_is_thumb_mode for get_next_pcs.  */
 static int
 get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
@@ -769,16 +750,20 @@ arm_prepare_to_resume (struct lwp_info *lwp)
       }
 }
 
-/* Find the next pc for a sigreturn or rt_sigreturn syscall.
+/* Find the next pc for a sigreturn or rt_sigreturn syscall.  In
+   addition, set IS_THUMB depending on whether we will return to ARM
+   or Thumb code.
    See arm-linux.h for stack layout details.  */
 static CORE_ADDR
-arm_sigreturn_next_pc (struct regcache *regcache, int svc_number)
+arm_sigreturn_next_pc (struct regcache *regcache, int svc_number,
+		       int *is_thumb)
 {
   unsigned long sp;
   unsigned long sp_data;
   /* Offset of PC register.  */
   int pc_offset = 0;
   CORE_ADDR next_pc = 0;
+  CORE_ADDR cpsr;
 
   gdb_assert (svc_number == __NR_sigreturn || svc_number == __NR_rt_sigreturn);
 
@@ -789,6 +774,10 @@ arm_sigreturn_next_pc (struct regcache *regcache, int svc_number)
     (sp, sp_data, svc_number, __NR_sigreturn == svc_number ? 1 : 0);
 
   (*the_target->read_memory) (sp + pc_offset, (unsigned char *) &next_pc, 4);
+
+  /* Set IS_THUMB according the CPSR saved on the stack.  */
+  (*the_target->read_memory) (sp + pc_offset + 4, (unsigned char *) &cpsr, 4);
+  *is_thumb = ((cpsr & CPSR_T) != 0);
 
   return next_pc;
 }
@@ -831,7 +820,9 @@ get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self, CORE_ADDR pc)
   /* This is a sigreturn or sigreturn_rt syscall.  */
   if (svc_number == __NR_sigreturn || svc_number == __NR_rt_sigreturn)
     {
-      next_pc = arm_sigreturn_next_pc (regcache, svc_number);
+      /* SIGRETURN or RT_SIGRETURN may affect the arm thumb mode, so
+	 update IS_THUMB.   */
+      next_pc = arm_sigreturn_next_pc (regcache, svc_number, &is_thumb);
     }
 
   /* Addresses for calling Thumb functions have the bit 0 set.  */
@@ -932,7 +923,7 @@ arm_arch_setup (void)
 /* Fetch the next possible PCs after the current instruction executes.  */
 
 static VEC (CORE_ADDR) *
-arm_gdbserver_get_next_pcs (CORE_ADDR pc, struct regcache *regcache)
+arm_gdbserver_get_next_pcs (struct regcache *regcache)
 {
   struct arm_get_next_pcs next_pcs_ctx;
   VEC (CORE_ADDR) *next_pcs = NULL;
@@ -942,10 +933,10 @@ arm_gdbserver_get_next_pcs (CORE_ADDR pc, struct regcache *regcache)
 			 /* Byte order is ignored assumed as host.  */
 			 0,
 			 0,
-			 (const gdb_byte *) &thumb2_breakpoint,
+			 1,
 			 regcache);
 
-  next_pcs = arm_get_next_pcs (&next_pcs_ctx, pc);
+  next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
   return next_pcs;
 }
@@ -1011,8 +1002,8 @@ struct linux_target_ops the_low_target = {
   arm_cannot_fetch_register,
   arm_cannot_store_register,
   NULL, /* fetch_register */
-  arm_get_pc,
-  arm_set_pc,
+  linux_get_pc_32bit,
+  linux_set_pc_32bit,
   arm_breakpoint_kind_from_pc,
   arm_sw_breakpoint_from_kind,
   arm_gdbserver_get_next_pcs,

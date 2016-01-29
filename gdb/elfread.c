@@ -902,7 +902,7 @@ elf_gnu_ifunc_resolver_stop (struct breakpoint *b)
   struct frame_info *prev_frame = get_prev_frame (get_current_frame ());
   struct frame_id prev_frame_id = get_stack_frame_id (prev_frame);
   CORE_ADDR prev_pc = get_frame_pc (prev_frame);
-  int thread_id = pid_to_thread_id (inferior_ptid);
+  int thread_id = ptid_to_global_thread_id (inferior_ptid);
 
   gdb_assert (b->type == bp_gnu_ifunc_resolver);
 
@@ -1006,7 +1006,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   sals_end.nelts = 0;
 
   b->type = bp_breakpoint;
-  update_breakpoint_locations (b, sals, sals_end);
+  update_breakpoint_locations (b, current_program_space, sals, sals_end);
 }
 
 /* A helper function for elf_symfile_read that reads the minimal

@@ -2776,16 +2776,36 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case EF_ARC_CPU_ARCV2HS:
 	      strcat (buf, ", ARC HS");
 	      break;
+	    case EF_ARC_CPU_GENERIC:
+	      strcat (buf, ", ARC generic");
+	      break;
+	    case E_ARC_MACH_ARC600:
+	      strcat (buf, ", ARC600");
+	      break;
+	    case E_ARC_MACH_ARC601:
+	      strcat (buf, ", ARC601");
+	      break;
+	    case E_ARC_MACH_ARC700:
+	      strcat (buf, ", ARC700");
+	      break;
 	    default:
-	      strcat (buf, ", unrecognized flag for ARCv2");
+	      strcat (buf, ", unrecognized cpu flag for ARCv2");
 	      break;
 	    }
 	  switch (e_flags & EF_ARC_OSABI_MSK)
 	    {
-	      /* Only upstream 3.9+ kernels will support ARCv2
-		 ISA.  */
+	    case E_ARC_OSABI_ORIG:
+	      strcat (buf, ", (ABI:legacy)");
+	      break;
+	    case E_ARC_OSABI_V2:
+	      strcat (buf, ", (ABI:v2)");
+	      break;
+	      /* Only upstream 3.9+ kernels will support ARCv2 ISA.  */
 	    case E_ARC_OSABI_V3:
 	      strcat (buf, ", v3 no-legacy-syscalls ABI");
+	      break;
+	    default:
+	      strcat (buf, ", unrecognised ARC OSABI flag");
 	      break;
 	    }
 	  break;
@@ -5410,6 +5430,9 @@ get_elf_section_flags (bfd_vma sh_flags)
 		   || elf_header.e_machine == EM_K1OM)
 		  && flag == SHF_X86_64_LARGE)
 		*p = 'l';
+	      else if (elf_header.e_machine == EM_ARM
+		       && flag == SHF_ARM_NOREAD)
+		  *p = 'y';
 	      else if (flag & SHF_MASKOS)
 		{
 		  *p = 'o';
@@ -5985,6 +6008,11 @@ process_section_headers (FILE * file)
 	  || elf_header.e_machine == EM_K1OM)
 	printf (_("Key to Flags:\n\
   W (write), A (alloc), X (execute), M (merge), S (strings), l (large)\n\
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
+  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
+      else if (elf_header.e_machine == EM_ARM)
+	printf (_("Key to Flags:\n\
+  W (write), A (alloc), X (execute), M (merge), S (strings), y (noread)\n\
   I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
   O (extra OS processing required) o (OS specific), p (processor specific)\n"));
       else
@@ -11404,6 +11432,9 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 3; /* R_M32C_32.  */
     case EM_M32R:
       return reloc_type == 34; /* R_M32R_32_RELA.  */
+    case EM_68HC11:
+    case EM_68HC12:
+      return reloc_type == 6; /* R_M68HC11_32.  */
     case EM_MCORE:
       return reloc_type == 1; /* R_MCORE_ADDR32.  */
     case EM_CYGNUS_MEP:
@@ -15388,6 +15419,35 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
 }
 
 static const char *
+get_freebsd_elfcore_note_type (unsigned e_type)
+{
+  switch (e_type)
+    {
+    case NT_FREEBSD_THRMISC:
+      return _("NT_THRMISC (thrmisc structure)");
+    case NT_FREEBSD_PROCSTAT_PROC:
+      return _("NT_PROCSTAT_PROC (proc data)");
+    case NT_FREEBSD_PROCSTAT_FILES:
+      return _("NT_PROCSTAT_FILES (files data)");
+    case NT_FREEBSD_PROCSTAT_VMMAP:
+      return _("NT_PROCSTAT_VMMAP (vmmap data)");
+    case NT_FREEBSD_PROCSTAT_GROUPS:
+      return _("NT_PROCSTAT_GROUPS (groups data)");
+    case NT_FREEBSD_PROCSTAT_UMASK:
+      return _("NT_PROCSTAT_UMASK (umask data)");
+    case NT_FREEBSD_PROCSTAT_RLIMIT:
+      return _("NT_PROCSTAT_RLIMIT (rlimit data)");
+    case NT_FREEBSD_PROCSTAT_OSREL:
+      return _("NT_PROCSTAT_OSREL (osreldate data)");
+    case NT_FREEBSD_PROCSTAT_PSSTRINGS:
+      return _("NT_PROCSTAT_PSSTRINGS (ps_strings data)");
+    case NT_FREEBSD_PROCSTAT_AUXV:
+      return _("NT_PROCSTAT_AUXV (auxv data)");
+    }
+  return get_note_type (e_type);
+}
+
+static const char *
 get_netbsd_elfcore_note_type (unsigned e_type)
 {
   static char buff[64];
@@ -15635,6 +15695,10 @@ process_note (Elf_Internal_Note * pnote)
   else if (const_strneq (pnote->namedata, "GNU"))
     /* GNU-specific object file notes.  */
     nt = get_gnu_elf_note_type (pnote->type);
+
+  else if (const_strneq (pnote->namedata, "FreeBSD"))
+    /* FreeBSD-specific core file notes.  */
+    nt = get_freebsd_elfcore_note_type (pnote->type);
 
   else if (const_strneq (pnote->namedata, "NetBSD-CORE"))
     /* NetBSD-specific core file notes.  */

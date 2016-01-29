@@ -1,3 +1,132 @@
+2016-01-29  Andrew Senkevich  <andrew.senkevich@intel.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (avoid_fence): New.
+	(output_insn): Encode as lock addl $0x0, (%{r,e}sp) if avoid_fence
+	is true.
+	(OPTION_FENCE_AS_LOCK_ADD): New.
+	(md_longopts): Add -mfence-as-lock-add.
+	(md_parse_option): Handle -mfence-as-lock-add.
+	(md_show_usage): Add -mfence-as-lock-add=[no|yes].
+	* doc/c-i386.texi (-mfence-as-lock-add): Document.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+	* testsuite/gas/i386/fence-as-lock-add.s: New.
+	* testsuite/gas/i386/fence-as-lock-add-yes.d: Likewise.
+	* testsuite/gas/i386/fence-as-lock-add-no.d: Likewise.
+	* testsuite/gas/i386/x86-64-fence-as-lock-add-yes.d: Likewise.
+	* testsuite/gas/i386/x86-64-fence-as-lock-add-no.d: Likewise.
+
+2016-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (compressed_debug_sections): Remove trailing `]'.
+	* configure: Regenerated.
+
+2016-01-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (OPTION_OMIT_LOCK_PREFIX): Renamed to ...
+	(OPTION_MOMIT_LOCK_PREFIX): This.
+	(md_longopts): Updated.
+	(md_parse_option): Likewise.
+
+2016-01-25  Catherine Moore  <clm@codesourcery.com>
+
+	* config/mips/tc-mips.c (md_begin): Avoid gp-relative addressing
+	if abicalls are in effect.
+	* testsuite/gas/mips/sdata-gp.s: New test.
+	* testsuite/gas/mips/sdata-gp.d: New expected output
+	* testsuite/gas/mips/mips.exp: Run new test.
+
+2016-01-25  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/gas/arm/thumb2_it_search.d: New.
+	* testsuite/gas/arm/thumb2_it_search.s: New.
+
+2016-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19454
+	* testsuite/gas/arm/mapshort-elf.d: Fix expected output to cope
+	with arm-netbsdelf target.
+	* testsuite/gas/arm/blx-bl-convert.d: Skip for netbsdelf.
+
+2016-01-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 19456
+	* testsuite/gas/arm/weakdef-1.d: Skip for VxWorks.
+	* testsuite/gas/arm/blx-bl-convert.d
+	* testsuite/gas/arm/plt-1.d: Likewise.
+	* testsuite/gas/arm/reloc-bad.d: Likewise.
+	* testsuite/gas/arm/thumb-w-good.d: Likewise.
+	* testsuite/gas/arm/thumb2_pool.d: Likewise.
+	* testsuite/gas/arm/ldconst.d: Adjust so that it works with VxWorks
+	* testsuite/gas/arm/tls_vxworks.d: Update expected output.
+
+	PR 19499
+	* doc/as.texinfo (Errors): Correct documentation describing the
+	interaction of .file and .line with warning and error messages.
+
+	PR 19458
+	* testsuite/gas/arm/armv8_2-a.d: Skip for COFF based targets.
+	* testsuite/gas/arm/archv8m-main.d: Likewise.
+	* testsuite/gas/arm/archv8m-base.d: Likewise.
+
+2016-01-20  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* testsuite/gas/aarch64/armv8_2-a-illegal.d: New.
+	* testsuite/gas/aarch64/armv8_2-a-illegal.l: New.
+	* testsuite/gas/aarch64/armv8_2-a-illegal.s: New.
+
+2016-01-20  Mickael Guene  <mickael.guene@st.com>
+	    Terry Guo  <terry.guo@arm.com>
+
+	* config/obj-elf.c (obj_elf_change_section) : Allow arm section with
+	SHF_ARM_NOREAD section flag.
+	* config/tc-arm.h (md_elf_section_letter) : Implement this hook to
+	handle letter 'y'.
+	(arm_elf_section_letter) : Declare it.
+	* config/tc-arm.c (arm_elf_section_letter): Handle letter 'y' to set
+	SHF_ARM_NOREAD section flag.
+	* doc/c-arm.texi (ARM section attribute): Document the 'y' attribute.
+
+	* testsuite/gas/arm/section-execute-only.s: New test case.
+	* testsuite/gas/arm/section-execute-only.d: Expected output.
+
+2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-mips.c (micromips_insn_length): Remove the mention
+	of 48-bit microMIPS instructions.
+
+2016-01-18  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/cfi/cfi.exp: Exclude m68hc11/12 from m68k test.
+
+2016-01-14  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/rl78/sp-relative-movw.s: New test.
+	* testsuite/gas/rl78/sp-relative-movw.d: Expected disassembly.
+	* testsuite/gas/rl78/rl78.exp: Run the new test.
+
+2016-01-14  Matthew Wahab  <matthew.wahab@arm.com>
+
+	* testsuite/gas/aarch64/illegal-sysreg-2.l: New.
+	* testsuite/gas/aarch64/illegal-sysreg-2.d: New.
+
+2016-01-13  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* config/tc-nios2.c (output_movia): Preset `code' to 0.
+
+2016-01-13  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* config/tc-h8300.c (get_operand): Remove spurious condition in
+	test for closing parenthesis.
+
 2016-01-12  Matthew Wahab  <matthew.wahab@arm.com>
 
 	* config/tc-arm.c (arm_ext_v8_2): New.

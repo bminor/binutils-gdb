@@ -112,7 +112,7 @@ record_linux_sockaddr (struct regcache *regcache,
                             "memory at addr = 0x%s len = %d.\n",
                             phex_nz (len, tdep->size_pointer),
                             tdep->size_int);
-        return -1;
+      return -1;
     }
   addrlen = (int) extract_unsigned_integer (a, tdep->size_int, byte_order);
   if (addrlen <= 0 || addrlen > tdep->size_sockaddr)
@@ -150,7 +150,7 @@ record_linux_msghdr (struct regcache *regcache,
                             "len = %d.\n",
                             phex_nz (addr, tdep->size_pointer),
                             tdep->size_msghdr);
-        return -1;
+      return -1;
     }
 
   /* msg_name msg_namelen */
@@ -188,7 +188,7 @@ record_linux_msghdr (struct regcache *regcache,
                                     "len = %d.\n",
                                     phex_nz (addr,tdep->size_pointer),
                                     tdep->size_iovec);
-                return -1;
+              return -1;
             }
           tmpaddr = (CORE_ADDR) extract_unsigned_integer (iov,
                                                           tdep->size_pointer,
@@ -983,7 +983,7 @@ Do you want to stop the program?"),
                                         "memory at addr = 0x%s len = %d.\n",
                                         OUTPUT_REG (tmpulongest, tdep->arg2),
                                         tdep->size_ulong);
-                    return -1;
+                  return -1;
                 }
               tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
                                                       byte_order);

@@ -203,7 +203,7 @@ bppy_set_thread (PyObject *self, PyObject *newvalue, void *closure)
       if (! gdb_py_int_as_long (newvalue, &id))
 	return -1;
 
-      if (! valid_thread_id (id))
+      if (!valid_global_thread_id (id))
 	{
 	  PyErr_SetString (PyExc_RuntimeError,
 			   _("Invalid thread ID."));

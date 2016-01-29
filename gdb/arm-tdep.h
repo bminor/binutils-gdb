@@ -138,10 +138,6 @@ struct gdbarch_tdep
   struct type *neon_double_type;
   struct type *neon_quad_type;
 
-  /* Return the expected next PC if the program is stopped at a syscall
-     instruction.  */
-  CORE_ADDR (*syscall_next_pc) (struct regcache *regcache);
-
    /* syscall record.  */
   int (*arm_syscall_record) (struct regcache *regcache, unsigned long svc_number);
 };
@@ -260,9 +256,6 @@ ULONGEST arm_get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
 
 CORE_ADDR arm_get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
 					     CORE_ADDR val);
-
-CORE_ADDR arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
-					    CORE_ADDR pc);
 
 int arm_get_next_pcs_is_thumb (struct arm_get_next_pcs *self);
 

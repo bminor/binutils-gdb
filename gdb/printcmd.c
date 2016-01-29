@@ -358,9 +358,9 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
   /* String printing should go through val_print_scalar_formatted.  */
   gdb_assert (options->format != 's');
 
-  if (len > sizeof(LONGEST) &&
-      (TYPE_CODE (type) == TYPE_CODE_INT
-       || TYPE_CODE (type) == TYPE_CODE_ENUM))
+  if (len > sizeof(LONGEST)
+      && (TYPE_CODE (type) == TYPE_CODE_INT
+	  || TYPE_CODE (type) == TYPE_CODE_ENUM))
     {
       switch (options->format)
 	{

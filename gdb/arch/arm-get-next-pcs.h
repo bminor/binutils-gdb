@@ -41,8 +41,9 @@ struct arm_get_next_pcs
   int byte_order;
   /* Byte order for code.  */
   int byte_order_for_code;
-  /* Thumb2 breakpoint instruction.  */
-  const gdb_byte *arm_thumb2_breakpoint;
+  /* Whether the target has 32-bit thumb-2 breakpoint defined or
+     not.  */
+  int has_thumb2_breakpoint;
   /* Registry cache.  */
   struct regcache *regcache;
 };
@@ -52,11 +53,10 @@ void arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
 			    struct arm_get_next_pcs_ops *ops,
 			    int byte_order,
 			    int byte_order_for_code,
-			    const gdb_byte *arm_thumb2_breakpoint,
+			    int has_thumb2_breakpoint,
 			    struct regcache *regcache);
 
 /* Find the next possible PCs after the current instruction executes.  */
-VEC (CORE_ADDR) *arm_get_next_pcs (struct arm_get_next_pcs *self,
-				   CORE_ADDR pc);
+VEC (CORE_ADDR) *arm_get_next_pcs (struct arm_get_next_pcs *self);
 
 #endif /* ARM_GET_NEXT_PCS_H */

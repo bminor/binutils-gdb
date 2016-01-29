@@ -113,13 +113,16 @@ get_linespec_location (const struct event_location *location)
 /* See description in location.h.  */
 
 struct event_location *
-new_address_location (CORE_ADDR addr)
+new_address_location (CORE_ADDR addr, const char *addr_string,
+		      int addr_string_len)
 {
   struct event_location *location;
 
   location = XCNEW (struct event_location);
   EL_TYPE (location) = ADDRESS_LOCATION;
   EL_ADDRESS (location) = addr;
+  if (addr_string != NULL)
+    EL_STRING (location) = xstrndup (addr_string, addr_string_len);
   return location;
 }
 
@@ -130,6 +133,15 @@ get_address_location (const struct event_location *location)
 {
   gdb_assert (EL_TYPE (location) == ADDRESS_LOCATION);
   return EL_ADDRESS (location);
+}
+
+/* See description in location.h.  */
+
+const char *
+get_address_string_location (const struct event_location *location)
+{
+  gdb_assert (EL_TYPE (location) == ADDRESS_LOCATION);
+  return EL_STRING (location);
 }
 
 /* See description in location.h.  */
@@ -635,7 +647,7 @@ string_to_event_location (char **stringp,
 
       orig = arg = *stringp;
       addr = linespec_expression_to_pc (&arg);
-      location = new_address_location (addr);
+      location = new_address_location (addr, orig, arg - orig);
       *stringp += arg - orig;
     }
   else

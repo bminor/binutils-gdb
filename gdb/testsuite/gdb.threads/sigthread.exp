@@ -49,4 +49,4 @@ after 500 {send_gdb "\003"}
 
 # Make sure we do not get an internal error from hitting Control-C
 # while many signals are flying back and forth.
-gdb_test "" "Program received signal SIGINT.*" "stop with control-c"
+gdb_test "" "Thread .* received signal SIGINT.*" "stop with control-c"

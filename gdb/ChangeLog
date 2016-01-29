@@ -1,3 +1,651 @@
+2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Regenerate.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add rawmemchr.
+
+2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (skip_to_semicolon): Remove.
+	(remote_parse_stop_reply): Use strchrnul instead of
+	skip_to_semicolon.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	strchrnul.
+	* gnulib/aclocal.m4: Regenerate.
+	* gnulib/config.in: Regenerate.
+	* gnulib/configure: Regenerate.
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Regenerate.
+	* gnulib/import/m4/gnulib-comp.m4: Regenerate.
+	* gnulib/import/m4/rawmemchr.m4: New file.
+	* gnulib/import/m4/strchrnul.m4: New file.
+	* gnulib/import/rawmemchr.c: New file.
+	* gnulib/import/rawmemchr.valgrind: New file.
+	* gnulib/import/strchrnul.c: New file.
+	* gnulib/import/strchrnul.valgrind: New file.
+
+2016-01-28  Yao Qi  <yao.qi@linaro.org>
+
+	* breakpoint.c (build_target_command_list): Don't call continue
+	if aexpr is NULL.
+	(build_target_condition_list): Likewise.
+
+2016-01-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* rx-tdep.c (rx_push_dummy_call): Treat scalars larger than 8
+	bytes as aggregates.
+
+2016-01-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (Responsible Maintainers): Add Keith Seitz as
+	Linespec Maintainers.
+
+2016-01-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/common-utils.c (skip_spaces): Fix comment.
+	(skip_to_space_const): Likewise.
+
+2016-01-25  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm-get-next-pcs.c (thumb_deal_with_atomic_sequence_raw):
+	Remove argument pc.  Get pc by regcache_read_pc.  Callers updated.
+	(arm_deal_with_atomic_sequence_raw): Likewise.
+	(thumb_get_next_pcs_raw): Likewise.
+	(arm_get_next_pcs_raw): Likewise.
+	(arm_get_next_pcs): Remove argument pc.  Callers updated.
+	* arch/arm-get-next-pcs.h (arm_get_next_pcs): Update declaration.
+
+2016-01-25  Mark Wielaard  <mjw@redhat.com>
+
+	* ada-lang.c (ada_evaluate_subexp): Add proper else block.
+	* c-typeprint.c (c_type_print_base): Fix misleading indentation of
+	if statement.
+	* inflow.c (child_terminal_ours_1): Fix misleading indentation of
+	statement block by introducing an else.
+	* linux-record.c (record_linux_sockaddr): Fix misleading indentation
+	of return statements.
+	(record_linux_msghdr): Likewise.
+
+2016-01-25  Pedro Alves  <palves@redhat.com>
+
+	PR threads/19461
+	* infrun.c (handle_inferior_event_1) <fork/vfork>: Update
+	parent/child running states.
+
+2016-01-25  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19494
+	* linux-nat.c (kill_one_lwp): New, factored out from ...
+	(kill_callback): ... this.
+	(kill_wait_callback): New, factored out from ...
+	(kill_wait_one_lwp): ... this.
+	(kill_unfollowed_fork_children): New function.
+	(linux_nat_kill): Use it.
+
+2016-01-22  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_pid_to_str): Adjust string format.
+
+2016-01-22  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-nat.c (fetch_fpregs): Call perror_with_name
+	instead of warning.
+	(store_fpregs, fetch_regs, store_regs): Likewise.
+	(fetch_wmmx_regs, store_wmmx_regs): Likewise.
+	(fetch_vfp_regs, store_vfp_regs): Likewise.
+
+2016-01-21  Doug Evans  <dje@google.com>
+
+	* breakpoint.c (init_breakpoint_sal): Add comment.
+
+2016-01-21  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* ax-gdb.c (gen_traced_pop): Use gen_fetch for string collection.
+
+2016-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* disasm.c (maybe_add_dis_line_entry): Rename to...
+	(add_dis_line_entry): ...this, and update header comment.
+	(do_mixed_source_and_assembly): Now use add_dis_line_entry.
+
+2016-01-21  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMPILER_CFLAGS): New.
+	(CXXFLAGS): Get it from configure.
+	(INTERNAL_CFLAGS_BASE, INTERNAL_LDFLAGS): Use COMPILER_CFLAGS
+	instead of CFLAGS.
+	* build-with-cxx.m4 (GDB_AC_BUILD_WITH_CXX): Set and AC_SUBST
+	COMPILER_CFLAGS.
+	* configure: Regenerate.
+
+2016-01-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* location.h (new_address_location): Add new parameters
+	"addr_string" and "addr_string_len".
+	(get_address_string_location): Add declaration.
+	* location.c (new_address_location): Add new parameters
+	"addr_string" and "addr_string_len".  If not NULL, store
+	a copy of the addr_string in the new location as well.
+	(get_address_string_location): New function.
+	(string_to_event_location): Update call to new_address_location.
+	* linespec.c (event_location_to_sals) <ADDRESS_LOCATION>:
+	Save the event location in the parser's state before
+	passing it to convert_address_location_to_sals.
+	* breakpoint.c (create_thread_event_breakpoint): Update call
+	to new_address_location.
+	(init_breakpoint_sal): Get the event location's string, if any,
+	and use it to update call to new_address_location.
+	* python/py-finishbreakpoint.c (bpfinishpy_init):
+	Update call to new_address_location.
+	* spu-tdep.c (spu_catch_start): Likewise.
+
+	* config/djgpp/fnchange.lst: Add entries for
+	gdb/testsuite/gdb.base/break-fun-addr1.c and
+	gdb/testsuite/gdb.base/break-fun-addr2.c.
+
+2016-01-21  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_sigreturn_next_pc): Add parameter
+	is_thumb and set it according to CPSR saved on the stack.
+	(arm_linux_get_next_pcs_syscall_next_pc): Pass is_thumb to
+	arm_linux_sigreturn_next_pc.
+
+2016-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/lib/gdb/printing.py (FlagEnumerationPrinter.__call__):
+	Fix enumerators sort key function.
+
+2016-01-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* printcmd.c (print_scalar_formatted): Move binary operator from
+	end of line to beginning of next line.  Adjust formatting
+	accordingly.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Use new "buflen" instead of
+	"len" with sysctl.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (find_stop_signal): Remove.
+	(struct fbsd_collect_regset_section_cb) <lwp>: New field.
+	<stop_signal>: New field.
+	<abort_iteration>: New field.
+	(fbsd_collect_regset_section_cb): Use new fields.
+	(fbsd_collect_thread_registers): New function.
+	(struct fbsd_corefile_thread_data): New structure.
+	(fbsd_corefile_thread): New function.
+	(fbsd_make_corefile_notes): Use new function to dump notes for each
+	non-exited thread in a process.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure.ac: Check for support for LWP names on FreeBSD.
+	* fbsd-nat.c [PT_LWPINFO] New variable debug_fbsd_lwp.
+	[TDP_RFPPWAIT || HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME]
+	(fbsd_fetch_kinfo_proc): Move function earlier.
+	[PT_LWPINFO] (fbsd_thread_alive): New function.
+	[PT_LWPINFO] (fbsd_pid_to_str): New function.
+	[HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME] (fbsd_thread_name): New function.
+	[PT_LWP_EVENTS] (fbsd_enable_lwp_events): New function.
+	[PT_LWPINFO] (fbsd_add_threads): New function.
+	[PT_LWPINFO] (fbsd_update_thread_list): New function.
+	[PT_LWPINFO] New variable super_resume.
+	[PT_LWPINFO] (resume_one_thread_cb): New function.
+	[PT_LWPINFO] (resume_all_threads_cb): New function.
+	[PT_LWPINFO] (fbsd_resume): New function.
+	(fbsd_remember_child): Save full ptid instead of plain pid.
+	(fbsd_is_child_pending): Return ptid of saved child process.
+	(fbsd_wait): Include lwp in returned ptid and switch to LWP ptid on
+	first stop.
+	[PT_LWP_EVENTS] Handle LWP events.
+	[TDP_RFPPWAIT] Include LWP in child ptid.
+	(fbsd_post_startup_inferior) [PT_LWP_EVENTS]: Enable LWP events.
+	(fbsd_post_attach) [PT_LWP_EVENTS]: Enable LWP events.
+	Add threads for existing processes.
+	(fbsd_nat_add_target) [PT_LWPINFO]: Set "to_thread_alive" to
+	"fbsd_thread_alive".
+	Set "to_pid_to_str" to "fbsd_pid_to_str".
+	[HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME]: Set "to_thread_name" to
+	"fbsd_thread_name".
+	[PT_LWPINFO]: Set "to_update_thread_list" to "fbsd_update_thread_list".
+	Set "to_has_thread_control" to "tc_schedlock".
+	Set "to_resume" to "fbsd_resume".
+	(_initialize_fbsd_nat): New function.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* amd64bsd-nat.c (amd64bsd_fetch_inferior_registers): Use
+	get_ptrace_pid.
+	(amd64bsd_store_inferior_registers): Use get_ptrace_pid.
+	(amd64bsd_dr_get): Use get_ptrace_pid.
+	(amd64bsd_dr_set): Use get_ptrace_pid.
+	* i386bsd-nat.c (i386bsd_fetch_inferior_registers): Use get_ptrace_pid.
+	(i386bsd_store_inferior_registers): Use get_ptrace_pid.
+	(i386bsd_dr_get): Use get_ptrace_pid.
+	(i386bsd_dr_set): Use get_ptrace_pid.
+	* inf-ptrace.c (get_ptrace_pid): Export.
+	* inf-ptrace.h (get_ptrace_pid): Declare.
+	* ppcfbsd-nat.c (ppcfbsd_fetch_inferior_registers): Use lwp id.
+	(ppcfbsd_store_inferior_registers): Use lwp id.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd_tdep.c (fbsd_core_pid_to_str): New function.
+	(fbsd_core_thread_name): New function.
+	(fbsd_init_abi): Add "core_pid_to_str" gdbarch method.
+	Add "core_thread_name" gdbarch method.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* corelow.c (core_thread_name): New function.
+	(init_core_ops): Use "core_thread_name" for the "to_thread_name"
+	target op.
+	* gdbarch.sh (core_thread_name): New gdbarch callback.
+	* gdbarch.h: Re-generate.
+	* gdbarch.c: Re-generate.
+
+2016-01-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/lib/gdb/printing.py (_EnumInstance.to_string): Explicitly
+	convert gdb.Value to integer type using int().
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure.ac: Include <sys/types.h when checking for "r_fs" in
+	"struct reg".
+	* configure: Regenerate.
+
+2016-01-19  Pedro Alves  <palves@redhat.com>
+
+	* ax-gdb.c (agent_command_1): Adjust call to decode_line_full.
+	* break-catch-throw.c (re_set_exception_catchpoint): Pass the
+	current program space down to linespec decoding and breakpoint
+	location updating.
+	* breakpoint.c (parse_breakpoint_sals): Adjust calls to
+	decode_line_full.
+	(until_break_command): Adjust calls to decode_line_1.
+	(base_breakpoint_decode_location, bkpt_decode_location): Add
+	'search_pspace' parameter.  Pass it along.
+	(bkpt_probe_create_sals_from_location): Adjust calls to
+	parse_probes.
+	(tracepoint_decode_location, tracepoint_probe_decode_location)
+	(strace_marker_decode_location): Add 'search_pspace' parameter.
+	Pass it along.
+	(all_locations_are_pending): Rewrite to take a breakpoint and
+	program space as arguments instead.
+	(hoist_existing_locations): New function.
+	(update_breakpoint_locations): Add 'filter_pspace' parameter.  Use
+	hoist_existing_locations instead of always removing all locations,
+	and adjust to all_locations_are_pending change.
+	(location_to_sals): Add 'search_pspace' parameter.  Pass it along.
+	Don't disable the breakpoint if there are other locations in
+	another program space.
+	(breakpoint_re_set_default): Adjust to pass down the current
+	program space as filter program space.
+	(decode_location_default): Add 'search_pspace' parameter and pass
+	it along.
+	(prepare_re_set_context): Don't switch program space here.
+	(breakpoint_re_set): Use save_current_space_and_thread instead of
+	save_current_program_space.
+	* breakpoint.h (struct breakpoint_ops) <decode_location>: Add
+	'search_pspace' parameter.
+	(update_breakpoint_locations): Add 'filter_pspace' parameter.
+	* cli/cli-cmds.c (edit_command, list_command): Adjust calls to
+	decode_line_1.
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Pass the current
+	program space as filter program space.
+	* linespec.c (struct linespec_state) <search_pspace>: New field.
+	(create_sals_line_offset, convert_explicit_location_to_sals)
+	(parse_linespec): Pass the search program space down.
+	(linespec_state_constructor): Add 'search_pspace' parameter.
+	Store it.
+	(linespec_parser_new): Add 'search_pspace' parameter and pass it
+	along.
+	(linespec_lex_to_end): Adjust.
+	(decode_line_full, decode_line_1): Add 'search_pspace' parameter
+	and pass it along.
+	(decode_line_with_last_displayed): Adjust.
+	(collect_symtabs_from_filename, symtabs_from_filename): New
+	'search_pspace' parameter.  Use it.
+	(find_function_symbols): Pass the search program space down.
+	* linespec.h (decode_line_1, decode_line_full): Add
+	'search_pspace' parameter.
+	* probe.c (parse_probes_in_pspace): New function, factored out
+	from ...
+	(parse_probes): ... this.  Add 'search_pspace' parameter and use
+	it.
+	* probe.h (parse_probes): Add pspace' parameter.
+	* python/python.c (gdbpy_decode_line): Adjust.
+	* tracepoint.c (scope_info): Adjust.
+
+2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (mips_insn_size): Remove 48-bit microMIPS
+	instruction support.
+	(micromips_next_pc): Likewise.
+	(micromips_scan_prologue): Likewise.
+	(micromips_deal_with_atomic_sequence): Likewise.
+	(micromips_stack_frame_destroyed_p): Likewise.
+	(mips_breakpoint_from_pc): Likewise.
+
+2016-01-18  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* mips-tdep.c (micromips_insn_at_pc_has_delay_slot): Pass
+	unshifted 16-bit microMIPS instruction word to `mips_insn_size'.
+
+2016-01-18  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that GDB now displays the ID and name of the
+	thread that hit a breakpoint or received a signal.
+	* break-catch-sig.c (signal_catchpoint_print_it): Use
+	maybe_print_thread_hit_breakpoint.
+	* break-catch-syscall.c (print_it_catch_syscall): Likewise.
+	* break-catch-throw.c (print_it_exception_catchpoint): Likewise.
+	* breakpoint.c (maybe_print_thread_hit_breakpoint): New function.
+	(print_it_catch_fork, print_it_catch_vfork, print_it_catch_solib)
+	(print_it_catch_exec, print_it_ranged_breakpoint)
+	(print_it_watchpoint, print_it_masked_watchpoint, bkpt_print_it):
+	Use maybe_print_thread_hit_breakpoint.
+	* breakpoint.h (maybe_print_thread_hit_breakpoint): Declare.
+	* gdbthread.h (show_thread_that_caused_stop): Declare.
+	* infrun.c (print_signal_received_reason): Print which thread
+	received signal.
+	* thread.c (show_thread_that_caused_stop): New function.
+
+2016-01-18  Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-namespaces.c (do_fork): New function.
+	(linux_mntns_get_helper): Use the above.
+
+2016-01-17  Jonas Hahnfeld <Hahnfeld@itc.rwth-aachen.de>  (tiny change)
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>.
+	PR gdb/19208
+	* dwarf2read.c (read_partial_die): Do not call set_objfile_main_name
+	if the function has no name.
+
+2016-01-15  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* charset.c [PHONY_ICONV] (GDB_DEFAULT_HOST_CHARSET):
+	Conditionalize for Windows host.
+	(GDB_DEFAULT_TARGET_CHARSET): Match GDB_DEFAULT_HOST_CHARSET.
+	(GDB_DEFAULT_TARGET_WIDE_CHARSET): Use UTF-32.
+	(phony_iconv_open): Handle both UTF-32 endiannesses.
+	(phony_iconv): Likewise.  Check for output overflow and clean up
+	out-of-input cases.  Correct adjustment to input buffer pointer.
+	(set_be_le_names) [PHONY_ICONV]: Use hard-wired names to match
+	phony_iconv_open.
+
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention star wildcard ranges.
+	* cli/cli-utils.c (get_number_or_range): Check state->in_range first.
+	(number_range_setup_range): New function.
+	* cli/cli-utils.h (number_range_setup_range): New declaration.
+	* thread.c (thread_apply_command): Support star TID ranges.
+	* tid-parse.c (tid_range_parser_finished)
+	(tid_range_parser_string, tid_range_parser_skip)
+	(get_tid_or_range, get_tid_or_range): Handle
+	TID_RANGE_STATE_STAR_RANGE.
+	(tid_range_parser_star_range): New function.
+	* tid-parse.h (enum tid_range_state) <TID_RANGE_STATE_STAR_RANGE>:
+	New value.
+	(tid_range_parser_star_range): New declaration.
+
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
+	* thread.c (thread_apply_command): Use the tid range parser to
+	advance past the thread ID list.
+	* tid-parse.c (get_positive_number_trailer): New function.
+	(parse_thread_id): Use it.
+	(get_tid_or_range): Use it.  Return 0 instead of throwing invalid
+	thread ID error.
+	(get_tid_or_range): Detect negative values.  Return 0 instead of
+	throwing invalid thread ID error.
+
+2016-01-14  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_get_next_pcs_syscall_next_pc):
+	Declare.
+	(arm_linux_get_next_pcs_ops): Install
+	arm_linux_get_next_pcs_syscall_next_pc.
+	(arm_linux_syscall_next_pc): Change to ...
+	(arm_linux_get_next_pcs_syscall_next_pc): ... it.
+	(arm_linux_init_abi): Don't set tdep->syscall_next_pc.
+	* arm-tdep.c (arm_get_next_pcs_syscall_next_pc): Declare.
+	(arm_get_next_pcs_syscall_next_pc): Make it static.  Don't
+	call tdep->syscall_next_pc.
+	* arm-tdep.h (struct gdbarch_tdep) <syscall_next_pc>: Remove.
+	(arm_get_next_pcs_syscall_next_pc): Remove.
+
+2016-01-14  Yao Qi  <yao.qi@linaro.org>
+
+	* remote.c (remote_set_syscall_catchpoint): Cast to char *.
+	* thread.c (do_captured_thread_select): Cast to const char *.
+
+2016-01-14  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm-get-next-pcs.c (arm_get_next_pcs_ctor): Change
+	argument arm_thumb2_breakpoint to has_thumb2_breakpoint.
+	(thumb_get_next_pcs_raw): Check has_thumb2_breakpoint
+	instead.
+	* arch/arm-get-next-pcs.h (struct arm_get_next_pcs)
+	<arm_thumb2_breakpoint>: Remove.
+	<has_thumb2_breakpoint>: New field.
+	(arm_get_next_pcs_ctor): Update declaration.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Pass
+	1 to arm_get_next_pcs_ctor.
+	* arm-tdep.c (arm_software_single_step): Pass 0 to
+	arm_get_next_pcs_ctor.
+
+2016-01-13  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* MAINTAINERS: Add Andreas Arnez as s390 target maintainer.
+
+2016-01-13  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm-get-next-pcs.c (arm_get_next_pcs_raw): Use
+	byte_order_for_code to read instruction.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention $_gthread.
+	* gdbthread.h (struct thread_info) <global_num>: Mention
+	$_gthread.
+	* thread.c (thread_num_make_value_helper): New function.
+	(thread_id_make_value): Delete.
+	(thread_id_per_inf_num_make_value, global_thread_id_make_value):
+	New.
+	(thread_funcs): Adjust.
+	(gthread_funcs): New.
+	(_initialize_thread): Register $_gthread variable.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention "info threads -gid".
+	* gdbthread.h (struct thread_info) <global_num>: Mention "info
+	threads -gid".
+	* thread.c (info_threads_command): Handle "-gid".
+	(_initialize_thread): Adjust "info threads" help string to mention
+	-gid.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention InferiorThread.global_num.
+	* python/py-infthread.c (thpy_get_global_num): New function.
+	(thread_object_getset): Register "global_num".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention that thread IDs are now per inferior and global
+	thread IDs.
+	* Makefile.in (SFILES): Add tid-parse.c.
+	(COMMON_OBS): Add tid-parse.o.
+	(HFILES_NO_SRCDIR): Add tid-parse.h.
+	* ada-tasks.c: Adjust to use ptid_to_global_thread_id.
+	* breakpoint.c (insert_breakpoint_locations)
+	(remove_threaded_breakpoints, bpstat_check_breakpoint_conditions)
+	(print_one_breakpoint_location, set_longjmp_breakpoint)
+	(check_longjmp_breakpoint_for_call_dummy)
+	(set_momentary_breakpoint): Adjust to use global IDs.
+	(find_condition_and_thread, watch_command_1): Use parse_thread_id.
+	(until_break_command, longjmp_bkpt_dtor)
+	(breakpoint_re_set_thread, insert_single_step_breakpoint): Adjust
+	to use global IDs.
+	* dummy-frame.c (pop_dummy_frame_bpt): Adjust to use
+	ptid_to_global_thread_id.
+	* elfread.c (elf_gnu_ifunc_resolver_stop): Likewise.
+	* gdbthread.h (struct thread_info): Rename field 'num' to
+	'global_num.  Add new fields 'per_inf_num' and 'inf'.
+	(thread_id_to_pid): Rename thread_id_to_pid to
+	global_thread_id_to_ptid.
+	(pid_to_thread_id): Rename to ...
+	(ptid_to_global_thread_id): ... this.
+	(valid_thread_id): Rename to ...
+	(valid_global_thread_id): ... this.
+	(find_thread_id): Rename to ...
+	(find_thread_global_id): ... this.
+	(ALL_THREADS, ALL_THREADS_BY_INFERIOR): Declare.
+	(print_thread_info): Add comment.
+	* tid-parse.h: New file.
+	* tid-parse.c: New file.
+	* infcmd.c (step_command_fsm_prepare)
+	(step_command_fsm_should_stop): Adjust to use the global thread
+	ID.
+	(until_next_command, until_next_command)
+	(finish_command_fsm_should_stop): Adjust to use the global thread
+	ID.
+	(attach_post_wait): Adjust to check the inferior number too.
+	* inferior.h (struct inferior) <highest_thread_num>: New field.
+	* infrun.c (handle_signal_stop)
+	(insert_exception_resume_breakpoint)
+	(insert_exception_resume_from_probe): Adjust to use the global
+	thread ID.
+	* record-btrace.c (record_btrace_open): Use global thread IDs.
+	* remote.c (process_initial_stop_replies): Also consider the
+	inferior number.
+	* target.c (target_pre_inferior): Clear the inferior's highest
+	thread num.
+	* thread.c (clear_thread_inferior_resources): Adjust to use the
+	global thread ID.
+	(new_thread): New inferior parameter.  Adjust to use it.  Set both
+	the thread's global ID and the thread's per-inferior ID.
+	(add_thread_silent): Adjust.
+	(find_thread_global_id): New.
+	(find_thread_id): Make static.  Adjust to rename.
+	(valid_thread_id): Rename to ...
+	(valid_global_thread_id): ... this.
+	(pid_to_thread_id): Rename to ...
+	(ptid_to_global_thread_id): ... this.
+	(thread_id_to_pid): Rename to ...
+	(global_thread_id_to_ptid): ... this.  Adjust.
+	(first_thread_of_process): Adjust.
+	(do_captured_list_thread_ids): Adjust to use global thread IDs.
+	(should_print_thread): New function.
+	(print_thread_info): Rename to ...
+	(print_thread_info_1): ... this, and add new show_global_ids
+	parameter.  Handle it.  Iterate over inferiors.
+	(print_thread_info): Reimplement as wrapper around
+	print_thread_info_1.
+	(show_inferior_qualified_tids): New function.
+	(print_thread_id): Use it.
+	(tp_array_compar): Compare inferior numbers too.
+	(thread_apply_command): Use tid_range_parser.
+	(do_captured_thread_select): Use parse_thread_id.
+	(thread_id_make_value): Adjust.
+	(_initialize_thread): Adjust "info threads" help string.
+	* varobj.c (struct varobj_root): Update comment.
+	(varobj_create): Adjust to use global thread IDs.
+	(value_of_root_1): Adjust to use global_thread_id_to_ptid.
+	* windows-tdep.c (display_tib): No longer accept an argument.
+	* cli/cli-utils.c (get_number_trailer): Make extern.
+	* cli/cli-utils.h (get_number_trailer): Declare.
+	(get_number_const): Adjust documentation.
+	* mi/mi-cmd-var.c (mi_cmd_var_update_iter): Adjust to use global
+	thread IDs.
+	* mi/mi-interp.c (mi_new_thread, mi_thread_exit)
+	(mi_on_normal_stop, mi_output_running_pid, mi_on_resume):
+	* mi/mi-main.c (mi_execute_command, mi_cmd_execute): Likewise.
+	* guile/scm-breakpoint.c (gdbscm_set_breakpoint_thread_x):
+	Likewise.
+	* python/py-breakpoint.c (bppy_set_thread): Likewise.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Likewise.
+	* python/py-infthread.c (thpy_get_num): Add comment and return the
+	per-inferior thread ID.
+	(thread_object_getset): Update comment of "num".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (remove_threaded_breakpoints)
+	(print_one_breakpoint_location): Use print_thread_id.
+	* btrace.c (btrace_enable, btrace_disable, btrace_teardown)
+	(btrace_fetch, btrace_clear): Use print_thread_id.
+	* common/print-utils.c (CELLSIZE): Delete.
+	(get_cell): Rename to ...
+	(get_print_cell): ... this and made extern.  Adjust call callers.
+	Adjust to use PRINT_CELL_SIZE.
+	* common/print-utils.h (get_print_cell): Declare.
+	(PRINT_CELL_SIZE): New.
+	* gdbthread.h (print_thread_id): Declare.
+	* infcmd.c (signal_command): Use print_thread_id.
+	* inferior.c (print_inferior): Use print_thread_id.
+	* infrun.c (handle_signal_stop)
+	(insert_exception_resume_breakpoint)
+	(insert_exception_resume_from_probe)
+	(print_signal_received_reason): Use print_thread_id.
+	* record-btrace.c (record_btrace_info)
+	(record_btrace_resume_thread, record_btrace_cancel_resume)
+	(record_btrace_step_thread, record_btrace_wait): Use
+	print_thread_id.
+	* thread.c (thread_apply_all_command): Use print_thread_id.
+	(print_thread_id): New function.
+	(thread_apply_command): Use print_thread_id.
+	(thread_command, thread_find_command, do_captured_thread_select):
+	Use print_thread_id.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention InferiorThread.inferior.
+	* python/py-infthread.c (thpy_get_inferior): New.
+	(thread_object_getset): Register "inferior".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention $_inferior.
+	* inferior.c (inferior_id_make_value): New.
+	(inferior_funcs): New.
+	(_initialize_inferior): Create $_inferior variable.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/19388
+	* frame.c (get_current_frame): Use validate_registers_access.
+	* gdbthread.h (validate_registers_access): Declare.
+	* infrun.c (validate_siginfo_access): Delete.
+	(siginfo_value_read, siginfo_value_write): Use
+	validate_registers_access.
+	* thread.c (validate_registers_access): New function.
+
+2016-01-12  Josh Stone  <jistone@redhat.com>
+	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* NEWS (Changes since GDB 7.10): Mention QCatchSyscalls and the
+	syscall_entry and syscall_return stop reasons.  Mention GDB
+	support for remote catch syscall.
+	* remote.c (PACKET_QCatchSyscalls): New enum.
+	(remote_set_syscall_catchpoint): New function.
+	(remote_protocol_features): New element for QCatchSyscalls.
+	(remote_parse_stop_reply): Parse syscall_entry/return stops.
+	(init_remote_ops): Install remote_set_syscall_catchpoint.
+	(_initialize_remote): Config QCatchSyscalls.
+	* linux-nat.h (struct lwp_info) <syscall_state>: Comment typo.
+
 2016-01-12  Yao Qi  <yao.qi@linaro.org>
 
 	* nat/linux-ptrace.c (linux_child_function): Cast child_stack

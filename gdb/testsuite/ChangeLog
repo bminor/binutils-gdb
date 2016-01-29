@@ -1,3 +1,206 @@
+2016-01-28  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/demangle.exp: Sync tests from libiberty testsuite.
+
+2016-01-28  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.fortran/vla-value.exp: Wrap test with with_timeout_factor.
+
+2016-01-25  Pedro Alves  <palves@redhat.com>
+
+	PR threads/19461
+	* gdb.base/fork-running-state.c: New file.
+	* gdb.base/fork-running-state.exp: New file.
+
+2016-01-25  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/19494
+	* gdb.base/catch-fork-kill.c: New file.
+	* gdb.base/catch-fork-kill.exp: New file.
+
+2016-01-25  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/step-sw-breakpoint-adjust-pc.exp (foreach_with_prefix):
+	Delete, moved to lib/gdb.exp.
+	* gdb.threads/forking-threads-plus-breakpoint.exp
+	(foreach_with_prefix): Likewise.
+	* gdb.threads/process-dies-while-handling-bp.exp
+	(foreach_with_prefix): Likewise.
+	* lib/gdb.exp (foreach_with_prefix): New procedure.
+
+2016-01-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/backtrace.exp: Bump stack collection fudge factor.
+	* gdb.trace/entry-values.exp: Bump stack collection fudge factor.
+
+2016-01-23  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/unavailable-dwarf-piece.exp: Fix bitfield handling on big
+	endian targets.
+
+2016-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	Fix testsuite compatibility with Guile.
+	* gdb.gdb/selftest.exp (send ^C to child process): Drop expected Thread
+	number.
+
+2016-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix testsuite compatibility with Guile.
+	* gdb.gdb/selftest.exp (send ^C to child process): Accept also Thread.
+	(thread 1): New test for backtrace through signal handler.
+
+2016-01-22  Yao Qi  <yao.qi@linaro.org>
+
+	PR testsuite/19491
+	* gdb.base/multi-forks.c: Include
+	../lib/unbuffer_output.c
+	(main): Call gdb_unbuffer_output.
+
+2016-01-21  Doug Evans  <dje@google.com>
+
+	* lib/ada.exp (gdb_compile_ada): Fix typo.
+
+2016-01-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/break-fun-addr.exp: New file.
+	* gdb.base/break-fun-addr1.c: New file.
+	* gdb.base/break-fun-addr2.c: New file.
+
+2016-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/py-pp-maint.exp: Change/add enum flag tests.
+	* gdb.python/py-pp-maint.c (enum flag_enum): Use more complex
+	enum flag values.
+
+2016-01-20  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.base/gnu_vector.exp: Re-establish handling for should_kfail
+	when GDB can not set the vector return value.  Add more comments
+	for clarification.
+
+2016-01-20  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* gdb.trace/tspeed.exp:  Use shlib instead of libs in gdb_compile
+	command.
+
+2016-01-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (DO_RUNTEST): Add --status and update usages.
+
+2016-01-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (check-single): Pass --status to runtest.
+	(check/%.exp): Likewise.
+
+2016-01-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (check-parallel): Propagate return code from make
+	do-check-parallel.
+
+2016-01-19  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/ftrace.exp: Fix expected message on continue.
+	* gdb.trace/pending.exp: Fix expected message on continue.
+	* gdb.trace/trace-break.exp: Fix expected message on continue.
+
+2016-01-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (gdb_test): Remove unused global references.
+
+2016-01-18  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/async-shell.exp: Adjust expected output.
+	* gdb.base/dprintf-non-stop.exp: Adjust expected output.
+	* gdb.base/siginfo-thread.exp: Adjust expected output.
+	* gdb.base/watchpoint-hw-hit-once.exp: Adjust expected output.
+	* gdb.java/jnpe.exp: Adjust expected output.
+	* gdb.threads/clone-new-thread-event.exp: Adjust expected output.
+	* gdb.threads/continue-pending-status.exp: Adjust expected output.
+	* gdb.threads/leader-exit.exp: Adjust expected output.
+	* gdb.threads/manythreads.exp: Adjust expected output.
+	* gdb.threads/pthreads.exp: Adjust expected output.
+	* gdb.threads/schedlock.exp: Adjust expected output.
+	* gdb.threads/siginfo-threads.exp: Adjust expected output.
+	* gdb.threads/signal-command-multiple-signals-pending.exp: Adjust
+	expected output.
+	* gdb.threads/signal-delivered-right-thread.exp: Adjust expected
+	output.
+	* gdb.threads/sigthread.exp: Adjust expected output.
+	* gdb.threads/watchpoint-fork.exp: Adjust expected output.
+
+2016-01-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.guile/scm-section-script.c: Replace @progbits with
+	%progbits.
+	* gdb.python/py-section-script.c: Likewise.
+
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/tids.exp: Test star wildcard ranges.
+
+2016-01-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/tids.exp (thr_apply_info_thr_error): Remove "p 1234"
+	command from "thread apply" invocation.
+	(thr_apply_info_thr_invalid): Default the expected output to the
+	input tid list.
+	(top level): Add tests that use convenience variables.  Add tests
+	for "thread apply" with a valid TID list, but missing the command.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/default.exp: Expect $_gthread as well.
+	* gdb.multi/tids.exp: Test $_gthread.
+	* gdb.threads/thread-specific.exp: Test $_gthread.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/tids.exp: Test "info threads -gid".
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/tids.exp: Test InferiorThread.global_num and
+	Breakpoint.thread.
+	* gdb.python/py-infthread.exp: Test InferiorThread.global_num.
+
+2016-01-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/break.exp: Adjust to output changes.
+	* gdb.base/hbreak2.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/watch_thread_num.exp: Likewise.
+	* gdb.linespec/keywords.exp: Likewise.
+	* gdb.multi/info-threads.exp: Likewise.
+	* gdb.threads/thread-find.exp: Likewise.
+	* gdb.multi/tids.c: New file.
+	* gdb.multi/tids.exp: New file.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-infthread.exp: Test InferiorThread.inferior.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/default.exp: Expect $_inferior as well.
+	* gdb.multi/base.exp: Test $_inferior.
+
+2016-01-13  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/19388
+	* gdb.base/catch-signal-siginfo-cond.c: New file.
+	* gdb.base/catch-signal-siginfo-cond.exp: New file.
+
+2016-01-12  Josh Stone  <jistone@redhat.com>
+	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/catch-syscall.c (do_execve): New variable.
+	(main): Conditionally trigger an execve.
+	* gdb.base/catch-syscall.exp: Enable testing for remote targets.
+	(test_catch_syscall_execve): New, check entry/return across execve.
+	(do_syscall_tests): Call test_catch_syscall_execve.
+
 2016-01-12  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/random-signal.exp (do_test): New procedure, with body

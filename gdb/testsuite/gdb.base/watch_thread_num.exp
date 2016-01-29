@@ -46,7 +46,7 @@ if { ![runto main] } then {
    return
 }
 
-gdb_test "watch shared_var thread 0" "Unknown thread 0\." "Watchpoint on invalid thread"
+gdb_test "watch shared_var thread 0" "Invalid thread ID: 0" "Watchpoint on invalid thread"
 gdb_test "watch shared_var thread" "A syntax error in expression, near `thread'\." "Invalid watch syntax"
 
 set bpexitline [gdb_get_line_number "all threads started"]

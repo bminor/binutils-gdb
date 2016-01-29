@@ -976,9 +976,7 @@ proc gdb_test_multiple { command message user_code } {
 #   -1 if there was an internal error.
 #  
 proc gdb_test { args } {
-    global verbose
     global gdb_prompt
-    global GDB
     upvar timeout timeout
 
     if [llength $args]>2 then {
@@ -1906,6 +1904,18 @@ proc with_test_prefix { prefix body } {
   } else {
       return -code $code $result
   }
+}
+
+# Wrapper for foreach that calls with_test_prefix on each iteration,
+# including the iterator's name and current value in the prefix.
+
+proc foreach_with_prefix {var list body} {
+    upvar 1 $var myvar
+    foreach myvar $list {
+	with_test_prefix "$var=$myvar" {
+	    uplevel 1 $body
+	}
+    }
 }
 
 # Run BODY in the context of the caller.  After BODY is run, the variables

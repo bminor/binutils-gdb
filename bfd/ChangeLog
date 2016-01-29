@@ -1,3 +1,142 @@
+2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19523
+	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Set BFD_DECOMPRESS to
+	decompress debug sections.
+
+2016-01-25  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elf32-arc.c (elf_arc_finish_dynamic_symbol): Rename `index' to
+	`dynindx'.
+
+2016-01-25  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19435
+	* mach-o.c (bfd_mach_o_close_and_cleanup): Suppress code to free
+	dsym filename buffer.
+
+2016-01-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (BZ16_REG_FIELD): Simplify calculation.
+
+2016-01-24  Maciej W. Rozycki  <macro@imgtec.com>
+
+	* elfxx-mips.c (BZ16_REG): Correct calculation.
+
+2016-01-21  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arc.c (ADD_RELA): Fix compile time warning errors by
+	changing the type of _loc to be bfd_byte *.
+	(elf_arc_finish_dynamic_symbol): Likewise.
+
+2016-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19455
+	* elf32-arm.c (elf32_arm_create_dynamic_sections): Set the ELF
+	class of the linker stub bfd.
+	(elf32_arm_check_relocs): Skip check for pic format after
+	processing a vxWorks R_ARM_ABS12 reloc.
+	* elflink.c (bfd_elf_final_link): Check for ELFCLASSNONE when
+	reporting a class mismatch.
+
+2016-01-21  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64.c (aarch64_type_of_stub): Allow insert long branch
+	veneer for sym_sec != input_sec.
+	(elfNN_aarch64_size_stub): Support STT_SECTION symbol.
+	(elfNN_aarch64_final_link_relocate): Take rela addend into account when
+	calculation destination.
+
+2016-01-21  Alan Modra  <amodra@gmail.com>
+
+	* elf-linux-core.h (swap_linux_prpsinfo32_out): New function.
+	(swap_linux_prpsinfo64_out): New function.
+	(LINUX_PRPSINFO32_SWAP_FIELDS): Delete.
+	(LINUX_PRPSINFO64_SWAP_FIELDS): Delete.
+	* elf.c (elfcore_write_linux_prpsinfo32): Adjust.  Don't memset.
+	(elfcore_write_linux_prpsinfo64): Likewise.
+	* elf32-ppc.c (swap_ppc_linux_prpsinfo32_out): New function.
+	(PPC_LINUX_PRPSINFO32_SWAP_FIELDS): Delete.
+	(elfcore_write_ppc_linux_prpsinfo32): Adjust.  Don't memset.
+
+2016-01-21  Alan Modra  <amodra@gmail.com>
+
+	* elf-linux-core.h: Rename from elf-linux-psinfo.h.
+	* elf.c: Adjust #include.
+	* elf32-ppc.c: Don't #include elf-linux-psinfo.h
+	* Makefile.am (SOURCE_HFILES): Update.
+	* Makefile.in: Regenerate.
+	* po/SRC-PORFILES.in: Regenerate.
+
+2016-01-21  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Move corefile selection later in file.  Move
+	tdefaults code immediately after other target vector code.
+	* configure: Regenerate.
+
+2016-01-20  Mickael Guene  <mickael.guene@st.com>
+
+	* elf32-arm.c (elf32_arm_special_sections): Remove catch of noread
+	section using '.text.noread' pattern.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_note): Recognize NT_FREEBSD_THRMISC notes.
+
+2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
+	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
+
+	* arc-plt.def: New file.
+	* arc-plt.h: Likewise.
+	* elf32-arc.c (elf_arc_abs_plt0_entry, elf_arc_abs_pltn_entry,
+		       elf_arcV2_abs_plt0_entry, elf_arcV2_abs_pltn_entry,
+		       elf_arc_pic_plt0_entry, elf_arc_pic_pltn_entry,
+		       elf_arcV2_pic_plt0_entry, elf_arcV2_pic_pltn_entry): Remove.
+	(name_for_global_symbol): Added.
+	(ADD_RELA): Helper to create dynamic relocs.
+	(new_got_entry_to_list): Create a new got entry in linked list.
+	(symbol_has_entry_of_type): Search for specific type of entry in
+	list.
+	(is_reloc_for_GOT): return FALSE for any TLS related relocs.
+	(is_reloc_for_TLS, arc_elf_set_private_flags)
+	(arc_elf_print_private_bfd_data, arc_elf_copy_private_bfd_data)
+	(arc_elf_merge_private_bfd_data): New functions.
+	(debug_arc_reloc): Cleaned debug info printing.
+	(PDATA reloc): Changed not to perform address alignment.
+	(reverse_me): Added. Fix for ARC_32 relocs.
+	(arc_do_relocation): Return bfd_reloc_of when no relocation should
+	occur.
+	(arc_get_local_got_ents): Renamed from arc_get_local_got_offsets.
+	Changed function to access an array of list of GOT entries instead
+	of just an array of offsets.
+	(elf_arc_relocate_section): Added support for PIC and TLS related relocations.
+	(elf_arc_check_relocs): Likewise.
+	(elf_arc_adjust_dynamic_symbol, elf_arc_finish_dynamic_symbol,
+	(elf_arc_finish_dynamic_sections): Likewise
+	(arc_create_dynamic_sections): Modified conditions to create
+	dynamic sections.
+	(ADD_SYMBOL_REF_SEC_AND_RELOC): New macro.
+	(plt_do_relocs_for_symbol, relocate_plt_for_symbol)
+	(relocate_plt_for_entry): Changed to support new way to define PLT
+	related code.
+	(add_symbol_to_plt): Likewise.
+	(arc_elf_link_hash_table_create): New function.
+
+2016-01-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19440
+	* coff-rs6000.c (_bfd_xcoff_swap_sym_in): Sign extend external
+	section number into internal section number.
+	* coff64-rs6000.c (_bfd_xcoff64_swap_sym_in): Likewise.
+	* coffswap.h (coff_swap_sym_in): Likewise.
+	* peXXigen.c (_bfd_XXi_swap_sym_in): Likewise.
+	* coffcode.h (_coff_bigobj_swap_sym_in): Make sure that internal
+	section number field is big enough to hold the external value.
+
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2016-01-12  Yury Usishchev  <y.usishchev@samsung.com>
 
 	* elf32-arm.c (elf32_arm_fix_exidx_coverage): Insert cantunwind

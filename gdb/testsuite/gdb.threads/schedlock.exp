@@ -69,7 +69,7 @@ proc stop_process { description } {
   # message first, or GDB's signal handler may not be in place.
   after 1000 {send_gdb "\003"}
   gdb_expect {
-    -re "Program received signal SIGINT.*$gdb_prompt $"
+    -re "Thread .* received signal SIGINT.*$gdb_prompt $"
       {
 	pass $description
       }

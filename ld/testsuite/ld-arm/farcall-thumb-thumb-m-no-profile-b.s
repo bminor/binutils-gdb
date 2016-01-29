@@ -2,7 +2,6 @@
 	.thumb
 	.type myfunc, function
 	.global myfunc
-	.text
-	.space 102400000
+	.section .foo, "xa"
 myfunc:
 	bx	lr

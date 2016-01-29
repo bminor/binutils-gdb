@@ -154,7 +154,7 @@ struct linux_target_ops
   const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
 
   /* Find the next possible PCs after the current instruction executes.  */
-  VEC (CORE_ADDR) *(*get_next_pcs) (CORE_ADDR pc, struct regcache *regcache);
+  VEC (CORE_ADDR) *(*get_next_pcs) (struct regcache *regcache);
 
   int decr_pc_after_break;
   int (*breakpoint_at) (CORE_ADDR pc);
@@ -240,6 +240,12 @@ struct linux_target_ops
 
   /* See target.h.  */
   int (*supports_hardware_single_step) (void);
+
+  /* Fill *SYSNO with the syscall nr trapped.  Fill *SYSRET with the
+     return code.  Only to be called when inferior is stopped
+     due to SYSCALL_SIGTRAP.  */
+  void (*get_syscall_trapinfo) (struct regcache *regcache,
+				int *sysno, int *sysret);
 };
 
 extern struct linux_target_ops the_low_target;
@@ -277,6 +283,13 @@ struct lwp_info
   /* If this flag is set, the lwp is known to be stopped right now (stop
      event already received in a wait()).  */
   int stopped;
+
+  /* Signal whether we are in a SYSCALL_ENTRY or
+     in a SYSCALL_RETURN event.
+     Values:
+     - TARGET_WAITKIND_SYSCALL_ENTRY
+     - TARGET_WAITKIND_SYSCALL_RETURN */
+  enum target_waitkind syscall_state;
 
   /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
@@ -378,6 +391,12 @@ void initialize_regsets_info (struct regsets_info *regsets_info);
 #endif
 
 void initialize_low_arch (void);
+
+void linux_set_pc_32bit (struct regcache *regcache, CORE_ADDR pc);
+CORE_ADDR linux_get_pc_32bit (struct regcache *regcache);
+
+void linux_set_pc_64bit (struct regcache *regcache, CORE_ADDR pc);
+CORE_ADDR linux_get_pc_64bit (struct regcache *regcache);
 
 /* From thread-db.c  */
 int thread_db_init (void);

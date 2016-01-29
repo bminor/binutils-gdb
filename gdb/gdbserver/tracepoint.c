@@ -5931,14 +5931,15 @@ compile_tracepoint_condition (struct tracepoint *tpoint,
   *jump_entry += 16;
 }
 
-/* We'll need to adjust these when we consider bi-arch setups, and big
-   endian machines.  */
+/* We'll need to adjust these when we consider bi-arch setups.  */
 
 static int
 write_inferior_data_ptr (CORE_ADDR where, CORE_ADDR ptr)
 {
+  uintptr_t pptr = ptr;
+
   return write_inferior_memory (where,
-				(unsigned char *) &ptr, sizeof (void *));
+				(unsigned char *) &pptr, sizeof pptr);
 }
 
 /* The base pointer of the IPA's heap.  This is the only memory the

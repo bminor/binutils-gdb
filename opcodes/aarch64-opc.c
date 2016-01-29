@@ -1878,9 +1878,11 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	{
 	case AARCH64_OPND_PSTATEFIELD:
 	  assert (idx == 0 && opnds[1].type == AARCH64_OPND_UIMM4);
-	  /* MSR PAN, #uimm4
+	  /* MSR UAO, #uimm4
+	     MSR PAN, #uimm4
 	     The immediate must be #0 or #1.  */
-	  if (opnd->pstatefield == 0x04 /* PAN.  */
+	  if ((opnd->pstatefield == 0x03	/* UAO.  */
+	       || opnd->pstatefield == 0x04)	/* PAN.  */
 	      && opnds[1].imm.value > 1)
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0, 1);
@@ -3222,18 +3224,16 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
 
   /* RAS extension.  */
 
-  /* ERRIDR_EL1 and ERRSELR_EL1.  */
+  /* ERRIDR_EL1, ERRSELR_EL1, ERXFR_EL1, ERXCTLR_EL1, ERXSTATUS_EL, ERXADDR_EL1,
+     ERXMISC0_EL1 AND ERXMISC1_EL1.  */
   if ((reg->value == CPENC (3, 0, C5, C3, 0)
-       || reg->value == CPENC (3, 0, C5, C3, 1))
-      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_RAS))
-    return FALSE;
-
-  /* ERXFR_EL1, ERXCTLR_EL1, ERXSTATUS_EL, ERXADDR_EL1, ERXMISC0_EL1 AND
-     ERXMISC1_EL1.  */
-  if ((reg->value == CPENC (3, 0, C5, C3, 0)
-       || reg->value == CPENC (3, 0, C5, C3 ,1)
+       || reg->value == CPENC (3, 0, C5, C3, 1)
        || reg->value == CPENC (3, 0, C5, C3, 2)
        || reg->value == CPENC (3, 0, C5, C3, 3)
+       || reg->value == CPENC (3, 0, C5, C4, 0)
+       || reg->value == CPENC (3, 0, C5, C4, 1)
+       || reg->value == CPENC (3, 0, C5, C4, 2)
+       || reg->value == CPENC (3, 0, C5, C4, 3)
        || reg->value == CPENC (3, 0, C5, C5, 0)
        || reg->value == CPENC (3, 0, C5, C5, 1))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_RAS))

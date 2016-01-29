@@ -28,6 +28,70 @@
 #include "fbsd-tdep.h"
 
 
+/* This is how we want PTIDs from core files to be printed.  */
+
+static char *
+fbsd_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
+{
+  static char buf[80];
+
+  if (ptid_get_lwp (ptid) != 0)
+    {
+      xsnprintf (buf, sizeof buf, "LWP %ld", ptid_get_lwp (ptid));
+      return buf;
+    }
+
+  return normal_pid_to_str (ptid);
+}
+
+/* Extract the name assigned to a thread from a core.  Returns the
+   string in a static buffer.  */
+
+static const char *
+fbsd_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
+{
+  static char buf[80];
+  struct bfd_section *section;
+  bfd_size_type size;
+  char sectionstr[32];
+
+  if (ptid_get_lwp (thr->ptid) != 0)
+    {
+      /* FreeBSD includes a NT_FREEBSD_THRMISC note for each thread
+	 whose contents are defined by a "struct thrmisc" declared in
+	 <sys/procfs.h> on FreeBSD.  The per-thread name is stored as
+	 a null-terminated string as the first member of the
+	 structure.  Rather than define the full structure here, just
+	 extract the null-terminated name from the start of the
+	 note.  */
+      xsnprintf (sectionstr, sizeof sectionstr, ".thrmisc/%ld",
+		ptid_get_lwp (thr->ptid));
+      section = bfd_get_section_by_name (core_bfd, sectionstr);
+      if (section != NULL && bfd_section_size (core_bfd, section) > 0)
+	{
+	  /* Truncate the name if it is longer than "buf".  */
+	  size = bfd_section_size (core_bfd, section);
+	  if (size > sizeof buf - 1)
+	    size = sizeof buf - 1;
+	  if (bfd_get_section_contents (core_bfd, section, buf, (file_ptr) 0,
+					size)
+	      && buf[0] != '\0')
+	    {
+	      buf[size] = '\0';
+
+	      /* Note that each thread will report the process command
+		 as its thread name instead of an empty name if a name
+		 has not been set explicitly.  Return a NULL name in
+		 that case.  */
+	      if (strcmp (buf, elf_tdata (core_bfd)->core->program) != 0)
+		return buf;
+	    }
+	}
+    }
+
+  return NULL;
+}
+
 static int
 find_signalled_thread (struct thread_info *info, void *data)
 {
@@ -38,17 +102,9 @@ find_signalled_thread (struct thread_info *info, void *data)
   return 0;
 }
 
-static enum gdb_signal
-find_stop_signal (void)
-{
-  struct thread_info *info =
-    iterate_over_threads (find_signalled_thread, NULL);
-
-  if (info)
-    return info->suspend.stop_signal;
-  else
-    return GDB_SIGNAL_0;
-}
+/* Structure for passing information from
+   fbsd_collect_thread_registers via an iterator to
+   fbsd_collect_regset_section_cb. */
 
 struct fbsd_collect_regset_section_cb_data
 {
@@ -56,6 +112,9 @@ struct fbsd_collect_regset_section_cb_data
   bfd *obfd;
   char *note_data;
   int *note_size;
+  unsigned long lwp;
+  enum gdb_signal stop_signal;
+  int abort_iteration;
 };
 
 static void
@@ -67,6 +126,9 @@ fbsd_collect_regset_section_cb (const char *sect_name, int size,
   struct fbsd_collect_regset_section_cb_data *data
     = (struct fbsd_collect_regset_section_cb_data *) cb_data;
 
+  if (data->abort_iteration)
+    return;
+
   gdb_assert (regset->collect_regset);
 
   buf = (char *) xmalloc (size);
@@ -75,13 +137,73 @@ fbsd_collect_regset_section_cb (const char *sect_name, int size,
   /* PRSTATUS still needs to be treated specially.  */
   if (strcmp (sect_name, ".reg") == 0)
     data->note_data = (char *) elfcore_write_prstatus
-      (data->obfd, data->note_data, data->note_size,
-       ptid_get_pid (inferior_ptid), find_stop_signal (), buf);
+      (data->obfd, data->note_data, data->note_size, data->lwp,
+       gdb_signal_to_host (data->stop_signal), buf);
   else
     data->note_data = (char *) elfcore_write_register_note
       (data->obfd, data->note_data, data->note_size,
        sect_name, buf, size);
   xfree (buf);
+
+  if (data->note_data == NULL)
+    data->abort_iteration = 1;
+}
+
+/* Records the thread's register state for the corefile note
+   section.  */
+
+static char *
+fbsd_collect_thread_registers (const struct regcache *regcache,
+			       ptid_t ptid, bfd *obfd,
+			       char *note_data, int *note_size,
+			       enum gdb_signal stop_signal)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct fbsd_collect_regset_section_cb_data data;
+
+  data.regcache = regcache;
+  data.obfd = obfd;
+  data.note_data = note_data;
+  data.note_size = note_size;
+  data.stop_signal = stop_signal;
+  data.abort_iteration = 0;
+  data.lwp = ptid_get_lwp (ptid);
+
+  gdbarch_iterate_over_regset_sections (gdbarch,
+					fbsd_collect_regset_section_cb,
+					&data, regcache);
+  return data.note_data;
+}
+
+struct fbsd_corefile_thread_data
+{
+  struct gdbarch *gdbarch;
+  bfd *obfd;
+  char *note_data;
+  int *note_size;
+  enum gdb_signal stop_signal;
+};
+
+/* Records the thread's register state for the corefile note
+   section.  */
+
+static void
+fbsd_corefile_thread (struct thread_info *info,
+		      struct fbsd_corefile_thread_data *args)
+{
+  struct cleanup *old_chain;
+  struct regcache *regcache;
+
+  regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
+
+  old_chain = save_inferior_ptid ();
+  inferior_ptid = info->ptid;
+  target_fetch_registers (regcache, -1);
+  do_cleanups (old_chain);
+
+  args->note_data = fbsd_collect_thread_registers
+    (regcache, info->ptid, args->obfd, args->note_data,
+     args->note_size, args->stop_signal);
 }
 
 /* Create appropriate note sections for a corefile, returning them in
@@ -90,26 +212,16 @@ fbsd_collect_regset_section_cb (const char *sect_name, int size,
 static char *
 fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 {
-  struct regcache *regcache = get_current_regcache ();
-  char *note_data;
+  struct fbsd_corefile_thread_data thread_args;
+  char *note_data = NULL;
   Elf_Internal_Ehdr *i_ehdrp;
-  struct fbsd_collect_regset_section_cb_data data;
+  struct thread_info *curr_thr, *signalled_thr, *thr;
 
   /* Put a "FreeBSD" label in the ELF header.  */
   i_ehdrp = elf_elfheader (obfd);
   i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
 
   gdb_assert (gdbarch_iterate_over_regset_sections_p (gdbarch));
-
-  data.regcache = regcache;
-  data.obfd = obfd;
-  data.note_data = NULL;
-  data.note_size = note_size;
-  target_fetch_registers (regcache, -1);
-  gdbarch_iterate_over_regset_sections (gdbarch,
-					fbsd_collect_regset_section_cb,
-					&data, regcache);
-  note_data = data.note_data;
 
   if (get_exec_file (0))
     {
@@ -124,6 +236,50 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 					  fname, psargs);
     }
 
+  /* Thread register information.  */
+  TRY
+    {
+      update_thread_list ();
+    }
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      exception_print (gdb_stderr, e);
+    }
+  END_CATCH
+
+  /* Like the kernel, prefer dumping the signalled thread first.
+     "First thread" is what tools use to infer the signalled thread.
+     In case there's more than one signalled thread, prefer the
+     current thread, if it is signalled.  */
+  curr_thr = inferior_thread ();
+  if (curr_thr->suspend.stop_signal != GDB_SIGNAL_0)
+    signalled_thr = curr_thr;
+  else
+    {
+      signalled_thr = iterate_over_threads (find_signalled_thread, NULL);
+      if (signalled_thr == NULL)
+	signalled_thr = curr_thr;
+    }
+
+  thread_args.gdbarch = gdbarch;
+  thread_args.obfd = obfd;
+  thread_args.note_data = note_data;
+  thread_args.note_size = note_size;
+  thread_args.stop_signal = signalled_thr->suspend.stop_signal;
+
+  fbsd_corefile_thread (signalled_thr, &thread_args);
+  ALL_NON_EXITED_THREADS (thr)
+    {
+      if (thr == signalled_thr)
+	continue;
+      if (ptid_get_pid (thr->ptid) != ptid_get_pid (inferior_ptid))
+	continue;
+
+      fbsd_corefile_thread (thr, &thread_args);
+    }
+
+  note_data = thread_args.note_data;
+
   return note_data;
 }
 
@@ -132,5 +288,7 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 void
 fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  set_gdbarch_core_pid_to_str (gdbarch, fbsd_core_pid_to_str);
+  set_gdbarch_core_thread_name (gdbarch, fbsd_core_thread_name);
   set_gdbarch_make_corefile_notes (gdbarch, fbsd_make_corefile_notes);
 }

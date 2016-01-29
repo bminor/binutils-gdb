@@ -78,7 +78,7 @@ struct varobj_root
      not NULL.  */
   struct frame_id frame;
 
-  /* The thread ID that this varobj_root belong to.  This field
+  /* The global thread ID that this varobj_root belongs to.  This field
      is only valid if valid_block is not NULL.
      When not 0, indicates which thread 'frame' belongs to.
      When 0, indicates that the thread list was empty when the varobj_root
@@ -380,7 +380,7 @@ varobj_create (char *objname,
 	    error (_("Failed to find the specified frame"));
 
 	  var->root->frame = get_frame_id (fi);
-	  var->root->thread_id = pid_to_thread_id (inferior_ptid);
+	  var->root->thread_id = ptid_to_global_thread_id (inferior_ptid);
 	  old_id = get_frame_id (get_selected_frame (NULL));
 	  select_frame (fi);	 
 	}
@@ -2363,8 +2363,9 @@ value_of_root_1 (struct varobj **var_handle)
     }
   else
     {
-      ptid_t ptid = thread_id_to_pid (var->root->thread_id);
-      if (in_thread_list (ptid))
+      ptid_t ptid = global_thread_id_to_ptid (var->root->thread_id);
+
+      if (!ptid_equal (minus_one_ptid, ptid))
 	{
 	  switch_to_thread (ptid);
 	  within_scope = check_scope (var);

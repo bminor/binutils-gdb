@@ -3575,6 +3575,9 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 	  htab->plt_entry_size
 	    = 4 * ARRAY_SIZE (elf32_arm_vxworks_exec_plt_entry);
 	}
+
+      if (elf_elfheader (dynobj))
+	elf_elfheader (dynobj)->e_ident[EI_CLASS] = ELFCLASS32;
     }
   else
     {
@@ -13613,6 +13616,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		may_need_local_target_p = TRUE;
 		break;
 	      }
+	    else goto jump_over;
+	      
 	    /* Fall through.  */
 
 	  case R_ARM_MOVW_ABS_NC:
@@ -13632,6 +13637,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    /* Fall through.  */
 	  case R_ARM_ABS32:
 	  case R_ARM_ABS32_NOI:
+	jump_over:
 	    if (h != NULL && bfd_link_executable (info))
 	      {
 		h->pointer_equality_needed = 1;
@@ -17839,16 +17845,6 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
   return n;
 }
 
-static const struct bfd_elf_special_section
-elf32_arm_special_sections[] =
-{
-/* Catch sections with .text.noread prefix and apply allocate, execute and
-   noread section attributes.  */
-  { STRING_COMMA_LEN (".text.noread"),  -2, SHT_PROGBITS,
-    SHF_ALLOC + SHF_EXECINSTR + SHF_ARM_NOREAD },
-  { NULL,			      0, 0, 0,			0 }
-};
-
 static bfd_boolean
 elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr * hdr)
 {
@@ -17953,8 +17949,6 @@ elf32_arm_count_additional_relocs (asection *sec)
 #define elf_backend_obj_attrs_order		elf32_arm_obj_attrs_order
 #define elf_backend_obj_attrs_handle_unknown 	elf32_arm_obj_attrs_handle_unknown
 
-#undef  elf_backend_special_sections
-#define elf_backend_special_sections 		elf32_arm_special_sections
 #undef elf_backend_section_flags
 #define elf_backend_section_flags		elf32_arm_section_flags
 #undef elf_backend_lookup_section_flags_hook

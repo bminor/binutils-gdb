@@ -43,8 +43,13 @@ gdb_test "print vla1(5,2,18)=1" "no such vector element \\\(vector not allocated
 # Try to access value in allocated VLA
 gdb_breakpoint [gdb_get_line_number "vla2-allocated"]
 gdb_continue_to_breakpoint "vla2-allocated"
-gdb_test "next" "\\d+(\\t|\\s)+vla1\\\(3, 6, 9\\\) = 42" \
-  "step over value assignment of vla1"
+# Many instructions to be executed when step over this line, and it is
+# slower in remote debugging.  Increase the timeout to avoid timeout
+# fail.
+with_timeout_factor 15 {
+    gdb_test "next" "\\d+(\\t|\\s)+vla1\\\(3, 6, 9\\\) = 42" \
+	"step over value assignment of vla1"
+}
 gdb_test "print &vla1" \
   " = \\\(PTR TO -> \\\( real\\\(kind=4\\\) \\\(10,10,10\\\)\\\)\\\) $hex" \
   "print allocated &vla1"
@@ -125,7 +130,12 @@ if ![runto MAIN__] then {
 }
 gdb_breakpoint [gdb_get_line_number "vla2-allocated"]
 gdb_continue_to_breakpoint "vla2-allocated"
-gdb_test "next" "\\d+.*vla1\\(3, 6, 9\\) = 42" "next (1)"
+# Many instructions to be executed when step over this line, and it is
+# slower in remote debugging.  Increase the timeout to avoid timeout
+# fail.
+with_timeout_factor 15 {
+    gdb_test "next" "\\d+.*vla1\\(3, 6, 9\\) = 42" "next (1)"
+}
 
 gdb_test_no_output "set \$myvar = vla1" "set \$myvar = vla1"
 gdb_test "print \$myvar" \

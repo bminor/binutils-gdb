@@ -15,8 +15,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern const unsigned short thumb2_breakpoint[];
-
 extern struct regs_info regs_info_aarch32;
 
 void arm_fill_gregset (struct regcache *regcache, void *buf);

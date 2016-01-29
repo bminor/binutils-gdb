@@ -32,6 +32,19 @@
 /* See nat/linux-namespaces.h.  */
 int debug_linux_namespaces;
 
+/* Handle systems without fork.  */
+
+static inline pid_t
+do_fork (void)
+{
+#ifdef HAVE_FORK
+  return fork ();
+#else
+  errno = ENOSYS;
+  return -1;
+#endif
+}
+
 /* Handle systems without setns.  */
 
 static inline int
@@ -644,7 +657,7 @@ linux_mntns_get_helper (void)
       if (gdb_socketpair_cloexec (AF_UNIX, SOCK_STREAM, 0, sv) < 0)
 	return NULL;
 
-      h.pid = fork ();
+      h.pid = do_fork ();
       if (h.pid < 0)
 	{
 	  int saved_errno = errno;

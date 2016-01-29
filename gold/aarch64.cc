@@ -1327,10 +1327,12 @@ Reloc_stub<size, big_endian>::stub_type_for_reloc(
   if (aarch64_valid_for_adrp_p(location, dest))
     return ST_ADRP_BRANCH;
 
-  if (parameters->options().output_is_position_independent()
-      && parameters->options().output_is_executable())
+  // Always use PC-relative addressing in case of -shared or -pie.
+  if (parameters->options().output_is_position_independent())
     return ST_LONG_BRANCH_PCREL;
 
+  // This saves 2 insns per stub, compared to ST_LONG_BRANCH_PCREL.
+  // But is only applicable to non-shared or non-pie.
   return ST_LONG_BRANCH_ABS;
 }
 

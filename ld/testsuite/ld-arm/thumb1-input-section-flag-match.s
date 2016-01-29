@@ -1,5 +1,5 @@
 	.text
-	.section .text.noread
+	.section .text.fetchonly,"axy",%progbits
 	.arch armv6s-m
 	.syntax unified
 	.global	_start

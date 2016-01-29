@@ -882,7 +882,7 @@ rl78_decode_opcode (unsigned long pc AU,
 /** 1010 1110			movw	%0, %s1				*/
   ID(mov); W(); DR(AX); SM(None, SFR);
 
-/** 11ra 1011			movw	%0, %e!1			*/
+/** 11ra 1011			movw	%0, %es!1			*/
   ID(mov); W(); DRW(ra); SM(None, IMMU(2));
 
 /** 11ra 1010			movw	%0, %1				*/

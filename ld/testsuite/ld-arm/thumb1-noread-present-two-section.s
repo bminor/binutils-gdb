@@ -1,5 +1,5 @@
 	.text
-	.section .text.noread.first
+	.section .text.fetchonly.first,"axy",%progbits
 	.arch armv6s-m
 	.syntax unified
 	.global	_start
@@ -9,7 +9,7 @@ _start:
 	bx lr
 
 	.text
-	.section .text.noread.second
+	.section .text.fetchonly.second,"axy",%progbits
 	.arch armv6s-m
 	.syntax unified
 	.global	foo

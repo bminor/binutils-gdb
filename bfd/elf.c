@@ -42,7 +42,7 @@ SECTION
 #include "elf-bfd.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
-#include "elf-linux-psinfo.h"
+#include "elf-linux-core.h"
 
 #ifdef CORE_HEADER
 #include CORE_HEADER
@@ -9287,6 +9287,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
     case NT_SIGINFO:
       return elfcore_make_note_pseudosection (abfd, ".note.linuxcore.siginfo",
 					      note);
+
+    case NT_FREEBSD_THRMISC:
+      if (note->namesz == 8
+	  && strcmp (note->namedata, "FreeBSD") == 0)
+	return elfcore_make_note_pseudosection (abfd, ".thrmisc", note);
+      else
+	return TRUE;
     }
 }
 
@@ -9784,9 +9791,7 @@ elfcore_write_linux_prpsinfo32
 {
   struct elf_external_linux_prpsinfo32 data;
 
-  memset (&data, 0, sizeof (data));
-  LINUX_PRPSINFO32_SWAP_FIELDS (abfd, prpsinfo, data);
-
+  swap_linux_prpsinfo32_out (abfd, prpsinfo, &data);
   return elfcore_write_note (abfd, buf, bufsiz, "CORE", NT_PRPSINFO,
 			     &data, sizeof (data));
 }
@@ -9798,9 +9803,7 @@ elfcore_write_linux_prpsinfo64
 {
   struct elf_external_linux_prpsinfo64 data;
 
-  memset (&data, 0, sizeof (data));
-  LINUX_PRPSINFO64_SWAP_FIELDS (abfd, prpsinfo, data);
-
+  swap_linux_prpsinfo64_out (abfd, prpsinfo, &data);
   return elfcore_write_note (abfd, buf, bufsiz,
 			     "CORE", NT_PRPSINFO, &data, sizeof (data));
 }

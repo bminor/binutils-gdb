@@ -230,6 +230,7 @@ gdb_test_multiple "return (int4) \{4, 2, 7, 6\}" $test {
 	pass $test
     }
     -re "The location .* is unknown.\r\n.* return value .* will be ignored.\r\n" {
+	# This happens, e.g., on s390x unless using the vector ABI.
 	set should_kfail 1
 	exp_continue
     }
@@ -240,4 +241,18 @@ gdb_test_multiple "return (int4) \{4, 2, 7, 6\}" $test {
 }
 
 gdb_test "next" ""
-gdb_test "p res" "\\{4, 2, 7, 6\\}.*" "verify vector return value"
+set test "verify vector return value"
+gdb_test_multiple "p res" $test {
+    -re ".*= \\{4, 2, 7, 6\\}\r\n.*$gdb_prompt $" {
+	pass $test
+    }
+    -re ".*= \\{.*\\}\r\n.*$gdb_prompt $" {
+	if { $should_kfail } {
+	    # GDB had not actually set the return value, likely due to
+	    # PR 8549.  So accept any return value and emit a KFAIL.
+	    kfail "gdb/8549" $test
+	} else {
+	    fail $test
+	}
+    }
+}

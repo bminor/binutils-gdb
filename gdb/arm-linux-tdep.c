@@ -265,10 +265,14 @@ static const gdb_byte arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa
 /* Syscall number for rt_sigreturn.  */
 #define ARM_RT_SIGRETURN 173
 
+static CORE_ADDR
+  arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
+					  CORE_ADDR pc);
+
 /* Operation function pointers for get_next_pcs.  */
 static struct arm_get_next_pcs_ops arm_linux_get_next_pcs_ops = {
   arm_get_next_pcs_read_memory_unsigned_integer,
-  arm_get_next_pcs_syscall_next_pc,
+  arm_linux_get_next_pcs_syscall_next_pc,
   arm_get_next_pcs_addr_bits_remove,
   arm_get_next_pcs_is_thumb
 };
@@ -778,10 +782,12 @@ arm_linux_sigreturn_return_addr (struct frame_info *frame,
 }
 
 /* Find the value of the next PC after a sigreturn or rt_sigreturn syscall
-   based on current processor state.  */
+   based on current processor state.  In addition, set IS_THUMB depending
+   on whether we will return to ARM or Thumb code.  */
+
 static CORE_ADDR
 arm_linux_sigreturn_next_pc (struct regcache *regcache,
-			     unsigned long svc_number)
+			     unsigned long svc_number, int *is_thumb)
 {
   ULONGEST sp;
   unsigned long sp_data;
@@ -790,6 +796,7 @@ arm_linux_sigreturn_next_pc (struct regcache *regcache,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int pc_offset = 0;
   int is_sigreturn = 0;
+  CORE_ADDR cpsr;
 
   gdb_assert (svc_number == ARM_SIGRETURN
 	      || svc_number == ARM_RT_SIGRETURN);
@@ -802,6 +809,10 @@ arm_linux_sigreturn_next_pc (struct regcache *regcache,
 						  is_sigreturn);
 
   next_pc = read_memory_unsigned_integer (sp + pc_offset, 4, byte_order);
+
+  /* Set IS_THUMB according the CPSR saved on the stack.  */
+  cpsr = read_memory_unsigned_integer (sp + pc_offset + 4, 4, byte_order);
+  *is_thumb = ((cpsr & arm_psr_thumb_bit (gdbarch)) != 0);
 
   return next_pc;
 }
@@ -859,26 +870,23 @@ arm_linux_get_syscall_number (struct gdbarch *gdbarch,
   return svc_number;
 }
 
-/* When the processor is at a syscall instruction, return the PC of the
-   next instruction to be executed.  */
-
 static CORE_ADDR
-arm_linux_syscall_next_pc (struct regcache *regcache)
+arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
+					CORE_ADDR pc)
 {
-  CORE_ADDR pc = regcache_read_pc (regcache);
   CORE_ADDR next_pc = 0;
-  int is_thumb = arm_is_thumb (regcache);
+  int is_thumb = arm_is_thumb (self->regcache);
   ULONGEST svc_number = 0;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = get_regcache_arch (self->regcache);
 
   if (is_thumb)
     {
-      svc_number = regcache_raw_get_unsigned (regcache, 7);
+      svc_number = regcache_raw_get_unsigned (self->regcache, 7);
       next_pc = pc + 2;
     }
   else
     {
-      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct gdbarch *gdbarch = get_regcache_arch (self->regcache);
       enum bfd_endian byte_order_for_code = 
 	gdbarch_byte_order_for_code (gdbarch);
       unsigned long this_instr = 
@@ -891,14 +899,19 @@ arm_linux_syscall_next_pc (struct regcache *regcache)
 	}
       else /* EABI.  */
 	{
-	  svc_number = regcache_raw_get_unsigned (regcache, 7);
+	  svc_number = regcache_raw_get_unsigned (self->regcache, 7);
 	}
 
       next_pc = pc + 4;
     }
 
   if (svc_number == ARM_SIGRETURN || svc_number == ARM_RT_SIGRETURN)
-    next_pc = arm_linux_sigreturn_next_pc (regcache, svc_number);
+    {
+      /* SIGRETURN or RT_SIGRETURN may affect the arm thumb mode, so
+	 update IS_THUMB.   */
+      next_pc = arm_linux_sigreturn_next_pc (self->regcache, svc_number,
+					     &is_thumb);
+    }
 
   /* Addresses for calling Thumb functions have the bit 0 set.  */
   if (is_thumb)
@@ -931,10 +944,10 @@ arm_linux_software_single_step (struct frame_info *frame)
 			 &arm_linux_get_next_pcs_ops,
 			 gdbarch_byte_order (gdbarch),
 			 gdbarch_byte_order_for_code (gdbarch),
-			 gdbarch_tdep (gdbarch)->thumb2_breakpoint,
+			 1,
 			 regcache);
 
-  next_pcs = arm_get_next_pcs (&next_pcs_ctx, regcache_read_pc (regcache));
+  next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
     {
@@ -1484,8 +1497,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_stap_is_single_operand (gdbarch, arm_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,
 					arm_stap_parse_special_token);
-
-  tdep->syscall_next_pc = arm_linux_syscall_next_pc;
 
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/arm-linux.xml");

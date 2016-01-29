@@ -624,6 +624,54 @@ handle_general_set (char *own_buf)
       return;
     }
 
+  if (startswith (own_buf, "QCatchSyscalls:"))
+    {
+      const char *p = own_buf + sizeof ("QCatchSyscalls:") - 1;
+      int enabled = -1;
+      CORE_ADDR sysno;
+      struct process_info *process;
+
+      if (!target_running () || !target_supports_catch_syscall ())
+	{
+	  write_enn (own_buf);
+	  return;
+	}
+
+      if (strcmp (p, "0") == 0)
+	enabled = 0;
+      else if (p[0] == '1' && (p[1] == ';' || p[1] == '\0'))
+	enabled = 1;
+      else
+	{
+	  fprintf (stderr, "Unknown catch-syscalls mode requested: %s\n",
+		   own_buf);
+	  write_enn (own_buf);
+	  return;
+	}
+
+      process = current_process ();
+      VEC_truncate (int, process->syscalls_to_catch, 0);
+
+      if (enabled)
+	{
+	  p += 1;
+	  if (*p == ';')
+	    {
+	      p += 1;
+	      while (*p != '\0')
+		{
+		  p = decode_address_to_semicolon (&sysno, p);
+		  VEC_safe_push (int, process->syscalls_to_catch, (int) sysno);
+		}
+	    }
+	  else
+	    VEC_safe_push (int, process->syscalls_to_catch, ANY_SYSCALL);
+	}
+
+      write_ok (own_buf);
+      return;
+    }
+
   if (strcmp (own_buf, "QStartNoAckMode") == 0)
     {
       if (remote_debug)
@@ -2200,6 +2248,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	       "PacketSize=%x;QPassSignals+;QProgramSignals+",
 	       PBUFSIZ - 1);
 
+      if (target_supports_catch_syscall ())
+	strcat (own_buf, ";QCatchSyscalls+");
+
       if (the_target->qxfer_libraries_svr4 != NULL)
 	strcat (own_buf, ";qXfer:libraries-svr4:read+"
 		";augmented-libraries-svr4-read+");
@@ -3769,15 +3820,6 @@ main (int argc, char *argv[])
   gdb_assert_not_reached ("captured_main should never return");
 }
 
-/* Skip PACKET until the next semi-colon (or end of string).  */
-
-static void
-skip_to_semicolon (char **packet)
-{
-  while (**packet != '\0' && **packet != ';')
-    (*packet)++;
-}
-
 /* Process options coming from Z packets for a breakpoint.  PACKET is
    the packet buffer.  *PACKET is updated to point to the first char
    after the last processed option.  */
@@ -3805,7 +3847,7 @@ process_point_options (struct breakpoint *bp, char **packet)
 	  if (debug_threads)
 	    debug_printf ("Found breakpoint condition.\n");
 	  if (!add_breakpoint_condition (bp, &dataptr))
-	    skip_to_semicolon (&dataptr);
+	    dataptr = strchrnul (dataptr, ';');
 	}
       else if (startswith (dataptr, "cmds:"))
 	{
@@ -3815,14 +3857,14 @@ process_point_options (struct breakpoint *bp, char **packet)
 	  persist = (*dataptr == '1');
 	  dataptr += 2;
 	  if (add_breakpoint_commands (bp, &dataptr, persist))
-	    skip_to_semicolon (&dataptr);
+	    dataptr = strchrnul (dataptr, ';');
 	}
       else
 	{
 	  fprintf (stderr, "Unknown token %c, ignoring.\n",
 		   *dataptr);
 	  /* Skip tokens until we find one that we recognize.  */
-	  skip_to_semicolon (&dataptr);
+	  dataptr = strchrnul (dataptr, ';');
 	}
     }
   *packet = dataptr;

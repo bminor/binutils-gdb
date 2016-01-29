@@ -731,6 +731,7 @@ MAKE
 CCDEPMODE
 DEPDIR
 am__leading_dot
+COMPILER_CFLAGS
 COMPILER
 INSTALL_STRIP_PROGRAM
 STRIP
@@ -5015,9 +5016,12 @@ fi
 
   if test "$enable_build_with_cxx" = "yes"; then
     COMPILER='$(CXX)'
+    COMPILER_CFLAGS='$(CXXFLAGS)'
    else
     COMPILER='$(CC)'
+    COMPILER_CFLAGS='$(CFLAGS)'
   fi
+
 
 
 
@@ -12782,7 +12786,8 @@ fi
 
 # See if <machine/reg.h> supports the %fs and %gs i386 segment registers.
 # Older i386 BSD's don't have the r_fs and r_gs members of `struct reg'.
-ac_fn_c_check_member "$LINENO" "struct reg" "r_fs" "ac_cv_member_struct_reg_r_fs" "#include <machine/reg.h>
+ac_fn_c_check_member "$LINENO" "struct reg" "r_fs" "ac_cv_member_struct_reg_r_fs" "#include <sys/types.h>
+#include <machine/reg.h>
 "
 if test "x$ac_cv_member_struct_reg_r_fs" = x""yes; then :
 
@@ -12792,7 +12797,8 @@ _ACEOF
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct reg" "r_gs" "ac_cv_member_struct_reg_r_gs" "#include <machine/reg.h>
+ac_fn_c_check_member "$LINENO" "struct reg" "r_gs" "ac_cv_member_struct_reg_r_gs" "#include <sys/types.h>
+#include <machine/reg.h>
 "
 if test "x$ac_cv_member_struct_reg_r_gs" = x""yes; then :
 
@@ -12962,6 +12968,22 @@ if test $gdb_cv_have_pt_getxmmregs = yes; then
 $as_echo "#define HAVE_PT_GETXMMREGS 1" >>confdefs.h
 
 fi
+
+# See if <sys/ptrace.h> supports LWP names on FreeBSD
+# Older FreeBSD versions don't have the pl_tdname member of
+# `struct ptrace_lwpinfo'.
+ac_fn_c_check_member "$LINENO" "struct ptrace_lwpinfo" "pl_tdname" "ac_cv_member_struct_ptrace_lwpinfo_pl_tdname" "#include <sys/ptrace.h>
+"
+if test "x$ac_cv_member_struct_ptrace_lwpinfo_pl_tdname" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME 1
+_ACEOF
+
+
+fi
+
+
 
 # Detect which type of /proc is in use, such as for Solaris.
 

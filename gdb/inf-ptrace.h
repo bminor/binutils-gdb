@@ -33,4 +33,9 @@ extern struct target_ops *
   inf_ptrace_trad_target (CORE_ADDR (*register_u_offset)
 					(struct gdbarch *, int, int));
 
+/* Return which PID to pass to ptrace in order to observe/control the
+   tracee identified by PTID.  */
+
+extern pid_t get_ptrace_pid (ptid_t);
+
 #endif

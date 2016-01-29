@@ -228,6 +228,7 @@ struct bound_probe
    symtabs_and_lines object and updates LOC or throws an error.  */
 
 extern struct symtabs_and_lines parse_probes (const struct event_location *loc,
+					      struct program_space *pspace,
 					      struct linespec_result *canon);
 
 /* Helper function to register the proper probe_ops to a newly created probe.

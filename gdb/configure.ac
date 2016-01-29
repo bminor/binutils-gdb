@@ -1448,7 +1448,8 @@ fi
 # See if <machine/reg.h> supports the %fs and %gs i386 segment registers.
 # Older i386 BSD's don't have the r_fs and r_gs members of `struct reg'.
 AC_CHECK_MEMBERS([struct reg.r_fs, struct reg.r_gs], [], [],
-                 [#include <machine/reg.h>])
+                 [#include <sys/types.h>
+#include <machine/reg.h>])
 
 # See if <sys/user.h> supports the %fs_base and %gs_bas amd64 segment registers.
 # Older amd64 Linux's don't have the fs_base and gs_base members of
@@ -1509,6 +1510,13 @@ if test $gdb_cv_have_pt_getxmmregs = yes; then
   AC_DEFINE(HAVE_PT_GETXMMREGS, 1,
   [Define if sys/ptrace.h defines the PT_GETXMMREGS request.])
 fi
+
+# See if <sys/ptrace.h> supports LWP names on FreeBSD
+# Older FreeBSD versions don't have the pl_tdname member of
+# `struct ptrace_lwpinfo'.
+AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_tdname], [], [],
+                 [#include <sys/ptrace.h>])
+
 
 # Detect which type of /proc is in use, such as for Solaris.
 

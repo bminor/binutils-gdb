@@ -219,7 +219,7 @@ gdb_test "trace foo" "Tracepoint $decimal at .*"
 # argument j.
 
 gdb_trace_setactions "set action for tracepoint 1" "" \
-    "collect i, j, global1, \(\*\(void \*\*\) \(\$$spreg\)\) @ 64" "^$"
+    "collect i, j, global1, \(\*\(void \*\*\) \(\$$spreg\)\) @ 128" "^$"
 
 gdb_test_no_output "tstart"
 

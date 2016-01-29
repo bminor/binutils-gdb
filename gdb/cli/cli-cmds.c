@@ -818,7 +818,7 @@ edit_command (char *arg, int from_tty)
       arg1 = arg;
       location = string_to_event_location (&arg1, current_language);
       cleanup = make_cleanup_delete_event_location (location);
-      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
+      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, NULL, NULL, 0);
 
       filter_sals (&sals);
       if (! sals.nelts)
@@ -971,7 +971,7 @@ list_command (char *arg, int from_tty)
 
       location = string_to_event_location (&arg1, current_language);
       make_cleanup_delete_event_location (location);
-      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, 0, 0);
+      sals = decode_line_1 (location, DECODE_LINE_LIST_MODE, NULL, NULL, 0);
 
       filter_sals (&sals);
       if (!sals.nelts)
@@ -1015,10 +1015,10 @@ list_command (char *arg, int from_tty)
 	  make_cleanup_delete_event_location (location);
 	  if (dummy_beg)
 	    sals_end = decode_line_1 (location,
-				      DECODE_LINE_LIST_MODE, 0, 0);
+				      DECODE_LINE_LIST_MODE, NULL, NULL, 0);
 	  else
 	    sals_end = decode_line_1 (location, DECODE_LINE_LIST_MODE,
-				      sal.symtab, sal.line);
+				      NULL, sal.symtab, sal.line);
 
 	  filter_sals (&sals_end);
 	  if (sals_end.nelts == 0)

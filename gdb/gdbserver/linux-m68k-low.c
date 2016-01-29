@@ -134,23 +134,6 @@ m68k_sw_breakpoint_from_kind (int kind, int *size)
   return m68k_breakpoint;
 }
 
-static CORE_ADDR
-m68k_get_pc (struct regcache *regcache)
-{
-  unsigned long pc;
-
-  collect_register_by_name (regcache, "pc", &pc);
-  return pc;
-}
-
-static void
-m68k_set_pc (struct regcache *regcache, CORE_ADDR value)
-{
-  unsigned long newpc = value;
-
-  supply_register_by_name (regcache, "pc", &newpc);
-}
-
 static int
 m68k_breakpoint_at (CORE_ADDR pc)
 {
@@ -222,8 +205,8 @@ struct linux_target_ops the_low_target = {
   m68k_cannot_fetch_register,
   m68k_cannot_store_register,
   NULL, /* fetch_register */
-  m68k_get_pc,
-  m68k_set_pc,
+  linux_get_pc_32bit,
+  linux_set_pc_32bit,
   NULL, /* breakpoint_kind_from_pc */
   m68k_sw_breakpoint_from_kind,
   NULL,

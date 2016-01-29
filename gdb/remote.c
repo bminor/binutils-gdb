@@ -1392,6 +1392,7 @@ enum {
   PACKET_qSupported,
   PACKET_qTStatus,
   PACKET_QPassSignals,
+  PACKET_QCatchSyscalls,
   PACKET_QProgramSignals,
   PACKET_qCRC,
   PACKET_qSearch_memory,
@@ -1985,6 +1986,93 @@ remote_pass_signals (struct target_ops *self,
       else
 	xfree (pass_packet);
     }
+}
+
+/* If 'QCatchSyscalls' is supported, tell the remote stub
+   to report syscalls to GDB.  */
+
+static int
+remote_set_syscall_catchpoint (struct target_ops *self,
+			       int pid, int needed, int any_count,
+			       int table_size, int *table)
+{
+  char *catch_packet;
+  enum packet_result result;
+  int n_sysno = 0;
+
+  if (packet_support (PACKET_QCatchSyscalls) == PACKET_DISABLE)
+    {
+      /* Not supported.  */
+      return 1;
+    }
+
+  if (needed && !any_count)
+    {
+      int i;
+
+      /* Count how many syscalls are to be caught (table[sysno] != 0).  */
+      for (i = 0; i < table_size; i++)
+	{
+	  if (table[i] != 0)
+	    n_sysno++;
+	}
+    }
+
+  if (remote_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "remote_set_syscall_catchpoint "
+			  "pid %d needed %d any_count %d n_sysno %d\n",
+			  pid, needed, any_count, n_sysno);
+    }
+
+  if (needed)
+    {
+      /* Prepare a packet with the sysno list, assuming max 8+1
+	 characters for a sysno.  If the resulting packet size is too
+	 big, fallback on the non-selective packet.  */
+      const int maxpktsz = strlen ("QCatchSyscalls:1") + n_sysno * 9 + 1;
+
+      catch_packet = (char *) xmalloc (maxpktsz);
+      strcpy (catch_packet, "QCatchSyscalls:1");
+      if (!any_count)
+	{
+	  int i;
+	  char *p;
+
+	  p = catch_packet;
+	  p += strlen (p);
+
+	  /* Add in catch_packet each syscall to be caught (table[i] != 0).  */
+	  for (i = 0; i < table_size; i++)
+	    {
+	      if (table[i] != 0)
+		p += xsnprintf (p, catch_packet + maxpktsz - p, ";%x", i);
+	    }
+	}
+      if (strlen (catch_packet) > get_remote_packet_size ())
+	{
+	  /* catch_packet too big.  Fallback to less efficient
+	     non selective mode, with GDB doing the filtering.  */
+	  catch_packet[sizeof ("QCatchSyscalls:1") - 1] = 0;
+	}
+    }
+  else
+    catch_packet = xstrdup ("QCatchSyscalls:0");
+
+  {
+    struct cleanup *old_chain = make_cleanup (xfree, catch_packet);
+    struct remote_state *rs = get_remote_state ();
+
+    putpkt (catch_packet);
+    getpkt (&rs->buf, &rs->buf_size, 0);
+    result = packet_ok (rs->buf, &remote_protocol_packets[PACKET_QCatchSyscalls]);
+    do_cleanups (old_chain);
+    if (result == PACKET_OK)
+      return 0;
+    else
+      return -1;
+  }
 }
 
 /* If 'QProgramSignals' is supported, tell the remote stub what
@@ -3881,7 +3969,9 @@ process_initial_stop_replies (int from_tty)
 	  && thread->suspend.waitstatus_pending_p)
 	selected = thread;
 
-      if (lowest_stopped == NULL || thread->num < lowest_stopped->num)
+      if (lowest_stopped == NULL
+	  || thread->inf->num < lowest_stopped->inf->num
+	  || thread->per_inf_num < lowest_stopped->per_inf_num)
 	lowest_stopped = thread;
 
       if (non_stop)
@@ -4467,6 +4557,8 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_traceframe_info },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QPassSignals },
+  { "QCatchSyscalls", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QCatchSyscalls },
   { "QProgramSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QProgramSignals },
   { "QStartNoAckMode", PACKET_DISABLE, remote_supported_packet,
@@ -6295,16 +6387,6 @@ peek_stop_reply (ptid_t ptid)
 			 stop_reply_match_ptid_and_ws, &ptid);
 }
 
-/* Skip PACKET until the next semi-colon (or end of string).  */
-
-static char *
-skip_to_semicolon (char *p)
-{
-  while (*p != '\0' && *p != ';')
-    p++;
-  return p;
-}
-
 /* Helper for remote_parse_stop_reply.  Return nonzero if the substring
    starting with P and ending with PEND matches PREFIX.  */
 
@@ -6371,6 +6453,22 @@ Packet: '%s'\n"),
 
 	  if (strprefix (p, p1, "thread"))
 	    event->ptid = read_ptid (++p1, &p);
+	  else if (strprefix (p, p1, "syscall_entry"))
+	    {
+	      ULONGEST sysno;
+
+	      event->ws.kind = TARGET_WAITKIND_SYSCALL_ENTRY;
+	      p = unpack_varlen_hex (++p1, &sysno);
+	      event->ws.value.syscall_number = (int) sysno;
+	    }
+	  else if (strprefix (p, p1, "syscall_return"))
+	    {
+	      ULONGEST sysno;
+
+	      event->ws.kind = TARGET_WAITKIND_SYSCALL_RETURN;
+	      p = unpack_varlen_hex (++p1, &sysno);
+	      event->ws.value.syscall_number = (int) sysno;
+	    }
 	  else if (strprefix (p, p1, "watch")
 		   || strprefix (p, p1, "rwatch")
 		   || strprefix (p, p1, "awatch"))
@@ -6391,7 +6489,7 @@ Packet: '%s'\n"),
 	      /* The value part is documented as "must be empty",
 		 though we ignore it, in case we ever decide to make
 		 use of it in a backward compatible way.  */
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "hwbreak"))
 	    {
@@ -6403,19 +6501,19 @@ Packet: '%s'\n"),
 		error (_("Unexpected hwbreak stop reason"));
 
 	      /* See above.  */
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "library"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_LOADED;
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "replaylog"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
 	      /* p1 will indicate "begin" or "end", but it makes
 		 no difference for now, so ignore it.  */
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "core"))
 	    {
@@ -6437,7 +6535,7 @@ Packet: '%s'\n"),
 	  else if (strprefix (p, p1, "vforkdone"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_VFORK_DONE;
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "exec"))
 	    {
@@ -6466,7 +6564,7 @@ Packet: '%s'\n"),
 	  else if (strprefix (p, p1, "create"))
 	    {
 	      event->ws.kind = TARGET_WAITKIND_THREAD_CREATED;
-	      p = skip_to_semicolon (p1 + 1);
+	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else
 	    {
@@ -6475,7 +6573,7 @@ Packet: '%s'\n"),
 
 	      if (skipregs)
 		{
-		  p = skip_to_semicolon (p1 + 1);
+		  p = strchrnul (p1 + 1, ';');
 		  p++;
 		  continue;
 		}
@@ -6512,7 +6610,7 @@ Packet: '%s'\n"),
 		{
 		  /* Not a number.  Silently skip unknown optional
 		     info.  */
-		  p = skip_to_semicolon (p1 + 1);
+		  p = strchrnul (p1 + 1, ';');
 		}
 	    }
 
@@ -12976,6 +13074,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_load = remote_load;
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_pass_signals = remote_pass_signals;
+  remote_ops.to_set_syscall_catchpoint = remote_set_syscall_catchpoint;
   remote_ops.to_program_signals = remote_program_signals;
   remote_ops.to_thread_alive = remote_thread_alive;
   remote_ops.to_thread_name = remote_thread_name;
@@ -13541,6 +13640,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QPassSignals],
 			 "QPassSignals", "pass-signals", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QCatchSyscalls],
+			 "QCatchSyscalls", "catch-syscalls", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QProgramSignals],
 			 "QProgramSignals", "program-signals", 0);

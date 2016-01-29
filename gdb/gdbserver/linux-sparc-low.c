@@ -223,18 +223,6 @@ sparc_store_fpregset (struct regcache *regcache, const void *buf)
       supply_register (regcache, i, ((char *) buf) + sparc_regmap[i]);
 }
 
-extern int debug_threads;
-
-static CORE_ADDR
-sparc_get_pc (struct regcache *regcache)
-{
-  unsigned long pc;
-  collect_register_by_name (regcache, "pc", &pc);
-  if (debug_threads)
-    debug_printf ("stop pc is %08lx\n", pc);
-  return pc;
-}
-
 static const gdb_byte sparc_breakpoint[INSN_SIZE] = {
   0x91, 0xd0, 0x20, 0x01
 };
@@ -315,7 +303,7 @@ struct linux_target_ops the_low_target = {
   sparc_cannot_fetch_register,
   sparc_cannot_store_register,
   NULL, /* fetch_register */
-  sparc_get_pc,
+  linux_get_pc_64bit,
   /* No sparc_set_pc is needed.  */
   NULL,
   NULL, /* breakpoint_kind_from_pc */

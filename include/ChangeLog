@@ -1,3 +1,38 @@
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (NT_FREEBSD_THRMISC): Define.
+	(NT_FREEBSD_PROCSTAT_PROC): Define.
+	(NT_FREEBSD_PROCSTAT_FILES): Define.
+	(NT_FREEBSD_PROCSTAT_VMMAP): Define.
+	(NT_FREEBSD_PROCSTAT_GROUPS): Define.
+	(NT_FREEBSD_PROCSTAT_UMASK): Define.
+	(NT_FREEBSD_PROCSTAT_RLIMIT): Define.
+	(NT_FREEBSD_PROCSTAT_OSREL): Define.
+	(NT_FREEBSD_PROCSTAT_PSSTRINGS): Define.
+	(NT_FREEBSD_PROCSTAT_AUXV): Define.
+
+2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
+	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
+
+	* elf/arc-reloc.def (ARC_32, ARC_GOTPC, ARC_TLS_GD_GOT)
+	(ARC_TLS_IE_GOT, ARC_TLS_DTPOFF, ARC_TLS_DTPOFF_S9, ARC_TLS_LE_S9)
+	(ARC_TLS_LE_32): Fixed formula.
+	(ARC_TLS_GD_LD): Use new special function.
+	* opcode/arc-func.h: Changed all the replacement
+	functions to clear the patching bits before doing an or it with the value
+	argument.
+
+2016-01-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19440
+	* coff/internal.h (internal_syment): Use int to hold section
+	number.
+	(N_UNDEF): Cast to int not short.
+	(N_ABS): Likewise.
+	(N_DEBUG): Likewise.
+	(N_TV): Likewise.
+	(P_TV): Likewise.
+
 2016-01-11  Nick Clifton  <nickc@redhat.com>
 
 	Import this change from GCC mainline:

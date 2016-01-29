@@ -46,6 +46,7 @@
 #include "filestuff.h"
 #include "tracepoint.h"
 #include "hostio.h"
+#include <inttypes.h>
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
    then ELFMAG0 will have been defined.  If it didn't get included by
@@ -461,6 +462,11 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 
   gdb_assert (event_lwp->waitstatus.kind == TARGET_WAITKIND_IGNORE);
 
+  /* All extended events we currently use are mid-syscall.  Only
+     PTRACE_EVENT_STOP is delivered more like a signal-stop, but
+     you have to be using PTRACE_SEIZE to get that.  */
+  event_lwp->syscall_state = TARGET_WAITKIND_SYSCALL_ENTRY;
+
   if ((event == PTRACE_EVENT_FORK) || (event == PTRACE_EVENT_VFORK)
       || (event == PTRACE_EVENT_CLONE))
     {
@@ -611,6 +617,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
   else if (event == PTRACE_EVENT_EXEC && report_exec_events)
     {
       struct process_info *proc;
+      VEC (int) *syscalls_to_catch;
       ptid_t event_ptid;
       pid_t event_pid;
 
@@ -624,8 +631,12 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
       event_ptid = ptid_of (event_thr);
       event_pid = ptid_get_pid (event_ptid);
 
-      /* Delete the execing process and all its threads.  */
+      /* Save the syscall list from the execing process.  */
       proc = get_thread_process (event_thr);
+      syscalls_to_catch = proc->syscalls_to_catch;
+      proc->syscalls_to_catch = NULL;
+
+      /* Delete the execing process and all its threads.  */
       linux_mourn (proc);
       current_thread = NULL;
 
@@ -647,6 +658,14 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
       event_lwp->status_pending = wstat;
       event_thr->last_resume_kind = resume_continue;
       event_thr->last_status.kind = TARGET_WAITKIND_IGNORE;
+
+      /* Update syscall state in the new lwp, effectively mid-syscall too.  */
+      event_lwp->syscall_state = TARGET_WAITKIND_SYSCALL_ENTRY;
+
+      /* Restore the list to catch.  Don't rely on the client, which is free
+	 to avoid sending a new list when the architecture doesn't change.
+	 Also, for ANY_SYSCALL, the architecture doesn't really matter.  */
+      proc->syscalls_to_catch = syscalls_to_catch;
 
       /* Report the event.  */
       *orig_event_lwp = event_lwp;
@@ -680,6 +699,40 @@ get_pc (struct lwp_info *lwp)
 
   current_thread = saved_thread;
   return pc;
+}
+
+/* This function should only be called if LWP got a SYSCALL_SIGTRAP.
+   Fill *SYSNO with the syscall nr trapped.  Fill *SYSRET with the
+   return code.  */
+
+static void
+get_syscall_trapinfo (struct lwp_info *lwp, int *sysno, int *sysret)
+{
+  struct thread_info *saved_thread;
+  struct regcache *regcache;
+
+  if (the_low_target.get_syscall_trapinfo == NULL)
+    {
+      /* If we cannot get the syscall trapinfo, report an unknown
+	 system call number and -ENOSYS return value.  */
+      *sysno = UNKNOWN_SYSCALL;
+      *sysret = -ENOSYS;
+      return;
+    }
+
+  saved_thread = current_thread;
+  current_thread = get_lwp_thread (lwp);
+
+  regcache = get_thread_regcache (current_thread, 1);
+  (*the_low_target.get_syscall_trapinfo) (regcache, sysno, sysret);
+
+  if (debug_threads)
+    {
+      debug_printf ("get_syscall_trapinfo sysno %d sysret %d\n",
+		    *sysno, *sysret);
+    }
+
+  current_thread = saved_thread;
 }
 
 /* This function should only be called if LWP got a SIGTRAP.
@@ -2236,6 +2289,8 @@ linux_low_ptrace_options (int attached)
   if (report_exec_events)
     options |= PTRACE_O_TRACEEXEC;
 
+  options |= PTRACE_O_TRACESYSGOOD;
+
   return options;
 }
 
@@ -2362,6 +2417,21 @@ linux_low_filter_event (int lwpid, int wstat)
 
       linux_enable_event_reporting (lwpid, options);
       child->must_set_ptrace_flags = 0;
+    }
+
+  /* Always update syscall_state, even if it will be filtered later.  */
+  if (WIFSTOPPED (wstat) && WSTOPSIG (wstat) == SYSCALL_SIGTRAP)
+    {
+      child->syscall_state
+	= (child->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY
+	   ? TARGET_WAITKIND_SYSCALL_RETURN
+	   : TARGET_WAITKIND_SYSCALL_ENTRY);
+    }
+  else
+    {
+      /* Almost all other ptrace-stops are known to be outside of system
+	 calls, with further exceptions in handle_extended_wait.  */
+      child->syscall_state = TARGET_WAITKIND_IGNORE;
     }
 
   /* Be careful to not overwrite stop_pc until
@@ -2973,6 +3043,44 @@ filter_exit_event (struct lwp_info *event_child,
   return ptid;
 }
 
+/* Returns 1 if GDB is interested in any event_child syscalls.  */
+
+static int
+gdb_catching_syscalls_p (struct lwp_info *event_child)
+{
+  struct thread_info *thread = get_lwp_thread (event_child);
+  struct process_info *proc = get_thread_process (thread);
+
+  return !VEC_empty (int, proc->syscalls_to_catch);
+}
+
+/* Returns 1 if GDB is interested in the event_child syscall.
+   Only to be called when stopped reason is SYSCALL_SIGTRAP.  */
+
+static int
+gdb_catch_this_syscall_p (struct lwp_info *event_child)
+{
+  int i, iter;
+  int sysno, sysret;
+  struct thread_info *thread = get_lwp_thread (event_child);
+  struct process_info *proc = get_thread_process (thread);
+
+  if (VEC_empty (int, proc->syscalls_to_catch))
+    return 0;
+
+  if (VEC_index (int, proc->syscalls_to_catch, 0) == ANY_SYSCALL)
+    return 1;
+
+  get_syscall_trapinfo (event_child, &sysno, &sysret);
+  for (i = 0;
+       VEC_iterate (int, proc->syscalls_to_catch, i, iter);
+       i++)
+    if (iter == sysno)
+      return 1;
+
+  return 0;
+}
+
 /* Wait for process, returns status.  */
 
 static ptid_t
@@ -3307,6 +3415,22 @@ linux_wait_1 (ptid_t ptid,
 
   /* Check whether GDB would be interested in this event.  */
 
+  /* Check if GDB is interested in this syscall.  */
+  if (WIFSTOPPED (w)
+      && WSTOPSIG (w) == SYSCALL_SIGTRAP
+      && !gdb_catch_this_syscall_p (event_child))
+    {
+      if (debug_threads)
+	{
+	  debug_printf ("Ignored syscall for LWP %ld.\n",
+			lwpid_of (current_thread));
+	}
+
+      linux_resume_one_lwp (event_child, event_child->stepping,
+			    0, NULL);
+      return ignore_event (ourstatus);
+    }
+
   /* If GDB is not interested in this signal, don't stop other
      threads, and don't report it to GDB.  Just resume the inferior
      right away.  We do this for threading-related signals as well as
@@ -3559,8 +3683,16 @@ linux_wait_1 (ptid_t ptid,
 	}
     }
 
-  if (current_thread->last_resume_kind == resume_stop
-      && WSTOPSIG (w) == SIGSTOP)
+  if (WSTOPSIG (w) == SYSCALL_SIGTRAP)
+    {
+      int sysret;
+
+      get_syscall_trapinfo (event_child,
+			    &ourstatus->value.syscall_number, &sysret);
+      ourstatus->kind = event_child->syscall_state;
+    }
+  else if (current_thread->last_resume_kind == resume_stop
+	   && WSTOPSIG (w) == SIGSTOP)
     {
       /* A thread that has been requested to stop by GDB with vCont;t,
 	 and it stopped cleanly, so report as SIG0.  The use of
@@ -3971,8 +4103,7 @@ install_software_single_step_breakpoints (struct lwp_info *lwp)
   VEC (CORE_ADDR) *next_pcs = NULL;
   struct cleanup *old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
 
-  pc = get_pc (lwp);
-  next_pcs = (*the_low_target.get_next_pcs) (pc, regcache);
+  next_pcs = (*the_low_target.get_next_pcs) (regcache);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); ++i)
     set_reinsert_breakpoint (pc);
@@ -4017,6 +4148,7 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
   struct thread_info *thread = get_lwp_thread (lwp);
   struct thread_info *saved_thread;
   int fast_tp_collecting;
+  int ptrace_request;
   struct process_info *proc = get_thread_process (thread);
 
   /* Note that target description may not be initialised
@@ -4204,7 +4336,14 @@ linux_resume_one_lwp_throw (struct lwp_info *lwp,
   regcache_invalidate_thread (thread);
   errno = 0;
   lwp->stepping = step;
-  ptrace (step ? PTRACE_SINGLESTEP : PTRACE_CONT, lwpid_of (thread),
+  if (step)
+    ptrace_request = PTRACE_SINGLESTEP;
+  else if (gdb_catching_syscalls_p (lwp))
+    ptrace_request = PTRACE_SYSCALL;
+  else
+    ptrace_request = PTRACE_CONT;
+  ptrace (ptrace_request,
+	  lwpid_of (thread),
 	  (PTRACE_TYPE_ARG3) 0,
 	  /* Coerce to a uintptr_t first to avoid potential gcc warning
 	     of coercing an 8 byte integer to a 4 byte pointer.  */
@@ -6286,6 +6425,13 @@ linux_process_qsupported (char **features, int count)
 }
 
 static int
+linux_supports_catch_syscall (void)
+{
+  return (the_low_target.get_syscall_trapinfo != NULL
+	  && linux_supports_tracesysgood ());
+}
+
+static int
 linux_supports_tracepoints (void)
 {
   if (*the_low_target.supports_tracepoints == NULL)
@@ -7111,6 +7257,57 @@ linux_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return linux_breakpoint_kind_from_pc (pcptr);
 }
 
+/* Default implementation of linux_target_ops method "set_pc" for
+   32-bit pc register which is literally named "pc".  */
+
+void
+linux_set_pc_32bit (struct regcache *regcache, CORE_ADDR pc)
+{
+  uint32_t newpc = pc;
+
+  supply_register_by_name (regcache, "pc", &newpc);
+}
+
+/* Default implementation of linux_target_ops method "get_pc" for
+   32-bit pc register which is literally named "pc".  */
+
+CORE_ADDR
+linux_get_pc_32bit (struct regcache *regcache)
+{
+  uint32_t pc;
+
+  collect_register_by_name (regcache, "pc", &pc);
+  if (debug_threads)
+    debug_printf ("stop pc is 0x%" PRIx32 "\n", pc);
+  return pc;
+}
+
+/* Default implementation of linux_target_ops method "set_pc" for
+   64-bit pc register which is literally named "pc".  */
+
+void
+linux_set_pc_64bit (struct regcache *regcache, CORE_ADDR pc)
+{
+  uint64_t newpc = pc;
+
+  supply_register_by_name (regcache, "pc", &newpc);
+}
+
+/* Default implementation of linux_target_ops method "get_pc" for
+   64-bit pc register which is literally named "pc".  */
+
+CORE_ADDR
+linux_get_pc_64bit (struct regcache *regcache)
+{
+  uint64_t pc;
+
+  collect_register_by_name (regcache, "pc", &pc);
+  if (debug_threads)
+    debug_printf ("stop pc is 0x%" PRIx64 "\n", pc);
+  return pc;
+}
+
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_post_create_inferior,
@@ -7209,7 +7406,8 @@ static struct target_ops linux_target_ops = {
   linux_sw_breakpoint_from_kind,
   linux_proc_tid_get_name,
   linux_breakpoint_kind_from_current_state,
-  linux_supports_software_single_step
+  linux_supports_software_single_step,
+  linux_supports_catch_syscall,
 };
 
 #ifdef HAVE_LINUX_REGSETS

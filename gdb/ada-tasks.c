@@ -1102,7 +1102,7 @@ print_ada_task_info (struct ui_out *uiout,
       /* Print the associated Thread ID.  */
       if (ui_out_is_mi_like_p (uiout))
         {
-	  const int thread_id = pid_to_thread_id (task_info->ptid);
+	  const int thread_id = ptid_to_global_thread_id (task_info->ptid);
 
 	  if (thread_id != 0)
 	    ui_out_field_int (uiout, "thread-id", thread_id);

@@ -3466,44 +3466,44 @@ linux_nat_wait (struct target_ops *ops,
   return event_ptid;
 }
 
-static int
-kill_callback (struct lwp_info *lp, void *data)
+/* Kill one LWP.  */
+
+static void
+kill_one_lwp (pid_t pid)
 {
   /* PTRACE_KILL may resume the inferior.  Send SIGKILL first.  */
 
   errno = 0;
-  kill_lwp (ptid_get_lwp (lp->ptid), SIGKILL);
+  kill_lwp (pid, SIGKILL);
   if (debug_linux_nat)
     {
       int save_errno = errno;
 
       fprintf_unfiltered (gdb_stdlog,
-			  "KC:  kill (SIGKILL) %s, 0, 0 (%s)\n",
-			  target_pid_to_str (lp->ptid),
+			  "KC:  kill (SIGKILL) %ld, 0, 0 (%s)\n", (long) pid,
 			  save_errno ? safe_strerror (save_errno) : "OK");
     }
 
   /* Some kernels ignore even SIGKILL for processes under ptrace.  */
 
   errno = 0;
-  ptrace (PTRACE_KILL, ptid_get_lwp (lp->ptid), 0, 0);
+  ptrace (PTRACE_KILL, pid, 0, 0);
   if (debug_linux_nat)
     {
       int save_errno = errno;
 
       fprintf_unfiltered (gdb_stdlog,
-			  "KC:  PTRACE_KILL %s, 0, 0 (%s)\n",
-			  target_pid_to_str (lp->ptid),
+			  "KC:  PTRACE_KILL %ld, 0, 0 (%s)\n", (long) pid,
 			  save_errno ? safe_strerror (save_errno) : "OK");
     }
-
-  return 0;
 }
 
-static int
-kill_wait_callback (struct lwp_info *lp, void *data)
+/* Wait for an LWP to die.  */
+
+static void
+kill_wait_one_lwp (pid_t pid)
 {
-  pid_t pid;
+  pid_t res;
 
   /* We must make sure that there are no pending events (delayed
      SIGSTOPs, pending SIGTRAPs, etc.) to make sure the current
@@ -3511,49 +3511,83 @@ kill_wait_callback (struct lwp_info *lp, void *data)
 
   do
     {
-      pid = my_waitpid (ptid_get_lwp (lp->ptid), NULL, __WALL);
-      if (pid != (pid_t) -1)
+      res = my_waitpid (pid, NULL, __WALL);
+      if (res != (pid_t) -1)
 	{
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
-				"KWC: wait %s received unknown.\n",
-				target_pid_to_str (lp->ptid));
+				"KWC: wait %ld received unknown.\n",
+				(long) pid);
 	  /* The Linux kernel sometimes fails to kill a thread
 	     completely after PTRACE_KILL; that goes from the stop
 	     point in do_fork out to the one in get_signal_to_deliver
 	     and waits again.  So kill it again.  */
-	  kill_callback (lp, NULL);
+	  kill_one_lwp (pid);
 	}
     }
-  while (pid == ptid_get_lwp (lp->ptid));
+  while (res == pid);
 
-  gdb_assert (pid == -1 && errno == ECHILD);
+  gdb_assert (res == -1 && errno == ECHILD);
+}
+
+/* Callback for iterate_over_lwps.  */
+
+static int
+kill_callback (struct lwp_info *lp, void *data)
+{
+  kill_one_lwp (ptid_get_lwp (lp->ptid));
   return 0;
+}
+
+/* Callback for iterate_over_lwps.  */
+
+static int
+kill_wait_callback (struct lwp_info *lp, void *data)
+{
+  kill_wait_one_lwp (ptid_get_lwp (lp->ptid));
+  return 0;
+}
+
+/* Kill the fork children of any threads of inferior INF that are
+   stopped at a fork event.  */
+
+static void
+kill_unfollowed_fork_children (struct inferior *inf)
+{
+  struct thread_info *thread;
+
+  ALL_NON_EXITED_THREADS (thread)
+    if (thread->inf == inf)
+      {
+	struct target_waitstatus *ws = &thread->pending_follow;
+
+	if (ws->kind == TARGET_WAITKIND_FORKED
+	    || ws->kind == TARGET_WAITKIND_VFORKED)
+	  {
+	    ptid_t child_ptid = ws->value.related_pid;
+	    int child_pid = ptid_get_pid (child_ptid);
+	    int child_lwp = ptid_get_lwp (child_ptid);
+	    int status;
+
+	    kill_one_lwp (child_lwp);
+	    kill_wait_one_lwp (child_lwp);
+
+	    /* Let the arch-specific native code know this process is
+	       gone.  */
+	    linux_nat_forget_process (child_pid);
+	  }
+      }
 }
 
 static void
 linux_nat_kill (struct target_ops *ops)
 {
   struct target_waitstatus last;
-  ptid_t last_ptid;
-  int status;
 
   /* If we're stopped while forking and we haven't followed yet,
      kill the other task.  We need to do this first because the
      parent will be sleeping if this is a vfork.  */
-
-  get_last_target_status (&last_ptid, &last);
-
-  if (last.kind == TARGET_WAITKIND_FORKED
-      || last.kind == TARGET_WAITKIND_VFORKED)
-    {
-      ptrace (PT_KILL, ptid_get_pid (last.value.related_pid), 0, 0);
-      wait (&status);
-
-      /* Let the arch-specific native code know this process is
-	 gone.  */
-      linux_nat_forget_process (ptid_get_pid (last.value.related_pid));
-    }
+  kill_unfollowed_fork_children (current_inferior ());
 
   if (forks_exist_p ())
     linux_fork_killall ();

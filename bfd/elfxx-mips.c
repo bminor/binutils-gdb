@@ -13110,9 +13110,8 @@ static const struct opcode_descriptor bz_insns_16[] = {
 
 /* Switch between a 5-bit register index and its 3-bit shorthand.  */
 
-#define BZ16_REG(opcode) ((((((opcode) >> 7) & 7) + 0x1e) & 0x17) + 2)
-#define BZ16_REG_FIELD(r) \
-  (((2 <= (r) && (r) <= 7) ? (r) : ((r) - 16)) << 7)
+#define BZ16_REG(opcode) ((((((opcode) >> 7) & 7) + 0x1e) & 0xf) + 2)
+#define BZ16_REG_FIELD(r) (((r) & 7) << 7)
 
 
 /* 32-bit instructions with a delay slot.  */

@@ -20,12 +20,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "../lib/unbuffer_output.c"
+
 pid_t pids[4];
 
 int
 main()
 {
   int i;
+
+  gdb_unbuffer_output ();
 
   for (i = 0; i < 4; i++)
     pids [i] = fork ();

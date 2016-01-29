@@ -45,7 +45,7 @@ proc gdb_compile_ada {source dest type options} {
     append options " additional_flags=-I$srcdir"
 
     set result [target_compile_ada_from_dir \
-                    $objdir [file tail $source] $dest $type $options]]
+                    $objdir [file tail $source] $dest $type $options]
 
     # The Ada build always produces some output, even when the build
     # succeeds. Thus, we can not use the output the same way we do in

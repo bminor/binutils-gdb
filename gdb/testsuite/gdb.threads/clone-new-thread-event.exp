@@ -30,5 +30,5 @@ if { ![runto_main] } {
 }
 
 gdb_test "continue" \
-    "Program received signal SIGUSR1, User defined signal 1.*" \
+    "Thread 2 received signal SIGUSR1, User defined signal 1.*" \
     "catch SIGUSR1"

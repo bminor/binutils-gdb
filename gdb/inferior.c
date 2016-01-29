@@ -748,8 +748,8 @@ inferior_command (char *args, int from_tty)
 	  switch_to_thread (tp->ptid);
 	}
 
-      printf_filtered (_("[Switching to thread %d (%s)] "),
-		       pid_to_thread_id (inferior_ptid),
+      printf_filtered (_("[Switching to thread %s (%s)] "),
+		       print_thread_id (inferior_thread ()),
 		       target_pid_to_str (inferior_ptid));
     }
   else
@@ -1008,6 +1008,26 @@ show_print_inferior_events (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Printing of inferior events is %s.\n"), value);
 }
 
+/* Return a new value for the selected inferior's id.  */
+
+static struct value *
+inferior_id_make_value (struct gdbarch *gdbarch, struct internalvar *var,
+			void *ignore)
+{
+  struct inferior *inf = current_inferior ();
+
+  return value_from_longest (builtin_type (gdbarch)->builtin_int, inf->num);
+}
+
+/* Implementation of `$_inferior' variable.  */
+
+static const struct internalvar_funcs inferior_funcs =
+{
+  inferior_id_make_value,
+  NULL,
+  NULL
+};
+
 
 
 void
@@ -1071,4 +1091,5 @@ Show printing of inferior events (e.g., inferior start and exit)."), NULL,
          show_print_inferior_events,
          &setprintlist, &showprintlist);
 
+  create_internalvar_type_lazy ("_inferior", &inferior_funcs, NULL);
 }

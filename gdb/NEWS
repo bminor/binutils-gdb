@@ -3,6 +3,61 @@
 
 *** Changes since GDB 7.10
 
+* GDB now supports debugging kernel-based threads on FreeBSD.
+
+* Per-inferior thread numbers
+
+  Thread numbers are now per inferior instead of global.  If you're
+  debugging multiple inferiors, GDB displays thread IDs using a
+  qualified INF_NUM.THR_NUM form.  For example:
+
+     (gdb) info threads
+       Id   Target Id         Frame
+       1.1  Thread 0x7ffff7fc2740 (LWP 8155) (running)
+       1.2  Thread 0x7ffff7fc1700 (LWP 8168) (running)
+     * 2.1  Thread 0x7ffff7fc2740 (LWP 8157) (running)
+       2.2  Thread 0x7ffff7fc1700 (LWP 8190) (running)
+
+  As consequence, thread numbers as visible in the $_thread
+  convenience variable and in Python's InferiorThread.num attribute
+  are no longer unique between inferiors.
+
+  GDB now maintains a second thread ID per thread, referred to as the
+  global thread ID, which is the new equivalent of thread numbers in
+  previous releases.  See also $_gthread below.
+
+  For backwards compatibility, MI's thread IDs always refer to global
+  IDs.
+
+* Commands that accept thread IDs now accept the qualified
+  INF_NUM.THR_NUM form as well.  For example:
+
+     (gdb) thread 2.1
+     [Switching to thread 2.1 (Thread 0x7ffff7fc2740 (LWP 8157))] (running)
+     (gdb)
+
+* In commands that accept a list of thread IDs, you can now refer to
+  all threads of an inferior using a star wildcard.  GDB accepts
+  "INF_NUM.*", to refer to all threads of inferior INF_NUM, and "*" to
+  refer to all threads of the current inferior.  For example, "info
+  threads 2.*".
+
+* You can use "info threads -gid" to display the global thread ID of
+  all threads.
+
+* The new convenience variable $_gthread holds the global number of
+  the current thread.
+
+* The new convenience variable $_inferior holds the number of the
+  current inferior.
+
+* GDB now displays the ID and name of the thread that hit a breakpoint
+  or received a signal, if your program is multi-threaded.  For
+  example:
+
+   Thread 3 "bar" hit Breakpoint 1 at 0x40087a: file program.c, line 20.
+   Thread 1 "main" received signal SIGINT, Interrupt.
+
 * Record btrace now supports non-stop mode.
 
 * Support for tracepoints on aarch64-linux was added in GDBserver.
@@ -46,6 +101,10 @@ maint show bfd-sharing
 set debug bfd-cache
 show debug bfd-cache
   Control display of debugging info regarding bfd caching.
+
+set debug fbsd-lwp
+show debug fbsd-lwp
+  Control display of debugging info regarding FreeBSD threads.
 
 set remote multiprocess-extensions-packet
 show remote multiprocess-extensions-packet
@@ -120,6 +179,21 @@ N stop reply
   threads are stopped).  The remote stub reports support for this stop
   reply to GDB's qSupported query.
 
+QCatchSyscalls:1 [;SYSNO]...
+QCatchSyscalls:0
+  Enable ("QCatchSyscalls:1") or disable ("QCatchSyscalls:0")
+  catching syscalls from the inferior process.
+
+syscall_entry stop reason
+  Indicates that a syscall was just called.
+
+syscall_return stop reason
+  Indicates that a syscall just returned.
+
+QCatchSyscalls:1 in qSupported
+  The qSupported packet may now include QCatchSyscalls:1 in the reply
+  to indicate support for catching syscalls.
+
 * Extended-remote exec events
 
   ** GDB now has support for exec events on extended-remote Linux targets.
@@ -142,11 +216,29 @@ show remote exec-event-feature-packet
      this enables follow-fork-mode, detach-on-fork, follow-exec-mode, and
      fork and exec catchpoints.
 
+* Remote syscall events
+
+  ** GDB now has support for catch syscall on remote Linux targets,
+     currently enabled on x86/x86_64 architectures.
+
+set remote catch-syscall-packet
+show remote catch-syscall-packet
+  Set/show the use of the remote catch syscall feature.
+
 * MI changes
 
   ** The -var-set-format command now accepts the zero-hexadecimal
      format.  It outputs data in hexadecimal format with zero-padding on the
      left.
+
+* Python Scripting
+
+  ** gdb.InferiorThread objects have a new attribute "global_num",
+     which refers to the thread's global thread ID.  The existing
+     "num" attribute now refers to the thread's per-inferior number.
+     See "Per-inferior thread numbers" above.
+  ** gdb.InferiorThread objects have a new attribute "inferior", which
+     is the Inferior object the thread belongs to.
 
 *** Changes in GDB 7.10
 

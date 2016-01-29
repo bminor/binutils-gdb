@@ -134,4 +134,10 @@ extern void discard_queued_stop_replies (ptid_t ptid);
    as large as the largest register set supported by gdbserver.  */
 #define PBUFSIZ 16384
 
+/* Definition for an unknown syscall, used basically in error-cases.  */
+#define UNKNOWN_SYSCALL (-1)
+
+/* Definition for any syscall, used for unfiltered syscall reporting.  */
+#define ANY_SYSCALL (-2)
+
 #endif /* SERVER_H */

@@ -11395,15 +11395,20 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    {
 		      const char *iclass, *oclass;
 
-		      if (bed->s->elfclass == ELFCLASS64)
+		      switch (bed->s->elfclass)
 			{
-			  iclass = "ELFCLASS32";
-			  oclass = "ELFCLASS64";
+			case ELFCLASS64: oclass = "ELFCLASS64"; break;
+			case ELFCLASS32: oclass = "ELFCLASS32"; break;
+			case ELFCLASSNONE: oclass = "ELFCLASSNONE"; break;
+			default: abort ();
 			}
-		      else
+
+		      switch (elf_elfheader (sub)->e_ident[EI_CLASS])
 			{
-			  iclass = "ELFCLASS64";
-			  oclass = "ELFCLASS32";
+			case ELFCLASS64: iclass = "ELFCLASS64"; break;
+			case ELFCLASS32: iclass = "ELFCLASS32"; break;
+			case ELFCLASSNONE: iclass = "ELFCLASSNONE"; break;
+			default: abort ();
 			}
 
 		      bfd_set_error (bfd_error_wrong_format);

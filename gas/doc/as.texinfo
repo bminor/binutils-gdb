@@ -2043,23 +2043,42 @@ file_name:@b{NNN}:Warning Message Text
 @end smallexample
 
 @noindent
-@cindex line numbers, in warnings/errors
-(where @b{NNN} is a line number).  If a logical file name has been given
-(@pxref{File,,@code{.file}}) it is used for the filename, otherwise the name of
-the current input file is used.  If a logical line number was given
+@cindex file names and line numbers, in warnings/errors
+(where @b{NNN} is a line number).  If both a logical file name
+(@pxref{File,,@code{.file}}) and a logical line number
 @ifset GENERIC
 (@pxref{Line,,@code{.line}})
 @end ifset
-then it is used to calculate the number printed,
-otherwise the actual line in the current source file is printed.  The
-message text is intended to be self explanatory (in the grand Unix
-tradition).
+have been given then they will be used, otherwise the file name and line number
+in the current assembler source file will be used.  The message text is
+intended to be self explanatory (in the grand Unix tradition).
+
+Note the file name must be set via the logical version of the @code{.file}
+directive, not the DWARF2 version of the @code{.file} directive.  For example:
+
+@smallexample
+  .file 2 "bar.c"
+     error_assembler_source
+  .file "foo.c"
+  .line 30
+      error_c_source
+@end smallexample
+
+produces this output:
+
+@smallexample
+  Assembler messages:
+  asm.s:2: Error: no such instruction: `error_assembler_source'
+  foo.c:31: Error: no such instruction: `error_c_source'
+@end smallexample
 
 @cindex format of error messages
 Error messages have the format
+
 @smallexample
 file_name:@b{NNN}:FATAL:Error Message Text
 @end smallexample
+
 The file name and line number are derived as for warning
 messages.  The actual message text may be rather less explanatory
 because many of them aren't supposed to happen.

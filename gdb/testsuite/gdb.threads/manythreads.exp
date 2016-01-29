@@ -70,14 +70,14 @@ proc interrupt_and_wait { message } {
 	-re "\\\[\[^\]\]* exited\\\]\r\n" {
 	    exp_continue
 	}
-	-re "Program received signal SIGINT.*$gdb_prompt $" {
+	-re " received signal SIGINT.*$gdb_prompt $" {
 	    pass "$message"
 	}
 	-re "$gdb_prompt $" {
 	    # Note that with this regex order, if GDB emits [New
 	    # Thread ...] output between "Program received signal" and
-	    # the prompt, the "Program received signal" regex won't
-	    # match.  That's good, as if we see that happening, it's a
+	    # the prompt, the "received signal" regex won't match.
+	    # That's good, as if we see that happening, it's a
 	    # regression.
 	    #
 	    # GDB makes sure to notify about signal stops, end of
@@ -92,7 +92,7 @@ proc interrupt_and_wait { message } {
 	    #  ... more new threads output ...
 	    #  [New Thread NNN]
 	    #  [New Thread NNN]
-	    #  Program received signal SIGINT, Interrupt.
+	    #  Thread NNN received signal SIGINT, Interrupt.
 	    #  [New Thread NNN]
 	    #  [New Thread NNN]
 	    #  ... pages of new threads output ...

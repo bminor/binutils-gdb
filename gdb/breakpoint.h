@@ -599,13 +599,15 @@ struct breakpoint_ops
 				  int, const struct breakpoint_ops *,
 				  int, int, int, unsigned);
 
-  /* Given the location (second parameter), this method decodes it
-     and provides the SAL locations related to it.  For ordinary breakpoints,
-     it calls `decode_line_full'.
+  /* Given the location (second parameter), this method decodes it and
+     provides the SAL locations related to it.  For ordinary
+     breakpoints, it calls `decode_line_full'.  If SEARCH_PSPACE is
+     not NULL, symbol search is restricted to just that program space.
 
      This function is called inside `location_to_sals'.  */
   void (*decode_location) (struct breakpoint *b,
 			   const struct event_location *location,
+			   struct program_space *search_pspace,
 			   struct symtabs_and_lines *sals);
 
   /* Return true if this breakpoint explains a signal.  See
@@ -1200,6 +1202,7 @@ extern void init_bp_location (struct bp_location *loc,
 			      struct breakpoint *owner);
 
 extern void update_breakpoint_locations (struct breakpoint *b,
+					 struct program_space *filter_pspace,
 					 struct symtabs_and_lines sals,
 					 struct symtabs_and_lines sals_end);
 
@@ -1621,5 +1624,9 @@ extern struct gdbarch *get_sal_arch (struct symtab_and_line sal);
 extern void breakpoint_free_objfile (struct objfile *objfile);
 
 extern char *ep_parse_optional_if_clause (char **arg);
+
+/* Print the "Thread ID hit" part of "Thread ID hit Breakpoint N" to
+   UIOUT iff debugging multiple threads.  */
+extern void maybe_print_thread_hit_breakpoint (struct ui_out *uiout);
 
 #endif /* !defined (BREAKPOINT_H) */

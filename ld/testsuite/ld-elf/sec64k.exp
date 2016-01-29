@@ -40,6 +40,11 @@ if { [istarget "arc-*-*"]
     return
 }
 
+# m68hc11, m68hc12 and xgate run out of address space.
+if { [istarget "m68hc1*-*"] || [istarget "xgate-*"] } {
+    return
+}
+
 # Test >64k sections, with and without -r.  First, create the assembly
 # files.  Have a relocation to another section and one within the local
 # section.

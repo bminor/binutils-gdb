@@ -5798,14 +5798,26 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
       if (mdata->dsym_bfd != NULL)
         {
           bfd *fat_bfd = mdata->dsym_bfd->my_archive;
+#if 0
+	  /* FIXME: PR 19435: This calculation to find the memory allocated by
+	     bfd_mach_o_follow_dsym for the filename does not always end up
+	     selecting the correct pointer.  Unfortunately this problem is
+	     very hard to reproduce on a non Mach-O native system, so until it
+	     can be traced and fixed on such a system, this code will remain
+	     commented out.  This does mean that there will be a memory leak,
+	     but it is small, and happens when we are closing down, so it
+	     should not matter too much.  */
           char *dsym_filename = (char *)(fat_bfd
                                          ? fat_bfd->filename
                                          : mdata->dsym_bfd->filename);
+#endif
           bfd_close (mdata->dsym_bfd);
           mdata->dsym_bfd = NULL;
           if (fat_bfd)
             bfd_close (fat_bfd);
+#if 0
           free (dsym_filename);
+#endif
         }
     }
 

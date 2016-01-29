@@ -242,309 +242,6 @@ AC_CHECK_DECLS(strnlen)
 # This is used only by compress.c.
 AM_ZLIB
 
-# If we are configured native, pick a core file support file.
-COREFILE=
-COREFLAG=
-CORE_HEADER=
-TRAD_HEADER=
-if test "${target}" = "${host}"; then
-  case "${host}" in
-  alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu | alpha*-*-*vms*)
-	COREFILE=''
-	;;
-  alpha*-*-linux-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/alphalinux.h"'
-	;;
-  alpha*-*-netbsd* | alpha*-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  alpha*-*-*)
-        COREFILE=osf-core.lo
-	;;
-  arm-*-freebsd* | arm-*-kfreebsd*-gnu)
-	COREFILE='' ;;
-  arm-*-netbsd* | arm-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  arm-*-riscix)		COREFILE=trad-core.lo ;;
-  hppa*-*-hpux*)	COREFILE=hpux-core.lo ;;
-  hppa*-*-hiux*)	COREFILE=hpux-core.lo ;;
-  hppa*-*-mpeix*)	COREFILE=hpux-core.lo ;;
-  hppa*-*-bsd*)		COREFILE="hpux-core.lo hppabsd-core.lo"
-			COREFLAG="-DHPUX_CORE -DHPPABSD_CORE" ;;
-  hppa*-*-netbsd* | hppa*-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-
-  i370-*-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/i370linux.h"'
-	;;
-
-changequote(,)dnl
-  i[3-7]86-sequent-bsd*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/symmetry.h"'
-	;;
-changequote(,)dnl
-  i[3-7]86-sequent-sysv4*) ;;
-  i[3-7]86-sequent-sysv*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/symmetry.h"'
-	;;
-changequote(,)dnl
-  i[3-7]86-*-bsdi)
-changequote([,])dnl
-	COREFILE=
-	;;
-changequote(,)dnl
-  i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[123] | i[3-7]86-*-freebsd[123]\.* | i[3-7]86-*-freebsd4\.[01234] | i[3-7]86-*-freebsd4\.[01234]\.* | i[3-7]86-*-freebsd*aout*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/i386bsd.h"'
-	;;
-changequote(,)dnl
-  i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu | i[3-7]86-*-dragonfly*)
-changequote([,])dnl
-	COREFILE=''
-	TRAD_HEADER='"hosts/i386bsd.h"'
-	;;
-changequote(,)dnl
-  i[3-7]86-*-netbsd* | i[3-7]86-*-knetbsd*-gnu | i[3-7]86-*-openbsd*)
-changequote([,])dnl
-	COREFILE=netbsd-core.lo
-	;;
-changequote(,)dnl
-  i[3-7]86-esix-sysv3*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/esix.h"'
-	;;
-changequote(,)dnl
-  i[3-7]86-*-sco3.2v5*)
-changequote([,])dnl
-	COREFILE=sco5-core.lo
-	;;
-changequote(,)dnl
-  i[3-7]86-*-sco* | i[3-7]86-*-isc*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/i386sco.h"'
-	;;
-changequote(,)dnl
-  i[3-7]86-*-mach3*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/i386mach3.h"'
-	;;
-changequote(,)dnl
-  i[3-7]86-*-linux-*)
-changequote([,])dnl
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/i386linux.h"'
-	case "$enable_targets"-"$want64" in
-	*x86_64-*linux*|*-true)
-	  CORE_HEADER='"hosts/x86-64linux.h"'
-	esac
-	;;
-changequote(,)dnl
-  i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;
-  i[3-7]86-*-aix*)	COREFILE=aix386-core.lo ;;
-changequote([,])dnl
-  i860-*-mach3* | i860-*-osf1*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/i860mach3.h"'
-	;;
-  mips-*-netbsd* | mips*-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  mips-dec-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/decstation.h"'
-	;;
-  mips-sgi-irix4*)	COREFILE=irix-core.lo ;;
-  mips-sgi-irix5*)	COREFILE=irix-core.lo ;;
-  mips-sgi-irix6*)	COREFILE=irix-core.lo ;;
-  mips-*-sysv4*)	;;
-  mips-*-sysv* | mips-*-riscos*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/riscos.h"'
-	;;
-  mips-sony-bsd*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/news-mips.h"'
-	;;
-  m68*-bull*-sysv*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/dpx2.h"'
-	;;
-  m68*-hp-hpux*)	COREFILE=hpux-core.lo ;;
-  m68*-hp-bsd*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/hp300bsd.h"'
-	;;
-  m68*-*-linux-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/m68klinux.h"'
-	;;
-  m68*-motorola-sysv*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/delta68.h"'
-	;;
-  m68*-sony-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/news.h"'
-	;;
-  m68*-*-netbsd* | m68*-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  m68*-apple-aux*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/m68kaux.h"'
-	;;
-  m88*-*-sysv4*)
-	;;
-  m88*-motorola-sysv*)
-	COREFILE=ptrace-core.lo
-	;;
-  m88*-*-mach3*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/m88kmach3.h"'
-	;;
-  m88*-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  ns32k-pc532-mach)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/pc532mach.h"'
-	;;
-  ns32k-*-netbsd* | ns32k-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  rs6000-*-lynx*)
-	COREFILE=lynx-core.lo
-	;;
-changequote(,)dnl
-  rs6000-*-aix[5-9].* | powerpc-*-aix[5-9].* | powerpc64-*-aix[5-9].*)
-changequote([,])dnl
-        COREFILE=rs6000-core.lo
-	COREFLAG="$COREFLAG -DAIX_5_CORE -DAIX_CORE_DUMPX_CORE"
-	;;
-changequote(,)dnl
-  rs6000-*-aix4.[3-9]* | powerpc-*-aix4.[3-9]*)
-changequote([,])dnl
-        COREFILE=rs6000-core.lo
-	COREFLAG="$COREFLAG -DAIX_CORE_DUMPX_CORE"
-	# Not all versions of AIX with -DAIX_CORE_DUMPX_CORE
-	# have c_impl as a member of struct core_dumpx
-	AC_MSG_CHECKING([for c_impl in struct core_dumpx])
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <core.h>]], [[struct core_dumpx c; c.c_impl = 0;]])],[AC_DEFINE(HAVE_ST_C_IMPL, 1,
-	    [Define if struct core_dumpx has member c_impl])
-	  AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
-	;;
-  rs6000-*-aix4*)	COREFILE=rs6000-core.lo ;;
-  rs6000-*-*)		COREFILE=rs6000-core.lo ;;
-  powerpc64-*-aix*)	COREFILE=rs6000-core.lo ;;
-  powerpc-*-aix4*)	COREFILE=rs6000-core.lo ;;
-  powerpc-*-aix*)	COREFILE=rs6000-core.lo ;;
-  powerpc-*-beos*)	;;
-  powerpc-*-freebsd* | powerpc-*-kfreebsd*-gnu)
-		        COREFILE='' ;;
-  powerpc-*-netbsd*)	COREFILE=netbsd-core.lo ;;
-  powerpc-*-*bsd*)	COREFILE=netbsd-core.lo ;;
-  s390*-*-*)            COREFILE=trad-core.lo ;;
-  sh*-*-netbsd* | sh*-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  sparc-*-netbsd* | sparc*-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  tahoe-*-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/tahoe.h"'
-	;;
-  vax-*-netbsd* | vax-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  vax-*-ultrix2*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/vaxult2.h"'
-	;;
-  vax-*-ultrix*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/vaxult2.h"'
-	;;
-  vax-*-linux-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/vaxlinux.h"'
-	;;
-  vax-*-*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/vaxbsd.h"'
-	;;
-  x86_64-*-linux*)
-	CORE_HEADER='"hosts/x86-64linux.h"'
-	;;
-  x86_64-*-netbsd* | x86_64-*-openbsd*)
-	COREFILE=netbsd-core.lo
-	;;
-  esac
-
-  case "$COREFILE" in
-  aix386-core.lo)	COREFLAG=-DAIX386_CORE ;;
-  hppabsd-core.lo)	COREFLAG=-DHPPABSD_CORE ;;
-  hpux-core.lo)		COREFLAG=-DHPUX_CORE ;;
-  irix-core.lo)		COREFLAG=-DIRIX_CORE ;;
-  lynx-core.lo)		COREFLAG=-DLYNX_CORE ;;
-  netbsd-core.lo)	COREFLAG=-DNETBSD_CORE ;;
-  osf-core.lo)		COREFLAG=-DOSF_CORE ;;
-  ptrace-core.lo)	COREFLAG=-DPTRACE_CORE ;;
-  rs6000-core.lo)	COREFLAG="$COREFLAG -DAIX_CORE" ;;
-  sco5-core.lo)		COREFLAG="$COREFLAG -DSCO5_CORE" ;;
-  trad-core.lo)		COREFLAG="$COREFLAG -DTRAD_CORE" ;;
-  esac
-
-  # ELF corefile support has several flavors, but all of
-  # them use something called <sys/procfs.h>
-  AC_CHECK_HEADERS(sys/procfs.h)
-  if test "$ac_cv_header_sys_procfs_h" = yes; then
-    BFD_HAVE_SYS_PROCFS_TYPE(prstatus_t)
-    BFD_HAVE_SYS_PROCFS_TYPE(prstatus32_t)
-    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(prstatus_t, pr_who)
-    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(prstatus32_t, pr_who)
-    BFD_HAVE_SYS_PROCFS_TYPE(pstatus_t)
-    BFD_HAVE_SYS_PROCFS_TYPE(pxstatus_t)
-    BFD_HAVE_SYS_PROCFS_TYPE(pstatus32_t)
-    BFD_HAVE_SYS_PROCFS_TYPE(prpsinfo_t)
-    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(prpsinfo_t, pr_pid)
-    BFD_HAVE_SYS_PROCFS_TYPE(prpsinfo32_t)
-    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(prpsinfo32_t, pr_pid)
-    BFD_HAVE_SYS_PROCFS_TYPE(psinfo_t)
-    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(psinfo_t, pr_pid)
-    BFD_HAVE_SYS_PROCFS_TYPE(psinfo32_t)
-    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(psinfo32_t, pr_pid)
-    BFD_HAVE_SYS_PROCFS_TYPE(lwpstatus_t)
-    BFD_HAVE_SYS_PROCFS_TYPE(lwpxstatus_t)
-    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_context)
-    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_reg)
-    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_fpreg)
-    BFD_HAVE_SYS_PROCFS_TYPE(win32_pstatus_t)
-  fi
-fi
-AC_SUBST(COREFILE)
-AC_SUBST(COREFLAG)
-if test -n "$CORE_HEADER"; then
-  AC_DEFINE_UNQUOTED(CORE_HEADER, $CORE_HEADER,
-    [Name of host specific core header file to include in elf.c.])
-fi
-if test -n "$TRAD_HEADER"; then
-  AC_DEFINE_UNQUOTED(TRAD_HEADER, $TRAD_HEADER,
-    [Name of host specific header file to include in trad-core.c.])
-fi
-
 # Check if linker supports --as-needed and --no-as-needed options
 AC_CACHE_CHECK(linker --as-needed support, bfd_cv_ld_as_needed,
 	[bfd_cv_ld_as_needed=no
@@ -1126,12 +823,323 @@ case ${host64}-${target64}-${want64} in
     ;;
 esac
 
+tdefaults=""
+test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
+test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
+test -n "${assocvecs}" && tdefaults="${tdefaults} -DASSOCIATED_VECS='${assocvecs}'"
+test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selarchs}'"
+
 AC_SUBST(wordsize)
 AC_SUBST(bfd64_libs)
 AC_SUBST(all_backends)
 AC_SUBST(bfd_backends)
 AC_SUBST(bfd_machines)
 AC_SUBST(bfd_default_target_size)
+AC_SUBST(tdefaults)
+AC_SUBST(havevecs)
+
+# If we are configured native, pick a core file support file.
+COREFILE=
+COREFLAG=
+CORE_HEADER=
+TRAD_HEADER=
+if test "${target}" = "${host}"; then
+  case "${host}" in
+  alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu | alpha*-*-*vms*)
+	COREFILE=''
+	;;
+  alpha*-*-linux-*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/alphalinux.h"'
+	;;
+  alpha*-*-netbsd* | alpha*-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  alpha*-*-*)
+        COREFILE=osf-core.lo
+	;;
+  arm-*-freebsd* | arm-*-kfreebsd*-gnu)
+	COREFILE='' ;;
+  arm-*-netbsd* | arm-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  arm-*-riscix)		COREFILE=trad-core.lo ;;
+  hppa*-*-hpux*)	COREFILE=hpux-core.lo ;;
+  hppa*-*-hiux*)	COREFILE=hpux-core.lo ;;
+  hppa*-*-mpeix*)	COREFILE=hpux-core.lo ;;
+  hppa*-*-bsd*)		COREFILE="hpux-core.lo hppabsd-core.lo"
+			COREFLAG="-DHPUX_CORE -DHPPABSD_CORE" ;;
+  hppa*-*-netbsd* | hppa*-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+
+  i370-*-*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/i370linux.h"'
+	;;
+
+changequote(,)dnl
+  i[3-7]86-sequent-bsd*)
+changequote([,])dnl
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/symmetry.h"'
+	;;
+changequote(,)dnl
+  i[3-7]86-sequent-sysv4*) ;;
+  i[3-7]86-sequent-sysv*)
+changequote([,])dnl
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/symmetry.h"'
+	;;
+changequote(,)dnl
+  i[3-7]86-*-bsdi)
+changequote([,])dnl
+	COREFILE=
+	;;
+changequote(,)dnl
+  i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[123] | i[3-7]86-*-freebsd[123]\.* | i[3-7]86-*-freebsd4\.[01234] | i[3-7]86-*-freebsd4\.[01234]\.* | i[3-7]86-*-freebsd*aout*)
+changequote([,])dnl
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/i386bsd.h"'
+	;;
+changequote(,)dnl
+  i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu | i[3-7]86-*-dragonfly*)
+changequote([,])dnl
+	COREFILE=''
+	TRAD_HEADER='"hosts/i386bsd.h"'
+	;;
+changequote(,)dnl
+  i[3-7]86-*-netbsd* | i[3-7]86-*-knetbsd*-gnu | i[3-7]86-*-openbsd*)
+changequote([,])dnl
+	COREFILE=netbsd-core.lo
+	;;
+changequote(,)dnl
+  i[3-7]86-esix-sysv3*)
+changequote([,])dnl
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/esix.h"'
+	;;
+changequote(,)dnl
+  i[3-7]86-*-sco3.2v5*)
+changequote([,])dnl
+	COREFILE=sco5-core.lo
+	;;
+changequote(,)dnl
+  i[3-7]86-*-sco* | i[3-7]86-*-isc*)
+changequote([,])dnl
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/i386sco.h"'
+	;;
+changequote(,)dnl
+  i[3-7]86-*-mach3*)
+changequote([,])dnl
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/i386mach3.h"'
+	;;
+changequote(,)dnl
+  i[3-7]86-*-linux-*)
+changequote([,])dnl
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/i386linux.h"'
+	case "$enable_targets"-"$want64" in
+	*x86_64-*linux*|*-true)
+	  CORE_HEADER='"hosts/x86-64linux.h"'
+	esac
+	;;
+changequote(,)dnl
+  i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;
+  i[3-7]86-*-aix*)	COREFILE=aix386-core.lo ;;
+changequote([,])dnl
+  i860-*-mach3* | i860-*-osf1*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/i860mach3.h"'
+	;;
+  mips-*-netbsd* | mips*-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  mips-dec-*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/decstation.h"'
+	;;
+  mips-sgi-irix4*)	COREFILE=irix-core.lo ;;
+  mips-sgi-irix5*)	COREFILE=irix-core.lo ;;
+  mips-sgi-irix6*)	COREFILE=irix-core.lo ;;
+  mips-*-sysv4*)	;;
+  mips-*-sysv* | mips-*-riscos*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/riscos.h"'
+	;;
+  mips-sony-bsd*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/news-mips.h"'
+	;;
+  m68*-bull*-sysv*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/dpx2.h"'
+	;;
+  m68*-hp-hpux*)	COREFILE=hpux-core.lo ;;
+  m68*-hp-bsd*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/hp300bsd.h"'
+	;;
+  m68*-*-linux-*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/m68klinux.h"'
+	;;
+  m68*-motorola-sysv*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/delta68.h"'
+	;;
+  m68*-sony-*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/news.h"'
+	;;
+  m68*-*-netbsd* | m68*-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  m68*-apple-aux*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/m68kaux.h"'
+	;;
+  m88*-*-sysv4*)
+	;;
+  m88*-motorola-sysv*)
+	COREFILE=ptrace-core.lo
+	;;
+  m88*-*-mach3*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/m88kmach3.h"'
+	;;
+  m88*-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  ns32k-pc532-mach)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/pc532mach.h"'
+	;;
+  ns32k-*-netbsd* | ns32k-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  rs6000-*-lynx*)
+	COREFILE=lynx-core.lo
+	;;
+changequote(,)dnl
+  rs6000-*-aix[5-9].* | powerpc-*-aix[5-9].* | powerpc64-*-aix[5-9].*)
+changequote([,])dnl
+        COREFILE=rs6000-core.lo
+	COREFLAG="$COREFLAG -DAIX_5_CORE -DAIX_CORE_DUMPX_CORE"
+	;;
+changequote(,)dnl
+  rs6000-*-aix4.[3-9]* | powerpc-*-aix4.[3-9]*)
+changequote([,])dnl
+        COREFILE=rs6000-core.lo
+	COREFLAG="$COREFLAG -DAIX_CORE_DUMPX_CORE"
+	# Not all versions of AIX with -DAIX_CORE_DUMPX_CORE
+	# have c_impl as a member of struct core_dumpx
+	AC_MSG_CHECKING([for c_impl in struct core_dumpx])
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <core.h>]], [[struct core_dumpx c; c.c_impl = 0;]])],[AC_DEFINE(HAVE_ST_C_IMPL, 1,
+	    [Define if struct core_dumpx has member c_impl])
+	  AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+	;;
+  rs6000-*-aix4*)	COREFILE=rs6000-core.lo ;;
+  rs6000-*-*)		COREFILE=rs6000-core.lo ;;
+  powerpc64-*-aix*)	COREFILE=rs6000-core.lo ;;
+  powerpc-*-aix4*)	COREFILE=rs6000-core.lo ;;
+  powerpc-*-aix*)	COREFILE=rs6000-core.lo ;;
+  powerpc-*-beos*)	;;
+  powerpc-*-freebsd* | powerpc-*-kfreebsd*-gnu)
+		        COREFILE='' ;;
+  powerpc-*-netbsd*)	COREFILE=netbsd-core.lo ;;
+  powerpc-*-*bsd*)	COREFILE=netbsd-core.lo ;;
+  s390*-*-*)            COREFILE=trad-core.lo ;;
+  sh*-*-netbsd* | sh*-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  sparc-*-netbsd* | sparc*-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  tahoe-*-*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/tahoe.h"'
+	;;
+  vax-*-netbsd* | vax-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  vax-*-ultrix2*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/vaxult2.h"'
+	;;
+  vax-*-ultrix*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/vaxult2.h"'
+	;;
+  vax-*-linux-*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/vaxlinux.h"'
+	;;
+  vax-*-*)
+	COREFILE=trad-core.lo
+	TRAD_HEADER='"hosts/vaxbsd.h"'
+	;;
+  x86_64-*-linux*)
+	CORE_HEADER='"hosts/x86-64linux.h"'
+	;;
+  x86_64-*-netbsd* | x86_64-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
+  esac
+
+  case "$COREFILE" in
+  aix386-core.lo)	COREFLAG=-DAIX386_CORE ;;
+  hppabsd-core.lo)	COREFLAG=-DHPPABSD_CORE ;;
+  hpux-core.lo)		COREFLAG=-DHPUX_CORE ;;
+  irix-core.lo)		COREFLAG=-DIRIX_CORE ;;
+  lynx-core.lo)		COREFLAG=-DLYNX_CORE ;;
+  netbsd-core.lo)	COREFLAG=-DNETBSD_CORE ;;
+  osf-core.lo)		COREFLAG=-DOSF_CORE ;;
+  ptrace-core.lo)	COREFLAG=-DPTRACE_CORE ;;
+  rs6000-core.lo)	COREFLAG="$COREFLAG -DAIX_CORE" ;;
+  sco5-core.lo)		COREFLAG="$COREFLAG -DSCO5_CORE" ;;
+  trad-core.lo)		COREFLAG="$COREFLAG -DTRAD_CORE" ;;
+  esac
+
+  # ELF corefile support has several flavors, but all of
+  # them use something called <sys/procfs.h>
+  AC_CHECK_HEADERS(sys/procfs.h)
+  if test "$ac_cv_header_sys_procfs_h" = yes; then
+    BFD_HAVE_SYS_PROCFS_TYPE(prstatus_t)
+    BFD_HAVE_SYS_PROCFS_TYPE(prstatus32_t)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(prstatus_t, pr_who)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(prstatus32_t, pr_who)
+    BFD_HAVE_SYS_PROCFS_TYPE(pstatus_t)
+    BFD_HAVE_SYS_PROCFS_TYPE(pxstatus_t)
+    BFD_HAVE_SYS_PROCFS_TYPE(pstatus32_t)
+    BFD_HAVE_SYS_PROCFS_TYPE(prpsinfo_t)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(prpsinfo_t, pr_pid)
+    BFD_HAVE_SYS_PROCFS_TYPE(prpsinfo32_t)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(prpsinfo32_t, pr_pid)
+    BFD_HAVE_SYS_PROCFS_TYPE(psinfo_t)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(psinfo_t, pr_pid)
+    BFD_HAVE_SYS_PROCFS_TYPE(psinfo32_t)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(psinfo32_t, pr_pid)
+    BFD_HAVE_SYS_PROCFS_TYPE(lwpstatus_t)
+    BFD_HAVE_SYS_PROCFS_TYPE(lwpxstatus_t)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_context)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_reg)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_fpreg)
+    BFD_HAVE_SYS_PROCFS_TYPE(win32_pstatus_t)
+  fi
+fi
+AC_SUBST(COREFILE)
+AC_SUBST(COREFLAG)
+if test -n "$CORE_HEADER"; then
+  AC_DEFINE_UNQUOTED(CORE_HEADER, $CORE_HEADER,
+    [Name of host specific core header file to include in elf.c.])
+fi
+if test -n "$TRAD_HEADER"; then
+  AC_DEFINE_UNQUOTED(TRAD_HEADER, $TRAD_HEADER,
+    [Name of host specific header file to include in trad-core.c.])
+fi
 
 if test "$plugins" = "yes"; then
   supports_plugins=1
@@ -1161,15 +1169,6 @@ fi
 AC_MSG_RESULT($bfd_file_ptr)
 AC_SUBST(bfd_file_ptr)
 AC_SUBST(bfd_ufile_ptr)
-
-
-tdefaults=""
-test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
-test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
-test -n "${assocvecs}" && tdefaults="${tdefaults} -DASSOCIATED_VECS='${assocvecs}'"
-test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selarchs}'"
-AC_SUBST(tdefaults)
-AC_SUBST(havevecs)
 
 dnl AC_CHECK_HEADERS(sys/mman.h)
 AC_FUNC_MMAP

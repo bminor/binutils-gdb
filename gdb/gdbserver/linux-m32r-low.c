@@ -53,23 +53,6 @@ m32r_cannot_fetch_register (int regno)
   return (regno >= m32r_num_regs);
 }
 
-static CORE_ADDR
-m32r_get_pc (struct regcache *regcache)
-{
-  unsigned long pc;
-  collect_register_by_name (regcache, "pc", &pc);
-  if (debug_threads)
-    debug_printf ("stop pc is %08lx\n", pc);
-  return pc;
-}
-
-static void
-m32r_set_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  unsigned long newpc = pc;
-  supply_register_by_name (regcache, "pc", &newpc);
-}
-
 static const unsigned short m32r_breakpoint = 0x10f1;
 #define m32r_breakpoint_len 2
 
@@ -135,8 +118,8 @@ struct linux_target_ops the_low_target = {
   m32r_cannot_fetch_register,
   m32r_cannot_store_register,
   NULL, /* fetch_register */
-  m32r_get_pc,
-  m32r_set_pc,
+  linux_get_pc_32bit,
+  linux_set_pc_32bit,
   NULL, /* breakpoint_from_pc */
   m32r_sw_breakpoint_from_kind,
   NULL,

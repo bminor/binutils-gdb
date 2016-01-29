@@ -436,8 +436,9 @@ proc test_with_self { executable } {
     if ![target_info exists gdb,nointerrupts] {
 	set description "send ^C to child process"
 	send_gdb "\003"
+	# "Thread 1" is displayed iff Guile support is linked in.
 	gdb_expect {
-	    -re "Program received signal SIGINT.*$gdb_prompt $" {
+	    -re "(Thread .*|Program) received signal SIGINT.*$gdb_prompt $" {
 		pass "$description"
 	    }
 	    -re ".*$gdb_prompt $" {
@@ -453,6 +454,10 @@ proc test_with_self { executable } {
     gdb_test "signal SIGINT" \
 	"Continuing with signal SIGINT.*" \
 	"$description"
+
+    # Switch back to the GDB thread if Guile support is linked in.
+    # "signal SIGINT" could also switch the current thread.
+    gdb_test "thread 1" {\[Switching to thread 1 .*\].*}
     
     # get a stack trace
     #

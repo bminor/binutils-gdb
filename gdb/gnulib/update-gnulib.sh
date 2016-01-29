@@ -42,9 +42,11 @@ IMPORTED_GNULIB_MODULES="\
     memchr \
     memmem \
     pathmax \
+    rawmemchr \
     readlink \
     rename \
     signal-h \
+    strchrnul \
     strstr \
     strtok_r \
     sys_stat \

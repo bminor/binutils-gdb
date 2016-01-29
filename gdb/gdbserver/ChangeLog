@@ -1,3 +1,161 @@
+2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* server.c (skip_to_semicolon):  Remove.
+	(process_point_options): Use strchrnul instead of
+	skip_to_semicolon.
+
+2016-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (arm_gdbserver_get_next_pcs): Remove argument pc.
+	* linux-low.c (install_software_single_step_breakpoints): Don't
+	call regcache_read_pc.
+	* linux-low.h (struct linux_target_ops) <get_next_pcs>: Remove
+	argument pc.
+
+2016-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (install_software_single_step_breakpoints): Call
+	regcache_read_pc instead of get_pc.
+
+2016-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* remote-utils.c (remote_close) [!USE_WIN32API]: Ignore SIGIO.
+	(unblock_async_io): Rename to ...
+	(block_unblock_async_io): ... it.  New function.
+	(enable_async_io): Don't install SIGIO handler.  Unblock it
+	instead.
+	(disable_async_io): Don't ignore SIGIO.  Block it instead.
+	(initialize_async_io): Install SIGIO handler.  Don't call
+	unblock_async_io.
+
+2016-01-26  Yao Qi  <yao.qi@linaro.org>
+
+	* remote-utils.c (getpkt): If the buffer isn't empty, and the
+	first character is '\003', call *the_target->request_interrupt.
+
+2016-01-25  Yao Qi  <yao.qi@linaro.org>
+
+	* remote-utils.c (new_thread_notify): Remove.
+	(dead_thread_notify): Likewise.
+	* remote-utils.h (new_thread_notify): Remove declaration.
+	(dead_thread_notify): Likewise.
+
+2016-01-23  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/pending.exp: Fix expected message on continue.
+
+2016-01-22  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracepoint.c (write_inferior_data_ptr): Cast to uintptr_t, so that
+	it works properly on big-endian machines where sizeof (CORE_ADDR)
+	!= sizeof (void *).
+
+2016-01-21  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMPILER_CFLAGS, CXXFLAGS): New.
+	(INTERNAL_CFLAGS_BASE): Use COMPILER_CFLAGS instead of CFLAGS.
+	* configure: Regenerate.
+
+2016-01-21  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (arm_sigreturn_next_pc): Add parameter
+	is_thumb and set it according to CPSR saved on the stack.
+	(get_next_pcs_syscall_next_pc): Pass is_thumb to
+	arm_sigreturn_next_pc.
+
+2016-01-18  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-low.c (linux_set_pc_64bit): New function.
+	(linux_get_pc_64bit): New function.
+	* linux-low.h (linux_set_pc_64bit, linux_get_pc_64bit):
+	Declare.
+	* linux-sparc-low.c (debug_threads): Remove declaration.
+	(sparc_get_pc): Remove.
+	(the_low_target): Use linux_get_pc_64bit instead of
+	sparc_get_pc.
+	* linux-tile-low.c (tile_get_pc, tile_set_pc): Remove.
+	(the_low_target): Use linux_get_pc_64bit and
+	linux_set_pc_64bit.
+
+2016-01-18  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (debug_threads): Remove declaration.
+	(arm_get_pc, arm_set_pc): Remove.
+	(the_low_target): Use linux_get_pc_32bit and
+	linux_set_pc_32bit.
+	* linux-bfin-low.c (bfin_get_pc, bfin_set_pc): Remove.
+	(the_low_target): Use linux_get_pc_32bit and
+	linux_set_pc_32bit.
+	* linux-cris-low.c (debug_threads): Remove declaration.
+	(cris_get_pc, cris_set_pc,): Remove.
+	(the_low_target): Use linux_get_pc_32bit and
+	linux_set_pc_32bit.
+	* linux-crisv32-low.c (debug_threads): Remove declaration.
+	(cris_get_pc, cris_set_pc): Remove.
+	(the_low_target): Use linux_get_pc_32bit and
+	linux_set_pc_32bit.
+	* linux-low.c: Include inttypes.h.
+	(linux_get_pc_32bit, linux_set_pc_32bit): New functions.
+	* linux-low.h (linux_get_pc_32bit, linux_set_pc_32bit): Declare.
+	* linux-m32r-low.c (m32r_get_pc, m32r_set_pc): Remove.
+	(the_low_target): Use linux_get_pc_32bit and
+	linux_set_pc_32bit.
+	* linux-m68k-low.c (m68k_get_pc, m68k_set_pc): Remove.
+	(the_low_target): Use linux_get_pc_32bit and
+	linux_set_pc_32bit.
+	* linux-nios2-low.c (nios2_get_pc, nios2_set_pc): Remove.
+	(the_low_target): Use linux_get_pc_32bit and
+	linux_set_pc_32bit.
+	* linux-sh-low.c (sh_get_pc, sh_set_pc): Remove.
+	(the_low_target): Use linux_get_pc_32bit and
+	linux_set_pc_32bit.
+	* linux-xtensa-low.c (xtensa_get_pc, xtensa_set_pc): Remove.
+	(the_low_target): Use linux_get_pc_32bit and
+	linux_set_pc_32bit.
+
+2016-01-18  Gary Benson  <gbenson@redhat.com>
+
+	* configure.ac (AC_FUNC_FORK): New check.
+	* config.in: Regenerate.
+	* configure: Likewise.
+
+2016-01-14  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-aarch32-low.c (thumb2_breakpoint): Make it static.
+	* linux-aarch32-low.h (thumb2_breakpoint): Remove declaration.
+	* linux-arm-low.c (arm_gdbserver_get_next_pcs): Pass 1 to
+	arm_get_next_pcs_ctor.
+
+2016-01-12  Josh Stone  <jistone@redhat.com>
+	    Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* inferiors.h: Include "gdb_vecs.h".
+	(struct process_info): Add syscalls_to_catch.
+	* inferiors.c (remove_process): Free syscalls_to_catch.
+	* remote-utils.c (prepare_resume_reply): Report syscall_entry and
+	syscall_return stops.
+	* server.h (UNKNOWN_SYSCALL, ANY_SYSCALL): Define.
+	* server.c (handle_general_set): Handle QCatchSyscalls.
+	(handle_query): Report support for QCatchSyscalls.
+	* target.h (struct target_ops): Add supports_catch_syscall.
+	(target_supports_catch_syscall): New macro.
+	* linux-low.h (struct linux_target_ops): Add get_syscall_trapinfo.
+	(struct lwp_info): Add syscall_state.
+	* linux-low.c (handle_extended_wait): Mark syscall_state as an entry.
+	Maintain syscall_state and syscalls_to_catch across exec.
+	(get_syscall_trapinfo): New function, proxy to the_low_target.
+	(linux_low_ptrace_options): Enable PTRACE_O_TRACESYSGOOD.
+	(linux_low_filter_event): Toggle syscall_state entry/return for
+	syscall traps, and set it ignored for all others.
+	(gdb_catching_syscalls_p): New function.
+	(gdb_catch_this_syscall_p): New function.
+	(linux_wait_1): Handle SYSCALL_SIGTRAP.
+	(linux_resume_one_lwp_throw): Add PTRACE_SYSCALL possibility.
+	(linux_supports_catch_syscall): New function.
+	(linux_target_ops): Install it.
+	* linux-x86-low.c (x86_get_syscall_trapinfo): New function.
+	(the_low_target): Install it.
+
 2016-01-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4: Include new ../warning.m4 file.

@@ -30,13 +30,13 @@ arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
 		       struct arm_get_next_pcs_ops *ops,
 		       int byte_order,
 		       int byte_order_for_code,
-		       const gdb_byte *arm_thumb2_breakpoint,
+		       int has_thumb2_breakpoint,
 		       struct regcache *regcache)
 {
   self->ops = ops;
   self->byte_order = byte_order;
   self->byte_order_for_code = byte_order_for_code;
-  self->arm_thumb2_breakpoint = arm_thumb2_breakpoint;
+  self->has_thumb2_breakpoint = has_thumb2_breakpoint;
   self->regcache = regcache;
 }
 
@@ -46,11 +46,11 @@ arm_get_next_pcs_ctor (struct arm_get_next_pcs *self,
    added to the next_pcs list.  */
 
 static VEC (CORE_ADDR) *
-thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self,
-				     CORE_ADDR pc)
+thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 {
   int byte_order_for_code = self->byte_order_for_code;
   CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   CORE_ADDR loc = pc;
   unsigned short insn1, insn2;
   int insn_count;
@@ -183,11 +183,11 @@ thumb_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self,
    added to the next_pcs list.  */
 
 static VEC (CORE_ADDR) *
-arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self,
-				   CORE_ADDR pc)
+arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self)
 {
   int byte_order_for_code = self->byte_order_for_code;
   CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   CORE_ADDR loc = pc;
   unsigned int insn;
   int insn_count;
@@ -261,10 +261,11 @@ arm_deal_with_atomic_sequence_raw (struct arm_get_next_pcs *self,
 /* Find the next possible PCs for thumb mode.  */
 
 static VEC (CORE_ADDR) *
-thumb_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
+thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 {
   int byte_order = self->byte_order;
   int byte_order_for_code = self->byte_order_for_code;
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
   unsigned short inst1;
   CORE_ADDR nextpc = pc + 2;		/* Default is next instruction.  */
@@ -297,7 +298,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
      flags, affecting the execution of further instructions, we may
      need to set two breakpoints.  */
 
-  if (self->arm_thumb2_breakpoint != NULL)
+  if (self->has_thumb2_breakpoint)
     {
       if ((inst1 & 0xff00) == 0xbf00 && (inst1 & 0x000f) != 0)
 	{
@@ -641,18 +642,20 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
    address in GDB and arm_addr_bits_remove in GDBServer.  */
 
 static VEC (CORE_ADDR) *
-arm_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
+arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 {
   int byte_order = self->byte_order;
+  int byte_order_for_code = self->byte_order_for_code;
   unsigned long pc_val;
   unsigned long this_instr = 0;
   unsigned long status;
   CORE_ADDR nextpc;
   struct regcache *regcache = self->regcache;
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   VEC (CORE_ADDR) *next_pcs = NULL;
 
   pc_val = (unsigned long) pc;
-  this_instr = self->ops->read_mem_uint (pc, 4, byte_order);
+  this_instr = self->ops->read_mem_uint (pc, 4, byte_order_for_code);
 
   status = regcache_raw_get_unsigned (regcache, ARM_PS_REGNUM);
   nextpc = (CORE_ADDR) (pc_val + 4);	/* Default case */
@@ -903,21 +906,21 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self, CORE_ADDR pc)
 /* See arm-get-next-pcs.h.  */
 
 VEC (CORE_ADDR) *
-arm_get_next_pcs (struct arm_get_next_pcs *self, CORE_ADDR pc)
+arm_get_next_pcs (struct arm_get_next_pcs *self)
 {
   VEC (CORE_ADDR) *next_pcs = NULL;
 
   if (self->ops->is_thumb (self))
     {
-      next_pcs = thumb_deal_with_atomic_sequence_raw (self, pc);
+      next_pcs = thumb_deal_with_atomic_sequence_raw (self);
       if (next_pcs == NULL)
-	next_pcs = thumb_get_next_pcs_raw (self, pc);
+	next_pcs = thumb_get_next_pcs_raw (self);
     }
   else
     {
-      next_pcs = arm_deal_with_atomic_sequence_raw (self, pc);
+      next_pcs = arm_deal_with_atomic_sequence_raw (self);
       if (next_pcs == NULL)
-	next_pcs = arm_get_next_pcs_raw (self, pc);
+	next_pcs = arm_get_next_pcs_raw (self);
     }
 
   return next_pcs;

@@ -1414,7 +1414,7 @@ Optional Features:
   --enable-targets        alternative target configurations besides the primary
   --enable-checking       enable run-time checks
   --enable-compressed-debug-sections={all,gas,none}
-                          compress debug sections by default]
+                          compress debug sections by default
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --disable-nls           do not use Native Language Support
@@ -8944,7 +8944,7 @@ _LT_EOF
 	if $NM -V 2>&1 | $GREP 'GNU' > /dev/null; then
 	  export_symbols_cmds='$NM -Bpg $libobjs $convenience | awk '\''{ if (((\$ 2 == "T") || (\$ 2 == "D") || (\$ 2 == "B") || (\$ 2 == "W")) && (substr(\$ 3,1,1) != ".")) { print \$ 3 } }'\'' | sort -u > $export_symbols'
 	else
-	  export_symbols_cmds='$NM -BCpg $libobjs $convenience | awk '\''{ if (((\$ 2 == "T") || (\$ 2 == "D") || (\$ 2 == "B")) && (substr(\$ 3,1,1) != ".")) { print \$ 3 } }'\'' | sort -u > $export_symbols'
+	  export_symbols_cmds='$NM -BCpg $libobjs $convenience | awk '\''{ if (((\$ 2 == "T") || (\$ 2 == "D") || (\$ 2 == "B") || (\$ 2 == "L")) && (substr(\$ 3,1,1) != ".")) { print \$ 3 } }'\'' | sort -u > $export_symbols'
 	fi
 	aix_use_runtimelinking=no
 
@@ -12862,8 +12862,9 @@ fi
 done
 test -n "$LEX" || LEX=":"
 
-if test "x$LEX" != "x:"; then
-  cat >conftest.l <<_ACEOF
+case "$LEX" in
+  :|*"missing "*) ;;
+  *) cat >conftest.l <<_ACEOF
 %%
 a { ECHO; }
 b { REJECT; }
@@ -12974,8 +12975,8 @@ $as_echo "#define YYTEXT_POINTER 1" >>confdefs.h
 
 fi
 rm -f conftest.l $LEX_OUTPUT_ROOT.c
-
-fi
+ ;;
+esac
 if test "$LEX" = :; then
   LEX=${am_missing_run}flex
 fi

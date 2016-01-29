@@ -1438,6 +1438,31 @@ x86_arch_setup (void)
   current_process ()->tdesc = x86_linux_read_description ();
 }
 
+/* Fill *SYSNO and *SYSRET with the syscall nr trapped and the syscall return
+   code.  This should only be called if LWP got a SYSCALL_SIGTRAP.  */
+
+static void
+x86_get_syscall_trapinfo (struct regcache *regcache, int *sysno, int *sysret)
+{
+  int use_64bit = register_size (regcache->tdesc, 0) == 8;
+
+  if (use_64bit)
+    {
+      long l_sysno;
+      long l_sysret;
+
+      collect_register_by_name (regcache, "orig_rax", &l_sysno);
+      collect_register_by_name (regcache, "rax", &l_sysret);
+      *sysno = (int) l_sysno;
+      *sysret = (int) l_sysret;
+    }
+  else
+    {
+      collect_register_by_name (regcache, "orig_eax", sysno);
+      collect_register_by_name (regcache, "eax", sysret);
+    }
+}
+
 static int
 x86_supports_tracepoints (void)
 {
@@ -3315,6 +3340,7 @@ struct linux_target_ops the_low_target =
   x86_supports_range_stepping,
   NULL, /* breakpoint_kind_from_current_state */
   x86_supports_hardware_single_step,
+  x86_get_syscall_trapinfo,
 };
 
 void

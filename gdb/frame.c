@@ -1473,14 +1473,7 @@ get_current_frame (void)
     error (_("No memory."));
   /* Traceframes are effectively a substitute for the live inferior.  */
   if (get_traceframe_number () < 0)
-    {
-      if (ptid_equal (inferior_ptid, null_ptid))
-	error (_("No selected thread."));
-      if (is_exited (inferior_ptid))
-	error (_("Invalid selected thread."));
-      if (is_executing (inferior_ptid))
-	error (_("Target is executing."));
-    }
+    validate_registers_access ();
 
   if (current_frame == NULL)
     {

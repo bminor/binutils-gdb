@@ -1,3 +1,62 @@
+2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19523
+	* Makefile.am (check-DEJAGNU): Pass CC and CC_FOR_BUILD to
+	runtest.
+	* Makefile.in: Regenerated.
+	* testsuite/binutils-all/compress.exp (test_gnu_debuglink): New
+	proc.
+	Run test_gnu_debuglink for native ELF build.
+
+2016-01-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 19495
+	* testsuite/binutils-all/dlltool.exp: Fix tests for targets which
+	do not support inserting leading underscores. 
+
+2016-01-20  Mickael Guene  <mickael.guene@st.com>
+
+	* readelf.c (get_elf_section_flags): Display y letter for section
+	with SHF_ARM_NOREAD section flag in readelf section output.
+	(process_section_headers): Add y letter in readelf section output
+	key mapping for ARM architecture.
+	* objdump.c (dump_section_header): Display NOREAD attributes as
+	well.
+	* doc/binutils.texi (objdump): Note that it is correct for
+	sections to have both the READONLY and NOREAD attributes.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* readelf.c (get_freebsd_elfcore_note_type): Remove unused variable.
+
+2016-01-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* readelf.c (get_freebsd_elfcore_note_type): New
+	(process_note): Add support for FreeBSD core notes.
+
+2016-01-18  Miranda Cupertino  <Cupertino.Miranda@synopsys.com>
+	    Zissulescu Claudiu  <Claudiu.Zissulescu@synopsys.com>
+
+	* readelf.c (get_machine_flags): Add support for newer ARC ELF
+	header flags.
+
+2016-01-18  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (is_elf_format): Return true
+	for m68hc11/12 and xgate triples.
+
+2016-01-17  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (is_32bit_abs_reloc): Add R_M68HC11_32.
+
 2016-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

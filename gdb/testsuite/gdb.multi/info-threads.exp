@@ -36,4 +36,4 @@ gdb_test "inferior 2" "Switching to inferior 2.*" "switch to inferior 2"
 
 # "info threads" while inferior 1 has execution and inferior 2 is not
 # running yet should show inferior 1's thread, and give no error.
-gdb_test "info threads" "1    .* main .* at .*$srcfile:.*No selected thread.*"
+gdb_test "info threads" "1\.1 .* main .* at .*$srcfile:.*No selected thread.*"

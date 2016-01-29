@@ -2995,7 +2995,13 @@ user-specified thread name.
 @end defvar
 
 @defvar InferiorThread.num
-ID of the thread, as assigned by GDB.
+The per-inferior number of the thread, as assigned by GDB.
+@end defvar
+
+@defvar InferiorThread.global_num
+The global ID of the thread, as assigned by GDB.  You can use this to
+make Python breakpoints thread-specific, for example
+(@pxref{python_breakpoint_thread,,The Breakpoint.thread attribute}).
 @end defvar
 
 @defvar InferiorThread.ptid
@@ -3004,6 +3010,11 @@ tuple containing three integers.  The first is the Process ID (PID); the second
 is the Lightweight Process ID (LWPID), and the third is the Thread ID (TID).
 Either the LWPID or TID may be 0, which indicates that the operating system
 does not  use that identifier.
+@end defvar
+
+@defvar InferiorThread.inferior
+The inferior this thread belongs to.  This attribute is represented as
+a @code{gdb.Inferior} object.  This attribute is not writable.
 @end defvar
 
 A @code{gdb.InferiorThread} object has the following methods:
@@ -4637,10 +4648,11 @@ first command is @code{silent}.  This is not reported by the
 @code{silent} attribute.
 @end defvar
 
+@anchor{python_breakpoint_thread}
 @defvar Breakpoint.thread
-If the breakpoint is thread-specific, this attribute holds the thread
-id.  If the breakpoint is not thread-specific, this attribute is
-@code{None}.  This attribute is writable.
+If the breakpoint is thread-specific, this attribute holds the
+thread's global id.  If the breakpoint is not thread-specific, this
+attribute is @code{None}.  This attribute is writable.
 @end defvar
 
 @defvar Breakpoint.task

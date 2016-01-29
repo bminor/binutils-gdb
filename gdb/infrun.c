@@ -5198,6 +5198,17 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  parent = ecs->ptid;
 	  child = ecs->ws.value.related_pid;
 
+	  /* At this point, the parent is marked running, and the
+	     child is marked stopped.  */
+
+	  /* If not resuming the parent, mark it stopped.  */
+	  if (follow_child && !detach_fork && !non_stop && !sched_multi)
+	    set_running (parent, 0);
+
+	  /* If resuming the child, mark it running.  */
+	  if (follow_child || (!detach_fork && (non_stop || sched_multi)))
+	    set_running (child, 1);
+
 	  /* In non-stop mode, also resume the other branch.  */
 	  if (!detach_fork && (non_stop
 			       || (sched_multi && target_is_non_stop_p ())))
@@ -5702,7 +5713,7 @@ handle_signal_stop (struct execution_control_state *ecs)
       context_switch (ecs->ptid);
 
       if (deprecated_context_hook)
-	deprecated_context_hook (pid_to_thread_id (ecs->ptid));
+	deprecated_context_hook (ptid_to_global_thread_id (ecs->ptid));
     }
 
   /* At this point, get hold of the now-current thread's frame.  */
@@ -7510,7 +7521,7 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 	  /* set_momentary_breakpoint_at_pc invalidates FRAME.  */
 	  frame = NULL;
 
-	  bp->thread = tp->num;
+	  bp->thread = tp->global_num;
 	  inferior_thread ()->control.exception_resume_breakpoint = bp;
 	}
     }
@@ -7547,7 +7558,7 @@ insert_exception_resume_from_probe (struct thread_info *tp,
 
   bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),
 				       handler, bp_exception_resume);
-  bp->thread = tp->num;
+  bp->thread = tp->global_num;
   inferior_thread ()->control.exception_resume_breakpoint = bp;
 }
 
@@ -7896,21 +7907,35 @@ print_exited_reason (struct ui_out *uiout, int exitstatus)
 void
 print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
 {
+  struct thread_info *thr = inferior_thread ();
+
   annotate_signal ();
 
-  if (siggnal == GDB_SIGNAL_0 && !ui_out_is_mi_like_p (uiout))
+  if (ui_out_is_mi_like_p (uiout))
+    ;
+  else if (show_thread_that_caused_stop ())
     {
-      struct thread_info *t = inferior_thread ();
+      const char *name;
 
-      ui_out_text (uiout, "\n[");
-      ui_out_field_string (uiout, "thread-name",
-			   target_pid_to_str (t->ptid));
-      ui_out_field_fmt (uiout, "thread-id", "] #%d", t->num);
-      ui_out_text (uiout, " stopped");
+      ui_out_text (uiout, "\nThread ");
+      ui_out_field_fmt (uiout, "thread-id", "%s", print_thread_id (thr));
+
+      name = thr->name != NULL ? thr->name : target_thread_name (thr);
+      if (name != NULL)
+	{
+	  ui_out_text (uiout, " \"");
+	  ui_out_field_fmt (uiout, "name", "%s", name);
+	  ui_out_text (uiout, "\"");
+	}
     }
   else
+    ui_out_text (uiout, "\nProgram");
+
+  if (siggnal == GDB_SIGNAL_0 && !ui_out_is_mi_like_p (uiout))
+    ui_out_text (uiout, " stopped");
+  else
     {
-      ui_out_text (uiout, "\nProgram received signal ");
+      ui_out_text (uiout, " received signal ");
       annotate_signal_name ();
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string
@@ -8684,25 +8709,6 @@ signals_info (char *signum_exp, int from_tty)
 		     "to change these tables.\n"));
 }
 
-/* Check if it makes sense to read $_siginfo from the current thread
-   at this point.  If not, throw an error.  */
-
-static void
-validate_siginfo_access (void)
-{
-  /* No current inferior, no siginfo.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
-    error (_("No thread selected."));
-
-  /* Don't try to read from a dead thread.  */
-  if (is_exited (inferior_ptid))
-    error (_("The current thread has terminated"));
-
-  /* ... or from a spinning thread.  */
-  if (is_running (inferior_ptid))
-    error (_("Selected thread is running."));
-}
-
 /* The $_siginfo convenience variable is a bit special.  We don't know
    for sure the type of the value until we actually have a chance to
    fetch the data.  The type can change depending on gdbarch, so it is
@@ -8721,7 +8727,9 @@ siginfo_value_read (struct value *v)
 {
   LONGEST transferred;
 
-  validate_siginfo_access ();
+  /* If we can access registers, so can we access $_siginfo.  Likewise
+     vice versa.  */
+  validate_registers_access ();
 
   transferred =
     target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO,
@@ -8742,7 +8750,9 @@ siginfo_value_write (struct value *v, struct value *fromval)
 {
   LONGEST transferred;
 
-  validate_siginfo_access ();
+  /* If we can access registers, so can we access $_siginfo.  Likewise
+     vice versa.  */
+  validate_registers_access ();
 
   transferred = target_write (&current_target,
 			      TARGET_OBJECT_SIGNAL_INFO,

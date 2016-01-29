@@ -1045,7 +1045,8 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
   if (!target_supports_btrace (conf->format))
     error (_("Target does not support branch tracing."));
 
-  DEBUG ("enable thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
+  DEBUG ("enable thread %s (%s)", print_thread_id (tp),
+	 target_pid_to_str (tp->ptid));
 
   tp->btrace.target = target_enable_btrace (tp->ptid, conf);
 
@@ -1077,7 +1078,8 @@ btrace_disable (struct thread_info *tp)
   if (btp->target == NULL)
     return;
 
-  DEBUG ("disable thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
+  DEBUG ("disable thread %s (%s)", print_thread_id (tp),
+	 target_pid_to_str (tp->ptid));
 
   target_disable_btrace (btp->target);
   btp->target = NULL;
@@ -1096,7 +1098,8 @@ btrace_teardown (struct thread_info *tp)
   if (btp->target == NULL)
     return;
 
-  DEBUG ("teardown thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
+  DEBUG ("teardown thread %s (%s)", print_thread_id (tp),
+	 target_pid_to_str (tp->ptid));
 
   target_teardown_btrace (btp->target);
   btp->target = NULL;
@@ -1270,7 +1273,8 @@ btrace_fetch (struct thread_info *tp)
   struct cleanup *cleanup;
   int errcode;
 
-  DEBUG ("fetch thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
+  DEBUG ("fetch thread %s (%s)", print_thread_id (tp),
+	 target_pid_to_str (tp->ptid));
 
   btinfo = &tp->btrace;
   tinfo = btinfo->target;
@@ -1342,7 +1346,8 @@ btrace_clear (struct thread_info *tp)
   struct btrace_thread_info *btinfo;
   struct btrace_function *it, *trash;
 
-  DEBUG ("clear thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
+  DEBUG ("clear thread %s (%s)", print_thread_id (tp),
+	 target_pid_to_str (tp->ptid));
 
   /* Make sure btrace frames that may hold a pointer into the branch
      trace data are destroyed.  */

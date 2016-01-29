@@ -339,6 +339,7 @@ remove_process (struct process_info *process)
   free_all_breakpoints (process);
   gdb_assert (find_thread_process (process) == NULL);
   remove_inferior (&all_processes, &process->entry);
+  VEC_free (int, process->syscalls_to_catch);
   free (process);
 }
 
