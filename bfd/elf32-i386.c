@@ -5359,19 +5359,23 @@ elf_i386_reloc_type_class (const struct bfd_link_info *info,
   bfd *abfd = info->output_bfd;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_link_hash_table *htab = elf_hash_table (info);
-  unsigned long r_symndx = ELF32_R_SYM (rela->r_info);
-  Elf_Internal_Sym sym;
 
-  if (htab->dynsym == NULL
-      || !bed->s->swap_symbol_in (abfd,
-				  (htab->dynsym->contents
-				   + r_symndx * sizeof (Elf32_External_Sym)),
-				  0, &sym))
-    abort ();
+  if (htab->dynsym != NULL
+      && htab->dynsym->contents != NULL)
+    {
+      /* Check relocation against STT_GNU_IFUNC symbol if there are
+         dynamic symbols.  */
+      unsigned long r_symndx = ELF32_R_SYM (rela->r_info);
+      Elf_Internal_Sym sym;
+      if (!bed->s->swap_symbol_in (abfd,
+				   (htab->dynsym->contents
+				    + r_symndx * sizeof (Elf32_External_Sym)),
+				   0, &sym))
+	abort ();
 
-  /* Check relocation against STT_GNU_IFUNC symbol.  */
-  if (ELF32_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
-    return reloc_class_ifunc;
+      if (ELF32_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+	return reloc_class_ifunc;
+    }
 
   switch (ELF32_R_TYPE (rela->r_info))
     {

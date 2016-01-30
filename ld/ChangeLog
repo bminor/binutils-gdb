@@ -1,3 +1,17 @@
+2016-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr19539.d: Skip cris*-*-* targets.
+
+	2016-01-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19539
+	* testsuite/ld-elf/pr19539.d: New file.
+	* testsuite/ld-elf/pr19539.s: Likewise.
+	* testsuite/ld-elf/pr19539.t: Likewise.
+
 2016-03-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
