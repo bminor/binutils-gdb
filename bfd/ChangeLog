@@ -1,3 +1,10 @@
+2016-01-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19539
+	* elf32-i386.c (elf_i386_reloc_type_class): Check relocation
+	against STT_GNU_IFUNC symbol only with dynamic symbols.
+	* elf64-x86-64.c (elf_x86_64_reloc_type_class): Likewise.
+
 2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/19523
