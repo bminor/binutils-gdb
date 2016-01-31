@@ -1,5 +1,22 @@
 2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cgen-ibld.in (insert_normal): Rework calculation of shift.
+	* epiphany-ibld.c: Regenerate.
+	* fr30-ibld.c: Regenerate.
+	* frv-ibld.c: Regenerate.
+	* ip2k-ibld.c: Regenerate.
+	* iq2000-ibld.c: Regenerate.
+	* lm32-ibld.c: Regenerate.
+	* m32c-ibld.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* mep-ibld.c: Regenerate.
+	* mt-ibld.c: Regenerate.
+	* or1k-ibld.c: Regenerate.
+	* xc16x-ibld.c: Regenerate.
+	* xstormy16-ibld.c: Regenerate.
+
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* epiphany-dis.c: Regenerated from latest cpu files.
 
 2016-02-01  Michael McConville  <mmcco@mykolab.com>
