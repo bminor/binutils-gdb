@@ -1,5 +1,12 @@
 2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/gas/epiphany/addr-syntax.d: Update expected register
+	names.
+	* testsuite/gas/epiphany/allinsn.d: Likewise.
+	* testsuite/gas/epiphany/sample.d: Likewise.
+
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/gas/epiphany/sample.d: Update expected output.
 
 2016-01-26  Claudiu Zissulescu  <claziss@synopsys.com>
