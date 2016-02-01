@@ -11723,7 +11723,7 @@ may indicate a value that is incorrectly large, this in turn may cause
 
 @table @code
 @kindex set max-value-size
-@itemx set max-value-size @var{bytes}
+@item set max-value-size @var{bytes}
 @itemx set max-value-size unlimited
 Set the maximum size of memory that @value{GDBN} will allocate for the
 contents of a value to @var{bytes}, trying to display a value that
