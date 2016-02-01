@@ -1,3 +1,7 @@
+2016-02-01  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Skipping Over Functions and Files): Fix typo.
+
 2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Value Sizes): New section.

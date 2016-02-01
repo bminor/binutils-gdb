@@ -5527,7 +5527,7 @@ default is @code{on}.
 @cindex skipping over functions and files
 
 The program you are debugging may contain some functions which are
-uninteresting to debug.  The @code{skip} comand lets you tell @value{GDBN} to
+uninteresting to debug.  The @code{skip} command lets you tell @value{GDBN} to
 skip a function or all functions in a file when stepping.
 
 For example, consider the following C function:
