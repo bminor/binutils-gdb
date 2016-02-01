@@ -6066,19 +6066,20 @@ bad_return:
 
       reloc_index = H_GET_32 (abfd, (plt_contents + plt_offset
 				     + bed->plt_reloc_offset));
-      if (reloc_index >= count)
-	abort ();
-      if (plt_bnd)
+      if (reloc_index < count)
 	{
-	  /* This is the index in .plt section.  */
-	  long plt_index = plt_offset / bed->plt_entry_size;
-	  /* Store VMA + the offset in .plt.bnd section.  */
-	  plt_sym_val[reloc_index] =
-	    (plt_bnd->vma
-	     + (plt_index - 1) * sizeof (elf_x86_64_legacy_plt2_entry));
+	  if (plt_bnd)
+	    {
+	      /* This is the index in .plt section.  */
+	      long plt_index = plt_offset / bed->plt_entry_size;
+	      /* Store VMA + the offset in .plt.bnd section.  */
+	      plt_sym_val[reloc_index] =
+		(plt_bnd->vma
+		 + (plt_index - 1) * sizeof (elf_x86_64_legacy_plt2_entry));
+	    }
+	  else
+	    plt_sym_val[reloc_index] = plt->vma + plt_offset;
 	}
-      else
-	plt_sym_val[reloc_index] = plt->vma + plt_offset;
       plt_offset += bed->plt_entry_size;
 
       /* PR binutils/18437: Skip extra relocations in the .rela.plt

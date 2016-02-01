@@ -5684,9 +5684,9 @@ bad_return:
       reloc_index = H_GET_32 (abfd, (plt_contents + plt_offset
 				     + bed->plt->plt_reloc_offset));
       reloc_index /= sizeof (Elf32_External_Rel);
-      if (reloc_index >= count)
-	abort ();
-      plt_sym_val[reloc_index] = plt->vma + plt_offset;
+      if (reloc_index < count)
+	plt_sym_val[reloc_index] = plt->vma + plt_offset;
+
       plt_offset += bed->plt->plt_entry_size;
 
       /* PR binutils/18437: Skip extra relocations in the .rel.plt
