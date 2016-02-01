@@ -1,3 +1,7 @@
+2016-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elf64-s390.c (elf_s390_reloc_name_lookup): Fix indentation.
+
 2016-01-31  John David Anglin  <danglin@gcc.gnu.org>
 
 	PR ld/19526
