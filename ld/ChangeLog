@@ -1,3 +1,17 @@
+2016-02-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19553
+	* testsuite/ld-elf/indirect.exp: Run tests for PR ld/19553.
+	* testsuite/ld-elf/pr19553.map: New file.
+	* testsuite/ld-elf/pr19553.map: Likewise.
+	* testsuite/ld-elf/pr19553a.c: Likewise.
+	* testsuite/ld-elf/pr19553b.c: Likewise.
+	* testsuite/ld-elf/pr19553b.out: Likewise.
+	* testsuite/ld-elf/pr19553c.c: Likewise.
+	* testsuite/ld-elf/pr19553c.out: Likewise.
+	* testsuite/ld-elf/pr19553d.c: Likewise.
+	* testsuite/ld-elf/pr19553d.out: Likewise.
+
 2016-01-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19539
