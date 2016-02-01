@@ -738,6 +738,7 @@ OPTIONAL_BACKENDS = \
 	hpux-core.lo \
 	irix-core.lo \
 	lynx-core.lo \
+	netbsd-core.lo \
 	osf-core.lo \
 	rs6000-core.lo \
 	sco5-core.lo \
@@ -749,6 +750,7 @@ OPTIONAL_BACKENDS_CFILES = \
 	hpux-core.c \
 	irix-core.c \
 	lynx-core.c \
+	netbsd-core.c \
 	osf-core.c \
 	rs6000-core.c \
 	sco5-core.c \

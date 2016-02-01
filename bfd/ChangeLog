@@ -1,3 +1,9 @@
+2016-02-01  Kamil Rytarowski  <n54@gmx.com>
+
+	* Makefile.am (OPTIONAL_BACKENDS): Add netbsd-core.lo.
+	(OPTIONAL_BACKENDS_CFILES): Add netbsd-core.c.
+	* Makefile.in: Regenerated.
+
 2016-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf64-s390.c (elf_s390_reloc_name_lookup): Fix indentation.
