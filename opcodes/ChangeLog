@@ -1,3 +1,7 @@
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* epiphany-dis.c: Regenerated from latest cpu files.
+
 2016-02-01  Michael McConville  <mmcco@mykolab.com>
 
 	* cgen-dis.c (count_decodable_bits): Use unsigned value for mask

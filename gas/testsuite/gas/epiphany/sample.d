@@ -218,4 +218,4 @@ Disassembly of section \.text:
 
 0000019e \<trap\>:
  19e:	03e2      	trap 0x0
- 1a0:	01d2 	rti
+ 1a0:	01d2      	rti
