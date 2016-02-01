@@ -1,3 +1,10 @@
+2016-02-01  John David Anglin  <danglin@gcc.gnu.org>
+
+	PR ld/19526
+	* elf32-hppa.c (elf32_hppa_final_link): Don't sort non-regular output
+	files.
+	* elf64-hppa.c (elf32_hppa_final_link): Likewise.  Remove retval.
+
 2016-01-25  Tristan Gingold  <gingold@adacore.com>
 
 	* version.m4: Bump version to 2.26.0
