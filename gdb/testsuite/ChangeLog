@@ -1,3 +1,12 @@
+2016-02-01  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/forking-threads-plus-breakpoint.exp
+	(displaced_stepping_supported): New global.
+	(probe_displaced_stepping_support): New procedure.
+	(do_test): Add 'displaced' parameter, and use it.
+	(top level): Check for displaced stepping support.  Add displaced
+	stepping on/off testing axis.
+
 2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.mi/mi-vla-fortran.exp: Add XFAIL for accessing unassociated
