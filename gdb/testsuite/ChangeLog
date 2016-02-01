@@ -1,5 +1,6 @@
 2016-02-01  Pedro Alves  <palves@redhat.com>
 
+	PR remote/19496
 	* gdb.threads/forking-threads-plus-breakpoint.exp
 	(displaced_stepping_supported): New global.
 	(probe_displaced_stepping_support): New procedure.
