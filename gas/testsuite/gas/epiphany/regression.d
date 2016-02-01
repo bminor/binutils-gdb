@@ -77,7 +77,7 @@ Disassembly of section \.text:
 
 0000006e \<NEXT\>:
   6e:	8014      	strb r4,\[r0\]
-  70:	e00c e000 	ldrb r63,\[r0\]
+  70:	e00c e000 	ldrb r63,\[r0,\+0x0\]
   74:	fe3f fc0a 	sub r63,r63,r4
   78:	0300      	beq 7e \<STOREB\>
   7a:	0023      	mov r0,0x1
@@ -93,7 +93,7 @@ Disassembly of section \.text:
 
 00000090 \<STORES\>:
   90:	8034      	strh r4,\[r0\]
-  92:	e02c e000 	ldrh r63,\[r0\]
+  92:	e02c e000 	ldrh r63,\[r0,\+0x0\]
   96:	fe3f fc0a 	sub r63,r63,r4
   9a:	0300      	beq a0 \<STORES2\>
   9c:	0023      	mov r0,0x1
@@ -109,7 +109,7 @@ Disassembly of section \.text:
 
 000000b2 \<STORE\>:
   b2:	8054      	str r4,\[r0\]
-  b4:	e04c e000 	ldr r63,\[r0\]
+  b4:	e04c e000 	ldr r63,\[r0,\+0x0\]
   b8:	fe3f fc0a 	sub r63,r63,r4
   bc:	0300      	beq c2 \<STORE2\>
   be:	0023      	mov r0,0x1

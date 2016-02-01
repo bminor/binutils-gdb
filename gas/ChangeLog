@@ -1,5 +1,12 @@
 2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/gas/epiphany/addr-syntax.d: Add explicit 0 offset to
+	some load instructions.
+	* testsuite/gas/epiphany/allinsn.d: Likewise.
+	* testsuite/gas/epiphany/regression.d: Likewise.
+
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/gas/epiphany/addr-syntax.d: Remove unneeded '.l'
 	suffixes from instruction mnemonics in expected output.
 	* testsuite/gas/epiphany/allinsn.d: Likewise.

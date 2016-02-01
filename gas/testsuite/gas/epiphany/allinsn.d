@@ -240,7 +240,7 @@ Disassembly of section .text:
  1d4:	4c8d e580 	ldrb r58,\[fp],\+r25
 
 000001d8 \<ldrbd16\>:
- 1d8:	900c 2400 	ldrb r12,\[r12]
+ 1d8:	900c 2400 	ldrb r12,\[r12,\+0x0]
  1dc:	6f84      	ldrb r3,\[r3,0x7]
  1de:	0204      	ldrb r0,\[r0,0x4]
  1e0:	6d8c 2400 	ldrb fp,\[fp,\+0x3]
@@ -250,7 +250,7 @@ Disassembly of section .text:
  1ee:	2484      	ldrb r1,\[r1,0x1]
 
 000001f0 \<ldrbd\>:
- 1f0:	900c 2400 	ldrb r12,\[r12]
+ 1f0:	900c 2400 	ldrb r12,\[r12,\+0x0]
  1f4:	6f8c fcff 	ldrb r59,\[r59,\+0x7ff]
  1f8:	900c 6c80 	ldrb r28,\[r28,\+0x400]
  1fc:	6f8c 6c7f 	ldrb r27,\[r27,\+0x3ff]
@@ -289,17 +289,17 @@ Disassembly of section .text:
  25c:	e1ad 7400 	ldrh r31,\[r40],\+r3
 
 00000260 \<ldrhd16\>:
- 260:	902c 2400 	ldrh r12,\[r12]
+ 260:	902c 2400 	ldrh r12,\[r12,\+0x0]
  264:	6fa4      	ldrh r3,\[r3,0x7]
  266:	0224      	ldrh r0,\[r0,0x4]
  268:	6dac 2400 	ldrh fp,\[fp,\+0x3]
  26c:	b4ac 2400 	ldrh sp,\[sp,\+0x1]
- 270:	c82c 2000 	ldrh lr,\[r2]
+ 270:	c82c 2000 	ldrh lr,\[r2,\+0x0]
  274:	63a4      	ldrh r3,\[r0,0x7]
  276:	0f24      	ldrh r0,\[r3,0x6]
 
 00000278 \<ldrhd\>:
- 278:	902c 2400 	ldrh r12,\[r12]
+ 278:	902c 2400 	ldrh r12,\[r12,\+0x0]
  27c:	6fac fcff 	ldrh r59,\[r59,\+0x7ff]
  280:	902c 6c80 	ldrh r28,\[r28,\+0x400]
  284:	6fac 6c7f 	ldrh r27,\[r27,\+0x3ff]
@@ -339,17 +339,17 @@ Disassembly of section .text:
  2e8:	91cd 2080 	ldr r12,\[r4],\+fp
 
 000002ec \<ldrd16\>:
- 2ec:	904c 2400 	ldr r12,\[r12]
+ 2ec:	904c 2400 	ldr r12,\[r12,\+0x0]
  2f0:	6fc4      	ldr r3,\[r3,0x7]
  2f2:	0244      	ldr r0,\[r0,0x4]
  2f4:	6dcc 2400 	ldr fp,\[fp,\+0x3]
  2f8:	b4cc 2400 	ldr sp,\[sp,\+0x1]
- 2fc:	144c 0400 	ldr r0,\[sp]
+ 2fc:	144c 0400 	ldr r0,\[sp,\+0x0]
  300:	87cc 2000 	ldr r12,\[r1,\+0x7]
  304:	64cc 2000 	ldr fp,\[r1,\+0x1]
 
 00000308 \<ldrd\>:
- 308:	904c 2400 	ldr r12,\[r12]
+ 308:	904c 2400 	ldr r12,\[r12,\+0x0]
  30c:	6fcc fcff 	ldr r59,\[r59,\+0x7ff]
  310:	904c 6c80 	ldr r28,\[r28,\+0x400]
  314:	6fcc 6c7f 	ldr r27,\[r27,\+0x3ff]
@@ -393,7 +393,7 @@ Disassembly of section .text:
  386:	41ed f080 	ldrd r58,\[r32],\+fp
 
 0000038a \<ldrdd16\>:
- 38a:	906c 2400 	ldrd r12,\[r12]
+ 38a:	906c 2400 	ldrd r12,\[r12,\+0x0]
  38e:	8fe4      	ldrd r4,\[r3,0x7]
  390:	0264      	ldrd r0,\[r0,0x4]
  392:	0dec 4400 	ldrd r16,\[fp,\+0x3]
@@ -403,7 +403,7 @@ Disassembly of section .text:
  3a2:	d0ec 2400 	ldrd lr,\[r12,\+0x1]
 
 000003a6 \<ldrdd\>:
- 3a6:	906c 2400 	ldrd r12,\[r12]
+ 3a6:	906c 2400 	ldrd r12,\[r12,\+0x0]
  3aa:	4fec fcff 	ldrd r58,\[r59,\+0x7ff]
  3ae:	906c 6c80 	ldrd r28,\[r28,\+0x400]
  3b2:	4fec 0c7f 	ldrd r2,\[r27,\+0x3ff]
