@@ -1,3 +1,10 @@
+2016-01-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* varobj.h (struct varobj): Fix typos in comments.
+	(struct lang_varobj_ops): Likewise.
+	* varobj.c (VAROBJ_TABLE_SIZE): Likewise.
+	(varobj_create): Move misplaced comment.
+
 2016-01-29  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* aarch64-tdep.c (aarch64_record_asimd_load_store): Add braces

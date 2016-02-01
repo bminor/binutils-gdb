@@ -53,7 +53,7 @@ enum varobj_scope_status
 /* String representations of gdb's format codes (defined in varobj.c).  */
 extern char *varobj_format_string[];
 
-/* Struct thar describes a variable object instance.  */
+/* Struct that describes a variable object instance.  */
 
 struct varobj;
 
@@ -107,7 +107,7 @@ struct varobj
   int index;
 
   /* The type of this variable.  This can be NULL
-     for artifial variable objects -- currently, the "accessibility" 
+     for artificial variable objects -- currently, the "accessibility"
      variable objects in C++.  */
   struct type *type;
 
@@ -198,7 +198,7 @@ struct lang_varobj_ops
      reported by -var-update.  Return zero if -var-update should never
      report changes of such values.  This makes sense for structures
      (since the changes in children values will be reported separately),
-     or for artifical objects (like 'public' pseudo-field in C++).
+     or for artificial objects (like 'public' pseudo-field in C++).
 
      Return value of 0 means that gdb need not call value_fetch_lazy
      for the value of this variable object.  */
