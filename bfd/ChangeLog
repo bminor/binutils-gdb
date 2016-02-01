@@ -1,3 +1,13 @@
+2016-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19553
+	* elflink.c (elf_link_add_object_symbols): Don't add DT_NEEDED
+	if a symbol from a library loaded via DT_NEEDED doesn't match
+	the symbol referenced by regular object.
+
 2016-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
