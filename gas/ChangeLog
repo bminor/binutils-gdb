@@ -1,5 +1,11 @@
 2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* testsuite/gas/ip2k/allinsn.d: New file.
+	* testsuite/gas/ip2k/allinsn.s: New file.
+	* testsuite/gas/ip2k/ip2k-allinsn.exp: New file.
+
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* testsuite/gas/epiphany/addr-syntax.d: Add explicit 0 offset to
 	some load instructions.
 	* testsuite/gas/epiphany/allinsn.d: Likewise.
