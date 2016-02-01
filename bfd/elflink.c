@@ -4562,8 +4562,10 @@ error_free_dyn:
 		break;
 	      }
 
-	  /* Don't add DT_NEEDED for references from the dummy bfd.  */
+	  /* Don't add DT_NEEDED for references from the dummy bfd nor
+	     for unmatched symbol.  */
 	  if (!add_needed
+	      && matched
 	      && definition
 	      && ((dynsym
 		   && h->ref_regular_nonweak
