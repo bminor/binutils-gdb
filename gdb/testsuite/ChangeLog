@@ -1,3 +1,7 @@
+2016-02-01  Doug Evans  <dje@google.com>
+
+	* gdb.base/skip.exp: Clean up multiple references to same test name.
+
 2016-02-01  Pedro Alves  <palves@redhat.com>
 
 	PR remote/19496
