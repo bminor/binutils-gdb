@@ -1,3 +1,9 @@
+2016-02-01  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-microblaze.c (parse_imm): Fix compile time warning
+	message extending a negative 32-bit value into a larger signed
+	value on a 32-bit host.
+
 2016-01-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/19532
