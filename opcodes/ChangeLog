@@ -1,3 +1,8 @@
+2016-02-01  Michael McConville  <mmcco@mykolab.com>
+
+	* cgen-dis.c (count_decodable_bits): Use unsigned value for mask
+	test bit.
+
 2016-01-25  Renlin Li  <renlin.li@arm.com>
 
 	* arm-dis.c (mapping_symbol_for_insn): New function.
