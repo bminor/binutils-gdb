@@ -1,3 +1,8 @@
+2016-02-01  Nathaniel Smith  <njs@pobox.com>
+
+	* peicode.h (pe_ILF_build_a_bfd): Create an import symbol for both
+	CODE and DATA.
+
 2016-02-01  Alan Modra  <amodra@gmail.com>
 
 	* elf64-x86-64.c (elf_x86_64_get_plt_sym_val): Don't abort on
