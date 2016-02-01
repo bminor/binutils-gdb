@@ -7268,7 +7268,10 @@ encode_arm_immediate (unsigned int val)
 {
   unsigned int a, i;
 
-  for (i = 0; i < 32; i += 2)
+  if (val <= 0xff)
+    return val;
+
+  for (i = 2; i < 32; i += 2)
     if ((a = rotate_left (val, i)) <= 0xff)
       return a | (i << 7); /* 12-bit pack: [shift-cnt,const].  */
 

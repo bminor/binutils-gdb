@@ -1,3 +1,9 @@
+2016-02-01  Loria  <Loria@phantasia.org>
+
+	PR target/19311
+	* config/tc-arm.c (encode_arm_immediate): Recode to improve
+	efficiency and avoid an LLVM loop optimization bug.
+
 2016-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-microblaze.c (parse_imm): Fix compile time warning
