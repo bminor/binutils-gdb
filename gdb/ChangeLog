@@ -1,5 +1,19 @@
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* linux-tdep.h (linux_get_siginfo_type_with_fields): Make extern.
+	* linux-tdep.c (linux_get_siginfo_type_with_fields): Make extern.
+	* i386-linux-tdep.h (x86_linux_get_siginfo_type): New
+	function.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Add
+	x86_linux_get_siginfo_type for the amd64 abi.
+	* i386-linux-tdep.c (x86_linux_get_siginfo_type): New
+	function.
+	(i386_linux_init_abi): Add new function at the i386 ABI
+	initialization.
+
+
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* linux-tdep.h (linux_siginfo_extra_field_values): New enum values.
 	(linux_siginfo_extra_fields): New enum type.
 	* linux-tdep.c (linux_get_siginfo_type_with_fields): New function.

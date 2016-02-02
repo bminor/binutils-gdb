@@ -72,4 +72,7 @@ extern struct target_desc *tdesc_i386_avx512_linux;
 
 extern int i386_linux_gregset_reg_offset[];
 
+/* Return x86 siginfo type.  */
+extern struct type *x86_linux_get_siginfo_type (struct gdbarch *gdbarch);
+
 #endif /* i386-linux-tdep.h */

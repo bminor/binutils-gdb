@@ -1838,6 +1838,8 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_process_record (gdbarch, i386_process_record);
   set_gdbarch_process_record_signal (gdbarch, amd64_linux_record_signal);
+
+  set_gdbarch_get_siginfo_type (gdbarch, x86_linux_get_siginfo_type);
 }
 
 static void

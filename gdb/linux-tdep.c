@@ -243,10 +243,9 @@ get_linux_inferior_data (void)
   return info;
 }
 
-/* This function is suitable for architectures that
-   extend/override the standard siginfo in a specific way.  */
+/* See linux-tdep.h.  */
 
-static struct type *
+struct type *
 linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
 				    linux_siginfo_extra_fields extra_fields)
 {

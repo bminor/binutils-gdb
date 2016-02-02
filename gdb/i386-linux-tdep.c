@@ -656,6 +656,12 @@ i386_linux_supply_xstateregset (const struct regset *regset,
   i387_supply_xsave (regcache, regnum, xstateregs);
 }
 
+struct type *
+x86_linux_get_siginfo_type (struct gdbarch *gdbarch)
+{
+  return linux_get_siginfo_type_with_fields (gdbarch, LINUX_SIGINFO_FIELD_ADDR_BND);
+}
+
 /* Similar to i386_collect_fpregset, but use XSAVE extended state.  */
 
 static void
@@ -994,6 +1000,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_I386);
   set_gdbarch_get_syscall_number (gdbarch,
                                   i386_linux_get_syscall_number);
+
+  set_gdbarch_get_siginfo_type (gdbarch, x86_linux_get_siginfo_type);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
