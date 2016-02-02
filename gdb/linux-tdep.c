@@ -243,11 +243,12 @@ get_linux_inferior_data (void)
   return info;
 }
 
-/* This function is suitable for architectures that don't
-   extend/override the standard siginfo structure.  */
+/* This function is suitable for architectures that
+   extend/override the standard siginfo in a specific way.  */
 
 static struct type *
-linux_get_siginfo_type (struct gdbarch *gdbarch)
+linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
+				    linux_siginfo_extra_fields extra_fields)
 {
   struct linux_gdbarch_data *linux_gdbarch_data;
   struct type *int_type, *uint_type, *long_type, *void_ptr_type;
@@ -362,6 +363,15 @@ linux_get_siginfo_type (struct gdbarch *gdbarch)
   linux_gdbarch_data->siginfo_type = siginfo_type;
 
   return siginfo_type;
+}
+
+/* This function is suitable for architectures that don't
+   extend/override the standard siginfo structure.  */
+
+static struct type *
+linux_get_siginfo_type (struct gdbarch *gdbarch)
+{
+  return linux_get_siginfo_type_with_fields (gdbarch, 0);
 }
 
 /* Return true if the target is running on uClinux instead of normal

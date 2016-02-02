@@ -1,5 +1,12 @@
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* linux-tdep.h (linux_siginfo_extra_field_values): New enum values.
+	(linux_siginfo_extra_fields): New enum type.
+	* linux-tdep.c (linux_get_siginfo_type_with_fields): New function.
+	(linux_get_siginfo_type): Use new function.
+
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* nat/amd64-linux-siginfo.c: New file.
 	* nat/amd64-linux-siginfo.h: New file.
 	* Makefile.in (HFILES_NO_SRCDIR): Add nat/amd64-linux-siginfo.h.
