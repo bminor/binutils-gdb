@@ -2,7 +2,7 @@
 
 	PR ld/19542
 	* elf64-x86-64.c (elf_x86_64_convert_load): Store the estimated
-	distrances in the compressed_size field of the output section.
+	distances in the compressed_size field of the output section.
 
 2016-02-02  Alan Modra  <amodra@gmail.com>
 
