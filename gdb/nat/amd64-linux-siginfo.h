@@ -20,12 +20,24 @@
 #ifndef AMD64_LINUX_SIGINFO_H
 #define AMD64_LINUX_SIGINFO_H 1
 
-
 /* When GDB is built as a 64-bit application on Linux, the
    PTRACE_GETSIGINFO data is always presented in 64-bit layout.  Since
    debugging a 32-bit inferior with a 64-bit GDB should look the same
    as debugging it with a 32-bit GDB, we do the 32-bit <-> 64-bit
-   conversion in-place ourselves.  */
+   conversion in-place ourselves.
+   In other to make this conversion independent of the system where gdb
+   is compiled the most complete version of the siginfo, named as native
+   siginfo, is used internally as an intermediate step.
+
+   Conversion using nat_siginfo is exemplified below:
+   compat_siginfo_from_siginfo or compat_x32_siginfo_from_siginfo
+
+      buffer (from the kernel) -> nat_siginfo -> 32 / X32 siginfo
+
+   siginfo_from_compat_x32_siginfo or siginfo_from_compat_siginfo
+
+     32 / X32 siginfo -> nat_siginfo -> buffer (to the kernel)  */
+
 
 /* Kind of siginfo fixup to be performed.  */
 

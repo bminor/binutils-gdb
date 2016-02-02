@@ -1,5 +1,17 @@
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* amd64-linux-siginfo.c (nat_siginfo_t, nat_sigval_t, nat_timeval):
+	New types.
+	(compat_siginfo): New bound fields added.
+	(compat_x32_siginfo): New field added.
+	(cpt_si_addr_lsb): New define.
+	(compat_siginfo_from_siginfo): Use nat_siginfo.
+	(siginfo_from_compat_siginfo): Use nat_siginfo.
+	(compat_x32_siginfo_from_siginfo): Likewise.
+	(siginfo_from_compat_x32_siginfo): Likewise.
+
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* linux-tdep.c (linux_get_siginfo_type): Add the _addr_bnd
 	structure to the siginfo if extra_fields contains
 	LINUX_SIGINFO_FIELD_ADDR_BND.
