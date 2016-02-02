@@ -1,3 +1,8 @@
+2016-02-02  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Further restrict
+	ELFv2 entry optimization.
+
 2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/19547
