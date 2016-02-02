@@ -1,3 +1,18 @@
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* nat/amd64-linux-siginfo.c: New file.
+	* nat/amd64-linux-siginfo.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/amd64-linux-siginfo.h.
+	(amd64-linux-siginfo.o): New rule.
+	* config/i386/linux64.mh (NATDEPFILES): Add amd64-linux-siginfo.o.
+	* amd64-linux-nat.c (nat/amd64-linux-siginfo.h): New include.
+	(compat_siginfo_from_siginfo, siginfo_from_compat_siginfo)
+	(compat_x32_siginfo_from_siginfo, siginfo_from_compat_x32_siginfo)
+	(compat_timeval, compat_sigval, compat_x32_clock, cpt_si_pid)
+	(cpt_si_uid, cpt_si_timerid, cpt_si_overrun, cpt_si_status)
+	(cpt_si_utime, cpt_si_stime, cpt_si_ptr, cpt_si_addr, cpt_si_band)
+	(cpt_si_fd, si_timerid, si_overrun): Move to nat/amd64-linux-siginfo.c.
+
 2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* value.c (max_value_size): New variable.

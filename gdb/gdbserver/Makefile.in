@@ -608,6 +608,9 @@ arm-get-next-pcs.o: ../arch/arm-get-next-pcs.c
 x86-dregs.o: ../nat/x86-dregs.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+amd64-linux-siginfo.o: ../nat/amd64-linux-siginfo.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 linux-btrace.o: ../nat/linux-btrace.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
