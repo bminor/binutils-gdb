@@ -3355,6 +3355,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   /* SHT_GROUP sections are in relocatable files only.  */
   if (link_info == NULL || bfd_link_relocatable (link_info))
     {
+      bfd_size_type reloc_count = 0;
+
       /* Put SHT_GROUP sections first.  */
       for (sec = abfd->sections; sec != NULL; sec = sec->next)
 	{
@@ -3371,7 +3373,14 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	      else
 		d->this_idx = section_number++;
 	    }
+
+	  /* Count relocations.  */
+	  reloc_count += sec->reloc_count;
 	}
+
+      /* Clear HAS_RELOC if there are no relocations.  */
+      if (reloc_count == 0)
+	abfd->flags &= ~HAS_RELOC;
     }
 
   for (sec = abfd->sections; sec; sec = sec->next)

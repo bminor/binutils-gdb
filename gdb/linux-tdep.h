@@ -24,6 +24,23 @@
 
 struct regcache;
 
+/* Enum used to define the extra fields of the siginfo type used by an
+   architecture.  */
+enum linux_siginfo_extra_field_values
+{
+  /* Add bound fields into the segmentation fault field.  */
+  LINUX_SIGINFO_FIELD_ADDR_BND = 1
+};
+
+/* Defines a type for the values defined in linux_siginfo_extra_field_values.  */
+DEF_ENUM_FLAGS_TYPE (enum linux_siginfo_extra_field_values,
+		     linux_siginfo_extra_fields);
+
+/* This function is suitable for architectures that
+   extend/override the standard siginfo in a specific way.  */
+struct type *linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
+						 linux_siginfo_extra_fields);
+
 typedef char *(*linux_collect_thread_registers_ftype) (const struct regcache *,
 						       ptid_t,
 						       bfd *, char *, int *,

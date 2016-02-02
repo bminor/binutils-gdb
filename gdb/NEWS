@@ -119,6 +119,12 @@ show ada print-signatures"
   Control whether parameter types and return types are displayed in overloads
   selection menus.  It is activaled (@code{on}) by default.
 
+set max-value-size
+show max-value-size
+  Controls the maximum size of memory, in bytes, that GDB will
+  allocate for value contents.  Prevents incorrect programs from
+  causing GDB to allocate overly large buffers.  Default is 64k.
+
 * The "disassemble" command accepts a new modifier: /s.
   It prints mixed source+disassembly like /m with two differences:
   - disassembled instructions are now printed in program order, and

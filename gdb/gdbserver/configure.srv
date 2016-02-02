@@ -118,8 +118,9 @@ case "${target}" in
 			if test "$gdb_cv_i386_is_x86_64" = yes ; then
 			    srv_regobj="$srv_regobj $srv_amd64_linux_regobj"
 			    srv_xmlfiles="${srv_xmlfiles} $srv_amd64_linux_xmlfiles"
+			    srv_tgtobj="amd64-linux-siginfo.o"
 			fi
-			srv_tgtobj="$srv_linux_obj linux-x86-low.o x86-low.o x86-dregs.o i387-fp.o"
+			srv_tgtobj="${srv_tgtobj} $srv_linux_obj linux-x86-low.o x86-low.o x86-dregs.o i387-fp.o"
 			srv_tgtobj="${srv_tgtobj} linux-btrace.o x86-linux.o"
 			srv_tgtobj="${srv_tgtobj} x86-linux-dregs.o"
 			srv_linux_usrregs=yes
@@ -339,6 +340,7 @@ case "${target}" in
 			srv_tgtobj="$srv_linux_obj linux-x86-low.o x86-low.o x86-dregs.o i387-fp.o"
 			srv_tgtobj="${srv_tgtobj} linux-btrace.o x86-linux.o"
 			srv_tgtobj="${srv_tgtobj} x86-linux-dregs.o"
+			srv_tgtobj="${srv_tgtobj} amd64-linux-siginfo.o"
 			srv_xmlfiles="$srv_i386_linux_xmlfiles $srv_amd64_linux_xmlfiles"
 			srv_linux_usrregs=yes # This is for i386 progs.
 			srv_linux_regsets=yes

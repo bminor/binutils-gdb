@@ -220,7 +220,7 @@ static int format_code[] = { 0, 't', 'd', 'x', 'o', 'z' };
 static struct varobj_root *rootlist;
 
 /* Prime number indicating the number of buckets in the hash table.  */
-/* A prime large enough to avoid too many colisions.  */
+/* A prime large enough to avoid too many collisions.  */
 #define VAROBJ_TABLE_SIZE 227
 
 /* Pointer to the varobj hash table (built at run time).  */
@@ -245,8 +245,6 @@ varobj_ensure_python_env (const struct varobj *var)
 			    var->root->exp->language_defn);
 }
 #endif
-
-/* Creates a varobj (not its children).  */
 
 /* Return the full FRAME which corresponds to the given CORE_ADDR
    or NULL if no FRAME on the chain corresponds to CORE_ADDR.  */
@@ -279,6 +277,8 @@ find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
 
   return NULL;
 }
+
+/* Creates a varobj (not its children).  */
 
 struct varobj *
 varobj_create (char *objname,

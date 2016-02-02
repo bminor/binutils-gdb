@@ -337,10 +337,10 @@ elf_s390_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 	&& strcasecmp (elf_howto_table[i].name, r_name) == 0)
       return &elf_howto_table[i];
 
-    if (strcasecmp (elf64_s390_vtinherit_howto.name, r_name) == 0)
-      return &elf64_s390_vtinherit_howto;
-    if (strcasecmp (elf64_s390_vtentry_howto.name, r_name) == 0)
-      return &elf64_s390_vtentry_howto;
+  if (strcasecmp (elf64_s390_vtinherit_howto.name, r_name) == 0)
+    return &elf64_s390_vtinherit_howto;
+  if (strcasecmp (elf64_s390_vtentry_howto.name, r_name) == 0)
+    return &elf64_s390_vtentry_howto;
 
   return NULL;
 }

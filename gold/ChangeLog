@@ -1,3 +1,7 @@
+2016-02-02  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (relocate): Further restrict ELFv2 entry optimization.
+
 2016-01-15 Han Shen  <shenhan@google.com>
 
 	PR gold/19472 - need pc-relative stubs.

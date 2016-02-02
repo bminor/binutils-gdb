@@ -1,3 +1,81 @@
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-linux-siginfo.c (nat_siginfo_t, nat_sigval_t, nat_timeval):
+	New types.
+	(compat_siginfo): New bound fields added.
+	(compat_x32_siginfo): New field added.
+	(cpt_si_addr_lsb): New define.
+	(compat_siginfo_from_siginfo): Use nat_siginfo.
+	(siginfo_from_compat_siginfo): Use nat_siginfo.
+	(compat_x32_siginfo_from_siginfo): Likewise.
+	(siginfo_from_compat_x32_siginfo): Likewise.
+
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* linux-tdep.c (linux_get_siginfo_type): Add the _addr_bnd
+	structure to the siginfo if extra_fields contains
+	LINUX_SIGINFO_FIELD_ADDR_BND.
+
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* linux-tdep.h (linux_get_siginfo_type_with_fields): Make extern.
+	* linux-tdep.c (linux_get_siginfo_type_with_fields): Make extern.
+	* i386-linux-tdep.h (x86_linux_get_siginfo_type): New
+	function.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Add
+	x86_linux_get_siginfo_type for the amd64 abi.
+	* i386-linux-tdep.c (x86_linux_get_siginfo_type): New
+	function.
+	(i386_linux_init_abi): Add new function at the i386 ABI
+	initialization.
+
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* linux-tdep.h (linux_siginfo_extra_field_values): New enum values.
+	(linux_siginfo_extra_fields): New enum type.
+	* linux-tdep.c (linux_get_siginfo_type_with_fields): New function.
+	(linux_get_siginfo_type): Use new function.
+
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* nat/amd64-linux-siginfo.c: New file.
+	* nat/amd64-linux-siginfo.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/amd64-linux-siginfo.h.
+	(amd64-linux-siginfo.o): New rule.
+	* config/i386/linux64.mh (NATDEPFILES): Add amd64-linux-siginfo.o.
+	* amd64-linux-nat.c (nat/amd64-linux-siginfo.h): New include.
+	(compat_siginfo_from_siginfo, siginfo_from_compat_siginfo)
+	(compat_x32_siginfo_from_siginfo, siginfo_from_compat_x32_siginfo)
+	(compat_timeval, compat_sigval, compat_x32_clock, cpt_si_pid)
+	(cpt_si_uid, cpt_si_timerid, cpt_si_overrun, cpt_si_status)
+	(cpt_si_utime, cpt_si_stime, cpt_si_ptr, cpt_si_addr, cpt_si_band)
+	(cpt_si_fd, si_timerid, si_overrun): Move to nat/amd64-linux-siginfo.c.
+
+2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* value.c (max_value_size): New variable.
+	(MIN_VALUE_FOR_MAX_VALUE_SIZE): New define.
+	(set_max_value_size): New function.
+	(show_max_value_size): New function.
+	(check_type_length_before_alloc): New function.
+	(allocate_value_contents): Call check_type_length_before_alloc.
+	(set_value_enclosing_type): Likewise.
+	(_initialize_values): Add set/show handler for max-value-size.
+	* NEWS: Mention new set/show command.
+
+2016-01-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* varobj.h (struct varobj): Fix typos in comments.
+	(struct lang_varobj_ops): Likewise.
+	* varobj.c (VAROBJ_TABLE_SIZE): Likewise.
+	(varobj_create): Move misplaced comment.
+
+2016-01-29  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aarch64-tdep.c (aarch64_record_asimd_load_store): Add braces
+	to for include additional lines.
+	* xcoffread.c (scan_xcoff_symtab): Remove unnecessary braces.
+
 2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gnulib/import/Makefile.am: Regenerate.

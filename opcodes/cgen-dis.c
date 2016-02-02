@@ -40,7 +40,8 @@ count_decodable_bits (const CGEN_INSN *insn)
 {
   unsigned mask = CGEN_INSN_BASE_MASK (insn);
   int bits = 0;
-  int m;
+  unsigned m;
+
   for (m = 1; m != 0; m <<= 1)
     {
       if (mask & m)

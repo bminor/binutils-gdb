@@ -1,3 +1,29 @@
+2016-02-01  Doug Evans  <dje@google.com>
+
+	* gdb.base/skip.exp: Clean up multiple references to same test name.
+
+2016-02-01  Pedro Alves  <palves@redhat.com>
+
+	PR remote/19496
+	* gdb.threads/forking-threads-plus-breakpoint.exp
+	(displaced_stepping_supported): New global.
+	(probe_displaced_stepping_support): New procedure.
+	(do_test): Add 'displaced' parameter, and use it.
+	(top level): Check for displaced stepping support.  Add displaced
+	stepping on/off testing axis.
+
+2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/mi-vla-fortran.exp: Add XFAIL for accessing unassociated
+	pointer.  Don't perform further tests on the unassociated pointer
+	if the first test fails.
+
+2016-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/max-value-size.c: New file.
+	* gdb.base/max-value-size.exp: New file.
+	* gdb.base/huge.exp: Disable max-value-size for this test.
+
 2016-01-28  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* gdb.dlang/demangle.exp: Sync tests from libiberty testsuite.

@@ -1,3 +1,20 @@
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* configure.srv (x86_64-*-linux*): Add amd64-linux-siginfo.o
+	to srv_tgtobj.
+	(i[34567]86-*-linux*): Add amd64-linux-siginfo.o
+	to srv_tgtobj.
+	* linux-x86-low.c [__x86_64__]: Include
+	"nat/amd64-linux-siginfo.h".
+	(compat_siginfo_from_siginfo, siginfo_from_compat_siginfo)
+	(compat_x32_siginfo_from_siginfo, siginfo_from_compat_x32_siginfo)
+	(compat_timeval, compat_sigval, compat_x32_clock, cpt_si_pid)
+	(cpt_si_uid, cpt_si_timerid, cpt_si_overrun, cpt_si_status)
+	(cpt_si_utime, cpt_si_stime, cpt_si_ptr, cpt_si_addr, cpt_si_band)
+	(cpt_si_fd, si_timerid, si_overrun): Move from
+	nat/amd64-linux-siginfo.c.
+	* Makefile.in (amd64-linux-siginfo.o:): New rule.
+
 2016-01-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* server.c (skip_to_semicolon):  Remove.

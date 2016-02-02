@@ -1,3 +1,62 @@
+2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19542
+	* elf64-x86-64.c (elf_x86_64_convert_load): Store the estimated
+	distrances in the compressed_size field of the output section.
+
+2016-02-02  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Further restrict
+	ELFv2 entry optimization.
+
+2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19547
+	* elf.c (assign_section_numbers): Clear HAS_RELOC if there are
+	no relocations in relocatable files.
+
+2016-02-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19553
+	* elflink.c (elf_link_add_object_symbols): Don't add DT_NEEDED
+	if a symbol from a library loaded via DT_NEEDED doesn't match
+	the symbol referenced by regular object.
+
+2016-02-01  Nathaniel Smith  <njs@pobox.com>
+
+	* peicode.h (pe_ILF_build_a_bfd): Create an import symbol for both
+	CODE and DATA.
+
+2016-02-01  Alan Modra  <amodra@gmail.com>
+
+	* elf64-x86-64.c (elf_x86_64_get_plt_sym_val): Don't abort on
+	an out of range reloc_index.
+	* elf32-i386.c (elf_i386_get_plt_sym_val): Likewise.
+
+2016-02-01  Kamil Rytarowski  <n54@gmx.com>
+
+	* Makefile.am (OPTIONAL_BACKENDS): Add netbsd-core.lo.
+	(OPTIONAL_BACKENDS_CFILES): Add netbsd-core.c.
+	* Makefile.in: Regenerated.
+
+2016-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elf64-s390.c (elf_s390_reloc_name_lookup): Fix indentation.
+
+2016-01-31  John David Anglin  <danglin@gcc.gnu.org>
+
+	PR ld/19526
+	* elf32-hppa.c (elf32_hppa_final_link): Don't sort non-regular output
+	files.
+	* elf64-hppa.c (elf32_hppa_final_link): Likewise.  Remove retval.
+
+2016-01-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19539
+	* elf32-i386.c (elf_i386_reloc_type_class): Check relocation
+	against STT_GNU_IFUNC symbol only with dynamic symbols.
+	* elf64-x86-64.c (elf_x86_64_reloc_type_class): Likewise.
+
 2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/19523

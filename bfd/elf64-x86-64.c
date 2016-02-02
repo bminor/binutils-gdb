@@ -3190,35 +3190,43 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 	}
       else
 	{
-	  asection *asect;
-	  bfd_size_type size;
+	  bfd_signed_vma distance;
 
 	  /* At this point, we don't know the load addresses of TSEC
 	     section nor SEC section.  We estimate the distrance between
-	     SEC and TSEC.  */
-	  size = 0;
-	  for (asect = sec->output_section;
-	       asect != NULL && asect != tsec->output_section;
-	       asect = asect->next)
+	     SEC and TSEC.  We store the estimated distrances in the
+	     compressed_size field of the output section, which is only
+	     used to decompress the compressed input section.  */
+	  if (sec->output_section->compressed_size == 0)
 	    {
-	      asection *i;
-	      for (i = asect->output_section->map_head.s;
-		   i != NULL;
-		   i = i->map_head.s)
+	      asection *asect;
+	      bfd_size_type size = 0;
+	      for (asect = link_info->output_bfd->sections;
+		   asect != NULL;
+		   asect = asect->next)
 		{
-		  size = align_power (size, i->alignment_power);
-		  size += i->size;
+		  asection *i;
+		  for (i = asect->map_head.s;
+		       i != NULL;
+		       i = i->map_head.s)
+		    {
+		      size = align_power (size, i->alignment_power);
+		      size += i->size;
+		    }
+		  asect->compressed_size = size;
 		}
 	    }
 
 	  /* Don't convert GOTPCREL relocations if TSEC isn't placed
 	     after SEC.  */
-	  if (asect == NULL)
+	  distance = (tsec->output_section->compressed_size
+		      - sec->output_section->compressed_size);
+	  if (distance < 0)
 	    continue;
 
 	  /* Take PT_GNU_RELRO segment into account by adding
 	     maxpagesize.  */
-	  if ((toff + size + maxpagesize - roff + 0x80000000)
+	  if ((toff + distance + maxpagesize - roff + 0x80000000)
 	      > 0xffffffff)
 	    continue;
 	}
@@ -5728,19 +5736,23 @@ elf_x86_64_reloc_type_class (const struct bfd_link_info *info,
   bfd *abfd = info->output_bfd;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_x86_64_link_hash_table *htab = elf_x86_64_hash_table (info);
-  unsigned long r_symndx = htab->r_sym (rela->r_info);
-  Elf_Internal_Sym sym;
 
-  if (htab->elf.dynsym == NULL
-      || !bed->s->swap_symbol_in (abfd,
-				  (htab->elf.dynsym->contents
-				   + r_symndx * bed->s->sizeof_sym),
-				  0, &sym))
-    abort ();
+  if (htab->elf.dynsym != NULL
+      && htab->elf.dynsym->contents != NULL)
+    {
+      /* Check relocation against STT_GNU_IFUNC symbol if there are
+         dynamic symbols.  */
+      unsigned long r_symndx = htab->r_sym (rela->r_info);
+      Elf_Internal_Sym sym;
+      if (!bed->s->swap_symbol_in (abfd,
+				   (htab->elf.dynsym->contents
+				    + r_symndx * bed->s->sizeof_sym),
+				   0, &sym))
+	abort ();
 
-  /* Check relocation against STT_GNU_IFUNC symbol.  */
-  if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
-    return reloc_class_ifunc;
+      if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+	return reloc_class_ifunc;
+    }
 
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {
@@ -6062,19 +6074,20 @@ bad_return:
 
       reloc_index = H_GET_32 (abfd, (plt_contents + plt_offset
 				     + bed->plt_reloc_offset));
-      if (reloc_index >= count)
-	abort ();
-      if (plt_bnd)
+      if (reloc_index < count)
 	{
-	  /* This is the index in .plt section.  */
-	  long plt_index = plt_offset / bed->plt_entry_size;
-	  /* Store VMA + the offset in .plt.bnd section.  */
-	  plt_sym_val[reloc_index] =
-	    (plt_bnd->vma
-	     + (plt_index - 1) * sizeof (elf_x86_64_legacy_plt2_entry));
+	  if (plt_bnd)
+	    {
+	      /* This is the index in .plt section.  */
+	      long plt_index = plt_offset / bed->plt_entry_size;
+	      /* Store VMA + the offset in .plt.bnd section.  */
+	      plt_sym_val[reloc_index] =
+		(plt_bnd->vma
+		 + (plt_index - 1) * sizeof (elf_x86_64_legacy_plt2_entry));
+	    }
+	  else
+	    plt_sym_val[reloc_index] = plt->vma + plt_offset;
 	}
-      else
-	plt_sym_val[reloc_index] = plt->vma + plt_offset;
       plt_offset += bed->plt_entry_size;
 
       /* PR binutils/18437: Skip extra relocations in the .rela.plt

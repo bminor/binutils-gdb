@@ -128,23 +128,39 @@ mi_create_breakpoint "-t vla.f90:$bp_lineno" 6 "del" "vla" ".*vla.f90" \
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
-mi_gdb_test "580-data-evaluate-expression pvla2" \
-  "580\\^done,value=\"<not associated>\"" "evaluate not associated vla"
 
-mi_create_varobj_checked pvla2_not_associated pvla2 "<not associated>" \
-  "create local variable pvla2_not_associated"
-mi_gdb_test "581-var-info-type pvla2_not_associated" \
-  "581\\^done,type=\"<not associated>\"" \
-  "info type variable pvla2_not_associated"
-mi_gdb_test "582-var-show-format pvla2_not_associated" \
-  "582\\^done,format=\"natural\"" \
-  "show format variable pvla2_not_associated"
-mi_gdb_test "583-var-evaluate-expression pvla2_not_associated" \
-  "583\\^done,value=\"\\\[0\\\]\"" \
-  "eval variable pvla2_not_associated"
-mi_list_array_varobj_children_with_index "pvla2_not_associated" "0" "1" \
-    "real\\\(kind=4\\\)" "get children of pvla2_not_associated"
 
+set test "evaluate not associated vla"
+send_gdb "580-data-evaluate-expression pvla2\n"
+gdb_expect {
+    -re "580\\^done,value=\"<not associated>\".*${mi_gdb_prompt}$" {
+	pass $test
+
+	mi_create_varobj_checked pvla2_not_associated pvla2 "<not associated>" \
+	    "create local variable pvla2_not_associated"
+	mi_gdb_test "581-var-info-type pvla2_not_associated" \
+	    "581\\^done,type=\"<not associated>\"" \
+	    "info type variable pvla2_not_associated"
+	mi_gdb_test "582-var-show-format pvla2_not_associated" \
+	    "582\\^done,format=\"natural\"" \
+	    "show format variable pvla2_not_associated"
+	mi_gdb_test "583-var-evaluate-expression pvla2_not_associated" \
+	    "583\\^done,value=\"\\\[0\\\]\"" \
+	    "eval variable pvla2_not_associated"
+	mi_list_array_varobj_children_with_index "pvla2_not_associated" "0" "1" \
+	    "real\\\(kind=4\\\)" "get children of pvla2_not_associated"
+    }
+    -re "580\\^error,msg=\"value contents too large \\(\[0-9\]+ bytes\\).*${mi_gdb_prompt}$" {
+	# Undefined behaviour in gfortran.
+	xfail $test
+    }
+    -re "${mi_gdb_prompt}$" {
+	fail $test
+    }
+    timeout {
+	fail "$test (timeout)"
+    }
+}
 
 set bp_lineno [gdb_get_line_number "pvla2-associated"]
 mi_create_breakpoint "-t vla.f90:$bp_lineno" 7 "del" "vla" ".*vla.f90" \

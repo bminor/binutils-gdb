@@ -737,9 +737,9 @@ parse_imm (char * s, expressionS * e, offsetT min, offsetT max)
     as_fatal (_("operand must be a constant or a label"));
   else if (e->X_op == O_constant)
     {
-      /* Special case: sign extend negative 32-bit values to 64-bits.  */
+      /* Special case: sign extend negative 32-bit values to offsetT size.  */
       if ((e->X_add_number >> 31) == 1)
-	e->X_add_number |= -((offsetT) 1 << 31);
+	e->X_add_number |= -((addressT) (1U << 31));
 
       if (e->X_add_number < min || e->X_add_number > max)
 	{

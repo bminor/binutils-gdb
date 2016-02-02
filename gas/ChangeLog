@@ -1,3 +1,66 @@
+2016-02-02  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/gas/arm/thumb2_it_search.d: Skip non-elf targets.
+
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/ip2k/allinsn.d: New file.
+	* testsuite/gas/ip2k/allinsn.s: New file.
+	* testsuite/gas/ip2k/ip2k-allinsn.exp: New file.
+
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/epiphany/addr-syntax.d: Add explicit 0 offset to
+	some load instructions.
+	* testsuite/gas/epiphany/allinsn.d: Likewise.
+	* testsuite/gas/epiphany/regression.d: Likewise.
+
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/epiphany/addr-syntax.d: Remove unneeded '.l'
+	suffixes from instruction mnemonics in expected output.
+	* testsuite/gas/epiphany/allinsn.d: Likewise.
+	* testsuite/gas/epiphany/regression.d: Likewise.
+	* testsuite/gas/epiphany/sample.d: Likewise.
+
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/epiphany/addr-syntax.d: Update expected register
+	names.
+	* testsuite/gas/epiphany/allinsn.d: Likewise.
+	* testsuite/gas/epiphany/sample.d: Likewise.
+
+2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/epiphany/sample.d: Update expected output.
+
+2016-01-26  Claudiu Zissulescu  <claziss@synopsys.com>
+
+        * config/tc-arc.c (md_apply_fix): Allow addendum.
+        (arc_reloc_op): Allow complex expressions for tpoff.
+        (md_apply_fix): Handle resolved TLS local symbol.
+
+	* testsuite/gas/arc/tls-relocs1.d: New file.
+	* testsuite/gas/arc/tls-relocs1.s: Likewise.
+
+2016-02-01  Loria  <Loria@phantasia.org>
+
+	PR target/19311
+	* config/tc-arm.c (encode_arm_immediate): Recode to improve
+	efficiency and avoid an LLVM loop optimization bug.
+
+2016-02-01  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-microblaze.c (parse_imm): Fix compile time warning
+	message extending a negative 32-bit value into a larger signed
+	value on a 32-bit host.
+
+2016-01-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19532
+	* configure.ac (compressed_debug_sections): Replace == with =.
+	* configure: Regenerated.
+
 2016-01-29  Andrew Senkevich  <andrew.senkevich@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

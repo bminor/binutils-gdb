@@ -5527,7 +5527,7 @@ default is @code{on}.
 @cindex skipping over functions and files
 
 The program you are debugging may contain some functions which are
-uninteresting to debug.  The @code{skip} comand lets you tell @value{GDBN} to
+uninteresting to debug.  The @code{skip} command lets you tell @value{GDBN} to
 skip a function or all functions in a file when stepping.
 
 For example, consider the following C function:
@@ -8636,6 +8636,7 @@ being passed the type of @var{arg} as the argument.
                                 character set than GDB does
 * Caching Target Data::         Data caching for targets
 * Searching Memory::            Searching memory for a sequence of bytes
+* Value Sizes::                 Managing memory allocated for values
 @end menu
 
 @node Expressions
@@ -11710,6 +11711,47 @@ $1 = 1
 (gdb) print $_
 $2 = (void *) 0x8049560
 @end smallexample
+
+@node Value Sizes
+@section Value Sizes
+
+Whenever @value{GDBN} prints a value memory will be allocated within
+@value{GDBN} to hold the contents of the value.  It is possible in
+some languages with dynamic typing systems, that an invalid program
+may indicate a value that is incorrectly large, this in turn may cause
+@value{GDBN} to try and allocate an overly large ammount of memory.
+
+@table @code
+@kindex set max-value-size
+@item set max-value-size @var{bytes}
+@itemx set max-value-size unlimited
+Set the maximum size of memory that @value{GDBN} will allocate for the
+contents of a value to @var{bytes}, trying to display a value that
+requires more memory than that will result in an error.
+
+Setting this variable does not effect values that have already been
+allocated within @value{GDBN}, only future allocations.
+
+There's a minimum size that @code{max-value-size} can be set to in
+order that @value{GDBN} can still operate correctly, this minimum is
+currently 16 bytes.
+
+The limit applies to the results of some subexpressions as well as to
+complete expressions.  For example, an expression denoting a simple
+integer component, such as @code{x.y.z}, may fail if the size of
+@var{x.y} is dynamic and exceeds @var{bytes}.  On the other hand,
+@value{GDBN} is sometimes clever; the expression @code{A[i]}, where
+@var{A} is an array variable with non-constant size, will generally
+succeed regardless of the bounds on @var{A}, as long as the component
+size is less than @var{bytes}.
+
+The default value of @code{max-value-size} is currently 64k.
+
+@kindex show max-value-size
+@item show max-value-size
+Show the maximum size of memory, in bytes, that @value{GDBN} will
+allocate for the contents of a value.
+@end table
 
 @node Optimized Code
 @chapter Debugging Optimized Code
