@@ -1,3 +1,7 @@
+2016-02-02  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/gas/arm/thumb2_it_search.d: Skip non-elf targets.
+
 2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testsuite/gas/ip2k/allinsn.d: New file.
