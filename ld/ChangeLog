@@ -1,3 +1,10 @@
+2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18591
+	* testsuite/ld-x86-64/pr18591.d: New file.
+	* testsuite/ld-x86-64/pr18591.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr18591.
+
 2016-02-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19553
