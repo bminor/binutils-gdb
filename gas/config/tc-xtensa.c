@@ -5961,15 +5961,15 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	    {
 	    case BFD_RELOC_8:
 	      fixP->fx_r_type = BFD_RELOC_XTENSA_DIFF8;
-	      fixP->fx_signed = 1;
+	      fixP->fx_signed = 0;
 	      break;
 	    case BFD_RELOC_16:
 	      fixP->fx_r_type = BFD_RELOC_XTENSA_DIFF16;
-	      fixP->fx_signed = 1;
+	      fixP->fx_signed = 0;
 	      break;
 	    case BFD_RELOC_32:
 	      fixP->fx_r_type = BFD_RELOC_XTENSA_DIFF32;
-	      fixP->fx_signed = 1;
+	      fixP->fx_signed = 0;
 	      break;
 	    default:
 	      break;

@@ -1,3 +1,13 @@
+2016-02-03  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (md_apply_fix): Mark BFD_RELOC_XTENSA_DIFF*
+	substitutions for BFD_RELOC_* as unsigned.
+	* gas/testsuite/gas/xtensa/all.exp: Add loc to list of xtensa
+	tests.
+	* gas/testsuite/gas/xtensa/loc.d: New file: loc test result
+	patterns.
+	* gas/testsuite/gas/xtensa/loc.s: New file: loc test.
+
 2016-02-03  Kevin Buettner  <kevinb@redhat.com>
 
     	* config/tc-msp430.h (DWARF2_ADDR_SIZE): Set to 4.
