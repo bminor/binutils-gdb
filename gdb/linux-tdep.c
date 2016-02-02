@@ -250,7 +250,7 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
 				    linux_siginfo_extra_fields extra_fields)
 {
   struct linux_gdbarch_data *linux_gdbarch_data;
-  struct type *int_type, *uint_type, *long_type, *void_ptr_type;
+  struct type *int_type, *uint_type, *long_type, *void_ptr_type, *short_type;
   struct type *uid_type, *pid_type;
   struct type *sigval_type, *clock_type;
   struct type *siginfo_type, *sifields_type;
@@ -266,6 +266,8 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
 				 1, "unsigned int");
   long_type = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
 				 0, "long");
+  short_type = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
+				 0, "short");
   void_ptr_type = lookup_pointer_type (builtin_type (gdbarch)->builtin_void);
 
   /* sival_t */
@@ -341,6 +343,18 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
   /* _sigfault */
   type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   append_composite_type_field (type, "si_addr", void_ptr_type);
+
+  /* Additional bound fields for _sigfault in case they were requested.  */
+  if ((extra_fields & LINUX_SIGINFO_FIELD_ADDR_BND) != 0)
+    {
+      struct type *sigfault_bnd_fields;
+
+      append_composite_type_field (type, "_addr_lsb", short_type);
+      sigfault_bnd_fields = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+      append_composite_type_field (sigfault_bnd_fields, "_lower", void_ptr_type);
+      append_composite_type_field (sigfault_bnd_fields, "_upper", void_ptr_type);
+      append_composite_type_field (type, "_addr_bnd", sigfault_bnd_fields);
+    }
   append_composite_type_field (sifields_type, "_sigfault", type);
 
   /* _sigpoll */

@@ -1,5 +1,11 @@
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* linux-tdep.c (linux_get_siginfo_type): Add the _addr_bnd
+	structure to the siginfo if extra_fields contains
+	LINUX_SIGINFO_FIELD_ADDR_BND.
+
+2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* linux-tdep.h (linux_get_siginfo_type_with_fields): Make extern.
 	* linux-tdep.c (linux_get_siginfo_type_with_fields): Make extern.
 	* i386-linux-tdep.h (x86_linux_get_siginfo_type): New
@@ -10,7 +16,6 @@
 	function.
 	(i386_linux_init_abi): Add new function at the i386 ABI
 	initialization.
-
 
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
