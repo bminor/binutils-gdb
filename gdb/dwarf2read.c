@@ -1,6 +1,6 @@
 /* DWARF 2 debugging format support for GDB.
 
-   Copyright (C) 1994-2015 Free Software Foundation, Inc.
+   Copyright (C) 1994-2016 Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
    Inc.  with support from Florida State University (under contract
@@ -8416,6 +8416,22 @@ do_ui_file_peek_last (void *object, const char *buffer, long length)
     *last_char_p = buffer[length - 1];
 }
 
+/* Return the DIE's linkage name attribute, either DW_AT_linkage_name
+   or DW_AT_MIPS_linkage_name.  Returns NULL if the attribute is not
+   defined for the given DIE.  */
+
+static const char *
+dw2_linkage_name (struct die_info *die, struct dwarf2_cu *cu)
+{
+  const char *linkage_name;
+
+  linkage_name = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
+  if (linkage_name == NULL)
+    linkage_name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
+
+  return linkage_name;
+}
+
 /* Compute the fully qualified name of DIE in CU.  If PHYSNAME is nonzero,
    compute the physname for the object, which include a method's:
    - formal parameters (C++/Java),
@@ -8456,11 +8472,8 @@ dwarf2_compute_name (const char *name,
 	 to be able to reference.  Ideally, we want the user to be able
 	 to reference this entity using either natural or linkage name,
 	 but we haven't started looking at this enhancement yet.  */
-      const char *linkage_name;
+      const char *linkage_name = dw2_linkage_name (die, cu);
 
-      linkage_name = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
-      if (linkage_name == NULL)
-	linkage_name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
       if (linkage_name != NULL)
 	return linkage_name;
     }
@@ -8716,9 +8729,7 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 
   back_to = make_cleanup (null_cleanup, NULL);
 
-  mangled = dwarf2_string_attr (die, DW_AT_linkage_name, cu);
-  if (mangled == NULL)
-    mangled = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
+  mangled = dw2_linkage_name (die, cu);
 
   /* DW_AT_linkage_name is missing in some cases - depend on what GDB
      has computed.  */
@@ -11726,13 +11737,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  const char *target_physname;
 
 	  /* Prefer the mangled name; otherwise compute the demangled one.  */
-	  target_physname = dwarf2_string_attr (target_die,
-						DW_AT_linkage_name,
-						target_cu);
-	  if (target_physname == NULL)
-	    target_physname = dwarf2_string_attr (target_die,
-						 DW_AT_MIPS_linkage_name,
-						 target_cu);
+	  target_physname = dw2_linkage_name (target_die, target_cu);
 	  if (target_physname == NULL)
 	    target_physname = dwarf2_physname (NULL, target_die, target_cu);
 	  if (target_physname == NULL)
@@ -12815,6 +12820,26 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
 	  && (type_name[len] == '\0' || type_name[len] == '<'));
 }
 
+/* Return true if this member function is a destructor, false
+   otherwise.  */
+
+static int
+dwarf2_is_destructor (struct die_info *die, struct dwarf2_cu *cu)
+{
+  const char *fieldname;
+
+  if (die->parent == NULL)
+    return 0;
+
+  if (die->parent->tag != DW_TAG_structure_type
+      && die->parent->tag != DW_TAG_union_type
+      && die->parent->tag != DW_TAG_class_type)
+    return 0;
+
+  fieldname = dwarf2_name (die, cu);
+  return (fieldname != NULL && *fieldname == '~');
+}
+
 /* Add a member function to the proper fieldlist.  */
 
 static void
@@ -12947,6 +12972,32 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
     fnp->is_artificial = 1;
 
   fnp->is_constructor = dwarf2_is_constructor (die, cu);
+  if (fnp->is_constructor)
+    {
+      const char *linkage_name;
+
+      linkage_name = dw2_linkage_name (die, cu);
+      if (linkage_name != NULL)
+	{
+	  fnp->cdtor_type.ctor_kind = is_constructor_name (linkage_name);
+	  gdb_assert (fnp->cdtor_type.ctor_kind != 0);
+	}
+    }
+  else
+    {
+      fnp->is_destructor = dwarf2_is_destructor (die, cu);
+      if (fnp->is_destructor)
+	{
+	  const char *linkage_name;
+
+	  linkage_name = dw2_linkage_name (die, cu);
+	  if (linkage_name != NULL)
+	    {
+	      fnp->cdtor_type.dtor_kind = is_destructor_name (linkage_name);
+	      gdb_assert (fnp->cdtor_type.dtor_kind != 0);
+	    }
+	}
+    }
 
   /* Get index in virtual function table if it is a virtual member
      function.  For older versions of GCC, this is an offset in the
@@ -13068,7 +13119,7 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
 /* Returns non-zero if NAME is the name of a vtable member in CU's
    language, zero otherwise.  */
 static int
-is_vtable_name (const char *name, struct dwarf2_cu *cu)
+dw2_is_vtable_name (const char *name, struct dwarf2_cu *cu)
 {
   static const char vptr[] = "_vptr";
   static const char vtable[] = "vtable";
@@ -13369,7 +13420,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		    {
 		      const char *fieldname = TYPE_FIELD_NAME (t, i);
 
-                      if (is_vtable_name (fieldname, cu))
+                      if (dw2_is_vtable_name (fieldname, cu))
 			{
 			  set_type_vptr_fieldno (type, i);
 			  break;
@@ -19207,10 +19258,7 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  const char *linkage_name;
 
-	  linkage_name = dwarf2_string_attr (child, DW_AT_linkage_name, cu);
-	  if (linkage_name == NULL)
-	    linkage_name = dwarf2_string_attr (child, DW_AT_MIPS_linkage_name,
-	                                       cu);
+	  linkage_name = dw2_linkage_name (child, cu);
 	  if (linkage_name != NULL)
 	    {
 	      char *actual_name

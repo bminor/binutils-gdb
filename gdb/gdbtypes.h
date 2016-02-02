@@ -1,7 +1,7 @@
 
 /* Internal type definitions for GDB.
 
-   Copyright (C) 1992-2015 Free Software Foundation, Inc.
+   Copyright (C) 1992-2016 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -45,6 +45,7 @@
  */
 
 #include "hashtab.h"
+#include "cp-abi.h"  /* !!keiths: YUCK!  */
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -860,6 +861,18 @@ struct fn_field
 
   struct type *fcontext;
 
+  /* If this method is a constructor or destructor, this field will describe
+     what kind of constructor or destructor it is.  */
+
+  union
+  {
+    /* The type of this constructor if IS_CONSTRUCTOR.  */
+    enum ctor_kinds ctor_kind;
+
+    /* The type of this destructor if IS_DESTRUCTOR.  */
+    enum dtor_kinds dtor_kind;
+  } cdtor_type;
+
   /* Attributes.  */
 
   unsigned int is_const:1;
@@ -883,9 +896,13 @@ struct fn_field
 
   unsigned int is_constructor : 1;
 
+  /* * True if this function is a destructor, false otherwise.  */
+
+  unsigned int is_destructor : 1;
+
   /* * Unused.  */
 
-  unsigned int dummy:3;
+  unsigned int dummy:2;
 
   /* * Index into that baseclass's virtual function table, minus 2;
      else if static: VOFFSET_STATIC; else: 0.  */
@@ -1442,6 +1459,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD_ABSTRACT(thisfn, n) ((thisfn)[n].is_abstract)
 #define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
 #define TYPE_FN_FIELD_CONSTRUCTOR(thisfn, n) ((thisfn)[n].is_constructor)
+#define TYPE_FN_FIELD_DESTRUCTOR(thisfn, n) ((thisfn)[n].is_destructor)
 #define TYPE_FN_FIELD_FCONTEXT(thisfn, n) ((thisfn)[n].fcontext)
 #define TYPE_FN_FIELD_VOFFSET(thisfn, n) ((thisfn)[n].voffset-2)
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)

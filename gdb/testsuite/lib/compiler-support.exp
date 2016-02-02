@@ -1,4 +1,4 @@
-# Copyright 2015 Free Software Foundation, Inc.
+# Copyright 2015, 2016 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -154,8 +154,8 @@ namespace eval ::CompileExpression {
 		} else {
 		    set command "compile code $varName_ = $exp"
 		}
-		gdb_test_no_output $command
-		gdb_test "p $varName_" "= $result" $tst
+		gdb_test_no_output $command $tst
+		gdb_test "p $varName_" "= $result" "result of $tst"
 	    }
 	}
     }

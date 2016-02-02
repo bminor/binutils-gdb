@@ -1,6 +1,6 @@
 /* Parser for linespec for the GNU debugger, GDB.
 
-   Copyright (C) 1986-2015 Free Software Foundation, Inc.
+   Copyright (C) 1986-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2886,6 +2886,114 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_ptr) *file_symtabs,
   do_cleanups (cleanup);
   discard_cleanups (outer);
   return collector.symbols;
+}
+
+/* See cp-support.h for description.  This function is defined here because all
+   the support routines for it are defined in this file.  */
+
+struct fn_field *
+cp_find_method_field (struct symbol *method_symbol, int xtor_only)
+{
+  struct linespec_state state;
+  VEC (block_symbol_d) *syms;
+  VEC (symtab_ptr) *file_symtabs = NULL;
+  struct cleanup *cleanup;
+  struct block_symbol *class_sym;
+  char *class_name, *method_name;
+  const char *last, *p, *method_fullname;
+
+  /* Sanity check: if the symbol's type isn't actually a method, do not
+     bother attempting to find a fn_field for it.  */
+  if (TYPE_CODE (SYMBOL_TYPE (method_symbol)) != TYPE_CODE_METHOD)
+    return NULL;
+
+  /* Find class/method names.  */
+  method_fullname = SYMBOL_NATURAL_NAME (method_symbol);
+  last = NULL;
+  p = find_toplevel_string (method_fullname, "::");
+  while (p != NULL)
+    {
+      last = p;
+      p = find_toplevel_string (p + 2, "::");
+    }
+
+  class_name = XNEWVEC (char, last - method_fullname + 1);
+  cleanup = make_cleanup (xfree, class_name);
+  strncpy (class_name, method_fullname, last - method_fullname);
+  class_name[last - method_fullname] = '\0';
+  last += 2;
+  method_name = XNEWVEC (char, strlen (last) + 1);
+  make_cleanup (xfree, method_name);
+  strcpy (method_name, last);
+
+  if (xtor_only)
+    {
+      int len;
+      char *n = class_name;
+      char *raw_class = cp_func_name (class_name);
+
+      if (raw_class != NULL)
+	n = raw_class;
+
+      /* !!keiths; This test isn't perfect in the general case, but it
+	 should be enough for our compiler-centric case which is always
+	 well-defined.  Consider moving this code to compile/ somewhere.  */
+      len = strlen (method_name);
+      if (!(strncmp (method_name, n, len) == 0
+	    && (n[len] == '\0' || n[len] == '<'))
+	  || method_name[0] != '~')
+	{
+	  /* Not a constructor or destructor -- return.  */
+	  xfree (raw_class);
+	  do_cleanups (cleanup);
+	  return NULL;
+	}
+
+      xfree (raw_class);
+    }
+
+  memset (&state, 0, sizeof (struct linespec_state));
+  state.language = language_def (language_cplus);
+  VEC_safe_push (symtab_ptr, file_symtabs, symbol_symtab (method_symbol));
+  cleanup = make_cleanup (VEC_cleanup (symtab_ptr), &file_symtabs);
+  syms = lookup_prefix_sym (&state, file_symtabs, class_name);
+  make_cleanup (VEC_cleanup (block_symbol_d), &syms);
+
+  if (!VEC_empty (block_symbol_d, syms))
+    {
+      int i;
+      struct type *class_type;
+
+      /* !!keiths: Can we expect more than one? I don't think so.  */
+      gdb_assert (VEC_length (block_symbol_d, syms) == 1);
+      class_sym = VEC_index (block_symbol_d, syms, 0);
+      class_type = SYMBOL_TYPE (class_sym->symbol);
+
+      /* CLASS_SYM is the parent class... Loop over fn_fields defined in this
+	 class looking for the one of matching name and type.  */
+      for (i = 0; i < TYPE_NFN_FIELDS (class_type); ++i)
+	{
+	  int j;
+	  const char *name = TYPE_FN_FIELDLIST_NAME (class_type, i);
+	  struct fn_field *fields = TYPE_FN_FIELDLIST1 (class_type, i);
+
+	  if (!streq (name, method_name))
+	    continue;
+
+	  for (j = 0; j < TYPE_FN_FIELDLIST_LENGTH (class_type, i); ++j)
+	    {
+	      if (streq (SYMBOL_LINKAGE_NAME (method_symbol),
+			 TYPE_FN_FIELD_PHYSNAME (fields, j)))
+		{
+		  do_cleanups (cleanup);
+		  return &TYPE_FN_FIELD (fields, j);
+		}
+	    }
+	}
+    }
+
+  do_cleanups (cleanup);
+  return NULL;
 }
 
 /* A qsort comparison function for symbols.  The resulting order does

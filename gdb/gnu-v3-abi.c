@@ -1,7 +1,7 @@
 /* Abstraction of GNU v3 abi.
    Contributed by Jim Blandy <jimb@redhat.com>
 
-   Copyright (C) 2001-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1370,6 +1370,81 @@ gnuv3_pass_by_reference (struct type *type)
   return 0;
 }
 
+/* Wrapper for libiberty's is_gnu_v3_mangled_ctor function which
+   maps libiberty's values onto our own set of return values.  */
+
+static enum ctor_kinds
+gnuv3_is_constructor_name (const char *mangled_name)
+{
+  enum gnu_v3_ctor_kinds libiberty_kind;
+  enum ctor_kinds kind;
+
+  libiberty_kind = is_gnu_v3_mangled_ctor (mangled_name);
+
+  switch (libiberty_kind)
+    {
+    case 0:
+      kind = 0;
+      break;
+    case gnu_v3_complete_object_ctor:
+      kind = complete_object_ctor;
+      break;
+    case gnu_v3_base_object_ctor:
+      kind = base_object_ctor;
+      break;
+    case gnu_v3_complete_object_allocating_ctor:
+      kind = complete_object_allocating_ctor;
+      break;
+    case gnu_v3_unified_ctor:
+      kind = unified_ctor;
+      break;
+    case gnu_v3_object_ctor_group:
+      kind = object_ctor_group;
+      break;
+    default:
+      gdb_assert_not_reached ("unhandled libiberty constructor kind");
+    }
+
+  return kind;
+}
+
+/* Wrapper for libiberty's is_gnu_v3_mangled_dtor function which
+   maps libiberty's values onto our own set of return values.  */
+
+static enum dtor_kinds
+gnuv3_is_destructor_name (const char *mangled_name)
+{
+  enum gnu_v3_dtor_kinds libiberty_kind;
+  enum dtor_kinds kind;
+
+  libiberty_kind = is_gnu_v3_mangled_dtor (mangled_name);
+  switch (libiberty_kind)
+  {
+  case 0:
+    kind = 0;
+    break;
+  case gnu_v3_deleting_dtor:
+    kind = deleting_dtor;
+    break;
+  case gnu_v3_complete_object_dtor:
+    kind = complete_object_dtor;
+    break;
+  case gnu_v3_base_object_dtor:
+    kind = complete_object_dtor;
+    break;
+  case gnu_v3_unified_dtor:
+    kind = unified_dtor;
+    break;
+  case gnu_v3_object_dtor_group:
+    kind = object_dtor_group;
+    break;
+  default:
+    gdb_assert_not_reached ("unhandled libiberty destructor kind");
+  }
+
+  return kind;
+}
+
 static void
 init_gnuv3_ops (void)
 {
@@ -1381,10 +1456,8 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.shortname = "gnu-v3";
   gnu_v3_abi_ops.longname = "GNU G++ Version 3 ABI";
   gnu_v3_abi_ops.doc = "G++ Version 3 ABI";
-  gnu_v3_abi_ops.is_destructor_name =
-    (enum dtor_kinds (*) (const char *))is_gnu_v3_mangled_dtor;
-  gnu_v3_abi_ops.is_constructor_name =
-    (enum ctor_kinds (*) (const char *))is_gnu_v3_mangled_ctor;
+  gnu_v3_abi_ops.is_destructor_name = gnuv3_is_destructor_name;
+  gnu_v3_abi_ops.is_constructor_name = gnuv3_is_constructor_name;
   gnu_v3_abi_ops.is_vtable_name = gnuv3_is_vtable_name;
   gnu_v3_abi_ops.is_operator_name = gnuv3_is_operator_name;
   gnu_v3_abi_ops.rtti_type = gnuv3_rtti_type;

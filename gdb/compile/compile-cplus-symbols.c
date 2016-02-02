@@ -1,6 +1,6 @@
 /* Convert symbols from GDB to GCC
 
-   Copyright (C) 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2014-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -191,10 +191,38 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	  break;
 
 	case LOC_BLOCK:
-	  kind = GCC_CP_SYMBOL_FUNCTION;
-	  addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
-	  if (is_global && TYPE_GNU_IFUNC (SYMBOL_TYPE (sym.symbol)))
-	    addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
+	  {
+	    int ignore;
+	    char *special_name;
+	    const char *func_name;
+	    struct fn_field *field;
+
+	    kind = GCC_CP_SYMBOL_FUNCTION;
+	    addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
+	    if (is_global && TYPE_GNU_IFUNC (SYMBOL_TYPE (sym.symbol)))
+	      addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
+
+	    special_name = NULL;
+	    field = cp_find_method_field (sym.symbol, 1);
+	    func_name = maybe_canonicalize_special_function
+	      (SYMBOL_LINKAGE_NAME (sym.symbol), NULL,
+	       SYMBOL_TYPE (sym.symbol), &special_name, &ignore);
+	    if (special_name != NULL)
+	      {
+		kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
+		name = special_name;
+	      }
+	    else if (func_name != SYMBOL_NATURAL_NAME (sym.symbol))
+	      {
+		kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
+		name = xstrdup (func_name);
+	      }
+	    else if (ignore)
+	      {
+		/* !!keiths: I don't think we can get here, can we?  */
+		gdb_assert_not_reached ("told to ignore method!");
+	      }
+	  }
 	  break;
 
 	case LOC_CONST:
@@ -323,7 +351,7 @@ convert_one_symbol (struct compile_cplus_instance *context,
 	    }
 
 	  /* Get the `raw' name of the symbol.  */
-	  if (SYMBOL_NATURAL_NAME (sym.symbol) != NULL)
+	  if (name == NULL && SYMBOL_NATURAL_NAME (sym.symbol) != NULL)
 	    {
 	      name
 		= cp_func_name (SYMBOL_NATURAL_NAME (sym.symbol));

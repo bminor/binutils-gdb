@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2016 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
    Namespace support contributed by David Carlton.
@@ -157,5 +157,12 @@ extern struct cmd_list_element *maint_cplus_cmd_list;
 /* A wrapper for bfd_demangle.  */
 
 char *gdb_demangle (const char *name, int options);
+
+/* Find the fn_field for the method with symbol METHOD_SYMBOL in its
+   parent class.  If XTOR_ONLY is non-zero, any symbols not representing a
+   constructor or destructor will return NULL.   */
+
+extern struct fn_field *cp_find_method_field (struct symbol *method_symbol,
+					      int xtor_only);
 
 #endif /* CP_SUPPORT_H */

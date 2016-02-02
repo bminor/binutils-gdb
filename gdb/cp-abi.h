@@ -3,7 +3,7 @@
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 
-   Copyright (C) 2001-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -47,7 +47,13 @@ enum ctor_kinds {
   base_object_ctor,
 
   /* An allocating complete-object constructor.  */
-  complete_object_allocating_ctor
+  complete_object_allocating_ctor,
+
+  /* GCC's "unified" constructor.  */
+  unified_ctor,
+
+  /* Deprecated?  */
+  object_ctor_group
 };
 
 /* Return non-zero iff NAME is the mangled name of a constructor.
@@ -70,7 +76,13 @@ enum dtor_kinds {
 
   /* A destructor which finalizes a subobject of some larger
      object.  */
-  base_object_dtor
+  base_object_dtor,
+
+  /* GCC's "unified" destructor.  */
+  unified_dtor,
+
+  /* Deprecated?  */
+  object_dtor_group
 };
   
 /* Return non-zero iff NAME is the mangled name of a destructor.

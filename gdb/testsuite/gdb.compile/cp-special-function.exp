@@ -1,0 +1,259 @@
+# Copyright 2015, 2016 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# (Very) simple method tests.
+
+load_lib compiler-support.exp
+
+standard_testfile .cc
+
+if {[skip_cplus_tests]} {
+    untested "skipping C++ tests"
+    return
+}
+
+if {[prepare_for_testing $testfile $testfile $srcfile \
+	 {debug nowarnings c++ additional_flags=-std=c++11}]} {
+    return -1
+}
+
+if {![runto_main]} {
+    return -1
+}
+
+if {[skip_compile_feature_tests]} {
+    untested \
+	"compile command not supported (could not find libcc1 shared library?)"
+    return -1
+}
+
+gdb_breakpoint [gdb_get_line_number "break here" $srcfile]
+gdb_continue_to_breakpoint "testing location"
+
+# Reminder, "var" is an integer; all these types get converted to `int'.
+CompileExpression::new "var"
+CompileExpression::add_imp "a + 1" 2
+CompileExpression::add_imp "a + b" 3
+CompileExpression::add_imp "a + b + 3" 6
+CompileExpression::add_imp "1 + a + a" 3
+CompileExpression::add_imp "1 + b + 1" 4
+CompileExpression::add_imp "(+a).get ()" 11
+CompileExpression::add_imp "(+c).get ()" 7
+CompileExpression::add_imp "a + (+c).get ()" 8
+
+CompileExpression::add_imp "a - 2" -1
+CompileExpression::add_imp "a - b" -1
+CompileExpression::add_imp "a - b - 3" -4
+CompileExpression::add_imp "2 - a - a" 0
+CompileExpression::add_imp "2 - b - 2" -2
+CompileExpression::add_imp "(-a).get ()" 21
+CompileExpression::add_imp "(-c).get ()" 17
+CompileExpression::add_imp "a - (-c).get ()" -16
+
+CompileExpression::add_imp "a & 3" 1
+CompileExpression::add_imp "a & b" 0
+CompileExpression::add_imp "a & b & 3" 0
+CompileExpression::add_imp "3 & a & a" 1
+CompileExpression::add_imp "3 & b & 3" 2
+CompileExpression::add_imp "(&a).get ()" 31
+CompileExpression::add_imp "(&c).get ()" 27
+CompileExpression::add_imp "a & (&c).get ()" 1
+
+CompileExpression::add_imp "a * 4" 4
+CompileExpression::add_imp "a * b" 2
+CompileExpression::add_imp "a * b * 4" 8
+CompileExpression::add_imp "4 * a * a" 4
+CompileExpression::add_imp "4 * b * 4" 32
+CompileExpression::add_imp "(*a).get ()" 41
+CompileExpression::add_imp "(*c).get ()" 37
+CompileExpression::add_imp "a * (*c).get ()" 37
+
+CompileExpression::add_imp "(~a).get ()" -2
+CompileExpression::add_imp "(~b).get ()" -3
+CompileExpression::add_imp "(~c).get ()" 2
+
+CompileExpression::add_imp "a / 1" 1
+CompileExpression::add_imp "10 / b" 5
+CompileExpression::add_imp "b / a" 2
+CompileExpression::add_imp "-3 / c / 1 / a" 1
+
+CompileExpression::add_imp "a % 1" 0
+CompileExpression::add_imp "5 % c" 2
+CompileExpression::add_imp "a % c" 1
+CompileExpression::add_imp "-2 % c % b % 1" 0
+
+CompileExpression::add_imp "a | 1" 1
+CompileExpression::add_imp "1 | b" 3
+CompileExpression::add_imp "b | c" -1
+CompileExpression::add_imp "1 | a | b | 4" 7
+
+CompileExpression::add_imp "a ^ 1" 0
+CompileExpression::add_imp "1 ^ b" 3
+CompileExpression::add_imp "b ^ c" -1
+CompileExpression::add_imp "1 ^ a ^ b ^ 4" 6
+
+# !!keiths: I don't know why this is failing...
+CompileExpression::add_exp "d = b; var = d.get ();" 2
+CompileExpression::add_exp "d = 21; var = d.get ();" 21
+CompileExpression::add_exp "d = 0; var = d.get ();" 0
+
+CompileExpression::add_exp "d.int_ = 1; var = d.get ()" 1
+CompileExpression::add_exp "d += a; var = d.get ();" 2
+CompileExpression::add_exp "d += 2; var = d.get ();" 4
+
+CompileExpression::add_exp "d.int_ = 2; var = d.get ()" 2
+CompileExpression::add_exp "d -= a; var = d.get ();" 1
+CompileExpression::add_exp "d -= 2; var = d.get ();" -1
+
+CompileExpression::add_exp "d.int_ = 3; var = d.get ()" 3
+CompileExpression::add_exp "d *= 2; var = d.get ()" 6
+CompileExpression::add_exp  "d *= d; var = d.get ()" 36
+
+CompileExpression::add_exp "d.int_ = 6; var = d.get ()" 6
+CompileExpression::add_exp "d /= 2; var = d.get ()" 3
+CompileExpression::add_exp  "d /= d; var = d.get ()" 1
+
+CompileExpression::add_exp "d.int_ = 4; var = d.get ()" 4
+CompileExpression::add_exp "d %= 3; var = d.get ()" 1
+CompileExpression::add_exp  "d %= d; var = d.get ()" 0
+
+CompileExpression::add_exp "d.int_ = 5; var = d.get ()" 5
+CompileExpression::add_exp "d &= 4; var = d.get ()" 4
+CompileExpression::add_exp  "d &= a; var = d.get ()" 0
+
+CompileExpression::add_exp "d.int_ = 8; var = d.get ()" 8
+CompileExpression::add_exp "d |= a; var = d.get ()" 9
+CompileExpression::add_exp  "d |= 16; var = d.get ()" 25
+
+CompileExpression::add_exp "d.int_ = 9; var = d.get ()" 9
+CompileExpression::add_exp "d ^= 2; var = d.get ()" 11
+CompileExpression::add_exp  "d ^= d; var = d.get ()" 0
+
+CompileExpression::add_imp "d.int_ = 10; var = d.get ()" 10
+CompileExpression::add_imp "d << 2" 40
+CompileExpression::add_imp "d << a" 20
+CompileExpression::add_imp "1 << b" 4
+
+CompileExpression::add_imp "d.int_ = 12; var = d.get ()" 12
+CompileExpression::add_imp "d >> 2" 3
+CompileExpression::add_imp "d >> a" 6
+CompileExpression::add_imp "10 >> a" 5
+
+CompileExpression::add_exp "d.int_ = 13; var = d.get ()" 13
+CompileExpression::add_exp "d <<= 2; var = d.get ()" 52
+CompileExpression::add_exp  "d <<= a; var = d.get ()" 104
+
+CompileExpression::add_exp "d.int_ = 14; var = d.get ()" 14
+CompileExpression::add_exp "d >>= 2; var = d.get ()" 3
+CompileExpression::add_exp  "d >>= a; var = d.get ()" 1
+
+CompileExpression::add_imp "d.int_ = 1013; var = d.get ()" 1013
+CompileExpression::add_imp "d == 2" 0
+CompileExpression::add_imp "d == d" 1
+CompileExpression::add_imp "1 == d" 0
+
+CompileExpression::add_imp "d.int_ = 1014; var = d.get ()" 1014
+CompileExpression::add_imp "d != 2" 1
+CompileExpression::add_imp "d != d" 0
+CompileExpression::add_imp "1014 == d" 1
+
+CompileExpression::add_imp "d.int_ = 15; var = d.get ()" 15
+CompileExpression::add_imp "d < 2" 0
+CompileExpression::add_imp "a < d" 1
+CompileExpression::add_imp "16 < d" 0
+
+CompileExpression::add_imp "d.int_ = 16; var = d.get ()" 16
+CompileExpression::add_imp "d > 2" 1
+CompileExpression::add_imp "d < a" 0
+CompileExpression::add_imp "15 < d" 1
+
+CompileExpression::add_imp "d.int_ = 17; var = d.get ()" 17
+CompileExpression::add_imp "d <= 2" 0
+CompileExpression::add_imp "a <= d" 1
+CompileExpression::add_imp "18 <= d" 0
+
+CompileExpression::add_imp "d.int_ = 18; var = d.get ()" 18
+CompileExpression::add_imp "d >= 2" 1
+CompileExpression::add_imp "d <= a" 0
+CompileExpression::add_imp "15 <= d" 1
+
+CompileExpression::add_imp "d.int_ = 19; var = d.get ()" 19
+CompileExpression::add_imp "!d" 0
+
+CompileExpression::add_imp "d.int_ = 20; var = d.get ()" 20
+CompileExpression::add_imp "d && 0" 0
+CompileExpression::add_imp "d && a" 1
+CompileExpression::add_imp "0 && d" 0
+
+CompileExpression::add_imp "d.int_ = 21; var = d.get ()" 21
+CompileExpression::add_imp "d || 0" 1
+CompileExpression::add_imp "d || a" 1
+CompileExpression::add_imp "0 || d" 1
+
+CompileExpression::add_exp "d.int_ = 22; var = d.get ()" 22
+CompileExpression::add_imp "(d++).get ()" 22
+CompileExpression::add_imp "d.get ()" 23 "get value of post-incr d"
+CompileExpression::add_imp "(++d).get ()" 24
+
+CompileExpression::add_exp "d.int_ = 23; var = d.get ()" 23
+CompileExpression::add_imp "(d--).get ()" 23
+CompileExpression::add_imp "d.get ()" 22 "get value of post-decr d"
+CompileExpression::add_imp "(--d).get ()" 21
+
+CompileExpression::add_exp "d.int_ = 24; var = d.get ()" 24
+CompileExpression::add_imp "(a,d).get ()" 1
+CompileExpression::add_imp "(d,a).get ()" 24
+
+CompileExpression::add_exp "d.int_ = 25; var = d.get ()" 25
+CompileExpression::add_imp "d->*3" 28
+CompileExpression::add_imp "d->*b" 27 "d->*b 1"
+
+CompileExpression::add_exp "d.int_ = 26; var = d.get ()" 26
+CompileExpression::add_imp "d->*4" 30
+CompileExpression::add_imp "d->*b" 28 "d->*b 2"
+
+CompileExpression::add_exp "d.pub_var = 1; var = d.pub_var" 1
+CompileExpression::add_imp "d->pub_var" -21
+
+# "'d' cannot be used as function"
+ CompileExpression::add_exp "d.int_ = 27; var = d.get ()" 27
+ CompileExpression::add_imp "d ()" -27
+ CompileExpression::add_imp "d (3)" 4
+ CompileExpression::add_imp "a (b)" 3
+
+CompileExpression::add_exp "d.int_ = 28; var = d.get ()" 28
+CompileExpression::add_imp "d\[10\]" 18
+CompileExpression::add_imp "d\[b\]" 26
+
+# "unable to find XYZ literal operator 'operator""_MI'"
+ CompileExpression::add_imp "10_MI" 100
+ CompileExpression::add_imp "'c'_MI" 200
+ CompileExpression::add_imp "\"foo\"_MI" 300
+
+# crash
+ CompileExpression::add_exp \
+     "MyInteger *myint_ptr = new MyInteger (1); var = myint_ptr->pub_var" 1234
+
+CompileExpression::add_exp "d.int_ = 29; var = d.int_" 29
+CompileExpression::add_exp "ch = d; var = ch;" 29
+# !!keiths: Why do I need to "force" this to signed to work?
+CompileExpression::add_exp "signed char a_char = d; var = a_char - 9" 20
+
+CompileExpression::add_exp "d.int_ = 30; var = d.int_" 30
+CompileExpression::add_imp "d" -30
+CompileExpression::add_exp "int integer = d; var = integer - 10" -40
+
+CompileExpression::run_tests "code"
+#CompileExpression::run_tests "print"

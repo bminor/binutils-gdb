@@ -1,6 +1,6 @@
 /* Convert types from GDB to GCC
 
-   Copyright (C) 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2014-2016 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,7 @@
 #include "symtab.h"
 #include "source.h"
 #include "cp-support.h"
+#include "cp-abi.h"
 #include "symtab.h"
 #include "objfiles.h"
 #include "block.h"
@@ -521,7 +522,7 @@ ccp_pop_processing_context (struct compile_cplus_instance *context,
 
 struct compile_cplus_context *
 new_processing_context (struct compile_cplus_instance *context,
-			const char *typename, const struct type *type,
+			const char *typename, struct type *type,
 			gcc_type *nested_type)
 {
   char *name;
@@ -554,7 +555,7 @@ new_processing_context (struct compile_cplus_instance *context,
 	 unqualified name of the type to process.  */
       scope = get_processing_context_scope (pctx);
 
-      if (type != SYMBOL_TYPE (scope->bsymbol.symbol)
+      if (!types_equal (type, SYMBOL_TYPE (scope->bsymbol.symbol))
 	  && (cur_scope == NULL
 	      || cur_scope->bsymbol.symbol != scope->bsymbol.symbol))
 	{
@@ -928,6 +929,308 @@ ccp_convert_method (struct compile_cplus_instance *context,
   return result;
 }
 
+#define OPHASH1(A) ((uint32_t) A << 16)
+#define OPHASH2(A,B) OPHASH1(A) | (uint32_t) B << 8
+#define OPHASH3(A,B,C) OPHASH2(A,B) | (uint32_t) C
+
+/* Compute a one, two, or three letter hash for the operator given by
+   OP.  Returns the computed hash or zero for (some) conversion operators.  */
+
+static uint32_t
+operator_hash (const char *op)
+{
+  const char *p = op;
+  uint32_t hash = 0;
+  int len = 0;
+
+  while (p[0] != '\0' && (p[0] != '(' || p[1] == ')'))
+    {
+      ++len;
+      ++p;
+    }
+
+  switch (len)
+    {
+    case 1:
+      hash = OPHASH1(op[0]);
+      break;
+    case 2:
+     hash = OPHASH2(op[0], op[1]);
+     break;
+    case 3:
+      /* This will also hash "operator int", but the plug-in does not
+	 recognize OPHASH3('i', 'n', 't'), so we still end up in the code
+	 to do a conversion operator in the caller.  */
+      hash = OPHASH3(op[0], op[1], op[2]);
+      break;
+    default:
+      break;
+    }
+
+  //printf ("hash for %s is %x\n", op, hash);
+  return hash;
+}
+
+/* Returns non-zero iff TYPE represents a binary method.  */
+
+static int
+is_binary_method (const struct type *type)
+{
+  int i, len;
+
+  for (i = 0, len = 0; i < TYPE_NFIELDS (type); ++i)
+    {
+      if (!TYPE_FIELD_ARTIFICIAL (type, i))
+	++len;
+    }
+
+ return len > 1;
+}
+
+/* See compile-internal.h.  */
+
+#define DEBUG_XTOR 0
+const char *
+maybe_canonicalize_special_function (const char *field_name,
+				     const struct fn_field *method_field,
+				     const struct type *method_type,
+				     char **outname, int *ignore)
+{
+  /* We assume that no method is to be ignored.  */
+  *ignore = 0;
+
+  /* We only consider ctors and dtors if METHOD_FIELD is non-NULL.  */
+  /* !!keiths: Ick.  Maybe we can look it up here instead if it is NULL?  */
+  if (method_field != NULL)
+    {
+      if (method_field->is_constructor)
+	{
+	  switch (method_field->cdtor_type.ctor_kind)
+	    {
+	    case complete_object_ctor:
+#if DEBUG_XTOR
+	      printf ("complete_object_ctor (C1)\n");
+#endif
+	      return "C1";
+	    case base_object_ctor:
+#if DEBUG_XTOR
+	      printf ("base_object_ctor (C2)\n");
+#endif
+	      return "C2";
+	    case complete_object_allocating_ctor:
+#if DEBUG_XTOR
+	      printf ("complete_object_allocating_ctor (C1)\n");
+#endif
+	      return "C1";
+	    case unified_ctor:
+#if DEBUG_XTOR
+	      printf ("unified_ctor (C4 -- ignore)\n");
+#endif
+	      *ignore = 1;
+	      return field_name; /* C4  */
+	    case object_ctor_group:
+#if DEBUG_XTOR
+	      printf ("object_ctor_group (C? -- ignore)\n");
+#endif
+	      *ignore = 1;
+	      return field_name; /* C1 ??  */
+
+	    default:
+	      gdb_assert_not_reached ("unknown constructor kind");
+	    }
+	}
+      else if (method_field->is_destructor)
+	{
+	  switch (method_field->cdtor_type.dtor_kind)
+	    {
+	    case deleting_dtor:
+#if DEBUG_XTOR
+	      printf ("deleting_dtor (D0)\n");
+#endif
+	      return "D0";
+	    case complete_object_dtor:
+#if DEBUG_XTOR
+	      printf ("complete_object_dtor (D1)\n");
+#endif
+	      return "D1";
+	    case base_object_dtor:
+#if DEBUG_XTOR
+	      printf ("base_object_dtor (D2)\n");
+#endif
+	      return "D2";
+	    case unified_dtor:
+#if DEBUG_XTOR
+	      printf ("unified_dtor (D4 -- ignore)\n");
+#endif
+	      *ignore = 1;
+	      return field_name; /* D4  */
+	    case object_dtor_group:
+#if DEBUG_XTOR
+	      printf ("object_dtor_group (D? -- ignore)\n");
+#endif
+	      *ignore = 1;
+	      return field_name; /* D1 ??  */
+
+	    default:
+	      gdb_assert_not_reached ("unknown destructor kind");
+	    }
+	}
+    }
+
+  if (!is_operator_name (field_name))
+    return field_name;
+
+  /* Skip over "operator".  */
+  field_name += sizeof ("operator") - 1;
+
+  if (strncmp (field_name, "new", sizeof ("new") - 1) == 0)
+    {
+      field_name += 3;
+      if (*field_name == '\0')
+	return "nw";
+      else if (*field_name == '[')
+	return "na";
+    }
+  else if (strncmp (field_name, "delete", sizeof ("delete") - 1) == 0)
+    {
+      if (*field_name == '\0')
+	return "dl";
+      else if (*field_name == '[')
+	return "da";
+    }
+  else if (field_name[0] == '\"' && field_name[1] == '\"')
+    {
+      const char *end;
+      size_t len;
+
+      /* Skip over \"\" -- the plug-in doesn't want it.  */
+      field_name += 2;
+
+      /* Skip any whitespace that may have been introduced during
+	 canonicalization.  */
+      field_name = skip_spaces_const (field_name);
+
+      /* Find the opening '(', if any.  */
+      end = strchr (field_name, '(');
+      if (end == NULL)
+	end = field_name + strlen (field_name);
+
+      /* Size of buffer: 'li', 'i', sizeof operator name, '\0'  */
+      len = 2 + end - field_name + 1;
+      *outname = xmalloc (len);
+      strcpy (*outname, "li");
+      strncat (*outname, field_name, end - field_name);
+      (*outname)[len] = '\0';
+      //printf ("GOT LITERAL OPERATOR: %s\n", *outname);
+      return "li";
+    }
+
+  switch (operator_hash (field_name))
+    {
+    case OPHASH1 ('+'):
+      if (is_binary_method (method_type))
+	return "pl";
+      else
+	return "ps";
+      break;
+
+    case OPHASH1 ('-'):
+      if (is_binary_method (method_type))
+	return "mi";
+      else
+	return "ng";
+      break;
+    case OPHASH1 ('&'):
+      if (is_binary_method (method_type))
+	return "an";
+      else
+	return "ad";
+      break;
+
+    case OPHASH1 ('*'):
+      if (is_binary_method (method_type))
+	return "ml";
+      else
+	return "de";
+      break;
+
+    case OPHASH1 ('~'):
+      return "co";
+    case OPHASH1 ('/'):
+      return "dv";
+    case OPHASH1 ('%'):
+      return "rm";
+    case OPHASH1 ('|'):
+      return "or";
+    case OPHASH1 ('^'):
+      return "eo";
+    case OPHASH1 ('='):
+      return "aS";
+    case OPHASH2 ('+', '='):
+      return "pL";
+    case OPHASH2 ('-', '='):
+      return "mI";
+    case OPHASH2 ('*', '='):
+      return "mL";
+    case OPHASH2 ('/', '='):
+      return "dV";
+    case OPHASH2 ('%', '='):
+      return "rM";
+    case OPHASH2 ('&', '='):
+      return "aN";
+    case OPHASH2 ('|', '='):
+      return "oR";
+    case OPHASH2 ('^', '='):
+      return "eO";
+    case OPHASH2 ('<', '<'):
+      return "ls";
+    case OPHASH2 ('>', '>'):
+      return "rs";
+    case OPHASH3 ('<', '<', '='):
+      return "lS";
+    case OPHASH3 ('>', '>', '='):
+      return "rS";
+    case OPHASH2 ('=', '='):
+      return "eq";
+    case OPHASH2 ('!', '='):
+      return "ne";
+    case OPHASH1 ('<'):
+      return "lt";
+    case OPHASH1 ('>'):
+      return "gt";
+    case OPHASH2 ('<', '='):
+      return "le";
+    case OPHASH2 ('>', '='):
+      return "ge";
+    case OPHASH1 ('!'):
+      return "nt";
+    case OPHASH2 ('&', '&'):
+      return "aa";
+    case OPHASH2 ('|', '|'):
+      return "oo";
+    case OPHASH2 ('+', '+'):
+      return "pp";
+    case OPHASH2 ('-', '-'):
+      return "mm";
+    case OPHASH1 (','):
+      return "cm";
+    case OPHASH3 ('-', '>', '*'):
+      return "pm";
+    case OPHASH2 ('-', '>'):
+      return "pt";
+    case OPHASH2 ('(', ')'):
+      return "cl";
+    case OPHASH2 ('[', ']'):
+      return "ix";
+    case OPHASH1 ('?'):
+      return "qu";
+
+    default:
+      /* Conversion operators: Full name is not needed.  */
+      return "cv";
+    }
+}
+
 /* Convert all methods defined in TYPE, which should be a class/struct/union
    with gcc_type CLASS_TYPE.  */
 
@@ -980,11 +1283,40 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	  unsigned int line;
 	  const char *kind; //debug
 	  enum gcc_cp_symbol_kind sym_kind = GCC_CP_SYMBOL_FUNCTION;
+	  const char *name;
+	  char *special_name;
+	  struct cleanup *back_to;
+	  int ignore;
 
 	  /* Skip artificial methods.  */
 	  if (TYPE_FN_FIELD_ARTIFICIAL (methods, j))
 	    continue;
 
+	  special_name = NULL;
+	  name = maybe_canonicalize_special_function (overloaded_name,
+						      &methods[j],
+						      methods[j].type,
+						      &special_name,
+						      &ignore);
+	  /* !!keiths: I don't know if this is really necessary...  */
+	  if (ignore)
+	    {
+	      //printf ("ignoring method %s\n", methods[j].physname);
+	      continue;
+	    }
+
+	  back_to = make_cleanup (null_cleanup, NULL);
+
+	  if (special_name != NULL)
+	    {
+	      make_cleanup (xfree, special_name);
+	      name = special_name;
+	    }
+	  if (name != overloaded_name)
+	    {
+	      //printf ("SPECIAL FUNCTION %s\n", name);
+	      sym_kind |= GCC_CP_FLAG_SPECIAL_FUNCTION;
+	    }
 	  sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (methods, j),
 			       get_current_search_block (), VAR_DOMAIN, NULL);
 
@@ -997,10 +1329,10 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 		  method_type
 		    = ccp_convert_method (context, type,
 					  TYPE_FN_FIELD_TYPE (methods, j));
-		  CPOPS ("new_decl pure virtual method %s\n", overloaded_name);
+		  CPOPS ("new_decl pure virtual method %s\n", name);
 		  CPCALL (new_decl, context,
-			  overloaded_name,
-			  (GCC_CP_SYMBOL_FUNCTION
+			  name,
+			  (sym_kind
 			   | GCC_CP_FLAG_VIRTUAL_FUNCTION
 			   | GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION),
 			  method_type,
@@ -1008,6 +1340,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 			  0,
 			  NULL,
 			  0);
+		  do_cleanups (back_to);
 		  continue;
 		}
 
@@ -1022,6 +1355,7 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	      warning (_("Method %s appears to be optimized out.\n"
 			 "All references to this method will be undefined."),
 			 TYPE_FN_FIELD_PHYSNAME (methods, j));
+	      do_cleanups (back_to);
 	      continue;
 	    }
 
@@ -1051,16 +1385,17 @@ ccp_convert_struct_or_union_methods (struct compile_cplus_instance *context,
 	  /* !!keiths: Is this sufficient?  */
 	  address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
 
-	  CPOPS ("new_decl%s method %s at %s\n", kind,
-		 overloaded_name, core_addr_to_string (address));
+	  CPOPS ("new_decl%s method %s at %s\n", kind, name,
+		 core_addr_to_string (address));
 	  CPCALL (new_decl, context,
-		  overloaded_name,
+		  name,
 		  sym_kind,
 		  method_type,
 		  NULL,
 		  address,
 		  filename,
 		  line);
+	  do_cleanups (back_to);
 #endif
 	}
     }
@@ -1254,7 +1589,7 @@ ccp_convert_enum (struct compile_cplus_instance *context, struct type *type)
   // FIXME: drop any namespaces and enclosing class names, if any. -lxo
   /* !!keiths: Why?  Drop or push, just like convert_struct_or_union?  */
 
-  CPOPS ("int_type %d\n", TYPE_LENGTH (type));
+  CPOPS ("int_type %d %d\n", TYPE_UNSIGNED (type), TYPE_LENGTH (type));
   int_type = CPCALL (int_type, context,
 		     TYPE_UNSIGNED (type), TYPE_LENGTH (type));
   CPOPS ("\tgcc_type = %lld\n", int_type);
@@ -1315,7 +1650,7 @@ ccp_convert_func (struct compile_cplus_instance *context, struct type *type,
      pure virtual method, TYPE_PROTOTYPED == 0.
      But this *may* be needed for several gdb.compile tests.  Or at least
      indicate other unresolved bugs in this file or elsewhere in gdb.  */
-  int is_varargs = TYPE_VARARGS (type) || !TYPE_PROTOTYPED (type);
+  int is_varargs = TYPE_VARARGS (type) /*|| !TYPE_PROTOTYPED (type)*/;
 
   /* This approach means we can't make self-referential function
      types.  Those are impossible in C, though.  */
@@ -1355,7 +1690,7 @@ ccp_convert_int (struct compile_cplus_instance *context, struct type *type)
 {
   gcc_type result;
 
-  CPOPS ("int_type %d\n", TYPE_LENGTH (type));
+  CPOPS ("int_type %d %d\n", TYPE_LENGTH (type), TYPE_UNSIGNED (type));
   result = CPCALL (int_type, context, TYPE_UNSIGNED (type), TYPE_LENGTH (type));
   CPOPS ("\tgcc_type = %lld\n", result);
   return result;

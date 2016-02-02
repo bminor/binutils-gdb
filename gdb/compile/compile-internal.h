@@ -1,5 +1,5 @@
 /* Header file for GDB compile command and supporting functions.
-   Copyright (C) 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2014-2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -221,8 +221,29 @@ extern void ccp_pop_processing_context (struct compile_cplus_instance *,
 					struct compile_cplus_context *);
 extern struct compile_cplus_context *
   new_processing_context (struct compile_cplus_instance *,
-			  const char *, const struct type *, gcc_type *);
+			  const char *, struct type *, gcc_type *);
 
 extern void delete_processing_context (struct compile_cplus_context *);
 
+/* Maybe canonicalize FIELD_NAME with function field METHOD_FIELD (may
+   be NULL for non-constructors) and METHOD_TYPE (may not be NULL).
+
+   If the field is not represented by one of the plug-in's "special functions,"
+   (operators, ctors, dtors), return FIELD_NAME.
+
+   Otherwise return the unique plug-in identifier for the function.
+
+   If memory was allocated for the name (required by some function types),
+   it *OUTNAME will be set and should be used over the return value.  It
+   must subsequently be freed by the caller.
+
+   If the given method should be ignored (not defined to the plug-in),
+   IGNORE will be set to 1.  */
+
+extern const char *
+  maybe_canonicalize_special_function (const char *field_name,
+				       const struct fn_field *method_field,
+				       const struct type *method_type,
+				       char **outname,
+				       int *ignore);
 #endif /* GDB_COMPILE_INTERNAL_H */
