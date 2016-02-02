@@ -1,3 +1,7 @@
+2016-02-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ui-out.c (MAX_UI_OUT_LEVELS): Remove.
+
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* amd64-linux-siginfo.c (nat_siginfo_t, nat_sigval_t, nat_timeval):
