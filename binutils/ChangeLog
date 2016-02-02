@@ -1,3 +1,11 @@
+2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19547
+	* testsuite/binutils-all/objcopy.exp
+	(objcopy_test_without_global_symbol): New proc.
+	Run objcopy_test_without_global_symbol.
+	* testsuite/binutils-all/pr19547.c: New file.
+
 2016-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/19523

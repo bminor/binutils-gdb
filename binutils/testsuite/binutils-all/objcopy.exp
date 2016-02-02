@@ -1104,3 +1104,43 @@ if [is_elf_format] {
     run_dump_test "exclude-1b"
 }
 run_dump_test "localize-hidden-2"
+
+# Test objcopying an object file without global symbol
+
+proc objcopy_test_without_global_symbol { } {
+    global OBJCOPY
+    global OBJCOPYFLAGS
+    global OBJDUMP
+    global OBJDUMPFLAGS
+    global srcdir
+    global subdir
+
+    set test "strip without global symbol "
+
+    if { [target_compile $srcdir/$subdir/pr19547.c tmpdir/pr19547.o object debug] != "" } {
+	untested $test
+	return
+    }
+
+    if [is_remote host] {
+	set objfile [remote_download host tmpdir/pr19547.o]
+    } else {
+	set objfile tmpdir/pr19547.o
+    }
+
+    set exec_output [binutils_run $OBJCOPY "$OBJCOPYFLAGS --strip-unneeded $objfile"]
+    if ![string equal "" $exec_output] {
+	fail $test
+	return
+    }
+
+    set exec_output [binutils_run $OBJDUMP "$OBJDUMPFLAGS -t $objfile"]
+    if {![regexp "no symbols" $exec_output]} {
+	fail $test
+	return
+    }
+
+    pass $test
+}
+
+objcopy_test_without_global_symbol

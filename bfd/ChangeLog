@@ -1,3 +1,9 @@
+2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19547
+	* elf.c (assign_section_numbers): Clear HAS_RELOC if there are
+	no relocations in relocatable files.
+
 2016-02-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19553
