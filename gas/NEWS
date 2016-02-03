@@ -1,5 +1,8 @@
 -*- text -*-
 
+* New command line option -mfence-as-lock-add=yes for x86 target to encode
+  lfence, mfence and sfence as "lock addl $0x0, (%[re]sp)".
+
 Changes in 2.26:
 
 * Add a configure option --enable-compressed-debug-sections={all,gas} to
