@@ -1,3 +1,7 @@
+2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Remove duplicated marker for 2.26.
+
 2016-02-02  Renlin Li  <renlin.li@arm.com>
 
 	* testsuite/gas/arm/thumb2_it_search.d: Skip non-elf targets.
