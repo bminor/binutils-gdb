@@ -898,7 +898,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) xsave;
   int i;
-  unsigned int clear_bv;
+  ULONGEST clear_bv;
   static const gdb_byte zero[MAX_REGISTER_SIZE] = { 0 };
   enum
     {
@@ -950,12 +950,15 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
   if (regclass != none)
     {
-      /* Get `xstat_bv'.  */
-      const gdb_byte *xstate_bv_p = XSAVE_XSTATE_BV_ADDR (regs);
+      /* Get `xstat_bv'.  The supported bits in `xstat_bv' are 8 bytes.  */
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      ULONGEST xstate_bv = 0;
 
-      /* The supported bits in `xstat_bv' are 1 byte.  Clear part in
-	 vector registers if its bit in xstat_bv is zero.  */
-      clear_bv = (~(*xstate_bv_p)) & tdep->xcr0;
+      xstate_bv = extract_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs),
+					    8, byte_order);
+
+      /* Clear part in vector registers if its bit in xstat_bv is zero.  */
+      clear_bv = (~(xstate_bv)) & tdep->xcr0;
     }
   else
     clear_bv = X86_XSTATE_ALL_MASK;
@@ -1333,11 +1336,14 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
   if ((regclass & check))
     {
       gdb_byte raw[I386_MAX_REGISTER_SIZE];
-      gdb_byte *xstate_bv_p = XSAVE_XSTATE_BV_ADDR (regs);
-      unsigned int xstate_bv = 0;
-      /* The supported bits in `xstat_bv' are 1 byte.  */
-      unsigned int clear_bv = (~(*xstate_bv_p)) & tdep->xcr0;
+      ULONGEST initial_xstate_bv, clear_bv, xstate_bv = 0;
       gdb_byte *p;
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+      /* The supported bits in `xstat_bv' are 8 bytes.  */
+      initial_xstate_bv = extract_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs),
+						    8, byte_order);
+      clear_bv = (~(initial_xstate_bv)) & tdep->xcr0;
 
       /* Clear register set if its bit in xstat_bv is zero.  */
       if (clear_bv)
@@ -1619,8 +1625,11 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	 registers are changed.  */
       if (xstate_bv)
 	{
-	  /* The supported bits in `xstat_bv' are 1 byte.  */
-	  *xstate_bv_p |= (gdb_byte) xstate_bv;
+	  /* The supported bits in `xstat_bv' are 8 bytes.  */
+	  initial_xstate_bv |= xstate_bv;
+	  store_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs),
+				  8, byte_order,
+				  initial_xstate_bv);
 
 	  switch (regclass)
 	    {

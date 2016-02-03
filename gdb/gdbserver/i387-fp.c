@@ -273,14 +273,14 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
   struct i387_xsave *fp = (struct i387_xsave *) buf;
   int i;
   unsigned long val, val2;
-  unsigned int clear_bv;
   unsigned long long xstate_bv = 0;
+  unsigned long long clear_bv = 0;
   char raw[64];
   char *p;
   /* Amd64 has 16 xmm regs; I386 has 8 xmm regs.  */
   int num_xmm_registers = register_size (regcache->tdesc, 0) == 8 ? 16 : 8;
 
-  /* The supported bits in `xstat_bv' are 1 byte.  Clear part in
+  /* The supported bits in `xstat_bv' are 8 bytes.  Clear part in
      vector registers if its bit in xstat_bv is zero.  */
   clear_bv = (~fp->xstate_bv) & x86_xcr0;
 
@@ -643,12 +643,12 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
   struct i387_fxsave *fxp = (struct i387_fxsave *) buf;
   int i, top;
   unsigned long val;
-  unsigned int clear_bv;
+  unsigned long long clear_bv;
   gdb_byte *p;
   /* Amd64 has 16 xmm regs; I386 has 8 xmm regs.  */
   int num_xmm_registers = register_size (regcache->tdesc, 0) == 8 ? 16 : 8;
 
-  /* The supported bits in `xstat_bv' are 1 byte.  Clear part in
+  /* The supported bits in `xstat_bv' are 8 bytes.  Clear part in
      vector registers if its bit in xstat_bv is zero.  */
   clear_bv = (~fp->xstate_bv) & x86_xcr0;
 
