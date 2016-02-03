@@ -1,3 +1,49 @@
+2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19520
+	* testsuite/ld-i386/branch1.d: Pass -mrelax-relocations=yes to as.
+	* testsuite/ld-i386/call1.d: Likewise.
+	* testsuite/ld-i386/call2.d: Likewise.
+	* testsuite/ld-i386/call3a.d: Likewise.
+	* testsuite/ld-i386/call3b.d: Likewise.
+	* testsuite/ld-i386/call3c.d: Likewise.
+	* testsuite/ld-i386/call3d.d: Likewise.
+	* testsuite/ld-i386/call3e.d: Likewise.
+	* testsuite/ld-i386/call3f.d: Likewise.
+	* testsuite/ld-i386/call3g.d: Likewise.
+	* testsuite/ld-i386/call3h.d: Likewise.
+	* testsuite/ld-i386/jmp1.d: Likewise.
+	* testsuite/ld-i386/jmp2.d: Likewise.
+	* testsuite/ld-i386/lea1c.d: Likewise.
+	* testsuite/ld-i386/load1.d: Likewise.
+	* testsuite/ld-i386/load2.d: Likewise.
+	* testsuite/ld-i386/load3.d: Likewise.
+	* testsuite/ld-i386/load4a.d: Likewise.
+	* testsuite/ld-i386/load5a.d: Likewise.
+	* testsuite/ld-i386/mov2b.d: Likewise.
+	* testsuite/ld-i386/mov3.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-21-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-22-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-5r-local-x86-64.d: Likewise.
+	* testsuite/ld-x86-64/call1a.d: Likewise.
+	* testsuite/ld-x86-64/call1b.d: Likewise.
+	* testsuite/ld-x86-64/call1c.d: Likewise.
+	* testsuite/ld-x86-64/call1d.d: Likewise.
+	* testsuite/ld-x86-64/call1e.d: Likewise.
+	* testsuite/ld-x86-64/call1f.d: Likewise.
+	* testsuite/ld-x86-64/call1h.d: Likewise.
+	* testsuite/ld-x86-64/call1i.d: Likewise.
+	* testsuite/ld-x86-64/load1a.d: Likewise.
+	* testsuite/ld-x86-64/load1b.d: Likewise.
+	* testsuite/ld-i386/got1a.S: Load GOT into %ecx and use it.
+	* testsuite/ld-i386/got1.dd: Updated.
+	* testsuite/ld-i386/got1d.S (1): Removed.
+	* testsuite/ld-i386/i386.exp: Add -Wa,-mrelax-relocations=yes.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master

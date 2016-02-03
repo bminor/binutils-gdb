@@ -3,6 +3,42 @@
 	Backport from master
 	2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/19520
+	* NEWS: Mention new command line option -mrelax-relocations and
+	new configure option --enable-x86-relax-relocations for x86
+	target.
+	* config.in: Regenerated.
+	* configure.ac: Add --enable-x86-relax-relocations.
+	(ac_default_x86_relax_relocations): New.  Default to 1 except
+	for x86 Solaris targets older than Solaris 12.
+	(DEFAULT_GENERATE_X86_RELAX_RELOCATIONS): Define.
+	* configure: Likewise.
+	* config/tc-i386.c (generate_relax_relocations): New.
+	(OPTION_MRELAX_RELOCATIONS): Likewise.
+	(output_disp): Don't generate relax relocations if
+	generate_relax_relocations is 0.
+	(md_longopts): Add -mrelax-relocations.
+	(md_show_usage): Likewise.
+	(md_parse_option): Handle OPTION_MRELAX_RELOCATIONS.
+	* doc/c-i386.texi: Document -mrelax-relocations=.
+	* testsuite/gas/i386/got-no-relax.d: New file.
+	* testsuite/gas/i386/x86-64-gotpcrel-no-relax.d: Likewise.
+	* testsuite/gas/i386/got.d: Pass -mrelax-relocations=yes to as.
+	* testsuite/gas/i386/localpic.d: Likewise.
+	* testsuite/gas/i386/mixed-mode-reloc32.d: Likewise.
+	* testsuite/gas/i386/reloc32.d: Likewise.
+	* testsuite/gas/i386/x86-64-gotpcrel.d: Likewise.
+	* testsuite/gas/i386/x86-64-localpic.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-gotpcrel.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-localpic.d: Likewise.
+	* testsuite/gas/i386/i386.exp: Run got-no-relax and
+	x86-64-gotpcrel-no-relax.
+
+2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* NEWS: Remove duplicated marker for 2.26.
 
 2016-01-29  H.J. Lu  <hongjiu.lu@intel.com>
