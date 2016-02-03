@@ -1,3 +1,10 @@
+2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Remove duplicated marker for 2.26.
+
 2016-01-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
