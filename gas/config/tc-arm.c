@@ -24094,16 +24094,6 @@ arm_fix_adjustable (fixS * fixP)
 #endif /* defined (OBJ_ELF) || defined (OBJ_COFF) */
 
 #ifdef OBJ_ELF
-bfd_vma
-arm_elf_section_letter (int letter, char **ptrmsg)
-{
-  if (letter == 'y')
-    return SHF_ARM_NOREAD;
-
-  *ptrmsg = _("unrecognized .section attribute: want a,e,w,x,y,M,S,G,T");
-  return -1;
-}
-
 const char *
 elf32_arm_target_format (void)
 {

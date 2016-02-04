@@ -1,3 +1,15 @@
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-arm/arm-elf.exp: Remove ARM NOREAD section tests.
+	* testsuite/ld-arm/thumb1-input-section-flag-match.d: Delete.
+	* testsuite/ld-arm/thumb1-input-section-flag-match.s: Delete.
+	* testsuite/ld-arm/thumb1-noread-not-present-mixing-two-section.d: Delete.
+	* testsuite/ld-arm/thumb1-noread-not-present-mixing-two-section.s: Delete.
+	* testsuite/ld-arm/thumb1-noread-present-one-section.d: Delete.
+	* testsuite/ld-arm/thumb1-noread-present-one-section.s: Delete.
+	* testsuite/ld-arm/thumb1-noread-present-two-section.d: Delete.
+	* testsuite/ld-arm/thumb1-noread-present-two-section.s: Delete.
+
 2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/19520

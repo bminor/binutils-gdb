@@ -1,5 +1,15 @@
 2016-02-04  Nick Clifton  <nickc@redhat.com>
 
+	* config/obj-elf.c (obj_elf_change_section): Remove support for
+	ARM NOREAD sections.
+	* config/tc-arm.c (arm_elf_section_letter): Delete.
+	* config/tc-arm.h (md_elf_section_letter): Delete.
+	* doc/c-arm.texi (ARM Section Attribute): Delete section.
+	* testsuite/gas/arm/section-execute-only.d: Delete.
+	* testsuite/gas/arm/section-execute-only.s: Delete.
+
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
 	PR target/19561
 	* config/tc-msp430.c (msp430_operands): Remove case 7.  Use case 2
 	to handle encoding of RRUX instruction.
