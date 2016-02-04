@@ -1,3 +1,9 @@
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19561
+	* opcode/msp430.h (IGNORE_CARRY_BIT): New define.
+	(RRUX): Synthesise using case 2 rather than 7.
+
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (NT_FREEBSD_THRMISC): Define.

@@ -1,3 +1,10 @@
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19561
+	* msp430-dis.c (print_insn_msp430): Add a special case for
+	decoding an RRC instruction with the ZC bit set in the extension
+	word.
+
 2016-02-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cgen-ibld.in (insert_normal): Rework calculation of shift.

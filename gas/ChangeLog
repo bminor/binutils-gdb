@@ -1,12 +1,19 @@
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19561
+	* config/tc-msp430.c (msp430_operands): Remove case 7.  Use case 2
+	to handle encoding of RRUX instruction.
+	* testsuite/gas/msp430/msp430x.s: Add more tests of the extended
+	shift instructions.
+	* testsuite/gas/msp430/msp430x.d: Update expected disassembly.
+
 2016-02-03  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (md_apply_fix): Mark BFD_RELOC_XTENSA_DIFF*
 	substitutions for BFD_RELOC_* as unsigned.
-	* gas/testsuite/gas/xtensa/all.exp: Add loc to list of xtensa
-	tests.
-	* gas/testsuite/gas/xtensa/loc.d: New file: loc test result
-	patterns.
-	* gas/testsuite/gas/xtensa/loc.s: New file: loc test.
+	* testsuite/gas/xtensa/all.exp: Add loc to list of xtensa tests.
+	* testsuite/gas/xtensa/loc.d: New file: loc test result	patterns.
+	* testsuite/gas/xtensa/loc.s: New file: loc test.
 
 2016-02-03  Kevin Buettner  <kevinb@redhat.com>
 
