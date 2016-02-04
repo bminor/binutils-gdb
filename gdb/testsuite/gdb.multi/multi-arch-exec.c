@@ -18,12 +18,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <limits.h>
+#include <string.h>
 
 int
-main ()
+main (int argc, char ** argv)
 {
-  execl (BASEDIR "/multi-arch-exec-hello",
-         BASEDIR "/multi-arch-exec-hello",
+  char prog[PATH_MAX];
+  int len;
+
+  strcpy (prog, argv[0]);
+  len = strlen (prog);
+  /* Replace "multi-arch-exec" with "multi-arch-exec-hello".  */
+  memcpy (prog + len - 15, "multi-arch-exec-hello", 21);
+  prog[len + 6] = 0;
+
+  execl (prog,
+         prog,
          (char *) NULL);
   perror ("execl failed");
   exit (1);

@@ -1,3 +1,33 @@
+2016-02-04  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/foll-exec-mode.c: Include limits.h.
+	(main): Add parameters argc and argv.  Get directory from
+	argv[0].
+	* gdb.base/foll-exec-mode.exp: Don't pass -DBASEDIR in
+	compilation.
+	* gdb.base/foll-exec.c: Include limits.h.
+	(main): Add parameters argc and argv.
+	Get directory from argv[0].
+	* gdb.base/foll-exec.exp: Don't pass -DBASEDIR in compilation.
+	Adjust tests on the number of lines as source code changed.
+	* gdb.base/foll-vfork-exit.c: Include limits.h.
+	(main): Add one line of statement before vfork.
+	* gdb.base/foll-vfork.c: Include limits.h and string.h.
+	(main): Add parameters argc and argv.  Get directory from
+	argv[0].
+	* gdb.base/foll-vfork.exp: Don't pass -DBASEDIR in compilation.
+	(setup_gdb): Set tbreak to skip some source lines.
+	* gdb.multi/bkpt-multi-exec.c: Include limits.h.
+	(main): Add parameters argc and argv.  Get directory from
+	argv[0].
+	* gdb.multi/bkpt-multi-exec.exp: Don't pass -DBASEDIR in
+	compilation.
+	* gdb.multi/multi-arch-exec.c: Include limits.h and string.h.
+	(main): Add parameters argc and argv.  Get directory from
+	argv[0].
+	* gdb.multi/multi-arch-exec.exp: Don't pass -DBASEDIR in
+	compilation.
+
 2016-02-01  Doug Evans  <dje@google.com>
 
 	* gdb.base/skip.exp: Clean up multiple references to same test name.

@@ -19,17 +19,26 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <limits.h>
 
 int global_i = 100;
 
-int main (void)
+int main (int argc, char ** argv)
 {
   int local_j = global_i + 1;
   int local_k = local_j + 1;
+  char prog[PATH_MAX];
+  int len;
+
+  strcpy (prog, argv[0]);
+  len = strlen (prog);
+  /* Replace "foll-exec-mode" with "execd-prog".  */
+  memcpy (prog + len - 14, "execd-prog", 10);
+  prog[len - 4] = 0;
 
   printf ("foll-exec is about to execlp(execd-prog)...\n");
 
-  execlp (BASEDIR "/execd-prog",     /* Set breakpoint here.  */
+  execlp (prog,     /* Set breakpoint here.  */
 	  "/execd-prog",
 	  "execlp arg1 from foll-exec",
 	  (char *) 0);
