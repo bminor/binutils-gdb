@@ -1,3 +1,8 @@
+2016-02-04  Yao Qi  <yao.qi@linaro.org>
+
+	* remote.c (remote_wait_as): Set rs->waiting_for_stop_reply to
+	0 before handling 'F' and set it back afterwards.
+
 2016-02-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* ui-out.c (MAX_UI_OUT_LEVELS): Remove.

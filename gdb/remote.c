@@ -6984,8 +6984,16 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
       status->value.sig = GDB_SIGNAL_0;
       break;
     case 'F':		/* File-I/O request.  */
+      /* GDB may access the inferior memory while handling the File-I/O
+	 request, but we don't want GDB accessing memory while waiting
+	 for a stop reply.  See the comments in putpkt_binary.  Set
+	 waiting_for_stop_reply to 0 temporarily.  */
+      rs->waiting_for_stop_reply = 0;
       remote_fileio_request (buf, rs->ctrlc_pending_p);
       rs->ctrlc_pending_p = 0;
+      /* GDB handled the File-I/O request, and the target is running
+	 again.  Keep waiting for events.  */
+      rs->waiting_for_stop_reply = 1;
       break;
     case 'N': case 'T': case 'S': case 'X': case 'W':
       {
