@@ -1,3 +1,9 @@
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
+	* cgen-scache.c (scache_option_handler): Prevent possible
+	undefined behaviour computing the size of the scache by using
+	unsigned integers instead of signed integers.
+
 2016-01-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* sim-fpu.c: Minor comment fixes throughout.
