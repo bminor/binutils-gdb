@@ -1,3 +1,34 @@
+2016-03-03  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19019
+	* layout.h (Layout::add_target_specific_dynamic_tag): New function.
+	* layout.cc (Layout::add_target_specific_dynamic_tag): New function.
+	* mips.cc (Target_mips::make_symbol): Adjust function signature.
+	* sparc.cc (Target_sparc::Target_sparc): Initialize register_syms_.
+	(Target_sparc::do_is_defined_by_abi): Remove test for
+	STT_SPARC_REGISTER.
+	(Target_sparc::Register_symbol): New struct type.
+	(Target_sparc::register_syms_): New data member.
+	(Target_sparc<64, true>::sparc_info): Set has_make_symbol to true.
+	(Target_sparc::make_symbol): New function.
+	(Target_sparc::do_finalize_sections): Add register symbols and new
+	dynamic table entries.
+	* symtab.h (Sized_symbol::init_undefined): Add value parameter.
+	(Symbol_table::add_target_global_symbol): New function.
+	(Symbol_table::target_symbols_): New data member.
+	* symtab.cc (Sized_symbol::init_undefined): Add value parameter.
+	(Symbol_table::Symbol_table): Initialize target_symbols_.
+	(Symbol_table::add_from_object): Pass additional parameters to
+	Target::make_symbol.
+	(Symbol_table::define_special_symbol): Likewise.
+	(Symbol_table::add_undefined_symbol_from_command_line): Pass 0 for
+	undefined symbol value.
+	(Symbol_table::set_dynsym_indexes): Process target-specific symbols.
+	(Symbol_table::sized_finalize): Likewise.
+	(Symbol_table::sized_write_globals): Likewise.
+	* target.h (Sized_target::make_symbol): Add name, st_type, object,
+	st_shndx, and value parameters.
+
 2015-03-03  Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
 
 	* plugin.cc (do_should_include_member): Ignore LDPK_UNDEF and

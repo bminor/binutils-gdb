@@ -4724,6 +4724,15 @@ Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
     }
 }
 
+void
+Layout::add_target_specific_dynamic_tag(elfcpp::DT tag, unsigned int val)
+{
+  Output_data_dynamic* odyn = this->dynamic_data_;
+  if (odyn == NULL)
+    return;
+  odyn->add_constant(tag, val);
+}
+
 // Finish the .dynamic section and PT_DYNAMIC segment.
 
 void
