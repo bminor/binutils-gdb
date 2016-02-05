@@ -138,6 +138,11 @@ binary_unittest_SOURCES = binary_unittest.cc
 check_PROGRAMS += leb128_unittest
 leb128_unittest_SOURCES = leb128_unittest.cc
 
+check_PROGRAMS += overflow_unittest
+overflow_unittest_SOURCES = overflow_unittest.cc
+overflow_unittest.o: overflow_unittest.cc
+	$(CXXCOMPILE) -O3 -c -o $@ $<
+
 endif NATIVE_OR_CROSS_LINKER
 
 # ---------------------------------------------------------------------

@@ -1,3 +1,51 @@
+2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18695
+	* reloc.h (Relocate_functions::Address): New typedef.
+	(Relocate_functions::Addendtype): New typedef.
+	(Relocate_functions::Overflow_check): New enum type.
+	(Relocate_functions::Reloc_status): New enum type.
+	(Relocate_functions::check_overflow): New function template.
+	(Relocate_functions::rel): Add check parameter; check for overflow.
+	(Relocate_functions::rel_unaligned): Likewise.
+	(Relocate_functions::rela): Likewise.
+	(Relocate_functions::pcrel): Likewise.
+	(Relocate_functions::pcrel_unaligned): Likewise.
+	(Relocate_functions::pcrela): Likewise.
+	(Relocate_functions::rel8): Adjust parameter types.
+	(Relocate_functions::rela8): Likewise.
+	(Relocate_functions::pcrel8): Likewise.
+	(Relocate_functions::pcrela8): Likewise.
+	(Relocate_functions::rel16): Likewise.
+	(Relocate_functions::rela168): Likewise.
+	(Relocate_functions::pcrel16): Likewise.
+	(Relocate_functions::pcrela16): Likewise.
+	(Relocate_functions::rel32): Likewise.
+	(Relocate_functions::rel32_unaligned): Likewise.
+	(Relocate_functions::rela32): Likewise.
+	(Relocate_functions::pcrel32): Likewise.
+	(Relocate_functions::pcrel32_unaligned): Likewise.
+	(Relocate_functions::pcrela32): Likewise.
+	(Relocate_functions::rel8_check): New function.
+	(Relocate_functions::rela8_check): New function.
+	(Relocate_functions::pcrel8_check): New function.
+	(Relocate_functions::pcrela8_check): New function.
+	(Relocate_functions::rel16_check): New function.
+	(Relocate_functions::rela168_check): New function.
+	(Relocate_functions::pcrel16_check): New function.
+	(Relocate_functions::pcrela16_check): New function.
+	(Relocate_functions::rel32_check): New function.
+	(Relocate_functions::rel32_unaligned_check): New function.
+	(Relocate_functions::rela32_check): New function.
+	(Relocate_functions::pcrel32_check): New function.
+	(Relocate_functions::pcrel32_unaligned_check): New function.
+	(Relocate_functions::pcrela32_check): New function.
+	(Bits::has_unsigned_overflow32): New function.
+	(Bits::has_unsigned_overflow): New function.
+	* testsuite/Makefile.am (overflow_unittest): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/overflow_unittest.cc: New source file.
+
 2016-02-04  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (relocate): Adjust last patch for big-endian.
