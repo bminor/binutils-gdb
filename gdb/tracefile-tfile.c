@@ -29,6 +29,7 @@
 #include "completer.h"
 #include "filenames.h"
 #include "remote.h"
+#include "xml-tdesc.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -264,6 +265,42 @@ tfile_write_uploaded_tp (struct trace_file_writer *self,
 }
 
 /* This is the implementation of trace_file_write_ops method
+   write_tdesc.  */
+
+static void
+tfile_write_tdesc (struct trace_file_writer *self)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+  char *tdesc = target_fetch_description_xml (&current_target);
+  char *ptr = tdesc;
+  char *next;
+
+  if (tdesc == NULL)
+    return;
+
+  /* Write tdesc line by line, prefixing each line with "tdesc ".  */
+  while (ptr != NULL)
+    {
+      next = strchr (ptr, '\n');
+      if (next != NULL)
+	{
+	  fprintf (writer->fp, "tdesc %.*s\n", (int) (next - ptr), ptr);
+	  /* Skip the \n.  */
+	  next++;
+	}
+      else if (*ptr != '\0')
+	{
+	  /* Last line, doesn't have a newline.  */
+	  fprintf (writer->fp, "tdesc %s\n", ptr);
+	}
+      ptr = next;
+    }
+
+  xfree (tdesc);
+}
+
+/* This is the implementation of trace_file_write_ops method
    write_definition_end.  */
 
 static void
@@ -316,6 +353,7 @@ static const struct trace_file_write_ops tfile_write_ops =
   tfile_write_status,
   tfile_write_uploaded_tsv,
   tfile_write_uploaded_tp,
+  tfile_write_tdesc,
   tfile_write_definition_end,
   tfile_write_raw_data,
   NULL,

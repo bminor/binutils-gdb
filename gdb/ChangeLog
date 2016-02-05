@@ -1,3 +1,14 @@
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* ctf.c (ctf_write_tdesc): New function.
+	(ctf_write_ops): Wire in ctf_write_tdesc.
+	* tracefile-tfile.c (tfile_write_tdesc): New function.
+	(tfile_write_ops): Wire in tfile_write_tdesc.
+	* tracefile.c (trace_save): Call write_tdesc method.
+	* tracefile.h (struct trace_file_write_ops): Add write_tdesc method.
+	* xml-tdesc.c (target_fetch_description_xml): New function.
+	* xml-tdesc.h: Add target_fetch_description_xml prototype.
+
 2016-02-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* arm-tdep.c (arm_copy_extra_ld_st): Fix "unpriveleged" typo.
