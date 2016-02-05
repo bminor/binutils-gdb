@@ -1,3 +1,11 @@
+2016-03-17  Markus Metzger  <markus.t.metzger@intel.com>
+
+	PR gdb/19829
+	* gdb.btrace/tailcall-only.exp: New.
+	* gdb.btrace/tailcall-only.c: New.
+	* gdb.btrace/x86_64-tailcall-only.S: New.
+	* gdb.btrace/i686-tailcall-only.S: New.
+
 2016-02-16  Don Breazeal  <donb@codesourcery.com>
 
 	PR remote/19496
