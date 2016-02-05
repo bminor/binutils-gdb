@@ -2002,8 +2002,7 @@ finish_command (char *arg, int from_tty)
 
   /* Ignore TAILCALL_FRAME type frames, they were executed already before
      entering THISFRAME.  */
-  while (get_frame_type (frame) == TAILCALL_FRAME)
-    frame = get_prev_frame (frame);
+  frame = skip_tailcall_frames (frame);
 
   /* Find the function we will return from.  */
 

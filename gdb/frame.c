@@ -438,6 +438,17 @@ skip_artificial_frames (struct frame_info *frame)
   return frame;
 }
 
+/* See frame.h.  */
+
+struct frame_info *
+skip_tailcall_frames (struct frame_info *frame)
+{
+  while (get_frame_type (frame) == TAILCALL_FRAME)
+    frame = get_prev_frame (frame);
+
+  return frame;
+}
+
 /* Compute the frame's uniq ID that can be used to, later, re-find the
    frame.  */
 
@@ -972,8 +983,7 @@ frame_pop (struct frame_info *this_frame)
 
   /* Ignore TAILCALL_FRAME type frames, they were executed already before
      entering THISFRAME.  */
-  while (get_frame_type (prev_frame) == TAILCALL_FRAME)
-    prev_frame = get_prev_frame (prev_frame);
+  prev_frame = skip_tailcall_frames (prev_frame);
 
   /* Make a copy of all the register values unwound from this frame.
      Save them in a scratch buffer so that there isn't a race between
