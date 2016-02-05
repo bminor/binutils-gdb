@@ -1074,6 +1074,20 @@ x86_64_mov_to_lea13.stdout: x86_64_mov_to_lea13
 x86_64_mov_to_lea14.stdout: x86_64_mov_to_lea14
 	$(TEST_OBJDUMP) -dw $< > $@
 
+check_SCRIPTS += x86_64_overflow_pc32.sh
+check_DATA += x86_64_overflow_pc32.err
+MOSTLYCLEANFILES += x86_64_overflow_pc32.err
+x86_64_overflow_pc32.o: x86_64_overflow_pc32.s
+	$(TEST_AS) -o $@ $<
+x86_64_overflow_pc32.err: x86_64_overflow_pc32.o gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -shared -o x86_64_overflow_pc32 x86_64_overflow_pc32.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -shared -o x86_64_overflow_pc32 x86_64_overflow_pc32.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of x86_64_overflow_pc32 should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
 endif DEFAULT_TARGET_X86_64
 
 if DEFAULT_TARGET_I386

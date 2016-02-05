@@ -1,4 +1,15 @@
-2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+2016-02-05  Cary Coutant  <ccoutant@gmail.com>
+	    Andrew Senkevich  <andrew.senkevich@intel.com>
+
+	PR gold/18695
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Add overflow
+	checking for R_X86_64_32, R_X86_64_32S, R_X86_64_PC32, and
+	R_X86_64_PLT32.
+	* testsuite/Makefile.am (x86_64_overflow_pc32): New test.
+	* testsuite/x86_64_overflow_pc32.sh: New test script.
+	* testsuite/x86_64_overflow_pc32.s: New source file.
+
+2016-02-05  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/18695
 	* reloc.h (Relocate_functions::Address): New typedef.
