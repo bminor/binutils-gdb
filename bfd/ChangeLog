@@ -1,3 +1,8 @@
+2016-02-05  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
+
+	* cpu-arc.c: Change default archure from bfd_mach_arc_arcv2
+	to bfd_mach_arc_arc600.
+
 2016-02-04  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Adjust last patch

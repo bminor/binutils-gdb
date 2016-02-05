@@ -1,3 +1,8 @@
+2016-02-05  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
+
+	* testsuite/binutils-all/objdump.exp: Update expected default
+	architecture value for ARC binaries.
+
 2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/19547
@@ -20,7 +25,7 @@
 
 	PR 19495
 	* testsuite/binutils-all/dlltool.exp: Fix tests for targets which
-	do not support inserting leading underscores. 
+	do not support inserting leading underscores.
 
 2016-01-20  Mickael Guene  <mickael.guene@st.com>
 
