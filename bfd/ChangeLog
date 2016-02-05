@@ -1,3 +1,7 @@
+2016-02-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* pe-mips.c (coff_mips_reloc): Fix formatting.
+
 2016-02-05  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
 
 	* cpu-arc.c: Change default archure from bfd_mach_arc_arcv2
