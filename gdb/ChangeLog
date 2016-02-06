@@ -1,3 +1,8 @@
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracefile-tfile.c (tfile_fetch_registers): Fix off-by-one in bounds
+	check.
+
 2016-02-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

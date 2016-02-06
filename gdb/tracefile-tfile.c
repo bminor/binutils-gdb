@@ -816,7 +816,7 @@ tfile_fetch_registers (struct target_ops *ops,
 	{
 	  regsize = register_size (gdbarch, regn);
 	  /* Make sure we stay within block bounds.  */
-	  if (offset + regsize >= trace_regblock_size)
+	  if (offset + regsize > trace_regblock_size)
 	    break;
 	  if (regcache_register_status (regcache, regn) == REG_UNKNOWN)
 	    {
