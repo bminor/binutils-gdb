@@ -1,5 +1,6 @@
 2016-02-06  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/19577
 	* reloc.h (Bits::has_unsigned_overflow32): Fix unsigned/signed
 	comparison.
 	(Bits::has_unsigned_overflow): Likewise.
