@@ -1,3 +1,8 @@
+2016-02-11  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/tfile-avx.c: New test.
+	* gdb.trace/tfile-avx.exp: New test.
+
 2016-02-09  Keith Seitz  <keiths@redhat.com>
 
 	PR breakpoints/19546
