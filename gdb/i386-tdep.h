@@ -360,6 +360,10 @@ extern void i386_pseudo_register_write (struct gdbarch *gdbarch,
 					struct regcache *regcache,
 					int regnum, const gdb_byte *buf);
 
+extern int i386_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+					    struct agent_expr *ax,
+					    int regnum);
+
 /* Segment selectors.  */
 #define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */
 #define I386_SEL_UPL	0x0003	/* User Privilige Level.  */

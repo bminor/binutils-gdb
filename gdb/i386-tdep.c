@@ -3419,9 +3419,6 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 	}
       else if (i386_byte_regnum_p (gdbarch, regnum))
 	{
-	  /* Check byte pseudo registers last since this function will
-	     be called from amd64_pseudo_register_read, which handles
-	     byte pseudo registers differently.  */
 	  int gpnum = regnum - tdep->al_regnum;
 
 	  /* Extract (always little endian).  We read both lower and
@@ -3584,9 +3581,6 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       else if (i386_byte_regnum_p (gdbarch, regnum))
 	{
-	  /* Check byte pseudo registers last since this function will
-	     be called from amd64_pseudo_register_read, which handles
-	     byte pseudo registers differently.  */
 	  int gpnum = regnum - tdep->al_regnum;
 
 	  /* Read ...  We read both lower and upper registers.  */
@@ -3602,6 +3596,88 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       else
 	internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }
+}
+
+/* Implement the 'ax_pseudo_register_collect' gdbarch method.  */
+
+int
+i386_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+				 struct agent_expr *ax, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (i386_mmx_regnum_p (gdbarch, regnum))
+    {
+      /* MMX to FPU register mapping depends on current TOS.  Let's just
+	 not care and collect everything...  */
+      int i;
+
+      ax_reg_mask (ax, I387_FSTAT_REGNUM (tdep));
+      for (i = 0; i < 8; i++)
+	ax_reg_mask (ax, I387_ST0_REGNUM (tdep) + i);
+      return 0;
+    }
+  else if (i386_bnd_regnum_p (gdbarch, regnum))
+    {
+      regnum -= tdep->bnd0_regnum;
+      ax_reg_mask (ax, I387_BND0R_REGNUM (tdep) + regnum);
+      return 0;
+    }
+  else if (i386_k_regnum_p (gdbarch, regnum))
+    {
+      regnum -= tdep->k0_regnum;
+      ax_reg_mask (ax, tdep->k0_regnum + regnum);
+      return 0;
+    }
+  else if (i386_zmm_regnum_p (gdbarch, regnum))
+    {
+      regnum -= tdep->zmm0_regnum;
+      if (regnum < num_lower_zmm_regs)
+	{
+	  ax_reg_mask (ax, I387_XMM0_REGNUM (tdep) + regnum);
+	  ax_reg_mask (ax, tdep->ymm0h_regnum + regnum);
+	}
+      else
+	{
+	  ax_reg_mask (ax, I387_XMM16_REGNUM (tdep) + regnum
+			   - num_lower_zmm_regs);
+	  ax_reg_mask (ax, I387_YMM16H_REGNUM (tdep) + regnum
+			   - num_lower_zmm_regs);
+	}
+      ax_reg_mask (ax, tdep->zmm0h_regnum + regnum);
+      return 0;
+    }
+  else if (i386_ymm_regnum_p (gdbarch, regnum))
+    {
+      regnum -= tdep->ymm0_regnum;
+      ax_reg_mask (ax, I387_XMM0_REGNUM (tdep) + regnum);
+      ax_reg_mask (ax, tdep->ymm0h_regnum + regnum);
+      return 0;
+    }
+  else if (i386_ymm_avx512_regnum_p (gdbarch, regnum))
+    {
+      regnum -= tdep->ymm16_regnum;
+      ax_reg_mask (ax, I387_XMM16_REGNUM (tdep) + regnum);
+      ax_reg_mask (ax, tdep->ymm16h_regnum + regnum);
+      return 0;
+    }
+  else if (i386_word_regnum_p (gdbarch, regnum))
+    {
+      int gpnum = regnum - tdep->ax_regnum;
+
+      ax_reg_mask (ax, gpnum);
+      return 0;
+    }
+  else if (i386_byte_regnum_p (gdbarch, regnum))
+    {
+      int gpnum = regnum - tdep->al_regnum;
+
+      ax_reg_mask (ax, gpnum % 4);
+      return 0;
+    }
+  else
+    internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  return 1;
 }
 
 
@@ -8423,6 +8499,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_read_value (gdbarch,
 					  i386_pseudo_register_read_value);
   set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
+  set_gdbarch_ax_pseudo_register_collect (gdbarch,
+					  i386_ax_pseudo_register_collect);
 
   set_tdesc_pseudo_register_type (gdbarch, i386_pseudo_register_type);
   set_tdesc_pseudo_register_name (gdbarch, i386_pseudo_register_name);
