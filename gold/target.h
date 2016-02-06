@@ -326,8 +326,10 @@ class Target
   // without -fsplit-stack.  SYM is known to be defined in an object
   // compiled without -fsplit-stack.
   bool
-  is_call_to_non_split(const Symbol* sym, const unsigned char* preloc) const
-  { return this->do_is_call_to_non_split(sym, preloc); }
+  is_call_to_non_split(const Symbol* sym, const unsigned char* preloc,
+		       const unsigned char* view,
+		       section_size_type view_size) const
+  { return this->do_is_call_to_non_split(sym, preloc, view, view_size); }
 
   // A function starts at OFFSET in section SHNDX in OBJECT.  That
   // function was compiled with -fsplit-stack, but it refers to a
@@ -661,7 +663,8 @@ class Target
   // default implementation is that any function not defined by the
   // ABI is a call to a non-split function.
   virtual bool
-  do_is_call_to_non_split(const Symbol* sym, const unsigned char*) const;
+  do_is_call_to_non_split(const Symbol* sym, const unsigned char*,
+			  const unsigned char*, section_size_type) const;
 
   // Virtual function which may be overridden by the child class.
   virtual void
