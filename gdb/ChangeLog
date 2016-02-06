@@ -1,5 +1,15 @@
 2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* tracefile-tfile.c (trace_tdesc): New static variable.
+	(tfile_open): Clear trace_tdesc, call target_find_description.
+	(tfile_interp_line): Recognize tdesc lines.
+	(tfile_close): Clear trace_tdesc.
+	(tfile_xfer_partial_features): New function.
+	(tfile_xfer_partial): Call tfile_xfer_partial_features.
+	(tfile_append_tdesc_line): New function.
+
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* ctf.c (ctf_write_tdesc): New function.
 	(ctf_write_ops): Wire in ctf_write_tdesc.
 	* tracefile-tfile.c (tfile_write_tdesc): New function.
