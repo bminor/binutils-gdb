@@ -41048,8 +41048,7 @@ endianness.
 @item R @var{bytes}
 Register block.  The number and ordering of bytes matches that of a
 @code{g} packet in the remote protocol.  Note that these are the
-actual bytes, in target order and @value{GDBN} register order, not a
-hexadecimal encoding.
+actual bytes, in target order, not a hexadecimal encoding.
 
 @item M @var{address} @var{length} @var{bytes}...
 Memory block.  This is a contiguous block of memory, at the 8-byte
