@@ -1015,7 +1015,7 @@ class Bits
     gold_assert(bits > 0 && bits <= 32);
     if (bits == 32)
       return false;
-    uint32_t max = static_cast<int32_t>((1U << bits) - 1);
+    uint32_t max = static_cast<uint32_t>((1U << bits) - 1);
     return val > max;
   }
 
@@ -1081,7 +1081,7 @@ class Bits
     gold_assert(bits > 0 && bits <= 64);
     if (bits == 64)
       return false;
-    uint64_t max = static_cast<int64_t>((static_cast<uint64_t>(1) << bits) - 1);
+    uint64_t max = (static_cast<uint64_t>(1) << bits) - 1;
     return val > max;
   }
 
