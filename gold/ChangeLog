@@ -1,3 +1,9 @@
+2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+
+	* reloc.h (Bits::has_unsigned_overflow32): Fix unsigned/signed
+	comparison.
+	(Bits::has_unsigned_overflow): Likewise.
+
 2016-02-06  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* i386.cc (Target_i386::is_call_to_non_split): Add view and view_size
