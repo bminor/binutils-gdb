@@ -3347,6 +3347,52 @@ Target_x86_64<size>::do_finalize_sections(
     }
 }
 
+// For x32, we need to handle PC-relative relocations using full 64-bit
+// arithmetic, so that we can detect relocation overflows properly.
+// This class overrides the pcrela32_check methods from the defaults in
+// Relocate_functions in reloc.h.
+
+template<int size>
+class X86_64_relocate_functions : public Relocate_functions<size, false>
+{
+ public:
+  typedef Relocate_functions<size, false> Base;
+
+  // Do a simple PC relative relocation with the addend in the
+  // relocation.
+  static inline typename Base::Reloc_status
+  pcrela32_check(unsigned char* view,
+		 typename elfcpp::Elf_types<64>::Elf_Addr value,
+		 typename elfcpp::Elf_types<64>::Elf_Swxword addend,
+		 typename elfcpp::Elf_types<64>::Elf_Addr address)
+  {
+    typedef typename elfcpp::Swap<32, false>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    value = value + addend - address;
+    elfcpp::Swap<32, false>::writeval(wv, value);
+    return (Bits<32>::has_overflow(value)
+	    ? Base::RELOC_OVERFLOW : Base::RELOC_OK);
+  }
+
+  // Do a simple PC relative relocation with a Symbol_value with the
+  // addend in the relocation.
+  static inline typename Base::Reloc_status
+  pcrela32_check(unsigned char* view,
+		 const Sized_relobj_file<size, false>* object,
+		 const Symbol_value<size>* psymval,
+		 typename elfcpp::Elf_types<64>::Elf_Swxword addend,
+		 typename elfcpp::Elf_types<64>::Elf_Addr address)
+  {
+    typedef typename elfcpp::Swap<32, false>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    typename elfcpp::Elf_types<64>::Elf_Addr value =
+	psymval->value(object, addend) - address;
+    elfcpp::Swap<32, false>::writeval(wv, value);
+    return (Bits<32>::has_overflow(value)
+	    ? Base::RELOC_OVERFLOW : Base::RELOC_OK);
+  }
+};
+
 // Perform a relocation.
 
 template<int size>
@@ -3364,7 +3410,7 @@ Target_x86_64<size>::Relocate::relocate(
     typename elfcpp::Elf_types<size>::Elf_Addr address,
     section_size_type view_size)
 {
-  typedef Relocate_functions<size, false> Reloc_funcs;
+  typedef X86_64_relocate_functions<size> Reloc_funcs;
   const elfcpp::Rela<size, false> rela(preloc);
   unsigned int r_type = elfcpp::elf_r_type<size>(rela.get_r_info());
 
@@ -3476,7 +3522,7 @@ Target_x86_64<size>::Relocate::relocate(
     case elfcpp::R_X86_64_PC32:
     case elfcpp::R_X86_64_PC32_BND:
       rstatus = Reloc_funcs::pcrela32_check(view, object, psymval, addend,
-					    address, Reloc_funcs::CHECK_SIGNED);
+					    address);
       break;
 
     case elfcpp::R_X86_64_16:
@@ -3507,7 +3553,7 @@ Target_x86_64<size>::Relocate::relocate(
       // behaves differently because psymval was set to point to
       // the PLT entry, rather than the symbol, in Scan::global().
       rstatus = Reloc_funcs::pcrela32_check(view, object, psymval, addend,
-					    address, Reloc_funcs::CHECK_SIGNED);
+					    address);
       break;
 
     case elfcpp::R_X86_64_PLTOFF64:
@@ -3532,7 +3578,7 @@ Target_x86_64<size>::Relocate::relocate(
 	gold_assert(gsym);
 	typename elfcpp::Elf_types<size>::Elf_Addr value;
 	value = target->got_plt_section()->address();
-	Reloc_funcs::pcrela32(view, value, addend, address);
+	Reloc_funcs::pcrela32_check(view, value, addend, address);
       }
       break;
 
@@ -3577,8 +3623,7 @@ Target_x86_64<size>::Relocate::relocate(
 		  && Target_x86_64<size>::can_convert_mov_to_lea(gsym))))
 	{
 	  view[-2] = 0x8d;
-	  Reloc_funcs::pcrela32(view, object, psymval, addend,
-						    address);
+	  Reloc_funcs::pcrela32(view, object, psymval, addend, address);
 	}
       else
 	{
@@ -3596,7 +3641,7 @@ Target_x86_64<size>::Relocate::relocate(
 	    }
 	  typename elfcpp::Elf_types<size>::Elf_Addr value;
 	  value = target->got_plt_section()->address() + got_offset;
-	  Reloc_funcs::pcrela32(view, value, addend, address);
+	  Reloc_funcs::pcrela32_check(view, value, addend, address);
 	}
       }
       break;

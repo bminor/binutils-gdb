@@ -336,9 +336,14 @@ class Relocate_functions
 
   enum Overflow_check
   {
+    // No overflow checking.
     CHECK_NONE,
+    // Check for overflow of a signed value.
     CHECK_SIGNED,
+    // Check for overflow of an unsigned value.
     CHECK_UNSIGNED,
+    // Check for overflow of a signed or unsigned value.
+    // (i.e., no error if either signed or unsigned fits.)
     CHECK_SIGNED_OR_UNSIGNED
   };
 

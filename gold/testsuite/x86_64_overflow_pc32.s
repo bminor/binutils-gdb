@@ -1,5 +1,4 @@
 	.data
-	.space 0x8ff00000
 	.hidden foo
 	.globl	foo
 foo:

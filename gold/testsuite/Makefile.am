@@ -1080,10 +1080,26 @@ MOSTLYCLEANFILES += x86_64_overflow_pc32.err
 x86_64_overflow_pc32.o: x86_64_overflow_pc32.s
 	$(TEST_AS) -o $@ $<
 x86_64_overflow_pc32.err: x86_64_overflow_pc32.o gcctestdir/ld
-	@echo $(CXXLINK) -Bgcctestdir/ -shared -o x86_64_overflow_pc32 x86_64_overflow_pc32.o "2>$@"
-	@if $(CXXLINK) -Bgcctestdir/ -shared -o x86_64_overflow_pc32 x86_64_overflow_pc32.o 2>$@; \
+	@echo gcctestdir/ld -e bar -Tdata=0x81000000 -o x86_64_overflow_pc32 x86_64_overflow_pc32.o "2>$@"
+	@if gcctestdir/ld -e bar -Tdata=0x81000000 -o x86_64_overflow_pc32 x86_64_overflow_pc32.o 2>$@; \
 	then \
 	  echo 1>&2 "Link of x86_64_overflow_pc32 should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
+check_SCRIPTS += x32_overflow_pc32.sh
+check_DATA += x32_overflow_pc32.err
+MOSTLYCLEANFILES += x32_overflow_pc32.err
+x86_64_overflow_pc32.o: x86_64_overflow_pc32.s
+	$(TEST_AS) -o $@ $<
+x32_overflow_pc32.o: x86_64_overflow_pc32.s
+	$(TEST_AS) --x32 -o $@ $<
+x32_overflow_pc32.err: x32_overflow_pc32.o gcctestdir/ld
+	@echo gcctestdir/ld -e bar -Tdata=0x81000000 -o x32_overflow_pc32 x32_overflow_pc32.o "2>$@"
+	@if gcctestdir/ld -e bar -Tdata=0x81000000 -o x32_overflow_pc32 x32_overflow_pc32.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of x32_overflow_pc32 should have failed"; \
 	  rm -f $@; \
 	  exit 1; \
 	fi
