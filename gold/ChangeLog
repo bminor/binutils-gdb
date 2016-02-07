@@ -1,5 +1,16 @@
 2016-02-06  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/19577
+	* reloc.h (Limits): New class.
+	(Bits::has_overflow32): Use min/max values from Limits.
+	(Bits::has_unsigned_overflow32): Likewise.
+	(Bits::has_signed_unsigned_overflow32): Likewise.
+	(Bits::has_overflow): Likewise.
+	(Bits::has_unsigned_overflow): Likewise.
+	(Bits::has_signed_unsigned_overflow64): Likewise.
+
+2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/19567
 	* reloc.h (Relocate_functions::Overflow_check): Add comments.
 	* x86_64.cc (X86_64_relocate_functions): New class.

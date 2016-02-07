@@ -974,6 +974,26 @@ class Relocate_functions
 			      CHECK_NONE); }
 };
 
+// Convenience class for min and max values of a given BITS length.
+
+template<int bits>
+class Limits
+{
+ public:
+  static const uint64_t MAX_UNSIGNED = (1ULL << bits) - 1;
+  static const int64_t MAX_SIGNED = MAX_UNSIGNED >> 1;
+  static const int64_t MIN_SIGNED = -MAX_SIGNED - 1;
+};
+
+template<>
+class Limits<64>
+{
+ public:
+  static const uint64_t MAX_UNSIGNED = ~0ULL;
+  static const int64_t MAX_SIGNED = MAX_UNSIGNED >> 1;
+  static const int64_t MIN_SIGNED = -MAX_SIGNED - 1;
+};
+
 // Integer manipulation functions used by various targets when
 // performing relocations.
 
@@ -1006,8 +1026,8 @@ class Bits
     gold_assert(bits > 0 && bits <= 32);
     if (bits == 32)
       return false;
-    int32_t max = (1 << (bits - 1)) - 1;
-    int32_t min = -(1 << (bits - 1));
+    const int32_t max = static_cast<int32_t>(Limits<bits>::MAX_SIGNED);
+    const int32_t min = static_cast<int32_t>(Limits<bits>::MIN_SIGNED);
     int32_t as_signed = static_cast<int32_t>(val);
     return as_signed > max || as_signed < min;
   }
@@ -1020,7 +1040,7 @@ class Bits
     gold_assert(bits > 0 && bits <= 32);
     if (bits == 32)
       return false;
-    uint32_t max = static_cast<uint32_t>((1U << bits) - 1);
+    const uint32_t max = static_cast<uint32_t>(Limits<bits>::MAX_UNSIGNED);
     return val > max;
   }
 
@@ -1034,8 +1054,8 @@ class Bits
     gold_assert(bits > 0 && bits <= 32);
     if (bits == 32)
       return false;
-    int32_t max = static_cast<int32_t>((1U << bits) - 1);
-    int32_t min = -(1 << (bits - 1));
+    const int32_t max = static_cast<int32_t>(Limits<bits>::MAX_UNSIGNED);
+    const int32_t min = static_cast<int32_t>(Limits<bits>::MIN_SIGNED);
     int32_t as_signed = static_cast<int32_t>(val);
     return as_signed > max || as_signed < min;
   }
@@ -1072,8 +1092,8 @@ class Bits
     gold_assert(bits > 0 && bits <= 64);
     if (bits == 64)
       return false;
-    int64_t max = (static_cast<int64_t>(1) << (bits - 1)) - 1;
-    int64_t min = -(static_cast<int64_t>(1) << (bits - 1));
+    const int64_t max = Limits<bits>::MAX_SIGNED;
+    const int64_t min = Limits<bits>::MIN_SIGNED;
     int64_t as_signed = static_cast<int64_t>(val);
     return as_signed > max || as_signed < min;
   }
@@ -1086,7 +1106,7 @@ class Bits
     gold_assert(bits > 0 && bits <= 64);
     if (bits == 64)
       return false;
-    uint64_t max = (static_cast<uint64_t>(1) << bits) - 1;
+    const uint64_t max = Limits<bits>::MAX_UNSIGNED;
     return val > max;
   }
 
@@ -1100,8 +1120,8 @@ class Bits
     gold_assert(bits > 0 && bits <= 64);
     if (bits == 64)
       return false;
-    int64_t max = static_cast<int64_t>((static_cast<uint64_t>(1) << bits) - 1);
-    int64_t min = -(static_cast<int64_t>(1) << (bits - 1));
+    const int64_t max = static_cast<int64_t>(Limits<bits>::MAX_UNSIGNED);
+    const int64_t min = Limits<bits>::MIN_SIGNED;
     int64_t as_signed = static_cast<int64_t>(val);
     return as_signed > max || as_signed < min;
   }
