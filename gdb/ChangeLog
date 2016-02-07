@@ -1,3 +1,19 @@
+2016-02-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* varobj.h (varobj_delete): Remove dellist parameter, update and
+	move documentation here.
+	* varobj.c (struct cpstack, cppush, cppop): Remove.
+	(delete_variable): Remove resultp (first) parameter.
+	(delete_variable_1): Likewise.
+	(varobj_delete): Remove dellist parameter and unused code.
+	(update_dynamic_varobj_children): Adjust varobj_delete call.
+	(update_type_if_necessary): Likewise.
+	(varobj_set_visualizer): Likewise.
+	(varobj_update): Likewise.
+	(value_of_root): Likewise.
+	(varobj_invalidate_iter): Likewise.
+	* mi/mi-cmd-var.c (mi_cmd_var_delete): Likewise.
+
 2016-02-04  Yao Qi  <yao.qi@linaro.org>
 
 	* remote.c (remote_wait_as): Set rs->waiting_for_stop_reply to

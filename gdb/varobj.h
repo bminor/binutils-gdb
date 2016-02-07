@@ -246,8 +246,10 @@ extern char *varobj_get_objname (const struct varobj *var);
 
 extern char *varobj_get_expression (const struct varobj *var);
 
-extern int varobj_delete (struct varobj *var, char ***dellist,
-			  int only_children);
+/* Delete a varobj and all its children if only_children == 0, otherwise delete
+   only the children.  Return the number of deleted variables.  */
+
+extern int varobj_delete (struct varobj *var, int only_children);
 
 extern enum varobj_display_formats varobj_set_display_format (
 							 struct varobj *var,
