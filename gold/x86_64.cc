@@ -3385,8 +3385,17 @@ class X86_64_relocate_functions : public Relocate_functions<size, false>
   {
     typedef typename elfcpp::Swap<32, false>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
-    typename elfcpp::Elf_types<64>::Elf_Addr value =
-	psymval->value(object, addend) - address;
+    typename elfcpp::Elf_types<64>::Elf_Addr value;
+    if (addend >= 0)
+      value = psymval->value(object, addend);
+    else
+      {
+	// For negative addends, get the symbol value without
+	// the addend, then add the addend using 64-bit arithmetic.
+	value = psymval->value(object, 0);
+	value += addend;
+      }
+    value -= address;
     elfcpp::Swap<32, false>::writeval(wv, value);
     return (Bits<32>::has_overflow(value)
 	    ? Base::RELOC_OVERFLOW : Base::RELOC_OK);

@@ -1,5 +1,10 @@
 2016-02-06  Cary Coutant  <ccoutant@gmail.com>
 
+	* x86_64.cc (X86_64_relocate_functions::pcrela32_check): Fix x32
+	overflow checking when symbol value + addend < 0.
+
+2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/19577
 	* reloc.h (Limits): New class.
 	(Bits::has_overflow32): Use min/max values from Limits.
