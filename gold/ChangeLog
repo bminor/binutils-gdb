@@ -1,5 +1,12 @@
+2016-02-07  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18695
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Add additional
+	information to relocation overflow errors.
+
 2016-02-06  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/18695
 	* x86_64.cc (X86_64_relocate_functions::pcrela32_check): Fix x32
 	overflow checking when symbol value + addend < 0.
 

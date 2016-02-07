@@ -3701,8 +3701,30 @@ Target_x86_64<size>::Relocate::relocate(
     }
 
   if (rstatus == Reloc_funcs::RELOC_OVERFLOW)
-    gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
-			   _("relocation overflow"));
+    {
+      if (gsym == NULL)
+        {
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+	  gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+				 _("relocation overflow: "
+				   "reference to local symbol %u in %s"),
+				 r_sym, object->name().c_str());
+        }
+      else if (gsym->is_defined() && gsym->source() == Symbol::FROM_OBJECT)
+        {
+	  gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+				 _("relocation overflow: "
+				   "reference to '%s' defined in %s"),
+				 gsym->name(),
+				 gsym->object()->name().c_str());
+        }
+      else
+        {
+	  gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+				 _("relocation overflow: reference to '%s'"),
+				 gsym->name());
+        }
+    }
 
   return true;
 }
