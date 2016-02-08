@@ -274,7 +274,8 @@ static struct arm_get_next_pcs_ops arm_linux_get_next_pcs_ops = {
   arm_get_next_pcs_read_memory_unsigned_integer,
   arm_linux_get_next_pcs_syscall_next_pc,
   arm_get_next_pcs_addr_bits_remove,
-  arm_get_next_pcs_is_thumb
+  arm_get_next_pcs_is_thumb,
+  arm_linux_get_next_pcs_fixup,
 };
 
 static void
@@ -950,18 +951,7 @@ arm_linux_software_single_step (struct frame_info *frame)
   next_pcs = arm_get_next_pcs (&next_pcs_ctx);
 
   for (i = 0; VEC_iterate (CORE_ADDR, next_pcs, i, pc); i++)
-    {
-      /* The Linux kernel offers some user-mode helpers in a high page.  We can
-	 not read this page (as of 2.6.23), and even if we could then we
-	 couldn't set breakpoints in it, and even if we could then the atomic
-	 operations would fail when interrupted.  They are all called as
-	 functions and return to the address in LR, so step to there
-	 instead.  */
-      if (pc > 0xffff0000)
-	pc = get_frame_register_unsigned (frame, ARM_LR_REGNUM);
-
-      arm_insert_single_step_breakpoint (gdbarch, aspace, pc);
-    }
+    arm_insert_single_step_breakpoint (gdbarch, aspace, pc);
 
   do_cleanups (old_chain);
 

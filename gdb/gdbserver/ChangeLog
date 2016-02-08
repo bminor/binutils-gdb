@@ -1,3 +1,8 @@
+2016-02-12  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (get_next_pcs_ops): Initialize it with
+	arm_linux_get_next_pcs_fixup.
+
 2016-02-12  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* tracepoint.c (x_tracepoint_action_download): Change

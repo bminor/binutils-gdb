@@ -157,7 +157,8 @@ static struct arm_get_next_pcs_ops get_next_pcs_ops = {
   get_next_pcs_read_memory_unsigned_integer,
   get_next_pcs_syscall_next_pc,
   get_next_pcs_addr_bits_remove,
-  get_next_pcs_is_thumb
+  get_next_pcs_is_thumb,
+  arm_linux_get_next_pcs_fixup,
 };
 
 static int

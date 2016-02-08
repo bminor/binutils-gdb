@@ -18,8 +18,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "common-defs.h"
+#include "common-regcache.h"
 #include "arch/arm.h"
 #include "arm-linux.h"
+#include "arch/arm-get-next-pcs.h"
 
 /* Calculate the offset from stack pointer of the pc register on the stack
    in the case of a sigreturn or sigreturn_rt syscall.  */
@@ -54,4 +56,22 @@ arm_linux_sigreturn_next_pc_offset (unsigned long sp,
   pc_offset = r0_offset + INT_REGISTER_SIZE * ARM_PC_REGNUM;
 
   return pc_offset;
+}
+
+/* Implementation of "fixup" method of struct arm_get_next_pcs_ops
+   for arm-linux.  */
+
+CORE_ADDR
+arm_linux_get_next_pcs_fixup (struct arm_get_next_pcs *self,
+			      CORE_ADDR nextpc)
+{
+  /* The Linux kernel offers some user-mode helpers in a high page.  We can
+     not read this page (as of 2.6.23), and even if we could then we
+     couldn't set breakpoints in it, and even if we could then the atomic
+     operations would fail when interrupted.  They are all called as
+     functions and return to the address in LR, so step to there
+     instead.  */
+  if (nextpc > 0xffff0000)
+    nextpc = regcache_raw_get_unsigned (self->regcache, ARM_LR_REGNUM);
+  return nextpc;
 }
