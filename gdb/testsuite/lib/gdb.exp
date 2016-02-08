@@ -4317,7 +4317,7 @@ proc default_gdb_init { test_file_name } {
 proc make_gdb_parallel_path { args } {
     global GDB_PARALLEL objdir
     set joiner [list "file" "join" $objdir]
-    if { $GDB_PARALLEL != "yes" } {
+    if { [info exists GDB_PARALLEL] && $GDB_PARALLEL != "yes" } {
 	lappend joiner $GDB_PARALLEL
     }
     set joiner [concat $joiner $args]
@@ -4329,15 +4329,11 @@ proc make_gdb_parallel_path { args } {
 # the directory is returned.
 
 proc standard_output_file {basename} {
-    global objdir subdir gdb_test_file_name GDB_PARALLEL
+    global objdir subdir gdb_test_file_name
 
-    if {[info exists GDB_PARALLEL]} {
-	set dir [make_gdb_parallel_path outputs $subdir $gdb_test_file_name]
-	file mkdir $dir
-	return [file join $dir $basename]
-    } else {
-	return [file join $objdir $subdir $basename]
-    }
+    set dir [make_gdb_parallel_path outputs $subdir $gdb_test_file_name]
+    file mkdir $dir
+    return [file join $dir $basename]
 }
 
 # Return the name of a file in our standard temporary directory.

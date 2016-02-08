@@ -33,12 +33,6 @@ SHELL = @SHELL@
 EXEEXT = @EXEEXT@
 SUBDIRS = @subdirs@
 RPATH_ENVVAR = @RPATH_ENVVAR@
-ALL_SUBDIRS = gdb.ada gdb.arch gdb.asm gdb.base gdb.btrace gdb.cell gdb.cp \
-	gdb.disasm gdb.dlang gdb.dwarf2 gdb.fortran gdb.gdb gdb.go \
-	gdb.java gdb.linespec gdb.mi gdb.modula2 gdb.multi \
-	gdb.objc gdb.opencl gdb.opt gdb.pascal gdb.python gdb.server \
-	gdb.stabs gdb.reverse gdb.threads gdb.trace gdb.xml \
-	$(SUBDIRS)
 
 EXTRA_RULES = @EXTRA_RULES@
 
@@ -282,29 +276,11 @@ clean mostlyclean:
 	-rm -rf outputs temp cache
 	-rm -rf gdb.perf/workers gdb.perf/outputs gdb.perf/temp gdb.perf/cache
 	-rm -f read1.so expect-read1
-	if [ x"${ALL_SUBDIRS}" != x ] ; then \
-	    for dir in ${ALL_SUBDIRS}; \
-	    do \
-		    echo "$$dir:"; \
-		    if [ -d $$dir ]; then \
-			    (cd $$dir; $(MAKE) clean); \
-		    fi; \
-	    done ; \
-	else true; fi
 
 distclean maintainer-clean realclean: clean
 	-rm -f *~ core
 	-rm -f Makefile config.status *-init.exp
 	-rm -fr *.log summary detail *.plog *.sum *.psum site.*
-	if [ x"${ALL_SUBDIRS}" != x ] ; then \
-	    for dir in ${ALL_SUBDIRS}; \
-	    do \
-		    echo "$$dir:"; \
-		    if [ -d $$dir ]; then \
-			    (cd $$dir; $(MAKE) distclean); \
-		    fi; \
-	    done ; \
-	else true; fi
 
 Makefile : Makefile.in config.status $(host_makefile_frag)
 	$(SHELL) config.status

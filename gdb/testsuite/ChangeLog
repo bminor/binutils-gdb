@@ -1,5 +1,49 @@
 2016-02-08  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* Makefile.in (ALL_SUBDIRS): Remove.
+	(clean mostlyclean): Do not recurse in ALL_SUBDIRS.
+	(distclean maintainer-clean realclean): Likewise.
+	* configure.ac (AC_OUTPUT): Remove gdb.*/Makefile.
+	* configure: Regenerate.
+	* gdb.ada/Makefile.in: Delete.
+	* gdb.arch/Makefile.in: Likewise.
+	* gdb.asm/Makefile.in: Likewise.
+	* gdb.base/Makefile.in: Likewise.
+	* gdb.btrace/Makefile.in: Likewise.
+	* gdb.cell/Makefile.in: Likewise.
+	* gdb.compile/Makefile.in: Likewise.
+	* gdb.cp/Makefile.in: Likewise.
+	* gdb.disasm/Makefile.in: Likewise.
+	* gdb.dlang/Makefile.in: Likewise.
+	* gdb.dwarf2/Makefile.in: Likewise.
+	* gdb.fortran/Makefile.in: Likewise.
+	* gdb.gdb/Makefile.in: Likewise.
+	* gdb.go/Makefile.in: Likewise.
+	* gdb.guile/Makefile.in: Likewise.
+	* gdb.java/Makefile.in: Likewise.
+	* gdb.linespec/Makefile.in: Likewise.
+	* gdb.mi/Makefile.in: Likewise.
+	* gdb.modula2/Makefile.in: Likewise.
+	* gdb.multi/Makefile.in: Likewise.
+	* gdb.objc/Makefile.in: Likewise.
+	* gdb.opencl/Makefile.in: Likewise.
+	* gdb.opt/Makefile.in: Likewise.
+	* gdb.pascal/Makefile.in: Likewise.
+	* gdb.perf/Makefile.in: Likewise.
+	* gdb.python/Makefile.in: Likewise.
+	* gdb.reverse/Makefile.in: Likewise.
+	* gdb.server/Makefile.in: Likewise.
+	* gdb.stabs/Makefile.in: Likewise.
+	* gdb.threads/Makefile.in: Likewise.
+	* gdb.trace/Makefile.in: Likewise.
+	* gdb.xml/Makefile.in: Likewise.
+	* lib/gdb.exp (make_gdb_parallel_path): Add check for
+	GDB_PARALLEL.
+	(standard_output_file): Remove check for GDB_PARALLEL, always
+	return path in outputs/$subdir/$testname.
+
+2016-02-08  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* Makefile.in (abs_srcdir): Assign @abs_srcdir@.
 	(site.exp): Assign abs_srcdir to tcl's srcdir.
 
