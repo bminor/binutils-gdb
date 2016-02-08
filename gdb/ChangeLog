@@ -1,5 +1,12 @@
 2016-02-09  Keith Seitz  <keiths@redhat.com>
 
+	PR breakpoints/19546
+	* breakpoint.c (breakpoint_event_location_empty_p): New function.
+	(update_breakpoints_after_exec, bkpt_re_set): Use this new function
+	instead of event_location_empty_p.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
 	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Use
 	string_to_event_location_basic instead of string_to_event_location.
 

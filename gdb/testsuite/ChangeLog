@@ -1,5 +1,12 @@
 2016-02-09  Keith Seitz  <keiths@redhat.com>
 
+	PR breakpoints/19546
+	* gdb.base/infcall-exec.c: New file.
+	* gdb.base/infcall-exec2.c: New file.
+	* gdb.base/infcall-exec.exp: New file.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
 	* gdb.guile/scm-breakpoint.exp (test_bkpt_address): New procedure.
 	(toplevel): Call test_bkpt_address.
 

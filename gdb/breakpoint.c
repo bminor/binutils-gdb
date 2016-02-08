@@ -3764,6 +3764,14 @@ create_exception_master_breakpoint (void)
     }
 }
 
+/* Does B have a location spec?  */
+
+static int
+breakpoint_event_location_empty_p (const struct breakpoint *b)
+{
+  return b->location != NULL && event_location_empty_p (b->location);
+}
+
 void
 update_breakpoints_after_exec (void)
 {
@@ -3878,7 +3886,7 @@ update_breakpoints_after_exec (void)
     /* Without a symbolic address, we have little hope of the
        pre-exec() address meaning the same thing in the post-exec()
        a.out.  */
-    if (event_location_empty_p (b->location))
+    if (breakpoint_event_location_empty_p (b))
       {
 	delete_breakpoint (b);
 	continue;
@@ -13063,7 +13071,7 @@ static void
 bkpt_re_set (struct breakpoint *b)
 {
   /* FIXME: is this still reachable?  */
-  if (event_location_empty_p (b->location))
+  if (breakpoint_event_location_empty_p (b))
     {
       /* Anything without a location can't be re-set.  */
       delete_breakpoint (b);
