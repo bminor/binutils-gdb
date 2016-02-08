@@ -1,3 +1,8 @@
+2016-02-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (abs_srcdir): Assign @abs_srcdir@.
+	(site.exp): Assign abs_srcdir to tcl's srcdir.
+
 2016-02-04  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/foll-exec-mode.c: Include limits.h.
