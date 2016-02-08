@@ -766,7 +766,6 @@ int
 remote_register_number_and_offset (struct gdbarch *gdbarch, int regnum,
 				   int *pnum, int *poffset)
 {
-  int sizeof_g_packet;
   struct packet_reg *regs;
   struct cleanup *old_chain;
 
@@ -775,7 +774,7 @@ remote_register_number_and_offset (struct gdbarch *gdbarch, int regnum,
   regs = XCNEWVEC (struct packet_reg, gdbarch_num_regs (gdbarch));
   old_chain = make_cleanup (xfree, regs);
 
-  sizeof_g_packet = map_regcache_remote_table (gdbarch, regs);
+  map_regcache_remote_table (gdbarch, regs);
 
   *pnum = regs[regnum].pnum;
   *poffset = regs[regnum].offset;
@@ -2202,9 +2201,6 @@ set_general_process (void)
 static int
 remote_thread_always_alive (struct target_ops *ops, ptid_t ptid)
 {
-  struct remote_state *rs = get_remote_state ();
-  char *p, *endp;
-
   if (ptid_equal (ptid, magic_null_ptid))
     /* The main thread is always alive.  */
     return 1;
@@ -3197,7 +3193,6 @@ remote_get_threads_with_qthreadinfo (struct target_ops *ops,
 static void
 remote_update_thread_list (struct target_ops *ops)
 {
-  struct remote_state *rs = get_remote_state ();
   struct threads_listing_context context;
   struct cleanup *old_chain;
   int got_list = 0;
@@ -3953,8 +3948,6 @@ process_initial_stop_replies (int from_tty)
      that as current.  */
   ALL_NON_EXITED_THREADS (thread)
     {
-      struct target_waitstatus *ws;
-
       if (first == NULL)
 	first = thread;
 
@@ -3962,8 +3955,6 @@ process_initial_stop_replies (int from_tty)
 	set_running (thread->ptid, 0);
       else if (thread->state != THREAD_STOPPED)
 	continue;
-
-      ws = &thread->suspend.waitstatus;
 
       if (selected == NULL
 	  && thread->suspend.waitstatus_pending_p)
@@ -4118,10 +4109,6 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
   if (!target_is_non_stop_p ())
     {
-      ptid_t ptid;
-      int fake_pid_p = 0;
-      struct inferior *inf;
-
       if (rs->buf[0] == 'W' || rs->buf[0] == 'X')
 	{
 	  if (!extended_p)
@@ -4341,7 +4328,6 @@ remote_check_symbols (void)
 {
   struct remote_state *rs = get_remote_state ();
   char *msg, *reply, *tmp;
-  struct bound_minimal_symbol sym;
   int end;
   struct cleanup *old_chain;
 
@@ -6224,7 +6210,6 @@ remove_stop_reply_for_inferior (QUEUE (stop_reply_p) *q,
 static void
 discard_pending_stop_replies (struct inferior *inf)
 {
-  int i;
   struct queue_iter_param param;
   struct stop_reply *reply;
   struct remote_state *rs = get_remote_state ();
@@ -6811,7 +6796,6 @@ process_stop_reply (struct stop_reply *stop_reply,
       && status->kind != TARGET_WAITKIND_SIGNALLED
       && status->kind != TARGET_WAITKIND_NO_RESUMED)
     {
-      struct remote_state *rs = get_remote_state ();
       struct private_thread_info *remote_thr;
 
       /* Expedited registers.  */
@@ -8289,7 +8273,6 @@ putpkt_binary (const char *buf, int cnt)
   int ch;
   int tcount = 0;
   char *p;
-  char *message;
 
   /* Catch cases like trying to read memory or listing threads while
      we're waiting for a stop reply.  The remote server wouldn't be
@@ -8669,9 +8652,7 @@ getpkt (char **buf,
 	long *sizeof_buf,
 	int forever)
 {
-  int timed_out;
-
-  timed_out = getpkt_sane (buf, sizeof_buf, forever);
+  getpkt_sane (buf, sizeof_buf, forever);
 }
 
 
@@ -9234,8 +9215,6 @@ remote_add_target_side_condition (struct gdbarch *gdbarch,
 {
   struct agent_expr *aexpr = NULL;
   int i, ix;
-  char *pkt;
-  char *buf_start = buf;
 
   if (VEC_empty (agent_expr_p, bp_tgt->conditions))
     return 0;
@@ -9307,7 +9286,6 @@ remote_insert_breakpoint (struct target_ops *ops,
       struct remote_state *rs;
       char *p, *endbuf;
       int bpsize;
-      struct condition_list *cond = NULL;
 
       /* Make sure the remote is pointing at the right process, if
 	 necessary.  */
@@ -9562,8 +9540,6 @@ remote_stopped_by_sw_breakpoint (struct target_ops *ops)
 static int
 remote_supports_stopped_by_sw_breakpoint (struct target_ops *ops)
 {
-  struct remote_state *rs = get_remote_state ();
-
   return (packet_support (PACKET_swbreak_feature) == PACKET_ENABLE);
 }
 
@@ -9584,8 +9560,6 @@ remote_stopped_by_hw_breakpoint (struct target_ops *ops)
 static int
 remote_supports_stopped_by_hw_breakpoint (struct target_ops *ops)
 {
-  struct remote_state *rs = get_remote_state ();
-
   return (packet_support (PACKET_hwbreak_feature) == PACKET_ENABLE);
 }
 
@@ -10051,8 +10025,6 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   /* Only handle flash writes.  */
   if (writebuf != NULL)
     {
-      LONGEST xfered;
-
       switch (object)
 	{
 	case TARGET_OBJECT_FLASH:
@@ -12920,7 +12892,6 @@ remote_read_btrace (struct target_ops *self,
 		    enum btrace_read_type type)
 {
   struct packet_config *packet = &remote_protocol_packets[PACKET_qXfer_btrace];
-  struct remote_state *rs = get_remote_state ();
   struct cleanup *cleanup;
   const char *annex;
   char *xml;
@@ -13247,8 +13218,6 @@ static serial_event_ftype remote_async_serial_handler;
 static void
 remote_async_serial_handler (struct serial *scb, void *context)
 {
-  struct remote_state *rs = (struct remote_state *) context;
-
   /* Don't propogate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */
   inferior_event_handler (INF_REG_EVENT, NULL);
@@ -13300,7 +13269,6 @@ remote_thread_events (struct target_ops *ops, int enable)
 {
   struct remote_state *rs = get_remote_state ();
   size_t size = get_remote_packet_size ();
-  char *p = rs->buf;
 
   if (packet_support (PACKET_QThreadEvents) == PACKET_DISABLE)
     return;
@@ -13466,7 +13434,6 @@ set_range_stepping (char *ignore_args, int from_tty,
 void
 _initialize_remote (void)
 {
-  struct remote_state *rs;
   struct cmd_list_element *cmd;
   const char *cmd_name;
 

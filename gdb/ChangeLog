@@ -1,3 +1,26 @@
+2016-02-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_register_number_and_offset): Remove unused
+	variable(s).
+	(remote_thread_always_alive): Likewise.
+	(remote_update_thread_list): Likewise.
+	(process_initial_stop_replies): Likewise.
+	(remote_start_remote): Likewise.
+	(remote_check_symbols): Likewise.
+	(discard_pending_stop_replies): Likewise.
+	(process_stop_reply): Likewise.
+	(putpkt_binary): Likewise.
+	(getpkt): Likewise.
+	(remote_add_target_side_condition): Likewise.
+	(remote_insert_breakpoint): Likewise.
+	(remote_supports_stopped_by_sw_breakpoint): Likewise.
+	(remote_supports_stopped_by_hw_breakpoint): Likewise.
+	(remote_xfer_partial): Likewise.
+	(remote_read_btrace): Likewise.
+	(remote_async_serial_handler): Likewise.
+	(remote_thread_events): Likewise.
+	(_initialize_remote): Likewise.
+
 2016-02-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* varobj.h (varobj_delete): Remove dellist parameter, update and
