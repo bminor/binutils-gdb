@@ -1021,6 +1021,7 @@
 #define AT_SUN_LDNAME   2006    /* String giving name of dynamic linker.  */
 #define AT_SUN_LPAGESZ  2007    /* Large pagesize.   */
 #define AT_SUN_PLATFORM 2008    /* Platform name string.  */
+#undef AT_SUN_HWCAP
 #define AT_SUN_HWCAP    2009	/* Machine dependent hints about
 				   processor capabilities.  */
 #define AT_SUN_IFLUSH   2010    /* Should flush icache? */

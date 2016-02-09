@@ -1,3 +1,8 @@
+2016-02-09  Alan Modra  <amodra@gmail.com>
+
+	PR 16583
+	* elf/common.h (AT_SUN_HWCAP): Undef before defining.
+
 2016-02-04  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19561
