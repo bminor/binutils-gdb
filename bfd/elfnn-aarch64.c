@@ -6405,10 +6405,6 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  break;
 	}
 
-      if (!save_addend)
-	addend = 0;
-
-
       /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
          because such sections are not SEC_ALLOC and thus ld.so will
          not process them.  */
@@ -6448,6 +6444,34 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		     name, input_bfd, input_section, rel->r_offset);
 		  return FALSE;
 		}
+	      /* Overflow can occur when a variable is referenced with a type
+		 that has a larger alignment than the type with which it was
+		 declared. eg:
+		   file1.c: extern int foo; int a (void) { return foo; }
+		   file2.c: char bar, foo, baz;
+		 If the variable is placed into a data section at an offset
+		 that is incompatible with the larger alignment requirement
+		 overflow will occur.  (Strictly speaking this is not overflow
+		 but rather an alignment problem, but the bfd_reloc_ error
+		 enum does not have a value to cover that situation).
+
+		 Try to catch this situation here and provide a more helpful
+		 error message to the user.  */
+	      if (addend & ((1 << howto->rightshift) - 1)
+		  /* FIXME: Are we testing all of the appropriate reloc
+		     types here ?  */
+		  && (real_r_type == BFD_RELOC_AARCH64_LD_LO19_PCREL
+		      || real_r_type == BFD_RELOC_AARCH64_LDST16_LO12
+		      || real_r_type == BFD_RELOC_AARCH64_LDST32_LO12
+		      || real_r_type == BFD_RELOC_AARCH64_LDST64_LO12
+		      || real_r_type == BFD_RELOC_AARCH64_LDST128_LO12))
+		{
+		  info->callbacks->warning
+		    (info, _("One possible cause of this error is that the \
+symbol is being referenced in the indicated code as if it had a larger \
+alignment than was declared where it was defined."),
+		     name, input_bfd, input_section, rel->r_offset);
+		}
 	      break;
 
 	    case bfd_reloc_undefined:
@@ -6482,6 +6506,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	      break;
 	    }
 	}
+
+      if (!save_addend)
+	addend = 0;
     }
 
   return TRUE;
