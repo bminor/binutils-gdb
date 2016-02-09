@@ -1,3 +1,11 @@
+2016-02-09  Nick Clifton  <nickc@redhat.com>
+
+	* opcode/metag.h (metag_scondtab): Mark as possibly unused.
+	* opcode/nds32.h (nds32_r45map): Likewise.
+	(nds32_r54map): Likewise.
+	* opcode/visium.h (gen_reg_table): Likewise.
+	(fp_reg_table, cc_table, opcode_table): Likewise.
+
 2016-02-09  Alan Modra  <amodra@gmail.com>
 
 	PR 16583

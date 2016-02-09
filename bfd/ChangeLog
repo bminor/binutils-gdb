@@ -1,5 +1,9 @@
 2016-02-09  Nick Clifton  <nickc@redhat.com>
 
+	* oasys.c (oasys_archive_p): Fix indentation.
+	* elf32-nds32.c (nds32_elf_relax_section): Use an unsigned
+	constant for left shifting.
+
 	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Add a more
 	helpful warning message to explain why certain AArch64 relocs
 	might overflow.

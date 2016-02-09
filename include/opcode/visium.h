@@ -104,7 +104,7 @@ struct reg_entry
   unsigned char code;
 };
 
-static const struct reg_entry gen_reg_table[] =
+static const struct reg_entry gen_reg_table[] ATTRIBUTE_UNUSED =
 {
   {"fp", 0x16},
   {"r0", 0x0},
@@ -142,7 +142,7 @@ static const struct reg_entry gen_reg_table[] =
   {"sp", 0x17},
 };
 
-static const struct reg_entry fp_reg_table[] =
+static const struct reg_entry fp_reg_table[] ATTRIBUTE_UNUSED =
 {
   {"f0", 0x0},
   {"f1", 0x1},
@@ -166,7 +166,7 @@ static const struct cc_entry
 {
   char *name;
   int code;
-} cc_table [] =
+} cc_table [] ATTRIBUTE_UNUSED =
 {
   {"cc", 6},
   {"cs", 2},
@@ -229,7 +229,7 @@ static const struct opcode_entry
   unsigned code;
   char flags;
 }
-opcode_table[] =
+opcode_table[] ATTRIBUTE_UNUSED =
 {
   { "adc.b",    mode_dab,  class3|(1<<21)|(1), def },
   { "adc.l",    mode_dab,  class3|(1<<21)|(4), def },
@@ -335,3 +335,4 @@ opcode_table[] =
   { "xor.l",    mode_dab,  class3|(8<<21)|(4), def },
   { "xor.w",    mode_dab,  class3|(8<<21)|(2), def },
 };
+
