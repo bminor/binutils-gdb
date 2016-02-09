@@ -1,7 +1,3 @@
-2016-02-09  Walfred Tedeschi  <walfred.tedeschi@intel.com>
-
-	* linux-x86-low.c (x86_siginfo_fixup): Add cast to gdb_byte*.
-
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* configure.srv (x86_64-*-linux*): Add amd64-linux-siginfo.o

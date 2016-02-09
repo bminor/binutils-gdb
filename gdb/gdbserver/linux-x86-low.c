@@ -690,12 +690,12 @@ x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
 
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())
-      return amd64_linux_siginfo_fixup_common (native, (gdb_byte *) inf,
-					       direction, FIXUP_32);
+      return amd64_linux_siginfo_fixup_common (native, inf, direction,
+					       FIXUP_32);
   /* No fixup for native x32 GDB.  */
   else if (!is_elf64 && sizeof (void *) == 8)
-    return amd64_linux_siginfo_fixup_common (native, (gdb_byte *) inf,
-					     direction, FIXUP_X32);
+    return amd64_linux_siginfo_fixup_common (native, inf, direction,
+					     FIXUP_X32);
 #endif
 
   return 0;
