@@ -1,3 +1,15 @@
+2016-02-09  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/19548
+	* breakpoint.c (create_overlay_event_breakpoint): Don't update
+	global location list here.
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint, create_jit_event_breakpoint)
+	(update_breakpoint_locations):
+	(breakpoint_re_set): Update global location list after all
+	breakpoints are re-set.
+
 2016-02-08  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote.c (remote_register_number_and_offset): Remove unused

@@ -3488,7 +3488,6 @@ create_overlay_event_breakpoint (void)
          overlay_events_enabled = 0;
        }
     }
-  update_global_location_list (UGLL_MAY_INSERT);
 }
 
 static void
@@ -3602,7 +3601,6 @@ create_longjmp_master_breakpoint (void)
 	}
     }
   }
-  update_global_location_list (UGLL_MAY_INSERT);
 
   do_cleanups (old_chain);
 }
@@ -3660,8 +3658,6 @@ create_std_terminate_master_breakpoint (void)
       b->enable_state = bp_disabled;
     }
   }
-
-  update_global_location_list (UGLL_MAY_INSERT);
 
   do_cleanups (old_chain);
 }
@@ -3766,8 +3762,6 @@ create_exception_master_breakpoint (void)
       b->location = new_explicit_location (&explicit_loc);
       b->enable_state = bp_disabled;
     }
-
-  update_global_location_list (UGLL_MAY_INSERT);
 }
 
 void
@@ -7807,12 +7801,8 @@ struct lang_and_radix
 struct breakpoint *
 create_jit_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 {
-  struct breakpoint *b;
-
-  b = create_internal_breakpoint (gdbarch, address, bp_jit_event,
-				  &internal_breakpoint_ops);
-  update_global_location_list_nothrow (UGLL_MAY_INSERT);
-  return b;
+  return create_internal_breakpoint (gdbarch, address, bp_jit_event,
+				     &internal_breakpoint_ops);
 }
 
 /* Remove JIT code registration and unregistration breakpoint(s).  */
@@ -14278,7 +14268,6 @@ update_breakpoint_locations (struct breakpoint *b,
       /* Ranged breakpoints have only one start location and one end
 	 location.  */
       b->enable_state = bp_disabled;
-      update_global_location_list (UGLL_MAY_INSERT);
       printf_unfiltered (_("Could not reset ranged breakpoint %d: "
 			   "multiple locations found\n"),
 			 b->number);
@@ -14376,8 +14365,6 @@ update_breakpoint_locations (struct breakpoint *b,
 
   if (!locations_are_equal (existing_locations, b->loc))
     observer_notify_breakpoint_modified (b);
-
-  update_global_location_list (UGLL_MAY_INSERT);
 }
 
 /* Find the SaL locations corresponding to the given LOCATION.
@@ -14617,6 +14604,11 @@ breakpoint_re_set (void)
   save_input_radix = input_radix;
   old_chain = save_current_space_and_thread ();
 
+  /* Note: we must not try to insert locations until after all
+     breakpoints have been re-set.  Otherwise, e.g., when re-setting
+     breakpoint 1, we'd insert the locations of breakpoint 2, which
+     hadn't been re-set yet, and thus may have stale locations.  */
+
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
   {
     /* Format possible error msg.  */
@@ -14637,6 +14629,9 @@ breakpoint_re_set (void)
   create_longjmp_master_breakpoint ();
   create_std_terminate_master_breakpoint ();
   create_exception_master_breakpoint ();
+
+  /* Now we can insert.  */
+  update_global_location_list (UGLL_MAY_INSERT);
 }
 
 /* Reset the thread number of this breakpoint:

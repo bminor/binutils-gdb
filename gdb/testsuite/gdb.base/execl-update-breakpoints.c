@@ -20,6 +20,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+void
+some_function (void)
+{
+}
+
 int
 main (int argc, char **argv)
 {
@@ -34,5 +39,6 @@ main (int argc, char **argv)
 
   execl (bin, bin, (char *) NULL);
   perror ("execl failed");
+  some_function ();
   exit (1);
 }
