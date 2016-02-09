@@ -7611,7 +7611,6 @@ fi
 
 ac_config_files="$ac_config_files Makefile"
 
-ac_config_commands="$ac_config_commands default"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8312,7 +8311,6 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -8858,7 +8856,7 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
   case $ac_file$ac_mode in
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
-    "default":C) case x$CONFIG_HEADERS in
+    "Makefile":F) case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;
 esac

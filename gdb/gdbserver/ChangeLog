@@ -1,5 +1,11 @@
 2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* configure.ac: Use AC_CONFIG_FILES instead of passing arguments
+	to AC_OUTPUT.
+	* configure: Regenerate.
+
+2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* linux-aarch64-low.c (aarch64_linux_siginfo_fixup): Change
 	void * to gdb_byte *.
 	* linux-low.c (siginfo_fixup): Likewise.

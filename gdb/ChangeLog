@@ -1,3 +1,9 @@
+2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.ac: Use AC_CONFIG_FILES instead of passing arguments
+	to AC_OUTPUT.  Remove "exit 0" at the end.
+	* configure: Regenerate.
+
 2016-02-09  Pedro Alves  <palves@redhat.com>
 
 	PR breakpoints/19548

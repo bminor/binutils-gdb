@@ -16565,10 +16565,8 @@ $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
 
 ac_config_files="$ac_config_files gcore"
 
-
 ac_config_files="$ac_config_files Makefile gdb-gdb.gdb doc/Makefile data-directory/Makefile"
 
-ac_config_commands="$ac_config_commands default"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -17289,7 +17287,6 @@ do
     "gdb-gdb.gdb") CONFIG_FILES="$CONFIG_FILES gdb-gdb.gdb" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "data-directory/Makefile") CONFIG_FILES="$CONFIG_FILES data-directory/Makefile" ;;
-    "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -17907,7 +17904,25 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
   case $ac_file$ac_mode in
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
     "gcore":F) chmod +x gcore ;;
-    "default":C)
+    "Makefile":F)
+case x$CONFIG_HEADERS in
+xconfig.h:config.in)
+echo > stamp-h ;;
+esac
+ ;;
+    "gdb-gdb.gdb":F)
+case x$CONFIG_HEADERS in
+xconfig.h:config.in)
+echo > stamp-h ;;
+esac
+ ;;
+    "doc/Makefile":F)
+case x$CONFIG_HEADERS in
+xconfig.h:config.in)
+echo > stamp-h ;;
+esac
+ ;;
+    "data-directory/Makefile":F)
 case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;
@@ -18096,5 +18111,3 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
-
-exit 0

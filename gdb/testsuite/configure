@@ -3511,8 +3511,8 @@ program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 
 ac_config_files="$ac_config_files lib/pdtrace"
 
-
 ac_config_files="$ac_config_files Makefile"
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
