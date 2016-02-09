@@ -5982,7 +5982,7 @@ linux_qxfer_osdata (const char *annex,
    layout of the inferiors' architecture.  */
 
 static void
-siginfo_fixup (siginfo_t *siginfo, void *inf_siginfo, int direction)
+siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
 {
   int done = 0;
 
@@ -6006,7 +6006,7 @@ linux_xfer_siginfo (const char *annex, unsigned char *readbuf,
 {
   int pid;
   siginfo_t siginfo;
-  char inf_siginfo[sizeof (siginfo_t)];
+  gdb_byte inf_siginfo[sizeof (siginfo_t)];
 
   if (current_thread == NULL)
     return -1;

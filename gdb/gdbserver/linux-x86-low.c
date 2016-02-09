@@ -681,7 +681,7 @@ x86_debug_reg_state (pid_t pid)
    INF.  */
 
 static int
-x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
+x86_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
 {
 #ifdef __x86_64__
   unsigned int machine;

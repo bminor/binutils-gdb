@@ -1,3 +1,13 @@
+2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-aarch64-low.c (aarch64_linux_siginfo_fixup): Change
+	void * to gdb_byte *.
+	* linux-low.c (siginfo_fixup): Likewise.
+	(linux_xfer_siginfo): Likewise.
+	* linux-low.h (struct linux_target_ops) <siginfo_fixup>:
+	Likewise.
+	* linux-x86-low.c (x86_siginfo_fixup): Likewise.
+
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* configure.srv (x86_64-*-linux*): Add amd64-linux-siginfo.o
