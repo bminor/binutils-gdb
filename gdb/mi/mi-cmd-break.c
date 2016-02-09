@@ -341,7 +341,7 @@ mi_cmd_break_insert_1 (int dprintf, char *command, char **argv, int argc)
     }
   else
     {
-      location = string_to_event_location (&address, current_language);
+      location = string_to_event_location_basic (&address, current_language);
       if (*address)
 	{
 	  delete_event_location (location);

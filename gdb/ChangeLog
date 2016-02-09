@@ -1,5 +1,10 @@
 2016-02-09  Keith Seitz  <keiths@redhat.com>
 
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Use
+	string_to_event_location_basic instead of string_to_event_location.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
 	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Skip
 	leading whitespace and use string_to_event_location_basic instead
 	of new_linespec_location.
