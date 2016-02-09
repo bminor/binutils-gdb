@@ -207,11 +207,23 @@ extern struct event_location *
    but invalid, input, e.g., if it is called with missing argument parameters
    or invalid options.
 
-   The return result must be freed with delete_event_location.  */
+   The return result must be freed with delete_event_location.
+
+   This function is intended to be used by CLI commands and will parse
+   explicit locations in a CLI-centric way.  Other interfaces should use
+   string_to_event_location_basic if they want to maintain support for
+   legacy specifications of probe, address, and linespec locations.  */
 
 extern struct event_location *
   string_to_event_location (char **argp,
 			    const struct language_defn *langauge);
+
+/* Like string_to_event_location, but does not attempt to parse explicit
+   locations.  */
+
+extern struct event_location *
+  string_to_event_location_basic (char **argp,
+				  const struct language_defn *language);
 
 /* Attempt to convert the input string in *ARGP into an explicit location.
    ARGP is advanced past any processed input.  Returns an event_location

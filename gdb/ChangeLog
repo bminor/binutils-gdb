@@ -1,3 +1,13 @@
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	* location.c (string_to_explicit_location): Note that "-p" is
+	reserved for probe locations and return NULL for any input
+	that starts with that.
+	(string_to_event_location): Move "legacy" linespec code to ...
+	(string_to_event_location_basic): ... here.
+	* location.h (string_to_event_location): Update comment.
+	(string_to_event_location_basic): New function.
+
 2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* configure.ac: Use AC_CONFIG_FILES instead of passing arguments
