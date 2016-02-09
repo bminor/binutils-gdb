@@ -1,3 +1,9 @@
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	PR python/19506
+	* gdb.python/py-breakpoint.exp (test_bkpt_address): New procedure.
+	(toplevel): Call test_bkpt_address.
+
 2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* configure.ac: Use AC_CONFIG_FILES instead of passing arguments

@@ -1,5 +1,11 @@
 2016-02-09  Keith Seitz  <keiths@redhat.com>
 
+	PR python/19506
+	* python/py-breakpoint.c (bppy_init): Use
+	string_to_event_location_basic instead of new_linespec_location.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
 	* location.c (string_to_explicit_location): Note that "-p" is
 	reserved for probe locations and return NULL for any input
 	that starts with that.
