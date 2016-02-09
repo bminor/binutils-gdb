@@ -1,9 +1,3 @@
-2016-02-09  Nick Clifton  <nickc@redhat.com>
-
-	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Add a more
-	helpful warning message to explain why certain AArch64 relocs
-	might overflow.
-
 2016-02-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* pe-mips.c (coff_mips_reloc): Fix formatting.

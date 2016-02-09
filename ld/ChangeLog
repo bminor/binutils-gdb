@@ -1,10 +1,3 @@
-2016-02-09  Nick Clifton  <nickc@redhat.com>
-
-	* testsuite/ld-aarch64/reloc-overflow-bad.d: New test.
-	* testsuite/ld-aarch64/reloc-overflow-1.s: New source file.
-	* testsuite/ld-aarch64/reloc-overflow-2.s: New source file.
-	* testsuite/ld-aarch64/aarch64-elf.exp: Run the new test.
-
 2016-02-04  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-arm/arm-elf.exp: Remove ARM NOREAD section tests.
