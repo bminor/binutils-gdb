@@ -1,3 +1,7 @@
+2016-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* development.sh (development): Set to false.
+
 2016-02-09  Nick Clifton  <nickc@redhat.com>
 
 	* oasys.c (oasys_archive_p): Fix indentation.
