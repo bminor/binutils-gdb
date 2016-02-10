@@ -41031,7 +41031,38 @@ as tracepoint definitions or register set size.  @value{GDBN} will
 ignore any line that it does not recognize.  An empty line marks the end
 of this section.
 
-@c FIXME add some specific types of data
+@table @code
+@item R @var{size}
+Specifies the size of a register block in bytes.  This is equal to the
+size of a @code{g} packet payload in the remote protocol.  @var{size}
+is an ascii decimal number.  There should be only one such line in
+a single trace file.
+
+@item status @var{status}
+Trace status.  @var{status} has the same format as a @code{qTStatus}
+remote packet reply.  There should be only one such line in a single trace
+file.
+
+@item tp @var{payload}
+Tracepoint definition.  The @var{payload} has the same format as
+@code{qTfP}/@code{qTsP} remote packet reply payload.  A single tracepoint
+may take multiple lines of definition, corresponding to the multiple
+reply packets.
+
+@item tsv @var{payload}
+Trace state variable definition.  The @var{payload} has the same format as
+@code{qTfV}/@code{qTsV} remote packet reply payload.  A single variable
+may take multiple lines of definition, corresponding to the multiple
+reply packets.
+
+@item tdesc @var{payload}
+Target description in XML format.  The @var{payload} is a single line of
+the XML file.  All such lines should be concatenated together to get
+the original XML file.  This file is in the same format as @code{qXfer}
+@code{features} payload, and corresponds to the main @code{target.xml}
+file.  Includes are not allowed.
+
+@end table
 
 The trace frame section consists of a number of consecutive frames.
 Each frame begins with a two-byte tracepoint number, followed by a
