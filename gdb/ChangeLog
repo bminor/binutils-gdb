@@ -1,3 +1,8 @@
+2016-02-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arm-tdep.c (arm_copy_extra_ld_st): Fix "unpriveleged" typo.
+	(arm_decode_dp_misc): Likewise.
+
 2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* amd64-tdep.c (amd64_ax_pseudo_register_collect): New function.

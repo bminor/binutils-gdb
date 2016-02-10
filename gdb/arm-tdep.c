@@ -5420,7 +5420,7 @@ cleanup_store (struct gdbarch *gdbarch, struct regcache *regs,
    transfers, which have a different encoding to byte/word transfers.  */
 
 static int
-arm_copy_extra_ld_st (struct gdbarch *gdbarch, uint32_t insn, int unpriveleged,
+arm_copy_extra_ld_st (struct gdbarch *gdbarch, uint32_t insn, int unprivileged,
 		      struct regcache *regs, struct displaced_step_closure *dsc)
 {
   unsigned int op1 = bits (insn, 20, 24);
@@ -5439,7 +5439,7 @@ arm_copy_extra_ld_st (struct gdbarch *gdbarch, uint32_t insn, int unpriveleged,
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: copying %sextra load/store "
-			"insn %.8lx\n", unpriveleged ? "unpriveleged " : "",
+			"insn %.8lx\n", unprivileged ? "unprivileged " : "",
 			(unsigned long) insn);
 
   opcode = ((op2 << 2) | (op1 & 0x1) | ((op1 & 0x4) >> 1)) - 4;
@@ -6549,7 +6549,7 @@ arm_decode_dp_misc (struct gdbarch *gdbarch, uint32_t insn,
       else if ((op1 & 0x10) == 0x10 && op2 == 0x9)
 	return arm_copy_unmodified (gdbarch, insn, "synch", dsc);
       else if (op2 == 0xb || (op2 & 0xd) == 0xd)
-	/* 2nd arg means "unpriveleged".  */
+	/* 2nd arg means "unprivileged".  */
 	return arm_copy_extra_ld_st (gdbarch, insn, (op1 & 0x12) == 0x02, regs,
 				     dsc);
     }
