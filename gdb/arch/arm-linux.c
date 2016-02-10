@@ -68,10 +68,72 @@ arm_linux_get_next_pcs_fixup (struct arm_get_next_pcs *self,
   /* The Linux kernel offers some user-mode helpers in a high page.  We can
      not read this page (as of 2.6.23), and even if we could then we
      couldn't set breakpoints in it, and even if we could then the atomic
-     operations would fail when interrupted.  They are all called as
-     functions and return to the address in LR, so step to there
-     instead.  */
+     operations would fail when interrupted.  They are all (tail) called
+     as functions and return to the address in LR.  However, when GDB single
+     step this instruction, this instruction isn't executed yet, and LR
+     may not be updated yet.  In other words, GDB can get the target
+     address from LR if this instruction isn't BL or BLX.  */
   if (nextpc > 0xffff0000)
-    nextpc = regcache_raw_get_unsigned (self->regcache, ARM_LR_REGNUM);
+    {
+      int bl_blx_p = 0;
+      CORE_ADDR pc = regcache_read_pc (self->regcache);
+      int pc_incr = 0;
+
+      if (self->ops->is_thumb (self))
+	{
+	  unsigned short inst1
+	    = self->ops->read_mem_uint (pc, 2, self->byte_order_for_code);
+
+	  if (bits (inst1, 8, 15) == 0x47 && bit (inst1, 7))
+	    {
+	      /* BLX Rm */
+	      bl_blx_p = 1;
+	      pc_incr = 2;
+	    }
+	  else if (thumb_insn_size (inst1) == 4)
+	    {
+	      unsigned short inst2;
+
+	      inst2 = self->ops->read_mem_uint (pc + 2, 2,
+						self->byte_order_for_code);
+
+	      if ((inst1 & 0xf800) == 0xf000 && bits (inst2, 14, 15) == 0x3)
+		{
+		  /* BL <label> and BLX <label> */
+		  bl_blx_p = 1;
+		  pc_incr = 4;
+		}
+	    }
+
+	  pc_incr = MAKE_THUMB_ADDR (pc_incr);
+	}
+      else
+	{
+	  unsigned int insn
+	    = self->ops->read_mem_uint (pc, 4, self->byte_order_for_code);
+
+	  if (bits (insn, 28, 31) == INST_NV)
+	    {
+	      if (bits (insn, 25, 27) == 0x5) /* BLX <label> */
+		bl_blx_p = 1;
+	    }
+	  else
+	    {
+	      if (bits (insn, 24, 27) == 0xb  /* BL <label> */
+		  || bits (insn, 4, 27) == 0x12fff3 /* BLX Rm */)
+		bl_blx_p = 1;
+	    }
+
+	  pc_incr = 4;
+	}
+
+      /* If the instruction BL or BLX, the target address is the following
+	 instruction of BL or BLX, otherwise, the target address is in LR
+	 already.  */
+      if (bl_blx_p)
+	nextpc = pc + pc_incr;
+      else
+	nextpc = regcache_raw_get_unsigned (self->regcache, ARM_LR_REGNUM);
+    }
   return nextpc;
 }

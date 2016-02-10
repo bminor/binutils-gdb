@@ -1,5 +1,10 @@
 2016-02-12  Yao Qi  <yao.qi@linaro.org>
 
+	* arch/arm-linux.c (arm_linux_get_next_pcs_fixup): Calculate
+	nextpc according to instruction.
+
+2016-02-12  Yao Qi  <yao.qi@linaro.org>
+
 	* arch/arm-get-next-pcs.c (arm_get_next_pcs): Call
 	self->ops->fixup if it isn't NULL.
 	* arch/arm-get-next-pcs.h: Include gdb_vecs.h.
