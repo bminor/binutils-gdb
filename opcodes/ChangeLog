@@ -1,3 +1,9 @@
+2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
+	    Janek van Oirschot  <jvanoirs@synopsys.com>
+
+        * arc-opc.c (arc_relax_opcodes, arc_num_relax_opcodes): New
+        variable.
+
 2016-02-04  Nick Clifton  <nickc@redhat.com>
 
 	PR target/19561

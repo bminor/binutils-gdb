@@ -1,3 +1,45 @@
+2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
+	    Janek van Oirschot <jvanoirs@synopsys.com>
+
+	* config/tc-arc.h (TC_FRAG_TYPE, TC_PCREL_ADJUST, MAX_INSN_ARGS)
+	(MAX_INSN_FLGS, MAX_FLAG_NAME_LENGHT, TC_GENERIC_RELAX_TABLE):
+	Define.
+	(arc_flags, arc_relax_type): New structure.
+	* config/tc-arc.c (FRAG_MAX_GROWTH, RELAX_TABLE_ENTRY)
+	(RELAX_TABLE_ENTRY_MAX): New define.
+	(relaxation_state, md_relax_table, arc_relaxable_insns)
+	(arc_num_relaxable_ins): New variable.
+	(rlx_operand_type, arc_rlx_types): New enums.
+	(arc_relaxable_ins): New structure.
+	(OPTION_RELAX): New option.
+	(arc_insn): New relax member.
+	(arc_flags): Remove.
+	(relax_insn_p): New function.
+	(apply_fixups): Likewise.
+	(relaxable_operand): Likewise.
+	(may_relax_expr): Likewise.
+	(relaxable_flag): Likewise.
+	(arc_pcrel_adjust): Likewise.
+	(md_estimate_size_before_relax): Implement.
+	(md_convert_frag): Likewise.
+	(md_parse_option): Handle new mrelax option.
+	(md_show_usage): Likewise.
+	(assemble_insn): Set relax member.
+	(emit_insn0): New function.
+	(emit_insn1): Likewise.
+	(emit_insn): Handle relaxation case.
+	* NEWS: Mention the new relaxation option.
+	* doc/c-arc.texi (ARC Options): Document new mrelax option.
+	* doc/as.texinfo (Target ARC Options): Likewise.
+	* testsuite/gas/arc/relax-avoid1.d: New file.
+	* testsuite/gas/arc/relax-avoid1.s: Likewise.
+	* testsuite/gas/arc/relax-avoid2.d: Likewise.
+	* testsuite/gas/arc/relax-avoid2.s: Likewise.
+	* testsuite/gas/arc/relax-avoid3.d: Likewise.
+	* testsuite/gas/arc/relax-avoid3.s: Likewise.
+	* testsuite/gas/arc/relax-b.d: Likewise.
+	* testsuite/gas/arc/relax-b.s: Likewise.
+
 2016-02-08  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-ia64.c (dot_prologue): Fix formatting.

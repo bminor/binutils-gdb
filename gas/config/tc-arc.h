@@ -177,6 +177,14 @@ extern long md_pcrel_from_section (struct fix *, segT);
 /* This hook is required to parse register names as operands.  */
 #define md_parse_name(name, exp, m, c) arc_parse_name (name, exp)
 
+/* Used within frags to pass some information to some relaxation
+   machine dependent values.  */
+#define TC_FRAG_TYPE struct arc_relax_type
+
+/* Adjust non PC-rel values at relaxation time.  */
+#define TC_PCREL_ADJUST(F) arc_pcrel_adjust (F)
+
+extern int arc_pcrel_adjust (fragS *);
 extern bfd_boolean arc_parse_name (const char *, struct expressionS *);
 extern int tc_arc_fix_adjustable (struct fix *);
 extern void arc_handle_align (fragS *);
@@ -193,3 +201,51 @@ extern void arc_frob_label (symbolS *);
 #define NOP_OPCODE_S   0x000078E0
 #define NOP_OPCODE_L   0x264A7000 /* mov 0,0.  */
 
+#define MAX_FLAG_NAME_LENGHT 3
+
+struct arc_flags
+{
+  /* Name of the parsed flag.  */
+  char name[MAX_FLAG_NAME_LENGHT + 1];
+
+  /* The code of the parsed flag.  Valid when is not zero.  */
+  unsigned char code;
+};
+
+#ifndef MAX_INSN_ARGS
+#define MAX_INSN_ARGS	     6
+#endif
+
+#ifndef MAX_INSN_FLGS
+#define MAX_INSN_FLGS	     3
+#endif
+
+extern const relax_typeS md_relax_table[];
+#define TC_GENERIC_RELAX_TABLE md_relax_table
+
+/* Used to construct instructions at md_convert_frag stage of
+   relaxation.  */
+struct arc_relax_type
+{
+  /* Dictates whether the pc-relativity should be kept in mind when
+     relax_frag is called or whether the pc-relativity should be
+     solved outside of relaxation.  For clarification: BL(_S) and
+     B(_S) use pcrel == 1 and ADD with a solvable expression as 3rd
+     operand use pcrel == 0.  */
+  unsigned char pcrel;
+
+  /* Expressions that dictate the operands.  Used for re-assembling in
+     md_convert_frag.  */
+  expressionS tok[MAX_INSN_ARGS];
+
+  /* Number of tok (i.e. number of operands).  Used for re-assembling
+     in md_convert_frag.  */
+  int ntok;
+
+  /* Flags of instruction.  Used for re-assembling in
+     md_convert_frag.  */
+  struct arc_flags pflags[MAX_INSN_FLGS];
+
+  /* Number of flags.  Used for re-assembling in md_convert_frag.  */
+  int nflg;
+};

@@ -24,8 +24,13 @@
 #ifndef OPCODE_ARC_H
 #define OPCODE_ARC_H
 
+#ifndef MAX_INSN_ARGS
 #define MAX_INSN_ARGS	     6
+#endif
+
+#ifndef MAX_INSN_FLGS
 #define MAX_INSN_FLGS	     3
+#endif
 
 /* Instruction Class.  */
 typedef enum
@@ -409,5 +414,8 @@ struct arc_aux_reg
 
 extern const struct arc_aux_reg arc_aux_regs[];
 extern const unsigned arc_num_aux_regs;
+
+extern const struct arc_opcode arc_relax_opcodes[];
+extern const unsigned arc_num_relax_opcodes;
 
 #endif /* OPCODE_ARC_H */

@@ -1,3 +1,9 @@
+2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
+	    Janek van Oirschot  <jvanoirs@synopsys.com>
+
+        * opcode/arc.h (arc_opcode arc_relax_opcodes, arc_num_relax_opcodes):
+        Declare.
+
 2016-02-09  Nick Clifton  <nickc@redhat.com>
 
 	* opcode/metag.h (metag_scondtab): Mark as possibly unused.
