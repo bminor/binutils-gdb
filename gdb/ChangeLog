@@ -1,5 +1,9 @@
 2016-02-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Replace -cvs suffix by -git suffix.
+
+2016-02-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Set GDB version number to 7.10.90.DATE-cvs.
 
 2016-02-10  Joel Brobecker  <brobecker@adacore.com>
