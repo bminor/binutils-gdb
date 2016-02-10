@@ -1,5 +1,10 @@
 2016-02-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Change "Changes since GDB version 7.10" into "Changes
+	in GDB version 7.11".
+
+2016-02-10  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 7.11 branch created (9ef9e6a6a0dd8f948708cb67c9afcfd0be40cb0a):
 	* version.in: Bump version to 7.10.90.DATE-git.
 
