@@ -1,3 +1,7 @@
+2016-02-10  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_raw_read_unsigned): Clear *VAL.
+
 2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* configure.ac: Use AC_CONFIG_FILES instead of passing arguments
