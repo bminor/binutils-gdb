@@ -319,6 +319,7 @@ run_dump_test "load5a"
 run_dump_test "load5b"
 run_dump_test "load6"
 run_dump_test "pr19175"
+run_dump_test "pr19615"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
