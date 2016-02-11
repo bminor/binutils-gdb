@@ -1,3 +1,23 @@
+2016-02-11  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19614
+	* dw2gencfi.c (cfi_sections_set): Delay setting this variable
+	until it is actually used.
+	(cfi_set_sections): Set cfi_sections_set to true.
+	(dot_cfi_startproc): Likewise.
+	(dot_cfi_endproc): Likewise.
+	(dot_cfi_fde_data): Likewise.
+	(cfi_finish): Likewise.
+	(dot_cfi_sections): Do not set cfi_sections_set.
+	* doc/as.texinfo (.cfi_sections): Note that targets can provide
+	their own cfi section name.  Also note that the directive can be
+	reissued provided that CFI generation has not started.
+	* testsuite/gas/mips/compact-eh-err2.s: Add .cfi_startproc and
+	.cfi_endproc directives so that the redefinition of .cfi_sections
+	will trigger the generation of the error message.
+	* testsuite/gas/mips/compact-eh-err2.l: Update expected line
+	number of error message.
+
 2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
 	    Janek van Oirschot <jvanoirs@synopsys.com>
 

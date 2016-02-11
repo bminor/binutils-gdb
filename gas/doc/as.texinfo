@@ -4683,6 +4683,14 @@ directive is not used is @code{.cfi_sections .eh_frame}.
 On targets that support compact unwinding tables these can be generated
 by specifying @code{.eh_frame_entry} instead of @code{.eh_frame}.
 
+Some targets may support an additional name, such as @code{.c6xabi.exidx}
+which is used by the @value{TIC6X} target.
+
+The @code{.cfi_sections} directive can be repeated, with the same or different
+arguments, provided that CFI generation has not yet started.  Once CFI
+generation has started however the section list is fixed and any attempts to
+redefine it will result in an error.
+
 @subsection @code{.cfi_startproc [simple]}
 @cindex @code{cfi_startproc} directive
 @code{.cfi_startproc} is used at the beginning of each function that

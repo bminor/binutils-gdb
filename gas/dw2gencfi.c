@@ -509,6 +509,7 @@ void
 cfi_set_sections (void)
 {
   frchain_now->frch_cfi_data->cur_fde_data->sections = all_cfi_sections;
+  cfi_sections_set = TRUE;
 }
 
 /* Universal functions to store new instructions.  */
@@ -1248,7 +1249,6 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
   if (cfi_sections_set && cfi_sections != sections)
     as_bad (_("inconsistent uses of .cfi_sections"));
-  cfi_sections_set = TRUE;
   cfi_sections = sections;
 }
 
@@ -1284,6 +1284,7 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
     }
   demand_empty_rest_of_line ();
 
+  cfi_sections_set = TRUE;
   all_cfi_sections |= cfi_sections;
   cfi_set_sections ();
   frchain_now->frch_cfi_data->cur_cfa_offset = 0;
@@ -1310,6 +1311,7 @@ dot_cfi_endproc (int ignored ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 
+  cfi_sections_set = TRUE;
   if ((cfi_sections & CFI_EMIT_target) != 0)
     tc_cfi_endproc (last_fde);
 }
@@ -1372,6 +1374,7 @@ dot_cfi_fde_data (int ignored ATTRIBUTE_UNUSED)
 
   last_fde = frchain_now->frch_cfi_data->cur_fde_data;
 
+  cfi_sections_set = TRUE;
   if ((cfi_sections & CFI_EMIT_target) != 0
       || (cfi_sections & CFI_EMIT_eh_frame_compact) != 0)
     {
@@ -2223,6 +2226,7 @@ cfi_finish (void)
   if (all_fde_data == 0)
     return;
 
+  cfi_sections_set = TRUE;
   if ((all_cfi_sections & CFI_EMIT_eh_frame) != 0
       || (all_cfi_sections & CFI_EMIT_eh_frame_compact) != 0)
     {
@@ -2408,6 +2412,7 @@ cfi_finish (void)
       flag_traditional_format = save_flag_traditional_format;
     }
 
+  cfi_sections_set = TRUE;
   if ((all_cfi_sections & CFI_EMIT_debug_frame) != 0)
     {
       int alignment = ffs (DWARF2_ADDR_SIZE (stdoutput)) - 1;
