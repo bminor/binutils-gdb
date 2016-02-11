@@ -1,5 +1,14 @@
 2016-02-11  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* arm-tdep.c (arm_displaced_step_copy_insn): Remove.
+	(ARM displaced stepping support): Remove reference to
+	arm_displaced_step_copy_insn in comment.
+	* arm-tdep.h (arm_displaced_step_copy_insn): Remove.
+	* arm-linux-tdep.c (arm_linux_displaced_step_copy_insn): Remove
+	reference to arm_displaced_step_copy_insn in comment.
+
+2016-02-11  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* arm-tdep.c (thumb_copy_unmodified_16bit): Change type of insn.
 	(thumb_copy_b): Likewise.
 	(arm_decode_b_bl_ldmstm): Likewise.

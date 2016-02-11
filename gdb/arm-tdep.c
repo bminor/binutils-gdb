@@ -4307,13 +4307,12 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
    Generally ARM displaced stepping works as follows:
 
    1. When an instruction is to be single-stepped, it is first decoded by
-      arm_process_displaced_insn (called from arm_displaced_step_copy_insn).
-      Depending on the type of instruction, it is then copied to a scratch
-      location, possibly in a modified form.  The copy_* set of functions
-      performs such modification, as necessary.  A breakpoint is placed after
-      the modified instruction in the scratch space to return control to GDB.
-      Note in particular that instructions which modify the PC will no longer
-      do so after modification.
+      arm_process_displaced_insn.  Depending on the type of instruction, it is
+      then copied to a scratch location, possibly in a modified form.  The
+      copy_* set of functions performs such modification, as necessary.  A
+      breakpoint is placed after the modified instruction in the scratch space
+      to return control to GDB.  Note in particular that instructions which
+      modify the PC will no longer do so after modification.
 
    2. The instruction is single-stepped, by setting the PC to the scratch
       location address, and resuming.  Control returns to GDB when the
@@ -7599,22 +7598,6 @@ arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
 			paddress (gdbarch, from), paddress (gdbarch, to));
-}
-
-/* Entry point for copying an instruction into scratch space for displaced
-   stepping.  */
-
-struct displaced_step_closure *
-arm_displaced_step_copy_insn (struct gdbarch *gdbarch,
-			      CORE_ADDR from, CORE_ADDR to,
-			      struct regcache *regs)
-{
-  struct displaced_step_closure *dsc = XNEW (struct displaced_step_closure);
-
-  arm_process_displaced_insn (gdbarch, from, to, regs, dsc);
-  arm_displaced_init_closure (gdbarch, from, to, dsc);
-
-  return dsc;
 }
 
 /* Entry point for cleaning things up after a displaced instruction has been

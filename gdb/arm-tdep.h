@@ -265,9 +265,6 @@ int arm_software_single_step (struct frame_info *);
 int arm_is_thumb (struct regcache *regcache);
 int arm_frame_is_thumb (struct frame_info *frame);
 
-extern struct displaced_step_closure *
-  arm_displaced_step_copy_insn (struct gdbarch *, CORE_ADDR, CORE_ADDR,
-				struct regcache *);
 extern void arm_displaced_step_fixup (struct gdbarch *,
 				      struct displaced_step_closure *,
 				      CORE_ADDR, CORE_ADDR, struct regcache *);
