@@ -1,3 +1,8 @@
+2016-02-11  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* tracepoint.c (encode_actions_1): Use target_gdbarch () rather
+	than loc->gdbarch.
+
 2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* tracefile-tfile.c (trace_tdesc): New static variable.
