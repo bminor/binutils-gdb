@@ -1,5 +1,9 @@
 2016-02-11  Pedro Alves  <palves@redhat.com>
 
+	* README (Parallel testing): Add missing double quotes.
+
+2016-02-11  Pedro Alves  <palves@redhat.com>
+
 	* README (Parallel testing): New section.
 	(GDB_PARALLEL): Rewrite.
 	(FORCE_PARALLEL): Document.

@@ -44,8 +44,8 @@ serialized.  This can be overridden by either using the
 `check-parallel' target in the Makefile, or by setting FORCE_PARALLEL
 to any non-empty value:
 
-	make check-parallel RUNTESTFLAGS="--target_board=native-gdbserver
-	make check RUNTESTFLAGS="--target_board=native-gdbserver FORCE_PARALLEL=1
+	make check-parallel RUNTESTFLAGS="--target_board=native-gdbserver"
+	make check RUNTESTFLAGS="--target_board=native-gdbserver" FORCE_PARALLEL=1
 
 If you want to use runtest directly instead of using the Makefile, see
 the description of GDB_PARALLEL below.
