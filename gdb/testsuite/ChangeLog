@@ -1,3 +1,9 @@
+2016-02-11  Pedro Alves  <palves@redhat.com>
+
+	* README (Parallel testing): New section.
+	(GDB_PARALLEL): Rewrite.
+	(FORCE_PARALLEL): Document.
+
 2016-02-11  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/tfile-avx.c: New test.
