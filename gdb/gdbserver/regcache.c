@@ -21,6 +21,9 @@
 #include "gdbthread.h"
 #include "tdesc.h"
 #include "rsp-low.h"
+#include "bfd-types.h"
+#include "gdb-byteswap.h"
+
 #ifndef IN_PROCESS_AGENT
 
 struct regcache *
@@ -424,14 +427,25 @@ collect_register (struct regcache *regcache, int n, void *buf)
 	  register_size (regcache->tdesc, n));
 }
 
+#ifndef IN_PROCESS_AGENT
+
+/* Return host endianness as an enum bfd_endian.  */
+
+static enum bfd_endian
+host_bfd_endian (void)
+{
+  return (__BYTE_ORDER == __LITTLE_ENDIAN
+	  ? BFD_ENDIAN_LITTLE
+	  : BFD_ENDIAN_BIG);
+}
+
 enum register_status
 regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
 			    ULONGEST *val)
 {
   int size;
-
-  gdb_assert (regcache != NULL);
-  gdb_assert (regnum >= 0 && regnum < regcache->tdesc->num_registers);
+  gdb_byte *buf;
+  enum bfd_endian byteorder;
 
   size = register_size (regcache->tdesc, regnum);
 
@@ -440,13 +454,16 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
             "%d bytes."),
           (int) sizeof (ULONGEST));
 
-  *val = 0;
-  collect_register (regcache, regnum, val);
+  buf = (gdb_byte *) alloca (size);
+  collect_register (regcache, regnum, buf);
 
+  /* Assume the inferior's byte order is the same as gdbserver's (the
+     host).  */
+  byteorder = host_bfd_endian ();
+
+  *val = extract_unsigned_integer (buf, size, byteorder);
   return REG_VALID;
 }
-
-#ifndef IN_PROCESS_AGENT
 
 void
 collect_register_as_string (struct regcache *regcache, int n, char *buf)

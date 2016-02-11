@@ -185,7 +185,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/btrace-common.c \
 	$(srcdir)/common/fileio.c $(srcdir)/nat/linux-namespaces.c \
 	$(srcdir)/arch/arm.c $(srcdir)/common/common-regcache.c \
-	$(srcdir)/arch/arm-linux.c $(srcdir)/arch/arm-get-next-pcs.c
+	$(srcdir)/arch/arm-linux.c $(srcdir)/arch/arm-get-next-pcs.c \
+	$(srcdir)/common/gdb-byteswap.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -200,6 +201,7 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
       tdesc.o print-utils.o rsp-low.o errors.o common-debug.o cleanups.o \
       common-exceptions.o symbol.o btrace-common.o fileio.o common-regcache.o \
+      gdb-byteswap.o \
       $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
@@ -588,6 +590,9 @@ fileio.o: ../common/fileio.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 common-regcache.o: ../common/common-regcache.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+gdb-byteswap.o: ../common/gdb-byteswap.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
