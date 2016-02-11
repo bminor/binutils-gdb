@@ -1,3 +1,12 @@
+2016-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19601
+	* elf32-i386.c (elf_i386_relocate_section): Mask off the least
+	significant bit in GOT offset for R_386_GOT32X.
+
 2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master

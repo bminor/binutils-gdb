@@ -4016,10 +4016,12 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 	  /* It is relative to .got.plt section.  */
 	  if (h->got.offset != (bfd_vma) -1)
-	    /* Use GOT entry.  */
+	    /* Use GOT entry.  Mask off the least significant bit in
+	       GOT offset which may be set by R_386_GOT32 processing
+	       below.  */
 	    relocation = (htab->elf.sgot->output_section->vma
 			  + htab->elf.sgot->output_offset
-			  + h->got.offset - offplt);
+			  + (h->got.offset & ~1) - offplt);
 	  else
 	    /* Use GOTPLT entry.  */
 	    relocation = (h->plt.offset / plt_entry_size - 1 + 3) * 4;
