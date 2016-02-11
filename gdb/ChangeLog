@@ -1,5 +1,36 @@
 2016-02-11  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* arm-tdep.c (arm_skip_prologue): Remove unused variables.
+	(arm_analyze_prologue): Likewise.
+	(arm_scan_prologue): Likewise.
+	(arm_m_exception_prev_register): Likewise.
+	(arm_copy_block_xfer): Likewise.
+	(thumb2_copy_block_xfer): Likewise.
+	(arm_decode_miscellaneous): Likewise.
+	(arm_decode_ld_st_word_ubyte): Likewise.
+	(arm_decode_svc_copro): Likewise.
+	(thumb2_decode_svc_copro): Likewise.
+	(thumb_copy_16bit_ldr_literal): Likewise.
+	(thumb_copy_pop_pc_16bit): Likewise.
+	(decode_thumb_32bit_ld_mem_hints): Likewise.
+	(arm_show_force_mode): Likewise.
+	(_initialize_arm_tdep): Likewise.
+	(arm_record_strx): Likewise.
+	(arm_record_extension_space): Likewise.
+	(arm_record_data_proc_misc_ld_str): Likewise.
+	(arm_record_exreg_ld_st_insn): Likewise.
+	(arm_record_vfp_data_proc_insn): Likewise.
+	(arm_record_coproc_data_proc): Likewise.
+	(thumb_record_misc): Likewise.
+	(thumb_record_ldm_stm_swi): Likewise.
+	(thumb2_record_ld_st_dual_ex_tbb): Likewise.
+	(thumb2_record_ld_mem_hints): Likewise.
+	(thumb2_record_lmul_lmla_div): Likewise.
+	(thumb2_record_asimd_struct_ld_st): Likewise.
+	(arm_process_record): Likewise.
+
+2016-02-11  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* arm-tdep.c (arm_displaced_step_copy_insn): Remove.
 	(ARM displaced stepping support): Remove reference to
 	arm_displaced_step_copy_insn in comment.
