@@ -1,5 +1,9 @@
 2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* stack.c (frame_info): Check frame_unwind_caller_id.
+
+2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* frame.h (skip_tailcall_frames): New.
 	* frame.c (skip_tailcall_frames): New.
 	(frame_pop): Call skip_tailcall_frames.
