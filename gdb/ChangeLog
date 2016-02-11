@@ -1,3 +1,11 @@
+2016-02-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arm-tdep.c (thumb_copy_unmodified_16bit): Change type of insn.
+	(thumb_copy_b): Likewise.
+	(arm_decode_b_bl_ldmstm): Likewise.
+	(thumb_copy_16bit_ldr_literal): Likewise.
+	(thumb_copy_pop_pc_16bit): Likewise.
+
 2016-02-11  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* tracepoint.c (encode_actions_1): Use target_gdbarch () rather
