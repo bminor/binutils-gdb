@@ -1,3 +1,19 @@
+2016-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19615
+	* ld.texinfo: Document -Bsymbolic and -Bsymbolic-functions for
+	PIE.
+	* lexsup.c (parse_args): Enable -Bsymbolic and
+	-Bsymbolic-functions for PIE.
+	* testsuite/ld-i386/i386.exp: Run pr19615.
+	* testsuite/ld-i386/pr19615.d: New file.
+	* testsuite/ld-i386/pr19615.s: Likewise.
+	* testsuite/ld-x86-64/pr19615.d: Likewise.
+	* testsuite/ld-x86-64/pr19615.s: Likewise.
+
 2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
