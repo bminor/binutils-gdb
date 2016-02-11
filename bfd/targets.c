@@ -171,8 +171,6 @@ DESCRIPTION
 .  bfd_target_sym_flavour
 .};
 .
-.enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
-.
 .{* Forward declaration.  *}
 .typedef struct bfd_link_info _bfd_link_info;
 .

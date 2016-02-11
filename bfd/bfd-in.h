@@ -35,6 +35,7 @@ extern "C" {
 #include "ansidecl.h"
 #include "symcat.h"
 #include <sys/stat.h>
+#include "bfd-types.h"
 
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #ifndef SABER

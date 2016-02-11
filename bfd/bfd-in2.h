@@ -42,6 +42,7 @@ extern "C" {
 #include "ansidecl.h"
 #include "symcat.h"
 #include <sys/stat.h>
+#include "bfd-types.h"
 
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #ifndef SABER
@@ -7123,8 +7124,6 @@ enum bfd_flavour
   bfd_target_pef_xlib_flavour,
   bfd_target_sym_flavour
 };
-
-enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
 
 /* Forward declaration.  */
 typedef struct bfd_link_info _bfd_link_info;
