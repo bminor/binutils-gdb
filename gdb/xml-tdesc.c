@@ -638,6 +638,18 @@ target_read_description_xml (struct target_ops *ops)
 char *
 target_fetch_description_xml (struct target_ops *ops)
 {
+#if !defined(HAVE_LIBEXPAT)
+  static int have_warned;
+
+  if (!have_warned)
+    {
+      have_warned = 1;
+      warning (_("Can not fetch XML target description; XML support was "
+		 "disabled at compile time"));
+    }
+
+  return NULL;
+#else
   struct target_desc *tdesc;
   char *tdesc_str;
   char *expanded_text;
@@ -659,4 +671,5 @@ target_fetch_description_xml (struct target_ops *ops)
     }
 
   return expanded_text;
+#endif
 }

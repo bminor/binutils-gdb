@@ -1,3 +1,8 @@
+2016-02-12  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* xml-tdesc.c (target_fetch_description_xml) [!HAVE_LIBEXPAT]: Warn
+	and return NULL.
+
 2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* frame.h (skip_tailcall_frames): Update comment.
