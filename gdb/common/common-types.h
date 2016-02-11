@@ -20,6 +20,10 @@
 #ifndef COMMON_TYPES_H
 #define COMMON_TYPES_H
 
+/* This header is always available, even when BFD is not
+   configured.  */
+#include "bfd-types.h"
+
 #ifdef GDBSERVER
 
 /* * A byte from the program being debugged.  */
