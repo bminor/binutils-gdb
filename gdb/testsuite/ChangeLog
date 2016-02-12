@@ -1,3 +1,8 @@
+2016-02-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* i386-biarch-core.exp: Define corefile using
+	standard_output_file.
+
 2016-02-12  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.arch/arm-single-step-kernel-helper.c: New.
