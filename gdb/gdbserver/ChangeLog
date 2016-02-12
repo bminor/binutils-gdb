@@ -1,5 +1,22 @@
 2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* linux-s390-low.c (s390_num_regs_3264): Define on 31-bit too.
+	(s390_regmap_3264) [!__s390x__]: New global.
+	(s390_collect_ptrace_register): Skip map entries containing -1.
+	(s390_supply_ptrace_register): Ditto.
+	(s390_fill_gprs_high): New function.
+	(s390_store_gprs_high): New function.
+	(s390_regsets): Add NT_S390_HIGH_GPRS.
+	(s390_get_hwcap): Enable on 31-bit.
+	(have_hwcap_s390_high_gprs): Enable on 31-bit.
+	(s390_arch_setup): Enable detection of high GPRs, TDB, VX on 31-bit.
+	Detect NT_S390_HIGH_GPRS.
+	(s390_usrregs_info_3264): Enable on 31-bit.
+	(s390_regs_info): Enable regs_info_3264 on 31-bit.
+	(initialize_low_arch): Initialize s390_regsets_info_3264 on 31-bit.
+
+2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	PR gdb/13808
 	* Makefile.in: Add i386-*-linux-ipa.o and amd64-*-linux-ipa.o.
 	* configure.srv: Ditto.
