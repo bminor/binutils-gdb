@@ -1,0 +1,1094 @@
+From 785d0de006c82f2c1472fbb3a1d787ab3b6bde3f Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Wed, 10 Feb 2016 15:12:27 -0800
+Subject: [PATCH] Optimize loading undefweak symbol address via GOT
+
+When loading address of the undefined weak symbol, foo, via GOT, we can
+convert "mov foo@GOT, %reg" to "mov $0x0, %reg" if foo is bound locally.
+Also a symbol is bound locally when building PIE without --dynamic-list
+nor --export-dynamic.
+
+bfd/
+
+	PR ld/19609
+	* elf-bfd.h (SYMBOLIC_BIND): Also return TRUE for PIE without
+	--dynamic-list nor --export-dynamic.
+	* elf32-i386.c (elf_i386_convert_load): Convert "mov foo@GOT,
+	%reg" to "mov $0x0, %reg" if foo is bound locally.
+	(elf_i386_relocate_section): Don't generate dynamic relocations
+	against weak undefined symbols bound locally.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Don't
+	allocate dynamic relocations against weak undefined symbols
+	bound locally.
+	(elf_x86_64_convert_load): Convert "mov foo@GOT, %reg" to "mov
+	$0x0, %reg" if foo is bound locally.
+	(elf_x86_64_relocate_section): Don't generate dynamic
+	relocations against weak undefined symbols bound locally.
+
+ld/
+
+	PR ld/19609
+	* testsuite/ld-i386/i386.exp: Run undefweak and tests for
+	PR ld/19609.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/mov1b.d: Updated.
+	* testsuite/ld-x86-64/mov1b.d: Likewise.
+	* testsuite/ld-x86-64/mov1d.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-3b.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-4b.d: Likewise.
+	* testsuite/ld-i386/pr19609.s: New file.
+	* testsuite/ld-i386/pr19609a.d: Likewise.
+	* testsuite/ld-i386/pr19609b.d: Likewise.
+	* testsuite/ld-i386/pr19609c.d: Likewise.
+	* testsuite/ld-i386/pr19609d.d: Likewise.
+	* testsuite/ld-i386/pr19609e.d: Likewise.
+	* testsuite/ld-i386/pr19609f.d: Likewise.
+	* testsuite/ld-i386/pr19609g.d: Likewise.
+	* testsuite/ld-i386/pr19609h.d: Likewise.
+	* testsuite/ld-i386/undefweak.s: Likewise.
+	* testsuite/ld-i386/undefweaka.d: Likewise.
+	* testsuite/ld-i386/undefweakb.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-3c.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-3d.d: Likewise.
+	* testsuite/ld-x86-64/pr19609.s: Likewise.
+	* testsuite/ld-x86-64/pr19609a.d: Likewise.
+	* testsuite/ld-x86-64/pr19609b.d: Likewise.
+	* testsuite/ld-x86-64/pr19609c.d: Likewise.
+	* testsuite/ld-x86-64/pr19609d.d: Likewise.
+	* testsuite/ld-x86-64/pr19609e.d: Likewise.
+	* testsuite/ld-x86-64/pr19609f.d: Likewise.
+	* testsuite/ld-x86-64/pr19609g.d: Likewise.
+	* testsuite/ld-x86-64/pr19609i.d: Likewise.
+	* testsuite/ld-x86-64/pr19609j.d: Likewise.
+	* testsuite/ld-x86-64/pr19609k.d: Likewise.
+	* testsuite/ld-x86-64/pr19609l.d: Likewise.
+---
+ bfd/elf-bfd.h                       | 14 ++++---
+ bfd/elf32-i386.c                    | 75 ++++++++++++++++++++++++++-----------
+ bfd/elf64-x86-64.c                  | 75 ++++++++++++++++++++++++++++---------
+ ld/testsuite/ld-i386/i386.exp       | 10 +++++
+ ld/testsuite/ld-i386/mov1b.d        |  4 +-
+ ld/testsuite/ld-i386/pr19609.s      |  8 ++++
+ ld/testsuite/ld-i386/pr19609a.d     | 13 +++++++
+ ld/testsuite/ld-i386/pr19609b.d     | 13 +++++++
+ ld/testsuite/ld-i386/pr19609c.d     | 13 +++++++
+ ld/testsuite/ld-i386/pr19609d.d     | 13 +++++++
+ ld/testsuite/ld-i386/pr19609e.d     | 13 +++++++
+ ld/testsuite/ld-i386/pr19609f.d     | 13 +++++++
+ ld/testsuite/ld-i386/pr19609g.d     | 13 +++++++
+ ld/testsuite/ld-i386/pr19609h.d     | 13 +++++++
+ ld/testsuite/ld-i386/undefweak.s    | 10 +++++
+ ld/testsuite/ld-i386/undefweaka.d   |  9 +++++
+ ld/testsuite/ld-i386/undefweakb.d   | 11 ++++++
+ ld/testsuite/ld-x86-64/mov1b.d      |  4 +-
+ ld/testsuite/ld-x86-64/mov1d.d      |  4 +-
+ ld/testsuite/ld-x86-64/pr13082-3b.d |  9 +++--
+ ld/testsuite/ld-x86-64/pr13082-3c.d |  9 +++++
+ ld/testsuite/ld-x86-64/pr13082-3d.d | 10 +++++
+ ld/testsuite/ld-x86-64/pr13082-4b.d |  9 +++--
+ ld/testsuite/ld-x86-64/pr19609.s    | 10 +++++
+ ld/testsuite/ld-x86-64/pr19609a.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609b.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609c.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609d.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609e.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609f.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609g.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609i.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609j.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609k.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/pr19609l.d   | 15 ++++++++
+ ld/testsuite/ld-x86-64/x86-64.exp   | 33 ++++++++++++++++
+ 36 files changed, 514 insertions(+), 59 deletions(-)
+ create mode 100644 ld/testsuite/ld-i386/pr19609.s
+ create mode 100644 ld/testsuite/ld-i386/pr19609a.d
+ create mode 100644 ld/testsuite/ld-i386/pr19609b.d
+ create mode 100644 ld/testsuite/ld-i386/pr19609c.d
+ create mode 100644 ld/testsuite/ld-i386/pr19609d.d
+ create mode 100644 ld/testsuite/ld-i386/pr19609e.d
+ create mode 100644 ld/testsuite/ld-i386/pr19609f.d
+ create mode 100644 ld/testsuite/ld-i386/pr19609g.d
+ create mode 100644 ld/testsuite/ld-i386/pr19609h.d
+ create mode 100644 ld/testsuite/ld-i386/undefweak.s
+ create mode 100644 ld/testsuite/ld-i386/undefweaka.d
+ create mode 100644 ld/testsuite/ld-i386/undefweakb.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr13082-3c.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr13082-3d.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609a.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609b.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609c.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609d.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609e.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609f.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609g.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609i.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609j.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609k.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19609l.d
+
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index 6a04f04..5e5ca2d 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -2639,11 +2639,15 @@ extern asection _bfd_elf_large_com_section;
+     continue;								\
+   }
+ 
+-/* Will a symbol be bound to the definition within the shared
+-   library, if any.  A unique symbol can never be bound locally.  */
+-#define SYMBOLIC_BIND(INFO, H) \
+-    (!(H)->unique_global \
+-     && ((INFO)->symbolic || ((INFO)->dynamic && !(H)->dynamic)))
++/* Will a symbol be bound to the definition within the PIC object, if
++   any.  A unique symbol can never be bound locally.  */
++#define SYMBOLIC_BIND(INFO, H)						\
++    (!(H)->unique_global						\
++     && ((INFO)->symbolic						\
++	 || ((INFO)->dynamic && !(H)->dynamic)				\
++	 || (!(INFO)->export_dynamic					\
++	     && !(INFO)->dynamic					\
++	     && bfd_link_pie (INFO))))
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
+index a8951d8..ad85a57 100644
+--- a/bfd/elf32-i386.c
++++ b/bfd/elf32-i386.c
+@@ -2611,11 +2611,12 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	}
+ 
+       /* Also discard relocs on undefined weak syms with non-default
+-    	 visibility.  */
++	 visibility or bound locally.  */
+       if (eh->dyn_relocs != NULL
+ 	  && h->root.type == bfd_link_hash_undefweak)
+ 	{
+-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
++	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
++	      || SYMBOLIC_BIND (info, h))
+ 	    eh->dyn_relocs = NULL;
+ 
+ 	  /* Make sure undefined weak symbols are output as a dynamic
+@@ -2812,6 +2813,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
+       unsigned int addend;
+       unsigned int nop;
+       bfd_vma nop_offset;
++      bfd_boolean undefweak;
+ 
+       if (r_type != R_386_GOT32 && r_type != R_386_GOT32X)
+ 	continue;
+@@ -2875,6 +2877,8 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
+ 	    continue;
+ 	}
+ 
++      undefweak = FALSE;
++
+       /* Try to convert R_386_GOT32 and R_386_GOT32X.  Get the symbol
+ 	 referred to by the reloc.  */
+       if (r_symndx < symtab_hdr->sh_info)
+@@ -2976,34 +2980,54 @@ convert_branch:
+ 	  if (h == htab->elf.hdynamic)
+ 	    continue;
+ 
++	  /* If undefined weak symbol is bound locally, its reference
++	     is resolved as 0.  */
++	  undefweak = (h->root.type == bfd_link_hash_undefweak
++		       && (SYMBOLIC_BIND (link_info, h)
++			   || !htab->elf.dynamic_sections_created));
++
+ 	  /* def_regular is set by an assignment in a linker script in
+ 	     bfd_elf_record_link_assignment.  */
+-	  if ((h->def_regular
+-	       || h->root.type == bfd_link_hash_defined
+-	       || h->root.type == bfd_link_hash_defweak)
+-	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
++	  if (undefweak
++	      || ((h->def_regular
++		   || h->root.type == bfd_link_hash_defined
++		   || h->root.type == bfd_link_hash_defweak)
++		  && SYMBOL_REFERENCES_LOCAL (link_info, h)))
+ 	    {
+ convert_load:
+ 	      if (opcode == 0x8b)
+ 		{
+-		  /* Convert "mov foo@GOT(%reg1), %reg2" to
+-		     "lea foo@GOTOFF(%reg1), %reg2".  */
+-		  if (r_type == R_386_GOT32X
+-		      && (baseless || !bfd_link_pic (link_info)))
++		  if (undefweak)
+ 		    {
++		      /* Convert "mov foo@GOT[(%reg1)], %reg2" to
++			 "mov $0x0, %reg2" if foo is weak undefined
++			 bound locally.  */
+ 		      r_type = R_386_32;
+-		      /* For R_386_32, convert
+-			 "lea foo@GOTOFF(%reg1), %reg2" to
+-			 "lea foo@GOT, %reg2".  */
+-		      if (!baseless)
++		      modrm = 0xc0 | (modrm & 0x38) >> 3;
++		      bfd_put_8 (abfd, modrm, contents + roff - 1);
++		      opcode = 0xc7;
++		    }
++		  else
++		    {
++		      /* Convert "mov foo@GOT(%reg1), %reg2" to
++			 "lea foo@GOTOFF(%reg1), %reg2".  */
++		      if (r_type == R_386_GOT32X
++			  && (baseless || !bfd_link_pic (link_info)))
+ 			{
+-			  modrm = 0x5 | (modrm & 0x38);
+-			  bfd_put_8 (abfd, modrm, contents + roff - 1);
++			  r_type = R_386_32;
++			  /* For R_386_32, convert
++			     "lea foo@GOTOFF(%reg1), %reg2" to
++			     "lea foo@GOT, %reg2".  */
++			  if (!baseless)
++			    {
++			      modrm = 0x5 | (modrm & 0x38);
++			      bfd_put_8 (abfd, modrm, contents + roff - 1);
++			    }
+ 			}
++		      else
++			r_type = R_386_GOTOFF;
++		      opcode = 0x8d;
+ 		    }
+-		  else
+-		    r_type = R_386_GOTOFF;
+-		  opcode = 0x8d;
+ 		}
+ 	      else
+ 		{
+@@ -4244,11 +4268,15 @@ r_386_got32:
+ 	      || is_vxworks_tls)
+ 	    break;
+ 
+-	  /* Copy dynamic function pointer relocations.  */
++	  /* Copy dynamic function pointer relocations.  Don't generate
++	     dynamic relocations against weak undefined symbols bound
++	     locally.  */
+ 	  if ((bfd_link_pic (info)
+ 	       && (h == NULL
+-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+-		   || h->root.type != bfd_link_hash_undefweak)
++		   || (!(h->root.type == bfd_link_hash_undefweak
++			 && SYMBOLIC_BIND (info, h))
++		       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
++			   || h->root.type != bfd_link_hash_undefweak)))
+ 	       && ((r_type != R_386_PC32 && r_type != R_386_SIZE32)
+ 		   || !SYMBOL_CALLS_LOCAL (info, h)))
+ 	      || (ELIMINATE_COPY_RELOCS
+@@ -4256,6 +4284,9 @@ r_386_got32:
+ 		  && h != NULL
+ 		  && h->dynindx != -1
+ 		  && (!h->non_got_ref || eh->func_pointer_refcount > 0)
++		  && !(h->root.type == bfd_link_hash_undefweak
++		       && (SYMBOLIC_BIND (info, h)
++			   || !htab->elf.dynamic_sections_created))
+ 		  && ((h->def_dynamic
+ 		       && !h->def_regular)
+ 		      || h->root.type == bfd_link_hash_undefweak
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index 463ce3a..6240ead 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -2832,12 +2832,13 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+ 	}
+ 
+       /* Also discard relocs on undefined weak syms with non-default
+-	 visibility.  */
++	 visibility or bound locally.  */
+       if (eh->dyn_relocs != NULL)
+ 	{
+ 	  if (h->root.type == bfd_link_hash_undefweak)
+ 	    {
+-	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
++	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
++		  || SYMBOLIC_BIND (info, h))
+ 		eh->dyn_relocs = NULL;
+ 
+ 	      /* Make sure undefined weak symbols are output as a dynamic
+@@ -3050,6 +3051,7 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
+       bfd_signed_vma raddend;
+       unsigned int opcode;
+       unsigned int modrm;
++      bfd_boolean mov_undefweak;
+ 
+       if (r_type != R_X86_64_GOTPCREL
+ 	  && r_type != R_X86_64_GOTPCRELX
+@@ -3087,6 +3089,8 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
+ 	    }
+ 	}
+ 
++      mov_undefweak = FALSE;
++
+       /* Get the symbol referred to by the reloc.  */
+       if (r_symndx < symtab_hdr->sh_info)
+ 	{
+@@ -3124,24 +3128,38 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
+ 		 || h->root.type == bfd_link_hash_warning)
+ 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+ 
++	  /* If undefined weak symbol is bound locally, its reference
++	     is resolved as 0.  */
++	  mov_undefweak = (opcode == 0x8b
++			   && (r_type == R_X86_64_GOTPCRELX
++			       || r_type == R_X86_64_REX_GOTPCRELX)
++			   && h->root.type == bfd_link_hash_undefweak
++			   && (SYMBOLIC_BIND (link_info, h)
++			       || !htab->elf.dynamic_sections_created));
++
+ 	  /* STT_GNU_IFUNC must keep GOTPCREL relocations.  We also
+ 	     avoid optimizing GOTPCREL relocations againt _DYNAMIC
+ 	     since ld.so may use its link-time address.  */
+-	  if ((h->def_regular
+-	       || h->root.type == bfd_link_hash_defined
+-	       || h->root.type == bfd_link_hash_defweak)
+-	      && h->type != STT_GNU_IFUNC
+-	      && h != htab->elf.hdynamic
+-	      && SYMBOL_REFERENCES_LOCAL (link_info, h))
++	  if (h->type != STT_GNU_IFUNC
++	      && (mov_undefweak
++		  || ((h->def_regular
++		       || h->root.type == bfd_link_hash_defined
++		       || h->root.type == bfd_link_hash_defweak)
++		      && h != htab->elf.hdynamic
++		      && SYMBOL_REFERENCES_LOCAL (link_info, h))))
+ 	    {
+ 	      /* bfd_link_hash_new or bfd_link_hash_undefined is
+ 	         set by an assignment in a linker script in
+ 	         bfd_elf_record_link_assignment.  FIXME: If we
+ 		 ever get a linker error due relocation overflow,
+-		 we will skip this optimization.  */
+-	      if (h->def_regular
+-		  && (h->root.type == bfd_link_hash_new
+-		      || h->root.type == bfd_link_hash_undefined))
++		 we will skip this optimization.
++
++		 There is no overflow for relocations against undefined
++		 weak symbol bound locally.  */
++	      if (mov_undefweak
++		  || (h->def_regular
++		      && (h->root.type == bfd_link_hash_new
++			  || h->root.type == bfd_link_hash_undefined)))
+ 		goto convert;
+ 	      tsec = h->root.u.def.section;
+ 	      toff = h->root.u.def.value;
+@@ -3274,7 +3292,17 @@ convert:
+ 	}
+       else
+ 	{
+-	  if (opcode == 0x8b)
++	  if (mov_undefweak)
++	    {
++	      /* Convert "mov foo@GOTPCREL(%rip), %reg" to
++		 "mov $0x0, %reg" if foo is weak undefined bound
++		 locally.  */
++	      opcode = 0xc7;
++	      modrm = bfd_get_8 (abfd, contents + roff - 1);
++	      modrm = 0xc0 | (modrm & 0x38) >> 3;
++	      goto rewrite_modrm_rex;
++	    }
++	  else if (opcode == 0x8b)
+ 	    {
+ 	      /* Convert "mov foo@GOTPCREL(%rip), %reg" to
+ 		 "lea foo(%rip), %reg".  */
+@@ -3298,6 +3326,8 @@ convert:
+ 		  modrm = 0xc0 | (modrm & 0x38) >> 3 | (opcode & 0x3c);
+ 		  opcode = 0x81;
+ 		}
++
++rewrite_modrm_rex:
+ 	      bfd_put_8 (abfd, modrm, contents + roff - 1);
+ 
+ 	      if (r_type == R_X86_64_REX_GOTPCRELX)
+@@ -4529,8 +4559,11 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+ 		  /* Symbol doesn't need copy reloc and isn't referenced
+ 		     locally.  We only allow branch to symbol with
+ 		     non-default visibility. */
+-		  fail = (!branch
+-			  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT);
++		  fail = (!(h->root.type == bfd_link_hash_undefweak
++			    && SYMBOLIC_BIND (info, h))
++			  && (!branch
++			      || (ELF_ST_VISIBILITY (h->other)
++				  == STV_DEFAULT)));
+ 		}
+ 
+ 	      if (fail)
+@@ -4585,7 +4618,8 @@ direct:
+ 	   /* Don't copy a pc-relative relocation into the output file
+ 	      if the symbol needs copy reloc or the symbol is undefined
+ 	      when building executable.  Copy dynamic function pointer
+-	      relocations.  */
++	      relocations.  Don't generate dynamic relocations against
++	      weak undefined symbols bound locally.  */
+ 	  if ((bfd_link_pic (info)
+ 	       && !(bfd_link_executable (info)
+ 		    && h != NULL
+@@ -4594,8 +4628,10 @@ direct:
+ 			|| h->root.type == bfd_link_hash_undefined)
+ 		    && IS_X86_64_PCREL_TYPE (r_type))
+ 	       && (h == NULL
+-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+-		   || h->root.type != bfd_link_hash_undefweak)
++		   || (!(h->root.type == bfd_link_hash_undefweak
++			 && SYMBOLIC_BIND (info, h))
++		       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
++			   || h->root.type != bfd_link_hash_undefweak)))
+ 	       && ((! IS_X86_64_PCREL_TYPE (r_type)
+ 		      && r_type != R_X86_64_SIZE32
+ 		      && r_type != R_X86_64_SIZE64)
+@@ -4605,6 +4641,9 @@ direct:
+ 		  && h != NULL
+ 		  && h->dynindx != -1
+ 		  && (!h->non_got_ref || eh->func_pointer_refcount > 0)
++		  && !(h->root.type == bfd_link_hash_undefweak
++		       && (SYMBOLIC_BIND (info, h)
++			   || !htab->elf.dynamic_sections_created))
+ 		  && ((h->def_dynamic
+ 		       && !h->def_regular)
+ 		      || h->root.type == bfd_link_hash_undefweak
+diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
+index 1a79694..0f5a11a 100644
+--- a/ld/testsuite/ld-i386/i386.exp
++++ b/ld/testsuite/ld-i386/i386.exp
+@@ -320,6 +320,16 @@ run_dump_test "load5b"
+ run_dump_test "load6"
+ run_dump_test "pr19175"
+ run_dump_test "pr19615"
++run_dump_test "pr19609a"
++run_dump_test "pr19609b"
++run_dump_test "pr19609c"
++run_dump_test "pr19609d"
++run_dump_test "pr19609e"
++run_dump_test "pr19609f"
++run_dump_test "pr19609g"
++run_dump_test "pr19609h"
++run_dump_test "undefweaka"
++run_dump_test "undefweakb"
+ 
+ if { !([istarget "i?86-*-linux*"]
+        || [istarget "i?86-*-gnu*"]
+diff --git a/ld/testsuite/ld-i386/mov1b.d b/ld/testsuite/ld-i386/mov1b.d
+index ae40862..92ea4b3 100644
+--- a/ld/testsuite/ld-i386/mov1b.d
++++ b/ld/testsuite/ld-i386/mov1b.d
+@@ -10,6 +10,6 @@ Disassembly of section .text:
+ 
+ #...
+ [ 	]*[a-f0-9]+:	8b 81 ([0-9a-f]{2} ){4} *	mov    -0x[a-f0-9]+\(%ecx\),%eax
+-[ 	]*[a-f0-9]+:	8b 81 ([0-9a-f]{2} ){4} *	mov    -0x[a-f0-9]+\(%ecx\),%eax
+-[ 	]*[a-f0-9]+:	8b 81 ([0-9a-f]{2} ){4} *	mov    -0x[a-f0-9]+\(%ecx\),%eax
++[ 	]*[a-f0-9]+:	c7 c0 00 00 00 00 *	mov    \$0x0,%eax
++[ 	]*[a-f0-9]+:	c7 c0 00 00 00 00 *	mov    \$0x0,%eax
+ #pass
+diff --git a/ld/testsuite/ld-i386/pr19609.s b/ld/testsuite/ld-i386/pr19609.s
+new file mode 100644
+index 0000000..3a8e5ca
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19609.s
+@@ -0,0 +1,8 @@
++	.text
++	.weak bar
++	.globl	_start
++	.type	_start, @function
++_start:
++	mov	bar@GOT(%edx), %eax
++	mov	bar@GOT(%edx), %ecx
++	.size	_start, .-_start
+diff --git a/ld/testsuite/ld-i386/pr19609a.d b/ld/testsuite/ld-i386/pr19609a.d
+new file mode 100644
+index 0000000..559dd29
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19609a.d
+@@ -0,0 +1,13 @@
++#source: pr19609.s
++#as: --32
++#ld: -melf_i386
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	c7 c0 00 00 00 00    	mov    \$0x0,%eax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
+diff --git a/ld/testsuite/ld-i386/pr19609b.d b/ld/testsuite/ld-i386/pr19609b.d
+new file mode 100644
+index 0000000..59c75ca
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19609b.d
+@@ -0,0 +1,13 @@
++#source: pr19609.s
++#as: --32
++#ld: -pie -melf_i386
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	c7 c0 00 00 00 00    	mov    \$0x0,%eax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
+diff --git a/ld/testsuite/ld-i386/pr19609c.d b/ld/testsuite/ld-i386/pr19609c.d
+new file mode 100644
+index 0000000..3e5dfde
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19609c.d
+@@ -0,0 +1,13 @@
++#source: pr19609.s
++#as: --32
++#ld: -shared -melf_i386
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	8b 82 fc ff ff ff    	mov    -0x4\(%edx\),%eax
++[ 	]*[a-f0-9]+:	8b 8a fc ff ff ff    	mov    -0x4\(%edx\),%ecx
+diff --git a/ld/testsuite/ld-i386/pr19609d.d b/ld/testsuite/ld-i386/pr19609d.d
+new file mode 100644
+index 0000000..f6830e8
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19609d.d
+@@ -0,0 +1,13 @@
++#source: pr19609.s
++#as: --32
++#ld: -E -melf_i386
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	c7 c0 00 00 00 00    	mov    \$0x0,%eax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
+diff --git a/ld/testsuite/ld-i386/pr19609e.d b/ld/testsuite/ld-i386/pr19609e.d
+new file mode 100644
+index 0000000..cc8141c
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19609e.d
+@@ -0,0 +1,13 @@
++#source: pr19609.s
++#as: --32
++#ld: -pie -E -Bsymbolic -melf_i386
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	c7 c0 00 00 00 00    	mov    \$0x0,%eax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
+diff --git a/ld/testsuite/ld-i386/pr19609f.d b/ld/testsuite/ld-i386/pr19609f.d
+new file mode 100644
+index 0000000..0bc5c35
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19609f.d
+@@ -0,0 +1,13 @@
++#source: pr19609.s
++#as: --32
++#ld: -pie --dynamic-list-data -melf_i386
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	c7 c0 00 00 00 00    	mov    \$0x0,%eax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
+diff --git a/ld/testsuite/ld-i386/pr19609g.d b/ld/testsuite/ld-i386/pr19609g.d
+new file mode 100644
+index 0000000..e87ff00
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19609g.d
+@@ -0,0 +1,13 @@
++#source: pr19609.s
++#as: --32
++#ld: -pie -E -melf_i386
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	8b 82 fc ff ff ff    	mov    -0x4\(%edx\),%eax
++[ 	]*[a-f0-9]+:	8b 8a fc ff ff ff    	mov    -0x4\(%edx\),%ecx
+diff --git a/ld/testsuite/ld-i386/pr19609h.d b/ld/testsuite/ld-i386/pr19609h.d
+new file mode 100644
+index 0000000..3b71ac8
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19609h.d
+@@ -0,0 +1,13 @@
++#source: pr19609.s
++#as: --32
++#ld: -pie -E -Bsymbolic-functions -melf_i386
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	c7 c0 00 00 00 00    	mov    \$0x0,%eax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
+diff --git a/ld/testsuite/ld-i386/undefweak.s b/ld/testsuite/ld-i386/undefweak.s
+new file mode 100644
+index 0000000..f34c917
+--- /dev/null
++++ b/ld/testsuite/ld-i386/undefweak.s
+@@ -0,0 +1,10 @@
++	.text
++	.globl _start
++_start:
++	mov	.Ljmp(%eax), %eax
++	jmp	*(%eax)
++	.section	.data.rel.ro.local,"aw",@progbits
++	.weak func
++	.align	8
++.Ljmp:
++	.long func
+diff --git a/ld/testsuite/ld-i386/undefweaka.d b/ld/testsuite/ld-i386/undefweaka.d
+new file mode 100644
+index 0000000..c106ebf
+--- /dev/null
++++ b/ld/testsuite/ld-i386/undefweaka.d
+@@ -0,0 +1,9 @@
++#source: undefweak.s
++#as: --32
++#ld: -shared -melf_i386
++#readelf: -r --wide
++
++Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
++ Offset     Info    Type                Sym. Value  Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_RELATIVE +
++[0-9a-f]+ +[0-9a-f]+ +R_386_32 +[0-9a-f]+ +func
+diff --git a/ld/testsuite/ld-i386/undefweakb.d b/ld/testsuite/ld-i386/undefweakb.d
+new file mode 100644
+index 0000000..48ebad8
+--- /dev/null
++++ b/ld/testsuite/ld-i386/undefweakb.d
+@@ -0,0 +1,11 @@
++#source: undefweak.s
++#as: --32
++#ld: -pie -melf_i386
++#readelf: -r --wide -x .data.rel.ro
++
++Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++ Offset     Info    Type                Sym. Value  Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_RELATIVE +
++
++Hex dump of section '.data.rel.ro':
++  0x[a-f0-9]+ 00000000                            ....
+diff --git a/ld/testsuite/ld-x86-64/mov1b.d b/ld/testsuite/ld-x86-64/mov1b.d
+index f112c1c..3a14715 100644
+--- a/ld/testsuite/ld-x86-64/mov1b.d
++++ b/ld/testsuite/ld-x86-64/mov1b.d
+@@ -10,6 +10,6 @@ Disassembly of section .text:
+ 
+ #...
+ [ 	]*[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%rax        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
+-[ 	]*[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%rax        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
+-[ 	]*[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%rax        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 *	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 *	mov    \$0x0,%rax
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/mov1d.d b/ld/testsuite/ld-x86-64/mov1d.d
+index 794a546..ed0e5f9 100644
+--- a/ld/testsuite/ld-x86-64/mov1d.d
++++ b/ld/testsuite/ld-x86-64/mov1d.d
+@@ -10,6 +10,6 @@ Disassembly of section .text:
+ 
+ #...
+ [ 	]*[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%rax        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
+-[ 	]*[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%rax        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
+-[ 	]*[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%rax        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 *	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 *	mov    \$0x0,%rax
+ #pass
+diff --git a/ld/testsuite/ld-x86-64/pr13082-3b.d b/ld/testsuite/ld-x86-64/pr13082-3b.d
+index 12efaf0..c3c3f86 100644
+--- a/ld/testsuite/ld-x86-64/pr13082-3b.d
++++ b/ld/testsuite/ld-x86-64/pr13082-3b.d
+@@ -2,8 +2,9 @@
+ #name: PR ld/13082-3 (b)
+ #as: --x32
+ #ld: -pie -melf32_x86_64
+-#readelf: -r --wide
++#readelf: -r -x .data.rel.ro
+ 
+-Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
+- Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
+-[0-9a-f]+ +[0-9a-f]+ +R_X86_64_32 +[0-9a-f]+ +func \+ 0
++There are no relocations in this file.
++
++Hex dump of section '.data.rel.ro':
++  0x[a-f0-9]+ 00000000 00000000                   ........
+diff --git a/ld/testsuite/ld-x86-64/pr13082-3c.d b/ld/testsuite/ld-x86-64/pr13082-3c.d
+new file mode 100644
+index 0000000..9947425
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr13082-3c.d
+@@ -0,0 +1,9 @@
++#source: pr13082-3.s
++#name: PR ld/13082-3 (c)
++#as: --64
++#ld: -shared -melf_x86_64
++#readelf: -r --wide
++
++Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
++    Offset             Info             Type               Symbol's Value  Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_64 +[0-9a-f]+ +func \+ 0
+diff --git a/ld/testsuite/ld-x86-64/pr13082-3d.d b/ld/testsuite/ld-x86-64/pr13082-3d.d
+new file mode 100644
+index 0000000..8385d50
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr13082-3d.d
+@@ -0,0 +1,10 @@
++#source: pr13082-3.s
++#name: PR ld/13082-3 (d)
++#as: --64
++#ld: -pie -melf_x86_64
++#readelf: -r -x .data.rel.ro
++
++There are no relocations in this file.
++
++Hex dump of section '.data.rel.ro':
++  0x[a-f0-9]+ 00000000 00000000                   ........
+diff --git a/ld/testsuite/ld-x86-64/pr13082-4b.d b/ld/testsuite/ld-x86-64/pr13082-4b.d
+index cb4d90a..2b7584c 100644
+--- a/ld/testsuite/ld-x86-64/pr13082-4b.d
++++ b/ld/testsuite/ld-x86-64/pr13082-4b.d
+@@ -2,8 +2,9 @@
+ #name: PR ld/13082-4 (b)
+ #as: --x32
+ #ld: -pie -melf32_x86_64
+-#readelf: -r --wide
++#readelf: -r -x .data.rel.ro
+ 
+-Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
+- Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
+-[0-9a-f]+ +[0-9a-f]+ +R_X86_64_64 +[0-9a-f]+ +func \+ 1
++There are no relocations in this file.
++
++Hex dump of section '.data.rel.ro':
++  0x[a-f0-9]+ 01000000 00000000                   ........
+diff --git a/ld/testsuite/ld-x86-64/pr19609.s b/ld/testsuite/ld-x86-64/pr19609.s
+new file mode 100644
+index 0000000..602efff
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609.s
+@@ -0,0 +1,10 @@
++	.text
++	.weak bar
++	.globl	_start
++	.type	_start, @function
++_start:
++	mov	bar@GOTPCREL(%rip), %rax
++	mov	bar@GOTPCREL(%rip), %ecx
++	mov	bar@GOTPCREL(%rip), %r11
++	mov	bar@GOTPCREL(%rip), %r12d
++	.size	_start, .-_start
+diff --git a/ld/testsuite/ld-x86-64/pr19609a.d b/ld/testsuite/ld-x86-64/pr19609a.d
+new file mode 100644
+index 0000000..a202c87
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609a.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --64
++#ld: -melf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
++[ 	]*[a-f0-9]+:	49 c7 c3 00 00 00 00 	mov    \$0x0,%r11
++[ 	]*[a-f0-9]+:	41 c7 c4 00 00 00 00 	mov    \$0x0,%r12d
+diff --git a/ld/testsuite/ld-x86-64/pr19609b.d b/ld/testsuite/ld-x86-64/pr19609b.d
+new file mode 100644
+index 0000000..640e177
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609b.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --64
++#ld: -pie -melf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
++[ 	]*[a-f0-9]+:	49 c7 c3 00 00 00 00 	mov    \$0x0,%r11
++[ 	]*[a-f0-9]+:	41 c7 c4 00 00 00 00 	mov    \$0x0,%r12d
+diff --git a/ld/testsuite/ld-x86-64/pr19609c.d b/ld/testsuite/ld-x86-64/pr19609c.d
+new file mode 100644
+index 0000000..f24f62a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609c.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --64
++#ld: -shared -melf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%rax        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	8b 0d ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%ecx        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	4c 8b 1d ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%r11        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	44 8b 25 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%r12d        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
+diff --git a/ld/testsuite/ld-x86-64/pr19609d.d b/ld/testsuite/ld-x86-64/pr19609d.d
+new file mode 100644
+index 0000000..aaec7d1
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609d.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --64
++#ld: -E -melf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
++[ 	]*[a-f0-9]+:	49 c7 c3 00 00 00 00 	mov    \$0x0,%r11
++[ 	]*[a-f0-9]+:	41 c7 c4 00 00 00 00 	mov    \$0x0,%r12d
+diff --git a/ld/testsuite/ld-x86-64/pr19609e.d b/ld/testsuite/ld-x86-64/pr19609e.d
+new file mode 100644
+index 0000000..676dd17
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609e.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --64
++#ld: -pie -E -Bsymbolic -melf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
++[ 	]*[a-f0-9]+:	49 c7 c3 00 00 00 00 	mov    \$0x0,%r11
++[ 	]*[a-f0-9]+:	41 c7 c4 00 00 00 00 	mov    \$0x0,%r12d
+diff --git a/ld/testsuite/ld-x86-64/pr19609f.d b/ld/testsuite/ld-x86-64/pr19609f.d
+new file mode 100644
+index 0000000..81bca52
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609f.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --64
++#ld: -pie --dynamic-list-data -melf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
++[ 	]*[a-f0-9]+:	49 c7 c3 00 00 00 00 	mov    \$0x0,%r11
++[ 	]*[a-f0-9]+:	41 c7 c4 00 00 00 00 	mov    \$0x0,%r12d
+diff --git a/ld/testsuite/ld-x86-64/pr19609g.d b/ld/testsuite/ld-x86-64/pr19609g.d
+new file mode 100644
+index 0000000..c488d66
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609g.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --64
++#ld: -pie -E -melf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%rax        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	8b 0d ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%ecx        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	4c 8b 1d ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%r11        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	44 8b 25 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%r12d        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
+diff --git a/ld/testsuite/ld-x86-64/pr19609i.d b/ld/testsuite/ld-x86-64/pr19609i.d
+new file mode 100644
+index 0000000..c46c378
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609i.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --x32
++#ld: -melf32_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
++[ 	]*[a-f0-9]+:	49 c7 c3 00 00 00 00 	mov    \$0x0,%r11
++[ 	]*[a-f0-9]+:	41 c7 c4 00 00 00 00 	mov    \$0x0,%r12d
+diff --git a/ld/testsuite/ld-x86-64/pr19609j.d b/ld/testsuite/ld-x86-64/pr19609j.d
+new file mode 100644
+index 0000000..642f748
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609j.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --x32
++#ld: -pie -melf32_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
++[ 	]*[a-f0-9]+:	49 c7 c3 00 00 00 00 	mov    \$0x0,%r11
++[ 	]*[a-f0-9]+:	41 c7 c4 00 00 00 00 	mov    \$0x0,%r12d
+diff --git a/ld/testsuite/ld-x86-64/pr19609k.d b/ld/testsuite/ld-x86-64/pr19609k.d
+new file mode 100644
+index 0000000..d002273
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609k.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --x32
++#ld: -shared -melf32_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%rax        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	8b 0d ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%ecx        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	4c 8b 1d ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%r11        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
++[ 	]*[a-f0-9]+:	44 8b 25 ([0-9a-f]{2} ){4} *	mov    0x[a-f0-9]+\(%rip\),%r12d        # [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
+diff --git a/ld/testsuite/ld-x86-64/pr19609l.d b/ld/testsuite/ld-x86-64/pr19609l.d
+new file mode 100644
+index 0000000..db0681b
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19609l.d
+@@ -0,0 +1,15 @@
++#source: pr19609.s
++#as: --64
++#ld: -pie -E -Bsymbolic-functions -melf_x86_64
++#objdump: -dw
++
++.*: +file format .*
++
++
++Disassembly of section .text:
++
++[a-f0-9]+ <_start>:
++[ 	]*[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
++[ 	]*[a-f0-9]+:	c7 c1 00 00 00 00    	mov    \$0x0,%ecx
++[ 	]*[a-f0-9]+:	49 c7 c3 00 00 00 00 	mov    \$0x0,%r11
++[ 	]*[a-f0-9]+:	41 c7 c4 00 00 00 00 	mov    \$0x0,%r12d
+diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
+index 7248377..3ea314c 100644
+--- a/ld/testsuite/ld-x86-64/x86-64.exp
++++ b/ld/testsuite/ld-x86-64/x86-64.exp
+@@ -299,6 +299,28 @@ run_dump_test "pr13082-2a"
+ run_dump_test "pr13082-2b"
+ run_dump_test "pr13082-3a"
+ run_dump_test "pr13082-3b"
++run_dump_test "pr13082-3c"
++run_dump_test "pr13082-3d"
++run_dump_test "pr13082-4a"
++run_dump_test "pr13082-4b"
++run_dump_test "pr13082-5a"
++run_dump_test "pr13082-5b"
++run_dump_test "pr13082-6a"
++run_dump_test "pr13082-6b"
++run_dump_test "lea1a"
++run_dump_test "lea1b"
++run_dump_test "lea1c"
++run_dump_test "lea1d"
++run_dump_test "lea1e"
++run_dump_test "lea1f"
++run_dump_test "lea1g"
++run_dump_test "lea1h"
++run_dump_test "lea1i"
++run_dump_test "lea1j"
++run_dump_test "lea1k"
++run_dump_test "lea1l"
++run_dump_test "mov1a"
++run_dump_test "mov1b"
+ run_dump_test "pr13082-4a"
+ run_dump_test "pr13082-4b"
+ run_dump_test "pr13082-5a"
+@@ -355,6 +377,17 @@ run_dump_test "pr19162"
+ run_dump_test "pr19175"
+ run_dump_test "pr18591"
+ run_dump_test "pr19615"
++run_dump_test "pr19609a"
++run_dump_test "pr19609b"
++run_dump_test "pr19609c"
++run_dump_test "pr19609d"
++run_dump_test "pr19609e"
++run_dump_test "pr19609f"
++run_dump_test "pr19609g"
++run_dump_test "pr19609i"
++run_dump_test "pr19609j"
++run_dump_test "pr19609k"
++run_dump_test "pr19609l"
+ 
+ # Add $PLT_CFLAGS if PLT is expected.
+ global PLT_CFLAGS
+-- 
+2.5.0
+
