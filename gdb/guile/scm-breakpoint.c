@@ -425,8 +425,8 @@ gdbscm_register_breakpoint_x (SCM self)
 
   pending_breakpoint_scm = self;
   location = bp_smob->spec.location;
-  copy = location;
-  eloc = new_linespec_location (&copy);
+  copy = skip_spaces (location);
+  eloc = string_to_event_location_basic (&copy, current_language);
   cleanup = make_cleanup_delete_event_location (eloc);
 
   TRY

@@ -1128,8 +1128,7 @@ arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
 
 /* Linux-specific displaced step instruction copying function.  Detects when
    the program has stepped into a Linux kernel helper routine (which must be
-   handled as a special case), falling back to arm_displaced_step_copy_insn()
-   if it hasn't.  */
+   handled as a special case).  */
 
 static struct displaced_step_closure *
 arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,

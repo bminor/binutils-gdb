@@ -1359,3 +1359,129 @@ const struct arc_aux_reg arc_aux_regs[] =
 };
 
 const unsigned arc_num_aux_regs = ARRAY_SIZE (arc_aux_regs);
+
+/* NOTE: The order of this array MUST be consistent with 'enum
+   arc_rlx_types' located in tc-arc.h!  */
+const struct arc_opcode arc_relax_opcodes[] =
+{
+  { NULL, 0x0, 0x0, 0x0, ARITH, NONE, { UNUSED }, { 0 } },
+
+  /* bl_s s13 11111sssssssssss.  */
+  { "bl_s", 0x0000F800, 0x0000F800, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, BRANCH, NONE,
+    { SIMM13_A32_5_S }, { 0 }},
+
+  /* bl<.d> s25 00001sssssssss10SSSSSSSSSSNRtttt.  */
+  { "bl", 0x08020000, 0xF8030000, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, BRANCH, NONE,
+    { SIMM25_A32_5 }, { C_D }},
+
+  /* b_s s10 1111000sssssssss.  */
+  { "b_s", 0x0000F000, 0x0000FE00, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, BRANCH, NONE,
+    { SIMM10_A16_7_S }, { 0 }},
+
+  /* b<.d> s25 00000ssssssssss1SSSSSSSSSSNRtttt.  */
+  { "b", 0x00010000, 0xF8010000, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, BRANCH, NONE,
+    { SIMM25_A16_5 }, { C_D }},
+
+  /* add_s c,b,u3 01101bbbccc00uuu.  Wants UIMM3_13_S_PCREL.  */
+  { "add_s", 0x00006800, 0x0000F818, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, ARITH, NONE,
+    { RC_S, RB_S, UIMM3_13_S }, { 0 }},
+
+  /* add<.f> a,b,u6 00100bbb01000000FBBBuuuuuuAAAAAA.  Wants
+     UIMM6_20_PCREL.  */
+  { "add", 0x20400000, 0xF8FF0000, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, ARITH, NONE,
+    { RA, RB, UIMM6_20 }, { C_F }},
+
+  /* add<.f> a,b,limm 00100bbb00000000FBBB111110AAAAAA.  */
+  { "add", 0x20000F80, 0xF8FF0FC0, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, ARITH, NONE,
+    { RA, RB, LIMM }, { C_F }},
+
+  /* ld_s c,b,u7 10000bbbcccuuuuu.  Wants UIMM7_A32_11_S_PCREL.  */
+  { "ld_s", 0x00008000, 0x0000F800, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, MEMORY, NONE,
+    { RC_S, BRAKET, RB_S, UIMM7_A32_11_S, BRAKETdup }, { 0 }},
+
+  /* ld<.di><.aa><.x><zz> a,b,s9
+     00010bbbssssssssSBBBDaaZZXAAAAAA.  Wants SIMM9_8_PCREL.  */
+  { "ld", 0x10000000, 0xF8000000, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, MEMORY, NONE,
+    { RA, BRAKET, RB, SIMM9_8, BRAKETdup },
+    { C_ZZ23, C_DI20, C_AA21, C_X25 }},
+
+  /* ld<.di><.aa><.x><zz> a,b,limm 00100bbbaa110ZZXDBBB111110AAAAAA.  */
+  { "ld", 0x20300F80, 0xF8380FC0, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, MEMORY, NONE,
+    { RA, BRAKET, RB, LIMM, BRAKETdup },
+    { C_ZZ13, C_DI16, C_AA8, C_X15 }},
+
+  /* mov_s b,u8 11011bbbuuuuuuuu.  Wants UIMM8_8_S_PCREL.  */
+  { "mov_s", 0x0000D800, 0x0000F800, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, MEMORY, NONE,
+    { RB_S, UIMM8_8_S }, { 0 }},
+
+  /* mov<.f> b,s12 00100bbb10001010FBBBssssssSSSSSS.  Wants
+     SIMM12_20_PCREL.  */
+  { "mov", 0x208A0000, 0xF8FF0000, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, MEMORY, NONE,
+    { RB, SIMM12_20 }, { C_F }},
+
+  /* mov<.f> b,limm 00100bbb00001010FBBB111110RRRRRR.  */
+  { "mov", 0x200A0F80, 0xF8FF0FC0, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, MEMORY, NONE,
+    { RB, LIMM }, { C_F }},
+
+  /* sub_s c,b,u3 01101bbbccc01uuu.  UIMM3_13_S_PCREL.  */
+  { "sub_s", 0x00006808, 0x0000F818, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, ARITH, NONE,
+    { RC_S, RB_S, UIMM3_13_S }, { 0 }},
+
+  /* sub<.f> a,b,u6 00100bbb01000010FBBBuuuuuuAAAAAA.
+     UIMM6_20_PCREL.  */
+  { "sub", 0x20420000, 0xF8FF0000, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, ARITH, NONE,
+    { RA, RB, UIMM6_20 }, { C_F }},
+
+  /* sub<.f> a,b,limm 00100bbb00000010FBBB111110AAAAAA.  */
+  { "sub", 0x20020F80, 0xF8FF0FC0, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, ARITH, NONE,
+    { RA, RB, LIMM }, { C_F }},
+
+  /* mpy<.f> a,b,u6 00100bbb01011010FBBBuuuuuuAAAAAA.
+     UIMM6_20_PCREL.  */
+  { "mpy", 0x205A0000, 0xF8FF0000, ARC_OPCODE_ARC700 | ARC_OPCODE_ARCv2EM
+    | ARC_OPCODE_ARCv2HS, ARITH, MPY6E, { RA, RB, UIMM6_20 }, { C_F }},
+
+  /* mpy<.f> a,b,limm 00100bbb00011010FBBB111110AAAAAA.  */
+  { "mpy", 0x201A0F80, 0xF8FF0FC0, ARC_OPCODE_ARC700 | ARC_OPCODE_ARCv2EM
+    | ARC_OPCODE_ARCv2HS, ARITH, MPY6E, { RA, RB, LIMM }, { C_F }},
+
+  /* mov<.f><.cc> b,u6 00100bbb11001010FBBBuuuuuu1QQQQQ.
+     UIMM6_20_PCREL.  */
+  { "mov", 0x20CA0020, 0xF8FF0020, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, MEMORY, NONE,
+    { RB, UIMM6_20 }, { C_F, C_CC }},
+
+  /* mov<.f><.cc> b,limm 00100bbb11001010FBBB1111100QQQQQ.  */
+  { "mov", 0x20CA0F80, 0xF8FF0FE0, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, MEMORY, NONE,
+    { RB, LIMM }, { C_F, C_CC }},
+
+  /* add<.f><.cc> b,b,u6 00100bbb11000000FBBBuuuuuu1QQQQQ.
+     UIMM6_20_PCREL.  */
+  { "add", 0x20C00020, 0xF8FF0020, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, ARITH, NONE,
+    { RB, RBdup, UIMM6_20 }, { C_F, C_CC }},
+
+  /* add<.f><.cc> b,b,limm 00100bbb11000000FBBB1111100QQQQQ.  */
+  { "add", 0x20C00F80, 0xF8FF0FE0, ARC_OPCODE_ARC600 | ARC_OPCODE_ARC700
+    | ARC_OPCODE_ARCv2EM | ARC_OPCODE_ARCv2HS, ARITH, NONE,
+    { RB, RBdup, LIMM }, { C_F, C_CC }}
+};
+
+const unsigned arc_num_relax_opcodes = ARRAY_SIZE (arc_relax_opcodes);

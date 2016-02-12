@@ -25,6 +25,31 @@ The second is to cd to the testsuite directory and invoke the DejaGnu
 (The `site.exp' file contains a handful of useful variables like host
 and target triplets, and pathnames.)
 
+Parallel testing
+****************
+
+If not testing with a remote host (in DejaGnu's sense), you can run
+the GDB test suite in a fully parallel mode.  In this mode, each .exp
+file runs separately and maybe simultaneously.  The test suite ensures
+that all the temporary files created by the test suite do not clash,
+by putting them into separate directories.  This mode is primarily
+intended for use by the Makefile.
+
+For GNU make, the Makefile tries to run the tests in parallel mode if
+any -j option is given.  For a non-GNU make, tests are not
+parallelized.
+
+If RUNTESTFLAGS is not empty, then by default the tests are
+serialized.  This can be overridden by either using the
+`check-parallel' target in the Makefile, or by setting FORCE_PARALLEL
+to any non-empty value:
+
+	make check-parallel RUNTESTFLAGS="--target_board=native-gdbserver"
+	make check RUNTESTFLAGS="--target_board=native-gdbserver" FORCE_PARALLEL=1
+
+If you want to use runtest directly instead of using the Makefile, see
+the description of GDB_PARALLEL below.
+
 Running the Performance Tests
 *****************************
 
@@ -125,19 +150,18 @@ a .gdbinit.  For example:
 
 GDB_PARALLEL
 
-When testing natively (that is, not with a remote host), you can run
-the GDB test suite in a fully parallel mode.  In this mode, each .exp
-file runs separately and maybe simultaneously.  The test suite will
-ensure that all the temporary files created by the test suite do not
-clash, by putting them into separate directories.  This mode is
-primarily intended for use by the Makefile.
+To use parallel testing mode without using the the Makefile, set
+GDB_PARALLEL on the runtest command line to "yes".  Before starting
+the tests, you must ensure that the directories cache, outputs, and
+temp in the test suite build directory are either empty or have been
+deleted.  cache in particular is used to share data across invocations
+of runtest, and files there may affect the test results.  The Makefile
+automatically does these deletions.
 
-To use this mode, set the GDB_PARALLEL on the runtest command line.
-Before starting the tests, you must ensure that the directories cache,
-outputs, and temp in the test suite build directory are either empty
-or have been deleted.  cache in particular is used to share data
-across invocations of runtest, and files there may affect the test
-results.  Note that the Makefile automatically does these deletions.
+FORCE_PARALLEL
+
+Setting FORCE_PARALLEL to any non-empty value forces parallel testing
+mode even if RUNTESTFLAGS is not empty.
 
 GDB_INOTIFY
 

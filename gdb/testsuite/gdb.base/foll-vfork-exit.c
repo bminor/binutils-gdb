@@ -23,7 +23,10 @@ main ()
 {
   int pid;
 
-  pid = vfork ();
+  /* A statement before vfork to make sure a breakpoint on main isn't
+     set on vfork below.  */
+  pid = 1;
+  pid = vfork (); /* VFORK */
   if (pid == 0)
     {
       printf ("I'm the child!\n");

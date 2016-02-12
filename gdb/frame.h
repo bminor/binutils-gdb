@@ -820,5 +820,10 @@ extern int frame_unwinder_is (struct frame_info *fi,
 
 extern enum language get_frame_language (struct frame_info *frame);
 
+/* Return the first non-tailcall frame above FRAME or FRAME if it is not a
+   tailcall frame.  Return NULL if FRAME is the start of a tailcall-only
+   chain.  */
+
+extern struct frame_info *skip_tailcall_frames (struct frame_info *frame);
 
 #endif /* !defined (FRAME_H)  */

@@ -1,8 +1,47 @@
+2016-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19601
+	* elf32-i386.c (elf_i386_relocate_section): Mask off the least
+	significant bit in GOT offset for R_386_GOT32X.
+
+2016-02-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 19405
+	* elf32-nios2.c (nios2_elf32_install_imm16): Allow for signed
+	immediate values.
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Limit the
+	number of messages about FDE encoding preventing .eh_frame_hdr
+	generation.
+
+2016-02-09  Nick Clifton  <nickc@redhat.com>
+
+	* oasys.c (oasys_archive_p): Fix indentation.
+	* elf32-nds32.c (nds32_elf_relax_section): Use an unsigned
+	constant for left shifting.
+
+	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Add a more
+	helpful warning message to explain why certain AArch64 relocs
+	might overflow.
+
+2016-02-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* pe-mips.c (coff_mips_reloc): Fix formatting.
+
+2016-02-05  Cupertino Miranda  <Cupertino.Miranda@synopsys.com>
+
+	* cpu-arc.c: Change default archure from bfd_mach_arc_arcv2
+	to bfd_mach_arc_arc600.
+
+2016-02-04  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Adjust last patch
+	for big-endian.
+
 2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19542
 	* elf64-x86-64.c (elf_x86_64_convert_load): Store the estimated
-	distrances in the compressed_size field of the output section.
+	distances in the compressed_size field of the output section.
 
 2016-02-02  Alan Modra  <amodra@gmail.com>
 

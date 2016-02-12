@@ -1,3 +1,9 @@
+2016-02-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (sim_engine_run): Change sd->base.prog_bfd to
+	STATE_PROG_BFD (sd).
+	* configure: Regenerate.
+
 2016-01-18  Andrew Bennett  <andrew.bennett@imgtec.com>
 	    Maciej W. Rozycki  <macro@imgtec.com>
 

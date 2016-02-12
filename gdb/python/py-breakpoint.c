@@ -663,7 +663,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   TRY
     {
-      char *copy = xstrdup (spec);
+      char *copy = xstrdup (skip_spaces_const (spec));
       struct cleanup *cleanup = make_cleanup (xfree, copy);
 
       switch (type)
@@ -672,7 +672,8 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	  {
 	    struct event_location *location;
 
-	    location = new_linespec_location (&copy);
+	    location
+	      = string_to_event_location_basic (&copy, current_language);
 	    make_cleanup_delete_event_location (location);
 	    create_breakpoint (python_gdbarch,
 			       location, NULL, -1, NULL,

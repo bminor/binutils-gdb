@@ -1,3 +1,142 @@
+2016-02-11  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/19614
+	* dw2gencfi.c (cfi_sections_set): Delay setting this variable
+	until it is actually used.
+	(cfi_set_sections): Set cfi_sections_set to true.
+	(dot_cfi_startproc): Likewise.
+	(dot_cfi_endproc): Likewise.
+	(dot_cfi_fde_data): Likewise.
+	(cfi_finish): Likewise.
+	(dot_cfi_sections): Do not set cfi_sections_set.
+	* doc/as.texinfo (.cfi_sections): Note that targets can provide
+	their own cfi section name.  Also note that the directive can be
+	reissued provided that CFI generation has not started.
+	* testsuite/gas/mips/compact-eh-err2.s: Add .cfi_startproc and
+	.cfi_endproc directives so that the redefinition of .cfi_sections
+	will trigger the generation of the error message.
+	* testsuite/gas/mips/compact-eh-err2.l: Update expected line
+	number of error message.
+
+2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
+	    Janek van Oirschot <jvanoirs@synopsys.com>
+
+	* config/tc-arc.h (TC_FRAG_TYPE, TC_PCREL_ADJUST, MAX_INSN_ARGS)
+	(MAX_INSN_FLGS, MAX_FLAG_NAME_LENGHT, TC_GENERIC_RELAX_TABLE):
+	Define.
+	(arc_flags, arc_relax_type): New structure.
+	* config/tc-arc.c (FRAG_MAX_GROWTH, RELAX_TABLE_ENTRY)
+	(RELAX_TABLE_ENTRY_MAX): New define.
+	(relaxation_state, md_relax_table, arc_relaxable_insns)
+	(arc_num_relaxable_ins): New variable.
+	(rlx_operand_type, arc_rlx_types): New enums.
+	(arc_relaxable_ins): New structure.
+	(OPTION_RELAX): New option.
+	(arc_insn): New relax member.
+	(arc_flags): Remove.
+	(relax_insn_p): New function.
+	(apply_fixups): Likewise.
+	(relaxable_operand): Likewise.
+	(may_relax_expr): Likewise.
+	(relaxable_flag): Likewise.
+	(arc_pcrel_adjust): Likewise.
+	(md_estimate_size_before_relax): Implement.
+	(md_convert_frag): Likewise.
+	(md_parse_option): Handle new mrelax option.
+	(md_show_usage): Likewise.
+	(assemble_insn): Set relax member.
+	(emit_insn0): New function.
+	(emit_insn1): Likewise.
+	(emit_insn): Handle relaxation case.
+	* NEWS: Mention the new relaxation option.
+	* doc/c-arc.texi (ARC Options): Document new mrelax option.
+	* doc/as.texinfo (Target ARC Options): Likewise.
+	* testsuite/gas/arc/relax-avoid1.d: New file.
+	* testsuite/gas/arc/relax-avoid1.s: Likewise.
+	* testsuite/gas/arc/relax-avoid2.d: Likewise.
+	* testsuite/gas/arc/relax-avoid2.s: Likewise.
+	* testsuite/gas/arc/relax-avoid3.d: Likewise.
+	* testsuite/gas/arc/relax-avoid3.s: Likewise.
+	* testsuite/gas/arc/relax-b.d: Likewise.
+	* testsuite/gas/arc/relax-b.s: Likewise.
+
+2016-02-08  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ia64.c (dot_prologue): Fix formatting.
+
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-elf.c (obj_elf_change_section): Remove support for
+	ARM NOREAD sections.
+	* config/tc-arm.c (arm_elf_section_letter): Delete.
+	* config/tc-arm.h (md_elf_section_letter): Delete.
+	* doc/c-arm.texi (ARM Section Attribute): Delete section.
+	* testsuite/gas/arm/section-execute-only.d: Delete.
+	* testsuite/gas/arm/section-execute-only.s: Delete.
+
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19561
+	* config/tc-msp430.c (msp430_operands): Remove case 7.  Use case 2
+	to handle encoding of RRUX instruction.
+	* testsuite/gas/msp430/msp430x.s: Add more tests of the extended
+	shift instructions.
+	* testsuite/gas/msp430/msp430x.d: Update expected disassembly.
+
+2016-02-03  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (md_apply_fix): Mark BFD_RELOC_XTENSA_DIFF*
+	substitutions for BFD_RELOC_* as unsigned.
+	* testsuite/gas/xtensa/all.exp: Add loc to list of xtensa tests.
+	* testsuite/gas/xtensa/loc.d: New file: loc test result	patterns.
+	* testsuite/gas/xtensa/loc.s: New file: loc test.
+
+2016-02-03  Kevin Buettner  <kevinb@redhat.com>
+
+    	* config/tc-msp430.h (DWARF2_ADDR_SIZE): Set to 4.
+
+2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19520
+	* NEWS: Mention new command line option -mrelax-relocations and
+	new configure option --enable-x86-relax-relocations for x86
+	target.
+	* config.in: Regenerated.
+	* configure.ac: Add --enable-x86-relax-relocations.
+	(ac_default_x86_relax_relocations): New.  Default to 1 except
+	for x86 Solaris targets older than Solaris 12.
+	(DEFAULT_GENERATE_X86_RELAX_RELOCATIONS): Define.
+	* configure: Likewise.
+	* config/tc-i386.c (generate_relax_relocations): New.
+	(OPTION_MRELAX_RELOCATIONS): Likewise.
+	(output_disp): Don't generate relax relocations if
+	generate_relax_relocations is 0.
+	(md_longopts): Add -mrelax-relocations.
+	(md_show_usage): Likewise.
+	(md_parse_option): Handle OPTION_MRELAX_RELOCATIONS.
+	* doc/c-i386.texi: Document -mrelax-relocations=.
+	* testsuite/gas/i386/got-no-relax.d: New file.
+	* testsuite/gas/i386/x86-64-gotpcrel-no-relax.d: Likewise.
+	* testsuite/gas/i386/got.d: Pass -mrelax-relocations=yes to as.
+	* testsuite/gas/i386/localpic.d: Likewise.
+	* testsuite/gas/i386/mixed-mode-reloc32.d: Likewise.
+	* testsuite/gas/i386/reloc32.d: Likewise.
+	* testsuite/gas/i386/x86-64-gotpcrel.d: Likewise.
+	* testsuite/gas/i386/x86-64-localpic.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-gotpcrel.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-localpic.d: Likewise.
+	* testsuite/gas/i386/i386.exp: Run got-no-relax and
+	x86-64-gotpcrel-no-relax.
+
+2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention new command line option -mfence-as-lock-add=yes
+	for x86 target.
+
+2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Remove duplicated marker for 2.26.
+
 2016-02-02  Renlin Li  <renlin.li@arm.com>
 
 	* testsuite/gas/arm/thumb2_it_search.d: Skip non-elf targets.

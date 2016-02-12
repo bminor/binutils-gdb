@@ -12344,8 +12344,8 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
       Elf_Internal_Rela *tmp_rel;
 
       /* Pad to alignment boundary.  Only handle current section alignment.  */
-      sec_size_align = (sec->size + (~((-1) << sec->alignment_power)))
-		       & ((-1) << sec->alignment_power);
+      sec_size_align = (sec->size + (~((-1U) << sec->alignment_power)))
+		       & ((-1U) << sec->alignment_power);
       if ((sec_size_align - sec->size) & 0x2)
 	{
 	  insn16 = NDS32_NOP16;

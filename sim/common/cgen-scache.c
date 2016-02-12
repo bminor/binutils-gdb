@@ -121,24 +121,26 @@ scache_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	{
 	  if (arg != NULL)
 	    {
-	      int n = strtol (arg, NULL, 0);
+	      unsigned int n = (unsigned int) strtoul (arg, NULL, 0);
 	      if (n < MIN_SCACHE_SIZE)
 		{
-		  sim_io_eprintf (sd, "invalid scache size `%d', must be at least 4", n);
+		  sim_io_eprintf (sd, "invalid scache size `%u', must be at least %u",
+				  n, MIN_SCACHE_SIZE);
 		  return SIM_RC_FAIL;
 		}
 	      /* Ensure it's a multiple of 2.  */
 	      if ((n & (n - 1)) != 0)
 		{
-		  sim_io_eprintf (sd, "scache size `%d' not a multiple of 2\n", n);
-		  {
-		    /* round up to nearest multiple of 2 */
-		    int i;
-		    for (i = 1; i < n; i <<= 1)
-		      continue;
-		    n = i;
-		  }
-		  sim_io_eprintf (sd, "rounding scache size up to %d\n", n);
+		  unsigned int i;
+		  sim_io_eprintf (sd, "scache size `%u' not a multiple of 2\n", n);
+		  /* Round up to nearest multiple of 2.  */
+		  for (i = 1; i && i < n; i <<= 1)
+		    continue;
+		  if (i)
+		    {
+		      n = i;
+		      sim_io_eprintf (sd, "rounding scache size up to %u\n", n);
+		    }
 		}
 	      if (cpu == NULL)
 		STATE_SCACHE_SIZE (sd) = n;

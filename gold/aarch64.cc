@@ -8248,10 +8248,6 @@ Target_aarch64<size, big_endian>::scan_erratum_843419_span(
 	    }
 	  if (do_report)
 	    {
-	      gold_info(_("Erratum 843419 found and fixed at \"%s\", "
-			     "section %d, offset 0x%08x."),
-			   relobj->name().c_str(), shndx,
-			   (unsigned int)(span_start + offset));
 	      unsigned int erratum_insn_offset =
 		span_start + offset + insn_offset;
 	      Address erratum_address =

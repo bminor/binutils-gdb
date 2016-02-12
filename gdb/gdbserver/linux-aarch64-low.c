@@ -431,7 +431,7 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 /* Implementation of linux_target_ops method "siginfo_fixup".  */
 
 static int
-aarch64_linux_siginfo_fixup (siginfo_t *native, void *inf, int direction)
+aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
 {
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())

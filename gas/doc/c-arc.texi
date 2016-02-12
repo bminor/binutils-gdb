@@ -85,6 +85,12 @@ default.
 This option turns on Code Density instructions.  Only valid for ARC EM
 processors.
 
+@cindex @code{-mrelax} command line option, ARC
+@item -mrelax
+Enable support for assembly-time relaxation.  The assembler will
+replace a longer version of an instruction with a shorter one,
+whenever it is possible.
+
 @end table
 
 @node ARC Syntax

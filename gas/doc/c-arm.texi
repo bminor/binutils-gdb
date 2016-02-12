@@ -23,7 +23,6 @@
 * ARM Opcodes::              Opcodes
 * ARM Mapping Symbols::      Mapping Symbols
 * ARM Unwinding Tutorial::   Unwinding
-* ARM Section Attribute::    Section Attribute
 @end menu
 
 @node ARM Options
@@ -1239,14 +1238,3 @@ know more about the object-file format used to represent unwind
 information, you may consult the @cite{Exception Handling ABI for the
 ARM Architecture} available from @uref{http://infocenter.arm.com}.
 
-@node ARM Section Attribute
-@section Section Attribute
-
-@cindex ARM section attribute
-@table @code
-@item y
-This letter specifies a text section with NOREAD attribute for
-hardware that supports execute-only memory region.  If not supported
-by hardware a section with this attribute will be treated as normal
-text section.
-@end table

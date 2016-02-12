@@ -473,9 +473,11 @@ if test x"$STDINT_H" != x; then
 fi
 AC_SUBST(GNULIB_STDINT_H)
 
-AC_OUTPUT(Makefile,
+AC_CONFIG_FILES([Makefile],
 [case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;
 esac
 ])
+
+AC_OUTPUT

@@ -90,6 +90,9 @@ trace_save (const char *filename, struct trace_file_writer *writer,
   /* Write out the size of a register block.  */
   writer->ops->write_regblock_type (writer, trace_regblock_size);
 
+  /* Write out the target description info.  */
+  writer->ops->write_tdesc (writer);
+
   /* Write out status of the tracing run (aka "tstatus" info).  */
   writer->ops->write_status (writer, ts);
 

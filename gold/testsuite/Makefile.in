@@ -54,7 +54,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_34) $(am__EXEEXT_35) $(am__EXEEXT_36) \
 	$(am__EXEEXT_37)
 @NATIVE_OR_CROSS_LINKER_TRUE@am__append_1 = object_unittest \
-@NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest leb128_unittest
+@NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest leb128_unittest \
+@NATIVE_OR_CROSS_LINKER_TRUE@	overflow_unittest
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = incremental_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.sh gc_tls_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.sh \
@@ -198,21 +199,41 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_24 = tls_static_test \
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_25 = tls_shared_nonpic_test
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = x86_64_mov_to_lea.sh
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = x86_64_mov_to_lea1.stdout x86_64_mov_to_lea2.stdout \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea3.stdout x86_64_mov_to_lea4.stdout \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea5.stdout x86_64_mov_to_lea6.stdout \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea7.stdout x86_64_mov_to_lea8.stdout \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea9.stdout x86_64_mov_to_lea10.stdout \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea11.stdout x86_64_mov_to_lea12.stdout \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea13.stdout x86_64_mov_to_lea14.stdout
-
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = x86_64_mov_to_lea1 x86_64_mov_to_lea2 \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea3 x86_64_mov_to_lea4 x86_64_mov_to_lea5 \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea6 x86_64_mov_to_lea7 x86_64_mov_to_lea8 \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea9 x86_64_mov_to_lea10 x86_64_mov_to_lea11 \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea12 x86_64_mov_to_lea13 x86_64_mov_to_lea14
-
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = x86_64_mov_to_lea.sh \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_overflow_pc32.sh \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x32_overflow_pc32.sh
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = x86_64_mov_to_lea1.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea2.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea3.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea4.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea5.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea6.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea7.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea8.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea9.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea10.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea11.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea12.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea13.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea14.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_overflow_pc32.err \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x32_overflow_pc32.err
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = x86_64_mov_to_lea1 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea2 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea3 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea4 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea5 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea6 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea7 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea8 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea9 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea10 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea11 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea12 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea13 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_mov_to_lea14 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x86_64_overflow_pc32.err \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	x32_overflow_pc32.err
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_29 = i386_mov_to_lea.sh
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_30 = i386_mov_to_lea1.stdout  i386_mov_to_lea2.stdout \
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	i386_mov_to_lea3.stdout  i386_mov_to_lea4.stdout \
@@ -849,7 +870,8 @@ am_libgoldtest_a_OBJECTS = test.$(OBJEXT) testmain.$(OBJEXT) \
 libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @NATIVE_OR_CROSS_LINKER_TRUE@am__EXEEXT_1 = object_unittest$(EXEEXT) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest$(EXEEXT) \
-@NATIVE_OR_CROSS_LINKER_TRUE@	leb128_unittest$(EXEEXT)
+@NATIVE_OR_CROSS_LINKER_TRUE@	leb128_unittest$(EXEEXT) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	overflow_unittest$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_2 = icf_virtual_function_folding_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	large_symbol_alignment$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test$(EXEEXT) \
@@ -1584,6 +1606,14 @@ object_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+@NATIVE_OR_CROSS_LINKER_TRUE@am_overflow_unittest_OBJECTS =  \
+@NATIVE_OR_CROSS_LINKER_TRUE@	overflow_unittest.$(OBJEXT)
+overflow_unittest_OBJECTS = $(am_overflow_unittest_OBJECTS)
+overflow_unittest_LDADD = $(LDADD)
+overflow_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 permission_test_SOURCES = permission_test.c
 permission_test_OBJECTS = permission_test.$(OBJEXT)
 permission_test_LDADD = $(LDADD)
@@ -2126,11 +2156,12 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(large_symbol_alignment_SOURCES) $(leb128_unittest_SOURCES) \
 	local_labels_test.c many_sections_r_test.c \
 	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
-	permission_test.c $(pie_copyrelocs_test_SOURCES) \
-	plugin_test_1.c plugin_test_10.c plugin_test_11.c \
-	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
-	plugin_test_5.c plugin_test_6.c plugin_test_7.c \
-	plugin_test_8.c plugin_test_tls.c $(protected_1_SOURCES) \
+	$(overflow_unittest_SOURCES) permission_test.c \
+	$(pie_copyrelocs_test_SOURCES) plugin_test_1.c \
+	plugin_test_10.c plugin_test_11.c plugin_test_2.c \
+	plugin_test_3.c plugin_test_4.c plugin_test_5.c \
+	plugin_test_6.c plugin_test_7.c plugin_test_8.c \
+	plugin_test_tls.c $(protected_1_SOURCES) \
 	$(protected_2_SOURCES) $(relro_now_test_SOURCES) \
 	$(relro_script_test_SOURCES) $(relro_strip_test_SOURCES) \
 	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
@@ -2496,6 +2527,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_SOURCES = object_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_SOURCES = binary_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_SOURCES = leb128_unittest.cc
+@NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest_SOURCES = overflow_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_SOURCES = large_symbol_alignment.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_LDFLAGS = -Bgcctestdir/
@@ -3533,6 +3565,9 @@ many_sections_test$(EXEEXT): $(many_sections_test_OBJECTS) $(many_sections_test_
 object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENCIES) 
 	@rm -f object_unittest$(EXEEXT)
 	$(CXXLINK) $(object_unittest_OBJECTS) $(object_unittest_LDADD) $(LIBS)
+overflow_unittest$(EXEEXT): $(overflow_unittest_OBJECTS) $(overflow_unittest_DEPENDENCIES) 
+	@rm -f overflow_unittest$(EXEEXT)
+	$(CXXLINK) $(overflow_unittest_OBJECTS) $(overflow_unittest_LDADD) $(LIBS)
 @GCC_FALSE@permission_test$(EXEEXT): $(permission_test_OBJECTS) $(permission_test_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f permission_test$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(permission_test_OBJECTS) $(permission_test_LDADD) $(LIBS)
@@ -3969,6 +4004,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/overflow_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/permission_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_1.Po@am__quote@
@@ -4410,6 +4446,10 @@ tls_pie_test.sh.log: tls_pie_test.sh
 	@p='tls_pie_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 x86_64_mov_to_lea.sh.log: x86_64_mov_to_lea.sh
 	@p='x86_64_mov_to_lea.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+x86_64_overflow_pc32.sh.log: x86_64_overflow_pc32.sh
+	@p='x86_64_overflow_pc32.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+x32_overflow_pc32.sh.log: x32_overflow_pc32.sh
+	@p='x32_overflow_pc32.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 i386_mov_to_lea.sh.log: i386_mov_to_lea.sh
 	@p='i386_mov_to_lea.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 debug_msg.sh.log: debug_msg.sh
@@ -4550,6 +4590,8 @@ binary_unittest.log: binary_unittest$(EXEEXT)
 	@p='binary_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 leb128_unittest.log: leb128_unittest$(EXEEXT)
 	@p='leb128_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+overflow_unittest.log: overflow_unittest$(EXEEXT)
+	@p='overflow_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_virtual_function_folding_test.log: icf_virtual_function_folding_test$(EXEEXT)
 	@p='icf_virtual_function_folding_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 large_symbol_alignment.log: large_symbol_alignment$(EXEEXT)
@@ -5027,6 +5069,8 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	test -d gcctestdir || mkdir -p gcctestdir
 @GCC_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	rm -f gcctestdir/as
 @GCC_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	(cd gcctestdir && $(LN_S) $(abs_top_builddir)/../gas/as-new as)
+@NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest.o: overflow_unittest.cc
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(CXXCOMPILE) -O3 -c -o $@ $<
 
 # ---------------------------------------------------------------------
 # These tests test the output of gold (end-to-end tests).  In
@@ -5449,6 +5493,28 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -dw $< > $@
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_mov_to_lea14.stdout: x86_64_mov_to_lea14
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -dw $< > $@
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_overflow_pc32.o: x86_64_overflow_pc32.s
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_overflow_pc32.err: x86_64_overflow_pc32.o gcctestdir/ld
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo gcctestdir/ld -e bar -Tdata=0x81000000 -o x86_64_overflow_pc32 x86_64_overflow_pc32.o "2>$@"
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if gcctestdir/ld -e bar -Tdata=0x81000000 -o x86_64_overflow_pc32 x86_64_overflow_pc32.o 2>$@; \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of x86_64_overflow_pc32 should have failed"; \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x86_64_overflow_pc32.o: x86_64_overflow_pc32.s
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x32_overflow_pc32.o: x86_64_overflow_pc32.s
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) --x32 -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@x32_overflow_pc32.err: x32_overflow_pc32.o gcctestdir/ld
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo gcctestdir/ld -e bar -Tdata=0x81000000 -o x32_overflow_pc32 x32_overflow_pc32.o "2>$@"
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if gcctestdir/ld -e bar -Tdata=0x81000000 -o x32_overflow_pc32 x32_overflow_pc32.o 2>$@; \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of x32_overflow_pc32 should have failed"; \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
 
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@i386_mov_to_lea1.o: i386_mov_to_lea1.s
 @DEFAULT_TARGET_I386_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AS) --32 -o $@ $<

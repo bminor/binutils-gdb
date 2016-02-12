@@ -500,7 +500,8 @@ class Target_i386 : public Sized_target<32, false>
 
   // Return whether SYM is call to a non-split function.
   bool
-  do_is_call_to_non_split(const Symbol* sym, const unsigned char*) const;
+  do_is_call_to_non_split(const Symbol* sym, const unsigned char*,
+			  const unsigned char*, section_size_type) const;
 
   // Adjust -fsplit-stack code which calls non-split-stack code.
   void
@@ -3916,7 +3917,9 @@ Target_i386::do_ehframe_datarel_base() const
 
 bool
 Target_i386::do_is_call_to_non_split(const Symbol* sym,
-				     const unsigned char*) const
+				     const unsigned char*,
+				     const unsigned char*,
+				     section_size_type) const
 {
   return (sym->type() == elfcpp::STT_FUNC
 	  && !is_prefix_of("__i686.get_pc_thunk.", sym->name()));

@@ -3194,7 +3194,7 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
 
 	  /* At this point, we don't know the load addresses of TSEC
 	     section nor SEC section.  We estimate the distrance between
-	     SEC and TSEC.  We store the estimated distrances in the
+	     SEC and TSEC.  We store the estimated distances in the
 	     compressed_size field of the output section, which is only
 	     used to decompress the compressed input section.  */
 	  if (sec->output_section->compressed_size == 0)

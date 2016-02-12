@@ -1,3 +1,136 @@
+2016-02-11 Rahul Chaudhry  <rahulchaudhry@google.com>
+
+	* aarch64.cc (Target_aarch64::scan_erratum_843419_span): Remove
+	info message for every erratum 843419 found and fixed.
+
+2016-02-07  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18695
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Add additional
+	information to relocation overflow errors.
+
+2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18695
+	* x86_64.cc (X86_64_relocate_functions::pcrela32_check): Fix x32
+	overflow checking when symbol value + addend < 0.
+
+2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19577
+	* reloc.h (Limits): New class.
+	(Bits::has_overflow32): Use min/max values from Limits.
+	(Bits::has_unsigned_overflow32): Likewise.
+	(Bits::has_signed_unsigned_overflow32): Likewise.
+	(Bits::has_overflow): Likewise.
+	(Bits::has_unsigned_overflow): Likewise.
+	(Bits::has_signed_unsigned_overflow64): Likewise.
+
+2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19567
+	* reloc.h (Relocate_functions::Overflow_check): Add comments.
+	* x86_64.cc (X86_64_relocate_functions): New class.
+	(Target_x86_64::Relocate::relocate): Use the new class.
+	* testsuite/Makefile.am (x86_64_overflow_pc32): Add -Tdata option.
+	(x32_overflow_pc32): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/x32_overflow_pc32.sh: New script.
+	* testsuite/x86_64_overflow_pc32.s: Remove .space directive.
+
+2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19577
+	* reloc.h (Bits::has_unsigned_overflow32): Fix static_cast.
+	(Bits::has_unsigned_overflow): Remove unnecessary static_cast.
+
+2016-02-06  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/19577
+	* reloc.h (Bits::has_unsigned_overflow32): Fix unsigned/signed
+	comparison.
+	(Bits::has_unsigned_overflow): Likewise.
+
+2016-02-06  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* i386.cc (Target_i386::is_call_to_non_split): Add view and view_size
+	parameters.
+	* reloc.cc (Sized_relobj_file::split_stack_adjust_reltype): Pass view
+	and view_size to is_call_to_non_split.
+	* target.cc (Target::is_call_to_non_split): Add view and view_size
+	parameters.
+	* target.h (class Target): Likewise.
+
+2016-02-05  Sriraman Tallam  <tmsriram@google.com>
+
+	* icf.cc (get_rel_addend): New function.
+	(get_section_contents):  Move merge section addend computation to a
+	new function.  Ignore negative values for SHT_REL and SHT_RELA addends.
+	Fix bug to not read past the length of the section.
+
+2016-02-05  Cary Coutant  <ccoutant@gmail.com>
+	    Andrew Senkevich  <andrew.senkevich@intel.com>
+
+	PR gold/18695
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Add overflow
+	checking for R_X86_64_32, R_X86_64_32S, R_X86_64_PC32, and
+	R_X86_64_PLT32.
+	* testsuite/Makefile.am (x86_64_overflow_pc32): New test.
+	* testsuite/x86_64_overflow_pc32.sh: New test script.
+	* testsuite/x86_64_overflow_pc32.s: New source file.
+
+2016-02-05  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/18695
+	* reloc.h (Relocate_functions::Address): New typedef.
+	(Relocate_functions::Addendtype): New typedef.
+	(Relocate_functions::Overflow_check): New enum type.
+	(Relocate_functions::Reloc_status): New enum type.
+	(Relocate_functions::check_overflow): New function template.
+	(Relocate_functions::rel): Add check parameter; check for overflow.
+	(Relocate_functions::rel_unaligned): Likewise.
+	(Relocate_functions::rela): Likewise.
+	(Relocate_functions::pcrel): Likewise.
+	(Relocate_functions::pcrel_unaligned): Likewise.
+	(Relocate_functions::pcrela): Likewise.
+	(Relocate_functions::rel8): Adjust parameter types.
+	(Relocate_functions::rela8): Likewise.
+	(Relocate_functions::pcrel8): Likewise.
+	(Relocate_functions::pcrela8): Likewise.
+	(Relocate_functions::rel16): Likewise.
+	(Relocate_functions::rela168): Likewise.
+	(Relocate_functions::pcrel16): Likewise.
+	(Relocate_functions::pcrela16): Likewise.
+	(Relocate_functions::rel32): Likewise.
+	(Relocate_functions::rel32_unaligned): Likewise.
+	(Relocate_functions::rela32): Likewise.
+	(Relocate_functions::pcrel32): Likewise.
+	(Relocate_functions::pcrel32_unaligned): Likewise.
+	(Relocate_functions::pcrela32): Likewise.
+	(Relocate_functions::rel8_check): New function.
+	(Relocate_functions::rela8_check): New function.
+	(Relocate_functions::pcrel8_check): New function.
+	(Relocate_functions::pcrela8_check): New function.
+	(Relocate_functions::rel16_check): New function.
+	(Relocate_functions::rela168_check): New function.
+	(Relocate_functions::pcrel16_check): New function.
+	(Relocate_functions::pcrela16_check): New function.
+	(Relocate_functions::rel32_check): New function.
+	(Relocate_functions::rel32_unaligned_check): New function.
+	(Relocate_functions::rela32_check): New function.
+	(Relocate_functions::pcrel32_check): New function.
+	(Relocate_functions::pcrel32_unaligned_check): New function.
+	(Relocate_functions::pcrela32_check): New function.
+	(Bits::has_unsigned_overflow32): New function.
+	(Bits::has_unsigned_overflow): New function.
+	* testsuite/Makefile.am (overflow_unittest): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/overflow_unittest.cc: New source file.
+
+2016-02-04  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (relocate): Adjust last patch for big-endian.
+
 2016-02-02  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (relocate): Further restrict ELFv2 entry optimization.

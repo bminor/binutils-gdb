@@ -440,6 +440,7 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
             "%d bytes."),
           (int) sizeof (ULONGEST));
 
+  *val = 0;
   collect_register (regcache, regnum, val);
 
   return REG_VALID;

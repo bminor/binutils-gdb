@@ -64,10 +64,6 @@
 #include "elf/nios2.h"
 #endif
 
-#ifdef TC_ARM
-#include "elf/arm.h"
-#endif
-
 static void obj_elf_line (int);
 static void obj_elf_size (int);
 static void obj_elf_type (int);
@@ -676,11 +672,6 @@ obj_elf_change_section (const char *name,
 		       || ssect->type == SHT_FINI_ARRAY
 		       || ssect->type == SHT_PREINIT_ARRAY))
 	    /* RX init/fini arrays can and should have the "awx" attributes set.  */
-	    ;
-#endif
-#ifdef TC_ARM
-	  else if (attr == (SHF_EXECINSTR | SHF_ARM_NOREAD | SHF_ALLOC))
-	    /* ARM can have code section with SHF_ARM_NOREAD attribute.  */
 	    ;
 #endif
 	  else

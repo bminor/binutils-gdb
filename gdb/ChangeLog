@@ -1,3 +1,247 @@
+2016-02-12  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* xml-tdesc.c (target_fetch_description_xml) [!HAVE_LIBEXPAT]: Warn
+	and return NULL.
+
+2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* frame.h (skip_tailcall_frames): Update comment.
+	* frame.c (skip_artificial_frames, skip_tailcall_frames): Return NULL
+	if only artificial frames are found.  Update comment.
+	(frame_unwind_caller_id): Handle NULL return.
+	(frame_unwind_caller_pc, frame_unwind_caller_arch): Assert that
+	skip_artificial_frames does not return NULL.
+	(frame_pop): Add an error if only tailcall frames are found.
+	* infcmd.c (finish_command): Move skip_tailcall_frames call into
+	forward-execution case.  Add an error if only tailcall frames are
+	found.
+
+2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* stack.c (frame_info): Check frame_unwind_caller_id.
+
+2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* frame.h (skip_tailcall_frames): New.
+	* frame.c (skip_tailcall_frames): New.
+	(frame_pop): Call skip_tailcall_frames.
+	* infcmd.c (finish_command): Call skip_tailcall_frames.
+
+2016-02-11  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (check-parallel): New rule.
+
+2016-02-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arm-tdep.c (arm_skip_prologue): Remove unused variables.
+	(arm_analyze_prologue): Likewise.
+	(arm_scan_prologue): Likewise.
+	(arm_m_exception_prev_register): Likewise.
+	(arm_copy_block_xfer): Likewise.
+	(thumb2_copy_block_xfer): Likewise.
+	(arm_decode_miscellaneous): Likewise.
+	(arm_decode_ld_st_word_ubyte): Likewise.
+	(arm_decode_svc_copro): Likewise.
+	(thumb2_decode_svc_copro): Likewise.
+	(thumb_copy_16bit_ldr_literal): Likewise.
+	(thumb_copy_pop_pc_16bit): Likewise.
+	(decode_thumb_32bit_ld_mem_hints): Likewise.
+	(arm_show_force_mode): Likewise.
+	(_initialize_arm_tdep): Likewise.
+	(arm_record_strx): Likewise.
+	(arm_record_extension_space): Likewise.
+	(arm_record_data_proc_misc_ld_str): Likewise.
+	(arm_record_exreg_ld_st_insn): Likewise.
+	(arm_record_vfp_data_proc_insn): Likewise.
+	(arm_record_coproc_data_proc): Likewise.
+	(thumb_record_misc): Likewise.
+	(thumb_record_ldm_stm_swi): Likewise.
+	(thumb2_record_ld_st_dual_ex_tbb): Likewise.
+	(thumb2_record_ld_mem_hints): Likewise.
+	(thumb2_record_lmul_lmla_div): Likewise.
+	(thumb2_record_asimd_struct_ld_st): Likewise.
+	(arm_process_record): Likewise.
+
+2016-02-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arm-tdep.c (arm_displaced_step_copy_insn): Remove.
+	(ARM displaced stepping support): Remove reference to
+	arm_displaced_step_copy_insn in comment.
+	* arm-tdep.h (arm_displaced_step_copy_insn): Remove.
+	* arm-linux-tdep.c (arm_linux_displaced_step_copy_insn): Remove
+	reference to arm_displaced_step_copy_insn in comment.
+
+2016-02-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arm-tdep.c (thumb_copy_unmodified_16bit): Change type of insn.
+	(thumb_copy_b): Likewise.
+	(arm_decode_b_bl_ldmstm): Likewise.
+	(thumb_copy_16bit_ldr_literal): Likewise.
+	(thumb_copy_pop_pc_16bit): Likewise.
+
+2016-02-11  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* tracepoint.c (encode_actions_1): Use target_gdbarch () rather
+	than loc->gdbarch.
+
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracefile-tfile.c (trace_tdesc): New static variable.
+	(tfile_open): Clear trace_tdesc, call target_find_description.
+	(tfile_interp_line): Recognize tdesc lines.
+	(tfile_close): Clear trace_tdesc.
+	(tfile_xfer_partial_features): New function.
+	(tfile_xfer_partial): Call tfile_xfer_partial_features.
+	(tfile_append_tdesc_line): New function.
+
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* ctf.c (ctf_write_tdesc): New function.
+	(ctf_write_ops): Wire in ctf_write_tdesc.
+	* tracefile-tfile.c (tfile_write_tdesc): New function.
+	(tfile_write_ops): Wire in tfile_write_tdesc.
+	* tracefile.c (trace_save): Call write_tdesc method.
+	* tracefile.h (struct trace_file_write_ops): Add write_tdesc method.
+	* xml-tdesc.c (target_fetch_description_xml): New function.
+	* xml-tdesc.h: Add target_fetch_description_xml prototype.
+
+2016-02-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arm-tdep.c (arm_copy_extra_ld_st): Fix "unpriveleged" typo.
+	(arm_decode_dp_misc): Likewise.
+
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* amd64-tdep.c (amd64_ax_pseudo_register_collect): New function.
+	(amd64_init_abi): Fill ax_pseudo_register_collect hook.
+	* gdb/i386-tdep.c (i386_pseudo_register_read_into_value): Remove
+	misleading comment.
+	(i386_pseudo_register_write): Ditto.
+	(i386_ax_pseudo_register_collect): New function.
+	(i386_gdbarch_init): Fill ax_pseudo_register_collect hook.
+	* i386-tdep.h: Add i386_ax_pseudo_register_collect prototype.
+
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracefile-tfile.c (tfile_fetch_registers): Use g packet order
+	instead of gdb order.
+
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracefile-tfile.c (tfile_fetch_registers): Fix off-by-one in bounds
+	check.
+
+2016-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
+2016-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.11 branch created (9ef9e6a6a0dd8f948708cb67c9afcfd0be40cb0a):
+	* version.in: Bump version to 7.11.50.DATE-git.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoints/19546
+	* breakpoint.c (breakpoint_event_location_empty_p): New function.
+	(update_breakpoints_after_exec, bkpt_re_set): Use this new function
+	instead of event_location_empty_p.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Use
+	string_to_event_location_basic instead of string_to_event_location.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Skip
+	leading whitespace and use string_to_event_location_basic instead
+	of new_linespec_location.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	PR python/19506
+	* python/py-breakpoint.c (bppy_init): Use
+	string_to_event_location_basic instead of new_linespec_location.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	* location.c (string_to_explicit_location): Note that "-p" is
+	reserved for probe locations and return NULL for any input
+	that starts with that.
+	(string_to_event_location): Move "legacy" linespec code to ...
+	(string_to_event_location_basic): ... here.
+	* location.h (string_to_event_location): Update comment.
+	(string_to_event_location_basic): New function.
+
+2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.ac: Use AC_CONFIG_FILES instead of passing arguments
+	to AC_OUTPUT.  Remove "exit 0" at the end.
+	* configure: Regenerate.
+
+2016-02-09  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/19548
+	* breakpoint.c (create_overlay_event_breakpoint): Don't update
+	global location list here.
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint, create_jit_event_breakpoint)
+	(update_breakpoint_locations):
+	(breakpoint_re_set): Update global location list after all
+	breakpoints are re-set.
+
+2016-02-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote.c (remote_register_number_and_offset): Remove unused
+	variable(s).
+	(remote_thread_always_alive): Likewise.
+	(remote_update_thread_list): Likewise.
+	(process_initial_stop_replies): Likewise.
+	(remote_start_remote): Likewise.
+	(remote_check_symbols): Likewise.
+	(discard_pending_stop_replies): Likewise.
+	(process_stop_reply): Likewise.
+	(putpkt_binary): Likewise.
+	(getpkt): Likewise.
+	(remote_add_target_side_condition): Likewise.
+	(remote_insert_breakpoint): Likewise.
+	(remote_supports_stopped_by_sw_breakpoint): Likewise.
+	(remote_supports_stopped_by_hw_breakpoint): Likewise.
+	(remote_xfer_partial): Likewise.
+	(remote_read_btrace): Likewise.
+	(remote_async_serial_handler): Likewise.
+	(remote_thread_events): Likewise.
+	(_initialize_remote): Likewise.
+
+2016-02-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* varobj.h (varobj_delete): Remove dellist parameter, update and
+	move documentation here.
+	* varobj.c (struct cpstack, cppush, cppop): Remove.
+	(delete_variable): Remove resultp (first) parameter.
+	(delete_variable_1): Likewise.
+	(varobj_delete): Remove dellist parameter and unused code.
+	(update_dynamic_varobj_children): Adjust varobj_delete call.
+	(update_type_if_necessary): Likewise.
+	(varobj_set_visualizer): Likewise.
+	(varobj_update): Likewise.
+	(value_of_root): Likewise.
+	(varobj_invalidate_iter): Likewise.
+	* mi/mi-cmd-var.c (mi_cmd_var_delete): Likewise.
+
+2016-02-04  Yao Qi  <yao.qi@linaro.org>
+
+	* remote.c (remote_wait_as): Set rs->waiting_for_stop_reply to
+	0 before handling 'F' and set it back afterwards.
+
+2016-02-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* ui-out.c (MAX_UI_OUT_LEVELS): Remove.
+
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* amd64-linux-siginfo.c (nat_siginfo_t, nat_sigval_t, nat_timeval):

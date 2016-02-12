@@ -13915,7 +13915,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if (!bfd_link_pic (info)
 	      && !info->traditional_format
 	      && !htab->opd_abi
-	      && rel->r_addend == 0
+	      && rel->r_addend == d_offset
 	      && h != NULL && &h->elf == htab->elf.hgot
 	      && rel + 1 < relend
 	      && rel[1].r_info == ELF64_R_INFO (r_symndx, R_PPC64_REL16_LO)

@@ -259,7 +259,7 @@ sim_engine_run (SIM_DESC sd,
 
   if (STATE_ARCHITECTURE (sd) == NULL)
     mach = bfd_mach_${sim_multi_default};
-  else if (elf_elfheader (sd->base.prog_bfd)->e_flags
+  else if (elf_elfheader (STATE_PROG_BFD (sd))->e_flags
 	   & EF_MIPS_ARCH_ASE_MICROMIPS)
     mach = bfd_mach_mips_micromips;
   else

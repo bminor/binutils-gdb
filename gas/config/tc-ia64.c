@@ -4360,12 +4360,14 @@ dot_prologue (int dummy ATTRIBUTE_UNUSED)
 	as_warn (_("Pointless use of zero first operand to .prologue"));
       else
 	mask = e.X_add_number;
-	n = popcount (mask);
+
+      n = popcount (mask);
 
       if (sep == ',')
 	parse_operand_and_eval (&e, 0);
       else
 	e.X_op = O_absent;
+
       if (e.X_op == O_constant
 	  && e.X_add_number >= 0
 	  && e.X_add_number < 128)
@@ -4385,7 +4387,6 @@ dot_prologue (int dummy ATTRIBUTE_UNUSED)
 	  as_bad (_("Second operand to .prologue must be the first of %d general registers"), n);
 	  grsave = 0;
 	}
-
     }
 
   if (mask)

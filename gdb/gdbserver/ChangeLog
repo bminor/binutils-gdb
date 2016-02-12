@@ -1,3 +1,50 @@
+2016-02-12  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracepoint.c (x_tracepoint_action_download): Change
+	write_inferior_data_ptr to write_inferior_data_pointer.
+	(cmd_qtstart): Likewise.
+	(write_inferior_data_ptr): Remove.
+	(download_agent_expr): Change write_inferior_data_ptr to
+	write_inferior_data_pointer.
+	(download_tracepoint_1): Likewise.
+	(download_tracepoint): Likewise.
+	(download_trace_state_variables): Likewise.
+
+2016-02-11  Wei-cheng Wang  <cole945@gmail.com>
+	    Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* tracepoint.c (struct tracepoint_action_ops): Remove.
+	(struct tracepoint_action): Remove ops.
+	(m_tracepoint_action_download, r_tracepoint_action_download)
+	(x_tracepoint_action_download, l_tracepoint_action_download): Adjust
+	size and offset accordingly.
+	(m_tracepoint_action_ops, r_tracepoint_action_ops)
+	(x_tracepoint_action_ops, l_tracepoint_action_ops): Remove.
+	(tracepoint_action_send, tracepoint_action_download): New functions.
+	Helpers for trace action handlers.
+	(add_tracepoint_action): Remove setup actions ops.
+	(download_tracepoint_1, tracepoint_send_agent): Call helper functions.
+
+2016-02-10  Yao Qi  <yao.qi@linaro.org>
+
+	* regcache.c (regcache_raw_read_unsigned): Clear *VAL.
+
+2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.ac: Use AC_CONFIG_FILES instead of passing arguments
+	to AC_OUTPUT.
+	* configure: Regenerate.
+
+2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linux-aarch64-low.c (aarch64_linux_siginfo_fixup): Change
+	void * to gdb_byte *.
+	* linux-low.c (siginfo_fixup): Likewise.
+	(linux_xfer_siginfo): Likewise.
+	* linux-low.h (struct linux_target_ops) <siginfo_fixup>:
+	Likewise.
+	* linux-x86-low.c (x86_siginfo_fixup): Likewise.
+
 2016-02-02  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* configure.srv (x86_64-*-linux*): Add amd64-linux-siginfo.o

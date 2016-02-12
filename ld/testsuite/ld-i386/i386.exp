@@ -319,6 +319,7 @@ run_dump_test "load5a"
 run_dump_test "load5b"
 run_dump_test "load6"
 run_dump_test "pr19175"
+run_dump_test "pr19615"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
@@ -357,7 +358,7 @@ if { [isnative]
 	[list \
 	    "Build libplt-main1.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC -Wa,-mrelax-relocations=yes" \
 	    { plt-main1.c } \
 	    {{readelf {-Wr} plt-main1.rd}} \
 	    "libplt-main1.a" \
@@ -365,7 +366,7 @@ if { [isnative]
 	[list \
 	    "Build libplt-main2.a" \
 	    "" \
-	    "-fPIC" \
+	    "-fPIC -Wa,-mrelax-relocations=yes" \
 	    { plt-main2.c } \
 	    {{readelf {-Wr} plt-main2.rd}} \
 	    "libplt-main2.a" \
@@ -373,7 +374,7 @@ if { [isnative]
 	[list \
 	    "Build libplt-main3.a" \
 	    "" \
-	    "-fPIC $PLT_CFLAGS" \
+	    "-fPIC -Wa,-mrelax-relocations=yes $PLT_CFLAGS" \
 	    { plt-main3.c } \
 	    {{readelf {-Wr} plt-main3.rd}} \
 	    "libplt-main3.a" \
@@ -381,7 +382,7 @@ if { [isnative]
 	[list \
 	    "Build libplt-main4.a" \
 	    "" \
-	    "-fPIC $PLT_CFLAGS" \
+	    "-fPIC -Wa,-mrelax-relocations=yes $PLT_CFLAGS" \
 	    { plt-main4.c } \
 	    {{readelf {-Wr} plt-main4.rd}} \
 	    "libplt-main4.a" \
@@ -535,7 +536,7 @@ if { [isnative]
 	[list \
 	    "Build gotpc1" \
 	    "tmpdir/got1d.so" \
-	    "" \
+	    "-Wa,-mrelax-relocations=yes" \
 	    { got1a.S got1b.c got1c.c } \
 	    {{objdump {-dw} got1.dd}} \
 	    "got1" \

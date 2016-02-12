@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.10
+*** Changes since GDB 7.11
+
+*** Changes in GDB 7.11
 
 * GDB now supports debugging kernel-based threads on FreeBSD.
 

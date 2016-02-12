@@ -1251,7 +1251,8 @@ Sized_relobj_file<size, big_endian>::split_stack_adjust_reltype(
 	  && gsym->source() == Symbol::FROM_OBJECT
 	  && !gsym->object()->uses_split_stack())
 	{
-	  if (parameters->target().is_call_to_non_split(gsym, pr))
+	  if (parameters->target().is_call_to_non_split(gsym, pr, view,
+							view_size))
 	    {
 	      Reltype reloc(pr);
 	      section_offset_type offset =

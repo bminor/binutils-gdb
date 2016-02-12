@@ -46,8 +46,6 @@ set srcfile2 ${testfile2}.c
 set binfile2 [standard_output_file ${testfile2}]
 
 set compile_options debug
-set dirname [relative_filename [pwd] [file dirname $binfile]]
-lappend compile_options "additional_flags=-DBASEDIR=\"$dirname\""
 
 # build the first test case
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable $compile_options] != "" } {

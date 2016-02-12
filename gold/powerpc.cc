@@ -7727,7 +7727,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      && preloc != NULL
 	      && target->abiversion() >= 2
 	      && !parameters->options().output_is_position_independent()
-	      && rela.get_r_addend() == 4
+	      && rela.get_r_addend() == d_offset + 4
 	      && gsym != NULL
 	      && strcmp(gsym->name(), ".TOC.") == 0)
 	    {

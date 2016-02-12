@@ -1,3 +1,28 @@
+2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
+	    Janek van Oirschot  <jvanoirs@synopsys.com>
+
+        * opcode/arc.h (arc_opcode arc_relax_opcodes, arc_num_relax_opcodes):
+        Declare.
+
+2016-02-09  Nick Clifton  <nickc@redhat.com>
+
+	* opcode/metag.h (metag_scondtab): Mark as possibly unused.
+	* opcode/nds32.h (nds32_r45map): Likewise.
+	(nds32_r54map): Likewise.
+	* opcode/visium.h (gen_reg_table): Likewise.
+	(fp_reg_table, cc_table, opcode_table): Likewise.
+
+2016-02-09  Alan Modra  <amodra@gmail.com>
+
+	PR 16583
+	* elf/common.h (AT_SUN_HWCAP): Undef before defining.
+
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
+	PR target/19561
+	* opcode/msp430.h (IGNORE_CARRY_BIT): New define.
+	(RRUX): Synthesise using case 2 rather than 7.
+
 2016-01-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (NT_FREEBSD_THRMISC): Define.

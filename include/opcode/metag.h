@@ -683,7 +683,7 @@ typedef struct
   enum scond_code code;
 } split_condition;
 
-static const split_condition metag_scondtab[] =
+static const split_condition metag_scondtab[] ATTRIBUTE_UNUSED =
   {
     { "LEQ",   SCOND_LEQ },
     { "LEZ",   SCOND_LEQ },

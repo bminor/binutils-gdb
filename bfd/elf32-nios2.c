@@ -1905,7 +1905,7 @@ nios2_elf32_install_imm16 (asection *sec, bfd_vma offset, bfd_vma value)
 {
   bfd_vma word = bfd_get_32 (sec->owner, sec->contents + offset);
 
-  BFD_ASSERT(value <= 0xffff);
+  BFD_ASSERT (value <= 0xffff || ((bfd_signed_vma) value) >= -0xffff);
 
   bfd_put_32 (sec->owner, word | ((value & 0xffff) << 6),
 	      sec->contents + offset);

@@ -138,6 +138,11 @@ binary_unittest_SOURCES = binary_unittest.cc
 check_PROGRAMS += leb128_unittest
 leb128_unittest_SOURCES = leb128_unittest.cc
 
+check_PROGRAMS += overflow_unittest
+overflow_unittest_SOURCES = overflow_unittest.cc
+overflow_unittest.o: overflow_unittest.cc
+	$(CXXCOMPILE) -O3 -c -o $@ $<
+
 endif NATIVE_OR_CROSS_LINKER
 
 # ---------------------------------------------------------------------
@@ -1068,6 +1073,36 @@ x86_64_mov_to_lea13.stdout: x86_64_mov_to_lea13
 	$(TEST_OBJDUMP) -dw $< > $@
 x86_64_mov_to_lea14.stdout: x86_64_mov_to_lea14
 	$(TEST_OBJDUMP) -dw $< > $@
+
+check_SCRIPTS += x86_64_overflow_pc32.sh
+check_DATA += x86_64_overflow_pc32.err
+MOSTLYCLEANFILES += x86_64_overflow_pc32.err
+x86_64_overflow_pc32.o: x86_64_overflow_pc32.s
+	$(TEST_AS) -o $@ $<
+x86_64_overflow_pc32.err: x86_64_overflow_pc32.o gcctestdir/ld
+	@echo gcctestdir/ld -e bar -Tdata=0x81000000 -o x86_64_overflow_pc32 x86_64_overflow_pc32.o "2>$@"
+	@if gcctestdir/ld -e bar -Tdata=0x81000000 -o x86_64_overflow_pc32 x86_64_overflow_pc32.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of x86_64_overflow_pc32 should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
+check_SCRIPTS += x32_overflow_pc32.sh
+check_DATA += x32_overflow_pc32.err
+MOSTLYCLEANFILES += x32_overflow_pc32.err
+x86_64_overflow_pc32.o: x86_64_overflow_pc32.s
+	$(TEST_AS) -o $@ $<
+x32_overflow_pc32.o: x86_64_overflow_pc32.s
+	$(TEST_AS) --x32 -o $@ $<
+x32_overflow_pc32.err: x32_overflow_pc32.o gcctestdir/ld
+	@echo gcctestdir/ld -e bar -Tdata=0x81000000 -o x32_overflow_pc32 x32_overflow_pc32.o "2>$@"
+	@if gcctestdir/ld -e bar -Tdata=0x81000000 -o x32_overflow_pc32 x32_overflow_pc32.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of x32_overflow_pc32 should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
 
 endif DEFAULT_TARGET_X86_64
 

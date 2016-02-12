@@ -3172,63 +3172,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    break;
 	  }
 
-	case 7:
-	  {
-	    int reg;
-
-	    /* RRUX: Synthetic unsigned right shift of a register by one bit.  */
-	    if (extended & 0xff)
-	      {
-		as_bad (_("repeat count cannot be used with %s"), opcode->name);
-		break;
-	      }
-
-	    line = extract_operand (line, l1, sizeof (l1));
-	    if ((reg = check_reg (l1)) == -1)
-	      {
-		as_bad (_("expected register as argument of %s"),
-			opcode->name);
-		break;
-	      }
-
-	    if (target_is_430xv2 () && reg == 0)
-	      {
-		as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
-		break;
-	      }
-
-	    if (byte_op)
-	      {
-		/* Tricky - there is no single instruction that will do this.
-		   Encode as: RRA.B rN { BIC.B #0x80, rN  */
-		op_length = 6;
-		frag = frag_more (op_length);
-		where = frag - frag_now->fr_literal;
-		bin = 0x1140 | reg;
-		bfd_putl16 ((bfd_vma) bin, frag);
-		dwarf2_emit_insn (2);
-		bin = 0xc070 | reg;
-		bfd_putl16 ((bfd_vma) bin, frag + 2);
-		bin = 0x0080;
-		bfd_putl16 ((bfd_vma) bin, frag + 4);
-		dwarf2_emit_insn (4);
-	      }
-	    else
-	      {
-		/* Encode as RRUM[.A] rN.  */
-		bin = opcode->bin_opcode;
-		if (! addr_op)
-		  bin |= 0x10;
-		bin |= reg;
-		op_length = 2;
-		frag = frag_more (op_length);
-		where = frag - frag_now->fr_literal;
-		bfd_putl16 ((bfd_vma) bin, frag);
-		dwarf2_emit_insn (op_length);
-	      }
-	    break;
-	  }
-
 	case 8:
 	  {
 	    bfd_boolean need_reloc = FALSE;
@@ -3660,6 +3603,9 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  else if (! addr_op)
 	    extended |= BYTE_OPERATION;
 
+	  if (is_opcode ("rrux"))
+	    extended |= IGNORE_CARRY_BIT;
+	  
 	  if (op1.ol != 0 && ((extended & 0xf) != 0))
 	    {
 	      as_bad (_("repeat instruction used with non-register mode instruction"));

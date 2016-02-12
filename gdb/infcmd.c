@@ -2000,11 +2000,6 @@ finish_command (char *arg, int from_tty)
       return;
     }
 
-  /* Ignore TAILCALL_FRAME type frames, they were executed already before
-     entering THISFRAME.  */
-  while (get_frame_type (frame) == TAILCALL_FRAME)
-    frame = get_prev_frame (frame);
-
   /* Find the function we will return from.  */
 
   sm->function = find_pc_function (get_frame_pc (get_selected_frame (NULL)));
@@ -2031,7 +2026,16 @@ finish_command (char *arg, int from_tty)
   if (execution_direction == EXEC_REVERSE)
     finish_backward (sm);
   else
-    finish_forward (sm, frame);
+    {
+      /* Ignore TAILCALL_FRAME type frames, they were executed already before
+	 entering THISFRAME.  */
+      frame = skip_tailcall_frames (frame);
+
+      if (frame == NULL)
+	error (_("Cannot find the caller frame."));
+
+      finish_forward (sm, frame);
+    }
 }
 
 

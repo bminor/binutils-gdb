@@ -1,3 +1,137 @@
+2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/tailcall-only.exp: New.
+	* gdb.btrace/tailcall-only.c: New.
+	* gdb.btrace/x86_64-tailcall-only.S: New.
+	* gdb.btrace/i686-tailcall-only.S: New.
+
+2016-02-11  Pedro Alves  <palves@redhat.com>
+
+	* README (Parallel testing): Add missing double quotes.
+
+2016-02-11  Pedro Alves  <palves@redhat.com>
+
+	* README (Parallel testing): New section.
+	(GDB_PARALLEL): Rewrite.
+	(FORCE_PARALLEL): Document.
+
+2016-02-11  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/tfile-avx.c: New test.
+	* gdb.trace/tfile-avx.exp: New test.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoints/19546
+	* gdb.base/infcall-exec.c: New file.
+	* gdb.base/infcall-exec2.c: New file.
+	* gdb.base/infcall-exec.exp: New file.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.guile/scm-breakpoint.exp (test_bkpt_address): New procedure.
+	(toplevel): Call test_bkpt_address.
+
+2016-02-09  Keith Seitz  <keiths@redhat.com>
+
+	PR python/19506
+	* gdb.python/py-breakpoint.exp (test_bkpt_address): New procedure.
+	(toplevel): Call test_bkpt_address.
+
+2016-02-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.ac: Use AC_CONFIG_FILES instead of passing arguments
+	to AC_OUTPUT.
+	* configure: Regenerate.
+
+2016-02-09  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/19548
+	* gdb.base/execl-update-breakpoints.c (some_function): New
+	function.
+	(main): Call it.
+	* gdb.base/execl-update-breakpoints.exp: Add a second breakpoint.
+	Tighten expected GDB output.
+
+2016-02-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (ALL_SUBDIRS): Remove.
+	(clean mostlyclean): Do not recurse in ALL_SUBDIRS.
+	(distclean maintainer-clean realclean): Likewise.
+	* configure.ac (AC_OUTPUT): Remove gdb.*/Makefile.
+	* configure: Regenerate.
+	* gdb.ada/Makefile.in: Delete.
+	* gdb.arch/Makefile.in: Likewise.
+	* gdb.asm/Makefile.in: Likewise.
+	* gdb.base/Makefile.in: Likewise.
+	* gdb.btrace/Makefile.in: Likewise.
+	* gdb.cell/Makefile.in: Likewise.
+	* gdb.compile/Makefile.in: Likewise.
+	* gdb.cp/Makefile.in: Likewise.
+	* gdb.disasm/Makefile.in: Likewise.
+	* gdb.dlang/Makefile.in: Likewise.
+	* gdb.dwarf2/Makefile.in: Likewise.
+	* gdb.fortran/Makefile.in: Likewise.
+	* gdb.gdb/Makefile.in: Likewise.
+	* gdb.go/Makefile.in: Likewise.
+	* gdb.guile/Makefile.in: Likewise.
+	* gdb.java/Makefile.in: Likewise.
+	* gdb.linespec/Makefile.in: Likewise.
+	* gdb.mi/Makefile.in: Likewise.
+	* gdb.modula2/Makefile.in: Likewise.
+	* gdb.multi/Makefile.in: Likewise.
+	* gdb.objc/Makefile.in: Likewise.
+	* gdb.opencl/Makefile.in: Likewise.
+	* gdb.opt/Makefile.in: Likewise.
+	* gdb.pascal/Makefile.in: Likewise.
+	* gdb.perf/Makefile.in: Likewise.
+	* gdb.python/Makefile.in: Likewise.
+	* gdb.reverse/Makefile.in: Likewise.
+	* gdb.server/Makefile.in: Likewise.
+	* gdb.stabs/Makefile.in: Likewise.
+	* gdb.threads/Makefile.in: Likewise.
+	* gdb.trace/Makefile.in: Likewise.
+	* gdb.xml/Makefile.in: Likewise.
+	* lib/gdb.exp (make_gdb_parallel_path): Add check for
+	GDB_PARALLEL.
+	(standard_output_file): Remove check for GDB_PARALLEL, always
+	return path in outputs/$subdir/$testname.
+
+2016-02-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (abs_srcdir): Assign @abs_srcdir@.
+	(site.exp): Assign abs_srcdir to tcl's srcdir.
+
+2016-02-04  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/foll-exec-mode.c: Include limits.h.
+	(main): Add parameters argc and argv.  Get directory from
+	argv[0].
+	* gdb.base/foll-exec-mode.exp: Don't pass -DBASEDIR in
+	compilation.
+	* gdb.base/foll-exec.c: Include limits.h.
+	(main): Add parameters argc and argv.
+	Get directory from argv[0].
+	* gdb.base/foll-exec.exp: Don't pass -DBASEDIR in compilation.
+	Adjust tests on the number of lines as source code changed.
+	* gdb.base/foll-vfork-exit.c: Include limits.h.
+	(main): Add one line of statement before vfork.
+	* gdb.base/foll-vfork.c: Include limits.h and string.h.
+	(main): Add parameters argc and argv.  Get directory from
+	argv[0].
+	* gdb.base/foll-vfork.exp: Don't pass -DBASEDIR in compilation.
+	(setup_gdb): Set tbreak to skip some source lines.
+	* gdb.multi/bkpt-multi-exec.c: Include limits.h.
+	(main): Add parameters argc and argv.  Get directory from
+	argv[0].
+	* gdb.multi/bkpt-multi-exec.exp: Don't pass -DBASEDIR in
+	compilation.
+	* gdb.multi/multi-arch-exec.c: Include limits.h and string.h.
+	(main): Add parameters argc and argv.  Get directory from
+	argv[0].
+	* gdb.multi/multi-arch-exec.exp: Don't pass -DBASEDIR in
+	compilation.
+
 2016-02-01  Doug Evans  <dje@google.com>
 
 	* gdb.base/skip.exp: Clean up multiple references to same test name.

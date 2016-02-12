@@ -1,3 +1,78 @@
+2016-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19615
+	* ld.texinfo: Document -Bsymbolic and -Bsymbolic-functions for
+	PIE.
+	* lexsup.c (parse_args): Enable -Bsymbolic and
+	-Bsymbolic-functions for PIE.
+	* testsuite/ld-i386/i386.exp: Run pr19615.
+	* testsuite/ld-i386/pr19615.d: New file.
+	* testsuite/ld-i386/pr19615.s: Likewise.
+	* testsuite/ld-x86-64/pr19615.d: Likewise.
+	* testsuite/ld-x86-64/pr19615.s: Likewise.
+
+2016-02-09  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-aarch64/reloc-overflow-bad.d: New test.
+	* testsuite/ld-aarch64/reloc-overflow-1.s: New source file.
+	* testsuite/ld-aarch64/reloc-overflow-2.s: New source file.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Run the new test.
+
+2016-02-04  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-arm/arm-elf.exp: Remove ARM NOREAD section tests.
+	* testsuite/ld-arm/thumb1-input-section-flag-match.d: Delete.
+	* testsuite/ld-arm/thumb1-input-section-flag-match.s: Delete.
+	* testsuite/ld-arm/thumb1-noread-not-present-mixing-two-section.d: Delete.
+	* testsuite/ld-arm/thumb1-noread-not-present-mixing-two-section.s: Delete.
+	* testsuite/ld-arm/thumb1-noread-present-one-section.d: Delete.
+	* testsuite/ld-arm/thumb1-noread-present-one-section.s: Delete.
+	* testsuite/ld-arm/thumb1-noread-present-two-section.d: Delete.
+	* testsuite/ld-arm/thumb1-noread-present-two-section.s: Delete.
+
+2016-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/19520
+	* testsuite/ld-i386/branch1.d: Pass -mrelax-relocations=yes to as.
+	* testsuite/ld-i386/call1.d: Likewise.
+	* testsuite/ld-i386/call2.d: Likewise.
+	* testsuite/ld-i386/call3a.d: Likewise.
+	* testsuite/ld-i386/call3b.d: Likewise.
+	* testsuite/ld-i386/call3c.d: Likewise.
+	* testsuite/ld-i386/call3d.d: Likewise.
+	* testsuite/ld-i386/call3e.d: Likewise.
+	* testsuite/ld-i386/call3f.d: Likewise.
+	* testsuite/ld-i386/call3g.d: Likewise.
+	* testsuite/ld-i386/call3h.d: Likewise.
+	* testsuite/ld-i386/jmp1.d: Likewise.
+	* testsuite/ld-i386/jmp2.d: Likewise.
+	* testsuite/ld-i386/lea1c.d: Likewise.
+	* testsuite/ld-i386/load1.d: Likewise.
+	* testsuite/ld-i386/load2.d: Likewise.
+	* testsuite/ld-i386/load3.d: Likewise.
+	* testsuite/ld-i386/load4a.d: Likewise.
+	* testsuite/ld-i386/load5a.d: Likewise.
+	* testsuite/ld-i386/mov2b.d: Likewise.
+	* testsuite/ld-i386/mov3.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-21-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-22-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-5r-local-x86-64.d: Likewise.
+	* testsuite/ld-x86-64/call1a.d: Likewise.
+	* testsuite/ld-x86-64/call1b.d: Likewise.
+	* testsuite/ld-x86-64/call1c.d: Likewise.
+	* testsuite/ld-x86-64/call1d.d: Likewise.
+	* testsuite/ld-x86-64/call1e.d: Likewise.
+	* testsuite/ld-x86-64/call1f.d: Likewise.
+	* testsuite/ld-x86-64/call1h.d: Likewise.
+	* testsuite/ld-x86-64/call1i.d: Likewise.
+	* testsuite/ld-x86-64/load1a.d: Likewise.
+	* testsuite/ld-x86-64/load1b.d: Likewise.
+	* testsuite/ld-i386/got1a.S: Load GOT into %ecx and use it.
+	* testsuite/ld-i386/got1.dd: Updated.
+	* testsuite/ld-i386/got1d.S (1): Removed.
+	* testsuite/ld-i386/i386.exp: Add -Wa,-mrelax-relocations=yes.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2016-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18591

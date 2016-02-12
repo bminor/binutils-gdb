@@ -205,7 +205,7 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
 
   var = varobj_get_handle (name);
 
-  numdel = varobj_delete (var, NULL, children_only_p);
+  numdel = varobj_delete (var, children_only_p);
 
   ui_out_field_int (uiout, "ndeleted", numdel);
 

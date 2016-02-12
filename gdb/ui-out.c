@@ -37,12 +37,6 @@ struct ui_out_hdr
     struct ui_out_hdr *next;
   };
 
-/* Maintain a stack so that the info applicable to the inner most list
-   is always available.  Stack/nested level 0 is reserved for the
-   top-level result.  */
-
-enum { MAX_UI_OUT_LEVELS = 8 };
-
 struct ui_out_level
   {
     /* Count each field; the first element is for non-list fields.  */

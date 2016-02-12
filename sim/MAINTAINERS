@@ -42,5 +42,6 @@ v850		DJ Delorie <dj@redhat.com>
 common		Ben Elliston <bje@gnu.org>
 mips		Andrew Cagney <ac131313@redhat.com>
 mips		Chris Demetriou <cgd@netbsd.org>
+mips		Thiemo Seufer <ths@networkno.de>
 ppc		Geoff Keating <geoffk@geoffk.org>
 ppc		Andrew Cagney <cagney@gnu.org>

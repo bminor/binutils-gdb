@@ -1,3 +1,8 @@
+2016-02-10  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.texinfo (Trace File Format): Remove misleading information
+	about register block ordering.
+
 2016-02-01  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Value Sizes): Fix typo.

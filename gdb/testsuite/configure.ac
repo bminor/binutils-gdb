@@ -102,15 +102,6 @@ GDB_AC_TRANSFORM(readelf, READELF_TRANSFORM_NAME)
 GDB_AC_TRANSFORM(as, GAS_TRANSFORM_NAME)
 GDB_AC_TRANSFORM(nm, NM_TRANSFORM_NAME)
 AC_CONFIG_FILES([lib/pdtrace], [chmod +x lib/pdtrace])
+AC_CONFIG_FILES([Makefile])
 
-AC_OUTPUT([Makefile \
-  gdb.ada/Makefile \
-  gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.btrace/Makefile \
-  gdb.cell/Makefile gdb.compile/Makefile gdb.cp/Makefile gdb.disasm/Makefile \
-  gdb.dwarf2/Makefile gdb.dlang/Makefile gdb.fortran/Makefile gdb.gdb/Makefile \
-  gdb.go/Makefile gdb.server/Makefile gdb.java/Makefile \
-  gdb.guile/Makefile gdb.linespec/Makefile \
-  gdb.mi/Makefile gdb.modula2/Makefile gdb.multi/Makefile \
-  gdb.objc/Makefile gdb.opencl/Makefile gdb.opt/Makefile gdb.pascal/Makefile \
-  gdb.perf/Makefile gdb.python/Makefile gdb.reverse/Makefile gdb.stabs/Makefile \
-  gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile])
+AC_OUTPUT
