@@ -1,5 +1,11 @@
 2016-02-12  Yao Qi  <yao.qi@linaro.org>
 
+	* linux-aarch64-low.c (aarch64_get_pc): Call linux_get_pc_64bit
+	or linux_get_pc_32bit.
+	(aarch64_set_pc): Call linux_set_pc_64bit or linux_set_pc_32bit.
+
+2016-02-12  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-arm-low.c (get_next_pcs_ops): Initialize it with
 	arm_linux_get_next_pcs_fixup.
 
