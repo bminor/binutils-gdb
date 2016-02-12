@@ -1,3 +1,8 @@
+2016-02-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* i386-biarch-core.exp: Define corefile using
+	standard_output_file.
+
 2016-02-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with recent gfortran-5.3.1.
