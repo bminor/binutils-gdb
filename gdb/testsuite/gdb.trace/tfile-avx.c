@@ -35,7 +35,9 @@ end (void)
 int
 main (void)
 {
-  register __v8si a asm("ymm15") = {
+  /* Strictly speaking, it should be ymm15 (xmm15 is 128-bit), but gcc older
+     than 4.9 doesn't recognize "ymm15" as a valid register name.  */
+  register __v8si a asm("xmm15") = {
     0x12340001,
     0x12340002,
     0x12340003,
