@@ -1,3 +1,9 @@
+2016-02-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.fortran/vla-value-sub-finish.exp (set max-value-size 1024*1024):
+	New test.
+	* gdb.fortran/vla-value-sub.exp: Likewise.
+
 2016-02-09  Keith Seitz  <keiths@redhat.com>
 
 	PR breakpoints/19546
