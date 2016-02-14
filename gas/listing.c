@@ -236,7 +236,7 @@ listing_message (const char *name, const char *message)
     {
       unsigned int l = strlen (name) + strlen (message) + 1;
       char *n = (char *) xmalloc (l);
-      struct list_message *lm = xmalloc (sizeof *lm);
+      struct list_message *lm = XNEW (struct list_message);
       strcpy (n, name);
       strcat (n, message);
       lm->message = n;
