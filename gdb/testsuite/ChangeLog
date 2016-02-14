@@ -1,5 +1,18 @@
 2016-02-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix compatibility with recent gfortran-5.3.1.
+	* gdb.fortran/vla-history.exp (print vla1 allocated)
+	(print vla2 allocated, print $2, print $3): Remove
+	(print $4): Rename to ...
+	(print $2): ... here.
+	(print $9): Rename to ...
+	(print $5): ... here.
+	(print $10): Rename to ...
+	(print $6): ... here.
+	* gdb.fortran/vla.f90: Add pvla initialization.
+
+2016-02-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.fortran/vla-value-sub-finish.exp (set max-value-size 1024*1024):
 	New test.
 	* gdb.fortran/vla-value-sub.exp: Likewise.
