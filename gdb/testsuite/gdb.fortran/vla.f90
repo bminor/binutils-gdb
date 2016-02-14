@@ -19,6 +19,7 @@ program vla
   real, target, allocatable :: vla3 (:, :)
   real, pointer :: pvla (:, :, :)
   logical :: l
+  nullify(pvla)
 
   allocate (vla1 (10,10,10))          ! vla1-init
   l = allocated(vla1)
