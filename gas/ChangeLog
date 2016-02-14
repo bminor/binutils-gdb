@@ -1,3 +1,38 @@
+2016-03-20  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* tc-i386.c (f32_1): Change type to unsigned char[].
+	(f32_2): Likewise.
+	(f32_3): Likewise.
+	(f32_4): Likewise.
+	(f32_5): Likewise.
+	(f32_6): Likewise.
+	(f32_7): Likewise.
+	(f32_8): Likewise.
+	(f32_9): Likewise.
+	(f32_10): Likewise.
+	(f32_11): Likewise.
+	(f32_12): Likewise.
+	(f32_13): Likewise.
+	(f32_14): Likewise.
+	(f16_3): Likewise.
+	(f16_4): Likewise.
+	(f16_5): Likewise.
+	(f16_6): Likewise.
+	(f16_7): Likewise.
+	(f16_8): Likewise.
+	(jump_31): Likewise.
+	(f32_patt): Likewise.
+	(f16_patt): Likewise.
+	(alt_3): Likewise.
+	(alt_4): Likewise.
+	(alt_5): Likewise.
+	(alt_6): Likewise.
+	(alt_7): Likewise.
+	(alt_8): Likewise.
+	(alt_9): Likewise.
+	(alt_10): Likewise.
+	(alt_patt): Likewise.
+
 2016-03-18  Nick Clifton  <nickc@redhat.com>
 
 	* doc/c-aarch64.texi (AArch64 Directives): Add descriptions of
