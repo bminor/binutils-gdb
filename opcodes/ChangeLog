@@ -1,3 +1,12 @@
+2016-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (print_insn): Parenthesize expression to prevent
+	truncated addresses.
+	(OP_J): Likewise.
+
 2016-01-25  Tristan Gingold  <gingold@adacore.com>
 
 	* configure: Regenerate.
