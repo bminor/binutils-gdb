@@ -1,3 +1,7 @@
+2016-02-15  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_analyze_prologue): Remove "0x".
+
 2016-02-12  Yao Qi  <yao.qi@linaro.org>
 
 	* arch/arm-linux.c (arm_linux_get_next_pcs_fixup): Calculate
