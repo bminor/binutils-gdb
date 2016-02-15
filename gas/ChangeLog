@@ -1,4 +1,14 @@
-2016-02-15  Nick Clifton  <nickc@redhat.com>
+202016-02-15  Vinay  <Vinay.G@kpit.com>
+
+	PR gas/19665
+	* config/rx-parse.y (MOV):  Opcode generation for index
+	register addressing mode.
+	* testsuite/gas/rx/rx.exp: Updated for new testcase.
+	* testsuite/gas/rx/pr19665.s: New file.
+	* testsuite/gas/rx/pr19665.s: New file.
+	* testsuite/gas/rx/mov.d: Update expected output.
+
+16-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo (.section): Document that numeric values can now
 	be used for the flags and type fields of the ELF target's .section
