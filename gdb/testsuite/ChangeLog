@@ -1,3 +1,9 @@
+2016-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-gnu-cfi.exp: Use standard_output_file.
+	* gdb.arch/i386-prologue.exp: Likewise.
+	* gdb.arch/i386-size.exp: Likewise.
+
 2016-02-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/wrong_frame_bt_full.exp: Use standard_output_file to
