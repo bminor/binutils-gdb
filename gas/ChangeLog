@@ -1,3 +1,25 @@
+2016-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (.section): Document that numeric values can now
+	be used for the flags and type fields of the ELF target's .section
+	directive.  Add notes about the restrictions on setting flags and
+	types.
+	* config/obj-elf.c (obj_elf_change_section): Allow known sections
+	to be given processor specific section types.  Allow processor and
+	application specific flags of a section to be set after
+	definition.
+	(obj_elf_parse_section_letters): Handle parsing numeric values.
+	(obj_elf_section_type): Handle parsing numeric values.
+	(obj_elf_section): Allow numeric type values.
+	* config/obj-elf.h (obj_elf_change_section): Update prototype.
+	* testsuite/gas/elf/section10.d: New test.
+	* testsuite/gas/elf/section10.s: Source file for new test.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+	* testsuite/gas/i386/ilp32/x86-64-unwind.d: Remove dependency upon
+	the description of the flags produced by readelf.
+	* testsuite/gas/tic6x/scomm-directive-4.d: Likewise.
+	* NEWS: Mention the new feature.
+
 2016-02-11  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/19614

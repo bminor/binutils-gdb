@@ -1,3 +1,9 @@
+2016-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (struct bfd_elf_special_section): Use unsigned values
+	for length and type fields.  Use a signed value for the
+	suffix_length field.
+
 2016-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19601

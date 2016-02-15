@@ -26,9 +26,7 @@ Section Headers:
  +\[[0-9a-f]+\] \.symtab .*
  +\[[0-9a-f]+\] \.strtab .*
 Key to Flags:
-.*
-.*
-.*
+#...
 
 Elf file type is DYN \(Shared object file\)
 Entry point 0x[0-9a-f]+

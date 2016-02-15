@@ -1,4 +1,6 @@
 -*- text -*-
+* Add ability to set section flags and types via numeric values for ELF
+  based targets.
 
 * Add a configure option --enable-x86-relax-relocations to decide whether
   x86 assembler should generate relax relocations by default.  Default to

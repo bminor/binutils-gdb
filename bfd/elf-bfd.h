@@ -731,15 +731,15 @@ typedef enum {
 struct bfd_elf_special_section
 {
   const char *prefix;
-  int prefix_length;
+  unsigned int prefix_length;
   /* 0 means name must match PREFIX exactly.
      -1 means name must start with PREFIX followed by an arbitrary string.
      -2 means name must match PREFIX exactly or consist of PREFIX followed
      by a dot then anything.
      > 0 means name must start with the first PREFIX_LENGTH chars of
      PREFIX and finish with the last SUFFIX_LENGTH chars of PREFIX.  */
-  int suffix_length;
-  int type;
+  signed int suffix_length;
+  unsigned int type;
   bfd_vma attr;
 };
 

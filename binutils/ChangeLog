@@ -1,3 +1,13 @@
+2016-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_section_type_name): Add hex prefix to offsets
+	printed for LOPROC and LOOS values.  Ensure that a result is
+	always returned for the V850 target, even when an unrecognised
+	processor specific value is encountered.
+	(process_section_headers): Display key values in the order in
+	which they appear to the user.  Add the "C (compressed)" value to
+	the list.
+
 2016-02-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/binutils.texi: Fix a typo.
