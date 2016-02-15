@@ -23,16 +23,17 @@
 
 set main_testfile wrong_frame_bt_full-main
 set opaque_testfile wrong_frame_bt_full-opaque
+set opaque_objfile [standard_output_file "$opaque_testfile.o"]
 
 if {[gdb_compile "${srcdir}/${subdir}/$opaque_testfile.c" \
-                 $opaque_testfile.o \
+                 $opaque_objfile \
                  object {}] != ""} {
   untested "failed to compile $opaque_testfile.c"
   return -1
 }
 
 if {[gdb_compile \
-      [list ${srcdir}/${subdir}/$main_testfile.c $opaque_testfile.o] \
+      [list ${srcdir}/${subdir}/$main_testfile.c $opaque_objfile] \
       [standard_output_file ${main_testfile}] \
       executable {debug}] != ""} {
     untested "failed to build $main_testfile"
