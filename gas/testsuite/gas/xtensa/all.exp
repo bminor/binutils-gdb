@@ -102,6 +102,7 @@ if [istarget xtensa*-*-*] then {
     run_dump_test "first_frag_align"
     run_dump_test "auto-litpools"
     run_dump_test "loc"
+    run_dump_test "init-fini-literals"
 }
 
 if [info exists errorInfo] then {
