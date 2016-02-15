@@ -1,6 +1,6 @@
-202016-02-15  Vinay  <Vinay.G@kpit.com>
+202016-02-15  Vinay Kumar G. <Vinay.G@kpit.com>
 
-	PR gas/19665
+	PR gas/19556
 	* config/rx-parse.y (MOV):  Opcode generation for index
 	register addressing mode.
 	* testsuite/gas/rx/rx.exp: Updated for new testcase.
