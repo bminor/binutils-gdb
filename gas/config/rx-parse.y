@@ -274,6 +274,15 @@ statement :
 
 /* ---------------------------------------------------------------------- */
 
+	| MOV DOT_B '#' EXPR ',' '[' REG ']'
+	  { B2 (0xf8, 0x04); F ($7, 8, 4); IMMB ($4, 12);}
+
+	| MOV DOT_W '#' EXPR ',' '[' REG ']'
+          { B2 (0xf8, 0x01); F ($7, 8, 4); IMMW ($4, 12);}
+
+	| MOV DOT_L '#' EXPR ',' '[' REG ']'
+	  { B2 (0xf8, 0x02); F ($7, 8, 4); IMM ($4, 12);}
+
 	| MOV DOT_B '#' EXPR ',' disp '[' REG ']'
 	  /* rx_disp5op changes the value if it succeeds, so keep it last.  */
 	  { if ($8 <= 7 && rx_uintop ($4, 8) && rx_disp5op0 (&$6, BSIZE))

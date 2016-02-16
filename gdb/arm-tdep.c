@@ -247,7 +247,8 @@ static struct arm_get_next_pcs_ops arm_get_next_pcs_ops = {
   arm_get_next_pcs_read_memory_unsigned_integer,
   arm_get_next_pcs_syscall_next_pc,
   arm_get_next_pcs_addr_bits_remove,
-  arm_get_next_pcs_is_thumb
+  arm_get_next_pcs_is_thumb,
+  NULL,
 };
 
 struct arm_prologue_cache

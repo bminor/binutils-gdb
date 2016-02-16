@@ -163,23 +163,9 @@ static CORE_ADDR
 aarch64_get_pc (struct regcache *regcache)
 {
   if (register_size (regcache->tdesc, 0) == 8)
-    {
-      unsigned long pc;
-
-      collect_register_by_name (regcache, "pc", &pc);
-      if (debug_threads)
-	debug_printf ("stop pc is %08lx\n", pc);
-      return pc;
-    }
+    return linux_get_pc_64bit (regcache);
   else
-    {
-      unsigned int pc;
-
-      collect_register_by_name (regcache, "pc", &pc);
-      if (debug_threads)
-	debug_printf ("stop pc is %04x\n", pc);
-      return pc;
-    }
+    return linux_get_pc_32bit (regcache);
 }
 
 /* Implementation of linux_target_ops method "set_pc".  */
@@ -188,15 +174,9 @@ static void
 aarch64_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   if (register_size (regcache->tdesc, 0) == 8)
-    {
-      unsigned long newpc = pc;
-      supply_register_by_name (regcache, "pc", &newpc);
-    }
+    linux_set_pc_64bit (regcache, pc);
   else
-    {
-      unsigned int newpc = pc;
-      supply_register_by_name (regcache, "pc", &newpc);
-    }
+    linux_set_pc_32bit (regcache, pc);
 }
 
 #define aarch64_breakpoint_len 4

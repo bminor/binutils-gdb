@@ -34,3 +34,4 @@ foreach test [lsort [glob $srcdir/$subdir/*.sm]] {
 
 run_dump_test "rx-asm-good"
 # run_list_test "rx-asm-bad" "" "Generation of error messages with bogus Renesas assembler directives"
+run_dump_test "pr19665"

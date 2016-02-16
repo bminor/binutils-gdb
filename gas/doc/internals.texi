@@ -151,10 +151,6 @@ Set the name of the symbol.
 @cindex S_IS_EXTERNAL
 Return non-zero if the symbol is externally visible.
 
-@item S_IS_EXTERN
-@cindex S_IS_EXTERN
-A synonym for @code{S_IS_EXTERNAL}.  Don't use it.
-
 @item S_IS_WEAK
 @cindex S_IS_WEAK
 Return non-zero if the symbol is weak, or if it is a @code{weakref} alias or

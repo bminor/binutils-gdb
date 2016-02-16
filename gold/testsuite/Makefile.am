@@ -3397,6 +3397,180 @@ MOSTLYCLEANFILES += arm_farcall_thumb_arm arm_farcall_thumb_arm_5t
 
 endif DEFAULT_TARGET_ARM
 
+if DEFAULT_TARGET_S390
+
+check_SCRIPTS += split_s390.sh
+check_DATA += split_s390_z1.stdout split_s390_z2.stdout split_s390_z3.stdout \
+	split_s390_z4.stdout split_s390_n1.stdout split_s390_n2.stdout \
+	split_s390_a1.stdout split_s390_a2.stdout split_s390_z1_ns.stdout \
+	split_s390_z2_ns.stdout split_s390_z3_ns.stdout split_s390_z4_ns.stdout \
+	split_s390_n1_ns.stdout split_s390_n2_ns.stdout split_s390_r.stdout \
+	split_s390x_z1.stdout split_s390x_z2.stdout split_s390x_z3.stdout \
+	split_s390x_z4.stdout split_s390x_n1.stdout split_s390x_n2.stdout \
+	split_s390x_a1.stdout split_s390x_a2.stdout split_s390x_z1_ns.stdout \
+	split_s390x_z2_ns.stdout split_s390x_z3_ns.stdout \
+	split_s390x_z4_ns.stdout split_s390x_n1_ns.stdout \
+	split_s390x_n2_ns.stdout split_s390x_r.stdout
+SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+split_s390_1_z1.o: split_s390_1_z1.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_1_z2.o: split_s390_1_z2.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_1_z3.o: split_s390_1_z3.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_1_z4.o: split_s390_1_z4.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_1_n1.o: split_s390_1_n1.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_1_n2.o: split_s390_1_n2.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_1_a1.o: split_s390_1_a1.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_1_a2.o: split_s390_1_a2.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_2_s.o: split_s390_2_s.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_2_ns.o: split_s390_2_ns.s
+	$(TEST_AS) -m31 -o $@ $<
+split_s390_z1: split_s390_1_z1.o split_s390_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z1.o split_s390_2_s.o
+split_s390_z1.stdout: split_s390_z1
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390_z2: split_s390_1_z2.o split_s390_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z2.o split_s390_2_s.o
+split_s390_z2.stdout: split_s390_z2
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390_z3: split_s390_1_z3.o split_s390_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z3.o split_s390_2_s.o
+split_s390_z3.stdout: split_s390_z3
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390_z4: split_s390_1_z4.o split_s390_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z4.o split_s390_2_s.o
+split_s390_z4.stdout: split_s390_z4
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390_n1: split_s390_1_n1.o split_s390_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_n1.o split_s390_2_s.o
+split_s390_n1.stdout: split_s390_n1
+	$(TEST_OBJDUMP) -d $< > $@
+split_s390_n2: split_s390_1_n2.o split_s390_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_n2.o split_s390_2_s.o
+split_s390_n2.stdout: split_s390_n2
+	$(TEST_OBJDUMP) -d $< > $@
+split_s390_z1_ns: split_s390_1_z1.o split_s390_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z1.o split_s390_2_ns.o
+split_s390_z1_ns.stdout: split_s390_z1_ns
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390_z2_ns: split_s390_1_z2.o split_s390_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z2.o split_s390_2_ns.o
+split_s390_z2_ns.stdout: split_s390_z2_ns
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390_z3_ns: split_s390_1_z3.o split_s390_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z3.o split_s390_2_ns.o
+split_s390_z3_ns.stdout: split_s390_z3_ns
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390_z4_ns: split_s390_1_z4.o split_s390_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_z4.o split_s390_2_ns.o
+split_s390_z4_ns.stdout: split_s390_z4_ns
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390_n1_ns: split_s390_1_n1.o split_s390_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_n1.o split_s390_2_ns.o
+split_s390_n1_ns.stdout: split_s390_n1_ns
+	$(TEST_OBJDUMP) -d $< > $@
+split_s390_n2_ns.stdout: split_s390_1_n2.o split_s390_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o split_s390_n2 split_s390_1_n2.o split_s390_2_ns.o > $@ 2>&1 || exit 0
+split_s390_a1.stdout: split_s390_1_a1.o split_s390_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o split_s390_a1 split_s390_1_a1.o split_s390_2_ns.o > $@ 2>&1 || exit 0
+split_s390_a2: split_s390_1_a2.o split_s390_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390_1_a2.o split_s390_2_ns.o
+split_s390_a2.stdout: split_s390_a2
+	$(TEST_OBJDUMP) -d $< > $@
+split_s390_r.stdout: split_s390_1_z1.o split_s390_2_ns.o ../ld-new
+	../ld-new -r split_s390_1_z1.o split_s390_2_ns.o -o split_s390_r > $@ 2>&1 || exit 0
+split_s390x_1_z1.o: split_s390x_1_z1.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_1_z2.o: split_s390x_1_z2.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_1_z3.o: split_s390x_1_z3.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_1_z4.o: split_s390x_1_z4.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_1_n1.o: split_s390x_1_n1.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_1_n2.o: split_s390x_1_n2.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_1_a1.o: split_s390x_1_a1.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_1_a2.o: split_s390x_1_a2.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_2_s.o: split_s390x_2_s.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_2_ns.o: split_s390x_2_ns.s
+	$(TEST_AS) -m64 -o $@ $<
+split_s390x_z1: split_s390x_1_z1.o split_s390x_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z1.o split_s390x_2_s.o
+split_s390x_z1.stdout: split_s390x_z1
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390x_z2: split_s390x_1_z2.o split_s390x_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z2.o split_s390x_2_s.o
+split_s390x_z2.stdout: split_s390x_z2
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390x_z3: split_s390x_1_z3.o split_s390x_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z3.o split_s390x_2_s.o
+split_s390x_z3.stdout: split_s390x_z3
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390x_z4: split_s390x_1_z4.o split_s390x_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z4.o split_s390x_2_s.o
+split_s390x_z4.stdout: split_s390x_z4
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390x_n1: split_s390x_1_n1.o split_s390x_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_n1.o split_s390x_2_s.o
+split_s390x_n1.stdout: split_s390x_n1
+	$(TEST_OBJDUMP) -d $< > $@
+split_s390x_n2: split_s390x_1_n2.o split_s390x_2_s.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_n2.o split_s390x_2_s.o
+split_s390x_n2.stdout: split_s390x_n2
+	$(TEST_OBJDUMP) -d $< > $@
+split_s390x_z1_ns: split_s390x_1_z1.o split_s390x_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z1.o split_s390x_2_ns.o
+split_s390x_z1_ns.stdout: split_s390x_z1_ns
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390x_z2_ns: split_s390x_1_z2.o split_s390x_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z2.o split_s390x_2_ns.o
+split_s390x_z2_ns.stdout: split_s390x_z2_ns
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390x_z3_ns: split_s390x_1_z3.o split_s390x_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z3.o split_s390x_2_ns.o
+split_s390x_z3_ns.stdout: split_s390x_z3_ns
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390x_z4_ns: split_s390x_1_z4.o split_s390x_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_z4.o split_s390x_2_ns.o
+split_s390x_z4_ns.stdout: split_s390x_z4_ns
+	$(TEST_OBJDUMP) -j .rodata -j .text -D $< > $@
+split_s390x_n1_ns: split_s390x_1_n1.o split_s390x_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_n1.o split_s390x_2_ns.o
+split_s390x_n1_ns.stdout: split_s390x_n1_ns
+	$(TEST_OBJDUMP) -d $< > $@
+split_s390x_n2_ns.stdout: split_s390x_1_n2.o split_s390x_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o split_s390x_n2 split_s390x_1_n2.o split_s390x_2_ns.o > $@ 2>&1 || exit 0
+split_s390x_a1.stdout: split_s390x_1_a1.o split_s390x_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o split_s390x_a1 split_s390x_1_a1.o split_s390x_2_ns.o > $@ 2>&1 || exit 0
+split_s390x_a2: split_s390x_1_a2.o split_s390x_2_ns.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_s390x_1_a2.o split_s390x_2_ns.o
+split_s390x_a2.stdout: split_s390x_a2
+	$(TEST_OBJDUMP) -d $< > $@
+split_s390x_r.stdout: split_s390x_1_z1.o split_s390x_2_ns.o ../ld-new
+	../ld-new -r split_s390x_1_z1.o split_s390x_2_ns.o -o split_s390x_r > $@ 2>&1 || exit 0
+MOSTLYCLEANFILES += split_s390_z1 split_s390_z2 split_s390_z3 \
+	split_s390_z4 split_s390_n1 split_s390_n2 split_s390_a1 \
+	split_s390_a2 split_s390_z1_ns split_s390_z2_ns split_s390_z3_ns \
+	split_s390_z4_ns split_s390_n1_ns split_s390_n2_ns split_s390_r \
+	split_s390x_z1 split_s390x_z2 split_s390x_z3 split_s390x_z4 \
+	split_s390x_n1 split_s390x_n2 split_s390x_a1 split_s390x_a2 \
+	split_s390x_z1_ns split_s390x_z2_ns split_s390x_z3_ns \
+	split_s390x_z4_ns split_s390x_n1_ns split_s390x_n2_ns split_s390x_r
+
+endif DEFAULT_TARGET_S390
+
 endif NATIVE_OR_CROSS_LINKER
 
 # Tests for the dwp tool.

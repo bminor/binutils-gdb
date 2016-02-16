@@ -1,3 +1,16 @@
+2016-02-16  Joseph Myers  <joseph@codesourcery.com>
+
+	* plugin.c (plugin_vec): Set match priority to 255.
+	* format.c (bfd_check_format_matches) [BFD_SUPPORTS_PLUGINS]: When
+	matching against the plugin vector, take priority from there not
+	from TEMP.
+
+2016-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (struct bfd_elf_special_section): Use unsigned values
+	for length and type fields.  Use a signed value for the
+	suffix_length field.
+
 2016-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19601

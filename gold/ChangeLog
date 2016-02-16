@@ -1,3 +1,48 @@
+2016-02-15  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* s390.cc (Target_s390::match_view_u): New helper method.
+	(Target_s390::do_is_call_to_non_split): New method.
+	(Target_s390::ss_code_st_r14): New const.
+	(Target_s390::ss_code_l_r14): New const.
+	(Target_s390::ss_code_bras_8): New const.
+	(Target_s390::ss_code_l_basr): New const.
+	(Target_s390::ss_code_a_basr): New const.
+	(Target_s390::ss_code_ear): New const.
+	(Target_s390::ss_code_c): New const.
+	(Target_s390::ss_code_larl): New const.
+	(Target_s390::ss_code_brasl): New const.
+	(Target_s390::ss_code_jg): New const.
+	(Target_s390::ss_code_jgl): New const.
+	(Target_s390::ss_match_mcount): New helper method.
+	(Target_s390::ss_match_l): New helper method.
+	(Target_s390::ss_match_ahi): New helper method.
+	(Target_s390::ss_match_alfi): New helper method.
+	(Target_s390::ss_match_cr): New helper method.
+	(Target_s390::do_calls_non_split): New method.
+	* testsuite/Makefile.am: Added new tests.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/split_s390.sh: New test.
+	* testsuite/split_s390_1_a1.s: New test.
+	* testsuite/split_s390_1_a2.s: New test.
+	* testsuite/split_s390_1_n1.s: New test.
+	* testsuite/split_s390_1_n2.s: New test.
+	* testsuite/split_s390_1_z1.s: New test.
+	* testsuite/split_s390_1_z2.s: New test.
+	* testsuite/split_s390_1_z3.s: New test.
+	* testsuite/split_s390_1_z4.s: New test.
+	* testsuite/split_s390_2_ns.s: New test.
+	* testsuite/split_s390_2_s.s: New test.
+	* testsuite/split_s390x_1_a1.s: New test.
+	* testsuite/split_s390x_1_a2.s: New test.
+	* testsuite/split_s390x_1_n1.s: New test.
+	* testsuite/split_s390x_1_n2.s: New test.
+	* testsuite/split_s390x_1_z1.s: New test.
+	* testsuite/split_s390x_1_z2.s: New test.
+	* testsuite/split_s390x_1_z3.s: New test.
+	* testsuite/split_s390x_1_z4.s: New test.
+	* testsuite/split_s390x_2_ns.s: New test.
+	* testsuite/split_s390x_2_s.s: New test.
+
 2016-02-11 Rahul Chaudhry  <rahulchaudhry@google.com>
 
 	* aarch64.cc (Target_aarch64::scan_erratum_843419_span): Remove

@@ -3893,6 +3893,7 @@ static const char *
 get_section_type_name (unsigned int sh_type)
 {
   static char buff[32];
+  const char * result;
 
   switch (sh_type)
     {
@@ -3926,8 +3927,6 @@ get_section_type_name (unsigned int sh_type)
     default:
       if ((sh_type >= SHT_LOPROC) && (sh_type <= SHT_HIPROC))
 	{
-	  const char * result;
-
 	  switch (elf_header.e_machine)
 	    {
 	    case EM_MIPS:
@@ -3970,12 +3969,10 @@ get_section_type_name (unsigned int sh_type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, "LOPROC+%x", sh_type - SHT_LOPROC);
+	  sprintf (buff, "LOPROC+%#x", sh_type - SHT_LOPROC);
 	}
       else if ((sh_type >= SHT_LOOS) && (sh_type <= SHT_HIOS))
 	{
-	  const char * result;
-
 	  switch (elf_header.e_machine)
 	    {
 	    case EM_IA_64:
@@ -3989,7 +3986,7 @@ get_section_type_name (unsigned int sh_type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, "LOOS+%x", sh_type - SHT_LOOS);
+	  sprintf (buff, "LOOS+%#x", sh_type - SHT_LOOS);
 	}
       else if ((sh_type >= SHT_LOUSER) && (sh_type <= SHT_HIUSER))
 	{
@@ -3998,12 +3995,16 @@ get_section_type_name (unsigned int sh_type)
 	    case EM_V800:
 	    case EM_V850:
 	    case EM_CYGNUS_V850:
-	      return get_v850_section_type_name (sh_type);
+	      result = get_v850_section_type_name (sh_type);
 	    default:
+	      result = NULL;
 	      break;
 	    }
 
-	  sprintf (buff, "LOUSER+%x", sh_type - SHT_LOUSER);
+	  if (result != NULL)
+	    return result;
+
+	  sprintf (buff, "LOUSER+%#x", sh_type - SHT_LOUSER);
 	}
       else
 	/* This message is probably going to be displayed in a 15
@@ -6003,23 +6004,20 @@ process_section_headers (FILE * file)
 
   if (!do_section_details)
     {
+      /* The ordering of the letters shown here matches the ordering of the
+	 corresponding SHF_xxx values, and hence the order in which these
+	 letters will be displayed to the user.  */
+      printf (_("Key to Flags:\n\
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n\
+  L (link order), O (extra OS processing required), G (group), T (TLS),\n\
+  C (compressed), x (unknown), o (OS specific), E (exclude),\n"));
       if (elf_header.e_machine == EM_X86_64
 	  || elf_header.e_machine == EM_L1OM
 	  || elf_header.e_machine == EM_K1OM)
-	printf (_("Key to Flags:\n\
-  W (write), A (alloc), X (execute), M (merge), S (strings), l (large)\n\
-  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
-  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
+	printf (_("l (large), "));
       else if (elf_header.e_machine == EM_ARM)
-	printf (_("Key to Flags:\n\
-  W (write), A (alloc), X (execute), M (merge), S (strings), y (noread)\n\
-  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
-  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
-      else
-	printf (_("Key to Flags:\n\
-  W (write), A (alloc), X (execute), M (merge), S (strings)\n\
-  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
-  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
+	printf (_("y (noread), "));
+      printf ("p (processor specific)\n");
     }
 
   return 1;

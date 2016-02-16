@@ -1,3 +1,28 @@
+2016-02-15  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-tdep.c (aarch64_analyze_prologue): Remove "0x".
+
+2016-02-12  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm-linux.c (arm_linux_get_next_pcs_fixup): Calculate
+	nextpc according to instruction.
+
+2016-02-12  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm-get-next-pcs.c (arm_get_next_pcs): Call
+	self->ops->fixup if it isn't NULL.
+	* arch/arm-get-next-pcs.h: Include gdb_vecs.h.
+	(struct arm_get_next_pcs_ops) <fixup>: New field.
+	* arch/arm-linux.c: Include common-regcache.h and
+	arch/arm-get-next-pcs.h.
+	(arm_linux_get_next_pcs_fixup): New function.
+	* arch/arm-linux.h (arm_linux_get_next_pcs_fixup): Declare.
+	* arm-linux-tdep.c (arm_linux_get_next_pcs_ops): Initialize
+	it with arm_linux_get_next_pcs_fixup.
+	(arm_linux_software_single_step): Move code to
+	arm_linux_get_next_pcs_fixup.
+	* arm-tdep.c (arm_get_next_pcs_ops): Initialize it.
+
 2016-02-12  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* xml-tdesc.c (target_fetch_description_xml) [!HAVE_LIBEXPAT]: Warn

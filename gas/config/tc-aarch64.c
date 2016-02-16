@@ -3473,10 +3473,8 @@ parse_address_reloc (char **str, aarch64_opnd_info *operand)
 static bfd_boolean
 parse_half (char **str, int *internal_fixup_p)
 {
-  char *p, *saved;
-  int dummy;
+  char *p = *str;
 
-  p = *str;
   skip_past_char (&p, '#');
 
   gas_assert (internal_fixup_p);
@@ -3505,12 +3503,6 @@ parse_half (char **str, int *internal_fixup_p)
     }
   else
     *internal_fixup_p = 1;
-
-  /* Avoid parsing a register as a general symbol.  */
-  saved = p;
-  if (aarch64_reg_parse_32_64 (&p, 0, 0, &dummy, &dummy) != PARSE_FAIL)
-    return FALSE;
-  p = saved;
 
   if (! my_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, 1))
     return FALSE;

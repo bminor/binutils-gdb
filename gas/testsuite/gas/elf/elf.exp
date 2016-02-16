@@ -201,6 +201,7 @@ if { [is_elf_format] } then {
     run_dump_test "section7"
     run_dump_test "section8"
     run_dump_test "section9"
+    run_dump_test "section10"
     run_dump_test "dwarf2-1"
     run_dump_test "dwarf2-2"
     run_dump_test "dwarf2-3"

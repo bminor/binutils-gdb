@@ -71,4 +71,8 @@ arm_linux_sigreturn_next_pc_offset (unsigned long sp,
 				    unsigned long svc_number,
 				    int is_sigreturn);
 
+struct arm_get_next_pcs;
+
+CORE_ADDR arm_linux_get_next_pcs_fixup (struct arm_get_next_pcs *self,
+					CORE_ADDR pc);
 #endif /* ARM_LINUX_H */

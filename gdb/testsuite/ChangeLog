@@ -1,3 +1,55 @@
+2016-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-prologue.c: Add missing prototypes.
+
+2016-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-gnu-cfi.exp: Use standard_output_file.
+	* gdb.arch/i386-prologue.exp: Likewise.
+	* gdb.arch/i386-size.exp: Likewise.
+
+2016-02-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/wrong_frame_bt_full.exp: Use standard_output_file to
+	define object file path.
+	* gdb.btrace/gcore.exp: Use standard_output_file to define core
+	file path.
+	* lib/opencl.exp (gdb_compile_opencl_hostapp): Use
+	standard_output_file to define binfile.
+
+2016-02-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility with recent gfortran-5.3.1.
+	* gdb.fortran/vla-history.exp (print vla1 allocated)
+	(print vla2 allocated, print $2, print $3): Remove
+	(print $4): Rename to ...
+	(print $2): ... here.
+	(print $9): Rename to ...
+	(print $5): ... here.
+	(print $10): Rename to ...
+	(print $6): ... here.
+	* gdb.fortran/vla.f90: Add pvla initialization.
+
+2016-02-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.fortran/vla-value-sub-finish.exp (set max-value-size 1024*1024):
+	New test.
+	* gdb.fortran/vla-value-sub.exp: Likewise.
+
+2016-02-12  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/tfile-avx.c (main): Change ymm15 to xmm15.
+
+2016-02-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* i386-biarch-core.exp: Define corefile using
+	standard_output_file.
+
+2016-02-12  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.arch/arm-single-step-kernel-helper.c: New.
+	* gdb.arch/arm-single-step-kernel-helper.exp: New.
+
 2016-02-12  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/tailcall-only.exp: New.
