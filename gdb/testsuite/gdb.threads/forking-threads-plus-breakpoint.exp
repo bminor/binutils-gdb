@@ -100,12 +100,6 @@ proc do_test { cond_bp_target detach_on_fork displaced } {
     set fork_count 0
     set ok 0
 
-    if {$displaced == "off"
-	&& [target_info exists gdb_protocol]
-	&& ([target_info gdb_protocol] == "remote"
-	    || [target_info gdb_protocol] == "extended-remote")} {
-	setup_kfail "remote/19496" *-*-*
-    }
     set test "inferior 1 exited"
     gdb_test_multiple "" $test {
 	-re "Inferior 1 \(\[^\r\n\]+\) exited normally" {

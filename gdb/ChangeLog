@@ -1,3 +1,9 @@
+2016-02-16  Don Breazeal  <donb@codesourcery.com>
+
+	PR remote/19496
+	* remote.c (remove_new_fork_children): Check for pending
+	fork status in thread_info.suspend.
+
 2016-02-16  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-linux-tdep.c (arm_linux_software_single_step): Assign
