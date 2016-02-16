@@ -1,3 +1,8 @@
+2016-02-16  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Section): Fix up texinfo snafus in previous
+	update.
+
 2016-02-16  Renlin Li  <renlin.li@arm.com>
 
 	PR gas/19620

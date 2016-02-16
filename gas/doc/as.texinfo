@@ -6268,6 +6268,7 @@ ways:
 
 If the optional argument is quoted, it is taken as flags to use for the
 section.  Each flag is a single character.  The following flags are recognized:
+
 @table @code
 @item b
 bss section (uninitialized data)
@@ -6356,6 +6357,7 @@ macros just for that purpose.
 
 The optional @var{flags} argument is a quoted string which may contain any
 combination of the following characters:
+
 @table @code
 @item a
 section is allocatable
@@ -6375,13 +6377,13 @@ section is a member of a section group
 section is used for thread-local-storage
 @item ?
 section is a member of the previously-current section's group, if any
-@item @var{number}
+@item @code{<number>}
 a numeric value indicating the bits to be set in the ELF section header's flags
 field.  Note - if one or more of the alphabetic characters described above is
 also included in the flags field, their bit values will be ORed into the
 resulting value.
-@item @{target specific}
-some targets extend this list with their own types
+@item @code{<target specific>}
+some targets extend this list with their own flag characters
 @end table
 
 Note - once a section's flags have been set they cannot be changed.  There are
@@ -6389,9 +6391,10 @@ a few exceptions to this rule however.  Processor and application specific
 flags can be added to an already defined section.  The @code{.interp},
 @code{.strtab} and @code{.symtab} sections can have the allocate flag
 (@code{a}) set after they are initially defined, and the @code{.note-GNU-stack}
-section may have the executable (@code(x)) flag added.
+section may have the executable (@code{x}) flag added.
 
 The optional @var{type} argument may contain one of the following constants:
+
 @table @code
 @item @@progbits
 section contains data
@@ -6405,9 +6408,9 @@ section contains an array of pointers to init functions
 section contains an array of pointers to finish functions
 @item @@preinit_array
 section contains an array of pointers to pre-init functions
-@item @@@var{number}
+@item @@@code{<number>}
 a numeric value to be set as the ELF section header's type field.
-@item @@@{target specific}
+@item @@@code{<target specific>}
 some targets extend this list with their own types
 @end table
 
@@ -6448,6 +6451,7 @@ be present along with an additional field like this:
 
 The @var{GroupName} field specifies the name of the section group to which this
 particular section belongs.  The optional linkage field can contain:
+
 @table @code
 @item comdat
 indicates that only one copy of this section should be retained
@@ -6483,6 +6487,7 @@ directive for compatibility with the Solaris assembler:
 
 Note that the section name is quoted.  There may be a sequence of comma
 separated flags:
+
 @table @code
 @item #alloc
 section is allocatable
