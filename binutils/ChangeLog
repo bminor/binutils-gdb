@@ -1,3 +1,8 @@
+2016-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/19647
+	* readelf.c (get_section_type_name): Add a missing break.
+
 2016-02-16  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* readelf.c (is_32bit_pcrel_reloc): Add R_ARC_32_PCREL.
