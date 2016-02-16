@@ -1,0 +1,276 @@
+From 586c2b4a3366be3051a9267da6e2c20d179da81b Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Sun, 14 Feb 2016 06:10:10 -0800
+Subject: [PATCH] Bind non-dynamic symbols locally in PIE
+
+Non-dynamic symbols are always bound locally in PIE and we always create
+the dynsym section, even if it is empty, with dynamic sections.
+
+bfd/
+
+	PR ld/19636
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Discard relocations
+	against locally bound weak undefined symbols.
+	(elf_i386_relocate_section): Don't generate dynamic relocations
+	against locally bound weak undefined symbols.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Discard
+	relocations on locally bound weak undefined symbols.
+	(elf_x86_64_relocate_section): Don't generate dynamic relocations
+	against locally bound weak undefined symbols.
+	* elflink.c (bfd_elf_record_link_assignment): Make the linker
+	assigned symbol dynamic for shared library or relocatable
+	executable.
+	(_bfd_elf_link_renumber_dynsyms): Check for shared library,
+	instead of PIC.  Always create the dynsym section, even if it is
+	empty, with dynamic sections.
+	(bfd_elf_final_link): Check for shared library, instead of PIC,
+	when writing out the section symbols.
+
+ld/
+
+	PR ld/19636
+	* testsuite/ld-elf/pr19636.s: New file.
+	* testsuite/ld-elf/pr19636a.d: Likewise.
+	* testsuite/ld-elf/pr19636b.d: Likewise.
+	* testsuite/ld-x86-64/pr13082-3b.d: Updated.
+	* testsuite/ld-x86-64/pr13082-4b.d: Likewise.
+---
+ bfd/elf-bfd.h                       | 15 ++++++++++-----
+ bfd/elf32-i386.c                    | 15 ++++++++++-----
+ bfd/elf64-x86-64.c                  | 14 +++++++++-----
+ bfd/elflink.c                       | 14 +++++++-------
+ ld/testsuite/ld-elf/pr19636.s       |  5 +++++
+ ld/testsuite/ld-elf/pr19636a.d      | 10 ++++++++++
+ ld/testsuite/ld-elf/pr19636b.d      | 12 ++++++++++++
+ ld/testsuite/ld-x86-64/pr13082-3b.d |  4 +---
+ ld/testsuite/ld-x86-64/pr13082-4b.d |  4 +---
+ 9 files changed, 65 insertions(+), 28 deletions(-)
+ create mode 100644 ld/testsuite/ld-elf/pr19636.s
+ create mode 100644 ld/testsuite/ld-elf/pr19636a.d
+ create mode 100644 ld/testsuite/ld-elf/pr19636b.d
+
+diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
+index ea4d59a..c9884d5 100644
+--- a/bfd/elf-bfd.h
++++ b/bfd/elf-bfd.h
+@@ -2639,11 +2639,16 @@ extern asection _bfd_elf_large_com_section;
+     continue;								\
+   }
+ 
+-/* Will a symbol be bound to the definition within the shared
+-   library, if any.  A unique symbol can never be bound locally.  */
+-#define SYMBOLIC_BIND(INFO, H) \
+-    (!(H)->unique_global \
+-     && ((INFO)->symbolic || ((INFO)->dynamic && !(H)->dynamic)))
++/* Will a symbol be bound to the definition within the PIC object, if
++   any.  A unique symbol can never be bound locally.  Non-dynamic symbol
++   is always bound locally in PIE.  */
++#define SYMBOLIC_BIND(INFO, H)						\
++    (!(H)->unique_global						\
++     && ((INFO)->symbolic						\
++	 || ((INFO)->dynamic && !(H)->dynamic)				\
++	 || (!(INFO)->export_dynamic					\
++	     && !(INFO)->dynamic					\
++	     && bfd_link_pie (INFO))))
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
+index a8951d8..f3414ba 100644
+--- a/bfd/elf32-i386.c
++++ b/bfd/elf32-i386.c
+@@ -2611,11 +2611,12 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	}
+ 
+       /* Also discard relocs on undefined weak syms with non-default
+-    	 visibility.  */
++	 visibility or bound locally.  */
+       if (eh->dyn_relocs != NULL
+ 	  && h->root.type == bfd_link_hash_undefweak)
+ 	{
+-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
++	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
++	      || SYMBOLIC_BIND (info, h))
+ 	    eh->dyn_relocs = NULL;
+ 
+ 	  /* Make sure undefined weak symbols are output as a dynamic
+@@ -4244,11 +4245,15 @@ r_386_got32:
+ 	      || is_vxworks_tls)
+ 	    break;
+ 
+-	  /* Copy dynamic function pointer relocations.  */
++	  /* Copy dynamic function pointer relocations.  Don't generate
++	     dynamic relocations against locally bound weak undefined
++	     symbols.  */
+ 	  if ((bfd_link_pic (info)
+ 	       && (h == NULL
+-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+-		   || h->root.type != bfd_link_hash_undefweak)
++		   || (!(h->root.type == bfd_link_hash_undefweak
++			 && SYMBOLIC_BIND (info, h))
++		       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
++			   || h->root.type != bfd_link_hash_undefweak)))
+ 	       && ((r_type != R_386_PC32 && r_type != R_386_SIZE32)
+ 		   || !SYMBOL_CALLS_LOCAL (info, h)))
+ 	      || (ELIMINATE_COPY_RELOCS
+diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
+index 463ce3a..5e96e00 100644
+--- a/bfd/elf64-x86-64.c
++++ b/bfd/elf64-x86-64.c
+@@ -2832,12 +2832,13 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+ 	}
+ 
+       /* Also discard relocs on undefined weak syms with non-default
+-	 visibility.  */
++	 visibility or bound locally.  */
+       if (eh->dyn_relocs != NULL)
+ 	{
+ 	  if (h->root.type == bfd_link_hash_undefweak)
+ 	    {
+-	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
++	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
++		  || SYMBOLIC_BIND (info, h))
+ 		eh->dyn_relocs = NULL;
+ 
+ 	      /* Make sure undefined weak symbols are output as a dynamic
+@@ -4585,7 +4586,8 @@ direct:
+ 	   /* Don't copy a pc-relative relocation into the output file
+ 	      if the symbol needs copy reloc or the symbol is undefined
+ 	      when building executable.  Copy dynamic function pointer
+-	      relocations.  */
++	      relocations.  Don't generate dynamic relocations against
++	      locally bound weak undefined symbols.  */
+ 	  if ((bfd_link_pic (info)
+ 	       && !(bfd_link_executable (info)
+ 		    && h != NULL
+@@ -4594,8 +4596,10 @@ direct:
+ 			|| h->root.type == bfd_link_hash_undefined)
+ 		    && IS_X86_64_PCREL_TYPE (r_type))
+ 	       && (h == NULL
+-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+-		   || h->root.type != bfd_link_hash_undefweak)
++		   || (!(h->root.type == bfd_link_hash_undefweak
++			 && SYMBOLIC_BIND (info, h))
++		       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
++			   || h->root.type != bfd_link_hash_undefweak)))
+ 	       && ((! IS_X86_64_PCREL_TYPE (r_type)
+ 		      && r_type != R_X86_64_SIZE32
+ 		      && r_type != R_X86_64_SIZE64)
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index ac03ce5..c3fa20d 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -632,8 +632,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
+ 
+   if ((h->def_dynamic
+        || h->ref_dynamic
+-       || bfd_link_pic (info)
+-       || (bfd_link_pde (info)
++       || bfd_link_dll (info)
++       || (bfd_link_executable (info)
+ 	   && elf_hash_table (info)->is_relocatable_executable))
+       && h->dynindx == -1)
+     {
+@@ -844,7 +844,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
+ {
+   unsigned long dynsymcount = 0;
+ 
+-  if (bfd_link_pic (info)
++  if (bfd_link_dll (info)
+       || elf_hash_table (info)->is_relocatable_executable)
+     {
+       const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
+@@ -875,9 +875,9 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
+ 			  &dynsymcount);
+ 
+   /* There is an unused NULL entry at the head of the table which
+-     we must account for in our count.  Unless there weren't any
+-     symbols, which means we'll have no table at all.  */
+-  if (dynsymcount != 0)
++     we must account for in our count.  We always create the dynsym
++     section, even if it is empty, with dynamic sections.  */
++  if (elf_hash_table (info)->dynamic_sections_created)
+     ++dynsymcount;
+ 
+   elf_hash_table (info)->dynsymcount = dynsymcount;
+@@ -11484,7 +11484,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
+       long last_local = 0;
+ 
+       /* Write out the section symbols for the output sections.  */
+-      if (bfd_link_pic (info)
++      if (bfd_link_dll (info)
+ 	  || elf_hash_table (info)->is_relocatable_executable)
+ 	{
+ 	  asection *s;
+diff --git a/ld/testsuite/ld-elf/pr19636.s b/ld/testsuite/ld-elf/pr19636.s
+new file mode 100644
+index 0000000..9bd7e4a
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr19636.s
+@@ -0,0 +1,5 @@
++	.text
++	.weak func
++	.globl _start
++_start:
++	.dc.a func
+diff --git a/ld/testsuite/ld-elf/pr19636a.d b/ld/testsuite/ld-elf/pr19636a.d
+new file mode 100644
+index 0000000..f645d09
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr19636a.d
+@@ -0,0 +1,10 @@
++#source: pr19636.s
++#ld: -pie
++#readelf : -r --dyn-syms --wide
++#target: x86_64-*-linux* i?86-*-linux-gnu
++
++There are no relocations in this file.
++
++Symbol table '\.dynsym' contains 1 entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
+diff --git a/ld/testsuite/ld-elf/pr19636b.d b/ld/testsuite/ld-elf/pr19636b.d
+new file mode 100644
+index 0000000..3b4d22f
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr19636b.d
+@@ -0,0 +1,12 @@
++#source: pr19636.s
++#ld: -pie -E
++#readelf : -r --dyn-syms --wide
++#target: *-*-linux* *-*-gnu* *-*-solaris*
++
++Relocation section '\.rela?\..*' at offset 0x[0-9a-f]+ contains [0-9]+ entries:
++#...
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-x86-64/pr13082-3b.d b/ld/testsuite/ld-x86-64/pr13082-3b.d
+index 12efaf0..766dd74 100644
+--- a/ld/testsuite/ld-x86-64/pr13082-3b.d
++++ b/ld/testsuite/ld-x86-64/pr13082-3b.d
+@@ -4,6 +4,4 @@
+ #ld: -pie -melf32_x86_64
+ #readelf: -r --wide
+ 
+-Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
+- Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
+-[0-9a-f]+ +[0-9a-f]+ +R_X86_64_32 +[0-9a-f]+ +func \+ 0
++There are no relocations in this file.
+diff --git a/ld/testsuite/ld-x86-64/pr13082-4b.d b/ld/testsuite/ld-x86-64/pr13082-4b.d
+index cb4d90a..6d4a35b 100644
+--- a/ld/testsuite/ld-x86-64/pr13082-4b.d
++++ b/ld/testsuite/ld-x86-64/pr13082-4b.d
+@@ -4,6 +4,4 @@
+ #ld: -pie -melf32_x86_64
+ #readelf: -r --wide
+ 
+-Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
+- Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
+-[0-9a-f]+ +[0-9a-f]+ +R_X86_64_64 +[0-9a-f]+ +func \+ 1
++There are no relocations in this file.
+-- 
+2.5.0
+
