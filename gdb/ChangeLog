@@ -1,5 +1,10 @@
 2016-02-16  Yao Qi  <yao.qi@linaro.org>
 
+	* arm-linux-tdep.c (arm_linux_software_single_step): Assign
+	'old_chain' later.
+
+2016-02-16  Yao Qi  <yao.qi@linaro.org>
+
 	* arch/arm-get-next-pcs.h (struct arm_get_next_pcs_ops)
 	<syscall_next_pc>: Remove argument PC.  Callers updated.
 	* arm-linux-tdep.c (arm_linux_get_next_pcs_syscall_next_pc):
