@@ -933,12 +933,14 @@ arm_linux_software_single_step (struct frame_info *frame)
   CORE_ADDR pc;
   int i;
   VEC (CORE_ADDR) *next_pcs = NULL;
-  struct cleanup *old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
+  struct cleanup *old_chain;
 
   /* If the target does have hardware single step, GDB doesn't have
      to bother software single step.  */
   if (target_can_do_single_step () == 1)
     return 0;
+
+  old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
 
   arm_get_next_pcs_ctor (&next_pcs_ctx,
 			 &arm_linux_get_next_pcs_ops,

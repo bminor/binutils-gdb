@@ -1,3 +1,8 @@
+2016-02-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arm-linux-tdep.c (arm_linux_software_single_step): Assign
+	'old_chain' later.
+
 2016-02-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Replace -cvs suffix by -git suffix.
