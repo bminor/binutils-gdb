@@ -1,5 +1,10 @@
 2016-02-16  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* lib/gdb.exp (standard_temp_file): Return a path specific to
+	the runtest invocation.
+
+2016-02-16  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.trace/save-trace.exp: Change relative path to be in the
 	standard output directory.
 

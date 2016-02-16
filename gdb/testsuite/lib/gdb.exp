@@ -4339,13 +4339,12 @@ proc standard_output_file {basename} {
 # Return the name of a file in our standard temporary directory.
 
 proc standard_temp_file {basename} {
-    global objdir GDB_PARALLEL
-
-    if {[info exists GDB_PARALLEL]} {
-	return [make_gdb_parallel_path temp $basename]
-    } else {
-	return $basename
-    }
+    # Since a particular runtest invocation is only executing a single test
+    # file at any given time, we can use the runtest pid to build the
+    # path of the temp directory.
+    set dir [make_gdb_parallel_path temp [pid]]
+    file mkdir $dir
+    return [file join $dir $basename]
 }
 
 # Set 'testfile', 'srcfile', and 'binfile'.
