@@ -11558,6 +11558,9 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
       return reloc_type == 6;
     case EM_ALPHA:
       return reloc_type == 10; /* R_ALPHA_SREL32.  */
+    case EM_ARC_COMPACT:
+    case EM_ARC_COMPACT2:
+      return reloc_type == 49; /* R_ARC_32_PCREL.  */
     case EM_ARM:
       return reloc_type == 3;  /* R_ARM_REL32 */
     case EM_MICROBLAZE:
