@@ -1,4 +1,4 @@
-202016-02-15  Vinay Kumar G. <Vinay.G@kpit.com>
+2016-02-15  Vinay Kumar G. <Vinay.G@kpit.com>
 
 	PR gas/19556
 	* config/rx-parse.y (MOV):  Opcode generation for index
@@ -8,7 +8,7 @@
 	* testsuite/gas/rx/pr19665.s: New file.
 	* testsuite/gas/rx/mov.d: Update expected output.
 
-16-02-15  Nick Clifton  <nickc@redhat.com>
+2016-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo (.section): Document that numeric values can now
 	be used for the flags and type fields of the ELF target's .section
