@@ -1,3 +1,10 @@
+2016-02-16  Renlin Li  <renlin.li@arm.com>
+
+	PR gas/19620
+	* config/tc-aarch64.c (parse_half): Remove restrictions on symbol name.
+	* testsuite/gas/aarch64/movw_label.d: New.
+	* testsuite/gas/aarch64/movw_label.s: New.
+
 2016-02-15  Vinay Kumar G. <Vinay.G@kpit.com>
 
 	PR gas/19556
