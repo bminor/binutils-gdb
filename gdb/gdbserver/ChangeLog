@@ -1,3 +1,8 @@
+2016-02-16  Yao Qi  <yao.qi@linaro.org>
+
+	* linux-arm-low.c (get_next_pcs_syscall_next_pc): Remove argument
+	PC.  Get pc from regcache_read_pc.
+
 2016-02-12  Yao Qi  <yao.qi@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_get_pc): Call linux_get_pc_64bit

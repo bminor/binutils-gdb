@@ -1,3 +1,12 @@
+2016-02-16  Yao Qi  <yao.qi@linaro.org>
+
+	* arch/arm-get-next-pcs.h (struct arm_get_next_pcs_ops)
+	<syscall_next_pc>: Remove argument PC.  Callers updated.
+	* arm-linux-tdep.c (arm_linux_get_next_pcs_syscall_next_pc):
+	Remove argument PC.  Get pc from regcache_read_pc.
+	* arm-tdep.c (arm_get_next_pcs_syscall_next_pc): Remove
+	argument PC.
+
 2016-02-15  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-tdep.c (aarch64_analyze_prologue): Remove "0x".

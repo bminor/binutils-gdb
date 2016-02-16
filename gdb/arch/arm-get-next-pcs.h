@@ -28,7 +28,7 @@ struct arm_get_next_pcs;
 struct arm_get_next_pcs_ops
 {
   ULONGEST (*read_mem_uint) (CORE_ADDR memaddr, int len, int byte_order);
-  CORE_ADDR (*syscall_next_pc) (struct arm_get_next_pcs *self, CORE_ADDR pc);
+  CORE_ADDR (*syscall_next_pc) (struct arm_get_next_pcs *self);
   CORE_ADDR (*addr_bits_remove) (struct arm_get_next_pcs *self, CORE_ADDR val);
   int (*is_thumb) (struct arm_get_next_pcs *self);
 
