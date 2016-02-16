@@ -91,7 +91,8 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
     } else {
 	run_dump_test "cfi-sh-1"
     }
-
+} elseif { [istarget "arc*-*-*"] } then {
+    run_dump_test "cfi-arc-1"
 } elseif { [istarget "arm*-*"] } then {
     # Only ELF based ARM targets support CFI.
     if { [is_pecoff_format] } then {

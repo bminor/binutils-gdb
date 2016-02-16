@@ -1,3 +1,11 @@
+2016-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/Makefile.am (x86_64_mov_to_lea5.o): Pass
+	-mrelax-relocations=yes to $(TEST_AS).
+	(x86_64_mov_to_lea6.o): Likewise.
+	(x86_64_overflow_pc32.o): Remove duplicated target.
+	* testsuite/Makefile.in: Regenerated.
+
 2016-02-15  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* s390.cc (Target_s390::match_view_u): New helper method.

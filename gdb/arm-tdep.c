@@ -238,8 +238,7 @@ static void arm_neon_quad_write (struct gdbarch *gdbarch,
 				 int regnum, const gdb_byte *buf);
 
 static CORE_ADDR
-  arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
-				    CORE_ADDR pc);
+  arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self);
 
 
 /* get_next_pcs operations.  */
@@ -6139,8 +6138,7 @@ arm_get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
 /* Wrapper over syscall_next_pc for use in get_next_pcs.  */
 
 static CORE_ADDR
-arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
-				  CORE_ADDR pc)
+arm_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 {
   return 0;
 }

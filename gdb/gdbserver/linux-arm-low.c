@@ -147,8 +147,7 @@ static ULONGEST get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
 static CORE_ADDR get_next_pcs_addr_bits_remove (struct arm_get_next_pcs *self,
 						CORE_ADDR val);
 
-static CORE_ADDR get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
-					       CORE_ADDR pc);
+static CORE_ADDR get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self);
 
 static int get_next_pcs_is_thumb (struct arm_get_next_pcs *self);
 
@@ -786,9 +785,10 @@ arm_sigreturn_next_pc (struct regcache *regcache, int svc_number,
 /* When PC is at a syscall instruction, return the PC of the next
    instruction to be executed.  */
 static CORE_ADDR
-get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self, CORE_ADDR pc)
+get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 {
   CORE_ADDR next_pc = 0;
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   int is_thumb = arm_is_thumb_mode ();
   ULONGEST svc_number = 0;
   struct regcache *regcache = self->regcache;

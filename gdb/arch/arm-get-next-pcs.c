@@ -417,7 +417,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
       unsigned long cond = bits (inst1, 8, 11);
       if (cond == 0x0f)  /* 0x0f = SWI */
 	{
-	  nextpc = self->ops->syscall_next_pc (self, pc);
+	  nextpc = self->ops->syscall_next_pc (self);
 	}
       else if (cond != 0x0f && condition_true (cond, status))
 	nextpc = pc_val + (sbits (inst1, 0, 7) << 1);
@@ -889,7 +889,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	  break;
 	case 0xf:		/* SWI */
 	  {
-	    nextpc = self->ops->syscall_next_pc (self, pc);
+	    nextpc = self->ops->syscall_next_pc (self);
 	  }
 	  break;
 

@@ -151,7 +151,18 @@ proc do_save_load_test { save_path } {
 gdb_verify_tracepoints "verify trace setup"
 
 with_test_prefix "relative" {
-    do_save_load_test "savetrace-relative.tr"
+    set filepath [standard_output_file "savetrace-relative.tr"]
+
+    # This only works because the pwd is a prefix of the standard output
+    # directory.  If this assumption becomes false, then this test needs to be
+    # changed (the relative path from [pwd] to the standard output directory
+    # will become a bit more complicated to compute).
+    if {[string first [pwd] $filepath] != 0} {
+	error "[pwd] is not a prefix of $filepath."
+    }
+
+    set filepath [string map "[pwd] ." $filepath]
+    do_save_load_test "$filepath"
 }
 
 with_test_prefix "absolute" {

@@ -1,3 +1,12 @@
+2016-02-16  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (tc_arc_frame_initial_instructions): New
+	function.
+	(tc_arc_regname_to_dw2regnum): Likewise.
+	* config/tc-arc.h (TARGET_USE_CFIPOP): Define
+	(tc_cfi_frame_initial_instructions): Likewise.
+	(tc_regname_to_dw2regnum): Likewise.
+
 2016-02-16  Trevor Saunders  <tbsaunde@tbsaunde.org>
 
 	* doc/internals.texi (S_IS_EXTERN): Remove.

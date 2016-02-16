@@ -24,6 +24,7 @@
 #include "subsegs.h"
 #include "struc-symbol.h"
 #include "dwarf2dbg.h"
+#include "dw2gencfi.h"
 #include "safe-ctype.h"
 
 #include "opcode/arc.h"
@@ -3674,4 +3675,25 @@ arc_pcrel_adjust (fragS *fragP)
     return fragP->fr_address + fragP->fr_fix;
 
   return 0;
+}
+
+/* Initialize the DWARF-2 unwind information for this procedure.  */
+
+void
+tc_arc_frame_initial_instructions (void)
+{
+  /* Stack pointer is register 28.  */
+  cfi_add_CFA_def_cfa_register (28);
+}
+
+int
+tc_arc_regname_to_dw2regnum (char *regname)
+{
+  struct symbol *sym;
+
+  sym = hash_find (arc_reg_hash, regname);
+  if (sym)
+    return S_GET_VALUE (sym);
+
+  return -1;
 }

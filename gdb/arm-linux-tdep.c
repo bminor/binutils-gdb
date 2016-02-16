@@ -266,8 +266,7 @@ static const gdb_byte arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa
 #define ARM_RT_SIGRETURN 173
 
 static CORE_ADDR
-  arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
-					  CORE_ADDR pc);
+  arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self);
 
 /* Operation function pointers for get_next_pcs.  */
 static struct arm_get_next_pcs_ops arm_linux_get_next_pcs_ops = {
@@ -872,10 +871,10 @@ arm_linux_get_syscall_number (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self,
-					CORE_ADDR pc)
+arm_linux_get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
 {
   CORE_ADDR next_pc = 0;
+  CORE_ADDR pc = regcache_read_pc (self->regcache);
   int is_thumb = arm_is_thumb (self->regcache);
   ULONGEST svc_number = 0;
   struct gdbarch *gdbarch = get_regcache_arch (self->regcache);
@@ -934,12 +933,14 @@ arm_linux_software_single_step (struct frame_info *frame)
   CORE_ADDR pc;
   int i;
   VEC (CORE_ADDR) *next_pcs = NULL;
-  struct cleanup *old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
+  struct cleanup *old_chain;
 
   /* If the target does have hardware single step, GDB doesn't have
      to bother software single step.  */
   if (target_can_do_single_step () == 1)
     return 0;
+
+  old_chain = make_cleanup (VEC_cleanup (CORE_ADDR), &next_pcs);
 
   arm_get_next_pcs_ctor (&next_pcs_ctx,
 			 &arm_linux_get_next_pcs_ops,

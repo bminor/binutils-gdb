@@ -191,11 +191,20 @@ extern void arc_handle_align (fragS *);
 extern void arc_cons_fix_new (fragS *, int, int, expressionS *,
 			      bfd_reloc_code_real_type);
 extern void arc_frob_label (symbolS *);
+extern void tc_arc_frame_initial_instructions (void);
+extern int tc_arc_regname_to_dw2regnum (char *regname);
 
 /* The blink register is r31.  */
 #define DWARF2_DEFAULT_RETURN_COLUMN	31
 /* Registers are generally saved at negative offsets to the CFA.  */
 #define DWARF2_CIE_DATA_ALIGNMENT	(-4)
+
+/* We want .cfi_* pseudo-ops for generating unwind info.  */
+#define TARGET_USE_CFIPOP 1
+
+/* CFI hooks.  */
+#define tc_cfi_frame_initial_instructions  tc_arc_frame_initial_instructions
+#define tc_regname_to_dw2regnum tc_arc_regname_to_dw2regnum
 
 /* Define the NOPs.  */
 #define NOP_OPCODE_S   0x000078E0

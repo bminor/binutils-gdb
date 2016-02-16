@@ -6166,7 +6166,12 @@ remove_new_fork_children (struct threads_listing_context *context)
      fork child threads from the CONTEXT list.  */
   ALL_NON_EXITED_THREADS (thread)
     {
-      struct target_waitstatus *ws = &thread->pending_follow;
+      struct target_waitstatus *ws;
+
+      if (thread->suspend.waitstatus_pending_p)
+	ws = &thread->suspend.waitstatus;
+      else
+	ws = &thread->pending_follow;
 
       if (is_pending_fork_parent (ws, pid, thread->ptid))
 	{

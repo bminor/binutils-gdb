@@ -1,3 +1,19 @@
+2016-02-16  Don Breazeal  <donb@codesourcery.com>
+
+	PR remote/19496
+	* gdb.threads/forking-threads-plus-breakpoint.exp (do_test):
+	Remove kfail for PR remote/19496.
+
+2016-02-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* lib/gdb.exp (standard_temp_file): Return a path specific to
+	the runtest invocation.
+
+2016-02-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/save-trace.exp: Change relative path to be in the
+	standard output directory.
+
 2016-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/i386-prologue.c: Add missing prototypes.
