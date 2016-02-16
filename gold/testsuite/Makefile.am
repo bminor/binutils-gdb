@@ -1010,9 +1010,9 @@ x86_64_mov_to_lea3.o: x86_64_mov_to_lea2.s
 x86_64_mov_to_lea4.o: x86_64_mov_to_lea2.s
 	$(TEST_AS) --64 -o $@ $<
 x86_64_mov_to_lea5.o: x86_64_mov_to_lea3.s
-	$(TEST_AS) --x32 -o $@ $<
+	$(TEST_AS) --x32 -mrelax-relocations=yes -o $@ $<
 x86_64_mov_to_lea6.o: x86_64_mov_to_lea3.s
-	$(TEST_AS) --64 -o $@ $<
+	$(TEST_AS) --64 -mrelax-relocations=yes -o $@ $<
 x86_64_mov_to_lea7.o: x86_64_mov_to_lea4.s
 	$(TEST_AS) --x32 -o $@ $<
 x86_64_mov_to_lea8.o: x86_64_mov_to_lea4.s
@@ -1091,8 +1091,6 @@ x86_64_overflow_pc32.err: x86_64_overflow_pc32.o gcctestdir/ld
 check_SCRIPTS += x32_overflow_pc32.sh
 check_DATA += x32_overflow_pc32.err
 MOSTLYCLEANFILES += x32_overflow_pc32.err
-x86_64_overflow_pc32.o: x86_64_overflow_pc32.s
-	$(TEST_AS) -o $@ $<
 x32_overflow_pc32.o: x86_64_overflow_pc32.s
 	$(TEST_AS) --x32 -o $@ $<
 x32_overflow_pc32.err: x32_overflow_pc32.o gcctestdir/ld
