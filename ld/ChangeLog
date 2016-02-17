@@ -2,6 +2,12 @@
 
 	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Updated.
 	* testsuite/ld-ifunc/ifunc-1-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-3a-x86.d: Likewise.
+
+2016-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Updated.
+	* testsuite/ld-ifunc/ifunc-1-x86.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-2-local-x86-64.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-2-x86-64.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-3a-x86.d: Likewise.
