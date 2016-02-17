@@ -141,6 +141,7 @@ void
 exec_file_locate_attach (int pid, int from_tty)
 {
   char *exec_file, *full_exec_path = NULL;
+  struct cleanup *old_chain;
 
   /* Do nothing if we already have an executable filename.  */
   exec_file = (char *) get_exec_file (0);
@@ -170,8 +171,12 @@ exec_file_locate_attach (int pid, int from_tty)
 	full_exec_path = xstrdup (exec_file);
     }
 
+  old_chain = make_cleanup (xfree, full_exec_path);
+
   exec_file_attach (full_exec_path, from_tty);
   symbol_file_add_main (full_exec_path, from_tty);
+
+  do_cleanups (old_chain);
 }
 
 /* Set FILENAME as the new exec file.
