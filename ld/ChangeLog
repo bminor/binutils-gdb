@@ -1,3 +1,7 @@
+2016-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/eh-frame-hdr.d: Skip for ARC ELF targets.
+
 2016-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-i386/pr12718.d: Remove dependency upon the
