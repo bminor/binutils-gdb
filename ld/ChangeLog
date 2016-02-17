@@ -1,3 +1,29 @@
+2016-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Updated.
+	* testsuite/ld-ifunc/ifunc-1-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-local-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-2-x86-64.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-3a-x86.d: Likewise.
+	* testsuite/ld-ifunc/pr17154-x86-64.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-1.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1.d: Likewise.
+	* testsuite/ld-x86-64/ilp32-4-nacl.d: Likewise.
+	* testsuite/ld-x86-64/ilp32-4.d: Likewise.
+	* testsuite/ld-x86-64/load1c-nacl.d: Likewise.
+	* testsuite/ld-x86-64/load1c.d: Likewise.
+	* testsuite/ld-x86-64/load1d-nacl.d: Likewise.
+	* testsuite/ld-x86-64/load1d.d: Likewise.
+	* testsuite/ld-x86-64/pr14207.d: Likewise.
+	* testsuite/ld-x86-64/pr19162.d: Likewise.
+	* testsuite/ld-x86-64/tlsdesc-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlsdesc.rd: Likewise.
+	* testsuite/ld-x86-64/tlsgdesc-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlsgdesc.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic-nacl.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic.rd: Likewise.
+
 2016-02-17  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-elf/eh-frame-hdr.d: Skip for ARC ELF targets.

@@ -6407,6 +6407,8 @@ static const struct bfd_elf_special_section
   elf_x86_64_additional_program_headers
 #define elf_backend_hash_symbol \
   elf_x86_64_hash_symbol
+#define elf_backend_omit_section_dynsym \
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
 
 #include "elf64-target.h"
 
