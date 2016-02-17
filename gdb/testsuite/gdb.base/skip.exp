@@ -24,35 +24,30 @@ if { [prepare_for_testing skip.exp "skip" \
 set srcfile skip.c
 set srcfile1 skip1.c
 
-#
 # Right after we start gdb, there's no default file or function to skip.
-#
+
 gdb_test "skip file" "No default file now." "skip file (no default file)"
 gdb_test "skip function" "No default function now."
 gdb_test "skip" "No default function now." "skip (no default function)"
 
 if ![runto_main] { fail "skip tests suppressed" }
 
-#
 # Test |info skip| with an empty skiplist.
-#
+
 gdb_test "info skip" "Not skipping any files or functions\." "info skip empty"
 
-#
 # Create a skiplist entry for the current file and function.
-#
+
 gdb_test "skip file" "File .*$srcfile will be skipped when stepping\." "skip file ($srcfile)"
 gdb_test "skip" "Function main will be skipped when stepping\." "skip (main)"
 
-#
 # Create a skiplist entry for a specified file and function.
-#
+
 gdb_test "skip file skip1.c" "File .*$srcfile1 will be skipped when stepping\."
 gdb_test "skip function baz" "Function baz will be skipped when stepping\."
 
-#
 # Test bad skiplist entry modification commands
-#
+
 gdb_test "skip enable 999" "No skiplist entries found with number 999."
 gdb_test "skip disable 999" "No skiplist entries found with number 999."
 gdb_test "skip delete 999" "No skiplist entries found with number 999."
@@ -60,14 +55,12 @@ gdb_test "skip enable a" "Args must be numbers or '\\$' variables."
 gdb_test "skip disable a" "Args must be numbers or '\\$' variables."
 gdb_test "skip delete a" "Args must be numbers or '\\$' variables."
 
-#
 # Ask for info on a skiplist entry which doesn't exist.
-#
+
 gdb_test "info skip 999" "No skiplist entries found with number 999."
 
-#
 # Does |info skip| look right?
-#
+
 gdb_test "info skip" \
   "Num\\s+Type\\s+Enb\\s+What\\s*
 1\\s+file\\s+y\\s+.*$srcfile\\s*
@@ -75,21 +68,18 @@ gdb_test "info skip" \
 3\\s+file\\s+y\\s+$srcfile1\\s*
 4\\s+function\\s+y\\s+baz\\s*"
 
-#
 # Right now, we have an outstanding skiplist entry on both source
 # files, so when we step into the first line in main(), we should step
 # right over it and go to the second line of main().
-#
 
 if ![runto_main] { fail "skip tests suppressed" }
 gdb_test "step" ".*" "step in the main"
 gdb_test "bt" "\\s*\\#0\\s+main.*" "step after all ignored"
 
-#
 # Now remove skip.c from the skiplist.  Our first step should take us
 # into foo(), and our second step should take us to the next line in
 # main().
-#
+
 gdb_test "skip delete 1"
 # Check that entry 1 is missing from |info skip|
 gdb_test "info skip" \
@@ -105,10 +95,9 @@ gdb_test "step" "foo \\(\\) at.*" "$test (1)"
 gdb_test "step" ".*" "$test (2)" ; # Return from foo()
 gdb_test "step" "main \\(\\) at.*" "$test (3)"
 
-#
 # Now disable the skiplist entry for  skip1.c.  We should now
 # step into foo(), then into bar(), but not into baz().
-#
+
 gdb_test "skip disable 3"
 # Is entry 3 disabled in |info skip|?
 gdb_test "info skip 3" ".*\\n3\\s+file\\s+n.*" \
@@ -122,9 +111,8 @@ gdb_test "step" "foo \\(\\) at.*" "$test (3)"
 gdb_test "step" ".*" "$test (4)"; # Return from bar()
 gdb_test "step" "main \\(\\) at.*" "$test (5)"
 
-#
 # Enable skiplist entry 3 and make sure we step over it like before.
-#
+
 gdb_test "skip enable 3"
 # Is entry 3 enabled in |info skip|?
 gdb_test "info skip 3" ".*\\n3\\s+file\\s+y.*" \

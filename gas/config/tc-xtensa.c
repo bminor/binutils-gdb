@@ -11061,6 +11061,10 @@ xtensa_move_literals (void)
   fixS *fix, *next_fix, **fix_splice;
   sym_list *lit;
   struct litpool_seg *lps;
+  const char *init_name = INIT_SECTION_NAME;
+  const char *fini_name = FINI_SECTION_NAME;
+  int init_name_len = strlen(init_name);
+  int fini_name_len = strlen(fini_name);
 
   mark_literal_frags (literal_head->next);
 
@@ -11171,9 +11175,13 @@ xtensa_move_literals (void)
 
   for (segment = literal_head->next; segment; segment = segment->next)
     {
+      const char *seg_name = segment_name (segment->seg);
+
       /* Keep the literals for .init and .fini in separate sections.  */
-      if (!strcmp (segment_name (segment->seg), INIT_SECTION_NAME)
-	  || !strcmp (segment_name (segment->seg), FINI_SECTION_NAME))
+      if ((!memcmp (seg_name, init_name, init_name_len) &&
+	   !strcmp (seg_name + init_name_len, ".literal")) ||
+	  (!memcmp (seg_name, fini_name, fini_name_len) &&
+	   !strcmp (seg_name + fini_name_len, ".literal")))
 	continue;
 
       frchain_from = seg_info (segment->seg)->frchainP;

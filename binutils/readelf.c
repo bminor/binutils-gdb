@@ -3996,6 +3996,7 @@ get_section_type_name (unsigned int sh_type)
 	    case EM_V850:
 	    case EM_CYGNUS_V850:
 	      result = get_v850_section_type_name (sh_type);
+	      break;
 	    default:
 	      result = NULL;
 	      break;

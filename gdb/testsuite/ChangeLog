@@ -1,3 +1,9 @@
+2016-02-16  Doug Evans  <dje@google.com>
+
+	* gdb.base/skip.c: Add copyright.  Whitespace cleanup.
+	* gdb.base/skip1.c: Ditto.
+	* gdb.base/skip.exp: Whitespace cleanup.
+
 2016-02-16  Don Breazeal  <donb@codesourcery.com>
 
 	PR remote/19496
