@@ -122,6 +122,12 @@ CXX_FOR_TARGET = ` \
     else \
       echo $$r/../gcc/g++ -B$$r/../gcc/; \
     fi; \
+  elif [ -f $$r/../gcc/xg++ ] ; then \
+    if [ -f $$r/../newlib/Makefile ] ; then \
+      echo $$r/../gcc/xg++ -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/../gcc/xg++ -B$$r/../gcc/; \
+    fi; \
   else \
     if [ "@host@" = "@target@" ] ; then \
       echo $(CXX); \

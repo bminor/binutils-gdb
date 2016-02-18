@@ -1,3 +1,10 @@
+2016-02-18  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (CXX_FOR_TARGET): Check for the presence of an
+	in-tree xg++ executable after checking for the presence of an
+	in-tree g++ executable.
+	* Makefile.in: Regenerate.
+
 2016-02-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-ifunc/ifunc-1-local-x86.d: Updated.
