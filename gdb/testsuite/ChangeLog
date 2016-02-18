@@ -1,3 +1,8 @@
+2016-02-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/forking-threads-plus-breakpoint.exp (do_test):
+	Set "set breakpoint condition-evaluation" per $cond_bp_target.
+
 2016-02-16  Doug Evans  <dje@google.com>
 
 	* gdb.base/skip.c: Add copyright.  Whitespace cleanup.
