@@ -1,3 +1,11 @@
+2016-02-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19617
+	* testsuite/ld-elf/pr19617.s: New file.
+	* testsuite/ld-elf/pr19617a.d: Likewise.
+	* testsuite/ld-elf/pr19617b.d: Likewise.
+	* testsuite/ld-elf/pr19617c.d: Likewise.
+
 2016-02-18  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (CXX_FOR_TARGET): Check for the presence of an

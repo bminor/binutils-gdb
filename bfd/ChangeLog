@@ -1,3 +1,9 @@
+2016-02-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19617
+	* elflink.c (elf_link_add_object_symbols): Always create dynamic
+	sections for -E/--dynamic-list.
+
 2016-02-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_backend_omit_section_dynsym): New.  Defined

@@ -3598,11 +3598,14 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* If we are creating a shared library, create all the dynamic
 	 sections immediately.  We need to attach them to something,
 	 so we attach them to this BFD, provided it is the right
-	 format and is not from ld --just-symbols.  FIXME: If there
+	 format and is not from ld --just-symbols.  Always create the
+	 dynamic sections for -E/--dynamic-list.  FIXME: If there
 	 are no input BFD's of the same format as the output, we can't
 	 make a shared library.  */
       if (!just_syms
-	  && bfd_link_pic (info)
+	  && (bfd_link_pic (info)
+	      || info->export_dynamic
+	      || info->dynamic)
 	  && is_elf_hash_table (htab)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
