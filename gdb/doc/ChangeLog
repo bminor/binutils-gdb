@@ -1,3 +1,8 @@
+2016-02-18  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.texinfo (Signals): Add bound violation display hints for
+	a SIGSEGV.
+
 2016-02-18  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.texinfo (Trace File Format): Add documentation for description

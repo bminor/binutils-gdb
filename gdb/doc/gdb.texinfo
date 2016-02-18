@@ -5852,6 +5852,33 @@ $1 = (void *) 0x7ffff7ff7000
 
 Depending on target support, @code{$_siginfo} may also be writable.
 
+@cindex Intel MPX boundary violations
+@cindex boundary violations, Intel MPX
+On some targets, a @code{SIGSEGV} can be caused by a boundary
+violation, i.e., accessing an address outside of the allowed range.
+In those cases @value{GDBN} may displays additional information,
+depending on how @value{GDBN} has been told to handle the signal.
+With @code{handle stop SIGSEGV}, @value{GDBN} displays the violation
+kind: "Upper" or "Lower", the memory address accessed and the
+bounds, while with @code{handle nostop SIGSEGV} no additional
+information is displayed.
+
+The usual output of a segfault is:
+@smallexample
+Program received signal SIGSEGV, Segmentation fault
+0x0000000000400d7c in upper () at i386-mpx-sigsegv.c:68
+68        value = *(p + len);
+@end smallexample
+
+While a bound violation is presented as:
+@smallexample
+Program received signal SIGSEGV, Segmentation fault
+Upper bound violation while accessing address 0x7fffffffc3b3
+Bounds: [lower = 0x7fffffffc390, upper = 0x7fffffffc3a3]
+0x0000000000400d7c in upper () at i386-mpx-sigsegv.c:68
+68        value = *(p + len);
+@end smallexample
+
 @node Thread Stops
 @section Stopping and Starting Multi-thread Programs
 

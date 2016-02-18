@@ -189,6 +189,7 @@ struct gdbarch
   int num_pseudo_regs;
   gdbarch_ax_pseudo_register_collect_ftype *ax_pseudo_register_collect;
   gdbarch_ax_pseudo_register_push_stack_ftype *ax_pseudo_register_push_stack;
+  gdbarch_handle_segmentation_fault_ftype *handle_segmentation_fault;
   int sp_regnum;
   int pc_regnum;
   int ps_regnum;
@@ -534,6 +535,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
   /* Skip verify of ax_pseudo_register_collect, has predicate.  */
   /* Skip verify of ax_pseudo_register_push_stack, has predicate.  */
+  /* Skip verify of handle_segmentation_fault, has predicate.  */
   /* Skip verify of sp_regnum, invalid_p == 0 */
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
@@ -1035,6 +1037,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: half_format = %s\n",
                       pformat (gdbarch->half_format));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_handle_segmentation_fault_p() = %d\n",
+                      gdbarch_handle_segmentation_fault_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: handle_segmentation_fault = <%s>\n",
+                      host_address_to_string (gdbarch->handle_segmentation_fault));
   fprintf_unfiltered (file,
                       "gdbarch_dump: has_dos_based_file_system = %s\n",
                       plongest (gdbarch->has_dos_based_file_system));
@@ -1997,6 +2005,30 @@ set_gdbarch_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
                                            gdbarch_ax_pseudo_register_push_stack_ftype ax_pseudo_register_push_stack)
 {
   gdbarch->ax_pseudo_register_push_stack = ax_pseudo_register_push_stack;
+}
+
+int
+gdbarch_handle_segmentation_fault_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->handle_segmentation_fault != NULL;
+}
+
+void
+gdbarch_handle_segmentation_fault (struct gdbarch *gdbarch, struct ui_out *uiout)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->handle_segmentation_fault != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_handle_segmentation_fault called\n");
+  gdbarch->handle_segmentation_fault (gdbarch, uiout);
+}
+
+void
+set_gdbarch_handle_segmentation_fault (struct gdbarch *gdbarch,
+                                       gdbarch_handle_segmentation_fault_ftype handle_segmentation_fault)
+{
+  gdbarch->handle_segmentation_fault = handle_segmentation_fault;
 }
 
 int

@@ -37,6 +37,11 @@
 /* Get XSAVE extended state xcr0 from core dump.  */
 extern uint64_t i386_linux_core_read_xcr0 (bfd *abfd);
 
+/* Handle and display information related to the MPX bound violation
+   to the user.  */
+extern void i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
+						  struct ui_out *uiout);
+
 /* Linux target description.  */
 extern struct target_desc *tdesc_i386_linux;
 extern struct target_desc *tdesc_i386_mmx_linux;

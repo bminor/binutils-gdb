@@ -1,3 +1,10 @@
+2016-02-18  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx-sigsegv.c: New file.
+	* gdb.arch/i386-mpx-sigsegv.exp: New file.
+	* gdb.arch/i386-mpx-simple_segv.c: New file.
+	* gdb.arch/i386-mpx-simple_segv.exp: New file.
+
 2016-02-18  Yao Qi  <yao.qi@linaro.org>
 
 	* gdb.base/disp-step-syscall.exp (disp_step_cross_syscall):
