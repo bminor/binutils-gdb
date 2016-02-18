@@ -185,6 +185,7 @@ run_dump_test "farcall-bl-none-function"
 run_dump_test "farcall-b-section"
 run_dump_test "farcall-bl-section"
 
+run_dump_test "relocs-258-dyn"
 run_dump_test "tls-relax-all"
 run_dump_test "tls-relax-gd-le"
 run_dump_test "tls-relax-gdesc-le"
