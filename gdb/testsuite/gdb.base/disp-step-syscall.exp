@@ -49,8 +49,6 @@ proc disp_step_cross_syscall { syscall } {
 	    return
 	}
 
-	set is_target_remote [gdb_is_target_remote]
-
 	# Delete the breakpoint on main.
 	gdb_test_no_output "delete break 1"
 
@@ -130,10 +128,6 @@ proc disp_step_cross_syscall { syscall } {
 	gdb_test_no_output "set displaced-stepping on"
 
 	# Check the address of next instruction of syscall.
-	if {$syscall == "vfork" && $is_target_remote} {
-	    setup_kfail server/13796 "*-*-*"
-	}
-
 	if {[gdb_test "stepi" "x/i .*=>.*" "single step over $syscall"] != 0} {
 	    return -1
 	}

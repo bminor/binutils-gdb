@@ -1,5 +1,10 @@
 2016-02-18  Yao Qi  <yao.qi@linaro.org>
 
+	* gdb.base/disp-step-syscall.exp (disp_step_cross_syscall):
+	Don't call setup_kfail.
+
+2016-02-18  Yao Qi  <yao.qi@linaro.org>
+
 	* gdb.threads/forking-threads-plus-breakpoint.exp (do_test):
 	Set "set breakpoint condition-evaluation" per $cond_bp_target.
 
