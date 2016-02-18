@@ -1,5 +1,12 @@
 2016-02-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/pr19617a.d: Enable only for *-*-linux*,
+	*-*-gnu* and *-*-solaris*.
+	* testsuite/ld-elf/pr19617b.d: Likewise.
+	* testsuite/ld-elf/pr19617c.d: Likewise.
+
+2016-02-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/19617
 	* testsuite/ld-elf/pr19617.s: New file.
 	* testsuite/ld-elf/pr19617a.d: Likewise.

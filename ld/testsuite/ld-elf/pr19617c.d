@@ -1,6 +1,7 @@
 #source: pr19617.s
 #ld: --dynamic-list-data
 #readelf : --dyn-syms --wide
+#target: *-*-linux* *-*-gnu* *-*-solaris*
 
 #failif
 #...

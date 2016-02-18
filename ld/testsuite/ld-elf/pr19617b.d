@@ -1,6 +1,7 @@
 #source: pr19617.s
 #ld: --dynamic-list-data
 #readelf : --dyn-syms --wide
+#target: *-*-linux* *-*-gnu* *-*-solaris*
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
