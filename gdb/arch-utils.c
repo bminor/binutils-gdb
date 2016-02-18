@@ -897,6 +897,29 @@ default_addressable_memory_unit_size (struct gdbarch *gdbarch)
   return 1;
 }
 
+void
+default_guess_tracepoint_registers (struct gdbarch *gdbarch,
+				    struct regcache *regcache,
+				    CORE_ADDR addr)
+{
+  int pc_regno = gdbarch_pc_regnum (gdbarch);
+  gdb_byte *regs;
+
+  /* This guessing code below only works if the PC register isn't
+     a pseudo-register.  The value of a pseudo-register isn't stored
+     in the (non-readonly) regcache -- instead it's recomputed
+     (probably from some other cached raw register) whenever the
+     register is read.  In this case, a custom method implementation
+     should be used by the architecture.  */
+  if (pc_regno < 0 || pc_regno >= gdbarch_num_regs (gdbarch))
+    return;
+
+  regs = (gdb_byte *) alloca (register_size (gdbarch, pc_regno));
+  store_unsigned_integer (regs, register_size (gdbarch, pc_regno),
+			  gdbarch_byte_order (gdbarch), addr);
+  regcache_raw_supply (regcache, pc_regno, regs);
+}
+
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_gdbarch_utils;
 

@@ -1327,6 +1327,15 @@ typedef int (gdbarch_fast_tracepoint_valid_at_ftype) (struct gdbarch *gdbarch, C
 extern int gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr, char **msg);
 extern void set_gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, gdbarch_fast_tracepoint_valid_at_ftype *fast_tracepoint_valid_at);
 
+/* Guess register state based on tracepoint location.  Used for tracepoints
+   where no registers have been collected, but there's only one location,
+   allowing us to guess the PC value, and perhaps some other registers.
+   On entry, regcache has all registers marked as unavailable. */
+
+typedef void (gdbarch_guess_tracepoint_registers_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR addr);
+extern void gdbarch_guess_tracepoint_registers (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR addr);
+extern void set_gdbarch_guess_tracepoint_registers (struct gdbarch *gdbarch, gdbarch_guess_tracepoint_registers_ftype *guess_tracepoint_registers);
+
 /* Return the "auto" target charset. */
 
 typedef const char * (gdbarch_auto_charset_ftype) (void);
