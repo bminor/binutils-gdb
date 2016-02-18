@@ -238,7 +238,6 @@ static unsigned int bundle_lock_depth;
 #endif
 
 static void do_s_func (int end_p, const char *default_prefix);
-static void do_align (int, char *, int, int);
 static void s_align (int, int);
 static void s_altmacro (int);
 static void s_bad_end (int);
@@ -487,6 +486,7 @@ static offsetT
 get_absolute_expr (expressionS *exp)
 {
   expression_and_evaluate (exp);
+
   if (exp->X_op != O_constant)
     {
       if (exp->X_op != O_absent)
@@ -685,7 +685,8 @@ finish_bundle (fragS *frag, unsigned int size)
   /* We do this every time rather than just in s_bundle_align_mode
      so that we catch any affected section without needing hooks all
      over for all paths that do section changes.  It's cheap enough.  */
-  record_alignment (now_seg, bundle_align_p2 - OCTETS_PER_BYTE_POWER);
+  if (bundle_align_p2 > OCTETS_PER_BYTE_POWER)
+    record_alignment (now_seg, bundle_align_p2 - OCTETS_PER_BYTE_POWER);
 }
 
 /* Assemble one instruction.  This takes care of the bundle features
@@ -735,6 +736,75 @@ single instruction is %u bytes long but .bundle_align_mode limit is %u"),
 # define assemble_one(line) md_assemble(line)
 
 #endif  /* HANDLE_BUNDLE */
+
+static bfd_boolean
+in_bss (void)
+{
+  flagword flags = bfd_get_section_flags (stdoutput, now_seg);
+
+  return (flags & SEC_ALLOC) && !(flags & (SEC_LOAD | SEC_HAS_CONTENTS));
+}
+
+/* Guts of .align directive:
+   N is the power of two to which to align.  A value of zero is accepted but
+    ignored: the default alignment of the section will be at least this.
+   FILL may be NULL, or it may point to the bytes of the fill pattern.
+   LEN is the length of whatever FILL points to, if anything.  If LEN is zero
+    but FILL is not NULL then LEN is treated as if it were one.
+   MAX is the maximum number of characters to skip when doing the alignment,
+    or 0 if there is no maximum.  */
+
+static void
+do_align (unsigned int n, char *fill, unsigned int len, unsigned int max)
+{
+  if (now_seg == absolute_section || in_bss ())
+    {
+      if (fill != NULL)
+	while (len-- > 0)
+	  if (*fill++ != '\0')
+	    {
+	      if (now_seg == absolute_section)
+		as_warn (_("ignoring fill value in absolute section"));
+	      else
+		as_warn (_("ignoring fill value in section `%s'"),
+			 segment_name (now_seg));
+	      break;
+	    }
+      fill = NULL;
+      len = 0;
+    }
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+#ifdef md_do_align
+  md_do_align (n, fill, len, max, just_record_alignment);
+#endif
+
+  /* Only make a frag if we HAVE to...  */
+  if ((n > OCTETS_PER_BYTE_POWER) && !need_pass_2)
+    {
+      if (fill == NULL)
+	{
+	  if (subseg_text_p (now_seg))
+	    frag_align_code (n, max);
+	  else
+	    frag_align (n, 0, max);
+	}
+      else if (len <= 1)
+	frag_align (n, *fill, max);
+      else
+	frag_align_pattern (n, fill, len, max);
+    }
+
+#ifdef md_do_align
+ just_record_alignment: ATTRIBUTE_UNUSED_LABEL
+#endif
+
+  if (n > OCTETS_PER_BYTE_POWER)
+    record_alignment (now_seg, n - OCTETS_PER_BYTE_POWER);
+}
 
 /* We read the file, putting things into a web that represents what we
    have been reading.  */
@@ -1337,14 +1407,6 @@ convert_to_bignum (expressionS *exp, int sign)
   exp->X_add_number = i;
 }
 
-static bfd_boolean
-in_bss (void)
-{
-  flagword flags = bfd_get_section_flags (stdoutput, now_seg);
-
-  return (flags & SEC_ALLOC) && !(flags & (SEC_LOAD | SEC_HAS_CONTENTS));
-}
-
 /* For most MRI pseudo-ops, the line actually ends at the first
    nonquoted space.  This function looks for that point, stuffs a null
    in, and sets *STOPCP to the character that used to be there, and
@@ -1401,62 +1463,6 @@ s_abort (int ignore ATTRIBUTE_UNUSED)
   as_fatal (_(".abort detected.  Abandoning ship."));
 }
 
-/* Guts of .align directive.  N is the power of two to which to align.
-   FILL may be NULL, or it may point to the bytes of the fill pattern.
-   LEN is the length of whatever FILL points to, if anything.  MAX is
-   the maximum number of characters to skip when doing the alignment,
-   or 0 if there is no maximum.  */
-
-static void
-do_align (int n, char *fill, int len, int max)
-{
-  if (now_seg == absolute_section || in_bss ())
-    {
-      if (fill != NULL)
-	while (len-- > 0)
-	  if (*fill++ != '\0')
-	    {
-	      if (now_seg == absolute_section)
-		as_warn (_("ignoring fill value in absolute section"));
-	      else
-		as_warn (_("ignoring fill value in section `%s'"),
-			 segment_name (now_seg));
-	      break;
-	    }
-      fill = NULL;
-      len = 0;
-    }
-
-#ifdef md_flush_pending_output
-  md_flush_pending_output ();
-#endif
-#ifdef md_do_align
-  md_do_align (n, fill, len, max, just_record_alignment);
-#endif
-
-  /* Only make a frag if we HAVE to...  */
-  if (n != 0 && !need_pass_2)
-    {
-      if (fill == NULL)
-	{
-	  if (subseg_text_p (now_seg))
-	    frag_align_code (n, max);
-	  else
-	    frag_align (n, 0, max);
-	}
-      else if (len <= 1)
-	frag_align (n, *fill, max);
-      else
-	frag_align_pattern (n, fill, len, max);
-    }
-
-#ifdef md_do_align
- just_record_alignment: ATTRIBUTE_UNUSED_LABEL
-#endif
-
-  record_alignment (now_seg, n - OCTETS_PER_BYTE_POWER);
-}
-
 /* Handle the .align pseudo-op.  A positive ARG is a default alignment
    (in bytes).  A negative ARG is the negative of the length of the
    fill pattern.  BYTES_P is non-zero if the alignment value should be
@@ -1466,14 +1472,14 @@ do_align (int n, char *fill, int len, int max)
 #endif
 
 static void
-s_align (int arg, int bytes_p)
+s_align (signed int arg, int bytes_p)
 {
   unsigned int align_limit = TC_ALIGN_LIMIT;
   unsigned int align;
   char *stop = NULL;
   char stopc = 0;
   offsetT fill = 0;
-  int max;
+  unsigned int max;
   int fill_p;
 
   if (flag_mri)
@@ -1553,15 +1559,16 @@ s_align (int arg, int bytes_p)
     }
   else
     {
-      int fill_len;
+      unsigned int fill_len;
 
       if (arg >= 0)
 	fill_len = 1;
       else
 	fill_len = -arg;
+
       if (fill_len <= 1)
 	{
-	  char fill_char;
+	  char fill_char = 0;
 
 	  fill_char = fill;
 	  do_align (align, &fill_char, fill_len, max);
@@ -1571,7 +1578,12 @@ s_align (int arg, int bytes_p)
 	  char ab[16];
 
 	  if ((size_t) fill_len > sizeof ab)
-	    abort ();
+	    {
+	      as_warn (_("fill pattern too long, truncating to %u"),
+		       (unsigned) sizeof ab);
+	      fill_len = sizeof ab;
+	    }
+
 	  md_number_to_chars (ab, fill, fill_len);
 	  do_align (align, ab, fill_len, max);
 	}
@@ -2429,7 +2441,7 @@ s_linkonce (int ignore ATTRIBUTE_UNUSED)
 }
 
 void
-bss_alloc (symbolS *symbolP, addressT size, int align)
+bss_alloc (symbolS *symbolP, addressT size, unsigned int align)
 {
   char *pfrag;
   segT current_seg = now_seg;
@@ -2453,7 +2465,7 @@ bss_alloc (symbolS *symbolP, addressT size, int align)
 #endif
   subseg_set (bss_seg, 1);
 
-  if (align)
+  if (align > OCTETS_PER_BYTE_POWER)
     {
       record_alignment (bss_seg, align);
       frag_align (align, 0, 0);
@@ -2907,7 +2919,7 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 
   if (c == ',')
     {
-      int align;
+      unsigned int align;
 
       ++input_line_pointer;
       align = get_absolute_expression ();
@@ -3006,7 +3018,7 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 	}
       else if (strcasecmp (seccmd, "align") == 0)
 	{
-	  int align;
+	  unsigned int align;
 
 	  (void) restore_line_pointer (c);
 	  align = get_absolute_expression ();
@@ -4993,9 +5005,25 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
   demand_empty_rest_of_line ();
 }
 
-/* Return the size of a LEB128 value.  */
+/* LEB128 Encoding.
 
-static inline int
+   Note - we are using the DWARF standard's definition of LEB128 encoding
+   where each 7-bit value is a stored in a byte, *not* an octet.  This
+   means that on targets where a byte contains multiple octets there is
+   a *huge waste of space*.  (This also means that we do not have to
+   have special versions of these functions for when OCTETS_PER_BYTE_POWER
+   is non-zero).
+
+   If the 7-bit values were to be packed into N-bit bytes (where N > 8)
+   we would then have to consider whether multiple, successive LEB128
+   values should be packed into the bytes without padding (bad idea) or
+   whether each LEB128 number is padded out to a whole number of bytes.
+   Plus you have to decide on the endianness of packing octets into a
+   byte.  */
+
+/* Return the size of a LEB128 value in bytes.  */
+
+static inline unsigned int
 sizeof_sleb128 (offsetT value)
 {
   int size = 0;
@@ -5016,7 +5044,7 @@ sizeof_sleb128 (offsetT value)
   return size;
 }
 
-static inline int
+static inline unsigned int
 sizeof_uleb128 (valueT value)
 {
   int size = 0;
@@ -5031,7 +5059,7 @@ sizeof_uleb128 (valueT value)
   return size;
 }
 
-int
+unsigned int
 sizeof_leb128 (valueT value, int sign)
 {
   if (sign)
@@ -5040,9 +5068,9 @@ sizeof_leb128 (valueT value, int sign)
     return sizeof_uleb128 (value);
 }
 
-/* Output a LEB128 value.  */
+/* Output a LEB128 value.  Returns the number of bytes used.  */
 
-static inline int
+static inline unsigned int
 output_sleb128 (char *p, offsetT value)
 {
   char *orig = p;
@@ -5069,7 +5097,7 @@ output_sleb128 (char *p, offsetT value)
   return p - orig;
 }
 
-static inline int
+static inline unsigned int
 output_uleb128 (char *p, valueT value)
 {
   char *orig = p;
@@ -5077,6 +5105,7 @@ output_uleb128 (char *p, valueT value)
   do
     {
       unsigned byte = (value & 0x7f);
+
       value >>= 7;
       if (value != 0)
 	/* More bytes to follow.  */
@@ -5089,7 +5118,7 @@ output_uleb128 (char *p, valueT value)
   return p - orig;
 }
 
-int
+unsigned int
 output_leb128 (char *p, valueT value, int sign)
 {
   if (sign)
@@ -5100,10 +5129,11 @@ output_leb128 (char *p, valueT value, int sign)
 
 /* Do the same for bignums.  We combine sizeof with output here in that
    we don't output for NULL values of P.  It isn't really as critical as
-   for "normal" values that this be streamlined.  */
+   for "normal" values that this be streamlined.  Returns the number of
+   bytes used.  */
 
-static inline int
-output_big_sleb128 (char *p, LITTLENUM_TYPE *bignum, int size)
+static inline unsigned int
+output_big_sleb128 (char *p, LITTLENUM_TYPE *bignum, unsigned int size)
 {
   char *orig = p;
   valueT val = 0;
@@ -5157,8 +5187,8 @@ output_big_sleb128 (char *p, LITTLENUM_TYPE *bignum, int size)
   return p - orig;
 }
 
-static inline int
-output_big_uleb128 (char *p, LITTLENUM_TYPE *bignum, int size)
+static inline unsigned int
+output_big_uleb128 (char *p, LITTLENUM_TYPE *bignum, unsigned int size)
 {
   char *orig = p;
   valueT val = 0;
@@ -5196,8 +5226,8 @@ output_big_uleb128 (char *p, LITTLENUM_TYPE *bignum, int size)
   return p - orig;
 }
 
-static int
-output_big_leb128 (char *p, LITTLENUM_TYPE *bignum, int size, int sign)
+static unsigned int
+output_big_leb128 (char *p, LITTLENUM_TYPE *bignum, unsigned int size, int sign)
 {
   if (sign)
     return output_big_sleb128 (p, bignum, size);
@@ -5270,23 +5300,25 @@ emit_leb128_expr (expressionS *exp, int sign)
       /* If we've got a constant, emit the thing directly right now.  */
 
       valueT value = exp->X_add_number;
-      int size;
+      unsigned int size;
       char *p;
 
       size = sizeof_leb128 (value, sign);
       p = frag_more (size);
-      output_leb128 (p, value, sign);
+      if (output_leb128 (p, value, sign) > size)
+	abort ();
     }
   else if (op == O_big)
     {
       /* O_big is a different sort of constant.  */
 
-      int size;
+      unsigned int size;
       char *p;
 
       size = output_big_leb128 (NULL, generic_bignum, exp->X_add_number, sign);
       p = frag_more (size);
-      output_big_leb128 (p, generic_bignum, exp->X_add_number, sign);
+      if (output_big_leb128 (p, generic_bignum, exp->X_add_number, sign) > size)
+	abort ();
     }
   else
     {

@@ -1,3 +1,24 @@
+2016-02-18  Dan Gisselquist  <dgisselq@verizon.net>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* read.c (finish_bundle): Avoid recording a negative alignment.
+	(do_align): Use unsigned values for n, len and max.  Only create
+	a frag if the alignment requirement is greater than the minimum
+	byte alignment.  Avoid recording a negative alignment.
+	(s_align): Use unsigned values where appropriate.
+	(bss_alloc): Use an unsigned value for the alignment.
+	(sizeof_sleb128): Add a comment noting that we encode one octet
+	per byte, regardless of the value of OCTETS_PER_BYTE_POWER.
+	(emit_leb129_expr): Abort if the emitted encoding was longer than
+	expected.
+	* read.h (output_leb128): Update prototype.
+	(sizeof_leb128): Update prototype.
+	(bss_alloc): Update prototype.
+	* write.c (record_alignment): Use an unsigned value for the
+	alignment.  Do not record alignments less than the minimum
+	alignment for a byte.
+	* write.h (record_alignment): Update prototype.
+
 2016-02-17  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (xtensa_move_literals): Fix check for
