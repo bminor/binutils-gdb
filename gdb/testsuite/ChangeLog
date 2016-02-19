@@ -1,3 +1,8 @@
+2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/entry-values.exp: Surround $call_insn with '\y',
+	change x86_64 call_insn to 'callq'.
+
 2016-02-24  Antoine Tremblay  <antoine.tremblay@ericsson.com>
 
 	* gdb.trace/tfile-avx.c: Move to...
