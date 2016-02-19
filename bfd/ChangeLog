@@ -1,3 +1,9 @@
+2016-02-19  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/19628
+	* reloc.c (bfd_generic_get_relocated_section_contents): Stop
+	processing if we encounter a reloc without an associated symbol.
+
 2016-02-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19617
