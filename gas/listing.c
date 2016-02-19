@@ -551,10 +551,9 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
 
 /* This function rewinds the requested file back to the line requested,
    reads it in again into the buffer provided and then restores the file
-   back to its original location.  Returns the buffer pointer upon success
-   or an empty string if an error occurs.  */
+   back to its original location.  */
 
-static char *
+static void
 rebuffer_line (file_info_type *  file,
 	       unsigned int      linenum,
 	       char *            buffer,
@@ -570,7 +569,7 @@ rebuffer_line (file_info_type *  file,
 
   /* Sanity checks.  */
   if (file == NULL || buffer == NULL || size <= 1 || file->linenum <= linenum)
-    return "";
+    return;
 
   /* Check the cache and see if we last used this file.  */
   if (last_open_file_info == NULL || file != last_open_file_info)
@@ -588,7 +587,7 @@ rebuffer_line (file_info_type *  file,
       if (last_open_file == NULL)
 	{
 	  file->at_end = 1;
-	  return "";
+	  return;
 	}
 
       /* Seek to where we were last time this file was open.  */
@@ -599,7 +598,7 @@ rebuffer_line (file_info_type *  file,
   /* Remember where we are in the current file.  */
   pos2 = pos = ftell (last_open_file);
   if (pos < 3)
-    return "";
+    return;
   current_line = file->linenum;
 
   /* Leave room for the nul at the end of the buffer.  */
@@ -624,7 +623,7 @@ rebuffer_line (file_info_type *  file,
       if (fread (buffer, 1, size, last_open_file) != size)
 	{
 	  as_warn (_("unable to rebuffer file: %s\n"), file->filename);
-	  return "";
+	  return;
 	}
 
       for (ptr = buffer + size; ptr >= buffer; -- ptr)
@@ -691,8 +690,6 @@ rebuffer_line (file_info_type *  file,
 
   /* Reset the file position.  */
   fseek (last_open_file, pos, SEEK_SET);
-
-  return buffer;
 }
 
 static const char *fn;

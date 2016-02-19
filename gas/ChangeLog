@@ -1,5 +1,7 @@
 016-02-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* listing.c (rebuffer_line): Change return type to void.
+
 	* symbols.c (decode_local_label_name): Make type a const char *.
 	* listing.c (print_source): Make type of p const char *.
 	(print_line): Make type of string const	char *.
