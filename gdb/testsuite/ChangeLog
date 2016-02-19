@@ -1,5 +1,9 @@
 2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	* gdb.trace/ftrace.exp: Remove unnecessary target check.
+
+2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* gdb.trace/entry-values.exp: Surround $call_insn with '\y',
 	change x86_64 call_insn to 'callq'.
 
