@@ -1,5 +1,12 @@
 2016-02-29  Yao Qi  <yao.qi@linaro.org>
 
+	* aarch64-linux-tdep.c (aarch64_canonicalize_syscall): Support
+	eventfd2, eventfd2, dup3, inotify_init1, fallocate and pipe2.
+	Return gdb_sys_epoll_create1 instead of gdb_sys_epoll_create
+	for aarch64_sys_epoll_create1.
+
+2016-02-29  Yao Qi  <yao.qi@linaro.org>
+
 	* linux-record.h (enum gdb_syscall) <gdb_sys_fallocate>: New.
 	<gdb_sys_eventfd2, gdb_sys_epoll_create1, gdb_sys_dup3>: New.
 	<gdb_sys_pipe2, gdb_sys_inotify_init1>: New.
