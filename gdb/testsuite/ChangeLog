@@ -1,3 +1,12 @@
+2016-03-09  Wei-cheng Wang  <cole945@gmail.com>
+	    Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/actions.c (gdb_recursion_test_fp): New typedef.
+	(gdb_recursion_test_ptr): New global variable.
+	(gdb_recursion_test): Call gdb_recursion_test_ptr instead of
+	gdb_recursion_test.
+	(gdb_c_test): Ditto.
+
 2016-03-09  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/change-loc.exp: Don't depend on tracepoint location
