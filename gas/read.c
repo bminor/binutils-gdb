@@ -1176,6 +1176,11 @@ read_a_source_file (char *name)
 
 		      assemble_one (s); /* Assemble 1 instruction.  */
 
+		      /* PR 19630: The backend may have set ilp to NULL
+			 if it encountered a catastrophic failure.  */
+		      if (input_line_pointer == NULL)
+			as_fatal (_("unable to continue with assembly."));
+ 
 		      *input_line_pointer++ = nul_char;
 
 		      /* We resume loop AFTER the end-of-line from

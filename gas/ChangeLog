@@ -1,3 +1,9 @@
+2016-02-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 19630
+	* read.c (read_a_source_file): Check for assemble_one returning
+	with input_line_pointer set to NULL.
+
 016-02-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* listing.c (rebuffer_line): Change return type to void.
