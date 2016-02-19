@@ -7939,6 +7939,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
   if (reloc_count > 0)
     {
       arelent **parent;
+
       for (parent = reloc_vector; *parent != NULL; parent++)
 	{
 	  char *error_message = NULL;
@@ -7946,6 +7947,16 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	  bfd_reloc_status_type r;
 
 	  symbol = *(*parent)->sym_ptr_ptr;
+	  /* PR ld/19628: A specially crafted input file
+	     can result in a NULL symbol pointer here.  */
+	  if (symbol == NULL)
+	    {
+	      link_info->callbacks->einfo
+		(_("%X%P: %B(%A): error: relocation for offset %V has no value\n"),
+		 abfd, input_section, (* parent)->address);
+	      goto error_return;
+	    }
+
 	  if (symbol->section && discarded_section (symbol->section))
 	    {
 	      bfd_byte *p;

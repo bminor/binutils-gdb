@@ -167,6 +167,40 @@ s390_write_pc (struct regcache *regcache, CORE_ADDR pc)
     regcache_cooked_write_unsigned (regcache, S390_SYSTEM_CALL_REGNUM, 0);
 }
 
+/* The "guess_tracepoint_registers" gdbarch method.  */
+
+static void
+s390_guess_tracepoint_registers (struct gdbarch *gdbarch,
+				 struct regcache *regcache,
+				 CORE_ADDR addr)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int sz = register_size (gdbarch, S390_PSWA_REGNUM);
+  gdb_byte *reg = (gdb_byte *) alloca (sz);
+  ULONGEST pswm, pswa;
+
+  /* Set PSWA from the location and a default PSWM (the only part we're
+     unlikely to get right is the CC).  */
+  if (tdep->abi == ABI_LINUX_S390)
+    {
+      /* 31-bit PSWA needs high bit set (it's very unlikely the target
+	 was in 24-bit mode).  */
+      pswa = addr | 0x80000000UL;
+      pswm = 0x070d0000UL;
+    }
+  else
+    {
+      pswa = addr;
+      pswm = 0x0705000180000000ULL;
+    }
+
+  store_unsigned_integer (reg, sz, gdbarch_byte_order (gdbarch), pswa);
+  regcache_raw_supply (regcache, S390_PSWA_REGNUM, reg);
+
+  store_unsigned_integer (reg, sz, gdbarch_byte_order (gdbarch), pswm);
+  regcache_raw_supply (regcache, S390_PSWM_REGNUM, reg);
+}
+
 
 /* DWARF Register Mapping.  */
 
@@ -7857,6 +7891,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    s390_iterate_over_regset_sections);
   set_gdbarch_cannot_store_register (gdbarch, s390_cannot_store_register);
   set_gdbarch_write_pc (gdbarch, s390_write_pc);
+  set_gdbarch_guess_tracepoint_registers (gdbarch, s390_guess_tracepoint_registers);
   set_gdbarch_pseudo_register_read (gdbarch, s390_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, s390_pseudo_register_write);
   set_tdesc_pseudo_register_name (gdbarch, s390_pseudo_register_name);

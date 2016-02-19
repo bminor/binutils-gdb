@@ -424,6 +424,8 @@ extern int i386_process_record (struct gdbarch *gdbarch,
                                 struct regcache *regcache, CORE_ADDR addr);
 extern const struct target_desc *i386_target_description (uint64_t xcr0);
 
+/* Return true iff the current target is MPX enabled.  */
+extern int i386_mpx_enabled (void);
 
 
 /* Functions and variables exported from i386bsd-tdep.c.  */

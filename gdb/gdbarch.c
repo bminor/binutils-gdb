@@ -189,6 +189,7 @@ struct gdbarch
   int num_pseudo_regs;
   gdbarch_ax_pseudo_register_collect_ftype *ax_pseudo_register_collect;
   gdbarch_ax_pseudo_register_push_stack_ftype *ax_pseudo_register_push_stack;
+  gdbarch_handle_segmentation_fault_ftype *handle_segmentation_fault;
   int sp_regnum;
   int pc_regnum;
   int ps_regnum;
@@ -312,6 +313,7 @@ struct gdbarch
   int has_global_breakpoints;
   gdbarch_has_shared_address_space_ftype *has_shared_address_space;
   gdbarch_fast_tracepoint_valid_at_ftype *fast_tracepoint_valid_at;
+  gdbarch_guess_tracepoint_registers_ftype *guess_tracepoint_registers;
   gdbarch_auto_charset_ftype *auto_charset;
   gdbarch_auto_wide_charset_ftype *auto_wide_charset;
   const char * solib_symbols_extension;
@@ -419,6 +421,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->relocate_instruction = NULL;
   gdbarch->has_shared_address_space = default_has_shared_address_space;
   gdbarch->fast_tracepoint_valid_at = default_fast_tracepoint_valid_at;
+  gdbarch->guess_tracepoint_registers = default_guess_tracepoint_registers;
   gdbarch->auto_charset = default_auto_charset;
   gdbarch->auto_wide_charset = default_auto_wide_charset;
   gdbarch->gen_return_address = default_gen_return_address;
@@ -532,6 +535,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
   /* Skip verify of ax_pseudo_register_collect, has predicate.  */
   /* Skip verify of ax_pseudo_register_push_stack, has predicate.  */
+  /* Skip verify of handle_segmentation_fault, has predicate.  */
   /* Skip verify of sp_regnum, invalid_p == 0 */
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
@@ -658,6 +662,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of has_global_breakpoints, invalid_p == 0 */
   /* Skip verify of has_shared_address_space, invalid_p == 0 */
   /* Skip verify of fast_tracepoint_valid_at, invalid_p == 0 */
+  /* Skip verify of guess_tracepoint_registers, invalid_p == 0 */
   /* Skip verify of auto_charset, invalid_p == 0 */
   /* Skip verify of auto_wide_charset, invalid_p == 0 */
   /* Skip verify of has_dos_based_file_system, invalid_p == 0 */
@@ -1024,11 +1029,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: gnu_triplet_regexp = <%s>\n",
                       host_address_to_string (gdbarch->gnu_triplet_regexp));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: guess_tracepoint_registers = <%s>\n",
+                      host_address_to_string (gdbarch->guess_tracepoint_registers));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: half_bit = %s\n",
                       plongest (gdbarch->half_bit));
   fprintf_unfiltered (file,
                       "gdbarch_dump: half_format = %s\n",
                       pformat (gdbarch->half_format));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_handle_segmentation_fault_p() = %d\n",
+                      gdbarch_handle_segmentation_fault_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: handle_segmentation_fault = <%s>\n",
+                      host_address_to_string (gdbarch->handle_segmentation_fault));
   fprintf_unfiltered (file,
                       "gdbarch_dump: has_dos_based_file_system = %s\n",
                       plongest (gdbarch->has_dos_based_file_system));
@@ -1991,6 +2005,30 @@ set_gdbarch_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
                                            gdbarch_ax_pseudo_register_push_stack_ftype ax_pseudo_register_push_stack)
 {
   gdbarch->ax_pseudo_register_push_stack = ax_pseudo_register_push_stack;
+}
+
+int
+gdbarch_handle_segmentation_fault_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->handle_segmentation_fault != NULL;
+}
+
+void
+gdbarch_handle_segmentation_fault (struct gdbarch *gdbarch, struct ui_out *uiout)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->handle_segmentation_fault != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_handle_segmentation_fault called\n");
+  gdbarch->handle_segmentation_fault (gdbarch, uiout);
+}
+
+void
+set_gdbarch_handle_segmentation_fault (struct gdbarch *gdbarch,
+                                       gdbarch_handle_segmentation_fault_ftype handle_segmentation_fault)
+{
+  gdbarch->handle_segmentation_fault = handle_segmentation_fault;
 }
 
 int
@@ -4448,6 +4486,23 @@ set_gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
                                       gdbarch_fast_tracepoint_valid_at_ftype fast_tracepoint_valid_at)
 {
   gdbarch->fast_tracepoint_valid_at = fast_tracepoint_valid_at;
+}
+
+void
+gdbarch_guess_tracepoint_registers (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->guess_tracepoint_registers != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_guess_tracepoint_registers called\n");
+  gdbarch->guess_tracepoint_registers (gdbarch, regcache, addr);
+}
+
+void
+set_gdbarch_guess_tracepoint_registers (struct gdbarch *gdbarch,
+                                        gdbarch_guess_tracepoint_registers_ftype guess_tracepoint_registers)
+{
+  gdbarch->guess_tracepoint_registers = guess_tracepoint_registers;
 }
 
 const char *

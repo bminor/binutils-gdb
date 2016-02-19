@@ -1,3 +1,33 @@
+2016-02-18  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* lib/future.exp: Add D support.
+	(gdb_find_gdc): New proc.
+	(gdb_default_target_compile): Add D support.
+
+2016-02-18  Wei-cheng Wang  <cole945@gmail.com>
+
+	* gdb.trace/tspeed.c (myclock): Return wallclock instead of
+	user+system time.
+	(trace_speed_test): Determine the iteration count for a time
+	between 15..30 seconds.
+
+2016-02-18  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx-sigsegv.c: New file.
+	* gdb.arch/i386-mpx-sigsegv.exp: New file.
+	* gdb.arch/i386-mpx-simple_segv.c: New file.
+	* gdb.arch/i386-mpx-simple_segv.exp: New file.
+
+2016-02-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.base/disp-step-syscall.exp (disp_step_cross_syscall):
+	Don't call setup_kfail.
+
+2016-02-18  Yao Qi  <yao.qi@linaro.org>
+
+	* gdb.threads/forking-threads-plus-breakpoint.exp (do_test):
+	Set "set breakpoint condition-evaluation" per $cond_bp_target.
+
 2016-02-16  Doug Evans  <dje@google.com>
 
 	* gdb.base/skip.c: Add copyright.  Whitespace cleanup.

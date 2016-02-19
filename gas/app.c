@@ -211,7 +211,7 @@ do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
 /* Saved state of the scrubber.  */
 static int state;
 static int old_state;
-static char *out_string;
+static const char *out_string;
 static char out_buf[20];
 static int add_newlines;
 static char *saved_input;
@@ -229,7 +229,7 @@ struct app_save
 {
   int          state;
   int          old_state;
-  char *       out_string;
+  const char * out_string;
   char         out_buf[sizeof (out_buf)];
   int          add_newlines;
   char *       saved_input;

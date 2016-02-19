@@ -52,7 +52,7 @@
 #define ARM_EXT_MP       0x08000000     /* Multiprocessing Extensions.  */
 #define ARM_EXT_SEC	 0x10000000	/* Security extensions.  */
 #define ARM_EXT_OS	 0x20000000	/* OS Extensions.  */
-#define ARM_EXT_ADIV	 0x40000000	/* Integer divide extensions in ARM 
+#define ARM_EXT_ADIV	 0x40000000	/* Integer divide extensions in ARM
 					   state.  */
 #define ARM_EXT_VIRT	 0x80000000	/* Virtualization extensions.  */
 
@@ -61,6 +61,7 @@
 #define ARM_EXT2_V8M	 0x00000004	/* ARM V8M.  */
 #define ARM_EXT2_ATOMICS 0x00000008	/* ARMv8 atomics.  */
 #define ARM_EXT2_V6T2_V8M 0x00000010	/* V8M Baseline from V6T2.  */
+#define ARM_EXT2_FP16_INST 0x00000020	/* ARM V8.2A FP16 instructions.  */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00000001	/* Allow MIA etc.          */

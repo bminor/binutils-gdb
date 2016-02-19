@@ -1,3 +1,55 @@
+2016-02-19  Matthew Wahab  <matthew.wahab@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (arm_ext_fp16): New.
+	(arm_extensions): New entry for "fp16".
+
+2016-02-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 19630
+	* read.c (read_a_source_file): Check for assemble_one returning
+	with input_line_pointer set to NULL.
+
+016-02-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* listing.c (rebuffer_line): Change return type to void.
+
+	* symbols.c (decode_local_label_name): Make type a const char *.
+	* listing.c (print_source): Make type of p const char *.
+	(print_line): Make type of string const	char *.
+	(buffer_line): Return const char *.
+	(title): Make type const char *.
+	(subtitle): Likewise.
+	(listing_listing): Make type of p const char *.
+	* messages.c (as_internal_value_out_of_range): Make type of prefix
+	const char *.
+	* stabs.c (s_stab_generic): make type of stab_secname, stabstr_secname
+	and string const char *.
+	* read.c (_bfd_rel): Make type of name const char *.
+	* app.c (out_string): Change type to const char *.
+       	(struct app_save::out_string): Likewise.
+
+2016-02-18  Dan Gisselquist  <dgisselq@verizon.net>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* read.c (finish_bundle): Avoid recording a negative alignment.
+	(do_align): Use unsigned values for n, len and max.  Only create
+	a frag if the alignment requirement is greater than the minimum
+	byte alignment.  Avoid recording a negative alignment.
+	(s_align): Use unsigned values where appropriate.
+	(bss_alloc): Use an unsigned value for the alignment.
+	(sizeof_sleb128): Add a comment noting that we encode one octet
+	per byte, regardless of the value of OCTETS_PER_BYTE_POWER.
+	(emit_leb129_expr): Abort if the emitted encoding was longer than
+	expected.
+	* read.h (output_leb128): Update prototype.
+	(sizeof_leb128): Update prototype.
+	(bss_alloc): Update prototype.
+	* write.c (record_alignment): Use an unsigned value for the
+	alignment.  Do not record alignments less than the minimum
+	alignment for a byte.
+	* write.h (record_alignment): Update prototype.
+
 2016-02-17  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (xtensa_move_literals): Fix check for

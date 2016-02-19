@@ -8729,9 +8729,7 @@ i386_mpx_bd_base (void)
   return ret & MPX_BASE_MASK;
 }
 
-/* Check if the current target is MPX enabled.  */
-
-static int
+int
 i386_mpx_enabled (void)
 {
   const struct gdbarch_tdep *tdep = gdbarch_tdep (get_current_arch ());

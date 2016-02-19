@@ -166,9 +166,9 @@ extern addressT dot_value;
 extern fragS *dot_frag;
 extern struct reloc_list* reloc_list;
 
-extern void append (char **charPP, char *fromP, unsigned long length);
-extern void record_alignment (segT seg, int align);
-extern int get_recorded_alignment (segT seg);
+extern void append (char **, char *, unsigned long);
+extern void record_alignment (segT, unsigned);
+extern int get_recorded_alignment (segT);
 extern void write_object_file (void);
 extern long relax_frag (segT, fragS *, long);
 extern int relax_segment (struct frag *, segT, int);

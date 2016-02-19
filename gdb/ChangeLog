@@ -1,3 +1,34 @@
+2016-02-18  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* s390-linux-tdep.c (s390_guess_tracepoint_registers): New function.
+	(s390_gdbarch_init): Fill guess_tracepoint_registers hook.
+
+2016-02-18  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* NEWS: Add entry for bound violation.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common):
+	Add handler for segmentation fault.
+	* gdbarch.sh (handle_segmentation_fault): New.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* i386-linux-tdep.c (i386_linux_handle_segmentation_fault): New.
+	(SIG_CODE_BONDARY_FAULT): New define.
+	(i386_linux_init_abi): Use i386_mpx_bound_violation_handler.
+	* i386-linux-tdep.h (i386_linux_handle_segmentation_fault) New.
+	* i386-tdep.c (i386_mpx_enabled): Add as external.
+	* i386-tdep.c (i386_mpx_enabled): Add as external.
+	* infrun.c (handle_segmentation_fault): New function.
+	(print_signal_received_reason): Use handle_segmentation_fault.
+
+2016-02-18  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* arch-utils.c (default_guess_tracepoint_registers): New function.
+	* arch-utils.h (default_guess_tracepoint_registers): New prototype.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh: Add guess_tracepoint_registers hook.
+	* tracefile.c (tracefile_fetch_registers): Use the new gdbarch hook.
+
 2016-02-17  Gary Benson  <gbenson@redhat.com>
 
 	* exec.c (exec_file_locate_attach): Add missing cleanup.

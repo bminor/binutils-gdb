@@ -30,6 +30,7 @@
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
 #include "linux-tdep.h"
+#include "utils.h"
 #include "glibc-tdep.h"
 #include "solib-svr4.h"
 #include "symtab.h"
@@ -382,6 +383,71 @@ i386_canonicalize_syscall (int syscall)
     return (enum gdb_syscall) syscall;
   else
     return gdb_sys_no_syscall;
+}
+
+/* Value of the sigcode in case of a boundary fault.  */
+
+#define SIG_CODE_BONDARY_FAULT 3
+
+/* i386 GNU/Linux implementation of the handle_segmentation_fault
+   gdbarch hook.  Displays information related to MPX bound
+   violations.  */
+void
+i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
+				      struct ui_out *uiout)
+{
+  CORE_ADDR lower_bound, upper_bound, access;
+  int is_upper;
+  long sig_code = 0;
+
+  if (!i386_mpx_enabled ())
+    return;
+
+  TRY
+    {
+      /* Sigcode evaluates if the actual segfault is a boundary violation.  */
+      sig_code = parse_and_eval_long ("$_siginfo.si_code\n");
+
+      lower_bound
+        = parse_and_eval_long ("$_siginfo._sifields._sigfault._addr_bnd._lower");
+      upper_bound
+        = parse_and_eval_long ("$_siginfo._sifields._sigfault._addr_bnd._upper");
+      access
+        = parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
+    }
+  CATCH (exception, RETURN_MASK_ALL)
+    {
+      return;
+    }
+  END_CATCH
+
+  /* If this is not a boundary violation just return.  */
+  if (sig_code != SIG_CODE_BONDARY_FAULT)
+    return;
+
+  is_upper = (access > upper_bound ? 1 : 0);
+
+  ui_out_text (uiout, "\n");
+  if (is_upper)
+    ui_out_field_string (uiout, "sigcode-meaning",
+			 _("Upper bound violation"));
+  else
+    ui_out_field_string (uiout, "sigcode-meaning",
+			 _("Lower bound violation"));
+
+  ui_out_text (uiout, _(" while accessing address "));
+  ui_out_field_fmt (uiout, "bound-access", "%s",
+		    paddress (gdbarch, access));
+
+  ui_out_text (uiout, _("\nBounds: [lower = "));
+  ui_out_field_fmt (uiout, "lower-bound", "%s",
+		    paddress (gdbarch, lower_bound));
+
+  ui_out_text (uiout, _(", upper = "));
+  ui_out_field_fmt (uiout, "upper-bound", "%s",
+		    paddress (gdbarch, upper_bound));
+
+  ui_out_text (uiout, _("]"));
 }
 
 /* Parse the arguments of current system call instruction and record
@@ -1002,6 +1068,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                   i386_linux_get_syscall_number);
 
   set_gdbarch_get_siginfo_type (gdbarch, x86_linux_get_siginfo_type);
+  set_gdbarch_handle_segmentation_fault (gdbarch,
+					 i386_linux_handle_segmentation_fault);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

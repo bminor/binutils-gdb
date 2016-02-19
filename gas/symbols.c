@@ -1888,7 +1888,7 @@ decode_local_label_name (char *s)
   char *symbol_decode;
   int label_number;
   int instance_number;
-  char *type;
+  const char *type;
   const char *message_format;
   int lindex = 0;
 

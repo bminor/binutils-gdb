@@ -3,6 +3,20 @@
 
 *** Changes since GDB 7.11
 
+* Intel MPX bound violation handling.
+
+   Segmentation faults caused by a Intel MPX boundary violation
+   now display the kind of violation (upper or lower), the memory
+   address accessed and the memory bounds, along with the usual
+   signal received and code location.
+
+   For example:
+
+   Program received signal SIGSEGV, Segmentation fault
+   Upper bound violation while accessing address 0x7fffffffc3b3
+   Bounds: [lower = 0x7fffffffc390, upper = 0x7fffffffc3a3]
+   0x0000000000400d7c in upper () at i386-mpx-sigsegv.c:68
+
 *** Changes in GDB 7.11
 
 * GDB now supports debugging kernel-based threads on FreeBSD.

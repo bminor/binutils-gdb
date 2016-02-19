@@ -3002,7 +3002,11 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
       if ((type & N_STAB) != 0)
 	continue;
 
+      /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
+      if (GET_WORD (abfd, p->e_strx) > obj_aout_external_string_size (abfd))
+	return FALSE;
       name = strings + GET_WORD (abfd, p->e_strx);
+      
       value = GET_WORD (abfd, p->e_value);
       flags = BSF_GLOBAL;
       string = NULL;
@@ -3060,6 +3064,9 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     which this one really is.  */
 	  BFD_ASSERT (p + 1 < pend);
 	  ++p;
+	  /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
+	  if (GET_WORD (abfd, p->e_strx) > obj_aout_external_string_size (abfd))
+	    return FALSE;
 	  string = strings + GET_WORD (abfd, p->e_strx);
 	  section = bfd_ind_section_ptr;
 	  flags |= BSF_INDIRECT;
@@ -3093,6 +3100,9 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    return TRUE;
 	  ++p;
 	  string = name;
+	  /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
+	  if (GET_WORD (abfd, p->e_strx) > obj_aout_external_string_size (abfd))
+	    return FALSE;
 	  name = strings + GET_WORD (abfd, p->e_strx);
 	  section = bfd_und_section_ptr;
 	  flags |= BSF_WARNING;
