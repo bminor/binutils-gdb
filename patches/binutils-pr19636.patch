@@ -1,34 +1,55 @@
-From 1d68377c5b7d5704912bde0acabc2610c2099496 Mon Sep 17 00:00:00 2001
+From 15186c9380e9779e7c6043180f98525d0b8fed7e Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Sun, 14 Feb 2016 06:10:10 -0800
-Subject: [PATCH] Bind symbols to their definitions locally in PIE
+Subject: [PATCH] Bind symbols to their definitions in executable
 
-Symbols are always bound locally to their definitions in PIE, similar to
--shared -Bsymbolic.  We should always create the dynsym section, even if
-it is empty, with dynamic sections.
+Symbols are always bound locally to their definitions in executable.
+There should be no relocations against undefined weak symbols in
+executable.  We should always create the dynsym section, even if it
+is empty, with dynamic sections.
+
+Undefined weak symbols are aren't needed in the dynamic symbol table in
+executable for i386 nor x86-64.  The only exception is on i386, we may
+need undefined weak symbols in the dynamic symbol table in PIE so that
+we can branch to 0 without PLT.
 
 bfd/
 
 	PR ld/19636
-	* elf-bfd.h (SYMBOLIC_BIND): Bind symbols to their definitions
-	locally in PIE.
-	* elf32-i386.c (elf_i386_allocate_dynrelocs): Don't allocate
-	space for dynamic relocations and discard relocations against
-	locally bound undefined weak symbols.
+	* elf32-i386.c (elf_i386_fixup_symbol): New function.
+	(elf_i386_pie_finish_undefweak_symbol): Likewise.
+	(elf_i386_allocate_dynrelocs): Don't allocate space for dynamic
+	relocations and discard relocations against undefined weak symbols
+	in executable.  Don't make undefined weak symbols in executable
+	dynamic.  Keep dynamic non-GOT/non-PLT relocation against
+	undefined weak symbols in PIE.
 	(elf_i386_relocate_section): Don't generate dynamic relocations
-	against locally bound weak undefined symbols.
-	(elf_i386_finish_dynamic_symbol): Don't generate dynamic
-	relocation against locally bound undefined weak symbol.
-	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Don't allocate
-	space for dynamic relocations and discard relocations against
-	locally bound undefined weak symbols.
-	(elf_x86_64_relocate_section): Don't generate dynamic relocations
-	against locally bound weak undefined symbols.
-	(elf_x86_64_finish_dynamic_symbol): Don't generate dynamic
-	relocation against locally bound undefined weak symbol.
-	* elflink.c (bfd_elf_record_link_assignment): Check for shared
-	library, instead of PIC, when make the linker assigned symbol
+	against weak undefined symbols in PIE, except for R_386_PC32.
+	(elf_i386_finish_dynamic_symbol): Keep PLT/GOT entries without
+	dynamic PLT/GOT relocations for undefined weak symbols in PIE.
+	Don't generate dynamic relocation against undefined weak symbol
+	in executable.
+	(elf_i386_finish_dynamic_sections): Call
+	elf_i386_pie_finish_undefweak_symbol on all symbols in PIE.
+	(elf_backend_fixup_symbol): New.
+	* elf64-x86-64.c (elf_x86_64_fixup_symbol): New function.
+	(elf_x86_64_pie_finish_undefweak_symbol): Likewise.
+	(elf_x86_64_allocate_dynrelocs): Don't allocate space for dynamic
+	relocations and discard relocations against undefined weak symbols
+	in executable.  Don't make undefined weak symbols in executable
 	dynamic.
+	(elf_x86_64_relocate_section): Don't generate dynamic relocations
+	against weak undefined symbols in PIE.
+	(elf_x86_64_finish_dynamic_symbol): Keep PLT/GOT entries without
+	dynamic PLT/GOT relocations for undefined weak symbols in PIE.
+	Don't generate dynamic relocation against undefined weak symbol
+	in executable.
+	(elf_x86_64_finish_dynamic_sections): Call
+	elf_x86_64_pie_finish_undefweak_symbol on all symbols in PIE.
+	(elf_backend_fixup_symbol): New.
+	* elflink.c (bfd_elf_record_link_assignment): Check for shared
+	library, instead of PIC, and don't check PDE when make the linker
+	assigned symbol dynamic.
 	(_bfd_elf_link_renumber_dynsyms): Check for shared library,
 	instead of PIC.  Always create the dynsym section, even if it is
 	empty, with dynamic sections.
@@ -43,177 +64,594 @@ ld/
 	* testsuite/ld-elf/pr19636-1b.d: Likewise.
 	* testsuite/ld-elf/pr19636-1c.d: Likewise.
 	* testsuite/ld-elf/pr19636-1d.d: Likewise.
+	* testsuite/ld-elf/pr19636-1e.d: Likewise.
 	* testsuite/ld-elf/pr19636-2.s: Likewise.
 	* testsuite/ld-elf/pr19636-2a.d: Likewise.
 	* testsuite/ld-elf/pr19636-2b.d: Likewise.
 	* testsuite/ld-elf/pr19636-2c.d: Likewise.
-	* testsuite/ld-i386/pr19636.s: Likewise.
-	* testsuite/ld-i386/pr19636a.d: Likewise.
-	* testsuite/ld-i386/pr19636b.d: Likewise.
-	* testsuite/ld-i386/pr19636c.d: Likewise.
+	* testsuite/ld-i386/pr19636-1.s: Likewise.
+	* testsuite/ld-i386/pr19636-1a.d: Likewise.
+	* testsuite/ld-i386/pr19636-1b.d: Likewise.
+	* testsuite/ld-i386/pr19636-1c.d: Likewise.
+	* testsuite/ld-i386/pr19636-1d-nacl.d: Likewise.
+	* testsuite/ld-i386/pr19636-1d.d: Likewise.
+	* testsuite/ld-i386/pr19636-1e.d: Likewise.
+	* testsuite/ld-i386/pr19636-1f.d: Likewise.
+	* testsuite/ld-i386/pr19636-1g.d: Likewise.
+	* testsuite/ld-i386/pr19636-1h.d: Likewise.
+	* testsuite/ld-i386/pr19636-1i.d: Likewise.
+	* testsuite/ld-i386/pr19636-2.s: Likewise.
+	* testsuite/ld-i386/pr19636-2a.d: Likewise.
+	* testsuite/ld-i386/pr19636-2b.d: Likewise.
+	* testsuite/ld-i386/pr19636-2c-nacl.d: Likewise.
+	* testsuite/ld-i386/pr19636-2c.d: Likewise.
+	* testsuite/ld-i386/pr19636-2d-nacl.d: Likewise.
+	* testsuite/ld-i386/pr19636-2d.d: Likewise.
+	* testsuite/ld-i386/pr19636-2e-nacl.d: Likewise.
+	* testsuite/ld-i386/pr19636-2e.d: Likewise.
 	* testsuite/ld-x86-64/pr19636.s: Likewise.
 	* testsuite/ld-x86-64/pr19636a.d: Likewise.
 	* testsuite/ld-x86-64/pr19636b.d: Likewise.
 	* testsuite/ld-x86-64/pr19636c.d: Likewise.
+	* testsuite/ld-x86-64/pr19636d-nacl.d: Likewise.
+	* testsuite/ld-x86-64/pr19636d.d: Likewise.
+	* testsuite/ld-x86-64/pr19636e.d: Likewise.
+	* testsuite/ld-x86-64/pr19636f.d: Likewise.
+	* testsuite/ld-x86-64/pr19636g.d: Likewise.
+	* testsuite/ld-x86-64/pr19636h.d: Likewise.
+	* testsuite/ld-x86-64/pr19636i.d: Likewise.
 	* testsuite/ld-i386/i386.exp: Run PR ld/19636 tests.
 	* testsuite/ld-x86-64/x86-64.exp: Likewise.
 	* testsuite/ld-x86-64/pr13082-3b.d: Updated.
 	* testsuite/ld-x86-64/pr13082-4b.d: Likewise.
 ---
- bfd/elf-bfd.h                       | 13 ++++++++-----
- bfd/elf32-i386.c                    | 27 +++++++++++++++++++--------
- bfd/elf64-x86-64.c                  | 28 +++++++++++++++++++---------
- bfd/elflink.c                       | 12 ++++++------
- ld/testsuite/ld-elf/pr19636-1.s     |  5 +++++
- ld/testsuite/ld-elf/pr19636-1a.d    | 10 ++++++++++
- ld/testsuite/ld-elf/pr19636-1b.d    |  6 ++++++
- ld/testsuite/ld-elf/pr19636-1c.d    |  6 ++++++
- ld/testsuite/ld-elf/pr19636-1d.d    | 14 ++++++++++++++
- ld/testsuite/ld-elf/pr19636-2.s     | 14 ++++++++++++++
- ld/testsuite/ld-elf/pr19636-2a.d    |  8 ++++++++
- ld/testsuite/ld-elf/pr19636-2b.d    | 10 ++++++++++
- ld/testsuite/ld-elf/pr19636-2c.d    | 10 ++++++++++
- ld/testsuite/ld-i386/i386.exp       |  3 +++
- ld/testsuite/ld-i386/pr19636.s      |  6 ++++++
- ld/testsuite/ld-i386/pr19636a.d     |  9 +++++++++
- ld/testsuite/ld-i386/pr19636b.d     |  9 +++++++++
- ld/testsuite/ld-i386/pr19636c.d     |  9 +++++++++
- ld/testsuite/ld-x86-64/pr13082-3b.d |  4 +---
- ld/testsuite/ld-x86-64/pr13082-4b.d |  4 +---
- ld/testsuite/ld-x86-64/pr19636.s    |  6 ++++++
- ld/testsuite/ld-x86-64/pr19636a.d   |  9 +++++++++
- ld/testsuite/ld-x86-64/pr19636b.d   |  9 +++++++++
- ld/testsuite/ld-x86-64/pr19636c.d   |  9 +++++++++
- ld/testsuite/ld-x86-64/x86-64.exp   |  3 +++
- 25 files changed, 209 insertions(+), 34 deletions(-)
+ bfd/elf32-i386.c                       | 233 ++++++++++++++++++++++++---------
+ bfd/elf64-x86-64.c                     | 226 ++++++++++++++++++++++----------
+ bfd/elflink.c                          |  15 +--
+ ld/testsuite/ld-elf/pr19636-1.s        |   5 +
+ ld/testsuite/ld-elf/pr19636-1a.d       |  10 ++
+ ld/testsuite/ld-elf/pr19636-1b.d       |   6 +
+ ld/testsuite/ld-elf/pr19636-1c.d       |   9 ++
+ ld/testsuite/ld-elf/pr19636-1d.d       |  14 ++
+ ld/testsuite/ld-elf/pr19636-1e.d       |  14 ++
+ ld/testsuite/ld-elf/pr19636-2.s        |  14 ++
+ ld/testsuite/ld-elf/pr19636-2a.d       |   8 ++
+ ld/testsuite/ld-elf/pr19636-2b.d       |  10 ++
+ ld/testsuite/ld-elf/pr19636-2c.d       |  10 ++
+ ld/testsuite/ld-i386/i386.exp          |  18 +++
+ ld/testsuite/ld-i386/pr19636-1.s       |   9 ++
+ ld/testsuite/ld-i386/pr19636-1a.d      |  16 +++
+ ld/testsuite/ld-i386/pr19636-1b.d      |  19 +++
+ ld/testsuite/ld-i386/pr19636-1c.d      |   9 ++
+ ld/testsuite/ld-i386/pr19636-1d-nacl.d | 124 ++++++++++++++++++
+ ld/testsuite/ld-i386/pr19636-1d.d      |  26 ++++
+ ld/testsuite/ld-i386/pr19636-1e.d      |  19 +++
+ ld/testsuite/ld-i386/pr19636-1f.d      |  19 +++
+ ld/testsuite/ld-i386/pr19636-1g.d      |  12 ++
+ ld/testsuite/ld-i386/pr19636-1h.d      |  19 +++
+ ld/testsuite/ld-i386/pr19636-1i.d      |   9 ++
+ ld/testsuite/ld-i386/pr19636-2.s       |   9 ++
+ ld/testsuite/ld-i386/pr19636-2a.d      |  19 +++
+ ld/testsuite/ld-i386/pr19636-2b.d      |  22 ++++
+ ld/testsuite/ld-i386/pr19636-2c-nacl.d | 126 ++++++++++++++++++
+ ld/testsuite/ld-i386/pr19636-2c.d      |  28 ++++
+ ld/testsuite/ld-i386/pr19636-2d-nacl.d |  21 +++
+ ld/testsuite/ld-i386/pr19636-2d.d      |  17 +++
+ ld/testsuite/ld-i386/pr19636-2e-nacl.d |  21 +++
+ ld/testsuite/ld-i386/pr19636-2e.d      |  17 +++
+ ld/testsuite/ld-x86-64/pr13082-3b.d    |   4 +-
+ ld/testsuite/ld-x86-64/pr13082-4b.d    |   4 +-
+ ld/testsuite/ld-x86-64/pr19636.s       |   9 ++
+ ld/testsuite/ld-x86-64/pr19636a.d      |  17 +++
+ ld/testsuite/ld-x86-64/pr19636b.d      |  20 +++
+ ld/testsuite/ld-x86-64/pr19636c.d      |   9 ++
+ ld/testsuite/ld-x86-64/pr19636d-nacl.d |  37 ++++++
+ ld/testsuite/ld-x86-64/pr19636d.d      |  25 ++++
+ ld/testsuite/ld-x86-64/pr19636e.d      |  19 +++
+ ld/testsuite/ld-x86-64/pr19636f.d      |  19 +++
+ ld/testsuite/ld-x86-64/pr19636g.d      |  13 ++
+ ld/testsuite/ld-x86-64/pr19636h.d      |  20 +++
+ ld/testsuite/ld-x86-64/pr19636i.d      |   9 ++
+ ld/testsuite/ld-x86-64/x86-64.exp      |  10 ++
+ 48 files changed, 1223 insertions(+), 145 deletions(-)
  create mode 100644 ld/testsuite/ld-elf/pr19636-1.s
  create mode 100644 ld/testsuite/ld-elf/pr19636-1a.d
  create mode 100644 ld/testsuite/ld-elf/pr19636-1b.d
  create mode 100644 ld/testsuite/ld-elf/pr19636-1c.d
  create mode 100644 ld/testsuite/ld-elf/pr19636-1d.d
+ create mode 100644 ld/testsuite/ld-elf/pr19636-1e.d
  create mode 100644 ld/testsuite/ld-elf/pr19636-2.s
  create mode 100644 ld/testsuite/ld-elf/pr19636-2a.d
  create mode 100644 ld/testsuite/ld-elf/pr19636-2b.d
  create mode 100644 ld/testsuite/ld-elf/pr19636-2c.d
- create mode 100644 ld/testsuite/ld-i386/pr19636.s
- create mode 100644 ld/testsuite/ld-i386/pr19636a.d
- create mode 100644 ld/testsuite/ld-i386/pr19636b.d
- create mode 100644 ld/testsuite/ld-i386/pr19636c.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1.s
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1a.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1b.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1c.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1d-nacl.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1d.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1e.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1f.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1g.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1h.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-1i.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-2.s
+ create mode 100644 ld/testsuite/ld-i386/pr19636-2a.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-2b.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-2c-nacl.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-2c.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-2d-nacl.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-2d.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-2e-nacl.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-2e.d
  create mode 100644 ld/testsuite/ld-x86-64/pr19636.s
  create mode 100644 ld/testsuite/ld-x86-64/pr19636a.d
  create mode 100644 ld/testsuite/ld-x86-64/pr19636b.d
  create mode 100644 ld/testsuite/ld-x86-64/pr19636c.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636d-nacl.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636d.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636e.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636f.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636g.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636h.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636i.d
 
-diff --git a/bfd/elf-bfd.h b/bfd/elf-bfd.h
-index ea4d59a..3a2617b 100644
---- a/bfd/elf-bfd.h
-+++ b/bfd/elf-bfd.h
-@@ -2639,11 +2639,14 @@ extern asection _bfd_elf_large_com_section;
-     continue;								\
-   }
- 
--/* Will a symbol be bound to the definition within the shared
--   library, if any.  A unique symbol can never be bound locally.  */
--#define SYMBOLIC_BIND(INFO, H) \
--    (!(H)->unique_global \
--     && ((INFO)->symbolic || ((INFO)->dynamic && !(H)->dynamic)))
-+/* Will a symbol be bound to the definition within the PIC object, if
-+   any.  A unique symbol can never be bound locally.  Symbols are always
-+   bound locally in PIE, similar to -shared -Bsymbolic.  */
-+#define SYMBOLIC_BIND(INFO, H)						\
-+    (!(H)->unique_global						\
-+     && ((INFO)->symbolic						\
-+	 || ((INFO)->dynamic && !(H)->dynamic)				\
-+	 || bfd_link_pie (INFO)))
- 
- #ifdef __cplusplus
- }
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index a8951d8..f74e788 100644
+index a8951d8..36868e3 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
-@@ -2546,7 +2546,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+@@ -2147,6 +2147,24 @@ elf_i386_gc_sweep_hook (bfd *abfd,
+   return TRUE;
+ }
+ 
++/* Remove undefined weak symbol from the dynamic symbol table in
++   executable.  */
++
++static bfd_boolean
++elf_i386_fixup_symbol (struct bfd_link_info *info,
++		       struct elf_link_hash_entry *h)
++{
++  if (h->root.type == bfd_link_hash_undefweak
++      && bfd_link_executable (info)
++      && h->dynindx != -1)
++    {
++      h->dynindx = -1;
++      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
++			      h->dynstr_index);
++    }
++  return TRUE;
++}
++
+ /* Adjust a symbol defined by a dynamic object and referenced by a
+    regular object.  The current definition is in some section of the
+    dynamic object, but we're not including those sections.  We have to
+@@ -2405,7 +2423,9 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+       /* Make sure this symbol is output as a dynamic symbol.
+ 	 Undefined weak syms won't yet be marked as dynamic.  */
+       if (h->dynindx == -1
+-	  && !h->forced_local)
++	  && !h->forced_local
++	  && (h->root.type != bfd_link_hash_undefweak
++	      || !bfd_link_executable (info)))
+ 	{
+ 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+ 	    return FALSE;
+@@ -2462,9 +2482,16 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 		 script.  */
+ 	      htab->elf.sgotplt->size += 4;
+ 
+-	      /* We also need to make an entry in the .rel.plt section.  */
+-	      htab->elf.srelplt->size += sizeof (Elf32_External_Rel);
+-	      htab->elf.srelplt->reloc_count++;
++	      /* There should be no PLT relocation against undefined
++		 weak symbol in executable.  */
++	      if (h->root.type != bfd_link_hash_undefweak
++		  || !bfd_link_executable (info))
++		{
++		  /* We also need to make an entry in the .rel.plt
++		     section.  */
++		  htab->elf.srelplt->size += sizeof (Elf32_External_Rel);
++		  htab->elf.srelplt->reloc_count++;
++		}
+ 	    }
+ 
+ 	  if (get_elf_i386_backend_data (info->output_bfd)->is_vxworks
+@@ -2518,7 +2545,9 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+       /* Make sure this symbol is output as a dynamic symbol.
+ 	 Undefined weak syms won't yet be marked as dynamic.  */
+       if (h->dynindx == -1
+-	  && !h->forced_local)
++	  && !h->forced_local
++	  && (h->root.type != bfd_link_hash_undefweak
++	      || !bfd_link_executable (info)))
+ 	{
+ 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+ 	    return FALSE;
+@@ -2546,7 +2575,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
  	 R_386_TLS_IE resp. R_386_TLS_GOTIE needs one dynamic relocation,
  	 (but if both R_386_TLS_IE_32 and R_386_TLS_IE is present, we
  	 need two), R_386_TLS_GD needs one if local symbol and two if
 -	 global.  */
-+	 global.  No dynamic relocation against locally bound undefined
-+	 weak symbol.  */
++	 global.  No dynamic relocation against undefined weak symbol
++	 in executable.  */
        if (tls_type == GOT_TLS_IE_BOTH)
  	htab->elf.srelgot->size += 2 * sizeof (Elf32_External_Rel);
        else if ((GOT_TLS_GD_P (tls_type) && h->dynindx == -1)
-@@ -2555,7 +2556,9 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+@@ -2555,7 +2585,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
        else if (GOT_TLS_GD_P (tls_type))
  	htab->elf.srelgot->size += 2 * sizeof (Elf32_External_Rel);
        else if (! GOT_TLS_GDESC_P (tls_type)
 -	       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 +	       && ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-+		    && !bfd_link_executable (info)
-+		    && !SYMBOLIC_BIND (info, h))
++		    && !bfd_link_executable (info))
  		   || h->root.type != bfd_link_hash_undefweak)
  	       && (bfd_link_pic (info)
  		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-@@ -2611,11 +2614,12 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+@@ -2611,13 +2642,43 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
  	}
  
        /* Also discard relocs on undefined weak syms with non-default
 -    	 visibility.  */
-+	 visibility or bound locally.  */
++	 visibility or in PIE.  */
        if (eh->dyn_relocs != NULL
  	  && h->root.type == bfd_link_hash_undefweak)
  	{
 -	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+-	    eh->dyn_relocs = NULL;
++	  /* Undefined weak symbol is never bound locally in shared
++	     library.  */
 +	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-+	      || SYMBOLIC_BIND (info, h))
- 	    eh->dyn_relocs = NULL;
++	      || bfd_link_pie (info))
++	    {
++	      if (h->non_got_ref)
++		{
++		  /* Keep dynamic non-GOT/non-PLT relocation so that we
++		     can branch to 0 without PLT.  */
++		  struct elf_dyn_relocs **pp;
  
++		  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
++		    if (p->pc_count == 0)
++		      *pp = p->next;
++		    else
++		      {
++			/* Remove non-R_386_PC32 relocation.  */
++			p->count = p->pc_count;
++			pp = &p->next;
++		      }
++
++		  if (eh->dyn_relocs != NULL)
++		    {
++		      /* Make sure undefined weak symbols are output
++			 as dynamic symbols in PIEs for dynamic non-GOT
++			 non-PLT reloations.  */
++		      if (! bfd_elf_link_record_dynamic_symbol (info, h))
++			return FALSE;
++		    }
++		}
++	      else
++		eh->dyn_relocs = NULL;
++	    }
  	  /* Make sure undefined weak symbols are output as a dynamic
-@@ -4244,11 +4248,14 @@ r_386_got32:
+ 	     symbol in PIEs.  */
+ 	  else if (h->dynindx == -1
+@@ -2645,7 +2706,9 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+ 	  /* Make sure this symbol is output as a dynamic symbol.
+ 	     Undefined weak syms won't yet be marked as dynamic.  */
+ 	  if (h->dynindx == -1
+-	      && !h->forced_local)
++	      && !h->forced_local
++	      && (h->root.type != bfd_link_hash_undefweak
++		  || !bfd_link_executable (info)))
+ 	    {
+ 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
+ 		return FALSE;
+@@ -4244,11 +4307,15 @@ r_386_got32:
  	      || is_vxworks_tls)
  	    break;
  
 -	  /* Copy dynamic function pointer relocations.  */
 +	  /* Copy dynamic function pointer relocations.  Don't generate
-+	     dynamic relocations against locally bound weak undefined
-+	     symbols.  */
++	     dynamic relocations against weak undefined symbols in
++	     PIE, except for R_386_PC32.  */
  	  if ((bfd_link_pic (info)
  	       && (h == NULL
 -		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 -		   || h->root.type != bfd_link_hash_undefweak)
 +		   || ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-+			&& !SYMBOLIC_BIND (info, h))
++			&& (!bfd_link_pie (info)
++			    || r_type == R_386_PC32))
 +		       || h->root.type != bfd_link_hash_undefweak))
  	       && ((r_type != R_386_PC32 && r_type != R_386_SIZE32)
  		   || !SYMBOL_CALLS_LOCAL (info, h)))
  	      || (ELIMINATE_COPY_RELOCS
-@@ -5244,9 +5251,13 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5009,6 +5076,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+   unsigned plt_entry_size;
+   const struct elf_i386_backend_data *abed;
+   struct elf_i386_link_hash_entry *eh;
++  bfd_boolean undefweak_in_pie;
+ 
+   htab = elf_i386_hash_table (info);
+   if (htab == NULL)
+@@ -5017,6 +5085,12 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+   abed = get_elf_i386_backend_data (output_bfd);
+   plt_entry_size = GET_PLT_ENTRY_SIZE (output_bfd);
+ 
++  /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
++     undefined weak symbols in PIE so that they are resolved to 0 at
++     run-time.  */
++  undefweak_in_pie = (h->root.type == bfd_link_hash_undefweak
++		      && bfd_link_pie (info));
++
+   eh = (struct elf_i386_link_hash_entry *) h;
+ 
+   if (h->plt.offset != (bfd_vma) -1)
+@@ -5046,6 +5120,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 	 it up.  */
+ 
+       if ((h->dynindx == -1
++	   && !undefweak_in_pie
+ 	   && !((h->forced_local || bfd_link_executable (info))
+ 		&& h->def_regular
+ 		&& h->type == STT_GNU_IFUNC))
+@@ -5134,54 +5209,61 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+                       + abed->plt->plt_got_offset);
+ 	}
+ 
+-      /* Fill in the entry in the global offset table.  */
+-      bfd_put_32 (output_bfd,
+-		  (plt->output_section->vma
+-		   + plt->output_offset
+-		   + h->plt.offset
+-		   + abed->plt->plt_lazy_offset),
+-		  gotplt->contents + got_offset);
+-
+-      /* Fill in the entry in the .rel.plt section.  */
+-      rel.r_offset = (gotplt->output_section->vma
+-		      + gotplt->output_offset
+-		      + got_offset);
+-      if (h->dynindx == -1
+-	  || ((bfd_link_executable (info)
+-	       || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+-	      && h->def_regular
+-	       && h->type == STT_GNU_IFUNC))
++      /* Fill in the entry in the global offset table.  Leave the entry
++	 as zero for undefined weak symbol in PIE.  No PLT relocation
++	 against undefined weak symbol in PIE.  */
++      if (!undefweak_in_pie)
+ 	{
+-	  /* If an STT_GNU_IFUNC symbol is locally defined, generate
+-	     R_386_IRELATIVE instead of R_386_JUMP_SLOT.  Store addend
+-	     in the .got.plt section.  */
+ 	  bfd_put_32 (output_bfd,
+-		      (h->root.u.def.value
+-		       + h->root.u.def.section->output_section->vma
+-		       + h->root.u.def.section->output_offset),
++		      (plt->output_section->vma
++		       + plt->output_offset
++		       + h->plt.offset
++		       + abed->plt->plt_lazy_offset),
+ 		      gotplt->contents + got_offset);
+-	  rel.r_info = ELF32_R_INFO (0, R_386_IRELATIVE);
+-	  /* R_386_IRELATIVE comes last.  */
+-	  plt_index = htab->next_irelative_index--;
+-	}
+-      else
+-	{
+-	  rel.r_info = ELF32_R_INFO (h->dynindx, R_386_JUMP_SLOT);
+-	  plt_index = htab->next_jump_slot_index++;
+-	}
+-      loc = relplt->contents + plt_index * sizeof (Elf32_External_Rel);
+-      bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
+ 
+-      /* Don't fill PLT entry for static executables.  */
+-      if (plt == htab->elf.splt)
+-	{
+-	  bfd_put_32 (output_bfd, plt_index * sizeof (Elf32_External_Rel),
+-		      plt->contents + h->plt.offset
+-                      + abed->plt->plt_reloc_offset);
+-	  bfd_put_32 (output_bfd, - (h->plt.offset
+-                                     + abed->plt->plt_plt_offset + 4),
+-		      plt->contents + h->plt.offset
+-                      + abed->plt->plt_plt_offset);
++	  /* Fill in the entry in the .rel.plt section.  */
++	  rel.r_offset = (gotplt->output_section->vma
++			  + gotplt->output_offset
++			  + got_offset);
++	  if (h->dynindx == -1
++	      || ((bfd_link_executable (info)
++		   || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
++		  && h->def_regular
++		  && h->type == STT_GNU_IFUNC))
++	    {
++	      /* If an STT_GNU_IFUNC symbol is locally defined, generate
++		 R_386_IRELATIVE instead of R_386_JUMP_SLOT.  Store addend
++		 in the .got.plt section.  */
++	      bfd_put_32 (output_bfd,
++			  (h->root.u.def.value
++			   + h->root.u.def.section->output_section->vma
++			   + h->root.u.def.section->output_offset),
++			  gotplt->contents + got_offset);
++	      rel.r_info = ELF32_R_INFO (0, R_386_IRELATIVE);
++	      /* R_386_IRELATIVE comes last.  */
++	      plt_index = htab->next_irelative_index--;
++	    }
++	  else
++	    {
++	      rel.r_info = ELF32_R_INFO (h->dynindx, R_386_JUMP_SLOT);
++	      plt_index = htab->next_jump_slot_index++;
++	    }
++
++	  loc = relplt->contents + plt_index * sizeof (Elf32_External_Rel);
++	  bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
++
++	  /* Don't fill PLT entry for static executables.  */
++	  if (plt == htab->elf.splt)
++	    {
++	      bfd_put_32 (output_bfd,
++			  plt_index * sizeof (Elf32_External_Rel),
++			  plt->contents + h->plt.offset
++			  + abed->plt->plt_reloc_offset);
++	      bfd_put_32 (output_bfd, - (h->plt.offset
++					 + abed->plt->plt_plt_offset + 4),
++			  plt->contents + h->plt.offset
++			  + abed->plt->plt_plt_offset);
++	    }
+ 	}
+     }
+   else if (eh->plt_got.offset != (bfd_vma) -1)
+@@ -5227,7 +5309,8 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+ 		  plt->contents + plt_offset + plt_got_offset);
+     }
+ 
+-  if (!h->def_regular
++  if (!undefweak_in_pie
++      && !h->def_regular
+       && (h->plt.offset != (bfd_vma) -1
+ 	  || eh->plt_got.offset != (bfd_vma) -1))
+     {
+@@ -5244,9 +5327,13 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
  	sym->st_value = 0;
      }
  
-+  /* Don't generate dynamic relocation against locally bound undefined
-+     weak symbol.  */
++  /* Don't generate dynamic GOT relocation against undefined weak
++     symbol in executable.  */
    if (h->got.offset != (bfd_vma) -1
        && ! GOT_TLS_GD_ANY_P (elf_i386_hash_entry(h)->tls_type)
 -      && (elf_i386_hash_entry(h)->tls_type & GOT_TLS_IE) == 0)
 +      && (elf_i386_hash_entry(h)->tls_type & GOT_TLS_IE) == 0
-+      && ((!bfd_link_executable (info) && !SYMBOLIC_BIND (info, h))
++      && (!bfd_link_executable (info)
 +	  || h->root.type != bfd_link_hash_undefweak))
      {
        Elf_Internal_Rela rel;
  
+@@ -5346,6 +5433,25 @@ elf_i386_finish_local_dynamic_symbol (void **slot, void *inf)
+ 					 h, NULL);
+ }
+ 
++/* Finish up undefined weak symbol handling in PIE.  Fill its PLT entry
++   here since undefined weak symbol may not be dynamic and may not be
++   called for elf_i386_finish_dynamic_symbol.  */
++
++static bfd_boolean
++elf_i386_pie_finish_undefweak_symbol (struct bfd_hash_entry *bh,
++				      void *inf)
++{
++  struct elf_link_hash_entry *h = (struct elf_link_hash_entry *) bh;
++  struct bfd_link_info *info = (struct bfd_link_info *) inf;
++
++  if (h->root.type != bfd_link_hash_undefweak
++      || h->dynindx != -1)
++    return TRUE;
++
++  return elf_i386_finish_dynamic_symbol (info->output_bfd,
++					     info, h, NULL);
++}
++
+ /* Used to decide how to sort relocs in an optimal manner for the
+    dynamic linker, before writing them out.  */
+ 
+@@ -5624,6 +5730,12 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
+ 		 elf_i386_finish_local_dynamic_symbol,
+ 		 info);
+ 
++  /* Fill PLT entries for undefined weak symbols in PIE.  */
++  if (bfd_link_pie (info))
++    bfd_hash_traverse (&info->hash->table,
++		       elf_i386_pie_finish_undefweak_symbol,
++		       info);
++
+   return TRUE;
+ }
+ 
+@@ -5801,6 +5913,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
+   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
+ #define elf_backend_hash_symbol		      elf_i386_hash_symbol
+ #define elf_backend_add_symbol_hook           elf_i386_add_symbol_hook
++#define elf_backend_fixup_symbol	      elf_i386_fixup_symbol
+ 
+ #include "elf32-target.h"
+ 
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 8ea478d..f95678d 100644
+index 8ea478d..420aa03 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
-@@ -2777,15 +2777,18 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -2363,6 +2363,24 @@ pointer:
+   return TRUE;
+ }
+ 
++/* Remove undefined weak symbol from the dynamic symbol table in
++   executable.  */
++
++static bfd_boolean
++elf_x86_64_fixup_symbol (struct bfd_link_info *info,
++		       struct elf_link_hash_entry *h)
++{
++  if (h->root.type == bfd_link_hash_undefweak
++      && bfd_link_executable (info)
++      && h->dynindx != -1)
++    {
++      h->dynindx = -1;
++      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
++			      h->dynstr_index);
++    }
++  return TRUE;
++}
++
+ /* Adjust a symbol defined by a dynamic object and referenced by a
+    regular object.  The current definition is in some section of the
+    dynamic object, but we're not including those sections.  We have to
+@@ -2641,7 +2659,9 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+       /* Make sure this symbol is output as a dynamic symbol.
+ 	 Undefined weak syms won't yet be marked as dynamic.  */
+       if (h->dynindx == -1
+-	  && !h->forced_local)
++	  && !h->forced_local
++	  && (h->root.type != bfd_link_hash_undefweak
++	      || !bfd_link_executable (info)))
+ 	{
+ 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+ 	    return FALSE;
+@@ -2715,10 +2735,16 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+ 		 script.  */
+ 	      htab->elf.sgotplt->size += GOT_ENTRY_SIZE;
+ 
+-	      /* We also need to make an entry in the .rela.plt
+-		 section.  */
+-	      htab->elf.srelplt->size += bed->s->sizeof_rela;
+-	      htab->elf.srelplt->reloc_count++;
++	      /* There should be no PLT relocation against undefined
++		 weak symbol in executable.  */
++	      if (h->root.type != bfd_link_hash_undefweak
++		  || !bfd_link_executable (info))
++		{
++		  /* We also need to make an entry in the .rela.plt
++		     section.  */
++		  htab->elf.srelplt->size += bed->s->sizeof_rela;
++		  htab->elf.srelplt->reloc_count++;
++		}
+ 	    }
+ 	}
+       else
+@@ -2753,7 +2779,9 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+       /* Make sure this symbol is output as a dynamic symbol.
+ 	 Undefined weak syms won't yet be marked as dynamic.  */
+       if (h->dynindx == -1
+-	  && !h->forced_local)
++	  && !h->forced_local
++	  && (h->root.type != bfd_link_hash_undefweak
++	      || !bfd_link_executable (info)))
+ 	{
+ 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+ 	    return FALSE;
+@@ -2777,15 +2805,17 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  	}
        dyn = htab->elf.dynamic_sections_created;
        /* R_X86_64_TLSGD needs one dynamic relocation if local symbol
 -	 and two if global.
 -	 R_X86_64_GOTTPOFF needs one dynamic relocation.  */
 +	 and two if global.  R_X86_64_GOTTPOFF needs one dynamic
-+	 relocation.  No dynamic relocation against locally bound
-+	 undefined weak symbol.  */
++	 relocation.  No dynamic relocation against undefined weak
++	 symbol in executable.  */
        if ((GOT_TLS_GD_P (tls_type) && h->dynindx == -1)
  	  || tls_type == GOT_TLS_IE)
  	htab->elf.srelgot->size += bed->s->sizeof_rela;
@@ -222,78 +660,324 @@ index 8ea478d..f95678d 100644
        else if (! GOT_TLS_GDESC_P (tls_type)
 -	       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 +	       && ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-+		    && !bfd_link_executable (info)
-+		    && !SYMBOLIC_BIND (info, h))
++		    && !bfd_link_executable (info))
  		   || h->root.type != bfd_link_hash_undefweak)
  	       && (bfd_link_pic (info)
  		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-@@ -2832,12 +2835,13 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+@@ -2832,12 +2862,15 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
  	}
  
        /* Also discard relocs on undefined weak syms with non-default
 -	 visibility.  */
-+	 visibility or bound locally.  */
++	 visibility or in PIE.  */
        if (eh->dyn_relocs != NULL)
  	{
  	  if (h->root.type == bfd_link_hash_undefweak)
  	    {
 -	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
++	      /* Undefined weak symbol is never bound locally in shared
++		 library.  */
 +	      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-+		  || SYMBOLIC_BIND (info, h))
++		  || bfd_link_pie (info))
  		eh->dyn_relocs = NULL;
  
  	      /* Make sure undefined weak symbols are output as a dynamic
-@@ -4585,7 +4589,8 @@ direct:
+@@ -2884,6 +2917,8 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+ 	     Undefined weak syms won't yet be marked as dynamic.  */
+ 	  if (h->dynindx == -1
+ 	      && ! h->forced_local
++	      && (h->root.type != bfd_link_hash_undefweak
++		  || !bfd_link_executable (info))
+ 	      && ! bfd_elf_link_record_dynamic_symbol (info, h))
+ 	    return FALSE;
+ 
+@@ -4508,7 +4543,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+ 	      && (input_section->flags & SEC_ALLOC) != 0
+ 	      && (input_section->flags & SEC_READONLY) != 0
+ 	      && h != NULL
+-	      && !(bfd_link_executable (info)
++	      && !(bfd_link_pie (info)
+ 		   && h->root.type == bfd_link_hash_undefined))
+ 	    {
+ 	      bfd_boolean fail = FALSE;
+@@ -4523,7 +4558,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
+ 		     defined locally or for a branch.  */
+ 		  fail = !h->def_regular && !branch;
+ 		}
+-	      else if (!(bfd_link_executable (info)
++	      else if (!(bfd_link_pie (info)
+ 			 && (h->needs_copy || eh->needs_copy)))
+ 		{
+ 		  /* Symbol doesn't need copy reloc and isn't referenced
+@@ -4585,17 +4620,19 @@ direct:
  	   /* Don't copy a pc-relative relocation into the output file
  	      if the symbol needs copy reloc or the symbol is undefined
  	      when building executable.  Copy dynamic function pointer
 -	      relocations.  */
 +	      relocations.  Don't generate dynamic relocations against
-+	      locally bound weak undefined symbols.  */
++	      weak undefined symbols in PIE.  */
  	  if ((bfd_link_pic (info)
- 	       && !(bfd_link_executable (info)
+-	       && !(bfd_link_executable (info)
++	       && !(bfd_link_pie (info)
  		    && h != NULL
-@@ -4594,8 +4599,9 @@ direct:
+ 		    && (h->needs_copy
+ 			|| eh->needs_copy
  			|| h->root.type == bfd_link_hash_undefined)
  		    && IS_X86_64_PCREL_TYPE (r_type))
  	       && (h == NULL
 -		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 -		   || h->root.type != bfd_link_hash_undefweak)
 +		   || ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-+			&& !SYMBOLIC_BIND (info, h))
++			&& !bfd_link_pie (info))
 +		       || h->root.type != bfd_link_hash_undefweak))
  	       && ((! IS_X86_64_PCREL_TYPE (r_type)
  		      && r_type != R_X86_64_SIZE32
  		      && r_type != R_X86_64_SIZE64)
-@@ -5617,9 +5623,13 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+@@ -5336,12 +5373,13 @@ static bfd_boolean
+ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+ 				  struct bfd_link_info *info,
+ 				  struct elf_link_hash_entry *h,
+-				  Elf_Internal_Sym *sym ATTRIBUTE_UNUSED)
++				  Elf_Internal_Sym *sym)
+ {
+   struct elf_x86_64_link_hash_table *htab;
+   const struct elf_x86_64_backend_data *abed;
+   bfd_boolean use_plt_bnd;
+   struct elf_x86_64_link_hash_entry *eh;
++  bfd_boolean undefweak_in_pie;
+ 
+   htab = elf_x86_64_hash_table (info);
+   if (htab == NULL)
+@@ -5354,6 +5392,12 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+ 	  ? &elf_x86_64_bnd_arch_bed
+ 	  : get_elf_x86_64_backend_data (output_bfd));
+ 
++  /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
++     undefined weak symbols in PIE so that they are resolved to 0 at
++     run-time.  */
++  undefweak_in_pie = (h->root.type == bfd_link_hash_undefweak
++		      && bfd_link_pie (info));
++
+   eh = (struct elf_x86_64_link_hash_entry *) h;
+ 
+   if (h->plt.offset != (bfd_vma) -1)
+@@ -5385,6 +5429,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+       /* This symbol has an entry in the procedure linkage table.  Set
+ 	 it up.	 */
+       if ((h->dynindx == -1
++	   && !undefweak_in_pie
+ 	   && !((h->forced_local || bfd_link_executable (info))
+ 		&& h->def_regular
+ 		&& h->type == STT_GNU_IFUNC))
+@@ -5485,60 +5530,67 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+ 		  resolved_plt->contents + plt_offset + plt_got_offset);
+ 
+       /* Fill in the entry in the global offset table, initially this
+-	 points to the second part of the PLT entry.  */
+-      bfd_put_64 (output_bfd, (plt->output_section->vma
+-			       + plt->output_offset
+-			       + h->plt.offset + abed->plt_lazy_offset),
+-		  gotplt->contents + got_offset);
+-
+-      /* Fill in the entry in the .rela.plt section.  */
+-      rela.r_offset = (gotplt->output_section->vma
+-		       + gotplt->output_offset
+-		       + got_offset);
+-      if (h->dynindx == -1
+-	  || ((bfd_link_executable (info)
+-	       || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+-	      && h->def_regular
+-	      && h->type == STT_GNU_IFUNC))
++	 points to the second part of the PLT entry.  Leave the entry
++	 as zero for undefined weak symbol in PIE.  No PLT relocation
++	 against undefined weak symbol in PIE.  */
++      if (!undefweak_in_pie)
+ 	{
+-	  /* If an STT_GNU_IFUNC symbol is locally defined, generate
+-	     R_X86_64_IRELATIVE instead of R_X86_64_JUMP_SLOT.  */
+-	  rela.r_info = htab->r_info (0, R_X86_64_IRELATIVE);
+-	  rela.r_addend = (h->root.u.def.value
+-			   + h->root.u.def.section->output_section->vma
+-			   + h->root.u.def.section->output_offset);
+-	  /* R_X86_64_IRELATIVE comes last.  */
+-	  plt_index = htab->next_irelative_index--;
+-	}
+-      else
+-	{
+-	  rela.r_info = htab->r_info (h->dynindx, R_X86_64_JUMP_SLOT);
+-	  rela.r_addend = 0;
+-	  plt_index = htab->next_jump_slot_index++;
+-	}
++	  bfd_put_64 (output_bfd, (plt->output_section->vma
++				   + plt->output_offset
++				   + h->plt.offset
++				   + abed->plt_lazy_offset),
++		      gotplt->contents + got_offset);
++
++	  /* Fill in the entry in the .rela.plt section.  */
++	  rela.r_offset = (gotplt->output_section->vma
++			   + gotplt->output_offset
++			   + got_offset);
++	  if (h->dynindx == -1
++	      || ((bfd_link_executable (info)
++		   || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
++		  && h->def_regular
++		  && h->type == STT_GNU_IFUNC))
++	    {
++	      /* If an STT_GNU_IFUNC symbol is locally defined, generate
++		 R_X86_64_IRELATIVE instead of R_X86_64_JUMP_SLOT.  */
++	      rela.r_info = htab->r_info (0, R_X86_64_IRELATIVE);
++	      rela.r_addend = (h->root.u.def.value
++			       + h->root.u.def.section->output_section->vma
++			       + h->root.u.def.section->output_offset);
++	      /* R_X86_64_IRELATIVE comes last.  */
++	      plt_index = htab->next_irelative_index--;
++	    }
++	  else
++	    {
++	      rela.r_info = htab->r_info (h->dynindx, R_X86_64_JUMP_SLOT);
++	      rela.r_addend = 0;
++	      plt_index = htab->next_jump_slot_index++;
++	    }
+ 
+-      /* Don't fill PLT entry for static executables.  */
+-      if (plt == htab->elf.splt)
+-	{
+-	  bfd_vma plt0_offset = h->plt.offset + plt_plt_insn_end;
+-
+-	  /* Put relocation index.  */
+-	  bfd_put_32 (output_bfd, plt_index,
+-		      plt->contents + h->plt.offset + abed->plt_reloc_offset);
+-
+-	  /* Put offset for jmp .PLT0 and check for overflow.  We don't
+-	     check relocation index for overflow since branch displacement
+-	     will overflow first.  */
+-	  if (plt0_offset > 0x80000000)
+-	    info->callbacks->einfo (_("%F%B: branch displacement overflow in PLT entry for `%s'\n"),
+-				    output_bfd, h->root.root.string);
+-	  bfd_put_32 (output_bfd, - plt0_offset,
+-		      plt->contents + h->plt.offset + plt_plt_offset);
+-	}
++	  /* Don't fill PLT entry for static executables.  */
++	  if (plt == htab->elf.splt)
++	    {
++	      bfd_vma plt0_offset = h->plt.offset + plt_plt_insn_end;
++
++	      /* Put relocation index.  */
++	      bfd_put_32 (output_bfd, plt_index,
++			  (plt->contents + h->plt.offset
++			   + abed->plt_reloc_offset));
++
++	      /* Put offset for jmp .PLT0 and check for overflow.  We don't
++		 check relocation index for overflow since branch displacement
++		 will overflow first.  */
++	      if (plt0_offset > 0x80000000)
++		info->callbacks->einfo (_("%F%B: branch displacement overflow in PLT entry for `%s'\n"),
++					output_bfd, h->root.root.string);
++	      bfd_put_32 (output_bfd, - plt0_offset,
++			  plt->contents + h->plt.offset + plt_plt_offset);
++	    }
+ 
+-      bed = get_elf_backend_data (output_bfd);
+-      loc = relplt->contents + plt_index * bed->s->sizeof_rela;
+-      bed->s->swap_reloca_out (output_bfd, &rela, loc);
++	  bed = get_elf_backend_data (output_bfd);
++	  loc = relplt->contents + plt_index * bed->s->sizeof_rela;
++	  bed->s->swap_reloca_out (output_bfd, &rela, loc);
++	}
+     }
+   else if (eh->plt_got.offset != (bfd_vma) -1)
+     {
+@@ -5600,7 +5652,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
+ 		  plt->contents + plt_offset + plt_got_offset);
+     }
+ 
+-  if (!h->def_regular
++  if (!undefweak_in_pie
++      && !h->def_regular
+       && (h->plt.offset != (bfd_vma) -1
+ 	  || eh->plt_got.offset != (bfd_vma) -1))
+     {
+@@ -5617,9 +5670,13 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
  	sym->st_value = 0;
      }
  
-+  /* Don't generate dynamic relocation against locally bound undefined
-+     weak symbol.  */
++  /* Don't generate dynamic GOT relocation against undefined weak
++     symbol in executable.  */
    if (h->got.offset != (bfd_vma) -1
        && ! GOT_TLS_GD_ANY_P (elf_x86_64_hash_entry (h)->tls_type)
 -      && elf_x86_64_hash_entry (h)->tls_type != GOT_TLS_IE)
 +      && elf_x86_64_hash_entry (h)->tls_type != GOT_TLS_IE
-+      && ((!bfd_link_executable (info) && !SYMBOLIC_BIND (info, h))
++      && (!bfd_link_executable (info)
 +	  || h->root.type != bfd_link_hash_undefweak))
      {
        Elf_Internal_Rela rela;
  
+@@ -5725,6 +5782,25 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
+ 					     info, h, NULL);
+ }
+ 
++/* Finish up undefined weak symbol handling in PIE.  Fill its PLT entry
++   here since undefined weak symbol may not be dynamic and may not be
++   called for elf_x86_64_finish_dynamic_symbol.  */
++
++static bfd_boolean
++elf_x86_64_pie_finish_undefweak_symbol (struct bfd_hash_entry *bh,
++					void *inf)
++{
++  struct elf_link_hash_entry *h = (struct elf_link_hash_entry *) bh;
++  struct bfd_link_info *info = (struct bfd_link_info *) inf;
++
++  if (h->root.type != bfd_link_hash_undefweak
++      || h->dynindx != -1)
++    return TRUE;
++
++  return elf_x86_64_finish_dynamic_symbol (info->output_bfd,
++					     info, h, NULL);
++}
++
+ /* Used to decide how to sort relocs in an optimal manner for the
+    dynamic linker, before writing them out.  */
+ 
+@@ -5998,6 +6074,12 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
+ 		 elf_x86_64_finish_local_dynamic_symbol,
+ 		 info);
+ 
++  /* Fill PLT entries for undefined weak symbols in PIE.  */
++  if (bfd_link_pie (info))
++    bfd_hash_traverse (&info->hash->table,
++		       elf_x86_64_pie_finish_undefweak_symbol,
++		       info);
++
+   return TRUE;
+ }
+ 
+@@ -6409,6 +6491,8 @@ static const struct bfd_elf_special_section
+   elf_x86_64_hash_symbol
+ #define elf_backend_omit_section_dynsym \
+   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, asection *)) bfd_true)
++#define elf_backend_fixup_symbol \
++  elf_x86_64_fixup_symbol
+ 
+ #include "elf64-target.h"
+ 
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index ac03ce5..2e790f9 100644
+index c7672ed..d9abb8e 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
-@@ -632,7 +632,7 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
+@@ -632,9 +632,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
  
    if ((h->def_dynamic
         || h->ref_dynamic
 -       || bfd_link_pic (info)
+-       || (bfd_link_pde (info)
+-	   && elf_hash_table (info)->is_relocatable_executable))
 +       || bfd_link_dll (info)
-        || (bfd_link_pde (info)
- 	   && elf_hash_table (info)->is_relocatable_executable))
++       || elf_hash_table (info)->is_relocatable_executable)
        && h->dynindx == -1)
-@@ -844,7 +844,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
+     {
+       if (! bfd_elf_link_record_dynamic_symbol (info, h))
+@@ -844,7 +843,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
  {
    unsigned long dynsymcount = 0;
  
@@ -302,7 +986,7 @@ index ac03ce5..2e790f9 100644
        || elf_hash_table (info)->is_relocatable_executable)
      {
        const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
-@@ -875,9 +875,9 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
+@@ -875,9 +874,9 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
  			  &dynsymcount);
  
    /* There is an unused NULL entry at the head of the table which
@@ -315,7 +999,7 @@ index ac03ce5..2e790f9 100644
      ++dynsymcount;
  
    elf_hash_table (info)->dynsymcount = dynsymcount;
-@@ -11484,7 +11484,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
+@@ -11487,7 +11486,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
        long last_local = 0;
  
        /* Write out the section symbols for the output sections.  */
@@ -365,16 +1049,19 @@ index 0000000..dbea06c
 +There are no relocations in this file.
 diff --git a/ld/testsuite/ld-elf/pr19636-1c.d b/ld/testsuite/ld-elf/pr19636-1c.d
 new file mode 100644
-index 0000000..669740f
+index 0000000..2d108ae
 --- /dev/null
 +++ b/ld/testsuite/ld-elf/pr19636-1c.d
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,9 @@
 +#source: pr19636-1.s
-+#ld: -shared -Bsymbolic
-+#readelf : -r --wide
++#ld: -pie -E
++#readelf : --dyn-syms --wide
 +#target: x86_64-* i?86-*
 +
-+There are no relocations in this file.
++#failif
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
 diff --git a/ld/testsuite/ld-elf/pr19636-1d.d b/ld/testsuite/ld-elf/pr19636-1d.d
 new file mode 100644
 index 0000000..f32add6
@@ -383,6 +1070,26 @@ index 0000000..f32add6
 @@ -0,0 +1,14 @@
 +#source: pr19636-1.s
 +#ld: -shared
++#readelf : -r --wide --dyn-syms
++#target: *-*-linux* *-*-gnu* *-*-solaris*
++
++Relocation section '\.rela?\..*' at offset 0x[0-9a-f]+ contains [0-9]+ entries:
++#...
++[0-9a-f]+[ \t]+[0-9a-f]+[ \t]+R_.*[ \t]+[0-9a-f]+[ \t]+func.*
++#...
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-elf/pr19636-1e.d b/ld/testsuite/ld-elf/pr19636-1e.d
+new file mode 100644
+index 0000000..bc92aaa
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr19636-1e.d
+@@ -0,0 +1,14 @@
++#source: pr19636-1.s
++#ld: -shared -Bsymbolic
 +#readelf : -r --wide --dyn-syms
 +#target: *-*-linux* *-*-gnu* *-*-solaris*
 +
@@ -462,76 +1169,715 @@ index 0000000..433d60c
 + +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
 +#pass
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
-index 1a79694..9934de5 100644
+index 1a79694..c760766 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
-@@ -320,6 +320,9 @@ run_dump_test "load5b"
+@@ -320,6 +320,24 @@ run_dump_test "load5b"
  run_dump_test "load6"
  run_dump_test "pr19175"
  run_dump_test "pr19615"
-+run_dump_test "pr19636a"
-+run_dump_test "pr19636b"
-+run_dump_test "pr19636c"
++run_dump_test "pr19636-1a"
++run_dump_test "pr19636-1b"
++run_dump_test "pr19636-1c"
++run_dump_test "pr19636-1d"
++run_dump_test "pr19636-1d-nacl"
++run_dump_test "pr19636-1e"
++run_dump_test "pr19636-1f"
++run_dump_test "pr19636-1g"
++run_dump_test "pr19636-1h"
++run_dump_test "pr19636-1i"
++run_dump_test "pr19636-2a"
++run_dump_test "pr19636-2b"
++run_dump_test "pr19636-2c"
++run_dump_test "pr19636-2c-nacl"
++run_dump_test "pr19636-2d"
++run_dump_test "pr19636-2d-nacl"
++run_dump_test "pr19636-2e"
++run_dump_test "pr19636-2e-nacl"
  
  if { !([istarget "i?86-*-linux*"]
         || [istarget "i?86-*-gnu*"]
-diff --git a/ld/testsuite/ld-i386/pr19636.s b/ld/testsuite/ld-i386/pr19636.s
+diff --git a/ld/testsuite/ld-i386/pr19636-1.s b/ld/testsuite/ld-i386/pr19636-1.s
 new file mode 100644
-index 0000000..c7fbf77
+index 0000000..b2bc4df
 --- /dev/null
-+++ b/ld/testsuite/ld-i386/pr19636.s
-@@ -0,0 +1,6 @@
++++ b/ld/testsuite/ld-i386/pr19636-1.s
+@@ -0,0 +1,9 @@
++	.text
++	.weak func1
++	.weak func2
++	.weak func3
++	.globl _start
++_start:
++	cmp func1@GOT(%eax), %eax
++	jmp *func2@GOT(%eax)
++	call func3@PLT
+diff --git a/ld/testsuite/ld-i386/pr19636-1a.d b/ld/testsuite/ld-i386/pr19636-1a.d
+new file mode 100644
+index 0000000..ef17c89
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1a.d
+@@ -0,0 +1,16 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -pie -m elf_i386
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
++
++There are no relocations in this file.
++
++Symbol table '\.dynsym' contains 1 entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
++
++Hex dump of section '.got':
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .\.+
+diff --git a/ld/testsuite/ld-i386/pr19636-1b.d b/ld/testsuite/ld-i386/pr19636-1b.d
+new file mode 100644
+index 0000000..bbf9442
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1b.d
+@@ -0,0 +1,19 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -pie -E -m elf_i386
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
++
++There are no relocations in this file.
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +_start
++#...
++
++Hex dump of section '.got':
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .\.+
+diff --git a/ld/testsuite/ld-i386/pr19636-1c.d b/ld/testsuite/ld-i386/pr19636-1c.d
+new file mode 100644
+index 0000000..a23392d
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1c.d
+@@ -0,0 +1,9 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -pie -E -m elf_i386
++#readelf : --wide --dyn-syms
++
++#failif
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
++#...
+diff --git a/ld/testsuite/ld-i386/pr19636-1d-nacl.d b/ld/testsuite/ld-i386/pr19636-1d-nacl.d
+new file mode 100644
+index 0000000..173cd28
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1d-nacl.d
+@@ -0,0 +1,124 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -pie -m elf_i386
++#objdump: -dw
++#target: i?86-*-nacl* x86_64-*-nacl*
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+ <.plt>:
++[ 	]*[a-f0-9]+:	ff 73 04             	pushl  0x4\(%ebx\)
++[ 	]*[a-f0-9]+:	8b 4b 08             	mov    0x8\(%ebx\),%ecx
++[ 	]*[a-f0-9]+:	83 e1 e0             	and    \$0xffffffe0,%ecx
++[ 	]*[a-f0-9]+:	ff e1                	jmp    \*%ecx
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	8b 8b 0c 00 00 00    	mov    0xc\(%ebx\),%ecx
++[ 	]*[a-f0-9]+:	83 e1 e0             	and    \$0xffffffe0,%ecx
++[ 	]*[a-f0-9]+:	ff e1                	jmp    \*%ecx
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmp    6a <_start-0x16>
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+80 <_start>:
++[ 	]*[a-f0-9]+:	3b 80 f8 ff ff ff    	cmp    -0x8\(%eax\),%eax
++[ 	]*[a-f0-9]+:	ff a0 fc ff ff ff    	jmp    \*-0x4\(%eax\)
++[ 	]*[a-f0-9]+:	e8 af ff ff ff       	call   40 <_start-0x40>
+diff --git a/ld/testsuite/ld-i386/pr19636-1d.d b/ld/testsuite/ld-i386/pr19636-1d.d
+new file mode 100644
+index 0000000..5430991
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1d.d
+@@ -0,0 +1,26 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -pie -m elf_i386
++#objdump: -dw
++#notarget: i?86-*-nacl* x86_64-*-nacl*
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+110 <.plt>:
++[ 	]*[a-f0-9]+:	ff b3 04 00 00 00    	pushl  0x4\(%ebx\)
++[ 	]*[a-f0-9]+:	ff a3 08 00 00 00    	jmp    \*0x8\(%ebx\)
++[ 	]*[a-f0-9]+:	00 00                	add    %al,\(%eax\)
++[ 	]*[a-f0-9]+:	00 00                	add    %al,\(%eax\)
++[ 	]*[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
++[ 	]*[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmp    [a-f0-9]+ <.*>
++
++Disassembly of section .text:
++
++0+130 <_start>:
++[ 	]*[a-f0-9]+:	3b 80 f8 ff ff ff    	cmp    -0x8\(%eax\),%eax
++[ 	]*[a-f0-9]+:	ff a0 fc ff ff ff    	jmp    \*-0x4\(%eax\)
++[ 	]*[a-f0-9]+:	e8 df ff ff ff       	call   120 <_start-0x10>
+diff --git a/ld/testsuite/ld-i386/pr19636-1e.d b/ld/testsuite/ld-i386/pr19636-1e.d
+new file mode 100644
+index 0000000..91fb7d3
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1e.d
+@@ -0,0 +1,19 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -shared -m elf_i386
++#readelf : -r --wide --dyn-syms
++
++Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 2 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_GLOB_DAT +0+ +func1
++[0-9a-f]+ +[0-9a-f]+ +R_386_GLOB_DAT +0+ +func2
++
++Relocation section '\.rel\.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_JUMP_SLOT +0+ +func3
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
++#pass
+diff --git a/ld/testsuite/ld-i386/pr19636-1f.d b/ld/testsuite/ld-i386/pr19636-1f.d
+new file mode 100644
+index 0000000..242d493
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1f.d
+@@ -0,0 +1,19 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -shared -Bsymbolic -m elf_i386
++#readelf : -r --wide --dyn-syms
++
++Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 2 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_GLOB_DAT +0+ +func1
++[0-9a-f]+ +[0-9a-f]+ +R_386_GLOB_DAT +0+ +func2
++
++Relocation section '\.rel\.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_JUMP_SLOT +0+ +func3
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
++#pass
+diff --git a/ld/testsuite/ld-i386/pr19636-1g.d b/ld/testsuite/ld-i386/pr19636-1g.d
+new file mode 100644
+index 0000000..0335a6e
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1g.d
+@@ -0,0 +1,12 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -m elf_i386
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
++
++There are no relocations in this file.
++
++Hex dump of section '.got':
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ [0 ]+\.+
+diff --git a/ld/testsuite/ld-i386/pr19636-1h.d b/ld/testsuite/ld-i386/pr19636-1h.d
+new file mode 100644
+index 0000000..6e30314
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1h.d
+@@ -0,0 +1,19 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -E -m elf_i386
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
++
++There are no relocations in this file.
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +_start
++#...
++
++Hex dump of section '.got':
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .\.+
+diff --git a/ld/testsuite/ld-i386/pr19636-1i.d b/ld/testsuite/ld-i386/pr19636-1i.d
+new file mode 100644
+index 0000000..a7a4e8f
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-1i.d
+@@ -0,0 +1,9 @@
++#source: pr19636-1.s
++#as: --32 -mrelax-relocations=no
++#ld: -E -m elf_i386
++#readelf : --wide --dyn-syms
++
++#failif
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
++#...
+diff --git a/ld/testsuite/ld-i386/pr19636-2.s b/ld/testsuite/ld-i386/pr19636-2.s
+new file mode 100644
+index 0000000..e8e7c9f
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-2.s
+@@ -0,0 +1,9 @@
 +	.text
 +	.weak func
 +	.globl _start
 +_start:
-+	mov func@GOT(%eax), %eax
++	cmp func@GOT(%eax), %eax
 +	jmp *func@GOT(%eax)
-diff --git a/ld/testsuite/ld-i386/pr19636a.d b/ld/testsuite/ld-i386/pr19636a.d
++	call func@PLT
++	cmp $func, %eax
++	call func
+diff --git a/ld/testsuite/ld-i386/pr19636-2a.d b/ld/testsuite/ld-i386/pr19636-2a.d
 new file mode 100644
-index 0000000..6a960e4
+index 0000000..fbed7e7
 --- /dev/null
-+++ b/ld/testsuite/ld-i386/pr19636a.d
-@@ -0,0 +1,9 @@
-+#source: pr19636.s
-+#as: --32
++++ b/ld/testsuite/ld-i386/pr19636-2a.d
+@@ -0,0 +1,19 @@
++#source: pr19636-2.s
++#as: --32 -mrelax-relocations=no
 +#ld: -pie -m elf_i386
-+#readelf : -r --wide -x .got
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
-+There are no relocations in this file.
++Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_PC32 +0+ +func
++
++Symbol table '\.dynsym' contains 2 entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
 +
 +Hex dump of section '.got':
-+  0x[0-9a-f]+ 00000000                            ....
-diff --git a/ld/testsuite/ld-i386/pr19636b.d b/ld/testsuite/ld-i386/pr19636b.d
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .\.+
+diff --git a/ld/testsuite/ld-i386/pr19636-2b.d b/ld/testsuite/ld-i386/pr19636-2b.d
 new file mode 100644
-index 0000000..6ed0d06
+index 0000000..9a0a263
 --- /dev/null
-+++ b/ld/testsuite/ld-i386/pr19636b.d
-@@ -0,0 +1,9 @@
-+#source: pr19636.s
-+#as: --32
++++ b/ld/testsuite/ld-i386/pr19636-2b.d
+@@ -0,0 +1,22 @@
++#source: pr19636-2.s
++#as: --32 -mrelax-relocations=no
 +#ld: -pie -E -m elf_i386
-+#readelf : -r --wide -x .got
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
-+There are no relocations in this file.
++Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_PC32 +0+ +func
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +_start
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
 +
 +Hex dump of section '.got':
-+  0x[0-9a-f]+ 00000000                            ....
-diff --git a/ld/testsuite/ld-i386/pr19636c.d b/ld/testsuite/ld-i386/pr19636c.d
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .\.+
+diff --git a/ld/testsuite/ld-i386/pr19636-2c-nacl.d b/ld/testsuite/ld-i386/pr19636-2c-nacl.d
 new file mode 100644
-index 0000000..4abe82f
+index 0000000..7543e0e
 --- /dev/null
-+++ b/ld/testsuite/ld-i386/pr19636c.d
-@@ -0,0 +1,9 @@
-+#source: pr19636.s
-+#as: --32
++++ b/ld/testsuite/ld-i386/pr19636-2c-nacl.d
+@@ -0,0 +1,126 @@
++#source: pr19636-2.s
++#as: --32 -mrelax-relocations=no
++#ld: -pie -m elf_i386
++#objdump: -dw
++#target: i?86-*-nacl* x86_64-*-nacl*
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+ <.plt>:
++[ 	]*[a-f0-9]+:	ff 73 04             	pushl  0x4\(%ebx\)
++[ 	]*[a-f0-9]+:	8b 4b 08             	mov    0x8\(%ebx\),%ecx
++[ 	]*[a-f0-9]+:	83 e1 e0             	and    \$0xffffffe0,%ecx
++[ 	]*[a-f0-9]+:	ff e1                	jmp    \*%ecx
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	8b 8b 0c 00 00 00    	mov    0xc\(%ebx\),%ecx
++[ 	]*[a-f0-9]+:	83 e1 e0             	and    \$0xffffffe0,%ecx
++[ 	]*[a-f0-9]+:	ff e1                	jmp    \*%ecx
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmp    6a <_start-0x16>
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++[ 	]*[a-f0-9]+:	90                   	nop
++
++Disassembly of section .text:
++
++0+80 <_start>:
++[ 	]*[a-f0-9]+:	3b 80 fc ff ff ff    	cmp    -0x4\(%eax\),%eax
++[ 	]*[a-f0-9]+:	ff a0 fc ff ff ff    	jmp    \*-0x4\(%eax\)
++[ 	]*[a-f0-9]+:	e8 af ff ff ff       	call   40 <_start-0x40>
++[ 	]*[a-f0-9]+:	3d 00 00 00 00       	cmp    \$0x0,%eax
++[ 	]*[a-f0-9]+:	e8 fc ff ff ff       	call   97 <_start\+0x17>
+diff --git a/ld/testsuite/ld-i386/pr19636-2c.d b/ld/testsuite/ld-i386/pr19636-2c.d
+new file mode 100644
+index 0000000..98b53aa
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-2c.d
+@@ -0,0 +1,28 @@
++#source: pr19636-2.s
++#as: --32 -mrelax-relocations=no
++#ld: -pie -m elf_i386
++#objdump: -dw
++#notarget: i?86-*-nacl* x86_64-*-nacl*
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+130 <.plt>:
++[ 	]*[a-f0-9]+:	ff b3 04 00 00 00    	pushl  0x4\(%ebx\)
++[ 	]*[a-f0-9]+:	ff a3 08 00 00 00    	jmp    \*0x8\(%ebx\)
++[ 	]*[a-f0-9]+:	00 00                	add    %al,\(%eax\)
++[ 	]*[a-f0-9]+:	00 00                	add    %al,\(%eax\)
++[ 	]*[a-f0-9]+:	ff a3 0c 00 00 00    	jmp    \*0xc\(%ebx\)
++[ 	]*[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
++[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmp    150 <_start>
++
++Disassembly of section .text:
++
++0+150 <_start>:
++[ 	]*[a-f0-9]+:	3b 80 fc ff ff ff    	cmp    -0x4\(%eax\),%eax
++[ 	]*[a-f0-9]+:	ff a0 fc ff ff ff    	jmp    \*-0x4\(%eax\)
++[ 	]*[a-f0-9]+:	e8 df ff ff ff       	call   140 <_start-0x10>
++[ 	]*[a-f0-9]+:	3d 00 00 00 00       	cmp    \$0x0,%eax
++[ 	]*[a-f0-9]+:	e8 fc ff ff ff       	call   167 <_start\+0x17>
+diff --git a/ld/testsuite/ld-i386/pr19636-2d-nacl.d b/ld/testsuite/ld-i386/pr19636-2d-nacl.d
+new file mode 100644
+index 0000000..99c491f
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-2d-nacl.d
+@@ -0,0 +1,21 @@
++#source: pr19636-2.s
++#as: --32 -mrelax-relocations=no
++#ld: -shared -m elf_i386
++#readelf : -r --wide --dyn-syms
++#target: i?86-*-nacl* x86_64-*-nacl*
++
++Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 3 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_32 +0+ +func
++[0-9a-f]+ +[0-9a-f]+ +R_386_PC32 +0+ +func
++[0-9a-f]+ +[0-9a-f]+ +R_386_GLOB_DAT +0+ +func
++
++Relocation section '\.rel\.plt' at offset [0x0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_JUMP_SLOT +0+ +func
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#pass
+diff --git a/ld/testsuite/ld-i386/pr19636-2d.d b/ld/testsuite/ld-i386/pr19636-2d.d
+new file mode 100644
+index 0000000..28eaa04
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-2d.d
+@@ -0,0 +1,17 @@
++#source: pr19636-2.s
++#as: --32 -mrelax-relocations=no
++#ld: -shared -m elf_i386
++#readelf : -r --wide --dyn-syms
++#notarget: i?86-*-nacl* x86_64-*-nacl*
++
++Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 3 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_32 +0+ +func
++[0-9a-f]+ +[0-9a-f]+ +R_386_PC32 +0+ +func
++[0-9a-f]+ +[0-9a-f]+ +R_386_GLOB_DAT +0+ +func
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#pass
+diff --git a/ld/testsuite/ld-i386/pr19636-2e-nacl.d b/ld/testsuite/ld-i386/pr19636-2e-nacl.d
+new file mode 100644
+index 0000000..f791128
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-2e-nacl.d
+@@ -0,0 +1,21 @@
++#source: pr19636-2.s
++#as: --32 -mrelax-relocations=no
 +#ld: -shared -Bsymbolic -m elf_i386
-+#readelf : -r --wide -x .got
++#readelf : -r --wide --dyn-syms
++#target: i?86-*-nacl* x86_64-*-nacl*
 +
-+There are no relocations in this file.
++Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 3 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_32 +0+ +func
++[0-9a-f]+ +[0-9a-f]+ +R_386_PC32 +0+ +func
++[0-9a-f]+ +[0-9a-f]+ +R_386_GLOB_DAT +0+ +func
 +
-+Hex dump of section '.got':
-+  0x[0-9a-f]+ 00000000                            ....
++Relocation section '\.rel\.plt' at offset [0x0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_JUMP_SLOT +0+ +func
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#pass
+diff --git a/ld/testsuite/ld-i386/pr19636-2e.d b/ld/testsuite/ld-i386/pr19636-2e.d
+new file mode 100644
+index 0000000..148e306
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-2e.d
+@@ -0,0 +1,17 @@
++#source: pr19636-2.s
++#as: --32 -mrelax-relocations=no
++#ld: -shared -Bsymbolic -m elf_i386
++#readelf : -r --wide --dyn-syms
++#notarget: i?86-*-nacl* x86_64-*-nacl*
++
++Relocation section '\.rel\.dyn' at offset [0x0-9a-f]+ contains 3 entries:
++ +Offset +Info +Type +Sym. Value +Symbol's Name
++[0-9a-f]+ +[0-9a-f]+ +R_386_32 +0+ +func
++[0-9a-f]+ +[0-9a-f]+ +R_386_PC32 +0+ +func
++[0-9a-f]+ +[0-9a-f]+ +R_386_GLOB_DAT +0+ +func
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#pass
 diff --git a/ld/testsuite/ld-x86-64/pr13082-3b.d b/ld/testsuite/ld-x86-64/pr13082-3b.d
 index 12efaf0..766dd74 100644
 --- a/ld/testsuite/ld-x86-64/pr13082-3b.d
@@ -558,72 +1904,285 @@ index cb4d90a..6d4a35b 100644
 +There are no relocations in this file.
 diff --git a/ld/testsuite/ld-x86-64/pr19636.s b/ld/testsuite/ld-x86-64/pr19636.s
 new file mode 100644
-index 0000000..81a9a3f
+index 0000000..8814ecd
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636.s
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,9 @@
 +	.text
-+	.weak func
++	.weak func1
++	.weak func2
++	.weak func3
 +	.globl _start
 +_start:
-+	mov func@GOTPCREL(%rip),%rax
-+	jmp *func@GOTPCREL(%rip)
++	cmp func1@GOTPCREL(%rip),%rax
++	jmp *func2@GOTPCREL(%rip)
++	call func3@PLT
 diff --git a/ld/testsuite/ld-x86-64/pr19636a.d b/ld/testsuite/ld-x86-64/pr19636a.d
 new file mode 100644
-index 0000000..ff1d264
+index 0000000..dc868da
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636a.d
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,17 @@
 +#source: pr19636.s
-+#as: --64
++#as: --64 -mrelax-relocations=no
 +#ld: -pie -m elf_x86_64
-+#readelf : -r --wide -x .got
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
 +
++Symbol table '\.dynsym' contains 1 entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
++
 +Hex dump of section '.got':
-+  0x[0-9a-f]+ 00000000 00000000                   ........
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .+
++  0x[0-9a-f]+ [0 ]+\.+
 diff --git a/ld/testsuite/ld-x86-64/pr19636b.d b/ld/testsuite/ld-x86-64/pr19636b.d
 new file mode 100644
-index 0000000..98b1d2a
+index 0000000..5a27ad8
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636b.d
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,20 @@
 +#source: pr19636.s
-+#as: --64
++#as: --64 -mrelax-relocations=no
 +#ld: -pie -E -m elf_x86_64
-+#readelf : -r --wide -x .got
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
 +
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +_start
++#...
++
 +Hex dump of section '.got':
-+  0x[0-9a-f]+ 00000000 00000000                   ........
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .+
++  0x[0-9a-f]+ [0 ]+\.+
 diff --git a/ld/testsuite/ld-x86-64/pr19636c.d b/ld/testsuite/ld-x86-64/pr19636c.d
 new file mode 100644
-index 0000000..ce4d084
+index 0000000..e7021e8
 --- /dev/null
 +++ b/ld/testsuite/ld-x86-64/pr19636c.d
 @@ -0,0 +1,9 @@
 +#source: pr19636.s
-+#as: --64
++#as: --64 -mrelax-relocations=no
++#ld: -pie -E -m elf_x86_64
++#readelf : --wide --dyn-syms
++
++#failif
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
++#...
+diff --git a/ld/testsuite/ld-x86-64/pr19636d-nacl.d b/ld/testsuite/ld-x86-64/pr19636d-nacl.d
+new file mode 100644
+index 0000000..537a901
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636d-nacl.d
+@@ -0,0 +1,37 @@
++#source: pr19636.s
++#as: --64 -mrelax-relocations=no
++#ld: -pie -m elf_x86_64
++#objdump: -dw
++#target: x86_64-*-nacl*
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+ <.plt>:
++[ 	]*[a-f0-9]+:	ff 35 c2 02 01 10    	pushq  0x100102c2\(%rip\)        # 100102c8 <_GLOBAL_OFFSET_TABLE_\+0x8>
++[ 	]*[a-f0-9]+:	4c 8b 1d c3 02 01 10 	mov    0x100102c3\(%rip\),%r11        # 100102d0 <_GLOBAL_OFFSET_TABLE_\+0x10>
++[ 	]*[a-f0-9]+:	41 83 e3 e0          	and    \$0xffffffe0,%r11d
++[ 	]*[a-f0-9]+:	4d 01 fb             	add    %r15,%r11
++[ 	]*[a-f0-9]+:	41 ff e3             	jmpq   \*%r11
++[ 	]*[a-f0-9]+:	66 0f 1f 84 00 00 00 00 00 	nopw   0x0\(%rax,%rax,1\)
++[ 	]*[a-f0-9]+:	66 66 66 66 66 66 2e 0f 1f 84 00 00 00 00 00 	data16 data16 data16 data16 data16 nopw %cs:0x0\(%rax,%rax,1\)
++[ 	]*[a-f0-9]+:	66 66 66 66 66 66 2e 0f 1f 84 00 00 00 00 00 	data16 data16 data16 data16 data16 nopw %cs:0x0\(%rax,%rax,1\)
++[ 	]*[a-f0-9]+:	66 90                	xchg   %ax,%ax
++[ 	]*[a-f0-9]+:	4c 8b 1d 91 02 01 10 	mov    0x10010291\(%rip\),%r11        # 100102d8 <_GLOBAL_OFFSET_TABLE_\+0x18>
++[ 	]*[a-f0-9]+:	41 83 e3 e0          	and    \$0xffffffe0,%r11d
++[ 	]*[a-f0-9]+:	4d 01 fb             	add    %r15,%r11
++[ 	]*[a-f0-9]+:	41 ff e3             	jmpq   \*%r11
++[ 	]*[a-f0-9]+:	66 66 66 66 66 66 2e 0f 1f 84 00 00 00 00 00 	data16 data16 data16 data16 data16 nopw %cs:0x0\(%rax,%rax,1\)
++[ 	]*[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0
++[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmpq   6a <_start-0x16>
++[ 	]*[a-f0-9]+:	66 66 66 66 66 66 2e 0f 1f 84 00 00 00 00 00 	data16 data16 data16 data16 data16 nopw %cs:0x0\(%rax,%rax,1\)
++[ 	]*[a-f0-9]+:	0f 1f 80 00 00 00 00 	nopl   0x0\(%rax\)
++
++Disassembly of section .text:
++
++0+80 <_start>:
++[ 	]*[a-f0-9]+:	48 3b 05 29 02 01 10 	cmp    0x10010229\(%rip\),%rax        # 100102b0 <_DYNAMIC\+0xe0>
++[ 	]*[a-f0-9]+:	ff 25 2b 02 01 10    	jmpq   \*0x1001022b\(%rip\)        # 100102b8 <_DYNAMIC\+0xe8>
++[ 	]*[a-f0-9]+:	e8 ae ff ff ff       	callq  40 <_start-0x40>
+diff --git a/ld/testsuite/ld-x86-64/pr19636d.d b/ld/testsuite/ld-x86-64/pr19636d.d
+new file mode 100644
+index 0000000..86b0fd6
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636d.d
+@@ -0,0 +1,25 @@
++#source: pr19636.s
++#as: --64 -mrelax-relocations=no
++#ld: -pie -m elf_x86_64
++#objdump: -dw
++#notarget: x86_64-*-nacl*
++
++.*: +file format .*
++
++
++Disassembly of section .plt:
++
++0+1a0 <.plt>:
++[ 	]*[a-f0-9]+:	ff 35 2a 01 20 00    	pushq  0x20012a\(%rip\)        # 2002d0 <_GLOBAL_OFFSET_TABLE_\+0x8>
++[ 	]*[a-f0-9]+:	ff 25 2c 01 20 00    	jmpq   \*0x20012c\(%rip\)        # 2002d8 <_GLOBAL_OFFSET_TABLE_\+0x10>
++[ 	]*[a-f0-9]+:	0f 1f 40 00          	nopl   0x0\(%rax\)
++[ 	]*[a-f0-9]+:	ff 25 2a 01 20 00    	jmpq   \*0x20012a\(%rip\)        # 2002e0 <_GLOBAL_OFFSET_TABLE_\+0x18>
++[ 	]*[a-f0-9]+:	68 00 00 00 00       	pushq  \$0x0+
++[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmpq   [a-f0-9]+ <.*>
++
++Disassembly of section .text:
++
++0+1c0 <_start>:
++[ 	]*[a-f0-9]+:	48 3b 05 f1 00 20 00 	cmp    0x2000f1\(%rip\),%rax        # 2002b8 <_DYNAMIC\+0xe0>
++[ 	]*[a-f0-9]+:	ff 25 f3 00 20 00    	jmpq   \*0x2000f3\(%rip\)        # 2002c0 <_DYNAMIC\+0xe8>
++[ 	]*[a-f0-9]+:	e8 de ff ff ff       	callq  1b0 <_start-0x10>
+diff --git a/ld/testsuite/ld-x86-64/pr19636e.d b/ld/testsuite/ld-x86-64/pr19636e.d
+new file mode 100644
+index 0000000..972462c
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636e.d
+@@ -0,0 +1,19 @@
++#source: pr19636.s
++#as: --64 -mrelax-relocations=no
++#ld: -shared -m elf_x86_64
++#readelf : -r --wide --dyn-syms
++
++Relocation section '\.rela\.dyn' at offset [0x0-9a-f]+ contains 2 entries:
++ +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_GLOB_DAT +0+ +func1 \+ 0
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_GLOB_DAT +0+ +func2 \+ 0
++
++Relocation section '\.rela\.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_JUMP_SLOT +0+ +func3 \+ 0
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr19636f.d b/ld/testsuite/ld-x86-64/pr19636f.d
+new file mode 100644
+index 0000000..339929d
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636f.d
+@@ -0,0 +1,19 @@
++#source: pr19636.s
++#as: --64 -mrelax-relocations=no
 +#ld: -shared -Bsymbolic -m elf_x86_64
-+#readelf : -r --wide -x .got
++#readelf : -r --wide --dyn-syms
++
++Relocation section '\.rela\.dyn' at offset [0x0-9a-f]+ contains 2 entries:
++ +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_GLOB_DAT +0+ +func1 \+ 0
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_GLOB_DAT +0+ +func2 \+ 0
++
++Relocation section '\.rela\.plt' at offset 0x[0-9a-f]+ contains 1 entries:
++ +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
++[0-9a-f]+ +[0-9a-f]+ +R_X86_64_JUMP_SLOT +0+ +func3 \+ 0
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr19636g.d b/ld/testsuite/ld-x86-64/pr19636g.d
+new file mode 100644
+index 0000000..7aace78
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636g.d
+@@ -0,0 +1,13 @@
++#source: pr19636.s
++#as: --64 -mrelax-relocations=no
++#ld: -m elf_x86_64
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
 +
 +There are no relocations in this file.
 +
 +Hex dump of section '.got':
-+  0x[0-9a-f]+ 00000000 00000000                   ........
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ [0 ]+\.+
++  0x[0-9a-f]+ [0 ]+\.+
+diff --git a/ld/testsuite/ld-x86-64/pr19636h.d b/ld/testsuite/ld-x86-64/pr19636h.d
+new file mode 100644
+index 0000000..dc066d9
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636h.d
+@@ -0,0 +1,20 @@
++#source: pr19636.s
++#as: --64 -mrelax-relocations=no
++#ld: -E -m elf_x86_64
++#readelf : -r --wide -x .got -x .got.plt --dyn-syms
++
++There are no relocations in this file.
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +_start
++#...
++
++Hex dump of section '.got':
++  0x[0-9a-f]+ [0 ]+\.+
++
++Hex dump of section '.got.plt':
++  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .+
++  0x[0-9a-f]+ [0 ]+\.+
+diff --git a/ld/testsuite/ld-x86-64/pr19636i.d b/ld/testsuite/ld-x86-64/pr19636i.d
+new file mode 100644
+index 0000000..3a80170
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636i.d
+@@ -0,0 +1,9 @@
++#source: pr19636.s
++#as: --64 -mrelax-relocations=no
++#ld: -E -m elf_x86_64
++#readelf : --wide --dyn-syms
++
++#failif
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
++#...
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 7248377..91806c2 100644
+index 7248377..d6a9073 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
-@@ -355,6 +355,9 @@ run_dump_test "pr19162"
+@@ -355,6 +355,16 @@ run_dump_test "pr19162"
  run_dump_test "pr19175"
  run_dump_test "pr18591"
  run_dump_test "pr19615"
 +run_dump_test "pr19636a"
 +run_dump_test "pr19636b"
 +run_dump_test "pr19636c"
++run_dump_test "pr19636d"
++run_dump_test "pr19636d-nacl"
++run_dump_test "pr19636e"
++run_dump_test "pr19636f"
++run_dump_test "pr19636g"
++run_dump_test "pr19636h"
++run_dump_test "pr19636i"
  
  # Add $PLT_CFLAGS if PLT is expected.
  global PLT_CFLAGS
