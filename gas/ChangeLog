@@ -1,3 +1,9 @@
+2016-02-19  Matthew Wahab  <matthew.wahab@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* config/tc-arm.c (arm_ext_fp16): New.
+	(arm_extensions): New entry for "fp16".
+
 2016-02-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 19630

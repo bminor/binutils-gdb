@@ -216,6 +216,9 @@ static const arm_feature_set arm_ext_atomics =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_ATOMICS);
 static const arm_feature_set arm_ext_v8_2 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_2A);
+/* FP16 instructions.  */
+static const arm_feature_set arm_ext_fp16 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1, -1);
@@ -25068,6 +25071,9 @@ static const struct arm_option_extension_value_table arm_extensions[] =
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
   ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8, ARM_FEATURE_COPROC (FPU_VFP_ARMV8),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V8)),
+  ARM_EXT_OPT ("fp16",  ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+			ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+			ARM_ARCH_V8_2A),
   ARM_EXT_OPT ("idiv",	ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
 			ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
 				   ARM_FEATURE_CORE_LOW (ARM_EXT_V7A | ARM_EXT_V7R)),

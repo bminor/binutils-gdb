@@ -1,3 +1,8 @@
+2016-02-19  Matthew Wahab  <matthew.wahab@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* opcode/arm.h (ARM_EXT2_FP16_INSN): New.
+
 2016-02-10  Claudiu Zissulescu  <claziss@synopsys.com>
 	    Janek van Oirschot  <jvanoirs@synopsys.com>
 
