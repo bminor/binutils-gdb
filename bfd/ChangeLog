@@ -1,5 +1,9 @@
 2016-02-19  Nick Clifton  <nickc@redhat.com>
 
+	PR ld/19629
+	* aoutx.h (aout_link_add_symbols): Check for out of range string
+	table offsets.
+
 	PR ld/19628
 	* reloc.c (bfd_generic_get_relocated_section_contents): Stop
 	processing if we encounter a reloc without an associated symbol.
