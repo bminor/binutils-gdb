@@ -1,3 +1,20 @@
+016-02-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* symbols.c (decode_local_label_name): Make type a const char *.
+	* listing.c (print_source): Make type of p const char *.
+	(print_line): Make type of string const	char *.
+	(buffer_line): Return const char *.
+	(title): Make type const char *.
+	(subtitle): Likewise.
+	(listing_listing): Make type of p const char *.
+	* messages.c (as_internal_value_out_of_range): Make type of prefix
+	const char *.
+	* stabs.c (s_stab_generic): make type of stab_secname, stabstr_secname
+	and string const char *.
+	* read.c (_bfd_rel): Make type of name const char *.
+	* app.c (out_string): Change type to const char *.
+       	(struct app_save::out_string): Likewise.
+
 2016-02-18  Dan Gisselquist  <dgisselq@verizon.net>
 	    Nick Clifton  <nickc@redhat.com>
 

@@ -34,7 +34,7 @@
 
 int outputting_stabs_line_debug = 0;
 
-static void s_stab_generic (int, char *, char *);
+static void s_stab_generic (int, const char *, const char *);
 static void generate_asm_file (int, char *);
 
 /* Allow backends to override the names used for the stab sections.  */
@@ -176,7 +176,9 @@ aout_process_stab (what, string, type, other, desc)
    kinds of stab sections.  */
 
 static void
-s_stab_generic (int what, char *stab_secname, char *stabstr_secname)
+s_stab_generic (int          what,
+		const char * stab_secname,
+	       	const char * stabstr_secname)
 {
   long longint;
   char *string, *saved_string_obstack_end;

@@ -4050,10 +4050,11 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
   char *r_name;
   int c;
   struct reloc_list *reloc;
-  struct _bfd_rel { char *name; bfd_reloc_code_real_type code; };
-  static struct _bfd_rel bfd_relocs[] = {
+  struct _bfd_rel { const char * name; bfd_reloc_code_real_type code; };
+  static struct _bfd_rel bfd_relocs[] =
+  {
     { "NONE", BFD_RELOC_NONE },
-    { "8", BFD_RELOC_8 },
+    { "8",  BFD_RELOC_8 },
     { "16", BFD_RELOC_16 },
     { "32", BFD_RELOC_32 },
     { "64", BFD_RELOC_64 }

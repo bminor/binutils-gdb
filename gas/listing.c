@@ -223,7 +223,8 @@ static file_info_type *file_info (const char *);
 static void new_frag (void);
 static void listing_page (list_info_type *);
 static unsigned int calc_hex (list_info_type *);
-static void print_lines (list_info_type *, unsigned int, char *, unsigned int);
+static void print_lines (list_info_type *, unsigned int, const char *,
+			 unsigned int);
 static void list_symbol_table (void);
 static int debugging_pseudo (list_info_type *, const char *);
 static void listing_listing (char *);
@@ -472,7 +473,7 @@ listing_prev_line (void)
    truncated to size.  It appends a fake line to the end of each input
    file to make using the returned buffer simpler.  */
 
-static char *
+static const char *
 buffer_line (file_info_type *file, char *line, unsigned int size)
 {
   unsigned int count = 0;
@@ -695,12 +696,11 @@ rebuffer_line (file_info_type *  file,
 }
 
 static const char *fn;
-
-static unsigned int eject;	/* Eject pending */
-static unsigned int page;	/* Current page number */
-static char *title;		/* Current title */
-static char *subtitle;		/* Current subtitle */
-static unsigned int on_page;	/* Number of lines printed on current page */
+static unsigned int eject;	/* Eject pending.  */
+static unsigned int page;	/* Current page number.  */
+static const char *title;	/* Current title.  */
+static const char *subtitle;	/* Current subtitle.  */
+static unsigned int on_page;	/* Number of lines printed on current page.  */
 
 static void
 listing_page (list_info_type *list)
@@ -832,7 +832,7 @@ calc_hex (list_info_type *list)
 
 static void
 print_lines (list_info_type *list, unsigned int lineno,
-	     char *string, unsigned int address)
+	     const char *string, unsigned int address)
 {
   unsigned int idx;
   unsigned int nchars;
@@ -1095,7 +1095,7 @@ print_source (file_info_type *  current_file,
       while (current_file->linenum < list->hll_line
 	     && !current_file->at_end)
 	{
-	  char *p;
+	  const char *p;
 
 	  cache = cached_lines + next_free_line;
 	  cache->file = current_file;
@@ -1202,7 +1202,7 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
   list_info_type *list = head;
   file_info_type *current_hll_file = (file_info_type *) NULL;
   char *buffer;
-  char *p;
+  const char *p;
   int show_listing = 1;
   unsigned int width;
 
