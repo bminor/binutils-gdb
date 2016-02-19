@@ -181,7 +181,8 @@ s_stab_generic (int          what,
 	       	const char * stabstr_secname)
 {
   long longint;
-  char *string, *saved_string_obstack_end;
+  const char *string;
+  char *saved_string_obstack_end;
   int type;
   int other;
   int desc;
