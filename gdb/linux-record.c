@@ -2302,6 +2302,21 @@ Do you want to stop the program?"),
         }
       break;
 
+    case gdb_sys_fallocate:
+    case gdb_sys_eventfd2:
+    case gdb_sys_epoll_create1:
+    case gdb_sys_dup3:
+      break;
+
+    case gdb_sys_pipe2:
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+					 tdep->size_int * 2))
+      break;
+
+    case gdb_sys_inotify_init1:
+      break;
+
     default:
       printf_unfiltered (_("Process record and replay target doesn't "
                            "support syscall number %d\n"), syscall);
