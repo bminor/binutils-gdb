@@ -1,3 +1,7 @@
+2016-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr19539.d: Skip cris*-*-* targets.
+
 2016-02-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr19617a.d: Enable only for *-*-linux*,
