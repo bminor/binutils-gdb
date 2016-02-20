@@ -1,3 +1,11 @@
+2016-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (register_number): Check RegVRex.
+	* testsuite/gas/i386/x86-64-avx512f.s: Add a test for vgatherqpd
+	with %zmm19 and %zmm3.
+	* testsuite/gas/i386/x86-64-avx512f-intel.d: Updated.
+	* testsuite/gas/i386/x86-64-avx512f.d: Likewise.
+
 2016-02-19  Matthew Wahab  <matthew.wahab@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
