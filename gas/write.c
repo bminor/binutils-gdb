@@ -1433,14 +1433,12 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
     {
-      stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
       compression_header_size
 	= bfd_get_compression_header_size (stdoutput, NULL);
       header_size = compression_header_size;
     }
   else
     {
-      stdoutput->flags |= BFD_COMPRESS;
       compression_header_size = 0;
       header_size = 12;
     }
@@ -2216,7 +2214,13 @@ write_object_file (void)
      we start writing any sections, because it will affect the file
      layout, which is fixed once we start writing contents.  */
   if (flag_compress_debug)
-    bfd_map_over_sections (stdoutput, compress_debug, (char *) 0);
+    {
+      if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
+	stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
+      else
+	stdoutput->flags |= BFD_COMPRESS;
+      bfd_map_over_sections (stdoutput, compress_debug, (char *) 0);
+    }
 
   bfd_map_over_sections (stdoutput, write_contents, (char *) 0);
 }

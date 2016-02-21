@@ -1,3 +1,9 @@
+2016-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (compress_debug): Move BFD compression bits setting
+	to ...
+	(write_object_file): Here.
+
 2016-02-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (register_number): Check RegVRex.
