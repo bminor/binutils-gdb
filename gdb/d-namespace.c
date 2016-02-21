@@ -485,7 +485,7 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 		      name_scope++;
 		      sym = d_lookup_symbol_imports (current->import_src,
 						     name + name_scope,
-						     block, domain, 0);
+						     block, domain);
 		    }
 		}
 	    }
@@ -495,7 +495,7 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 		 current->import_src as MODULE to direct the search
 		 towards the imported module.  */
 	      sym = d_lookup_symbol_imports (current->import_src,
-					     name, block, domain, 0);
+					     name, block, domain);
 	    }
 	  current->searched = 0;
 	  discard_cleanups (searched_cleanup);
