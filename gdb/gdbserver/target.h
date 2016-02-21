@@ -471,6 +471,9 @@ struct target_ops
   /* Return 1 if the target supports catch syscall, 0 (or leave the
      callback NULL) otherwise.  */
   int (*supports_catch_syscall) (void);
+
+  /* Return tdesc index for IPA.  */
+  int (*get_ipa_tdesc_idx) (void);
 };
 
 extern struct target_ops *the_target;
@@ -549,6 +552,10 @@ int kill_inferior (int);
 #define target_supports_catch_syscall()              	\
   (the_target->supports_catch_syscall ?			\
    (*the_target->supports_catch_syscall) () : 0)
+
+#define target_get_ipa_tdesc_idx()			\
+  (the_target->get_ipa_tdesc_idx			\
+   ? (*the_target->get_ipa_tdesc_idx) () : 0)
 
 #define target_supports_tracepoints()			\
   (the_target->supports_tracepoints			\

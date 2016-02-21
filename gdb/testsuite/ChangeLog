@@ -1,5 +1,10 @@
 2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
 
+	PR gdb/13808
+	* gdb.trace/ftrace.exp (test_fast_tracepoints): Remove kfail.
+
+2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>
+
 	* gdb.trace/ftrace.exp: Remove unnecessary target check.
 
 2016-02-25  Marcin Kościelnicki  <koriakin@0x04.net>

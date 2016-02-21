@@ -6406,6 +6406,15 @@ linux_supports_catch_syscall (void)
 }
 
 static int
+linux_get_ipa_tdesc_idx (void)
+{
+  if (the_low_target.get_ipa_tdesc_idx == NULL)
+    return 0;
+
+  return (*the_low_target.get_ipa_tdesc_idx) ();
+}
+
+static int
 linux_supports_tracepoints (void)
 {
   if (*the_low_target.supports_tracepoints == NULL)
@@ -7382,6 +7391,7 @@ static struct target_ops linux_target_ops = {
   linux_breakpoint_kind_from_current_state,
   linux_supports_software_single_step,
   linux_supports_catch_syscall,
+  linux_get_ipa_tdesc_idx,
 };
 
 #ifdef HAVE_LINUX_REGSETS

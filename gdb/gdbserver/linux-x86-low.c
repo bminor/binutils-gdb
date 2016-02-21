@@ -45,57 +45,7 @@
 #include "nat/linux-nat.h"
 #include "nat/x86-linux.h"
 #include "nat/x86-linux-dregs.h"
-
-#ifdef __x86_64__
-/* Defined in auto-generated file amd64-linux.c.  */
-void init_registers_amd64_linux (void);
-extern const struct target_desc *tdesc_amd64_linux;
-
-/* Defined in auto-generated file amd64-avx-linux.c.  */
-void init_registers_amd64_avx_linux (void);
-extern const struct target_desc *tdesc_amd64_avx_linux;
-
-/* Defined in auto-generated file amd64-avx512-linux.c.  */
-void init_registers_amd64_avx512_linux (void);
-extern const struct target_desc *tdesc_amd64_avx512_linux;
-
-/* Defined in auto-generated file amd64-mpx-linux.c.  */
-void init_registers_amd64_mpx_linux (void);
-extern const struct target_desc *tdesc_amd64_mpx_linux;
-
-/* Defined in auto-generated file x32-linux.c.  */
-void init_registers_x32_linux (void);
-extern const struct target_desc *tdesc_x32_linux;
-
-/* Defined in auto-generated file x32-avx-linux.c.  */
-void init_registers_x32_avx_linux (void);
-extern const struct target_desc *tdesc_x32_avx_linux;
-
-/* Defined in auto-generated file x32-avx512-linux.c.  */
-void init_registers_x32_avx512_linux (void);
-extern const struct target_desc *tdesc_x32_avx512_linux;
-
-#endif
-
-/* Defined in auto-generated file i386-linux.c.  */
-void init_registers_i386_linux (void);
-extern const struct target_desc *tdesc_i386_linux;
-
-/* Defined in auto-generated file i386-mmx-linux.c.  */
-void init_registers_i386_mmx_linux (void);
-extern const struct target_desc *tdesc_i386_mmx_linux;
-
-/* Defined in auto-generated file i386-avx-linux.c.  */
-void init_registers_i386_avx_linux (void);
-extern const struct target_desc *tdesc_i386_avx_linux;
-
-/* Defined in auto-generated file i386-avx512-linux.c.  */
-void init_registers_i386_avx512_linux (void);
-extern const struct target_desc *tdesc_i386_avx512_linux;
-
-/* Defined in auto-generated file i386-mpx-linux.c.  */
-void init_registers_i386_mpx_linux (void);
-extern const struct target_desc *tdesc_i386_mpx_linux;
+#include "linux-x86-tdesc.h"
 
 #ifdef __x86_64__
 static struct target_desc *tdesc_amd64_linux_no_xml;
@@ -2891,6 +2841,38 @@ x86_supports_hardware_single_step (void)
   return 1;
 }
 
+static int
+x86_get_ipa_tdesc_idx (void)
+{
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+  const struct target_desc *tdesc = regcache->tdesc;
+
+#ifdef __x86_64__
+  if (tdesc == tdesc_amd64_linux || tdesc == tdesc_amd64_linux_no_xml
+      || tdesc == tdesc_x32_linux)
+    return X86_TDESC_SSE;
+  if (tdesc == tdesc_amd64_avx_linux || tdesc == tdesc_x32_avx_linux)
+    return X86_TDESC_AVX;
+  if (tdesc == tdesc_amd64_mpx_linux)
+    return X86_TDESC_MPX;
+  if (tdesc == tdesc_amd64_avx512_linux || tdesc == tdesc_x32_avx512_linux)
+    return X86_TDESC_AVX512;
+#endif
+
+  if (tdesc == tdesc_i386_mmx_linux)
+    return X86_TDESC_MMX;
+  if (tdesc == tdesc_i386_linux || tdesc == tdesc_i386_linux_no_xml)
+    return X86_TDESC_SSE;
+  if (tdesc == tdesc_i386_avx_linux)
+    return X86_TDESC_AVX;
+  if (tdesc == tdesc_i386_mpx_linux)
+    return X86_TDESC_MPX;
+  if (tdesc == tdesc_i386_avx512_linux)
+    return X86_TDESC_AVX512;
+
+  return 0;
+}
+
 /* This is initialized assuming an amd64 target.
    x86_arch_setup will correct it for i386 or amd64 targets.  */
 
@@ -2934,6 +2916,7 @@ struct linux_target_ops the_low_target =
   NULL, /* breakpoint_kind_from_current_state */
   x86_supports_hardware_single_step,
   x86_get_syscall_trapinfo,
+  x86_get_ipa_tdesc_idx,
 };
 
 void
