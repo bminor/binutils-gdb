@@ -1,3 +1,8 @@
+2016-02-21  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* d-namespace.c (d_lookup_symbol_imports): Remove argument
+	'search_parents'.  All callers updated.
+
 2016-02-18  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* s390-linux-tdep.c (s390_guess_tracepoint_registers): New function.
