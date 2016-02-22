@@ -1,5 +1,9 @@
 2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* as.c (parse_args): Cast literal to char * when assigning to optarg.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* config/tc-ia64.c (md_assemble): Add temporary variable to pass to
 	get_symbol_name ().
 	* config/tc-sparc.c (s_register): Cast a literal to char * in

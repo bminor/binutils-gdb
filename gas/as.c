@@ -621,7 +621,7 @@ parse_args (int * pargc, char *** pargv)
 
 	case 1:			/* File name.  */
 	  if (!strcmp (optarg, "-"))
-	    optarg = "";
+	    optarg = (char *) "";
 	  new_argv[new_argc++] = optarg;
 	  new_argv[new_argc] = NULL;
 	  break;
