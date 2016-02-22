@@ -302,7 +302,7 @@ static struct
 	struct label_fix *tag_fixups;
 	struct unw_rec_list *unwind_record;	/* Unwind directive.  */
 	expressionS opnd[6];
-	char *src_file;
+	const char *src_file;
 	unsigned int src_line;
 	struct dwarf2_line_info debug_line;
       }
@@ -672,7 +672,7 @@ static struct rsrc {
   int insn_srlz;                    /* current insn serialization state */
   int data_srlz;                    /* current data serialization state */
   int qp_regno;                     /* qualifying predicate for this usage */
-  char *file;                       /* what file marked this dependency */
+  const char *file;                       /* what file marked this dependency */
   unsigned int line;                /* what line marked this dependency */
   struct mem_offset mem_offset;     /* optional memory offset hint */
   enum { CMP_NONE, CMP_OR, CMP_AND } cmp_type; /* OR or AND compare? */
@@ -10856,7 +10856,7 @@ md_assemble (char *str)
   /* Build the instruction.  */
   CURR_SLOT.qp_regno = qp_regno;
   CURR_SLOT.idesc = idesc;
-  as_where (&CURR_SLOT.src_file, &CURR_SLOT.src_line);
+  CURR_SLOT.src_file = as_where (&CURR_SLOT.src_line);
   dwarf2_where (&CURR_SLOT.debug_line);
   dwarf2_consume_line_info ();
 
@@ -11766,7 +11766,7 @@ ia64_check_label (symbolS *label)
    the relocatable file.  */
 struct alias
 {
-  char *file;		/* The file where the directive is seen.  */
+  const char *file;		/* The file where the directive is seen.  */
   unsigned int line;	/* The line number the directive is at.  */
   const char *name;	/* The original name of the symbol.  */
 };
@@ -11859,7 +11859,7 @@ dot_alias (int section)
     }
 
   h = (struct alias *) xmalloc (sizeof (struct alias));
-  as_where (&h->file, &h->line);
+  h->file = as_where (&h->line);
   h->name = name;
 
   error_string = hash_jam (ahash, alias, (void *) h);

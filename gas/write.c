@@ -192,7 +192,7 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
   TC_INIT_FIX_DATA (fixP);
 #endif
 
-  as_where (&fixP->fx_file, &fixP->fx_line);
+  fixP->fx_file = as_where (&fixP->fx_line);
 
   {
 
@@ -1137,7 +1137,7 @@ fix_segment (bfd *abfd ATTRIBUTE_UNUSED,
 
 static void
 install_reloc (asection *sec, arelent *reloc, fragS *fragp,
-	       char *file, unsigned int line)
+	       const char *file, unsigned int line)
 {
   char *err;
   bfd_reloc_status_type s;

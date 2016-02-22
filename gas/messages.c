@@ -19,10 +19,10 @@
 
 #include "as.h"
 
-static void identify (char *);
+static void identify (const char *);
 static void as_show_where (void);
-static void as_warn_internal (char *, unsigned int, char *);
-static void as_bad_internal (char *, unsigned int, char *);
+static void as_warn_internal (const char *, unsigned int, char *);
+static void as_bad_internal (const char *, unsigned int, char *);
 
 /* Despite the rest of the comments in this file, (FIXME-SOON),
    here is the current scheme for error messages etc:
@@ -61,7 +61,7 @@ static void as_bad_internal (char *, unsigned int, char *);
    continues as though no error occurred.  */
 
 static void
-identify (char *file)
+identify (const char *file)
 {
   static int identified;
 
@@ -72,7 +72,7 @@ identify (char *file)
   if (!file)
     {
       unsigned int x;
-      as_where (&file, &x);
+      file = as_where (&x);
     }
 
   if (file)
@@ -105,10 +105,10 @@ had_errors (void)
 static void
 as_show_where (void)
 {
-  char *file;
+  const char *file;
   unsigned int line;
 
-  as_where (&file, &line);
+  file = as_where (&line);
   identify (file);
   if (file)
     {
@@ -140,12 +140,12 @@ as_tsktsk (const char *format, ...)
 /* The common portion of as_warn and as_warn_where.  */
 
 static void
-as_warn_internal (char *file, unsigned int line, char *buffer)
+as_warn_internal (const char *file, unsigned int line, char *buffer)
 {
   ++warning_count;
 
   if (file == NULL)
-    as_where (&file, &line);
+    file = as_where (&line);
 
   identify (file);
   if (file)
@@ -188,7 +188,7 @@ as_warn (const char *format, ...)
    the varargs correctly and portably.  */
 
 void
-as_warn_where (char *file, unsigned int line, const char *format, ...)
+as_warn_where (const char *file, unsigned int line, const char *format, ...)
 {
   va_list args;
   char buffer[2000];
@@ -205,12 +205,12 @@ as_warn_where (char *file, unsigned int line, const char *format, ...)
 /* The common portion of as_bad and as_bad_where.  */
 
 static void
-as_bad_internal (char *file, unsigned int line, char *buffer)
+as_bad_internal (const char *file, unsigned int line, char *buffer)
 {
   ++error_count;
 
   if (file == NULL)
-    as_where (&file, &line);
+    file = as_where (&line);
 
   identify (file);
   if (file)
@@ -251,7 +251,7 @@ as_bad (const char *format, ...)
    the varargs correctly and portably.  */
 
 void
-as_bad_where (char *file, unsigned int line, const char *format, ...)
+as_bad_where (const char *file, unsigned int line, const char *format, ...)
 {
   va_list args;
   char buffer[2000];
@@ -346,7 +346,7 @@ as_internal_value_out_of_range (const char *  prefix,
 				offsetT       val,
 				offsetT       min,
 				offsetT       max,
-				char *        file,
+				const char *        file,
 				unsigned      line,
 				int           bad)
 {
@@ -418,7 +418,7 @@ as_warn_value_out_of_range (char *   prefix,
 			   offsetT  value,
 			   offsetT  min,
 			   offsetT  max,
-			   char *   file,
+			   const char *   file,
 			   unsigned line)
 {
   as_internal_value_out_of_range (prefix, value, min, max, file, line, 0);
@@ -429,7 +429,7 @@ as_bad_value_out_of_range (char *   prefix,
 			   offsetT  value,
 			   offsetT  min,
 			   offsetT  max,
-			   char *   file,
+			   const char *   file,
 			   unsigned line)
 {
   as_internal_value_out_of_range (prefix, value, min, max, file, line, 1);

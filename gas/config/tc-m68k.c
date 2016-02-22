@@ -122,7 +122,7 @@ struct label_line
 {
   struct label_line *next;
   symbolS *label;
-  char *file;
+  const char *file;
   unsigned int line;
   int text;
 };
@@ -4792,7 +4792,7 @@ m68k_frob_label (symbolS *sym)
   n = (struct label_line *) xmalloc (sizeof *n);
   n->next = labels;
   n->label = sym;
-  as_where (&n->file, &n->line);
+  n->file = as_where (&n->line);
   n->text = 0;
   labels = n;
   current_label = n;

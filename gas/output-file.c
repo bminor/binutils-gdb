@@ -28,7 +28,7 @@
 bfd *stdoutput;
 
 void
-output_file_create (char *name)
+output_file_create (const char *name)
 {
   if (name[0] == '-' && name[1] == '\0')
     as_fatal (_("can't open a bfd on stdout %s"), name);
@@ -50,7 +50,7 @@ output_file_create (char *name)
 }
 
 void
-output_file_close (char *filename)
+output_file_close (const char *filename)
 {
   bfd_boolean res;
 

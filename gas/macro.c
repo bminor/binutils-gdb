@@ -648,7 +648,7 @@ free_macro (macro_entry *macro)
 const char *
 define_macro (size_t idx, sb *in, sb *label,
 	      size_t (*get_line) (sb *),
-	      char *file, unsigned int line,
+	      const char *file, unsigned int line,
 	      const char **namep)
 {
   macro_entry *macro;

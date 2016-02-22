@@ -1291,7 +1291,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 
 #ifdef WARN_COMMENTS
 	  if (!found_comment)
-	    as_where (&found_comment_file, &found_comment);
+	    found_comment_file = as_where (&found_comment);
 #endif
 	  do
 	    {

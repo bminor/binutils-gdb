@@ -1840,7 +1840,7 @@ d30v_start_line (void)
 }
 
 static void
-check_size (long value, int bits, char *file, int line)
+check_size (long value, int bits, const char *file, int line)
 {
   int tmp, max;
 

@@ -60,7 +60,7 @@ struct frag {
   struct frag *fr_next;
 
   /* Where the frag was created, or where it became a variant frag.  */
-  char *fr_file;
+  const char *fr_file;
   unsigned int fr_line;
 
 #ifndef NO_LISTING

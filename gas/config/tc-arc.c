@@ -2239,7 +2239,7 @@ static unsigned
 insert_operand (unsigned insn,
 		const struct arc_operand *operand,
 		offsetT val,
-		char *file,
+		const char *file,
 		unsigned line)
 {
   offsetT min = 0, max = 0;

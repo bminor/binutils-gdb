@@ -4259,11 +4259,11 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 static void
 output_info (const char *format, ...)
 {
-  char *file;
+  const char *file;
   unsigned int line;
   va_list args;
 
-  as_where (&file, &line);
+  file = as_where (&line);
   if (file)
     {
       if (line != 0)

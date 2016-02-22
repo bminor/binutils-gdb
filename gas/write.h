@@ -112,7 +112,7 @@ struct fix
 
   /* The location of the instruction which created the reloc, used
      in error messages.  */
-  char *fx_file;
+  const char *fx_file;
   unsigned fx_line;
 
 #ifdef USING_CGEN
@@ -156,7 +156,7 @@ struct reloc_list
       arelent r;
     } b;
   } u;
-  char *file;
+  const char *file;
   unsigned int line;
 };
 

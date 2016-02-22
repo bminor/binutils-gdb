@@ -186,7 +186,7 @@ int mmix_next_semicolon_is_eoln = 1;
 
 /* Do we have a BSPEC in progress?  */
 static int doing_bspec = 0;
-static char *bspec_file;
+static const char *bspec_file;
 static unsigned int bspec_line;
 
 struct option md_longopts[] =
@@ -2141,7 +2141,7 @@ s_bspec (int unused ATTRIBUTE_UNUSED)
   subseg_set (sec, 0);
 
   /* Save position for missing ESPEC.  */
-  as_where (&bspec_file, &bspec_line);
+  bspec_file = as_where (&bspec_line);
 
   doing_bspec = 1;
 }
@@ -2939,18 +2939,16 @@ mmix_handle_mmixal (void)
 	 caller is about to bump the counters.  Adjust the error messages.  */
       if (is_end_of_line[(unsigned int) *s])
 	{
-	  char *name;
 	  unsigned int line;
-	  as_where (&name, &line);
+	  const char * name = as_where (&line);
 	  as_bad_where (name, line + 1,
 			_("[0-9]H labels may not appear alone on a line"));
 	  current_fb_label = -1;
 	}
       if (*s == '.')
 	{
-	  char *name;
 	  unsigned int line;
-	  as_where (&name, &line);
+	  const char * name  = as_where (&line);
 	  as_bad_where (name, line + 1,
 			_("[0-9]H labels do not mix with dot-pseudos"));
 	  current_fb_label = -1;
@@ -3555,7 +3553,7 @@ mmix_md_end (void)
       actual_seg = S_GET_SEGMENT (loc_assert->loc_sym);
       if (actual_seg != loc_assert->old_seg)
 	{
-	  char *fnam;
+	  const char *fnam;
 	  unsigned int line;
 	  int e_valid = expr_symbol_where (loc_assert->loc_sym, &fnam, &line);
 

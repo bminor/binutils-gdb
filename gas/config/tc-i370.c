@@ -2498,7 +2498,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	 any operands that need relocation.  Due to the 12-bit naturew of
 	 i370 addressing, this would be unusual.  */
         {
-          char *sfile;
+          const char *sfile;
           unsigned int sline;
 
           /* Use expr_symbol_where to see if this is an expression
