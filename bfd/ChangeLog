@@ -1,3 +1,9 @@
+2016-02-22  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64. (aarch64_type_of_stub): Remove redundation calcuation
+	for destination.  Remove useless function parameters.
+	(elfNN_aarch64_size_stubs): Update parameters for aarch64_type_of_stub.
+
 2016-02-19  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/19629
