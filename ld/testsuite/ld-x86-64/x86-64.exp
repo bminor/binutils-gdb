@@ -239,6 +239,12 @@ run_dump_test "pr14215"
 run_dump_test "pr14207"
 run_dump_test "gotplt1"
 run_dump_test "pie1"
+run_dump_test "largecomm-1a"
+run_dump_test "largecomm-1b"
+run_dump_test "largecomm-1c"
+run_dump_test "largecomm-1d"
+run_dump_test "largecomm-1e"
+run_dump_test "largecomm-1f"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
@@ -375,6 +381,7 @@ run_dump_test "pr19636-2i"
 run_dump_test "pr19636-3a"
 run_dump_test "pr19636-3b"
 run_dump_test "pr19636-3c"
+run_dump_test "pr19645"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"

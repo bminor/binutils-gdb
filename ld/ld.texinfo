@@ -1092,6 +1092,10 @@ The recognized keywords are:
 Combines multiple reloc sections and sorts them to make dynamic symbol
 lookup caching possible.
 
+@item common
+Generate common symbols with the STT_COMMON type druing a relocatable
+link.
+
 @item defs
 Disallows undefined symbols in object files.  Undefined symbols in
 shared libraries are still allowed.
@@ -1131,6 +1135,10 @@ Allows multiple definitions.
 
 @item nocombreloc
 Disables multiple reloc sections combining.
+
+@item nocommon
+Generate common symbols with the STT_OBJECT type druing a relocatable
+link.
 
 @item nocopyreloc
 Disable linker generated .dynbss variables used in place of variables

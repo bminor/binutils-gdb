@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add --elf-stt-common= option to objcopy for ELF targets to control
+  whether to convert common symbols to the STT_COMMON type.
+
 Changes in 2.26:
 
 * Add option to objcopy to insert new symbols into a file:

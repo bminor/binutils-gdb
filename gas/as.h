@@ -592,6 +592,9 @@ COMMON enum
   }
 flag_size_check;
 
+/* If we should generate ELF common symbols with the STT_COMMON type.  */
+extern int flag_use_elf_stt_common;
+
 /* If section name substitution sequences should be honored */
 COMMON int flag_sectname_subst;
 #endif

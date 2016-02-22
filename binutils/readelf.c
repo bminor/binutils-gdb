@@ -11982,6 +11982,7 @@ apply_relocations (void *                     file,
 	     referencing a global array.  For an example of this see
 	     the _clz.o binary in libgcc.a.  */
 	  if (sym != symtab
+	      && ELF_ST_TYPE (sym->st_info) != STT_COMMON
 	      && ELF_ST_TYPE (sym->st_info) > STT_SECTION)
 	    {
 	      warn (_("skipping unexpected symbol type %s in %ld'th relocation in section %s\n"),

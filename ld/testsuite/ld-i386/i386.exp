@@ -349,6 +349,7 @@ run_dump_test "pr19636-4a"
 run_dump_test "pr19636-4b"
 run_dump_test "pr19636-4c"
 run_dump_test "pr19636-4d"
+run_dump_test "pr19645"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
