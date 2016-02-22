@@ -1,3 +1,8 @@
+2016-02-22  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* gdb.trace/unavailable.exp (gdb_unavailable_registers_test_1): Fix
+	info registers pattern.
+
 2016-02-18  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	* lib/future.exp: Add D support.
