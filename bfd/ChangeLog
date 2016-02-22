@@ -1,3 +1,8 @@
+2016-02-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* syms.c: Remove BSF_COMMON from comments.
+	* bfd-in2.h: Regenerated.
+
 2016-02-22  Jiong Wang  <jiong.wang@arm.com>
 
 	* elfnn-aarch64. (aarch64_type_of_stub): Remove redundation calcuation
