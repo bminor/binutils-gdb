@@ -1,3 +1,7 @@
+2016-02-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb-gdb.py (class TypeFlagsPrinter): Use parentheses for print.
+
 2016-02-22  Yao Qi  <yao.qi@linaro.org>
 
 	* arm-tdep.c: Fix code format issues.
