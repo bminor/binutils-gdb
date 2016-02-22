@@ -450,7 +450,7 @@ static int br_cnt;
 /* Name of the table of pointers to branches.  A local (i.e.,
    non-external) symbol.  */
 
-static void ctrl_fmt (char *, long, int);
+static void ctrl_fmt (const char *, long, int);
 
 
 void
@@ -495,7 +495,7 @@ md_begin (void)
    string is not consumed in the evaluation -- tolerate no dangling junk!  */
 
 static void
-parse_expr (char *textP,		/* Text of expression to be parsed.  */
+parse_expr (const char *textP,		/* Text of expression to be parsed.  */
 	    expressionS *expP)		/* Where to put the results of parsing.  */
 {
   char *save_in;		/* Save global here.  */
@@ -513,7 +513,7 @@ parse_expr (char *textP,		/* Text of expression to be parsed.  */
   else
     {
       save_in = input_line_pointer;	/* Save global.  */
-      input_line_pointer = textP;	/* Make parser work for us.  */
+      input_line_pointer = (char *) textP;	/* Make parser work for us.  */
 
       (void) expression (expP);
       if ((size_t) (input_line_pointer - textP) != strlen (textP))
@@ -558,7 +558,7 @@ emit (long instr)		/* Word to be output, host byte order.  */
   		address displacement is greater than 13 bits.  */
 
 static void
-get_cdisp (char *dispP, /* Displacement as specified in source instruction.  */
+get_cdisp (const char *dispP, /* Displacement as specified in source instruction.  */
 	   const char *ifmtP, /* "COBR" or "CTRL" (for use in error message).  */
 	   long instr,  /* Instruction needing the displacement.  */
 	   int numbits, /* # bits of displacement (13 for COBR, 24 for CTRL).  */
@@ -1494,7 +1494,7 @@ brlab_next (void)
 }
 
 static void
-ctrl_fmt (char *targP,		/* Pointer to text of lone operand (if any).  */
+ctrl_fmt (const char *targP,		/* Pointer to text of lone operand (if any).  */
 	  long opcode,		/* Template of instruction.  */
 	  int num_ops)		/* Number of operands.  */
 {

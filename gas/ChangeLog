@@ -1,5 +1,14 @@
 2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
+	* config/tc-i960.c (parse_expr): Cast to char * when assigning to
+	input_line_pointer.
+	* config/tc-m32r.c (expand_debug_syms): Likewise.
+	* config/tc-msp430.c (msp430_dstoperand): Likewise.
+	* config/tc-z80.c (md_begin): Likewise.
+	* stabs.c (stabs_generate_asm_func): Likewise.
+
+2016-03-31  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
 	* cgen.c: Modernize the way functions declare arguments.
 	* config/tc-bfin.c: Likewise.
 	* config/tc-pdp11.c: Likewise.

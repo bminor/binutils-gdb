@@ -249,7 +249,7 @@ md_begin (void)
         }
     }
   p = input_line_pointer;
-  input_line_pointer = "0";
+  input_line_pointer = (char *) "0";
   nul.X_md=0;
   expression (& nul);
   input_line_pointer = p;

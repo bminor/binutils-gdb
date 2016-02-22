@@ -662,7 +662,7 @@ stabs_generate_asm_func (const char *funcname, const char *startlabname)
 
   if (! void_emitted_p)
     {
-      input_line_pointer = "\"void:t1=1\",128,0,0,0";
+      input_line_pointer = (char *) "\"void:t1=1\",128,0,0,0";
       s_stab ('s');
       void_emitted_p = 1;
     }

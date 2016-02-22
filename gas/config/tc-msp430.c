@@ -2156,7 +2156,7 @@ msp430_dstoperand (struct msp430_operand_s * op,
 
   if (op->am == 2)
     {
-      char *__tl = "0";
+      char *__tl = (char *) "0";
 
       op->mode = OP_EXP;
       op->am = 1;
