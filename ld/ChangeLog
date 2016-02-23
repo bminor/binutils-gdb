@@ -1,3 +1,10 @@
+2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-frv/fdpic-pie-6.d: Updated.
+	* testsuite/ld-mips-elf/pie-n32.d: Likewise.
+	* testsuite/ld-mips-elf/pie-n64.d: Likewise.
+	* testsuite/ld-mips-elf/pie-o32.d: Likewise.
+
 2016-02-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr19539.d: Skip cris*-*-* targets.

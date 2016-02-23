@@ -1,3 +1,9 @@
+2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (bfd_elf_record_link_assignment): Check for shared
+	library, instead of PIC, and don't check PDE when making linker
+	assigned symbol dynamic.
+
 2016-02-23  Faraz Shahbazker  <faraz.shahbazker@imgtec.com>
 
 	* bfd/elfxx-mips.c (_bfd_mips_post_process_headers): Increment
