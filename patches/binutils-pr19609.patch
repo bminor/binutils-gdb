@@ -1,4 +1,4 @@
-From b0bf1ae5a04784b96e29460ccca5d587e8e9b6ef Mon Sep 17 00:00:00 2001
+From ff14210ceceb8d97971176e0059fcbe98638d15b Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Wed, 10 Feb 2016 15:12:27 -0800
 Subject: [PATCH] Optimize x86 GOT32X/GOTPCRELX relocations
@@ -256,7 +256,7 @@ ld/
  create mode 100644 ld/testsuite/ld-x86-64/pr19609-5e.d
 
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index 36868e3..7824e6d 100644
+index 269d5c7..5565345 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
 @@ -2825,6 +2825,7 @@ elf_i386_convert_load (bfd *abfd, asection *sec,
@@ -409,7 +409,7 @@ index 36868e3..7824e6d 100644
  	    {
  	      Elf_Internal_Rela outrel;
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 420aa03..eb89444 100644
+index 4a5578b..9e7aa07 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
 @@ -3037,6 +3037,8 @@ elf_x86_64_convert_load (bfd *abfd, asection *sec,
@@ -700,13 +700,13 @@ index e6e82de..cfea36b 100644
  [ 	]*[a-f0-9]+:	83 ec 0c             	sub    \$0xc,%esp
  [ 	]*[a-f0-9]+:	6a 00                	push   \$0x0
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
-index c760766..f23efd5 100644
+index 9c030d1..f47890f 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
-@@ -338,6 +338,20 @@ run_dump_test "pr19636-2d"
- run_dump_test "pr19636-2d-nacl"
- run_dump_test "pr19636-2e"
- run_dump_test "pr19636-2e-nacl"
+@@ -349,6 +349,20 @@ run_dump_test "pr19636-4a"
+ run_dump_test "pr19636-4b"
+ run_dump_test "pr19636-4c"
+ run_dump_test "pr19636-4d"
 +run_dump_test "pr19609-1a"
 +run_dump_test "pr19609-1b"
 +run_dump_test "pr19609-1c"
@@ -2244,7 +2244,7 @@ index 0000000..b6b6c65
 +[a-f0-9]+ <_start>:
 +[ ]+[a-f0-9]+:	ff 15 ([0-9a-f]{2} ){4} *	callq  \*-?0x[a-f0-9]+\(%rip\)        # [a-f0-9]+ <[0-9a-zA-Z_]+[\+\-]+0x[a-f0-9]+>
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index d6a9073..b516991 100644
+index a8c356b..7d585dd 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
 @@ -299,6 +299,8 @@ run_dump_test "pr13082-2a"
@@ -2256,10 +2256,10 @@ index d6a9073..b516991 100644
  run_dump_test "pr13082-4a"
  run_dump_test "pr13082-4b"
  run_dump_test "pr13082-5a"
-@@ -365,6 +367,35 @@ run_dump_test "pr19636f"
- run_dump_test "pr19636g"
- run_dump_test "pr19636h"
- run_dump_test "pr19636i"
+@@ -375,6 +377,35 @@ run_dump_test "pr19636-2i"
+ run_dump_test "pr19636-3a"
+ run_dump_test "pr19636-3b"
+ run_dump_test "pr19636-3c"
 +run_dump_test "pr19609-1a"
 +run_dump_test "pr19609-1b"
 +run_dump_test "pr19609-1c"
