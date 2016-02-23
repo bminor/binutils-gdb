@@ -1,3 +1,8 @@
+2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/elf/elf.exp: Skip tests for common directive on
+	hpux.
+
 2016-02-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* output-file.c (output_file_create): Make file name argument const.
