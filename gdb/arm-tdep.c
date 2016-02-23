@@ -6741,7 +6741,7 @@ thumb2_decode_ext_reg_ld_st (struct gdbarch *gdbarch, uint16_t insn1,
 }
 
 static int
-arm_decode_svc_copro (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
+arm_decode_svc_copro (struct gdbarch *gdbarch, uint32_t insn,
 		      struct regcache *regs, struct displaced_step_closure *dsc)
 {
   unsigned int op1 = bits (insn, 20, 25);
@@ -7446,7 +7446,7 @@ thumb_process_displaced_32bit_insn (struct gdbarch *gdbarch, uint16_t insn1,
 
 static void
 thumb_process_displaced_insn (struct gdbarch *gdbarch, CORE_ADDR from,
-			      CORE_ADDR to, struct regcache *regs,
+			      struct regcache *regs,
 			      struct displaced_step_closure *dsc)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
@@ -7487,7 +7487,7 @@ arm_process_displaced_insn (struct gdbarch *gdbarch, CORE_ADDR from,
   dsc->wrote_to_pc = 0;
 
   if (!displaced_in_arm_mode (regs))
-    return thumb_process_displaced_insn (gdbarch, from, to, regs, dsc);
+    return thumb_process_displaced_insn (gdbarch, from, regs, dsc);
 
   dsc->is_thumb = 0;
   dsc->insn_size = 4;
@@ -7518,7 +7518,7 @@ arm_process_displaced_insn (struct gdbarch *gdbarch, CORE_ADDR from,
       break;
 
     case 0xc: case 0xd: case 0xe: case 0xf:
-      err = arm_decode_svc_copro (gdbarch, insn, to, regs, dsc);
+      err = arm_decode_svc_copro (gdbarch, insn, regs, dsc);
       break;
     }
 

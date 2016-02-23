@@ -1,3 +1,9 @@
+2016-02-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arm-tdep.c (arm_decode_svc_copro): Remove "to" parameter.
+	(thumb_process_displaced_insn): Likewise.
+	(arm_process_displaced_insn): Adjust calls.
+
 2016-02-23  Yao Qi  <yao.qi@linaro.org>
 
 	* aarch64-linux-tdep.c (enum aarch64_syscall) <aarch64_sys_mknod>:
