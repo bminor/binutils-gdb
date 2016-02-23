@@ -297,10 +297,10 @@ new_frag (void)
 void
 listing_newline (char *ps)
 {
-  char *file;
+  const char *file;
   unsigned int line;
   static unsigned int last_line = 0xffff;
-  static char *last_file = NULL;
+  static const char *last_file = NULL;
   list_info_type *new_i = NULL;
 
   if (listing == 0)
@@ -327,7 +327,7 @@ listing_newline (char *ps)
     }
 #endif
 
-  as_where (&file, &line);
+  file = as_where (&line);
   if (ps == NULL)
     {
       if (line == last_line

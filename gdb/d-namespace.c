@@ -388,31 +388,15 @@ reset_directive_searched (void *data)
 }
 
 /* Search for NAME by applying all import statements belonging to
-   BLOCK which are applicable in SCOPE.
-
-   If SEARCH_PARENTS the search will include imports which are
-   applicable in parents of SCOPE.
-   Example:
-
-     module A;
-     import X;
-     void B() {
-       import Y;
-     }
-
-   If SCOPE is "A.B" and SEARCH_PARENTS is true, the imports of
-   modules X and Y will be considered.  If SEARCH_PARENTS is false
-   only the import of Y is considered.  */
+   BLOCK which are applicable in SCOPE.  */
 
 static struct block_symbol
 d_lookup_symbol_imports (const char *scope, const char *name,
 			 const struct block *block,
-			 const domain_enum domain,
-			 const int search_parents)
+			 const domain_enum domain)
 {
   struct using_direct *current;
   struct block_symbol sym;
-  int directive_match;
   struct cleanup *searched_cleanup;
 
   /* First, try to find the symbol in the given module.  */
@@ -430,18 +414,9 @@ d_lookup_symbol_imports (const char *scope, const char *name,
        current = current->next)
     {
       const char **excludep;
-      int len = strlen (current->import_dest);
 
-      directive_match = (search_parents
-			 ? (strncmp (scope, current->import_dest, len) == 0
-			    && (len == 0
-				|| scope[len] == '.'
-				|| scope[len] == '\0'))
-			 : strcmp (scope, current->import_dest) == 0);
-
-      /* If the import destination is the current scope or one of its
-	 ancestors then it is applicable.  */
-      if (directive_match && !current->searched)
+      /* If the import destination is the current scope then search it.  */
+      if (!current->searched && strcmp (scope, current->import_dest) == 0)
 	{
 	  /* Mark this import as searched so that the recursive call
 	     does not search it again.  */
@@ -510,7 +485,7 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 		      name_scope++;
 		      sym = d_lookup_symbol_imports (current->import_src,
 						     name + name_scope,
-						     block, domain, 0);
+						     block, domain);
 		    }
 		}
 	    }
@@ -520,7 +495,7 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 		 current->import_src as MODULE to direct the search
 		 towards the imported module.  */
 	      sym = d_lookup_symbol_imports (current->import_src,
-					     name, block, domain, 0);
+					     name, block, domain);
 	    }
 	  current->searched = 0;
 	  discard_cleanups (searched_cleanup);
@@ -554,7 +529,7 @@ d_lookup_symbol_module (const char *scope, const char *name,
      blocks.  */
   while (block != NULL)
     {
-      sym = d_lookup_symbol_imports (scope, name, block, domain, 1);
+      sym = d_lookup_symbol_imports (scope, name, block, domain);
 
       if (sym.symbol != NULL)
 	return sym;

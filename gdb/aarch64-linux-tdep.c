@@ -409,12 +409,12 @@ enum aarch64_syscall {
   aarch64_sys_ioprio_set = 30,
   aarch64_sys_ioprio_get = 31,
   aarch64_sys_flock = 32,
-  aarch64_sys_mknod = 33,
-  aarch64_sys_mkdir = 34,
-  aarch64_sys_unlink = 35,
-  aarch64_sys_symlink = 36,
-  aarch64_sys_link = 37,
-  aarch64_sys_rename = 38,
+  aarch64_sys_mknodat = 33,
+  aarch64_sys_mkdirat = 34,
+  aarch64_sys_unlinkat = 35,
+  aarch64_sys_symlinkat = 36,
+  aarch64_sys_linkat = 37,
+  aarch64_sys_renameat = 38,
   aarch64_sys_umount2 = 39,
   aarch64_sys_mount = 40,
   aarch64_sys_pivot_root = 41,
@@ -424,7 +424,7 @@ enum aarch64_syscall {
   aarch64_sys_truncate = 45,
   aarch64_sys_ftruncate = 46,
   aarch64_sys_fallocate = 47,
-  aarch64_sys_faccess = 48,
+  aarch64_sys_faccessat = 48,
   aarch64_sys_chdir = 49,
   aarch64_sys_fchdir = 50,
   aarch64_sys_chroot = 51,
@@ -432,7 +432,7 @@ enum aarch64_syscall {
   aarch64_sys_fchmodat = 53,
   aarch64_sys_fchownat = 54,
   aarch64_sys_fchown = 55,
-  aarch64_sys_open = 56,
+  aarch64_sys_openat = 56,
   aarch64_sys_close = 57,
   aarch64_sys_vhangup = 58,
   aarch64_sys_pipe2 = 59,
@@ -454,8 +454,8 @@ enum aarch64_syscall {
   aarch64_sys_vmsplice = 75,
   aarch64_sys_splice = 76,
   aarch64_sys_tee = 77,
-  aarch64_sys_readlink = 78,
-  aarch64_sys_fstatat = 79,
+  aarch64_sys_readlinkat = 78,
+  aarch64_sys_newfstatat = 79,
   aarch64_sys_fstat = 80,
   aarch64_sys_sync = 81,
   aarch64_sys_fsync = 82,
@@ -648,6 +648,9 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
 #define SYSCALL_MAP(SYSCALL) case aarch64_sys_##SYSCALL: \
   return gdb_sys_##SYSCALL
 
+#define UNSUPPORTED_SYSCALL_MAP(SYSCALL) case aarch64_sys_##SYSCALL: \
+  return gdb_sys_no_syscall
+
   switch (syscall_number)
     {
       SYSCALL_MAP (io_setup);
@@ -670,6 +673,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (fremovexattr);
       SYSCALL_MAP (getcwd);
       SYSCALL_MAP (lookup_dcookie);
+      UNSUPPORTED_SYSCALL_MAP (eventfd2);
 
     case aarch64_sys_epoll_create1:
       return gdb_sys_epoll_create;
@@ -677,26 +681,40 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (epoll_ctl);
       SYSCALL_MAP (epoll_pwait);
       SYSCALL_MAP (dup);
+      UNSUPPORTED_SYSCALL_MAP (dup3);
       SYSCALL_MAP (fcntl);
+      UNSUPPORTED_SYSCALL_MAP (inotify_init1);
       SYSCALL_MAP (inotify_add_watch);
       SYSCALL_MAP (inotify_rm_watch);
       SYSCALL_MAP (ioctl);
       SYSCALL_MAP (ioprio_set);
       SYSCALL_MAP (ioprio_get);
       SYSCALL_MAP (flock);
+      SYSCALL_MAP (mknodat);
+      SYSCALL_MAP (mkdirat);
+      SYSCALL_MAP (unlinkat);
+      SYSCALL_MAP (symlinkat);
+      SYSCALL_MAP (linkat);
+      SYSCALL_MAP (renameat);
+      UNSUPPORTED_SYSCALL_MAP (umount2);
       SYSCALL_MAP (mount);
+      SYSCALL_MAP (pivot_root);
       SYSCALL_MAP (nfsservctl);
       SYSCALL_MAP (statfs);
       SYSCALL_MAP (truncate);
       SYSCALL_MAP (ftruncate);
+      UNSUPPORTED_SYSCALL_MAP (fallocate);
+      SYSCALL_MAP (faccessat);
       SYSCALL_MAP (fchdir);
       SYSCALL_MAP (chroot);
       SYSCALL_MAP (fchmod);
       SYSCALL_MAP (fchmodat);
       SYSCALL_MAP (fchownat);
       SYSCALL_MAP (fchown);
+      SYSCALL_MAP (openat);
       SYSCALL_MAP (close);
       SYSCALL_MAP (vhangup);
+      UNSUPPORTED_SYSCALL_MAP (pipe2);
       SYSCALL_MAP (quotactl);
       SYSCALL_MAP (getdents64);
       SYSCALL_MAP (lseek);
@@ -706,17 +724,27 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (writev);
       SYSCALL_MAP (pread64);
       SYSCALL_MAP (pwrite64);
+      UNSUPPORTED_SYSCALL_MAP (preadv);
+      UNSUPPORTED_SYSCALL_MAP (pwritev);
       SYSCALL_MAP (sendfile);
       SYSCALL_MAP (pselect6);
       SYSCALL_MAP (ppoll);
+      UNSUPPORTED_SYSCALL_MAP (signalfd4);
       SYSCALL_MAP (vmsplice);
       SYSCALL_MAP (splice);
       SYSCALL_MAP (tee);
+      SYSCALL_MAP (readlinkat);
+      SYSCALL_MAP (newfstatat);
+
       SYSCALL_MAP (fstat);
       SYSCALL_MAP (sync);
       SYSCALL_MAP (fsync);
       SYSCALL_MAP (fdatasync);
       SYSCALL_MAP (sync_file_range);
+      UNSUPPORTED_SYSCALL_MAP (timerfd_create);
+      UNSUPPORTED_SYSCALL_MAP (timerfd_settime);
+      UNSUPPORTED_SYSCALL_MAP (timerfd_gettime);
+      UNSUPPORTED_SYSCALL_MAP (utimensat);
       SYSCALL_MAP (acct);
       SYSCALL_MAP (capget);
       SYSCALL_MAP (capset);
@@ -796,6 +824,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (getrusage);
       SYSCALL_MAP (umask);
       SYSCALL_MAP (prctl);
+      SYSCALL_MAP (getcpu);
       SYSCALL_MAP (gettimeofday);
       SYSCALL_MAP (settimeofday);
       SYSCALL_MAP (adjtimex);
@@ -870,7 +899,28 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (set_mempolicy);
       SYSCALL_MAP (migrate_pages);
       SYSCALL_MAP (move_pages);
+      UNSUPPORTED_SYSCALL_MAP (rt_tgsigqueueinfo);
+      UNSUPPORTED_SYSCALL_MAP (perf_event_open);
+      UNSUPPORTED_SYSCALL_MAP (accept4);
+      UNSUPPORTED_SYSCALL_MAP (recvmmsg);
 
+      SYSCALL_MAP (wait4);
+
+      UNSUPPORTED_SYSCALL_MAP (prlimit64);
+      UNSUPPORTED_SYSCALL_MAP (fanotify_init);
+      UNSUPPORTED_SYSCALL_MAP (fanotify_mark);
+      UNSUPPORTED_SYSCALL_MAP (name_to_handle_at);
+      UNSUPPORTED_SYSCALL_MAP (open_by_handle_at);
+      UNSUPPORTED_SYSCALL_MAP (clock_adjtime);
+      UNSUPPORTED_SYSCALL_MAP (syncfs);
+      UNSUPPORTED_SYSCALL_MAP (setns);
+      UNSUPPORTED_SYSCALL_MAP (sendmmsg);
+      UNSUPPORTED_SYSCALL_MAP (process_vm_readv);
+      UNSUPPORTED_SYSCALL_MAP (process_vm_writev);
+      UNSUPPORTED_SYSCALL_MAP (kcmp);
+      UNSUPPORTED_SYSCALL_MAP (finit_module);
+      UNSUPPORTED_SYSCALL_MAP (sched_setattr);
+      UNSUPPORTED_SYSCALL_MAP (sched_getattr);
   default:
     return gdb_sys_no_syscall;
   }

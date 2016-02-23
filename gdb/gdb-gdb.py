@@ -88,14 +88,14 @@ class TypeFlagsPrinter:
         try:
             flags = gdb.lookup_type("enum type_flag_value")
         except:
-            print "Warning: Cannot find enum type_flag_value type."
-            print "         `struct type' pretty-printer will be degraded"
+            print("Warning: Cannot find enum type_flag_value type.")
+            print("         `struct type' pretty-printer will be degraded")
             return
         try:
             iflags = gdb.lookup_type("enum type_instance_flag_value")
         except:
-            print "Warning: Cannot find enum type_instance_flag_value type."
-            print "         `struct type' pretty-printer will be degraded"
+            print("Warning: Cannot find enum type_instance_flag_value type.")
+            print("         `struct type' pretty-printer will be degraded")
             return
         # Note: TYPE_FLAG_MIN is a duplicate of TYPE_FLAG_UNSIGNED,
         # so exclude it from the list we are building.

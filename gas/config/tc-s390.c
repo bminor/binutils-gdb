@@ -582,7 +582,7 @@ static void
 s390_insert_operand (unsigned char *insn,
 		     const struct s390_operand *operand,
 		     offsetT val,
-		     char *file,
+		     const char *file,
 		     unsigned int line)
 {
   addressT uval;
@@ -2316,7 +2316,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       else
 	{
-	  char *sfile;
+	  const char *sfile;
 	  unsigned int sline;
 
 	  /* Use expr_symbol_where to see if this is an expression

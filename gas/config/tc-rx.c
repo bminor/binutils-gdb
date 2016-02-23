@@ -266,10 +266,10 @@ rx_include (int ignore)
   FILE * try;
   char * path;
   char * filename;
-  char * current_filename;
+  const char * current_filename;
   char * last_char;
-  char * p;
-  char * d;
+  const char * p;
+  const char * d;
   char * f;
   char   end_char;
   size_t len;
@@ -300,7 +300,7 @@ rx_include (int ignore)
       return;
     }
 
-  as_where (& current_filename, NULL);
+   current_filename = as_where (NULL);
   f = (char *) xmalloc (strlen (current_filename) + strlen (filename) + 1);
 
   /* Check the filename.  If [@]..FILE[@] is found then replace
@@ -308,7 +308,7 @@ rx_include (int ignore)
      of any directory prefixes or extensions.  */
   if ((p = rx_strcasestr (filename, "..file")) != NULL)
     {
-      char * c;
+      const char * c;
 
       len = 6; /* strlen ("..file"); */
 

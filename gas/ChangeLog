@@ -1,3 +1,156 @@
+2016-02-22  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+
+	* output-file.c (output_file_create): Make file name argument const.
+	(output_file_close): Likewise.
+	* output-file.h (output_file_create): Adjust.
+	(output_file_close): Likewise.
+	* depend.c (quote_string_for_make): Make src argument const char *.
+	(register_dependency): Likewise.
+	(wrap_output): Likewise.
+	* as.h (register_dependency): Adjust.
+	* config/tc-xtensa.c (finish_vinsn): Remove unnecessary calls to
+	as_where ();
+	* symbols.c (S_SET_EXTERNAL): Likewise.
+	* input-scrub.c (as_where): Return the file name.
+	* as.h (as_where): Adjust prototype.
+	* app.c (do_scrub_chars): Adjust.
+	* cond.c (s_elseif): Likewise.
+	(s_else): Likewise.
+	(initialize_cframe): Likewise.
+	* config/obj-coff.c (obj_coff_init_stab_section): Likewise.
+	* config/obj-elf.c (obj_elf_init_stab_section): Likewise.
+	* config/obj-som.c (obj_som_init_stab_section): Likewise.
+	* config/tc-aarch64.c (output_info): Likewise.
+	* config/tc-ia64.c (md_assemble): Likewise.
+	(dot_alias): Likewise.
+	* config/tc-m68k.c (m68k_frob_label): Likewise.
+	* config/tc-mmix.c (s_bspec): Likewise.
+	(mmix_handle_mmixal): Likewise.
+	* config/tc-rx.c (rx_include): Likewise.
+	* config/tc-tic54x.c (tic54x_set_default_include): Likewise.
+	(tic54x_adjust_symtab): Likewise.
+	* config/tc-xtensa.c (directive_push): Likewise.
+	(xtensa_sanity_check): Likewise.
+	(xtensa_relax_frag): Likewise.
+	(md_convert_frag): Likewise.
+	(tinsn_to_slotbuf): Likewise.
+	* dwarf2dbg.c (dwarf2_where): Likewise.
+	* ecoff.c (add_file): Likewise.
+	(ecoff_generate_asm_lineno): Likewise.
+	* expr.c (make_expr_symbol): Likewise.
+	* frags.c (frag_new): Likewise.
+	(frag_var_init): Likewise.
+	* listing.c (listing_newline): Likewise.
+	* messages.c (identify): Likewise.
+	(as_show_where): Likewise.
+	(as_warn_internal): Likewise.
+	(as_bad_internal): Likewise.
+	* read.c (s_irp): Likewise.
+	(s_macro): Likewise.
+	(s_reloc): Likewise.
+	* stabs.c (stabs_generate_asm_file): Likewise.
+	(stabs_generate_asm_lineno): Likewise.
+	(stabs_generate_asm_func): Likewise.
+	* write.c (fix_new_internal): Likewise.
+	* as.h (PRINTF_WHERE_LIKE): Make file name argument const.
+	(as_warn_value_out_of_range): Adjust prototype.
+	(as_bad_value_out_of_range): Adjust prototype.
+	* messages.c (identify): Make file name argument const char *.
+	(as_warn_internal): Likewise.
+	(as_warn_where): Likewise.
+	(as_bad_internal): Likewise.
+	(as_bad_where): Likewise.
+	(as_internal_value_out_of_range): Likewise.
+	(as_warn_value_out_of_range): Likewise.
+	(as_bad_value_out_of_range): Likewise.
+	* as.h (found_comment_file): Change type to const char *.
+	* cond.c (file_line::file): Likewise.
+	* config/obj-coff.c (obj_coff_init_stab_section): Make variable const.
+	* config/obj-elf.c (obj_elf_init_stab_section): Likewise.
+	* config/obj-som.c (obj_som_init_stab_section): Likewise.
+	* config/tc-aarch64.c (output_info): Likewise.
+	* config/tc-alpha.c (insert_operand): Likewise.
+	* config/tc-arc.c (insert_operand): Likewise.
+	* config/tc-d30v.c (check_size): Likewise.
+	* config/tc-ia64.c (struct alias): Likewise.
+	* config/tc-m68k.c (struct label_line): Likewise.
+	* config/tc-mcore.c (md_apply_fix): Likewise.
+	* config/tc-microblaze.c (md_estimate_size_before_relax): Likewise.
+	* config/tc-mips.c (mips16_immed): Likewise.
+	* config/tc-mmix.c (mmix_handle_mmixal): Likewise.
+	* config/tc-ppc.c (ppc_insert_operand): Likewise.
+	* config/tc-rx.c (rx_include): Likewise.
+	* config/tc-s390.c (s390_insert_operand): Likewise.
+	* config/tc-tic54x.c (tic54x_set_default_include): Likewise.
+	(tic54x_adjust_symtab): Likewise.
+	* config/tc-tilegx.c (insert_operand): Likewise.
+	(apply_special_operator): Likewise.
+	* config/tc-tilepro.c (insert_operand): Likewise.
+	* config/tc-xtensa.c (directive_push): Likewise.
+	* ecoff.c (add_file): Likewise.
+	(ecoff_generate_asm_lineno): Likewise.
+	* listing.c (listing_newline): Likewise.
+	* read.c (s_irp): Likewise.
+	* write.c (install_reloc): Likewise.
+	* write.h (struct fix): Likewise.
+	* input-file.c (file_name): Change type to const char *.
+	(saved_file::file_name): Likewise.
+	(input_file_open): Change type of argument to const char *.
+	* input-file.h (input_file_open): Adjust.
+	* input-scrub.c (logical_input_file): change type to const char *.
+	(physical_input_file): Likewise.
+       	(struct input_save): Adjust.
+	(input_scrub_push): Adjust.
+	(input_scrub_begin): Adjust.
+	(as_where): Adjust.
+	* input-scrub.c (input_scrub_new_file): Make file name argument const.
+	(input_scrub_include_file): Likewise.
+	(new_logical_line_flags): Likewise.
+	(new_logical_line): Likewise.
+	* as.h: Adjust.
+	* frags.h (struct frag): Change type of fr_file to const char *.
+	* expr.c (expr_symbol_where): Change type of file argument to
+	const char **.
+	* expr.h (expr_symbol_where): Likewise.
+	* config/tc-i370.c (md_apply_fix): adjust.
+	* config/tc-mmix.c (mmix_md_end): Likewise.
+	* config/tc-ppc.c (md_apply_fix): Likewise.
+	* config/tc-s390.c (md_apply_fix): Likewise.
+	* symbols.c (report_op_error): Likewise.
+	(resolve_symbol_value): Likewise.
+	* config/tc-ia64.c (slot::src_file): Change type to const char *.
+	(rsrc::file): Likewise.
+	* config/tc-xtensa.c (xtensa_sanity_check): Change type of variable to
+	const char *.
+	(xtensa_relax_frag): Likewise.
+	(md_convert_frag): Likewise.
+	(tinsn_to_slotbuf): Likewise.
+	* expr.c (expr_symbol_line): Likewise.
+	* macro.c (define_macro): Likewise.
+	* macro.h (macro_struct): Likewise.
+	* messages.c (as_show_where): Likewise.
+	* read.c (s_macro): Likewise.
+	* stabs.c (stabs_generate_asm_file): Likewise.
+	(generate_asm_file): Likewise.
+	(stabs_generate_asm_lineno): Likewise.
+	* write.h (struct reloc_list): Likewise.
+	* input-scrub.c (as_where): Change return type to const char *.
+	* as.h (as_wheree): Adjust.
+
+2016-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (compress_debug): Move BFD compression bits setting
+	to ...
+	(write_object_file): Here.
+
+2016-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (register_number): Check RegVRex.
+	* testsuite/gas/i386/x86-64-avx512f.s: Add a test for vgatherqpd
+	with %zmm19 and %zmm3.
+	* testsuite/gas/i386/x86-64-avx512f-intel.d: Updated.
+	* testsuite/gas/i386/x86-64-avx512f.d: Likewise.
+
 2016-02-19  Matthew Wahab  <matthew.wahab@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
@@ -10,7 +163,7 @@
 	* read.c (read_a_source_file): Check for assemble_one returning
 	with input_line_pointer set to NULL.
 
-016-02-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
+2016-02-19  Trevor Saunders  <tbsaunde+binutils@tbsaunde.org>
 
 	* listing.c (rebuffer_line): Change return type to void.
 

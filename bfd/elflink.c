@@ -632,9 +632,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 
   if ((h->def_dynamic
        || h->ref_dynamic
-       || bfd_link_pic (info)
-       || (bfd_link_pde (info)
-	   && elf_hash_table (info)->is_relocatable_executable))
+       || bfd_link_dll (info)
+       || elf_hash_table (info)->is_relocatable_executable)
       && h->dynindx == -1)
     {
       if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -875,9 +874,9 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 			  &dynsymcount);
 
   /* There is an unused NULL entry at the head of the table which
-     we must account for in our count.  Unless there weren't any
-     symbols, which means we'll have no table at all.  */
-  if (dynsymcount != 0)
+     we must account for in our count.  We always create the dynsym
+     section, even if it is empty, with dynamic sections.  */
+  if (elf_hash_table (info)->dynamic_sections_created)
     ++dynsymcount;
 
   elf_hash_table (info)->dynsymcount = dynsymcount;

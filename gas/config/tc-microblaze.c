@@ -1960,7 +1960,7 @@ md_apply_fix (fixS *   fixP,
 	      segT     segment)
 {
   char *       buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
-  char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
+  const char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
   const char * symname;
   /* Note: use offsetT because it is signed, valueT is unsigned.  */
   offsetT      val  = (offsetT) * valp;
@@ -2257,7 +2257,7 @@ md_estimate_size_before_relax (fragS * fragP,
 		{
                   /* Variable not in small data read only segment accessed
 		     using small data read only anchor.  */
-                  char *file = fragP->fr_file ? fragP->fr_file : _("unknown");
+                  const char *file = fragP->fr_file ? fragP->fr_file : _("unknown");
 
                   as_bad_where (file, fragP->fr_line,
                                 _("Variable is accessed using small data read "
@@ -2280,7 +2280,7 @@ md_estimate_size_before_relax (fragS * fragP,
                 }
 	      else
 		{
-                  char *file = fragP->fr_file ? fragP->fr_file : _("unknown");
+                  const char *file = fragP->fr_file ? fragP->fr_file : _("unknown");
 
                   as_bad_where (file, fragP->fr_line,
                                 _("Variable is accessed using small data read "

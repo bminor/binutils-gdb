@@ -352,7 +352,7 @@ static tilepro_bundle_bits
 insert_operand (tilepro_bundle_bits bits,
                 const struct tilepro_operand *operand,
                 int operand_value,
-                char *file,
+                const char *file,
                 unsigned lineno)
 {
   /* Range-check the immediate.  */

@@ -972,7 +972,7 @@ use_complex_relocs_for (symbolS * symp)
 static void
 report_op_error (symbolS *symp, symbolS *left, operatorT op, symbolS *right)
 {
-  char *file;
+  const char *file;
   unsigned int line;
   segT seg_left = left ? S_GET_SEGMENT (left) : 0;
   segT seg_right = S_GET_SEGMENT (right);
@@ -1379,7 +1379,7 @@ resolve_symbol_value (symbolS *symp)
 		 already issued a warning about using a bad symbol.  */
 	      if (seg_right == absolute_section && finalize_syms)
 		{
-		  char *file;
+		  const char *file;
 		  unsigned int line;
 
 		  if (expr_symbol_where (symp, &file, &line))
@@ -2222,13 +2222,8 @@ S_SET_EXTERNAL (symbolS *s)
     }
   if (s->bsym->flags & BSF_SECTION_SYM)
     {
-      char * file;
-      unsigned int line;
-
       /* Do not reassign section symbols.  */
-      as_where (& file, & line);
-      as_warn_where (file, line,
-		     _("section symbols are already global"));
+      as_warn (_("section symbols are already global"));
       return;
     }
 #ifndef TC_GLOBAL_REGISTER_SYMBOL_OK

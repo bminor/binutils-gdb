@@ -330,7 +330,7 @@ proc gdb_unavailable_registers_test_1 { } {
     test_register "\$pc"
 
     gdb_test "info registers" \
-	"<unavailable>.*<unavailable>" \
+	".*<unavailable>.*<unavailable>.*" \
 	"info registers, multiple registers not available"
 
     gdb_test "info registers \$$spreg" \

@@ -2045,7 +2045,7 @@ obj_elf_ident (int ignore ATTRIBUTE_UNUSED)
 void
 obj_elf_init_stab_section (segT seg)
 {
-  char *file;
+  const char *file;
   char *p;
   char *stabstr_name;
   unsigned int stroff;
@@ -2058,7 +2058,7 @@ obj_elf_init_stab_section (segT seg)
   p = frag_more (12);
   /* Zero it out.  */
   memset (p, 0, 12);
-  as_where (&file, NULL);
+  file = as_where (NULL);
   stabstr_name = (char *) xmalloc (strlen (segment_name (seg)) + 4);
   strcpy (stabstr_name, segment_name (seg));
   strcat (stabstr_name, "str");

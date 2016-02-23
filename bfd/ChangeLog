@@ -1,3 +1,42 @@
+2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (bfd_elf_record_link_assignment): Check for shared
+	library, instead of PIC, and don't check PDE when making linker
+	assigned symbol dynamic.
+
+2016-02-23  Faraz Shahbazker  <faraz.shahbazker@imgtec.com>
+
+	* bfd/elfxx-mips.c (_bfd_mips_post_process_headers): Increment
+	ABIVERSION for non-executable stack.
+
+2016-02-23  Rich Felker  <bugdal@aerifal.cx>
+
+	PR target/19516
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_symbol):
+	Always produce a RELATIVE reloc for a local symbol.
+
+2016-02-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	Fix test-case ld-elf/pr19617b
+	* elf32-cris.c (elf_cris_discard_excess_program_dynamics): Don't
+	discard unused non-function symbols when --dynamic-list-data.
+
+2016-02-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Always create the
+	dynsym section, even if it is empty, with dynamic sections.
+
+2016-02-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* syms.c: Remove BSF_COMMON from comments.
+	* bfd-in2.h: Regenerated.
+
+2016-02-22  Jiong Wang  <jiong.wang@arm.com>
+
+	* elfnn-aarch64. (aarch64_type_of_stub): Remove redundation calcuation
+	for destination.  Remove useless function parameters.
+	(elfNN_aarch64_size_stubs): Update parameters for aarch64_type_of_stub.
+
 2016-02-19  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/19629

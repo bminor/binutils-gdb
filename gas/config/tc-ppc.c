@@ -1774,7 +1774,7 @@ ppc_insert_operand (unsigned long insn,
 		    const struct powerpc_operand *operand,
 		    offsetT val,
 		    ppc_cpu_t cpu,
-		    char *file,
+		    const char *file,
 		    unsigned int line)
 {
   long min, max, right;
@@ -6841,7 +6841,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       gas_assert (fixP->fx_addsy != NULL);
       if (fixP->fx_r_type == BFD_RELOC_NONE)
 	{
-	  char *sfile;
+	  const char *sfile;
 	  unsigned int sline;
 
 	  /* Use expr_symbol_where to see if this is an expression
@@ -7069,7 +7069,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	default:
 	  if (fixP->fx_addsy)
 	    {
-	      char *sfile;
+	      const char *sfile;
 	      unsigned int sline;
 
 	      /* Use expr_symbol_where to see if this is an

@@ -2348,13 +2348,14 @@ s_globl (int ignore ATTRIBUTE_UNUSED)
 void
 s_irp (int irpc)
 {
-  char *file, *eol;
+  char * eol;
+  const char * file;
   unsigned int line;
   sb s;
   const char *err;
   sb out;
 
-  as_where (&file, &line);
+  file = as_where (&line);
 
   eol = find_end_of_line (input_line_pointer, 0);
   sb_build (&s, eol - input_line_pointer);
@@ -2683,13 +2684,14 @@ get_macro_line_sb (sb *line)
 void
 s_macro (int ignore ATTRIBUTE_UNUSED)
 {
-  char *file, *eol;
+  char *eol;
+  const char * file;
   unsigned int line;
   sb s;
   const char *err;
   const char *name;
 
-  as_where (&file, &line);
+  file = as_where (&line);
 
   eol = find_end_of_line (input_line_pointer, 0);
   sb_build (&s, eol - input_line_pointer);
@@ -4163,7 +4165,7 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
       break;
     }
 
-  as_where (&reloc->file, &reloc->line);
+  reloc->file = as_where (&reloc->line);
   reloc->next = reloc_list;
   reloc_list = reloc;
 

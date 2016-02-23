@@ -1880,6 +1880,9 @@ register_number (const reg_entry *r)
   if (r->reg_flags & RegRex)
     nr += 8;
 
+  if (r->reg_flags & RegVRex)
+    nr += 16;
+
   return nr;
 }
 

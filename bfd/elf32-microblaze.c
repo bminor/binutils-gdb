@@ -3288,7 +3288,7 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
       BFD_ASSERT (sgot != NULL && srela != NULL);
 
       offset = (sgot->output_section->vma + sgot->output_offset
-                       + (h->got.offset &~ (bfd_vma) 1));
+		+ (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
          locally, we just want to emit a RELATIVE reloc.  Likewise if
@@ -3296,8 +3296,8 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
          The entry in the global offset table will already have been
          initialized in the relocate_section function.  */
       if (bfd_link_pic (info)
-          && (info->symbolic || h->dynindx == -1)
-          && h->def_regular)
+          && ((info->symbolic && h->def_regular)
+	      || h->dynindx == -1))
         {
           asection *sec = h->root.u.def.section;
           microblaze_elf_output_dynamic_relocation (output_bfd,

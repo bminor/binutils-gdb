@@ -1876,10 +1876,10 @@ tic54x_set_default_include (int dot)
 
   if (!dot)
     {
-      char *curfile;
+      const char *curfile;
       unsigned lineno;
 
-      as_where (&curfile, &lineno);
+      curfile = as_where (&lineno);
       dir = strcpy (xmalloc (strlen (curfile) + 1), curfile);
       tmp = strrchr (dir, '/');
     }
@@ -5002,9 +5002,8 @@ tic54x_adjust_symtab (void)
   if (symbol_rootP == NULL
       || S_GET_STORAGE_CLASS (symbol_rootP) != C_FILE)
     {
-      char *filename;
       unsigned lineno;
-      as_where (&filename, &lineno);
+      const char * filename = as_where (&lineno);
       c_dot_file_symbol (filename, 0);
     }
 }

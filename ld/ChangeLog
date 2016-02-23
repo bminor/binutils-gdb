@@ -1,3 +1,36 @@
+2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ELF_X86_DEPS): New.
+	(eelf_i386.c): Replace $(ELF_DEPS) with $(ELF_X86_DEPS).
+	(eelf_i386_chaos.c): Likewise.
+	(eelf_i386_fbsd.c): Likewise.
+	(eelf_i386_ldso.c): Likewise.
+	(eelf_i386_nacl.c): Likewise.
+	(eelf_i386_sol2.c): Likewise.
+	(eelf_iamcu.c): Likewise.
+	(eelf32_x86_64.c): Likewise.
+	(eelf32_x86_64_nacl.c): Likewise.
+	(eelf_l1om.c): Likewise.
+	(eelf_l1om_fbsd.c): Likewise.
+	(eelf_k1om.c): Likewise.
+	(eelf_k1om_fbsd.c): Likewise.
+	(eelf_x86_64.c): Likewise.
+	(eelf_x86_64_cloudabi.c): Likewise.
+	(eelf_x86_64_fbsd.c): Likewise.
+	(eelf_x86_64_sol2.c): Likewise.
+	* Makefile.in: Regenerated.
+
+2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-frv/fdpic-pie-6.d: Updated.
+	* testsuite/ld-mips-elf/pie-n32.d: Likewise.
+	* testsuite/ld-mips-elf/pie-n64.d: Likewise.
+	* testsuite/ld-mips-elf/pie-o32.d: Likewise.
+
+2016-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/pr19539.d: Skip cris*-*-* targets.
+
 2016-02-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/pr19617a.d: Enable only for *-*-linux*,

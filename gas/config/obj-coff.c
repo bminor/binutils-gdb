@@ -1810,7 +1810,7 @@ coff_frob_section (segT sec)
 void
 obj_coff_init_stab_section (segT seg)
 {
-  char *file;
+  const char *file;
   char *p;
   char *stabstr_name;
   unsigned int stroff;
@@ -1819,7 +1819,7 @@ obj_coff_init_stab_section (segT seg)
   p = frag_more (12);
   /* Zero it out.  */
   memset (p, 0, 12);
-  as_where (&file, (unsigned int *) NULL);
+  file = as_where ((unsigned int *) NULL);
   stabstr_name = xmalloc (strlen (seg->name) + 4);
   strcpy (stabstr_name, seg->name);
   strcat (stabstr_name, "str");

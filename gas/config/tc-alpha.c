@@ -1973,7 +1973,7 @@ static unsigned
 insert_operand (unsigned insn,
 		const struct alpha_operand *operand,
 		offsetT val,
-		char *file,
+		const char *file,
 		unsigned line)
 {
   if (operand->bits != 32 && !(operand->flags & AXP_OPERAND_NOOVERFLOW))
