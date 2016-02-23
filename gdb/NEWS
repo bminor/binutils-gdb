@@ -141,6 +141,14 @@ show max-value-size
   allocate for value contents.  Prevents incorrect programs from
   causing GDB to allocate overly large buffers.  Default is 64k.
 
+skip -file file
+skip -gfile file-glob-pattern
+skip -function function
+skip -rfunction regular-expression
+  A generalized form of the skip command, with new support for
+  glob-style file names and regular expressions for function names.
+  Additionally, a file spec and a function spec may now be combined.
+
 * The "disassemble" command accepts a new modifier: /s.
   It prints mixed source+disassembly like /m with two differences:
   - disassembled instructions are now printed in program order, and

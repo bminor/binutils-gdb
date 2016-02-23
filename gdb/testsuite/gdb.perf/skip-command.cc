@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2011-2016 Free Software Foundation, Inc.
+   Copyright (C) 2016 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,25 +15,32 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int
-bar (void)
-{
-  return 1;
-}
+volatile int flag;
 
 int
-baz (int a)
+func ()
 {
-  return a + 1;
+  return 42;
 }
 
-static void
-test_skip (void)
+class c
 {
-}
+ public:
+  int _x;
+  c () : _x (42) {}
+};
 
 void
-skip1_test_skip_file_and_function (void)
+call_me (int x, c y)
 {
-  test_skip ();
+}
+
+int
+main ()
+{
+  while (flag)
+    {
+      call_me (func (), c ());
+    }
+  return 0;
 }

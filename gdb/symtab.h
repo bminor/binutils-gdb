@@ -1600,6 +1600,9 @@ extern int basenames_may_differ;
 int compare_filenames_for_search (const char *filename,
 				  const char *search_name);
 
+int compare_glob_filenames_for_search (const char *filename,
+				       const char *search_name);
+
 int iterate_over_some_symtabs (const char *name,
 			       const char *real_path,
 			       int (*callback) (struct symtab *symtab,

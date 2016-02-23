@@ -20,6 +20,7 @@
 int foo (void);
 int bar (void);
 int baz (int);
+void skip1_test_skip_file_and_function (void);
 
 int
 main ()
@@ -32,4 +33,23 @@ int
 foo ()
 {
   return 0;
+}
+
+static void
+test_skip (void)
+{
+}
+
+static void
+end_test_skip_file_and_function (void)
+{
+  abort ();
+}
+
+void
+test_skip_file_and_function (void)
+{
+  test_skip ();
+  skip1_test_skip_file_and_function ();
+  end_test_skip_file_and_function ();
 }

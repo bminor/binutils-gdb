@@ -1,3 +1,8 @@
+2016-02-23  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Skipping Over Functions and Files): Document new
+	options to "skip" command.  Update docs of output of "info skip".
+
 2016-02-18  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.texinfo (Signals): Add bound violation display hints for

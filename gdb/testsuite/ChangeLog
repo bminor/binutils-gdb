@@ -1,3 +1,16 @@
+2016-02-23  Doug Evans  <dje@google.com>
+
+	* gdb.base/skip.c (test_skip): New function.
+	(end_test_skip_file_and_function): New function.
+	(test_skip_file_and_function): New function.
+	* gdb.base/skip1.c (test_skip): New function.
+	(skip1_test_skip_file_and_function): New function.
+	* gdb.base/skip.exp: Add tests for new skip options.
+	* gdb.base/skip-solib.exp: Update expected output.
+	* gdb.perf/skip-command.cc: New file.
+	* gdb.perf/skip-command.exp: New file.
+	* gdb.perf/skip-command.py: New file.
+
 2016-02-22  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* gdb.trace/unavailable.exp (gdb_unavailable_registers_test_1): Fix

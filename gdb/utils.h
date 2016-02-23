@@ -135,6 +135,10 @@ extern void substitute_path_component (char **stringp, const char *from,
 				       const char *to);
 
 char *ldirname (const char *filename);
+
+extern int count_path_elements (const char *path);
+
+extern const char *strip_leading_path_elements (const char *path, int n);
 
 /* GDB output, ui_file utilities.  */
 
