@@ -1,3 +1,9 @@
+2016-02-23  Rich Felker  <bugdal@aerifal.cx>
+
+	PR target/19516
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_symbol):
+	Always produce a RELATIVE reloc for a local symbol.
+
 2016-02-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	Fix test-case ld-elf/pr19617b
