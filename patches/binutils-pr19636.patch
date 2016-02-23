@@ -1007,9 +1007,9 @@ index 1a79694..9c030d1 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
 @@ -320,6 +320,35 @@ run_dump_test "load5b"
- run_dump_test "load6"
  run_dump_test "pr19175"
  run_dump_test "pr19615"
+ run_dump_test "pr19645"
 +run_dump_test "pr19636-1a"
 +run_dump_test "pr19636-1b"
 +run_dump_test "pr19636-1c"
@@ -2421,9 +2421,9 @@ index 7248377..a8c356b 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
 @@ -355,6 +355,26 @@ run_dump_test "pr19162"
- run_dump_test "pr19175"
  run_dump_test "pr18591"
  run_dump_test "pr19615"
+ run_dump_test "pr19645"
 +run_dump_test "pr19636-1a"
 +run_dump_test "pr19636-1b"
 +run_dump_test "pr19636-1c"
