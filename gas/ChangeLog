@@ -1,3 +1,10 @@
+2016-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/gas/all/gas.exp: Change target pattern to cover
+	arceb-*.
+	* testsuite/gas/all/redef3.d: Likewise.
+	* testsuite/gas/elf/elf.exp: Likewise.
+
 2016-02-24  Renlin Li  <renlin.li@arm.com>
 
 	* config/tc-arm.c (BAD_FP16): New error message macro.
