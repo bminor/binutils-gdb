@@ -1,17 +1,19 @@
-From 15186c9380e9779e7c6043180f98525d0b8fed7e Mon Sep 17 00:00:00 2001
+From a42496a8de0da8fdb37953ca85a76b4d99732eaf Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Sun, 14 Feb 2016 06:10:10 -0800
-Subject: [PATCH] Bind symbols to their definitions in executable
+Subject: [PATCH] [x86] Resolve undefweak and defined symbols in executable
 
-Symbols are always bound locally to their definitions in executable.
-There should be no relocations against undefined weak symbols in
-executable.  We should always create the dynsym section, even if it
-is empty, with dynamic sections.
+For i386 and x86-64, undefined weak and defined symbols are resolved
+without dynamic relocation when creating executable.  Undefined weak
+symbols aren't needed in the dynamic symbol table in executable.  One
+exception is on i386, we need undefined weak symbols in the dynamic
+symbol table in PIE if input relocatable files contain branchs without
+PLT so that we can branch to 0 with dynamic relocation in text section.
 
-Undefined weak symbols are aren't needed in the dynamic symbol table in
-executable for i386 nor x86-64.  The only exception is on i386, we may
-need undefined weak symbols in the dynamic symbol table in PIE so that
-we can branch to 0 without PLT.
+This makes behaviors of static executable, dynamic executable and
+position independent executable consistent with references to undefined
+weak and defined symbols, regardless if the relocatable input is
+compiled with PIC or not.
 
 bfd/
 
@@ -47,29 +49,11 @@ bfd/
 	(elf_x86_64_finish_dynamic_sections): Call
 	elf_x86_64_pie_finish_undefweak_symbol on all symbols in PIE.
 	(elf_backend_fixup_symbol): New.
-	* elflink.c (bfd_elf_record_link_assignment): Check for shared
-	library, instead of PIC, and don't check PDE when make the linker
-	assigned symbol dynamic.
-	(_bfd_elf_link_renumber_dynsyms): Check for shared library,
-	instead of PIC.  Always create the dynsym section, even if it is
-	empty, with dynamic sections.
-	(bfd_elf_final_link): Check for shared library, instead of PIC,
-	when writing out the section symbols.
 
 ld/
 
 	PR ld/19636
-	* testsuite/ld-elf/pr19636-1.s: New file.
-	* testsuite/ld-elf/pr19636-1a.d: Likewise.
-	* testsuite/ld-elf/pr19636-1b.d: Likewise.
-	* testsuite/ld-elf/pr19636-1c.d: Likewise.
-	* testsuite/ld-elf/pr19636-1d.d: Likewise.
-	* testsuite/ld-elf/pr19636-1e.d: Likewise.
-	* testsuite/ld-elf/pr19636-2.s: Likewise.
-	* testsuite/ld-elf/pr19636-2a.d: Likewise.
-	* testsuite/ld-elf/pr19636-2b.d: Likewise.
-	* testsuite/ld-elf/pr19636-2c.d: Likewise.
-	* testsuite/ld-i386/pr19636-1.s: Likewise.
+	* testsuite/ld-i386/pr19636-1.s: New file.
 	* testsuite/ld-i386/pr19636-1a.d: Likewise.
 	* testsuite/ld-i386/pr19636-1b.d: Likewise.
 	* testsuite/ld-i386/pr19636-1c.d: Likewise.
@@ -89,81 +73,112 @@ ld/
 	* testsuite/ld-i386/pr19636-2d.d: Likewise.
 	* testsuite/ld-i386/pr19636-2e-nacl.d: Likewise.
 	* testsuite/ld-i386/pr19636-2e.d: Likewise.
-	* testsuite/ld-x86-64/pr19636.s: Likewise.
-	* testsuite/ld-x86-64/pr19636a.d: Likewise.
-	* testsuite/ld-x86-64/pr19636b.d: Likewise.
-	* testsuite/ld-x86-64/pr19636c.d: Likewise.
-	* testsuite/ld-x86-64/pr19636d-nacl.d: Likewise.
-	* testsuite/ld-x86-64/pr19636d.d: Likewise.
-	* testsuite/ld-x86-64/pr19636e.d: Likewise.
-	* testsuite/ld-x86-64/pr19636f.d: Likewise.
-	* testsuite/ld-x86-64/pr19636g.d: Likewise.
-	* testsuite/ld-x86-64/pr19636h.d: Likewise.
-	* testsuite/ld-x86-64/pr19636i.d: Likewise.
+	* testsuite/ld-i386/pr19636-3.s: Likewise.
+	* testsuite/ld-i386/pr19636-3a.d: Likewise.
+	* testsuite/ld-i386/pr19636-3b.d: Likewise.
+	* testsuite/ld-i386/pr19636-3c.d: Likewise.
+	* testsuite/ld-i386/pr19636-3d.d: Likewise.
+	* testsuite/ld-i386/pr19636-3e.d: Likewise.
+	* testsuite/ld-i386/pr19636-3f.d: Likewise.
+	* testsuite/ld-i386/pr19636-3g.d: Likewise.
+	* testsuite/ld-i386/pr19636-4.s: Likewise.
+	* testsuite/ld-i386/pr19636-4a.d: Likewise.
+	* testsuite/ld-i386/pr19636-4b.d: Likewise.
+	* testsuite/ld-i386/pr19636-4c.d: Likewise.
+	* testsuite/ld-i386/pr19636-4d.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1.s: Likewise.
+	* testsuite/ld-x86-64/pr19636-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1c.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1d.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1e.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1f.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1g.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2.s: Likewise.
+	* testsuite/ld-x86-64/pr19636-2a.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2b.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2c.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2d-nacl.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2d.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2e.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2f.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2g.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2h.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-2i.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-3.s: Likewise.
+	* testsuite/ld-x86-64/pr19636-3a.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-3b.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-3c.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-3d.d: Likewise.
 	* testsuite/ld-i386/i386.exp: Run PR ld/19636 tests.
 	* testsuite/ld-x86-64/x86-64.exp: Likewise.
-	* testsuite/ld-x86-64/pr13082-3b.d: Updated.
+	* testsuite/ld-x86-64/pr13082-3b.d: Likewise.
 	* testsuite/ld-x86-64/pr13082-4b.d: Likewise.
 ---
- bfd/elf32-i386.c                       | 233 ++++++++++++++++++++++++---------
- bfd/elf64-x86-64.c                     | 226 ++++++++++++++++++++++----------
- bfd/elflink.c                          |  15 +--
- ld/testsuite/ld-elf/pr19636-1.s        |   5 +
- ld/testsuite/ld-elf/pr19636-1a.d       |  10 ++
- ld/testsuite/ld-elf/pr19636-1b.d       |   6 +
- ld/testsuite/ld-elf/pr19636-1c.d       |   9 ++
- ld/testsuite/ld-elf/pr19636-1d.d       |  14 ++
- ld/testsuite/ld-elf/pr19636-1e.d       |  14 ++
- ld/testsuite/ld-elf/pr19636-2.s        |  14 ++
- ld/testsuite/ld-elf/pr19636-2a.d       |   8 ++
- ld/testsuite/ld-elf/pr19636-2b.d       |  10 ++
- ld/testsuite/ld-elf/pr19636-2c.d       |  10 ++
- ld/testsuite/ld-i386/i386.exp          |  18 +++
- ld/testsuite/ld-i386/pr19636-1.s       |   9 ++
- ld/testsuite/ld-i386/pr19636-1a.d      |  16 +++
- ld/testsuite/ld-i386/pr19636-1b.d      |  19 +++
- ld/testsuite/ld-i386/pr19636-1c.d      |   9 ++
- ld/testsuite/ld-i386/pr19636-1d-nacl.d | 124 ++++++++++++++++++
- ld/testsuite/ld-i386/pr19636-1d.d      |  26 ++++
- ld/testsuite/ld-i386/pr19636-1e.d      |  19 +++
- ld/testsuite/ld-i386/pr19636-1f.d      |  19 +++
- ld/testsuite/ld-i386/pr19636-1g.d      |  12 ++
- ld/testsuite/ld-i386/pr19636-1h.d      |  19 +++
- ld/testsuite/ld-i386/pr19636-1i.d      |   9 ++
- ld/testsuite/ld-i386/pr19636-2.s       |   9 ++
- ld/testsuite/ld-i386/pr19636-2a.d      |  19 +++
- ld/testsuite/ld-i386/pr19636-2b.d      |  22 ++++
- ld/testsuite/ld-i386/pr19636-2c-nacl.d | 126 ++++++++++++++++++
- ld/testsuite/ld-i386/pr19636-2c.d      |  28 ++++
- ld/testsuite/ld-i386/pr19636-2d-nacl.d |  21 +++
- ld/testsuite/ld-i386/pr19636-2d.d      |  17 +++
- ld/testsuite/ld-i386/pr19636-2e-nacl.d |  21 +++
- ld/testsuite/ld-i386/pr19636-2e.d      |  17 +++
- ld/testsuite/ld-x86-64/pr13082-3b.d    |   4 +-
- ld/testsuite/ld-x86-64/pr13082-4b.d    |   4 +-
- ld/testsuite/ld-x86-64/pr19636.s       |   9 ++
- ld/testsuite/ld-x86-64/pr19636a.d      |  17 +++
- ld/testsuite/ld-x86-64/pr19636b.d      |  20 +++
- ld/testsuite/ld-x86-64/pr19636c.d      |   9 ++
- ld/testsuite/ld-x86-64/pr19636d-nacl.d |  37 ++++++
- ld/testsuite/ld-x86-64/pr19636d.d      |  25 ++++
- ld/testsuite/ld-x86-64/pr19636e.d      |  19 +++
- ld/testsuite/ld-x86-64/pr19636f.d      |  19 +++
- ld/testsuite/ld-x86-64/pr19636g.d      |  13 ++
- ld/testsuite/ld-x86-64/pr19636h.d      |  20 +++
- ld/testsuite/ld-x86-64/pr19636i.d      |   9 ++
- ld/testsuite/ld-x86-64/x86-64.exp      |  10 ++
- 48 files changed, 1223 insertions(+), 145 deletions(-)
- create mode 100644 ld/testsuite/ld-elf/pr19636-1.s
- create mode 100644 ld/testsuite/ld-elf/pr19636-1a.d
- create mode 100644 ld/testsuite/ld-elf/pr19636-1b.d
- create mode 100644 ld/testsuite/ld-elf/pr19636-1c.d
- create mode 100644 ld/testsuite/ld-elf/pr19636-1d.d
- create mode 100644 ld/testsuite/ld-elf/pr19636-1e.d
- create mode 100644 ld/testsuite/ld-elf/pr19636-2.s
- create mode 100644 ld/testsuite/ld-elf/pr19636-2a.d
- create mode 100644 ld/testsuite/ld-elf/pr19636-2b.d
- create mode 100644 ld/testsuite/ld-elf/pr19636-2c.d
+ bfd/elf32-i386.c                         | 233 +++++++++++++++++++++++--------
+ bfd/elf64-x86-64.c                       | 226 ++++++++++++++++++++----------
+ ld/testsuite/ld-i386/i386.exp            |  29 ++++
+ ld/testsuite/ld-i386/pr19636-1.s         |   9 ++
+ ld/testsuite/ld-i386/pr19636-1a.d        |  16 +++
+ ld/testsuite/ld-i386/pr19636-1b.d        |  19 +++
+ ld/testsuite/ld-i386/pr19636-1c.d        |   9 ++
+ ld/testsuite/ld-i386/pr19636-1d-nacl.d   | 124 ++++++++++++++++
+ ld/testsuite/ld-i386/pr19636-1d.d        |  26 ++++
+ ld/testsuite/ld-i386/pr19636-1e.d        |  19 +++
+ ld/testsuite/ld-i386/pr19636-1f.d        |  19 +++
+ ld/testsuite/ld-i386/pr19636-1g.d        |  12 ++
+ ld/testsuite/ld-i386/pr19636-1h.d        |  19 +++
+ ld/testsuite/ld-i386/pr19636-1i.d        |   9 ++
+ ld/testsuite/ld-i386/pr19636-2.s         |   9 ++
+ ld/testsuite/ld-i386/pr19636-2a.d        |  19 +++
+ ld/testsuite/ld-i386/pr19636-2b.d        |  22 +++
+ ld/testsuite/ld-i386/pr19636-2c-nacl.d   | 126 +++++++++++++++++
+ ld/testsuite/ld-i386/pr19636-2c.d        |  28 ++++
+ ld/testsuite/ld-i386/pr19636-2d-nacl.d   |  21 +++
+ ld/testsuite/ld-i386/pr19636-2d.d        |  17 +++
+ ld/testsuite/ld-i386/pr19636-2e-nacl.d   |  21 +++
+ ld/testsuite/ld-i386/pr19636-2e.d        |  17 +++
+ ld/testsuite/ld-i386/pr19636-3.s         |   5 +
+ ld/testsuite/ld-i386/pr19636-3a.d        |  10 ++
+ ld/testsuite/ld-i386/pr19636-3b.d        |   6 +
+ ld/testsuite/ld-i386/pr19636-3c.d        |   9 ++
+ ld/testsuite/ld-i386/pr19636-3d.d        |  14 ++
+ ld/testsuite/ld-i386/pr19636-3e.d        |  14 ++
+ ld/testsuite/ld-i386/pr19636-3f.d        |   6 +
+ ld/testsuite/ld-i386/pr19636-3g.d        |   9 ++
+ ld/testsuite/ld-i386/pr19636-4.s         |  14 ++
+ ld/testsuite/ld-i386/pr19636-4a.d        |   8 ++
+ ld/testsuite/ld-i386/pr19636-4b.d        |  10 ++
+ ld/testsuite/ld-i386/pr19636-4c.d        |  10 ++
+ ld/testsuite/ld-i386/pr19636-4d.d        |  10 ++
+ ld/testsuite/ld-x86-64/pr13082-3b.d      |   4 +-
+ ld/testsuite/ld-x86-64/pr13082-4b.d      |   4 +-
+ ld/testsuite/ld-x86-64/pr19636-1.s       |   5 +
+ ld/testsuite/ld-x86-64/pr19636-1a.d      |  10 ++
+ ld/testsuite/ld-x86-64/pr19636-1b.d      |   6 +
+ ld/testsuite/ld-x86-64/pr19636-1c.d      |   9 ++
+ ld/testsuite/ld-x86-64/pr19636-1d.d      |  14 ++
+ ld/testsuite/ld-x86-64/pr19636-1e.d      |  14 ++
+ ld/testsuite/ld-x86-64/pr19636-1f.d      |   6 +
+ ld/testsuite/ld-x86-64/pr19636-1g.d      |   9 ++
+ ld/testsuite/ld-x86-64/pr19636-2.s       |   9 ++
+ ld/testsuite/ld-x86-64/pr19636-2a.d      |  17 +++
+ ld/testsuite/ld-x86-64/pr19636-2b.d      |  20 +++
+ ld/testsuite/ld-x86-64/pr19636-2c.d      |   9 ++
+ ld/testsuite/ld-x86-64/pr19636-2d-nacl.d |  37 +++++
+ ld/testsuite/ld-x86-64/pr19636-2d.d      |  25 ++++
+ ld/testsuite/ld-x86-64/pr19636-2e.d      |  19 +++
+ ld/testsuite/ld-x86-64/pr19636-2f.d      |  19 +++
+ ld/testsuite/ld-x86-64/pr19636-2g.d      |  13 ++
+ ld/testsuite/ld-x86-64/pr19636-2h.d      |  20 +++
+ ld/testsuite/ld-x86-64/pr19636-2i.d      |   9 ++
+ ld/testsuite/ld-x86-64/pr19636-3.s       |  14 ++
+ ld/testsuite/ld-x86-64/pr19636-3a.d      |   8 ++
+ ld/testsuite/ld-x86-64/pr19636-3b.d      |  10 ++
+ ld/testsuite/ld-x86-64/pr19636-3c.d      |  10 ++
+ ld/testsuite/ld-x86-64/pr19636-3d.d      |  10 ++
+ ld/testsuite/ld-x86-64/x86-64.exp        |  20 +++
+ 63 files changed, 1387 insertions(+), 137 deletions(-)
  create mode 100644 ld/testsuite/ld-i386/pr19636-1.s
  create mode 100644 ld/testsuite/ld-i386/pr19636-1a.d
  create mode 100644 ld/testsuite/ld-i386/pr19636-1b.d
@@ -184,20 +199,46 @@ ld/
  create mode 100644 ld/testsuite/ld-i386/pr19636-2d.d
  create mode 100644 ld/testsuite/ld-i386/pr19636-2e-nacl.d
  create mode 100644 ld/testsuite/ld-i386/pr19636-2e.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636.s
- create mode 100644 ld/testsuite/ld-x86-64/pr19636a.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636b.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636c.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636d-nacl.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636d.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636e.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636f.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636g.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636h.d
- create mode 100644 ld/testsuite/ld-x86-64/pr19636i.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-3.s
+ create mode 100644 ld/testsuite/ld-i386/pr19636-3a.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-3b.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-3c.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-3d.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-3e.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-3f.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-3g.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-4.s
+ create mode 100644 ld/testsuite/ld-i386/pr19636-4a.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-4b.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-4c.d
+ create mode 100644 ld/testsuite/ld-i386/pr19636-4d.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-1.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-1a.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-1b.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-1c.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-1d.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-1e.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-1f.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-1g.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2a.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2b.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2c.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2d-nacl.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2d.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2e.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2f.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2g.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2h.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-2i.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-3.s
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-3a.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-3b.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-3c.d
+ create mode 100644 ld/testsuite/ld-x86-64/pr19636-3d.d
 
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index a8951d8..36868e3 100644
+index a8951d8..269d5c7 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
 @@ -2147,6 +2147,24 @@ elf_i386_gc_sweep_hook (bfd *abfd,
@@ -368,7 +409,7 @@ index a8951d8..36868e3 100644
    unsigned plt_entry_size;
    const struct elf_i386_backend_data *abed;
    struct elf_i386_link_hash_entry *eh;
-+  bfd_boolean undefweak_in_pie;
++  bfd_boolean local_undefweak;
  
    htab = elf_i386_hash_table (info);
    if (htab == NULL)
@@ -377,10 +418,10 @@ index a8951d8..36868e3 100644
    plt_entry_size = GET_PLT_ENTRY_SIZE (output_bfd);
  
 +  /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
-+     undefined weak symbols in PIE so that they are resolved to 0 at
-+     run-time.  */
-+  undefweak_in_pie = (h->root.type == bfd_link_hash_undefweak
-+		      && bfd_link_pie (info));
++     undefined weak symbols in executable so that they are resolved
++     to 0 at run-time.  */
++  local_undefweak = (h->root.type == bfd_link_hash_undefweak
++		     && bfd_link_executable (info));
 +
    eh = (struct elf_i386_link_hash_entry *) h;
  
@@ -389,7 +430,7 @@ index a8951d8..36868e3 100644
  	 it up.  */
  
        if ((h->dynindx == -1
-+	   && !undefweak_in_pie
++	   && !local_undefweak
  	   && !((h->forced_local || bfd_link_executable (info))
  		&& h->def_regular
  		&& h->type == STT_GNU_IFUNC))
@@ -417,7 +458,7 @@ index a8951d8..36868e3 100644
 +      /* Fill in the entry in the global offset table.  Leave the entry
 +	 as zero for undefined weak symbol in PIE.  No PLT relocation
 +	 against undefined weak symbol in PIE.  */
-+      if (!undefweak_in_pie)
++      if (!local_undefweak)
  	{
 -	  /* If an STT_GNU_IFUNC symbol is locally defined, generate
 -	     R_386_IRELATIVE instead of R_386_JUMP_SLOT.  Store addend
@@ -504,7 +545,7 @@ index a8951d8..36868e3 100644
      }
  
 -  if (!h->def_regular
-+  if (!undefweak_in_pie
++  if (!local_undefweak
 +      && !h->def_regular
        && (h->plt.offset != (bfd_vma) -1
  	  || eh->plt_got.offset != (bfd_vma) -1))
@@ -572,7 +613,7 @@ index a8951d8..36868e3 100644
  #include "elf32-target.h"
  
 diff --git a/bfd/elf64-x86-64.c b/bfd/elf64-x86-64.c
-index 8ea478d..420aa03 100644
+index 8ea478d..4a5578b 100644
 --- a/bfd/elf64-x86-64.c
 +++ b/bfd/elf64-x86-64.c
 @@ -2363,6 +2363,24 @@ pointer:
@@ -744,7 +785,7 @@ index 8ea478d..420aa03 100644
    const struct elf_x86_64_backend_data *abed;
    bfd_boolean use_plt_bnd;
    struct elf_x86_64_link_hash_entry *eh;
-+  bfd_boolean undefweak_in_pie;
++  bfd_boolean local_undefweak;
  
    htab = elf_x86_64_hash_table (info);
    if (htab == NULL)
@@ -753,10 +794,10 @@ index 8ea478d..420aa03 100644
  	  : get_elf_x86_64_backend_data (output_bfd));
  
 +  /* We keep PLT/GOT entries without dynamic PLT/GOT relocations for
-+     undefined weak symbols in PIE so that they are resolved to 0 at
-+     run-time.  */
-+  undefweak_in_pie = (h->root.type == bfd_link_hash_undefweak
-+		      && bfd_link_pie (info));
++     undefined weak symbols in executable so that they are resolved
++     to 0 at run-time.  */
++  local_undefweak = (h->root.type == bfd_link_hash_undefweak
++		     && bfd_link_executable (info));
 +
    eh = (struct elf_x86_64_link_hash_entry *) h;
  
@@ -765,7 +806,7 @@ index 8ea478d..420aa03 100644
        /* This symbol has an entry in the procedure linkage table.  Set
  	 it up.	 */
        if ((h->dynindx == -1
-+	   && !undefweak_in_pie
++	   && !local_undefweak
  	   && !((h->forced_local || bfd_link_executable (info))
  		&& h->def_regular
  		&& h->type == STT_GNU_IFUNC))
@@ -791,7 +832,7 @@ index 8ea478d..420aa03 100644
 +	 points to the second part of the PLT entry.  Leave the entry
 +	 as zero for undefined weak symbol in PIE.  No PLT relocation
 +	 against undefined weak symbol in PIE.  */
-+      if (!undefweak_in_pie)
++      if (!local_undefweak)
  	{
 -	  /* If an STT_GNU_IFUNC symbol is locally defined, generate
 -	     R_X86_64_IRELATIVE instead of R_X86_64_JUMP_SLOT.  */
@@ -893,7 +934,7 @@ index 8ea478d..420aa03 100644
      }
  
 -  if (!h->def_regular
-+  if (!undefweak_in_pie
++  if (!local_undefweak
 +      && !h->def_regular
        && (h->plt.offset != (bfd_vma) -1
  	  || eh->plt_got.offset != (bfd_vma) -1))
@@ -961,218 +1002,11 @@ index 8ea478d..420aa03 100644
  
  #include "elf64-target.h"
  
-diff --git a/bfd/elflink.c b/bfd/elflink.c
-index c7672ed..d9abb8e 100644
---- a/bfd/elflink.c
-+++ b/bfd/elflink.c
-@@ -632,9 +632,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
- 
-   if ((h->def_dynamic
-        || h->ref_dynamic
--       || bfd_link_pic (info)
--       || (bfd_link_pde (info)
--	   && elf_hash_table (info)->is_relocatable_executable))
-+       || bfd_link_dll (info)
-+       || elf_hash_table (info)->is_relocatable_executable)
-       && h->dynindx == -1)
-     {
-       if (! bfd_elf_link_record_dynamic_symbol (info, h))
-@@ -844,7 +843,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
- {
-   unsigned long dynsymcount = 0;
- 
--  if (bfd_link_pic (info)
-+  if (bfd_link_dll (info)
-       || elf_hash_table (info)->is_relocatable_executable)
-     {
-       const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
-@@ -875,9 +874,9 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
- 			  &dynsymcount);
- 
-   /* There is an unused NULL entry at the head of the table which
--     we must account for in our count.  Unless there weren't any
--     symbols, which means we'll have no table at all.  */
--  if (dynsymcount != 0)
-+     we must account for in our count.  We always create the dynsym
-+     section, even if it is empty, with dynamic sections.  */
-+  if (elf_hash_table (info)->dynamic_sections_created)
-     ++dynsymcount;
- 
-   elf_hash_table (info)->dynsymcount = dynsymcount;
-@@ -11487,7 +11486,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
-       long last_local = 0;
- 
-       /* Write out the section symbols for the output sections.  */
--      if (bfd_link_pic (info)
-+      if (bfd_link_dll (info)
- 	  || elf_hash_table (info)->is_relocatable_executable)
- 	{
- 	  asection *s;
-diff --git a/ld/testsuite/ld-elf/pr19636-1.s b/ld/testsuite/ld-elf/pr19636-1.s
-new file mode 100644
-index 0000000..9bd7e4a
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-1.s
-@@ -0,0 +1,5 @@
-+	.text
-+	.weak func
-+	.globl _start
-+_start:
-+	.dc.a func
-diff --git a/ld/testsuite/ld-elf/pr19636-1a.d b/ld/testsuite/ld-elf/pr19636-1a.d
-new file mode 100644
-index 0000000..f6f6092
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-1a.d
-@@ -0,0 +1,10 @@
-+#source: pr19636-1.s
-+#ld: -pie
-+#readelf : -r --dyn-syms --wide
-+#target: x86_64-*-linux* i?86-*-linux-gnu
-+
-+There are no relocations in this file.
-+
-+Symbol table '\.dynsym' contains 1 entries:
-+ +Num: +Value +Size Type +Bind +Vis +Ndx Name
-+ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
-diff --git a/ld/testsuite/ld-elf/pr19636-1b.d b/ld/testsuite/ld-elf/pr19636-1b.d
-new file mode 100644
-index 0000000..dbea06c
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-1b.d
-@@ -0,0 +1,6 @@
-+#source: pr19636-1.s
-+#ld: -pie -E
-+#readelf : -r --wide
-+#target: x86_64-* i?86-*
-+
-+There are no relocations in this file.
-diff --git a/ld/testsuite/ld-elf/pr19636-1c.d b/ld/testsuite/ld-elf/pr19636-1c.d
-new file mode 100644
-index 0000000..2d108ae
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-1c.d
-@@ -0,0 +1,9 @@
-+#source: pr19636-1.s
-+#ld: -pie -E
-+#readelf : --dyn-syms --wide
-+#target: x86_64-* i?86-*
-+
-+#failif
-+#...
-+ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
-+#...
-diff --git a/ld/testsuite/ld-elf/pr19636-1d.d b/ld/testsuite/ld-elf/pr19636-1d.d
-new file mode 100644
-index 0000000..f32add6
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-1d.d
-@@ -0,0 +1,14 @@
-+#source: pr19636-1.s
-+#ld: -shared
-+#readelf : -r --wide --dyn-syms
-+#target: *-*-linux* *-*-gnu* *-*-solaris*
-+
-+Relocation section '\.rela?\..*' at offset 0x[0-9a-f]+ contains [0-9]+ entries:
-+#...
-+[0-9a-f]+[ \t]+[0-9a-f]+[ \t]+R_.*[ \t]+[0-9a-f]+[ \t]+func.*
-+#...
-+Symbol table '\.dynsym' contains [0-9]+ entries:
-+ +Num: +Value +Size Type +Bind +Vis +Ndx Name
-+#...
-+ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
-+#...
-diff --git a/ld/testsuite/ld-elf/pr19636-1e.d b/ld/testsuite/ld-elf/pr19636-1e.d
-new file mode 100644
-index 0000000..bc92aaa
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-1e.d
-@@ -0,0 +1,14 @@
-+#source: pr19636-1.s
-+#ld: -shared -Bsymbolic
-+#readelf : -r --wide --dyn-syms
-+#target: *-*-linux* *-*-gnu* *-*-solaris*
-+
-+Relocation section '\.rela?\..*' at offset 0x[0-9a-f]+ contains [0-9]+ entries:
-+#...
-+[0-9a-f]+[ \t]+[0-9a-f]+[ \t]+R_.*[ \t]+[0-9a-f]+[ \t]+func.*
-+#...
-+Symbol table '\.dynsym' contains [0-9]+ entries:
-+ +Num: +Value +Size Type +Bind +Vis +Ndx Name
-+#...
-+ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
-+#...
-diff --git a/ld/testsuite/ld-elf/pr19636-2.s b/ld/testsuite/ld-elf/pr19636-2.s
-new file mode 100644
-index 0000000..6c981f5
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-2.s
-@@ -0,0 +1,14 @@
-+	.text
-+	.type start,"function"
-+	.global start
-+start:
-+	.type _start,"function"
-+	.global _start
-+_start:
-+	.type __start,"function"
-+	.global __start
-+__start:
-+	.type main,"function"
-+	.global main
-+main:
-+	.long 0
-diff --git a/ld/testsuite/ld-elf/pr19636-2a.d b/ld/testsuite/ld-elf/pr19636-2a.d
-new file mode 100644
-index 0000000..48640d7
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-2a.d
-@@ -0,0 +1,8 @@
-+#source: pr19636-2.s
-+#ld: -pie --defsym foobar=0x100
-+#readelf : --dyn-syms --wide
-+#target: *-*-linux* *-*-gnu*
-+
-+Symbol table '\.dynsym' contains 1 entries:
-+ +Num: +Value +Size Type +Bind +Vis +Ndx Name
-+ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
-diff --git a/ld/testsuite/ld-elf/pr19636-2b.d b/ld/testsuite/ld-elf/pr19636-2b.d
-new file mode 100644
-index 0000000..7f219e5
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-2b.d
-@@ -0,0 +1,10 @@
-+#source: pr19636-2.s
-+#ld: -pie -E --defsym foobar=0x100
-+#readelf : --dyn-syms --wide
-+#target: *-*-linux* *-*-gnu* *-*-solaris*
-+
-+Symbol table '\.dynsym' contains [0-9]+ entries:
-+ +Num: +Value +Size Type +Bind +Vis +Ndx Name
-+#...
-+ +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
-+#pass
-diff --git a/ld/testsuite/ld-elf/pr19636-2c.d b/ld/testsuite/ld-elf/pr19636-2c.d
-new file mode 100644
-index 0000000..433d60c
---- /dev/null
-+++ b/ld/testsuite/ld-elf/pr19636-2c.d
-@@ -0,0 +1,10 @@
-+#source: pr19636-2.s
-+#ld: -shared -Bsymbolic --defsym foobar=0x100
-+#readelf : --dyn-syms --wide
-+#target: *-*-linux* *-*-gnu* *-*-solaris*
-+
-+Symbol table '\.dynsym' contains [0-9]+ entries:
-+ +Num: +Value +Size Type +Bind +Vis +Ndx Name
-+#...
-+ +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
-+#pass
 diff --git a/ld/testsuite/ld-i386/i386.exp b/ld/testsuite/ld-i386/i386.exp
-index 1a79694..c760766 100644
+index 1a79694..9c030d1 100644
 --- a/ld/testsuite/ld-i386/i386.exp
 +++ b/ld/testsuite/ld-i386/i386.exp
-@@ -320,6 +320,24 @@ run_dump_test "load5b"
+@@ -320,6 +320,35 @@ run_dump_test "load5b"
  run_dump_test "load6"
  run_dump_test "pr19175"
  run_dump_test "pr19615"
@@ -1194,6 +1028,17 @@ index 1a79694..c760766 100644
 +run_dump_test "pr19636-2d-nacl"
 +run_dump_test "pr19636-2e"
 +run_dump_test "pr19636-2e-nacl"
++run_dump_test "pr19636-3a"
++run_dump_test "pr19636-3b"
++run_dump_test "pr19636-3c"
++run_dump_test "pr19636-3d"
++run_dump_test "pr19636-3e"
++run_dump_test "pr19636-3f"
++run_dump_test "pr19636-3g"
++run_dump_test "pr19636-4a"
++run_dump_test "pr19636-4b"
++run_dump_test "pr19636-4c"
++run_dump_test "pr19636-4d"
  
  if { !([istarget "i?86-*-linux*"]
         || [istarget "i?86-*-gnu*"]
@@ -1878,6 +1723,209 @@ index 0000000..148e306
 +#...
 + +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
 +#pass
+diff --git a/ld/testsuite/ld-i386/pr19636-3.s b/ld/testsuite/ld-i386/pr19636-3.s
+new file mode 100644
+index 0000000..9bd7e4a
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-3.s
+@@ -0,0 +1,5 @@
++	.text
++	.weak func
++	.globl _start
++_start:
++	.dc.a func
+diff --git a/ld/testsuite/ld-i386/pr19636-3a.d b/ld/testsuite/ld-i386/pr19636-3a.d
+new file mode 100644
+index 0000000..078896e
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-3a.d
+@@ -0,0 +1,10 @@
++#source: pr19636-3.s
++#as: --32
++#ld: -pie -m elf_i386
++#readelf : -r --dyn-syms --wide
++
++There are no relocations in this file.
++
++Symbol table '\.dynsym' contains 1 entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
+diff --git a/ld/testsuite/ld-i386/pr19636-3b.d b/ld/testsuite/ld-i386/pr19636-3b.d
+new file mode 100644
+index 0000000..e8f9138
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-3b.d
+@@ -0,0 +1,6 @@
++#source: pr19636-3.s
++#as: --32
++#ld: -pie -E -m elf_i386
++#readelf : -r --wide
++
++There are no relocations in this file.
+diff --git a/ld/testsuite/ld-i386/pr19636-3c.d b/ld/testsuite/ld-i386/pr19636-3c.d
+new file mode 100644
+index 0000000..701b131
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-3c.d
+@@ -0,0 +1,9 @@
++#source: pr19636-3.s
++#as: --32
++#ld: -pie -E -m elf_i386
++#readelf : --dyn-syms --wide
++
++#failif
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-i386/pr19636-3d.d b/ld/testsuite/ld-i386/pr19636-3d.d
+new file mode 100644
+index 0000000..12ff6b8
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-3d.d
+@@ -0,0 +1,14 @@
++#source: pr19636-3.s
++#as: --32
++#ld: -shared -m elf_i386
++#readelf : -r --wide --dyn-syms
++
++Relocation section '\.rela?\..*' at offset 0x[0-9a-f]+ contains [0-9]+ entries:
++#...
++[0-9a-f]+[ \t]+[0-9a-f]+[ \t]+R_.*[ \t]+[0-9a-f]+[ \t]+func.*
++#...
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-i386/pr19636-3e.d b/ld/testsuite/ld-i386/pr19636-3e.d
+new file mode 100644
+index 0000000..a0f3344
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-3e.d
+@@ -0,0 +1,14 @@
++#source: pr19636-3.s
++#as: --32
++#ld: -shared -Bsymbolic -m elf_i386
++#readelf : -r --wide --dyn-syms
++
++Relocation section '\.rela?\..*' at offset 0x[0-9a-f]+ contains [0-9]+ entries:
++#...
++[0-9a-f]+[ \t]+[0-9a-f]+[ \t]+R_.*[ \t]+[0-9a-f]+[ \t]+func.*
++#...
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-i386/pr19636-3f.d b/ld/testsuite/ld-i386/pr19636-3f.d
+new file mode 100644
+index 0000000..858850b
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-3f.d
+@@ -0,0 +1,6 @@
++#source: pr19636-3.s
++#as: --32
++#ld: -E -m elf_i386
++#readelf : -r --wide
++
++There are no relocations in this file.
+diff --git a/ld/testsuite/ld-i386/pr19636-3g.d b/ld/testsuite/ld-i386/pr19636-3g.d
+new file mode 100644
+index 0000000..1b0d668
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-3g.d
+@@ -0,0 +1,9 @@
++#source: pr19636-3.s
++#as: --32
++#ld: -E -m elf_i386
++#readelf : --dyn-syms --wide
++
++#failif
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-i386/pr19636-4.s b/ld/testsuite/ld-i386/pr19636-4.s
+new file mode 100644
+index 0000000..6c981f5
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-4.s
+@@ -0,0 +1,14 @@
++	.text
++	.type start,"function"
++	.global start
++start:
++	.type _start,"function"
++	.global _start
++_start:
++	.type __start,"function"
++	.global __start
++__start:
++	.type main,"function"
++	.global main
++main:
++	.long 0
+diff --git a/ld/testsuite/ld-i386/pr19636-4a.d b/ld/testsuite/ld-i386/pr19636-4a.d
+new file mode 100644
+index 0000000..8cdbc1c
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-4a.d
+@@ -0,0 +1,8 @@
++#source: pr19636-4.s
++#as: --32
++#ld: -pie --defsym foobar=0x100 -m elf_i386
++#readelf : --dyn-syms --wide
++
++Symbol table '\.dynsym' contains 1 entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
+diff --git a/ld/testsuite/ld-i386/pr19636-4b.d b/ld/testsuite/ld-i386/pr19636-4b.d
+new file mode 100644
+index 0000000..7ac3629
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-4b.d
+@@ -0,0 +1,10 @@
++#source: pr19636-4.s
++#as: --32
++#ld: -pie -E --defsym foobar=0x100 -m elf_i386
++#readelf : --dyn-syms --wide
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
++#pass
+diff --git a/ld/testsuite/ld-i386/pr19636-4c.d b/ld/testsuite/ld-i386/pr19636-4c.d
+new file mode 100644
+index 0000000..a3891c4
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-4c.d
+@@ -0,0 +1,10 @@
++#source: pr19636-4.s
++#as: --32
++#ld: -shared -Bsymbolic --defsym foobar=0x100 -m elf_i386
++#readelf : --dyn-syms --wide
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
++#pass
+diff --git a/ld/testsuite/ld-i386/pr19636-4d.d b/ld/testsuite/ld-i386/pr19636-4d.d
+new file mode 100644
+index 0000000..a9487f0
+--- /dev/null
++++ b/ld/testsuite/ld-i386/pr19636-4d.d
+@@ -0,0 +1,10 @@
++#source: pr19636-4.s
++#as: --32
++#ld: -E --defsym foobar=0x100 -m elf_i386
++#readelf : --dyn-syms --wide
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
++#pass
 diff --git a/ld/testsuite/ld-x86-64/pr13082-3b.d b/ld/testsuite/ld-x86-64/pr13082-3b.d
 index 12efaf0..766dd74 100644
 --- a/ld/testsuite/ld-x86-64/pr13082-3b.d
@@ -1902,11 +1950,132 @@ index cb4d90a..6d4a35b 100644
 - Offset     Info    Type                Sym. Value  Symbol's Name \+ Addend
 -[0-9a-f]+ +[0-9a-f]+ +R_X86_64_64 +[0-9a-f]+ +func \+ 1
 +There are no relocations in this file.
-diff --git a/ld/testsuite/ld-x86-64/pr19636.s b/ld/testsuite/ld-x86-64/pr19636.s
+diff --git a/ld/testsuite/ld-x86-64/pr19636-1.s b/ld/testsuite/ld-x86-64/pr19636-1.s
+new file mode 100644
+index 0000000..9bd7e4a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-1.s
+@@ -0,0 +1,5 @@
++	.text
++	.weak func
++	.globl _start
++_start:
++	.dc.a func
+diff --git a/ld/testsuite/ld-x86-64/pr19636-1a.d b/ld/testsuite/ld-x86-64/pr19636-1a.d
+new file mode 100644
+index 0000000..5cdfcb9
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-1a.d
+@@ -0,0 +1,10 @@
++#source: pr19636-1.s
++#as: --64
++#ld: -pie -m elf_x86_64
++#readelf : -r --dyn-syms --wide
++
++There are no relocations in this file.
++
++Symbol table '\.dynsym' contains 1 entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
+diff --git a/ld/testsuite/ld-x86-64/pr19636-1b.d b/ld/testsuite/ld-x86-64/pr19636-1b.d
+new file mode 100644
+index 0000000..e68e399
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-1b.d
+@@ -0,0 +1,6 @@
++#source: pr19636-1.s
++#as: --64
++#ld: -pie -E -m elf_x86_64
++#readelf : -r --wide
++
++There are no relocations in this file.
+diff --git a/ld/testsuite/ld-x86-64/pr19636-1c.d b/ld/testsuite/ld-x86-64/pr19636-1c.d
+new file mode 100644
+index 0000000..5262a51
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-1c.d
+@@ -0,0 +1,9 @@
++#source: pr19636-1.s
++#as: --64
++#ld: -pie -E -m elf_x86_64
++#readelf : --dyn-syms --wide
++
++#failif
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-x86-64/pr19636-1d.d b/ld/testsuite/ld-x86-64/pr19636-1d.d
+new file mode 100644
+index 0000000..00da41e
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-1d.d
+@@ -0,0 +1,14 @@
++#source: pr19636-1.s
++#as: --64
++#ld: -shared -m elf_x86_64
++#readelf : -r --wide --dyn-syms
++
++Relocation section '\.rela?\..*' at offset 0x[0-9a-f]+ contains [0-9]+ entries:
++#...
++[0-9a-f]+[ \t]+[0-9a-f]+[ \t]+R_.*[ \t]+[0-9a-f]+[ \t]+func.*
++#...
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-x86-64/pr19636-1e.d b/ld/testsuite/ld-x86-64/pr19636-1e.d
+new file mode 100644
+index 0000000..ea369b2
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-1e.d
+@@ -0,0 +1,14 @@
++#source: pr19636-1.s
++#as: --64
++#ld: -shared -Bsymbolic -m elf_x86_64
++#readelf : -r --wide --dyn-syms
++
++Relocation section '\.rela?\..*' at offset 0x[0-9a-f]+ contains [0-9]+ entries:
++#...
++[0-9a-f]+[ \t]+[0-9a-f]+[ \t]+R_.*[ \t]+[0-9a-f]+[ \t]+func.*
++#...
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-x86-64/pr19636-1f.d b/ld/testsuite/ld-x86-64/pr19636-1f.d
+new file mode 100644
+index 0000000..4fc721a
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-1f.d
+@@ -0,0 +1,6 @@
++#source: pr19636-1.s
++#as: --64
++#ld: -E -m elf_x86_64
++#readelf : -r --wide
++
++There are no relocations in this file.
+diff --git a/ld/testsuite/ld-x86-64/pr19636-1g.d b/ld/testsuite/ld-x86-64/pr19636-1g.d
+new file mode 100644
+index 0000000..7cd52a5
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-1g.d
+@@ -0,0 +1,9 @@
++#source: pr19636-1.s
++#as: --64
++#ld: -E -m elf_x86_64
++#readelf : --dyn-syms --wide
++
++#failif
++#...
++ +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func
++#...
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2.s b/ld/testsuite/ld-x86-64/pr19636-2.s
 new file mode 100644
 index 0000000..8814ecd
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636.s
++++ b/ld/testsuite/ld-x86-64/pr19636-2.s
 @@ -0,0 +1,9 @@
 +	.text
 +	.weak func1
@@ -1917,13 +2086,13 @@ index 0000000..8814ecd
 +	cmp func1@GOTPCREL(%rip),%rax
 +	jmp *func2@GOTPCREL(%rip)
 +	call func3@PLT
-diff --git a/ld/testsuite/ld-x86-64/pr19636a.d b/ld/testsuite/ld-x86-64/pr19636a.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2a.d b/ld/testsuite/ld-x86-64/pr19636-2a.d
 new file mode 100644
-index 0000000..dc868da
+index 0000000..5a1894c
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636a.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2a.d
 @@ -0,0 +1,17 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -pie -m elf_x86_64
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
@@ -1940,13 +2109,13 @@ index 0000000..dc868da
 +Hex dump of section '.got.plt':
 +  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .+
 +  0x[0-9a-f]+ [0 ]+\.+
-diff --git a/ld/testsuite/ld-x86-64/pr19636b.d b/ld/testsuite/ld-x86-64/pr19636b.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2b.d b/ld/testsuite/ld-x86-64/pr19636-2b.d
 new file mode 100644
-index 0000000..5a27ad8
+index 0000000..5cc255c
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636b.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2b.d
 @@ -0,0 +1,20 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -pie -E -m elf_x86_64
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
@@ -1966,13 +2135,13 @@ index 0000000..5a27ad8
 +Hex dump of section '.got.plt':
 +  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .+
 +  0x[0-9a-f]+ [0 ]+\.+
-diff --git a/ld/testsuite/ld-x86-64/pr19636c.d b/ld/testsuite/ld-x86-64/pr19636c.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2c.d b/ld/testsuite/ld-x86-64/pr19636-2c.d
 new file mode 100644
-index 0000000..e7021e8
+index 0000000..73bde74
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636c.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2c.d
 @@ -0,0 +1,9 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -pie -E -m elf_x86_64
 +#readelf : --wide --dyn-syms
@@ -1981,13 +2150,13 @@ index 0000000..e7021e8
 +#...
 + +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
 +#...
-diff --git a/ld/testsuite/ld-x86-64/pr19636d-nacl.d b/ld/testsuite/ld-x86-64/pr19636d-nacl.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2d-nacl.d b/ld/testsuite/ld-x86-64/pr19636-2d-nacl.d
 new file mode 100644
-index 0000000..537a901
+index 0000000..70cae22
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636d-nacl.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2d-nacl.d
 @@ -0,0 +1,37 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -pie -m elf_x86_64
 +#objdump: -dw
@@ -2024,13 +2193,13 @@ index 0000000..537a901
 +[ 	]*[a-f0-9]+:	48 3b 05 29 02 01 10 	cmp    0x10010229\(%rip\),%rax        # 100102b0 <_DYNAMIC\+0xe0>
 +[ 	]*[a-f0-9]+:	ff 25 2b 02 01 10    	jmpq   \*0x1001022b\(%rip\)        # 100102b8 <_DYNAMIC\+0xe8>
 +[ 	]*[a-f0-9]+:	e8 ae ff ff ff       	callq  40 <_start-0x40>
-diff --git a/ld/testsuite/ld-x86-64/pr19636d.d b/ld/testsuite/ld-x86-64/pr19636d.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2d.d b/ld/testsuite/ld-x86-64/pr19636-2d.d
 new file mode 100644
-index 0000000..86b0fd6
+index 0000000..b8a469d
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636d.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2d.d
 @@ -0,0 +1,25 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -pie -m elf_x86_64
 +#objdump: -dw
@@ -2055,13 +2224,13 @@ index 0000000..86b0fd6
 +[ 	]*[a-f0-9]+:	48 3b 05 f1 00 20 00 	cmp    0x2000f1\(%rip\),%rax        # 2002b8 <_DYNAMIC\+0xe0>
 +[ 	]*[a-f0-9]+:	ff 25 f3 00 20 00    	jmpq   \*0x2000f3\(%rip\)        # 2002c0 <_DYNAMIC\+0xe8>
 +[ 	]*[a-f0-9]+:	e8 de ff ff ff       	callq  1b0 <_start-0x10>
-diff --git a/ld/testsuite/ld-x86-64/pr19636e.d b/ld/testsuite/ld-x86-64/pr19636e.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2e.d b/ld/testsuite/ld-x86-64/pr19636-2e.d
 new file mode 100644
-index 0000000..972462c
+index 0000000..21a6e95
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636e.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2e.d
 @@ -0,0 +1,19 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -shared -m elf_x86_64
 +#readelf : -r --wide --dyn-syms
@@ -2080,13 +2249,13 @@ index 0000000..972462c
 +#...
 + +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
 +#pass
-diff --git a/ld/testsuite/ld-x86-64/pr19636f.d b/ld/testsuite/ld-x86-64/pr19636f.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2f.d b/ld/testsuite/ld-x86-64/pr19636-2f.d
 new file mode 100644
-index 0000000..339929d
+index 0000000..9388fd3
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636f.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2f.d
 @@ -0,0 +1,19 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -shared -Bsymbolic -m elf_x86_64
 +#readelf : -r --wide --dyn-syms
@@ -2105,13 +2274,13 @@ index 0000000..339929d
 +#...
 + +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
 +#pass
-diff --git a/ld/testsuite/ld-x86-64/pr19636g.d b/ld/testsuite/ld-x86-64/pr19636g.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2g.d b/ld/testsuite/ld-x86-64/pr19636-2g.d
 new file mode 100644
-index 0000000..7aace78
+index 0000000..782b86c
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636g.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2g.d
 @@ -0,0 +1,13 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -m elf_x86_64
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
@@ -2124,13 +2293,13 @@ index 0000000..7aace78
 +Hex dump of section '.got.plt':
 +  0x[0-9a-f]+ [0 ]+\.+
 +  0x[0-9a-f]+ [0 ]+\.+
-diff --git a/ld/testsuite/ld-x86-64/pr19636h.d b/ld/testsuite/ld-x86-64/pr19636h.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2h.d b/ld/testsuite/ld-x86-64/pr19636-2h.d
 new file mode 100644
-index 0000000..dc066d9
+index 0000000..3676839
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636h.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2h.d
 @@ -0,0 +1,20 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -E -m elf_x86_64
 +#readelf : -r --wide -x .got -x .got.plt --dyn-syms
@@ -2150,13 +2319,13 @@ index 0000000..dc066d9
 +Hex dump of section '.got.plt':
 +  0x[0-9a-f]+ +[0-9a-f]+ +[0 ]+ .+
 +  0x[0-9a-f]+ [0 ]+\.+
-diff --git a/ld/testsuite/ld-x86-64/pr19636i.d b/ld/testsuite/ld-x86-64/pr19636i.d
+diff --git a/ld/testsuite/ld-x86-64/pr19636-2i.d b/ld/testsuite/ld-x86-64/pr19636-2i.d
 new file mode 100644
-index 0000000..3a80170
+index 0000000..c65f397
 --- /dev/null
-+++ b/ld/testsuite/ld-x86-64/pr19636i.d
++++ b/ld/testsuite/ld-x86-64/pr19636-2i.d
 @@ -0,0 +1,9 @@
-+#source: pr19636.s
++#source: pr19636-2.s
 +#as: --64 -mrelax-relocations=no
 +#ld: -E -m elf_x86_64
 +#readelf : --wide --dyn-syms
@@ -2165,24 +2334,116 @@ index 0000000..3a80170
 +#...
 + +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +WEAK +DEFAULT +UND +func[0-9]?
 +#...
+diff --git a/ld/testsuite/ld-x86-64/pr19636-3.s b/ld/testsuite/ld-x86-64/pr19636-3.s
+new file mode 100644
+index 0000000..6c981f5
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-3.s
+@@ -0,0 +1,14 @@
++	.text
++	.type start,"function"
++	.global start
++start:
++	.type _start,"function"
++	.global _start
++_start:
++	.type __start,"function"
++	.global __start
++__start:
++	.type main,"function"
++	.global main
++main:
++	.long 0
+diff --git a/ld/testsuite/ld-x86-64/pr19636-3a.d b/ld/testsuite/ld-x86-64/pr19636-3a.d
+new file mode 100644
+index 0000000..af01939
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-3a.d
+@@ -0,0 +1,8 @@
++#source: pr19636-3.s
++#as: --64
++#ld: -pie --defsym foobar=0x100 -m elf_x86_64
++#readelf : --dyn-syms --wide
++
++Symbol table '\.dynsym' contains 1 entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++ +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
+diff --git a/ld/testsuite/ld-x86-64/pr19636-3b.d b/ld/testsuite/ld-x86-64/pr19636-3b.d
+new file mode 100644
+index 0000000..be8c4f6
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-3b.d
+@@ -0,0 +1,10 @@
++#source: pr19636-3.s
++#as: --64
++#ld: -pie -E --defsym foobar=0x100 -m elf_x86_64
++#readelf : --dyn-syms --wide
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr19636-3c.d b/ld/testsuite/ld-x86-64/pr19636-3c.d
+new file mode 100644
+index 0000000..02b6464
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-3c.d
+@@ -0,0 +1,10 @@
++#source: pr19636-3.s
++#as: --64
++#ld: -shared -Bsymbolic --defsym foobar=0x100 -m elf_x86_64
++#readelf : --dyn-syms --wide
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
++#pass
+diff --git a/ld/testsuite/ld-x86-64/pr19636-3d.d b/ld/testsuite/ld-x86-64/pr19636-3d.d
+new file mode 100644
+index 0000000..3d9a6d7
+--- /dev/null
++++ b/ld/testsuite/ld-x86-64/pr19636-3d.d
+@@ -0,0 +1,10 @@
++#source: pr19636-3.s
++#as: --64
++#ld: -E --defsym foobar=0x100 -m elf_x86_64
++#readelf : --dyn-syms --wide
++
++Symbol table '\.dynsym' contains [0-9]+ entries:
++ +Num: +Value +Size Type +Bind +Vis +Ndx Name
++#...
++ +[0-9]+: +0+100 +0 +NOTYPE +GLOBAL +DEFAULT +ABS +foobar
++#pass
 diff --git a/ld/testsuite/ld-x86-64/x86-64.exp b/ld/testsuite/ld-x86-64/x86-64.exp
-index 7248377..d6a9073 100644
+index 7248377..a8c356b 100644
 --- a/ld/testsuite/ld-x86-64/x86-64.exp
 +++ b/ld/testsuite/ld-x86-64/x86-64.exp
-@@ -355,6 +355,16 @@ run_dump_test "pr19162"
+@@ -355,6 +355,26 @@ run_dump_test "pr19162"
  run_dump_test "pr19175"
  run_dump_test "pr18591"
  run_dump_test "pr19615"
-+run_dump_test "pr19636a"
-+run_dump_test "pr19636b"
-+run_dump_test "pr19636c"
-+run_dump_test "pr19636d"
-+run_dump_test "pr19636d-nacl"
-+run_dump_test "pr19636e"
-+run_dump_test "pr19636f"
-+run_dump_test "pr19636g"
-+run_dump_test "pr19636h"
-+run_dump_test "pr19636i"
++run_dump_test "pr19636-1a"
++run_dump_test "pr19636-1b"
++run_dump_test "pr19636-1c"
++run_dump_test "pr19636-1d"
++run_dump_test "pr19636-1e"
++run_dump_test "pr19636-1f"
++run_dump_test "pr19636-1g"
++run_dump_test "pr19636-2a"
++run_dump_test "pr19636-2b"
++run_dump_test "pr19636-2c"
++run_dump_test "pr19636-2d"
++run_dump_test "pr19636-2d-nacl"
++run_dump_test "pr19636-2e"
++run_dump_test "pr19636-2f"
++run_dump_test "pr19636-2g"
++run_dump_test "pr19636-2h"
++run_dump_test "pr19636-2i"
++run_dump_test "pr19636-3a"
++run_dump_test "pr19636-3b"
++run_dump_test "pr19636-3c"
  
  # Add $PLT_CFLAGS if PLT is expected.
  global PLT_CFLAGS
