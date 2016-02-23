@@ -1,4 +1,4 @@
-From c72691bf10068d49d64c7643fbf2aa64b8267515 Mon Sep 17 00:00:00 2001
+From eb48bed6bc5dc33b5f8d70941e70a6fc51496b13 Mon Sep 17 00:00:00 2001
 From: "H.J. Lu" <hjl.tools@gmail.com>
 Date: Mon, 22 Feb 2016 09:18:52 -0800
 Subject: [PATCH] Properly implement STT_COMMON
@@ -166,7 +166,7 @@ ld/
  bfd/configure.ac                            |  20 ------
  bfd/elf.c                                   |  16 +++--
  bfd/elfcode.h                               |   1 +
- bfd/elflink.c                               |  84 +++++++++++++++++-----
+ bfd/elflink.c                               |  85 ++++++++++++++++++-----
  bfd/elfxx-target.h                          |   4 +-
  bfd/syms.c                                  |   4 +-
  binutils/NEWS                               |   3 +
@@ -241,7 +241,7 @@ ld/
  ld/testsuite/ld-x86-64/pr19645.d            |  13 ++++
  ld/testsuite/ld-x86-64/pr19645.s            |   6 ++
  ld/testsuite/ld-x86-64/x86-64.exp           |   1 +
- 82 files changed, 1146 insertions(+), 341 deletions(-)
+ 82 files changed, 1147 insertions(+), 341 deletions(-)
  create mode 100644 binutils/testsuite/binutils-all/common-1.s
  create mode 100644 binutils/testsuite/binutils-all/common-1a.d
  create mode 100644 binutils/testsuite/binutils-all/common-1b.d
@@ -532,7 +532,7 @@ index 7223dd3..79a14f3 100644
  	    case STT_OBJECT:
  	      sym->symbol.flags |= BSF_OBJECT;
 diff --git a/bfd/elflink.c b/bfd/elflink.c
-index 7d565f5..c401bfe 100644
+index 7d565f5..34fdf2d 100644
 --- a/bfd/elflink.c
 +++ b/bfd/elflink.c
 @@ -525,8 +525,10 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
@@ -623,7 +623,7 @@ index 7d565f5..c401bfe 100644
    switch (h->root.type)
      {
      default:
-@@ -9281,6 +9292,41 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9281,6 +9292,42 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
        return TRUE;
      }
  
@@ -641,6 +641,7 @@ index 7d565f5..c401bfe 100644
 +	  type = STT_OBJECT;
 +	break;
 +      case bfd_link_hash_undefined:
++      case bfd_link_hash_undefweak:
 +	break;
 +      default:
 +	abort ();
@@ -665,7 +666,7 @@ index 7d565f5..c401bfe 100644
    /* Give the processor backend a chance to tweak the symbol value,
       and also to finish up anything that needs to be done for this
       symbol.  FIXME: Not calling elf_backend_finish_dynamic_symbol for
-@@ -9317,7 +9363,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
+@@ -9317,7 +9364,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
  	  || ELF_ST_BIND (sym.st_info) == STB_WEAK))
      {
        int bindtype;
