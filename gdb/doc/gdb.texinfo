@@ -5528,7 +5528,8 @@ default is @code{on}.
 
 The program you are debugging may contain some functions which are
 uninteresting to debug.  The @code{skip} command lets you tell @value{GDBN} to
-skip a function or all functions in a file when stepping.
+skip a function, all functions in a file or a particular function in
+a particular file when stepping.
 
 For example, consider the following C function:
 
@@ -5555,13 +5556,75 @@ A more flexible solution is to execute @kbd{skip boring}.  This instructs
 @code{step} at line 103, you'll step over @code{boring} and directly into
 @code{foo}.
 
-You can also instruct @value{GDBN} to skip all functions in a file, with, for
-example, @code{skip file boring.c}.
+Functions may be skipped by providing either a function name, linespec
+(@pxref{Specify Location}), regular expression that matches the function's
+name, file name or a @code{glob}-style pattern that matches the file name.
+
+On Posix systems the form of the regular expression is
+``Extended Regular Expressions''.  See for example @samp{man 7 regex}
+on @sc{gnu}/Linux systems.  On non-Posix systems the form of the regular
+expression is whatever is provided by the @code{regcomp} function of
+the underlying system.
+See for example @samp{man 7 glob} on @sc{gnu}/Linux systems for a
+description of @code{glob}-style patterns.
 
 @table @code
+@kindex skip
+@item skip @r{[}@var{options}@r{]}
+The basic form of the @code{skip} command takes zero or more options
+that specify what to skip.
+The @var{options} argument is any useful combination of the following:
+
+@table @code
+@item -file @var{file}
+@itemx -fi @var{file}
+Functions in @var{file} will be skipped over when stepping.
+
+@item -gfile @var{file-glob-pattern}
+@itemx -gfi @var{file-glob-pattern}
+@cindex skipping over files via glob-style patterns
+Functions in files matching @var{file-glob-pattern} will be skipped
+over when stepping.
+
+@smallexample
+(gdb) skip -gfi utils/*.c
+@end smallexample
+
+@item -function @var{linespec}
+@itemx -fu @var{linespec}
+Functions named by @var{linespec} or the function containing the line
+named by @var{linespec} will be skipped over when stepping.
+@xref{Specify Location}.
+
+@item -rfunction @var{regexp}
+@itemx -rfu @var{regexp}
+@cindex skipping over functions via regular expressions
+Functions whose name matches @var{regexp} will be skipped over when stepping.
+
+This form is useful for complex function names.
+For example, there is generally no need to step into C@t{++} @code{std::string}
+constructors or destructors.  Plus with C@t{++} templates it can be hard to
+write out the full name of the function, and often it doesn't matter what
+the template arguments are.  Specifying the function to be skipped as a
+regular expression makes this easier.
+
+@smallexample
+(gdb) skip -rfu ^std::(allocator|basic_string)<.*>::~?\1 *\(
+@end smallexample
+
+If you want to skip every templated C@t{++} constructor and destructor
+in the @code{std} namespace you can do:
+
+@smallexample
+(gdb) skip -rfu ^std::([a-zA-z0-9_]+)<.*>::~?\1 *\(
+@end smallexample
+@end table
+
+If no options are specified, the function you're currently debugging
+will be skipped.
+
 @kindex skip function
-@item skip @r{[}@var{linespec}@r{]}
-@itemx skip function @r{[}@var{linespec}@r{]}
+@item skip function @r{[}@var{linespec}@r{]}
 After running this command, the function named by @var{linespec} or the
 function containing the line named by @var{linespec} will be skipped over when
 stepping.  @xref{Specify Location}.
@@ -5576,6 +5639,11 @@ will be skipped.
 @item skip file @r{[}@var{filename}@r{]}
 After running this command, any function whose source lives in @var{filename}
 will be skipped over when stepping.
+
+@smallexample
+(gdb) skip file boring.c
+File boring.c will be skipped when stepping.
+@end smallexample
 
 If you do not specify @var{filename}, functions whose source lives in the file
 you're currently debugging will be skipped.
@@ -5594,20 +5662,21 @@ print a table with details about all functions and files marked for skipping.
 @table @emph
 @item Identifier
 A number identifying this skip.
-@item Type
-The type of this skip, either @samp{function} or @samp{file}.
 @item Enabled or Disabled
-Enabled skips are marked with @samp{y}.  Disabled skips are marked with @samp{n}.
-@item Address
-For function skips, this column indicates the address in memory of the function
-being skipped.  If you've set a function skip on a function which has not yet
-been loaded, this field will contain @samp{<PENDING>}.  Once a shared library
-which has the function is loaded, @code{info skip} will show the function's
-address here.
-@item What
-For file skips, this field contains the filename being skipped.  For functions
-skips, this field contains the function name and its line number in the file
-where it is defined.
+Enabled skips are marked with @samp{y}.
+Disabled skips are marked with @samp{n}.
+@item Glob
+If the file name is a @samp{glob} pattern this is @samp{y}.
+Otherwise it is @samp{n}.
+@item File
+The name or @samp{glob} pattern of the file to be skipped.
+If no file is specified this is @samp{<none>}.
+@item RE
+If the function name is a @samp{regular expression} this is @samp{y}.
+Otherwise it is @samp{n}.
+@item Function
+The name or regular expression of the function to skip.
+If no function is specified this is @samp{<none>}.
 @end table
 
 @kindex skip delete

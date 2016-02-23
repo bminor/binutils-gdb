@@ -3380,6 +3380,83 @@ gdb_filename_fnmatch (const char *pattern, const char *string, int flags)
   return fnmatch (pattern, string, flags);
 }
 
+/* Return the number of path elements in PATH.
+   / = 1
+   /foo = 2
+   /foo/ = 2
+   foo/bar = 2
+   foo/ = 1  */
+
+int
+count_path_elements (const char *path)
+{
+  int count = 0;
+  const char *p = path;
+
+  if (HAS_DRIVE_SPEC (p))
+    {
+      p = STRIP_DRIVE_SPEC (p);
+      ++count;
+    }
+
+  while (*p != '\0')
+    {
+      if (IS_DIR_SEPARATOR (*p))
+	++count;
+      ++p;
+    }
+
+  /* Backup one if last character is /, unless it's the only one.  */
+  if (p > path + 1 && IS_DIR_SEPARATOR (p[-1]))
+    --count;
+
+  /* Add one for the file name, if present.  */
+  if (p > path && !IS_DIR_SEPARATOR (p[-1]))
+    ++count;
+
+  return count;
+}
+
+/* Remove N leading path elements from PATH.
+   N must be non-negative.
+   If PATH has more than N path elements then return NULL.
+   If PATH has exactly N path elements then return "".
+   See count_path_elements for a description of how we do the counting.  */
+
+const char *
+strip_leading_path_elements (const char *path, int n)
+{
+  int i = 0;
+  const char *p = path;
+
+  gdb_assert (n >= 0);
+
+  if (n == 0)
+    return p;
+
+  if (HAS_DRIVE_SPEC (p))
+    {
+      p = STRIP_DRIVE_SPEC (p);
+      ++i;
+    }
+
+  while (i < n)
+    {
+      while (*p != '\0' && !IS_DIR_SEPARATOR (*p))
+	++p;
+      if (*p == '\0')
+	{
+	  if (i + 1 == n)
+	    return "";
+	  return NULL;
+	}
+      ++p;
+      ++i;
+    }
+
+  return p;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_utils;
 

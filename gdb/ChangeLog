@@ -1,3 +1,33 @@
+2016-02-23  Doug Evans  <dje@google.com>
+
+	Extend "skip" command to support -file, -gfile, -function, -rfunction.
+	* NEWS: Document new features.
+	* skip.c: #include "fnmatch.h", "gdb_regex.h".
+	(skiplist_entry) <file>: Renamed from filename.
+	<function>: Renamed from function_name.
+	<file_is_glob, function_is_regexp>: New members.
+	<compiled_function_regexp, compiled_function_regexp_is_valid>:
+	New members.
+	(make_skip_entry): New function.
+	(free_skiplist_entry, free_skiplist_entry_cleanup): New functions.
+	(make_free_skiplist_entry_cleanup): New function.
+	(skip_file_command): Update.
+	(skip_function, skip_function_command): Update.
+	(compile_skip_regexp): New functions.
+	(skip_command): Add support for new options.
+	(skip_info): Update.
+	(skip_file_p, skip_gfile_p): New functions.
+	(skip_function_p, skip_rfunction_p): New functions.
+	(function_name_is_marked_for_skip): Update and simplify.
+	(_initialize_step_skip): Update.
+	* symtab.c: #include "fnmatch.h".
+	(compare_glob_filenames_for_search): New function.
+	* symtab.h (compare_glob_filenames_for_search): Declare.
+	* utils.c (count_path_elements): New function.
+	(strip_leading_path_elements): New function.
+	* utils.h (count_path_elements): Declare.
+	(strip_leading_path_elements): Declare.
+
 2016-02-23  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* arm-tdep.c (arm_decode_svc_copro): Remove "to" parameter.

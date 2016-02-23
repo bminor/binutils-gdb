@@ -41,7 +41,7 @@
 #include "p-lang.h"
 #include "addrmap.h"
 #include "cli/cli-utils.h"
-
+#include "fnmatch.h"
 #include "hashtab.h"
 
 #include "gdb_obstack.h"
@@ -340,6 +340,40 @@ compare_filenames_for_search (const char *filename, const char *search_name)
 	      && IS_DIR_SEPARATOR (filename[len - search_len - 1]))
 	  || (HAS_DRIVE_SPEC (filename)
 	      && STRIP_DRIVE_SPEC (filename) == &filename[len - search_len]));
+}
+
+/* Same as compare_filenames_for_search, but for glob-style patterns.
+   Heads up on the order of the arguments.  They match the order of
+   compare_filenames_for_search, but it's the opposite of the order of
+   arguments to gdb_filename_fnmatch.  */
+
+int
+compare_glob_filenames_for_search (const char *filename,
+				   const char *search_name)
+{
+  /* We rely on the property of glob-style patterns with FNM_FILE_NAME that
+     all /s have to be explicitly specified.  */
+  int file_path_elements = count_path_elements (filename);
+  int search_path_elements = count_path_elements (search_name);
+
+  if (search_path_elements > file_path_elements)
+    return 0;
+
+  if (IS_ABSOLUTE_PATH (search_name))
+    {
+      return (search_path_elements == file_path_elements
+	      && gdb_filename_fnmatch (search_name, filename,
+				       FNM_FILE_NAME | FNM_NOESCAPE) == 0);
+    }
+
+  {
+    const char *file_to_compare
+      = strip_leading_path_elements (filename,
+				     file_path_elements - search_path_elements);
+
+    return gdb_filename_fnmatch (search_name, file_to_compare,
+				 FNM_FILE_NAME | FNM_NOESCAPE) == 0;
+  }
 }
 
 /* Check for a symtab of a specific name by searching some symtabs.
