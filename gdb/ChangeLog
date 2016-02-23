@@ -1,3 +1,19 @@
+2016-02-23  Yao Qi  <yao.qi@linaro.org>
+
+	* aarch64-linux-tdep.c (enum aarch64_syscall) <aarch64_sys_mknod>:
+	Remove.
+	<aarch64_sys_mkdir, aarch64_sys_unlink, aarch64_sys_symlink>: Remove.
+	<aarch64_sys_link, aarch64_sys_rename, aarch64_sys_faccess>: Remove.
+	<aarch64_sys_mknodat, aarch64_sys_mkdirat>: New.
+	<aarch64_sys_unlinkat, aarch64_sys_symlinkat>: New.
+	<aarch64_sys_linkat, aarch64_sys_renameat>: New.
+	<aarch64_sys_faccessat>: New.
+	<aarch64_sys_open, aarch64_sys_readlink, aarch64_sys_fstatat>: Remove.
+	<aarch64_sys_openat, aarch64_sys_readlinkat>: New.
+	<aarch64_sys_newfstatat>: New.
+	(UNSUPPORTED_SYSCALL_MAP): New macro.
+	(aarch64_canonicalize_syscall): Add missing syscalls.
+
 2016-02-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb-gdb.py (class TypeFlagsPrinter): Use parentheses for print.
