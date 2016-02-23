@@ -1,3 +1,9 @@
+2016-02-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	Fix test-case ld-elf/pr19617b
+	* elf32-cris.c (elf_cris_discard_excess_program_dynamics): Don't
+	discard unused non-function symbols when --dynamic-list-data.
+
 2016-02-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_link_renumber_dynsyms): Always create the
