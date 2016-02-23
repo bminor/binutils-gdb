@@ -875,9 +875,9 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
 			  &dynsymcount);
 
   /* There is an unused NULL entry at the head of the table which
-     we must account for in our count.  Unless there weren't any
-     symbols, which means we'll have no table at all.  */
-  if (dynsymcount != 0)
+     we must account for in our count.  We always create the dynsym
+     section, even if it is empty, with dynamic sections.  */
+  if (elf_hash_table (info)->dynamic_sections_created)
     ++dynsymcount;
 
   elf_hash_table (info)->dynsymcount = dynsymcount;

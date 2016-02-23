@@ -1,5 +1,10 @@
 2016-02-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Always create the
+	dynsym section, even if it is empty, with dynamic sections.
+
+2016-02-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* syms.c: Remove BSF_COMMON from comments.
 	* bfd-in2.h: Regenerated.
 
