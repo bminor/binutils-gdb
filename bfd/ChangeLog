@@ -1,3 +1,8 @@
+2016-02-23  Faraz Shahbazker  <faraz.shahbazker@imgtec.com>
+
+	* bfd/elfxx-mips.c (_bfd_mips_post_process_headers): Increment
+	ABIVERSION for non-executable stack.
+
 2016-02-23  Rich Felker  <bugdal@aerifal.cx>
 
 	PR target/19516
