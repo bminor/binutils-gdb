@@ -1,3 +1,10 @@
+2016-02-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19698
+	* testsuite/ld-elf/pr19698.d: New file.
+	* testsuite/ld-elf/pr19698.s: Likewise.
+	* testsuite/ld-elf/pr19698.t: Likewise.
+
 2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ELF_X86_DEPS): New.
