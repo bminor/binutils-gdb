@@ -13252,7 +13252,19 @@ NEON_ENC_TAB
   X(2, (S, R), SINGLE),			\
   X(2, (R, S), SINGLE),			\
   X(2, (F, R), SINGLE),			\
-  X(2, (R, F), SINGLE)
+  X(2, (R, F), SINGLE),			\
+/* Half float shape supported so far.  */\
+  X (2, (H, D), MIXED),			\
+  X (2, (D, H), MIXED),			\
+  X (2, (H, F), MIXED),			\
+  X (2, (F, H), MIXED),			\
+  X (2, (H, H), HALF),			\
+  X (2, (H, R), HALF),			\
+  X (2, (R, H), HALF),			\
+  X (2, (H, I), HALF),			\
+  X (3, (H, H, H), HALF),		\
+  X (3, (H, F, I), MIXED),		\
+  X (3, (F, H, I), MIXED)
 
 #define S2(A,B)		NS_##A##B
 #define S3(A,B,C)	NS_##A##B##C
@@ -13273,6 +13285,7 @@ enum neon_shape
 
 enum neon_shape_class
 {
+  SC_HALF,
   SC_SINGLE,
   SC_DOUBLE,
   SC_QUAD,
@@ -13290,6 +13303,7 @@ static enum neon_shape_class neon_shape_class[] =
 
 enum neon_shape_el
 {
+  SE_H,
   SE_F,
   SE_D,
   SE_Q,
@@ -13302,6 +13316,7 @@ enum neon_shape_el
 /* Register widths of above.  */
 static unsigned neon_shape_el_size[] =
 {
+  16,
   32,
   64,
   128,
@@ -13386,6 +13401,7 @@ enum neon_type_mask
 #define N_SUF_32   (N_SU_32 | N_F32)
 #define N_I_ALL    (N_I8 | N_I16 | N_I32 | N_I64)
 #define N_IF_32    (N_I8 | N_I16 | N_I32 | N_F32)
+#define N_F_ALL    (N_F16 | N_F32 | N_F64)
 
 /* Pass this as the first type argument to neon_check_type to ignore types
    altogether.  */
@@ -13427,11 +13443,56 @@ neon_select_shape (enum neon_shape shape, ...)
 
 	  switch (neon_shape_tab[shape].el[j])
 	    {
+	      /* If a  .f16,  .16,  .u16,  .s16 type specifier is given over
+		 a VFP single precision register operand, it's essentially
+		 means only half of the register is used.
+
+		 If the type specifier is given after the mnemonics, the
+		 information is stored in inst.vectype.  If the type specifier
+		 is given after register operand, the information is stored
+		 in inst.operands[].vectype.
+
+		 When there is only one type specifier, and all the register
+		 operands are the same type of hardware register, the type
+		 specifier applies to all register operands.
+
+		 If no type specifier is given, the shape is inferred from
+		 operand information.
+
+		 for example:
+		 vadd.f16 s0, s1, s2:		NS_HHH
+		 vabs.f16 s0, s1:		NS_HH
+		 vmov.f16 s0, r1:		NS_HR
+		 vmov.f16 r0, s1:		NS_RH
+		 vcvt.f16 r0, s1:		NS_RH
+		 vcvt.f16.s32	s2, s2, #29:	NS_HFI
+		 vcvt.f16.s32	s2, s2:		NS_HF
+	      */
+	    case SE_H:
+	      if (!(inst.operands[j].isreg
+		    && inst.operands[j].isvec
+		    && inst.operands[j].issingle
+		    && !inst.operands[j].isquad
+		    && ((inst.vectype.elems == 1
+			 && inst.vectype.el[0].size == 16)
+			|| (inst.vectype.elems > 1
+			    && inst.vectype.el[j].size == 16)
+			|| (inst.vectype.elems == 0
+			    && inst.operands[j].vectype.type != NT_invtype
+			    && inst.operands[j].vectype.size == 16))))
+		matches = 0;
+	      break;
+
 	    case SE_F:
 	      if (!(inst.operands[j].isreg
 		    && inst.operands[j].isvec
 		    && inst.operands[j].issingle
-		    && !inst.operands[j].isquad))
+		    && !inst.operands[j].isquad
+		    && ((inst.vectype.elems == 1 && inst.vectype.el[0].size == 32)
+			|| (inst.vectype.elems > 1 && inst.vectype.el[j].size == 32)
+			|| (inst.vectype.elems == 0
+			    && (inst.operands[j].vectype.size == 32
+				|| inst.operands[j].vectype.type == NT_invtype)))))
 		matches = 0;
 	      break;
 
@@ -13647,7 +13708,7 @@ el_type_of_type_chk (enum neon_el_type *type, unsigned *size,
     *type = NT_untyped;
   else if ((mask & (N_P8 | N_P16 | N_P64)) != 0)
     *type = NT_poly;
-  else if ((mask & (N_F16 | N_F32 | N_F64)) != 0)
+  else if ((mask & (N_F_ALL)) != 0)
     *type = NT_float;
   else
     return FAIL;
@@ -15207,7 +15268,8 @@ do_vfp_nsyn_cvt (enum neon_shape rs, enum neon_cvt_flavour flavour)
 {
   const char *opname = 0;
 
-  if (rs == NS_DDI || rs == NS_QQI || rs == NS_FFI)
+  if (rs == NS_DDI || rs == NS_QQI || rs == NS_FFI
+      || rs == NS_FHI || rs == NS_HFI)
     {
       /* Conversions with immediate bitshift.  */
       const char *enc[] =
@@ -15249,7 +15311,7 @@ do_vfp_nsyn_cvt (enum neon_shape rs, enum neon_cvt_flavour flavour)
 static void
 do_vfp_nsyn_cvtz (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_FF, NS_FD, NS_NULL);
+  enum neon_shape rs = neon_select_shape (NS_FH, NS_FF, NS_FD, NS_NULL);
   enum neon_cvt_flavour flavour = get_neon_cvt_flavour (rs);
   const char *enc[] =
     {
@@ -15325,7 +15387,9 @@ static void
 do_neon_cvt_1 (enum neon_cvt_mode mode)
 {
   enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_FFI, NS_DD, NS_QQ,
-    NS_FD, NS_DF, NS_FF, NS_QD, NS_DQ, NS_NULL);
+					  NS_FD, NS_DF, NS_FF, NS_QD, NS_DQ,
+					  NS_FH, NS_HF, NS_FHI, NS_HFI,
+					  NS_NULL);
   enum neon_cvt_flavour flavour = get_neon_cvt_flavour (rs);
 
   /* PR11109: Handle round-to-zero for VCVT conversions.  */
@@ -15525,7 +15589,8 @@ do_neon_cvttb_2 (bfd_boolean t, bfd_boolean to, bfd_boolean is_double)
 static void
 do_neon_cvttb_1 (bfd_boolean t)
 {
-  enum neon_shape rs = neon_select_shape (NS_FF, NS_FD, NS_DF, NS_NULL);
+  enum neon_shape rs = neon_select_shape (NS_HF, NS_HD, NS_FH, NS_FF, NS_FD,
+					  NS_DF, NS_DH, NS_NULL);
 
   if (rs == NS_NULL)
     return;

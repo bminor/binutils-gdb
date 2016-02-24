@@ -1,5 +1,19 @@
 2016-02-24  Renlin Li  <renlin.li@arm.com>
 
+	* config/tc-arm.c (NEON_ENC_TAB): Add fp16 instruction shape.
+	(neon_shape_class): New SC_HALF.
+	(neon_shape_el): New SE_H.
+	(neon_shape_el_size): New size for SE_H.
+	(N_F_ALL): New macro to aggregate N_F16, N_F32, N_64.
+	(neon_select_shape): Add SE_H support code.
+	(el_type_of_type_chk): Use N_F_ALL.
+	(do_vfp_nsyn_cvt): Add SE_H shape support.
+	(do_neon_cvtz): Likewise.
+	(do_neon_cvt_1): Likewise.
+	(do_neon_cvttb_1): Likewise.
+
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
 	* testsuite/gas/arm/copro.d: Adjust output.
 	* testsuite/gas/arm/copro.s: Adjust co-processor num.
 
