@@ -1,3 +1,8 @@
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
+	* arm-dis.c (print_insn_coprocessor): Check co-processor number for
+	cpd/cpd2, mcr/mcr2, mrc/mrc2, ldc/ldc2, stc/stc2.
+
 2016-02-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (print_insn): Parenthesize expression to prevent

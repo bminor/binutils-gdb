@@ -3198,6 +3198,7 @@ print_insn_coprocessor (bfd_vma pc,
   unsigned long mask;
   unsigned long value = 0;
   int cond;
+  int cp_num;
   struct arm_private_data *private_data = info->private_data;
   arm_feature_set allowed_arches = ARM_ARCH_NONE;
 
@@ -3236,6 +3237,8 @@ print_insn_coprocessor (bfd_vma pc,
 
       mask = insn->mask;
       value = insn->value;
+      cp_num = (given >> 8) & 0xf;
+
       if (thumb)
 	{
 	  /* The high 4 bits are 0xe for Arm conditional instructions, and
@@ -3270,6 +3273,26 @@ print_insn_coprocessor (bfd_vma pc,
 
       if (! ARM_CPU_HAS_FEATURE (insn->arch, allowed_arches))
 	continue;
+
+      if (insn->value == 0xfe000010     /* mcr2  */
+	  || insn->value == 0xfe100010  /* mrc2  */
+	  || insn->value == 0xfc100000  /* ldc2  */
+	  || insn->value == 0xfc000000) /* stc2  */
+	{
+	  if (cp_num == 10 || cp_num == 11)
+	    is_unpredictable = TRUE;
+	}
+      else if (insn->value == 0x0e000000     /* cdp  */
+	       || insn->value == 0xfe000000  /* cdp2  */
+	       || insn->value == 0x0e000010  /* mcr  */
+	       || insn->value == 0x0e100010  /* mrc  */
+	       || insn->value == 0x0c100000  /* ldc  */
+	       || insn->value == 0x0c000000) /* stc  */
+	{
+	  /* Floating-point instructions.  */
+	  if (cp_num == 10 || cp_num == 11)
+	    continue;
+	}
 
       for (c = insn->assembler; *c; c++)
 	{

@@ -1,3 +1,8 @@
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
+	* testsuite/gas/arm/copro.s: Use coprocessor other than 10, 11.
+	* testsuite/gas/arm/copro.d: Update.
+
 2016-02-24  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add entry for cortex-a32.
