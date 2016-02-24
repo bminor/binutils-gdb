@@ -1,3 +1,8 @@
+2016-02-25  Antoine Tremblay  <antoine.tremblay@ericsson.com>
+
+	* ax-general.c (ax_reg): Call gdbarch_remote_register_number.
+	(ax_reg_mask): Likewise.
+
 2016-02-24  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (save_sigtrap) Delete.
