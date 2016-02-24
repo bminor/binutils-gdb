@@ -4983,9 +4983,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 
-#if ARCH_SIZE == 64
-	case BFD_RELOC_AARCH64_32:
-#endif
 	case BFD_RELOC_AARCH64_NN:
 	  if (rel->r_addend != 0)
 	    {
@@ -5158,9 +5155,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       *unresolved_reloc_p = FALSE;
       return bfd_reloc_ok;
 
-#if ARCH_SIZE == 64
-    case BFD_RELOC_AARCH64_32:
-#endif
     case BFD_RELOC_AARCH64_NN:
 
       /* When generating a shared object or relocatable executable, these
@@ -5326,6 +5320,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	}
 
     case BFD_RELOC_AARCH64_16:
+#if ARCH_SIZE == 64
+    case BFD_RELOC_AARCH64_32:
+#endif
     case BFD_RELOC_AARCH64_ADD_LO12:
     case BFD_RELOC_AARCH64_BRANCH19:
     case BFD_RELOC_AARCH64_LDST128_LO12:
@@ -6800,9 +6797,6 @@ elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 	case BFD_RELOC_AARCH64_MOVW_G1_NC:
 	case BFD_RELOC_AARCH64_MOVW_G2_NC:
 	case BFD_RELOC_AARCH64_MOVW_G3:
-#if ARCH_SIZE == 64
-	case BFD_RELOC_AARCH64_32:
-#endif
 	case BFD_RELOC_AARCH64_NN:
 	  if (h != NULL && bfd_link_executable (info))
 	    {
@@ -7108,9 +7102,6 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
 	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
 	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
-#if ARCH_SIZE == 64
-	    case BFD_RELOC_AARCH64_32:
-#endif
 	    case BFD_RELOC_AARCH64_NN:
 	      if (htab->root.dynobj == NULL)
 		htab->root.dynobj = abfd;
@@ -7126,9 +7117,6 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       switch (bfd_r_type)
 	{
-#if ARCH_SIZE == 64
-	case BFD_RELOC_AARCH64_32:
-#endif
 	case BFD_RELOC_AARCH64_NN:
 
 	  /* We don't need to handle relocs into sections not going into
