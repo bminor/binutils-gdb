@@ -120,6 +120,7 @@ recognized:
 @code{cortex-a9},
 @code{cortex-a15},
 @code{cortex-a17},
+@code{cortex-a32},
 @code{cortex-a35},
 @code{cortex-a53},
 @code{cortex-a57},
