@@ -1,3 +1,12 @@
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2016-02-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Set plt_got.offset
+	to (bfd_vma) -1 when setting needs_plt to 0.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewise.
+
 2016-02-26  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (create_linkage_sections): Create sfpr when
