@@ -60,7 +60,7 @@ set testpid [spawn_id_get_pid $test_spawn_id]
 
 gdb_start
 file delete -- $binfile
-gdb_test "attach $testpid" "Attaching to process $testpid\r\n.*: No such file or directory\\." "attach"
+gdb_test "attach $testpid" "Attaching to process $testpid\r\n.*" "attach"
 gdb_test "set architecture $arch" "The target architecture is assumed to be $arch"
 gdb_test "info shared" "From\[ \t\]+To\[ \t\]+Syms Read\[ \t\]+Shared Object Library\r\n0x.*"
 

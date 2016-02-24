@@ -1,3 +1,8 @@
+2016-02-24  Gary Benson  <gbenson@redhat.com>
+
+	* exec.c (exec_file_locate_attach): Do not attempt to
+	locate main executable locally if not found in sysroot.
+
 2016-02-24  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.11 released.

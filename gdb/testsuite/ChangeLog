@@ -1,3 +1,8 @@
+2016-02-24  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/attach-pie-noexec.exp: Do not expect an error
+	message on attach.
+
 2016-02-23  Doug Evans  <dje@google.com>
 
 	* gdb.base/skip.c (test_skip): New function.
