@@ -1,6 +1,15 @@
 2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
+	2016-02-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/19698
+	* elflink.c (bfd_elf_record_link_assignment): Set versioned if
+	symbol version is unknown.
+
+2016-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
 	2016-02-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19553
