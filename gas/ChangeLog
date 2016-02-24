@@ -1,3 +1,7 @@
+2016-02-24  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+    * doc/c-arm.texi (ARM Options): Document cortex-a17.
+
 2016-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/elf/elf.exp: Skip tests for common directive on
