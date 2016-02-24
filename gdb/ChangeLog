@@ -1,3 +1,7 @@
+2016-02-24  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.11 released.
+
 2016-02-24  Wei-cheng Wang  <cole945@gmail.com>
 
 	* rs6000-tdep.c (rs6000_frame_cache, rs6000_frame_this_id): Handle
