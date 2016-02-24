@@ -3209,7 +3209,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct rs6000_framedata fdata;
   int wordsize = tdep->wordsize;
-  CORE_ADDR func, pc;
+  CORE_ADDR func = 0, pc = 0;
 
   if ((*this_cache) != NULL)
     return (struct rs6000_frame_cache *) (*this_cache);

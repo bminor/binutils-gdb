@@ -1,3 +1,8 @@
+2016-02-24  Marcin Kościelnicki  <koriakin@0x04.net>
+
+	* rs6000-tdep.c (rs6000_frame_cache): Initialize frame and pc to 0
+	to avoid spurious warnings.
+
 2016-02-24  Gary Benson  <gbenson@redhat.com>
 
 	* exec.c (exec_file_locate_attach): Do not attempt to
