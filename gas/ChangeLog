@@ -1,5 +1,10 @@
 2016-02-24  Renlin Li  <renlin.li@arm.com>
 
+	* testsuite/gas/arm/copro.d: Adjust output.
+	* testsuite/gas/arm/copro.s: Adjust co-processor num.
+
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
 	* testsuite/gas/arm/mask_1.d: New.
 	* testsuite/gas/arm/mask_1.s: New.
 

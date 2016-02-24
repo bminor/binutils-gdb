@@ -1,5 +1,10 @@
 2016-02-24  Renlin Li  <renlin.li@arm.com>
 
+	* arm-dis.c (coprocessor_opcodes): Add fp16 instruction entries.
+	(print_insn_coprocessor): Support fp16 instructions.
+
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
 	* arm-dis.c (print_insn_coprocessor): Fix mask for vsel, vmaxnm,
 	vminnm, vrint(mpna).
 
