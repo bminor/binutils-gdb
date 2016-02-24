@@ -735,32 +735,16 @@ get_syscall_trapinfo (struct lwp_info *lwp, int *sysno, int *sysret)
   current_thread = saved_thread;
 }
 
-/* This function should only be called if LWP got a SIGTRAP.
-   The SIGTRAP could mean several things.
+static int check_stopped_by_watchpoint (struct lwp_info *child);
 
-   On i386, where decr_pc_after_break is non-zero:
-
-   If we were single-stepping this process using PTRACE_SINGLESTEP, we
-   will get only the one SIGTRAP.  The value of $eip will be the next
-   instruction.  If the instruction we stepped over was a breakpoint,
-   we need to decrement the PC.
-
-   If we continue the process using PTRACE_CONT, we will get a
-   SIGTRAP when we hit a breakpoint.  The value of $eip will be
-   the instruction after the breakpoint (i.e. needs to be
-   decremented).  If we report the SIGTRAP to GDB, we must also
-   report the undecremented PC.  If the breakpoint is removed, we
-   must resume at the decremented PC.
-
-   On a non-decr_pc_after_break machine with hardware or kernel
-   single-step:
-
-   If we either single-step a breakpoint instruction, or continue and
-   hit a breakpoint instruction, our PC will point at the breakpoint
-   instruction.  */
+/* Called when the LWP stopped for a signal/trap.  If it stopped for a
+   trap check what caused it (breakpoint, watchpoint, trace, etc.),
+   and save the result in the LWP's stop_reason field.  If it stopped
+   for a breakpoint, decrement the PC if necessary on the lwp's
+   architecture.  Returns true if we now have the LWP's stop PC.  */
 
 static int
-check_stopped_by_breakpoint (struct lwp_info *lwp)
+save_stop_reason (struct lwp_info *lwp)
 {
   CORE_ADDR pc;
   CORE_ADDR sw_breakpoint_pc;
@@ -785,56 +769,39 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
     {
       if (siginfo.si_signo == SIGTRAP)
 	{
-	  if (GDB_ARCH_IS_TRAP_BRKPT (siginfo.si_code))
+	  if (GDB_ARCH_IS_TRAP_BRKPT (siginfo.si_code)
+	      && GDB_ARCH_IS_TRAP_HWBKPT (siginfo.si_code))
 	    {
-	      if (debug_threads)
-		{
-		  struct thread_info *thr = get_lwp_thread (lwp);
-
-		  debug_printf ("CSBB: %s stopped by software breakpoint\n",
-				target_pid_to_str (ptid_of (thr)));
-		}
-
-	      /* Back up the PC if necessary.  */
-	      if (pc != sw_breakpoint_pc)
-		{
-		  struct regcache *regcache
-		    = get_thread_regcache (current_thread, 1);
-		  (*the_low_target.set_pc) (regcache, sw_breakpoint_pc);
-		}
-
-	      lwp->stop_pc = sw_breakpoint_pc;
-	      lwp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
-	      current_thread = saved_thread;
-	      return 1;
+	      /* The si_code is ambiguous on this arch -- check debug
+		 registers.  */
+	      if (!check_stopped_by_watchpoint (lwp))
+		lwp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
 	    }
-	  else if (siginfo.si_code == TRAP_HWBKPT)
+	  else if (GDB_ARCH_IS_TRAP_BRKPT (siginfo.si_code))
 	    {
-	      if (debug_threads)
-		{
-		  struct thread_info *thr = get_lwp_thread (lwp);
-
-		  debug_printf ("CSBB: %s stopped by hardware "
-				"breakpoint/watchpoint\n",
-				target_pid_to_str (ptid_of (thr)));
-		}
-
-	      lwp->stop_pc = pc;
-	      lwp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
-	      current_thread = saved_thread;
-	      return 1;
+	      /* If we determine the LWP stopped for a SW breakpoint,
+		 trust it.  Particularly don't check watchpoint
+		 registers, because at least on s390, we'd find
+		 stopped-by-watchpoint as long as there's a watchpoint
+		 set.  */
+	      lwp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
+	    }
+	  else if (GDB_ARCH_IS_TRAP_HWBKPT (siginfo.si_code))
+	    {
+	      /* This can indicate either a hardware breakpoint or
+		 hardware watchpoint.  Check debug registers.  */
+	      if (!check_stopped_by_watchpoint (lwp))
+		lwp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
 	    }
 	  else if (siginfo.si_code == TRAP_TRACE)
 	    {
-	      if (debug_threads)
-		{
-		  struct thread_info *thr = get_lwp_thread (lwp);
-
-		  debug_printf ("CSBB: %s stopped by trace\n",
-				target_pid_to_str (ptid_of (thr)));
-		}
-
-	      lwp->stop_reason = TARGET_STOPPED_BY_SINGLE_STEP;
+	      /* We may have single stepped an instruction that
+		 triggered a watchpoint.  In that case, on some
+		 architectures (such as x86), instead of TRAP_HWBKPT,
+		 si_code indicates TRAP_TRACE, and we need to check
+		 the debug registers separately.  */
+	      if (!check_stopped_by_watchpoint (lwp))
+		lwp->stop_reason = TARGET_STOPPED_BY_SINGLE_STEP;
 	    }
 	}
     }
@@ -845,6 +812,16 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
      case we need to report the breakpoint PC.  */
   if ((!lwp->stepping || lwp->stop_pc == sw_breakpoint_pc)
       && (*the_low_target.breakpoint_at) (sw_breakpoint_pc))
+    lwp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
+
+  if (hardware_breakpoint_inserted_here (pc))
+    lwp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
+
+  if (lwp->stop_reason == TARGET_STOPPED_BY_NO_REASON)
+    check_stopped_by_watchpoint (lwp);
+#endif
+
+  if (lwp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT)
     {
       if (debug_threads)
 	{
@@ -856,19 +833,16 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
 
       /* Back up the PC if necessary.  */
       if (pc != sw_breakpoint_pc)
-        {
+	{
 	  struct regcache *regcache
 	    = get_thread_regcache (current_thread, 1);
 	  (*the_low_target.set_pc) (regcache, sw_breakpoint_pc);
 	}
 
-      lwp->stop_pc = sw_breakpoint_pc;
-      lwp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
-      current_thread = saved_thread;
-      return 1;
+      /* Update this so we record the correct stop PC below.  */
+      pc = sw_breakpoint_pc;
     }
-
-  if (hardware_breakpoint_inserted_here (pc))
+  else if (lwp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT)
     {
       if (debug_threads)
 	{
@@ -877,16 +851,31 @@ check_stopped_by_breakpoint (struct lwp_info *lwp)
 	  debug_printf ("CSBB: %s stopped by hardware breakpoint\n",
 			target_pid_to_str (ptid_of (thr)));
 	}
-
-      lwp->stop_pc = pc;
-      lwp->stop_reason = TARGET_STOPPED_BY_HW_BREAKPOINT;
-      current_thread = saved_thread;
-      return 1;
     }
-#endif
+  else if (lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
+    {
+      if (debug_threads)
+	{
+	  struct thread_info *thr = get_lwp_thread (lwp);
 
+	  debug_printf ("CSBB: %s stopped by hardware watchpoint\n",
+			target_pid_to_str (ptid_of (thr)));
+	}
+    }
+  else if (lwp->stop_reason == TARGET_STOPPED_BY_SINGLE_STEP)
+    {
+      if (debug_threads)
+	{
+	  struct thread_info *thr = get_lwp_thread (lwp);
+
+	  debug_printf ("CSBB: %s stopped by trace\n",
+			target_pid_to_str (ptid_of (thr)));
+	}
+    }
+
+  lwp->stop_pc = pc;
   current_thread = saved_thread;
-  return 0;
+  return 1;
 }
 
 static struct lwp_info *
@@ -2434,8 +2423,8 @@ linux_low_filter_event (int lwpid, int wstat)
       child->syscall_state = TARGET_WAITKIND_IGNORE;
     }
 
-  /* Be careful to not overwrite stop_pc until
-     check_stopped_by_breakpoint is called.  */
+  /* Be careful to not overwrite stop_pc until save_stop_reason is
+     called.  */
   if (WIFSTOPPED (wstat) && WSTOPSIG (wstat) == SIGTRAP
       && linux_is_extended_waitstatus (wstat))
     {
@@ -2448,26 +2437,11 @@ linux_low_filter_event (int lwpid, int wstat)
 	}
     }
 
-  /* Check first whether this was a SW/HW breakpoint before checking
-     watchpoints, because at least s390 can't tell the data address of
-     hardware watchpoint hits, and returns stopped-by-watchpoint as
-     long as there's a watchpoint set.  */
   if (WIFSTOPPED (wstat) && linux_wstatus_maybe_breakpoint (wstat))
     {
-      if (check_stopped_by_breakpoint (child))
+      if (save_stop_reason (child))
 	have_stop_pc = 1;
     }
-
-  /* Note that TRAP_HWBKPT can indicate either a hardware breakpoint
-     or hardware watchpoint.  Check which is which if we got
-     TARGET_STOPPED_BY_HW_BREAKPOINT.  Likewise, we may have single
-     stepped an instruction that triggered a watchpoint.  In that
-     case, on some architectures (such as x86), instead of
-     TRAP_HWBKPT, si_code indicates TRAP_TRACE, and we need to check
-     the debug registers separately.  */
-  if (WIFSTOPPED (wstat) && WSTOPSIG (wstat) == SIGTRAP
-      && child->stop_reason != TARGET_STOPPED_BY_SW_BREAKPOINT)
-    check_stopped_by_watchpoint (child);
 
   if (!have_stop_pc)
     child->stop_pc = get_pc (child);
@@ -3209,7 +3183,7 @@ linux_wait_1 (ptid_t ptid,
      hardware single step it means a gdb/gdbserver breakpoint had been
      planted on top of a permanent breakpoint, in the case of a software
      single step it may just mean that gdbserver hit the reinsert breakpoint.
-     The PC has been adjusted by check_stopped_by_breakpoint to point at
+     The PC has been adjusted by save_stop_reason to point at
      the breakpoint address.
      So in the case of the hardware single step advance the PC manually
      past the breakpoint and in the case of software single step advance only

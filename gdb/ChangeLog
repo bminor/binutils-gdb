@@ -1,3 +1,22 @@
+2016-02-24  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (save_sigtrap) Delete.
+	(stop_wait_callback): Call save_stop_reason instead of
+	save_sigtrap.
+	(check_stopped_by_breakpoint): Rename to ...
+	(save_stop_reason): ... this.  Bits of save_sigtrap folded here.
+	Use GDB_ARCH_IS_TRAP_HWBKPT and handle ambiguous
+	GDB_ARCH_IS_TRAP_BRKPT / GDB_ARCH_IS_TRAP_HWBKPT.  Factor out
+	common code between the USE_SIGTRAP_SIGINFO and
+	!USE_SIGTRAP_SIGINFO blocks.
+	(linux_nat_filter_event): Call save_stop_reason instead of
+	save_sigtrap.
+	* nat/linux-ptrace.h: Check for both SI_KERNEL and TRAP_BRKPT
+	si_code for MIPS.
+	* nat/linux-ptrace.h: Fix "TRAP_HWBPT" typo in x86 table.  Add
+	comments on MIPS behavior.
+	(GDB_ARCH_IS_TRAP_HWBKPT): Define for all archs.
+
 2016-02-24  Marcin Kościelnicki  <koriakin@0x04.net>
 
 	* rs6000-tdep.c (rs6000_frame_cache): Initialize frame and pc to 0
