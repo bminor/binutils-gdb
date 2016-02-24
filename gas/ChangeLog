@@ -1,5 +1,38 @@
 2016-02-24  Renlin Li  <renlin.li@arm.com>
 
+	* config/tc-arm.c (BAD_FP16): New error message macro.
+	(do_scalar_fp16_v82_encode): Change the coproc field to 9 for armv8.2
+	fp16 scalar instructions.
+	(neon_check_type): Allow different size from key.
+	(do_vfp_nsyn_add_sub): Add support SE_H shape support.
+	(try_vfp_nsyn): Likewise.
+	(do_vfp_nsyn_mla_mls): Likewise.
+	(do_vfp_nsyn_fma_fms): Likewise.
+	(do_vfp_nsyn_ldm_stm): Likewise
+	(do_vfp_nsyn_sqrt): Likewise
+	(do_vfp_nsyn_div): Likewise
+	(do_vfp_nsyn_nmul): Likewise.
+	(do_vfp_nsyn_cmp): Likewise.
+	(do_neon_shll): Likewise.
+	(do_vfp_nsyn_cvt_fpv8): Likewise.
+	(do_neon_cvttb_2): Likewise.
+	(do_neon_mov): Likewise.
+	(do_neon_rshift_round_imm): Likewise.
+	(do_neon_ldr_str): Likewise.
+	(do_vfp_nsyn_fpv8): Likewise.
+	(do_vmaxnm): Likewise.
+	(do_vrint_1): Likewise.
+	(insns): New entry for vins, vmovx.
+	(md_apply_fix): Left shift 1 bit for fp16 vldr/vstr.
+	* testsuite/gas/arm/armv8-2-fp16-scalar-thumb.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-scalar.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-scalar.s: New.
+	* testsuite/gas/arm/armv8-2-fp16-scalar-bad.s: New
+	* testsuite/gas/arm/armv8-2-fp16-scalar-bad.d: New
+	* testsuite/gas/arm/armv8-2-fp16-scalar-bad.l: New
+
+2016-02-24  Renlin Li  <renlin.li@arm.com>
+
 	* config/tc-arm.c (NEON_ENC_TAB): Add fp16 instruction shape.
 	(neon_shape_class): New SC_HALF.
 	(neon_shape_el): New SE_H.

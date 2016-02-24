@@ -784,7 +784,8 @@ struct asm_opcode
 	_("cannot use register index with PC-relative addressing")
 #define BAD_PC_WRITEBACK \
 	_("cannot use writeback with PC-relative addressing")
-#define BAD_RANGE     _("branch out of range")
+#define BAD_RANGE	_("branch out of range")
+#define BAD_FP16	_("selected processor does not support fp16 instruction")
 #define UNPRED_REG(R)	_("using " R " results in unpredictable behaviour")
 
 static struct hash_control * arm_ops_hsh;
@@ -7262,6 +7263,26 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 /* Functions for operand encoding.  ARM, then Thumb.  */
 
 #define rotate_left(v, n) (v << (n & 31) | v >> ((32 - n) & 31))
+
+/* If the current inst is scalar ARMv8.2 fp16 instruction, do special encoding.
+
+   The only binary encoding difference is the Coprocessor number.  Coprocessor
+   9 is used for half-precision calculations or conversions.  The format of the
+   instruction is the same as the equivalent Coprocessor 10 instuction that
+   exists for Single-Precision operation.  */
+
+static void
+do_scalar_fp16_v82_encode (void)
+{
+  if (inst.cond != COND_ALWAYS)
+    as_warn (_("ARMv8.2 scalar fp16 instruction cannot be conditional,"
+	       " the behaviour is UNPREDICTABLE"));
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16),
+	      _(BAD_FP16));
+
+  inst.instruction = (inst.instruction & 0xfffff0ff) | 0x900;
+  mark_feature_used (&arm_ext_fp16);
+}
 
 /* If VAL can be encoded in the immediate field of an ARM instruction,
    return the encoded form.  Otherwise, return FAIL.  */
@@ -13896,6 +13917,18 @@ neon_check_type (unsigned els, enum neon_shape ns, ...)
 		  else
 		    match = g_size;
 
+		  /* FP16 will use a single precision register.  */
+		  if (regwidth == 32 && match == 16)
+		    {
+		      if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16))
+			match = regwidth;
+		      else
+			{
+			  inst.error = _(BAD_FP16);
+			  return badtype;
+			}
+		    }
+
 		  if (regwidth != match)
 		    {
 		      first_error (_("operand size must match register width"));
@@ -13987,12 +14020,16 @@ do_vfp_nsyn_add_sub (enum neon_shape rs)
 {
   int is_add = (inst.instruction & 0x0fffffff) == N_MNEM_vadd;
 
-  if (rs == NS_FFF)
+  if (rs == NS_FFF || rs == NS_HHH)
     {
       if (is_add)
 	do_vfp_nsyn_opcode ("fadds");
       else
 	do_vfp_nsyn_opcode ("fsubs");
+
+      /* ARMv8.2 fp16 instruction.  */
+      if (rs == NS_HHH)
+	do_scalar_fp16_v82_encode ();
     }
   else
     {
@@ -14015,15 +14052,14 @@ try_vfp_nsyn (int args, void (*pfn) (enum neon_shape))
   switch (args)
     {
     case 2:
-      rs = neon_select_shape (NS_FF, NS_DD, NS_NULL);
-      et = neon_check_type (2, rs,
-	N_EQK | N_VFP, N_F32 | N_F64 | N_KEY | N_VFP);
+      rs = neon_select_shape (NS_HH, NS_FF, NS_DD, NS_NULL);
+      et = neon_check_type (2, rs, N_EQK | N_VFP, N_F_ALL | N_KEY | N_VFP);
       break;
 
     case 3:
-      rs = neon_select_shape (NS_FFF, NS_DDD, NS_NULL);
-      et = neon_check_type (3, rs,
-	N_EQK | N_VFP, N_EQK | N_VFP, N_F32 | N_F64 | N_KEY | N_VFP);
+      rs = neon_select_shape (NS_HHH, NS_FFF, NS_DDD, NS_NULL);
+      et = neon_check_type (3, rs, N_EQK | N_VFP, N_EQK | N_VFP,
+			    N_F_ALL | N_KEY | N_VFP);
       break;
 
     default:
@@ -14045,12 +14081,16 @@ do_vfp_nsyn_mla_mls (enum neon_shape rs)
 {
   int is_mla = (inst.instruction & 0x0fffffff) == N_MNEM_vmla;
 
-  if (rs == NS_FFF)
+  if (rs == NS_FFF || rs == NS_HHH)
     {
       if (is_mla)
 	do_vfp_nsyn_opcode ("fmacs");
       else
 	do_vfp_nsyn_opcode ("fnmacs");
+
+      /* ARMv8.2 fp16 instruction.  */
+      if (rs == NS_HHH)
+	do_scalar_fp16_v82_encode ();
     }
   else
     {
@@ -14066,12 +14106,16 @@ do_vfp_nsyn_fma_fms (enum neon_shape rs)
 {
   int is_fma = (inst.instruction & 0x0fffffff) == N_MNEM_vfma;
 
-  if (rs == NS_FFF)
+  if (rs == NS_FFF || rs == NS_HHH)
     {
       if (is_fma)
 	do_vfp_nsyn_opcode ("ffmas");
       else
 	do_vfp_nsyn_opcode ("ffnmas");
+
+      /* ARMv8.2 fp16 instruction.  */
+      if (rs == NS_HHH)
+	do_scalar_fp16_v82_encode ();
     }
   else
     {
@@ -14085,8 +14129,14 @@ do_vfp_nsyn_fma_fms (enum neon_shape rs)
 static void
 do_vfp_nsyn_mul (enum neon_shape rs)
 {
-  if (rs == NS_FFF)
-    do_vfp_nsyn_opcode ("fmuls");
+  if (rs == NS_FFF || rs == NS_HHH)
+    {
+      do_vfp_nsyn_opcode ("fmuls");
+
+      /* ARMv8.2 fp16 instruction.  */
+      if (rs == NS_HHH)
+	do_scalar_fp16_v82_encode ();
+    }
   else
     do_vfp_nsyn_opcode ("fmuld");
 }
@@ -14095,14 +14145,18 @@ static void
 do_vfp_nsyn_abs_neg (enum neon_shape rs)
 {
   int is_neg = (inst.instruction & 0x80) != 0;
-  neon_check_type (2, rs, N_EQK | N_VFP, N_F32 | N_F64 | N_VFP | N_KEY);
+  neon_check_type (2, rs, N_EQK | N_VFP, N_F_ALL | N_VFP | N_KEY);
 
-  if (rs == NS_FF)
+  if (rs == NS_FF || rs == NS_HH)
     {
       if (is_neg)
 	do_vfp_nsyn_opcode ("fnegs");
       else
 	do_vfp_nsyn_opcode ("fabss");
+
+      /* ARMv8.2 fp16 instruction.  */
+      if (rs == NS_HH)
+	do_scalar_fp16_v82_encode ();
     }
   else
     {
@@ -14139,11 +14193,17 @@ do_vfp_nsyn_ldm_stm (int is_dbmode)
 static void
 do_vfp_nsyn_sqrt (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_FF, NS_DD, NS_NULL);
-  neon_check_type (2, rs, N_EQK | N_VFP, N_F32 | N_F64 | N_KEY | N_VFP);
+  enum neon_shape rs = neon_select_shape (NS_HH, NS_FF, NS_DD, NS_NULL);
+  neon_check_type (2, rs, N_EQK | N_VFP, N_F_ALL | N_KEY | N_VFP);
 
-  if (rs == NS_FF)
-    do_vfp_nsyn_opcode ("fsqrts");
+  if (rs == NS_FF || rs == NS_HH)
+    {
+      do_vfp_nsyn_opcode ("fsqrts");
+
+      /* ARMv8.2 fp16 instruction.  */
+      if (rs == NS_HH)
+	do_scalar_fp16_v82_encode ();
+    }
   else
     do_vfp_nsyn_opcode ("fsqrtd");
 }
@@ -14151,12 +14211,18 @@ do_vfp_nsyn_sqrt (void)
 static void
 do_vfp_nsyn_div (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_FFF, NS_DDD, NS_NULL);
+  enum neon_shape rs = neon_select_shape (NS_HHH, NS_FFF, NS_DDD, NS_NULL);
   neon_check_type (3, rs, N_EQK | N_VFP, N_EQK | N_VFP,
-    N_F32 | N_F64 | N_KEY | N_VFP);
+		   N_F_ALL | N_KEY | N_VFP);
 
-  if (rs == NS_FFF)
-    do_vfp_nsyn_opcode ("fdivs");
+  if (rs == NS_FFF || rs == NS_HHH)
+    {
+      do_vfp_nsyn_opcode ("fdivs");
+
+      /* ARMv8.2 fp16 instruction.  */
+      if (rs == NS_HHH)
+	do_scalar_fp16_v82_encode ();
+    }
   else
     do_vfp_nsyn_opcode ("fdivd");
 }
@@ -14164,14 +14230,18 @@ do_vfp_nsyn_div (void)
 static void
 do_vfp_nsyn_nmul (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_FFF, NS_DDD, NS_NULL);
+  enum neon_shape rs = neon_select_shape (NS_HHH, NS_FFF, NS_DDD, NS_NULL);
   neon_check_type (3, rs, N_EQK | N_VFP, N_EQK | N_VFP,
-    N_F32 | N_F64 | N_KEY | N_VFP);
+		   N_F_ALL | N_KEY | N_VFP);
 
-  if (rs == NS_FFF)
+  if (rs == NS_FFF || rs == NS_HHH)
     {
       NEON_ENCODE (SINGLE, inst);
       do_vfp_sp_dyadic ();
+
+      /* ARMv8.2 fp16 instruction.  */
+      if (rs == NS_HHH)
+	do_scalar_fp16_v82_encode ();
     }
   else
     {
@@ -14179,17 +14249,19 @@ do_vfp_nsyn_nmul (void)
       do_vfp_dp_rd_rn_rm ();
     }
   do_vfp_cond_or_thumb ();
+
 }
 
 static void
 do_vfp_nsyn_cmp (void)
 {
+  enum neon_shape rs;
   if (inst.operands[1].isreg)
     {
-      enum neon_shape rs = neon_select_shape (NS_FF, NS_DD, NS_NULL);
-      neon_check_type (2, rs, N_EQK | N_VFP, N_F32 | N_F64 | N_KEY | N_VFP);
+      rs = neon_select_shape (NS_HH, NS_FF, NS_DD, NS_NULL);
+      neon_check_type (2, rs, N_EQK | N_VFP, N_F_ALL | N_KEY | N_VFP);
 
-      if (rs == NS_FF)
+      if (rs == NS_FF || rs == NS_HH)
 	{
 	  NEON_ENCODE (SINGLE, inst);
 	  do_vfp_sp_monadic ();
@@ -14202,8 +14274,8 @@ do_vfp_nsyn_cmp (void)
     }
   else
     {
-      enum neon_shape rs = neon_select_shape (NS_FI, NS_DI, NS_NULL);
-      neon_check_type (2, rs, N_F32 | N_F64 | N_KEY | N_VFP, N_EQK);
+      rs = neon_select_shape (NS_HI, NS_FI, NS_DI, NS_NULL);
+      neon_check_type (2, rs, N_F_ALL | N_KEY | N_VFP, N_EQK);
 
       switch (inst.instruction & 0x0fffffff)
 	{
@@ -14217,7 +14289,7 @@ do_vfp_nsyn_cmp (void)
 	  abort ();
 	}
 
-      if (rs == NS_FI)
+      if (rs == NS_FI || rs == NS_HI)
 	{
 	  NEON_ENCODE (SINGLE, inst);
 	  do_vfp_sp_compare_z ();
@@ -14229,6 +14301,10 @@ do_vfp_nsyn_cmp (void)
 	}
     }
   do_vfp_cond_or_thumb ();
+
+  /* ARMv8.2 fp16 instruction.  */
+  if (rs == NS_HI || rs == NS_HH)
+    do_scalar_fp16_v82_encode ();
 }
 
 static void
@@ -15194,6 +15270,13 @@ do_neon_shll (void)
   /* Half-precision conversions.  */					      \
   CVT_VAR (f32_f16, N_F32, N_F16, whole_reg,   NULL,     NULL,     NULL)      \
   CVT_VAR (f16_f32, N_F16, N_F32, whole_reg,   NULL,     NULL,     NULL)      \
+  /* New VCVT instructions introduced by ARMv8.2 fp16 extension.	      \
+     Compared with single/double precision variants, only the co-processor    \
+     field is different, so the encoding flow is reused here.  */	      \
+  CVT_VAR (f16_s32, N_F16 | N_KEY, N_S32, N_VFP, "fsltos", "fsitos", NULL)    \
+  CVT_VAR (f16_u32, N_F16 | N_KEY, N_U32, N_VFP, "fultos", "fuitos", NULL)    \
+  CVT_VAR (u32_f16, N_U32, N_F16 | N_KEY, N_VFP, "ftouls", "ftouis", "ftouizs")\
+  CVT_VAR (s32_f16, N_S32, N_F16 | N_KEY, N_VFP, "ftosls", "ftosis", "ftosizs")\
   /* VFP instructions.  */						      \
   CVT_VAR (f32_f64, N_F32, N_F64, N_VFP,       NULL,     "fcvtsd", NULL)      \
   CVT_VAR (f64_f32, N_F64, N_F32, N_VFP,       NULL,     "fcvtds", NULL)      \
@@ -15306,6 +15389,13 @@ do_vfp_nsyn_cvt (enum neon_shape rs, enum neon_cvt_flavour flavour)
 
   if (opname)
     do_vfp_nsyn_opcode (opname);
+
+  /* ARMv8.2 fp16 VCVT instruction.  */
+  if (flavour == neon_cvt_flavour_s32_f16
+      || flavour == neon_cvt_flavour_u32_f16
+      || flavour == neon_cvt_flavour_f16_u32
+      || flavour == neon_cvt_flavour_f16_s32)
+    do_scalar_fp16_v82_encode ();
 }
 
 static void
@@ -15339,6 +15429,11 @@ do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour,
     constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
 		_(BAD_FPU));
 
+  if (flavour == neon_cvt_flavour_s32_f16
+      || flavour == neon_cvt_flavour_u32_f16)
+    constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16),
+		_(BAD_FP16));
+
   set_it_insn_type (OUTSIDE_IT_INSN);
 
   switch (flavour)
@@ -15351,11 +15446,19 @@ do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour,
       sz = 0;
       op = 1;
       break;
+    case neon_cvt_flavour_s32_f16:
+      sz = 0;
+      op = 1;
+      break;
     case neon_cvt_flavour_u32_f64:
       sz = 1;
       op = 0;
       break;
     case neon_cvt_flavour_u32_f32:
+      sz = 0;
+      op = 0;
+      break;
+    case neon_cvt_flavour_u32_f16:
       sz = 0;
       op = 0;
       break;
@@ -15377,6 +15480,11 @@ do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour,
   encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Sd);
   encode_arm_vfp_reg (inst.operands[1].reg, sz == 1 ? VFP_REG_Dm : VFP_REG_Sm);
   inst.instruction |= sz << 8;
+
+  /* ARMv8.2 fp16 VCVT instruction.  */
+  if (flavour == neon_cvt_flavour_s32_f16
+      ||flavour == neon_cvt_flavour_u32_f16)
+    do_scalar_fp16_v82_encode ();
   inst.instruction |= op << 7;
   inst.instruction |= rm << 16;
   inst.instruction |= 0xf0000000;
@@ -15402,6 +15510,18 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
       && (rs == NS_FD || rs == NS_FF))
     {
       do_vfp_nsyn_cvtz ();
+      return;
+    }
+
+  /* ARMv8.2 fp16 VCVT conversions.  */
+  if (mode == neon_cvt_mode_z
+      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_fp16)
+      && (flavour == neon_cvt_flavour_s32_f16
+	  || flavour == neon_cvt_flavour_u32_f16)
+      && (rs == NS_FH))
+    {
+      do_vfp_nsyn_cvtz ();
+      do_scalar_fp16_v82_encode ();
       return;
     }
 
@@ -15970,8 +16090,9 @@ static void
 do_neon_mov (void)
 {
   enum neon_shape rs = neon_select_shape (NS_RRFF, NS_FFRR, NS_DRR, NS_RRD,
-    NS_QQ, NS_DD, NS_QI, NS_DI, NS_SR, NS_RS, NS_FF, NS_FI, NS_RF, NS_FR,
-    NS_NULL);
+					  NS_QQ, NS_DD, NS_QI, NS_DI, NS_SR,
+					  NS_RS, NS_FF, NS_FI, NS_RF, NS_FR,
+					  NS_HR, NS_RH, NS_HI, NS_NULL);
   struct neon_type_el et;
   const char *ldconst = 0;
 
@@ -16149,6 +16270,7 @@ do_neon_mov (void)
       do_vfp_nsyn_opcode ("fcpys");
       break;
 
+    case NS_HI:
     case NS_FI:  /* case 10 (fconsts).  */
       ldconst = "fconsts";
       encode_fconstd:
@@ -16156,17 +16278,29 @@ do_neon_mov (void)
 	{
 	  inst.operands[1].imm = neon_qfloat_bits (inst.operands[1].imm);
 	  do_vfp_nsyn_opcode (ldconst);
+
+	  /* ARMv8.2 fp16 vmov.f16 instruction.  */
+	  if (rs == NS_HI)
+	    do_scalar_fp16_v82_encode ();
 	}
       else
 	first_error (_("immediate out of range"));
       break;
 
+    case NS_RH:
     case NS_RF:  /* case 12 (fmrs).  */
       do_vfp_nsyn_opcode ("fmrs");
+      /* ARMv8.2 fp16 vmov.f16 instruction.  */
+      if (rs == NS_RH)
+	do_scalar_fp16_v82_encode ();
       break;
 
+    case NS_HR:
     case NS_FR:  /* case 13 (fmsr).  */
       do_vfp_nsyn_opcode ("fmsr");
+      /* ARMv8.2 fp16 vmov.f16 instruction.  */
+      if (rs == NS_HR)
+	do_scalar_fp16_v82_encode ();
       break;
 
     /* The encoders for the fmrrs and fmsrr instructions expect three operands
@@ -16220,6 +16354,21 @@ do_neon_rshift_round_imm (void)
 	      _("immediate out of range for shift"));
   neon_imm_shift (TRUE, et.type == NT_unsigned, neon_quad (rs), et,
 		  et.size - imm);
+}
+
+static void
+do_neon_movhf (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_HH, NS_NULL);
+  constraint (rs != NS_HH, _("invalid suffix"));
+
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
+	      _(BAD_FPU));
+
+  do_vfp_sp_monadic ();
+
+  inst.is_neon = 1;
+  inst.instruction |= 0xf0000000;
 }
 
 static void
@@ -16398,6 +16547,10 @@ do_neon_ldr_str (void)
 	do_vfp_nsyn_opcode ("flds");
       else
 	do_vfp_nsyn_opcode ("fsts");
+
+      /* ARMv8.2 vldr.16/vstr.16 instruction.  */
+      if (inst.vectype.el[0].size == 16)
+	do_scalar_fp16_v82_encode ();
     }
   else
     {
@@ -16755,8 +16908,14 @@ do_vfp_nsyn_fpv8 (enum neon_shape rs)
 
   NEON_ENCODE (FPV8, inst);
 
-  if (rs == NS_FFF)
-    do_vfp_sp_dyadic ();
+  if (rs == NS_FFF || rs == NS_HHH)
+    {
+      do_vfp_sp_dyadic ();
+
+      /* ARMv8.2 fp16 instruction.  */
+      if (rs == NS_HHH)
+	do_scalar_fp16_v82_encode ();
+    }
   else
     do_vfp_dp_rd_rn_rm ();
 
@@ -16792,7 +16951,7 @@ do_vmaxnm (void)
 static void
 do_vrint_1 (enum neon_cvt_mode mode)
 {
-  enum neon_shape rs = neon_select_shape (NS_FF, NS_DD, NS_QQ, NS_NULL);
+  enum neon_shape rs = neon_select_shape (NS_HH, NS_FF, NS_DD, NS_QQ, NS_NULL);
   struct neon_type_el et;
 
   if (rs == NS_NULL)
@@ -16804,7 +16963,8 @@ do_vrint_1 (enum neon_cvt_mode mode)
     constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
 		_(BAD_FPU));
 
-  et = neon_check_type (2, rs, N_EQK | N_VFP, N_F32 | N_F64 | N_KEY | N_VFP);
+  et = neon_check_type (2, rs, N_EQK | N_VFP, N_F_ALL | N_KEY
+			| N_VFP);
   if (et.type != NT_invtype)
     {
       /* VFP encodings.  */
@@ -16813,7 +16973,7 @@ do_vrint_1 (enum neon_cvt_mode mode)
 	set_it_insn_type (OUTSIDE_IT_INSN);
 
       NEON_ENCODE (FPV8, inst);
-      if (rs == NS_FF)
+      if (rs == NS_FF || rs == NS_HH)
 	do_vfp_sp_monadic ();
       else
 	do_vfp_dp_rd_rm ();
@@ -16832,6 +16992,10 @@ do_vrint_1 (enum neon_cvt_mode mode)
 
       inst.instruction |= (rs == NS_DD) << 8;
       do_vfp_cond_or_thumb ();
+
+      /* ARMv8.2 fp16 vrint instruction.  */
+      if (rs == NS_HH)
+      do_scalar_fp16_v82_encode ();
     }
   else
     {
@@ -20036,6 +20200,15 @@ static const struct asm_opcode insns[] =
  NCE(vmov,      0,       1, (VMOV), neon_mov),
  NCE(vmovq,     0,       1, (VMOV), neon_mov),
 
+#undef  ARM_VARIANT
+#define ARM_VARIANT    & arm_ext_fp16
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_fp16
+ /* New instructions added from v8.2, allowing the extraction and insertion of
+    the upper 16 bits of a 32-bit vector register.  */
+ NCE (vmovx,     eb00a40,       2, (RVS, RVS), neon_movhf),
+ NCE (vins,      eb00ac0,       2, (RVS, RVS), neon_movhf),
+
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & fpu_neon_ext_v1
 #undef  ARM_VARIANT
@@ -23156,7 +23329,20 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_CP_OFF_IMM:
     case BFD_RELOC_ARM_T32_CP_OFF_IMM:
-      if (value < -1023 || value > 1023 || (value & 3))
+      if (fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM)
+	newval = md_chars_to_number (buf, INSN_SIZE);
+      else
+	newval = get_thumb32_insn (buf);
+      if ((newval & 0x0f200f00) == 0x0d000900)
+	{
+	  /* This is a fp16 vstr/vldr.  The immediate offset in the mnemonic
+	     has permitted values that are multiples of 2, in the range 0
+	     to 510.  */
+	  if (value < -510 || value > 510 || (value & 1))
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("co-processor offset out of range"));
+	}
+      else if (value < -1023 || value > 1023 || (value & 3))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("co-processor offset out of range"));
     cp_off_common:
@@ -23173,6 +23359,17 @@ md_apply_fix (fixS *	fixP,
       else
 	{
 	  newval &= 0xff7fff00;
+	  if ((newval & 0x0f200f00) == 0x0d000900)
+	    {
+	      /* This is a fp16 vstr/vldr.
+
+		 It requires the immediate offset in the instruction is shifted
+		 left by 1 to be a half-word offset.
+
+		 Here, left shift by 1 first, and later right shift by 2
+		 should get the right offset.  */
+	      value <<= 1;
+	    }
 	  newval |= (value >> 2) | (sign ? INDEX_UP : 0);
 	}
       if (fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM
